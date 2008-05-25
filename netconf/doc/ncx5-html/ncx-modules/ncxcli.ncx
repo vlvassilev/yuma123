@@ -1,0 +1,180 @@
+ncx-module ncxcli {
+  header {
+    description "NCX Command Line Application Startup Parameters";
+    version 0.2;
+    owner ncx;
+    application ncxcli;
+    copyright "Copyright (C) 2007, Andy Bierman.";
+    contact-info "Send comments to <ietf@andybierman.com>.";
+    last-update "2007-02-20";
+    revision-history {
+       0.1 "Initial version";
+       0.2 "Shortened name, added optional tags";
+    }
+  }
+
+  imports {
+    import ncxtypes;
+    import netconf { RpcOkReplyType };
+  }
+
+  definitions {
+
+    parmset ncxcli-boot {
+      description
+         "CLI Parameter Set for the NETCONF Manager Application.";
+      order loose;
+      parms {
+        parm user {
+          description
+             "User name to use for NETCONF sessions.
+              If none, then user will be prompted before connecting.";
+          type NcxUserName;
+          max-access read-write;
+	  usage optional;
+        }
+
+        parm password {
+          description
+             "User password to use for NETCONF sessions.
+              If none, then user will be prompted before connecting.";
+          type string;
+          max-access read-write;
+	  usage optional;
+        }
+
+        parm agent {
+          description
+             "IP address or DNS name of the NETCONF agent target.
+              If none, then user will be prompted before connecting.";
+          type string;
+          max-access read-write;
+	  usage optional;
+        }
+
+	parm modules {
+          description
+             "List of NCX module names to load at boot-time.
+              Any imported modules required will be loaded automatically.";
+          type NcxModuleList;
+          max-access read-write;
+	  usage optional;
+        }
+
+	parm default-owner {
+          description
+             "Default owner string to use before 'ncx' and 'ietf' are tried.";
+          type NcxName;
+          max-access read-write;
+	  usage optional;
+        }
+
+      }
+    }
+
+    parmset NcxCliConnectPS {
+      description
+         "CLI Parameter Set for connecting to an agent.";
+      order loose;
+      parms {
+        parm user {
+          description
+             "User name to use for NETCONF sessions.";
+          type NcxUserName;
+        }
+
+        parm password {
+          description
+             "User password to use for NETCONF sessions.";
+          type string;
+        }
+
+        parm agent {
+          description
+             "IP address or DNS name of the NETCONF agent target.";
+          type string;
+        }
+
+      }
+    }
+
+    parmset NcxLoadPS {
+      description
+         "RPC parameter set for load RPC command.";
+      parms {
+        parm module {
+          description
+             "Module name to load";
+          type NcxName;
+        }
+      }
+    }
+
+    parmset NcxShowPS {
+      description
+         "RPC parameter set for show RPC command.";
+      parms {
+        choice {
+          parm module {
+            description "Show info for one module";
+            type NcxName;
+          }
+          parm modules {
+            description "List brief info on all modules";
+            type flag;
+          }
+          parm def {
+            description "Show info for one definition";
+            type NcxQName;
+          }
+          parm version {
+            description "Show ncxcli version info";
+            type flag;
+          }
+        }
+      }
+    }
+	
+    rpc connect {
+      description "Connect to a NETCONF agent.";
+      rpc-type exec;
+      input NcxCliConnectPS;
+      output RpcOkReplyType;
+    }
+
+    rpc help {
+      description "Print the ncxcli help text";
+      rpc-type exec;
+      output RpcOkReplyType;
+    }
+
+    rpc load {
+      description "Internal command to load a module or other file.";
+      rpc-type exec;
+      input NcxLoadPS;
+      output RpcOkReplyType;
+    }
+
+    rpc save {
+      description "Meta command to save configuration edits.";
+      rpc-type exec;
+      output RpcOkReplyType;
+    }
+
+    rpc show {
+      description "Local show command for ncxcli info.";
+      rpc-type exec;
+      input NcxShowPS;
+      output RpcOkReplyType;
+    }
+
+    rpc quit {
+      description "Quit the NCXCLI application";
+      rpc-type exec;
+      output RpcOkReplyType;
+    }
+
+  }
+}
+
+

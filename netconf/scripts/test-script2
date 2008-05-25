@@ -1,0 +1,6 @@
+# nested test script for NCXCLI
+
+get-config \
+   source=running
+get source=running
+

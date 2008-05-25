@@ -1,0 +1,1064 @@
+
+
+
+Internet Engineering Task Force                               A. Bierman
+Internet-Draft                                        netconfcentral.org
+Intended status: Standards Track                          August 6, 2007
+Expires: February 7, 2008
+
+
+         Network Configuration Extensions : Protocol Extensions
+                        draft-bierman-ncx-ext-00
+
+Status of this Memo
+
+   By submitting this Internet-Draft, each author represents that any
+   applicable patent or other IPR claims of which he or she is aware
+   have been or will be disclosed, and any of which he or she becomes
+   aware will be disclosed, in accordance with Section 6 of BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on February 7, 2008.
+
+Copyright Notice
+
+   Copyright (C) The IETF Trust (2007).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires February 7, 2008                [Page 1]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+Abstract
+
+   The standardization of network configuration interfaces for use with
+   the NETCONF protocol requires a structured data modeling environment
+   which promotes human usability and multi-vendor interoperability.
+   The Network Configuration Extensions (NCX) are a set of
+   specifications intended to address NETCONF data modeling issues.
+   This document defines some NETCONF protocol extensions for improving
+   the functionality of some existing protocol operations.
+
+
+Table of Contents
+
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  3
+     1.1.  Terminology  . . . . . . . . . . . . . . . . . . . . . . .  4
+       1.1.1.  Requirements Notation  . . . . . . . . . . . . . . . .  4
+       1.1.2.  NETCONF Terms  . . . . . . . . . . . . . . . . . . . .  4
+   2.  Definitions  . . . . . . . . . . . . . . . . . . . . . . . . .  5
+     2.1.  test-only Enumeration  . . . . . . . . . . . . . . . . . .  5
+     2.2.  with-defaults Attribute  . . . . . . . . . . . . . . . . .  7
+     2.3.  with-metadata Attribute  . . . . . . . . . . . . . . . . .  9
+     2.4.  last-modified Attribute  . . . . . . . . . . . . . . . . . 11
+   3.  Data Model XSD . . . . . . . . . . . . . . . . . . . . . . . . 13
+   4.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 15
+   5.  Security Considerations  . . . . . . . . . . . . . . . . . . . 16
+   6.  References . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+     6.1.  Normative References . . . . . . . . . . . . . . . . . . . 17
+     6.2.  Informative References . . . . . . . . . . . . . . . . . . 17
+   Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 18
+   Intellectual Property and Copyright Statements . . . . . . . . . . 19
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires February 7, 2008                [Page 2]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+1.  Introduction
+
+   The standardization of network configuration interfaces for use with
+   the NETCONF [RFC4741] protocol requires a structured data modeling
+   environment which promotes human usability, and multi-vendor
+   interoperability.  This document defines NETCONF protocol extensions
+   for improving the functionality of some existing protocol operations.
+
+   The Network Configuration Protocol utilizes the Extensible Markup
+   Language [W3C.REC-xml] for encoding protocol messages used to manage
+   network device configuration databases.
+
+
+
+
+    The NETCONF stack can be conceptually partitioned into four layers.
+
+          Layer                Example
+         +-------------+   +--------------------+ +-------------------+
+     (4) |   Content   |   | Configuration data | | Notification data |
+         +-------------+   +--------------------+ +-------------------+
+                |                    |                   |
+         +-------------+   +-----------------+     +---------------+
+     (3) | Operations  |   |  <edit-config>  |     |  <eventType>  |
+         +-------------+   +-----------------+     +---------------+
+                |                    |                   |
+         +-------------+   +--------------------+  +----------------+
+     (2) |     RPC     |   | <rpc>, <rpc-reply> |  | <notification> |
+         +-------------+   +--------------------+  +----------------+
+                |                    |                   |
+         +-------------+       +-----------------------------+
+     (1) |  Transport  |       |   BEEP, SSH, SSL, console   |
+         |   Protocol  |       |                             |
+         +-------------+       +-----------------------------+
+
+
+
+                                 Figure 1
+
+   This document addresses NETCONF protocol extensions for the
+   Operations and Content layers, as defined in [RFC4741].  This
+   document does not address NETCONF notification messages, defined in
+   [I-D.ietf-netconf-notification].
+
+   This document defines four minor extensions to the NETCONF protocol:
+
+   o  test-only <test-option> for <edit-config> operation
+
+
+
+
+Bierman                 Expires February 7, 2008                [Page 3]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+   o  with-defaults attribute for retrieval operations
+
+   o  with-metadata attribute for retrieval operations
+
+   o  last-modified metadata attribute for data model objects
+
+1.1.  Terminology
+
+1.1.1.  Requirements Notation
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [RFC2119].
+
+1.1.2.  NETCONF Terms
+
+   The following terms are defined in RFC 4741 and are not redefined
+   here:
+
+   o  agent
+
+   o  application
+
+   o  manager
+
+   o  operation
+
+   o  RPC
+
+   o  RPC request
+
+   o  RPC response
+
+   o  session
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires February 7, 2008                [Page 4]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+2.  Definitions
+
+   This section defines the semantics of the conceptual data structures
+   found in the data model in Section 3.
+
+2.1.  test-only Enumeration
+
+   The 'test-only' enumeration is an extension to the <test-option>
+   parameter for the <edit-config> operation, to allow a manager to test
+   an edit operation without the agent actually performing the edit(s).
+   The <validate> operation provides this feature for an entire
+   configuration database, but there is no corresponding feature for a
+   single <edit-config> operation.
+
+   The new list of <test-option> parameter options is shown for context:
+
+   o  test-then-set
+
+   o  set
+
+   o  test-only
+
+   If the manager uses the 'test-only' string, then the agent will
+   perform its normal conceptual validation procedures for the entire
+   <edit-config> operation, except the actual edit(s) will not be
+   performed.
+
+   If errors are found in the requested operation, then <rpc-error>
+   elements are returned as needed.  Otherwise an <ok/> RPC response is
+   returned.  No data within the specified target configuration database
+   is actually changed by the agent as a result of the operation.
+
+   The behavior for the 'test-then-set' and 'set' enumerations for the
+   <test-option> element are not changed.  They are defined in
+   [RFC4741].
+
+   Due to internal resource requirements or system state changes that
+   may affect the operational capabilities of the device, the agent may
+   not accept the same <edit-config> operation (using a different <test-
+   option> value), sent by the manager at some time after the 'test-
+   only' version.
+
+   The updated schema definition fragment for the
+   'testOptionTypeExtended' is shown below.  It can also found in
+   Section 3.
+
+
+
+
+
+
+Bierman                 Expires February 7, 2008                [Page 5]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+      <!--
+        Type for <test-option> parameter to <edit-config>
+        -->
+      <xs:simpleType name="TestOptionTypeExtended">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="test-then-set"/>
+          <xs:enumeration value="set"/>
+          <xs:enumeration value="test-only"/>
+        </xs:restriction>
+      </xs:simpleType>
+
+
+                                 Figure 2
+
+   The following example shows an <edit-config> operation which is using
+   the test-only mode.  The manager is checking whether the agent will
+   accept a large MTU value for the interface named 'eth0' (in the
+   example.com Interfaces data model).  In this case, the positive
+   response simply means the request validated properly.  The MTU
+   parameter is not changed after this operation.
+
+
+
+      <rpc message-id="101"
+           xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <edit-config>
+          <target><running/></target>
+          <default-operation>none</default-operation>
+          <test-option>test-only</test-option>
+          <error-option>continue-on-error</error-option>
+          <config>
+            <interfaces xmlns="http://example.com/interfaces/1.2"
+                xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+              <interface>
+                <name>Ethernet0/0</name>
+                <mtu nc:operation="replace">8192</mtu>
+              </interface>
+            </interfaces>
+          </config>
+        </edit-config>
+      </rpc>
+
+      <rpc-reply message-id="101"
+           xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <ok/>
+      </rpc-reply>
+
+
+
+
+
+Bierman                 Expires February 7, 2008                [Page 6]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+                                 Figure 3
+
+2.2.  with-defaults Attribute
+
+   The 'with-defaults' XML attribute defines an extension to the
+   retrieval operations to allow a manager to control the generation of
+   data model nodes which contain the agent-supplied default value.
+
+   As defined, the NETCONF protocol does not distinguish between values
+   which have been set by a management application, and default values
+   which have been set by the agent.  As a result, these agent-selected
+   default values are always included in the output of retrieval
+   operations.
+
+   However, it is quite common for networking devices to suppress the
+   output of parameters set to the default value.  This is done to save
+   CPU time and non-volatile memory.  In addition, there are likely to
+   be a large number of such parameters.  Is is often not useful to
+   network operators to view all these default values.  It is usually
+   more interesting to view just the parameters which have been
+   explicitly set by the network operator.
+
+   The 'with-defaults' attribute is used to control the generation of
+   agent-selected default values.  If the 'with-defaults' attribute is
+   present in the <rpc> element, for any of the protocol operations
+   which return the contents of a configuration database, the agent will
+   use the 'with-defaults' value to control default suppression.
+
+   If the <rpc> element contains an XML attribute named 'with-defaults'
+   in the following protocol operations, then the agent will use the
+   value to control output of elements containing the default value for
+   that element.
+
+   o  <get>
+
+   o  <get-config>
+
+   o  <copy-config>
+
+   Index clause components are not subject to default suppression.  If
+   an element within the configuration database is considered to be part
+   of a key, and represents one of the naming components for a
+   conceptual data structure which allows multiple named instances of an
+   ancestor node, then this element is never suppressed, regardless of
+   the value of the 'with-defaults' attribute.
+
+   The 'with-defaults' attribute is defined in the namespace specified
+   as the 'targetNamespace' in Section 3.  However, an agent should
+
+
+
+Bierman                 Expires February 7, 2008                [Page 7]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+   accept it even if no namespace is used.
+
+   The default value of the 'with-defaults' attribute is 'true'.  This
+   means all nodes are returned, including those with default values.
+   This is the behavior defined by [RFC4741].
+
+   The schema definition fragment for the 'with-defaults' attribute is
+   shown below.  It can also found in Section 3.
+
+
+
+      <!--
+        with-defaults attribute for <rpc> element
+        -->
+        <xs:attribute name="with-defaults"
+          type="xs:boolean" default="true"/>
+
+
+                                 Figure 4
+
+   The following example shows a <get> operation which is using the
+   'with-defaults' attribute.  The manager is retrieving the
+   'interfaces' object, defined in the example.com Interfaces data
+   model.  (In this simple example, the 'name' field is defined as the
+   key, and the 'mtu' field is the only other data in the <interface>
+   element).  The default MTU value of '1500' is not returned for the
+   interface named 'Eth1' because it is set to the default value, and
+   the 'with-defaults' attribute is set to 'false'.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires February 7, 2008                [Page 8]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+      <rpc message-id="102" with-defaults="false"
+           xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <get>
+          <filter type="subtree">
+            <interfaces xmlns="http://example.com/interfaces/1.2"/>
+          </filter>
+        </get>
+      </rpc>
+
+      <rpc-reply message-id="102" with-defaults="false"
+           xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <data>
+          <interfaces xmlns="http://example.com/interfaces/1.2">
+            <interface>
+              <name>Eth0</name>
+              <mtu>8192</mtu>
+            </interface>
+            <interface>
+              <name>Eth1</name>
+            </interface>
+            <interface>
+              <name>loopback</name>
+              <mtu>8192</mtu>
+            </interface>
+          </interfaces>
+        </data>
+      </rpc-reply>
+
+
+                                 Figure 5
+
+2.3.  with-metadata Attribute
+
+   The 'with-metadata' XML attribute defines an extension to the
+   retrieval operations to allow a manager to control the generation of
+   agent-supplied meta-data (XML attributes) within the database nodes
+   value.
+
+   Agent supplied meta-data might include information such as a 'last
+   change time' timestamp, or other meta-data associated with actual
+   configuration database contents.  It is up to the agent developer as
+   to which meta-data, if any, is affected by the 'with-metadata'
+   attribute.
+
+   It is useful to retrieve this information as part of normal
+   management operations.  However, when comparing two conceptual
+   databases, it is useful to suppress the output of the agent-supplied
+   meta-data, in order to highlight only the differences that the
+
+
+
+Bierman                 Expires February 7, 2008                [Page 9]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+   manager has made.
+
+   The 'with-metadata' attribute is used to control the generation of
+   agent-generated meta-data.  If the 'with-metadata' attribute is
+   present in the <rpc> element, for any of the protocol operations
+   which return the contents of a configuration database, the agent will
+   use the 'with-metadata' value to control agent-generated meta-data
+   suppression.
+
+   If the <rpc> element contains an XML attribute named 'with-metadata'
+   in the following protocol operations, then the agent will use the
+   value to control output of elements containing any agent-generated
+   meta-data for that element.
+
+   o  <get>
+
+   o  <get-config>
+
+   o  <copy-config>
+
+   The 'with-metadata' attribute is defined in the namespace specified
+   as the 'targetNamespace' in Section 3.  However, an agent should
+   accept it even if no namespace is used.
+
+   The default value of the 'with-metadata' attribute is 'false'.  This
+   means all nodes are returned without agent-supplied meta-data, unless
+   explicitly requested by the manager by setting the 'with-metadata'
+   attribute to 'true'.
+
+   The schema definition fragment for the 'with-metadata' attribute is
+   shown below.  It can also found in Section 3.
+
+
+
+      <!--
+        with-metadata attribute for <rpc> element
+        -->
+        <xs:attribute name="with-metadata"
+          type="xs:boolean" default="false"/>
+
+
+                                 Figure 6
+
+   The following example shows a <get> operation which is using the
+   'with-metadata' attribute.  The manager is retrieving the
+   'interfaces' object, defined in the example.com Interfaces data
+   model.  (In this simple example, the 'name' field is defined as the
+   key, and the 'mtu' field is the only other data in the <interface>
+
+
+
+Bierman                 Expires February 7, 2008               [Page 10]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+   element).  The agent supplied 'last-modified' timestamp is returned
+   for each interface.  The agent does not maintain this timestamp for
+   individual fields within the <interface> element.
+
+
+
+      <rpc message-id="103" with-metadata="true"
+           xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <get>
+          <filter type="subtree">
+            <interfaces xmlns="http://example.com/interfaces/1.2"/>
+          </filter>
+        </get>
+      </rpc>
+
+      <rpc-reply message-id="103" with-metadata="true"
+           xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <data>
+          <interfaces xmlns="http://example.com/interfaces/1.2"
+           xmlns:ts="http://netconfcentral.org/ncx/1.0">
+            <interface
+                ts:last-modified="2007-08-06T13:20:00.000-08:00">
+              <name>Eth0</name>
+              <mtu>8192</mtu>
+            </interface>
+            <interface
+                ts:last-modified="2007-07-19T09:15:04.000-08:00">
+              <name>Eth1</name>
+              <mtu>1500</mtu>
+            </interface>
+            <interface
+                ts:last-modified="2007-07-19T09:05:05.000-08:00">
+              <name>loopback</name>
+              <mtu>8192</mtu>
+            </interface>
+          </interfaces>
+        </data>
+      </rpc-reply>
+
+
+                                 Figure 7
+
+2.4.  last-modified Attribute
+
+   The 'last-modified' XML attribute defines a meta-data extension for
+   any data model, which identifies the agent system time when the agent
+   last detected a change in some portion of the <running> configuration
+   database.
+
+
+
+Bierman                 Expires February 7, 2008               [Page 11]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+   The 'last-modified' attribute is a string encoded with the 'dateTime'
+   data type.  Maintenance of these time stamps will consume agent
+   memory and CPU resources, so it is not expected that an agent will
+   maintain the 'last-modified' timestamp for all data model contents.
+   The granularity of these timestamps is determined by the agent
+   implementer.
+
+   It is suggested that dynamic objects, which can be created and
+   deleted by a manager, should maintain the 'last-modified' attribute
+   for each instance of the dynamic object.  This allows applications
+   within multi-manager environments to use agent configuration data in
+   a more robust manner, by easily detecting that other applications
+   have made changes to the dynamic configuration data.
+
+   The 'last-modified' attribute is defined in the namespace specified
+   as the 'targetNamespace' in Section 3.  However, a manager should
+   accept it even if no namespace is used by the agent.
+
+   The schema definition fragment for the 'last-modified' attribute is
+   shown below.  It can also found in Section 3.
+
+
+
+      <!--
+        last-modified XML attribute for configuration database elements
+        -->
+        <xs:attribute name="last-modified" type="xs:dateTime"/>
+
+
+                                 Figure 8
+
+   An example RPC request and response using the 'last-modified'
+   timestamp example can be found in Section 2.3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires February 7, 2008               [Page 12]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+3.  Data Model XSD
+
+   This section contains an XML Schema Definition [W3C.REC-xmlschema-2]
+   which defines the XML syntax associated with the conceptual data
+   structure semantics found in Section 2.
+
+
+
+   BEGIN
+
+   <?xml version="1.0" encoding="UTF-8"?>
+   <xs:schema xmlns="http://netconfcentral.org/ncx/1.0"
+    targetNamespace="http://netconfcentral.org/ncx/1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified" attributeFormDefault="unqualified"
+    xml:lang="en" version="1.0"
+    xmlns:ncx="http://netconfcentral.org/ncx/1.0">
+    <xs:annotation>
+     <xs:documentation>
+
+       Module: ncx
+       Owner: ncx
+       Application: types
+       Version: 1.0
+       Contact Info: Send comments to ietf@andybierman.com.
+
+       Description:
+         NCX Protocol Extensions
+
+       Revision History:
+
+         Revision: 1.0
+         Initial version.
+     </xs:documentation>
+    </xs:annotation>
+
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+     schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+
+    <!--
+      test-option for <edit-config> operation
+      -->
+    <xs:simpleType name="TestOptionTypeExtended">
+     <xs:annotation>
+      <xs:documentation>
+        Test option for edit-config operation, with the
+        'test-only' option added.
+      </xs:documentation>
+
+
+
+Bierman                 Expires February 7, 2008               [Page 13]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+     </xs:annotation>
+     <xs:restriction base="xs:string">
+      <xs:enumeration value="test-then-set"/>
+      <xs:enumeration value="set"/>
+      <xs:enumeration value="test-only"/>
+     </xs:restriction>
+    </xs:simpleType>
+
+    <!--
+      with-defaults attribute for <rpc> element
+      -->
+    <xs:attribute name="with-defaults"
+       type="xs:boolean" default="true"/>
+
+    <!--
+      with-metadata attribute for <rpc> element
+      -->
+    <xs:attribute name="with-metadata"
+       type="xs:boolean" default="false"/>
+
+    <!--
+      last-modified attribute for potentially any database element
+      -->
+    <xs:attribute name="last-modified" type="xs:dateTime"/>
+
+   </xs:schema>
+
+   END
+
+
+                                 Figure 9
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires February 7, 2008               [Page 14]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+4.  IANA Considerations
+
+   There are two actions that are requested of IANA:
+
+   1.  register data model schema namespace URI
+
+   2.  register data model schema URL and store associated XSD
+
+   [namespace URI TBD]
+
+   [namespace URL TBD]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires February 7, 2008               [Page 15]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+5.  Security Considerations
+
+   This document defines some minor extensions to existing NETCONF
+   protocol operations.  They do not introduce any new or increased
+   security risks into the management system.
+
+   The 'test-only' extensions allows a manager to test a potential
+   <edit-config> operation without actually applying it.  This is
+   intended to help applications detect variances and optional behavior
+   (within a data model), between different agents that implement a
+   particular data model.
+
+   The 'with-defaults' and 'with-metadata' XML attributes provide
+   manager controls over the retrieval of particular types of XML data
+   from a configuration database.  They only suppress data that can
+   already be retrieved with the standard protocol operations, and do
+   not add any data to the configuration database.
+
+   The 'last-modified' XML attribute provide a consistent mechanism to
+   associate a last modification timestamp with XML sub-trees within the
+   <running> configuration database.  This information is optional, and
+   may not be provided by the agent, or may not be provided on a
+   consistent basis within the database (depending on the agent
+   implementation).  This timestamp could provide information to a
+   session (with appropriate read access permissions) on when particular
+   database elements last changed value.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires February 7, 2008               [Page 16]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+6.  References
+
+6.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC4741]  Enns, R., "NETCONF Configuration Protocol", RFC 4741,
+              December 2006.
+
+   [W3C.REC-xml]
+              Bray, T., Paoli, J., Sperberg-McQueen, C., and E. Maler,
+              "Extensible Markup Language (XML) 1.0 (2nd ed)", W3C REC-
+              xml, October 2000, <http://www.w3.org/TR/REC-xml>.
+
+   [W3C.REC-xmlschema-2]
+              Biron, P. and A. Malhotra, "XML Schema Part 2: Datatypes",
+              W3C REC-xmlschema-2, May 2001,
+              <http://www.w3.org/TR/xmlschema-2/>.
+
+6.2.  Informative References
+
+   [I-D.ietf-netconf-notification]
+              Trevino, H. and S. Chisholm, "NETCONF Event
+              Notifications", draft-ietf-netconf-notification-08 (work
+              in progress), July 2007.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires February 7, 2008               [Page 17]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+Author's Address
+
+   Andy Bierman
+   netconfcentral.org
+   Simi Valley, CA
+   USA
+
+   Email: ietf@andybierman.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires February 7, 2008               [Page 18]
+
+Internet-Draft                   NCX-EXT                     August 2007
+
+
+Full Copyright Statement
+
+   Copyright (C) The IETF Trust (2007).
+
+   This document is subject to the rights, licenses and restrictions
+   contained in BCP 78, and except as set forth therein, the authors
+   retain all their rights.
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY, THE IETF TRUST AND
+   THE INTERNET ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF
+   THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Intellectual Property
+
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the procedures with respect to rights in RFC documents can be
+   found in BCP 78 and BCP 79.
+
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use of
+   such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository at
+   http://www.ietf.org/ipr.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at
+   ietf-ipr@ietf.org.
+
+
+Acknowledgment
+
+   Funding for the RFC Editor function is provided by the IETF
+   Administrative Support Activity (IASA).
+
+
+
+
+
+Bierman                 Expires February 7, 2008               [Page 19]
+

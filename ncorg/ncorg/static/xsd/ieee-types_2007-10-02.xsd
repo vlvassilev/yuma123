@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:ieee-types"
+   targetNamespace="urn:ietf:params:xml:ns:yang:ieee-types"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2007-10-02"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'ieee-types.yang' by yangdump version 0.9.2
+         
+         Module: ieee-types
+         Organization: YANG Language Design Team
+         Version: 2007-10-02
+         Contact: Martin Bjorklund (Editor) &lt;mbj@tail-f.com&gt;
+      </xs:documentation>
+      <xs:documentation>
+         This module contains standard derived YANG types
+         for IEEE 802 addresses and related things.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/swdev/trunk/netconf/modules/./yang/ieee-types.yang
+         </ncx:source>
+         <ncx:organization>
+            YANG Language Design Team
+         </ncx:organization>
+         <ncx:contact>
+            Martin Bjorklund (Editor) &lt;mbj@tail-f.com&gt;
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2007-10-02</ncx:version>
+            <ncx:description>Initial revision.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="mac-address">
+      <xs:annotation>
+         <xs:documentation>
+            The mac-address type represents an 802 MAC address
+            represented in the `canonical' order defined by 
+            IEEE 802.1a, i.e., as if it were transmitted least 
+            significant bit first, even though 802.5 (in contrast
+            to other 802.x protocols) requires MAC addresses to 
+            be transmitted most significant bit first.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:reference>
+               <ncx:text>RFC 2579 STD 58</ncx:text>
+               <ncx:url>
+                  http://www.ietf.org/rfc/rfc2579.txt
+               </ncx:url>
+            </ncx:reference>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:restriction base="yang:phys-address"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="bridgeid">
+      <xs:annotation>
+         <xs:documentation>
+            The bridgeid type represents identifers that uniquely
+            identify a bridge.  Its first four hexadecimal digits
+            contain a priority value followed by a colon. The
+            remaining characters contain the MAC address used to 
+            refer to a bridge in a unique fashion (typically, the
+            numerically smallest MAC address of all ports on the
+            bridge).
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:reference>
+               <ncx:text>RFC 4188</ncx:text>
+               <ncx:url>
+                  http://www.ietf.org/rfc/rfc4188.txt
+               </ncx:url>
+            </ncx:reference>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern
+            value="[0-9a-fA-F]{4}:([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="vlanid">
+      <xs:annotation>
+         <xs:documentation>
+            The vlanid type uniquely identifies a VLAN. This is 
+            the 12-bit VLAN-ID used in the VLAN Tag header. The 
+            range is defined by the referenced specification.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  IEEE Std 802.1Q 2003 Edition, Virtual Bridged Local
+                  Area Networks.
+               </ncx:text>
+            </ncx:reference>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:restriction base="xs:unsignedShort">
+         <xs:minInclusive value="1"/>
+         <xs:maxInclusive value="4094"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+</xs:schema>

@@ -1,0 +1,987 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:smiv2:TCP-MIB"
+   targetNamespace="urn:ietf:params:xml:ns:yang:smiv2:TCP-MIB"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2005-02-18"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:inet-address="urn:ietf:params:xml:ns:yang:smiv2:INET-ADDRESS-MIB"
+   xmlns:inet="urn:ietf:params:xml:ns:yang:inet-types"
+   xmlns:smi="urn:ietf:params:xml:ns:yang:yang-smi"
+   xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'TCP-MIB.yang' by yangdump version 0.9.2
+         
+         Module: TCP-MIB
+         Organization: IETF IPv6 MIB Revision Team
+         http://www.ietf.org/html.charters/ipv6-charter.html
+         Version: 2005-02-18
+         Contact: Rajiv Raghunarayan (editor)
+         
+         Cisco Systems Inc.
+         170 West Tasman Drive
+         San Jose, CA 95134
+         
+         Phone: +1 408 853 9612
+         Email: &lt;raraghun@cisco.com&gt;
+         
+         Send comments to &lt;ipv6@ietf.org&gt;
+      </xs:documentation>
+      <xs:documentation>
+         The MIB module for managing TCP implementations.
+         
+         Copyright (C) The Internet Society (2005). This version
+         of this MIB module is a part of RFC 4022; see the RFC
+         itself for full legal notices.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/swdev/trunk/netconf/modules/./ietf/TCP-MIB.yang
+         </ncx:source>
+         <ncx:organization>
+            IETF IPv6 MIB Revision Team
+            http://www.ietf.org/html.charters/ipv6-charter.html
+         </ncx:organization>
+         <ncx:contact>
+            Rajiv Raghunarayan (editor)
+            
+            Cisco Systems Inc.
+            170 West Tasman Drive
+            San Jose, CA 95134
+            
+            Phone: +1 408 853 9612
+            Email: &lt;raraghun@cisco.com&gt;
+            
+            Send comments to &lt;ipv6@ietf.org&gt;
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2005-02-18</ncx:version>
+            <ncx:description>
+               IP version neutral revision, published as RFC 4022.
+            </ncx:description>
+         </ncx:revision>
+         <ncx:revision>
+            <ncx:version>1994-11-01</ncx:version>
+            <ncx:description>
+               Initial SMIv2 version, published as RFC 2012.
+            </ncx:description>
+         </ncx:revision>
+         <ncx:revision>
+            <ncx:version>1991-03-31</ncx:version>
+            <ncx:description>
+               The initial revision of this MIB module was part of
+               MIB-II.
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:element name="tcp">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <smi:oid  smi:oid="1.3.6.1.2.1.6"/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="tcpRtoAlgorithm" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The algorithm used to determine the timeout value used for
+                     retransmitting unacknowledged octets.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                     <xs:enumeration value="other">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>1</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="constant">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>2</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="rsre">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>3</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="vanj">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>4</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="rfc2988">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>5</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="tcpRtoMin" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The minimum value permitted by a TCP implementation for
+                     the retransmission timeout, measured in milliseconds.
+                     More refined semantics for objects of this type depend
+                     on the algorithm used to determine the retransmission
+                     timeout; in particular, the IETF standard algorithm
+                     rfc2988(5) provides a minimum value.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <ncx:units>milliseconds</ncx:units>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.2"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:simpleType>
+                  <xs:restriction base="xs:int">
+                     <xs:minInclusive value="0"/>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="tcpRtoMax" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The maximum value permitted by a TCP implementation for
+                     the retransmission timeout, measured in milliseconds.
+                     More refined semantics for objects of this type depend
+                     on the algorithm used to determine the retransmission
+                     timeout; in particular, the IETF standard algorithm
+                     rfc2988(5) provides an upper bound (as part of an
+                     adaptive backoff algorithm).
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <ncx:units>milliseconds</ncx:units>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.3"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:simpleType>
+                  <xs:restriction base="xs:int">
+                     <xs:minInclusive value="0"/>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="tcpMaxConn" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The limit on the total number of TCP connections the entity
+                     can support.  In entities where the maximum number of
+                     connections is dynamic, this object should contain the
+                     value -1.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.4"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:simpleType>
+                  <xs:restriction base="xs:int">
+                     <xs:minInclusive value="-1"/>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="tcpActiveOpens" type="yang:counter32"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The number of times that TCP connections have made a direct
+                     transition to the SYN-SENT state from the CLOSED state.
+                     
+                     Discontinuities in the value of this counter are
+                     indicated via discontinuities in the value of sysUpTime.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.5"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="tcpPassiveOpens" type="yang:counter32"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The number of times TCP connections have made a direct
+                     transition to the SYN-RCVD state from the LISTEN state.
+                     
+                     Discontinuities in the value of this counter are
+                     indicated via discontinuities in the value of sysUpTime.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.6"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="tcpAttemptFails" type="yang:counter32"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The number of times that TCP connections have made a direct
+                     transition to the CLOSED state from either the SYN-SENT
+                     state or the SYN-RCVD state, plus the number of times that
+                     TCP connections have made a direct transition to the
+                     LISTEN state from the SYN-RCVD state.
+                     
+                     Discontinuities in the value of this counter are
+                     indicated via discontinuities in the value of sysUpTime.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.7"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="tcpEstabResets" type="yang:counter32"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The number of times that TCP connections have made a direct
+                     transition to the CLOSED state from either the ESTABLISHED
+                     state or the CLOSE-WAIT state.
+                     
+                     Discontinuities in the value of this counter are
+                     indicated via discontinuities in the value of sysUpTime.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.8"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="tcpCurrEstab" type="yang:gauge32"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The number of TCP connections for which the current state
+                     is either ESTABLISHED or CLOSE-WAIT.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.9"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="tcpInSegs" type="yang:counter32"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The total number of segments received, including those
+                     received in error.  This count includes segments received
+                     on currently established connections.
+                     
+                     Discontinuities in the value of this counter are
+                     indicated via discontinuities in the value of sysUpTime.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.10"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="tcpOutSegs" type="yang:counter32"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The total number of segments sent, including those on
+                     current connections but excluding those containing only
+                     retransmitted octets.
+                     
+                     Discontinuities in the value of this counter are
+                     indicated via discontinuities in the value of sysUpTime.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.11"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="tcpRetransSegs" type="yang:counter32"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The total number of segments retransmitted; that is, the
+                     number of TCP segments transmitted containing one or more
+                     previously transmitted octets.
+                     
+                     Discontinuities in the value of this counter are
+                     indicated via discontinuities in the value of sysUpTime.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.12"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="tcpConnEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     A conceptual row of the tcpConnTable containing information
+                     about a particular current IPv4 TCP connection.  Each row
+                     of this table is transient in that it ceases to exist when
+                     (or soon after) the connection makes the transition to the
+                     CLOSED state.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:status>deprecated</ncx:status>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.13.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="tcpConnLocalAddress"
+                        type="inet:ipv4-address">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The local IP address for this TCP connection.  In the case
+                              of a connection in the listen state willing to
+                              accept connections for any IP interface associated with the
+                              node, the value 0.0.0.0 is used.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:status>deprecated</ncx:status>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.13.1.2"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="tcpConnLocalPort">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The local port number for this TCP connection.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:status>deprecated</ncx:status>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.13.1.3"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:int">
+                              <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="65535"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="tcpConnRemAddress"
+                        type="inet:ipv4-address">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The remote IP address for this TCP connection.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:status>deprecated</ncx:status>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.13.1.4"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="tcpConnRemPort">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The remote port number for this TCP connection.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:status>deprecated</ncx:status>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.13.1.5"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:int">
+                              <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="65535"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="tcpConnState" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The state of this TCP connection.
+                              
+                              The only value that may be set by a management station is
+                              deleteTCB(12).  Accordingly, it is appropriate for an agent
+                              to return a `badValue' response if a management station
+                              attempts to set this object to any other value.
+                              
+                              If a management station sets this object to the value
+                              deleteTCB(12), then the TCB (as defined in [RFC793]) of
+                              the corresponding connection on the managed node is
+                              deleted, resulting in immediate termination of the
+                              connection.
+                              
+                              As an implementation-specific option, a RST segment may be
+                              sent from the managed node to the other TCP endpoint (note,
+                              however, that RST segments are not sent reliably).
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:status>deprecated</ncx:status>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.13.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:string">
+                              <xs:enumeration value="closed">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>1</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="listen">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>2</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="synSent">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>3</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="synReceived">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>4</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="established">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>5</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="finWait1">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>6</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="finWait2">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>7</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="closeWait">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>8</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="lastAck">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>9</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="closing">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>10</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="timeWait">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>11</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="deleteTCB">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>12</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="__.tcp.tcpConnEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="tcpConnEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="tcpConnLocalAddress"/>
+                  <xs:field xpath="tcpConnLocalPort"/>
+                  <xs:field xpath="tcpConnRemAddress"/>
+                  <xs:field xpath="tcpConnRemPort"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="tcpInErrs" type="yang:counter32"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The total number of segments received in error (e.g., bad
+                     TCP checksums).
+                     
+                     Discontinuities in the value of this counter are
+                     indicated via discontinuities in the value of sysUpTime.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.14"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="tcpOutRsts" type="yang:counter32"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The number of TCP segments sent containing the RST flag.
+                     
+                     Discontinuities in the value of this counter are
+                     indicated via discontinuities in the value of sysUpTime.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.15"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="tcpHCInSegs" type="yang:counter64"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The total number of segments received, including those
+                     received in error.  This count includes segments received
+                     
+                     on currently established connections.  This object is
+                     the 64-bit equivalent of tcpInSegs.
+                     
+                     Discontinuities in the value of this counter are
+                     indicated via discontinuities in the value of sysUpTime.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.17"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="tcpHCOutSegs" type="yang:counter64"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The total number of segments sent, including those on
+                     current connections but excluding those containing only
+                     retransmitted octets.  This object is the 64-bit
+                     equivalent of tcpOutSegs.
+                     
+                     Discontinuities in the value of this counter are
+                     indicated via discontinuities in the value of sysUpTime.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.18"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="tcpConnectionEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     A conceptual row of the tcpConnectionTable containing
+                     information about a particular current TCP connection.
+                     Each row of this table is transient in that it ceases to
+                     exist when (or soon after) the connection makes the
+                     transition to the CLOSED state.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.19.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="tcpConnectionLocalAddressType"
+                        type="inet-address:InetAddressType">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The address type of tcpConnectionLocalAddress.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.19.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="tcpConnectionLocalAddress"
+                        type="inet-address:InetAddress">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The local IP address for this TCP connection.  The type
+                              of this address is determined by the value of
+                              tcpConnectionLocalAddressType.
+                              
+                              As this object is used in the index for the
+                              tcpConnectionTable, implementors should be
+                              careful not to create entries that would result in OIDs
+                              with more than 128 subidentifiers; otherwise the information
+                              cannot be accessed by using SNMPv1, SNMPv2c, or SNMPv3.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.19.1.2"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="tcpConnectionLocalPort"
+                        type="inet-address:InetPortNumber">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The local port number for this TCP connection.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.19.1.3"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="tcpConnectionRemAddressType"
+                        type="inet-address:InetAddressType">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The address type of tcpConnectionRemAddress.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.19.1.4"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="tcpConnectionRemAddress"
+                        type="inet-address:InetAddress">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The remote IP address for this TCP connection.  The type
+                              of this address is determined by the value of
+                              tcpConnectionRemAddressType.
+                              
+                              As this object is used in the index for the
+                              tcpConnectionTable, implementors should be
+                              careful not to create entries that would result in OIDs
+                              with more than 128 subidentifiers; otherwise the information
+                              cannot be accessed by using SNMPv1, SNMPv2c, or SNMPv3.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.19.1.5"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="tcpConnectionRemPort"
+                        type="inet-address:InetPortNumber">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The remote port number for this TCP connection.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.19.1.6"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="tcpConnectionState"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The state of this TCP connection.
+                              
+                              The value listen(2) is included only for parallelism to the
+                              old tcpConnTable and should not be used.  A connection in
+                              LISTEN state should be present in the tcpListenerTable.
+                              
+                              The only value that may be set by a management station is
+                              deleteTCB(12).  Accordingly, it is appropriate for an agent
+                              to return a `badValue' response if a management station
+                              attempts to set this object to any other value.
+                              
+                              If a management station sets this object to the value
+                              deleteTCB(12), then the TCB (as defined in [RFC793]) of
+                              the corresponding connection on the managed node is
+                              deleted, resulting in immediate termination of the
+                              connection.
+                              
+                              As an implementation-specific option, a RST segment may be
+                              sent from the managed node to the other TCP endpoint (note,
+                              however, that RST segments are not sent reliably).
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.19.1.7"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:string">
+                              <xs:enumeration value="closed">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>1</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="listen">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>2</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="synSent">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>3</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="synReceived">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>4</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="established">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>5</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="finWait1">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>6</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="finWait2">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>7</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="closeWait">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>8</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="lastAck">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>9</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="closing">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>10</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="timeWait">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>11</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="deleteTCB">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>12</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="tcpConnectionProcess"
+                        type="xs:unsignedInt" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The system's process ID for the process associated with
+                              this connection, or zero if there is no such process.  This
+                              value is expected to be the same as HOST-RESOURCES-MIB::
+                              hrSWRunIndex or SYSAPPL-MIB::sysApplElmtRunIndex for some
+                              row in the appropriate tables.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.19.1.8"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="__.tcp.tcpConnectionEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="tcpConnectionEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="tcpConnectionLocalAddressType"/>
+                  <xs:field xpath="tcpConnectionLocalAddress"/>
+                  <xs:field xpath="tcpConnectionLocalPort"/>
+                  <xs:field xpath="tcpConnectionRemAddressType"/>
+                  <xs:field xpath="tcpConnectionRemAddress"/>
+                  <xs:field xpath="tcpConnectionRemPort"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="tcpListenerEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     A conceptual row of the tcpListenerTable containing
+                     information about a particular TCP listener.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.6.20.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="tcpListenerLocalAddressType"
+                        type="inet-address:InetAddressType">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The address type of tcpListenerLocalAddress.  The value
+                              should be unknown (0) if connection initiations to all
+                              local IP addresses are accepted.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.20.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="tcpListenerLocalAddress"
+                        type="inet-address:InetAddress">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The local IP address for this TCP connection.
+                              
+                              The value of this object can be represented in three
+                              possible ways, depending on the characteristics of the
+                              listening application:
+                              
+                              1. For an application willing to accept both IPv4 and
+                                 IPv6 datagrams, the value of this object must be
+                                 ''h (a zero-length octet-string), with the value
+                                 of the corresponding tcpListenerLocalAddressType
+                                 object being unknown (0).
+                              
+                              2. For an application willing to accept only IPv4 or
+                                 IPv6 datagrams, the value of this object must be
+                                 '0.0.0.0' or '::' respectively, with
+                                 tcpListenerLocalAddressType representing the
+                                 appropriate address type.
+                              
+                              3. For an application which is listening for data
+                                 destined only to a specific IP address, the value
+                                 of this object is the specific local address, with
+                                 tcpListenerLocalAddressType representing the
+                                 appropriate address type.
+                              
+                              As this object is used in the index for the
+                              tcpListenerTable, implementors should be
+                              careful not to create entries that would result in OIDs
+                              with more than 128 subidentifiers; otherwise the information
+                              cannot be accessed, using SNMPv1, SNMPv2c, or SNMPv3.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.20.1.2"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="tcpListenerLocalPort"
+                        type="inet-address:InetPortNumber">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The local port number for this TCP connection.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.20.1.3"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="tcpListenerProcess"
+                        type="xs:unsignedInt" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The system's process ID for the process associated with
+                              this listener, or zero if there is no such process.  This
+                              value is expected to be the same as HOST-RESOURCES-MIB::
+                              hrSWRunIndex or SYSAPPL-MIB::sysApplElmtRunIndex for some
+                              row in the appropriate tables.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.6.20.1.4"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="__.tcp.tcpListenerEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="tcpListenerEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="tcpListenerLocalAddressType"/>
+                  <xs:field xpath="tcpListenerLocalAddress"/>
+                  <xs:field xpath="tcpListenerLocalPort"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.tcp.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

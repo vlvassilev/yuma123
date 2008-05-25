@@ -1,0 +1,1144 @@
+
+<div>
+   <h1 class="yang">ipfix-psamp.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#Direction.71">Direction</a></li>
+         </ul>
+      </li>
+      <li><a href="#">Groupings</a>
+         <ul>
+            <li class="daddy"><a href="#InformationElement.44">InformationElement</a>
+               <ul>
+                  <li><a href="#ieEnterpriseNumber.47">ieEnterpriseNumber</a></li>
+                  <li class="daddy"><a href="#NameOrId.53">NameOrId</a>
+                     <ul>
+                        <li class="daddy"><a href="#ieName.55">ieName</a>
+                           <ul>
+                              <li><a href="#ieName.55">ieName</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#ieId.58">ieId</a>
+                           <ul>
+                              <li><a href="#ieId.58">ieId</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li><a href="#ieLength.63">ieLength</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#Interface.82">Interface</a>
+               <ul>
+                  <li class="daddy"><a href="#IndexOrName.85">IndexOrName</a>
+                     <ul>
+                        <li class="daddy"><a href="#ifIndex.90">ifIndex</a>
+                           <ul>
+                              <li><a href="#ifIndex.90">ifIndex</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#ifName.91">ifName</a>
+                           <ul>
+                              <li><a href="#ifName.91">ifName</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li><a href="#direction.94">direction</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#Linecard.102">Linecard</a>
+               <ul>
+                  <li class="daddy"><a href="#IndexOrName.105">IndexOrName</a>
+                     <ul>
+                        <li class="daddy"><a href="#entPhysicalIndex.110">entPhysicalIndex</a>
+                           <ul>
+                              <li><a href="#entPhysicalIndex.110">entPhysicalIndex</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#entPhysicalName.111">entPhysicalName</a>
+                           <ul>
+                              <li><a href="#entPhysicalName.111">entPhysicalName</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li><a href="#direction.114">direction</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#MeteringProcess.122">MeteringProcess</a>
+               <ul>
+                  <li><a href="#meteringProcessId.126">meteringProcessId</a></li>
+                  <li><a href="#selectionProcess.132">selectionProcess</a></li>
+                  <li><a href="#cache.140">cache</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#ipfix.148">ipfix</a>
+               <ul>
+                  <li class="daddy"><a href="#collectingProcess.150">collectingProcess</a>
+                     <ul>
+                        <li><a href="#name.154">name</a></li>
+                        <li class="daddy"><a href="#receiver.159">receiver</a>
+                           <ul>
+                              <li><a href="#name.163">name</a></li>
+                              <li><a href="#TransportProtocol.165">TransportProtocol</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#meteringProcess.216">meteringProcess</a>
+                           <ul>
+                              <li><a href="#name.222">name</a></li>
+                              <li><a href="#meteringProcessId.126">meteringProcessId</a></li>
+                              <li><a href="#selectionProcess.132">selectionProcess</a></li>
+                              <li><a href="#cache.140">cache</a></li>
+                              <li><a href="#uses.228">uses</a></li>
+                           </ul>
+                        </li>
+                        <li><a href="#exportingProcess.231">exportingProcess</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#observationPoint.238">observationPoint</a>
+                     <ul>
+                        <li><a href="#name.242">name</a></li>
+                        <li><a href="#observationPointId.247">observationPointId</a></li>
+                        <li><a href="#observationDomainId.253">observationDomainId</a></li>
+                        <li class="daddy"><a href="#OPType.259">OPType</a>
+                           <ul>
+                              <li><a href="#interface.261">interface</a></li>
+                              <li><a href="#linecard.262">linecard</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#meteringProcess.265">meteringProcess</a>
+                           <ul>
+                              <li><a href="#name.269">name</a></li>
+                              <li><a href="#meteringProcessId.126">meteringProcessId</a></li>
+                              <li><a href="#selectionProcess.132">selectionProcess</a></li>
+                              <li><a href="#cache.140">cache</a></li>
+                              <li><a href="#uses.275">uses</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#selectionProcess.279">selectionProcess</a>
+                     <ul>
+                        <li><a href="#name.284">name</a></li>
+                        <li><a href="#selectorId.289">selectorId</a></li>
+                        <li class="daddy"><a href="#Method.295">Method</a>
+                           <ul>
+                              <li><a href="#sampCountBased.300">sampCountBased</a></li>
+                              <li><a href="#sampTimeBased.304">sampTimeBased</a></li>
+                              <li><a href="#sampRandOutOfN.308">sampRandOutOfN</a></li>
+                              <li><a href="#sampUniProb.312">sampUniProb</a></li>
+                              <li><a href="#sampNonUniProb.319">sampNonUniProb</a></li>
+                              <li><a href="#sampFlowState.324">sampFlowState</a></li>
+                              <li><a href="#filterMatch.329">filterMatch</a></li>
+                              <li><a href="#filterHash.335">filterHash</a></li>
+                              <li><a href="#filterRState.348">filterRState</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#cache.365">cache</a>
+                     <ul>
+                        <li><a href="#name.369">name</a></li>
+                        <li><a href="#cacheType.374">cacheType</a></li>
+                        <li><a href="#cacheSize.388">cacheSize</a></li>
+                        <li><a href="#activeTimeout.390">activeTimeout</a></li>
+                        <li><a href="#idleTimeout.392">idleTimeout</a></li>
+                        <li class="daddy"><a href="#template.394">template</a>
+                           <ul>
+                              <li><a href="#templateId.395">templateId</a></li>
+                              <li><a href="#field.401">field</a></li>
+                           </ul>
+                        </li>
+                        <li><a href="#exportingProcess.413">exportingProcess</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#exportingProcess.419">exportingProcess</a>
+                     <ul>
+                        <li><a href="#name.423">name</a></li>
+                        <li><a href="#exportingProcessId.428">exportingProcessId</a></li>
+                        <li class="daddy"><a href="#destination.434">destination</a>
+                           <ul>
+                              <li><a href="#name.437">name</a></li>
+                              <li><a href="#type.439">type</a></li>
+                              <li><a href="#TransportProtocol.451">TransportProtocol</a></li>
+                              <li><a href="#option.512">option</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">ipfix-psamp</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:ipfix-psamp-config"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"ipfix"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/inet-types/2007-10-02">inet-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"inet"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/IF-MIB/2000-06-14">IF-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"if"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/ENTITY-MIB/2005-08-10">ENTITY-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"ent"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"IPFIX WG"</span>;
+
+      <span class="yang_kw">contact</span> <span class="yang_str">"muenz@informatik.uni-tuebingen.de"</span>;
+
+      <span class="yang_kw">description</span> <span class="yang_str">"IPFIX/PSAMP Configuration Data Model"</span>;
+
+      <span class="yang_kw">reference</span> <span class="yang_str">"draft-muenz-ipfix-configuration-04.txt"</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-02-20"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Version of draft-muenz-ipfix-configuration-04
+            Changes in -04:
+            - first version in yang
+            - Collecting Process can be configured for file import
+            - Collecting Process can be configured to export received
+            records without modifications (e.g., to file or other collectors)
+            - SCTP export parameter timedReliability
+            - parameter for eligible local IP addresses for SCTP endpoint
+            - all tags names uncapitalized, types names etc. capitalized
+            - CacheParameters renamed as Cache
+            - description attribute removed
+            Changes in -03:
+            - Linecard and Interface classes now have direction element
+            - sec =&gt; s (SI unit)
+            - optional description attribute for annotations
+            - simplifications in ExportingProcess class
+            - new parameters: observationPointId, meteringProcessId,
+            selectorId, exportingProcessId (note that devices do not
+            have to support the configuration of these parameters)
+            - new FileExport class for exporting into a file
+            - Reporting class renamed Option Class
+            Changes in -02:
+            - new structure without next pointers
+            - packet reporting and flow metering replaced by record cache
+            - added reporting with options"</span>;
+      }
+
+
+      <span class="yang_cmt">// typedefs</span>
+
+      <a name="Direction.71"/><span class="yang_kw">typedef</span> <span class="yang_id">Direction</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+            <span class="yang_kw">enum</span> <span class="yang_str">"ingress"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"egress"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"both"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+            }
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Direction of packets going through an interface or
+            linecard."</span>;
+      }
+
+      <span class="yang_cmt">// groupings</span>
+
+      <a name="InformationElement.44"/><span class="yang_kw">grouping</span> <span class="yang_id">InformationElement</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Parameters of an Information Element."</span>;
+
+         <a name="ieEnterpriseNumber.47"/><span class="yang_kw">leaf</span> <span class="yang_id">ieEnterpriseNumber</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Omitted in the case of an IETF specified Information
+               Elements."</span>;
+         }
+
+         <a name="NameOrId.53"/><span class="yang_kw">choice</span> <span class="yang_id">NameOrId</span> {
+            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+
+            <a name="ieName.55"/><span class="yang_kw">case</span> <span class="yang_id">ieName</span> {
+
+               <a name="ieName.55"/><span class="yang_kw">leaf</span> <span class="yang_id">ieName</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+            }  <span class="yang_cmt">// case ieName</span>
+
+            <a name="ieId.58"/><span class="yang_kw">case</span> <span class="yang_id">ieId</span> {
+
+               <a name="ieId.58"/><span class="yang_kw">leaf</span> <span class="yang_id">ieId</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">uint16</span>;
+               }
+            }  <span class="yang_cmt">// case ieId</span>
+         }  <span class="yang_cmt">// choice NameOrId</span>
+
+         <a name="ieLength.63"/><span class="yang_kw">leaf</span> <span class="yang_id">ieLength</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint16</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Length can be omitted if a default length exists for
+               the specified Information Element."</span>;
+         }
+      }  <span class="yang_cmt">// grouping InformationElement</span>
+
+      <a name="Interface.82"/><span class="yang_kw">grouping</span> <span class="yang_id">Interface</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Interface as input to Observation Point."</span>;
+
+         <a name="IndexOrName.85"/><span class="yang_kw">choice</span> <span class="yang_id">IndexOrName</span> {
+            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Index or name of the interface as stored in the
+               ifTable of IF-MIB."</span>;
+            <span class="yang_kw">reference</span> <span class="yang_str">"RFC 1229."</span>;
+
+            <a name="ifIndex.90"/><span class="yang_kw">case</span> <span class="yang_id">ifIndex</span> {
+
+               <a name="ifIndex.90"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               }
+            }  <span class="yang_cmt">// case ifIndex</span>
+
+            <a name="ifName.91"/><span class="yang_kw">case</span> <span class="yang_id">ifName</span> {
+
+               <a name="ifName.91"/><span class="yang_kw">leaf</span> <span class="yang_id">ifName</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+            }  <span class="yang_cmt">// case ifName</span>
+         }  <span class="yang_cmt">// choice IndexOrName</span>
+
+         <a name="direction.94"/><span class="yang_kw">leaf</span> <span class="yang_id">direction</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#Direction.71">Direction</a></span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Direction of packets. If not applicable (e.g., in the
+               case of a sniffing interface in promiscuous mode), this parameter
+               is omitted"</span>;
+         }
+      }  <span class="yang_cmt">// grouping Interface</span>
+
+      <a name="Linecard.102"/><span class="yang_kw">grouping</span> <span class="yang_id">Linecard</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Linecard as input to Observation Point."</span>;
+
+         <a name="IndexOrName.105"/><span class="yang_kw">choice</span> <span class="yang_id">IndexOrName</span> {
+            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Index or name of the linecard as stored in the
+               entPhysicalTable of ENTITY-MIB."</span>;
+            <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4133."</span>;
+
+            <a name="entPhysicalIndex.110"/><span class="yang_kw">case</span> <span class="yang_id">entPhysicalIndex</span> {
+
+               <a name="entPhysicalIndex.110"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               }
+            }  <span class="yang_cmt">// case entPhysicalIndex</span>
+
+            <a name="entPhysicalName.111"/><span class="yang_kw">case</span> <span class="yang_id">entPhysicalName</span> {
+
+               <a name="entPhysicalName.111"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalName</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+            }  <span class="yang_cmt">// case entPhysicalName</span>
+         }  <span class="yang_cmt">// choice IndexOrName</span>
+
+         <a name="direction.114"/><span class="yang_kw">leaf</span> <span class="yang_id">direction</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#Direction.71">Direction</a></span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Direction of packets. If not applicable (e.g., in the
+               case of a sniffing interface in promiscuous mode), this parameter
+               is omitted"</span>;
+         }
+      }  <span class="yang_cmt">// grouping Linecard</span>
+
+      <a name="MeteringProcess.122"/><span class="yang_kw">grouping</span> <span class="yang_id">MeteringProcess</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Selection Processes and Record Cache of a Metering
+            Process."</span>;
+
+         <a name="meteringProcessId.126"/><span class="yang_kw">leaf</span> <span class="yang_id">meteringProcessId</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"If omitted, the Metering Process ID is assigned by the
+               monitoring device."</span>;
+         }
+
+         <a name="selectionProcess.132"/><span class="yang_kw">leaf-list</span> <span class="yang_id">selectionProcess</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+               <span class="yang_kw">path</span> <span class="yang_str">"/ipfix/selectionProcess/name"</span>;
+            }
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"user"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Selection Processes are applied in the order of
+               their appearance. If no Selection Process is specified, all
+               packets are selected."</span>;
+         }
+
+         <a name="cache.140"/><span class="yang_kw">leaf</span> <span class="yang_id">cache</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+               <span class="yang_kw">path</span> <span class="yang_str">"/ipfix/cache/name"</span>;
+            }
+            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+         }
+      }  <span class="yang_cmt">// grouping MeteringProcess</span>
+
+      <span class="yang_cmt">// objects</span>
+
+      <a name="ipfix.148"/><span class="yang_kw">container</span> <span class="yang_id">ipfix</span> {
+
+         <a name="collectingProcess.150"/><span class="yang_kw">list</span> <span class="yang_id">collectingProcess</span> {
+            <span class="yang_kw">key</span> "<a href="#name.154">name</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span> <span class="yang_str">"Parameters of a Collecting Process."</span>;
+
+            <a name="name.154"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Arbitrary but unique name of the Collecting Process."</span>;
+            }
+
+            <a name="receiver.159"/><span class="yang_kw">list</span> <span class="yang_id">receiver</span> {
+               <span class="yang_kw">key</span> "<a href="#name.163">name</a>";
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Receiver parameters."</span>;
+
+               <a name="name.163"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+
+               <a name="TransportProtocol.165"/><span class="yang_kw">choice</span> <span class="yang_id">TransportProtocol</span> {
+                  <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+
+                  <a name="sctpReceiver.167"/><span class="yang_kw">case</span> <span class="yang_id">sctpReceiver</span> {
+
+                     <a name="sctpReceiver.167"/><span class="yang_kw">container</span> <span class="yang_id">sctpReceiver</span> {
+                        <span class="yang_kw">description</span> <span class="yang_str">"SCTP receiver parameters."</span>;
+                        <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4960."</span>;
+
+                        <a name="ipAddress.170"/><span class="yang_kw">leaf-list</span> <span class="yang_id">ipAddress</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
+                           <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+                           <span class="yang_kw">description</span>
+                              <span class="yang_str">"List of eligible local IP addresses to be used by
+                              the SCTP endpoint. If omitted, all locally assigned IP
+                              addresses are used by the SCTP endpoint."</span>;
+                        }
+
+                        <a name="transportPort.176"/><span class="yang_kw">leaf</span> <span class="yang_id">transportPort</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#port-number.75">inet:port-number</a></span>;
+                           <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                        }
+                     }  <span class="yang_cmt">// container sctpReceiver</span>
+                  }  <span class="yang_cmt">// case sctpReceiver</span>
+
+                  <a name="udpReceiver.181"/><span class="yang_kw">case</span> <span class="yang_id">udpReceiver</span> {
+
+                     <a name="udpReceiver.181"/><span class="yang_kw">container</span> <span class="yang_id">udpReceiver</span> {
+                        <span class="yang_kw">description</span> <span class="yang_str">"UDP receiver parameters."</span>;
+
+                        <a name="ipAddress.183"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddress</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
+                           <span class="yang_kw">description</span>
+                              <span class="yang_str">"If omitted, all locally assigned IP addresses are
+                              used by the UDP endpoint."</span>;
+                        }
+
+                        <a name="transportPort.188"/><span class="yang_kw">leaf</span> <span class="yang_id">transportPort</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#port-number.75">inet:port-number</a></span>;
+                           <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                        }
+
+                        <a name="defaultTemplateLifetime.192"/><span class="yang_kw">leaf</span> <span class="yang_id">defaultTemplateLifetime</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                        }
+                     }  <span class="yang_cmt">// container udpReceiver</span>
+                  }  <span class="yang_cmt">// case udpReceiver</span>
+
+                  <a name="tcpReceiver.194"/><span class="yang_kw">case</span> <span class="yang_id">tcpReceiver</span> {
+
+                     <a name="tcpReceiver.194"/><span class="yang_kw">container</span> <span class="yang_id">tcpReceiver</span> {
+                        <span class="yang_kw">description</span> <span class="yang_str">"TCP receiver parameters."</span>;
+
+                        <a name="ipAddress.196"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddress</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
+                           <span class="yang_kw">description</span>
+                              <span class="yang_str">"If omitted, all locally assigned IP addresses are
+                              used by the TCP endpoint."</span>;
+                        }
+
+                        <a name="transportPort.201"/><span class="yang_kw">leaf</span> <span class="yang_id">transportPort</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#port-number.75">inet:port-number</a></span>;
+                           <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                        }
+                     }  <span class="yang_cmt">// container tcpReceiver</span>
+                  }  <span class="yang_cmt">// case tcpReceiver</span>
+
+                  <a name="fileImport.206"/><span class="yang_kw">case</span> <span class="yang_id">fileImport</span> {
+
+                     <a name="fileImport.206"/><span class="yang_kw">container</span> <span class="yang_id">fileImport</span> {
+                        <span class="yang_kw">description</span> <span class="yang_str">"File import parameters."</span>;
+
+                        <a name="uri.208"/><span class="yang_kw">leaf</span> <span class="yang_id">uri</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#uri.145">yang:uri</a></span>;
+                           <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                        }
+                     }  <span class="yang_cmt">// container fileImport</span>
+                  }  <span class="yang_cmt">// case fileImport</span>
+               }  <span class="yang_cmt">// choice TransportProtocol</span>
+            }  <span class="yang_cmt">// list receiver</span>
+
+            <a name="meteringProcess.216"/><span class="yang_kw">list</span> <span class="yang_id">meteringProcess</span> {
+               <span class="yang_kw">key</span> "<a href="#name.222">name</a>";
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Metering Processes process received records in parallel.
+                  Monitoring device acts as IPFIX mediator/concentrator."</span>;
+
+               <a name="name.222"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"Arbitrary but unique name of the Monitoring
+                     Process."</span>;
+               }
+               <a name="uses.228"/><span class="yang_kw">uses</span> <a href="#MeteringProcess.122">MeteringProcess</a>;
+            }  <span class="yang_cmt">// list meteringProcess</span>
+
+            <a name="exportingProcess.231"/><span class="yang_kw">leaf-list</span> <span class="yang_id">exportingProcess</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span> <span class="yang_str">"/ipfix/exportingProcess/name"</span>;
+               }
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Export of received records without any modifications.
+                  Records are exported by all Exporting Processes in the list."</span>;
+            }
+         }  <span class="yang_cmt">// list collectingProcess</span>
+
+         <a name="observationPoint.238"/><span class="yang_kw">list</span> <span class="yang_id">observationPoint</span> {
+            <span class="yang_kw">key</span> "<a href="#name.242">name</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span> <span class="yang_str">"Parameters of an Observation Point."</span>;
+
+            <a name="name.242"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Arbitrary but unique name of the Observation Point."</span>;
+            }
+
+            <a name="observationPointId.247"/><span class="yang_kw">leaf</span> <span class="yang_id">observationPointId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"If omitted, the Observation Point ID is assigned by the
+                  monitoring device."</span>;
+            }
+
+            <a name="observationDomainId.253"/><span class="yang_kw">leaf</span> <span class="yang_id">observationDomainId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"If omitted, the Observation Domain ID is assigned by the
+                  monitoring device."</span>;
+            }
+
+            <a name="OPType.259"/><span class="yang_kw">choice</span> <span class="yang_id">OPType</span> {
+               <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+
+               <a name="interface.261"/><span class="yang_kw">case</span> <span class="yang_id">interface</span> {
+
+                  <a name="interface.261"/><span class="yang_kw">container</span> <span class="yang_id">interface</span> {
+                     <a name="uses.261"/><span class="yang_kw">uses</span> <a href="#Interface.82">Interface</a>;
+                  }  <span class="yang_cmt">// container interface</span>
+               }  <span class="yang_cmt">// case interface</span>
+
+               <a name="linecard.262"/><span class="yang_kw">case</span> <span class="yang_id">linecard</span> {
+
+                  <a name="linecard.262"/><span class="yang_kw">container</span> <span class="yang_id">linecard</span> {
+                     <a name="uses.262"/><span class="yang_kw">uses</span> <a href="#Linecard.102">Linecard</a>;
+                  }  <span class="yang_cmt">// container linecard</span>
+               }  <span class="yang_cmt">// case linecard</span>
+            }  <span class="yang_cmt">// choice OPType</span>
+
+            <a name="meteringProcess.265"/><span class="yang_kw">list</span> <span class="yang_id">meteringProcess</span> {
+               <span class="yang_kw">key</span> "<a href="#name.269">name</a>";
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Metering Processes process packets in parallel."</span>;
+
+               <a name="name.269"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"Arbitrary but unique name of the Monitoring
+                     Process."</span>;
+               }
+               <a name="uses.275"/><span class="yang_kw">uses</span> <a href="#MeteringProcess.122">MeteringProcess</a>;
+            }  <span class="yang_cmt">// list meteringProcess</span>
+         }  <span class="yang_cmt">// list observationPoint</span>
+
+         <a name="selectionProcess.279"/><span class="yang_kw">list</span> <span class="yang_id">selectionProcess</span> {
+            <span class="yang_kw">key</span> "<a href="#name.284">name</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Parameters of a Selection Process (i.e., Primitive
+               Selector)."</span>;
+
+            <a name="name.284"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Arbitrary but unique name of the Selection Process."</span>;
+            }
+
+            <a name="selectorId.289"/><span class="yang_kw">leaf</span> <span class="yang_id">selectorId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"If omitted, the Selector ID is assigned by the
+                  monitoring device."</span>;
+            }
+
+            <a name="Method.295"/><span class="yang_kw">choice</span> <span class="yang_id">Method</span> {
+               <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"See PSAMP-MIB for details about the selection methods
+                  and their parameters."</span>;
+               <span class="yang_kw">reference</span> <span class="yang_str">"draft-ietf-psamp-mib-06."</span>;
+
+               <a name="sampCountBased.300"/><span class="yang_kw">case</span> <span class="yang_id">sampCountBased</span> {
+
+                  <a name="sampCountBased.300"/><span class="yang_kw">container</span> <span class="yang_id">sampCountBased</span> {
+
+                     <a name="interval.301"/><span class="yang_kw">leaf</span> <span class="yang_id">interval</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                     }
+
+                     <a name="spacing.302"/><span class="yang_kw">leaf</span> <span class="yang_id">spacing</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                     }
+                  }  <span class="yang_cmt">// container sampCountBased</span>
+               }  <span class="yang_cmt">// case sampCountBased</span>
+
+               <a name="sampTimeBased.304"/><span class="yang_kw">case</span> <span class="yang_id">sampTimeBased</span> {
+
+                  <a name="sampTimeBased.304"/><span class="yang_kw">container</span> <span class="yang_id">sampTimeBased</span> {
+
+                     <a name="interval.305"/><span class="yang_kw">leaf</span> <span class="yang_id">interval</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                     }
+
+                     <a name="spacing.306"/><span class="yang_kw">leaf</span> <span class="yang_id">spacing</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                     }
+                  }  <span class="yang_cmt">// container sampTimeBased</span>
+               }  <span class="yang_cmt">// case sampTimeBased</span>
+
+               <a name="sampRandOutOfN.308"/><span class="yang_kw">case</span> <span class="yang_id">sampRandOutOfN</span> {
+
+                  <a name="sampRandOutOfN.308"/><span class="yang_kw">container</span> <span class="yang_id">sampRandOutOfN</span> {
+
+                     <a name="population.309"/><span class="yang_kw">leaf</span> <span class="yang_id">population</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                     }
+
+                     <a name="sample.310"/><span class="yang_kw">leaf</span> <span class="yang_id">sample</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                     }
+                  }  <span class="yang_cmt">// container sampRandOutOfN</span>
+               }  <span class="yang_cmt">// case sampRandOutOfN</span>
+
+               <a name="sampUniProb.312"/><span class="yang_kw">case</span> <span class="yang_id">sampUniProb</span> {
+
+                  <a name="sampUniProb.312"/><span class="yang_kw">container</span> <span class="yang_id">sampUniProb</span> {
+
+                     <a name="probability.313"/><span class="yang_kw">leaf</span> <span class="yang_id">probability</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                        <span class="yang_kw">description</span>
+                           <span class="yang_str">"The given value must be divided by 4294967295."</span>;
+                     }
+                  }  <span class="yang_cmt">// container sampUniProb</span>
+               }  <span class="yang_cmt">// case sampUniProb</span>
+
+               <a name="sampNonUniProb.319"/><span class="yang_kw">case</span> <span class="yang_id">sampNonUniProb</span> {
+
+                  <a name="sampNonUniProb.319"/><span class="yang_kw">container</span> <span class="yang_id">sampNonUniProb</span> {
+                     <span class="yang_kw">description</span> <span class="yang_str">"In PSAMP-MIB, these are OIDs."</span>;
+
+                     <a name="function.321"/><span class="yang_kw">leaf</span> <span class="yang_id">function</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+
+                     <a name="funcParam.322"/><span class="yang_kw">leaf</span> <span class="yang_id">funcParam</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+                  }  <span class="yang_cmt">// container sampNonUniProb</span>
+               }  <span class="yang_cmt">// case sampNonUniProb</span>
+
+               <a name="sampFlowState.324"/><span class="yang_kw">case</span> <span class="yang_id">sampFlowState</span> {
+
+                  <a name="sampFlowState.324"/><span class="yang_kw">container</span> <span class="yang_id">sampFlowState</span> {
+                     <span class="yang_kw">description</span> <span class="yang_str">"In PSAMP-MIB, these are OIDs."</span>;
+
+                     <a name="function.326"/><span class="yang_kw">leaf</span> <span class="yang_id">function</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+
+                     <a name="funcParam.327"/><span class="yang_kw">leaf</span> <span class="yang_id">funcParam</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+                  }  <span class="yang_cmt">// container sampFlowState</span>
+               }  <span class="yang_cmt">// case sampFlowState</span>
+
+               <a name="filterMatch.329"/><span class="yang_kw">case</span> <span class="yang_id">filterMatch</span> {
+
+                  <a name="filterMatch.329"/><span class="yang_kw">container</span> <span class="yang_id">filterMatch</span> {
+
+                     <a name="fieldId.330"/><span class="yang_kw">leaf</span> <span class="yang_id">fieldId</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                     }
+
+                     <a name="startValue.331"/><span class="yang_kw">leaf</span> <span class="yang_id">startValue</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+
+                     <a name="stopValue.332"/><span class="yang_kw">leaf</span> <span class="yang_id">stopValue</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+
+                     <a name="mask.333"/><span class="yang_kw">leaf</span> <span class="yang_id">mask</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+                  }  <span class="yang_cmt">// container filterMatch</span>
+               }  <span class="yang_cmt">// case filterMatch</span>
+
+               <a name="filterHash.335"/><span class="yang_kw">case</span> <span class="yang_id">filterHash</span> {
+
+                  <a name="filterHash.335"/><span class="yang_kw">container</span> <span class="yang_id">filterHash</span> {
+                     <span class="yang_kw">description</span>
+                        <span class="yang_str">"In PSAMP-MIB, function and funcParam are OIDs."</span>;
+
+                     <a name="addrType.337"/><span class="yang_kw">leaf</span> <span class="yang_id">addrType</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-version.26">inet:ip-version</a></span>;
+                     }
+
+                     <a name="headerBits.338"/><span class="yang_kw">leaf</span> <span class="yang_id">headerBits</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+
+                     <a name="payloadBytes.339"/><span class="yang_kw">leaf</span> <span class="yang_id">payloadBytes</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                     }
+
+                     <a name="payloadBits.340"/><span class="yang_kw">leaf</span> <span class="yang_id">payloadBits</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+
+                     <a name="function.341"/><span class="yang_kw">leaf</span> <span class="yang_id">function</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+
+                     <a name="funcParam.342"/><span class="yang_kw">leaf</span> <span class="yang_id">funcParam</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+
+                     <a name="inputBits.343"/><span class="yang_kw">leaf</span> <span class="yang_id">inputBits</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                     }
+
+                     <a name="outputBits.344"/><span class="yang_kw">leaf</span> <span class="yang_id">outputBits</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                     }
+
+                     <a name="outputMask.345"/><span class="yang_kw">leaf</span> <span class="yang_id">outputMask</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+
+                     <a name="selection.346"/><span class="yang_kw">leaf</span> <span class="yang_id">selection</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+                  }  <span class="yang_cmt">// container filterHash</span>
+               }  <span class="yang_cmt">// case filterHash</span>
+
+               <a name="filterRState.348"/><span class="yang_kw">case</span> <span class="yang_id">filterRState</span> {
+
+                  <a name="filterRState.348"/><span class="yang_kw">container</span> <span class="yang_id">filterRState</span> {
+                     <span class="yang_kw">description</span> <span class="yang_str">"In PSAMP-MIB, vendorFunc is OID."</span>;
+
+                     <a name="function.350"/><span class="yang_kw">leaf</span> <span class="yang_id">function</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+                     }
+
+                     <a name="negate.351"/><span class="yang_kw">leaf</span> <span class="yang_id">negate</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">boolean</span>;
+                     }
+
+                     <a name="ifIndex.352"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                        <span class="yang_kw">description</span>
+                           <span class="yang_str">"Index of the interface as stored in the ifTable
+                           of IF-MIB."</span>;
+                        <span class="yang_kw">reference</span> <span class="yang_str">"RFC 2863."</span>;
+                     }
+
+                     <a name="startAS.358"/><span class="yang_kw">leaf</span> <span class="yang_id">startAS</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#asn.98">inet:asn</a></span>;
+                     }
+
+                     <a name="stopAS.359"/><span class="yang_kw">leaf</span> <span class="yang_id">stopAS</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#asn.98">inet:asn</a></span>;
+                     }
+
+                     <a name="vendorFunc.360"/><span class="yang_kw">leaf</span> <span class="yang_id">vendorFunc</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     }
+                  }  <span class="yang_cmt">// container filterRState</span>
+               }  <span class="yang_cmt">// case filterRState</span>
+            }  <span class="yang_cmt">// choice Method</span>
+         }  <span class="yang_cmt">// list selectionProcess</span>
+
+         <a name="cache.365"/><span class="yang_kw">list</span> <span class="yang_id">cache</span> {
+            <span class="yang_kw">key</span> "<a href="#name.369">name</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span> <span class="yang_str">"Parameters of a cache."</span>;
+
+            <a name="name.369"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Arbitrary but unique name of the cache."</span>;
+            }
+
+            <a name="cacheType.374"/><span class="yang_kw">leaf</span> <span class="yang_id">cacheType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"normal"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+                     <span class="yang_kw">description</span>
+                        <span class="yang_str">"Flow expiration after active and idle timeout."</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"immediate"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                     <span class="yang_kw">description</span>
+                        <span class="yang_str">"Flow expiration after the first packet (PSAMP export)."</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"permanent"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                     <span class="yang_kw">description</span>
+                        <span class="yang_str">"No flow expiration, periodical export after active timeout."</span>;
+                  }
+               }
+            }
+
+            <a name="cacheSize.388"/><span class="yang_kw">leaf</span> <span class="yang_id">cacheSize</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+            }
+
+            <a name="activeTimeout.390"/><span class="yang_kw">leaf</span> <span class="yang_id">activeTimeout</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+            }
+
+            <a name="idleTimeout.392"/><span class="yang_kw">leaf</span> <span class="yang_id">idleTimeout</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+            }
+
+            <a name="template.394"/><span class="yang_kw">container</span> <span class="yang_id">template</span> {
+
+               <a name="templateId.395"/><span class="yang_kw">leaf</span> <span class="yang_id">templateId</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">uint16</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"If omitted, the Template ID is assigned by the
+                     monitoring device."</span>;
+               }
+
+               <a name="field.401"/><span class="yang_kw">list</span> <span class="yang_id">field</span> {
+                  <span class="yang_kw">key</span> "<a href="#name.405">name</a>";
+                  <span class="yang_kw">ordered-by</span> <span class="yang_str">"user"</span>;
+
+                  <a name="name.405"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                  }
+                  <a name="uses.407"/><span class="yang_kw">uses</span> <a href="#InformationElement.44">InformationElement</a>;
+
+                  <a name="isFlowKey.409"/><span class="yang_kw">leaf</span> <span class="yang_id">isFlowKey</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+                  }
+               }  <span class="yang_cmt">// list field</span>
+            }  <span class="yang_cmt">// container template</span>
+
+            <a name="exportingProcess.413"/><span class="yang_kw">leaf-list</span> <span class="yang_id">exportingProcess</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span> <span class="yang_str">"/ipfix/exportingProcess/name"</span>;
+               }
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Records are exported by all Exporting Processes in the list."</span>;
+            }
+         }  <span class="yang_cmt">// list cache</span>
+
+         <a name="exportingProcess.419"/><span class="yang_kw">list</span> <span class="yang_id">exportingProcess</span> {
+            <span class="yang_kw">key</span> "<a href="#name.423">name</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span> <span class="yang_str">"Parameters of an Exporting Process."</span>;
+
+            <a name="name.423"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Arbitrary but unique name of the Exporting Process."</span>;
+            }
+
+            <a name="exportingProcessId.428"/><span class="yang_kw">leaf</span> <span class="yang_id">exportingProcessId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"If omitted, the Exporting Process ID is assigned by the
+                  monitoring device."</span>;
+            }
+
+            <a name="destination.434"/><span class="yang_kw">list</span> <span class="yang_id">destination</span> {
+               <span class="yang_kw">key</span> "<a href="#name.437">name</a>";
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+
+               <a name="name.437"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+
+               <a name="type.439"/><span class="yang_kw">leaf</span> <span class="yang_id">type</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                     <span class="yang_kw">enum</span> <span class="yang_str">"primary"</span> {
+                        <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+                     }
+                     <span class="yang_kw">enum</span> <span class="yang_str">"secondary"</span> {
+                        <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                     }
+                     <span class="yang_kw">enum</span> <span class="yang_str">"duplicate"</span> {
+                        <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                     }
+                     <span class="yang_kw">enum</span> <span class="yang_str">"loadBalancing"</span> {
+                        <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                     }
+                     <span class="yang_kw">enum</span> <span class="yang_str">"unused"</span> {
+                        <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                     }
+                  }
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"Transport Session type according to IPFIX-MIB"</span>;
+                  <span class="yang_kw">reference</span> <span class="yang_str">"draft-ietf-ipfix-mib-02."</span>;
+               }
+
+               <a name="TransportProtocol.451"/><span class="yang_kw">choice</span> <span class="yang_id">TransportProtocol</span> {
+                  <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+
+                  <a name="sctpExport.453"/><span class="yang_kw">case</span> <span class="yang_id">sctpExport</span> {
+
+                     <a name="sctpExport.453"/><span class="yang_kw">container</span> <span class="yang_id">sctpExport</span> {
+                        <span class="yang_kw">description</span> <span class="yang_str">"SCTP export parameters."</span>;
+                        <span class="yang_kw">reference</span> <span class="yang_str">"RFC 3758, RFC 4960."</span>;
+
+                        <a name="destinationIpAddress.456"/><span class="yang_kw">leaf</span> <span class="yang_id">destinationIpAddress</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
+                           <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                        }
+
+                        <a name="destinationTransportPort.460"/><span class="yang_kw">leaf</span> <span class="yang_id">destinationTransportPort</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#port-number.75">inet:port-number</a></span>;
+                           <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                        }
+
+                        <a name="sourceIpAddress.464"/><span class="yang_kw">leaf-list</span> <span class="yang_id">sourceIpAddress</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
+                           <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+                           <span class="yang_kw">description</span>
+                              <span class="yang_str">"List of eligible local IP addresses to be used by
+                              the SCTP endpoint. If omitted, all locally assigned IP
+                              addresses are used by the local endpoint."</span>;
+                        }
+
+                        <a name="timedReliability.470"/><span class="yang_kw">leaf</span> <span class="yang_id">timedReliability</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+                        }
+                     }  <span class="yang_cmt">// container sctpExport</span>
+                  }  <span class="yang_cmt">// case sctpExport</span>
+
+                  <a name="udpExport.472"/><span class="yang_kw">case</span> <span class="yang_id">udpExport</span> {
+
+                     <a name="udpExport.472"/><span class="yang_kw">container</span> <span class="yang_id">udpExport</span> {
+                        <span class="yang_kw">description</span> <span class="yang_str">"UDP export parameters."</span>;
+
+                        <a name="destinationIpAddress.474"/><span class="yang_kw">leaf</span> <span class="yang_id">destinationIpAddress</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
+                           <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                        }
+
+                        <a name="destinationTransportPort.478"/><span class="yang_kw">leaf</span> <span class="yang_id">destinationTransportPort</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#port-number.75">inet:port-number</a></span>;
+                           <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                        }
+
+                        <a name="sourceIpAddress.482"/><span class="yang_kw">leaf</span> <span class="yang_id">sourceIpAddress</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
+                           <span class="yang_kw">description</span>
+                              <span class="yang_str">"Source IP address. If omitted, the address
+                              assigned to the outgoing interface is used."</span>;
+                        }
+
+                        <a name="templateRefreshTimeout.487"/><span class="yang_kw">leaf</span> <span class="yang_id">templateRefreshTimeout</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+                        }
+
+                        <a name="templateRefreshPacket.488"/><span class="yang_kw">leaf</span> <span class="yang_id">templateRefreshPacket</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                        }
+
+                        <a name="optionTemplateRefreshTimeout.489"/><span class="yang_kw">leaf</span> <span class="yang_id">optionTemplateRefreshTimeout</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+                        }
+
+                        <a name="optionTemplateRefreshPacket.490"/><span class="yang_kw">leaf</span> <span class="yang_id">optionTemplateRefreshPacket</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                        }
+                     }  <span class="yang_cmt">// container udpExport</span>
+                  }  <span class="yang_cmt">// case udpExport</span>
+
+                  <a name="tcpExport.492"/><span class="yang_kw">case</span> <span class="yang_id">tcpExport</span> {
+
+                     <a name="tcpExport.492"/><span class="yang_kw">container</span> <span class="yang_id">tcpExport</span> {
+                        <span class="yang_kw">description</span> <span class="yang_str">"TCP export parameters."</span>;
+
+                        <a name="destinationIpAddress.494"/><span class="yang_kw">leaf</span> <span class="yang_id">destinationIpAddress</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
+                           <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                        }
+
+                        <a name="destinationTransportPort.498"/><span class="yang_kw">leaf</span> <span class="yang_id">destinationTransportPort</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#port-number.75">inet:port-number</a></span>;
+                           <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                        }
+                     }  <span class="yang_cmt">// container tcpExport</span>
+                  }  <span class="yang_cmt">// case tcpExport</span>
+
+                  <a name="fileExport.503"/><span class="yang_kw">case</span> <span class="yang_id">fileExport</span> {
+
+                     <a name="fileExport.503"/><span class="yang_kw">container</span> <span class="yang_id">fileExport</span> {
+                        <span class="yang_kw">description</span> <span class="yang_str">"File export parameters."</span>;
+
+                        <a name="uri.505"/><span class="yang_kw">leaf</span> <span class="yang_id">uri</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#uri.145">yang:uri</a></span>;
+                           <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                        }
+                     }  <span class="yang_cmt">// container fileExport</span>
+                  }  <span class="yang_cmt">// case fileExport</span>
+               }  <span class="yang_cmt">// choice TransportProtocol</span>
+
+               <a name="option.512"/><span class="yang_kw">list</span> <span class="yang_id">option</span> {
+                  <span class="yang_kw">key</span> "<a href="#name.514">name</a>";
+                  <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+
+                  <a name="name.514"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                  }
+
+                  <a name="type.515"/><span class="yang_kw">leaf</span> <span class="yang_id">type</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                        <span class="yang_kw">enum</span> <span class="yang_str">"meteringStatistics"</span> {
+                           <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+                           <span class="yang_kw">description</span> <span class="yang_str">"Metering Process Statistics."</span>;
+                           <span class="yang_kw">reference</span> <span class="yang_str">"RFC 5101, section 4.1."</span>;
+                        }
+                        <span class="yang_kw">enum</span> <span class="yang_str">"meteringReliability"</span> {
+                           <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                           <span class="yang_kw">description</span>
+                              <span class="yang_str">"Metering Process Reliability Statistics."</span>;
+                           <span class="yang_kw">reference</span> <span class="yang_str">"RFC 5101, section 4.2."</span>;
+                        }
+                        <span class="yang_kw">enum</span> <span class="yang_str">"exportingReliability"</span> {
+                           <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                           <span class="yang_kw">description</span>
+                              <span class="yang_str">"Exporting Process Reliability Statistics."</span>;
+                           <span class="yang_kw">reference</span> <span class="yang_str">"RFC 5101, section 4.3."</span>;
+                        }
+                        <span class="yang_kw">enum</span> <span class="yang_str">"flowKeys"</span> {
+                           <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                           <span class="yang_kw">description</span> <span class="yang_str">"Flow Keys."</span>;
+                           <span class="yang_kw">reference</span> <span class="yang_str">"RFC 5101, section 4.4."</span>;
+                        }
+                        <span class="yang_kw">enum</span> <span class="yang_str">"selectionSequence"</span> {
+                           <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                           <span class="yang_kw">description</span>
+                              <span class="yang_str">"Selection Sequence and Selector Reports."</span>;
+                           <span class="yang_kw">reference</span>
+                              <span class="yang_str">"draft-ietf-psamp-protocol-09, section 6.5.1 and
+                              6.5.2."</span>;
+                        }
+                        <span class="yang_kw">enum</span> <span class="yang_str">"selectionStatistics"</span> {
+                           <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                           <span class="yang_kw">description</span> <span class="yang_str">"Selection Sequence Statistics Report."</span>;
+                           <span class="yang_kw">reference</span>
+                              <span class="yang_str">"draft-ietf-psamp-protocol-09, section 6.5.3."</span>;
+                        }
+                        <span class="yang_kw">enum</span> <span class="yang_str">"accuracy"</span> {
+                           <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+                           <span class="yang_kw">description</span> <span class="yang_str">"Accuracy Report."</span>;
+                           <span class="yang_kw">reference</span>
+                              <span class="yang_str">"draft-ietf-psamp-protocol-09, section 6.5.4."</span>;
+                        }
+                        <span class="yang_kw">enum</span> <span class="yang_str">"reducingRedundancy"</span> {
+                           <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+                           <span class="yang_kw">description</span>
+                              <span class="yang_str">"Application of ipfix-reducing-redundancy."</span>;
+                        }
+                     }
+                     <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                  }
+
+                  <a name="timeout.552"/><span class="yang_kw">leaf</span> <span class="yang_id">timeout</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+                     <span class="yang_kw">description</span>
+                        <span class="yang_str">"Time interval for exporting option data."</span>;
+                  }
+
+                  <a name="optionTemplate.556"/><span class="yang_kw">container</span> <span class="yang_id">optionTemplate</span> {
+                     <span class="yang_kw">description</span>
+                        <span class="yang_str">"If no Option Template is specified, the Exporter
+                        defines a template according to option type and available
+                        option data."</span>;
+
+                     <a name="templateId.560"/><span class="yang_kw">leaf</span> <span class="yang_id">templateId</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">uint16</span>;
+                        <span class="yang_kw">description</span>
+                           <span class="yang_str">"If omitted, the Template ID is assigned by the
+                           monitoring device."</span>;
+                     }
+
+                     <a name="optionField.565"/><span class="yang_kw">list</span> <span class="yang_id">optionField</span> {
+                        <span class="yang_kw">key</span> "<a href="#name.568">name</a>";
+                        <span class="yang_kw">ordered-by</span> <span class="yang_str">"user"</span>;
+
+                        <a name="name.568"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                        }
+                        <a name="uses.569"/><span class="yang_kw">uses</span> <a href="#InformationElement.44">InformationElement</a>;
+
+                        <a name="isScope.570"/><span class="yang_kw">leaf</span> <span class="yang_id">isScope</span> {
+                           <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+                        }
+                     }  <span class="yang_cmt">// list optionField</span>
+                  }  <span class="yang_cmt">// container optionTemplate</span>
+               }  <span class="yang_cmt">// list option</span>
+            }  <span class="yang_cmt">// list destination</span>
+         }  <span class="yang_cmt">// list exportingProcess</span>
+      }  <span class="yang_cmt">// container ipfix</span>
+   }  <span class="yang_cmt">// module ipfix-psamp</span>
+</pre>
+</div>
+</div>

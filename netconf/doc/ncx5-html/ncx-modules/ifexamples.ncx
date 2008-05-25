@@ -1,0 +1,79 @@
+ncx-module ifexamples {
+  header {
+    description "Documentation examples module";
+    version 1.0;
+    owner ncx;
+    application ifdata;
+    copyright "Copyright 2007 andybierman.com";
+    contact-info "Send comments to <ietf@andybierman.com>.";
+    last-update "2007-07-14";
+    revision-history {
+      1.0    "Initial version";
+    }
+  }
+
+  imports {
+    import ncxtypes { NcxName };
+    import netconf { RpcOkReplyType };    
+  }
+
+  definitions {
+
+    type Interface {
+      description 
+        "One interface entry matching the 'interface' element used
+         throughout the document.";
+      syntax {
+        table [name] {
+          NcxName  name;
+          uint     ifMtu;
+        }
+      }
+    }
+
+    parmset interfaces {
+      description 
+        "Parmset matching the interfaces examples used
+         throughout the document.";
+      parms {
+        parm interface {
+          description "Table of interface entries.";
+          type Interface;
+        }
+      }
+    }
+
+    type ResetMode {
+      description "Enumeration of interface reset mode options.
+                    in == reset interface input only
+                    out == reset interface output only
+                    both == reset interface input and output
+                  ";
+      syntax {
+        string = { in out both };
+      }
+      default "both";
+    }
+
+    rpc reset-interface {
+      description 
+       "An RPC method to reset the requested interface.";
+      rpc-type exec;
+      parms {
+        parm name {
+           description "Name of interface to reset.";
+           type NcxName;
+           usage mandatory;
+        }
+           
+        parm reset-mode {
+           description "Type of reset requested.";
+           type ResetMode;
+           usage optional;
+        }
+      }
+      output RpcOkReplyType;
+    }
+
+  }
+}

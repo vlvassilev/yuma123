@@ -1,0 +1,2910 @@
+
+Network Working Group                                        S. Chisholm
+Internet-Draft                                                 K. Curran
+Expires: July 12, 2006                                            Nortel
+                                                              H. Trevino
+                                                                   Cisco
+                                                         January 8, 2006
+
+
+                      NETCONF Event Notifications
+                 draft-ietf-netconf-notification-00.txt
+
+Status of this Memo
+
+   By submitting this Internet-Draft, each author represents that any
+   applicable patent or other IPR claims of which he or she is aware
+   have been or will be disclosed, and any of which he or she becomes
+   aware will be disclosed, in accordance with Section 6 of BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on July 12, 2006.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2006).
+
+Abstract
+
+   This memo defines a framework for sending asynchronous messages, or
+   event notifications in NETCONF.  It defines both the operations
+   necessary to support this concept, and also discusses implications
+   for the mapping to application protocols.
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                 [Page 1]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+Table of Contents
+
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  4
+     1.1   Definition of Terms  . . . . . . . . . . . . . . . . . . .  4
+     1.2   Event Notifications in NETCONF . . . . . . . . . . . . . .  5
+   2.  Event-Related Operations . . . . . . . . . . . . . . . . . . .  6
+     2.1   Subscribing to receive Events  . . . . . . . . . . . . . .  6
+       2.1.1   create-subscription  . . . . . . . . . . . . . . . . .  6
+     2.2   Sending Event Notifications  . . . . . . . . . . . . . . .  7
+       2.2.1   Events . . . . . . . . . . . . . . . . . . . . . . . .  7
+     2.3   Changing the Subscription  . . . . . . . . . . . . . . . .  8
+       2.3.1   modify-subscription  . . . . . . . . . . . . . . . . .  9
+     2.4   Terminating the Subscription . . . . . . . . . . . . . . . 10
+       2.4.1   cancel-subscription  . . . . . . . . . . . . . . . . . 10
+   3.  Supporting Concepts  . . . . . . . . . . . . . . . . . . . . . 11
+     3.1   Capabilities Exchange  . . . . . . . . . . . . . . . . . . 11
+     3.2   Querying Subscription Properties . . . . . . . . . . . . . 11
+     3.3   RPC One-way Messages . . . . . . . . . . . . . . . . . . . 14
+     3.4   User-Specified Filters . . . . . . . . . . . . . . . . . . 14
+       3.4.1   Named Profiles . . . . . . . . . . . . . . . . . . . . 15
+       3.4.2   Filtering  . . . . . . . . . . . . . . . . . . . . . . 15
+     3.5   Event Classes  . . . . . . . . . . . . . . . . . . . . . . 15
+     3.6   Defining Event Notifications . . . . . . . . . . . . . . . 16
+     3.7   Interleaving Messages  . . . . . . . . . . . . . . . . . . 16
+   4.  XML Schema for Event Notifications . . . . . . . . . . . . . . 18
+   5.  Mapping to Application Protocols . . . . . . . . . . . . . . . 23
+     5.1   SSH  . . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+     5.2   BEEP . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+       5.2.1   One-way Messages in Beep . . . . . . . . . . . . . . . 24
+     5.3   SOAP . . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+       5.3.1   A NETCONF over Soap over HTTP Example  . . . . . . . . 25
+   6.  Filtering examples . . . . . . . . . . . . . . . . . . . . . . 28
+     6.1   Event Classes  . . . . . . . . . . . . . . . . . . . . . . 28
+     6.2   Subtree Filtering  . . . . . . . . . . . . . . . . . . . . 28
+     6.3   XPATH filters  . . . . . . . . . . . . . . . . . . . . . . 30
+   7.  Security Considerations  . . . . . . . . . . . . . . . . . . . 32
+   8.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 33
+   9.  Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . 34
+   10.   References . . . . . . . . . . . . . . . . . . . . . . . . . 34
+       Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . 35
+   A.  Potential Event Content  . . . . . . . . . . . . . . . . . . . 36
+     A.1   Event Identifier . . . . . . . . . . . . . . . . . . . . . 36
+     A.2   Resource Instance  . . . . . . . . . . . . . . . . . . . . 36
+     A.3   Event Time . . . . . . . . . . . . . . . . . . . . . . . . 36
+     A.4   Perceived Severity . . . . . . . . . . . . . . . . . . . . 36
+     A.5   Probable Cause . . . . . . . . . . . . . . . . . . . . . . 37
+     A.6   Specific Problem . . . . . . . . . . . . . . . . . . . . . 37
+     A.7   Trend Indication . . . . . . . . . . . . . . . . . . . . . 37
+
+
+
+Chisholm, et al.          Expires July 12, 2006                 [Page 2]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+     A.8   Additional Alarm Text  . . . . . . . . . . . . . . . . . . 37
+     A.9   Threshold Identifier . . . . . . . . . . . . . . . . . . . 37
+     A.10  Threshold Type . . . . . . . . . . . . . . . . . . . . . . 38
+     A.11  Observed Value . . . . . . . . . . . . . . . . . . . . . . 38
+     A.12  State Change Information . . . . . . . . . . . . . . . . . 38
+   B.  Configuration Event Class Notifications  . . . . . . . . . . . 39
+     B.1   Types of Configuration Events  . . . . . . . . . . . . . . 39
+     B.2   Config Event Notification Structure  . . . . . . . . . . . 40
+     B.3   Configuration Event Content  . . . . . . . . . . . . . . . 42
+       B.3.1   Target Datastore . . . . . . . . . . . . . . . . . . . 42
+       B.3.2   User Info  . . . . . . . . . . . . . . . . . . . . . . 42
+       B.3.3   Data Source  . . . . . . . . . . . . . . . . . . . . . 42
+       B.3.4   Operation  . . . . . . . . . . . . . . . . . . . . . . 42
+       B.3.5   Context  . . . . . . . . . . . . . . . . . . . . . . . 42
+       B.3.6   Entered Command  . . . . . . . . . . . . . . . . . . . 43
+       B.3.7   New Config . . . . . . . . . . . . . . . . . . . . . . 43
+       B.3.8   Old Config . . . . . . . . . . . . . . . . . . . . . . 43
+       B.3.9   Non-netconf commands in configuration notifications  . 43
+     B.4   Design Alternative . . . . . . . . . . . . . . . . . . . . 43
+       B.4.1   Server Session Initiation  . . . . . . . . . . . . . . 43
+       B.4.2   Establishment  . . . . . . . . . . . . . . . . . . . . 44
+       B.4.3   Teardown . . . . . . . . . . . . . . . . . . . . . . . 44
+       B.4.4   Suspend And Resume . . . . . . . . . . . . . . . . . . 45
+       B.4.5   Lifecycle  . . . . . . . . . . . . . . . . . . . . . . 45
+   C.  NETCONF Event Notifications and Syslog . . . . . . . . . . . . 46
+     C.1   Leveraging Syslog Field Definitions  . . . . . . . . . . . 46
+       C.1.1   Field Mapping  . . . . . . . . . . . . . . . . . . . . 47
+       C.1.2   Severity Mapping . . . . . . . . . . . . . . . . . . . 48
+     C.2   Syslog within NETCONF Events . . . . . . . . . . . . . . . 48
+       C.2.1   Motivation . . . . . . . . . . . . . . . . . . . . . . 48
+       C.2.2   Embedding syslog messages in a NETCONF Event . . . . . 48
+       C.2.3   Supported Forwarding Options . . . . . . . . . . . . . 49
+       Intellectual Property and Copyright Statements . . . . . . . . 51
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                 [Page 3]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+1.  Introduction
+
+   NETCONF [NETCONF-PROTO] can be conceptually partitioned into four
+   layers:
+
+                Layer                      Example
+            +-------------+      +-----------------------------+
+            |   Content   |      |     Configuration data      |
+            +-------------+      +-----------------------------+
+                   |                           |
+            +-------------+      +-----------------------------+
+            | Operations  |      | <get-config>, <edit-config> |
+            +-------------+      +-----------------------------+
+                   |                           |
+            +-------------+      +-----------------------------+
+            |     RPC     |      |    <rpc>, <rpc-reply>       |
+            +-------------+      +-----------------------------+
+                   |                           |
+            +-------------+      +-----------------------------+
+            | Application |      |   BEEP, SSH, SSL, console   |
+            |   Protocol  |      |                             |
+            +-------------+      +-----------------------------+
+
+   This document defines a framework for sending asynchronous messages,
+   or event notifications in NETCONF.  It defines both the operations
+   necessary to support this concept, and also discusses implications
+   for the mapping to application protocols.
+
+                                 Figure 1
+
+
+1.1  Definition of Terms
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in RFC 2119 [3].
+
+   Element: An XML Element[XML].
+
+   Managed Entity: A node, which supports NETCONF[NETCONF] and has
+      access to management instrumentation.  This is also known as the
+      NETCONF server.
+
+   Managed Object: A collection of one of more Elements that define an
+      abstract thing of interest.
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                 [Page 4]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+1.2  Event Notifications in NETCONF
+
+   An event is something that happens which may be of interest - a
+   configuration change, a fault, a change in status, crossing a
+   threshold, or an external input to the system, for example.  Often
+   this results in an asynchronous message, sometimes referred to as a
+   notification or event notification, being sent out to interested
+   parties to notify them that this event has occurred.
+
+   This memo defines a mechanism whereby the NETCONF client indicates
+   interest in receiving event notifications from a NETCONF server by
+   creating a subscription to receive event notifications.  The NETCONF
+   server replies to indicate whether the subscription request was
+   successful and, if it was successful, begins sending the event
+   notifications to the NETCONF client as the events occur within the
+   system.  These event notifications will continue to be sent until
+   either the NETCONF session is terminated or an explicit command to
+   cancel the subscription is sent.  The event notification subscription
+   allows a number of options to enable the NETCONF client to specify
+   which events are of interest.  These are specified when the
+   subscription is created, but can be modified later using a modify
+   subscription command.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                 [Page 5]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+2.  Event-Related Operations
+
+2.1  Subscribing to receive Events
+
+   The event notification subscription is initiated by the NETCONF
+   client and responded to by the NETCONF server.  When the event
+   notification subscription is created, the events of interest are
+   specified.
+
+   It is possible to create more than one event notification
+   subscription on a single underlying connection.  Each event
+   notification subscription therefore has its own unique identifier.
+
+   Content for an event notification subscription can be selected by
+   specifying which event classes are of interest and /or by applying
+   user-specified filters.
+
+2.1.1  create-subscription
+
+   <create-subscription>
+
+   Description:
+
+      This command initiates an event notification subscription which
+      will send asynchronous event notifications to the initiator of the
+      command until the  <cancel-subscription >  command is sent.
+
+   Parameters:
+
+      Event Classes:
+
+         An optional parameter that indicates which event classes are of
+         interest.  If not present, events of all classes will be sent.
+
+      Filter:
+
+         An optional parameter that indicates which subset of all
+         possible events are of interest.  The format of this parameter
+         is the same as that of the filter parameter in the NETCONF
+         protocol operations.  If not present, all events not precluded
+         by other parameters will be sent.  These filter parameters can
+         only be modified using the modify-subscription command.
+
+      Named Profile
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                 [Page 6]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+         An optional parameter that points to a separately defined
+         filter profile.  If not present, no additional filtering will
+         be applied.  If the separate definition of these filters is
+         updated, then these changes will be reflected in the filtered
+         events on this subscription.
+
+   Positive Response:
+
+      If the NETCONF server can satisfy the request, the server sends an
+      <rpc-reply>  element containing a <data> element containing the
+      subscription ID.
+
+   Negative Response:
+
+      An  <rpc-error> element is included within the <rpc-reply>  if the
+      request cannot be completed for any reason.
+
+
+2.2  Sending Event Notifications
+
+   Once the subscription has been set up, the NETCONF server sends the
+   event notifications asynchronously along the connection.
+   Notifications are tagged with event classes, subscription ID,
+   sequence number, and date and time.
+
+2.2.1  Events
+
+   Events
+
+   <notification>
+
+   Description:
+
+      An event notification is sent to the initiator of an <create-
+      subscription>  command asynchronously when an event of interest to
+      them has occurred.  An event notification is a complete XML
+      document.
+
+   Parameters:
+
+      Event Classes:
+
+         The event class or classes associated with this event
+         notification
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                 [Page 7]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+      Subscription Id:
+
+         A unique identifier for this event subscription
+
+      Sequence Number:
+
+         A sequentially increasing number to uniquely identify event
+         notifications for this subscription.  It starts at 0, always
+         increases by just one and rolls back to 0 after its maximum
+         value is reached.
+
+      Date and Time:
+
+         The date and time that the event notification was sent by the
+         NETCONF server.
+
+   Positive Response:
+
+      No response.
+
+   Negative Response:
+
+      No response.
+
+
+2.2.1.1  Event Notification
+
+   The NETCONF Event notification structure is shown in the following
+   figure.
+
+   _____________
+   |RPC-Header||
+   |__________||
+   |message-id||
+   |__________||
+   ____________________________________________________________________
+   || Event Header                                             || Data |
+   ||__________________________________________________________||______|
+   || subscriptionId| eventClasses| sequenceNumber| dataAndTime||      |
+   ||_______________|_____________|_______________|____________||______|
+
+
+2.3  Changing the Subscription
+
+   After an event notification subscription has been established, the
+   NETCONF client can initiate a request to change properties of the
+   event notification subscription.  This prevents loss of event
+   notifications that might otherwise occur during a tear down and
+
+
+
+Chisholm, et al.          Expires July 12, 2006                 [Page 8]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+   recreation of the event notification subscription.  This command is
+   responded to by the NETCONF server
+
+2.3.1  modify-subscription
+
+   <modify-subscription>
+
+   Description:
+
+      Change properties of the event notification subscription.
+
+   Parameters:
+
+      Subscription Id:
+
+         A unique identifier for this event subscription.
+
+      Event Classes:
+
+         An optional parameter that indicates which Event Classes are of
+         interest.  If not present, events of all classes will be sent.
+
+      Filter:
+
+         An optional parameter that indicates which subset of all
+         possible events that are of interest.  The format is the same
+         filter used for other NETCONF commands.  If not present,  all
+         events not precluded by other parameters will be sent.  These
+         filter parameters can only be modified using the modify-
+         subscription command.
+
+      Named Profile:
+
+         An optional parameter that points to separately defined filter
+         profile.  If not present, no additional filtering will be
+         applied.  If the separate definition of these filters is
+         updated, then these changes will be reflected in the events
+         seen on this subscription.
+
+   Positive Response:
+
+      If the NETCONF server was able to satisfy the request, an <rpc-
+      reply> is sent that includes an  <ok>  element.
+
+   Negative Response:
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                 [Page 9]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+      An <rpc-error> element is included within the <rpc-reply> if the
+      request cannot be completed for any reason.
+
+
+2.4  Terminating the Subscription
+
+   Closing of the event notification subscription is initiated by the
+   NETCONF client.  The specific subscription to be closed is specified
+   using a subscription ID.  The NETCONF server responds.  Note that the
+   NETCONF session may also be torn down for other reasons and this will
+   also result in the subscription being cancelled, but is not subjected
+   to the behaviour of this command.
+
+2.4.1  cancel-subscription
+
+   <cancel-subscription>
+
+   Description:
+
+      Tear down the event notification subscription.
+
+   Parameters:
+
+      Subscription Id:
+
+         A unique identifier for this event notification subscription.
+
+   Positive Response:
+
+      If the NETCONF server was able to satisfy the request, an <rpc-
+      reply> is sent that includes an <ok> element.
+
+   Negative Response:
+
+      An <rpc-error> element is included within the <rpc-reply> if the
+      request cannot be completed for any reason.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 10]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+3.  Supporting Concepts
+
+3.1  Capabilities Exchange
+
+   The ability to process and send event notifications is advertised
+   during the capability exchange between the NETCONF client and server.
+
+   "urn:ietf:params:xml:ns:netconf:notification:1.0"
+
+   For Example
+
+
+      <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <capabilities>
+          <capability>
+            urn:ietf:params:xml:ns:netconf:base:1.0
+          </capability>
+          <capability>
+            urn:ietf:params:xml:ns:netconf:capability:startup:1.0
+          </capability>
+          <capability>
+            urn:ietf:params:xml:ns:netconf:notification:1.0
+          </capability>
+        </capabilities>
+        <session-id>4</session-id>
+      </hello>
+
+
+
+3.2  Querying Subscription Properties
+
+   The following Schema can be used to retrieve information about active
+   event notification subscriptions
+
+
+           <xs:schema
+       xmlns:xs="http://www.w3.org/2001/XMLSchema"
+       xmlns=
+      "urn:ietf:params:xml:ns:netconf:subscription:1.0"
+      targetNamespace=
+      "urn:ietf:params:xml:ns:netconf:subscription:1.0"
+      xmlns:netconf=
+      "urn:ietf:params:xml:ns:netconf:base:1.0"
+      xmlns:ncEvent=
+      "urn:ietf:params:xml:ns:netconf:notification:1.0"
+       elementFormDefault="qualified"
+       attributeFormDefault="unqualified" xml:lang="en">
+        <annotation>
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 11]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+                       <documentation xml:lang="en">
+                         Schema for reporting on Event Subscriptions
+         </documentation>
+         <appinfo>
+           <nm:identity
+               xmlns:nm="urn:ietf:params:xml:ns:netmod:base:1.0">
+               <nm:Name>NetConf State Schema</nm:Name>
+               <nm:LastUpdated>2005-11-30T09:30:47-05:00
+               </nm:LastUpdated>
+               <nm:Organization>IETF</nm:Organization>
+               <nm:Description>
+                  A schema that can be used to learn about current
+                  NetConf Event Subscriptions
+               </nm:Description>
+             </nm:identity>
+           </appinfo>
+              </annotation>
+
+       <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+                  schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+       <xs:import
+            namespace="urn:ietf:params:xml:ns:netconf:notification:1.0"
+                        schemaLocation="ietf-netconf-notification.xsd"/>
+       <xs:import namespace="urn:ietf:params:xml:ns:netconf:base:1.0"
+                   schemaLocation="draft-ietf-netconf-prot-09.xsd"/>
+
+
+      <xs:element name="netconfSubscription">
+        <xs:complexType>
+        <xs:sequence maxOccurs="unbounded">
+
+          <xs:element name="session-id"
+                            type="netconf:SessionId" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">
+              The session id associated with this subscription.
+              </xs:documentation>
+           </xs:annotation>
+          </xs:element>
+
+                 <xs:element name="subscriptionID"
+                            type="ncEvent:SubscriptionID" >
+            <xs:annotation>
+              <xs:documentation xml:lang="en">
+              The subscription id associated with this subscription.
+              </xs:documentation>
+           </xs:annotation>
+          </xs:element>
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 12]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+          <xs:element name="eventClasses">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">
+              The event classes associated with this subscription.
+              </xs:documentation>
+           </xs:annotation>
+           <xs:complexType>
+             <xs:sequence minOccurs="0" maxOccurs="unbounded">
+               <xs:element ref="ncEvent:EventClass"/>
+             </xs:sequence>
+           </xs:complexType>
+          </xs:element>
+
+            <xs:element name="filter"
+                        type="netconf:filterInlineType"  minOccurs="0">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">
+              The filters associated with this subscription.
+              </xs:documentation>
+           </xs:annotation>
+          </xs:element>
+
+          <xs:element name="namedProfile"
+                type="xs:string" minOccurs="0">
+                         <xs:annotation>
+              <xs:documentation xml:lang="en">
+              The named profile associated with this subscription.
+              Note that the contents of the named profile may have
+              changed since it was last applied
+              </xs:documentation>
+           </xs:annotation>
+           </xs:element>
+
+          <xs:element name="lastModified"
+                type="xs:dateTime" >
+                         <xs:annotation>
+              <xs:documentation xml:lang="en">
+              The last time this subscription was modified. If it has
+              not been modified since creation, this is the time of
+              subscription creation.
+              </xs:documentation>
+           </xs:annotation>
+           </xs:element>
+
+           <xs:element name="messagesSent"
+                type="xs:integer" minOccurs="0">
+                         <xs:annotation>
+              <xs:documentation xml:lang="en">
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 13]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+              A count of event notifications sent along this connection
+              since the subscription was created.
+              </xs:documentation>
+           </xs:annotation>
+           </xs:element>
+
+           <xs:element name="lastSequenceNumber"
+                type="xs:integer" minOccurs="0">
+                         <xs:annotation>
+              <xs:documentation xml:lang="en">
+              The sequence number of the last event notification sent to
+              this subscription
+              </xs:documentation>
+           </xs:annotation>
+           </xs:element>
+
+           <xs:key name="uniqueSubscription">
+             <xs:selector xpath=".//subscription"/>
+             <xs:field xpath="session-id"/>
+             <xs:field xpath="subscriptionID"/>
+             </xs:key>
+
+         </xs:sequence>
+         </xs:complexType>
+         </xs:element>
+
+       </xs:schema>
+
+
+
+3.3  RPC One-way Messages
+
+   In order to support the concept that each individual event
+   notification is a well-defined XML-document that can be processed
+   without waiting for all events to come in, it makes sense to define
+   events, not as an endless reply to a subscription command, but as
+   independent messages that originate from the NETCONF server.  In
+   order to support this model, this memo introduces the concept of a
+   one-way RPC message.
+
+   The one-way RPC message is similar to the two-way RPC message, except
+   that no response is expected to the command.  In the case of event
+   notification, this RPC will originate from the NETCONF server, and
+   not the NETCONF client.
+
+3.4  User-Specified Filters
+
+   Note that when multiple filters are specified, they are applied
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 14]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+   collectively, so event notifications needs to pass all specified
+   filters in order to be sent to the subscriber.  If a filter is
+   specified to look for data of a particular value, and the data item
+   is not present within a particular event for its value to be checked,
+   it will be filtered out.  For example, if one were to check for
+   'severity=critical' in a configuration event notification where this
+   field was not supported, then the notification would be filtered out.
+
+3.4.1  Named Profiles
+
+   A named profile is a filter that is created ahead of time and applied
+   at the time an event notification subscription is created or
+   modified.  Note that changes to the profile after the subscription
+   has been created will have no effect unless a modify subscription
+   command is issued.  Since named profiles exist outside of the
+   subscription, they persist after the subscription has been cancelled.
+
+3.4.2  Filtering
+
+   Just-in-time filtering is explicitly stated when the event
+   notification subscription is created.  It can only be changed using
+   the modify subscription command.  This is specified via the Filter
+   parameter.  Filters only exist as parameters to the subscription.
+
+3.5  Event Classes
+
+   Events can be broadly classified into one more event classes.  Each
+   event class identifies a set of event notifications which share
+   important characteristics, such being generated from similar events
+   or sharing much of the same content.
+
+   The initial set of event classes is fault, configuration, state,
+   audit, data, maintenance, metrics, security, information and
+   heartbeat.
+
+   A fault event notification is generated when a fault condition (error
+   or warning) occurs.  A fault event may result in an alarm.  Examples
+   of fault events could be a communications alarm, environmental alarm,
+   equipment alarm, processing error alarm, quality of service alarm, or
+   a threshold crossing event.  See RFC3877 and RFC2819 for more
+   information.
+
+   A configuration event, alternatively known as an inventory event, is
+   used to notify that hardware, software, or a service has been added/
+   changed/removed.  In keeping aligned with NETCONF protocol
+   operations,  configuration events may included copy configuration
+   event, delete configuration event, or the edit configuration event
+   (create, delete, merge, replace).
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 15]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+   A state event indicates a change from one state to another, where a
+   state is a condition or stage in the existence of a managed entity.
+   State change events are seen in many specifications.  For Entity
+   state changes, see [Entity-State-MIB] for more information.
+
+   Audit events provide event of very specific actions within a managed
+   device.  In isolation an audit events provides very limited data.  A
+   collection of audit information forms an audit trail.
+
+   A data dump event is an asynchronous event containing information
+   about a system, its configuration, state, etc.
+
+   A maintenance event signals the beginning, process or end of an
+   action either generated by a manual or automated  maintenance action.
+
+   A metrics event contains a metric or a collection of metrics.  This
+   includes performance metrics.
+
+   A heart beat event is sent periodically to enable testing that the
+   communications channel is still functional.  It behaves much like the
+   other event classes, with the exception that implementations may not
+   want to include an event log, if supported.  Although widely used
+   throughout the industry, no current corresponding work within the
+   IETF.  However, other standards bodies such as the TeleManagement
+   Forum have similar definitions.
+
+   An Information event is something that happens of interest which is
+   within the expected operational behaviour and not otherwise covered
+   by another class.
+
+3.6  Defining Event Notifications
+
+   Event Notifications are defined ahead of time by defining an XML
+   element and assigning it to particular event classes.  This will be
+   done using an "eventClasses" attribute.
+
+3.7  Interleaving Messages
+
+   While each NETCONF message must be a complete XML document, the
+   design of the event system allows for the interleaving of complete
+   asynchronous event notifications with complete synchronous messages.
+   It is possible to still send command-response type messages such as
+   <modify-subscription> while events are being generated.  The only
+   restriction is that each message must be complete
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 16]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+   The following sequence diagram demonstrates an example NETCONF
+   session where after basic session establishment and capability
+   exchange, NETCONF client (C), subscribes to receive event
+   notifications.  The NETCONF server (S), starts sending event
+   notifications as events of interest happen within the system.  The
+   NETCONF client decides to change the characteristics of their event
+   subscription so sends a  <modify-subscription> command.  Before the
+   NETCONF server, receives this command, another event is generated and
+   the NETCONF server starts to send the event notification.  The
+   NETCONF server finishes sending this event notification before
+   processing the  <modify-subscription> command and sending the reply.
+
+
+                             C                           S
+                             |                           |
+                             |  capability exchange      |
+                             |-------------------------->|
+                             |<------------------------->|
+                             |                           |
+                             |  <create-subscription>    |
+                             |-------------------------->|
+                             |<--------------------------|
+                             |                           |
+                             |     <notification>        |
+                             |<--------------------------|
+                             |                           |
+                             |     <notification>        |
+                             |<--------------------------|
+                             |                           |
+                             |  <modify-subscription>    |
+                             |-------------------------->| (buffered)
+                             |     <notification>        |
+                             |<--------------------------|
+                             |  <rpc-reply>              |
+                             |<--------------------------|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 17]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+4.  XML Schema for Event Notifications
+
+
+   <?xml version="1.0" encoding="UTF-8"?>
+      <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+             xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"
+             xmlns:netconf="urn:ietf:params:xml:ns:netconf:base:1.0"
+       targetNamespace="urn:ietf:params:xml:ns:netconf:notification:1.0"
+             elementFormDefault="qualified"
+             attributeFormDefault="unqualified"
+               xml:lang="en">
+        <!--
+          import standard XML definitions
+          -->
+        <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+                   schemaLocation="http://www.w3.org/2001/xml.xsd">
+          <xs:annotation>
+            <xs:documentation>
+              This import accesses the xml: attribute groups for the
+              xml:lang as declared on the error-message element.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:import>
+
+        <!-- import base netconf definitions -->
+    <xs:import namespace="urn:ietf:params:xml:ns:netconf:base:1.0"
+          schemaLocation="urn:ietf:params:xml:ns:netconf:base:1.0" />
+
+
+   <!-- ************** Type definitions ***********************-->
+
+        <xs:simpleType name="SubscriptionID">
+        <xs:annotation>
+          <xs:documentation>
+          The unique identifier for this particular subscription within
+          the session.
+          </xs:documentation>
+          </xs:annotation>
+           <xs:restriction base="xs:string"/>
+           </xs:simpleType>
+
+           <xs:simpleType name="SequenceNumber">
+        <xs:annotation>
+          <xs:documentation>
+          A monotonically  increasing integer. Starts at 0.
+          Always increases by just one. Roll back to 0 after maximum
+          value is reached.
+          </xs:documentation>
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 18]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+          </xs:annotation>
+           <xs:restriction base="xs:integer"/>
+           </xs:simpleType>
+
+           <xs:complexType name="EventClassType"/>
+           <xs:element name="EventClass"
+                       type="EventClassType" abstract="true"/>
+           <xs:element name="fault" type="EventClassType"
+                       substitutionGroup="EventClass"/>
+           <xs:element name="information" type="EventClassType"
+                       substitutionGroup="EventClass"/>
+           <xs:element name="state" type="EventClassType"
+                       substitutionGroup="EventClass"/>
+           <xs:element name="configuration" type="EventClassType"
+                       substitutionGroup="EventClass"/>
+           <xs:element name="data" type="EventClassType"
+                       substitutionGroup="EventClass"/>
+           <xs:element name="maintenance" type="EventClassType"
+                       substitutionGroup="EventClass"/>
+           <xs:element name="metrics" type="EventClassType"
+                       substitutionGroup="EventClass"/>
+           <xs:element name="security" type="EventClassType"
+                       substitutionGroup="EventClass"/>
+           <xs:element name="heartbeat" type="EventClassType"
+                       substitutionGroup="EventClass"/>
+
+         <xs:complexType name="EventClasses">
+           <xs:sequence maxOccurs="unbounded">
+             <xs:element ref="EventClasses" />
+           </xs:sequence>
+         </xs:complexType>
+
+
+
+   <!-- ************** Symmetrical Operations  ********************-->
+
+
+        <!--
+          <create-subscription> operation
+          -->
+        <xs:complexType name="createSubscriptionType">
+          <xs:complexContent>
+            <xs:extension base="netconf:rpcOperationType">
+              <xs:sequence>
+                <xs:element name="event-classes"
+                                     minOccurs="0">
+                  <xs:complexType>
+                     <xs:complexContent>
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 19]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+                       <xs:extension base="EventClasses"/>
+                     </xs:complexContent>
+                   </xs:complexType>
+                 </xs:element>
+                <xs:element name="filter"
+                     type="netconf:filterInlineType" minOccurs="0"/>
+                <xs:element name="named-profile"
+                            type="xs:string" minOccurs="0"/>
+              </xs:sequence>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+        <xs:element name="create-subscription"
+                    type="createSubscriptionType"
+                    substitutionGroup="netconf:rpcOperation"/>
+
+        <!--
+          <modify-subscription> operation
+          -->
+        <xs:complexType name="modifySubscriptionType">
+          <xs:complexContent>
+            <xs:extension base="netconf:rpcOperationType">
+              <xs:sequence>
+                <xs:element name="subscription-id"
+                                 type="SubscriptionID" />
+                <xs:element name="event-classes"
+                                      minOccurs="0">
+                  <xs:complexType>
+                     <xs:complexContent>
+                       <xs:extension base="EventClasses"/>
+                     </xs:complexContent>
+                   </xs:complexType>
+                 </xs:element>
+                <xs:element name="filter"
+                            type="netconf:filterInlineType"
+                            minOccurs="0"/>
+                <xs:element name="named-profile"
+                            type="xs:string" minOccurs="0"/>
+              </xs:sequence>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+        <xs:element name="modify-subscription"
+                    type="modifySubscriptionType"
+                    substitutionGroup="netconf:rpcOperation"/>
+
+        <!--
+          <cancel-subscription> operation
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 20]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+          -->
+        <xs:complexType name="cancelSubscriptionType">
+          <xs:complexContent>
+            <xs:extension base="netconf:rpcOperationType">
+              <xs:sequence>
+                <xs:element name="subscription-id"
+                     type="SubscriptionID" />
+              </xs:sequence>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+        <xs:element name="cancel-subscription"
+                    type="cancelSubscriptionType"
+                    substitutionGroup="netconf:rpcOperation"/>
+
+
+   <!-- ************** One-way Operations  ******************-->
+
+        <xs:complexType name="rpcOneWayType">
+            <xs:group ref="rpc-one-way"/>
+          <xs:attribute name="message-id" type="xs:string"
+                       use="optional"/>
+        </xs:complexType>
+        <xs:group name="rpc-one-way">
+          <xs:sequence>
+            <xs:element name="data" type="netconf:dataInlineType"
+                            minOccurs="0"/>
+          </xs:sequence>
+        </xs:group>
+
+          <!--
+          <Event> operation
+          -->
+        <xs:complexType name="NotificationType">
+          <xs:complexContent>
+            <xs:extension base="rpcOneWayType">
+              <xs:sequence>
+                <xs:element name="subscription-id"
+                                     type="SubscriptionID"/>
+                <xs:element name="event-classes" type="EventClasses"/>
+                <xs:element name="sequence-number"
+                                  type="SequenceNumber"/>
+                <xs:element name="date-time" type="xs:dateTime">
+                   <xs:annotation>
+                      <xs:documentation>
+                      The date and time that the event notification was
+                      sent by the netconf server.
+                      </xs:documentation>
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 21]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+                   </xs:annotation>
+                </xs:element>
+              </xs:sequence>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+        <xs:element name="notification" type="NotificationType"/>
+
+      </xs:schema>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 22]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+5.  Mapping to Application Protocols
+
+   Currently, the NETCONF family of specification allows for running
+   NETCONF over a number of application protocols, some of which support
+   multiple configurations.  Some of these options will be better suited
+   for supporting event notifications then others.
+
+5.1  SSH
+
+   Session establishment and two-way messages are based on the NETCONF
+   over SSH transport mapping [NETCONF-SSH]
+
+   One-way messages are supported as follows: Once the session has been
+   established and capabilities have been exchanged, the server may send
+   complete XML documents to the NETCONF client containing rpc-one-way
+   elements.  No response is expected from the NETCONF client.
+
+   As the other examples in [NETCONF-SSH] illustrate, a special
+   character sequence, MUST be sent by both the client and the server
+   after each XML document in the NETCONF exchange.  This character
+   sequence cannot legally appear in an XML document, so it can be
+   unambiguously used to identify the end of the current document in the
+   event notification of an XML syntax or parsing error, allowing
+   resynchronization of the NETCONF exchange.
+
+   The NETCONF over SSH session to receive an event notification might
+   look like this:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 23]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+       <?xml version="1.0" encoding="UTF-8"?>
+       <rpc-one-way message-id="105"
+                xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+          <notification>
+            <subscription-id>123456</subscription-id>
+            <event-class><configuration/><audit/></event-classes>
+            <sequence-number>2</sequence-number>
+            <date-time>2000-01-12T12:13:14Z</date-time>
+              <data>
+                 <user>Fred Flinstone</user>
+                 <operation>
+                  <edit-config>
+                    <target>
+                     <running/>
+                    </target>
+                    <config>
+                      <top xmlns="http://example.com/schema/1.2/config">
+                         <interface>
+                           <name>Ethernet0/0</name>
+                           <mtu>1500</mtu>
+                        </interface>
+                      </top>
+                   </config>
+                 </edit-config>
+               </operation>
+             </data>
+          </notification>
+        </rpc-one-way>
+        ]]>
+    ]]>
+
+
+5.2  BEEP
+
+   Session establishment and two-way messages are based on the NETCONF
+   over BEEP transport mapping NETCONF-BEEP
+
+5.2.1  One-way Messages in Beep
+
+   One-way messages can be supported either by mapping to the existing
+   one-to-many BEEP construct or by creating a new one-to-none
+   construct.
+
+   This area is for future study.
+
+5.2.1.1  One-way messages via the One-to-many Construct
+
+   Messages in one-to-many exchanges: "rcp", "rpc-one-way", "rpc-reply"
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 24]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+   Messages in positive replies: "rpc-reply", "rpc-one-way"
+
+5.2.1.2  One-way messages via the One-to-none Construct
+
+   Note that this construct would need to be added to an extension or
+   update to 'The Blocks Extensible Exchange Protocol Core' RFC 3080.
+
+   MSG/NoANS: the client sends a "MSG" message, the server, sends no
+   reply.
+
+   In one-to-none exchanges, no reply to the "MSG" message is expected.
+
+5.3  SOAP
+
+   Session management and message exchange are based on the NETCONF over
+   SOAP transport mapping NETCONF-SOAP
+
+   Note that the use of "persistent connections" "chunked transfer-
+   coding" when using HTTP becomes even more important in the supporting
+   of event notifications
+
+5.3.1  A NETCONF over Soap over HTTP Example
+
+      C: POST /netconf HTTP/1.1
+      C: Host: netconfdevice
+      C: Content-Type: text/xml; charset=utf-8
+      C: Accept: application/soap+xml, text/*
+      C: Cache-Control: no-cache
+      C: Pragma: no-cache
+      C: Content-Length: 465
+      C:
+      C: <?xml version="1.0" encoding="UTF-8"?>
+      C: <soapenv:Envelope
+      C:   xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
+      C:   <soapenv:Body>
+      C:     <rpc message-id="101"
+      C:        xmlns=
+              "xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+      C:       <create-subscription>
+      C:       </create-subscription>
+      C:     </rpc>
+      C:   </soapenv:Body>
+      C: </soapenv:Envelope>
+
+      The response:
+
+      S: HTTP/1.1 200 OK
+      S: Content-Type: application/soap+xml; charset=utf-8
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 25]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+      S: Content-Length: 917
+      S:
+      S: <?xml version="1.0" encoding="UTF-8"?>
+      S: <soapenv:Envelope
+      S:   xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
+      S:   <soapenv:Body>
+      S:     <rpc-reply message-id="101"
+      S:        xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+      S:       <data>
+      S:         <top xmlns=
+                      "http://example.com/schema/1.2/notification">
+      S:           <subscriptionId>123456</subscriptionId>
+      S:         </top>
+      S:       </data>
+      S:     </rpc-reply>
+      S:   </soapenv:Body>
+      S: </soapenv:Envelope>
+
+      And then some time later
+
+      S: HTTP/1.1 200 OK
+      S: Content-Type: application/soap+xml; charset=utf-8
+      S: Content-Length: 917
+      S:
+      S: <?xml version="1.0" encoding="UTF-8"?>
+      S: <soapenv:Envelope
+      S:   xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
+      S:   <soapenv:Body>
+      S:     <rpc-one-way message-id="101"
+      S:        xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+      S:       <data>
+      S:     <notification>
+      S:      <subscriptionID>123456</subscriptionID>
+      S:      <eventClass><configuration/><audit/></eventClass>
+      S:      <sequenceNumber>2</sequenceNumber>
+      S:           <dateAndTime>2000-01-12T12:13:14Z</dateAndTime>
+      S:        <data>
+      S:           <user>Fred Flinstone</user>
+      S:              <operation>
+      S:               <edit-config>
+      S:              <target>
+      S:               <running/>
+      S:              </target>
+      S:             <config>
+      S:              <top xmlns="http://example.com/schema/1.2/config">
+      S:                   <interface>
+      S:                     <name>Ethernet0/0</name>
+      S:                     <mtu>1500</mtu>
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 26]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+      S:                  </interface>
+      S:               </top>
+      S:            </config>
+      S:           </edit-config>
+      S:         </operation>
+      S:       </data>
+      S:    </notification>
+      S:       </data>
+      S:     </rpc-one-way>
+      S:   </soapenv:Body>
+      S: </soapenv:Envelope>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 27]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+6.  Filtering examples
+
+   The following section provides examples to illustrate the various
+   methods of filtering content on an event notification subscription.
+
+6.1  Event Classes
+
+   The following example illustrates selecting all event notifications
+   for EventClasses fault, state or config
+
+        <rpc message-id="101"
+             xmlns="urn:ietf:params:xml:ns:netconf:event:1.0">
+          <create-subscription>
+            <eventClasses>
+               <fault/>
+               <state/>
+               <config/>
+            </eventClasses>
+          </create-subscription>
+        </rpc>
+
+
+6.2  Subtree Filtering
+
+   XML subtree filtering is not well suited for creating elaborate
+   filter definitions given that it only supports equality comparisons
+   (e.g. in the event subtree give me all event notifications which have
+   severity=critical or severity=major or severity=minor).
+   Nevertheless, it may be used for defining simple notification
+   forwarding filters as shown below.
+
+   The following example illustrates selecting fault EventClass which
+   have severities of critical, major, or minor.  The filtering criteria
+   evaluation is as follows:
+
+   ((fault) & ((severity=critical) | (severity=major) | (severity =
+   minor)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 28]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+        <rpc message-id="101"
+             xmlns="urn:ietf:params:xml:ns:netconf:event:1.0">
+          <create-subscription>
+            <eventClasses>
+               <fault/>
+            </eventClasses>
+            <netconf:filter type="subtree">
+              <neb xmlns="urn:ietf:params:xml:ns:netconf:event:1.0">
+                <event>
+                    <severity>critical</severity>
+                </event>
+                <event>
+                    <severity>major</severity>
+                </event>
+                <event>
+                    <severity>minor</severity>
+                </event>
+              </neb>
+            </netconf:filter>
+          </create-subscription>
+        </rpc>
+
+   The following example illustrates selecting fault, state, config
+   EventClasses which have severities of critical, major, or minor and
+   come from card Ethernet0.  The filtering criteria evaluation is as
+   follows:
+
+   ((fault | state | config) & ((fault & severity=critical) | (fault &
+   severity=major) | (fault & severity = minor) | (card=Ethernet0)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 29]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+        <rpc message-id="101"
+             xmlns="urn:ietf:params:xml:ns:netconf:event:1.0">
+          <create-subscription>
+            <eventClasses>
+               <fault/>
+               <state/>
+               <config/>
+            </eventClasses>
+            <netconf:filter type="subtree">
+              <neb xmlns="urn:ietf:params:xml:ns:netconf:event:1.0">
+                <event>
+                    <eventClasses>fault</eventClasses>
+                    <severity>critical</severity>
+                </event>
+                <event>
+                    <eventClasses>fault</eventClasses>
+                    <severity>major</severity>
+                </event>
+                <event>
+                    <eventClasses>fault</eventClasses>
+                    <severity>minor</severity>
+                </event>
+                <event>
+                    <card>Ethernet0</card>
+                </event>
+              </neb>
+            </netconf:filter>
+          </create-subscription>
+        </rpc>
+
+
+
+6.3  XPATH filters
+
+   The following example illustrates selecting fault EventClass which
+   have severities of critical, major, or minor.  The filtering criteria
+   evaluation is as follows:
+
+   ((fault) & ((severity=critical) | (severity=major) | (severity =
+   minor)))
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 30]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+        <rpc message-id="101"
+             xmlns="urn:ietf:params:xml:ns:netconf:event:1.0">
+          <create-subscription>
+            <eventClasses>
+               <fault/>
+            </eventClasses>
+            <netconf:filter type="xpath">
+              (/event[eventClasses/fault] and
+              (/event[severity="critical"] or
+               /event[severity="major"] or /event[severity="minor"]))
+            </netconf:filter>
+          </create-subscription>
+        </rpc>
+
+
+   The following example illustrates selecting fault, state, config
+   EventClasses which have severities of critical, major, or minor and
+   come from card Ethernet0.  The filtering criteria evaluation is as
+   follows:
+
+   ((fault | state | config) & ((fault & severity=critical) | (fault &
+   severity=major) | (fault & severity = minor) | (card=Ethernet0)))
+
+
+        <rpc message-id="101"
+             xmlns="urn:ietf:params:xml:ns:netconf:event:1.0">
+          <create-subscription>
+            <eventClasses>
+               <fault/>
+               <state/>
+               <config/>
+            </eventClasses>
+            <netconf:filter type="xpath">
+               ((/event[eventClasses/fault]  or
+               /event[eventClasses/state]     or
+                /event[eventClasses/config]) and
+                ( (/event[eventClasses/fault] and
+                /event[severity="critical"]) or
+                (/event[eventClasses/fault]    and
+                /event[severity="major"])    or
+                (/event[eventClasses/fault]    and
+                /event[severity="minor"])    or
+                /event[card="Ethernet0"]))
+            </netconf:filter>
+          </create-subscription>
+        </rpc>
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 31]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+7.  Security Considerations
+
+   To be determined once specific aspects of this solution are better
+   understood.  In particular, the access control framework and the
+   choice of transport will have a major impact on the security of the
+   solution
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 32]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+8.  IANA Considerations
+
+   Event Classes will likely be an IANA-managed resource.  The initial
+   set of values is defined in this specification.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 33]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+9.  Acknowledgements
+
+   Thanks to Gilbert Gagnon and Greg Wilbur for providing their input
+   into the early work on this document.  In addition, the editors would
+   like to acknowledge input at the Vancouver editing session from the
+   following people: Orly Nicklass, James Bakstrieve, Yoshifumi
+   Atarashi, Glenn Waters, Alexander Clemm, Dave Harrington, Dave
+   Partain, Ray Atarashi and Dave Perkins.
+
+10.  References
+
+   [NETCONF]  Enns, R., "NETCONF Configuration Protocol",
+              ID draft-ietf-netconf-prot-06, April 2005.
+
+   [NETCONF BEEP]
+              Lear, E. and K. Crozier, "Using the NETCONF Protocol over
+              Blocks Extensible Exchange Protocol (BEEP)",
+              ID draft-ietf-netconf-beep-05, March 2005.
+
+   [NETCONF Datamodel]
+              Chisholm, S. and S. Adwankar, "Framework for NETCONF
+              Content", ID draft-chisholm-netconf-model-04.txt,
+              October 2005.
+
+   [NETCONF SOAP]
+              Goddard, T., "Using the Network Configuration Protocol
+              (NETCONF) Over the Simple Object Access Protocol (SOAP)",
+              ID draft-ietf-netconf-soap-05, April 2005.
+
+   [NETCONF SSH]
+              Wasserman, M. and T. Goddard, "Using the NETCONF
+              Configuration Protocol over Secure Shell (SSH)",
+              ID draft-ietf-netconf-ssh-04.txt, April 2005.
+
+   [URI]      Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+              Resource Identifiers (URI): Generic Syntax", RFC 2396,
+              August 1998.
+
+   [XML]      World Wide Web Consortium, "Extensible Markup Language
+              (XML) 1.0", W3C XML, February 1998,
+              <http://www.w3.org/TR/1998/REC-xml-19980210>.
+
+   [refs.RFC2026]
+              Bradner, S., "The Internet Standards Process -- Revision
+              3", RFC 2026, BCP 9, October 1996.
+
+   [refs.RFC2119]
+              Bradner, s., "Key words for RFCs to Indicate Requirements
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 34]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+              Levels", RFC 2119, March 1997.
+
+   [refs.RFC2223]
+              Postel, J. and J. Reynolds, "Instructions to RFC Authors",
+              RFC 2223, October 1997.
+
+   [refs.RFC3080]
+              Rose, M., "The Blocks Extensible Exchange Protocol Core",
+              RFC 3080, March 2001.
+
+
+Authors' Addresses
+
+   Sharon Chisholm
+   Nortel
+   3500 Carling Ave
+   Nepean, Ontario  K2H 8E9
+   Canada
+
+   Email: schishol@nortel.com
+
+
+   Kim Curran
+   Nortel
+   3500 Carling Ave
+   Nepean, Ontario  K2H 8E9
+   Canada
+
+   Email: kicurran@nortel.com
+
+
+   Hector Trevino
+   Cisco
+   Suite 400
+   9155 E. Nichols Ave
+   Englewood, CO  80112
+   USA
+
+   Email: htrevino@cisco.com
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 35]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+Appendix A.  Potential Event Content
+
+   This non-normative appendix explores possible content of event
+   notifications.  It provides field descriptions and indicates their
+   applicability for the various event classes.  Fields specific to
+   configuration events (configuration event class) are provided in
+   Appendix B.
+
+A.1  Event Identifier
+
+   A unique event identifier provided for event correlation purposes.
+   This field is used by management applications to identify events
+   which are generated for a single event occurrence via different
+   mechanisms (e.g. syslog, NETCONF).  Ie, this event identifier could
+   be included as content in a syslog or SNMP message to indicate that
+   all the messages were generated from the same source event.  Event Id
+   values may be re-used across re-boots.
+
+   Applicable event classes: All
+
+A.2  Resource Instance
+
+   This field identifies the element/entity/object for which the event
+   is applicable.
+
+   Applicable event classes: All
+
+A.3  Event Time
+
+   This field represents the time at which the action causing the
+   generation of the event has taken place.  Event time field is
+   composed of two parts: event generation time and event sysUpTime.
+
+   Event generation time follows the syslog TIMESTAMP format defined in
+   draft-ietf-syslog-protocol-14.txt (derived from RFC3339 but with
+   additional restrictions).  Event sysUpTime is of XML type integer
+   (0..4294967295) and it follows the same definition as sysUpTime
+   (TimeTicks) defined in RFC3418 - "The time (in hundredths of a
+   second) since the network management portion of the system was last
+   re-initialized).
+
+   Applicable event classes: All
+
+A.4  Perceived Severity
+
+   The severity of the alarm as determined by the alarm detection point
+   using the information it has available [RFC3877].  The values are
+   cleared, indeterminate, critical, major, minor and warning.
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 36]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+   Applicable event classes: fault
+
+A.5  Probable Cause
+
+   This field provides further information describing the cause of the
+   alarm .  Allowed values for this field are the same as those listed
+   in RFC3877 and are derived from ITU X.733 and ITU M.3100.
+
+   Note that this concept is being evolved to be less linear, within the
+   ITU-T, in X.733.1, a protocol-neutral version of X.733.  It may make
+   sense to consider alignment with this update on the concept of
+   probable cause, instead of the one in RFC3877 and X.733.
+
+   Applicable event classes: fault
+
+A.6  Specific Problem
+
+   This parameter is optional.  When present, it identifies further
+   refinements to the Probable cause of the alarm.  This definition
+   follows ITU X.733
+
+   Applicable event classes: fault
+
+A.7  Trend Indication
+
+   This parameter indicates the trend of the alarm against the managed
+   resource Allowed values for this field are as specified in RFC3877
+   and follow the ITU X.733 value definitions
+
+   Applicable event classes: fault
+
+A.8  Additional Alarm Text
+
+   This parameter is provided to allow implementation to include a
+   textual description of the alarm
+
+   Applicable event classes: fault
+
+A.9  Threshold Identifier
+
+   This field holds the identifier of the monitored variable for which
+   the threshold was set.  This is analogous to the alarmVariable
+   OBJECT-TYPE in RFC2819.
+
+   Applicable event classes: fault (useful for threshold crossing
+   alarms)
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 37]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+A.10  Threshold Type
+
+   This parameter is used to indicate the direction of the threshold
+   crossing: rising, falling, or clear.
+
+   Rising threshold type: This indicates that the value of a monitored
+   variable has crossed the set threshold in the upwards direction.
+   Only sent to indicate a problem
+
+   Falling threshold type: This indicates that the value of a monitored
+   variable has crossed the set threshold in the downwards direction.
+   Only sent to indicate a problem.
+
+   Clear threshold type: This indicates that the value of the monitored
+   variable for which a threshold alarm had been previously issued as a
+   result of crossing the set value either in the upwards or downwards
+   direction has been restored to a value within an acceptable range
+   (i.e. does not exceed the set threshold).  Note that this differs
+   from RFC2819.
+
+   Applicable event classes: fault (useful in the case threshold
+   crossing alarms)
+
+A.11  Observed Value
+
+   The value of the monitored parameter (Threshold Identifier) for the
+   last sampling period.  This parameter follows the alarmValue
+   definition in RFC2819.  This field is in two parts - the value and
+   the units of measure.
+
+   Applicable event classes: fault (useful in the case threshold
+   crossing alarms)
+
+A.12  State Change Information
+
+   This parameter holds the name and values of the state attributes
+   whose values have changed and are being reported.
+
+   This is a parameter composed of three fields: Attribute Name, Old
+   Value, and New Value.  The definitions given in RFC4268 for state
+   attributes and values are being followed.
+
+   Applicable event classes: state
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 38]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+Appendix B.  Configuration Event Class Notifications
+
+   This non-normative appendix provides a detailed description of a
+   configuration change event notification definition in support of the
+   configuration operations, particularly those defined by the NETCONF
+   protocol.
+
+B.1  Types of Configuration Events
+
+   Configuration event notifications include:
+
+   o  All-triggered Configuration Events
+
+   o  NETCONF-triggered Configuration Events
+
+   All-triggered Configuration events report on changes from the
+   perspective of the managed resource, rather than the commands which
+   created the configuration change.  They are reported regardless of
+   what specific method was used to initiate the change.  They indicate
+   that a change has occurred around hardware, software, services or
+   other managed resources within a system.  Specific events includes
+
+   o  Resource Added
+
+   o  Resource Removed
+
+   o  Resource Modified
+
+   NETCONF-triggered events are those which correspond to the execution
+   of explicit NETCONF operations.  These include:
+
+   o  copy-config event
+
+      *  This is a data store level event generated following the
+         successful completion of a copy-config operation.  This
+         represents the creation of a new configuration file or
+         replacement of an existing one.
+
+   o  delete-config event
+
+      *  This is a data store level event generated following the
+         successful completion of a delete-config operation.  This
+         represents the deletion of a configuration file.
+
+   o  edit-config event
+
+      *  This is an event generated following a change in configuration
+         due to an edit-config operation, e.g., due to the completion of
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 39]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+         an edit-config operation which successfully changed some part
+         of the configuration.  See edit-config error-options (stop-on-
+         error, ignore-error, rollback-on-error)  The contents of this
+         event are dependent on the type of operation performed: edit-
+         config (merge, replace, delete, create).  This event is not
+         intended to report completely unsuccessful configuration
+         operations.
+
+   o  lock-config event
+
+      *  This is a data store level event generated following the
+         successful locking of a configuration data store.
+
+   o  unlock-config event
+
+      *  This is a data store level event generated following the
+         successful release of a lock previously held on a configuration
+         data store.
+
+
+B.2  Config Event Notification Structure
+
+   The table below lists the EventInfo parameters for a config event
+   notification.
+
+   Nomenclature:
+
+   O - This is marked optional field because it is implementation/
+   notification category dependent.  In some cases this may be user
+   configurable.
+
+   M - This is a mandatory field that must be included.  Dependency on
+   event class may exist as noted below
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 40]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+        -----------------------------------------------------
+              Parameter Name               Restrictions
+        -----------------------------------------------------
+               EventInfo
+        -----------------------------------------------------
+                  EventID                          O
+        -----------------------------------------------------
+                  ResourceInstance                 M
+        -----------------------------------------------------
+                  ConfigChangeType                 M
+        -----------------------------------------------------
+                  TargetDataStore                  M
+        -----------------------------------------------------
+                  UserInfo                         O
+        -----------------------------------------------------
+                     UserName
+        -----------------------------------------------------
+                     SourceIndicator
+        -----------------------------------------------------
+                     TransactionId
+        -----------------------------------------------------
+                  CopyConfigInfo        -- copy-config only
+        -----------------------------------------------------
+                     DataSource                    M
+        -----------------------------------------------------
+                  EditConfigInfo        -- edit-config only
+        -----------------------------------------------------
+                     EventTime                     M
+        -----------------------------------------------------
+                     Context                       O
+        -----------------------------------------------------
+                     EnteredCommand                M
+        -----------------------------------------------------
+                     NewConfig                     M
+        -----------------------------------------------------
+                     MergeReplaceInfo
+        -----------------------------------------------------
+                        OldConfig                  O
+        -----------------------------------------------------
+                  EventTime                        M
+        -----------------------------------------------------
+                      EventGenerationTime
+        -----------------------------------------------------
+                      EventSysUpTime
+        -----------------------------------------------------
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 41]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+B.3  Configuration Event Content
+
+   The applicability of these fields to other event classes is for
+   further study.
+
+B.3.1  Target Datastore
+
+   Target datastore refers to the data store (startup, candidate,
+   running) which was modified by the management operation.
+
+B.3.2  User Info
+
+   This is used to convey information describing who originated the
+   configuration event and the means for submitting the request.  The
+   user info field contains the following information:
+
+      user Name: User id which was authorized to execute the associated
+      management operation causing the generation of this event.
+
+      source Indicator: Indicates the method employed to initiate the
+      management operation telnet, NETCONF, console, etc.
+
+      transaction Id: If available, this field contains a unique
+      identifier for the associated management operation.  This is
+      implementation dependent and may require additional information to
+      be communicated between server and client.  A possible option is
+      to make use of the message-id in the NETCONF rpc header
+
+
+B.3.3  Data Source
+
+   The data source is used, for example, in the copy configuration
+   command to indicated the source of information used in the copy
+   operation
+
+   Applicable Event Classes: configuration (useful for copy-config)
+
+B.3.4  Operation
+
+   Operation is used, for example, in the edit configuration command to
+   indicated the specific operation that has taken place - create,
+   delete, merge, replace.
+
+   Applicable Event Classes: configuration (useful for edit-config)
+
+B.3.5  Context
+
+   The configuration sub-mode under which the command was executed.
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 42]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+   Applicable Event Classes: configuration
+
+B.3.6  Entered Command
+
+   The command entered and executed on the device.
+
+B.3.7  New Config
+
+   The device's configuration following the successful execution of the
+   entered command.
+
+   Applicable Event Classes: configuration
+
+B.3.8  Old Config
+
+   The configuration prior to the execution of the entered command.
+
+   Applicable Event Classes: configuration
+
+B.3.9  Non-netconf commands in configuration notifications
+
+   To support legacy implementations and for better integration with
+   other deployed solutions on the box, sending information via netconf
+   about configuration changes that were originated via other solutions,
+   such as command line interfaces is necessary.  In order to do this,
+   the information in the message needs to be clearly tagged so that the
+   consumer of the information knows what to expect.  In addition, the
+   creation of the subscription needs allow for the client to indicate
+   whether this non-XML formatted information is of interest
+
+   The latter is done by identifying the XML namespace under which the
+   data syntax/schema is defined.  A NETCONF client requests the format
+   in which it wants the NETCONF server to issue the event notifications
+   at subscription time by specifying the appropriate namespace under
+   the Filter parameter in the  <create-subscription>  operation.  An
+   example is provided below:
+
+          <netconf:filter>
+             <data-format:config-format-xml
+                           xmlns="http://www.example.com/xmlnetevents"/>
+          </netconf:filter>
+
+
+B.4  Design Alternative
+
+B.4.1  Server Session Initiation
+
+   Currently the NETCONF protocol requires session establishment to be
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 43]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+   initiated by the NETCONF client.  With the introduction of event
+   notifications in NETCONF as well deployments which might require the
+   "call-home" feature to get around firewall and/or NAT issues, the
+   ability for a NETCONF server to initiate sessions becomes important.
+
+   Other potential uses of this feature includes the following
+   deployment scenario: NE registration/auto-configuration.  The device
+   is pre-configured with a target destination address (the management
+   station's address) where it needs to register and download its
+   configuration.  When managing large numbers of devices (e.g.  CPEs)
+   this also allows for increased scalability since the management
+   station does not need to maintain established sessions to all managed
+   devices.
+
+   This appendix proposes extensions to the event subscription session
+   establishment procedures and related operations to allow for server
+   session initiation.
+
+   Note that the security implications of this approach, compared with
+   more traditional, well understood models, is for further study.
+
+   The subscription information as described in the body of this
+   document indicates that it is transient in nature (i.e. it is not
+   persisted and it is only applicable through the life of the session).
+   This section describes additional functionality for persisting event
+   subscription information and allowing the NETCONF server (e.g.
+   network element) to initiate the event subscription session.
+
+   QUICK SUMMARY:  The <create-subscription>, <cancel-subscription>,
+   <modify-subscription> operations would be used in same manner as
+   described in doc.  It may use useful to allow a client and server to
+   re-establish an events subscription.  This would result in another
+   capability to allow session initiation by the server.
+
+B.4.2  Establishment
+
+   In order to establish an event subscription, a client must issue a
+   <create-subscription> message request.  Upon a successful response
+   from the server (e.g. network element) the event subscription is
+   established.  With this modified persistent version of the
+   subscription, the NETCONF server would maintain the subscription
+   information as part of its configuration.
+
+B.4.3  Teardown
+
+   A event subscription is torn down when a) the client issues a
+   <cancel-subscription>  message and it is successfully processed by
+   the server (i.e. the server issues a positive response) or b) the
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 44]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+   NETCONF session carrying the event subscription goes down for any
+   reason.
+
+   If the subscription is not persistent, the user must create a new
+   subscription with the exact same parameters as the original session.
+   If instead, subscriptions were persistent, as part of the network
+   element's configuration, the client simply needs to re-establish the
+   session by specifying the subscription Id.
+
+B.4.4  Suspend And Resume
+
+   Since the purpose of the <cancel-subscription> operation is to stop
+   event notification forwarding and due to its transient nature removes
+   all subscription configuration; a different mechanism might be needed
+   for shutting down the session but preserving the subscription
+   information thus allowing the NETCONF server to re-establish the
+   parameters and reproduce the subscription.
+
+   The suspend and resume commands would allows a NETCONF client to
+   suspend event notification forwarding without removing the existing
+   subscription information.  Operations <suspend-subscription> and
+   ><resume-subscription> are proposed for this purpose.
+
+   Since event subscription information is now persistent, unsolicited
+   session termination (i.e. other than <cancel-subscription))  is
+   treated as if a  <suspend-subscription>  command was issued.  Event
+   forwarding is resumed by sending a <resume-subscription> to the
+   NETCONF server on a new connection.
+
+B.4.5  Lifecycle
+
+   Configuration information associated with the event subscription
+   (event classes and  filters) could persist beyond the life of the
+   event subscription session. (i.e. it is maintained by the network
+   element as part of its configuration).  This configuration
+   information is subject to the behaviour of the datastore it resides
+   in and may or may not persist across re-boots (e.g. it could be part
+   of the running configuration but not the startup configuration).
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 45]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+Appendix C.  NETCONF Event Notifications and Syslog
+
+   This appendix describes the mapping between syslog message fields and
+   NETCONF event notification fields.  The purpose of this mapping is to
+   provide an unambiguous mapping to enable consistent multi-protocol
+   implementations as well as to enable future migration.
+
+   The second part of the appendix describes an optional capability to
+   embed an entire syslog message (hereafter referred to as syslog
+   message(s) to avoid confusion with the message field in syslog)
+   within a NETCONF event notification.
+
+C.1  Leveraging Syslog Field Definitions
+
+   This section provides a semantic mapping between NETCONF event fields
+   and syslog message fields.
+
+     -------------------------------------------------------------------
+     |         PRI         |          HEADER         |    MESSAGE      |
+     -------------------------------------------------------------------
+     | FACILITY | SEVERITY |  TIMESTAMP  | HOSTNAME  |  TAG CONTENT    |
+     -------------------------------------------------------------------
+                    Figure 2 - syslog message (RFC3164)
+
+
+     -------------------------------------------------------------------
+    |     HEADER         |    STRUCTURED DATA         |    MESSAGE     |
+     -------------------------------------------------------------------
+         Figure 3 - syslog message (draft-ietf-syslog-protocol-14.txt)
+
+   HEADER (Version, Facility, Severity, Truncate, Flag, TimeStamp,
+           HostName, AppName, ProcId, MsgId)
+
+       STRUCTURED DATA (Zero or more Structured Data Elements - SDEs)
+
+        MESSAGE ( Text message )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 46]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+C.1.1  Field Mapping
+
+   ------------------------------------------------------
+     RFC3164      Syslog ID       NETCONF Event
+   ------------------------------------------------------
+                   VERSION
+   ------------------------------------------------------
+     FACILITY      FACILITY
+   ------------------------------------------------------
+     SEVERITY      SEVERITY        PerceivedSeverity
+   ------------------------------------------------------
+                   TRUNCATE FLAG
+   ------------------------------------------------------
+     TIMESTAMP     TIMESTAMP       EventTime
+   ------------------------------------------------------
+     HOSTNAME      HOSTNAME        EventOrigin
+   ------------------------------------------------------
+     TAG           APP-NAME        EventOrigin
+   ------------------------------------------------------
+                   PROC-ID
+   ------------------------------------------------------
+                   MSG-ID
+   ------------------------------------------------------
+     CONTENT       CONTENT         AdditionalText
+   ------------------------------------------------------
+
+        Figure 4 - syslog to NETCONF Event field mapping
+
+   Notes:
+
+   VERSION:  Schema version is found in XML Schema namespace.  However,
+   no correspondence to syslog.
+
+   FACILITY: No well defined semantics for this field.  Therefore not
+   used at this time.
+
+   TRUNCATE: Not applicable.  NETCONF events must be complete XML
+   documents therefore cannot be truncated.
+
+   TIME: TIMESTAMP in syslog ID is derived from RFC3339 but with
+   additional restrictions
+
+   PROC-ID: No equivalent field
+
+   CONTENT: This is a free form text field with not defined semantics.
+   The contents of this field may be included in the AdditionalText
+   field.
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 47]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+C.1.2  Severity Mapping
+
+   The severity value mappings stated in (draft-ietf-syslog-protocol-14)
+   are used:
+
+                 ITU Perceived Severity      syslog SEVERITY
+                 Critical                    Alert
+                 Major                       Critical
+                 Minor                       Error
+                 Warning                     Warning
+                 Indeterminate               Notice
+                 Cleared                     Notice
+
+      Figure 5. ITU PerceivedSeverity to syslog SEVERITY mapping.
+
+
+C.2  Syslog within NETCONF Events
+
+C.2.1  Motivation
+
+   The syslog protocol (RFC3164) is widely used by equipment vendors as
+   a means to deliver event messages.  Due to the widespread use of
+   syslog as well as a potential phased availability and coverage of
+   NETCONF events by equipment vendors, it is envisioned that users will
+   also follow a phased migration.  As a way to facilitate migration and
+   at the same time allow equipment vendors to provide comprehensive
+   event coverage over a NETCONF event subscription session, syslog
+   messages could be embedded in their entirety within the body of a
+   NETCONF event notification.
+
+   The information provided in this appendix describes a mechanism to
+   leverage syslog messages for the purpose of complementing the
+   available NETCONF event notification set.  The intent is to promote
+   the use of the NETCONF interface and not to simply provide a wrapper
+   and additional delivery mechanism for syslog messages.  NETCONF
+   events are intended to be well defined and structured, therefore
+   providing an advantage over the unstructured and often times
+   arbitrarily defined syslog messages (i.e. the message field).
+
+   Covered herein is the syslog protocol as defined in RFC3164 and
+   draft-ietf-syslog-protocol-14.txt.
+
+C.2.2  Embedding syslog messages in a NETCONF Event
+
+   When event notifications are supported, the default behaviour for a
+   NETCONF server is to send NETCONF event notifications over an
+   established event subscription.  As an option, the NETCONF server may
+   embed a syslog message in its entirety (e.g.  RFC3164 - PRI, Header,
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 48]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+   and Message fields), placing it within the Event Info field
+   (SyslogInfo sub-field) - see Figure 1.
+
+   _____________________________________________________
+   | NETCONF Event  Header         |           Data            |
+   |________________________|___________________________|
+   |                        |         Event Info        |
+   |________________________|___________________________|
+                            |                           |
+                            v                           v
+                             ____________________________
+                            | Event Fields | SyslogInfo |
+                            |___________________________|
+
+
+   Figure 1 - Embedding syslog in a NETCONF Event Notifications
+
+
+C.2.3  Supported Forwarding Options
+
+   Three event forwarding options may be supported by the NETCONF
+   server: a) XML only (mandatory if NETCONF events capability is
+   supported) b) XML and syslog (Optional) c) syslog only (optional)
+
+   Note to the reader: Option "a" above refers to event notification
+   messages defined for use over the NETCONF protocol.  While their use
+   is not necessarily limited to NETCONF protocol, they are referred to
+   as "NETCONF XML-event" in the remainder of this section simply to
+   avoid ambiguity.
+
+C.2.3.1  XML and Syslog option - Forwarding Behaviour
+
+   It is possible, due to coverage, for a given NETCONF implementation
+   to not support a comprehensive set of NETCONF event notifications.
+   Therefore, it is possible for a given event to trigger the generation
+   of a syslog message without a NETCONF-aware counterpart.  In such
+   situations, the NETCONF server could form a NETCONF event
+   notification, embed the syslog message in the SyslogInfo field and
+   forward the NETCONF event notifications to all subscribed
+   destinations.  Otherwise, both NETCONF event and syslog messages must
+   be included in the Event Info field.
+
+C.2.3.2  Event Class Identification
+
+   The event class field is found in the NETCONF event header
+   information as described in the main body of this document.  It
+   conveys information describing that type of event for which the event
+   notification is generated and lets the consumer of the message know
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 49]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+   what to expect.  NETCONF event notifications which only contain a
+   syslog message (Options b or c) must have the EventClass field set to
+   "information".  [Editor's Note: This needs to be thought through.  It
+   may not be the best option.]  The NETCONF client parses the message
+   in the same manner as any other message, finds the normal fields
+   empty [Editor's Note: or not present?] and either proceeds to parse
+   the SyslogInfo field or hands the syslog message to the entity
+   responsible for processing syslog messages.
+
+C.2.3.3  Event Subscription Options
+
+   A NETCONF client may request subscription to options b) XML and
+   syslog or c) syslog only listed in "Supported Forwarding Options" at
+   subscription time via the user-specified filter.  The FILTER or NAMED
+   FILTER parameter in <create-subscription>.  As previously indicated,
+   the default behaviour is to forward NETCONF XML only event
+   notifications.
+
+C.2.3.4  Supported Forwarding Option Discovery
+
+   A potential means for a NETCONF server to convey its feature set
+   support is via capabilities.  However, in this particular case, the
+   event content is not a protocol feature therefore other means are
+   needed.  A future version of this document will address this issue.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 50]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+Intellectual Property Statement
+
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the procedures with respect to rights in RFC documents can be
+   found in BCP 78 and BCP 79.
+
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use of
+   such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository at
+   http://www.ietf.org/ipr.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at
+   ietf-ipr@ietf.org.
+
+   The IETF has been notified of intellectual property rights claimed in
+   regard to some or all of the specification contained in this
+   document.  For more information consult the online list of claimed
+   rights.
+
+
+Disclaimer of Validity
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE INTERNET
+   ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
+   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Copyright Statement
+
+   Copyright (C) The Internet Society (2006).  This document is subject
+   to the rights, licenses and restrictions contained in BCP 78, and
+   except as set forth therein, the authors retain all their rights.
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 51]
+
+Internet-Draft         NETCONF Event Notifications          January 2006
+
+
+Acknowledgment
+
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chisholm, et al.          Expires July 12, 2006                [Page 52]
+

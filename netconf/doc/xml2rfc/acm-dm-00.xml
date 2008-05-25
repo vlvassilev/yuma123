@@ -1,0 +1,600 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://netconfcentral.org/ncx/security"
+ targetNamespace="http://netconfcentral.org/ncx/security"
+ xmlns:xs="http://www.w3.org/2001/XMLSchema"
+ elementFormDefault="qualified" 
+ attributeFormDefault="unqualified"
+ xml:lang="en" version="0.6" 
+ xmlns:ncx="http://netconfcentral.org/ncx/1.0"
+ xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+ xmlns:n8="http://netconfcentral.org/ietf/types">
+ <xs:annotation>
+  <xs:documentation> 
+
+    Module: ncx-acm
+    Owner: ncx
+    Application: security
+    Version: 0.6
+    Contact Info: Send comments to ietf@andybierman.com.
+
+    Description:
+      NETCONF Access Control Model Parameters
+  </xs:documentation>
+ </xs:annotation>
+
+ <!--
+   import standard XML definitions
+  -->
+ <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+  schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+
+ <!--
+   import inetAddress definition
+  -->
+ <xs:import namespace="http://netconfcentral.org/ietf/types"
+  schemaLocation="http://netconfcentral.org/ietf/types
+  http://www.netconfcentral.org/xsd/ietf/inetAddress.xsd"/>
+
+
+ <!--
+   Global Access Control Mode Type
+  -->
+ <xs:simpleType name="NcxAccessControlMode">
+  <xs:annotation>
+   <xs:documentation>
+     NCX System access control mode.
+          off == no access control checking enforced 
+          warn == warn only if access violation detected
+          loose == any RPC method in the netconf namespace can
+              be invoked;  read-only data allowed for all
+          strict == ncxacl RPC entry must be present to invoke
+              an RPC method; ncxacl Data entry must be present
+              to access any data. (Except for user == 'root'.)
+   </xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="off"/>
+   <xs:enumeration value="warn"/>
+   <xs:enumeration value="loose"/>
+   <xs:enumeration value="strict"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <!--
+   Administrative Role Type
+  -->
+ <xs:simpleType name="NcxAccessAdminRole">
+  <xs:annotation>
+   <xs:documentation>Type of administrative role assigned to the session
+         root == root account, no access control applied
+         admin == administrative account, access control applied
+         guest == guest account, read-only and configured
+                   access control applied.</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="root"/>
+   <xs:enumeration value="admin"/>
+   <xs:enumeration value="guest"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <!--
+   Request Classification Type
+  -->
+ <xs:simpleType name="NcxAccessRequestType">
+  <xs:annotation>
+   <xs:documentation>
+     Type of request causing an access violation.
+          rpcRequest:
+            An RPC method invocation request was denied.
+          dataRead:
+            A configuration data read request was denied.
+          dataWrite:
+            A configuration data write request was denied.
+    </xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="rpcRequest"/>
+   <xs:enumeration value="dataRead"/>
+   <xs:enumeration value="dataWrite"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <!--
+   Name Type
+  -->
+ <xs:simpleType name="NcxAccessName">
+  <xs:annotation>
+   <xs:documentation>NCX Access Name string.</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:pattern value="[a-z,A-Z][a-z,A-Z,0-9,\-,_]*"/>
+   <xs:minLength value="1"/>
+   <xs:maxLength value="1023"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <!--
+   List of Names Type
+  -->
+ <xs:simpleType name="NcxAccessNameList">
+  <xs:annotation>
+   <xs:documentation>
+     List of NcxAcessName strings.
+   </xs:documentation>
+   <xs:appinfo>
+    <ncx:no-duplicates/>
+   </xs:appinfo>
+  </xs:annotation>
+  <xs:list itemType="NcxAccessName"/>
+ </xs:simpleType>
+
+ <!--
+   RPC Classification Type
+  -->
+ <xs:simpleType name="NcxAccessRpcType">
+  <xs:annotation>
+   <xs:documentation>
+     NCX RPC Type Classifications
+    </xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="other"/>
+   <xs:enumeration value="config"/>
+   <xs:enumeration value="exec"/>
+   <xs:enumeration value="monitor"/>
+   <xs:enumeration value="debug"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <!--
+   List of RPC Classifications Type
+  -->
+ <xs:simpleType name="NcxAccessRpcTypeList">
+  <xs:annotation>
+   <xs:documentation>
+     List NCX RPC Type Classifications
+   </xs:documentation>
+   <xs:appinfo>
+    <ncx:no-duplicates/>
+    <ncx:merge-type>sort</ncx:merge-type>
+   </xs:appinfo>
+  </xs:annotation>
+  <xs:list itemType="NcxAccessRpcType"/>
+ </xs:simpleType>
+
+ <!--
+   Data Access Type
+  -->
+ <xs:simpleType name="NcxAccessType">
+  <xs:annotation>
+   <xs:documentation>
+      NETCONF Data Access Types:
+          none == no access allowed at all.
+               This value is used in ACLs, not max-access clauses.
+          read-only == read access allowed in all operations.
+               This value implies notify access as well.
+          read-write == all but create/delete allowed.
+               Values can be read and edited.
+               Merge and replace operations will be permitted, even
+               (e.g., create the instance if it does not exist.
+               This allows a manager to save static or agent-created entries
+               in copy-config operations, and then reload them later.
+          read-create == all access allowed
+               Instances can be read, created, edited, and deleted.
+   </xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="none"/>
+   <xs:enumeration value="read-only"/>
+   <xs:enumeration value="read-write"/>
+   <xs:enumeration value="read-create"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <!--
+   Access Rule Type (not for data access)
+  -->
+ <xs:simpleType name="NcxAccessRuleType">
+  <xs:annotation>
+   <xs:documentation>
+     NCX Access Control Rule Type
+   </xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="permit"/>
+   <xs:enumeration value="deny"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <!--
+   Access Node List Type
+  -->
+ <xs:complexType name="NcxAccessNodeList">
+  <xs:annotation>
+   <xs:documentation>
+     NCX Access Control Node Identifier Type
+    </xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="namespaceUri" type="xs:anyURI"/>
+   <xs:element name="elementNames" minOccurs="0">
+    <xs:simpleType>
+     <xs:list itemType="NcxAccessName"/>
+    </xs:simpleType>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   accessDeniedEvent Notification Contents Type
+  -->
+ <xs:complexType name="NcxAccessDeniedEvent">
+  <xs:annotation>
+   <xs:documentation>
+     Access Denied Event Notification Contents
+   </xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="eventClass" type="xs:string"/>
+   <xs:element name="eventSeverity" type="xs:string"/>
+   <xs:element name="eventTime" type="xs:dateTime"/>
+   <xs:element name="eventSessionId" type="xs:unsignedInt"/>
+   <xs:element name="eventSessionAddress" type="n8:InetAddress"/>
+   <xs:element name="eventGroupName" type="NcxAccessName"/>
+   <xs:element name="eventAccessRequested" type="NcxAccessRequestType"/>
+   <xs:element name="eventErrorPath" type="xs:string"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   configCapabilities Type
+  -->
+ <xs:complexType name="NcxAccessConfigCapabilities">
+  <xs:annotation>
+   <xs:documentation>
+     Read-only parameters indicating some agent access control
+     capabilities.
+   </xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="globalConfig" type="xs:boolean"/>
+   <xs:element name="groupConfig" type="xs:boolean"/>
+   <xs:element name="rpcAccessConfig" type="xs:boolean"/>
+   <xs:element name="rpcTypeAccessConfig" type="xs:boolean"/>
+   <xs:element name="databaseAccessConfig" type="xs:boolean"/>
+   <xs:element name="notificationAccessConfig" type="xs:boolean"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   profile Type
+  -->
+ <xs:complexType name="NcxAccessGlobalProfile">
+  <xs:annotation>
+   <xs:documentation>
+     Read-write parameters controlling some global 
+     agent access control behavior.
+   </xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="accessControlMode" type="NcxAccessControlMode"/>
+   <xs:element name="accessDeniedEventEnabled" type="xs:boolean"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   group Type
+  -->
+ <xs:complexType name="NcxAccessGroupRec">
+  <xs:annotation>
+   <xs:documentation>
+       One NCX Group Membership Record
+         The 'role' parameter should not be changed
+         after it is set.
+
+         If a user name is present in the 'users' table then it
+         is a member of the group identified by 'name'.
+
+         If a host address is present in the 'hosts' table then it
+         is a member of the group identified by 'name'. 
+
+         If both 'users' and 'hosts' are missing then the group
+         will be considered empty.
+   </xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="name" type="NcxAccessName"/>
+   <xs:element name="role" type="NcxAccessAdminRole"/>
+   <xs:element name="users" minOccurs="0">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="user" type="NcxAccessName"/>
+     </xs:sequence>
+    </xs:complexType>
+    <xs:key name="usersKey">
+     <xs:selector xpath="user"/>
+     <xs:field xpath="user"/>
+    </xs:key>
+   </xs:element>
+   <xs:element name="hosts" minOccurs="0">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="host" type="n8:InetAddress" minOccurs="0"
+       maxOccurs="unbounded"/>
+     </xs:sequence>
+    </xs:complexType>
+    <xs:key name="hostsKey">
+     <xs:selector xpath="host"/>
+     <xs:field xpath="host"/>
+    </xs:key>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   groups Type
+  -->
+ <xs:complexType name="NcxAccessGroupTable">
+  <xs:annotation>
+   <xs:documentation>
+      NCX Group Membership Table
+         Users and hosts can belong to any number of groups.
+         The group name must be unique.
+   </xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="group" type="NcxAccessGroupRec" minOccurs="0"
+    maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   rpcRule Type
+  -->
+ <xs:complexType name="NcxAccessRpcRule">
+  <xs:annotation>
+   <xs:documentation>
+     One NCX RPC Method Access Control Rule
+   </xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="ruleNumber" type="xs:unsignedInt"/>
+   <xs:element name="ruleType" type="NcxAccessRuleType"/>
+   <xs:element name="groupList" type="NcxAccessNameList"/>
+   <xs:element name="rpcTarget">
+    <xs:complexType>
+     <xs:choice>
+      <xs:element name="rpcTypeList" type="NcxAccessRpcType"/>
+      <xs:element name="rpcMethodList" type="NcxAccessNodeList"/>
+      <xs:element name="xpathExpr" type="xs:string"/>
+      <xs:element name="all"/>
+     </xs:choice>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   rpcRules Type
+  -->
+ <xs:complexType name="NcxAccessRpcTable">
+  <xs:annotation>
+   <xs:documentation>
+     NCX Access Control Rules for RPC Methods.
+   </xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="rpcRule" type="NcxAccessRpcRule" minOccurs="0"
+    maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   dataRule Type
+  -->
+ <xs:complexType name="NcxAccessDataRule">
+  <xs:annotation>
+   <xs:documentation>
+     One NCX Data Access Control Rule
+   </xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="ruleNumber" type="xs:unsignedInt"/>
+   <xs:element name="access" type="NcxAccessType" default="none"/>
+   <xs:element name="groupList" type="NcxAccessNameList"/>
+   <xs:element name="dataTarget">
+    <xs:complexType>
+     <xs:choice>
+      <xs:element name="dataNodeList" type="NcxAccessNodeList"/>
+      <xs:element name="xpathExpr" type="xs:string"/>
+      <xs:element name="all"/>
+     </xs:choice>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   dataRules Type
+  -->
+ <xs:complexType name="NcxAccessDataTable">
+  <xs:annotation>
+   <xs:documentation>
+     NCX Access Control Rules for Configuration Data
+   </xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="dataRule" type="NcxAccessDataRule" minOccurs="0"
+    maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   notificationRule Type
+  -->
+ <xs:complexType name="NcxAccessNotificationRule">
+  <xs:annotation>
+   <xs:documentation>
+     One NCX Notification Access Control Rule
+   </xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="ruleNumber" type="xs:unsignedInt"/>
+   <xs:element name="ruleType" type="NcxAccessRuleType"/>
+   <xs:element name="groupList" type="NcxAccessNameList"/>
+   <xs:element name="eventTarget">
+    <xs:complexType>
+     <xs:choice>
+      <xs:element name="eventNodeList" type="NcxAccessNodeList"/>
+      <xs:element name="xpathExpr" type="xs:string"/>
+      <xs:element name="all"/>
+     </xs:choice>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   notificationRules Type
+  -->
+ <xs:complexType name="NcxAccessNotificationTable">
+  <xs:annotation>
+   <xs:documentation>
+     NCX Access Control Rules for Notifications.
+   </xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="notificationRule" type="NcxAccessNotificationRule"
+    minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   blank type template for a security object
+  -->
+ <xs:complexType name="securityPSType"/>
+
+ <!--
+   abstract template for the security element
+  -->
+ <xs:element name="securityPS" type="securityPSType" abstract="true"/>
+
+ <!--
+   abstract template for the security application contents
+  -->
+ <xs:complexType name="securityAppType">
+  <xs:sequence>
+   <xs:element ref="securityPS" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <!--
+   accessControl Type
+  -->
+ <xs:complexType name="accessControlPSType">
+  <xs:annotation>
+   <xs:documentation>
+    Parameters for NETCONF Access Control.
+   </xs:documentation>
+  </xs:annotation>
+  <xs:complexContent>
+   <xs:extension base="securityPSType">
+    <xs:sequence>
+     <xs:element name="configCapabilities"
+      type="NcxAccessConfigCapabilities">
+      <xs:annotation>
+       <xs:documentation>
+        NCX ACM configuration supported by the agent
+       </xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-only</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="profile" type="NcxAccessConfigCapabilities">
+      <xs:annotation>
+       <xs:documentation>
+        NCX Global Access Control Profile Parameters
+       </xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-only</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="groups" type="NcxAccessGroupTable">
+      <xs:annotation>
+       <xs:documentation>
+        NCX Group Membership Table
+       </xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+      <xs:key name="groupsKey">
+       <xs:selector xpath="group"/>
+       <xs:field xpath="group/name"/>
+      </xs:key>
+     </xs:element>
+     <xs:element name="rpcRules" type="NcxAccessRpcTable">
+      <xs:annotation>
+       <xs:documentation>
+        NCX RPC Execution Access Control Table
+       </xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+      <xs:key name="rpcRulesKey">
+       <xs:selector xpath="rpcRule"/>
+       <xs:field xpath="rpcRule/ruleNumber"/>
+      </xs:key>
+     </xs:element>
+     <xs:element name="dataRules" type="NcxAccessDataTable">
+      <xs:annotation>
+       <xs:documentation>
+         NCX Data Model Access Control Table
+       </xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+      <xs:key name="dataRulesKey">
+       <xs:selector xpath="dataRule"/>
+       <xs:field xpath="dataRule/ruleNumber"/>
+      </xs:key>
+     </xs:element>
+     <xs:element name="notificationRules"
+      type="NcxAccessNotificationTable">
+      <xs:annotation>
+       <xs:documentation>
+         NCX Data Model Access Control Table
+       </xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+      <xs:key name="notificationRulesKey">
+       <xs:selector xpath="notificationRule"/>
+       <xs:field xpath="notificationRule/ruleNumber"/>
+      </xs:key>
+     </xs:element>
+    </xs:sequence>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+
+ <!--
+   element definition for the accessControl object
+  -->
+ <xs:element name="accessControl" type="accessControlPSType"
+  substitutionGroup="securityPS"/>
+
+ <!--
+   element definition for the accessDeniedEvent notification
+   not really accessible via the data model!!!
+   Just contained in the 'notification' element!!!
+  -->
+ <xs:element name="accessDeniedEvent" type="NcxAccessDeniedEvent"/>
+
+</xs:schema>

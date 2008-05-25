@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://netconfcentral.org/ncx/ncxcli"
+ targetNamespace="http://netconfcentral.org/ncx/ncxcli"
+ xmlns:xs="http://www.w3.org/2001/XMLSchema"
+ elementFormDefault="qualified" attributeFormDefault="unqualified"
+ xml:lang="en" version="0.2" xmlns:ncx="http://netconfcentral.org/ncx/1.0"
+ xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+ xmlns:n8="http://netconfcentral.org/ncx/types">
+ <xs:annotation>
+  <xs:documentation> Converted from NCX module by ncxdump v0.2
+
+    Module: ncxcli
+    Owner: ncx
+    Application: ncxcli
+    Version: 0.2
+    Copyright (C) 2007, Andy Bierman.
+    Contact Info: Send comments to &lt;ietf@andybierman.com&gt;.
+
+    Description:
+      NCX Command Line Application Startup Parameters
+
+    Revision History:
+
+      Revision: 0.1
+      Initial version
+
+      Revision: 0.2
+      Shortened name, added optional tags
+</xs:documentation>
+ </xs:annotation>
+
+ <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+  schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+
+ <xs:import namespace="http://netconfcentral.org/ncx/types"
+  schemaLocation="http://netconfcentral.org/ncx/types
+  http://www.netconfcentral.org/xsd/ncx/ncxtypes.xsd"/>
+
+ <xs:import namespace="urn:ietf:params:xml:ns:netconf:base:1.0"
+  schemaLocation="urn:ietf:params:xml:ns:netconf:base:1.0
+  http://www.netconfcentral.org/xsd/ietf/netconf.xsd"/>
+
+ <xs:complexType name="ncxcliPSType"/>
+
+ <xs:element name="ncxcliPS" type="ncxcliPSType" abstract="true"/>
+
+ <xs:complexType name="ncxcliAppType">
+  <xs:sequence>
+   <xs:element ref="ncxcliPS" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <xs:complexType name="ncxcli-bootPSType">
+  <xs:annotation>
+   <xs:documentation>CLI Parameter Set for the NETCONF Manager Application.</xs:documentation>
+  </xs:annotation>
+  <xs:complexContent>
+   <xs:extension base="ncxcliPSType">
+    <xs:sequence>
+     <xs:element name="user" type="n8:NcxUserName">
+      <xs:annotation>
+       <xs:documentation>User name to use for NETCONF sessions.
+              If none, then user will be prompted before connecting.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="password" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>User password to use for NETCONF sessions.
+              If none, then user will be prompted before connecting.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="agent" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>IP address or DNS name of the NETCONF agent target.
+              If none, then user will be prompted before connecting.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="modules" type="n8:NcxModuleList">
+      <xs:annotation>
+       <xs:documentation>List of NCX module names to load at boot-time.
+              Any imported modules required will be loaded automatically.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="default-owner" type="n8:NcxName">
+      <xs:annotation>
+       <xs:documentation>Default owner string to use before 'ncx' and 'ietf' are tried.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+
+ <xs:element name="ncxcli-boot" type="ncxcli-bootPSType"
+  substitutionGroup="ncxcliPS"/>
+
+ <xs:complexType name="NcxCliConnectPSPSType">
+  <xs:annotation>
+   <xs:documentation>CLI Parameter Set for connecting to an agent.</xs:documentation>
+  </xs:annotation>
+  <xs:complexContent>
+   <xs:extension base="ncxcliPSType">
+    <xs:sequence>
+     <xs:element name="user" type="n8:NcxUserName">
+      <xs:annotation>
+       <xs:documentation>User name to use for NETCONF sessions.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="password" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>User password to use for NETCONF sessions.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="agent" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>IP address or DNS name of the NETCONF agent target.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+
+ <xs:element name="NcxCliConnectPS" type="NcxCliConnectPSPSType"
+  substitutionGroup="ncxcliPS"/>
+
+ <xs:complexType name="NcxLoadPSPSType">
+  <xs:annotation>
+   <xs:documentation>RPC parameter set for load RPC command.</xs:documentation>
+  </xs:annotation>
+  <xs:complexContent>
+   <xs:extension base="ncxcliPSType">
+    <xs:sequence>
+     <xs:element name="module" type="n8:NcxName">
+      <xs:annotation>
+       <xs:documentation>Module name to load</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+
+ <xs:element name="NcxLoadPS" type="NcxLoadPSPSType"
+  substitutionGroup="ncxcliPS"/>
+
+ <xs:complexType name="NcxShowPSPSType">
+  <xs:annotation>
+   <xs:documentation>RPC parameter set for show RPC command.</xs:documentation>
+  </xs:annotation>
+  <xs:complexContent>
+   <xs:extension base="ncxcliPSType">
+    <xs:sequence>
+     <xs:choice>
+      <xs:element name="module" type="n8:NcxName">
+       <xs:annotation>
+        <xs:documentation>Show info for one module</xs:documentation>
+        <xs:appinfo>
+         <ncx:max-access>read-create</ncx:max-access>
+        </xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="modules" type="xs:flag">
+       <xs:annotation>
+        <xs:documentation>List brief info on all modules</xs:documentation>
+        <xs:appinfo>
+         <ncx:max-access>read-create</ncx:max-access>
+        </xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="def" type="n8:NcxQName">
+       <xs:annotation>
+        <xs:documentation>Show info for one definition</xs:documentation>
+        <xs:appinfo>
+         <ncx:max-access>read-create</ncx:max-access>
+        </xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="version" type="xs:flag">
+       <xs:annotation>
+        <xs:documentation>Show ncxcli version info</xs:documentation>
+        <xs:appinfo>
+         <ncx:max-access>read-create</ncx:max-access>
+        </xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+     </xs:choice>
+    </xs:sequence>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+
+ <xs:element name="NcxShowPS" type="NcxShowPSPSType"
+  substitutionGroup="ncxcliPS"/>
+
+ <xs:element name="connect" type="NcxCliConnectPS"
+  substitutionGroup="nc:rpcOperation">
+  <xs:annotation>
+   <xs:documentation>Connect to a NETCONF agent.</xs:documentation>
+   <xs:appinfo>
+    <ncx:rpc-type>exec</ncx:rpc-type>
+    <ncx:rpc-output>RpcOkReplyType</ncx:rpc-output>
+   </xs:appinfo>
+  </xs:annotation>
+ </xs:element>
+
+ <xs:element name="help" type="nc:rpcOperationType"
+  substitutionGroup="nc:rpcOperation">
+  <xs:annotation>
+   <xs:documentation>Print the ncxcli help text</xs:documentation>
+   <xs:appinfo>
+    <ncx:rpc-type>exec</ncx:rpc-type>
+    <ncx:rpc-output>RpcOkReplyType</ncx:rpc-output>
+   </xs:appinfo>
+  </xs:annotation>
+ </xs:element>
+
+ <xs:element name="load" type="NcxLoadPS"
+  substitutionGroup="nc:rpcOperation">
+  <xs:annotation>
+   <xs:documentation>Internal command to load a module or other file.</xs:documentation>
+   <xs:appinfo>
+    <ncx:rpc-type>exec</ncx:rpc-type>
+    <ncx:rpc-output>RpcOkReplyType</ncx:rpc-output>
+   </xs:appinfo>
+  </xs:annotation>
+ </xs:element>
+
+ <xs:element name="save" type="nc:rpcOperationType"
+  substitutionGroup="nc:rpcOperation">
+  <xs:annotation>
+   <xs:documentation>Meta command to save configuration edits.</xs:documentation>
+   <xs:appinfo>
+    <ncx:rpc-type>exec</ncx:rpc-type>
+    <ncx:rpc-output>RpcOkReplyType</ncx:rpc-output>
+   </xs:appinfo>
+  </xs:annotation>
+ </xs:element>
+
+ <xs:element name="show" type="NcxShowPS"
+  substitutionGroup="nc:rpcOperation">
+  <xs:annotation>
+   <xs:documentation>Local show command for ncxcli info.</xs:documentation>
+   <xs:appinfo>
+    <ncx:rpc-type>exec</ncx:rpc-type>
+    <ncx:rpc-output>RpcOkReplyType</ncx:rpc-output>
+   </xs:appinfo>
+  </xs:annotation>
+ </xs:element>
+
+ <xs:element name="quit" type="nc:rpcOperationType"
+  substitutionGroup="nc:rpcOperation">
+  <xs:annotation>
+   <xs:documentation>Quit the NCXCLI application</xs:documentation>
+   <xs:appinfo>
+    <ncx:rpc-type>exec</ncx:rpc-type>
+    <ncx:rpc-output>RpcOkReplyType</ncx:rpc-output>
+   </xs:appinfo>
+  </xs:annotation>
+ </xs:element>
+
+</xs:schema>

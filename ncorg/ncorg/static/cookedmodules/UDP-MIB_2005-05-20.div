@@ -1,0 +1,406 @@
+
+<div>
+   <h1 class="yang">UDP-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#udp.88">udp</a>
+               <ul>
+                  <li><a href="#udpInDatagrams.90">udpInDatagrams</a></li>
+                  <li><a href="#udpNoPorts.104">udpNoPorts</a></li>
+                  <li><a href="#udpInErrors.118">udpInErrors</a></li>
+                  <li><a href="#udpOutDatagrams.133">udpOutDatagrams</a></li>
+                  <li class="daddy"><a href="#udpEntry.150">udpEntry</a>
+                     <ul>
+                        <li><a href="#udpLocalAddress.159">udpLocalAddress</a></li>
+                        <li><a href="#udpLocalPort.171">udpLocalPort</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#udpEndpointEntry.186">udpEndpointEntry</a>
+                     <ul>
+                        <li><a href="#udpEndpointLocalAddressType.205">udpEndpointLocalAddressType</a></li>
+                        <li><a href="#udpEndpointLocalAddress.216">udpEndpointLocalAddress</a></li>
+                        <li><a href="#udpEndpointLocalPort.256">udpEndpointLocalPort</a></li>
+                        <li><a href="#udpEndpointRemoteAddressType.264">udpEndpointRemoteAddressType</a></li>
+                        <li><a href="#udpEndpointRemoteAddress.281">udpEndpointRemoteAddress</a></li>
+                        <li><a href="#udpEndpointRemotePort.301">udpEndpointRemotePort</a></li>
+                        <li><a href="#udpEndpointInstance.311">udpEndpointInstance</a></li>
+                        <li><a href="#udpEndpointProcess.326">udpEndpointProcess</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#udpHCInDatagrams.340">udpHCInDatagrams</a></li>
+                  <li><a href="#udpHCOutDatagrams.355">udpHCOutDatagrams</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">UDP-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:UDP-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"udp-mib"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/INET-ADDRESS-MIB/2005-02-04">INET-ADDRESS-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"inet-address"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/inet-types/2007-10-02">inet-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"inet"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+
+      <span class="yang_kw">organization</span>
+         <span class="yang_str">"IETF IPv6 Working Group
+         http://www.ietf.org/html.charters/ipv6-charter.html"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"Bill Fenner (editor)
+         
+         AT&amp;T Labs -- Research
+         75 Willow Rd.
+         Menlo Park, CA 94025
+         
+         Phone: +1 650 330-7893
+         Email: &lt;fenner@research.att.com&gt;
+         
+         John Flick (editor)
+         
+         Hewlett-Packard Company
+         8000 Foothills Blvd. M/S 5557
+         Roseville, CA 95747
+         
+         Phone: +1 916 785 4018
+         Email: &lt;john.flick@hp.com&gt;
+         
+         Send comments to &lt;ipv6@ietf.org&gt;"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"The MIB module for managing UDP implementations.
+         Copyright (C) The Internet Society (2005).  This
+         version of this MIB module is part of RFC 4113;
+         see the RFC itself for full legal notices."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2005-05-20"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"IP version neutral revision, incorporating the
+            following revisions:
+            
+            - Added udpHCInDatagrams and udpHCOutDatagrams in order
+              to provide high-capacity counters for fast networks.
+            - Added text to the descriptions of all counter objects
+              to indicate how discontinuities are detected.
+            - Deprecated the IPv4-specific udpTable and replaced it
+              with the version neutral udpEndpointTable.  This
+              table includes support for connected UDP endpoints
+              and support for identification of the operating
+              system process associated with a UDP endpoint.
+            - Deprecated the udpGroup and replaced it with object
+              groups representing the current set of objects.
+            - Deprecated udpMIBCompliance and replaced it with
+              udpMIBCompliance2, which includes the compliance
+              information for the new object groups.
+            
+            This version published as RFC 4113."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1994-11-01"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Initial SMIv2 version, published as RFC 2013."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1991-03-31"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"The initial revision of this MIB module was part of
+            MIB-II, published as RFC 1213."</span>;
+      }
+
+
+      <span class="yang_cmt">// objects</span>
+
+      <a name="udp.88"/><span class="yang_kw">container</span> <span class="yang_id">udp</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7"</span>;
+
+         <a name="udpInDatagrams.90"/><span class="yang_kw">leaf</span> <span class="yang_id">udpInDatagrams</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of UDP datagrams delivered to UDP
+               users.
+               
+               Discontinuities in the value of this counter can occur
+               at re-initialization of the management system, and at
+               other times as indicated by discontinuities in the
+               value of sysUpTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.1"</span>;
+         }
+
+         <a name="udpNoPorts.104"/><span class="yang_kw">leaf</span> <span class="yang_id">udpNoPorts</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of received UDP datagrams for which
+               there was no application at the destination port.
+               
+               Discontinuities in the value of this counter can occur
+               at re-initialization of the management system, and at
+               other times as indicated by discontinuities in the
+               value of sysUpTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.2"</span>;
+         }
+
+         <a name="udpInErrors.118"/><span class="yang_kw">leaf</span> <span class="yang_id">udpInErrors</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of received UDP datagrams that could not be
+               delivered for reasons other than the lack of an
+               application at the destination port.
+               
+               Discontinuities in the value of this counter can occur
+               at re-initialization of the management system, and at
+               other times as indicated by discontinuities in the
+               value of sysUpTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.3"</span>;
+         }
+
+         <a name="udpOutDatagrams.133"/><span class="yang_kw">leaf</span> <span class="yang_id">udpOutDatagrams</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of UDP datagrams sent from this
+               entity.
+               
+               Discontinuities in the value of this counter can occur
+               at re-initialization of the management system, and at
+               other times as indicated by discontinuities in the
+               value of sysUpTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.4"</span>;
+         }
+
+         <a name="udpEntry.150"/><span class="yang_kw">list</span> <span class="yang_id">udpEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#udpLocalAddress.159">udpLocalAddress</a>, <a href="#udpLocalPort.171">udpLocalPort</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Information about a particular current UDP listener."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.5.1"</span>;
+
+            <a name="udpLocalAddress.159"/><span class="yang_kw">leaf</span> <span class="yang_id">udpLocalAddress</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The local IP address for this UDP listener.  In the
+                  case of a UDP listener that is willing to accept
+                  datagrams for any IP interface associated with the
+                  node, the value 0.0.0.0 is used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.5.1.1"</span>;
+            }
+
+            <a name="udpLocalPort.171"/><span class="yang_kw">leaf</span> <span class="yang_id">udpLocalPort</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..65535"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The local port number for this UDP listener."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.5.1.2"</span>;
+            }
+         }  <span class="yang_cmt">// list udpEntry</span>
+
+         <a name="udpEndpointEntry.186"/><span class="yang_kw">list</span> <span class="yang_id">udpEndpointEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#udpEndpointLocalAddressType.205">udpEndpointLocalAddressType</a>, <a href="#udpEndpointLocalAddress.216">udpEndpointLocalAddress</a>, <a href="#udpEndpointLocalPort.256">udpEndpointLocalPort</a>, <a href="#udpEndpointRemoteAddressType.264">udpEndpointRemoteAddressType</a>, <a href="#udpEndpointRemoteAddress.281">udpEndpointRemoteAddress</a>, <a href="#udpEndpointRemotePort.301">udpEndpointRemotePort</a>, <a href="#udpEndpointInstance.311">udpEndpointInstance</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Information about a particular current UDP endpoint.
+               
+               Implementers need to be aware that if the total number
+               of elements (octets or sub-identifiers) in
+               udpEndpointLocalAddress and udpEndpointRemoteAddress
+               exceeds 111, then OIDs of column instances in this table
+               will have more than 128 sub-identifiers and cannot be
+               accessed using SNMPv1, SNMPv2c, or SNMPv3."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.7.1"</span>;
+
+            <a name="udpEndpointLocalAddressType.205"/><span class="yang_kw">leaf</span> <span class="yang_id">udpEndpointLocalAddressType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The address type of udpEndpointLocalAddress.  Only
+                  IPv4, IPv4z, IPv6, and IPv6z addresses are expected, or
+                  unknown(0) if datagrams for all local IP addresses are
+                  accepted."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.7.1.1"</span>;
+            }
+
+            <a name="udpEndpointLocalAddress.216"/><span class="yang_kw">leaf</span> <span class="yang_id">udpEndpointLocalAddress</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddress.128">inet-address:InetAddress</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The local IP address for this UDP endpoint.
+                  
+                  The value of this object can be represented in three
+                  
+                  possible ways, depending on the characteristics of the
+                  listening application:
+                  
+                  1. For an application that is willing to accept both
+                     IPv4 and IPv6 datagrams, the value of this object
+                     must be ''h (a zero-length octet-string), with
+                     the value of the corresponding instance of the
+                     udpEndpointLocalAddressType object being unknown(0).
+                  
+                  2. For an application that is willing to accept only IPv4
+                     or only IPv6 datagrams, the value of this object
+                     must be '0.0.0.0' or '::', respectively, while the
+                     corresponding instance of the
+                     udpEndpointLocalAddressType object represents the
+                     appropriate address type.
+                  
+                  3. For an application that is listening for data
+                     destined only to a specific IP address, the value
+                     of this object is the specific IP address for which
+                     this node is receiving packets, with the
+                     corresponding instance of the
+                     udpEndpointLocalAddressType object representing the
+                     appropriate address type.
+                  
+                  As this object is used in the index for the
+                  udpEndpointTable, implementors of this table should be
+                  careful not to create entries that would result in OIDs
+                  with more than 128 subidentifiers; else the information
+                  cannot be accessed using SNMPv1, SNMPv2c, or SNMPv3."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.7.1.2"</span>;
+            }
+
+            <a name="udpEndpointLocalPort.256"/><span class="yang_kw">leaf</span> <span class="yang_id">udpEndpointLocalPort</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetPortNumber.324">inet-address:InetPortNumber</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The local port number for this UDP endpoint."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.7.1.3"</span>;
+            }
+
+            <a name="udpEndpointRemoteAddressType.264"/><span class="yang_kw">leaf</span> <span class="yang_id">udpEndpointRemoteAddressType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The address type of udpEndpointRemoteAddress.  Only
+                  IPv4, IPv4z, IPv6, and IPv6z addresses are expected, or
+                  unknown(0) if datagrams for all remote IP addresses are
+                  accepted.  Also, note that some combinations of
+                  
+                  udpEndpointLocalAdressType and
+                  udpEndpointRemoteAddressType are not supported.  In
+                  particular, if the value of this object is not
+                  unknown(0), it is expected to always refer to the
+                  same IP version as udpEndpointLocalAddressType."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.7.1.4"</span>;
+            }
+
+            <a name="udpEndpointRemoteAddress.281"/><span class="yang_kw">leaf</span> <span class="yang_id">udpEndpointRemoteAddress</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddress.128">inet-address:InetAddress</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The remote IP address for this UDP endpoint.  If
+                  datagrams from any remote system are to be accepted,
+                  this value is ''h (a zero-length octet-string).
+                  Otherwise, it has the type described by
+                  udpEndpointRemoteAddressType and is the address of the
+                  remote system from which datagrams are to be accepted
+                  (or to which all datagrams will be sent).
+                  
+                  As this object is used in the index for the
+                  udpEndpointTable, implementors of this table should be
+                  careful not to create entries that would result in OIDs
+                  with more than 128 subidentifiers; else the information
+                  cannot be accessed using SNMPv1, SNMPv2c, or SNMPv3."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.7.1.5"</span>;
+            }
+
+            <a name="udpEndpointRemotePort.301"/><span class="yang_kw">leaf</span> <span class="yang_id">udpEndpointRemotePort</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetPortNumber.324">inet-address:InetPortNumber</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The remote port number for this UDP endpoint.  If
+                  datagrams from any remote system are to be accepted,
+                  this value is zero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.7.1.6"</span>;
+            }
+
+            <a name="udpEndpointInstance.311"/><span class="yang_kw">leaf</span> <span class="yang_id">udpEndpointInstance</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The instance of this tuple.  This object is used to
+                  distinguish among multiple processes 'connected' to
+                  the same UDP endpoint.  For example, on a system
+                  implementing the BSD sockets interface, this would be
+                  used to support the SO_REUSEADDR and SO_REUSEPORT
+                  socket options."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.7.1.7"</span>;
+            }
+
+            <a name="udpEndpointProcess.326"/><span class="yang_kw">leaf</span> <span class="yang_id">udpEndpointProcess</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The system's process ID for the process associated with
+                  this endpoint, or zero if there is no such process.
+                  This value is expected to be the same as
+                  HOST-RESOURCES-MIB::hrSWRunIndex or SYSAPPL-MIB::
+                  sysApplElmtRunIndex for some row in the appropriate
+                  tables."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.7.1.8"</span>;
+            }
+         }  <span class="yang_cmt">// list udpEndpointEntry</span>
+
+         <a name="udpHCInDatagrams.340"/><span class="yang_kw">leaf</span> <span class="yang_id">udpHCInDatagrams</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of UDP datagrams delivered to UDP
+               users, for devices that can receive more than 1
+               million UDP datagrams per second.
+               
+               Discontinuities in the value of this counter can occur
+               at re-initialization of the management system, and at
+               other times as indicated by discontinuities in the
+               value of sysUpTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.8"</span>;
+         }
+
+         <a name="udpHCOutDatagrams.355"/><span class="yang_kw">leaf</span> <span class="yang_id">udpHCOutDatagrams</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of UDP datagrams sent from this
+               entity, for devices that can transmit more than 1
+               million UDP datagrams per second.
+               
+               Discontinuities in the value of this counter can occur
+               at re-initialization of the management system, and at
+               other times as indicated by discontinuities in the
+               value of sysUpTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.9"</span>;
+         }
+      }  <span class="yang_cmt">// container udp</span>
+   }  <span class="yang_cmt">// module UDP-MIB</span>
+</pre>
+</div>
+</div>

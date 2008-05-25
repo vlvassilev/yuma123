@@ -1,0 +1,194 @@
+ncx-module inetAddress {
+  header {
+    description 
+      "InetAddress data types converted from the following sources: 
+
+        * RFC 4001:  Textual Conventions for Transport Addresses
+
+        * draft-romascanu-netconf-datatypes-01.txt
+  
+        * libsmi output from 'smidump -f xsd' command
+          http://www.ibr.cs.tu-bs.de/projects/libsmi/   
+      
+     The InetAddress data types are literal translations for easier
+     SNMP compatibility.  ASCII versions are also available.";
+    version 0.1;
+    owner ietf;
+    application types;
+    copyright 
+       "Copyright (C) Andy Bierman (2005-2007).  All Rights Reserved.";
+    contact-info 
+      "Translated by Andy Bierman.
+       Send comments to <ietf@andybierman.com>.";
+    last-update "2007-03-01";
+    revision-history {
+       0.1 "Initial version.";
+       0.2 "Update based on NETCONF mailing list discussion.
+            Changed choice to a union and scope ID to an attribute
+            so all address types can be part of the InetAddress union.
+            NOTE!!! Errors in the patterns have not been corrected
+            NOTE!!! Complex Type (metadata in union not allowed, not fixed
+           ";
+    }
+  }
+
+  definitions {
+
+    type InetAddressType {
+      description 
+        "InetAddressType TC from RFC 4001, pages 6 - 7.
+         Extended to support more IPv6 address types";
+      syntax { 
+        enum = { unknown ipv4 ipv6 ipv4z ipv6z ipv6m ipv6s dns=16 };
+      }
+    }
+
+    type InetZoneIndex {
+      description "InetAddress Zone Index from RFC 4001.";
+      syntax { 
+        uint (1..65535);
+      }
+    }
+
+    type InetAddressUnknown {
+      description "Entry for a generic type, not included here";
+      syntax { string; }
+    }
+
+    type InetAddressIPv4 {
+      description "InetAddressIPv4 TC from RFC 4001, pages 7 - 8.";
+      syntax { 
+        string (7..15) 
+          pattern = "((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}"
+                    "(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])";
+      }
+    }
+
+    type InetAddressIPv4z {
+      description 
+        "InetAddressIPv4z TC from RFC 4001, pages 8 - 9.,
+         draft-romascanu-netconf-datatypes-01.txt, page 5";
+      syntax { InetAddressIPv4; }
+      metadata {
+        InetZoneIndex   zoneIndex;
+      }
+    }
+
+    # InetAddressIPv6Full
+    type InetAddressIPv6 {
+      description "InetAddressIPv6 TC from RFC 4001, page 8.,
+         draft-romascanu-netconf-datatypes-01.txt, page 6";
+      syntax {
+        string pattern = "(([0-9a-fA-F]{1,4}:){6})
+            (([0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4})|
+            ([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))";
+      }
+    }
+ 
+    # InetAddressIPv6Mixed
+    type InetAddressIPv6m {
+      description 
+         "draft-romascanu-netconf-datatypes-01.txt, page 6";
+      syntax {
+        string pattern = "(([0-9a-fA-F]{1,4}:){6})
+              (([0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4})|
+              ([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))";
+      }
+    }
+  
+    # InetAddressIPv6Short
+    type InetAddressIPv6s {
+      description 
+         "draft-romascanu-netconf-datatypes-01.txt, page 6";
+      syntax {
+        string pattern = 
+            "(([0-9a-fA-F]{1,4}:)*|([0-9a-fA-F]{1,4}))*(::)
+             (([0-9a-fA-F]{1,4}:)*|([0-9a-fA-F]{1,4}))*";
+      }
+    }
+
+    type InetAddressIPv6z {
+      description "InetAddressIPv6z TC from RFC 4001, page 9.
+         draft-romascanu-netconf-datatypes-01.txt, page 6.";
+      syntax { InetAddressIPv6; }
+      metadata {
+         InetZoneIndex  zoneIndex;
+      }
+    }
+
+    type InetAddressDNS {
+      description "InetAddressDNS TC from RFC 4001, pages 9 - 10.";
+      syntax { string (1..255); }
+    }
+
+    type InetAddressPrefixLength {
+      description "InetAddressDNS TC from RFC 4001, pages 9 - 10.";
+      syntax { uint (0..2040); }
+    }
+
+    type InetPortNumber {
+      description "InetPortNumber TC from RFC 4001, pages 10 - 11.";
+      syntax { uint (0..65535); }
+    }
+
+    type InetAutonomousSystemNumber {
+      description "InetAutonomousSystemNumber TC from RFC 4001, page 11.";
+      syntax { uint; }
+    }
+
+    type InetScopeType {
+      description "InetScopeType TC from RFC 4001, pages 11 - 12.";
+      syntax { 
+        enum = { interfaceLocal=1
+               linkLocal
+               subnetLocal
+               adminLocal
+               siteLocal
+               organizationLocal=8
+               global=14 };
+      }
+    }
+
+    type InetVersion {
+      description "InetVersion TC from RFC 4001, pages 12 - 13.";
+      syntax { 
+        enum = { unknown ipv4 ipv6 };
+      }
+    }
+
+    type InetAddress {
+      description 
+        "InetAddress TC from RFC 4001, page 7. 
+
+         The actual format of the string content is determined by
+         the optional 'type' attribute as follows:
+         
+          unknown: InetAddressUnknown
+          ipv4:    InetAddressIPv4
+          ipv6:    InetAddressIPv6
+          ipv4z:   InetAddressIPv4z 
+          ipv6z:   InetAddressIPv6z
+          ipv6m:   InetAddressIPv6m
+          ipv6s:   InetAddressIPv6s
+          dns:     InetAddressDNS";
+      syntax { 
+        union {
+          # the parser will check these types in the order listed
+          InetAddressIPv4
+          InetAddressIPv4z
+          InetAddressIPv6
+          InetAddressIPv6m
+          InetAddressIPv6s
+          InetAddressDNS
+          InetAddressUnknown
+        };
+      }
+      metadata {
+        InetAddressType type?;
+      }
+    }
+
+  }
+}
+
+

@@ -1,0 +1,1176 @@
+
+<div>
+   <h1 class="yang">IP-FORWARD-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#ipForward.88">ipForward</a>
+               <ul>
+                  <li><a href="#ipForwardNumber.90">ipForwardNumber</a></li>
+                  <li class="daddy"><a href="#ipForwardEntry.103">ipForwardEntry</a>
+                     <ul>
+                        <li><a href="#ipForwardDest.114">ipForwardDest</a></li>
+                        <li><a href="#ipForwardMask.133">ipForwardMask</a></li>
+                        <li><a href="#ipForwardPolicy.154">ipForwardPolicy</a></li>
+                        <li><a href="#ipForwardNextHop.201">ipForwardNextHop</a></li>
+                        <li><a href="#ipForwardIfIndex.211">ipForwardIfIndex</a></li>
+                        <li><a href="#ipForwardType.223">ipForwardType</a></li>
+                        <li><a href="#ipForwardProto.254">ipForwardProto</a></li>
+                        <li><a href="#ipForwardAge.282">ipForwardAge</a></li>
+                        <li><a href="#ipForwardInfo.296">ipForwardInfo</a></li>
+                        <li><a href="#ipForwardNextHopAS.313">ipForwardNextHopAS</a></li>
+                        <li><a href="#ipForwardMetric1.325">ipForwardMetric1</a></li>
+                        <li><a href="#ipForwardMetric2.339">ipForwardMetric2</a></li>
+                        <li><a href="#ipForwardMetric3.353">ipForwardMetric3</a></li>
+                        <li><a href="#ipForwardMetric4.367">ipForwardMetric4</a></li>
+                        <li><a href="#ipForwardMetric5.381">ipForwardMetric5</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#ipCidrRouteNumber.396">ipCidrRouteNumber</a></li>
+                  <li class="daddy"><a href="#ipCidrRouteEntry.410">ipCidrRouteEntry</a>
+                     <ul>
+                        <li><a href="#ipCidrRouteDest.424">ipCidrRouteDest</a></li>
+                        <li><a href="#ipCidrRouteMask.442">ipCidrRouteMask</a></li>
+                        <li><a href="#ipCidrRouteTos.462">ipCidrRouteTos</a></li>
+                        <li><a href="#ipCidrRouteNextHop.497">ipCidrRouteNextHop</a></li>
+                        <li><a href="#ipCidrRouteIfIndex.507">ipCidrRouteIfIndex</a></li>
+                        <li><a href="#ipCidrRouteType.519">ipCidrRouteType</a></li>
+                        <li><a href="#ipCidrRouteProto.545">ipCidrRouteProto</a></li>
+                        <li><a href="#ipCidrRouteAge.574">ipCidrRouteAge</a></li>
+                        <li><a href="#ipCidrRouteInfo.588">ipCidrRouteInfo</a></li>
+                        <li><a href="#ipCidrRouteNextHopAS.605">ipCidrRouteNextHopAS</a></li>
+                        <li><a href="#ipCidrRouteMetric1.619">ipCidrRouteMetric1</a></li>
+                        <li><a href="#ipCidrRouteMetric2.633">ipCidrRouteMetric2</a></li>
+                        <li><a href="#ipCidrRouteMetric3.650">ipCidrRouteMetric3</a></li>
+                        <li><a href="#ipCidrRouteMetric4.664">ipCidrRouteMetric4</a></li>
+                        <li><a href="#ipCidrRouteMetric5.678">ipCidrRouteMetric5</a></li>
+                        <li><a href="#ipCidrRouteStatus.692">ipCidrRouteStatus</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#inetCidrRouteNumber.704">inetCidrRouteNumber</a></li>
+                  <li class="daddy"><a href="#inetCidrRouteEntry.716">inetCidrRouteEntry</a>
+                     <ul>
+                        <li><a href="#inetCidrRouteDestType.738">inetCidrRouteDestType</a></li>
+                        <li><a href="#inetCidrRouteDest.752">inetCidrRouteDest</a></li>
+                        <li><a href="#inetCidrRoutePfxLen.773">inetCidrRoutePfxLen</a></li>
+                        <li><a href="#inetCidrRoutePolicy.797">inetCidrRoutePolicy</a></li>
+                        <li><a href="#inetCidrRouteNextHopType.809">inetCidrRouteNextHopType</a></li>
+                        <li><a href="#inetCidrRouteNextHop.826">inetCidrRouteNextHop</a></li>
+                        <li><a href="#inetCidrRouteIfIndex.841">inetCidrRouteIfIndex</a></li>
+                        <li><a href="#inetCidrRouteType.852">inetCidrRouteType</a></li>
+                        <li><a href="#inetCidrRouteProto.882">inetCidrRouteProto</a></li>
+                        <li><a href="#inetCidrRouteAge.893">inetCidrRouteAge</a></li>
+                        <li><a href="#inetCidrRouteNextHopAS.905">inetCidrRouteNextHopAS</a></li>
+                        <li><a href="#inetCidrRouteMetric1.918">inetCidrRouteMetric1</a></li>
+                        <li><a href="#inetCidrRouteMetric2.931">inetCidrRouteMetric2</a></li>
+                        <li><a href="#inetCidrRouteMetric3.944">inetCidrRouteMetric3</a></li>
+                        <li><a href="#inetCidrRouteMetric4.957">inetCidrRouteMetric4</a></li>
+                        <li><a href="#inetCidrRouteMetric5.970">inetCidrRouteMetric5</a></li>
+                        <li><a href="#inetCidrRouteStatus.986">inetCidrRouteStatus</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#inetCidrRouteDiscards.999">inetCidrRouteDiscards</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">IP-FORWARD-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:IP-FORWARD-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"ip-forward"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/IANA-RTPROTO-MIB/2000-09-26">IANA-RTPROTO-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"iana-rtproto"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/IF-MIB/2000-06-14">IF-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"if-mib"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/INET-ADDRESS-MIB/2005-02-04">INET-ADDRESS-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"inet-address"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/IP-MIB/2006-02-02">IP-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"ip-mib"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMPv2-TC/1999-04-01">SNMPv2-TC</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smiv2"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/inet-types/2007-10-02">inet-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"inet"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+
+      <span class="yang_kw">organization</span>
+         <span class="yang_str">"IETF IPv6 Working Group
+         http://www.ietf.org/html.charters/ipv6-charter.html"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"Editor:
+         Brian Haberman
+         Johns Hopkins University - Applied Physics Laboratory
+         Mailstop 17-S442
+         11100 Johns Hopkins Road
+         Laurel MD,  20723-6099  USA
+         
+         Phone: +1-443-778-1319
+         Email: brian@innovationslab.net
+         
+         Send comments to &lt;ipv6@ietf.org&gt;"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"The MIB module for the management of CIDR multipath IP
+         Routes.
+         
+         Copyright (C) The Internet Society (2006).  This version
+         of this MIB module is a part of RFC 4292; see the RFC
+         itself for full legal notices."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2006-02-01"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"IPv4/v6 version-independent revision.  Minimal changes
+            were made to the original RFC 2096 MIB to allow easy
+            upgrade of existing IPv4 implementations to the
+            version-independent MIB.  These changes include:
+            
+            Adding inetCidrRouteDiscards as a replacement for the
+            deprecated ipRoutingDiscards and ipv6DiscardedRoutes
+            objects.
+            
+            Adding a new conformance statement to support the
+            implementation of the IP Forwarding MIB in a
+            read-only mode.
+            
+            
+            
+            
+            The inetCidrRouteTable replaces the IPv4-specific
+            ipCidrRouteTable, its related objects, and related
+            conformance statements.
+            
+            Published as RFC 4292."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1996-09-19"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Revised to support CIDR routes.
+            Published as RFC 2096."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1992-07-02"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Initial version, published as RFC 1354."</span>;
+      }
+
+
+      <span class="yang_cmt">// objects</span>
+
+      <a name="ipForward.88"/><span class="yang_kw">container</span> <span class="yang_id">ipForward</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24"</span>;
+
+         <a name="ipForwardNumber.90"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardNumber</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of current ipForwardTable entries that are
+               not invalid."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.1"</span>;
+         }
+
+         <a name="ipForwardEntry.103"/><span class="yang_kw">list</span> <span class="yang_id">ipForwardEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#ipForwardDest.114">ipForwardDest</a>, <a href="#ipForwardProto.254">ipForwardProto</a>, <a href="#ipForwardPolicy.154">ipForwardPolicy</a>, <a href="#ipForwardNextHop.201">ipForwardNextHop</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"A particular route to a particular destination, under a
+               particular policy."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1"</span>;
+
+            <a name="ipForwardDest.114"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardDest</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The destination IP address of this route.  An entry
+                  with a value of 0.0.0.0 is considered a default route.
+                  
+                  This object may not take a Multicast (Class D) address
+                  value.
+                  
+                  Any assignment (implicit or otherwise) of an instance
+                  of this object to a value x must be rejected if the
+                  bitwise logical-AND of x with the value of the
+                  corresponding instance of the ipForwardMask object is
+                  not equal to x."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.1"</span>;
+            }
+
+            <a name="ipForwardMask.133"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardMask</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Indicate the mask to be logical-ANDed with the
+                  destination address before being compared to the value
+                  in the ipForwardDest field.  For those systems that do
+                  not support arbitrary subnet masks, an agent constructs
+                  the value of the ipForwardMask by reference to the IP
+                  Address Class.
+                  
+                  Any assignment (implicit or otherwise) of an instance
+                  of this object to a value x must be rejected if the
+                  bitwise logical-AND of x with the value of the
+                  corresponding instance of the ipForwardDest object is
+                  not equal to ipForwardDest."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0x00000000"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.2"</span>;
+            }
+
+            <a name="ipForwardPolicy.154"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardPolicy</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The general set of conditions that would cause
+                  the selection of one multipath route (set of
+                  next hops for a given destination) is referred
+                  to as 'policy'.
+                  
+                  Unless the mechanism indicated by ipForwardProto
+                  specifies otherwise, the policy specifier is
+                  the IP TOS Field.  The encoding of IP TOS is as
+                  specified by the following convention.  Zero
+                  indicates the default path if no more specific
+                  policy applies.
+                  
+                  +-----+-----+-----+-----+-----+-----+-----+-----+
+                  |                 |                       |     |
+                  |   PRECEDENCE    |    TYPE OF SERVICE    |  0  |
+                  |                 |                       |     |
+                  +-----+-----+-----+-----+-----+-----+-----+-----+
+                  
+                  
+                  
+                  	     IP TOS                IP TOS
+                     Field     Policy      Field     Policy
+                     Contents    Code      Contents    Code
+                     0 0 0 0  ==&gt;   0      0 0 0 1  ==&gt;   2
+                     0 0 1 0  ==&gt;   4      0 0 1 1  ==&gt;   6
+                     0 1 0 0  ==&gt;   8      0 1 0 1  ==&gt;  10
+                     0 1 1 0  ==&gt;  12      0 1 1 1  ==&gt;  14
+                     1 0 0 0  ==&gt;  16      1 0 0 1  ==&gt;  18
+                     1 0 1 0  ==&gt;  20      1 0 1 1  ==&gt;  22
+                     1 1 0 0  ==&gt;  24      1 1 0 1  ==&gt;  26
+                     1 1 1 0  ==&gt;  28      1 1 1 1  ==&gt;  30
+                  
+                  Protocols defining 'policy' otherwise must either
+                  define a set of values that are valid for
+                  this object or must implement an integer-instanced
+                  policy table for which this object's
+                  value acts as an index."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.3"</span>;
+            }
+
+            <a name="ipForwardNextHop.201"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardNextHop</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"On remote routes, the address of the next system en
+                  route; otherwise, 0.0.0.0."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.4"</span>;
+            }
+
+            <a name="ipForwardIfIndex.211"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardIfIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The ifIndex value that identifies the local interface
+                  through which the next hop of this route should be
+                  reached."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.5"</span>;
+            }
+
+            <a name="ipForwardType.223"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"invalid"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"local"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"remote"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The type of route.  Note that local(3) refers to a
+                  route for which the next hop is the final destination;
+                  remote(4) refers to a route for which the next hop is
+                  not the final destination.
+                  
+                  Setting this object to the value invalid(2) has the
+                  effect of invalidating the corresponding entry in the
+                  ipForwardTable object.  That is, it effectively
+                  disassociates the destination identified with said
+                  entry from the route identified with said entry.  It is
+                  an implementation-specific matter as to whether the
+                  agent removes an invalidated entry from the table.
+                  Accordingly, management stations must be prepared to
+                  receive tabular information from agents that
+                  corresponds to entries not currently in use.  Proper
+                  interpretation of such entries requires examination of
+                  the relevant ipForwardType object."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"invalid"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.6"</span>;
+            }
+
+            <a name="ipForwardProto.254"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardProto</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"local"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"netmgmt"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"icmp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"egp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"ggp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"hello"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"rip"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">8</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"is-is"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"es-is"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">10</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"ciscoIgrp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">11</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"bbnSpfIgp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">12</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"ospf"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">13</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"bgp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">14</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"idpr"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">15</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The routing mechanism via which this route was learned.
+                  Inclusion of values for gateway routing protocols is
+                  not intended to imply that hosts should support those
+                  protocols."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.7"</span>;
+            }
+
+            <a name="ipForwardAge.282"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardAge</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of seconds since this route was last updated
+                  or otherwise determined to be correct.  Note that no
+                  semantics of `too old' can be implied except through
+                  knowledge of the routing protocol by which the route
+                  was learned."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.8"</span>;
+            }
+
+            <a name="ipForwardInfo.296"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardInfo</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A reference to MIB definitions specific to the
+                  particular routing protocol that is responsible for
+                  this route, as determined by the value specified in the
+                  route's ipForwardProto value.  If this information is
+                  not present, its value should be set to the OBJECT
+                  IDENTIFIER { 0 0 }, which is a syntactically valid
+                  object identifier, and any implementation conforming to
+                  ASN.1 and the Basic Encoding Rules must be able to
+                  generate and recognize this value."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.9"</span>;
+            }
+
+            <a name="ipForwardNextHopAS.313"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardNextHopAS</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The Autonomous System Number of the Next Hop.  When
+                  this is unknown or not relevant to the protocol
+                  indicated by ipForwardProto, zero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.10"</span>;
+            }
+
+            <a name="ipForwardMetric1.325"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardMetric1</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The primary routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's ipForwardProto value.
+                  If this metric is not used, its value should be set to
+                  -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.11"</span>;
+            }
+
+            <a name="ipForwardMetric2.339"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardMetric2</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An alternate routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's ipForwardProto value.
+                  If this metric is not used, its value should be set to
+                  -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.12"</span>;
+            }
+
+            <a name="ipForwardMetric3.353"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardMetric3</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An alternate routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's ipForwardProto value.
+                  If this metric is not used, its value should be set to
+                  -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.13"</span>;
+            }
+
+            <a name="ipForwardMetric4.367"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardMetric4</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An alternate routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's ipForwardProto value.
+                  If this metric is not used, its value should be set to
+                  -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.14"</span>;
+            }
+
+            <a name="ipForwardMetric5.381"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardMetric5</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An alternate routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's ipForwardProto value.
+                  If this metric is not used, its value should be set to
+                  -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.15"</span>;
+            }
+         }  <span class="yang_cmt">// list ipForwardEntry</span>
+
+         <a name="ipCidrRouteNumber.396"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteNumber</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of current ipCidrRouteTable entries that are
+               not invalid.  This object is deprecated in favor of
+               inetCidrRouteNumber and the inetCidrRouteTable."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.3"</span>;
+         }
+
+         <a name="ipCidrRouteEntry.410"/><span class="yang_kw">list</span> <span class="yang_id">ipCidrRouteEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#ipCidrRouteDest.424">ipCidrRouteDest</a>, <a href="#ipCidrRouteMask.442">ipCidrRouteMask</a>, <a href="#ipCidrRouteTos.462">ipCidrRouteTos</a>, <a href="#ipCidrRouteNextHop.497">ipCidrRouteNextHop</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"A particular route to a particular destination, under a
+               
+               
+               
+               particular policy."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1"</span>;
+
+            <a name="ipCidrRouteDest.424"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteDest</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The destination IP address of this route.
+                  
+                  This object may not take a Multicast (Class D) address
+                  value.
+                  
+                  Any assignment (implicit or otherwise) of an instance
+                  of this object to a value x must be rejected if the
+                  bitwise logical-AND of x with the value of the
+                  corresponding instance of the ipCidrRouteMask object is
+                  not equal to x."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.1"</span>;
+            }
+
+            <a name="ipCidrRouteMask.442"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteMask</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Indicate the mask to be logical-ANDed with the
+                  destination address before being compared to the value
+                  in the ipCidrRouteDest field.  For those systems that
+                  do not support arbitrary subnet masks, an agent
+                  constructs the value of the ipCidrRouteMask by
+                  reference to the IP Address Class.
+                  
+                  Any assignment (implicit or otherwise) of an instance
+                  of this object to a value x must be rejected if the
+                  bitwise logical-AND of x with the value of the
+                  corresponding instance of the ipCidrRouteDest object is
+                  not equal to ipCidrRouteDest."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.2"</span>;
+            }
+
+            <a name="ipCidrRouteTos.462"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteTos</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The policy specifier is the IP TOS Field.  The encoding
+                  of IP TOS is as specified by the following convention.
+                  Zero indicates the default path if no more specific
+                  policy applies.
+                  
+                  +-----+-----+-----+-----+-----+-----+-----+-----+
+                  |                 |                       |     |
+                  |   PRECEDENCE    |    TYPE OF SERVICE    |  0  |
+                  |                 |                       |     |
+                  +-----+-----+-----+-----+-----+-----+-----+-----+
+                  
+                  	     IP TOS                IP TOS
+                     Field     Policy      Field     Policy
+                     Contents    Code      Contents    Code
+                     0 0 0 0  ==&gt;   0      0 0 0 1  ==&gt;   2
+                     0 0 1 0  ==&gt;   4      0 0 1 1  ==&gt;   6
+                     0 1 0 0  ==&gt;   8      0 1 0 1  ==&gt;  10
+                     0 1 1 0  ==&gt;  12      0 1 1 1  ==&gt;  14
+                     1 0 0 0  ==&gt;  16      1 0 0 1  ==&gt;  18
+                     1 0 1 0  ==&gt;  20      1 0 1 1  ==&gt;  22
+                  
+                  
+                  
+                     1 1 0 0  ==&gt;  24      1 1 0 1  ==&gt;  26
+                     1 1 1 0  ==&gt;  28      1 1 1 1  ==&gt;  30"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.3"</span>;
+            }
+
+            <a name="ipCidrRouteNextHop.497"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteNextHop</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"On remote routes, the address of the next system en
+                  route; Otherwise, 0.0.0.0."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.4"</span>;
+            }
+
+            <a name="ipCidrRouteIfIndex.507"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteIfIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The ifIndex value that identifies the local interface
+                  through which the next hop of this route should be
+                  reached."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.5"</span>;
+            }
+
+            <a name="ipCidrRouteType.519"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"reject"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"local"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"remote"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The type of route.  Note that local(3) refers to a
+                  route for which the next hop is the final destination;
+                  remote(4) refers to a route for which the next hop is
+                  not the final destination.
+                  
+                  Routes that do not result in traffic forwarding or
+                  rejection should not be displayed, even if the
+                  implementation keeps them stored internally.
+                  
+                  reject (2) refers to a route that, if matched,
+                  discards the message as unreachable.  This is used in
+                  some protocols as a means of correctly aggregating
+                  routes."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.6"</span>;
+            }
+
+            <a name="ipCidrRouteProto.545"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteProto</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"local"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"netmgmt"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"icmp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"egp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"ggp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"hello"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"rip"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">8</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"isIs"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"esIs"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">10</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"ciscoIgrp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">11</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"bbnSpfIgp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">12</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"ospf"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">13</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"bgp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">14</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"idpr"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">15</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"ciscoEigrp"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">16</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The routing mechanism via which this route was learned.
+                  Inclusion of values for gateway routing protocols is
+                  not intended to imply that hosts should support those
+                  protocols."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.7"</span>;
+            }
+
+            <a name="ipCidrRouteAge.574"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteAge</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of seconds since this route was last updated
+                  or otherwise determined to be correct.  Note that no
+                  semantics of `too old' can be implied, except through
+                  knowledge of the routing protocol by which the route
+                  was learned."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.8"</span>;
+            }
+
+            <a name="ipCidrRouteInfo.588"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteInfo</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A reference to MIB definitions specific to the
+                  particular routing protocol that is responsible for
+                  this route, as determined by the value specified in the
+                  route's ipCidrRouteProto value.  If this information is
+                  not present, its value should be set to the OBJECT
+                  IDENTIFIER { 0 0 }, which is a syntactically valid
+                  object identifier, and any implementation conforming to
+                  ASN.1 and the Basic Encoding Rules must be able to
+                  generate and recognize this value."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.9"</span>;
+            }
+
+            <a name="ipCidrRouteNextHopAS.605"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteNextHopAS</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The Autonomous System Number of the Next Hop.  The
+                  semantics of this object are determined by the routing-
+                  protocol specified in the route's ipCidrRouteProto
+                  value.  When this object is unknown or not relevant, its
+                  value should be set to zero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.10"</span>;
+            }
+
+            <a name="ipCidrRouteMetric1.619"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteMetric1</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The primary routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's ipCidrRouteProto
+                  value.  If this metric is not used, its value should be
+                  set to -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.11"</span>;
+            }
+
+            <a name="ipCidrRouteMetric2.633"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteMetric2</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An alternate routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's ipCidrRouteProto
+                  value.  If this metric is not used, its value should be
+                  
+                  
+                  
+                  set to -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.12"</span>;
+            }
+
+            <a name="ipCidrRouteMetric3.650"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteMetric3</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An alternate routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's ipCidrRouteProto
+                  value.  If this metric is not used, its value should be
+                  set to -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.13"</span>;
+            }
+
+            <a name="ipCidrRouteMetric4.664"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteMetric4</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An alternate routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's ipCidrRouteProto
+                  value.  If this metric is not used, its value should be
+                  set to -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.14"</span>;
+            }
+
+            <a name="ipCidrRouteMetric5.678"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteMetric5</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An alternate routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's ipCidrRouteProto
+                  value.  If this metric is not used, its value should be
+                  set to -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.15"</span>;
+            }
+
+            <a name="ipCidrRouteStatus.692"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The row status variable, used according to row
+                  installation and removal conventions."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.16"</span>;
+            }
+         }  <span class="yang_cmt">// list ipCidrRouteEntry</span>
+
+         <a name="inetCidrRouteNumber.704"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteNumber</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of current inetCidrRouteTable entries that
+               are not invalid."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.6"</span>;
+         }
+
+         <a name="inetCidrRouteEntry.716"/><span class="yang_kw">list</span> <span class="yang_id">inetCidrRouteEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#inetCidrRouteDestType.738">inetCidrRouteDestType</a>, <a href="#inetCidrRouteDest.752">inetCidrRouteDest</a>, <a href="#inetCidrRoutePfxLen.773">inetCidrRoutePfxLen</a>, <a href="#inetCidrRoutePolicy.797">inetCidrRoutePolicy</a>, <a href="#inetCidrRouteNextHopType.809">inetCidrRouteNextHopType</a>, <a href="#inetCidrRouteNextHop.826">inetCidrRouteNextHop</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"A particular route to a particular destination, under a
+               particular policy (as reflected in the
+               inetCidrRoutePolicy object).
+               
+               Dynamically created rows will survive an agent reboot.
+               
+               Implementers need to be aware that if the total number
+               of elements (octets or sub-identifiers) in
+               inetCidrRouteDest, inetCidrRoutePolicy, and
+               inetCidrRouteNextHop exceeds 111, then OIDs of column
+               instances in this table will have more than 128 sub-
+               identifiers and cannot be accessed using SNMPv1,
+               SNMPv2c, or SNMPv3."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1"</span>;
+
+            <a name="inetCidrRouteDestType.738"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteDestType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The type of the inetCidrRouteDest address, as defined
+                  in the InetAddress MIB.
+                  
+                  Only those address types that may appear in an actual
+                  routing table are allowed as values of this object."</span>;
+               <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4001"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.1"</span>;
+            }
+
+            <a name="inetCidrRouteDest.752"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteDest</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddress.128">inet-address:InetAddress</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The destination IP address of this route.
+                  
+                  The type of this address is determined by the value of
+                  the inetCidrRouteDestType object.
+                  
+                  The values for the index objects inetCidrRouteDest and
+                  inetCidrRoutePfxLen must be consistent.  When the value
+                  of inetCidrRouteDest (excluding the zone index, if one
+                  is present) is x, then the bitwise logical-AND
+                  of x with the value of the mask formed from the
+                  corresponding index object inetCidrRoutePfxLen MUST be
+                  equal to x.  If not, then the index pair is not
+                  consistent and an inconsistentName error must be
+                  returned on SET or CREATE requests."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.2"</span>;
+            }
+
+            <a name="inetCidrRoutePfxLen.773"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRoutePfxLen</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressPrefixLength.285">inet-address:InetAddressPrefixLength</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Indicates the number of leading one bits that form the
+                  mask to be logical-ANDed with the destination address
+                  before being compared to the value in the
+                  
+                  
+                  
+                  inetCidrRouteDest field.
+                  
+                  The values for the index objects inetCidrRouteDest and
+                  inetCidrRoutePfxLen must be consistent.  When the value
+                  of inetCidrRouteDest (excluding the zone index, if one
+                  is present) is x, then the bitwise logical-AND
+                  of x with the value of the mask formed from the
+                  corresponding index object inetCidrRoutePfxLen MUST be
+                  equal to x.  If not, then the index pair is not
+                  consistent and an inconsistentName error must be
+                  returned on SET or CREATE requests."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.3"</span>;
+            }
+
+            <a name="inetCidrRoutePolicy.797"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRoutePolicy</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object is an opaque object without any defined
+                  semantics.  Its purpose is to serve as an additional
+                  index that may delineate between multiple entries to
+                  the same destination.  The value { 0 0 } shall be used
+                  as the default value for this object."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.4"</span>;
+            }
+
+            <a name="inetCidrRouteNextHopType.809"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteNextHopType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The type of the inetCidrRouteNextHop address, as
+                  defined in the InetAddress MIB.
+                  
+                  Value should be set to unknown(0) for non-remote
+                  routes.
+                  
+                  Only those address types that may appear in an actual
+                  routing table are allowed as values of this object."</span>;
+               <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4001"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.5"</span>;
+            }
+
+            <a name="inetCidrRouteNextHop.826"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteNextHop</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddress.128">inet-address:InetAddress</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"On remote routes, the address of the next system en
+                  
+                  
+                  
+                  route.  For non-remote routes, a zero length string.
+                  
+                  The type of this address is determined by the value of
+                  the inetCidrRouteNextHopType object."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.6"</span>;
+            }
+
+            <a name="inetCidrRouteIfIndex.841"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteIfIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndexOrZero.95">if-mib:InterfaceIndexOrZero</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The ifIndex value that identifies the local interface
+                  through which the next hop of this route should be
+                  reached.  A value of 0 is valid and represents the
+                  scenario where no interface is specified."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.7"</span>;
+            }
+
+            <a name="inetCidrRouteType.852"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"reject"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"local"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"remote"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"blackhole"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The type of route.  Note that local(3) refers to a
+                  route for which the next hop is the final destination;
+                  remote(4) refers to a route for which the next hop is
+                  not the final destination.
+                  
+                  Routes that do not result in traffic forwarding or
+                  rejection should not be displayed, even if the
+                  implementation keeps them stored internally.
+                  
+                  reject(2) refers to a route that, if matched, discards
+                  the message as unreachable and returns a notification
+                  (e.g., ICMP error) to the message sender.  This is used
+                  in some protocols as a means of correctly aggregating
+                  routes.
+                  
+                  blackhole(5) refers to a route that, if matched,
+                  discards the message silently."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.8"</span>;
+            }
+
+            <a name="inetCidrRouteProto.882"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteProto</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IANA-RTPROTO-MIB/2000-09-26#IANAipRouteProtocol.55">iana-rtproto:IANAipRouteProtocol</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The routing mechanism via which this route was learned.
+                  Inclusion of values for gateway routing protocols is
+                  not intended to imply that hosts should support those
+                  protocols."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.9"</span>;
+            }
+
+            <a name="inetCidrRouteAge.893"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteAge</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of seconds since this route was last updated
+                  or otherwise determined to be correct.  Note that no
+                  semantics of 'too old' can be implied, except through
+                  knowledge of the routing protocol by which the route
+                  was learned."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.10"</span>;
+            }
+
+            <a name="inetCidrRouteNextHopAS.905"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteNextHopAS</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAutonomousSystemNumber.345">inet-address:InetAutonomousSystemNumber</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The Autonomous System Number of the Next Hop.  The
+                  semantics of this object are determined by the routing-
+                  protocol specified in the route's inetCidrRouteProto
+                  value.  When this object is unknown or not relevant, its
+                  value should be set to zero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.11"</span>;
+            }
+
+            <a name="inetCidrRouteMetric1.918"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteMetric1</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The primary routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's inetCidrRouteProto
+                  value.  If this metric is not used, its value should be
+                  set to -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.12"</span>;
+            }
+
+            <a name="inetCidrRouteMetric2.931"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteMetric2</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An alternate routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's inetCidrRouteProto
+                  value.  If this metric is not used, its value should be
+                  set to -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.13"</span>;
+            }
+
+            <a name="inetCidrRouteMetric3.944"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteMetric3</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An alternate routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's inetCidrRouteProto
+                  value.  If this metric is not used, its value should be
+                  set to -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.14"</span>;
+            }
+
+            <a name="inetCidrRouteMetric4.957"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteMetric4</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An alternate routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  protocol specified in the route's inetCidrRouteProto
+                  value.  If this metric is not used, its value should be
+                  set to -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.15"</span>;
+            }
+
+            <a name="inetCidrRouteMetric5.970"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteMetric5</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An alternate routing metric for this route.  The
+                  semantics of this metric are determined by the routing-
+                  
+                  
+                  
+                  protocol specified in the route's inetCidrRouteProto
+                  value.  If this metric is not used, its value should be
+                  set to -1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.16"</span>;
+            }
+
+            <a name="inetCidrRouteStatus.986"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The row status variable, used according to row
+                  installation and removal conventions.
+                  
+                  A row entry cannot be modified when the status is
+                  marked as active(1)."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.17"</span>;
+            }
+         }  <span class="yang_cmt">// list inetCidrRouteEntry</span>
+
+         <a name="inetCidrRouteDiscards.999"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteDiscards</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of valid route entries discarded from the
+               inetCidrRouteTable.  Discarded route entries do not
+               appear in the inetCidrRouteTable.  One possible reason
+               for discarding an entry would be to free-up buffer space
+               for other route table entries."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.8"</span>;
+         }
+      }  <span class="yang_cmt">// container ipForward</span>
+   }  <span class="yang_cmt">// module IP-FORWARD-MIB</span>
+</pre>
+</div>
+</div>

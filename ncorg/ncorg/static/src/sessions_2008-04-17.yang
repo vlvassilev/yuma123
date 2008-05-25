@@ -1,0 +1,207 @@
+module sessions {
+
+  namespace "http://netconfcentral.com/ns/sessions";
+
+  prefix "ses";
+
+  import yang-types { prefix "yang"; }   // for zero-based-counter types
+
+  import netconf { prefix "nc"; }   // for SessionID type
+
+  organization  "Netconf Central";
+
+  contact
+    "Andy Bierman <support@netconfcentral.com>";
+
+  description
+    "This module contains objects for monitoring NETCONF
+     session statistics and state info.";
+
+  revision 2008-04-17 {
+    description 
+       "Remove NCX version and rename ysessions to sessions.";
+  }
+
+  revision 2007-11-20 {
+    description 
+       "Initial revision, converted from sessions.ncx.";
+  }
+
+  // Types
+
+  typedef UserName {
+    description "NETCONF Session User name string";
+    type string { 
+      length "1..1023";
+      pattern '[a-z,A-Z][a-z,A-Z,0-9,\-,_]*';
+    }
+  }
+
+  // Groupings
+
+  grouping SessionStats {
+    description 
+      "The set of session statistics collected by the agent";
+
+    leaf inBytes {
+      description
+        "The total number of bytes contained in NETCONF PDUs
+         received on a particular session.";
+      type yang:zero-based-counter64;
+      config false;
+    }
+
+    leaf inDropBytes {
+      description
+        "The total number of bytes dropped (and therefore not received)
+         on a particular session.";
+      type yang:zero-based-counter64;
+      config false;
+    }
+
+    leaf inMsgs {
+      description
+        "The total number of NETCONF PDUs received
+         on a particular session without errors.";
+      type yang:zero-based-counter64;
+      config false;
+    }
+
+    leaf inErrMsgs {
+      description
+        "The total number of NETCONF PDUs received
+         on a particular session with errors";
+      type yang:zero-based-counter64;
+      config false;
+    }
+        
+    leaf outBytes {
+      description
+        "The total number of bytes contained in NETCONF PDUs
+         transmitted on a particular session.";
+      type yang:zero-based-counter64;
+      config false;
+    }
+
+    leaf outMsgs {
+      description
+        "The total number of NETCONF PDUs transmitted
+         on a particular session which did not contain any 
+         <rpc-error> elements.";
+      type yang:zero-based-counter64;
+      config false;
+    }
+
+    leaf outErrMsgs {
+      description
+        "The total number of NETCONF PDUs transmitted
+         on a particular session which contained one or more
+         <rpc-error> elements.";
+      type yang:zero-based-counter64;
+      config false;
+    }
+  }
+
+  // Data objects
+       
+  container netconfd {
+    description
+      "The sessionInfo container is implemented as a child
+       of the top-level element <netconfd>.";
+
+    container sessionInfo {
+      description
+        "Read-only Session Statistics and Information";
+      config false;
+      status current;
+      
+      leaf activeSessions {
+        description
+          "Current number of open NETCONF sessions.";
+        type yang:zero-based-counter32;
+      }
+
+      leaf closedSessions {
+        description
+          "Total number of closed NETCONF sessions.";
+        type yang:zero-based-counter32;
+      }
+
+      leaf failedSessions {
+        description
+          "Total number of failed NETCONF sessions, which
+           failed to be established for any reason.";
+        type yang:zero-based-counter32;
+      }
+
+      container sessionTotals {
+        description 
+          "Running global statistics totals aggregating
+           all open and closed session statistics totals";
+        uses SessionStats;
+      }
+
+      container sessions {
+        description 
+          "Container for active session information and statistics.
+           There is one entry for each session which is active 
+           or starting up.";
+
+        list session {
+          description "Per-Session Information Block";
+
+          key "id";
+
+          leaf id { 
+            description 
+             "The session ID assigned by the agent for the session.";
+            type nc:SessionId; 
+          }
+
+          leaf startTime {
+            description
+              "The system time when this session was first opened.";
+            type yang:date-and-time;
+          }
+
+          leaf userName {
+            description
+              "The user name associated with this session.";             
+            type UserName;
+          }
+  
+          leaf state {
+            description
+              "A textual representation of the current session state.";
+            type string;
+          }
+
+          container locks {
+            description
+              "Container for the list of names of the locked 
+               configurations";
+
+            // currently implemented as xsd:list instead
+            // but YANG does not support the xsd:list type
+
+            leaf-list config {
+              description
+                "Each <config> leaf contains the name of a 
+                 configuration that is currently locked by 
+                 this session.";
+              type string;
+              min-elements 0;
+            }
+          }
+
+          container stats {
+            description
+              "The set of statistics collected for this session.";
+            uses SessionStats;
+          }
+        }  // end list session
+      }    // end container sessions
+    }      // end container sessionInfo
+  }        // end container netconfd
+
+}

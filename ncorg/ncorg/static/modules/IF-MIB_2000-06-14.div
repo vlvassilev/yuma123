@@ -1,0 +1,1489 @@
+
+<div>
+   <h1 class="yang">IF-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#OwnerString.61">OwnerString</a></li>
+            <li><a href="#InterfaceIndex.81">InterfaceIndex</a></li>
+            <li><a href="#InterfaceIndexOrZero.95">InterfaceIndexOrZero</a></li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#interfaces.112">interfaces</a>
+               <ul>
+                  <li><a href="#ifNumber.114">ifNumber</a></li>
+                  <li class="daddy"><a href="#ifEntry.126">ifEntry</a>
+                     <ul>
+                        <li><a href="#ifIndex.135">ifIndex</a></li>
+                        <li><a href="#ifDescr.148">ifDescr</a></li>
+                        <li><a href="#ifType.161">ifType</a></li>
+                        <li><a href="#ifMtu.172">ifMtu</a></li>
+                        <li><a href="#ifSpeed.184">ifSpeed</a></li>
+                        <li><a href="#ifPhysAddress.200">ifPhysAddress</a></li>
+                        <li><a href="#ifAdminStatus.214">ifAdminStatus</a></li>
+                        <li><a href="#ifOperStatus.233">ifOperStatus</a></li>
+                        <li><a href="#ifLastChange.261">ifLastChange</a></li>
+                        <li><a href="#ifInOctets.273">ifInOctets</a></li>
+                        <li><a href="#ifInUcastPkts.287">ifInUcastPkts</a></li>
+                        <li><a href="#ifInNUcastPkts.302">ifInNUcastPkts</a></li>
+                        <li><a href="#ifInDiscards.321">ifInDiscards</a></li>
+                        <li><a href="#ifInErrors.339">ifInErrors</a></li>
+                        <li><a href="#ifInUnknownProtos.357">ifInUnknownProtos</a></li>
+                        <li><a href="#ifOutOctets.378">ifOutOctets</a></li>
+                        <li><a href="#ifOutUcastPkts.392">ifOutUcastPkts</a></li>
+                        <li><a href="#ifOutNUcastPkts.408">ifOutNUcastPkts</a></li>
+                        <li><a href="#ifOutDiscards.428">ifOutDiscards</a></li>
+                        <li><a href="#ifOutErrors.444">ifOutErrors</a></li>
+                        <li><a href="#ifOutQLen.461">ifOutQLen</a></li>
+                        <li><a href="#ifSpecific.470">ifSpecific</a></li>
+                        <li><a href="#ifName.645">ifName</a></li>
+                        <li><a href="#ifInMulticastPkts.667">ifInMulticastPkts</a></li>
+                        <li><a href="#ifInBroadcastPkts.684">ifInBroadcastPkts</a></li>
+                        <li><a href="#ifOutMulticastPkts.699">ifOutMulticastPkts</a></li>
+                        <li><a href="#ifOutBroadcastPkts.716">ifOutBroadcastPkts</a></li>
+                        <li><a href="#ifHCInOctets.733">ifHCInOctets</a></li>
+                        <li><a href="#ifHCInUcastPkts.748">ifHCInUcastPkts</a></li>
+                        <li><a href="#ifHCInMulticastPkts.764">ifHCInMulticastPkts</a></li>
+                        <li><a href="#ifHCInBroadcastPkts.781">ifHCInBroadcastPkts</a></li>
+                        <li><a href="#ifHCOutOctets.797">ifHCOutOctets</a></li>
+                        <li><a href="#ifHCOutUcastPkts.812">ifHCOutUcastPkts</a></li>
+                        <li><a href="#ifHCOutMulticastPkts.829">ifHCOutMulticastPkts</a></li>
+                        <li><a href="#ifHCOutBroadcastPkts.847">ifHCOutBroadcastPkts</a></li>
+                        <li><a href="#ifLinkUpDownTrapEnable.864">ifLinkUpDownTrapEnable</a></li>
+                        <li><a href="#ifHighSpeed.881">ifHighSpeed</a></li>
+                        <li><a href="#ifPromiscuousMode.896">ifPromiscuousMode</a></li>
+                        <li><a href="#ifConnectorPresent.913">ifConnectorPresent</a></li>
+                        <li><a href="#ifAlias.923">ifAlias</a></li>
+                        <li><a href="#ifCounterDiscontinuityTime.957">ifCounterDiscontinuityTime</a></li>
+                        <li><a href="#ifTestId.984">ifTestId</a></li>
+                        <li><a href="#ifTestStatus.994">ifTestStatus</a></li>
+                        <li><a href="#ifTestType.1011">ifTestType</a></li>
+                        <li><a href="#ifTestResult.1039">ifTestResult</a></li>
+                        <li><a href="#ifTestCode.1061">ifTestCode</a></li>
+                        <li><a href="#ifTestOwner.1081">ifTestOwner</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#ifMIBObjects.492">ifMIBObjects</a>
+               <ul>
+                  <li class="daddy"><a href="#ifStackEntry.497">ifStackEntry</a>
+                     <ul>
+                        <li><a href="#ifStackHigherLayer.508">ifStackHigherLayer</a></li>
+                        <li><a href="#ifStackLowerLayer.520">ifStackLowerLayer</a></li>
+                        <li><a href="#ifStackStatus.532">ifStackStatus</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#ifRcvAddressEntry.552">ifRcvAddressEntry</a>
+                     <ul>
+                        <li><a href="#ifIndex.561">ifIndex</a></li>
+                        <li><a href="#ifRcvAddressAddress.570">ifRcvAddressAddress</a></li>
+                        <li><a href="#ifRcvAddressStatus.579">ifRcvAddressStatus</a></li>
+                        <li><a href="#ifRcvAddressType.588">ifRcvAddressType</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#ifTableLastChange.609">ifTableLastChange</a></li>
+                  <li><a href="#ifStackLastChange.621">ifStackLastChange</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#augment.640">augment</a>
+               <ul>
+                  <li><a href="#ifName.645">ifName</a></li>
+                  <li><a href="#ifInMulticastPkts.667">ifInMulticastPkts</a></li>
+                  <li><a href="#ifInBroadcastPkts.684">ifInBroadcastPkts</a></li>
+                  <li><a href="#ifOutMulticastPkts.699">ifOutMulticastPkts</a></li>
+                  <li><a href="#ifOutBroadcastPkts.716">ifOutBroadcastPkts</a></li>
+                  <li><a href="#ifHCInOctets.733">ifHCInOctets</a></li>
+                  <li><a href="#ifHCInUcastPkts.748">ifHCInUcastPkts</a></li>
+                  <li><a href="#ifHCInMulticastPkts.764">ifHCInMulticastPkts</a></li>
+                  <li><a href="#ifHCInBroadcastPkts.781">ifHCInBroadcastPkts</a></li>
+                  <li><a href="#ifHCOutOctets.797">ifHCOutOctets</a></li>
+                  <li><a href="#ifHCOutUcastPkts.812">ifHCOutUcastPkts</a></li>
+                  <li><a href="#ifHCOutMulticastPkts.829">ifHCOutMulticastPkts</a></li>
+                  <li><a href="#ifHCOutBroadcastPkts.847">ifHCOutBroadcastPkts</a></li>
+                  <li><a href="#ifLinkUpDownTrapEnable.864">ifLinkUpDownTrapEnable</a></li>
+                  <li><a href="#ifHighSpeed.881">ifHighSpeed</a></li>
+                  <li><a href="#ifPromiscuousMode.896">ifPromiscuousMode</a></li>
+                  <li><a href="#ifConnectorPresent.913">ifConnectorPresent</a></li>
+                  <li><a href="#ifAlias.923">ifAlias</a></li>
+                  <li><a href="#ifCounterDiscontinuityTime.957">ifCounterDiscontinuityTime</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#augment.978">augment</a>
+               <ul>
+                  <li><a href="#ifTestId.984">ifTestId</a></li>
+                  <li><a href="#ifTestStatus.994">ifTestStatus</a></li>
+                  <li><a href="#ifTestType.1011">ifTestType</a></li>
+                  <li><a href="#ifTestResult.1039">ifTestResult</a></li>
+                  <li><a href="#ifTestCode.1061">ifTestCode</a></li>
+                  <li><a href="#ifTestOwner.1081">ifTestOwner</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+      <li><a href="#">Notifications</a>
+         <ul>
+            <li><a href="#linkDown.1093">linkDown</a></li>
+            <li><a href="#linkUp.1183">linkUp</a></li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">IF-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:IF-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"if-mib"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/IANAifType-MIB/2005-10-10">IANAifType-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"ianaiftype-mib"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMPv2-TC/1999-04-01">SNMPv2-TC</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smiv2"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"IETF Interfaces MIB Working Group"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"   Keith McCloghrie
+         Cisco Systems, Inc.
+         170 West Tasman Drive
+         San Jose, CA  95134-1706
+         US
+         
+         408-526-5260
+         kzm@cisco.com"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"The MIB module to describe generic objects for network
+         interface sub-layers.  This MIB is an updated version of
+         MIB-II's ifTable, and incorporates the extensions defined in
+         RFC 1229."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-06-14"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Clarifications agreed upon by the Interfaces MIB WG, and
+            published as RFC 2863."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1996-02-28"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Revisions made by the Interfaces MIB WG, and published in
+            RFC 2233."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1993-11-08"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Initial revision, published as part of RFC 1573."</span>;
+      }
+
+
+      <span class="yang_cmt">// typedefs</span>
+
+      <a name="OwnerString.61"/><span class="yang_kw">typedef</span> <span class="yang_id">OwnerString</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+            <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
+            <span class="yang_kw">pattern</span> <span class="yang_str">'\p{IsBasicLatin}{0,255}'</span>;
+            <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"255a"</span>;
+         }
+         <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"This data type is used to model an administratively
+            assigned name of the owner of a resource.  This information
+            is taken from the NVT ASCII character set.  It is suggested
+            that this name contain one or more of the following: ASCII
+            form of the manager station's transport address, management
+            station name (e.g., domain name), network management
+            personnel's name, location, or phone number.  In some cases
+            the agent itself will be the owner of an entry.  In these
+            cases, this string shall be set to a string starting with
+            'agent'."</span>;
+      }
+
+      <a name="InterfaceIndex.81"/><span class="yang_kw">typedef</span> <span class="yang_id">InterfaceIndex</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
+            <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"A unique value, greater than zero, for each interface or
+            interface sub-layer in the managed system.  It is
+            recommended that values are assigned contiguously starting
+            from 1.  The value for each interface sub-layer must remain
+            constant at least from one re-initialization of the entity's
+            network management system to the next re-initialization."</span>;
+      }
+
+      <a name="InterfaceIndexOrZero.95"/><span class="yang_kw">typedef</span> <span class="yang_id">InterfaceIndexOrZero</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
+            <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"This textual convention is an extension of the
+            InterfaceIndex convention.  The latter defines a greater
+            than zero value used to identify an interface or interface
+            sub-layer in the managed system.  This extension permits the
+            additional value of zero.  the value zero is object-specific
+            and must therefore be defined as part of the description of
+            any object which uses this syntax.  Examples of the usage of
+            zero might include situations where interface was unknown,
+            or when none or all interfaces need to be referenced."</span>;
+      }
+
+      <span class="yang_cmt">// objects</span>
+
+      <a name="interfaces.112"/><span class="yang_kw">container</span> <span class="yang_id">interfaces</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2"</span>;
+
+         <a name="ifNumber.114"/><span class="yang_kw">leaf</span> <span class="yang_id">ifNumber</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of network interfaces (regardless of their
+               current state) present on this system."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.1"</span>;
+         }
+
+         <a name="ifEntry.126"/><span class="yang_kw">list</span> <span class="yang_id">ifEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#ifIndex.135">ifIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry containing management information applicable to a
+               particular interface."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1"</span>;
+
+            <a name="ifIndex.135"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#InterfaceIndex.81">InterfaceIndex</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A unique value, greater than zero, for each interface.  It
+                  is recommended that values are assigned contiguously
+                  starting from 1.  The value for each interface sub-layer
+                  must remain constant at least from one re-initialization of
+                  the entity's network management system to the next re-
+                  initialization."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.1"</span>;
+            }
+
+            <a name="ifDescr.148"/><span class="yang_kw">leaf</span> <span class="yang_id">ifDescr</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DisplayString.39">smiv2:DisplayString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A textual string containing information about the
+                  interface.  This string should include the name of the
+                  manufacturer, the product name and the version of the
+                  interface hardware/software."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.2"</span>;
+            }
+
+            <a name="ifType.161"/><span class="yang_kw">leaf</span> <span class="yang_id">ifType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IANAifType-MIB/2005-10-10#IANAifType.236">ianaiftype-mib:IANAifType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The type of interface.  Additional values for ifType are
+                  assigned by the Internet Assigned Numbers Authority (IANA),
+                  through updating the syntax of the IANAifType textual
+                  convention."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.3"</span>;
+            }
+
+            <a name="ifMtu.172"/><span class="yang_kw">leaf</span> <span class="yang_id">ifMtu</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The size of the largest packet which can be sent/received
+                  on the interface, specified in octets.  For interfaces that
+                  are used for transmitting network datagrams, this is the
+                  size of the largest network datagram that can be sent on the
+                  interface."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.4"</span>;
+            }
+
+            <a name="ifSpeed.184"/><span class="yang_kw">leaf</span> <span class="yang_id">ifSpeed</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An estimate of the interface's current bandwidth in bits
+                  per second.  For interfaces which do not vary in bandwidth
+                  or for those where no accurate estimation can be made, this
+                  object should contain the nominal bandwidth.  If the
+                  bandwidth of the interface is greater than the maximum value
+                  reportable by this object then this object should report its
+                  maximum value (4,294,967,295) and ifHighSpeed must be used
+                  to report the interace's speed.  For a sub-layer which has
+                  no concept of bandwidth, this object should be zero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.5"</span>;
+            }
+
+            <a name="ifPhysAddress.200"/><span class="yang_kw">leaf</span> <span class="yang_id">ifPhysAddress</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#phys-address.268">yang:phys-address</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The interface's address at its protocol sub-layer.  For
+                  example, for an 802.x interface, this object normally
+                  contains a MAC address.  The interface's media-specific MIB
+                  must define the bit and byte ordering and the format of the
+                  value of this object.  For interfaces which do not have such
+                  an address (e.g., a serial line), this object should contain
+                  an octet string of zero length."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.6"</span>;
+            }
+
+            <a name="ifAdminStatus.214"/><span class="yang_kw">leaf</span> <span class="yang_id">ifAdminStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"up"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"down"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"testing"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The desired state of the interface.  The testing(3) state
+                  indicates that no operational packets can be passed.  When a
+                  managed system initializes, all interfaces start with
+                  ifAdminStatus in the down(2) state.  As a result of either
+                  explicit management action or per configuration information
+                  retained by the managed system, ifAdminStatus is then
+                  changed to either the up(1) or testing(3) states (or remains
+                  in the down(2) state)."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.7"</span>;
+            }
+
+            <a name="ifOperStatus.233"/><span class="yang_kw">leaf</span> <span class="yang_id">ifOperStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"up"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"down"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"testing"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"unknown"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"dormant"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"notPresent"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"lowerLayerDown"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The current operational state of the interface.  The
+                  testing(3) state indicates that no operational packets can
+                  be passed.  If ifAdminStatus is down(2) then ifOperStatus
+                  should be down(2).  If ifAdminStatus is changed to up(1)
+                  then ifOperStatus should change to up(1) if the interface is
+                  ready to transmit and receive network traffic; it should
+                  change to dormant(5) if the interface is waiting for
+                  external actions (such as a serial line waiting for an
+                  incoming connection); it should remain in the down(2) state
+                  if and only if there is a fault that prevents it from going
+                  to the up(1) state; it should remain in the notPresent(6)
+                  state if the interface has missing (typically, hardware)
+                  components."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.8"</span>;
+            }
+
+            <a name="ifLastChange.261"/><span class="yang_kw">leaf</span> <span class="yang_id">ifLastChange</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of sysUpTime at the time the interface entered
+                  its current operational state.  If the current state was
+                  entered prior to the last re-initialization of the local
+                  network management subsystem, then this object contains a
+                  zero value."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.9"</span>;
+            }
+
+            <a name="ifInOctets.273"/><span class="yang_kw">leaf</span> <span class="yang_id">ifInOctets</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The total number of octets received on the interface,
+                  including framing characters.
+                  
+                  Discontinuities in the value of this counter can occur at
+                  re-initialization of the management system, and at other
+                  times as indicated by the value of
+                  ifCounterDiscontinuityTime."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.10"</span>;
+            }
+
+            <a name="ifInUcastPkts.287"/><span class="yang_kw">leaf</span> <span class="yang_id">ifInUcastPkts</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of packets, delivered by this sub-layer to a
+                  higher (sub-)layer, which were not addressed to a multicast
+                  or broadcast address at this sub-layer.
+                  
+                  Discontinuities in the value of this counter can occur at
+                  re-initialization of the management system, and at other
+                  times as indicated by the value of
+                  ifCounterDiscontinuityTime."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.11"</span>;
+            }
+
+            <a name="ifInNUcastPkts.302"/><span class="yang_kw">leaf</span> <span class="yang_id">ifInNUcastPkts</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of packets, delivered by this sub-layer to a
+                  higher (sub-)layer, which were addressed to a multicast or
+                  broadcast address at this sub-layer.
+                  
+                  Discontinuities in the value of this counter can occur at
+                  re-initialization of the management system, and at other
+                  times as indicated by the value of
+                  ifCounterDiscontinuityTime.
+                  
+                  This object is deprecated in favour of ifInMulticastPkts and
+                  ifInBroadcastPkts."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.12"</span>;
+            }
+
+            <a name="ifInDiscards.321"/><span class="yang_kw">leaf</span> <span class="yang_id">ifInDiscards</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of inbound packets which were chosen to be
+                  discarded even though no errors had been detected to prevent
+                  
+                  their being deliverable to a higher-layer protocol.  One
+                  possible reason for discarding such a packet could be to
+                  free up buffer space.
+                  
+                  Discontinuities in the value of this counter can occur at
+                  re-initialization of the management system, and at other
+                  times as indicated by the value of
+                  ifCounterDiscontinuityTime."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.13"</span>;
+            }
+
+            <a name="ifInErrors.339"/><span class="yang_kw">leaf</span> <span class="yang_id">ifInErrors</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"For packet-oriented interfaces, the number of inbound
+                  packets that contained errors preventing them from being
+                  deliverable to a higher-layer protocol.  For character-
+                  oriented or fixed-length interfaces, the number of inbound
+                  transmission units that contained errors preventing them
+                  from being deliverable to a higher-layer protocol.
+                  
+                  Discontinuities in the value of this counter can occur at
+                  re-initialization of the management system, and at other
+                  times as indicated by the value of
+                  ifCounterDiscontinuityTime."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.14"</span>;
+            }
+
+            <a name="ifInUnknownProtos.357"/><span class="yang_kw">leaf</span> <span class="yang_id">ifInUnknownProtos</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"For packet-oriented interfaces, the number of packets
+                  received via the interface which were discarded because of
+                  an unknown or unsupported protocol.  For character-oriented
+                  or fixed-length interfaces that support protocol
+                  multiplexing the number of transmission units received via
+                  the interface which were discarded because of an unknown or
+                  unsupported protocol.  For any interface that does not
+                  support protocol multiplexing, this counter will always be
+                  0.
+                  
+                  Discontinuities in the value of this counter can occur at
+                  re-initialization of the management system, and at other
+                  times as indicated by the value of
+                  ifCounterDiscontinuityTime."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.15"</span>;
+            }
+
+            <a name="ifOutOctets.378"/><span class="yang_kw">leaf</span> <span class="yang_id">ifOutOctets</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The total number of octets transmitted out of the
+                  interface, including framing characters.
+                  
+                  Discontinuities in the value of this counter can occur at
+                  re-initialization of the management system, and at other
+                  times as indicated by the value of
+                  ifCounterDiscontinuityTime."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.16"</span>;
+            }
+
+            <a name="ifOutUcastPkts.392"/><span class="yang_kw">leaf</span> <span class="yang_id">ifOutUcastPkts</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The total number of packets that higher-level protocols
+                  requested be transmitted, and which were not addressed to a
+                  multicast or broadcast address at this sub-layer, including
+                  those that were discarded or not sent.
+                  
+                  Discontinuities in the value of this counter can occur at
+                  re-initialization of the management system, and at other
+                  times as indicated by the value of
+                  ifCounterDiscontinuityTime."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.17"</span>;
+            }
+
+            <a name="ifOutNUcastPkts.408"/><span class="yang_kw">leaf</span> <span class="yang_id">ifOutNUcastPkts</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The total number of packets that higher-level protocols
+                  requested be transmitted, and which were addressed to a
+                  multicast or broadcast address at this sub-layer, including
+                  those that were discarded or not sent.
+                  
+                  Discontinuities in the value of this counter can occur at
+                  re-initialization of the management system, and at other
+                  times as indicated by the value of
+                  ifCounterDiscontinuityTime.
+                  
+                  This object is deprecated in favour of ifOutMulticastPkts
+                  and ifOutBroadcastPkts."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.18"</span>;
+            }
+
+            <a name="ifOutDiscards.428"/><span class="yang_kw">leaf</span> <span class="yang_id">ifOutDiscards</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of outbound packets which were chosen to be
+                  discarded even though no errors had been detected to prevent
+                  their being transmitted.  One possible reason for discarding
+                  such a packet could be to free up buffer space.
+                  
+                  Discontinuities in the value of this counter can occur at
+                  re-initialization of the management system, and at other
+                  times as indicated by the value of
+                  ifCounterDiscontinuityTime."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.19"</span>;
+            }
+
+            <a name="ifOutErrors.444"/><span class="yang_kw">leaf</span> <span class="yang_id">ifOutErrors</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"For packet-oriented interfaces, the number of outbound
+                  packets that could not be transmitted because of errors.
+                  For character-oriented or fixed-length interfaces, the
+                  number of outbound transmission units that could not be
+                  transmitted because of errors.
+                  
+                  Discontinuities in the value of this counter can occur at
+                  re-initialization of the management system, and at other
+                  times as indicated by the value of
+                  ifCounterDiscontinuityTime."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.20"</span>;
+            }
+
+            <a name="ifOutQLen.461"/><span class="yang_kw">leaf</span> <span class="yang_id">ifOutQLen</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The length of the output packet queue (in packets)."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.21"</span>;
+            }
+
+            <a name="ifSpecific.470"/><span class="yang_kw">leaf</span> <span class="yang_id">ifSpecific</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A reference to MIB definitions specific to the particular
+                  media being used to realize the interface.  It is
+                  
+                  recommended that this value point to an instance of a MIB
+                  object in the media-specific MIB, i.e., that this object
+                  have the semantics associated with the InstancePointer
+                  textual convention defined in RFC 2579.  In fact, it is
+                  recommended that the media-specific MIB specify what value
+                  ifSpecific should/can take for values of ifType.  If no MIB
+                  definitions specific to the particular media are available,
+                  the value should be set to the OBJECT IDENTIFIER { 0 0 }."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.22"</span>;
+            }
+         }  <span class="yang_cmt">// list ifEntry</span>
+      }  <span class="yang_cmt">// container interfaces</span>
+
+      <a name="ifMIBObjects.492"/><span class="yang_kw">container</span> <span class="yang_id">ifMIBObjects</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1"</span>;
+
+         <a name="ifStackEntry.497"/><span class="yang_kw">list</span> <span class="yang_id">ifStackEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#ifStackHigherLayer.508">ifStackHigherLayer</a>, <a href="#ifStackLowerLayer.520">ifStackLowerLayer</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Information on a particular relationship between two sub-
+               layers, specifying that one sub-layer runs on 'top' of the
+               other sub-layer.  Each sub-layer corresponds to a conceptual
+               row in the ifTable."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.2.1"</span>;
+
+            <a name="ifStackHigherLayer.508"/><span class="yang_kw">leaf</span> <span class="yang_id">ifStackHigherLayer</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#InterfaceIndexOrZero.95">InterfaceIndexOrZero</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of ifIndex corresponding to the higher sub-layer
+                  of the relationship, i.e., the sub-layer which runs on 'top'
+                  of the sub-layer identified by the corresponding instance of
+                  ifStackLowerLayer.  If there is no higher sub-layer (below
+                  the internetwork layer), then this object has the value 0."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.2.1.1"</span>;
+            }
+
+            <a name="ifStackLowerLayer.520"/><span class="yang_kw">leaf</span> <span class="yang_id">ifStackLowerLayer</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#InterfaceIndexOrZero.95">InterfaceIndexOrZero</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of ifIndex corresponding to the lower sub-layer
+                  of the relationship, i.e., the sub-layer which runs 'below'
+                  the sub-layer identified by the corresponding instance of
+                  ifStackHigherLayer.  If there is no lower sub-layer, then
+                  this object has the value 0."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.2.1.2"</span>;
+            }
+
+            <a name="ifStackStatus.532"/><span class="yang_kw">leaf</span> <span class="yang_id">ifStackStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of the relationship between two sub-layers.
+                  
+                  Changing the value of this object from 'active' to
+                  'notInService' or 'destroy' will likely have consequences up
+                  and down the interface stack.  Thus, write access to this
+                  object is likely to be inappropriate for some types of
+                  interfaces, and many implementations will choose not to
+                  support write-access for any type of interface."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.2.1.3"</span>;
+            }
+         }  <span class="yang_cmt">// list ifStackEntry</span>
+
+         <a name="ifRcvAddressEntry.552"/><span class="yang_kw">list</span> <span class="yang_id">ifRcvAddressEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#ifIndex.561">ifIndex</a>, <a href="#ifRcvAddressAddress.570">ifRcvAddressAddress</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"A list of objects identifying an address for which the
+               system will accept packets/frames on the particular
+               interface identified by the index value ifIndex."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.4.1"</span>;
+
+            <a name="ifIndex.561"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="ifRcvAddressAddress.570"/><span class="yang_kw">leaf</span> <span class="yang_id">ifRcvAddressAddress</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#phys-address.268">yang:phys-address</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An address for which the system will accept packets/frames
+                  on this entry's interface."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.4.1.1"</span>;
+            }
+
+            <a name="ifRcvAddressStatus.579"/><span class="yang_kw">leaf</span> <span class="yang_id">ifRcvAddressStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object is used to create and delete rows in the
+                  ifRcvAddressTable."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.4.1.2"</span>;
+            }
+
+            <a name="ifRcvAddressType.588"/><span class="yang_kw">leaf</span> <span class="yang_id">ifRcvAddressType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"volatile"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"nonVolatile"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object has the value nonVolatile(3) for those entries
+                  in the table which are valid and will not be deleted by the
+                  next restart of the managed system.  Entries having the
+                  value volatile(2) are valid and exist, but have not been
+                  saved, so that will not exist after the next restart of the
+                  managed system.  Entries having the value other(1) are valid
+                  and exist but are not classified as to whether they will
+                  continue to exist after the next restart."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"volatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.4.1.3"</span>;
+            }
+         }  <span class="yang_cmt">// list ifRcvAddressEntry</span>
+
+         <a name="ifTableLastChange.609"/><span class="yang_kw">leaf</span> <span class="yang_id">ifTableLastChange</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The value of sysUpTime at the time of the last creation or
+               deletion of an entry in the ifTable.  If the number of
+               entries has been unchanged since the last re-initialization
+               of the local network management subsystem, then this object
+               contains a zero value."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.5"</span>;
+         }
+
+         <a name="ifStackLastChange.621"/><span class="yang_kw">leaf</span> <span class="yang_id">ifStackLastChange</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The value of sysUpTime at the time of the last change of
+               the (whole) interface stack.  A change of the interface
+               stack is defined to be any creation, deletion, or change in
+               value of any instance of ifStackStatus.  If the interface
+               stack has been unchanged since the last re-initialization of
+               the local network management subsystem, then this object
+               contains a zero value."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.6"</span>;
+         }
+      }  <span class="yang_cmt">// container ifMIBObjects</span>
+      <a name="augment.640"/><span class="yang_kw">augment</span> <a href="#ifEntry.126">/if-mib:interfaces/if-mib:ifEntry</a> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"An entry containing additional management information
+            applicable to a particular interface."</span>;
+
+         <a name="ifName.645"/><span class="yang_kw">leaf</span> <span class="yang_id">ifName</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DisplayString.39">smiv2:DisplayString</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The textual name of the interface.  The value of this
+               object should be the name of the interface as assigned by
+               the local device and should be suitable for use in commands
+               entered at the device's `console'.  This might be a text
+               name, such as `le0' or a simple port number, such as `1',
+               depending on the interface naming syntax of the device.  If
+               several entries in the ifTable together represent a single
+               interface as named by the device, then each will have the
+               same value of ifName.  Note that for an agent which responds
+               to SNMP queries concerning an interface on some other
+               (proxied) device, then the value of ifName for such an
+               interface is the proxied device's local name for it.
+               
+               If there is no local name, or this object is otherwise not
+               applicable, then this object contains a zero-length string."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.1"</span>;
+         }
+
+         <a name="ifInMulticastPkts.667"/><span class="yang_kw">leaf</span> <span class="yang_id">ifInMulticastPkts</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of packets, delivered by this sub-layer to a
+               higher (sub-)layer, which were addressed to a multicast
+               address at this sub-layer.  For a MAC layer protocol, this
+               includes both Group and Functional addresses.
+               
+               Discontinuities in the value of this counter can occur at
+               re-initialization of the management system, and at other
+               
+               times as indicated by the value of
+               ifCounterDiscontinuityTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.2"</span>;
+         }
+
+         <a name="ifInBroadcastPkts.684"/><span class="yang_kw">leaf</span> <span class="yang_id">ifInBroadcastPkts</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of packets, delivered by this sub-layer to a
+               higher (sub-)layer, which were addressed to a broadcast
+               address at this sub-layer.
+               
+               Discontinuities in the value of this counter can occur at
+               re-initialization of the management system, and at other
+               times as indicated by the value of
+               ifCounterDiscontinuityTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.3"</span>;
+         }
+
+         <a name="ifOutMulticastPkts.699"/><span class="yang_kw">leaf</span> <span class="yang_id">ifOutMulticastPkts</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of packets that higher-level protocols
+               requested be transmitted, and which were addressed to a
+               multicast address at this sub-layer, including those that
+               were discarded or not sent.  For a MAC layer protocol, this
+               includes both Group and Functional addresses.
+               
+               Discontinuities in the value of this counter can occur at
+               re-initialization of the management system, and at other
+               times as indicated by the value of
+               ifCounterDiscontinuityTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.4"</span>;
+         }
+
+         <a name="ifOutBroadcastPkts.716"/><span class="yang_kw">leaf</span> <span class="yang_id">ifOutBroadcastPkts</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of packets that higher-level protocols
+               requested be transmitted, and which were addressed to a
+               broadcast address at this sub-layer, including those that
+               were discarded or not sent.
+               
+               Discontinuities in the value of this counter can occur at
+               re-initialization of the management system, and at other
+               
+               times as indicated by the value of
+               ifCounterDiscontinuityTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.5"</span>;
+         }
+
+         <a name="ifHCInOctets.733"/><span class="yang_kw">leaf</span> <span class="yang_id">ifHCInOctets</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of octets received on the interface,
+               including framing characters.  This object is a 64-bit
+               version of ifInOctets.
+               
+               Discontinuities in the value of this counter can occur at
+               re-initialization of the management system, and at other
+               times as indicated by the value of
+               ifCounterDiscontinuityTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.6"</span>;
+         }
+
+         <a name="ifHCInUcastPkts.748"/><span class="yang_kw">leaf</span> <span class="yang_id">ifHCInUcastPkts</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of packets, delivered by this sub-layer to a
+               higher (sub-)layer, which were not addressed to a multicast
+               or broadcast address at this sub-layer.  This object is a
+               64-bit version of ifInUcastPkts.
+               
+               Discontinuities in the value of this counter can occur at
+               re-initialization of the management system, and at other
+               times as indicated by the value of
+               ifCounterDiscontinuityTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.7"</span>;
+         }
+
+         <a name="ifHCInMulticastPkts.764"/><span class="yang_kw">leaf</span> <span class="yang_id">ifHCInMulticastPkts</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of packets, delivered by this sub-layer to a
+               higher (sub-)layer, which were addressed to a multicast
+               address at this sub-layer.  For a MAC layer protocol, this
+               includes both Group and Functional addresses.  This object
+               is a 64-bit version of ifInMulticastPkts.
+               
+               Discontinuities in the value of this counter can occur at
+               re-initialization of the management system, and at other
+               times as indicated by the value of
+               ifCounterDiscontinuityTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.8"</span>;
+         }
+
+         <a name="ifHCInBroadcastPkts.781"/><span class="yang_kw">leaf</span> <span class="yang_id">ifHCInBroadcastPkts</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of packets, delivered by this sub-layer to a
+               higher (sub-)layer, which were addressed to a broadcast
+               address at this sub-layer.  This object is a 64-bit version
+               of ifInBroadcastPkts.
+               
+               Discontinuities in the value of this counter can occur at
+               re-initialization of the management system, and at other
+               times as indicated by the value of
+               ifCounterDiscontinuityTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.9"</span>;
+         }
+
+         <a name="ifHCOutOctets.797"/><span class="yang_kw">leaf</span> <span class="yang_id">ifHCOutOctets</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of octets transmitted out of the
+               interface, including framing characters.  This object is a
+               64-bit version of ifOutOctets.
+               
+               Discontinuities in the value of this counter can occur at
+               re-initialization of the management system, and at other
+               times as indicated by the value of
+               ifCounterDiscontinuityTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.10"</span>;
+         }
+
+         <a name="ifHCOutUcastPkts.812"/><span class="yang_kw">leaf</span> <span class="yang_id">ifHCOutUcastPkts</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of packets that higher-level protocols
+               requested be transmitted, and which were not addressed to a
+               multicast or broadcast address at this sub-layer, including
+               those that were discarded or not sent.  This object is a
+               64-bit version of ifOutUcastPkts.
+               
+               Discontinuities in the value of this counter can occur at
+               re-initialization of the management system, and at other
+               times as indicated by the value of
+               ifCounterDiscontinuityTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.11"</span>;
+         }
+
+         <a name="ifHCOutMulticastPkts.829"/><span class="yang_kw">leaf</span> <span class="yang_id">ifHCOutMulticastPkts</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of packets that higher-level protocols
+               requested be transmitted, and which were addressed to a
+               multicast address at this sub-layer, including those that
+               were discarded or not sent.  For a MAC layer protocol, this
+               includes both Group and Functional addresses.  This object
+               is a 64-bit version of ifOutMulticastPkts.
+               
+               Discontinuities in the value of this counter can occur at
+               re-initialization of the management system, and at other
+               times as indicated by the value of
+               ifCounterDiscontinuityTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.12"</span>;
+         }
+
+         <a name="ifHCOutBroadcastPkts.847"/><span class="yang_kw">leaf</span> <span class="yang_id">ifHCOutBroadcastPkts</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of packets that higher-level protocols
+               requested be transmitted, and which were addressed to a
+               broadcast address at this sub-layer, including those that
+               were discarded or not sent.  This object is a 64-bit version
+               of ifOutBroadcastPkts.
+               
+               Discontinuities in the value of this counter can occur at
+               re-initialization of the management system, and at other
+               times as indicated by the value of
+               ifCounterDiscontinuityTime."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.13"</span>;
+         }
+
+         <a name="ifLinkUpDownTrapEnable.864"/><span class="yang_kw">leaf</span> <span class="yang_id">ifLinkUpDownTrapEnable</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+               <span class="yang_kw">enum</span> <span class="yang_str">"enabled"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+               }
+            }
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Indicates whether linkUp/linkDown traps should be generated
+               for this interface.
+               
+               By default, this object should have the value enabled(1) for
+               interfaces which do not operate on 'top' of any other
+               interface (as defined in the ifStackTable), and disabled(2)
+               otherwise."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.14"</span>;
+         }
+
+         <a name="ifHighSpeed.881"/><span class="yang_kw">leaf</span> <span class="yang_id">ifHighSpeed</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An estimate of the interface's current bandwidth in units
+               of 1,000,000 bits per second.  If this object reports a
+               value of `n' then the speed of the interface is somewhere in
+               the range of `n-500,000' to `n+499,999'.  For interfaces
+               which do not vary in bandwidth or for those where no
+               accurate estimation can be made, this object should contain
+               the nominal bandwidth.  For a sub-layer which has no concept
+               of bandwidth, this object should be zero."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.15"</span>;
+         }
+
+         <a name="ifPromiscuousMode.896"/><span class="yang_kw">leaf</span> <span class="yang_id">ifPromiscuousMode</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TruthValue.100">smiv2:TruthValue</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object has a value of false(2) if this interface only
+               accepts packets/frames that are addressed to this station.
+               This object has a value of true(1) when the station accepts
+               all packets/frames transmitted on the media.  The value
+               true(1) is only legal on certain types of media.  If legal,
+               setting this object to a value of true(1) may require the
+               interface to be reset before becoming effective.
+               
+               The value of ifPromiscuousMode does not affect the reception
+               of broadcast and multicast packets/frames by the interface."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.16"</span>;
+         }
+
+         <a name="ifConnectorPresent.913"/><span class="yang_kw">leaf</span> <span class="yang_id">ifConnectorPresent</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TruthValue.100">smiv2:TruthValue</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object has the value 'true(1)' if the interface
+               sublayer has a physical connector and the value 'false(2)'
+               otherwise."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.17"</span>;
+         }
+
+         <a name="ifAlias.923"/><span class="yang_kw">leaf</span> <span class="yang_id">ifAlias</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DisplayString.39">smiv2:DisplayString</a></span> {
+               <span class="yang_kw">length</span> <span class="yang_str">"0..64"</span>;
+            }
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object is an 'alias' name for the interface as
+               specified by a network manager, and provides a non-volatile
+               'handle' for the interface.
+               
+               On the first instantiation of an interface, the value of
+               ifAlias associated with that interface is the zero-length
+               string.  As and when a value is written into an instance of
+               ifAlias through a network management set operation, then the
+               agent must retain the supplied value in the ifAlias instance
+               associated with the same interface for as long as that
+               interface remains instantiated, including across all re-
+               initializations/reboots of the network management system,
+               including those which result in a change of the interface's
+               ifIndex value.
+               
+               An example of the value which a network manager might store
+               in this object for a WAN interface is the (Telco's) circuit
+               number/identifier of the interface.
+               
+               Some agents may support write-access only for interfaces
+               having particular values of ifType.  An agent which supports
+               write access to this object is required to keep the value in
+               non-volatile storage, but it may limit the length of new
+               values depending on how much storage is already occupied by
+               the current values for other interfaces."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.18"</span>;
+         }
+
+         <a name="ifCounterDiscontinuityTime.957"/><span class="yang_kw">leaf</span> <span class="yang_id">ifCounterDiscontinuityTime</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The value of sysUpTime on the most recent occasion at which
+               any one or more of this interface's counters suffered a
+               discontinuity.  The relevant counters are the specific
+               instances associated with this interface of any Counter32 or
+               
+               Counter64 object contained in the ifTable or ifXTable.  If
+               no such discontinuities have occurred since the last re-
+               initialization of the local management subsystem, then this
+               object contains a zero value."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1.19"</span>;
+         }
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1"</span>;
+      }
+      <a name="augment.978"/><span class="yang_kw">augment</span> <a href="#ifEntry.126">/if-mib:interfaces/if-mib:ifEntry</a> {
+         <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"An entry containing objects for invoking tests on an
+            interface."</span>;
+
+         <a name="ifTestId.984"/><span class="yang_kw">leaf</span> <span class="yang_id">ifTestId</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TestAndIncr.109">smiv2:TestAndIncr</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object identifies the current invocation of the
+               interface's test."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.3.1.1"</span>;
+         }
+
+         <a name="ifTestStatus.994"/><span class="yang_kw">leaf</span> <span class="yang_id">ifTestStatus</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+               <span class="yang_kw">enum</span> <span class="yang_str">"notInUse"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"inUse"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+               }
+            }
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object indicates whether or not some manager currently
+               has the necessary 'ownership' required to invoke a test on
+               this interface.  A write to this object is only successful
+               when it changes its value from 'notInUse(1)' to 'inUse(2)'.
+               After completion of a test, the agent resets the value back
+               to 'notInUse(1)'."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.3.1.2"</span>;
+         }
+
+         <a name="ifTestType.1011"/><span class="yang_kw">leaf</span> <span class="yang_id">ifTestType</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#AutonomousType.141">smiv2:AutonomousType</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"A control variable used to start and stop operator-
+               initiated interface tests.  Most OBJECT IDENTIFIER values
+               assigned to tests are defined elsewhere, in association with
+               specific types of interface.  However, this document assigns
+               a value for a full-duplex loopback test, and defines the
+               special meanings of the subject identifier:
+               
+                   noTest  OBJECT IDENTIFIER ::= { 0 0 }
+               
+               When the value noTest is written to this object, no action
+               is taken unless a test is in progress, in which case the
+               test is aborted.  Writing any other value to this object is
+               
+               only valid when no test is currently in progress, in which
+               case the indicated test is initiated.
+               
+               When read, this object always returns the most recent value
+               that ifTestType was set to.  If it has not been set since
+               the last initialization of the network management subsystem
+               on the agent, a value of noTest is returned."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.3.1.3"</span>;
+         }
+
+         <a name="ifTestResult.1039"/><span class="yang_kw">leaf</span> <span class="yang_id">ifTestResult</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+               <span class="yang_kw">enum</span> <span class="yang_str">"none"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"success"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"inProgress"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"notSupported"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"unAbleToRun"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"aborted"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"failed"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+               }
+            }
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains the result of the most recently
+               requested test, or the value none(1) if no tests have been
+               requested since the last reset.  Note that this facility
+               provides no provision for saving the results of one test
+               when starting another, as could be required if used by
+               multiple managers concurrently."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.3.1.4"</span>;
+         }
+
+         <a name="ifTestCode.1061"/><span class="yang_kw">leaf</span> <span class="yang_id">ifTestCode</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains a code which contains more specific
+               information on the test result, for example an error-code
+               after a failed test.  Error codes and other values this
+               object may take are specific to the type of interface and/or
+               test.  The value may have the semantics of either the
+               AutonomousType or InstancePointer textual conventions as
+               defined in RFC 2579.  The identifier:
+               
+                   testCodeUnknown  OBJECT IDENTIFIER ::= { 0 0 }
+               
+               is defined for use if no additional result code is
+               available."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.3.1.5"</span>;
+         }
+
+         <a name="ifTestOwner.1081"/><span class="yang_kw">leaf</span> <span class="yang_id">ifTestOwner</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#OwnerString.61">OwnerString</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The entity which currently has the 'ownership' required to
+               invoke a test on this interface."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.3.1.6"</span>;
+         }
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.3.1"</span>;
+      }
+
+      <a name="linkDown.1093"/><span class="yang_kw">notification</span> <span class="yang_id">linkDown</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"A linkDown trap signifies that the SNMP entity, acting in
+            an agent role, has detected that the ifOperStatus object for
+            one of its communication links is about to enter the down
+            state from some other state (but not from the notPresent
+            state).  This other state is indicated by the included value
+            of ifOperStatus."</span>;
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.5.3"</span>;
+
+         <a name="linkDown-ifIndex.1103"/><span class="yang_kw">container</span> <span class="yang_id">linkDown-ifIndex</span> {
+
+            <a name="ifIndex.1104"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+         }  <span class="yang_cmt">// container linkDown-ifIndex</span>
+
+         <a name="linkDown-ifAdminStatus.1114"/><span class="yang_kw">container</span> <span class="yang_id">linkDown-ifAdminStatus</span> {
+
+            <a name="ifIndex.1115"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="ifAdminStatus.1123"/><span class="yang_kw">leaf</span> <span class="yang_id">ifAdminStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"up"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"down"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"testing"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The desired state of the interface.  The testing(3) state
+                  indicates that no operational packets can be passed.  When a
+                  managed system initializes, all interfaces start with
+                  ifAdminStatus in the down(2) state.  As a result of either
+                  explicit management action or per configuration information
+                  retained by the managed system, ifAdminStatus is then
+                  changed to either the up(1) or testing(3) states (or remains
+                  in the down(2) state)."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.7"</span>;
+            }
+         }  <span class="yang_cmt">// container linkDown-ifAdminStatus</span>
+
+         <a name="linkDown-ifOperStatus.1143"/><span class="yang_kw">container</span> <span class="yang_id">linkDown-ifOperStatus</span> {
+
+            <a name="ifIndex.1144"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="ifOperStatus.1152"/><span class="yang_kw">leaf</span> <span class="yang_id">ifOperStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"up"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"down"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"testing"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"unknown"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"dormant"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"notPresent"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"lowerLayerDown"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The current operational state of the interface.  The
+                  testing(3) state indicates that no operational packets can
+                  be passed.  If ifAdminStatus is down(2) then ifOperStatus
+                  should be down(2).  If ifAdminStatus is changed to up(1)
+                  then ifOperStatus should change to up(1) if the interface is
+                  ready to transmit and receive network traffic; it should
+                  change to dormant(5) if the interface is waiting for
+                  external actions (such as a serial line waiting for an
+                  incoming connection); it should remain in the down(2) state
+                  if and only if there is a fault that prevents it from going
+                  to the up(1) state; it should remain in the notPresent(6)
+                  state if the interface has missing (typically, hardware)
+                  components."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.8"</span>;
+            }
+         }  <span class="yang_cmt">// container linkDown-ifOperStatus</span>
+      }  <span class="yang_cmt">// notification linkDown</span>
+
+      <a name="linkUp.1183"/><span class="yang_kw">notification</span> <span class="yang_id">linkUp</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"A linkUp trap signifies that the SNMP entity, acting in an
+            agent role, has detected that the ifOperStatus object for
+            one of its communication links left the down state and
+            transitioned into some other state (but not into the
+            notPresent state).  This other state is indicated by the
+            included value of ifOperStatus."</span>;
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.5.4"</span>;
+
+         <a name="linkUp-ifIndex.1193"/><span class="yang_kw">container</span> <span class="yang_id">linkUp-ifIndex</span> {
+
+            <a name="ifIndex.1194"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+         }  <span class="yang_cmt">// container linkUp-ifIndex</span>
+
+         <a name="linkUp-ifAdminStatus.1204"/><span class="yang_kw">container</span> <span class="yang_id">linkUp-ifAdminStatus</span> {
+
+            <a name="ifIndex.1205"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="ifAdminStatus.1213"/><span class="yang_kw">leaf</span> <span class="yang_id">ifAdminStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"up"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"down"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"testing"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The desired state of the interface.  The testing(3) state
+                  indicates that no operational packets can be passed.  When a
+                  managed system initializes, all interfaces start with
+                  ifAdminStatus in the down(2) state.  As a result of either
+                  explicit management action or per configuration information
+                  retained by the managed system, ifAdminStatus is then
+                  changed to either the up(1) or testing(3) states (or remains
+                  in the down(2) state)."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.7"</span>;
+            }
+         }  <span class="yang_cmt">// container linkUp-ifAdminStatus</span>
+
+         <a name="linkUp-ifOperStatus.1233"/><span class="yang_kw">container</span> <span class="yang_id">linkUp-ifOperStatus</span> {
+
+            <a name="ifIndex.1234"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="ifOperStatus.1242"/><span class="yang_kw">leaf</span> <span class="yang_id">ifOperStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"up"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"down"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"testing"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"unknown"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"dormant"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"notPresent"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"lowerLayerDown"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The current operational state of the interface.  The
+                  testing(3) state indicates that no operational packets can
+                  be passed.  If ifAdminStatus is down(2) then ifOperStatus
+                  should be down(2).  If ifAdminStatus is changed to up(1)
+                  then ifOperStatus should change to up(1) if the interface is
+                  ready to transmit and receive network traffic; it should
+                  change to dormant(5) if the interface is waiting for
+                  external actions (such as a serial line waiting for an
+                  incoming connection); it should remain in the down(2) state
+                  if and only if there is a fault that prevents it from going
+                  to the up(1) state; it should remain in the notPresent(6)
+                  state if the interface has missing (typically, hardware)
+                  components."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.8"</span>;
+            }
+         }  <span class="yang_cmt">// container linkUp-ifOperStatus</span>
+      }  <span class="yang_cmt">// notification linkUp</span>
+   }  <span class="yang_cmt">// module IF-MIB</span>
+</pre>
+</div>
+</div>

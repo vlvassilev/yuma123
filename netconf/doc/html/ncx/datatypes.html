@@ -1,0 +1,3541 @@
+<!doctype html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>NCX Data Types (draft 0.2)</title>
+    <link rel="stylesheet" href="/css/ncx.css" type="text/css"/>
+  </head>
+<body>
+
+<p>
+<a href="index.html">NCX Home</a>
+</p>
+
+<h1 align="center">NCX Data Types</h1>
+
+<p>Contents:</p>
+
+<ul>
+<li><a href="#Overview">Overview</a>
+<li><a href="#Data_Type_Properties">Data Type Properties</a>
+  <ul>
+  <li><a href="#owner">Owner</a></li>
+  <li><a href="#namespace">Namespace</a></li>
+  <li><a href="#name">Name</a></li>
+  <li><a href="#semantics">Semantics</a></li>
+  <li><a href="#conformance">Conformance Condition</a></li>
+  <li><a href="#syntax">Syntax</a></li>
+  <li><a href="#index">Index</a></li>
+  <li><a href="#range">Range Restrictions</a></li>
+  <li><a href="#value-set">Value Set Restrictions</a></li>
+  <li><a href="#pattern">Pattern Restrictions</a></li>
+  <li><a href="#instance-qualifier">Instance Restrictions</a></li>
+  <li><a href="#metadata">Meta-Data</a></li>
+  <li><a href="#default">Default Value</a></li>
+  <li><a href="#max-access">Maximum Protocol Access</a></li>
+  <li><a href="#data-class">Data Classification</a></li>
+  <li><a href="#status">Lifecycle Status</a></li>
+  <li><a href="#appinfo">Application Info</a></li>
+  <li><a href="#duplicates">Duplicate Values</a></li>
+  <li><a href="#merge-type">Merge Type</a></li>
+  </ul>
+</li>
+<li><a href="#Derived_Types">Derived Types</a></li>
+<li><a href="#Base_Types">Base Types</a>
+  <ul>
+  <li><a href="#Simple_Types">Simple Types</a>
+    <ul>
+    <li><a href="#int">int</a></li>
+    <li><a href="#uint">uint</a></li>
+    <li><a href="#long">long</a></li>
+    <li><a href="#ulong">ulong</a></li>
+    <li><a href="#float">float</a></li>
+    <li><a href="#double">double</a></li>
+    <li><a href="#enum">enum</a></li>
+    <li><a href="#string">string</a></li>
+    <li><a href="#list">list</a></li>
+    <li><a href="#union">union</a></li>
+    <li><a href="#flag">flag</a></li>
+    </ul>
+  </li>
+  <li><a href="#Complex_Types">Complex Types</a>
+    <ul>
+    <li><a href="#struct">struct</a></li>
+    <li><a href="#choice">choice</a></li>
+    <li><a href="#container">container</a></li>
+    </ul>
+  </li>
+  <li><a href="#Special_Types">Special Types</a>
+    <ul>
+    <li><a href="#any">any</a></li>
+    <li><a href="#root">root</a></li>
+    </ul>
+
+  </ul>
+</li>
+<li><a href="#Syntax_Examples">Syntax Clause Examples</a>
+</ul>
+
+<h1><a name="Overview">Overview</a></h1>
+
+<p>
+The NCX language provides a set of data types that can be used
+to create user-named data types with additional properties.
+Data types are the building blocks for higher-level constructs,
+such as remote procedure parameters or configuration data models.
+</p>
+
+<p>
+This section defines the following aspects of NCX data modeling:
+</p>
+
+<ul>
+<li>Data Type Properties</li>
+<li>Base Types</li>
+<li>Derived Types</li>
+<li>Syntax Examples</li>
+</ul>
+
+<h1><a name="Data_Type_Properties">Data Type Properties</a></h1>
+
+<p>
+An NCX data type has a number of properties that can be
+set with the NCX <a href="#NCX_Type">type</a> definition
+construct.  The following table describes the NCX type properties:
+</p>
+
+<table summary="Type Properties" border="1" align="center" width="100%">
+<tr>  
+<th>Name</th>
+<th>Use</th>
+<th>Description</th>
+</tr>
+
+<tr>  
+<td><a href="#owner">owner</a></td>
+<td>required</td>
+<td>The naming authority for the data type. This is
+    derived from the <b>owner</b> clause in the NCX module header
+    that contains the type definition.  
+</tr>
+
+<tr>  
+<td><a href="#namespace">namespace</a></td>
+<td>required</td>
+<td>The XML namespace for the data type. This is either
+    derived from the NCX module header or set
+    with the <b>namespace</b> clause in the module
+    that contains the type definition.  
+</tr>
+
+<tr>
+<td><a href="#name">name</a></td>
+<td>required</td>
+<td>The user-specified <b>name</b> for the data type.</td>
+</tr>
+
+<tr>  
+<td><a href="#semantics">semantics</a></td>
+<td>required</td>
+<td>The user-defined conceptual semantics for the data type,
+set with the <b>description</b> clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#conformance">conformance condition</a></td>
+<td>optional</td>
+<td>The boolean Xpath expression that indicates whether the data type
+must be supported by a particular agent implementation, 
+set with the <b>condition</b> clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#syntax">syntax</a></td>
+<td>required</td>
+<td>Defines the expected structure of instances of the data type.
+This is set with the <b>syntax</b> clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#index">index</a></td>
+<td>conditional</td>
+<td>Defines the index components for data types with
+named instances (table or container).
+This is set with the <b>index</b> clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#range">range</a></td>
+<td>optional</td>
+<td>Defines any constraints on the value of numbers, the length of
+strings, or the number of items allowed in a list.  This is set
+with the <b>range</b> clause, within the syntax clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#value-set">value set</a></td>
+<td>optional</td>
+<td>
+Defines the specific values allowed for enum and string data types.
+This is set with the <b>value set</b> clause, within the syntax clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#pattern">pattern</a></td>
+<td>optional</td>
+<td>
+Defines the pattern expression for string data types.
+This is set with the <b>pattern</b> clause, within the syntax clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#instance-qualifier">instance qualifier</a></td>
+<td>optional</td>
+<td>
+Defines how many unnamed instances of a data type may be present.
+This is set with the <b>instance qualifier</b> clause, 
+within the syntax clause.</td>
+</tr>
+
+<tr> 
+<td><a href="#metadata">metadata</a></td>
+<td>optional</td>
+<td>Defines any XML attributes associated with the data type. 
+This property is inherited from the parent data type, and
+set with the <b>metadata</b> clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#default">default value</a></td>
+<td>optional</td>
+<td>Defines the default value that will be used if the data type
+is optional and a value is not supplied.
+This is set with the <b>default</b> clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#units">units</a></td>
+<td>optional</td>
+<td>Defines the type of units that apply to the data type.
+This is set with the <b>units</b> clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#max-access">max access</a></td>
+<td>optional</td>
+<td>Defines the maximum protocol access allowed for an
+instance of the data type, set with the <b>max-access</b> clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#data-class">data class</a></td>
+<td>optional</td>
+<td>Defines whether the data type represents configuration
+data, transient configuration data,
+or state data, set with the <b>data-class</b> clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#status">lifecycle status</a></td>
+<td>optional</td>
+<td>
+Defines the lifecycle status of the type definition 
+set with the <b>status</b> clause, within the appinfo clause.
+This has exactly the same semantics as the STATUS clause in SMIv2.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#appinfo">appinfo</a></td>
+<td>optional</td>
+<td>User extensible application information related to the data type,
+set with the <b>appinfo</b> clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#duplicates">duplicates</a></td>
+<td>optional</td>
+<td>Defines whether a list data type, or unnamed instances of 
+any data type, are allowed to contain duplicate values, 
+set with the <b>duplicates</b> 
+or <b>no-duplicates</b> clause,
+within the appinfo clause.</td>
+</tr>
+
+<tr>  
+<td><a href="#merge-type">merge type</a></td>
+<td>optional</td>
+<td>Defines the algorithm used when merging data into
+a list data type, or unnamed instances of 
+any data type, set with the <b>merge-type</b> clause,
+within the appinfo clause.</td>
+</tr>
+
+</table>
+
+<h2><a name="owner">Owner</a></h2>
+
+<p>
+The type owner is identified by the module 
+<a href="modules.html#Hdr_owner">owner</a> field,
+which is specified in the module header.
+All definitions with the same 'owner' must be unique,
+regardless of which module contains the definition.
+</p>
+
+<p>
+Once an owner is assigned to a data type, it can never
+be changed in a future version of the module which
+contains the data type.
+</p>
+
+<h2><a name="namespace">Namespace</a></h2>
+
+<p>
+The type namespace is identified by the module 
+<a href="modules.html#Hdr_owner">namespace</a> field,
+which is specified in the module header.  If this
+field is not present, then the namespace is
+algorithmically assigned, based on the module owner
+and <a href="modules.html#Hdr_application">application</a>.
+</p>
+
+<p>
+Native NCX processing will ignore the type namespace
+and rely on imports processing to resolve type definitions.
+The type namespace is only used to generate conforming XSD
+files.
+</p>
+
+<p>
+Once a namespace is assigned to a data type, it can never
+be changed in a future version of the module which
+contains the data type.
+</p>
+ 
+<h2><a name="name">Name</a></h2>
+
+<p>
+The type name is identified by an string conforming
+to the 
+<a href="modules.html#Ncx_Names">NcxName</a> data type.
+</p>
+
+<p>
+Once a name is assigned to a data type, it can never
+be changed in a future version of the module which
+contains the data type.
+</p>
+
+<h2><a name="semantics">Semantics</a></h2>
+
+<p>
+The data type semantics are captured in the 
+<a href="modules.html#Type_description">description</a>
+clause, and inherent in the choice of NCX Base Type
+for the data type.
+</p>
+
+<h2><a name="conformance">Conformance Condition</a></h2>
+
+<p>
+Normally, a data type or parameter set object
+is mandatory to support, but if the 
+<a href="modules.html#Type_condition">condition</a> clause
+in the <a href="modules.html#NCX_Types">type</a> construct
+is present, then the associated definition is only mandatory 
+to support if the condition expression evaluates to 'true'.
+</p>
+
+<h2><a name="syntax">Syntax</a></h2>
+
+<p>
+The syntax clause allows specific properties to be
+assigned to data types to characterize the data type
+for protocol processing purposes.  For complex data types,
+the syntax also contains the definitions of the child nodes
+within the data type.
+</p>
+
+<p>
+The format of the syntax clause for a data type is determined
+by the NCX Base Type used in the type definition.
+Refer to the base type definition section for details
+on the syntax expected for each base type.
+</p>
+
+<h2><a name="index">Index</a></h2>
+
+<p>
+The index property only applies to data types that
+provide named data instances, which includes the 
+<a href="#table">table</a> and <a href="#container">container</a>
+data types.
+</p>
+
+<p>
+The index property applies to the data node itself
+for the 'table' data type, but applies to the child
+nodes for the 'container' data type.
+</p>
+
+<p>
+An index clause contains one or more index components.
+Each component identifies an node within the table
+or container child nodes, which must be unique for
+all instances of the data type.  The component may
+be declared 'inline' as well, in which case the XML
+instance document is expected to contain the specified
+node listed before any fields defined in the table.
+</p>
+
+<p>
+There is no limit to the number of index clause components
+that may be specified.
+</p>
+
+<p>
+An index clause component can take several forms,
+which can be combined arbitrarily in the same index clause.
+</p>
+
+<ul>
+<li><b>inline [int a (1..42)]</b>
+<br/>A simple type definition is specified inline.  A corresponding
+object must be pre-pended to the conceptual components of the table 
+row content to identify this index component.
+</li>
+<li><b>inline-named [IndexType a]</b>
+<br/>A simple type definition is specified inline.  A corresponding
+object must be pre-pended to the conceptual components of the table 
+row content to identify this index component.
+</li>
+
+<li><b>simple [b, a]</b>
+<br/>A top-level child node within the table row content is
+specified as the index component.  Index order does not have to match
+node order.
+</li>
+<li><b>scoped [c.foo.id]</b>
+<br/>A nested child node within the table row content is
+specified as the index component.  Index order does not have to match
+node order. There is no maximum depth limit defined.
+</li>
+</ul>
+
+<p>
+The following data types are permitted for an index clause component:
+</p>
+
+<ul>
+<li>int</li>
+<li>uint</li>
+<li>long</li>
+<li>ulong</li>
+<li>float</li>
+<li>double</li>
+<li>string</li>
+<li>enum</li>
+<li>union</li>
+</ul>
+
+<p>
+The following ABNF fragment defines an NCX index clause:
+</p>
+
+<pre>
+
+    index-decl = "[" index-decl-val "]"
+   
+    index-decl-val = index-component 0*("," index-component)
+   
+    index-component = c-index-type / scoped-name 
+                     / name / named-type
+   
+    c-index-type = c-num-type / c-string-type 
+                    / c-enum-type / c-union-type
+   
+   
+    # Scoped Index Identifier:
+    #   Each name component (between the dots) is
+    #   limited in size to NcxName syntax rules
+   
+    scoped-name = unquoted-string    # name1.name2.name3 ...
+
+</pre>
+
+<h2><a name="range">Range Restrictions</a></h2>
+
+<p>
+The range clause is used to constrain
+the values of numeric data types, the length of string data types,
+or the number of members in a list data type.  The same basic
+construct is used in all cases.
+</p>
+
+<p>
+The base type of a numeric range should match the base
+type of the underlying data type.  A number can be
+entered as an integer, hexidecimal number or a floating
+point number.  
+The following table defines which numeric forms are allowed
+in each range clause application:
+</p>
+
+<table summary="Range Clauses" border="1" align="center" width="100%">
+<tr>  
+<th>Clause Type</th>
+<th>Description</th>
+</tr>
+
+<tr>  
+<td>numeric constraint</td>
+<td>
+A numeric range may be entered in any form,
+as long as the value is permitted within the
+base type.  For example, a floating point number
+cannot be used to specify the range boundaries
+for an integer data type.  The compiler will
+attempt to convert any number format to the
+same numeric type as the data type being defined.
+</td>
+</tr>
+
+<tr>  
+<td>string length constraint</td>
+<td>
+The base type of a length constraint is <a href="#uint">uint</a>.
+</td>
+</tr>
+
+<tr>  
+<td>list member count constraint</td>
+<td>
+The base type of a list member count constraint is <a href="#uint">uint</a>.
+</td>
+</tr>
+</table>
+
+<p>
+The following type definitions show some examples of range clause usage:
+</p>
+
+<pre>
+
+    type Num1 {
+      description "integer from 1 to 10";
+      syntax { int (1 .. 10); }
+    }
+
+    type Num2 {
+      description "integer from 3 to 10";
+      syntax { Num1 (3 .. ); }
+    }
+
+    type Num3 {
+      description "float from 1.1 to 2.25";
+      syntax { float (1.1 .. 2.25); }
+    }
+
+    type Str1 {
+      description "string length 0.. 255";
+      syntax { string (0 .. 255); }
+    }
+
+    type Str2 {
+      description "string length 1 to 5 or 10 or 20 to 255";
+      syntax { string (10 | 1 .. 5 | 20  .. 0xff); }
+    }
+
+    type List1 {
+      description "list of 1 - 20 strings, each length of 0.. 255 bytes";
+      syntax { list (1 .. 20) { Str1 }; }
+    }
+
+</pre>
+
+<p>
+The format of a range clause is very similar to SMIv2 range definitions,
+with the following differences:
+</p>
+
+<ul>
+<li>
+Numeric form may be integer, hexidecimal, or floating point.
+</li>
+<li>
+Range terms do not have to appear in ascending order, although
+they must not overlap.
+</li>
+<li>
+If the lower or upper bound is not supplied, then the lower
+or upper bound value is inherited from the parent data type.
+</li>
+<li>
+Ranges are not cumulative. If present in a data type
+definition, then it overrides any range definitions
+that have been defined in any parent type definitions
+(except for inheriting lower or upper bounds described above).
+</li>
+</ul>
+
+<h2><a name="value-set">Value Set Restrictions</a></h2>
+
+<p>
+The value set clause is used to specify a set of fixed values
+that a string-based data type is allowed to hold.
+A value set is entered as a list of whitespace delimited strings.
+Each string may be in quoted or unquoted format.
+</p>
+
+<p>
+The following type definitions show some examples of value set clause usage:
+</p>
+
+<pre>
+
+    type Color {
+      description "string can contain blue green or red";
+      syntax { string = { blue green red }; }
+    }
+
+    type MoreColors {
+      description 
+        "string can contain blue green or red or bright orange or yellow";
+      syntax { Color += { "bright orange" yellow }; }
+    }
+
+</pre>
+
+<p>
+The <a href="#enum">enum</a> data type also allows value set constraints
+to be specified, except the format is compatible with the SMIv2
+enumerated INTEGER data type, which contains string value
+enumerations, which also have an associated numeric value.
+Refer to the enum data type definition for details on specifying
+enumeration data types.
+</p>
+
+<p>
+The value set constraint will override any previous such constraints
+in any parent type definition, if the 'equals sign' (=) assignment
+operator is used.
+</p>
+
+<p>
+The value set constraint will add additional values to
+any previous such constraints
+in any parent type definitions, if the 'plus equals sign' (+=) assignment
+operator is used.  Duplicate values are allowed and not considered
+an error.
+</p>
+
+<h2><a name="pattern">Pattern Restrictions</a></h2>
+
+<p>
+The pattern clause is used to specify XSD-type pattern strings that 
+can be used to specify the allowed values of formatted string
+data types.  The syntax of a pattern string id defined by
+the <a href="http:www.w3c.org/">XSD</a> standard.
+</p>
+
+<p>
+The following type definitions show some examples of pattern clause usage:
+</p>
+
+<pre>
+
+    type Ipv4Address {
+      description "string with IPv4 address format";
+      syntax { 
+        string pattern = 
+             "(([0-1]?[0-9]?[0-9]|2?[0-5]?[0-5])\.){3}"
+             "([0-1]?[0-9]?[0-9]|2?[0-5]?[0-5])";
+      }
+    }
+
+    type NcxName {
+      description "format for an NCX Name String";
+      syntax { 
+        string pattern = "[a-z,A-Z][a-z,A-Z,0-9,\-,_]*"
+      }
+    }
+
+</pre>
+
+<p>
+The pattern clause is allowed to contain one or more quoted strings
+as its value.  If more than one string is supplied, then all consecutive
+quoted strings will be concatenated into one pattern string.
+This allows long patterns to be broken into multiple strings
+allowing better page formatting for reading and printing.
+The pattern clause is the only clause in which this
+string concatenation is permitted, since any whitespace
+within a pattern is significant (i.e., part of the pattern).
+</p>
+
+<p>
+The pattern clause can only be declared once within a data type.
+If present, it will override any pattern clause within any
+parent data type.  If not present, the first parent data type
+with a pattern clause will be used.
+</p>
+
+<h2><a name="instance-qualifier">Instance Restrictions</a></h2>
+
+<p>
+An instance qualifier clause is used to specify how
+many conceptual instances of a particular NCX data type
+are permitted to occur within an instance of that data type.
+</p>
+
+<p>
+This clause is used to qualify the number of unnamed instances
+of a particular data type.  The values are derived from
+the RelaxNG specification, and provide
+course-grained granularity to control instance count.
+For control of a specific number of instances, then
+a data type which supports indexing (i.e., table or container)
+must be used to constrain the instance values to specific values.
+</p>
+
+<p>
+The following table describes the supported instance qualifier
+values:
+</p>
+
+<table summary="Instance Qualifiers" border="1" align="center" width="100%">
+<tr>  
+<th>Token Value</th>
+<th>Description</th>
+</tr>
+
+<tr>  
+<td>?</td>
+<td>Zero or one instances are permitted</td>
+</tr>
+
+<tr>  
+<td>*</td>
+<td>Zero or more instances are permitted</td>
+</tr>
+
+<tr>  
+<td>+</td>
+<td>One or more instances are permitted</td>
+</tr>
+
+<tr>  
+<td>(none)</td>
+<td>Exacly one instance is permitted</td>
+</tr>
+</table>
+
+<p>
+The full set of instance qualifiers is only enforced for
+transient data, such as the input parameters for an RPC method.
+Unnamed data is not allowed in a data parameter set,
+so the instance qualifiers which allow this (* and +)
+are not enforced, if encountered within a data model.
+</p>
+
+<p>
+If an instance qualifier that allows an instance to
+be optional (? and *), then this property is enforced
+within a data model, if an object using such a data type
+is encountered.
+</p>
+
+<p>
+Within an index clause, the instance qualifiers that might
+be defined for a data type are ignored, as all index components
+must appear exactly once within a given set of indexed data.
+</p>
+
+<p>
+Only one instance qualifier constraint may be present
+for a given data type or child node within a complex data type.
+The instance qualifier will apply to all data model objects
+which use that data type.
+</p>
+
+<p>
+The following type definitions show some examples of instance qualifier
+clause usage:
+</p>
+
+<pre>
+
+    type NumInst1 {
+      description "zero or one integer, with a value from 1 to 10";
+      syntax { int (1 .. 10)?; }
+    }
+
+    type Struct1 {
+      description "one or more structs";
+      syntax { 
+        struct {
+          int x?;     # optional child node 'x'
+          string y;   # mandatory child node 'y'
+          float z+;   # one or more child node 'z' expected
+        }+
+      }
+    }
+
+</pre>
+
+<p>
+The NCX base types all have a default instance qualifier property
+of (none, exactly one instance expected), except for the following
+data types:
+</p>
+
+<ul>
+<li>table<br/>zero or more instances of the data type are expected
+for a data model object of this data type</li>
+<li>container<br/>zero or more instances of the child node
+data type are expected for a data model object of type 'container'
+</li>
+</ul>
+
+<h2><a name="metadata">Metadata</a></h2>
+
+<p>
+The metadata clause allows any number of XML attributes
+to be assigned to a data type definition.
+</p>
+
+<p>
+If a namespace is designated for the metadata variable
+and a namespace is explicitly provided in a protocol operation,
+then the namespace must match.  If either no namespace is
+defined for the attribute, or no namespace is in effect
+within a protocol operation, then the namespace match test
+will not be performed.
+</p>
+
+<p>
+All XML attributes are considered to be meta-data in NCX.
+Actual data type content should not be placed in any metadata
+variables.  
+</p>
+
+<p>
+Meta-data used within an RPC method parameter (such as
+with the filter element), may be writeable, but 
+all meta-data within the configuration data model
+is considered to be read-only.
+</p>
+
+<p>
+There are some reserved metadata variables
+which must not be redefined by any data type.
+The following table summarizes the reserved metadata definitions
+which must not be redefined:
+</p>
+
+<table summary="Reserved Metadata" border="1" align="center" width="100%">
+<tr>  
+<th>Owner</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+
+<tr>  
+<td>ietf</td>
+<td>operation</td>
+<td>
+The NETCONF 'operation' attribute is used within the <b>edit-config</b>
+RPC method, to indicate which edit mode is in effect.
+RFC 4741 defines this XML attribute.
+</td>
+</tr>
+
+<tr>  
+<td>ncx</td>
+<td>last-modified</td>
+<td>
+Indicates the date and time that the value of a data model object
+was last modified in any way,
+</td>
+</tr>
+
+<tr>  
+<td>ncx</td>
+<td>with-defaults</td>
+<td>
+Indicates whether data model objects set to
+the default value should be included in retrieval operations.
+</td>
+</tr>
+
+<tr>  
+<td>ncx</td>
+<td>with-metadata</td>
+<td>
+Indicates whether agent-generated meta-data associated with
+data model objects should be included in retrieval operations.
+</td>
+</tr>
+
+</table>
+
+<h2><a name="default">Default Value</a></h2>
+
+<p>
+Any simple data type can have a default value associated with it.
+In the event a protocol operation requires a value for a
+data model object using the data type, but none is provided,
+then this assigned default value will be used instead.
+</p>
+
+<p>
+If a default value is defined for a derived data type,
+the any default values defined in any parent data types
+will be ignored.
+</p>
+
+<h2><a name="max-access">Maximum Protocol Access</a></h2>
+
+<p>
+The <b>max-access</b> clause is used to identify the maximum level
+of generic protocol access that is permitted for a particular
+data type or data model object.
+</p>
+
+<p>
+There are three values at this time:
+</p>
+
+<ul>
+<li><b>read-only</b>
+<br/>Read access only; No write operations allowed</li>
+<li><b>read-write</b>
+<br/>Read and Update operations allowed</li>
+<li><b>read-create</b>
+<br/>Create, Read, Update, and Delete operations allowed</li>
+</ul>
+
+<p>
+Refer to the <a href="modules.html#Type_max-access">max-access</a>
+documentation in the <a href="modules.html">NCX Modules</a>
+section for more details.
+</p>
+
+<p>
+Unlike with SMIv2, the NCX max-access should only be specified
+if it is known for a particular sub-tree, and should also
+only be specified if the value is less than 'read-create'.
+</p>
+
+<p>
+For example, the InetAddress data type can be used within
+applications as read-only, read-write, or read-create,
+so it does not help to define a max-access clause for this data type.
+</p>
+
+<p>
+However, the Counter32 data type from SMIv2 is required to be
+read-only whenever it is used, so a max-access clause for
+this data type is appropriate:
+</p>
+
+<pre>
+
+    type Counter32 {
+      description "Counter32 from RFC 2578, page 8.";
+      syntax { uint; }
+      max-access read-only;
+    }
+
+</pre>
+
+<h2><a name="data-class">Data Classification</a></h2>
+
+<p>
+The NETCONF protocol must distinguish between different
+types of data:
+</p>
+
+<ul>
+<li><b>config</b><br/>Persistent Configuration Data
+<br/>Data is included in &lt;get-config&gt; and
+&lt;copy-config&gt; output, and also saved to
+non-volatile storage as needed.</li>
+<li><b>tconfig</b><br/>Transient Configuration Data
+<br/>Data is included in &lt;get-config&gt; and
+&lt;copy-config&gt; output, but is <b>not saved</b> to
+non-volatile storage.</li>
+<li><b>state</b><br/>All Other Data
+<br/>Data is only included in &lt;get&gt; operation
+output, and is not saved to non-volatile storage.</li>
+</ul>
+
+<p>
+This property can be assigned to a data type with the
+<a href="modules.html#Type_data-class">type data-class</a>
+clause if the value is known for all possible instances of
+a particular data type.
+</p>
+
+<p>
+If it is possible for an instance of the data type to
+have different classifications, then this clause should not
+be used in the data type definition.  In this case, the
+property value will be determined at run-time, based
+on the data model object definition.
+</p>
+
+<p>
+This property is independent of the <b>max-access</b>
+clause, and allows for read-only data such as an agent-assigned
+index, to be treated as configuration data.
+</p>
+
+<p>
+This property is usually assigned to a parameter definition 
+with the
+<a href="modules.html#Parm_data-class">parm data-class</a>
+clause, rather than the data type for the parameter.
+</p>
+
+<h2><a name="status">Lifecycle Status</a></h2>
+
+<p>
+Since a data type definition should not be removed from 
+future versions of a module, an indication is needed whether
+the data type should be used or not.  
+</p>
+
+<p>
+The value <b>current</b>
+is the default, which indicates the type definition is currently
+in use.  The value <b>deprecated</b> indicates that the type definition
+is no longer current, and will be removed from use in the future.  THe
+value <b>obsolete</b> indicates that the type definition is no
+longer supported, and the definition remains to insure that
+the type name is never reused.
+</p>
+
+<h2><a name="appinfo">Application Info</a></h2>
+
+<p>
+The <b>appinfo</b> clause is used to define simple name-only
+or name-value-pair extension clauses that are of interest
+to applications in some manner. 
+Refer to the <a href="modules.html">NCX Modules</a> section
+for more details on the appinfo clause.
+</p>
+
+<p>
+There are several <a href="extensions.html#NCX_Extensions">
+extensions</a> to the XSD output format defined for data types.
+The <a href="modules.html#Type_appinfo">type appinfo</a>
+clause is used in some cases to help automate
+NETCONF protocol processing of data model objects using
+the type definition.
+</p>
+
+<h2><a name="duplicates">Duplicate Values</a></h2>
+
+<p>
+The <b>no-duplicates</b> clause within the appinfo section is used
+to control protocol merge operation behavior for all objects
+using the data type definition.  Refer to the 
+<a href="modules.html#duplicates">no-duplicates clause</a> documentation
+for more details on this property.
+</p>
+
+<h2><a name="merge-type">Merge Type</a></h2>
+
+<p>
+The <b>merge-type</b> clause within the appinfo section is used
+to control protocol merge operation behavior for all objects
+using the data type definition.  Refer to the 
+<a href="modules.html#merge-type">merge-type clause</a> documentation
+for more details on this property.
+</p>
+
+<h1><a name="Derived_Types">Derived Types</a></h1>
+
+<p>
+Whenever an NCX clause calls for a data type name, the
+name of an NCX Base Type or a different NCX Derived Type
+can be specified.  This section defines how data type
+properties are inherited from parent data types.
+</p>
+
+<p>
+A derived type changes one or more of the properties associated
+with another data type, which may be as little as the type 
+name.  The base type of a derived type can never change,
+but properties such as a value set, pattern, range, default, etc.
+can be changed.
+</p>
+
+<p>
+NCX supports extension and restriction of simple types,
+such as numbers, enumerations, and strings.  Internally,
+type definitions are processed 'backwards', from the
+derived type definition(s) to the base type.
+</p>
+
+<p>
+The following type definitions show how a numeric data type
+might change some properties of a numeric data type.
+</p>
+
+<pre>
+
+    type Num1 {
+      description "integer from 1 to 10, derived from 'int'";
+      syntax { int (1 .. 10); }
+    }
+
+    type Num2 {
+      description "integer from 3 to 10, derived from 'Num1'";
+      syntax { Num1 (3 .. ); }
+      units "seconds";
+    }
+
+    type Num3 {
+      description 
+        "integer from 3 to 9, with a default of 3, derived from 'Num2'";
+      syntax { Num2 (..9); }
+      default "3";
+    }
+
+</pre>
+
+<p>
+Not all type properties are processed in the same manner
+for a derived type.  For example, a new <a href=datatypes.html#range>range</a>
+clause may override or alter any previous range clauses in the type chain,
+while the <a href="datatypes.html#default">default</a> clause always 
+overrides any previous default value defined in the type chain.
+</p>
+
+<p>
+In general, the 'Equals' operator (=) is used to override
+a data type property, and the 'Plus Equal' operator (+=)
+is used to extend a property.
+</p>
+
+<p>
+The following example shows how new enumeration types might be defined:
+</p>
+
+<pre>
+
+    type Enum1 {
+      description "enumerated integer";
+      syntax { 
+        enum = { up=1 down testing };
+      }
+    }
+
+    type Enum2 {
+      description "enumerated integer derived from 'Enum1'";
+      syntax { 
+        Enum1 += { dormant=4 suspended };
+      }
+      max-access read-write;
+    }
+
+    type Enum3 {
+      description 
+        "enumerated integer, override 'Enum2' value set but
+         not other properties";
+      syntax { 
+        Enum1 = { up=1 down };
+      }
+    }
+
+</pre>
+
+<p>
+In the example above, the type definition for 'Enum2' must
+explicitly set the start enumeration value at '4', otherwise
+the default value of '0' would be used instead, causing an
+error due to overlapping enumeration definitions ('suspended'
+and 'up' values would both equal '1').
+</p>
+
+<h1><a name="Base_Types">Base Types</a></h1>
+
+<p>
+An NCX Base Type is a data type built into the language.
+They cannot be redefined, in that a derived type must not
+have the same name as any base type name.
+</p>
+
+<p>
+The following table describes the NCX base types:
+</p>
+
+<table summary="NCX Base Types" border="1" align="center" width="100%">
+<tr>  
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+
+<tr>  
+<td><a href="#int">int</a></td>
+<td>Number</td>
+<td>Signed 32 bit integer</td>
+</tr>
+
+<tr>  
+<td><a href="#uint">uint</a></td>
+<td>Number</td>
+<td>Unsigned 32 bit integer</td>
+</tr>
+
+<tr>  
+<td><a href="#long">long</a></td>
+<td>Number</td>
+<td>Signed 64 bit integer</td>
+</tr>
+
+<tr>  
+<td><a href="#ulong">ulong</a></td>
+<td>Number</td>
+<td>Unsigned 64 bit integer</td>
+</tr>
+
+<tr>  
+<td><a href="#float">float</a></td>
+<td>Number</td>
+<td>32 bit IEEE floating point real number</td>
+</tr>
+
+<tr>  
+<td><a href="#double">double</a></td>
+<td>Number</td>
+<td>64 bit IEEE floating point real number</td>
+</tr>
+
+<tr>  
+<td><a href="#enum">enum</a></td>
+<td>Text/Number</td>
+<td>Enumerated strings with associated numeric values</td>
+</tr>
+
+<tr>  
+<td><a href="#string">string</a></td>
+<td>Text</td>
+<td>String of UTF-8 characters</td>
+</tr>
+
+<tr>  
+<td><a href="#list">list</a></td>
+<td>Text</td>
+<td>Whitespace delimited list of members</td>
+</tr>
+
+<tr>  
+<td><a href="#union">union</a></td>
+<td>Text/Number</td>
+<td>Choice of simple types</td>
+</tr>
+
+<tr>  
+<td><a href="#flag">flag</a></td>
+<td>Empty</td>
+<td>An optional empty element, which has a default value of 'false'
+(i.e., not-present).</td>
+</tr>
+
+<tr>  
+<td><a href="#struct">struct</a></td>
+<td>Complex</td>
+<td>Conceptual container of members</td>
+</tr>
+
+<tr>  
+<td><a href="#choice">choice</a></td>
+<td>Complex</td>
+<td>Conceptual container of choices of members </td>
+</tr>
+
+<tr>  
+<td><a href="#table">table</a></td>
+<td>Complex</td>
+<td>Indexed container of members </td>
+</tr>
+
+<tr>  
+<td><a href="#container">container</a></td>
+<td>Complex</td>
+<td>Container of an indexed member</td>
+</tr>
+
+<tr>  
+<td><a href="#any">any</a></td>
+<td>Complex</td>
+<td>Any allowable data type</td>
+</tr>
+
+</table>
+
+<p>
+The following ABNF fragment defines the valid contents of a syntax clause:
+</p>
+
+<pre>
+
+    # syntax clause ABNF
+    # still many errors, need to fix!!!
+   
+    ncx-syntax-contents = simple-type / complex-type / full-named-type
+    
+    simple-type = sim-type [inst-qual] ";"
+   
+    sim-type = any-type / flag-type
+             / num-type / union-type /
+             / enum-type / string-type / list-type 
+   
+    any-type = "any"
+   
+    flag-type = "flag"
+   
+    num-type = ord-type / real-type
+   
+    ord-type = ord-type-val [ord-range]
+   
+    ord-type-val = "int" / "uint" / "long" / "ulong"
+   
+    real-type = real-type-val [real-range]
+   
+    real-type-val = "float" / "double"
+   
+    range = "(" range-spec 0*("|" range-spec) ")"
+   
+    range-spec = number / number-pair
+   
+    number-pair = number-pair-1 / number-pair-2 
+   
+    number-pair-1 = [number] ".." number 
+   
+    number-pair-2 = number ".." [number]
+   
+    ord-range = "(" ord-range-spec 0*("|" ord-range-spec) ")"
+   
+    ord-range-spec = ord-num / ord-num-pair
+   
+    ord-num-pair = ord-num-pair-1 / ord-num-pair-2
+   
+    ord-num-pair-1 = [ord-num] ".." ord-num
+   
+    ord-num-pair-2 = ord-num ".." [ord-num]
+   
+    uint-range = "(" uint-range-spec 0*("|" uint-range-spec) ")"
+   
+    uint-range-spec = uint-num / uint-num-pair 
+   
+    uint-num-pair = uint-num-pair-1 / uint-num-pair-2
+   
+    uint-num-pair-1 = [uint-num] ".." uint-num
+   
+    uint-num-pair-2 = uint-num ".." [uint-num]
+   
+    real-range = "(" real-range-spec 0*("|" real-range-spec) ")"
+   
+    real-range-spec = real-num / real-num-pair
+   
+    real-num-pair = real-num-pair-1 / real-num-pair-2
+   
+    real-num-pair-1 = [real-num] ".." real-num
+   
+    real-num-pair-2 = real-num ".." [real-num]
+   
+    string-restrictions = string-restriction / string-set
+   
+    string-restriction = [uint-range] [string-val-restriction]
+   
+    string-val-restriction = string-pattern 
+   
+    enum-type = "enum" "=" enum-spec
+   
+    enum-spec = "{" 1*(enum-elem) "}"
+   
+    enum-elem = name ["=" int-num] 
+   
+    string-type = string-type-val [string-restrictions]
+   
+    string-set = "=" "{" 1*(string) "}"
+   
+    string = quoted-string / unquoted-string
+   
+    quoted-string = """ whitespace-allowed-string """
+   
+    unquoted-string = whitespace-not-allowed-string
+   
+    string-pattern = "pattern" "=" quoted-string
+   
+    union-type = "union" union-body
+   
+    union-body = "{" typename 1*(wspace typename) "}"
+   
+    list-type = "list" list-body
+   
+    list-body = [uint-range] wspace "{" unquoted-string "}"
+   
+   
+    complex-type = complex-type-val  [inst-qual]
+   
+    complex-type-val = struct-type / choice-type 
+             / table-type / container-type
+   
+    struct-type =  "struct" "{" 1*(c-member) "}"
+   
+    choice-type =  "choice" "{" 1*(choice-member)  "}"
+   
+    choice-member = choice-block / c-member
+    
+    choice-block = "[" 1*(c-member) "]"
+   
+    table-type = "table" index-decl "{" 1*(c-member) "}"
+   
+    # container data type
+    #   index-decl: only scoped-local index form allowed here
+    #        mname: name of a struct data type
+    #         name: name of the struct (row)
+    
+    container-type = "container" index-decl 
+          "{" mname wspace name ";" "}"
+   
+    # typename member-name [new range, etc.]
+    named-type =  name wspace name [named-type-ext]  
+   
+    full-named-type =  named-type [named-type-ext] ";"   
+   
+    named-type-ext = named-num-ext / named-str-ext / named-enum-ext
+   
+    named-ext-type = "=" / "+=" 
+   
+    named-num-ext = named-ext-type range
+   
+    named-str-ext = named-ext-type string-restrictions
+   
+    named-enum-ext = named-ext-type enum-spec
+   
+   
+    # inside complex type members
+    # rules need to be replicated with an additional name field
+   
+    c-member = c-complex-member / c-simple-member
+   
+    c-complex-member = c-complex-type [inst-qual] 
+   
+    c-simple-member =  c-simple-member-val [inst-qual] ";"
+    
+    c-simple-member-val = c-simple-type / named-type
+   
+    c-complex-type = c-struct-type / c-choice-type 
+                     / c-table-type / c-container-type
+   
+    c-struct-type =  "struct" wspace name "{" 1*(c-member) "}"
+   
+    c-choice-type =  "choice" wspace name "{" 1*(choice-member) "}"
+   
+    c-table-type = "table" wspace name index-decl "{" 1*(c-member) "}"
+   
+    c-container-type = "container" wspace name index-decl 
+          "{" mname wspace name ";" "}"
+   
+    # named type must resolve to one of the listed base types
+    # or to a struct that contains (a struct that contains...)
+    # a named or base type in the list below
+   
+    metatype-decl = c-num-type / c-enum-type 
+                    / c-string-type / named-type
+   
+    c-simple-type = c-any-type 
+                    / c-flag-type
+                    / c-num-type / c-union-type
+  / c-enum-type 
+                    / c-string-type / c-list-type
+   
+    c-any-type = "any" wspace name
+   
+    c-flag-type = flag wspace name
+   
+    # !!! redo with 3 different ranges from above
+    c-num-type = c-num-type-val wspace name [range]
+   
+    c-num-type-val = "int" / "uint" / "long" / "ulong" / "float" / "double"
+   
+    c-enum-type = "enum" wspace name "=" enum-spec
+   
+    c-string-type = string-type-val wspace name [string-restrictions]
+   
+    c-union-type = "union" wspace name union-body
+   
+    c-list-type = "list" wspace name list-body
+   
+    # RelaxNG Instance Occurrence Qualifiers
+    # ? == 0 or 1 
+    # + == 1 or more
+    # * == 0 or more
+   
+    inst-qual = "?" / "+" / "*" 
+   
+    number =  ord-num / real-num
+   
+    ord-num = int-num / hex-num
+   
+    int-num = [num-sign] 1*(dec-digit)
+
+    num-sign = "+" / "-"
+
+</pre>
+
+
+<h2><a name="Simple_Types">Simple Types</a></h2>
+
+<p>
+An NCX Simple Type is slightly different than an XSD 'simpleType'.
+An NCX simple type cannot contain child nodes of an arbitrary type.
+</p>
+<p>
+The following data types are considered to be simple types:
+</p>
+
+<ul>
+<li><a href="#int">int</a></li>
+<li><a href="#uint">uint</a></li>
+<li><a href="#long">long</a></li>
+<li><a href="#ulong">ulong</a></li>
+<li><a href="#float">float</a></li>
+<li><a href="#double">double</a></li>
+<li><a href="#enum">enum</a></li>
+<li><a href="#string">string</a></li>
+<li><a href="#list">list</a></li>
+<li><a href="#union">union</a></li>
+<li><a href="#flag">flag</a></li>
+</ul>
+
+<h3><a name="int">Base Type 'int'</a></h3>
+
+<p>
+The 'int' data type provides a 32-bit signed numeric data type.
+The relevant properties for the int data type
+are shown below:
+</p>
+
+<ul>
+<li>Minimum Value: -2147483648</li>
+<li>Maximum Value:  2147483647</li>
+<li>Value Range Allowed</li>
+<li>Decimal number representation allowed</li>
+<li>Hexidecimal number representation allowed for positive values</li>
+<li>Instance Qualifier Allowed</li>
+</ul>
+
+<p>
+The basic form of the int data type is shown below:
+</p>
+
+<pre>
+
+    int [value-range] ;
+
+</pre>
+
+<p>
+When used as a child node definition, the following form 
+is used instead:
+</p>
+
+<pre>
+
+    int node-name [value-range] ;
+
+</pre>
+
+<p>
+Some data type definitions using the uint data type are shown below:
+</p>
+
+<pre>
+
+    type Int1 {
+      description "Range from -147 to maximum int value allowed";
+      syntax  {
+        int (-147 .. );
+      }
+    } 
+
+    type Int2 {
+      description "Range from -147 to 42 now in affect";
+      syntax  {
+        Int1 ( .. 42);
+      }
+    } 
+
+</pre>
+
+<h3><a name="uint">Base Type 'uint'</a></h3>
+
+<p>
+The 'uint' data type provides a 32-bit unsigned numeric data type.
+The relevant properties for the uint data type
+are shown below:
+</p>
+
+<ul>
+<li>Minimum Value: 0</li>
+<li>Maximum Value: 4294967295</li>
+<li>Value Range Allowed</li>
+<li>Decimal number representation allowed</li>
+<li>Hexidecimal number representation allowed for all values</li>
+<li>Instance Qualifier Allowed</li>
+</ul>
+
+<p>
+The basic form of the uint data type is shown below:
+</p>
+
+<pre>
+
+    uint [value-range] ;
+
+</pre>
+
+<p>
+When used as a child node definition, the following form 
+is used instead:
+</p>
+
+<pre>
+
+    uint node-name [value-range] ;
+
+</pre>
+
+<p>
+Some data type definitions using the uint data type are shown below:
+</p>
+
+<pre>
+
+    type Num1 {
+      description "All uint values allowed, called an alias type";
+      syntax  {
+        uint;
+      }
+    } 
+
+    type Num2 {
+      description "All properties of Num1, except range now applied";
+      syntax  {
+        Num1 (1 .. 10);
+      }
+    } 
+
+    type Num3 {
+      description "All properties of Num2, except default now applied";
+      syntax  {
+        Num2;
+      }
+      default "0";
+    } 
+
+    type Num4 {
+      description "All properties of Num2, except metadata now added";
+      syntax  {
+        Num3;
+      }
+      metadata {
+        string units;
+        dateTime lastChangeTime;
+      }
+    } 
+
+</pre>
+
+<h3><a name="long">Base Type 'long'</a></h3>
+
+<p>
+The 'long' data type provides a 64-bit signed numeric data type.
+The relevant properties for the long data type
+are shown below:
+</p>
+
+<ul>
+<li>Minimum Value: -9223372036854775808</li>
+<li>Maximum Value:  9223372036854775807</li>
+<li>Value Range Allowed</li>
+<li>Decimal number representation allowed</li>
+<li>Hexidecimal number representation allowed for positive values</li>
+<li>Instance Qualifier Allowed</li>
+</ul>
+
+<p>
+The basic form of the long data type is shown below:
+</p>
+
+<pre>
+
+    long [value-range] ;
+
+</pre>
+
+<p>
+When used as a child node definition, the following form 
+is used instead:
+</p>
+
+<pre>
+
+    long node-name [value-range] ;
+
+</pre>
+
+<p>
+Some data type definitions using the long data type are shown below:
+</p>
+
+<pre>
+
+    type Long1 {
+      description "64 bit signed integer";
+      syntax  { long; }
+    } 
+
+    type Long2 {
+      description "long with a range";
+      syntax  {
+        Long1 (-432553331 .. 453465543310);
+      }
+    } 
+
+</pre>
+
+<h3><a name="ulong">Base Type 'ulong'</a></h3>
+
+<p>
+The 'ulong' data type provides a 64-bit signed numeric data type.
+The relevant properties for the ulong data type
+are shown below:
+</p>
+
+<ul>
+<li>Minimum Value: 0</li>
+<li>Maximum Value: 18446744073709551615</li>
+<li>Value Range Allowed</li>
+<li>Decimal number representation allowed</li>
+<li>Hexidecimal number representation allowed for all values</li>
+<li>Instance Qualifier Allowed</li>
+</ul>
+
+<p>
+The basic form of the ulong data type is shown below:
+</p>
+
+<pre>
+
+    ulong [value-range] ;
+
+</pre>
+
+<p>
+When used as a child node definition, the following form 
+is used instead:
+</p>
+
+<pre>
+
+    ulong node-name [value-range] ;
+
+</pre>
+
+<p>
+Some data type definitions using the ulong data type are shown below:
+</p>
+
+<pre>
+
+    type Ulong1 {
+      description "64 bit unsigned integer";
+      syntax  { ulong; }
+    } 
+
+    type Ulong2 {
+      description "ulong with a range and a default";
+      syntax  {
+        Ulong1 (1 .. 2453365543310);
+      }
+      default "2355433";
+    } 
+
+</pre>
+
+<h3><a name="float">Base Type 'float'</a></h3>
+
+<p>
+The 'float' data type provides a 32-bit signed numeric data type,
+using IEEE floating point representation.
+The relevant properties for the float data type
+are shown below:
+</p>
+
+<ul>
+<li>Minimum Value: see IEEE specification</li>
+<li>Maximum Value: see IEEE specification</li>
+<li>Value Range Allowed</li>
+<li>Decimal number representation allowed</li>
+<li>Hexidecimal number representation allowed for positive values</li>
+<li>Floating point number representation allowed for all values</li>
+<li>Instance Qualifier Allowed</li>
+</ul>
+
+<p>
+The basic form of the float data type is shown below:
+</p>
+
+<pre>
+
+    float [value-range] ;
+
+</pre>
+
+<p>
+When used as a child node definition, the following form 
+is used instead:
+</p>
+
+<pre>
+
+    float node-name [value-range] ;
+
+</pre>
+
+<p>
+The following type definitions show some examples of the float data type:
+</p>
+
+<pre>
+
+    type Float1 {
+      description "32 bit IEEE floating point number";
+      syntax { float; }
+    }
+
+    type Float2 {
+      description "float from -3.14 to +3.14";
+      syntax { Float1 (-3.14 .. 3.14); }
+    }
+
+</pre>
+
+<h3><a name="double">Base Type 'double'</a></h3>
+
+<p>
+The 'double' data type provides a 64-bit signed numeric data type,
+using IEEE floating point representation.
+The relevant properties for the double data type
+are shown below:
+</p>
+
+<ul>
+<li>Minimum Value: see IEEE specification</li>
+<li>Maximum Value: see IEEE specification</li>
+<li>Value Range Allowed</li>
+<li>Decimal number representation allowed</li>
+<li>Hexidecimal number representation allowed for positive values</li>
+<li>Floating point number representation allowed for all values</li>
+<li>Instance Qualifier Allowed</li>
+</ul>
+
+<p>
+The basic form of the double data type is shown below:
+</p>
+
+<pre>
+
+    double [value-range] ;
+
+</pre>
+
+<p>
+When used as a child node definition, the following form 
+is used instead:
+</p>
+
+<pre>
+
+    double node-name [value-range] ;
+
+</pre>
+
+<p>
+The following type definitions show some examples of the float data type:
+</p>
+
+<pre>
+
+    type Double1 {
+      description "64 bit IEEE floating point number";
+      syntax { double; }
+    }
+
+    type Double2 {
+      description "double with a default";
+      syntax { Double1; }
+      default "3.14";
+    }
+
+</pre>
+
+<h3><a name="enum">Base Type 'enum'</a></h3>
+
+<p>
+The enum data type provides a tuple consisting of a string-based value
+and a 32 bit signed numeric (int) value.  This datatype is conceptually
+similar to the SMIv2 enumerated INTEGER data type.  When used within
+a data model object, there are 3 different forms allowed for this data type:
+</p>
+
+<ul>
+<li>Enumeration Name String Only </li>
+<li>Enumeration Numeric Value Only</li>
+<li>Enumeration Name and Numeric Value</li>
+</ul>
+
+<p>
+The relevant properties for the enum data type
+are shown below:
+</p>
+
+<ul>
+<li>Instance Qualifier Allowed</li>
+</ul>
+
+<p>
+The following example shows the 3 different forms allowed for 
+a data model object using the enum data type:
+</p>
+
+<pre>
+     Enum Definition:
+
+     type foo {
+       syntax {
+         enum = { start=1 next last=40 };
+       }
+     }
+
+     3 Forms of Acceptable Output:
+
+        Form 1  2   3
+        ---------------------
+        start   1   start(1)
+        next    2   next(2)
+        last    40  last(40)
+
+</pre>
+
+<p>
+The syntax of the enum data type is conceptually equivalent
+to the mechanism defined in the C Programming Language for
+defining enumerations.
+</p>
+
+<ul>
+<li>An enumeration name string must be provided</li>
+<li>The enumeration name string must be unique within the
+data type for which it is defined.  For derived types,
+this includes all values which have been defined in any
+parent data types.</li>
+<li>The enumeration numeric value must be unique within the
+data type for which it is defined.  For derived types,
+this includes all values which have been defined in any
+parent data types.</li>
+<li>Unless an explicit numeric value is provided, the value
+of the previous enumeration numeric value plus one will be used.</li>
+<li>Unless explicitly provided, the numeric value of the
+first enumeration within the data type definition has
+a value of zero</li>
+<li>Numeric enumeration values must appear in ascending order</li>
+<li>There is no order defined for the enumeration name string value</li>
+<li>The canonical representation of an enumeration is simply
+its enumeration string value, in order to remain compatible
+with XML.</li>
+</ul>
+
+<p>
+The format of the complete enumeration form is shown below:
+</p>
+
+<pre>
+
+   enum-type = "enum" "=" enum-spec
+
+   enum-spec = "{" 1*(enum-elem) "}"
+
+   enum-elem = name ["=" int-num] 
+
+</pre>
+
+<h3><a name="string">Base Type 'string'</a></h3>
+
+<p>
+The NCX string clause is used to specify a string-based value.
+The relevant properties for the string data type
+are shown below:
+</p>
+
+<ul>
+<li>Minimum Length: 0 characters</li>
+<li>Maximum Length: 2^^31-1 characters</li>
+<li>Length Range Allowed</li>
+<li>Quoted string representation allowed</li>
+<li>Unquoted string representation allowed</li>
+<li>Value Set Allowed</li>
+<li>Pattern Allowed</li>
+<li>Instance Qualifier Allowed</li>
+<li>
+If a value set is provided then the pattern is not allowed.
+If a pattern is provided then a value set is not allowed.
+</li>
+<li>
+If a length range and pattern are both provided,
+then both constraints must be enforced, and the pattern
+must not specify any length constraints.
+</li>
+<li>
+A length range is not allowed to be present if a value set
+is provides, since the set of allowable values is fixed,
+and the length range is not relevant.
+</li>
+<li>Strings are usually allowed to be entered in either
+quoted or unquoted form, except the pattern string
+must use the quoted string form.
+</li>
+<li>The underlying data type is unsigned char</li>
+<li>Sometimes either string form is allowed, otherwise a quoted-string
+   may be required</li>
+<li>A quoted string (" string ")
+   is allowed to contain whitespace, and any NCX tokens inside the
+   string (even comments) will be ignored.</li>
+<li>The character entity (&amp;quot;) is used to allow a double 
+    quote char inside a string</li>
+<li>An unquoted string begins with a char and ends on the first
+     NCX token or whitespace</li>
+</ul>
+
+<p>
+The following examples show the various forms of a string
+data type that are permitted:
+</p>
+
+<pre>
+
+    type PlainString {
+      description "Simple string data type with no restrictions";
+      syntax { string; }
+    }
+
+    type AdminString {
+      description "Simple string from 0 to 255 characters in length";
+      syntax { 
+        string (0 .. 255); 
+      }
+    }
+
+    type PatternString {
+      description "Simple string with a pattern";
+      syntax { 
+        string pattern = "\c+";
+      }
+    }
+
+    type PatternLengthString {
+      description "Simple string with a pattern and length range";
+      syntax { 
+        string (1 .. 50) pattern = "\c+";
+      }
+    }
+
+    type FixedString {
+      description "Simple string with fixed values";
+      syntax { 
+        string = { apple orange banana }; 
+      }
+    }
+
+    type ExtendedFixedString {
+      description "Extended string with fixed values";
+      syntax { 
+        FixedString += { lemon cherry }; 
+      }
+    }
+
+</pre>
+
+<p>
+The following ABNF defines the allowable syntax of a string
+data type:
+</p>
+
+<pre>
+
+   string-type = string-type-val [string-restrictions]
+
+   string-set = "=" "{" 1*(string) "}"
+
+   string = quoted-string / unquoted-string
+
+   quoted-string = """ whitespace-allowed-string """
+
+   unquoted-string = whitespace-not-allowed-string
+
+   string-pattern = "pattern" "=" 1*(quoted-string)
+
+</pre>
+
+<h3><a name="list">Base Type 'list'</a></h3>
+
+<p>
+The list data type provides a whitespace-delimited set of
+values, all conforming to the underlying data type defined
+for the list.  This data type is intended to directly support
+the 'list' data type found in XSD.
+</p>
+
+<p>
+A list is a simple type.  None of the individual values
+can be accessed independently.  Only the entire list
+is available for protocol operation access.
+</p>
+
+<p>
+The relevant properties for the list data type
+are shown below:
+</p>
+
+<ul>
+<li>Minimum Length: 0 list members</li>
+<li>Maximum Length: 2^^31-1 list members</li>
+<li>List Member Range Propert Allowed</li>
+<li>Merge Order Property Allowed</li>
+<li>Duplicates Property Allowed</li>
+<li>Quoted string list member representation allowed</li>
+<li>Unquoted string list member representation allowed</li>
+<li>Instance Qualifier Allowed</li>
+</ul>
+
+<p>
+The basic syntax of the list data type is shown below:
+</p>
+
+<pre>
+
+    list [list-range] = "{" list-base-type "}" ";"
+
+</pre>
+
+<p>
+The 'list-base-type' can be an NCX Base Type or a Derived Type
+which has an appropriate base type.
+The following data types are permitted to be used for list members:
+</p>
+
+<ul>
+<li>int</li>
+<li>uint</li>
+<li>long</li>
+<li>ulong</li>
+<li>float</li>
+<li>double</li>
+<li>string</li>
+<li>enum</li>
+<li>union</li>
+</ul>
+
+<p>
+If the list base type is a derived type which defines
+any metadata, then this metadata is ignored when
+encoding and decoding list contents.
+</p>
+
+<p>
+If a list-range clause is present, then the number of list members
+which can appear in a data model object instance is constrained
+to a number permitted by the range.  In order to constrain the
+length or value of list members, then a derived type must be
+used as the list-base-type.
+</p>
+
+<p>
+The following examples show some list data type definitions:
+</p>
+
+<pre>
+
+    type List1 {
+      description "Unconstrained list of unsigned integers.";
+      syntax {
+        list { uint };
+      }
+    }
+
+    # a valid value for element foo of type 'List1'
+    #  &lt;foo&gt;55 102 2 0 55&lt;\foo&gt;
+
+    type List2 {
+      description "Constrained list of colors";
+      syntax { 
+         list { Color }; 
+      }
+      appinfo {
+         no-duplicates;
+      }
+    }
+
+    # a valid value for element foo of type 'List2'
+    #  &lt;foo&gt;blue red&lt;\foo&gt;
+
+    type List3 {
+      description "List containing 1 to 8 numbers";
+      syntax  {
+	list  (1..8) { Num3 };
+      }
+      appinfo {
+         merge-type ordered;
+      }
+    } 
+
+    # a valid value for element foo of type 'List3'
+    #  &lt;foo&gt;1.11 1.84 1.84 2.1&lt;\foo&gt;
+
+</pre>
+
+<p>
+By default, the list order is undefined.
+If the <b>merge-type</b> clause in the appinfo clause
+is present, then the NETCONF 'merge' operation will
+follow the indicated merge order algorithm.
+If not present, then list members will be appended
+to the end of the existing values.
+</p>
+
+<p>
+By default, duplicate values amongst list members are permitted.
+If the <b>no-duplicates</b> clause in the appinfo clause
+is present, then only one instance of any particular list
+member value is permitted.
+</p>
+
+<p>
+The following ABNF fragment defines the syntax of the list data type:
+</p>
+
+<pre>
+
+    list-type = "list" [uint-range] "{" string "}" ";"
+
+</pre>
+
+<h3><a name="union">Base Type 'union'</a></h3>
+
+<p>
+The union data type provides a simple data type which
+permits different data types to be used for a single
+data model object.  This data type is intended to support
+the 'union' data type found in XSD.  SMIv2
+has some support for this data type with a discriminated
+union, in which 2 MIB objects are used to represent the
+union.  One is used to represent the actual data type
+variant used, and the other is usually a generic OCTET STRING.
+</p>
+
+<p>
+Unions in NCX (and XSD) are different than SMIv2 unions.
+There is no requirement to have a discriminator for the
+union values.  Strong typing within the union type itself
+is used instead.
+</p>
+
+<p>
+A union defines the set of member data types that may
+be used within the content of a simple data model object.
+The list of member data types are ordered.  That is, an
+agent will evaluate a data model object of type 'union'
+by validating the content against each member type, in order,
+until (and if) the content is valid for the specified type.
+For this reason, care should be used by the data model designer
+to order the union member types to the most specific
+are listed first, and the most generic are listed last.
+</p>
+
+<p>
+The following data type properties are supported by the
+union data type:
+</p>
+
+<ul>
+<li>Instance Qualifier Allowed</li>
+</ul>
+
+<p>
+The basic syntax of the union data type is shown below:
+</p>
+
+<pre>
+
+    union "{" union-member-list "}" ";"
+
+</pre>
+
+<p>
+The 'union-member-list' is a list which contains two or more
+data type names.  Each member can be an NCX Base Type or a Derived Type
+which has an appropriate base type.
+</p>
+
+<p>
+The following data types are permitted to be used for union members:
+</p>
+
+<ul>
+<li>int</li>
+<li>uint</li>
+<li>long</li>
+<li>ulong</li>
+<li>float</li>
+<li>double</li>
+<li>string</li>
+<li>enum</li>
+<li>list</li>
+</ul>
+
+<p>
+The following examples show some union data type definitions:
+</p>
+
+<pre>
+
+    type Union1 {
+      description "Union of different numbers";
+      syntax {
+        union { Num3 Num1 uint int };
+      }
+    }
+
+    type InetAddress {
+      description 
+        "InetAddress TC from RFC 4001, page 7. 
+
+         The actual format of the string content is determined by
+         the optional 'type' attribute as follows:
+         
+          unknown: InetAddressUnknown
+          ipv4:    InetAddressIPv4
+          ipv6:    InetAddressIPv6
+          ipv4z:   InetAddressIPv4z 
+          ipv6z:   InetAddressIPv6z
+          ipv6m:   InetAddressIPv6m
+          ipv6s:   InetAddressIPv6s
+          dns:     InetAddressDNS
+         ";
+      syntax { 
+        union {
+          # the parser will check these types in the order listed
+          InetAddressIPv4
+          InetAddressIPv4z
+          InetAddressIPv6
+          InetAddressIPv6m
+          InetAddressIPv6s
+          InetAddressDNS
+          InetAddressUnknown
+        };
+      }
+      metadata {
+        InetAddressType type?;
+      }
+    }
+
+</pre>
+
+<p>
+The following ABNF fragment defines the syntax of the union data type:
+</p>
+
+<pre>
+
+    union-type = "union" union-body ";"
+
+    union-body = "{" typename 2*(wspace typename) "}" 
+
+</pre>
+
+<h3><a name="flag">Base Type 'flag'</a></h3>
+
+<p>
+The 'flag' data type provides a shorthand mechanism to
+define and process <b>empty</b> (boolean) parameters, 
+in which the only real content is whether the
+parameter is present or not.
+This mechanism is used extensively in CLI-based interfaces
+to enable  particular behavior that is turned off (false)
+by default.
+</p>
+
+<p>
+The following data type properties are supported by the
+flag data type:
+</p>
+
+<ul>
+<li>Instance Qualifier Allowed</li>
+</ul>
+
+<p>
+This data type is always optional.  If an instance qualifier
+is present, then it is only used to determine if more than one
+instance is permitted.
+</p>
+
+<p>
+The basic syntax of the flag data type is shown below:
+</p>
+
+<pre>
+
+    flag  ";"
+
+</pre>
+
+<p>
+The following example from the NETCONF protocol shows
+how a flag object is defined and used.
+</p>
+
+<pre>
+
+    type RpcOkReplyType {
+      description "NETCONF &lt;rpc-reply&gt; OK Content.";
+      syntax { 
+        choice {
+          flag          ok;
+          RpcErrorType  rpc-error*;
+        }
+      }
+      metadata {
+        MessageId message-id;
+      }
+    }
+
+    #
+    # Example &lt;rpc-reply&gt;
+    # In this example, the request was completed without errors
+    #
+
+    &lt;rpc-reply message-id="101" 
+      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;ok/&gt;
+    &lt;/rpc-reply&gt;
+
+</pre>
+
+<p>
+The following ABNF fragment defines the syntax of the flag data type.
+</p>
+
+<pre>
+
+    flag-type = "flag"
+
+</pre>
+
+<h2><a name="Complex_Types">Complex Types</a></h2>
+
+<p>
+An NCX Complex Type can contain one or more child nodes,
+each of any arbitrary type.
+</p>
+
+<p>
+The following data types are considered to be complex types:
+</p>
+
+<ul>
+<li><a href="#struct">struct</a></li>
+<li><a href="#choice">choice</a></li>
+<li><a href="#table">table</a></li>
+<li><a href="#container">container</a></li>
+<li><a href="#any">any</a></li>
+</ul>
+
+<h3><a name="struct">Base Type 'struct'</a></h3>
+
+<p>
+The 'struct' data type provides a named, reusable container
+of child nodes.
+</p>
+
+<ul>
+<li>
+Each child node name must be unique within the
+scope of the struct definition being defined
+(i.e., all sibling nodes).
+</li>
+<li>Any data type can be used for a child node, including 'struct'.</li>
+<li>At least one child node must be defined</li>
+<li>At most 2^^31 - 1 child nodes can be defined</li>
+<li>
+Child nodes are ordered, and NETCONF PDUs containing
+data model object instances of type 'struct' must
+be encoded to conform to the defined child node order.
+</li>
+</ul>
+
+<p>
+The following data type properties are supported by the
+struct data type:
+</p>
+
+<ul>
+<li>Instance Qualifier Allowed</li>
+</ul>
+
+<p>
+By default, the instance qualifier property value for an
+object that uses the 'struct' data type is "zero or more".
+Using an explicit instance qualifier clause will override this 
+default value.
+</p>
+
+<p>
+The basic syntax of the struct data type is shown below:
+</p>
+
+<pre>
+
+    struct "{" child-definitions "}"
+
+</pre>
+
+<p>
+The following example from the NETCONF protocol shows
+how a struct is defined and used:
+</p>
+
+<pre>
+
+    type RpcErrorType {
+      description "NETCONF &lt;rpc-error&gt; Element Content";
+      syntax { 
+        struct {
+          ErrorType        error-type;
+          ErrorTag         error-tag;
+          ErrorSeverity    error-severity;
+          string           error-app-tag?;
+          string           error-path?;
+          LangString       error-message?;
+          any              error-info?;
+        }
+      }
+    }
+
+    #
+    # Example &lt;rpc-reply&gt; with an error to report
+    # In this example, the source parameter 'running' was misspelled.
+    #
+
+    &lt;rpc-reply message-id="101" 
+      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;rpc-error&gt;
+        &lt;error-type&gt;rpc&lt;/error-type&gt;
+        &lt;error-tag&gt;invalid-value&lt;/error-tag&gt;
+        &lt;error-severity&gt;error&lt;/error-severity&gt;
+        &lt;error-path&gt;/rpc/get-config/source&lt;/error-path&gt;
+        &lt;error-message xml:lang="en"&gt;Config name 'runnimg' not found&lt;/error-message&gt;
+      &lt;/rpc-error&gt;
+    &lt;/rpc-reply&gt;
+
+</pre>
+
+<p>
+The following example shows how an inline (unnamed type)
+that uses unnamed instances, can be defined and used:
+</p>
+
+<pre>
+
+    type ContactInfoType {
+      description "Struct containing more structs and simple fields";
+      syntax { 
+        struct {
+          struct name {
+            string  first-name;
+            string  middle-name?;
+            string  last-name;
+          }
+          struct address {
+            string  street1;
+            string  street2?;
+            string  city;
+            string  county?;
+            string  country;
+            string  postal-code?;
+          }
+          string email (1..255)?;
+          struct phone {
+            string home;
+            string office?;
+            string cell?;
+          }?
+        }*    # zero or more unnamed instances allowed to exist
+      }
+    }
+
+    #
+    # Example &lt;rpc-reply&gt; with data from the contact info database
+    # In this example, the a &lt;get&gt; request for the entire
+    # &lt;contact&gt; element
+    # The application is members
+    # The parameter set is 'contact-info'
+    # The parameter is 'contact', type 'ContactInfoType'
+
+
+    &lt;rpc message-id="701" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;get-config&gt;
+        &lt;source&gt;
+          &lt;running/&gt;
+        &lt;/source&gt;
+        &lt;filter type="subtree"&gt;
+          &lt;members xmlns="http://example.com/xsd/members"/&gt;
+        &lt;/filter&gt;
+      &lt;/get-config&gt;
+    &lt;/rpc&gt;
+
+    &lt;rpc-reply message-id="701" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;data&gt;
+        &lt;members xmlns="http://example.com/xsd/members"&gt;
+          &lt;contact-info&gt;
+            &lt;contact&gt;
+              &lt;name&gt;
+                &lt;first-name&gt;George&lt;/first-name&gt;
+                &lt;middle-name&gt;Walker&lt;/middle-name&gt;
+                &lt;last-name&gt;Jetson&lt;/last-name&gt;
+              &lt;/name&gt;
+              &lt;address&gt;
+                &lt;street1&gt;Cloud Nine Blvd.&lt;/street1&gt;
+                &lt;street2&gt;Apt. 23&lt;/street2&gt;
+                &lt;city&gt;Skybox Forty Two&lt;/city&gt;
+                &lt;county&gt;Los Angeles&lt;/county&gt;
+                &lt;country&gt;USA&lt;/country&gt;
+                &lt;postal-code&gt;91326&lt;/postal-code&gt;
+              &lt;/address&gt;
+              &lt;email&gt;gwjetson@example.com&lt;/email&gt;
+              &lt;phone&gt;
+                &lt;home&gt;818-555-1234&lt;/home&gt;
+                &lt;office&gt;800-555-3000 ext. 43&lt;/office&gt;
+                &lt;cell&gt;818-555-7777&lt;/cell&gt;
+              &lt;/phone&gt;
+            &lt;/contact&gt;
+            &lt;contact&gt;
+              &lt;name&gt;
+                &lt;first-name&gt;Fred&lt;/first-name&gt;
+                &lt;last-name&gt;Flintstone&lt;/last-name&gt;
+              &lt;/name&gt;
+              &lt;address&gt;
+                &lt;street1&gt;123 Rock Lane&lt;/street1&gt;
+                &lt;city&gt;Bedrock&lt;/city&gt;
+                &lt;country&gt;USA&lt;/country&gt;
+              &lt;/address&gt;
+            &lt;/contact&gt;
+          &lt;/contact-info&gt;
+        &lt;/members&gt;
+      &lt;/data&gt;
+    &lt;/rpc-reply&gt;
+
+</pre>
+
+<p>
+The namespace ID of the child node is fixed to be
+the same as the node declared with the 'struct' data type. 
+</p>
+
+<p>
+The following ABNF fragment defines the syntax of an struct data type.
+</p>
+
+<pre>
+
+    struct-type =  "struct" "{" 1*(c-member) "}"
+
+    c-member = c-complex-member / c-simple-member
+
+    c-complex-member = c-complex-type [inst-qual] 
+
+    c-simple-member =  c-simple-member-val [inst-qual] ";"
+ 
+    c-simple-member-val = c-simple-type / named-type
+
+    c-complex-type = c-struct-type / c-choice-type 
+                    / c-table-type / c-container-type
+
+    c-struct-type =  "struct" wspace name "{" 1*(c-member) "}"
+
+</pre>
+
+<h3><a name="choice">Base Type 'choice'</a></h3>
+
+<p>
+The 'choice' data type provides a named, reusable container,
+in which exactly one of 'N' possible choices is expected to
+be present within a protocol operation.
+</p>
+
+<ul>
+<li>
+Each child node name must be unique within the
+scope of the choice definition being defined
+(i.e., all sibling nodes).
+</li>
+<li>Any data type can be used for a child node, including 'choice'.</li>
+<li>At least one child node must be defined</li>
+<li>At most 2^^31 - 1 child nodes can be defined</li>
+<li>
+Child nodes are ordered, and NETCONF PDUs containing
+data model object instances of type 'choice' must
+be encoded to conform to the defined child node order.
+</li>
+<li>
+If an inline group is specified (i.e., square brackets
+around the child nodes in the group), then all members
+of the group must be specified, or all must be absent.
+</li>
+<li>
+The presence of instance qualifiers within the
+child node definitions, and the application of agent-selected
+default values, will impact which nodes are considered
+to be 'missing', when an RPC Error is generated by the agent.
+</ul>
+
+<p>
+The following data type properties are supported by the
+choice data type:
+</p>
+
+<ul>
+<li>Instance Qualifier Allowed</li>
+</ul>
+
+<p>
+The basic syntax of the choice data type is shown below:
+</p>
+
+<pre>
+
+    choice "{" child-definitions "}"
+
+</pre>
+
+<p>
+The following example from the NETCONF protocol shows
+how a choice is defined and used. In this choice, either
+the &lt;ok&gt; element is returned, or the block containing
+zero or more &lt;rpc-error&gt; elements, followed by zero or one
+and &lt;data&gt; element, is returned.
+</p>
+
+<pre>
+
+    type RpcReplyType {
+      description "NETCONF &lt;rpc-reply&gt; construct. ";
+      syntax { 
+        choice {
+          flag          ok;
+        [ RpcErrorType  rpc-error*;
+          any           data?; ]          
+        }
+      }
+      metadata {
+        MessageId message-id;
+      }
+    }
+
+
+    #
+    # Example &lt;rpc-reply&gt; with an warning to report and data
+    # In this example, an unsupported parameter was ignored and
+    # the loopback interface was created anyway
+    #
+
+    &lt;rpc message-id="321" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;create-loopback-interface xmlns="http://example.com/acme-app"&gt;
+        &lt;mtu&gt;1500&lt;/mtu&gt;
+        &lt;alias&gt;testbed-3-lo&lt;/alias&gt;
+        &lt;error-option&gt;rollback-on-error&lt;/error-option&gt;
+      &lt;/create-loopback-interface&gt;
+    &lt;/rpc&gt;
+
+    &lt;rpc-reply message-id="321" 
+      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"
+      xmlns:acme="http://example.com/acme-app"&gt;
+      &lt;rpc-error&gt;
+        &lt;error-type&gt;protocol&lt;/error-type&gt;
+        &lt;error-tag&gt;operation-not-supported&lt;/error-tag&gt;
+        &lt;error-severity&gt;warning&lt;/error-severity&gt;
+        &lt;error-path&gt;
+           /rpc/acme:create-loopback-interface/error-option
+        &lt;/error-path&gt;
+        &lt;error-message xml:lang="en"&gt;
+          Error option 'rollback-on-error' not supported.
+        &lt;/error-message&gt;
+      &lt;/rpc-error&gt;
+      &lt;data&gt;
+        &lt;acme:instance-id&gt;
+          /acme:interfaces/interface[ifName=='lo-149']
+        &lt;/acme:instance-id&gt;
+      &lt;/data&gt;
+    &lt;/rpc-reply&gt;
+
+</pre>
+
+<p>
+The namespace ID of the child node is fixed to be
+the same as the node declared with the 'choice' data type. 
+</p>
+
+<p>
+The following ABNF fragment defines the syntax of an choice data type.
+</p>
+
+<pre>
+
+    choice-type =  "choice" "{" 1*(choice-member)  "}"
+
+    choice-member = choice-block / c-member
+ 
+    choice-block = "[" 1*(c-member) "]"
+
+    c-member = c-complex-member / c-simple-member
+
+    c-complex-member = c-complex-type [inst-qual] 
+
+    c-simple-member =  c-simple-member-val [inst-qual] ";"
+ 
+    c-simple-member-val = c-simple-type / named-type
+
+    c-complex-type = c-struct-type / c-choice-type 
+                    / c-table-type / c-container-type
+
+    c-choice-type =  "choice" wspace name "{" 1*(choice-member) "}"
+
+</pre>
+
+<h3><a name="table">Base Type 'table'</a></h3>
+
+<p>
+The table data type is used as follows:
+</p>
+
+<ul>
+<li>Defines the contents of a conceptual table row</li>
+<li>Like a <b>struct with an index</b></li>
+<li>A table is a set of <b>named</b> data model
+object instances
+</li>
+<li>
+An <b>index clause</b> is used to specify the index 
+components (i.e., nodes within the table) that identify a 
+single row instance</li>
+<li>Index components are used to identify a unique conceptual instance of the
+contents of one table row.
+</li>
+</ul>
+
+<p>
+The following example shows how a table with an inline struct
+can be defined and used:
+</p>
+
+<pre>
+
+    type ContactInfoTable {
+      description "Better design contact-info structured section";
+      syntax { 
+        table [name.last-name, name.first-name]  {
+          struct name {
+            string  first-name;
+            string  middle-name?;
+            string  last-name;
+          }
+          struct address {
+            string  street1;
+            string  street2?;
+            string  city;
+            string  county?;
+            string  country;
+            string  postal-code?;
+          }
+          string email (1..255)?;
+          struct phone {
+            string home;
+            string office?;
+            string cell?;
+          }?
+        }    # by default, zero or more named instances allowed to exist
+      }
+    }
+
+    #
+    # Example &lt;rpc-reply&gt; with data from the contact info database
+    # In this example, the a &lt;get&gt; request for the entire
+    # &lt;contact&gt; element
+    # The application is members
+    # The parameter set is 'contact-info'
+    # The parameter is 'contact', type 'ContactInfoTable'
+
+    # Works exactly the same as if it were defined as a struct,
+    # except each (first-name, last-name) tuple is required
+    # to be unique
+
+    &lt;rpc message-id="702" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;get-config&gt;
+        &lt;source&gt;
+          &lt;running/&gt;
+        &lt;/source&gt;
+        &lt;filter type="subtree"&gt;
+          &lt;members xmlns="http://example.com/xsd/members"/&gt;
+        &lt;/filter&gt;
+      &lt;/get-config&gt;
+    &lt;/rpc&gt;
+
+    &lt;rpc-reply message-id="702" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;data&gt;
+        &lt;members xmlns="http://example.com/xsd/members"&gt;
+          &lt;contact-info&gt;
+            &lt;contact&gt;
+              &lt;name&gt;
+                &lt;first-name&gt;Fred&lt;/first-name&gt;
+                &lt;last-name&gt;Flintstone&lt;/last-name&gt;
+              &lt;/name&gt;
+              &lt;address&gt;
+                &lt;street1&gt;123 Rock Lane&lt;/street1&gt;
+                &lt;city&gt;Bedrock&lt;/city&gt;
+                &lt;country&gt;USA&lt;/country&gt;
+              &lt;/address&gt;
+            &lt;/contact&gt;
+            &lt;contact&gt;
+              &lt;name&gt;
+                &lt;first-name&gt;George&lt;/first-name&gt;
+                &lt;middle-name&gt;Walker&lt;/middle-name&gt;
+                &lt;last-name&gt;Jetson&lt;/last-name&gt;
+              &lt;/name&gt;
+              &lt;address&gt;
+                &lt;street1&gt;Cloud Nine Blvd.&lt;/street1&gt;
+                &lt;street2&gt;Apt. 23&lt;/street2&gt;
+                &lt;city&gt;Skybox Forty Two&lt;/city&gt;
+                &lt;county&gt;Los Angeles&lt;/county&gt;
+                &lt;country&gt;USA&lt;/country&gt;
+                &lt;postal-code&gt;91326&lt;/postal-code&gt;
+              &lt;/address&gt;
+              &lt;email&gt;gwjetson@example.com&lt;/email&gt;
+              &lt;phone&gt;
+                &lt;home&gt;818-555-1234&lt;/home&gt;
+                &lt;office&gt;800-555-3000 ext. 43&lt;/office&gt;
+                &lt;cell&gt;818-555-7777&lt;/cell&gt;
+              &lt;/phone&gt;
+            &lt;/contact&gt;
+          &lt;/contact-info&gt;
+        &lt;/members&gt;
+      &lt;/data&gt;
+    &lt;/rpc-reply&gt;
+
+</pre>
+
+<p>
+This time, the data is returned in sorted order, because
+a sort order is implied by the index clause by evaluating
+each index component, left to right, and returning the
+entries in that sequence.
+</p>
+
+<p>
+In the example above, the inline type definition
+for the contact info table row data is needed to prevent
+adding an extra containment layer.
+</p>
+
+<p>
+In the example below, a named type is used instead of an inline
+type for the table row contents, and the &lt;rpc-reply&gt;
+in the example shows the extra layer that would be needed
+to reuse the 'ContactInfoType' definition in this manner.
+</p>
+
+<pre>
+
+    type ContactInfoNamedTable {
+      description "Named Table Row Type adds extra XML layer";
+      syntax { 
+        table [info.name.last-name, info.name.first-name]  {
+          ContactInfoType info;
+        }
+      }
+    }
+
+    #
+    # Example &lt;rpc-reply&gt; with data from the contact info database
+    # In this example, the a &lt;get&gt; request for the entire
+    # &lt;contact&gt; element
+    # The application is members
+    # The parameter set is 'contact-info'
+    # The parameter is 'contact', type 'ContactInfoNamedTable'
+
+    # Works exactly the same as if it were defined as a struct,
+    # except each (first-name, last-name) tuple is required
+    # to be unique
+
+    &lt;rpc message-id="703" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;get-config&gt;
+        &lt;source&gt;
+          &lt;running/&gt;
+        &lt;/source&gt;
+        &lt;filter type="subtree"&gt;
+          &lt;members xmlns="http://example.com/xsd/members"/&gt;
+        &lt;/filter&gt;
+      &lt;/get-config&gt;
+    &lt;/rpc&gt;
+
+    #
+    # NCX Instance Identifiers for table rows returned
+    # /example:members/contact-info/contact/info[name/last-name='Flintstone'
+    #    and name/first-name='Fred']
+    # /example:members/contact-info/contact/info[name/last-name='Jetson'
+    #    and name/first-name='George']
+
+
+    &lt;rpc-reply message-id="703" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;data&gt;
+        &lt;members xmlns="http://example.com/xsd/members"&gt;
+          &lt;contact-info&gt;
+            &lt;contact&gt;
+              &lt;info&gt;
+                &lt;name&gt;
+                  &lt;first-name&gt;Fred&lt;/first-name&gt;
+                  &lt;last-name&gt;Flintstone&lt;/last-name&gt;
+                &lt;/name&gt;
+                &lt;address&gt;
+                  &lt;street1&gt;123 Rock Lane&lt;/street1&gt;
+                  &lt;city&gt;Bedrock&lt;/city&gt;
+                  &lt;country&gt;USA&lt;/country&gt;
+                &lt;/address&gt;
+              &lt;/info&gt;
+            &lt;/contact&gt;
+            &lt;contact&gt;
+              &lt;info&gt;
+                &lt;name&gt;
+                  &lt;first-name&gt;George&lt;/first-name&gt;
+                  &lt;middle-name&gt;Walker&lt;/middle-name&gt;
+                  &lt;last-name&gt;Jetson&lt;/last-name&gt;
+                &lt;/name&gt;
+                &lt;address&gt;
+                  &lt;street1&gt;Cloud Nine Blvd.&lt;/street1&gt;
+                  &lt;street2&gt;Apt. 23&lt;/street2&gt;
+                  &lt;city&gt;Skybox Forty Two&lt;/city&gt;
+                  &lt;county&gt;Los Angeles&lt;/county&gt;
+                  &lt;country&gt;USA&lt;/country&gt;
+                  &lt;postal-code&gt;91326&lt;/postal-code&gt;
+                &lt;/address&gt;
+                &lt;email&gt;gwjetson@example.com&lt;/email&gt;
+                &lt;phone&gt;
+                  &lt;home&gt;818-555-1234&lt;/home&gt;
+                  &lt;office&gt;800-555-3000 ext. 43&lt;/office&gt;
+                  &lt;cell&gt;818-555-7777&lt;/cell&gt;
+                &lt;/phone&gt;
+              &lt;/info&gt;
+            &lt;/contact&gt;
+          &lt;/contact-info&gt;
+        &lt;/members&gt;
+      &lt;/data&gt;
+    &lt;/rpc-reply&gt;
+
+</pre>
+
+<p>
+The ABNF fragment for a table type definition is shown below:
+</p>
+
+<pre>
+
+    table-type = "table" index-decl "{" 1*(c-member) "}"
+
+</pre>
+
+<h3><a name="container">Base Type 'container'</a></h3>
+
+<p>
+The container data type provides a static container node
+that may have zero or more instances of a specific data type
+as the table row contents.  It is used to simplify the data model
+constructions needed to define this common mechanism.
+</p>
+
+<p>
+The container data type also allows named data types to
+be used as table row content <b>without adding an extra XML layer</b>
+into the protocol operation data.
+</p>
+
+<p>
+There are some important differences between a table and a container:
+</p>
+
+<ul>
+<li>
+The index clause applies to instances of the child node
+within the container, not the container itself.
+</li>
+<li>
+By default, zero or one instances of a container are permitted
+for any object of type 'container'.
+</li>
+<li>
+A container must contain exactly one child node definition,
+instead of one or more child nodes like a table.
+</li>
+</ul>
+
+<p>
+The following example from the NETCONF protocol shows how
+the &lt;capabilities&gt; container might be defined:
+</p>
+
+<pre>
+
+    type NcCapabilities {
+      description "Generic Capabilities List.";
+      syntax { 
+        container [capability] {
+          anyURI capability;
+        }
+      }
+    }
+
+</pre>
+
+<p>
+By default, containers have a <b>max-access of read-write</b>.
+This means the agent must create the container but after
+it is created, manager applications can create, edit, and delete
+table rows within the container.
+</p>
+
+<p>
+Containers also provide better data organization, since there
+is always a place in the XML tree that will exist for
+access control of filtering purposes, regardless of how many
+table row instances actually exist.
+</p>
+
+<p>
+In the example below, a named type is used instead of an inline
+type for the table row contents, and the parameter is a
+container instead of the table contents itself.  This adds
+an XML layer above the table contents for the container itself.
+The &lt;rpc-reply&gt; in the example shows the extra layer that 
+would be needed for the &lt;contacts&gt; container.
+</p>
+
+<pre>
+
+    type ContactsType {
+      description "Container of Contact Info records";
+      syntax { 
+        container [contact.name.last-name, contact.name.first-name]  {
+          ContactInfoType contact;
+        }
+      }
+    }
+
+    #
+    # Example &lt;rpc-reply&gt; with data from the contact info database
+    # In this example, the a &lt;get&gt; request for the entire
+    # &lt;contacts&gt; element
+    # The application is members
+    # The parameter set is 'contact-info'
+    # The parameter is 'contacts', type 'ContactsType'
+
+    # Works exactly the same as if it were defined as a struct,
+    # except each contact (first-name, last-name) tuple is required
+    # to be unique
+
+    &lt;rpc message-id="703" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;get-config&gt;
+        &lt;source&gt;
+          &lt;running/&gt;
+        &lt;/source&gt;
+        &lt;filter type="subtree"&gt;
+          &lt;members xmlns="http://example.com/xsd/members"/&gt;
+        &lt;/filter&gt;
+      &lt;/get-config&gt;
+    &lt;/rpc&gt;
+
+    &lt;rpc-reply message-id="703" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;data&gt;
+        &lt;members xmlns="http://example.com/xsd/members"&gt;
+          &lt;contact-info&gt;
+            &lt;contacts&gt;         
+              &lt;contact&gt;
+                &lt;name&gt;
+                  &lt;first-name&gt;Fred&lt;/first-name&gt;
+                  &lt;last-name&gt;Flintstone&lt;/last-name&gt;
+                &lt;/name&gt;
+                &lt;address&gt;
+                  &lt;street1&gt;123 Rock Lane&lt;/street1&gt;
+                  &lt;city&gt;Bedrock&lt;/city&gt;
+                  &lt;country&gt;USA&lt;/country&gt;
+                &lt;/address&gt;
+              &lt;/contact&gt;
+              &lt;contact&gt;
+                &lt;name&gt;
+                  &lt;first-name&gt;George&lt;/first-name&gt;
+                  &lt;middle-name&gt;Walker&lt;/middle-name&gt;
+                  &lt;last-name&gt;Jetson&lt;/last-name&gt;
+                &lt;/name&gt;
+                &lt;address&gt;
+                  &lt;street1&gt;Cloud Nine Blvd.&lt;/street1&gt;
+                  &lt;street2&gt;Apt. 23&lt;/street2&gt;
+                  &lt;city&gt;Skybox Forty Two&lt;/city&gt;
+                  &lt;county&gt;Los Angeles&lt;/county&gt;
+                  &lt;country&gt;USA&lt;/country&gt;
+                  &lt;postal-code&gt;91326&lt;/postal-code&gt;
+                &lt;/address&gt;
+                &lt;email&gt;gwjetson@example.com&lt;/email&gt;
+                &lt;phone&gt;
+                  &lt;home&gt;818-555-1234&lt;/home&gt;
+                  &lt;office&gt;800-555-3000 ext. 43&lt;/office&gt;
+                  &lt;cell&gt;818-555-7777&lt;/cell&gt;
+                &lt;/phone&gt;
+              &lt;/contact&gt;
+            &lt;/contacts&gt;
+          &lt;/contact-info&gt;
+        &lt;/members&gt;
+      &lt;/data&gt;
+    &lt;/rpc-reply&gt;
+
+</pre>
+
+<h2><a name="Special_Types">Special Types</a></h2>
+
+<h3><a name="any">Base Type 'any'</a></h3>
+
+<p>
+The 'any' data type is intended to provide compatibility with
+NETCONF, which has nodes such as &lt;data&gt; that can
+contain any type of data.  The subtree filter content must
+use this data type because any namespace and any node are
+permitted, even if there is no corresponding definition within the agent's 
+data model.
+</p>
+
+<p>
+There are no data type property clauses that may be applied
+to the 'any' data type.
+</p>
+
+<p>
+Mixed content is not allowed in NCX,
+so an object of type 'any' must contain a string, or contain
+zero or more child nodes, and so on for each child node encountered.
+</p>
+
+<p>
+The following example shows how the 'any' data type is defined
+and used:
+</p>
+
+<pre>
+
+    type FilterType {
+      description "NETCONF &lt;filter&gt; Attribute Content";
+      syntax { string = { subtree xpath }; }
+      default "subtree";
+    }
+
+    type InlineFilterType {
+      description "NETCONF &lt;filter&gt; Element Content";
+      syntax { any; }
+      metadata { 
+        FilterType type;       # xpath or subtree
+        string     select?;    # Xpath expression if type=xpath
+      }
+    }
+
+</pre>
+
+<h3><a name="root">Base Type 'root'</a></h3>
+
+<p>
+The 'root' data type is intended to provide compatibility with
+NETCONF, which has nodes such as &lt;config&gt; or &lt;filter&gt;
+that represent the conceptual root of a NETCONF
+Configuration Database.
+</p>
+
+<p>
+There are no data type property clauses that may be applied
+to the 'root' data type.
+</p>
+
+<p>
+This data type must not appear inside the contents
+of any data parameter set.  It is only allowed to
+appear in the 'type' clause of an RPC parameter set 'parm' clause,
+or within a 'type alias' definition.
+</p>
+
+<p>
+The following example shows how the 'root' data type is defined
+and used:
+</p>
+
+<pre>
+
+    type ConfigInlineType {
+      description 
+        "NETCONF 'config' element content.  
+
+         Note: The 'config' element base type is 'root', not 'any'.
+         For NCX automation purposes, this type contains any 
+         number of application containers, each containing
+         zero or more parmsets.";
+      syntax { root; }
+    }
+
+</pre>
+
+<h1><a name="Syntax_Examples">Syntax Clause Examples</a></h1>
+
+<pre>
+
+    syntax {
+      int (0 | 5..127);
+
+      # integer with value from 0 to 127
+      # &lt;foo&gt;16&lt;/foo&gt;
+    }
+
+    syntax {
+      string (..255);
+    
+      # string with length from 0 to 255
+      # &lt;foo&gt;barney rubble&lt;/foo&gt;
+    }
+    
+    syntax {
+      string = { "fred flintstone" barney wilma };
+    
+      # string enum with 3 fixed values
+      # &lt;foo&gt;wilma&lt;/foo&gt;
+    }
+    
+    syntax {
+      string = { "fred flintstone" barney wilma };
+    
+      # string enum with 3 fixed values
+      # &lt;foo&gt;wilma&lt;/foo&gt;
+    }
+    
+    syntax {
+      enum = { fred barney wilma=20 last };
+    
+      # enum starts at zero and increment by one by default
+      # enums must be in ascending order
+      # optional number assignment overrides default, can't go backwards
+      # enum content in instance documents (3 forms):
+      #   &lt;foo&gt;barney&lt;/foo&gt;
+      #   &lt;foo&gt;barney(1)&lt;foo&gt;
+      #   &lt;foo&gt;1&lt;/foo&gt;
+    }
+    
+    syntax {
+      # struct containing 3 simple types
+      # &lt;foo&gt;
+      #   &lt;name&gt;Wilma Flintstone&lt;/name&gt;
+      #   &lt;address&gt;123 Main St., Bedrock, NY&lt;/address&gt;
+      #   &lt;phone&gt;212-452-8845&lt;/phone&gt;
+      # &lt;/foo&gt;
+    
+      struct {
+         string name;
+         string address;
+         string phone;
+      }
+    }
+    
+    syntax {
+      choice {
+         OwnerInfo owner;
+         RenterInfo renter;
+      }
+    
+      # choice of 2 named complex types
+      # choice of multiple content types within a simple types 
+      # is not allowed
+      # &lt;foo&gt;
+      #   &lt;owner&gt;
+      #     &lt;owner-data&gt;
+      #       &lt;foobar&gt;data&lt;/foobar&gt;
+      #     &lt;/owner-data&gt;
+      #   &lt;/owner&gt;
+      # &lt;foo&gt;
+      # OR
+      # &lt;foo&gt;
+      #   &lt;renter&gt;
+      #      &lt;blah&gt;data&lt;/blah&gt;
+      #   &lt;/renter&gt;
+      # &lt;/foo&gt;
+      # 
+    }
+    
+    syntax {
+    
+      # Type: Contacts
+      table [int id (1..255)] {
+         string name;
+         string address;
+         string phone?;
+      }
+    
+      # table containing 3 simple types, indexed by an integer
+      # named id that can be a value from 1 to 60
+      # The 'phone' table member is optional (? == 0 or 1 instance).
+      #
+      # If the index component is not one of the table contents
+      # top-level nodes, then it is placed within the table
+      # contents, ahead of the nodes actually defined in the table.
+      #
+      # The index component names MUST NOT conflict with any
+      # of the top-level nodes defined in the table contents.
+      # The &lt;imports&gt; processing will determine where the
+      # index component is defined and its namespace
+      #
+      # Table instances are not constructed within containers
+      # but simply as multiple instances (maxOccurs="unbounded")
+      #
+      # &lt;foo&gt;
+      #   &lt;id&gt;44&lt;/id&gt;
+      #   &lt;name&gt;Wilma&lt;/name&gt;
+      #   &lt;address&gt;123 Main St., Bedrock, NY&lt;/address&gt;
+      #   &lt;phone&gt;212-452-8845&lt;/phone&gt;
+      # &lt;/foo&gt;
+      # &lt;foo&gt;
+      #   &lt;id&gt;63&lt;/id&gt;
+      #   &lt;name&gt;Wilma&lt;/name&gt;
+      #   &lt;address&gt;123 Main St., Bedrock, NY&lt;/address&gt;
+      #   &lt;phone&gt;212-452-8845&lt;/phone&gt;
+      # &lt;/foo&gt;
+    }
+    
+    
+    syntax {
+      table server [addr] {
+         InetAddress addr;
+         string protocol;
+         Port  port-num;
+         MacAddress mac-addr;  
+      }
+    
+      # 
+      # To declare an table that uses one or more table content
+      # members as index components, simply declare the index
+      # component as a scoped-name or a name
+      #
+      # &lt;servers&gt;
+      #   &lt;server&gt;
+      #      &lt;addr type="ipv4"&gt;192.168.0.1&lt;/addr&gt;
+      #      &lt;protocol&gt;http&lt;/protocol&gt;
+      #      &lt;port-num&gt;80&lt;/port-num&gt;
+      #      &lt;mac-addr&gt;22:44:10:ef:00:00:40&lt;/mac-addr&gt;
+      #   &lt;/server&gt;
+      #   &lt;server&gt;
+      #      &lt;addr type="ipv4"&gt;192.168.0.10&lt;/addr&gt;
+      #      &lt;protocol&gt;ssh&lt;/protocol&gt;
+      #      &lt;port-num&gt;110&lt;/port-num&gt;
+      #      &lt;mac-addr&gt;22:44:aa:00:00:45:80&lt;/mac-addr&gt;
+      #   &lt;/server&gt;
+    }
+    
+    
+    syntax {
+      # Type: ContactList with inline integer index
+      # Index id can be value 3, 5, 7, 8, 9, 10
+      struct {
+        table node [int id ( 3 | 5 | 7 .. 10 )] {
+          string name;
+          string address;
+          string phone;
+        }
+      }
+    }
+    
+    
+    
+    syntax {
+      table [positiveInteger contact-id] {
+        #customer contact
+        Contact contact;
+    
+        # contact history
+        struct contact-history {
+          table event [dateTime contact-time] {
+            SalesRepId  handler;
+            string contact-type = { phone email in-person };
+            choice details {
+              string    brief;
+              EventRec  full;
+            }
+          }
+        }
+      }
+    
+      #
+      # &lt;foo&gt;
+      #   &lt;contact-id&gt;12&lt;/contact-id&gt;
+      #   &lt;contact&gt;
+      #     &lt;name&gt;Fred&lt;/name&gt;
+      #     &lt;address&gt;144 Elm St&lt;/address&gt;
+      #     &lt;phone&gt;555-1212&lt;/phone&gt;
+      #   &lt;/contact&gt;
+      #   &lt;contact-history&gt;
+      #     &lt;event&gt;
+      #       &lt;contact-time&gt;2005-10-15&lt;/contact-time&gt;
+      #       &lt;handler&gt;username&lt;/handler&gt;
+      #       &lt;contact-type&gt;phone&lt;/contact-type&gt;
+      #       &lt;details&gt;
+      #         &lt;brief&gt;Called to order P43 printer&lt;/brief&gt;
+      #       &lt;/details&gt;
+      #     &lt;/event&gt;
+      #     &lt;event&gt;
+      #       &lt;contact-time&gt;2005-11-02&lt;/contact-time&gt;
+      #       &lt;handler&gt;username&lt;/handler&gt;
+      #       &lt;contact-type&gt;phone&lt;/contact-type&gt;
+      #       &lt;details&gt;
+      #         &lt;brief&gt;Called to cancel P43 printer&lt;/brief&gt;
+      #       &lt;/details&gt;
+      #     &lt;/event&gt;
+      #   &lt;/contact-history&gt;
+      # &lt;/foo&gt;
+      #
+    }
+    
+</pre>
+
+<hr/>
+<p>
+Copyright &copy; 2007 by Andy Bierman, All Rights Reserved.
+</p>
+<p>Last-Updated: 2007-05-30</p>
+</body>
+</html>

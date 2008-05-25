@@ -1,0 +1,568 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://netconfcentral.com/ns/sessions"
+   targetNamespace="http://netconfcentral.com/ns/sessions"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2008-04-17"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'sessions.yang' by yangdump version 0.9.2
+         
+         Module: sessions
+         Organization: Netconf Central
+         Version: 2008-04-17
+         Contact: Andy Bierman &lt;support@netconfcentral.com&gt;
+      </xs:documentation>
+      <xs:documentation>
+         This module contains objects for monitoring NETCONF
+         session statistics and state info.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/swdev/trunk/netconf/modules/./netconfcentral/sessions.yang
+         </ncx:source>
+         <ncx:organization>Netconf Central</ncx:organization>
+         <ncx:contact>
+            Andy Bierman &lt;support@netconfcentral.com&gt;
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2008-04-17</ncx:version>
+            <ncx:description>
+               Remove NCX version and rename ysessions to sessions.
+            </ncx:description>
+         </ncx:revision>
+         <ncx:revision>
+            <ncx:version>2007-11-20</ncx:version>
+            <ncx:description>
+               Initial revision, converted from sessions.ncx.
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="UserName">
+      <xs:annotation>
+         <xs:documentation>
+            NETCONF Session User name string
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern value="[a-z,A-Z][a-z,A-Z,0-9,\-,_]*"/>
+         <xs:minLength value="1"/>
+         <xs:maxLength value="1023"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:group name="SessionStats">
+      <xs:annotation>
+         <xs:documentation>
+            The set of session statistics collected by the agent
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:element name="inBytes" type="yang:zero-based-counter64"
+            default="0" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  The total number of bytes contained in NETCONF PDUs
+                  received on a particular session.
+               </xs:documentation>
+               <xs:appinfo>
+                  <ncx:config>false</ncx:config>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="inDropBytes"
+            type="yang:zero-based-counter64" default="0" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  The total number of bytes dropped (and therefore not received)
+                  on a particular session.
+               </xs:documentation>
+               <xs:appinfo>
+                  <ncx:config>false</ncx:config>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="inMsgs" type="yang:zero-based-counter64"
+            default="0" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  The total number of NETCONF PDUs received
+                  on a particular session without errors.
+               </xs:documentation>
+               <xs:appinfo>
+                  <ncx:config>false</ncx:config>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="inErrMsgs" type="yang:zero-based-counter64"
+            default="0" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  The total number of NETCONF PDUs received
+                  on a particular session with errors
+               </xs:documentation>
+               <xs:appinfo>
+                  <ncx:config>false</ncx:config>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="outBytes" type="yang:zero-based-counter64"
+            default="0" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  The total number of bytes contained in NETCONF PDUs
+                  transmitted on a particular session.
+               </xs:documentation>
+               <xs:appinfo>
+                  <ncx:config>false</ncx:config>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="outMsgs" type="yang:zero-based-counter64"
+            default="0" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  The total number of NETCONF PDUs transmitted
+                  on a particular session which did not contain any 
+                  &lt;rpc-error&gt; elements.
+               </xs:documentation>
+               <xs:appinfo>
+                  <ncx:config>false</ncx:config>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="outErrMsgs" type="yang:zero-based-counter64"
+            default="0" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  The total number of NETCONF PDUs transmitted
+                  on a particular session which contained one or more
+                  &lt;rpc-error&gt; elements.
+               </xs:documentation>
+               <xs:appinfo>
+                  <ncx:config>false</ncx:config>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:element name="netconfd">
+      <xs:annotation>
+         <xs:documentation>
+            The sessionInfo container is implemented as a child
+            of the top-level element &lt;netconfd&gt;.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="sessionInfo">
+               <xs:annotation>
+                  <xs:documentation>
+                     Read-only Session Statistics and Information
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="activeSessions"
+                        type="yang:zero-based-counter32" default="0"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Current number of open NETCONF sessions.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="closedSessions"
+                        type="yang:zero-based-counter32" default="0"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Total number of closed NETCONF sessions.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="failedSessions"
+                        type="yang:zero-based-counter32" default="0"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Total number of failed NETCONF sessions, which
+                              failed to be established for any reason.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="sessionTotals">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Running global statistics totals aggregating
+                              all open and closed session statistics totals
+                           </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="inBytes"
+                                 type="yang:zero-based-counter64"
+                                 default="0" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The total number of bytes contained in NETCONF PDUs
+                                       received on a particular session.
+                                    </xs:documentation>
+                                    <xs:appinfo>
+                                       <ncx:config>false</ncx:config>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="inDropBytes"
+                                 type="yang:zero-based-counter64"
+                                 default="0" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The total number of bytes dropped (and therefore not received)
+                                       on a particular session.
+                                    </xs:documentation>
+                                    <xs:appinfo>
+                                       <ncx:config>false</ncx:config>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="inMsgs"
+                                 type="yang:zero-based-counter64"
+                                 default="0" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The total number of NETCONF PDUs received
+                                       on a particular session without errors.
+                                    </xs:documentation>
+                                    <xs:appinfo>
+                                       <ncx:config>false</ncx:config>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="inErrMsgs"
+                                 type="yang:zero-based-counter64"
+                                 default="0" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The total number of NETCONF PDUs received
+                                       on a particular session with errors
+                                    </xs:documentation>
+                                    <xs:appinfo>
+                                       <ncx:config>false</ncx:config>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="outBytes"
+                                 type="yang:zero-based-counter64"
+                                 default="0" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The total number of bytes contained in NETCONF PDUs
+                                       transmitted on a particular session.
+                                    </xs:documentation>
+                                    <xs:appinfo>
+                                       <ncx:config>false</ncx:config>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="outMsgs"
+                                 type="yang:zero-based-counter64"
+                                 default="0" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The total number of NETCONF PDUs transmitted
+                                       on a particular session which did not contain any 
+                                       &lt;rpc-error&gt; elements.
+                                    </xs:documentation>
+                                    <xs:appinfo>
+                                       <ncx:config>false</ncx:config>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="outErrMsgs"
+                                 type="yang:zero-based-counter64"
+                                 default="0" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The total number of NETCONF PDUs transmitted
+                                       on a particular session which contained one or more
+                                       &lt;rpc-error&gt; elements.
+                                    </xs:documentation>
+                                    <xs:appinfo>
+                                       <ncx:config>false</ncx:config>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element
+                                 name="__.netconfd.sessionInfo.sessionTotals.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                     </xs:element>
+                     <xs:element name="sessions">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Container for active session information and statistics.
+                              There is one entry for each session which is active 
+                              or starting up.
+                           </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="session" minOccurs="0"
+                                 maxOccurs="unbounded">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       Per-Session Information Block
+                                    </xs:documentation>
+                                    <xs:appinfo>
+                                       <ncx:ordered-by>system</ncx:ordered-by>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:complexType>
+                                    <xs:sequence>
+                                       <xs:element name="id"
+                                          type="nc:SessionId">
+                                          <xs:annotation>
+                                             <xs:documentation>
+                                                The session ID assigned by the agent for the session.
+                                             </xs:documentation>
+                                          </xs:annotation>
+                                       </xs:element>
+                                       <xs:element name="startTime"
+                                          type="yang:date-and-time"
+                                          minOccurs="0">
+                                          <xs:annotation>
+                                             <xs:documentation>
+                                                The system time when this session was first opened.
+                                             </xs:documentation>
+                                          </xs:annotation>
+                                       </xs:element>
+                                       <xs:element name="userName"
+                                          type="UserName" minOccurs="0">
+                                          <xs:annotation>
+                                             <xs:documentation>
+                                                The user name associated with this session.
+                                             </xs:documentation>
+                                          </xs:annotation>
+                                       </xs:element>
+                                       <xs:element name="state"
+                                          type="xs:string"
+                                          minOccurs="0">
+                                          <xs:annotation>
+                                             <xs:documentation>
+                                                A textual representation of the current session state.
+                                             </xs:documentation>
+                                          </xs:annotation>
+                                       </xs:element>
+                                       <xs:element name="locks">
+                                          <xs:annotation>
+                                             <xs:documentation>
+                                                Container for the list of names of the locked 
+                                                configurations
+                                             </xs:documentation>
+                                          </xs:annotation>
+                                          <xs:complexType>
+                                             <xs:sequence>
+                                                <xs:element
+                                                   name="config"
+                                                   type="xs:string"
+                                                   minOccurs="0"
+                                                   maxOccurs="unbounded">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         Each &lt;config&gt; leaf contains the name of a 
+                                                         configuration that is currently locked by 
+                                                         this session.
+                                                      </xs:documentation>
+                                                      <xs:appinfo>
+                                                         <ncx:ordered-by>
+                                                            system</ncx:ordered-by>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:element>
+                                                <xs:element
+                                                   name="__.netconfd.sessionInfo.sessions.session.locks.A__"
+                                                   minOccurs="0"
+                                                   maxOccurs="unbounded"
+                                                   abstract="true"/>
+                                             </xs:sequence>
+                                          </xs:complexType>
+                                       </xs:element>
+                                       <xs:element name="stats">
+                                          <xs:annotation>
+                                             <xs:documentation>
+                                                The set of statistics collected for this session.
+                                             </xs:documentation>
+                                          </xs:annotation>
+                                          <xs:complexType>
+                                             <xs:sequence>
+                                                <xs:element
+                                                   name="inBytes"
+                                                   type="yang:zero-based-counter64"
+                                                   default="0"
+                                                   minOccurs="0">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         The total number of bytes contained in NETCONF PDUs
+                                                         received on a particular session.
+                                                      </xs:documentation>
+                                                      <xs:appinfo>
+                                                         <ncx:config>
+                                                            false</ncx:config>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:element>
+                                                <xs:element
+                                                   name="inDropBytes"
+                                                   type="yang:zero-based-counter64"
+                                                   default="0"
+                                                   minOccurs="0">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         The total number of bytes dropped (and therefore not received)
+                                                         on a particular session.
+                                                      </xs:documentation>
+                                                      <xs:appinfo>
+                                                         <ncx:config>
+                                                            false</ncx:config>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:element>
+                                                <xs:element
+                                                   name="inMsgs"
+                                                   type="yang:zero-based-counter64"
+                                                   default="0"
+                                                   minOccurs="0">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         The total number of NETCONF PDUs received
+                                                         on a particular session without errors.
+                                                      </xs:documentation>
+                                                      <xs:appinfo>
+                                                         <ncx:config>
+                                                            false</ncx:config>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:element>
+                                                <xs:element
+                                                   name="inErrMsgs"
+                                                   type="yang:zero-based-counter64"
+                                                   default="0"
+                                                   minOccurs="0">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         The total number of NETCONF PDUs received
+                                                         on a particular session with errors
+                                                      </xs:documentation>
+                                                      <xs:appinfo>
+                                                         <ncx:config>
+                                                            false</ncx:config>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:element>
+                                                <xs:element
+                                                   name="outBytes"
+                                                   type="yang:zero-based-counter64"
+                                                   default="0"
+                                                   minOccurs="0">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         The total number of bytes contained in NETCONF PDUs
+                                                         transmitted on a particular session.
+                                                      </xs:documentation>
+                                                      <xs:appinfo>
+                                                         <ncx:config>
+                                                            false</ncx:config>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:element>
+                                                <xs:element
+                                                   name="outMsgs"
+                                                   type="yang:zero-based-counter64"
+                                                   default="0"
+                                                   minOccurs="0">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         The total number of NETCONF PDUs transmitted
+                                                         on a particular session which did not contain any 
+                                                         &lt;rpc-error&gt; elements.
+                                                      </xs:documentation>
+                                                      <xs:appinfo>
+                                                         <ncx:config>
+                                                            false</ncx:config>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:element>
+                                                <xs:element
+                                                   name="outErrMsgs"
+                                                   type="yang:zero-based-counter64"
+                                                   default="0"
+                                                   minOccurs="0">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         The total number of NETCONF PDUs transmitted
+                                                         on a particular session which contained one or more
+                                                         &lt;rpc-error&gt; elements.
+                                                      </xs:documentation>
+                                                      <xs:appinfo>
+                                                         <ncx:config>
+                                                            false</ncx:config>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:element>
+                                                <xs:element
+                                                   name="__.netconfd.sessionInfo.sessions.session.stats.A__"
+                                                   minOccurs="0"
+                                                   maxOccurs="unbounded"
+                                                   abstract="true"/>
+                                             </xs:sequence>
+                                          </xs:complexType>
+                                       </xs:element>
+                                       <xs:element
+                                          name="__.netconfd.sessionInfo.sessions.session.A__"
+                                          minOccurs="0"
+                                          maxOccurs="unbounded"
+                                          abstract="true"/>
+                                    </xs:sequence>
+                                 </xs:complexType>
+                                 <xs:key name="session_Key">
+                                    <xs:selector xpath="."/>
+                                    <xs:field xpath="id"/>
+                                 </xs:key>
+                              </xs:element>
+                              <xs:element
+                                 name="__.netconfd.sessionInfo.sessions.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                     </xs:element>
+                     <xs:element name="__.netconfd.sessionInfo.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="__.netconfd.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

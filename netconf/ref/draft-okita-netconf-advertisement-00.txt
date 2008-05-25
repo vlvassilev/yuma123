@@ -1,0 +1,1064 @@
+
+
+Network Working Group                                           H. Okita
+Internet-Draft                                             Hitachi, Ltd.
+Intended status: Informational                                 T. Iijima
+Expires: May 15, 2008                                        A. Atarashi
+                                                           Alaxala Corp.
+                                                       November 12, 2007
+
+
+    NETCONF Configuration Interface Advertisement with WSDL and XSD
+                  draft-okita-netconf-advertisement-00
+
+Status of this Memo
+
+   By submitting this Internet-Draft, each author represents that any
+   applicable patent or other IPR claims of which he or she is aware
+   have been or will be disclosed, and any of which he or she becomes
+   aware will be disclosed, in accordance with Section 6 of BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on May 15, 2008.
+
+Copyright Notice
+
+   Copyright (C) The IETF Trust (2007).
+
+
+
+
+
+
+
+
+
+
+
+
+Okita, et al.             Expires May 15, 2008                  [Page 1]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+Abstract
+
+   This memo describes a configuration interface advertisement method
+   for NETCONF device developers.  In the proposal, the developers take
+   a configuration interface definition information of target NETCONF
+   devices.  On their development environment, they generate stab
+   classes to control the devices.  The NETCONF device advertises their
+   configuration interface by a WSDL file.  The WSDL file describes
+   message type of each NETCONF operation of the device.  The WSDL file
+   contains XML Schema in its types element and describes definition of
+   the types definition used to configuration data.  By this
+   configuration interface advertisement, Network management System
+   (NMS) developers can improve their development efficiency of the NMS.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Okita, et al.             Expires May 15, 2008                  [Page 2]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+1.  Introduction
+
+   IETF netconf WG made up NETCONF protocol [1] , standard configuration
+   protocol between a network management system and network devices.  By
+   using this unified management/configuration protocol, operators can
+   reduce management/configuration cost.  Developers of the network
+   management system (NMS) read configuration interface definition
+   document and write code that accesses the configuration interface of
+   the NETCONF device.
+
+   Now, there are no standard way to take XML Schema [11] from a target
+   NETCONF device.  To implement the NETCONF NMS, the developers should
+   check the Schema that defines the configuration data of the target
+   NETCONF device.  They should know XML tree construction of the
+   configuration data and type definition of the each element in the XML
+   tree.
+
+   This document provides the requirements to NETCONF devices and the
+   programming model to suppress the implementation cost of the NMS that
+   manages NETCONF devices.
+
+   First, this document standardizes how to describe the configuration
+   interface of NETCONF devices.  Second, this document standardizes how
+   to describe the type definition of the XML elements that occur in the
+   NETCONF protocol messages.  Last, this document standardizes how to
+   advertise the above configuration interface definition information.
+
+   This document also describe how NETCONF NMS developers automeate the
+   construction of NETCONF stack during the development of a NETCONF
+   NMS.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Okita, et al.             Expires May 15, 2008                  [Page 3]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+2.  NETCONF Protocol
+
+   Characteristics of the NETCONF protocol are (1) XML-format, (2) RPC-
+   style, and (3) separation of operation and datamodel.
+
+   The NETCONF protocol has protocol messages described in XML [13]
+   format.  XML-format makes it easy for operators to read configuration
+   data.  It also improves machine readability of the configuration data
+   since XML documents are well-formed.  From a different viewpoint,
+   various XML related tools eases development of devices compliant to
+   the NETCONF protocol.
+
+   The NETCONF protocol is a Remote Procedure Call (RPC) style protocol.
+   RPC-style protocols have sets of a request message and a
+   corresponding reply message.  It is easy to implement on a management
+   software, since each RPC of the protocol corresponds to a function
+   call of the programs.
+
+
+                 Layer                      Example
+            +-------------+      +-----------------------------+
+        (4) |   Content   |      |     Configuration data      |
+            +-------------+      +-----------------------------+
+                   |                           |
+            +-------------+      +-----------------------------+
+        (3) | Operations  |      | <get-config>, <edit-config> |
+            +-------------+      +-----------------------------+
+                   |                           |
+            +-------------+      +-----------------------------+
+        (2) |     RPC     |      |    <rpc>, <rpc-reply>       |
+            +-------------+      +-----------------------------+
+                   |                           |
+            +-------------+      +-----------------------------+
+        (1) |  Transport  |      |     SSH, SSL, console,      |
+            |   Protocol  |      |     SOAP/HTTP, BEEP         |
+            +-------------+      +-----------------------------+
+
+
+                                 Figure 1
+
+   The NETCONF protocol defines protocol operations and datamodels
+   separately.  The NETCONF protocol has four layers.  Figure 1 shows
+   the NETCONF protocol structure.  It contains Transport Protocol
+   Layer, RPC Layer, Operations Layer and Content Layer.
+
+   In the RPC Layer and Operations Layer, the netconf WG defined RPC
+   message and basic protocol operations [1] .  These NETCONF operations
+   carry configuration data inside <config> element.  The WG also
+
+
+
+Okita, et al.             Expires May 15, 2008                  [Page 4]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+   defined the transport mapping of the NETCONF protocol for SSH [2] ,
+   SOAP/HTTP [3] and BEEP [4] .
+
+   The Content Layer defines model of the NETCONF content carried by
+   NETCONF operations such as <get-config> and <edit-config>.  The
+   structure of the configuration data is defined by schema language
+   such as DTD [10] , XML Schema [11] or RelaxNG for the each model.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Okita, et al.             Expires May 15, 2008                  [Page 5]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+3.  Proposal
+
+   To fulfill the above requirements, we propose adoption of Web-Service
+   architecture to the NETCONF system architecture.  The proposed
+   NETCONF system uses Web Service Description Language (WSDL) [14] and
+   XML Schema (XSD) widely deployed in Web-service system.
+
+   Features of this proposal:
+
+      WSDL for interface advertisement
+
+      XSD for type definition
+
+      HTTP access to the WSDL file with fixed URL
+
+3.1.  Target Architecture
+
+   This proposal assumes the following NETCONF system architecture.
+   Developers implement their NMS as a NETCONF manager on their
+   development environment with help of the NETCONF configuration
+   interface information provided by NETCONF device developers via the
+   direct access to the NETCONF device or via indirect access with Web
+   server.  The implemented NMS works on a runtime environment and
+   access NETCONF devices via NETCONF protocol.
+
+      NETCONF Device
+
+      Development Environment NETCONF Manager
+
+      Runtime Environment NETCONF Manager
+
+      Device vendor's Web server
+
+3.2.  NETCONF Operation Interface Advertisement by WSDL
+
+   NETCONF devices advertise their configuration interface to the
+   NETCONF NMS developers.  The developers know name of the operation,
+   number and type of arguments, and type of return value from the
+   interface advertisement.
+
+   In this proposal, NETCONF system use WSDL file to advertise their
+   configuration interface to the NMS developers.  Somehow the NMS
+   developers takes a WSDL file corresponding to a target NETCONF
+   device, and read the WSDL file.  Then the developers know NETCONF
+   operations implemented in the NETCONF device.
+
+   The WSDL file SHOULD include two ordinary NETCONF protocol message
+   exchanges: hello exchange and RPC exchange.  In the hello exchange, a
+
+
+
+Okita, et al.             Expires May 15, 2008                  [Page 6]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+   NETCONF Manager throw <hello> element to a NETCONF devices a NETCONF
+   request, and then get <hello> element from the NETCONF device as a
+   NETCONF response.  In the RPC exchange, the NETCONF manager throw
+   <rpc> element and get <rpc-reply> element.
+
+   Below is a recommended WSDL file example to advertise NETCONF device
+   configuration interface proposed in RFC4743[3].  In this example,
+   SOAP over HTTP is selected as its transport protocol binding.
+   NETCONF device developers can choose their favorite transport binding
+   and modify the binding part of this WSDL file.
+
+   The WSDL file describes type definition of the argument and return
+   value of each operation by XML Schema.  Developers MAY prepare
+   external XML Schema as separate file or inline Schema in this WSDL
+   file.  In this example, an external XML Schema defines the types.
+   When developers prepare inline schema, they make types element under
+   the definition element of this WSDL file and place schema element
+   same with external schema under the types element.
+
+
+   <?xml version="1.0" encoding="UTF-8"?>
+      <definitions
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:tns="urn:ietf:params:xml:ns:netconf:soap:1.0"
+        xmlns:netb="urn:ietf:params:xml:ns:netconf:base:1.0"
+        targetNamespace="urn:ietf:params:xml:ns:netconf:soap:1.0"
+        name="netconf-soap_1.0.wsdl">
+
+        <import namespace="urn:ietf:params:xml:ns:netconf:base:1.0"
+                location="netconf-base_1.0.xsd"/>
+
+        <message name="helloRequest">
+          <part name="in" element="netb:hello"/>
+        </message>
+        <message name="helloResponse">
+          <part name="out" element="netb:hello"/>
+        </message>
+
+        <message name="rpcRequest">
+          <part name="in" element="netb:rpc"/>
+        </message>
+        <message name="rpcResponse">
+          <part name="out" element="netb:rpc-reply"/>
+        </message>
+
+        <portType name="netconfPortType">
+          <operation name="rpc">
+
+
+
+Okita, et al.             Expires May 15, 2008                  [Page 7]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+            <input message="tns:rpcRequest"/>
+            <output message="tns:rpcResponse"/>
+          </operation>
+          <operation name="hello">
+            <input message="tns:helloRequest"/>
+            <output message="tns:helloResponse"/>
+          </operation>
+        </portType>
+
+        <binding name="netconfBinding" type="tns:netconfPortType">
+          <SOAP:binding style="document"
+               transport="http://schemas.xmlsoap.org/soap/http"/>
+          <operation name="hello">
+            <SOAP:operation/>
+            <input>
+              <SOAP:body use="literal"
+                   namespace="urn:ietf:params:xml:ns:netconf:base:1.0"/>
+            </input>
+            <output>
+              <SOAP:body use="literal"
+                   namespace="urn:ietf:params:xml:ns:netconf:base:1.0"/>
+            </output>
+          </operation>
+          <operation name="rpc">
+            <SOAP:operation/>
+            <input>
+              <SOAP:body use="literal"
+                   namespace="urn:ietf:params:xml:ns:netconf:base:1.0"/>
+            </input>
+            <output>
+              <SOAP:body use="literal"
+                   namespace="urn:ietf:params:xml:ns:netconf:base:1.0"/>
+            </output>
+          </operation>
+        </binding>
+
+        <service name="netconf">
+          <port binding="tns:netconfBinding" name="netconfBinding">
+            <SOAP:address location="http://localhost:8080/netconf/"/>
+          </port>
+        </service>
+
+     </definitions>
+
+
+   When device developers choose SOAP over HTTP binding for the NETCONF
+   configuration service, the WSDL file should select "document-literal"
+   as its transport binding and message encoding.  In the WSDL file,
+
+
+
+Okita, et al.             Expires May 15, 2008                  [Page 8]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+   style attribute of the binding element SHOULD be "document". input
+   and output element in binding element SHOULD include body element
+   that has attribute with "literal" value.
+
+3.3.  Operation and Datamodel Type Definition Advertisement by XSD
+
+   The NETCONF system should prepare XML Schema describing the type of
+   argument and return value of rpc request.  As described above, a WSDL
+   file describes interface of a NETCONF device.  In addition to the
+   interface, the NETCONF device should advertise the type definition.
+
+   The XSD file SHOULD include ordinary NETCONF operations described in
+   NETCONF Protocol [1] as the argument of rpc operation defined in the
+   above WSDL file.  The XSD file MAY also include NETCONF notification
+   subscription operation described in NETCONF Notification [2].  The
+   XSD file MAY also include additional NETCONF operations added by
+   vendors.
+
+   Ordinary NETCONF operations:
+
+      get
+
+      getConfig
+
+      editConfig
+
+      lock
+
+      unlock
+
+      subscribe
+
+   NETCONF device developers can add configuration datamodel as
+   additional type definition in this XSD file.  They can add import
+   element for the pointer to an external schema defining configuration
+   item elements, for example, interfaceType, vlanType, and etc.  They
+   can use proposed configuration datamodels like VLAN datamodel [6],
+   Diff-Serv datamodel [7], and ACL datamodel [8].  They can also
+   include these type definitions as an inline schema in this XSD file.
+
+   Following describes an example XML Schema advertising the type
+   definition of the NETCONF operation messages.  It contains following
+   type definitions as an example.  This XML Schema contains types for
+   edit-config operation message, interface configuration message, and
+   vlan configuration message.  The two types are described by inline
+   schema.
+
+
+
+
+
+Okita, et al.             Expires May 15, 2008                  [Page 9]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+      rpcType
+
+      rpcOperationType
+
+      interfaceType
+
+      vlanType
+
+      configInlineType
+
+      editConfigType
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+   <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+              xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"
+              targetNamespace="urn:ietf:params:xml:ns:netconf:base:1.0"
+              elementFormDefault="qualified"
+              attributeFormDefault="qualified"
+              xml:lang="en">
+     <!--
+       <rpc> element
+       -->
+     <xs:complexType name="rpcType">
+       <xs:sequence>
+         <xs:element ref="rpcOperation"/>
+       </xs:sequence>
+       <xs:attribute name="message-id" type="xs:string" use="required"/>
+     </xs:complexType>
+     <xs:element name="rpc" type="rpcType"/>
+
+     <!--
+       rpcOperationType: abstraction type
+       -->
+     <xs:complexType name="rpcOperationType"/>
+     <xs:element name="rpcOperation"
+                 type="rpcOperationType" abstract="true"/>
+
+     <!--
+       Type for <interface> element
+       -->
+     <xs:complexType name="interfaceType">
+       <xs:sequence>
+         <xs:element name="IfId"   type="xs:integer"
+         <xs:element name="IfName" type="xs:string"
+       </xs:sequence>
+     </xs:complexType>
+
+
+
+Okita, et al.             Expires May 15, 2008                 [Page 10]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+     <xs:element name="interface" type="interfaceType">
+
+     <!--
+       Type for <vlan> element
+       -->
+     <xs:complexType name="vlanType">
+       <xs:sequence>
+         <xs:element name="VlanId"   type="xs:integer"
+         <xs:element name="VlanName" type="xs:string"
+       </xs:sequence>
+     </xs:complexType>
+     <xs:element name="vlan" type="vlanType">
+
+     <!--
+       Type for <config> element
+       -->
+     <xs:complexType name="configInlineType">
+       <xs:complexContent>
+         <xs:extension base="xs:anyType"/>
+       </xs:complexContent>
+     </xs:complexType>
+
+     <!--
+       <edit-config> operation
+       -->
+     <xs:complexType name="editConfigType">
+       <xs:complexContent>
+         <xs:extension base="rpcOperationType">
+           <xs:sequence>
+             <xs:element name="config"
+                         type="configInlineType"/>
+           </xs:sequence>
+         </xs:extension>
+       </xs:complexContent>
+     </xs:complexType>
+     <xs:element name="edit-config" type="editConfigType"
+                 substitutionGroup="rpcOperation"/>
+   </xs:schema>
+
+
+3.4.  Publishment of WSDL and XSD by HTTP
+
+   NETCONF device developers can publish their WSDL and XSD by several
+   methods as described below.
+
+      HTTP server on the target NETCONF device
+
+
+
+
+
+Okita, et al.             Expires May 15, 2008                 [Page 11]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+      HTTP server on the vendor's Web site.
+
+      FTP server on the target NETCONF device
+
+      Manual for NMS developers
+
+   When they publish their WSDL and XSD file by HTTP server on the
+   device or their Web site, they can use several methods to advertise
+   URL of the WSDL file for NMS developers as described below.
+
+      Manual for NMS developers
+
+      Inline retrieval operation
+
+      Universal Description, Discovery, and Integration (UDDI)
+
+   To publish a WSDL file of a NETCONF device, the NETCONF device SHOULD
+   publish it by HTTP.  The device MAY use FTP server or text on the
+   developer's manual.
+
+   If the NETCONF device publish its WSDL file by HTTP, its URL takes
+   following form.  The URL SHOULD contains string "http://", IP
+   address, port number followed by a slash and "netconf.wsdl".  The IP
+   address in the URL is an IP address of a management interface of the
+   target NETCONF device.  If the port number is not 80, they should
+   wrote down the appropriate port number in a user's manual.
+
+   http://127.0.0.1:8080/netconf.wsdl
+
+3.5.  Reference Programming Model with Web-Service Middleware
+
+   When a NETCONF device support NETCONF over SOAP and publish its WSDL,
+   NMS developers can reduce much of their implementation time.  They
+   can utilize Web-Service middleware to construct their NMS code.
+
+   From the WSDL file published by the NETCONF device, the Web-Service
+   middleware generate automatically stub classes for NMS code to access
+   configuration interface of the NETCONF device via SOAP over HTTP
+   transport.  The NMS developers have only to implement NMS logic using
+   the stub classes.
+
+   Using WSDL and Web-Service middleware, NMS developers might follow
+   the sequence described below.
+
+      prepare a NETCONF device
+
+      take a WSDL file from the device via HTTP
+
+
+
+
+Okita, et al.             Expires May 15, 2008                 [Page 12]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+      extract XML Schema from the WSDL file for reference
+
+      generate stub class source file from the WSDL file by Web-Service
+      middleware
+
+      take the stub class in their development environment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Okita, et al.             Expires May 15, 2008                 [Page 13]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+4.  Security Consideration
+
+   In the NETCONF architecture, the transport protocol layer is
+   responsible for the security between a network manager and network
+   devices.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Okita, et al.             Expires May 15, 2008                 [Page 14]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+5.  IANA Consideration
+
+   This document has no actions for IANA.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Okita, et al.             Expires May 15, 2008                 [Page 15]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+6.  References
+
+6.1.  Normative References
+
+   [1]   Enns, R., "NETCONF Configuration Protocol", RFC 4741,
+         December 2006.
+
+   [2]   Wasserman, M. and T. Goddard, "Using the NETCONF Configuration
+         Protocol over Secure SHell (SSH)", RFC 4742, December 2006.
+
+   [3]   Goddard, T., "Using NETCONF over the Simple Object Access
+         Protocol (SOAP)", RFC 4743, December 2006.
+
+   [4]   Lear, E. and K. Crozier, "Using the NETCONF Protocol over the
+         Blocks Extensible Exchange Protocol (BEEP)", RFC 4744,
+         December 2006.
+
+6.2.  Informative References
+
+   [5]   Admankar, S. and S. Chisholm, "Using XML Schema to define
+         Netconf Content", draft-chisholm-netconf-model-06 (work in
+         progress), February 2007.
+
+   [6]   Iijima, T., "VLAN data model for NETCONF",
+         draft-iijima-ngo-vlandatamodel-01 (work in progress),
+         August 2007.
+
+   [7]   Okita, H., "A NETCONF Datamodel for Diff-Serv QoS Control
+         Configuration", draft-okita-ngo-diffservdatamodel-01 (work in
+         progress), July 2007.
+
+   [8]   Iijima, T., "ACL data model for NETCONF",
+         draft-iijima-ngo-acldatamodel-00 (work in progress), July 2007.
+
+   [9]   Tomoyuki, I., "Experience of implementing NETCONF over SOAP",
+         draft-iijima-netconf-soap-implementation-03 (work in progress),
+         October 2007.
+
+   [10]  Sperberg-McQueen, C., Paoli, J., Maler, E., Yergeau, F., and T.
+         Bray, "Extensible Markup Language (XML) 1.0 (Fourth Edition)",
+         World Wide Web Consortium Recommendation REC-xml-20060816,
+         August 2006, <http://www.w3.org/TR/2006/REC-xml-20060816>.
+
+   [11]  Fallside, D., "XML Schema Part 0: Primer", World Wide Web
+         Consortium FirstEdition REC-xmlschema-0-20010502, May 2001,
+         <http://www.w3.org/TR/2001/REC-xmlschema-0-20010502>.
+
+   [12]  Gudgin, M., Nielsen, H., Moreau, J., Mendelsohn, N., and M.
+
+
+
+Okita, et al.             Expires May 15, 2008                 [Page 16]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+         Hadley, "SOAP Version 1.2 Part 1: Messaging Framework", World
+         Wide Web Consortium FirstEdition REC-soap12-part1-20030624,
+         June 2003,
+         <http://www.w3.org/TR/2003/REC-soap12-part1-20030624>.
+
+   [13]  Liu, C. and D. Booth, "Web Services Description Language (WSDL)
+         Version 2.0 Part 0: Primer", World Wide Web Consortium
+         Recommendation REC-wsdl20-primer-20070626, June 2007,
+         <http://www.w3.org/TR/2007/REC-wsdl20-primer-20070626>.
+
+   [14]  Moreau, J., Ryman, A., Chinnici, R., and S. Weerawarana, "Web
+         Services Description Language (WSDL) Version 2.0 Part 1: Core
+         Language", World Wide Web Consortium Recommendation REC-wsdl20-
+         20070626, June 2007,
+         <http://www.w3.org/TR/2007/REC-wsdl20-20070626>.
+
+   [15]  Lewis, A., Moreau, J., Orchard, D., Haas, H., Weerawarana, S.,
+         and R. Chinnici, "Web Services Description Language (WSDL)
+         Version 2.0 Part 2: Adjuncts", World Wide Web Consortium
+         Recommendation REC-wsdl20-adjuncts-20070626, June 2007,
+         <http://www.w3.org/TR/2007/REC-wsdl20-adjuncts-20070626>.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Okita, et al.             Expires May 15, 2008                 [Page 17]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+Authors' Addresses
+
+   Hideki Okita
+   Central Research Laboratory, Hitachi, Ltd.
+   1-280 Higashi-Koigakubo
+   Kokubunji, Tokyo  185-8601
+   Japan
+
+   Phone: +81-42-323-1111
+   Fax:   +81-42-327-7868
+   Email: hideki.okita.pf@hitachi.com
+
+
+   Tomoyuki Iijima
+   Alaxala Networks Corp.
+   Shin-Kawasaki Mitsui Bldg.
+   890 Saiwai-ku Kashimada
+   Kawasaki, Kanagawa  212-0058
+   Japan
+
+   Phone: +81-44-549-1735
+   Fax:   +81-44-549-1272
+   Email: tomoyuki.iijima@alaxala.com
+
+
+   Yoshifumi Atarashi
+   Alaxala Networks Corp.
+   Shin-Kawasaki Mitsui Bldg.
+   890 Saiwai-ku Kashimada
+   Kawasaki, Kanagawa  212-0058
+   Japan
+
+   Phone: +81-44-549-1735
+   Fax:   +81-44-549-1272
+   Email: atarashi@alaxala.net
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Okita, et al.             Expires May 15, 2008                 [Page 18]
+
+Internet-Draft       NETCONF Interface Advertisement       November 2007
+
+
+Full Copyright Statement
+
+   Copyright (C) The IETF Trust (2007).
+
+   This document is subject to the rights, licenses and restrictions
+   contained in BCP 78, and except as set forth therein, the authors
+   retain all their rights.
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY, THE IETF TRUST AND
+   THE INTERNET ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF
+   THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Intellectual Property
+
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the procedures with respect to rights in RFC documents can be
+   found in BCP 78 and BCP 79.
+
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use of
+   such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository at
+   http://www.ietf.org/ipr.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at
+   ietf-ipr@ietf.org.
+
+
+Acknowledgment
+
+   Funding for the RFC Editor function is provided by the IETF
+   Administrative Support Activity (IASA).
+
+
+
+
+
+Okita, et al.             Expires May 15, 2008                 [Page 19]
+
+

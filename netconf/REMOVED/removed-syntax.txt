@@ -1,0 +1,79 @@
+
+NCX Module XML Syntax
+----------------------
+
+<ncx-module>
+
+  <header>
+    <name>ModuleName</name>
+    <version>moduleVersionString</version>
+    <owner>applicationOwnerName</owner>
+    <application>applicationName</application>
+   [<copyright>CopyrightString</copyright>]
+   [<contact-info>Contact Info</contact-info>]
+   [<description>Optional Module Description</description>]
+   [<namespace>OverrideDefaultNamespaceID</namespace>]
+  </header>
+
+  <imports>
+    <import>
+      <module>ModuleName</module>
+      [<items>Item1 Item2 Item3</items>]
+    </import>
+  </imports>
+
+  <definitions>
+
+    <type>
+      <name>
+      [<default> -- string value -- </default>]
+      [<description>]
+       <syntax> ** see <syntax-contents> ABNF below **</syntax>
+    </type>
+
+    <parmset>
+      <name>ParmsetName</name>
+      [<order>strict | loose</order>
+     [<description>Optional PSD Description</description>]
+     <parms>
+       <parm>
+         <name>ParameterName</name>
+         <type>ParameterTypeName</type>
+        [<max-access>AllowedAccessClause</max-access>]
+        [<usage>mandatory | optional | conditional</usage>]
+        [<default>DefaultValue</default>]
+        [<description>Object Description Clause</description>]
+       </parm>
+     </parms>
+    </parmset>
+
+    <monitor>
+      <name>MonitorObjectName</name>
+     [<description>Optional MON Description</description>]
+     <objects>
+       <object>
+         <name>Monitor Object Name</name>
+         <type>Monitor Object Type</type>
+         [<description>Object Description Clause</description>]
+       </object>
+     </objects>
+    </monitor>
+
+    <rpc>
+      <name>RpcMethodName</name>
+      <rpc-type> other | config | exec | monitor | debug </rpc-type>
+      <in-psd>InputPsdName</in-psd>
+      <out-data>OutputDataName (PSD or MON)</out-data>
+     [<description>]
+    </rpc>
+
+    <event>
+      <name>
+      <event-class>
+      <event-type>
+     [<event-data>]
+     [<description>]
+    </event>
+
+  </definitions>
+</ncx-module>

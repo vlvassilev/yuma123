@@ -1,0 +1,161 @@
+ncx-module sessions {
+  header {
+    description "NCX Session Statistics and State info.";
+    version 0.1;
+    owner ncx;
+    application netconfd;
+    copyright "Copyright (C) 2007, Andy Bierman.";
+    contact-info "Send comments to <ietf@andybierman.com>.";
+    last-update "2007-04-21";
+    revision-history {
+       0.1 "Initial version";
+    }
+  }
+
+  imports {
+    import ncxtypes;
+    import netconf;
+    import xsd;
+    import smi;
+  }
+
+  definitions {
+
+    type NcxSessionStats {
+      description "NCX Per-Session Statistics";
+      syntax { 
+        struct {
+          ZeroBasedCounter64  inBytes;
+          ZeroBasedCounter64  inDropBytes;
+          ZeroBasedCounter64  inMsgs;
+          ZeroBasedCounter64  inErrMsgs;
+          ZeroBasedCounter64  outBytes;
+          ZeroBasedCounter64  outDropBytes;
+          ZeroBasedCounter64  outMsgs;
+          ZeroBasedCounter64  outErrMsgs;
+        }
+      }
+      max-access read-only;
+    }
+
+    type NcxWithDefaultType {
+      description 
+         "Controls suppression of default values.";
+      syntax { boolean; }
+      default "true";
+    }
+
+    type NcxWithMetaType {
+      description 
+         "Controls suppression of internal meta-data values.";
+      syntax { boolean; }
+      default "false";
+    }
+
+    type NcxSessionInfo {
+      description "NCX Per-Session Information Block";
+      syntax { 
+        struct {
+          NcxSessionId        id;
+          dateTime            startTime;
+          NcxUserName         userName;
+          string              state;
+          NcxLockList         locks;
+          NcxSessionStats     stats;
+        }
+      }
+    }
+
+    type NcxSessions {
+      description 
+         "Container of session info records.
+          There is one entry for each non-closed session,
+          which is a session that is active or starting up.";
+      syntax { 
+        container [session.id] {
+          NcxSessionInfo      session;
+        }
+      }
+    }
+       
+    parmset sessionInfo {
+      description
+         "NCX Read-only Session Statistics and Information";
+      order strict;
+      data-class state;
+      parms {
+
+        parm activeSessions {
+          description
+             "Current number of open NETCONF sessions.";
+          type ZeroBasedCounter32;
+          max-access read-only;
+        }
+
+        parm closedSessions {
+          description
+             "Total number of closed NETCONF sessions.";
+          type ZeroBasedCounter32;
+          max-access read-only;
+        }
+
+        parm failedSessions {
+          description
+             "Total number of failed NETCONF sessions, that
+              failed to be established for any reason.";
+          type ZeroBasedCounter32;
+          max-access read-only;
+        }
+
+        parm sessionTotals {
+          description 
+             "Running global statistics totals aggregating
+              all open and closed session statistics totals";
+          type NcxSessionStats;
+          max-access read-only;
+        }
+
+        parm sessions {
+          description "Per active session information and statistics.";
+          type NcxSessions;
+          max-access read-only;
+        }
+      }
+    }
+
+    parmset mySession {
+      description
+         "NCX Transient Per-Session Configuration Parameters";
+      order strict;
+      data-class tconfig;
+      parms {
+
+        parm linesize {
+          description
+             "Desired maximum line length for session reply output.";
+          type NcxLineLength;
+          max-access read-write;
+        }
+
+        parm withDefDefault {
+          description
+             "The default value of the 'with-defaults' attribute
+              for this session.  If this attribute is not present
+              in the 'rpc' element, then the value of this parameter
+              will be used by the agent.";
+          type NcxWithDefaultType;
+          max-access read-write;
+        }
+
+        parm withMetaDefault {
+          description
+             "The default value of the 'with-metadata' attribute
+              for this session.";
+          type NcxWithMetaType;
+          max-access read-write;
+        }
+      }
+    }
+
+  }
+}

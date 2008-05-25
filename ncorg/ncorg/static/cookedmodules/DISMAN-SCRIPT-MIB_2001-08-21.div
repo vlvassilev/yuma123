@@ -1,0 +1,1931 @@
+
+<div>
+   <h1 class="yang">DISMAN-SCRIPT-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#smObjects.91">smObjects</a>
+               <ul>
+                  <li class="daddy"><a href="#smLangEntry.96">smLangEntry</a>
+                     <ul>
+                        <li><a href="#smLangIndex.104">smLangIndex</a></li>
+                        <li><a href="#smLangLanguage.122">smLangLanguage</a></li>
+                        <li><a href="#smLangVersion.130">smLangVersion</a></li>
+                        <li><a href="#smLangVendor.146">smLangVendor</a></li>
+                        <li><a href="#smLangRevision.159">smLangRevision</a></li>
+                        <li><a href="#smLangDescr.175">smLangDescr</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#smExtsnEntry.187">smExtsnEntry</a>
+                     <ul>
+                        <li><a href="#smLangIndex.194">smLangIndex</a></li>
+                        <li><a href="#smExtsnIndex.203">smExtsnIndex</a></li>
+                        <li><a href="#smExtsnExtension.218">smExtsnExtension</a></li>
+                        <li><a href="#smExtsnVersion.227">smExtsnVersion</a></li>
+                        <li><a href="#smExtsnVendor.240">smExtsnVendor</a></li>
+                        <li><a href="#smExtsnRevision.253">smExtsnRevision</a></li>
+                        <li><a href="#smExtsnDescr.269">smExtsnDescr</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#smScriptObjects.282">smScriptObjects</a>
+               <ul>
+                  <li class="daddy"><a href="#smScriptEntry.287">smScriptEntry</a>
+                     <ul>
+                        <li><a href="#smScriptOwner.297">smScriptOwner</a></li>
+                        <li><a href="#smScriptName.307">smScriptName</a></li>
+                        <li><a href="#smScriptDescr.327">smScriptDescr</a></li>
+                        <li><a href="#smScriptLanguage.335">smScriptLanguage</a></li>
+                        <li><a href="#smScriptSource.356">smScriptSource</a></li>
+                        <li><a href="#smScriptAdminStatus.389">smScriptAdminStatus</a></li>
+                        <li><a href="#smScriptOperStatus.410">smScriptOperStatus</a></li>
+                        <li><a href="#smScriptStorageType.493">smScriptStorageType</a></li>
+                        <li><a href="#smScriptRowStatus.535">smScriptRowStatus</a></li>
+                        <li><a href="#smScriptError.570">smScriptError</a></li>
+                        <li><a href="#smScriptLastChange.584">smScriptLastChange</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#smCodeEntry.602">smCodeEntry</a>
+                     <ul>
+                        <li><a href="#smScriptOwner.609">smScriptOwner</a></li>
+                        <li><a href="#smScriptName.617">smScriptName</a></li>
+                        <li><a href="#smCodeIndex.626">smCodeIndex</a></li>
+                        <li><a href="#smCodeText.636">smCodeText</a></li>
+                        <li><a href="#smCodeRowStatus.648">smCodeRowStatus</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#smRunObjects.663">smRunObjects</a>
+               <ul>
+                  <li class="daddy"><a href="#smLaunchEntry.668">smLaunchEntry</a>
+                     <ul>
+                        <li><a href="#smLaunchOwner.676">smLaunchOwner</a></li>
+                        <li><a href="#smLaunchName.691">smLaunchName</a></li>
+                        <li><a href="#smLaunchScriptOwner.709">smLaunchScriptOwner</a></li>
+                        <li><a href="#smLaunchScriptName.723">smLaunchScriptName</a></li>
+                        <li><a href="#smLaunchArgument.741">smLaunchArgument</a></li>
+                        <li><a href="#smLaunchMaxRunning.752">smLaunchMaxRunning</a></li>
+                        <li><a href="#smLaunchMaxCompleted.766">smLaunchMaxCompleted</a></li>
+                        <li><a href="#smLaunchLifeTime.784">smLaunchLifeTime</a></li>
+                        <li><a href="#smLaunchExpireTime.800">smLaunchExpireTime</a></li>
+                        <li><a href="#smLaunchStart.816">smLaunchStart</a></li>
+                        <li><a href="#smLaunchControl.900">smLaunchControl</a></li>
+                        <li><a href="#smLaunchAdminStatus.932">smLaunchAdminStatus</a></li>
+                        <li><a href="#smLaunchOperStatus.957">smLaunchOperStatus</a></li>
+                        <li><a href="#smLaunchRunIndexNext.988">smLaunchRunIndexNext</a></li>
+                        <li><a href="#smLaunchStorageType.1012">smLaunchStorageType</a></li>
+                        <li><a href="#smLaunchRowStatus.1031">smLaunchRowStatus</a></li>
+                        <li><a href="#smLaunchError.1052">smLaunchError</a></li>
+                        <li><a href="#smLaunchLastChange.1064">smLaunchLastChange</a></li>
+                        <li><a href="#smLaunchRowExpireTime.1080">smLaunchRowExpireTime</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#smRunEntry.1122">smRunEntry</a>
+                     <ul>
+                        <li><a href="#smLaunchOwner.1130">smLaunchOwner</a></li>
+                        <li><a href="#smLaunchName.1138">smLaunchName</a></li>
+                        <li><a href="#smRunIndex.1147">smRunIndex</a></li>
+                        <li><a href="#smRunArgument.1164">smRunArgument</a></li>
+                        <li><a href="#smRunStartTime.1173">smRunStartTime</a></li>
+                        <li><a href="#smRunEndTime.1184">smRunEndTime</a></li>
+                        <li><a href="#smRunLifeTime.1195">smRunLifeTime</a></li>
+                        <li><a href="#smRunExpireTime.1232">smRunExpireTime</a></li>
+                        <li><a href="#smRunExitCode.1253">smRunExitCode</a></li>
+                        <li><a href="#smRunResult.1305">smRunResult</a></li>
+                        <li><a href="#smRunControl.1315">smRunControl</a></li>
+                        <li><a href="#smRunState.1355">smRunState</a></li>
+                        <li><a href="#smRunError.1395">smRunError</a></li>
+                        <li><a href="#smRunResultTime.1408">smRunResultTime</a></li>
+                        <li><a href="#smRunErrorTime.1420">smRunErrorTime</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+      <li><a href="#">Notifications</a>
+         <ul>
+            <li><a href="#smScriptAbort.1436">smScriptAbort</a></li>
+            <li><a href="#smScriptResult.1598">smScriptResult</a></li>
+            <li><a href="#smScriptException.1648">smScriptException</a></li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">DISMAN-SCRIPT-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:DISMAN-SCRIPT-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"disman-script"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14">SNMP-FRAMEWORK-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-framework"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMPv2-TC/1999-04-01">SNMPv2-TC</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smiv2"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+
+      <span class="yang_kw">organization</span>
+         <span class="yang_str">"IETF Distributed Management Working Group"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"WG EMail:  disman@dorothy.bmc.com
+         Subscribe: disman-request@dorothy.bmc.com
+         
+         Chair:     Randy Presuhn
+         	   BMC Software, Inc.
+         
+         Postal:    Office 1-3141
+         	   2141 North First Street
+         	   San Jose,  California 95131
+         	   USA
+         EMail:     rpresuhn@bmc.com
+         Phone:     +1 408 546-1006
+         
+         Editor:    David B. Levi
+         	   Nortel Networks
+         Postal:    4401 Great America Parkway
+         	   Santa Clara, CA 95052-8185
+         	   USA
+         EMail:     dlevi@nortelnetworks.com
+         Phone:     +1 423 686 0432
+         
+         Editor:    Juergen Schoenwaelder
+         	   TU Braunschweig
+         Postal:    Bueltenweg 74/75
+         	   38106 Braunschweig
+         	   Germany
+         EMail:     schoenw@ibr.cs.tu-bs.de
+         Phone:     +49 531 391-3283"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"This MIB module defines a set of objects that allow to
+         delegate management scripts to distributed managers."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2001-08-21"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Revised version, published as RFC 3165.
+            
+            This revision introduces several new objects: smScriptError,
+            smScriptLastChange, smLaunchError, smLaunchLastChange,
+            smLaunchRowExpireTime, smRunResultTime, and smRunErrorTime.
+            
+            The following existing objects were updated: the maximum
+            value of smRunLifeTime now disables the timer, an
+            autostart value was added to the smLaunchAdminStatus
+            object, and a new expired state was added to the
+            smLaunchOperStatus object.
+            
+            A new smScriptException notification has been added to
+            support runtime error notifications.
+            
+            Created new conformance and compliance statements that
+            take care of the new objects and notifications.
+            
+            Clarifications have been added in several places to remove
+            ambiguities or contradictions that were discovered and
+            reported by implementors."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1999-02-22"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Initial version, published as RFC 2592."</span>;
+      }
+
+
+      <span class="yang_cmt">// objects</span>
+
+      <a name="smObjects.91"/><span class="yang_kw">container</span> <span class="yang_id">smObjects</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1"</span>;
+
+         <a name="smLangEntry.96"/><span class="yang_kw">list</span> <span class="yang_id">smLangEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#smLangIndex.104">smLangIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry describing a particular language."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.1.1"</span>;
+
+            <a name="smLangIndex.104"/><span class="yang_kw">leaf</span> <span class="yang_id">smLangIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The locally arbitrary, but unique identifier associated
+                  with this language entry.
+                  
+                  The value is expected to remain constant at least from one
+                  re-initialization of the entity's network management system
+                  to the next re-initialization.
+                  
+                  Note that the data type and the range of this object must
+                  be consistent with the definition of smScriptLanguage."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.1.1.1"</span>;
+            }
+
+            <a name="smLangLanguage.122"/><span class="yang_kw">leaf</span> <span class="yang_id">smLangLanguage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The globally unique identification of the language."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.1.1.2"</span>;
+            }
+
+            <a name="smLangVersion.130"/><span class="yang_kw">leaf</span> <span class="yang_id">smLangVersion</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The version number of the language. The zero-length string
+                  shall be used if the language does not have a version
+                  number.
+                  
+                  It is suggested that the version number consist of one or
+                  more decimal numbers separated by dots, where the first
+                  number is called the major version number."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.1.1.3"</span>;
+            }
+
+            <a name="smLangVendor.146"/><span class="yang_kw">leaf</span> <span class="yang_id">smLangVendor</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An object identifier which identifies the vendor who
+                  provides the implementation of the language. This object
+                  identifier SHALL point to the object identifier directly
+                  below the enterprise object identifier {1 3 6 1 4 1}
+                  allocated for the vendor. The value must be the object
+                  identifier {0 0} if the vendor is not known."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.1.1.4"</span>;
+            }
+
+            <a name="smLangRevision.159"/><span class="yang_kw">leaf</span> <span class="yang_id">smLangRevision</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The version number of the language implementation.
+                  The value of this object must be an empty string if
+                  version number of the implementation is unknown.
+                  
+                  It is suggested that the value consist of one or more
+                  decimal numbers separated by dots, where the first
+                  number is called the major version number."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.1.1.5"</span>;
+            }
+
+            <a name="smLangDescr.175"/><span class="yang_kw">leaf</span> <span class="yang_id">smLangDescr</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"A textual description of the language."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.1.1.6"</span>;
+            }
+         }  <span class="yang_cmt">// list smLangEntry</span>
+
+         <a name="smExtsnEntry.187"/><span class="yang_kw">list</span> <span class="yang_id">smExtsnEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#smLangIndex.194">smLangIndex</a>, <a href="#smExtsnIndex.203">smExtsnIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry describing a particular language extension."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.2.1"</span>;
+
+            <a name="smLangIndex.194"/><span class="yang_kw">leaf</span> <span class="yang_id">smLangIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smObjects/disman-script:smLangEntry/disman-script:smLangIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smExtsnIndex.203"/><span class="yang_kw">leaf</span> <span class="yang_id">smExtsnIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The locally arbitrary, but unique identifier associated
+                  with this language extension entry.
+                  
+                  The value is expected to remain constant at least from one
+                  re-initialization of the entity's network management system
+                  to the next re-initialization."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.2.1.1"</span>;
+            }
+
+            <a name="smExtsnExtension.218"/><span class="yang_kw">leaf</span> <span class="yang_id">smExtsnExtension</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The globally unique identification of the language
+                  extension."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.2.1.2"</span>;
+            }
+
+            <a name="smExtsnVersion.227"/><span class="yang_kw">leaf</span> <span class="yang_id">smExtsnVersion</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The version number of the language extension.
+                  It is suggested that the version number consist of one or
+                  more decimal numbers separated by dots, where the first
+                  number is called the major version number."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.2.1.3"</span>;
+            }
+
+            <a name="smExtsnVendor.240"/><span class="yang_kw">leaf</span> <span class="yang_id">smExtsnVendor</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An object identifier which identifies the vendor who
+                  provides the implementation of the extension. The
+                  object identifier value should point to the OID node
+                  directly below the enterprise OID {1 3 6 1 4 1}
+                  allocated for the vendor. The value must by the object
+                  identifier {0 0} if the vendor is not known."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.2.1.4"</span>;
+            }
+
+            <a name="smExtsnRevision.253"/><span class="yang_kw">leaf</span> <span class="yang_id">smExtsnRevision</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The version number of the extension implementation.
+                  The value of this object must be an empty string if
+                  version number of the implementation is unknown.
+                  
+                  It is suggested that the value consist of one or more
+                  decimal numbers separated by dots, where the first
+                  number is called the major version number."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.2.1.5"</span>;
+            }
+
+            <a name="smExtsnDescr.269"/><span class="yang_kw">leaf</span> <span class="yang_id">smExtsnDescr</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A textual description of the language extension."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.2.1.6"</span>;
+            }
+         }  <span class="yang_cmt">// list smExtsnEntry</span>
+      }  <span class="yang_cmt">// container smObjects</span>
+
+      <a name="smScriptObjects.282"/><span class="yang_kw">container</span> <span class="yang_id">smScriptObjects</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3"</span>;
+
+         <a name="smScriptEntry.287"/><span class="yang_kw">list</span> <span class="yang_id">smScriptEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#smScriptOwner.297">smScriptOwner</a>, <a href="#smScriptName.307">smScriptName</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry describing a particular script. Every script that
+               is stored in non-volatile memory is required to appear in
+               this script table."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.1.1"</span>;
+
+            <a name="smScriptOwner.297"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The manager who owns this row in the smScriptTable."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.1.1.1"</span>;
+            }
+
+            <a name="smScriptName.307"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The locally-unique, administratively assigned name for this
+                  script. This object allows an smScriptOwner to have multiple
+                  entries in the smScriptTable.
+                  
+                  This value of this object may be used to derive the name
+                  (e.g. a file name) which is used by the Script MIB
+                  implementation to access the script in non-volatile
+                  storage. The details of this mapping are implementation
+                  specific. However, the mapping needs to ensure that scripts
+                  created by different owners with the same script name do not
+                  map to the same name in non-volatile storage."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.1.1.2"</span>;
+            }
+
+            <a name="smScriptDescr.327"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptDescr</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A description of the purpose of the script."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.1.1.3"</span>;
+            }
+
+            <a name="smScriptLanguage.335"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptLanguage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of this object type identifies an entry in the
+                  smLangTable which is used to execute this script.
+                  The special value 0 may be used by hard-wired scripts
+                  that can not be modified and that are executed by
+                  internal functions.
+                  
+                  Set requests to change this object are invalid if the
+                  value of smScriptOperStatus is `enabled' or `compiling'
+                  and will result in an inconsistentValue error.
+                  
+                  Note that the data type and the range of this object must
+                  be consistent with the definition of smLangIndex."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.1.1.4"</span>;
+            }
+
+            <a name="smScriptSource.356"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptSource</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DisplayString.39">smiv2:DisplayString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object either contains a reference to the script
+                  source or an empty string. A reference must be given
+                  in the form of a Uniform Resource Locator (URL) as
+                  defined in RFC 2396. The allowed character sets and the
+                  encoding rules defined in RFC 2396 section 2 apply.
+                  
+                  When the smScriptAdminStatus object is set to `enabled',
+                  the Script MIB implementation will `pull' the script
+                  source from the URL contained in this object if the URL
+                  is not empty.
+                  
+                  An empty URL indicates that the script source is loaded
+                  from local storage. The script is read from the smCodeTable
+                  if the value of smScriptStorageType is volatile. Otherwise,
+                  the script is read from non-volatile storage.
+                  
+                  Note: This document does not mandate implementation of any
+                  specific URL scheme. An attempt to load a script from a
+                  nonsupported URL scheme will cause the smScriptOperStatus
+                  to report an `unknownProtocol' error.
+                  
+                  Set requests to change this object are invalid if the
+                  value of smScriptOperStatus is `enabled', `editing',
+                  `retrieving' or `compiling' and will result in an
+                  inconsistentValue error."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.1.1.5"</span>;
+            }
+
+            <a name="smScriptAdminStatus.389"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptAdminStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"enabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"editing"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of this object indicates the desired status of
+                  the script. See the definition of smScriptOperStatus for
+                  a description of the values.
+                  
+                  When the smScriptAdminStatus object is set to `enabled' and
+                  the smScriptOperStatus is `disabled' or one of the error
+                  states, the Script MIB implementation will `pull' the script
+                  source from the URL contained in the smScriptSource object
+                  if the URL is not empty."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"disabled"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.1.1.6"</span>;
+            }
+
+            <a name="smScriptOperStatus.410"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptOperStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"enabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"editing"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"retrieving"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"compiling"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"noSuchScript"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"accessDenied"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"wrongLanguage"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">8</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"wrongVersion"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"compilationFailed"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">10</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"noResourcesLeft"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">11</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"unknownProtocol"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">12</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"protocolFailure"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">13</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"genericError"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">14</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The actual status of the script in the runtime system. The
+                  value of this object is only meaningful when the value of
+                  the smScriptRowStatus object is `active'.
+                  
+                  The smScriptOperStatus object may have the following values:
+                  
+                  - `enabled' indicates that the script is available and can
+                     be started by a launch table entry.
+                  
+                  - `disabled' indicates that the script can not be used.
+                  
+                  - `editing' indicates that the script can be modified in the
+                    smCodeTable.
+                  
+                  - `retrieving' indicates that the script is currently being
+                    loaded from non-volatile storage or a remote system.
+                  
+                  - `compiling' indicates that the script is currently being
+                    compiled by the runtime system.
+                  
+                  - `noSuchScript' indicates that the script does not exist
+                    at the smScriptSource.
+                  
+                  - `accessDenied' indicates that the script can not be loaded
+                    from the smScriptSource due to a lack of permissions.
+                  
+                  - `wrongLanguage' indicates that the script can not be
+                     loaded from the smScriptSource because of a language
+                     mismatch.
+                  
+                  - `wrongVersion' indicates that the script can not be loaded
+                    from the smScriptSource because of a language version
+                    mismatch.
+                  
+                  - `compilationFailed' indicates that the compilation failed.
+                  
+                  - `noResourcesLeft' indicates that the runtime system does
+                    not have enough resources to load the script.
+                  
+                  - `unknownProtocol' indicates that the script could not be
+                    loaded from the smScriptSource because the requested
+                    protocol is not supported.
+                  
+                  - `protocolFailure' indicates that the script could not be
+                    loaded from the smScriptSource because of a protocol
+                    failure.
+                  
+                  - `genericError' indicates that the script could not be
+                  
+                    loaded due to an error condition not listed above.
+                  
+                  The `retrieving' and `compiling' states are transient states
+                  which will either lead to one of the error states or the
+                  `enabled' state. The `disabled' and `editing' states are
+                  administrative states which are only reached by explicit
+                  management operations.
+                  
+                  All launch table entries that refer to this script table
+                  entry shall have an smLaunchOperStatus value of `disabled'
+                  when the value of this object is not `enabled'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"disabled"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.1.1.7"</span>;
+            }
+
+            <a name="smScriptStorageType.493"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptStorageType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object defines whether this row and the script
+                  controlled by this row are kept in volatile storage and
+                  lost upon reboot or if this row is backed up by
+                  non-volatile or permanent storage.
+                  
+                  The storage type of this row always complies with the value
+                  of this entry if the value of the corresponding RowStatus
+                  object is `active'.
+                  
+                  However, the storage type of the script controlled by this
+                  row may be different, if the value of this entry is
+                  `non-volatile'. The script controlled by this row is written
+                  into local non-volatile storage if the following condition
+                  becomes true:
+                  
+                  (a) the URL contained in the smScriptSource object is empty
+                      and
+                  (b) the smScriptStorageType is `nonVolatile'
+                      and
+                  (c) the smScriptOperStatus is `enabled'
+                  
+                  Setting this object to `volatile' removes a script from
+                  non-volatile storage if the script controlled by this row
+                  has been in non-volatile storage before. Attempts to set
+                  this object to permanent will always fail with an
+                  inconsistentValue error.
+                  
+                  The value of smScriptStorageType is only meaningful if the
+                  value of the corresponding RowStatus object is `active'.
+                  
+                  If smScriptStorageType has the value permanent(4), then all
+                  objects whose MAX-ACCESS value is read-create must be
+                  writable, with the exception of the smScriptStorageType and
+                  smScriptRowStatus objects, which shall be read-only."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"volatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.1.1.8"</span>;
+            }
+
+            <a name="smScriptRowStatus.535"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptRowStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A control that allows entries to be added and removed from
+                  this table.
+                  
+                  Changing the smScriptRowStatus from `active' to
+                  `notInService' will remove the associated script from the
+                  runtime system.
+                  
+                  Deleting conceptual rows from this table may affect the
+                  deletion of other resources associated with this row. For
+                  example, a script stored in non-volatile storage may be
+                  removed from non-volatile storage.
+                  
+                  An entry may not exist in the `active' state unless all
+                  required objects in the entry have appropriate values. Rows
+                  that are not complete or not in service are not known by the
+                  script runtime system.
+                  
+                  Attempts to `destroy' a row or to set a row `notInService'
+                  while the smScriptOperStatus is `enabled' will result in an
+                  inconsistentValue error.
+                  
+                  Attempts to `destroy' a row or to set a row `notInService'
+                  where the value of the smScriptStorageType object is
+                  `permanent' or `readOnly' will result in an
+                  inconsistentValue error.
+                  
+                  The value of this object has no effect on whether other
+                  objects in this conceptual row can be modified."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.1.1.9"</span>;
+            }
+
+            <a name="smScriptError.570"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptError</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object contains a descriptive error message if the
+                  
+                  transition into the operational status `enabled' failed.
+                  Implementations must reset the error message to a
+                  zero-length string when a new attempt to change the
+                  script status to `enabled' is started."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.1.1.10"</span>;
+            }
+
+            <a name="smScriptLastChange.584"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptLastChange</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The date and time when this script table entry was last
+                  modified. The value '0000000000000000'H is returned if
+                  the script table entry has not yet been modified.
+                  
+                  Note that the resetting of smScriptError is not considered
+                  a change of the script table entry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0x0000000000000000"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.1.1.11"</span>;
+            }
+         }  <span class="yang_cmt">// list smScriptEntry</span>
+
+         <a name="smCodeEntry.602"/><span class="yang_kw">list</span> <span class="yang_id">smCodeEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#smScriptOwner.609">smScriptOwner</a>, <a href="#smScriptName.617">smScriptName</a>, <a href="#smCodeIndex.626">smCodeIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry describing a particular fragment of a script."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.2.1"</span>;
+
+            <a name="smScriptOwner.609"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smScriptObjects/disman-script:smScriptEntry/disman-script:smScriptOwner"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smScriptName.617"/><span class="yang_kw">leaf</span> <span class="yang_id">smScriptName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smScriptObjects/disman-script:smScriptEntry/disman-script:smScriptName"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smCodeIndex.626"/><span class="yang_kw">leaf</span> <span class="yang_id">smCodeIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The index value identifying this code fragment."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.2.1.1"</span>;
+            }
+
+            <a name="smCodeText.636"/><span class="yang_kw">leaf</span> <span class="yang_id">smCodeText</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"1..1024"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The code that makes up a fragment of a script. The format
+                  of this code fragment depends on the script language which
+                  is identified by the associated smScriptLanguage object."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.2.1.2"</span>;
+            }
+
+            <a name="smCodeRowStatus.648"/><span class="yang_kw">leaf</span> <span class="yang_id">smCodeRowStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A control that allows entries to be added and removed from
+                  this table.
+                  
+                  The value of this object has no effect on whether other
+                  objects in this conceptual row can be modified."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.3.2.1.3"</span>;
+            }
+         }  <span class="yang_cmt">// list smCodeEntry</span>
+      }  <span class="yang_cmt">// container smScriptObjects</span>
+
+      <a name="smRunObjects.663"/><span class="yang_kw">container</span> <span class="yang_id">smRunObjects</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4"</span>;
+
+         <a name="smLaunchEntry.668"/><span class="yang_kw">list</span> <span class="yang_id">smLaunchEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#smLaunchOwner.676">smLaunchOwner</a>, <a href="#smLaunchName.691">smLaunchName</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry describing a particular executable script."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1"</span>;
+
+            <a name="smLaunchOwner.676"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The manager who owns this row in the smLaunchTable. Every
+                  instance of a running script started from a particular entry
+                  in the smLaunchTable (i.e. entries in the smRunTable) will
+                  be owned by the same smLaunchOwner used to index the entry
+                  in the smLaunchTable. This owner is not necessarily the same
+                  as the owner of the script itself (smLaunchScriptOwner)."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.1"</span>;
+            }
+
+            <a name="smLaunchName.691"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The locally-unique, administratively assigned name for this
+                  launch table entry. This object allows an smLaunchOwner to
+                  have multiple entries in the smLaunchTable. The smLaunchName
+                  is an arbitrary name that must be different from any other
+                  smLaunchTable entries with the same smLaunchOwner but can be
+                  the same as other entries in the smLaunchTable with
+                  different smLaunchOwner values. Note that the value of
+                  smLaunchName is not related in any way to the name of the
+                  script being launched."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.2"</span>;
+            }
+
+            <a name="smLaunchScriptOwner.709"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchScriptOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of this object in combination with the value of
+                  smLaunchScriptName identifies the script that can be
+                  launched from this smLaunchTable entry. Attempts to write
+                  this object will fail with an inconsistentValue error if
+                  the value of smLaunchOperStatus is `enabled'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.3"</span>;
+            }
+
+            <a name="smLaunchScriptName.723"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchScriptName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of this object in combination with the value of
+                  the smLaunchScriptOwner identifies the script that can be
+                  launched from this smLaunchTable entry. The zero-length
+                  string may be used to point to a non-existing script.
+                  
+                  Attempts to write this object will fail with an
+                  inconsistentValue error if the value of smLaunchOperStatus
+                  is `enabled'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.4"</span>;
+            }
+
+            <a name="smLaunchArgument.741"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchArgument</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The argument supplied to the script. When a script is
+                  invoked, the value of this object is used to initialize
+                  the smRunArgument object."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.5"</span>;
+            }
+
+            <a name="smLaunchMaxRunning.752"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchMaxRunning</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The maximum number of concurrently running scripts that may
+                  be invoked from this entry in the smLaunchTable. Lowering
+                  the current value of this object does not affect any scripts
+                  that are already executing."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.6"</span>;
+            }
+
+            <a name="smLaunchMaxCompleted.766"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchMaxCompleted</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The maximum number of finished scripts invoked from this
+                  entry in the smLaunchTable allowed to be retained in the
+                  smRunTable. Whenever the value of this object is changed
+                  and whenever a script terminates, entries in the smRunTable
+                  are deleted if necessary until the number of completed
+                  scripts is smaller than the value of this object. Scripts
+                  whose smRunEndTime value indicates the oldest completion
+                  time are deleted first."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.7"</span>;
+            }
+
+            <a name="smLaunchLifeTime.784"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchLifeTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TimeInterval.675">smiv2:TimeInterval</a></span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"centi-seconds"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The default maximum amount of time a script launched
+                  from this entry may run. The value of this object is used
+                  to initialize the smRunLifeTime object when a script is
+                  launched. Changing the value of an smLaunchLifeTime
+                  instance does not affect scripts previously launched from
+                  
+                  this entry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"360000"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.8"</span>;
+            }
+
+            <a name="smLaunchExpireTime.800"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchExpireTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TimeInterval.675">smiv2:TimeInterval</a></span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"centi-seconds"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The default maximum amount of time information about a
+                  script launched from this entry is kept in the smRunTable
+                  after the script has completed execution.  The value of
+                  this object is used to initialize the smRunExpireTime
+                  object when a script is launched. Changing the value of an
+                  smLaunchExpireTime instance does not affect scripts
+                  previously launched from this entry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"360000"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.9"</span>;
+            }
+
+            <a name="smLaunchStart.816"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchStart</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object is used to start the execution of scripts.
+                  When retrieved, the value will be the value of smRunIndex
+                  for the last script that started execution by manipulating
+                  this object. The value will be zero if no script started
+                  execution yet.
+                  
+                  A script is started by setting this object to an unused
+                  smRunIndex value. A new row in the smRunTable will be
+                  created which is indexed by the value supplied by the
+                  set-request in addition to the value of smLaunchOwner and
+                  smLaunchName. An unused value can be obtained by reading
+                  the smLaunchRunIndexNext object.
+                  
+                  Setting this object to the special value 0 will start
+                  the script with a self-generated smRunIndex value. The
+                  consequence is that the script invoker has no reliable
+                  way to determine the smRunIndex value for this script
+                  invocation and that the invoker has therefore no way
+                  to obtain the results from this script invocation. The
+                  special value 0 is however useful for scheduled script
+                  invocations.
+                  
+                  If this object is set, the following checks must be
+                  
+                  performed:
+                  
+                  1) The value of the smLaunchOperStatus object in this
+                     entry of the smLaunchTable must be `enabled'.
+                  2) The values of smLaunchScriptOwner and
+                     smLaunchScriptName of this row must identify an
+                     existing entry in the smScriptTable.
+                  3) The value of smScriptOperStatus of this entry must
+                     be `enabled'.
+                  4) The principal performing the set operation must have
+                     read access to the script. This must be checked by
+                     calling the isAccessAllowed abstract service interface
+                     defined in RFC 2271 on the row in the smScriptTable
+                     identified by smLaunchScriptOwner and smLaunchScriptName.
+                     The isAccessAllowed abstract service interface must be
+                     called on all columnar objects in the smScriptTable with
+                     a MAX-ACCESS value different than `not-accessible'. The
+                     test fails as soon as a call indicates that access is
+                     not allowed.
+                  5) If the value provided by the set operation is not 0,
+                     a check must be made that the value is currently not
+                     in use. Otherwise, if the value provided by the set
+                     operation is 0, a suitable unused value must be
+                     generated.
+                  6) The number of currently executing scripts invoked
+                     from this smLaunchTable entry must be less than
+                     smLaunchMaxRunning.
+                  
+                  Attempts to start a script will fail with an
+                  inconsistentValue error if one of the checks described
+                  above fails.
+                  
+                  Otherwise, if all checks have been passed, a new entry
+                  in the smRunTable will be created indexed by smLaunchOwner,
+                  smLaunchName and the new value for smRunIndex. The value
+                  of smLaunchArgument will be copied into smRunArgument,
+                  the value of smLaunchLifeTime will be copied to
+                  smRunLifeTime, and the value of smLaunchExpireTime
+                  will be copied to smRunExpireTime.
+                  
+                  The smRunStartTime will be set to the current time and
+                  the smRunState will be set to `initializing' before the
+                  script execution is initiated in the appropriate runtime
+                  system.
+                  
+                  Note that the data type and the range of this object must
+                  be consistent with the smRunIndex object. Since this
+                  object might be written from the scheduling MIB, the
+                  
+                  data type Integer32 rather than Unsigned32 is used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.10"</span>;
+            }
+
+            <a name="smLaunchControl.900"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchControl</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"abort"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"suspend"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"resume"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"nop"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object is used to request a state change for all
+                  running scripts in the smRunTable that were started from
+                  this row in the smLaunchTable.
+                  
+                  Setting this object to abort(1), suspend(2) or resume(3)
+                  will set the smRunControl object of all applicable rows
+                  in the smRunTable to abort(1), suspend(2) or resume(3)
+                  respectively. The phrase `applicable rows' means the set of
+                  rows which were created from this entry in the smLaunchTable
+                  and whose value of smRunState allows the corresponding
+                  state change as described in the definition of the
+                  smRunControl object. Setting this object to nop(4) has no
+                  effect.
+                  
+                  Attempts to set this object lead to an inconsistentValue
+                  error only if all implicated sets on all the applicable
+                  rows lead to inconsistentValue errors. It is not allowed
+                  to return an inconsistentValue error if at least one state
+                  change on one of the applicable rows was successful."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nop"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.11"</span>;
+            }
+
+            <a name="smLaunchAdminStatus.932"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchAdminStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"enabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"autostart"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of this object indicates the desired status of
+                  this launch table entry. The values enabled(1) and
+                  autostart(3) both indicate that the launch table entry
+                  
+                  should transition into the operational enabled(1) state as
+                  soon as the associated script table entry is enabled(1).
+                  
+                  The value autostart(3) further indicates that the script
+                  is started automatically by conceptually writing the
+                  value 0 into the associated smLaunchStart object during
+                  the transition from the `disabled' into the `enabled'
+                  operational state. This is useful for scripts that are
+                  to be launched on system start-up."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"disabled"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.12"</span>;
+            }
+
+            <a name="smLaunchOperStatus.957"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchOperStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"enabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"expired"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of this object indicates the actual status of
+                  this launch table entry.  The smLaunchOperStatus object
+                  may have the following values:
+                  
+                  - `enabled' indicates that the launch table entry is
+                    available and can be used to start scripts.
+                  
+                  - `disabled' indicates that the launch table entry can
+                    not be used to start scripts.
+                  
+                  - `expired' indicates that the launch table entry can
+                    not be used to start scripts and will disappear as
+                    soon as all smRunTable entries associated with this
+                    launch table entry have disappeared.
+                  
+                  The value `enabled' requires that the smLaunchRowStatus
+                  object is active. The value `disabled' requires that there
+                  are no entries in the smRunTable associated with this
+                  smLaunchTable entry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"disabled"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.13"</span>;
+            }
+
+            <a name="smLaunchRunIndexNext.988"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchRunIndexNext</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This variable is used for creating rows in the smRunTable.
+                  The value of this variable is a currently unused value
+                  for smRunIndex, which can be written into the smLaunchStart
+                  object associated with this row to launch a script.
+                  
+                  The value returned when reading this variable must be unique
+                  for the smLaunchOwner and smLaunchName associated with this
+                  row. Subsequent attempts to read this variable must return
+                  different values.
+                  
+                  This variable will return the special value 0 if no new rows
+                  can be created.
+                  
+                  Note that the data type and the range of this object must be
+                  consistent with the definition of smRunIndex."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.14"</span>;
+            }
+
+            <a name="smLaunchStorageType.1012"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchStorageType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object defines if this row is kept in volatile storage
+                  and lost upon reboot or if this row is backed up by stable
+                  storage.
+                  
+                  The value of smLaunchStorageType is only meaningful if the
+                  value of the corresponding RowStatus object is active.
+                  
+                  If smLaunchStorageType has the value permanent(4), then all
+                  objects whose MAX-ACCESS value is read-create must be
+                  writable, with the exception of the smLaunchStorageType and
+                  smLaunchRowStatus objects, which shall be read-only."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"volatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.15"</span>;
+            }
+
+            <a name="smLaunchRowStatus.1031"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchRowStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A control that allows entries to be added and removed from
+                  this table.
+                  
+                  Attempts to `destroy' a row or to set a row `notInService'
+                  while the smLaunchOperStatus is `enabled' will result in
+                  an inconsistentValue error.
+                  
+                  Attempts to `destroy' a row or to set a row `notInService'
+                  where the value of the smLaunchStorageType object is
+                  `permanent' or `readOnly' will result in an
+                  inconsistentValue error.
+                  
+                  The value of this object has no effect on whether other
+                  objects in this conceptual row can be modified."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.16"</span>;
+            }
+
+            <a name="smLaunchError.1052"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchError</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object contains a descriptive error message if an
+                  attempt to launch a script fails. Implementations must reset
+                  the error message to a zero-length string when a new attempt
+                  to launch a script is started."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.17"</span>;
+            }
+
+            <a name="smLaunchLastChange.1064"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchLastChange</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The date and time when this launch table entry was last
+                  modified. The value '0000000000000000'H is returned if
+                  the launch table entry has not yet been modified.
+                  
+                  Note that a change of smLaunchStart, smLaunchControl,
+                  smLaunchRunIndexNext, smLaunchRowExpireTime, or the
+                  resetting of smLaunchError is not considered a change
+                  of this launch table entry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0x0000000000000000"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.18"</span>;
+            }
+
+            <a name="smLaunchRowExpireTime.1080"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchRowExpireTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TimeInterval.675">smiv2:TimeInterval</a></span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"centi-seconds"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of this object specifies how long this row remains
+                  in the `enabled' or `disabled' operational state. The value
+                  reported by this object ticks backwards. When the value
+                  reaches 0, it stops ticking backward and the row is
+                  deleted if there are no smRunTable entries associated with
+                  
+                  this smLaunchTable entry. Otherwise, the smLaunchOperStatus
+                  changes to `expired' and the row deletion is deferred
+                  until there are no smRunTable entries associated with this
+                  smLaunchTable entry.
+                  
+                  The smLaunchRowExpireTime will not tick backwards if it is
+                  set to its maximum value (2147483647). In other words,
+                  setting this object to its maximum value turns the timer
+                  off.
+                  
+                  The value of this object may be set in order to increase
+                  or reduce the remaining time that the launch table entry
+                  may be used. Setting the value to 0 will cause an immediate
+                  row deletion or transition into the `expired' operational
+                  state.
+                  
+                  It is not possible to set this object while the operational
+                  status is `expired'. Attempts to modify this object while
+                  the operational status is `expired' leads to an
+                  inconsistentValue error.
+                  
+                  Note that the timer ticks backwards independent of the
+                  operational state of the launch table entry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"2147483647"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.1.1.19"</span>;
+            }
+         }  <span class="yang_cmt">// list smLaunchEntry</span>
+
+         <a name="smRunEntry.1122"/><span class="yang_kw">list</span> <span class="yang_id">smRunEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#smLaunchOwner.1130">smLaunchOwner</a>, <a href="#smLaunchName.1138">smLaunchName</a>, <a href="#smRunIndex.1147">smRunIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry describing a particular running or finished
+               script."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1"</span>;
+
+            <a name="smLaunchOwner.1130"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchOwner"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smLaunchName.1138"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchName"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smRunIndex.1147"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The locally arbitrary, but unique identifier associated
+                  with this running or finished script. This value must be
+                  unique for all rows in the smRunTable with the same
+                  smLaunchOwner and smLaunchName.
+                  
+                  Note that the data type and the range of this object must
+                  be consistent with the definition of smLaunchRunIndexNext
+                  and smLaunchStart."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.1"</span>;
+            }
+
+            <a name="smRunArgument.1164"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunArgument</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The argument supplied to the script when it started."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.2"</span>;
+            }
+
+            <a name="smRunStartTime.1173"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunStartTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The date and time when the execution started. The value
+                  '0000000000000000'H is returned if the script has not
+                  started yet."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0x0000000000000000"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.3"</span>;
+            }
+
+            <a name="smRunEndTime.1184"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunEndTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The date and time when the execution terminated. The value
+                  '0000000000000000'H is returned if the script has not
+                  terminated yet."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0x0000000000000000"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.4"</span>;
+            }
+
+            <a name="smRunLifeTime.1195"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunLifeTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TimeInterval.675">smiv2:TimeInterval</a></span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"centi-seconds"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object specifies how long the script can execute.
+                  This object returns the remaining time that the script
+                  may run. The object is initialized with the value of the
+                  associated smLaunchLifeTime object and ticks backwards.
+                  The script is aborted immediately when the value reaches 0.
+                  
+                  The value of this object may be set in order to increase or
+                  reduce the remaining time that the script may run. Setting
+                  this value to 0 will abort script execution immediately,
+                  and, if the value of smRunExpireTime is also 0, will remove
+                  this entry from the smRunTable once it has terminated.
+                  
+                  If smRunLifeTime is set to its maximum value (2147483647),
+                  either by a set operation or by its initialization from the
+                  smLaunchLifeTime object, then it will not tick backwards.
+                  A running script with a maximum smRunLifeTime value will
+                  thus never be terminated with a `lifeTimeExceeded' exit
+                  code.
+                  
+                  The value of smRunLifeTime reflects the real-time execution
+                  time as seen by the outside world. The value of this object
+                  will always be 0 for a script that finished execution, that
+                  is smRunState has the value `terminated'.
+                  
+                  The value of smRunLifeTime does not change while a script
+                  is suspended, that is smRunState has the value `suspended'.
+                  Note that this does not affect set operations. It is legal
+                  to modify smRunLifeTime via set operations while a script
+                  is suspended."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.5"</span>;
+            }
+
+            <a name="smRunExpireTime.1232"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunExpireTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TimeInterval.675">smiv2:TimeInterval</a></span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"centi-seconds"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of this object specifies how long this row can
+                  exist in the smRunTable after the script has terminated.
+                  This object returns the remaining time that the row may
+                  exist before it is aged out. The object is initialized with
+                  the value of the associated smLaunchExpireTime object and
+                  ticks backwards. The entry in the smRunTable is destroyed
+                  when the value reaches 0 and the smRunState has the value
+                  `terminated'.
+                  
+                  The value of this object may be set in order to increase or
+                  reduce the remaining time that the row may exist.  Setting
+                  the value to 0 will destroy this entry as soon as the
+                  smRunState has the value `terminated'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.6"</span>;
+            }
+
+            <a name="smRunExitCode.1253"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunExitCode</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"noError"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"halted"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"lifeTimeExceeded"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"noResourcesLeft"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"languageError"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"runtimeError"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"invalidArgument"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"securityViolation"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">8</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"genericError"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of this object indicates the reason why a
+                  script finished execution. The smRunExitCode code may have
+                  one of the following values:
+                  
+                  - `noError', which indicates that the script completed
+                     successfully without errors;
+                  
+                  - `halted', which indicates that the script was halted
+                     by a request from an authorized manager;
+                  
+                  - `lifeTimeExceeded', which indicates that the script
+                     exited because a time limit was exceeded;
+                  
+                  - `noResourcesLeft', which indicates that the script
+                     exited because it ran out of resources (e.g. memory);
+                  
+                  - `languageError', which indicates that the script exited
+                     because of a language error (e.g. a syntax error in an
+                     interpreted language);
+                  
+                  - `runtimeError', which indicates that the script exited
+                     due to a runtime error (e.g. a division by zero);
+                  
+                  - `invalidArgument', which indicates that the script could
+                     not be run because of invalid script arguments;
+                  
+                  - `securityViolation', which indicates that the script
+                     exited due to a security violation;
+                  
+                  - `genericError', which indicates that the script exited
+                     for an unspecified reason.
+                  
+                  If the script has not yet begun running, or is currently
+                  running, the value will be `noError'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"noError"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.7"</span>;
+            }
+
+            <a name="smRunResult.1305"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunResult</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The result value produced by the running script. Note that
+                  the result may change while the script is executing."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.8"</span>;
+            }
+
+            <a name="smRunControl.1315"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunControl</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"abort"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"suspend"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"resume"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"nop"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of this object indicates the desired status of the
+                  script execution defined by this row.
+                  
+                  Setting this object to `abort' will abort execution if the
+                  
+                  value of smRunState is `initializing', `executing',
+                  `suspending', `suspended' or `resuming'. Setting this object
+                  to `abort' when the value of smRunState is `aborting' or
+                  `terminated', or if the implementation can determine that
+                  the attempt to abort the execution would fail, will result
+                  in an inconsistentValue error.
+                  
+                  Setting this object to `suspend' will suspend execution
+                  if the value of smRunState is `executing'. Setting this
+                  object to `suspend' will cause an inconsistentValue error
+                  if the value of smRunState is not `executing' or if the
+                  implementation can determine that the attempt to suspend
+                  the execution would fail.
+                  
+                  Setting this object to `resume' will resume execution
+                  if the value of smRunState is `suspending' or
+                  `suspended'. Setting this object to `resume' will cause an
+                  inconsistentValue error if the value of smRunState is
+                  not `suspended' or if the implementation can determine
+                  that the attempt to resume the execution would fail.
+                  
+                  Setting this object to nop(4) has no effect."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nop"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.9"</span>;
+            }
+
+            <a name="smRunState.1355"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunState</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"initializing"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"executing"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"suspending"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"suspended"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"resuming"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"aborting"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"terminated"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of this object indicates the script's execution
+                  state. If the script has been invoked but has not yet
+                  begun execution, the value will be `initializing'. If the
+                  script is running, the value will be `executing'.
+                  
+                  A running script which received a request to suspend
+                  execution first transitions into a temporary `suspending'
+                  state.  The temporary `suspending' state changes to
+                  `suspended' when the script has actually been suspended. The
+                  temporary `suspending' state changes back to `executing' if
+                  
+                  the attempt to suspend the running script fails.
+                  
+                  A suspended script which received a request to resume
+                  execution first transitions into a temporary `resuming'
+                  state. The temporary `resuming' state changes to `running'
+                  when the script has actually been resumed. The temporary
+                  `resuming' state changes back to `suspended' if the attempt
+                  to resume the suspended script fails.
+                  
+                  A script which received a request to abort execution but
+                  which is still running first transitions into a temporary
+                  `aborting' state.
+                  
+                  A script which has finished its execution is `terminated'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.10"</span>;
+            }
+
+            <a name="smRunError.1395"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunError</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object contains a descriptive error message if the
+                  script startup or execution raised an abnormal condition.
+                  An implementation must store a descriptive error message
+                  in this object if the script exits with the smRunExitCode
+                  `genericError'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.11"</span>;
+            }
+
+            <a name="smRunResultTime.1408"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunResultTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The date and time when the smRunResult was last updated.
+                  The value '0000000000000000'H is returned if smRunResult
+                  has not yet been updated after the creation of this
+                  smRunTable entry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0x0000000000000000"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.12"</span>;
+            }
+
+            <a name="smRunErrorTime.1420"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunErrorTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The date and time when the smRunError was last updated.
+                  The value '0000000000000000'H is returned if smRunError
+                  
+                  has not yet been updated after the creation of this
+                  smRunTable entry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0x0000000000000000"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.13"</span>;
+            }
+         }  <span class="yang_cmt">// list smRunEntry</span>
+      }  <span class="yang_cmt">// container smRunObjects</span>
+
+      <a name="smScriptAbort.1436"/><span class="yang_kw">notification</span> <span class="yang_id">smScriptAbort</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"This notification is generated whenever a running script
+            terminates with an smRunExitCode unequal to `noError'."</span>;
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.2.0.1"</span>;
+
+         <a name="smScriptAbort-smRunExitCode.1442"/><span class="yang_kw">container</span> <span class="yang_id">smScriptAbort-smRunExitCode</span> {
+
+            <a name="smLaunchOwner.1443"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchOwner"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smLaunchName.1451"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchName"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smRunIndex.1459"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smRunEntry/disman-script:smRunIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smRunExitCode.1467"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunExitCode</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"noError"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"halted"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"lifeTimeExceeded"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"noResourcesLeft"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"languageError"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"runtimeError"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"invalidArgument"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"securityViolation"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">8</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"genericError"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of this object indicates the reason why a
+                  script finished execution. The smRunExitCode code may have
+                  one of the following values:
+                  
+                  - `noError', which indicates that the script completed
+                     successfully without errors;
+                  
+                  - `halted', which indicates that the script was halted
+                     by a request from an authorized manager;
+                  
+                  - `lifeTimeExceeded', which indicates that the script
+                     exited because a time limit was exceeded;
+                  
+                  - `noResourcesLeft', which indicates that the script
+                     exited because it ran out of resources (e.g. memory);
+                  
+                  - `languageError', which indicates that the script exited
+                     because of a language error (e.g. a syntax error in an
+                     interpreted language);
+                  
+                  - `runtimeError', which indicates that the script exited
+                     due to a runtime error (e.g. a division by zero);
+                  
+                  - `invalidArgument', which indicates that the script could
+                     not be run because of invalid script arguments;
+                  
+                  - `securityViolation', which indicates that the script
+                     exited due to a security violation;
+                  
+                  - `genericError', which indicates that the script exited
+                     for an unspecified reason.
+                  
+                  If the script has not yet begun running, or is currently
+                  running, the value will be `noError'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"noError"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.7"</span>;
+            }
+         }  <span class="yang_cmt">// container smScriptAbort-smRunExitCode</span>
+
+         <a name="smScriptAbort-smRunEndTime.1520"/><span class="yang_kw">container</span> <span class="yang_id">smScriptAbort-smRunEndTime</span> {
+
+            <a name="smLaunchOwner.1521"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchOwner"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smLaunchName.1529"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchName"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smRunIndex.1537"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smRunEntry/disman-script:smRunIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smRunEndTime.1545"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunEndTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The date and time when the execution terminated. The value
+                  '0000000000000000'H is returned if the script has not
+                  terminated yet."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0x0000000000000000"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.4"</span>;
+            }
+         }  <span class="yang_cmt">// container smScriptAbort-smRunEndTime</span>
+
+         <a name="smScriptAbort-smRunError.1557"/><span class="yang_kw">container</span> <span class="yang_id">smScriptAbort-smRunError</span> {
+
+            <a name="smLaunchOwner.1558"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchOwner"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smLaunchName.1566"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchName"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smRunIndex.1574"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smRunEntry/disman-script:smRunIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smRunError.1582"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunError</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object contains a descriptive error message if the
+                  script startup or execution raised an abnormal condition.
+                  An implementation must store a descriptive error message
+                  in this object if the script exits with the smRunExitCode
+                  `genericError'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.11"</span>;
+            }
+         }  <span class="yang_cmt">// container smScriptAbort-smRunError</span>
+      }  <span class="yang_cmt">// notification smScriptAbort</span>
+
+      <a name="smScriptResult.1598"/><span class="yang_kw">notification</span> <span class="yang_id">smScriptResult</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"This notification can be used by scripts to notify other
+            management applications about results produced by the
+            script.
+            
+            This notification is not automatically generated by the
+            Script MIB implementation. It is the responsibility of
+            the executing script to emit this notification where it
+            is appropriate to do so."</span>;
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.2.0.2"</span>;
+
+         <a name="smScriptResult-smRunResult.1610"/><span class="yang_kw">container</span> <span class="yang_id">smScriptResult-smRunResult</span> {
+
+            <a name="smLaunchOwner.1611"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchOwner"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smLaunchName.1619"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchName"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smRunIndex.1627"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smRunEntry/disman-script:smRunIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smRunResult.1635"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunResult</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The result value produced by the running script. Note that
+                  the result may change while the script is executing."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.8"</span>;
+            }
+         }  <span class="yang_cmt">// container smScriptResult-smRunResult</span>
+      }  <span class="yang_cmt">// notification smScriptResult</span>
+
+      <a name="smScriptException.1648"/><span class="yang_kw">notification</span> <span class="yang_id">smScriptException</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"This notification can be used by scripts to notify other
+            management applications about script errors.
+            
+            This notification is not automatically generated by the
+            Script MIB implementation. It is the responsibility of
+            the executing script or the runtime system to emit this
+            notification where it is appropriate to do so."</span>;
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.2.0.3"</span>;
+
+         <a name="smScriptException-smRunError.1659"/><span class="yang_kw">container</span> <span class="yang_id">smScriptException-smRunError</span> {
+
+            <a name="smLaunchOwner.1660"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchOwner"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smLaunchName.1668"/><span class="yang_kw">leaf</span> <span class="yang_id">smLaunchName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchName"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smRunIndex.1676"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-script:smRunObjects/disman-script:smRunEntry/disman-script:smRunIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="smRunError.1684"/><span class="yang_kw">leaf</span> <span class="yang_id">smRunError</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object contains a descriptive error message if the
+                  script startup or execution raised an abnormal condition.
+                  An implementation must store a descriptive error message
+                  in this object if the script exits with the smRunExitCode
+                  `genericError'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.64.1.4.2.1.11"</span>;
+            }
+         }  <span class="yang_cmt">// container smScriptException-smRunError</span>
+      }  <span class="yang_cmt">// notification smScriptException</span>
+   }  <span class="yang_cmt">// module DISMAN-SCRIPT-MIB</span>
+</pre>
+</div>
+</div>

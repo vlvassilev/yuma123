@@ -1,0 +1,306 @@
+ncx-module smi {
+  header {
+    description 
+      "SMIv2 data types converted from the following sources: 
+
+        * RFC 2578: Structure of Management Information Version 2 (SMIv2)
+          
+        * RFC 2579: Textual Conventions for SMIv2
+
+        * RFC 2856: High Capacity Data Types
+
+        * draft-romascanu-netconf-datatypes-01.txt
+
+        * libsmi output from 'smidump -f xsd' command
+          http://www.ibr.cs.tu-bs.de/projects/libsmi/ ";
+
+    version 0.5;
+    owner ietf;
+    application types;
+    copyright 
+      "Copyright (C) Andy Bierman (2006-2007).  All Rights Reserved.";
+    contact-info 
+      "Translated by Andy Bierman.
+       Send comments to ietf@andybierman.com.";
+    last-update "2007-03-02";
+    revision-history {
+       0.5 "Update based on NGO mailing list comments:
+             change BITS back to list, fix bugs.";
+       0.4 "Change BITS from list to ustring";
+       0.3 "Try to align to smidump and draft-romascanu.";
+       0.2 "Refine OID and other tabular data types.";
+       0.1 "Initial version.";
+    }
+  }
+
+  imports {
+    import xsd { NMTOKEN };
+  }
+
+  definitions {
+
+    type INTEGER {
+      description 
+        "INTEGER from RFC 2578, page 8 and sec. 7.1.1.
+         An enumerated integer is simply the 'enum' data type";
+      syntax { int; }
+    }
+
+    type OctetString {
+      description "OCTET STRING from RFC 2578, page 8.";
+      syntax { string (0..65535); }
+    }
+
+    type ObjectIdentifier {
+      description "OBJECT IDENTIFIER from RFC 2578, page 8.,
+                   libsmi v0.4.5 output.";
+      syntax { 
+	string (2..128) pattern ="[0-2](\.(0|([1-9]([0-9]*))))*";
+      }
+    }
+
+    type Integer32 {
+      description "Integer32 from RFC 2578, sec. 7.1.1";
+      syntax { int; }
+    }
+
+    type IpAddress {
+      description "IpAddress from RFC 2578, page 8."; 
+      syntax { string; }
+      appinfo {
+        status deprecated;
+        replaced-by "InetAddress";
+      }
+    }
+
+    type Counter32 {
+      description "Counter32 from RFC 2578, page 8.";
+      syntax { uint; }
+      max-access read-only;
+    }
+
+    type Gauge32 {
+      description "Gauge32 from RFC 2578, page 8.";
+      syntax { uint; }
+    }
+
+    type Unsigned32 {
+      description "Unsigned32 from RFC 2578, page 8.";
+      syntax { uint; }
+    }
+
+    type TimeTicks {
+      description "TimeTicks from RFC 2578, page 8.";
+      syntax { uint; }
+    }
+
+    type Opaque {
+      description "Opaque from RFC 2578, page 8.";
+      syntax { string; }
+    }
+
+    type Counter64 {
+      description "Counter64 from RFC 2578, page 8.";
+      syntax { ulong; }
+      max-access read-only;
+    }
+
+    type Unsigned64 {
+      description "Unsigned64 TC (missing) from RFC 2856.";
+      syntax { ulong; }
+    }
+
+    type CounterBasedGauge64 {
+      description "CounterBasedGauge64 TC from RFC 2856, pages 5 -6.";
+      syntax { ulong; }
+    }
+
+    type ZeroBasedCounter32 {
+      description "Zero Based Counter for Counter32";
+      syntax { uint; }
+      default "0";
+      max-access read-only;
+    }
+
+    type ZeroBasedCounter64 {
+      description "ZeroBasedCounter64 TC from RFC 2856, page 6.";
+      syntax { ulong; }
+      default "0";
+      max-access read-only;
+    }
+
+    type BITS {
+      description 
+        "BITS from RFC 2579, page 3.
+         Bit definition in the hexBinary string are in network 
+         byte order.";
+      syntax { 
+         list { NMTOKEN }; 
+      }
+      appinfo {
+         no-duplicates;
+         merge-type ordered;
+      }
+    }
+
+    type DisplayString {
+      description "DisplayString TC from RFC 2579, page 3.,
+                   smidump v0.4.5;
+
+        Represents textual information taken from the NVT ASCII
+        character set, as defined in pages 4, 10-11 of RFC 854.
+
+        To summarize RFC 854, the NVT ASCII repertoire specifies:
+
+          - the use of character codes 0-127 (decimal)
+
+          - the graphics characters (32-126) are interpreted as
+            US ASCII
+
+          - NUL, LF, CR, BEL, BS, HT, VT and FF have the special
+            meanings specified in RFC 854
+
+          - the other 25 codes have no standard interpretation
+
+          - the sequence 'CR LF' means newline
+
+          - the sequence 'CR NUL' means carriage-return
+
+          - an 'LF' not preceded by a 'CR' means moving to the
+            same column on the next line.
+
+          - the sequence 'CR x' for any x other than LF or NUL is
+            illegal.  (Note that this also means that a string may
+            end with either 'CR LF' or 'CR NUL', but not with CR.)
+
+        Any object defined using this syntax may not exceed 255
+        characters in length.";
+
+      syntax { 
+        string (0..255)
+          pattern = "((((\p{IsBasicLatin})){0,255})){0,1}";
+      }
+      appinfo {
+        display-hint "255a";
+      }
+    }
+
+    type PhysAddress {
+      description "PhysAddress TC from RFC 2579, page 4.";
+      syntax { 
+        string 
+          pattern = "(((([0-9A-Fa-f]{2}):)*([0-9A-Fa-f]{2}))){0,1}";
+      }
+    }
+
+    type MacAddress {
+      description 
+        "IEE 802 MAC Address String. from smidump v0.4.5,
+
+        Represents an 802 MAC address represented in the
+        `canonical' order defined by IEEE 802.1a, i.e., as if it
+        were transmitted least significant bit first, even though
+        802.5 (in contrast to other 802.x protocols) requires MAC
+        addresses to be transmitted most significant bit first.";
+      syntax {
+         string (17) 
+           pattern = "(((([0-9A-Fa-f]{2}):){5,5})([0-9A-Fa-f]{2}))";
+      }
+      appinfo {
+        display-hint "1x:";
+      }
+    }
+
+    type TruthValue {
+      description "TruthValue TC from RFC 2579, page 5.";
+      syntax { enum = {true=1 false}; }
+    }
+
+    type TestAndIncr {
+      description "TestAndIncr TC from RFC 2579, page 5.";
+      syntax { uint (0..2147483647); }
+    }
+
+    type AutonomousType {
+      description "AutonomousType TC from RFC 2579, page 5.";
+      syntax { ObjectIdentifier; }
+    }
+
+    type InstancePointer {
+      description
+        "A pointer to either a specific instance of a MIB object or
+         a conceptual row of a MIB table in the managed device.  In
+         the latter case, by convention, it is the name of the
+         particular instance of the first accessible columnar object
+         in the conceptual row.
+
+         The two uses of this textual convention are replaced by
+         VariablePointer and RowPointer, respectively.";
+      syntax { ObjectIdentifier; }
+      appinfo {
+         status deprecated;
+      }
+    }
+
+    type VariablePointer {
+      description 
+        "VariablePointer TC from RFC 2579, page 6. smidump v0.4.5,
+
+         A pointer to a specific object instance.  For example,
+         sysContact.0 or ifInOctets.3.";
+      syntax { ObjectIdentifier; }
+    }
+
+    type RowPointer {
+      description "RowPointer TC from RFC 2579, page 6.";
+      syntax { ObjectIdentifier; }
+    }
+
+    type RowStatus {
+      description "RowStatus TC from RFC 2579, pages 6 - 17.";
+      syntax { 
+        enum = { 
+          active=1 notInService notReady createAndGo createAndWait destroy
+        }; 
+      }
+    }
+
+    type TimeStamp {
+      description "TimeStamp TC from RFC 2579, pages 17 - 18.";
+      syntax { uint (0..2147483647); }
+    }
+   
+    type TimeInterval {
+      description "TimeInterval TC from RFC 2579, page 18.";
+      syntax { uint (0..2147483647); }
+    }
+
+    type DateAndTime {
+      description "DateAndTime TC from RFC 2579, pages 18 - 19.";
+      syntax { 
+        string (8..28);
+      }
+    }
+
+    type StorageType {
+      description "StorageType TC from RFC 2579, page 19.";
+      syntax { 
+        enum = { 
+          other=1 volatile nonVolatile permanent readOnly 
+        }; 
+      }
+    }
+   
+    type TDomain {
+      description "TDomain TC from RFC 2579, page 20.";
+      syntax { ObjectIdentifier; }
+    }
+
+    type TAddress {
+      description "TAddress TC from RFC 2579, page 20.";
+      syntax { string (1..255); }
+    }
+  }
+}
+
+

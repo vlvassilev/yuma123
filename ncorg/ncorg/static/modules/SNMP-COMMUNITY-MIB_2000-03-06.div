@@ -1,0 +1,330 @@
+
+<div>
+   <h1 class="yang">SNMP-COMMUNITY-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#snmpCommunityMIBObjects.85">snmpCommunityMIBObjects</a>
+               <ul>
+                  <li class="daddy"><a href="#snmpCommunityEntry.90">snmpCommunityEntry</a>
+                     <ul>
+                        <li><a href="#snmpCommunityIndex.98">snmpCommunityIndex</a></li>
+                        <li><a href="#snmpCommunityName.108">snmpCommunityName</a></li>
+                        <li><a href="#snmpCommunitySecurityName.117">snmpCommunitySecurityName</a></li>
+                        <li><a href="#snmpCommunityContextEngineID.129">snmpCommunityContextEngineID</a></li>
+                        <li><a href="#snmpCommunityContextName.143">snmpCommunityContextName</a></li>
+                        <li><a href="#snmpCommunityTransportTag.156">snmpCommunityTransportTag</a></li>
+                        <li><a href="#snmpCommunityStorageType.180">snmpCommunityStorageType</a></li>
+                        <li><a href="#snmpCommunityStatus.191">snmpCommunityStatus</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#snmpTrapAddress.210">snmpTrapAddress</a></li>
+                  <li><a href="#snmpTrapCommunity.223">snmpTrapCommunity</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#augment.242">augment</a>
+               <ul>
+                  <li><a href="#snmpTargetAddrTMask.246">snmpTargetAddrTMask</a></li>
+                  <li><a href="#snmpTargetAddrMMS.284">snmpTargetAddrMMS</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">SNMP-COMMUNITY-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:SNMP-COMMUNITY-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-community"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14">SNMP-FRAMEWORK-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-framework"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMP-TARGET-MIB/2002-10-14">SNMP-TARGET-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-target"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMPv2-TC/1999-04-01">SNMPv2-TC</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smiv2"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/inet-types/2007-10-02">inet-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"inet"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"SNMPv3 Working Group"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"WG-email:   snmpv3@lists.tislabs.com
+         Subscribe:  majordomo@lists.tislabs.com
+         	    In msg body:  subscribe snmpv3
+         
+         Chair:      Russ Mundy
+         	    TIS Labs at Network Associates
+         Postal:     3060 Washington Rd
+         	    Glenwood MD 21738
+         	    USA
+         Email:      mundy@tislabs.com
+         Phone:      +1-301-854-6889
+         
+         Co-editor:  Rob Frye
+         	    CoSine Communications
+         Postal:     1200 Bridge Parkway
+         	    Redwood City, CA 94065
+         	    USA
+         E-mail:     rfrye@cosinecom.com
+         Phone:      +1 703 725 1130
+         
+         Co-editor:  David B. Levi
+         	    Nortel Networks
+         Postal:     3505 Kesterwood Drive
+         	    Knoxville, TN 37918
+         E-mail:     dlevi@nortelnetworks.com
+         Phone:      +1 423 686 0432
+         
+         Co-editor:  Shawn A. Routhier
+         	    Integrated Systems Inc.
+         Postal:     333 North Ave 4th Floor
+         	    Wakefield, MA 01880
+         E-mail:     sar@epilogue.com
+         Phone:      +1 781 245 0804
+         
+         Co-editor:  Bert Wijnen
+         	    Lucent Technologies
+         Postal:     Schagen 33
+         	    3461 GL Linschoten
+         	    Netherlands
+         Email:      bwijnen@lucent.com
+         Phone:      +31-348-407-775"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"This MIB module defines objects to help support coexistence
+         between SNMPv1, SNMPv2c, and SNMPv3."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-03-06"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"This version published as RFC 2576."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1999-05-13"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"The Initial Revision"</span>;
+      }
+
+
+      <span class="yang_cmt">// objects</span>
+
+      <a name="snmpCommunityMIBObjects.85"/><span class="yang_kw">container</span> <span class="yang_id">snmpCommunityMIBObjects</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1"</span>;
+
+         <a name="snmpCommunityEntry.90"/><span class="yang_kw">list</span> <span class="yang_id">snmpCommunityEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#snmpCommunityIndex.98">snmpCommunityIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Information about a particular community string."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1"</span>;
+
+            <a name="snmpCommunityIndex.98"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The unique index value of a row in this table."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.1"</span>;
+            }
+
+            <a name="snmpCommunityName.108"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The community string for which a row in this table
+                  represents a configuration."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.2"</span>;
+            }
+
+            <a name="snmpCommunitySecurityName.117"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunitySecurityName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A human readable string representing the corresponding
+                  value of snmpCommunityName in a Security Model
+                  independent format."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.3"</span>;
+            }
+
+            <a name="snmpCommunityContextEngineID.129"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityContextEngineID</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpEngineID.105">snmp-framework:SnmpEngineID</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The contextEngineID indicating the location of the
+                  context in which management information is accessed
+                  when using the community string specified by the
+                  corresponding instance of snmpCommunityName.
+                  
+                  The default value is the snmpEngineID of the entity in
+                  which this object is instantiated."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.4"</span>;
+            }
+
+            <a name="snmpCommunityContextName.143"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityContextName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The context in which management information is accessed
+                  when using the community string specified by the corresponding
+                  instance of snmpCommunityName."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.5"</span>;
+            }
+
+            <a name="snmpCommunityTransportTag.156"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityTransportTag</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-TARGET-MIB/2002-10-14#SnmpTagValue.96">snmp-target:SnmpTagValue</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object specifies a set of transport endpoints
+                  from which a command responder application will accept
+                  management requests.  If a management request containing
+                  this community is received on a transport endpoint other
+                  than the transport endpoints identified by this object,
+                  the request is deemed unauthentic.
+                  
+                  The transports identified by this object are specified
+                  
+                  in the snmpTargetAddrTable.  Entries in that table
+                  whose snmpTargetAddrTagList contains this tag value
+                  are identified.
+                  
+                  If the value of this object has zero-length, transport
+                  endpoints are not checked when authenticating messages
+                  containing this community string."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.6"</span>;
+            }
+
+            <a name="snmpCommunityStorageType.180"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityStorageType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row in the
+                  snmpCommunityTable.  Conceptual rows having the value
+                  'permanent' need not allow write-access to any
+                  columnar object in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.7"</span>;
+            }
+
+            <a name="snmpCommunityStatus.191"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row in the snmpCommunityTable.
+                  
+                  An entry in this table is not qualified for activation
+                  until instances of all corresponding columns have been
+                  initialized, either through default values, or through
+                  Set operations.  The snmpCommunityName and
+                  snmpCommunitySecurityName objects must be explicitly set.
+                  
+                  There is no restriction on setting columns in this table
+                  when the value of snmpCommunityStatus is active(1)."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.8"</span>;
+            }
+         }  <span class="yang_cmt">// list snmpCommunityEntry</span>
+
+         <a name="snmpTrapAddress.210"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapAddress</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The value of the agent-addr field of a Trap PDU which
+               is forwarded by a proxy forwarder application using
+               an SNMP version other than SNMPv1.  The value of this
+               object SHOULD contain the value of the agent-addr field
+               from the original Trap PDU as generated by an SNMPv1
+               agent."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.3"</span>;
+         }
+
+         <a name="snmpTrapCommunity.223"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapCommunity</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The value of the community string field of an SNMPv1
+               message containing a Trap PDU which is forwarded by a
+               a proxy forwarder application using an SNMP version
+               other than SNMPv1.  The value of this object SHOULD
+               contain the value of the community string field from
+               the original SNMPv1 message containing a Trap PDU as
+               generated by an SNMPv1 agent."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.4"</span>;
+         }
+      }  <span class="yang_cmt">// container snmpCommunityMIBObjects</span>
+      <a name="augment.242"/><span class="yang_kw">augment</span> <a href="/modules/SNMP-TARGET-MIB/2002-10-14#snmpTargetAddrEntry.279">/snmp-target:snmpTargetObjects/snmp-target:snmpTargetAddrEntry</a> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Information about a particular mask and mms value."</span>;
+
+         <a name="snmpTargetAddrTMask.246"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrTMask</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
+               <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
+            }
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The mask value associated with an entry in the
+               snmpTargetAddrTable.  The value of this object must
+               have the same length as the corresponding instance of
+               snmpTargetAddrTAddress, or must have length 0.  An
+               attempt to set it to any other value will result in
+               an inconsistentValue error.
+               
+               The value of this object allows an entry in the
+               snmpTargetAddrTable to specify multiple addresses.
+               The mask value is used to select which bits of
+               a transport address must match bits of the corresponding
+               instance of snmpTargetAddrTAddress, in order for the
+               transport address to match a particular entry in the
+               snmpTargetAddrTable.  Bits which are 1 in the mask
+               value indicate bits in the transport address which
+               must match bits in the snmpTargetAddrTAddress value.
+               
+               Bits which are 0 in the mask indicate bits in the
+               transport address which need not match.  If the
+               length of the mask is 0, the mask should be treated
+               as if all its bits were 1 and its length were equal
+               to the length of the corresponding value of
+               snmpTargetAddrTable.
+               
+               This object may not be modified while the value of the
+               corresponding instance of snmpTargetAddrRowStatus is
+               active(1).  An attempt to set this object in this case
+               will result in an inconsistentValue error."</span>;
+            <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.2.1.1"</span>;
+         }
+
+         <a name="snmpTargetAddrMMS.284"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrMMS</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+               <span class="yang_kw">range</span> <span class="yang_str">"0 | 484..2147483647"</span>;
+            }
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The maximum message size value associated with an entry
+               in the snmpTargetAddrTable."</span>;
+            <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"484"</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.2.1.2"</span>;
+         }
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.2.1"</span>;
+      }
+   }  <span class="yang_cmt">// module SNMP-COMMUNITY-MIB</span>
+</pre>
+</div>
+</div>

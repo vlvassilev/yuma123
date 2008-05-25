@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://netconfcentral.org/ncx/ncxdump"
+ targetNamespace="http://netconfcentral.org/ncx/ncxdump"
+ xmlns:xs="http://www.w3.org/2001/XMLSchema"
+ elementFormDefault="qualified" attributeFormDefault="unqualified"
+ xml:lang="en" version="0.1" xmlns:ncx="http://netconfcentral.org/ncx/1.0"
+ xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+ <xs:annotation>
+  <xs:documentation> Converted from NCX module by ncxdump v0.2
+
+    Module: ncxdump
+    Owner: ncx
+    Application: ncxdump
+    Version: 0.1
+    Copyright (C) 2006, Andy Bierman.
+    Contact Info: Send comments to &lt;ietf@andybierman.com&gt;.
+
+    Description:
+      CLI Parameters NCX Module Converter Application</xs:documentation>
+ </xs:annotation>
+
+ <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+  schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+
+ <xs:simpleType name="NcxFormatType">
+  <xs:annotation>
+   <xs:documentation>Conversion Output Formats.</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="xsd"/>
+   <xs:enumeration value="html"/>
+   <xs:enumeration value="h"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:complexType name="ncxdumpPSType"/>
+
+ <xs:element name="ncxdumpPS" type="ncxdumpPSType" abstract="true"/>
+
+ <xs:complexType name="ncxdumpAppType">
+  <xs:sequence>
+   <xs:element ref="ncxdumpPS" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <xs:complexType name="ncxdump-cliPSType">
+  <xs:annotation>
+   <xs:documentation>CLI Parameter Set for the NCX Converter Application.</xs:documentation>
+  </xs:annotation>
+  <xs:complexContent>
+   <xs:extension base="ncxdumpPSType">
+    <xs:sequence>
+     <xs:element name="module" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>NCX source module name to convert.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="output" type="xs:string">
+      <xs:annotation>
+       <xs:documentation>Output file name to use. 
+             Default is STDOUT if none specified.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="format" type="NcxFormatType">
+      <xs:annotation>
+       <xs:documentation>NCX target file name to use.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="help" type="xs:flag">
+      <xs:annotation>
+       <xs:documentation>Print ncxdump help file and exit.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+
+ <xs:element name="ncxdump-cli" type="ncxdump-cliPSType"
+  substitutionGroup="ncxdumpPS"/>
+
+</xs:schema>

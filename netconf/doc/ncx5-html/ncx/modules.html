@@ -1,0 +1,3262 @@
+<!doctype html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>NCX Modules (draft 0.6)</title>
+    <link rel="stylesheet" href="/css/ncx.css" type="text/css"/>
+  </head>
+<body>
+
+<p>
+<a href="index.html">NCX Home</a>
+</p>
+
+<h1 align="center">NCX Modules</h1>
+
+<p>
+Contents:
+</p>
+
+<ul>
+<li><a href="#Overview">Overview</a>
+  <ul>
+  <li><a href="#NCX_Clauses">NCX Clauses</a>
+    <ul>
+    <li><a href="#Clause_Types">Clause Types</a></li>
+    <li><a href="#Clause_Order">Clause Order</a></li>
+    </ul>
+  </li>
+  <li><a href="#Language_Components">Language Components</a>
+    <ul>
+    <li><a href="#Strings">Strings</a></li>
+    <li><a href="#Numbers">Numbers</a></li>
+    <li><a href="#Tokens">Tokens</a></li>
+    <li><a href="#Comments">Comments</a></li>
+    <li><a href="#Character_Entities">Character Entities</a></li>
+    </ul>
+  </li>
+  </ul>
+</li>
+<li><a href="#NCX_Module_Syntax">NCX Module Syntax</a>
+  <ul>
+  <li><a href="#NCX_Header">Header Section</a>
+    <ul>
+    <li><a href="#Hdr_description">Description Clause</a></li>
+    <li><a href="#Hdr_version">Version Clause</a></li>
+    <li><a href="#Hdr_owner">Owner Clause</a></li>
+    <li><a href="#Hdr_application">Application Clause</a></li>
+    <li><a href="#Hdr_copyright">Copyright Clause</a></li>
+    <li><a href="#Hdr_contact-info">Contact Info Clause</a></li>
+    <li><a href="#Hdr_namespace">Namespace Clause</a></li>
+    <li><a href="#Hdr_last-update">Last Update Clause</a></li>
+    <li><a href="#Hdr_revision-history">Revision History Clause</a></li>
+    <li><a href="#Hdr_appinfo">Application Info Clause</a></li>
+    <li><a href="#Hdr_ABNF">Header ABNF</a></li>
+    </ul>
+  </li>
+  <li><a href="#NCX_Imports">Imports Section</a>  
+    <ul>
+    <li><a href="#NCX_Import_Resolution">
+        Import Resolution Processing Order
+        </a>
+    </li>
+    </ul>
+  </li>
+  <li><a href="#NCX_Definitions">Definitions Section</a>  
+    <ul>
+    <li><a href="#NCX_Types">Type Construct</a>
+      <ul>
+      <li><a href="#Type_description">Description Clause</a></li>
+      <li><a href="#Type_condition">Condition Clause</a></li>
+      <li><a href="#Type_syntax">Syntax Clause</a></li>
+      <li><a href="#Type_metadata">Metadata Clause</a></li>
+      <li><a href="#Type_default">Default Clause</a></li>
+      <li><a href="#Type_max-access">Max Access Clause</a></li>
+      <li><a href="#Type_data-class">Data Class Clause</a></li>
+      <li><a href="#Type_units">Units Clause</a></li>
+      <li><a href="#Type_appinfo">Application Info Clause</a></li>
+      <li><a href="#Type_Examples">Examples</a></li>
+      </ul>
+    </li>
+    <li><a href="#NCX_Parmsets">Parameter Set Construct</a>
+      <ul>
+      <li><a href="#Psd_description">Description Clause</a></li>
+      <li><a href="#Psd_condition">Condition Clause</a></li>
+      <li><a href="#Psd_order">Order Clause</a></li>
+      <li><a href="#Psd_appinfo">Application Info Clause</a></li>
+      <li><a href="#Psd_parms">Parms Clause</a></li>
+      <li><a href="#NCX_Parm">Parm Construct</a>
+        <ul>
+        <li><a href="#Parm_description">Description Clause</a></li>
+        <li><a href="#Parm_condition">Condition Clause</a></li>
+        <li><a href="#Parm_type">Type Clause</a></li>
+        <li><a href="#Parm_max-access">Max Access Clause</a></li>
+        <li><a href="#Parm_usage">Usage Clause</a></li>
+        <li><a href="#Parm_data-class">Data Class Clause</a></li>
+        <li><a href="#Parm_appinfo">Application Info Clause</a></li>
+        </ul>
+      </li>
+      <li><a href="#Parmset_Examples">Examples</a></li>
+      </ul>
+    </li>
+    <li><a href="#NCX_RPCs">Remote Procedure Call Construct</a>
+      <ul>
+      <li><a href="#Rpc_description">Description Clause</a></li>
+      <li><a href="#Rpc_condition">Condition Clause</a></li>
+      <li><a href="#Rpc_rpc-type">RPC Type Clause</a></li>
+      <li><a href="#Rpc_input">Input Clause</a></li>
+      <li><a href="#Rpc_parms">Parms Clause</a></li>
+      <li><a href="#Rpc_output">Output Clause</a></li>
+      <li><a href="#Rpc_appinfo">Application Info Clause</a></li>
+      <li><a href="#Rpc_Examples">Examples</a></li>
+      </ul>
+    </li>
+    <li><a href="#NCX_Notifications">Notification Construct</a></li>
+    </ul>
+  </li>
+  </ul>
+</li>
+</ul>
+
+<h1><a name="Overview">Overview</a></h1>
+
+<p>
+All NCX constructs are defined within the context of
+a particular module.  The module header identifies some 
+important information that is the same for all definitions
+in the same module, such as the module owner, application,
+and version.  The module name itself has no
+impact on the data model representation.
+</p>
+<p>
+NCX constructs are used to organize management information
+schema definitions, which can be represented in different encodings,
+such as XML.  Most NCX constructs can be represented with
+an equivalent XML Schema Definition (XSD).
+</p>
+
+<p>
+<b>NCX Modules vs. Data Model Framework</b>
+</p>
+
+<ul>
+<li>Modules are simply containers of definitions.</li>
+<li>All module names must be globally unique, regardless
+of the owner of the module.</li>
+<li>The conceptual data model framework is a hierarchy of 
+owner-specific applications.</li>
+<li>Each application may define its own parameter sets, RPC methods,  
+and notifications.</li>
+<li>Each module specifies one owner and application name,
+    which has one namespace associated with it.</li>
+<li>Any number of namespaces can be mapped to a single owner name.</li>
+<li>The ['owner', 'application'] tuple, not the module, determines the 
+    real data model container.</li>
+<li>All owner-specific definitions (i.e., type, parmset,
+    rpc, notif) are considered be be in the same naming scope 
+    if they share the same owner name, even though the XML namespace
+    is derived from the owner and application name.</li>
+<li>The Type construct can be used by any owner or application because
+    data types are just abstractions in NCX</li>
+<li>Accessible constructs (parmset, rpc, notif) are mapped to a specific
+    owner and application, which usually determines the XML namespace URI
+    assigned to these accessible data model objects.</li>
+</ul>
+
+<h2><a name="NCX_Clauses">NCX Clauses</a></h2>
+
+<p>
+At some level, an NCX module can be represented as a series
+of constructs and clauses, consisting of one or more NCX
+language tokens.  These clauses are used to specify 
+conceptual data model types and objects,
+associated with some application.
+</p>
+
+<p>
+All NCX clauses are case-sensitive.
+Whitespace is allowed between any two tokens,
+and is only required between two string tokens.
+</p>
+
+<h3><a name="Clause_Types">Clause Types</a></h3>
+
+<p>
+There are two clause types:
+</p>
+
+<ul>
+<li>A <b>complex clause</b> is a series of tokens
+which form a conceptual definition, containing more
+complex clauses or simple clauses.
+<br/>It always has the following form:
+<pre>
+
+    clause-type [clause-name] "{" [clause-contents] "}"
+
+</pre>
+</li>
+<li>
+A <b>simple clause</b> is a series of tokens which
+form a sub-component or property of a conceptual definition
+that cannot contain any complex clauses.
+<br/>It always has the following form:
+<pre>
+
+    clause-type [clause-contents] ";"
+
+</pre>
+</li>
+</ul>
+
+<h3><a name="Clause_Order">Clause Order</a></h3>
+
+<p>
+<b>There is no clause order.</b>
+</p>
+<p>
+Almost all NCX clauses are unordered, such as the
+four different data model object definitions and
+all their sub-clauses. Notable exceptions are
+three clauses within the module itself.
+The header, imports, and definitions clauses 
+must appear in that order.
+</p>
+
+<p>
+<b>Forward references are not allowed.</b>
+</p>
+<p>
+Within a particular &lt;definitions&gt; section, any named
+construct used (e.g., a parmset name or a derived type)
+must either be defined in another module included in the
+&lt;imports&gt; section, or previously defined in the current module.
+</p>
+
+<p>
+The only exception to the 'no forward references' rule is
+an index clause component which identifies a node in the
+child node section which immediately follows the index clause.
+</p>
+
+<p>
+<b>Clause order can be significant.</b>
+</p>
+<p>
+There are some cases in which the relative order of the 
+definitions is significant, such as the 'parm' clause to
+define a parameter, a child node within a complex
+data type, or the components of an index clause.
+In these cases, the order of clauses selected by the
+data model designer will be preserved by the agent.
+</p>
+
+<p>
+<b>The syntax clause is special.</b>
+</p>
+
+<p>
+The contents of the <a href="#Type_syntax">syntax clause</a>
+are ordered, and all tokens within it must appear in the correct sequence.
+</p>
+
+<p>
+<b>Canonical order is suggested.</b>
+</p>
+
+<p>
+The canonical clause order is the order specified in the
+ABNF for a particular construct.
+To improve module readability, it is suggested that clauses be 
+entered in this order.
+</p>
+
+<h2><a name="Language_Components">Language Components</a></h2>
+
+<p>
+At the most basic level, there are five different components in the 
+NCX language:
+</p>
+
+<ul>
+<li>string</li>
+<li>number</li>
+<li>token</li>
+<li>comment</li>
+<li>character entity</li>
+</ul>
+
+<p>
+All NCX clauses are constructed from these basic components.
+</p>
+
+<h3><a name="Strings">Strings</a></h3>
+
+<p>
+A string literal can be entered in two forms: quoted and unquoted.
+Unquoted strings are usually suitable for specifying short name strings
+or other constructs that do not contain any whitespace or reserved characters.
+</p>
+
+<ul>
+<li>A <b>quoted string</b> begins and ends with a double-quote 
+character (&quot;).  These double quote characters are not part of the
+string.</li>
+<li>An <b>unquoted string</b> begins with a non-whitespace or 
+non-token character,
+and ends with the character preceding another language token
+or a whitespace character.</li>
+<li>A special variant of an unquoted string, called a <b>version string</b>,
+may contain the 'Period' token.</li>
+<li>The <b>conceptual maximum string length</b> is 2,147,483,647 
+(2^^31 -1) bytes in length, however, an implementation may
+impose smaller string size restrictions.</li>
+<li>An agent must support an <b>actual maximum string length</b> 
+no smaller than 1024 bytes in length.</li>
+<li>The underlying data type for the string data 
+type is 'unsigned char'.  Conceptually, a string is a
+sequence of UTF-8 characters.</li>
+<li>The double quote character must not appear within a string.</li>
+<li>The 'quote' character entity (&amp;quot;) is used to represent a 
+double quote char within a string.</li>
+<li>Strings can be constrained with size ranges, 
+enumerated value sets, and XSD patterns.</li>
+<li>
+When declaring a <b>pattern</b> within a string data type, the pattern string
+may be specified as multiple quoted strings, e.g., one on each of
+multiple lines for documentation formatting and printing considerations.
+In such a case, the specified pattern is obtained by extracting the
+multiple strings and concatenating them in the order they were
+specified.</li>
+</ul>
+
+<h3><a name="Numbers">Numbers</a></h3>
+
+<p>
+There are three forms of number input:
+</p>
+
+<ul>
+<li><b>Decimal number</b><br/>
+Begins with optional '+' or '-' character and contains 
+one or more decimal digits</li>
+<li><b>Hexidecimal number</b><br/>
+Begins with the character sequence '0x' or '0X', and
+contains one or more hex (a-f,A-F) characters or decimal digits.
+There should be an integral number of bytes represented.
+If not, a leading '0' nibble (4 bits) will be added to unsigned
+numbers, and signed numbers will be sign-extended (i.e., 
+prefixed with 0x0 or 0xf )
+</li>
+<li><b>Real number</b><br/>
+Follows IEEE Floating point representation. (Link TBD)
+</li>
+</ul>
+
+<h3><a name="Tokens">Tokens</a></h3>
+
+<ul>
+<li>A token is a reserved character sequence that is used within
+the NCX language.</li>
+<li>Unless it is inside a quoted string, 
+a token will be parsed in left-to-right order, as encountered
+in the NCX module.</li>
+<li>A token will terminate any unquoted string, such as a Name string.</li>
+<li>All token sequences are reserved words and must not be used, except
+inside a quoted string.</li>
+<li>
+The XML tokens '&lt;' and '&gt;' are not used in any NCX clauses,
+but may appear within clauses containing string content, 
+such as a 'description' or 'pattern' clause.
+</li>
+</ul>
+
+<p>
+The following table identifies the tokens that are used in the 
+NCX language.
+</p>
+
+<table summary="NCX Tokens" border="1" align="center" width="100%">
+<tr>  
+<th>Name</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+
+<tr>  
+<td>Left Brace</td>
+<td> { </td>
+<td>Used to start a section</td>
+</tr>
+
+<tr>  
+<td>Right Brace</td>
+<td> } </td>
+<td>Used to end a section</td>
+</tr>
+
+<tr>  
+<td>Left Parenthesis</td>
+<td> ( </td>
+<td>Used to start a range size clause</td>
+</tr>
+
+<tr>  
+<td>Right Parenthesis</td>
+<td> ) </td>
+<td>Used to end a range or size clause</td>
+</tr>
+
+<tr>  
+<td>Hashmark</td>
+<td> # </td>
+<td>Used to begin a comment</td>
+</tr>
+
+<tr>  
+<td>Double Quote</td>
+<td> &quot; </td>
+<td>Used to begin and end a quoted string</td>
+</tr>
+
+<tr>  
+<td>Equals</td>
+<td> = </td>
+<td>Used in assignment clauses</td>
+</tr>
+
+<tr>  
+<td>Plus Equals</td>
+<td> += </td>
+<td>Used in extension clauses for enumerations and strings (2 chars)</td>
+</tr>
+
+<tr>  
+<td>Period</td>
+<td> . </td>
+<td>Used to separate name string components</td>
+</tr>
+
+<tr>  
+<td>Double Period</td>
+<td> .. </td>
+<td>Used to separate range clause components (2 chars)</td>
+</tr>
+
+<tr>  
+<td>Bar</td>
+<td> | </td>
+<td>Used to separate range clause components</td>
+</tr>
+
+<tr>  
+<td>Left Bracket</td>
+<td> [ </td>
+<td>Used to begin an index clause</td>
+</tr>
+
+<tr>  
+<td>Right Bracket</td>
+<td> ] </td>
+<td>Used to end an index clause</td>
+</tr>
+
+<tr>  
+<td>Colon</td>
+<td> : </td>
+<td>Used to separate module and definition name components</td>
+</tr>
+
+<tr>  
+<td>Comma</td>
+<td> , </td>
+<td>Used to separate index clause components</td>
+</tr>
+
+<tr>  
+<td>At Sign</td>
+<td> @ </td>
+<td>Used to indicate an attribute within an NCX Instance Identifier</td>
+</tr>
+
+<tr>  
+<td>Ampersand</td>
+<td> &amp; </td>
+<td>Used to begin a character entity sequence</td>
+</tr>
+
+<tr>  
+<td>Semicolon</td>
+<td> ; </td>
+<td>Used to terminate simple clauses and character entities</td>
+</tr>
+
+<tr>  
+<td>Asterisk</td>
+<td> * </td>
+<td>Used to identify 'zero or more entries' within an instance qualifier clause</td>
+</tr>
+
+<tr>  
+<td>Question Mark</td>
+<td> ? </td>
+<td>Used to identify 'zero or one entries' within an instance qualifier clause</td>
+</tr>
+
+<tr>  
+<td>Plus Sign</td>
+<td> + </td>
+<td>Used to identify 'one or more entries' within an instance qualifier clause,
+and also used to indicate a positive value within a numeric expression</td>
+</tr>
+
+<tr>  
+<td>Minus Sign</td>
+<td> - </td>
+<td>Used to indicate a negative value within a numeric expression</td>
+</tr>
+
+</table>
+
+<h3><a name="Comments">Comments</a></h3>
+
+<p>
+The comment construct allows descriptive text to be embedded anywhere
+in an NCX module.
+</p>
+
+<ul>
+<li>A comment starts with the first hash mark char encountered '#',
+which is not within a quoted string.</li>
+<li>A comment is terminated with a newline or end-of-file char.</li>
+<li>The comment construct is ignored if encountered inside a quoted
+string.</li>
+<li>Syntactically, a comment is treated as a single whitespace character.
+Since a comment cannot occur within a quoted string, it can only serve
+as a separator between two other language tokens.</li>
+</ul>
+
+<p>
+The following examples demonstrate NCX comment usage:
+</p>
+
+<pre>
+
+   # This is a comment
+   # This is another comment
+   foo bar baz   # The third comment
+   "This is not # a comment, it is just a string"
+
+</pre>
+
+<h3><a name="Character_Entities">Character Entities</a></h3>
+
+<p>
+Character entities are defined in XML, and are used to represent characters
+that would not otherwise be allowed or possible within a string.
+The following characters will be converted to character entities if
+encountered in string content:
+</p>
+
+<ul>
+<li>
+The <b>left angle bracket</b> (less-than)
+will be replaced by the 'Less-than' character entity (&amp;lt;)
+</li>
+<li>
+The <b>right angle bracket</b> (greater-than)
+will be replaced by the 'Greater-than' character entity (&amp;gt;)
+</li>
+</ul>
+
+
+<h1><a name="NCX_Module_Syntax">NCX Module Syntax</a></h1>
+
+<p>
+An NCX module contains up to three sections:
+</p>
+
+<ul>
+<li><a href="#NCX_Header">Header Section</a></li>
+<li><a href="#NCX_Imports">Imports Section</a></li>
+<li><a href="#NCX_Definitions">Definitions Section</a></li>
+</ul>
+
+<p>
+Only the header section is mandatory, but a module without a definitions
+section can only serve as a 'place-holder' for the module name.
+</p>
+
+<p>
+The basic form is shown below for a module named 'foo':
+</p>
+
+<pre>
+
+    ncx-module foo {
+      header { ... }
+      imports { ... }
+      definitions { ... }
+    }
+
+</pre>
+
+<p>
+The basic ABNF for an NCX module is shown below:
+</p>
+
+<pre>
+
+    ncx-module = "ncx-module" wspace name "{"
+       ncx-header [ncx-imports] [ncx-definitions] "}"
+
+</pre>
+
+<p>
+In general, complex declarations begin with a name,
+then followed by a left brace '{', and end with a right brace '}'.
+</p>
+
+<p>
+Simple clauses start with a name and end with a semi-colon ';'.  
+</p>
+
+<h2><a name="NCX_Header">Module Header</a></h2>
+
+<p>
+The module header contains all of the module-specific
+information used to manage various aspects of the NCX
+environment, such as data organization, namespace URI
+generation, data model access control, and module lifecycle.
+</p>
+<p>
+The NCX header can be summarized with the following 'pseudo-syntax':
+</p>
+
+<pre>
+
+  header {
+    description   "Optional Module Description";?
+    version       versionString;
+    owner         ownerName;
+    application   appName;
+    copyright     "copyright string";?
+    contact-info  "contact info string";?
+    namespace     "OverrideDefaultNamespaceID";?
+    last-update   dateTime;?
+    revision-history { rev-hist-entry* }?
+    appinfo { appinfo-entry+ }?
+  }
+
+</pre>
+
+<p>
+The following table describes each header clause:
+</p>
+
+<table summary="NCX Header Clauses" border="1" align="center" width="100%">
+<tr>  
+<th>Name</th>
+<th>Use</th>
+<th>Description</th>
+</tr>
+
+<tr>  
+<td><a href="#Hdr_description">description</a></td>
+<td>Optional</td>
+<td>Module-level documentation</td>
+</tr>
+
+<tr>  
+<td><a href="#Hdr_version">version</a></td>
+<td>Required</td>
+<td>Unique string identifying the module version</td>
+</tr>
+
+<tr>  
+<td><a href="#Hdr_owner">owner</a></td>
+<td>Required</td>
+<td>Unique name string identifying the module owner</td>
+</tr>
+
+<tr>  
+<td><a href="#Hdr_application">application</a></td>
+<td>Required</td>
+<td>Name string identifying the owner-specific application for the module</td>
+</tr>
+
+<tr>  
+<td><a href="#Hdr_copyright">copyright</a></td>
+<td>Optional</td>
+<td>Copyright statement for the module</td>
+</tr>
+
+<tr>  
+<td><a href="#Hdr_contact-info">contact-info</a></td>
+<td>Optional</td>
+<td>Contact information for inquiries related to the module</td>
+</tr>
+
+<tr>  
+<td><a href="#Hdr_namespace">namespace</a></td>
+<td>Optional</td>
+<td>Explicit namespace URI for the module to override auto-generated value</td>
+</tr>
+
+<tr>  
+<td><a href="#Hdr_last-update">last-update</a></td>
+<td>Optional</td>
+<td>Explicit namespace URI for the module to override auto-generated value</td>
+</tr>
+
+<tr>  
+<td><a href="#Hdr_revision-history">revision-history</a></td>
+<td>Optional</td>
+<td>List of changes made to the module in previous versions</td>
+</tr>
+
+<tr>  
+<td><a href="#Hdr_appinfo">appinfo</a></td>
+<td>Optional</td>
+<td>
+List of user-defined module-related application information entries.
+</tr>
+</table>
+
+<p>
+The following header demonstrates the usage of each header clause.
+</p>
+
+<pre>
+
+  header {
+    description 
+      "NETCONF Protocol 
+        * Data Types
+        * Parmsets
+        * RPCs
+       Translated from RFC 4741.";
+    version 0.6;
+    owner ietf;
+    application netconf;
+    copyright 
+      "Copyright (C) Andy Bierman (2006-2007).  All Rights Reserved."
+    contact-info 
+      "Translated by Andy Bierman.
+       Send comments to &lt;ietf@andybierman.com&gt;.";
+    namespace "urn:ietf:params:xml:ns:netconf:base:1.0";
+    last-update "2006-11-09";
+    revision-history {
+      0.6 "Fix bug in RpcErrorType";
+      0.5 "Align to prot-12 version.";
+      0.4 "Align to prot-10 version.";
+      0.1 "Initial version.";
+    }
+    appinfo {
+      interest-list "netconf@ops.ietf.org";
+    }
+  }
+
+</pre>
+
+<h3><a name="Hdr_description">Description Clause</a></h3>
+
+<p>
+The header description clause is used to provide documentation
+for the entire module, such as its purpose.  It is similar the the
+DESCRIPTION clause in SMIv2 except it is optional instead of mandatory.
+</p>
+
+<p>
+All NCX module names share the same naming space, such that
+a module name contained in an 'import' clause can match only one
+actual module within an implementation.
+</p>
+
+<p>
+It is strongly suggested that this clause be present
+in every NCX module, and also be the first sub-clause
+within the header.
+</p>
+
+<h3><a name="Hdr_version">Version Clause</a></h3>
+
+<p>
+The module version is a user-defined string.
+It does not have any real significance within the
+NCX language, and exists solely to provide product
+lifecycle support.
+</p>
+
+<p>
+Whenever a published NCX module is modified,
+the version string value must be changed to a
+previously unused value.
+</p>
+
+<p>
+For XSD translation purposes, the value of this clause
+is used as the value of the 'version' attribute within
+the &lt;schema&gt; element.
+</p>
+
+<p>
+A module version string can contain a quoted or unquoted string.
+This version string is specially treated, however, 
+if it does contain an unquoted string.
+Zero or more Period tokens (.),
+a traditional field separator in version strings,
+is allowed to be present in an unquoted module version string.
+</p>
+
+<h3><a name="Hdr_owner">Owner Clause</a>   </h3>
+
+<p>
+The <b>module owner name</b> is a string representing the organization
+responsible for authoring and updating the NCX module.  This 
+could be a vendor name or one of the reserved owner names
+(<b>ietf</b> or <b>ncx</b>), or some other administratively unique string.
+</p>
+
+<p>
+It is expected that an Owner Name Resistry will need to
+be maintained by some organization, such as
+<a href="http://www.iana.org/">IANA</a>.
+</p>
+
+<p>
+If the 'namespace' clause is omitted, then a default namespace URI using the
+owner and application fields will be constructed instead.
+</p>
+
+<p>
+An unquoted string conforming to an <a href="#Names">NCX Name</a> 
+construct is allowed for this clause.
+</p>
+
+<h3><a name="Hdr_application">Application Clause</a></h3>
+
+<p>
+The <b>application name</b> is a string representing the
+the application for which this module applies.
+This string will be used as the application container
+for the elements defined in NCX data models.
+If the 'namespace' clause is omitted, then a default namespace URI using the
+owner and application fields will be constructed instead.
+</p>
+
+<p>
+An unquoted string conforming to an <a href="#Names">NCX Name</a> 
+construct is allowed for this clause.
+</p>
+
+<h3><a name="Hdr_copyright">Copyright Clause</a></h3>
+
+<p>
+The <b>module copyright</b> is a string representing the
+copyright notice for the module.
+</p>
+
+<p>
+A quoted string is allowed for this clause.
+</p>
+
+<h3><a name="Hdr_contact-info">Contact Info Clause</a></h3>
+
+<p>
+The <b>contact-info</b> clause is a documentation string representing the
+author and/or organization contact information for questions
+related to the module.
+</p>
+
+<p>
+A quoted string is allowed for this clause.
+</p>
+
+<h3><a name="Hdr_namespace">Namespace Clause</a></h3>
+
+<p>
+The <b>module namespace URI</b> is an optional URI string.  
+If this parameter is present then the data model namespace URI will be set
+to the exact value of this clause instead of the default constructed string.
+</p>
+
+<p>
+Do not include the 'xmlns' attribute or any prefix
+values, just the namespace URI value.
+</p>
+
+<p>
+A quoted string is allowed for this clause.
+</p>
+
+<h3><a name="Hdr_last-update">Last Update Clause</a></h3>
+
+<p>
+The <b>last update timestamp</b> is an optional 'dateTime' string,
+which represents the date the current version was published.
+</p>
+
+<p>
+A quoted string, which should conform to the XSD 'dateTime' data type,
+is allowed for this clause.
+</p>
+
+<h3><a name="Hdr_revision-history">Revision History Clause</a></h3>
+
+<p>
+The <b>revision history section</b> is an optional formatted clause,
+which should contain a revision entry for each prior published version of
+the module.
+</p>
+
+<p>
+Each <b>revision entry</b> is a tuple of 3 tokens:
+</p>
+
+<ul>
+<li><b>Revision String</b> is a mandatory version string 
+  identifying the corresponding revision.
+  <br/>A quoted or unquoted version string is allowed for this clause.
+</li>
+<li><b>Revision Description</b> is a mandatory documentation string 
+  describing the changes made in the revision.</li>
+<li><b>Semicolon</b><br/> token terminates the revision clause.</li>
+</ul>
+
+<p>
+Zero or more revision clauses may be present within the revision-history
+clause.  Clauses should be listed with the most recent revisions
+documented first, and the older revisions listed last, in descending 
+order.
+</p>
+
+<h3><a name="Hdr_appinfo">Appinfo Clause</a></h3>
+
+<p>
+The appinfo section is an optional formatted clause,
+which contains one or more application info entries related
+to the module.  Each appinfo clause is translated directed
+to &lt;appinfo&gt; child node elements when converted to XSD format.
+These values can also be made available internally to applications.
+</p>
+
+<p>
+For XSD translation purposes, each appinfo entry directly defines an 
+&lt;appinfo&gt; element, which can be empty or have a string value.
+</p>
+
+<p>
+The semantics associated with an appinfo clause are defined 
+outside the scope of the NCX language.  These clauses can
+be used by application and agent developers to provide extra information
+for software tools for process network management operations,
+based on the clause contents.
+For example. the 'netconfd' agent uses several appinfo
+<a href="extensions.html">extensions</a>, which define
+mechanisms to assist in NETCONF protocol operation processing.  
+</p>
+
+<p>
+Each <b>appinfo entry</b> is a tuple of 2 or 3 tokens:
+</p>
+
+<ul>
+<li><b>Appinfo Entry Name</b> is a mandatory name string identifying the 
+name of the application info entry.  This value will be
+used for the element name during XSD translation
+<br/>An unquoted name string is allowed for this clause.
+</li>
+<li><b>Appinfo Entry Value</b> is an optional quoted string value that
+will be associated with the appinfo entry name.</li>
+<li><b>Semicolon</b><br/> token terminates the appinfo entry.</li>
+</ul>
+
+<p>
+One or more appinfo entry clauses must be present if the appinfo
+clause is present. NCX defines some reserved appinfo extensions,
+which are defined in the <a href="extensions.html#NCX_Extensions">
+NCX NETCONF Extensions</a>
+</p>
+
+<h3><a name="Hdr_ABNF">Header ABNF</a></h3>
+
+<p>
+The ABNF fragment for the NCX header is defined as follows:
+</p>
+
+<pre>
+
+    ncx-header =  "header" "{" header-contents "}"
+
+    header-contents = [ncx-descr] hdr-version hdr-owner 
+                      [hdr-copyright] [hdr-contact] [hdr-ns]
+                      [hdr-last-update] [hdr-rev-history] [ncx-appinfo]
+
+
+ 
+    hdr-version = "version" wspace ver-string ";"
+
+    ver-string = string
+
+    hdr-owner = "owner" wspace name ";"
+
+    hdr-copyright = "copyright" wspace quoted-string ";"
+
+    hdr-contact = "contact-info" wspace quoted-string ";"   
+
+    ncx-descr = "description" wspace quoted-string ";"
+
+    hdr-ns = "namespace" wspace quoted-string ";"
+
+    hdr-last-update = "last-update" wspace unquoted-string ";"
+
+    hdr-rev-history = "revision-history" 
+        "{" 0*(hdr-revhist-entry) "}"
+
+    hdr-revhist-entry = unquoted-string wspace quoted-string ";"
+
+    ncx-appinfo = "appinfo" "{" 0*(ncx-appinfo-entry) "}"
+
+    ncx-appinfo-entry = unquoted-string [wspace quoted-string] ";"
+
+</pre>
+
+<h2><a name="NCX_Imports">Imports Section</a></h2>
+
+<p>
+The module imports section is an optional structured clause,
+which contains zero or more <b>import clauses</b>.
+</p>
+
+<p>
+These import clauses are used within a pre-determined algorithm to resolve
+NCX Definition Identifiers which may be encountered in 
+the 'definitions' section.
+</p>
+
+<ul>
+<li>Each import clause contains a <b>module name</b>, which identifies an NCX
+module which should be checked for external definitions.</li>
+<li>An optional <b>items</b> sub-clause may also be present in
+a particular import entry.</li>
+<li>If the items list is present, then only the specified
+    items will be available from that module.</li>
+<li>If the items clause is not present, then
+the import clause simply declares the module search order.</li>
+<li>The order of the import clauses is significant.<br/>
+Unknown identifiers will usually be resolved in the order
+the import entries are defined in the 'imports' clause.</li>
+<li>Duplicate 'import' entries are not errors.</li>
+<li>Unused 'import' entries are not errors.</li>
+<li>The built-in <a href="datatypes.html">NCX base types</a> 
+cannot be imported or redefined.</li>
+<li>Only module-level definitions (i.e., simple definition identifiers)
+can be listed in the import clause, although all child node definitions
+are available for use within constructs such as the index clause,
+within the definitions section.</li>
+</ul>
+
+<p>
+An example imports section:
+</p>
+
+<pre>
+
+    imports {
+      import ncxtypes;
+      import inetAddress { InetAddressType };
+      import netconf;
+      import xsd;
+      import smi { Unsigned32 Unsigned64 };
+    }
+
+</pre>
+
+<p>
+In this example, if the data type 'Unsigned32' was used in the
+definitions section, then it would be derived from the module named 'smi',
+even if the 'ncxtypes', 'netconf' or 'xsd' modules contained
+a definition named 'Unsigned32'.  The 'inetAddress' module would not be 
+checked, since an items clause exists and 'Unsigned32' is not in the list.
+</p>
+
+<h3>
+<a name="NCX_Import_Resolution">Import Resolution Processing Order</a>
+</h3>
+
+<p>
+The following algorithm is used to locate a 
+<a href="#Object_Identifiers">Object Identifier</a>
+during processing of the 'definitions' section:
+</p>
+
+<ul>
+<li>If the module-qualified object identifier form
+(e.g., 'module:identifier') is used, then only that
+specific module will be searched.
+<br/>If the identifier is not found in the specified module, the search fails
+with an 'unresolved definition' error.</li>
+<li>If the simple form is used instead of the module-qualified form,
+then modules are searched as follows:
+  <ol>
+  <li>Definitions previously defined in the current module being parsed</li>
+  <li>Search the imports clause in order for the first 'items' list
+       that contains the definition name.</li>
+  <li>Search the import clause in order, checking all modules
+       without an items list, for the first one that contains 
+       the definition name.</li>
+  <li>Within an index clause, forward references to fields within
+      the table or container being defined are allowed.</li>
+  <li>If none of the tests above succeed, then the search fails with
+      an 'unresolved definition' error.</li>
+  </ol>
+</li>
+</ul>
+
+<p>
+The ABNF fragment for the imports section is defined as follows:
+</p>
+
+<pre>
+
+    ncx-imports = "imports" "{" 0*(ncx-import) "}"
+
+    ncx-import = "import" wspace name [import-items] ";" 
+
+    import-items = "{" 0*(name) "}"
+
+</pre>
+
+<h2><a name="NCX_Definitions">Definitions Section</a></h2>
+
+<p>
+The module definitions section is an optional structured clause,
+which contains zero or more <b>definition clauses</b>.
+</p>
+
+<p>
+There is no defined order for definitions within a module,
+except that no forward references to module-level definitions
+from the same module are allowed.
+</p>
+
+<p>
+There are 4 constructs available for use within the definitions section.
+</p>
+
+<table summary="NCX Definitions" border="1" align="center" width="100%">
+<tr>  
+<th>Name</th>
+<th>Description</th>
+</tr>
+
+<tr>  
+<td><a href="#NCX_Types">type</a></td>
+<td>Used to define simple and complex types for use in other NCX definitions.
+Types are conceptual abstractions which cannot be accessed directly
+with NETCONF operations.</td>
+</tr>
+
+<tr>  
+<td><a href="#NCX_Parmsets">parmset</a></td>
+<td>Used to define parameter sets for RPC methods or data model applications.
+Parmsets are used to define management conceptual management objects, or
+parameters to an RPC method, which can be accessed directly with 
+NETCONF operations.</td>
+</tr>
+
+<tr>  
+<td><a href="#NCX_RPCs">rpc</a></td>
+<td>Used to define a Remote Procedure Call method.</td>
+</tr>
+
+<tr>  
+<td><a href="#NCX_Notifications">notification</a></td>
+<td>Used to define conceptual event notification messages associated
+with the application defined in the module.</td>
+</tr>
+</table>
+
+<p>
+All definition names within a module must be unique.  In addition,
+all sibling nodes defined within a complex type construct must
+be unique within the scope of the parent.
+</p>
+
+<p>
+The ABNF fragment for the definitions section is defined as follows:
+</p>
+
+<pre>
+
+    ncx-definitions = "definitions" "{" 0*(ncx-definition) "}"
+
+    ncx-definition = ncx-type / ncx-ps / ncx-rpc / ncx-notif
+
+</pre>
+
+<h3><a name="NCX_Types">Type Construct</a></h3>
+
+<p>
+The concepts and definitions related to NCX data structures can
+be found on the <a href="datatypes.html">NCX Data Types</a> page.
+This section does not define data organization, data type properties,
+or syntax clause usage.
+</p>
+
+<p>
+<b>Data Type Summary</b>
+</p>
+
+<p>
+The 'type' construct is used to specify all of the properties
+of reusable data types.  
+</p>
+
+<ul>
+<li>Similar to an SMIv2 <a href="http://www.ietf.org/rfc/rfc2579.txt">
+TEXTUAL-CONVENTION</a></li>
+<li>Defines the conceptual semantics, syntax, and 
+<a href="datatypes.html#Data_Type_Properties">properties</a> of a data 
+type</li>
+<li>Does not directly define any conceptual data objects, accessible via a 
+management protocol</li>
+<li>All of the data type properties available in NCX 
+can be controlled with the type construct, although 
+the 'parm' clause within the the 
+<a href="#NCX_Parmsets">parmset</a> construct can override or assign a 
+few of the properties.</li>
+<li>User data types can be constructed from the base types in the language,
+   or from other user-defined data types.</li>
+<li>Type definitions are used for two purposes:
+  <ol>
+  <li>Define reusable or <b>abstract</b> data types</li>
+  <li>Define <b>final</b> or <b>concrete</b> data type that will
+   be identified within the 'parm' clause of the 'parmset' construct.</li>
+  </ol>
+</li>
+<li>There are no restrictions on type usage; the 'abstract vs. concrete' 
+distinction is determined by the usage of the data type.
+</li>
+</ul>
+
+<p>
+The following 'pseudo-syntax' shows the clauses for a type construct:
+</p>
+
+<pre>
+
+    type TypeName {
+      description "descriptionString";?
+      condition   "conditionString";?
+      syntax  {
+        # elements defined here
+        # all data types allowed in elements
+        #  -- see ncx-syntax-contents ABNF -- 
+      }
+      metadata {   
+        # attributes are called metadata
+        # a subset of inline data type decls are allowed in metadata
+        # named types resolving to this subset are also allowed
+        #  -- see ncx-metadata ABNF --       
+      }?
+      default "value-string";?
+      max-access "access-string";?
+      data-class config;      # config, tconfig, or state; may be redundant 
+      units "string";?
+      appinfo {
+        # name value pairs are all stored as strings
+        name [value];*
+      }?
+    }*
+
+</pre>
+
+<p>
+An NCX data type can is either a simple type or a complex type.
+These terms are slightly different than their counterparts
+in XSD, &lt;complexType&gt; and &lt;simpleType&gt;.
+</p>
+
+<p>
+In its most simple form, a type definition can be used as
+an alias for another data type:
+</p>
+
+<pre>
+
+    type Integer32 {
+       syntax { int; }
+    }
+
+</pre>
+
+<p>
+<b>Simple Type</b>
+</p>
+
+<p>
+A simple type is any type with empty or simple XML element 
+content.
+An NCX simple type can have meta-data associated with it 
+(XML attributes).  The following 
+<a href="datatypes.html#Base_Types">NCX base types</a> are 
+considered simple data types:
+</p>
+
+<ul>
+<li><a href="datatypes.html#int">int</a></li>
+<li><a href="datatypes.html#uint">uint</a></li>
+<li><a href="datatypes.html#long">long</a></li>
+<li><a href="datatypes.html#ulong">ulong</a></li>
+<li><a href="datatypes.html#enum">enum</a></li>
+<li><a href="datatypes.html#string">string</a></li>
+<li><a href="datatypes.html#list">list</a></li>
+<li><a href="datatypes.html#union">union</a></li>
+<li><a href="datatypes.html#flag">flag</a></li>
+</ul>
+
+<p>
+<b>Complex Type</b>
+</p>
+
+<p>
+A complex type has one or more child nodes of any possible 
+XML content, including other complex types.
+A complex type can have meta-data associated with it (XML attributes),
+however, like the C language, complex types cannot be derived from
+other complex types.  They can contain child nodes of any named
+type, but not modify a named type similar to class derivation
+or the XSD &lt;extension&gt; construct for a &lt;complexType&gt;
+The following 
+<a href="datatypes.html#Base_Types">NCX base types</a> are 
+considered complex data types:
+</p>
+
+<ul>
+<li><a href="datatypes.html#struct">struct</a></li>
+<li><a href="datatypes.html#choice">choice</a></li>
+<li><a href="datatypes.html#table">table</a></li>
+<li><a href="datatypes.html#container">container</a></li>
+<li><a href="datatypes.html#any">any</a></li>
+<li><a href="datatypes.html#root">root</a></li>
+</ul>
+
+<p>
+Types that are defined by the NCX language are called base types.
+These may not be redefined by the user, and are not imported
+from any module. 
+</p>
+
+<p>
+<b>Named Types</b>
+</p>
+
+<p>
+All data types defined in NCX modules are called named types.
+These may be redefined by the user, and must be imported
+from a module.
+</p>
+
+<p>
+A named type has a <b>parent type</b> which may be a base type
+or another named type.  Eventually, a type definition must resolve
+to a base type.
+</p>
+
+<p>
+<b>Inline Types</b>
+</p>
+
+<p>
+When defining child nodes within complex types, either a named type
+or a base type may be used.  Some constructs such
+as ranges and instance qualifiers be defined within
+a syntax clause for child nodes.  Such definitions are
+called inline types or anonymous types because they are 
+defined within another data type, and cannot be reused.
+</p>
+
+<p>
+Some properties, such as max-access, can only be modified
+by using a named type.  In addition, user-type callback functions
+can only be mapped to named types, not base types or named types.
+</p>
+
+<p>
+The following table summarizes the clauses within the type construct:
+</p>
+
+<table summary="Type Clauses" border="1" align="center" width="100%">
+<tr>  
+<th>Name</th>
+<th>Usage</th>
+<th>Description</th>
+</tr>
+
+<tr>  
+<td><a href="#Type_description">description</a></td>
+<td>optional</td>
+<td>The user documentation related to this data type.</td>
+</tr>
+
+<tr>  
+<td><a href="#Type_condition">condition</a></td>
+<td>optional</td>
+<td>The boolean expression which defines the conditions under
+which the data type will be supported on an agent implementation.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Type_syntax">syntax</a></td>
+<td>required</td>
+<td>A 'C-like' clause which defines the conceptual structure
+of the data type content, its XML element representation, and the number of
+instances which may exist of the data type.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Type_metadata">metadata</a></td>
+<td>optional</td>
+<td>A structured clause which defines the conceptual meta-data
+associated with the data type content, its XML attribute representation, 
+and whether the meta data is required or optional.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Type_default">default</a></td>
+<td>optional</td>
+<td>The required default value an agent must supply in
+the event a data model object of this data type is required
+(e.g., RPC method parameter or data parmset) in a protocol operation,
+but not provided by the manager.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Type_max-access">max-access</a></td>
+<td>optional</td>
+<td>The maximum protocol access that is conceptually possible for this data type.</td>
+</tr>
+
+<tr>  
+<td><a href="#Type_data-class">data-class</a></td>
+<td>optional</td>
+<td>The data classification for this data type, either <b>config</b>, 
+<b>tconfig</b>, or <b>state</b>.  
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Type_units">units</a></td>
+<td>optional</td>
+<td>A description of the measurement units used by the data type.</td>
+</tr>
+
+<tr>  
+<td><a href="#Type_appinfo">appinfo</a></td>
+<td>optional</td>
+<td>Defines any application-specific information associated
+with the data type.</td>
+</tr>
+</table>
+
+<h4><a name="Type_description">description</a></h4>
+
+<p>
+The type description clause is similar to the DESCRIPTION clause in SMIv2.
+It is used to provide user documentation related to the data type which
+is of interest to network operators and protocol developers.  Unlike SMIv2,
+this clause is optional in NCX.  It is strongly suggested that this clause
+be present in all published versions of an NCX module.
+</p>
+
+<p>
+Any reference material (similar to the
+SMIv2 REFERENCE clause) should also be includes in this clause.  If
+the condition clause is also present, then a textual description of
+the condition clause should also be present.
+</p>
+
+<p>
+The description clause is not impacted by the presence of any 
+description clauses in parent type definitions.
+</p>
+
+<h4><a name="Type_condition">condition</a></h4>
+
+<p>
+The condition clause provides a structured boolean expression
+to classify the support requirements for the data type.  For example,
+the clause <b>capability == ietf:candidate</b> would indicate
+that the data type was only required to be supported on an agent
+if the <a href="../ref/rfc4741.txt">:candidate</a> capability was supported.
+</p>
+
+<p>
+Note: The full syntax and support of this feature is still TBD.
+</p>
+
+<p>
+The condition clause is impacted by the presence of any 
+condition clauses in parent type definitions.  The newest
+condition will override any previously declared conditions.
+If no condition is provided, then the first condition clause found
+in the type chain will be used.
+</p>
+
+<h4><a name="Type_syntax">syntax</a></h4>
+
+<p>
+The syntax clause is mandatory 
+Some data type semantics are inherent in the data type,
+such as the named instances associated with tables and containers
+or the '1 of N' selection characteristics of a 'choice', 'union'
+or 'value set'.  The details of syntax clause construction
+are defined in the section for each <a href="datatypes.html">NCX data type</a>.
+</p>
+
+<p>
+The basic form of syntax clause can be described with the 
+following 'pseudo-syntax':
+</p>
+
+<pre>
+
+    syntax { 
+      parent-type-name 
+        [node-name] [type-modifiers] [instance-qualifier] [terminator] 
+    }
+
+</pre>
+
+<ul>
+<li>
+The <b>parent-type-name</b> can be an NCX base type or another named type.
+</li>
+<li>
+The <b>node-name</b> is never present in the top level of a syntax.
+This is derived from the name of the parameter or data model object
+that is using the data type.
+<br/>
+The second through Nth levels within a complex type must define
+a node-name which is unique amongst all sibling nodes.
+</li>
+<li>
+The <b>type-modifiers</b> are restrictions or extensions to the parent
+type, such as a new default value, range definition, string pattern,
+value set value, or enumeration value.
+</li>
+<li>
+The <b>instance-qualifier</b> is a RelaxNG-style token for controlling
+the number of conceptual instances of a data model object of the data type.
+</li>
+<li>
+The <b>terminator</b> is either the Semicolon token for simple types,
+or nothing, for complex types.
+</li>
+</ul>
+
+<p>
+The syntax clause is impacted by the presence of any 
+syntax clauses in parent type definitions.  Different
+properties within the syntax clause (e.g., range, pattern) 
+behave differently.  
+Refer to the documentation on the 
+specific <a href="datatypes.html">NCX Base Types</a> regarding
+the exact behavior of all properties affected by the syntax clause.
+</p>
+
+<h4><a name="Type_metadata">metadata</a></h4>
+
+<p>
+The metadata clause defines any XML attributes associated with the data type.
+The clause is essentially the same as a struct of simple types.
+The following NCX base types are permitted in a meta data clause:
+</p>
+
+<ul>
+<li><a href="datatypes.html#int">int</a></li>
+<li><a href="datatypes.html#uint">uint</a></li>
+<li><a href="datatypes.html#long">long</a></li>
+<li><a href="datatypes.html#ulong">ulong</a></li>
+<li><a href="datatypes.html#enum">enum</a></li>
+<li><a href="datatypes.html#string">string</a></li>
+<li><a href="datatypes.html#list">list</a></li>
+<li><a href="datatypes.html#union">union</a></li>
+</ul>
+
+<p>
+The only instance qualifier allowed in a metadata variable declaration
+is the Question Mark token (?) to indicate the XML attribute is optional.
+If the token is not present, then the XML attribute is required.
+</p>
+
+<p>
+If the data type used for a meta-data object has an instance qualifier
+property that allows multiple instances (i.e., '*' or '+'), then
+this aspect is ignored, since multiple instances of XML attributes are
+not allowed.  Only the lower bound (zero or one) aspect of this
+property will be enforced for meta-data.
+</p>
+
+<p>
+Metadata is not ordered, which means it may appear in XML instance documents
+in any order, within an element start tag or empty tag.
+</p>
+
+<p>
+A sample metadata clause may appear in a type definition as follows:
+</p>
+
+<pre>
+
+    type TestType {
+      description "Metadata test";
+      syntax {
+        int (1..255);
+      }     # end syntax clause
+      metadata {
+        int  x;
+        float y?;
+        string test = { up down testing};
+      }     # end metadata clause
+    }    # end type construct
+
+</pre>
+
+<p>
+In this example, 'x' and 'test' are required, and 'y' is optional.
+<br/>A sample value might appear as follows:
+</p>
+
+<pre>
+
+   &lt;foo x="3" test="down" y="2.55"&gt;42&lt;/foo&gt;
+
+</pre>
+
+<p>
+If any metadata variable is declared in a derived type, which
+conflicts with the name of a metadata variable in one or more
+parent type definitions, then the newer definition is used,
+and any older definitions are unavailable for use.
+</p>
+
+<p>
+Metadata is additive regarding parent data types.
+Any metadata definitions (which do not conflict with
+any of the metadata variable names declared in the type definition)
+are available in a data model object using the derived type
+being defined.
+</p>
+
+<p>
+There is one reserved value called <b>operation</b> that must
+not be used in the unqualified form in any data type. The NETCONF
+protocol defines this attribute for use with the &lt;edit-config&gt;
+operation in the NETCONF Base Namespace.
+</p>
+
+<p>
+Other reserved attributes are defined in 
+the <a href="extensions.html#NCX_Extensions">NCX Extensions</a> section.
+</p>
+
+<h4><a name="Type_default">default</a></h4>
+
+<p>
+The default clause provides a <b>mandatory-to-support</b> default value for
+the data type, in the event a management operation requires a value
+but one is not provided.  If this clause is present, then the 
+instance qualifier property will be affected, since the data type
+is effectively optional, regardless of the instance qualifier value.
+</p>
+
+<p>
+The value provided in the quoted string must be valid for the data type.
+</p>
+
+<p>
+At this time, only simple types can specify a default value.
+</p>
+
+<p>
+The structure of the default clause can be shown with
+the following pseudo-syntax:
+</p>
+
+<pre>
+
+    (default "some value" ; )?
+
+</pre>
+
+<p>
+A sample default clause might appear in a type definition as follows:
+</p>
+
+<pre>
+
+    type ZeroBasedCounter64 {
+      description "ZeroBasedCounter64 TC from RFC 2856, page 6.";
+      syntax { ulong; }
+      default "0";
+    }
+
+</pre>
+
+<p>
+The use of this clause will impact the &lt;get&gt; and &lt;get-config&gt;
+operations, if the NCX extension parameter
+<a href="extensions.html#NCX_Extensions">with-defaults</a> is present.  If 'with-defaults'
+is equal to 'false', then data model instances matching the default value
+will be skipped during operation processing by the agent.
+</p>
+
+<h4><a name="Type_max-access">max-access</a></h4>
+
+<p>
+The max-access clause is used to define the 'max-access' property
+for all data model instances which use the data type.  It should only
+be used if the maximum access that makes protocol sense is known.
+</p>
+
+<p>
+Refer to the <a href="overview.html#NACM">NETCONF access control model</a>
+documentation for more details on the affects of this clause.
+</p>
+
+<p>
+The structure of the max-access clause can be shown with
+the following pseudo-syntax:
+</p>
+
+<pre>
+
+    (max-access (read-only | read-write | read-create) ; )?
+
+</pre>
+
+<p>
+A sample default clause might appear in a type definition as follows:
+</p>
+
+<pre>
+
+    type Counter32 {
+      description "Counter32 from RFC 2578, page 8.";
+      syntax { uint; }
+      max-access read-only;
+    }
+
+</pre>
+
+<p>
+Normally, the max-access clause is only used in a <b>concrete data type</b>
+definition to define a different max-access than the parent node
+for specific child nodes.  The max-access clause for
+the 'parm' clause in the <a href="#NCX_Parmsets">parmset</a> construct
+is usually used to declare this property.
+</p>
+
+<h4><a name="Type_data-class">data-class</a></h4>
+
+<p>
+The data-class clause is used to explicitly set the data classification
+for all data model instances using the type definition.
+</p>
+
+<p>
+A type definition for the data-class parameter follows:
+</p>
+
+<pre>
+
+    type DataClassType {
+      description "The NCX data classification for the data type.";
+      syntax { string = { config tconfig state }; }
+      default "config";
+    }
+
+</pre>
+
+<p>
+There are three values supported at this time:
+</p>
+
+<table summary="Data Class Values" border="1" align="center" width="100%">
+
+<tr>  
+<th>Value</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td><b>config</b></td>
+<td>
+All data model objects using the data type are considered to 
+be <b>configuration data</b>, and will be affected by protocol 
+operations which alter non-volatile configuration storage.
+This is the default value, unless the <b>max-access</b> for
+a data model object using the data type is set to <b>read-only</b>.
+Data model objects with this classification will be saved
+in non-volatile configuration storage, and also be returned
+when retrieved with the &lt;get-config&gt; protocol operation.
+</td>
+</tr>
+
+<tr>
+<td><b>tconfig</b></td>
+<td>
+All data model objects using the data type are considered to 
+be <b>transient configuration data</b>, and will not be affected by protocol 
+operations which alter non-volatile configuration storage.
+Data model objects with this classification will not be saved
+in non-volatile configuration storage, but will be returned
+when retrieved with the &lt;get-config&gt; protocol operation.
+</td>
+</tr>
+
+<tr>
+<td><b>state</b></td>
+<td>
+All data model objects using the data type are considered to 
+be <b>state data</b>, and will not be affected by protocol 
+operations which alter non-volatile configuration storage.
+This is the default value if the <b>max-access</b> for
+a data model object using the data type is set to <b>read-only</b>.
+Data model objects with this classification will not be saved
+in non-volatile configuration storage, and will not be returned
+when retrieved with the &lt;get-config&gt; protocol operation.
+</td>
+</tr>
+</table>
+
+<p>
+The structure of the data-class clause can be shown with
+the following pseudo-syntax:
+</p>
+
+<pre>
+
+    (data-class (config | tconfig | state) ; )?
+
+</pre>
+
+<p>
+A sample data-class clause might appear in a type definition as follows:
+</p>
+
+<pre>
+
+    type SampleType {
+      description "data-class example.";
+      syntax { foo:ContainerType?; }
+      max-access read-only;
+      data-class tconfig;
+    }
+
+</pre>
+
+<p>
+The data-class clause is needed to force the agent
+to consider read-only data to be configuration data.
+Some examples of this type of data are containers of
+agent supplied parameters, which are read-only for all users
+but are part of the configuration data model.
+</p>
+
+<p>
+Some examples of transient configuration data might be
+commands which affect behavior of the current session,
+and are not saved across a reboot of the device, or
+configuration commands which are set by some in-band
+mechanism associated with a temporary or non-static resource.
+</p>
+
+<p>
+The 'mySession' data parmset from the 'sessions' module,
+shown below, is an example of per-session 
+configuration data that is deleted when the 
+session is terminated, and is not saved in NV-storage.
+</p>
+
+<pre>
+
+    parmset mySession {
+      description
+         "NCX Transient Per-Session Configuration Parameters";
+      order strict;
+      data-class tconfig;
+      parms {
+
+        parm linesize {
+          description
+             "Desired maximum line length for session reply output.";
+          type NcxLineLength;
+          max-access read-write;
+        }
+
+        parm withDefDefault {
+          description
+             "The default value of the 'with-defaults' attribute
+              for this session.  If this attribute is not present
+              in the 'rpc' element, then the value of this parameter
+              will be used by the agent.";
+          type NcxWithDefaultType;
+          max-access read-write;
+        }
+
+        parm withMetaDefault {
+          description
+             "The default value of the 'with-metadata' attribute
+              for this session.";
+          type NcxWithMetaType;
+          max-access read-write;
+        }
+      }
+    }
+
+</pre>
+
+<p>
+An &lt;edit-config&gt; operation to set the line length
+to a new value is shown below:
+</p>
+
+<pre>
+
+    &lt;rpc message-id="101" 
+      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;edit-config&gt;
+        &lt;target&gt;
+          &lt;running/&gt;
+        &lt;/target&gt;
+        &lt;default-operation&gt;none&lt;/default-operation&gt;
+        &lt;test-option&gt;test-then-set&lt;/test-option&gt;
+        &lt;error-option&gt;rollback-on-error&lt;/error-option&gt;
+        &lt;config&gt;
+          &lt;netconfd xmlns="http://netconfcentral.org/ncx/netconfd"&gt;
+            &lt;mySession&gt;
+              &lt;linesize operation="replace"&gt;132&lt;/linesize&gt;
+            &lt;/mySession&gt;
+          &lt;/netconfd&gt;
+        &lt;/config&gt;
+      &lt;/edit-config&gt;
+    &lt;/rpc&gt;
+
+</pre>
+
+<h4><a name="Type_units">units</a></h4>
+
+<p>
+The units clause provides additional formatted documentation
+for application programmers regarding numeric data types.
+This is similar to the UNITS clause in SMIv2.  There are
+no specific rules for the contents of this clause, except
+that it is a valid string.
+</p>
+
+<h4><a name="Type_appinfo">appinfo</a></h4>
+
+<p>
+The appinfo section is an optional formatted clause,
+which contains one or more application info entries related
+to the type definition.  Each appinfo clause is translated directed
+to &lt;appinfo&gt; child node elements when converted to XSD format.
+These values can also be made available internally to applications.
+</p>
+
+<p>
+There are some NCX extensions defined which impact
+the processing of data model objects using certain base types.
+For example, the <b>no-duplicates</b> and <b>merge-type</b>
+variables define how unnamed data model instances are processed
+during &lt;edit-config&gt; operations.
+</p>
+
+<p>
+A sample appinfo clause may appear in a type definition as follows:
+</p>
+
+<pre>
+
+
+    type NcTransOrderType {
+      description "NETCONF Transport Binding Order Type";
+      syntax { 
+         string = { beep ssh soap-beep soap-https };
+      }
+      default "ssh";
+    }
+
+    type NcTransOrderList {
+      description "NETCONF Transport Binding Order List";
+      syntax { 
+         list (1..3) { NcTransOrderType };
+      }
+      appinfo {
+        no-duplicates;
+        merge-type last;
+      }
+    }
+
+</pre>
+
+<p>
+In this example, a data model object of type 'NcTransOrderList'
+is allowed to contain a list of 1 to 3 instances of
+a 'NcTransOrderType' string.  No duplicate values are
+allowed in the list, and automated merge operations
+will use the 'merge last' algorithm for insersion of entries
+in the list.
+</p>
+
+<p>
+A sample value might appear as follows:
+</p>
+
+<pre>
+
+   &lt;foo&gt;soap-https ssh beep&lt;/foo&gt;
+
+</pre>
+
+<p>
+The following ABNF fragment defines the syntax allowed for an NCX 
+type definition.
+</p>
+
+<pre>
+
+    ncx-type = "type" name "{" 
+                    [ncx-descr] 
+                    [ncx-condition] 
+                     ncx-syntax 
+                    [ncx-metadata] 
+                    [ncx-default] 
+                    [ncx-max-access]
+                    [ncx-data-class]
+                    [ncx-units]
+                    [ncx-appinfo]
+                "}"
+   
+    ncx-syntax = "syntax" "{" ncx-syntax-contents "}"
+   
+    ncx-metadata = "metadata" "{" 0*(ncx-metadata-decl) "}"
+   
+    ncx-metadata-decl = metatype-decl ["?"] ";"
+   
+    ncx-units = "units" wspace string ";"
+   
+    # see datatypes.html for 'ncx-syntax-contents'   
+
+</pre>
+
+<h4><a name="Type_Examples">Examples</a></h4>
+
+<pre>
+
+    type NcxName {
+      description "General Purpose NCX Name string.";
+      syntax { 
+	string (1..1023) pattern = "[a-z,A-Z][a-z,A-Z,0-9,\-,_]*"; 
+      }
+    }
+
+    type NcxSimpleId {
+      description "Simple Definition Identifier string.";
+      syntax { NcxName; }
+    }
+
+    type NcxScopedId {
+      description "Scoped Definition Identifier string.";
+      syntax {
+	string (3..) pattern =
+          "([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)\.(([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)+)";
+      }
+    }
+
+    type NcxModQualId {
+      description "Module Qualified Simple Definition Identifier string.";
+      syntax {
+	string (3..) pattern =
+          "([a-z,A-Z][a-z,A-Z,0-9,\-,_]*):([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)";
+      }
+    }
+
+    type NcxModScopedId {
+      description "Module Qualified Scoped Definition Identifier string.";
+      syntax {
+	string (5..) pattern =
+          "([a-z,A-Z][a-z,A-Z,0-9,\-,_]*):([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)\."
+          "(([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)+)";
+      }
+    }
+
+    type NcxIdentifier {
+      description "Union of all the Identifier types.";
+      syntax {
+        union { NcxSimpleId NcxScopedId NcxModQualId NcxModScopedId };
+      }
+    }
+
+    type NcxUserName {
+      description "NCX User Name string.";
+      syntax { NcxName; }
+    }
+
+    type NcxGroupName {
+      description "NCX Group Name string.";
+      syntax { NcxName; }
+    }
+
+    type NcxModuleList {
+      description "List of NCX Module names.";
+      syntax { list { NcxName }; }
+    }
+
+</pre>
+
+<h3><a name="NCX_Parmsets">Parmset Construct</a></h3>
+
+<p>
+The 'parmset' construct is used to 
+define data model objects which
+can be accessed via network management protocol operations.
+Conceptually, a parameter set is like a variable of type 'struct'.
+However, unlike a struct (or any other data type), a parameter
+set may be defined to allow parameters to appear in any order.
+</p>
+
+<p>
+A <b>parameter set</b> is a conceptual grouping of functionally
+related data model objects, to facilitate a management operation.
+It contains one or more parameters, which may be simple or complex
+data types, using base or derived type definitions from any module.
+</p>
+
+<p>
+There is only one type of parmset definition, but it is used in 
+three different ways within NCX:
+</p>
+
+<table summary="NCX Parmset Types" border="1" align="center" width="100%">
+<tr>  
+<th>Value</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td><b>RPC parmset</b></td>
+<td>
+This type of parameter set defines the input parameters 
+for a specific Remote Procedure Call method.  It must not contain
+read-only parameters.
+</td>
+</tr>
+
+<tr>
+<td><b>Data parmset</b></td>
+<td>
+This type of parameter set defines data model objects which
+can be accessed with protocol operations such as &lt;edit-config&gt;.
+It may contain writable and/or read-only parameters.
+Typically, all the various tables and scalars that would be included
+in a single SMIv2 MIB module are grouped into a small number of data 
+parameter sets.
+</td>
+</tr>
+
+<tr>
+<td><b>CLI parmset</b></td>
+<td>
+A data parmset which contains only simple parameters, and/or choices
+of simple parameters, can be used to model and implement command line interface 
+parameter sets.  It must not contain read-only parameters.
+</td>
+</tr>
+
+</table>
+
+<p>
+The following 'pseudo-syntax' shows the clauses for a parmset construct:
+</p>
+
+<pre>
+
+    parmset PsdName {
+      description "Optional PSD Description";?
+      condition "Condition Expression";?
+      order OrderType;?       # strict or loose ordering, def: loose
+      type ParmsetType;?      # rpc or data parmset, def: data
+      data-class config;?     # config or state: def
+      appinfo {
+        # name value pairs are all stored as strings
+        name [value];*
+      }?
+
+      parms {
+        parm ParameterName {
+          description "Description Clause";?
+          condition "Condition Expression";?
+          type ParameterTypeName;
+          max-access AllowedAccessClause;?
+          usage UsageType;?   # mandatory, optional, or conditional
+          data-class config;  # config or state; may be redundant 
+          appinfo {
+             # name value pairs are all stored as strings
+             name [value];*
+          }?
+
+        # choices are optional, blocks are optional
+        # 3 choices, choose 1 of parm: p1, p2, p3 and p4
+        choice {
+          parm p1 {  ... }      # choice 1
+
+          parm p2 { ... }       # choice 2
+
+          # block makes all parms in the block 1 choice
+          # nested brackets are not allowed
+          # used like an inline XSD group
+          [  parm p3 { ... }    # choice 3
+
+             parm p4 { ... }    # choice 3
+          ]
+        }
+      }  # end parms section
+
+        
+    }*   # end parmset
+
+</pre>
+
+<p>
+The following table summarizes the clauses within the parmset construct:
+</p>
+
+<table summary="NCX Parmset Clauses" border="1" align="center" width="100%">
+<tr>  
+<th>Name</th>
+<th>Usage</th>
+<th>Description</th>
+</tr>
+
+<tr>  
+<td><a href="#Psd_description">description</a></td>
+<td>optional</td>
+<td>The user documentation related to this parameter set.</td>
+</tr>
+
+<tr>  
+<td><a href="#Psd_condition">condition</a></td>
+<td>optional</td>
+<td>The boolean expression which defines the conditions under
+which the parameter set will be supported on an agent implementation.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Psd_order">order</a></td>
+<td>optional</td>
+<td>Controls whether a parameter out of order will be treated as
+an error or not. The values <b>strict</b> and <b>loose</b> are permitted.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Psd_appinfo">appinfo</a></td>
+<td>optional</td>
+<td>Defines any application-specific information associated
+with the parameter set.</td>
+</tr>
+
+<tr>  
+<td><a href="#Psd_parms">parms</a></td>
+<td>required</td>
+<td>Defines the parameter section for the parameter set.</td>
+</tr>
+
+</table>
+
+<p>
+The top-level ABNF fragment for the parmset construct is defined
+as follows:
+</p>
+
+<pre>
+
+    ncx-parmset = "parmset" wspace name 
+      "{" ncx-ps-contents "}"
+ 
+    ncx-ps-contents = [ncx-descr] 
+                   [ncx-condition] 
+                   [ncx-order] 
+                   [ncx-appinfo]
+                   [ncx-parms]
+
+    ncx-parms  = "parms" "{" 1*(ncx-pterm) "}"
+
+</pre>
+
+<h4><a name="Psd_description">description</a></h4>
+
+<p>
+The parameter set description clause is 
+used to provide user documentation related to the data model objects, which
+is of interest to network operators and protocol developers.
+</p>
+
+<p>
+This clause is optional, but it is strongly suggested that
+it be present in all published versions of the NCX module.
+</p>
+
+<h4><a name="Psd_condition">condition</a></h4>
+
+<p>
+The condition clause provides a structured boolean expression
+to classify the support requirements for the parameter set.
+</p>
+
+<p>
+Note: The full syntax and support of this feature is still TBD.
+</p>
+
+<h4><a name="Psd_order">order</a></h4>
+
+<p>
+The order clause indicated whether parameters which are out of
+order is treated as an error or not.  There are two values
+allowed:
+</p>
+
+<table summary="Parameter Order" border="1" align="center" width="100%">
+
+<tr>  
+<th>Value</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td><b>loose</b></td>
+<td>
+Parameter instances are allowed to occur in the wrong order.
+This is the default value.
+</td>
+</tr>
+
+<tr>
+<td><b>strict</b></td>
+<td>
+Parameter instances are not allowed to occur in the wrong order.  Instances 
+must be presented in the order the 'parm' clauses are defined..
+</td>
+</tr>
+
+</table>
+
+<h4><a name="Psd_appinfo">appinfo</a></h4>
+
+<p>
+The appinfo section is an optional formatted clause,
+which contains one or more application info entries related
+to the parameter set definition.  Each appinfo clause is translated directed
+to &lt;appinfo&gt; child node elements when converted to XSD format.
+These values can also be made available internally to applications.
+</p>
+
+<p>
+There are no NCX extensions defined which impact
+the processing of parameter sets at this time.
+</p>
+
+<h4><a name="Psd_parms">parms</a></h4>
+
+<p>
+The parameter section within a parmset construct must contain
+at least one 'parm' clause. This section may also contain
+one or more 'choice' declarations, similar to the 'choice' data type.
+This allows a parameter set to create a choice construct 'inline',
+instead of creating a new data type definition for that purpose
+and assigning it to a single parameter.  This alternative allows
+a choice to be inserted without adding an extra XML node level.
+</p>
+
+<h4><a name="NCX_Parm">Parm Construct</a></h4>
+
+<p>
+Within the parms section of a parameter set, at least one <b>parm</b> construct
+is expected to be present.  A parameter is similar to an SNMIv2 OBJECT-TYPE
+macro (i.e., MIB object), except the data type for the parameter instance
+can be a complex type or a simple type.
+</p>
+
+<p>
+The following table summarizes the clauses within the parm construct:
+</p>
+
+<table summary="Parm Clauses" border="1" align="center" width="100%">
+<tr>  
+<th>Name</th>
+<th>Usage</th>
+<th>Description</th>
+</tr>
+
+<tr>  
+<td><a href="#Parm_description">description</a></td>
+<td>optional</td>
+<td>The user documentation related to the parameter.</td>
+</tr>
+
+<tr>  
+<td><a href="#Parm_condition">condition</a></td>
+<td>optional</td>
+<td>The boolean expression which defines the conditions under
+which the parameter will be supported on an agent implementation.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Parm_type">type</a></td>
+<td>required</td>
+<td>The name of the data type for the parameter.</td>
+</tr>
+
+<tr>  
+<td><a href="#Parm_max-access">max-access</a></td>
+<td>optional</td>
+<td>The maximum protocol access that is conceptually possible for this parameter.</td>
+</tr>
+
+<tr>  
+<td><a href="#Parm_usage">usage</a></td>
+<td>optional</td>
+<td>Controls whether the parameter is mandatory, conditional, or optional.</td>
+</tr>
+
+<tr>  
+<td><a href="#Parm_data-class">data-class</a></td>
+<td>optional</td>
+<td>The data classification for this parameter, either <b>config</b>,
+<b>tconfig</b> or <b>state</b>.  
+Only data with the property value 'config' will 
+be saved in non-volatile storage, during any protocol operations which 
+alter non-volatile storage of configuration data.</td>
+</tr>
+
+<tr>  
+<td><a href="#Parm_appinfo">appinfo</a></td>
+<td>optional</td>
+<td>Defines any application-specific information associated
+with the parameter.</td>
+</tr>
+</table>
+
+<p>
+The ABNF fragment for a parameter section is defined as follows:
+</p>
+
+<pre>
+
+    ncx-pterm = ncx-pchoice / ncx-parm
+
+    # nested choices are not allowed but eventually at least 
+    # one ncx-parm must be specified
+
+    ncx-pchoice = "choice" "{" 1*(ncx-pchoice-member) "}"
+
+    ncx-pchoice-member = ncx-pchoice-block / ncx-parm
+
+    ncx-pchoice-block = "[" 1*(ncx-parm) "]"
+ 
+    ncx-parm = "parm" name "{" ncx-parm-contents "}"
+
+    ncx-parm-contents = [ncx-descr] 
+                        [ncx-condition] 
+                         ncx-typname 
+                        [ncx-max-access]
+                        [ncx-ps-usage]
+                        [ncx-data-class] 
+                        [ncx-appinfo]
+
+
+    ### [ncx-ps-usage]
+
+    ncx-data-class = "class" wspace ncx-data-class-type ";"
+
+    ncx-data-class-type = "config" / "tconfig" / "state"
+
+    ncx-typname = "type" wspace mname ";"
+
+</pre>
+
+<h5><a name="Parm_description">description</a></h5>
+
+<p>
+The parameter description clause is 
+used to provide user documentation related to the parameter, which
+is of interest to network operators and protocol developers.
+</p>
+
+<p>
+This clause is optional, but it is strongly suggested that
+it be present in all published versions of the NCX module.
+</p>
+
+<h5><a name="Parm_condition">condition</a></h5>
+
+<p>
+The condition clause provides a structured boolean expression
+to classify the support requirements for the parameter.
+</p>
+
+<h5><a name="Parm_type">type</a></h5>
+
+<p>
+The type clause indicates the data type name for the parameter.
+A simple or module-qualified definition identifier is allowed as input.
+</p>
+
+<h5><a name="Parm_max-access">max-access</a></h5>
+
+<p>
+The max-access clause is used to define the 'max-access' property
+for the parameter.
+</p>
+
+<p>
+Refer to the
+<a href="overview.htl#Access_Control_Model">NETCONF access control model</a>
+documentation for more details on the affects of this clause.
+</p>
+
+<p>
+For parameters, a default value will be determined if no value
+is explicitly set.  If the parameter is writable, then the
+default max-access will be <b>read-create</b>, otherwise
+the default max-access will be set to <b>read-only</b>.
+</p>
+
+<h5><a name="Parm_usage">usage</a></h5>
+
+<p>
+The usage clause is used to explicitly set the type of usage
+for the parameter.  This clause can be used to override
+the instance qualifier property of the parameter data type.
+</p>
+
+<p>
+The NCX type for the parm usage clause is defined as follows:
+</p>
+
+<pre>
+
+    type NcxParmUsage {
+      description "Parameter Usage Classification.";
+      syntax { 
+	string = { mandatory conditional optional }?; 
+      }
+    }
+
+</pre>
+
+<p>
+There are three values supported at this time:
+</p>
+
+<table summary="Parameter Class" border="1" align="center" width="100%">
+<tr>  
+<th>Value</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td><b>mandatory</b></td>
+<td>The parameter is mandatory.  This is the default value unless 
+the 'condition' clause is present.</td>
+</tr>
+
+<tr>
+<td><b>conditional</b></td>
+<td>The parameter is conditional.  This is the default value if the
+condition clause is present.</td>
+</tr>
+
+<tr>
+<td><b>optional</b></td>
+<td>The parameter is optional.  This value will override any instance qualifier
+property defined for the data type of the parameter.</td>
+</tr>
+</table>
+
+<h5><a name="Parm_data-class">data-class</a></h5>
+
+<p>
+The data-class clause is used to explicitly set the data classification
+for the parameter. Refer to the data-class definition within the
+type construct for details on this clause, and it has exactly the
+same behavior when applied to a parameter.
+</p>
+
+<h5><a name="Parm_appinfo">appinfo</a></h5>
+
+<p>
+The appinfo section is an optional formatted clause,
+which contains one or more application info entries related
+to the parameter definition.  Each appinfo clause is translated directed
+to &lt;appinfo&gt; child node elements when converted to XSD format.
+These values can also be made available internally to applications.
+</p>
+
+<p>
+There are no NCX extensions defined which impact
+the processing of a parameter construct at this time.
+</p>
+
+<h4><a name="Parmset_Examples">Parmset Examples</a></h4>
+
+<p>
+The following example shows a <b>RPC parmset</b> definition
+and a protocol operation instance conforming to the definition.
+</p>
+
+<pre>
+
+    # RPC parameter set for edit-config RPC method
+    parmset EditConfigPS {
+      description "NETCONF &lt;edit-config&gt; Parameter Set.";
+      order strict;
+      type rpc;
+      parms {
+        parm target {
+          description "Particular configuration to edit.";
+          # prot-11 is wrong here; correct input is config name
+          #type RpcOperationTargetType;
+          type ConfigNameType;
+        }
+        parm default-operation {
+          description 
+            "Default operation to apply if not explicitly set.";
+          type DefaultOperationType;
+        }
+        parm test-option {
+          description 
+            "Test option if validate capability supported.
+             The 'validate' capability must be present to set
+             this object to 'test-then-set'.";
+          condition "capability == netconf:validate";
+          type TestOptionType;
+        }
+        parm error-option {
+          description 
+            "Error recovery option.";
+          type ErrorOptionType;
+        }
+        choice {
+          parm config {
+            description 
+              "Inline Config content: &lt;config&gt;element.";
+            type ConfigInlineType;
+          }
+          parm url {
+            description 
+              "Pointer to Config content: &lt;url&gt; element.";
+            condition "capability == netconf:url";
+            type ConfigURIType;
+          }
+        }
+      }
+    }
+
+    # example instance TBD
+
+</pre>
+
+<p>
+The following example shows a <b>CLI parmset</b> definition
+and a command line instance conforming to the definition.
+</p>
+
+<pre>
+
+    # CLI parameter set for netconfd CLI 
+    parmset nc-cli {
+      description
+         "CLI Parameter Set for the NETCONF Agent Application.";
+      order loose;
+      parms {
+        parm agent-mode {
+          description
+             "Agent operation mode.";
+          type NcAgentMode;
+          max-access read-write;
+	  usage mandatory;
+        }
+
+        parm startup-type {
+          description "Agent startup commit type.";
+          type NcStartupType;
+          max-access read-write;
+	  usage mandatory;
+        }
+
+	parm ssh-port {
+          description
+             "Port number to use for the SSH transport mapping.";
+          type NcSshPort;
+          max-access read-write;
+	  usage mandatory;
+        }
+        parm cfg-path {
+          description
+             "Internal file search path for configuration modules.";
+          type FileSpecList;
+          max-access read-write;
+          usage optional;
+        }
+        parm startup-url {
+          description
+             "URL target to use startup configuration is stored remotely.";
+          type string;
+          max-access read-write;
+	  usage optional;
+        }
+      }
+    }
+
+    # example instance TBD
+
+</pre>
+
+<p>
+The following example shows a <b>data parmset</b> definition
+and a &lt;get-config&gt; operation instance conforming to the definition.
+</p>
+
+<pre>
+
+    # data parameter set for access control
+    parmset test-parmset {
+      description
+         "Test Parameters.";
+      order loose;
+      parms {
+        parm test-name {
+          type NcxName;
+          max-access read-write;
+        }
+        parm test-list {
+          description
+             "Test List.";
+          type NcTransOrderList;
+          max-access read-write;
+        }
+
+        parm test-table {
+          description
+             "Test Table.";
+          type NcTransOrderList;
+          max-access read-write;
+        }
+      }
+    }
+
+    # example instance TBD
+
+</pre>
+
+<h3><a name="NCX_RPCs">RPC Construct</a></h3>
+
+<p>
+The 'rpc' construct is used to define a remote procedure call
+for use with the NETCONF protocol. The namespace URI for
+the RPC method will be determined from the module header.
+The name of the RPC method element is the name assigned
+in the 'rpc' construct.
+</p>
+
+<p>
+The following 'pseudo-syntax' shows the clauses for a rpc construct:
+</p>
+
+<pre>
+
+    # User-defined RPC method definition
+    # The input parameter set is optional
+    # The output data is mandatory and can 
+    # contain a type or parmset name
+    #
+
+    rpc RpcMethodName {
+      description "Description Clause";?
+      condition "Condition Expression";?
+      rpc-type RpcMethodType;
+      ( input InputParmsetName; | parms {...} )?
+      output OutputDataName;?
+      appinfo {
+        # name value pairs are all stored as strings
+        name [value];*
+      }?
+    }*
+
+</pre>
+
+<p>
+The following table summarizes the clauses within the rpc construct:
+</p>
+
+<table summary="RPC Clauses" border="1" align="center" width="100%">
+<tr>  
+<th>Name</th>
+<th>Usage</th>
+<th>Description</th>
+</tr>
+
+<tr>  
+<td><a href="#Rpc_description">description</a></td>
+<td>optional</td>
+<td>The user documentation related to this RPC method.</td>
+</tr>
+
+<tr>  
+<td><a href="#Rpc_condition">condition</a></td>
+<td>optional</td>
+<td>The boolean expression which defines the conditions under
+which the RPC method will be supported on an agent implementation.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Rpc_rpc-type">rpc-type</a></td>
+<td>required</td>
+<td>
+The classification associated with this RPC method.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Rpc_input">input</a></td>
+<td>optional</td>
+<td>
+The name of the parmset that defines the input parameters
+for the RPC method.  If this clause is present, then the 'parms'
+clause must not bre present.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Rpc_parms">parms</a></td>
+<td>optional</td>
+<td>
+The inline definitions of the input parameters
+for the RPC method.  If this clause is present, then the 'input'
+clause must not be present.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Rpc_output">output</a></td>
+<td>optional</td>
+<td>
+The name of the parmset or data type that defines the output parameters
+for the RPC method.
+</td>
+</tr>
+
+<tr>  
+<td><a href="#Rpc_appinfo">appinfo</a></td>
+<td>optional</td>
+<td>Defines any application-specific information associated
+with the RPC method.</td>
+</tr>
+</table>
+
+<p>
+The ABNF fragment for the rpc construct is defined
+as follows:
+</p>
+
+<pre>
+
+    ncx-rpc = "rpc" wspace name "{" ncx-rpc-contents "}"
+
+    ncx-rpc-contents = [ncx-descr] [ncx-condition]
+                       ncx-rpc-type [ncx-input-type] [ncx-output]
+
+    ncx-rpc-type = "rpc-type" wspace ncx-rpc-type-val ";"
+
+    ncx-input-type = ncx-input / ncx-parms
+
+    ncx-rpc-type-val = "other" / "config" / "exec" / 
+                    "monitor" / "debug"
+
+    ncx-input = "input" wspace mname ";"
+
+    ncx-output = "output" wspace mname ";"
+
+</pre>
+
+<h4><a name="Rpc_description">description</a></h4>
+
+<p>
+The RPC method description clause is 
+used to provide user documentation related to the RPC method, which
+is of interest to network operators and protocol developers.
+</p>
+
+<p>
+This clause is optional, but it is strongly suggested that
+it be present in all published versions of the NCX module.
+</p>
+
+<h4><a name="Rpc_condition">condition</a></h4>
+
+<p>
+The condition clause provides a structured boolean expression
+to classify the support requirements for the RPC method.
+</p>
+
+<p>
+Note: The full syntax and support of this feature is still TBD.
+</p>
+
+<h4><a name="Rpc_rpc-type">rpc-type</a></h4>
+
+<p>
+The rpc-type clause defines the user-assigned classification
+for a RPC method.
+</p>
+
+<p>
+The NCX type definition for the rpc-type clause is defined
+as follows:
+</p>
+
+<pre>
+
+    type RpcClassType {
+      description "RPC Method classification.";
+      syntax { 
+        string = { other config exec monitor debug };
+      }
+    }
+
+</pre>
+
+<p>
+There are five values supported at this time:
+</p>
+
+<table summary="RPC Types" border="1" align="center" width="100%">
+<tr>  
+<th>Value</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td><b>other</b></td>
+<td>The RPC method is some other type, defined outside the scope
+of the NCX language.</td>
+</tr>
+
+<tr>
+<td><b>config</b></td>
+<td>The RPC method is related to configuration management.</td>
+</tr>
+
+<tr>
+<td><b>exec</b></td>
+<td>The RPC method is related to some sort of executable procedure,
+such as a ping operation.</td>
+</tr>
+
+<tr>
+<td><b>monitor</b></td>
+<td>The RPC method is related to some sort of monitoring procedure,
+such as statistics retrieval.</td>
+</tr>
+
+<tr>
+<td><b>debug</b></td>
+<td>The RPC method is related to some sort of debugging procedure</td>
+</tr>
+</table>
+
+<h4><a name="Rpc_input">input</a></h4>
+
+<p>
+The input clause is used to specify the name of the input parameter set
+for the RPC method.  RPC methods are not required to define any
+input parameters, or all the parameters could be optional.
+</p>
+
+<p>
+The use of a named parmset for the input parameters allows
+it to be shared by multiple RPC methods.  These parameters
+can be entered inline with the 'parms' clause, if this
+RPC method input parameter shraing feature is not required.
+</p>
+
+<p>
+If this clause is present, then the 'parms' clause must not
+be present.
+</p>
+
+<p>
+The NCX type for the rpc 'input' parameter is defined as follows:
+</p>
+
+<pre>
+
+    type NcxRpcInput {
+      description "RPC Input Parameters Expected.";
+      syntax { NcxSimpleIdentifier?; }
+    }
+
+</pre>
+
+
+<h4><a name="Rpc_parms">parms</a></h4>
+
+<p>
+The parms clause is used to specify the input parameter set
+for the RPC method.  RPC methods are not required to define any
+input parameters, or all the parameters could be optional.
+</p>
+
+<p>
+If this clause is present, then the 'input' clause must not
+be present.
+</p>
+
+<p>
+The NCX type for the rpc 'parms' parameter is exactly
+the same as the 'parms' parameter for a
+<a href="#Psd_parms">parmset</a>.
+</p>
+
+<h4><a name="Rpc_output">output</a></h4>
+
+<p>
+The output parameter is used to indicate the specific type of
+data that should be returned in the &lt;data&gt; element,
+within an &lt;rpc-reply&gt;.
+</p>
+
+<p>
+The NCX type for the rpc 'output' parameter is defined as follows:
+</p>
+
+<pre>
+
+    type NcxRpcOutput {
+      description "Type of RPC Response Data Expected.";
+      syntax { NcxSimpleIdentifier?; }
+    }
+
+</pre>
+
+<p>
+If the <b>&lt;ok&gt;</b> form of the RPC response is used,
+then this parameter is not required to be present.  The default
+type 'RpcOkReplyType' from the netconf module will be used
+in this case.
+</p>
+
+<p>
+If the generic <b>&lt;data&gt;</b> form of the RPC response is used,
+and the exact data format is not known, then this parameter should 
+be present and contain the value <b>RpcDataReplyType</b>.  This 
+is the generic response defined in the NETCONF protocol.
+</p>
+
+<p>
+This parameter is not used by the agent at all, only the manager.
+If present, the manager will check the type of definition
+(parmset or data type) after locating the template for the supplied value.
+</p>
+
+<p>
+If the parameter is a data type, then it must represent the
+entire format of the reply message, such as defined
+in the 'RpcDataReplyType' data type.
+</p>
+
+<p>
+If the parameter is a parameter set, then it must represent
+the <b>contents of the &lt;data&gt; element</b>, not the entire
+contents of the &lt;rpc-reply&gt; element.
+</p>
+
+<h4><a name="Rpc_appinfo">appinfo</a></h4>
+
+<p>
+The appinfo section is an optional formatted clause,
+which contains one or more application info entries related
+to the RPC method.  Each appinfo clause is translated directed
+to &lt;appinfo&gt; child node elements when converted to XSD format.
+These values can also be made available internally to applications.
+</p>
+
+<p>
+There are two NCX extensions defined which impact
+the processing of RPC methods at this time:
+</p>
+
+<table summary="NCX RPC Extensions" border="1" align="center" width="100%">
+<tr>  
+<th>Value</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td><b>rpc-type</b></td>
+<td>
+Contains the value of the 'rpc-type' clause (e.g., config) for the RPC method.
+</td>
+</tr>
+
+<tr>
+<td><b>rpc-output</b></td>
+<td>
+Contains the value of the 'output' clause (e.g., RpcOkReplyType) for 
+the RPC method.
+</td>
+</tr>
+</table>
+
+<h4><a name="Rpc_Examples">Examples</a></h4>
+
+<p>
+The following example shows an RPC definition and RPC invocation
+without any input parameters or output data (example namespace URI shown):
+</p>
+
+<pre>
+
+    rpc full-reset {
+      description "Reset the entire managed system.";
+      rpc-type exec;
+    }
+
+    # Example Request Message
+
+    &lt;rpc message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;full-reset xmlns="http://www.example.com/exec-commands"/&gt;
+    &lt;/rpc&gt;
+
+    # Example Response Message 
+
+    &lt;rpc-reply message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;ok/&gt;
+    &lt;/rpc-reply&gt;
+     
+</pre>
+
+<p>
+The following example shows an RPC definition and RPC invocation
+with input parameters and output data (example namespace URI shown):
+</p>
+
+<pre>
+
+    type SodaName {
+      description 
+        "Concrete type for the soda parameter. Requires one or more
+         instances (1 to 64 bytes in length) to be present.";
+      syntax { string (1..64)+; }
+    }
+
+    type SodaData {
+      description 
+        "Concrete type for the soda reply data. Returns one entry
+         for each requested soda parameter.";
+      syntax { 
+        struct {
+          SodaName     name;            # name of soda requested
+          uint         count;           # quantity found
+        }*
+      }
+    }
+
+    parmset SodaDataPS {
+      description "Data returned from the soda test.";
+      parms {
+        parm soda-count {
+          description "Soda Inventory Statistics Entry.";
+          type SodaData;
+        }
+      }
+    }
+
+    rpc soda-test {
+      description 
+        "Check the soda machine to see if the desired beverage is available.";
+      rpc-type monitor;
+      parms {
+        parm soda-name {
+          description "Name of the desired brand of soda.";
+          type SodaName;
+          usage mandatory;
+        }
+      }
+      output SodaDataPS;
+    }
+
+    # Example Request Message 
+
+    &lt;rpc message-id="102" 
+      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;soda-test xmlns="http://www.example.com/monitor-commands"&gt;
+        &lt;soda-name&gt;root beer&lt;/soda-name&gt;
+        &lt;soda-name&gt;ginger ale&lt;/soda-name&gt;
+        &lt;soda-name&gt;cola&lt;/soda-name&gt;
+      &lt;/soda-test&gt;
+    &lt;/rpc&gt;
+     
+    # Example Response Message 
+
+    &lt;rpc-reply message-id="102"
+      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;data&gt;
+        &lt;soda-count xmlns="http://www.example.com/monitor-commands"&gt;
+          &lt;name&gt;root beer&lt;/name&gt;
+          &lt;count&gt;4&lt;/count&gt;
+        &lt;/soda-count&gt;
+        &lt;soda-count xmlns="http://www.example.com/monitor-commands"&gt;
+          &lt;name&gt;ginger ale&lt;/name&gt;
+          &lt;count&gt;0&lt;/count&gt;
+        &lt;/soda-count&gt;
+        &lt;soda-count xmlns="http://www.example.com/monitor-commands"&gt;
+          &lt;name&gt;cola&lt;/name&gt;
+          &lt;count&gt;1&lt;/count&gt;
+        &lt;/soda-count&gt;
+      &lt;/data&gt;&gt;
+    &lt;/rpc-reply&gt;
+
+</pre>
+
+<h3><a name="NCX_Notifications">Notification Construct</a></h3>
+
+<p>
+The notification construct is used to define NETCONF Event Notifications,
+related to the application specified in the module header.
+</p>
+
+<p>
+Details are TBD until the NETCONF WG finishes this work.
+</p>
+
+<hr/>
+<p>
+Copyright &copy;2007 by Andy Bierman, All Rights Reserved.
+</p>
+<p>Last-Updated: 2007-07-16</p>
+</body>
+</html>

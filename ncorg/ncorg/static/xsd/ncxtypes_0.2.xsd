@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://netconfcentral.com/ncx/ncxtypes"
+   targetNamespace="http://netconfcentral.com/ncx/ncxtypes"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="0.2" xmlns:ncx="http://netconfcentral.com/ncx">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from NCX file 'ncxtypes.ncx' by yangdump version 0.9.2
+         
+         Module: ncxtypes
+         Version: 0.2
+         Copyright: Copyright (C) 2006-2007, Andy Bierman.
+         Contact: Send comments to &lt;ietf@andybierman.com&gt;.
+      </xs:documentation>
+      <xs:documentation>
+         NCX Common Data Types
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/swdev/trunk/netconf/modules/netconfcentral/ncxtypes.ncx
+         </ncx:source>
+         <ncx:contact>
+            Send comments to &lt;ietf@andybierman.com&gt;.
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>0.1</ncx:version>
+            <ncx:description>Initial version.</ncx:description>
+         </ncx:revision>
+         <ncx:revision>
+            <ncx:version>0.2</ncx:version>
+            <ncx:description>
+               Changed application to types
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:complexType name="any">
+      <xs:annotation>
+         <xs:documentation>
+            Changed any base type to anyxml for YANG
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexContent>
+         <xs:extension base="xs:anyType"/>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:simpleType name="int">
+      <xs:annotation>
+         <xs:documentation>
+            Changed int base type to int32 for YANG
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:int"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="uint">
+      <xs:annotation>
+         <xs:documentation>
+            Changed uint base type to uint32 for YANG
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:unsignedInt"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="long">
+      <xs:annotation>
+         <xs:documentation>
+            Changed long base type to int64 for YANG
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:long"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="ulong">
+      <xs:annotation>
+         <xs:documentation>
+            Changed ulong base type to uint64 for YANG
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:unsignedLong"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="float">
+      <xs:annotation>
+         <xs:documentation>
+            Changed float base type to float32 for YANG
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:float"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="double">
+      <xs:annotation>
+         <xs:documentation>
+            Changed double base type to float64 for YANG
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:double"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="ustring">
+      <xs:annotation>
+         <xs:documentation>
+            Changed ustring base type to binary for YANG
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:base64Binary"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxName">
+      <xs:annotation>
+         <xs:documentation>
+            General Purpose NCX Name string.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern value="[a-z,A-Z][a-z,A-Z,0-9,\-,_]*"/>
+         <xs:minLength value="1"/>
+         <xs:maxLength value="1023"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxQName">
+      <xs:annotation>
+         <xs:documentation>
+            Qualified Name:
+               module-name:NcxName OR owner-name:NcxName.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern
+            value="(([a-z,A-Z][a-z,A-Z,0-9,\-,_]*):)?([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)"/>
+         <xs:minLength value="1"/>
+         <xs:maxLength value="2046"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxSimpleId">
+      <xs:annotation>
+         <xs:documentation>
+            Simple Definition Identifier string.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="NcxName"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxScopedId">
+      <xs:annotation>
+         <xs:documentation>
+            Scoped Definition Identifier string.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern
+            value="([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)\.(([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)+)"/>
+         <xs:minLength value="3"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxModQualId">
+      <xs:annotation>
+         <xs:documentation>
+            Module Qualified Simple Definition Identifier string.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern
+            value="([a-z,A-Z][a-z,A-Z,0-9,\-,_]*):([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)"/>
+         <xs:minLength value="3"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxModScopedId">
+      <xs:annotation>
+         <xs:documentation>
+            Module Qualified Scoped Definition Identifier string.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern
+            value="([a-z,A-Z][a-z,A-Z,0-9,\-,_]*):([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)\.(([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)+)"/>
+         <xs:minLength value="5"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxIdentifier">
+      <xs:annotation>
+         <xs:documentation>
+            Union of all the Identifier types.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:union
+         memberTypes="NcxSimpleId NcxScopedId
+NcxModQualId NcxModScopedId"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxSessionId">
+      <xs:annotation>
+         <xs:documentation>
+            NCX Session ID number
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="uint">
+         <xs:minInclusive value="1"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxLineLength">
+      <xs:annotation>
+         <xs:documentation>
+            Requested Maximum Line Length
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="uint">
+         <xs:minInclusive value="32"/>
+         <xs:maxInclusive value="65535"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxUserName">
+      <xs:annotation>
+         <xs:documentation>
+            NCX User Name string.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="NcxName"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxGroupName">
+      <xs:annotation>
+         <xs:documentation>
+            NCX Group Name string.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="NcxName"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxModuleList">
+      <xs:annotation>
+         <xs:documentation>
+            List of NCX Module names.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:list itemType="NcxName"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxLockList">
+      <xs:annotation>
+         <xs:documentation>
+            List of config named that are currently locked.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:list itemType="NcxName"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcAccessControlType">
+      <xs:annotation>
+         <xs:documentation>
+            NCX System access control mode.
+             open == no access control checking enforced
+             loose == any RPC method in the netconf namespace can
+                 be invoked;  read-only data allowed for all
+             strict == ncxacl RPC entry must be present to invoke
+                 an RPC method; ncxacl Data entry must be present
+                 to access any data. (Except for user == 'root'.)
+            
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:default>strict</ncx:default>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="open">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>0</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="loose">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>1</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="strict">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>2</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxRpcType">
+      <xs:annotation>
+         <xs:documentation>
+            NCX RPC Type Classifications
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="other">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>0</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="config">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>1</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="exec">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>2</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="monitor">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>3</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="debug">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>4</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcxRpcTypeList">
+      <xs:annotation>
+         <xs:documentation>
+            List NCX RPC Type Classifications
+         </xs:documentation>
+      </xs:annotation>
+      <xs:list itemType="NcxRpcType"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcDebugType">
+      <xs:annotation>
+         <xs:documentation>
+            NCX Session debug logging control enumeration.
+            Each successive value includes all the previous
+            messages from lower value enumeration values,
+            plus the messages for the specified value.
+            
+             off == no logging is done
+             error == log error messages
+             warn == log warning messages
+             info == log info messages 
+             debug == log debug level 1 messages
+             debug2 == log debug level 2 messages
+             debug3 == log debug level 3 messages
+            
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:default>info</ncx:default>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="off"/>
+         <xs:enumeration value="error"/>
+         <xs:enumeration value="warn"/>
+         <xs:enumeration value="info"/>
+         <xs:enumeration value="debug"/>
+         <xs:enumeration value="debug2"/>
+         <xs:enumeration value="debug3"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcPortNumber">
+      <xs:annotation>
+         <xs:documentation>
+            Transport layer port number.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="uint">
+         <xs:minInclusive value="1"/>
+         <xs:maxInclusive value="65535"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcIndex">
+      <xs:annotation>
+         <xs:documentation>
+            Non-negative index value
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="uint">
+         <xs:minInclusive value="1"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcPathList">
+      <xs:annotation>
+         <xs:documentation>
+            PATHSPEC formatted string indicating the machine-dependent
+            search path for the NCX programs to use.  Parameters
+            with this data type can be used to override the
+            default search order, and insert special work
+            directories in the search path.
+            
+            Each component in the string is an absolute or
+            relative directory path specification.
+            The colon char ':' is used to separate the path strings.
+            Whitespace is not allowed in the string at all.
+            
+            For example, the following string contains 3 paths
+            that would be used in the order given:
+            
+            /home/users/testbed1/yang:/home/users/yang:/usr/share/yang
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="NcModuleSpec">
+      <xs:annotation>
+         <xs:documentation>
+            A string which specifices a module name, or a filespec
+            which represents a module.
+            
+            If the string is a simple identifier string, then
+            it will be treated as a module name, and the search
+            path will be used to find the complete filespec.
+            
+            If the string:
+              -  ends in the sub-string '.yang' or '.ncx'
+              -  begins with the dot character '.'
+              -  contains any  or a path separator characters
+            then it is considered to be a filespec, not a module
+            name, and only that filespec will be used for input,
+            instead of using the module search path.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string"/>
+   </xs:simpleType>
+
+</xs:schema>

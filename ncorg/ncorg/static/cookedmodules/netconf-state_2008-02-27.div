@@ -1,0 +1,278 @@
+
+<div>
+   <h1 class="yang">netconf-state.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#SessionId.32">SessionId</a></li>
+            <li><a href="#ConfigName.39">ConfigName</a></li>
+            <li><a href="#srcIdentifier.67">srcIdentifier</a></li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#netconfState.79">netconfState</a>
+               <ul>
+                  <li class="daddy"><a href="#capabilities.82">capabilities</a>
+                     <ul>
+                        <li><a href="#capability.86">capability</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#sessions.92">sessions</a>
+                     <ul>
+                        <li class="daddy"><a href="#session.96">session</a>
+                           <ul>
+                              <li><a href="#sessionId.98">sessionId</a></li>
+                              <li><a href="#username.99">username</a></li>
+                              <li><a href="#transport.100">transport</a></li>
+                              <li><a href="#protocol.101">protocol</a></li>
+                              <li><a href="#sourceIdentifier.102">sourceIdentifier</a></li>
+                              <li><a href="#loginTime.103">loginTime</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#configurations.107">configurations</a>
+                     <ul>
+                        <li class="daddy"><a href="#config.112">config</a>
+                           <ul>
+                              <li><a href="#name.114">name</a></li>
+                              <li><a href="#lockStatus.115">lockStatus</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#subscriptions.142">subscriptions</a>
+                           <ul>
+                              <li><a href="#subscription.146">subscription</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">netconf-state</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:netconf:state:1.0"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"ns"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/inet-types/2007-10-02">inet-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"inet"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"IETF"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"NetConf Monitoring Schema.
+         All elements in this Schema are read-only."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-02-27"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Updated to match draft-ietf-netconf-monitoring-01"</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-02-01"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Updated to match draft-bjorklund-netconf-yang-01"</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2007-11-12"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Updated to match draft-scott-netconf-monitoring-00.txt"</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2007-07-22"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Initial revision."</span>;
+      }
+
+
+      <span class="yang_cmt">// typedefs</span>
+
+      <a name="SessionId.32"/><span class="yang_kw">typedef</span> <span class="yang_id">SessionId</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+         }
+         <span class="yang_kw">reference</span> <span class="yang_str">"rfc4741"</span>;
+      }
+
+      <a name="ConfigName.39"/><span class="yang_kw">typedef</span> <span class="yang_id">ConfigName</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+            <span class="yang_kw">enum</span> <span class="yang_str">"running"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"candidate"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"startup"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+            }
+         }
+         <span class="yang_kw">reference</span> <span class="yang_str">"rfc4741"</span>;
+      }
+
+      <a name="srcIdentifier.67"/><span class="yang_kw">typedef</span> <span class="yang_id">srcIdentifier</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">union</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv6-address.148">inet:ipv6-address</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#domain-name.243">inet:domain-name</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Information about source of the session.
+            IPv4Address, IPv6Address, DNS name or any other form is allowed"</span>;
+      }
+
+      <span class="yang_cmt">// objects</span>
+
+      <a name="netconfState.79"/><span class="yang_kw">container</span> <span class="yang_id">netconfState</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+
+         <a name="capabilities.82"/><span class="yang_kw">container</span> <span class="yang_id">capabilities</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"List of NETCONF capabilities supported
+               by this device."</span>;
+
+            <a name="capability.86"/><span class="yang_kw">leaf-list</span> <span class="yang_id">capability</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#uri.145">yang:uri</a></span>;
+               <span class="yang_kw">min-elements</span> <span class="yang_str">"1"</span>;
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            }
+         }  <span class="yang_cmt">// container capabilities</span>
+
+         <a name="sessions.92"/><span class="yang_kw">container</span> <span class="yang_id">sessions</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"List of NETCONF sessions currently
+               active on this device."</span>;
+
+            <a name="session.96"/><span class="yang_kw">list</span> <span class="yang_id">session</span> {
+               <span class="yang_kw">key</span> "<a href="#sessionId.98">sessionId</a>";
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+
+               <a name="sessionId.98"/><span class="yang_kw">leaf</span> <span class="yang_id">sessionId</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id"><a href="#SessionId.32">SessionId</a></span>;
+               }
+
+               <a name="username.99"/><span class="yang_kw">leaf</span> <span class="yang_id">username</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+
+               <a name="transport.100"/><span class="yang_kw">leaf</span> <span class="yang_id">transport</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+
+               <a name="protocol.101"/><span class="yang_kw">leaf</span> <span class="yang_id">protocol</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+
+               <a name="sourceIdentifier.102"/><span class="yang_kw">leaf</span> <span class="yang_id">sourceIdentifier</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id"><a href="#srcIdentifier.67">srcIdentifier</a></span>;
+               }
+
+               <a name="loginTime.103"/><span class="yang_kw">leaf</span> <span class="yang_id">loginTime</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#date-and-time.201">yang:date-and-time</a></span>;
+               }
+            }  <span class="yang_cmt">// list session</span>
+         }  <span class="yang_cmt">// container sessions</span>
+
+         <a name="configurations.107"/><span class="yang_kw">container</span> <span class="yang_id">configurations</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"List of NETCONF configuration datastores (e.g. running,
+               startup, candidate) supported on this device and related
+               information."</span>;
+
+            <a name="config.112"/><span class="yang_kw">list</span> <span class="yang_id">config</span> {
+               <span class="yang_kw">key</span> "<a href="#name.114">name</a>";
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+
+               <a name="name.114"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigName.39">ConfigName</a></span>;
+               }
+
+               <a name="lockStatus.115"/><span class="yang_kw">container</span> <span class="yang_id">lockStatus</span> {
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"An indication of whether a resource is locked or
+                     unlocked.  If locked, additional information about
+                     the locking such as user an time stamp is provided."</span>;
+
+                  <a name="lock-state.120"/><span class="yang_kw">leaf</span> <span class="yang_id">lock-state</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                        <span class="yang_kw">enum</span> <span class="yang_str">"locked"</span> {
+                           <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+                        }
+                        <span class="yang_kw">enum</span> <span class="yang_str">"unlocked"</span> {
+                           <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                        }
+                     }
+                  }
+
+                  <a name="lockedBySession.126"/><span class="yang_kw">leaf</span> <span class="yang_id">lockedBySession</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id"><a href="#SessionId.32">SessionId</a></span>;
+                     <span class="yang_kw">description</span>
+                        <span class="yang_str">"The session ID of the session that has locked
+                        this resource."</span>;
+                  }
+
+                  <a name="lockedTime.132"/><span class="yang_kw">leaf</span> <span class="yang_id">lockedTime</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#date-and-time.201">yang:date-and-time</a></span>;
+                     <span class="yang_kw">description</span>
+                        <span class="yang_str">"The date and time of when the resource was
+                        locked. If the resource is currently unlocked,
+                        this element will not be present."</span>;
+                  }
+               }  <span class="yang_cmt">// container lockStatus</span>
+            }  <span class="yang_cmt">// list config</span>
+
+            <a name="subscriptions.142"/><span class="yang_kw">container</span> <span class="yang_id">subscriptions</span> {
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"List of NETCONF notification subscriptions
+                  active on this device and related information."</span>;
+
+               <a name="subscription.146"/><span class="yang_kw">list</span> <span class="yang_id">subscription</span> {
+                  <span class="yang_kw">key</span> "<a href="#session-id.150">session-id</a>";
+                  <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"Information about Netconf Notification Subscriptions."</span>;
+
+                  <a name="session-id.150"/><span class="yang_kw">leaf</span> <span class="yang_id">session-id</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id"><a href="#SessionId.32">SessionId</a></span>;
+                     <span class="yang_kw">description</span>
+                        <span class="yang_str">"The session id associated with this subscription."</span>;
+                  }
+
+                  <a name="stream.155"/><span class="yang_kw">leaf</span> <span class="yang_id">stream</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                     <span class="yang_kw">description</span>
+                        <span class="yang_str">"The stream associated with this subscription."</span>;
+                  }
+
+                  <a name="filter.160"/><span class="yang_kw">anyxml</span> <span class="yang_id">filter</span> {
+                     <span class="yang_kw">description</span>
+                        <span class="yang_str">"The filters associated with this subscription."</span>;
+                  }
+
+                  <a name="messagesSent.164"/><span class="yang_kw">leaf</span> <span class="yang_id">messagesSent</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter32.52">yang:zero-based-counter32</a></span>;
+                     <span class="yang_kw">description</span>
+                        <span class="yang_str">"A count of event notifications sent along
+                        this connection since the subscription was
+                        created."</span>;
+                  }
+               }  <span class="yang_cmt">// list subscription</span>
+            }  <span class="yang_cmt">// container subscriptions</span>
+         }  <span class="yang_cmt">// container configurations</span>
+      }  <span class="yang_cmt">// container netconfState</span>
+   }  <span class="yang_cmt">// module netconf-state</span>
+</pre>
+</div>
+</div>

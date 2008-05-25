@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:top xmlns="bar" xmlns:t="foo">
+  <a/>
+  <t:b></t:b>
+  <t:d/>
+  <e>1</e>
+  <x:f xmlns:x="">17</x:f>
+  <x:f xmlns:x=" ">18</x:f>
+  <g xmlns=""/>
+</t:top>
+
+
+
+
+
+
+
+

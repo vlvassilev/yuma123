@@ -1,0 +1,1023 @@
+
+<div>
+   <h1 class="yang">IANAifType-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#IANAifType.236">IANAifType</a></li>
+            <li><a href="#IANAtunnelType.497">IANAtunnelType</a></li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">IANAifType-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:IANAifType-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"ianaiftype-mib"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"IANA"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"        Internet Assigned Numbers Authority
+         
+         Postal: ICANN
+         	4676 Admiralty Way, Suite 330
+         	Marina del Rey, CA 90292
+         
+         Tel:    +1 310 823 9358
+         E-Mail: iana@iana.org"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"This MIB module defines the IANAifType Textual
+         Convention, and thus the enumerated values of
+         the ifType object defined in MIB-II's ifTable."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2005-10-10"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANA ifType 230."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2005-09-09"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANA ifType 229."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2005-05-27"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANA ifType 228."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2005-03-03"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Added the IANAtunnelType TC and deprecated
+            IANAifType sixToFour (215) per 
+            RFC4087."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2004-11-22"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANA ifType 227."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2004-06-17"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANA ifType 226."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2004-05-12"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Added description for IANAifType 6, and 
+            changed the descriptions for IANAifTypes
+            180, 181, and 182."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2004-05-07"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType 225."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2003-08-25"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Deprecated IANAifTypes 7 and 11. Obsoleted
+            IANAifTypes 62, 69, and 117.  ethernetCsmacd (6)
+            should be used instead of these values"</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2003-08-18"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType
+         224."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2003-08-07"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            222 and 223."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2003-03-18"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType
+         221."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2003-01-13"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType
+         220."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2002-10-17"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType
+         219."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2002-07-16"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            217 and 218."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2002-07-10"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            215 and 216."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2002-06-19"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType
+         214."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2002-01-04"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            211, 212 and 213."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2001-12-20"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            209 and 210."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2001-11-15"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            207 and 208."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2001-11-06"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType
+         206."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2001-11-02"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType
+         205."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2001-10-16"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            199, 200, 201, 202, 203, and 204."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2001-09-19"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType
+         198."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2001-05-11"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType
+         197."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2001-01-12"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            195 and 196."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-12-19"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            193 and 194."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-12-07"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            191 and 192."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-12-04"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType
+         190."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-10-17"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            188 and 189."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-10-02"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType 187."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-09-01"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            184, 185, and 186."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-08-24"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Registration of new IANAifType 183."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-08-23"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes
+            174-182."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-08-22"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes 170,
+            171, 172 and 173."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-04-25"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Registration of new IANAifTypes 168 and 169."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-03-06"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Fixed a missing semi-colon in the IMPORT.
+            Also cleaned up the REVISION log a bit.
+            It is not complete, but from now on it will
+            be maintained and kept up to date with each
+            change to this MIB module."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1999-10-08"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Include new name assignments up to cnr(85).
+            This is the first version available via the WWW
+            at: ftp://ftp.isi.edu/mib/ianaiftype.mib"</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1994-01-31"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Initial version of this MIB as published in
+            RFC 1573."</span>;
+      }
+
+
+      <span class="yang_cmt">// typedefs</span>
+
+      <a name="IANAifType.236"/><span class="yang_kw">typedef</span> <span class="yang_id">IANAifType</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+            <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"regular1822"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"hdh1822"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ddnX25"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"rfc877x25"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ethernetCsmacd"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"iso88023Csmacd"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"iso88024TokenBus"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">8</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"iso88025TokenRing"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"iso88026Man"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">10</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"starLan"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">11</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"proteon10Mbit"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">12</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"proteon80Mbit"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">13</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"hyperchannel"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">14</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"fddi"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">15</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"lapb"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">16</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"sdlc"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">17</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ds1"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">18</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"e1"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">19</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"basicISDN"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">20</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"primaryISDN"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">21</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"propPointToPointSerial"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">22</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ppp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">23</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"softwareLoopback"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">24</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"eon"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">25</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ethernet3Mbit"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">26</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"nsip"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">27</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"slip"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">28</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ultra"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">29</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ds3"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">30</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"sip"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">31</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"frameRelay"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">32</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"rs232"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">33</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"para"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">34</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"arcnet"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">35</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"arcnetPlus"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">36</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"atm"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">37</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"miox25"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">38</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"sonet"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">39</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"x25ple"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">40</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"iso88022llc"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">41</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"localTalk"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">42</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"smdsDxi"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">43</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"frameRelayService"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">44</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"v35"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">45</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"hssi"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">46</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"hippi"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">47</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"modem"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">48</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"aal5"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">49</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"sonetPath"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">50</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"sonetVT"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">51</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"smdsIcip"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">52</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"propVirtual"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">53</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"propMultiplexor"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">54</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ieee80212"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">55</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"fibreChannel"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">56</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"hippiInterface"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">57</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"frameRelayInterconnect"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">58</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"aflane8023"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">59</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"aflane8025"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">60</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"cctEmul"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">61</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"fastEther"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">62</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"isdn"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">63</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"v11"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">64</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"v36"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">65</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"g703at64k"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">66</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"g703at2mb"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">67</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"qllc"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">68</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"fastEtherFX"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">69</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"channel"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">70</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ieee80211"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">71</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ibm370parChan"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">72</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"escon"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">73</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"dlsw"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">74</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"isdns"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">75</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"isdnu"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">76</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"lapd"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">77</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ipSwitch"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">78</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"rsrb"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">79</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"atmLogical"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">80</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ds0"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">81</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ds0Bundle"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">82</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"bsc"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">83</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"async"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">84</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"cnr"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">85</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"iso88025Dtr"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">86</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"eplrs"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">87</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"arap"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">88</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"propCnls"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">89</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"hostPad"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">90</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"termPad"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">91</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"frameRelayMPI"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">92</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"x213"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">93</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"adsl"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">94</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"radsl"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">95</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"sdsl"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">96</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"vdsl"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">97</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"iso88025CRFPInt"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">98</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"myrinet"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">99</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voiceEM"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">100</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voiceFXO"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">101</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voiceFXS"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">102</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voiceEncap"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">103</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voiceOverIp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">104</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"atmDxi"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">105</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"atmFuni"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">106</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"atmIma"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">107</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"pppMultilinkBundle"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">108</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ipOverCdlc"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">109</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ipOverClaw"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">110</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"stackToStack"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">111</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"virtualIpAddress"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">112</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"mpc"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">113</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ipOverAtm"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">114</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"iso88025Fiber"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">115</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"tdlc"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">116</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"gigabitEthernet"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">117</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"hdlc"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">118</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"lapf"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">119</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"v37"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">120</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"x25mlp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">121</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"x25huntGroup"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">122</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"trasnpHdlc"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">123</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"interleave"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">124</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"fast"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">125</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ip"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">126</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"docsCableMaclayer"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">127</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"docsCableDownstream"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">128</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"docsCableUpstream"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">129</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"a12MppSwitch"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">130</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"tunnel"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">131</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"coffee"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">132</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ces"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">133</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"atmSubInterface"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">134</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"l2vlan"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">135</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"l3ipvlan"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">136</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"l3ipxvlan"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">137</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"digitalPowerline"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">138</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"mediaMailOverIp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">139</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"dtm"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">140</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"dcn"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">141</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ipForward"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">142</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"msdsl"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">143</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ieee1394"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">144</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"if-gsn"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">145</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"dvbRccMacLayer"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">146</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"dvbRccDownstream"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">147</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"dvbRccUpstream"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">148</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"atmVirtual"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">149</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"mplsTunnel"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">150</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"srp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">151</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voiceOverAtm"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">152</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voiceOverFrameRelay"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">153</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"idsl"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">154</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"compositeLink"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">155</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ss7SigLink"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">156</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"propWirelessP2P"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">157</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"frForward"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">158</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"rfc1483"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">159</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"usb"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">160</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ieee8023adLag"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">161</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"bgppolicyaccounting"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">162</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"frf16MfrBundle"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">163</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"h323Gatekeeper"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">164</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"h323Proxy"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">165</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"mpls"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">166</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"mfSigLink"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">167</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"hdsl2"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">168</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"shdsl"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">169</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ds1FDL"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">170</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"pos"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">171</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"dvbAsiIn"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">172</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"dvbAsiOut"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">173</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"plc"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">174</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"nfas"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">175</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"tr008"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">176</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"gr303RDT"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">177</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"gr303IDT"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">178</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"isup"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">179</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"propDocsWirelessMaclayer"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">180</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"propDocsWirelessDownstream"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">181</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"propDocsWirelessUpstream"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">182</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"hiperlan2"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">183</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"propBWAp2Mp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">184</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"sonetOverheadChannel"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">185</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"digitalWrapperOverheadChannel"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">186</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"aal2"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">187</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"radioMAC"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">188</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"atmRadio"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">189</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"imt"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">190</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"mvl"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">191</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"reachDSL"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">192</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"frDlciEndPt"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">193</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"atmVciEndPt"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">194</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"opticalChannel"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">195</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"opticalTransport"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">196</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"propAtm"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">197</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voiceOverCable"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">198</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"infiniband"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">199</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"teLink"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">200</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"q2931"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">201</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"virtualTg"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">202</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"sipTg"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">203</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"sipSig"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">204</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"docsCableUpstreamChannel"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">205</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"econet"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">206</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"pon155"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">207</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"pon622"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">208</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"bridge"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">209</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"linegroup"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">210</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voiceEMFGD"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">211</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voiceFGDEANA"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">212</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voiceDID"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">213</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"mpegTransport"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">214</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"sixToFour"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">215</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"gtp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">216</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"pdnEtherLoop1"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">217</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"pdnEtherLoop2"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">218</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"opticalChannelGroup"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">219</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"homepna"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">220</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"gfp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">221</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"ciscoISLvlan"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">222</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"actelisMetaLOOP"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">223</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"fcipLink"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">224</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"rpr"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">225</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"qam"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">226</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"lmp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">227</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"cblVectaStar"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">228</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"docsCableMCmtsDownstream"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">229</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"adsl2"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">230</span>;
+            }
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"This data type is used as the syntax of the ifType
+            object in the (updated) definition of MIB-II's
+            ifTable.
+            
+            The definition of this textual convention with the
+            addition of newly assigned values is published
+            periodically by the IANA, in either the Assigned
+            Numbers RFC, or some derivative of it specific to
+            Internet Network Management number assignments.  (The
+            latest arrangements can be obtained by contacting the
+            IANA.)
+            
+            Requests for new values should be made to IANA via
+            email (iana@iana.org).
+            
+            The relationship between the assignment of ifType
+            values and of OIDs to particular media-specific MIBs
+            is solely the purview of IANA and is subject to change
+            without notice.  Quite often, a media-specific MIB's
+            OID-subtree assignment within MIB-II's 'transmission'
+            subtree will be the same as its ifType value.
+            However, in some circumstances this will not be the
+            case, and implementors must not pre-assume any
+            specific relationship between ifType values and
+            transmission subtree OIDs."</span>;
+      }
+
+      <a name="IANAtunnelType.497"/><span class="yang_kw">typedef</span> <span class="yang_id">IANAtunnelType</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+            <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"direct"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"gre"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"minimal"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"l2tp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"pptp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"l2f"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"udp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">8</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"atmp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"msdp"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">10</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"sixToFour"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">11</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"sixOverFour"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">12</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"isatap"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">13</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"teredo"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">14</span>;
+            }
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"The encapsulation method used by a tunnel. The value
+            direct indicates that a packet is encapsulated
+            directly within a normal IP header, with no
+            intermediate header, and unicast to the remote tunnel
+            endpoint (e.g., an RFC 2003 IP-in-IP tunnel, or an RFC
+            1933 IPv6-in-IPv4 tunnel). The value minimal indicates
+            that a Minimal Forwarding Header (RFC 2004) is
+            inserted between the outer header and the payload
+            packet. The value UDP indicates that the payload
+            packet is encapsulated within a normal UDP packet
+            (e.g., RFC 1234).
+            
+            The values sixToFour, sixOverFour, and isatap
+            indicates that an IPv6 packet is encapsulated directly
+            within an IPv4 header, with no intermediate header,
+            and unicast to the destination determined by the 6to4,
+            6over4, or ISATAP protocol.
+            
+            The remaining protocol-specific values indicate that a
+            header of the protocol of that name is inserted
+            between the outer header and the payload header.
+            
+            The assignment policy for IANAtunnelType values is
+            identical to the policy for assigning IANAifType
+            values."</span>;
+      }
+   }  <span class="yang_cmt">// module IANAifType-MIB</span>
+</pre>
+</div>
+</div>

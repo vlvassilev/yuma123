@@ -1,0 +1,386 @@
+
+<div>
+   <h1 class="yang">SNMP-USM-DH-OBJECTS-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#DHKeyChange.48">DHKeyChange</a></li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#usmDHPublicObjects.97">usmDHPublicObjects</a>
+               <ul>
+                  <li><a href="#usmDHParameters.99">usmDHParameters</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#usmDHKickstartGroup.135">usmDHKickstartGroup</a>
+               <ul>
+                  <li class="daddy"><a href="#usmDHKickstartEntry.140">usmDHKickstartEntry</a>
+                     <ul>
+                        <li><a href="#usmDHKickstartIndex.157">usmDHKickstartIndex</a></li>
+                        <li><a href="#usmDHKickstartMyPublic.167">usmDHKickstartMyPublic</a></li>
+                        <li><a href="#usmDHKickstartMgrPublic.210">usmDHKickstartMgrPublic</a></li>
+                        <li><a href="#usmDHKickstartSecurityName.272">usmDHKickstartSecurityName</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#augment.289">augment</a>
+               <ul>
+                  <li><a href="#usmDHUserAuthKeyChange.294">usmDHUserAuthKeyChange</a></li>
+                  <li><a href="#usmDHUserOwnAuthKeyChange.308">usmDHUserOwnAuthKeyChange</a></li>
+                  <li><a href="#usmDHUserPrivKeyChange.322">usmDHUserPrivKeyChange</a></li>
+                  <li><a href="#usmDHUserOwnPrivKeyChange.336">usmDHUserOwnPrivKeyChange</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">SNMP-USM-DH-OBJECTS-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:SNMP-USM-DH-OBJECTS-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-usm"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14">SNMP-FRAMEWORK-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-framework"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMP-USER-BASED-SM-MIB/2002-10-16">SNMP-USER-BASED-SM-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-user"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"Excite@Home"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"Author: Mike StJohns
+         Postal: Excite@Home
+         	450 Broadway
+         	Redwood City, CA 94063
+         Email:  stjohns@corp.home.net
+         Phone:  +1-650-556-5368"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"The management information definitions for providing forward
+         secrecy for key changes for the usmUserTable, and for providing a
+         method for 'kickstarting' access to the agent via a Diffie-Helman
+         key agreement."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-03-06"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Initial version published as RFC 2786."</span>;
+      }
+
+
+      <span class="yang_cmt">// typedefs</span>
+
+      <a name="DHKeyChange.48"/><span class="yang_kw">typedef</span> <span class="yang_id">DHKeyChange</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Upon initialization, or upon creation of a row containing an
+            object of this type, and after any successful SET of this value, a
+            GET of this value returns 'y' where y = g^xa MOD p, and where g is
+            the base from usmDHParameters, p is the prime from
+            usmDHParameters, and xa is a new random integer selected by the
+            agent in the interval 2^(l-1) &lt;= xa &lt; 2^l &lt; p-1.  'l' is the
+            optional privateValueLength from usmDHParameters in bits.  If 'l'
+            is omitted, then xa (and xr below) is selected in the interval 0
+            &lt;= xa &lt; p-1.  y is expressed as an OCTET STRING 'PV' of length 'k'
+            which satisfies
+            
+            	  k
+                y =  SUM   2^(8(k-i)) PV'i
+            	 i=1
+            
+                where PV1,...,PVk are the octets of PV from first to last, and
+                where PV1 &lt;&gt; 0.
+            
+            A successful SET consists of the value 'y' expressed as an OCTET
+            STRING as above concatenated with the value 'z'(expressed as an
+            OCTET STRING in the same manner as y) where z = g^xr MOD p, where
+            g, p and l are as above, and where xr is a new random integer
+            selected by the manager in the interval 2^(l-1) &lt;= xr &lt; 2^l &lt;
+            p-1. A SET to an object of this type will fail with the error
+            wrongValue if the current 'y' does not match the 'y' portion of
+            the value of the varbind for the object. (E.g. GET yout, SET
+            concat(yin, z), yout &lt;&gt; yin).
+            
+            Note that the private values xa and xr are never transmitted from
+            manager to device or vice versa, only the values y and z.
+            Obviously, these values must be retained until a successful SET on
+            the associated object.
+            
+            The shared secret 'sk' is calculated at the agent as sk = z^xa MOD
+            p, and at the manager as sk = y^xr MOD p.
+            
+            Each object definition of this type MUST describe how to map from
+            the shared secret 'sk' to the operational key value used by the
+            protocols and operations related to the object.  In general, if n
+            bits of key are required, the author suggests using the n
+            right-most bits of the shared secret as the operational key value."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"-- Diffie-Hellman Key-Agreement Standard, PKCS #3;
+            RSA Laboratories, November 1993"</span>;
+      }
+
+      <span class="yang_cmt">// objects</span>
+
+      <a name="usmDHPublicObjects.97"/><span class="yang_kw">container</span> <span class="yang_id">usmDHPublicObjects</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.1"</span>;
+
+         <a name="usmDHParameters.99"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHParameters</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The public Diffie-Hellman parameters for doing a Diffie-Hellman
+               key agreement for this device.  This is encoded as an ASN.1
+               DHParameter per PKCS #3, section 9.  E.g.
+               
+                   DHParameter ::= SEQUENCE {
+                      prime   INTEGER,   -- p
+                      base    INTEGER,   -- g
+                      privateValueLength  INTEGER OPTIONAL }
+               
+               
+               Implementors are encouraged to use either the values from
+               Oakley Group 1  or the values of from Oakley Group 2 as specified
+               in RFC-2409, The Internet Key Exchange, Section 6.1, 6.2 as the
+               default for this object.  Other values may be used, but the
+               security properties of those values MUST be well understood and
+               MUST meet the requirements of PKCS #3 for the selection of
+               Diffie-Hellman primes.
+               
+                   In addition, any time usmDHParameters changes, all values of
+               type DHKeyChange will change and new random numbers MUST be
+               generated by the agent for each DHKeyChange object."</span>;
+            <span class="yang_kw">reference</span>
+               <span class="yang_str">"-- Diffie-Hellman Key-Agreement Standard, PKCS #3,
+               RSA Laboratories, November 1993
+               -- The Internet Key Exchange, RFC 2409, November 1998,
+               Sec 6.1, 6.2"</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.1.1"</span>;
+         }
+      }  <span class="yang_cmt">// container usmDHPublicObjects</span>
+
+      <a name="usmDHKickstartGroup.135"/><span class="yang_kw">container</span> <span class="yang_id">usmDHKickstartGroup</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.2"</span>;
+
+         <a name="usmDHKickstartEntry.140"/><span class="yang_kw">list</span> <span class="yang_id">usmDHKickstartEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#usmDHKickstartIndex.157">usmDHKickstartIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in the usmDHKickstartTable.  The agent SHOULD either
+               delete this entry or mark it as inactive upon a successful SET of
+               any of the KeyChange-typed objects in the usmUserEntry or upon a
+               successful SET of any of the DHKeyChange-typed objects in the
+               usmDhKeyChangeEntry where the related usmSecurityName (e.g. row of
+               usmUserTable or row of ushDhKeyChangeTable) equals this entry's
+               usmDhKickstartSecurityName.  In otherwords, once you've changed
+               one or more of the keys for a row in usmUserTable with a
+               particular security name, the row in this table with that same
+               security name is no longer useful or meaningful."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.2.1.1"</span>;
+
+            <a name="usmDHKickstartIndex.157"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHKickstartIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Index value for this row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.2.1.1.1"</span>;
+            }
+
+            <a name="usmDHKickstartMyPublic.167"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHKickstartMyPublic</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The agent's Diffie-Hellman public value for this row.  At
+                  initialization, the agent generates a random number and derives
+                  its public value from that number.  This public value is published
+                  here.  This public value 'y' equals g^r MOD p where g is the from
+                  the set of Diffie-Hellman parameters, p is the prime from those
+                  parameters, and r is a random integer selected by the agent in the
+                  interval 2^(l-1) &lt;= r &lt; p-1 &lt; 2^l.  If l is unspecified, then r is
+                  a random integer selected in the interval 0 &lt;= r &lt; p-1
+                  
+                  The public value is expressed as an OCTET STRING 'PV' of length
+                  'k' which satisfies
+                  
+                  	  k
+                      y =  SUM   2^(8(k-i)) PV'i
+                  	 i = 1
+                  
+                      where PV1,...,PVk are the octets of PV from first to last, and
+                      where PV1 != 0.
+                  
+                  
+                  The following DH parameters (Oakley group #2, RFC 2409, sec 6.1,
+                  6.2) are used for this object:
+                  
+                  g = 2
+                  p = FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
+                      29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
+                      EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
+                      E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED
+                      EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE65381
+                      FFFFFFFF FFFFFFFF
+                  l=1024"</span>;
+               <span class="yang_kw">reference</span>
+                  <span class="yang_str">"-- Diffie-Hellman Key-Agreement Standard, PKCS#3v1.4;
+                  RSA Laboratories, November 1993
+                  -- The Internet Key Exchange, RFC2409;
+                  Harkins, D., Carrel, D.; November 1998"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.2.1.1.2"</span>;
+            }
+
+            <a name="usmDHKickstartMgrPublic.210"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHKickstartMgrPublic</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The manager's Diffie-Hellman public value for this row.  Note
+                  that this value is not set via the SNMP agent, but may be set via
+                  some out of band method, such as the device's configuration file.
+                  The manager calculates this value in the same manner and using the
+                  same parameter set as the agent does.  E.g. it selects a random
+                  number 'r', calculates y = g^r mod p and provides 'y' as the
+                  public number expressed as an OCTET STRING.  See
+                  usmDHKickstartMyPublic for details.
+                  
+                  When this object is set with a valid value during initialization,
+                  a row is created in the usmUserTable with the following values:
+                  
+                  usmUserEngineID             localEngineID
+                  usmUserName                 [value of usmDHKickstartSecurityName]
+                  usmUserSecurityName         [value of usmDHKickstartSecurityName]
+                  usmUserCloneFrom            ZeroDotZero
+                  usmUserAuthProtocol         usmHMACMD5AuthProtocol
+                  usmUserAuthKeyChange        -- derived from set value
+                  usmUserOwnAuthKeyChange     -- derived from set value
+                  usmUserPrivProtocol         usmDESPrivProtocol
+                  usmUserPrivKeyChange        -- derived from set value
+                  usmUserOwnPrivKeyChange     -- derived from set value
+                  usmUserPublic               ''
+                  usmUserStorageType          permanent
+                  usmUserStatus               active
+                  
+                  A shared secret 'sk' is calculated at the agent as sk =
+                  mgrPublic^r mod p where r is the agents random number and p is the
+                  DH prime from the common parameters.  The underlying privacy key
+                  for this row is derived from sk by applying the key derivation
+                  function PBKDF2 defined in PKCS#5v2.0 with a salt of 0xd1310ba6,
+                  and iterationCount of 500, a keyLength of 16 (for
+                  usmDESPrivProtocol), and a prf (pseudo random function) of
+                  'id-hmacWithSHA1'.  The underlying authentication key for this row
+                  is derived from sk by applying the key derivation function PBKDF2
+                  with a salt of 0x98dfb5ac , an interation count of 500, a
+                  keyLength of 16 (for usmHMAC5AuthProtocol), and a prf of
+                  'id-hmacWithSHA1'.  Note: The salts are the first two words in the
+                  ks0 [key schedule 0] of the BLOWFISH cipher from 'Applied
+                  Cryptography' by Bruce Schnier - they could be any relatively
+                  random string of bits.
+                  
+                  The manager can use its knowledge of its own random number and the
+                  agent's public value to kickstart its access to the agent in a
+                  secure manner.  Note that the security of this approach is
+                  directly related to the strength of the authorization security of
+                  the out of band provisioning of the managers public value
+                  (e.g. the configuration file), but is not dependent at all on the
+                  strength of the confidentiality of the out of band provisioning
+                  data."</span>;
+               <span class="yang_kw">reference</span>
+                  <span class="yang_str">"-- Password-Based Cryptography Standard, PKCS#5v2.0;
+                  RSA Laboratories, March 1999
+                  -- Applied Cryptography, 2nd Ed.; B. Schneier,
+                  Counterpane Systems; John Wiley &amp; Sons, 1996"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.2.1.1.3"</span>;
+            }
+
+            <a name="usmDHKickstartSecurityName.272"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHKickstartSecurityName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The usmUserName and usmUserSecurityName in the usmUserTable
+                  associated with this row.  This is provided in the same manner and
+                  at the same time as the usmDHKickstartMgrPublic value -
+                  e.g. possibly manually, or via the device's configuration file."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.2.1.1.4"</span>;
+            }
+         }  <span class="yang_cmt">// list usmDHKickstartEntry</span>
+      }  <span class="yang_cmt">// container usmDHKickstartGroup</span>
+      <a name="augment.289"/><span class="yang_kw">augment</span> <a href="/modules/SNMP-USER-BASED-SM-MIB/2002-10-16#usmUserEntry.303">/snmp-user:usmUser/snmp-user:usmUserEntry</a> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"A row of DHKeyChange objects which augment or replace the
+            functionality of the KeyChange objects in the base table row."</span>;
+
+         <a name="usmDHUserAuthKeyChange.294"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHUserAuthKeyChange</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#DHKeyChange.48">DHKeyChange</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The object used to change any given user's Authentication Key
+               using a Diffie-Hellman key exchange.
+               
+               The right-most n bits of the shared secret 'sk', where 'n' is the
+               number of bits required for the protocol defined by
+               usmUserAuthProtocol, are installed as the operational
+               authentication key for this row after a successful SET."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.1.2.1.1"</span>;
+         }
+
+         <a name="usmDHUserOwnAuthKeyChange.308"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHUserOwnAuthKeyChange</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#DHKeyChange.48">DHKeyChange</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The object used to change the agents own Authentication Key
+               using a Diffie-Hellman key exchange.
+               
+               The right-most n bits of the shared secret 'sk', where 'n' is the
+               number of bits required for the protocol defined by
+               usmUserAuthProtocol, are installed as the operational
+               authentication key for this row after a successful SET."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.1.2.1.2"</span>;
+         }
+
+         <a name="usmDHUserPrivKeyChange.322"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHUserPrivKeyChange</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#DHKeyChange.48">DHKeyChange</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The object used to change any given user's Privacy Key using
+               a Diffie-Hellman key exchange.
+               
+               The right-most n bits of the shared secret 'sk', where 'n' is the
+               number of bits required for the protocol defined by
+               usmUserPrivProtocol, are installed as the operational privacy key
+               for this row after a successful SET."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.1.2.1.3"</span>;
+         }
+
+         <a name="usmDHUserOwnPrivKeyChange.336"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHUserOwnPrivKeyChange</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#DHKeyChange.48">DHKeyChange</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The object used to change the agent's own Privacy Key using a
+               Diffie-Hellman key exchange.
+               
+               The right-most n bits of the shared secret 'sk', where 'n' is the
+               number of bits required for the protocol defined by
+               usmUserPrivProtocol, are installed as the operational privacy key
+               for this row after a successful SET."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.1.2.1.4"</span>;
+         }
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.1.2.1"</span>;
+      }
+   }  <span class="yang_cmt">// module SNMP-USM-DH-OBJECTS-MIB</span>
+</pre>
+</div>
+</div>

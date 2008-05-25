@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://www.w3.org/2001/XMLSchema"
+   targetNamespace="http://www.w3.org/2001/XMLSchema"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2007-12-06"
+   xmlns:ncx="http://netconfcentral.com/ncx">
+   <annotation>
+      <documentation>
+         Converted from YANG file 'xsd.yang' by yangdump version 0.9.2
+         
+         Module: xsd
+         Organization: YANG Language Design Team
+         Version: 2007-12-06
+         Contact: yang@ietf.org
+      </documentation>
+      <documentation>
+         XSD derived types for usage in YANG.
+      </documentation>
+      <appinfo>
+         <ncx:source>
+            /home/andy/swdev/trunk/netconf/modules/netconfcentral/xsd.yang
+         </ncx:source>
+         <ncx:organization>
+            YANG Language Design Team
+         </ncx:organization>
+         <ncx:contact>yang@ietf.org</ncx:contact>
+      </appinfo>
+      <appinfo>
+         <ncx:revision>
+            <ncx:version>2007-12-06</ncx:version>
+            <ncx:description>
+               Initial revision.  There is more work to do
+               filling in patterns for some of the string types
+            </ncx:description>
+         </ncx:revision>
+      </appinfo>
+   </annotation>
+
+   <simpleType name="normalizedString">
+      <annotation>
+         <documentation>
+            XSD normalized string
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#normalizedString
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="token">
+      <annotation>
+         <documentation>XSD token string</documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#token
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="base64Binary">
+      <annotation>
+         <documentation>
+            XSD base64 binary encoded string
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#base64Binary
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="hexBinary">
+      <annotation>
+         <documentation>
+            XSD hex binary encoded string
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#hexBinary
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="base64Binary"/>
+   </simpleType>
+
+   <simpleType name="integer">
+      <annotation>
+         <documentation>
+            XSD unbounded integer type. 
+            This cannot be given a range like a number.
+            This pattern does not supoort string representations
+            of numbers, such as one two three
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#integer
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string">
+         <pattern value="[\-+]?[0-9]+"/>
+      </restriction>
+   </simpleType>
+
+   <simpleType name="positiveInteger">
+      <annotation>
+         <documentation>
+            XSD unbounded positive integer.
+            This cannot be given a range like a number.
+            This pattern does not supoort string representations
+            of numbers, such as one two three
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#positiveInteger
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string">
+         <pattern value="[\+]?[1-9]+[0-9]*"/>
+      </restriction>
+   </simpleType>
+
+   <simpleType name="negativeInteger">
+      <annotation>
+         <documentation>
+            XSD unbounded negative integer.
+            This cannot be given a range like a number.
+            This pattern does not supoort string representations
+            of numbers, such as one two three
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#negativeInteger
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string">
+         <pattern value="[\-]?[1-9]+[0-9]*"/>
+      </restriction>
+   </simpleType>
+
+   <simpleType name="nonNegativeInteger">
+      <annotation>
+         <documentation>
+            XSD unbounded non-negative integer.
+            This cannot be given a range like a number.
+            This pattern does not supoort string representations
+            of numbers, such as one two three
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#nonNegativeInteger
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string">
+         <pattern value="[\+]?[0-9]*"/>
+      </restriction>
+   </simpleType>
+
+   <simpleType name="nonPositiveInteger">
+      <annotation>
+         <documentation>
+            XSD unbounded non-positive integer.
+            This cannot be given a range like a number.
+            This pattern does not supoort string representations
+            of numbers, such as one two three
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#nonPositiveInteger
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string">
+         <pattern value="\-[1-9]+[0-9]*"/>
+      </restriction>
+   </simpleType>
+
+   <simpleType name="long">
+      <annotation>
+         <documentation>
+            XSD 64 bit signed integer.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#long
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="long"/>
+   </simpleType>
+
+   <simpleType name="unsignedLong">
+      <annotation>
+         <documentation>
+            XSD 64 bit unsigned integer.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#unsignedLong
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="unsignedLong"/>
+   </simpleType>
+
+   <simpleType name="int">
+      <annotation>
+         <documentation>
+            XSD 32 bit signed integer.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#int
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="int"/>
+   </simpleType>
+
+   <simpleType name="unsignedInt">
+      <annotation>
+         <documentation>
+            XSD 32 bit unsigned integer.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#unsignedInt
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="unsignedInt"/>
+   </simpleType>
+
+   <simpleType name="short">
+      <annotation>
+         <documentation>
+            XSD 16 bit signed integer.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#short
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="short"/>
+   </simpleType>
+
+   <simpleType name="unsignedShort">
+      <annotation>
+         <documentation>
+            XSD 16 bit unsigned integer.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#unsignedShort
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="unsignedShort"/>
+   </simpleType>
+
+   <simpleType name="byte">
+      <annotation>
+         <documentation>
+            XSD 8 bit signed integer.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#byte
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="byte"/>
+   </simpleType>
+
+   <simpleType name="unsignedByte">
+      <annotation>
+         <documentation>
+            XSD 8 bit unsigned integer.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#unsignedByte
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="unsignedByte"/>
+   </simpleType>
+
+   <simpleType name="decimal">
+      <annotation>
+         <documentation>
+            XSD decimal data type.
+            [To do: not sure if this is a bounded real number
+             or an unbounded real number.].
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#decimal
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="float">
+      <annotation>
+         <documentation>
+            XSD 32 bit floating point number.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#float
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="float"/>
+   </simpleType>
+
+   <simpleType name="double">
+      <annotation>
+         <documentation>
+            XSD 64 bit floating point number.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#double
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="double"/>
+   </simpleType>
+
+   <simpleType name="duration">
+      <annotation>
+         <documentation>
+            XSD duration string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#duration
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="dateTime">
+      <annotation>
+         <documentation>
+            XSD date and time string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#dateTime
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string">
+         <pattern value=".+T.+(Z|[+-].+)"/>
+      </restriction>
+   </simpleType>
+
+   <simpleType name="date">
+      <annotation>
+         <documentation>
+            XSD date string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#date
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="time">
+      <annotation>
+         <documentation>
+            XSD time string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#time
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="gYear">
+      <annotation>
+         <documentation>
+            XSD year string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#gYear
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="gYearMonth">
+      <annotation>
+         <documentation>
+            XSD year and month string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#gYearMonth
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="gMonth">
+      <annotation>
+         <documentation>
+            XSD month string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#gMonth
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="gMonthDay">
+      <annotation>
+         <documentation>
+            XSD month and day string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#gMonthDay
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="gDay">
+      <annotation>
+         <documentation>XSD day string type.</documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#gDay
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="Name">
+      <annotation>
+         <documentation>
+            XSD name string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#Name
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="QName">
+      <annotation>
+         <documentation>
+            XSD namespace-qualified name string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#QName
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="NCName">
+      <annotation>
+         <documentation>
+            XSD not-namespace-qualified name string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#NCName
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string">
+         <pattern value="[\i-[:]][\c-[:]]*"/>
+      </restriction>
+   </simpleType>
+
+   <simpleType name="anyURI">
+      <annotation>
+         <documentation>
+            XSD universal resource identifier string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#anyURI
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="language">
+      <annotation>
+         <documentation>
+            XSD language identifier string type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#language
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="ID">
+      <annotation>
+         <documentation>
+            XSD ID attribute type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#ID
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="IDREF">
+      <annotation>
+         <documentation>
+            XSD IDREF attribute type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#IDREF
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="IDREFS">
+      <annotation>
+         <documentation>
+            XSD IDREFS attribute type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#IDREFS
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="ENTITY">
+      <annotation>
+         <documentation>
+            XSD ENTITY attribute type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#ENTITY
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="ENTITIES">
+      <annotation>
+         <documentation>
+            XSD ENTITIES attribute type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#ENTITIES
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="NOTATION">
+      <annotation>
+         <documentation>
+            XSD NOTATION attribute type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#NOTATION
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="NMTOKEN">
+      <annotation>
+         <documentation>
+            XSD NMTOKEN attribute type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#NMTOKEN
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+   <simpleType name="NMTOKENS">
+      <annotation>
+         <documentation>
+            XSD NMTOKENS attribute type.
+         </documentation>
+         <appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#NMTOKENS
+               </ncx:text>
+            </ncx:reference>
+         </appinfo>
+      </annotation>
+      <restriction base="string"/>
+   </simpleType>
+
+</schema>

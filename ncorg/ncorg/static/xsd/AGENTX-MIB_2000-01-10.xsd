@@ -1,0 +1,707 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:smiv2:AGENTX-MIB"
+   targetNamespace="urn:ietf:params:xml:ns:yang:smiv2:AGENTX-MIB"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2000-01-10"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:snmp-framework="urn:ietf:params:xml:ns:yang:smiv2:SNMP-FRAMEWORK-MIB"
+   xmlns:smiv2="urn:ietf:params:xml:ns:yang:smiv2:SNMPv2-TC"
+   xmlns:smi="urn:ietf:params:xml:ns:yang:yang-smi"
+   xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'AGENTX-MIB.yang' by yangdump version 0.9.2
+         
+         Module: AGENTX-MIB
+         Organization: AgentX Working Group
+         Version: 2000-01-10
+         Contact: WG-email:   agentx@dorothy.bmc.com
+         Subscribe:  agentx-request@dorothy.bmc.com
+         WG-email Archive:  ftp://ftp.peer.com/pub/agentx/archives
+         FTP repository:  ftp://ftp.peer.com/pub/agentx
+         http://www.ietf.org/html.charters/agentx-charter.html
+         
+         Chair:      Bob Natale
+         	    ACE*COMM Corporation
+         Email:      bnatale@acecomm.com
+         
+         WG editor:  Mark Ellison
+         	    Ellison Software Consulting, Inc.
+         Email:      ellison@world.std.com
+         
+         Co-author:  Lauren Heintz
+         	    Cisco Systems,
+         EMail:      lheintz@cisco.com
+         
+         Co-author:  Smitha Gudur
+         	    Independent Consultant
+         Email:      sgudur@hotmail.com
+      </xs:documentation>
+      <xs:documentation>
+         This is the MIB module for the SNMP Agent Extensibility
+         Protocol (AgentX).  This MIB module will be implemented by
+         the master agent.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/swdev/trunk/netconf/modules/./ietf/AGENTX-MIB.yang
+         </ncx:source>
+         <ncx:organization>AgentX Working Group</ncx:organization>
+         <ncx:contact>
+            WG-email:   agentx@dorothy.bmc.com
+            Subscribe:  agentx-request@dorothy.bmc.com
+            WG-email Archive:  ftp://ftp.peer.com/pub/agentx/archives
+            FTP repository:  ftp://ftp.peer.com/pub/agentx
+            http://www.ietf.org/html.charters/agentx-charter.html
+            
+            Chair:      Bob Natale
+            	    ACE*COMM Corporation
+            Email:      bnatale@acecomm.com
+            
+            WG editor:  Mark Ellison
+            	    Ellison Software Consulting, Inc.
+            Email:      ellison@world.std.com
+            
+            Co-author:  Lauren Heintz
+            	    Cisco Systems,
+            EMail:      lheintz@cisco.com
+            
+            Co-author:  Smitha Gudur
+            	    Independent Consultant
+            Email:      sgudur@hotmail.com
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2000-01-10</ncx:version>
+            <ncx:description>
+               Initial version published as RFC 2742.
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="AgentxTAddress">
+      <xs:annotation>
+         <xs:documentation>
+            Denotes a transport service address.  This is identical to
+            the TAddress textual convention (SNMPv2-SMI) except that
+            zero-length values are permitted.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:base64Binary">
+         <xs:maxLength value="255"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:element name="agentxGeneral">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <smi:oid  smi:oid="1.3.6.1.2.1.74.1.1"/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="agentxDefaultTimeout" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The default length of time, in seconds, that the master
+                     agent should allow to elapse after dispatching a message
+                     to a session before it regards the subagent as not
+                     responding.  This is a system-wide value that may
+                     override the timeout value associated with a particular
+                     session (agentxSessionTimeout) or a particular registered
+                     MIB region (agentxRegTimeout).  If the associated value of
+                     agentxSessionTimeout and agentxRegTimeout are zero, or
+                     impractical in accordance with implementation-specific
+                     procedure of the master agent, the value represented by
+                     this object will be the effective timeout value for the
+                     
+                     master agent to await a response to a dispatch from a
+                     given subagent.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <ncx:units>seconds</ncx:units>
+                     <smi:default  smi:default="5"/>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.74.1.1.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:simpleType>
+                  <xs:restriction base="xs:int">
+                     <xs:minInclusive value="0"/>
+                     <xs:maxInclusive value="255"/>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="agentxMasterAgentXVer" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The AgentX protocol version supported by this master agent.
+                     The current protocol version is 1.  Note that the master agent
+                     must also allow interaction with earlier version subagents.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.74.1.1.2"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:simpleType>
+                  <xs:restriction base="xs:int">
+                     <xs:minInclusive value="1"/>
+                     <xs:maxInclusive value="255"/>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="__.agentxGeneral.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="agentxConnection">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <smi:oid  smi:oid="1.3.6.1.2.1.74.1.2"/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="agentxConnTableLastChange"
+               type="yang:timestamp" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The value of sysUpTime when the last row creation or deletion
+                     occurred in the agentxConnectionTable.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.74.1.2.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="agentxConnectionEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     An agentxConnectionEntry contains information describing a
+                     single AgentX transport connection.  A connection may be
+                     
+                     used to support zero or more AgentX sessions.  An entry is
+                     created when a new transport connection is established,
+                     and is destroyed when the transport connection is terminated.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.74.1.2.2.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="agentxConnIndex">
+                        <xs:annotation>
+                           <xs:documentation>
+                              agentxConnIndex contains the value that uniquely identifies
+                              an open transport connection used by this master agent
+                              to provide AgentX service.  Values of this index should
+                              not be re-used.  The value assigned to a given transport
+                              connection is constant for the lifetime of that connection.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.2.2.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:unsignedInt">
+                              <xs:minInclusive value="1"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="agentxConnOpenTime"
+                        type="yang:timestamp" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The value of sysUpTime when this connection was established
+                              and, therefore, its value when this entry was added to the table.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.2.2.1.2"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="agentxConnTransportDomain"
+                        type="smiv2:TDomain" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The transport protocol in use for this connection to the
+                              subagent.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.2.2.1.3"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="agentxConnTransportAddress"
+                        type="AgentxTAddress" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The transport address of the remote (subagent) end of this
+                              connection to the master agent.  This object may be zero-length
+                              for unix-domain sockets (and possibly other types of transport
+                              addresses) since the subagent need not bind a filename to its
+                              local socket.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.2.2.1.4"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element
+                        name="__.agentxConnection.agentxConnectionEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="agentxConnectionEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="agentxConnIndex"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.agentxConnection.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="agentxSession">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <smi:oid  smi:oid="1.3.6.1.2.1.74.1.3"/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="agentxSessionTableLastChange"
+               type="yang:timestamp" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The value of sysUpTime when the last row creation or deletion
+                     occurred in the agentxSessionTable.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.74.1.3.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="agentxSessionEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     Information about a single open session between the AgentX
+                     master agent and a subagent is contained in this entry.  An
+                     entry is created when a new session is successfully established
+                     and is destroyed either when the subagent transport connection
+                     has terminated or when the subagent session is closed.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.74.1.3.2.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="agentxConnIndex">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Automagically generated keyref leaf.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType/>
+                     </xs:element>
+                     <xs:element name="agentxSessionIndex">
+                        <xs:annotation>
+                           <xs:documentation>
+                              A unique index for the subagent session.  It is the same as
+                              h.sessionID defined in the agentx header.  Note that if
+                              a subagent's session with the master agent is closed for
+                              any reason its index should not be re-used.
+                              A value of zero(0) is specifically allowed in order
+                              to be compatible with the definition of h.sessionId.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.3.2.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:unsignedInt"/>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="agentxSessionObjectID"
+                        type="yang:object-identifier" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              This is taken from the o.id field of the agentx-Open-PDU.
+                              This attribute will report a value of '0.0' for subagents
+                              not supporting the notion of an AgentX session object
+                              identifier.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.3.2.1.2"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="agentxSessionDescr"
+                        type="snmp-framework:SnmpAdminString"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              A textual description of the session.  This is analogous to
+                              sysDescr defined in the SNMPv2-MIB in RFC 1907 [19] and is
+                              taken from the o.descr field of the agentx-Open-PDU.
+                              This attribute will report a zero-length string value for
+                              subagents not supporting the notion of a session description.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.3.2.1.3"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="agentxSessionAdminStatus"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The administrative (desired) status of the session.  Setting
+                              the value to 'down(2)' closes the subagent session (with c.reason
+                              set to 'reasonByManager').
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.3.2.1.4"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:string">
+                              <xs:enumeration value="up">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>1</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="down">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>2</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="agentxSessionOpenTime"
+                        type="yang:timestamp" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The value of sysUpTime when this session was opened and,
+                              therefore, its value when this entry was added to the table.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.3.2.1.5"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="agentxSessionAgentXVer"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The version of the AgentX protocol supported by the
+                              session.  This must be less than or equal to the value of
+                              agentxMasterAgentXVer.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.3.2.1.6"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:int">
+                              <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="255"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="agentxSessionTimeout"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The length of time, in seconds, that a master agent should
+                              allow to elapse after dispatching a message to this session
+                              before it regards the subagent as not responding.  This value
+                              is taken from the o.timeout field of the agentx-Open-PDU.
+                              This is a session-specific value that may be overridden by
+                              values associated with the specific registered MIB regions
+                              (see agentxRegTimeout). A value of zero(0) indicates that
+                              the master agent's default timeout value should be used
+                              
+                              (see agentxDefaultTimeout).
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <ncx:units>seconds</ncx:units>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.3.2.1.7"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:int">
+                              <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="255"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element
+                        name="__.agentxSession.agentxSessionEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="agentxSessionEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="agentxConnIndex"/>
+                  <xs:field xpath="agentxSessionIndex"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.agentxSession.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="agentxRegistration">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <smi:oid  smi:oid="1.3.6.1.2.1.74.1.4"/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="agentxRegistrationTableLastChange"
+               type="yang:timestamp" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The value of sysUpTime when the last row creation or deletion
+                     occurred in the agentxRegistrationTable.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.74.1.4.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="agentxRegistrationEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     Contains information for a single registered region.  An
+                     entry is created when a session  successfully registers a
+                     region and is destroyed for any of three reasons: this region
+                     is unregistered by the session, the session is closed,
+                     or the subagent connection is closed.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.74.1.4.2.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="agentxConnIndex">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Automagically generated keyref leaf.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType/>
+                     </xs:element>
+                     <xs:element name="agentxSessionIndex">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Automagically generated keyref leaf.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType/>
+                     </xs:element>
+                     <xs:element name="agentxRegIndex">
+                        <xs:annotation>
+                           <xs:documentation>
+                              agentxRegIndex uniquely identifies a registration entry.
+                              This value is constant for the lifetime of an entry.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.4.2.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:unsignedInt">
+                              <xs:minInclusive value="1"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="agentxRegContext"
+                        type="xs:base64Binary" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The context in which the session supports the objects in this
+                              region.  A zero-length context indicates the default context.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.4.2.1.2"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="agentxRegStart"
+                        type="yang:object-identifier" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The starting OBJECT IDENTIFIER of this registration entry.  The
+                              session identified by agentxSessionIndex implements objects
+                              starting at this value (inclusive).  Note that this value could
+                              identify an object type, an object instance, or a partial object
+                              instance.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.4.2.1.3"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="agentxRegRangeSubId"
+                        type="xs:unsignedInt" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              agentxRegRangeSubId is used to specify the range.  This is
+                              taken from r.region_subid in the registration PDU.  If the value
+                              of this object is zero, no range is specified.  If it is non-zero,
+                              it identifies the `nth' sub-identifier in r.region for which
+                              this entry's agentxRegUpperBound value is substituted in the
+                              OID for purposes of defining the region's upper bound.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.4.2.1.4"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="agentxRegUpperBound"
+                        type="xs:unsignedInt" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              agentxRegUpperBound represents the upper-bound sub-identifier in
+                              a registration.  This is taken from the r.upper_bound in the
+                              registration PDU.  If agentxRegRangeSubid (r.region_subid) is
+                              zero, this value is also zero and is not used to define an upper
+                              bound for this registration.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.4.2.1.5"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="agentxRegPriority"
+                        type="xs:unsignedInt" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The registration priority.  Lower values have higher priority.
+                              This value is taken from r.priority in the register PDU.
+                              Sessions should use the value of 127 for r.priority if a
+                              default value is desired.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.4.2.1.6"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="agentxRegTimeout" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The timeout value, in seconds, for responses to
+                              requests associated with this registered MIB region.
+                              A value of zero(0) indicates the default value (indicated
+                              by by agentxSessionTimeout or agentxDefaultTimeout) is to
+                              be used.  This value is taken from the r.timeout field of
+                              the agentx-Register-PDU.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <ncx:units>seconds</ncx:units>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.4.2.1.7"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:int">
+                              <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="255"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="agentxRegInstance"
+                        type="smiv2:TruthValue" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The value of agentxRegInstance is `true' for
+                              registrations for which the INSTANCE_REGISTRATION
+                              was set, and is `false' for all other registrations.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.74.1.4.2.1.8"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element
+                        name="__.agentxRegistration.agentxRegistrationEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="agentxRegistrationEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="agentxConnIndex"/>
+                  <xs:field xpath="agentxSessionIndex"/>
+                  <xs:field xpath="agentxRegIndex"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.agentxRegistration.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

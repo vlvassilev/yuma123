@@ -1,0 +1,248 @@
+ncx-module ncxtypes {
+  header {
+    description "NCX Common Data Types";
+    version 0.2;
+    owner ncx;
+    application types;
+    copyright "Copyright (C) 2006-2007, Andy Bierman.";
+    contact-info "Send comments to <ietf@andybierman.com>.";
+    last-update "2007-03-02";
+    revision-history {
+       0.1 "Initial version.";
+       0.2 "Changed application to types";
+    }
+  }
+
+  definitions {
+
+    type any {
+      description "Changed any base type to anyxml for YANG";
+      syntax { anyxml; }
+    }
+
+    type int {
+      description "Changed int base type to int32 for YANG";
+      syntax { int32; }
+    }
+
+    type uint {
+      description "Changed uint base type to uint32 for YANG";
+      syntax { uint32; }
+    }
+
+    type long {
+      description "Changed long base type to int64 for YANG";
+      syntax { int64; }
+    }
+
+    type ulong {
+      description "Changed ulong base type to uint64 for YANG";
+      syntax { uint64; }
+    }
+
+    type float {
+      description "Changed float base type to float32 for YANG";
+      syntax { float32; }
+    }
+
+    type double {
+      description "Changed double base type to float64 for YANG";
+      syntax { float64; }
+    }
+
+    type ustring {
+      description "Changed ustring base type to binary for YANG";
+      syntax { binary; }
+    }
+
+    type NcxName {
+      description "General Purpose NCX Name string.";
+      syntax { 
+	string (1..1023) pattern = '[a-z,A-Z][a-z,A-Z,0-9,\-,_]*'; 
+      }
+    }
+
+    type NcxQName {
+      description 
+        "Qualified Name:
+            module-name:NcxName OR owner-name:NcxName.";
+      syntax {
+	string (1..2046) pattern =
+          '(([a-z,A-Z][a-z,A-Z,0-9,\-,_]*):)?([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)';
+      }
+    }
+
+    type NcxSimpleId {
+      description "Simple Definition Identifier string.";
+      syntax { NcxName; }
+    }
+
+    type NcxScopedId {
+      description "Scoped Definition Identifier string.";
+      syntax {
+	string (3..) pattern =
+          '([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)\.(([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)+)';
+      }
+    }
+
+    type NcxModQualId {
+      description "Module Qualified Simple Definition Identifier string.";
+      syntax {
+	string (3..) pattern =
+          '([a-z,A-Z][a-z,A-Z,0-9,\-,_]*):([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)';
+      }
+    }
+
+    type NcxModScopedId {
+      description "Module Qualified Scoped Definition Identifier string.";
+      syntax {
+	string (5..) pattern =
+          '([a-z,A-Z][a-z,A-Z,0-9,\-,_]*):([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)\.' +
+          '(([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)+)';
+      }
+    }
+
+    type NcxIdentifier {
+      description "Union of all the Identifier types.";
+      syntax {
+        union { NcxSimpleId NcxScopedId NcxModQualId NcxModScopedId };
+      }
+    }
+
+    type NcxSessionId {
+      description "NCX Session ID number";
+      syntax { uint (1..); }
+    }
+
+    type NcxLineLength {
+      description "Requested Maximum Line Length";
+      syntax { uint (32..65535); }
+    }
+
+    type NcxUserName {
+      description "NCX User Name string.";
+      syntax { NcxName; }
+    }
+
+    type NcxGroupName {
+      description "NCX Group Name string.";
+      syntax { NcxName; }
+    }
+
+    type NcxModuleList {
+      description "List of NCX Module names.";
+      syntax { slist { NcxName }; }
+    }
+
+    type NcxLockList {
+      description "List of config named that are currently locked.";
+      syntax { slist { NcxName }; }
+    }
+
+    type NcAccessControlType {
+      description 
+        "NCX System access control mode.
+          open == no access control checking enforced 
+          loose == any RPC method in the netconf namespace can
+              be invoked;  read-only data allowed for all
+          strict == ncxacl RPC entry must be present to invoke
+              an RPC method; ncxacl Data entry must be present
+              to access any data. (Except for user == 'root'.)
+         ";
+      syntax {
+         enum = { open loose strict };
+      }
+      default "strict";
+    }
+
+    type NcxRpcType {
+      description "NCX RPC Type Classifications";
+      syntax {
+        enum = { other config exec monitor debug };
+      }
+    }
+
+    type NcxRpcTypeList {
+      description "List NCX RPC Type Classifications";
+      syntax {
+        slist { NcxRpcType };
+      }
+      appinfo {
+        ncx:no-duplicates;
+        ncx:merge-type sort;
+      }
+    }
+
+    type NcDebugType {
+      description 
+        "NCX Session debug logging control enumeration.
+         Each successive value includes all the previous
+         messages from lower value enumeration values,
+         plus the messages for the specified value.
+
+          off == no logging is done
+          error == log error messages
+          warn == log warning messages
+          info == log info messages 
+          debug == log debug level 1 messages
+          debug2 == log debug level 2 messages
+          debug3 == log debug level 3 messages
+         ";
+      syntax {
+         string = { off error warn info debug debug2 debug3 };
+      }
+      default "info";
+    }
+
+    type NcPortNumber { 
+      description "Transport layer port number.";
+      syntax { uint ( 1 .. 65535 ); }
+    }
+
+    type NcIndex { 
+      description "Non-negative index value";
+      syntax { uint ( 1 ..  ); }
+    }
+
+    type NcPathList {
+      description 
+        "PATHSPEC formatted string indicating the machine-dependent
+         search path for the NCX programs to use.  Parameters
+         with this data type can be used to override the
+         default search order, and insert special work
+         directories in the search path.
+
+         Each component in the string is an absolute or
+         relative directory path specification.
+         The colon char ':' is used to separate the path strings.
+         Whitespace is not allowed in the string at all.
+
+         For example, the following string contains 3 paths
+         that would be used in the order given:
+
+         /home/users/testbed1/yang:/home/users/yang:/usr/share/yang";
+      syntax { string; }
+    }
+
+    type NcModuleSpec {
+      description 
+        "A string which specifices a module name, or a filespec
+         which represents a module.
+
+         If the string is a simple identifier string, then
+         it will be treated as a module name, and the search
+         path will be used to find the complete filespec.
+
+         If the string:
+           -  ends in the sub-string '.yang' or '.ncx'
+           -  begins with the dot character '.'
+           -  contains any  or a path separator characters
+         then it is considered to be a filespec, not a module
+         name, and only that filespec will be used for input,
+         instead of using the module search path.";
+      syntax { string; }
+    }
+    
+  }
+}
+

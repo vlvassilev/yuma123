@@ -1,0 +1,33 @@
+../../target/db/db.o: db.c ../platform/procdefs.h ../util/status.h \
+  db_config.h db.h
+
+../../target/db/db_config.o: db_config.c ../platform/procdefs.h \
+  ../util/status.h ../util/xml_util.h \
+  /usr/include/libxml2/libxml/xmlreader.h \
+  /usr/include/libxml2/libxml/xmlversion.h \
+  /usr/include/libxml2/libxml/xmlexports.h \
+  /usr/include/libxml2/libxml/tree.h \
+  /usr/include/libxml2/libxml/xmlstring.h \
+  /usr/include/libxml2/libxml/xmlregexp.h \
+  /usr/include/libxml2/libxml/dict.h \
+  /usr/include/libxml2/libxml/xmlmemory.h \
+  /usr/include/libxml2/libxml/threads.h \
+  /usr/include/libxml2/libxml/globals.h \
+  /usr/include/libxml2/libxml/parser.h /usr/include/libxml2/libxml/hash.h \
+  /usr/include/libxml2/libxml/valid.h \
+  /usr/include/libxml2/libxml/xmlerror.h \
+  /usr/include/libxml2/libxml/list.h \
+  /usr/include/libxml2/libxml/xmlautomata.h \
+  /usr/include/libxml2/libxml/entities.h \
+  /usr/include/libxml2/libxml/encoding.h \
+  /usr/include/libxml2/libxml/xmlIO.h /usr/include/libxml2/libxml/SAX.h \
+  /usr/include/libxml2/libxml/xlink.h /usr/include/libxml2/libxml/SAX2.h \
+  /usr/include/libxml2/libxml/relaxng.h \
+  /usr/include/libxml2/libxml/xmlschemas.h \
+  /usr/include/libxml2/libxml/xmlstring.h ../ncx/ncxconst.h \
+  ../util/xmlns.h ../util/dlq.h db_config.h
+
+../../target/db/db_table.o: db_table.c ../platform/procdefs.h \
+  ../util/status.h db.h db_table.h
+
+

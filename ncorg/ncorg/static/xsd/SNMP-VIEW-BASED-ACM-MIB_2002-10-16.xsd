@@ -1,0 +1,850 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:smiv2:SNMP-VIEW-BASED-ACM-MIB"
+   targetNamespace="urn:ietf:params:xml:ns:yang:smiv2:SNMP-VIEW-BASED-ACM-MIB"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2002-10-16"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:snmp-framework="urn:ietf:params:xml:ns:yang:smiv2:SNMP-FRAMEWORK-MIB"
+   xmlns:smiv2="urn:ietf:params:xml:ns:yang:smiv2:SNMPv2-TC"
+   xmlns:smi="urn:ietf:params:xml:ns:yang:yang-smi"
+   xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'SNMP-VIEW-BASED-ACM-MIB.yang' by yangdump version 0.9.2
+         
+         Module: SNMP-VIEW-BASED-ACM-MIB
+         Organization: SNMPv3 Working Group
+         Version: 2002-10-16
+         Contact: WG-email:   snmpv3@lists.tislabs.com
+         Subscribe:  majordomo@lists.tislabs.com
+         	    In message body:  subscribe snmpv3
+         
+         Co-Chair:   Russ Mundy
+         	    Network Associates Laboratories
+         postal:     15204 Omega Drive, Suite 300
+         	    Rockville, MD 20850-4601
+         	    USA
+         email:      mundy@tislabs.com
+         phone:      +1 301-947-7107
+         
+         Co-Chair:   David Harrington
+         	    Enterasys Networks
+         Postal:     35 Industrial Way
+         	    P. O. Box 5004
+         	    Rochester, New Hampshire 03866-5005
+         	    USA
+         EMail:      dbh@enterasys.com
+         Phone:      +1 603-337-2614
+         
+         Co-editor:  Bert Wijnen
+         	    Lucent Technologies
+         postal:     Schagen 33
+         	    3461 GL Linschoten
+         	    Netherlands
+         email:      bwijnen@lucent.com
+         phone:      +31-348-480-685
+         
+         Co-editor:  Randy Presuhn
+         	    BMC Software, Inc.
+         
+         postal:     2141 North First Street
+         	    San Jose, CA 95131
+         	    USA
+         email:      randy_presuhn@bmc.com
+         phone:      +1 408-546-1006
+         
+         Co-editor:  Keith McCloghrie
+         	    Cisco Systems, Inc.
+         postal:     170 West Tasman Drive
+         	    San Jose, CA  95134-1706
+         	    USA
+         email:      kzm@cisco.com
+         phone:      +1-408-526-5260
+      </xs:documentation>
+      <xs:documentation>
+         The management information definitions for the
+         View-based Access Control Model for SNMP.
+         
+         Copyright (C) The Internet Society (2002). This
+         version of this MIB module is part of RFC 3415;
+         see the RFC itself for full legal notices.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/swdev/trunk/netconf/modules/./ietf/SNMP-VIEW-BASED-ACM-MIB.yang
+         </ncx:source>
+         <ncx:organization>SNMPv3 Working Group</ncx:organization>
+         <ncx:contact>
+            WG-email:   snmpv3@lists.tislabs.com
+            Subscribe:  majordomo@lists.tislabs.com
+            	    In message body:  subscribe snmpv3
+            
+            Co-Chair:   Russ Mundy
+            	    Network Associates Laboratories
+            postal:     15204 Omega Drive, Suite 300
+            	    Rockville, MD 20850-4601
+            	    USA
+            email:      mundy@tislabs.com
+            phone:      +1 301-947-7107
+            
+            Co-Chair:   David Harrington
+            	    Enterasys Networks
+            Postal:     35 Industrial Way
+            	    P. O. Box 5004
+            	    Rochester, New Hampshire 03866-5005
+            	    USA
+            EMail:      dbh@enterasys.com
+            Phone:      +1 603-337-2614
+            
+            Co-editor:  Bert Wijnen
+            	    Lucent Technologies
+            postal:     Schagen 33
+            	    3461 GL Linschoten
+            	    Netherlands
+            email:      bwijnen@lucent.com
+            phone:      +31-348-480-685
+            
+            Co-editor:  Randy Presuhn
+            	    BMC Software, Inc.
+            
+            postal:     2141 North First Street
+            	    San Jose, CA 95131
+            	    USA
+            email:      randy_presuhn@bmc.com
+            phone:      +1 408-546-1006
+            
+            Co-editor:  Keith McCloghrie
+            	    Cisco Systems, Inc.
+            postal:     170 West Tasman Drive
+            	    San Jose, CA  95134-1706
+            	    USA
+            email:      kzm@cisco.com
+            phone:      +1-408-526-5260
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2002-10-16</ncx:version>
+            <ncx:description>
+               Clarifications, published as RFC3415
+            </ncx:description>
+         </ncx:revision>
+         <ncx:revision>
+            <ncx:version>1999-01-20</ncx:version>
+            <ncx:description>
+               Clarifications, published as RFC2575
+            </ncx:description>
+         </ncx:revision>
+         <ncx:revision>
+            <ncx:version>1997-11-20</ncx:version>
+            <ncx:description>
+               Initial version, published as RFC2275
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:element name="vacmMIBObjects">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <smi:oid  smi:oid="1.3.6.1.6.3.16.1"/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="vacmContextEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     Information about a particular context.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.6.3.16.1.1.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="vacmContextName">
+                        <xs:annotation>
+                           <xs:documentation>
+                              A human readable name identifying a particular
+                              context at a particular SNMP entity.
+                              
+                              The empty contextName (zero length) represents the
+                              default context.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.1.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction
+                              base="snmp-framework:SnmpAdminString">
+                              <xs:maxLength value="32"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element
+                        name="__.vacmMIBObjects.vacmContextEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="vacmContextEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="vacmContextName"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="vacmSecurityToGroupEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     An entry in this table maps the combination of a
+                     securityModel and securityName into a groupName.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.6.3.16.1.2.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="vacmSecurityModel">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The Security Model, by which the vacmSecurityName
+                              referenced by this entry is provided.
+                              
+                              Note, this object may not take the 'any' (0) value.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.2.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction
+                              base="snmp-framework:SnmpSecurityModel">
+                              <xs:minInclusive value="1"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="vacmSecurityName">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The securityName for the principal, represented in a
+                              Security Model independent format, which is mapped by
+                              this entry to a groupName.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.2.1.2"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction
+                              base="snmp-framework:SnmpAdminString">
+                              <xs:minLength value="1"/>
+                              <xs:maxLength value="32"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="vacmGroupName" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The name of the group to which this entry (e.g., the
+                              combination of securityModel and securityName)
+                              belongs.
+                              
+                              This groupName is used as index into the
+                              vacmAccessTable to select an access control policy.
+                              However, a value in this table does not imply that an
+                              instance with the value exists in table vacmAccesTable.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.2.1.3"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction
+                              base="snmp-framework:SnmpAdminString">
+                              <xs:minLength value="1"/>
+                              <xs:maxLength value="32"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="vacmSecurityToGroupStorageType"
+                        type="smiv2:StorageType" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The storage type for this conceptual row.
+                              Conceptual rows having the value 'permanent' need not
+                              allow write-access to any columnar objects in the row.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:default  smi:default="nonVolatile"/>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.2.1.4"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="vacmSecurityToGroupStatus"
+                        type="smiv2:RowStatus" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The status of this conceptual row.
+                              
+                              Until instances of all corresponding columns are
+                              appropriately configured, the value of the
+                              
+                              corresponding instance of the vacmSecurityToGroupStatus
+                              column is 'notReady'.
+                              
+                              In particular, a newly created row cannot be made
+                              active until a value has been set for vacmGroupName.
+                              
+                              The  RowStatus TC [RFC2579] requires that this
+                              DESCRIPTION clause states under which circumstances
+                              other objects in this row can be modified:
+                              
+                              The value of this object has no effect on whether
+                              other objects in this conceptual row can be modified.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.2.1.5"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element
+                        name="__.vacmMIBObjects.vacmSecurityToGroupEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="vacmSecurityToGroupEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="vacmSecurityModel"/>
+                  <xs:field xpath="vacmSecurityName"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="vacmAccessEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     An access right configured in the Local Configuration
+                     Datastore (LCD) authorizing access to an SNMP context.
+                     
+                     Entries in this table can use an instance value for
+                     object vacmGroupName even if no entry in table
+                     vacmAccessSecurityToGroupTable has a corresponding
+                     value for object vacmGroupName.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.6.3.16.1.4.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="vacmGroupName">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Automagically generated keyref leaf.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType/>
+                     </xs:element>
+                     <xs:element name="vacmAccessContextPrefix">
+                        <xs:annotation>
+                           <xs:documentation>
+                              In order to gain the access rights allowed by this
+                              conceptual row, a contextName must match exactly
+                              (if the value of vacmAccessContextMatch is 'exact')
+                              or partially (if the value of vacmAccessContextMatch
+                              is 'prefix') to the value of the instance of this
+                              object.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.4.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction
+                              base="snmp-framework:SnmpAdminString">
+                              <xs:maxLength value="32"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="vacmAccessSecurityModel"
+                        type="snmp-framework:SnmpSecurityModel">
+                        <xs:annotation>
+                           <xs:documentation>
+                              In order to gain the access rights allowed by this
+                              conceptual row, this securityModel must be in use.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.4.1.2"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="vacmAccessSecurityLevel"
+                        type="snmp-framework:SnmpSecurityLevel">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The minimum level of security required in order to
+                              gain the access rights allowed by this conceptual
+                              row.  A securityLevel of noAuthNoPriv is less than
+                              authNoPriv which in turn is less than authPriv.
+                              
+                              If multiple entries are equally indexed except for
+                              this vacmAccessSecurityLevel index, then the entry
+                              which has the highest value for
+                              vacmAccessSecurityLevel is selected.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.4.1.3"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="vacmAccessContextMatch"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              If the value of this object is exact(1), then all
+                              rows where the contextName exactly matches
+                              vacmAccessContextPrefix are selected.
+                              
+                              If the value of this object is prefix(2), then all
+                              rows where the contextName whose starting octets
+                              exactly match vacmAccessContextPrefix are selected.
+                              This allows for a simple form of wildcarding.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:default  smi:default="exact"/>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.4.1.4"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:string">
+                              <xs:enumeration value="exact">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>1</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="prefix">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>2</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="vacmAccessReadViewName"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The value of an instance of this object identifies
+                              the MIB view of the SNMP context to which this
+                              conceptual row authorizes read access.
+                              
+                              The identified MIB view is that one for which the
+                              vacmViewTreeFamilyViewName has the same value as the
+                              instance of this object; if the value is the empty
+                              string or if there is no active MIB view having this
+                              value of vacmViewTreeFamilyViewName, then no access
+                              is granted.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:default  smi:default=""/>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.4.1.5"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction
+                              base="snmp-framework:SnmpAdminString">
+                              <xs:maxLength value="32"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="vacmAccessWriteViewName"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The value of an instance of this object identifies
+                              the MIB view of the SNMP context to which this
+                              conceptual row authorizes write access.
+                              
+                              The identified MIB view is that one for which the
+                              vacmViewTreeFamilyViewName has the same value as the
+                              instance of this object; if the value is the empty
+                              string or if there is no active MIB view having this
+                              value of vacmViewTreeFamilyViewName, then no access
+                              is granted.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:default  smi:default=""/>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.4.1.6"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction
+                              base="snmp-framework:SnmpAdminString">
+                              <xs:maxLength value="32"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="vacmAccessNotifyViewName"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The value of an instance of this object identifies
+                              the MIB view of the SNMP context to which this
+                              conceptual row authorizes access for notifications.
+                              
+                              The identified MIB view is that one for which the
+                              vacmViewTreeFamilyViewName has the same value as the
+                              instance of this object; if the value is the empty
+                              string or if there is no active MIB view having this
+                              value of vacmViewTreeFamilyViewName, then no access
+                              is granted.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:default  smi:default=""/>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.4.1.7"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction
+                              base="snmp-framework:SnmpAdminString">
+                              <xs:maxLength value="32"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="vacmAccessStorageType"
+                        type="smiv2:StorageType" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The storage type for this conceptual row.
+                              
+                              Conceptual rows having the value 'permanent' need not
+                              allow write-access to any columnar objects in the row.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:default  smi:default="nonVolatile"/>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.4.1.8"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="vacmAccessStatus"
+                        type="smiv2:RowStatus" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The status of this conceptual row.
+                              
+                              The  RowStatus TC [RFC2579] requires that this
+                              DESCRIPTION clause states under which circumstances
+                              other objects in this row can be modified:
+                              
+                              The value of this object has no effect on whether
+                              other objects in this conceptual row can be modified.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.4.1.9"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element
+                        name="__.vacmMIBObjects.vacmAccessEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="vacmAccessEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="vacmGroupName"/>
+                  <xs:field xpath="vacmAccessContextPrefix"/>
+                  <xs:field xpath="vacmAccessSecurityModel"/>
+                  <xs:field xpath="vacmAccessSecurityLevel"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.vacmMIBObjects.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="vacmMIBViews">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <smi:oid  smi:oid="1.3.6.1.6.3.16.1.5"/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="vacmViewSpinLock"
+               type="smiv2:TestAndIncr" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     An advisory lock used to allow cooperating SNMP
+                     Command Generator applications to coordinate their
+                     use of the Set operation in creating or modifying
+                     views.
+                     
+                     When creating a new view or altering an existing
+                     view, it is important to understand the potential
+                     interactions with other uses of the view.  The
+                     vacmViewSpinLock should be retrieved.  The name of
+                     the view to be created should be determined to be
+                     unique by the SNMP Command Generator application by
+                     consulting the vacmViewTreeFamilyTable.  Finally,
+                     the named view may be created (Set), including the
+                     advisory lock.
+                     If another SNMP Command Generator application has
+                     altered the views in the meantime, then the spin
+                     lock's value will have changed, and so this creation
+                     will fail because it will specify the wrong value for
+                     the spin lock.
+                     
+                     Since this is an advisory lock, the use of this lock
+                     is not enforced.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>true</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.6.3.16.1.5.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="vacmViewTreeFamilyEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     Information on a particular family of view subtrees
+                     included in or excluded from a particular SNMP
+                     context's MIB view.
+                     
+                     Implementations must not restrict the number of
+                     families of view subtrees for a given MIB view,
+                     except as dictated by resource constraints on the
+                     overall number of entries in the
+                     vacmViewTreeFamilyTable.
+                     
+                     If no conceptual rows exist in this table for a given
+                     MIB view (viewName), that view may be thought of as
+                     consisting of the empty set of view subtrees.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.6.3.16.1.5.2.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="vacmViewTreeFamilyViewName">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The human readable name for a family of view subtrees.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.5.2.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction
+                              base="snmp-framework:SnmpAdminString">
+                              <xs:minLength value="1"/>
+                              <xs:maxLength value="32"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="vacmViewTreeFamilySubtree"
+                        type="yang:object-identifier">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The MIB subtree which when combined with the
+                              corresponding instance of vacmViewTreeFamilyMask
+                              defines a family of view subtrees.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.5.2.1.2"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="vacmViewTreeFamilyMask"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The bit mask which, in combination with the
+                              corresponding instance of vacmViewTreeFamilySubtree,
+                              defines a family of view subtrees.
+                              
+                              Each bit of this bit mask corresponds to a
+                              sub-identifier of vacmViewTreeFamilySubtree, with the
+                              most significant bit of the i-th octet of this octet
+                              string value (extended if necessary, see below)
+                              corresponding to the (8*i - 7)-th sub-identifier, and
+                              the least significant bit of the i-th octet of this
+                              octet string corresponding to the (8*i)-th
+                              sub-identifier, where i is in the range 1 through 16.
+                              
+                              Each bit of this bit mask specifies whether or not
+                              the corresponding sub-identifiers must match when
+                              determining if an OBJECT IDENTIFIER is in this
+                              family of view subtrees; a '1' indicates that an
+                              exact match must occur; a '0' indicates 'wild card',
+                              i.e., any sub-identifier value matches.
+                              
+                              Thus, the OBJECT IDENTIFIER X of an object instance
+                              is contained in a family of view subtrees if, for
+                              each sub-identifier of the value of
+                              vacmViewTreeFamilySubtree, either:
+                              
+                                the i-th bit of vacmViewTreeFamilyMask is 0, or
+                              
+                                the i-th sub-identifier of X is equal to the i-th
+                                sub-identifier of the value of
+                                vacmViewTreeFamilySubtree.
+                              
+                              If the value of this bit mask is M bits long and
+                              
+                              there are more than M sub-identifiers in the
+                              corresponding instance of vacmViewTreeFamilySubtree,
+                              then the bit mask is extended with 1's to be the
+                              required length.
+                              
+                              Note that when the value of this object is the
+                              zero-length string, this extension rule results in
+                              a mask of all-1's being used (i.e., no 'wild card'),
+                              and the family of view subtrees is the one view
+                              subtree uniquely identified by the corresponding
+                              instance of vacmViewTreeFamilySubtree.
+                              
+                              Note that masks of length greater than zero length
+                              do not need to be supported.  In this case this
+                              object is made read-only.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:default  smi:default=""/>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.5.2.1.3"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:base64Binary">
+                              <xs:maxLength value="16"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="vacmViewTreeFamilyType"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Indicates whether the corresponding instances of
+                              vacmViewTreeFamilySubtree and vacmViewTreeFamilyMask
+                              define a family of view subtrees which is included in
+                              or excluded from the MIB view.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:default  smi:default="included"/>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.5.2.1.4"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:string">
+                              <xs:enumeration value="included">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>1</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="excluded">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>2</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="vacmViewTreeFamilyStorageType"
+                        type="smiv2:StorageType" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The storage type for this conceptual row.
+                              
+                              Conceptual rows having the value 'permanent' need not
+                              allow write-access to any columnar objects in the row.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:default  smi:default="nonVolatile"/>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.5.2.1.5"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="vacmViewTreeFamilyStatus"
+                        type="smiv2:RowStatus" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The status of this conceptual row.
+                              
+                              The  RowStatus TC [RFC2579] requires that this
+                              DESCRIPTION clause states under which circumstances
+                              other objects in this row can be modified:
+                              
+                              The value of this object has no effect on whether
+                              other objects in this conceptual row can be modified.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.6.3.16.1.5.2.1.6"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element
+                        name="__.vacmMIBViews.vacmViewTreeFamilyEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="vacmViewTreeFamilyEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="vacmViewTreeFamilyViewName"/>
+                  <xs:field xpath="vacmViewTreeFamilySubtree"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.vacmMIBViews.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

@@ -1,0 +1,687 @@
+
+<div>
+   <h1 class="yang">NOTIFICATION-LOG-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#nlmConfig.49">nlmConfig</a>
+               <ul>
+                  <li><a href="#nlmConfigGlobalEntryLimit.51">nlmConfigGlobalEntryLimit</a></li>
+                  <li><a href="#nlmConfigGlobalAgeOut.78">nlmConfigGlobalAgeOut</a></li>
+                  <li class="daddy"><a href="#nlmConfigLogEntry.102">nlmConfigLogEntry</a>
+                     <ul>
+                        <li><a href="#nlmLogName.112">nlmLogName</a></li>
+                        <li><a href="#nlmConfigLogFilterName.128">nlmConfigLogFilterName</a></li>
+                        <li><a href="#nlmConfigLogEntryLimit.146">nlmConfigLogEntryLimit</a></li>
+                        <li><a href="#nlmConfigLogAdminStatus.169">nlmConfigLogAdminStatus</a></li>
+                        <li><a href="#nlmConfigLogOperStatus.186">nlmConfigLogOperStatus</a></li>
+                        <li><a href="#nlmConfigLogStorageType.207">nlmConfigLogStorageType</a></li>
+                        <li><a href="#nlmConfigLogEntryStatus.215">nlmConfigLogEntryStatus</a></li>
+                        <li><a href="#nlmStatsLogNotificationsLogged.574">nlmStatsLogNotificationsLogged</a></li>
+                        <li><a href="#nlmStatsLogNotificationsBumped.583">nlmStatsLogNotificationsBumped</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#nlmStats.233">nlmStats</a>
+               <ul>
+                  <li><a href="#nlmStatsGlobalNotificationsLogged.235">nlmStatsGlobalNotificationsLogged</a></li>
+                  <li><a href="#nlmStatsGlobalNotificationsBumped.246">nlmStatsGlobalNotificationsBumped</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#nlmLog.261">nlmLog</a>
+               <ul>
+                  <li class="daddy"><a href="#nlmLogEntry.266">nlmLogEntry</a>
+                     <ul>
+                        <li><a href="#nlmLogName.291">nlmLogName</a></li>
+                        <li><a href="#nlmLogIndex.300">nlmLogIndex</a></li>
+                        <li><a href="#nlmLogTime.313">nlmLogTime</a></li>
+                        <li><a href="#nlmLogDateAndTime.323">nlmLogDateAndTime</a></li>
+                        <li><a href="#nlmLogEngineID.332">nlmLogEngineID</a></li>
+                        <li><a href="#nlmLogEngineTAddress.347">nlmLogEngineTAddress</a></li>
+                        <li><a href="#nlmLogEngineTDomain.369">nlmLogEngineTDomain</a></li>
+                        <li><a href="#nlmLogContextEngineID.383">nlmLogContextEngineID</a></li>
+                        <li><a href="#nlmLogContextName.393">nlmLogContextName</a></li>
+                        <li><a href="#nlmLogNotificationID.402">nlmLogNotificationID</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#nlmLogVariableEntry.415">nlmLogVariableEntry</a>
+                     <ul>
+                        <li><a href="#nlmLogName.425">nlmLogName</a></li>
+                        <li><a href="#nlmLogIndex.433">nlmLogIndex</a></li>
+                        <li><a href="#nlmLogVariableIndex.442">nlmLogVariableIndex</a></li>
+                        <li><a href="#nlmLogVariableID.454">nlmLogVariableID</a></li>
+                        <li><a href="#nlmLogVariableValueType.462">nlmLogVariableValueType</a></li>
+                        <li><a href="#nlmLogVariableCounter32Val.481">nlmLogVariableCounter32Val</a></li>
+                        <li><a href="#nlmLogVariableUnsigned32Val.489">nlmLogVariableUnsigned32Val</a></li>
+                        <li><a href="#nlmLogVariableTimeTicksVal.497">nlmLogVariableTimeTicksVal</a></li>
+                        <li><a href="#nlmLogVariableInteger32Val.505">nlmLogVariableInteger32Val</a></li>
+                        <li><a href="#nlmLogVariableOctetStringVal.513">nlmLogVariableOctetStringVal</a></li>
+                        <li><a href="#nlmLogVariableIpAddressVal.521">nlmLogVariableIpAddressVal</a></li>
+                        <li><a href="#nlmLogVariableOidVal.540">nlmLogVariableOidVal</a></li>
+                        <li><a href="#nlmLogVariableCounter64Val.548">nlmLogVariableCounter64Val</a></li>
+                        <li><a href="#nlmLogVariableOpaqueVal.556">nlmLogVariableOpaqueVal</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">NOTIFICATION-LOG-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:NOTIFICATION-LOG-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"notification-log"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14">SNMP-FRAMEWORK-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-framework"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMPv2-TC/1999-04-01">SNMPv2-TC</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smiv2"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/inet-types/2007-10-02">inet-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"inet"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+
+      <span class="yang_kw">organization</span>
+         <span class="yang_str">"IETF Distributed Management Working Group"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"Ramanathan Kavasseri
+         Cisco Systems, Inc.
+         170 West Tasman Drive,
+         San Jose CA 95134-1706.
+         Phone: +1 408 527 2446
+         Email: ramk@cisco.com"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"The MIB module for logging SNMP Notifications, that is, Traps
+         
+         
+         and Informs."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-11-27"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"This is the initial version of this MIB.
+            Published as RFC 3014"</span>;
+      }
+
+
+      <span class="yang_cmt">// objects</span>
+
+      <a name="nlmConfig.49"/><span class="yang_kw">container</span> <span class="yang_id">nlmConfig</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1"</span>;
+
+         <a name="nlmConfigGlobalEntryLimit.51"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigGlobalEntryLimit</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The maximum number of notification entries that may be held
+               in nlmLogTable for all nlmLogNames added together.  A particular
+               setting does not guarantee that much data can be held.
+               
+               If an application changes the limit while there are
+               Notifications in the log, the oldest Notifications MUST be
+               discarded to bring the log down to the new limit - thus the
+               value of nlmConfigGlobalEntryLimit MUST take precedence over
+               the values of nlmConfigGlobalAgeOut and nlmConfigLogEntryLimit,
+               even if the Notification being discarded has been present for
+               fewer minutes than the value of nlmConfigGlobalAgeOut, or if
+               the named log has fewer entries than that specified in
+               nlmConfigLogEntryLimit.
+               
+               A value of 0 means no limit.
+               
+               Please be aware that contention between multiple managers
+               trying to set this object to different values MAY affect the
+               reliability and completeness of data seen by each manager."</span>;
+            <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.1"</span>;
+         }
+
+         <a name="nlmConfigGlobalAgeOut.78"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigGlobalAgeOut</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+            <span class="yang_kw">units</span> <span class="yang_str">"minutes"</span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of minutes a Notification SHOULD be kept in a log
+               before it is automatically removed.
+               
+               If an application changes the value of nlmConfigGlobalAgeOut,
+               Notifications older than the new time MAY be discarded to meet the
+               new time.
+               
+               A value of 0 means no age out.
+               
+               Please be aware that contention between multiple managers
+               trying to set this object to different values MAY affect the
+               reliability and completeness of data seen by each manager."</span>;
+            <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"1440"</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.2"</span>;
+         }
+
+         <a name="nlmConfigLogEntry.102"/><span class="yang_kw">list</span> <span class="yang_id">nlmConfigLogEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#nlmLogName.112">nlmLogName</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"A logging control entry.  Depending on the entry's storage type
+               entries may be supplied by the system or created and deleted by
+               applications using nlmConfigLogEntryStatus."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1"</span>;
+
+            <a name="nlmLogName.112"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The name of the log.
+                  
+                  An implementation may allow multiple named logs, up to some
+                  implementation-specific limit (which may be none).  A
+                  zero-length log name is reserved for creation and deletion by
+                  the managed system, and MUST be used as the default log name by
+                  systems that do not support named logs."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.1"</span>;
+            }
+
+            <a name="nlmConfigLogFilterName.128"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogFilterName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A value of snmpNotifyFilterProfileName as used as an index
+                  into the snmpNotifyFilterTable in the SNMP Notification MIB,
+                  specifying the locally or remotely originated Notifications
+                  to be filtered out and not logged in this log.
+                  
+                  A zero-length value or a name that does not identify an
+                  existing entry in snmpNotifyFilterTable indicate no
+                  Notifications are to be logged in this log."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.2"</span>;
+            }
+
+            <a name="nlmConfigLogEntryLimit.146"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogEntryLimit</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The maximum number of notification entries that can be held in
+                  nlmLogTable for this named log.  A particular setting does not
+                  guarantee that that much data can be held.
+                  
+                  If an application changes the limit while there are
+                  Notifications in the log, the oldest Notifications are discarded
+                  to bring the log down to the new limit.
+                  
+                  
+                  
+                  A value of 0 indicates no limit.
+                  
+                  Please be aware that contention between multiple managers
+                  trying to set this object to different values MAY affect the
+                  reliability and completeness of data seen by each manager."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.3"</span>;
+            }
+
+            <a name="nlmConfigLogAdminStatus.169"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogAdminStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"enabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Control to enable or disable the log without otherwise
+                  disturbing the log's entry.
+                  
+                  Please be aware that contention between multiple managers
+                  trying to set this object to different values MAY affect the
+                  reliability and completeness of data seen by each manager."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"enabled"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.4"</span>;
+            }
+
+            <a name="nlmConfigLogOperStatus.186"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogOperStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"operational"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"noFilter"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The operational status of this log:
+                  
+                  disabled  administratively disabled
+                  
+                  operational    administratively enabled and working
+                  
+                  noFilter  administratively enabled but either
+                  	  nlmConfigLogFilterName is zero length
+                  	  or does not name an existing entry in
+                  	  snmpNotifyFilterTable"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.5"</span>;
+            }
+
+            <a name="nlmConfigLogStorageType.207"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogStorageType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type of this conceptual row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.6"</span>;
+            }
+
+            <a name="nlmConfigLogEntryStatus.215"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogEntryStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Control for creating and deleting entries.  Entries may be
+                  modified while active.
+                  
+                  For non-null-named logs, the managed system records the security
+                  credentials from the request that sets nlmConfigLogStatus
+                  to 'active' and uses that identity to apply access control to
+                  the objects in the Notification to decide if that Notification
+                  may be logged."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.7"</span>;
+            }
+
+            <a name="nlmStatsLogNotificationsLogged.574"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsLogNotificationsLogged</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of Notifications put in this named log."</span>;
+               <span class="yang_kw">smi:oid</span> <span class="yang_str">"1.3.6.1.2.1.92.1.2.3.1.1"</span>;
+            }
+
+            <a name="nlmStatsLogNotificationsBumped.583"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsLogNotificationsBumped</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of log entries discarded from this named log to make
+                  room for a new entry due to lack of resources or the value of
+                  nlmConfigGlobalEntryLimit or nlmConfigLogEntryLimit.  This does not
+                  include entries discarded due to the value of
+                  nlmConfigGlobalAgeOut."</span>;
+               <span class="yang_kw">smi:oid</span> <span class="yang_str">"1.3.6.1.2.1.92.1.2.3.1.2"</span>;
+            }
+         }  <span class="yang_cmt">// list nlmConfigLogEntry</span>
+      }  <span class="yang_cmt">// container nlmConfig</span>
+
+      <a name="nlmStats.233"/><span class="yang_kw">container</span> <span class="yang_id">nlmStats</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.2"</span>;
+
+         <a name="nlmStatsGlobalNotificationsLogged.235"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsGlobalNotificationsLogged</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of Notifications put into the nlmLogTable.  This
+               counts a Notification once for each log entry, so a Notification
+                put into multiple logs is counted multiple times."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.2.1"</span>;
+         }
+
+         <a name="nlmStatsGlobalNotificationsBumped.246"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsGlobalNotificationsBumped</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The number of log entries discarded to make room for a new entry
+               due to lack of resources or the value of nlmConfigGlobalEntryLimit
+               or nlmConfigLogEntryLimit.  This does not include entries discarded
+               due to the value of nlmConfigGlobalAgeOut."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.2.2"</span>;
+         }
+      }  <span class="yang_cmt">// container nlmStats</span>
+
+      <a name="nlmLog.261"/><span class="yang_kw">container</span> <span class="yang_id">nlmLog</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3"</span>;
+
+         <a name="nlmLogEntry.266"/><span class="yang_kw">list</span> <span class="yang_id">nlmLogEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#nlmLogName.291">nlmLogName</a>, <a href="#nlmLogIndex.300">nlmLogIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"A Notification log entry.
+               
+               Entries appear in this table when Notifications occur and pass
+               filtering by nlmConfigLogFilterName and access control.  They are
+               removed to make way for new entries due to lack of resources or
+               the values of nlmConfigGlobalEntryLimit, nlmConfigGlobalAgeOut, or
+               nlmConfigLogEntryLimit.
+               
+               If adding an entry would exceed nlmConfigGlobalEntryLimit or system
+               resources in general, the oldest entry in any log SHOULD be removed
+               to make room for the new one.
+               
+               If adding an entry would exceed nlmConfigLogEntryLimit the oldest
+               entry in that log SHOULD be removed to make room for the new one.
+               
+               Before the managed system puts a locally-generated Notification
+               into a non-null-named log it assures that the creator of the log
+               has access to the information in the Notification.  If not it
+               does not log that Notification in that log."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1"</span>;
+
+            <a name="nlmLogName.291"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/notification-log:nlmConfig/notification-log:nlmConfigLogEntry/notification-log:nlmLogName"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="nlmLogIndex.300"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A monotonically increasing integer for the sole purpose of
+                  indexing entries within the named log.  When it reaches the
+                  maximum value, an extremely unlikely event, the agent wraps the
+                  value back to 1."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.1"</span>;
+            }
+
+            <a name="nlmLogTime.313"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of sysUpTime when the entry was placed in the log. If
+                  the entry occurred before the most recent management system
+                  initialization this object value MUST be set to zero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.2"</span>;
+            }
+
+            <a name="nlmLogDateAndTime.323"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogDateAndTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The local date and time when the entry was logged, instantiated
+                  only by systems that have date and time capability."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.3"</span>;
+            }
+
+            <a name="nlmLogEngineID.332"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogEngineID</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpEngineID.105">snmp-framework:SnmpEngineID</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The identification of the SNMP engine at which the Notification
+                  
+                  
+                  originated.
+                  
+                  If the log can contain Notifications from only one engine
+                  or the Trap is in SNMPv1 format, this object is a zero-length
+                  string."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.4"</span>;
+            }
+
+            <a name="nlmLogEngineTAddress.347"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogEngineTAddress</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TAddress.759">smiv2:TAddress</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The transport service address of the SNMP engine from which the
+                  Notification was received, formatted according to the corresponding
+                  value of nlmLogEngineTDomain. This is used to identify the source
+                  of an SNMPv1 trap, since an nlmLogEngineId cannot be extracted
+                  from the SNMPv1 trap pdu.
+                  
+                  This object MUST always be instantiated, even if the log
+                  can contain Notifications from only one engine.
+                  
+                  Please be aware that the nlmLogEngineTAddress may not uniquely
+                  identify the SNMP engine from which the Notification was received.
+                  For example, if an SNMP engine uses DHCP or NAT to obtain
+                  ip addresses, the address it uses may be shared with other
+                  network devices, and hence will not uniquely identify the
+                  SNMP engine."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.5"</span>;
+            }
+
+            <a name="nlmLogEngineTDomain.369"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogEngineTDomain</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TDomain.747">smiv2:TDomain</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Indicates the kind of transport service by which a Notification
+                  was received from an SNMP engine. nlmLogEngineTAddress contains
+                  the transport service address of the SNMP engine from which
+                  this Notification was received.
+                  
+                  Possible values for this object are presently found in the
+                  Transport Mappings for SNMPv2 document (RFC 1906 [8])."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.6"</span>;
+            }
+
+            <a name="nlmLogContextEngineID.383"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogContextEngineID</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpEngineID.105">snmp-framework:SnmpEngineID</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"If the Notification was received in a protocol which has a
+                  contextEngineID element like SNMPv3, this object has that value.
+                  Otherwise its value is a zero-length string."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.7"</span>;
+            }
+
+            <a name="nlmLogContextName.393"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogContextName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The name of the SNMP MIB context from which the Notification came.
+                  For SNMPv1 Traps this is the community string from the Trap."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.8"</span>;
+            }
+
+            <a name="nlmLogNotificationID.402"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogNotificationID</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The NOTIFICATION-TYPE object identifier of the Notification that
+                  occurred."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.9"</span>;
+            }
+         }  <span class="yang_cmt">// list nlmLogEntry</span>
+
+         <a name="nlmLogVariableEntry.415"/><span class="yang_kw">list</span> <span class="yang_id">nlmLogVariableEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#nlmLogName.425">nlmLogName</a>, <a href="#nlmLogIndex.433">nlmLogIndex</a>, <a href="#nlmLogVariableIndex.442">nlmLogVariableIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"A Notification log entry variable.
+               
+               Entries appear in this table when there are variables in
+               the varbind list of a Notification in nlmLogTable."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1"</span>;
+
+            <a name="nlmLogName.425"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/notification-log:nlmConfig/notification-log:nlmConfigLogEntry/notification-log:nlmLogName"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="nlmLogIndex.433"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/notification-log:nlmLog/notification-log:nlmLogEntry/notification-log:nlmLogIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="nlmLogVariableIndex.442"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A monotonically increasing integer, starting at 1 for a given
+                  nlmLogIndex, for indexing variables within the logged
+                  Notification."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.1"</span>;
+            }
+
+            <a name="nlmLogVariableID.454"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableID</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"The variable's object identifier."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.2"</span>;
+            }
+
+            <a name="nlmLogVariableValueType.462"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableValueType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"counter32"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"unsigned32"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"timeTicks"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"integer32"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"ipAddress"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"octetString"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"objectId"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"counter64"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">8</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"opaque"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The type of the value.  One and only one of the value
+                  objects that follow must be instantiated, based on this type."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.3"</span>;
+            }
+
+            <a name="nlmLogVariableCounter32Val.481"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableCounter32Val</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value when nlmLogVariableType is 'counter32'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.4"</span>;
+            }
+
+            <a name="nlmLogVariableUnsigned32Val.489"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableUnsigned32Val</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value when nlmLogVariableType is 'unsigned32'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.5"</span>;
+            }
+
+            <a name="nlmLogVariableTimeTicksVal.497"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableTimeTicksVal</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value when nlmLogVariableType is 'timeTicks'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.6"</span>;
+            }
+
+            <a name="nlmLogVariableInteger32Val.505"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableInteger32Val</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value when nlmLogVariableType is 'integer32'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.7"</span>;
+            }
+
+            <a name="nlmLogVariableOctetStringVal.513"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableOctetStringVal</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value when nlmLogVariableType is 'octetString'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.8"</span>;
+            }
+
+            <a name="nlmLogVariableIpAddressVal.521"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableIpAddressVal</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value when nlmLogVariableType is 'ipAddress'.
+                  Although this seems to be unfriendly for IPv6, we
+                  have to recognize that there are a number of older
+                  MIBs that do contain an IPv4 format address, known
+                  as IpAddress.
+                  
+                  IPv6 addresses are represented using TAddress or
+                  InetAddress, and so the underlying datatype is
+                  
+                  
+                  OCTET STRING, and their value would be stored in
+                  the nlmLogVariableOctetStringVal column."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.9"</span>;
+            }
+
+            <a name="nlmLogVariableOidVal.540"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableOidVal</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value when nlmLogVariableType is 'objectId'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.10"</span>;
+            }
+
+            <a name="nlmLogVariableCounter64Val.548"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableCounter64Val</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value when nlmLogVariableType is 'counter64'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.11"</span>;
+            }
+
+            <a name="nlmLogVariableOpaqueVal.556"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableOpaqueVal</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value when nlmLogVariableType is 'opaque'."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.12"</span>;
+            }
+         }  <span class="yang_cmt">// list nlmLogVariableEntry</span>
+      }  <span class="yang_cmt">// container nlmLog</span>
+   }  <span class="yang_cmt">// module NOTIFICATION-LOG-MIB</span>
+</pre>
+</div>
+</div>

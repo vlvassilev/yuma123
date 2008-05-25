@@ -1,0 +1,151 @@
+
+<div>
+   <h1 class="yang">SNMP-MPD-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#snmpMPDStats.93">snmpMPDStats</a>
+               <ul>
+                  <li><a href="#snmpUnknownSecurityModels.95">snmpUnknownSecurityModels</a></li>
+                  <li><a href="#snmpInvalidMsgs.106">snmpInvalidMsgs</a></li>
+                  <li><a href="#snmpUnknownPDUHandlers.116">snmpUnknownPDUHandlers</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">SNMP-MPD-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:SNMP-MPD-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-mpd"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"SNMPv3 Working Group"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"WG-EMail:   snmpv3@lists.tislabs.com
+         Subscribe:  snmpv3-request@lists.tislabs.com
+         
+         Co-Chair:   Russ Mundy
+         	    Network Associates Laboratories
+         postal:     15204 Omega Drive, Suite 300
+         	    Rockville, MD 20850-4601
+         	    USA
+         
+         EMail:      mundy@tislabs.com
+         phone:      +1 301-947-7107
+         
+         Co-Chair &amp;
+         Co-editor:  David Harrington
+         	    Enterasys Networks
+         postal:     35 Industrial Way
+         	    P. O. Box 5005
+         	    Rochester NH 03866-5005
+         	    USA
+         EMail:      dbh@enterasys.com
+         phone:      +1 603-337-2614
+         
+         Co-editor:  Jeffrey Case
+         	    SNMP Research, Inc.
+         postal:     3001 Kimberlin Heights Road
+         	    Knoxville, TN 37920-9716
+         	    USA
+         EMail:      case@snmp.com
+         phone:      +1 423-573-1434
+         
+         Co-editor:  Randy Presuhn
+         	    BMC Software, Inc.
+         postal:     2141 North First Street
+         	    San Jose, CA 95131
+         	    USA
+         EMail:      randy_presuhn@bmc.com
+         phone:      +1 408-546-1006
+         
+         Co-editor:  Bert Wijnen
+         	    Lucent Technologies
+         postal:     Schagen 33
+         	    3461 GL Linschoten
+         	    Netherlands
+         EMail:      bwijnen@lucent.com
+         phone:      +31 348-680-485"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"The MIB for Message Processing and Dispatching
+         
+         Copyright (C) The Internet Society (2002). This
+         version of this MIB module is part of RFC 3412;
+         see the RFC itself for full legal notices."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2002-10-14"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Updated addresses, published as RFC 3412."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1999-05-04"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Updated addresses, published as RFC 2572."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1997-09-30"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Original version, published as RFC 2272."</span>;
+      }
+
+
+      <span class="yang_cmt">// objects</span>
+
+      <a name="snmpMPDStats.93"/><span class="yang_kw">container</span> <span class="yang_id">snmpMPDStats</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.11.2.1"</span>;
+
+         <a name="snmpUnknownSecurityModels.95"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpUnknownSecurityModels</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of packets received by the SNMP
+               engine which were dropped because they referenced a
+               securityModel that was not known to or supported by
+               the SNMP engine."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.11.2.1.1"</span>;
+         }
+
+         <a name="snmpInvalidMsgs.106"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInvalidMsgs</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of packets received by the SNMP
+               engine which were dropped because there were invalid
+               or inconsistent components in the SNMP message."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.11.2.1.2"</span>;
+         }
+
+         <a name="snmpUnknownPDUHandlers.116"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpUnknownPDUHandlers</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The total number of packets received by the SNMP
+               engine which were dropped because the PDU contained
+               in the packet could not be passed to an application
+               responsible for handling the pduType, e.g. no SNMP
+               application had registered for the proper
+               combination of the contextEngineID and the pduType."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.11.2.1.3"</span>;
+         }
+      }  <span class="yang_cmt">// container snmpMPDStats</span>
+   }  <span class="yang_cmt">// module SNMP-MPD-MIB</span>
+</pre>
+</div>
+</div>

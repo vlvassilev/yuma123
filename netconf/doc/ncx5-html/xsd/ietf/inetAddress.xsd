@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://netconfcentral.org/ietf/types"
+ targetNamespace="http://netconfcentral.org/ietf/types"
+ xmlns:xs="http://www.w3.org/2001/XMLSchema"
+ elementFormDefault="qualified" attributeFormDefault="unqualified"
+ xml:lang="en" version="0.1" xmlns:ncx="http://netconfcentral.org/ncx/1.0">
+ <xs:annotation>
+  <xs:documentation> Converted from NCX module by ncxdump v0.2
+
+    Module: inetAddress
+    Owner: ietf
+    Application: types
+    Version: 0.1
+    Copyright (C) Andy Bierman (2005-2007).  All Rights Reserved.
+    Contact Info: Translated by Andy Bierman.
+       Send comments to &lt;ietf@andybierman.com&gt;.
+
+    Description:
+      InetAddress data types converted from the following sources: 
+
+        * RFC 4001:  Textual Conventions for Transport Addresses
+
+        * draft-romascanu-netconf-datatypes-01.txt
+  
+        * libsmi output from 'smidump -f xsd' command
+          http://www.ibr.cs.tu-bs.de/projects/libsmi/   
+      
+     The InetAddress data types are literal translations for easier
+     SNMP compatibility.  ASCII versions are also available.
+
+    Revision History:
+
+      Revision: 0.1
+      Initial version.
+
+      Revision: 0.2
+      Update based on NETCONF mailing list discussion.
+            Changed choice to a union and scope ID to an attribute
+            so all address types can be part of the InetAddress union.
+            NOTE!!! Errors in the patterns have not been corrected
+            NOTE!!! Complex Type (metadata in union not allowed, not fixed
+           
+</xs:documentation>
+ </xs:annotation>
+
+ <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+  schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+
+ <xs:simpleType name="InetAddressType">
+  <xs:annotation>
+   <xs:documentation>InetAddressType TC from RFC 4001, pages 6 - 7.
+         Extended to support more IPv6 address types</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="unknown"/>
+   <xs:enumeration value="ipv4"/>
+   <xs:enumeration value="ipv6"/>
+   <xs:enumeration value="ipv4z"/>
+   <xs:enumeration value="ipv6z"/>
+   <xs:enumeration value="ipv6m"/>
+   <xs:enumeration value="ipv6s"/>
+   <xs:enumeration value="dns"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:simpleType name="InetZoneIndex">
+  <xs:annotation>
+   <xs:documentation>InetAddress Zone Index from RFC 4001.</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:unsignedInt">
+   <xs:minInclusive value="1"/>
+   <xs:maxInclusive value="65535"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:simpleType name="InetAddressUnknown">
+  <xs:annotation>
+   <xs:documentation>Entry for a generic type, not included here</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string"/>
+ </xs:simpleType>
+
+ <xs:simpleType name="InetAddressIPv4">
+  <xs:annotation>
+   <xs:documentation>InetAddressIPv4 TC from RFC 4001, pages 7 - 8.</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:pattern value="((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])"/>
+   <xs:minLength value="7"/>
+   <xs:maxLength value="15"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:complexType name="InetAddressIPv4z">
+  <xs:annotation>
+   <xs:documentation>InetAddressIPv4z TC from RFC 4001, pages 8 - 9.,
+         draft-romascanu-netconf-datatypes-01.txt, page 5</xs:documentation>
+  </xs:annotation>
+  <xs:simpleContent>
+   <xs:extension base="InetAddressIPv4">
+    <xs:attribute name="zoneIndex" type="InetZoneIndex" use="required"/>
+   </xs:extension>
+  </xs:simpleContent>
+ </xs:complexType>
+
+ <xs:simpleType name="InetAddressIPv6">
+  <xs:annotation>
+   <xs:documentation>InetAddressIPv6 TC from RFC 4001, page 8.,
+         draft-romascanu-netconf-datatypes-01.txt, page 6</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:pattern value="(([0-9a-fA-F]{1,4}:){6})
+            (([0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4})|
+            ([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:simpleType name="InetAddressIPv6m">
+  <xs:annotation>
+   <xs:documentation>draft-romascanu-netconf-datatypes-01.txt, page 6</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:pattern value="(([0-9a-fA-F]{1,4}:){6})
+              (([0-9a-fA-F]{1,4}:[0-9a-fA-F]{1,4})|
+              ([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:simpleType name="InetAddressIPv6s">
+  <xs:annotation>
+   <xs:documentation>draft-romascanu-netconf-datatypes-01.txt, page 6</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:pattern value="(([0-9a-fA-F]{1,4}:)*|([0-9a-fA-F]{1,4}))*(::)
+             (([0-9a-fA-F]{1,4}:)*|([0-9a-fA-F]{1,4}))*"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:complexType name="InetAddressIPv6z">
+  <xs:annotation>
+   <xs:documentation>InetAddressIPv6z TC from RFC 4001, page 9.
+         draft-romascanu-netconf-datatypes-01.txt, page 6.</xs:documentation>
+  </xs:annotation>
+  <xs:simpleContent>
+   <xs:extension base="InetAddressIPv6">
+    <xs:attribute name="zoneIndex" type="InetZoneIndex" use="required"/>
+   </xs:extension>
+  </xs:simpleContent>
+ </xs:complexType>
+
+ <xs:simpleType name="InetAddressDNS">
+  <xs:annotation>
+   <xs:documentation>InetAddressDNS TC from RFC 4001, pages 9 - 10.</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:minLength value="1"/>
+   <xs:maxLength value="255"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:simpleType name="InetAddressPrefixLength">
+  <xs:annotation>
+   <xs:documentation>InetAddressDNS TC from RFC 4001, pages 9 - 10.</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:unsignedInt">
+   <xs:maxInclusive value="2040"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:simpleType name="InetPortNumber">
+  <xs:annotation>
+   <xs:documentation>InetPortNumber TC from RFC 4001, pages 10 - 11.</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:unsignedInt">
+   <xs:maxInclusive value="65535"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:simpleType name="InetAutonomousSystemNumber">
+  <xs:annotation>
+   <xs:documentation>InetAutonomousSystemNumber TC from RFC 4001, page 11.</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:unsignedInt"/>
+ </xs:simpleType>
+
+ <xs:simpleType name="InetScopeType">
+  <xs:annotation>
+   <xs:documentation>InetScopeType TC from RFC 4001, pages 11 - 12.</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="interfaceLocal"/>
+   <xs:enumeration value="linkLocal"/>
+   <xs:enumeration value="subnetLocal"/>
+   <xs:enumeration value="adminLocal"/>
+   <xs:enumeration value="siteLocal"/>
+   <xs:enumeration value="organizationLocal"/>
+   <xs:enumeration value="global"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:simpleType name="InetVersion">
+  <xs:annotation>
+   <xs:documentation>InetVersion TC from RFC 4001, pages 12 - 13.</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="unknown"/>
+   <xs:enumeration value="ipv4"/>
+   <xs:enumeration value="ipv6"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:simpleType name="InetAddressBT">
+  <xs:union memberTypes="InetAddressIPv4 InetAddressIPv4z InetAddressIPv6 InetAddressIPv6m
+InetAddressIPv6s InetAddressDNS InetAddressUnknown"/>
+ </xs:simpleType>
+
+ <xs:complexType name="InetAddress">
+  <xs:annotation>
+   <xs:documentation>InetAddress TC from RFC 4001, page 7. 
+
+         The actual format of the string content is determined by
+         the optional 'type' attribute as follows:
+         
+          unknown: InetAddressUnknown
+          ipv4:    InetAddressIPv4
+          ipv6:    InetAddressIPv6
+          ipv4z:   InetAddressIPv4z 
+          ipv6z:   InetAddressIPv6z
+          ipv6m:   InetAddressIPv6m
+          ipv6s:   InetAddressIPv6s
+          dns:     InetAddressDNS</xs:documentation>
+  </xs:annotation>
+  <xs:simpleContent>
+   <xs:extension base="InetAddressBT">
+    <xs:attribute name="type" type="InetAddressType"/>
+   </xs:extension>
+  </xs:simpleContent>
+ </xs:complexType>
+
+</xs:schema>

@@ -1,0 +1,729 @@
+<!doctype html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>NCX Extensions (draft 0.2)</title>
+    <link rel="stylesheet" href="/css/ncx.css" type="text/css"/>
+  </head>
+<body>
+
+<p>
+<a href="index.html">NCX Home</a>
+</p>
+
+<h1 align="center">NCX Extensions</h1>
+
+<p>
+Contents:
+</p>
+
+<ul>
+<li><a href="#NCX_Extensions">NETCONF Protocol Extensions</a>
+  <ul>
+  <li><a href="#test-only">
+     Edit Config Test-Only Mode (test-only enumeration)</a></li>
+  <li><a href="#default-suppression">
+     Default Suppression (with-defaults attribute)</a></li>
+  <li><a href="#with-metadata">
+     Metadata Control (with-metadata attribute)</a></li>
+  <li><a href="#bad-value">
+     Bad Value Error Indication (bad-value element)</a></li>
+  </ul>
+</li>
+<li><a href="#NCX_Appinfo">NCX Appinfo Extensions</a>
+  <ul>
+  <li><a href="#lifecycle-status">Lifecycle Status (status clause)</a></li>
+  <li><a href="#replaced-by">
+     Replaced-By Indication (replaced-by clause)</a></li>
+  <li><a href="#display-hint">Display Hint (display-hint clause)</a></li>
+  <li><a href="#duplicates">
+     Duplicate Instances Control (no-duplicates clause)</a></li>
+  <li><a href="#merge-type">
+     Merge Operation Control (merge-type clause)</a></li>
+  <li><a href="#hidden">Publication Control (hidden clause)</a></li>
+  <li><a href="#RPC_Properties">
+    RPC Properties (rpc-type and rpc-output clauses)</a></li>
+  <li><a href="#Data_Properties">
+    Data Properties (last-modified attribute)</a></li>
+  </ul>
+</li>
+</ul>
+
+<h1><a name="NCX_Extensions">NETCONF Protocol Extensions</a></h1>
+
+<p>
+This section defines the NETCONF Protocol Extensions supported
+by the NCX language.  These extensions are intended to either
+improve the protocol operations or help the netconfd agent
+automate specific protocol behavior.
+</p>
+
+<h2>
+<a name="test-only">Edit Config Test-Only Mode (test-only enumeration)</a>
+</h2>
+
+<p>
+The &lt;edit-config&gt; protocol operation does not support
+a mode in which a manager can test if a specific edit request
+will be accepted by the agent.  The &lt;validate&gt; operation
+expects a complete configuration for validation purposes,
+and does not support validation of a configuration fragment
+against the intended target database.
+</p>
+
+<p>
+The <b>test-only</b> enumeration has been added to the list
+of supported values for the &lt;error-option&gt; parameter,
+for this purpose.  If set to this value, the agent will
+perform the exact same validation procedures that would
+otherwise be performed, but will not actually execute
+the requested edit operation, even if it valid and without errors.
+</p>
+
+<p>
+The contents of the &lt;error-option&gt; parameter within
+the &lt;edit-config&gt; operation can be defined with the following
+NCX type:
+</p>
+
+<pre>
+
+    type ErrorOption {
+      description 
+        "Error processing option for the &lt;edit-config&gt; operation.";
+      syntax { 
+        string = { test test-then-set test-only };
+      }
+      default "test";
+    }
+
+</pre>
+
+<h2>
+<a name="default-suppression">Default Suppression (with-defaults attribute)</a>
+</h2>
+
+<p>
+The NETCONF protocol contains the following operations which 
+return or copy the contents of a configuration database:
+</p>
+
+<ul>
+<li>get-config</li>
+<li>get</li>
+<li>copy-config</li>
+</ul>
+
+<p>
+As defined, the NETCONF protocol does not distinguish between
+values which have been set by a management application,
+and default values which have been set by the agent.
+As a result, these agent-selected default values are
+always included in the output of the protocol operations
+listed above.
+</p>
+
+<p>
+However, it is quite common for networking devices to
+suppress the output of parameters set to the default value.
+This is done to save CPU time and non-volatile memory.
+In addition, there are likely to be a large number of
+such parameters.  Is is often not useful to network operators
+to view all these default values.  It is usually more
+interesting to view just the parameters which have
+been explicitly set by the network operator.
+</p>
+
+<p>
+The <b>with-defaults</b> attribute has been added to NCX
+to control the generation of agent-selected default values.
+If the 'with-defaults' attribute is present in the &lt;rpc&gt;
+element, for any of the protocol operations which return
+the contents of a configuration database, the agent will
+use the value to control default suppression.
+</p>
+
+<p>
+The contents of this clause can be defined with the following
+NCX type:
+</p>
+
+<pre>
+
+    type WithDefaults {
+      description 
+        "Indicates whether parameters set to the default value
+         should be returned or suppressed by the agent.";
+      syntax { boolean; }
+      default "true";
+    }
+
+</pre>
+
+<p>
+If the 'with-defaults' attribute is set to <b>false</b> then
+any XML attribute or XML element that contains the agent selected
+default value will not be included in the output.  
+There is no distinction made here between parameters set
+to the default value by a manager, vs. those set to
+the default value by the agent.
+</p>
+
+<p>
+The default value for this attribute is <b>true</b>, which
+is the behavior defined by the NETCONF protocol.
+</p>
+
+<p>
+This attribute only affects configuration parameters
+(i.e., data-class is equal to <b>config</b> or <b>tconfig</b>).
+In addition, it only applies to parameters for which at
+least one conceptual instance exists within the agent.
+Parameters which have no conceptual instances are simply
+ignored by the agent and are not in use.
+</p>
+
+<p>
+If any filtering is specified in the retrieval operation,
+then it is conceptually applied after the default suppression
+test has been performed.
+</p>
+
+<p>
+The following example shows a &lt;get-config&gt; operation
+which is requesting default suppression:
+</p>
+
+<pre>
+
+    &lt;rpc message-id="101" with-defaults="false"
+      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;get-config&gt;
+        &lt;source&gt;
+          &lt;running/&gt;
+        &lt;/source&gt;
+        &lt;filter type="subtree"&gt;
+          &lt;interfaces xmlns="http://netconfcentral.org/ncx/interfaces"/&gt;
+        &lt;/filter&gt;
+      &lt;/get-config&gt;
+    &lt;/rpc&gt;
+
+</pre>
+
+
+<h2>
+<a name="with-metadata">Metadata Control (with-metadata attribute)</a>
+</h2>
+
+<p>
+The NETCONF protocol contains the following operations which 
+return or copy the contents of a configuration database:
+</p>
+
+<ul>
+<li>get-config</li>
+<li>get</li>
+<li>copy-config</li>
+</ul>
+
+<p>
+The <b>with-metadata</b> attribute has been added to NCX
+to control the generation of agent-maintained meta-data
+associated with data model object instances.
+</p>
+<p>
+If the 'with-metadata' attribute is present in the &lt;rpc&gt;
+element, for any of the protocol operations which return
+the contents of a configuration database, the agent will
+use the value to control the generation of XML attributes
+within the response.
+</p>
+
+<p>
+The contents of this clause can be defined with the following
+NCX type:
+</p>
+
+<pre>
+
+    type WithMetadata {
+      description 
+        "Indicates whether internal meta-data should be included
+         by the agent in data model object instances.";
+      syntax { 
+        string = { true false };
+      }
+      default "false";
+    }
+
+</pre>
+
+<p>
+If the 'with-metadata' attribute is set to <b>true</b> then
+any internal XML attributes maintained by the agent,
+within data model object instances,
+will be included in the &lt;rpc-reply&gt; for the
+particular protocol operation.
+</p>
+
+<p>
+An <b>internal meta-data</b> object is one that is
+not specified in the user-defined data model module.
+For example, the 'last-modified' XML attribuute
+is controlled by the 'with-metadata' attribute.
+</p>
+
+<p>
+The default value for this attribute is <b>false</b>.
+</p>
+
+<p>
+This attribute only affects configuration parameters
+(i.e., data-class is equal to <b>config</b> or <b>tconfig</b>).
+</p>
+
+<p>
+The following example shows a &lt;get-config&gt; operation
+which is requesting meta-data inclusion:
+</p>
+
+<pre>
+
+    &lt;rpc message-id="102" with-metadata="true"
+      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+      &lt;get-config&gt;
+        &lt;source&gt;
+          &lt;running/&gt;
+        &lt;/source&gt;
+        &lt;filter type="subtree"&gt;
+          &lt;interfaces xmlns="http://netconfcentral.org/ncx/interfaces"/&gt;
+        &lt;/filter&gt;
+      &lt;/get-config&gt;
+    &lt;/rpc&gt;
+
+</pre>
+
+<h2>
+<a name="bad-value">Bad Value Error Indication (bad-value element)</a>
+</h2>
+
+<p>
+The <b>bad-value</b> element is extra data added to
+the contents of the &lt;error-info&gt; element, for
+error conditions such as 'invalid-value', in which the
+agent can identify the contents of the parameter or
+object instance that caused the error.
+</p>
+
+<p>
+The contents of this clause can be defined with the following
+NCX type:
+</p>
+
+<pre>
+
+    type BadValue {
+      description 
+        "Indicates the bad value string that caused an error";
+      syntax { string (1..); }
+    }
+
+</pre>
+
+<h2>
+<a name="lifecycle-status">Lifecycle Status (status clause)</a>
+</h2>
+
+<p>
+The lifecycle status clause is used to identify definitions
+which are being phased out, or already have been removed,
+from a module over time.  This is conceptually equivalent
+to the STATUS clause found in SMIv2.  
+</p>
+
+<p>
+The contents of this clause can be defined with the following
+NCX type:
+</p>
+
+<pre>
+
+    type LifecycleStatus {
+      description 
+        "Indicates the lifecycle status of the definition.
+         These enumerated strings have the exact same meaning
+         as defined in the SMIv2 STATUS clause.";
+      syntax { 
+        string = { current deprecated obsolete };
+      }
+      default "current";
+    }
+
+</pre>
+
+<p>
+The <b>status</b> clause is used within the <b>appinfo</b>
+clause to indicate the lifecycle status of a definition.
+The following values are supported:
+</p>
+
+<ul>
+<li>
+<b>current</b><br/>The definition is current. This is the default value.
+</li>
+<li>
+<b>deprecated</b><br/>The definition is deprecated and will likely
+be removed in the future
+</li>
+<li>
+<b>obsolete</b><br/>The definition is obsolete and has been removed.
+The definition remains in the module to prevent the name from
+ever being reused
+</li>
+</ul>
+
+<p>
+This clause is included in the 'appinfo' section rather than
+a dedicated clause within each type of NCX construct because
+it is rarely useful.  The default value 'current' is almost
+always the assigned value.  It is suggested that the clause
+not be present unless its value is 'deprecated' or 'obsolete',
+so it is more noticeable to the reader.
+</p>
+
+<p>
+The following type definition shows a deprecated definition:
+</p>
+
+<pre>
+
+    type InstancePointer {
+      description
+        "A pointer to either a specific instance of a MIB object or
+         a conceptual row of a MIB table in the managed device.  In
+         the latter case, by convention, it is the name of the
+         particular instance of the first accessible columnar object
+         in the conceptual row.
+
+         The two uses of this textual convention are replaced by
+         VariablePointer and RowPointer, respectively.";
+      syntax { ObjectIdentifier; }
+      appinfo {
+         status deprecated;
+      }
+    }
+
+</pre>
+
+<h2>
+<a name="replaced-by">Replaced-By Pointer (replaced-by clause)</a>
+</h2>
+
+<p>
+The <b>replaced-by</b> clause is used within the 'appinfo' section
+to identify the definition which has replaced a deprecated
+or obsolete definition.  It should only be used if the 'status'
+clause is also present and indicates the definition is not current.
+</p>
+
+<p>
+The contents of this clause can be defined with the following
+NCX type:
+</p>
+
+<pre>
+
+    type ReplacedBy {
+      description 
+        "Indicates the name of an NCX definition which has
+         replaced the definition containing the 'replaced-by' clause";
+      syntax { NcxName; }
+    }
+
+</pre>
+
+<p>
+The following example shows how this clause may be used:
+</p>
+
+<pre>
+
+    type IpAddress {
+      description "IpAddress from RFC 2578, page 8."; 
+      syntax { string; }
+      appinfo {
+        status deprecated;
+        replaced-by "InetAddress";
+      }
+    }
+
+</pre>
+
+<h2>
+<a name="display-hint">Display Hint (display-hint clause)</a>
+</h2>
+
+<p>
+The <b>display-hint</b> clause is used within the 'appinfo' section
+for backward compatibility with SMIv2.  It is used to assist
+an application in displaying the contents of a data type.
+</p>
+
+<p>
+The contents of this clause can be defined with the following
+NCX type:
+</p>
+
+<pre>
+
+    type DisplayHint {
+      description 
+        "DISPLAY-HIMT from SMIv2";
+      syntax { string; }
+    }
+
+</pre>
+
+<h2>
+<a name="duplicates">Duplicate Instances Control (no-duplicates clause)</a>
+</h2>
+
+<p>
+The instance qualifier clause is used to control whether
+multiple instances of a particular data model object are permitted
+to exist or not.  If multiple instances are allowed to exist,
+then it is often useful to indicate whether duplicate values
+(i.e., two instances of the same data model object which contain
+the same value) are permitted to exist.
+</p>
+
+<p>
+There are two usage scenarios within the NCX language
+where duplicate instance control is applied:
+</p>
+
+<ul>
+<li>Multiple unnamed instances (i.e., no index clause)</li>
+<li>Multiple members of a data model object with a base type of 'list'</li>
+</ul>
+
+<p>
+If the <b>no-duplicates</b> clause within the appinfo section
+is present, then duplicate values will not be allowed to exist
+for the indicated data model object.
+</p>
+
+<p>
+If the <b>duplicates</b> clause within the appinfo section
+is present, then duplicate values will be allowed to exist
+for the indicated data model object.
+</p>
+
+<p>
+The default behavior is to allow duplicate values.
+Any metadata associated with a data model object
+is <b>not</b> included in the value comparison test for 
+duplicate values.
+</p>
+
+<h2>
+<a name="merge-type">Merge Operation Control (merge-type clause)</a>
+</h2>
+
+<p>
+The &lt;edit-config&gt; protocol operation supports
+an edit operation called <b>merge</b>.  However it is
+a data-model specific matter as to how a merge operation
+is actually performed.
+</p>
+
+<p>
+There are two usage scenarios within the NCX language
+where merge operation control is applied:
+</p>
+
+<ul>
+<li>Multiple unnamed instances (i.e., no index clause)</li>
+<li>Multiple members of a data model object with a base type of 'list'</li>
+</ul>
+
+<p>
+The contents of this clause can be defined with the following
+NCX type:
+</p>
+
+<pre>
+
+    type MergeType {
+      description 
+        "Merge algorithm for unnamed instances and lists";
+      syntax { 
+        string = { first last sort }; 
+      }
+      default "last";
+    }
+
+</pre>
+
+<p>
+The merge order for data model objects with named instances
+is always determined by the index clause defined for the instances,
+so this clause does not apply in that case.
+</p>
+
+<p>
+The following example shows how the merge-type clause might
+be used:
+</p>
+
+<pre>
+
+    type ColorPreference {
+      description 
+        "List of 3 preferred colors";
+      syntax { 
+        list { Colors };
+        
+      }
+      appinfo {
+        merge-type first;
+      }
+    }
+
+</pre>
+
+<h2>
+<a name="hidden">Publication Control (hidden clause)</a>
+</h2>
+
+<p>
+Sometimes it is desirable to define commands which are not
+actually published in any documentation or made available in
+any online help operations which might expose its existence.
+These are often called <b>hidden commands</b>.
+</p>
+
+<p>
+The publication of a particular parameter set, parameter, or data type,
+can be controlled with the 'hidden' clause, within the appinfo clause.
+</p>
+
+<p>
+The following NCX Type defines the hidden clause:
+</p>
+
+<pre>
+
+    type HiddenType {
+      description 
+        "If present, the data model object is considered to be hidden
+         and should not be published";
+      syntax { flag; }
+    }
+
+</pre>
+
+<p>
+The following example shows how the 'hidden' clause might
+be used within a parameter definition:
+</p>
+
+<pre>
+
+    parm new-knob {
+      description "New knob -- Not ready for release!";
+      type NewKnobType;
+      appinfo {
+        hidden;
+      }
+    }
+
+</pre>
+
+<h2>
+<a name="RPC_Properties">RPC Properties (rpc-type and rpc-output clauses)</a>
+</h2>
+
+<p>
+There are two appinfo clauses that are generated during XSD translation
+and therefore <b>reserved appinfo clauses</b> that should not
+appear in an NCX module:
+</p>
+
+<ul>
+<li>rpc-type</li>
+<li>rpc-output</li>
+</ul>
+
+<p>
+The <b>rpc-type</b> clause indicates the value of the RPC Type
+clause within the 'rpc' construct.  It is defined with
+the following NCX type:
+</p>
+
+<pre>
+
+    type RpcClassType {
+      description "RPC Method classification.";
+      syntax { 
+        string = { other config exec monitor debug };
+      }
+    }
+
+</pre>
+
+<p>
+The <b>rpc-output</b> clause indicates the value of the RPC Output
+clause within the 'rpc' construct.  It is defined with
+the following NCX type:
+</p>
+
+<pre>
+
+    type RpcOutputType {
+      description "RPC Output Data Structure.";
+      syntax { NcxName; }
+    }
+
+</pre>
+
+<h2>
+<a name="Data_Properties">
+  Data Properties (last-modified attribute)
+</a>
+</h2>
+
+<p>
+There is one XML attribute that is maintained within the
+agent for each writable data parameter set.
+</p>
+
+<p>
+The <b>last-modified</b> attribute indicates the date and time
+when an instance of a writable data model parameter set was 
+last modified within the &lt;running&gt; configuration database.
+It is defined with the following NCX type:
+</p>
+
+<pre>
+
+    type LastModifiedType {
+      description "Data Parameter Set Instance Modification Timestamp.";
+      syntax { dateTime; }
+    }
+
+</pre>
+
+<p>
+This XML attribute is located within the element representing
+the start of the data parameter set, within the NETCONF
+configuration database.
+</p>
+
+<hr/>
+<p>
+Copyright &copy;2007 by Andy Bierman, All Rights Reserved.
+</p>
+<p>Last-Updated: 2007-05-30</p>
+</body>
+</html>

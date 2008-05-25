@@ -1,0 +1,3572 @@
+/*  FILE: yang_typ.c
+
+
+   YANG module parser, typedef and type statement support
+
+    Data type conversion
+
+    Current NCX base type   YANG builtin type
+
+    NCX_BT_ANY              anyxml
+    NCX_BT_ROOT             N/A
+    NCX_BT_BITS             bits
+    NCX_BT_ENAME            N/A
+    NCX_BT_ENUM             enumeration
+    NCX_BT_EMPTY            empty
+    NCX_BT_INT8             int8
+    NCX_BT_INT32            int16
+    NCX_BT_INT32            int32
+    NCX_BT_INT32            int64
+    NCX_BT_UINT8            uint8
+    NCX_BT_UINT32           uint16
+    NCX_BT_UINT32           uint32
+    NCX_BT_UINT64           uint64
+    NCX_BT_FLOAT            float32
+    NCX_BT_DOUBLE           float64
+    NCX_BT_STRING           string
+    NCX_BT_USTRING          binary
+    NCX_BT_UNION            union
+    NCX_BT_SLIST            N/A
+    NCX_BT_XLIST            N/A
+    NCX_BT_CONTAINER        container ** Not a type **
+    NCX_BT_CHOICE           choice ** Not a type **
+    NCX_BT_LIST             list ** Not a type **
+    NCX_BT_XCONTAINER       N/A
+    NCX_BT_KEYREF           keyref
+    NCX_BT_INSTANCE_ID      instance-identifier
+  
+    sim-typ w/ '*' iqual    leaf-list
+
+
+*********************************************************************
+*                                                                   *
+*                  C H A N G E   H I S T O R Y                      *
+*                                                                   *
+*********************************************************************
+
+date         init     comment
+----------------------------------------------------------------------
+26oct07      abb      begun; start from ncx_parse.c
+15nov07      abb      split out from yang_parse.c
+
+
+*********************************************************************
+*                                                                   *
+*                     I N C L U D E    F I L E S                    *
+*                                                                   *
+*********************************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <ctype.h>
+
+#include <xmlstring.h>
+
+#ifndef _H_procdefs
+#include  "procdefs.h"
+#endif
+
+#ifndef _H_def_reg
+#include "def_reg.h"
+#endif
+
+#ifndef _H_dlq
+#include  "dlq.h"
+#endif
+
+#ifndef _H_log
+#include "log.h"
+#endif
+
+#ifndef _H_ncxconst
+#include "ncxconst.h"
+#endif
+
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
+#ifndef _H_ncx
+#include "ncx.h"
+#endif
+
+#ifndef _H_obj
+#include "obj.h"
+#endif
+
+#ifndef _H_psd
+#include "psd.h"
+#endif
+
+#ifndef _H_status
+#include  "status.h"
+#endif
+
+#ifndef _H_typ
+#include  "typ.h"
+#endif
+
+#ifndef _H_xml_util
+#include "xml_util.h"
+#endif
+
+#ifndef _H_yangconst
+#include "yangconst.h"
+#endif
+
+#ifndef _H_yang
+#include "yang.h"
+#endif
+
+#ifndef _H_yang_typ
+#include "yang_typ.h"
+#endif
+
+/********************************************************************
+*                                                                   *
+*                       C O N S T A N T S                           *
+*                                                                   *
+*********************************************************************/
+
+#ifdef DEBUG
+/* #define YANG_TYP_DEBUG 1 */
+/* #define YANG_TYP_TK_DEBUG 1 */
+#endif
+
+
+static status_t 
+    resolve_type (tk_chain_t *tkc,
+		  ncx_module_t  *mod,
+		  typ_def_t *typdef,
+		  const xmlChar *name,
+		  const xmlChar *defval,
+		  obj_template_t *obj,
+		  grp_template_t *grp);
+
+
+/********************************************************************
+* FUNCTION loop_test
+* 
+* Check for named type dependency loops
+* Called during phase 2 of module parsing
+*
+* INPUTS:
+*   tkc == token chain
+*   typdef == typdef in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    loop_test (tk_chain_t *tkc,
+	       typ_def_t *typdef)
+{
+    typ_def_t *testdef;
+    status_t   res;
+
+    res = NO_ERR;
+
+    if (typdef->class == NCX_CL_NAMED) {
+	testdef = typ_get_parent_typdef(typdef);
+	while (testdef && res==NO_ERR) {
+	    if (testdef == typdef) {
+		res = ERR_NCX_DEF_LOOP;
+		tkc->cur = typdef->tk;
+	    } else {
+		testdef = typ_get_parent_typdef(testdef);
+	    }
+	}
+    }
+
+    return res;
+
+}   /* loop_test */
+
+
+/********************************************************************
+* FUNCTION restriction_test
+* 
+* Check for proper restrictions to a data type definition
+* Called during phase 2 of module parsing
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   typdef == typdef in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    restriction_test (tk_chain_t *tkc,
+		      ncx_module_t *mod,
+		      typ_def_t *typdef)
+{
+    typ_def_t    *testdef, *newdef;
+    ncx_btype_t   btyp, testbtyp;
+    status_t      res, retres;
+
+    if (typdef->class != NCX_CL_NAMED) {
+	return NO_ERR;
+    }
+
+    res = NO_ERR;
+    retres = NO_ERR;
+    btyp = typ_get_basetype(typdef);
+
+    /* if there is a 'newtyp', then restrictions were
+     * added; If NULL, then just a type name was given
+     */
+    testdef = typdef;
+    while (testdef && testdef->class==NCX_CL_NAMED) {
+	newdef = testdef->def.named.newtyp;
+	if (!newdef) {
+	    testdef = typ_get_parent_typdef(testdef);
+	    continue;
+	}
+
+	/* validate the 'newdef' typdef */
+	testbtyp = typ_get_basetype(newdef);
+	if (testbtyp==NCX_BT_NONE) {
+	    newdef->def.simple.btyp = btyp;
+
+	    /* check if proper base type restrictions
+	     * are present. Range allowed for numbers
+	     * and strings only
+	     */
+	    if (!dlq_empty(&newdef->def.simple.rangeQ)) {
+		if (!(typ_is_number(btyp) || typ_is_string(btyp))) {
+		    log_error("\nError: Range or length not "
+			      "allowed for the %s builtin type",
+			      tk_get_btype_sym(btyp));
+		    retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
+		    tkc->cur = typdef->tk;
+		    ncx_print_errormsg(tkc, mod, retres);
+		}
+	    }
+
+	    /* Check that a pattern was actually entered
+	     * Check Pattern allowed for NCX_BT_STRING only
+	     */
+	    if (!dlq_empty(&newdef->def.simple.valQ)) {
+		if (newdef->def.simple.strrest == NCX_SR_ENUM) {
+		    log_error("\nError: keyword 'enumeration' "
+			      "within a restriction"
+			      "for a %s type",
+			      tk_get_btype_sym(btyp));
+		    retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
+		    tkc->cur = typdef->tk;
+		    ncx_print_errormsg(tkc, mod, retres);
+		} else if (newdef->def.simple.strrest == NCX_SR_BIT) {
+		    log_error("\nError: keyword 'bit' "
+			      "within a restriction"
+			      "for a %s type",
+			      tk_get_btype_sym(btyp));
+		    retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
+		    tkc->cur = typdef->tk;
+		    ncx_print_errormsg(tkc, mod, retres);
+		} else if (btyp != NCX_BT_STRING) {
+		    log_error("\nError: restrictions not "
+			      "allowed for a %s type",
+			      tk_get_btype_sym(btyp));
+		    retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
+		    tkc->cur = typdef->tk;
+		    ncx_print_errormsg(tkc, mod, retres);
+		}
+	    }
+	} else if (testbtyp != btyp) {
+	    log_error("\nError: Derived type '%s' does not match "
+		      "the eventual builtin type (%s)",
+		      tk_get_btype_sym(testbtyp),
+		      tk_get_btype_sym(btyp));
+	    retres = ERR_NCX_WRONG_DATATYP;
+	    tkc->cur = typdef->tk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+
+	/* setup the next (parent) typdef in the chain */
+	testdef = typ_get_parent_typdef(testdef);
+    }
+
+    return retres;
+
+}   /* restriction_test */
+
+
+/********************************************************************
+* FUNCTION consume_yang_rangedef
+* 
+* Current token is the start of range fragment
+* Process the token chain and gather the range fragment
+* in a pre-allocated typ_rangedef_t struct
+*
+* Normal exit with current token as the next one to
+* be processed.
+*
+* Cloned from consume_rangedef in ncx_parse.c because
+* the YANG range clause is different than NCX
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   typdef == typdef in progress
+*   btyp == base type of range vals
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    consume_yang_rangedef (tk_chain_t *tkc,
+			   ncx_module_t *mod,
+			   typ_def_t *typdef,
+			   ncx_btype_t btyp)
+{
+    typ_rangedef_t  *rv;
+    const char      *expstr;
+    dlq_hdr_t       *rangeQ;
+    status_t         res, retres;
+    boolean          done;
+    int32            cmpval;
+
+    expstr = "number or min, max, -INF, INF keywords";
+    res = NO_ERR;
+    retres = NO_ERR;
+    done = FALSE;
+
+    rangeQ = typ_get_rangeQ_con(typdef);
+    if (!rangeQ) {
+	res = SET_ERROR(ERR_NCX_DATA_MISSING);
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    /* get a new range value struct */
+    rv = typ_new_rangedef();
+    if (!rv) {
+	res = ERR_INTERNAL_MEM;
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    /* save the range builtin type */
+    rv->btyp = btyp;
+
+    /* get the first range-boundary, check if min requested */
+    if (TK_CUR_STR(tkc)) {
+	if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MIN)) {
+	    /* flag lower bound min for later eval */
+	    rv->flags |= TYP_FL_LBMIN;
+	} else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MAX)) {
+	    /* flag lower bound max for later eval */
+	    rv->flags |= TYP_FL_LBMAX;
+	} else if (btyp==NCX_BT_FLOAT32 || btyp==NCX_BT_FLOAT64) {
+	    /* -INF and INF keywords allowed for real numbers */
+	    if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_NEGINF)) {
+		/* flag lower bound -INF for later eval */
+		rv->flags |= TYP_FL_LBINF;
+	    } else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_POSINF)) {
+		/* flag lower bound INF for later eval */
+		rv->flags |= TYP_FL_LBINF2;
+	    } else {
+		res = ERR_NCX_WRONG_TKVAL;
+	    }
+	} else {
+	    res = ERR_NCX_WRONG_TKVAL;
+	}
+    } else if (TK_CUR_NUM(tkc)) {
+	if (btyp != NCX_BT_NONE) {
+	    res = ncx_convert_tkcnum(tkc, btyp, &rv->lb);
+	} else {
+	    rv->lbstr = xml_strdup(TK_CUR_VAL(tkc));
+	    if (!rv->lbstr) {
+		res = ERR_INTERNAL_MEM;
+
+	    }
+	}
+    } else {
+	res = ERR_NCX_WRONG_TKTYPE;
+    }
+
+    /* record any error so far */
+    if (res != NO_ERR) {
+	retres = res;
+	ncx_mod_exp_err(tkc, mod, res, expstr);
+	if (NEED_EXIT) {
+	    typ_free_rangedef(rv, btyp);
+	    return retres;
+	}
+    }
+
+    /* move past lower range-boundary */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	typ_free_rangedef(rv, btyp);
+	return res;
+    }
+
+    /* check if done with this range part */
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+    case TK_TT_LBRACE:
+    case TK_TT_BAR:
+	/* normal end of range reached 
+	 * lower bound is the upper bound also
+	 */
+	if (rv->flags & TYP_FL_LBMIN) {
+	    rv->flags |= TYP_FL_UBMIN;
+	} else if (rv->flags & TYP_FL_LBMAX) {
+	    rv->flags |= TYP_FL_UBMAX;
+	} else if (rv->flags & TYP_FL_LBINF) {
+	    rv->flags |= TYP_FL_UBINF2;
+	} else if (rv->flags & TYP_FL_LBINF2) {
+	    rv->flags |= TYP_FL_UBINF;
+	} else {
+	    if (btyp != NCX_BT_NONE) {
+		res = ncx_copy_num(&rv->lb, &rv->ub, btyp);
+	    } else {
+		rv->ubstr = xml_strdup(rv->lbstr);
+		if (!rv->ubstr) {
+		    res = ERR_INTERNAL_MEM;
+		}
+	    }
+	}
+	done = TRUE;
+	break;
+    case TK_TT_RANGESEP:
+	/* continue on to upper bound */
+	res = TK_ADV(tkc);
+	break;
+    default:
+	res = ERR_NCX_WRONG_TKTYPE;
+    }
+
+    /* record any error in previous section */
+    if (res != NO_ERR) {
+	ncx_mod_exp_err(tkc, mod, res, expstr);
+	retres = res;
+	if (NEED_EXIT) {
+	    typ_free_rangedef(rv, btyp);
+	    return res;
+	}
+    }
+
+    /* get the last range-boundary, check if max requested */
+    if (!done) {
+	if (TK_CUR_STR(tkc)) {
+	    if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MIN)) {
+		/* flag upper bound min for later eval */
+		rv->flags |= TYP_FL_UBMIN;
+	    } else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MAX)) {
+		/* flag upper bound max for later eval */
+		rv->flags |= TYP_FL_UBMAX;
+	    } else if (btyp==NCX_BT_FLOAT32 || btyp==NCX_BT_FLOAT64) {
+		if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_NEGINF)) {
+		    /* flag upper bound -INF for later eval */
+		    rv->flags |= TYP_FL_UBINF2;
+		} else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_POSINF)) {
+		    /* flag upper bound INF for later eval */
+		    rv->flags |= TYP_FL_UBINF;
+		} else {
+		    res = ERR_NCX_WRONG_TKVAL;
+		}
+	    } else {
+		res = ERR_NCX_WRONG_TKVAL;
+	    }
+	} else if (TK_CUR_NUM(tkc)) {
+	    if (btyp != NCX_BT_NONE) {
+		res = ncx_convert_tkcnum(tkc, btyp, &rv->ub);
+	    } else {
+		rv->ubstr = xml_strdup(TK_CUR_VAL(tkc));
+		if (!rv->ubstr) {
+		    res = ERR_INTERNAL_MEM;
+		}
+	    }
+	} else {
+	    res = ERR_NCX_WRONG_TKTYPE;
+	}
+
+	/* record any error in previous section */
+	if (res != NO_ERR) {
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	    retres = res;
+	    if (NEED_EXIT) {
+		typ_free_rangedef(rv, btyp);
+		return res;
+	    }
+	}
+
+	/* move past this keyword or number */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	    typ_free_rangedef(rv, btyp);
+	    return res;
+	}
+    }
+
+    /* check basic overlap, still need to evaluate min max later */
+    if (!(rv->flags & TYP_RANGE_FLAGS)) {
+	/* just numbers entered, no min.max.-INF, INF */
+	if (btyp != NCX_BT_NONE) {
+	    cmpval = ncx_compare_nums(&rv->lb, &rv->ub, btyp);
+	    if (cmpval > 0) {
+		retres = ERR_NCX_INVALID_RANGE;
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
+    } else {
+	/* check corner cases with min, max, -INF, INF keywords
+	 * check this LB > the last UB (if any lastrv) 
+	 */
+	if (rv->flags & (TYP_FL_LBMAX|TYP_FL_LBINF2)) {
+	    /* lower bound set to max or INF */
+	    if (!(rv->flags & (TYP_FL_UBMAX|TYP_FL_UBINF))) {
+		/* upper bound not set to max or INF */
+		retres = ERR_NCX_INVALID_RANGE;
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
+	if (rv->flags & (TYP_FL_UBMIN|TYP_FL_UBINF2)) {
+	    /* upper bound set to min or -INF */
+	    if (!(rv->flags & (TYP_FL_LBMIN|TYP_FL_LBINF))) {
+		/* lower bound not set to min or -INF */
+		retres = ERR_NCX_INVALID_RANGE;
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
+	if ((rv->flags & TYP_FL_LBINF) && !dlq_empty(rangeQ)) {
+	    /* LB set to -INF and the rangeQ is not empty */
+	    retres = ERR_NCX_OVERLAP_RANGE;
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+    }
+
+    /* save and exit if rangedef is valid */
+    if (retres == NO_ERR) {
+	dlq_enque(rv, rangeQ);
+    } else {
+	typ_free_rangedef(rv, btyp);
+    }
+    return retres;
+
+}  /* consume_yang_rangedef */
+
+
+/********************************************************************
+* FUNCTION consume_yang_range
+* 
+* Current token is the 'range' or 'length' keyword
+* Process the token chain and gather the range definition in typdef
+*
+* Cloned from consume_range in ncx_parse.c because
+* the YANG range clause is different than NCX
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   typdef == typedef struct in progress (already setup as SIMPLE)
+*            simple.btyp == enum for the specific builtin type
+*   isrange == TRUE if called from range definition
+*           == FALSE if called from a length definition
+*
+* RETURNS:
+*  status
+*********************************************************************/
+static status_t 
+    consume_yang_range (tk_chain_t *tkc,
+			ncx_module_t *mod,
+			typ_def_t *typdef,
+			boolean isrange)
+{
+    const char   *expstr;
+    status_t      res, retres;
+    boolean       done;
+    ncx_btype_t   rbtyp, btyp;
+
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    /* save the range token in case needed for error msg */
+    typdef->def.simple.range.tk = TK_CUR(tkc);
+
+    btyp = typ_get_basetype(typdef);
+    if (btyp == NCX_BT_NONE) {
+	if (isrange) {
+	    /* signal that the range will be processed in phase 2 */
+	    rbtyp = NCX_BT_NONE; 
+	} else {
+	    /* length range is always uint32 */
+	    rbtyp = NCX_BT_UINT32;   
+	}
+    } else {
+	/* get the correct number type for the range specification */
+	rbtyp = typ_get_range_type(btyp);
+    }
+
+    /* move past start-of-range keyword
+     * check token type, which may be in a quoted string
+     * an identifier string, or a series of tokens
+     */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    if (TK_CUR_STR(tkc)) {
+	if (typdef->def.simple.range.rangestr) {
+	    m__free(typdef->def.simple.range.rangestr);
+	}
+	typdef->def.simple.range.rangestr = xml_strdup(TK_CUR_VAL(tkc));
+	if (!typdef->def.simple.range.rangestr) {
+	    res = ERR_INTERNAL_MEM;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+
+	/* undo quotes or identifier string into separate tokens 
+	 * In YANG there are very few tokens, so all these no-WSP
+	 * strings are valid. If quoted, the entire range clause
+	 * will be a single string.  If not, many combinations
+	 * of valid range clause tokens might be mis-classified
+	 * E.g.:
+	 *  range min..max;  (TSTRING)
+	 *  range 1..100;    (DNUM, STRING, DNUM)
+	 *  range -INF..47.8 (STRING, RNUM)
+	 */
+	res = tk_retokenize_cur_string(tkc, mod);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}	    
+    }
+
+    /* get all the range-part sections */
+    done = FALSE;
+    while (!done) {
+        /* get one range spec */
+        res = consume_yang_rangedef(tkc, mod, typdef, rbtyp);
+	CHK_EXIT;
+
+        /* Current token is either a BAR or SEMICOL/LBRACE
+         * Move past it if BAR and keep going
+         * Else exit loop, pointing at this token
+         */
+        switch (TK_CUR_TYP(tkc)) {
+        case TK_TT_SEMICOL:
+        case TK_TT_LBRACE:
+            done = TRUE;
+            break;
+        case TK_TT_BAR:
+            res = TK_ADV(tkc);
+            if (res != NO_ERR) {
+		ncx_print_errormsg(tkc, mod, res);
+		return res;
+            }
+            break;
+        default:
+	    expstr = "semi-colon, left brace, or vertical bar";
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+        }
+    }
+
+    /* check sub-section for error-app-tag and error-message */
+    if (TK_CUR_TYP(tkc)==TK_TT_LBRACE) {
+	res = yang_consume_error_stmts(tkc, mod,
+				       &typdef->range_errinfo,
+				       &typdef->appinfoQ);
+	CHK_EXIT;
+    }
+
+    return retres;
+
+}  /* consume_yang_range */
+
+
+/********************************************************************
+* FUNCTION consume_yang_pattern
+* 
+* Current token is the 'pattern' keyword
+* Process the token chain and gather the pattern definition in typdef
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   typdef == typedef struct in progress (already setup as SIMPLE)
+*            simple.btyp == enum for the specific builtin type
+*
+* RETURNS:
+*  status
+*********************************************************************/
+static status_t 
+    consume_yang_pattern (tk_chain_t *tkc,
+			  ncx_module_t *mod,
+			  typ_def_t *typdef)
+{
+    typ_sval_t  *sv;
+    const char  *expstr;
+    status_t     res, retres;
+
+    retres = NO_ERR;
+    expstr = "pattern string";
+    typdef->def.simple.strrest = NCX_SR_PATTERN;
+
+    /* move past pattern keyword to pattern value, get 1 string */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    if (TK_CUR_STR(tkc)) {
+	sv = typ_new_sval(TK_CUR_VAL(tkc), NCX_BT_STRING);
+	if (!sv) {
+	    res = ERR_INTERNAL_MEM;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+
+	/* make sure the pattern is valid */
+	res = typ_compile_pattern(NCX_BT_STRING, sv);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    retres = res;
+	    if (NEED_EXIT) {
+		return res;
+	    }
+	}
+
+	/* save the string in the valQ */
+	if (retres==NO_ERR) {
+	    dlq_enque(sv, &typdef->def.simple.valQ);
+	} else {
+	    typ_free_sval(sv);
+	}
+    }
+
+
+    /* move to the next token, which must be ';' or '{' */
+    expstr = "semicolon or left brace";
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+    case TK_TT_LBRACE:
+	break;
+    default:
+	retres = ERR_NCX_WRONG_TKTYPE;
+	ncx_mod_exp_err(tkc, mod, retres, expstr);
+    }
+
+    /* check sub-section for error-app-tag and error-message */
+    if (TK_CUR_TYP(tkc)==TK_TT_LBRACE) {
+	expstr = NULL;
+	res = yang_consume_error_stmts(tkc, mod,
+				       &typdef->pat_errinfo,
+				       &typdef->appinfoQ);
+	if (res != NO_ERR) {
+	    retres = res;
+	}
+    }
+
+    return retres;
+
+}  /* consume_yang_pattern */
+
+
+/********************************************************************
+* FUNCTION finish_string_type
+* 
+* Parse the next N tokens as 1 string type definition
+* sub-section, expecting 'length' or 'pattern' keywords
+*
+* Current token is the left brace starting the string
+* sub-section. Continue until right brace or error.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   typdef == typ_def_t in progress
+*   btyp == the builtin type already figured out
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    finish_string_type (tk_chain_t  *tkc,
+			ncx_module_t *mod,
+			typ_def_t *typdef,
+			ncx_btype_t btyp)
+{
+    const xmlChar *val;
+    const char    *expstr;
+    tk_type_t      tktyp;
+    status_t       res, retres;
+    boolean        done, lendone, patdone;
+
+    expstr = "length or pattern keyword";
+    done = FALSE;    
+    lendone = FALSE;
+    patdone = FALSE;
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    while (!done) {
+
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+	    CHK_EXIT;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_LENGTH)) {
+	    if (lendone) {
+		retres = ERR_NCX_ENTRY_EXISTS;
+		log_error("\nError: length clause already entered");
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+
+	    lendone = TRUE;
+	    res = consume_yang_range(tkc, mod, typdef, FALSE);
+	    CHK_EXIT;
+        } else if (!xml_strcmp(val, YANG_K_PATTERN)) {
+	    if (patdone) {
+		retres = ERR_NCX_ENTRY_EXISTS;
+		log_error("\nError: pattern clause already entered");
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	    patdone = TRUE;
+
+	    /* make sure this is not the 'binary' data type */
+	    if (btyp == NCX_BT_BINARY) {
+		log_error("\nPattern restriction not allowed"
+			  " for the binary type");
+		retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
+		ncx_print_errormsg(tkc, mod, retres);
+	    } 
+
+	    res = consume_yang_pattern(tkc, mod, typdef);
+	    CHK_EXIT;
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+    }
+
+    return retres;
+
+}  /* finish_string_type */
+
+
+/********************************************************************
+* FUNCTION finish_number_type
+* 
+* Parse the next N tokens as the sub-section for a number type
+* Expecting range statement.
+*
+* Current token is the left brace starting the string
+* sub-section. Continue until right brace or error.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   typdef == typ_def_t in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    finish_number_type (tk_chain_t  *tkc,
+			ncx_module_t *mod,
+			typ_def_t *typdef)
+{
+    const xmlChar *val;
+    const char    *expstr;
+    tk_type_t      tktyp;
+    status_t       res, retres;
+    boolean        done, rangedone;
+
+    expstr = "range keyword";
+    rangedone = FALSE;
+    res = NO_ERR;
+    retres = NO_ERR;
+    done = FALSE;
+
+    while (!done) {
+
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+	    CHK_EXIT;
+	    continue;
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_RANGE)) {
+	    if (rangedone) {
+		retres = ERR_NCX_ENTRY_EXISTS;
+		log_error("\nError: range statement already entered");
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+
+	    rangedone = TRUE;
+	    res = consume_yang_range(tkc, mod, typdef, TRUE);
+	    CHK_EXIT;
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+    }
+
+    return retres;
+
+}  /* finish_number_type */
+
+
+/********************************************************************
+* FUNCTION finish_unknown_type
+* 
+* Parse the next N tokens as the subsection of a
+* local type that is being refined
+*
+* Current token is the left brace starting the string
+* sub-section. Continue until right brace or error.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   typdef == typ_def_t in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    finish_unknown_type (tk_chain_t  *tkc,
+			 ncx_module_t *mod,
+			 typ_def_t *typdef)
+{
+    const xmlChar *val;
+    const char    *expstr;
+    tk_type_t      tktyp;
+    status_t       res, retres;
+    boolean        done, rangedone, lendone, patdone;
+
+    expstr = "range, length, or pattern keyword";
+    rangedone = FALSE;
+    lendone = FALSE;
+    patdone = FALSE;
+    res = NO_ERR;
+    retres = NO_ERR;
+    done = FALSE;
+
+    while (!done) {
+
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+	    CHK_EXIT;
+	    continue;
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	default:
+	    res = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_RANGE)) {
+	    if (lendone) {
+		retres = ERR_NCX_ENTRY_EXISTS;
+		log_error("\nError: length clause already entered,"
+			  "  range clause not allowed");
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	    if (rangedone) {
+		retres = ERR_NCX_ENTRY_EXISTS;
+		log_error("\nError: range clause already entered");
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+
+	    rangedone = TRUE;
+	    res = consume_yang_range(tkc, mod, typdef, TRUE);
+	    CHK_EXIT;
+        } else if (!xml_strcmp(val, YANG_K_LENGTH)) {
+	    if (rangedone) {
+		retres = ERR_NCX_ENTRY_EXISTS;
+		log_error("\nError: range clause already entered,"
+			  "  length clause not allowed");
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	    if (lendone) {
+		retres = ERR_NCX_ENTRY_EXISTS;
+		log_error("\nError: length clause already entered");
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	    lendone = TRUE;
+	    res = consume_yang_range(tkc, mod, typdef, FALSE);
+	    CHK_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_PATTERN)) {
+	    if (patdone) {
+		retres = ERR_NCX_ENTRY_EXISTS;
+		log_error("\nError: pattern clause already entered");
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	    patdone = TRUE;
+	    res = consume_yang_pattern(tkc, mod, typdef);
+	    CHK_EXIT;
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+    }
+
+    return retres;
+
+}  /* finish_unknown_type */
+
+
+/********************************************************************
+* FUNCTION insert_yang_enumbit
+* 
+* Insert an enum or bit in its proper order in the simple->valQ
+*
+*
+* Error messages are printed by this function
+*
+* INPUTS:
+*   tkc == token chain in progress
+*   mod == module in progress
+*   en == typ_enum_t struct to insert in the sim->valQ
+*   typdef == simple typdef in progress
+*   btyp == builtin type (NCX_BT_ENUM or NCX_BT_BITS)
+*   valset == TRUE is value or position is set
+*          == FALSE to use auto-numbering
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    insert_yang_enumbit (tk_chain_t *tkc,
+			 ncx_module_t *mod,
+			 typ_enum_t *en, 
+			 typ_def_t *typdef,
+			 ncx_btype_t btyp,
+			 boolean valset)
+{
+    typ_simple_t *sim;
+    typ_enum_t   *enl;
+    boolean       done;
+    status_t      res;
+
+    sim = &typdef->def.simple;
+
+    /* check if this is a duplicate entry */
+    for (enl = (typ_enum_t *)dlq_firstEntry(&sim->valQ);
+         enl != NULL;
+         enl = (typ_enum_t *)dlq_nextEntry(enl)) {
+        if (!xml_strcmp(en->name, enl->name)) {
+	    res = ERR_NCX_DUP_ENTRY;
+	    log_error("\nError: duplicate enum or bit name (%s)", en->name);
+	    ncx_print_errormsg(tkc, mod, res);
+            return res;
+        } else if (valset && btyp==NCX_BT_ENUM && en->val==enl->val) {
+	    res = ERR_NCX_DUP_ENTRY;
+	    log_error("\nError: duplicate enum value (%d)", en->val);
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	} else if (valset && btyp==NCX_BT_BITS && en->pos==enl->pos) {
+	    res = ERR_NCX_DUP_ENTRY;
+	    log_error("\nError: duplicate bit position (%u)", en->pos);
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+    }
+
+    /* check if this is an out-of-order insert */
+    if (valset) {
+	done = FALSE;
+	for (enl = (typ_enum_t *)dlq_firstEntry(&sim->valQ);
+	     enl != NULL && !done;
+	     enl = (typ_enum_t *)dlq_nextEntry(enl)) {
+	    if (btyp==NCX_BT_ENUM) {
+		if (en->val < enl->val) {
+		    res = ERR_NCX_ENUM_VAL_ORDER;
+		    log_warn("\nWarning: Out of order enum '%s' = %d",
+			     (char *)en->name, en->val);
+		    ncx_print_errormsg(tkc, mod, res);
+		    done = TRUE;
+		}
+	    } else {
+		if (en->pos < enl->pos) {
+		    res = ERR_NCX_BIT_POS_ORDER;
+		    log_warn("\nWarning: Out of order bit '%s' = %u",
+			     (char *)en->name, en->pos);
+		    ncx_print_errormsg(tkc, mod, res);
+		    done = TRUE;
+		}
+	    }
+	}
+    } else {
+	/* value not set, use last value + 1 */
+	enl = (typ_enum_t *)dlq_lastEntry(&sim->valQ);
+	if (!enl) {
+	    if (btyp==NCX_BT_ENUM) {
+		en->val = 0;
+	    } else {
+		en->pos = 0;
+	    }
+	} else {
+	    if (btyp==NCX_BT_ENUM) {
+		en->val = enl->val+1;
+	    } else {
+		en->pos = enl->pos+1;
+	    }
+	}
+    }
+
+    /* always insert in the user-defined order == new last entry */
+    dlq_enque(en, &sim->valQ);
+    return NO_ERR;
+
+}  /* insert_yang_enumbit */
+
+
+/********************************************************************
+* FUNCTION consume_yang_bit
+* 
+* Current token is the 'bit' keyword
+* Process the token chain and gather the bit definition in typdef
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   typdef == typedef struct in progress (already setup as SIMPLE)
+*            simple.btyp == enum for the specific builtin type
+*
+* RETURNS:
+*  status
+*********************************************************************/
+static status_t 
+    consume_yang_bit (tk_chain_t *tkc,
+		      ncx_module_t *mod,
+		      typ_def_t *typdef)
+{
+    typ_enum_t    *enu;
+    xmlChar       *val, *str;
+    const char    *expstr;
+    tk_type_t      tktyp;
+    status_t       res, retres;
+    boolean        done, desc, ref, stat, pos;
+
+    enu = NULL;
+    str = NULL;
+    retres = NO_ERR;
+    done = FALSE;
+    desc = FALSE;
+    ref = FALSE;
+    stat = FALSE;
+    pos = FALSE;
+
+    /* move past bit keyword
+     * check token type, which should be an identifier string
+     */
+    res = yang_consume_id_string(tkc, mod, &str);
+    CHK_EXIT;
+
+    if (str) {
+	enu = typ_new_enum2(str);
+    } else {
+	enu = typ_new_enum((const xmlChar *)"none");
+    }
+    if (!enu) {
+	res = ERR_INTERNAL_MEM;
+	if (str) {
+	    m__free(str);
+	}
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    } else {
+	enu->flags |= TYP_FL_ISBITS;
+    }
+
+    /* move past identifier-str to stmtsep */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	typ_free_enum(enu);
+	return res;
+    }
+
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+	done = TRUE;
+	break;
+    case TK_TT_LBRACE:
+	done = FALSE;
+	break;
+    default:
+	expstr = "semi-colon or left brace";
+	res = ERR_NCX_WRONG_TKTYPE;
+	ncx_mod_exp_err(tkc, mod, res, expstr);
+	typ_free_enum(enu);
+	return res;
+    }
+
+    /* get all the bit sub-clauses */
+    while (!done) {
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    typ_free_enum(enu);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    typ_free_enum(enu);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &enu->appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT) {
+		    typ_free_enum(enu);
+		    return res;
+		}
+	    }
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    expstr = "bit sub-statement";
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+	    res = yang_consume_descr(tkc, mod, &enu->descr,
+				     &desc, &enu->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+	    res = yang_consume_descr(tkc, mod, &enu->ref,
+				     &ref, &enu->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+	    res = yang_consume_status(tkc, mod, &enu->status,
+				     &stat, &enu->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_POSITION)) {
+	    res = yang_consume_uint32(tkc, mod, &enu->pos,
+				      &pos, &enu->appinfoQ);
+	    enu->flags |= TYP_FL_ESET;   /* mark explicit set val */
+	} else {
+	    res = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	}
+	if (res != NO_ERR) {
+	    retres = res;
+	    if (NEED_EXIT) {
+		typ_free_enum(enu);
+		return res;
+	    }
+	}
+    }
+
+    /* save the bit definition */
+    if (retres == NO_ERR) {
+	res = insert_yang_enumbit(tkc, mod, enu, typdef,
+				  NCX_BT_BITS, pos);
+	if (res != NO_ERR) {
+	    typ_free_enum(enu);
+	}
+    } else {
+	typ_free_enum(enu);
+    }
+
+    return retres;
+
+}  /* consume_yang_bit */
+
+
+/********************************************************************
+* FUNCTION finish_bits_type
+* 
+* Parse the next N tokens as the subsection of a
+* NCX_BT_BITS type that is being refined
+*
+* Current token is the left brace starting the string
+* sub-section. Continue until right brace or error.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   typdef == typ_def_t in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    finish_bits_type (tk_chain_t  *tkc,
+		      ncx_module_t *mod,
+		      typ_def_t *typdef)
+{
+    const xmlChar *val;
+    const char    *expstr;
+    tk_type_t      tktyp;
+    status_t       res, retres;
+    boolean        done, bitdone;
+
+    expstr = "bit keyword";
+    bitdone = FALSE;
+    retres = NO_ERR;
+    done = FALSE;
+
+    typdef->def.simple.strrest = NCX_SR_BIT;
+
+    while (!done) {
+
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+	    CHK_EXIT;
+	    continue;
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_BIT)) {
+	    bitdone = TRUE;
+	    res = consume_yang_bit(tkc, mod, typdef);
+	    CHK_EXIT;
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+    }
+
+    /* check all the mandatory clauses are present */
+    if (!bitdone) {
+	expstr = "mandatory bit clause";
+	retres = ERR_NCX_DATA_MISSING;
+	ncx_mod_exp_err(tkc, mod, retres, expstr);
+    }
+
+    return retres;
+
+}  /* finish_bits_type */
+
+
+/********************************************************************
+* FUNCTION consume_yang_enum
+* 
+* Current token is the 'enum' keyword
+* Process the token chain and gather the enum definition in typdef
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   typdef == typedef struct in progress (already setup as SIMPLE)
+*            simple.btyp == enum for the specific builtin type
+*
+* RETURNS:
+*  status
+*********************************************************************/
+static status_t 
+    consume_yang_enum (tk_chain_t *tkc,
+		       ncx_module_t *mod,
+		       typ_def_t *typdef)
+{
+    typ_enum_t    *enu;
+    xmlChar       *val, *str;
+    const char    *expstr;
+    tk_type_t      tktyp;
+    status_t       res, retres;
+    boolean        done, desc, ref, stat, valdone;
+
+    enu = NULL;
+    str = NULL;
+    res = NO_ERR;
+    retres = NO_ERR;
+    desc = FALSE;
+    ref = FALSE;
+    stat = FALSE;
+    valdone = FALSE;
+    expstr = "enum value string";
+
+    /* move past enum keyword
+     * check token type, which should be a trimmed string
+     */
+    res = yang_consume_string(tkc, mod, &str);
+    CHK_EXIT;
+
+    /* validate the enum string format */
+    if (str) {
+	if (!*str) {
+	    res = ERR_NCX_WRONG_LEN;
+	    log_error("\nError: Zero length enum string");
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	    m__free(str);
+	    str = NULL;
+	} else if (xml_isspace(*str)) {
+	    res = ERR_NCX_INVALID_VALUE;
+	    log_error("\nError: Leading whitespace in enum string '%s'",
+		      str);
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	    m__free(str);
+	    str = NULL;
+	} else if (xml_isspace(str[xml_strlen(str)-1])) {
+	    res = ERR_NCX_INVALID_VALUE;
+	    log_error("\nError: Trailing whitespace in enum string '%s'",
+		      str);
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	    m__free(str);
+	    str = NULL;
+	} else {
+	    /* pass off the malloced string */
+	    enu = typ_new_enum2(str);
+	}
+    } else {
+	/* copy the placeholder string during error processing */
+	enu = typ_new_enum(NCX_EL_NONE);
+    }
+
+    /* check enum malloced OK */
+    if (!enu) {
+	if (res == NO_ERR) {
+	    res = ERR_INTERNAL_MEM;
+	    ncx_print_errormsg(tkc, mod, res);
+	}
+	if (str) {
+	    m__free(str);
+	}
+	return res;
+    }
+
+    /* have malloced enum struct
+     * move past identifier-str to stmtsep
+     */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	typ_free_enum(enu);
+	return res;
+    }
+
+    /* check statement exit or sub-statement start */
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+	done = TRUE;
+	break;
+    case TK_TT_LBRACE:
+	done = FALSE;
+	break;
+    default:
+	expstr = "semi-colon or left brace";
+	res = ERR_NCX_WRONG_TKTYPE;
+	ncx_mod_exp_err(tkc, mod, res, expstr);
+	typ_free_enum(enu);
+	return res;
+    }
+
+    /* get all the enum sub-clauses */
+    while (!done) {
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    typ_free_enum(enu);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    typ_free_enum(enu);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &enu->appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT) {
+		    typ_free_enum(enu);
+		    return res;
+		}
+	    }
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    expstr = "bit sub-statement";
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+	    res = yang_consume_descr(tkc, mod,  &enu->descr, 
+				     &desc,  &enu->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+	    res = yang_consume_descr(tkc, mod,  &enu->ref, 
+				     &ref,  &enu->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+	    res = yang_consume_status(tkc, mod,  &enu->status, 
+				     &stat,  &enu->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_VALUE)) {
+	    res = yang_consume_int32(tkc, mod,  &enu->val, 
+				     &valdone,  &enu->appinfoQ);
+	    enu->flags |= TYP_FL_ESET;   /* mark explicit set val */
+	} else {
+	    res = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	}
+	if (res != NO_ERR) {
+	    retres = res;
+	    if (NEED_EXIT) {
+		typ_free_enum(enu);
+		return res;
+	    }
+	}
+    }
+
+    /* save the enum definition */
+    if (retres == NO_ERR) {
+	res = insert_yang_enumbit(tkc, mod, enu, typdef,
+				  NCX_BT_ENUM, valdone);
+	if (res != NO_ERR) {
+	    typ_free_enum(enu);
+	}
+    } else {
+	typ_free_enum(enu);
+    }
+
+    return retres;
+
+}  /* consume_yang_enum */
+
+
+/********************************************************************
+* FUNCTION finish_enum_type
+* 
+* Parse the next N tokens as the subsection of a
+* NCX_BT_ENUM type that is being refined
+*
+* Current token is the left brace starting the string
+* sub-section. Continue until right brace or error.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   typdef == typ_def_t in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    finish_enum_type (tk_chain_t  *tkc,
+		      ncx_module_t *mod,
+		      typ_def_t *typdef)
+{
+    const xmlChar *val;
+    const char    *expstr;
+    tk_type_t      tktyp;
+    status_t       res, retres;
+    boolean        done, enumdone;
+
+    expstr = "enum keyword";
+    enumdone = FALSE;
+    res = NO_ERR;
+    retres = NO_ERR;
+    done = FALSE;
+
+    typdef->def.simple.strrest = NCX_SR_ENUM;
+
+    while (!done) {
+
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+	    CHK_EXIT;
+	    continue;
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_ENUM)) {
+	    enumdone = TRUE;
+	    res = consume_yang_enum(tkc, mod, typdef);
+	    CHK_EXIT;
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+    }
+
+    /* check all the mandatory clauses are present */
+    if (!enumdone) {
+	expstr = "mandatory enum clause";
+	retres = ERR_NCX_DATA_MISSING;
+	ncx_mod_exp_err(tkc, mod, retres, expstr);
+    }
+
+    return retres;
+
+}  /* finish_enum_type */
+
+
+/********************************************************************
+* FUNCTION finish_union_type
+* 
+* Parse the next N tokens as the subsection of a
+* NCX_BT_UNION type that is being defined
+*
+* Current token is the left brace starting the string
+* sub-section. Continue until right brace or error.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   typdef == typ_def_t in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    finish_union_type (tk_chain_t  *tkc,
+		       ncx_module_t *mod,
+		       typ_def_t *typdef)
+{
+    const xmlChar *val;
+    const char    *expstr;
+    typ_unionnode_t  *un;
+    tk_type_t      tktyp;
+    status_t       res, retres;
+    boolean        done, typedone;
+
+    expstr = "type keyword";
+    typedone = FALSE;
+    res = NO_ERR;
+    retres = NO_ERR;
+    done = FALSE;
+
+    while (!done) {
+
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+	    CHK_EXIT;
+	    continue;
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_TYPE)) {
+	    typedone = TRUE;
+	    un = typ_new_unionnode(NULL);
+	    if (!un) {
+		res = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, res);
+		return res;
+	    } else {
+		un->typdef = typ_new_typdef();
+		if (!un->typdef) {
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		    typ_free_unionnode(un);
+		    return res;
+		}
+	    }
+
+	    res = yang_typ_consume_type(tkc, mod, un->typdef);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT) {
+		    typ_free_unionnode(un);
+		    return res;
+		}
+	    }
+
+	    if (res == NO_ERR) {
+		dlq_enque(un, &typdef->def.simple.unionQ);
+	    } else {
+		typ_free_unionnode(un);
+	    }
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+    }
+
+    /* check all the mandatory clauses are present */
+    if (!typedone) {
+	expstr = "mandatory type clause";
+	retres = ERR_NCX_DATA_MISSING;
+	ncx_mod_exp_err(tkc, mod, retres, expstr);
+    }
+
+    return retres;
+
+}  /* finish_union_type */
+
+
+/********************************************************************
+* FUNCTION finish_keyref_type
+* 
+* Parse the next N tokens as the subsection of a
+* NCX_BT_KEYREF type that is being defined
+*
+* Current token is the left brace starting the string
+* sub-section. Continue until right brace or error.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   typdef == typ_def_t in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    finish_keyref_type (tk_chain_t  *tkc,
+			ncx_module_t *mod,
+			typ_def_t *typdef)
+{
+    typ_sval_t    *sv;
+    const xmlChar *val;
+    const char    *expstr;
+    tk_type_t      tktyp;
+    status_t       res, retres;
+    boolean        done, pathdone;
+
+    expstr = "path keyword";
+    pathdone = FALSE;
+    res = NO_ERR;
+    retres = NO_ERR;
+    done = FALSE;
+
+    while (!done) {
+
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+	    CHK_EXIT;
+	    continue;
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_PATH)) {
+	    if (pathdone) {
+		retres = ERR_NCX_ENTRY_EXISTS;
+		log_error("\nError: path statement already entered");
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	    pathdone = TRUE;
+
+	    /* get the path string value and save it */
+	    res = TK_ADV(tkc);
+	    if (res != NO_ERR) {
+		ncx_print_errormsg(tkc, mod, res);
+		return res;
+	    }
+
+	    if (TK_CUR_STR(tkc)) {
+		/* save the path string in the typdef valQ */
+		sv = typ_new_sval(TK_CUR_VAL(tkc), NCX_BT_STRING);
+		if (!sv) {
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		    return res;
+		} else {
+		    dlq_enque(sv, &typdef->def.simple.valQ);
+		}
+	    } else {
+		retres = ERR_NCX_WRONG_TKTYPE;
+		expstr = "path string";
+		ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    }
+
+	    res = yang_consume_semiapp(tkc, mod, &typdef->appinfoQ);
+	    CHK_EXIT;
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+    }
+
+    return retres;
+
+}  /* finish_keyref_type */
+
+
+/********************************************************************
+* FUNCTION resolve_minmax
+* 
+* Resolve the min and max keywords in the rangeQ if present
+* 
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   rangeQ == rangeQ to process
+*   simple == TRUE if this is a NCX_CL_SIMPLE typedef
+*          == FALSE if this is a NCX_CL_NAMED typedef
+*   rbtyp == range builtin type
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_minmax (tk_chain_t *tkc,
+		    ncx_module_t *mod,
+		    typ_def_t *typdef,
+		    boolean simple,
+		    ncx_btype_t  rbtyp)
+{
+    dlq_hdr_t      *rangeQ, *parentQ;
+    typ_rangedef_t *rv, *pfirstrv, *plastrv;
+    typ_def_t      *parentdef, *rangedef;
+    status_t        res;
+
+    rangeQ = typ_get_rangeQ_con(typdef);
+    if (!rangeQ || dlq_empty(rangeQ)) {
+	return ERR_NCX_SKIPPED;
+    }
+
+    res = NO_ERR;
+    pfirstrv = NULL;
+    plastrv = NULL;
+
+    /* get the parent range bounds, if any */
+    if (!simple) {
+	parentdef = typ_get_parent_typdef(typdef);
+	rangedef = typ_get_qual_typdef(parentdef, NCX_SQUAL_RANGE);
+	if (rangedef) {
+	    parentQ = typ_get_rangeQ_con(rangedef);
+	    if (!parentQ || dlq_empty(parentQ)) {
+		return SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	    pfirstrv = (typ_rangedef_t *)dlq_firstEntry(parentQ);
+	    plastrv = (typ_rangedef_t *)dlq_lastEntry(parentQ);
+	}
+    }
+
+    for (rv = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
+	 rv != NULL && res==NO_ERR;
+	 rv = (typ_rangedef_t *)dlq_nextEntry(rv)) {
+
+	if (rv->btyp ==NCX_BT_NONE) {
+	    rv->btyp = rbtyp;
+	} else if (rv->btyp != rbtyp) {
+	    res = ERR_NCX_WRONG_DATATYP;
+	}
+
+	/* set the lower bound if set to 'min' or 'max' */
+	if (rv->flags & TYP_FL_LBMIN) {
+	    if (pfirstrv) {
+		if (pfirstrv->flags & TYP_FL_LBINF) {
+		    rv->flags |= TYP_FL_LBINF;
+		} else if (pfirstrv->flags & TYP_FL_LBINF2) {
+		    rv->flags |= TYP_FL_LBINF2;
+		} else {
+		    res = ncx_copy_num(&pfirstrv->lb, &rv->lb, rbtyp);
+		}
+	    } else {
+		if (rbtyp==NCX_BT_FLOAT32 || rbtyp==NCX_BT_FLOAT64) {
+		    rv->flags |= TYP_FL_LBINF;
+		} else {
+		    ncx_set_num_min(&rv->lb, rbtyp);
+		}
+	    }
+	} else if (rv->flags & TYP_FL_LBMAX) {
+	    if (plastrv) {
+		if (plastrv->flags & TYP_FL_UBINF) {
+		    rv->flags |= TYP_FL_LBINF2;
+		} else if (plastrv->flags & TYP_FL_UBINF2) {
+		    rv->flags |= TYP_FL_LBINF;
+		} else {
+		    res = ncx_copy_num(&plastrv->ub, &rv->lb, rbtyp);
+		}
+	    } else {
+		if (rbtyp==NCX_BT_FLOAT32 || rbtyp==NCX_BT_FLOAT64) {
+		    rv->flags |= TYP_FL_LBINF2;
+		} else {
+		    ncx_set_num_max(&rv->lb, rbtyp);
+		}
+	    }
+	} else if (rv->lbstr) {
+	    res = ncx_decode_num(rv->lbstr, rbtyp, &rv->lb);
+	}
+
+	if (res != NO_ERR) {
+	    continue;
+	}
+
+	/* set the upper bound if set to 'min' or 'max' */
+	if (rv->flags & TYP_FL_UBMAX) {
+	    if (plastrv) {
+		if (plastrv->flags & TYP_FL_UBINF) {
+		    rv->flags |= TYP_FL_UBINF;
+		} else if (plastrv->flags & TYP_FL_UBINF2) {
+		    rv->flags |= TYP_FL_UBINF2;
+		} else {
+		    res = ncx_copy_num(&plastrv->ub, &rv->ub, rbtyp);
+		}
+	    } else {
+		if (rbtyp==NCX_BT_FLOAT32 || rbtyp==NCX_BT_FLOAT64) {
+		    rv->flags |= TYP_FL_UBINF;
+		} else {
+		    ncx_set_num_max(&rv->ub, rbtyp);
+		}
+	    }
+	} else if (rv->flags & TYP_FL_UBMIN) {
+	    if (pfirstrv) {
+		if (pfirstrv->flags & TYP_FL_LBINF) {
+		    rv->flags |= TYP_FL_UBINF2;
+		} else if (pfirstrv->flags & TYP_FL_LBINF2) {
+		    rv->flags |= TYP_FL_UBINF;
+		} else {
+		    res = ncx_copy_num(&pfirstrv->lb, &rv->ub, rbtyp);
+		}
+	    } else {
+		if (rbtyp==NCX_BT_FLOAT32 || rbtyp==NCX_BT_FLOAT64) {
+		    rv->flags |= TYP_FL_UBINF2;
+		} else {
+		    ncx_set_num_min(&rv->ub, rbtyp);
+		}
+	    }
+	} else if (rv->ubstr) {
+	    res = ncx_decode_num(rv->ubstr, rbtyp, &rv->ub);
+	}
+    }
+
+    if (res != NO_ERR) {
+	if (simple) {
+	    tkc->cur = typdef->def.simple.range.tk;
+	} else {
+	    tkc->cur = typdef->tk;
+	}
+
+	ncx_print_errormsg(tkc, mod, res);
+    } else {
+	/* set flags even if boundary set explicitly so
+	 * the ncxdump program will suppress these clauses
+	 * unless really needed
+	 */
+	rv = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
+	if (rv && ncx_is_min(&rv->lb, rbtyp)) {
+	    rv->flags |= TYP_FL_LBMIN;
+	}
+	rv = (typ_rangedef_t *)dlq_lastEntry(rangeQ);
+	if (rv && ncx_is_max(&rv->ub, rbtyp)) {
+	    rv->flags |= TYP_FL_UBMAX;
+	}
+    }
+	    
+    return res;
+
+}  /* resolve_minmax */
+
+
+/********************************************************************
+* FUNCTION finish_yang_range
+* 
+* Validate the typdef chain range definitions
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   typdef == typ_def_t in progress
+*   rbtyp == range builtin type
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    finish_yang_range (tk_chain_t  *tkc,
+		       ncx_module_t *mod,
+		       typ_def_t *typdef,
+		       ncx_btype_t rbtyp)
+{
+    dlq_hdr_t  *rangeQ;
+    status_t    res;
+
+    res = NO_ERR;
+
+    switch (typ_get_base_class(typdef)) {
+    case NCX_CL_NAMED:
+	res = finish_yang_range(tkc, mod,
+				typ_get_parent_typdef(typdef),
+				rbtyp);
+	if (res == NO_ERR) {
+	    res = resolve_minmax(tkc, mod, typdef, FALSE, rbtyp);
+	    if (res == NO_ERR) {
+		rangeQ = typ_get_rangeQ_con(typdef);
+		typ_normalize_rangeQ(rangeQ, rbtyp);
+	    } else if (res == ERR_NCX_SKIPPED) {
+		res = NO_ERR;
+	    }
+	}
+	break;
+    case NCX_CL_SIMPLE:
+	/* this is the final stop in the type chain
+	 * if this typdef has a range, then check it
+	 * and convert min/max to real numbers
+	 */
+	res = resolve_minmax(tkc, mod, typdef, TRUE, rbtyp);
+	if (res == NO_ERR) {
+	    rangeQ = typ_get_rangeQ_con(typdef);
+	    typ_normalize_rangeQ(rangeQ, rbtyp);
+	} else if (res == ERR_NCX_SKIPPED) {
+	    res = NO_ERR;
+	}
+	break;
+    default:
+	break;
+    }
+
+    return res;
+
+} /* finish_yang_range */
+
+
+/********************************************************************
+* FUNCTION rv_fits_in_rangedef
+* 
+* Check if the testrv fits within the checkrv
+*
+* INPUTS:
+*    btyp == number base type
+*    testrv == rangedef to test
+*    checkrv == rangedef to test against
+*
+* RETURNS:
+*    status, NO_ERR if rangedef is valid and passes the range
+*            defined by the rangedefs in checkQ
+*********************************************************************/
+static status_t
+    rv_fits_in_rangedef (ncx_btype_t  btyp,
+			 const typ_rangedef_t *testrv,
+			 const typ_rangedef_t *checkrv)
+{
+    int32            cmp;
+    boolean          lbok, lbok2, ubok, ubok2;
+
+    lbok = FALSE;
+    lbok2 = FALSE;
+    ubok = FALSE;
+    ubok2 = FALSE;
+
+    /* make sure any INF corner cases are met */
+    if (testrv->flags & TYP_FL_LBINF && !(checkrv->flags & TYP_FL_LBINF)) {
+	return ERR_NCX_NOT_IN_RANGE;
+    }
+    if (testrv->flags & TYP_FL_LBINF2 && !(checkrv->flags & TYP_FL_LBINF2)) {
+	return ERR_NCX_NOT_IN_RANGE;
+    }
+    if (testrv->flags & TYP_FL_UBINF && !(checkrv->flags & TYP_FL_UBINF)) {
+	return ERR_NCX_NOT_IN_RANGE;
+    }
+    if (testrv->flags & TYP_FL_UBINF2 && !(checkrv->flags & TYP_FL_UBINF2)) {
+	return ERR_NCX_NOT_IN_RANGE;
+    }
+
+    /* check lower bound */
+    if (!(checkrv->flags & TYP_FL_LBINF)) {
+	cmp = ncx_compare_nums(&testrv->lb, &checkrv->lb, btyp);
+	if (cmp >= 0) {
+	    lbok = TRUE;
+	}
+    } else {
+	/* LB == -INF, always passes the test */
+	lbok = TRUE;
+    } 
+    if (!(checkrv->flags & TYP_FL_UBINF)) {
+	cmp = ncx_compare_nums(&testrv->lb, &checkrv->ub, btyp);
+	if (cmp <= 0) {
+	    lbok2 = TRUE;
+	}
+    } else {
+	/* UB == INF, always passes the test */
+	lbok2 = TRUE;
+    }
+
+    /* check upper bound */
+    if (!(checkrv->flags & TYP_FL_LBINF)) {
+	cmp = ncx_compare_nums(&testrv->ub, &checkrv->lb, btyp);
+	if (cmp >= 0) {
+	    ubok = TRUE;
+	}
+    } else {
+	/* LB == -INF, always passes the test */
+	ubok = TRUE;
+    } 
+    if (!(checkrv->flags & TYP_FL_UBINF)) {
+	cmp = ncx_compare_nums(&testrv->ub, &checkrv->ub, btyp);
+	if (cmp <= 0) {
+	    ubok2 = TRUE;
+	}
+    } else {
+	/* UB == INF, always passes the test */
+	ubok2 = TRUE;
+    }
+
+    return (lbok && lbok2 && ubok && ubok2) ? NO_ERR :
+	ERR_NCX_NOT_IN_RANGE;
+
+}  /* rv_fits_in_rangedef */
+
+
+/********************************************************************
+* FUNCTION validate_range_chain
+* 
+* Final validatation of all range definitions within 
+* the type definition 
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   intypdef == typ_def_t in progress to validate
+*   typname == name from typedef (may be NULL for unnamed types)
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    validate_range_chain (tk_chain_t  *tkc,
+			  ncx_module_t *mod,
+			  typ_def_t *intypdef,
+			  const xmlChar *typname)
+{
+    dlq_hdr_t      *rangeQ, *prangeQ;
+    typ_def_t      *typdef, *parentdef;
+    typ_rangedef_t *rv, *checkrv;
+    typ_range_t    *range;
+    ncx_num_t      *curmax;
+    status_t        res, res2;
+    boolean         done, errdone, ubinf, first;
+    ncx_btype_t     rbtyp;
+    int32           retval;
+
+    typdef = typ_get_qual_typdef(intypdef, NCX_SQUAL_RANGE);
+    if (!typdef) {
+	return NO_ERR;
+    }
+
+    res = NO_ERR;
+    errdone = FALSE;
+    rbtyp = typ_get_range_type(typ_get_basetype(typdef));
+    if (!typname) {
+	typname = (const xmlChar *)"(unnamed type)";
+    }
+
+    /* Test 1: Individual tests
+     * validate each individual range definition in each
+     * typdef in the chain for the specified typ_template_t
+     * Check that each rangeQ is well-formed on its own
+     */
+    while (typdef && res==NO_ERR) {
+
+	rangeQ = typ_get_rangeQ_con(typdef);
+	if (!rangeQ || dlq_empty(rangeQ)) {
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+
+	curmax = NULL;
+	ubinf = FALSE;
+	first = TRUE;
+
+	for (rv = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
+	     rv != NULL && res==NO_ERR;
+	     rv = (typ_rangedef_t *)dlq_nextEntry(rv)) {
+
+	    /* check range-part after INF */
+	    if (ubinf) {
+		res = ERR_NCX_INVALID_RANGE;
+		log_error("\nError: INF already used and no more range"
+			  " part clauses are allowed in type '%s'",
+			  typname);
+		continue;
+	    }
+
+	    /* check upper-bound not >= lower-bound */
+	    retval = ncx_compare_nums(&rv->lb, &rv->ub, rbtyp);
+	    if (retval == 1) {
+		res = ERR_NCX_INVALID_RANGE;
+		log_error("\nError: lower bound is greater than "
+			  "upper bound in range part clause in type '%s'",
+			  typname);
+		continue;
+	    }
+
+	    /* check -INF used in a range-part other than first */
+	    if (rv->flags & TYP_FL_LBINF) {
+		if (!first) {
+		    res = ERR_NCX_OVERLAP_RANGE;
+		    log_error("\nError: -INF not allowed here in type '%s'",
+			      typname);
+		    continue;
+		}
+	    }
+
+	    /* check this lower-bound > any previous upper bound */
+	    if (rv->flags & TYP_FL_UBINF) {
+		ubinf = TRUE;
+	    } else if (!curmax) {
+		curmax = &rv->ub;
+	    } else {
+		retval = ncx_compare_nums(&rv->lb, curmax, rbtyp);
+		if (retval != 1) {
+		    res = ERR_NCX_OVERLAP_RANGE;
+		} else {
+		    curmax = &rv->ub;
+		}
+	    }
+	    first = FALSE;
+	}
+
+	if (res == NO_ERR) {
+	    typdef = typ_get_parent_typdef(typdef);
+	    if (typdef) {
+		typdef = typ_get_qual_typdef(typdef, NCX_SQUAL_RANGE);
+	    }
+	} else {
+	    tkc->cur = typdef->tk;
+	}
+    }
+
+    if (res != NO_ERR && !errdone) {
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    /* Test 2: Typdef Chain tests
+     * validate each individual range definition in each
+     * typdef in the chain against any previously defined
+     * range definitions in the typdef chain
+     */
+    typdef = typ_get_qual_typdef(intypdef, NCX_SQUAL_RANGE);
+    while (typdef && res==NO_ERR) {
+
+	/* have a typdef with a range definition
+	 * rangeQ contains the rangedef structs to test
+	 * For each parent typdef with a range clause:
+	 *    check raneQ contents against prangeQ contents
+	 *
+	 * rv is the rangedef to test
+	 * checkrv is the rangedef to test against
+	 */
+	rangeQ = typ_get_rangeQ_con(typdef);
+	for (rv = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
+	     rv != NULL && res==NO_ERR;
+	     rv = (typ_rangedef_t *)dlq_nextEntry(rv)) {
+
+	    parentdef = typ_get_parent_typdef(typdef);
+	    if (parentdef) {
+		parentdef = typ_get_qual_typdef(parentdef, NCX_SQUAL_RANGE);
+
+		while (parentdef && res==NO_ERR) {
+		    prangeQ = typ_get_rangeQ_con(parentdef);
+
+		    /* rv rangedef just has to fit within one
+		     * of the checkrv rangedefs to pass the test
+		     */
+		    done = FALSE;
+		    for (checkrv = (typ_rangedef_t *)dlq_firstEntry(prangeQ);
+			 checkrv != NULL && !done;
+			 checkrv = (typ_rangedef_t *)
+			     dlq_nextEntry(checkrv)) {
+			res2 = rv_fits_in_rangedef(rbtyp, rv, checkrv);
+			if (res2 == NO_ERR) {
+			    done = TRUE;
+			}
+		    }
+
+		    if (!done) {
+			res = ERR_NCX_NOT_IN_RANGE;
+			log_error("\nError: Range definition for '%s' is not a"
+				  " valid restriction of a parent range",
+				  typname);
+		    } else {
+			parentdef = typ_get_parent_typdef(parentdef);
+			if (parentdef) {
+			    parentdef = 
+				typ_get_qual_typdef(parentdef,
+						    NCX_SQUAL_RANGE);
+			}
+		    }
+		}
+	    }
+	}
+
+	if (res == NO_ERR) {
+	    /* setup next loop */
+	    typdef = typ_get_parent_typdef(typdef);
+	    if (typdef) {
+		typdef = typ_get_qual_typdef(typdef, NCX_SQUAL_RANGE);
+	    }
+	} else {
+	    /* set error token */
+	    range = typ_get_range_con(typdef);
+	    if (range && range->tk) {
+		tkc->cur = range->tk;
+	    } else if (typdef->tk) {
+		tkc->cur = typdef->tk;
+	    } else {
+		tkc->cur = intypdef->tk;
+	    }
+	}
+    }
+
+    if (res != NO_ERR && !errdone) {
+	ncx_print_errormsg(tkc, mod, res);
+    }
+
+    return res;
+
+} /* validate_range_chain */
+
+
+/********************************************************************
+* FUNCTION resolve_union_type
+* 
+* Check for named type dependency loops
+* Called during phase 2 of module parsing
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   unionQ == Q of unfinished typ_unionnode_t structs
+*   parent == obj_template_t containing the union (may be NULL)
+*   grp == grp_template_t containing the union (may be NULL)
+*            
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    resolve_union_type (tk_chain_t *tkc,
+			ncx_module_t *mod,
+			dlq_hdr_t  *unionQ,
+			obj_template_t *parent,
+			grp_template_t *grp)
+{
+    typ_unionnode_t *un;
+    status_t         res, retres;
+    ncx_btype_t      btyp;
+
+    retres = NO_ERR;
+
+    /* first resolve all the local type names */
+    for (un = (typ_unionnode_t *)dlq_firstEntry(unionQ);
+	 un != NULL;
+	 un = (typ_unionnode_t *)dlq_nextEntry(un)) {
+
+	res = resolve_type(tkc, mod, un->typdef,
+			   NULL, NULL, parent, grp);
+	CHK_EXIT;
+
+	btyp = typ_get_basetype(un->typdef);
+	if (btyp != NCX_BT_NONE && !typ_ok_for_union(btyp)) {
+	    retres = ERR_NCX_WRONG_TYPE;
+	    log_error("\nError: builtin type '%s' not allowed"
+		      " within a union", tk_get_btype_sym(btyp));
+	    tkc->cur = un->typdef->tk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+
+	if (un->typdef->class == NCX_CL_NAMED) {
+	    un->typ = un->typdef->def.named.typ;
+	    /* keep the typdef around for ncxdump */
+	}
+    }
+
+    return retres;
+
+}   /* resolve_union_type */
+
+
+/*******************************************************************
+* FUNCTION resolve_type
+* 
+* Analyze the typdef
+* Finish if a named type, and/or range clauses present,
+* which were left unfinished due to possible forward references
+*
+* Algorithm for checking named types in 4 separate loops:
+*   1) resolve all open type name references
+*   2) check for any name loops in all named types
+*   3) check that all base types and builtin types
+*      in each type chain are correct.  Also check that
+*      all restrictions given are correct for that type
+*   4) Check all range clauses and resolve all min/max
+*      keyword uses to decimal numbers and validate that
+*      each range is well-formed.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   typdef == typ_def_t struct to check
+*   name == name of the typ_template that contains 'typdef'
+*   defval == default value string to check (may be NULL)
+*   obj == obj_template containing this typdef, NULL if top-level
+*   grp == grp_template containing this typdef, otherwise NULL
+*  
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_type (tk_chain_t *tkc,
+		  ncx_module_t  *mod,
+		  typ_def_t *typdef,
+		  const xmlChar *name,
+		  const xmlChar *defval,
+		  obj_template_t *obj,
+		  grp_template_t *grp)
+{
+    typ_def_t        *testdef;
+    typ_template_t   *errtyp;
+    grp_template_t   *nextgrp;
+    typ_enum_t       *enu;
+    status_t         res, retres;
+    boolean          errdone;
+
+    res = NO_ERR;
+    retres = NO_ERR;
+    errdone = FALSE;
+
+    if (typdef->class == NCX_CL_BASE) {
+	return NO_ERR;
+    }
+
+#ifdef YANG_TYP_DEBUG
+    log_debug3("\nyang_typ: resolve type '%s' (name %s) on line %u",
+	       (typdef->typename) ? typdef->typename : NCX_EL_NONE,
+	       (name) ? name : NCX_EL_NONE,
+	       (typdef->tk) ? typdef->tk->linenum : 0);
+#endif
+
+    /* check the appinfoQ */
+    res = ncx_resolve_appinfoQ(tkc, mod, &typdef->appinfoQ);
+    if (NEED_EXIT) {
+	return res;
+    } else {
+	res = NO_ERR;
+    }
+
+    /* first resolve all the local type names */
+    if (res == NO_ERR) {
+	res = obj_set_named_type(tkc, mod, name, typdef, obj, grp);
+    }
+
+    /* type name loop check */
+    if (res == NO_ERR) {
+	res = loop_test(tkc, typdef);
+    }
+
+    /* If no loops then make sure base type is correct */
+    if (res == NO_ERR) {
+	res = restriction_test(tkc, mod, typdef);
+    }
+
+    /* print any errors so far, and exit if the typdef may
+     * not be stable enough to test further
+     */
+    if (res != NO_ERR) {
+	tkc->cur = typdef->tk;
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    /* go through again and resolve the range definitions
+     * This is needed if min and max keywords used
+     * Errors printed in the called fn
+     */
+    res = finish_yang_range(tkc, mod, typdef,
+			    typ_get_range_type
+			    (typ_get_basetype(typdef)));
+
+    /* validate that the ranges are valid now that min/max is set 
+     * and all parent ranges are also set.  A range must be valid
+     * wrt/ its parent range definition(s)
+     * Errors printed in the called fn
+     */
+    if (res == NO_ERR) {
+	res = validate_range_chain(tkc, mod, typdef, name);
+    }
+
+    /* check default value if any defined */
+    if (res == NO_ERR) {
+	if (defval && typ_get_basetype(typdef) != NCX_BT_NONE) {
+	    res = val_simval_ok(typdef, defval);
+	    if (res != NO_ERR) {
+		if (obj) {
+		    log_error("\nError: %s '%s' has invalid "
+			      "default value (%s)",
+			      (name) ? "Type" : 
+			      (const char *)obj_get_typestr(obj),
+			      (name) ? name : obj_get_name(obj), defval);
+		} else {
+		    log_error("\nError: %s '%s' has invalid "
+			      "default value (%s)",
+			      (name) ? "Type" : "leaf or leaf-list",
+			      (name) ? (const char *)name : "--", defval);
+		}
+		tkc->cur = typdef->tk;
+		ncx_print_errormsg(tkc, mod, res);
+	    }
+	}
+    }
+
+    /* check each enumeration appinfoQ */
+    if (res == NO_ERR) {
+	switch (typ_get_basetype(typdef)) {
+	case NCX_BT_ENUM:
+	case NCX_BT_BITS:
+	    if (typdef->class == NCX_CL_SIMPLE) {
+		for (enu = (typ_enum_t *)
+			 dlq_firstEntry(&typdef->def.simple.valQ);
+		     enu != NO_ERR;
+		     enu = (typ_enum_t *)dlq_nextEntry(enu)) {
+
+		    res = ncx_resolve_appinfoQ(tkc, mod, &enu->appinfoQ);
+		    CHK_EXIT;
+		}
+		res = NO_ERR;
+	    }
+	    break;
+	default:
+	    ;
+	}
+    }
+
+    /* special check for union typdefs, errors printed by called fn */
+    if (res == NO_ERR) {
+	if (typdef->class == NCX_CL_SIMPLE &&
+	    typ_get_basetype(typdef) == NCX_BT_UNION) {
+	    testdef = typ_get_base_typdef(typdef);
+	    res = resolve_union_type(tkc, mod,
+				     &testdef->def.simple.unionQ,
+				     obj, grp);
+	}
+    }
+
+    /*  check shadow typedef name error, even if other errors so far */
+    if (name) {
+	errtyp = NULL;
+
+	/* if object directly within a grouping, then need
+	 * to make sure that parent groupings do not contain
+	 * this type definition
+	 */
+	if (obj && obj->grp && obj->grp->parentgrp) {
+	    nextgrp = obj->grp->parentgrp;
+	    while (nextgrp) {
+		errtyp = ncx_find_type_que(&nextgrp->typedefQ, name);
+		if (errtyp) {
+		    nextgrp = NULL;
+		} else {
+		    nextgrp = nextgrp->parentgrp;
+		}
+	    }
+	}
+
+	/* check local typedef shadowed further up the chain */
+	if (!errtyp && obj && obj->parent) {
+	    errtyp = obj_find_type(obj->parent, name);
+	}
+
+	/* check module-global (exportable) typedef shadowed
+	 * only check for nested typedefs
+	 */
+	if (!errtyp && obj && (name || obj->grp || obj->parent)) {
+	    errtyp = ncx_find_type(mod, name);
+	}
+
+	if (errtyp) {
+	    res = ERR_NCX_DUP_ENTRY;
+	    log_error("\nError: local typedef %s shadows "
+		      "definition on line %u", name,
+		      errtyp->linenum);
+	    tkc->cur = typdef->tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	}
+    }
+
+    return (retres != NO_ERR) ? retres : res;
+
+}  /* resolve_type */
+
+
+/********************************************************************
+* FUNCTION resolve_typedef
+* 
+* Analyze the typdef
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   typ == typ_template struct to check
+*   obj == obj_template containing this typdef, NULL if top-level
+*   grp == grp_template containing this typdef, NULL if none
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_typedef (tk_chain_t *tkc,
+		     ncx_module_t  *mod,
+		     typ_template_t *typ,
+		     obj_template_t *obj,
+		     grp_template_t *grp)
+{
+    status_t   res, retres;
+
+    retres = NO_ERR;
+
+    /* check the appinfoQ */
+    res = ncx_resolve_appinfoQ(tkc, mod, &typ->appinfoQ);
+    CHK_EXIT;
+
+    res = resolve_type(tkc, mod, &typ->typdef, typ->name,
+		       typ->defval, obj, grp);
+    CHK_EXIT;
+    return retres;
+
+}  /* resolve_typedef */
+
+
+/**************  E X T E R N A L   F U N C T I O N S  **************/
+
+
+/********************************************************************
+* FUNCTION yang_typ_consume_type
+* 
+* Parse the next N tokens as a type clause
+* Add to the typ_template_t struct in progress
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'type' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod   == module in progress
+*   intypdef == struct that will get the type info
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_typ_consume_type (tk_chain_t *tkc,
+			   ncx_module_t  *mod,
+			   typ_def_t *intypdef)
+{
+    const char     *expstr;
+    typ_template_t *imptyp;
+    typ_def_t      *typdef;
+    ncx_btype_t     btyp;
+    boolean         done, extonly, derived;
+    status_t        res, retres;
+
+    expstr = "type name";
+    imptyp = NULL;
+    done = FALSE;
+    extonly = FALSE;
+    derived = FALSE;
+    res = NO_ERR;
+    retres = NO_ERR;
+    btyp = NCX_BT_NONE;
+
+    intypdef->tk = TK_CUR(tkc);
+
+    /* Get the mandatory base type */
+    res = yang_consume_pid_string(tkc, mod, 
+				  &intypdef->prefix,
+				  &intypdef->typename);
+    CHK_EXIT;
+
+    /* got ID and prefix if there is one */
+    if (intypdef->prefix && intypdef->typename &&
+	xml_strcmp(intypdef->prefix, mod->prefix)) {
+	/* real import - not the same as this module's prefix */
+	res = yang_find_imp_typedef(tkc, mod,
+				    intypdef->prefix,
+				    intypdef->typename,
+				    TK_CUR(tkc),
+				    &imptyp);
+	if (res != NO_ERR) {
+	    CHK_EXIT;
+	    /* type not found but continue processing errors for now */
+	    typ_init_named(intypdef);
+	} else {
+	    /* found named type OK, setup typdef */
+	    typ_init_named(intypdef);
+	    btyp = typ_get_basetype(&imptyp->typdef);
+	    typ_set_named_typdef(intypdef, imptyp);
+	}
+    } else if (intypdef->typename) {
+	/* there was no real prefix, so try to resolve this ID
+	 * as a builtin type, else save as a local type
+	 * btyp == NCX_BT_NONE indicates a local type
+	 */
+	btyp = tk_get_yang_btype_id(intypdef->typename,
+				    xml_strlen(intypdef->typename));
+	if (btyp != NCX_BT_NONE) {
+	    /* base type is builtin type */
+	    typ_init_simple(intypdef, btyp);
+	} else {
+	    /* base type local named type */
+	    typ_init_named(intypdef);
+	}
+    } else {
+	/* not even a typename to work with, error already set */
+	typ_init_named(intypdef);
+    }	
+		
+    /* check for ending semi-colon or starting left brace */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    if (TK_CUR_TYP(tkc) == TK_TT_SEMICOL) {
+	/* got the type name and that's all.
+	 * Check if a named imported type is given
+	 * or a builtin type name, and gen an error
+	 * if any subclauses are expected
+	 */
+	if (imptyp) {
+	    return NO_ERR;
+	}
+
+	/* check if builtin type and missing data */
+	switch (btyp) {
+	case NCX_BT_BITS:
+	    retres = ERR_NCX_MISSING_TYPE;
+	    expstr = "bit definitions";
+	    break;
+	case NCX_BT_ENUM:
+	    retres = ERR_NCX_MISSING_TYPE;
+	    expstr = "enum definitions";
+	    break;
+	case NCX_BT_UNION:
+	    retres = ERR_NCX_MISSING_TYPE;
+	    expstr = "union member definitions";
+	    break;
+	case NCX_BT_KEYREF:
+	    retres = ERR_NCX_MISSING_TYPE;
+	    expstr = "path specifier";
+	    break;
+	default:
+	    return NO_ERR;
+	}
+	ncx_mod_exp_err(tkc, mod, retres, expstr);
+	return retres;
+    } else if (TK_CUR_TYP(tkc) != TK_TT_LBRACE) {
+	retres = ERR_NCX_WRONG_TKTYPE;
+	ncx_mod_exp_err(tkc, mod, retres, expstr);
+	return retres;
+    }
+
+    /* got left brace, get the type sub-section clauses
+     * adding restrictions to an imported type or
+     * to a local named type (btyp not set yet)
+     */
+    if (imptyp || btyp == NCX_BT_NONE) {
+	res = typ_set_new_named(intypdef, btyp);
+	if (res == NO_ERR) {
+	    typdef = typ_get_new_named(intypdef);
+	    derived = TRUE;
+	    typdef->def.simple.flags |= TYP_FL_REPLACE;
+	} else {
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+    } else {
+	typdef = intypdef;
+    }
+
+    /* check for hard-wired builtin type sub-sections */
+    switch (btyp) {
+    case NCX_BT_NONE:
+	/* extending a local type that has not been resolved yet */
+	res = finish_unknown_type(tkc, mod, typdef);
+	CHK_EXIT;
+	break;
+    case NCX_BT_ANY:
+	extonly = TRUE;
+	break;
+    case NCX_BT_BITS:
+	if (derived) {
+	    extonly = TRUE;
+	} else {
+	    res = finish_bits_type(tkc, mod, typdef);
+	    CHK_EXIT;
+	}
+	break;
+    case NCX_BT_ENUM:
+	if (derived) {
+	    extonly = TRUE;
+	} else {
+	    res = finish_enum_type(tkc, mod, typdef);
+	    CHK_EXIT;
+	    break;
+	case NCX_BT_EMPTY:
+	    extonly = TRUE;
+	    break;
+	case NCX_BT_INT8:
+	case NCX_BT_INT16:
+	case NCX_BT_INT32:
+	case NCX_BT_INT64:
+	case NCX_BT_UINT8:
+	case NCX_BT_UINT16:
+	case NCX_BT_UINT32:
+	case NCX_BT_UINT64:
+	case NCX_BT_FLOAT32:
+	case NCX_BT_FLOAT64:
+	    res = finish_number_type(tkc, mod, typdef);
+	    CHK_EXIT;
+	    break;
+	case NCX_BT_STRING:
+	case NCX_BT_BINARY:
+	    res = finish_string_type(tkc, mod, typdef, btyp);
+	    CHK_EXIT;
+	    break;
+	case NCX_BT_UNION:
+	    if (derived) {
+		extonly = TRUE;
+	    } else {
+		res = finish_union_type(tkc, mod, typdef);
+		CHK_EXIT;
+	    }
+	    break;
+	case NCX_BT_KEYREF:
+	    if (derived) {
+		extonly = TRUE;
+	    } else {
+		res = finish_keyref_type(tkc, mod, typdef);
+		CHK_EXIT;
+	    }
+	    break;
+	default:
+	    retres = SET_ERROR(ERR_INTERNAL_VAL);
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+    }
+
+    /* check if this sub-section is only allowed
+     * to have extensions in it; no YANG statements
+     */
+    if (extonly) {
+	/* give back left brace and get the appinfo */
+	TK_BKUP(tkc);  
+	res = yang_consume_semiapp(tkc, mod,
+				   &typdef->appinfoQ);
+	CHK_EXIT;
+    }
+
+    return retres;
+
+}  /* yang_typ_consume_type */
+
+
+/********************************************************************
+* FUNCTION yang_typ_consume_typedef
+* 
+* Parse the next N tokens as a typedef clause
+* Create a typ_template_t struct and add it to the specified module
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'typedef' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   que == queue will get the typ_template_t 
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_typ_consume_typedef (tk_chain_t *tkc,
+			      ncx_module_t  *mod,
+			      dlq_hdr_t *que)
+{
+    typ_template_t  *typ, *testtyp;
+    const xmlChar   *val;
+    const char      *expstr;
+    xmlChar         *str;
+    tk_token_t      *savetk;
+    tk_type_t        tktyp;
+    boolean          done, typdone, typeok, unit, def, stat, desc, ref;
+    status_t         res, retres;
+
+    typ = NULL;
+    testtyp = NULL;
+    val = NULL;
+    expstr = "identifier string";
+    str = NULL;
+    tktyp = TK_TT_NONE;
+    done = FALSE;
+    typdone = FALSE;
+    typeok = FALSE;
+    unit = FALSE;
+    def = FALSE;
+    stat = FALSE;
+    desc = FALSE;
+    ref = FALSE;
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    /* Get a new typ_template_t to fill in */
+    typ = typ_new_template();
+    if (!typ) {
+	res = ERR_INTERNAL_MEM;
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    } else {
+	typ->tk = TK_CUR(tkc);
+	typ->linenum = typ->tk->linenum;
+	typ->mod = mod;
+    }
+
+    /* Get the mandatory type name */
+    res = yang_consume_id_string(tkc, mod, &typ->name);
+    CHK_EXIT;
+
+    /* Get the starting left brace for the sub-clauses */
+    res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
+    CHK_EXIT;
+
+    /* get the prefix clause and any appinfo extensions */
+    while (!done) {
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    typ_free_template(typ);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    typ_free_template(typ);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &typ->typdef.appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT) {
+		    typ_free_template(typ);
+		}
+		return res;
+	    }
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	default:
+	    expstr = "keyword";
+	    res = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+	if (!xml_strcmp(val, YANG_K_TYPE)) {
+	    if (typdone) {
+		retres = ERR_NCX_ENTRY_EXISTS;
+		typeok = FALSE;
+		log_error("\nError: type clause already entered");
+		ncx_print_errormsg(tkc, mod, res);
+		typ_clean_typdef(&typ->typdef);
+	    }
+	    typdone = TRUE;
+	    res = yang_typ_consume_type(tkc, mod, &typ->typdef);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT) {
+		    typ_free_template(typ);
+		    return res;
+		}
+	    } else {
+		typeok = TRUE;
+	    }
+	} else if (!xml_strcmp(val, YANG_K_UNITS)) {
+	    res = yang_consume_strclause(tkc, mod, &typ->units,
+					 &unit, &typ->typdef.appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT) {
+		    typ_free_template(typ);
+		    return res;
+		}
+	    }
+	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
+	    res = yang_consume_strclause(tkc, mod, &typ->defval,
+					 &def, &typ->typdef.appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT) {
+		    typ_free_template(typ);
+		    return res;
+		}
+	    }
+	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
+	    res = yang_consume_status(tkc, mod, &typ->status,
+				      &stat, &typ->typdef.appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT) {
+		    typ_free_template(typ);
+		    return res;
+		}
+	    }
+	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+	    res = yang_consume_descr(tkc, mod, &typ->descr,
+				     &desc, &typ->typdef.appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT) {
+		    typ_free_template(typ);
+		    return res;
+		}
+	    }
+	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+	    res = yang_consume_descr(tkc, mod, &typ->ref,
+				     &ref, &typ->typdef.appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT) {
+		    typ_free_template(typ);
+		    return res;
+		}
+	    }
+	} else {
+	    expstr = "keyword";
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+    }
+
+    /* check all the mandatory clauses are present */
+    if (!typdone) {
+	expstr = "mandatory type clause";
+	retres = ERR_NCX_DATA_MISSING;
+	ncx_mod_exp_err(tkc, mod, retres, expstr);
+    }
+
+    /* check if the type name is already used in this module */
+    if (typ->name && ncx_valid_name2(typ->name)) {
+	testtyp = ncx_find_type_que(que, typ->name);
+	if (testtyp) {
+	    /* fatal error for duplicate type w/ same name */
+	    retres = ERR_NCX_DUP_ENTRY;
+	    log_error("\nError: type '%s' is already defined on line %u",
+		      typ->name, testtyp->linenum);
+	    savetk = tkc->cur;
+	    tkc->cur = typ->tk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	    tkc->cur = savetk;
+	    typ_free_template(typ);
+	} else if (typeok) {
+#ifdef YANG_TYP_DEBUG
+	    log_debug3("\nyang_typ: adding type (%s) to mod (%s)", 
+		       typ->name, mod->name);
+#endif
+	    dlq_enque(typ, que);
+	} else {
+	    typ_free_template(typ);
+	}	    
+    } else {
+	typ_free_template(typ);
+    }
+
+    return retres;
+
+}  /* yang_typ_consume_typedef */
+
+
+/********************************************************************
+* FUNCTION yang_typ_resolve_typedefs
+* 
+* Analyze the entire typeQ within the module struct
+* Finish all the named types and range clauses,
+* which were left unfinished due to possible forward references
+*
+* Check all the types in the Q
+* If a type has validation errors, it will be removed
+* from the typeQ
+*
+* Algorithm for checking named types in 4 separate loops:
+*   1) resolve all open type name references
+*   2) check for any name loops in all named types
+*   3) check that all base types and builtin types
+*      in each type chain are correct.  Also check that
+*      all restrictions given are correct for that type
+*   4) Check all range clauses and resolve all min/max
+*      keyword uses to decimal numbers and validate that
+*      each range is well-formed.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   typeQ == Q of typ_template_t structs t0o check
+*   parent == obj_template containing this typeQ
+*          == NULL if this is a module-level typeQ
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_typ_resolve_typedefs (tk_chain_t *tkc,
+			       ncx_module_t  *mod,
+			       dlq_hdr_t *typeQ,
+			       obj_template_t *parent)
+{
+    typ_template_t  *typ;
+    status_t         res, retres;
+
+#ifdef DEBUG
+    if (!tkc || !mod || !typeQ) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    retres = NO_ERR;
+
+    /* first resolve all the local type names */
+    for (typ = (typ_template_t *)dlq_firstEntry(typeQ);
+	 typ != NULL;
+	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
+
+	res = resolve_typedef(tkc, mod, typ, parent, NULL);
+	CHK_EXIT;
+    }
+
+    return retres;
+
+}  /* yang_typ_resolve_typedefs */
+
+
+/********************************************************************
+* FUNCTION yang_typ_resolve_typedefs_grp
+* 
+* Analyze the entire typeQ within the module struct
+* Finish all the named types and range clauses,
+* which were left unfinished due to possible forward references
+*
+* Check all the types in the Q
+* If a type has validation errors, it will be removed
+* from the typeQ
+*
+* Algorithm for checking named types in 4 separate loops:
+*   1) resolve all open type name references
+*   2) check for any name loops in all named types
+*   3) check that all base types and builtin types
+*      in each type chain are correct.  Also check that
+*      all restrictions given are correct for that type
+*   4) Check all range clauses and resolve all min/max
+*      keyword uses to decimal numbers and validate that
+*      each range is well-formed.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   typeQ == Q of typ_template_t structs t0o check
+*   parent == obj_template containing this typeQ
+*          == NULL if this is a module-level typeQ
+*   grp == grp_template containing this typedef
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_typ_resolve_typedefs_grp (tk_chain_t *tkc,
+				   ncx_module_t  *mod,
+				   dlq_hdr_t *typeQ,
+				   obj_template_t *parent,
+				   grp_template_t *grp)
+{
+    typ_template_t  *typ;
+    status_t         res, retres;
+
+#ifdef DEBUG
+    if (!tkc || !mod || !typeQ) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    retres = NO_ERR;
+
+    /* first resolve all the local type names */
+    for (typ = (typ_template_t *)dlq_firstEntry(typeQ);
+	 typ != NULL;
+	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
+
+	res = resolve_typedef(tkc, mod, typ, parent, grp);
+	CHK_EXIT;
+    }
+
+    return retres;
+
+}  /* yang_typ_resolve_typedefs_grp */
+
+
+/********************************************************************
+* FUNCTION yang_typ_resolve_type
+* 
+* Analyze the typdef within a single leaf or leaf-list statement
+* Finish if a named type, and/or range clauses present,
+* which were left unfinished due to possible forward references
+*
+* Algorithm for checking named types in 4 separate loops:
+*   1) resolve all open type name references
+*   2) check for any name loops in all named types
+*   3) check that all base types and builtin types
+*      in each type chain are correct.  Also check that
+*      all restrictions given are correct for that type
+*   4) Check all range clauses and resolve all min/max
+*      keyword uses to decimal numbers and validate that
+*      each range is well-formed.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   typdef == typdef struct from leaf or leaf-list to check
+*   defval == default value string for this leaf (may be NULL)
+*   obj == obj_template containing this typdef
+*       == NULL if this is a top-level union typedef,
+*          checking its nested unnamed type clauses
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_typ_resolve_type (tk_chain_t *tkc,
+			   ncx_module_t  *mod,
+			   typ_def_t *typdef,
+			   const xmlChar *defval,
+			   obj_template_t *obj)
+{
+    status_t         res;
+
+#ifdef DEBUG
+    if (!tkc || !mod || !typdef) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = resolve_type(tkc, mod, typdef, NULL, defval, obj, NULL);
+    return res;
+
+}  /* yang_typ_resolve_type */
+
+
+/********************************************************************
+* FUNCTION yang_typ_rangenum_ok
+* 
+* Check a typdef for range definitions
+* and check if the specified number passes all
+* the range checks (if any)
+*
+* INPUTS:
+*   typdef == typdef to check
+*   num == number to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_typ_rangenum_ok (typ_def_t *typdef,
+			  const ncx_num_t *num)
+{
+    typ_def_t   *rdef;
+    status_t     res;
+    ncx_btype_t  rbtyp;
+
+    res = NO_ERR;
+    rbtyp = typ_get_range_type(typ_get_basetype(typdef));
+
+    rdef = typ_get_qual_typdef(typdef, NCX_SQUAL_RANGE);
+    while (rdef && res==NO_ERR) {
+	res = val_range_ok(rdef, rbtyp, num);
+	if (res != NO_ERR) {
+	    continue;
+	}
+	rdef = typ_get_parent_typdef(rdef);
+	if (rdef) {
+	    rdef = typ_get_qual_typdef(rdef, NCX_SQUAL_RANGE);
+	}
+    }
+
+    return res;
+    
+} /* yang_typ_rangenum_ok */
+
+
+/* END file yang_typ.c */

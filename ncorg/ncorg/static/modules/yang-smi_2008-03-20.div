@@ -1,0 +1,68 @@
+
+<div>
+   <h1 class="yang">yang-smi.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Extensions</a>
+         <ul>
+            <li><a href="#oid.21">oid</a></li>
+            <li><a href="#display-hint.27">display-hint</a></li>
+            <li><a href="#default.33">default</a></li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">yang-smi</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span> <span class="yang_str">"urn:ietf:params:xml:ns:yang:yang-smi"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"YANG Language Design Team"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"Martin Bjorklund (Editor) &lt;mbj@tail-f.com&gt;"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"This module contains extensions for dealing with SMIv2 modules."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-03-20"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Initial revision."</span>;
+      }
+
+
+      <span class="yang_cmt">// extensions</span>
+
+      <a name="oid.21"/><span class="yang_kw">extension</span> <span class="yang_id">oid</span> {
+         <span class="yang_kw">argument</span> <span class="yang_str">"oid"</span> {
+            <span class="yang_kw">yin-element</span> <span class="yang_str">"false"</span> {
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"OBJECT IDENTIFIER value assigned to a particular node."</span>;
+      }
+
+      <a name="display-hint.27"/><span class="yang_kw">extension</span> <span class="yang_id">display-hint</span> {
+         <span class="yang_kw">argument</span> <span class="yang_str">"hint"</span> {
+            <span class="yang_kw">yin-element</span> <span class="yang_str">"false"</span> {
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"DISPLAY-HINT value provided in a TEXTUAL-CONVENTION macro."</span>;
+      }
+
+      <a name="default.33"/><span class="yang_kw">extension</span> <span class="yang_id">default</span> {
+         <span class="yang_kw">argument</span> <span class="yang_str">"default"</span> {
+            <span class="yang_kw">yin-element</span> <span class="yang_str">"false"</span> {
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"DEFVAL value provided in an OBJECT-TYPE macro."</span>;
+      }
+   }  <span class="yang_cmt">// module yang-smi</span>
+</pre>
+</div>
+</div>

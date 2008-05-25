@@ -1,0 +1,45 @@
+
+Yangtools WEB Site README
+--------------------------
+
+Version:  2008-05-19 (v0.9.2)
+
+Pre-Build steps:
+
+   - set netconf/src/platform/platform.profile details
+      - CFLAGS has -ggdb3 for debug version (out for real)
+      - CFLAGS has -DLINUX or -DMACOSX
+      - CINC has /sw/include added for MACOSX
+
+Build:
+
+   - cd netconf/src
+   - make
+   - su
+   - make install
+   - cd ../modules
+   - make
+   - cd ../../mysql
+   - ./redo_mysql.sh
+   - ./load_newmod.sh newmod.sql
+
+Run WEB server
+   - cd ../ncorg
+   - ./start-ncorg.sh
+     (runs WEBBrick on port 8080)
+
+Run NETCONF Agent
+  - TBD
+
+
+External Installed Files:
+   - /usr/bin/yangdump
+   - /usr/local/bin/netconf-subsystem
+
+External file dependencies:
+   - /etc/services (for netconfd)
+   - /etc/ssh/sshd_config
+   - SELinux config to allow access to port 830
+   - /etc/httpd/conf/httpd.conf (to proxy to WEBBrick as 'ncxserver')
+
+

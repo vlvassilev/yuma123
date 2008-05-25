@@ -1,0 +1,438 @@
+
+<div>
+   <h1 class="yang">SNMP-NOTIFICATION-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#snmpNotifyObjects.93">snmpNotifyObjects</a>
+               <ul>
+                  <li class="daddy"><a href="#snmpNotifyEntry.98">snmpNotifyEntry</a>
+                     <ul>
+                        <li><a href="#snmpNotifyName.113">snmpNotifyName</a></li>
+                        <li><a href="#snmpNotifyTag.124">snmpNotifyTag</a></li>
+                        <li><a href="#snmpNotifyType.138">snmpNotifyType</a></li>
+                        <li><a href="#snmpNotifyStorageType.169">snmpNotifyStorageType</a></li>
+                        <li><a href="#snmpNotifyRowStatus.180">snmpNotifyRowStatus</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#snmpNotifyFilterProfileEntry.196">snmpNotifyFilterProfileEntry</a>
+                     <ul>
+                        <li><a href="#snmpTargetParamsName.209">snmpTargetParamsName</a></li>
+                        <li><a href="#snmpNotifyFilterProfileName.218">snmpNotifyFilterProfileName</a></li>
+                        <li><a href="#snmpNotifyFilterProfileStorType.230">snmpNotifyFilterProfileStorType</a></li>
+                        <li><a href="#snmpNotifyFilterProfileRowStatus.241">snmpNotifyFilterProfileRowStatus</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#snmpNotifyFilterEntry.266">snmpNotifyFilterEntry</a>
+                     <ul>
+                        <li><a href="#snmpNotifyFilterProfileName.277">snmpNotifyFilterProfileName</a></li>
+                        <li><a href="#snmpNotifyFilterSubtree.286">snmpNotifyFilterSubtree</a></li>
+                        <li><a href="#snmpNotifyFilterMask.297">snmpNotifyFilterMask</a></li>
+                        <li><a href="#snmpNotifyFilterType.351">snmpNotifyFilterType</a></li>
+                        <li><a href="#snmpNotifyFilterStorageType.366">snmpNotifyFilterStorageType</a></li>
+                        <li><a href="#snmpNotifyFilterRowStatus.378">snmpNotifyFilterRowStatus</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">SNMP-NOTIFICATION-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:SNMP-NOTIFICATION-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-notification"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14">SNMP-FRAMEWORK-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-framework"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMP-TARGET-MIB/2002-10-14">SNMP-TARGET-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-target"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMPv2-TC/1999-04-01">SNMPv2-TC</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smiv2"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"IETF SNMPv3 Working Group"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"WG-email:   snmpv3@lists.tislabs.com
+         Subscribe:  majordomo@lists.tislabs.com
+         	    In message body:  subscribe snmpv3
+         
+         Co-Chair:   Russ Mundy
+         	    Network Associates Laboratories
+         Postal:     15204 Omega Drive, Suite 300
+         	    Rockville, MD 20850-4601
+         	    USA
+         EMail:      mundy@tislabs.com
+         Phone:      +1 301-947-7107
+         
+         Co-Chair:   David Harrington
+         	    Enterasys Networks
+         Postal:     35 Industrial Way
+         	    P. O. Box 5004
+         	    Rochester, New Hampshire 03866-5005
+         	    USA
+         EMail:      dbh@enterasys.com
+         Phone:      +1 603-337-2614
+         
+         Co-editor:  David B. Levi
+         	    Nortel Networks
+         Postal:     3505 Kesterwood Drive
+         	    Knoxville, Tennessee 37918
+         EMail:      dlevi@nortelnetworks.com
+         Phone:      +1 865 686 0432
+         
+         Co-editor:  Paul Meyer
+         	    Secure Computing Corporation
+         Postal:     2675 Long Lake Road
+         	    Roseville, Minnesota 55113
+         EMail:      paul_meyer@securecomputing.com
+         Phone:      +1 651 628 1592
+         
+         Co-editor:  Bob Stewart
+         	    Retired"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"This MIB module defines MIB objects which provide
+         mechanisms to remotely configure the parameters
+         used by an SNMP entity for the generation of
+         notifications.
+         
+         Copyright (C) The Internet Society (2002). This
+         version of this MIB module is part of RFC 3413;
+         see the RFC itself for full legal notices."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2002-10-14"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Clarifications, published as
+         RFC 3413."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1998-08-04"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Clarifications, published as
+         RFC 2573."</span>;
+      }
+      <span class="yang_kw">revision</span> <span class="yang_str">"1997-07-14"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"The initial revision, published as RFC2273."</span>;
+      }
+
+
+      <span class="yang_cmt">// objects</span>
+
+      <a name="snmpNotifyObjects.93"/><span class="yang_kw">container</span> <span class="yang_id">snmpNotifyObjects</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1"</span>;
+
+         <a name="snmpNotifyEntry.98"/><span class="yang_kw">list</span> <span class="yang_id">snmpNotifyEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#snmpNotifyName.113">snmpNotifyName</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in this table selects a set of management targets
+               which should receive notifications, as well as the type of
+               
+               notification which should be sent to each selected
+               management target.
+               
+               Entries in the snmpNotifyTable are created and
+               deleted using the snmpNotifyRowStatus object."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.1.1"</span>;
+
+            <a name="snmpNotifyName.113"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The locally arbitrary, but unique identifier associated
+                  with this snmpNotifyEntry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.1.1.1"</span>;
+            }
+
+            <a name="snmpNotifyTag.124"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyTag</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-TARGET-MIB/2002-10-14#SnmpTagValue.96">snmp-target:SnmpTagValue</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object contains a single tag value which is used
+                  to select entries in the snmpTargetAddrTable.  Any entry
+                  in the snmpTargetAddrTable which contains a tag value
+                  which is equal to the value of an instance of this
+                  object is selected.  If this object contains a value
+                  of zero length, no entries are selected."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.1.1.2"</span>;
+            }
+
+            <a name="snmpNotifyType.138"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"trap"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"inform"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object determines the type of notification to
+                  
+                  be generated for entries in the snmpTargetAddrTable
+                  selected by the corresponding instance of
+                  snmpNotifyTag.  This value is only used when
+                  generating notifications, and is ignored when
+                  using the snmpTargetAddrTable for other purposes.
+                  
+                  If the value of this object is trap(1), then any
+                  messages generated for selected rows will contain
+                  Unconfirmed-Class PDUs.
+                  
+                  If the value of this object is inform(2), then any
+                  messages generated for selected rows will contain
+                  Confirmed-Class PDUs.
+                  
+                  Note that if an SNMP entity only supports
+                  generation of Unconfirmed-Class PDUs (and not
+                  Confirmed-Class PDUs), then this object may be
+                  read-only."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"trap"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.1.1.3"</span>;
+            }
+
+            <a name="snmpNotifyStorageType.169"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyStorageType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.
+                  Conceptual rows having the value 'permanent' need not
+                  allow write-access to any columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.1.1.4"</span>;
+            }
+
+            <a name="snmpNotifyRowStatus.180"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyRowStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row.
+                  
+                  To create a row in this table, a manager must
+                  set this object to either createAndGo(4) or
+                  createAndWait(5)."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.1.1.5"</span>;
+            }
+         }  <span class="yang_cmt">// list snmpNotifyEntry</span>
+
+         <a name="snmpNotifyFilterProfileEntry.196"/><span class="yang_kw">list</span> <span class="yang_id">snmpNotifyFilterProfileEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#snmpTargetParamsName.209">snmpTargetParamsName</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in this table indicates the name of the filter
+               profile to be used when generating notifications using
+               the corresponding entry in the snmpTargetParamsTable.
+               
+               Entries in the snmpNotifyFilterProfileTable are created
+               and deleted using the snmpNotifyFilterProfileRowStatus
+               object."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.2.1"</span>;
+
+            <a name="snmpTargetParamsName.209"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/snmp-target:snmpTargetObjects/snmp-target:snmpTargetParamsEntry/snmp-target:snmpTargetParamsName"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="snmpNotifyFilterProfileName.218"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterProfileName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The name of the filter profile to be used when generating
+                  notifications using the corresponding entry in the
+                  snmpTargetAddrTable."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.2.1.1"</span>;
+            }
+
+            <a name="snmpNotifyFilterProfileStorType.230"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterProfileStorType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.
+                  Conceptual rows having the value 'permanent' need not
+                  allow write-access to any columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.2.1.2"</span>;
+            }
+
+            <a name="snmpNotifyFilterProfileRowStatus.241"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterProfileRowStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row.
+                  
+                  To create a row in this table, a manager must
+                  set this object to either createAndGo(4) or
+                  createAndWait(5).
+                  
+                  Until instances of all corresponding columns are
+                  appropriately configured, the value of the
+                  corresponding instance of the
+                  snmpNotifyFilterProfileRowStatus column is 'notReady'.
+                  
+                  In particular, a newly created row cannot be made
+                  active until the corresponding instance of
+                  snmpNotifyFilterProfileName has been set."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.2.1.3"</span>;
+            }
+         }  <span class="yang_cmt">// list snmpNotifyFilterProfileEntry</span>
+
+         <a name="snmpNotifyFilterEntry.266"/><span class="yang_kw">list</span> <span class="yang_id">snmpNotifyFilterEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#snmpNotifyFilterProfileName.277">snmpNotifyFilterProfileName</a>, <a href="#snmpNotifyFilterSubtree.286">snmpNotifyFilterSubtree</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An element of a filter profile.
+               
+               Entries in the snmpNotifyFilterTable are created and
+               deleted using the snmpNotifyFilterRowStatus object."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.3.1"</span>;
+
+            <a name="snmpNotifyFilterProfileName.277"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterProfileName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/snmp-notification:snmpNotifyObjects/snmp-notification:snmpNotifyFilterProfileEntry/snmp-notification:snmpNotifyFilterProfileName"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="snmpNotifyFilterSubtree.286"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterSubtree</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The MIB subtree which, when combined with the corresponding
+                  instance of snmpNotifyFilterMask, defines a family of
+                  subtrees which are included in or excluded from the
+                  filter profile."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.3.1.1"</span>;
+            }
+
+            <a name="snmpNotifyFilterMask.297"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterMask</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..16"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The bit mask which, in combination with the corresponding
+                  instance of snmpNotifyFilterSubtree, defines a family of
+                  subtrees which are included in or excluded from the
+                  filter profile.
+                  
+                  Each bit of this bit mask corresponds to a
+                  sub-identifier of snmpNotifyFilterSubtree, with the
+                  most significant bit of the i-th octet of this octet
+                  string value (extended if necessary, see below)
+                  corresponding to the (8*i - 7)-th sub-identifier, and
+                  the least significant bit of the i-th octet of this
+                  octet string corresponding to the (8*i)-th
+                  sub-identifier, where i is in the range 1 through 16.
+                  
+                  Each bit of this bit mask specifies whether or not
+                  the corresponding sub-identifiers must match when
+                  determining if an OBJECT IDENTIFIER matches this
+                  family of filter subtrees; a '1' indicates that an
+                  exact match must occur; a '0' indicates 'wild card',
+                  i.e., any sub-identifier value matches.
+                  
+                  Thus, the OBJECT IDENTIFIER X of an object instance
+                  is contained in a family of filter subtrees if, for
+                  each sub-identifier of the value of
+                  snmpNotifyFilterSubtree, either:
+                  
+                    the i-th bit of snmpNotifyFilterMask is 0, or
+                  
+                    the i-th sub-identifier of X is equal to the i-th
+                    sub-identifier of the value of
+                    snmpNotifyFilterSubtree.
+                  
+                  If the value of this bit mask is M bits long and
+                  there are more than M sub-identifiers in the
+                  corresponding instance of snmpNotifyFilterSubtree,
+                  then the bit mask is extended with 1's to be the
+                  required length.
+                  
+                  Note that when the value of this object is the
+                  zero-length string, this extension rule results in
+                  a mask of all-1's being used (i.e., no 'wild card'),
+                  and the family of filter subtrees is the one
+                  subtree uniquely identified by the corresponding
+                  instance of snmpNotifyFilterSubtree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.3.1.2"</span>;
+            }
+
+            <a name="snmpNotifyFilterType.351"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"included"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"excluded"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object indicates whether the family of filter subtrees
+                  defined by this entry are included in or excluded from a
+                  filter.  A more detailed discussion of the use of this
+                  object can be found in section 6. of [SNMP-APPL]."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"included"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.3.1.3"</span>;
+            }
+
+            <a name="snmpNotifyFilterStorageType.366"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterStorageType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.
+                  Conceptual rows having the value 'permanent' need not
+                  
+                  allow write-access to any columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.3.1.4"</span>;
+            }
+
+            <a name="snmpNotifyFilterRowStatus.378"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterRowStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row.
+                  
+                  To create a row in this table, a manager must
+                  set this object to either createAndGo(4) or
+                  createAndWait(5)."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.3.1.5"</span>;
+            }
+         }  <span class="yang_cmt">// list snmpNotifyFilterEntry</span>
+      }  <span class="yang_cmt">// container snmpNotifyObjects</span>
+   }  <span class="yang_cmt">// module SNMP-NOTIFICATION-MIB</span>
+</pre>
+</div>
+</div>

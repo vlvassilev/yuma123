@@ -1,0 +1,532 @@
+<!doctype html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>NETCONF Access Control Model (draft 0.2)</title>
+    <link rel="stylesheet" href="/css/ncx.css" type="text/css"/>
+  </head>
+<body>
+
+<p>
+<a href="index.html">NCX Home</a>
+</p>
+
+<h1 align="center">NETCONF Access Control Model</h1>
+
+<p>Contents:</p>
+
+<ul>
+<li><a href="#NACM">NACM Overview</a>
+  <ul>
+  <li><a href="#NACM_Global">Global Access Control</a></li>
+  <li><a href="#NACM_UsersGroups">Users and Groups</a></li>
+  <li><a href="#NACM_Rights">Access Rights</a></li>
+  </ul>
+</li>
+<li><a href="#NACM_DataModel">NACM Data Model</a></li>
+</ul>
+
+<h1><a name="NACM">NACM Overview</a></h1>
+
+<p>
+[Note: This specification is preliminary and incomplete.]
+</p>
+
+<p>
+The NETCONF protocol uses a procedural interface model,
+based on the &lt;rpc&gt; element and set of defined
+protocol operations.  There is no access control model
+defined for NETCONF, and a specialized model is needed.
+</p>
+
+<p>
+The access control model is essentially a two step procedure:
+<ol>
+<li>Grant access to the invoke the Remote Procedure Call</li>
+<li>If configuration database contents are accessed as a
+result of invoking the RPC method, then grant access
+to the indicated configuration data.</li>
+</ol>
+</p>
+
+<h2><a name="NACM_Global">Global Access Control</a></h2>
+
+<p>
+The <b>ncx-access</b> parameter set is used to
+restrict NETCONF protocol access within an agent.
+</p>
+
+<p>
+There is a top-level switch in the ncx-access parameter set,
+called <b>mode</b>,
+to control the basic level of access control that is applied
+by the agent:
+</p>
+
+<ul>
+<li><b>none</b>  -- no access control applied at all</li>
+<li><b>loose</b>  -- access control applied to writing configuration data only</li>
+<li><b>strict</b>  -- access control applied to all access</li>
+</ul>
+
+<h2><a name="NACM_UsersGroups">Users and Groups</a></h2>
+
+<ul>
+<li>Access is granted to a <b>group</b> using its name as a key</li>
+<li>A <b>username or InetAddress</b> can be a member of a group</li>
+<li>The mapping from NETCONF transport to username is out of scope</li>
+</ul>
+
+<p>
+There are three ways to <b>grant data access to a group</b> in NACM:
+</p>
+
+<ol>
+<li>Invoke by RPC Type (e.g., config, exec, monitor, debug)</li>
+<li>Invoke by RPC Method (e.g., edit-config, rock-the-house, 
+  delete-config)</li>
+<li>Max-access by Data Xpath Expression 
+ (e.g., {read-create, /interfaces/interface[ifName='eth0']} )
+</li>
+</ol>
+
+<p>
+The NACM data model is used to grant protocol access
+or data access to NETCONF groups:
+</p>
+
+<h2><a name="NACM_Rights">Access Rights</a></h2>
+
+<p>
+For each group that is configured on the agent,
+there are various access rights that may be granted
+to a NETCONF session, by using the tables within the data model.
+</p>
+
+<p>
+The first level of access that must be granted (in strict mode)
+is permission to execute the RPC method being invoked.
+If access is granted (because an entry for the group is
+in the <b>NcxRpcTypeAccessTable</b> 
+or <b>NcxRpcAccessTable</b>), then the RPC method is invoked.
+If the 'mode' parameter is not set to 'strict' then no check
+is made, and the RPC method is simply invoked.
+</p>
+
+<p>
+If the access control mode is strict, then any access
+to any configuration database is checked in the
+<b>NcxDataAccessTable</b>.
+An entry must exist for the group and the data,
+with the <b>max-access</b> level set high enough to
+allow the protocol operation.
+</p>
+
+
+<p>
+If the the access control mode is 'loose' then 
+the <b>NcxDataAccessTable</b> is only checked for
+write operations, which create, edit, or delete
+conceptual configuration data.
+</p>
+
+<h1><a name="NACM_DataModel">NACM Data Model</a></h2>
+
+<p>
+The following NCX module defines the NACM configuration data model:
+</p>
+
+<pre>
+
+    ncx-module nacm {
+      header {
+        description 
+          "NCX Access Control Parameters
+    
+           Usage:
+           1) Add 1 or more users and/or hosts to the NcxGroupTable
+    
+           - Group Table 
+             - A user or host is allowed to belong to multiple groups
+             - Access in each of the access control tables is 
+               by group name, not user name or host address
+             - the user 'rrot' always has access to all RPC methods 
+               and all data
+    
+           2) Add 1 or more Access Control Entries
+              to the access control tables below:
+    
+           3) First, a user must be granted access in one of these 2
+              RPC access control tables:
+    
+             - RPC Type Access Table
+               - listed group names are allowed to access any RPC
+                 method of a particular type, such as 'config' , 'exec'
+                 or 'monitor'
+    
+             - RPC Method Access Table
+               - listed group names are allowed to invoke the 
+                 specified RPC method
+    
+             If the user does not have permission to access
+             the RPC method, then permission is denied and
+             an access-denied error is generated.
+    
+             If the agent is not configures to require strict access,
+             then all RPC types and all RPC methods can
+             be accessed by all users.
+    
+           4) If the system access control is configured as 'strict',
+              and the RPC method accesses any data elements within
+              the conceptual configuration database,
+              then a user must be granted access in the
+              Data access control tables:
+    
+             - Data Access Table
+               - listed group names are allowed the indicated max-access
+                 to any instance of the specified data object
+    
+           5) If the system access control is configured as 'strict',
+              then this parmset must be used to configure all access 
+              control parameters must be setup by 'root' before the 
+              agent can be used
+    
+             - Parmset ncx-access
+               - parameter set to configure the access control tables
+    
+          ";
+        version 0.4;
+        owner ncx;
+        application security;
+        copyright "Copyright (C) 2006-2007, Andy Bierman.";
+        contact-info "Send comments to &lt;ietf@andybierman.com&gt;.";
+        last-update "2007-03-30";
+      }
+    
+      imports {
+        import ncxtypes;
+        import xsd;
+        import smi { Counter64 };
+        import inetAddress;
+      }
+    
+      definitions {
+
+        type NcxAccessControlMode {
+          description 
+            "NCX Agent Access Control Mode";
+          syntax {
+            string = { off loose strict };
+          }
+          default "loose";
+        }
+    
+        #
+        # One Group Record
+        # Membership by user name or host address
+        #
+    
+
+        type NcxGroupRec {
+          description 
+            "One NCX Group Membership Record
+    
+             If a user name is present in the 'users' table then it
+             is a member of the group identified by 'name'.
+    
+             If a host address is present in the 'hosts' table then it
+             is a member of the group identified by 'name'. 
+    
+             If both 'users' and 'hosts' are missing then the group
+             will be considered empty.";
+    
+          syntax {
+            struct {
+              NcxGroupName name;
+              container users [user] {
+                NcxUserName user; 
+              }?
+    
+              # structs containing (structs containing)
+              # only simple types can be used as an index directly
+              container hosts [host] {
+                InetAddress host;
+              }?
+            }
+          }
+        }
+    
+        #
+        # Group Table
+        #
+    
+        type NcxGroupTable {
+          description 
+            "NCX Group Membership Table
+             Users and hosts can belong to any number of groups.
+             The group name must be unique.";
+          syntax {
+            # scoped names can be local (child of one of the 
+            # table members) or remote (just like SMI but scoped)
+            container [group.name] {
+              NcxGroupRec group;
+            }
+          }
+        }
+    
+        #
+        # Group Execution for RPC by RPC Type Record
+        #
+    
+        type NcxRpcTypeAccessRec {
+          description 
+            "NCX Access Control Entry for a Group by RPC Method Type.
+             If an rpc-type is present in the 'rpc-types' list then the
+             'group' is granted execution access to any RPC method with 
+             the same value of the rpc-type values.";
+          syntax {
+            struct {
+    	  NcxGroupName group;
+              NcxRpcTypeList rpc-types;
+            }
+          }
+        }
+    
+        #
+        # Group Execution for RPC by RPC Type Table
+        #
+    
+        type NcxRpcTypeAccessTable {
+          description 
+            "NCX Access Control Table for RPC Type";
+          syntax {
+            container [rpc-type-acl.group] {
+              NcxRpcTypeAccessRec rpc-type-acl;
+            }
+          }
+        }
+    
+        #
+        # Group Execution for RPC by Name Record
+        #
+    
+        type NcxRpcAccessRec {
+          description 
+            "NCX Access Control Entry for a Group by RPC Method Name.
+    
+             If a method identified by a (owner, rpc) tuple is present 
+             in the 'ace' table, then the 'group' is granted execution 
+             access to that RPC method with the same (owner, rpc) values.";
+          syntax {
+            struct {
+              NcxName group; 
+              struct aces {
+                table ace [owner, rpc] {
+                  NcxName owner;
+                  NcxName rpc;
+                }
+              }
+            }
+          }
+        }
+    
+        #
+        # Group Execution for RPC by Name Table
+        #
+    
+        type NcxRpcAccessTable {
+          description 
+            "NCX Access Control Table for RPC Method Name";
+          syntax {
+            container [rpc-acl.group] {
+              NcxRpcAccessRec rpc-acl;
+            }
+          }
+        }
+    
+        #
+        # Group Max Access to Data by Data Name Record
+        #
+    
+        type NcxDataAccessRec {
+          description 
+            "NCX Access Control Entry for a Group by Data Object Name.
+    
+             If data identified by a (owner, data) tuple is present 
+             in the 'ace' table, then the 'group' is granted at most
+             'maxacc' level of access to the data named by the 
+             (owner, data) values.";
+          syntax {
+            struct {
+              NcxName group;
+              struct aces {
+                table ace [owner, data] {
+                  NcxName owner;
+                  string data;   # Xpath expression
+    	      NcxAccessType maxacc;
+                }
+              }
+            }
+          }
+        }
+    
+        #
+        # Group Max Access to Data by Data Name Table
+        #
+    
+        type NcxDataAccessTable {
+          description 
+            "NCX Access Control Table for Data Objects";
+          syntax {
+            container [data-acl.group] {
+              NcxDataAccessRec data-acl;
+            }
+          }
+        }
+    
+        #
+        # Parameter Set to Configure NCX Access Control
+        #
+    
+        parmset ncx-access {
+          description
+             "Parameters for NETCONF Access Control.";
+          order loose;
+          parms {
+            parm mode {
+              description "NCX Access Control Mode";
+              type NcxAccessControlMode;
+              usage mandatory;
+            }
+
+            parm groups {
+              description "NCX Group Membership Table";
+              type NcxGroupTable;
+              usage mandatory;
+            }
+    
+            parm rpc-type-acls {
+              description "NCX RPC Type Access Control Table ";
+              type NcxRpcTypeAccessTable;
+              usage optional;
+            }
+    
+            parm rpc-acls {
+              description "NCX RPC Execution Access Control Table ";
+              type NcxRpcAccessTable;
+              usage optional;
+            }
+    
+            parm data-acls {
+              description "NCX Data Model Access Control Table ";
+              type NcxDataAccessTable;
+              usage optional;
+            }
+          }
+        }
+    
+      }
+    }
+    
+</pre>
+
+<p>
+The following example shows a NETCONF Configuration Database
+fragment containing some access control data.
+</p>
+
+<p>
+In this example, there are two groups, 'control-staff' and 'test'staff'.
+</p>
+
+<p>
+The 'control-staff' group has complete (read-create) 
+access to the entire database (/).
+</p>
+
+<p>
+The 'test-staff' group has read-only access to the entire database,
+permission to execute the 'edit-config' RPC method,
+and read-write access to the 'mySession' parameter set.
+</p>
+
+<pre>
+
+ &lt;security xmlns="http://netconfcentral.org/ncx/security"&gt;
+  &lt;ncx-access&gt;
+   &lt;mode&gt;strict&lt;mode&gt;
+   &lt;groups&gt;
+    &lt;group&gt;
+     &lt;name&gt;control-staff&lt;/name&gt;
+     &lt;users&gt;
+      &lt;user&gt;andy&lt;/user&gt;
+      &lt;user&gt;fred&lt;/user&gt;
+     &lt;/users&gt;
+    &lt;/group&gt;
+    &lt;group&gt;
+     &lt;name&gt;test-staff&lt;/name&gt;
+     &lt;users&gt;
+      &lt;user&gt;barney&lt;/user&gt;
+     &lt;/users&gt;
+    &lt;/group&gt;
+   &lt;/groups&gt;
+
+   &lt;rpc-type-acls&gt;
+    &lt;rpc-type-acl&gt;
+     &lt;group&gt;control-staff&lt;/group&gt;
+     &lt;rpc-types&gt;config(1) monitor(3) debug(4) exec(2) other(0)&lt;/rpc-types&gt;
+    &lt;/rpc-type-acl&gt;
+    &lt;rpc-type-acl&gt;
+     &lt;group&gt;monitor-staff&lt;/group&gt;
+     &lt;rpc-types&gt;monitor(3) debug(4)&lt;/rpc-types&gt;
+    &lt;/rpc-type-acl&gt;
+   &lt;/rpc-type-acls&gt;
+   &lt;rpc-acls&gt;
+    &lt;rpc-acl&gt;
+     &lt;group&gt;test-staff&lt;/group&gt;
+     &lt;aces&gt;
+       &lt;ace&gt;
+         &lt;owner&gt;ietf&lt;/owner&gt;
+         &lt;rpc&gt;edit-config&lt;/rpc&gt;
+       &lt;/ace&gt;
+     &lt;/aces&gt;
+    &lt;/rpc-acl&gt;
+   &lt;/rpc-acls&gt;
+   &lt;data-acls&gt;
+    &lt;data-acl&gt;
+     &lt;group&gt;control-staff&lt;/group&gt;
+     &lt;aces&gt;
+      &lt;ace&gt;
+       &lt;data&gt;/&lt;/data&gt;
+       &lt;maxacc&gt;read-create(3)&lt;/maxacc&gt;
+      &lt;/ace&gt;
+     &lt;/aces&gt;
+    &lt;/data-acl&gt;
+    &lt;data-acl&gt;
+     &lt;group&gt;test-staff&lt;/group&gt;
+     &lt;aces&gt;
+      &lt;ace&gt;
+       &lt;data xmlns:ncd="http://netconfcentral.org/ncx/netconfd"&gt;
+          /ncd:netconfd/mySession
+       &lt;/data&gt;
+       &lt;maxacc&gt;read-write(2)&lt;/maxacc&gt;
+      &lt;/ace&gt;
+      &lt;ace&gt;
+       &lt;data&gt;/&lt;/data&gt;
+       &lt;maxacc&gt;read-only(1)&lt;/maxacc&gt;
+      &lt;/ace&gt;
+     &lt;/aces&gt;
+    &lt;/data-acl&gt;
+   &lt;/data-acls&gt;
+  &lt;/ncx-access&gt;
+ &lt;/security&gt;
+
+</pre>
+
+<hr/>
+<p>
+Copyright &copy; 2007 by Andy Bierman, All Rights Reserved.
+</p>
+<p>Last-Updated: 2007-06-09</p>
+</body>
+</html>

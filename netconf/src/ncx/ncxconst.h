@@ -1,0 +1,573 @@
+#ifndef _H_ncxconst
+#define _H_ncxconst
+
+/*  FILE: ncxconst.h
+*********************************************************************
+*								    *
+*			 P U R P O S E				    *
+*								    *
+*********************************************************************
+
+  Contains NCX constants separated to prevent H file include loops
+ 
+*********************************************************************
+*								    *
+*		   C H A N G E	 H I S T O R Y			    *
+*								    *
+*********************************************************************
+
+date	     init     comment
+----------------------------------------------------------------------
+14-nov-05    abb      Begun; split from ncx.h
+04-feb-06    abb      Move base/nc.h constants into this file
+10-nov-07    abb      Moved types typ ncxtypes.h
+*/
+
+#include <math.h>
+#include <xmlstring.h>
+
+/********************************************************************
+*								    *
+*			 C O N S T A N T S			    *
+*								    *
+*********************************************************************/
+
+/* NETCONF Base URN */
+#define NC_VER          "1.0"
+#define NC_PREFIX       (const xmlChar *)"nc"
+
+#define NC_MODULE       (const xmlChar *)"netconf"
+
+#define NC_OK_REPLY  (const xmlChar *)"RpcOkReplyType"
+
+#define NC_URN  (const xmlChar *)"urn:ietf:params:xml:ns:netconf:base:1.0"
+
+
+/* NETCONF SSH End of Message Marker */
+#define NC_SSH_END "]]>]]>"
+#define NC_SSH_END_LEN 6
+
+/* NETCONF Module Owner */
+#define NC_OWNER        (const xmlChar *)"ietf"
+
+/* NETCONF Application Container Name */
+#define NC_APP          "netconf"
+
+/* NETCONF edit-config operation attribute name */
+#define NC_OPERATION_ATTR_NAME (const xmlChar *)"operation"
+
+#define NC_OPERATION_ATTR_TYPE (const xmlChar *)"EditOperationType"
+
+#define NC_RPC_REPLY_TYPE (const xmlChar *)"RpcReplyType"
+
+#define NCX_SSH_PORT    22
+#define NCX_NCSSH_PORT  830
+
+#define NCX_MODULE       (const xmlChar *)"ncx"
+
+#define INVALID_URN    (const xmlChar *)"INVALID"
+
+/* max number len to use for static buffer allocation only */
+#define NCX_MAX_NUMLEN   32
+
+ /* all name fields in YANG or NCX can be 1 to 63 bytes
+  * YANG conformance requires this number to be >= 63
+  */
+#define NCX_MAX_NLEN  63
+
+/* ncxserver server transport */
+#define NCX_SERVER_TRANSPORT "ssh"
+
+/* ncxserver version */
+#define NCX_SERVER_VERSION   1
+
+
+/* URN for NETCONF standard modules */
+#define NC_URN1         (const xmlChar *)"urn:netconf:params:xml:ns:"
+
+/* URN for NCX extensions */
+#define NCX_VER    "1.0"
+#define NCX_URN    (const xmlChar *)"http://netconfcentral.com/ncx"
+#define NCX_URL    (const xmlChar *)\
+		    "http://netconfcentral.com/xsd/ncx/ncx.xsd"
+#define NCX_MOD    (const xmlChar *)"ncx"
+
+
+/* URN for XSD */
+#define XSD_URN         (const xmlChar *)"http://www.w3.org/2001/XMLSchema"
+#define XSD_PREFIX      (const xmlChar *)"xs"
+
+/* URN for XSI */
+#define XSI_URN         (const xmlChar *)\
+			 "http://www.w3.org/2001/XMLSchema-instance"
+#define XSI_PREFIX      (const xmlChar *)"xsi"
+
+
+/* URN for NETCONF Notifications */
+#define NCN_URN         (const xmlChar *)\
+                         "urn:ietf:params:xml:ns:netconf:notification:1.0"
+#define NCN_PREFIX      (const xmlChar *)"ncn"
+
+
+/*** TEMP HARDWIRED ***/
+#define NCX_HOSTNAME    (const xmlChar *)"netconfcentral.com"
+
+/* schemaLocation string */
+#define NCX_SCHEMA_LOC  (const xmlChar *)"http://www.netconfcentral.com/xsd/"
+
+#define NCX_XSD_EXT     (const xmlChar *)"xsd"
+
+/* Constructed URN format for NCX module namespace is:
+ *    http://NCX_HOSTNAME/OWNER/APPNAME/APPVER
+ */
+#define NCX_URNP1       (const xmlChar *)"http://"
+
+
+/* default prefix to use for NCX namespace */
+#define NCX_PREFIX      (const xmlChar *)"ncx"
+#define NCX_PREFIX_LEN  3
+
+/* default prefix for the xmlns namespace (not really used */
+#define NS_PREFIX      (const xmlChar *)"ns"
+#define NS_PREFIX_LEN  2
+#define NS_URN     (const xmlChar *)"http://www.w3.org/2000/xmlns/"
+
+/* needed for xml:lang attribute */
+#define NCX_XML_URN  (const xmlChar *)"http://www.w3.org/XML/1998/namespace"
+#define NCX_XML_SLOC (const xmlChar *)\
+		      "http://www.w3.org/XML/1998/namespace"\
+		      "\n    http://www.w3.org/2001/xml.xsd"
+
+/* NCX owner for built-in definitions */
+#define NCX_OWNER       (const xmlChar *)"ncx"
+#define NCX_OWNER_LEN     3
+
+#define NCX_DEF_OWNER   (const xmlChar *)"netconf"
+
+#define NCX_DEF_MODULE  (const xmlChar *)"netconf"
+
+#define NCX_DEF_LANG    (const xmlChar *)"en"
+
+#define NCX_DEF_MERGETYPE NCX_MERGE_LAST
+
+#define NCX_ROOT_USER       (const xmlChar *)"root"
+
+#define NCX_SUFFIX          (const xmlChar *)"ncx"
+
+#define NCX_CONF_SUFFIX     (const xmlChar *)"conf"
+
+#define NCX_CLI_START_CH   '-'
+
+#define NCX_SQUOTE_CH  '\''
+#define NCX_QUOTE_CH   '\"'
+#define NCX_VAR_CH     '$'
+
+/* inline XML entered as [<foo>...</foo>] */
+#define NCX_XML_CH     '<'
+#define NCX_XML1a_CH   '['
+#define NCX_XML1b_CH   '<'
+#define NCX_XML2a_CH   '>'
+#define NCX_XML2b_CH   ']'
+
+#define NCX_ASSIGN_CH  '='
+#define NCX_AT_CH      '@'
+
+#define NCX_TABSIZE     8
+
+/* start of comment token in all NCX text */
+#define NCX_COMMENT_CH   '#'
+
+/* scoped identifier field separator token */
+#define NCX_SCOPE_CH     '/'
+
+/* filespec identifier field separator token */
+#define NCX_PATHSEP_CH     '/'
+
+/* module scoped identifier field separator token */
+#define NCX_MODSCOPE_CH     ':'
+
+/* start of a double quoted string in NCX text */
+#define NCX_QSTRING_CH   '"'
+
+/* start of a single quoted string in NCX text */
+#define NCX_SQSTRING_CH   '\''
+
+/* Standard 0x0 syntax to indicate a HEX number is specified */
+#define NCX_IS_HEX_CH(c) ((c)=='x' || (c)=='X')
+
+/* max hex digits in the value part of a hex number */
+#define NCX_MAX_HEXCHAR 16
+
+/* max attributes that will be printed per line */
+#define NCX_ATTR_PER_LINE    3
+#define NCX_BIG_ATTR_SIZE    24
+
+/* max decimal digits in a plain int */
+#define NCX_MAX_DCHAR   20
+
+/* max digits in a real number */
+#define NCX_MAX_RCHAR   255
+
+/* Maximum string length (2^^31 - 1) */
+#define NCX_MAX_STRLEN  0x7fffffff
+
+/* Maximum string of a single quoted string (64K - 1) */
+#define NCX_MAX_Q_STRLEN  0xffff
+
+/* max number of cached ncx_filptr_t records */
+#define NCX_DEF_FILPTR_CACHESIZE  300
+
+/* default indent amount for nesting XML output */
+#define NCX_DEF_INDENT  3
+
+/* Default startup config data file name */
+#define NCX_DEF_STARTUP_FILE  (const xmlChar *)"startup-cfg.xml"
+
+/* default value for the with-defaults option */
+#define NCX_DEF_WITHDEF   TRUE
+
+/* default value for the with-metadata option */
+#define NCX_DEF_WITHMETA  FALSE
+
+
+/* String start char:
+ * if the XML string starts with a double quote
+ * then it will be interpreted as whitespace-allowed
+ */
+#define NCX_STR_START   (const xmlChar)'"'
+#define NCX_STR_END     (const xmlChar)'"'
+
+
+/* Enumeration number start and end chars */
+#define NCX_ENU_START   (const xmlChar)'('
+#define NCX_ENU_END     (const xmlChar)')'
+
+
+/* String names matching psd_pstype_t enums */
+#define NCX_PSTYP_CLI        (const xmlChar *)"cli"
+#define NCX_PSTYP_DATA       (const xmlChar *)"data"
+#define NCX_PSTYP_RPC        (const xmlChar *)"rpc"
+
+
+
+/* Min and max int */
+#define NCX_MIN_INT   INT_MIN
+#define NCX_MAX_INT   INT_MAX
+
+#define NCX_MIN_INT8    -128
+#define NCX_MAX_INT8    127
+
+#define NCX_MIN_INT16   -32768
+#define NCX_MAX_INT16   32767
+
+/* Min and max long */
+#define NCX_MAX_LONG   9223372036854775807LL
+#define NCX_MIN_LONG   (-NCX_MAX_LONG - 1LL)
+
+
+/* Min and max uint */
+#define NCX_MIN_UINT   0
+#define NCX_MAX_UINT   UINT_MAX
+
+#define NCX_MAX_UINT8  255
+#define NCX_MAX_UINT16 65535
+
+/* Min and max uint64 */
+#define NCX_MIN_ULONG   0
+#define NCX_MAX_ULONG   18446744073709551615ULL
+
+
+/* Min and max float */
+#define NCX_MIN_FLOAT   "-inf"
+#define NCX_MAX_FLOAT   "inf"
+
+/* Min and max double */
+#define NCX_MIN_DOUBLE  "-inf"
+#define NCX_MAX_DOUBLE   "inf"
+
+
+/* NETCONF built-in config names */
+#define NCX_CFG_RUNNING      (const xmlChar *)"running"
+#define NCX_CFG_CANDIDATE    (const xmlChar *)"candidate"
+#define NCX_CFG_STARTUP      (const xmlChar *)"startup"
+
+/* NCX Extension configuration names */
+#define NCX_CFG_ROLLBACK     (const xmlChar *)"rollback"
+
+
+/* alias values for the agt_ses_new_vparmset 'full' parameter
+ * and help module 'full' parameters
+ */
+#define FULL    TRUE
+#define PARTIAL FALSE
+
+
+
+/* NCX and NETCONF element and attribute names
+ *
+ * NETCONF common parameter names 
+ * NETCONF built-in error-info element names 
+ * name of Xpath index for position-only table index 
+ * NCX token and element names 
+ * NCX token names of the builtin types used in the <syntax> clause 
+ *
+ */
+#define NCX_AUGHOOK_START      (const xmlChar *)"__"
+#define NCX_AUGHOOK_END        (const xmlChar *)".A__"
+
+
+#define NCX_EL_ACCESS_RC       ((const xmlChar *)"read-create")
+#define NCX_EL_ACCESS_RO       ((const xmlChar *)"read-only")
+#define NCX_EL_ACCESS_RW       ((const xmlChar *)"read-write")
+#define NCX_EL_ADDRESS         ((const xmlChar *)"address")
+#define NCX_EL_AGTMODE_ST      ((const xmlChar *)"standalone")
+#define NCX_EL_AGTMODE_DU      ((const xmlChar *)"dual")
+#define NCX_EL_AGTMODE_SE      ((const xmlChar *)"server")
+#define NCX_EL_ANY             ((const xmlChar *)"any")
+#define NCX_EL_ANYXML          ((const xmlChar *)"anyxml")
+#define NCX_EL_APPINFO         ((const xmlChar *)"appinfo")
+#define NCX_EL_APPLICATION     ((const xmlChar *)"application")
+#define NCX_EL_BAD_ATTRIBUTE   ((const xmlChar *)"bad-attribute")
+#define NCX_EL_BAD_ELEMENT     ((const xmlChar *)"bad-element")
+#define NCX_EL_BAD_NAMESPACE   ((const xmlChar *)"bad-namespace")
+#define NCX_EL_BAD_VALUE       ((const xmlChar *)"bad-value")
+#define NCX_EL_BINARY          ((const xmlChar *)"binary")
+#define NCX_EL_BITS            ((const xmlChar *)"bits")
+#define NCX_EL_BOOLEAN         ((const xmlChar *)"boolean")
+#define NCX_EL_BYTE            ((const xmlChar *)"byte")
+#define NCX_EL_C               ((const xmlChar *)"C")
+#define NCX_EL_CANDIDATE       ((const xmlChar *)"candidate")
+#define NCX_EL_CAPABILITIES    ((const xmlChar *)"capabilities")
+#define NCX_EL_CAPABILITY      ((const xmlChar *)"capability")
+#define NCX_EL_CASE_NAME       ((const xmlChar *)"case-name")
+#define NCX_EL_CHOICE          ((const xmlChar *)"choice")
+#define NCX_EL_CHOICE_NAME     ((const xmlChar *)"choice-name")
+#define NCX_EL_CLASS           ((const xmlChar *)"class")
+#define NCX_EL_CLOSE_SESSION   ((const xmlChar *)"close-session")
+#define NCX_EL_COMMIT          ((const xmlChar *)"commit")
+#define NCX_EL_CONDITION       ((const xmlChar *)"condition")
+#define NCX_EL_CONFIG          ((const xmlChar *)"config")
+#define NCX_EL_CONFIRMED       ((const xmlChar *)"confirmed")
+#define NCX_EL_CONFIRM_TIMEOUT ((const xmlChar *)"confirm-timeout")
+#define NCX_EL_CONTAINER       ((const xmlChar *)"container")
+#define NCX_EL_CONTACT_INFO    ((const xmlChar *)"contact-info")
+#define NCX_EL_CONTINUE_ON_ERROR ((const xmlChar *)"continue-on-error")
+#define NCX_EL_COPY            ((const xmlChar *)"copy")
+#define NCX_EL_COPYRIGHT       ((const xmlChar *)"copyright")
+#define NCX_EL_COPY_CONFIG     ((const xmlChar *)"copy-config")
+#define NCX_EL_CREATE          ((const xmlChar *)"create")
+#define NCX_EL_CURRENT         ((const xmlChar *)"current")
+#define NCX_EL_DATA            ((const xmlChar *)"data")
+#define NCX_EL_DATAPATH        ((const xmlChar *)"datapath")
+#define NCX_EL_DATA_CLASS      ((const xmlChar *)"data-class")
+#define NCX_EL_DEBUG           ((const xmlChar *)"debug")
+#define NCX_EL_DEF             ((const xmlChar *)"def")
+#define NCX_EL_DEFAULT         ((const xmlChar *)"default")
+#define NCX_EL_DEFAULT_OPERATION ((const xmlChar *)"default-operation")
+#define NCX_EL_DEFINITIONS     ((const xmlChar *)"definitions")
+#define NCX_EL_DEFOP           ((const xmlChar *)"default-operation")
+#define NCX_EL_DELETE          ((const xmlChar *)"delete")
+#define NCX_EL_DELETE_CONFIG   ((const xmlChar *)"delete-config")
+#define NCX_EL_DEPRECATED      ((const xmlChar *)"deprecated")
+#define NCX_EL_DESCRIPTION     ((const xmlChar *)"description")
+#define NCX_EL_DISCARD_CHANGES ((const xmlChar *)"discard-changes")
+#define NCX_EL_DOUBLE          ((const xmlChar *)"double")
+#define NCX_EL_EDIT_CONFIG     ((const xmlChar *)"edit-config")
+#define NCX_EL_EMPTY           ((const xmlChar *)"empty")
+#define NCX_EL_ENAME           ((const xmlChar *)"ename")
+#define NCX_EL_ENUM            ((const xmlChar *)"enum")
+#define NCX_EL_ENUMERATION     ((const xmlChar *)"enumeration")
+#define NCX_EL_ERR_ELEMENT     ((const xmlChar *)"err-element")
+#define NCX_EL_ERROP           ((const xmlChar *)"error-option")
+#define NCX_EL_ERROR           ((const xmlChar *)"error")
+#define NCX_EL_ERROR_APP_TAG   ((const xmlChar *)"error-app-tag")
+#define NCX_EL_ERROR_INFO      ((const xmlChar *)"error-info")
+#define NCX_EL_ERROR_LEVEL     ((const xmlChar *)"error-level")
+#define NCX_EL_ERROR_OPTION    ((const xmlChar *)"error-option")
+#define NCX_EL_ERROR_MESSAGE   ((const xmlChar *)"error-message")
+#define NCX_EL_ERROR_PATH      ((const xmlChar *)"error-path")
+#define NCX_EL_ERROR_SEVERITY  ((const xmlChar *)"error-severity")
+#define NCX_EL_ERROR_TAG       ((const xmlChar *)"error-tag")
+#define NCX_EL_ERROR_TYPE      ((const xmlChar *)"error-type")
+#define NCX_EL_EXEC            ((const xmlChar *)"exec")
+#define NCX_EL_EXTERN          ((const xmlChar *)"extern")
+#define NCX_EL_FALSE           ((const xmlChar *)"false")
+#define NCX_EL_FILTER          ((const xmlChar *)"filter")
+#define NCX_EL_FLAG            ((const xmlChar *)"flag")
+#define NCX_EL_FLOAT           ((const xmlChar *)"float")
+#define NCX_EL_FLOAT32         ((const xmlChar *)"float32")
+#define NCX_EL_FLOAT64         ((const xmlChar *)"float64")
+#define NCX_EL_GET             ((const xmlChar *)"get")
+#define NCX_EL_GET_CONFIG      ((const xmlChar *)"get-config")
+#define NCX_EL_GLOBAL          ((const xmlChar *)"global")
+#define NCX_EL_GROUP_ID        ((const xmlChar *)"group-id")
+#define NCX_EL_H               ((const xmlChar *)"h")
+#define NCX_EL_HEADER          ((const xmlChar *)"header")
+#define NCX_EL_HELLO           ((const xmlChar *)"hello")
+#define NCX_EL_HELP            ((const xmlChar *)"help")
+#define NCX_EL_HTML            ((const xmlChar *)"html")
+#define NCX_EL_ILLEGAL         ((const xmlChar *)"illegal")
+#define NCX_EL_IMPORT          ((const xmlChar *)"import")
+#define NCX_EL_IMPORTS         ((const xmlChar *)"imports")
+#define NCX_EL_INCLUDE         ((const xmlChar *)"include")
+#define NCX_EL_INPUT           ((const xmlChar *)"input")
+#define NCX_EL_INSTANCE_IDENTIFIER \
+                               ((const xmlChar *)"instance-identifier")
+#define NCX_EL_INT             ((const xmlChar *)"int")
+#define NCX_EL_INT8            ((const xmlChar *)"int8")
+#define NCX_EL_INT16           ((const xmlChar *)"int16")
+#define NCX_EL_INT32           ((const xmlChar *)"int32")
+#define NCX_EL_INT64           ((const xmlChar *)"int64")
+#define NCX_EL_ITEMS           ((const xmlChar *)"items")
+#define NCX_EL_KEYREF          ((const xmlChar *)"keyref")
+#define NCX_EL_KILL_SESSION    ((const xmlChar *)"kill-session")
+#define NCX_EL_LANG            ((const xmlChar *)"xml:lang")
+#define NCX_EL_LAST_MODIFIED   ((const xmlChar *)"last-modified")
+#define NCX_EL_LAST_UPDATE     ((const xmlChar *)"last-update")
+#define NCX_EL_LIST            ((const xmlChar *)"list")
+#define NCX_EL_LOAD            ((const xmlChar *)"load")
+#define NCX_EL_LOAD_CONFIG     ((const xmlChar *)"load-config")
+#define NCX_EL_LOCAL           ((const xmlChar *)"local")
+#define NCX_EL_LOCK            ((const xmlChar *)"lock")
+#define NCX_EL_LOCK_SOURCE     ((const xmlChar *)"lock-source")
+#define NCX_EL_LOG             ((const xmlChar *)"log")
+#define NCX_EL_LOGAPPEND       ((const xmlChar *)"log-append")
+#define NCX_EL_LOGLEVEL        ((const xmlChar *)"log-level")
+#define NCX_EL_LONG            ((const xmlChar *)"long")
+#define NCX_EL_MAGIC           ((const xmlChar *)"magic")
+#define NCX_EL_MAX_ACCESS      ((const xmlChar *)"max-access")
+#define NCX_EL_MERGE           ((const xmlChar *)"merge")
+#define NCX_EL_MESSAGE_ID      ((const xmlChar *)"message-id")
+#define NCX_EL_METADATA        ((const xmlChar *)"metadata")
+#define NCX_EL_MODPATH         ((const xmlChar *)"modpath")
+#define NCX_EL_MODULE          ((const xmlChar *)"module")
+#define NCX_EL_MODULELIST      ((const xmlChar *)"modulelist")
+#define NCX_EL_MODULES         ((const xmlChar *)"modules")
+#define NCX_EL_MONITOR         ((const xmlChar *)"monitor")
+#define NCX_EL_NAME            ((const xmlChar *)"name")
+#define NCX_EL_NCXCONNECT      ((const xmlChar *)"ncx-connect")
+#define NCX_EL_NAMESPACE       ((const xmlChar *)"namespace")
+#define NCX_EL_NCXMODULE       ((const xmlChar *)"ncx-module")
+#define NCX_EL_NONE            ((const xmlChar *)"none")
+#define NCX_EL_NODUPLICATES    ((const xmlChar *)"no-duplicates")
+#define NCX_EL_NOOP_ELEMENT    ((const xmlChar *)"noop-element")
+#define NCX_EL_NOTIF           ((const xmlChar *)"notif")
+#define NCX_EL_NOTIF_CLASS     ((const xmlChar *)"notif-class")
+#define NCX_EL_NOTIF_DATA      ((const xmlChar *)"notif-data")
+#define NCX_EL_NOTIF_TYPE      ((const xmlChar *)"notif-type")
+#define NCX_EL_NODEFAULT       ((const xmlChar *)"no default")
+#define NCX_EL_OBJECT          ((const xmlChar *)"object")
+#define NCX_EL_OBJECTS         ((const xmlChar *)"objects")
+#define NCX_EL_OBSOLETE        ((const xmlChar *)"obsolete")
+#define NCX_EL_OK              ((const xmlChar *)"ok")
+#define NCX_EL_OK_ELEMENT      ((const xmlChar *)"ok-element")
+#define NCX_EL_ORDER           ((const xmlChar *)"order")
+#define NCX_EL_ORDER_L         ((const xmlChar *)"loose")
+#define NCX_EL_ORDER_S         ((const xmlChar *)"strict")
+#define NCX_EL_OTHER           ((const xmlChar *)"other")
+#define NCX_EL_OUTPUT          ((const xmlChar *)"output")
+#define NCX_EL_OWNER           ((const xmlChar *)"owner")
+#define NCX_EL_PARM            ((const xmlChar *)"parm")
+#define NCX_EL_PARMSET         ((const xmlChar *)"parmset")
+#define NCX_EL_PARMS           ((const xmlChar *)"parms")
+#define NCX_EL_PATH            ((const xmlChar *)"path")
+#define NCX_EL_PATTERN         ((const xmlChar *)"pattern")
+#define NCX_EL_PORT            ((const xmlChar *)"port")
+#define NCX_EL_POS             ((const xmlChar *)"pos")
+#define NCX_EL_POSITION        ((const xmlChar *)"position")
+#define NCX_EL_PROTOCOL        ((const xmlChar *)"protocol")
+#define NCX_EL_REPLACE         ((const xmlChar *)"replace")
+#define NCX_EL_REVISION_HISTORY ((const xmlChar *)"revision-history")
+#define NCX_EL_ROLLBACK_ON_ERROR ((const xmlChar *)"rollback-on-error")
+#define NCX_EL_ROOT            ((const xmlChar *)"root")
+#define NCX_EL_RPC             ((const xmlChar *)"rpc")
+#define NCX_EL_RPC_ERROR       ((const xmlChar *)"rpc-error")
+#define NCX_EL_RPC_OUTPUT      ((const xmlChar *)"rpc-output")
+#define NCX_EL_RPC_REPLY       ((const xmlChar *)"rpc-reply")
+#define NCX_EL_RPC_TYPE        ((const xmlChar *)"rpc-type")
+#define NCX_EL_RUNNING         ((const xmlChar *)"running")
+#define NCX_EL_RUNPATH         ((const xmlChar *)"runpath")
+#define NCX_EL_SCRIPT          ((const xmlChar *)"script")
+#define NCX_EL_SELECT          ((const xmlChar *)"select")
+#define NCX_EL_SESSION_ID      ((const xmlChar *)"session-id")
+#define NCX_EL_SET             ((const xmlChar *)"set")
+#define NCX_EL_SHORT           ((const xmlChar *)"short")
+#define NCX_EL_SLIST           ((const xmlChar *)"slist")
+#define NCX_EL_SOURCE          ((const xmlChar *)"source")
+#define NCX_EL_SQL             ((const xmlChar *)"sql")
+#define NCX_EL_SQLDB           ((const xmlChar *)"sqldb")
+#define NCX_EL_STARTUP         ((const xmlChar *)"startup")
+#define NCX_EL_STATE           ((const xmlChar *)"state")
+#define NCX_EL_STATUS          ((const xmlChar *)"status")
+#define NCX_EL_STOP_ON_ERROR   ((const xmlChar *)"stop-on-error")
+#define NCX_EL_STRING          ((const xmlChar *)"string")
+#define NCX_EL_STRUCT          ((const xmlChar *)"struct")
+#define NCX_EL_SUBTREE         ((const xmlChar *)"subtree")
+#define NCX_EL_SYNTAX          ((const xmlChar *)"syntax")
+#define NCX_EL_TABLE           ((const xmlChar *)"table")
+#define NCX_EL_TARGET          ((const xmlChar *)"target")
+#define NCX_EL_TCONFIG         ((const xmlChar *)"tconfig")
+#define NCX_EL_TESTONLY        ((const xmlChar *)"test-only")
+#define NCX_EL_TESTOP          ((const xmlChar *)"test-option")
+#define NCX_EL_TESTTHENSET     ((const xmlChar *)"test-then-set")
+#define NCX_EL_TEXT            ((const xmlChar *)"text")
+#define NCX_EL_TRANSPORT       ((const xmlChar *)"transport")
+#define NCX_EL_TRUE            ((const xmlChar *)"true")
+#define NCX_EL_TYPE            ((const xmlChar *)"type")
+#define NCX_EL_UINT8           ((const xmlChar *)"uint8")
+#define NCX_EL_UINT16          ((const xmlChar *)"uint16")
+#define NCX_EL_UINT32          ((const xmlChar *)"uint32")
+#define NCX_EL_UINT64          ((const xmlChar *)"uint64")
+#define NCX_EL_UNION           ((const xmlChar *)"union")
+#define NCX_EL_UNITS           ((const xmlChar *)"units")
+#define NCX_EL_UNLOCK          ((const xmlChar *)"unlock")
+#define NCX_EL_UNSIGNED_BYTE   ((const xmlChar *)"unsignedByte")
+#define NCX_EL_UNSIGNED_INT    ((const xmlChar *)"unsignedInt")
+#define NCX_EL_UNSIGNED_LONG   ((const xmlChar *)"unsignedLong")
+#define NCX_EL_UNSIGNED_SHORT  ((const xmlChar *)"unsignedShort")
+#define NCX_EL_ULONG           ((const xmlChar *)"ulong")
+#define NCX_EL_URL             ((const xmlChar *)"url")
+#define NCX_EL_USER            ((const xmlChar *)"user")
+#define NCX_EL_USAGE           ((const xmlChar *)"usage")
+#define NCX_EL_USAGE_C         ((const xmlChar *)"conditional")
+#define NCX_EL_USAGE_M         ((const xmlChar *)"mandatory")
+#define NCX_EL_USAGE_O         ((const xmlChar *)"optional")
+#define NCX_EL_USTRING         ((const xmlChar *)"ustring")
+#define NCX_EL_VALIDATE        ((const xmlChar *)"validate")
+#define NCX_EL_VALUE           ((const xmlChar *)"value")
+#define NCX_EL_VAR             ((const xmlChar *)"var")
+#define NCX_EL_VARS            ((const xmlChar *)"vars")
+#define NCX_EL_VERSION         ((const xmlChar *)"version")
+#define NCX_EL_WARNING         ((const xmlChar *)"warning")
+#define NCX_EL_WHEN            ((const xmlChar *)"when")
+#define NCX_EL_WITH_DEFAULTS   ((const xmlChar *)"with-defaults")
+#define NCX_EL_WITH_METADATA   ((const xmlChar *)"with-metadata")
+#define NCX_EL_XCONTAINER      ((const xmlChar *)"xcontainer")
+#define NCX_EL_XLIST           ((const xmlChar *)"xlist")
+#define NCX_EL_XPATH           ((const xmlChar *)"xpath")
+#define NCX_EL_XSD             ((const xmlChar *)"xsd")
+#define NCX_EL_YANG            ((const xmlChar *)"yang")
+#define NCX_EL_ZERO            ((const xmlChar *)"0.0")
+
+
+/* bit definitions for ncx_lstr_t flags field */
+#define NCX_FL_RANGE_ERR   bit0
+#define NCX_FL_VALUE_ERR   bit1
+
+
+/* textual parameter tags for various NCX functions
+ * that use boolean parameters
+ */
+#define NCX_SAVESTR    TRUE
+#define NCX_NO_SAVESTR FALSE
+
+#define NCX_LMEM_ENUM(L)   ((L)->val.enu)
+#define NCX_LMEM_STR(L)    ((L)->val.str)
+#define NCX_LMEM_STRVAL(L) ((L)->val.str)
+#define NCX_LMEM_NUM(L)    ((L)->val.num)
+
+/* constants for isglobal function parameter */
+#define ISGLOBAL  TRUE
+#define ISLOCAL   FALSE
+
+#endif	    /* _H_ncxconst */

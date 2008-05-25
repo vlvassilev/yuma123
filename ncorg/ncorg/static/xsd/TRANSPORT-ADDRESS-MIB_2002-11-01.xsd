@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:smiv2:TRANSPORT-ADDRESS-MIB"
+   targetNamespace="urn:ietf:params:xml:ns:yang:smiv2:TRANSPORT-ADDRESS-MIB"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2002-11-01"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:smi="urn:ietf:params:xml:ns:yang:yang-smi"
+   xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'TRANSPORT-ADDRESS-MIB.yang' by yangdump version 0.9.2
+         
+         Module: TRANSPORT-ADDRESS-MIB
+         Organization: IETF Operations and Management Area
+         Version: 2002-11-01
+         Contact: Juergen Schoenwaelder (Editor)
+         TU Braunschweig
+         Bueltenweg 74/75
+         38106 Braunschweig, Germany
+         Phone: +49 531 391-3289
+         EMail: schoenw@ibr.cs.tu-bs.de
+         
+         Send comments to &lt;mibs@ops.ietf.org&gt;.
+      </xs:documentation>
+      <xs:documentation>
+         This MIB module provides commonly used transport
+         address definitions.
+         
+         Copyright (C) The Internet Society (2002). This version of
+         this MIB module is part of RFC 3419; see the RFC itself for
+         full legal notices.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/swdev/trunk/netconf/modules/./ietf/TRANSPORT-ADDRESS-MIB.yang
+         </ncx:source>
+         <ncx:organization>
+            IETF Operations and Management Area
+         </ncx:organization>
+         <ncx:contact>
+            Juergen Schoenwaelder (Editor)
+            TU Braunschweig
+            Bueltenweg 74/75
+            38106 Braunschweig, Germany
+            Phone: +49 531 391-3289
+            EMail: schoenw@ibr.cs.tu-bs.de
+            
+            Send comments to &lt;mibs@ops.ietf.org&gt;.
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2002-11-01</ncx:version>
+            <ncx:description>
+               Initial version, published as RFC 3419.
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="TransportDomain">
+      <xs:annotation>
+         <xs:documentation>
+            A value that represents a transport domain.
+            
+            Some possible values, such as transportDomainUdpIpv4, are
+            defined in this module.  Other possible values can be
+            defined in other MIB modules.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="yang:object-identifier"/>
+   </xs:simpleType>
+
+   <xs:simpleType name="TransportAddressType">
+      <xs:annotation>
+         <xs:documentation>
+            A value that represents a transport domain. This is the
+            enumerated version of the transport domain registrations
+            in this MIB module. The enumerated values have the
+            following meaning:
+            
+            unknown(0)     unknown transport address type
+            udpIpv4(1)     transportDomainUdpIpv4
+            udpIpv6(2)     transportDomainUdpIpv6
+            udpIpv4z(3)    transportDomainUdpIpv4z
+            udpIpv6z(4)    transportDomainUdpIpv6z
+            tcpIpv4(5)     transportDomainTcpIpv4
+            tcpIpv6(6)     transportDomainTcpIpv6
+            tcpIpv4z(7)    transportDomainTcpIpv4z
+            tcpIpv6z(8)    transportDomainTcpIpv6z
+            sctpIpv4(9)    transportDomainSctpIpv4
+            sctpIpv6(10)   transportDomainSctpIpv6
+            sctpIpv4z(11)  transportDomainSctpIpv4z
+            sctpIpv6z(12)  transportDomainSctpIpv6z
+            local(13)      transportDomainLocal
+            udpDns(14)     transportDomainUdpDns
+            tcpDns(15)     transportDomainTcpDns
+            sctpDns(16)    transportDomainSctpDns
+            
+            This textual convention can be used to represent transport
+            domains in situations where a syntax of TransportDomain is
+            unwieldy (for example, when used as an index).
+            
+            The usage of this textual convention implies that additional
+            transport domains can only be supported by updating this MIB
+            module. This extensibility restriction does not apply for the
+            TransportDomain textual convention which allows MIB authors
+            to define additional transport domains independently in
+            other MIB modules.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="unknown">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>0</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="udpIpv4">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>1</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="udpIpv6">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>2</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="udpIpv4z">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>3</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="udpIpv6z">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>4</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="tcpIpv4">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>5</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="tcpIpv6">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>6</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="tcpIpv4z">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>7</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="tcpIpv6z">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>8</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="sctpIpv4">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>9</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="sctpIpv6">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>10</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="sctpIpv4z">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>11</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="sctpIpv6z">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>12</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="local">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>13</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="udpDns">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>14</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="tcpDns">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>15</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="sctpDns">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>16</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="TransportAddress">
+      <xs:annotation>
+         <xs:documentation>
+            Denotes a generic transport address.
+            
+            A TransportAddress value is always interpreted within the
+            context of a TransportAddressType or TransportDomain value.
+            Every usage of the TransportAddress textual convention MUST
+            specify the TransportAddressType or TransportDomain object
+            which provides the context. Furthermore, MIB authors SHOULD
+            define a separate TransportAddressType or TransportDomain
+            object for each TransportAddress object. It is suggested that
+            the TransportAddressType or TransportDomain is logically
+            registered before the object(s) which use the
+            TransportAddress textual convention if they appear in the
+            same logical row.
+            
+            The value of a TransportAddress object must always be
+            consistent with the value of the associated
+            TransportAddressType or TransportDomain object. Attempts
+            to set a TransportAddress object to a value which is
+            inconsistent with the associated TransportAddressType or
+            TransportDomain must fail with an inconsistentValue error.
+            
+            When this textual convention is used as a syntax of an
+            index object, there may be issues with the limit of 128
+            sub-identifiers specified in SMIv2, STD 58. In this case,
+            the OBJECT-TYPE declaration MUST include a 'SIZE' clause
+            to limit the number of potential instance sub-identifiers.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:base64Binary">
+         <xs:maxLength value="255"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="TransportAddressIPv4">
+      <xs:annotation>
+         <xs:documentation>
+            Represents a transport address consisting of an IPv4
+            address and a port number (as used for example by UDP,
+            TCP and SCTP):
+            
+             octets       contents         encoding
+              1-4         IPv4 address     network-byte order
+              5-6         port number      network-byte order
+            
+            This textual convention SHOULD NOT be used directly in object
+            definitions since it restricts addresses to a specific format.
+            However, if it is used, it MAY be used either on its own or
+            in conjunction with TransportAddressType or TransportDomain
+            as a pair.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern
+            value="((0|[1-9](([0-9]){0,2}))(0|[1-9](([0-9]){0,2}))(0|[1-9](([0-9]){0,2}))(0|[1-9](([0-9]){0,2}))((0|[1-9](([0-9]){0,4})){1,1})(0|[1-9](([0-9]){0,4})))"/>
+         <xs:minLength value="6"/>
+         <xs:maxLength value="6"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="TransportAddressIPv6">
+      <xs:annotation>
+         <xs:documentation>
+            Represents a transport address consisting of an IPv6
+            address and a port number (as used for example by UDP,
+            TCP and SCTP):
+            
+             octets       contents         encoding
+              1-16        IPv6 address     network-byte order
+             17-18        port number      network-byte order
+            
+            This textual convention SHOULD NOT be used directly in object
+            definitions since it restricts addresses to a specific format.
+            However, if it is used, it MAY be used either on its own or
+            in conjunction with TransportAddressType or TransportDomain
+            as a pair.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern
+            value="(((\p{IsBasicLatin}){0})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})((\p{IsBasicLatin}){0})((0|[1-9](([0-9]){0,4})){1,1})(0|[1-9](([0-9]){0,4})))"/>
+         <xs:minLength value="18"/>
+         <xs:maxLength value="18"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="TransportAddressIPv4z">
+      <xs:annotation>
+         <xs:documentation>
+            Represents a transport address consisting of an IPv4
+            address, a zone index and a port number (as used for
+            example by UDP, TCP and SCTP):
+            
+             octets       contents         encoding
+              1-4         IPv4 address     network-byte order
+              5-8         zone index       network-byte order
+              9-10        port number      network-byte order
+            
+            This textual convention SHOULD NOT be used directly in object
+            definitions since it restricts addresses to a specific format.
+            However, if it is used, it MAY be used either on its own or
+            in conjunction with TransportAddressType or TransportDomain
+            as a pair.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern
+            value="((0|[1-9](([0-9]){0,2}))(0|[1-9](([0-9]){0,2}))(0|[1-9](([0-9]){0,2}))(0|[1-9](([0-9]){0,2}))(0|[1-9](([0-9]){0,9}))((0|[1-9](([0-9]){0,4})){1,1})(0|[1-9](([0-9]){0,4})))"/>
+         <xs:minLength value="10"/>
+         <xs:maxLength value="10"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="TransportAddressIPv6z">
+      <xs:annotation>
+         <xs:documentation>
+            Represents a transport address consisting of an IPv6
+            address, a zone index and a port number (as used for
+            example by UDP, TCP and SCTP):
+            
+             octets       contents         encoding
+              1-16        IPv6 address     network-byte order
+             17-20        zone index       network-byte order
+             21-22        port number      network-byte order
+            
+            This textual convention SHOULD NOT be used directly in object
+            definitions since it restricts addresses to a specific format.
+            However, if it is used, it MAY be used either on its own or
+            in conjunction with TransportAddressType or TransportDomain
+            as a pair.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern
+            value="(((\p{IsBasicLatin}){0})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(([0-9A-Fa-f]{2}){2})(0|[1-9](([0-9]){0,9}))((\p{IsBasicLatin}){0})((0|[1-9](([0-9]){0,4})){1,1})(0|[1-9](([0-9]){0,4})))"/>
+         <xs:minLength value="22"/>
+         <xs:maxLength value="22"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="TransportAddressLocal">
+      <xs:annotation>
+         <xs:documentation>
+            Represents a POSIX Local IPC transport address:
+            
+            octets       contents                   encoding
+             all         POSIX Local IPC address    string
+            
+            The Posix Local IPC transport domain subsumes UNIX domain
+            sockets.
+            
+            This textual convention SHOULD NOT be used directly in object
+            definitions since it restricts addresses to a specific format.
+            However, if it is used, it MAY be used either on its own or
+            in conjunction with TransportAddressType or TransportDomain
+            as a pair.
+            
+            When this textual convention is used as a syntax of an
+            index object, there may be issues with the limit of 128
+            sub-identifiers specified in SMIv2, STD 58. In this case,
+            the OBJECT-TYPE declaration MUST include a 'SIZE' clause
+            to limit the number of potential instance sub-identifiers.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  Protocol Independent Interfaces (IEEE POSIX 1003.1g)
+               </ncx:text>
+            </ncx:reference>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern value="\p{IsBasicLatin}{1,1}"/>
+         <xs:minLength value="1"/>
+         <xs:maxLength value="255"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="TransportAddressDns">
+      <xs:annotation>
+         <xs:documentation>
+            Represents a DNS domain name followed by a colon ':'
+            (ASCII character 0x3A) and a port number in ASCII.
+            The name SHOULD be fully qualified whenever possible.
+            
+            Values of this textual convention are not directly useable as
+            transport-layer addressing information, and require runtime
+            resolution. As such, applications that write them must be
+            prepared for handling errors if such values are not
+            supported, or cannot be resolved (if resolution occurs at the
+            time of the management operation).
+            
+            The DESCRIPTION clause of TransportAddress objects that may
+            have TransportAddressDns values must fully describe how (and
+            when) such names are to be resolved to IP addresses and vice
+            versa.
+            
+            This textual convention SHOULD NOT be used directly in object
+            definitions since it restricts addresses to a specific format.
+            However, if it is used, it MAY be used either on its own or
+            in conjunction with TransportAddressType or TransportDomain
+            as a pair.
+            
+            When this textual convention is used as a syntax of an
+            index object, there may be issues with the limit of 128
+            sub-identifiers specified in SMIv2, STD 58. In this case,
+            the OBJECT-TYPE declaration MUST include a 'SIZE' clause
+            to limit the number of potential instance sub-identifiers.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:pattern value="\p{IsBasicLatin}{1,1}"/>
+         <xs:minLength value="1"/>
+         <xs:maxLength value="255"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+</xs:schema>

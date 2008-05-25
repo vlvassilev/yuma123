@@ -1,0 +1,3 @@
+# connect to the ncxserver for testing
+
+connect user=andy password=dr0pz0ne agent=localhost

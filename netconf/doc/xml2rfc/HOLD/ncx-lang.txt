@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!-- This template is for creating an Internet Draft using xml2rfc,
+     which is available here: http://xml.resource.org. -->
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!-- One method to get references from the online citation libraries.
+     There has to be one entity for each item to be referenced. 
+     An alternate method (rfc include) is described in the references. -->
+
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+<!ENTITY RFC2629 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2629.xml">
+<!ENTITY RFC3552 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3552.xml">
+<!ENTITY I-D.narten-iana-considerations-rfc2434bis SYSTEM "http://xml.resource.org/public/rfc/bibxml3/reference.I-D.narten-iana-considerations-rfc2434bis.xml">
+]>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<!-- used by XSLT processors -->
+<!-- For a complete list and description of processing instructions (PIs), 
+     please see http://xml.resource.org/authoring/README.html. -->
+<!-- Below are generally applicable Processing Instructions (PIs) that most I-Ds might want to use.
+     (Here they are set differently than their defaults in xml2rfc v1.32) -->
+<?rfc strict="yes" ?>
+<!-- give errors regarding ID-nits and DTD validation -->
+<!-- control the table of contents (ToC) -->
+<?rfc toc="yes"?>
+<!-- generate a ToC -->
+<?rfc tocdepth="4"?>
+<!-- the number of levels of subsections in ToC. default: 3 -->
+<!-- control references -->
+<?rfc symrefs="yes"?>
+<!-- use symbolic references tags, i.e, [RFC2119] instead of [1] -->
+<?rfc sortrefs="yes" ?>
+<!-- sort the reference entries alphabetically -->
+<!-- control vertical white space 
+     (using these PIs as follows is recommended by the RFC Editor) -->
+<?rfc compact="yes" ?>
+<!-- do not start each main section on a new page -->
+<?rfc subcompact="no" ?>
+<!-- keep one blank line between list items -->
+<!-- end of list of popular I-D processing instructions -->
+<rfc category="exp" docName="draft-abierman-ncx-smi-00" ipr="full3978">
+  <!-- category values: std, bcp, info, exp, and historic
+     ipr values: full3667, noModification3667, noDerivatives3667
+     you can add the attributes updates="NNNN" and obsoletes="NNNN" 
+     they will automatically be output with "(if approved)" -->
+
+  <!-- ***** FRONT MATTER ***** -->
+
+  <front>
+    <!-- The abbreviated title is used in the page header - it is only necessary if the 
+         full title is longer than 39 characters -->
+
+    <title abbrev="NCX SMI">Network Configuration Extensions : 
+         Structure of Management Information </title>
+
+    <!-- add 'role="editor"' below for the editors if appropriate -->
+
+    <!-- Another author who claims to be an editor -->
+
+    <author fullname="Andy Bierman" initials="A.B." role="editor"
+            surname="Bierman">
+      <organization>netconfcentral.org</organization>
+
+      <address>
+        <postal>
+          <street></street>
+
+          <!-- Reorder these if your country does things differently -->
+
+          <city>Simi Valley</city>
+
+          <region>CA</region>
+
+          <code></code>
+
+          <country>USA</country>
+        </postal>
+
+        <email>ietf@andybierman.com</email>
+
+        <!-- uri and facsimile elements may also be added -->
+      </address>
+    </author>
+
+    <date month="August" year="2007" />
+
+    <!-- If the month and year are both specified and are the current ones, xml2rfc will fill 
+         in the current day for you. If only the current year is specified, xml2rfc will fill 
+	 in the current day and month for you. If the year is not the current one, it is 
+	 necessary to specify at least a month (xml2rfc assumes day="1" if not specified for the 
+	 purpose of calculating the expiry date).  With drafts it is normally sufficient to 
+	 specify just the year. -->
+
+    <!-- Meta-data Declarations -->
+
+    <area>Management</area>
+
+    <workgroup>Internet Engineering Task Force</workgroup>
+
+    <!-- WG name at the upperleft corner of the doc,
+         IETF is fine for individual submissions.  
+	 If this element is not present, the default is "Network Working Group",
+         which is used by the RFC Editor as a nod to the history of the IETF. -->
+
+    <keyword>NETCONF</keyword>
+    <keyword>NCX</keyword>
+    <keyword>SMI</keyword>
+    <keyword>XML</keyword>
+
+    <!-- Keywords will be incorporated into HTML output
+         files in a meta tag but they have no effect on text or nroff
+         output. If you submit your draft to the RFC Editor, the
+         keywords will be used for the search engine. -->
+
+    <abstract>
+      <t>The standardization of network configuration interfaces for use 
+         with the NETCONF Protocol requires a structured data modeling environment
+         which promotes human usability, multi-vendor interoperability, and reuse
+         of existing IETF data models written in SMIv2.  This document defines
+         a Structure of Management Information suitable for use with the NETCONF protocol.
+    </abstract>
+  </front>
+
+  <middle>
+   <section title="Introduction">
+    <t>
+     The Network Configuration Protocol <xref
+     target="RFC4741">RFC&nbsp;4741</xref>.</t> defines an XML-based protocol for
+     managing network device configuration databases.  However, there is no
+     specifications for the inter-operable organization of a 
+     conceptual NETCONF configuration database, and precisely how the standard NETCONF
+     protocol operations behave on the configuration database.
+    </t>
+
+    <t>
+     This document addresses the following concepts:
+     <list style="symbols">
+      <t>NCX Data Organization</t>
+      <t>NCX Data Naming</t
+     </list>
+    </t>
+
+    <section title="Requirements Language">
+     <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+      "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+      document are to be interpreted as described in <xref
+      target="RFC2119">RFC 2119</xref>.</t>
+    </section>
+
+    <section title="Terms">
+      <t>The following terms are defined in RFC 4741 and are not redefined
+         here:
+        <list style="symbols">
+         <t>agent</t>
+         <t>client</t>
+         <t>manager</t>
+         <t>RPC</t>
+         <t>server</t>
+         <t>session</t>
+        </list>
+      </t>
+
+      <t>The following terms are used throughout this documentation:
+       <list style="hanging">
+         <t hangtext="application:">
+           A set of functionally-related, owner-specific, conceptual
+           data modeling interfaces.  All NCX data model objects exist
+           within the scope and context of a single application.
+         </t>
+
+         <t hangtext="data model:">
+          Formal representation of the application and protocol specific components
+          of a conceptual network management programmatic interface.
+         </t>
+
+         <t hangtext="data model module:">
+          Container of definitions pertaining to some portion of one or more data models.
+         </t>
+
+         <t hangtext="data model object:">
+          A definition within a data model module that
+          represents conceptual management data, which can be accessed
+          by a manager via a network
+          management protocol. Also called an object.
+         </t>
+
+         <t hangtext="data model notification:">
+          A definition within a data model module that
+          represents a conceptual notification message construct.
+          Also called an notification.
+         </t>
+
+         <t hangtext="data model method:">
+          A definition within a data model module that
+          represents a conceptual remote procedure call (RPC) construct.
+          Also called a method.
+         </t>
+
+         <t hangtext="owner:">
+          The naming authority for a data model definition.
+          All owner names must be globally unique,
+          maintained in a registry by IANA.
+          All data model definition names within the scope
+          of a single owner must be unique.
+         </t>
+
+         <t hangtext="parameter set:">
+          A set of one or more functionally related parameters,
+          used within the NETCONF protocol in some manner.
+         </t>
+
+         <t hangtext="NETCONF Data Model:">
+          The high-level organization and framework which encompasses
+          all protocol operations, conceptual data definitions,
+          and instances of those definitions.
+         </t>
+
+         <t hangtext="Object Identifier:">
+           A string which identifies a particular data model object.
+         </t>
+
+         <t hangtext="Instance Identifier:">
+           A string which identifies a particular instance of a data model object.
+         </t>
+       </list>
+     </t>
+    </section>
+
+    <section title="Problem Statement">
+     <t>
+      Network operators and network equipment (NE) software developers
+      need a lot of expertise, and spend a lot of time, to configure,
+      control, and monitor network devices.
+     </t>
+
+     <t>
+      Network configuration has traditionally been very proprietary
+      in nature, and based on screen-scraping
+      Command Line Interface (CLI) commands
+      that can be stored in a textual file.  Configuration management
+      is usually done manually, and is prone to human-introduced error.
+      Often, scripts or applications which use the CLI as a programmatic interface
+      are developed ad-hoc to automate and simplify some repetitive management tasks.
+     </t>
+
+     <t>
+      Programmatic interfaces
+      built on top of the CLI are insufficient for the following reasons:
+ 
+      <list style="symbols">
+        <t>
+         CLI is proprietary, requiring extra effort by operators
+         to learn and manage different CLIs for different equipment.
+        </t>
+        <t>
+         CLI lacks a formal description language to completely
+         define all properties of the programmatic interface
+        </t>
+        <t>
+         CLI lacks any structured error responses, and very little
+         information about specific errors is available to applications
+        </t>
+        <t>
+         CLI lacks any sort of formalized transaction mechanism,
+         to safely lock, alter, and unlock configuration databases in
+         a multi-application environment.
+        </t>
+       </list>
+     </t>
+
+     <t>
+      NETCONF (by design) separates the application-specific
+      content within a network management operation from the operation itself.
+      There is currently no standard data model content defined for NETCONF.
+      Since it uses XML encoding, any data modeling language
+      that describe XML instance documents can be used to define
+      management definitions for use with the NETCONF protocol.
+     </t>
+
+     <t>
+      Typically, XML Schema Definition (XSD) is used to describe
+      valid schemas for XML instance documents for a particular XML application.
+      However, XSD is rather difficult for humans to work with efficiently.
+      It is verbose and complex, difficult to read and write, but is
+      still an excellent formal description mechanism for applications
+      to use.
+     </t>
+
+     <t>
+      Because XSD is so difficult for humans to understand and
+      define without errors, moving from CLI to XML based 
+      configuration management is not that easy.  An application
+      cannot really use an XSD schema to manage a network device
+      until the data model definitions accurately reflect the
+      native programmatic interface available from the NETCONF agent.
+     </t>
+
+     <t>
+      This 'human usability' problem is especially important
+      in the area of network management because increased
+      complexity increases the risk that something will break
+      in an unexpected way. Network operators and protocol
+      developers need to fully understand that the XML data model
+      correctly reflects the normative specification found in text.
+      This has proven difficult when using XSD to define the XML syntax.
+     </t>
+
+     <t>
+      Just as important as the human usability problems is the fact
+      that XSD is designed and intended for use as a generalized
+      formal definition of the content of XML instance documents.
+     </t>
+
+     <t>
+      XSD does not address network management problems that
+      have long been recognized and partially solved:
+      <list style="symbols">
+       <t>extensible modularity</t>
+       <t>definition and module lifecycle</t>
+       <t>user documentation</t>
+       <t>implementation conformance</t>
+       <t>maximum protocol access</t>
+       <t>integration with existing SNMP-based data structures</t>
+       <t>agent implementation conformance</t>
+       <t>conditional presence tests based on referential integrity
+          or protocol functionality</t>
+       <t>user-defined RPC Methods</t>
+       <t>user-defined Notifications</t>
+       <t>protocol operation dependent schema</t>
+       <t>conditional definitions based on platform capabilities</t>
+      </list>
+     </t>
+
+    <t>
+      Although it is possible to
+      arbitrarily extend the &lt;appinfo&gt; element,
+      this XSD mechanism is by definition non-standard,
+      and 'off-the-shelf' XSD-based applications will not
+      be able to do anything useful with information encoded
+      in this manner.
+     </t>
+
+     <t>
+      In addition to the many aspects of standards-based data
+      model definition and maintenance that are not directly
+      addressed by XSD. The NETCONF protocol uses data model
+      schema differently, depending on the protocol operation
+      mode.
+     </t>
+          
+     <t>
+      There are four different usage-based representations, 
+      which would each require its own XSD schema, that are
+      conceptually and simultaneously supported by a NETCONF Data Model:
+
+      <list style="hanging">
+       <t hangtext="full:">
+        Conceptualization of all
+        data model objects and all possible instances. 
+        This is the canonical representation
+        that is defined as the combined contents of all data
+        model modules used within all managed systems. The data
+        properties represent the syntax, semantics, and requirements
+        of a data model, independent of all protocol operations.<br/>
+       </t>
+       <t hangtext="concise:">
+        Conceptualization of all
+        data model object instances within a managed system.
+        Only the writable data model object values which have actually been 
+        configured to non-default values by a management application are 
+        within this representation. This is also called
+        the no-defaults representation.
+       </t>
+       <t hangtext="filter">
+        Conceptualization of all permutations
+        of all valid subtree filter expressions which are possible
+        for a particular data model object.  An XSD would
+        need to treat every element and every attribute as optional
+        in order to support this representation.  In addition,
+        unknown namespaces, elements and attributes are not
+        errors, but rather valid filter components which simply 
+        produce no matching output from the underlying data model
+        instances within the agent. This is also called the
+        subtree filter representation.
+       </t>
+       <t hangtext="edit-config">
+        Conceptualization of all permutations
+        of all valid data model instances which are possible
+        for a particular data model object, which permit
+        the NETCONF edit-mode 'operation' attribute (for 
+        the edit-config protocol operation) to be present.
+        An XSD would need to include this XML attribute
+        in every XML element within the conceptual 
+        configuration data model to represent this mode. 
+       </t>
+      </list>
+     </t> 
+    </section>
+
+    <section title="Solution Requirements">
+     <t>
+      There is a need for a human-friendly netconf management framework
+      and data model definition language, which has human-friendly
+      mechanisms for defining data models for use with the NETCONF protocol,
+      in a structured manner.
+     </t>
+
+     <t>
+      A simple and extensible data organization framework must be
+      defined.
+     </t>
+
+     <t>
+      A simple hierarchical data naming mechanism, compatible with NETCONF Xpath
+      filter expressions, must be defined.
+     </t>
+
+     <t>
+      A conceptual framework for standardized, interoperable application
+      of NETCONF protocl operations on arbitrary data models must be
+      defined.
+     </t>
+
+     <t>
+      A conceptual framework for standardized, interoperable enforcement
+      of user-configured access control mechanisms on arbitrary data models must be
+      defined.
+     </t>
+
+     <t>
+      Mechanisms for specifying modular, user-defined derived types must be defined.
+     </t>
+
+     <t>
+      Mechanisms to import definitions from other modules must be defined.
+     </t>
+
+     <t>
+      The data modeling language and framework must integrate many of
+      the features and constructs found in SMIv2, while allowing full access
+      to new, more powerful data modeling mechanisms, available with XML.
+     </t>
+
+     <t>
+      Algorithmic translation for NETCONF protocol access to SMIv2 defined MIB data 
+      must be defined.
+     </t>
+
+     <t>
+      In order to support XML-based applications efficiently, a tool to convert 
+      this language into XSD format must be available.
+     </t>
+    </section>
+
+
+
+
+
+<p>
+The Network Configuration Extensions (NCX) data modeling language 
+and NCX Framework are designed
+to address the requirements of distributed network management 
+applications which implement the NETCONF protocol.
+</p>
+
+<h2><a name="Design_Goals">Design Goals</a></h2>
+
+<p>
+The design goals for the NCX language can be summarized as follows:
+</p>
+
+<ul>
+<li>
+Make each construct as simple as possible for humans to use and understand
+</li>
+<li>Encourage definition modularity and reuse</li>
+<li>
+Provide control of as many data type and data object properties as possible
+</li>
+<li>Provide mechanisms for data model module lifecycle management</li>
+<li>Provide vendor-extensible mechanisms to assist tools automation</li>
+<li>Reuse as many good ideas as possible
+  from other languages such as C, XSD, SMIv2, and RelaxNG
+</li>
+<li>Hide NETCONF details from the data model designer</li>
+<li>Allow sufficient data model design flexibility</li>
+<li>Provide a simple access control framework that fully supports NETCONF</li>
+<li>
+Allow maximum integration and reuse of SMIv2-based management definitions
+</li>
+</ul>
+
+<h2><a name="Design_NonGoals">Design Non-Goals</a></h2>
+
+<p>
+The NCX language is not intended to be:
+</p>
+
+<ul>
+<li>a generalized XML Instance Document definition language like XSD</li>
+<li>a mechanism to hide or negate bad data model design</li>
+<li>a mechanism to insulate novice software developers from
+conceptual data structure complexity</li>
+<li>a mechanism which supports mixed-mode XML usage</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   <section anchor="Acknowledgements" title="Acknowledgements">
+     <t>This template was derived from an initial version written by Pekka
+     Savola and contributed by him to the xml2rfc project.</t>
+
+     <t>This document is part of a plan to make xml2rfc indispensable <xref
+     target="DOMINATION"></xref>.</t>
+   </section>
+
+   <!-- Possibly a 'Contributors' section ... -->
+
+   <section anchor="IANA" title="IANA Considerations">
+     <t>This memo includes no request to IANA.</t>
+
+      <t>All drafts are required to have an IANA considerations section (see
+      <xref target="I-D.narten-iana-considerations-rfc2434bis">the update of
+      RFC 2434</xref> for a guide). If the draft does not require IANA to do
+      anything, the section contains an explicit statement that this is the
+      case (as above). If there are no requirements for IANA, the section will
+      be removed during conversion into an RFC by the RFC Editor.</t>
+   </section>
+
+   <section anchor="Security" title="Security Considerations">
+      <t>All drafts are required to have a security considerations section.
+      See <xref target="RFC3552">RFC 3552</xref> for a guide.</t>
+   </section>
+  </middle>
+
+  <!--  *****BACK MATTER ***** -->
+
+  <back>
+    <!-- References split into informative and normative -->
+
+    <!-- There are 2 ways to insert reference entries from the citation libraries:
+     1. define an ENTITY at the top, and use "ampersand character"RFC2629; here (as shown)
+     2. simply use a PI "less than character"?rfc include="reference.RFC.2119.xml"?> here
+        (for I-Ds: include="reference.I-D.narten-iana-considerations-rfc2434bis.xml")
+
+     Both are cited textually in the same manner: by using xref elements.
+     If you use the PI option, xml2rfc will, by default, try to find included files in the same
+     directory as the including file. You can also define the XML_LIBRARY environment variable
+     with a value containing a set of directories to search.  These can be either in the local
+     filing system or remote ones accessed by http (http://domain/dir/... ).-->
+
+    <references title="Normative References">
+      <!--?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml"?-->
+      &RFC2119;
+
+      <reference anchor="min_ref">
+        <!-- the following is the minimum to make xml2rfc happy -->
+
+        <front>
+          <title>Minimal Reference</title>
+
+          <author initials="authInitials" surname="authSurName">
+            <organization></organization>
+          </author>
+
+          <date year="2006" />
+        </front>
+      </reference>
+    </references>
+
+    <references title="Informative References">
+      <!-- Here we use entities that we defined at the beginning. -->
+
+      &RFC2629;
+
+      &RFC3552;
+
+      &I-D.narten-iana-considerations-rfc2434bis;
+
+      <!-- A reference written by by an organization not a person. -->
+
+      <reference anchor="DOMINATION"
+                 target="http://www.example.com/dominator.html">
+        <front>
+          <title>Ultimate Plan for Taking Over the World</title>
+
+          <author>
+            <organization>Mad Dominators, Inc.</organization>
+          </author>
+
+          <date year="1984" />
+        </front>
+      </reference>
+    </references>
+
+    <section anchor="app-additional" title="Additional Stuff">
+      <t>This becomes an Appendix.</t>
+    </section>
+
+    <!-- Change Log
+
+v00 2006-03-15  EBD   Initial version
+
+v01 2006-04-03  EBD   Moved PI location back to position 1 -
+                      v3.1 of XMLmind is better with them at this location.
+v02 2007-03-07  AH    removed extraneous nested_list attribute,
+                      other minor corrections
+v03 2007-03-09  EBD   Added comments on null IANA sections and fixed heading capitalization.
+                      Modified comments around figure to reflect non-implementation of
+                      figure indent control.  Put in reference using anchor="DOMINATION".
+                      Fixed up the date specification comments to reflect current truth.
+v04 2007-03-09 AH     Major changes: shortened discussion of PIs,
+                      added discussion of rfc include.
+v05 2007-03-10 EBD    Added preamble to C program example to tell about ABNF and alternative 
+                      images. Removed meta-characters from comments (causes problems).  -->
+  </back>
+</rfc>

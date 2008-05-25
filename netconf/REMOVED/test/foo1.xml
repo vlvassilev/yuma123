@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<top xmlns="http://www.example.com/base" xmlns:s="http://foo.com">
+  <foo i="1" s="test" s:t="test1" 
+       u="  test2  ">
+    <bar j="4" k="42"><running>  x   </running></bar>
+  </foo>
+  <s:foo s:i="2">
+     norton
+  </s:foo>
+  <e7>foo</e7>
+  <IfEntry.ifIndex>55</IfEntry.ifIndex>
+</top>
+
+
+
+
+
+
+
+
+
+

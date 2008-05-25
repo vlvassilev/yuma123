@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://netconfcentral.org/ncx/netconfd"
+ targetNamespace="http://netconfcentral.org/ncx/netconfd"
+ xmlns:xs="http://www.w3.org/2001/XMLSchema"
+ elementFormDefault="qualified" attributeFormDefault="unqualified"
+ xml:lang="en" version="0.4" xmlns:ncx="http://netconfcentral.org/ncx/1.0"
+ xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"
+ xmlns:n8="http://netconfcentral.org/ncx/types"
+ xmlns:n9="http://netconfcentral.org/ietf/types">
+ <xs:annotation>
+  <xs:documentation> Converted from NCX module by ncxdump v0.2
+
+    Module: netconfd
+    Owner: ncx
+    Application: netconfd
+    Version: 0.4
+    Copyright (C) 2006-2007, Andy Bierman.
+    Contact Info: Send comments to &lt;ietf@andybierman.com&gt;.
+
+    Description:
+      NCX Agent Configuration Parameters and Statistics
+
+    Revision History:
+
+      Revision: 0.4
+      Add stats and change name from ncxagtboot to netconfd
+
+      Revision: 0.3
+      Changed nc-boot and expand as nc-cli parmset.
+
+      Revision: 0.2
+      Added load-config RPC method
+
+      Revision: 0.1
+      Initial version
+</xs:documentation>
+ </xs:annotation>
+
+ <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+  schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+
+ <xs:import namespace="http://netconfcentral.org/ncx/types"
+  schemaLocation="http://netconfcentral.org/ncx/types
+  http://www.netconfcentral.org/xsd/ncx/ncxtypes.xsd"/>
+
+ <xs:import namespace="urn:ietf:params:xml:ns:netconf:base:1.0"
+  schemaLocation="urn:ietf:params:xml:ns:netconf:base:1.0
+  http://www.netconfcentral.org/xsd/ietf/netconf.xsd"/>
+
+ <xs:import namespace="http://netconfcentral.org/ietf/types"
+  schemaLocation="http://netconfcentral.org/ietf/types
+  http://www.netconfcentral.org/xsd/ietf/smi.xsd"/>
+
+ <xs:simpleType name="NcAgentMode">
+  <xs:annotation>
+   <xs:documentation>NETCONF Agent Operation Mode 
+           standalone == single monolithic agent
+           other == TBD; sub-agent mode or SNMP proxy mode</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="standalone"/>
+   <xs:enumeration value="other"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:simpleType name="NcPort">
+  <xs:annotation>
+   <xs:documentation>Placeholder for a TCP/UDP port number data type</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:unsignedInt">
+   <xs:maxInclusive value="65535"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:complexType name="NcSshPort">
+  <xs:annotation>
+   <xs:documentation>NETCONF Agent SSH Port Binding</xs:documentation>
+  </xs:annotation>
+  <xs:simpleContent>
+   <xs:extension base="NcPort"/>
+  </xs:simpleContent>
+ </xs:complexType>
+
+ <xs:simpleType name="FileSpecList">
+  <xs:annotation>
+   <xs:documentation>PATHSPEC formatted string indicating the machine-dependent
+         search path for the ncx-modules directory</xs:documentation>
+  </xs:annotation>
+  <xs:list itemType="xs:string"/>
+ </xs:simpleType>
+
+ <xs:simpleType name="NcStartupType">
+  <xs:annotation>
+   <xs:documentation>NETCONF Agent Native Startup Update Mode</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="mirror"/>
+   <xs:enumeration value="distinct"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:complexType name="DefaultOwner">
+  <xs:annotation>
+   <xs:documentation>Default owner used in protocol operations</xs:documentation>
+  </xs:annotation>
+  <xs:simpleContent>
+   <xs:extension base="n8:NcxName"/>
+  </xs:simpleContent>
+ </xs:complexType>
+
+ <xs:simpleType name="NcTransOrderType">
+  <xs:annotation>
+   <xs:documentation>NETCONF Transport Binding Order Type</xs:documentation>
+  </xs:annotation>
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="beep"/>
+   <xs:enumeration value="ssh"/>
+   <xs:enumeration value="soap-beep"/>
+   <xs:enumeration value="soap-https"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:simpleType name="NcTransOrderList">
+  <xs:annotation>
+   <xs:documentation>NETCONF Transport Binding Order List</xs:documentation>
+   <xs:appinfo>
+    <ncx:no-duplicates/>
+    <ncx:merge-type>last</ncx:merge-type>
+   </xs:appinfo>
+  </xs:annotation>
+  <xs:list>
+   <xs:simpleType>
+    <xs:restriction base="NcTransOrderType">
+     <xs:minLength value="1"/>
+     <xs:maxLength value="4"/>
+    </xs:restriction>
+   </xs:simpleType>
+  </xs:list>
+ </xs:simpleType>
+
+ <xs:complexType name="NcBinding">
+  <xs:annotation>
+   <xs:documentation>NETCONF Transport Binding</xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="id" type="n8:NcIndex"/>
+   <xs:element name="protocol" type="xs:string"/>
+   <xs:element name="port" type="n8:NcPortNumber"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <xs:complexType name="NcBindingTable">
+  <xs:annotation>
+   <xs:documentation>Containerized Table of NETCONF Transport Bindings.</xs:documentation>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="binding" type="NcBinding" minOccurs="0"
+    maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <xs:complexType name="netconfdPSType"/>
+
+ <xs:element name="netconfdPS" type="netconfdPSType" abstract="true"/>
+
+ <xs:complexType name="netconfdAppType">
+  <xs:sequence>
+   <xs:element ref="netconfdPS" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+
+ <xs:complexType name="nc-cliPSType">
+  <xs:annotation>
+   <xs:documentation>CLI Parameter Set for the NETCONF Agent Application.</xs:documentation>
+  </xs:annotation>
+  <xs:complexContent>
+   <xs:extension base="netconfdPSType">
+    <xs:sequence>
+     <xs:element name="agent-mode" type="NcAgentMode">
+      <xs:annotation>
+       <xs:documentation>Agent operation mode.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="startup-type" type="NcStartupType">
+      <xs:annotation>
+       <xs:documentation>Agent startup commit type.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="ssh-port" type="NcSshPort">
+      <xs:annotation>
+       <xs:documentation>Port number to use for the SSH transport mapping.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="cfg-path" type="FileSpecList">
+      <xs:annotation>
+       <xs:documentation>Internal file search path for configuration modules.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+
+ <xs:element name="nc-cli" type="nc-cliPSType"
+  substitutionGroup="netconfdPS"/>
+
+ <xs:complexType name="nc-transportPSType">
+  <xs:annotation>
+   <xs:documentation>Parameters for the NETCONF Transport Mappings.</xs:documentation>
+  </xs:annotation>
+  <xs:complexContent>
+   <xs:extension base="netconfdPSType">
+    <xs:sequence>
+     <xs:element name="binding-order" type="NcTransOrderList">
+      <xs:annotation>
+       <xs:documentation>Transport binding order used during NETCONF session startup.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="default-owner" type="DefaultOwner">
+      <xs:annotation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+     <xs:element name="bindings" type="NcBindingTable">
+      <xs:annotation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+      <xs:key name="bindingsKey">
+       <xs:selector xpath="binding"/>
+       <xs:field xpath="binding/id"/>
+      </xs:key>
+     </xs:element>
+    </xs:sequence>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+
+ <xs:element name="nc-transport" type="nc-transportPSType"
+  substitutionGroup="netconfdPS"/>
+
+ <xs:complexType name="LoadConfigPS">
+  <xs:annotation>
+   <xs:documentation>Internal NCX extension to load XML config files.</xs:documentation>
+  </xs:annotation>
+  <xs:complexContent>
+   <xs:extension base="nc:rpcOperationType">
+    <xs:sequence>
+     <xs:element name="config" type="nc:ConfigInlineType">
+      <xs:annotation>
+       <xs:documentation>XML Config contents.</xs:documentation>
+       <xs:appinfo>
+        <ncx:max-access>read-create</ncx:max-access>
+       </xs:appinfo>
+      </xs:annotation>
+     </xs:element>
+    </xs:sequence>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+
+ <xs:element name="load-config" type="LoadConfigPS"
+  substitutionGroup="nc:rpcOperation">
+  <xs:annotation>
+   <xs:documentation>NCX load-config operation.</xs:documentation>
+   <xs:appinfo>
+    <ncx:rpc-type>config</ncx:rpc-type>
+    <ncx:rpc-output>RpcOkReplyType</ncx:rpc-output>
+   </xs:appinfo>
+  </xs:annotation>
+ </xs:element>
+
+</xs:schema>

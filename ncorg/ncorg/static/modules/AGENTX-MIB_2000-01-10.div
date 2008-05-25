@@ -1,0 +1,527 @@
+
+<div>
+   <h1 class="yang">AGENTX-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#AgentxTAddress.63">AgentxTAddress</a></li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#agentxGeneral.73">agentxGeneral</a>
+               <ul>
+                  <li><a href="#agentxDefaultTimeout.75">agentxDefaultTimeout</a></li>
+                  <li><a href="#agentxMasterAgentXVer.100">agentxMasterAgentXVer</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#agentxConnection.114">agentxConnection</a>
+               <ul>
+                  <li><a href="#agentxConnTableLastChange.116">agentxConnTableLastChange</a></li>
+                  <li class="daddy"><a href="#agentxConnectionEntry.128">agentxConnectionEntry</a>
+                     <ul>
+                        <li><a href="#agentxConnIndex.141">agentxConnIndex</a></li>
+                        <li><a href="#agentxConnOpenTime.155">agentxConnOpenTime</a></li>
+                        <li><a href="#agentxConnTransportDomain.164">agentxConnTransportDomain</a></li>
+                        <li><a href="#agentxConnTransportAddress.173">agentxConnTransportAddress</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#agentxSession.188">agentxSession</a>
+               <ul>
+                  <li><a href="#agentxSessionTableLastChange.190">agentxSessionTableLastChange</a></li>
+                  <li class="daddy"><a href="#agentxSessionEntry.202">agentxSessionEntry</a>
+                     <ul>
+                        <li><a href="#agentxConnIndex.213">agentxConnIndex</a></li>
+                        <li><a href="#agentxSessionIndex.222">agentxSessionIndex</a></li>
+                        <li><a href="#agentxSessionObjectID.237">agentxSessionObjectID</a></li>
+                        <li><a href="#agentxSessionDescr.248">agentxSessionDescr</a></li>
+                        <li><a href="#agentxSessionAdminStatus.260">agentxSessionAdminStatus</a></li>
+                        <li><a href="#agentxSessionOpenTime.273">agentxSessionOpenTime</a></li>
+                        <li><a href="#agentxSessionAgentXVer.282">agentxSessionAgentXVer</a></li>
+                        <li><a href="#agentxSessionTimeout.294">agentxSessionTimeout</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#agentxRegistration.317">agentxRegistration</a>
+               <ul>
+                  <li><a href="#agentxRegistrationTableLastChange.319">agentxRegistrationTableLastChange</a></li>
+                  <li class="daddy"><a href="#agentxRegistrationEntry.331">agentxRegistrationEntry</a>
+                     <ul>
+                        <li><a href="#agentxConnIndex.342">agentxConnIndex</a></li>
+                        <li><a href="#agentxSessionIndex.350">agentxSessionIndex</a></li>
+                        <li><a href="#agentxRegIndex.359">agentxRegIndex</a></li>
+                        <li><a href="#agentxRegContext.370">agentxRegContext</a></li>
+                        <li><a href="#agentxRegStart.379">agentxRegStart</a></li>
+                        <li><a href="#agentxRegRangeSubId.391">agentxRegRangeSubId</a></li>
+                        <li><a href="#agentxRegUpperBound.404">agentxRegUpperBound</a></li>
+                        <li><a href="#agentxRegPriority.416">agentxRegPriority</a></li>
+                        <li><a href="#agentxRegTimeout.427">agentxRegTimeout</a></li>
+                        <li><a href="#agentxRegInstance.443">agentxRegInstance</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">AGENTX-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:AGENTX-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"agentx-mib"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14">SNMP-FRAMEWORK-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-framework"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMPv2-TC/1999-04-01">SNMPv2-TC</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smiv2"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"AgentX Working Group"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"WG-email:   agentx@dorothy.bmc.com
+         Subscribe:  agentx-request@dorothy.bmc.com
+         WG-email Archive:  ftp://ftp.peer.com/pub/agentx/archives
+         FTP repository:  ftp://ftp.peer.com/pub/agentx
+         http://www.ietf.org/html.charters/agentx-charter.html
+         
+         Chair:      Bob Natale
+         	    ACE*COMM Corporation
+         Email:      bnatale@acecomm.com
+         
+         WG editor:  Mark Ellison
+         	    Ellison Software Consulting, Inc.
+         Email:      ellison@world.std.com
+         
+         Co-author:  Lauren Heintz
+         	    Cisco Systems,
+         EMail:      lheintz@cisco.com
+         
+         Co-author:  Smitha Gudur
+         	    Independent Consultant
+         Email:      sgudur@hotmail.com"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"This is the MIB module for the SNMP Agent Extensibility
+         Protocol (AgentX).  This MIB module will be implemented by
+         the master agent."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-01-10"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Initial version published as RFC 2742."</span>;
+      }
+
+
+      <span class="yang_cmt">// typedefs</span>
+
+      <a name="AgentxTAddress.63"/><span class="yang_kw">typedef</span> <span class="yang_id">AgentxTAddress</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
+            <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Denotes a transport service address.  This is identical to
+            the TAddress textual convention (SNMPv2-SMI) except that
+            zero-length values are permitted."</span>;
+      }
+
+      <span class="yang_cmt">// objects</span>
+
+      <a name="agentxGeneral.73"/><span class="yang_kw">container</span> <span class="yang_id">agentxGeneral</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.1"</span>;
+
+         <a name="agentxDefaultTimeout.75"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxDefaultTimeout</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+               <span class="yang_kw">range</span> <span class="yang_str">"0..255"</span>;
+            }
+            <span class="yang_kw">units</span> <span class="yang_str">"seconds"</span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The default length of time, in seconds, that the master
+               agent should allow to elapse after dispatching a message
+               to a session before it regards the subagent as not
+               responding.  This is a system-wide value that may
+               override the timeout value associated with a particular
+               session (agentxSessionTimeout) or a particular registered
+               MIB region (agentxRegTimeout).  If the associated value of
+               agentxSessionTimeout and agentxRegTimeout are zero, or
+               impractical in accordance with implementation-specific
+               procedure of the master agent, the value represented by
+               this object will be the effective timeout value for the
+               
+               master agent to await a response to a dispatch from a
+               given subagent."</span>;
+            <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"5"</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.1.1"</span>;
+         }
+
+         <a name="agentxMasterAgentXVer.100"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxMasterAgentXVer</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+               <span class="yang_kw">range</span> <span class="yang_str">"1..255"</span>;
+            }
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The AgentX protocol version supported by this master agent.
+               The current protocol version is 1.  Note that the master agent
+               must also allow interaction with earlier version subagents."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.1.2"</span>;
+         }
+      }  <span class="yang_cmt">// container agentxGeneral</span>
+
+      <a name="agentxConnection.114"/><span class="yang_kw">container</span> <span class="yang_id">agentxConnection</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.2"</span>;
+
+         <a name="agentxConnTableLastChange.116"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxConnTableLastChange</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The value of sysUpTime when the last row creation or deletion
+               occurred in the agentxConnectionTable."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.2.1"</span>;
+         }
+
+         <a name="agentxConnectionEntry.128"/><span class="yang_kw">list</span> <span class="yang_id">agentxConnectionEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#agentxConnIndex.141">agentxConnIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An agentxConnectionEntry contains information describing a
+               single AgentX transport connection.  A connection may be
+               
+               used to support zero or more AgentX sessions.  An entry is
+               created when a new transport connection is established,
+               and is destroyed when the transport connection is terminated."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.2.2.1"</span>;
+
+            <a name="agentxConnIndex.141"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxConnIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"agentxConnIndex contains the value that uniquely identifies
+                  an open transport connection used by this master agent
+                  to provide AgentX service.  Values of this index should
+                  not be re-used.  The value assigned to a given transport
+                  connection is constant for the lifetime of that connection."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.2.2.1.1"</span>;
+            }
+
+            <a name="agentxConnOpenTime.155"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxConnOpenTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of sysUpTime when this connection was established
+                  and, therefore, its value when this entry was added to the table."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.2.2.1.2"</span>;
+            }
+
+            <a name="agentxConnTransportDomain.164"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxConnTransportDomain</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TDomain.747">smiv2:TDomain</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The transport protocol in use for this connection to the
+                  subagent."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.2.2.1.3"</span>;
+            }
+
+            <a name="agentxConnTransportAddress.173"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxConnTransportAddress</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#AgentxTAddress.63">AgentxTAddress</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The transport address of the remote (subagent) end of this
+                  connection to the master agent.  This object may be zero-length
+                  for unix-domain sockets (and possibly other types of transport
+                  addresses) since the subagent need not bind a filename to its
+                  local socket."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.2.2.1.4"</span>;
+            }
+         }  <span class="yang_cmt">// list agentxConnectionEntry</span>
+      }  <span class="yang_cmt">// container agentxConnection</span>
+
+      <a name="agentxSession.188"/><span class="yang_kw">container</span> <span class="yang_id">agentxSession</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.3"</span>;
+
+         <a name="agentxSessionTableLastChange.190"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxSessionTableLastChange</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The value of sysUpTime when the last row creation or deletion
+               occurred in the agentxSessionTable."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.3.1"</span>;
+         }
+
+         <a name="agentxSessionEntry.202"/><span class="yang_kw">list</span> <span class="yang_id">agentxSessionEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#agentxConnIndex.213">agentxConnIndex</a>, <a href="#agentxSessionIndex.222">agentxSessionIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Information about a single open session between the AgentX
+               master agent and a subagent is contained in this entry.  An
+               entry is created when a new session is successfully established
+               and is destroyed either when the subagent transport connection
+               has terminated or when the subagent session is closed."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.3.2.1"</span>;
+
+            <a name="agentxConnIndex.213"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxConnIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/agentx-mib:agentxConnection/agentx-mib:agentxConnectionEntry/agentx-mib:agentxConnIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="agentxSessionIndex.222"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxSessionIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A unique index for the subagent session.  It is the same as
+                  h.sessionID defined in the agentx header.  Note that if
+                  a subagent's session with the master agent is closed for
+                  any reason its index should not be re-used.
+                  A value of zero(0) is specifically allowed in order
+                  to be compatible with the definition of h.sessionId."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.3.2.1.1"</span>;
+            }
+
+            <a name="agentxSessionObjectID.237"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxSessionObjectID</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This is taken from the o.id field of the agentx-Open-PDU.
+                  This attribute will report a value of '0.0' for subagents
+                  not supporting the notion of an AgentX session object
+                  identifier."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.3.2.1.2"</span>;
+            }
+
+            <a name="agentxSessionDescr.248"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxSessionDescr</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A textual description of the session.  This is analogous to
+                  sysDescr defined in the SNMPv2-MIB in RFC 1907 [19] and is
+                  taken from the o.descr field of the agentx-Open-PDU.
+                  This attribute will report a zero-length string value for
+                  subagents not supporting the notion of a session description."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.3.2.1.3"</span>;
+            }
+
+            <a name="agentxSessionAdminStatus.260"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxSessionAdminStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"up"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"down"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The administrative (desired) status of the session.  Setting
+                  the value to 'down(2)' closes the subagent session (with c.reason
+                  set to 'reasonByManager')."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.3.2.1.4"</span>;
+            }
+
+            <a name="agentxSessionOpenTime.273"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxSessionOpenTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of sysUpTime when this session was opened and,
+                  therefore, its value when this entry was added to the table."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.3.2.1.5"</span>;
+            }
+
+            <a name="agentxSessionAgentXVer.282"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxSessionAgentXVer</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..255"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The version of the AgentX protocol supported by the
+                  session.  This must be less than or equal to the value of
+                  agentxMasterAgentXVer."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.3.2.1.6"</span>;
+            }
+
+            <a name="agentxSessionTimeout.294"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxSessionTimeout</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..255"</span>;
+               }
+               <span class="yang_kw">units</span> <span class="yang_str">"seconds"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The length of time, in seconds, that a master agent should
+                  allow to elapse after dispatching a message to this session
+                  before it regards the subagent as not responding.  This value
+                  is taken from the o.timeout field of the agentx-Open-PDU.
+                  This is a session-specific value that may be overridden by
+                  values associated with the specific registered MIB regions
+                  (see agentxRegTimeout). A value of zero(0) indicates that
+                  the master agent's default timeout value should be used
+                  
+                  (see agentxDefaultTimeout)."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.3.2.1.7"</span>;
+            }
+         }  <span class="yang_cmt">// list agentxSessionEntry</span>
+      }  <span class="yang_cmt">// container agentxSession</span>
+
+      <a name="agentxRegistration.317"/><span class="yang_kw">container</span> <span class="yang_id">agentxRegistration</span> {
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.4"</span>;
+
+         <a name="agentxRegistrationTableLastChange.319"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxRegistrationTableLastChange</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The value of sysUpTime when the last row creation or deletion
+               occurred in the agentxRegistrationTable."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.4.1"</span>;
+         }
+
+         <a name="agentxRegistrationEntry.331"/><span class="yang_kw">list</span> <span class="yang_id">agentxRegistrationEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#agentxConnIndex.342">agentxConnIndex</a>, <a href="#agentxSessionIndex.350">agentxSessionIndex</a>, <a href="#agentxRegIndex.359">agentxRegIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Contains information for a single registered region.  An
+               entry is created when a session  successfully registers a
+               region and is destroyed for any of three reasons: this region
+               is unregistered by the session, the session is closed,
+               or the subagent connection is closed."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.4.2.1"</span>;
+
+            <a name="agentxConnIndex.342"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxConnIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/agentx-mib:agentxConnection/agentx-mib:agentxConnectionEntry/agentx-mib:agentxConnIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="agentxSessionIndex.350"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxSessionIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/agentx-mib:agentxSession/agentx-mib:agentxSessionEntry/agentx-mib:agentxSessionIndex"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
+            }
+
+            <a name="agentxRegIndex.359"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxRegIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"agentxRegIndex uniquely identifies a registration entry.
+                  This value is constant for the lifetime of an entry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.4.2.1.1"</span>;
+            }
+
+            <a name="agentxRegContext.370"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxRegContext</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The context in which the session supports the objects in this
+                  region.  A zero-length context indicates the default context."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.4.2.1.2"</span>;
+            }
+
+            <a name="agentxRegStart.379"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxRegStart</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The starting OBJECT IDENTIFIER of this registration entry.  The
+                  session identified by agentxSessionIndex implements objects
+                  starting at this value (inclusive).  Note that this value could
+                  identify an object type, an object instance, or a partial object
+                  instance."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.4.2.1.3"</span>;
+            }
+
+            <a name="agentxRegRangeSubId.391"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxRegRangeSubId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"agentxRegRangeSubId is used to specify the range.  This is
+                  taken from r.region_subid in the registration PDU.  If the value
+                  of this object is zero, no range is specified.  If it is non-zero,
+                  it identifies the `nth' sub-identifier in r.region for which
+                  this entry's agentxRegUpperBound value is substituted in the
+                  OID for purposes of defining the region's upper bound."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.4.2.1.4"</span>;
+            }
+
+            <a name="agentxRegUpperBound.404"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxRegUpperBound</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"agentxRegUpperBound represents the upper-bound sub-identifier in
+                  a registration.  This is taken from the r.upper_bound in the
+                  registration PDU.  If agentxRegRangeSubid (r.region_subid) is
+                  zero, this value is also zero and is not used to define an upper
+                  bound for this registration."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.4.2.1.5"</span>;
+            }
+
+            <a name="agentxRegPriority.416"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxRegPriority</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The registration priority.  Lower values have higher priority.
+                  This value is taken from r.priority in the register PDU.
+                  Sessions should use the value of 127 for r.priority if a
+                  default value is desired."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.4.2.1.6"</span>;
+            }
+
+            <a name="agentxRegTimeout.427"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxRegTimeout</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..255"</span>;
+               }
+               <span class="yang_kw">units</span> <span class="yang_str">"seconds"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The timeout value, in seconds, for responses to
+                  requests associated with this registered MIB region.
+                  A value of zero(0) indicates the default value (indicated
+                  by by agentxSessionTimeout or agentxDefaultTimeout) is to
+                  be used.  This value is taken from the r.timeout field of
+                  the agentx-Register-PDU."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.4.2.1.7"</span>;
+            }
+
+            <a name="agentxRegInstance.443"/><span class="yang_kw">leaf</span> <span class="yang_id">agentxRegInstance</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TruthValue.100">smiv2:TruthValue</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of agentxRegInstance is `true' for
+                  registrations for which the INSTANCE_REGISTRATION
+                  was set, and is `false' for all other registrations."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.74.1.4.2.1.8"</span>;
+            }
+         }  <span class="yang_cmt">// list agentxRegistrationEntry</span>
+      }  <span class="yang_cmt">// container agentxRegistration</span>
+   }  <span class="yang_cmt">// module AGENTX-MIB</span>
+</pre>
+</div>
+</div>

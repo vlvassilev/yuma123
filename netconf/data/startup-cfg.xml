@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nc:config xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+ <security xmlns="http://netconfcentral.com/ncx/ncx-acm">
+  <accessControl>
+   <profile>
+    <accessControlMode>loose</accessControlMode>
+    <accessDeniedEventEnabled>true</accessDeniedEventEnabled>
+   </profile>
+   <groups>
+    <group>
+     <name>control-staff</name>
+     <role>admin</role>
+     <users>
+      <user>andy</user>
+      <user>fred</user>
+     </users>
+    </group>
+    <group>
+     <name>test-staff</name>
+     <role>guest</role>
+     <users>
+      <user>barney</user>
+     </users>
+    </group>
+   </groups>
+   <rpcRules>
+    <rpcRule>
+     <ruleNumber>1</ruleNumber>
+     <ruleType>permit</ruleType>
+     <groupList>control-staff</groupList>
+     <rpcTarget>
+      <all/>
+     </rpcTarget>
+    </rpcRule>
+    <rpcRule>
+     <ruleNumber>2</ruleNumber>
+     <ruleType>permit</ruleType>
+     <groupList>test-staff</groupList>
+     <rpcTarget>
+      <rpcTypeList>monitor exec</rpcTypeList>
+     </rpcTarget>
+    </rpcRule>
+    <rpcRule>
+     <ruleNumber>99</ruleNumber>
+     <ruleType>deny</ruleType>
+     <groupList>control-staff test-staff</groupList>
+     <rpcTarget>
+      <all/>
+     </rpcTarget>
+    </rpcRule>
+   </rpcRules>
+  </accessControl>
+ </security>
+</nc:config>

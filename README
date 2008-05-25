@@ -23,10 +23,16 @@ Build:
    - ./redo_mysql.sh
    - ./load_newmod.sh newmod.sql
 
-Run WEB server
+Run development WEB server
    - cd ../ncorg
    - ./start-ncorg.sh
      (runs WEBBrick on port 8080)
+
+Run production WEB serverin background:
+  Usually added to end of /etc/rc.local:
+  (cd /path/to/trunk/ncorg; ./start-ncorg.sh prod.cfg&)
+
+TBD: graceful CherryPy shutdown and restart via /etc/rc.d/init.d/
 
 Run NETCONF Agent
   - TBD

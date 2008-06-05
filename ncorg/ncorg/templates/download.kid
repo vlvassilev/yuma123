@@ -12,7 +12,7 @@
   </head>
   <body>
     <div class="download">
-      <h1>Netconf Central Downloads</h1>
+      <h1>Downloads</h1>
       <h2>
 	<a href="${tg.url('/yangdump_manual')}">yangdump</a>
       </h2>
@@ -111,6 +111,27 @@
 	    </tr>
 	  </table>
 	</div>
+      </div>
+      <br/>
+      <div>
+	<h2>Subversion Server Access</h2>
+	<p>
+	  The most current files can be obtained from the
+	  <a href="http://subversion.tigris.org/">Subversion</a>
+	  directory, with the following command:
+	</p>
+	<pre class="code">
+
+     svn checkout http://svn.netconfcentral.com/svn/yangtools
+	</pre>
+	<p>
+	  To retrieve only the latest set of modules from the subversion
+	  server, use the following command:
+	</p>
+	<pre class="code">
+
+     svn checkout http://svn.netconfcentral.com/svn/yangtools/modules
+	</pre>
       </div>
     </div>
   </body>

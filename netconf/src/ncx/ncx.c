@@ -4256,7 +4256,7 @@ status_t
 	    while (*str2 && (*str2 != NCX_STR_END)) {
 		str2++;
 	    }
-	    len = str2-str1;
+	    len = (uint32)(str2-str1);
 	    if (*str2) {
 		str2++;
 	    } else {
@@ -4270,7 +4270,7 @@ status_t
 		   (*str2 != NCX_STR_START)) {
 		str2++;
 	    }
-	    len = str2-str1;
+	    len = (uint32)(str2-str1);
 	}
 
 	/* copy the string just parsed 
@@ -7093,7 +7093,7 @@ status_t
     while (ncx_valid_name_ch(*s)) {
 	s++;
     }
-    *len = s - str;
+    *len = (uint32)(s - str);
     if (*len > NCX_MAX_NLEN) {
 	return ERR_NCX_TOO_BIG;
     } else {

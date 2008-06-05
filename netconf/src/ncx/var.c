@@ -758,7 +758,7 @@ status_t
     /* return the name string */
     *name = str;
     str += *namelen;
-    *len = str - line;
+    *len = (uint32)(str - line);
     return NO_ERR;
 
 }  /* var_check_ref */

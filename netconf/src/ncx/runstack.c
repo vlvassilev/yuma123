@@ -392,7 +392,7 @@ xmlChar *
 
 	se->linenum++;  /* used for error messages */
 
-	len = xml_strlen(start);
+	len = (int)xml_strlen(start);
 	
 	/* get rid of EOLN if present */
 	if (len && start[len-1]=='\n') {

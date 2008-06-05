@@ -590,7 +590,7 @@ static status_t
          * treat this as a request to unset the variable
 	 */
 	var_unset(name, nlen, isglobal);
-	*len = str - line;
+	*len = (uint32)(str - line);
 	return NO_ERR;
     }
 
@@ -634,7 +634,7 @@ static status_t
 	    res = ERR_INTERNAL_MEM;
 	} else {
 	    result_isglobal = isglobal;
-	    *len = str - line;
+	    *len = (uint32)(str - line);
 	    *getrpc = TRUE;
 	}
     } else {
@@ -847,7 +847,7 @@ static xmlChar *
 	}
 
 	/* find end of string */
-	len = xml_strlen(str);
+	len = (int)xml_strlen(str);
 	
 	/* get rid of EOLN if present */
 	if (len && str[len-1]=='\n') {
@@ -949,12 +949,12 @@ static void *
     if (*p == ':') {
 
 	/* use an explicit module name or prefix ion YANG */
-	modlen = p - start;
+	modlen = (uint32)(p - start);
 	q = p+1;
 	while (*q && !xml_isspace(*q)) {
 	    q++;
 	}
-	*len = q - line;
+	*len = (uint32)(q - line);
 
 	oldq = *q;
 	*q = 0;
@@ -965,7 +965,7 @@ static void *
 	defname = p+1;
     } else {
 	/* no module prefix, use default module, if any */
-	*len = p - line;
+	*len = (uint32)(p - line);
 
 	oldp = *p;
 	*p = 0;
@@ -2454,7 +2454,7 @@ static status_t
 
     /* add the P1 through P9 parameters that are present */
     for (num=1; num<=NCXCLI_MAX_RUNPARMS; num++) {
-	buff[1] = '0' + num;
+	buff[1] = (xmlChar)('0' + num);
 	parm = ps_find_parm(ps, buff);
 	if (parm) {
 	    /* store P7 named as ASCII 7 */

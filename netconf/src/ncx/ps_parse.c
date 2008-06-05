@@ -785,8 +785,8 @@ ps_parmset_t *
     /* copy the argv strings into the buffer */
     buffpos = 0;
     for (parmnum=1; parmnum < argc; parmnum++) {
-	buffpos += (int)xml_strcpy((xmlChar *)&buff[buffpos], 
-				   (const xmlChar *)argv[parmnum]);
+	buffpos += xml_strcpy((xmlChar *)&buff[buffpos], 
+			      (const xmlChar *)argv[parmnum]);
 	if (parmnum+1 < argc) {
 	    buff[buffpos++] = ' ';
 	}
@@ -841,7 +841,7 @@ ps_parmset_t *
 		str++;
 	    }
 
-	    parmnamelen = str - parmname;
+	    parmnamelen = (uint32)(str - parmname);
 	    buffpos += parmnamelen;
 
 	    /* check if this parameter name is in the parmset def */
@@ -935,7 +935,7 @@ ps_parmset_t *
 			*str = 0;
 
 			/* skip buffpos past eo-string */
-			buffpos += (str - parmval) + 1;  
+			buffpos += (uint32)((str - parmval) + 1);  
 		    }
 		}
 

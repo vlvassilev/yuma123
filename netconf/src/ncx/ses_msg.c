@@ -517,7 +517,7 @@ status_t
 	    retcnt -= (ssize_t)buffleft;
 	    buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);	    
 	} else {
-	    buff->buffpos += retcnt;
+	    buff->buffpos += (uint32)retcnt;
 	    retcnt = 0;
 	}
     }

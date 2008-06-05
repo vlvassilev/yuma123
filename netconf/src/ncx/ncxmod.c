@@ -149,14 +149,14 @@ static status_t
 	
     pathlen = xml_strlen(path);
     if (pathlen) {
-	pathsep = (path[pathlen-1] == NCXMOD_PSCHAR);
+	pathsep = (uint32)(path[pathlen-1] == NCXMOD_PSCHAR);
     } else {
 	pathsep = 0;
     }
 
     if (path2) {
 	path2len = xml_strlen(path2);
-	path2sep = (path2len && path2[path2len-1]==NCXMOD_PSCHAR);
+	path2sep = (uint32)(path2len && path2[path2len-1]==NCXMOD_PSCHAR);
     } else {
 	path2len = 0;
 	path2sep = 0;
@@ -465,7 +465,7 @@ static boolean
 
     mlen = xml_strlen(modname);
     slen = (modsuffix) ? xml_strlen(modsuffix) : 0;
-    dot = (slen) ? 1 : 0;
+    dot = (uint32)((slen) ? 1 : 0);
 
     /* go through the path list and check each string */
     str = pathlist;

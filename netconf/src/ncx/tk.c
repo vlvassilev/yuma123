@@ -1254,7 +1254,7 @@ static status_t
     }
     if ((str - start) < NCX_MAX_NLEN) {
         /* got a valid identifier fragment */
-        *len = str - start;
+        *len = (uint32)(str - start);
         return NO_ERR;
     } else {
         return ERR_NCX_LEN_EXCEEDED;
@@ -1413,7 +1413,7 @@ static status_t
          * save the module name: bptr to str 
          */
         module = tkc->bptr;
-        modlen = str - tkc->bptr;
+        modlen = (uint32)(str - tkc->bptr);
         item = ++str;
 
         /* str now points at the start of the imported item 

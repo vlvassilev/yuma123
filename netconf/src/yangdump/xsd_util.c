@@ -157,7 +157,7 @@ static xmlChar *
     uint32   len, slen, inlen;
 
     len = inlen = (schemaloc) ? xml_strlen(schemaloc) : 0;
-    slen = (inlen && schemaloc[inlen-1] != '/') ? 1 : 0;
+    slen = (uint32)((inlen && schemaloc[inlen-1] != '/') ? 1 : 0);
     len += slen;
     len += xml_strlen(modname);
     len += 6;    /* 1 backslash, file ext and terminating zero */ 
@@ -1155,7 +1155,7 @@ static xmlChar *
     uint32         len, slen, plen;
 
     slen = (schemaloc) ? xml_strlen(schemaloc) : 0;
-    plen = (slen && schemaloc[slen-1] != '/') ? 1 : 0;
+    plen = (uint32)((slen && schemaloc[slen-1] != '/') ? 1 : 0);
 
     len = 9;  /* newline + 4 spaces + file ext */
     len += slen;    

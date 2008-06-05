@@ -631,8 +631,8 @@ static status_t
 	    buff += cnt;
 	    *buff++ = VAL_EQUAL_CH;
 	    if (strval) {
-		*buff++ = (format==NCX_IFMT_XPATH1) ?
-		    VAL_QUOTE_CH : VAL_DBLQUOTE_CH;
+		*buff++ = (xmlChar)((format==NCX_IFMT_XPATH1) ?
+				    VAL_QUOTE_CH : VAL_DBLQUOTE_CH);
 		/* account for equal, quote-char */
 		total = cnt+2;  
 	    } else {
@@ -640,7 +640,7 @@ static status_t
 	    }
 	    *buff = 0;
 	} else {
-	    total = xml_strlen(val->name) + ((strval) ? 2 : 1);
+	    total = xml_strlen(val->name) + (uint32)((strval) ? 2 : 1);
 	}
     }
 
@@ -1061,8 +1061,8 @@ static status_t
 
 	/* add another path sep char */
 	if (buff) {
-	    *buff++ = (format==NCX_IFMT_C) ? 
-		VAL_INST_SEPCH : VAL_XPATH_SEPCH;
+	    *buff++ = (xmlChar)((format==NCX_IFMT_C) ? 
+				VAL_INST_SEPCH : VAL_XPATH_SEPCH);
 	}
 	cnt++;
     }

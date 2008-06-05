@@ -484,7 +484,7 @@ status_t
     }
 
     /* set the length and malloc flag */
-    cap->cap_mod_len = p - cap->cap_mod;
+    cap->cap_mod_len = (uint32)(p - cap->cap_mod);
     cap->cap_mod_malloc = NULL;
 
     /* check if stopped on a separator char,

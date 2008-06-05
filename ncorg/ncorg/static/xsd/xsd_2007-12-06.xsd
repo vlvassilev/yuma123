@@ -19,7 +19,7 @@
       </documentation>
       <appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/netconfcentral/xsd.yang
+            /home/andy/swdev/trunk/netconf/modules/./netconfcentral/xsd.yang
          </ncx:source>
          <ncx:organization>
             YANG Language Design Team

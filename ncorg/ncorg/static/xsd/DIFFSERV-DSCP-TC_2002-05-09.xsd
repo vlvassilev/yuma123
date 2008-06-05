@@ -41,7 +41,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/DIFFSERV-DSCP-TC.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/DIFFSERV-DSCP-TC.yang
          </ncx:source>
          <ncx:organization>
             IETF Differentiated Services WG

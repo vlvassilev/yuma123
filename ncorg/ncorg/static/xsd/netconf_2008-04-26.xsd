@@ -23,7 +23,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/netconf.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/netconf.yang
          </ncx:source>
          <ncx:contact>
             Translated by Andy Bierman.

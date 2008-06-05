@@ -25,6 +25,8 @@
                         <li><a href="#snmpTargetAddrParams.375">snmpTargetAddrParams</a></li>
                         <li><a href="#snmpTargetAddrStorageType.388">snmpTargetAddrStorageType</a></li>
                         <li><a href="#snmpTargetAddrRowStatus.399">snmpTargetAddrRowStatus</a></li>
+                        <li><a href="#snmpTargetAddrTMask.246">snmpTargetAddrTMask</a></li>
+                        <li><a href="#snmpTargetAddrMMS.284">snmpTargetAddrMMS</a></li>
                      </ul>
                   </li>
                   <li class="daddy"><a href="#snmpTargetParamsEntry.433">snmpTargetParamsEntry</a>

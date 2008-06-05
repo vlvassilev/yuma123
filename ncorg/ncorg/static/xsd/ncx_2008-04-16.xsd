@@ -21,7 +21,7 @@
       </xs:documentation>
       <xs:appinfo>
          <source>
-            /home/andy/swdev/trunk/netconf/modules/netconfcentral/ncx.yang
+            /home/andy/swdev/trunk/netconf/modules/./netconfcentral/ncx.yang
          </source>
          <organization>Netconf Central</organization>
          <contact>

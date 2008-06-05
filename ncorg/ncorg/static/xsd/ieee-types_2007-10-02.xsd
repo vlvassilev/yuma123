@@ -66,7 +66,7 @@
             The bridgeid type represents identifers that uniquely
             identify a bridge.  Its first four hexadecimal digits
             contain a priority value followed by a colon. The
-            remaining characters contain the MAC address used to 
+            remaining characters contain the MAC address used to
             refer to a bridge in a unique fashion (typically, the
             numerically smallest MAC address of all ports on the
             bridge).

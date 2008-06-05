@@ -20,7 +20,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/yang/inet-types.yang
+            /home/andy/swdev/trunk/netconf/modules/./yang/inet-types.yang
          </ncx:source>
          <ncx:organization>
             YANG Language Design Team
@@ -114,8 +114,8 @@
    <xs:simpleType name="flow-label">
       <xs:annotation>
          <xs:documentation>
-            The flow-label type represents flow identifier or 
-            Flow Label in an IPv6 packet header that may be 
+            The flow-label type represents flow identifier or
+            Flow Label in an IPv6 packet header that may be
             used to discriminate traffic flows.
          </xs:documentation>
          <xs:appinfo>
@@ -138,7 +138,7 @@
             The port-number type represents a 16-bit port
             number of an Internet transport layer protocol
             such as UDP, TCP, DCCP or SCTP. Port numbers are
-            assigned by IANA.  A current list of all 
+            assigned by IANA.  A current list of all
             assignments is available from
             &lt;http://www.iana.org/&gt;.
             

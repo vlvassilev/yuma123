@@ -110,7 +110,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 
     <div id="footer">
       <hr />
-      <p>YangTools 0.9.&beta;1, Copyright &#169; 2008, Andy Bierman</p>
+      <p>YangTools 0.9.&beta;2, Copyright &#169; 2008, Andy Bierman</p>
       <p>TurboGears is Copyright &#169; 2007, Kevin Dangoor</p>
       <p>Send comments and bug reports to &lt;support@netconfcentral.com&gt;</p>
     </div>

@@ -10,7 +10,7 @@
 </head>
 <body>
 <h1 align="center">yangdump</h1>
-<h2 align="center">Version 0.9.1</h2>
+<h2 align="center">Version 0.9.2</h2>
 <a href="#NAME">NAME</a><br/>
 <a href="#SYNOPSIS">SYNOPSIS</a><br/>
 <a href="#DESCRIPTION">DESCRIPTION</a><br/>
@@ -65,7 +65,8 @@
 YANG data models. Information about a module or submodule
 can be generated as well. This version of yangdump supports
 the YANG data modeling language defined in
-<b>draft-bjorklund-netconf-yang-02.txt</b>.</p>
+<a href="http://www3.tools.ietf.org/html/draft-ietf-netmod-yang-00">
+<b>draft-ietf-netmod-yang-00.txt</b></a>.</p>
 <!-- INDENTATION -->
 <p>The <b>format</b> parameter is used to select a
 translation output mode. If it is missing, then no
@@ -180,7 +181,8 @@ if this parameter is present.</p>
 <td width="21%"></td>
 <td width="77%">
 <p>YANG or NCX source module name to validate and convert.
-The <b>subtree</b> option cannot be used if this option is
+Multiple instances of this parameter are allowed.
+The <b>subtree</b> option cannot be used if this parameter is
 present.</p>
 </td></tr>
 </table>
@@ -228,7 +230,7 @@ errors.</p>
 <td width="21%"></td>
 <td width="77%">
 <p>Output file name to use. Default is STDOUT if none
-specified and the <b>defname</b> parameter is also
+specified and the <b>defnames</b> parameter is also
 missing.</p>
 <!-- INDENTATION -->
 <p>If this parameter represents an existing directory, then
@@ -328,7 +330,7 @@ and source filespec, then exit.</p>
 <td width="21%"></td>
 <td width="77%">
 <p>Validate the file, write information for the symbols that
-this [sub]module exports, then exit. Report includes the
+the [sub]module exports, then exit. Report includes the
 following info for the specific file, not the entire module,
 if submodules are used:</p>
 <!-- INDENTATION -->
@@ -362,7 +364,7 @@ if submodules are used:</p>
 <td width="21%"></td>
 <td width="77%">
 <p>Validate the file, write the module name, version and
-module source for each file that this [sub]module imports
+module source for each file that the [sub]module imports
 and includes, then exit.</p>
 <!-- INDENTATION -->
 <p>Each dependency type, name, version, and source is listed
@@ -387,7 +389,7 @@ that import or include file was not found.</p>
 <td width="21%"></td>
 <td width="77%">
 <p>Validate the file, write the list of object identifiers,
-that this [sub]module contains, then exit.</p>
+that the [sub]module contains, then exit.</p>
 <!-- INDENTATION -->
 <p>Each accessible object node is listed once, including all
 child nodes. Notifications and RPC methods are considered

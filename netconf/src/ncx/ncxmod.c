@@ -599,7 +599,7 @@ static status_t
 	} else {
 	    res = ERR_FIL_BAD_FILENAME;
 	}
-	return res;
+        return res;	
     } else {
 	buff[pathlen] = 0;
     }
@@ -700,6 +700,8 @@ static status_t
 *   modname == module name to find (no file suffix)
 *   pcb == parser control block in progress
 *   ptyp == parser source type
+*   usepath == TRUE if path should be used directed
+*              FALSE if the path should be appended with the 'modules' dir
 *   done == address of return done flag
 *
 * OUTPUTS:
@@ -716,6 +718,7 @@ static status_t
 		       const xmlChar *modname,
 		       yang_pcb_t *pcb,
 		       yang_parsetype_t ptyp,
+		       boolean usepath,
 		       boolean *done)
 {
     const xmlChar  *path2;
@@ -728,7 +731,7 @@ static status_t
     res = NO_ERR;
     res2 = NO_ERR;
     p = buff;
-    path2 = NCXMOD_DIR;
+    path2 = (usepath) ? NULL : NCXMOD_DIR;
 
     total = xml_strlen(path);
     if (total >= bufflen) {
@@ -866,7 +869,7 @@ static status_t
 	/* copy the next string into the path buffer */
 	xml_strncpy(pathbuff, str, pathlen);
 	res = check_module_path(pathbuff, buff, bufflen,
-				modname, pcb, ptyp, done);
+				modname, pcb, ptyp, TRUE, done);
 	if (*done) {
 	    m__free(pathbuff);
 	    return res;
@@ -1047,13 +1050,13 @@ static status_t
     /* 3) HOME/modules directory */
     if (!done && ncxmod_env_userhome) {
 	res = check_module_path(ncxmod_env_userhome, buff, bufflen,
-				modname, pcb, ptyp, &done);
+				modname, pcb, ptyp, FALSE, &done);
     }
 
     /* 4) YANG_HOME/modules directory */
     if (!done && ncxmod_env_home) {
 	res = check_module_path(ncxmod_env_home, buff, bufflen,
-				modname, pcb, ptyp, &done);
+				modname, pcb, ptyp, FALSE, &done);
     }
 
     /* 5) YANG_INSTALL/modules directory or default install path
@@ -1063,14 +1066,14 @@ static status_t
     if (!done) {
 	if (ncxmod_env_install) {
 	    res = check_module_path(ncxmod_env_install, buff, bufflen,
-				    modname, pcb, ptyp, &done);
+				    modname, pcb, ptyp, FALSE, &done);
 	} else {
 	    res = check_module_path(NCXMOD_DEFAULT_INSTALL, buff, bufflen,
-				    modname, pcb, ptyp, &done);
+				    modname, pcb, ptyp, FALSE, &done);
         }
     }
 
-    if (res != NO_ERR) {
+    if (res != NO_ERR || !done) {
 	res2 = add_failed(modname, pcb, res);
     }
 

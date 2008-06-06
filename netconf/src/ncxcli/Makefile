@@ -24,16 +24,19 @@ PROG=ncxcli
 # Then put the library that contains foo BEFORE the one
 # that contains bar. 
 
-## (LINUX
+ifdef MAC
+# MACODS
+ LIBS =	-lmgr \
+	-lncx \
+	-L/sw/lib -lxml2 -lcurses -lssh2 -ltecla
+else
+# LINUX
 LIBS = 	-lmgr \
 	-lncx \
 	-L/usr/lib -lxml2 -lcurses \
 	-L/usr/local/lib -lssh2 -ltecla
+endif
 
-## MACODS
-# LIBS = 	-lmgr \
-#	-lncx \
-#	-L/sw/lib -lxml2 -lcurses -lssh2 -ltecla
 
 
 

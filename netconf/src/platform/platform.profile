@@ -25,19 +25,20 @@ endif
 
 
 # added /sw/include for MacOSX
-# MAC version
-#CINC=-I. -I../agt -I../agtinst -I../db -I../mgr \
-#    -I../ncx -I../platform \
-#    -I/usr/include -I/usr/include/libxml2 \
-#    -I/usr/include/libxml2/libxml
-#    -I/sw/include
-
+ifdef MAC
+# MACOSX version
+CINC=-I. -I../agt -I../agtinst -I../db -I../mgr \
+    -I../ncx -I../platform \
+    -I/usr/include -I/usr/include/libxml2 \
+    -I/usr/include/libxml2/libxml \
+    -I/sw/include
+else
 # LINUX version
 CINC=-I. -I../agt -I../agtinst -I../db -I../mgr \
     -I../ncx -I../platform \
     -I/usr/include -I/usr/include/libxml2 \
     -I/usr/include/libxml2/libxml
-
+endif
         
 CC=gcc
 LINK=gcc

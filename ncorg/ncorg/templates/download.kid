@@ -47,10 +47,21 @@
 	      <td><b>Filename</b></td>
 	    </tr>
 	    <tr>
+	      <td>2008-06-05</td>
+	      <td>&nbsp;</td>
+	      <td>
+		<a href="${tg.url('/downloads/yangdump/yangdump' +
+			 '-linux_0.9.2.tar.gz')}">
+		  yangdump-linux_0.9.2.tar.gz
+		</a>
+	      </td>
+	    </tr>
+	    <tr>
 	      <td>2008-05-15</td>
 	      <td>&nbsp;</td>
 	      <td>
-		<a href="${tg.url('/downloads/yangdump/yangdump-linux_0.9.1.tar.gz')}">
+		<a href="${tg.url('/downloads/yangdump/yangdump' +
+			 '-linux_0.9.1.tar.gz')}">
 		  yangdump-linux_0.9.1.tar.gz
 		</a>
 	      </td>
@@ -68,6 +79,16 @@
 	      <td><b>Release date</b></td>
 	      <td>&nbsp;</td>
 	      <td><b>Filename</b></td>
+	    </tr>
+	    <tr>
+	      <td>2008-06-05</td>
+	      <td>&nbsp;</td>
+	      <td>
+		<a href="${tg.url('/downloads/yangdump/yangdump' +
+			 '-macosx_0.9.2.tar.gz')}">
+		  yangdump-macosx_0.9.2.tar.gz
+		</a>
+	      </td>
 	    </tr>
 	    <tr>
 	      <td>2008-05-15</td>
@@ -99,6 +120,15 @@
 	      <td><b>Release date</b></td>
 	      <td>&nbsp;</td>
 	      <td><b>Filename</b></td>
+	    </tr>
+	    <tr>
+	      <td>2008-06-05</td>
+	      <td>&nbsp;</td>
+	      <td>
+		<a href="${tg.url('/downloads/modules/modules_0.9.2.tar.gz')}">
+		  modules_0.9.2.tar.gz
+		</a>
+	      </td>
 	    </tr>
 	    <tr>
 	      <td>2008-05-15</td>

@@ -1,0 +1,100 @@
+
+YANGDUMP -- A Compiler for the YANG data modeling language
+===========================================================
+
+Copyright (c) 2008, Andy Bierman
+
+See the file "COPYING" for information on usage and redistribution
+of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+
+This software comprises:
+
+ - a binary linux program called 'yangdump'
+ - documentation pages
+ - a set of freely available YANG modules 
+
+Some of the YANG modules includes with this software were
+generated with the smidump program, available at:
+
+ http://www.ibr.cs.tu-bs.de/projects/libsmi/
+
+WARNING
+=======
+
+This version of yangdump implements the YANG language specification
+as defined in:
+
+http://www.ietf.org/internet-drafts/draft-bjorklund-netconf-yang-02.txt
+
+Future versions of yangdump may not maintain full compatibility with
+this Internet Draft.
+
+IMPORTANT INSTALLATION NOTE
+===========================
+
+  **************************************************************
+  *                                                            *
+  *  This program will not function unless the yangdump.ncx    *
+  *  and ncxtypes.ncx files are available in the module path.  *
+  *  These files are used for CLI and config file processing.  *
+  *                                                            *
+  **************************************************************
+
+MANIFEST
+========
+
+README					this file
+COPYING					the yangdump license terms
+ChangeLog				a summary of changes to each release
+yangdump                                binary executable program
+yangdump.1                              man page for yangdump (groff format)
+yangdump-man.html                       man page for yangdump (HTML format)
+modules.tar.gz                          YANG data models in modules/... 
+
+
+INSTALLATION
+============
+
+ 1) Copy the file 'yangdump' to a directory within your shell's
+    search path for executables, such as /usr/bin or /usr/local/bin.
+    You will need to choose a different location if you do not
+    have root priveleges.
+
+     >> cp yanto /usr/local/bin
+
+ 2) Unzip the modules.tar.gz file
+
+     >>  gunzip modules.tar.gz
+
+ 3) Untar the modules directory somewhere in the module search
+    path for yangdump.  A directory tree called 'modules' will
+    be created.
+
+     >> tar xvf modules.tar <target-dir>
+
+    - The default locations searched by yangdump for modules:
+  
+       -  current directory
+       -  $HOME/modules
+       - /usr/share/yang/modules
+
+   - If the YANG_HOME or YANG_INSTALL environment variables
+     is set, then yangdump will also look for modules there:
+
+       - $YANG_HOME/modules
+       - $YANG_INSTALL/modules
+
+ 4) create a yangdump config file, if desired.
+    The default config file checked by yangdump is:
+
+       - /etc/yangdump.conf
+
+    This default can be overridden with the --config parameter.
+
+ 5) View the man page for more details on usage
+
+   - yangdump-man.html
+
+  OR
+
+  - man ./yangdump.1

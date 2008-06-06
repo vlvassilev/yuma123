@@ -12,7 +12,7 @@ echo ""
 /usr/bin/mysqladmin -uroot -pchewieboy create netconfcentral
 
 echo ""
-echo "Reloading the netconfcentral.org database from netconfcentral.sql..."
+echo "Reloading the netconfcentral.com database from netconfcentral.sql..."
 echo ""
 
 /usr/bin/mysql -uandysql -pkaligirl netconfcentral < ./netconfcentral.sql

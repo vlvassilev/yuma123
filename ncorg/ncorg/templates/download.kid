@@ -27,7 +27,13 @@
             and other formats.
 	  </p>
 	  <p>
-            It is available in binary form for Linux and MacOSX platforms.
+            It is available in binary format for the following platforms:
+	    <ul>
+	      <li>Mac OS X 10.4 (MacBook Pro, Intel)</li>
+	      <li>Fedora Linux fc9 (i386)</li>
+	      <li>Ubuntu Linux 8.04 (i386)  </li>
+	      <li>OpenSUSE 10.3 (i386)</li>
+	    </ul>
 	  </p>
 	  <p><b>
 	    Download the archive file for your computer platform.</b>
@@ -36,7 +42,41 @@
 	  </p>
 	</div>
 	<div class="tabbertab">
-          <h2>Linux</h2>
+          <h2>Mac OS X</h2>
+          <p>
+	    Contains the yangdump binary release for 
+	    Mac OS X (Intel) platforms.
+	  </p>
+	  <table>
+	    <tr>
+	      <td><b>Release date</b></td>
+	      <td>&nbsp;</td>
+	      <td><b>Filename</b></td>
+	    </tr>
+	    <tr>
+	      <td>2008-06-05</td>
+	      <td>&nbsp;</td>
+	      <td>
+		<a href="${tg.url('/downloads/yangdump/yangdump' +
+			 '-macosx_0.9.2.tar.gz')}">
+		  yangdump-macosx_0.9.2.tar.gz
+		</a>
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>2008-05-15</td>
+	      <td>&nbsp;</td>
+	      <td>
+		<a href="${tg.url('/downloads/yangdump/yangdump' +
+			 '-macosx_0.9.1.tar.gz')}">
+		  yangdump-macosx_0.9.1.tar.gz
+		</a>
+	      </td>
+	    </tr>
+	  </table>
+	</div>
+	<div class="tabbertab">
+          <h2>Fedora</h2>
           <p>
 	    Contains the yangdump binary release for Linux x86 platforms.
 	  </p>
@@ -69,10 +109,10 @@
 	  </table>
 	</div>
 	<div class="tabbertab">
-          <h2>MacOSX</h2>
+          <h2>Ubuntu</h2>
           <p>
 	    Contains the yangdump binary release for 
-	    MacOS X (Intel) platforms.
+	    Ubuntu (x386) platforms.
 	  </p>
 	  <table>
 	    <tr>
@@ -81,22 +121,36 @@
 	      <td><b>Filename</b></td>
 	    </tr>
 	    <tr>
-	      <td>2008-06-05</td>
+	      <td>2008-06-10</td>
 	      <td>&nbsp;</td>
 	      <td>
 		<a href="${tg.url('/downloads/yangdump/yangdump' +
-			 '-macosx_0.9.2.tar.gz')}">
-		  yangdump-macosx_0.9.2.tar.gz
+			 '-ubuntu_0.9.2.tar.gz')}">
+		  yangdump-ubuntu_0.9.2.tar.gz
 		</a>
 	      </td>
 	    </tr>
+	  </table>
+	</div>
+	<div class="tabbertab">
+          <h2>OpenSUSE</h2>
+          <p>
+	    Contains the yangdump binary release for 
+	    OpenSUSE (10.3 x386) platforms.
+	  </p>
+	  <table>
 	    <tr>
-	      <td>2008-05-15</td>
+	      <td><b>Release date</b></td>
+	      <td>&nbsp;</td>
+	      <td><b>Filename</b></td>
+	    </tr>
+	    <tr>
+	      <td>2008-06-15</td>
 	      <td>&nbsp;</td>
 	      <td>
 		<a href="${tg.url('/downloads/yangdump/yangdump' +
-			 '-macosx_0.9.1.tar.gz')}">
-		  yangdump-macosx_0.9.1.tar.gz
+			 '-opensuse_0.9.2.tar.gz')}">
+		  yangdump-opensuse_0.9.2.tar.gz
 		</a>
 	      </td>
 	    </tr>

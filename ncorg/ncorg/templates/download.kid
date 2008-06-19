@@ -8,11 +8,11 @@
 	  http-equiv="Content-Type" py:replace="''"/>
     <link media="screen" href="/tg_widgets/turbogears.widgets/tabber/tabber.css"
 	  type="text/css" rel="stylesheet"/>
-    <title>Netconf Central Downloads</title>
+    <title>Netconf Central Free Downloads</title>
   </head>
   <body>
     <div class="download">
-      <h1>Downloads</h1>
+      <h1>Free Downloads</h1>
       <h2>
 	<a href="${tg.url('/yangdump_manual')}">yangdump</a>
       </h2>

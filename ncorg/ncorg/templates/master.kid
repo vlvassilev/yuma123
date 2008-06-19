@@ -32,6 +32,10 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 
 //--><!]]></script>
 
+
+  <meta name="keywords"
+	content="netconf, xml, yang, yangtools, configuration, 
+         router configuration, configuration tools, yangdump, SMIv2"/>
   </head>
   <body py:match="item.tag=='{http://www.w3.org/1999/xhtml}body'" 
 	py:attrs="item.items()">
@@ -55,24 +59,24 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 	<li><a href="/">Home</a></li>
 	<li><a href="">YANG&nbsp;Database</a>
 	  <ul>
-            <li class="daddy"><a href="">List All</a>
+            <li class="daddy"><a href="">List&nbsp;All</a>
 	      <ul>
 		<li><a href="/modulelist">Modules</a></li>
 		<li><a href="/typedeflist">Typedefs</a></li>
 		<li><a href="/groupinglist">Groupings</a></li>
 		<li><a href="/objectlist">Objects</a></li>
-		<li><a href="/rpclist">RPC Methods</a></li>
+		<li><a href="/rpclist">RPC&nbsp;Methods</a></li>
 		<li><a href="/notificationlist">Notifications</a></li>
 		<li><a href="/extensionlist">Extensions</a></li>
 	      </ul>
 	    </li>
-	    <li class="daddy"><a href="">Browse All</a>
+	    <li class="daddy"><a href="">Browse&nbsp;All</a>
 	      <ul>
 		<li><a href="/modulebrowse">Modules</a></li>
 		<li><a href="/typedefbrowse">Typedefs</a></li>
 		<li><a href="/groupingbrowse">Groupings</a></li>
 		<li><a href="/objectbrowse">Objects</a></li>
-		<li><a href="/rpcbrowse">RPC Methods</a></li>
+		<li><a href="/rpcbrowse">RPC&nbsp;Methods</a></li>
 		<li><a href="/notificationbrowse">Notifications</a></li>
 		<li><a href="/extensionbrowse">Extensions</a></li>
 	      </ul>
@@ -82,18 +86,18 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 	</li>
 	<li><a href="">Online&nbsp;Tools</a>
 	  <ul>
-	    <li><a href="/run_yangdump">Run yangdump</a></li>
+	    <li><a href="/run_yangdump">Run&nbsp;yangdump</a></li>
           </ul>
 	</li>
 	<li><a href="">Documentation</a>
 	  <ul>
-	    <li><a href="/database_docs">YANG database</a></li>
-	    <li><a href="/yangdump_manual">yangdump program</a></li>
-	    <li><a href="/netconf_docs">NETCONF protocol</a></li>
-	    <li><a href="/yang_docs">YANG language</a></li>
+	    <li><a href="/database_docs">YANG&nbsp;database</a></li>
+	    <li><a href="/yangdump_manual">yangdump&nbsp;program</a></li>
+	    <li><a href="/netconf_docs">NETCONF&nbsp;protocol</a></li>
+	    <li><a href="/yang_docs">YANG&nbsp;language</a></li>
 	  </ul>
 	</li>
-	<li><a href="">Download</a>
+	<li><a href="">Free&nbsp;Downloads</a>
 	  <ul>
 	    <li><a href="/download">yangdump</a></li>
           </ul>
@@ -110,7 +114,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 
     <div id="footer">
       <hr />
-      <p>YangTools 0.9.&beta;2, Copyright &#169; 2008, Andy Bierman</p>
+      <p>YangTools 0.9.&beta;3, Copyright &#169; 2008, Andy Bierman</p>
       <p>TurboGears is Copyright &#169; 2007, Kevin Dangoor</p>
       <p>Send comments and bug reports to &lt;support@netconfcentral.com&gt;</p>
     </div>

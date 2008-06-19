@@ -492,22 +492,35 @@ div.ncdocs {
   font-size: 10pt;
 }
 
-div.ncdocs h2 {
+div.ncdocs table {
   text-align: left;
+}
+
+div.ncdocs td {
+  padding-left: 4px;
+}
+
+div.ncdocs h2, h3, h4 {
+  text-align: left;
+}
+
+div.ncdocs ol {
+  text-align: left;
+  margin-left: .5in;
 }
 
 div.ncdocs p {
   text-align: left;
   font-size: 100%;
-  margin-left: .4in;
+  margin-left: .3in;
   width: 90%;
 }
 
 div.ncdocs pre {
   text-align: left;
-  font-size: 90%;
-  margin-left: .125in;
-  width: 95%;
+  font-size: 85%;
+  margin-left: .5in;
+  width: 90%;
   border: 1px solid black;
   padding-top: 5px;
   background: #e5e5e5;

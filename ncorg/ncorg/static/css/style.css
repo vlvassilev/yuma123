@@ -56,6 +56,10 @@ div.nchello_home {
   text-align: center;
 }
 
+div.nchello_home h3 {
+  text-align: center;
+}
+		 
 div.download {
   width: 80%;
   font-size: 100%;
@@ -500,7 +504,15 @@ div.ncdocs td {
   padding-left: 4px;
 }
 
-div.ncdocs h2, h3, h4 {
+div.ncdocs h2 {
+  text-align: left;
+}
+
+div.ncdocs h3 {
+  text-align: left;
+}
+
+div.ncdocs h4 {
   text-align: left;
 }
 

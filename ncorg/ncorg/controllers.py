@@ -21,6 +21,15 @@ log = logging.getLogger("ncorg.controllers")
 #
 def copyYangFile(filename, file):
     """Copy a file from the runyang form to the hack workdir"""
+
+    if filename.find('/') != -1:
+        fn = filename.rpartition('/')
+        filename = fn[2]
+    else:
+        if filename.find('\\') != -1:
+            fn = filename.rpartition('\\')
+            filename = fn[2]
+
     targetPath = os.getcwd() + "/ncorg/workdir/" + filename
     try:
         targetFile = open(targetPath, 'w')
@@ -52,6 +61,15 @@ def deleteOldYangFiles():
 #
 def getYangInputFilename(filename):
     """Get a filename for the yangdump input file"""
+
+    if filename.find('/') != -1:
+        fn = filename.rpartition('/')
+        filename = fn[2]
+    else:
+        if filename.find('\\') != -1:
+            fn = filename.rpartition('\\')
+            filename = fn[2]
+    
     targetPath = os.getcwd() + "/ncorg/workdir/" + filename
     return targetPath
 
@@ -63,6 +81,26 @@ def getYangOutputFilename():
     filename = "results"
     targetPath = os.getcwd() + "/ncorg/workdir/" + filename
     return targetPath
+
+
+#
+# generate the correct results output file name to send to yangdump
+#
+def getYangResultFilename(filename):
+    """Get a full URL path for the yangdump results"""
+
+    if filename.find('/') != -1:
+        fn = filename.rpartition('/')
+        filename = fn[2]
+    else:
+        if filename.find('\\') != -1:
+            fn = filename.rpartition('\\')
+            filename = fn[2]
+
+    resultPath = "/yangdumpresults/" + filename + "/results"
+    return resultPath
+
+
 
 #
 # generate the correctwork directory path for the user or session
@@ -769,7 +807,7 @@ class Root(controllers.RootController):
         if result != 0:
             flash(result)
             redirect('/')
-        
+
         result = copyYangFile(srcfile.filename, srcfile.file)
         if result != "":
             flash(result)
@@ -795,8 +833,7 @@ class Root(controllers.RootController):
 
         yang_result = os.system(cmdline)
 
-        # temp until unique filenames and session cleanup figured out
-        newpath = "/yangdumpresults/" + srcfile.filename + "/results"
+        newpath = getYangResultFilename(srcfile.filename)
         redirect(newpath)
 
 

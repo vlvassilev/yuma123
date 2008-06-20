@@ -300,7 +300,7 @@
 		all at once.
 	      </p>
 	      <p>
-		<b>Unlike the &lt;running&gt; database, any changes
+		<b>Unlike the &lt;running/&gt; database, any changes
 		made to the &lt;candidate/&gt; database do not
 		take effect right away within the network device.</b>
 	      </p>
@@ -308,7 +308,7 @@
 		When ready, the manager can use the &lt;commit&gt;
 		operation to activate the changes embodied
 		in the &lt;candidate/&gt; database, and make
-		them part of the &lt;running&gt; configuration.
+		them part of the &lt;running/&gt; configuration.
 		This also clears out the &lt;candidate/&gt;
 		database and leaves it ready for the next use.
 	      </p>
@@ -317,7 +317,7 @@
 		the manager should use the &lt;discard-changes&gt;
 		operation to remove any unwanted changes, if
 		the &lt;commit&gt; operation is not used.
-		This will clean out the &lt;candidate&gt; database without
+		This will clean out the &lt;candidate/&gt; database without
 		activating any changes that it may contain, and
 		prevent the next manager using this global database
 		from making unintended changes.
@@ -326,7 +326,7 @@
 		Agent platforms which support 
 		the <b>:candidate</b> capability
 		usually do not also support the <b>:writable-running</b>
-		capability, since mixing direct edits to &lt;running&gt;
+		capability, since mixing direct edits to &lt;running/&gt;
 		would defeat the purpose of using this scratchpad
 		database to collect and validate changes before
 		applying them. 

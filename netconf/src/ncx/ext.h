@@ -72,6 +72,7 @@ typedef struct ext_template_t_ {
     xmlns_id_t       nsid;
     ncx_status_t     status;
     boolean          argel;
+    boolean          used;                  /* needed by yangdiff */
     dlq_hdr_t        appinfoQ;              /* Q of ncx_appinfo_t */
 } ext_template_t;
 

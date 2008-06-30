@@ -210,9 +210,9 @@ static void
 * FUNCTION process_cli_input
 *
 * Process the param line parameters against the hardwired
-* parmset for the netconfd program
+* parmset for the yangdump program
 *
-* get all the parms and store them in the ncx_cvtparms struct
+* get all the parms and store them in the cvtparms struct
 *
 * INPUTS:
 *    argc == argument count
@@ -1174,10 +1174,11 @@ static status_t
 	}
 	return NO_ERR;
     } else if (res != NO_ERR) {
-	if (pcb->top && (pcb->top->errors || pcb->top->warnings)) {
-	    log_write("\n*** %s: %u Errors, %u Warnings\n", 
-		      pcb->top->sourcefn,
-		      pcb->top->errors, pcb->top->warnings);
+	if (pcb && pcb->top && 
+	    (LOGINFO || (pcb->top->errors || pcb->top->warnings))) {
+	    log_info("\n*** %s: %u Errors, %u Warnings\n", 
+		     pcb->top->sourcefn,
+		     pcb->top->errors, pcb->top->warnings);
 	} else {
 	    log_write("\n");
 	}
@@ -1185,7 +1186,7 @@ static status_t
 	    yang_free_pcb(pcb);
 	}
 	return res;
-    } else if (LOGINFO && pcb->top) {
+    } else if (LOGINFO && pcb && pcb->top) {
 	log_info("\n*** %s: %u Errors, %u Warnings\n", 
 		 pcb->top->sourcefn,
 		 pcb->top->errors, pcb->top->warnings);

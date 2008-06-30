@@ -1780,8 +1780,8 @@ static status_t
 	}
     }
 
-    /* check if this module is already loaded */
-    if (mod->ismod && mod->name && 
+    /* check if this module is already loaded, except in diff mode */
+    if (mod->ismod && mod->name && !pcb->diffmode &&
 	def_reg_find_module(mod->name)) {
 	switch (ptyp) {
 	case YANG_PT_TOP:
@@ -1927,14 +1927,16 @@ static status_t
 	    mod->allimpQ = NULL;
 
 	    if (!loaded) {
-		res = ncx_add_to_registry(mod);
-		if (res != NO_ERR) {
-		    retres = res;
-		} else {
-		    /* if mod==top, and top is a submodule, then 
-		     * yang_free_pcb will delete the submodule later
-		     */
-		    *wasadded = TRUE;
+		if (!pcb->diffmode) {
+		    res = ncx_add_to_registry(mod);
+		    if (res != NO_ERR) {
+			retres = res;
+		    } else {
+			/* if mod==top, and top is a submodule, then 
+			 * yang_free_pcb will delete the submodule later
+			 */
+			*wasadded = TRUE;
+		    }
 		}
 	    }
 	} else {
@@ -2103,10 +2105,10 @@ status_t
 	    if (!wasadd) {
 		ncx_free_module(mod);
 	    }
-	} else if (!wasadd) {
+	} else if (!wasadd && !pcb->diffmode) {
 	    if (mod->ismod) {
 		if (pcb->top == mod) {
-		    /* swap with the real module alread y done */
+		    /* swap with the real module already done */
 		    pcb->top = ncx_find_module(mod->name);
 		}
 	    } else if (!pcb->with_submods) {

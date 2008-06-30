@@ -175,6 +175,16 @@ extern yang_pcb_t *
 			    boolean with_submods,
 			    status_t  *res);
 
+
+
+extern yang_pcb_t *
+    ncxmod_load_module_diff (const xmlChar *modname,
+			     boolean subtree_mode,
+			     boolean with_submods,
+			     const xmlChar *modpath,
+			     status_t  *res);
+
+
 #ifdef NOT_YET
 extern status_t 
     ncxmod_unload_module (const xmlChar *modname);

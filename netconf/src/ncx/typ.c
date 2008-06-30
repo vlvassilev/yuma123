@@ -3604,7 +3604,6 @@ const typ_enum_t *
 }  /* typ_first_enumdef */
 
 
-
 /********************************************************************
 * FUNCTION typ_first_enumdef2
 *
@@ -3630,7 +3629,7 @@ typ_enum_t *
 
 
 /********************************************************************
-* FUNCTION typ_first_enumdef2
+* FUNCTION typ_first_con_enumdef
 *
 * Get the first enum def struct
 *
@@ -3662,6 +3661,41 @@ const typ_enum_t *
 	dlq_firstEntry(&typdef->def.simple.valQ);
 
 }  /* typ_first_con_enumdef */
+
+/********************************************************************
+* FUNCTION typ_find_enumdef
+*
+* Get the specified enum def struct
+*
+* INPUTS:
+*    ebQ == enum/bits Q to check
+*    name == name of the enum to find
+* RETURNS:
+*   pointer to the specified enum def of NULL if none
+*********************************************************************/
+typ_enum_t *
+    typ_find_enumdef (dlq_hdr_t *ebQ,
+		      const xmlChar *name)
+{
+    typ_enum_t *en;
+
+#ifdef DEBUG
+    if (!ebQ || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (en = (typ_enum_t *)dlq_firstEntry(ebQ);
+	 en != NULL;
+	 en = (typ_enum_t *)dlq_nextEntry(en)) {
+	if (!xml_strcmp(en->name, name)) {
+	    return en;
+	}
+    }
+    return NULL;
+    
+}  /* typ_find_enumdef */
 
 
 /********************************************************************

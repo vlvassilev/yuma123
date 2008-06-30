@@ -185,20 +185,18 @@ ncx-module yangdump {
             search path in order for this program to function:
  
               * yangdump.ncx (this file)
-                default: /usr/share/yang/modules/apps/yangdump.ncx
+                default locations: 
+                   ~/modules/netconfcentral/yangdump.ncx
+                   /usr/share/yang/modules/netconfcentral/yangdump.ncx
+
 
               * ncxtypes.ncx
-                default: /usr/share/yang/modules/base/ncxtypes.ncx
-
-            The following data files must be present in the data file
-            search path in order for HTML translation to function properly:
- 
-              * yangdump-css-contents.txt
-                default: /usr/share/yang/data/yangdump-css-contents.txt
-
+                default locations: 
+                   ~/modules/netconfcentral/ncxtypes.ncx
+                   /usr/share/yang/modules/netconfcentral/ncxtypes.ncx
 
             This version of yangdump supports the version of YANG
-            defined in draft-bjorklund-netconf-yang-02.txt.
+            defined in draft-ietf-netmod-yang-00.txt.
 
         BUGS
            - keyref Xpath expressions are not validated

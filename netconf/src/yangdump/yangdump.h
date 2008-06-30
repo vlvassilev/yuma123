@@ -8,7 +8,7 @@
 *								    *
 *********************************************************************
 
-  Exportsd yangdump.ncx conversion CLI parameter struct
+  Exports yangdump.ncx conversion CLI parameter struct
  
 *********************************************************************
 *								    *
@@ -37,7 +37,7 @@ date	     init     comment
 *			 C O N S T A N T S			    *
 *								    *
 *********************************************************************/
-#define YANGDUMP_PROGVER    (const xmlChar *)"0.9.2"
+#define YANGDUMP_PROGVER    (const xmlChar *)"0.9.3"
 
 #define PROGNAME            "yangdump"
 

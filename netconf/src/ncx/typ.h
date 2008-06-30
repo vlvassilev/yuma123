@@ -67,6 +67,7 @@ date	     init     comment
 /* typ_enum_t flags field */
 #define TYP_FL_ESET      bit0         /* value explicitly set */
 #define TYP_FL_ISBITS    bit1         /* enum really used in bits */
+#define TYP_FL_SEEN      bit2         /* used by yangdiff */
 
 /* typ_sval_t flags field */
 #define TYP_FL_USTRING   bit0         /* value is ustring, not string */
@@ -355,6 +356,7 @@ typedef struct typ_unionnode_t_ {
     dlq_hdr_t     qhdr;
     typ_template_t *typ;      /* not malloced, just back-ptr */
     typ_def_t      *typdef;   /* malloced for unnamed inline type */
+    boolean         seen;     /* needed for yangdiff */
 } typ_unionnode_t;
 
 
@@ -741,11 +743,16 @@ extern boolean
 extern const typ_enum_t *
     typ_first_enumdef (const typ_def_t *typdef);
 
+
 extern typ_enum_t *
     typ_first_enumdef2 (typ_def_t *typdef);
 
 extern const typ_enum_t *
     typ_first_con_enumdef (const typ_def_t *typdef);
+
+extern typ_enum_t *
+    typ_find_enumdef (dlq_hdr_t *ebQ,
+		      const xmlChar *name);
 
 extern uint32
     typ_enumdef_count (const typ_def_t *typdef);

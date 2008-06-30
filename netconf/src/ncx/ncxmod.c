@@ -1454,6 +1454,62 @@ yang_pcb_t *
 
 
 /********************************************************************
+* FUNCTION ncxmod_load_module_diff
+*
+* Determine the location of the specified module
+* and then load it into the system, if not already loaded
+* Return the PCB instead of deleting it
+* !!Do not add definitions to the registry!!
+*
+* INPUTS:
+*   modname == module name with no path prefix or file extension
+*   subtree_mode == TRUE if in a subtree loop
+*                == FALSE if processing one module in yangdump
+*   with_submods == TRUE if YANG_PT_TOP mode should skip submodules
+*                == FALSE if top-level mode skip process sub-modules 
+*   modpath == module path to override the modpath CLI var or
+*              the YANG_MODPATH env var
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   pointer to malloced parser control block, or NULL of none
+*********************************************************************/
+yang_pcb_t *
+    ncxmod_load_module_diff (const xmlChar *modname,
+			     boolean subtree_mode,
+			     boolean with_submods,
+			     const xmlChar *modpath,
+			     status_t *res)
+{
+
+    yang_pcb_t *pcb;
+
+#ifdef DEBUG
+    if (!modname || !res) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    pcb = yang_new_pcb();
+    if (!pcb) {
+	*res = ERR_INTERNAL_MEM;
+    } else {
+	pcb->subtree_mode = subtree_mode;
+	pcb->with_submods = with_submods;
+	pcb->diffmode = TRUE;
+	*res = load_module(modname, pcb, YANG_PT_TOP);
+    }
+
+    return pcb;
+
+}  /* ncxmod_load_module_xsd */
+
+
+/********************************************************************
 * FUNCTION ncxmod_find_data_file
 *
 * Determine the location of the specified data file

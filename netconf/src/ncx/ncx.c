@@ -6560,10 +6560,12 @@ void
 
     iserr = (res <= ERR_LAST_USR_ERR) ? TRUE : FALSE;
 
-    if (iserr) {
-	mod->errors++;
-    } else {
-	mod->warnings++;
+    if (mod) {
+	if (iserr) {
+	    mod->errors++;
+	} else {
+	    mod->warnings++;
+	}
     }
 
     if (iserr) {

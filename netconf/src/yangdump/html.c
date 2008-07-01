@@ -140,6 +140,21 @@ date         init     comment
 *********************************************************************/
 
 static void
+    write_typedefs (ses_cb_t *scb,
+		    const ncx_module_t *mod,
+		    const yangdump_cvtparms_t *cp,
+		    const dlq_hdr_t *typedefQ,
+		    int32 startindent);
+
+
+static void
+    write_groupings (ses_cb_t *scb,
+		     const ncx_module_t *mod,
+		     const yangdump_cvtparms_t *cp,
+		     const dlq_hdr_t *groupingQ,
+		     int32 startindent);
+
+static void
     write_type_clause (ses_cb_t *scb,
 		       const ncx_module_t *mod,
 		       const yangdump_cvtparms_t *cp,
@@ -1154,6 +1169,74 @@ static void
 
 
 /********************************************************************
+* FUNCTION write_typedef
+* 
+* Generate the HTML for 1 typedef
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parameters to use
+*   typ == typ_template_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_typedef (ses_cb_t *scb,
+		   const ncx_module_t *mod,
+		   const yangdump_cvtparms_t *cp,
+		   const typ_template_t *typ,
+		   int32 startindent)
+{
+    const xmlChar           *submod;
+    int32                    indent;
+
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+    indent = startindent + ses_indent_count(scb);
+
+    write_href_id(scb, submod, YANG_K_TYPEDEF, 
+		  typ->name, startindent, typ->linenum, FALSE);
+
+    /* type field */
+    write_type_clause(scb, mod, cp, &typ->typdef, indent);
+
+    /* units field */
+    if (typ->units) {
+	write_simple_str(scb, YANG_K_UNITS, 
+			 typ->units, indent, 2, TRUE);
+    }
+
+    /* default field */
+    if (typ->defval) {
+	write_simple_str(scb, YANG_K_DEFAULT, 
+			 typ->defval, indent, 2, TRUE);
+    }
+
+    /* status field */
+    write_status(scb, typ->status, indent);
+
+    /* description field */
+    if (typ->descr) {
+	write_simple_str(scb, YANG_K_DESCRIPTION, 
+			 typ->descr, indent, 2, TRUE);
+    }
+
+    /* reference field */
+    if (typ->ref) {
+	write_simple_str(scb, YANG_K_REFERENCE, 
+			 typ->ref, indent, 2, TRUE);
+    }
+
+    /* appinfoQ */
+    write_appinfoQ(scb, mod, cp, &typ->appinfoQ, indent);
+
+    /* end typedef clause */
+    ses_putstr_indent(scb, END_SEC, startindent);
+
+}  /* write_typedef */
+
+
+/********************************************************************
 * FUNCTION write_typedefs
 * 
 * Generate the HTML for the specified typedefQ
@@ -1174,15 +1257,10 @@ static void
 		    int32 startindent)
 {
     const typ_template_t    *typ;
-    const xmlChar           *submod;
-    int32                    indent;
 
     if (dlq_empty(typedefQ)) {
 	return;
     }
-
-    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
-    indent = startindent + ses_indent_count(scb);
 
     if (typedefQ == &mod->typeQ) {
 	write_banner_cmt(scb, mod, cp,
@@ -1193,47 +1271,81 @@ static void
 	 typ != NULL;
 	 typ = (const typ_template_t *)dlq_nextEntry(typ)) {
 
-	write_href_id(scb, submod, YANG_K_TYPEDEF, 
-		      typ->name, startindent, typ->linenum, FALSE);
-
-	/* type field */
-	write_type_clause(scb, mod, cp, &typ->typdef, indent);
-
-	/* units field */
-	if (typ->units) {
-	    write_simple_str(scb, YANG_K_UNITS, 
-			     typ->units, indent, 2, TRUE);
-	}
-
-	/* default field */
-	if (typ->defval) {
-	    write_simple_str(scb, YANG_K_DEFAULT, 
-			     typ->defval, indent, 2, TRUE);
-	}
-
-	/* status field */
-	write_status(scb, typ->status, indent);
-
-	/* description field */
-	if (typ->descr) {
-	    write_simple_str(scb, YANG_K_DESCRIPTION, 
-			     typ->descr, indent, 2, TRUE);
-	}
-
-	/* reference field */
-	if (typ->ref) {
-	    write_simple_str(scb, YANG_K_REFERENCE, 
-			     typ->ref, indent, 2, TRUE);
-	}
-
-	/* appinfoQ */
-	write_appinfoQ(scb, mod, cp, &typ->appinfoQ, indent);
-
-	/* end typedef clause */
-	ses_putstr_indent(scb, END_SEC, startindent);
+	write_typedef(scb, mod, cp, typ, startindent);
     }
 
 }  /* write_typedefs */
+
+
+/********************************************************************
+* FUNCTION write_grouping
+* 
+* Generate the HTML for 1 grouping
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parameters to use
+*   grp == grp_template_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_grouping (ses_cb_t *scb,
+		    const ncx_module_t *mod,
+		    const yangdump_cvtparms_t *cp,
+		    const grp_template_t *grp,
+		    int32 startindent)
+{
+    const xmlChar           *submod;
+    int32                    indent;
+    boolean                  cooked;
+
+    cooked = (strcmp(cp->objview, OBJVIEW_COOKED)) ? FALSE : TRUE;
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+	
+    indent = startindent + ses_indent_count(scb);
+
+    if (cooked && !grp_has_typedefs(grp)) {
+	return;
+    }
+	
+    write_href_id(scb, submod, YANG_K_GROUPING, 
+		  grp->name, startindent, grp->linenum, FALSE);
+
+    /* status field */
+    write_status(scb, grp->status, indent);
+
+    /* description field */
+    if (grp->descr) {
+	write_simple_str(scb, YANG_K_DESCRIPTION, 
+			 grp->descr, indent, 2, TRUE);
+    }
+
+    /* reference field */
+    if (grp->ref) {
+	write_simple_str(scb, YANG_K_REFERENCE, 
+			 grp->ref, indent, 2, TRUE);
+    }
+
+    write_typedefs(scb, mod, cp, &grp->typedefQ, indent);
+
+    write_groupings(scb, mod, cp, &grp->groupingQ, indent);
+
+    if (!cooked) {
+	write_objects(scb, mod, cp, &grp->datadefQ, indent);
+    }
+
+    /* appinfoQ */
+    write_appinfoQ(scb, mod, cp, &grp->appinfoQ, indent);
+
+    /* end grouping clause */
+    ses_putstr_indent(scb, END_SEC, startindent);
+
+    /* end grouping comment */
+    write_endsec_cmt(scb, YANG_K_GROUPING, grp->name);
+
+}  /* write_grouping */
 
 
 /********************************************************************
@@ -1258,7 +1370,6 @@ static void
 {
     const grp_template_t    *grp;
     const xmlChar           *submod;
-    int32                    indent;
     boolean                  needed, cooked;
 
     if (dlq_empty(groupingQ)) {
@@ -1290,53 +1401,690 @@ static void
 			 (const xmlChar *)"groupings", startindent);
     }
 
-    indent = startindent + ses_indent_count(scb);
-
     for (grp = (const grp_template_t *)dlq_firstEntry(groupingQ);
 	 grp != NULL;
 	 grp = (const grp_template_t *)dlq_nextEntry(grp)) {
 
-	if (cooked && !grp_has_typedefs(grp)) {
-	    continue;
-	}
-	
-	write_href_id(scb, submod, YANG_K_GROUPING, 
-		      grp->name, startindent, grp->linenum, FALSE);
-
-	/* status field */
-	write_status(scb, grp->status, indent);
-
-	/* description field */
-	if (grp->descr) {
-	    write_simple_str(scb, YANG_K_DESCRIPTION, 
-			     grp->descr, indent, 2, TRUE);
-	}
-
-	/* reference field */
-	if (grp->ref) {
-	    write_simple_str(scb, YANG_K_REFERENCE, 
-			     grp->ref, indent, 2, TRUE);
-	}
-
-	write_typedefs(scb, mod, cp, &grp->typedefQ, indent);
-
-	write_groupings(scb, mod, cp, &grp->groupingQ, indent);
-
-	if (!cooked) {
-	    write_objects(scb, mod, cp, &grp->datadefQ, indent);
-	}
-
-	/* appinfoQ */
-	write_appinfoQ(scb, mod, cp, &grp->appinfoQ, indent);
-
-	/* end grouping clause */
-	ses_putstr_indent(scb, END_SEC, startindent);
-
-	/* end grouping comment */
-	write_endsec_cmt(scb, YANG_K_GROUPING, grp->name);
+	write_grouping(scb, mod, cp, grp, startindent);
     }
 
 }  /* write_groupings */
+
+
+/********************************************************************
+* FUNCTION write_object
+* 
+* Generate the HTML for the 1 datadef
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parameters to use
+*   obj == obj_template_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_object (ses_cb_t *scb,
+		  const ncx_module_t *mod,
+		  const yangdump_cvtparms_t *cp,
+		  const obj_template_t *obj,
+		  int32 startindent)
+{
+    const obj_container_t   *con;
+    const obj_leaf_t        *leaf;
+    const obj_leaflist_t    *leaflist;
+    const obj_list_t        *list;
+    const obj_choice_t      *choic;
+    const obj_case_t        *cas;
+    const obj_uses_t        *uses;
+    const obj_augment_t     *aug;
+    const obj_rpc_t         *rpc;
+    const obj_rpcio_t       *rpcio;
+    const obj_notif_t       *notif;
+    const obj_key_t         *key, *nextkey;
+    const obj_unique_t      *uni;
+    const obj_unique_comp_t *unicomp, *nextunicomp;
+    const xmlChar           *fname, *fversion, *submod;
+    int32                    indent;
+    char                     buff[NCX_MAX_NUMLEN];
+    boolean                  notrefined, isanyxml, isempty;
+
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+
+    indent = startindent + ses_indent_count(scb);
+
+    if (obj_is_cloned(obj) && !strcmp(cp->objview, OBJVIEW_RAW)) {
+	/* skip cloned objects in 'raw' object view mode */
+	return;
+    }
+
+    notrefined = !obj_is_refine(obj);
+    isempty = obj_is_empty(obj);
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+	con = obj->def.container;
+	write_href_id(scb, submod, YANG_K_CONTAINER, con->name,
+		      startindent, obj->linenum, isempty);
+	if (isempty) {
+	    return;
+	}
+
+	/* 0 or more must-stmts */
+	write_musts(scb, &con->mustQ, indent);
+
+	/* presence field */
+	if (con->presence) {
+	    write_simple_str(scb, YANG_K_PRESENCE, 
+			     con->presence, indent, 2, TRUE);
+	}
+
+	/* config field, only if actually set (no default) */
+	if (con->confset) {
+	    write_simple_str(scb, YANG_K_CONFIG, 
+			     (con->config) ? NCX_EL_TRUE : NCX_EL_FALSE,
+			     indent, 2, TRUE);
+	}
+	    
+	/* status field */
+	if (notrefined) {
+	    write_status(scb, con->status, indent);
+	}
+
+	/* description field */
+	if (con->descr) {
+	    write_simple_str(scb, YANG_K_DESCRIPTION, 
+			     con->descr, indent, 2, TRUE);
+	}
+	    
+	/* reference field */
+	if (con->ref) {
+	    write_simple_str(scb, YANG_K_REFERENCE, 
+			     con->ref, indent, 2, TRUE);
+	}
+
+	write_appinfoQ(scb, mod, cp, &con->appinfoQ, indent);
+
+	if (notrefined) {
+	    write_typedefs(scb, mod, cp, con->typedefQ, indent);
+	    write_groupings(scb, mod, cp, con->groupingQ, indent);
+	}
+
+	write_objects(scb, mod, cp, con->datadefQ, indent);
+
+	/* end object definition clause */
+	ses_putstr_indent(scb, END_SEC, startindent);
+
+	/* end container comment */
+	write_endsec_cmt(scb, YANG_K_CONTAINER, con->name);
+	break;
+    case OBJ_TYP_LEAF:
+	leaf = obj->def.leaf;
+	isanyxml = (typ_get_basetype(leaf->typdef) == NCX_BT_ANY) ?
+	    TRUE : FALSE;
+	if (isanyxml) {
+	    write_href_id(scb, submod, YANG_K_ANYXML, leaf->name,
+			  startindent, obj->linenum, isempty);
+	    if (isempty) {
+		return;
+	    }
+	} else {
+	    write_href_id(scb, submod, YANG_K_LEAF, leaf->name,
+			  startindent, obj->linenum, isempty);
+	    if (isempty) {
+		return;
+	    }
+
+	    /* type field */
+	    if (notrefined) {
+		write_type_clause(scb, mod, cp, leaf->typdef, indent);
+	    }
+
+	    /* units clause */
+	    if (notrefined && leaf->units) {
+		write_simple_str(scb, YANG_K_UNITS, leaf->units,
+				 indent, 2, TRUE);
+	    }
+
+	    /* 0 or more must-stmts */
+	    write_musts(scb, &leaf->mustQ, indent);
+
+	    /* default field */
+	    if (leaf->defval) {
+		write_simple_str(scb, YANG_K_DEFAULT, 
+				 leaf->defval, indent, 2, TRUE);
+	    }
+	}
+
+	/* config field, only if actually set (no default) */
+	if (leaf->confset) {
+	    write_simple_str(scb, YANG_K_CONFIG, 
+			     (leaf->config) ? 
+			     NCX_EL_TRUE : NCX_EL_FALSE,
+			     indent, 2, TRUE);
+	}
+
+	/* mandatory field, only if actually set (no default) */
+	if (leaf->mandset) {
+	    write_simple_str(scb, YANG_K_MANDATORY, 
+			     (leaf->mandatory) ? 
+			     NCX_EL_TRUE : NCX_EL_FALSE,
+			     indent, 2, TRUE);
+	}
+
+	/* status field */
+	if (notrefined) {
+	    write_status(scb, leaf->status, indent);
+	}
+
+	/* description field */
+	if (leaf->descr) {
+	    write_simple_str(scb, YANG_K_DESCRIPTION, 
+			     leaf->descr, indent, 2, TRUE);
+	}
+
+	/* reference field */
+	if (leaf->ref) {
+	    write_simple_str(scb, YANG_K_REFERENCE, 
+			     leaf->ref, indent, 2, TRUE);
+	}
+
+	write_appinfoQ(scb, mod, cp, &leaf->appinfoQ, indent);
+
+	/* end object definition clause */
+	ses_putstr_indent(scb, END_SEC, startindent);
+	break;
+    case OBJ_TYP_LEAF_LIST:
+	leaflist = obj->def.leaflist;
+	write_href_id(scb, submod, YANG_K_LEAF_LIST, leaflist->name,
+		      startindent, obj->linenum, isempty);
+	if (isempty) {
+	    return;
+	}
+
+	/* type field */
+	if (notrefined) {
+	    write_type_clause(scb, mod, cp, leaflist->typdef, indent);
+	}
+
+	/* units clause */
+	if (notrefined && leaflist->units) {
+	    write_simple_str(scb, YANG_K_UNITS, leaflist->units,
+			     indent, 2, TRUE);
+	}
+
+	/* 0 or more must-stmts */
+	write_musts(scb, &leaflist->mustQ, indent);
+
+	/* config field, only if actually set (no default) */
+	if (leaflist->confset) {
+	    write_simple_str(scb, YANG_K_CONFIG, 
+			     (leaflist->config) ? 
+			     NCX_EL_TRUE : NCX_EL_FALSE,
+			     indent, 2, TRUE);
+	}
+
+	/*  min-elements */
+	if (leaflist->minset && leaflist->minelems) {
+	    sprintf(buff, "%u", leaflist->minelems);
+	    write_simple_str(scb, YANG_K_MIN_ELEMENTS, 
+			     (const xmlChar *)buff,
+			     indent, 2, TRUE);
+	}
+
+	/*  max-elements */
+	if (leaflist->maxset && leaflist->maxelems) {
+	    sprintf(buff, "%u", leaflist->maxelems);
+	    write_simple_str(scb, YANG_K_MAX_ELEMENTS, 
+			     (const xmlChar *)buff,
+			     indent, 2, TRUE);
+	}
+
+	/* ordered-by field */
+	if (notrefined) {
+	    write_simple_str(scb, YANG_K_ORDERED_BY, 
+			     (leaflist->ordersys) ? 
+			     YANG_K_SYSTEM : YANG_K_USER,
+			     indent, 2, TRUE);
+	}
+
+	/* status field */
+	if (notrefined) {
+	    write_status(scb, leaflist->status, indent);
+	}
+
+	/* description field */
+	if (leaflist->descr) {
+	    write_simple_str(scb, YANG_K_DESCRIPTION, 
+			     leaflist->descr, indent, 2, TRUE);
+	}
+
+	/* reference field */
+	if (leaflist->ref) {
+	    write_simple_str(scb, YANG_K_REFERENCE, 
+			     leaflist->ref, indent, 2, TRUE);
+	}
+
+	write_appinfoQ(scb, mod, cp, &leaflist->appinfoQ, indent);
+
+	/* end object definition clause */
+	ses_putstr_indent(scb, END_SEC, startindent);
+	break;
+    case OBJ_TYP_LIST:
+	list = obj->def.list;
+	write_href_id(scb, submod, YANG_K_LIST, list->name,
+		      startindent, obj->linenum, isempty);
+	if (isempty) {
+	    return;
+	}
+	/* 0 or more must-stmts */
+	write_musts(scb, &list->mustQ, indent);
+
+	/* key field, manual generation to make links */
+	if (notrefined && !dlq_empty(list->keyQ)) {
+	    ses_indent(scb, indent);
+	    write_kw(scb, YANG_K_KEY);
+	    ses_putstr(scb, (const xmlChar *)" \"");
+
+	    for (key = (const obj_key_t *)dlq_firstEntry(list->keyQ);
+		 key != NULL; key = nextkey) {
+		nextkey = (const obj_key_t *)dlq_nextEntry(key);
+		write_a(scb, cp, NULL, NULL, submod, NULL,
+			obj_get_name(key->keyobj),
+			key->keyobj->linenum);
+		if (nextkey) {
+		    ses_putstr(scb, (const xmlChar *)", ");
+		}
+	    }
+	    ses_putstr(scb, (const xmlChar *)"\";");
+	}
+
+	/* unique fields, manual generation to make links */
+	if (notrefined && !dlq_empty(list->uniqueQ)) {
+	    for (uni = (const obj_unique_t *)
+		     dlq_firstEntry(list->uniqueQ);
+		 uni != NULL;
+		 uni = (const obj_unique_t *)dlq_nextEntry(uni)) {
+
+		ses_indent(scb, indent);
+		write_kw(scb, YANG_K_UNIQUE);
+		ses_putstr(scb, (const xmlChar *)" \"");
+
+		for (unicomp = (const obj_unique_comp_t *)
+			 dlq_firstEntry(&uni->compQ);
+		     unicomp != NULL; unicomp = nextunicomp) {
+		    nextunicomp = (const obj_unique_comp_t *)
+			dlq_nextEntry(unicomp);
+		    write_a2(scb, cp, NULL, NULL, submod,
+			     obj_get_name(unicomp->unobj),
+			     unicomp->unobj->linenum,
+			     unicomp->xpath);
+		    if (nextunicomp) {
+			ses_putstr(scb, (const xmlChar *)", ");
+		    }
+		}
+		ses_putstr(scb, (const xmlChar *)"\";");
+	    }
+	}
+
+	/* config field, only if actually set (no default) */
+	if (list->confset) {
+	    write_simple_str(scb, YANG_K_CONFIG, 
+			     (list->config) ? 
+			     NCX_EL_TRUE : NCX_EL_FALSE,
+			     indent, 2, TRUE);
+	}
+
+	/*  min-elements */
+	if (list->minset && list->minelems) {
+	    sprintf(buff, "%u", list->minelems);
+	    write_simple_str(scb, YANG_K_MIN_ELEMENTS, 
+			     (const xmlChar *)buff,
+			     indent, 2, TRUE);
+	}
+
+	/*  max-elements */
+	if (list->maxset && list->maxelems) {
+	    sprintf(buff, "%u", list->maxelems);
+	    write_simple_str(scb, YANG_K_MAX_ELEMENTS, 
+			     (const xmlChar *)buff,
+			     indent, 2, TRUE);
+	}
+
+	/* ordered-by field */
+	if (notrefined) {
+	    write_simple_str(scb, YANG_K_ORDERED_BY, 
+			     (list->ordersys) ? 
+			     YANG_K_SYSTEM : YANG_K_USER,
+			     indent, 2, TRUE);
+	}
+
+	/* status field */
+	if (notrefined) {
+	    write_status(scb, list->status, indent);
+	}
+
+	/* description field */
+	if (list->descr) {
+	    write_simple_str(scb, YANG_K_DESCRIPTION, 
+			     list->descr, indent, 2, TRUE);
+	}
+
+	/* reference field */
+	if (list->ref) {
+	    write_simple_str(scb, YANG_K_REFERENCE, 
+			     list->ref, indent, 2, TRUE);
+	}
+
+	write_appinfoQ(scb, mod, cp, &list->appinfoQ, indent);
+
+	if (notrefined) {
+	    write_typedefs(scb, mod, cp, list->typedefQ, indent);
+	    write_groupings(scb, mod, cp, list->groupingQ, indent);
+	}
+
+	write_objects(scb, mod, cp, list->datadefQ, indent);
+
+	/* end object definition clause */
+	ses_putstr_indent(scb, END_SEC, startindent);
+
+	/* end list section comment */
+	write_endsec_cmt(scb, YANG_K_LIST, list->name);
+	break;
+    case OBJ_TYP_CHOICE:
+	choic = obj->def.choic;
+	write_href_id(scb, submod, YANG_K_CHOICE, choic->name,
+		      startindent, obj->linenum, isempty);
+	if (isempty) {
+	    return;
+	}
+
+	/* default case field */
+	if (choic->defval) {
+	    write_simple_str(scb, YANG_K_DEFAULT, 
+			     choic->defval, indent, 2, TRUE);
+	}
+
+	/* mandatory field, only if actually set (no default) */
+	if (choic->mandset) {
+	    write_simple_str(scb, YANG_K_MANDATORY, 
+			     (choic->mandatory) ? 
+			     NCX_EL_TRUE : NCX_EL_FALSE,
+			     indent, 2, TRUE);
+	}
+
+	/* status field */
+	if (notrefined) {
+	    write_status(scb, choic->status, indent);
+	}
+
+	/* description field */
+	if (choic->descr) {
+	    write_simple_str(scb, YANG_K_DESCRIPTION, 
+			     choic->descr, indent, 2, TRUE);
+	}
+
+	/* reference field */
+	if (choic->ref) {
+	    write_simple_str(scb, YANG_K_REFERENCE, 
+			     choic->ref, indent, 2, TRUE);
+	}
+
+	write_appinfoQ(scb, mod, cp, &choic->appinfoQ, indent);
+
+	write_objects(scb, mod, cp, choic->caseQ, indent);
+
+	/* end object definition clause */
+	ses_putstr_indent(scb, END_SEC, startindent);
+
+	/* end choice comment */
+	write_endsec_cmt(scb, YANG_K_CHOICE, choic->name);
+	break;
+    case OBJ_TYP_CASE:
+	cas = obj->def.cas;
+	write_href_id(scb, submod, YANG_K_CASE, cas->name,
+		      startindent, obj->linenum, isempty);
+	if (isempty) {
+	    return;
+	}
+
+	/* status field */
+	if (notrefined) {
+	    write_status(scb, cas->status, indent);
+	}
+
+	/* description field */
+	if (cas->descr) {
+	    write_simple_str(scb, YANG_K_DESCRIPTION, 
+			     cas->descr, indent, 2, TRUE);
+	}
+
+	/* reference field */
+	if (cas->ref) {
+	    write_simple_str(scb, YANG_K_REFERENCE, 
+			     cas->ref, indent, 2, TRUE);
+	}
+
+	write_appinfoQ(scb, mod, cp, &cas->appinfoQ, indent);
+
+	write_objects(scb, mod, cp, cas->datadefQ, indent);
+
+	/* end object definition clause */
+	ses_putstr_indent(scb, END_SEC, startindent);
+
+	/* end case comment */
+	write_endsec_cmt(scb, YANG_K_CASE, cas->name);
+	break;
+    case OBJ_TYP_USES:
+	if (strcmp(cp->objview, OBJVIEW_RAW)) {
+	    return;
+	}
+
+	uses = obj->def.uses;
+	ses_indent(scb, startindent);
+	write_id_a(scb, submod, YANG_K_USES, obj->linenum);
+	write_kw(scb, YANG_K_USES);
+	ses_putchar(scb, ' ');
+	fname = NULL;
+	fversion = NULL;
+	if (uses->prefix && 
+	    xml_strcmp(uses->prefix, mod->prefix)) {
+	    if (uses->grp && uses->grp->mod) {
+		fname = uses->grp->mod->name;
+		fversion = uses->grp->mod->version;
+	    }
+	}
+	write_a(scb, cp, fname, fversion, submod,
+		uses->prefix, uses->name,
+		uses->grp->linenum);
+	if (uses->descr || uses->ref || 
+	    uses->status != NCX_STATUS_CURRENT ||
+	    !dlq_empty(uses->datadefQ) ||
+	    !dlq_empty(&uses->appinfoQ)) {
+
+	    ses_putstr(scb, START_SEC);
+
+	    /* status field */
+	    write_status(scb, uses->status, indent);
+
+	    /* description field */
+	    if (uses->descr) {
+		write_simple_str(scb, YANG_K_DESCRIPTION, 
+				 uses->descr, indent, 2, TRUE);
+	    }
+
+	    /* reference field */
+	    if (uses->ref) {
+		write_simple_str(scb, YANG_K_REFERENCE, 
+				 uses->ref, indent, 2, TRUE);
+	    }
+
+	    write_appinfoQ(scb, mod, cp, &uses->appinfoQ, indent);
+
+	    write_objects(scb, mod, cp, uses->datadefQ, indent);
+
+	    /* end object definition clause */
+	    ses_putstr_indent(scb, END_SEC, startindent);
+	} else {
+	    ses_putchar(scb, ';');
+	}
+	break;
+    case OBJ_TYP_AUGMENT:
+	if (strcmp(cp->objview, OBJVIEW_RAW)) {
+	    return;
+	}
+
+	aug = obj->def.augment;
+	ses_indent(scb, startindent);
+	write_id_a(scb, submod, YANG_K_AUGMENT, obj->linenum);
+	write_kw(scb, YANG_K_AUGMENT);
+	ses_putchar(scb, ' ');
+	fname = NULL;
+	fversion = NULL;
+	if (aug->targobj && aug->targobj->mod &&
+	    aug->targobj->mod != mod) {
+	    fname = aug->targobj->mod->name;
+	    fversion = aug->targobj->mod->version;
+	}
+	write_a2(scb, cp, fname, fversion, submod,
+		 obj_get_name(aug->targobj), 
+		 aug->targobj->linenum, aug->target);
+
+	if (isempty) {
+	    ses_putchar(scb, ';');
+	    return;
+	}
+
+	ses_putstr(scb, START_SEC);
+
+	/* when field */
+	if (aug->when.xpath) {
+	    write_simple_str(scb, YANG_K_WHEN, aug->when.xpath,
+			     indent, 2, TRUE);
+	}		
+
+	/* status field */
+	write_status(scb, aug->status, indent);
+
+	/* description field */
+	if (aug->descr) {
+	    write_simple_str(scb, YANG_K_DESCRIPTION, 
+			     aug->descr, indent, 2, TRUE);
+	}
+
+	/* reference field */
+	if (aug->ref) {
+	    write_simple_str(scb, YANG_K_REFERENCE, 
+			     aug->ref, indent, 2, TRUE);
+	}
+
+	if (!dlq_empty(&aug->datadefQ)) {
+	    write_objects(scb, mod, cp, &aug->datadefQ, indent);
+	}
+
+	write_appinfoQ(scb, mod, cp, &aug->appinfoQ, indent);
+
+	/* end object definition clause */
+	ses_putstr_indent(scb, END_SEC, startindent);
+	break;
+    case OBJ_TYP_RPC:
+	rpc = obj->def.rpc;
+	write_href_id(scb, submod, YANG_K_RPC, rpc->name,
+		      startindent, obj->linenum, isempty);
+	if (isempty) {
+	    return;
+	}
+	/* status field */
+	write_status(scb, rpc->status, indent);
+
+	/* description field */
+	if (rpc->descr) {
+	    write_simple_str(scb, YANG_K_DESCRIPTION, 
+			     rpc->descr, indent, 2, TRUE);
+	}
+
+	/* reference field */
+	if (rpc->ref) {
+	    write_simple_str(scb, YANG_K_REFERENCE, 
+			     rpc->ref, indent, 2, TRUE);
+	}
+
+	write_appinfoQ(scb, mod, cp, &rpc->appinfoQ, indent);
+
+	write_typedefs(scb, mod, cp, &rpc->typedefQ, indent);
+
+	write_groupings(scb, mod, cp, &rpc->groupingQ, indent);
+
+	write_objects(scb, mod, cp, &rpc->datadefQ, indent);
+
+	/* end object definition clause */
+	ses_putstr_indent(scb, END_SEC, startindent);
+
+	/* end RPC section comment */
+	write_endsec_cmt(scb, YANG_K_RPC, rpc->name);
+	break;
+    case OBJ_TYP_RPCIO:
+	rpcio = obj->def.rpcio;
+	write_href_id(scb, submod, obj_get_name(obj), NULL,
+		      startindent, obj->linenum, isempty);
+	if (isempty) {
+	    return;
+	}
+
+	write_appinfoQ(scb, mod, cp, &rpcio->appinfoQ, indent);
+
+	write_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
+
+	write_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
+
+	write_objects(scb, mod, cp, &rpcio->datadefQ, indent);
+
+	/* end object definition clause */
+	ses_putstr_indent(scb, END_SEC, startindent);
+	break;
+    case OBJ_TYP_NOTIF:
+	notif = obj->def.notif;
+	write_href_id(scb, submod, YANG_K_NOTIFICATION, notif->name,
+		      startindent, obj->linenum, isempty);
+	if (isempty) {
+	    return;
+	}
+
+	/* status field */
+	write_status(scb, notif->status, indent);
+
+	/* description field */
+	if (notif->descr) {
+	    write_simple_str(scb, YANG_K_DESCRIPTION, 
+			     notif->descr, indent, 2, TRUE);
+	}
+
+	/* reference field */
+	if (notif->ref) {
+	    write_simple_str(scb, YANG_K_REFERENCE, 
+			     notif->ref, indent, 2, TRUE);
+	}
+
+	write_appinfoQ(scb, mod, cp, &notif->appinfoQ, indent);
+
+	write_typedefs(scb, mod, cp, &notif->typedefQ, indent);
+
+	write_groupings(scb, mod, cp, &notif->groupingQ, indent);
+
+	write_objects(scb, mod, cp, &notif->datadefQ, indent);
+
+	/* end object definition clause */
+	ses_putstr_indent(scb, END_SEC, startindent);
+
+	/* end notification section comment */
+	write_endsec_cmt(scb, YANG_K_NOTIFICATION, notif->name);
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    
+}  /* write_object */
 
 
 /********************************************************************
@@ -1360,673 +2108,86 @@ static void
 		   int32 startindent)
 {
     const obj_template_t    *obj;
-    const obj_container_t   *con;
-    const obj_leaf_t        *leaf;
-    const obj_leaflist_t    *leaflist;
-    const obj_list_t        *list;
-    const obj_choice_t      *choic;
-    const obj_case_t        *cas;
-    const obj_uses_t        *uses;
-    const obj_augment_t     *aug;
-    const obj_rpc_t         *rpc;
-    const obj_rpcio_t       *rpcio;
-    const obj_notif_t       *notif;
-    const obj_key_t         *key, *nextkey;
-    const obj_unique_t      *uni;
-    const obj_unique_comp_t *unicomp, *nextunicomp;
-    const xmlChar           *fname, *fversion, *submod;
-    int32                    indent;
-    char                     buff[NCX_MAX_NUMLEN];
-    boolean                  notrefined, isanyxml, isempty;
 
     if (dlq_empty(datadefQ)) {
 	return;
     }
-
-    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
 
     if (datadefQ == &mod->datadefQ) {
 	write_banner_cmt(scb, mod, cp,
 			 (const xmlChar *)"objects", startindent);
     }
 
-    indent = startindent + ses_indent_count(scb);
-
     for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
-
-	if (obj_is_cloned(obj) && !strcmp(cp->objview, OBJVIEW_RAW)) {
-	    /* skip cloned objects in 'raw' object view mode */
-	    continue;
-	}
-
-	notrefined = !obj_is_refine(obj);
-	isempty = obj_is_empty(obj);
-
-	switch (obj->objtype) {
-	case OBJ_TYP_CONTAINER:
-	    con = obj->def.container;
-	    write_href_id(scb, submod, YANG_K_CONTAINER, con->name,
-			  startindent, obj->linenum, isempty);
-	    if (isempty) {
-		continue;
-	    }
-
-	    /* 0 or more must-stmts */
-	    write_musts(scb, &con->mustQ, indent);
-
-	    /* presence field */
-	    if (con->presence) {
-		write_simple_str(scb, YANG_K_PRESENCE, 
-				 con->presence, indent, 2, TRUE);
-	    }
-
-	    /* config field, only if actually set (no default) */
-	    if (con->confset) {
-		write_simple_str(scb, YANG_K_CONFIG, 
-				 (con->config) ? NCX_EL_TRUE : NCX_EL_FALSE,
-				 indent, 2, TRUE);
-	    }
-	    
-	    /* status field */
-	    if (notrefined) {
-		write_status(scb, con->status, indent);
-	    }
-
-	    /* description field */
-	    if (con->descr) {
-		write_simple_str(scb, YANG_K_DESCRIPTION, 
-				 con->descr, indent, 2, TRUE);
-	    }
-	    
-	    /* reference field */
-	    if (con->ref) {
-		write_simple_str(scb, YANG_K_REFERENCE, 
-				 con->ref, indent, 2, TRUE);
-	    }
-
-	    write_appinfoQ(scb, mod, cp, &con->appinfoQ, indent);
-
-	    if (notrefined) {
-		write_typedefs(scb, mod, cp, con->typedefQ, indent);
-		write_groupings(scb, mod, cp, con->groupingQ, indent);
-	    }
-
-	    write_objects(scb, mod, cp, con->datadefQ, indent);
-
-	    /* end object definition clause */
-	    ses_putstr_indent(scb, END_SEC, startindent);
-
-	    /* end container comment */
-	    write_endsec_cmt(scb, YANG_K_CONTAINER, con->name);
-	    break;
-	case OBJ_TYP_LEAF:
-	    leaf = obj->def.leaf;
-	    isanyxml = (typ_get_basetype(leaf->typdef) == NCX_BT_ANY) ?
-		TRUE : FALSE;
-	    if (isanyxml) {
-		write_href_id(scb, submod, YANG_K_ANYXML, leaf->name,
-			      startindent, obj->linenum, isempty);
-		if (isempty) {
-		    continue;
-		}
-	    } else {
-		write_href_id(scb, submod, YANG_K_LEAF, leaf->name,
-			      startindent, obj->linenum, isempty);
-		if (isempty) {
-		    continue;
-		}
-
-		/* type field */
-		if (notrefined) {
-		    write_type_clause(scb, mod, cp, leaf->typdef, indent);
-		}
-
-		/* units clause */
-		if (notrefined && leaf->units) {
-		    write_simple_str(scb, YANG_K_UNITS, leaf->units,
-				     indent, 2, TRUE);
-		}
-
-		/* 0 or more must-stmts */
-		write_musts(scb, &leaf->mustQ, indent);
-
-		/* default field */
-		if (leaf->defval) {
-		    write_simple_str(scb, YANG_K_DEFAULT, 
-				     leaf->defval, indent, 2, TRUE);
-		}
-	    }
-
-	    /* config field, only if actually set (no default) */
-	    if (leaf->confset) {
-		write_simple_str(scb, YANG_K_CONFIG, 
-				 (leaf->config) ? 
-				 NCX_EL_TRUE : NCX_EL_FALSE,
-				 indent, 2, TRUE);
-	    }
-
-	    /* mandatory field, only if actually set (no default) */
-	    if (leaf->mandset) {
-		write_simple_str(scb, YANG_K_MANDATORY, 
-				 (leaf->mandatory) ? 
-				 NCX_EL_TRUE : NCX_EL_FALSE,
-				 indent, 2, TRUE);
-	    }
-
-	    /* status field */
-	    if (notrefined) {
-		write_status(scb, leaf->status, indent);
-	    }
-
-	    /* description field */
-	    if (leaf->descr) {
-		write_simple_str(scb, YANG_K_DESCRIPTION, 
-				 leaf->descr, indent, 2, TRUE);
-	    }
-
-	    /* reference field */
-	    if (leaf->ref) {
-		write_simple_str(scb, YANG_K_REFERENCE, 
-				 leaf->ref, indent, 2, TRUE);
-	    }
-
-	    write_appinfoQ(scb, mod, cp, &leaf->appinfoQ, indent);
-
-	    /* end object definition clause */
-	    ses_putstr_indent(scb, END_SEC, startindent);
-	    break;
-	case OBJ_TYP_LEAF_LIST:
-	    leaflist = obj->def.leaflist;
-	    write_href_id(scb, submod, YANG_K_LEAF_LIST, leaflist->name,
-			  startindent, obj->linenum, isempty);
-	    if (isempty) {
-		continue;
-	    }
-
-	    /* type field */
-	    if (notrefined) {
-		write_type_clause(scb, mod, cp, leaflist->typdef, indent);
-	    }
-
-	    /* units clause */
-	    if (notrefined && leaflist->units) {
-		write_simple_str(scb, YANG_K_UNITS, leaflist->units,
-				 indent, 2, TRUE);
-	    }
-
-	    /* 0 or more must-stmts */
-	    write_musts(scb, &leaflist->mustQ, indent);
-
-	    /* config field, only if actually set (no default) */
-	    if (leaflist->confset) {
-		write_simple_str(scb, YANG_K_CONFIG, 
-				 (leaflist->config) ? 
-				 NCX_EL_TRUE : NCX_EL_FALSE,
-				 indent, 2, TRUE);
-	    }
-
-	    /*  min-elements */
-	    if (leaflist->minset && leaflist->minelems) {
-		sprintf(buff, "%u", leaflist->minelems);
-		write_simple_str(scb, YANG_K_MIN_ELEMENTS, 
-				 (const xmlChar *)buff,
-				 indent, 2, TRUE);
-	    }
-
-	    /*  max-elements */
-	    if (leaflist->maxset && leaflist->maxelems) {
-		sprintf(buff, "%u", leaflist->maxelems);
-		write_simple_str(scb, YANG_K_MAX_ELEMENTS, 
-				 (const xmlChar *)buff,
-				 indent, 2, TRUE);
-	    }
-
-	    /* ordered-by field */
-	    if (notrefined) {
-		write_simple_str(scb, YANG_K_ORDERED_BY, 
-				 (leaflist->ordersys) ? 
-				 YANG_K_SYSTEM : YANG_K_USER,
-				 indent, 2, TRUE);
-	    }
-
-	    /* status field */
-	    if (notrefined) {
-		write_status(scb, leaflist->status, indent);
-	    }
-
-	    /* description field */
-	    if (leaflist->descr) {
-		write_simple_str(scb, YANG_K_DESCRIPTION, 
-				 leaflist->descr, indent, 2, TRUE);
-	    }
-
-	    /* reference field */
-	    if (leaflist->ref) {
-		write_simple_str(scb, YANG_K_REFERENCE, 
-				 leaflist->ref, indent, 2, TRUE);
-	    }
-
-	    write_appinfoQ(scb, mod, cp, &leaflist->appinfoQ, indent);
-
-	    /* end object definition clause */
-	    ses_putstr_indent(scb, END_SEC, startindent);
-	    break;
-	case OBJ_TYP_LIST:
-	    list = obj->def.list;
-	    write_href_id(scb, submod, YANG_K_LIST, list->name,
-			  startindent, obj->linenum, isempty);
-	    if (isempty) {
-		continue;
-	    }
-	    /* 0 or more must-stmts */
-	    write_musts(scb, &list->mustQ, indent);
-
-	    /* key field, manual generation to make links */
-	    if (notrefined && !dlq_empty(list->keyQ)) {
-		ses_indent(scb, indent);
-		write_kw(scb, YANG_K_KEY);
-		ses_putstr(scb, (const xmlChar *)" \"");
-
-		for (key = (const obj_key_t *)dlq_firstEntry(list->keyQ);
-		     key != NULL; key = nextkey) {
-		     nextkey = (const obj_key_t *)dlq_nextEntry(key);
-		     write_a(scb, cp, NULL, NULL, submod, NULL,
-			     obj_get_name(key->keyobj),
-			     key->keyobj->linenum);
-		     if (nextkey) {
-			 ses_putstr(scb, (const xmlChar *)", ");
-		     }
-		}
-		ses_putstr(scb, (const xmlChar *)"\";");
-	    }
-
-	    /* unique fields, manual generation to make links */
-	    if (notrefined && !dlq_empty(list->uniqueQ)) {
-		for (uni = (const obj_unique_t *)
-			 dlq_firstEntry(list->uniqueQ);
-		     uni != NULL;
-		     uni = (const obj_unique_t *)dlq_nextEntry(uni)) {
-
-		    ses_indent(scb, indent);
-		    write_kw(scb, YANG_K_UNIQUE);
-		    ses_putstr(scb, (const xmlChar *)" \"");
-
-		    for (unicomp = (const obj_unique_comp_t *)
-			     dlq_firstEntry(&uni->compQ);
-			 unicomp != NULL; unicomp = nextunicomp) {
-			nextunicomp = (const obj_unique_comp_t *)
-			    dlq_nextEntry(unicomp);
-			write_a2(scb, cp, NULL, NULL, submod,
-				 obj_get_name(unicomp->unobj),
-				 unicomp->unobj->linenum,
-				 unicomp->xpath);
-			if (nextunicomp) {
-			    ses_putstr(scb, (const xmlChar *)", ");
-			}
-		    }
-		    ses_putstr(scb, (const xmlChar *)"\";");
-		}
-	    }
-
-	    /* config field, only if actually set (no default) */
-	    if (list->confset) {
-		write_simple_str(scb, YANG_K_CONFIG, 
-				 (list->config) ? 
-				 NCX_EL_TRUE : NCX_EL_FALSE,
-				 indent, 2, TRUE);
-	    }
-
-	    /*  min-elements */
-	    if (list->minset && list->minelems) {
-		sprintf(buff, "%u", list->minelems);
-		write_simple_str(scb, YANG_K_MIN_ELEMENTS, 
-				 (const xmlChar *)buff,
-				 indent, 2, TRUE);
-	    }
-
-	    /*  max-elements */
-	    if (list->maxset && list->maxelems) {
-		sprintf(buff, "%u", list->maxelems);
-		write_simple_str(scb, YANG_K_MAX_ELEMENTS, 
-				 (const xmlChar *)buff,
-				 indent, 2, TRUE);
-	    }
-
-	    /* ordered-by field */
-	    if (notrefined) {
-		write_simple_str(scb, YANG_K_ORDERED_BY, 
-				 (list->ordersys) ? 
-				 YANG_K_SYSTEM : YANG_K_USER,
-				 indent, 2, TRUE);
-	    }
-
-	    /* status field */
-	    if (notrefined) {
-		write_status(scb, list->status, indent);
-	    }
-
-	    /* description field */
-	    if (list->descr) {
-		write_simple_str(scb, YANG_K_DESCRIPTION, 
-				 list->descr, indent, 2, TRUE);
-	    }
-
-	    /* reference field */
-	    if (list->ref) {
-		write_simple_str(scb, YANG_K_REFERENCE, 
-				 list->ref, indent, 2, TRUE);
-	    }
-
-	    write_appinfoQ(scb, mod, cp, &list->appinfoQ, indent);
-
-	    if (notrefined) {
-		write_typedefs(scb, mod, cp, list->typedefQ, indent);
-		write_groupings(scb, mod, cp, list->groupingQ, indent);
-	    }
-
-	    write_objects(scb, mod, cp, list->datadefQ, indent);
-
-	    /* end object definition clause */
-	    ses_putstr_indent(scb, END_SEC, startindent);
-
-	    /* end list section comment */
-	    write_endsec_cmt(scb, YANG_K_LIST, list->name);
-	    break;
-	case OBJ_TYP_CHOICE:
-	    choic = obj->def.choic;
-	    write_href_id(scb, submod, YANG_K_CHOICE, choic->name,
-			  startindent, obj->linenum, isempty);
-	    if (isempty) {
-		continue;
-	    }
-
-	    /* default case field */
-	    if (choic->defval) {
-		write_simple_str(scb, YANG_K_DEFAULT, 
-				 choic->defval, indent, 2, TRUE);
-	    }
-
-	    /* mandatory field, only if actually set (no default) */
-	    if (choic->mandset) {
-		write_simple_str(scb, YANG_K_MANDATORY, 
-				 (choic->mandatory) ? 
-				 NCX_EL_TRUE : NCX_EL_FALSE,
-				 indent, 2, TRUE);
-	    }
-
-	    /* status field */
-	    if (notrefined) {
-		write_status(scb, choic->status, indent);
-	    }
-
-	    /* description field */
-	    if (choic->descr) {
-		write_simple_str(scb, YANG_K_DESCRIPTION, 
-				 choic->descr, indent, 2, TRUE);
-	    }
-
-	    /* reference field */
-	    if (choic->ref) {
-		write_simple_str(scb, YANG_K_REFERENCE, 
-				 choic->ref, indent, 2, TRUE);
-	    }
-
-	    write_appinfoQ(scb, mod, cp, &choic->appinfoQ, indent);
-
-	    write_objects(scb, mod, cp, choic->caseQ, indent);
-
-	    /* end object definition clause */
-	    ses_putstr_indent(scb, END_SEC, startindent);
-
-	    /* end choice comment */
-	    write_endsec_cmt(scb, YANG_K_CHOICE, choic->name);
-	    break;
-	case OBJ_TYP_CASE:
-	    cas = obj->def.cas;
-	    write_href_id(scb, submod, YANG_K_CASE, cas->name,
-			  startindent, obj->linenum, isempty);
-	    if (isempty) {
-		continue;
-	    }
-
-	    /* status field */
-	    if (notrefined) {
-		write_status(scb, cas->status, indent);
-	    }
-
-	    /* description field */
-	    if (cas->descr) {
-		write_simple_str(scb, YANG_K_DESCRIPTION, 
-				 cas->descr, indent, 2, TRUE);
-	    }
-
-	    /* reference field */
-	    if (cas->ref) {
-		write_simple_str(scb, YANG_K_REFERENCE, 
-				 cas->ref, indent, 2, TRUE);
-	    }
-
-	    write_appinfoQ(scb, mod, cp, &cas->appinfoQ, indent);
-
-	    write_objects(scb, mod, cp, cas->datadefQ, indent);
-
-	    /* end object definition clause */
-	    ses_putstr_indent(scb, END_SEC, startindent);
-
-	    /* end case comment */
-	    write_endsec_cmt(scb, YANG_K_CASE, cas->name);
-	    break;
-	case OBJ_TYP_USES:
-	    if (strcmp(cp->objview, OBJVIEW_RAW)) {
-		break;
-	    }
-
-	    uses = obj->def.uses;
-	    ses_indent(scb, startindent);
-	    write_id_a(scb, submod, YANG_K_USES, obj->linenum);
-	    write_kw(scb, YANG_K_USES);
-	    ses_putchar(scb, ' ');
-	    fname = NULL;
-	    fversion = NULL;
-	    if (uses->prefix && 
-		xml_strcmp(uses->prefix, mod->prefix)) {
-		if (uses->grp && uses->grp->mod) {
-		    fname = uses->grp->mod->name;
-		    fversion = uses->grp->mod->version;
-		}
-	    }
-	    write_a(scb, cp, fname, fversion, submod,
-		    uses->prefix, uses->name,
-		    uses->grp->linenum);
-	    if (uses->descr || uses->ref || 
-		uses->status != NCX_STATUS_CURRENT ||
-		!dlq_empty(uses->datadefQ) ||
-		!dlq_empty(&uses->appinfoQ)) {
-
-		ses_putstr(scb, START_SEC);
-
-		/* status field */
-		write_status(scb, uses->status, indent);
-
-		/* description field */
-		if (uses->descr) {
-		    write_simple_str(scb, YANG_K_DESCRIPTION, 
-				     uses->descr, indent, 2, TRUE);
-		}
-
-		/* reference field */
-		if (uses->ref) {
-		    write_simple_str(scb, YANG_K_REFERENCE, 
-				     uses->ref, indent, 2, TRUE);
-		}
-
-		write_appinfoQ(scb, mod, cp, &uses->appinfoQ, indent);
-
-		write_objects(scb, mod, cp, uses->datadefQ, indent);
-
-		/* end object definition clause */
-		ses_putstr_indent(scb, END_SEC, startindent);
-	    } else {
-		ses_putchar(scb, ';');
-	    }
-	    break;
-	case OBJ_TYP_AUGMENT:
-	    if (strcmp(cp->objview, OBJVIEW_RAW)) {
-		break;
-	    }
-
-	    aug = obj->def.augment;
-	    ses_indent(scb, startindent);
-	    write_id_a(scb, submod, YANG_K_AUGMENT, obj->linenum);
-	    write_kw(scb, YANG_K_AUGMENT);
-	    ses_putchar(scb, ' ');
-	    fname = NULL;
-	    fversion = NULL;
-	    if (aug->targobj && aug->targobj->mod &&
-		aug->targobj->mod != mod) {
-		fname = aug->targobj->mod->name;
-		fversion = aug->targobj->mod->version;
-	    }
-	    write_a2(scb, cp, fname, fversion, submod,
-		     obj_get_name(aug->targobj), 
-		     aug->targobj->linenum, aug->target);
-
-	    if (isempty) {
-		ses_putchar(scb, ';');
-		continue;
-	    }
-
-	    ses_putstr(scb, START_SEC);
-
-	    /* when field */
-	    if (aug->when.xpath) {
-		write_simple_str(scb, YANG_K_WHEN, aug->when.xpath,
-				 indent, 2, TRUE);
-	    }		
-
-	    /* status field */
-	    write_status(scb, aug->status, indent);
-
-	    /* description field */
-	    if (aug->descr) {
-		write_simple_str(scb, YANG_K_DESCRIPTION, 
-				 aug->descr, indent, 2, TRUE);
-	    }
-
-	    /* reference field */
-	    if (aug->ref) {
-		write_simple_str(scb, YANG_K_REFERENCE, 
-				 aug->ref, indent, 2, TRUE);
-	    }
-
-	    if (!dlq_empty(&aug->datadefQ)) {
-		write_objects(scb, mod, cp, &aug->datadefQ, indent);
-	    }
-
-	    write_appinfoQ(scb, mod, cp, &aug->appinfoQ, indent);
-
-	    /* end object definition clause */
-	    ses_putstr_indent(scb, END_SEC, startindent);
-	    break;
-	case OBJ_TYP_RPC:
-	    rpc = obj->def.rpc;
-	    write_href_id(scb, submod, YANG_K_RPC, rpc->name,
-			  startindent, obj->linenum, isempty);
-	    if (isempty) {
-		continue;
-	    }
-	    /* status field */
-	    write_status(scb, rpc->status, indent);
-
-	    /* description field */
-	    if (rpc->descr) {
-		write_simple_str(scb, YANG_K_DESCRIPTION, 
-		     rpc->descr, indent, 2, TRUE);
-	    }
-
-	    /* reference field */
-	    if (rpc->ref) {
-		write_simple_str(scb, YANG_K_REFERENCE, 
-				 rpc->ref, indent, 2, TRUE);
-	    }
-
-	    write_appinfoQ(scb, mod, cp, &rpc->appinfoQ, indent);
-
-	    write_typedefs(scb, mod, cp, &rpc->typedefQ, indent);
-
-	    write_groupings(scb, mod, cp, &rpc->groupingQ, indent);
-
-	    write_objects(scb, mod, cp, &rpc->datadefQ, indent);
-
-	    /* end object definition clause */
-	    ses_putstr_indent(scb, END_SEC, startindent);
-
-	    /* end RPC section comment */
-	    write_endsec_cmt(scb, YANG_K_RPC, rpc->name);
-	    break;
-	case OBJ_TYP_RPCIO:
-	    rpcio = obj->def.rpcio;
-	    write_href_id(scb, submod, obj_get_name(obj), NULL,
-			  startindent, obj->linenum, isempty);
-	    if (isempty) {
-		continue;
-	    }
-
-	    write_appinfoQ(scb, mod, cp, &rpcio->appinfoQ, indent);
-
-	    write_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
-
-	    write_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
-
-	    write_objects(scb, mod, cp, &rpcio->datadefQ, indent);
-
-	    /* end object definition clause */
-	    ses_putstr_indent(scb, END_SEC, startindent);
-	    break;
-	case OBJ_TYP_NOTIF:
-	    notif = obj->def.notif;
-	    write_href_id(scb, submod, YANG_K_NOTIFICATION, notif->name,
-			  startindent, obj->linenum, isempty);
-	    if (isempty) {
-		continue;
-	    }
-
-	    /* status field */
-	    write_status(scb, notif->status, indent);
-
-	    /* description field */
-	    if (notif->descr) {
-		write_simple_str(scb, YANG_K_DESCRIPTION, 
-		     notif->descr, indent, 2, TRUE);
-	    }
-
-	    /* reference field */
-	    if (notif->ref) {
-		write_simple_str(scb, YANG_K_REFERENCE, 
-				 notif->ref, indent, 2, TRUE);
-	    }
-
-	    write_appinfoQ(scb, mod, cp, &notif->appinfoQ, indent);
-
-	    write_typedefs(scb, mod, cp, &notif->typedefQ, indent);
-
-	    write_groupings(scb, mod, cp, &notif->groupingQ, indent);
-
-	    write_objects(scb, mod, cp, &notif->datadefQ, indent);
-
-	    /* end object definition clause */
-	    ses_putstr_indent(scb, END_SEC, startindent);
-
-	    /* end notification section comment */
-	    write_endsec_cmt(scb, YANG_K_NOTIFICATION, notif->name);
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
+	
+	write_object(scb, mod, cp, obj, startindent);
     }
+
 }  /* write_objects */
+
+
+/********************************************************************
+* FUNCTION write_extension
+* 
+* Generate the HTML for 1 extension
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   ext == ext_template_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_extension (ses_cb_t *scb,
+		     const ncx_module_t *mod,
+		     const yangdump_cvtparms_t *cp,
+		     const ext_template_t *ext,
+		     int32 startindent)
+{
+    const xmlChar     *submod;
+    int32              indent;
+
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+    indent = startindent + ses_indent_count(scb);
+
+    write_href_id(scb, submod, YANG_K_EXTENSION, 
+		  ext->name, startindent, ext->linenum, FALSE);
+
+    /* argument sub-clause */
+    if (ext->arg) {
+	write_simple_str(scb, YANG_K_ARGUMENT, 
+			 ext->arg, indent, 2, FALSE);
+	write_simple_str(scb, YANG_K_YIN_ELEMENT, 
+			 ext->argel ? NCX_EL_TRUE : NCX_EL_FALSE,
+			 indent + ses_indent_count(scb), 2, FALSE);
+	ses_putstr_indent(scb, END_SEC, indent);
+    }
+
+    /* status field */
+    write_status(scb, ext->status, indent);
+
+    /* description field */
+    if (ext->descr) {
+	write_simple_str(scb, YANG_K_DESCRIPTION, 
+			 ext->descr, indent, 2, TRUE);
+    }
+
+    /* reference field */
+    if (ext->ref) {
+	write_simple_str(scb, YANG_K_REFERENCE, 
+			 ext->ref, indent, 2, TRUE);
+    }
+
+    write_appinfoQ(scb, mod, cp, &ext->appinfoQ, indent);
+
+    /* end extension clause */
+    ses_putstr_indent(scb, END_SEC, startindent);
+
+}  /* write_extension */
 
 
 /********************************************************************
@@ -2050,56 +2211,19 @@ static void
 		      int32 startindent)
 {
     const ext_template_t *ext;
-    const xmlChar        *submod;
-    int32              indent;
 
     if (dlq_empty(extensionQ)) {
 	return;
     }
 
-    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
-
     write_banner_cmt(scb, mod, cp,
 		     (const xmlChar *)"extensions", startindent);
-
-    indent = startindent + ses_indent_count(scb);
 
     for (ext = (const ext_template_t *)dlq_firstEntry(extensionQ);
 	 ext != NULL;
 	 ext = (ext_template_t *)dlq_nextEntry(ext)) {
 
-	write_href_id(scb, submod, YANG_K_EXTENSION, 
-		      ext->name, startindent, ext->linenum, FALSE);
-
-	/* argument sub-clause */
-	if (ext->arg) {
-	    write_simple_str(scb, YANG_K_ARGUMENT, 
-			     ext->arg, indent, 2, FALSE);
-	    write_simple_str(scb, YANG_K_YIN_ELEMENT, 
-			     ext->argel ? NCX_EL_TRUE : NCX_EL_FALSE,
-			     indent + ses_indent_count(scb), 2, FALSE);
-	    ses_putstr_indent(scb, END_SEC, indent);
-	}
-
-	/* status field */
-	write_status(scb, ext->status, indent);
-
-	/* description field */
-	if (ext->descr) {
-	    write_simple_str(scb, YANG_K_DESCRIPTION, 
-			     ext->descr, indent, 2, TRUE);
-	}
-
-	/* reference field */
-	if (ext->ref) {
-	    write_simple_str(scb, YANG_K_REFERENCE, 
-			     ext->ref, indent, 2, TRUE);
-	}
-
-	write_appinfoQ(scb, mod, cp, &ext->appinfoQ, indent);
-
-	/* end extension clause */
-	ses_putstr_indent(scb, END_SEC, startindent);
+	write_extension(scb, mod, cp, ext, startindent);
     }
 
 }  /* write_extensions */
@@ -2316,8 +2440,6 @@ static void
 			 indent + ses_indent_count(scb), 2, TRUE);
 
 	ses_putstr_indent(scb, END_SEC, indent);
-    }
-    if (!dlq_empty(&mod->revhistQ)) {
 	ses_putchar(scb, '\n');
     }
 
@@ -2952,6 +3074,8 @@ static void
 		     const yangdump_cvtparms_t *cp)
 {
     const yang_node_t     *node;
+    const yang_stmt_t     *stmt;
+    boolean                stmtmode;
 
     if (cp->html_div) {
 	/* start wrapper div */
@@ -2997,7 +3121,14 @@ static void
     /* module header */
     write_mod_header(scb, mod, cp, cp->indent);
 
-    write_typedefs(scb, mod, cp, &mod->typeQ, 2*cp->indent);
+    /* if the top-level statement order was saved, it was only for
+     * the YANG_PT_TOP module, and none of the sub-modules
+     */
+    stmtmode = dlq_empty(&mod->stmtQ) ? FALSE : TRUE;
+
+    if (!stmtmode) {
+	write_typedefs(scb, mod, cp, &mod->typeQ, 2*cp->indent);
+    }
 
     if (cp->unified && mod->ismod) {
 	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
@@ -3010,7 +3141,9 @@ static void
 	}
     }
 
-    write_groupings(scb, mod, cp, &mod->groupingQ, 2*cp->indent);
+    if (!stmtmode) {
+	write_groupings(scb, mod, cp, &mod->groupingQ, 2*cp->indent);
+    }
 
     if (cp->unified && mod->ismod) {
 	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
@@ -3023,7 +3156,24 @@ static void
 	}
     }
 
-    write_objects(scb, mod, cp, &mod->datadefQ, 2*cp->indent);
+    if (!stmtmode) {
+	write_extensions(scb, mod, cp, &mod->extensionQ, 2*cp->indent);
+    }
+
+    if (cp->unified && mod->ismod) {
+	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	     node != NULL;
+	     node = (const yang_node_t *)dlq_nextEntry(node)) {
+	    if (node->submod) {
+		write_extensions(scb, node->submod, cp, 
+				 &node->submod->extensionQ, 2*cp->indent);
+	    }
+	}
+    }
+
+    if (!stmtmode) {
+	write_objects(scb, mod, cp, &mod->datadefQ, 2*cp->indent);
+    }
 
     if (cp->unified && mod->ismod) {
 	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
@@ -3036,18 +3186,32 @@ static void
 	}
     }
 
-    write_extensions(scb, mod, cp, &mod->extensionQ, 2*cp->indent);
-
-    if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_extensions(scb, node->submod, cp, 
-				 &node->submod->extensionQ, 2*cp->indent);
+    if (stmtmode) {
+	for (stmt = (const yang_stmt_t *)dlq_firstEntry(&mod->stmtQ);
+	     stmt != NULL;
+	     stmt = (const yang_stmt_t *)dlq_nextEntry(stmt)) {
+	    switch (stmt->stmttype) {
+	    case YANG_ST_NONE:
+		SET_ERROR(ERR_INTERNAL_VAL);
+		break;
+	    case YANG_ST_TYPEDEF:
+		write_typedef(scb, mod, cp, stmt->s.typ, 2*cp->indent);
+		break;
+	    case YANG_ST_GROUPING:
+		write_grouping(scb, mod, cp, stmt->s.grp, 2*cp->indent);
+		break;
+	    case YANG_ST_EXTENSION:
+		write_extension(scb, mod, cp, stmt->s.ext, 2*cp->indent);
+		break;
+	    case YANG_ST_OBJECT:
+		write_object(scb, mod, cp, stmt->s.obj, 2*cp->indent);
+		break;
+	    default:
+		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 	}
     }
+
 
     /* TBD: need a better way to generate all the top-level
      * extensions.  This approach is broken because it gathers

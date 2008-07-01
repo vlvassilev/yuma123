@@ -263,6 +263,7 @@ status_t
     const xmlChar   *val;
     const char      *expstr;
     xmlChar         *str;
+    yang_stmt_t     *stmt;
     tk_type_t        tktyp;
     boolean          done, stat, desc, ref;
     status_t         res, retres;
@@ -412,6 +413,18 @@ status_t
 		       grp->name, mod->name);
 #endif
 	    dlq_enque(grp, que);  /* may have some errors */
+
+	    if (mod->stmtmode && que==&mod->groupingQ) {
+		/* save stmt record for top-level groupings only */
+		stmt = yang_new_grp_stmt(grp);
+		if (stmt) {
+		    dlq_enque(stmt, &mod->stmtQ);
+		} else {
+		    log_error("\nError: malloc failure for grp_stmt");
+		    retres = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, retres);
+		}
+	    }
 	}
     } else {
 	grp_free_template(grp);

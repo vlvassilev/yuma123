@@ -3144,6 +3144,7 @@ status_t
     const char      *expstr;
     xmlChar         *str;
     tk_token_t      *savetk;
+    yang_stmt_t     *stmt;
     tk_type_t        tktyp;
     boolean          done, typdone, typeok, unit, def, stat, desc, ref;
     status_t         res, retres;
@@ -3331,6 +3332,18 @@ status_t
 		       typ->name, mod->name);
 #endif
 	    dlq_enque(typ, que);
+
+	    if (mod->stmtmode && que==&mod->typeQ) {
+		/* save stmt for top-level typedefs only */
+		stmt = yang_new_typ_stmt(typ);
+		if (stmt) {
+		    dlq_enque(stmt, &mod->stmtQ);
+		} else {
+		    log_error("\nError: malloc failure for typ_stmt");
+		    retres = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, retres);
+		}
+	    }
 	} else {
 	    typ_free_template(typ);
 	}	    

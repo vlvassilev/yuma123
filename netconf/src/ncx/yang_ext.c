@@ -297,6 +297,7 @@ status_t
     ext_template_t  *ext, *testext;
     const xmlChar   *val;
     const char      *expstr;
+    yang_stmt_t     *stmt;
     tk_type_t        tktyp;
     boolean          done, arg, stat, desc, ref;
     status_t         res, retres;
@@ -421,6 +422,16 @@ status_t
 	    ext_free_template(ext);
 	} else {
 	    dlq_enque(ext, &mod->extensionQ);  /* may have some errors */
+	    if (mod->stmtmode) {
+		stmt = yang_new_ext_stmt(ext);
+		if (stmt) {
+		    dlq_enque(stmt, &mod->stmtQ);
+		} else {
+		    log_error("\nError: malloc failure for ext_stmt");
+		    retres = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, retres);
+		}
+	    }
 	}
     } else {
 	ext_free_template(ext);

@@ -2041,6 +2041,158 @@ void
 
 
 /********************************************************************
+* FUNCTION yang_new_typ_stmt
+* 
+* Create a new YANG stmt node for a typedef
+*
+* RETURNS:
+*   pointer to new and initialized struct, NULL if memory error
+*********************************************************************/
+yang_stmt_t *
+    yang_new_typ_stmt (typ_template_t *typ)
+{
+    yang_stmt_t *stmt;
+
+#ifdef DEBUG
+    if (!typ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    stmt = m__getObj(yang_stmt_t);
+    if (!stmt) {
+	return NULL;
+    }
+    memset(stmt, 0x0, sizeof(yang_stmt_t));
+    stmt->stmttype = YANG_ST_TYPEDEF;
+    stmt->s.typ = typ;
+    return stmt;
+
+} /* yang_new_typ_stmt */
+
+
+/********************************************************************
+* FUNCTION yang_new_grp_stmt
+* 
+* Create a new YANG stmt node for a grouping
+*
+* RETURNS:
+*   pointer to new and initialized struct, NULL if memory error
+*********************************************************************/
+yang_stmt_t *
+    yang_new_grp_stmt (grp_template_t *grp)
+{
+    yang_stmt_t *stmt;
+
+#ifdef DEBUG
+    if (!grp) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    stmt = m__getObj(yang_stmt_t);
+    if (!stmt) {
+	return NULL;
+    }
+    memset(stmt, 0x0, sizeof(yang_stmt_t));
+    stmt->stmttype = YANG_ST_GROUPING;
+    stmt->s.grp = grp;
+    return stmt;
+
+} /* yang_new_grp_stmt */
+
+
+/********************************************************************
+* FUNCTION yang_new_ext_stmt
+* 
+* Create a new YANG stmt node for an extension
+*
+* RETURNS:
+*   pointer to new and initialized struct, NULL if memory error
+*********************************************************************/
+yang_stmt_t *
+    yang_new_ext_stmt (ext_template_t *ext)
+{
+    yang_stmt_t *stmt;
+
+#ifdef DEBUG
+    if (!ext) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    stmt = m__getObj(yang_stmt_t);
+    if (!stmt) {
+	return NULL;
+    }
+    memset(stmt, 0x0, sizeof(yang_stmt_t));
+    stmt->stmttype = YANG_ST_EXTENSION;
+    stmt->s.ext = ext;
+    return stmt;
+
+} /* yang_new_ext_stmt */
+
+
+/********************************************************************
+* FUNCTION yang_new_obj_stmt
+* 
+* Create a new YANG stmt node for an object
+*
+* RETURNS:
+*   pointer to new and initialized struct, NULL if memory error
+*********************************************************************/
+yang_stmt_t *
+    yang_new_obj_stmt (obj_template_t *obj)
+{
+    yang_stmt_t *stmt;
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    stmt = m__getObj(yang_stmt_t);
+    if (!stmt) {
+	return NULL;
+    }
+    memset(stmt, 0x0, sizeof(yang_stmt_t));
+    stmt->stmttype = YANG_ST_OBJECT;
+    stmt->s.obj = obj;
+    return stmt;
+
+} /* yang_new_obj_stmt */
+
+
+/********************************************************************
+* FUNCTION yang_free_stmt
+* 
+* Delete a YANG statement node
+*
+* INPUTS:
+*    stmt == yang_stmt_t node to delete
+*
+*********************************************************************/
+void
+    yang_free_stmt (yang_stmt_t *stmt)
+{
+#ifdef DEBUG
+    if (!stmt) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    m__free(stmt);
+
+}  /* yang_free_stmt */
+
+
+/********************************************************************
 * FUNCTION yang_validate_date_string
 * 
 * Validate a YANG date string for a revision entry

@@ -267,6 +267,7 @@ static status_t
 {
     obj_template_t  *testobj;
     const xmlChar   *name;
+    yang_stmt_t     *stmt;
     status_t         res;
 
     res = NO_ERR;
@@ -292,6 +293,17 @@ static status_t
 	obj_free_template(obj);
     } else {
 	dlq_enque(obj, que);  /* may have some errors */
+	if (mod->stmtmode && que==&mod->datadefQ) {
+	    /* save top-level object order only */
+	    stmt = yang_new_obj_stmt(obj);
+	    if (stmt) {
+		dlq_enque(stmt, &mod->stmtQ);
+	    } else {
+		log_error("\nError: malloc failure for obj_stmt");
+		res = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, res);
+	    }
+	}
     }
     return res;
 

@@ -896,7 +896,7 @@ static status_t
 	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (!obj_has_name(obj)) {
-	    continue;
+	    continue;  /* skip uses and augment */
 	}
 
 	res = obj_copy_object_id(obj, buff, bufflen, &reallen);
@@ -906,7 +906,10 @@ static status_t
 	    return res;
 	}
 
-	log_write("\n%s %s", obj_get_typestr(obj), buff);
+	ses_putchar(scb, '\n');
+	ses_putstr(scb, obj_get_typestr(obj));
+	ses_putchar(scb, ' ');
+	ses_putstr(scb, buff);
 
 	childQ = obj_get_datadefQ(obj);
 	if (childQ) {

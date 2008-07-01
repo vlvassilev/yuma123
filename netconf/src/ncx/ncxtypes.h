@@ -479,6 +479,7 @@ typedef struct ncx_module_t_ {
     uint32            langver;
     boolean           ismod;     /* module/submodule keyword */
     boolean           isyang;        /* T:YANG src F:NCX src */
+    boolean           stmtmode;       /* T: save yang_stmt_t */
     status_t          status;         /* module parse result */
     uint32            errors;            /* yangdump results */
     uint32            warnings;          /* yangdump results */
@@ -497,6 +498,8 @@ typedef struct ncx_module_t_ {
                                   /* saved from pcb->allimpQ */
     dlq_hdr_t         saveincQ;          /* Q of yang_node_t */ 
                                   /* saved from pcb->allincQ */
+    dlq_hdr_t         stmtQ;             /* Q of yang_stmt_t */
+                             /* saved for top, yang, docmode */
 } ncx_module_t;
 
 

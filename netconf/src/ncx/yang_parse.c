@@ -2084,11 +2084,19 @@ status_t
 
 	    /* set the back-ptr to Q of all the include files */
 	    mod->allincQ = &pcb->allincQ;
+
+	    /* set the stmt-track mode flag if needed */
+	    if (ptyp==YANG_PT_TOP && pcb->stmtmode) {
+		mod->stmtmode = TRUE;
+	    }
 	}
     }
 
-    /* serialize the file into language tokens */
     if (res == NO_ERR) {
+	/* serialize the file into language tokens
+	 * !!! need to change this later because it may use too
+	 * !!! much memory in embedded parsers
+	 */
 	res = tk_tokenize_input(tkc, mod);
 
 #ifdef YANG_PARSE_TK_DEBUG

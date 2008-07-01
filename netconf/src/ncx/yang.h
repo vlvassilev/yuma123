@@ -41,6 +41,10 @@ date	     init     comment
 #include "ncxtypes.h"
 #endif
 
+#ifndef _H_obj
+#include "obj.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -59,7 +63,7 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-/* YANG parser entry types */
+/* YANG parser mode entry types */
 typedef enum yang_parsetype_t_ {
     YANG_PT_NONE,
     YANG_PT_TOP,          /* called from top level [sub]module */
@@ -67,6 +71,30 @@ typedef enum yang_parsetype_t_ {
     YANG_PT_IMPORT,           /* called from module import-stmt */
     YANG_PT_TOP_INCL     /* called from submodule to get prefix */
 } yang_parsetype_t;
+
+
+/* YANG statement types for yang_stmt_t order struct */
+typedef enum yang_stmttype_t_ {
+    YANG_ST_NONE,
+    YANG_ST_TYPEDEF,            /* node is typ_template_t */
+    YANG_ST_GROUPING,           /* node is grp_template_t */
+    YANG_ST_EXTENSION,          /* node is ext_template_t */
+    YANG_ST_OBJECT              /* node is obj_template_t */
+} yang_stmttype_t;
+
+
+/* YANG statement node to track top-level statement order for doc output */
+typedef struct yang_stmt_t_ {
+    dlq_hdr_t        qhdr;
+    yang_stmttype_t  stmttype;
+    /* these node pointers are back-pointers and not malloced here */
+    union s_ {
+	typ_template_t *typ;
+	grp_template_t *grp;
+	ext_template_t *ext;
+	obj_template_t *obj;
+    } s;
+} yang_stmt_t;
 
 
 /* YANG node entry to track if a module has been used already */
@@ -80,7 +108,6 @@ typedef struct yang_node_t_ {
     tk_chain_t    *tkc;      /* saved token chain for errors */
     boolean        submodcopy;    /* TRUE if submod back-ptr */
     status_t       res;         /* saved result for 'failed' */
-
 } yang_node_t;
 
 
@@ -128,6 +155,7 @@ typedef struct yang_pcb_t_ {
     struct ncx_module_t_ *top;        /* top-level file */
     boolean       subtree_mode;
     boolean       with_submods;
+    boolean       stmtmode;      /* save top-level stmt order */
     boolean       diffmode;        /* TRUE = yangdiff old ver */
     dlq_hdr_t     allimpQ;          /* Q of yang_import_ptr_t */
 
@@ -307,6 +335,21 @@ extern void
     yang_free_pcb (yang_pcb_t *pcb);
 
 
+extern yang_stmt_t *
+    yang_new_typ_stmt (typ_template_t *typ);
+
+extern yang_stmt_t *
+    yang_new_grp_stmt (grp_template_t *grp);
+
+extern yang_stmt_t *
+    yang_new_ext_stmt (ext_template_t *ext);
+
+extern yang_stmt_t *
+    yang_new_obj_stmt (obj_template_t *obj);
+
+extern void
+    yang_free_stmt (yang_stmt_t *stmt);
+
 extern void
     yang_dump_nodeQ (dlq_hdr_t *que,
 		     const char *name);
@@ -337,6 +380,5 @@ extern void
 extern yang_import_ptr_t *
     yang_find_import_ptr (dlq_hdr_t *que,
 			  const xmlChar *name);
-
 
 #endif	    /* _H_yang */

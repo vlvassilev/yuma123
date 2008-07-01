@@ -1445,6 +1445,7 @@ yang_pcb_t *
     } else {
 	pcb->subtree_mode = subtree_mode;
 	pcb->with_submods = with_submods;
+	pcb->stmtmode = TRUE;
 	*res = load_module(modname, pcb, YANG_PT_TOP);
     }
 
@@ -1501,6 +1502,7 @@ yang_pcb_t *
 	pcb->subtree_mode = subtree_mode;
 	pcb->with_submods = with_submods;
 	pcb->diffmode = TRUE;
+	pcb->stmtmode = TRUE;
 	*res = load_module(modname, pcb, YANG_PT_TOP);
     }
 

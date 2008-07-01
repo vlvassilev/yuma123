@@ -634,6 +634,7 @@ static void
     psd_template_t *psd;
     rpc_template_t *rpc;
     obj_template_t *obj;
+    yang_stmt_t    *stmt;
 
 #ifdef DEBUG
     if (!mod) {
@@ -705,6 +706,12 @@ static void
     while (!dlq_empty(&mod->revhistQ)) {
 	revhist = (ncx_revhist_t *)dlq_deque(&mod->revhistQ);
         ncx_free_revhist(revhist);
+    }
+
+    /* clear the YANG stmtQ, used for docmode only */
+    while (!dlq_empty(&mod->stmtQ)) {
+	stmt = (yang_stmt_t *)dlq_deque(&mod->stmtQ);
+	yang_free_stmt(stmt);
     }
 
     ncx_clean_appinfoQ(&mod->appinfoQ);
@@ -971,6 +978,7 @@ ncx_module_t *
     dlq_createSQue(&mod->typnameQ);
     dlq_createSQue(&mod->saveimpQ);
     dlq_createSQue(&mod->saveincQ);
+    dlq_createSQue(&mod->stmtQ);
     return mod;
 
 }  /* ncx_new_module */

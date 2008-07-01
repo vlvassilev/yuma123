@@ -1896,7 +1896,11 @@ ncx_btype_t
 	    return NCX_BT_NONE;
 	}
     case NCX_CL_REF:
-        return typ_get_basetype(typdef->def.ref.typdef);
+	if (typdef->def.ref.typdef) {
+	    return typ_get_basetype(typdef->def.ref.typdef);
+	} else {
+	    return NCX_BT_NONE;
+	}
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return NCX_BT_NONE;

@@ -2369,6 +2369,9 @@ status_t
     btyp = typ_get_basetype(typdef);
 
     switch (btyp) {
+    case NCX_BT_NONE:
+	res = ERR_NCX_DEF_NOT_FOUND;
+	break;
     case NCX_BT_ANY:
     case NCX_BT_ROOT:
 	res = ERR_NCX_INVALID_VALUE;
@@ -2397,7 +2400,6 @@ status_t
 	    res = ERR_NCX_INVALID_VALUE;
 	}
 	break;
-
     case NCX_BT_UINT8:
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:

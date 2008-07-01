@@ -25,8 +25,6 @@
                         <li><a href="#snmpTargetAddrParams.375">snmpTargetAddrParams</a></li>
                         <li><a href="#snmpTargetAddrStorageType.388">snmpTargetAddrStorageType</a></li>
                         <li><a href="#snmpTargetAddrRowStatus.399">snmpTargetAddrRowStatus</a></li>
-                        <li><a href="#snmpTargetAddrTMask.246">snmpTargetAddrTMask</a></li>
-                        <li><a href="#snmpTargetAddrMMS.284">snmpTargetAddrMMS</a></li>
                      </ul>
                   </li>
                   <li class="daddy"><a href="#snmpTargetParamsEntry.433">snmpTargetParamsEntry</a>
@@ -132,10 +130,12 @@
             length tag values, improved tag list examples.
             Published as RFC 3413."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"1998-08-04"</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"Clarifications, published as
          RFC 2573."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"1997-07-14"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"The initial revision, published as RFC2273."</span>;

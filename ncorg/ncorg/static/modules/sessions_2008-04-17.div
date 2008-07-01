@@ -89,13 +89,12 @@
          <span class="yang_kw">description</span>
             <span class="yang_str">"Remove NCX version and rename ysessions to sessions."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"2007-11-20"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Initial revision, converted from sessions.ncx."</span>;
       }
 
-
-      <span class="yang_cmt">// typedefs</span>
 
       <a name="UserName.32"/><span class="yang_kw">typedef</span> <span class="yang_id">UserName</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
@@ -104,8 +103,6 @@
          }
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF Session User name string"</span>;
       }
-
-      <span class="yang_cmt">// groupings</span>
 
       <a name="SessionStats.42"/><span class="yang_kw">grouping</span> <span class="yang_id">SessionStats</span> {
          <span class="yang_kw">description</span>
@@ -170,8 +167,6 @@
          }
       }  <span class="yang_cmt">// grouping SessionStats</span>
 
-      <span class="yang_cmt">// objects</span>
-
       <a name="netconfd.107"/><span class="yang_kw">container</span> <span class="yang_id">netconfd</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"The sessionInfo container is implemented as a child
@@ -211,7 +206,7 @@
             <a name="sessions.144"/><span class="yang_kw">container</span> <span class="yang_id">sessions</span> {
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Container for active session information and statistics.
-                  There is one entry for each session which is active 
+                  There is one entry for each session which is active
                   or starting up."</span>;
 
                <a name="session.150"/><span class="yang_kw">list</span> <span class="yang_id">session</span> {

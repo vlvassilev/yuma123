@@ -84,20 +84,21 @@
          <span class="yang_kw">description</span>
             <span class="yang_str">"Updated to match draft-ietf-netconf-monitoring-01"</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"2008-02-01"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Updated to match draft-bjorklund-netconf-yang-01"</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"2007-11-12"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Updated to match draft-scott-netconf-monitoring-00.txt"</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"2007-07-22"</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"Initial revision."</span>;
       }
 
-
-      <span class="yang_cmt">// typedefs</span>
 
       <a name="SessionId.32"/><span class="yang_kw">typedef</span> <span class="yang_id">SessionId</span> {
          <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
@@ -132,8 +133,6 @@
             <span class="yang_str">"Information about source of the session.
             IPv4Address, IPv6Address, DNS name or any other form is allowed"</span>;
       }
-
-      <span class="yang_cmt">// objects</span>
 
       <a name="netconfState.79"/><span class="yang_kw">container</span> <span class="yang_id">netconfState</span> {
          <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;

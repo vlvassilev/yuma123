@@ -124,17 +124,17 @@
          <span class="yang_kw">description</span> <span class="yang_str">"Clarifications, published as
          RFC 3413."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"1998-08-04"</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"Clarifications, published as
          RFC 2573."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"1997-07-14"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"The initial revision, published as RFC2273."</span>;
       }
 
-
-      <span class="yang_cmt">// objects</span>
 
       <a name="snmpNotifyObjects.93"/><span class="yang_kw">container</span> <span class="yang_id">snmpNotifyObjects</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1"</span>;

@@ -46,33 +46,35 @@
 
       <span class="yang_kw">revision</span> <span class="yang_str">"2002-03-14"</span> {
          <span class="yang_kw">description</span>
-            <span class="yang_str">"AddressFamilyNumbers assignment 22 to
-            fibreChannelWWPN. AddressFamilyNumbers
+            <span class="yang_str">"AddressFamilyNumbers assignment 22 to 
+            fibreChannelWWPN. AddressFamilyNumbers 
             assignment 23 to fibreChannelWWNN.
             AddressFamilyNumers assignment 24 to gwid."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"2000-09-08"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"AddressFamilyNumbers assignment 19 to xtpOverIpv4.  
             AddressFamilyNumbers assignment 20 to xtpOverIpv6.  
             AddressFamilyNumbers assignment 21 to xtpNativeModeXTP."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"2000-03-01"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"AddressFamilyNumbers assignment 17 to distinguishedName. 
             AddressFamilyNumbers assignment 18 to asNumber."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"2000-02-04"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"AddressFamilyNumbers assignment 16 to dns."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"1999-08-26"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Initial version, published as RFC 2677."</span>;
       }
 
-
-      <span class="yang_cmt">// typedefs</span>
 
       <a name="AddressFamilyNumbers.69"/><span class="yang_kw">typedef</span> <span class="yang_id">AddressFamilyNumbers</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {

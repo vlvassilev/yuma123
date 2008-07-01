@@ -13,29 +13,53 @@
   <body>
     <div class="ncresults">
       <?python
+
 	 import os,sys
 
-    banner = "Validation results for " + srcfile
-    err = ""
-    results = ""
-    opened = 0
-    fname = os.getcwd() + "/ncorg/workdir/" + resfile
+	 banner = "Validation results for " + srcfile
+	 err = ""
+	 err2 = None
+	 results = ""
+	 opened = 0
+	 opened2 = 0
 
-    try:
-        f = open(fname, 'r')
-    except IOError:
-        err = "Could not open file %s" % (fname)
-    except:
-        err = "Unexpected error: %s" % (sys.exc_info()[0])
-        raise
-    else:
-        opened = 1
-        results = f.read()
-        f.close()
+	 fname = os.getcwd() + "/ncorg/workdir/" + resfile
+
+	 try:
+	      f = open(fname, 'r')
+	 except IOError:
+	     err = "Could not open file %s" % (fname)
+	 except:
+	     err = "Unexpected error: %s" % (sys.exc_info()[0])
+	     raise
+	 else:
+	     opened = 1
+	     results = f.read()
+	     f.close()
+
+	 if report:
+	     opened2 = 0
+	     fname2 = os.getcwd() + "/ncorg/workdir/reports"
+	     try:
+	         f2 = open(fname2, 'r')
+	     except IOError:
+	         err2 = "Could not open file %s" % (fname2)
+	     except:
+	         err2 = "Unexpected error: %s" % (sys.exc_info()[0])
+	         raise
+	     else:
+	         opened2 = 1
+	         results2 = f2.read()
+	         f2.close()
       ?>
-      <h1 py:content="banner"/>
+      <h2 py:content="banner"/>
       <pre py:if="opened==1" py:content="results"/>
       <div py:if="opened==0" py:content="err"/>
+      <div py:if="report">
+        <h2 py:content="'Reports for ' + srcfile" />
+	<div py:if="err2" py:content="err2"/>
+	<pre py:if="opened2==1" py:content="results2"/>	
+      </div>
     </div>
   </body>
 </html>

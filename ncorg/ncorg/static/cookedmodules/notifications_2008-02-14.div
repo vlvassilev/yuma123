@@ -59,14 +59,10 @@
       }
 
 
-      <span class="yang_cmt">// typedefs</span>
-
       <a name="streamNameType.25"/><span class="yang_kw">typedef</span> <span class="yang_id">streamNameType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span>;
          <span class="yang_kw">description</span> <span class="yang_str">"The name of an event stream."</span>;
       }
-
-      <span class="yang_cmt">// objects</span>
 
       <a name="create-subscription.31"/><span class="yang_kw">rpc</span> <span class="yang_id">create-subscription</span> {
          <span class="yang_kw">description</span>

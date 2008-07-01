@@ -339,6 +339,7 @@
             
             This version published as RFC 2819."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"1995-02-01"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Bug fixes, clarifications and minor changes based on
@@ -387,13 +388,12 @@
             
             - examples of proper instance naming for each table"</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"1991-11-01"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"The original version of this MIB, published as RFC1271."</span>;
       }
 
-
-      <span class="yang_cmt">// typedefs</span>
 
       <a name="OwnerString.100"/><span class="yang_kw">typedef</span> <span class="yang_id">OwnerString</span> {
          <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
@@ -515,8 +515,6 @@
             the agent and is made despite the fact that managers should
             never exercise these additional state transitions."</span>;
       }
-
-      <span class="yang_cmt">// objects</span>
 
       <a name="statistics.213"/><span class="yang_kw">container</span> <span class="yang_id">statistics</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.1"</span>;

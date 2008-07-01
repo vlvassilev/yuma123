@@ -8,7 +8,7 @@
    xmlns:smi="urn:ietf:params:xml:ns:yang:yang-smi">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'IANAifType-MIB.yang' by yangdump version 0.9.2
+         Converted from YANG file 'IANAifType-MIB.yang' by yangdump version 0.9.3
          
          Module: IANAifType-MIB
          Organization: IANA

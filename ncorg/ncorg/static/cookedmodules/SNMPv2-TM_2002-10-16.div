@@ -71,16 +71,16 @@
       <span class="yang_kw">revision</span> <span class="yang_str">"2002-10-16"</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"Clarifications, published as RFC 3417."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"1996-01-01"</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"Clarifications, published as RFC 1906."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"1993-04-01"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"The initial version, published as RFC 1449."</span>;
       }
 
-
-      <span class="yang_cmt">// typedefs</span>
 
       <a name="SnmpUDPAddress.76"/><span class="yang_kw">typedef</span> <span class="yang_id">SnmpUDPAddress</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {

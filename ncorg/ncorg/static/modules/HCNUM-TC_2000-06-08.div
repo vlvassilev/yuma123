@@ -75,8 +75,6 @@
       }
 
 
-      <span class="yang_cmt">// typedefs</span>
-
       <a name="CounterBasedGauge64.69"/><span class="yang_kw">typedef</span> <span class="yang_id">CounterBasedGauge64</span> {
          <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
          <span class="yang_kw">description</span>

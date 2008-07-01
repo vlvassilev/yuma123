@@ -63,8 +63,6 @@
       }
 
 
-      <span class="yang_cmt">// typedefs</span>
-
       <a name="Dscp.59"/><span class="yang_kw">typedef</span> <span class="yang_id">Dscp</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"0..63"</span>;

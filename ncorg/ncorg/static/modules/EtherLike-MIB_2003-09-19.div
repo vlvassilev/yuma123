@@ -189,25 +189,26 @@
             
             This version published as RFC 3635."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"1999-08-24"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Updated to include support for 1000 Mb/sec
             interfaces and full-duplex interfaces.
             This version published as RFC 2665."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"1998-06-03"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Updated to include support for 100 Mb/sec
             interfaces.
             This version published as RFC 2358."</span>;
       }
+
       <span class="yang_kw">revision</span> <span class="yang_str">"1994-02-03"</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Initial version, published as RFC 1650."</span>;
       }
 
-
-      <span class="yang_cmt">// objects</span>
 
       <a name="dot3.133"/><span class="yang_kw">container</span> <span class="yang_id">dot3</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7"</span>;

@@ -12,7 +12,7 @@
    xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'ENTITY-SENSOR-MIB.yang' by yangdump version 0.9.2
+         Converted from YANG file 'ENTITY-SENSOR-MIB.yang' by yangdump version 0.9.3
          
          Module: ENTITY-SENSOR-MIB
          Organization: IETF Entity MIB Working Group

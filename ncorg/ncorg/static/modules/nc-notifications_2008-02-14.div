@@ -67,8 +67,6 @@
       }
 
 
-      <span class="yang_cmt">// objects</span>
-
       <a name="netconf.26"/><span class="yang_kw">container</span> <span class="yang_id">netconf</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Top-level element in the notification namespace"</span>;

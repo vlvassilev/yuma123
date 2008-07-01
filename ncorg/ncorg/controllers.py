@@ -76,9 +76,19 @@ def getYangInputFilename(filename):
 #
 # generate the correct results output file name to send to yangdump
 #
-def getYangOutputFilename():
-    """Get a filename for the yangdump results"""
+def getYangLogFilename():
+    """Get a filename for the yangdump validation results"""
     filename = "results"
+    targetPath = os.getcwd() + "/ncorg/workdir/" + filename
+    return targetPath
+
+
+#
+# generate the correct results output file name to send to yangdump
+#
+def getYangOutputFilename():
+    """Get a filename for the yangdump generated reports"""
+    filename = "reports"
     targetPath = os.getcwd() + "/ncorg/workdir/" + filename
     return targetPath
 
@@ -176,6 +186,15 @@ srcfile = widgets.FileField(validator=validators.FieldStorageUploadConverter(not
                             name='srcfile',
                             label=_(u'Select YANG source module\n'))
 
+modversion = widgets.CheckBox(name='modversion', default=False,
+                              label='Include module version report')
+exports = widgets.CheckBox(name='exports', default=False,
+                              label='Include exported symbols report')
+dependencies = widgets.CheckBox(name='dependencies', default=False,
+                              label='Include external dependecies report')
+identifiers = widgets.CheckBox(name='identifiers', default=False,
+                              label='Include object identifiers report')
+
 # 0 or more dependency files can also be entered
 depfile = widgets.FileField(name='depfile', label='')
 
@@ -188,7 +207,7 @@ expform = ExpandingForm(
 # this creates the entire run yangdump form
 runyangdump_form = widgets.ListForm(
     'runyangdumpform',
-    fields = [srcfile, expform],
+    fields = [srcfile, expform, modversion, exports, dependencies, identifiers],
     action = 'runyangdump',
     submit_text = _(u'Submit Files'),
     validator = RunYangExpandingFormSchema()
@@ -787,11 +806,12 @@ class Root(controllers.RootController):
 
 
     @expose(template="ncorg.templates.yangdump_results")
-    def yangdumpresults(self, srcfile, resfile, *args, **kw):
+    def yangdumpresults(self, srcfile, resfile, report, *args, **kw):
 
         return dict(modmenu=moduleJumpMenu,
                     srcfile=srcfile,
-                    resfile=resfile)
+                    resfile=resfile,
+                    report=report)
 
 
     #
@@ -800,9 +820,12 @@ class Root(controllers.RootController):
     @expose()
     @validate(form=runyangdump_form)
     @error_handler(run_yangdump)
-    def runyangdump(self, srcfile, depfiles=None, **kw):
+    def runyangdump(self, srcfile, depfiles=None, 
+                    modversion=False, exports=False,
+                    dependencies=False, identifiers=False, **kw):
         """Handle submission from the runyang form"""
 
+        report = False
         result = deleteOldYangFiles()
         if result != 0:
             flash(result)
@@ -823,18 +846,38 @@ class Root(controllers.RootController):
                         redirect('/')
 
         # setup the command line to call yangdump
-        outputfile = getYangOutputFilename()
+        logfile = getYangLogFilename()
         infile = getYangInputFilename(srcfile.filename)
         modpath = getYangModpath()
-        cmdline = "/usr/bin/yangdump --log-level=info --log=" + outputfile \
+        cmdline = "/usr/bin/yangdump --log-level=info --log=" + logfile \
             + " --modpath=" + modpath + " --module=" + infile
+
+        if modversion:
+            cmdline += " --modversion"
+            report = True
+
+        if exports:
+            cmdline += " --exports"
+            report = True
+
+        if dependencies:
+            cmdline += " --dependencies"
+            report = True
+
+        if identifiers:
+            cmdline += " --identifiers"
+            report = True
+
+        if report:
+            cmdline += " --output="
+            cmdline += getYangOutputFilename()
 
         log.debug("run yangdump: " + cmdline)
 
         yang_result = os.system(cmdline)
 
         newpath = getYangResultFilename(srcfile.filename)
-        redirect(newpath)
+        redirect(newpath, report=report)
 
 
 
@@ -1289,6 +1332,5 @@ class Root(controllers.RootController):
         tabber = widgets.Tabber()
         return dict(modmenu=moduleJumpMenu,
                     tabber=tabber)
-
 
 

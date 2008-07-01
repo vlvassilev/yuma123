@@ -42,18 +42,16 @@
       }
 
 
-      <span class="yang_cmt">// typedefs</span>
-
       <a name="mac-address.30"/><span class="yang_kw">typedef</span> <span class="yang_id">mac-address</span> {
          <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#phys-address.268">yang:phys-address</a></span> {
             <span class="yang_kw">pattern</span> <span class="yang_str">'([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}'</span>;
          }
          <span class="yang_kw">description</span>
             <span class="yang_str">"The mac-address type represents an 802 MAC address
-            represented in the `canonical' order defined by 
-            IEEE 802.1a, i.e., as if it were transmitted least 
+            represented in the `canonical' order defined by
+            IEEE 802.1a, i.e., as if it were transmitted least
             significant bit first, even though 802.5 (in contrast
-            to other 802.x protocols) requires MAC addresses to 
+            to other 802.x protocols) requires MAC addresses to
             be transmitted most significant bit first."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 2579 STD 58"</span>;
       }
@@ -79,8 +77,8 @@
             <span class="yang_kw">range</span> <span class="yang_str">"1..4094"</span>;
          }
          <span class="yang_kw">description</span>
-            <span class="yang_str">"The vlanid type uniquely identifies a VLAN. This is 
-            the 12-bit VLAN-ID used in the VLAN Tag header. The 
+            <span class="yang_str">"The vlanid type uniquely identifies a VLAN. This is
+            the 12-bit VLAN-ID used in the VLAN Tag header. The
             range is defined by the referenced specification."</span>;
          <span class="yang_kw">reference</span>
             <span class="yang_str">"IEEE Std 802.1Q 2003 Edition, Virtual Bridged Local

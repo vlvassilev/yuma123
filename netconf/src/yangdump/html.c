@@ -1901,6 +1901,9 @@ static void
 	}
 
 	uses = obj->def.uses;
+	if (!first) {
+	    ses_putchar(scb, '\n');
+	}
 	ses_indent(scb, startindent);
 	write_id_a(scb, submod, YANG_K_USES, obj->linenum);
 	write_kw(scb, YANG_K_USES);
@@ -1955,6 +1958,9 @@ static void
 	}
 
 	aug = obj->def.augment;
+	if (!first) {
+	    ses_putchar(scb, '\n');
+	}
 	ses_indent(scb, startindent);
 	write_id_a(scb, submod, YANG_K_AUGMENT, obj->linenum);
 	write_kw(scb, YANG_K_AUGMENT);

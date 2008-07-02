@@ -1544,6 +1544,9 @@ static void
 	}
 
 	aug = obj->def.augment;
+	if (!first) {
+	    ses_putchar(scb, '\n');
+	}
 	ses_indent(scb, startindent);
 	ses_putstr(scb, YANG_K_AUGMENT);
 	ses_putchar(scb, ' ');

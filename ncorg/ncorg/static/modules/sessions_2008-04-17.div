@@ -196,6 +196,7 @@
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Running global statistics totals aggregating
                   all open and closed session statistics totals"</span>;
+
                <a name="uses.141"/><span class="yang_kw">uses</span> <a href="#SessionStats.42">SessionStats</a>;
             }  <span class="yang_cmt">// container sessionTotals</span>
 
@@ -249,6 +250,7 @@
                   <a name="stats.197"/><span class="yang_kw">container</span> <span class="yang_id">stats</span> {
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"The set of statistics collected for this session."</span>;
+
                      <a name="uses.200"/><span class="yang_kw">uses</span> <a href="#SessionStats.42">SessionStats</a>;
                   }  <span class="yang_cmt">// container stats</span>
                }  <span class="yang_cmt">// list session</span>

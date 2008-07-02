@@ -486,6 +486,7 @@
                      <span class="yang_str">"Arbitrary but unique name of the Monitoring
                      Process."</span>;
                }
+
                <a name="uses.228"/><span class="yang_kw">uses</span> <a href="#MeteringProcess.122">MeteringProcess</a>;
             }  <span class="yang_cmt">// list meteringProcess</span>
 
@@ -528,12 +529,14 @@
                <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
                <a name="interface.261"/><span class="yang_kw">case</span> <span class="yang_id">interface</span> {
                   <a name="interface.261"/><span class="yang_kw">container</span> <span class="yang_id">interface</span> {
+
                      <a name="uses.261"/><span class="yang_kw">uses</span> <a href="#Interface.82">Interface</a>;
                   }  <span class="yang_cmt">// container interface</span>
                }  <span class="yang_cmt">// case interface</span>
 
                <a name="linecard.262"/><span class="yang_kw">case</span> <span class="yang_id">linecard</span> {
                   <a name="linecard.262"/><span class="yang_kw">container</span> <span class="yang_id">linecard</span> {
+
                      <a name="uses.262"/><span class="yang_kw">uses</span> <a href="#Linecard.102">Linecard</a>;
                   }  <span class="yang_cmt">// container linecard</span>
                }  <span class="yang_cmt">// case linecard</span>
@@ -550,6 +553,7 @@
                      <span class="yang_str">"Arbitrary but unique name of the Monitoring
                      Process."</span>;
                }
+
                <a name="uses.275"/><span class="yang_kw">uses</span> <a href="#MeteringProcess.122">MeteringProcess</a>;
             }  <span class="yang_cmt">// list meteringProcess</span>
          }  <span class="yang_cmt">// list observationPoint</span>
@@ -808,6 +812,7 @@
                   <a name="name.405"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                      <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                   }
+
                   <a name="uses.407"/><span class="yang_kw">uses</span> <a href="#InformationElement.44">InformationElement</a>;
 
                   <a name="isFlowKey.409"/><span class="yang_kw">leaf</span> <span class="yang_id">isFlowKey</span> {
@@ -1052,6 +1057,7 @@
                         <a name="name.568"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                         }
+
                         <a name="uses.569"/><span class="yang_kw">uses</span> <a href="#InformationElement.44">InformationElement</a>;
 
                         <a name="isScope.570"/><span class="yang_kw">leaf</span> <span class="yang_id">isScope</span> {

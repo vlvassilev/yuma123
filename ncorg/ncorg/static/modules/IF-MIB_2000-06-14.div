@@ -780,6 +780,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.6"</span>;
          }
       }  <span class="yang_cmt">// container ifMIBObjects</span>
+
       <a name="augment.640"/><span class="yang_kw">augment</span> <a href="#ifEntry.126">/if-mib:interfaces/if-mib:ifEntry</a> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"An entry containing additional management information
@@ -1117,6 +1118,7 @@
          }
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.1.1"</span>;
       }
+
       <a name="augment.978"/><span class="yang_kw">augment</span> <a href="#ifEntry.126">/if-mib:interfaces/if-mib:ifEntry</a> {
          <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
          <span class="yang_kw">description</span>

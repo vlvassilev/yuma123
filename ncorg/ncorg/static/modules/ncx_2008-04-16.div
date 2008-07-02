@@ -244,6 +244,7 @@
                <span class="yang_str">"Contains the description-stmt value from the must-stmt,
                if present."</span>;
          }
+
          <a name="uses.130"/><span class="yang_kw">uses</span> <a href="#reference.182">reference</a>;
 
          <a name="error-app-tag.132"/><span class="yang_kw">leaf</span> <span class="yang_id">error-app-tag</span> {
@@ -299,6 +300,7 @@
             Will be present in appinfo for all 'bits' typedefs, and
             inline type-stmts for leafs and leaf-lists."</span>;
       }
+
       <a name="uses.204"/><span class="yang_kw">uses</span> <a href="#reference.182">reference</a>;
 
       <a name="revision.206"/><span class="yang_kw">container</span> <span class="yang_id">revision</span> {

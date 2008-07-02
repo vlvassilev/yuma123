@@ -646,6 +646,7 @@
       <a name="NcAgentHello.195"/><span class="yang_kw">grouping</span> <span class="yang_id">NcAgentHello</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Generic Agent Hello Message Parameters."</span>;
+
          <a name="uses.198"/><span class="yang_kw">uses</span> <a href="#NcCapabilities.183">NcCapabilities</a>;
 
          <a name="session-id.200"/><span class="yang_kw">leaf</span> <span class="yang_id">session-id</span> {
@@ -657,6 +658,7 @@
       <a name="NcManagerHello.206"/><span class="yang_kw">grouping</span> <span class="yang_id">NcManagerHello</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Generic Manager Hello Message Parameters."</span>;
+
          <a name="uses.209"/><span class="yang_kw">uses</span> <a href="#NcCapabilities.183">NcCapabilities</a>;
       }  <span class="yang_cmt">// grouping NcManagerHello</span>
 
@@ -813,6 +815,7 @@
             <span class="yang_str">"NETCONF 'rpc-reply' Error and/or Data Content"</span>;
          <a name="rpc-error.362"/><span class="yang_kw">container</span> <span class="yang_id">rpc-error</span> {
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+
             <a name="uses.364"/><span class="yang_kw">uses</span> <a href="#RpcErrorType.285">RpcErrorType</a>;
          }  <span class="yang_cmt">// container rpc-error</span>
 
@@ -841,6 +844,7 @@
             <a name="rpc-error.386"/><span class="yang_kw">case</span> <span class="yang_id">rpc-error</span> {
                <a name="rpc-error.386"/><span class="yang_kw">container</span> <span class="yang_id">rpc-error</span> {
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+
                   <a name="uses.387"/><span class="yang_kw">uses</span> <a href="#RpcErrorType.285">RpcErrorType</a>;
                }  <span class="yang_cmt">// container rpc-error</span>
             }  <span class="yang_cmt">// case rpc-error</span>
@@ -861,6 +865,7 @@
             }  <span class="yang_cmt">// case ok</span>
 
             <a name="data-error.405"/><span class="yang_kw">case</span> <span class="yang_id">data-error</span> {
+
                <a name="uses.406"/><span class="yang_kw">uses</span> <a href="#RpcDataReplyType.359">RpcDataReplyType</a>;
             }  <span class="yang_cmt">// case data-error</span>
          }  <span class="yang_cmt">// choice ok-or-data-error</span>
@@ -897,7 +902,9 @@
       <a name="GetConfigSourceType.431"/><span class="yang_kw">grouping</span> <span class="yang_id">GetConfigSourceType</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"NETCONF config 'source' Parameter contents."</span>;
+
          <a name="uses.434"/><span class="yang_kw">uses</span> <a href="#CommonConfigSourceType.411">CommonConfigSourceType</a>;
+
          <a name="augment.435"/><span class="yang_kw">augment</span> <a href="#config-source.414">config-source</a> {
             <a name="url.436"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
@@ -910,7 +917,9 @@
 
       <a name="RpcOperationSourceType.445"/><span class="yang_kw">grouping</span> <span class="yang_id">RpcOperationSourceType</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF 'source' Parameter contents."</span>;
+
          <a name="uses.448"/><span class="yang_kw">uses</span> <a href="#CommonConfigSourceType.411">CommonConfigSourceType</a>;
+
          <a name="augment.449"/><span class="yang_kw">augment</span> <a href="#config-source.414">config-source</a> {
             <a name="url.450"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
@@ -927,7 +936,9 @@
 
       <a name="RpcOperationTargetType.463"/><span class="yang_kw">grouping</span> <span class="yang_id">RpcOperationTargetType</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF 'target' Parameter contents."</span>;
+
          <a name="uses.466"/><span class="yang_kw">uses</span> <a href="#CommonConfigSourceType.411">CommonConfigSourceType</a>;
+
          <a name="augment.467"/><span class="yang_kw">augment</span> <a href="#config-source.414">config-source</a> {
             <a name="url.468"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
@@ -948,6 +959,7 @@
          <span class="yang_kw">description</span> <span class="yang_str">"Remote Procedure Call response message"</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 4.2"</span>;
          <a href="/modules/ncx/2008-04-16#metadata.266">ncx:metadata</a> <span class="yang_str">"MessageId message-id"</span>;
+
          <a name="uses.492"/><span class="yang_kw">uses</span> <a href="#RpcReplyType.393">RpcReplyType</a>;
       }  <span class="yang_cmt">// container rpc-reply</span>
 
@@ -959,6 +971,7 @@
          <a name="input.507"/><span class="yang_kw">input</span> {
             <a name="source.508"/><span class="yang_kw">container</span> <span class="yang_id">source</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to retrieve."</span>;
+
                <a name="uses.511"/><span class="yang_kw">uses</span> <a href="#GetConfigSourceType.431">GetConfigSourceType</a>;
             }  <span class="yang_cmt">// container source</span>
 
@@ -999,6 +1012,7 @@
          <a name="input.551"/><span class="yang_kw">input</span> {
             <a name="target.552"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to edit."</span>;
+
                <a name="uses.555"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
             }  <span class="yang_cmt">// container target</span>
 
@@ -1066,11 +1080,13 @@
          <a name="input.617"/><span class="yang_kw">input</span> {
             <a name="target.618"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to copy to."</span>;
+
                <a name="uses.621"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
             }  <span class="yang_cmt">// container target</span>
 
             <a name="source.624"/><span class="yang_kw">container</span> <span class="yang_id">source</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to copy from."</span>;
+
                <a name="uses.627"/><span class="yang_kw">uses</span> <a href="#RpcOperationSourceType.445">RpcOperationSourceType</a>;
             }  <span class="yang_cmt">// container source</span>
          }
@@ -1088,6 +1104,7 @@
          <a name="input.644"/><span class="yang_kw">input</span> {
             <a name="target.645"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to delete."</span>;
+
                <a name="uses.647"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
             }  <span class="yang_cmt">// container target</span>
          }
@@ -1105,6 +1122,7 @@
          <a name="input.664"/><span class="yang_kw">input</span> {
             <a name="target.665"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to lock"</span>;
+
                <a name="uses.668"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
             }  <span class="yang_cmt">// container target</span>
          }
@@ -1130,6 +1148,7 @@
          <a name="input.693"/><span class="yang_kw">input</span> {
             <a name="target.694"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to unlock."</span>;
+
                <a name="uses.697"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
             }  <span class="yang_cmt">// container target</span>
          }
@@ -1281,6 +1300,7 @@
          <a name="input.862"/><span class="yang_kw">input</span> {
             <a name="source.863"/><span class="yang_kw">container</span> <span class="yang_id">source</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to validate."</span>;
+
                <a name="uses.866"/><span class="yang_kw">uses</span> <a href="#RpcOperationSourceType.445">RpcOperationSourceType</a>;
             }  <span class="yang_cmt">// container source</span>
          }

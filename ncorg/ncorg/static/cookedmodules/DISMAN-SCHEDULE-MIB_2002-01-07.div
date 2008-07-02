@@ -129,7 +129,6 @@
             <span class="yang_str">"Initial version, published as RFC 2591."</span>;
       }
 
-
       <a name="SnmpPduErrorStatus.80"/><span class="yang_kw">typedef</span> <span class="yang_id">SnmpPduErrorStatus</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"noResponse"</span> {
@@ -202,7 +201,6 @@
 
       <a name="schedObjects.110"/><span class="yang_kw">container</span> <span class="yang_id">schedObjects</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1"</span>;
-
          <a name="schedLocalTime.112"/><span class="yang_kw">leaf</span> <span class="yang_id">schedLocalTime</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span> {
                <span class="yang_kw">length</span> <span class="yang_str">"11"</span>;
@@ -231,7 +229,6 @@
                schedRowStatus is active and schedAdminStatus and
                schedOperStatus are both enabled."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1"</span>;
-
             <a name="schedOwner.145"/><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
@@ -1105,9 +1102,7 @@
             <span class="yang_str">"This notification is generated whenever the invocation of a
             scheduled action fails."</span>;
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.2.0.1"</span>;
-
          <a name="schedActionFailure-schedLastFailure.675"/><span class="yang_kw">container</span> <span class="yang_id">schedActionFailure-schedLastFailure</span> {
-
             <a name="schedOwner.676"/><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -1139,7 +1134,6 @@
          }  <span class="yang_cmt">// container schedActionFailure-schedLastFailure</span>
 
          <a name="schedActionFailure-schedLastFailed.704"/><span class="yang_kw">container</span> <span class="yang_id">schedActionFailure-schedLastFailed</span> {
-
             <a name="schedOwner.705"/><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>

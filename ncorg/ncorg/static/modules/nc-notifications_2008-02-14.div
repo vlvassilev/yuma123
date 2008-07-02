@@ -66,25 +66,21 @@
          <span class="yang_kw">description</span> <span class="yang_str">"Initial version, based on -11 draft."</span>;
       }
 
-
       <a name="netconf.26"/><span class="yang_kw">container</span> <span class="yang_id">netconf</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Top-level element in the notification namespace"</span>;
-
          <a name="streams.29"/><span class="yang_kw">container</span> <span class="yang_id">streams</span> {
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The list of event streams supported by the system. When
                a query is issued, the returned set of streams is 
                determined based on user privileges."</span>;
-
             <a name="stream.36"/><span class="yang_kw">list</span> <span class="yang_id">stream</span> {
                <span class="yang_kw">key</span> "<a href="#name.42">name</a>";
                <span class="yang_kw">min-elements</span> <span class="yang_str">"1"</span>;
                <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Stream name, description and other information."</span>;
-
                <a name="name.42"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                   <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/notifications/2008-02-14#streamNameType.25">ncEvent:streamNameType</a></span>;
                   <span class="yang_kw">description</span>

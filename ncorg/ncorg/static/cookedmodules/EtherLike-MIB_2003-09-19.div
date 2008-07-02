@@ -209,10 +209,8 @@
             <span class="yang_str">"Initial version, published as RFC 1650."</span>;
       }
 
-
       <a name="dot3.133"/><span class="yang_kw">container</span> <span class="yang_id">dot3</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7"</span>;
-
          <a name="dot3StatsEntry.138"/><span class="yang_kw">list</span> <span class="yang_id">dot3StatsEntry</span> {
             <span class="yang_kw">key</span> "<a href="#dot3StatsIndex.147">dot3StatsIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -220,7 +218,6 @@
                <span class="yang_str">"Statistics for a particular interface to an
                ethernet-like medium."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1"</span>;
-
             <a name="dot3StatsIndex.147"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndex.81">if-mib:InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -817,7 +814,6 @@
                particular interface is accompanied by a
                particular number of media collisions."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.5.1"</span>;
-
             <a name="ifIndex.736"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -878,7 +874,6 @@
                about the MAC Control sublayer on a single
                ethernet-like interface."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.9.1"</span>;
-
             <a name="dot3StatsIndex.802"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -963,7 +958,6 @@
                about the MAC Control PAUSE function on a single
                ethernet-like interface."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.10.1"</span>;
-
             <a name="dot3StatsIndex.888"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -1182,7 +1176,6 @@
                <span class="yang_str">"An entry containing 64-bit statistics for a
                single ethernet-like interface."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.11.1"</span>;
-
             <a name="dot3StatsIndex.1094"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>

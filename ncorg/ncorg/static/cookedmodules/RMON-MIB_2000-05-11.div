@@ -394,7 +394,6 @@
             <span class="yang_str">"The original version of this MIB, published as RFC1271."</span>;
       }
 
-
       <a name="OwnerString.100"/><span class="yang_kw">typedef</span> <span class="yang_id">OwnerString</span> {
          <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"0..127"</span>;
@@ -518,7 +517,6 @@
 
       <a name="statistics.213"/><span class="yang_kw">container</span> <span class="yang_id">statistics</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.1"</span>;
-
          <a name="etherStatsEntry.218"/><span class="yang_kw">list</span> <span class="yang_id">etherStatsEntry</span> {
             <span class="yang_kw">key</span> "<a href="#etherStatsIndex.228">etherStatsIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -527,7 +525,6 @@
                Ethernet interface.  As an example, an instance of the
                etherStatsPkts object might be named etherStatsPkts.1"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.1.1.1"</span>;
-
             <a name="etherStatsIndex.228"/><span class="yang_kw">leaf</span> <span class="yang_id">etherStatsIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -850,7 +847,6 @@
 
       <a name="history.550"/><span class="yang_kw">container</span> <span class="yang_id">history</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.2"</span>;
-
          <a name="historyControlEntry.555"/><span class="yang_kw">list</span> <span class="yang_id">historyControlEntry</span> {
             <span class="yang_kw">key</span> "<a href="#historyControlIndex.566">historyControlIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -860,7 +856,6 @@
                historyControlInterval object might be named
                historyControlInterval.2"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.2.1.1"</span>;
-
             <a name="historyControlIndex.566"/><span class="yang_kw">leaf</span> <span class="yang_id">historyControlIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -1039,7 +1034,6 @@
                instance of the etherHistoryPkts object might be named
                etherHistoryPkts.2.89"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.2.2.1"</span>;
-
             <a name="etherHistoryIndex.749"/><span class="yang_kw">leaf</span> <span class="yang_id">etherHistoryIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -1279,7 +1273,6 @@
 
       <a name="alarm.987"/><span class="yang_kw">container</span> <span class="yang_id">alarm</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.3"</span>;
-
          <a name="alarmEntry.992"/><span class="yang_kw">list</span> <span class="yang_id">alarmEntry</span> {
             <span class="yang_kw">key</span> "<a href="#alarmIndex.1002">alarmIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -1288,7 +1281,6 @@
                for alarm conditions.  For example, an instance of the
                alarmValue object might be named alarmValue.8"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.3.1.1"</span>;
-
             <a name="alarmIndex.1002"/><span class="yang_kw">leaf</span> <span class="yang_id">alarmIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -1543,7 +1535,6 @@
 
       <a name="hosts.1246"/><span class="yang_kw">container</span> <span class="yang_id">hosts</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.4"</span>;
-
          <a name="hostControlEntry.1251"/><span class="yang_kw">list</span> <span class="yang_id">hostControlEntry</span> {
             <span class="yang_kw">key</span> "<a href="#hostControlIndex.1263">hostControlIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -1554,7 +1545,6 @@
                hostControlTableSize object might be named
                hostControlTableSize.1"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.4.1.1"</span>;
-
             <a name="hostControlIndex.1263"/><span class="yang_kw">leaf</span> <span class="yang_id">hostControlIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -1651,7 +1641,6 @@
                an instance of the hostOutBroadcastPkts object might be
                named hostOutBroadcastPkts.1.6.8.0.32.27.3.176"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.4.2.1"</span>;
-
             <a name="hostAddress.1364"/><span class="yang_kw">leaf</span> <span class="yang_id">hostAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1792,7 +1781,6 @@
                hostTimeOutBroadcastPkts object might be named
                hostTimeOutBroadcastPkts.1.687"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.4.3.1"</span>;
-
             <a name="hostTimeAddress.1510"/><span class="yang_kw">leaf</span> <span class="yang_id">hostTimeAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1931,7 +1919,6 @@
 
       <a name="hostTopN.1648"/><span class="yang_kw">container</span> <span class="yang_id">hostTopN</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.5"</span>;
-
          <a name="hostTopNControlEntry.1653"/><span class="yang_kw">list</span> <span class="yang_id">hostTopNControlEntry</span> {
             <span class="yang_kw">key</span> "<a href="#hostTopNControlIndex.1664">hostTopNControlIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -1941,7 +1928,6 @@
                example, an instance of the hostTopNDuration object might
                be named hostTopNDuration.3"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.5.1.1"</span>;
-
             <a name="hostTopNControlIndex.1664"/><span class="yang_kw">leaf</span> <span class="yang_id">hostTopNControlIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -2131,7 +2117,6 @@
                report.  For example, an instance of the hostTopNRate
                object might be named hostTopNRate.3.10"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.5.2.1"</span>;
-
             <a name="hostTopNReport.1844"/><span class="yang_kw">leaf</span> <span class="yang_id">hostTopNReport</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -2185,7 +2170,6 @@
 
       <a name="matrix.1897"/><span class="yang_kw">container</span> <span class="yang_id">matrix</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.6"</span>;
-
          <a name="matrixControlEntry.1902"/><span class="yang_kw">list</span> <span class="yang_id">matrixControlEntry</span> {
             <span class="yang_kw">key</span> "<a href="#matrixControlIndex.1914">matrixControlIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -2196,7 +2180,6 @@
                matrixControlLastDeleteTime object might be named
                matrixControlLastDeleteTime.1"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.6.1.1"</span>;
-
             <a name="matrixControlIndex.1914"/><span class="yang_kw">leaf</span> <span class="yang_id">matrixControlIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -2297,7 +2280,6 @@
                an instance of the matrixSDPkts object might be named
                matrixSDPkts.1.6.8.0.32.27.3.176.6.8.0.32.10.8.113"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.6.2.1"</span>;
-
             <a name="matrixSDSourceAddress.2020"/><span class="yang_kw">leaf</span> <span class="yang_id">matrixSDSourceAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2369,7 +2351,6 @@
                an instance of the matrixSDPkts object might be named
                matrixSDPkts.1.6.8.0.32.10.8.113.6.8.0.32.27.3.176"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.6.3.1"</span>;
-
             <a name="matrixDSSourceAddress.2099"/><span class="yang_kw">leaf</span> <span class="yang_id">matrixDSSourceAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2435,7 +2416,6 @@
 
       <a name="filter.2165"/><span class="yang_kw">container</span> <span class="yang_id">filter</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.7"</span>;
-
          <a name="filterEntry.2170"/><span class="yang_kw">list</span> <span class="yang_id">filterEntry</span> {
             <span class="yang_kw">key</span> "<a href="#filterIndex.2180">filterIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -2444,7 +2424,6 @@
                particular interface.  As an example, an instance of the
                filterPktData object might be named filterPktData.12"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.7.1.1"</span>;
-
             <a name="filterIndex.2180"/><span class="yang_kw">leaf</span> <span class="yang_id">filterIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -2699,7 +2678,6 @@
                particular interface.  As an example, an instance of the
                channelMatches object might be named channelMatches.3"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.7.2.1"</span>;
-
             <a name="channelIndex.2440"/><span class="yang_kw">leaf</span> <span class="yang_id">channelIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -2941,7 +2919,6 @@
 
       <a name="capture.2668"/><span class="yang_kw">container</span> <span class="yang_id">capture</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.8"</span>;
-
          <a name="bufferControlEntry.2673"/><span class="yang_kw">list</span> <span class="yang_id">bufferControlEntry</span> {
             <span class="yang_kw">key</span> "<a href="#bufferControlIndex.2684">bufferControlIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -2951,7 +2928,6 @@
                instance of the bufferControlCaptureSliceSize object might
                be named bufferControlCaptureSliceSize.3"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.8.1.1"</span>;
-
             <a name="bufferControlIndex.2684"/><span class="yang_kw">leaf</span> <span class="yang_id">bufferControlIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -3214,7 +3190,6 @@
                example, an instance of the captureBufferPacketData
                object might be named captureBufferPacketData.3.1783"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.8.2.1"</span>;
-
             <a name="captureBufferControlIndex.2943"/><span class="yang_kw">leaf</span> <span class="yang_id">captureBufferControlIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -3337,7 +3312,6 @@
 
       <a name="event.3064"/><span class="yang_kw">container</span> <span class="yang_id">event</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.9"</span>;
-
          <a name="eventEntry.3069"/><span class="yang_kw">list</span> <span class="yang_id">eventEntry</span> {
             <span class="yang_kw">key</span> "<a href="#eventIndex.3080">eventIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -3347,7 +3321,6 @@
                of the eventLastTimeSent object might be named
                eventLastTimeSent.6"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.9.1.1"</span>;
-
             <a name="eventIndex.3080"/><span class="yang_kw">leaf</span> <span class="yang_id">eventIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -3452,7 +3425,6 @@
                logged.  For example, an instance of the logDescription
                object might be named logDescription.6.47"</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.9.2.1"</span>;
-
             <a name="logEventIndex.3182"/><span class="yang_kw">leaf</span> <span class="yang_id">logEventIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..65535"</span>;
@@ -3515,9 +3487,7 @@
             an event that is configured for sending SNMP
             traps."</span>;
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.0.1"</span>;
-
          <a name="risingAlarm-alarmIndex.3246"/><span class="yang_kw">container</span> <span class="yang_id">risingAlarm-alarmIndex</span> {
-
             <a name="alarmIndex.3247"/><span class="yang_kw">leaf</span> <span class="yang_id">alarmIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -3529,7 +3499,6 @@
          }  <span class="yang_cmt">// container risingAlarm-alarmIndex</span>
 
          <a name="risingAlarm-alarmVariable.3257"/><span class="yang_kw">container</span> <span class="yang_id">risingAlarm-alarmVariable</span> {
-
             <a name="alarmIndex.3258"/><span class="yang_kw">leaf</span> <span class="yang_id">alarmIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -3574,7 +3543,6 @@
          }  <span class="yang_cmt">// container risingAlarm-alarmVariable</span>
 
          <a name="risingAlarm-alarmSampleType.3300"/><span class="yang_kw">container</span> <span class="yang_id">risingAlarm-alarmSampleType</span> {
-
             <a name="alarmIndex.3301"/><span class="yang_kw">leaf</span> <span class="yang_id">alarmIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -3613,7 +3581,6 @@
          }  <span class="yang_cmt">// container risingAlarm-alarmSampleType</span>
 
          <a name="risingAlarm-alarmValue.3333"/><span class="yang_kw">container</span> <span class="yang_id">risingAlarm-alarmValue</span> {
-
             <a name="alarmIndex.3334"/><span class="yang_kw">leaf</span> <span class="yang_id">alarmIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -3645,7 +3612,6 @@
          }  <span class="yang_cmt">// container risingAlarm-alarmValue</span>
 
          <a name="risingAlarm-alarmRisingThreshold.3363"/><span class="yang_kw">container</span> <span class="yang_id">risingAlarm-alarmRisingThreshold</span> {
-
             <a name="alarmIndex.3364"/><span class="yang_kw">leaf</span> <span class="yang_id">alarmIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -3689,9 +3655,7 @@
             an event that is configured for sending SNMP
             traps."</span>;
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.16.0.2"</span>;
-
          <a name="fallingAlarm-alarmIndex.3408"/><span class="yang_kw">container</span> <span class="yang_id">fallingAlarm-alarmIndex</span> {
-
             <a name="alarmIndex.3409"/><span class="yang_kw">leaf</span> <span class="yang_id">alarmIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -3703,7 +3667,6 @@
          }  <span class="yang_cmt">// container fallingAlarm-alarmIndex</span>
 
          <a name="fallingAlarm-alarmVariable.3419"/><span class="yang_kw">container</span> <span class="yang_id">fallingAlarm-alarmVariable</span> {
-
             <a name="alarmIndex.3420"/><span class="yang_kw">leaf</span> <span class="yang_id">alarmIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -3748,7 +3711,6 @@
          }  <span class="yang_cmt">// container fallingAlarm-alarmVariable</span>
 
          <a name="fallingAlarm-alarmSampleType.3462"/><span class="yang_kw">container</span> <span class="yang_id">fallingAlarm-alarmSampleType</span> {
-
             <a name="alarmIndex.3463"/><span class="yang_kw">leaf</span> <span class="yang_id">alarmIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -3787,7 +3749,6 @@
          }  <span class="yang_cmt">// container fallingAlarm-alarmSampleType</span>
 
          <a name="fallingAlarm-alarmValue.3495"/><span class="yang_kw">container</span> <span class="yang_id">fallingAlarm-alarmValue</span> {
-
             <a name="alarmIndex.3496"/><span class="yang_kw">leaf</span> <span class="yang_id">alarmIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -3819,7 +3780,6 @@
          }  <span class="yang_cmt">// container fallingAlarm-alarmValue</span>
 
          <a name="fallingAlarm-alarmFallingThreshold.3525"/><span class="yang_kw">container</span> <span class="yang_id">fallingAlarm-alarmFallingThreshold</span> {
-
             <a name="alarmIndex.3526"/><span class="yang_kw">leaf</span> <span class="yang_id">alarmIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>

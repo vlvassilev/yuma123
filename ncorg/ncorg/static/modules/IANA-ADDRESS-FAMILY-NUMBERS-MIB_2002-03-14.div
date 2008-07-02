@@ -75,7 +75,6 @@
             <span class="yang_str">"Initial version, published as RFC 2677."</span>;
       }
 
-
       <a name="AddressFamilyNumbers.69"/><span class="yang_kw">typedef</span> <span class="yang_id">AddressFamilyNumbers</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {

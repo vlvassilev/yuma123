@@ -77,7 +77,6 @@
 
 
       <span class="yang_cmt">// typedefs</span>
-
       <a name="normalizedString.25"/><span class="yang_kw">typedef</span> <span class="yang_id">normalizedString</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span>;
          <span class="yang_kw">description</span> <span class="yang_str">"XSD normalized string"</span>;

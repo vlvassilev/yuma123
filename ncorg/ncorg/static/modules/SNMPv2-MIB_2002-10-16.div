@@ -160,10 +160,8 @@
             as RFC 1450."</span>;
       }
 
-
       <a name="system.79"/><span class="yang_kw">container</span> <span class="yang_id">system</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1"</span>;
-
          <a name="sysDescr.81"/><span class="yang_kw">leaf</span> <span class="yang_id">sysDescr</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DisplayString.39">smiv2:DisplayString</a></span> {
                <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
@@ -287,7 +285,6 @@
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry (conceptual row) in the sysORTable."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1.9.1"</span>;
-
             <a name="sysORIndex.209"/><span class="yang_kw">leaf</span> <span class="yang_id">sysORIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
@@ -332,7 +329,6 @@
 
       <a name="snmp.252"/><span class="yang_kw">container</span> <span class="yang_id">snmp</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11"</span>;
-
          <a name="snmpInPkts.254"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInPkts</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -705,7 +701,6 @@
 
       <a name="snmpTrap.621"/><span class="yang_kw">container</span> <span class="yang_id">snmpTrap</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.4"</span>;
-
          <a name="snmpTrapOID.623"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapOID</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -732,7 +727,6 @@
 
       <a name="snmpSet.648"/><span class="yang_kw">container</span> <span class="yang_id">snmpSet</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.6"</span>;
-
          <a name="snmpSetSerialNo.650"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpSetSerialNo</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TestAndIncr.109">smiv2:TestAndIncr</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;

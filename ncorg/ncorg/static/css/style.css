@@ -551,39 +551,33 @@ div.ncdocs ul {
   a.yang_kw:link    { 
     color: blue; 
     background-color: transparent;
-    font-size: 90%;
   }
   a.yang_kw:visited { 
     color: blue; 
     background-color: transparent;
-    font-size: 90%;
   }
   a.yang_kw:active  {
     color: blue; 
     background-color: transparent;
-    font-size: 90%;
   }
 
   a.yang_id:link    { 
     color: red; 
     background-color: transparent;
-    font-size: 90%;
   }
   a.yang_id:visited { 
     color: red; 
     background-color: transparent;
-    font-size: 90%;
   }
   a.yang_id:active  { 
     color: red; 
     background-color: transparent;
-    font-size: 90%;
   }
 
   div.yang {
     width: 80%;
     background-color:  white;
-    font-size: 100%;
+    font-size: 9pt;
     color: black;
     margin: 10px 10px 10px .4in;
     padding: 1px 10px 10px 1px;
@@ -600,32 +594,26 @@ div.ncdocs ul {
 
   pre.yang {
     font-family: monospace;
-    font-size: 90%;
   }
 
   span.yang_kw {
     color: blue;
-    font-size: 90%;
   }
 
   span.yang_id {
     color: red;
-    font-size: 90%;
   }
 
   span.yang_id a {
     color: red;
-    font-size: 90%;
   }
 
   span.yang_cmt {
     color: brown;
-    font-size: 90%;
   }
 
   span.yang_str {
     color: green;
-    font-size: 90%;
   }
 
   div.tocplain {

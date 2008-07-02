@@ -95,7 +95,6 @@
             <span class="yang_str">"Initial revision, converted from sessions.ncx."</span>;
       }
 
-
       <a name="UserName.32"/><span class="yang_kw">typedef</span> <span class="yang_id">UserName</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"1..1023"</span>;
@@ -107,7 +106,6 @@
       <a name="SessionStats.42"/><span class="yang_kw">grouping</span> <span class="yang_id">SessionStats</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"The set of session statistics collected by the agent"</span>;
-
          <a name="inBytes.46"/><span class="yang_kw">leaf</span> <span class="yang_id">inBytes</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -171,12 +169,10 @@
          <span class="yang_kw">description</span>
             <span class="yang_str">"The sessionInfo container is implemented as a child
             of the top-level element &lt;netconfd&gt;."</span>;
-
          <a name="sessionInfo.112"/><span class="yang_kw">container</span> <span class="yang_id">sessionInfo</span> {
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Read-only Session Statistics and Information"</span>;
-
             <a name="activeSessions.118"/><span class="yang_kw">leaf</span> <span class="yang_id">activeSessions</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter32.52">yang:zero-based-counter32</a></span>;
                <span class="yang_kw">description</span>
@@ -208,12 +204,10 @@
                   <span class="yang_str">"Container for active session information and statistics.
                   There is one entry for each session which is active
                   or starting up."</span>;
-
                <a name="session.150"/><span class="yang_kw">list</span> <span class="yang_id">session</span> {
                   <span class="yang_kw">key</span> "<a href="#id.155">id</a>";
                   <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
                   <span class="yang_kw">description</span> <span class="yang_str">"Per-Session Information Block"</span>;
-
                   <a name="id.155"/><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
                      <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/netconf/2008-04-26#SessionId.43">nc:SessionId</a></span>;
                      <span class="yang_kw">description</span>
@@ -242,7 +236,6 @@
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"Container for the list of names of the locked 
                         configurations"</span>;
-
                      <a name="config.187"/><span class="yang_kw">leaf-list</span> <span class="yang_id">config</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                         <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;

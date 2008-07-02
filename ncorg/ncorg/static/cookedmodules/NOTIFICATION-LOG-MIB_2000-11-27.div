@@ -122,10 +122,8 @@
             Published as RFC 3014"</span>;
       }
 
-
       <a name="nlmConfig.49"/><span class="yang_kw">container</span> <span class="yang_id">nlmConfig</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1"</span>;
-
          <a name="nlmConfigGlobalEntryLimit.51"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigGlobalEntryLimit</span> {
             <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -182,7 +180,6 @@
                entries may be supplied by the system or created and deleted by
                applications using nlmConfigLogEntryStatus."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1"</span>;
-
             <a name="nlmLogName.112"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
@@ -337,7 +334,6 @@
 
       <a name="nlmStats.233"/><span class="yang_kw">container</span> <span class="yang_id">nlmStats</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.2"</span>;
-
          <a name="nlmStatsGlobalNotificationsLogged.235"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsGlobalNotificationsLogged</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
@@ -364,7 +360,6 @@
 
       <a name="nlmLog.261"/><span class="yang_kw">container</span> <span class="yang_id">nlmLog</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3"</span>;
-
          <a name="nlmLogEntry.266"/><span class="yang_kw">list</span> <span class="yang_id">nlmLogEntry</span> {
             <span class="yang_kw">key</span> "<a href="#nlmLogName.291">nlmLogName</a>, <a href="#nlmLogIndex.300">nlmLogIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -389,7 +384,6 @@
                has access to the information in the Notification.  If not it
                does not log that Notification in that log."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1"</span>;
-
             <a name="nlmLogName.291"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogName</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -520,7 +514,6 @@
                Entries appear in this table when there are variables in
                the varbind list of a Notification in nlmLogTable."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1"</span>;
-
             <a name="nlmLogName.425"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogName</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>

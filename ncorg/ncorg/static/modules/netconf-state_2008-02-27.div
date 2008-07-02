@@ -154,7 +154,6 @@
          <span class="yang_kw">description</span> <span class="yang_str">"Initial revision."</span>;
       }
 
-
       <a name="SessionId.32"/><span class="yang_kw">typedef</span> <span class="yang_id">SessionId</span> {
          <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
@@ -178,33 +177,27 @@
       }
 
       <a name="transportType.48"/><span class="yang_kw">grouping</span> <span class="yang_id">transportType</span> {
-
          <a name="transportType.49"/><span class="yang_kw">choice</span> <span class="yang_id">transportType</span> {
             <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
-
             <a name="console.51"/><span class="yang_kw">case</span> <span class="yang_id">console</span> {
-
                <a name="console.51"/><span class="yang_kw">leaf</span> <span class="yang_id">console</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                }
             }  <span class="yang_cmt">// case console</span>
 
             <a name="tcp.52"/><span class="yang_kw">case</span> <span class="yang_id">tcp</span> {
-
                <a name="tcp.52"/><span class="yang_kw">leaf</span> <span class="yang_id">tcp</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                }
             }  <span class="yang_cmt">// case tcp</span>
 
             <a name="ssh.53"/><span class="yang_kw">case</span> <span class="yang_id">ssh</span> {
-
                <a name="ssh.53"/><span class="yang_kw">leaf</span> <span class="yang_id">ssh</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                }
             }  <span class="yang_cmt">// case ssh</span>
 
             <a name="ssl.54"/><span class="yang_kw">case</span> <span class="yang_id">ssl</span> {
-
                <a name="ssl.54"/><span class="yang_kw">leaf</span> <span class="yang_id">ssl</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                }
@@ -213,26 +206,21 @@
       }  <span class="yang_cmt">// grouping transportType</span>
 
       <a name="sessionType.58"/><span class="yang_kw">grouping</span> <span class="yang_id">sessionType</span> {
-
          <a name="sessionType.59"/><span class="yang_kw">choice</span> <span class="yang_id">sessionType</span> {
             <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
-
             <a name="cli.61"/><span class="yang_kw">case</span> <span class="yang_id">cli</span> {
-
                <a name="cli.61"/><span class="yang_kw">leaf</span> <span class="yang_id">cli</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                }
             }  <span class="yang_cmt">// case cli</span>
 
             <a name="netconf.62"/><span class="yang_kw">case</span> <span class="yang_id">netconf</span> {
-
                <a name="netconf.62"/><span class="yang_kw">leaf</span> <span class="yang_id">netconf</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                }
             }  <span class="yang_cmt">// case netconf</span>
 
             <a name="webui.63"/><span class="yang_kw">case</span> <span class="yang_id">webui</span> {
-
                <a name="webui.63"/><span class="yang_kw">leaf</span> <span class="yang_id">webui</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                }
@@ -254,12 +242,10 @@
 
       <a name="netconfState.79"/><span class="yang_kw">container</span> <span class="yang_id">netconfState</span> {
          <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
-
          <a name="capabilities.82"/><span class="yang_kw">container</span> <span class="yang_id">capabilities</span> {
             <span class="yang_kw">description</span>
                <span class="yang_str">"List of NETCONF capabilities supported
                by this device."</span>;
-
             <a name="capability.86"/><span class="yang_kw">leaf-list</span> <span class="yang_id">capability</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#uri.145">yang:uri</a></span>;
                <span class="yang_kw">min-elements</span> <span class="yang_str">"1"</span>;
@@ -271,11 +257,9 @@
             <span class="yang_kw">description</span>
                <span class="yang_str">"List of NETCONF sessions currently
                active on this device."</span>;
-
             <a name="session.96"/><span class="yang_kw">list</span> <span class="yang_id">session</span> {
                <span class="yang_kw">key</span> "<a href="#sessionId.98">sessionId</a>";
                <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
-
                <a name="sessionId.98"/><span class="yang_kw">leaf</span> <span class="yang_id">sessionId</span> {
                   <span class="yang_kw">type</span> <span class="yang_id"><a href="#SessionId.32">SessionId</a></span>;
                }
@@ -307,11 +291,9 @@
                <span class="yang_str">"List of NETCONF configuration datastores (e.g. running,
                startup, candidate) supported on this device and related
                information."</span>;
-
             <a name="config.112"/><span class="yang_kw">list</span> <span class="yang_id">config</span> {
                <span class="yang_kw">key</span> "<a href="#name.114">name</a>";
                <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
-
                <a name="name.114"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                   <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigName.39">ConfigName</a></span>;
                }
@@ -321,7 +303,6 @@
                      <span class="yang_str">"An indication of whether a resource is locked or
                      unlocked.  If locked, additional information about
                      the locking such as user an time stamp is provided."</span>;
-
                   <a name="lock-state.120"/><span class="yang_kw">leaf</span> <span class="yang_id">lock-state</span> {
                      <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                         <span class="yang_kw">enum</span> <span class="yang_str">"locked"</span> {
@@ -354,13 +335,11 @@
                <span class="yang_kw">description</span>
                   <span class="yang_str">"List of NETCONF notification subscriptions
                   active on this device and related information."</span>;
-
                <a name="subscription.146"/><span class="yang_kw">list</span> <span class="yang_id">subscription</span> {
                   <span class="yang_kw">key</span> "<a href="#session-id.150">session-id</a>";
                   <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
                   <span class="yang_kw">description</span>
                      <span class="yang_str">"Information about Netconf Notification Subscriptions."</span>;
-
                   <a name="session-id.150"/><span class="yang_kw">leaf</span> <span class="yang_id">session-id</span> {
                      <span class="yang_kw">type</span> <span class="yang_id"><a href="#SessionId.32">SessionId</a></span>;
                      <span class="yang_kw">description</span>

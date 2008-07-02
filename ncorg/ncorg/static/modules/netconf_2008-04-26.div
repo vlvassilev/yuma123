@@ -404,7 +404,6 @@
             <span class="yang_str">"Initial conversion from netconf.ncx version 0.6."</span>;
       }
 
-
       <a name="Language.36"/><span class="yang_kw">typedef</span> <span class="yang_id">Language</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">pattern</span> <span class="yang_str">'[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*'</span>;
@@ -634,10 +633,8 @@
 
       <a name="NcCapabilities.183"/><span class="yang_kw">grouping</span> <span class="yang_id">NcCapabilities</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"Generic Capabilities List."</span>;
-
          <a name="capabilities.186"/><span class="yang_kw">container</span> <span class="yang_id">capabilities</span> {
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
-
             <a name="capability.188"/><span class="yang_kw">leaf-list</span> <span class="yang_id">capability</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/xsd/2007-12-06#anyURI.348">xs:anyURI</a></span>;
                <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -666,7 +663,6 @@
       <a name="ErrorInfoContent.214"/><span class="yang_kw">grouping</span> <span class="yang_id">ErrorInfoContent</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"NETCONF standard 'error-info' Element Content;"</span>;
-
          <a name="bad-attribute.218"/><span class="yang_kw">leaf-list</span> <span class="yang_id">bad-attribute</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/xsd/2007-12-06#QName.328">xs:QName</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -741,7 +737,6 @@
 
       <a name="RpcErrorType.285"/><span class="yang_kw">grouping</span> <span class="yang_id">RpcErrorType</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF 'rpc-error' Element Content"</span>;
-
          <a name="error-type.288"/><span class="yang_kw">leaf</span> <span class="yang_id">error-type</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#ErrorType.69">ErrorType</a></span>;
             <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
@@ -816,7 +811,6 @@
       <a name="RpcDataReplyType.359"/><span class="yang_kw">grouping</span> <span class="yang_id">RpcDataReplyType</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"NETCONF 'rpc-reply' Error and/or Data Content"</span>;
-
          <a name="rpc-error.362"/><span class="yang_kw">container</span> <span class="yang_id">rpc-error</span> {
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <a name="uses.364"/><span class="yang_kw">uses</span> <a href="#RpcErrorType.285">RpcErrorType</a>;
@@ -833,11 +827,8 @@
 
       <a name="RpcOkReplyType.374"/><span class="yang_kw">grouping</span> <span class="yang_id">RpcOkReplyType</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF 'rpc-reply' OK Content."</span>;
-
          <a name="ok-or-error.377"/><span class="yang_kw">choice</span> <span class="yang_id">ok-or-error</span> {
-
             <a name="ok.378"/><span class="yang_kw">case</span> <span class="yang_id">ok</span> {
-
                <a name="ok.378"/><span class="yang_kw">leaf</span> <span class="yang_id">ok</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -848,7 +839,6 @@
             }  <span class="yang_cmt">// case ok</span>
 
             <a name="rpc-error.386"/><span class="yang_kw">case</span> <span class="yang_id">rpc-error</span> {
-
                <a name="rpc-error.386"/><span class="yang_kw">container</span> <span class="yang_id">rpc-error</span> {
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                   <a name="uses.387"/><span class="yang_kw">uses</span> <a href="#RpcErrorType.285">RpcErrorType</a>;
@@ -859,11 +849,8 @@
 
       <a name="RpcReplyType.393"/><span class="yang_kw">grouping</span> <span class="yang_id">RpcReplyType</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"Generic NETCONF 'rpc-reply' content. "</span>;
-
          <a name="ok-or-data-error.396"/><span class="yang_kw">choice</span> <span class="yang_id">ok-or-data-error</span> {
-
             <a name="ok.397"/><span class="yang_kw">case</span> <span class="yang_id">ok</span> {
-
                <a name="ok.397"/><span class="yang_kw">leaf</span> <span class="yang_id">ok</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -882,11 +869,8 @@
       <a name="CommonConfigSourceType.411"/><span class="yang_kw">grouping</span> <span class="yang_id">CommonConfigSourceType</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Common NETCONF config parameter contents."</span>;
-
          <a name="config-source.414"/><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
-
             <a name="candidate.415"/><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
-
                <a name="candidate.415"/><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                   <span class="yang_kw">description</span>
@@ -895,14 +879,12 @@
             }  <span class="yang_cmt">// case candidate</span>
 
             <a name="running.420"/><span class="yang_kw">case</span> <span class="yang_id">running</span> {
-
                <a name="running.420"/><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                }
             }  <span class="yang_cmt">// case running</span>
 
             <a name="startup.423"/><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
-
                <a name="startup.423"/><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                   <span class="yang_kw">description</span>
@@ -917,7 +899,6 @@
             <span class="yang_str">"NETCONF config 'source' Parameter contents."</span>;
          <a name="uses.434"/><span class="yang_kw">uses</span> <a href="#CommonConfigSourceType.411">CommonConfigSourceType</a>;
          <a name="augment.435"/><span class="yang_kw">augment</span> <a href="#config-source.414">config-source</a> {
-
             <a name="url.436"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                <span class="yang_kw">description</span>
@@ -931,7 +912,6 @@
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF 'source' Parameter contents."</span>;
          <a name="uses.448"/><span class="yang_kw">uses</span> <a href="#CommonConfigSourceType.411">CommonConfigSourceType</a>;
          <a name="augment.449"/><span class="yang_kw">augment</span> <a href="#config-source.414">config-source</a> {
-
             <a name="url.450"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                <span class="yang_kw">description</span>
@@ -949,7 +929,6 @@
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF 'target' Parameter contents."</span>;
          <a name="uses.466"/><span class="yang_kw">uses</span> <a href="#CommonConfigSourceType.411">CommonConfigSourceType</a>;
          <a name="augment.467"/><span class="yang_kw">augment</span> <a href="#config-source.414">config-source</a> {
-
             <a name="url.468"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                <span class="yang_kw">description</span>
@@ -977,9 +956,7 @@
             <span class="yang_str">"Retrieve all or part of a specified configuration."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.2"</span>;
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"monitor"</span>;
-
          <a name="input.507"/><span class="yang_kw">input</span> {
-
             <a name="source.508"/><span class="yang_kw">container</span> <span class="yang_id">source</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to retrieve."</span>;
                <a name="uses.511"/><span class="yang_kw">uses</span> <a href="#GetConfigSourceType.431">GetConfigSourceType</a>;
@@ -993,7 +970,6 @@
          }
 
          <a name="output.521"/><span class="yang_kw">output</span> {
-
             <a name="data.522"/><span class="yang_kw">anyxml</span> <span class="yang_id">data</span> {
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Copy of the source database subset which matched
@@ -1020,9 +996,7 @@
             source's data and requested operations."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.2"</span>;
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
-
          <a name="input.551"/><span class="yang_kw">input</span> {
-
             <a name="target.552"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to edit."</span>;
                <a name="uses.555"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
@@ -1048,9 +1022,7 @@
             }
 
             <a name="edit-content.577"/><span class="yang_kw">choice</span> <span class="yang_id">edit-content</span> {
-
                <a name="config.578"/><span class="yang_kw">case</span> <span class="yang_id">config</span> {
-
                   <a name="config.578"/><span class="yang_kw">anyxml</span> <span class="yang_id">config</span> {
                      <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
                      <span class="yang_kw">description</span>
@@ -1059,7 +1031,6 @@
                }  <span class="yang_cmt">// case config</span>
 
                <a name="url.583"/><span class="yang_kw">case</span> <span class="yang_id">url</span> {
-
                   <a name="url.583"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                      <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                      <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
@@ -1092,9 +1063,7 @@
             tag containing invalid-value."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.3"</span>;
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
-
          <a name="input.617"/><span class="yang_kw">input</span> {
-
             <a name="target.618"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to copy to."</span>;
                <a name="uses.621"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
@@ -1116,9 +1085,7 @@
             'url' element can appear as the &lt;target&gt; parameter."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.4"</span>;
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
-
          <a name="input.644"/><span class="yang_kw">input</span> {
-
             <a name="target.645"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to delete."</span>;
                <a name="uses.647"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
@@ -1135,9 +1102,7 @@
             line interface (CLI) scripts), and human users. ..."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.5"</span>;
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
-
          <a name="input.664"/><span class="yang_kw">input</span> {
-
             <a name="target.665"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to lock"</span>;
                <a name="uses.668"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
@@ -1162,9 +1127,7 @@
             'rpc-error'."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.6"</span>;
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
-
          <a name="input.693"/><span class="yang_kw">input</span> {
-
             <a name="target.694"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to unlock."</span>;
                <a name="uses.697"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
@@ -1177,9 +1140,7 @@
             <span class="yang_str">"Retrieve running configuration and device state information."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.7"</span>;
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"monitor"</span>;
-
          <a name="input.710"/><span class="yang_kw">input</span> {
-
             <a name="filter.711"/><span class="yang_kw">anyxml</span> <span class="yang_id">filter</span> {
                <span class="yang_kw">description</span>
                   <span class="yang_str">"This parameter specifies the portion of the system
@@ -1204,7 +1165,6 @@
          }
 
          <a name="output.734"/><span class="yang_kw">output</span> {
-
             <a name="data.735"/><span class="yang_kw">anyxml</span> <span class="yang_id">data</span> {
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Copy of the 'running' database subset which matched
@@ -1244,9 +1204,7 @@
             entity holding the lock."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.9"</span>;
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"exec"</span>;
-
          <a name="input.779"/><span class="yang_kw">input</span> {
-
             <a name="session-id.780"/><span class="yang_kw">leaf</span> <span class="yang_id">session-id</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#SessionId.43">SessionId</a></span>;
                <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
@@ -1279,9 +1237,7 @@
             'commit' operation is not available."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 8.3.4.1"</span>;
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
-
          <a name="input.815"/><span class="yang_kw">input</span> {
-
             <a name="confirmed.816"/><span class="yang_kw">leaf</span> <span class="yang_id">confirmed</span> {
                <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                <span class="yang_kw">description</span>
@@ -1322,9 +1278,7 @@
             Validates the contents of the specified configuration."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 8.6.4.1"</span>;
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
-
          <a name="input.862"/><span class="yang_kw">input</span> {
-
             <a name="source.863"/><span class="yang_kw">container</span> <span class="yang_id">source</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to validate."</span>;
                <a name="uses.866"/><span class="yang_kw">uses</span> <a href="#RpcOperationSourceType.445">RpcOperationSourceType</a>;

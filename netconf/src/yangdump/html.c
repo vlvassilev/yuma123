@@ -168,6 +168,7 @@ static void
 		   const dlq_hdr_t *datadefQ,
 		   int32 startindent);
 
+
 /********************************************************************
 * FUNCTION start_elem
 * 
@@ -640,6 +641,8 @@ static void
 *   indent == indent count to use
 *   linenum == line number for this identifier to use in URLs
 *   finsemi == TRUE if end in ';', FALSE if '{'
+*   newln == TRUE if a newline should be output first
+*            FALSE if newline should not be output first
 *********************************************************************/
 static void
     write_href_id (ses_cb_t *scb,
@@ -648,9 +651,12 @@ static void
 		   const xmlChar *idname,
 		   int32 indent,
 		   uint32 linenum,
-		   boolean finsemi)
+		   boolean finsemi,
+		   boolean newln)
 {
-    ses_putchar(scb, '\n');
+    if (newln) {
+	ses_putchar(scb, '\n');
+    }
     ses_indent(scb, indent);
     if (idname) {
 	write_id_a(scb, submod, idname, linenum);
@@ -1179,14 +1185,16 @@ static void
 *   cp == conversion parameters to use
 *   typ == typ_template_t to use
 *   startindent == start indent count
-*
+*   first == TRUE if this is the first object at this indent level
+*            FALSE if not the first object at this indent level
 *********************************************************************/
 static void
     write_typedef (ses_cb_t *scb,
 		   const ncx_module_t *mod,
 		   const yangdump_cvtparms_t *cp,
 		   const typ_template_t *typ,
-		   int32 startindent)
+		   int32 startindent,
+		   boolean first)
 {
     const xmlChar           *submod;
     int32                    indent;
@@ -1195,7 +1203,8 @@ static void
     indent = startindent + ses_indent_count(scb);
 
     write_href_id(scb, submod, YANG_K_TYPEDEF, 
-		  typ->name, startindent, typ->linenum, FALSE);
+		  typ->name, startindent, typ->linenum,
+		  FALSE, !first);
 
     /* type field */
     write_type_clause(scb, mod, cp, &typ->typdef, indent);
@@ -1257,6 +1266,7 @@ static void
 		    int32 startindent)
 {
     const typ_template_t    *typ;
+    boolean                  first;
 
     if (dlq_empty(typedefQ)) {
 	return;
@@ -1267,11 +1277,13 @@ static void
 			 (const xmlChar *)"typedefs", startindent);
     }
 
+    first = TRUE;
     for (typ = (const typ_template_t *)dlq_firstEntry(typedefQ);
 	 typ != NULL;
 	 typ = (const typ_template_t *)dlq_nextEntry(typ)) {
 
-	write_typedef(scb, mod, cp, typ, startindent);
+	write_typedef(scb, mod, cp, typ, startindent, first);
+	first = FALSE;
     }
 
 }  /* write_typedefs */
@@ -1288,14 +1300,16 @@ static void
 *   cp == conversion parameters to use
 *   grp == grp_template_t to use
 *   startindent == start indent count
-*
+*   first == TRUE if this is the first object at this indent level
+*            FALSE if not the first object at this indent level
 *********************************************************************/
 static void
     write_grouping (ses_cb_t *scb,
 		    const ncx_module_t *mod,
 		    const yangdump_cvtparms_t *cp,
 		    const grp_template_t *grp,
-		    int32 startindent)
+		    int32 startindent,
+		    boolean first)
 {
     const xmlChar           *submod;
     int32                    indent;
@@ -1311,7 +1325,8 @@ static void
     }
 	
     write_href_id(scb, submod, YANG_K_GROUPING, 
-		  grp->name, startindent, grp->linenum, FALSE);
+		  grp->name, startindent, grp->linenum, 
+		  FALSE, !first);
 
     /* status field */
     write_status(scb, grp->status, indent);
@@ -1370,7 +1385,7 @@ static void
 {
     const grp_template_t    *grp;
     const xmlChar           *submod;
-    boolean                  needed, cooked;
+    boolean                  needed, cooked, first;
 
     if (dlq_empty(groupingQ)) {
 	return;
@@ -1401,11 +1416,13 @@ static void
 			 (const xmlChar *)"groupings", startindent);
     }
 
+    first = TRUE;
     for (grp = (const grp_template_t *)dlq_firstEntry(groupingQ);
 	 grp != NULL;
 	 grp = (const grp_template_t *)dlq_nextEntry(grp)) {
 
-	write_grouping(scb, mod, cp, grp, startindent);
+	write_grouping(scb, mod, cp, grp, startindent, first);
+	first = FALSE;
     }
 
 }  /* write_groupings */
@@ -1422,14 +1439,16 @@ static void
 *   cp == conversion parameters to use
 *   obj == obj_template_t to use
 *   startindent == start indent count
-*
+*   first == TRUE if this is the first object at this indent level
+*            FALSE if not the first object at this indent level
 *********************************************************************/
 static void
     write_object (ses_cb_t *scb,
 		  const ncx_module_t *mod,
 		  const yangdump_cvtparms_t *cp,
 		  const obj_template_t *obj,
-		  int32 startindent)
+		  int32 startindent,
+		  boolean first)
 {
     const obj_container_t   *con;
     const obj_leaf_t        *leaf;
@@ -1466,7 +1485,7 @@ static void
     case OBJ_TYP_CONTAINER:
 	con = obj->def.container;
 	write_href_id(scb, submod, YANG_K_CONTAINER, con->name,
-		      startindent, obj->linenum, isempty);
+		      startindent, obj->linenum, isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1525,13 +1544,13 @@ static void
 	    TRUE : FALSE;
 	if (isanyxml) {
 	    write_href_id(scb, submod, YANG_K_ANYXML, leaf->name,
-			  startindent, obj->linenum, isempty);
+			  startindent, obj->linenum, isempty, !first);
 	    if (isempty) {
 		return;
 	    }
 	} else {
 	    write_href_id(scb, submod, YANG_K_LEAF, leaf->name,
-			  startindent, obj->linenum, isempty);
+			  startindent, obj->linenum, isempty, !first);
 	    if (isempty) {
 		return;
 	    }
@@ -1598,7 +1617,7 @@ static void
     case OBJ_TYP_LEAF_LIST:
 	leaflist = obj->def.leaflist;
 	write_href_id(scb, submod, YANG_K_LEAF_LIST, leaflist->name,
-		      startindent, obj->linenum, isempty);
+		      startindent, obj->linenum, isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1674,7 +1693,7 @@ static void
     case OBJ_TYP_LIST:
 	list = obj->def.list;
 	write_href_id(scb, submod, YANG_K_LIST, list->name,
-		      startindent, obj->linenum, isempty);
+		      startindent, obj->linenum, isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1795,7 +1814,7 @@ static void
     case OBJ_TYP_CHOICE:
 	choic = obj->def.choic;
 	write_href_id(scb, submod, YANG_K_CHOICE, choic->name,
-		      startindent, obj->linenum, isempty);
+		      startindent, obj->linenum, isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1844,7 +1863,7 @@ static void
     case OBJ_TYP_CASE:
 	cas = obj->def.cas;
 	write_href_id(scb, submod, YANG_K_CASE, cas->name,
-		      startindent, obj->linenum, isempty);
+		      startindent, obj->linenum, isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1991,7 +2010,7 @@ static void
     case OBJ_TYP_RPC:
 	rpc = obj->def.rpc;
 	write_href_id(scb, submod, YANG_K_RPC, rpc->name,
-		      startindent, obj->linenum, isempty);
+		      startindent, obj->linenum, isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -2027,7 +2046,7 @@ static void
     case OBJ_TYP_RPCIO:
 	rpcio = obj->def.rpcio;
 	write_href_id(scb, submod, obj_get_name(obj), NULL,
-		      startindent, obj->linenum, isempty);
+		      startindent, obj->linenum, isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -2046,7 +2065,7 @@ static void
     case OBJ_TYP_NOTIF:
 	notif = obj->def.notif;
 	write_href_id(scb, submod, YANG_K_NOTIFICATION, notif->name,
-		      startindent, obj->linenum, isempty);
+		      startindent, obj->linenum, isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -2108,6 +2127,7 @@ static void
 		   int32 startindent)
 {
     const obj_template_t    *obj;
+    boolean                  first;
 
     if (dlq_empty(datadefQ)) {
 	return;
@@ -2118,11 +2138,13 @@ static void
 			 (const xmlChar *)"objects", startindent);
     }
 
+    first = TRUE;
     for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 	
-	write_object(scb, mod, cp, obj, startindent);
+	write_object(scb, mod, cp, obj, startindent, first);
+	first = FALSE;
     }
 
 }  /* write_objects */
@@ -2155,7 +2177,7 @@ static void
     indent = startindent + ses_indent_count(scb);
 
     write_href_id(scb, submod, YANG_K_EXTENSION, 
-		  ext->name, startindent, ext->linenum, FALSE);
+		  ext->name, startindent, ext->linenum, FALSE, FALSE);
 
     /* argument sub-clause */
     if (ext->arg) {
@@ -3075,7 +3097,7 @@ static void
 {
     const yang_node_t     *node;
     const yang_stmt_t     *stmt;
-    boolean                stmtmode;
+    boolean                stmtmode, first;
 
     if (cp->html_div) {
 	/* start wrapper div */
@@ -3187,6 +3209,7 @@ static void
     }
 
     if (stmtmode) {
+	first = TRUE;
 	for (stmt = (const yang_stmt_t *)dlq_firstEntry(&mod->stmtQ);
 	     stmt != NULL;
 	     stmt = (const yang_stmt_t *)dlq_nextEntry(stmt)) {
@@ -3195,20 +3218,21 @@ static void
 		SET_ERROR(ERR_INTERNAL_VAL);
 		break;
 	    case YANG_ST_TYPEDEF:
-		write_typedef(scb, mod, cp, stmt->s.typ, 2*cp->indent);
+		write_typedef(scb, mod, cp, stmt->s.typ, 2*cp->indent, first);
 		break;
 	    case YANG_ST_GROUPING:
-		write_grouping(scb, mod, cp, stmt->s.grp, 2*cp->indent);
+		write_grouping(scb, mod, cp, stmt->s.grp, 2*cp->indent, first);
 		break;
 	    case YANG_ST_EXTENSION:
 		write_extension(scb, mod, cp, stmt->s.ext, 2*cp->indent);
 		break;
 	    case YANG_ST_OBJECT:
-		write_object(scb, mod, cp, stmt->s.obj, 2*cp->indent);
+		write_object(scb, mod, cp, stmt->s.obj, 2*cp->indent, first);
 		break;
 	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
+	    first = FALSE;
 	}
     }
 

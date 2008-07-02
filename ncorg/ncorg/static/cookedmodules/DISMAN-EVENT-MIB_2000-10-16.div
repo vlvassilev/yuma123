@@ -224,7 +224,6 @@
             Published as RFC 2981"</span>;
       }
 
-
       <a name="FailureReason.50"/><span class="yang_kw">typedef</span> <span class="yang_id">FailureReason</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"sampleOverrun"</span> {
@@ -336,7 +335,6 @@
 
       <a name="mteResource.109"/><span class="yang_kw">container</span> <span class="yang_id">mteResource</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.1"</span>;
-
          <a name="mteResourceSampleMinimum.111"/><span class="yang_kw">leaf</span> <span class="yang_id">mteResourceSampleMinimum</span> {
             <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
@@ -420,7 +418,6 @@
 
       <a name="mteTrigger.193"/><span class="yang_kw">container</span> <span class="yang_id">mteTrigger</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.2"</span>;
-
          <a name="mteTriggerFailures.195"/><span class="yang_kw">leaf</span> <span class="yang_id">mteTriggerFailures</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"failures"</span>;
@@ -442,7 +439,6 @@
                <span class="yang_str">"Information about a single trigger.  Applications create and
                delete entries using mteTriggerEntryStatus."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.2.2.1"</span>;
-
             <a name="mteOwner.221"/><span class="yang_kw">leaf</span> <span class="yang_id">mteOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
@@ -754,7 +750,6 @@
                automatically exist in this this table for each mteTriggerEntry
                that has mteTriggerSampleType set to 'deltaValue'."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.2.3.1"</span>;
-
             <a name="mteOwner.526"/><span class="yang_kw">leaf</span> <span class="yang_id">mteOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -850,7 +845,6 @@
                automatically exist in this this table for each mteTriggerEntry
                that has 'existence' set in mteTriggerTest."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.2.4.1"</span>;
-
             <a name="mteOwner.618"/><span class="yang_kw">leaf</span> <span class="yang_id">mteOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -987,7 +981,6 @@
                automatically exist in this this table for each mteTriggerEntry
                that has 'boolean' set in mteTriggerTest."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.2.5.1"</span>;
-
             <a name="mteOwner.747"/><span class="yang_kw">leaf</span> <span class="yang_id">mteOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -1128,7 +1121,6 @@
                automatically exist in this table for each mteTriggerEntry
                that has 'threshold' set in mteTriggerTest."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.2.6.1"</span>;
-
             <a name="mteOwner.878"/><span class="yang_kw">leaf</span> <span class="yang_id">mteOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -1412,7 +1404,6 @@
 
       <a name="mteObjects.1153"/><span class="yang_kw">container</span> <span class="yang_id">mteObjects</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.3"</span>;
-
          <a name="mteObjectsEntry.1158"/><span class="yang_kw">list</span> <span class="yang_id">mteObjectsEntry</span> {
             <span class="yang_kw">key</span> "<a href="#mteOwner.1170">mteOwner</a>, <a href="#mteObjectsName.1179">mteObjectsName</a>, <a href="#mteObjectsIndex.1190">mteObjectsIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -1424,7 +1415,6 @@
                lexical order of their index in this table.  Those associated
                with a trigger come first, then trigger test, then event."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.3.1.1"</span>;
-
             <a name="mteOwner.1170"/><span class="yang_kw">leaf</span> <span class="yang_id">mteOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -1519,7 +1509,6 @@
 
       <a name="mteEvent.1263"/><span class="yang_kw">container</span> <span class="yang_id">mteEvent</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.4"</span>;
-
          <a name="mteEventFailures.1265"/><span class="yang_kw">leaf</span> <span class="yang_id">mteEventFailures</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1538,7 +1527,6 @@
                <span class="yang_str">"Information about a single event.  Applications create and
                delete entries using mteEventEntryStatus."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.4.2.1"</span>;
-
             <a name="mteOwner.1287"/><span class="yang_kw">leaf</span> <span class="yang_id">mteOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -1622,7 +1610,6 @@
                automatically exist in this this table for each mteEventEntry
                that has 'notification' set in mteEventActions."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.4.3.1"</span>;
-
             <a name="mteOwner.1370"/><span class="yang_kw">leaf</span> <span class="yang_id">mteOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -1691,7 +1678,6 @@
                automatically exist in this this table for each mteEventEntry
                that has 'set' set in mteEventActions."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.1.4.4.1"</span>;
-
             <a name="mteOwner.1441"/><span class="yang_kw">leaf</span> <span class="yang_id">mteOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -1819,7 +1805,6 @@
 
       <a name="dismanEventMIBNotificationObjects.1566"/><span class="yang_kw">container</span> <span class="yang_id">dismanEventMIBNotificationObjects</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.2.1"</span>;
-
          <a name="mteHotTrigger.1568"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotTrigger</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1888,9 +1873,7 @@
             instances has fired, for triggers with mteTriggerType
             'boolean' or 'existence'."</span>;
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.2.0.1"</span>;
-
          <a name="mteTriggerFired-mteHotTrigger.1638"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFired-mteHotTrigger</span> {
-
             <a name="mteHotTrigger.1639"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotTrigger</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1901,7 +1884,6 @@
          }  <span class="yang_cmt">// container mteTriggerFired-mteHotTrigger</span>
 
          <a name="mteTriggerFired-mteHotTargetName.1648"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFired-mteHotTargetName</span> {
-
             <a name="mteHotTargetName.1649"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotTargetName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1913,7 +1895,6 @@
          }  <span class="yang_cmt">// container mteTriggerFired-mteHotTargetName</span>
 
          <a name="mteTriggerFired-mteHotContextName.1659"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFired-mteHotContextName</span> {
-
             <a name="mteHotContextName.1660"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotContextName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1926,7 +1907,6 @@
          }  <span class="yang_cmt">// container mteTriggerFired-mteHotContextName</span>
 
          <a name="mteTriggerFired-mteHotOID.1671"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFired-mteHotOID</span> {
-
             <a name="mteHotOID.1672"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotOID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1945,7 +1925,6 @@
          }  <span class="yang_cmt">// container mteTriggerFired-mteHotOID</span>
 
          <a name="mteTriggerFired-mteHotValue.1689"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFired-mteHotValue</span> {
-
             <a name="mteHotValue.1690"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotValue</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1962,9 +1941,7 @@
             <span class="yang_str">"Notification that the rising threshold was met for triggers
             with mteTriggerType 'threshold'."</span>;
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.2.0.2"</span>;
-
          <a name="mteTriggerRising-mteHotTrigger.1708"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerRising-mteHotTrigger</span> {
-
             <a name="mteHotTrigger.1709"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotTrigger</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1975,7 +1952,6 @@
          }  <span class="yang_cmt">// container mteTriggerRising-mteHotTrigger</span>
 
          <a name="mteTriggerRising-mteHotTargetName.1718"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerRising-mteHotTargetName</span> {
-
             <a name="mteHotTargetName.1719"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotTargetName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1987,7 +1963,6 @@
          }  <span class="yang_cmt">// container mteTriggerRising-mteHotTargetName</span>
 
          <a name="mteTriggerRising-mteHotContextName.1729"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerRising-mteHotContextName</span> {
-
             <a name="mteHotContextName.1730"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotContextName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2000,7 +1975,6 @@
          }  <span class="yang_cmt">// container mteTriggerRising-mteHotContextName</span>
 
          <a name="mteTriggerRising-mteHotOID.1741"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerRising-mteHotOID</span> {
-
             <a name="mteHotOID.1742"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotOID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2019,7 +1993,6 @@
          }  <span class="yang_cmt">// container mteTriggerRising-mteHotOID</span>
 
          <a name="mteTriggerRising-mteHotValue.1759"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerRising-mteHotValue</span> {
-
             <a name="mteHotValue.1760"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotValue</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2036,9 +2009,7 @@
             <span class="yang_str">"Notification that the falling threshold was met for triggers
             with mteTriggerType 'threshold'."</span>;
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.2.0.3"</span>;
-
          <a name="mteTriggerFalling-mteHotTrigger.1778"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFalling-mteHotTrigger</span> {
-
             <a name="mteHotTrigger.1779"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotTrigger</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2049,7 +2020,6 @@
          }  <span class="yang_cmt">// container mteTriggerFalling-mteHotTrigger</span>
 
          <a name="mteTriggerFalling-mteHotTargetName.1788"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFalling-mteHotTargetName</span> {
-
             <a name="mteHotTargetName.1789"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotTargetName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2061,7 +2031,6 @@
          }  <span class="yang_cmt">// container mteTriggerFalling-mteHotTargetName</span>
 
          <a name="mteTriggerFalling-mteHotContextName.1799"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFalling-mteHotContextName</span> {
-
             <a name="mteHotContextName.1800"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotContextName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2074,7 +2043,6 @@
          }  <span class="yang_cmt">// container mteTriggerFalling-mteHotContextName</span>
 
          <a name="mteTriggerFalling-mteHotOID.1811"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFalling-mteHotOID</span> {
-
             <a name="mteHotOID.1812"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotOID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2093,7 +2061,6 @@
          }  <span class="yang_cmt">// container mteTriggerFalling-mteHotOID</span>
 
          <a name="mteTriggerFalling-mteHotValue.1829"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFalling-mteHotValue</span> {
-
             <a name="mteHotValue.1830"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotValue</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2115,9 +2082,7 @@
             a problem that has appeared in the error counters and can not
             be found otherwise."</span>;
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.2.0.4"</span>;
-
          <a name="mteTriggerFailure-mteHotTrigger.1853"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFailure-mteHotTrigger</span> {
-
             <a name="mteHotTrigger.1854"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotTrigger</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2128,7 +2093,6 @@
          }  <span class="yang_cmt">// container mteTriggerFailure-mteHotTrigger</span>
 
          <a name="mteTriggerFailure-mteHotTargetName.1863"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFailure-mteHotTargetName</span> {
-
             <a name="mteHotTargetName.1864"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotTargetName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2140,7 +2104,6 @@
          }  <span class="yang_cmt">// container mteTriggerFailure-mteHotTargetName</span>
 
          <a name="mteTriggerFailure-mteHotContextName.1874"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFailure-mteHotContextName</span> {
-
             <a name="mteHotContextName.1875"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotContextName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2153,7 +2116,6 @@
          }  <span class="yang_cmt">// container mteTriggerFailure-mteHotContextName</span>
 
          <a name="mteTriggerFailure-mteHotOID.1886"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFailure-mteHotOID</span> {
-
             <a name="mteHotOID.1887"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotOID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2172,7 +2134,6 @@
          }  <span class="yang_cmt">// container mteTriggerFailure-mteHotOID</span>
 
          <a name="mteTriggerFailure-mteFailedReason.1904"/><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFailure-mteFailedReason</span> {
-
             <a name="mteFailedReason.1905"/><span class="yang_kw">leaf</span> <span class="yang_id">mteFailedReason</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#FailureReason.50">FailureReason</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2195,9 +2156,7 @@
             a problem that has appeared in the error counters and can not
             be found otherwise."</span>;
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.88.2.0.5"</span>;
-
          <a name="mteEventSetFailure-mteHotTrigger.1929"/><span class="yang_kw">container</span> <span class="yang_id">mteEventSetFailure-mteHotTrigger</span> {
-
             <a name="mteHotTrigger.1930"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotTrigger</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2208,7 +2167,6 @@
          }  <span class="yang_cmt">// container mteEventSetFailure-mteHotTrigger</span>
 
          <a name="mteEventSetFailure-mteHotTargetName.1939"/><span class="yang_kw">container</span> <span class="yang_id">mteEventSetFailure-mteHotTargetName</span> {
-
             <a name="mteHotTargetName.1940"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotTargetName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2220,7 +2178,6 @@
          }  <span class="yang_cmt">// container mteEventSetFailure-mteHotTargetName</span>
 
          <a name="mteEventSetFailure-mteHotContextName.1950"/><span class="yang_kw">container</span> <span class="yang_id">mteEventSetFailure-mteHotContextName</span> {
-
             <a name="mteHotContextName.1951"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotContextName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2233,7 +2190,6 @@
          }  <span class="yang_cmt">// container mteEventSetFailure-mteHotContextName</span>
 
          <a name="mteEventSetFailure-mteHotOID.1962"/><span class="yang_kw">container</span> <span class="yang_id">mteEventSetFailure-mteHotOID</span> {
-
             <a name="mteHotOID.1963"/><span class="yang_kw">leaf</span> <span class="yang_id">mteHotOID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -2252,7 +2208,6 @@
          }  <span class="yang_cmt">// container mteEventSetFailure-mteHotOID</span>
 
          <a name="mteEventSetFailure-mteFailedReason.1980"/><span class="yang_kw">container</span> <span class="yang_id">mteEventSetFailure-mteFailedReason</span> {
-
             <a name="mteFailedReason.1981"/><span class="yang_kw">leaf</span> <span class="yang_id">mteFailedReason</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#FailureReason.50">FailureReason</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;

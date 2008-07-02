@@ -57,7 +57,6 @@
 
 
       <span class="yang_cmt">// typedefs</span>
-
       <a name="DisplayString.39"/><span class="yang_kw">typedef</span> <span class="yang_id">DisplayString</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;

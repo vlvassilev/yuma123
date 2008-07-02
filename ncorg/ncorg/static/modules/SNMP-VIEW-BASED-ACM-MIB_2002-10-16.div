@@ -151,17 +151,14 @@
          <span class="yang_kw">description</span> <span class="yang_str">"Initial version, published as RFC2275"</span>;
       }
 
-
       <a name="vacmMIBObjects.96"/><span class="yang_kw">container</span> <span class="yang_id">vacmMIBObjects</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1"</span>;
-
          <a name="vacmContextEntry.101"/><span class="yang_kw">list</span> <span class="yang_id">vacmContextEntry</span> {
             <span class="yang_kw">key</span> "<a href="#vacmContextName.109">vacmContextName</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Information about a particular context."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.1.1"</span>;
-
             <a name="vacmContextName.109"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmContextName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
@@ -184,7 +181,6 @@
                <span class="yang_str">"An entry in this table maps the combination of a
                securityModel and securityName into a groupName."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.2.1"</span>;
-
             <a name="vacmSecurityModel.136"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmSecurityModel</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpSecurityModel.207">snmp-framework:SnmpSecurityModel</a></span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
@@ -275,7 +271,6 @@
                vacmAccessSecurityToGroupTable has a corresponding
                value for object vacmGroupName."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.4.1"</span>;
-
             <a name="vacmGroupName.231"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmGroupName</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -439,7 +434,6 @@
 
       <a name="vacmMIBViews.390"/><span class="yang_kw">container</span> <span class="yang_id">vacmMIBViews</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.5"</span>;
-
          <a name="vacmViewSpinLock.392"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewSpinLock</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TestAndIncr.109">smiv2:TestAndIncr</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -487,7 +481,6 @@
                MIB view (viewName), that view may be thought of as
                consisting of the empty set of view subtrees."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.5.2.1"</span>;
-
             <a name="vacmViewTreeFamilyViewName.445"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilyViewName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;

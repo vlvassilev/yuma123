@@ -190,12 +190,10 @@
       }
 
       <a name="ipfix.148"/><span class="yang_kw">container</span> <span class="yang_id">ipfix</span> {
-
          <a name="collectingProcess.150"/><span class="yang_kw">list</span> <span class="yang_id">collectingProcess</span> {
             <span class="yang_kw">key</span> "<a href="#name.154">name</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span> <span class="yang_str">"Parameters of a Collecting Process."</span>;
-
             <a name="name.154"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                <span class="yang_kw">description</span>
@@ -206,20 +204,16 @@
                <span class="yang_kw">key</span> "<a href="#name.163">name</a>";
                <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"Receiver parameters."</span>;
-
                <a name="name.163"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                }
 
                <a name="TransportProtocol.165"/><span class="yang_kw">choice</span> <span class="yang_id">TransportProtocol</span> {
                   <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
-
                   <a name="sctpReceiver.167"/><span class="yang_kw">case</span> <span class="yang_id">sctpReceiver</span> {
-
                      <a name="sctpReceiver.167"/><span class="yang_kw">container</span> <span class="yang_id">sctpReceiver</span> {
                         <span class="yang_kw">description</span> <span class="yang_str">"SCTP receiver parameters."</span>;
                         <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4960."</span>;
-
                         <a name="ipAddress.170"/><span class="yang_kw">leaf-list</span> <span class="yang_id">ipAddress</span> {
                            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
                            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -237,10 +231,8 @@
                   }  <span class="yang_cmt">// case sctpReceiver</span>
 
                   <a name="udpReceiver.181"/><span class="yang_kw">case</span> <span class="yang_id">udpReceiver</span> {
-
                      <a name="udpReceiver.181"/><span class="yang_kw">container</span> <span class="yang_id">udpReceiver</span> {
                         <span class="yang_kw">description</span> <span class="yang_str">"UDP receiver parameters."</span>;
-
                         <a name="ipAddress.183"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddress</span> {
                            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
                            <span class="yang_kw">description</span>
@@ -260,10 +252,8 @@
                   }  <span class="yang_cmt">// case udpReceiver</span>
 
                   <a name="tcpReceiver.194"/><span class="yang_kw">case</span> <span class="yang_id">tcpReceiver</span> {
-
                      <a name="tcpReceiver.194"/><span class="yang_kw">container</span> <span class="yang_id">tcpReceiver</span> {
                         <span class="yang_kw">description</span> <span class="yang_str">"TCP receiver parameters."</span>;
-
                         <a name="ipAddress.196"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddress</span> {
                            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
                            <span class="yang_kw">description</span>
@@ -279,10 +269,8 @@
                   }  <span class="yang_cmt">// case tcpReceiver</span>
 
                   <a name="fileImport.206"/><span class="yang_kw">case</span> <span class="yang_id">fileImport</span> {
-
                      <a name="fileImport.206"/><span class="yang_kw">container</span> <span class="yang_id">fileImport</span> {
                         <span class="yang_kw">description</span> <span class="yang_str">"File import parameters."</span>;
-
                         <a name="uri.208"/><span class="yang_kw">leaf</span> <span class="yang_id">uri</span> {
                            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#uri.145">yang:uri</a></span>;
                            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
@@ -298,7 +286,6 @@
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Metering Processes process received records in parallel.
                   Monitoring device acts as IPFIX mediator/concentrator."</span>;
-
                <a name="name.222"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                   <span class="yang_kw">description</span>
@@ -347,7 +334,6 @@
             <span class="yang_kw">key</span> "<a href="#name.242">name</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span> <span class="yang_str">"Parameters of an Observation Point."</span>;
-
             <a name="name.242"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                <span class="yang_kw">description</span>
@@ -370,26 +356,20 @@
 
             <a name="OPType.259"/><span class="yang_kw">choice</span> <span class="yang_id">OPType</span> {
                <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
-
                <a name="interface.261"/><span class="yang_kw">case</span> <span class="yang_id">interface</span> {
-
                   <a name="interface.261"/><span class="yang_kw">container</span> <span class="yang_id">interface</span> {
-
                      <a name="IndexOrName.85"/><span class="yang_kw">choice</span> <span class="yang_id">IndexOrName</span> {
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Index or name of the interface as stored in the
                            ifTable of IF-MIB."</span>;
                         <span class="yang_kw">reference</span> <span class="yang_str">"RFC 1229."</span>;
-
                         <a name="ifIndex.90"/><span class="yang_kw">case</span> <span class="yang_id">ifIndex</span> {
-
                            <a name="ifIndex.90"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
                               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                            }
                         }  <span class="yang_cmt">// case ifIndex</span>
 
                         <a name="ifName.91"/><span class="yang_kw">case</span> <span class="yang_id">ifName</span> {
-
                            <a name="ifName.91"/><span class="yang_kw">leaf</span> <span class="yang_id">ifName</span> {
                               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                            }
@@ -407,24 +387,19 @@
                }  <span class="yang_cmt">// case interface</span>
 
                <a name="linecard.262"/><span class="yang_kw">case</span> <span class="yang_id">linecard</span> {
-
                   <a name="linecard.262"/><span class="yang_kw">container</span> <span class="yang_id">linecard</span> {
-
                      <a name="IndexOrName.105"/><span class="yang_kw">choice</span> <span class="yang_id">IndexOrName</span> {
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Index or name of the linecard as stored in the
                            entPhysicalTable of ENTITY-MIB."</span>;
                         <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4133."</span>;
-
                         <a name="entPhysicalIndex.110"/><span class="yang_kw">case</span> <span class="yang_id">entPhysicalIndex</span> {
-
                            <a name="entPhysicalIndex.110"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                            }
                         }  <span class="yang_cmt">// case entPhysicalIndex</span>
 
                         <a name="entPhysicalName.111"/><span class="yang_kw">case</span> <span class="yang_id">entPhysicalName</span> {
-
                            <a name="entPhysicalName.111"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalName</span> {
                               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                            }
@@ -447,7 +422,6 @@
                <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Metering Processes process packets in parallel."</span>;
-
                <a name="name.269"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                   <span class="yang_kw">description</span>
@@ -488,7 +462,6 @@
             <span class="yang_kw">description</span>
                <span class="yang_str">"Parameters of a Selection Process (i.e., Primitive
                Selector)."</span>;
-
             <a name="name.284"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                <span class="yang_kw">description</span>
@@ -508,11 +481,8 @@
                   <span class="yang_str">"See PSAMP-MIB for details about the selection methods
                   and their parameters."</span>;
                <span class="yang_kw">reference</span> <span class="yang_str">"draft-ietf-psamp-mib-06."</span>;
-
                <a name="sampCountBased.300"/><span class="yang_kw">case</span> <span class="yang_id">sampCountBased</span> {
-
                   <a name="sampCountBased.300"/><span class="yang_kw">container</span> <span class="yang_id">sampCountBased</span> {
-
                      <a name="interval.301"/><span class="yang_kw">leaf</span> <span class="yang_id">interval</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                      }
@@ -524,9 +494,7 @@
                }  <span class="yang_cmt">// case sampCountBased</span>
 
                <a name="sampTimeBased.304"/><span class="yang_kw">case</span> <span class="yang_id">sampTimeBased</span> {
-
                   <a name="sampTimeBased.304"/><span class="yang_kw">container</span> <span class="yang_id">sampTimeBased</span> {
-
                      <a name="interval.305"/><span class="yang_kw">leaf</span> <span class="yang_id">interval</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                      }
@@ -538,9 +506,7 @@
                }  <span class="yang_cmt">// case sampTimeBased</span>
 
                <a name="sampRandOutOfN.308"/><span class="yang_kw">case</span> <span class="yang_id">sampRandOutOfN</span> {
-
                   <a name="sampRandOutOfN.308"/><span class="yang_kw">container</span> <span class="yang_id">sampRandOutOfN</span> {
-
                      <a name="population.309"/><span class="yang_kw">leaf</span> <span class="yang_id">population</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                      }
@@ -552,9 +518,7 @@
                }  <span class="yang_cmt">// case sampRandOutOfN</span>
 
                <a name="sampUniProb.312"/><span class="yang_kw">case</span> <span class="yang_id">sampUniProb</span> {
-
                   <a name="sampUniProb.312"/><span class="yang_kw">container</span> <span class="yang_id">sampUniProb</span> {
-
                      <a name="probability.313"/><span class="yang_kw">leaf</span> <span class="yang_id">probability</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                         <span class="yang_kw">description</span>
@@ -564,10 +528,8 @@
                }  <span class="yang_cmt">// case sampUniProb</span>
 
                <a name="sampNonUniProb.319"/><span class="yang_kw">case</span> <span class="yang_id">sampNonUniProb</span> {
-
                   <a name="sampNonUniProb.319"/><span class="yang_kw">container</span> <span class="yang_id">sampNonUniProb</span> {
                      <span class="yang_kw">description</span> <span class="yang_str">"In PSAMP-MIB, these are OIDs."</span>;
-
                      <a name="function.321"/><span class="yang_kw">leaf</span> <span class="yang_id">function</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                      }
@@ -579,10 +541,8 @@
                }  <span class="yang_cmt">// case sampNonUniProb</span>
 
                <a name="sampFlowState.324"/><span class="yang_kw">case</span> <span class="yang_id">sampFlowState</span> {
-
                   <a name="sampFlowState.324"/><span class="yang_kw">container</span> <span class="yang_id">sampFlowState</span> {
                      <span class="yang_kw">description</span> <span class="yang_str">"In PSAMP-MIB, these are OIDs."</span>;
-
                      <a name="function.326"/><span class="yang_kw">leaf</span> <span class="yang_id">function</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                      }
@@ -594,9 +554,7 @@
                }  <span class="yang_cmt">// case sampFlowState</span>
 
                <a name="filterMatch.329"/><span class="yang_kw">case</span> <span class="yang_id">filterMatch</span> {
-
                   <a name="filterMatch.329"/><span class="yang_kw">container</span> <span class="yang_id">filterMatch</span> {
-
                      <a name="fieldId.330"/><span class="yang_kw">leaf</span> <span class="yang_id">fieldId</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                      }
@@ -616,11 +574,9 @@
                }  <span class="yang_cmt">// case filterMatch</span>
 
                <a name="filterHash.335"/><span class="yang_kw">case</span> <span class="yang_id">filterHash</span> {
-
                   <a name="filterHash.335"/><span class="yang_kw">container</span> <span class="yang_id">filterHash</span> {
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"In PSAMP-MIB, function and funcParam are OIDs."</span>;
-
                      <a name="addrType.337"/><span class="yang_kw">leaf</span> <span class="yang_id">addrType</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-version.26">inet:ip-version</a></span>;
                      }
@@ -664,10 +620,8 @@
                }  <span class="yang_cmt">// case filterHash</span>
 
                <a name="filterRState.348"/><span class="yang_kw">case</span> <span class="yang_id">filterRState</span> {
-
                   <a name="filterRState.348"/><span class="yang_kw">container</span> <span class="yang_id">filterRState</span> {
                      <span class="yang_kw">description</span> <span class="yang_str">"In PSAMP-MIB, vendorFunc is OID."</span>;
-
                      <a name="function.350"/><span class="yang_kw">leaf</span> <span class="yang_id">function</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
                      }
@@ -704,7 +658,6 @@
             <span class="yang_kw">key</span> "<a href="#name.369">name</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span> <span class="yang_str">"Parameters of a cache."</span>;
-
             <a name="name.369"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                <span class="yang_kw">description</span>
@@ -744,7 +697,6 @@
             }
 
             <a name="template.394"/><span class="yang_kw">container</span> <span class="yang_id">template</span> {
-
                <a name="templateId.395"/><span class="yang_kw">leaf</span> <span class="yang_id">templateId</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">uint16</span>;
                   <span class="yang_kw">description</span>
@@ -755,7 +707,6 @@
                <a name="field.401"/><span class="yang_kw">list</span> <span class="yang_id">field</span> {
                   <span class="yang_kw">key</span> "<a href="#name.405">name</a>";
                   <span class="yang_kw">ordered-by</span> <span class="yang_str">"user"</span>;
-
                   <a name="name.405"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                      <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                   }
@@ -768,16 +719,13 @@
                   }
 
                   <a name="NameOrId.53"/><span class="yang_kw">choice</span> <span class="yang_id">NameOrId</span> {
-
                      <a name="ieName.55"/><span class="yang_kw">case</span> <span class="yang_id">ieName</span> {
-
                         <a name="ieName.55"/><span class="yang_kw">leaf</span> <span class="yang_id">ieName</span> {
                            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                         }
                      }  <span class="yang_cmt">// case ieName</span>
 
                      <a name="ieId.58"/><span class="yang_kw">case</span> <span class="yang_id">ieId</span> {
-
                         <a name="ieId.58"/><span class="yang_kw">leaf</span> <span class="yang_id">ieId</span> {
                            <span class="yang_kw">type</span> <span class="yang_id">uint16</span>;
                         }
@@ -811,7 +759,6 @@
             <span class="yang_kw">key</span> "<a href="#name.423">name</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span> <span class="yang_str">"Parameters of an Exporting Process."</span>;
-
             <a name="name.423"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                <span class="yang_kw">description</span>
@@ -828,7 +775,6 @@
             <a name="destination.434"/><span class="yang_kw">list</span> <span class="yang_id">destination</span> {
                <span class="yang_kw">key</span> "<a href="#name.437">name</a>";
                <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
-
                <a name="name.437"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                }
@@ -858,13 +804,10 @@
 
                <a name="TransportProtocol.451"/><span class="yang_kw">choice</span> <span class="yang_id">TransportProtocol</span> {
                   <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
-
                   <a name="sctpExport.453"/><span class="yang_kw">case</span> <span class="yang_id">sctpExport</span> {
-
                      <a name="sctpExport.453"/><span class="yang_kw">container</span> <span class="yang_id">sctpExport</span> {
                         <span class="yang_kw">description</span> <span class="yang_str">"SCTP export parameters."</span>;
                         <span class="yang_kw">reference</span> <span class="yang_str">"RFC 3758, RFC 4960."</span>;
-
                         <a name="destinationIpAddress.456"/><span class="yang_kw">leaf</span> <span class="yang_id">destinationIpAddress</span> {
                            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
                            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
@@ -891,10 +834,8 @@
                   }  <span class="yang_cmt">// case sctpExport</span>
 
                   <a name="udpExport.472"/><span class="yang_kw">case</span> <span class="yang_id">udpExport</span> {
-
                      <a name="udpExport.472"/><span class="yang_kw">container</span> <span class="yang_id">udpExport</span> {
                         <span class="yang_kw">description</span> <span class="yang_str">"UDP export parameters."</span>;
-
                         <a name="destinationIpAddress.474"/><span class="yang_kw">leaf</span> <span class="yang_id">destinationIpAddress</span> {
                            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
                            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
@@ -931,10 +872,8 @@
                   }  <span class="yang_cmt">// case udpExport</span>
 
                   <a name="tcpExport.492"/><span class="yang_kw">case</span> <span class="yang_id">tcpExport</span> {
-
                      <a name="tcpExport.492"/><span class="yang_kw">container</span> <span class="yang_id">tcpExport</span> {
                         <span class="yang_kw">description</span> <span class="yang_str">"TCP export parameters."</span>;
-
                         <a name="destinationIpAddress.494"/><span class="yang_kw">leaf</span> <span class="yang_id">destinationIpAddress</span> {
                            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ip-address.124">inet:ip-address</a></span>;
                            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
@@ -948,10 +887,8 @@
                   }  <span class="yang_cmt">// case tcpExport</span>
 
                   <a name="fileExport.503"/><span class="yang_kw">case</span> <span class="yang_id">fileExport</span> {
-
                      <a name="fileExport.503"/><span class="yang_kw">container</span> <span class="yang_id">fileExport</span> {
                         <span class="yang_kw">description</span> <span class="yang_str">"File export parameters."</span>;
-
                         <a name="uri.505"/><span class="yang_kw">leaf</span> <span class="yang_id">uri</span> {
                            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#uri.145">yang:uri</a></span>;
                            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
@@ -963,7 +900,6 @@
                <a name="option.512"/><span class="yang_kw">list</span> <span class="yang_id">option</span> {
                   <span class="yang_kw">key</span> "<a href="#name.514">name</a>";
                   <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
-
                   <a name="name.514"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                      <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                   }
@@ -1032,7 +968,6 @@
                         <span class="yang_str">"If no Option Template is specified, the Exporter
                         defines a template according to option type and available
                         option data."</span>;
-
                      <a name="templateId.560"/><span class="yang_kw">leaf</span> <span class="yang_id">templateId</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">uint16</span>;
                         <span class="yang_kw">description</span>
@@ -1043,7 +978,6 @@
                      <a name="optionField.565"/><span class="yang_kw">list</span> <span class="yang_id">optionField</span> {
                         <span class="yang_kw">key</span> "<a href="#name.568">name</a>";
                         <span class="yang_kw">ordered-by</span> <span class="yang_str">"user"</span>;
-
                         <a name="name.568"/><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
                            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                         }
@@ -1056,16 +990,13 @@
                         }
 
                         <a name="NameOrId.53"/><span class="yang_kw">choice</span> <span class="yang_id">NameOrId</span> {
-
                            <a name="ieName.55"/><span class="yang_kw">case</span> <span class="yang_id">ieName</span> {
-
                               <a name="ieName.55"/><span class="yang_kw">leaf</span> <span class="yang_id">ieName</span> {
                                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                               }
                            }  <span class="yang_cmt">// case ieName</span>
 
                            <a name="ieId.58"/><span class="yang_kw">case</span> <span class="yang_id">ieId</span> {
-
                               <a name="ieId.58"/><span class="yang_kw">leaf</span> <span class="yang_id">ieId</span> {
                                  <span class="yang_kw">type</span> <span class="yang_id">uint16</span>;
                               }

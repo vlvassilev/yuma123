@@ -176,10 +176,8 @@
             <span class="yang_str">"Initial version, published as RFC 1354."</span>;
       }
 
-
       <a name="ipForward.88"/><span class="yang_kw">container</span> <span class="yang_id">ipForward</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24"</span>;
-
          <a name="ipForwardNumber.90"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardNumber</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -198,7 +196,6 @@
                <span class="yang_str">"A particular route to a particular destination, under a
                particular policy."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1"</span>;
-
             <a name="ipForwardDest.114"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardDest</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -541,7 +538,6 @@
                
                particular policy."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1"</span>;
-
             <a name="ipCidrRouteDest.424"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteDest</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -888,7 +884,6 @@
                identifiers and cannot be accessed using SNMPv1,
                SNMPv2c, or SNMPv3."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1"</span>;
-
             <a name="inetCidrRouteDestType.738"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteDestType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;

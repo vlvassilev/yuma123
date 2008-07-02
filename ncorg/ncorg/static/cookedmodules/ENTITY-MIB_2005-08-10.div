@@ -178,7 +178,6 @@
 
 
       <span class="yang_cmt">// typedefs</span>
-
       <a name="PhysicalIndex.84"/><span class="yang_kw">typedef</span> <span class="yang_id">PhysicalIndex</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
@@ -345,10 +344,8 @@
       }
 
       <span class="yang_cmt">// objects</span>
-
       <a name="entityPhysical.225"/><span class="yang_kw">container</span> <span class="yang_id">entityPhysical</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1"</span>;
-
          <a name="entPhysicalEntry.230"/><span class="yang_kw">list</span> <span class="yang_id">entPhysicalEntry</span> {
             <span class="yang_kw">key</span> "<a href="#entPhysicalIndex.245">entPhysicalIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -362,7 +359,6 @@
                an NMS relate the particular entry to other entries in this
                table."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1"</span>;
-
             <a name="entPhysicalIndex.245"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#PhysicalIndex.84">PhysicalIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -796,7 +792,6 @@
 
       <a name="entityLogical.678"/><span class="yang_kw">container</span> <span class="yang_id">entityLogical</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.2"</span>;
-
          <a name="entLogicalEntry.683"/><span class="yang_kw">list</span> <span class="yang_id">entLogicalEntry</span> {
             <span class="yang_kw">key</span> "<a href="#entLogicalIndex.693">entLogicalIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -805,7 +800,6 @@
                may be managed by this agent or other SNMP agents (possibly)
                in the same chassis."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.2.1.1"</span>;
-
             <a name="entLogicalIndex.693"/><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
@@ -978,7 +972,6 @@
 
       <a name="entityMapping.864"/><span class="yang_kw">container</span> <span class="yang_id">entityMapping</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.3"</span>;
-
          <a name="entLPMappingEntry.869"/><span class="yang_kw">list</span> <span class="yang_id">entLPMappingEntry</span> {
             <span class="yang_kw">key</span> "<a href="#entLogicalIndex.881">entLogicalIndex</a>, <a href="#entLPPhysicalIndex.890">entLPPhysicalIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -990,7 +983,6 @@
                MIBs used to manage a particular logical entity to infer how
                physical component information is utilized."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.3.1.1"</span>;
-
             <a name="entLogicalIndex.881"/><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -1029,7 +1021,6 @@
                physical ports (i.e., associated entPhysicalClass value is
                'port(10)') are permitted to exist in this table."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.3.2.1"</span>;
-
             <a name="entPhysicalIndex.923"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -1124,7 +1115,6 @@
             <span class="yang_kw">description</span>
                <span class="yang_str">"A single container/'containee' relationship."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.3.3.1"</span>;
-
             <a name="entPhysicalIndex.1021"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -1147,7 +1137,6 @@
 
       <a name="entityGeneral.1042"/><span class="yang_kw">container</span> <span class="yang_id">entityGeneral</span> {
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.4"</span>;
-
          <a name="entLastChangeTime.1044"/><span class="yang_kw">leaf</span> <span class="yang_id">entLastChangeTime</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;

@@ -96,13 +96,11 @@
 
 
       <span class="yang_cmt">// extensions</span>
-
       <a name="no-duplicates.260"/><span class="yang_kw">extension</span> <span class="yang_id">no-duplicates</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Used to indicate that no duplicate values are allowed
             in a leaf-list."</span>;
       }
-
       <a name="metadata.266"/><span class="yang_kw">extension</span> <span class="yang_id">metadata</span> {
          <span class="yang_kw">argument</span> <span class="yang_str">"syntax-string"</span> {
             <span class="yang_kw">yin-element</span> <span class="yang_str">"true"</span> {
@@ -111,7 +109,6 @@
             <span class="yang_str">"Used to define an XML attribute to be associated with a
             data-def-stmt node."</span>;
       }
-
       <a name="rpc-type.275"/><span class="yang_kw">extension</span> <span class="yang_id">rpc-type</span> {
          <span class="yang_kw">argument</span> <span class="yang_str">"type-string"</span> {
             <span class="yang_kw">yin-element</span> <span class="yang_str">"true"</span> {
@@ -123,7 +120,6 @@
       }
 
       <span class="yang_cmt">// objects</span>
-
       <a name="belongs-to.32"/><span class="yang_kw">leaf</span> <span class="yang_id">belongs-to</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span>;
          <span class="yang_kw">description</span>
@@ -206,7 +202,6 @@
          <span class="yang_kw">description</span>
             <span class="yang_str">"Contains the fields from one must-stmt.  Will be present
             in appinfo for each must-stmt defined within an object."</span>;
-
          <a name="xpath.115"/><span class="yang_kw">leaf</span> <span class="yang_id">xpath</span> {
             <span class="yang_kw">type</span> <span class="yang_id">string</span>;
             <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
@@ -227,7 +222,6 @@
                <span class="yang_str">"Contains information from the reference-stmt.  Will
                be present in appinfo for objects which contain a
                reference-stmt."</span>;
-
             <a name="text.189"/><span class="yang_kw">leaf</span> <span class="yang_id">text</span> {
                <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
@@ -301,7 +295,6 @@
             <span class="yang_str">"Contains information from the reference-stmt.  Will
             be present in appinfo for objects which contain a
             reference-stmt."</span>;
-
          <a name="text.189"/><span class="yang_kw">leaf</span> <span class="yang_id">text</span> {
             <span class="yang_kw">type</span> <span class="yang_id">string</span>;
             <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
@@ -320,7 +313,6 @@
          <span class="yang_kw">description</span>
             <span class="yang_str">"Contains the fields from one revision-stmt.  Will be present
             in appinfo for each revision-stmt defined within the module."</span>;
-
          <a name="version.211"/><span class="yang_kw">leaf</span> <span class="yang_id">version</span> {
             <span class="yang_kw">type</span> <span class="yang_id">string</span>;
             <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;

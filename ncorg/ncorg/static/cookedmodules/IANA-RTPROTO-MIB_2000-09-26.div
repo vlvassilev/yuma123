@@ -60,7 +60,6 @@
 
 
       <span class="yang_cmt">// typedefs</span>
-
       <a name="IANAipRouteProtocol.55"/><span class="yang_kw">typedef</span> <span class="yang_id">IANAipRouteProtocol</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {

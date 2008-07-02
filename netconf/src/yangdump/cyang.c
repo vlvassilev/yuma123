@@ -304,15 +304,20 @@ static void
 *   idname == identifier name (may be NULL)
 *   indent == indent count to use
 *   finsemi == TRUE if end in ';', FALSE if '{'
+*   newln == TRUE if a newline should be output first
+*            FALSE if newline should not be output first
 *********************************************************************/
 static void
     write_cyang_id (ses_cb_t *scb,
 		    const xmlChar *kwname,
 		    const xmlChar *idname,
 		    int32 indent,
-		    boolean finsemi)
+		    boolean finsemi,
+		    boolean newln)
 {
-    ses_putchar(scb, '\n');
+    if (newln) {
+	ses_putchar(scb, '\n');
+    }
     ses_putstr_indent(scb, kwname, indent);
     if (idname) {
 	ses_putchar(scb, ' ');
@@ -793,20 +798,23 @@ static void
 *   cp == conversion parameters to use
 *   typ == typ_template_t to use
 *   startindent == start indent count
-*
-*********************************************************************/
+*   first == TRUE if this is the first typedef at this indent level
+*            FALSE if not the first typedef at this indent level
+**********************************************************************/
 static void
     write_cyang_typedef (ses_cb_t *scb,
 			 const ncx_module_t *mod,
 			 const yangdump_cvtparms_t *cp,
 			 const typ_template_t *typ,
-			 int32 startindent)
+			 int32 startindent,
+			 boolean first)
 {
     int32                    indent;
 
     indent = startindent + ses_indent_count(scb);
 
-    write_cyang_id(scb, YANG_K_TYPEDEF, typ->name, startindent, FALSE);
+    write_cyang_id(scb, YANG_K_TYPEDEF, typ->name, startindent, 
+		   FALSE, !first);
 
     /* type field */
     write_cyang_type_clause(scb, mod, cp, &typ->typdef, indent);
@@ -869,6 +877,7 @@ static void
 			  int32 startindent)
 {
     const typ_template_t    *typ;
+    boolean                  first;
 
     if (dlq_empty(typedefQ)) {
 	return;
@@ -879,15 +888,16 @@ static void
 			       (const xmlChar *)"typedefs", startindent);
     }
 
+    first = TRUE;
     for (typ = (const typ_template_t *)dlq_firstEntry(typedefQ);
 	 typ != NULL;
 	 typ = (const typ_template_t *)dlq_nextEntry(typ)) {
 
-	write_cyang_typedef(scb, mod, cp, typ, startindent);
+	write_cyang_typedef(scb, mod, cp, typ, startindent, first);
+	first = FALSE;
     }
 
 }  /* write_cyang_typedefs */
-
 
 
 /********************************************************************
@@ -901,14 +911,16 @@ static void
 *   cp == conversion parameters to use
 *   grp == grp_template_t to use
 *   startindent == start indent count
-*
-*********************************************************************/
+*   first == TRUE if this is the first grouping at this indent level
+*            FALSE if not the first grouping at this indent level
+**********************************************************************/
 static void
     write_cyang_grouping (ses_cb_t *scb,
 			  const ncx_module_t *mod,
 			  const yangdump_cvtparms_t *cp,
 			  const grp_template_t *grp,
-			  int32 startindent)
+			  int32 startindent,
+			  boolean first)
 {
     int32                    indent;
     boolean                  cooked;
@@ -920,7 +932,8 @@ static void
 	return;
     }
 	
-    write_cyang_id(scb, YANG_K_GROUPING, grp->name, startindent, FALSE);
+    write_cyang_id(scb, YANG_K_GROUPING, grp->name, startindent,
+		   FALSE, !first);
 
     /* status field */
     write_cyang_status(scb, grp->status, indent);
@@ -978,7 +991,7 @@ static void
 			   int32 startindent)
 {
     const grp_template_t    *grp;
-    boolean                  needed, cooked;
+    boolean                  needed, cooked, first;
 
     if (dlq_empty(groupingQ)) {
 	return;
@@ -1007,11 +1020,13 @@ static void
 			       (const xmlChar *)"groupings", startindent);
     }
 
+    first = TRUE;
     for (grp = (const grp_template_t *)dlq_firstEntry(groupingQ);
 	 grp != NULL;
 	 grp = (const grp_template_t *)dlq_nextEntry(grp)) {
 
-	write_cyang_grouping(scb, mod, cp, grp, startindent);
+	write_cyang_grouping(scb, mod, cp, grp, startindent, first);
+	first = FALSE;
     }
 
 }  /* write_cyang_groupings */
@@ -1028,14 +1043,16 @@ static void
 *   cp == conversion parameters to use
 *   obj == obj_template_t to use
 *   startindent == start indent count
-*
-*********************************************************************/
+*   first == TRUE if this is the first object at this indent level
+*            FALSE if not the first object at this indent level
+**********************************************************************/
 static void
     write_cyang_object (ses_cb_t *scb,
 			const ncx_module_t *mod,
 			const yangdump_cvtparms_t *cp,
 			const obj_template_t *obj,
-			int32 startindent)
+			int32 startindent,
+			boolean first)
 {
     const obj_container_t   *con;
     const obj_leaf_t        *leaf;
@@ -1068,7 +1085,8 @@ static void
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
 	con = obj->def.container;
-	write_cyang_id(scb, YANG_K_CONTAINER, con->name, startindent, isempty);
+	write_cyang_id(scb, YANG_K_CONTAINER, con->name, startindent, 
+		       isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1126,12 +1144,14 @@ static void
 	isanyxml = (typ_get_basetype(leaf->typdef) == NCX_BT_ANY) ?
 	    TRUE : FALSE;
 	if (isanyxml) {
-	    write_cyang_id(scb, YANG_K_ANYXML, leaf->name, startindent, isempty);
+	    write_cyang_id(scb, YANG_K_ANYXML, leaf->name, startindent, 
+			   isempty, !first);
 	    if (isempty) {
 		return;
 	    }
 	} else {
-	    write_cyang_id(scb, YANG_K_LEAF, leaf->name, startindent, isempty);
+	    write_cyang_id(scb, YANG_K_LEAF, leaf->name, startindent, 
+			   isempty, !first);
 	    if (isempty) {
 		return;
 	    }
@@ -1197,7 +1217,8 @@ static void
 	break;
     case OBJ_TYP_LEAF_LIST:
 	leaflist = obj->def.leaflist;
-	write_cyang_id(scb, YANG_K_LEAF_LIST, leaflist->name, startindent, isempty);
+	write_cyang_id(scb, YANG_K_LEAF_LIST, leaflist->name, startindent, 
+		       isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1272,7 +1293,8 @@ static void
 	break;
     case OBJ_TYP_LIST:
 	list = obj->def.list;
-	write_cyang_id(scb, YANG_K_LIST, list->name, startindent, isempty);
+	write_cyang_id(scb, YANG_K_LIST, list->name, startindent, 
+		       isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1387,7 +1409,8 @@ static void
 	break;
     case OBJ_TYP_CHOICE:
 	choic = obj->def.choic;
-	write_cyang_id(scb, YANG_K_CHOICE, choic->name, startindent, isempty);
+	write_cyang_id(scb, YANG_K_CHOICE, choic->name, startindent, 
+		       isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1435,7 +1458,8 @@ static void
 	break;
     case OBJ_TYP_CASE:
 	cas = obj->def.cas;
-	write_cyang_id(scb, YANG_K_CASE, cas->name, startindent, isempty);
+	write_cyang_id(scb, YANG_K_CASE, cas->name, startindent, 
+		       isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1564,7 +1588,8 @@ static void
 	break;
     case OBJ_TYP_RPC:
 	rpc = obj->def.rpc;
-	write_cyang_id(scb, YANG_K_RPC, rpc->name, startindent, isempty);
+	write_cyang_id(scb, YANG_K_RPC, rpc->name, startindent, 
+		       isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1600,7 +1625,8 @@ static void
 	break;
     case OBJ_TYP_RPCIO:
 	rpcio = obj->def.rpcio;
-	write_cyang_id(scb, obj_get_name(obj), NULL, startindent, isempty);
+	write_cyang_id(scb, obj_get_name(obj), NULL, startindent, 
+		       isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1618,7 +1644,8 @@ static void
 	break;
     case OBJ_TYP_NOTIF:
 	notif = obj->def.notif;
-	write_cyang_id(scb, YANG_K_NOTIFICATION, notif->name, startindent, isempty);
+	write_cyang_id(scb, YANG_K_NOTIFICATION, notif->name, startindent, 
+		       isempty, !first);
 	if (isempty) {
 	    return;
 	}
@@ -1680,6 +1707,7 @@ static void
 			 int32 startindent)
 {
     const obj_template_t    *obj;
+    boolean                  first;
 
     if (dlq_empty(datadefQ)) {
 	return;
@@ -1690,11 +1718,13 @@ static void
 			       (const xmlChar *)"objects", startindent);
     }
 
+    first = TRUE;
     for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	write_cyang_object(scb, mod, cp, obj, startindent);
+	write_cyang_object(scb, mod, cp, obj, startindent, first);
+	first = FALSE;
     }
 
 }  /* write_cyang_objects */
@@ -1724,7 +1754,8 @@ static void
 
     indent = startindent + ses_indent_count(scb);
 
-    write_cyang_id(scb, YANG_K_EXTENSION, ext->name, startindent, FALSE);
+    write_cyang_id(scb, YANG_K_EXTENSION, ext->name, startindent, 
+		   FALSE, FALSE);
 
     /* argument sub-clause */
     if (ext->arg) {
@@ -2025,7 +2056,7 @@ static void
 {
     const yang_node_t     *node;
     const yang_stmt_t     *stmt;
-    boolean                stmtmode;
+    boolean                stmtmode, first;
 
     write_cyang_header(scb, mod, cp);
 
@@ -2095,6 +2126,7 @@ static void
     }
 
     if (stmtmode) {
+	first = TRUE;
 	for (stmt = (const yang_stmt_t *)dlq_firstEntry(&mod->stmtQ);
 	     stmt != NULL;
 	     stmt = (const yang_stmt_t *)dlq_nextEntry(stmt)) {
@@ -2103,20 +2135,21 @@ static void
 		SET_ERROR(ERR_INTERNAL_VAL);
 		break;
 	    case YANG_ST_TYPEDEF:
-		write_cyang_typedef(scb, mod, cp, stmt->s.typ, cp->indent);
+		write_cyang_typedef(scb, mod, cp, stmt->s.typ, cp->indent, first);
 		break;
 	    case YANG_ST_GROUPING:
-		write_cyang_grouping(scb, mod, cp, stmt->s.grp, cp->indent);
+		write_cyang_grouping(scb, mod, cp, stmt->s.grp, cp->indent, first);
 		break;
 	    case YANG_ST_EXTENSION:
 		write_cyang_extension(scb, mod, cp, stmt->s.ext, cp->indent);
 		break;
 	    case YANG_ST_OBJECT:
-		write_cyang_object(scb, mod, cp, stmt->s.obj, cp->indent);
+		write_cyang_object(scb, mod, cp, stmt->s.obj, cp->indent, first);
 		break;
 	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
+	    first = FALSE;
 	}
     }
     

@@ -1497,6 +1497,9 @@ static void
 	}
 
 	uses = obj->def.uses;
+	if (!first) {
+	    ses_putchar(scb, '\n');
+	}
 	ses_indent(scb, startindent);
 	ses_putstr(scb, YANG_K_USES);
 	ses_putchar(scb, ' ');

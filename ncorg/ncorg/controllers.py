@@ -808,9 +808,6 @@ class Root(controllers.RootController):
     @expose(template="ncorg.templates.yangdump_results")
     def yangdumpresults(self, srcfile, resfile, report, *args, **kw):
 
-        log.debug(srcfile);
-        log.debug(resfile);
-        log.debug(report);
         return dict(modmenu=moduleJumpMenu,
                     srcfile=srcfile,
                     resfile=resfile,

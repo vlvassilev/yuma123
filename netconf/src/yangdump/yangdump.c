@@ -627,15 +627,6 @@ static void
     psd_template_t    *psd;
 
     if (mod->ismod) {
-	sprintf(buff, "\nmodule %s", mod->name);
-    } else {
-	sprintf(buff, "\nsubmodule %s", mod->name);
-    }
-    ses_putstr(scb, (const xmlChar *)buff);
-    ses_putchar(scb, ' ');
-    ses_putstr(scb, mod->version);
-
-    if (mod->ismod) {
 	sprintf(buff, "\nnamespace %s", mod->ns);
 	ses_putstr(scb, (const xmlChar *)buff);
 	if (mod->prefix) {
@@ -732,7 +723,20 @@ static void
 	return;
     }
 
+
     ses_putstr(scb, (const xmlChar *)"\nexports:");
+
+    if (pcb->subtree_mode) {
+	if (mod->ismod) {
+	    sprintf(cp->buff, "\nmodule %s", mod->name);
+	} else {
+	    sprintf(cp->buff, "\nsubmodule %s", mod->name);
+	}
+	ses_putstr(scb, (const xmlChar *)cp->buff);
+	ses_putchar(scb, ' ');
+	ses_putstr(scb, mod->version);
+    }
+
     output_one_module_exports(mod, scb, cp->buff);
 
     if (cp->unified && mod->ismod) {
@@ -767,16 +771,6 @@ static void
     ncx_import_t      *imp;
     yang_import_ptr_t *impptr;
     yang_node_t       *node; 
-
-
-    if (mod->ismod) {
-	sprintf(cp->buff, "\nmodule %s", mod->name);
-    } else {
-	sprintf(cp->buff, "\nsubmodule %s", mod->name);
-    }
-    ses_putstr(scb,(const xmlChar *)cp->buff);
-    ses_putchar(scb, ' ');
-    ses_putstr(scb, mod->version);
 
     if (mod->isyang) {
 	for (impptr = (yang_import_ptr_t *)dlq_firstEntry(&mod->saveimpQ);
@@ -850,6 +844,18 @@ static void
     }
 
     ses_putstr(scb, (const xmlChar *)"\ndependencies:");
+
+    if (pcb->subtree_mode) {
+	if (mod->ismod) {
+	    sprintf(cp->buff, "\nmodule %s", mod->name);
+	} else {
+	    sprintf(cp->buff, "\nsubmodule %s", mod->name);
+	}
+	ses_putstr(scb,(const xmlChar *)cp->buff);
+	ses_putchar(scb, ' ');
+	ses_putstr(scb, mod->version);
+    }
+
     output_one_module_dependencies(mod, scb, cp);
 
     if (cp->unified && mod->ismod) {
@@ -943,16 +949,6 @@ static void
 				   xmlChar *buff,
 				   uint32 bufflen)
 {
-    if (mod->ismod) {
-	sprintf((char *)buff, "\nmodule %s", mod->name);
-    } else {
-	sprintf((char *)buff, "\nsubmodule %s", mod->name);
-    }
-    ses_putstr(scb, buff);
-
-    sprintf((char *)buff, " %s", mod->version);
-    ses_putstr(scb, buff);
-
     (void)output_identifiers(&mod->datadefQ, scb, buff, bufflen);
     ses_putchar(scb, '\n');
 
@@ -988,6 +984,19 @@ static void
     }
 
     ses_putstr(scb, (const xmlChar *)"\nidentifiers:");
+
+    if (pcb->subtree_mode) {
+	if (mod->ismod) {
+	    sprintf((char *)cp->buff, "\nmodule %s", mod->name);
+	} else {
+	    sprintf((char *)cp->buff, "\nsubmodule %s", mod->name);
+	}
+	ses_putstr(scb, (const xmlChar *)cp->buff);
+
+	sprintf((char *)cp->buff, " %s", mod->version);
+	ses_putstr(scb, (const xmlChar *)cp->buff);
+    }
+
     output_one_module_identifiers(mod, scb,
 				  (xmlChar *)cp->buff,
 				  cp->bufflen);
@@ -1032,7 +1041,7 @@ static void
     sprintf(buff, " %s", (mod->version) ? mod->version : NCX_EL_NONE);
     ses_putstr(scb, (const xmlChar *)buff);
 
-    if (mod->source) {
+    if (mod->source && LOGDEBUG2) {
 	ses_putchar(scb, ' ');
 	ses_putstr(scb, mod->source);
     }

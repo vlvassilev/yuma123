@@ -1921,8 +1921,10 @@ static status_t
 		mod->nsid = pcb->mod->nsid;
 	    }
 
-	    dlq_block_enque(mod->allimpQ, &mod->saveimpQ);
-	    dlq_block_enque(mod->allincQ, &mod->saveincQ);
+	    if (pcb->top == mod) {
+		dlq_block_enque(mod->allimpQ, &mod->saveimpQ);
+		dlq_block_enque(mod->allincQ, &mod->saveincQ);
+	    }  /* else leave the pcb->allimpQ and pcb->allincQ alone */
 	    mod->allincQ = NULL;
 	    mod->allimpQ = NULL;
 

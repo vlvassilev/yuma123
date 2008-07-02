@@ -55,7 +55,7 @@
       <h2 py:content="banner"/>
       <pre py:if="opened==1" py:content="results"/>
       <div py:if="opened==0" py:content="err"/>
-      <div py:if="report==True">
+      <div py:if="report=='True'">
         <h2 py:content="'Reports for ' + srcfile" />
 	<div py:if="err2" py:content="err2"/>
 	<pre py:if="opened2==1" py:content="results2"/>	

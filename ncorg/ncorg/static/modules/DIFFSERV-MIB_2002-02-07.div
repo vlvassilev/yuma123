@@ -297,7 +297,7 @@
             <span class="yang_str">"Initial version, published as RFC 3289."</span>;
       }
 
-      <a name="IndexInteger.69"/><span class="yang_kw">typedef</span> <span class="yang_id">IndexInteger</span> {
+      <a name="IndexInteger.69"></a><span class="yang_kw">typedef</span> <span class="yang_id">IndexInteger</span> {
          <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
             <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
@@ -306,7 +306,7 @@
             <span class="yang_str">"An integer which may be used as a table index."</span>;
       }
 
-      <a name="IndexIntegerNextFree.78"/><span class="yang_kw">typedef</span> <span class="yang_id">IndexIntegerNextFree</span> {
+      <a name="IndexIntegerNextFree.78"></a><span class="yang_kw">typedef</span> <span class="yang_id">IndexIntegerNextFree</span> {
          <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"0..4294967295"</span>;
             <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
@@ -340,7 +340,7 @@
             functionality."</span>;
       }
 
-      <a name="IfDirection.112"/><span class="yang_kw">typedef</span> <span class="yang_id">IfDirection</span> {
+      <a name="IfDirection.112"></a><span class="yang_kw">typedef</span> <span class="yang_id">IfDirection</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"inbound"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -356,8 +356,8 @@
             transmission on the interface."</span>;
       }
 
-      <a name="diffServDataPath.124"/><span class="yang_kw">container</span> <span class="yang_id">diffServDataPath</span> {
-         <a name="diffServDataPathEntry.129"/><span class="yang_kw">list</span> <span class="yang_id">diffServDataPathEntry</span> {
+      <a name="diffServDataPath.124"></a><span class="yang_kw">container</span> <span class="yang_id">diffServDataPath</span> {
+         <a name="diffServDataPathEntry.129"></a><span class="yang_kw">list</span> <span class="yang_id">diffServDataPathEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ifIndex.148">ifIndex</a> <a href="#diffServDataPathIfDirection.157">diffServDataPathIfDirection</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -374,7 +374,7 @@
                this may reflect the configuration for an interface whose ifIndex
                has been assigned but for which the supporting implementation is
                not currently present."</span>;
-            <a name="ifIndex.148"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+            <a name="ifIndex.148"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex"</span>;
@@ -383,7 +383,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="diffServDataPathIfDirection.157"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServDataPathIfDirection</span> {
+            <a name="diffServDataPathIfDirection.157"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServDataPathIfDirection</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IfDirection.112">IfDirection</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -392,7 +392,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.1.1.1.1"</span>;
             }
 
-            <a name="diffServDataPathStart.166"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServDataPathStart</span> {
+            <a name="diffServDataPathStart.166"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServDataPathStart</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -417,7 +417,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.1.1.1.2"</span>;
             }
 
-            <a name="diffServDataPathStorage.191"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServDataPathStorage</span> {
+            <a name="diffServDataPathStorage.191"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServDataPathStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -428,7 +428,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.1.1.1.3"</span>;
             }
 
-            <a name="diffServDataPathStatus.202"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServDataPathStatus</span> {
+            <a name="diffServDataPathStatus.202"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServDataPathStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -441,8 +441,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.1"</span>;
       }  <span class="yang_cmt">// container diffServDataPath</span>
 
-      <a name="diffServClassifier.214"/><span class="yang_kw">container</span> <span class="yang_id">diffServClassifier</span> {
-         <a name="diffServClfrNextFree.216"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrNextFree</span> {
+      <a name="diffServClassifier.214"></a><span class="yang_kw">container</span> <span class="yang_id">diffServClassifier</span> {
+         <a name="diffServClfrNextFree.216"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -451,14 +451,14 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.1"</span>;
          }
 
-         <a name="diffServClfrEntry.228"/><span class="yang_kw">list</span> <span class="yang_id">diffServClfrEntry</span> {
+         <a name="diffServClfrEntry.228"></a><span class="yang_kw">list</span> <span class="yang_id">diffServClfrEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServClfrId.238">diffServClfrId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry in the classifier table describes a single classifier.
                All classifier elements belonging to the same classifier use the
                classifier's diffServClfrId as part of their index."</span>;
-            <a name="diffServClfrId.238"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrId</span> {
+            <a name="diffServClfrId.238"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -468,7 +468,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.2.1.1"</span>;
             }
 
-            <a name="diffServClfrStorage.248"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrStorage</span> {
+            <a name="diffServClfrStorage.248"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -479,7 +479,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.2.1.2"</span>;
             }
 
-            <a name="diffServClfrStatus.259"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrStatus</span> {
+            <a name="diffServClfrStatus.259"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -493,7 +493,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.2.1"</span>;
          }  <span class="yang_cmt">// list diffServClfrEntry</span>
 
-         <a name="diffServClfrElementNextFree.272"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementNextFree</span> {
+         <a name="diffServClfrElementNextFree.272"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -502,13 +502,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.3"</span>;
          }
 
-         <a name="diffServClfrElementEntry.284"/><span class="yang_kw">list</span> <span class="yang_id">diffServClfrElementEntry</span> {
+         <a name="diffServClfrElementEntry.284"></a><span class="yang_kw">list</span> <span class="yang_id">diffServClfrElementEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServClfrId.292">diffServClfrId</a> <a href="#diffServClfrElementId.301">diffServClfrElementId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry in the classifier element table describes a single
                element of the classifier."</span>;
-            <a name="diffServClfrId.292"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrId</span> {
+            <a name="diffServClfrId.292"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrId</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/diffserv-mib:diffServClassifier/diffserv-mib:diffServClfrEntry/diffserv-mib:diffServClfrId"</span>;
@@ -517,7 +517,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="diffServClfrElementId.301"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementId</span> {
+            <a name="diffServClfrElementId.301"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -527,7 +527,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1.1"</span>;
             }
 
-            <a name="diffServClfrElementPrecedence.311"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementPrecedence</span> {
+            <a name="diffServClfrElementPrecedence.311"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementPrecedence</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -552,7 +552,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1.2"</span>;
             }
 
-            <a name="diffServClfrElementNext.336"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementNext</span> {
+            <a name="diffServClfrElementNext.336"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementNext</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -581,7 +581,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1.3"</span>;
             }
 
-            <a name="diffServClfrElementSpecific.365"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementSpecific</span> {
+            <a name="diffServClfrElementSpecific.365"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementSpecific</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -602,7 +602,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1.4"</span>;
             }
 
-            <a name="diffServClfrElementStorage.386"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementStorage</span> {
+            <a name="diffServClfrElementStorage.386"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -613,7 +613,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1.5"</span>;
             }
 
-            <a name="diffServClfrElementStatus.397"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementStatus</span> {
+            <a name="diffServClfrElementStatus.397"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -627,7 +627,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1"</span>;
          }  <span class="yang_cmt">// list diffServClfrElementEntry</span>
 
-         <a name="diffServMultiFieldClfrNextFree.410"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrNextFree</span> {
+         <a name="diffServMultiFieldClfrNextFree.410"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -636,12 +636,12 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.5"</span>;
          }
 
-         <a name="diffServMultiFieldClfrEntry.422"/><span class="yang_kw">list</span> <span class="yang_id">diffServMultiFieldClfrEntry</span> {
+         <a name="diffServMultiFieldClfrEntry.422"></a><span class="yang_kw">list</span> <span class="yang_id">diffServMultiFieldClfrEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServMultiFieldClfrId.430">diffServMultiFieldClfrId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An IP Multi-field Classifier entry describes a single filter."</span>;
-            <a name="diffServMultiFieldClfrId.430"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrId</span> {
+            <a name="diffServMultiFieldClfrId.430"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -651,7 +651,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.1"</span>;
             }
 
-            <a name="diffServMultiFieldClfrAddrType.440"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrAddrType</span> {
+            <a name="diffServMultiFieldClfrAddrType.440"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrAddrType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -666,7 +666,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.2"</span>;
             }
 
-            <a name="diffServMultiFieldClfrDstAddr.455"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDstAddr</span> {
+            <a name="diffServMultiFieldClfrDstAddr.455"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDstAddr</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddress.128">inet-address:InetAddress</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -677,7 +677,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.3"</span>;
             }
 
-            <a name="diffServMultiFieldClfrDstPrefixLength.466"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDstPrefixLength</span> {
+            <a name="diffServMultiFieldClfrDstPrefixLength.466"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDstPrefixLength</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressPrefixLength.285">inet-address:InetAddressPrefixLength</a></span>;
                <span class="yang_kw">units</span> <span class="yang_str">"bits"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -692,7 +692,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.4"</span>;
             }
 
-            <a name="diffServMultiFieldClfrSrcAddr.481"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrSrcAddr</span> {
+            <a name="diffServMultiFieldClfrSrcAddr.481"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrSrcAddr</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddress.128">inet-address:InetAddress</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -703,7 +703,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.5"</span>;
             }
 
-            <a name="diffServMultiFieldClfrSrcPrefixLength.492"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrSrcPrefixLength</span> {
+            <a name="diffServMultiFieldClfrSrcPrefixLength.492"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrSrcPrefixLength</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressPrefixLength.285">inet-address:InetAddressPrefixLength</a></span>;
                <span class="yang_kw">units</span> <span class="yang_str">"bits"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -718,7 +718,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.6"</span>;
             }
 
-            <a name="diffServMultiFieldClfrDscp.507"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDscp</span> {
+            <a name="diffServMultiFieldClfrDscp.507"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDscp</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/DIFFSERV-DSCP-TC/2002-05-09#DscpOrAny.71">diffserv-dscp:DscpOrAny</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -729,7 +729,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.7"</span>;
             }
 
-            <a name="diffServMultiFieldClfrFlowId.518"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrFlowId</span> {
+            <a name="diffServMultiFieldClfrFlowId.518"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrFlowId</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..1048575"</span>;
                }
@@ -738,7 +738,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.8"</span>;
             }
 
-            <a name="diffServMultiFieldClfrProtocol.528"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrProtocol</span> {
+            <a name="diffServMultiFieldClfrProtocol.528"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrProtocol</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..255"</span>;
                }
@@ -752,7 +752,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.9"</span>;
             }
 
-            <a name="diffServMultiFieldClfrDstL4PortMin.542"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDstL4PortMin</span> {
+            <a name="diffServMultiFieldClfrDstL4PortMin.542"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDstL4PortMin</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetPortNumber.324">inet-address:InetPortNumber</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -762,7 +762,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.10"</span>;
             }
 
-            <a name="diffServMultiFieldClfrDstL4PortMax.552"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDstL4PortMax</span> {
+            <a name="diffServMultiFieldClfrDstL4PortMax.552"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDstL4PortMax</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetPortNumber.324">inet-address:InetPortNumber</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -774,7 +774,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.11"</span>;
             }
 
-            <a name="diffServMultiFieldClfrSrcL4PortMin.564"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrSrcL4PortMin</span> {
+            <a name="diffServMultiFieldClfrSrcL4PortMin.564"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrSrcL4PortMin</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetPortNumber.324">inet-address:InetPortNumber</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -784,7 +784,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.12"</span>;
             }
 
-            <a name="diffServMultiFieldClfrSrcL4PortMax.574"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrSrcL4PortMax</span> {
+            <a name="diffServMultiFieldClfrSrcL4PortMax.574"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrSrcL4PortMax</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetPortNumber.324">inet-address:InetPortNumber</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -796,7 +796,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.13"</span>;
             }
 
-            <a name="diffServMultiFieldClfrStorage.586"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrStorage</span> {
+            <a name="diffServMultiFieldClfrStorage.586"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -807,7 +807,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.14"</span>;
             }
 
-            <a name="diffServMultiFieldClfrStatus.597"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrStatus</span> {
+            <a name="diffServMultiFieldClfrStatus.597"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -823,8 +823,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2"</span>;
       }  <span class="yang_cmt">// container diffServClassifier</span>
 
-      <a name="diffServMeter.612"/><span class="yang_kw">container</span> <span class="yang_id">diffServMeter</span> {
-         <a name="diffServMeterNextFree.614"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterNextFree</span> {
+      <a name="diffServMeter.612"></a><span class="yang_kw">container</span> <span class="yang_id">diffServMeter</span> {
+         <a name="diffServMeterNextFree.614"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -833,13 +833,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.1"</span>;
          }
 
-         <a name="diffServMeterEntry.626"/><span class="yang_kw">list</span> <span class="yang_id">diffServMeterEntry</span> {
+         <a name="diffServMeterEntry.626"></a><span class="yang_kw">list</span> <span class="yang_id">diffServMeterEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServMeterId.635">diffServMeterId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry in the meter table describes a single conformance level
                of a meter."</span>;
-            <a name="diffServMeterId.635"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterId</span> {
+            <a name="diffServMeterId.635"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -849,7 +849,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.2.1.1"</span>;
             }
 
-            <a name="diffServMeterSucceedNext.645"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterSucceedNext</span> {
+            <a name="diffServMeterSucceedNext.645"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterSucceedNext</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -876,7 +876,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.2.1.2"</span>;
             }
 
-            <a name="diffServMeterFailNext.672"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterFailNext</span> {
+            <a name="diffServMeterFailNext.672"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterFailNext</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -906,7 +906,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.2.1.3"</span>;
             }
 
-            <a name="diffServMeterSpecific.702"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterSpecific</span> {
+            <a name="diffServMeterSpecific.702"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterSpecific</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -924,7 +924,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.2.1.4"</span>;
             }
 
-            <a name="diffServMeterStorage.720"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterStorage</span> {
+            <a name="diffServMeterStorage.720"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -935,7 +935,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.2.1.5"</span>;
             }
 
-            <a name="diffServMeterStatus.731"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterStatus</span> {
+            <a name="diffServMeterStatus.731"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -951,8 +951,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3"</span>;
       }  <span class="yang_cmt">// container diffServMeter</span>
 
-      <a name="diffServTBParam.746"/><span class="yang_kw">container</span> <span class="yang_id">diffServTBParam</span> {
-         <a name="diffServTBParamNextFree.748"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamNextFree</span> {
+      <a name="diffServTBParam.746"></a><span class="yang_kw">container</span> <span class="yang_id">diffServTBParam</span> {
+         <a name="diffServTBParamNextFree.748"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -961,13 +961,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.1"</span>;
          }
 
-         <a name="diffServTBParamEntry.760"/><span class="yang_kw">list</span> <span class="yang_id">diffServTBParamEntry</span> {
+         <a name="diffServTBParamEntry.760"></a><span class="yang_kw">list</span> <span class="yang_id">diffServTBParamEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServTBParamId.769">diffServTBParamId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry that describes a single set of token bucket
                parameters."</span>;
-            <a name="diffServTBParamId.769"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamId</span> {
+            <a name="diffServTBParamId.769"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -977,7 +977,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.1"</span>;
             }
 
-            <a name="diffServTBParamType.779"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamType</span> {
+            <a name="diffServTBParamType.779"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#AutonomousType.141">smiv2:AutonomousType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -994,7 +994,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.2"</span>;
             }
 
-            <a name="diffServTBParamRate.796"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamRate</span> {
+            <a name="diffServTBParamRate.796"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamRate</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -1010,7 +1010,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.3"</span>;
             }
 
-            <a name="diffServTBParamBurstSize.812"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamBurstSize</span> {
+            <a name="diffServTBParamBurstSize.812"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamBurstSize</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INTEGRATED-SERVICES-MIB/1995-11-03#BurstSize.148">integrated-services:BurstSize</a></span>;
                <span class="yang_kw">units</span> <span class="yang_str">"Bytes"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -1023,7 +1023,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.4"</span>;
             }
 
-            <a name="diffServTBParamInterval.825"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamInterval</span> {
+            <a name="diffServTBParamInterval.825"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamInterval</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -1041,7 +1041,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.5"</span>;
             }
 
-            <a name="diffServTBParamStorage.843"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamStorage</span> {
+            <a name="diffServTBParamStorage.843"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1052,7 +1052,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.6"</span>;
             }
 
-            <a name="diffServTBParamStatus.854"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamStatus</span> {
+            <a name="diffServTBParamStatus.854"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1068,8 +1068,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4"</span>;
       }  <span class="yang_cmt">// container diffServTBParam</span>
 
-      <a name="diffServAction.869"/><span class="yang_kw">container</span> <span class="yang_id">diffServAction</span> {
-         <a name="diffServActionNextFree.871"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionNextFree</span> {
+      <a name="diffServAction.869"></a><span class="yang_kw">container</span> <span class="yang_id">diffServAction</span> {
+         <a name="diffServActionNextFree.871"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -1078,13 +1078,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.1"</span>;
          }
 
-         <a name="diffServActionEntry.883"/><span class="yang_kw">list</span> <span class="yang_id">diffServActionEntry</span> {
+         <a name="diffServActionEntry.883"></a><span class="yang_kw">list</span> <span class="yang_id">diffServActionEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServActionId.892">diffServActionId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Each entry in the action table allows description of one
                specific action to be applied to traffic."</span>;
-            <a name="diffServActionId.892"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionId</span> {
+            <a name="diffServActionId.892"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1094,7 +1094,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1.1"</span>;
             }
 
-            <a name="diffServActionInterface.902"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionInterface</span> {
+            <a name="diffServActionInterface.902"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionInterface</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndexOrZero.95">if-mib:InterfaceIndexOrZero</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1119,7 +1119,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1.2"</span>;
             }
 
-            <a name="diffServActionNext.927"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionNext</span> {
+            <a name="diffServActionNext.927"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionNext</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1145,7 +1145,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1.3"</span>;
             }
 
-            <a name="diffServActionSpecific.953"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionSpecific</span> {
+            <a name="diffServActionSpecific.953"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionSpecific</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1165,7 +1165,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1.4"</span>;
             }
 
-            <a name="diffServActionStorage.973"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionStorage</span> {
+            <a name="diffServActionStorage.973"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1176,7 +1176,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1.5"</span>;
             }
 
-            <a name="diffServActionStatus.984"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionStatus</span> {
+            <a name="diffServActionStatus.984"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1190,13 +1190,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1"</span>;
          }  <span class="yang_cmt">// list diffServActionEntry</span>
 
-         <a name="diffServDscpMarkActEntry.1000"/><span class="yang_kw">list</span> <span class="yang_id">diffServDscpMarkActEntry</span> {
+         <a name="diffServDscpMarkActEntry.1000"></a><span class="yang_kw">list</span> <span class="yang_id">diffServDscpMarkActEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServDscpMarkActDscp.1009">diffServDscpMarkActDscp</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry in the DSCP mark action table that describes a single
                DSCP used for marking."</span>;
-            <a name="diffServDscpMarkActDscp.1009"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServDscpMarkActDscp</span> {
+            <a name="diffServDscpMarkActDscp.1009"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServDscpMarkActDscp</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/DIFFSERV-DSCP-TC/2002-05-09#Dscp.59">diffserv-dscp:Dscp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1211,7 +1211,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.3.1"</span>;
          }  <span class="yang_cmt">// list diffServDscpMarkActEntry</span>
 
-         <a name="diffServCountActNextFree.1023"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActNextFree</span> {
+         <a name="diffServCountActNextFree.1023"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -1220,13 +1220,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.4"</span>;
          }
 
-         <a name="diffServCountActEntry.1035"/><span class="yang_kw">list</span> <span class="yang_id">diffServCountActEntry</span> {
+         <a name="diffServCountActEntry.1035"></a><span class="yang_kw">list</span> <span class="yang_id">diffServCountActEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServCountActId.1044">diffServCountActId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry in the count action table describes a single set of
                traffic counters."</span>;
-            <a name="diffServCountActId.1044"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActId</span> {
+            <a name="diffServCountActId.1044"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1239,7 +1239,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.5.1.1"</span>;
             }
 
-            <a name="diffServCountActOctets.1057"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActOctets</span> {
+            <a name="diffServCountActOctets.1057"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1252,7 +1252,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.5.1.2"</span>;
             }
 
-            <a name="diffServCountActPkts.1070"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActPkts</span> {
+            <a name="diffServCountActPkts.1070"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1265,7 +1265,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.5.1.3"</span>;
             }
 
-            <a name="diffServCountActStorage.1083"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActStorage</span> {
+            <a name="diffServCountActStorage.1083"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1276,7 +1276,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.5.1.4"</span>;
             }
 
-            <a name="diffServCountActStatus.1094"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActStatus</span> {
+            <a name="diffServCountActStatus.1094"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1295,8 +1295,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5"</span>;
       }  <span class="yang_cmt">// container diffServAction</span>
 
-      <a name="diffServAlgDrop.1112"/><span class="yang_kw">container</span> <span class="yang_id">diffServAlgDrop</span> {
-         <a name="diffServAlgDropNextFree.1114"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropNextFree</span> {
+      <a name="diffServAlgDrop.1112"></a><span class="yang_kw">container</span> <span class="yang_id">diffServAlgDrop</span> {
+         <a name="diffServAlgDropNextFree.1114"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -1305,7 +1305,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.1"</span>;
          }
 
-         <a name="diffServAlgDropEntry.1126"/><span class="yang_kw">list</span> <span class="yang_id">diffServAlgDropEntry</span> {
+         <a name="diffServAlgDropEntry.1126"></a><span class="yang_kw">list</span> <span class="yang_id">diffServAlgDropEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServAlgDropId.1137">diffServAlgDropId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -1313,7 +1313,7 @@
                some algorithm. Further details of the algorithm type are to be
                found in diffServAlgDropType and with more detail parameter entry
                pointed to by diffServAlgDropSpecific when necessary."</span>;
-            <a name="diffServAlgDropId.1137"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropId</span> {
+            <a name="diffServAlgDropId.1137"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1323,7 +1323,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.1"</span>;
             }
 
-            <a name="diffServAlgDropType.1147"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropType</span> {
+            <a name="diffServAlgDropType.1147"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropType</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -1379,7 +1379,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.2"</span>;
             }
 
-            <a name="diffServAlgDropNext.1193"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropNext</span> {
+            <a name="diffServAlgDropNext.1193"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropNext</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1406,7 +1406,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.3"</span>;
             }
 
-            <a name="diffServAlgDropQMeasure.1220"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropQMeasure</span> {
+            <a name="diffServAlgDropQMeasure.1220"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropQMeasure</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1424,7 +1424,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.4"</span>;
             }
 
-            <a name="diffServAlgDropQThreshold.1238"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropQThreshold</span> {
+            <a name="diffServAlgDropQThreshold.1238"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropQThreshold</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -1443,7 +1443,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.5"</span>;
             }
 
-            <a name="diffServAlgDropSpecific.1257"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropSpecific</span> {
+            <a name="diffServAlgDropSpecific.1257"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropSpecific</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1470,7 +1470,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.6"</span>;
             }
 
-            <a name="diffServAlgDropOctets.1284"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropOctets</span> {
+            <a name="diffServAlgDropOctets.1284"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1484,7 +1484,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.7"</span>;
             }
 
-            <a name="diffServAlgDropPkts.1298"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropPkts</span> {
+            <a name="diffServAlgDropPkts.1298"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1498,7 +1498,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.8"</span>;
             }
 
-            <a name="diffServAlgRandomDropOctets.1312"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgRandomDropOctets</span> {
+            <a name="diffServAlgRandomDropOctets.1312"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgRandomDropOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1513,7 +1513,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.9"</span>;
             }
 
-            <a name="diffServAlgRandomDropPkts.1327"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgRandomDropPkts</span> {
+            <a name="diffServAlgRandomDropPkts.1327"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgRandomDropPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1528,7 +1528,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.10"</span>;
             }
 
-            <a name="diffServAlgDropStorage.1342"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropStorage</span> {
+            <a name="diffServAlgDropStorage.1342"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1539,7 +1539,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.11"</span>;
             }
 
-            <a name="diffServAlgDropStatus.1353"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropStatus</span> {
+            <a name="diffServAlgDropStatus.1353"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1553,7 +1553,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1"</span>;
          }  <span class="yang_cmt">// list diffServAlgDropEntry</span>
 
-         <a name="diffServRandomDropNextFree.1366"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropNextFree</span> {
+         <a name="diffServRandomDropNextFree.1366"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -1562,13 +1562,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.3"</span>;
          }
 
-         <a name="diffServRandomDropEntry.1378"/><span class="yang_kw">list</span> <span class="yang_id">diffServRandomDropEntry</span> {
+         <a name="diffServRandomDropEntry.1378"></a><span class="yang_kw">list</span> <span class="yang_id">diffServRandomDropEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServRandomDropId.1387">diffServRandomDropId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry describes a process that drops packets according to a
                random algorithm."</span>;
-            <a name="diffServRandomDropId.1387"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropId</span> {
+            <a name="diffServRandomDropId.1387"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1578,7 +1578,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.1"</span>;
             }
 
-            <a name="diffServRandomDropMinThreshBytes.1397"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropMinThreshBytes</span> {
+            <a name="diffServRandomDropMinThreshBytes.1397"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropMinThreshBytes</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -1592,7 +1592,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.2"</span>;
             }
 
-            <a name="diffServRandomDropMinThreshPkts.1411"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropMinThreshPkts</span> {
+            <a name="diffServRandomDropMinThreshPkts.1411"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropMinThreshPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -1606,7 +1606,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.3"</span>;
             }
 
-            <a name="diffServRandomDropMaxThreshBytes.1425"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropMaxThreshBytes</span> {
+            <a name="diffServRandomDropMaxThreshBytes.1425"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropMaxThreshBytes</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -1622,7 +1622,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.4"</span>;
             }
 
-            <a name="diffServRandomDropMaxThreshPkts.1441"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropMaxThreshPkts</span> {
+            <a name="diffServRandomDropMaxThreshPkts.1441"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropMaxThreshPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -1638,7 +1638,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.5"</span>;
             }
 
-            <a name="diffServRandomDropProbMax.1457"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropProbMax</span> {
+            <a name="diffServRandomDropProbMax.1457"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropProbMax</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..1000"</span>;
                }
@@ -1654,7 +1654,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.6"</span>;
             }
 
-            <a name="diffServRandomDropWeight.1473"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropWeight</span> {
+            <a name="diffServRandomDropWeight.1473"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropWeight</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..65536"</span>;
                }
@@ -1676,7 +1676,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.7"</span>;
             }
 
-            <a name="diffServRandomDropSamplingRate.1495"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropSamplingRate</span> {
+            <a name="diffServRandomDropSamplingRate.1495"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropSamplingRate</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..1000000"</span>;
                }
@@ -1689,7 +1689,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.8"</span>;
             }
 
-            <a name="diffServRandomDropStorage.1508"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropStorage</span> {
+            <a name="diffServRandomDropStorage.1508"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1700,7 +1700,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.9"</span>;
             }
 
-            <a name="diffServRandomDropStatus.1519"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropStatus</span> {
+            <a name="diffServRandomDropStatus.1519"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1716,8 +1716,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6"</span>;
       }  <span class="yang_cmt">// container diffServAlgDrop</span>
 
-      <a name="diffServQueue.1534"/><span class="yang_kw">container</span> <span class="yang_id">diffServQueue</span> {
-         <a name="diffServQNextFree.1536"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServQNextFree</span> {
+      <a name="diffServQueue.1534"></a><span class="yang_kw">container</span> <span class="yang_id">diffServQueue</span> {
+         <a name="diffServQNextFree.1536"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -1726,13 +1726,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.1"</span>;
          }
 
-         <a name="diffServQEntry.1548"/><span class="yang_kw">list</span> <span class="yang_id">diffServQEntry</span> {
+         <a name="diffServQEntry.1548"></a><span class="yang_kw">list</span> <span class="yang_id">diffServQEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServQId.1557">diffServQId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry in the Queue Table describes a single queue or class of
                traffic."</span>;
-            <a name="diffServQId.1557"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServQId</span> {
+            <a name="diffServQId.1557"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1742,7 +1742,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.2.1.1"</span>;
             }
 
-            <a name="diffServQNext.1567"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServQNext</span> {
+            <a name="diffServQNext.1567"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQNext</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1761,7 +1761,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.2.1.2"</span>;
             }
 
-            <a name="diffServQMinRate.1586"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServQMinRate</span> {
+            <a name="diffServQMinRate.1586"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQMinRate</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1779,7 +1779,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.2.1.3"</span>;
             }
 
-            <a name="diffServQMaxRate.1604"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServQMaxRate</span> {
+            <a name="diffServQMaxRate.1604"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQMaxRate</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1800,7 +1800,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.2.1.4"</span>;
             }
 
-            <a name="diffServQStorage.1625"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServQStorage</span> {
+            <a name="diffServQStorage.1625"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1811,7 +1811,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.2.1.5"</span>;
             }
 
-            <a name="diffServQStatus.1636"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServQStatus</span> {
+            <a name="diffServQStatus.1636"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1827,8 +1827,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7"</span>;
       }  <span class="yang_cmt">// container diffServQueue</span>
 
-      <a name="diffServScheduler.1651"/><span class="yang_kw">container</span> <span class="yang_id">diffServScheduler</span> {
-         <a name="diffServSchedulerNextFree.1653"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerNextFree</span> {
+      <a name="diffServScheduler.1651"></a><span class="yang_kw">container</span> <span class="yang_id">diffServScheduler</span> {
+         <a name="diffServSchedulerNextFree.1653"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -1837,13 +1837,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.1"</span>;
          }
 
-         <a name="diffServSchedulerEntry.1665"/><span class="yang_kw">list</span> <span class="yang_id">diffServSchedulerEntry</span> {
+         <a name="diffServSchedulerEntry.1665"></a><span class="yang_kw">list</span> <span class="yang_id">diffServSchedulerEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServSchedulerId.1674">diffServSchedulerId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry in the Scheduler Table describing a single instance of
                a scheduling algorithm."</span>;
-            <a name="diffServSchedulerId.1674"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerId</span> {
+            <a name="diffServSchedulerId.1674"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1853,7 +1853,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.1"</span>;
             }
 
-            <a name="diffServSchedulerNext.1684"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerNext</span> {
+            <a name="diffServSchedulerNext.1684"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerNext</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1886,7 +1886,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.2"</span>;
             }
 
-            <a name="diffServSchedulerMethod.1717"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerMethod</span> {
+            <a name="diffServSchedulerMethod.1717"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerMethod</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#AutonomousType.141">smiv2:AutonomousType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1901,7 +1901,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.3"</span>;
             }
 
-            <a name="diffServSchedulerMinRate.1732"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerMinRate</span> {
+            <a name="diffServSchedulerMinRate.1732"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerMinRate</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1921,7 +1921,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.4"</span>;
             }
 
-            <a name="diffServSchedulerMaxRate.1752"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerMaxRate</span> {
+            <a name="diffServSchedulerMaxRate.1752"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerMaxRate</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1943,7 +1943,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.5"</span>;
             }
 
-            <a name="diffServSchedulerStorage.1774"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerStorage</span> {
+            <a name="diffServSchedulerStorage.1774"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1954,7 +1954,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.6"</span>;
             }
 
-            <a name="diffServSchedulerStatus.1785"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerStatus</span> {
+            <a name="diffServSchedulerStatus.1785"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1968,7 +1968,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1"</span>;
          }  <span class="yang_cmt">// list diffServSchedulerEntry</span>
 
-         <a name="diffServMinRateNextFree.1798"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateNextFree</span> {
+         <a name="diffServMinRateNextFree.1798"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -1977,14 +1977,14 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.3"</span>;
          }
 
-         <a name="diffServMinRateEntry.1810"/><span class="yang_kw">list</span> <span class="yang_id">diffServMinRateEntry</span> {
+         <a name="diffServMinRateEntry.1810"></a><span class="yang_kw">list</span> <span class="yang_id">diffServMinRateEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServMinRateId.1820">diffServMinRateId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry in the Minimum Rate Parameters Table describes a single
                set of scheduling parameters for use by one or more queues or
                schedulers."</span>;
-            <a name="diffServMinRateId.1820"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateId</span> {
+            <a name="diffServMinRateId.1820"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1994,7 +1994,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1.1"</span>;
             }
 
-            <a name="diffServMinRatePriority.1830"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRatePriority</span> {
+            <a name="diffServMinRatePriority.1830"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRatePriority</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -2010,7 +2010,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1.2"</span>;
             }
 
-            <a name="diffServMinRateAbsolute.1846"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateAbsolute</span> {
+            <a name="diffServMinRateAbsolute.1846"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateAbsolute</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -2039,7 +2039,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1.3"</span>;
             }
 
-            <a name="diffServMinRateRelative.1875"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateRelative</span> {
+            <a name="diffServMinRateRelative.1875"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateRelative</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -2070,7 +2070,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1.4"</span>;
             }
 
-            <a name="diffServMinRateStorage.1906"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateStorage</span> {
+            <a name="diffServMinRateStorage.1906"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -2081,7 +2081,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1.5"</span>;
             }
 
-            <a name="diffServMinRateStatus.1917"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateStatus</span> {
+            <a name="diffServMinRateStatus.1917"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -2095,7 +2095,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1"</span>;
          }  <span class="yang_cmt">// list diffServMinRateEntry</span>
 
-         <a name="diffServMaxRateNextFree.1930"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateNextFree</span> {
+         <a name="diffServMaxRateNextFree.1930"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateNextFree</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -2104,14 +2104,14 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.5"</span>;
          }
 
-         <a name="diffServMaxRateEntry.1942"/><span class="yang_kw">list</span> <span class="yang_id">diffServMaxRateEntry</span> {
+         <a name="diffServMaxRateEntry.1942"></a><span class="yang_kw">list</span> <span class="yang_id">diffServMaxRateEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServMaxRateId.1952">diffServMaxRateId</a> <a href="#diffServMaxRateLevel.1962">diffServMaxRateLevel</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry in the Maximum Rate Parameter Table describes a single
                set of scheduling parameters for use by one or more queues or
                schedulers."</span>;
-            <a name="diffServMaxRateId.1952"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateId</span> {
+            <a name="diffServMaxRateId.1952"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2121,7 +2121,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.1"</span>;
             }
 
-            <a name="diffServMaxRateLevel.1962"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateLevel</span> {
+            <a name="diffServMaxRateLevel.1962"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateLevel</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..32"</span>;
                }
@@ -2139,7 +2139,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.2"</span>;
             }
 
-            <a name="diffServMaxRateAbsolute.1980"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateAbsolute</span> {
+            <a name="diffServMaxRateAbsolute.1980"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateAbsolute</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -2172,7 +2172,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.3"</span>;
             }
 
-            <a name="diffServMaxRateRelative.2013"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateRelative</span> {
+            <a name="diffServMaxRateRelative.2013"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateRelative</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -2203,7 +2203,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.4"</span>;
             }
 
-            <a name="diffServMaxRateThreshold.2044"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateThreshold</span> {
+            <a name="diffServMaxRateThreshold.2044"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateThreshold</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INTEGRATED-SERVICES-MIB/1995-11-03#BurstSize.148">integrated-services:BurstSize</a></span>;
                <span class="yang_kw">units</span> <span class="yang_str">"Bytes"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -2219,7 +2219,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.5"</span>;
             }
 
-            <a name="diffServMaxRateStorage.2061"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateStorage</span> {
+            <a name="diffServMaxRateStorage.2061"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateStorage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -2230,7 +2230,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.6"</span>;
             }
 
-            <a name="diffServMaxRateStatus.2072"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateStatus</span> {
+            <a name="diffServMaxRateStatus.2072"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>

@@ -91,13 +91,13 @@
             <span class="yang_str">"Initial version, published as RFC 4268."</span>;
       }
 
-      <a name="entStateObjects.61"/><span class="yang_kw">container</span> <span class="yang_id">entStateObjects</span> {
-         <a name="entStateEntry.66"/><span class="yang_kw">list</span> <span class="yang_id">entStateEntry</span> {
+      <a name="entStateObjects.61"></a><span class="yang_kw">container</span> <span class="yang_id">entStateObjects</span> {
+         <a name="entStateEntry.66"></a><span class="yang_kw">list</span> <span class="yang_id">entStateEntry</span> {
             <span class="yang_kw">key</span> "<a href="#entPhysicalIndex.73">entPhysicalIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"State information about this physical entity."</span>;
-            <a name="entPhysicalIndex.73"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
+            <a name="entPhysicalIndex.73"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/entity-mib:entityPhysical/entity-mib:entPhysicalEntry/entity-mib:entPhysicalIndex"</span>;
@@ -106,7 +106,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="entStateLastChanged.82"/><span class="yang_kw">leaf</span> <span class="yang_id">entStateLastChanged</span> {
+            <a name="entStateLastChanged.82"></a><span class="yang_kw">leaf</span> <span class="yang_id">entStateLastChanged</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -125,7 +125,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1.1.1.1"</span>;
             }
 
-            <a name="entStateAdmin.101"/><span class="yang_kw">leaf</span> <span class="yang_id">entStateAdmin</span> {
+            <a name="entStateAdmin.101"></a><span class="yang_kw">leaf</span> <span class="yang_id">entStateAdmin</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ENTITY-STATE-TC-MIB/2005-11-22#EntityAdminState.60">entity-state:EntityAdminState</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -157,7 +157,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1.1.1.2"</span>;
             }
 
-            <a name="entStateOper.133"/><span class="yang_kw">leaf</span> <span class="yang_id">entStateOper</span> {
+            <a name="entStateOper.133"></a><span class="yang_kw">leaf</span> <span class="yang_id">entStateOper</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ENTITY-STATE-TC-MIB/2005-11-22#EntityOperState.83">entity-state:EntityOperState</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -195,7 +195,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1.1.1.3"</span>;
             }
 
-            <a name="entStateUsage.171"/><span class="yang_kw">leaf</span> <span class="yang_id">entStateUsage</span> {
+            <a name="entStateUsage.171"></a><span class="yang_kw">leaf</span> <span class="yang_id">entStateUsage</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ENTITY-STATE-TC-MIB/2005-11-22#EntityUsageState.102">entity-state:EntityUsageState</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -222,7 +222,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1.1.1.4"</span>;
             }
 
-            <a name="entStateAlarm.198"/><span class="yang_kw">leaf</span> <span class="yang_id">entStateAlarm</span> {
+            <a name="entStateAlarm.198"></a><span class="yang_kw">leaf</span> <span class="yang_id">entStateAlarm</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ENTITY-STATE-TC-MIB/2005-11-22#EntityAlarmStatus.121">entity-state:EntityAlarmStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -245,7 +245,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1.1.1.5"</span>;
             }
 
-            <a name="entStateStandby.221"/><span class="yang_kw">leaf</span> <span class="yang_id">entStateStandby</span> {
+            <a name="entStateStandby.221"></a><span class="yang_kw">leaf</span> <span class="yang_id">entStateStandby</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ENTITY-STATE-TC-MIB/2005-11-22#EntityStandbyStatus.160">entity-state:EntityStandbyStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -262,7 +262,7 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1"</span>;
       }  <span class="yang_cmt">// container entStateObjects</span>
 
-      <a name="entStateOperEnabled.237"/><span class="yang_kw">notification</span> <span class="yang_id">entStateOperEnabled</span> {
+      <a name="entStateOperEnabled.237"></a><span class="yang_kw">notification</span> <span class="yang_id">entStateOperEnabled</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"An entStateOperEnabled notification signifies that the
             SNMP entity, acting in an agent role, has detected that
@@ -278,8 +278,8 @@
             there were any known alarms against the entity at that
             time that may explain why the physical entity has become
             operationally disabled."</span>;
-         <a name="entStateOperEnabled-entStateAdmin.255"/><span class="yang_kw">container</span> <span class="yang_id">entStateOperEnabled-entStateAdmin</span> {
-            <a name="entPhysicalIndex.256"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
+         <a name="entStateOperEnabled-entStateAdmin.255"></a><span class="yang_kw">container</span> <span class="yang_id">entStateOperEnabled-entStateAdmin</span> {
+            <a name="entPhysicalIndex.256"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/entity-mib:entityPhysical/entity-mib:entPhysicalEntry/entity-mib:entPhysicalIndex"</span>;
@@ -288,7 +288,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="entStateAdmin.264"/><span class="yang_kw">leaf</span> <span class="yang_id">entStateAdmin</span> {
+            <a name="entStateAdmin.264"></a><span class="yang_kw">leaf</span> <span class="yang_id">entStateAdmin</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ENTITY-STATE-TC-MIB/2005-11-22#EntityAdminState.60">entity-state:EntityAdminState</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -321,8 +321,8 @@
             }
          }  <span class="yang_cmt">// container entStateOperEnabled-entStateAdmin</span>
 
-         <a name="entStateOperEnabled-entStateAlarm.297"/><span class="yang_kw">container</span> <span class="yang_id">entStateOperEnabled-entStateAlarm</span> {
-            <a name="entPhysicalIndex.298"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
+         <a name="entStateOperEnabled-entStateAlarm.297"></a><span class="yang_kw">container</span> <span class="yang_id">entStateOperEnabled-entStateAlarm</span> {
+            <a name="entPhysicalIndex.298"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/entity-mib:entityPhysical/entity-mib:entPhysicalEntry/entity-mib:entPhysicalIndex"</span>;
@@ -331,7 +331,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="entStateAlarm.306"/><span class="yang_kw">leaf</span> <span class="yang_id">entStateAlarm</span> {
+            <a name="entStateAlarm.306"></a><span class="yang_kw">leaf</span> <span class="yang_id">entStateAlarm</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ENTITY-STATE-TC-MIB/2005-11-22#EntityAlarmStatus.121">entity-state:EntityAlarmStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -357,7 +357,7 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.0.1"</span>;
       }  <span class="yang_cmt">// notification entStateOperEnabled</span>
 
-      <a name="entStateOperDisabled.332"/><span class="yang_kw">notification</span> <span class="yang_id">entStateOperDisabled</span> {
+      <a name="entStateOperDisabled.332"></a><span class="yang_kw">notification</span> <span class="yang_id">entStateOperDisabled</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"An entStateOperDisabled notification signifies that the
             SNMP entity, acting in an agent role, has detected that
@@ -373,8 +373,8 @@
             there were any known alarms against the entity at that
             time that may affect the physical entity's
             ability to stay operationally enabled."</span>;
-         <a name="entStateOperDisabled-entStateAdmin.350"/><span class="yang_kw">container</span> <span class="yang_id">entStateOperDisabled-entStateAdmin</span> {
-            <a name="entPhysicalIndex.351"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
+         <a name="entStateOperDisabled-entStateAdmin.350"></a><span class="yang_kw">container</span> <span class="yang_id">entStateOperDisabled-entStateAdmin</span> {
+            <a name="entPhysicalIndex.351"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/entity-mib:entityPhysical/entity-mib:entPhysicalEntry/entity-mib:entPhysicalIndex"</span>;
@@ -383,7 +383,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="entStateAdmin.359"/><span class="yang_kw">leaf</span> <span class="yang_id">entStateAdmin</span> {
+            <a name="entStateAdmin.359"></a><span class="yang_kw">leaf</span> <span class="yang_id">entStateAdmin</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ENTITY-STATE-TC-MIB/2005-11-22#EntityAdminState.60">entity-state:EntityAdminState</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -416,8 +416,8 @@
             }
          }  <span class="yang_cmt">// container entStateOperDisabled-entStateAdmin</span>
 
-         <a name="entStateOperDisabled-entStateAlarm.392"/><span class="yang_kw">container</span> <span class="yang_id">entStateOperDisabled-entStateAlarm</span> {
-            <a name="entPhysicalIndex.393"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
+         <a name="entStateOperDisabled-entStateAlarm.392"></a><span class="yang_kw">container</span> <span class="yang_id">entStateOperDisabled-entStateAlarm</span> {
+            <a name="entPhysicalIndex.393"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/entity-mib:entityPhysical/entity-mib:entPhysicalEntry/entity-mib:entPhysicalIndex"</span>;
@@ -426,7 +426,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="entStateAlarm.401"/><span class="yang_kw">leaf</span> <span class="yang_id">entStateAlarm</span> {
+            <a name="entStateAlarm.401"></a><span class="yang_kw">leaf</span> <span class="yang_id">entStateAlarm</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ENTITY-STATE-TC-MIB/2005-11-22#EntityAlarmStatus.121">entity-state:EntityAlarmStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>

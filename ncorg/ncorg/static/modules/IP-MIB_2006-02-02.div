@@ -391,7 +391,7 @@
             which was published as RFC 1213."</span>;
       }
 
-      <a name="IpAddressOriginTC.70"/><span class="yang_kw">typedef</span> <span class="yang_id">IpAddressOriginTC</span> {
+      <a name="IpAddressOriginTC.70"></a><span class="yang_kw">typedef</span> <span class="yang_id">IpAddressOriginTC</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -429,7 +429,7 @@
             3041 privacy address."</span>;
       }
 
-      <a name="IpAddressStatusTC.98"/><span class="yang_kw">typedef</span> <span class="yang_id">IpAddressStatusTC</span> {
+      <a name="IpAddressStatusTC.98"></a><span class="yang_kw">typedef</span> <span class="yang_id">IpAddressStatusTC</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"preferred"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -503,7 +503,7 @@
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 2462"</span>;
       }
 
-      <a name="IpAddressPrefixOriginTC.157"/><span class="yang_kw">typedef</span> <span class="yang_id">IpAddressPrefixOriginTC</span> {
+      <a name="IpAddressPrefixOriginTC.157"></a><span class="yang_kw">typedef</span> <span class="yang_id">IpAddressPrefixOriginTC</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -544,7 +544,7 @@
             prefix was found."</span>;
       }
 
-      <a name="Ipv6AddressIfIdentifierTC.188"/><span class="yang_kw">typedef</span> <span class="yang_id">Ipv6AddressIfIdentifierTC</span> {
+      <a name="Ipv6AddressIfIdentifierTC.188"></a><span class="yang_kw">typedef</span> <span class="yang_id">Ipv6AddressIfIdentifierTC</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"0..8"</span>;
             <span class="yang_kw">pattern</span>
@@ -557,8 +557,8 @@
             of up to 8 octets in network byte-order."</span>;
       }
 
-      <a name="ip.200"/><span class="yang_kw">container</span> <span class="yang_id">ip</span> {
-         <a name="ipForwarding.202"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwarding</span> {
+      <a name="ip.200"></a><span class="yang_kw">container</span> <span class="yang_id">ip</span> {
+         <a name="ipForwarding.202"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipForwarding</span> {
             <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                <span class="yang_kw">enum</span> <span class="yang_str">"forwarding"</span> {
                   <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -583,7 +583,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.1"</span>;
          }
 
-         <a name="ipDefaultTTL.223"/><span class="yang_kw">leaf</span> <span class="yang_id">ipDefaultTTL</span> {
+         <a name="ipDefaultTTL.223"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipDefaultTTL</span> {
             <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                <span class="yang_kw">range</span> <span class="yang_str">"1..255"</span>;
             }
@@ -605,7 +605,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.2"</span>;
          }
 
-         <a name="ipInReceives.245"/><span class="yang_kw">leaf</span> <span class="yang_id">ipInReceives</span> {
+         <a name="ipInReceives.245"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipInReceives</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -622,7 +622,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.3"</span>;
          }
 
-         <a name="ipInHdrErrors.262"/><span class="yang_kw">leaf</span> <span class="yang_id">ipInHdrErrors</span> {
+         <a name="ipInHdrErrors.262"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipInHdrErrors</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -638,7 +638,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.4"</span>;
          }
 
-         <a name="ipInAddrErrors.278"/><span class="yang_kw">leaf</span> <span class="yang_id">ipInAddrErrors</span> {
+         <a name="ipInAddrErrors.278"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipInAddrErrors</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -658,7 +658,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.5"</span>;
          }
 
-         <a name="ipForwDatagrams.298"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwDatagrams</span> {
+         <a name="ipForwDatagrams.298"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipForwDatagrams</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -680,7 +680,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.6"</span>;
          }
 
-         <a name="ipInUnknownProtos.320"/><span class="yang_kw">leaf</span> <span class="yang_id">ipInUnknownProtos</span> {
+         <a name="ipInUnknownProtos.320"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipInUnknownProtos</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -695,7 +695,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.7"</span>;
          }
 
-         <a name="ipInDiscards.335"/><span class="yang_kw">leaf</span> <span class="yang_id">ipInDiscards</span> {
+         <a name="ipInDiscards.335"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipInDiscards</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -712,7 +712,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.8"</span>;
          }
 
-         <a name="ipInDelivers.352"/><span class="yang_kw">leaf</span> <span class="yang_id">ipInDelivers</span> {
+         <a name="ipInDelivers.352"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipInDelivers</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -729,7 +729,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.9"</span>;
          }
 
-         <a name="ipOutRequests.369"/><span class="yang_kw">leaf</span> <span class="yang_id">ipOutRequests</span> {
+         <a name="ipOutRequests.369"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipOutRequests</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -745,7 +745,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.10"</span>;
          }
 
-         <a name="ipOutDiscards.385"/><span class="yang_kw">leaf</span> <span class="yang_id">ipOutDiscards</span> {
+         <a name="ipOutDiscards.385"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipOutDiscards</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -763,7 +763,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.11"</span>;
          }
 
-         <a name="ipOutNoRoutes.403"/><span class="yang_kw">leaf</span> <span class="yang_id">ipOutNoRoutes</span> {
+         <a name="ipOutNoRoutes.403"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipOutNoRoutes</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -784,7 +784,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.12"</span>;
          }
 
-         <a name="ipReasmTimeout.424"/><span class="yang_kw">leaf</span> <span class="yang_id">ipReasmTimeout</span> {
+         <a name="ipReasmTimeout.424"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipReasmTimeout</span> {
             <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
             <span class="yang_kw">units</span> <span class="yang_str">"seconds"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -794,7 +794,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.13"</span>;
          }
 
-         <a name="ipReasmReqds.434"/><span class="yang_kw">leaf</span> <span class="yang_id">ipReasmReqds</span> {
+         <a name="ipReasmReqds.434"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipReasmReqds</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -808,7 +808,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.14"</span>;
          }
 
-         <a name="ipReasmOKs.448"/><span class="yang_kw">leaf</span> <span class="yang_id">ipReasmOKs</span> {
+         <a name="ipReasmOKs.448"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipReasmOKs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -821,7 +821,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.15"</span>;
          }
 
-         <a name="ipReasmFails.461"/><span class="yang_kw">leaf</span> <span class="yang_id">ipReasmFails</span> {
+         <a name="ipReasmFails.461"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipReasmFails</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -839,7 +839,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.16"</span>;
          }
 
-         <a name="ipFragOKs.479"/><span class="yang_kw">leaf</span> <span class="yang_id">ipFragOKs</span> {
+         <a name="ipFragOKs.479"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipFragOKs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -853,7 +853,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.17"</span>;
          }
 
-         <a name="ipFragFails.493"/><span class="yang_kw">leaf</span> <span class="yang_id">ipFragFails</span> {
+         <a name="ipFragFails.493"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipFragFails</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -869,7 +869,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.18"</span>;
          }
 
-         <a name="ipFragCreates.509"/><span class="yang_kw">leaf</span> <span class="yang_id">ipFragCreates</span> {
+         <a name="ipFragCreates.509"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipFragCreates</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -883,14 +883,14 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.19"</span>;
          }
 
-         <a name="ipAddrEntry.526"/><span class="yang_kw">list</span> <span class="yang_id">ipAddrEntry</span> {
+         <a name="ipAddrEntry.526"></a><span class="yang_kw">list</span> <span class="yang_id">ipAddrEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ipAdEntAddr.536">ipAdEntAddr</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The addressing information for one of this entity's IPv4
                addresses."</span>;
-            <a name="ipAdEntAddr.536"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAdEntAddr</span> {
+            <a name="ipAdEntAddr.536"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAdEntAddr</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -900,7 +900,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.20.1.1"</span>;
             }
 
-            <a name="ipAdEntIfIndex.546"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAdEntIfIndex</span> {
+            <a name="ipAdEntIfIndex.546"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAdEntIfIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
                }
@@ -914,7 +914,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.20.1.2"</span>;
             }
 
-            <a name="ipAdEntNetMask.560"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAdEntNetMask</span> {
+            <a name="ipAdEntNetMask.560"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAdEntNetMask</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -925,7 +925,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.20.1.3"</span>;
             }
 
-            <a name="ipAdEntBcastAddr.571"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAdEntBcastAddr</span> {
+            <a name="ipAdEntBcastAddr.571"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAdEntBcastAddr</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..1"</span>;
                }
@@ -942,7 +942,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.20.1.4"</span>;
             }
 
-            <a name="ipAdEntReasmMaxSize.588"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAdEntReasmMaxSize</span> {
+            <a name="ipAdEntReasmMaxSize.588"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAdEntReasmMaxSize</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..65535"</span>;
                }
@@ -957,14 +957,14 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.20.1"</span>;
          }  <span class="yang_cmt">// list ipAddrEntry</span>
 
-         <a name="ipNetToMediaEntry.605"/><span class="yang_kw">list</span> <span class="yang_id">ipNetToMediaEntry</span> {
+         <a name="ipNetToMediaEntry.605"></a><span class="yang_kw">list</span> <span class="yang_id">ipNetToMediaEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ipNetToMediaIfIndex.615">ipNetToMediaIfIndex</a> <a href="#ipNetToMediaNetAddress.654">ipNetToMediaNetAddress</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Each entry contains one IpAddress to `physical' address
                equivalence."</span>;
-            <a name="ipNetToMediaIfIndex.615"/><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToMediaIfIndex</span> {
+            <a name="ipNetToMediaIfIndex.615"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToMediaIfIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
                }
@@ -985,7 +985,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.22.1.1"</span>;
             }
 
-            <a name="ipNetToMediaPhysAddress.636"/><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToMediaPhysAddress</span> {
+            <a name="ipNetToMediaPhysAddress.636"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToMediaPhysAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#phys-address.268">yang:phys-address</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..65535"</span>;
                }
@@ -1003,7 +1003,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.22.1.2"</span>;
             }
 
-            <a name="ipNetToMediaNetAddress.654"/><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToMediaNetAddress</span> {
+            <a name="ipNetToMediaNetAddress.654"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToMediaNetAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -1017,7 +1017,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.22.1.3"</span>;
             }
 
-            <a name="ipNetToMediaType.668"/><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToMediaType</span> {
+            <a name="ipNetToMediaType.668"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToMediaType</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -1062,7 +1062,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.22.1"</span>;
          }  <span class="yang_cmt">// list ipNetToMediaEntry</span>
 
-         <a name="ipRoutingDiscards.704"/><span class="yang_kw">leaf</span> <span class="yang_id">ipRoutingDiscards</span> {
+         <a name="ipRoutingDiscards.704"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipRoutingDiscards</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -1083,7 +1083,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.23"</span>;
          }
 
-         <a name="ipv6IpForwarding.725"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6IpForwarding</span> {
+         <a name="ipv6IpForwarding.725"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6IpForwarding</span> {
             <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                <span class="yang_kw">enum</span> <span class="yang_str">"forwarding"</span> {
                   <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -1106,7 +1106,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.25"</span>;
          }
 
-         <a name="ipv6IpDefaultHopLimit.744"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6IpDefaultHopLimit</span> {
+         <a name="ipv6IpDefaultHopLimit.744"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6IpDefaultHopLimit</span> {
             <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                <span class="yang_kw">range</span> <span class="yang_str">"0..255"</span>;
             }
@@ -1124,7 +1124,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.26"</span>;
          }
 
-         <a name="ipv4InterfaceTableLastChange.763"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv4InterfaceTableLastChange</span> {
+         <a name="ipv4InterfaceTableLastChange.763"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv4InterfaceTableLastChange</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -1140,13 +1140,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.27"</span>;
          }
 
-         <a name="ipv4InterfaceEntry.782"/><span class="yang_kw">list</span> <span class="yang_id">ipv4InterfaceEntry</span> {
+         <a name="ipv4InterfaceEntry.782"></a><span class="yang_kw">list</span> <span class="yang_id">ipv4InterfaceEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ipv4InterfaceIfIndex.791">ipv4InterfaceIfIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry containing IPv4-specific information for a specific
                interface."</span>;
-            <a name="ipv4InterfaceIfIndex.791"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv4InterfaceIfIndex</span> {
+            <a name="ipv4InterfaceIfIndex.791"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv4InterfaceIfIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndex.81">if-mib:InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1157,7 +1157,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.28.1.1"</span>;
             }
 
-            <a name="ipv4InterfaceReasmMaxSize.802"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv4InterfaceReasmMaxSize</span> {
+            <a name="ipv4InterfaceReasmMaxSize.802"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv4InterfaceReasmMaxSize</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..65535"</span>;
                }
@@ -1169,7 +1169,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.28.1.2"</span>;
             }
 
-            <a name="ipv4InterfaceEnableStatus.814"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv4InterfaceEnableStatus</span> {
+            <a name="ipv4InterfaceEnableStatus.814"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv4InterfaceEnableStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"up"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -1188,7 +1188,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.28.1.3"</span>;
             }
 
-            <a name="ipv4InterfaceRetransmitTime.829"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv4InterfaceRetransmitTime</span> {
+            <a name="ipv4InterfaceRetransmitTime.829"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv4InterfaceRetransmitTime</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">units</span> <span class="yang_str">"milliseconds"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1203,7 +1203,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.28.1"</span>;
          }  <span class="yang_cmt">// list ipv4InterfaceEntry</span>
 
-         <a name="ipv6InterfaceTableLastChange.844"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceTableLastChange</span> {
+         <a name="ipv6InterfaceTableLastChange.844"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceTableLastChange</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -1221,13 +1221,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.29"</span>;
          }
 
-         <a name="ipv6InterfaceEntry.865"/><span class="yang_kw">list</span> <span class="yang_id">ipv6InterfaceEntry</span> {
+         <a name="ipv6InterfaceEntry.865"></a><span class="yang_kw">list</span> <span class="yang_id">ipv6InterfaceEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ipv6InterfaceIfIndex.874">ipv6InterfaceIfIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry containing IPv6-specific information for a given
                interface."</span>;
-            <a name="ipv6InterfaceIfIndex.874"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceIfIndex</span> {
+            <a name="ipv6InterfaceIfIndex.874"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceIfIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndex.81">if-mib:InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1238,7 +1238,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.30.1.1"</span>;
             }
 
-            <a name="ipv6InterfaceReasmMaxSize.885"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceReasmMaxSize</span> {
+            <a name="ipv6InterfaceReasmMaxSize.885"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceReasmMaxSize</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1500..65535"</span>;
                }
@@ -1251,7 +1251,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.30.1.2"</span>;
             }
 
-            <a name="ipv6InterfaceIdentifier.898"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceIdentifier</span> {
+            <a name="ipv6InterfaceIdentifier.898"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceIdentifier</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#Ipv6AddressIfIdentifierTC.188">Ipv6AddressIfIdentifierTC</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1271,7 +1271,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.30.1.3"</span>;
             }
 
-            <a name="ipv6InterfaceEnableStatus.918"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceEnableStatus</span> {
+            <a name="ipv6InterfaceEnableStatus.918"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceEnableStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"up"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -1294,7 +1294,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.30.1.5"</span>;
             }
 
-            <a name="ipv6InterfaceReachableTime.937"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceReachableTime</span> {
+            <a name="ipv6InterfaceReachableTime.937"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceReachableTime</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">units</span> <span class="yang_str">"milliseconds"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1305,7 +1305,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.30.1.6"</span>;
             }
 
-            <a name="ipv6InterfaceRetransmitTime.949"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceRetransmitTime</span> {
+            <a name="ipv6InterfaceRetransmitTime.949"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceRetransmitTime</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">units</span> <span class="yang_str">"milliseconds"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1317,7 +1317,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.30.1.7"</span>;
             }
 
-            <a name="ipv6InterfaceForwarding.962"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceForwarding</span> {
+            <a name="ipv6InterfaceForwarding.962"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceForwarding</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"forwarding"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -1349,11 +1349,11 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.30.1"</span>;
          }  <span class="yang_cmt">// list ipv6InterfaceEntry</span>
 
-         <a name="ipAddressPrefixEntry.993"/><span class="yang_kw">list</span> <span class="yang_id">ipAddressPrefixEntry</span> {
+         <a name="ipAddressPrefixEntry.993"></a><span class="yang_kw">list</span> <span class="yang_id">ipAddressPrefixEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ipAddressPrefixIfIndex.1002">ipAddressPrefixIfIndex</a> <a href="#ipAddressPrefixType.1013">ipAddressPrefixType</a> <a href="#ipAddressPrefixPrefix.1021">ipAddressPrefixPrefix</a> <a href="#ipAddressPrefixLength.1038">ipAddressPrefixLength</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span> <span class="yang_str">"An entry in the ipAddressPrefixTable."</span>;
-            <a name="ipAddressPrefixIfIndex.1002"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixIfIndex</span> {
+            <a name="ipAddressPrefixIfIndex.1002"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixIfIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndex.81">if-mib:InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1364,14 +1364,14 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.32.1.1"</span>;
             }
 
-            <a name="ipAddressPrefixType.1013"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixType</span> {
+            <a name="ipAddressPrefixType.1013"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The address type of ipAddressPrefix."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.32.1.2"</span>;
             }
 
-            <a name="ipAddressPrefixPrefix.1021"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixPrefix</span> {
+            <a name="ipAddressPrefixPrefix.1021"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixPrefix</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddress.128">inet-address:InetAddress</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1388,7 +1388,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.32.1.3"</span>;
             }
 
-            <a name="ipAddressPrefixLength.1038"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixLength</span> {
+            <a name="ipAddressPrefixLength.1038"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixLength</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressPrefixLength.285">inet-address:InetAddressPrefixLength</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1399,14 +1399,14 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.32.1.4"</span>;
             }
 
-            <a name="ipAddressPrefixOrigin.1049"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixOrigin</span> {
+            <a name="ipAddressPrefixOrigin.1049"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixOrigin</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IpAddressPrefixOriginTC.157">IpAddressPrefixOriginTC</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The origin of this prefix."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.32.1.5"</span>;
             }
 
-            <a name="ipAddressPrefixOnLinkFlag.1057"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixOnLinkFlag</span> {
+            <a name="ipAddressPrefixOnLinkFlag.1057"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixOnLinkFlag</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TruthValue.100">smiv2:TruthValue</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1421,7 +1421,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.32.1.6"</span>;
             }
 
-            <a name="ipAddressPrefixAutonomousFlag.1072"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixAutonomousFlag</span> {
+            <a name="ipAddressPrefixAutonomousFlag.1072"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixAutonomousFlag</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TruthValue.100">smiv2:TruthValue</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1438,7 +1438,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.32.1.7"</span>;
             }
 
-            <a name="ipAddressPrefixAdvPreferredLifetime.1089"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixAdvPreferredLifetime</span> {
+            <a name="ipAddressPrefixAdvPreferredLifetime.1089"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixAdvPreferredLifetime</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">units</span> <span class="yang_str">"seconds"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1460,7 +1460,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.32.1.8"</span>;
             }
 
-            <a name="ipAddressPrefixAdvValidLifetime.1111"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixAdvValidLifetime</span> {
+            <a name="ipAddressPrefixAdvValidLifetime.1111"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefixAdvValidLifetime</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">units</span> <span class="yang_str">"seconds"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1484,7 +1484,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.32.1"</span>;
          }  <span class="yang_cmt">// list ipAddressPrefixEntry</span>
 
-         <a name="ipAddressSpinLock.1134"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressSpinLock</span> {
+         <a name="ipAddressSpinLock.1134"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressSpinLock</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TestAndIncr.109">smiv2:TestAndIncr</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>
@@ -1507,19 +1507,19 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.33"</span>;
          }
 
-         <a name="ipAddressEntry.1160"/><span class="yang_kw">list</span> <span class="yang_id">ipAddressEntry</span> {
+         <a name="ipAddressEntry.1160"></a><span class="yang_kw">list</span> <span class="yang_id">ipAddressEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ipAddressAddrType.1168">ipAddressAddrType</a> <a href="#ipAddressAddr.1176">ipAddressAddr</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An address mapping for a particular interface."</span>;
-            <a name="ipAddressAddrType.1168"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressAddrType</span> {
+            <a name="ipAddressAddrType.1168"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressAddrType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The address type of ipAddressAddr."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.34.1.1"</span>;
             }
 
-            <a name="ipAddressAddr.1176"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressAddr</span> {
+            <a name="ipAddressAddr.1176"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressAddr</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddress.128">inet-address:InetAddress</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1537,7 +1537,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.34.1.2"</span>;
             }
 
-            <a name="ipAddressIfIndex.1194"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressIfIndex</span> {
+            <a name="ipAddressIfIndex.1194"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressIfIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndex.81">if-mib:InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1548,7 +1548,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.34.1.3"</span>;
             }
 
-            <a name="ipAddressType.1205"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressType</span> {
+            <a name="ipAddressType.1205"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressType</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"unicast"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -1568,7 +1568,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.34.1.4"</span>;
             }
 
-            <a name="ipAddressPrefix.1219"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefix</span> {
+            <a name="ipAddressPrefix.1219"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressPrefix</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1578,14 +1578,14 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.34.1.5"</span>;
             }
 
-            <a name="ipAddressOrigin.1229"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressOrigin</span> {
+            <a name="ipAddressOrigin.1229"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressOrigin</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IpAddressOriginTC.70">IpAddressOriginTC</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The origin of the address."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.34.1.6"</span>;
             }
 
-            <a name="ipAddressStatus.1237"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressStatus</span> {
+            <a name="ipAddressStatus.1237"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#IpAddressStatusTC.98">IpAddressStatusTC</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1598,7 +1598,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.34.1.7"</span>;
             }
 
-            <a name="ipAddressCreated.1250"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressCreated</span> {
+            <a name="ipAddressCreated.1250"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressCreated</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1609,7 +1609,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.34.1.8"</span>;
             }
 
-            <a name="ipAddressLastChanged.1261"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressLastChanged</span> {
+            <a name="ipAddressLastChanged.1261"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressLastChanged</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1620,7 +1620,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.34.1.9"</span>;
             }
 
-            <a name="ipAddressRowStatus.1272"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressRowStatus</span> {
+            <a name="ipAddressRowStatus.1272"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressRowStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1640,7 +1640,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.34.1.10"</span>;
             }
 
-            <a name="ipAddressStorageType.1292"/><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressStorageType</span> {
+            <a name="ipAddressStorageType.1292"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressStorageType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1653,13 +1653,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.34.1"</span>;
          }  <span class="yang_cmt">// list ipAddressEntry</span>
 
-         <a name="ipNetToPhysicalEntry.1307"/><span class="yang_kw">list</span> <span class="yang_id">ipNetToPhysicalEntry</span> {
+         <a name="ipNetToPhysicalEntry.1307"></a><span class="yang_kw">list</span> <span class="yang_id">ipNetToPhysicalEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ipNetToPhysicalIfIndex.1318">ipNetToPhysicalIfIndex</a> <a href="#ipNetToPhysicalNetAddressType.1329">ipNetToPhysicalNetAddressType</a> <a href="#ipNetToPhysicalNetAddress.1337">ipNetToPhysicalNetAddress</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Each entry contains one IP address to `physical' address
                equivalence."</span>;
-            <a name="ipNetToPhysicalIfIndex.1318"/><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalIfIndex</span> {
+            <a name="ipNetToPhysicalIfIndex.1318"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalIfIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndex.81">if-mib:InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1670,14 +1670,14 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.35.1.1"</span>;
             }
 
-            <a name="ipNetToPhysicalNetAddressType.1329"/><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalNetAddressType</span> {
+            <a name="ipNetToPhysicalNetAddressType.1329"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalNetAddressType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The type of ipNetToPhysicalNetAddress."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.35.1.2"</span>;
             }
 
-            <a name="ipNetToPhysicalNetAddress.1337"/><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalNetAddress</span> {
+            <a name="ipNetToPhysicalNetAddress.1337"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalNetAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddress.128">inet-address:InetAddress</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1696,7 +1696,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.35.1.3"</span>;
             }
 
-            <a name="ipNetToPhysicalPhysAddress.1356"/><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalPhysAddress</span> {
+            <a name="ipNetToPhysicalPhysAddress.1356"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalPhysAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#phys-address.268">yang:phys-address</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..65535"</span>;
                }
@@ -1710,7 +1710,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.35.1.4"</span>;
             }
 
-            <a name="ipNetToPhysicalLastUpdated.1370"/><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalLastUpdated</span> {
+            <a name="ipNetToPhysicalLastUpdated.1370"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalLastUpdated</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1721,7 +1721,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.35.1.5"</span>;
             }
 
-            <a name="ipNetToPhysicalType.1381"/><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalType</span> {
+            <a name="ipNetToPhysicalType.1381"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalType</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -1778,7 +1778,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.35.1.6"</span>;
             }
 
-            <a name="ipNetToPhysicalState.1428"/><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalState</span> {
+            <a name="ipNetToPhysicalState.1428"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalState</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"reachable"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -1812,7 +1812,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.35.1.7"</span>;
             }
 
-            <a name="ipNetToPhysicalRowStatus.1449"/><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalRowStatus</span> {
+            <a name="ipNetToPhysicalRowStatus.1449"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalRowStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1835,13 +1835,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.35.1"</span>;
          }  <span class="yang_cmt">// list ipNetToPhysicalEntry</span>
 
-         <a name="ipv6ScopeZoneIndexEntry.1474"/><span class="yang_kw">list</span> <span class="yang_id">ipv6ScopeZoneIndexEntry</span> {
+         <a name="ipv6ScopeZoneIndexEntry.1474"></a><span class="yang_kw">list</span> <span class="yang_id">ipv6ScopeZoneIndexEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ipv6ScopeZoneIndexIfIndex.1483">ipv6ScopeZoneIndexIfIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Each entry contains the list of scope identifiers on a given
                interface."</span>;
-            <a name="ipv6ScopeZoneIndexIfIndex.1483"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexIfIndex</span> {
+            <a name="ipv6ScopeZoneIndexIfIndex.1483"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexIfIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndex.81">if-mib:InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1852,7 +1852,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1.1"</span>;
             }
 
-            <a name="ipv6ScopeZoneIndexLinkLocal.1494"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexLinkLocal</span> {
+            <a name="ipv6ScopeZoneIndexLinkLocal.1494"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexLinkLocal</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetZoneIndex.391">inet-address:InetZoneIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1860,7 +1860,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1.2"</span>;
             }
 
-            <a name="ipv6ScopeZoneIndex3.1502"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndex3</span> {
+            <a name="ipv6ScopeZoneIndex3.1502"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndex3</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetZoneIndex.391">inet-address:InetZoneIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1868,7 +1868,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1.3"</span>;
             }
 
-            <a name="ipv6ScopeZoneIndexAdminLocal.1510"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexAdminLocal</span> {
+            <a name="ipv6ScopeZoneIndexAdminLocal.1510"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexAdminLocal</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetZoneIndex.391">inet-address:InetZoneIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1876,7 +1876,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1.4"</span>;
             }
 
-            <a name="ipv6ScopeZoneIndexSiteLocal.1518"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexSiteLocal</span> {
+            <a name="ipv6ScopeZoneIndexSiteLocal.1518"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexSiteLocal</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetZoneIndex.391">inet-address:InetZoneIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1884,7 +1884,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1.5"</span>;
             }
 
-            <a name="ipv6ScopeZoneIndex6.1526"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndex6</span> {
+            <a name="ipv6ScopeZoneIndex6.1526"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndex6</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetZoneIndex.391">inet-address:InetZoneIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1892,7 +1892,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1.6"</span>;
             }
 
-            <a name="ipv6ScopeZoneIndex7.1534"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndex7</span> {
+            <a name="ipv6ScopeZoneIndex7.1534"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndex7</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetZoneIndex.391">inet-address:InetZoneIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1900,7 +1900,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1.7"</span>;
             }
 
-            <a name="ipv6ScopeZoneIndexOrganizationLocal.1542"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexOrganizationLocal</span> {
+            <a name="ipv6ScopeZoneIndexOrganizationLocal.1542"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexOrganizationLocal</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetZoneIndex.391">inet-address:InetZoneIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1909,7 +1909,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1.8"</span>;
             }
 
-            <a name="ipv6ScopeZoneIndex9.1551"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndex9</span> {
+            <a name="ipv6ScopeZoneIndex9.1551"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndex9</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetZoneIndex.391">inet-address:InetZoneIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1917,7 +1917,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1.9"</span>;
             }
 
-            <a name="ipv6ScopeZoneIndexA.1559"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexA</span> {
+            <a name="ipv6ScopeZoneIndexA.1559"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexA</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetZoneIndex.391">inet-address:InetZoneIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1925,7 +1925,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1.10"</span>;
             }
 
-            <a name="ipv6ScopeZoneIndexB.1567"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexB</span> {
+            <a name="ipv6ScopeZoneIndexB.1567"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexB</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetZoneIndex.391">inet-address:InetZoneIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1933,7 +1933,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1.11"</span>;
             }
 
-            <a name="ipv6ScopeZoneIndexC.1575"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexC</span> {
+            <a name="ipv6ScopeZoneIndexC.1575"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexC</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetZoneIndex.391">inet-address:InetZoneIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1941,7 +1941,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1.12"</span>;
             }
 
-            <a name="ipv6ScopeZoneIndexD.1583"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexD</span> {
+            <a name="ipv6ScopeZoneIndexD.1583"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6ScopeZoneIndexD</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetZoneIndex.391">inet-address:InetZoneIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1951,20 +1951,20 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.36.1"</span>;
          }  <span class="yang_cmt">// list ipv6ScopeZoneIndexEntry</span>
 
-         <a name="ipDefaultRouterEntry.1595"/><span class="yang_kw">list</span> <span class="yang_id">ipDefaultRouterEntry</span> {
+         <a name="ipDefaultRouterEntry.1595"></a><span class="yang_kw">list</span> <span class="yang_id">ipDefaultRouterEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ipDefaultRouterAddressType.1605">ipDefaultRouterAddressType</a> <a href="#ipDefaultRouterAddress.1613">ipDefaultRouterAddress</a> <a href="#ipDefaultRouterIfIndex.1629">ipDefaultRouterIfIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Each entry contains information about a default router known
                to this entity."</span>;
-            <a name="ipDefaultRouterAddressType.1605"/><span class="yang_kw">leaf</span> <span class="yang_id">ipDefaultRouterAddressType</span> {
+            <a name="ipDefaultRouterAddressType.1605"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipDefaultRouterAddressType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The address type for this row."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.37.1.1"</span>;
             }
 
-            <a name="ipDefaultRouterAddress.1613"/><span class="yang_kw">leaf</span> <span class="yang_id">ipDefaultRouterAddress</span> {
+            <a name="ipDefaultRouterAddress.1613"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipDefaultRouterAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddress.128">inet-address:InetAddress</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1980,7 +1980,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.37.1.2"</span>;
             }
 
-            <a name="ipDefaultRouterIfIndex.1629"/><span class="yang_kw">leaf</span> <span class="yang_id">ipDefaultRouterIfIndex</span> {
+            <a name="ipDefaultRouterIfIndex.1629"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipDefaultRouterIfIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndex.81">if-mib:InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1991,7 +1991,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.37.1.3"</span>;
             }
 
-            <a name="ipDefaultRouterLifetime.1640"/><span class="yang_kw">leaf</span> <span class="yang_id">ipDefaultRouterLifetime</span> {
+            <a name="ipDefaultRouterLifetime.1640"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipDefaultRouterLifetime</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..65535"</span>;
                }
@@ -2012,7 +2012,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.37.1.4"</span>;
             }
 
-            <a name="ipDefaultRouterPreference.1661"/><span class="yang_kw">leaf</span> <span class="yang_id">ipDefaultRouterPreference</span> {
+            <a name="ipDefaultRouterPreference.1661"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipDefaultRouterPreference</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"reserved"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">-2</span>;
@@ -2044,7 +2044,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.37.1"</span>;
          }  <span class="yang_cmt">// list ipDefaultRouterEntry</span>
 
-         <a name="ipv6RouterAdvertSpinLock.1685"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertSpinLock</span> {
+         <a name="ipv6RouterAdvertSpinLock.1685"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertSpinLock</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TestAndIncr.109">smiv2:TestAndIncr</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>
@@ -2067,7 +2067,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.38"</span>;
          }
 
-         <a name="ipv6RouterAdvertEntry.1711"/><span class="yang_kw">list</span> <span class="yang_id">ipv6RouterAdvertEntry</span> {
+         <a name="ipv6RouterAdvertEntry.1711"></a><span class="yang_kw">list</span> <span class="yang_id">ipv6RouterAdvertEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ipv6RouterAdvertIfIndex.1724">ipv6RouterAdvertIfIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -2077,7 +2077,7 @@
                Information in this table is persistent, and when this
                object is written, the entity SHOULD save the change to
                non-volatile storage."</span>;
-            <a name="ipv6RouterAdvertIfIndex.1724"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertIfIndex</span> {
+            <a name="ipv6RouterAdvertIfIndex.1724"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertIfIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndex.81">if-mib:InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2089,7 +2089,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.39.1.1"</span>;
             }
 
-            <a name="ipv6RouterAdvertSendAdverts.1736"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertSendAdverts</span> {
+            <a name="ipv6RouterAdvertSendAdverts.1736"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertSendAdverts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TruthValue.100">smiv2:TruthValue</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -2101,7 +2101,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.39.1.2"</span>;
             }
 
-            <a name="ipv6RouterAdvertMaxInterval.1749"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertMaxInterval</span> {
+            <a name="ipv6RouterAdvertMaxInterval.1749"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertMaxInterval</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"4..1800"</span>;
                }
@@ -2118,7 +2118,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.39.1.3"</span>;
             }
 
-            <a name="ipv6RouterAdvertMinInterval.1767"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertMinInterval</span> {
+            <a name="ipv6RouterAdvertMinInterval.1767"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertMinInterval</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"3..1350"</span>;
                }
@@ -2135,7 +2135,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.39.1.4"</span>;
             }
 
-            <a name="ipv6RouterAdvertManagedFlag.1785"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertManagedFlag</span> {
+            <a name="ipv6RouterAdvertManagedFlag.1785"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertManagedFlag</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TruthValue.100">smiv2:TruthValue</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -2147,7 +2147,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.39.1.5"</span>;
             }
 
-            <a name="ipv6RouterAdvertOtherConfigFlag.1798"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertOtherConfigFlag</span> {
+            <a name="ipv6RouterAdvertOtherConfigFlag.1798"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertOtherConfigFlag</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TruthValue.100">smiv2:TruthValue</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -2159,7 +2159,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.39.1.6"</span>;
             }
 
-            <a name="ipv6RouterAdvertLinkMTU.1811"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertLinkMTU</span> {
+            <a name="ipv6RouterAdvertLinkMTU.1811"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertLinkMTU</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -2172,7 +2172,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.39.1.7"</span>;
             }
 
-            <a name="ipv6RouterAdvertReachableTime.1825"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertReachableTime</span> {
+            <a name="ipv6RouterAdvertReachableTime.1825"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertReachableTime</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..3600000"</span>;
                }
@@ -2190,7 +2190,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.39.1.8"</span>;
             }
 
-            <a name="ipv6RouterAdvertRetransmitTime.1844"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertRetransmitTime</span> {
+            <a name="ipv6RouterAdvertRetransmitTime.1844"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertRetransmitTime</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">units</span> <span class="yang_str">"milliseconds"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -2206,7 +2206,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.39.1.9"</span>;
             }
 
-            <a name="ipv6RouterAdvertCurHopLimit.1861"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertCurHopLimit</span> {
+            <a name="ipv6RouterAdvertCurHopLimit.1861"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertCurHopLimit</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..255"</span>;
                }
@@ -2229,7 +2229,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.39.1.10"</span>;
             }
 
-            <a name="ipv6RouterAdvertDefaultLifetime.1885"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertDefaultLifetime</span> {
+            <a name="ipv6RouterAdvertDefaultLifetime.1885"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertDefaultLifetime</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0 | 4..9000"</span>;
                }
@@ -2249,7 +2249,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.39.1.11"</span>;
             }
 
-            <a name="ipv6RouterAdvertRowStatus.1906"/><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertRowStatus</span> {
+            <a name="ipv6RouterAdvertRowStatus.1906"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6RouterAdvertRowStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -2271,21 +2271,21 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4"</span>;
       }  <span class="yang_cmt">// container ip</span>
 
-      <a name="ipTrafficStats.1927"/><span class="yang_kw">container</span> <span class="yang_id">ipTrafficStats</span> {
-         <a name="ipSystemStatsEntry.1932"/><span class="yang_kw">list</span> <span class="yang_id">ipSystemStatsEntry</span> {
+      <a name="ipTrafficStats.1927"></a><span class="yang_kw">container</span> <span class="yang_id">ipTrafficStats</span> {
+         <a name="ipSystemStatsEntry.1932"></a><span class="yang_kw">list</span> <span class="yang_id">ipSystemStatsEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ipSystemStatsIPVersion.1941">ipSystemStatsIPVersion</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"A statistics entry containing system-wide objects for a
                particular IP version."</span>;
-            <a name="ipSystemStatsIPVersion.1941"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsIPVersion</span> {
+            <a name="ipSystemStatsIPVersion.1941"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsIPVersion</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetVersion.415">inet-address:InetVersion</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The IP version of this row."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.1"</span>;
             }
 
-            <a name="ipSystemStatsInReceives.1949"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInReceives</span> {
+            <a name="ipSystemStatsInReceives.1949"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInReceives</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2299,7 +2299,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.3"</span>;
             }
 
-            <a name="ipSystemStatsHCInReceives.1963"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInReceives</span> {
+            <a name="ipSystemStatsHCInReceives.1963"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInReceives</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2315,7 +2315,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.4"</span>;
             }
 
-            <a name="ipSystemStatsInOctets.1979"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInOctets</span> {
+            <a name="ipSystemStatsInOctets.1979"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2330,7 +2330,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.5"</span>;
             }
 
-            <a name="ipSystemStatsHCInOctets.1994"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInOctets</span> {
+            <a name="ipSystemStatsHCInOctets.1994"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2349,7 +2349,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.6"</span>;
             }
 
-            <a name="ipSystemStatsInHdrErrors.2013"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInHdrErrors</span> {
+            <a name="ipSystemStatsInHdrErrors.2013"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInHdrErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2365,7 +2365,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.7"</span>;
             }
 
-            <a name="ipSystemStatsInNoRoutes.2029"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInNoRoutes</span> {
+            <a name="ipSystemStatsInNoRoutes.2029"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInNoRoutes</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2379,7 +2379,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.8"</span>;
             }
 
-            <a name="ipSystemStatsInAddrErrors.2043"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInAddrErrors</span> {
+            <a name="ipSystemStatsInAddrErrors.2043"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInAddrErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2401,7 +2401,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.9"</span>;
             }
 
-            <a name="ipSystemStatsInUnknownProtos.2065"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInUnknownProtos</span> {
+            <a name="ipSystemStatsInUnknownProtos.2065"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInUnknownProtos</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2421,7 +2421,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.10"</span>;
             }
 
-            <a name="ipSystemStatsInTruncatedPkts.2085"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInTruncatedPkts</span> {
+            <a name="ipSystemStatsInTruncatedPkts.2085"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInTruncatedPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2435,7 +2435,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.11"</span>;
             }
 
-            <a name="ipSystemStatsInForwDatagrams.2099"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInForwDatagrams</span> {
+            <a name="ipSystemStatsInForwDatagrams.2099"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInForwDatagrams</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2457,7 +2457,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.12"</span>;
             }
 
-            <a name="ipSystemStatsHCInForwDatagrams.2121"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInForwDatagrams</span> {
+            <a name="ipSystemStatsHCInForwDatagrams.2121"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInForwDatagrams</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2474,7 +2474,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.13"</span>;
             }
 
-            <a name="ipSystemStatsReasmReqds.2138"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsReasmReqds</span> {
+            <a name="ipSystemStatsReasmReqds.2138"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsReasmReqds</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2496,7 +2496,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.14"</span>;
             }
 
-            <a name="ipSystemStatsReasmOKs.2160"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsReasmOKs</span> {
+            <a name="ipSystemStatsReasmOKs.2160"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsReasmOKs</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2514,7 +2514,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.15"</span>;
             }
 
-            <a name="ipSystemStatsReasmFails.2178"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsReasmFails</span> {
+            <a name="ipSystemStatsReasmFails.2178"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsReasmFails</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2537,7 +2537,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.16"</span>;
             }
 
-            <a name="ipSystemStatsInDiscards.2201"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInDiscards</span> {
+            <a name="ipSystemStatsInDiscards.2201"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInDiscards</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2554,7 +2554,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.17"</span>;
             }
 
-            <a name="ipSystemStatsInDelivers.2218"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInDelivers</span> {
+            <a name="ipSystemStatsInDelivers.2218"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInDelivers</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2573,7 +2573,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.18"</span>;
             }
 
-            <a name="ipSystemStatsHCInDelivers.2237"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInDelivers</span> {
+            <a name="ipSystemStatsHCInDelivers.2237"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInDelivers</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2589,7 +2589,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.19"</span>;
             }
 
-            <a name="ipSystemStatsOutRequests.2253"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutRequests</span> {
+            <a name="ipSystemStatsOutRequests.2253"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutRequests</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2605,7 +2605,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.20"</span>;
             }
 
-            <a name="ipSystemStatsHCOutRequests.2269"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutRequests</span> {
+            <a name="ipSystemStatsHCOutRequests.2269"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutRequests</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2621,7 +2621,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.21"</span>;
             }
 
-            <a name="ipSystemStatsOutNoRoutes.2285"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutNoRoutes</span> {
+            <a name="ipSystemStatsOutNoRoutes.2285"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutNoRoutes</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2636,7 +2636,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.22"</span>;
             }
 
-            <a name="ipSystemStatsOutForwDatagrams.2300"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutForwDatagrams</span> {
+            <a name="ipSystemStatsOutForwDatagrams.2300"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutForwDatagrams</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2658,7 +2658,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.23"</span>;
             }
 
-            <a name="ipSystemStatsHCOutForwDatagrams.2322"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutForwDatagrams</span> {
+            <a name="ipSystemStatsHCOutForwDatagrams.2322"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutForwDatagrams</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2675,7 +2675,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.24"</span>;
             }
 
-            <a name="ipSystemStatsOutDiscards.2339"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutDiscards</span> {
+            <a name="ipSystemStatsOutDiscards.2339"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutDiscards</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2696,7 +2696,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.25"</span>;
             }
 
-            <a name="ipSystemStatsOutFragReqds.2360"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutFragReqds</span> {
+            <a name="ipSystemStatsOutFragReqds.2360"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutFragReqds</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2714,7 +2714,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.26"</span>;
             }
 
-            <a name="ipSystemStatsOutFragOKs.2378"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutFragOKs</span> {
+            <a name="ipSystemStatsOutFragOKs.2378"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutFragOKs</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2732,7 +2732,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.27"</span>;
             }
 
-            <a name="ipSystemStatsOutFragFails.2396"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutFragFails</span> {
+            <a name="ipSystemStatsOutFragFails.2396"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutFragFails</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2753,7 +2753,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.28"</span>;
             }
 
-            <a name="ipSystemStatsOutFragCreates.2417"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutFragCreates</span> {
+            <a name="ipSystemStatsOutFragCreates.2417"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutFragCreates</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2771,7 +2771,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.29"</span>;
             }
 
-            <a name="ipSystemStatsOutTransmits.2435"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutTransmits</span> {
+            <a name="ipSystemStatsOutTransmits.2435"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutTransmits</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2790,7 +2790,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.30"</span>;
             }
 
-            <a name="ipSystemStatsHCOutTransmits.2454"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutTransmits</span> {
+            <a name="ipSystemStatsHCOutTransmits.2454"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutTransmits</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2806,7 +2806,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.31"</span>;
             }
 
-            <a name="ipSystemStatsOutOctets.2470"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutOctets</span> {
+            <a name="ipSystemStatsOutOctets.2470"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2821,7 +2821,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.32"</span>;
             }
 
-            <a name="ipSystemStatsHCOutOctets.2485"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutOctets</span> {
+            <a name="ipSystemStatsHCOutOctets.2485"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2840,7 +2840,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.33"</span>;
             }
 
-            <a name="ipSystemStatsInMcastPkts.2504"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInMcastPkts</span> {
+            <a name="ipSystemStatsInMcastPkts.2504"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInMcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2853,7 +2853,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.34"</span>;
             }
 
-            <a name="ipSystemStatsHCInMcastPkts.2517"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInMcastPkts</span> {
+            <a name="ipSystemStatsHCInMcastPkts.2517"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInMcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2868,7 +2868,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.35"</span>;
             }
 
-            <a name="ipSystemStatsInMcastOctets.2532"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInMcastOctets</span> {
+            <a name="ipSystemStatsInMcastOctets.2532"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInMcastOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2883,7 +2883,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.36"</span>;
             }
 
-            <a name="ipSystemStatsHCInMcastOctets.2547"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInMcastOctets</span> {
+            <a name="ipSystemStatsHCInMcastOctets.2547"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInMcastOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2898,7 +2898,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.37"</span>;
             }
 
-            <a name="ipSystemStatsOutMcastPkts.2562"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutMcastPkts</span> {
+            <a name="ipSystemStatsOutMcastPkts.2562"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutMcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2911,7 +2911,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.38"</span>;
             }
 
-            <a name="ipSystemStatsHCOutMcastPkts.2575"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutMcastPkts</span> {
+            <a name="ipSystemStatsHCOutMcastPkts.2575"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutMcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2926,7 +2926,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.39"</span>;
             }
 
-            <a name="ipSystemStatsOutMcastOctets.2590"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutMcastOctets</span> {
+            <a name="ipSystemStatsOutMcastOctets.2590"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutMcastOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2944,7 +2944,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.40"</span>;
             }
 
-            <a name="ipSystemStatsHCOutMcastOctets.2608"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutMcastOctets</span> {
+            <a name="ipSystemStatsHCOutMcastOctets.2608"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutMcastOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2959,7 +2959,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.41"</span>;
             }
 
-            <a name="ipSystemStatsInBcastPkts.2623"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInBcastPkts</span> {
+            <a name="ipSystemStatsInBcastPkts.2623"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInBcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2972,7 +2972,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.42"</span>;
             }
 
-            <a name="ipSystemStatsHCInBcastPkts.2636"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInBcastPkts</span> {
+            <a name="ipSystemStatsHCInBcastPkts.2636"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInBcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -2990,7 +2990,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.43"</span>;
             }
 
-            <a name="ipSystemStatsOutBcastPkts.2654"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutBcastPkts</span> {
+            <a name="ipSystemStatsOutBcastPkts.2654"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutBcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3003,7 +3003,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.44"</span>;
             }
 
-            <a name="ipSystemStatsHCOutBcastPkts.2667"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutBcastPkts</span> {
+            <a name="ipSystemStatsHCOutBcastPkts.2667"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutBcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3018,7 +3018,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.45"</span>;
             }
 
-            <a name="ipSystemStatsDiscontinuityTime.2682"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsDiscontinuityTime</span> {
+            <a name="ipSystemStatsDiscontinuityTime.2682"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsDiscontinuityTime</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3032,7 +3032,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1.46"</span>;
             }
 
-            <a name="ipSystemStatsRefreshRate.2696"/><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsRefreshRate</span> {
+            <a name="ipSystemStatsRefreshRate.2696"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsRefreshRate</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">units</span> <span class="yang_str">"milli-seconds"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -3045,7 +3045,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.1.1"</span>;
          }  <span class="yang_cmt">// list ipSystemStatsEntry</span>
 
-         <a name="ipIfStatsTableLastChange.2708"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsTableLastChange</span> {
+         <a name="ipIfStatsTableLastChange.2708"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsTableLastChange</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -3059,20 +3059,20 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.2"</span>;
          }
 
-         <a name="ipIfStatsEntry.2725"/><span class="yang_kw">list</span> <span class="yang_id">ipIfStatsEntry</span> {
+         <a name="ipIfStatsEntry.2725"></a><span class="yang_kw">list</span> <span class="yang_id">ipIfStatsEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ipIfStatsIPVersion.2734">ipIfStatsIPVersion</a> <a href="#ipIfStatsIfIndex.2742">ipIfStatsIfIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An interface statistics entry containing objects for a
                particular interface and version of IP."</span>;
-            <a name="ipIfStatsIPVersion.2734"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsIPVersion</span> {
+            <a name="ipIfStatsIPVersion.2734"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsIPVersion</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetVersion.415">inet-address:InetVersion</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The IP version of this row."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.1"</span>;
             }
 
-            <a name="ipIfStatsIfIndex.2742"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsIfIndex</span> {
+            <a name="ipIfStatsIfIndex.2742"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsIfIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndex.81">if-mib:InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3083,7 +3083,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.2"</span>;
             }
 
-            <a name="ipIfStatsInReceives.2753"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInReceives</span> {
+            <a name="ipIfStatsInReceives.2753"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInReceives</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3097,7 +3097,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.3"</span>;
             }
 
-            <a name="ipIfStatsHCInReceives.2767"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInReceives</span> {
+            <a name="ipIfStatsHCInReceives.2767"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInReceives</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3113,7 +3113,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.4"</span>;
             }
 
-            <a name="ipIfStatsInOctets.2783"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInOctets</span> {
+            <a name="ipIfStatsInOctets.2783"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3128,7 +3128,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.5"</span>;
             }
 
-            <a name="ipIfStatsHCInOctets.2798"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInOctets</span> {
+            <a name="ipIfStatsHCInOctets.2798"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3144,7 +3144,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.6"</span>;
             }
 
-            <a name="ipIfStatsInHdrErrors.2814"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInHdrErrors</span> {
+            <a name="ipIfStatsInHdrErrors.2814"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInHdrErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3160,7 +3160,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.7"</span>;
             }
 
-            <a name="ipIfStatsInNoRoutes.2830"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInNoRoutes</span> {
+            <a name="ipIfStatsInNoRoutes.2830"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInNoRoutes</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3174,7 +3174,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.8"</span>;
             }
 
-            <a name="ipIfStatsInAddrErrors.2844"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInAddrErrors</span> {
+            <a name="ipIfStatsInAddrErrors.2844"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInAddrErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3193,7 +3193,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.9"</span>;
             }
 
-            <a name="ipIfStatsInUnknownProtos.2863"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInUnknownProtos</span> {
+            <a name="ipIfStatsInUnknownProtos.2863"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInUnknownProtos</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3216,7 +3216,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.10"</span>;
             }
 
-            <a name="ipIfStatsInTruncatedPkts.2886"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInTruncatedPkts</span> {
+            <a name="ipIfStatsInTruncatedPkts.2886"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInTruncatedPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3230,7 +3230,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.11"</span>;
             }
 
-            <a name="ipIfStatsInForwDatagrams.2900"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInForwDatagrams</span> {
+            <a name="ipIfStatsInForwDatagrams.2900"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInForwDatagrams</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3252,7 +3252,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.12"</span>;
             }
 
-            <a name="ipIfStatsHCInForwDatagrams.2922"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInForwDatagrams</span> {
+            <a name="ipIfStatsHCInForwDatagrams.2922"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInForwDatagrams</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3272,7 +3272,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.13"</span>;
             }
 
-            <a name="ipIfStatsReasmReqds.2942"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsReasmReqds</span> {
+            <a name="ipIfStatsReasmReqds.2942"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsReasmReqds</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3291,7 +3291,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.14"</span>;
             }
 
-            <a name="ipIfStatsReasmOKs.2961"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsReasmOKs</span> {
+            <a name="ipIfStatsReasmOKs.2961"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsReasmOKs</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3309,7 +3309,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.15"</span>;
             }
 
-            <a name="ipIfStatsReasmFails.2979"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsReasmFails</span> {
+            <a name="ipIfStatsReasmFails.2979"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsReasmFails</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3332,7 +3332,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.16"</span>;
             }
 
-            <a name="ipIfStatsInDiscards.3002"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInDiscards</span> {
+            <a name="ipIfStatsInDiscards.3002"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInDiscards</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3349,7 +3349,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.17"</span>;
             }
 
-            <a name="ipIfStatsInDelivers.3019"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInDelivers</span> {
+            <a name="ipIfStatsInDelivers.3019"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInDelivers</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3371,7 +3371,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.18"</span>;
             }
 
-            <a name="ipIfStatsHCInDelivers.3041"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInDelivers</span> {
+            <a name="ipIfStatsHCInDelivers.3041"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInDelivers</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3387,7 +3387,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.19"</span>;
             }
 
-            <a name="ipIfStatsOutRequests.3057"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutRequests</span> {
+            <a name="ipIfStatsOutRequests.3057"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutRequests</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3403,7 +3403,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.20"</span>;
             }
 
-            <a name="ipIfStatsHCOutRequests.3073"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutRequests</span> {
+            <a name="ipIfStatsHCOutRequests.3073"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutRequests</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3422,7 +3422,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.21"</span>;
             }
 
-            <a name="ipIfStatsOutForwDatagrams.3092"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutForwDatagrams</span> {
+            <a name="ipIfStatsOutForwDatagrams.3092"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutForwDatagrams</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3444,7 +3444,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.23"</span>;
             }
 
-            <a name="ipIfStatsHCOutForwDatagrams.3114"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutForwDatagrams</span> {
+            <a name="ipIfStatsHCOutForwDatagrams.3114"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutForwDatagrams</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3464,7 +3464,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.24"</span>;
             }
 
-            <a name="ipIfStatsOutDiscards.3134"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutDiscards</span> {
+            <a name="ipIfStatsOutDiscards.3134"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutDiscards</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3482,7 +3482,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.25"</span>;
             }
 
-            <a name="ipIfStatsOutFragReqds.3152"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutFragReqds</span> {
+            <a name="ipIfStatsOutFragReqds.3152"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutFragReqds</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3500,7 +3500,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.26"</span>;
             }
 
-            <a name="ipIfStatsOutFragOKs.3170"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutFragOKs</span> {
+            <a name="ipIfStatsOutFragOKs.3170"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutFragOKs</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3521,7 +3521,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.27"</span>;
             }
 
-            <a name="ipIfStatsOutFragFails.3191"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutFragFails</span> {
+            <a name="ipIfStatsOutFragFails.3191"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutFragFails</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3542,7 +3542,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.28"</span>;
             }
 
-            <a name="ipIfStatsOutFragCreates.3212"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutFragCreates</span> {
+            <a name="ipIfStatsOutFragCreates.3212"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutFragCreates</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3560,7 +3560,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.29"</span>;
             }
 
-            <a name="ipIfStatsOutTransmits.3230"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutTransmits</span> {
+            <a name="ipIfStatsOutTransmits.3230"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutTransmits</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3576,7 +3576,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.30"</span>;
             }
 
-            <a name="ipIfStatsHCOutTransmits.3246"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutTransmits</span> {
+            <a name="ipIfStatsHCOutTransmits.3246"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutTransmits</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3592,7 +3592,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.31"</span>;
             }
 
-            <a name="ipIfStatsOutOctets.3262"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutOctets</span> {
+            <a name="ipIfStatsOutOctets.3262"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3607,7 +3607,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.32"</span>;
             }
 
-            <a name="ipIfStatsHCOutOctets.3277"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutOctets</span> {
+            <a name="ipIfStatsHCOutOctets.3277"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3622,7 +3622,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.33"</span>;
             }
 
-            <a name="ipIfStatsInMcastPkts.3292"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInMcastPkts</span> {
+            <a name="ipIfStatsInMcastPkts.3292"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInMcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3635,7 +3635,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.34"</span>;
             }
 
-            <a name="ipIfStatsHCInMcastPkts.3305"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInMcastPkts</span> {
+            <a name="ipIfStatsHCInMcastPkts.3305"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInMcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3650,7 +3650,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.35"</span>;
             }
 
-            <a name="ipIfStatsInMcastOctets.3320"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInMcastOctets</span> {
+            <a name="ipIfStatsInMcastOctets.3320"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInMcastOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3668,7 +3668,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.36"</span>;
             }
 
-            <a name="ipIfStatsHCInMcastOctets.3338"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInMcastOctets</span> {
+            <a name="ipIfStatsHCInMcastOctets.3338"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInMcastOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3683,7 +3683,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.37"</span>;
             }
 
-            <a name="ipIfStatsOutMcastPkts.3353"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutMcastPkts</span> {
+            <a name="ipIfStatsOutMcastPkts.3353"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutMcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3696,7 +3696,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.38"</span>;
             }
 
-            <a name="ipIfStatsHCOutMcastPkts.3366"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutMcastPkts</span> {
+            <a name="ipIfStatsHCOutMcastPkts.3366"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutMcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3714,7 +3714,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.39"</span>;
             }
 
-            <a name="ipIfStatsOutMcastOctets.3384"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutMcastOctets</span> {
+            <a name="ipIfStatsOutMcastOctets.3384"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutMcastOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3729,7 +3729,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.40"</span>;
             }
 
-            <a name="ipIfStatsHCOutMcastOctets.3399"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutMcastOctets</span> {
+            <a name="ipIfStatsHCOutMcastOctets.3399"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutMcastOctets</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3744,7 +3744,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.41"</span>;
             }
 
-            <a name="ipIfStatsInBcastPkts.3414"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInBcastPkts</span> {
+            <a name="ipIfStatsInBcastPkts.3414"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInBcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3757,7 +3757,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.42"</span>;
             }
 
-            <a name="ipIfStatsHCInBcastPkts.3427"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInBcastPkts</span> {
+            <a name="ipIfStatsHCInBcastPkts.3427"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInBcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3772,7 +3772,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.43"</span>;
             }
 
-            <a name="ipIfStatsOutBcastPkts.3442"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutBcastPkts</span> {
+            <a name="ipIfStatsOutBcastPkts.3442"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutBcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3785,7 +3785,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.44"</span>;
             }
 
-            <a name="ipIfStatsHCOutBcastPkts.3455"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutBcastPkts</span> {
+            <a name="ipIfStatsHCOutBcastPkts.3455"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutBcastPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3800,7 +3800,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.45"</span>;
             }
 
-            <a name="ipIfStatsDiscontinuityTime.3470"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsDiscontinuityTime</span> {
+            <a name="ipIfStatsDiscontinuityTime.3470"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsDiscontinuityTime</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -3817,7 +3817,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31.3.1.46"</span>;
             }
 
-            <a name="ipIfStatsRefreshRate.3487"/><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsRefreshRate</span> {
+            <a name="ipIfStatsRefreshRate.3487"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsRefreshRate</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">units</span> <span class="yang_str">"milli-seconds"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -3832,8 +3832,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.31"</span>;
       }  <span class="yang_cmt">// container ipTrafficStats</span>
 
-      <a name="icmp.3501"/><span class="yang_kw">container</span> <span class="yang_id">icmp</span> {
-         <a name="icmpInMsgs.3503"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInMsgs</span> {
+      <a name="icmp.3501"></a><span class="yang_kw">container</span> <span class="yang_id">icmp</span> {
+         <a name="icmpInMsgs.3503"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInMsgs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -3848,7 +3848,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.1"</span>;
          }
 
-         <a name="icmpInErrors.3518"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInErrors</span> {
+         <a name="icmpInErrors.3518"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInErrors</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -3863,7 +3863,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.2"</span>;
          }
 
-         <a name="icmpInDestUnreachs.3533"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInDestUnreachs</span> {
+         <a name="icmpInDestUnreachs.3533"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInDestUnreachs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -3877,7 +3877,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.3"</span>;
          }
 
-         <a name="icmpInTimeExcds.3547"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInTimeExcds</span> {
+         <a name="icmpInTimeExcds.3547"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInTimeExcds</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -3890,7 +3890,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.4"</span>;
          }
 
-         <a name="icmpInParmProbs.3560"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInParmProbs</span> {
+         <a name="icmpInParmProbs.3560"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInParmProbs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -3903,7 +3903,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.5"</span>;
          }
 
-         <a name="icmpInSrcQuenchs.3573"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInSrcQuenchs</span> {
+         <a name="icmpInSrcQuenchs.3573"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInSrcQuenchs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -3916,7 +3916,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.6"</span>;
          }
 
-         <a name="icmpInRedirects.3586"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInRedirects</span> {
+         <a name="icmpInRedirects.3586"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInRedirects</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -3929,7 +3929,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.7"</span>;
          }
 
-         <a name="icmpInEchos.3599"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInEchos</span> {
+         <a name="icmpInEchos.3599"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInEchos</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -3942,7 +3942,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.8"</span>;
          }
 
-         <a name="icmpInEchoReps.3612"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInEchoReps</span> {
+         <a name="icmpInEchoReps.3612"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInEchoReps</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -3955,7 +3955,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.9"</span>;
          }
 
-         <a name="icmpInTimestamps.3625"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInTimestamps</span> {
+         <a name="icmpInTimestamps.3625"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInTimestamps</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -3968,7 +3968,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.10"</span>;
          }
 
-         <a name="icmpInTimestampReps.3638"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInTimestampReps</span> {
+         <a name="icmpInTimestampReps.3638"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInTimestampReps</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -3981,7 +3981,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.11"</span>;
          }
 
-         <a name="icmpInAddrMasks.3651"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInAddrMasks</span> {
+         <a name="icmpInAddrMasks.3651"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInAddrMasks</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -3994,7 +3994,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.12"</span>;
          }
 
-         <a name="icmpInAddrMaskReps.3664"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpInAddrMaskReps</span> {
+         <a name="icmpInAddrMaskReps.3664"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInAddrMaskReps</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4007,7 +4007,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.13"</span>;
          }
 
-         <a name="icmpOutMsgs.3677"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutMsgs</span> {
+         <a name="icmpOutMsgs.3677"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutMsgs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4022,7 +4022,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.14"</span>;
          }
 
-         <a name="icmpOutErrors.3692"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutErrors</span> {
+         <a name="icmpOutErrors.3692"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutErrors</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4041,7 +4041,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.15"</span>;
          }
 
-         <a name="icmpOutDestUnreachs.3711"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutDestUnreachs</span> {
+         <a name="icmpOutDestUnreachs.3711"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutDestUnreachs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4054,7 +4054,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.16"</span>;
          }
 
-         <a name="icmpOutTimeExcds.3724"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutTimeExcds</span> {
+         <a name="icmpOutTimeExcds.3724"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutTimeExcds</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4067,7 +4067,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.17"</span>;
          }
 
-         <a name="icmpOutParmProbs.3737"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutParmProbs</span> {
+         <a name="icmpOutParmProbs.3737"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutParmProbs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4080,7 +4080,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.18"</span>;
          }
 
-         <a name="icmpOutSrcQuenchs.3750"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutSrcQuenchs</span> {
+         <a name="icmpOutSrcQuenchs.3750"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutSrcQuenchs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4093,7 +4093,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.19"</span>;
          }
 
-         <a name="icmpOutRedirects.3763"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutRedirects</span> {
+         <a name="icmpOutRedirects.3763"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutRedirects</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4108,7 +4108,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.20"</span>;
          }
 
-         <a name="icmpOutEchos.3778"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutEchos</span> {
+         <a name="icmpOutEchos.3778"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutEchos</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4121,7 +4121,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.21"</span>;
          }
 
-         <a name="icmpOutEchoReps.3791"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutEchoReps</span> {
+         <a name="icmpOutEchoReps.3791"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutEchoReps</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4134,7 +4134,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.22"</span>;
          }
 
-         <a name="icmpOutTimestamps.3804"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutTimestamps</span> {
+         <a name="icmpOutTimestamps.3804"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutTimestamps</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4147,7 +4147,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.23"</span>;
          }
 
-         <a name="icmpOutTimestampReps.3817"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutTimestampReps</span> {
+         <a name="icmpOutTimestampReps.3817"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutTimestampReps</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4160,7 +4160,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.24"</span>;
          }
 
-         <a name="icmpOutAddrMasks.3830"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutAddrMasks</span> {
+         <a name="icmpOutAddrMasks.3830"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutAddrMasks</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4173,7 +4173,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.25"</span>;
          }
 
-         <a name="icmpOutAddrMaskReps.3843"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutAddrMaskReps</span> {
+         <a name="icmpOutAddrMaskReps.3843"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutAddrMaskReps</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -4186,19 +4186,19 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.26"</span>;
          }
 
-         <a name="icmpStatsEntry.3859"/><span class="yang_kw">list</span> <span class="yang_id">icmpStatsEntry</span> {
+         <a name="icmpStatsEntry.3859"></a><span class="yang_kw">list</span> <span class="yang_id">icmpStatsEntry</span> {
             <span class="yang_kw">key</span> "<a href="#icmpStatsIPVersion.3867">icmpStatsIPVersion</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"A conceptual row in the icmpStatsTable."</span>;
-            <a name="icmpStatsIPVersion.3867"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsIPVersion</span> {
+            <a name="icmpStatsIPVersion.3867"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsIPVersion</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetVersion.415">inet-address:InetVersion</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The IP version of the statistics."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.29.1.1"</span>;
             }
 
-            <a name="icmpStatsInMsgs.3875"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsInMsgs</span> {
+            <a name="icmpStatsInMsgs.3875"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsInMsgs</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -4208,7 +4208,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.29.1.2"</span>;
             }
 
-            <a name="icmpStatsInErrors.3885"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsInErrors</span> {
+            <a name="icmpStatsInErrors.3885"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsInErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -4218,7 +4218,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.29.1.3"</span>;
             }
 
-            <a name="icmpStatsOutMsgs.3895"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsOutMsgs</span> {
+            <a name="icmpStatsOutMsgs.3895"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsOutMsgs</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -4228,7 +4228,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.29.1.4"</span>;
             }
 
-            <a name="icmpStatsOutErrors.3905"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsOutErrors</span> {
+            <a name="icmpStatsOutErrors.3905"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsOutErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -4244,7 +4244,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.29.1"</span>;
          }  <span class="yang_cmt">// list icmpStatsEntry</span>
 
-         <a name="icmpMsgStatsEntry.3923"/><span class="yang_kw">list</span> <span class="yang_id">icmpMsgStatsEntry</span> {
+         <a name="icmpMsgStatsEntry.3923"></a><span class="yang_kw">list</span> <span class="yang_id">icmpMsgStatsEntry</span> {
             <span class="yang_kw">key</span> "<a href="#icmpMsgStatsIPVersion.3941">icmpMsgStatsIPVersion</a> <a href="#icmpMsgStatsType.3949">icmpMsgStatsType</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -4259,14 +4259,14 @@
                received or transmitted.  After receiving or transmitting
                any succeeding messages with Type=X, the relevant counter
                must be incremented."</span>;
-            <a name="icmpMsgStatsIPVersion.3941"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpMsgStatsIPVersion</span> {
+            <a name="icmpMsgStatsIPVersion.3941"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpMsgStatsIPVersion</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetVersion.415">inet-address:InetVersion</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The IP version of the statistics."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.30.1.1"</span>;
             }
 
-            <a name="icmpMsgStatsType.3949"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpMsgStatsType</span> {
+            <a name="icmpMsgStatsType.3949"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpMsgStatsType</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..255"</span>;
                }
@@ -4283,7 +4283,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.30.1.2"</span>;
             }
 
-            <a name="icmpMsgStatsInPkts.3966"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpMsgStatsInPkts</span> {
+            <a name="icmpMsgStatsInPkts.3966"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpMsgStatsInPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -4291,7 +4291,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.5.30.1.3"</span>;
             }
 
-            <a name="icmpMsgStatsOutPkts.3974"/><span class="yang_kw">leaf</span> <span class="yang_id">icmpMsgStatsOutPkts</span> {
+            <a name="icmpMsgStatsOutPkts.3974"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpMsgStatsOutPkts</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>

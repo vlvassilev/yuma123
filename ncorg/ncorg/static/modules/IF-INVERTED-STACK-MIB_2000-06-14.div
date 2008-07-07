@@ -64,8 +64,8 @@
             <span class="yang_str">"Initial revision, published as RFC 2864"</span>;
       }
 
-      <a name="ifInvMIBObjects.46"/><span class="yang_kw">container</span> <span class="yang_id">ifInvMIBObjects</span> {
-         <a name="ifInvStackEntry.51"/><span class="yang_kw">list</span> <span class="yang_id">ifInvStackEntry</span> {
+      <a name="ifInvMIBObjects.46"></a><span class="yang_kw">container</span> <span class="yang_id">ifInvMIBObjects</span> {
+         <a name="ifInvStackEntry.51"></a><span class="yang_kw">list</span> <span class="yang_id">ifInvStackEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ifStackLowerLayer.61">ifStackLowerLayer</a> <a href="#ifStackHigherLayer.69">ifStackHigherLayer</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -73,7 +73,7 @@
                layers, specifying that one sub-layer runs underneath the
                other sub-layer.  Each sub-layer corresponds to a conceptual
                row in the ifTable."</span>;
-            <a name="ifStackLowerLayer.61"/><span class="yang_kw">leaf</span> <span class="yang_id">ifStackLowerLayer</span> {
+            <a name="ifStackLowerLayer.61"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifStackLowerLayer</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/if-mib:ifMIBObjects/if-mib:ifStackEntry/if-mib:ifStackLowerLayer"</span>;
@@ -82,7 +82,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="ifStackHigherLayer.69"/><span class="yang_kw">leaf</span> <span class="yang_id">ifStackHigherLayer</span> {
+            <a name="ifStackHigherLayer.69"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifStackHigherLayer</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/if-mib:ifMIBObjects/if-mib:ifStackEntry/if-mib:ifStackHigherLayer"</span>;
@@ -91,7 +91,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="ifInvStackStatus.78"/><span class="yang_kw">leaf</span> <span class="yang_id">ifInvStackStatus</span> {
+            <a name="ifInvStackStatus.78"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifInvStackStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>

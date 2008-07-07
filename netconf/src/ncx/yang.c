@@ -2000,7 +2000,11 @@ yang_pcb_t *
     dlq_createSQue(&pcb->allincQ);
     dlq_createSQue(&pcb->incchainQ);
     dlq_createSQue(&pcb->failedQ);
-
+    /* needed for init load and imports for yangdump
+     * do not do this for the agent, which will set 'save descr' 
+     * mode to FALSE to indicate do not care about module display
+     */
+    pcb->stmtmode = ncx_save_descr(); 
     return pcb;
 
 } /* yang_new_pcb */
@@ -2190,6 +2194,34 @@ void
     m__free(stmt);
 
 }  /* yang_free_stmt */
+
+
+/********************************************************************
+* FUNCTION yang_clean_stmtQ
+* 
+* Delete a Q of YANG statement node
+*
+* INPUTS:
+*    que == Q of yang_stmt_t node to delete
+*
+*********************************************************************/
+void
+    yang_clean_stmtQ (dlq_hdr_t *que)
+{
+    yang_stmt_t *stmt;
+
+#ifdef DEBUG
+    if (!que) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+    while (!dlq_empty(que)) {
+	stmt = (yang_stmt_t *)dlq_deque(que);
+	yang_free_stmt(stmt);
+    }
+
+}  /* yang_clean_stmtQ */
 
 
 /********************************************************************

@@ -141,9 +141,7 @@
             <span class="yang_str">"The initial revision, published as RFC2273."</span>;
       }
 
-
-      <span class="yang_cmt">// typedefs</span>
-      <a name="SnmpTagValue.96"/><span class="yang_kw">typedef</span> <span class="yang_id">SnmpTagValue</span> {
+      <a name="SnmpTagValue.96"></a><span class="yang_kw">typedef</span> <span class="yang_id">SnmpTagValue</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
             <span class="yang_kw">pattern</span> <span class="yang_str">'.{0,255}'</span>;
@@ -218,7 +216,7 @@
             application and MIB specific."</span>;
       }
 
-      <a name="SnmpTagList.171"/><span class="yang_kw">typedef</span> <span class="yang_id">SnmpTagList</span> {
+      <a name="SnmpTagList.171"></a><span class="yang_kw">typedef</span> <span class="yang_id">SnmpTagList</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
             <span class="yang_kw">pattern</span> <span class="yang_str">'.{0,255}'</span>;
@@ -296,9 +294,8 @@
             will be selected."</span>;
       }
 
-      <span class="yang_cmt">// objects</span>
-      <a name="snmpTargetObjects.249"/><span class="yang_kw">container</span> <span class="yang_id">snmpTargetObjects</span> {
-         <a name="snmpTargetSpinLock.251"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetSpinLock</span> {
+      <a name="snmpTargetObjects.249"></a><span class="yang_kw">container</span> <span class="yang_id">snmpTargetObjects</span> {
+         <a name="snmpTargetSpinLock.251"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetSpinLock</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TestAndIncr.109">smiv2:TestAndIncr</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>
@@ -323,7 +320,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.1"</span>;
          }
 
-         <a name="snmpTargetAddrEntry.279"/><span class="yang_kw">list</span> <span class="yang_id">snmpTargetAddrEntry</span> {
+         <a name="snmpTargetAddrEntry.279"></a><span class="yang_kw">list</span> <span class="yang_id">snmpTargetAddrEntry</span> {
             <span class="yang_kw">key</span> "<a href="#snmpTargetAddrName.291">snmpTargetAddrName</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -332,7 +329,7 @@
                
                Entries in the snmpTargetAddrTable are created and
                deleted using the snmpTargetAddrRowStatus object."</span>;
-            <a name="snmpTargetAddrName.291"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrName</span> {
+            <a name="snmpTargetAddrName.291"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
                }
@@ -343,7 +340,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.2.1.1"</span>;
             }
 
-            <a name="snmpTargetAddrTDomain.302"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrTDomain</span> {
+            <a name="snmpTargetAddrTDomain.302"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrTDomain</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TDomain.747">smiv2:TDomain</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -352,7 +349,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.2.1.2"</span>;
             }
 
-            <a name="snmpTargetAddrTAddress.311"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrTAddress</span> {
+            <a name="snmpTargetAddrTAddress.311"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrTAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TAddress.759">smiv2:TAddress</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -362,7 +359,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.2.1.3"</span>;
             }
 
-            <a name="snmpTargetAddrTimeout.321"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrTimeout</span> {
+            <a name="snmpTargetAddrTimeout.321"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrTimeout</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TimeInterval.675">smiv2:TimeInterval</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -391,7 +388,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.2.1.4"</span>;
             }
 
-            <a name="snmpTargetAddrRetryCount.350"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrRetryCount</span> {
+            <a name="snmpTargetAddrRetryCount.350"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrRetryCount</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..255"</span>;
                }
@@ -405,7 +402,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.2.1.5"</span>;
             }
 
-            <a name="snmpTargetAddrTagList.364"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrTagList</span> {
+            <a name="snmpTargetAddrTagList.364"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrTagList</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#SnmpTagList.171">SnmpTagList</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -416,7 +413,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.2.1.6"</span>;
             }
 
-            <a name="snmpTargetAddrParams.375"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrParams</span> {
+            <a name="snmpTargetAddrParams.375"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrParams</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
                }
@@ -429,7 +426,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.2.1.7"</span>;
             }
 
-            <a name="snmpTargetAddrStorageType.388"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrStorageType</span> {
+            <a name="snmpTargetAddrStorageType.388"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrStorageType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -440,7 +437,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.2.1.8"</span>;
             }
 
-            <a name="snmpTargetAddrRowStatus.399"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrRowStatus</span> {
+            <a name="snmpTargetAddrRowStatus.399"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrRowStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -472,7 +469,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.2.1"</span>;
          }  <span class="yang_cmt">// list snmpTargetAddrEntry</span>
 
-         <a name="snmpTargetParamsEntry.433"/><span class="yang_kw">list</span> <span class="yang_id">snmpTargetParamsEntry</span> {
+         <a name="snmpTargetParamsEntry.433"></a><span class="yang_kw">list</span> <span class="yang_id">snmpTargetParamsEntry</span> {
             <span class="yang_kw">key</span> "<a href="#snmpTargetParamsName.444">snmpTargetParamsName</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -480,7 +477,7 @@
                
                Entries in the snmpTargetParamsTable are created and
                deleted using the snmpTargetParamsRowStatus object."</span>;
-            <a name="snmpTargetParamsName.444"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsName</span> {
+            <a name="snmpTargetParamsName.444"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
                }
@@ -491,7 +488,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.3.1.1"</span>;
             }
 
-            <a name="snmpTargetParamsMPModel.455"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsMPModel</span> {
+            <a name="snmpTargetParamsMPModel.455"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsMPModel</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpMessageProcessingModel.281">snmp-framework:SnmpMessageProcessingModel</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -500,7 +497,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.3.1.2"</span>;
             }
 
-            <a name="snmpTargetParamsSecurityModel.464"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsSecurityModel</span> {
+            <a name="snmpTargetParamsSecurityModel.464"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsSecurityModel</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpSecurityModel.207">snmp-framework:SnmpSecurityModel</a></span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
                }
@@ -515,7 +512,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.3.1.3"</span>;
             }
 
-            <a name="snmpTargetParamsSecurityName.479"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsSecurityName</span> {
+            <a name="snmpTargetParamsSecurityName.479"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsSecurityName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -525,7 +522,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.3.1.4"</span>;
             }
 
-            <a name="snmpTargetParamsSecurityLevel.489"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsSecurityLevel</span> {
+            <a name="snmpTargetParamsSecurityLevel.489"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsSecurityLevel</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpSecurityLevel.354">snmp-framework:SnmpSecurityLevel</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -534,7 +531,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.3.1.5"</span>;
             }
 
-            <a name="snmpTargetParamsStorageType.498"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsStorageType</span> {
+            <a name="snmpTargetParamsStorageType.498"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsStorageType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -545,7 +542,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.3.1.6"</span>;
             }
 
-            <a name="snmpTargetParamsRowStatus.509"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsRowStatus</span> {
+            <a name="snmpTargetParamsRowStatus.509"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsRowStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -581,7 +578,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.3.1"</span>;
          }  <span class="yang_cmt">// list snmpTargetParamsEntry</span>
 
-         <a name="snmpUnavailableContexts.544"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpUnavailableContexts</span> {
+         <a name="snmpUnavailableContexts.544"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpUnavailableContexts</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -591,7 +588,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.4"</span>;
          }
 
-         <a name="snmpUnknownContexts.554"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpUnknownContexts</span> {
+         <a name="snmpUnknownContexts.554"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpUnknownContexts</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>

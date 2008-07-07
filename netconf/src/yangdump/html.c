@@ -431,7 +431,7 @@ static void
 	sprintf(buff, "%u", linenum);
 	ses_putstr(scb, (const xmlChar *)buff);
     }
-    ses_putstr(scb, (const xmlChar *)"\"/>");
+    ses_putstr(scb, (const xmlChar *)"\"></a>");
 
 }  /* write_id_a */
 
@@ -2185,7 +2185,7 @@ static void
     indent = startindent + ses_indent_count(scb);
 
     write_href_id(scb, submod, YANG_K_EXTENSION, 
-		  ext->name, startindent, ext->linenum, FALSE, FALSE);
+		  ext->name, startindent, ext->linenum, FALSE, TRUE);
 
     /* argument sub-clause */
     if (ext->arg) {
@@ -2545,7 +2545,6 @@ static void
     const obj_template_t *obj;
     const dlq_hdr_t      *childQ;
     boolean               cooked;
-    xmlChar               buff[MENU_LABEL_LEN];
 
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
     cooked = strcmp(cp->objview, OBJVIEW_COOKED) ? FALSE : TRUE;

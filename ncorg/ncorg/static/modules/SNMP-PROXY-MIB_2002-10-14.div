@@ -117,8 +117,8 @@
             <span class="yang_str">"The initial revision, published as RFC2273."</span>;
       }
 
-      <a name="snmpProxyObjects.91"/><span class="yang_kw">container</span> <span class="yang_id">snmpProxyObjects</span> {
-         <a name="snmpProxyEntry.96"/><span class="yang_kw">list</span> <span class="yang_id">snmpProxyEntry</span> {
+      <a name="snmpProxyObjects.91"></a><span class="yang_kw">container</span> <span class="yang_id">snmpProxyObjects</span> {
+         <a name="snmpProxyEntry.96"></a><span class="yang_kw">list</span> <span class="yang_id">snmpProxyEntry</span> {
             <span class="yang_kw">key</span> "<a href="#snmpProxyName.108">snmpProxyName</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -127,7 +127,7 @@
                
                Entries in the snmpProxyTable are created and deleted
                using the snmpProxyRowStatus object."</span>;
-            <a name="snmpProxyName.108"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyName</span> {
+            <a name="snmpProxyName.108"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
                }
@@ -138,7 +138,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.14.1.2.1.1"</span>;
             }
 
-            <a name="snmpProxyType.119"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyType</span> {
+            <a name="snmpProxyType.119"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyType</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"read"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -160,7 +160,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.14.1.2.1.2"</span>;
             }
 
-            <a name="snmpProxyContextEngineID.133"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyContextEngineID</span> {
+            <a name="snmpProxyContextEngineID.133"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyContextEngineID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpEngineID.105">snmp-framework:SnmpEngineID</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -170,7 +170,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.14.1.2.1.3"</span>;
             }
 
-            <a name="snmpProxyContextName.143"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyContextName</span> {
+            <a name="snmpProxyContextName.143"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyContextName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -184,7 +184,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.14.1.2.1.4"</span>;
             }
 
-            <a name="snmpProxyTargetParamsIn.157"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyTargetParamsIn</span> {
+            <a name="snmpProxyTargetParamsIn.157"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyTargetParamsIn</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -194,7 +194,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.14.1.2.1.5"</span>;
             }
 
-            <a name="snmpProxySingleTargetOut.167"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxySingleTargetOut</span> {
+            <a name="snmpProxySingleTargetOut.167"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxySingleTargetOut</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -210,7 +210,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.14.1.2.1.6"</span>;
             }
 
-            <a name="snmpProxyMultipleTargetOut.183"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyMultipleTargetOut</span> {
+            <a name="snmpProxyMultipleTargetOut.183"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyMultipleTargetOut</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-TARGET-MIB/2002-10-14#SnmpTagValue.96">snmp-target:SnmpTagValue</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -223,7 +223,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.14.1.2.1.7"</span>;
             }
 
-            <a name="snmpProxyStorageType.196"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyStorageType</span> {
+            <a name="snmpProxyStorageType.196"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyStorageType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -234,7 +234,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.14.1.2.1.8"</span>;
             }
 
-            <a name="snmpProxyRowStatus.207"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyRowStatus</span> {
+            <a name="snmpProxyRowStatus.207"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyRowStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>

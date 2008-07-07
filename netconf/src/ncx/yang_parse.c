@@ -2088,10 +2088,8 @@ status_t
 	    /* set the back-ptr to Q of all the include files */
 	    mod->allincQ = &pcb->allincQ;
 
-	    /* set the stmt-track mode flag if needed */
-	    if (ptyp==YANG_PT_TOP && pcb->stmtmode) {
-		mod->stmtmode = TRUE;
-	    }
+	    /* set the stmt-track mode flag to the master flag in the PCB */
+	    mod->stmtmode = pcb->stmtmode;
 	}
     }
 

@@ -124,7 +124,7 @@
          <span class="yang_kw">description</span> <span class="yang_str">"This version published as RFC 2213."</span>;
       }
 
-      <a name="SessionNumber.57"/><span class="yang_kw">typedef</span> <span class="yang_id">SessionNumber</span> {
+      <a name="SessionNumber.57"></a><span class="yang_kw">typedef</span> <span class="yang_id">SessionNumber</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
          }
@@ -140,7 +140,7 @@
             instance object that became unwieldy."</span>;
       }
 
-      <a name="Protocol.73"/><span class="yang_kw">typedef</span> <span class="yang_id">Protocol</span> {
+      <a name="Protocol.73"></a><span class="yang_kw">typedef</span> <span class="yang_id">Protocol</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"1..255"</span>;
             <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
@@ -154,7 +154,7 @@
             signed Numbers RFC."</span>;
       }
 
-      <a name="SessionType.87"/><span class="yang_kw">typedef</span> <span class="yang_id">SessionType</span> {
+      <a name="SessionType.87"></a><span class="yang_kw">typedef</span> <span class="yang_id">SessionType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"1..255"</span>;
          }
@@ -173,7 +173,7 @@
             port numbers, for example."</span>;
       }
 
-      <a name="Port.106"/><span class="yang_kw">typedef</span> <span class="yang_id">Port</span> {
+      <a name="Port.106"></a><span class="yang_kw">typedef</span> <span class="yang_id">Port</span> {
          <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"2..4"</span>;
          }
@@ -190,7 +190,7 @@
             stream."</span>;
       }
 
-      <a name="MessageSize.123"/><span class="yang_kw">typedef</span> <span class="yang_id">MessageSize</span> {
+      <a name="MessageSize.123"></a><span class="yang_kw">typedef</span> <span class="yang_id">MessageSize</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
             <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
@@ -201,7 +201,7 @@
             message along an integrated services route."</span>;
       }
 
-      <a name="BitRate.134"/><span class="yang_kw">typedef</span> <span class="yang_id">BitRate</span> {
+      <a name="BitRate.134"></a><span class="yang_kw">typedef</span> <span class="yang_id">BitRate</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
             <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
@@ -215,7 +215,7 @@
             cated for use by a flow."</span>;
       }
 
-      <a name="BurstSize.148"/><span class="yang_kw">typedef</span> <span class="yang_id">BurstSize</span> {
+      <a name="BurstSize.148"></a><span class="yang_kw">typedef</span> <span class="yang_id">BurstSize</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
             <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
@@ -226,7 +226,7 @@
             for policing."</span>;
       }
 
-      <a name="QosService.159"/><span class="yang_kw">typedef</span> <span class="yang_id">QosService</span> {
+      <a name="QosService.159"></a><span class="yang_kw">typedef</span> <span class="yang_id">QosService</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"bestEffort"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -241,14 +241,14 @@
          <span class="yang_kw">description</span> <span class="yang_str">"The class of service in use by a flow."</span>;
       }
 
-      <a name="intSrvObjects.169"/><span class="yang_kw">container</span> <span class="yang_id">intSrvObjects</span> {
-         <a name="intSrvIfAttribEntry.174"/><span class="yang_kw">list</span> <span class="yang_id">intSrvIfAttribEntry</span> {
+      <a name="intSrvObjects.169"></a><span class="yang_kw">container</span> <span class="yang_id">intSrvObjects</span> {
+         <a name="intSrvIfAttribEntry.174"></a><span class="yang_kw">list</span> <span class="yang_id">intSrvIfAttribEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ifIndex.182">ifIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The reservable attributes of  a  given  inter-
                face."</span>;
-            <a name="ifIndex.182"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+            <a name="ifIndex.182"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex"</span>;
@@ -257,7 +257,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="intSrvIfAttribAllocatedBits.191"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvIfAttribAllocatedBits</span> {
+            <a name="intSrvIfAttribAllocatedBits.191"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvIfAttribAllocatedBits</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#BitRate.134">BitRate</a></span>;
                <span class="yang_kw">units</span> <span class="yang_str">"Bits per second"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -267,7 +267,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.1.1.1"</span>;
             }
 
-            <a name="intSrvIfAttribMaxAllocatedBits.201"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvIfAttribMaxAllocatedBits</span> {
+            <a name="intSrvIfAttribMaxAllocatedBits.201"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvIfAttribMaxAllocatedBits</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#BitRate.134">BitRate</a></span>;
                <span class="yang_kw">units</span> <span class="yang_str">"Bits per second"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -278,7 +278,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.1.1.2"</span>;
             }
 
-            <a name="intSrvIfAttribAllocatedBuffer.212"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvIfAttribAllocatedBuffer</span> {
+            <a name="intSrvIfAttribAllocatedBuffer.212"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvIfAttribAllocatedBuffer</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#BurstSize.148">BurstSize</a></span>;
                <span class="yang_kw">units</span> <span class="yang_str">"Bytes"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -289,7 +289,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.1.1.3"</span>;
             }
 
-            <a name="intSrvIfAttribFlows.223"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvIfAttribFlows</span> {
+            <a name="intSrvIfAttribFlows.223"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvIfAttribFlows</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -300,7 +300,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.1.1.4"</span>;
             }
 
-            <a name="intSrvIfAttribPropagationDelay.234"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvIfAttribPropagationDelay</span> {
+            <a name="intSrvIfAttribPropagationDelay.234"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvIfAttribPropagationDelay</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
                <span class="yang_kw">units</span> <span class="yang_str">"microseconds"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -312,7 +312,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.1.1.5"</span>;
             }
 
-            <a name="intSrvIfAttribStatus.246"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvIfAttribStatus</span> {
+            <a name="intSrvIfAttribStatus.246"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvIfAttribStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -323,7 +323,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.1.1"</span>;
          }  <span class="yang_cmt">// list intSrvIfAttribEntry</span>
 
-         <a name="intSrvFlowEntry.259"/><span class="yang_kw">list</span> <span class="yang_id">intSrvFlowEntry</span> {
+         <a name="intSrvFlowEntry.259"></a><span class="yang_kw">list</span> <span class="yang_id">intSrvFlowEntry</span> {
             <span class="yang_kw">key</span> "<a href="#intSrvFlowNumber.270">intSrvFlowNumber</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -331,7 +331,7 @@
                terface   by   a   given   flow.   The  counter
                intSrvFlowPoliced starts counting  at  the  in-
                stallation of the flow."</span>;
-            <a name="intSrvFlowNumber.270"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowNumber</span> {
+            <a name="intSrvFlowNumber.270"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowNumber</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#SessionNumber.57">SessionNumber</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -341,7 +341,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.1"</span>;
             }
 
-            <a name="intSrvFlowType.280"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowType</span> {
+            <a name="intSrvFlowType.280"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#SessionType.87">SessionType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -350,7 +350,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.2"</span>;
             }
 
-            <a name="intSrvFlowOwner.289"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowOwner</span> {
+            <a name="intSrvFlowOwner.289"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -369,7 +369,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.3"</span>;
             }
 
-            <a name="intSrvFlowDestAddr.302"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowDestAddr</span> {
+            <a name="intSrvFlowDestAddr.302"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowDestAddr</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"4..16"</span>;
                }
@@ -382,7 +382,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.4"</span>;
             }
 
-            <a name="intSrvFlowSenderAddr.315"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowSenderAddr</span> {
+            <a name="intSrvFlowSenderAddr.315"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowSenderAddr</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"4..16"</span>;
                }
@@ -396,7 +396,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.5"</span>;
             }
 
-            <a name="intSrvFlowDestAddrLength.329"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowDestAddrLength</span> {
+            <a name="intSrvFlowDestAddrLength.329"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowDestAddrLength</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..128"</span>;
                }
@@ -410,7 +410,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.6"</span>;
             }
 
-            <a name="intSrvFlowSenderAddrLength.343"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowSenderAddrLength</span> {
+            <a name="intSrvFlowSenderAddrLength.343"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowSenderAddrLength</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..128"</span>;
                }
@@ -424,7 +424,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.7"</span>;
             }
 
-            <a name="intSrvFlowProtocol.357"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowProtocol</span> {
+            <a name="intSrvFlowProtocol.357"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowProtocol</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#Protocol.73">Protocol</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -434,7 +434,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.8"</span>;
             }
 
-            <a name="intSrvFlowDestPort.367"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowDestPort</span> {
+            <a name="intSrvFlowDestPort.367"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowDestPort</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#Port.106">Port</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -453,7 +453,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.9"</span>;
             }
 
-            <a name="intSrvFlowPort.386"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowPort</span> {
+            <a name="intSrvFlowPort.386"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowPort</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#Port.106">Port</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -469,7 +469,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.10"</span>;
             }
 
-            <a name="intSrvFlowFlowId.402"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowFlowId</span> {
+            <a name="intSrvFlowFlowId.402"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowFlowId</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..16777215"</span>;
                }
@@ -480,7 +480,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.11"</span>;
             }
 
-            <a name="intSrvFlowInterface.413"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowInterface</span> {
+            <a name="intSrvFlowInterface.413"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowInterface</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndex.81">if-mib:InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -489,7 +489,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.12"</span>;
             }
 
-            <a name="intSrvFlowIfAddr.422"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowIfAddr</span> {
+            <a name="intSrvFlowIfAddr.422"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowIfAddr</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"4..16"</span>;
                }
@@ -505,7 +505,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.13"</span>;
             }
 
-            <a name="intSrvFlowRate.438"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowRate</span> {
+            <a name="intSrvFlowRate.438"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowRate</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#BitRate.134">BitRate</a></span>;
                <span class="yang_kw">units</span> <span class="yang_str">"bits per second"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -519,7 +519,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.14"</span>;
             }
 
-            <a name="intSrvFlowBurst.452"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowBurst</span> {
+            <a name="intSrvFlowBurst.452"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowBurst</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#BurstSize.148">BurstSize</a></span>;
                <span class="yang_kw">units</span> <span class="yang_str">"bytes"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -535,7 +535,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.15"</span>;
             }
 
-            <a name="intSrvFlowWeight.468"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowWeight</span> {
+            <a name="intSrvFlowWeight.468"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowWeight</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -546,7 +546,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.16"</span>;
             }
 
-            <a name="intSrvFlowQueue.479"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowQueue</span> {
+            <a name="intSrvFlowQueue.479"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowQueue</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -557,7 +557,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.17"</span>;
             }
 
-            <a name="intSrvFlowMinTU.490"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowMinTU</span> {
+            <a name="intSrvFlowMinTU.490"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowMinTU</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#MessageSize.123">MessageSize</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -567,7 +567,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.18"</span>;
             }
 
-            <a name="intSrvFlowMaxTU.500"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowMaxTU</span> {
+            <a name="intSrvFlowMaxTU.500"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowMaxTU</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#MessageSize.123">MessageSize</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -577,7 +577,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.19"</span>;
             }
 
-            <a name="intSrvFlowBestEffort.510"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowBestEffort</span> {
+            <a name="intSrvFlowBestEffort.510"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowBestEffort</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -586,7 +586,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.20"</span>;
             }
 
-            <a name="intSrvFlowPoliced.519"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowPoliced</span> {
+            <a name="intSrvFlowPoliced.519"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowPoliced</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -595,7 +595,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.21"</span>;
             }
 
-            <a name="intSrvFlowDiscard.528"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowDiscard</span> {
+            <a name="intSrvFlowDiscard.528"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowDiscard</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TruthValue.100">smiv2:TruthValue</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -606,7 +606,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.22"</span>;
             }
 
-            <a name="intSrvFlowService.539"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowService</span> {
+            <a name="intSrvFlowService.539"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowService</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#QosService.159">QosService</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -614,7 +614,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.23"</span>;
             }
 
-            <a name="intSrvFlowOrder.547"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowOrder</span> {
+            <a name="intSrvFlowOrder.547"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowOrder</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..65535"</span>;
                }
@@ -629,7 +629,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1.2.1.24"</span>;
             }
 
-            <a name="intSrvFlowStatus.562"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowStatus</span> {
+            <a name="intSrvFlowStatus.562"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -647,8 +647,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.52.1"</span>;
       }  <span class="yang_cmt">// container intSrvObjects</span>
 
-      <a name="intSrvGenObjects.579"/><span class="yang_kw">container</span> <span class="yang_id">intSrvGenObjects</span> {
-         <a name="intSrvFlowNewIndex.581"/><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowNewIndex</span> {
+      <a name="intSrvGenObjects.579"></a><span class="yang_kw">container</span> <span class="yang_id">intSrvGenObjects</span> {
+         <a name="intSrvFlowNewIndex.581"></a><span class="yang_kw">leaf</span> <span class="yang_id">intSrvFlowNewIndex</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TestAndIncr.109">smiv2:TestAndIncr</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>

@@ -125,7 +125,7 @@
             <span class="yang_str">"The original version of this MIB was published in RFC 1565"</span>;
       }
 
-      <a name="DistinguishedName.75"/><span class="yang_kw">typedef</span> <span class="yang_id">DistinguishedName</span> {
+      <a name="DistinguishedName.75"></a><span class="yang_kw">typedef</span> <span class="yang_id">DistinguishedName</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
             <span class="yang_kw">pattern</span> <span class="yang_str">'\p{IsBasicLatin}{0,255}'</span>;
@@ -137,7 +137,7 @@
             RFC 2279."</span>;
       }
 
-      <a name="URLString.87"/><span class="yang_kw">typedef</span> <span class="yang_id">URLString</span> {
+      <a name="URLString.87"></a><span class="yang_kw">typedef</span> <span class="yang_id">URLString</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
             <span class="yang_kw">pattern</span> <span class="yang_str">'\p{IsBasicLatin}{0,255}'</span>;
@@ -149,14 +149,14 @@
             charset defined in RFC 854."</span>;
       }
 
-      <a name="application.99"/><span class="yang_kw">container</span> <span class="yang_id">application</span> {
-         <a name="applEntry.104"/><span class="yang_kw">list</span> <span class="yang_id">applEntry</span> {
+      <a name="application.99"></a><span class="yang_kw">container</span> <span class="yang_id">application</span> {
+         <a name="applEntry.104"></a><span class="yang_kw">list</span> <span class="yang_id">applEntry</span> {
             <span class="yang_kw">key</span> "<a href="#applIndex.113">applIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry associated with a single network service
                application."</span>;
-            <a name="applIndex.113"/><span class="yang_kw">leaf</span> <span class="yang_id">applIndex</span> {
+            <a name="applIndex.113"></a><span class="yang_kw">leaf</span> <span class="yang_id">applIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
                }
@@ -168,7 +168,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.1"</span>;
             }
 
-            <a name="applName.125"/><span class="yang_kw">leaf</span> <span class="yang_id">applName</span> {
+            <a name="applName.125"></a><span class="yang_kw">leaf</span> <span class="yang_id">applName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -177,7 +177,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.2"</span>;
             }
 
-            <a name="applDirectoryName.134"/><span class="yang_kw">leaf</span> <span class="yang_id">applDirectoryName</span> {
+            <a name="applDirectoryName.134"></a><span class="yang_kw">leaf</span> <span class="yang_id">applDirectoryName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#DistinguishedName.75">DistinguishedName</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -188,7 +188,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.3"</span>;
             }
 
-            <a name="applVersion.145"/><span class="yang_kw">leaf</span> <span class="yang_id">applVersion</span> {
+            <a name="applVersion.145"></a><span class="yang_kw">leaf</span> <span class="yang_id">applVersion</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -198,7 +198,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.4"</span>;
             }
 
-            <a name="applUptime.155"/><span class="yang_kw">leaf</span> <span class="yang_id">applUptime</span> {
+            <a name="applUptime.155"></a><span class="yang_kw">leaf</span> <span class="yang_id">applUptime</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -210,7 +210,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.5"</span>;
             }
 
-            <a name="applOperStatus.167"/><span class="yang_kw">leaf</span> <span class="yang_id">applOperStatus</span> {
+            <a name="applOperStatus.167"></a><span class="yang_kw">leaf</span> <span class="yang_id">applOperStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"up"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -250,7 +250,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.6"</span>;
             }
 
-            <a name="applLastChange.195"/><span class="yang_kw">leaf</span> <span class="yang_id">applLastChange</span> {
+            <a name="applLastChange.195"></a><span class="yang_kw">leaf</span> <span class="yang_id">applLastChange</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -262,7 +262,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.7"</span>;
             }
 
-            <a name="applInboundAssociations.207"/><span class="yang_kw">leaf</span> <span class="yang_id">applInboundAssociations</span> {
+            <a name="applInboundAssociations.207"></a><span class="yang_kw">leaf</span> <span class="yang_id">applInboundAssociations</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -273,7 +273,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.8"</span>;
             }
 
-            <a name="applOutboundAssociations.218"/><span class="yang_kw">leaf</span> <span class="yang_id">applOutboundAssociations</span> {
+            <a name="applOutboundAssociations.218"></a><span class="yang_kw">leaf</span> <span class="yang_id">applOutboundAssociations</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -284,7 +284,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.9"</span>;
             }
 
-            <a name="applAccumulatedInboundAssociations.229"/><span class="yang_kw">leaf</span> <span class="yang_id">applAccumulatedInboundAssociations</span> {
+            <a name="applAccumulatedInboundAssociations.229"></a><span class="yang_kw">leaf</span> <span class="yang_id">applAccumulatedInboundAssociations</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -293,7 +293,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.10"</span>;
             }
 
-            <a name="applAccumulatedOutboundAssociations.238"/><span class="yang_kw">leaf</span> <span class="yang_id">applAccumulatedOutboundAssociations</span> {
+            <a name="applAccumulatedOutboundAssociations.238"></a><span class="yang_kw">leaf</span> <span class="yang_id">applAccumulatedOutboundAssociations</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -302,7 +302,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.11"</span>;
             }
 
-            <a name="applLastInboundActivity.247"/><span class="yang_kw">leaf</span> <span class="yang_id">applLastInboundActivity</span> {
+            <a name="applLastInboundActivity.247"></a><span class="yang_kw">leaf</span> <span class="yang_id">applLastInboundActivity</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -313,7 +313,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.12"</span>;
             }
 
-            <a name="applLastOutboundActivity.258"/><span class="yang_kw">leaf</span> <span class="yang_id">applLastOutboundActivity</span> {
+            <a name="applLastOutboundActivity.258"></a><span class="yang_kw">leaf</span> <span class="yang_id">applLastOutboundActivity</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -324,7 +324,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.13"</span>;
             }
 
-            <a name="applRejectedInboundAssociations.269"/><span class="yang_kw">leaf</span> <span class="yang_id">applRejectedInboundAssociations</span> {
+            <a name="applRejectedInboundAssociations.269"></a><span class="yang_kw">leaf</span> <span class="yang_id">applRejectedInboundAssociations</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -340,7 +340,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.14"</span>;
             }
 
-            <a name="applFailedOutboundAssociations.285"/><span class="yang_kw">leaf</span> <span class="yang_id">applFailedOutboundAssociations</span> {
+            <a name="applFailedOutboundAssociations.285"></a><span class="yang_kw">leaf</span> <span class="yang_id">applFailedOutboundAssociations</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -351,7 +351,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.15"</span>;
             }
 
-            <a name="applDescription.296"/><span class="yang_kw">leaf</span> <span class="yang_id">applDescription</span> {
+            <a name="applDescription.296"></a><span class="yang_kw">leaf</span> <span class="yang_id">applDescription</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -361,7 +361,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.16"</span>;
             }
 
-            <a name="applURL.306"/><span class="yang_kw">leaf</span> <span class="yang_id">applURL</span> {
+            <a name="applURL.306"></a><span class="yang_kw">leaf</span> <span class="yang_id">applURL</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#URLString.87">URLString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -373,13 +373,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1"</span>;
          }  <span class="yang_cmt">// list applEntry</span>
 
-         <a name="assocEntry.320"/><span class="yang_kw">list</span> <span class="yang_id">assocEntry</span> {
+         <a name="assocEntry.320"></a><span class="yang_kw">list</span> <span class="yang_id">assocEntry</span> {
             <span class="yang_kw">key</span> "<a href="#applIndex.328">applIndex</a> <a href="#assocIndex.337">assocIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry associated with an association for a network
                service application."</span>;
-            <a name="applIndex.328"/><span class="yang_kw">leaf</span> <span class="yang_id">applIndex</span> {
+            <a name="applIndex.328"></a><span class="yang_kw">leaf</span> <span class="yang_id">applIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/network-services:application/network-services:applEntry/network-services:applIndex"</span>;
@@ -388,7 +388,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="assocIndex.337"/><span class="yang_kw">leaf</span> <span class="yang_id">assocIndex</span> {
+            <a name="assocIndex.337"></a><span class="yang_kw">leaf</span> <span class="yang_id">assocIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
                }
@@ -401,7 +401,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.2.1.1"</span>;
             }
 
-            <a name="assocRemoteApplication.350"/><span class="yang_kw">leaf</span> <span class="yang_id">assocRemoteApplication</span> {
+            <a name="assocRemoteApplication.350"></a><span class="yang_kw">leaf</span> <span class="yang_id">assocRemoteApplication</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -418,7 +418,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.2.1.2"</span>;
             }
 
-            <a name="assocApplicationProtocol.367"/><span class="yang_kw">leaf</span> <span class="yang_id">assocApplicationProtocol</span> {
+            <a name="assocApplicationProtocol.367"></a><span class="yang_kw">leaf</span> <span class="yang_id">assocApplicationProtocol</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -434,7 +434,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.2.1.3"</span>;
             }
 
-            <a name="assocApplicationType.383"/><span class="yang_kw">leaf</span> <span class="yang_id">assocApplicationType</span> {
+            <a name="assocApplicationType.383"></a><span class="yang_kw">leaf</span> <span class="yang_id">assocApplicationType</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"uainitiator"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -461,7 +461,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.2.1.4"</span>;
             }
 
-            <a name="assocDuration.402"/><span class="yang_kw">leaf</span> <span class="yang_id">assocDuration</span> {
+            <a name="assocDuration.402"></a><span class="yang_kw">leaf</span> <span class="yang_id">assocDuration</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>

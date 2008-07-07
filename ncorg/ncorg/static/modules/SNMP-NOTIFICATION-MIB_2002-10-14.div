@@ -135,8 +135,8 @@
             <span class="yang_str">"The initial revision, published as RFC2273."</span>;
       }
 
-      <a name="snmpNotifyObjects.93"/><span class="yang_kw">container</span> <span class="yang_id">snmpNotifyObjects</span> {
-         <a name="snmpNotifyEntry.98"/><span class="yang_kw">list</span> <span class="yang_id">snmpNotifyEntry</span> {
+      <a name="snmpNotifyObjects.93"></a><span class="yang_kw">container</span> <span class="yang_id">snmpNotifyObjects</span> {
+         <a name="snmpNotifyEntry.98"></a><span class="yang_kw">list</span> <span class="yang_id">snmpNotifyEntry</span> {
             <span class="yang_kw">key</span> "<a href="#snmpNotifyName.113">snmpNotifyName</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -148,7 +148,7 @@
                
                Entries in the snmpNotifyTable are created and
                deleted using the snmpNotifyRowStatus object."</span>;
-            <a name="snmpNotifyName.113"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyName</span> {
+            <a name="snmpNotifyName.113"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
                }
@@ -159,7 +159,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.1.1.1"</span>;
             }
 
-            <a name="snmpNotifyTag.124"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyTag</span> {
+            <a name="snmpNotifyTag.124"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyTag</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-TARGET-MIB/2002-10-14#SnmpTagValue.96">snmp-target:SnmpTagValue</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -173,7 +173,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.1.1.2"</span>;
             }
 
-            <a name="snmpNotifyType.138"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyType</span> {
+            <a name="snmpNotifyType.138"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyType</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"trap"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -208,7 +208,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.1.1.3"</span>;
             }
 
-            <a name="snmpNotifyStorageType.169"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyStorageType</span> {
+            <a name="snmpNotifyStorageType.169"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyStorageType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -219,7 +219,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.1.1.4"</span>;
             }
 
-            <a name="snmpNotifyRowStatus.180"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyRowStatus</span> {
+            <a name="snmpNotifyRowStatus.180"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyRowStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -233,7 +233,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.1.1"</span>;
          }  <span class="yang_cmt">// list snmpNotifyEntry</span>
 
-         <a name="snmpNotifyFilterProfileEntry.196"/><span class="yang_kw">list</span> <span class="yang_id">snmpNotifyFilterProfileEntry</span> {
+         <a name="snmpNotifyFilterProfileEntry.196"></a><span class="yang_kw">list</span> <span class="yang_id">snmpNotifyFilterProfileEntry</span> {
             <span class="yang_kw">key</span> "<a href="#snmpTargetParamsName.209">snmpTargetParamsName</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -244,7 +244,7 @@
                Entries in the snmpNotifyFilterProfileTable are created
                and deleted using the snmpNotifyFilterProfileRowStatus
                object."</span>;
-            <a name="snmpTargetParamsName.209"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsName</span> {
+            <a name="snmpTargetParamsName.209"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsName</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/snmp-target:snmpTargetObjects/snmp-target:snmpTargetParamsEntry/snmp-target:snmpTargetParamsName"</span>;
@@ -253,7 +253,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="snmpNotifyFilterProfileName.218"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterProfileName</span> {
+            <a name="snmpNotifyFilterProfileName.218"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterProfileName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
                }
@@ -265,7 +265,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.2.1.1"</span>;
             }
 
-            <a name="snmpNotifyFilterProfileStorType.230"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterProfileStorType</span> {
+            <a name="snmpNotifyFilterProfileStorType.230"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterProfileStorType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -276,7 +276,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.2.1.2"</span>;
             }
 
-            <a name="snmpNotifyFilterProfileRowStatus.241"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterProfileRowStatus</span> {
+            <a name="snmpNotifyFilterProfileRowStatus.241"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterProfileRowStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -299,7 +299,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.2.1"</span>;
          }  <span class="yang_cmt">// list snmpNotifyFilterProfileEntry</span>
 
-         <a name="snmpNotifyFilterEntry.266"/><span class="yang_kw">list</span> <span class="yang_id">snmpNotifyFilterEntry</span> {
+         <a name="snmpNotifyFilterEntry.266"></a><span class="yang_kw">list</span> <span class="yang_id">snmpNotifyFilterEntry</span> {
             <span class="yang_kw">key</span> "<a href="#snmpNotifyFilterProfileName.277">snmpNotifyFilterProfileName</a> <a href="#snmpNotifyFilterSubtree.286">snmpNotifyFilterSubtree</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -307,7 +307,7 @@
                
                Entries in the snmpNotifyFilterTable are created and
                deleted using the snmpNotifyFilterRowStatus object."</span>;
-            <a name="snmpNotifyFilterProfileName.277"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterProfileName</span> {
+            <a name="snmpNotifyFilterProfileName.277"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterProfileName</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/snmp-notification:snmpNotifyObjects/snmp-notification:snmpNotifyFilterProfileEntry/snmp-notification:snmpNotifyFilterProfileName"</span>;
@@ -316,7 +316,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="snmpNotifyFilterSubtree.286"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterSubtree</span> {
+            <a name="snmpNotifyFilterSubtree.286"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterSubtree</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -327,7 +327,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.3.1.1"</span>;
             }
 
-            <a name="snmpNotifyFilterMask.297"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterMask</span> {
+            <a name="snmpNotifyFilterMask.297"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterMask</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..16"</span>;
                }
@@ -381,7 +381,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.3.1.2"</span>;
             }
 
-            <a name="snmpNotifyFilterType.351"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterType</span> {
+            <a name="snmpNotifyFilterType.351"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterType</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"included"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -400,7 +400,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.3.1.3"</span>;
             }
 
-            <a name="snmpNotifyFilterStorageType.366"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterStorageType</span> {
+            <a name="snmpNotifyFilterStorageType.366"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterStorageType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -412,7 +412,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.13.1.3.1.4"</span>;
             }
 
-            <a name="snmpNotifyFilterRowStatus.378"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterRowStatus</span> {
+            <a name="snmpNotifyFilterRowStatus.378"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpNotifyFilterRowStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>

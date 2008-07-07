@@ -129,7 +129,7 @@
             <span class="yang_str">"Initial version, published as RFC 2591."</span>;
       }
 
-      <a name="SnmpPduErrorStatus.80"/><span class="yang_kw">typedef</span> <span class="yang_id">SnmpPduErrorStatus</span> {
+      <a name="SnmpPduErrorStatus.80"></a><span class="yang_kw">typedef</span> <span class="yang_id">SnmpPduErrorStatus</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"noResponse"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">-1</span>;
@@ -199,8 +199,8 @@
             timeout condition."</span>;
       }
 
-      <a name="schedObjects.110"/><span class="yang_kw">container</span> <span class="yang_id">schedObjects</span> {
-         <a name="schedLocalTime.112"/><span class="yang_kw">leaf</span> <span class="yang_id">schedLocalTime</span> {
+      <a name="schedObjects.110"></a><span class="yang_kw">container</span> <span class="yang_id">schedObjects</span> {
+         <a name="schedLocalTime.112"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedLocalTime</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span> {
                <span class="yang_kw">length</span> <span class="yang_str">"11"</span>;
             }
@@ -214,7 +214,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.1"</span>;
          }
 
-         <a name="schedEntry.129"/><span class="yang_kw">list</span> <span class="yang_id">schedEntry</span> {
+         <a name="schedEntry.129"></a><span class="yang_kw">list</span> <span class="yang_id">schedEntry</span> {
             <span class="yang_kw">key</span> "<a href="#schedOwner.145">schedOwner</a> <a href="#schedName.158">schedName</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -227,7 +227,7 @@
                and the objects in the schedCalendarGroup when
                schedRowStatus is active and schedAdminStatus and
                schedOperStatus are both enabled."</span>;
-            <a name="schedOwner.145"/><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
+            <a name="schedOwner.145"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -240,7 +240,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.1"</span>;
             }
 
-            <a name="schedName.158"/><span class="yang_kw">leaf</span> <span class="yang_id">schedName</span> {
+            <a name="schedName.158"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
                }
@@ -252,7 +252,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.2"</span>;
             }
 
-            <a name="schedDescr.170"/><span class="yang_kw">leaf</span> <span class="yang_id">schedDescr</span> {
+            <a name="schedDescr.170"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedDescr</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -262,7 +262,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.3"</span>;
             }
 
-            <a name="schedInterval.180"/><span class="yang_kw">leaf</span> <span class="yang_id">schedInterval</span> {
+            <a name="schedInterval.180"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedInterval</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">units</span> <span class="yang_str">"seconds"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -289,7 +289,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.4"</span>;
             }
 
-            <a name="schedWeekDay.207"/><span class="yang_kw">leaf</span> <span class="yang_id">schedWeekDay</span> {
+            <a name="schedWeekDay.207"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedWeekDay</span> {
                <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
                   <span class="yang_kw">bit</span> <span class="yang_str">"sunday"</span> {
                      <span class="yang_kw">position</span> <span class="yang_str">0</span>;
@@ -328,7 +328,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.5"</span>;
             }
 
-            <a name="schedMonth.232"/><span class="yang_kw">leaf</span> <span class="yang_id">schedMonth</span> {
+            <a name="schedMonth.232"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedMonth</span> {
                <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
                   <span class="yang_kw">bit</span> <span class="yang_str">"january"</span> {
                      <span class="yang_kw">position</span> <span class="yang_str">0</span>;
@@ -383,7 +383,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.6"</span>;
             }
 
-            <a name="schedDay.263"/><span class="yang_kw">leaf</span> <span class="yang_id">schedDay</span> {
+            <a name="schedDay.263"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedDay</span> {
                <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
                   <span class="yang_kw">bit</span> <span class="yang_str">"d1"</span> {
                      <span class="yang_kw">position</span> <span class="yang_str">0</span>;
@@ -605,7 +605,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.7"</span>;
             }
 
-            <a name="schedHour.361"/><span class="yang_kw">leaf</span> <span class="yang_id">schedHour</span> {
+            <a name="schedHour.361"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedHour</span> {
                <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
                   <span class="yang_kw">bit</span> <span class="yang_str">"h0"</span> {
                      <span class="yang_kw">position</span> <span class="yang_str">0</span>;
@@ -692,7 +692,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.8"</span>;
             }
 
-            <a name="schedMinute.400"/><span class="yang_kw">leaf</span> <span class="yang_id">schedMinute</span> {
+            <a name="schedMinute.400"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedMinute</span> {
                <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
                   <span class="yang_kw">bit</span> <span class="yang_str">"m0"</span> {
                      <span class="yang_kw">position</span> <span class="yang_str">0</span>;
@@ -887,7 +887,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.9"</span>;
             }
 
-            <a name="schedContextName.475"/><span class="yang_kw">leaf</span> <span class="yang_id">schedContextName</span> {
+            <a name="schedContextName.475"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedContextName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -899,7 +899,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.10"</span>;
             }
 
-            <a name="schedVariable.487"/><span class="yang_kw">leaf</span> <span class="yang_id">schedVariable</span> {
+            <a name="schedVariable.487"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedVariable</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#VariablePointer.164">smiv2:VariablePointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -909,7 +909,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.11"</span>;
             }
 
-            <a name="schedValue.497"/><span class="yang_kw">leaf</span> <span class="yang_id">schedValue</span> {
+            <a name="schedValue.497"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedValue</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -927,7 +927,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.12"</span>;
             }
 
-            <a name="schedType.515"/><span class="yang_kw">leaf</span> <span class="yang_id">schedType</span> {
+            <a name="schedType.515"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedType</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"periodic"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -968,7 +968,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.13"</span>;
             }
 
-            <a name="schedAdminStatus.550"/><span class="yang_kw">leaf</span> <span class="yang_id">schedAdminStatus</span> {
+            <a name="schedAdminStatus.550"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedAdminStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"enabled"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -983,7 +983,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.14"</span>;
             }
 
-            <a name="schedOperStatus.562"/><span class="yang_kw">leaf</span> <span class="yang_id">schedOperStatus</span> {
+            <a name="schedOperStatus.562"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedOperStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"enabled"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -1012,7 +1012,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.15"</span>;
             }
 
-            <a name="schedFailures.585"/><span class="yang_kw">leaf</span> <span class="yang_id">schedFailures</span> {
+            <a name="schedFailures.585"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedFailures</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1022,7 +1022,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.16"</span>;
             }
 
-            <a name="schedLastFailure.595"/><span class="yang_kw">leaf</span> <span class="yang_id">schedLastFailure</span> {
+            <a name="schedLastFailure.595"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedLastFailure</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#SnmpPduErrorStatus.80">SnmpPduErrorStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1033,7 +1033,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.17"</span>;
             }
 
-            <a name="schedLastFailed.606"/><span class="yang_kw">leaf</span> <span class="yang_id">schedLastFailed</span> {
+            <a name="schedLastFailed.606"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedLastFailed</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1045,7 +1045,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.18"</span>;
             }
 
-            <a name="schedStorageType.618"/><span class="yang_kw">leaf</span> <span class="yang_id">schedStorageType</span> {
+            <a name="schedStorageType.618"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedStorageType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1064,7 +1064,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.19"</span>;
             }
 
-            <a name="schedRowStatus.637"/><span class="yang_kw">leaf</span> <span class="yang_id">schedRowStatus</span> {
+            <a name="schedRowStatus.637"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedRowStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -1084,7 +1084,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.20"</span>;
             }
 
-            <a name="schedTriggers.657"/><span class="yang_kw">leaf</span> <span class="yang_id">schedTriggers</span> {
+            <a name="schedTriggers.657"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedTriggers</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1097,12 +1097,12 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1"</span>;
       }  <span class="yang_cmt">// container schedObjects</span>
 
-      <a name="schedActionFailure.669"/><span class="yang_kw">notification</span> <span class="yang_id">schedActionFailure</span> {
+      <a name="schedActionFailure.669"></a><span class="yang_kw">notification</span> <span class="yang_id">schedActionFailure</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"This notification is generated whenever the invocation of a
             scheduled action fails."</span>;
-         <a name="schedActionFailure-schedLastFailure.675"/><span class="yang_kw">container</span> <span class="yang_id">schedActionFailure-schedLastFailure</span> {
-            <a name="schedOwner.676"/><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
+         <a name="schedActionFailure-schedLastFailure.675"></a><span class="yang_kw">container</span> <span class="yang_id">schedActionFailure-schedLastFailure</span> {
+            <a name="schedOwner.676"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/disman-schedule:schedObjects/disman-schedule:schedEntry/disman-schedule:schedOwner"</span>;
@@ -1111,7 +1111,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="schedName.684"/><span class="yang_kw">leaf</span> <span class="yang_id">schedName</span> {
+            <a name="schedName.684"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedName</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/disman-schedule:schedObjects/disman-schedule:schedEntry/disman-schedule:schedName"</span>;
@@ -1120,7 +1120,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="schedLastFailure.692"/><span class="yang_kw">leaf</span> <span class="yang_id">schedLastFailure</span> {
+            <a name="schedLastFailure.692"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedLastFailure</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#SnmpPduErrorStatus.80">SnmpPduErrorStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1132,8 +1132,8 @@
             }
          }  <span class="yang_cmt">// container schedActionFailure-schedLastFailure</span>
 
-         <a name="schedActionFailure-schedLastFailed.704"/><span class="yang_kw">container</span> <span class="yang_id">schedActionFailure-schedLastFailed</span> {
-            <a name="schedOwner.705"/><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
+         <a name="schedActionFailure-schedLastFailed.704"></a><span class="yang_kw">container</span> <span class="yang_id">schedActionFailure-schedLastFailed</span> {
+            <a name="schedOwner.705"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/disman-schedule:schedObjects/disman-schedule:schedEntry/disman-schedule:schedOwner"</span>;
@@ -1142,7 +1142,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="schedName.713"/><span class="yang_kw">leaf</span> <span class="yang_id">schedName</span> {
+            <a name="schedName.713"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedName</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/disman-schedule:schedObjects/disman-schedule:schedEntry/disman-schedule:schedName"</span>;
@@ -1151,7 +1151,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="schedLastFailed.721"/><span class="yang_kw">leaf</span> <span class="yang_id">schedLastFailed</span> {
+            <a name="schedLastFailed.721"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedLastFailed</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>

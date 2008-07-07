@@ -160,8 +160,8 @@
             as RFC 1450."</span>;
       }
 
-      <a name="system.79"/><span class="yang_kw">container</span> <span class="yang_id">system</span> {
-         <a name="sysDescr.81"/><span class="yang_kw">leaf</span> <span class="yang_id">sysDescr</span> {
+      <a name="system.79"></a><span class="yang_kw">container</span> <span class="yang_id">system</span> {
+         <a name="sysDescr.81"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysDescr</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DisplayString.39">smiv2:DisplayString</a></span> {
                <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
             }
@@ -174,7 +174,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1.1"</span>;
          }
 
-         <a name="sysObjectID.94"/><span class="yang_kw">leaf</span> <span class="yang_id">sysObjectID</span> {
+         <a name="sysObjectID.94"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysObjectID</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -190,7 +190,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1.2"</span>;
          }
 
-         <a name="sysUpTime.110"/><span class="yang_kw">leaf</span> <span class="yang_id">sysUpTime</span> {
+         <a name="sysUpTime.110"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysUpTime</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -200,7 +200,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1.3"</span>;
          }
 
-         <a name="sysContact.120"/><span class="yang_kw">leaf</span> <span class="yang_id">sysContact</span> {
+         <a name="sysContact.120"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysContact</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DisplayString.39">smiv2:DisplayString</a></span> {
                <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
             }
@@ -213,7 +213,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1.4"</span>;
          }
 
-         <a name="sysName.133"/><span class="yang_kw">leaf</span> <span class="yang_id">sysName</span> {
+         <a name="sysName.133"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysName</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DisplayString.39">smiv2:DisplayString</a></span> {
                <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
             }
@@ -226,7 +226,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1.5"</span>;
          }
 
-         <a name="sysLocation.146"/><span class="yang_kw">leaf</span> <span class="yang_id">sysLocation</span> {
+         <a name="sysLocation.146"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysLocation</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DisplayString.39">smiv2:DisplayString</a></span> {
                <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
             }
@@ -238,7 +238,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1.6"</span>;
          }
 
-         <a name="sysServices.158"/><span class="yang_kw">leaf</span> <span class="yang_id">sysServices</span> {
+         <a name="sysServices.158"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysServices</span> {
             <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                <span class="yang_kw">range</span> <span class="yang_str">"0..127"</span>;
             }
@@ -269,7 +269,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1.7"</span>;
          }
 
-         <a name="sysORLastChange.189"/><span class="yang_kw">leaf</span> <span class="yang_id">sysORLastChange</span> {
+         <a name="sysORLastChange.189"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysORLastChange</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -278,12 +278,12 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1.8"</span>;
          }
 
-         <a name="sysOREntry.201"/><span class="yang_kw">list</span> <span class="yang_id">sysOREntry</span> {
+         <a name="sysOREntry.201"></a><span class="yang_kw">list</span> <span class="yang_id">sysOREntry</span> {
             <span class="yang_kw">key</span> "<a href="#sysORIndex.209">sysORIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry (conceptual row) in the sysORTable."</span>;
-            <a name="sysORIndex.209"/><span class="yang_kw">leaf</span> <span class="yang_id">sysORIndex</span> {
+            <a name="sysORIndex.209"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysORIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
                }
@@ -294,7 +294,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1.9.1.1"</span>;
             }
 
-            <a name="sysORID.220"/><span class="yang_kw">leaf</span> <span class="yang_id">sysORID</span> {
+            <a name="sysORID.220"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysORID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -305,7 +305,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1.9.1.2"</span>;
             }
 
-            <a name="sysORDescr.231"/><span class="yang_kw">leaf</span> <span class="yang_id">sysORDescr</span> {
+            <a name="sysORDescr.231"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysORDescr</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DisplayString.39">smiv2:DisplayString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -314,7 +314,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1.9.1.3"</span>;
             }
 
-            <a name="sysORUpTime.240"/><span class="yang_kw">leaf</span> <span class="yang_id">sysORUpTime</span> {
+            <a name="sysORUpTime.240"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysORUpTime</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -327,8 +327,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.1"</span>;
       }  <span class="yang_cmt">// container system</span>
 
-      <a name="snmp.252"/><span class="yang_kw">container</span> <span class="yang_id">snmp</span> {
-         <a name="snmpInPkts.254"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInPkts</span> {
+      <a name="snmp.252"></a><span class="yang_kw">container</span> <span class="yang_id">snmp</span> {
+         <a name="snmpInPkts.254"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInPkts</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -337,7 +337,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.1"</span>;
          }
 
-         <a name="snmpOutPkts.263"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutPkts</span> {
+         <a name="snmpOutPkts.263"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutPkts</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -348,7 +348,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.2"</span>;
          }
 
-         <a name="snmpInBadVersions.274"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInBadVersions</span> {
+         <a name="snmpInBadVersions.274"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInBadVersions</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -358,7 +358,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.3"</span>;
          }
 
-         <a name="snmpInBadCommunityNames.284"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInBadCommunityNames</span> {
+         <a name="snmpInBadCommunityNames.284"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInBadCommunityNames</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -379,7 +379,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.4"</span>;
          }
 
-         <a name="snmpInBadCommunityUses.305"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInBadCommunityUses</span> {
+         <a name="snmpInBadCommunityUses.305"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInBadCommunityUses</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -398,7 +398,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.5"</span>;
          }
 
-         <a name="snmpInASNParseErrs.324"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInASNParseErrs</span> {
+         <a name="snmpInASNParseErrs.324"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInASNParseErrs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -407,7 +407,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.6"</span>;
          }
 
-         <a name="snmpInTooBigs.333"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInTooBigs</span> {
+         <a name="snmpInTooBigs.333"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInTooBigs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -419,7 +419,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.8"</span>;
          }
 
-         <a name="snmpInNoSuchNames.345"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInNoSuchNames</span> {
+         <a name="snmpInNoSuchNames.345"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInNoSuchNames</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -431,7 +431,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.9"</span>;
          }
 
-         <a name="snmpInBadValues.357"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInBadValues</span> {
+         <a name="snmpInBadValues.357"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInBadValues</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -443,7 +443,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.10"</span>;
          }
 
-         <a name="snmpInReadOnlys.369"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInReadOnlys</span> {
+         <a name="snmpInReadOnlys.369"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInReadOnlys</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -459,7 +459,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.11"</span>;
          }
 
-         <a name="snmpInGenErrs.385"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInGenErrs</span> {
+         <a name="snmpInGenErrs.385"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInGenErrs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -470,7 +470,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.12"</span>;
          }
 
-         <a name="snmpInTotalReqVars.396"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInTotalReqVars</span> {
+         <a name="snmpInTotalReqVars.396"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInTotalReqVars</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -482,7 +482,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.13"</span>;
          }
 
-         <a name="snmpInTotalSetVars.408"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInTotalSetVars</span> {
+         <a name="snmpInTotalSetVars.408"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInTotalSetVars</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -493,7 +493,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.14"</span>;
          }
 
-         <a name="snmpInGetRequests.419"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInGetRequests</span> {
+         <a name="snmpInGetRequests.419"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInGetRequests</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -504,7 +504,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.15"</span>;
          }
 
-         <a name="snmpInGetNexts.430"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInGetNexts</span> {
+         <a name="snmpInGetNexts.430"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInGetNexts</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -514,7 +514,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.16"</span>;
          }
 
-         <a name="snmpInSetRequests.440"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInSetRequests</span> {
+         <a name="snmpInSetRequests.440"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInSetRequests</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -525,7 +525,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.17"</span>;
          }
 
-         <a name="snmpInGetResponses.451"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInGetResponses</span> {
+         <a name="snmpInGetResponses.451"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInGetResponses</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -536,7 +536,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.18"</span>;
          }
 
-         <a name="snmpInTraps.462"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpInTraps</span> {
+         <a name="snmpInTraps.462"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInTraps</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -546,7 +546,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.19"</span>;
          }
 
-         <a name="snmpOutTooBigs.472"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutTooBigs</span> {
+         <a name="snmpOutTooBigs.472"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutTooBigs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -557,7 +557,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.20"</span>;
          }
 
-         <a name="snmpOutNoSuchNames.483"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutNoSuchNames</span> {
+         <a name="snmpOutNoSuchNames.483"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutNoSuchNames</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -568,7 +568,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.21"</span>;
          }
 
-         <a name="snmpOutBadValues.494"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutBadValues</span> {
+         <a name="snmpOutBadValues.494"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutBadValues</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -579,7 +579,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.22"</span>;
          }
 
-         <a name="snmpOutGenErrs.505"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutGenErrs</span> {
+         <a name="snmpOutGenErrs.505"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutGenErrs</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -590,7 +590,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.24"</span>;
          }
 
-         <a name="snmpOutGetRequests.516"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutGetRequests</span> {
+         <a name="snmpOutGetRequests.516"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutGetRequests</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -600,7 +600,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.25"</span>;
          }
 
-         <a name="snmpOutGetNexts.526"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutGetNexts</span> {
+         <a name="snmpOutGetNexts.526"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutGetNexts</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -610,7 +610,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.26"</span>;
          }
 
-         <a name="snmpOutSetRequests.536"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutSetRequests</span> {
+         <a name="snmpOutSetRequests.536"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutSetRequests</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -620,7 +620,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.27"</span>;
          }
 
-         <a name="snmpOutGetResponses.546"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutGetResponses</span> {
+         <a name="snmpOutGetResponses.546"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutGetResponses</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -630,7 +630,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.28"</span>;
          }
 
-         <a name="snmpOutTraps.556"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutTraps</span> {
+         <a name="snmpOutTraps.556"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutTraps</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
@@ -640,7 +640,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.29"</span>;
          }
 
-         <a name="snmpEnableAuthenTraps.566"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpEnableAuthenTraps</span> {
+         <a name="snmpEnableAuthenTraps.566"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpEnableAuthenTraps</span> {
             <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                <span class="yang_kw">enum</span> <span class="yang_str">"enabled"</span> {
                   <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -664,7 +664,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.30"</span>;
          }
 
-         <a name="snmpSilentDrops.586"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpSilentDrops</span> {
+         <a name="snmpSilentDrops.586"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpSilentDrops</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -681,7 +681,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11.31"</span>;
          }
 
-         <a name="snmpProxyDrops.603"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyDrops</span> {
+         <a name="snmpProxyDrops.603"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyDrops</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -699,8 +699,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.11"</span>;
       }  <span class="yang_cmt">// container snmp</span>
 
-      <a name="snmpTrap.621"/><span class="yang_kw">container</span> <span class="yang_id">snmpTrap</span> {
-         <a name="snmpTrapOID.623"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapOID</span> {
+      <a name="snmpTrap.621"></a><span class="yang_kw">container</span> <span class="yang_id">snmpTrap</span> {
+         <a name="snmpTrapOID.623"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapOID</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -711,7 +711,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.4.1"</span>;
          }
 
-         <a name="snmpTrapEnterprise.634"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapEnterprise</span> {
+         <a name="snmpTrapEnterprise.634"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapEnterprise</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -725,8 +725,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.4"</span>;
       }  <span class="yang_cmt">// container snmpTrap</span>
 
-      <a name="snmpSet.648"/><span class="yang_kw">container</span> <span class="yang_id">snmpSet</span> {
-         <a name="snmpSetSerialNo.650"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpSetSerialNo</span> {
+      <a name="snmpSet.648"></a><span class="yang_kw">container</span> <span class="yang_id">snmpSet</span> {
+         <a name="snmpSetSerialNo.650"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpSetSerialNo</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TestAndIncr.109">smiv2:TestAndIncr</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>
@@ -743,7 +743,7 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.6"</span>;
       }  <span class="yang_cmt">// container snmpSet</span>
 
-      <a name="coldStart.667"/><span class="yang_kw">notification</span> <span class="yang_id">coldStart</span> {
+      <a name="coldStart.667"></a><span class="yang_kw">notification</span> <span class="yang_id">coldStart</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"A coldStart trap signifies that the SNMP entity,
             supporting a notification originator application, is
@@ -752,7 +752,7 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.5.1"</span>;
       }  <span class="yang_cmt">// notification coldStart</span>
 
-      <a name="warmStart.677"/><span class="yang_kw">notification</span> <span class="yang_id">warmStart</span> {
+      <a name="warmStart.677"></a><span class="yang_kw">notification</span> <span class="yang_id">warmStart</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"A warmStart trap signifies that the SNMP entity,
             supporting a notification originator application,
@@ -761,7 +761,7 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.5.2"</span>;
       }  <span class="yang_cmt">// notification warmStart</span>
 
-      <a name="authenticationFailure.687"/><span class="yang_kw">notification</span> <span class="yang_id">authenticationFailure</span> {
+      <a name="authenticationFailure.687"></a><span class="yang_kw">notification</span> <span class="yang_id">authenticationFailure</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"An authenticationFailure trap signifies that the SNMP
             entity has received a protocol message that is not

@@ -55,9 +55,7 @@
          <span class="yang_kw">description</span> <span class="yang_str">"From RFC 2579."</span>;
       }
 
-
-      <span class="yang_cmt">// typedefs</span>
-      <a name="DisplayString.39"/><span class="yang_kw">typedef</span> <span class="yang_id">DisplayString</span> {
+      <a name="DisplayString.39"></a><span class="yang_kw">typedef</span> <span class="yang_id">DisplayString</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
             <span class="yang_kw">pattern</span> <span class="yang_str">'\p{IsBasicLatin}{0,255}'</span>;
@@ -95,7 +93,7 @@
             characters in length."</span>;
       }
 
-      <a name="PhysAddress.77"/><span class="yang_kw">typedef</span> <span class="yang_id">PhysAddress</span> {
+      <a name="PhysAddress.77"></a><span class="yang_kw">typedef</span> <span class="yang_id">PhysAddress</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">pattern</span>
                <span class="yang_str">'(((([0-9A-Fa-f]{2}))*([0-9A-Fa-f]{2}))){0,1}'</span>;
@@ -105,7 +103,7 @@
             <span class="yang_str">"Represents media- or physical-level addresses."</span>;
       }
 
-      <a name="MacAddress.86"/><span class="yang_kw">typedef</span> <span class="yang_id">MacAddress</span> {
+      <a name="MacAddress.86"></a><span class="yang_kw">typedef</span> <span class="yang_id">MacAddress</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"6"</span>;
             <span class="yang_kw">pattern</span>
@@ -120,7 +118,7 @@
             addresses to be transmitted most significant bit first."</span>;
       }
 
-      <a name="TruthValue.100"/><span class="yang_kw">typedef</span> <span class="yang_id">TruthValue</span> {
+      <a name="TruthValue.100"></a><span class="yang_kw">typedef</span> <span class="yang_id">TruthValue</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"true"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -132,7 +130,7 @@
          <span class="yang_kw">description</span> <span class="yang_str">"Represents a boolean value."</span>;
       }
 
-      <a name="TestAndIncr.109"/><span class="yang_kw">typedef</span> <span class="yang_id">TestAndIncr</span> {
+      <a name="TestAndIncr.109"></a><span class="yang_kw">typedef</span> <span class="yang_id">TestAndIncr</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
          }
@@ -164,7 +162,7 @@
             generated value."</span>;
       }
 
-      <a name="AutonomousType.141"/><span class="yang_kw">typedef</span> <span class="yang_id">AutonomousType</span> {
+      <a name="AutonomousType.141"></a><span class="yang_kw">typedef</span> <span class="yang_id">AutonomousType</span> {
          <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"Represents an independently extensible type identification
@@ -173,7 +171,7 @@
             protocol or hardware."</span>;
       }
 
-      <a name="InstancePointer.150"/><span class="yang_kw">typedef</span> <span class="yang_id">InstancePointer</span> {
+      <a name="InstancePointer.150"></a><span class="yang_kw">typedef</span> <span class="yang_id">InstancePointer</span> {
          <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
          <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
          <span class="yang_kw">description</span>
@@ -187,14 +185,14 @@
             VariablePointer and RowPointer, respectively."</span>;
       }
 
-      <a name="VariablePointer.164"/><span class="yang_kw">typedef</span> <span class="yang_id">VariablePointer</span> {
+      <a name="VariablePointer.164"></a><span class="yang_kw">typedef</span> <span class="yang_id">VariablePointer</span> {
          <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"A pointer to a specific object instance.  For example,
             sysContact.0 or ifInOctets.3."</span>;
       }
 
-      <a name="RowPointer.171"/><span class="yang_kw">typedef</span> <span class="yang_id">RowPointer</span> {
+      <a name="RowPointer.171"></a><span class="yang_kw">typedef</span> <span class="yang_id">RowPointer</span> {
          <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"Represents a pointer to a conceptual row.  The value is the
@@ -206,7 +204,7 @@
             ifDescr.3 would be used instead)."</span>;
       }
 
-      <a name="RowStatus.183"/><span class="yang_kw">typedef</span> <span class="yang_id">RowStatus</span> {
+      <a name="RowStatus.183"></a><span class="yang_kw">typedef</span> <span class="yang_id">RowStatus</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"active"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -691,7 +689,7 @@
             immediately removed."</span>;
       }
 
-      <a name="TimeStamp.656"/><span class="yang_kw">typedef</span> <span class="yang_id">TimeStamp</span> {
+      <a name="TimeStamp.656"></a><span class="yang_kw">typedef</span> <span class="yang_id">TimeStamp</span> {
          <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"The value of the sysUpTime object at which a specific
@@ -710,7 +708,7 @@
             ambiguities in the value of TimeStamp objects."</span>;
       }
 
-      <a name="TimeInterval.675"/><span class="yang_kw">typedef</span> <span class="yang_id">TimeInterval</span> {
+      <a name="TimeInterval.675"></a><span class="yang_kw">typedef</span> <span class="yang_id">TimeInterval</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
          }
@@ -718,7 +716,7 @@
             <span class="yang_str">"A period of time, measured in units of 0.01 seconds."</span>;
       }
 
-      <a name="DateAndTime.683"/><span class="yang_kw">typedef</span> <span class="yang_id">DateAndTime</span> {
+      <a name="DateAndTime.683"></a><span class="yang_kw">typedef</span> <span class="yang_id">DateAndTime</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"8 | 11"</span>;
             <span class="yang_kw">pattern</span>
@@ -755,7 +753,7 @@
             information (fields 8-10) is not present."</span>;
       }
 
-      <a name="StorageType.719"/><span class="yang_kw">typedef</span> <span class="yang_id">StorageType</span> {
+      <a name="StorageType.719"></a><span class="yang_kw">typedef</span> <span class="yang_id">StorageType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -793,7 +791,7 @@
             at a minimum allow to be writable."</span>;
       }
 
-      <a name="TDomain.747"/><span class="yang_kw">typedef</span> <span class="yang_id">TDomain</span> {
+      <a name="TDomain.747"></a><span class="yang_kw">typedef</span> <span class="yang_id">TDomain</span> {
          <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"Denotes a kind of transport service.
@@ -805,7 +803,7 @@
             <span class="yang_str">"The SNMPv2-TM MIB module is defined in RFC 1906."</span>;
       }
 
-      <a name="TAddress.759"/><span class="yang_kw">typedef</span> <span class="yang_id">TAddress</span> {
+      <a name="TAddress.759"></a><span class="yang_kw">typedef</span> <span class="yang_id">TAddress</span> {
          <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"1..255"</span>;
          }

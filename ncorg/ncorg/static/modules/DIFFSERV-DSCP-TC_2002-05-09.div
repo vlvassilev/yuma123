@@ -62,7 +62,7 @@
             <span class="yang_str">"Initial version, published as RFC 3289."</span>;
       }
 
-      <a name="Dscp.59"/><span class="yang_kw">typedef</span> <span class="yang_id">Dscp</span> {
+      <a name="Dscp.59"></a><span class="yang_kw">typedef</span> <span class="yang_id">Dscp</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"0..63"</span>;
             <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
@@ -73,7 +73,7 @@
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 2474, RFC 2780"</span>;
       }
 
-      <a name="DscpOrAny.71"/><span class="yang_kw">typedef</span> <span class="yang_id">DscpOrAny</span> {
+      <a name="DscpOrAny.71"></a><span class="yang_kw">typedef</span> <span class="yang_id">DscpOrAny</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"-1..63"</span>;
             <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;

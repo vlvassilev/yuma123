@@ -209,14 +209,14 @@
             <span class="yang_str">"Initial version, published as RFC 1650."</span>;
       }
 
-      <a name="dot3.133"/><span class="yang_kw">container</span> <span class="yang_id">dot3</span> {
-         <a name="dot3StatsEntry.138"/><span class="yang_kw">list</span> <span class="yang_id">dot3StatsEntry</span> {
+      <a name="dot3.133"></a><span class="yang_kw">container</span> <span class="yang_id">dot3</span> {
+         <a name="dot3StatsEntry.138"></a><span class="yang_kw">list</span> <span class="yang_id">dot3StatsEntry</span> {
             <span class="yang_kw">key</span> "<a href="#dot3StatsIndex.147">dot3StatsIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Statistics for a particular interface to an
                ethernet-like medium."</span>;
-            <a name="dot3StatsIndex.147"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsIndex</span> {
+            <a name="dot3StatsIndex.147"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndex.81">if-mib:InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -229,7 +229,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.1"</span>;
             }
 
-            <a name="dot3StatsAlignmentErrors.161"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsAlignmentErrors</span> {
+            <a name="dot3StatsAlignmentErrors.161"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsAlignmentErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -270,7 +270,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.2"</span>;
             }
 
-            <a name="dot3StatsFCSErrors.202"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsFCSErrors</span> {
+            <a name="dot3StatsFCSErrors.202"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsFCSErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -314,7 +314,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.3"</span>;
             }
 
-            <a name="dot3StatsSingleCollisionFrames.246"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsSingleCollisionFrames</span> {
+            <a name="dot3StatsSingleCollisionFrames.246"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsSingleCollisionFrames</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -343,7 +343,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.4"</span>;
             }
 
-            <a name="dot3StatsMultipleCollisionFrames.275"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsMultipleCollisionFrames</span> {
+            <a name="dot3StatsMultipleCollisionFrames.275"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsMultipleCollisionFrames</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -373,7 +373,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.5"</span>;
             }
 
-            <a name="dot3StatsSQETestErrors.305"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsSQETestErrors</span> {
+            <a name="dot3StatsSQETestErrors.305"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsSQETestErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -399,7 +399,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.6"</span>;
             }
 
-            <a name="dot3StatsDeferredTransmissions.331"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsDeferredTransmissions</span> {
+            <a name="dot3StatsDeferredTransmissions.331"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsDeferredTransmissions</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -424,7 +424,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.7"</span>;
             }
 
-            <a name="dot3StatsLateCollisions.356"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsLateCollisions</span> {
+            <a name="dot3StatsLateCollisions.356"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsLateCollisions</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -451,7 +451,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.8"</span>;
             }
 
-            <a name="dot3StatsExcessiveCollisions.383"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsExcessiveCollisions</span> {
+            <a name="dot3StatsExcessiveCollisions.383"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsExcessiveCollisions</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -472,7 +472,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.9"</span>;
             }
 
-            <a name="dot3StatsInternalMacTransmitErrors.404"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsInternalMacTransmitErrors</span> {
+            <a name="dot3StatsInternalMacTransmitErrors.404"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsInternalMacTransmitErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -513,7 +513,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.10"</span>;
             }
 
-            <a name="dot3StatsCarrierSenseErrors.445"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsCarrierSenseErrors</span> {
+            <a name="dot3StatsCarrierSenseErrors.445"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsCarrierSenseErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -541,7 +541,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.11"</span>;
             }
 
-            <a name="dot3StatsFrameTooLongs.473"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsFrameTooLongs</span> {
+            <a name="dot3StatsFrameTooLongs.473"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsFrameTooLongs</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -578,7 +578,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.13"</span>;
             }
 
-            <a name="dot3StatsInternalMacReceiveErrors.510"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsInternalMacReceiveErrors</span> {
+            <a name="dot3StatsInternalMacReceiveErrors.510"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsInternalMacReceiveErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -619,7 +619,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.16"</span>;
             }
 
-            <a name="dot3StatsEtherChipSet.551"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsEtherChipSet</span> {
+            <a name="dot3StatsEtherChipSet.551"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsEtherChipSet</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
@@ -655,7 +655,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.17"</span>;
             }
 
-            <a name="dot3StatsSymbolErrors.587"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsSymbolErrors</span> {
+            <a name="dot3StatsSymbolErrors.587"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsSymbolErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -718,7 +718,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.18"</span>;
             }
 
-            <a name="dot3StatsDuplexStatus.650"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsDuplexStatus</span> {
+            <a name="dot3StatsDuplexStatus.650"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsDuplexStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"unknown"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -761,7 +761,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.19"</span>;
             }
 
-            <a name="dot3StatsRateControlAbility.687"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsRateControlAbility</span> {
+            <a name="dot3StatsRateControlAbility.687"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsRateControlAbility</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TruthValue.100">smiv2:TruthValue</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -776,7 +776,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1.20"</span>;
             }
 
-            <a name="dot3StatsRateControlStatus.702"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsRateControlStatus</span> {
+            <a name="dot3StatsRateControlStatus.702"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsRateControlStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"rateControlOff"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -800,7 +800,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.2.1"</span>;
          }  <span class="yang_cmt">// list dot3StatsEntry</span>
 
-         <a name="dot3CollEntry.722"/><span class="yang_kw">list</span> <span class="yang_id">dot3CollEntry</span> {
+         <a name="dot3CollEntry.722"></a><span class="yang_kw">list</span> <span class="yang_id">dot3CollEntry</span> {
             <span class="yang_kw">key</span> "<a href="#ifIndex.736">ifIndex</a> <a href="#dot3CollCount.745">dot3CollCount</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -812,7 +812,7 @@
                the transmission (successful or otherwise) on a
                particular interface is accompanied by a
                particular number of media collisions."</span>;
-            <a name="ifIndex.736"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+            <a name="ifIndex.736"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex"</span>;
@@ -821,7 +821,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="dot3CollCount.745"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3CollCount</span> {
+            <a name="dot3CollCount.745"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3CollCount</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..16"</span>;
                }
@@ -834,7 +834,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.5.1.2"</span>;
             }
 
-            <a name="dot3CollFrequencies.758"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3CollFrequencies</span> {
+            <a name="dot3CollFrequencies.758"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3CollFrequencies</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -865,14 +865,14 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.5.1"</span>;
          }  <span class="yang_cmt">// list dot3CollEntry</span>
 
-         <a name="dot3ControlEntry.793"/><span class="yang_kw">list</span> <span class="yang_id">dot3ControlEntry</span> {
+         <a name="dot3ControlEntry.793"></a><span class="yang_kw">list</span> <span class="yang_id">dot3ControlEntry</span> {
             <span class="yang_kw">key</span> "<a href="#dot3StatsIndex.802">dot3StatsIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry in the table, containing information
                about the MAC Control sublayer on a single
                ethernet-like interface."</span>;
-            <a name="dot3StatsIndex.802"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsIndex</span> {
+            <a name="dot3StatsIndex.802"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/etherlike-mib:dot3/etherlike-mib:dot3StatsEntry/etherlike-mib:dot3StatsIndex"</span>;
@@ -881,7 +881,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="dot3ControlFunctionsSupported.811"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3ControlFunctionsSupported</span> {
+            <a name="dot3ControlFunctionsSupported.811"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3ControlFunctionsSupported</span> {
                <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
                   <span class="yang_kw">bit</span> <span class="yang_str">"pause"</span> {
                      <span class="yang_kw">position</span> <span class="yang_str">0</span>;
@@ -897,7 +897,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.9.1.1"</span>;
             }
 
-            <a name="dot3ControlInUnknownOpcodes.825"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3ControlInUnknownOpcodes</span> {
+            <a name="dot3ControlInUnknownOpcodes.825"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3ControlInUnknownOpcodes</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -925,7 +925,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.9.1.2"</span>;
             }
 
-            <a name="dot3HCControlInUnknownOpcodes.853"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCControlInUnknownOpcodes</span> {
+            <a name="dot3HCControlInUnknownOpcodes.853"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCControlInUnknownOpcodes</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -949,14 +949,14 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.9.1"</span>;
          }  <span class="yang_cmt">// list dot3ControlEntry</span>
 
-         <a name="dot3PauseEntry.879"/><span class="yang_kw">list</span> <span class="yang_id">dot3PauseEntry</span> {
+         <a name="dot3PauseEntry.879"></a><span class="yang_kw">list</span> <span class="yang_id">dot3PauseEntry</span> {
             <span class="yang_kw">key</span> "<a href="#dot3StatsIndex.888">dot3StatsIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry in the table, containing information
                about the MAC Control PAUSE function on a single
                ethernet-like interface."</span>;
-            <a name="dot3StatsIndex.888"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsIndex</span> {
+            <a name="dot3StatsIndex.888"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/etherlike-mib:dot3/etherlike-mib:dot3StatsEntry/etherlike-mib:dot3StatsIndex"</span>;
@@ -965,7 +965,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="dot3PauseAdminMode.897"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3PauseAdminMode</span> {
+            <a name="dot3PauseAdminMode.897"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3PauseAdminMode</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -1019,7 +1019,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.10.1.1"</span>;
             }
 
-            <a name="dot3PauseOperMode.943"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3PauseOperMode</span> {
+            <a name="dot3PauseOperMode.943"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3PauseOperMode</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -1054,7 +1054,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.10.1.2"</span>;
             }
 
-            <a name="dot3InPauseFrames.970"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3InPauseFrames</span> {
+            <a name="dot3InPauseFrames.970"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3InPauseFrames</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1085,7 +1085,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.10.1.3"</span>;
             }
 
-            <a name="dot3OutPauseFrames.1001"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3OutPauseFrames</span> {
+            <a name="dot3OutPauseFrames.1001"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3OutPauseFrames</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1116,7 +1116,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.10.1.4"</span>;
             }
 
-            <a name="dot3HCInPauseFrames.1032"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCInPauseFrames</span> {
+            <a name="dot3HCInPauseFrames.1032"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCInPauseFrames</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1141,7 +1141,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.10.1.5"</span>;
             }
 
-            <a name="dot3HCOutPauseFrames.1057"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCOutPauseFrames</span> {
+            <a name="dot3HCOutPauseFrames.1057"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCOutPauseFrames</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1168,13 +1168,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.10.1"</span>;
          }  <span class="yang_cmt">// list dot3PauseEntry</span>
 
-         <a name="dot3HCStatsEntry.1086"/><span class="yang_kw">list</span> <span class="yang_id">dot3HCStatsEntry</span> {
+         <a name="dot3HCStatsEntry.1086"></a><span class="yang_kw">list</span> <span class="yang_id">dot3HCStatsEntry</span> {
             <span class="yang_kw">key</span> "<a href="#dot3StatsIndex.1094">dot3StatsIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry containing 64-bit statistics for a
                single ethernet-like interface."</span>;
-            <a name="dot3StatsIndex.1094"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsIndex</span> {
+            <a name="dot3StatsIndex.1094"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/etherlike-mib:dot3/etherlike-mib:dot3StatsEntry/etherlike-mib:dot3StatsIndex"</span>;
@@ -1183,7 +1183,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="dot3HCStatsAlignmentErrors.1103"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsAlignmentErrors</span> {
+            <a name="dot3HCStatsAlignmentErrors.1103"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsAlignmentErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1218,7 +1218,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.11.1.1"</span>;
             }
 
-            <a name="dot3HCStatsFCSErrors.1138"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsFCSErrors</span> {
+            <a name="dot3HCStatsFCSErrors.1138"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsFCSErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1255,7 +1255,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.11.1.2"</span>;
             }
 
-            <a name="dot3HCStatsInternalMacTransmitErrors.1175"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsInternalMacTransmitErrors</span> {
+            <a name="dot3HCStatsInternalMacTransmitErrors.1175"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsInternalMacTransmitErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1291,7 +1291,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.11.1.3"</span>;
             }
 
-            <a name="dot3HCStatsFrameTooLongs.1211"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsFrameTooLongs</span> {
+            <a name="dot3HCStatsFrameTooLongs.1211"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsFrameTooLongs</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1323,7 +1323,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.11.1.4"</span>;
             }
 
-            <a name="dot3HCStatsInternalMacReceiveErrors.1243"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsInternalMacReceiveErrors</span> {
+            <a name="dot3HCStatsInternalMacReceiveErrors.1243"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsInternalMacReceiveErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1358,7 +1358,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.10.7.11.1.5"</span>;
             }
 
-            <a name="dot3HCStatsSymbolErrors.1278"/><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsSymbolErrors</span> {
+            <a name="dot3HCStatsSymbolErrors.1278"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsSymbolErrors</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>

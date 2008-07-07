@@ -82,7 +82,7 @@
          <span class="yang_kw">description</span> <span class="yang_str">"Initial version published as RFC 2786."</span>;
       }
 
-      <a name="DHKeyChange.48"/><span class="yang_kw">typedef</span> <span class="yang_id">DHKeyChange</span> {
+      <a name="DHKeyChange.48"></a><span class="yang_kw">typedef</span> <span class="yang_id">DHKeyChange</span> {
          <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"Upon initialization, or upon creation of a row containing an
@@ -131,8 +131,8 @@
             RSA Laboratories, November 1993"</span>;
       }
 
-      <a name="usmDHPublicObjects.97"/><span class="yang_kw">container</span> <span class="yang_id">usmDHPublicObjects</span> {
-         <a name="usmDHParameters.99"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHParameters</span> {
+      <a name="usmDHPublicObjects.97"></a><span class="yang_kw">container</span> <span class="yang_id">usmDHPublicObjects</span> {
+         <a name="usmDHParameters.99"></a><span class="yang_kw">leaf</span> <span class="yang_id">usmDHParameters</span> {
             <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>
@@ -167,8 +167,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.1"</span>;
       }  <span class="yang_cmt">// container usmDHPublicObjects</span>
 
-      <a name="usmDHKickstartGroup.135"/><span class="yang_kw">container</span> <span class="yang_id">usmDHKickstartGroup</span> {
-         <a name="usmDHKickstartEntry.140"/><span class="yang_kw">list</span> <span class="yang_id">usmDHKickstartEntry</span> {
+      <a name="usmDHKickstartGroup.135"></a><span class="yang_kw">container</span> <span class="yang_id">usmDHKickstartGroup</span> {
+         <a name="usmDHKickstartEntry.140"></a><span class="yang_kw">list</span> <span class="yang_id">usmDHKickstartEntry</span> {
             <span class="yang_kw">key</span> "<a href="#usmDHKickstartIndex.157">usmDHKickstartIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -182,7 +182,7 @@
                one or more of the keys for a row in usmUserTable with a
                particular security name, the row in this table with that same
                security name is no longer useful or meaningful."</span>;
-            <a name="usmDHKickstartIndex.157"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHKickstartIndex</span> {
+            <a name="usmDHKickstartIndex.157"></a><span class="yang_kw">leaf</span> <span class="yang_id">usmDHKickstartIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
                }
@@ -191,7 +191,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.2.1.1.1"</span>;
             }
 
-            <a name="usmDHKickstartMyPublic.167"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHKickstartMyPublic</span> {
+            <a name="usmDHKickstartMyPublic.167"></a><span class="yang_kw">leaf</span> <span class="yang_id">usmDHKickstartMyPublic</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -234,7 +234,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.2.1.1.2"</span>;
             }
 
-            <a name="usmDHKickstartMgrPublic.210"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHKickstartMgrPublic</span> {
+            <a name="usmDHKickstartMgrPublic.210"></a><span class="yang_kw">leaf</span> <span class="yang_id">usmDHKickstartMgrPublic</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -296,7 +296,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.2.1.1.3"</span>;
             }
 
-            <a name="usmDHKickstartSecurityName.272"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHKickstartSecurityName</span> {
+            <a name="usmDHKickstartSecurityName.272"></a><span class="yang_kw">leaf</span> <span class="yang_id">usmDHKickstartSecurityName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -311,11 +311,11 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.2"</span>;
       }  <span class="yang_cmt">// container usmDHKickstartGroup</span>
 
-      <a name="augment.289"/><span class="yang_kw">augment</span> <a href="/modules/SNMP-USER-BASED-SM-MIB/2002-10-16#usmUserEntry.303">/snmp-user:usmUser/snmp-user:usmUserEntry</a> {
+      <a name="augment.289"></a><span class="yang_kw">augment</span> <a href="/modules/SNMP-USER-BASED-SM-MIB/2002-10-16#usmUserEntry.303">/snmp-user:usmUser/snmp-user:usmUserEntry</a> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"A row of DHKeyChange objects which augment or replace the
             functionality of the KeyChange objects in the base table row."</span>;
-         <a name="usmDHUserAuthKeyChange.294"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHUserAuthKeyChange</span> {
+         <a name="usmDHUserAuthKeyChange.294"></a><span class="yang_kw">leaf</span> <span class="yang_id">usmDHUserAuthKeyChange</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#DHKeyChange.48">DHKeyChange</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>
@@ -329,7 +329,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.1.2.1.1"</span>;
          }
 
-         <a name="usmDHUserOwnAuthKeyChange.308"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHUserOwnAuthKeyChange</span> {
+         <a name="usmDHUserOwnAuthKeyChange.308"></a><span class="yang_kw">leaf</span> <span class="yang_id">usmDHUserOwnAuthKeyChange</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#DHKeyChange.48">DHKeyChange</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>
@@ -343,7 +343,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.1.2.1.2"</span>;
          }
 
-         <a name="usmDHUserPrivKeyChange.322"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHUserPrivKeyChange</span> {
+         <a name="usmDHUserPrivKeyChange.322"></a><span class="yang_kw">leaf</span> <span class="yang_id">usmDHUserPrivKeyChange</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#DHKeyChange.48">DHKeyChange</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>
@@ -357,7 +357,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.3.101.1.1.2.1.3"</span>;
          }
 
-         <a name="usmDHUserOwnPrivKeyChange.336"/><span class="yang_kw">leaf</span> <span class="yang_id">usmDHUserOwnPrivKeyChange</span> {
+         <a name="usmDHUserOwnPrivKeyChange.336"></a><span class="yang_kw">leaf</span> <span class="yang_id">usmDHUserOwnPrivKeyChange</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#DHKeyChange.48">DHKeyChange</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>

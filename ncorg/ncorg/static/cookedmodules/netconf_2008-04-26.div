@@ -239,41 +239,41 @@
             <span class="yang_str">"Initial conversion from netconf.ncx version 0.6."</span>;
       }
 
-      <a name="Language.36"/><span class="yang_kw">typedef</span> <span class="yang_id">Language</span> {
+      <a name="Language.36"></a><span class="yang_kw">typedef</span> <span class="yang_id">Language</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">pattern</span> <span class="yang_str">'[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*'</span>;
          }
          <span class="yang_kw">description</span> <span class="yang_str">"XML language type for LangString"</span>;
       }
 
-      <a name="SessionId.43"/><span class="yang_kw">typedef</span> <span class="yang_id">SessionId</span> {
+      <a name="SessionId.43"></a><span class="yang_kw">typedef</span> <span class="yang_id">SessionId</span> {
          <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"1..max"</span>;
          }
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF Session Id"</span>;
       }
 
-      <a name="SessionIdOrZero.50"/><span class="yang_kw">typedef</span> <span class="yang_id">SessionIdOrZero</span> {
+      <a name="SessionIdOrZero.50"></a><span class="yang_kw">typedef</span> <span class="yang_id">SessionIdOrZero</span> {
          <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"NETCONF Session Id or Zero to indicate none"</span>;
       }
 
-      <a name="LangString.56"/><span class="yang_kw">typedef</span> <span class="yang_id">LangString</span> {
+      <a name="LangString.56"></a><span class="yang_kw">typedef</span> <span class="yang_id">LangString</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <a href="/modules/ncx/2008-04-16#metadata.266">ncx:metadata</a> <span class="yang_str">"Language lang?"</span>;
          }
          <span class="yang_kw">description</span> <span class="yang_str">"XML string with a language attribute."</span>;
       }
 
-      <a name="MessageId.62"/><span class="yang_kw">typedef</span> <span class="yang_id">MessageId</span> {
+      <a name="MessageId.62"></a><span class="yang_kw">typedef</span> <span class="yang_id">MessageId</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"1..4095"</span>;
          }
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF message-id attribute"</span>;
       }
 
-      <a name="ErrorType.69"/><span class="yang_kw">typedef</span> <span class="yang_id">ErrorType</span> {
+      <a name="ErrorType.69"></a><span class="yang_kw">typedef</span> <span class="yang_id">ErrorType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"transport"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">0</span>;
@@ -291,7 +291,7 @@
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF Error Type"</span>;
       }
 
-      <a name="ErrorTag.79"/><span class="yang_kw">typedef</span> <span class="yang_id">ErrorTag</span> {
+      <a name="ErrorTag.79"></a><span class="yang_kw">typedef</span> <span class="yang_id">ErrorTag</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"in-use"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">0</span>;
@@ -354,7 +354,7 @@
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF Error Tag"</span>;
       }
 
-      <a name="ErrorSeverity.104"/><span class="yang_kw">typedef</span> <span class="yang_id">ErrorSeverity</span> {
+      <a name="ErrorSeverity.104"></a><span class="yang_kw">typedef</span> <span class="yang_id">ErrorSeverity</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"error"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">0</span>;
@@ -366,7 +366,7 @@
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF Error Severity"</span>;
       }
 
-      <a name="TestOptionType.112"/><span class="yang_kw">typedef</span> <span class="yang_id">TestOptionType</span> {
+      <a name="TestOptionType.112"></a><span class="yang_kw">typedef</span> <span class="yang_id">TestOptionType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"test-then-set"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">0</span>;
@@ -387,7 +387,7 @@
             of it is applied (always test-then-set)."</span>;
       }
 
-      <a name="ErrorOptionType.127"/><span class="yang_kw">typedef</span> <span class="yang_id">ErrorOptionType</span> {
+      <a name="ErrorOptionType.127"></a><span class="yang_kw">typedef</span> <span class="yang_id">ErrorOptionType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"stop-on-error"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">0</span>;
@@ -403,7 +403,7 @@
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF 'error-option' Element Content"</span>;
       }
 
-      <a name="FilterType.137"/><span class="yang_kw">typedef</span> <span class="yang_id">FilterType</span> {
+      <a name="FilterType.137"></a><span class="yang_kw">typedef</span> <span class="yang_id">FilterType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"subtree"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">0</span>;
@@ -416,7 +416,7 @@
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF 'filter' Attribute Content"</span>;
       }
 
-      <a name="EditOperationType.146"/><span class="yang_kw">typedef</span> <span class="yang_id">EditOperationType</span> {
+      <a name="EditOperationType.146"></a><span class="yang_kw">typedef</span> <span class="yang_id">EditOperationType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"merge"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">0</span>;
@@ -435,7 +435,7 @@
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF 'operation' Attribute Content"</span>;
       }
 
-      <a name="DefaultOperationType.157"/><span class="yang_kw">typedef</span> <span class="yang_id">DefaultOperationType</span> {
+      <a name="DefaultOperationType.157"></a><span class="yang_kw">typedef</span> <span class="yang_id">DefaultOperationType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"merge"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">0</span>;
@@ -452,7 +452,7 @@
             <span class="yang_str">"NETCONF 'default-operation' Element Content"</span>;
       }
 
-      <a name="ConfirmTimeoutType.167"/><span class="yang_kw">typedef</span> <span class="yang_id">ConfirmTimeoutType</span> {
+      <a name="ConfirmTimeoutType.167"></a><span class="yang_kw">typedef</span> <span class="yang_id">ConfirmTimeoutType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"1..max"</span>;
          }
@@ -462,22 +462,22 @@
             <span class="yang_str">"NETCONF 'confirm-timeout' Element Content"</span>;
       }
 
-      <a name="ConfigURIType.177"/><span class="yang_kw">typedef</span> <span class="yang_id">ConfigURIType</span> {
+      <a name="ConfigURIType.177"></a><span class="yang_kw">typedef</span> <span class="yang_id">ConfigURIType</span> {
          <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/xsd/2007-12-06#anyURI.348">xs:anyURI</a></span>;
       }
 
-      <a name="rpc.479"/><span class="yang_kw">container</span> <span class="yang_id">rpc</span> {
+      <a name="rpc.479"></a><span class="yang_kw">container</span> <span class="yang_id">rpc</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"Remote Procedure Call request message"</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 4.1"</span>;
          <a href="/modules/ncx/2008-04-16#metadata.266">ncx:metadata</a> <span class="yang_str">"MessageId message-id"</span>;
       }  <span class="yang_cmt">// container rpc</span>
 
-      <a name="rpc-reply.487"/><span class="yang_kw">container</span> <span class="yang_id">rpc-reply</span> {
+      <a name="rpc-reply.487"></a><span class="yang_kw">container</span> <span class="yang_id">rpc-reply</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"Remote Procedure Call response message"</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 4.2"</span>;
-         <a name="ok-or-data-error.396"/><span class="yang_kw">choice</span> <span class="yang_id">ok-or-data-error</span> {
-            <a name="ok.397"/><span class="yang_kw">case</span> <span class="yang_id">ok</span> {
-               <a name="ok.397"/><span class="yang_kw">leaf</span> <span class="yang_id">ok</span> {
+         <a name="ok-or-data-error.396"></a><span class="yang_kw">choice</span> <span class="yang_id">ok-or-data-error</span> {
+            <a name="ok.397"></a><span class="yang_kw">case</span> <span class="yang_id">ok</span> {
+               <a name="ok.397"></a><span class="yang_kw">leaf</span> <span class="yang_id">ok</span> {
                   <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                   <span class="yang_kw">description</span>
@@ -486,24 +486,24 @@
                }
             }  <span class="yang_cmt">// case ok</span>
 
-            <a name="data-error.405"/><span class="yang_kw">case</span> <span class="yang_id">data-error</span> {
-               <a name="rpc-error.362"/><span class="yang_kw">container</span> <span class="yang_id">rpc-error</span> {
+            <a name="data-error.405"></a><span class="yang_kw">case</span> <span class="yang_id">data-error</span> {
+               <a name="rpc-error.362"></a><span class="yang_kw">container</span> <span class="yang_id">rpc-error</span> {
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
-                  <a name="error-type.288"/><span class="yang_kw">leaf</span> <span class="yang_id">error-type</span> {
+                  <a name="error-type.288"></a><span class="yang_kw">leaf</span> <span class="yang_id">error-type</span> {
                      <span class="yang_kw">type</span> <span class="yang_id"><a href="#ErrorType.69">ErrorType</a></span>;
                      <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"Defines the conceptual layer that the error occurred."</span>;
                   }
 
-                  <a name="error-tag.295"/><span class="yang_kw">leaf</span> <span class="yang_id">error-tag</span> {
+                  <a name="error-tag.295"></a><span class="yang_kw">leaf</span> <span class="yang_id">error-tag</span> {
                      <span class="yang_kw">type</span> <span class="yang_id"><a href="#ErrorTag.79">ErrorTag</a></span>;
                      <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"Contains a string identifying the error condition."</span>;
                   }
 
-                  <a name="error-severity.302"/><span class="yang_kw">leaf</span> <span class="yang_id">error-severity</span> {
+                  <a name="error-severity.302"></a><span class="yang_kw">leaf</span> <span class="yang_id">error-severity</span> {
                      <span class="yang_kw">type</span> <span class="yang_id"><a href="#ErrorSeverity.104">ErrorSeverity</a></span>;
                      <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
                      <span class="yang_kw">description</span>
@@ -511,7 +511,7 @@
                         determined by the device."</span>;
                   }
 
-                  <a name="error-app-tag.310"/><span class="yang_kw">leaf</span> <span class="yang_id">error-app-tag</span> {
+                  <a name="error-app-tag.310"></a><span class="yang_kw">leaf</span> <span class="yang_id">error-app-tag</span> {
                      <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"Contains a string identifying the data-model-specific
@@ -521,7 +521,7 @@
                         error condition."</span>;
                   }
 
-                  <a name="error-path.320"/><span class="yang_kw">leaf</span> <span class="yang_id">error-path</span> {
+                  <a name="error-path.320"></a><span class="yang_kw">leaf</span> <span class="yang_id">error-path</span> {
                      <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"Contains the absolute XPath [2] expression identifying
@@ -536,7 +536,7 @@
                         including the default namespace."</span>;
                   }
 
-                  <a name="error-message.335"/><span class="yang_kw">leaf</span> <span class="yang_id">error-message</span> {
+                  <a name="error-message.335"></a><span class="yang_kw">leaf</span> <span class="yang_id">error-message</span> {
                      <span class="yang_kw">type</span> <span class="yang_id"><a href="#LangString.56">LangString</a></span>;
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"Contains a string suitable for human display that
@@ -545,7 +545,7 @@
                         condition.  This element SHOULD include an xml:lang attribute."</span>;
                   }
 
-                  <a name="error-info.344"/><span class="yang_kw">anyxml</span> <span class="yang_id">error-info</span> {
+                  <a name="error-info.344"></a><span class="yang_kw">anyxml</span> <span class="yang_id">error-info</span> {
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"Contains protocol- or data-model-specific error content.
                         This element will not be present if no such error content is
@@ -560,7 +560,7 @@
                   }
                }  <span class="yang_cmt">// container rpc-error</span>
 
-               <a name="data.366"/><span class="yang_kw">container</span> <span class="yang_id">data</span> {
+               <a name="data.366"></a><span class="yang_kw">container</span> <span class="yang_id">data</span> {
                   <span class="yang_kw">presence</span>
                      <span class="yang_str">"Indicates some data returned in the reply.
                      An empty container indicates the request produced
@@ -572,38 +572,38 @@
          <a href="/modules/ncx/2008-04-16#metadata.266">ncx:metadata</a> <span class="yang_str">"MessageId message-id"</span>;
       }  <span class="yang_cmt">// container rpc-reply</span>
 
-      <a name="get-config.499"/><span class="yang_kw">rpc</span> <span class="yang_id">get-config</span> {
+      <a name="get-config.499"></a><span class="yang_kw">rpc</span> <span class="yang_id">get-config</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Retrieve all or part of a specified configuration."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.2"</span>;
-         <a name="input.507"/><span class="yang_kw">input</span> {
-            <a name="source.508"/><span class="yang_kw">container</span> <span class="yang_id">source</span> {
+         <a name="input.507"></a><span class="yang_kw">input</span> {
+            <a name="source.508"></a><span class="yang_kw">container</span> <span class="yang_id">source</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to retrieve."</span>;
-               <a name="config-source.414"/><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
-                  <a name="candidate.415"/><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
-                     <a name="candidate.415"/><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
+               <a name="config-source.414"></a><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
+                  <a name="candidate.415"></a><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
+                     <a name="candidate.415"></a><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'candidate' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case candidate</span>
 
-                  <a name="running.420"/><span class="yang_kw">case</span> <span class="yang_id">running</span> {
-                     <a name="running.420"/><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
+                  <a name="running.420"></a><span class="yang_kw">case</span> <span class="yang_id">running</span> {
+                     <a name="running.420"></a><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                      }
                   }  <span class="yang_cmt">// case running</span>
 
-                  <a name="startup.423"/><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
-                     <a name="startup.423"/><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
+                  <a name="startup.423"></a><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
+                     <a name="startup.423"></a><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'startup' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case startup</span>
 
-                  <a name="url.436"/><span class="yang_kw">case</span> <span class="yang_id">url</span> {
-                     <a name="url.436"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
+                  <a name="url.436"></a><span class="yang_kw">case</span> <span class="yang_id">url</span> {
+                     <a name="url.436"></a><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"URL pointing to config data. Only available
@@ -613,15 +613,15 @@
                }  <span class="yang_cmt">// choice config-source</span>
             }  <span class="yang_cmt">// container source</span>
 
-            <a name="filter.514"/><span class="yang_kw">anyxml</span> <span class="yang_id">filter</span> {
+            <a name="filter.514"></a><span class="yang_kw">anyxml</span> <span class="yang_id">filter</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Subtree or Xpath filter to use."</span>;
                <a href="/modules/ncx/2008-04-16#metadata.266">ncx:metadata</a> <span class="yang_str">"FilterType type"</span>;
                <a href="/modules/ncx/2008-04-16#metadata.266">ncx:metadata</a> <span class="yang_str">"string select?"</span>;
             }
          }
 
-         <a name="output.521"/><span class="yang_kw">output</span> {
-            <a name="data.522"/><span class="yang_kw">anyxml</span> <span class="yang_id">data</span> {
+         <a name="output.521"></a><span class="yang_kw">output</span> {
+            <a name="data.522"></a><span class="yang_kw">anyxml</span> <span class="yang_id">data</span> {
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Copy of the source database subset which matched
                   the filter criteria (if any)."</span>;
@@ -630,7 +630,7 @@
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"monitor"</span>;
       }  <span class="yang_cmt">// rpc get-config</span>
 
-      <a name="edit-config.530"/><span class="yang_kw">rpc</span> <span class="yang_id">edit-config</span> {
+      <a name="edit-config.530"></a><span class="yang_kw">rpc</span> <span class="yang_id">edit-config</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"The 'edit-config' operation loads all or part of a specified
             configuration to the specified target configuration.  This
@@ -647,34 +647,34 @@
             the target configuration is changed in accordance with the
             source's data and requested operations."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.2"</span>;
-         <a name="input.551"/><span class="yang_kw">input</span> {
-            <a name="target.552"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
+         <a name="input.551"></a><span class="yang_kw">input</span> {
+            <a name="target.552"></a><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to edit."</span>;
-               <a name="config-source.414"/><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
-                  <a name="candidate.415"/><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
-                     <a name="candidate.415"/><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
+               <a name="config-source.414"></a><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
+                  <a name="candidate.415"></a><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
+                     <a name="candidate.415"></a><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'candidate' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case candidate</span>
 
-                  <a name="running.420"/><span class="yang_kw">case</span> <span class="yang_id">running</span> {
-                     <a name="running.420"/><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
+                  <a name="running.420"></a><span class="yang_kw">case</span> <span class="yang_id">running</span> {
+                     <a name="running.420"></a><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                      }
                   }  <span class="yang_cmt">// case running</span>
 
-                  <a name="startup.423"/><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
-                     <a name="startup.423"/><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
+                  <a name="startup.423"></a><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
+                     <a name="startup.423"></a><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'startup' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case startup</span>
 
-                  <a name="url.468"/><span class="yang_kw">case</span> <span class="yang_id">url</span> {
-                     <a name="url.468"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
+                  <a name="url.468"></a><span class="yang_kw">case</span> <span class="yang_id">url</span> {
+                     <a name="url.468"></a><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"URL pointing to desired config data output. Only 
@@ -684,13 +684,13 @@
                }  <span class="yang_cmt">// choice config-source</span>
             }  <span class="yang_cmt">// container target</span>
 
-            <a name="default-operation.558"/><span class="yang_kw">leaf</span> <span class="yang_id">default-operation</span> {
+            <a name="default-operation.558"></a><span class="yang_kw">leaf</span> <span class="yang_id">default-operation</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#DefaultOperationType.157">DefaultOperationType</a></span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Default operation to apply if not explicitly set."</span>;
             }
 
-            <a name="test-option.564"/><span class="yang_kw">leaf</span> <span class="yang_id">test-option</span> {
+            <a name="test-option.564"></a><span class="yang_kw">leaf</span> <span class="yang_id">test-option</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#TestOptionType.112">TestOptionType</a></span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Test option if validate capability supported.
@@ -698,22 +698,22 @@
                   this object to 'test-then-set'."</span>;
             }
 
-            <a name="error-option.572"/><span class="yang_kw">leaf</span> <span class="yang_id">error-option</span> {
+            <a name="error-option.572"></a><span class="yang_kw">leaf</span> <span class="yang_id">error-option</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#ErrorOptionType.127">ErrorOptionType</a></span>;
                <span class="yang_kw">description</span> <span class="yang_str">"Error recovery option."</span>;
             }
 
-            <a name="edit-content.577"/><span class="yang_kw">choice</span> <span class="yang_id">edit-content</span> {
-               <a name="config.578"/><span class="yang_kw">case</span> <span class="yang_id">config</span> {
-                  <a name="config.578"/><span class="yang_kw">anyxml</span> <span class="yang_id">config</span> {
+            <a name="edit-content.577"></a><span class="yang_kw">choice</span> <span class="yang_id">edit-content</span> {
+               <a name="config.578"></a><span class="yang_kw">case</span> <span class="yang_id">config</span> {
+                  <a name="config.578"></a><span class="yang_kw">anyxml</span> <span class="yang_id">config</span> {
                      <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"Inline Config content: 'config' element."</span>;
                   }
                }  <span class="yang_cmt">// case config</span>
 
-               <a name="url.583"/><span class="yang_kw">case</span> <span class="yang_id">url</span> {
-                  <a name="url.583"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
+               <a name="url.583"></a><span class="yang_kw">case</span> <span class="yang_id">url</span> {
+                  <a name="url.583"></a><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                      <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                      <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
                      <span class="yang_kw">description</span>
@@ -725,7 +725,7 @@
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc edit-config</span>
 
-      <a name="copy-config.593"/><span class="yang_kw">rpc</span> <span class="yang_id">copy-config</span> {
+      <a name="copy-config.593"></a><span class="yang_kw">rpc</span> <span class="yang_id">copy-config</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Create or replace an entire configuration datastore with the
             contents of another complete configuration datastore.  If the
@@ -745,34 +745,34 @@
             configuration datastore, an error MUST be returned with an error-
             tag containing invalid-value."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.3"</span>;
-         <a name="input.617"/><span class="yang_kw">input</span> {
-            <a name="target.618"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
+         <a name="input.617"></a><span class="yang_kw">input</span> {
+            <a name="target.618"></a><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to copy to."</span>;
-               <a name="config-source.414"/><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
-                  <a name="candidate.415"/><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
-                     <a name="candidate.415"/><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
+               <a name="config-source.414"></a><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
+                  <a name="candidate.415"></a><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
+                     <a name="candidate.415"></a><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'candidate' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case candidate</span>
 
-                  <a name="running.420"/><span class="yang_kw">case</span> <span class="yang_id">running</span> {
-                     <a name="running.420"/><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
+                  <a name="running.420"></a><span class="yang_kw">case</span> <span class="yang_id">running</span> {
+                     <a name="running.420"></a><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                      }
                   }  <span class="yang_cmt">// case running</span>
 
-                  <a name="startup.423"/><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
-                     <a name="startup.423"/><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
+                  <a name="startup.423"></a><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
+                     <a name="startup.423"></a><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'startup' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case startup</span>
 
-                  <a name="url.468"/><span class="yang_kw">case</span> <span class="yang_id">url</span> {
-                     <a name="url.468"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
+                  <a name="url.468"></a><span class="yang_kw">case</span> <span class="yang_id">url</span> {
+                     <a name="url.468"></a><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"URL pointing to desired config data output. Only 
@@ -782,33 +782,33 @@
                }  <span class="yang_cmt">// choice config-source</span>
             }  <span class="yang_cmt">// container target</span>
 
-            <a name="source.624"/><span class="yang_kw">container</span> <span class="yang_id">source</span> {
+            <a name="source.624"></a><span class="yang_kw">container</span> <span class="yang_id">source</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to copy from."</span>;
-               <a name="config-source.414"/><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
-                  <a name="candidate.415"/><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
-                     <a name="candidate.415"/><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
+               <a name="config-source.414"></a><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
+                  <a name="candidate.415"></a><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
+                     <a name="candidate.415"></a><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'candidate' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case candidate</span>
 
-                  <a name="running.420"/><span class="yang_kw">case</span> <span class="yang_id">running</span> {
-                     <a name="running.420"/><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
+                  <a name="running.420"></a><span class="yang_kw">case</span> <span class="yang_id">running</span> {
+                     <a name="running.420"></a><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                      }
                   }  <span class="yang_cmt">// case running</span>
 
-                  <a name="startup.423"/><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
-                     <a name="startup.423"/><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
+                  <a name="startup.423"></a><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
+                     <a name="startup.423"></a><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'startup' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case startup</span>
 
-                  <a name="url.450"/><span class="yang_kw">case</span> <span class="yang_id">url</span> {
-                     <a name="url.450"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
+                  <a name="url.450"></a><span class="yang_kw">case</span> <span class="yang_id">url</span> {
+                     <a name="url.450"></a><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"URL pointing to config data. Only available
@@ -816,8 +816,8 @@
                      }
                   }  <span class="yang_cmt">// case url</span>
 
-                  <a name="config.457"/><span class="yang_kw">case</span> <span class="yang_id">config</span> {
-                     <a name="config.457"/><span class="yang_kw">anyxml</span> <span class="yang_id">config</span> {
+                  <a name="config.457"></a><span class="yang_kw">case</span> <span class="yang_id">config</span> {
+                     <a name="config.457"></a><span class="yang_kw">anyxml</span> <span class="yang_id">config</span> {
                         <span class="yang_kw">description</span> <span class="yang_str">"Inline configuration data"</span>;
                      }
                   }  <span class="yang_cmt">// case config</span>
@@ -827,7 +827,7 @@
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc copy-config</span>
 
-      <a name="delete-config.632"/><span class="yang_kw">rpc</span> <span class="yang_id">delete-config</span> {
+      <a name="delete-config.632"></a><span class="yang_kw">rpc</span> <span class="yang_id">delete-config</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Delete a configuration datastore.  The 'running' configuration
             datastore cannot be deleted.
@@ -835,34 +835,34 @@
             If a NETCONF peer supports the :url capability (Section 8.8), the
             'url' element can appear as the &lt;target&gt; parameter."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.4"</span>;
-         <a name="input.644"/><span class="yang_kw">input</span> {
-            <a name="target.645"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
+         <a name="input.644"></a><span class="yang_kw">input</span> {
+            <a name="target.645"></a><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to delete."</span>;
-               <a name="config-source.414"/><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
-                  <a name="candidate.415"/><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
-                     <a name="candidate.415"/><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
+               <a name="config-source.414"></a><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
+                  <a name="candidate.415"></a><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
+                     <a name="candidate.415"></a><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'candidate' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case candidate</span>
 
-                  <a name="running.420"/><span class="yang_kw">case</span> <span class="yang_id">running</span> {
-                     <a name="running.420"/><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
+                  <a name="running.420"></a><span class="yang_kw">case</span> <span class="yang_id">running</span> {
+                     <a name="running.420"></a><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                      }
                   }  <span class="yang_cmt">// case running</span>
 
-                  <a name="startup.423"/><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
-                     <a name="startup.423"/><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
+                  <a name="startup.423"></a><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
+                     <a name="startup.423"></a><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'startup' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case startup</span>
 
-                  <a name="url.468"/><span class="yang_kw">case</span> <span class="yang_id">url</span> {
-                     <a name="url.468"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
+                  <a name="url.468"></a><span class="yang_kw">case</span> <span class="yang_id">url</span> {
+                     <a name="url.468"></a><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"URL pointing to desired config data output. Only 
@@ -875,7 +875,7 @@
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc delete-config</span>
 
-      <a name="lock.652"/><span class="yang_kw">rpc</span> <span class="yang_id">lock</span> {
+      <a name="lock.652"></a><span class="yang_kw">rpc</span> <span class="yang_id">lock</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"The lock operation allows the client to lock the configuration
             system of a device.  Such locks are intended to be short-lived and
@@ -883,34 +883,34 @@
             other NETCONF clients, non-NETCONF clients (e.g., SNMP and command
             line interface (CLI) scripts), and human users. ..."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.5"</span>;
-         <a name="input.664"/><span class="yang_kw">input</span> {
-            <a name="target.665"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
+         <a name="input.664"></a><span class="yang_kw">input</span> {
+            <a name="target.665"></a><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to lock"</span>;
-               <a name="config-source.414"/><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
-                  <a name="candidate.415"/><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
-                     <a name="candidate.415"/><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
+               <a name="config-source.414"></a><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
+                  <a name="candidate.415"></a><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
+                     <a name="candidate.415"></a><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'candidate' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case candidate</span>
 
-                  <a name="running.420"/><span class="yang_kw">case</span> <span class="yang_id">running</span> {
-                     <a name="running.420"/><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
+                  <a name="running.420"></a><span class="yang_kw">case</span> <span class="yang_id">running</span> {
+                     <a name="running.420"></a><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                      }
                   }  <span class="yang_cmt">// case running</span>
 
-                  <a name="startup.423"/><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
-                     <a name="startup.423"/><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
+                  <a name="startup.423"></a><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
+                     <a name="startup.423"></a><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'startup' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case startup</span>
 
-                  <a name="url.468"/><span class="yang_kw">case</span> <span class="yang_id">url</span> {
-                     <a name="url.468"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
+                  <a name="url.468"></a><span class="yang_kw">case</span> <span class="yang_id">url</span> {
+                     <a name="url.468"></a><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"URL pointing to desired config data output. Only 
@@ -923,7 +923,7 @@
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc lock</span>
 
-      <a name="unlock.673"/><span class="yang_kw">rpc</span> <span class="yang_id">unlock</span> {
+      <a name="unlock.673"></a><span class="yang_kw">rpc</span> <span class="yang_id">unlock</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"The unlock operation is used to release a configuration lock,
             previously obtained with the 'lock' operation.
@@ -939,34 +939,34 @@
             The server MUST respond with either an &lt;ok&gt; element or an
             'rpc-error'."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.6"</span>;
-         <a name="input.693"/><span class="yang_kw">input</span> {
-            <a name="target.694"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
+         <a name="input.693"></a><span class="yang_kw">input</span> {
+            <a name="target.694"></a><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to unlock."</span>;
-               <a name="config-source.414"/><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
-                  <a name="candidate.415"/><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
-                     <a name="candidate.415"/><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
+               <a name="config-source.414"></a><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
+                  <a name="candidate.415"></a><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
+                     <a name="candidate.415"></a><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'candidate' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case candidate</span>
 
-                  <a name="running.420"/><span class="yang_kw">case</span> <span class="yang_id">running</span> {
-                     <a name="running.420"/><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
+                  <a name="running.420"></a><span class="yang_kw">case</span> <span class="yang_id">running</span> {
+                     <a name="running.420"></a><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                      }
                   }  <span class="yang_cmt">// case running</span>
 
-                  <a name="startup.423"/><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
-                     <a name="startup.423"/><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
+                  <a name="startup.423"></a><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
+                     <a name="startup.423"></a><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'startup' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case startup</span>
 
-                  <a name="url.468"/><span class="yang_kw">case</span> <span class="yang_id">url</span> {
-                     <a name="url.468"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
+                  <a name="url.468"></a><span class="yang_kw">case</span> <span class="yang_id">url</span> {
+                     <a name="url.468"></a><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"URL pointing to desired config data output. Only 
@@ -979,12 +979,12 @@
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc unlock</span>
 
-      <a name="get.702"/><span class="yang_kw">rpc</span> <span class="yang_id">get</span> {
+      <a name="get.702"></a><span class="yang_kw">rpc</span> <span class="yang_id">get</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Retrieve running configuration and device state information."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.7"</span>;
-         <a name="input.710"/><span class="yang_kw">input</span> {
-            <a name="filter.711"/><span class="yang_kw">anyxml</span> <span class="yang_id">filter</span> {
+         <a name="input.710"></a><span class="yang_kw">input</span> {
+            <a name="filter.711"></a><span class="yang_kw">anyxml</span> <span class="yang_id">filter</span> {
                <span class="yang_kw">description</span>
                   <span class="yang_str">"This parameter specifies the portion of the system
                   configuration and state data to retrieve.  If this parameter is
@@ -1007,8 +1007,8 @@
             }
          }
 
-         <a name="output.734"/><span class="yang_kw">output</span> {
-            <a name="data.735"/><span class="yang_kw">anyxml</span> <span class="yang_id">data</span> {
+         <a name="output.734"></a><span class="yang_kw">output</span> {
+            <a name="data.735"></a><span class="yang_kw">anyxml</span> <span class="yang_id">data</span> {
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Copy of the 'running' database subset which matched
                   the filter criteria (if any)."</span>;
@@ -1017,7 +1017,7 @@
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"monitor"</span>;
       }  <span class="yang_cmt">// rpc get</span>
 
-      <a name="close-session.743"/><span class="yang_kw">rpc</span> <span class="yang_id">close-session</span> {
+      <a name="close-session.743"></a><span class="yang_kw">rpc</span> <span class="yang_id">close-session</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Request graceful termination of a NETCONF session.
             
@@ -1030,7 +1030,7 @@
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"other"</span>;
       }  <span class="yang_cmt">// rpc close-session</span>
 
-      <a name="kill-session.758"/><span class="yang_kw">rpc</span> <span class="yang_id">kill-session</span> {
+      <a name="kill-session.758"></a><span class="yang_kw">rpc</span> <span class="yang_id">kill-session</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Force the termination of a NETCONF session.
             
@@ -1047,8 +1047,8 @@
             configuration or other device state modifications made by the
             entity holding the lock."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.9"</span>;
-         <a name="input.779"/><span class="yang_kw">input</span> {
-            <a name="session-id.780"/><span class="yang_kw">leaf</span> <span class="yang_id">session-id</span> {
+         <a name="input.779"></a><span class="yang_kw">input</span> {
+            <a name="session-id.780"></a><span class="yang_kw">leaf</span> <span class="yang_id">session-id</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#SessionId.43">SessionId</a></span>;
                <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"Particular session to kill."</span>;
@@ -1057,7 +1057,7 @@
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"exec"</span>;
       }  <span class="yang_cmt">// rpc kill-session</span>
 
-      <a name="commit.788"/><span class="yang_kw">rpc</span> <span class="yang_id">commit</span> {
+      <a name="commit.788"></a><span class="yang_kw">rpc</span> <span class="yang_id">commit</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Only available if 'candidate' capability is supported.
             
@@ -1080,8 +1080,8 @@
             If the system does not have the :candidate capability, the
             'commit' operation is not available."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 8.3.4.1"</span>;
-         <a name="input.815"/><span class="yang_kw">input</span> {
-            <a name="confirmed.816"/><span class="yang_kw">leaf</span> <span class="yang_id">confirmed</span> {
+         <a name="input.815"></a><span class="yang_kw">input</span> {
+            <a name="confirmed.816"></a><span class="yang_kw">leaf</span> <span class="yang_id">confirmed</span> {
                <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Request a confirmed commit.  Only available if 
@@ -1089,7 +1089,7 @@
                <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 8.4.5.1"</span>;
             }
 
-            <a name="confirm-timeout.824"/><span class="yang_kw">leaf</span> <span class="yang_id">confirm-timeout</span> {
+            <a name="confirm-timeout.824"></a><span class="yang_kw">leaf</span> <span class="yang_id">confirm-timeout</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfirmTimeoutType.167">ConfirmTimeoutType</a></span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Request a specific timeout period for a confirmed commit
@@ -1100,7 +1100,7 @@
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc commit</span>
 
-      <a name="discard-changes.834"/><span class="yang_kw">rpc</span> <span class="yang_id">discard-changes</span> {
+      <a name="discard-changes.834"></a><span class="yang_kw">rpc</span> <span class="yang_id">discard-changes</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Only available if 'candidate' capability is supported.
             
@@ -1115,40 +1115,40 @@
          <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc discard-changes</span>
 
-      <a name="validate.852"/><span class="yang_kw">rpc</span> <span class="yang_id">validate</span> {
+      <a name="validate.852"></a><span class="yang_kw">rpc</span> <span class="yang_id">validate</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Only available if 'validate' capability is supported.
             
             Validates the contents of the specified configuration."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 8.6.4.1"</span>;
-         <a name="input.862"/><span class="yang_kw">input</span> {
-            <a name="source.863"/><span class="yang_kw">container</span> <span class="yang_id">source</span> {
+         <a name="input.862"></a><span class="yang_kw">input</span> {
+            <a name="source.863"></a><span class="yang_kw">container</span> <span class="yang_id">source</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to validate."</span>;
-               <a name="config-source.414"/><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
-                  <a name="candidate.415"/><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
-                     <a name="candidate.415"/><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
+               <a name="config-source.414"></a><span class="yang_kw">choice</span> <span class="yang_id">config-source</span> {
+                  <a name="candidate.415"></a><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
+                     <a name="candidate.415"></a><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'candidate' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case candidate</span>
 
-                  <a name="running.420"/><span class="yang_kw">case</span> <span class="yang_id">running</span> {
-                     <a name="running.420"/><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
+                  <a name="running.420"></a><span class="yang_kw">case</span> <span class="yang_id">running</span> {
+                     <a name="running.420"></a><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                      }
                   }  <span class="yang_cmt">// case running</span>
 
-                  <a name="startup.423"/><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
-                     <a name="startup.423"/><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
+                  <a name="startup.423"></a><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
+                     <a name="startup.423"></a><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"Only available if 'startup' capability supported."</span>;
                      }
                   }  <span class="yang_cmt">// case startup</span>
 
-                  <a name="url.450"/><span class="yang_kw">case</span> <span class="yang_id">url</span> {
-                     <a name="url.450"/><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
+                  <a name="url.450"></a><span class="yang_kw">case</span> <span class="yang_id">url</span> {
+                     <a name="url.450"></a><span class="yang_kw">leaf</span> <span class="yang_id">url</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="#ConfigURIType.177">ConfigURIType</a></span>;
                         <span class="yang_kw">description</span>
                            <span class="yang_str">"URL pointing to config data. Only available
@@ -1156,8 +1156,8 @@
                      }
                   }  <span class="yang_cmt">// case url</span>
 
-                  <a name="config.457"/><span class="yang_kw">case</span> <span class="yang_id">config</span> {
-                     <a name="config.457"/><span class="yang_kw">anyxml</span> <span class="yang_id">config</span> {
+                  <a name="config.457"></a><span class="yang_kw">case</span> <span class="yang_id">config</span> {
+                     <a name="config.457"></a><span class="yang_kw">anyxml</span> <span class="yang_id">config</span> {
                         <span class="yang_kw">description</span> <span class="yang_str">"Inline configuration data"</span>;
                      }
                   }  <span class="yang_cmt">// case config</span>

@@ -106,7 +106,7 @@
             as RFC 3433."</span>;
       }
 
-      <a name="EntitySensorDataType.73"/><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorDataType</span> {
+      <a name="EntitySensorDataType.73"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorDataType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -180,7 +180,7 @@
                truthvalue(12):  value takes { true(1), false(2) }"</span>;
       }
 
-      <a name="EntitySensorDataScale.123"/><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorDataScale</span> {
+      <a name="EntitySensorDataScale.123"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorDataScale</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"yocto"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -255,7 +255,7 @@
             Spec. Publ. 330, August 1991."</span>;
       }
 
-      <a name="EntitySensorPrecision.164"/><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorPrecision</span> {
+      <a name="EntitySensorPrecision.164"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorPrecision</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"-8..9"</span>;
          }
@@ -298,7 +298,7 @@
             as 'degrees C * 10'."</span>;
       }
 
-      <a name="EntitySensorValue.207"/><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorValue</span> {
+      <a name="EntitySensorValue.207"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorValue</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"-1000000000..1000000000"</span>;
          }
@@ -344,7 +344,7 @@
             contain a number ranging from -1000000000 to 1000000000."</span>;
       }
 
-      <a name="EntitySensorStatus.253"/><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorStatus</span> {
+      <a name="EntitySensorStatus.253"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorStatus</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"ok"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -372,8 +372,8 @@
             of-range, jittery, or wildly fluctuating readings."</span>;
       }
 
-      <a name="entitySensorObjects.275"/><span class="yang_kw">container</span> <span class="yang_id">entitySensorObjects</span> {
-         <a name="entPhySensorEntry.280"/><span class="yang_kw">list</span> <span class="yang_id">entPhySensorEntry</span> {
+      <a name="entitySensorObjects.275"></a><span class="yang_kw">container</span> <span class="yang_id">entitySensorObjects</span> {
+         <a name="entPhySensorEntry.280"></a><span class="yang_kw">list</span> <span class="yang_id">entPhySensorEntry</span> {
             <span class="yang_kw">key</span> "<a href="#entPhysicalIndex.300">entPhysicalIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -391,7 +391,7 @@
                for each physical sensor SHOULD be created at the same time
                as the associated entPhysicalEntry.  An entry SHOULD be
                destroyed if the associated entPhysicalEntry is destroyed."</span>;
-            <a name="entPhysicalIndex.300"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
+            <a name="entPhysicalIndex.300"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/entity-mib:entityPhysical/entity-mib:entPhysicalEntry/entity-mib:entPhysicalIndex"</span>;
@@ -400,7 +400,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="entPhySensorType.309"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorType</span> {
+            <a name="entPhySensorType.309"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#EntitySensorDataType.73">EntitySensorDataType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -412,7 +412,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.1"</span>;
             }
 
-            <a name="entPhySensorScale.321"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorScale</span> {
+            <a name="entPhySensorScale.321"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorScale</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#EntitySensorDataScale.123">EntitySensorDataScale</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -424,7 +424,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.2"</span>;
             }
 
-            <a name="entPhySensorPrecision.333"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorPrecision</span> {
+            <a name="entPhySensorPrecision.333"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorPrecision</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#EntitySensorPrecision.164">EntitySensorPrecision</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -441,7 +441,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.3"</span>;
             }
 
-            <a name="entPhySensorValue.350"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorValue</span> {
+            <a name="entPhySensorValue.350"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorValue</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#EntitySensorValue.207">EntitySensorValue</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -454,14 +454,14 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.4"</span>;
             }
 
-            <a name="entPhySensorOperStatus.363"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorOperStatus</span> {
+            <a name="entPhySensorOperStatus.363"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorOperStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#EntitySensorStatus.253">EntitySensorStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The operational status of the sensor."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.5"</span>;
             }
 
-            <a name="entPhySensorUnitsDisplay.371"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorUnitsDisplay</span> {
+            <a name="entPhySensorUnitsDisplay.371"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorUnitsDisplay</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -470,7 +470,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.6"</span>;
             }
 
-            <a name="entPhySensorValueTimeStamp.380"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorValueTimeStamp</span> {
+            <a name="entPhySensorValueTimeStamp.380"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorValueTimeStamp</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -479,7 +479,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.7"</span>;
             }
 
-            <a name="entPhySensorValueUpdateRate.389"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorValueUpdateRate</span> {
+            <a name="entPhySensorValueUpdateRate.389"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorValueUpdateRate</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">units</span> <span class="yang_str">"milliseconds"</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;

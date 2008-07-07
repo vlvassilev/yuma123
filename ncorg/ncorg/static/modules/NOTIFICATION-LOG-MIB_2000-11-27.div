@@ -126,8 +126,8 @@
             Published as RFC 3014"</span>;
       }
 
-      <a name="nlmConfig.49"/><span class="yang_kw">container</span> <span class="yang_id">nlmConfig</span> {
-         <a name="nlmConfigGlobalEntryLimit.51"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigGlobalEntryLimit</span> {
+      <a name="nlmConfig.49"></a><span class="yang_kw">container</span> <span class="yang_id">nlmConfig</span> {
+         <a name="nlmConfigGlobalEntryLimit.51"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigGlobalEntryLimit</span> {
             <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>
@@ -154,7 +154,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.1"</span>;
          }
 
-         <a name="nlmConfigGlobalAgeOut.78"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigGlobalAgeOut</span> {
+         <a name="nlmConfigGlobalAgeOut.78"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigGlobalAgeOut</span> {
             <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
             <span class="yang_kw">units</span> <span class="yang_str">"minutes"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -175,14 +175,14 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.2"</span>;
          }
 
-         <a name="nlmConfigLogEntry.102"/><span class="yang_kw">list</span> <span class="yang_id">nlmConfigLogEntry</span> {
+         <a name="nlmConfigLogEntry.102"></a><span class="yang_kw">list</span> <span class="yang_id">nlmConfigLogEntry</span> {
             <span class="yang_kw">key</span> "<a href="#nlmLogName.112">nlmLogName</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"A logging control entry.  Depending on the entry's storage type
                entries may be supplied by the system or created and deleted by
                applications using nlmConfigLogEntryStatus."</span>;
-            <a name="nlmLogName.112"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogName</span> {
+            <a name="nlmLogName.112"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -198,7 +198,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.1"</span>;
             }
 
-            <a name="nlmConfigLogFilterName.128"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogFilterName</span> {
+            <a name="nlmConfigLogFilterName.128"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogFilterName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -216,7 +216,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.2"</span>;
             }
 
-            <a name="nlmConfigLogEntryLimit.146"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogEntryLimit</span> {
+            <a name="nlmConfigLogEntryLimit.146"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogEntryLimit</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -239,7 +239,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.3"</span>;
             }
 
-            <a name="nlmConfigLogAdminStatus.169"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogAdminStatus</span> {
+            <a name="nlmConfigLogAdminStatus.169"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogAdminStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"enabled"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -260,7 +260,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.4"</span>;
             }
 
-            <a name="nlmConfigLogOperStatus.186"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogOperStatus</span> {
+            <a name="nlmConfigLogOperStatus.186"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogOperStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -287,7 +287,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.5"</span>;
             }
 
-            <a name="nlmConfigLogStorageType.207"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogStorageType</span> {
+            <a name="nlmConfigLogStorageType.207"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogStorageType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -295,7 +295,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1.3.1.6"</span>;
             }
 
-            <a name="nlmConfigLogEntryStatus.215"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogEntryStatus</span> {
+            <a name="nlmConfigLogEntryStatus.215"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmConfigLogEntryStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -314,8 +314,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.1"</span>;
       }  <span class="yang_cmt">// container nlmConfig</span>
 
-      <a name="nlmStats.233"/><span class="yang_kw">container</span> <span class="yang_id">nlmStats</span> {
-         <a name="nlmStatsGlobalNotificationsLogged.235"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsGlobalNotificationsLogged</span> {
+      <a name="nlmStats.233"></a><span class="yang_kw">container</span> <span class="yang_id">nlmStats</span> {
+         <a name="nlmStatsGlobalNotificationsLogged.235"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsGlobalNotificationsLogged</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -326,7 +326,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.2.1"</span>;
          }
 
-         <a name="nlmStatsGlobalNotificationsBumped.246"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsGlobalNotificationsBumped</span> {
+         <a name="nlmStatsGlobalNotificationsBumped.246"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsGlobalNotificationsBumped</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -340,8 +340,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.2"</span>;
       }  <span class="yang_cmt">// container nlmStats</span>
 
-      <a name="nlmLog.261"/><span class="yang_kw">container</span> <span class="yang_id">nlmLog</span> {
-         <a name="nlmLogEntry.266"/><span class="yang_kw">list</span> <span class="yang_id">nlmLogEntry</span> {
+      <a name="nlmLog.261"></a><span class="yang_kw">container</span> <span class="yang_id">nlmLog</span> {
+         <a name="nlmLogEntry.266"></a><span class="yang_kw">list</span> <span class="yang_id">nlmLogEntry</span> {
             <span class="yang_kw">key</span> "<a href="#nlmLogName.291">nlmLogName</a> <a href="#nlmLogIndex.300">nlmLogIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -364,7 +364,7 @@
                into a non-null-named log it assures that the creator of the log
                has access to the information in the Notification.  If not it
                does not log that Notification in that log."</span>;
-            <a name="nlmLogName.291"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogName</span> {
+            <a name="nlmLogName.291"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogName</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/notification-log:nlmConfig/notification-log:nlmConfigLogEntry/notification-log:nlmLogName"</span>;
@@ -373,7 +373,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="nlmLogIndex.300"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogIndex</span> {
+            <a name="nlmLogIndex.300"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -386,7 +386,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.1"</span>;
             }
 
-            <a name="nlmLogTime.313"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogTime</span> {
+            <a name="nlmLogTime.313"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogTime</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -396,7 +396,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.2"</span>;
             }
 
-            <a name="nlmLogDateAndTime.323"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogDateAndTime</span> {
+            <a name="nlmLogDateAndTime.323"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogDateAndTime</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -405,7 +405,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.3"</span>;
             }
 
-            <a name="nlmLogEngineID.332"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogEngineID</span> {
+            <a name="nlmLogEngineID.332"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogEngineID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpEngineID.105">snmp-framework:SnmpEngineID</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -420,7 +420,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.4"</span>;
             }
 
-            <a name="nlmLogEngineTAddress.347"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogEngineTAddress</span> {
+            <a name="nlmLogEngineTAddress.347"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogEngineTAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TAddress.759">smiv2:TAddress</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -442,7 +442,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.5"</span>;
             }
 
-            <a name="nlmLogEngineTDomain.369"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogEngineTDomain</span> {
+            <a name="nlmLogEngineTDomain.369"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogEngineTDomain</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TDomain.747">smiv2:TDomain</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -456,7 +456,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.6"</span>;
             }
 
-            <a name="nlmLogContextEngineID.383"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogContextEngineID</span> {
+            <a name="nlmLogContextEngineID.383"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogContextEngineID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpEngineID.105">snmp-framework:SnmpEngineID</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -466,7 +466,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.7"</span>;
             }
 
-            <a name="nlmLogContextName.393"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogContextName</span> {
+            <a name="nlmLogContextName.393"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogContextName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -475,7 +475,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1.8"</span>;
             }
 
-            <a name="nlmLogNotificationID.402"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogNotificationID</span> {
+            <a name="nlmLogNotificationID.402"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogNotificationID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -486,7 +486,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.1.1"</span>;
          }  <span class="yang_cmt">// list nlmLogEntry</span>
 
-         <a name="nlmLogVariableEntry.415"/><span class="yang_kw">list</span> <span class="yang_id">nlmLogVariableEntry</span> {
+         <a name="nlmLogVariableEntry.415"></a><span class="yang_kw">list</span> <span class="yang_id">nlmLogVariableEntry</span> {
             <span class="yang_kw">key</span> "<a href="#nlmLogName.425">nlmLogName</a> <a href="#nlmLogIndex.433">nlmLogIndex</a> <a href="#nlmLogVariableIndex.442">nlmLogVariableIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -494,7 +494,7 @@
                
                Entries appear in this table when there are variables in
                the varbind list of a Notification in nlmLogTable."</span>;
-            <a name="nlmLogName.425"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogName</span> {
+            <a name="nlmLogName.425"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogName</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/notification-log:nlmConfig/notification-log:nlmConfigLogEntry/notification-log:nlmLogName"</span>;
@@ -503,7 +503,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="nlmLogIndex.433"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogIndex</span> {
+            <a name="nlmLogIndex.433"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/notification-log:nlmLog/notification-log:nlmLogEntry/notification-log:nlmLogIndex"</span>;
@@ -512,7 +512,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="nlmLogVariableIndex.442"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableIndex</span> {
+            <a name="nlmLogVariableIndex.442"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
                }
@@ -524,14 +524,14 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.1"</span>;
             }
 
-            <a name="nlmLogVariableID.454"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableID</span> {
+            <a name="nlmLogVariableID.454"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The variable's object identifier."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.2"</span>;
             }
 
-            <a name="nlmLogVariableValueType.462"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableValueType</span> {
+            <a name="nlmLogVariableValueType.462"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableValueType</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"counter32"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -568,7 +568,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.3"</span>;
             }
 
-            <a name="nlmLogVariableCounter32Val.481"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableCounter32Val</span> {
+            <a name="nlmLogVariableCounter32Val.481"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableCounter32Val</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -576,7 +576,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.4"</span>;
             }
 
-            <a name="nlmLogVariableUnsigned32Val.489"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableUnsigned32Val</span> {
+            <a name="nlmLogVariableUnsigned32Val.489"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableUnsigned32Val</span> {
                <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -584,7 +584,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.5"</span>;
             }
 
-            <a name="nlmLogVariableTimeTicksVal.497"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableTimeTicksVal</span> {
+            <a name="nlmLogVariableTimeTicksVal.497"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableTimeTicksVal</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -592,7 +592,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.6"</span>;
             }
 
-            <a name="nlmLogVariableInteger32Val.505"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableInteger32Val</span> {
+            <a name="nlmLogVariableInteger32Val.505"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableInteger32Val</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -600,7 +600,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.7"</span>;
             }
 
-            <a name="nlmLogVariableOctetStringVal.513"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableOctetStringVal</span> {
+            <a name="nlmLogVariableOctetStringVal.513"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableOctetStringVal</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -608,7 +608,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.8"</span>;
             }
 
-            <a name="nlmLogVariableIpAddressVal.521"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableIpAddressVal</span> {
+            <a name="nlmLogVariableIpAddressVal.521"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableIpAddressVal</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -627,7 +627,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.9"</span>;
             }
 
-            <a name="nlmLogVariableOidVal.540"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableOidVal</span> {
+            <a name="nlmLogVariableOidVal.540"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableOidVal</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -635,7 +635,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.10"</span>;
             }
 
-            <a name="nlmLogVariableCounter64Val.548"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableCounter64Val</span> {
+            <a name="nlmLogVariableCounter64Val.548"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableCounter64Val</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -643,7 +643,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.11"</span>;
             }
 
-            <a name="nlmLogVariableOpaqueVal.556"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableOpaqueVal</span> {
+            <a name="nlmLogVariableOpaqueVal.556"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableOpaqueVal</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -655,9 +655,9 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3"</span>;
       }  <span class="yang_cmt">// container nlmLog</span>
 
-      <a name="augment.570"/><span class="yang_kw">augment</span> <a href="#nlmConfigLogEntry.102">/notification-log:nlmConfig/notification-log:nlmConfigLogEntry</a> {
+      <a name="augment.570"></a><span class="yang_kw">augment</span> <a href="#nlmConfigLogEntry.102">/notification-log:nlmConfig/notification-log:nlmConfigLogEntry</a> {
          <span class="yang_kw">description</span> <span class="yang_str">"A Notification log statistics entry."</span>;
-         <a name="nlmStatsLogNotificationsLogged.574"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsLogNotificationsLogged</span> {
+         <a name="nlmStatsLogNotificationsLogged.574"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsLogNotificationsLogged</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -666,7 +666,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.2.3.1.1"</span>;
          }
 
-         <a name="nlmStatsLogNotificationsBumped.583"/><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsLogNotificationsBumped</span> {
+         <a name="nlmStatsLogNotificationsBumped.583"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsLogNotificationsBumped</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;

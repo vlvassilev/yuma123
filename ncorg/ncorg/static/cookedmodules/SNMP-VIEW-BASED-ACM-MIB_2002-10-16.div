@@ -151,13 +151,13 @@
          <span class="yang_kw">description</span> <span class="yang_str">"Initial version, published as RFC2275"</span>;
       }
 
-      <a name="vacmMIBObjects.96"/><span class="yang_kw">container</span> <span class="yang_id">vacmMIBObjects</span> {
-         <a name="vacmContextEntry.101"/><span class="yang_kw">list</span> <span class="yang_id">vacmContextEntry</span> {
+      <a name="vacmMIBObjects.96"></a><span class="yang_kw">container</span> <span class="yang_id">vacmMIBObjects</span> {
+         <a name="vacmContextEntry.101"></a><span class="yang_kw">list</span> <span class="yang_id">vacmContextEntry</span> {
             <span class="yang_kw">key</span> "<a href="#vacmContextName.109">vacmContextName</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Information about a particular context."</span>;
-            <a name="vacmContextName.109"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmContextName</span> {
+            <a name="vacmContextName.109"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmContextName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -173,13 +173,13 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.1.1"</span>;
          }  <span class="yang_cmt">// list vacmContextEntry</span>
 
-         <a name="vacmSecurityToGroupEntry.127"/><span class="yang_kw">list</span> <span class="yang_id">vacmSecurityToGroupEntry</span> {
+         <a name="vacmSecurityToGroupEntry.127"></a><span class="yang_kw">list</span> <span class="yang_id">vacmSecurityToGroupEntry</span> {
             <span class="yang_kw">key</span> "<a href="#vacmSecurityModel.136">vacmSecurityModel</a> <a href="#vacmSecurityName.149">vacmSecurityName</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry in this table maps the combination of a
                securityModel and securityName into a groupName."</span>;
-            <a name="vacmSecurityModel.136"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmSecurityModel</span> {
+            <a name="vacmSecurityModel.136"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmSecurityModel</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpSecurityModel.207">snmp-framework:SnmpSecurityModel</a></span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
                }
@@ -192,7 +192,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.2.1.1"</span>;
             }
 
-            <a name="vacmSecurityName.149"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmSecurityName</span> {
+            <a name="vacmSecurityName.149"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmSecurityName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
                }
@@ -204,7 +204,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.2.1.2"</span>;
             }
 
-            <a name="vacmGroupName.161"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmGroupName</span> {
+            <a name="vacmGroupName.161"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmGroupName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
                }
@@ -221,7 +221,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.2.1.3"</span>;
             }
 
-            <a name="vacmSecurityToGroupStorageType.178"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmSecurityToGroupStorageType</span> {
+            <a name="vacmSecurityToGroupStorageType.178"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmSecurityToGroupStorageType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -232,7 +232,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.2.1.4"</span>;
             }
 
-            <a name="vacmSecurityToGroupStatus.189"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmSecurityToGroupStatus</span> {
+            <a name="vacmSecurityToGroupStatus.189"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmSecurityToGroupStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -258,7 +258,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.2.1"</span>;
          }  <span class="yang_cmt">// list vacmSecurityToGroupEntry</span>
 
-         <a name="vacmAccessEntry.217"/><span class="yang_kw">list</span> <span class="yang_id">vacmAccessEntry</span> {
+         <a name="vacmAccessEntry.217"></a><span class="yang_kw">list</span> <span class="yang_id">vacmAccessEntry</span> {
             <span class="yang_kw">key</span> "<a href="#vacmGroupName.231">vacmGroupName</a> <a href="#vacmAccessContextPrefix.240">vacmAccessContextPrefix</a> <a href="#vacmAccessSecurityModel.255">vacmAccessSecurityModel</a> <a href="#vacmAccessSecurityLevel.264">vacmAccessSecurityLevel</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -269,7 +269,7 @@
                object vacmGroupName even if no entry in table
                vacmAccessSecurityToGroupTable has a corresponding
                value for object vacmGroupName."</span>;
-            <a name="vacmGroupName.231"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmGroupName</span> {
+            <a name="vacmGroupName.231"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmGroupName</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/snmp-view:vacmMIBObjects/snmp-view:vacmSecurityToGroupEntry/snmp-view:vacmGroupName"</span>;
@@ -278,7 +278,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="vacmAccessContextPrefix.240"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessContextPrefix</span> {
+            <a name="vacmAccessContextPrefix.240"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessContextPrefix</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -293,7 +293,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.4.1.1"</span>;
             }
 
-            <a name="vacmAccessSecurityModel.255"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessSecurityModel</span> {
+            <a name="vacmAccessSecurityModel.255"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessSecurityModel</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpSecurityModel.207">snmp-framework:SnmpSecurityModel</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -302,7 +302,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.4.1.2"</span>;
             }
 
-            <a name="vacmAccessSecurityLevel.264"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessSecurityLevel</span> {
+            <a name="vacmAccessSecurityLevel.264"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessSecurityLevel</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpSecurityLevel.354">snmp-framework:SnmpSecurityLevel</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -318,7 +318,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.4.1.3"</span>;
             }
 
-            <a name="vacmAccessContextMatch.280"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessContextMatch</span> {
+            <a name="vacmAccessContextMatch.280"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessContextMatch</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"exact"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -341,7 +341,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.4.1.4"</span>;
             }
 
-            <a name="vacmAccessReadViewName.299"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessReadViewName</span> {
+            <a name="vacmAccessReadViewName.299"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessReadViewName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -361,7 +361,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.4.1.5"</span>;
             }
 
-            <a name="vacmAccessWriteViewName.319"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessWriteViewName</span> {
+            <a name="vacmAccessWriteViewName.319"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessWriteViewName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -381,7 +381,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.4.1.6"</span>;
             }
 
-            <a name="vacmAccessNotifyViewName.339"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessNotifyViewName</span> {
+            <a name="vacmAccessNotifyViewName.339"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessNotifyViewName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -401,7 +401,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.4.1.7"</span>;
             }
 
-            <a name="vacmAccessStorageType.359"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessStorageType</span> {
+            <a name="vacmAccessStorageType.359"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessStorageType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -413,7 +413,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.4.1.8"</span>;
             }
 
-            <a name="vacmAccessStatus.371"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessStatus</span> {
+            <a name="vacmAccessStatus.371"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmAccessStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -432,8 +432,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1"</span>;
       }  <span class="yang_cmt">// container vacmMIBObjects</span>
 
-      <a name="vacmMIBViews.390"/><span class="yang_kw">container</span> <span class="yang_id">vacmMIBViews</span> {
-         <a name="vacmViewSpinLock.392"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewSpinLock</span> {
+      <a name="vacmMIBViews.390"></a><span class="yang_kw">container</span> <span class="yang_id">vacmMIBViews</span> {
+         <a name="vacmViewSpinLock.392"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewSpinLock</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TestAndIncr.109">smiv2:TestAndIncr</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>
@@ -462,7 +462,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.5.1"</span>;
          }
 
-         <a name="vacmViewTreeFamilyEntry.424"/><span class="yang_kw">list</span> <span class="yang_id">vacmViewTreeFamilyEntry</span> {
+         <a name="vacmViewTreeFamilyEntry.424"></a><span class="yang_kw">list</span> <span class="yang_id">vacmViewTreeFamilyEntry</span> {
             <span class="yang_kw">key</span> "<a href="#vacmViewTreeFamilyViewName.445">vacmViewTreeFamilyViewName</a> <a href="#vacmViewTreeFamilySubtree.455">vacmViewTreeFamilySubtree</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -479,7 +479,7 @@
                If no conceptual rows exist in this table for a given
                MIB view (viewName), that view may be thought of as
                consisting of the empty set of view subtrees."</span>;
-            <a name="vacmViewTreeFamilyViewName.445"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilyViewName</span> {
+            <a name="vacmViewTreeFamilyViewName.445"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilyViewName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
                }
@@ -489,7 +489,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.5.2.1.1"</span>;
             }
 
-            <a name="vacmViewTreeFamilySubtree.455"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilySubtree</span> {
+            <a name="vacmViewTreeFamilySubtree.455"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilySubtree</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -499,7 +499,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.5.2.1.2"</span>;
             }
 
-            <a name="vacmViewTreeFamilyMask.465"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilyMask</span> {
+            <a name="vacmViewTreeFamilyMask.465"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilyMask</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..16"</span>;
                }
@@ -557,7 +557,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.5.2.1.3"</span>;
             }
 
-            <a name="vacmViewTreeFamilyType.523"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilyType</span> {
+            <a name="vacmViewTreeFamilyType.523"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilyType</span> {
                <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
                   <span class="yang_kw">enum</span> <span class="yang_str">"included"</span> {
                      <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -576,7 +576,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.5.2.1.4"</span>;
             }
 
-            <a name="vacmViewTreeFamilyStorageType.538"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilyStorageType</span> {
+            <a name="vacmViewTreeFamilyStorageType.538"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilyStorageType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -588,7 +588,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.16.1.5.2.1.5"</span>;
             }
 
-            <a name="vacmViewTreeFamilyStatus.550"/><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilyStatus</span> {
+            <a name="vacmViewTreeFamilyStatus.550"></a><span class="yang_kw">leaf</span> <span class="yang_id">vacmViewTreeFamilyStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>

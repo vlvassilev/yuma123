@@ -66,9 +66,7 @@
             <span class="yang_str">"Initial version, published as RFC 4268."</span>;
       }
 
-
-      <span class="yang_cmt">// typedefs</span>
-      <a name="EntityAdminState.60"/><span class="yang_kw">typedef</span> <span class="yang_id">EntityAdminState</span> {
+      <a name="EntityAdminState.60"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntityAdminState</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"unknown"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -99,7 +97,7 @@
             report administrative state."</span>;
       }
 
-      <a name="EntityOperState.83"/><span class="yang_kw">typedef</span> <span class="yang_id">EntityOperState</span> {
+      <a name="EntityOperState.83"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntityOperState</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"unknown"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -126,7 +124,7 @@
             resource is unable to report operational state."</span>;
       }
 
-      <a name="EntityUsageState.102"/><span class="yang_kw">typedef</span> <span class="yang_id">EntityUsageState</span> {
+      <a name="EntityUsageState.102"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntityUsageState</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"unknown"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -153,7 +151,7 @@
             that this resource is unable to report usage state."</span>;
       }
 
-      <a name="EntityAlarmStatus.121"/><span class="yang_kw">typedef</span> <span class="yang_id">EntityAlarmStatus</span> {
+      <a name="EntityAlarmStatus.121"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntityAlarmStatus</span> {
          <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
             <span class="yang_kw">bit</span> <span class="yang_str">"unknown"</span> {
                <span class="yang_kw">position</span> <span class="yang_str">0</span>;
@@ -206,7 +204,7 @@
             unable to report alarm state."</span>;
       }
 
-      <a name="EntityStandbyStatus.160"/><span class="yang_kw">typedef</span> <span class="yang_id">EntityStandbyStatus</span> {
+      <a name="EntityStandbyStatus.160"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntityStandbyStatus</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"unknown"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;

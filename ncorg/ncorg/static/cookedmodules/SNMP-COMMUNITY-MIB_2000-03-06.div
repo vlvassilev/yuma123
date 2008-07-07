@@ -113,13 +113,13 @@
          <span class="yang_kw">description</span> <span class="yang_str">"The Initial Revision"</span>;
       }
 
-      <a name="snmpCommunityMIBObjects.85"/><span class="yang_kw">container</span> <span class="yang_id">snmpCommunityMIBObjects</span> {
-         <a name="snmpCommunityEntry.90"/><span class="yang_kw">list</span> <span class="yang_id">snmpCommunityEntry</span> {
+      <a name="snmpCommunityMIBObjects.85"></a><span class="yang_kw">container</span> <span class="yang_id">snmpCommunityMIBObjects</span> {
+         <a name="snmpCommunityEntry.90"></a><span class="yang_kw">list</span> <span class="yang_id">snmpCommunityEntry</span> {
             <span class="yang_kw">key</span> "<a href="#snmpCommunityIndex.98">snmpCommunityIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Information about a particular community string."</span>;
-            <a name="snmpCommunityIndex.98"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityIndex</span> {
+            <a name="snmpCommunityIndex.98"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
                }
@@ -129,7 +129,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.1"</span>;
             }
 
-            <a name="snmpCommunityName.108"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityName</span> {
+            <a name="snmpCommunityName.108"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityName</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -138,7 +138,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.2"</span>;
             }
 
-            <a name="snmpCommunitySecurityName.117"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunitySecurityName</span> {
+            <a name="snmpCommunitySecurityName.117"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunitySecurityName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
                }
@@ -150,7 +150,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.3"</span>;
             }
 
-            <a name="snmpCommunityContextEngineID.129"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityContextEngineID</span> {
+            <a name="snmpCommunityContextEngineID.129"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityContextEngineID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpEngineID.105">snmp-framework:SnmpEngineID</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -164,7 +164,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.4"</span>;
             }
 
-            <a name="snmpCommunityContextName.143"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityContextName</span> {
+            <a name="snmpCommunityContextName.143"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityContextName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -177,7 +177,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.5"</span>;
             }
 
-            <a name="snmpCommunityTransportTag.156"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityTransportTag</span> {
+            <a name="snmpCommunityTransportTag.156"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityTransportTag</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-TARGET-MIB/2002-10-14#SnmpTagValue.96">snmp-target:SnmpTagValue</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -201,7 +201,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.6"</span>;
             }
 
-            <a name="snmpCommunityStorageType.180"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityStorageType</span> {
+            <a name="snmpCommunityStorageType.180"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityStorageType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -212,7 +212,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1.7"</span>;
             }
 
-            <a name="snmpCommunityStatus.191"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityStatus</span> {
+            <a name="snmpCommunityStatus.191"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpCommunityStatus</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -231,7 +231,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.1.1"</span>;
          }  <span class="yang_cmt">// list snmpCommunityEntry</span>
 
-         <a name="snmpTrapAddress.210"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapAddress</span> {
+         <a name="snmpTrapAddress.210"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapAddress</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -244,7 +244,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.18.1.3"</span>;
          }
 
-         <a name="snmpTrapCommunity.223"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapCommunity</span> {
+         <a name="snmpTrapCommunity.223"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapCommunity</span> {
             <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>

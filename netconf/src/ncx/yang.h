@@ -351,6 +351,9 @@ extern void
     yang_free_stmt (yang_stmt_t *stmt);
 
 extern void
+    yang_clean_stmtQ (dlq_hdr_t *que);
+
+extern void
     yang_dump_nodeQ (dlq_hdr_t *que,
 		     const char *name);
 

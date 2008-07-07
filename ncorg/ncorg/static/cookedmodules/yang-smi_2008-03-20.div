@@ -37,22 +37,23 @@
       }
 
 
-      <span class="yang_cmt">// extensions</span>
-      <a name="oid.21"/><span class="yang_kw">extension</span> <span class="yang_id">oid</span> {
+      <a name="oid.21"></a><span class="yang_kw">extension</span> <span class="yang_id">oid</span> {
          <span class="yang_kw">argument</span> <span class="yang_str">"oid"</span> {
             <span class="yang_kw">yin-element</span> <span class="yang_str">"false"</span> {
          }
          <span class="yang_kw">description</span>
             <span class="yang_str">"OBJECT IDENTIFIER value assigned to a particular node."</span>;
       }
-      <a name="display-hint.27"/><span class="yang_kw">extension</span> <span class="yang_id">display-hint</span> {
+
+      <a name="display-hint.27"></a><span class="yang_kw">extension</span> <span class="yang_id">display-hint</span> {
          <span class="yang_kw">argument</span> <span class="yang_str">"hint"</span> {
             <span class="yang_kw">yin-element</span> <span class="yang_str">"false"</span> {
          }
          <span class="yang_kw">description</span>
             <span class="yang_str">"DISPLAY-HINT value provided in a TEXTUAL-CONVENTION macro."</span>;
       }
-      <a name="default.33"/><span class="yang_kw">extension</span> <span class="yang_id">default</span> {
+
+      <a name="default.33"></a><span class="yang_kw">extension</span> <span class="yang_id">default</span> {
          <span class="yang_kw">argument</span> <span class="yang_str">"default"</span> {
             <span class="yang_kw">yin-element</span> <span class="yang_str">"false"</span> {
          }

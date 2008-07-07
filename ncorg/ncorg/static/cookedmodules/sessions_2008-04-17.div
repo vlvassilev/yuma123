@@ -79,7 +79,7 @@
             <span class="yang_str">"Initial revision, converted from sessions.ncx."</span>;
       }
 
-      <a name="UserName.32"/><span class="yang_kw">typedef</span> <span class="yang_id">UserName</span> {
+      <a name="UserName.32"></a><span class="yang_kw">typedef</span> <span class="yang_id">UserName</span> {
          <span class="yang_kw">type</span> <span class="yang_id">string</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"1..1023"</span>;
             <span class="yang_kw">pattern</span> <span class="yang_str">'[a-z,A-Z][a-z,A-Z,0-9,\-,_]*'</span>;
@@ -87,38 +87,38 @@
          <span class="yang_kw">description</span> <span class="yang_str">"NETCONF Session User name string"</span>;
       }
 
-      <a name="netconfd.107"/><span class="yang_kw">container</span> <span class="yang_id">netconfd</span> {
+      <a name="netconfd.107"></a><span class="yang_kw">container</span> <span class="yang_id">netconfd</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"The sessionInfo container is implemented as a child
             of the top-level element &lt;netconfd&gt;."</span>;
-         <a name="sessionInfo.112"/><span class="yang_kw">container</span> <span class="yang_id">sessionInfo</span> {
+         <a name="sessionInfo.112"></a><span class="yang_kw">container</span> <span class="yang_id">sessionInfo</span> {
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Read-only Session Statistics and Information"</span>;
-            <a name="activeSessions.118"/><span class="yang_kw">leaf</span> <span class="yang_id">activeSessions</span> {
+            <a name="activeSessions.118"></a><span class="yang_kw">leaf</span> <span class="yang_id">activeSessions</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter32.52">yang:zero-based-counter32</a></span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Current number of open NETCONF sessions."</span>;
             }
 
-            <a name="closedSessions.124"/><span class="yang_kw">leaf</span> <span class="yang_id">closedSessions</span> {
+            <a name="closedSessions.124"></a><span class="yang_kw">leaf</span> <span class="yang_id">closedSessions</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter32.52">yang:zero-based-counter32</a></span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Total number of closed NETCONF sessions."</span>;
             }
 
-            <a name="failedSessions.130"/><span class="yang_kw">leaf</span> <span class="yang_id">failedSessions</span> {
+            <a name="failedSessions.130"></a><span class="yang_kw">leaf</span> <span class="yang_id">failedSessions</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter32.52">yang:zero-based-counter32</a></span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Total number of failed NETCONF sessions, which
                   failed to be established for any reason."</span>;
             }
 
-            <a name="sessionTotals.137"/><span class="yang_kw">container</span> <span class="yang_id">sessionTotals</span> {
+            <a name="sessionTotals.137"></a><span class="yang_kw">container</span> <span class="yang_id">sessionTotals</span> {
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Running global statistics totals aggregating
                   all open and closed session statistics totals"</span>;
-               <a name="inBytes.46"/><span class="yang_kw">leaf</span> <span class="yang_id">inBytes</span> {
+               <a name="inBytes.46"></a><span class="yang_kw">leaf</span> <span class="yang_id">inBytes</span> {
                   <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                   <span class="yang_kw">description</span>
@@ -126,7 +126,7 @@
                      received on a particular session."</span>;
                }
 
-               <a name="inDropBytes.54"/><span class="yang_kw">leaf</span> <span class="yang_id">inDropBytes</span> {
+               <a name="inDropBytes.54"></a><span class="yang_kw">leaf</span> <span class="yang_id">inDropBytes</span> {
                   <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                   <span class="yang_kw">description</span>
@@ -134,7 +134,7 @@
                      on a particular session."</span>;
                }
 
-               <a name="inMsgs.62"/><span class="yang_kw">leaf</span> <span class="yang_id">inMsgs</span> {
+               <a name="inMsgs.62"></a><span class="yang_kw">leaf</span> <span class="yang_id">inMsgs</span> {
                   <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                   <span class="yang_kw">description</span>
@@ -142,7 +142,7 @@
                      on a particular session without errors."</span>;
                }
 
-               <a name="inErrMsgs.70"/><span class="yang_kw">leaf</span> <span class="yang_id">inErrMsgs</span> {
+               <a name="inErrMsgs.70"></a><span class="yang_kw">leaf</span> <span class="yang_id">inErrMsgs</span> {
                   <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                   <span class="yang_kw">description</span>
@@ -150,7 +150,7 @@
                      on a particular session with errors"</span>;
                }
 
-               <a name="outBytes.78"/><span class="yang_kw">leaf</span> <span class="yang_id">outBytes</span> {
+               <a name="outBytes.78"></a><span class="yang_kw">leaf</span> <span class="yang_id">outBytes</span> {
                   <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                   <span class="yang_kw">description</span>
@@ -158,7 +158,7 @@
                      transmitted on a particular session."</span>;
                }
 
-               <a name="outMsgs.86"/><span class="yang_kw">leaf</span> <span class="yang_id">outMsgs</span> {
+               <a name="outMsgs.86"></a><span class="yang_kw">leaf</span> <span class="yang_id">outMsgs</span> {
                   <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                   <span class="yang_kw">description</span>
@@ -167,7 +167,7 @@
                      &lt;rpc-error&gt; elements."</span>;
                }
 
-               <a name="outErrMsgs.95"/><span class="yang_kw">leaf</span> <span class="yang_id">outErrMsgs</span> {
+               <a name="outErrMsgs.95"></a><span class="yang_kw">leaf</span> <span class="yang_id">outErrMsgs</span> {
                   <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                   <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                   <span class="yang_kw">description</span>
@@ -177,57 +177,57 @@
                }
             }  <span class="yang_cmt">// container sessionTotals</span>
 
-            <a name="sessions.144"/><span class="yang_kw">container</span> <span class="yang_id">sessions</span> {
+            <a name="sessions.144"></a><span class="yang_kw">container</span> <span class="yang_id">sessions</span> {
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Container for active session information and statistics.
-                  There is one entry for each session which is active
+                  There is one entry for each session which is active 
                   or starting up."</span>;
-               <a name="session.150"/><span class="yang_kw">list</span> <span class="yang_id">session</span> {
+               <a name="session.150"></a><span class="yang_kw">list</span> <span class="yang_id">session</span> {
                   <span class="yang_kw">key</span> "<a href="#id.155">id</a>";
                   <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
                   <span class="yang_kw">description</span> <span class="yang_str">"Per-Session Information Block"</span>;
-                  <a name="id.155"/><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
+                  <a name="id.155"></a><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
                      <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/netconf/2008-04-26#SessionId.43">nc:SessionId</a></span>;
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"The session ID assigned by the agent for the session."</span>;
                   }
 
-                  <a name="startTime.161"/><span class="yang_kw">leaf</span> <span class="yang_id">startTime</span> {
+                  <a name="startTime.161"></a><span class="yang_kw">leaf</span> <span class="yang_id">startTime</span> {
                      <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#date-and-time.201">yang:date-and-time</a></span>;
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"The system time when this session was first opened."</span>;
                   }
 
-                  <a name="userName.167"/><span class="yang_kw">leaf</span> <span class="yang_id">userName</span> {
+                  <a name="userName.167"></a><span class="yang_kw">leaf</span> <span class="yang_id">userName</span> {
                      <span class="yang_kw">type</span> <span class="yang_id"><a href="#UserName.32">UserName</a></span>;
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"The user name associated with this session."</span>;
                   }
 
-                  <a name="state.173"/><span class="yang_kw">leaf</span> <span class="yang_id">state</span> {
+                  <a name="state.173"></a><span class="yang_kw">leaf</span> <span class="yang_id">state</span> {
                      <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"A textual representation of the current session state."</span>;
                   }
 
-                  <a name="locks.179"/><span class="yang_kw">container</span> <span class="yang_id">locks</span> {
+                  <a name="locks.179"></a><span class="yang_kw">container</span> <span class="yang_id">locks</span> {
                      <span class="yang_kw">description</span>
-                        <span class="yang_str">"Container for the list of names of the locked 
+                        <span class="yang_str">"Container for the list of names of the locked
                         configurations"</span>;
-                     <a name="config.187"/><span class="yang_kw">leaf-list</span> <span class="yang_id">config</span> {
+                     <a name="config.187"></a><span class="yang_kw">leaf-list</span> <span class="yang_id">config</span> {
                         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
                         <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
                         <span class="yang_kw">description</span>
-                           <span class="yang_str">"Each &lt;config&gt; leaf contains the name of a 
-                           configuration that is currently locked by 
+                           <span class="yang_str">"Each &lt;config&gt; leaf contains the name of a
+                           configuration that is currently locked by
                            this session."</span>;
                      }
                   }  <span class="yang_cmt">// container locks</span>
 
-                  <a name="stats.197"/><span class="yang_kw">container</span> <span class="yang_id">stats</span> {
+                  <a name="stats.197"></a><span class="yang_kw">container</span> <span class="yang_id">stats</span> {
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"The set of statistics collected for this session."</span>;
-                     <a name="inBytes.46"/><span class="yang_kw">leaf</span> <span class="yang_id">inBytes</span> {
+                     <a name="inBytes.46"></a><span class="yang_kw">leaf</span> <span class="yang_id">inBytes</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                         <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                         <span class="yang_kw">description</span>
@@ -235,7 +235,7 @@
                            received on a particular session."</span>;
                      }
 
-                     <a name="inDropBytes.54"/><span class="yang_kw">leaf</span> <span class="yang_id">inDropBytes</span> {
+                     <a name="inDropBytes.54"></a><span class="yang_kw">leaf</span> <span class="yang_id">inDropBytes</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                         <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                         <span class="yang_kw">description</span>
@@ -243,7 +243,7 @@
                            on a particular session."</span>;
                      }
 
-                     <a name="inMsgs.62"/><span class="yang_kw">leaf</span> <span class="yang_id">inMsgs</span> {
+                     <a name="inMsgs.62"></a><span class="yang_kw">leaf</span> <span class="yang_id">inMsgs</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                         <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                         <span class="yang_kw">description</span>
@@ -251,7 +251,7 @@
                            on a particular session without errors."</span>;
                      }
 
-                     <a name="inErrMsgs.70"/><span class="yang_kw">leaf</span> <span class="yang_id">inErrMsgs</span> {
+                     <a name="inErrMsgs.70"></a><span class="yang_kw">leaf</span> <span class="yang_id">inErrMsgs</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                         <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                         <span class="yang_kw">description</span>
@@ -259,7 +259,7 @@
                            on a particular session with errors"</span>;
                      }
 
-                     <a name="outBytes.78"/><span class="yang_kw">leaf</span> <span class="yang_id">outBytes</span> {
+                     <a name="outBytes.78"></a><span class="yang_kw">leaf</span> <span class="yang_id">outBytes</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                         <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                         <span class="yang_kw">description</span>
@@ -267,7 +267,7 @@
                            transmitted on a particular session."</span>;
                      }
 
-                     <a name="outMsgs.86"/><span class="yang_kw">leaf</span> <span class="yang_id">outMsgs</span> {
+                     <a name="outMsgs.86"></a><span class="yang_kw">leaf</span> <span class="yang_id">outMsgs</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                         <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                         <span class="yang_kw">description</span>
@@ -276,7 +276,7 @@
                            &lt;rpc-error&gt; elements."</span>;
                      }
 
-                     <a name="outErrMsgs.95"/><span class="yang_kw">leaf</span> <span class="yang_id">outErrMsgs</span> {
+                     <a name="outErrMsgs.95"></a><span class="yang_kw">leaf</span> <span class="yang_id">outErrMsgs</span> {
                         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter64.89">yang:zero-based-counter64</a></span>;
                         <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                         <span class="yang_kw">description</span>

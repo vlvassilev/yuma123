@@ -176,9 +176,7 @@
             RFC 2037."</span>;
       }
 
-
-      <span class="yang_cmt">// typedefs</span>
-      <a name="PhysicalIndex.84"/><span class="yang_kw">typedef</span> <span class="yang_id">PhysicalIndex</span> {
+      <a name="PhysicalIndex.84"></a><span class="yang_kw">typedef</span> <span class="yang_id">PhysicalIndex</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
             <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
@@ -190,7 +188,7 @@
             necessarily contiguous."</span>;
       }
 
-      <a name="PhysicalIndexOrZero.96"/><span class="yang_kw">typedef</span> <span class="yang_id">PhysicalIndexOrZero</span> {
+      <a name="PhysicalIndexOrZero.96"></a><span class="yang_kw">typedef</span> <span class="yang_id">PhysicalIndexOrZero</span> {
          <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
             <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
             <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
@@ -207,7 +205,7 @@
             referenced."</span>;
       }
 
-      <a name="PhysicalClass.113"/><span class="yang_kw">typedef</span> <span class="yang_id">PhysicalClass</span> {
+      <a name="PhysicalClass.113"></a><span class="yang_kw">typedef</span> <span class="yang_id">PhysicalClass</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -324,7 +322,7 @@
             class is some sort of central processing unit."</span>;
       }
 
-      <a name="SnmpEngineIdOrNone.206"/><span class="yang_kw">typedef</span> <span class="yang_id">SnmpEngineIdOrNone</span> {
+      <a name="SnmpEngineIdOrNone.206"></a><span class="yang_kw">typedef</span> <span class="yang_id">SnmpEngineIdOrNone</span> {
          <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
             <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
          }
@@ -343,9 +341,8 @@
             SNMPv3 is not supported)."</span>;
       }
 
-      <span class="yang_cmt">// objects</span>
-      <a name="entityPhysical.225"/><span class="yang_kw">container</span> <span class="yang_id">entityPhysical</span> {
-         <a name="entPhysicalEntry.230"/><span class="yang_kw">list</span> <span class="yang_id">entPhysicalEntry</span> {
+      <a name="entityPhysical.225"></a><span class="yang_kw">container</span> <span class="yang_id">entityPhysical</span> {
+         <a name="entPhysicalEntry.230"></a><span class="yang_kw">list</span> <span class="yang_id">entPhysicalEntry</span> {
             <span class="yang_kw">key</span> "<a href="#entPhysicalIndex.245">entPhysicalIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -357,14 +354,14 @@
                (entPhysicalContainedIn and entPhysicalParentRelPos) to help
                an NMS relate the particular entry to other entries in this
                table."</span>;
-            <a name="entPhysicalIndex.245"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
+            <a name="entPhysicalIndex.245"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#PhysicalIndex.84">PhysicalIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The index for this entry."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.1"</span>;
             }
 
-            <a name="entPhysicalDescr.253"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalDescr</span> {
+            <a name="entPhysicalDescr.253"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalDescr</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -376,7 +373,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.2"</span>;
             }
 
-            <a name="entPhysicalVendorType.265"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalVendorType</span> {
+            <a name="entPhysicalVendorType.265"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalVendorType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#AutonomousType.141">smiv2:AutonomousType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -396,7 +393,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.3"</span>;
             }
 
-            <a name="entPhysicalContainedIn.285"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalContainedIn</span> {
+            <a name="entPhysicalContainedIn.285"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalContainedIn</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#PhysicalIndexOrZero.96">PhysicalIndexOrZero</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -414,7 +411,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.4"</span>;
             }
 
-            <a name="entPhysicalClass.303"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalClass</span> {
+            <a name="entPhysicalClass.303"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalClass</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#PhysicalClass.113">PhysicalClass</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -433,7 +430,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.5"</span>;
             }
 
-            <a name="entPhysicalParentRelPos.322"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalParentRelPos</span> {
+            <a name="entPhysicalParentRelPos.322"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalParentRelPos</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"-1..2147483647"</span>;
                }
@@ -496,7 +493,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.6"</span>;
             }
 
-            <a name="entPhysicalName.385"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalName</span> {
+            <a name="entPhysicalName.385"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -519,7 +516,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.7"</span>;
             }
 
-            <a name="entPhysicalHardwareRev.408"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalHardwareRev</span> {
+            <a name="entPhysicalHardwareRev.408"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalHardwareRev</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -540,7 +537,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.8"</span>;
             }
 
-            <a name="entPhysicalFirmwareRev.429"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalFirmwareRev</span> {
+            <a name="entPhysicalFirmwareRev.429"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalFirmwareRev</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -558,7 +555,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.9"</span>;
             }
 
-            <a name="entPhysicalSoftwareRev.447"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalSoftwareRev</span> {
+            <a name="entPhysicalSoftwareRev.447"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalSoftwareRev</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -579,7 +576,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.10"</span>;
             }
 
-            <a name="entPhysicalSerialNum.468"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalSerialNum</span> {
+            <a name="entPhysicalSerialNum.468"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalSerialNum</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -626,7 +623,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.11"</span>;
             }
 
-            <a name="entPhysicalMfgName.515"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalMfgName</span> {
+            <a name="entPhysicalMfgName.515"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalMfgName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -646,7 +643,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.12"</span>;
             }
 
-            <a name="entPhysicalModelName.535"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalModelName</span> {
+            <a name="entPhysicalModelName.535"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalModelName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -661,7 +658,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.13"</span>;
             }
 
-            <a name="entPhysicalAlias.550"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalAlias</span> {
+            <a name="entPhysicalAlias.550"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalAlias</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -692,7 +689,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.14"</span>;
             }
 
-            <a name="entPhysicalAssetID.581"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalAssetID</span> {
+            <a name="entPhysicalAssetID.581"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalAssetID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
                }
@@ -734,7 +731,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.15"</span>;
             }
 
-            <a name="entPhysicalIsFRU.623"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIsFRU</span> {
+            <a name="entPhysicalIsFRU.623"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIsFRU</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TruthValue.100">smiv2:TruthValue</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -748,7 +745,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.16"</span>;
             }
 
-            <a name="entPhysicalMfgDate.637"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalMfgDate</span> {
+            <a name="entPhysicalMfgDate.637"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalMfgDate</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -760,7 +757,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1.1.1.17"</span>;
             }
 
-            <a name="entPhysicalUris.649"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalUris</span> {
+            <a name="entPhysicalUris.649"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalUris</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
@@ -790,15 +787,15 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.1"</span>;
       }  <span class="yang_cmt">// container entityPhysical</span>
 
-      <a name="entityLogical.678"/><span class="yang_kw">container</span> <span class="yang_id">entityLogical</span> {
-         <a name="entLogicalEntry.683"/><span class="yang_kw">list</span> <span class="yang_id">entLogicalEntry</span> {
+      <a name="entityLogical.678"></a><span class="yang_kw">container</span> <span class="yang_id">entityLogical</span> {
+         <a name="entLogicalEntry.683"></a><span class="yang_kw">list</span> <span class="yang_id">entLogicalEntry</span> {
             <span class="yang_kw">key</span> "<a href="#entLogicalIndex.693">entLogicalIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Information about a particular logical entity.  Entities
                may be managed by this agent or other SNMP agents (possibly)
                in the same chassis."</span>;
-            <a name="entLogicalIndex.693"/><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalIndex</span> {
+            <a name="entLogicalIndex.693"></a><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
                }
@@ -811,7 +808,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.2.1.1.1"</span>;
             }
 
-            <a name="entLogicalDescr.706"/><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalDescr</span> {
+            <a name="entLogicalDescr.706"></a><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalDescr</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -822,7 +819,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.2.1.1.2"</span>;
             }
 
-            <a name="entLogicalType.717"/><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalType</span> {
+            <a name="entLogicalType.717"></a><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#AutonomousType.141">smiv2:AutonomousType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -839,7 +836,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.2.1.1.3"</span>;
             }
 
-            <a name="entLogicalCommunity.734"/><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalCommunity</span> {
+            <a name="entLogicalCommunity.734"></a><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalCommunity</span> {
                <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..255"</span>;
                }
@@ -892,7 +889,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.2.1.1.4"</span>;
             }
 
-            <a name="entLogicalTAddress.787"/><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalTAddress</span> {
+            <a name="entLogicalTAddress.787"></a><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalTAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TAddress.759">smiv2:TAddress</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -909,7 +906,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.2.1.1.5"</span>;
             }
 
-            <a name="entLogicalTDomain.804"/><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalTDomain</span> {
+            <a name="entLogicalTDomain.804"></a><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalTDomain</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TDomain.747">smiv2:TDomain</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -921,7 +918,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.2.1.1.6"</span>;
             }
 
-            <a name="entLogicalContextEngineID.816"/><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalContextEngineID</span> {
+            <a name="entLogicalContextEngineID.816"></a><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalContextEngineID</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#SnmpEngineIdOrNone.206">SnmpEngineIdOrNone</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -942,7 +939,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.2.1.1.7"</span>;
             }
 
-            <a name="entLogicalContextName.837"/><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalContextName</span> {
+            <a name="entLogicalContextName.837"></a><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalContextName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -970,8 +967,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.2"</span>;
       }  <span class="yang_cmt">// container entityLogical</span>
 
-      <a name="entityMapping.864"/><span class="yang_kw">container</span> <span class="yang_id">entityMapping</span> {
-         <a name="entLPMappingEntry.869"/><span class="yang_kw">list</span> <span class="yang_id">entLPMappingEntry</span> {
+      <a name="entityMapping.864"></a><span class="yang_kw">container</span> <span class="yang_id">entityMapping</span> {
+         <a name="entLPMappingEntry.869"></a><span class="yang_kw">list</span> <span class="yang_id">entLPMappingEntry</span> {
             <span class="yang_kw">key</span> "<a href="#entLogicalIndex.881">entLogicalIndex</a> <a href="#entLPPhysicalIndex.890">entLPPhysicalIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -981,7 +978,7 @@
                It is expected that sufficient information exists in the
                MIBs used to manage a particular logical entity to infer how
                physical component information is utilized."</span>;
-            <a name="entLogicalIndex.881"/><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalIndex</span> {
+            <a name="entLogicalIndex.881"></a><span class="yang_kw">leaf</span> <span class="yang_id">entLogicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/entity-mib:entityLogical/entity-mib:entLogicalEntry/entity-mib:entLogicalIndex"</span>;
@@ -990,7 +987,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="entLPPhysicalIndex.890"/><span class="yang_kw">leaf</span> <span class="yang_id">entLPPhysicalIndex</span> {
+            <a name="entLPPhysicalIndex.890"></a><span class="yang_kw">leaf</span> <span class="yang_id">entLPPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#PhysicalIndex.84">PhysicalIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1002,7 +999,7 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.3.1.1"</span>;
          }  <span class="yang_cmt">// list entLPMappingEntry</span>
 
-         <a name="entAliasMappingEntry.904"/><span class="yang_kw">list</span> <span class="yang_id">entAliasMappingEntry</span> {
+         <a name="entAliasMappingEntry.904"></a><span class="yang_kw">list</span> <span class="yang_id">entAliasMappingEntry</span> {
             <span class="yang_kw">key</span> "<a href="#entPhysicalIndex.923">entPhysicalIndex</a> <a href="#entAliasLogicalIndexOrZero.932">entAliasLogicalIndexOrZero</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
@@ -1019,7 +1016,7 @@
                Note that only entPhysicalIndex values that represent
                physical ports (i.e., associated entPhysicalClass value is
                'port(10)') are permitted to exist in this table."</span>;
-            <a name="entPhysicalIndex.923"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
+            <a name="entPhysicalIndex.923"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/entity-mib:entityPhysical/entity-mib:entPhysicalEntry/entity-mib:entPhysicalIndex"</span>;
@@ -1028,7 +1025,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="entAliasLogicalIndexOrZero.932"/><span class="yang_kw">leaf</span> <span class="yang_id">entAliasLogicalIndexOrZero</span> {
+            <a name="entAliasLogicalIndexOrZero.932"></a><span class="yang_kw">leaf</span> <span class="yang_id">entAliasLogicalIndexOrZero</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"0..2147483647"</span>;
                }
@@ -1075,7 +1072,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.3.2.1.1"</span>;
             }
 
-            <a name="entAliasMappingIdentifier.979"/><span class="yang_kw">leaf</span> <span class="yang_id">entAliasMappingIdentifier</span> {
+            <a name="entAliasMappingIdentifier.979"></a><span class="yang_kw">leaf</span> <span class="yang_id">entAliasMappingIdentifier</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1108,12 +1105,12 @@
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.3.2.1"</span>;
          }  <span class="yang_cmt">// list entAliasMappingEntry</span>
 
-         <a name="entPhysicalContainsEntry.1014"/><span class="yang_kw">list</span> <span class="yang_id">entPhysicalContainsEntry</span> {
+         <a name="entPhysicalContainsEntry.1014"></a><span class="yang_kw">list</span> <span class="yang_id">entPhysicalContainsEntry</span> {
             <span class="yang_kw">key</span> "<a href="#entPhysicalIndex.1021">entPhysicalIndex</a> <a href="#entPhysicalChildIndex.1030">entPhysicalChildIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"A single container/'containee' relationship."</span>;
-            <a name="entPhysicalIndex.1021"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
+            <a name="entPhysicalIndex.1021"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
                      <span class="yang_str">"/entity-mib:entityPhysical/entity-mib:entPhysicalEntry/entity-mib:entPhysicalIndex"</span>;
@@ -1122,7 +1119,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated keyref leaf."</span>;
             }
 
-            <a name="entPhysicalChildIndex.1030"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalChildIndex</span> {
+            <a name="entPhysicalChildIndex.1030"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalChildIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#PhysicalIndex.84">PhysicalIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1135,8 +1132,8 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.3"</span>;
       }  <span class="yang_cmt">// container entityMapping</span>
 
-      <a name="entityGeneral.1042"/><span class="yang_kw">container</span> <span class="yang_id">entityGeneral</span> {
-         <a name="entLastChangeTime.1044"/><span class="yang_kw">leaf</span> <span class="yang_id">entLastChangeTime</span> {
+      <a name="entityGeneral.1042"></a><span class="yang_kw">container</span> <span class="yang_id">entityGeneral</span> {
+         <a name="entLastChangeTime.1044"></a><span class="yang_kw">leaf</span> <span class="yang_id">entLastChangeTime</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -1155,7 +1152,7 @@
          <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.47.1.4"</span>;
       }  <span class="yang_cmt">// container entityGeneral</span>
 
-      <a name="entConfigChange.1063"/><span class="yang_kw">notification</span> <span class="yang_id">entConfigChange</span> {
+      <a name="entConfigChange.1063"></a><span class="yang_kw">notification</span> <span class="yang_id">entConfigChange</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"An entConfigChange notification is generated when the value
             of entLastChangeTime changes.  It can be utilized by an NMS

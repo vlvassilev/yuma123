@@ -259,9 +259,7 @@
             RFC 1573."</span>;
       }
 
-
-      <span class="yang_cmt">// typedefs</span>
-      <a name="IANAifType.236"/><span class="yang_kw">typedef</span> <span class="yang_id">IANAifType</span> {
+      <a name="IANAifType.236"></a><span class="yang_kw">typedef</span> <span class="yang_id">IANAifType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;
@@ -982,7 +980,7 @@
             transmission subtree OIDs."</span>;
       }
 
-      <a name="IANAtunnelType.497"/><span class="yang_kw">typedef</span> <span class="yang_id">IANAtunnelType</span> {
+      <a name="IANAtunnelType.497"></a><span class="yang_kw">typedef</span> <span class="yang_id">IANAtunnelType</span> {
          <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
             <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
                <span class="yang_kw">value</span> <span class="yang_str">1</span>;

@@ -348,6 +348,7 @@
 		    py:content="ncextension.name"/>
 		<td  id="${idfill}" py:if="ncextension.argument"
 		     py:content="ncextension.argument[0:69]"/>
+		<td  id="${idfill}" py:if="not ncextension.argument">&nbsp;</td>
 		<td  id="${idfill}"
 		     py:content="ncextension.description[0:69]"/>
               </tr>

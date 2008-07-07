@@ -28,8 +28,12 @@
 	  <div>${objform()}</div>
 	</div>
         <div class="tabbertab">
-          <h2>Find Type Usage</h2>
+          <h2>Find type usage</h2>
 	  <div>${tuform()}</div>
+	</div>
+        <div class="tabbertab">
+          <h2>Find extensions</h2>
+	  <div>${extform()}</div>
 	</div>
       </div>
     </div>

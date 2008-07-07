@@ -16,6 +16,8 @@ from tg_expanding_form_widget.tg_expanding_form_widget import ExpandingForm
 
 log = logging.getLogger("ncorg.controllers")
 
+
+#################################################################################
 #
 # copy a YANG file to the workdir for the user or session
 #
@@ -43,10 +45,10 @@ def copyYangFile(filename, file):
         return ""
 
 
+#################################################################################
 #
 #  !!!! TEMP FIXES UNTIL USERS ADDED AND MULTIPLE WORKDIRs SUPPORTED 
 #
-
 #
 # delete all the old YANG files from the workdir for the user or session
 #
@@ -56,6 +58,8 @@ def deleteOldYangFiles():
     result = os.system('rm -f ' + targetPath)
     return result
 
+
+#################################################################################
 #
 # generate the correct YANG input file name to send to yangdump
 #
@@ -73,6 +77,8 @@ def getYangInputFilename(filename):
     targetPath = os.getcwd() + "/ncorg/workdir/" + filename
     return targetPath
 
+
+#################################################################################
 #
 # generate the correct results output file name to send to yangdump
 #
@@ -83,6 +89,7 @@ def getYangLogFilename():
     return targetPath
 
 
+#################################################################################
 #
 # generate the correct results output file name to send to yangdump
 #
@@ -93,6 +100,7 @@ def getYangOutputFilename():
     return targetPath
 
 
+#################################################################################
 #
 # generate the correct results output file name to send to yangdump
 #
@@ -111,7 +119,7 @@ def getYangResultFilename(filename):
     return resultPath
 
 
-
+#################################################################################
 #
 # generate the correctwork directory path for the user or session
 #
@@ -122,6 +130,7 @@ def getYangModpath():
     return workdir+devdir
 
 
+#################################################################################
 #
 # show module jump menu
 #
@@ -138,7 +147,7 @@ def createModuleJumpMenu():
     return modmenu
 
 
-
+#################################################################################
 # use a static variable to hold the module menu
 # instead of generating it every time.
 # when the module update code is added, it will need 
@@ -147,6 +156,7 @@ def createModuleJumpMenu():
 moduleJumpMenu = createModuleJumpMenu()
 
 
+#################################################################################
 #
 # for breadcrumbs -- this does not work yet not used!!!
 #
@@ -168,6 +178,7 @@ def createNavBarLinks():
     return crumbs
 
 
+#################################################################################
 #
 # Run yangdump Validation Schemas
 #
@@ -177,10 +188,10 @@ class RunYangFormSchema(validators.Schema):
 class RunYangExpandingFormSchema(validators.Schema):
     depfiles = validators.ForEach(RunYangFormSchema(),)
 
+#################################################################################
 #
 # Run yangdump Form Widgets
 #
-
 # srcfile is the 1 mandatory parameter
 srcfile = widgets.FileField(validator=validators.FieldStorageUploadConverter(not_empty=True),
                             name='srcfile',
@@ -214,6 +225,7 @@ runyangdump_form = widgets.ListForm(
 )
 
 
+#################################################################################
 #
 # form fields for the search database form
 #
@@ -241,6 +253,8 @@ class ModuleSearchFields(widgets.WidgetsList):
                                          button_text='Changed since this date',
                                          validator=validators.DateTimeConverter(format="%Y-%m-%d"))
 
+
+#################################################################################
 #
 # form fields for the search database form
 #
@@ -268,11 +282,13 @@ class TypedefSearchFields(widgets.WidgetsList):
                                          button_text='Changed since this date',
                                          validator=validators.DateTimeConverter(format="%Y-%m-%d"))
 
+
+#################################################################################
 #
 # form fields for the search database form
 #
 class ObjectSearchFields(widgets.WidgetsList):
-    """Setup the form fields for the definition portion of the search database page
+    """Setup the form fields for the object portion of the search database page
     """
     matchtype = widgets.RadioButtonList(name='matchtype',
                                         label="Object Match type:",
@@ -296,6 +312,7 @@ class ObjectSearchFields(widgets.WidgetsList):
                                          validator=validators.DateTimeConverter(format="%Y-%m-%d"))
 
 
+#################################################################################
 #
 # form fields for the search database form
 #
@@ -313,6 +330,37 @@ class TypeUsageSearchFields(widgets.WidgetsList):
                                     attrs=dict(size="40"))
 
 
+
+#################################################################################
+#
+# form fields for the search database form
+#
+class ExtensionSearchFields(widgets.WidgetsList):
+    """Setup the form fields for the extension portion of the search database page
+    """
+    matchtype = widgets.RadioButtonList(name='matchtype',
+                                        label="Extension Match type:",
+                                        validator=validators.NotEmpty,
+                                        default='All',
+                                        options=['All','Any'])
+    modnamepart = widgets.TextField(name='modnamepart',
+                                    label="Enter all or part of the module name",
+                                    validator = validators.UnicodeString(if_empty = None),
+                                    attrs=dict(size="40"))
+    extnamepart = widgets.TextField(name='extnamepart',
+                                    label="Enter all or part of the extension name",
+                                    validator = validators.UnicodeString(if_empty = None),
+                                    attrs=dict(size="40"))
+    moddate = widgets.CalendarDatePicker(name='moddate',
+                                         label='Enter a revision date (yyyy-mm-dd)',
+                                         calendar_lang='en',
+                                         format='%Y-%m-%d',
+                                         default='',
+                                         button_text='Changed since this date',
+                                         validator=validators.DateTimeConverter(format="%Y-%m-%d"))
+
+
+#################################################################################
 #
 # generate the module search form
 #
@@ -322,6 +370,7 @@ modsearch_form = widgets.TableForm(name='modsearch_form',
                                 action="searchyangdb_mod")
 
 
+#################################################################################
 #
 # generate the typedef search form
 #
@@ -330,6 +379,7 @@ typsearch_form = widgets.TableForm(name='typsearch_form',
                                 submit_text="Find types",
                                 action="searchyangdb_typ")
 
+#################################################################################
 #
 # generate the object search form
 #
@@ -338,6 +388,7 @@ objsearch_form = widgets.TableForm(name='objsearch_form',
                                 submit_text="Find objects",
                                 action="searchyangdb_obj")
 
+#################################################################################
 #
 # generate the type name usage search form
 #
@@ -347,49 +398,60 @@ tusearch_form = widgets.TableForm(name='tusearch_form',
                                   action="searchyangdb_tu")
 
 
+#################################################################################
+#
+# generate the extension search form
+#
+extsearch_form = widgets.TableForm(name='extsearch_form',
+                                  fields=ExtensionSearchFields(),
+                                  submit_text="Find extensions",
+                                  action="searchyangdb_ext")
+
+
+#################################################################################
 # main entry point
 class Root(controllers.RootController):
 
+    #################################################################################
     #
     # Home Page
     #
-
     @expose(template="ncorg.templates.homepage")
     def index(self, *args, **kw):
         return dict(modmenu=moduleJumpMenu)
 
 
+    #################################################################################
     #
     # About Page
     #
-
     @expose(template="ncorg.templates.ncorg_about")
     def about(self, *args, **kw):
         return dict(modmenu=moduleJumpMenu)
 
 
+    #################################################################################
     #
     # Contact Info Page
     #
-
     @expose(template="ncorg.templates.ncorg_contactinfo")
     def contactinfo(self, *args, **kw):
         return dict(modmenu=moduleJumpMenu)
 
 
+    #################################################################################
     #
     # Unknown Page
     #
-
     @expose(template="ncorg.templates.unknown")
     def default(self, *args, **kw):
         return dict(modmenu=moduleJumpMenu)
 
 
+    #################################################################################
     #
     # List Pages
     #
-
     @expose(template="ncorg.templates.ncmodule_list")
     def modulelist(self, *args, **kw):
         ncmodules = Ncmodule.select(AND(Ncmodule.q.ismod=="1", 
@@ -508,11 +570,10 @@ class Root(controllers.RootController):
 
 
 
-
+    #################################################################################
     #
     # Browse Pages
     #
-
     @expose(template="ncorg.templates.ncmodule_browse")
     def modulebrowse(self, mod="", *args, **kw):
         tabber = widgets.Tabber()
@@ -710,10 +771,10 @@ class Root(controllers.RootController):
                     name=name)
 
 
+    #################################################################################
     #
     # Full Module Report
     #
-
     @expose(template="ncorg.templates.ncmodule_report")
     def modulereport(self, mod, version="latest", *args, **kw):
         tabber = widgets.Tabber()
@@ -784,17 +845,17 @@ class Root(controllers.RootController):
                     version=version)
 
 
+    #################################################################################
     #
     # Show module source page
     # generated with yangdump -f html
-
     @expose(template="ncorg.templates.ncmodule_source")
     def modules(self, mod, version, *args, **kw):
         return dict(modmenu=moduleJumpMenu,
                     mod=mod,
                     version=version)
 
-
+    #################################################################################
     #
     # Run Yangdump page
     #
@@ -814,6 +875,7 @@ class Root(controllers.RootController):
                     report=report)
 
 
+    #################################################################################
     #
     # Process run yangdump parameters
     #
@@ -881,16 +943,7 @@ class Root(controllers.RootController):
 
 
 
-
-    #
-    # Show Yangdump manual page
-    #
-
-    @expose(template="ncorg.templates.man_yangdump")
-    def yangdump_manual(self, *args, **kw):
-        return dict(modmenu=moduleJumpMenu)
-
-
+    #################################################################################
     #
     # Search database page
     #
@@ -904,9 +957,11 @@ class Root(controllers.RootController):
                     modform=modsearch_form,
                     typform=typsearch_form,
                     objform=objsearch_form,
-                    tuform=tusearch_form)
+                    tuform=tusearch_form,
+                    extform=extsearch_form)
 
 
+    #################################################################################
     #
     # Process module search parameters
     #
@@ -927,6 +982,8 @@ class Root(controllers.RootController):
                  modprefix=modprefix,
                  moddate=moddate)
 
+
+    #################################################################################
     #
     # generate module search results page
     #
@@ -1023,11 +1080,11 @@ class Root(controllers.RootController):
         return dict(modmenu=moduleJumpMenu,
                     ncmodules=ncmodules)
 
-
+    #################################################################################
     #
     # Process typedef search parameters
     #
-    expose()
+    @expose()
     @validate(form=typsearch_form)
     @error_handler(search)
     def searchyangdb_typ(self, matchtype, modnamepart=None,
@@ -1044,7 +1101,7 @@ class Root(controllers.RootController):
                  typnamepart=typnamepart,
                  moddate=moddate)
 
-
+    #################################################################################
     #
     # Generate typedef search results page
     #
@@ -1134,10 +1191,11 @@ class Root(controllers.RootController):
                     nctypedefs=nctypedefs)
 
 
+    #################################################################################
     #
     # Process object search parameters
     #
-    expose()
+    @expose()
     @validate(form=objsearch_form)
     @error_handler(search)
     def searchyangdb_obj(self, matchtype, modnamepart=None,
@@ -1155,6 +1213,7 @@ class Root(controllers.RootController):
                  moddate=moddate)
 
 
+    #################################################################################
     #
     # Generate object search results page
     #
@@ -1244,11 +1303,11 @@ class Root(controllers.RootController):
                     ncobjects=ncobjects)
 
 
-
+    #################################################################################
     #
     # Process type name search parameters
     #
-    expose()
+    @expose()
     @validate(form=tusearch_form)
     @error_handler(search)
     def searchyangdb_tu(self, matchtype, typnamepart, **data):
@@ -1263,7 +1322,7 @@ class Root(controllers.RootController):
                  typnamepart=typnamepart)
 
 
-
+    #################################################################################
     #
     # Generate type name usage search results page
     #
@@ -1301,33 +1360,158 @@ class Root(controllers.RootController):
                     ncobjects=ncobjects)
 
 
+    #################################################################################
+    #
+    # Process extension search parameters
+    #
+    @expose()
+    @validate(form=extsearch_form)
+    @error_handler(search)
+    def searchyangdb_ext(self, matchtype, modnamepart=None,
+                         extnamepart=None, moddate=None, **data):
+        """Generate database search results"""
+
+        # have parameters, now check if any parameters were entered
+        if modnamepart==None and extnamepart==None and moddate==None:
+            redirect('/search')
+
+        redirect('/extsearch_results',
+                 matchtype=matchtype,
+                 modnamepart=modnamepart,
+                 extnamepart=extnamepart,
+                 moddate=moddate)
+
+    #################################################################################
+    #
+    # Generate extension search results page
+    #
+    @expose(template="ncorg.templates.extsearch_results")
+    def extsearch_results(self, 
+                          matchtype,
+                          modnamepart=None, 
+                          extnamepart=None,
+                          moddate=None,
+                          *args, **kw):
+
+        # remove 1 independent variable, set to 'start' if not provided
+        if moddate:
+            moddateset = True
+        else:
+            moddate = '1900-01-01'
+            moddateset = False
+
+        if matchtype=='All':
+            if modnamepart==None and extnamepart==None:
+                ncexts = Ncextension.select(AND(Ncextension.q.islatest=="1",
+                                                Ncextension.q.version >= moddate),
+                                            orderBy=Ncextension.q.name)
+            if modnamepart and extnamepart==None:
+                ncexts = Ncextension.select(AND(Ncextension.q.islatest=="1",
+                                                CONTAINSSTRING(Ncextension.q.modname, modnamepart),
+                                                Ncextension.q.version >= moddate),
+                                            orderBy=Ncextension.q.name)
+            if modnamepart==None and extnamepart:
+                ncexts = Ncextension.select(AND(Ncextension.q.islatest=="1",
+                                                CONTAINSSTRING(Ncextension.q.name, extnamepart),
+                                                Ncextension.q.version >= moddate),
+                                            orderBy=Ncextension.q.name)
+            if modnamepart and extnamepart:
+                ncexts = Ncextension.select(AND(Ncextension.q.islatest=="1",
+                                                CONTAINSSTRING(Ncextension.q.modname, modnamepart),
+                                                CONTAINSSTRING(Ncextension.q.name, extnamepart),
+                                                Ncextension.q.version >= moddate),
+                                            orderBy=Ncextension.q.name)
+        else:
+            if modnamepart==None and extnamepart==None:
+                ncexts = Ncextension.select(AND(Ncextension.q.islatest=="1",
+                                                Ncextension.q.version >= moddate),
+                                            orderBy=Ncextension.q.name)
+            if modnamepart and extnamepart==None:
+                if moddateset==True:
+                    ncexts = Ncextension.select(AND(Ncextension.q.islatest=="1",
+                                                    OR(CONTAINSSTRING(Ncextension.q.modname, 
+                                                                      modnamepart),
+                                                       Ncextension.q.version >= moddate)),
+                                                orderBy=Ncextension.q.name)
+                else:
+                    ncexts = Ncextension.select(AND(Ncextension.q.islatest=="1",
+                                                    CONTAINSSTRING(Ncextension.q.modname, 
+                                                                   modnamepart)),
+                                                orderBy=Ncextension.q.name)
+            if modnamepart==None and extnamepart:
+                if moddateset==True:
+                    ncexts = Ncextension.select(AND(Ncextension.q.islatest=="1",
+                                                    OR(CONTAINSSTRING(Ncextension.q.name,
+                                                                      extnamepart),
+                                                       Ncextension.q.version >= moddate)),
+                                                orderBy=Ncextension.q.name)
+                else:
+                    ncexts = Ncextension.select(AND(Ncextension.q.islatest=="1",
+                                                    CONTAINSSTRING(Ncextension.q.name,
+                                                                   extnamepart)),
+                                                  orderBy=Ncextension.q.name)
+            if modnamepart and extnamepart:
+                if moddateset==True:
+                    ncexts = Ncextension.select(AND(Ncextension.q.islatest=="1",
+                                                    OR(CONTAINSSTRING(Ncextension.q.modname,
+                                                                      modnamepart),
+                                                       CONTAINSSTRING(Ncextension.q.name, 
+                                                                      extnamepart),
+                                                       Ncextension.q.version >= moddate)),
+                                                orderBy=Ncextension.q.name)
+                else:
+                    ncexts = Ncextension.select(AND(Ncextension.q.islatest=="1",
+                                                    OR(CONTAINSSTRING(Ncextension.q.modname,
+                                                                      modnamepart),
+                                                       CONTAINSSTRING(Ncextension.q.name, 
+                                                                      extnamepart))),
+                                                orderBy=Ncextension.q.name)
+
+        return dict(modmenu=moduleJumpMenu,
+                    ncexts=ncexts)
+
+
+
+    #################################################################################
+    #
+    # Show Yangdump manual page
+    #
+    @expose(template="ncorg.templates.man_yangdump")
+    def yangdump_manual(self, *args, **kw):
+        return dict(modmenu=moduleJumpMenu)
+
+
+    #################################################################################
     #
     # Show the YANG database documentation page
     #
-    expose(template="ncorg.templates.doc_database")
+    @expose(template="ncorg.templates.doc_database")
     def database_docs(self, *args, **kw):
         return dict(modmenu=moduleJumpMenu)
 
 
+    #################################################################################
     #
     # Show the NETCONF documentation page
     #
-    expose(template="ncorg.templates.doc_netconf")
+    @expose(template="ncorg.templates.doc_netconf")
     def netconf_docs(self, *args, **kw):
         return dict(modmenu=moduleJumpMenu)
 
 
+    #################################################################################
     #
     # Show the YANG documentation page
     #
-    expose(template="ncorg.templates.doc_yang")
+    @expose(template="ncorg.templates.doc_yang")
     def yang_docs(self, *args, **kw):
         return dict(modmenu=moduleJumpMenu)
 
+    #################################################################################
     #
     # Show the download page
     #
-    expose(template="ncorg.templates.download")
+    @expose(template="ncorg.templates.download")
     def download(self, *args, **kw):
         tabber = widgets.Tabber()
         return dict(modmenu=moduleJumpMenu,

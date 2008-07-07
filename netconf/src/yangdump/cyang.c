@@ -1124,14 +1124,14 @@ static void
 				   con->ref, indent, 2, TRUE);
 	}
 
-	write_cyang_appinfoQ(scb, mod, cp, &con->appinfoQ, indent);
-
 	if (notrefined) {
 	    write_cyang_typedefs(scb, mod, cp, con->typedefQ, indent);
 	    write_cyang_groupings(scb, mod, cp, con->groupingQ, indent);
 	}
 
 	write_cyang_objects(scb, mod, cp, con->datadefQ, indent);
+
+	write_cyang_appinfoQ(scb, mod, cp, &con->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
@@ -1312,7 +1312,7 @@ static void
 		nextkey = (const obj_key_t *)dlq_nextEntry(key);
 		ses_putstr(scb, obj_get_name(key->keyobj));
 		if (nextkey) {
-		    ses_putstr(scb, (const xmlChar *)", ");
+		    ses_putchar(scb, ' ');
 		}
 	    }
 	    ses_putstr(scb, (const xmlChar *)"\";");
@@ -1392,7 +1392,7 @@ static void
 				   list->ref, indent, 2, TRUE);
 	}
 
-	write_cyang_appinfoQ(scb, mod, cp, &list->appinfoQ, indent);
+
 
 	if (notrefined) {
 	    write_cyang_typedefs(scb, mod, cp, list->typedefQ, indent);
@@ -1400,6 +1400,8 @@ static void
 	}
 
 	write_cyang_objects(scb, mod, cp, list->datadefQ, indent);
+
+	write_cyang_appinfoQ(scb, mod, cp, &list->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
@@ -1446,9 +1448,9 @@ static void
 				   choic->ref, indent, 2, TRUE);
 	}
 
-	write_cyang_appinfoQ(scb, mod, cp, &choic->appinfoQ, indent);
-
 	write_cyang_objects(scb, mod, cp, choic->caseQ, indent);
+
+	write_cyang_appinfoQ(scb, mod, cp, &choic->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
@@ -1481,9 +1483,9 @@ static void
 				   cas->ref, indent, 2, TRUE);
 	}
 
-	write_cyang_appinfoQ(scb, mod, cp, &cas->appinfoQ, indent);
-
 	write_cyang_objects(scb, mod, cp, cas->datadefQ, indent);
+
+	write_cyang_appinfoQ(scb, mod, cp, &cas->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
@@ -1531,9 +1533,9 @@ static void
 				       uses->ref, indent, 2, TRUE);
 	    }
 
-	    write_cyang_appinfoQ(scb, mod, cp, &uses->appinfoQ, indent);
-
 	    write_cyang_objects(scb, mod, cp, uses->datadefQ, indent);
+
+	    write_cyang_appinfoQ(scb, mod, cp, &uses->appinfoQ, indent);
 
 	    /* end object definition clause */
 	    ses_putstr_indent(scb, END_SEC, startindent);
@@ -1615,13 +1617,13 @@ static void
 				   rpc->ref, indent, 2, TRUE);
 	}
 
-	write_cyang_appinfoQ(scb, mod, cp, &rpc->appinfoQ, indent);
-
 	write_cyang_typedefs(scb, mod, cp, &rpc->typedefQ, indent);
 
 	write_cyang_groupings(scb, mod, cp, &rpc->groupingQ, indent);
 
 	write_cyang_objects(scb, mod, cp, &rpc->datadefQ, indent);
+
+	write_cyang_appinfoQ(scb, mod, cp, &rpc->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
@@ -1637,13 +1639,13 @@ static void
 	    return;
 	}
 
-	write_cyang_appinfoQ(scb, mod, cp, &rpcio->appinfoQ, indent);
-
 	write_cyang_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
 
 	write_cyang_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
 
 	write_cyang_objects(scb, mod, cp, &rpcio->datadefQ, indent);
+
+	write_cyang_appinfoQ(scb, mod, cp, &rpcio->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
@@ -1671,13 +1673,13 @@ static void
 				   notif->ref, indent, 2, TRUE);
 	}
 
-	write_cyang_appinfoQ(scb, mod, cp, &notif->appinfoQ, indent);
-
 	write_cyang_typedefs(scb, mod, cp, &notif->typedefQ, indent);
 
 	write_cyang_groupings(scb, mod, cp, &notif->groupingQ, indent);
 
 	write_cyang_objects(scb, mod, cp, &notif->datadefQ, indent);
+
+	write_cyang_appinfoQ(scb, mod, cp, &notif->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);

@@ -438,6 +438,9 @@ static uint32
     if (str_field_changed(NULL, oldprefix, 
 			  newprefix, FALSE, NULL)) {
 	if (oldprefix && newprefix) {
+	    /* check if the different prefix values reference
+	     * the same module name
+	     */
 	    oldimp = ncx_find_pre_import(oldmod, oldprefix);
 	    newimp = ncx_find_pre_import(newmod, newprefix);
 	    if (oldimp && newimp &&
@@ -446,6 +449,12 @@ static uint32
 	    } else {
 		return 1;
 	    }
+	} else if (oldprefix && 
+		   !xml_strcmp(oldprefix, oldmod->prefix)) {
+	    return 0;  /* using own module prefix */
+	} else if (newprefix && 
+		   !xml_strcmp(newprefix, newmod->prefix)) {
+	    return 0;  /* using own module prefix */
 	} else {
 	    return 1;
 	}
@@ -505,6 +514,34 @@ static void
     }
 
 }  /* output_line */
+
+
+/********************************************************************
+ * FUNCTION output_mstart_line
+ * 
+ *  Output one line for a comparison where the change is 'modify'
+ *  Just print the field name and identifier
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    fieldname == fieldname that is different to print
+ *    id == string ID value to print (may be NULL)
+ *********************************************************************/
+static void
+    output_lmstart_ine (yangdiff_diffparms_t *cp,
+			const xmlChar *fieldname,
+			const xmlChar *id)
+{
+    ses_putstr_indent(cp->scb, 
+		      (cp->edifftype==YANGDIFF_DT_REVISION) 
+		      ? MOD_STR : M_STR, cp->curindent);
+    ses_putstr(cp->scb, fieldname);
+    if (id) {
+	ses_putchar(cp->scb, ' ');
+	ses_putstr(cp->scb, id);
+    }
+
+}  /* output_mstart_line */
 
 
 /********************************************************************
@@ -895,7 +932,7 @@ static void
 	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-}  /* output_diff */
+}  /* output_diff2 */
 
 
 /********************************************************************
@@ -923,8 +960,9 @@ static void
 
     switch (cp->edifftype) {
     case YANGDIFF_DT_TERSE:
-	break;
     case YANGDIFF_DT_BRIEF:
+    case YANGDIFF_DT_REVISION:
+	output_cdb_line(cp, cdb);
 	break;
     case YANGDIFF_DT_NORMAL:
 	if (!cdb->oldval) {
@@ -940,8 +978,6 @@ static void
 			 cdb->fieldname, cdb->newval);
 	}
 	ses_putchar(cp->scb, '\n');
-	break;
-    case YANGDIFF_DT_REVISION:
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -1178,23 +1214,16 @@ static void
     case YANGDIFF_DT_TERSE:
     case YANGDIFF_DT_BRIEF:
     case YANGDIFF_DT_REVISION:
-	ses_putstr_indent(cp->scb, 
-			  (isrev) ? MOD_STR : M_STR, 
-			  cp->curindent);
-	ses_putstr(cp->scb, YANG_K_EXTENSION);
-	ses_putchar(cp->scb, ' ');
-	ses_putstr(cp->scb, oldext->name);
-	if (cp->edifftype == YANGDIFF_DT_TERSE) {
-	    return;
-	}
-
-	indent_in(cp);
-	for (i=0; i<5; i++) {
-	    if (extcdb[i].changed) {
-		output_cdb_line(cp, &extcdb[i]);
+	output_mstart_line(cp, YANG_K_EXTENSION, oldext->name);
+	if (cp->edifftype != YANGDIFF_DT_TERSE) {
+	    indent_in(cp);
+	    for (i=0; i<5; i++) {
+		if (extcdb[i].changed) {
+		    output_cdb_line(cp, &extcdb[i]);
+		}
 	    }
+	    indent_out(cp);
 	}
-	indent_out(cp);
 	break;
     case YANGDIFF_DT_NORMAL:
 	for (i=0; i<5; i++) {
@@ -1265,6 +1294,260 @@ static void
 
 
 /********************************************************************
+ * FUNCTION output_errinfo_diff
+ * 
+ *  Output the differences report for one ncx_errinfo_t struct
+ *  Used for may clauses, such as must, range, length, pattern;
+ *  within a leaf, leaf-list, or typedef definition
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    olderr == old err info struct (may be NULL)
+ *    newerr == new err info struct (may be NULL)
+ *
+ *********************************************************************/
+static void
+    output_errinfo_diff (yangdiff_diffparms_t *cp,
+			 const ncx_errinfo_t *olderr,
+			 const ncx_errinfo_t *newerr)
+{
+    if (!olderr && newerr) {
+	/* errinfo added in new revision */
+	output_diff(cp, YANG_K_ERROR_MESSAGE, NULL,
+		    newerr->error_message, FALSE);
+	output_diff(cp, YANG_K_ERROR_APP_TAG, NULL, 
+		    newerr->error_app_tag, FALSE);
+	output_diff(cp, YANG_K_DESCRIPTION, NULL, 
+		    newerr->descr, FALSE);
+	output_diff(cp, YANG_K_REFERENCE, NULL, 
+		    newerr->ref, FALSE);
+    } else if (olderr && !newerr) {
+	/* errinfo removed in new revision */
+	output_diff(cp, YANG_K_ERROR_MESSAGE,
+		    olderr->error_message, NULL, FALSE);
+	output_diff(cp, YANG_K_ERROR_APP_TAG,
+		    olderr->error_app_tag, NULL, FALSE);
+	output_diff(cp, YANG_K_DESCRIPTION,
+		    olderr->descr, NULL, FALSE);
+	output_diff(cp, YANG_K_REFERENCE,
+		    newerr->ref, NULL, FALSE);
+    } else if (olderr && newerr) {
+	/* errinfo maybe changed in new revision */
+	output_diff(cp, YANG_K_ERROR_MESSAGE,
+		    olderr->error_message,
+		    newerr->error_message, FALSE);
+	output_diff(cp, YANG_K_ERROR_APP_TAG,
+		    olderr->error_app_tag,
+		    newerr->error_app_tag, FALSE);
+	output_diff(cp, YANG_K_DESCRIPTION,
+		    olderr->descr, newerr->descr, FALSE);
+	output_diff(cp, YANG_K_REFERENCE,
+		    olderr->ref, newerr->ref, FALSE);
+    }
+} /* output_errinfo_diff */
+
+
+/********************************************************************
+* FUNCTION errinfo_changed
+*
+* Check if the ncx_errinfo_t struct changed at all
+*
+* INPUTS:
+*   olderr == old error struct to check
+*   newerr == new error struct to check
+*
+* RETURNS:
+*   1 if field changed
+*   0 if field not changed
+*********************************************************************/
+static uint32
+    errinfo_changed (const ncx_errinfo_t *olderr,
+		     const ncx_errinfo_t *newerr)
+{
+    if ((!olderr && newerr) || (olderr && !newerr)) {
+	return 1;
+    } else if (olderr && newerr) {
+	if (str_field_changed(YANG_K_DESCRIPTION,
+			      olderr->descr, newerr->descr,
+			      FALSE, NULL)) {
+	    return 1;
+	}
+	if (str_field_changed(YANG_K_REFERENCE,
+			      olderr->ref, newerr->ref,
+			      FALSE, NULL)) {
+	    return 1;
+	}
+	if (str_field_changed(YANG_K_ERROR_APP_TAG,
+			      olderr->error_app_tag,
+			      newerr->error_app_tag,
+			      FALSE, NULL)) {
+	    return 1;
+	}
+	if (str_field_changed(YANG_K_ERROR_MESSAGE,
+			      olderr->error_message,
+			      newerr->error_message,
+			      FALSE, NULL)) {
+	    return 1;
+	}
+	return 0;
+    } else {
+	return 0;
+    }
+    /*NOTREACHED*/
+    
+}  /* errinfo_changed */
+
+
+/********************************************************************
+ * FUNCTION output_range_diff
+ * 
+ *  Output the differences report for one range or length
+ *  clause and any sub-clauses,
+ *  within a leaf, leaf-list, or typedef definition
+ *
+ * Only the top-level typedef is checked, instead of
+ * following the type chain looking for the first rangedef.
+ * This prevents chain mis-alignment false positives
+ *
+ * Only the top-level rangedef is relevant for validation,
+ * since each refinement must be a valid subset of its parent
+ * range definition
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    keyword == range or length keyword
+ *    oldtypdef == old internal typedef
+ *    newtypdef == new internal typedef
+ *
+ *********************************************************************/
+static void
+    output_range_diff (yangdiff_diffparms_t *cp,
+		       const xmlChar *keyword,
+		       const typ_def_t *oldtypdef,
+		       const typ_def_t *newtypdef)
+{
+    const typ_range_t   *oldrange, *newrange;
+    const ncx_errinfo_t *olderr, *newerr;
+
+    oldrange = typ_get_crange_con(oldtypdef);
+    newrange = typ_get_crange_con(newtypdef);
+
+    olderr = typ_get_range_errinfo(oldtypdef);
+    newerr = typ_get_range_errinfo(newtypdef);
+
+    if (!oldrange && newrange) {
+	/* range added in new revision */
+	output_diff(cp, keyword, NULL, newrange->rangestr, FALSE);
+	indent_in(cp);
+	output_errinfo_diff(cp, NULL, newerr);
+	indent_out(cp);
+    } else if (oldrdef && !newrdef) {
+	/* range removed in new revision */
+	output_diff(cp, keyword, oldrange->rangestr, NULL, FALSE);
+	indent_in(cp);
+	output_errinfo_diff(cp, olderr, NULL);
+	indent_out(cp);
+    } else if (oldrdef && newrdef) {
+
+	/* check if range changed 
+	 * !!! should really compare rangedef structs to see
+	 * !!! if relative min and max are equivalent to literal numbers
+	 */
+	if (xml_strcmp(oldrange->rangestr, newrange->rangestr)) {
+	    output_diff(cp, keyword, oldrange->rangestr, 
+			newrange->rangestr, FALSE);
+	    indent_in(cp);
+	    output_errinfo_diff(cp, olderr, newerr);
+	    indent_out(cp);
+	}
+    }
+
+} /* output_range_diff */
+
+
+/********************************************************************
+ * FUNCTION output_pattern_diff
+ * 
+ *  Output the differences report for one pattern clause and
+ *  any of its sub-clauses, within a leaf, leaf-list, or 
+ *  typedef definition
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldtypdef == old internal typedef
+ *    newtypdef == new internal typedef
+ *
+ *********************************************************************/
+static void
+    output_pattern_diff (yangdiff_diffparms_t *cp,
+			 const typ_def_t *oldtypdef,
+			 const typ_def_t *newtypdef)
+{
+    const xmlChar       *oldpat, *newpat;
+    const ncx_errinfo_t *olderr, *newerr;
+
+    oldpat = typ_get_pattern(oldtypdef);
+    newpat = typ_get_pattern(newtypdef);
+
+    olderr = typ_get_pattern_errinfo(oldtypdef);
+    newerr = typ_get_pattern_errinfo(newtypdef);
+
+    if (!oldpat && newpat) {
+	/* pattern added in new revision */
+	output_diff(cp, YANG_K_PATTERN, NULL, newpat, FALSE);
+	indent_in(cp);
+	output_errinfo_diff(cp, NULL, newerr);
+	indent_out(cp);
+    } else if (oldpat && !newpat) {
+	/* pattern removed in new revision */
+	output_diff(cp, YANG_K_PATTERN, oldpat, NULL, FALSE);
+	indent_in(cp);
+	output_errinfo_diff(cp, olderr, NULL);
+	indent_out(cp);
+    } else if (oldpat && newpat) {
+	/* check if pattern changed */
+	if (xml_strcmp(oldpat, newpat)) {
+	    output_diff(cp, YANG_K_PATTERN, oldpat, newpat, FALSE);
+	    indent_in(cp);
+	    output_errinfo_diff(cp, olderr, newerr);
+	    indent_out(cp);
+	} else if (errinfo_changed(olderr, newerr)) {
+	    output_mstart_line(cp, YANG_K_PATTERN, oldpat);
+	    indent_in(cp);
+	    output_errinfo_diff(cp, olderr, newerr);
+	    indent_out(cp);
+	}
+    }
+
+} /* output_pattern_diff */
+
+
+/********************************************************************
+ * FUNCTION output_eb_type_diff
+ * 
+ *  Output the differences report for one enum or bits sub-clauses
+ *  within a leaf, leaf-list, or typedef definition
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    name == type name to use
+ *    oldtypdef == old internal typedef
+ *    newtypdef == new internal typedef
+ *    isbits == TRUE if NCX_BT_BITS
+ *              FALSE if NCX_BT_ENUM
+ *********************************************************************/
+static void
+    output_eb_type_diff (yangdiff_diffparms_t *cp,
+			 const xmlChar *name,
+			 const typ_def_t *oldtypdef,
+			 const typ_def_t *newtypdef,
+			 boolean isbits)
+{
+
+} /* output_eb_type_diff */
+
+
+/********************************************************************
  * FUNCTION output_one_type_diff
  * 
  *  Output the differences report for one type section
@@ -1277,8 +1560,6 @@ static void
  * INPUTS:
  *    cp == parameter block to use
  *    name == type nameto use
- *    oldmod == old module
- *    newmod == new module
  *    oldtypdef == old internal typedef
  *    newtypdef == new internal typedef
  *
@@ -1289,70 +1570,114 @@ static void
 			  const typ_def_t *oldtypdef,
 			  const typ_def_t *newtypdef)
 {
-    xmlChar        *p, *oldp, *newp;
-    yangdiff_cdb_t  typcdb[5];
-    uint32          changecnt, i;
-    boolean         isrev;
-
-    typ_def_t         *oldtest, *newtest;
-    const xmlChar     *oldpath, *newpath;
+    const typ_def_t    *oldbase, *newbase;
+    const typ_def_t    *oldtest, *newtest;
     const ncx_import_t *oldimp, *newimp;
-    ncx_btype_t        oldbtyp, newbtyp;
+    xmlChar            *p, *oldp, *newp;
+    const xmlChar      *oldname, *newname;
+    const xmlChar      *oldpath, *newpath;
+    yangdiff_cdb_t      typcdb[5];
+    uint32              changecnt, i;
+    boolean             isrev;
+    ncx_btype_t         oldbtyp, newbtyp;
+    ncx_tclass_t        oldclass, newclass;
+
+
+    oldclass = oldtypdef->class;
+    newclass = newtypdef->class;
+
+    oldname = typ_get_name(oldtypdef);
+    newname = typ_get_name(newtypdef);
+
+    oldbase = typ_get_cbase_typdef(oldtypdef);
+    newbase = typ_get_cbase_typdef(newtypdef);
+
+    oldbtyp = typ_get_basetype(oldtypdef);
+    newbtyp = typ_get_basetype(newtypdef);
 
     /* check if there is a module prefix involved
      * in the change.  This may be a false positive
      * if the prefix simply changed
+     * create YANG QNames for the type change record
+     * use the scratch buffer cp->buff for both strings
      */
-    if (prefix_field_changed(cp->oldmod, cp->newmod,
-			     oldtypdef->prefix, 
-			     newtypdef->prefix)) {
-	oldp = p = cp->buff;
-	if (oldtypdef->prefix) {
-	    p += xml_strcpy(p, oldtypdef->prefix);
-	    *p++ = ':';
+    p = cp->buff;
+    if (oldtypdef->prefix) {
+	oldp = p;
+	p += xml_strcpy(p, oldtypdef->prefix);
+	*p++ = ':';
+	p += xml_strcpy(p, oldname);
+	if (oldtypdef->class==NCX_CL_NAMED) {
+	    *p++ = ' ';
+	    *p++ = '(';
+	    p += xml_strcpy((const xmlChar *)
+			    tk_get_btype_sym(oldbtyp));
+	    *p++ = ')';
+	    *p = 0;	    
 	}
-	p += xml_strcpy(p, oldtypdef->name);
-	newp = ++p;
-	if (newtypdef->prefix) {
-	    p += xml_strcpy(p, newtypdef->prefix);
-	    *p++ = ':';
+	p++;   /* leave last NULL char in place */
+	oldname = oldp;
+    }
+    if (newtypdef->prefix) {
+	newp = p;
+	p += xml_strcpy(p, newtypdef->prefix);
+	*p++ = ':';
+	p += xml_strcpy(p, newname);
+	if (newtypdef->class==NCX_CL_NAMED) {
+	    *p++ = ' ';
+	    *p++ = '(';
+	    p += xml_strcpy((const xmlChar *)
+			    tk_get_btype_sym(newbtyp));
+	    *p++ = ')';
+	    *p = 0;
 	}
-	p += xml_strcpy(p, newtypdef->name);	    
-	(void)str_field_changed(YANG_K_TYPE, oldp, newp,
-				TRUE, &typcdb[0]);
-    } else if (str_field_changed(NULL, oldtypdef->typename, 
-			  newtypdef->typename, FALSE, NULL)) {
-
+	newname = newp;
     }
 
-
-
-
-    ses_putstr_indent(cp->scb, isrev ? MOD_STR : M_STR, 
-		      cp->curindent);
-    ses_putstr(cp->scb, YANG_K_TYPE);
-    ses_putchar(cp->scb, ' ');
-    if (oldtyp->prefix) {
-	ses_putstr(cp->scb, oldtyp->prefix);
-	ses_putchar(cp->scb, ':');
+    /* Print the type name change set only if it really
+     * changed; otherwise force an M line to be printed
+     */
+    if (str_field_changed(YANG_K_TYPE, oldname, newname, 
+			  TRUE, &typcdb[0])) {
+	output_cdb_diff(cp, YANG_K_TYPEDEF, oldname, &typcdb[0]);
+    } else {
+	output_mstart_line(cp, YANG_K_TYPE, oldname);
     }
-    ses_putstr(cp->scb, oldtyp->name);
 
     if (cp->edifftype == YANGDIFF_DT_TERSE) {
 	return;
     }
 
-    indent_in(cp);
-
-
-
-    if (oldtypdef->class != newtypdef->class) {
-	return 1;
+    if (oldclass==NCX_CL_BASE && newclass==NCX_CL_BASE) {
+	/* type field is a plain builtin like 'int32;' */
+	return;
     }
+
+    /* in all modes except 'terse', indent 1 level and
+     * show the specific sub-clauses that have changed
+     */
+    indent_in(cp);
 
     switch (oldtypdef->class) {
     case NCX_CL_BASE:
-	return (oldtypdef->def.base == newtypdef->def.base) ? 0 : 1;
+	if (typ_is_number(newbtyp)) {
+	    output_range_diff(cp, YANG_K_RANGE, oldtypdef, newtypdef);
+	} else if (typ_is_string(newbtyp)) {
+	    output_range_diff(cp, YANG_K_LENGTH, oldtypdef, newtypdef);
+	    output_pattern_diff(cp, name, oldtypdef, newtypdef);
+	} else {
+	    switch (newbtyp) {
+	    case NCX_BT_ENUM:
+		output_eb_type_diff(cp, name, oldtypdef, newtypdef, FALSE);
+		break;
+	    case NCX_BT_BITS:
+		output_eb_type_diff(cp, name, oldtypdef, newtypdef, TRUE);
+		break;
+	    default:
+		;
+	    }
+	}
+	break;
     case NCX_CL_SIMPLE:
 	oldbtyp = typ_get_basetype(oldtypdef);
 	newbtyp = typ_get_basetype(newtypdef);
@@ -1423,16 +1748,10 @@ static void
     changecnt = 0;
     changecnt += str_field_changed(YANG_K_DESCRIPTION,
 				   oldext->descr, newext->descr, 
-				   isrev, &extcdb[0]);
+				   isrev, &typcdb[0]);
     changecnt += str_field_changed(YANG_K_REFERENCE,
 				   oldext->ref, newext->ref, 
-				   isrev, &extcdb[1]);
-    changecnt += str_field_changed(YANG_K_ARGUMENT,
-				   oldext->arg, newext->arg, 
-				   isrev, &extcdb[2]);
-    changecnt += bool_field_changed(YANG_K_YIN_ELEMENT,
-				    oldext->argel, newext->argel, 
-				    isrev, &extcdb[3]);
+				   isrev, &typcdb[1]);
     changecnt += status_field_changed(YANG_K_STATUS,
 				      oldext->status, newext->status, 
 				      isrev, &extcdb[4]);
@@ -1445,30 +1764,24 @@ static void
     case YANGDIFF_DT_TERSE:
     case YANGDIFF_DT_BRIEF:
     case YANGDIFF_DT_REVISION:
-	ses_putstr_indent(cp->scb, 
-			  (cp->edifftype==YANGDIFF_DT_REVISION) ? 
-			  MOD_STR : M_STR, 
-			  cp->curindent);
-	ses_putstr(cp->scb, YANG_K_EXTENSION);
-	ses_putchar(cp->scb, ' ');
-	ses_putstr(cp->scb, oldext->name);
+	output_mstart_line(cp, YANG_K_TYPE, newname);
 	if (cp->edifftype == YANGDIFF_DT_TERSE) {
 	    return;
 	}
 
 	indent_in(cp);
 	for (i=0; i<5; i++) {
-	    if (extcdb[i].changed) {
-		output_cdb_line(cp, &extcdb[i]);
+	    if (typcdb[i].changed) {
+		output_cdb_line(cp, &typcdb[i]);
 	    }
 	}
 	indent_out(cp);
 	break;
     case YANGDIFF_DT_NORMAL:
 	for (i=0; i<5; i++) {
-	    if (extcdb[i].changed) {
-		output_cdb_diff(cp, YANG_K_EXTENSION,
-				oldext->name, &extcdb[i]);
+	    if (typcdb[i].changed) {
+		output_cdb_diff(cp, YANG_K_TYPE,
+				oldname, &typcdb[i]);
 	    }
 	}
 	break;
@@ -1477,57 +1790,6 @@ static void
     }
 
 } /* output_one_type_diff */
-
-
-/********************************************************************
-* FUNCTION errinfo_changed
-*
-* Check if the ncx_errinfo_t struct changed at all
-*
-* INPUTS:
-*   olderr == old error struct to check
-*   newerr == new error struct to check
-*
-* RETURNS:
-*   1 if field changed
-*   0 if field not changed
-*********************************************************************/
-static uint32
-    errinfo_changed (const ncx_errinfo_t *olderr,
-		     const ncx_errinfo_t *newerr)
-{
-    if ((!olderr && newerr) || (olderr && !newerr)) {
-	return 1;
-    } else if (olderr && newerr) {
-	if (str_field_changed(YANG_K_DESCRIPTION,
-			      olderr->descr, newerr->descr,
-			      FALSE, NULL)) {
-	    return 1;
-	}
-	if (str_field_changed(YANG_K_REFERENCE,
-			      olderr->ref, newerr->ref,
-			      FALSE, NULL)) {
-	    return 1;
-	}
-	if (str_field_changed(YANG_K_ERROR_APP_TAG,
-			      olderr->error_app_tag,
-			      newerr->error_app_tag,
-			      FALSE, NULL)) {
-	    return 1;
-	}
-	if (str_field_changed(YANG_K_ERROR_MESSAGE,
-			      olderr->error_message,
-			      newerr->error_message,
-			      FALSE, NULL)) {
-	    return 1;
-	}
-	return 0;
-    } else {
-	return 0;
-    }
-    /*NOTREACHED*/
-    
-}  /* errinfo_changed */
 
 
 /********************************************************************
@@ -1547,7 +1809,8 @@ static uint32
     pattern_changed (const typ_def_t *oldtypdef,
 		     const typ_def_t *newtypdef)
 {
-    const xmlChar  *oldpat, *newpat;
+    const xmlChar       *oldpat, *newpat;
+    const ncx_errinfo_t *olderr, *newerr;
 
     oldpat = typ_get_pattern(oldtypdef);
     newpat = typ_get_pattern(newtypdef);
@@ -1563,9 +1826,11 @@ static uint32
 	return 0;    	/* no pattern defined */
     }
 
+    olderr = typ_get_pattern_errinfo(oldtypdef);
+    newerr = typ_get_pattern_errinfo(newtypdef);
+
     /* pattern string is the same, check error stuff */
-    return errinfo_changed(oldtypdef->pat_errinfo,
-			   newtypdef->pat_errinfo);
+    return errinfo_changed(olderr, newerr);
     
 }  /* pattern_changed */
 
@@ -1588,6 +1853,7 @@ static uint32
 		   const typ_def_t *newtypdef)
 {
     const typ_range_t     *oldr, *newr;
+    const ncx_errinfo_t   *olderr, *newerr;
 
     oldr = typ_get_crange_con(oldtypdef);
     newr = typ_get_crange_con(newtypdef);
@@ -1604,8 +1870,9 @@ static uint32
     }
 
     /* range string is the same, check error stuff */
-    return errinfo_changed(oldtypdef->range_errinfo,
-			   newtypdef->range_errinfo);
+    olderr = typ_get_range_errinfo(oldtypdef);
+    newerr = typ_get_range_errinfo(newtypdef);
+    return errinfo_changed(olderr, newerr);
     
 }  /* range_changed */
 

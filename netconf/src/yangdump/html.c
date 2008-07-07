@@ -126,6 +126,8 @@ date         init     comment
 
 #define MENU_NEST_LEVEL   4
 
+#define MENU_LABEL_LEN    30
+
 /********************************************************************
 *                                                                   *
 *                           T Y P E S                               *
@@ -1523,14 +1525,14 @@ static void
 			     con->ref, indent, 2, TRUE);
 	}
 
-	write_appinfoQ(scb, mod, cp, &con->appinfoQ, indent);
-
 	if (notrefined) {
 	    write_typedefs(scb, mod, cp, con->typedefQ, indent);
 	    write_groupings(scb, mod, cp, con->groupingQ, indent);
 	}
 
 	write_objects(scb, mod, cp, con->datadefQ, indent);
+
+	write_appinfoQ(scb, mod, cp, &con->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
@@ -1713,7 +1715,7 @@ static void
 			obj_get_name(key->keyobj),
 			key->keyobj->linenum);
 		if (nextkey) {
-		    ses_putstr(scb, (const xmlChar *)", ");
+		    ses_putchar(scb, ' ');
 		}
 	    }
 	    ses_putstr(scb, (const xmlChar *)"\";");
@@ -1796,14 +1798,14 @@ static void
 			     list->ref, indent, 2, TRUE);
 	}
 
-	write_appinfoQ(scb, mod, cp, &list->appinfoQ, indent);
-
 	if (notrefined) {
 	    write_typedefs(scb, mod, cp, list->typedefQ, indent);
 	    write_groupings(scb, mod, cp, list->groupingQ, indent);
 	}
 
 	write_objects(scb, mod, cp, list->datadefQ, indent);
+
+	write_appinfoQ(scb, mod, cp, &list->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
@@ -1850,12 +1852,12 @@ static void
 			     choic->ref, indent, 2, TRUE);
 	}
 
-	write_appinfoQ(scb, mod, cp, &choic->appinfoQ, indent);
-
 	write_objects(scb, mod, cp, choic->caseQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
+
+	write_appinfoQ(scb, mod, cp, &choic->appinfoQ, indent);
 
 	/* end choice comment */
 	write_endsec_cmt(scb, YANG_K_CHOICE, choic->name);
@@ -1885,9 +1887,9 @@ static void
 			     cas->ref, indent, 2, TRUE);
 	}
 
-	write_appinfoQ(scb, mod, cp, &cas->appinfoQ, indent);
-
 	write_objects(scb, mod, cp, cas->datadefQ, indent);
+
+	write_appinfoQ(scb, mod, cp, &cas->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
@@ -1942,9 +1944,9 @@ static void
 				 uses->ref, indent, 2, TRUE);
 	    }
 
-	    write_appinfoQ(scb, mod, cp, &uses->appinfoQ, indent);
-
 	    write_objects(scb, mod, cp, uses->datadefQ, indent);
+
+	    write_appinfoQ(scb, mod, cp, &uses->appinfoQ, indent);
 
 	    /* end object definition clause */
 	    ses_putstr_indent(scb, END_SEC, startindent);
@@ -2035,13 +2037,13 @@ static void
 			     rpc->ref, indent, 2, TRUE);
 	}
 
-	write_appinfoQ(scb, mod, cp, &rpc->appinfoQ, indent);
-
 	write_typedefs(scb, mod, cp, &rpc->typedefQ, indent);
 
 	write_groupings(scb, mod, cp, &rpc->groupingQ, indent);
 
 	write_objects(scb, mod, cp, &rpc->datadefQ, indent);
+
+	write_appinfoQ(scb, mod, cp, &rpc->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
@@ -2057,13 +2059,13 @@ static void
 	    return;
 	}
 
-	write_appinfoQ(scb, mod, cp, &rpcio->appinfoQ, indent);
-
 	write_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
 
 	write_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
 
 	write_objects(scb, mod, cp, &rpcio->datadefQ, indent);
+
+	write_appinfoQ(scb, mod, cp, &rpcio->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
@@ -2091,13 +2093,13 @@ static void
 			     notif->ref, indent, 2, TRUE);
 	}
 
-	write_appinfoQ(scb, mod, cp, &notif->appinfoQ, indent);
-
 	write_typedefs(scb, mod, cp, &notif->typedefQ, indent);
 
 	write_groupings(scb, mod, cp, &notif->groupingQ, indent);
 
 	write_objects(scb, mod, cp, &notif->datadefQ, indent);
+
+	write_appinfoQ(scb, mod, cp, &notif->appinfoQ, indent);
 
 	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
@@ -2543,6 +2545,7 @@ static void
     const obj_template_t *obj;
     const dlq_hdr_t      *childQ;
     boolean               cooked;
+    xmlChar               buff[MENU_LABEL_LEN];
 
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
     cooked = strcmp(cp->objview, OBJVIEW_COOKED) ? FALSE : TRUE;
@@ -2558,6 +2561,11 @@ static void
 	if (cooked) {
 	    /* skip uses and augment objects in this mode */
 	    if (!obj_has_name(obj)) {
+		continue;
+	    }
+	} else {
+	    /* skip over cloned objects */
+	    if (obj_is_cloned(obj)) {
 		continue;
 	    }
 	}
@@ -3267,7 +3275,8 @@ static void
     /* end module and page */
     ses_indent(scb, cp->indent);
     ses_putchar(scb, '}');
-    write_endsec_cmt(scb, (mod->ismod) ? YANG_K_MODULE : YANG_K_SUBMODULE, mod->name);
+    write_endsec_cmt(scb, (mod->ismod) ? 
+		     YANG_K_MODULE : YANG_K_SUBMODULE, mod->name);
     end_elem(scb, EL_PRE, 0);
 
     /* end yellow box div */

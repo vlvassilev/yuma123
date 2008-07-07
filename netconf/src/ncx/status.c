@@ -550,6 +550,8 @@ const char *
 	return "undefined prefix";
     case ERR_NCX_IMPORT_ERRORS:
 	return "imported module has errors";
+    case ERR_NCX_PATTERN_FAILED:
+	return "pattern match failed";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

@@ -253,7 +253,8 @@ typedef enum status_t_
     ERR_NCX_EXP_SUBMODULE,              /* 330 */
     ERR_NCX_PREFIX_NOT_FOUND,           /* 331 */
     ERR_NCX_IMPORT_ERRORS,              /* 332 */
-    ERR_LAST_USR_ERR,                   /* 333 -- not really used */
+    ERR_NCX_PATTERN_FAILED,             /* 333 */
+    ERR_LAST_USR_ERR,                   /* 334 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */

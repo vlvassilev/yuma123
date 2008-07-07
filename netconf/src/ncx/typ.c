@@ -699,7 +699,6 @@ typ_def_t *
     typ_get_new_named (typ_def_t  *typdef)
 {
     if (typdef->class != NCX_CL_NAMED) {
-	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }
     return typdef->def.named.newtyp;
@@ -722,7 +721,6 @@ const typ_def_t *
     typ_cget_new_named (const typ_def_t  *typdef)
 {
     if (typdef->class != NCX_CL_NAMED) {
-	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }
     return typdef->def.named.newtyp;
@@ -1066,6 +1064,8 @@ dlq_hdr_t *
     typ_get_rangeQ (typ_def_t *typdef)
 {
     switch (typdef->class) {
+    case NCX_CL_BASE:
+	return NULL;
     case NCX_CL_SIMPLE:
 	return &typdef->def.simple.rangeQ;
     case NCX_CL_COMPLEX:
@@ -1077,7 +1077,6 @@ dlq_hdr_t *
 	} else {
 	    return typ_get_rangeQ(&typdef->def.named.typ->typdef);
 	}
-	/*NOTREACHED*/
     case NCX_CL_REF:
 	return typ_get_rangeQ(typdef->def.ref.typdef);
     default:
@@ -1103,6 +1102,8 @@ dlq_hdr_t *
     typ_get_rangeQ_con (typ_def_t *typdef)
 {
     switch (typdef->class) {
+    case NCX_CL_BASE:
+	return NULL;
     case NCX_CL_SIMPLE:
 	return &typdef->def.simple.rangeQ;
     case NCX_CL_COMPLEX:
@@ -1139,6 +1140,8 @@ const dlq_hdr_t *
     typ_get_crangeQ (const typ_def_t *typdef)
 {
     switch (typdef->class) {
+    case NCX_CL_BASE:
+	return NULL;
     case NCX_CL_SIMPLE:
 	return &typdef->def.simple.rangeQ;
     case NCX_CL_COMPLEX:
@@ -1176,6 +1179,8 @@ const dlq_hdr_t *
     typ_get_crangeQ_con (const typ_def_t *typdef)
 {
     switch (typdef->class) {
+    case NCX_CL_BASE:
+	return NULL;
     case NCX_CL_SIMPLE:
 	return &typdef->def.simple.rangeQ;
     case NCX_CL_COMPLEX:
@@ -1212,6 +1217,8 @@ typ_range_t *
     typ_get_range_con (typ_def_t *typdef)
 {
     switch (typdef->class) {
+    case NCX_CL_BASE:
+	return NULL;
     case NCX_CL_SIMPLE:
 	return &typdef->def.simple.range;
     case NCX_CL_COMPLEX:
@@ -1248,6 +1255,8 @@ const typ_range_t *
     typ_get_crange_con (const typ_def_t *typdef)
 {
     switch (typdef->class) {
+    case NCX_CL_BASE:
+	return NULL;
     case NCX_CL_SIMPLE:
 	return &typdef->def.simple.range;
     case NCX_CL_COMPLEX:
@@ -1310,6 +1319,8 @@ const typ_rangedef_t *
     typ_first_rangedef_con (const typ_def_t *typdef)
 {
     switch (typdef->class) {
+    case NCX_CL_BASE:
+	return NULL;
     case NCX_CL_SIMPLE:
 	return (const typ_rangedef_t *)
 	    dlq_firstEntry(&typdef->def.simple.rangeQ);
@@ -1344,7 +1355,9 @@ const typ_rangedef_t *
 *    ub == pointer to output upper bound number
 *
 * OUTPUTS:
-*  *btyp == the type of number in the return type, if non-NULL
+*   *btyp == the type of number in the return type, if non-NULL
+*   *lb == lower bound number
+*   *ub == upper bound number
 *
 * RETURNS:
 *   status, NO_ERR == something found
@@ -1360,6 +1373,9 @@ status_t
     
     res = NO_ERR;
     switch (typdef->class) {
+    case NCX_CL_BASE:
+	res = ERR_NCX_SKIPPED;
+	break;
     case NCX_CL_SIMPLE:
 	/* get lower bound */
 	rdef = (const typ_rangedef_t *)
@@ -3717,7 +3733,6 @@ uint32
     typ_enumdef_count (const typ_def_t *typdef)
 {
     if (typdef->class != NCX_CL_SIMPLE) {
-	SET_ERROR(ERR_INTERNAL_VAL);
 	return 0;
     }
 
@@ -3771,6 +3786,7 @@ const typ_sval_t *
 	}
 	break;
     case NCX_CL_REF:
+	/**** !!! SHOULD THIS BE NULL INSTEAD !!!  ****/
         retval = typ_first_strdef(typdef->def.ref.typdef);
 	break;
     default:
@@ -4325,6 +4341,58 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION typ_get_pattern_errinfo
+* 
+* Get the pattern errinfo for a typdef
+*
+* INPUTS:
+*   typdef == typ_def_t to check
+*
+* RETURNS:
+*   pointer to pattern string or NULL if none
+*********************************************************************/
+const ncx_errinfo_t *
+    typ_get_pattern_errinfo (const typ_def_t *typdef)
+{
+    if (typdef->class==NCX_CL_NAMED) {
+	if (typdef->def.named.newtyp) {
+	    return typdef->def.named.newtyp->pat_errinfo;
+	}
+    } else {
+	return typdef->pat_errinfo;
+    }
+    return NULL;
+
+}  /* typ_get_pattern_errinfo */
+
+
+/********************************************************************
+* FUNCTION typ_get_range_errinfo
+* 
+* Get the range errinfo for a typdef
+*
+* INPUTS:
+*   typdef == typ_def_t to check
+*
+* RETURNS:
+*   pointer to pattern string or NULL if none
+*********************************************************************/
+const ncx_errinfo_t *
+    typ_get_range_errinfo (const typ_def_t *typdef)
+{
+    if (typdef->class==NCX_CL_NAMED) {
+	if (typdef->def.named.newtyp) {
+	    return typdef->def.named.newtyp->range_errinfo;
+	}
+    } else {
+	return typdef->range_errinfo;
+    }
+    return NULL;
+
+}  /* typ_get_range_errinfo */
+
+
+/********************************************************************
 * FUNCTION typ_clean_typeQ
 * 
 * Clean a queue of typ_template_t structs
@@ -4514,6 +4582,56 @@ boolean
         return FALSE;
     }
 }  /* typ_ok_for_union */
+
+
+/********************************************************************
+* FUNCTION typ_ok
+* 
+* Check if the typdef chain has any errors
+* Checks the named types in the typdef chain to
+* see if they were already flagged as invalid
+*
+* INPUTS:
+*     typdef == starting typdef to check
+* RETURNS:
+*     TRUE if okay, FALSE if any errors so far
+*********************************************************************/
+boolean
+    typ_ok (const typ_def_t *typdef)
+{
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    switch (typdef->class) {
+    case NCX_CL_BASE:
+    case NCX_CL_SIMPLE:
+    case NCX_CL_COMPLEX:
+	return TRUE;
+    case NCX_CL_NAMED:
+	if (typdef->def.named.typ) {
+	    if (typdef->def.named.typ->res != NO_ERR) {
+		return FALSE;
+	    } else {
+		return typ_ok(&typdef->def.named.typ->typdef);
+	    }
+	} else {
+	    return FALSE;
+	}
+    case NCX_CL_REF:
+	if (typdef->def.ref.typdef) {
+	    return typ_ok(typdef->def.ref.typdef);
+	} else {
+	    return FALSE;
+	}
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
+    }
+}  /* typ_ok */
 
 
 /********************************************************************

@@ -344,6 +344,7 @@ typedef struct typ_template_t_ {
     uint32       linenum;
     tk_token_t  *tk;
     void        *grp;       /* const back-ptr to direct grp parent */
+    status_t     res;
 } typ_template_t;
 
 
@@ -807,6 +808,12 @@ extern status_t
 extern const xmlChar *
     typ_get_pattern (const typ_def_t *typdef);
 
+extern const ncx_errinfo_t *
+    typ_get_pattern_errinfo (const typ_def_t *typdef);
+
+extern const ncx_errinfo_t *
+    typ_get_range_errinfo (const typ_def_t *typdef);
+
 /* clean Q of typ_template_t */
 extern void
     typ_clean_typeQ (dlq_hdr_t *que);
@@ -823,6 +830,10 @@ extern boolean
 
 extern boolean
     typ_ok_for_union (ncx_btype_t btyp);
+
+/* check result in typdef chain */
+extern boolean
+    typ_ok (const typ_def_t *typdef);
 
 extern const xmlChar *
     typ_get_keyref_path (const typ_def_t *typdef);

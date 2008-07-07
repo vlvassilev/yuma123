@@ -439,22 +439,23 @@ static status_t
 	/* check this typdef for restrictions */
 	if (!xml_strcmp(sval->val, strval)) {
 	    return NO_ERR;
+	} else {
+	    return ERR_NCX_VAL_NOTINSET;
 	}
-	break;
     case NCX_SR_PATTERN:
 	/* check this typdef against the specified pattern */
 	if (sval->pattern) {
 	    if (pattern_match(sval->pattern, strval)) {
 		return NO_ERR;
+	    } else {
+		return ERR_NCX_PATTERN_FAILED;
 	    }
 	} else {
 	    return SET_ERROR(ERR_INTERNAL_PTR);
 	}	    
-	break;
     default:
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
-    return ERR_NCX_VAL_NOTINSET;
 
 } /* check_sval */
 
@@ -567,7 +568,7 @@ static status_t
     }
     return ERR_NCX_NOT_FOUND;
 
-} /* check_svalQ_eval */
+} /* check_svalQ_enum */
 
 
 /********************************************************************
@@ -1678,7 +1679,6 @@ status_t
 		   ncx_btype_t btyp,
 		   const xmlChar *strval)
 {
-    const typ_def_t *randef;
     const dlq_hdr_t *restQ;
     const dlq_hdr_t *rangeQ;
     ncx_strrest_t   strrest;
@@ -1699,24 +1699,14 @@ status_t
     case NCX_BT_ENAME:
 	break;
     case NCX_BT_INSTANCE_ID:
-	return NO_ERR;  /***/
+	return NO_ERR;  /*** BUG: MISSING INSTANCE ID VALIDATION ***/
     default:
 	return ERR_NCX_WRONG_DATATYP;
     }
 
-    /* get the typdef for the range def, if any */
-    randef = typ_get_cqual_typdef(typdef, NCX_SQUAL_RANGE);
-    if (randef) {
-	switch (randef->class) {
-	case NCX_CL_SIMPLE:
-	    rangeQ = &randef->def.simple.rangeQ;
-	    break;
-	case NCX_CL_NAMED:
-	    rangeQ = &randef->def.named.newtyp->def.simple.rangeQ;
-	    break;
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
+    /* get the typdef for the range def to check the length */
+    rangeQ = typ_get_crangeQ(typdef);
+    if (rangeQ && !dlq_empty(rangeQ)) {
 	len.u = xml_strlen(strval);
 	res = val_check_rangeQ(NCX_BT_UINT32, &len, rangeQ);
 	if (res != NO_ERR) {
@@ -1743,6 +1733,11 @@ status_t
 	case NCX_CL_NAMED:
 	    restQ = &typdef->def.named.newtyp->def.simple.valQ;
 	    strrest = typdef->def.named.newtyp->def.simple.strrest;
+
+	    /* the NCX = or += operators are not supported in YANG
+	     * this flag is ignored if the string restriction is
+	     * a 'pattern'
+	     */
 	    last = (typdef->def.named.newtyp->def.simple.flags 
 		    & TYP_FL_REPLACE) ? TRUE : FALSE;
 	    break;
@@ -1752,10 +1747,16 @@ status_t
 
 	/* check if value explicitly set in this Q */
 	res = check_svalQ(strval, strrest, restQ);
-	if (res == NO_ERR) {
-	    return NO_ERR;
-	} else if (last) {
-	    return res;
+	if (strrest == NCX_SR_PATTERN) {
+	    if (res != NO_ERR) {
+		return res;
+	    } /* else keep looking for more patterns in the type chain */
+	} else {
+	    if (res == NO_ERR) {
+		return NO_ERR;
+	    } else if (last) {
+		return res;
+	    }
 	}
 
 	/* try again */
@@ -1765,12 +1766,17 @@ status_t
 	}
 	    
 	if (!typdef) {
-	    /* since there was at least one value restriction
-	     * that did not pass the test, the fact that there
-	     * are no more possible values to check means that
-	     * this string does not pass the value restriction test 
-	     */
-	    return ERR_NCX_VAL_NOTINSET;
+	    if (strrest == NCX_SR_PATTERN) {
+		return NO_ERR;
+	    } else {
+		/* this is an NCX value set test
+		 * since there was at least one value restriction
+		 * that did not pass the test, the fact that there
+		 * are no more possible values to check means that
+		 * this string does not pass the value restriction test 
+		 */
+		return ERR_NCX_VAL_NOTINSET;
+	    }
 	}
     }
     /*NOTREACHED*/

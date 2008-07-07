@@ -141,7 +141,8 @@ static status_t
 		  const xmlChar *name,
 		  const xmlChar *defval,
 		  obj_template_t *obj,
-		  grp_template_t *grp);
+		  grp_template_t *grp,
+		  boolean fromdef);
 
 
 /********************************************************************
@@ -2576,7 +2577,9 @@ static status_t
 *   unionQ == Q of unfinished typ_unionnode_t structs
 *   parent == obj_template_t containing the union (may be NULL)
 *   grp == grp_template_t containing the union (may be NULL)
-*            
+*   fromdef == TRUE if this is a call for a typedef
+*           == FALSE if this is a call for a leaf or leaf-list
+
 * RETURNS:
 *   status
 *********************************************************************/
@@ -2585,7 +2588,8 @@ static status_t
 			ncx_module_t *mod,
 			dlq_hdr_t  *unionQ,
 			obj_template_t *parent,
-			grp_template_t *grp)
+			grp_template_t *grp,
+			boolean fromdef)
 {
     typ_unionnode_t *un;
     status_t         res, retres;
@@ -2599,7 +2603,7 @@ static status_t
 	 un = (typ_unionnode_t *)dlq_nextEntry(un)) {
 
 	res = resolve_type(tkc, mod, un->typdef,
-			   NULL, NULL, parent, grp);
+			   NULL, NULL, parent, grp, fromdef);
 	CHK_EXIT;
 
 	btyp = typ_get_basetype(un->typdef);
@@ -2650,7 +2654,8 @@ static status_t
 *   defval == default value string to check (may be NULL)
 *   obj == obj_template containing this typdef, NULL if top-level
 *   grp == grp_template containing this typdef, otherwise NULL
-*  
+*   fromdef == TRUE if this is a call for a typedef
+*           == FALSE if this is a call for a leaf or leaf-list
 * RETURNS:
 *   status of the operation
 *********************************************************************/
@@ -2661,7 +2666,8 @@ static status_t
 		  const xmlChar *name,
 		  const xmlChar *defval,
 		  obj_template_t *obj,
-		  grp_template_t *grp)
+		  grp_template_t *grp,
+		  boolean fromdef)
 {
     typ_def_t        *testdef;
     typ_template_t   *errtyp;
@@ -2704,7 +2710,7 @@ static status_t
     }
 
     /* If no loops then make sure base type is correct */
-    if (res == NO_ERR) {
+    if (res == NO_ERR && fromdef) {
 	res = restriction_test(tkc, mod, typdef);
     }
 
@@ -2721,22 +2727,26 @@ static status_t
      * This is needed if min and max keywords used
      * Errors printed in the called fn
      */
-    res = finish_yang_range(tkc, mod, typdef,
-			    typ_get_range_type
-			    (typ_get_basetype(typdef)));
+    if (fromdef || typ_get_new_named(typdef)) {
+	res = finish_yang_range(tkc, mod, typdef,
+				typ_get_range_type
+				(typ_get_basetype(typdef)));
+    }
 
     /* validate that the ranges are valid now that min/max is set 
      * and all parent ranges are also set.  A range must be valid
      * wrt/ its parent range definition(s)
      * Errors printed in the called fn
      */
-    if (res == NO_ERR) {
+    if (res == NO_ERR && (fromdef || typ_get_new_named(typdef))) {
 	res = validate_range_chain(tkc, mod, typdef, name);
     }
 
     /* check default value if any defined */
     if (res == NO_ERR) {
-	if (defval && typ_get_basetype(typdef) != NCX_BT_NONE) {
+	if (defval && (typ_get_basetype(typdef) != NCX_BT_NONE) &&
+	    typ_ok(typdef)) {
+
 	    res = val_simval_ok(typdef, defval);
 	    if (res != NO_ERR) {
 		if (obj) {
@@ -2786,7 +2796,7 @@ static status_t
 	    testdef = typ_get_base_typdef(typdef);
 	    res = resolve_union_type(tkc, mod,
 				     &testdef->def.simple.unionQ,
-				     obj, grp);
+				     obj, grp, fromdef);
 	}
     }
 
@@ -2867,11 +2877,14 @@ static status_t
     retres = NO_ERR;
 
     /* check the appinfoQ */
-    res = ncx_resolve_appinfoQ(tkc, mod, &typ->appinfoQ);
+    typ->res = res = ncx_resolve_appinfoQ(tkc, mod, &typ->appinfoQ);
     CHK_EXIT;
 
     res = resolve_type(tkc, mod, &typ->typdef, typ->name,
-		       typ->defval, obj, grp);
+		       typ->defval, obj, grp, TRUE);
+    if (typ->res == NO_ERR) {
+	typ->res = res;
+    }
     CHK_EXIT;
     return retres;
 
@@ -3534,7 +3547,7 @@ status_t
     }
 #endif
 
-    res = resolve_type(tkc, mod, typdef, NULL, defval, obj, NULL);
+    res = resolve_type(tkc, mod, typdef, NULL, defval, obj, NULL, FALSE);
     return res;
 
 }  /* yang_typ_resolve_type */

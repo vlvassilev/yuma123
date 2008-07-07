@@ -204,6 +204,7 @@ static status_t
 		     ncx_module_t *mod)
 {
     const xmlChar *val;
+    xmlChar       *str;
     const char    *expstr;
     tk_type_t      tktyp;
     status_t       res, retres;
@@ -267,7 +268,7 @@ static status_t
 	    ver = TRUE;
 
 	    /* get the version number */
-	    res = ncx_consume_token(tkc, mod, TK_TT_DNUM);
+	    res = yang_consume_string(tkc, mod, &str);
 	    if (res != NO_ERR) {
 		retres = res;
 	    } else {

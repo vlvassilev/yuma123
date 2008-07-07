@@ -2345,6 +2345,7 @@ static status_t
     const xmlChar   *val;
     const char      *expstr;
     xmlChar         *str;
+    yang_stmt_t     *stmt;
     tk_type_t        tktyp;
     boolean          done, stat, desc, ref;
     status_t         res, retres;
@@ -2490,6 +2491,17 @@ static status_t
 	    obj_free_template(obj);
 	} else {
 	    dlq_enque(obj, que);  /* may have some errors */
+	    if (mod->stmtmode && que==&mod->datadefQ) {
+		/* save top-level object order only */
+		stmt = yang_new_obj_stmt(obj);
+		if (stmt) {
+		    dlq_enque(stmt, &mod->stmtQ);
+		} else {
+		    log_error("\nError: malloc failure for obj_stmt");
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		}
+	    }
 	}
     } else {
 	obj_free_template(obj);
@@ -2777,6 +2789,7 @@ static status_t
     const xmlChar   *val;
     const char      *expstr;
     xmlChar         *str;
+    yang_stmt_t     *stmt;
     tk_type_t        tktyp;
     boolean          done, when, stat, desc, ref;
     boolean          rpcin, rpcout;
@@ -2896,6 +2909,17 @@ static status_t
     /* save or delete the obj_template_t struct */
     if (retres == NO_ERR) {
 	dlq_enque(obj, que);
+	if (mod->stmtmode && que==&mod->datadefQ) {
+	    /* save top-level object order only */
+	    stmt = yang_new_obj_stmt(obj);
+	    if (stmt) {
+		dlq_enque(stmt, &mod->stmtQ);
+	    } else {
+		log_error("\nError: malloc failure for obj_stmt");
+		res = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, res);
+	    }
+	}
     } else {
 	obj_free_template(obj);
     }

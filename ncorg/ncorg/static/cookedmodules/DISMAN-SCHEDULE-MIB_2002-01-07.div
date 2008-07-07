@@ -200,7 +200,6 @@
       }
 
       <a name="schedObjects.110"/><span class="yang_kw">container</span> <span class="yang_id">schedObjects</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1"</span>;
          <a name="schedLocalTime.112"/><span class="yang_kw">leaf</span> <span class="yang_id">schedLocalTime</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span> {
                <span class="yang_kw">length</span> <span class="yang_str">"11"</span>;
@@ -216,7 +215,7 @@
          }
 
          <a name="schedEntry.129"/><span class="yang_kw">list</span> <span class="yang_id">schedEntry</span> {
-            <span class="yang_kw">key</span> "<a href="#schedOwner.145">schedOwner</a>, <a href="#schedName.158">schedName</a>";
+            <span class="yang_kw">key</span> "<a href="#schedOwner.145">schedOwner</a> <a href="#schedName.158">schedName</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry describing a particular scheduled action.
@@ -228,7 +227,6 @@
                and the objects in the schedCalendarGroup when
                schedRowStatus is active and schedAdminStatus and
                schedOperStatus are both enabled."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1"</span>;
             <a name="schedOwner.145"/><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
@@ -1094,14 +1092,15 @@
                   successful or failed) to invoke the scheduled action."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.21"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1"</span>;
          }  <span class="yang_cmt">// list schedEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1"</span>;
       }  <span class="yang_cmt">// container schedObjects</span>
 
       <a name="schedActionFailure.669"/><span class="yang_kw">notification</span> <span class="yang_id">schedActionFailure</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"This notification is generated whenever the invocation of a
             scheduled action fails."</span>;
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.2.0.1"</span>;
          <a name="schedActionFailure-schedLastFailure.675"/><span class="yang_kw">container</span> <span class="yang_id">schedActionFailure-schedLastFailure</span> {
             <a name="schedOwner.676"/><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
@@ -1164,6 +1163,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.18"</span>;
             }
          }  <span class="yang_cmt">// container schedActionFailure-schedLastFailed</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.2.0.1"</span>;
       }  <span class="yang_cmt">// notification schedActionFailure</span>
    }  <span class="yang_cmt">// module DISMAN-SCHEDULE-MIB</span>
 </pre>

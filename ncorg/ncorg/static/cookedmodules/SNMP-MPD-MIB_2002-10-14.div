@@ -108,7 +108,6 @@
       }
 
       <a name="snmpMPDStats.93"/><span class="yang_kw">container</span> <span class="yang_id">snmpMPDStats</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.11.2.1"</span>;
          <a name="snmpUnknownSecurityModels.95"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpUnknownSecurityModels</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -142,6 +141,7 @@
                combination of the contextEngineID and the pduType."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.11.2.1.3"</span>;
          }
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.11.2.1"</span>;
       }  <span class="yang_cmt">// container snmpMPDStats</span>
    }  <span class="yang_cmt">// module SNMP-MPD-MIB</span>
 </pre>

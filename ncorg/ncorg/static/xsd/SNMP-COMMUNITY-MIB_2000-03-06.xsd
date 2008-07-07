@@ -398,6 +398,7 @@
       </xs:annotation>
       <xs:simpleType>
          <xs:restriction base="xs:base64Binary">
+            <xs:minLength value="0"/>
             <xs:maxLength value="255"/>
          </xs:restriction>
       </xs:simpleType>
@@ -427,6 +428,7 @@
             <xs:simpleType>
                <xs:restriction base="xs:int">
                   <xs:minInclusive value="484"/>
+                  <xs:maxInclusive value="2147483647"/>
                </xs:restriction>
             </xs:simpleType>
          </xs:union>

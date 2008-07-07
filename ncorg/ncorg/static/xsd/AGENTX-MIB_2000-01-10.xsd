@@ -219,6 +219,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:unsignedInt">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="4294967295"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -347,7 +348,10 @@
                            </xs:appinfo>
                         </xs:annotation>
                         <xs:simpleType>
-                           <xs:restriction base="xs:unsignedInt"/>
+                           <xs:restriction base="xs:unsignedInt">
+                              <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="4294967295"/>
+                           </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
                      <xs:element name="agentxSessionObjectID"
@@ -568,6 +572,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:unsignedInt">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="4294967295"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>

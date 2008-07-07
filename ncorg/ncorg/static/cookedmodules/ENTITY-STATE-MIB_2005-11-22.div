@@ -92,13 +92,11 @@
       }
 
       <a name="entStateObjects.61"/><span class="yang_kw">container</span> <span class="yang_id">entStateObjects</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1"</span>;
          <a name="entStateEntry.66"/><span class="yang_kw">list</span> <span class="yang_id">entStateEntry</span> {
             <span class="yang_kw">key</span> "<a href="#entPhysicalIndex.73">entPhysicalIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"State information about this physical entity."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1.1.1"</span>;
             <a name="entPhysicalIndex.73"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -259,7 +257,9 @@
                   object will always be 'providingService'."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1.1.1.6"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1.1.1"</span>;
          }  <span class="yang_cmt">// list entStateEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1"</span>;
       }  <span class="yang_cmt">// container entStateObjects</span>
 
       <a name="entStateOperEnabled.237"/><span class="yang_kw">notification</span> <span class="yang_id">entStateOperEnabled</span> {
@@ -278,7 +278,6 @@
             there were any known alarms against the entity at that
             time that may explain why the physical entity has become
             operationally disabled."</span>;
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.0.1"</span>;
          <a name="entStateOperEnabled-entStateAdmin.255"/><span class="yang_kw">container</span> <span class="yang_id">entStateOperEnabled-entStateAdmin</span> {
             <a name="entPhysicalIndex.256"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
@@ -355,6 +354,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1.1.1.5"</span>;
             }
          }  <span class="yang_cmt">// container entStateOperEnabled-entStateAlarm</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.0.1"</span>;
       }  <span class="yang_cmt">// notification entStateOperEnabled</span>
 
       <a name="entStateOperDisabled.332"/><span class="yang_kw">notification</span> <span class="yang_id">entStateOperDisabled</span> {
@@ -373,7 +373,6 @@
             there were any known alarms against the entity at that
             time that may affect the physical entity's
             ability to stay operationally enabled."</span>;
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.0.2"</span>;
          <a name="entStateOperDisabled-entStateAdmin.350"/><span class="yang_kw">container</span> <span class="yang_id">entStateOperDisabled-entStateAdmin</span> {
             <a name="entPhysicalIndex.351"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
@@ -450,6 +449,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.1.1.1.5"</span>;
             }
          }  <span class="yang_cmt">// container entStateOperDisabled-entStateAlarm</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.131.0.2"</span>;
       }  <span class="yang_cmt">// notification entStateOperDisabled</span>
    }  <span class="yang_cmt">// module ENTITY-STATE-MIB</span>
 </pre>

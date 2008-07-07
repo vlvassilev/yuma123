@@ -1000,6 +1000,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -4150,6 +4151,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -4401,6 +4403,7 @@
                         </xs:annotation>
                         <xs:simpleType>
                            <xs:restriction base="xs:base64Binary">
+                              <xs:minLength value="0"/>
                               <xs:maxLength value="127"/>
                            </xs:restriction>
                         </xs:simpleType>
@@ -4523,6 +4526,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>

@@ -35,14 +35,12 @@
             </li>
             <li class="daddy"><a href="#NcAgentHello.195">NcAgentHello</a>
                <ul>
-                  <li><a href="#capabilities.186">capabilities</a></li>
                   <li><a href="#uses.198">uses</a></li>
                   <li><a href="#session-id.200">session-id</a></li>
                </ul>
             </li>
             <li class="daddy"><a href="#NcManagerHello.206">NcManagerHello</a>
                <ul>
-                  <li><a href="#capabilities.186">capabilities</a></li>
                   <li><a href="#uses.209">uses</a></li>
                </ul>
             </li>
@@ -71,13 +69,6 @@
                <ul>
                   <li class="daddy"><a href="#rpc-error.362">rpc-error</a>
                      <ul>
-                        <li><a href="#error-type.288">error-type</a></li>
-                        <li><a href="#error-tag.295">error-tag</a></li>
-                        <li><a href="#error-severity.302">error-severity</a></li>
-                        <li><a href="#error-app-tag.310">error-app-tag</a></li>
-                        <li><a href="#error-path.320">error-path</a></li>
-                        <li><a href="#error-message.335">error-message</a></li>
-                        <li><a href="#error-info.344">error-info</a></li>
                         <li><a href="#uses.364">uses</a></li>
                      </ul>
                   </li>
@@ -97,13 +88,6 @@
                            <ul>
                               <li class="daddy"><a href="#rpc-error.386">rpc-error</a>
                                  <ul>
-                                    <li><a href="#error-type.288">error-type</a></li>
-                                    <li><a href="#error-tag.295">error-tag</a></li>
-                                    <li><a href="#error-severity.302">error-severity</a></li>
-                                    <li><a href="#error-app-tag.310">error-app-tag</a></li>
-                                    <li><a href="#error-path.320">error-path</a></li>
-                                    <li><a href="#error-message.335">error-message</a></li>
-                                    <li><a href="#error-info.344">error-info</a></li>
                                     <li><a href="#uses.387">uses</a></li>
                                  </ul>
                               </li>
@@ -124,8 +108,6 @@
                         </li>
                         <li class="daddy"><a href="#data-error.405">data-error</a>
                            <ul>
-                              <li><a href="#rpc-error.362">rpc-error</a></li>
-                              <li><a href="#data.366">data</a></li>
                               <li><a href="#uses.406">uses</a></li>
                            </ul>
                         </li>
@@ -158,7 +140,6 @@
             </li>
             <li class="daddy"><a href="#GetConfigSourceType.431">GetConfigSourceType</a>
                <ul>
-                  <li><a href="#config-source.414">config-source</a></li>
                   <li><a href="#uses.434">uses</a></li>
                   <li class="daddy"><a href="#augment.435">augment</a>
                      <ul>
@@ -169,7 +150,6 @@
             </li>
             <li class="daddy"><a href="#RpcOperationSourceType.445">RpcOperationSourceType</a>
                <ul>
-                  <li><a href="#config-source.414">config-source</a></li>
                   <li><a href="#uses.448">uses</a></li>
                   <li class="daddy"><a href="#augment.449">augment</a>
                      <ul>
@@ -181,7 +161,6 @@
             </li>
             <li class="daddy"><a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>
                <ul>
-                  <li><a href="#config-source.414">config-source</a></li>
                   <li><a href="#uses.466">uses</a></li>
                   <li class="daddy"><a href="#augment.467">augment</a>
                      <ul>
@@ -197,7 +176,6 @@
             <li><a href="#rpc.479">rpc</a></li>
             <li class="daddy"><a href="#rpc-reply.487">rpc-reply</a>
                <ul>
-                  <li><a href="#ok-or-data-error.396">ok-or-data-error</a></li>
                   <li><a href="#uses.492">uses</a></li>
                </ul>
             </li>
@@ -211,7 +189,6 @@
                      <ul>
                         <li class="daddy"><a href="#source.508">source</a>
                            <ul>
-                              <li><a href="#config-source.414">config-source</a></li>
                               <li><a href="#uses.511">uses</a></li>
                            </ul>
                         </li>
@@ -231,7 +208,6 @@
                      <ul>
                         <li class="daddy"><a href="#target.552">target</a>
                            <ul>
-                              <li><a href="#config-source.414">config-source</a></li>
                               <li><a href="#uses.555">uses</a></li>
                            </ul>
                         </li>
@@ -254,13 +230,11 @@
                      <ul>
                         <li class="daddy"><a href="#target.618">target</a>
                            <ul>
-                              <li><a href="#config-source.414">config-source</a></li>
                               <li><a href="#uses.621">uses</a></li>
                            </ul>
                         </li>
                         <li class="daddy"><a href="#source.624">source</a>
                            <ul>
-                              <li><a href="#config-source.414">config-source</a></li>
                               <li><a href="#uses.627">uses</a></li>
                            </ul>
                         </li>
@@ -274,7 +248,6 @@
                      <ul>
                         <li class="daddy"><a href="#target.645">target</a>
                            <ul>
-                              <li><a href="#config-source.414">config-source</a></li>
                               <li><a href="#uses.647">uses</a></li>
                            </ul>
                         </li>
@@ -288,7 +261,6 @@
                      <ul>
                         <li class="daddy"><a href="#target.665">target</a>
                            <ul>
-                              <li><a href="#config-source.414">config-source</a></li>
                               <li><a href="#uses.668">uses</a></li>
                            </ul>
                         </li>
@@ -302,7 +274,6 @@
                      <ul>
                         <li class="daddy"><a href="#target.694">target</a>
                            <ul>
-                              <li><a href="#config-source.414">config-source</a></li>
                               <li><a href="#uses.697">uses</a></li>
                            </ul>
                         </li>
@@ -351,7 +322,6 @@
                      <ul>
                         <li class="daddy"><a href="#source.863">source</a>
                            <ul>
-                              <li><a href="#config-source.414">config-source</a></li>
                               <li><a href="#uses.866">uses</a></li>
                            </ul>
                         </li>
@@ -958,16 +928,15 @@
       <a name="rpc-reply.487"/><span class="yang_kw">container</span> <span class="yang_id">rpc-reply</span> {
          <span class="yang_kw">description</span> <span class="yang_str">"Remote Procedure Call response message"</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 4.2"</span>;
-         <a href="/modules/ncx/2008-04-16#metadata.266">ncx:metadata</a> <span class="yang_str">"MessageId message-id"</span>;
 
          <a name="uses.492"/><span class="yang_kw">uses</span> <a href="#RpcReplyType.393">RpcReplyType</a>;
+         <a href="/modules/ncx/2008-04-16#metadata.266">ncx:metadata</a> <span class="yang_str">"MessageId message-id"</span>;
       }  <span class="yang_cmt">// container rpc-reply</span>
 
       <a name="get-config.499"/><span class="yang_kw">rpc</span> <span class="yang_id">get-config</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Retrieve all or part of a specified configuration."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.2"</span>;
-         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"monitor"</span>;
          <a name="input.507"/><span class="yang_kw">input</span> {
             <a name="source.508"/><span class="yang_kw">container</span> <span class="yang_id">source</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to retrieve."</span>;
@@ -989,6 +958,7 @@
                   the filter criteria (if any)."</span>;
             }
          }
+         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"monitor"</span>;
       }  <span class="yang_cmt">// rpc get-config</span>
 
       <a name="edit-config.530"/><span class="yang_kw">rpc</span> <span class="yang_id">edit-config</span> {
@@ -1008,7 +978,6 @@
             the target configuration is changed in accordance with the
             source's data and requested operations."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.2"</span>;
-         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
          <a name="input.551"/><span class="yang_kw">input</span> {
             <a name="target.552"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to edit."</span>;
@@ -1054,6 +1023,7 @@
                }  <span class="yang_cmt">// case url</span>
             }  <span class="yang_cmt">// choice edit-content</span>
          }
+         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc edit-config</span>
 
       <a name="copy-config.593"/><span class="yang_kw">rpc</span> <span class="yang_id">copy-config</span> {
@@ -1076,7 +1046,6 @@
             configuration datastore, an error MUST be returned with an error-
             tag containing invalid-value."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.3"</span>;
-         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
          <a name="input.617"/><span class="yang_kw">input</span> {
             <a name="target.618"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to copy to."</span>;
@@ -1090,6 +1059,7 @@
                <a name="uses.627"/><span class="yang_kw">uses</span> <a href="#RpcOperationSourceType.445">RpcOperationSourceType</a>;
             }  <span class="yang_cmt">// container source</span>
          }
+         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc copy-config</span>
 
       <a name="delete-config.632"/><span class="yang_kw">rpc</span> <span class="yang_id">delete-config</span> {
@@ -1100,7 +1070,6 @@
             If a NETCONF peer supports the :url capability (Section 8.8), the
             'url' element can appear as the &lt;target&gt; parameter."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.4"</span>;
-         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
          <a name="input.644"/><span class="yang_kw">input</span> {
             <a name="target.645"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to delete."</span>;
@@ -1108,6 +1077,7 @@
                <a name="uses.647"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
             }  <span class="yang_cmt">// container target</span>
          }
+         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc delete-config</span>
 
       <a name="lock.652"/><span class="yang_kw">rpc</span> <span class="yang_id">lock</span> {
@@ -1118,7 +1088,6 @@
             other NETCONF clients, non-NETCONF clients (e.g., SNMP and command
             line interface (CLI) scripts), and human users. ..."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.5"</span>;
-         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
          <a name="input.664"/><span class="yang_kw">input</span> {
             <a name="target.665"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to lock"</span>;
@@ -1126,6 +1095,7 @@
                <a name="uses.668"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
             }  <span class="yang_cmt">// container target</span>
          }
+         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc lock</span>
 
       <a name="unlock.673"/><span class="yang_kw">rpc</span> <span class="yang_id">unlock</span> {
@@ -1144,7 +1114,6 @@
             The server MUST respond with either an &lt;ok&gt; element or an
             'rpc-error'."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.6"</span>;
-         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
          <a name="input.693"/><span class="yang_kw">input</span> {
             <a name="target.694"/><span class="yang_kw">container</span> <span class="yang_id">target</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to unlock."</span>;
@@ -1152,13 +1121,13 @@
                <a name="uses.697"/><span class="yang_kw">uses</span> <a href="#RpcOperationTargetType.463">RpcOperationTargetType</a>;
             }  <span class="yang_cmt">// container target</span>
          }
+         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc unlock</span>
 
       <a name="get.702"/><span class="yang_kw">rpc</span> <span class="yang_id">get</span> {
          <span class="yang_kw">description</span>
             <span class="yang_str">"Retrieve running configuration and device state information."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.7"</span>;
-         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"monitor"</span>;
          <a name="input.710"/><span class="yang_kw">input</span> {
             <a name="filter.711"/><span class="yang_kw">anyxml</span> <span class="yang_id">filter</span> {
                <span class="yang_kw">description</span>
@@ -1190,6 +1159,7 @@
                   the filter criteria (if any)."</span>;
             }
          }
+         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"monitor"</span>;
       }  <span class="yang_cmt">// rpc get</span>
 
       <a name="close-session.743"/><span class="yang_kw">rpc</span> <span class="yang_id">close-session</span> {
@@ -1222,7 +1192,6 @@
             configuration or other device state modifications made by the
             entity holding the lock."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 7.9"</span>;
-         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"exec"</span>;
          <a name="input.779"/><span class="yang_kw">input</span> {
             <a name="session-id.780"/><span class="yang_kw">leaf</span> <span class="yang_id">session-id</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#SessionId.43">SessionId</a></span>;
@@ -1230,6 +1199,7 @@
                <span class="yang_kw">description</span> <span class="yang_str">"Particular session to kill."</span>;
             }
          }
+         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"exec"</span>;
       }  <span class="yang_cmt">// rpc kill-session</span>
 
       <a name="commit.788"/><span class="yang_kw">rpc</span> <span class="yang_id">commit</span> {
@@ -1255,7 +1225,6 @@
             If the system does not have the :candidate capability, the
             'commit' operation is not available."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 8.3.4.1"</span>;
-         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
          <a name="input.815"/><span class="yang_kw">input</span> {
             <a name="confirmed.816"/><span class="yang_kw">leaf</span> <span class="yang_id">confirmed</span> {
                <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
@@ -1273,6 +1242,7 @@
                <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 8.4.5.1"</span>;
             }
          }
+         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc commit</span>
 
       <a name="discard-changes.834"/><span class="yang_kw">rpc</span> <span class="yang_id">discard-changes</span> {
@@ -1296,7 +1266,6 @@
             
             Validates the contents of the specified configuration."</span>;
          <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4741, section 8.6.4.1"</span>;
-         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
          <a name="input.862"/><span class="yang_kw">input</span> {
             <a name="source.863"/><span class="yang_kw">container</span> <span class="yang_id">source</span> {
                <span class="yang_kw">description</span> <span class="yang_str">"Particular configuration to validate."</span>;
@@ -1304,6 +1273,7 @@
                <a name="uses.866"/><span class="yang_kw">uses</span> <a href="#RpcOperationSourceType.445">RpcOperationSourceType</a>;
             }  <span class="yang_cmt">// container source</span>
          }
+         <a href="/modules/ncx/2008-04-16#rpc-type.275">ncx:rpc-type</a> <span class="yang_str">"config"</span>;
       }  <span class="yang_cmt">// rpc validate</span>
    }  <span class="yang_cmt">// module netconf</span>
 </pre>

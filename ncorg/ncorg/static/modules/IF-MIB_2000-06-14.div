@@ -39,31 +39,6 @@
                         <li><a href="#ifOutErrors.444">ifOutErrors</a></li>
                         <li><a href="#ifOutQLen.461">ifOutQLen</a></li>
                         <li><a href="#ifSpecific.470">ifSpecific</a></li>
-                        <li><a href="#ifName.645">ifName</a></li>
-                        <li><a href="#ifInMulticastPkts.667">ifInMulticastPkts</a></li>
-                        <li><a href="#ifInBroadcastPkts.684">ifInBroadcastPkts</a></li>
-                        <li><a href="#ifOutMulticastPkts.699">ifOutMulticastPkts</a></li>
-                        <li><a href="#ifOutBroadcastPkts.716">ifOutBroadcastPkts</a></li>
-                        <li><a href="#ifHCInOctets.733">ifHCInOctets</a></li>
-                        <li><a href="#ifHCInUcastPkts.748">ifHCInUcastPkts</a></li>
-                        <li><a href="#ifHCInMulticastPkts.764">ifHCInMulticastPkts</a></li>
-                        <li><a href="#ifHCInBroadcastPkts.781">ifHCInBroadcastPkts</a></li>
-                        <li><a href="#ifHCOutOctets.797">ifHCOutOctets</a></li>
-                        <li><a href="#ifHCOutUcastPkts.812">ifHCOutUcastPkts</a></li>
-                        <li><a href="#ifHCOutMulticastPkts.829">ifHCOutMulticastPkts</a></li>
-                        <li><a href="#ifHCOutBroadcastPkts.847">ifHCOutBroadcastPkts</a></li>
-                        <li><a href="#ifLinkUpDownTrapEnable.864">ifLinkUpDownTrapEnable</a></li>
-                        <li><a href="#ifHighSpeed.881">ifHighSpeed</a></li>
-                        <li><a href="#ifPromiscuousMode.896">ifPromiscuousMode</a></li>
-                        <li><a href="#ifConnectorPresent.913">ifConnectorPresent</a></li>
-                        <li><a href="#ifAlias.923">ifAlias</a></li>
-                        <li><a href="#ifCounterDiscontinuityTime.957">ifCounterDiscontinuityTime</a></li>
-                        <li><a href="#ifTestId.984">ifTestId</a></li>
-                        <li><a href="#ifTestStatus.994">ifTestStatus</a></li>
-                        <li><a href="#ifTestType.1011">ifTestType</a></li>
-                        <li><a href="#ifTestResult.1039">ifTestResult</a></li>
-                        <li><a href="#ifTestCode.1061">ifTestCode</a></li>
-                        <li><a href="#ifTestOwner.1081">ifTestOwner</a></li>
                      </ul>
                   </li>
                </ul>
@@ -248,7 +223,6 @@
 
       <span class="yang_cmt">// objects</span>
       <a name="interfaces.112"/><span class="yang_kw">container</span> <span class="yang_id">interfaces</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2"</span>;
          <a name="ifNumber.114"/><span class="yang_kw">leaf</span> <span class="yang_id">ifNumber</span> {
             <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -264,7 +238,6 @@
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry containing management information applicable to a
                particular interface."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1"</span>;
             <a name="ifIndex.135"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#InterfaceIndex.81">InterfaceIndex</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -638,20 +611,20 @@
                   the value should be set to the OBJECT IDENTIFIER { 0 0 }."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.22"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1"</span>;
          }  <span class="yang_cmt">// list ifEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2"</span>;
       }  <span class="yang_cmt">// container interfaces</span>
 
       <a name="ifMIBObjects.492"/><span class="yang_kw">container</span> <span class="yang_id">ifMIBObjects</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1"</span>;
          <a name="ifStackEntry.497"/><span class="yang_kw">list</span> <span class="yang_id">ifStackEntry</span> {
-            <span class="yang_kw">key</span> "<a href="#ifStackHigherLayer.508">ifStackHigherLayer</a>, <a href="#ifStackLowerLayer.520">ifStackLowerLayer</a>";
+            <span class="yang_kw">key</span> "<a href="#ifStackHigherLayer.508">ifStackHigherLayer</a> <a href="#ifStackLowerLayer.520">ifStackLowerLayer</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Information on a particular relationship between two sub-
                layers, specifying that one sub-layer runs on 'top' of the
                other sub-layer.  Each sub-layer corresponds to a conceptual
                row in the ifTable."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.2.1"</span>;
             <a name="ifStackHigherLayer.508"/><span class="yang_kw">leaf</span> <span class="yang_id">ifStackHigherLayer</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#InterfaceIndexOrZero.95">InterfaceIndexOrZero</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -690,16 +663,16 @@
                   support write-access for any type of interface."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.2.1.3"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.2.1"</span>;
          }  <span class="yang_cmt">// list ifStackEntry</span>
 
          <a name="ifRcvAddressEntry.552"/><span class="yang_kw">list</span> <span class="yang_id">ifRcvAddressEntry</span> {
-            <span class="yang_kw">key</span> "<a href="#ifIndex.561">ifIndex</a>, <a href="#ifRcvAddressAddress.570">ifRcvAddressAddress</a>";
+            <span class="yang_kw">key</span> "<a href="#ifIndex.561">ifIndex</a> <a href="#ifRcvAddressAddress.570">ifRcvAddressAddress</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"A list of objects identifying an address for which the
                system will accept packets/frames on the particular
                interface identified by the index value ifIndex."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.4.1"</span>;
             <a name="ifIndex.561"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -752,6 +725,7 @@
                <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"volatile"</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.4.1.3"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.4.1"</span>;
          }  <span class="yang_cmt">// list ifRcvAddressEntry</span>
 
          <a name="ifTableLastChange.609"/><span class="yang_kw">leaf</span> <span class="yang_id">ifTableLastChange</span> {
@@ -779,6 +753,7 @@
                contains a zero value."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1.6"</span>;
          }
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.31.1"</span>;
       }  <span class="yang_cmt">// container ifMIBObjects</span>
 
       <a name="augment.640"/><span class="yang_kw">augment</span> <a href="#ifEntry.126">/if-mib:interfaces/if-mib:ifEntry</a> {
@@ -1259,7 +1234,6 @@
             state from some other state (but not from the notPresent
             state).  This other state is indicated by the included value
             of ifOperStatus."</span>;
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.5.3"</span>;
          <a name="linkDown-ifIndex.1103"/><span class="yang_kw">container</span> <span class="yang_id">linkDown-ifIndex</span> {
             <a name="ifIndex.1104"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
@@ -1359,6 +1333,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.8"</span>;
             }
          }  <span class="yang_cmt">// container linkDown-ifOperStatus</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.5.3"</span>;
       }  <span class="yang_cmt">// notification linkDown</span>
 
       <a name="linkUp.1183"/><span class="yang_kw">notification</span> <span class="yang_id">linkUp</span> {
@@ -1369,7 +1344,6 @@
             transitioned into some other state (but not into the
             notPresent state).  This other state is indicated by the
             included value of ifOperStatus."</span>;
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.5.4"</span>;
          <a name="linkUp-ifIndex.1193"/><span class="yang_kw">container</span> <span class="yang_id">linkUp-ifIndex</span> {
             <a name="ifIndex.1194"/><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
@@ -1469,6 +1443,7 @@
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.2.2.1.8"</span>;
             }
          }  <span class="yang_cmt">// container linkUp-ifOperStatus</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.1.1.5.4"</span>;
       }  <span class="yang_cmt">// notification linkUp</span>
    }  <span class="yang_cmt">// module IF-MIB</span>
 </pre>

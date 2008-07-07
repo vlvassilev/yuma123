@@ -150,14 +150,12 @@
       }
 
       <a name="application.99"/><span class="yang_kw">container</span> <span class="yang_id">application</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27"</span>;
          <a name="applEntry.104"/><span class="yang_kw">list</span> <span class="yang_id">applEntry</span> {
             <span class="yang_kw">key</span> "<a href="#applIndex.113">applIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry associated with a single network service
                application."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1"</span>;
             <a name="applIndex.113"/><span class="yang_kw">leaf</span> <span class="yang_id">applIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
@@ -372,15 +370,15 @@
                   the application in a status display."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1.17"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.1.1"</span>;
          }  <span class="yang_cmt">// list applEntry</span>
 
          <a name="assocEntry.320"/><span class="yang_kw">list</span> <span class="yang_id">assocEntry</span> {
-            <span class="yang_kw">key</span> "<a href="#applIndex.328">applIndex</a>, <a href="#assocIndex.337">assocIndex</a>";
+            <span class="yang_kw">key</span> "<a href="#applIndex.328">applIndex</a> <a href="#assocIndex.337">assocIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An entry associated with an association for a network
                service application."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.2.1"</span>;
             <a name="applIndex.328"/><span class="yang_kw">leaf</span> <span class="yang_id">applIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -473,7 +471,9 @@
                   object contains a zero value."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.2.1.5"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27.2.1"</span>;
          }  <span class="yang_cmt">// list assocEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.27"</span>;
       }  <span class="yang_cmt">// container application</span>
    }  <span class="yang_cmt">// module NETWORK-SERVICES-MIB</span>
 </pre>

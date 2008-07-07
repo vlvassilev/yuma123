@@ -65,16 +65,14 @@
       }
 
       <a name="ifInvMIBObjects.46"/><span class="yang_kw">container</span> <span class="yang_id">ifInvMIBObjects</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.77.1"</span>;
          <a name="ifInvStackEntry.51"/><span class="yang_kw">list</span> <span class="yang_id">ifInvStackEntry</span> {
-            <span class="yang_kw">key</span> "<a href="#ifStackLowerLayer.61">ifStackLowerLayer</a>, <a href="#ifStackHigherLayer.69">ifStackHigherLayer</a>";
+            <span class="yang_kw">key</span> "<a href="#ifStackLowerLayer.61">ifStackLowerLayer</a> <a href="#ifStackHigherLayer.69">ifStackHigherLayer</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Information on a particular relationship between two sub-
                layers, specifying that one sub-layer runs underneath the
                other sub-layer.  Each sub-layer corresponds to a conceptual
                row in the ifTable."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.77.1.1.1"</span>;
             <a name="ifStackLowerLayer.61"/><span class="yang_kw">leaf</span> <span class="yang_id">ifStackLowerLayer</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -114,7 +112,9 @@
                   in this table."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.77.1.1.1.1"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.77.1.1.1"</span>;
          }  <span class="yang_cmt">// list ifInvStackEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.77.1"</span>;
       }  <span class="yang_cmt">// container ifInvMIBObjects</span>
    }  <span class="yang_cmt">// module IF-INVERTED-STACK-MIB</span>
 </pre>

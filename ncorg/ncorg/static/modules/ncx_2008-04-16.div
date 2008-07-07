@@ -32,7 +32,6 @@
                <ul>
                   <li><a href="#xpath.115">xpath</a></li>
                   <li><a href="#description.123">description</a></li>
-                  <li><a href="#reference.183">reference</a></li>
                   <li><a href="#uses.130">uses</a></li>
                   <li><a href="#error-app-tag.132">error-app-tag</a></li>
                   <li><a href="#error-message.139">error-message</a></li>
@@ -42,7 +41,6 @@
             <li><a href="#organization.158">organization</a></li>
             <li><a href="#path.166">path</a></li>
             <li><a href="#position.174">position</a></li>
-            <li><a href="#reference.183">reference</a></li>
             <li><a href="#uses.204">uses</a></li>
             <li class="daddy"><a href="#revision.206">revision</a>
                <ul>

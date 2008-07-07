@@ -756,6 +756,7 @@
                         </xs:annotation>
                         <xs:simpleType>
                            <xs:restriction base="xs:base64Binary">
+                              <xs:minLength value="0"/>
                               <xs:maxLength value="16"/>
                            </xs:restriction>
                         </xs:simpleType>

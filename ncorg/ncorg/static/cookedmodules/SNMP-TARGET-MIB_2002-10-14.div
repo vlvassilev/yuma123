@@ -298,7 +298,6 @@
 
       <span class="yang_cmt">// objects</span>
       <a name="snmpTargetObjects.249"/><span class="yang_kw">container</span> <span class="yang_id">snmpTargetObjects</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1"</span>;
          <a name="snmpTargetSpinLock.251"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetSpinLock</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#TestAndIncr.109">smiv2:TestAndIncr</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -333,7 +332,6 @@
                
                Entries in the snmpTargetAddrTable are created and
                deleted using the snmpTargetAddrRowStatus object."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.2.1"</span>;
             <a name="snmpTargetAddrName.291"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetAddrName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
@@ -471,6 +469,7 @@
                   an inconsistentValue error."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.2.1.9"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.2.1"</span>;
          }  <span class="yang_cmt">// list snmpTargetAddrEntry</span>
 
          <a name="snmpTargetParamsEntry.433"/><span class="yang_kw">list</span> <span class="yang_id">snmpTargetParamsEntry</span> {
@@ -481,7 +480,6 @@
                
                Entries in the snmpTargetParamsTable are created and
                deleted using the snmpTargetParamsRowStatus object."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.3.1"</span>;
             <a name="snmpTargetParamsName.444"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpTargetParamsName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
@@ -580,6 +578,7 @@
                   an inconsistentValue error."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.3.1.7"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.3.1"</span>;
          }  <span class="yang_cmt">// list snmpTargetParamsEntry</span>
 
          <a name="snmpUnavailableContexts.544"/><span class="yang_kw">leaf</span> <span class="yang_id">snmpUnavailableContexts</span> {
@@ -601,6 +600,7 @@
                contained in the message was unknown."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1.5"</span>;
          }
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.6.3.12.1"</span>;
       }  <span class="yang_cmt">// container snmpTargetObjects</span>
    }  <span class="yang_cmt">// module SNMP-TARGET-MIB</span>
 </pre>

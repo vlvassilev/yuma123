@@ -248,6 +248,7 @@
                <xs:simpleType>
                   <xs:restriction base="xs:int">
                      <xs:minInclusive value="1"/>
+                     <xs:maxInclusive value="2147483647"/>
                   </xs:restriction>
                </xs:simpleType>
             </xs:element>
@@ -322,6 +323,7 @@
                <xs:simpleType>
                   <xs:restriction base="xs:int">
                      <xs:minInclusive value="0"/>
+                     <xs:maxInclusive value="2147483647"/>
                   </xs:restriction>
                </xs:simpleType>
             </xs:element>
@@ -382,6 +384,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -429,6 +432,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -453,6 +457,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -471,6 +476,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -548,6 +554,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -1195,6 +1202,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -1262,6 +1270,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -1314,6 +1323,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -1434,6 +1444,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -1519,6 +1530,7 @@
                <xs:simpleType>
                   <xs:restriction base="xs:int">
                      <xs:minInclusive value="1"/>
+                     <xs:maxInclusive value="2147483647"/>
                   </xs:restriction>
                </xs:simpleType>
             </xs:element>
@@ -1561,6 +1573,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -1743,6 +1756,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>
@@ -1870,6 +1884,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:int">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="2147483647"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>

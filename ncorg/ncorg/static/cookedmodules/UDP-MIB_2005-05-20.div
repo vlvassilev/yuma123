@@ -129,7 +129,6 @@
       }
 
       <a name="udp.88"/><span class="yang_kw">container</span> <span class="yang_id">udp</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7"</span>;
          <a name="udpInDatagrams.90"/><span class="yang_kw">leaf</span> <span class="yang_id">udpInDatagrams</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -188,12 +187,11 @@
          }
 
          <a name="udpEntry.150"/><span class="yang_kw">list</span> <span class="yang_id">udpEntry</span> {
-            <span class="yang_kw">key</span> "<a href="#udpLocalAddress.159">udpLocalAddress</a>, <a href="#udpLocalPort.171">udpLocalPort</a>";
+            <span class="yang_kw">key</span> "<a href="#udpLocalAddress.159">udpLocalAddress</a> <a href="#udpLocalPort.171">udpLocalPort</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Information about a particular current UDP listener."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.5.1"</span>;
             <a name="udpLocalAddress.159"/><span class="yang_kw">leaf</span> <span class="yang_id">udpLocalAddress</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -216,10 +214,11 @@
                   <span class="yang_str">"The local port number for this UDP listener."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.5.1.2"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.5.1"</span>;
          }  <span class="yang_cmt">// list udpEntry</span>
 
          <a name="udpEndpointEntry.186"/><span class="yang_kw">list</span> <span class="yang_id">udpEndpointEntry</span> {
-            <span class="yang_kw">key</span> "<a href="#udpEndpointLocalAddressType.205">udpEndpointLocalAddressType</a>, <a href="#udpEndpointLocalAddress.216">udpEndpointLocalAddress</a>, <a href="#udpEndpointLocalPort.256">udpEndpointLocalPort</a>, <a href="#udpEndpointRemoteAddressType.264">udpEndpointRemoteAddressType</a>, <a href="#udpEndpointRemoteAddress.281">udpEndpointRemoteAddress</a>, <a href="#udpEndpointRemotePort.301">udpEndpointRemotePort</a>, <a href="#udpEndpointInstance.311">udpEndpointInstance</a>";
+            <span class="yang_kw">key</span> "<a href="#udpEndpointLocalAddressType.205">udpEndpointLocalAddressType</a> <a href="#udpEndpointLocalAddress.216">udpEndpointLocalAddress</a> <a href="#udpEndpointLocalPort.256">udpEndpointLocalPort</a> <a href="#udpEndpointRemoteAddressType.264">udpEndpointRemoteAddressType</a> <a href="#udpEndpointRemoteAddress.281">udpEndpointRemoteAddress</a> <a href="#udpEndpointRemotePort.301">udpEndpointRemotePort</a> <a href="#udpEndpointInstance.311">udpEndpointInstance</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"Information about a particular current UDP endpoint.
@@ -230,7 +229,6 @@
                exceeds 111, then OIDs of column instances in this table
                will have more than 128 sub-identifiers and cannot be
                accessed using SNMPv1, SNMPv2c, or SNMPv3."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.7.1"</span>;
             <a name="udpEndpointLocalAddressType.205"/><span class="yang_kw">leaf</span> <span class="yang_id">udpEndpointLocalAddressType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -364,6 +362,7 @@
                   tables."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.7.1.8"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.7.1"</span>;
          }  <span class="yang_cmt">// list udpEndpointEntry</span>
 
          <a name="udpHCInDatagrams.340"/><span class="yang_kw">leaf</span> <span class="yang_id">udpHCInDatagrams</span> {
@@ -395,6 +394,7 @@
                value of sysUpTime."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7.9"</span>;
          }
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.7"</span>;
       }  <span class="yang_cmt">// container udp</span>
    }  <span class="yang_cmt">// module UDP-MIB</span>
 </pre>

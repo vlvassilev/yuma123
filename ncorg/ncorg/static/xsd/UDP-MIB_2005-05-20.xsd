@@ -424,6 +424,7 @@
                         <xs:simpleType>
                            <xs:restriction base="xs:unsignedInt">
                               <xs:minInclusive value="1"/>
+                              <xs:maxInclusive value="4294967295"/>
                            </xs:restriction>
                         </xs:simpleType>
                      </xs:element>

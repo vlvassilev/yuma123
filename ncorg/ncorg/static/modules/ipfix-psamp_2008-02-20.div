@@ -93,9 +93,6 @@
                         <li class="daddy"><a href="#meteringProcess.216">meteringProcess</a>
                            <ul>
                               <li><a href="#name.222">name</a></li>
-                              <li><a href="#meteringProcessId.126">meteringProcessId</a></li>
-                              <li><a href="#selectionProcess.132">selectionProcess</a></li>
-                              <li><a href="#cache.140">cache</a></li>
                               <li><a href="#uses.228">uses</a></li>
                            </ul>
                         </li>
@@ -116,9 +113,6 @@
                         <li class="daddy"><a href="#meteringProcess.265">meteringProcess</a>
                            <ul>
                               <li><a href="#name.269">name</a></li>
-                              <li><a href="#meteringProcessId.126">meteringProcessId</a></li>
-                              <li><a href="#selectionProcess.132">selectionProcess</a></li>
-                              <li><a href="#cache.140">cache</a></li>
                               <li><a href="#uses.275">uses</a></li>
                            </ul>
                         </li>

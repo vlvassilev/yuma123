@@ -87,7 +87,6 @@
       }
 
       <a name="diffServConfigMIBObjects.65"/><span class="yang_kw">container</span> <span class="yang_id">diffServConfigMIBObjects</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.108.1"</span>;
          <a name="diffServConfigEntry.70"/><span class="yang_kw">list</span> <span class="yang_id">diffServConfigEntry</span> {
             <span class="yang_kw">key</span> "<a href="#diffServConfigId.82">diffServConfigId</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -97,7 +96,6 @@
                into a specific per-hop-behavior.  Entries in this
                table might be defined by a vendor (pre-configured)
                or defined by a management application."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.108.1.2.1"</span>;
             <a name="diffServConfigId.82"/><span class="yang_kw">leaf</span> <span class="yang_id">diffServConfigId</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"1..116"</span>;
@@ -208,7 +206,9 @@
                <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"notInService"</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.108.1.2.1.7"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.108.1.2.1"</span>;
          }  <span class="yang_cmt">// list diffServConfigEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.108.1"</span>;
       }  <span class="yang_cmt">// container diffServConfigMIBObjects</span>
    }  <span class="yang_cmt">// module DIFFSERV-CONFIG-MIB</span>
 </pre>

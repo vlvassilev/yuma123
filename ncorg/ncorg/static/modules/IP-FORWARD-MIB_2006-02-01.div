@@ -177,7 +177,6 @@
       }
 
       <a name="ipForward.88"/><span class="yang_kw">container</span> <span class="yang_id">ipForward</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24"</span>;
          <a name="ipForwardNumber.90"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardNumber</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -189,13 +188,12 @@
          }
 
          <a name="ipForwardEntry.103"/><span class="yang_kw">list</span> <span class="yang_id">ipForwardEntry</span> {
-            <span class="yang_kw">key</span> "<a href="#ipForwardDest.114">ipForwardDest</a>, <a href="#ipForwardProto.254">ipForwardProto</a>, <a href="#ipForwardPolicy.154">ipForwardPolicy</a>, <a href="#ipForwardNextHop.201">ipForwardNextHop</a>";
+            <span class="yang_kw">key</span> "<a href="#ipForwardDest.114">ipForwardDest</a> <a href="#ipForwardProto.254">ipForwardProto</a> <a href="#ipForwardPolicy.154">ipForwardPolicy</a> <a href="#ipForwardNextHop.201">ipForwardNextHop</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"A particular route to a particular destination, under a
                particular policy."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1"</span>;
             <a name="ipForwardDest.114"/><span class="yang_kw">leaf</span> <span class="yang_id">ipForwardDest</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -514,6 +512,7 @@
                <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1.15"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.2.1"</span>;
          }  <span class="yang_cmt">// list ipForwardEntry</span>
 
          <a name="ipCidrRouteNumber.396"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteNumber</span> {
@@ -528,7 +527,7 @@
          }
 
          <a name="ipCidrRouteEntry.410"/><span class="yang_kw">list</span> <span class="yang_id">ipCidrRouteEntry</span> {
-            <span class="yang_kw">key</span> "<a href="#ipCidrRouteDest.424">ipCidrRouteDest</a>, <a href="#ipCidrRouteMask.442">ipCidrRouteMask</a>, <a href="#ipCidrRouteTos.462">ipCidrRouteTos</a>, <a href="#ipCidrRouteNextHop.497">ipCidrRouteNextHop</a>";
+            <span class="yang_kw">key</span> "<a href="#ipCidrRouteDest.424">ipCidrRouteDest</a> <a href="#ipCidrRouteMask.442">ipCidrRouteMask</a> <a href="#ipCidrRouteTos.462">ipCidrRouteTos</a> <a href="#ipCidrRouteNextHop.497">ipCidrRouteNextHop</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -537,7 +536,6 @@
                
                
                particular policy."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1"</span>;
             <a name="ipCidrRouteDest.424"/><span class="yang_kw">leaf</span> <span class="yang_id">ipCidrRouteDest</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -855,6 +853,7 @@
                   installation and removal conventions."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1.16"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.4.1"</span>;
          }  <span class="yang_cmt">// list ipCidrRouteEntry</span>
 
          <a name="inetCidrRouteNumber.704"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteNumber</span> {
@@ -867,7 +866,7 @@
          }
 
          <a name="inetCidrRouteEntry.716"/><span class="yang_kw">list</span> <span class="yang_id">inetCidrRouteEntry</span> {
-            <span class="yang_kw">key</span> "<a href="#inetCidrRouteDestType.738">inetCidrRouteDestType</a>, <a href="#inetCidrRouteDest.752">inetCidrRouteDest</a>, <a href="#inetCidrRoutePfxLen.773">inetCidrRoutePfxLen</a>, <a href="#inetCidrRoutePolicy.797">inetCidrRoutePolicy</a>, <a href="#inetCidrRouteNextHopType.809">inetCidrRouteNextHopType</a>, <a href="#inetCidrRouteNextHop.826">inetCidrRouteNextHop</a>";
+            <span class="yang_kw">key</span> "<a href="#inetCidrRouteDestType.738">inetCidrRouteDestType</a> <a href="#inetCidrRouteDest.752">inetCidrRouteDest</a> <a href="#inetCidrRoutePfxLen.773">inetCidrRoutePfxLen</a> <a href="#inetCidrRoutePolicy.797">inetCidrRoutePolicy</a> <a href="#inetCidrRouteNextHopType.809">inetCidrRouteNextHopType</a> <a href="#inetCidrRouteNextHop.826">inetCidrRouteNextHop</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"A particular route to a particular destination, under a
@@ -883,7 +882,6 @@
                instances in this table will have more than 128 sub-
                identifiers and cannot be accessed using SNMPv1,
                SNMPv2c, or SNMPv3."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1"</span>;
             <a name="inetCidrRouteDestType.738"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteDestType</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1151,6 +1149,7 @@
                   marked as active(1)."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1.17"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.7.1"</span>;
          }  <span class="yang_cmt">// list inetCidrRouteEntry</span>
 
          <a name="inetCidrRouteDiscards.999"/><span class="yang_kw">leaf</span> <span class="yang_id">inetCidrRouteDiscards</span> {
@@ -1164,6 +1163,7 @@
                for other route table entries."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24.8"</span>;
          }
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.4.24"</span>;
       }  <span class="yang_cmt">// container ipForward</span>
    }  <span class="yang_cmt">// module IP-FORWARD-MIB</span>
 </pre>

@@ -307,7 +307,6 @@
       }
 
       <a name="hrSystem.164"/><span class="yang_kw">container</span> <span class="yang_id">hrSystem</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.1"</span>;
          <a name="hrSystemUptime.166"/><span class="yang_kw">leaf</span> <span class="yang_id">hrSystemUptime</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -348,7 +347,6 @@
 
          <a name="hrSystemInitialLoadParameters.204"/><span class="yang_kw">leaf</span> <span class="yang_id">hrSystemInitialLoadParameters</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#InternationalDisplayString.150">InternationalDisplayString</a></span> {
-               <span class="yang_kw">length</span> <span class="yang_str">"0..128"</span>;
             }
             <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
             <span class="yang_kw">description</span>
@@ -398,10 +396,10 @@
                this maximum is reached."</span>;
             <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.1.7"</span>;
          }
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.1"</span>;
       }  <span class="yang_cmt">// container hrSystem</span>
 
       <a name="hrStorage.259"/><span class="yang_kw">container</span> <span class="yang_id">hrStorage</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.2"</span>;
          <a name="hrMemorySize.261"/><span class="yang_kw">leaf</span> <span class="yang_id">hrMemorySize</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="#KBytes.114">KBytes</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"KBytes"</span>;
@@ -419,7 +417,6 @@
                <span class="yang_str">"A (conceptual) entry for one logical storage area on
                the host.  As an example, an instance of the
                hrStorageType object might be named hrStorageType.3"</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.2.3.1"</span>;
             <a name="hrStorageIndex.284"/><span class="yang_kw">leaf</span> <span class="yang_id">hrStorageIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
@@ -506,11 +503,12 @@
                   stations must not depend on such an initialization."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.2.3.1.7"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.2.3.1"</span>;
          }  <span class="yang_cmt">// list hrStorageEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.2"</span>;
       }  <span class="yang_cmt">// container hrStorage</span>
 
       <a name="hrDevice.374"/><span class="yang_kw">container</span> <span class="yang_id">hrDevice</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3"</span>;
          <a name="hrDeviceEntry.379"/><span class="yang_kw">list</span> <span class="yang_id">hrDeviceEntry</span> {
             <span class="yang_kw">key</span> "<a href="#hrDeviceIndex.389">hrDeviceIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -518,7 +516,6 @@
                <span class="yang_str">"A (conceptual) entry for one device contained by the
                host.  As an example, an instance of the hrDeviceType
                object might be named hrDeviceType.3"</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.2.1"</span>;
             <a name="hrDeviceIndex.389"/><span class="yang_kw">leaf</span> <span class="yang_id">hrDeviceIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
@@ -629,6 +626,7 @@
                   must not depend on such an initialization."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.2.1.6"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.2.1"</span>;
          }  <span class="yang_cmt">// list hrDeviceEntry</span>
 
          <a name="hrProcessorEntry.495"/><span class="yang_kw">list</span> <span class="yang_id">hrProcessorEntry</span> {
@@ -643,7 +641,6 @@
                As an example of how objects in this table are named,
                an instance of the hrProcessorFrwID object might be
                named hrProcessorFrwID.3"</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.3.1"</span>;
             <a name="hrDeviceIndex.509"/><span class="yang_kw">leaf</span> <span class="yang_id">hrDeviceIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -674,6 +671,7 @@
                   smoothing period if necessary."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.3.1.2"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.3.1"</span>;
          }  <span class="yang_cmt">// list hrProcessorEntry</span>
 
          <a name="hrNetworkEntry.544"/><span class="yang_kw">list</span> <span class="yang_id">hrNetworkEntry</span> {
@@ -688,7 +686,6 @@
                As an example of how objects in this table are named,
                an instance of the hrNetworkIfIndex object might be
                named hrNetworkIfIndex.3"</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.4.1"</span>;
             <a name="hrDeviceIndex.558"/><span class="yang_kw">leaf</span> <span class="yang_id">hrDeviceIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -707,6 +704,7 @@
                   the ifTable, then this value shall be zero."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.4.1.1"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.4.1"</span>;
          }  <span class="yang_cmt">// list hrNetworkEntry</span>
 
          <a name="hrPrinterEntry.581"/><span class="yang_kw">list</span> <span class="yang_id">hrPrinterEntry</span> {
@@ -721,7 +719,6 @@
                As an example of how objects in this table are named,
                an instance of the hrPrinterStatus object might be
                named hrPrinterStatus.3"</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.5.1"</span>;
             <a name="hrDeviceIndex.595"/><span class="yang_kw">leaf</span> <span class="yang_id">hrDeviceIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -796,6 +793,7 @@
                   especially those requiring human intervention."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.5.1.2"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.5.1"</span>;
          }  <span class="yang_cmt">// list hrPrinterEntry</span>
 
          <a name="hrDiskStorageEntry.664"/><span class="yang_kw">list</span> <span class="yang_id">hrDiskStorageEntry</span> {
@@ -808,7 +806,6 @@
                corresponds to the hrDiskStorageEntry. As an example,
                an instance of the hrDiskStorageCapacity object might
                be named hrDiskStorageCapacity.3"</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.6.1"</span>;
             <a name="hrDeviceIndex.676"/><span class="yang_kw">leaf</span> <span class="yang_id">hrDeviceIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -890,10 +887,11 @@
                   value should be zero."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.6.1.4"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.6.1"</span>;
          }  <span class="yang_cmt">// list hrDiskStorageEntry</span>
 
          <a name="hrPartitionEntry.742"/><span class="yang_kw">list</span> <span class="yang_id">hrPartitionEntry</span> {
-            <span class="yang_kw">key</span> "<a href="#hrDeviceIndex.756">hrDeviceIndex</a>, <a href="#hrPartitionIndex.765">hrPartitionIndex</a>";
+            <span class="yang_kw">key</span> "<a href="#hrDeviceIndex.756">hrDeviceIndex</a> <a href="#hrPartitionIndex.765">hrPartitionIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"A (conceptual) entry for one partition.  The
@@ -904,7 +902,6 @@
                As an example of how objects in this table are named,
                an instance of the hrPartitionSize object might be
                named hrPartitionSize.3.1"</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.7.1"</span>;
             <a name="hrDeviceIndex.756"/><span class="yang_kw">leaf</span> <span class="yang_id">hrDeviceIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -930,7 +927,6 @@
 
             <a name="hrPartitionLabel.779"/><span class="yang_kw">leaf</span> <span class="yang_id">hrPartitionLabel</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#InternationalDisplayString.150">InternationalDisplayString</a></span> {
-                  <span class="yang_kw">length</span> <span class="yang_str">"0..128"</span>;
                }
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -971,6 +967,7 @@
                   one partition."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.7.1.5"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.7.1"</span>;
          }  <span class="yang_cmt">// list hrPartitionEntry</span>
 
          <a name="hrFSEntry.828"/><span class="yang_kw">list</span> <span class="yang_id">hrFSEntry</span> {
@@ -986,7 +983,6 @@
                As an example of how objects in this table are named,
                an instance of the hrFSMountPoint object might be
                named hrFSMountPoint.3"</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.8.1"</span>;
             <a name="hrFSIndex.844"/><span class="yang_kw">leaf</span> <span class="yang_id">hrFSIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
@@ -1002,7 +998,6 @@
 
             <a name="hrFSMountPoint.857"/><span class="yang_kw">leaf</span> <span class="yang_id">hrFSMountPoint</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#InternationalDisplayString.150">InternationalDisplayString</a></span> {
-                  <span class="yang_kw">length</span> <span class="yang_str">"0..128"</span>;
                }
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1012,7 +1007,6 @@
 
             <a name="hrFSRemoteMountPoint.867"/><span class="yang_kw">leaf</span> <span class="yang_id">hrFSRemoteMountPoint</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#InternationalDisplayString.150">InternationalDisplayString</a></span> {
-                  <span class="yang_kw">length</span> <span class="yang_str">"0..128"</span>;
                }
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1109,11 +1103,12 @@
                   (hex)'00 00 01 01 00 00 00 00'."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.8.1.9"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3.8.1"</span>;
          }  <span class="yang_cmt">// list hrFSEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.3"</span>;
       }  <span class="yang_cmt">// container hrDevice</span>
 
       <a name="hrSWRun.967"/><span class="yang_kw">container</span> <span class="yang_id">hrSWRun</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.4"</span>;
          <a name="hrSWOSIndex.969"/><span class="yang_kw">leaf</span> <span class="yang_id">hrSWOSIndex</span> {
             <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
@@ -1143,7 +1138,6 @@
                As an example of how objects in this table are named,
                an instance of the hrSWRunName object might be named
                hrSWRunName.1287"</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.4.2.1"</span>;
             <a name="hrSWRunIndex.1004"/><span class="yang_kw">leaf</span> <span class="yang_id">hrSWRunIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
@@ -1158,7 +1152,6 @@
 
             <a name="hrSWRunName.1016"/><span class="yang_kw">leaf</span> <span class="yang_id">hrSWRunName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#InternationalDisplayString.150">InternationalDisplayString</a></span> {
-                  <span class="yang_kw">length</span> <span class="yang_str">"0..64"</span>;
                }
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1181,7 +1174,6 @@
 
             <a name="hrSWRunPath.1039"/><span class="yang_kw">leaf</span> <span class="yang_id">hrSWRunPath</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#InternationalDisplayString.150">InternationalDisplayString</a></span> {
-                  <span class="yang_kw">length</span> <span class="yang_str">"0..128"</span>;
                }
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1193,7 +1185,6 @@
 
             <a name="hrSWRunParameters.1051"/><span class="yang_kw">leaf</span> <span class="yang_id">hrSWRunParameters</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#InternationalDisplayString.150">InternationalDisplayString</a></span> {
-                  <span class="yang_kw">length</span> <span class="yang_str">"0..128"</span>;
                }
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1269,7 +1260,9 @@
                   this process."</span>;
                <span class="yang_kw">smi:oid</span> <span class="yang_str">"1.3.6.1.2.1.25.5.1.1.2"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.4.2.1"</span>;
          }  <span class="yang_cmt">// list hrSWRunEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.4"</span>;
       }  <span class="yang_cmt">// container hrSWRun</span>
 
       <a name="hrSWRunPerf.1094"/><span class="yang_kw">container</span> <span class="yang_id">hrSWRunPerf</span> {
@@ -1277,7 +1270,6 @@
       }  <span class="yang_cmt">// container hrSWRunPerf</span>
 
       <a name="hrSWInstalled.1099"/><span class="yang_kw">container</span> <span class="yang_id">hrSWInstalled</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.6"</span>;
          <a name="hrSWInstalledLastChange.1101"/><span class="yang_kw">leaf</span> <span class="yang_id">hrSWInstalledLastChange</span> {
             <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
@@ -1314,7 +1306,6 @@
                As an example of how objects in this table are named,
                an instance of the hrSWInstalledName object might be
                named hrSWInstalledName.96"</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.6.3.1"</span>;
             <a name="hrSWInstalledIndex.1143"/><span class="yang_kw">leaf</span> <span class="yang_id">hrSWInstalledIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
                   <span class="yang_kw">range</span> <span class="yang_str">"1..2147483647"</span>;
@@ -1330,7 +1321,6 @@
 
             <a name="hrSWInstalledName.1156"/><span class="yang_kw">leaf</span> <span class="yang_id">hrSWInstalledName</span> {
                <span class="yang_kw">type</span> <span class="yang_id"><a href="#InternationalDisplayString.150">InternationalDisplayString</a></span> {
-                  <span class="yang_kw">length</span> <span class="yang_str">"0..64"</span>;
                }
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
@@ -1382,7 +1372,9 @@
                   (hex)'00 00 01 01 00 00 00 00'."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.6.3.1.5"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.6.3.1"</span>;
          }  <span class="yang_cmt">// list hrSWInstalledEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.25.6"</span>;
       }  <span class="yang_cmt">// container hrSWInstalled</span>
    }  <span class="yang_cmt">// module HOST-RESOURCES-MIB</span>
 </pre>

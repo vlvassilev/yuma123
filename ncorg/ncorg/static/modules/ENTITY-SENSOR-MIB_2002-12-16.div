@@ -373,7 +373,6 @@
       }
 
       <a name="entitySensorObjects.275"/><span class="yang_kw">container</span> <span class="yang_id">entitySensorObjects</span> {
-         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1"</span>;
          <a name="entPhySensorEntry.280"/><span class="yang_kw">list</span> <span class="yang_id">entPhySensorEntry</span> {
             <span class="yang_kw">key</span> "<a href="#entPhysicalIndex.300">entPhysicalIndex</a>";
             <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
@@ -392,7 +391,6 @@
                for each physical sensor SHOULD be created at the same time
                as the associated entPhysicalEntry.  An entry SHOULD be
                destroyed if the associated entPhysicalEntry is destroyed."</span>;
-            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1"</span>;
             <a name="entPhysicalIndex.300"/><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
                <span class="yang_kw">type</span> <span class="yang_id">keyref</span> {
                   <span class="yang_kw">path</span>
@@ -499,7 +497,9 @@
                       - the agent does not know the update rate."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.8"</span>;
             }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1"</span>;
          }  <span class="yang_cmt">// list entPhySensorEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1"</span>;
       }  <span class="yang_cmt">// container entitySensorObjects</span>
    }  <span class="yang_cmt">// module ENTITY-SENSOR-MIB</span>
 </pre>

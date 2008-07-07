@@ -34,13 +34,6 @@
                         <li><a href="#failedSessions.130">failedSessions</a></li>
                         <li class="daddy"><a href="#sessionTotals.137">sessionTotals</a>
                            <ul>
-                              <li><a href="#inBytes.46">inBytes</a></li>
-                              <li><a href="#inDropBytes.54">inDropBytes</a></li>
-                              <li><a href="#inMsgs.62">inMsgs</a></li>
-                              <li><a href="#inErrMsgs.70">inErrMsgs</a></li>
-                              <li><a href="#outBytes.78">outBytes</a></li>
-                              <li><a href="#outMsgs.86">outMsgs</a></li>
-                              <li><a href="#outErrMsgs.95">outErrMsgs</a></li>
                               <li><a href="#uses.141">uses</a></li>
                            </ul>
                         </li>
@@ -203,7 +196,7 @@
             <a name="sessions.144"/><span class="yang_kw">container</span> <span class="yang_id">sessions</span> {
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Container for active session information and statistics.
-                  There is one entry for each session which is active
+                  There is one entry for each session which is active 
                   or starting up."</span>;
                <a name="session.150"/><span class="yang_kw">list</span> <span class="yang_id">session</span> {
                   <span class="yang_kw">key</span> "<a href="#id.155">id</a>";

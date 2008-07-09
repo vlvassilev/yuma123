@@ -424,6 +424,8 @@ static rpc_err_t
 	return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_PATTERN_FAILED:
 	return RPC_ERR_INVALID_VALUE;
+    case ERR_NCX_INVALID_TYPE_CHANGE:
+	return RPC_ERR_INVALID_VALUE;
 	
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

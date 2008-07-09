@@ -1930,7 +1930,7 @@ static status_t
 	    mod->allimpQ = NULL;
 
 	    if (!loaded) {
-		if (!pcb->diffmode) {
+		if (!pcb->diffmode || ptyp==YANG_PT_IMPORT) {
 		    res = ncx_add_to_registry(mod);
 		    if (res != NO_ERR) {
 			retres = res;

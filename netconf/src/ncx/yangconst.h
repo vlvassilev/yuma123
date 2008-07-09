@@ -95,6 +95,7 @@ date	     init     comment
 #define YANG_K_TYPE              (const xmlChar *)"type"
 #define YANG_K_TYPEDEF           (const xmlChar *)"typedef"
 #define YANG_K_UNBOUNDED         (const xmlChar *)"unbounded"
+#define YANG_K_UNION             (const xmlChar *)"union"
 #define YANG_K_UNIQUE            (const xmlChar *)"unique"
 #define YANG_K_UNITS             (const xmlChar *)"units"
 #define YANG_K_USER              (const xmlChar *)"user"

@@ -175,6 +175,12 @@ static uint32
 		  typ_def_t *newtypdef);
 
 
+static void
+    output_one_type_diff (yangdiff_diffparms_t *cp,
+			  const xmlChar *name,
+			  typ_def_t *oldtypdef,
+			  typ_def_t *newtypdef);
+
 /********************************************************************
 * FUNCTION pr_err
 *
@@ -528,7 +534,7 @@ static void
  *    id == string ID value to print (may be NULL)
  *********************************************************************/
 static void
-    output_lmstart_ine (yangdiff_diffparms_t *cp,
+    output_mstart_line (yangdiff_diffparms_t *cp,
 			const xmlChar *fieldname,
 			const xmlChar *id)
 {
@@ -555,7 +561,7 @@ static void
  *********************************************************************/
 static void
     output_cdb_line (yangdiff_diffparms_t *cp,
-		     yangdiff_cdb_t *cdb)
+		     const yangdiff_cdb_t *cdb)
 {
     boolean showval;
 
@@ -952,7 +958,7 @@ static void
     output_cdb_diff (yangdiff_diffparms_t *cp,
 		     const xmlChar *fieldname,
 		     const xmlChar *fieldval,
-		     yangdiff_cdb_t *cdb)
+		     const yangdiff_cdb_t *cdb)
 {
     if (!cdb->changed) {
 	return;
@@ -1441,13 +1447,13 @@ static void
 	indent_in(cp);
 	output_errinfo_diff(cp, NULL, newerr);
 	indent_out(cp);
-    } else if (oldrdef && !newrdef) {
+    } else if (oldrange && !newrange) {
 	/* range removed in new revision */
 	output_diff(cp, keyword, oldrange->rangestr, NULL, FALSE);
 	indent_in(cp);
 	output_errinfo_diff(cp, olderr, NULL);
 	indent_out(cp);
-    } else if (oldrdef && newrdef) {
+    } else if (oldrange && newrange) {
 
 	/* check if range changed 
 	 * !!! should really compare rangedef structs to see
@@ -1538,13 +1544,384 @@ static void
  *********************************************************************/
 static void
     output_eb_type_diff (yangdiff_diffparms_t *cp,
-			 const xmlChar *name,
-			 const typ_def_t *oldtypdef,
-			 const typ_def_t *newtypdef,
+			 const xmlChar *name,  /*** not used ***/
+			 typ_def_t *oldtypdef,
+			 typ_def_t *newtypdef,
 			 boolean isbits)
 {
+    typ_enum_t      *oldval, *newval;
+    dlq_hdr_t       *oldQ, *newQ;
+    typ_def_t       *oldbase, *newbase;
+    const xmlChar   *kw;
+    xmlChar          oldnum[NCX_MAX_NUMLEN];
+    xmlChar          newnum[NCX_MAX_NUMLEN];
+    yangdiff_cdb_t   cdb[4];
+    boolean          isrev;
+    uint32           chcount, i;
+
+    oldbase = typ_get_base_typdef(oldtypdef);
+    newbase = typ_get_base_typdef(newtypdef);
+
+    oldQ = &oldbase->def.simple.valQ;
+    newQ = &newbase->def.simple.valQ;
+
+    isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
+    chcount = 0;
+    kw = isbits ? YANG_K_BIT : YANG_K_ENUM;
+
+    /* clear the seen flag to find new enums/bits */
+    for (newval = (typ_enum_t *)dlq_firstEntry(newQ);
+	 newval != NULL;
+	 newval = (typ_enum_t *)dlq_nextEntry(newval)) {
+	newval->flags &= ~TYP_FL_SEEN;
+    }
+
+    /* check for matching entries */
+    for (oldval = (typ_enum_t *)dlq_firstEntry(oldQ);
+	 oldval != NULL;
+	 oldval = (typ_enum_t *)dlq_nextEntry(oldval)) {
+
+	newval = typ_find_enumdef(newQ, oldval->name);
+	if (newval) {
+	    if (isbits) {
+		sprintf((char *)oldnum, "%u", oldval->pos);
+		sprintf((char *)newnum, "%u", newval->pos);			
+		chcount += str_field_changed(YANG_K_POSITION,
+					     oldnum, newnum,
+					     isrev, &cdb[0]);
+	    } else {
+		sprintf((char *)oldnum, "%d", oldval->val);
+		sprintf((char *)newnum, "%d", newval->val);			
+		chcount += str_field_changed(YANG_K_VALUE,
+					     oldnum, newnum,
+					     isrev, &cdb[0]);
+	    }
+	    chcount += str_field_changed(YANG_K_DESCRIPTION,
+					 oldval->descr, newval->descr,
+					 FALSE, &cdb[1]);
+	    chcount += str_field_changed(YANG_K_REFERENCE,
+					 oldval->ref, newval->ref,
+					 FALSE, &cdb[2]);
+	    chcount += status_field_changed(YANG_K_STATUS,
+					    oldval->status, newval->status,
+					    FALSE, &cdb[3]);
+	    newval->flags |= TYP_FL_SEEN;
+	    if (chcount) {
+		output_mstart_line(cp, kw, oldval->name);
+		if (cp->edifftype != YANGDIFF_DT_TERSE) {
+		    indent_in(cp);
+		    for (i=0; i<3; i++) {
+			output_cdb_diff(cp, kw, oldval->name, &cdb[i]);
+		    }
+		    indent_out(cp);
+		}
+	    }
+	} else {
+	    /* removed name in new version */
+	    output_diff(cp, kw, oldval->name, NULL, FALSE);
+	}
+    }
+
+    /* check for new entries */
+    for (newval = (typ_enum_t *)dlq_firstEntry(newQ);
+	 newval != NULL;
+	 newval = (typ_enum_t *)dlq_nextEntry(newval)) {
+	if ((newval->flags & TYP_FL_SEEN) == 0) {
+	    output_diff(cp, kw, NULL, newval->name, FALSE);
+	}
+    }
 
 } /* output_eb_type_diff */
+
+
+/********************************************************************
+* FUNCTION unQ_changed
+*
+* Check if the union Q in the typdef has changed
+*
+* INPUTS:
+*   cp == comparison parameter block to use
+*   oldQ == Q of old typ_unionnode_t structs to check
+*   newQ == Q of new typ_unionnode_t structs to check
+*
+* RETURNS:
+*   1 if field changed
+*   0 if field not changed
+*********************************************************************/
+static uint32
+    unQ_changed (yangdiff_diffparms_t *cp,
+		 dlq_hdr_t *oldQ,
+		 dlq_hdr_t *newQ)
+{
+    typ_unionnode_t     *oldval, *newval;
+    typ_def_t           *olddef, *newdef;
+    boolean              done;
+
+
+    if (dlq_count(oldQ) != dlq_count(newQ)) {
+	return 1;
+    }
+
+    /* clear the seen flag to be safe */
+    for (newval = (typ_unionnode_t *)dlq_firstEntry(newQ);
+	 newval != NULL;
+	 newval = (typ_unionnode_t *)dlq_nextEntry(newval)) {
+	newval->seen = FALSE;
+    }
+
+    oldval = (typ_unionnode_t *)dlq_firstEntry(oldQ);
+    newval = (typ_unionnode_t *)dlq_firstEntry(newQ);
+
+
+    /* check for matching entries */
+    done = FALSE;
+    while (!done) {
+	if (!oldval && !newval) {
+	    return 0;
+	} else if (!oldval && newval) {
+	    return 1;
+	} else if (oldval && !newval) {
+	    return 1;
+	} /* else both old val and new val exist */
+
+	olddef = typ_get_unionnode_ptr(oldval);
+	newdef = typ_get_unionnode_ptr(newval);
+
+	if (type_changed(cp, olddef, newdef)) {
+	    return 1;
+	}
+
+	newval->seen = TRUE;
+
+	oldval = (typ_unionnode_t *)dlq_nextEntry(oldval);
+	newval = (typ_unionnode_t *)dlq_nextEntry(newval);
+    }
+
+    /* check for new entries */
+    for (newval = (typ_unionnode_t *)dlq_firstEntry(newQ);
+	 newval != NULL;
+	 newval = (typ_unionnode_t *)dlq_nextEntry(newval)) {
+	if (!newval->seen) {
+	    return 1;
+	}
+    }
+
+    return 0;
+    
+}  /* unQ_changed */
+
+
+/********************************************************************
+* FUNCTION unQ_match
+*
+* Find the specified type in the unionnode Q
+*
+* INPUTS:
+*   cp == comparison parameters to use
+*   oldval == old typ_unionnode_t struct to check
+*   newQ == Q of new typ_unionnode_t structs to check
+*   idx == address of return index
+*
+* OUTPUTS:
+*   *idx == index of the unionnode entry found [0..N-1 numbering]
+*
+* RETURNS:
+*   pointer to the found entry
+*   NULL if not found
+*********************************************************************/
+static typ_unionnode_t *
+    unQ_match (yangdiff_diffparms_t *cp,
+	       typ_unionnode_t *oldval,
+	       dlq_hdr_t *newQ,
+	       uint32 *idx)
+{
+    typ_unionnode_t     *newval;
+    typ_def_t           *olddef, *newdef;
+
+    *idx = 0;
+
+    olddef = typ_get_unionnode_ptr(oldval);
+
+    for (newval = (typ_unionnode_t *)dlq_firstEntry(newQ);
+	 newval != NULL;
+	 newval = (typ_unionnode_t *)dlq_nextEntry(newval)) {
+	if (!newval->seen) {
+	    newdef = typ_get_unionnode_ptr(newval);
+	    if (!type_changed(cp, olddef, newdef)) {
+		return newval;
+	    }
+	}
+	(*idx)++;
+    }
+
+    return NULL;
+    
+}  /* unQ_match */
+
+
+/********************************************************************
+* FUNCTION unQ_match_id
+*
+* Find the specified type by position in the unionnode Q
+*
+* INPUTS:
+*   oldid == index of typ_unionnode_t struct to match
+*   newQ == Q of new typ_unionnode_t structs to check
+*
+* RETURNS:
+*   pointer to the found entry
+*   NULL if not found
+*********************************************************************/
+static typ_unionnode_t *
+    unQ_match_id (uint32 oldid,
+		  dlq_hdr_t *newQ)
+{
+    typ_unionnode_t     *newval;
+    uint32               idx;
+
+    idx = 0;
+
+    for (newval = (typ_unionnode_t *)dlq_firstEntry(newQ);
+	 newval != NULL;
+	 newval = (typ_unionnode_t *)dlq_nextEntry(newval)) {
+	if (idx==oldid) {
+	    return (newval->seen) ? NULL : newval;
+	} else if (idx>oldid) {
+	    return NULL;
+	}
+	idx++;
+    }
+
+    return NULL;
+    
+}  /* unQ_match_id */
+
+
+/********************************************************************
+ * FUNCTION output_union_diff
+ * 
+ *  Output the differences report for one union sub-clauses
+ *  within a leaf, leaf-list, or typedef definition
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    name == type name to use
+ *    oldtypdef == old internal typedef
+ *    newtypdef == new internal typedef
+ *********************************************************************/
+static void
+    output_union_diff (yangdiff_diffparms_t *cp,
+		       const xmlChar *name,
+		       typ_def_t *oldtypdef,
+		       typ_def_t *newtypdef)
+{
+    typ_unionnode_t     *oldval, *newval, *curnew;
+    dlq_hdr_t           *oldQ, *newQ;
+    typ_def_t           *olddef, *newdef;
+    uint32               chcount, oldid, newid;
+    boolean              isrev;
+    char                 oldnum[NCX_MAX_NUMLEN];
+    char                 newnum[NCX_MAX_NUMLEN];
+
+    olddef = typ_get_base_typdef(oldtypdef);
+    newdef = typ_get_base_typdef(newtypdef);
+
+    oldQ = &olddef->def.simple.unionQ,
+    newQ = &newdef->def.simple.unionQ;
+
+    if (!unQ_changed(cp, oldQ, newQ)) {
+	return;
+    }
+
+    isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
+    chcount = 0;
+    oldid = 0;
+    newid = 0;
+
+    /* clear the seen flag to be safe */
+    for (newval = (typ_unionnode_t *)dlq_firstEntry(newQ);
+	 newval != NULL;
+	 newval = (typ_unionnode_t *)dlq_nextEntry(newval)) {
+	newval->seen = FALSE;
+    }
+
+    /* start the diff output */
+    output_mstart_line(cp, YANG_K_UNION, NULL);
+    if (cp->edifftype == YANGDIFF_DT_TERSE) {
+	return;
+    }
+
+    indent_in(cp);
+
+    /* check for matching unionnode entries */
+    for (oldval = (typ_unionnode_t *)dlq_firstEntry(oldQ);
+	 oldval != NULL;
+	 oldval = (typ_unionnode_t *)dlq_nextEntry(oldval), oldid++) {
+
+	curnew = NULL;
+	sprintf(oldnum, "[%u]", oldid);
+	olddef = typ_get_unionnode_ptr(oldval);
+
+	/* first try the corresponded entry if available */
+	newval = unQ_match_id(oldid, newQ);
+	if (newval) {
+	    curnew = newval;
+	    newid = oldid;
+	    sprintf(newnum, "[%u]", newid);
+	    newdef = typ_get_unionnode_ptr(newval);
+
+	    /* if the corresponding entry did not change
+	     * then this is a match and continue to next type
+	     */
+	    if (!type_changed(cp, olddef, newdef)) {
+		newval->seen = TRUE;
+		continue;
+	    }
+	}
+	    
+	/* did not match the corresponding entry,
+	 * so see if the typdef moved in the new union
+	 */
+	newval = unQ_match(cp, oldval, newQ, &newid);
+	if (newval) {
+	    newval->seen = TRUE;
+	    if (oldid != newid) {
+		sprintf(newnum, "[%u]", newid);
+		/* old union node was moved in new version */
+		output_diff(cp, YANG_K_TYPE, 
+			    (const xmlChar *)oldnum, 
+			    (const xmlChar *)newnum, TRUE);
+	    }
+	} else if (curnew) {
+	    /* type node was changed in the new union */
+	    curnew->seen = TRUE;
+	    newdef = typ_get_unionnode_ptr(curnew);
+	    sprintf(newnum, "[%u]", oldid);
+	    output_one_type_diff(cp, (const xmlChar *)newnum,
+				 olddef, newdef);
+	} else {
+	    /* old union node was removed in new version */
+	    output_diff(cp, YANG_K_TYPE,
+			(const xmlChar *)oldnum, NULL, TRUE);
+	}
+    }
+
+    indent_out(cp);
+
+    /* check for new entries */
+    newid = 0;
+    for (newval = (typ_unionnode_t *)dlq_firstEntry(newQ);
+	 newval != NULL;
+	 newval = (typ_unionnode_t *)dlq_nextEntry(newval)) {
+	if (!newval->seen) {
+	    sprintf(newnum, "[%u]", newid);
+	    output_diff(cp, YANG_K_TYPE, NULL,
+			(const xmlChar *)newnum, TRUE);
+	}
+	newid++;
+    }
+
+} /* output_union_diff */
 
 
 /********************************************************************
@@ -1567,18 +1944,14 @@ static void
 static void
     output_one_type_diff (yangdiff_diffparms_t *cp,
 			  const xmlChar *name,
-			  const typ_def_t *oldtypdef,
-			  const typ_def_t *newtypdef)
+			  typ_def_t *oldtypdef,
+			  typ_def_t *newtypdef)
 {
     const typ_def_t    *oldbase, *newbase;
-    const typ_def_t    *oldtest, *newtest;
-    const ncx_import_t *oldimp, *newimp;
     xmlChar            *p, *oldp, *newp;
     const xmlChar      *oldname, *newname;
     const xmlChar      *oldpath, *newpath;
     yangdiff_cdb_t      typcdb[5];
-    uint32              changecnt, i;
-    boolean             isrev;
     ncx_btype_t         oldbtyp, newbtyp;
     ncx_tclass_t        oldclass, newclass;
 
@@ -1595,6 +1968,15 @@ static void
     oldbtyp = typ_get_basetype(oldtypdef);
     newbtyp = typ_get_basetype(newtypdef);
 
+    oldpath = NULL;
+    newpath = NULL;
+    if (oldbtyp == NCX_BT_KEYREF) {
+	oldpath = typ_get_keyref_path(oldtypdef);
+    }
+    if (newbtyp==NCX_BT_KEYREF) {
+	newpath = typ_get_keyref_path(newtypdef);
+    }
+
     /* check if there is a module prefix involved
      * in the change.  This may be a false positive
      * if the prefix simply changed
@@ -1610,7 +1992,7 @@ static void
 	if (oldtypdef->class==NCX_CL_NAMED) {
 	    *p++ = ' ';
 	    *p++ = '(';
-	    p += xml_strcpy((const xmlChar *)
+	    p += xml_strcpy(p, (const xmlChar *)
 			    tk_get_btype_sym(oldbtyp));
 	    *p++ = ')';
 	    *p = 0;	    
@@ -1626,7 +2008,7 @@ static void
 	if (newtypdef->class==NCX_CL_NAMED) {
 	    *p++ = ' ';
 	    *p++ = '(';
-	    p += xml_strcpy((const xmlChar *)
+	    p += xml_strcpy(p, (const xmlChar *)
 			    tk_get_btype_sym(newbtyp));
 	    *p++ = ')';
 	    *p = 0;
@@ -1644,10 +2026,25 @@ static void
 	output_mstart_line(cp, YANG_K_TYPE, oldname);
     }
 
+    /* check invalid change of builtin type */
+    if (oldbtyp != newbtyp) {
+	/* need to figure out what type changes are really allowed */
+	if (!((typ_is_number(oldbtyp) && typ_is_number(newbtyp)) ||
+	      (typ_is_string(oldbtyp) && typ_is_string(newbtyp)))) {
+	    log_error("\nError: Invalid builtin type change (%s to %s)",
+		      tk_get_btype_sym(oldbtyp),
+		      tk_get_btype_sym(newbtyp));
+	    ncx_print_errormsg(NULL, cp->oldmod, ERR_NCX_INVALID_TYPE_CHANGE);
+	    return;
+	}
+    }
+
+    /* check if that is all the data requested */
     if (cp->edifftype == YANGDIFF_DT_TERSE) {
 	return;
     }
 
+    /* check corner-case, no sub-fields to compare */
     if (oldclass==NCX_CL_BASE && newclass==NCX_CL_BASE) {
 	/* type field is a plain builtin like 'int32;' */
 	return;
@@ -1655,138 +2052,34 @@ static void
 
     /* in all modes except 'terse', indent 1 level and
      * show the specific sub-clauses that have changed
+     * !!! NORMAL MODE??? !!!
      */
     indent_in(cp);
 
-    switch (oldtypdef->class) {
-    case NCX_CL_BASE:
-	if (typ_is_number(newbtyp)) {
-	    output_range_diff(cp, YANG_K_RANGE, oldtypdef, newtypdef);
-	} else if (typ_is_string(newbtyp)) {
-	    output_range_diff(cp, YANG_K_LENGTH, oldtypdef, newtypdef);
-	    output_pattern_diff(cp, name, oldtypdef, newtypdef);
-	} else {
-	    switch (newbtyp) {
-	    case NCX_BT_ENUM:
-		output_eb_type_diff(cp, name, oldtypdef, newtypdef, FALSE);
-		break;
-	    case NCX_BT_BITS:
-		output_eb_type_diff(cp, name, oldtypdef, newtypdef, TRUE);
-		break;
-	    default:
-		;
-	    }
-	}
-	break;
-    case NCX_CL_SIMPLE:
-	oldbtyp = typ_get_basetype(oldtypdef);
-	newbtyp = typ_get_basetype(newtypdef);
-	if (oldbtyp != newbtyp) {
-	    return 1;
-	}
-	if (oldbtyp == NCX_BT_KEYREF) {
-	    oldpath = typ_get_keyref_path(oldtypdef);
-	    newpath = typ_get_keyref_path(newtypdef);
-	    return str_field_changed(YANG_K_PATH, oldpath, newpath, 
-				     FALSE, NULL);
-	} else if (typ_is_string(oldbtyp)) {
-	    if (pattern_changed(oldtypdef, newtypdef)) {
-		return 1;
-	    }
-	    if (range_changed(oldtypdef, newtypdef)) {
-		return 1;
-	    }
-	} else if (typ_is_number(oldbtyp)) {
-	    if (range_changed(oldtypdef, newtypdef)) {
-		return 1;
-	    }
-	} else {
-	    switch (oldbtyp) {
-	    case NCX_BT_BITS:
-		return ebQ_changed(&oldtypdef->def.simple.valQ,
-				   &newtypdef->def.simple.valQ, TRUE);
-	    case NCX_BT_ENUM:
-		return ebQ_changed(&oldtypdef->def.simple.valQ,
-				   &newtypdef->def.simple.valQ, FALSE);
-	    case NCX_BT_UNION:
-		return unQ_changed(&oldtypdef->def.simple.unionQ,
-				   &newtypdef->def.simple.unionQ);
-	    default:
-		;
-	    }
-	}
-	return 0;
-    case NCX_CL_COMPLEX:
-	/* not supported for NCX complex types!!! */
-	return 0;     
-    case NCX_CL_NAMED:
-	oldtest = typ_get_new_named(oldtypdef);
-	newtest = typ_get_new_named(newtypdef);
-	if ((!oldtest && newtest) || (oldtest && !newtest)) {
-	    return 1;
-	}
-	if (oldtest && newtest) {
-	    if (type_changed(cp, oldtest, newtest)) {
-	    }
-	}
-
-	return 0;
-    case NCX_CL_REF:
-	return type_changed(cp, oldtypdef->def.ref.typdef,
-			    newtypdef->def.ref.typdef);
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return 0;
-    }
-    /*NOTREACHED*/
-
-
-
-    isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
-
-    /* figure out what changed */
-    changecnt = 0;
-    changecnt += str_field_changed(YANG_K_DESCRIPTION,
-				   oldext->descr, newext->descr, 
-				   isrev, &typcdb[0]);
-    changecnt += str_field_changed(YANG_K_REFERENCE,
-				   oldext->ref, newext->ref, 
-				   isrev, &typcdb[1]);
-    changecnt += status_field_changed(YANG_K_STATUS,
-				      oldext->status, newext->status, 
-				      isrev, &extcdb[4]);
-    if (changecnt == 0) {
-	return;
+    /* special case -- check keyref here */
+    if (oldpath || newpath) {
+	output_diff(cp, YANG_K_PATH, oldpath, newpath, FALSE);
     }
 
-    /* generate the diff output, based on the requested format */
-    switch (cp->edifftype) {
-    case YANGDIFF_DT_TERSE:
-    case YANGDIFF_DT_BRIEF:
-    case YANGDIFF_DT_REVISION:
-	output_mstart_line(cp, YANG_K_TYPE, newname);
-	if (cp->edifftype == YANGDIFF_DT_TERSE) {
-	    return;
+    if (typ_is_number(oldbtyp)) {
+	output_range_diff(cp, YANG_K_RANGE, oldtypdef, newtypdef);
+    } else if (typ_is_string(oldbtyp)) {
+	output_range_diff(cp, YANG_K_LENGTH, oldtypdef, newtypdef);
+	output_pattern_diff(cp, oldtypdef, newtypdef);
+    } else {
+	switch (oldbtyp) {
+	case NCX_BT_ENUM:
+	    output_eb_type_diff(cp, name, oldtypdef, newtypdef, FALSE);
+	    break;
+	case NCX_BT_BITS:
+	    output_eb_type_diff(cp, name, oldtypdef, newtypdef, TRUE);
+	    break;
+	case NCX_BT_UNION:
+	    output_union_diff(cp, name, oldtypdef, newtypdef);
+	    break;
+	default:
+	    ;
 	}
-
-	indent_in(cp);
-	for (i=0; i<5; i++) {
-	    if (typcdb[i].changed) {
-		output_cdb_line(cp, &typcdb[i]);
-	    }
-	}
-	indent_out(cp);
-	break;
-    case YANGDIFF_DT_NORMAL:
-	for (i=0; i<5; i++) {
-	    if (typcdb[i].changed) {
-		output_cdb_diff(cp, YANG_K_TYPE,
-				oldname, &typcdb[i]);
-	    }
-	}
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
 } /* output_one_type_diff */
@@ -1899,7 +2192,6 @@ static uint32
 {
     typ_enum_t     *oldval, *newval;
 
-
     if (dlq_count(oldQ) != dlq_count(newQ)) {
 	return 1;
     }
@@ -1963,80 +2255,6 @@ static uint32
     
 }  /* ebQ_changed */
 
-
-/********************************************************************
-* FUNCTION unQ_changed
-*
-* Check if the union Q in the typdef has changed
-*
-* INPUTS:
-*   oldQ == Q of old typ_unionnode_t structs to check
-*   newQ == Q of new typ_unionnode_t structs to check
-*
-* RETURNS:
-*   1 if field changed
-*   0 if field not changed
-*********************************************************************/
-static uint32
-    unQ_changed (dlq_hdr_t *oldQ,
-		 dlq_hdr_t *newQ)
-{
-    typ_unionnode_t     *oldval, *newval;
-    boolean              done;
-
-
-    if (dlq_count(oldQ) != dlq_count(newQ)) {
-	return 1;
-    }
-
-    /* clear the seen flag to be safe */
-    for (newval = (typ_unionnode_t *)dlq_firstEntry(newQ);
-	 newval != NULL;
-	 newval = (typ_unionnode_t *)dlq_nextEntry(newval)) {
-	newval->seen = FALSE;
-    }
-
-    oldval = (typ_unionnode_t *)dlq_firstEntry(oldQ);
-    newval = (typ_unionnode_t *)dlq_firstEntry(newQ);
-
-
-    /* check for matching entries */
-    done = FALSE;
-    while (!done) {
-	if (!oldval || !newval) {
-	    return 0;
-	}
-
-	if (oldval->typdef && newval->typdef) {
-	    if (type_changed(cp, oldval->typdef, newval->typdef)) {
-		return 1;
-	    }
-	} else if (oldval->typ && newval->typ) {
-	    if (type_changed(cp, &oldval->typ->typdef,
-			     &newval->typ->typdef)) {
-		return 1;
-	    }
-	}
-
-	newval->seen = TRUE;
-
-	oldval = (typ_unionnode_t *)dlq_nextEntry(oldval);
-	newval = (typ_unionnode_t *)dlq_nextEntry(newval);
-
-    }
-
-    /* check for new entries */
-    for (newval = (typ_unionnode_t *)dlq_firstEntry(newQ);
-	 newval != NULL;
-	 newval = (typ_unionnode_t *)dlq_nextEntry(newval)) {
-	if (!newval->seen) {
-	    return 1;
-	}
-    }
-
-    return 0;
-    
-}  /* unQ_changed */
 
 
 /********************************************************************
@@ -2116,7 +2334,7 @@ static uint32
 		return ebQ_changed(&oldtypdef->def.simple.valQ,
 				   &newtypdef->def.simple.valQ, FALSE);
 	    case NCX_BT_UNION:
-		return unQ_changed(&oldtypdef->def.simple.unionQ,
+		return unQ_changed(cp, &oldtypdef->def.simple.unionQ,
 				   &newtypdef->def.simple.unionQ);
 	    default:
 		;
@@ -2136,8 +2354,8 @@ static uint32
 		return 1;
 	    }
 	}
-	return type_changed(cp, oldtypdef->def.named.typ,
-			    newtypdef->def.named.typ);
+	return type_changed(cp, &oldtypdef->def.named.typ->typdef,
+			    &newtypdef->def.named.typ->typdef);
     case NCX_CL_REF:
 	return type_changed(cp, oldtypdef->def.ref.typdef,
 			    newtypdef->def.ref.typdef);
@@ -2704,7 +2922,7 @@ static status_t
 
     if (ncx_any_dependency_errors(oldpcb->top)) {
 	log_error("\nError: one or more modules imported into old '%s' "
-		  "had errors", oldpcb->mod->sourcefn);
+		  "had errors", oldpcb->top->sourcefn);
 	skipreport = TRUE;
     } else {
 	cp->oldmod = oldpcb->top;
@@ -2713,11 +2931,11 @@ static status_t
     /* skip NCX files */
     if (!oldpcb->top->isyang) {
 	log_error("\nError: NCX modules not supported (%s)", 
-		  oldpcb->mod->sourcefn);
+		  oldpcb->top->sourcefn);
 	skipreport = TRUE;
     } else if (!newpcb->top->isyang) {
 	log_error("\nError: NCX modules not supported (%s)", 
-		  newpcb->mod->sourcefn);
+		  newpcb->top->sourcefn);
 	skipreport = TRUE;
     }
 

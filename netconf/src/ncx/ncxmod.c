@@ -1506,7 +1506,7 @@ yang_pcb_t *
 
     return pcb;
 
-}  /* ncxmod_load_module_xsd */
+}  /* ncxmod_load_module_diff */
 
 
 /********************************************************************

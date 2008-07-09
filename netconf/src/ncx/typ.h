@@ -791,6 +791,9 @@ extern typ_unionnode_t *
 extern void
     typ_free_unionnode (typ_unionnode_t *un);
 
+extern typ_def_t *
+    typ_get_unionnode_ptr (typ_unionnode_t *un);
+
 extern const typ_unionnode_t *
     typ_first_unionnode (const typ_def_t *typdef);
 

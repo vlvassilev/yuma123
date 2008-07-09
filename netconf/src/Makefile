@@ -3,7 +3,7 @@
 #   src directory
 
 ##################### PROGRAMS ########################
-APPS = netconfd yangdump subsys ncxcli
+APPS = netconfd yangdump yangdiff subsys ncxcli
 
 ##################### LIBRARIES ########################
 #

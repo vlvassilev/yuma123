@@ -552,6 +552,8 @@ const char *
 	return "imported module has errors";
     case ERR_NCX_PATTERN_FAILED:
 	return "pattern match failed";
+    case ERR_NCX_INVALID_TYPE_CHANGE:
+	return "invalid data type change";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

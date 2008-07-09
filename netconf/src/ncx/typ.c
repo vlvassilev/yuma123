@@ -4160,6 +4160,37 @@ void
 
 
 /********************************************************************
+* FUNCTION typ_get_unionnode_ptr
+* 
+* Get the proper typdef pointer from a unionnode
+*
+* INPUTS:
+*   un == union node to check
+*
+* RETURNS:
+*   pointer to the typ_def_t inside
+*********************************************************************/
+typ_def_t *
+    typ_get_unionnode_ptr (typ_unionnode_t *un)
+{
+#ifdef DEBUG
+    if (!un) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+    if (un->typdef) {
+	return un->typdef;
+    } else if (un->typ) {
+	return &un->typ->typdef;
+    } else {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+
+}  /* typ_get_unionnode_ptr */
+
+/********************************************************************
 * FUNCTION typ_first_unionnode
 * 
 * Get the first union node in the queue for a given typdef
@@ -4256,6 +4287,7 @@ boolean
     case NCX_BT_BINARY:
     case NCX_BT_ENAME:
     case NCX_BT_INSTANCE_ID:
+	return TRUE;
     case NCX_BT_KEYREF:   /***/
 	return TRUE;
     default:

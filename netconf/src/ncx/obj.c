@@ -2522,7 +2522,7 @@ obj_template_t *
 
 
 /********************************************************************
-* FUNCTION obj_find_template
+* FUNCTION obj_find_template_con
 * 
 * Find an object with the specified name
 * Return a const pointer; used by yangdump
@@ -2708,6 +2708,67 @@ obj_case_t *
     return NULL;
 
 }  /* obj_find_case */
+
+
+#ifdef NOT_NEEDEED
+/********************************************************************
+* FUNCTION obj_find_uses
+* 
+* Find a specified uses-stmt within a Q of obj_template_t
+*
+* INPUTS:
+*    que == Q of obj_template_t to check
+*    uobj == uses object to find a match for
+*
+* RETURNS:
+*    pointer to obj_template_t for matching object
+*    NULL if not found
+*********************************************************************/
+obj_template_t *
+    obj_find_uses (const dlq_hdr_t *que,
+		   const obj_template_t *uobj)
+{
+    const obj_template_t *obj;
+    const grp_template_t  *grp1, *grp2;
+
+#ifdef DEBUG
+    if (!que || !uobj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+    if (uobj->objtype != OBJ_TYP_USES) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+#endif
+
+    grp1 = uobj->def.uses->grp;
+
+    for (obj = (obj_template_t *)dlq_firstEntry(que);
+	 obj != NULL;
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+
+	if (obj->objtype != OBJ_TYP_USES) {
+	    continue;
+	}
+
+	grp2 = obj->def.uses->grp;
+
+	if (xml_strcmp(grp1->name, grp2->name)) {
+	    continue;
+	}
+
+	if (xml_strcmp(grp1->mod->name, grp2->mod->name)) {
+	    continue;
+	}
+
+	return obj;
+    }
+
+    return NULL;
+
+}  /* obj_find_uses */
+#endif
 
 
 /********************************************************************
@@ -4240,6 +4301,40 @@ void
     m__free(unc);
 
 }  /* obj_free_unique_comp */
+
+
+
+/********************************************************************
+* FUNCTION obj_find_unique
+* 
+* Find a specific unique-stmt
+*
+* RETURNS:
+*   pointer to found entry or NULL if not found
+*********************************************************************/
+obj_unique_t *
+    obj_find_unique (dlq_hdr_t *que,
+		     const xmlChar *xpath)
+{
+    obj_unique_t  *un;
+
+#ifdef DEBUG
+    if (!que || !xpath) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (un = (obj_unique_t *)dlq_firstEntry(que);
+	 un != NULL;
+	 un = (obj_unique_t *)dlq_nextEntry(un)) {
+	if (!xml_strcmp(un->xpath, xpath)) {
+	    return un;
+	}
+    }
+    return NULL;
+
+}  /* obj_find_unique */
 
 
 /********************************************************************

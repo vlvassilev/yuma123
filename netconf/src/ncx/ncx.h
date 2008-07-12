@@ -735,6 +735,11 @@ extern void
 extern void 
     ncx_free_errinfo (ncx_errinfo_t *err);
 
+/* used to diff 2 must-stmts */
+extern ncx_errinfo_t *
+    ncx_find_errinfo (dlq_hdr_t *que,
+		      const xmlChar *xpath);
+
 extern xmlChar *
     ncx_get_source (const xmlChar *fspec);
 

@@ -7799,6 +7799,42 @@ void
 }  /* ncx_free_errinfo */
 
 
+
+/********************************************************************
+* FUNCTION ncx_find_errinfo
+* 
+* Find the specified errinfo
+*
+* INPUTS:
+*    que == Q of ncx_errinfo_t to search
+*    xpath == XPath string to match 
+*********************************************************************/
+ncx_errinfo_t *
+    ncx_find_errinfo (dlq_hdr_t *que,
+		      const xmlChar *xpath)
+{
+    ncx_errinfo_t  *errinfo;
+
+#ifdef DEBUG
+    if (!que || !xpath) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (errinfo = (ncx_errinfo_t *)dlq_firstEntry(que);
+	 errinfo != NULL;
+	 errinfo = (ncx_errinfo_t *)dlq_nextEntry(errinfo)) {
+	if (!xml_strcmp(errinfo->xpath, xpath)) {
+	    return errinfo;
+	}
+    }
+    return NULL;
+
+}  /* ncx_find_errinfo */
+
+
+
 /********************************************************************
 * FUNCTION ncx_get_source
 * 

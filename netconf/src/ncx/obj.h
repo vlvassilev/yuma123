@@ -100,6 +100,14 @@ date	     init     comment
  */
 #define OBJ_FL_EMPTY        bit6
 
+/* object has been visited by the yangdiff program */
+#define OBJ_FL_SEEN         bit7
+
+
+/* object marked as changed by the yangdiff program */
+#define OBJ_FL_DIFF         bit8
+
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
@@ -152,6 +160,7 @@ typedef enum obj_augtype_t_ {
 typedef struct obj_key_t_ {
     dlq_hdr_t       qhdr;
     struct obj_template_t_ *keyobj;
+    boolean         seen;   /* used by yangdiff */
 } obj_key_t;
 
 
@@ -170,6 +179,7 @@ typedef struct obj_unique_t_ {
     xmlChar        *xpath;       /* complete saved unique str */
     uint32          linenum;
     dlq_hdr_t       compQ;          /* Q of obj_unique_comp_t */
+    boolean         seen;               /* needed by yangdiff */
 } obj_unique_t;
 
 
@@ -435,6 +445,13 @@ extern obj_case_t *
 		   const xmlChar *modname,
 		   const xmlChar *casname);
 
+#ifdef NOT_NEEDED
+extern obj_template_t *
+    obj_find_uses (const dlq_hdr_t *que,
+		   const obj_template_t *uobj);
+#endif
+
+
 extern obj_template_t * 
     obj_new_rpcio (obj_template_t *rpcobj,
 		   const xmlChar *name);
@@ -544,6 +561,11 @@ extern obj_unique_comp_t *
 
 extern void
     obj_free_unique_comp (obj_unique_comp_t *unc);
+
+extern obj_unique_t *
+    obj_find_unique (dlq_hdr_t *que,
+		     const xmlChar *xpath);
+
 
 extern obj_key_t *
     obj_new_key (void);

@@ -592,6 +592,7 @@ typedef struct ncx_errinfo_t_ {
     xmlChar          *ref;
     xmlChar          *error_app_tag;
     xmlChar          *error_message;
+    boolean           seen;                     /* for yangdiff */
 } ncx_errinfo_t;
 
 

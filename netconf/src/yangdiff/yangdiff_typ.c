@@ -1005,7 +1005,7 @@ uint32
 
     switch (oldtypdef->class) {
     case NCX_CL_BASE:
-	return (oldtypdef->def.base == newtypdef->def.base) ? 0 : 1;
+	return (uint32)((oldtypdef->def.base == newtypdef->def.base) ? 0 : 1);
     case NCX_CL_SIMPLE:
 	oldbtyp = typ_get_basetype(oldtypdef);
 	newbtyp = typ_get_basetype(newtypdef);

@@ -2024,33 +2024,16 @@ static obj_template_t *
 	    continue;
 	}
 
-	switch (obj->objtype) {
-	case OBJ_TYP_CONTAINER:
-	    if (!xml_strcmp(objname, obj->def.container->name)) {
+	if (obj_has_name(obj)) {
+	    if (!xml_strcmp(objname, obj_get_name(obj))) {
 		return obj;
 	    }
-	    break;
-	case OBJ_TYP_LEAF:
-	    if (!xml_strcmp(objname, obj->def.leaf->name)) {
-		return obj;
-	    }
-	    break;
-	case OBJ_TYP_LEAF_LIST:
-	    if (!xml_strcmp(objname, obj->def.leaflist->name)) {
-		return obj;
-	    }
-	    break;
-	case OBJ_TYP_LIST:
-	    if (!xml_strcmp(objname, obj->def.list->name)) {
-		return obj;
-	    }
-	    break;
-	case OBJ_TYP_CHOICE:
-	    if (!xml_strcmp(objname, obj->def.choic->name)) {
-		return obj;
-	    }
-
-	    if (test) {
+	    if (test && (obj->objtype == OBJ_TYP_CHOICE)) {
+		/* since the choice and case layers disappear, need
+		 * to check if any real node names would clash
+		 * will also check later that all choice nodes
+		 * within the same sibling set do not clash either
+		 */
 		for (casobj = (obj_template_t *)
 			 dlq_firstEntry(obj->def.choic->caseQ);
 		     casobj != NULL;
@@ -2063,34 +2046,6 @@ static obj_template_t *
 		    }
 		}
 	    }
-	    break;
-	case OBJ_TYP_CASE:
-	    if (!xml_strcmp(objname, obj->def.cas->name)) {
-		return obj;
-	    }
-	    break;
-	case OBJ_TYP_RPC:
-	    if (!xml_strcmp(objname, obj->def.rpc->name)) {
-		return obj;
-	    }
-	    break;
-	case OBJ_TYP_RPCIO:
-	    if (!xml_strcmp(objname, obj->def.rpcio->name)) {
-		return obj;
-	    }
-	    break;
-	case OBJ_TYP_NOTIF:
-	    if (!xml_strcmp(objname, obj->def.notif->name)) {
-		return obj;
-	    }
-	    break;
-	case OBJ_TYP_USES:
-	case OBJ_TYP_AUGMENT:
-	    /* skip these object types without names */
-	    break;
-	case OBJ_TYP_NONE:
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
     }
 
@@ -4956,6 +4911,36 @@ boolean
     return (obj->flags & OBJ_FL_EMPTY) ? TRUE : FALSE;
 
 }   /* obj_is_empty */
+
+
+/********************************************************************
+* FUNCTION obj_is_match
+* 
+* Check if one object is a match in identity with another one
+*
+* INPUTS:
+*    obj1  == first object to match
+*    obj2  == second object to match
+*
+* RETURNS:
+*    TRUE is a match, FALSE otherwise
+*********************************************************************/
+boolean
+    obj_is_match (const obj_template_t  *obj1,
+		  const obj_template_t *obj2)
+{
+    if (xml_strcmp(obj1->mod->name, obj2->mod->name)) {
+	return FALSE;
+    }
+
+    if (obj_has_name(obj1) && obj_has_name(obj2)) {
+	return xml_strcmp(obj_get_name(obj1), 
+			  obj_get_name(obj2)) ? FALSE : TRUE;
+    } else {
+	return FALSE;
+    }
+
+}  /* obj_is_match */
 
 
 /* END obj.c */

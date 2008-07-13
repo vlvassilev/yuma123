@@ -1691,7 +1691,9 @@ void
 			  dlq_hdr_t *newQ)
 {
     obj_template_t *oldobj, *newobj;
+    boolean         anyout;
 
+    anyout = FALSE;
 
     for (newobj = (obj_template_t *)dlq_firstEntry(newQ);
 	 newobj != NULL;
@@ -1716,10 +1718,12 @@ void
 	    if (oldobj->flags & OBJ_FL_SEEN) {
 		if (oldobj->flags & OBJ_FL_DIFF) {
 		    output_one_object_diff(cp, oldobj, newobj);
+		    anyout = TRUE;
 		}
 	    } else if (object_changed(cp, oldobj, newobj)) {
 		oldobj->flags |= (OBJ_FL_SEEN | OBJ_FL_DIFF);
 		output_one_object_diff(cp, oldobj, newobj);
+		anyout = TRUE;
 	    } else {
 		oldobj->flags |= OBJ_FL_SEEN;
 	    }
@@ -1728,6 +1732,7 @@ void
 	    oldobj->flags |= OBJ_FL_SEEN;
 	    output_diff(cp, obj_get_typestr(oldobj), 
 			obj_get_name(oldobj), NULL, TRUE);
+	    anyout = TRUE;
 	}
     }
 
@@ -1742,8 +1747,30 @@ void
 	    /* this object was added in the new version */
 	    output_diff(cp, obj_get_typestr(newobj),
 			NULL, obj_get_name(newobj), TRUE);
+	    anyout = TRUE;	    
 	}
     }
+
+    /* check if the object order changed at all, but only if this
+     * is not a top-level object.  Use a little hack to test here
+     */
+    if (!anyout && (oldQ != &cp->oldmod->datadefQ)) {
+	oldobj = (obj_template_t *)dlq_firstEntry(oldQ);
+	newobj = (obj_template_t *)dlq_firstEntry(newQ);
+	while (oldobj && newobj) {
+	    if (obj_has_name(oldobj)) {
+		if (!obj_is_match(oldobj, newobj)) {
+		    output_mstart_line(cp, (const xmlChar *)
+				       "child node order", 
+				       NULL, FALSE);
+		    return;
+		}
+	    }
+	    oldobj = (obj_template_t *)dlq_nextEntry(oldobj);
+	    newobj = (obj_template_t *)dlq_nextEntry(newobj);
+	}
+    }
+
 
 } /* output_datadefQ_diff */
 
@@ -1820,6 +1847,23 @@ uint32
 	}
     }
 
+    /* check if the object order changed at all, but only if this
+     * is not a top-level object.  Use a little hack to test here
+     */
+    if (oldQ != &cp->oldmod->datadefQ) {
+	oldobj = (obj_template_t *)dlq_firstEntry(oldQ);
+	newobj = (obj_template_t *)dlq_firstEntry(newQ);
+	while (oldobj && newobj) {
+	    if (obj_has_name(oldobj)) {
+		if (!obj_is_match(oldobj, newobj)) {
+		    return 1;
+		}
+	    }
+	    oldobj = (obj_template_t *)dlq_nextEntry(oldobj);
+	    newobj = (obj_template_t *)dlq_nextEntry(newobj);
+	}
+    }
+			       
     return 0;
 
 }  /* datadefQ_changed */

@@ -621,4 +621,8 @@ extern boolean
 extern boolean
     obj_is_empty (const obj_template_t *obj);
 
+extern boolean
+    obj_is_match (const obj_template_t  *obj1,
+		  const obj_template_t *obj2);
+
 #endif	    /* _H_obj */

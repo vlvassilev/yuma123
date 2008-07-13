@@ -606,7 +606,9 @@ static void
     old = oldobj->def.leaf;
     new = newobj->def.leaf;
 
-    output_one_type_diff(cp, old->typdef, new->typdef);
+    if (type_changed(cp, old->typdef, new->typdef)) {
+	output_one_type_diff(cp, old->typdef, new->typdef);
+    }
 
     if (str_field_changed(YANG_K_UNITS, old->units, new->units, 
 			  isrev, &cdb)) {
@@ -765,7 +767,9 @@ static void
     old = oldobj->def.leaflist;
     new = newobj->def.leaflist;
 
-    output_one_type_diff(cp, old->typdef, new->typdef);
+    if (type_changed(cp, old->typdef, new->typdef)) {
+	output_one_type_diff(cp, old->typdef, new->typdef);
+    }
 
     if (str_field_changed(YANG_K_UNITS, old->units, new->units, 
 			  isrev, &cdb)) {
@@ -1791,11 +1795,10 @@ uint32
 	if (newobj) {
 	    if (object_changed(cp, oldobj, newobj)) {
 		/* use the seen flag in the old tree to indicate
-		 * that a node has definitely changed, to save time
-		 * during the actual output by flagging the subtrees that
-		 * have changes, instead of running this code again
+		 * that a node has been visited and the 'diff' flag 
+		 * to indicate a node has changed
 		 */
-		oldobj->flags |= OBJ_FL_SEEN;
+		oldobj->flags |= (OBJ_FL_SEEN | OBJ_FL_DIFF);
 		return 1;
 	    } else {
 		newobj->flags |= OBJ_FL_SEEN;

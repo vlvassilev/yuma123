@@ -44,11 +44,8 @@ date	     init     comment
 #define YANGDIFF_PROGNAME   (const xmlChar *)"yangdiff"
 #define YANGDIFF_PROGVER    (const xmlChar *)"0.1.0"
 
-
-/* this should match the buffer size in ncx/tk.h */
-#define YANGDIFF_BUFFSIZE           0xffff
-#define YANGDIFF_MOD_BUFFSIZE       0x1fff
-#define YANGDIFF_DEF_MAXSIZE       12
+#define YANGDIFF_BUFFSIZE          0x7fff
+#define YANGDIFF_DEF_MAXSIZE       20
 
 #define YANGDIFF_DIFFTYPE_TERSE    (const xmlChar *)"terse"
 #define YANGDIFF_DIFFTYPE_NORMAL   (const xmlChar *)"normal"
@@ -122,7 +119,6 @@ typedef struct yangdiff_diffparms_t_ {
     xmlChar        *curold;
     xmlChar        *curnew;
     xmlChar        *buff;
-    xmlChar        *modbuff;
     ncx_module_t   *oldmod;
     ncx_module_t   *newmod;
     uint32          bufflen;

@@ -335,6 +335,10 @@ extern const xmlChar *
     xml_trim_string (const xmlChar *str, 
 		     uint32 *len);
 
+extern int 
+    xml_strcmp_nosp (const xmlChar *s1, 
+		     const xmlChar *s2);
+
 extern xmlChar *
     xml_copy_clean_string (const xmlChar *str);
 

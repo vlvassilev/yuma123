@@ -1771,6 +1771,84 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION xml_strcmp_nosp
+* 
+* String compare for xmlChar for 2 strings, but ignoring
+* whitespace differences.  All consecutive whitespace is 
+* treated as one space char for comparison purposes
+*
+* Needed by yangdiff to compare description clauses which
+* have been reformated
+*
+* INPUTS:
+*   s1 == zero-terminated xmlChar string to compare
+*   s2 == zero-terminated xmlChar string to compare
+*
+* RETURNS:
+*   == -1 : string 1 is less than string 2
+*   == 0  : strings are equal
+*   == 1  : string 1 is greater than string 2
+*********************************************************************/
+int 
+    xml_strcmp_nosp (const xmlChar *s1, 
+		     const xmlChar *s2)
+{
+#ifdef DEBUG
+    if (!s1 || !s2) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    /* skip starting whitespace */
+    while (*s1 && xml_isspace(*s1)) {
+	s1++;
+    }
+    while (*s2 && xml_isspace(*s2)) {
+	s2++;
+    }
+
+    /* use the first string as the master, the 2nd must track
+     * to the first, which means all non-whitespace sections
+     * are identical in both strings
+     */
+    while (*s1 && *s2) {
+
+	/* both strings point at non whitespace chars */
+        if (*s1 < *s2) {
+            return -1;
+        } else if (*s1 > *s2) {
+            return 1;
+        } else if (!*s1 && !*s2) {
+            return 0;
+        }
+
+	/* both strings point at the same non-whitespace char */
+        s1++;
+        s2++;
+	if (xml_isspace(*s1) && xml_isspace(*s2)) {
+	    /* both strings point at some WSP ch, resynch non-WSP */
+	    while (*s1 && xml_isspace(*s1)) {
+		s1++;
+	    }
+	    while (*s2 && xml_isspace(*s2)) {
+		s2++;
+	    }
+	}
+    }
+
+    if (*s1 == *s2) {
+	return 0;
+    } else if (*s1 < *s2) {
+	return 1;
+    } else {
+	return -1;
+    }
+
+}  /* xml_strcmp_nosp */
+
+
+/********************************************************************
 * FUNCTION xml_copy_clean_string
 * 
 * Get a malloced string contained the converted string

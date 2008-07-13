@@ -186,22 +186,12 @@ ncx-module yangdiff {
             D foo  -->  Deleted foo in new revision
             M foo  -->  Modified foo in new revision
 
-         The 'brief' option will also include the values of the
-         fields that are different.
+         The 'normal' option will also include the values of the
+         fields that are different, and provide nested context.
 
-            A foo bar -->  Added foo with new value bar in new revision
+            A foo 'bar' -->  Added foo with new value bar in new revision
             D foo  -->  Deleted foo with old value bar in new revision
             M foo  -->  Modified foo with new value bar in new revision
-
-         The 'normal' option will generate old (-) and new (+) style
-         reports for all differences found.
-          Add:
-            + foo bar  --> Added foo with new value bar in new revision
-          Delete:
-            - foo  bar -->  Deleted foo with old value bar in new revision
-          Modify:
-            - foo baz  --> Changed foo from old value baz
-            + foo bar  --> Changed foo to new value bar
 
          The 'revision' option will generate the differences in
          YANG revision-stmt format.
@@ -215,7 +205,7 @@ ncx-module yangdiff {
                     - Added must to /myobjects/some/list\";
               }  
           ";
-      syntax { enum = { terse brief normal revision }; }
+      syntax { enum = { terse normal revision }; }
       default "normal";
     }
 

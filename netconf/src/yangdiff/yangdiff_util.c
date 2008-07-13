@@ -228,8 +228,8 @@ uint32
 	    cdb->useval = oldstr;
 	    cdb->chtyp = (isrev) ? DEL_STR : D_STR;
 	}
-    } else if (oldstr && newstr &&
-	       xml_strcmp(oldstr, newstr)) {
+    } else if (oldstr && newstr && 
+	       xml_strcmp_nosp(oldstr, newstr)) {
 	ret = 1;
 	if (cdb) {
 	    cdb->changed = TRUE;
@@ -487,33 +487,26 @@ void
 	return;
     }
 
-    showval = TRUE;
+    showval = (cp->edifftype == YANGDIFF_DT_TERSE) ? FALSE : TRUE;
 
-    switch (cp->edifftype) {
-    case YANGDIFF_DT_TERSE:
-	showval = FALSE;
-	/* fall through */
-    case YANGDIFF_DT_NORMAL:
-    case YANGDIFF_DT_REVISION:
-	ses_putstr_indent(cp->scb, cdb->chtyp, cp->curindent);
-	ses_putstr(cp->scb, cdb->fieldname);
-	if (showval) {
-	    ses_putchar(cp->scb, ' ');
-	    if (cdb->oldval && cdb->newval) {
+    ses_putstr_indent(cp->scb, cdb->chtyp, cp->curindent);
+    ses_putstr(cp->scb, cdb->fieldname);
+    if (showval) {
+	ses_putchar(cp->scb, ' ');
+	if (cdb->oldval && cdb->newval) {
+	    if ((xml_strlen(cdb->oldval) < cp->maxlen) &&
+		(xml_strlen(cdb->newval) < cp->maxlen)) {
 		ses_putstr(cp->scb, FROM_STR);
 		output_val(cp, cdb->oldval);
 		ses_putchar(cp->scb, ' ');
 		ses_putstr(cp->scb, TO_STR);
 		output_val(cp, cdb->newval);
-	    } else if (cdb->useval) {
-		output_val(cp, cdb->useval);
-	    } else {
-		ses_putstr(cp->scb, (const xmlChar *)" ''");
 	    }
+	} else if (cdb->useval) {
+	    output_val(cp, cdb->useval);
+	} else {
+	    ses_putstr(cp->scb, (const xmlChar *)" ''");
 	}
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
 }  /* output_cdb_line */
@@ -576,7 +569,8 @@ void
     if (finish) {
 	ses_putstr(cp->scb, fieldname);
 	if (useto) {
-	    if (xml_strncmp(oldval, newval, cp->maxlen)) {
+	    if ((xml_strlen(oldval) < cp->maxlen) &&
+		(xml_strlen(newval) < cp->maxlen)) {
 		ses_putchar(cp->scb, ' ');
 		ses_putstr(cp->scb, FROM_STR);
 		output_val(cp, oldval);

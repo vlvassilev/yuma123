@@ -280,7 +280,6 @@ static void
     newQ = &newbase->def.simple.valQ;
 
     isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
-    chcount = 0;
     kw = isbits ? YANG_K_BIT : YANG_K_ENUM;
 
     /* clear the seen flag to find new enums/bits */
@@ -295,6 +294,7 @@ static void
 	 oldval != NULL;
 	 oldval = (typ_enum_t *)dlq_nextEntry(oldval)) {
 
+	chcount = 0;
 	newval = typ_find_enumdef(newQ, oldval->name);
 	if (newval) {
 	    if (isbits) {
@@ -324,7 +324,7 @@ static void
 		output_mstart_line(cp, kw, oldval->name, isbits);
 		if (cp->edifftype != YANGDIFF_DT_TERSE) {
 		    indent_in(cp);
-		    for (i=0; i<3; i++) {
+		    for (i=0; i<4; i++) {
 			output_cdb_line(cp, &cdb[i]);
 		    }
 		    indent_out(cp);

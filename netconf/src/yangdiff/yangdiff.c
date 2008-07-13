@@ -1195,13 +1195,6 @@ static status_t
     }
     cp->bufflen = YANGDIFF_BUFFSIZE;
 
-    cp->modbuff = m__getMem(YANGDIFF_MOD_BUFFSIZE);
-    if (!cp->modbuff) {
-	return ERR_INTERNAL_MEM;
-    }
-    cp->modbuff[0] = 0;
-    cp->modbufflen = YANGDIFF_MOD_BUFFSIZE;
-
     cp->maxlen = YANGDIFF_DEF_MAXSIZE;
 
     /* find the parmset definition in the registry */
@@ -1445,9 +1438,6 @@ static void
     }
     if (diffparms.buff) {
 	m__free(diffparms.buff);
-    }
-    if (diffparms.modbuff) {
-	m__free(diffparms.modbuff);
     }
 
     /* cleanup the NCX engine and registries */

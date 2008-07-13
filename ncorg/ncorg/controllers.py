@@ -202,7 +202,7 @@ modversion = widgets.CheckBox(name='modversion', default=False,
 exports = widgets.CheckBox(name='exports', default=False,
                               label='Include exported symbols report')
 dependencies = widgets.CheckBox(name='dependencies', default=False,
-                              label='Include external dependecies report')
+                              label='Include external dependencies report')
 identifiers = widgets.CheckBox(name='identifiers', default=False,
                               label='Include object identifiers report')
 

@@ -21,6 +21,7 @@ date         init     comment
 #include <memory.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <pwd.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <xmlstring.h>
@@ -100,12 +101,13 @@ static const xmlChar *ncxmod_env_userhome;
 
 static const xmlChar *ncxmod_mod_path;
 
+static const xmlChar *ncxmod_alt_path;
+
 static const xmlChar *ncxmod_data_path;
 
 static const xmlChar *ncxmod_run_path;
 
 static boolean ncxmod_subdirs;
-
 
 
 /********************************************************************
@@ -170,7 +172,7 @@ static status_t
 	total++;
     }
 
-    if (*path == '~') {
+    if (*path == NCXMOD_HMCHAR && path[1] == NCXMOD_PSCHAR) {
 	if (!ncxmod_env_userhome) {
 	    return ERR_FIL_BAD_FILENAME;
 	} else {
@@ -186,7 +188,7 @@ static status_t
 	    
     str = buff;
 
-    if (*path == '~') {
+    if (*path == NCXMOD_HMCHAR && path[1] == NCXMOD_PSCHAR) {
 	str += xml_strcpy(str, ncxmod_env_userhome);
 	str += xml_strcpy(str, &path[1]);
     } else {
@@ -700,7 +702,7 @@ static status_t
 *   modname == module name to find (no file suffix)
 *   pcb == parser control block in progress
 *   ptyp == parser source type
-*   usepath == TRUE if path should be used directed
+*   usepath == TRUE if path should be used directly
 *              FALSE if the path should be appended with the 'modules' dir
 *   done == address of return done flag
 *
@@ -985,7 +987,7 @@ static status_t
 	}
     }
 
-    /* check if the module is already loaded (in the ncx_modQ) */
+    /* check if the module is already loaded (in the current ncx_modQ) */
     if (!isfile) {
 	testmod = ncx_find_module(modname);
 	if (testmod) {
@@ -1026,6 +1028,12 @@ static status_t
 	    log_error("\nError: file not found (%s)", modname);
 	}
 	return res;
+    }
+
+    /* 0) try alt_path variable if set; used by yangdiff */
+    if (!done && ncxmod_alt_path) {
+	res = check_module_path(ncxmod_alt_path, buff, bufflen,
+				modname, pcb, ptyp, FALSE, &done);
     }
 
     /* 1a) try as module in current dir, YANG format  */
@@ -1266,6 +1274,8 @@ void
     /* try to get the module search path variable */
     ncxmod_mod_path = (const xmlChar *)getenv(NCXMOD_MODPATH);
 
+    ncxmod_alt_path = NULL;
+
     /* try to get the data search path variable */
     ncxmod_data_path = (const xmlChar *)getenv(NCXMOD_DATAPATH);
 
@@ -1501,6 +1511,9 @@ yang_pcb_t *
 	pcb->subtree_mode = subtree_mode;
 	pcb->with_submods = with_submods;
 	pcb->diffmode = TRUE;
+	if (modpath) {
+	    ncxmod_set_altpath(modpath);
+	}
 	*res = load_module(modname, pcb, YANG_PT_TOP);
     }
 
@@ -1905,12 +1918,12 @@ status_t
 *    FALSE otherwise
 *********************************************************************/
 boolean
-    ncxmod_test_subdir (const char *dirspec)
+    ncxmod_test_subdir (const xmlChar *dirspec)
 {
     DIR           *dp;
 
     /* try to open the buffer spec as a directory */
-    dp = opendir(dirspec);
+    dp = opendir((const char *)dirspec);
     if (!dp) {
 	return FALSE;
     } else {
@@ -1920,6 +1933,123 @@ boolean
     /*NOTREACHED*/
 
 }  /* ncxmod_test_subdir */
+
+
+/********************************************************************
+* FUNCTION ncxmod_get_userhome
+*
+* Get the user home dir from the passwd file
+*
+* INPUTS:
+*    user == user name string (may not be zero-terminiated)
+*    userlen == length of user
+*
+* RETURNS:
+*    const pointer to the user home directory string
+*********************************************************************/
+const xmlChar *
+    ncxmod_get_userhome (const xmlChar *user,
+		  uint32 userlen)
+{
+    struct passwd  *pw;
+    char            buff[64];
+
+    /* only support user names up to 63 chars in length */
+    if (userlen > 63) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+
+    if (!user) {
+	return (const xmlChar *)ncxmod_env_userhome;
+    }
+
+    strncpy(buff, (const char *)user, userlen);
+    pw = getpwnam(buff);
+    if (!pw) {
+	return NULL;
+    }
+
+    return (const xmlChar *)pw->pw_dir;
+
+}  /* ncxmod_get_userhome */
+
+
+/********************************************************************
+* FUNCTION ncxmod_get_envvar
+*
+* Get the specified shell environment variable
+*
+* INPUTS:
+*    name == name of the environment variable (may not be zero-terminiated)
+*    namelen == length of name string
+*
+* RETURNS:
+*    const pointer to the specified environment variable value
+*********************************************************************/
+const xmlChar *
+    ncxmod_get_envvar (const xmlChar *name,
+		       uint32 namelen)
+{
+    char            buff[64];
+
+#ifdef DEBUG
+    if (!name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    /* only support user names up to 63 chars in length */
+    if (namelen > 63) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+
+    strncpy(buff, (const char *)name, namelen);
+    return (const xmlChar *)getenv(buff);
+
+}  /* ncxmod_get_envvar */
+
+
+/********************************************************************
+* FUNCTION ncxmod_set_altpath
+*
+* Set the alternate path that should be used first (for yangdiff)
+*
+* INPUTS:
+*    altpath == full path string to use
+*               must be static 
+*               a const back-pointer is kept, not a copy
+*
+*********************************************************************/
+void
+    ncxmod_set_altpath (const xmlChar *altpath)
+{
+#ifdef DEBUG
+    if (!altpath) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    ncxmod_alt_path = altpath;
+
+}  /* ncxmod_set_altpath */
+
+
+/********************************************************************
+* FUNCTION ncxmod_clear_altpath
+*
+* Clear the alternate path so none is used (for yangdiff)
+*
+*********************************************************************/
+void
+    ncxmod_clear_altpath (void)
+{
+    ncxmod_alt_path = NULL;
+
+}  /* ncxmod_clear_altpath */
 
 
 /* END file ncxmod.c */

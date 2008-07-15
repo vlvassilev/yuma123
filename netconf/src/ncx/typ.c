@@ -1830,7 +1830,6 @@ status_t
 			 const xmlChar *typname,
 			 typ_template_t  **tptr)
 {
-    typ_template_t  *typ;
     ncx_node_t       dtyp;
     ncx_btype_t      btyp;
 
@@ -1846,13 +1845,9 @@ status_t
          * It does not include the type we are building, so
          * there is no need for a special check for that corner case
          */
-        for (typ = (typ_template_t *)dlq_firstEntry(&mod->typeQ);
-             typ != NULL;
-             typ = (typ_template_t *)dlq_nextEntry(typ)) {
-            if (!xml_strcmp(typ->name, typname)) {
-                *tptr = typ;
-                return NO_ERR;
-            }
+	*tptr = ncx_find_type(mod, typname);
+	if (*tptr) {
+	    return NO_ERR;
         }
 
         /* Typename not found, now go through the imports list 
@@ -1876,7 +1871,8 @@ status_t
     } else {
         dtyp = NCX_NT_TYP;
         *tptr = (typ_template_t *)
-            ncx_locate_modqual_import(modstr, typname, &dtyp);
+            ncx_locate_modqual_import(modstr, typname, 
+				      mod->diffmode, &dtyp);
     }
     return *tptr ? NO_ERR : ERR_NCX_DEF_NOT_FOUND;
 

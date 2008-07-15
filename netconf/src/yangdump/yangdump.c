@@ -428,10 +428,11 @@ static status_t
     if (parm) {
 	/* output -- use filename provided */
 	cp->output = (const char *)VAL_STR(parm->val);
-	cp->output_isdir = ncxmod_test_subdir(cp->output);
-    } else {
-	/* use default output -- STDOUT */
-	cp->output = NULL;
+	cp->full_output = ncx_get_source(VAL_STR(parm->val));
+	if (!cp->full_output) {
+	    return ERR_INTERNAL_MEM;
+	}
+	cp->output_isdir = ncxmod_test_subdir(cp->full_output);
     }
 
     /* simurls parameter */
@@ -1481,6 +1482,9 @@ static void
     }
     if (cvtparms.module) {
 	m__free(cvtparms.module);
+    }
+    if (cvtparms.full_output) {
+	m__free(cvtparms.full_output);
     }
     if (cvtparms.buff) {
 	m__free(cvtparms.buff);

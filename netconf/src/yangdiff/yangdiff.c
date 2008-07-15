@@ -712,33 +712,44 @@ static xmlChar *
 			  const yangdiff_diffparms_t *cp)
 {
     xmlChar         *buff, *p;
-    uint32           len;
+    const xmlChar   *newstart;
+    uint32           len, pslen;
 
+    pslen = 0;
 
-    if (cp->old_isdir) {
-	len = xml_strlen(cp->old);
-	if (cp->old[len-1] != NCXMOD_PSCHAR) {
-	    len++;
-	}
-	len += xml_strlen(newfn);
-    } else {
-	len = xml_strlen(cp->old);
+    /* setup source filespec pointer */
+    newstart = newfn;
+    if (cp->new_isdir) {
+	newstart += xml_strlen(cp->full_new);
     }
 
-    buff = m__getMem(len+1);
+    /* check length: subtree mode vs 1 file mode */
+    if (cp->old_isdir) {
+	len = xml_strlen(cp->full_old);
+	if ((cp->full_old[len-1] != NCXMOD_PSCHAR) && (*newstart != NCXMOD_PSCHAR)) {
+	    pslen = 1;
+	}
+	len += xml_strlen(newstart);
+    } else {
+	len = xml_strlen(cp->full_old);
+    }
+
+    /* get a buffer */
+    buff = m__getMem(len+pslen+1);
     if (!buff) {
 	return NULL;
     }
 
+    /* fill in buffer: subtree mode vs 1 file mode */
     if (cp->old_isdir) {
 	p = buff;
-	p += xml_strcpy(p, cp->old);
-	if (*(p-1) != NCXMOD_PSCHAR) {
+	p += xml_strcpy(p, cp->full_old);
+	if (pslen) {
 	    *p++ = NCXMOD_PSCHAR;
 	}
-	xml_strcpy(p, newfn);
+	xml_strcpy(p, newstart);
     } else {
-	xml_strcpy(buff, cp->old);
+	xml_strcpy(buff, cp->full_old);
     }
 
     return buff;
@@ -772,12 +783,16 @@ static status_t
      * if this is a subtree call, then the curnew pointer
      * will be set, otherwise the 'new' pointer must be set
      */
-    newpcb = ncxmod_load_module_xsd((cp->curnew) ? 
-				    cp->curnew : cp->new,
-				    (cp->curnew) ? TRUE : FALSE,
-				    TRUE  /* cp->unified */, &res);
+    if (cp->new_isdir) {
+	ncx_set_cur_modQ(&cp->newmodQ);
+    }
+
+    newpcb = ncxmod_load_module_diff((cp->curnew) ? cp->curnew : cp->new,
+				     (cp->curnew) ? TRUE : FALSE  /* subtree mode */,
+				     FALSE  /* cp->unified */, 
+				     (cp->curnew) ? cp->full_new : NULL,
+				     &res);
     if (res == ERR_NCX_SKIPPED) {
-	/* this is probably a submodule being skipped in subtree mode */
 	if (newpcb) {
 	    yang_free_pcb(newpcb);
 	}
@@ -802,7 +817,8 @@ static status_t
     }
 
     /* figure out where to get the requested 'old' file */
-    cp->curold = make_curold_filename(newpcb->top->sourcefn, cp);
+    cp->curold = make_curold_filename((cp->new_isdir) ? 
+				      cp->curnew : newpcb->top->sourcefn, cp);
     if (!cp->curold) {
 	res = ERR_INTERNAL_MEM;
 	ncx_print_errormsg(NULL, NULL, res);
@@ -810,14 +826,19 @@ static status_t
 	return res;
     }
 
+    if (cp->old_isdir) {
+	ncx_set_cur_modQ(&cp->oldmodQ);
+    }
+
     /* load in the requested 'old' module to compare
      * if this is a subtree call, then the curnew pointer
      * will be set, otherwise the 'new' pointer must be set
      */
     oldpcb = ncxmod_load_module_diff(cp->curold, 
-				     (cp->curnew) ? TRUE : FALSE,
-				     TRUE  /* cp->unified */,
-				     NULL /* modpath */,  &res);
+				     (cp->new_isdir) ? TRUE : FALSE,
+				     FALSE  /* cp->unified */,
+				     (cp->old_isdir) ? cp->full_old : NULL,
+				     &res);
     if (res == ERR_NCX_SKIPPED) {
 	/* this is probably a submodule being skipped in subtree mode */
 	log_debug("\nyangdiff: New PCB OK but old PCB skipped (%s)",
@@ -1161,6 +1182,7 @@ static status_t
 * parmset for the yangdiff program
 *
 * get all the parms and store them in the diffparms struct
+* !!! Relies on CLI parmset 'cp' remaining valid until program cleanup !!!
 *
 * INPUTS:
 *    argc == argument count
@@ -1311,21 +1333,25 @@ static status_t
     /* old parameter */
     res = ps_get_parmval(ps, YANGDIFF_PARM_OLD, &val);
     if (res == NO_ERR) {
-	cp->old = xml_strdup(VAL_STR(val));
-	if (!cp->old) {
+	cp->old = VAL_STR(val);
+	cp->full_old = ncx_get_source(VAL_STR(val));
+	if (!cp->full_old) {
 	    return ERR_INTERNAL_MEM;
+	} else {
+	    cp->old_isdir = ncxmod_test_subdir(cp->full_old); 
 	}
-	cp->old_isdir = ncxmod_test_subdir((const char *)cp->old);	
     }
 
     /* new parameter */
     res = ps_get_parmval(ps, YANGDIFF_PARM_NEW, &val);
     if (res == NO_ERR) {
-	cp->new = xml_strdup(VAL_STR(val));
-	if (!cp->new) {
+	cp->new = VAL_STR(val);
+	cp->full_new = ncx_get_source(VAL_STR(val));
+	if (!cp->full_new) {
 	    return ERR_INTERNAL_MEM;
+	} else {
+	    cp->new_isdir = ncxmod_test_subdir(cp->full_new);
 	}
-	cp->new_isdir = ncxmod_test_subdir((const char *)cp->new);
     }
 
     /* no-header parameter */
@@ -1341,13 +1367,14 @@ static status_t
     /* output parameter */
     parm = ps_find_parm(ps, YANGDIFF_PARM_OUTPUT);
     if (parm) {
-	/* output -- use filename provided */
-	cp->output = VAL_STR(parm->val);
-	cp->output_isdir = ncxmod_test_subdir((const char *)cp->output);
-    } else {
-	/* use default output -- STDOUT */
-	cp->output = NULL;
-    }
+	cp->output = VAL_STR(val);
+	cp->full_output = ncx_get_source(VAL_STR(val));
+	if (!cp->full_output) {
+	    return ERR_INTERNAL_MEM;
+	} else {
+	    cp->output_isdir = ncxmod_test_subdir(cp->full_output);
+	}
+    } /* else use default output -- STDOUT */
 
     /* version parameter */
     if (ps_find_parm(ps, NCX_EL_VERSION)) {
@@ -1373,6 +1400,9 @@ static status_t
 
     /* init module static variables */
     memset(&diffparms, 0x0, sizeof(yangdiff_diffparms_t));
+    dlq_createSQue(&diffparms.oldmodQ);
+    dlq_createSQue(&diffparms.newmodQ);
+
     cli_ps = NULL;
 
     /* initialize the NCX Library first to allow NCX modules
@@ -1413,20 +1443,23 @@ static status_t
 static void
     main_cleanup (void)
 {
+    ncx_module_t  *mod;
+
     if (cli_ps) {
 	ps_free_parmset(cli_ps);
     }
 
+    while (!dlq_empty(&diffparms.oldmodQ)) {
+	mod = dlq_deque(&diffparms.oldmodQ);
+	ncx_free_module(mod);
+    }
+
+    while (!dlq_empty(&diffparms.newmodQ)) {
+	mod = dlq_deque(&diffparms.newmodQ);
+	ncx_free_module(mod);
+    }
+
     /* free the input parameters */
-    if (diffparms.old) {
-	m__free(diffparms.old);
-    }
-    if (diffparms.new) {
-	m__free(diffparms.new);
-    }
-    if (diffparms.mod) {
-	ncx_free_module(diffparms.mod);
-    }
     if (diffparms.scb) {
 	ses_free_scb(diffparms.scb);
     }
@@ -1438,6 +1471,15 @@ static void
     }
     if (diffparms.buff) {
 	m__free(diffparms.buff);
+    }
+    if (diffparms.full_old) {
+	m__free(diffparms.full_old);
+    }
+    if (diffparms.full_new) {
+	m__free(diffparms.full_new);
+    }
+    if (diffparms.full_output) {
+	m__free(diffparms.full_output);
     }
 
     /* cleanup the NCX engine and registries */

@@ -1386,8 +1386,7 @@ status_t
 	    ncx_locate_import(mod, psdname, &dtyp);
     } else {
         *pptr = (psd_template_t *)
-            ncx_locate_modqual_import(modstr, psdname, &dtyp);
-
+            ncx_locate_modqual_import(modstr, psdname, mod->diffmode, &dtyp);
     }
     return *pptr ? NO_ERR : ERR_NCX_DEF_NOT_FOUND;
 

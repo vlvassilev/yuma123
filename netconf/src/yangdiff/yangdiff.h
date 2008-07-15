@@ -97,8 +97,8 @@ typedef enum yangdiff_difftype_t_ {
 /* struct of yangdiff conversion parameters */
 typedef struct yangdiff_diffparms_t_ {
     /* external parameters */
-    xmlChar        *old;   /* malloced due to subtree design */
-    xmlChar        *new;   /* malloced due to subtree design */
+    const xmlChar  *old;
+    const xmlChar  *new;
     const xmlChar  *output;
     const xmlChar  *difftype;
     const xmlChar  *logfilename;
@@ -114,19 +114,25 @@ typedef struct yangdiff_diffparms_t_ {
     uint32          maxlen;
 
     /* internal vars */
-    ncx_module_t   *mod;
+    dlq_hdr_t       oldmodQ;
+    dlq_hdr_t       newmodQ;
     ses_cb_t       *scb;
     xmlChar        *curold;
     xmlChar        *curnew;
     xmlChar        *buff;
     ncx_module_t   *oldmod;
     ncx_module_t   *newmod;
+    xmlChar        *full_old;
+    xmlChar        *full_new;
+    xmlChar        *full_output;
+
     uint32          bufflen;
     uint32          modbufflen;
     boolean         firstdone;
-    boolean         output_isdir;
     boolean         old_isdir;
     boolean         new_isdir;
+    boolean         output_isdir;
+
     yangdiff_difftype_t edifftype;
     int32           curindent;
 } yangdiff_diffparms_t;

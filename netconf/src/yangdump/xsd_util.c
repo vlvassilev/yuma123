@@ -1901,9 +1901,9 @@ xmlChar *
     }
 
     if (cp->output && *cp->output) {
-	len = (uint32)strlen(cp->output);
+	len = xml_strlen(cp->full_output);
 	if (cp->output_isdir) {
-	    if (cp->output[len-1] != NCXMOD_PSCHAR) {
+	    if (cp->full_output[len-1] != NCXMOD_PSCHAR) {
 		len++;
 	    }
 	    if (cp->noversionnames) {
@@ -1931,7 +1931,7 @@ xmlChar *
 
     if (cp->output && *cp->output) {
 	if (cp->output_isdir) {
-	    p += xml_strcpy(p, (const xmlChar *)cp->output);
+	    p += xml_strcpy(p, (const xmlChar *)cp->full_output);
 	    if (*(p-1) != NCXMOD_PSCHAR) {
 		*p++ = NCXMOD_PSCHAR;
 	    }
@@ -1942,7 +1942,7 @@ xmlChar *
 	    }
 	    xml_strcpy(p, ext); 
 	} else {
-	    xml_strcpy(p, (const xmlChar *)cp->output);
+	    xml_strcpy(p, (const xmlChar *)cp->full_output);
 	}
     } else {
 	p += xml_strcpy(p, mod->name);

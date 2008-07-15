@@ -55,6 +55,10 @@ date	     init     comment
 /* path, file separator char : SET TO UNIX */
 #define NCXMOD_PSCHAR   '/'
 
+#define NCXMOD_HMCHAR   '~'
+
+#define NCXMOD_ENVCHAR '$'
+
 /* file extension for NCX Modules */
 #define NCXMOD_NCX_SUFFIX         (const xmlChar *)"ncx"
 
@@ -217,6 +221,21 @@ extern status_t
 			    void *cookie);
 
 extern boolean
-    ncxmod_test_subdir (const char *dirspec);
+    ncxmod_test_subdir (const xmlChar *dirspec);
+
+extern const xmlChar *
+    ncxmod_get_userhome (const xmlChar *user,
+			 uint32 userlen);
+
+
+extern const xmlChar *
+    ncxmod_get_envvar (const xmlChar *name,
+		       uint32 namelen);
+
+extern void
+    ncxmod_set_altpath (const xmlChar *altpath);
+
+extern void
+    ncxmod_clear_altpath (void);
 
 #endif	    /* _H_ncxmod */

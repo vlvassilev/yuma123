@@ -184,6 +184,9 @@ extern rpc_template_t *
 extern status_t 
     ncx_add_to_registry (ncx_module_t *mod);
 
+extern status_t 
+    ncx_add_to_modQ (ncx_module_t *mod);
+
 extern boolean
     ncx_is_duplicate (ncx_module_t *mod,
 		      const xmlChar *defname);
@@ -233,6 +236,7 @@ extern void *
 extern void *
     ncx_locate_modqual_import (const xmlChar *modstr,
 			       const xmlChar *defname,
+			       boolean diffmode,
 			       ncx_node_t     *deftyp);
 
 /******************** ncx_include_t ******************/
@@ -742,5 +746,11 @@ extern ncx_errinfo_t *
 
 extern xmlChar *
     ncx_get_source (const xmlChar *fspec);
+
+extern void
+    ncx_set_cur_modQ (dlq_hdr_t *que);
+
+extern void
+    ncx_reset_modQ (void);
 
 #endif	    /* _H_ncx */

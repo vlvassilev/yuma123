@@ -480,6 +480,7 @@ typedef struct ncx_module_t_ {
     boolean           ismod;     /* module/submodule keyword */
     boolean           isyang;        /* T:YANG src F:NCX src */
     boolean           stmtmode;       /* T: save yang_stmt_t */
+    boolean           diffmode;      /* T: don't use def_reg */
     status_t          status;         /* module parse result */
     uint32            errors;            /* yangdump results */
     uint32            warnings;          /* yangdump results */

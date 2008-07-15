@@ -102,6 +102,7 @@ typedef struct yangdump_cvtparms_t_ {
     boolean         versionmode;
 
     /* internal vars */
+    xmlChar        *full_output;
     ncx_module_t   *mod;
     char           *srcfile;
     char           *buff;

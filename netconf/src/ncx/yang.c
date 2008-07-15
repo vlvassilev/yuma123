@@ -1508,7 +1508,8 @@ status_t
 	/* found import OK, look up imported type definition */
 	dtyp = NCX_NT_TYP;
 	*typ = (typ_template_t *)
-	    ncx_locate_modqual_import(imp->module, name, &dtyp);
+	    ncx_locate_modqual_import(imp->module, name, 
+				      mod->diffmode, &dtyp);
 	if (!*typ) {
 	    res = ERR_NCX_DEF_NOT_FOUND;
 	    log_error("\nError: typedef definition for '%s:%s' not found"
@@ -1586,7 +1587,8 @@ status_t
 	/* found import OK, look up imported type definition */
 	dtyp = NCX_NT_GRP;
 	*grp = (grp_template_t *)
-	    ncx_locate_modqual_import(imp->module, name, &dtyp);
+	    ncx_locate_modqual_import(imp->module, name, 
+				      mod->diffmode, &dtyp);
 	if (!*grp) {
 	    res = ERR_NCX_DEF_NOT_FOUND;
 	    log_error("\nError: grouping definition for '%s:%s' not found"
@@ -1662,13 +1664,21 @@ status_t
 	log_error("\nError: import for prefix '%s' not found", prefix);
     } else {
 	/* First find or load the module */
-	imod = def_reg_find_module(imp->module);
+	if (mod->diffmode) {
+	    imod = ncx_find_module(imp->module);
+	} else {
+	    imod = def_reg_find_module(imp->module);
+	}
 	if (!imod) {
 	    res = ncxmod_load_module(imp->module);
 	    CHK_EXIT;
 
 	    /* try again to find the module; should not fail */
-	    imod = def_reg_find_module(imp->module);
+	    if (mod->diffmode) {
+		imod = ncx_find_module(imp->module);
+	    } else {
+		imod = def_reg_find_module(imp->module);
+	    }
 	    if (!imod) {
 		log_error("\nError: failure importing module '%s'",
 			  imp->module);

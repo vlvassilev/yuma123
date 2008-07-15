@@ -272,7 +272,8 @@ static status_t
 
     /* get the first object template */
     if (imp) {
-	curobj = ncx_locate_modqual_import(imp->module, name, &dtyp);
+	curobj = ncx_locate_modqual_import(imp->module, name,
+					   mod->diffmode, &dtyp);
     } else if (*target == '/') {
 	curobj = obj_find_template_top(mod, mod->name, name);
     } else {

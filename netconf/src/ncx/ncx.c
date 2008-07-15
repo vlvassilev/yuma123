@@ -138,7 +138,7 @@ extern float strtof (const char *str, char **err);
 *                                                                   *
 *********************************************************************/
 
-static dlq_hdr_t     ncx_modQ;
+static dlq_hdr_t     ncx_modQ, *ncx_curQ;
 
 static dlq_hdr_t     ncx_appQ;
 
@@ -235,15 +235,19 @@ static xmlChar *
 * INPUTS:
 *   modname == module to look up or load
 *   defname == name of the app-specific definition to find
+*   diffmode == TRUE if Q search only; FALSE=def_reg OK
+*
 * OUTPUTS:
 *   *dtyp == NCX_NT_PARMSET  (if NO_ERR)
 *   *dptr == pointer to data struct or NULL if not found
+*
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
     check_moddef (const xmlChar  *modname, 
 		  const xmlChar  *defname,
+		  boolean diffmode,
 		  ncx_node_t      *dtyp,
 		  void          **dptr)
 {
@@ -253,23 +257,86 @@ static status_t
     retres = NO_ERR;
 
     /* First find or load the module */
-    imod = def_reg_find_module(modname);
+    if (diffmode) {
+	imod = ncx_find_module(modname);
+    } else {
+	imod = def_reg_find_module(modname);
+    }
+
     if (!imod) {
-        res = ncxmod_load_module(modname);
+	res = ncxmod_load_module(modname);
 	CHK_EXIT;
 
-        /* try again to find the module; should not fail */
-        imod = def_reg_find_module(modname);
-        if (!imod) {
-            return ERR_NCX_MOD_NOT_FOUND;
-        }
+	/* try again to find the module; should not fail */
+	if (diffmode) {
+	    imod = ncx_find_module(modname);
+	} else {
+	    imod = def_reg_find_module(modname);
+	}
+	if (!imod) {
+	    return ERR_NCX_MOD_NOT_FOUND;
+	}
     }
 
     /* have a module loaded that might contain this def 
      * look in the def_reg for the defname
      * the module may be loaded with non-fatal errors
      */
-    *dptr = def_reg_find_moddef(imod->name, defname, dtyp);
+    if (diffmode) {
+	switch (*dtyp) {
+	case NCX_NT_TYP:
+	    *dptr = ncx_find_type(imod, defname);
+	    break;
+	case NCX_NT_GRP:
+	    *dptr = ncx_find_grouping(imod, defname);
+	    break;
+	case NCX_NT_PSD:
+	    *dptr = ncx_find_psd(imod, defname);
+	    break;
+	case NCX_NT_RPC:
+	    *dptr = ncx_find_rpc(imod, defname);
+	    break;
+	case NCX_NT_OBJ:
+	    *dptr = obj_find_template(&imod->datadefQ, imod->name, defname);
+	    break;
+	case NCX_NT_NONE:
+	    *dptr = ncx_find_type(imod, defname);
+	    if (*dptr) {
+		*dtyp = NCX_NT_TYP;
+	    }
+	    if (!*dptr) {
+		*dptr = ncx_find_grouping(imod, defname);
+		if (*dptr) {
+		    *dtyp = NCX_NT_GRP;
+		}
+	    }
+	    if (!*dptr) {
+		*dptr = ncx_find_psd(imod, defname);
+		if (*dptr) {
+		    *dtyp = NCX_NT_PSD;
+		}
+	    }
+	    if (!*dptr) {
+		*dptr = ncx_find_rpc(imod, defname);
+		if (*dptr) {
+		    *dtyp = NCX_NT_RPC;
+		}
+	    }
+	    if (!*dptr) {
+		*dptr = obj_find_template(&imod->datadefQ, imod->name, defname);
+		if (*dptr) {
+		    *dtyp = NCX_NT_OBJ;
+		}
+	    }
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    *dptr = NULL;
+	}
+    } else {
+	*dptr = def_reg_find_moddef(imod->name, defname, dtyp);
+    }
+
     return (*dptr) ? NO_ERR : ERR_NCX_DEF_NOT_FOUND;
 
 }  /* check_moddef */
@@ -644,7 +711,7 @@ static void
 #endif
 
     /* unregister the module */
-    if (mod->ismod && removereg) {
+    if (mod->ismod && !mod->diffmode && removereg) {
 	def_reg_del_module(mod->name);
     }
 
@@ -657,7 +724,7 @@ static void
     /* clear the type Que */
     while (!dlq_empty(&mod->typeQ)) {
 	typ = (typ_template_t *)dlq_deque(&mod->typeQ);
-	if (typ->name && removereg) {
+	if (typ->name && !mod->diffmode && removereg) {
 	    def_reg_del_moddef(mod->name, typ->name, NCX_NT_TYP);
 	}
 	typ_free_template(typ);
@@ -666,7 +733,7 @@ static void
     /* clear the PSD Que */
     while (!dlq_empty(&mod->psdQ)) {
 	psd = (psd_template_t *)dlq_deque(&mod->psdQ);
-	if (removereg) {
+	if (!mod->diffmode && removereg) {
 	    def_reg_del_moddef(mod->name, psd->name, NCX_NT_PSD);
 	}
 	psd_free_template(psd);
@@ -675,7 +742,7 @@ static void
     /* clear the RPC Que */
     while (!dlq_empty(&mod->rpcQ)) {
 	rpc = (rpc_template_t *)dlq_deque(&mod->rpcQ);
-	if (removereg) {
+	if (!mod->diffmode && removereg) {
 	    def_reg_del_moddef(mod->name, rpc->name, NCX_NT_RPC);
 	}
 	rpc_free_template(rpc);
@@ -684,7 +751,7 @@ static void
     /* clear the grouping Que */
     while (!dlq_empty(&mod->groupingQ)) {
 	grp = (grp_template_t *)dlq_deque(&mod->groupingQ);
-	if (grp->name && removereg) {
+	if (grp->name && !mod->diffmode && removereg) {
 	    def_reg_del_moddef(mod->name, grp->name, NCX_NT_GRP);
 	}
 	grp_free_template(grp);
@@ -693,7 +760,7 @@ static void
     /* clear the datadefQ */
     while (!dlq_empty(&mod->datadefQ)) {
 	obj = (obj_template_t *)dlq_deque(&mod->datadefQ);
-	if (obj_has_name(obj) && removereg) {
+	if (obj_has_name(obj) && !mod->diffmode && removereg) {
 	    def_reg_del_moddef(mod->name, obj_get_name(obj), NCX_NT_OBJ);
 	}
 	obj_free_template(obj);
@@ -816,6 +883,7 @@ status_t
 
     /* create the module and appnode queues */
     dlq_createSQue(&ncx_modQ);
+    ncx_curQ = &ncx_modQ;
     dlq_createSQue(&ncx_appQ);
     dlq_createSQue(&ncx_filptrQ);
     ncx_max_filptrs = NCX_DEF_FILPTR_CACHESIZE;
@@ -1010,7 +1078,7 @@ ncx_module_t *
     }
 #endif
 
-    for (mod = (ncx_module_t *)dlq_firstEntry(&ncx_modQ);
+    for (mod = (ncx_module_t *)dlq_firstEntry(ncx_curQ);
          mod != NULL;
          mod = (ncx_module_t *)dlq_nextEntry(mod)) {
         if (!xml_strcmp(mod->name, modname)) {
@@ -1093,7 +1161,7 @@ boolean
 {
     ncx_module_t  *mod;
 
-    for (mod = (ncx_module_t *)dlq_firstEntry(&ncx_modQ);
+    for (mod = (ncx_module_t *)dlq_firstEntry(ncx_curQ);
 	 mod != NULL;
 	 mod = (ncx_module_t *)dlq_nextEntry(mod)) {
 	if (mod->status != NO_ERR) {
@@ -1698,6 +1766,31 @@ status_t
 
 
 /********************************************************************
+* FUNCTION ncx_add_to_modQ
+*
+* Add module to the current module Q
+* Used by yangdiff to bypass add_to_registry to support
+* N different module trees
+*
+* !!! Does not add anything to the def_reg database !!!
+* 
+* INPUTS:
+*   mod == module to add to current module Q
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    ncx_add_to_modQ (ncx_module_t *mod)
+{
+
+    dlq_enque(mod, ncx_curQ);
+    return NO_ERR;
+
+} /* ncx_add_to_modQ */
+
+
+/********************************************************************
 * FUNCTION ncx_is_duplicate
 * 
 * Search the specific module for the specified definition name.
@@ -1747,7 +1840,7 @@ boolean
 ncx_module_t *
     ncx_get_first_module (void)
 {
-    return (ncx_module_t *)dlq_firstEntry(&ncx_modQ);
+    return (ncx_module_t *)dlq_firstEntry(ncx_curQ);
 
 }  /* ncx_get_first_module */
 
@@ -2130,7 +2223,8 @@ void *
              item = (ncx_import_item_t *)dlq_nextEntry(item)) {
             if (!xml_strcmp(item->name, defname)) {
 		dptr = NULL;
-                res = check_moddef(imp->module, defname, deftyp, &dptr);
+                res = check_moddef(imp->module, defname, mod->diffmode,
+				   deftyp, &dptr);
                 if (res==NO_ERR) {
                     return dptr;
                 } else if (res != ERR_NCX_DEF_NOT_FOUND) {
@@ -2150,7 +2244,8 @@ void *
          imp = (ncx_import_t *)dlq_nextEntry(imp)) {
         /* check only if there is no item list this time */
         if (dlq_empty(&imp->itemQ)) {
-            res = check_moddef(imp->module, defname, deftyp, &dptr);
+            res = check_moddef(imp->module, defname, mod->diffmode,
+			       deftyp, &dptr);
             if (res == NO_ERR) {
                 return dptr;
 	    } else if (res != ERR_NCX_DEF_NOT_FOUND) {
@@ -2188,7 +2283,9 @@ void *
 * INPUTS:
 *     modstr == module name to check
 *     defname == name of definition to find
+*     diffmode == T: search ncx_curQ, F: search def_reg
 *     *deftyp == specified type or NCX_NT_NONE if any will do
+*
 * OUTPUTS:
 *    *deftyp == type retrieved if NO_ERR
 * RETURNS:
@@ -2197,6 +2294,7 @@ void *
 void *
     ncx_locate_modqual_import (const xmlChar *modstr,
 			       const xmlChar *defname,
+			       boolean diffmode,
 			       ncx_node_t     *deftyp)
 {
     void *dptr;
@@ -2209,7 +2307,7 @@ void *
     }
 #endif
 
-    res = check_moddef(modstr, defname, deftyp, &dptr);
+    res = check_moddef(modstr, defname, diffmode, deftyp, &dptr);
     return (res==NO_ERR) ? dptr : NULL;
     /*** error res is lost !!! ***/
 
@@ -7799,7 +7897,6 @@ void
 }  /* ncx_free_errinfo */
 
 
-
 /********************************************************************
 * FUNCTION ncx_find_errinfo
 * 
@@ -7834,18 +7931,20 @@ ncx_errinfo_t *
 }  /* ncx_find_errinfo */
 
 
-
 /********************************************************************
 * FUNCTION ncx_get_source
 * 
 * Get a malloced buffer containing the complete filespec
-* for the given into string.  If this is a complete dirspec,
+* for the given input string.  If this is a complete dirspec,
 * this this will just strdup the value.
 *
 * This is just a best effort to get the full spec.
 * If the full spec is greater than 1500 bytes,
 * then only the filespec will be copied, if the
 * current directory needs to be prepended to the filespec
+*
+*   - Remove ~/  --> $HOME
+*   - add trailing '/' if not present
 *
 * INPUTS:
 *    fspec == input filespec
@@ -7856,40 +7955,180 @@ ncx_errinfo_t *
 xmlChar *
     ncx_get_source (const xmlChar *fspec)
 {
-    xmlChar *buff;
-    uint32   bufflen;
-
+    const xmlChar  *p, *pp, *user;
+    xmlChar        *buff, *bp;
+    uint32          bufflen;
+    uint32          len, pslen, userlen;
+    
 #define DIRBUFF_SIZE 1500
 
-    if (*fspec == NCXMOD_PSCHAR) {
-	return xml_strdup(fspec);
-    }
-
-    buff = m__getMem(DIRBUFF_SIZE);
-    if (!buff) {
+#ifdef DEBUG
+    if (!fspec || !*fspec) {
+	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }
+#endif
 
-    if (!getcwd((char *)buff, DIRBUFF_SIZE)) {
-	SET_ERROR(ERR_BUFF_OVFL);
-	m__free(buff);
-	return xml_strdup(fspec);
+    buff = NULL;
+    user = NULL;
+    userlen = 0;
+    len = 0;
+    pslen = 0;
+    p = fspec;
+
+
+    if (*p == NCXMOD_PSCHAR) {
+	/* absolute path */
+	buff = xml_strdup(fspec);
+    } else if (*p == NCXMOD_HMCHAR) {
+	/* starts with ~[username]/some/path */
+	if (p[1] && p[1] != NCXMOD_PSCHAR) {
+	    /* explicit user name */
+	    pp = &p[1];
+	    p = &p[2];
+	    while (*p && *p != NCXMOD_PSCHAR) {
+		p++;
+	    }
+	    userlen = (uint32)(p-pp);
+	    user = ncxmod_get_userhome(pp, userlen);
+	} else {
+	    /* implied current user */
+	    p++;   /* skip ~ char */
+	    /* get current user home dir */
+	    user = ncxmod_get_userhome(NULL, 0);
+	    if (user) {
+		userlen = xml_strlen(user);
+	    }
+	}
+
+	if (!user) {
+	    log_error("\nError: invalid user name in path string (%s)",
+		      fspec);
+	    ncx_print_errormsg(NULL, NULL, ERR_NCX_INVALID_VALUE);
+	    return NULL;
+	}
+
+	len = xml_strlen(user);
+	if (len && user[len-1] != NCXMOD_PSCHAR) {
+	    pslen = 1;
+	}
+	if (*p) {
+	    len += xml_strlen(p);
+	}
+
+	buff = m__getMem(len+pslen+1);
+	if (!buff) {
+	    return NULL;
+	}
+
+	bp = buff;
+	bp += xml_strcpy(bp, user);
+	if (pslen) {
+	    *bp++ = NCXMOD_PSCHAR;
+	}
+	xml_strcpy(bp, p);
+    } else if (*p == NCXMOD_ENVCHAR) {
+	/* should start with $ENVVAR/some/path */
+	pp = ++p;
+	while (*pp && *p != NCXMOD_PSCHAR) {
+		pp++;
+	}
+	userlen = (uint32)(p-pp);
+	if (userlen) {
+	    user = ncxmod_get_envvar(p, userlen);
+	}
+	if (!user) {
+	    log_error("\nError: environment variable in path string (%s)",
+		      fspec);
+	    ncx_print_errormsg(NULL, NULL, ERR_NCX_INVALID_VALUE);
+	    return NULL;
+	}
+
+	len = xml_strlen(user);
+	if (len && user[len-1] != NCXMOD_PSCHAR) {
+	    pslen = 1;
+	}
+	if (*p) {
+	    len += xml_strlen(p);
+	}
+
+	buff = m__getMem(len+pslen+1);
+	if (!buff) {
+	    return NULL;
+	}
+
+	bp = buff;
+	bp += xml_strcpy(bp, user);
+	if (pslen) {
+	    *bp++ = NCXMOD_PSCHAR;
+	}
+	xml_strcpy(bp, p);
+    } else if (*p != NCXMOD_PSCHAR) {
+	/* prepend string with current directory */
+	buff = m__getMem(DIRBUFF_SIZE);
+	if (!buff) {
+	    return NULL;
+	}
+
+	if (!getcwd((char *)buff, DIRBUFF_SIZE)) {
+	    SET_ERROR(ERR_BUFF_OVFL);
+	    m__free(buff);
+	    return NULL;
+	}
+
+	bufflen = xml_strlen(buff);
+
+	if ((bufflen + xml_strlen(fspec) + 1) >= DIRBUFF_SIZE) {
+	    SET_ERROR(ERR_BUFF_OVFL);
+	    m__free(buff);
+	    return NULL;
+	}
+
+	buff[bufflen] = NCXMOD_PSCHAR;
+	xml_strcpy(&buff[bufflen+1], fspec);
     }
-
-    bufflen = xml_strlen(buff);
-
-    if ((bufflen + xml_strlen(fspec) + 1) >= DIRBUFF_SIZE) {
-	SET_ERROR(ERR_BUFF_OVFL);
-	m__free(buff);
-	return xml_strdup(fspec);
-    }
-
-    buff[bufflen] = NCXMOD_PSCHAR;
-    xml_strcpy(&buff[bufflen+1], fspec);
 
     return buff;
 
 }  /* ncx_get_source */
+
+
+/********************************************************************
+* FUNCTION ncx_set_cur_modQ
+* 
+* Set the current module Q to an alternate (for yangdiff)
+* This will be used for module searches usually in ncx_modQ
+*
+* INPUTS:
+*    que == Q of ncx_module_t to use
+*********************************************************************/
+void
+    ncx_set_cur_modQ (dlq_hdr_t *que)
+{
+#ifdef DEBUG
+    if (!que) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    ncx_curQ = que;
+
+}  /* ncx_set_cur_modQ */
+
+
+/********************************************************************
+* FUNCTION ncx_reset_modQ
+* 
+* Set the current module Q to the original ncx_modQ
+*
+*********************************************************************/
+void
+    ncx_reset_modQ (void)
+{
+    ncx_curQ = &ncx_modQ;
+
+}  /* ncx_reset_modQ */
 
 
 /* END file ncx.c */

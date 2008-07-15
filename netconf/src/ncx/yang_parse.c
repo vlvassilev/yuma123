@@ -1770,7 +1770,11 @@ static status_t
 	    mod->allimpQ = NULL;
 
 	    /* add the module name and namespace to the registry */
-	    res = ncx_add_to_registry(mod);
+	    if (pcb->diffmode) {
+		res = ncx_add_to_modQ(mod);
+	    } else {
+		res = ncx_add_to_registry(mod);
+	    }
 	    if (res != NO_ERR) {
 		retres = res;
 	    } else {
@@ -1930,16 +1934,18 @@ static status_t
 	    mod->allimpQ = NULL;
 
 	    if (!loaded) {
-		if (!pcb->diffmode || ptyp==YANG_PT_IMPORT) {
+		if (pcb->diffmode) {
+		    res = ncx_add_to_modQ(mod);
+		} else {
 		    res = ncx_add_to_registry(mod);
-		    if (res != NO_ERR) {
-			retres = res;
-		    } else {
-			/* if mod==top, and top is a submodule, then 
-			 * yang_free_pcb will delete the submodule later
-			 */
-			*wasadded = TRUE;
-		    }
+		}
+		if (res != NO_ERR) {
+		    retres = res;
+		} else {
+		    /* if mod==top, and top is a submodule, then 
+		     * yang_free_pcb will delete the submodule later
+		     */
+		    *wasadded = TRUE;
 		}
 	    }
 	} else {
@@ -2090,6 +2096,9 @@ status_t
 
 	    /* set the stmt-track mode flag to the master flag in the PCB */
 	    mod->stmtmode = pcb->stmtmode;
+
+	    /* set the diff-mode to flag that def_reg is used or not */
+	    mod->diffmode = pcb->diffmode;
 	}
     }
 

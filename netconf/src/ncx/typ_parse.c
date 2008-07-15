@@ -2541,7 +2541,8 @@ static status_t
     if (TK_CUR_MOD(tkc) != NULL) {
         /* look in the specified module for the template */
         dptr = ncx_locate_modqual_import(TK_CUR_MOD(tkc), 
-              TK_CUR_VAL(tkc), &dtyp);
+					 TK_CUR_VAL(tkc), 
+					 mod->diffmode, &dtyp);
         if (!dptr) {
 	    m__free(buff);
             return ERR_NCX_DEF_NOT_FOUND;

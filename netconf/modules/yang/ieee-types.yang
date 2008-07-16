@@ -19,6 +19,8 @@ module ieee-types {
         "This module contains standard derived YANG types
          for IEEE 802 addresses and related things.";
 
+    reference "draft-ietf-netmod-yang-00.txt";
+
     revision 2007-10-02 {
         description "Initial revision.";
     }

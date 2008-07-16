@@ -14,6 +14,8 @@ module yang-types {
     description
         "This module contains standard derived YANG types.";
 
+    reference "draft-ietf-netmod-yang-00.txt";
+
     revision 2007-10-02 {
         description "Initial revision.";
     }

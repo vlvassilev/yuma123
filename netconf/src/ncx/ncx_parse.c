@@ -2879,8 +2879,6 @@ ncx_module_t *
 	mod = testmod; 
 	if (testmod) {
 	    *res = NO_ERR;
-	} else {
-	    *res = SET_ERROR(ERR_INTERNAL_VAL);
 	}
     }
 

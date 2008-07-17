@@ -68,7 +68,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/SNMP-NOTIFICATION-MIB.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/SNMP-NOTIFICATION-MIB.yang
          </ncx:source>
          <ncx:organization>
             IETF SNMPv3 Working Group

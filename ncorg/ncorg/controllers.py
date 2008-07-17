@@ -1480,6 +1480,14 @@ class Root(controllers.RootController):
     def yangdump_manual(self, *args, **kw):
         return dict(modmenu=moduleJumpMenu)
 
+    #################################################################################
+    #
+    # Show Yangdiff manual page
+    #
+    @expose(template="ncorg.templates.man_yangdiff")
+    def yangdiff_manual(self, *args, **kw):
+        return dict(modmenu=moduleJumpMenu)
+
 
     #################################################################################
     #

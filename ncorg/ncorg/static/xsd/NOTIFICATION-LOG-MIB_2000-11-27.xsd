@@ -33,7 +33,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/NOTIFICATION-LOG-MIB.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/NOTIFICATION-LOG-MIB.yang
          </ncx:source>
          <ncx:organization>
             IETF Distributed Management Working Group

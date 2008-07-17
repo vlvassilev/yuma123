@@ -100,7 +100,7 @@
       <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
       }
-      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2008-05-22">yang-types</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
       }
 
@@ -175,7 +175,7 @@
          }
 
          <a name="sysObjectID.94"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysObjectID</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The vendor's authoritative identification of the
@@ -191,7 +191,7 @@
          }
 
          <a name="sysUpTime.110"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysUpTime</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timeticks.235">yang:timeticks</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The time (in hundredths of a second) since the
@@ -270,7 +270,7 @@
          }
 
          <a name="sysORLastChange.189"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysORLastChange</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timestamp.249">yang:timestamp</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The value of sysUpTime at the time of the most recent
@@ -295,7 +295,7 @@
             }
 
             <a name="sysORID.220"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysORID</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"An authoritative identification of a capabilities
@@ -315,7 +315,7 @@
             }
 
             <a name="sysORUpTime.240"></a><span class="yang_kw">leaf</span> <span class="yang_id">sysORUpTime</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timestamp.249">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value of sysUpTime at the time this conceptual
@@ -329,7 +329,7 @@
 
       <a name="snmp.252"></a><span class="yang_kw">container</span> <span class="yang_id">snmp</span> {
          <a name="snmpInPkts.254"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInPkts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of messages delivered to the SNMP
@@ -338,7 +338,7 @@
          }
 
          <a name="snmpOutPkts.263"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutPkts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -349,7 +349,7 @@
          }
 
          <a name="snmpInBadVersions.274"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInBadVersions</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of SNMP messages which were delivered
@@ -359,7 +359,7 @@
          }
 
          <a name="snmpInBadCommunityNames.284"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInBadCommunityNames</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of community-based SNMP messages (for
@@ -380,7 +380,7 @@
          }
 
          <a name="snmpInBadCommunityUses.305"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInBadCommunityUses</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of community-based SNMP messages (for
@@ -399,7 +399,7 @@
          }
 
          <a name="snmpInASNParseErrs.324"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInASNParseErrs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of ASN.1 or BER errors encountered by
@@ -408,7 +408,7 @@
          }
 
          <a name="snmpInTooBigs.333"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInTooBigs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -420,7 +420,7 @@
          }
 
          <a name="snmpInNoSuchNames.345"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInNoSuchNames</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -432,7 +432,7 @@
          }
 
          <a name="snmpInBadValues.357"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInBadValues</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -444,7 +444,7 @@
          }
 
          <a name="snmpInReadOnlys.369"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInReadOnlys</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -460,7 +460,7 @@
          }
 
          <a name="snmpInGenErrs.385"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInGenErrs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -471,7 +471,7 @@
          }
 
          <a name="snmpInTotalReqVars.396"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInTotalReqVars</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -483,7 +483,7 @@
          }
 
          <a name="snmpInTotalSetVars.408"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInTotalSetVars</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -494,7 +494,7 @@
          }
 
          <a name="snmpInGetRequests.419"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInGetRequests</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -505,7 +505,7 @@
          }
 
          <a name="snmpInGetNexts.430"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInGetNexts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -515,7 +515,7 @@
          }
 
          <a name="snmpInSetRequests.440"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInSetRequests</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -526,7 +526,7 @@
          }
 
          <a name="snmpInGetResponses.451"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInGetResponses</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -537,7 +537,7 @@
          }
 
          <a name="snmpInTraps.462"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpInTraps</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -547,7 +547,7 @@
          }
 
          <a name="snmpOutTooBigs.472"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutTooBigs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -558,7 +558,7 @@
          }
 
          <a name="snmpOutNoSuchNames.483"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutNoSuchNames</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -569,7 +569,7 @@
          }
 
          <a name="snmpOutBadValues.494"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutBadValues</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -580,7 +580,7 @@
          }
 
          <a name="snmpOutGenErrs.505"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutGenErrs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -591,7 +591,7 @@
          }
 
          <a name="snmpOutGetRequests.516"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutGetRequests</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -601,7 +601,7 @@
          }
 
          <a name="snmpOutGetNexts.526"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutGetNexts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -611,7 +611,7 @@
          }
 
          <a name="snmpOutSetRequests.536"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutSetRequests</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -621,7 +621,7 @@
          }
 
          <a name="snmpOutGetResponses.546"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutGetResponses</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -631,7 +631,7 @@
          }
 
          <a name="snmpOutTraps.556"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpOutTraps</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
             <span class="yang_kw">description</span>
@@ -665,7 +665,7 @@
          }
 
          <a name="snmpSilentDrops.586"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpSilentDrops</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of Confirmed Class PDUs (such as
@@ -682,7 +682,7 @@
          }
 
          <a name="snmpProxyDrops.603"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpProxyDrops</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of Confirmed Class PDUs
@@ -701,7 +701,7 @@
 
       <a name="snmpTrap.621"></a><span class="yang_kw">container</span> <span class="yang_id">snmpTrap</span> {
          <a name="snmpTrapOID.623"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapOID</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The authoritative identification of the notification
@@ -712,7 +712,7 @@
          }
 
          <a name="snmpTrapEnterprise.634"></a><span class="yang_kw">leaf</span> <span class="yang_id">snmpTrapEnterprise</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The authoritative identification of the enterprise

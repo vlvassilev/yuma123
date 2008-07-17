@@ -1,0 +1,92 @@
+
+<div>
+   <h1 class="yang">ieee-types.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#mac-address.33">mac-address</a></li>
+            <li><a href="#bridgeid.52">bridgeid</a></li>
+            <li><a href="#vlanid.69">vlanid</a></li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">ieee-types</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span> <span class="yang_str">"urn:ietf:params:xml:ns:yang:ieee-types"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"ieee"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2008-05-22">yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"YANG Language Design Team"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"Juergen Schoenwaelder (Editor)
+         &lt;j.schoenwaelder@jacobs-university.de&gt;"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"This module contains standard derived YANG types
+         for IEEE 802 addresses and related things."</span>;
+
+      <span class="yang_kw">reference</span> <span class="yang_str">"draft-schoenw-netmod-yang-types-01.txt"</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-05-22"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Initial revision."</span>;
+      }
+
+      <a name="mac-address.33"></a><span class="yang_kw">typedef</span> <span class="yang_id">mac-address</span> {
+         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#phys-address.273">yang:phys-address</a></span> {
+            <span class="yang_kw">pattern</span> <span class="yang_str">'([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}'</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"The mac-address type represents an 802 MAC address
+            represented in the `canonical' order defined by
+            IEEE 802.1a, i.e., as if it were transmitted least
+            significant bit first, even though 802.5 (in contrast
+            to other 802.x protocols) requires MAC addresses to
+            be transmitted most significant bit first."</span>;
+         <span class="yang_kw">reference</span> <span class="yang_str">"RFC 2579 STD 58"</span>;
+      }
+
+      <a name="bridgeid.52"></a><span class="yang_kw">typedef</span> <span class="yang_id">bridgeid</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+            <span class="yang_kw">pattern</span>
+               <span class="yang_str">'[0-9a-fA-F]{4}:([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}'</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"The bridgeid type represents identifers that uniquely
+            identify a bridge.  Its first four hexadecimal digits
+            contain a priority value followed by a colon. The
+            remaining characters contain the MAC address used to
+            refer to a bridge in a unique fashion (typically, the
+            numerically smallest MAC address of all ports on the
+            bridge)."</span>;
+         <span class="yang_kw">reference</span> <span class="yang_str">"RFC 4188"</span>;
+      }
+
+      <a name="vlanid.69"></a><span class="yang_kw">typedef</span> <span class="yang_id">vlanid</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint16</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"1..4094"</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"The vlanid type uniquely identifies a VLAN. This is
+            the 12-bit VLAN-ID used in the VLAN Tag header. The
+            range is defined by the referenced specification."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"IEEE Std 802.1Q 2003 Edition, Virtual Bridged Local
+            Area Networks."</span>;
+      }
+   }  <span class="yang_cmt">// module ieee-types</span>
+</pre>
+</div>
+</div>

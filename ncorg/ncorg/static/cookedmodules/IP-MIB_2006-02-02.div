@@ -339,13 +339,13 @@
       <span class="yang_kw">import</span> <a href="/modules/SNMPv2-TC/1999-04-01">SNMPv2-TC</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"smiv2"</span>;
       }
-      <span class="yang_kw">import</span> <a href="/modules/inet-types/2007-10-02">inet-types</a> {
+      <span class="yang_kw">import</span> <a href="/modules/inet-types/2008-06-07">inet-types</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"inet"</span>;
       }
       <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
       }
-      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2008-05-22">yang-types</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
       }
 
@@ -606,7 +606,7 @@
          }
 
          <a name="ipInReceives.245"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipInReceives</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -623,7 +623,7 @@
          }
 
          <a name="ipInHdrErrors.262"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipInHdrErrors</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -639,7 +639,7 @@
          }
 
          <a name="ipInAddrErrors.278"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipInAddrErrors</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -659,7 +659,7 @@
          }
 
          <a name="ipForwDatagrams.298"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipForwDatagrams</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -681,7 +681,7 @@
          }
 
          <a name="ipInUnknownProtos.320"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipInUnknownProtos</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -696,7 +696,7 @@
          }
 
          <a name="ipInDiscards.335"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipInDiscards</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -713,7 +713,7 @@
          }
 
          <a name="ipInDelivers.352"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipInDelivers</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -730,7 +730,7 @@
          }
 
          <a name="ipOutRequests.369"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipOutRequests</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -746,7 +746,7 @@
          }
 
          <a name="ipOutDiscards.385"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipOutDiscards</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -764,7 +764,7 @@
          }
 
          <a name="ipOutNoRoutes.403"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipOutNoRoutes</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -795,7 +795,7 @@
          }
 
          <a name="ipReasmReqds.434"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipReasmReqds</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -809,7 +809,7 @@
          }
 
          <a name="ipReasmOKs.448"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipReasmOKs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -822,7 +822,7 @@
          }
 
          <a name="ipReasmFails.461"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipReasmFails</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -840,7 +840,7 @@
          }
 
          <a name="ipFragOKs.479"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipFragOKs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -854,7 +854,7 @@
          }
 
          <a name="ipFragFails.493"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipFragFails</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -870,7 +870,7 @@
          }
 
          <a name="ipFragCreates.509"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipFragCreates</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -891,7 +891,7 @@
                <span class="yang_str">"The addressing information for one of this entity's IPv4
                addresses."</span>;
             <a name="ipAdEntAddr.536"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAdEntAddr</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2008-06-07#ipv4-address.138">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
                <span class="yang_kw">description</span>
@@ -915,7 +915,7 @@
             }
 
             <a name="ipAdEntNetMask.560"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAdEntNetMask</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2008-06-07#ipv4-address.138">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
                <span class="yang_kw">description</span>
@@ -986,7 +986,7 @@
             }
 
             <a name="ipNetToMediaPhysAddress.636"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToMediaPhysAddress</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#phys-address.268">yang:phys-address</a></span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#phys-address.273">yang:phys-address</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..65535"</span>;
                }
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -1004,7 +1004,7 @@
             }
 
             <a name="ipNetToMediaNetAddress.654"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToMediaNetAddress</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2008-06-07#ipv4-address.138">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
                <span class="yang_kw">description</span>
@@ -1063,7 +1063,7 @@
          }  <span class="yang_cmt">// list ipNetToMediaEntry</span>
 
          <a name="ipRoutingDiscards.704"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipRoutingDiscards</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -1125,7 +1125,7 @@
          }
 
          <a name="ipv4InterfaceTableLastChange.763"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv4InterfaceTableLastChange</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timestamp.249">yang:timestamp</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The value of sysUpTime on the most recent occasion at which
@@ -1204,7 +1204,7 @@
          }  <span class="yang_cmt">// list ipv4InterfaceEntry</span>
 
          <a name="ipv6InterfaceTableLastChange.844"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipv6InterfaceTableLastChange</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timestamp.249">yang:timestamp</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The value of sysUpTime on the most recent occasion at which
@@ -1599,7 +1599,7 @@
             }
 
             <a name="ipAddressCreated.1250"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressCreated</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timestamp.249">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value of sysUpTime at the time this entry was created.
@@ -1610,7 +1610,7 @@
             }
 
             <a name="ipAddressLastChanged.1261"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipAddressLastChanged</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timestamp.249">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value of sysUpTime at the time this entry was last
@@ -1697,7 +1697,7 @@
             }
 
             <a name="ipNetToPhysicalPhysAddress.1356"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalPhysAddress</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#phys-address.268">yang:phys-address</a></span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#phys-address.273">yang:phys-address</a></span> {
                   <span class="yang_kw">length</span> <span class="yang_str">"0..65535"</span>;
                }
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
@@ -1711,7 +1711,7 @@
             }
 
             <a name="ipNetToPhysicalLastUpdated.1370"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipNetToPhysicalLastUpdated</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timestamp.249">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value of sysUpTime at the time this entry was last
@@ -2286,7 +2286,7 @@
             }
 
             <a name="ipSystemStatsInReceives.1949"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInReceives</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of input IP datagrams received, including
@@ -2300,7 +2300,7 @@
             }
 
             <a name="ipSystemStatsHCInReceives.1963"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInReceives</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of input IP datagrams received, including
@@ -2316,7 +2316,7 @@
             }
 
             <a name="ipSystemStatsInOctets.1979"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets received in input IP datagrams,
@@ -2331,7 +2331,7 @@
             }
 
             <a name="ipSystemStatsHCInOctets.1994"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets received in input IP datagrams,
@@ -2350,7 +2350,7 @@
             }
 
             <a name="ipSystemStatsInHdrErrors.2013"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInHdrErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input IP datagrams discarded due to errors in
@@ -2366,7 +2366,7 @@
             }
 
             <a name="ipSystemStatsInNoRoutes.2029"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInNoRoutes</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input IP datagrams discarded because no route
@@ -2380,7 +2380,7 @@
             }
 
             <a name="ipSystemStatsInAddrErrors.2043"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInAddrErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input IP datagrams discarded because the IP
@@ -2402,7 +2402,7 @@
             }
 
             <a name="ipSystemStatsInUnknownProtos.2065"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInUnknownProtos</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of locally-addressed IP datagrams received
@@ -2422,7 +2422,7 @@
             }
 
             <a name="ipSystemStatsInTruncatedPkts.2085"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInTruncatedPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input IP datagrams discarded because the
@@ -2436,7 +2436,7 @@
             }
 
             <a name="ipSystemStatsInForwDatagrams.2099"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInForwDatagrams</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input datagrams for which this entity was not
@@ -2458,7 +2458,7 @@
             }
 
             <a name="ipSystemStatsHCInForwDatagrams.2121"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInForwDatagrams</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input datagrams for which this entity was not
@@ -2475,7 +2475,7 @@
             }
 
             <a name="ipSystemStatsReasmReqds.2138"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsReasmReqds</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP fragments received that needed to be
@@ -2497,7 +2497,7 @@
             }
 
             <a name="ipSystemStatsReasmOKs.2160"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsReasmOKs</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP datagrams successfully reassembled.
@@ -2515,7 +2515,7 @@
             }
 
             <a name="ipSystemStatsReasmFails.2178"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsReasmFails</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of failures detected by the IP re-assembly
@@ -2538,7 +2538,7 @@
             }
 
             <a name="ipSystemStatsInDiscards.2201"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInDiscards</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input IP datagrams for which no problems were
@@ -2555,7 +2555,7 @@
             }
 
             <a name="ipSystemStatsInDelivers.2218"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInDelivers</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of datagrams successfully delivered to IP
@@ -2574,7 +2574,7 @@
             }
 
             <a name="ipSystemStatsHCInDelivers.2237"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInDelivers</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of datagrams successfully delivered to IP
@@ -2590,7 +2590,7 @@
             }
 
             <a name="ipSystemStatsOutRequests.2253"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutRequests</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of IP datagrams that local IP user-
@@ -2606,7 +2606,7 @@
             }
 
             <a name="ipSystemStatsHCOutRequests.2269"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutRequests</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of IP datagrams that local IP user-
@@ -2622,7 +2622,7 @@
             }
 
             <a name="ipSystemStatsOutNoRoutes.2285"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutNoRoutes</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of locally generated IP datagrams discarded
@@ -2637,7 +2637,7 @@
             }
 
             <a name="ipSystemStatsOutForwDatagrams.2300"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutForwDatagrams</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of datagrams for which this entity was not their
@@ -2659,7 +2659,7 @@
             }
 
             <a name="ipSystemStatsHCOutForwDatagrams.2322"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutForwDatagrams</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of datagrams for which this entity was not their
@@ -2676,7 +2676,7 @@
             }
 
             <a name="ipSystemStatsOutDiscards.2339"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutDiscards</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of output IP datagrams for which no problem was
@@ -2697,7 +2697,7 @@
             }
 
             <a name="ipSystemStatsOutFragReqds.2360"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutFragReqds</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP datagrams that would require fragmentation
@@ -2715,7 +2715,7 @@
             }
 
             <a name="ipSystemStatsOutFragOKs.2378"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutFragOKs</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP datagrams that have been successfully
@@ -2733,7 +2733,7 @@
             }
 
             <a name="ipSystemStatsOutFragFails.2396"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutFragFails</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP datagrams that have been discarded because
@@ -2754,7 +2754,7 @@
             }
 
             <a name="ipSystemStatsOutFragCreates.2417"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutFragCreates</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of output datagram fragments that have been
@@ -2772,7 +2772,7 @@
             }
 
             <a name="ipSystemStatsOutTransmits.2435"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutTransmits</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of IP datagrams that this entity supplied
@@ -2791,7 +2791,7 @@
             }
 
             <a name="ipSystemStatsHCOutTransmits.2454"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutTransmits</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of IP datagrams that this entity supplied
@@ -2807,7 +2807,7 @@
             }
 
             <a name="ipSystemStatsOutOctets.2470"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets in IP datagrams delivered to the
@@ -2822,7 +2822,7 @@
             }
 
             <a name="ipSystemStatsHCOutOctets.2485"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets in IP datagrams delivered to the
@@ -2841,7 +2841,7 @@
             }
 
             <a name="ipSystemStatsInMcastPkts.2504"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInMcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP multicast datagrams received.
@@ -2854,7 +2854,7 @@
             }
 
             <a name="ipSystemStatsHCInMcastPkts.2517"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInMcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP multicast datagrams received.  This object
@@ -2869,7 +2869,7 @@
             }
 
             <a name="ipSystemStatsInMcastOctets.2532"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInMcastOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets received in IP multicast
@@ -2884,7 +2884,7 @@
             }
 
             <a name="ipSystemStatsHCInMcastOctets.2547"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInMcastOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets received in IP multicast
@@ -2899,7 +2899,7 @@
             }
 
             <a name="ipSystemStatsOutMcastPkts.2562"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutMcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP multicast datagrams transmitted.
@@ -2912,7 +2912,7 @@
             }
 
             <a name="ipSystemStatsHCOutMcastPkts.2575"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutMcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP multicast datagrams transmitted.  This
@@ -2927,7 +2927,7 @@
             }
 
             <a name="ipSystemStatsOutMcastOctets.2590"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutMcastOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets transmitted in IP multicast
@@ -2945,7 +2945,7 @@
             }
 
             <a name="ipSystemStatsHCOutMcastOctets.2608"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutMcastOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets transmitted in IP multicast
@@ -2960,7 +2960,7 @@
             }
 
             <a name="ipSystemStatsInBcastPkts.2623"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsInBcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP broadcast datagrams received.
@@ -2973,7 +2973,7 @@
             }
 
             <a name="ipSystemStatsHCInBcastPkts.2636"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCInBcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP broadcast datagrams received.  This object
@@ -2991,7 +2991,7 @@
             }
 
             <a name="ipSystemStatsOutBcastPkts.2654"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsOutBcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP broadcast datagrams transmitted.
@@ -3004,7 +3004,7 @@
             }
 
             <a name="ipSystemStatsHCOutBcastPkts.2667"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsHCOutBcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP broadcast datagrams transmitted.  This
@@ -3019,7 +3019,7 @@
             }
 
             <a name="ipSystemStatsDiscontinuityTime.2682"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipSystemStatsDiscontinuityTime</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timestamp.249">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value of sysUpTime on the most recent occasion at which
@@ -3046,7 +3046,7 @@
          }  <span class="yang_cmt">// list ipSystemStatsEntry</span>
 
          <a name="ipIfStatsTableLastChange.2708"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsTableLastChange</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timestamp.249">yang:timestamp</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The value of sysUpTime on the most recent occasion at which
@@ -3084,7 +3084,7 @@
             }
 
             <a name="ipIfStatsInReceives.2753"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInReceives</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of input IP datagrams received, including
@@ -3098,7 +3098,7 @@
             }
 
             <a name="ipIfStatsHCInReceives.2767"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInReceives</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of input IP datagrams received, including
@@ -3114,7 +3114,7 @@
             }
 
             <a name="ipIfStatsInOctets.2783"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets received in input IP datagrams,
@@ -3129,7 +3129,7 @@
             }
 
             <a name="ipIfStatsHCInOctets.2798"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets received in input IP datagrams,
@@ -3145,7 +3145,7 @@
             }
 
             <a name="ipIfStatsInHdrErrors.2814"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInHdrErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input IP datagrams discarded due to errors in
@@ -3161,7 +3161,7 @@
             }
 
             <a name="ipIfStatsInNoRoutes.2830"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInNoRoutes</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input IP datagrams discarded because no route
@@ -3175,7 +3175,7 @@
             }
 
             <a name="ipIfStatsInAddrErrors.2844"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInAddrErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input IP datagrams discarded because the IP
@@ -3194,7 +3194,7 @@
             }
 
             <a name="ipIfStatsInUnknownProtos.2863"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInUnknownProtos</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of locally-addressed IP datagrams received
@@ -3217,7 +3217,7 @@
             }
 
             <a name="ipIfStatsInTruncatedPkts.2886"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInTruncatedPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input IP datagrams discarded because the
@@ -3231,7 +3231,7 @@
             }
 
             <a name="ipIfStatsInForwDatagrams.2900"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInForwDatagrams</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input datagrams for which this entity was not
@@ -3253,7 +3253,7 @@
             }
 
             <a name="ipIfStatsHCInForwDatagrams.2922"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInForwDatagrams</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input datagrams for which this entity was not
@@ -3273,7 +3273,7 @@
             }
 
             <a name="ipIfStatsReasmReqds.2942"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsReasmReqds</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP fragments received that needed to be
@@ -3292,7 +3292,7 @@
             }
 
             <a name="ipIfStatsReasmOKs.2961"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsReasmOKs</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP datagrams successfully reassembled.
@@ -3310,7 +3310,7 @@
             }
 
             <a name="ipIfStatsReasmFails.2979"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsReasmFails</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of failures detected by the IP re-assembly
@@ -3333,7 +3333,7 @@
             }
 
             <a name="ipIfStatsInDiscards.3002"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInDiscards</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input IP datagrams for which no problems were
@@ -3350,7 +3350,7 @@
             }
 
             <a name="ipIfStatsInDelivers.3019"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInDelivers</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of datagrams successfully delivered to IP
@@ -3372,7 +3372,7 @@
             }
 
             <a name="ipIfStatsHCInDelivers.3041"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInDelivers</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of datagrams successfully delivered to IP
@@ -3388,7 +3388,7 @@
             }
 
             <a name="ipIfStatsOutRequests.3057"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutRequests</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of IP datagrams that local IP user-
@@ -3404,7 +3404,7 @@
             }
 
             <a name="ipIfStatsHCOutRequests.3073"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutRequests</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of IP datagrams that local IP user-
@@ -3423,7 +3423,7 @@
             }
 
             <a name="ipIfStatsOutForwDatagrams.3092"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutForwDatagrams</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of datagrams for which this entity was not their
@@ -3445,7 +3445,7 @@
             }
 
             <a name="ipIfStatsHCOutForwDatagrams.3114"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutForwDatagrams</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of datagrams for which this entity was not their
@@ -3465,7 +3465,7 @@
             }
 
             <a name="ipIfStatsOutDiscards.3134"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutDiscards</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of output IP datagrams for which no problem was
@@ -3483,7 +3483,7 @@
             }
 
             <a name="ipIfStatsOutFragReqds.3152"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutFragReqds</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP datagrams that would require fragmentation
@@ -3501,7 +3501,7 @@
             }
 
             <a name="ipIfStatsOutFragOKs.3170"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutFragOKs</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP datagrams that have been successfully
@@ -3522,7 +3522,7 @@
             }
 
             <a name="ipIfStatsOutFragFails.3191"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutFragFails</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP datagrams that have been discarded because
@@ -3543,7 +3543,7 @@
             }
 
             <a name="ipIfStatsOutFragCreates.3212"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutFragCreates</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of output datagram fragments that have been
@@ -3561,7 +3561,7 @@
             }
 
             <a name="ipIfStatsOutTransmits.3230"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutTransmits</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of IP datagrams that this entity supplied
@@ -3577,7 +3577,7 @@
             }
 
             <a name="ipIfStatsHCOutTransmits.3246"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutTransmits</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of IP datagrams that this entity supplied
@@ -3593,7 +3593,7 @@
             }
 
             <a name="ipIfStatsOutOctets.3262"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets in IP datagrams delivered to the
@@ -3608,7 +3608,7 @@
             }
 
             <a name="ipIfStatsHCOutOctets.3277"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets in IP datagrams delivered to the
@@ -3623,7 +3623,7 @@
             }
 
             <a name="ipIfStatsInMcastPkts.3292"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInMcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP multicast datagrams received.
@@ -3636,7 +3636,7 @@
             }
 
             <a name="ipIfStatsHCInMcastPkts.3305"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInMcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP multicast datagrams received.  This object
@@ -3651,7 +3651,7 @@
             }
 
             <a name="ipIfStatsInMcastOctets.3320"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInMcastOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets received in IP multicast
@@ -3669,7 +3669,7 @@
             }
 
             <a name="ipIfStatsHCInMcastOctets.3338"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInMcastOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets received in IP multicast
@@ -3684,7 +3684,7 @@
             }
 
             <a name="ipIfStatsOutMcastPkts.3353"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutMcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP multicast datagrams transmitted.
@@ -3697,7 +3697,7 @@
             }
 
             <a name="ipIfStatsHCOutMcastPkts.3366"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutMcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP multicast datagrams transmitted.  This
@@ -3715,7 +3715,7 @@
             }
 
             <a name="ipIfStatsOutMcastOctets.3384"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutMcastOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets transmitted in IP multicast
@@ -3730,7 +3730,7 @@
             }
 
             <a name="ipIfStatsHCOutMcastOctets.3399"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutMcastOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets transmitted in IP multicast
@@ -3745,7 +3745,7 @@
             }
 
             <a name="ipIfStatsInBcastPkts.3414"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsInBcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP broadcast datagrams received.
@@ -3758,7 +3758,7 @@
             }
 
             <a name="ipIfStatsHCInBcastPkts.3427"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCInBcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP broadcast datagrams received.  This object
@@ -3773,7 +3773,7 @@
             }
 
             <a name="ipIfStatsOutBcastPkts.3442"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsOutBcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP broadcast datagrams transmitted.
@@ -3786,7 +3786,7 @@
             }
 
             <a name="ipIfStatsHCOutBcastPkts.3455"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsHCOutBcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of IP broadcast datagrams transmitted.  This
@@ -3801,7 +3801,7 @@
             }
 
             <a name="ipIfStatsDiscontinuityTime.3470"></a><span class="yang_kw">leaf</span> <span class="yang_id">ipIfStatsDiscontinuityTime</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timestamp.249">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value of sysUpTime on the most recent occasion at which
@@ -3834,7 +3834,7 @@
 
       <a name="icmp.3501"></a><span class="yang_kw">container</span> <span class="yang_id">icmp</span> {
          <a name="icmpInMsgs.3503"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInMsgs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -3849,7 +3849,7 @@
          }
 
          <a name="icmpInErrors.3518"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInErrors</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -3864,7 +3864,7 @@
          }
 
          <a name="icmpInDestUnreachs.3533"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInDestUnreachs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -3878,7 +3878,7 @@
          }
 
          <a name="icmpInTimeExcds.3547"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInTimeExcds</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -3891,7 +3891,7 @@
          }
 
          <a name="icmpInParmProbs.3560"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInParmProbs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -3904,7 +3904,7 @@
          }
 
          <a name="icmpInSrcQuenchs.3573"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInSrcQuenchs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -3917,7 +3917,7 @@
          }
 
          <a name="icmpInRedirects.3586"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInRedirects</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -3930,7 +3930,7 @@
          }
 
          <a name="icmpInEchos.3599"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInEchos</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -3943,7 +3943,7 @@
          }
 
          <a name="icmpInEchoReps.3612"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInEchoReps</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -3956,7 +3956,7 @@
          }
 
          <a name="icmpInTimestamps.3625"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInTimestamps</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -3969,7 +3969,7 @@
          }
 
          <a name="icmpInTimestampReps.3638"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInTimestampReps</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -3982,7 +3982,7 @@
          }
 
          <a name="icmpInAddrMasks.3651"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInAddrMasks</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -3995,7 +3995,7 @@
          }
 
          <a name="icmpInAddrMaskReps.3664"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpInAddrMaskReps</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4008,7 +4008,7 @@
          }
 
          <a name="icmpOutMsgs.3677"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutMsgs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4023,7 +4023,7 @@
          }
 
          <a name="icmpOutErrors.3692"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutErrors</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4042,7 +4042,7 @@
          }
 
          <a name="icmpOutDestUnreachs.3711"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutDestUnreachs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4055,7 +4055,7 @@
          }
 
          <a name="icmpOutTimeExcds.3724"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutTimeExcds</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4068,7 +4068,7 @@
          }
 
          <a name="icmpOutParmProbs.3737"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutParmProbs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4081,7 +4081,7 @@
          }
 
          <a name="icmpOutSrcQuenchs.3750"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutSrcQuenchs</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4094,7 +4094,7 @@
          }
 
          <a name="icmpOutRedirects.3763"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutRedirects</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4109,7 +4109,7 @@
          }
 
          <a name="icmpOutEchos.3778"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutEchos</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4122,7 +4122,7 @@
          }
 
          <a name="icmpOutEchoReps.3791"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutEchoReps</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4135,7 +4135,7 @@
          }
 
          <a name="icmpOutTimestamps.3804"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutTimestamps</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4148,7 +4148,7 @@
          }
 
          <a name="icmpOutTimestampReps.3817"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutTimestampReps</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4161,7 +4161,7 @@
          }
 
          <a name="icmpOutAddrMasks.3830"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutAddrMasks</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4174,7 +4174,7 @@
          }
 
          <a name="icmpOutAddrMaskReps.3843"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpOutAddrMaskReps</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>
@@ -4199,7 +4199,7 @@
             }
 
             <a name="icmpStatsInMsgs.3875"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsInMsgs</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of ICMP messages that the entity received.
@@ -4209,7 +4209,7 @@
             }
 
             <a name="icmpStatsInErrors.3885"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsInErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of ICMP messages that the entity received but
@@ -4219,7 +4219,7 @@
             }
 
             <a name="icmpStatsOutMsgs.3895"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsOutMsgs</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of ICMP messages that the entity attempted
@@ -4229,7 +4229,7 @@
             }
 
             <a name="icmpStatsOutErrors.3905"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpStatsOutErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of ICMP messages that this entity did not send
@@ -4284,7 +4284,7 @@
             }
 
             <a name="icmpMsgStatsInPkts.3966"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpMsgStatsInPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of input packets for this AF and type."</span>;
@@ -4292,7 +4292,7 @@
             }
 
             <a name="icmpMsgStatsOutPkts.3974"></a><span class="yang_kw">leaf</span> <span class="yang_id">icmpMsgStatsOutPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of output packets for this AF and type."</span>;

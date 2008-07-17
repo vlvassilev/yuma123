@@ -262,7 +262,7 @@ NcxModQualId NcxModScopedId"/>
       <xs:annotation>
          <xs:documentation>
             NCX System access control mode.
-             open == no access control checking enforced
+             open == no access control checking enforced 
              loose == any RPC method in the netconf namespace can
                  be invoked;  read-only data allowed for all
              strict == ncxacl RPC entry must be present to invoke

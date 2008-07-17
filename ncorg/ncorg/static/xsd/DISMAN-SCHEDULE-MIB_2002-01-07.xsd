@@ -53,7 +53,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/DISMAN-SCHEDULE-MIB.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/DISMAN-SCHEDULE-MIB.yang
          </ncx:source>
          <ncx:organization>
             IETF Distributed Management Working Group

@@ -70,7 +70,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/EtherLike-MIB.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/EtherLike-MIB.yang
          </ncx:source>
          <ncx:organization>
             IETF Ethernet Interfaces and Hub MIB

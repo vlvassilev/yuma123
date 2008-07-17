@@ -41,7 +41,7 @@
       <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
       }
-      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2008-05-22">yang-types</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
       }
 
@@ -163,7 +163,7 @@
       }
 
       <a name="AutonomousType.141"></a><span class="yang_kw">typedef</span> <span class="yang_id">AutonomousType</span> {
-         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"Represents an independently extensible type identification
             value.  It may, for example, indicate a particular sub-tree
@@ -172,7 +172,7 @@
       }
 
       <a name="InstancePointer.150"></a><span class="yang_kw">typedef</span> <span class="yang_id">InstancePointer</span> {
-         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
          <span class="yang_kw">status</span> <span class="yang_str">"obsolete"</span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"A pointer to either a specific instance of a MIB object or
@@ -186,14 +186,14 @@
       }
 
       <a name="VariablePointer.164"></a><span class="yang_kw">typedef</span> <span class="yang_id">VariablePointer</span> {
-         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"A pointer to a specific object instance.  For example,
             sysContact.0 or ifInOctets.3."</span>;
       }
 
       <a name="RowPointer.171"></a><span class="yang_kw">typedef</span> <span class="yang_id">RowPointer</span> {
-         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"Represents a pointer to a conceptual row.  The value is the
             name of the instance of the first accessible columnar object
@@ -690,7 +690,7 @@
       }
 
       <a name="TimeStamp.656"></a><span class="yang_kw">typedef</span> <span class="yang_id">TimeStamp</span> {
-         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timeticks.235">yang:timeticks</a></span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"The value of the sysUpTime object at which a specific
             occurrence happened.  The specific occurrence must be
@@ -792,7 +792,7 @@
       }
 
       <a name="TDomain.747"></a><span class="yang_kw">typedef</span> <span class="yang_id">TDomain</span> {
-         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
          <span class="yang_kw">description</span>
             <span class="yang_str">"Denotes a kind of transport service.
             

@@ -1,0 +1,2214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:ipfix-psamp-config"
+   targetNamespace="urn:ietf:params:xml:ns:ipfix-psamp-config"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2008-07-07"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types"
+   xmlns:inet="urn:ietf:params:xml:ns:yang:inet-types"
+   xmlns:if-mib="urn:ietf:params:xml:ns:yang:smiv2:IF-MIB"
+   xmlns:entity-mib="urn:ietf:params:xml:ns:yang:smiv2:ENTITY-MIB">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'ipfix-psamp.yang' by yangdump version 0.9.3
+         
+         Module: ipfix-psamp
+         Organization: IPFIX WG
+         Version: 2008-07-07
+         Contact: muenz@informatik.uni-tuebingen.de
+      </xs:documentation>
+      <xs:documentation>
+         IPFIX/PSAMP Configuration Data Model
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:reference>
+            <ncx:text>
+               draft-ietf-ipfix-configuration-model-00.txt + asn bugfix
+            </ncx:text>
+            <ncx:url>
+               http://www.ietf.org/internet-drafts/draft-ietf-ipfix-configuration-model-00.txt
+            </ncx:url>
+         </ncx:reference>
+         <ncx:source>
+            /home/andy/swdev/trunk/netconf/modules/ietf/ipfix-psamp.yang
+         </ncx:source>
+         <ncx:organization>IPFIX WG</ncx:organization>
+         <ncx:contact>
+            muenz@informatik.uni-tuebingen.de
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2008-07-07</ncx:version>
+            <ncx:description>
+               Version of draft-ietf-ipfix-configuration-model-00
+               Changes in draft-ietf-ipfix-configuration-model-00:
+               - Metering Process container replaced by direct reference to
+               Selection Process
+               - concatenation of Selection Processes realize Selection Sequence
+               - removal of premature support of IPFIX Mediators/Concentrators.
+               - more SCTP parameters in SctpReceiver and SctpExport classes
+               - sendBufferSize parameter for all *Export classes
+               - templateId no longer configuration parameter
+               Changes in draft-muenz-ipfix-configuration-04:
+               - first version in yang
+               - Collecting Process can be configured for file import
+               - Collecting Process can be configured to export received
+               records without modifications (e.g., to file or other
+               collectors)
+               - SCTP export parameter timedReliability
+               - parameter for eligible local IP addresses for SCTP endpoint
+               - all tags names uncapitalized, types names etc. capitalized
+               - CacheParameters renamed as Cache
+               - description attribute removed
+               Changes in -03:
+               - Linecard and Interface classes now have direction element
+               - sec =&gt; s (SI unit)
+               - optional description attribute for annotations
+               - simplifications in ExportingProcess class
+               - new parameters: observationPointId, meteringProcessId,
+               selectorId, exportingProcessId (note that devices do not
+               have to support the configuration of these parameters)
+               - new FileExport class for exporting into a file
+               - Reporting class renamed Option Class
+               Changes in -02:
+               - new structure without next pointers
+               - packet reporting and flow metering replaced by record cache
+               - added reporting with options
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="Direction">
+      <xs:annotation>
+         <xs:documentation>
+            Direction of packets going through an interface or
+            linecard.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="ingress">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>0</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="egress">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>1</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="both">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>2</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:group name="InformationElement">
+      <xs:annotation>
+         <xs:documentation>
+            Parameters of an Information Element.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:element name="ieEnterpriseNumber" type="xs:unsignedInt"
+            minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  Omitted in the case of an IETF specified Information
+                  Elements.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+         <xs:choice>
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:choice-name>NameOrId</ncx:choice-name>
+                  <ncx:mandatory>true</ncx:mandatory>
+               </xs:appinfo>
+            </xs:annotation>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>ieName</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="ieName" type="xs:string" minOccurs="0"/>
+               <xs:element name="__.NameOrId.ieName.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>ieId</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="ieId" type="xs:unsignedShort"
+                  minOccurs="0"/>
+               <xs:element name="__.NameOrId.ieId.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:element name="__.NameOrId.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:choice>
+         <xs:element name="ieLength" type="xs:unsignedShort"
+            minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  Length can be omitted if a default length exists for
+                  the specified Information Element.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:group name="Interface">
+      <xs:annotation>
+         <xs:documentation>
+            Interface as input to Observation Point.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:choice>
+            <xs:annotation>
+               <xs:documentation>
+                  Index or name of the interface as stored in the
+                  ifTable of IF-MIB.
+               </xs:documentation>
+               <ncx:reference>
+                  <ncx:text>RFC 1229.</ncx:text>
+                  <ncx:url>
+                     http://www.ietf.org/rfc/rfc1229.txt
+                  </ncx:url>
+               </ncx:reference>
+               <xs:appinfo>
+                  <ncx:choice-name>IndexOrName</ncx:choice-name>
+                  <ncx:mandatory>true</ncx:mandatory>
+               </xs:appinfo>
+            </xs:annotation>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>ifIndex</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="ifIndex" type="xs:unsignedInt"
+                  minOccurs="0"/>
+               <xs:element name="__.IndexOrName.ifIndex.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>ifName</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="ifName" type="xs:string" minOccurs="0"/>
+               <xs:element name="__.IndexOrName.ifName.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:element name="__.IndexOrName.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:choice>
+         <xs:element name="direction" type="Direction" default="both"
+            minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  Direction of packets. If not applicable (e.g., in
+                  the case of a sniffing interface in promiscuous mode), this
+                  parameter is omitted
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:group name="Linecard">
+      <xs:annotation>
+         <xs:documentation>
+            Linecard as input to Observation Point.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:choice>
+            <xs:annotation>
+               <xs:documentation>
+                  Index or name of the linecard as stored in the
+                  entPhysicalTable of ENTITY-MIB.
+               </xs:documentation>
+               <ncx:reference>
+                  <ncx:text>RFC 4133.</ncx:text>
+                  <ncx:url>
+                     http://www.ietf.org/rfc/rfc4133.txt
+                  </ncx:url>
+               </ncx:reference>
+               <xs:appinfo>
+                  <ncx:choice-name>IndexOrName</ncx:choice-name>
+                  <ncx:mandatory>true</ncx:mandatory>
+               </xs:appinfo>
+            </xs:annotation>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>entPhysicalIndex</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="entPhysicalIndex"
+                  type="xs:unsignedInt" minOccurs="0"/>
+               <xs:element name="__.IndexOrName.entPhysicalIndex.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>entPhysicalName</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="entPhysicalName" type="xs:string"
+                  minOccurs="0"/>
+               <xs:element name="__.IndexOrName.entPhysicalName.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:element name="__.IndexOrName.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:choice>
+         <xs:element name="direction" type="Direction" default="both"
+            minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  Direction of packets. If not applicable (e.g., in
+                  the case of a sniffing interface in promiscuous mode), this
+                  parameter is omitted
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:element name="ipfix">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="collectingProcess" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     Parameters of a Collecting Process.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="name" type="xs:string">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Arbitrary but unique name of the Collecting
+                              Process.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="receiver" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:documentation>Receiver parameters.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="name" type="xs:string"/>
+                              <xs:choice>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:choice-name>
+                                          TransportProtocol
+                                       </ncx:choice-name>
+                                       <ncx:mandatory>true</ncx:mandatory>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:sequence>
+                                    <xs:annotation>
+                                       <xs:appinfo>
+                                          <ncx:case-name>sctpReceiver
+                                          </ncx:case-name>
+                                       </xs:appinfo>
+                                    </xs:annotation>
+                                    <xs:element name="sctpReceiver">
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             SCTP receiver parameters.
+                                          </xs:documentation>
+                                          <ncx:reference>
+                                             <ncx:text>RFC 4960.
+                                             </ncx:text>
+                                             <ncx:url>
+                                                http://www.ietf.org/rfc/rfc4960.txt
+                                             </ncx:url>
+                                          </ncx:reference>
+                                       </xs:annotation>
+                                       <xs:complexType>
+                                          <xs:sequence>
+                                             <xs:element
+                                                name="ipAddress"
+                                                type="inet:ip-address"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded">
+                                                <xs:annotation>
+                                                   <xs:documentation>
+                                                      List of eligible local IP addresses to be
+                                                      used by the SCTP endpoint. If omitted, all locally
+                                                      assigned IP addresses are used by the SCTP endpoint.
+                                                   </xs:documentation>
+                                                   <xs:appinfo>
+                                                      <ncx:ordered-by>
+                                                         system</ncx:ordered-by>
+                                                   </xs:appinfo>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="transportPort"
+                                                type="inet:port-number">
+                                                <xs:annotation>
+                                                   <xs:appinfo>
+                                                      <ncx:mandatory>
+                                                         true</ncx:mandatory>
+                                                   </xs:appinfo>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="maxAllowedStreams"
+                                                type="xs:unsignedShort"
+                                                minOccurs="0">
+                                                <xs:annotation>
+                                                   <xs:documentation>
+                                                      Maximum number of allowed inbound streams
+                                                      per SCTP association.
+                                                   </xs:documentation>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="__.ipfix.collectingProcess.receiver.TransportProtocol.sctpReceiver.sctpReceiver.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                       </xs:complexType>
+                                    </xs:element>
+                                    <xs:element
+                                       name="__.ipfix.collectingProcess.receiver.TransportProtocol.sctpReceiver.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                                 <xs:sequence>
+                                    <xs:annotation>
+                                       <xs:appinfo>
+                                          <ncx:case-name>udpReceiver
+                                          </ncx:case-name>
+                                       </xs:appinfo>
+                                    </xs:annotation>
+                                    <xs:element name="udpReceiver">
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             UDP receiver parameters.
+                                          </xs:documentation>
+                                       </xs:annotation>
+                                       <xs:complexType>
+                                          <xs:sequence>
+                                             <xs:element
+                                                name="ipAddress"
+                                                type="inet:ip-address"
+                                                minOccurs="0">
+                                                <xs:annotation>
+                                                   <xs:documentation>
+                                                      If omitted, all locally assigned IP
+                                                      addresses are used by the UDP endpoint.
+                                                   </xs:documentation>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="transportPort"
+                                                type="inet:port-number">
+                                                <xs:annotation>
+                                                   <xs:appinfo>
+                                                      <ncx:mandatory>
+                                                         true</ncx:mandatory>
+                                                   </xs:appinfo>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="defaultTemplateLifetime"
+                                                type="xs:unsignedInt"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="__.ipfix.collectingProcess.receiver.TransportProtocol.udpReceiver.udpReceiver.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                       </xs:complexType>
+                                    </xs:element>
+                                    <xs:element
+                                       name="__.ipfix.collectingProcess.receiver.TransportProtocol.udpReceiver.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                                 <xs:sequence>
+                                    <xs:annotation>
+                                       <xs:appinfo>
+                                          <ncx:case-name>tcpReceiver
+                                          </ncx:case-name>
+                                       </xs:appinfo>
+                                    </xs:annotation>
+                                    <xs:element name="tcpReceiver">
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             TCP receiver parameters.
+                                          </xs:documentation>
+                                       </xs:annotation>
+                                       <xs:complexType>
+                                          <xs:sequence>
+                                             <xs:element
+                                                name="ipAddress"
+                                                type="inet:ip-address"
+                                                minOccurs="0">
+                                                <xs:annotation>
+                                                   <xs:documentation>
+                                                      If omitted, all locally assigned IP
+                                                      addresses are used by the TCP endpoint.
+                                                   </xs:documentation>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="transportPort"
+                                                type="inet:port-number">
+                                                <xs:annotation>
+                                                   <xs:appinfo>
+                                                      <ncx:mandatory>
+                                                         true</ncx:mandatory>
+                                                   </xs:appinfo>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="__.ipfix.collectingProcess.receiver.TransportProtocol.tcpReceiver.tcpReceiver.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                       </xs:complexType>
+                                    </xs:element>
+                                    <xs:element
+                                       name="__.ipfix.collectingProcess.receiver.TransportProtocol.tcpReceiver.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                                 <xs:sequence>
+                                    <xs:annotation>
+                                       <xs:appinfo>
+                                          <ncx:case-name>fileReader
+                                          </ncx:case-name>
+                                       </xs:appinfo>
+                                    </xs:annotation>
+                                    <xs:element name="fileReader">
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             File Reader parameters.
+                                          </xs:documentation>
+                                       </xs:annotation>
+                                       <xs:complexType>
+                                          <xs:sequence>
+                                             <xs:element name="uri"
+                                                type="yang:uri">
+                                                <xs:annotation>
+                                                   <xs:appinfo>
+                                                      <ncx:mandatory>
+                                                         true</ncx:mandatory>
+                                                   </xs:appinfo>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="__.ipfix.collectingProcess.receiver.TransportProtocol.fileReader.fileReader.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                       </xs:complexType>
+                                    </xs:element>
+                                    <xs:element
+                                       name="__.ipfix.collectingProcess.receiver.TransportProtocol.fileReader.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                                 <xs:element
+                                    name="__.ipfix.collectingProcess.receiver.TransportProtocol.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:choice>
+                              <xs:element
+                                 name="__.ipfix.collectingProcess.receiver.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                        <xs:key name="receiver_Key">
+                           <xs:selector xpath="."/>
+                           <xs:field xpath="name"/>
+                        </xs:key>
+                     </xs:element>
+                     <xs:element name="exportingProcess" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Export of received records without any
+                              modifications. Records are processed by all Exporting
+                              Processes in the list.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType/>
+                     </xs:element>
+                     <xs:element name="__.ipfix.collectingProcess.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="collectingProcess_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="name"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="observationPoint" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     Parameters of an Observation Point.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="name" type="xs:string">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Arbitrary but unique name of the Observation
+                              Point.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="observationPointId"
+                        type="xs:unsignedInt" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              If omitted, the Observation Point ID is assigned
+                              by the monitoring device.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="observationDomainId"
+                        type="xs:unsignedInt" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              If omitted, the Observation Domain ID is assigned
+                              by the monitoring device.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:choice>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:choice-name>OPType</ncx:choice-name>
+                              <ncx:mandatory>true</ncx:mandatory>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:sequence>
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:case-name>interface</ncx:case-name>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:element name="interface">
+                              <xs:complexType>
+                                 <xs:sequence>
+                                    <xs:choice>
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             Index or name of the interface as stored in the
+                                             ifTable of IF-MIB.
+                                          </xs:documentation>
+                                          <ncx:reference>
+                                             <ncx:text>RFC 1229.
+                                             </ncx:text>
+                                             <ncx:url>
+                                                http://www.ietf.org/rfc/rfc1229.txt
+                                             </ncx:url>
+                                          </ncx:reference>
+                                          <xs:appinfo>
+                                             <ncx:choice-name>
+                                                IndexOrName</ncx:choice-name>
+                                          </xs:appinfo>
+                                       </xs:annotation>
+                                       <xs:sequence>
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:case-name>ifIndex
+                                                </ncx:case-name>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                          <xs:element name="ifIndex"
+                                             type="xs:unsignedInt"
+                                             minOccurs="0"/>
+                                          <xs:element
+                                             name="__.ipfix.observationPoint.OPType.interface.interface.IndexOrName.ifIndex.A__"
+                                             minOccurs="0"
+                                             maxOccurs="unbounded"
+                                             abstract="true"/>
+                                       </xs:sequence>
+                                       <xs:sequence>
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:case-name>ifName
+                                                </ncx:case-name>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                          <xs:element name="ifName"
+                                             type="xs:string"
+                                             minOccurs="0"/>
+                                          <xs:element
+                                             name="__.ipfix.observationPoint.OPType.interface.interface.IndexOrName.ifName.A__"
+                                             minOccurs="0"
+                                             maxOccurs="unbounded"
+                                             abstract="true"/>
+                                       </xs:sequence>
+                                       <xs:element
+                                          name="__.ipfix.observationPoint.OPType.interface.interface.IndexOrName.A__"
+                                          minOccurs="0"
+                                          maxOccurs="unbounded"
+                                          abstract="true"/>
+                                    </xs:choice>
+                                    <xs:element name="direction"
+                                       type="Direction" default="both"
+                                       minOccurs="0">
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             Direction of packets. If not applicable (e.g., in
+                                             the case of a sniffing interface in promiscuous mode), this
+                                             parameter is omitted
+                                          </xs:documentation>
+                                       </xs:annotation>
+                                    </xs:element>
+                                    <xs:element
+                                       name="__.ipfix.observationPoint.OPType.interface.interface.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                              </xs:complexType>
+                           </xs:element>
+                           <xs:element
+                              name="__.ipfix.observationPoint.OPType.interface.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                        <xs:sequence>
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:case-name>linecard</ncx:case-name>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:element name="linecard">
+                              <xs:complexType>
+                                 <xs:sequence>
+                                    <xs:choice>
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             Index or name of the linecard as stored in the
+                                             entPhysicalTable of ENTITY-MIB.
+                                          </xs:documentation>
+                                          <ncx:reference>
+                                             <ncx:text>RFC 4133.
+                                             </ncx:text>
+                                             <ncx:url>
+                                                http://www.ietf.org/rfc/rfc4133.txt
+                                             </ncx:url>
+                                          </ncx:reference>
+                                          <xs:appinfo>
+                                             <ncx:choice-name>
+                                                IndexOrName</ncx:choice-name>
+                                          </xs:appinfo>
+                                       </xs:annotation>
+                                       <xs:sequence>
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:case-name>
+                                                   entPhysicalIndex
+                                                </ncx:case-name>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                          <xs:element
+                                             name="entPhysicalIndex"
+                                             type="xs:unsignedInt"
+                                             minOccurs="0"/>
+                                          <xs:element
+                                             name="__.ipfix.observationPoint.OPType.linecard.linecard.IndexOrName.entPhysicalIndex.A__"
+                                             minOccurs="0"
+                                             maxOccurs="unbounded"
+                                             abstract="true"/>
+                                       </xs:sequence>
+                                       <xs:sequence>
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:case-name>
+                                                   entPhysicalName
+                                                </ncx:case-name>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                          <xs:element
+                                             name="entPhysicalName"
+                                             type="xs:string"
+                                             minOccurs="0"/>
+                                          <xs:element
+                                             name="__.ipfix.observationPoint.OPType.linecard.linecard.IndexOrName.entPhysicalName.A__"
+                                             minOccurs="0"
+                                             maxOccurs="unbounded"
+                                             abstract="true"/>
+                                       </xs:sequence>
+                                       <xs:element
+                                          name="__.ipfix.observationPoint.OPType.linecard.linecard.IndexOrName.A__"
+                                          minOccurs="0"
+                                          maxOccurs="unbounded"
+                                          abstract="true"/>
+                                    </xs:choice>
+                                    <xs:element name="direction"
+                                       type="Direction" default="both"
+                                       minOccurs="0">
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             Direction of packets. If not applicable (e.g., in
+                                             the case of a sniffing interface in promiscuous mode), this
+                                             parameter is omitted
+                                          </xs:documentation>
+                                       </xs:annotation>
+                                    </xs:element>
+                                    <xs:element
+                                       name="__.ipfix.observationPoint.OPType.linecard.linecard.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                              </xs:complexType>
+                           </xs:element>
+                           <xs:element
+                              name="__.ipfix.observationPoint.OPType.linecard.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                        <xs:element
+                           name="__.ipfix.observationPoint.OPType.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:choice>
+                     <xs:element name="selectionProcess" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Selection Processes in this list process packets
+                              in parallel.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType/>
+                     </xs:element>
+                     <xs:element name="__.ipfix.observationPoint.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="observationPoint_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="name"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="selectionProcess" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     Parameters of a Selection Process (i.e., Primitive
+                     Selector).
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="name" type="xs:string">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Arbitrary but unique name of the Selection
+                              Process.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="selectorId"
+                        type="xs:unsignedInt" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              If omitted, the Selector ID is assigned by the
+                              monitoring device.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:choice>
+                        <xs:annotation>
+                           <xs:documentation>
+                              See PSAMP-MIB for details about the selection
+                              methods and their parameters.
+                           </xs:documentation>
+                           <ncx:reference>
+                              <ncx:text>
+                                 draft-ietf-psamp-mib-06.
+                              </ncx:text>
+                              <ncx:url>
+                                 http://www.ietf.org/internet-drafts/draft-ietf-psamp-mib-06.
+                              </ncx:url>
+                           </ncx:reference>
+                           <xs:appinfo>
+                              <ncx:choice-name>Method</ncx:choice-name>
+                              <ncx:mandatory>true</ncx:mandatory>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:sequence>
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:case-name>selectAll</ncx:case-name>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:element name="selectAll" minOccurs="0"/>
+                           <xs:element
+                              name="__.ipfix.selectionProcess.Method.selectAll.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                        <xs:sequence>
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:case-name>sampCountBased
+                                 </ncx:case-name>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:element name="sampCountBased">
+                              <xs:complexType>
+                                 <xs:sequence>
+                                    <xs:element name="interval"
+                                       type="xs:unsignedInt"
+                                       minOccurs="0"/>
+                                    <xs:element name="spacing"
+                                       type="xs:unsignedInt"
+                                       minOccurs="0"/>
+                                    <xs:element
+                                       name="__.ipfix.selectionProcess.Method.sampCountBased.sampCountBased.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                              </xs:complexType>
+                           </xs:element>
+                           <xs:element
+                              name="__.ipfix.selectionProcess.Method.sampCountBased.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                        <xs:sequence>
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:case-name>sampTimeBased
+                                 </ncx:case-name>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:element name="sampTimeBased">
+                              <xs:complexType>
+                                 <xs:sequence>
+                                    <xs:element name="interval"
+                                       type="xs:unsignedInt"
+                                       minOccurs="0"/>
+                                    <xs:element name="spacing"
+                                       type="xs:unsignedInt"
+                                       minOccurs="0"/>
+                                    <xs:element
+                                       name="__.ipfix.selectionProcess.Method.sampTimeBased.sampTimeBased.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                              </xs:complexType>
+                           </xs:element>
+                           <xs:element
+                              name="__.ipfix.selectionProcess.Method.sampTimeBased.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                        <xs:sequence>
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:case-name>sampRandOutOfN
+                                 </ncx:case-name>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:element name="sampRandOutOfN">
+                              <xs:complexType>
+                                 <xs:sequence>
+                                    <xs:element name="population"
+                                       type="xs:unsignedInt"
+                                       minOccurs="0"/>
+                                    <xs:element name="sample"
+                                       type="xs:unsignedInt"
+                                       minOccurs="0"/>
+                                    <xs:element
+                                       name="__.ipfix.selectionProcess.Method.sampRandOutOfN.sampRandOutOfN.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                              </xs:complexType>
+                           </xs:element>
+                           <xs:element
+                              name="__.ipfix.selectionProcess.Method.sampRandOutOfN.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                        <xs:sequence>
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:case-name>sampUniProb</ncx:case-name>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:element name="sampUniProb">
+                              <xs:complexType>
+                                 <xs:sequence>
+                                    <xs:element name="probability"
+                                       type="xs:unsignedInt"
+                                       minOccurs="0">
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             The given value must be divided by
+                                             4294967295.
+                                          </xs:documentation>
+                                       </xs:annotation>
+                                    </xs:element>
+                                    <xs:element
+                                       name="__.ipfix.selectionProcess.Method.sampUniProb.sampUniProb.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                              </xs:complexType>
+                           </xs:element>
+                           <xs:element
+                              name="__.ipfix.selectionProcess.Method.sampUniProb.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                        <xs:sequence>
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:case-name>sampNonUniProb
+                                 </ncx:case-name>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:element name="sampNonUniProb">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    In PSAMP-MIB, these are OIDs.
+                                 </xs:documentation>
+                              </xs:annotation>
+                              <xs:complexType>
+                                 <xs:sequence>
+                                    <xs:element name="function"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element name="funcParam"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element
+                                       name="__.ipfix.selectionProcess.Method.sampNonUniProb.sampNonUniProb.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                              </xs:complexType>
+                           </xs:element>
+                           <xs:element
+                              name="__.ipfix.selectionProcess.Method.sampNonUniProb.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                        <xs:sequence>
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:case-name>sampFlowState
+                                 </ncx:case-name>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:element name="sampFlowState">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    In PSAMP-MIB, these are OIDs.
+                                 </xs:documentation>
+                              </xs:annotation>
+                              <xs:complexType>
+                                 <xs:sequence>
+                                    <xs:element name="function"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element name="funcParam"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element
+                                       name="__.ipfix.selectionProcess.Method.sampFlowState.sampFlowState.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                              </xs:complexType>
+                           </xs:element>
+                           <xs:element
+                              name="__.ipfix.selectionProcess.Method.sampFlowState.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                        <xs:sequence>
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:case-name>filterMatch</ncx:case-name>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:element name="filterMatch">
+                              <xs:complexType>
+                                 <xs:sequence>
+                                    <xs:element name="fieldId"
+                                       type="xs:unsignedInt"
+                                       minOccurs="0"/>
+                                    <xs:element name="startValue"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element name="stopValue"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element name="mask"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element
+                                       name="__.ipfix.selectionProcess.Method.filterMatch.filterMatch.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                              </xs:complexType>
+                           </xs:element>
+                           <xs:element
+                              name="__.ipfix.selectionProcess.Method.filterMatch.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                        <xs:sequence>
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:case-name>filterHash</ncx:case-name>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:element name="filterHash">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    In PSAMP-MIB, function and funcParam are OIDs.
+                                 </xs:documentation>
+                              </xs:annotation>
+                              <xs:complexType>
+                                 <xs:sequence>
+                                    <xs:element name="addrType"
+                                       type="inet:ip-version"
+                                       minOccurs="0"/>
+                                    <xs:element name="headerBits"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element name="payloadBytes"
+                                       type="xs:unsignedInt"
+                                       minOccurs="0"/>
+                                    <xs:element name="payloadBits"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element name="function"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element name="funcParam"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element name="inputBits"
+                                       type="xs:unsignedInt"
+                                       minOccurs="0"/>
+                                    <xs:element name="outputBits"
+                                       type="xs:unsignedInt"
+                                       minOccurs="0"/>
+                                    <xs:element name="outputMask"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element name="selection"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element
+                                       name="__.ipfix.selectionProcess.Method.filterHash.filterHash.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                              </xs:complexType>
+                           </xs:element>
+                           <xs:element
+                              name="__.ipfix.selectionProcess.Method.filterHash.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                        <xs:sequence>
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:case-name>filterRState</ncx:case-name>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:element name="filterRState">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    In PSAMP-MIB, vendorFunc is OID.
+                                 </xs:documentation>
+                              </xs:annotation>
+                              <xs:complexType>
+                                 <xs:sequence>
+                                    <xs:element name="function"
+                                       type="xs:int" minOccurs="0"/>
+                                    <xs:element name="negate"
+                                       type="xs:boolean" minOccurs="0"/>
+                                    <xs:element name="ifIndex"
+                                       type="xs:unsignedInt"
+                                       minOccurs="0">
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             Index of the interface as stored in the
+                                             ifTable of IF-MIB.
+                                          </xs:documentation>
+                                          <ncx:reference>
+                                             <ncx:text>RFC 2863.
+                                             </ncx:text>
+                                             <ncx:url>
+                                                http://www.ietf.org/rfc/rfc2863.txt
+                                             </ncx:url>
+                                          </ncx:reference>
+                                       </xs:annotation>
+                                    </xs:element>
+                                    <xs:element name="startAS"
+                                       type="inet:as-number"
+                                       minOccurs="0"/>
+                                    <xs:element name="stopAS"
+                                       type="inet:as-number"
+                                       minOccurs="0"/>
+                                    <xs:element name="vendorFunc"
+                                       type="xs:string" minOccurs="0"/>
+                                    <xs:element
+                                       name="__.ipfix.selectionProcess.Method.filterRState.filterRState.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                              </xs:complexType>
+                           </xs:element>
+                           <xs:element
+                              name="__.ipfix.selectionProcess.Method.filterRState.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                        <xs:element
+                           name="__.ipfix.selectionProcess.Method.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:choice>
+                     <xs:element name="selectionProcess" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:documentation>
+                              A Selection Process may pass selected packets or
+                              records to further Selection Processes, building Selection
+                              Sequences. All Selection Processes in this list process
+                              packets or records in parallel.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType/>
+                     </xs:element>
+                     <xs:element name="cache" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Caches in this list receive packets or records in
+                              parallel.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType/>
+                     </xs:element>
+                     <xs:element name="__.ipfix.selectionProcess.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="selectionProcess_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="name"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="cache" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     Parameters of a Cache.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="name" type="xs:string">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Arbitrary but unique name of the Cache.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="cacheType">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:mandatory>true</ncx:mandatory>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:string">
+                              <xs:enumeration value="immediate">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       Flow expiration after the first packet,
+                                       generation of Packet Records.
+                                    </xs:documentation>
+                                    <xs:appinfo>
+                                       <ncx:value>0</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="normal">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       Flow expiration after active and idle timeout,
+                                       generation of Flow Records.
+                                    </xs:documentation>
+                                    <xs:appinfo>
+                                       <ncx:value>1</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="permanent">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       No flow expiration, periodical export after
+                                       active timeout, generation of Flow Records.
+                                    </xs:documentation>
+                                    <xs:appinfo>
+                                       <ncx:value>2</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="maxRecords"
+                        type="xs:unsignedInt" minOccurs="0"/>
+                     <xs:element name="activeTimeout"
+                        type="yang:timeticks" minOccurs="0"/>
+                     <xs:element name="idleTimeout"
+                        type="yang:timeticks" minOccurs="0"/>
+                     <xs:element name="cacheLayout">
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="field" minOccurs="1"
+                                 maxOccurs="unbounded">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:ordered-by>system</ncx:ordered-by>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:complexType>
+                                    <xs:sequence>
+                                       <xs:element name="name"
+                                          type="xs:string"/>
+                                       <xs:element
+                                          name="ieEnterpriseNumber"
+                                          type="xs:unsignedInt"
+                                          minOccurs="0">
+                                          <xs:annotation>
+                                             <xs:documentation>
+                                                Omitted in the case of an IETF specified Information
+                                                Elements.
+                                             </xs:documentation>
+                                          </xs:annotation>
+                                       </xs:element>
+                                       <xs:choice>
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:choice-name>
+                                                   NameOrId</ncx:choice-name>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                          <xs:sequence>
+                                             <xs:annotation>
+                                                <xs:appinfo>
+                                                   <ncx:case-name>ieName
+                                                   </ncx:case-name>
+                                                </xs:appinfo>
+                                             </xs:annotation>
+                                             <xs:element name="ieName"
+                                                type="xs:string"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="__.ipfix.cache.cacheLayout.field.NameOrId.ieName.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                          <xs:sequence>
+                                             <xs:annotation>
+                                                <xs:appinfo>
+                                                   <ncx:case-name>ieId
+                                                   </ncx:case-name>
+                                                </xs:appinfo>
+                                             </xs:annotation>
+                                             <xs:element name="ieId"
+                                                type="xs:unsignedShort"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="__.ipfix.cache.cacheLayout.field.NameOrId.ieId.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                          <xs:element
+                                             name="__.ipfix.cache.cacheLayout.field.NameOrId.A__"
+                                             minOccurs="0"
+                                             maxOccurs="unbounded"
+                                             abstract="true"/>
+                                       </xs:choice>
+                                       <xs:element name="ieLength"
+                                          type="xs:unsignedShort"
+                                          minOccurs="0">
+                                          <xs:annotation>
+                                             <xs:documentation>
+                                                Length can be omitted if a default length exists for
+                                                the specified Information Element.
+                                             </xs:documentation>
+                                          </xs:annotation>
+                                       </xs:element>
+                                       <xs:element name="isFlowKey"
+                                          minOccurs="0"/>
+                                       <xs:element
+                                          name="__.ipfix.cache.cacheLayout.field.A__"
+                                          minOccurs="0"
+                                          maxOccurs="unbounded"
+                                          abstract="true"/>
+                                    </xs:sequence>
+                                 </xs:complexType>
+                                 <xs:key name="field_Key">
+                                    <xs:selector xpath="."/>
+                                    <xs:field xpath="name"/>
+                                 </xs:key>
+                              </xs:element>
+                              <xs:element
+                                 name="__.ipfix.cache.cacheLayout.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                     </xs:element>
+                     <xs:element name="exportingProcess" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Records are exported by all Exporting Processes in
+                              the list.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType/>
+                     </xs:element>
+                     <xs:element name="__.ipfix.cache.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="cache_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="name"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="exportingProcess" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     Parameters of an Exporting Process.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="name" type="xs:string">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Arbitrary but unique name of the Exporting
+                              Process.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="exportingProcessId"
+                        type="xs:unsignedInt" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              If omitted, the Exporting Process ID is assigned
+                              by the monitoring device.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="destination" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="name" type="xs:string"/>
+                              <xs:element name="type" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       Transport Session type according to IPFIX-MIB
+                                    </xs:documentation>
+                                    <ncx:reference>
+                                       <ncx:text>
+                                          draft-ietf-ipfix-mib-02.
+                                       </ncx:text>
+                                       <ncx:url>
+                                          http://www.ietf.org/internet-drafts/draft-ietf-ipfix-mib-02.
+                                       </ncx:url>
+                                    </ncx:reference>
+                                 </xs:annotation>
+                                 <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                       <xs:enumeration value="primary">
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:value>0</ncx:value>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                       </xs:enumeration>
+                                       <xs:enumeration
+                                          value="secondary">
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:value>1</ncx:value>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                       </xs:enumeration>
+                                       <xs:enumeration
+                                          value="duplicate">
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:value>2</ncx:value>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                       </xs:enumeration>
+                                       <xs:enumeration
+                                          value="loadBalancing">
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:value>3</ncx:value>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                       </xs:enumeration>
+                                       <xs:enumeration value="unused">
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:value>4</ncx:value>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                       </xs:enumeration>
+                                    </xs:restriction>
+                                 </xs:simpleType>
+                              </xs:element>
+                              <xs:choice>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:choice-name>
+                                          TransportProtocol
+                                       </ncx:choice-name>
+                                       <ncx:mandatory>true</ncx:mandatory>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:sequence>
+                                    <xs:annotation>
+                                       <xs:appinfo>
+                                          <ncx:case-name>sctpExport
+                                          </ncx:case-name>
+                                       </xs:appinfo>
+                                    </xs:annotation>
+                                    <xs:element name="sctpExport">
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             SCTP export parameters.
+                                          </xs:documentation>
+                                          <ncx:reference>
+                                             <ncx:text>
+                                                RFC 3758, RFC 4960.
+                                             </ncx:text>
+                                             <ncx:url>
+                                                http://www.ietf.org/rfc/rfc3758.txt
+                                             </ncx:url>
+                                          </ncx:reference>
+                                       </xs:annotation>
+                                       <xs:complexType>
+                                          <xs:sequence>
+                                             <xs:element
+                                                name="destinationIpAddress"
+                                                type="inet:ip-address">
+                                                <xs:annotation>
+                                                   <xs:appinfo>
+                                                      <ncx:mandatory>
+                                                         true</ncx:mandatory>
+                                                   </xs:appinfo>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="destinationTransportPort"
+                                                type="inet:port-number"
+                                                default="4739"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="sourceIpAddress"
+                                                type="inet:ip-address"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded">
+                                                <xs:annotation>
+                                                   <xs:documentation>
+                                                      List of eligible local IP addresses to be
+                                                      used by the SCTP endpoint. If omitted, all locally
+                                                      assigned IP addresses are used by the local endpoint.
+                                                   </xs:documentation>
+                                                   <xs:appinfo>
+                                                      <ncx:ordered-by>
+                                                         system</ncx:ordered-by>
+                                                   </xs:appinfo>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="sendBufferSize"
+                                                type="xs:unsignedInt"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="timedReliability"
+                                                type="yang:timeticks"
+                                                default="0"
+                                                minOccurs="0">
+                                                <xs:annotation>
+                                                   <xs:documentation>
+                                                      PR-SCTP lifetime for IPFIX Messages
+                                                      containing Data Sets only.
+                                                   </xs:documentation>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="numberOfStreams"
+                                                type="xs:unsignedShort"
+                                                minOccurs="0">
+                                                <xs:annotation>
+                                                   <xs:documentation>
+                                                      Number of outbound streams requested for the
+                                                      SCTP association.
+                                                   </xs:documentation>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="orderedDelivery"
+                                                type="xs:boolean"
+                                                default="true"
+                                                minOccurs="0">
+                                                <xs:annotation>
+                                                   <xs:documentation>
+                                                      Ordered delivery of IPFIX Messages
+                                                      containing Data Sets.
+                                                   </xs:documentation>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="__.ipfix.exportingProcess.destination.TransportProtocol.sctpExport.sctpExport.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                       </xs:complexType>
+                                    </xs:element>
+                                    <xs:element
+                                       name="__.ipfix.exportingProcess.destination.TransportProtocol.sctpExport.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                                 <xs:sequence>
+                                    <xs:annotation>
+                                       <xs:appinfo>
+                                          <ncx:case-name>udpExport
+                                          </ncx:case-name>
+                                       </xs:appinfo>
+                                    </xs:annotation>
+                                    <xs:element name="udpExport">
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             UDP export parameters.
+                                          </xs:documentation>
+                                       </xs:annotation>
+                                       <xs:complexType>
+                                          <xs:sequence>
+                                             <xs:element
+                                                name="destinationIpAddress"
+                                                type="inet:ip-address">
+                                                <xs:annotation>
+                                                   <xs:appinfo>
+                                                      <ncx:mandatory>
+                                                         true</ncx:mandatory>
+                                                   </xs:appinfo>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="destinationTransportPort"
+                                                type="inet:port-number"
+                                                default="4739"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="sourceIpAddress"
+                                                type="inet:ip-address"
+                                                minOccurs="0">
+                                                <xs:annotation>
+                                                   <xs:documentation>
+                                                      Source IP address. If omitted, the address
+                                                      assigned to the outgoing interface is used.
+                                                   </xs:documentation>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="sendBufferSize"
+                                                type="xs:unsignedInt"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="templateRefreshTimeout"
+                                                type="yang:timeticks"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="templateRefreshPacket"
+                                                type="xs:unsignedInt"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="optionTemplateRefreshTimeout"
+                                                type="yang:timeticks"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="optionTemplateRefreshPacket"
+                                                type="xs:unsignedInt"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="__.ipfix.exportingProcess.destination.TransportProtocol.udpExport.udpExport.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                       </xs:complexType>
+                                    </xs:element>
+                                    <xs:element
+                                       name="__.ipfix.exportingProcess.destination.TransportProtocol.udpExport.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                                 <xs:sequence>
+                                    <xs:annotation>
+                                       <xs:appinfo>
+                                          <ncx:case-name>tcpExport
+                                          </ncx:case-name>
+                                       </xs:appinfo>
+                                    </xs:annotation>
+                                    <xs:element name="tcpExport">
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             TCP export parameters.
+                                          </xs:documentation>
+                                       </xs:annotation>
+                                       <xs:complexType>
+                                          <xs:sequence>
+                                             <xs:element
+                                                name="destinationIpAddress"
+                                                type="inet:ip-address">
+                                                <xs:annotation>
+                                                   <xs:appinfo>
+                                                      <ncx:mandatory>
+                                                         true</ncx:mandatory>
+                                                   </xs:appinfo>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="destinationTransportPort"
+                                                type="inet:port-number"
+                                                default="4739"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="sendBufferSize"
+                                                type="xs:unsignedInt"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="__.ipfix.exportingProcess.destination.TransportProtocol.tcpExport.tcpExport.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                       </xs:complexType>
+                                    </xs:element>
+                                    <xs:element
+                                       name="__.ipfix.exportingProcess.destination.TransportProtocol.tcpExport.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                                 <xs:sequence>
+                                    <xs:annotation>
+                                       <xs:appinfo>
+                                          <ncx:case-name>fileWriter
+                                          </ncx:case-name>
+                                       </xs:appinfo>
+                                    </xs:annotation>
+                                    <xs:element name="fileWriter">
+                                       <xs:annotation>
+                                          <xs:documentation>
+                                             File Writer parameters.
+                                          </xs:documentation>
+                                       </xs:annotation>
+                                       <xs:complexType>
+                                          <xs:sequence>
+                                             <xs:element name="uri"
+                                                type="yang:uri">
+                                                <xs:annotation>
+                                                   <xs:appinfo>
+                                                      <ncx:mandatory>
+                                                         true</ncx:mandatory>
+                                                   </xs:appinfo>
+                                                </xs:annotation>
+                                             </xs:element>
+                                             <xs:element
+                                                name="__.ipfix.exportingProcess.destination.TransportProtocol.fileWriter.fileWriter.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                       </xs:complexType>
+                                    </xs:element>
+                                    <xs:element
+                                       name="__.ipfix.exportingProcess.destination.TransportProtocol.fileWriter.A__"
+                                       minOccurs="0"
+                                       maxOccurs="unbounded"
+                                       abstract="true"/>
+                                 </xs:sequence>
+                                 <xs:element
+                                    name="__.ipfix.exportingProcess.destination.TransportProtocol.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:choice>
+                              <xs:element name="option" minOccurs="0"
+                                 maxOccurs="unbounded">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:ordered-by>system</ncx:ordered-by>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:complexType>
+                                    <xs:sequence>
+                                       <xs:element name="name"
+                                          type="xs:string"/>
+                                       <xs:element name="type">
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:mandatory>true</ncx:mandatory>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                          <xs:simpleType>
+                                             <xs:restriction
+                                                base="xs:string">
+                                                <xs:enumeration
+                                                   value="meteringStatistics">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         Metering Process Statistics.
+                                                      </xs:documentation>
+                                                      <ncx:reference>
+                                                         <ncx:text>
+                                                            RFC 5101, section 4.1.
+                                                         </ncx:text>
+                                                         <ncx:url>
+                                                            http://www.ietf.org/rfc/rfc5101.txt
+                                                         </ncx:url>
+                                                      </ncx:reference>
+                                                      <xs:appinfo>
+                                                         <ncx:value>0</ncx:value>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:enumeration>
+                                                <xs:enumeration
+                                                   value="meteringReliability">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         Metering Process Reliability Statistics.
+                                                      </xs:documentation>
+                                                      <ncx:reference>
+                                                         <ncx:text>
+                                                            RFC 5101, section 4.2.
+                                                         </ncx:text>
+                                                         <ncx:url>
+                                                            http://www.ietf.org/rfc/rfc5101.txt
+                                                         </ncx:url>
+                                                      </ncx:reference>
+                                                      <xs:appinfo>
+                                                         <ncx:value>1</ncx:value>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:enumeration>
+                                                <xs:enumeration
+                                                   value="exportingReliability">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         Exporting Process Reliability
+                                                         Statistics.
+                                                      </xs:documentation>
+                                                      <ncx:reference>
+                                                         <ncx:text>
+                                                            RFC 5101, section 4.3.
+                                                         </ncx:text>
+                                                         <ncx:url>
+                                                            http://www.ietf.org/rfc/rfc5101.txt
+                                                         </ncx:url>
+                                                      </ncx:reference>
+                                                      <xs:appinfo>
+                                                         <ncx:value>2</ncx:value>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:enumeration>
+                                                <xs:enumeration
+                                                   value="flowKeys">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         Flow Keys.
+                                                      </xs:documentation>
+                                                      <ncx:reference>
+                                                         <ncx:text>
+                                                            RFC 5101, section 4.4.
+                                                         </ncx:text>
+                                                         <ncx:url>
+                                                            http://www.ietf.org/rfc/rfc5101.txt
+                                                         </ncx:url>
+                                                      </ncx:reference>
+                                                      <xs:appinfo>
+                                                         <ncx:value>3</ncx:value>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:enumeration>
+                                                <xs:enumeration
+                                                   value="selectionSequence">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         Selection Sequence and Selector Reports.
+                                                      </xs:documentation>
+                                                      <ncx:reference>
+                                                         <ncx:text>
+                                                            draft-ietf-psamp-protocol-09, section 6.5.1
+                                                            and 6.5.2.
+                                                         </ncx:text>
+                                                         <ncx:url>
+                                                            http://www.ietf.org/internet-drafts/draft-ietf-psamp-protocol-09,
+                                                         </ncx:url>
+                                                      </ncx:reference>
+                                                      <xs:appinfo>
+                                                         <ncx:value>4</ncx:value>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:enumeration>
+                                                <xs:enumeration
+                                                   value="selectionStatistics">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         Selection Sequence Statistics Report.
+                                                      </xs:documentation>
+                                                      <ncx:reference>
+                                                         <ncx:text>
+                                                            draft-ietf-psamp-protocol-09, section
+                                                            6.5.3.
+                                                         </ncx:text>
+                                                         <ncx:url>
+                                                            http://www.ietf.org/internet-drafts/draft-ietf-psamp-protocol-09,
+                                                         </ncx:url>
+                                                      </ncx:reference>
+                                                      <xs:appinfo>
+                                                         <ncx:value>5</ncx:value>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:enumeration>
+                                                <xs:enumeration
+                                                   value="accuracy">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         Accuracy Report.
+                                                      </xs:documentation>
+                                                      <ncx:reference>
+                                                         <ncx:text>
+                                                            draft-ietf-psamp-protocol-09, section
+                                                            6.5.4.
+                                                         </ncx:text>
+                                                         <ncx:url>
+                                                            http://www.ietf.org/internet-drafts/draft-ietf-psamp-protocol-09,
+                                                         </ncx:url>
+                                                      </ncx:reference>
+                                                      <xs:appinfo>
+                                                         <ncx:value>6</ncx:value>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:enumeration>
+                                                <xs:enumeration
+                                                   value="reducingRedundancy">
+                                                   <xs:annotation>
+                                                      <xs:documentation>
+                                                         Application of
+                                                         ipfix-reducing-redundancy.
+                                                      </xs:documentation>
+                                                      <ncx:reference>
+                                                         <ncx:text>
+                                                            draft-ietf-ipfix-reducing-redundancy-04
+                                                         </ncx:text>
+                                                         <ncx:url>
+                                                            http://www.ietf.org/internet-drafts/draft-ietf-ipfix-reducing-redundancy-04
+                                                         </ncx:url>
+                                                      </ncx:reference>
+                                                      <xs:appinfo>
+                                                         <ncx:value>7</ncx:value>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                </xs:enumeration>
+                                             </xs:restriction>
+                                          </xs:simpleType>
+                                       </xs:element>
+                                       <xs:element name="timeout"
+                                          type="yang:timeticks"
+                                          default="0" minOccurs="0">
+                                          <xs:annotation>
+                                             <xs:documentation>
+                                                Time interval for exporting option data.
+                                             </xs:documentation>
+                                          </xs:annotation>
+                                       </xs:element>
+                                       <xs:element
+                                          name="optionTemplate">
+                                          <xs:annotation>
+                                             <xs:documentation>
+                                                If no Option Template is specified, the
+                                                Exporter defines a template according to option type and
+                                                available option data.
+                                             </xs:documentation>
+                                             <xs:appinfo>
+                                                <ncx:presence>
+                                                   If present, the Exporter is to use this Option
+                                                   Template to export the option data.
+                                                </ncx:presence>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                          <xs:complexType>
+                                             <xs:sequence>
+                                                <xs:element
+                                                   name="optionField"
+                                                   minOccurs="0"
+                                                   maxOccurs="unbounded">
+                                                   <xs:annotation>
+                                                      <xs:appinfo>
+                                                         <ncx:ordered-by>
+                                                            user</ncx:ordered-by>
+                                                      </xs:appinfo>
+                                                   </xs:annotation>
+                                                   <xs:complexType>
+                                                      <xs:sequence>
+                                                         <xs:element
+                                                            name="name"
+                                                            type="xs:string"/>
+                                                         <xs:element
+                                                            name="ieEnterpriseNumber"
+                                                            type="xs:unsignedInt"
+                                                            minOccurs="0">
+                                                            <xs:annotation>
+                                                               <xs:documentation>
+                                                                  Omitted in the case of an IETF specified Information
+                                                                  Elements.
+                                                               </xs:documentation>
+                                                            </xs:annotation>
+                                                         </xs:element>
+                                                         <xs:choice>
+                                                            <xs:annotation>
+                                                               <xs:appinfo>
+                                                                  <ncx:choice-name>
+                                                                     NameOrId
+                                                                  </ncx:choice-name>
+                                                               </xs:appinfo>
+                                                            </xs:annotation>
+                                                            <xs:sequence>
+                                                               <xs:annotation>
+                                                                  <xs:appinfo>
+                                                                     <ncx:case-name>
+                                                                        ieName
+                                                                     </ncx:case-name>
+                                                                  </xs:appinfo>
+                                                               </xs:annotation>
+                                                               <xs:element
+                                                                  name="ieName"
+                                                                  type="xs:string"
+                                                                  minOccurs="0"/>
+                                                               <xs:element
+                                                                  name="__.ipfix.exportingProcess.destination.option.optionTemplate.optionField.NameOrId.ieName.A__"
+                                                                  minOccurs="0"
+                                                                  maxOccurs="unbounded"
+                                                                  abstract="true"/>
+                                                            </xs:sequence>
+                                                            <xs:sequence>
+                                                               <xs:annotation>
+                                                                  <xs:appinfo>
+                                                                     <ncx:case-name>
+                                                                        ieId
+                                                                     </ncx:case-name>
+                                                                  </xs:appinfo>
+                                                               </xs:annotation>
+                                                               <xs:element
+                                                                  name="ieId"
+                                                                  type="xs:unsignedShort"
+                                                                  minOccurs="0"/>
+                                                               <xs:element
+                                                                  name="__.ipfix.exportingProcess.destination.option.optionTemplate.optionField.NameOrId.ieId.A__"
+                                                                  minOccurs="0"
+                                                                  maxOccurs="unbounded"
+                                                                  abstract="true"/>
+                                                            </xs:sequence>
+                                                            <xs:element
+                                                               name="__.ipfix.exportingProcess.destination.option.optionTemplate.optionField.NameOrId.A__"
+                                                               minOccurs="0"
+                                                               maxOccurs="unbounded"
+                                                               abstract="true"/>
+                                                         </xs:choice>
+                                                         <xs:element
+                                                            name="ieLength"
+                                                            type="xs:unsignedShort"
+                                                            minOccurs="0">
+                                                            <xs:annotation>
+                                                               <xs:documentation>
+                                                                  Length can be omitted if a default length exists for
+                                                                  the specified Information Element.
+                                                               </xs:documentation>
+                                                            </xs:annotation>
+                                                         </xs:element>
+                                                         <xs:element
+                                                            name="isScope"
+                                                            minOccurs="0"/>
+                                                         <xs:element
+                                                            name="__.ipfix.exportingProcess.destination.option.optionTemplate.optionField.A__"
+                                                            minOccurs="0"
+                                                            maxOccurs="unbounded"
+                                                            abstract="true"/>
+                                                      </xs:sequence>
+                                                   </xs:complexType>
+                                                   <xs:key
+                                                      name="optionField_Key">
+                                                      <xs:selector
+                                                         xpath="."/>
+                                                      <xs:field
+                                                         xpath="name"/>
+                                                   </xs:key>
+                                                </xs:element>
+                                                <xs:element
+                                                   name="__.ipfix.exportingProcess.destination.option.optionTemplate.A__"
+                                                   minOccurs="0"
+                                                   maxOccurs="unbounded"
+                                                   abstract="true"/>
+                                             </xs:sequence>
+                                          </xs:complexType>
+                                       </xs:element>
+                                       <xs:element
+                                          name="__.ipfix.exportingProcess.destination.option.A__"
+                                          minOccurs="0"
+                                          maxOccurs="unbounded"
+                                          abstract="true"/>
+                                    </xs:sequence>
+                                 </xs:complexType>
+                                 <xs:key name="option_Key">
+                                    <xs:selector xpath="."/>
+                                    <xs:field xpath="name"/>
+                                 </xs:key>
+                              </xs:element>
+                              <xs:element
+                                 name="__.ipfix.exportingProcess.destination.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                        <xs:key name="destination_Key">
+                           <xs:selector xpath="."/>
+                           <xs:field xpath="name"/>
+                        </xs:key>
+                     </xs:element>
+                     <xs:element name="__.ipfix.exportingProcess.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="exportingProcess_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="name"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.ipfix.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

@@ -30,7 +30,7 @@
             </ncx:url>
          </ncx:reference>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/nc-notifications.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/nc-notifications.yang
          </ncx:source>
          <ncx:organization>IETF NETCONF WG</ncx:organization>
          <ncx:contact>netconf@ops.ietf.org</ncx:contact>

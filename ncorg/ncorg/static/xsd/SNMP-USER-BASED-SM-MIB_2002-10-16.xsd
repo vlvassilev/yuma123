@@ -65,7 +65,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/SNMP-USER-BASED-SM-MIB.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/SNMP-USER-BASED-SM-MIB.yang
          </ncx:source>
          <ncx:organization>SNMPv3 Working Group</ncx:organization>
          <ncx:contact>

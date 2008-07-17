@@ -1,0 +1,936 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:netconf:state"
+   targetNamespace="urn:ietf:params:xml:ns:netconf:state"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2008-06-23"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types"
+   xmlns:inet="urn:ietf:params:xml:ns:yang:inet-types">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'netconf-state.yang' by yangdump version 0.9.3
+         
+         Module: netconf-state
+         Organization: IETF
+         Version: 2008-06-23
+      </xs:documentation>
+      <xs:documentation>
+         NETCONF Monitoring Module.
+         All elements in this module are read-only.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:reference>
+            <ncx:text>
+               draft-ietf-netconf-monitoring-02.txt
+            </ncx:text>
+            <ncx:url>
+               http://www.ietf.org/internet-drafts/draft-ietf-netconf-monitoring-02.txt
+            </ncx:url>
+         </ncx:reference>
+         <ncx:source>
+            /home/andy/swdev/trunk/netconf/modules/ietf/netconf-state.yang
+         </ncx:source>
+         <ncx:organization>IETF</ncx:organization>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2008-06-23</ncx:version>
+            <ncx:description>Initial revision.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="SessionId">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:reference>
+               <ncx:text>rfc4741</ncx:text>
+            </ncx:reference>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:restriction base="xs:unsignedInt">
+         <xs:minInclusive value="1"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="TransportType">
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="SSH">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>0</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="SSL">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>1</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="Console">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>2</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="HTTP">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>3</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="HTTPS">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>4</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="ProtocolType">
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="CLI">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>0</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="NETCONF">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>1</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="WebUI">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>2</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="SchemaFormat">
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="XSD">
+            <xs:annotation>
+               <ncx:reference>
+                  <ncx:text>
+                     W3C REC REC-xmlschema-1-20041028
+                  </ncx:text>
+               </ncx:reference>
+               <xs:appinfo>
+                  <ncx:value>0</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="YANG">
+            <xs:annotation>
+               <ncx:reference>
+                  <ncx:text>
+                     draft-ietf-netmod-yang
+                  </ncx:text>
+                  <ncx:url>
+                     http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang
+                  </ncx:url>
+               </ncx:reference>
+               <xs:appinfo>
+                  <ncx:value>1</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="RNG">
+            <xs:annotation>
+               <ncx:reference>
+                  <ncx:text>ISO/IEC 19757-2</ncx:text>
+               </ncx:reference>
+               <xs:appinfo>
+                  <ncx:value>2</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:group name="ConfigurationDatastoreType">
+      <xs:annotation>
+         <xs:documentation>
+            Enumeration of possible NETCONF datastore types.
+         </xs:documentation>
+         <ncx:reference>
+            <ncx:text>rfc4741</ncx:text>
+         </ncx:reference>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:choice>
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:choice-name>datastore</ncx:choice-name>
+                  <ncx:mandatory>true</ncx:mandatory>
+               </xs:appinfo>
+            </xs:annotation>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>running</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="running" minOccurs="0"/>
+               <xs:element name="__.datastore.running.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>candidate</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="candidate" minOccurs="0"/>
+               <xs:element name="__.datastore.candidate.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>startup</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="startup" minOccurs="0"/>
+               <xs:element name="__.datastore.startup.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:element name="__.datastore.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:choice>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:element name="netconf">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>false</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="capabilities">
+               <xs:annotation>
+                  <xs:documentation>
+                     The list of currently provided NETCONF capabilities.  This
+                     may be different than those exchanged during session setup
+                     (i.e. hello).
+                  </xs:documentation>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="capability" type="yang:uri"
+                        minOccurs="1" maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="__.netconf.capabilities.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="configurations">
+               <xs:annotation>
+                  <xs:documentation>
+                     List of NETCONF configuration datastores (e.g. running,
+                     startup, candidate) supported on this device and related
+                     information.
+                  </xs:documentation>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="configuration" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="name">
+                                 <xs:complexType>
+                                    <xs:sequence>
+                                       <xs:choice>
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:choice-name>
+                                                   datastore</ncx:choice-name>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                          <xs:sequence>
+                                             <xs:annotation>
+                                                <xs:appinfo>
+                                                   <ncx:case-name>
+                                                      running</ncx:case-name>
+                                                </xs:appinfo>
+                                             </xs:annotation>
+                                             <xs:element name="running"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="__.netconf.configurations.configuration.name.datastore.running.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                          <xs:sequence>
+                                             <xs:annotation>
+                                                <xs:appinfo>
+                                                   <ncx:case-name>
+                                                      candidate</ncx:case-name>
+                                                </xs:appinfo>
+                                             </xs:annotation>
+                                             <xs:element
+                                                name="candidate"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="__.netconf.configurations.configuration.name.datastore.candidate.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                          <xs:sequence>
+                                             <xs:annotation>
+                                                <xs:appinfo>
+                                                   <ncx:case-name>
+                                                      startup</ncx:case-name>
+                                                </xs:appinfo>
+                                             </xs:annotation>
+                                             <xs:element name="startup"
+                                                minOccurs="0"/>
+                                             <xs:element
+                                                name="__.netconf.configurations.configuration.name.datastore.startup.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                          <xs:element
+                                             name="__.netconf.configurations.configuration.name.datastore.A__"
+                                             minOccurs="0"
+                                             maxOccurs="unbounded"
+                                             abstract="true"/>
+                                       </xs:choice>
+                                       <xs:element
+                                          name="__.netconf.configurations.configuration.name.A__"
+                                          minOccurs="0"
+                                          maxOccurs="unbounded"
+                                          abstract="true"/>
+                                    </xs:sequence>
+                                 </xs:complexType>
+                              </xs:element>
+                              <xs:element name="locks">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       An indication of whether a resource is locked or
+                                       unlocked.  If locked, additional information about
+                                       the locking such as user an time stamp is provided.
+                                    </xs:documentation>
+                                 </xs:annotation>
+                                 <xs:complexType>
+                                    <xs:sequence>
+                                       <xs:choice>
+                                          <xs:annotation>
+                                             <xs:appinfo>
+                                                <ncx:choice-name>
+                                                   lockType</ncx:choice-name>
+                                             </xs:appinfo>
+                                          </xs:annotation>
+                                          <xs:sequence>
+                                             <xs:annotation>
+                                                <xs:appinfo>
+                                                   <ncx:case-name>
+                                                      globalLock
+                                                   </ncx:case-name>
+                                                </xs:appinfo>
+                                             </xs:annotation>
+                                             <xs:element
+                                                name="globalLock">
+                                                <xs:annotation>
+                                                   <xs:documentation>
+                                                      Present if the global lock is set.
+                                                   </xs:documentation>
+                                                </xs:annotation>
+                                                <xs:complexType>
+                                                   <xs:sequence>
+                                                      <xs:element
+                                                         name="lockedBySession"
+                                                         type="SessionId"
+                                                         minOccurs="0">
+                                                         <xs:annotation>
+                                                            <xs:documentation>
+                                                               The session ID of the session that has locked
+                                                               this resource.
+                                                            </xs:documentation>
+                                                         </xs:annotation>
+                                                      </xs:element>
+                                                      <xs:element
+                                                         name="lockedTime"
+                                                         type="yang:date-and-time"
+                                                         minOccurs="0">
+                                                         <xs:annotation>
+                                                            <xs:documentation>
+                                                               The date and time of when the resource was
+                                                               locked.
+                                                            </xs:documentation>
+                                                         </xs:annotation>
+                                                      </xs:element>
+                                                      <xs:element
+                                                         name="__.netconf.configurations.configuration.locks.lockType.globalLock.globalLock.A__"
+                                                         minOccurs="0"
+                                                         maxOccurs="unbounded"
+                                                         abstract="true"/>
+                                                   </xs:sequence>
+                                                </xs:complexType>
+                                             </xs:element>
+                                             <xs:element
+                                                name="__.netconf.configurations.configuration.locks.lockType.globalLock.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                          <xs:sequence>
+                                             <xs:annotation>
+                                                <xs:appinfo>
+                                                   <ncx:case-name>
+                                                      partialLocks
+                                                   </ncx:case-name>
+                                                </xs:appinfo>
+                                             </xs:annotation>
+                                             <xs:element
+                                                name="partialLocks"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded">
+                                                <xs:annotation>
+                                                   <xs:documentation>
+                                                      Present if at least one partial lock is set.
+                                                   </xs:documentation>
+                                                   <xs:appinfo>
+                                                      <ncx:ordered-by>
+                                                         system</ncx:ordered-by>
+                                                   </xs:appinfo>
+                                                </xs:annotation>
+                                                <xs:complexType>
+                                                   <xs:sequence>
+                                                      <xs:element
+                                                         name="lockId"
+                                                         type="xs:unsignedInt"/>
+                                                      <xs:element
+                                                         name="lockedBySession"
+                                                         type="SessionId"
+                                                         minOccurs="0">
+                                                         <xs:annotation>
+                                                            <xs:documentation>
+                                                               The session ID of the session that has locked
+                                                               this resource.
+                                                            </xs:documentation>
+                                                         </xs:annotation>
+                                                      </xs:element>
+                                                      <xs:element
+                                                         name="lockedTime"
+                                                         type="yang:date-and-time"
+                                                         minOccurs="0">
+                                                         <xs:annotation>
+                                                            <xs:documentation>
+                                                               The date and time of when the resource was
+                                                               locked.
+                                                            </xs:documentation>
+                                                         </xs:annotation>
+                                                      </xs:element>
+                                                      <xs:element
+                                                         name="select"
+                                                         type="xs:string"
+                                                         minOccurs="1"
+                                                         maxOccurs="unbounded">
+                                                         <xs:annotation>
+                                                            <xs:documentation>
+                                                               The xpath expression which was used to request
+                                                               the lock.
+                                                            </xs:documentation>
+                                                            <xs:appinfo>
+                                                               <ncx:ordered-by>
+                                                                  system
+                                                               </ncx:ordered-by>
+                                                            </xs:appinfo>
+                                                         </xs:annotation>
+                                                      </xs:element>
+                                                      <xs:element
+                                                         name="lockedNodes"
+                                                         type="xs:string"
+                                                         minOccurs="0"
+                                                         maxOccurs="unbounded">
+                                                         <xs:annotation>
+                                                            <xs:documentation>
+                                                               The list of instance-identifiers (i.e. the
+                                                               locked nodes).
+                                                            </xs:documentation>
+                                                            <xs:appinfo>
+                                                               <ncx:ordered-by>
+                                                                  system
+                                                               </ncx:ordered-by>
+                                                            </xs:appinfo>
+                                                         </xs:annotation>
+                                                      </xs:element>
+                                                      <xs:element
+                                                         name="__.netconf.configurations.configuration.locks.lockType.partialLocks.partialLocks.A__"
+                                                         minOccurs="0"
+                                                         maxOccurs="unbounded"
+                                                         abstract="true"/>
+                                                   </xs:sequence>
+                                                </xs:complexType>
+                                                <xs:key
+                                                   name="partialLocks_Key">
+                                                   <xs:selector
+                                                      xpath="."/>
+                                                   <xs:field
+                                                      xpath="lockId"/>
+                                                </xs:key>
+                                             </xs:element>
+                                             <xs:element
+                                                name="__.netconf.configurations.configuration.locks.lockType.partialLocks.A__"
+                                                minOccurs="0"
+                                                maxOccurs="unbounded"
+                                                abstract="true"/>
+                                          </xs:sequence>
+                                          <xs:element
+                                             name="__.netconf.configurations.configuration.locks.lockType.A__"
+                                             minOccurs="0"
+                                             maxOccurs="unbounded"
+                                             abstract="true"/>
+                                       </xs:choice>
+                                       <xs:element
+                                          name="__.netconf.configurations.configuration.locks.A__"
+                                          minOccurs="0"
+                                          maxOccurs="unbounded"
+                                          abstract="true"/>
+                                    </xs:sequence>
+                                 </xs:complexType>
+                              </xs:element>
+                              <xs:element
+                                 name="__.netconf.configurations.configuration.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                     </xs:element>
+                     <xs:element name="__.netconf.configurations.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="schemas">
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="schema" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="identifier"
+                                 type="xs:string">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       Identifier to uniquely reference the schema
+                                    </xs:documentation>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="format"
+                                 type="SchemaFormat">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       Schema language for the file/module.
+                                    </xs:documentation>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="version"
+                                 type="xs:string">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       Version of the schema supported.  Multiple versions can be
+                                       supported simultaneously.
+                                    </xs:documentation>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="namespace"
+                                 type="yang:uri" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The XML namespace defined by the data model.
+                                    </xs:documentation>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="location" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       A location from which the schema can be retrieved.  Can be
+                                       either on the network device retrievable explicitly via the
+                                       get-schema netconf operation (denoted by the value
+                                       'NETCONF') or some network location (i.e. URL).
+                                    </xs:documentation>
+                                 </xs:annotation>
+                                 <xs:simpleType>
+                                    <xs:union>
+                                       <xs:simpleType>
+                                          <xs:restriction
+                                             base="xs:string">
+                                             <xs:enumeration
+                                                value="NETCONF">
+                                                <xs:annotation>
+                                                   <xs:appinfo>
+                                                      <ncx:value>0</ncx:value>
+                                                   </xs:appinfo>
+                                                </xs:annotation>
+                                             </xs:enumeration>
+                                          </xs:restriction>
+                                       </xs:simpleType>
+                                       <xs:simpleType>
+                                          <xs:restriction
+                                             base="yang:uri"/>
+                                       </xs:simpleType>
+                                    </xs:union>
+                                 </xs:simpleType>
+                              </xs:element>
+                              <xs:element
+                                 name="__.netconf.schemas.schema.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                        <xs:key name="schema_Key">
+                           <xs:selector xpath="."/>
+                           <xs:field xpath="identifier"/>
+                           <xs:field xpath="format"/>
+                           <xs:field xpath="version"/>
+                        </xs:key>
+                     </xs:element>
+                     <xs:element name="__.netconf.schemas.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="sessions">
+               <xs:annotation>
+                  <xs:documentation>
+                     List of NETCONF sessions currently active on this device.
+                  </xs:documentation>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="session" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="sessionId"
+                                 type="SessionId"/>
+                              <xs:element name="transport"
+                                 type="TransportType" minOccurs="0"/>
+                              <xs:element name="protocol"
+                                 type="ProtocolType" minOccurs="0"/>
+                              <xs:element name="username"
+                                 type="xs:string" minOccurs="0"/>
+                              <xs:element name="sourceHost"
+                                 type="inet:host" minOccurs="0"/>
+                              <xs:element name="loginTime"
+                                 type="yang:date-and-time"
+                                 minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       Time at which the session was established.
+                                    </xs:documentation>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element
+                                 name="__.netconf.sessions.session.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                        <xs:key name="session_Key">
+                           <xs:selector xpath="."/>
+                           <xs:field xpath="sessionId"/>
+                        </xs:key>
+                     </xs:element>
+                     <xs:element name="__.netconf.sessions.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="subscriptions">
+               <xs:annotation>
+                  <xs:documentation>
+                     Contains information on the active subscriptions on the
+                     NETCONF server.  Subscriptions which have ended are not
+                     reported.
+                  </xs:documentation>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="subscription" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Information about Netconf Notification Subscriptions.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="sessionId"
+                                 type="SessionId">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The session id associated with this subscription.
+                                    </xs:documentation>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="stream"
+                                 type="xs:string" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The stream associated with this subscription.
+                                    </xs:documentation>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="filter"
+                                 type="xs:anyType" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The filters associated with this subscription.
+                                    </xs:documentation>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="startTime"
+                                 type="yang:date-and-time"
+                                 minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The startTime parameter from the create-subscription
+                                       invokation, if it was present.
+                                    </xs:documentation>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="stopTime"
+                                 type="yang:date-and-time"
+                                 minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       The stopTime parameter from the create-subscription
+                                       invokation, if it was present.
+                                    </xs:documentation>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element name="messagesSent"
+                                 type="yang:zero-based-counter32"
+                                 default="0" minOccurs="0">
+                                 <xs:annotation>
+                                    <xs:documentation>
+                                       A count of event notifications sent along
+                                       this connection since the subscription was
+                                       created.
+                                    </xs:documentation>
+                                 </xs:annotation>
+                              </xs:element>
+                              <xs:element
+                                 name="__.netconf.subscriptions.subscription.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                        <xs:key name="subscription_Key">
+                           <xs:selector xpath="."/>
+                           <xs:field xpath="sessionId"/>
+                        </xs:key>
+                     </xs:element>
+                     <xs:element name="__.netconf.subscriptions.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="statistics">
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="netconfStartTime"
+                        type="yang:date-and-time" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Date and time at which the NETCONF server process was
+                              started.  Allows for calculation of time interval for
+                              reported metrics.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="inSessions"
+                        type="yang:zero-based-counter32" default="0"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The total number of NETCONF sessions started towards the
+                              NETCONF peer.
+                              
+                               inSessions - inBadHellos = 'number of correctly started
+                              			     netconf sessions'
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="inXMLParseErrors"
+                        type="yang:zero-based-counter32" default="0"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The total number of messages that were unparsable and thus
+                              ignored.  This covers both unparsable 'hello' and 'rpc'
+                              messages.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="inBadHellos"
+                        type="yang:zero-based-counter32" default="0"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The total number of sessions silently dropped because an
+                              invalid 'hello' message was received.  This includes hello
+                              messages with a 'session-id' attribute, bad namespace, and
+                              bad capability declarations.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="inRpcs"
+                        type="yang:zero-based-counter32" default="0"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The total number of rpc requests received.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="inBadRpcs"
+                        type="yang:zero-based-counter32" default="0"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The total number of rpcs which were parsed correctly, but
+                              couldn't be serviced because they contained
+                              non-conformant XML,  e.g. missing a mandatory parameter.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="inNotSupportedRpcs"
+                        type="yang:zero-based-counter32" default="0"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The total number of rpcs which were parsed correctly, but
+                              couldn't be serviced because they were not supported by
+                              the agent.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="outRpcReplies"
+                        type="yang:zero-based-counter32" default="0"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The total number of 'rpc-reply' messages sent.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="outRpcErrors"
+                        type="yang:zero-based-counter32" default="0"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The total number of 'rpc-reply' messages with 'rpc-error'
+                               sent.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="outNotifications"
+                        type="yang:zero-based-counter32" default="0"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The total number of 'notifications' messages sent.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="__.netconf.statistics.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="__.netconf.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="get-schema" substitutionGroup="nc:rpcOperation">
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="identifier" type="xs:string">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="version" type="xs:string">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="format" type="SchemaFormat">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.get-schema.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

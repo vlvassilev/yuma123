@@ -94,7 +94,7 @@
       <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
       }
-      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2008-05-22">yang-types</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
       }
 
@@ -230,7 +230,7 @@
             }
 
             <a name="dot3StatsAlignmentErrors.161"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsAlignmentErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames received on a particular
@@ -271,7 +271,7 @@
             }
 
             <a name="dot3StatsFCSErrors.202"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsFCSErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames received on a particular
@@ -315,7 +315,7 @@
             }
 
             <a name="dot3StatsSingleCollisionFrames.246"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsSingleCollisionFrames</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames that are involved in a single
@@ -344,7 +344,7 @@
             }
 
             <a name="dot3StatsMultipleCollisionFrames.275"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsMultipleCollisionFrames</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames that are involved in more
@@ -374,7 +374,7 @@
             }
 
             <a name="dot3StatsSQETestErrors.305"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsSQETestErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of times that the SQE TEST ERROR
@@ -400,7 +400,7 @@
             }
 
             <a name="dot3StatsDeferredTransmissions.331"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsDeferredTransmissions</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames for which the first
@@ -425,7 +425,7 @@
             }
 
             <a name="dot3StatsLateCollisions.356"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsLateCollisions</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of times that a collision is
@@ -452,7 +452,7 @@
             }
 
             <a name="dot3StatsExcessiveCollisions.383"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsExcessiveCollisions</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames for which transmission on a
@@ -473,7 +473,7 @@
             }
 
             <a name="dot3StatsInternalMacTransmitErrors.404"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsInternalMacTransmitErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames for which transmission on a
@@ -514,7 +514,7 @@
             }
 
             <a name="dot3StatsCarrierSenseErrors.445"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsCarrierSenseErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of times that the carrier sense
@@ -542,7 +542,7 @@
             }
 
             <a name="dot3StatsFrameTooLongs.473"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsFrameTooLongs</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames received on a particular
@@ -579,7 +579,7 @@
             }
 
             <a name="dot3StatsInternalMacReceiveErrors.510"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsInternalMacReceiveErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames for which reception on a
@@ -620,7 +620,7 @@
             }
 
             <a name="dot3StatsEtherChipSet.551"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsEtherChipSet</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
                <span class="yang_kw">description</span>
@@ -656,7 +656,7 @@
             }
 
             <a name="dot3StatsSymbolErrors.587"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3StatsSymbolErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"For an interface operating at 100 Mb/s, the
@@ -835,7 +835,7 @@
             }
 
             <a name="dot3CollFrequencies.758"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3CollFrequencies</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of individual MAC frames for which the
@@ -898,7 +898,7 @@
             }
 
             <a name="dot3ControlInUnknownOpcodes.825"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3ControlInUnknownOpcodes</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of MAC Control frames received on this
@@ -926,7 +926,7 @@
             }
 
             <a name="dot3HCControlInUnknownOpcodes.853"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCControlInUnknownOpcodes</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of MAC Control frames received on this
@@ -1055,7 +1055,7 @@
             }
 
             <a name="dot3InPauseFrames.970"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3InPauseFrames</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of MAC Control frames received on this
@@ -1086,7 +1086,7 @@
             }
 
             <a name="dot3OutPauseFrames.1001"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3OutPauseFrames</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of MAC Control frames transmitted on
@@ -1117,7 +1117,7 @@
             }
 
             <a name="dot3HCInPauseFrames.1032"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCInPauseFrames</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of MAC Control frames received on this
@@ -1142,7 +1142,7 @@
             }
 
             <a name="dot3HCOutPauseFrames.1057"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCOutPauseFrames</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of MAC Control frames transmitted on
@@ -1184,7 +1184,7 @@
             }
 
             <a name="dot3HCStatsAlignmentErrors.1103"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsAlignmentErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames received on a particular
@@ -1219,7 +1219,7 @@
             }
 
             <a name="dot3HCStatsFCSErrors.1138"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsFCSErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames received on a particular
@@ -1256,7 +1256,7 @@
             }
 
             <a name="dot3HCStatsInternalMacTransmitErrors.1175"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsInternalMacTransmitErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames for which transmission on a
@@ -1292,7 +1292,7 @@
             }
 
             <a name="dot3HCStatsFrameTooLongs.1211"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsFrameTooLongs</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames received on a particular
@@ -1324,7 +1324,7 @@
             }
 
             <a name="dot3HCStatsInternalMacReceiveErrors.1243"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsInternalMacReceiveErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"A count of frames for which reception on a
@@ -1359,7 +1359,7 @@
             }
 
             <a name="dot3HCStatsSymbolErrors.1278"></a><span class="yang_kw">leaf</span> <span class="yang_id">dot3HCStatsSymbolErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"For an interface operating at 100 Mb/s, the

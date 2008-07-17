@@ -93,13 +93,13 @@
       <span class="yang_kw">import</span> <a href="/modules/SNMPv2-TC/1999-04-01">SNMPv2-TC</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"smiv2"</span>;
       }
-      <span class="yang_kw">import</span> <a href="/modules/inet-types/2007-10-02">inet-types</a> {
+      <span class="yang_kw">import</span> <a href="/modules/inet-types/2008-06-07">inet-types</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"inet"</span>;
       }
       <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
       }
-      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2008-05-22">yang-types</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
       }
 
@@ -316,7 +316,7 @@
 
       <a name="nlmStats.233"></a><span class="yang_kw">container</span> <span class="yang_id">nlmStats</span> {
          <a name="nlmStatsGlobalNotificationsLogged.235"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsGlobalNotificationsLogged</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -327,7 +327,7 @@
          }
 
          <a name="nlmStatsGlobalNotificationsBumped.246"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsGlobalNotificationsBumped</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -387,7 +387,7 @@
             }
 
             <a name="nlmLogTime.313"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogTime</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timestamp.249">yang:timestamp</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value of sysUpTime when the entry was placed in the log. If
@@ -476,7 +476,7 @@
             }
 
             <a name="nlmLogNotificationID.402"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogNotificationID</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The NOTIFICATION-TYPE object identifier of the Notification that
@@ -525,7 +525,7 @@
             }
 
             <a name="nlmLogVariableID.454"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableID</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span> <span class="yang_str">"The variable's object identifier."</span>;
                <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.92.1.3.2.1.2"</span>;
@@ -569,7 +569,7 @@
             }
 
             <a name="nlmLogVariableCounter32Val.481"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableCounter32Val</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value when nlmLogVariableType is 'counter32'."</span>;
@@ -585,7 +585,7 @@
             }
 
             <a name="nlmLogVariableTimeTicksVal.497"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableTimeTicksVal</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timeticks.235">yang:timeticks</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value when nlmLogVariableType is 'timeTicks'."</span>;
@@ -609,7 +609,7 @@
             }
 
             <a name="nlmLogVariableIpAddressVal.521"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableIpAddressVal</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2008-06-07#ipv4-address.138">inet:ipv4-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value when nlmLogVariableType is 'ipAddress'.
@@ -628,7 +628,7 @@
             }
 
             <a name="nlmLogVariableOidVal.540"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableOidVal</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value when nlmLogVariableType is 'objectId'."</span>;
@@ -636,7 +636,7 @@
             }
 
             <a name="nlmLogVariableCounter64Val.548"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmLogVariableCounter64Val</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value when nlmLogVariableType is 'counter64'."</span>;
@@ -658,7 +658,7 @@
       <a name="augment.570"></a><span class="yang_kw">augment</span> <a href="#nlmConfigLogEntry.102">/notification-log:nlmConfig/notification-log:nlmConfigLogEntry</a> {
          <span class="yang_kw">description</span> <span class="yang_str">"A Notification log statistics entry."</span>;
          <a name="nlmStatsLogNotificationsLogged.574"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsLogNotificationsLogged</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -667,7 +667,7 @@
          }
 
          <a name="nlmStatsLogNotificationsBumped.583"></a><span class="yang_kw">leaf</span> <span class="yang_id">nlmStatsLogNotificationsBumped</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"notifications"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>

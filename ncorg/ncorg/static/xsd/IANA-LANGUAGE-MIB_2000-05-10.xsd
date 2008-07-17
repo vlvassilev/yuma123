@@ -45,7 +45,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/IANA-LANGUAGE-MIB.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/IANA-LANGUAGE-MIB.yang
          </ncx:source>
          <ncx:organization>IANA</ncx:organization>
          <ncx:contact>

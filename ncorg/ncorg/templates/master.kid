@@ -93,6 +93,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 	  <ul>
 	    <li><a href="/database_docs">YANG&nbsp;database</a></li>
 	    <li><a href="/yangdump_manual">yangdump&nbsp;program</a></li>
+	    <li><a href="/yangdiff_manual">yangdiff&nbsp;program</a></li>
 	    <li><a href="/netconf_docs">NETCONF&nbsp;protocol</a></li>
 	    <li><a href="/yang_docs">YANG&nbsp;language</a></li>
 	  </ul>
@@ -109,7 +110,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 
     <div id="footer">
       <hr />
-      <p>YangTools 0.9.&beta;6, Copyright &#169; 2008, Andy Bierman</p>
+      <p>YangTools 0.9.3, Copyright &#169; 2008, Andy Bierman</p>
       <p>TurboGears is Copyright &#169; 2007, Kevin Dangoor</p>
     </div>
   </body>

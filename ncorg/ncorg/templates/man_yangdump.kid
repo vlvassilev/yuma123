@@ -10,7 +10,7 @@
 </head>
 <body>
 <h1 align="center">yangdump</h1>
-<h2 align="center">Version 0.9.2</h2>
+<h2 align="center">Version 0.9.3</h2>
 <a href="#NAME">NAME</a><br/>
 <a href="#SYNOPSIS">SYNOPSIS</a><br/>
 <a href="#DESCRIPTION">DESCRIPTION</a><br/>
@@ -180,10 +180,38 @@ if this parameter is present.</p>
 <tr valign="top" align="left">
 <td width="21%"></td>
 <td width="77%">
-<p>YANG or NCX source module name to validate and convert.
-Multiple instances of this parameter are allowed.
+<p>
+YANG or NCX source module name to convert.
+</p>
+<p>
+If this string represents a filespec, 
+ending with the '.yang' or '.ncx' extension,
+then only that file location will be checked.
+</p>
+<p>
+If this string represents a module name, then
+the module search path will be checked for
+a file with the module name and the '.yang' 
+or '.ncx' extension.
+</p>
+<p>
+If this string begins with a '~' character,
+then a username is expected to follow or
+a directory separator character.  If it begins
+with a '$' character, then an environment variable
+name is expected to follow.
+</p>
+<pre>
+
+      ~/some/path ==&gt; &lt;my-home-dir&gt;/some/path
+
+      ~fred/some/path ==&gt; &lt;fred-home-dir&gt;/some/path
+
+</pre>
+<p>
 The <b>subtree</b> option cannot be used if this parameter is
-present.</p>
+present.
+</p>
 </td></tr>
 </table>
 <!-- INDENTATION -->
@@ -200,19 +228,44 @@ present.</p>
 <tr valign="top" align="left">
 <td width="21%"></td>
 <td width="77%">
-<p>Path specification of the directory subtree to convert.
+<p>
+Path specification of the directory subtree to convert.
 All of the YANG and NCX source modules contained in the
-specified directory sub-tree will be processed.</p>
-<!-- INDENTATION -->
-<p>If the <b>format</b> parameter is present, then one file
-with the default name will be generated for each YANG file
-found in the sub-tree.</p>
-<!-- INDENTATION -->
-<p>Note that symbolic links are not followed during the
-directory traversal. Only real directories will be searched
-and regular files will be checked as modules. Processing
-will continue to the next file if a module contains
-errors.</p>
+specified directory sub-tree will be processed.
+</p>
+<p>
+If the 'output' parameter is present, and identifies
+an existing directory, then any translation output
+files will be generated in that directory.  If this
+parameter identifies a file, then that one file will
+be used for output.
+</p>
+<p>
+If the 'format' parameter is present, then one file
+with the default name will be generated for each
+YANG or NCX file found in the sub-tree.
+</p>
+<p>
+Note that symbolic links are not followed
+during the directory traversal.  Only real directories
+will be searched and regular files will be checked as
+modules.  Processing will continue to the next file
+if a module contains errors.
+</p>
+<p>
+If this string begins with a '~' character,
+then a username is expected to follow or
+a directory separator character.  If it begins
+with a '$' character, then an environment variable
+name is expected to follow.
+</p>
+<pre>
+
+      ~/some/path ==&gt; &lt;my-home-dir&gt;/some/path
+
+      ~fred/some/path ==&gt; &lt;fred-home-dir&gt;/some/path
+
+</pre>
 </td></tr>
 </table>
 <!-- INDENTATION -->
@@ -241,7 +294,22 @@ specified directory.</p>
 <p>If this parameter represents a file name, then the
 <b>defnames</b> parameter will be ignored, and all
 translation output will be directed to the specified
-file.</p>
+file.
+</p>
+<p>
+If this string begins with a '~' character,
+then a username is expected to follow or
+a directory separator character.  If it begins
+with a '$' character, then an environment variable
+name is expected to follow.
+</p>
+<pre>
+
+      ~/some/path ==&gt; &lt;my-home-dir&gt;/some/path
+
+      ~fred/some/path ==&gt; &lt;fred-home-dir&gt;/some/path
+
+</pre>
 </td></tr>
 </table>
 <!-- INDENTATION -->
@@ -288,10 +356,12 @@ generated.</p>
 <!-- INDENTATION -->
 <p>The following translation formats are available:</p>
 <!-- INDENTATION -->
-<pre>   xsd :  XSD 1.0
-   html:  XHTML 1.0
-   yang:  Canonical YANG  (in progress)
-   sqldb: Netconf Central database SQL output (in progress)
+<pre>   
+
+   xsd :  XSD 1.0 translation
+   html:  XHTML 1.0 translation
+   yang:  Canonical YANG translation
+   copy:  Validate and copy with a new name
 
 </pre>
 </td></tr>
@@ -334,7 +404,9 @@ the [sub]module exports, then exit. Report includes the
 following info for the specific file, not the entire module,
 if submodules are used:</p>
 <!-- INDENTATION -->
-<pre>   - [sub]module name
+<pre>   
+
+   - [sub]module name
    - version
    - source filespec
    - namespace (module only)
@@ -1103,6 +1175,11 @@ search path in order for this program to function:</p>
 	  the alternate location of these files. The <b>modpath</b>
 	  parameter does not work for these two 'bootstrap' modules.
 	</li>
+        <li>comments are not preserved in HTML or YANG output</li>
+        <li>statement order in YANG and HTML output is not completely
+    preserved beyond the very top level.  Local typedefs, 
+    local groupings, and child node objects are defined in 
+    separate namespaces, so nested relative order is not maintained </li>
       </ul>
     </td>
   </tr>
@@ -1140,7 +1217,7 @@ message if any bugs are detected at runtime:</p>
 <tr valign="top" align="left">
 <td width="10%"></td>
 <td width="89%">
-<p><b>pyang</b>(1) <b>smidump</b>(1)</p>
+<p><b>pyang</b>(1)&nbsp;<b>smidump</b>(1)&nbsp;<b>yangdiff</b>(1)</p>
 </td></tr>
 </table>
 </body>

@@ -50,7 +50,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/SNMPv2-TM.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/SNMPv2-TM.yang
          </ncx:source>
          <ncx:organization>
             IETF SNMPv3 Working Group

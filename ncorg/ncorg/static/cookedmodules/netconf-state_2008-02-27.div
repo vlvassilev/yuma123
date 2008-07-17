@@ -67,10 +67,10 @@
 
       <span class="yang_kw">prefix</span> <span class="yang_str">"ns"</span>;
 
-      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2008-05-22">yang-types</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
       }
-      <span class="yang_kw">import</span> <a href="/modules/inet-types/2007-10-02">inet-types</a> {
+      <span class="yang_kw">import</span> <a href="/modules/inet-types/2008-06-07">inet-types</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"inet"</span>;
       }
 
@@ -123,9 +123,9 @@
 
       <a name="srcIdentifier.67"></a><span class="yang_kw">typedef</span> <span class="yang_id">srcIdentifier</span> {
          <span class="yang_kw">type</span> <span class="yang_id">union</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv4-address.135">inet:ipv4-address</a></span>;
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#ipv6-address.148">inet:ipv6-address</a></span>;
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2007-10-02#domain-name.243">inet:domain-name</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2008-06-07#ipv4-address.138">inet:ipv4-address</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2008-06-07#ipv6-address.158">inet:ipv6-address</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/inet-types/2008-06-07#domain-name.262">inet:domain-name</a></span>;
             <span class="yang_kw">type</span> <span class="yang_id">string</span>;
          }
          <span class="yang_kw">description</span>
@@ -140,7 +140,7 @@
                <span class="yang_str">"List of NETCONF capabilities supported
                by this device."</span>;
             <a name="capability.86"></a><span class="yang_kw">leaf-list</span> <span class="yang_id">capability</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#uri.145">yang:uri</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#uri.148">yang:uri</a></span>;
                <span class="yang_kw">min-elements</span> <span class="yang_str">"1"</span>;
                <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
             }
@@ -174,7 +174,7 @@
                }
 
                <a name="loginTime.103"></a><span class="yang_kw">leaf</span> <span class="yang_id">loginTime</span> {
-                  <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#date-and-time.201">yang:date-and-time</a></span>;
+                  <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#date-and-time.205">yang:date-and-time</a></span>;
                }
             }  <span class="yang_cmt">// list session</span>
          }  <span class="yang_cmt">// container sessions</span>
@@ -215,7 +215,7 @@
                   }
 
                   <a name="lockedTime.132"></a><span class="yang_kw">leaf</span> <span class="yang_id">lockedTime</span> {
-                     <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#date-and-time.201">yang:date-and-time</a></span>;
+                     <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#date-and-time.205">yang:date-and-time</a></span>;
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"The date and time of when the resource was
                         locked. If the resource is currently unlocked,
@@ -251,7 +251,7 @@
                   }
 
                   <a name="messagesSent.164"></a><span class="yang_kw">leaf</span> <span class="yang_id">messagesSent</span> {
-                     <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#zero-based-counter32.52">yang:zero-based-counter32</a></span>;
+                     <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#zero-based-counter32.55">yang:zero-based-counter32</a></span>;
                      <span class="yang_kw">description</span>
                         <span class="yang_str">"A count of event notifications sent along
                         this connection since the subscription was

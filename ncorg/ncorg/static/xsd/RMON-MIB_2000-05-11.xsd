@@ -30,7 +30,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/RMON-MIB.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/RMON-MIB.yang
          </ncx:source>
          <ncx:organization>
             IETF RMON MIB Working Group

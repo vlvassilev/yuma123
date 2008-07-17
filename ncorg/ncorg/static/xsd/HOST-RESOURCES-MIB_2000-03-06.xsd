@@ -46,7 +46,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/HOST-RESOURCES-MIB.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/HOST-RESOURCES-MIB.yang
          </ncx:source>
          <ncx:organization>
             IETF Host Resources MIB Working Group

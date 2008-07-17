@@ -129,7 +129,7 @@
       <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
       }
-      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2008-05-22">yang-types</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
       }
 
@@ -285,7 +285,7 @@
             }
 
             <a name="ifSpeed.184"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifSpeed</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#gauge32.102">yang:gauge32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"An estimate of the interface's current bandwidth in bits
@@ -301,7 +301,7 @@
             }
 
             <a name="ifPhysAddress.200"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifPhysAddress</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#phys-address.268">yang:phys-address</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#phys-address.273">yang:phys-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The interface's address at its protocol sub-layer.  For
@@ -382,7 +382,7 @@
             }
 
             <a name="ifLastChange.261"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifLastChange</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timeticks.235">yang:timeticks</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The value of sysUpTime at the time the interface entered
@@ -394,7 +394,7 @@
             }
 
             <a name="ifInOctets.273"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifInOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets received on the interface,
@@ -408,7 +408,7 @@
             }
 
             <a name="ifInUcastPkts.287"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifInUcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of packets, delivered by this sub-layer to a
@@ -423,7 +423,7 @@
             }
 
             <a name="ifInNUcastPkts.302"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifInNUcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
                <span class="yang_kw">description</span>
@@ -442,7 +442,7 @@
             }
 
             <a name="ifInDiscards.321"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifInDiscards</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of inbound packets which were chosen to be
@@ -460,7 +460,7 @@
             }
 
             <a name="ifInErrors.339"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifInErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"For packet-oriented interfaces, the number of inbound
@@ -478,7 +478,7 @@
             }
 
             <a name="ifInUnknownProtos.357"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifInUnknownProtos</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"For packet-oriented interfaces, the number of packets
@@ -499,7 +499,7 @@
             }
 
             <a name="ifOutOctets.378"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifOutOctets</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of octets transmitted out of the
@@ -513,7 +513,7 @@
             }
 
             <a name="ifOutUcastPkts.392"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifOutUcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The total number of packets that higher-level protocols
@@ -529,7 +529,7 @@
             }
 
             <a name="ifOutNUcastPkts.408"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifOutNUcastPkts</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
                <span class="yang_kw">description</span>
@@ -549,7 +549,7 @@
             }
 
             <a name="ifOutDiscards.428"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifOutDiscards</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The number of outbound packets which were chosen to be
@@ -565,7 +565,7 @@
             }
 
             <a name="ifOutErrors.444"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifOutErrors</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"For packet-oriented interfaces, the number of outbound
@@ -582,7 +582,7 @@
             }
 
             <a name="ifOutQLen.461"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifOutQLen</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#gauge32.102">yang:gauge32</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
                <span class="yang_kw">description</span>
@@ -591,7 +591,7 @@
             }
 
             <a name="ifSpecific.470"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifSpecific</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
                <span class="yang_kw">description</span>
@@ -680,7 +680,7 @@
             }
 
             <a name="ifRcvAddressAddress.570"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifRcvAddressAddress</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#phys-address.268">yang:phys-address</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#phys-address.273">yang:phys-address</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"An address for which the system will accept packets/frames
@@ -726,7 +726,7 @@
          }  <span class="yang_cmt">// list ifRcvAddressEntry</span>
 
          <a name="ifTableLastChange.609"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifTableLastChange</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timeticks.235">yang:timeticks</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The value of sysUpTime at the time of the last creation or
@@ -738,7 +738,7 @@
          }
 
          <a name="ifStackLastChange.621"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifStackLastChange</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timeticks.231">yang:timeticks</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timeticks.235">yang:timeticks</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The value of sysUpTime at the time of the last change of
@@ -780,7 +780,7 @@
          }
 
          <a name="ifInMulticastPkts.667"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifInMulticastPkts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The number of packets, delivered by this sub-layer to a
@@ -797,7 +797,7 @@
          }
 
          <a name="ifInBroadcastPkts.684"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifInBroadcastPkts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The number of packets, delivered by this sub-layer to a
@@ -812,7 +812,7 @@
          }
 
          <a name="ifOutMulticastPkts.699"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifOutMulticastPkts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of packets that higher-level protocols
@@ -829,7 +829,7 @@
          }
 
          <a name="ifOutBroadcastPkts.716"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifOutBroadcastPkts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of packets that higher-level protocols
@@ -846,7 +846,7 @@
          }
 
          <a name="ifHCInOctets.733"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifHCInOctets</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of octets received on the interface,
@@ -861,7 +861,7 @@
          }
 
          <a name="ifHCInUcastPkts.748"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifHCInUcastPkts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The number of packets, delivered by this sub-layer to a
@@ -877,7 +877,7 @@
          }
 
          <a name="ifHCInMulticastPkts.764"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifHCInMulticastPkts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The number of packets, delivered by this sub-layer to a
@@ -894,7 +894,7 @@
          }
 
          <a name="ifHCInBroadcastPkts.781"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifHCInBroadcastPkts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The number of packets, delivered by this sub-layer to a
@@ -910,7 +910,7 @@
          }
 
          <a name="ifHCOutOctets.797"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifHCOutOctets</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of octets transmitted out of the
@@ -925,7 +925,7 @@
          }
 
          <a name="ifHCOutUcastPkts.812"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifHCOutUcastPkts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of packets that higher-level protocols
@@ -942,7 +942,7 @@
          }
 
          <a name="ifHCOutMulticastPkts.829"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifHCOutMulticastPkts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of packets that higher-level protocols
@@ -960,7 +960,7 @@
          }
 
          <a name="ifHCOutBroadcastPkts.847"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifHCOutBroadcastPkts</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter64.62">yang:counter64</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter64.65">yang:counter64</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The total number of packets that higher-level protocols
@@ -998,7 +998,7 @@
          }
 
          <a name="ifHighSpeed.881"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifHighSpeed</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#gauge32.102">yang:gauge32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"An estimate of the interface's current bandwidth in units
@@ -1074,7 +1074,7 @@
          }
 
          <a name="ifCounterDiscontinuityTime.957"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifCounterDiscontinuityTime</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#timestamp.244">yang:timestamp</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#timestamp.249">yang:timestamp</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The value of sysUpTime on the most recent occasion at which
@@ -1192,7 +1192,7 @@
          }
 
          <a name="ifTestCode.1061"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifTestCode</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">status</span> <span class="yang_str">"deprecated"</span>;
             <span class="yang_kw">description</span>

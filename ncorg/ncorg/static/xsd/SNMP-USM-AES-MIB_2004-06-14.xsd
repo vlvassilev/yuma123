@@ -51,7 +51,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/SNMP-USM-AES-MIB.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/SNMP-USM-AES-MIB.yang
          </ncx:source>
          <ncx:organization>IETF</ncx:organization>
          <ncx:contact>

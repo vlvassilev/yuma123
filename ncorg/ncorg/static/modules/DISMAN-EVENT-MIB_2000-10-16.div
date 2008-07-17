@@ -199,7 +199,7 @@
       <span class="yang_kw">import</span> <a href="/modules/yang-smi/2008-03-20">yang-smi</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
       }
-      <span class="yang_kw">import</span> <a href="/modules/yang-types/2007-10-02">yang-types</a> {
+      <span class="yang_kw">import</span> <a href="/modules/yang-types/2008-05-22">yang-types</a> {
          <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
       }
 
@@ -384,7 +384,7 @@
          }
 
          <a name="mteResourceSampleInstances.160"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteResourceSampleInstances</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#gauge32.102">yang:gauge32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"instances"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -394,7 +394,7 @@
          }
 
          <a name="mteResourceSampleInstancesHigh.170"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteResourceSampleInstancesHigh</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#gauge32.99">yang:gauge32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#gauge32.102">yang:gauge32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"instances"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -404,7 +404,7 @@
          }
 
          <a name="mteResourceSampleInstanceLacks.180"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteResourceSampleInstanceLacks</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"instances"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -418,7 +418,7 @@
 
       <a name="mteTrigger.193"></a><span class="yang_kw">container</span> <span class="yang_id">mteTrigger</span> {
          <a name="mteTriggerFailures.195"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteTriggerFailures</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">units</span> <span class="yang_str">"failures"</span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
@@ -551,7 +551,7 @@
             }
 
             <a name="mteTriggerValueID.324"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteTriggerValueID</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The object identifier of the MIB object to sample to see
@@ -767,7 +767,7 @@
             }
 
             <a name="mteTriggerDeltaDiscontinuityID.543"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteTriggerDeltaDiscontinuityID</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The OBJECT IDENTIFIER (OID) of a TimeTicks, TimeStamp, or
@@ -1461,7 +1461,7 @@
             }
 
             <a name="mteObjectsID.1217"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteObjectsID</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The object identifier of a MIB object to add to a
@@ -1509,7 +1509,7 @@
 
       <a name="mteEvent.1263"></a><span class="yang_kw">container</span> <span class="yang_id">mteEvent</span> {
          <a name="mteEventFailures.1265"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteEventFailures</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#counter32.25">yang:counter32</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#counter32.28">yang:counter32</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The number of times an attempt to invoke an event
@@ -1627,7 +1627,7 @@
             }
 
             <a name="mteEventNotification.1387"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteEventNotification</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The object identifier from the NOTIFICATION-TYPE for the
@@ -1695,7 +1695,7 @@
             }
 
             <a name="mteEventSetObject.1458"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteEventSetObject</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The object identifier from the MIB object to set if
@@ -1832,7 +1832,7 @@
          }
 
          <a name="mteHotOID.1595"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteHotOID</span> {
-            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
             <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
             <span class="yang_kw">description</span>
                <span class="yang_str">"The object identifier of the destination object related to the
@@ -1907,7 +1907,7 @@
 
          <a name="mteTriggerFired-mteHotOID.1671"></a><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFired-mteHotOID</span> {
             <a name="mteHotOID.1672"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteHotOID</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The object identifier of the destination object related to the
@@ -1975,7 +1975,7 @@
 
          <a name="mteTriggerRising-mteHotOID.1741"></a><span class="yang_kw">container</span> <span class="yang_id">mteTriggerRising-mteHotOID</span> {
             <a name="mteHotOID.1742"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteHotOID</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The object identifier of the destination object related to the
@@ -2043,7 +2043,7 @@
 
          <a name="mteTriggerFalling-mteHotOID.1811"></a><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFalling-mteHotOID</span> {
             <a name="mteHotOID.1812"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteHotOID</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The object identifier of the destination object related to the
@@ -2116,7 +2116,7 @@
 
          <a name="mteTriggerFailure-mteHotOID.1886"></a><span class="yang_kw">container</span> <span class="yang_id">mteTriggerFailure-mteHotOID</span> {
             <a name="mteHotOID.1887"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteHotOID</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The object identifier of the destination object related to the
@@ -2190,7 +2190,7 @@
 
          <a name="mteEventSetFailure-mteHotOID.1962"></a><span class="yang_kw">container</span> <span class="yang_id">mteEventSetFailure-mteHotOID</span> {
             <a name="mteHotOID.1963"></a><span class="yang_kw">leaf</span> <span class="yang_id">mteHotOID</span> {
-               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2007-10-02#object-identifier.175">yang:object-identifier</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/yang-types/2008-05-22#object-identifier.178">yang:object-identifier</a></span>;
                <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
                <span class="yang_kw">description</span>
                   <span class="yang_str">"The object identifier of the destination object related to the

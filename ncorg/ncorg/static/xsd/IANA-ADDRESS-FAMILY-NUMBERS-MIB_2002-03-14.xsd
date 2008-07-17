@@ -29,7 +29,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/./ietf/IANA-ADDRESS-FAMILY-NUMBERS-MIB.yang
+            /home/andy/swdev/trunk/netconf/modules/ietf/IANA-ADDRESS-FAMILY-NUMBERS-MIB.yang
          </ncx:source>
          <ncx:organization>IANA</ncx:organization>
          <ncx:contact>
@@ -48,8 +48,8 @@
          <ncx:revision>
             <ncx:version>2002-03-14</ncx:version>
             <ncx:description>
-               AddressFamilyNumbers assignment 22 to
-               fibreChannelWWPN. AddressFamilyNumbers
+               AddressFamilyNumbers assignment 22 to 
+               fibreChannelWWPN. AddressFamilyNumbers 
                assignment 23 to fibreChannelWWNN.
                AddressFamilyNumers assignment 24 to gwid.
             </ncx:description>

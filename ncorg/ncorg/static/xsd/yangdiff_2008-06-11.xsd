@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://netconfcentral.com/ncx/yangdiff"
+   targetNamespace="http://netconfcentral.com/ncx/yangdiff"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2008-06-11"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:n8="http://netconfcentral.com/ncx/ncxtypes">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from NCX file 'yangdiff.ncx' by yangdump version 0.9.3
+         
+         Module: yangdiff
+         Version: 2008-06-11
+         Copyright: Copyright (C) 2008, Andy Bierman.
+         Contact: Send comments to &lt;support@netconfcentral.com&gt;.
+      </xs:documentation>
+      <xs:documentation>
+         yangdiff provides the ability to compare two revisions
+         of the same conceptual YANG module.  The entire concetual
+         data model is compared, not individual files.  This means
+         any included sub-modules will be processed as well.
+         
+         INPUT FILES
+         
+            To compare one module, use the 'old' and 'new'
+            parameters to specify YANG module files.
+         
+            To compare all the modules in a subtree, use the
+            'old' and 'new' parameters to specify a directory
+            to be searched for YANG modules to be processed.
+         
+            Unless the 'help' or 'version' parameters is entered,
+            the 'old' and 'new' parameters must be present.
+         
+         SEARCH PATH
+         
+             When a module name is entered as input, or when a
+             module or submodule name is specified in an import or include
+             statement within the file, the following search algorithm
+             is used to find the file:
+         
+             1) file is in the current directory
+             2) YANG_MODPATH environment var (or set by modpath parameter)
+             3) $HOME/modules directory
+             4) $YANG_HOME/modules directory
+             5) $YANG_INSTALL/modules directory OR
+                default install module location, '/usr/share/yang/modules'
+         
+             By default, the entire directory tree for all locations
+             (except step 1) will be searched, not just the specified
+             directory.  The 'no-subdirs' parameter can be used to
+             prevent sub-directories from being searched.
+         
+             Any directory name beginning with a dot character '.'
+             will be skipped.  Also, any directory named 'CVS' will
+             be skipped in directory searches.
+         
+         OUTPUT MODES
+         
+             By default, any comparison output will be sent to STDOUT.
+         
+             The 'output' parameter can be used to specify the
+             full filespec of the output file,  or a
+             complete directory specification to be combined
+             with the default filename (yangdiff.log).
+         
+         ERROR LOGGING
+         
+             By default, warnings and errors are sent to STDOUT.
+         
+             A log file can be specified instead with the 'log' parameter.
+             Existing log files can be reused with the 'logappend'
+             parameter, otherwise log files are overwritten.
+         
+             The logging level can be controlled with the 'log-level'
+             parameter.  The default log level is 'info'.  The
+             log-levels are additive:
+         
+                off:    suppress all errors (not recommended!)
+         	       A program return code of '1' indicates some error.
+                error:  print errors
+                warn:   print warnings
+                info:   print generally interesting trace info
+                debug:  print general debugging trace info
+                debug2: print verbose debugging trace info
+         
+         ENVIRONMENT VARIABLES
+         
+             The following optional environment variables can be used
+             to control module and data search behavior:
+         
+             HOME:  the user's home directory  (e.g., /home/andy)
+         
+             YANG_HOME:  The root of the user's YANG work directory
+         		(e.g., /home/andy/swdev/netconf)
+         
+             YANG_INSTALL:  The root of the directory that yangdiff
+         		    is installed on this system
+         		   (default is, /usr/share/yang)
+         
+             YANG_MODPATH: Colon-separated list of directories to
+         		  search for modules and submodules.
+         		  (e.g.: './workdir/modules:/home/andy/test-modules')
+         		  The 'modpath' parameter will override this
+         		  environment variable, if both are present.
+         
+         CONFIGURATION FILES
+         
+               * config file
+         	default: /etc/yangdiff.conf
+         
+             An ASCII configuration file format is supported to
+             store command line parameters.  The 'config' parameter
+             is used to specify a specific config file, otherwise
+             the default config file will be checked.
+         
+             - A hash mark until EOLN is treated as a comment
+             - All text is case-sensitive
+             - Whitespace within a line is not significant
+             - Whitespace to end a line is significant/
+               Unless the line starts a multi-line string,
+               an escaped EOLN (backslash EOLN) is needed
+               to enter a leaf on multiple lines.
+             - For parmsets that define lists, the key components
+               are listed just after the parameter name, without
+               any name,  e.g.,
+         
+         	interface eth0 {
+         	  # name = eth0 is not listed inside the braces
+         	  ifMtu 1500
+         	  ifName mySystem
+         	}
+         
+             A config file can contain any number of parameter
+             sets for different programs.  Each program
+             must have its own section, identifies by its name:
+         
+         	# this is a comment
+         	yangdiff {
+         	  log-level debug
+         	  output "~/swdev/testfiles"
+         	}
+         
+         	yangdump {
+         	  ...
+         	}
+         
+         FILES
+         
+             The following data files must be present in the module
+             search path in order for this program to function:
+         
+               * yangdiff.ncx (this file)
+         	default locations:
+         	  ~/modules/netconfcentral/yangdiff.ncx
+         	  /usr/share/yang/modules/netconfcentral/yangdiff.ncx
+         
+               * ncxtypes.ncx
+         	default locations:
+         	   ~/modules/netconfcentral/ncxtypes.ncx
+         	   /usr/share/yang/modules/netconfcentral/ncxtypes.ncx
+         
+         BUGS
+            - keyref Xpath expressions are not validated
+            - must-stmt Xpath expressions are not validated
+         
+              Internal diagnostics may generate the following
+              type of message if any bugs are detected at runtime:
+         
+              [E0]
+         	 filename.c:linenum error-number (error-msg)
+         
+              Please send a bug report to support@netconfcentral.com
+              if any messages of this type appear in the error log.
+         
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/swdev/trunk/netconf/modules/./netconfcentral/yangdiff.ncx
+         </ncx:source>
+         <ncx:contact>
+            Send comments to &lt;support@netconfcentral.com&gt;.
+         </ncx:contact>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="DiffType">
+      <xs:annotation>
+         <xs:documentation>
+            Type of comparision output requested.
+            The basic format is:
+            
+              [add/delete/modify] field-name [field-value]
+            
+            The 'terse' option will include the names
+            of the fields that are different.
+            
+               A foo  --&gt;  Added foo in new revision
+               D foo  --&gt;  Deleted foo in new revision
+               M foo  --&gt;  Modified foo in new revision
+            
+            The 'brief' option will also include the values of the
+            fields that are different.
+            
+               A foo bar --&gt;  Added foo with new value bar in new revision
+               D foo  --&gt;  Deleted foo with old value bar in new revision
+               M foo  --&gt;  Modified foo with new value bar in new revision
+            
+            The 'normal' option will generate old (-) and new (+) style
+            reports for all differences found.
+             Add:
+               + foo bar  --&gt; Added foo with new value bar in new revision
+             Delete:
+               - foo  bar --&gt;  Deleted foo with old value bar in new revision
+             Modify:
+               - foo baz  --&gt; Changed foo from old value baz
+               + foo bar  --&gt; Changed foo to new value bar
+            
+            The 'revision' option will generate the differences in
+            YANG revision-stmt format.
+            
+                 revision &lt;todays-date&gt; {
+                   description 
+            	 "
+            	   - Added import baxtypes'
+            	   - Changed contact to 'support@acme.com'
+            	   - Deleted /myobjects/first-list
+            	   - Added must to /myobjects/some/list";
+                 }  
+             
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:default>normal</ncx:default>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="terse">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>0</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="brief">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>1</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="normal">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>2</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="revision">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>3</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="DiffIndentType">
+      <xs:annotation>
+         <xs:documentation>
+            Requested indent amount.
+            Only a limited range of line indent values are allowed.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:default>3</ncx:default>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:restriction base="xs:unsignedInt">
+         <xs:maxInclusive value="9"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:complexType name="yangdiffPSType"/>
+
+   <xs:element name="yangdiffPS" type="yangdiffPSType" abstract="true"/>
+
+   <xs:complexType name="yangdiffAppType">
+      <xs:sequence>
+         <xs:element ref="yangdiffPS" minOccurs="0"
+            maxOccurs="unbounded"/>
+      </xs:sequence>
+   </xs:complexType>
+
+   <xs:complexType name="yangdiffPSType">
+      <xs:annotation>
+         <xs:documentation>
+            CLI Parameter Set for the YANG Module Compare Application.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexContent>
+         <xs:extension base="yangdiffPSType">
+            <xs:sequence>
+               <xs:element name="config" type="xs:string">
+                  <xs:annotation>
+                     <xs:documentation>
+                        The name of the configuration file to use.
+                        Any parameter except this one can be set in the config file.
+                        The default config file will be not be checked if this
+                        parameter is present.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="old" type="n8:NcModuleSpec">
+                  <xs:annotation>
+                     <xs:documentation>
+                        If this parameter indicates a filename, then it
+                        represents the YANG or NCX source module name 
+                        to compare as the older of the two revisions.
+                        
+                        If this parameter indicates a directory,
+                        then it will be used to to search for a
+                        file with the same name as identified by
+                        the 'new' parameter.
+                        
+                        This parameter must be present unless the 'help'
+                        or 'version' paraemters are used.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="new" type="n8:NcModuleSpec">
+                  <xs:annotation>
+                     <xs:documentation>
+                        If this parameter indicates a filename, then it
+                        represents the YANG or NCX source module name 
+                        to compare as the newer of the two revisions.
+                        
+                        If this parameter indicates a directory
+                        (and the 'old' parameter indicates a filename),
+                        then it will be used to to search for a
+                        file with the same name as the 'new' parameter.
+                        
+                        If the 'old' parameter identifies a directory
+                        as well (and the 'no-subdirs' parameter is present),
+                        then the modules within the 'new' directory will be 
+                        compared to files with the same name in the 'old' 
+                        directory.  If the 'no-subdirs' parameter is not
+                        present, then all sub-directories within the 'src'
+                        directory will also be checked.
+                        
+                        This parameter must be present unless the 'help'
+                        or 'version' paraemters are used.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="difftype" type="DiffType"
+                  default="normal">
+                  <xs:annotation>
+                     <xs:documentation>
+                        The type of comparision output requested.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="output" type="xs:string">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Output directory or file name to use. 
+                        The default is STDOUT if none is specified.
+                        
+                        If this parameter represents an existing directory,
+                        then the default comparision output file (yangdiff.log)
+                        will be generated in the specified directory.
+                        
+                        If this parameter represents a file name,
+                        then all comparision output will be directed
+                        to the specified file.  If the file already exists,
+                        it will be overwritten.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="help" type="xs:empty">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Print yangdiff help file and exit.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="indent" type="DiffIndentType"
+                  default="3">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Number of spaces to indent (0..9) in formatted output.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="log" type="xs:string">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Filespec for the program output file to use instead of STDOUT.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="log-append" type="xs:empty">
+                  <xs:annotation>
+                     <xs:documentation>
+                        If present, the log will be appended not over-written.
+                        If not, the log will be over-written.
+                        Only meaningful if the 'log' parameter is
+                        also present.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="log-level" type="n8:NcDebugType"
+                  default="info">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Sets the debug logging level for the program.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="modpath" type="n8:NcPathList">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Directory search path for YANG and NCX modules.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="no-header" type="xs:empty">
+                  <xs:annotation>
+                     <xs:documentation>
+                        If present, the header clauses will be skipped, and any 
+                        differences between the module headers will not be reported.
+                        Only object definitions will be compared.
+                        
+                        If missing, then header clauses will be compared,
+                        along will all the object definitions.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="no-subdirs" type="xs:empty">
+                  <xs:annotation>
+                     <xs:documentation>
+                        If present, the file search paths for modules, scripts, and data
+                        files will not include sub-directories if they exist in the
+                        specified path.
+                        
+                        If missing, then these file search paths will include
+                        sub-directories, if present.  Any directory name beginning
+                        with a dot '.' character, or named 'CVS', will be ignored.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="version" type="xs:empty">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Print yangdiff version string and exit.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:max-access>read-create</ncx:max-access>
+                     </xs:appinfo>
+                  </xs:annotation>
+               </xs:element>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="yangdiff" type="yangdiffPSType"
+      substitutionGroup="yangdiffPS"/>
+
+</xs:schema>

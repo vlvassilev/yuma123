@@ -2303,9 +2303,8 @@ status_t
 	    log_error("\nError: Invalid year string (%s)", numbuff);
 	    ncx_print_errormsg(tkc, mod, retres);
 	} else if (num.u < 1970) {
-	    res = ERR_NCX_DATE_PAST;
 	    log_warn("\nWarning: Invalid revision year (%s)", numbuff);
-	    ncx_print_errormsg(tkc, mod, retres);
+	    ncx_print_errormsg(tkc, mod, ERR_NCX_DATE_PAST);
 	} 
     }
 
@@ -2367,10 +2366,9 @@ status_t
     if (retres == NO_ERR) {
 	ret = xml_strcmp(curdate, datestr);
 	if (ret < 0) {
-	    res = ERR_NCX_DATE_FUTURE;
 	    log_warn("\nWarning: Revision date in the future (%s)",
 		     datestr);
-	    ncx_print_errormsg(tkc, mod, retres);
+	    ncx_print_errormsg(tkc, mod, ERR_NCX_DATE_FUTURE);
 	}
     }
 

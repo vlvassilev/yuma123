@@ -1057,8 +1057,12 @@ uint32
 		return 1;
 	    }
 	}
-	return type_changed(cp, &oldtypdef->def.named.typ->typdef,
-			    &newtypdef->def.named.typ->typdef);
+	return 0;
+	/*** do not look deep into named typed
+	 *** add switch to check this
+	 *** type_changed(cp, &oldtypdef->def.named.typ->typdef,
+	 ***		    &newtypdef->def.named.typ->typdef);
+         ***/
     case NCX_CL_REF:
 	return type_changed(cp, oldtypdef->def.ref.typdef,
 			    newtypdef->def.ref.typdef);

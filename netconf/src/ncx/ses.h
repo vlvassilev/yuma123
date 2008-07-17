@@ -297,4 +297,7 @@ extern void
     ses_put_extern (ses_cb_t *scb,
 		    const xmlChar *fname);
 
+extern uint64
+    ses_get_outbytes (const ses_cb_t *scb);
+
 #endif            /* _H_ses */

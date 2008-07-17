@@ -2874,7 +2874,7 @@ ncx_module_t *
     }
 
     if (*res == ERR_NCX_SKIPPED) {
-	testmod = def_reg_find_module(mod->name);
+	testmod = ncx_find_module(mod->name);
 	ncx_free_module(mod);
 	mod = testmod; 
 	if (testmod) {

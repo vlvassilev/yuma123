@@ -1,20 +1,39 @@
 ncx-module yangdiff {
   header {
     description 
-       "yangdiff provides the ability to compare two revisions
-        of the same conceptual YANG module.  The entire concetual
-        data model is compared, not individual files.  This means
-        any included sub-modules will be processed as well.
+       "yangdiff compares the semantics and syntax between 
+        two revisions of the same YANG module.  The 
+        conceptual data model is compared, not the 
+        individual files.  
+
+        For example, unless statement order is significant,
+        changing the order is not considered a change, and 
+        is not reported.  Reformatted test (whitespace changes)
+        are also not reported.
+
+        If a data type definition is changed in form,
+        but not content, then a 'modify type' message
+        will be generated, but no additional sub-fields
+        will be reported.
 
         INPUT FILES
 
            To compare one module, use the 'old' and 'new'
-           parameters to specify YANG module files.
+           parameters to specify YANG module files,
+           each with a filespec string ending with the '.yang'
+           file extension.  The filespecs must represent
+           different files.  If the 'old' parameter represents
+           a directory, then this directory will be searched
+           for the 'new' filename.
 
            To compare all the modules in a subtree, use the 
            'old' and 'new' parameters to specify a directory
            to be searched for YANG modules to be processed.
-
+           In this mode, each new module is compared to
+           a corresponding file within the 'old' subtree.
+           Also, dependency and include files
+           will be kept separate, for each subtree.
+           
            Unless the 'help' or 'version' parameters is entered, 
            the 'old' and 'new' parameters must be present.
 
@@ -25,11 +44,14 @@ ncx-module yangdiff {
             statement within the file, the following search algorithm
             is used to find the file:
 
-            1) file is in the current directory
-            2) YANG_MODPATH environment var (or set by modpath parameter)
-            3) $HOME/modules directory
-            4) $YANG_HOME/modules directory
-            5) $YANG_INSTALL/modules directory OR
+            1) if the parameter for the file that generated the
+               search request represents a subtree, search that
+               subtree first.
+            2) file is in the current directory
+            3) YANG_MODPATH environment var (or set by modpath parameter)
+            4) $HOME/modules directory
+            5) $YANG_HOME/modules directory
+            6) $YANG_INSTALL/modules directory OR
                default install module location, '/usr/share/yang/modules'
 
             By default, the entire directory tree for all locations
@@ -149,6 +171,15 @@ ncx-module yangdiff {
         BUGS
            - keyref Xpath expressions are not validated
            - must-stmt Xpath expressions are not validated
+           - sub-modules ignored in directory processing mode,
+             and module comparisons do not include sub-modules;
+             the 'unified' parameter will be added later to
+             support this feature
+           - comparison does not examine beyond the current
+             module (i.e. differences in imported modules);
+             The exception are typedef chains, which are
+             examined for semantic changes, regardless of
+             module location of the typedef.
           
              Internal diagnostics may generate the following
              type of message if any bugs are detected at runtime:
@@ -159,7 +190,7 @@ ncx-module yangdiff {
              Please send a bug report to support@netconfcentral.com
              if any messages of this type appear in the error log.
         ";
-    version "2008-06-11";
+    version "2008-07-15";
     owner ncx;
     application yangdiff;
     copyright "Copyright (C) 2008, Andy Bierman.";
@@ -174,37 +205,7 @@ ncx-module yangdiff {
 
     type DiffType {
       description
-        "Type of comparision output requested.
-         The basic format is:
-
-           [add/delete/modify] field-name [field-value]
-
-         The 'terse' option will include the names
-         of the fields that are different.
-
-            A foo  -->  Added foo in new revision
-            D foo  -->  Deleted foo in new revision
-            M foo  -->  Modified foo in new revision
-
-         The 'normal' option will also include the values of the
-         fields that are different, and provide nested context.
-
-            A foo 'bar' -->  Added foo with new value bar in new revision
-            D foo  -->  Deleted foo with old value bar in new revision
-            M foo  -->  Modified foo with new value bar in new revision
-
-         The 'revision' option will generate the differences in
-         YANG revision-stmt format.
-
-              revision <todays-date> {
-                description 
-                  \"
-                    - Added import baxtypes'
-                    - Changed contact to 'support@acme.com'
-                    - Deleted /myobjects/first-list
-                    - Added must to /myobjects/some/list\";
-              }  
-          ";
+        "Type of comparison output requested.";
       syntax { enum = { terse normal revision }; }
       default "normal";
     }
@@ -238,8 +239,10 @@ ncx-module yangdiff {
 
         parm old {
             description 
-              "If this parameter indicates a filename, then it
-               represents the YANG or NCX source module name 
+              "The older of the two revisions to compare.
+
+               If this parameter indicates a filename, then it
+               represents the YANG source module name 
                to compare as the older of the two revisions.
 
                If this parameter indicates a directory,
@@ -247,8 +250,20 @@ ncx-module yangdiff {
                file with the same name as identified by
                the 'new' parameter.
 
+               If this string begins with a '~' character,
+               then a username is expected to follow or
+               a directory separator character.  If it begins
+               with a '$' character, then an environment variable
+               name is expected to follow.
+
+                  ~/some/path ==> <my-home-dir>/some/path
+
+                  ~fred/some/path ==> <fred-home-dir>/some/path
+
+                  $workdir/some/path ==> <workdir-env-var>/some/path
+
                This parameter must be present unless the 'help'
-               or 'version' paraemters are used.";
+               or 'version' parameters are used.";
             type NcModuleSpec;
             usage optional;
         }
@@ -256,7 +271,7 @@ ncx-module yangdiff {
         parm new {
             description 
               "If this parameter indicates a filename, then it
-               represents the YANG or NCX source module name 
+               represents the YANG source module name 
                to compare as the newer of the two revisions.
 
                If this parameter indicates a directory
@@ -272,15 +287,56 @@ ncx-module yangdiff {
                present, then all sub-directories within the 'src'
                directory will also be checked.
 
+               If this string begins with a '~' character,
+               then a username is expected to follow or
+               a directory separator character.  If it begins
+               with a '$' character, then an environment variable
+               name is expected to follow.
+
+                  ~/some/path ==> <my-home-dir>/some/path
+
+                  ~fred/some/path ==> <fred-home-dir>/some/path
+ 
+                  $workdir/some/path ==> <workdir-env-var>/some/path
+
                This parameter must be present unless the 'help'
-               or 'version' paraemters are used.";
+               or 'version' parameters are used.";
             type NcModuleSpec;
             usage optional;
         }
 
         parm difftype {
             description 
-              "The type of comparision output requested.";
+              "The type of comparison output requested.
+               Allowed values are 'terse', 'normal', and 'revision'.
+
+               The basic format is:
+
+                 [add/delete/modify] field-name [field-value]
+
+              The 'terse' option will include the names
+              of the top-level fields that are different.
+
+                 A foo  -->  Added foo in new revision
+                 D foo  -->  Deleted foo in new revision
+                 M foo  -->  Modified foo in new revision (value too long)
+                 M foo from '0' to '1'  -->  Modified foo in new revision
+
+             The 'normal' option will also include any changes
+             for any nested fields or objects.  This is the default
+             option.
+
+             The 'revision' option will generate the differences report
+             in YANG revision-stmt format.  For example:
+
+              revision <todays-date> {
+                description 
+                  \"
+                    - Added import baxtypes
+                    - Changed contact to 'support@acme.com'
+                    - Modified container myobjects
+                       - Added list first-list\";
+              } ";
             type DiffType;
             usage optional;
         }
@@ -291,13 +347,26 @@ ncx-module yangdiff {
              The default is STDOUT if none is specified.
 
              If this parameter represents an existing directory,
-             then the default comparision output file (yangdiff.log)
+             then the default comparison output file (yangdiff.log)
              will be generated in the specified directory.
 
              If this parameter represents a file name,
-             then all comparision output will be directed
+             then all comparison output will be directed
              to the specified file.  If the file already exists,
-             it will be overwritten.";
+             it will be overwritten.
+
+             If this string begins with a '~' character,
+             then a username is expected to follow or
+             a directory separator character.  If it begins
+             with a '$' character, then an environment variable
+             name is expected to follow.
+
+                ~/some/path ==> <my-home-dir>/some/path
+
+                ~fred/some/path ==> <fred-home-dir>/some/path
+
+                $workdir/some/path ==> <workdir-env-var>/some/path";
+
           type string;
           usage optional;
         }

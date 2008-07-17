@@ -305,14 +305,18 @@ static status_t
     res = ps_get_parmval(ps, NCX_EL_LOG, &val);
     if (res == NO_ERR) {
 	cp->logfilename = VAL_STR(val);
+	cp->full_logfilename = ncx_get_source(VAL_STR(val));
+	if (!cp->full_logfilename) {
+	    return ERR_INTERNAL_MEM;
+	}
     }
     if (ps_find_parm(ps, NCX_EL_LOGAPPEND)) {
 	cp->logappend = TRUE;
     }
 
     /* try to open the log file if requested */
-    if (cp->logfilename) {
-	res = log_open((const char *)cp->logfilename,
+    if (cp->full_logfilename) {
+	res = log_open((const char *)cp->full_logfilename,
 		       cp->logappend, FALSE);
 	if (res != NO_ERR) {
 	    return res;
@@ -424,11 +428,11 @@ static status_t
     }
 
     /* output parameter */
-    parm = ps_find_parm(ps, YANGDUMP_PARM_OUTPUT);
-    if (parm) {
+    res = ps_get_parmval(ps, YANGDUMP_PARM_OUTPUT, &val);
+    if (res == NO_ERR) {
 	/* output -- use filename provided */
-	cp->output = (const char *)VAL_STR(parm->val);
-	cp->full_output = ncx_get_source(VAL_STR(parm->val));
+	cp->output = (const char *)VAL_STR(val);
+	cp->full_output = ncx_get_source(VAL_STR(val));
 	if (!cp->full_output) {
 	    return ERR_INTERNAL_MEM;
 	}
@@ -1187,18 +1191,29 @@ static status_t
 	}
 	return NO_ERR;
     } else if (res != NO_ERR) {
-	if (pcb && pcb->top && 
-	    (LOGINFO || (pcb->top->errors || pcb->top->warnings))) {
-	    log_info("\n*** %s: %u Errors, %u Warnings\n", 
-		     pcb->top->sourcefn,
-		     pcb->top->errors, pcb->top->warnings);
+	if (pcb && pcb->top) {
+	    if (pcb->top->errors) {
+		log_error("\n*** %s: %u Errors, %u Warnings\n", 
+			  pcb->top->sourcefn,
+			  pcb->top->errors, pcb->top->warnings);
+	    } else if (pcb->top->warnings) {
+		log_warn("\n*** %s: %u Errors, %u Warnings\n", 
+			 pcb->top->sourcefn,
+			 pcb->top->errors, pcb->top->warnings);
+	    }
 	} else {
-	    log_write("\n");
+	    /* make sure next task starts on a newline */
+	    log_error("\n");
 	}
-	if (pcb) {
-	    yang_free_pcb(pcb);
+	if (!pcb || !pcb->top || pcb->top->errors) {
+	    if (pcb) {
+		yang_free_pcb(pcb);
+	    }
+	    return res;
+	} else {
+	    /* just warnings reported */
+	    res = NO_ERR;
 	}
-	return res;
     } else if (LOGINFO && pcb && pcb->top) {
 	log_info("\n*** %s: %u Errors, %u Warnings\n", 
 		 pcb->top->sourcefn,
@@ -1247,7 +1262,7 @@ static status_t
     case NCX_CVTTYP_NONE:
 	if (ncx_any_dependency_errors(pcb->top)) {
 	    log_warn("\nWarning: one or more modules imported into '%s' "
-		     "had errors", pcb->mod->sourcefn);
+		     "had errors", pcb->top->sourcefn);
 	}
 	log_debug2("\nFile '%s' compiled without errors",
 		   pcb->top->sourcefn);
@@ -1442,7 +1457,7 @@ static status_t
     if (cp->module) {
 	m__free(cp->module);
     }
-    cp->module = strdup(fullspec);
+    cp->module = (char *)ncx_get_source((const xmlChar *)fullspec);
     if (!cp->module) {
 	return ERR_INTERNAL_MEM;
     }
@@ -1485,6 +1500,9 @@ static void
     }
     if (cvtparms.full_output) {
 	m__free(cvtparms.full_output);
+    }
+    if (cvtparms.full_logfilename) {
+	m__free(cvtparms.full_logfilename);
     }
     if (cvtparms.buff) {
 	m__free(cvtparms.buff);

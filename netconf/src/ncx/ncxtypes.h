@@ -481,6 +481,7 @@ typedef struct ncx_module_t_ {
     boolean           isyang;        /* T:YANG src F:NCX src */
     boolean           stmtmode;       /* T: save yang_stmt_t */
     boolean           diffmode;      /* T: don't use def_reg */
+    boolean           added;         /* T: don't free on err */
     status_t          status;         /* module parse result */
     uint32            errors;            /* yangdump results */
     uint32            warnings;          /* yangdump results */

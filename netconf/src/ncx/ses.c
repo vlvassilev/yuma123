@@ -1208,4 +1208,22 @@ void
 } /* ses_put_extern */
 
 
+
+/********************************************************************
+* FUNCTION ses_get_outbytes
+* 
+*  Get the session out-bytes count
+*
+* INPUTS:
+     scb == session to check
+*
+*********************************************************************/
+uint64
+    ses_get_outbytes (const ses_cb_t *scb)
+{
+    return scb->stats.out_bytes;
+
+} /* ses_get_outbytes */
+
+
 /* END file ses.c */

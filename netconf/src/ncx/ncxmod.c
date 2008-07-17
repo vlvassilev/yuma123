@@ -347,6 +347,9 @@ static status_t
 	mod = ncx_parse_from_filespec(buff, &res);
 	if (res==NO_ERR && ptyp==YANG_PT_TOP) {
 	    pcb->top = mod;
+	} else if (mod && (res != NO_ERR) && !mod->added) {
+	    ncx_free_module(mod);
+	    mod = NULL;
 	}
 	break;
     case NCXMOD_MODE_YANG:

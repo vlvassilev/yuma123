@@ -1207,7 +1207,9 @@ boolean
 	    }
 	    
 	    if (testmod->status != NO_ERR) {
-		return TRUE;
+		if (get_errtyp(testmod->status) < ERR_TYP_WARN) {
+		    return TRUE;
+		}
 	    }
 	}
     } else {
@@ -1218,12 +1220,16 @@ boolean
 
 	    testmod = ncx_find_module(imp->module);
 	    if (!testmod) {
-		/* this must be an unused import or the NCX parse would have failed */
+		/* this must be an unused import or the 
+		 * NCX parse would have failed 
+		 */
 		continue;
 	    }
 	    
 	    if (testmod->status != NO_ERR) {
-		return TRUE;
+		if (get_errtyp(testmod->status) < ERR_TYP_WARN) {
+		    return TRUE;
+		}
 	    }
 	}
     }
@@ -1757,6 +1763,7 @@ status_t
 	}
 
 	/* save the module in the module Q */
+	mod->added = TRUE;
 	dlq_enque(mod, &ncx_modQ);
     }
 
@@ -1784,6 +1791,7 @@ status_t
     ncx_add_to_modQ (ncx_module_t *mod)
 {
 
+    mod->added = TRUE;
     dlq_enque(mod, ncx_curQ);
     return NO_ERR;
 
@@ -7940,9 +7948,9 @@ ncx_errinfo_t *
 *
 * This is just a best effort to get the full spec.
 * If the full spec is greater than 1500 bytes,
-* then only the filespec will be copied, if the
-* current directory needs to be prepended to the filespec
+* then a NULL value (error) will be returned
 *
+*   - Change ./ --> cwd/
 *   - Remove ~/  --> $HOME
 *   - add trailing '/' if not present
 *
@@ -8063,7 +8071,15 @@ xmlChar *
 	    *bp++ = NCXMOD_PSCHAR;
 	}
 	xml_strcpy(bp, p);
-    } else if (*p != NCXMOD_PSCHAR) {
+    } else {
+	if (*p == NCXMOD_DOTCHAR) {
+	    if (!p[1]) {
+		p++;
+	    } else if (p[1] == NCXMOD_PSCHAR) {
+		p += 2;
+	    }
+	}
+
 	/* prepend string with current directory */
 	buff = m__getMem(DIRBUFF_SIZE);
 	if (!buff) {
@@ -8078,14 +8094,16 @@ xmlChar *
 
 	bufflen = xml_strlen(buff);
 
-	if ((bufflen + xml_strlen(fspec) + 1) >= DIRBUFF_SIZE) {
+	if ((bufflen + xml_strlen(p) + 1) >= DIRBUFF_SIZE) {
 	    SET_ERROR(ERR_BUFF_OVFL);
 	    m__free(buff);
 	    return NULL;
 	}
 
-	buff[bufflen] = NCXMOD_PSCHAR;
-	xml_strcpy(&buff[bufflen+1], fspec);
+	if (*p) {
+	    buff[bufflen] = NCXMOD_PSCHAR;
+	    xml_strcpy(&buff[bufflen+1], p);
+	}
     }
 
     return buff;

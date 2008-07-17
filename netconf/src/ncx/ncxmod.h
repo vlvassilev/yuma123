@@ -59,6 +59,8 @@ date	     init     comment
 
 #define NCXMOD_ENVCHAR '$'
 
+#define NCXMOD_DOTCHAR '.'
+
 /* file extension for NCX Modules */
 #define NCXMOD_NCX_SUFFIX         (const xmlChar *)"ncx"
 

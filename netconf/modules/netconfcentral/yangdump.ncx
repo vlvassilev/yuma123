@@ -211,7 +211,7 @@ ncx-module yangdump {
              Please send a bug report to support@netconfcentral.com
              if any messages of this type appear in the error log.
         ";
-    version "2008-04-23";
+    version "2008-07-15";
     owner ncx;
     application yangdump;
     copyright "Copyright (C) 2006-2008, Andy Bierman.";
@@ -252,7 +252,7 @@ ncx-module yangdump {
                expanded results of those clauses.
 
         cooked -- output does not include augment or uses clauses,
-               just the objects generated from thoses clauses (if any).";
+               just the objects generated from those clauses (if any).";
 
       syntax { string = { raw cooked }; }
       default "raw";
@@ -286,7 +286,29 @@ ncx-module yangdump {
         choice {
           parm module {
             description 
-              "YANG or NCX source module name to convert.";
+              "YANG or NCX source module name to convert.
+
+               If this string represents a filespec, 
+	       ending with the '.yang' or '.ncx' extension,
+	       then only that file location will be checked.
+
+               If this string represents a module name, then
+               the module search path will be checked for
+               a file with the module name and the '.yang' 
+               or '.ncx' extension.
+
+               If this string begins with a '~' character,
+               then a username is expected to follow or
+               a directory separator character.  If it begins
+               with a '$' character, then an environment variable
+               name is expected to follow.
+
+               ~/some/path ==> <my-home-dir>/some/path
+
+               ~fred/some/path ==> <fred-home-dir>/some/path
+
+               $workdir/some/path ==> <workdir-env-var>/some/path
+             ";
             type NcModuleSpecs;
             usage optional;
           }
@@ -311,7 +333,19 @@ ncx-module yangdump {
                during the directory traversal.  Only real directories
                will be searched and regular files will be checked as
                modules.  Processing will continue to the next file
-               if a module contains errors.";
+               if a module contains errors.
+
+               If this string begins with a '~' character,
+               then a username is expected to follow or
+               a directory separator character.  If it begins
+               with a '$' character, then an environment variable
+               name is expected to follow.
+
+               ~/some/path ==> <my-home-dir>/some/path
+
+               ~fred/some/path ==> <fred-home-dir>/some/path
+
+               $workdir/some/path ==> <workdir-env-var>/some/path";
             type NcModuleSpec;
             usage optional;
           }
@@ -331,7 +365,19 @@ ncx-module yangdump {
              If this parameter represents a file name,
              then the 'defnames' parameter will be ignored,
              and all translation output will be directed
-             to the specified file.";
+             to the specified file.
+
+             If this string begins with a '~' character,
+             then a username is expected to follow or
+             a directory separator character.   If it begins
+             with a '$' character, then an environment variable
+             name is expected to follow.
+
+               ~/some/path ==> <my-home-dir>/some/path
+
+               ~fred/some/path ==> <fred-home-dir>/some/path
+
+               $workdir/some/path ==> <workdir-env-var>/some/path";
           type string;
           usage optional;
         }
@@ -355,7 +401,13 @@ ncx-module yangdump {
             "Type of conversion desired, if any. If this
              parameter is missing, then no translation
              will be done, but the module will be validated,
-             and any requested reports will be generated.";
+             and any requested reports will be generated.
+
+             The following values are supported:
+                xsd  == XSD 1.0 translation
+                html == XHTML 1.0 translation
+                yang == Canonical YANG translation
+                copy == Validate and copy with a new name.";
           type FormatType;
           usage optional;
         }

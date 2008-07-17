@@ -689,6 +689,8 @@ static status_t
 	indent_out(cp);
     }
 
+    ses_putchar(cp->scb, '\n');
+
     return res;
 
 }  /* generate_diff_report */
@@ -762,6 +764,11 @@ static xmlChar *
  * 
  *  Validate and then compare one module to another
  *
+ * load in the requested 'new' module to compare
+ * if this is a subtree call, then the curnew pointer
+ * will be set, otherwise the 'new' pointer must be set
+ *
+ *
  * INPUTS:
  *    cp == parameter block to use
  *
@@ -779,16 +786,12 @@ static status_t
     skipreport = FALSE;
     cp->curindent = 0;
 
-    /* load in the requested 'new' module to compare
-     * if this is a subtree call, then the curnew pointer
-     * will be set, otherwise the 'new' pointer must be set
-     */
-    if (cp->new_isdir) {
-	ncx_set_cur_modQ(&cp->newmodQ);
-    }
+    /* force modules to be reloaded */
+    ncx_set_cur_modQ(&cp->newmodQ);
 
     newpcb = ncxmod_load_module_diff((cp->curnew) ? cp->curnew : cp->new,
-				     (cp->curnew) ? TRUE : FALSE  /* subtree mode */,
+				     /* subtree mode */
+				     (cp->curnew) ? TRUE : FALSE,
 				     FALSE  /* cp->unified */, 
 				     (cp->curnew) ? cp->full_new : NULL,
 				     &res);
@@ -798,18 +801,30 @@ static status_t
 	}
 	return NO_ERR;
     } else if (res != NO_ERR) {
-	if (newpcb && newpcb->top && 
-	    (newpcb->top->errors || newpcb->top->warnings)) {
-	    log_write("\n*** %s: %u Errors, %u Warnings\n", 
-		      newpcb->top->sourcefn,
-		      newpcb->top->errors, newpcb->top->warnings);
+	if (newpcb && newpcb->top) {
+	    if (newpcb->top->errors) {
+		log_error("\n*** %s: %u Errors, %u Warnings\n", 
+			  newpcb->top->sourcefn,
+			  newpcb->top->errors, newpcb->top->warnings);
+	    } else if (newpcb->top->warnings) {
+		log_warn("\n*** %s: %u Errors, %u Warnings\n", 
+			 newpcb->top->sourcefn,
+			 newpcb->top->errors, newpcb->top->warnings);
+	    }
 	} else {
-	    log_write("\n");   /***/
+	    /* make sure next task starts on a newline */
+	    log_error("\n");   
 	}
-	if (newpcb) {
-	    yang_free_pcb(newpcb);
+
+	if (!newpcb || !newpcb->top || newpcb->top->errors) {
+	    if (newpcb) {
+		yang_free_pcb(newpcb);
+	    }
+	    return res;
+	}  else {
+	    /* just warnings reported */
+	    res = NO_ERR;
 	}
-	return res;
     } else if (LOGDEBUG2 && newpcb && newpcb->top) {
 	log_debug2("\n*** %s: %u Errors, %u Warnings\n", 
 		   newpcb->top->sourcefn,
@@ -826,9 +841,8 @@ static status_t
 	return res;
     }
 
-    if (cp->old_isdir) {
-	ncx_set_cur_modQ(&cp->oldmodQ);
-    }
+    /* force modules to be reloaded */
+    ncx_set_cur_modQ(&cp->oldmodQ);
 
     /* load in the requested 'old' module to compare
      * if this is a subtree call, then the curnew pointer
@@ -849,19 +863,34 @@ static status_t
 	yang_free_pcb(newpcb);
 	return NO_ERR;
     } else if (res != NO_ERR) {
-	if (oldpcb && oldpcb->top &&
-	    (LOGINFO ||
-	     (oldpcb->top->errors || oldpcb->top->warnings))) {
-	    log_info("\n*** %s: %u Errors, %u Warnings\n", 
-		      oldpcb->top->sourcefn,
-		      oldpcb->top->errors, oldpcb->top->warnings);
+	if (oldpcb && oldpcb->top) {
+	    if (oldpcb->top->errors) {
+		log_error("\n*** %s: %u Errors, %u Warnings\n", 
+			  oldpcb->top->sourcefn,
+			  oldpcb->top->errors, oldpcb->top->warnings);
+	    } else if (oldpcb->top->warnings) {
+		log_warn("\n*** %s: %u Errors, %u Warnings\n", 
+			 oldpcb->top->sourcefn,
+			 oldpcb->top->errors, oldpcb->top->warnings);
+
+	    }
 	} else {
-	    log_write("\n");   /***/
+	    /* make sure next task starts on a newline */
+	    log_error("\n");
 	}
-	if (oldpcb) {
-	    yang_free_pcb(oldpcb);
+
+	if (!oldpcb || !oldpcb->top || oldpcb->top->errors) {
+	    if (newpcb) {
+		yang_free_pcb(newpcb);
+	    }
+	    if (oldpcb) {
+		yang_free_pcb(oldpcb);
+	    }
+	    return res;
+	}  else {
+	    /* just warnings reported */
+	    res = NO_ERR;
 	}
-	yang_free_pcb(newpcb);
 	return res;
     } else if (LOGDEBUG2 && oldpcb && oldpcb->top) {
 	log_debug2("\n*** %s: %u Errors, %u Warnings\n", 
@@ -869,11 +898,10 @@ static status_t
 		   oldpcb->top->errors, oldpcb->top->warnings);
     }
 
-
     /* check if old and new files parsed okay */
     if (ncx_any_dependency_errors(newpcb->top)) {
 	log_error("\nError: one or more modules imported into new '%s' "
-		  "had errors", newpcb->mod->sourcefn);
+		  "had errors", newpcb->top->sourcefn);
 	skipreport = TRUE;
     } else {
 	cp->newmod = newpcb->top;
@@ -953,7 +981,7 @@ static status_t
     if (cp->curnew) {
 	m__free(cp->curnew);
     }
-    cp->curnew = xml_strdup((const xmlChar *)fullspec);
+    cp->curnew = ncx_get_source((const xmlChar *)fullspec);
     if (!cp->curnew) {
 	return ERR_INTERNAL_MEM;
     }
@@ -1203,7 +1231,6 @@ static status_t
 {
     psd_template_t  *psd;
     ps_parmset_t    *ps;
-    ps_parm_t       *parm;
     val_value_t     *val;
     ncx_node_t       dtyp;
     status_t         res;
@@ -1277,14 +1304,18 @@ static status_t
     res = ps_get_parmval(ps, NCX_EL_LOG, &val);
     if (res == NO_ERR) {
 	cp->logfilename = VAL_STR(val);
+	cp->full_logfilename = ncx_get_source(VAL_STR(val));
+	if (!cp->full_logfilename) {
+	    return ERR_INTERNAL_MEM;
+	}
     }
     if (ps_find_parm(ps, NCX_EL_LOGAPPEND)) {
 	cp->logappend = TRUE;
     }
 
     /* try to open the log file if requested */
-    if (cp->logfilename) {
-	res = log_open((const char *)cp->logfilename,
+    if (cp->full_logfilename) {
+	res = log_open((const char *)cp->full_logfilename,
 		       cp->logappend, FALSE);
 	if (res != NO_ERR) {
 	    return res;
@@ -1365,8 +1396,8 @@ static status_t
     }
 
     /* output parameter */
-    parm = ps_find_parm(ps, YANGDIFF_PARM_OUTPUT);
-    if (parm) {
+    res = ps_get_parmval(ps, YANGDIFF_PARM_OUTPUT, &val);
+    if (res == NO_ERR) {
 	cp->output = VAL_STR(val);
 	cp->full_output = ncx_get_source(VAL_STR(val));
 	if (!cp->full_output) {
@@ -1481,6 +1512,9 @@ static void
     if (diffparms.full_output) {
 	m__free(diffparms.full_output);
     }
+    if (diffparms.full_logfilename) {
+	m__free(diffparms.full_logfilename);
+    }
 
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
@@ -1512,6 +1546,8 @@ int
      */
     if (res == NO_ERR) {
 	log_warn("\n");   /*** producing extra blank lines ***/
+    } else {
+	pr_err(res);
     }
 
     print_errors();

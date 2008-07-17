@@ -125,6 +125,7 @@ typedef struct yangdiff_diffparms_t_ {
     xmlChar        *full_old;
     xmlChar        *full_new;
     xmlChar        *full_output;
+    xmlChar        *full_logfilename;
 
     uint32          bufflen;
     uint32          modbufflen;

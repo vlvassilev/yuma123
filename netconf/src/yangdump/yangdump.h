@@ -103,6 +103,7 @@ typedef struct yangdump_cvtparms_t_ {
 
     /* internal vars */
     xmlChar        *full_output;
+    xmlChar        *full_logfilename;
     ncx_module_t   *mod;
     char           *srcfile;
     char           *buff;

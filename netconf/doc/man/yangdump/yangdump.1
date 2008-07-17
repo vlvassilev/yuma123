@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" groff -man -Tascii foo.1
 .\"
-.TH yangdump 1 "May 1, 2008" Linux "yangdump 0.9.0"
+.TH yangdump 1 "July 17, 2008" Linux "yangdump 0.9.3"
 .SH NAME
 yangdump \- validate YANG modules and convert them to different formats
 
@@ -88,6 +88,29 @@ will be not be checked if this parameter is present.
 .IP --\fBmodule\fP=string
 YANG or NCX source module name to validate and convert.
 The \fBsubtree\fP option cannot be used if this option is present.
+
+If this string represents a filespec, 
+ending with the \fB.yang\fP or \fB.ncx\fP extension,
+then only that file location will be checked.
+
+If this string represents a module name, then
+the module search path will be checked for
+a file the \fB.yang\fP or \fB.ncx\fP extension.
+
+If this string begins with a '~' character,
+then a username is expected to follow or
+a directory separator character.  If it begins
+with a '$' character, then an environment variable
+name is expected to follow.
+.nf
+
+      ~/some/path ==> <my-home-dir>/some/path
+
+      ~fred/some/path ==> <fred-home-dir>/some/path
+
+      $workdir/some/path ==> <workdir-env-var>/some/path
+
+.fi
 .IP --\fBsubtree\fP=string
 Path specification of the directory subtree to convert.
 All of the YANG and NCX source modules contained in the
@@ -102,6 +125,21 @@ during the directory traversal.  Only real directories
 will be searched and regular files will be checked as
 modules.  Processing will continue to the next file
 if a module contains errors.
+
+If this string begins with a '~' character,
+then a username is expected to follow or
+a directory separator character.  If it begins
+with a '$' character, then an environment variable
+name is expected to follow.
+.nf
+
+      ~/some/path ==> <my-home-dir>/some/path
+
+      ~fred/some/path ==> <fred-home-dir>/some/path
+
+      $workdir/some/path ==> <workdir-env-var>/some/path
+
+.fi
 .IP --\fBoutput\fP=filespec
 Output file name to use. 
 Default is STDOUT if none specified and the
@@ -116,6 +154,21 @@ If this parameter represents a file name,
 then the \fBdefnames\fP parameter will be ignored,
 and all translation output will be directed
 to the specified file.
+
+If this string begins with a '~' character,
+then a username is expected to follow or
+a directory separator character.  If it begins
+with a '$' character, then an environment variable
+name is expected to follow.
+.nf
+
+      ~/some/path ==> <my-home-dir>/some/path
+
+      ~fred/some/path ==> <fred-home-dir>/some/path
+
+      $workdir/some/path ==> <workdir-env-var>/some/path
+
+.fi
 .IP --\fBdefnames\fP
 Output to a file with the default name for the format,
 in the current directory.
@@ -136,8 +189,8 @@ The following translation formats are available:
 
    xsd :  XSD 1.0 
    html:  XHTML 1.0 
-   yang:  Canonical YANG  (in progress)
-   sqldb: Netconf Central database SQL output (in progress)
+   yang:  Canonical YANG (in progress)
+   copy:  Validate, and copy with a new name
 
 .fi
 .IP --\fBmodversion\fP
@@ -212,6 +265,11 @@ Number of spaces to indent (0..9) in formatted output.
 The default is 3 spaces.
 .IP --\fBlog\fP=filespec
 Filespec for the log file to use instead of STDOUT.
+If this string begins with a '~' character,
+then a username is expected to follow or
+a directory separator character.  If it begins
+with a '$' character, then an environment variable
+name is expected to follow.
 .IP --\fBlog-append\fP
 If present, the log will be appended not over-written.
 If not, the log will be over-written.
@@ -501,8 +559,11 @@ search path in order for this program to function:
 .SH BUGS
   - keyref Xpath expressions are not validated
   - must-stmt Xpath expressions are not validated
-  - top-level augment from module A into module B
-    is validated but output is not generated
+  - comments are not preserved in HTML or YANG output
+  - statement order in YANG and HTML output is not completely
+    preserved beyond the very top level.  Local typedefs, 
+    local groupings, and child node objects are defined in 
+    separate namespaces, so nested relative order is not maintained 
 
 .SH DIAGNOSTICS
 Internal diagnostics may generate the following
@@ -517,3 +578,4 @@ Andy Bierman, <andy at netconfcentral dot com>
 .SH SEE ALSO
 .BR pyang (1)
 .BR smidump (1)
+.BR yangdiff (1)

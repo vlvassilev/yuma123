@@ -705,11 +705,13 @@ static status_t
 		/* load the module now instead of later for validation */
 		res = ncxmod_load_imodule(imp->module, pcb, YANG_PT_IMPORT);
 		if (res != NO_ERR) {
-		    retres = ERR_NCX_IMPORT_ERRORS;
-		    log_error("\nError: '%s' import of module '%s' failed",
-			      mod->sourcefn, imp->module);
-		    ncx_print_errormsg(tkc, mod, retres);
-		}
+		    if (!pcb || !pcb->top || pcb->top->errors) {
+			retres = ERR_NCX_IMPORT_ERRORS;
+			log_error("\nError: '%s' import of module '%s' failed",
+				  mod->sourcefn, imp->module);
+			ncx_print_errormsg(tkc, mod, retres);
+		    }
+		} /* else ignore the warnings */
 
 		/* remove the node in the import chain that 
 		 * was added before the module was loaded
@@ -1464,12 +1466,6 @@ static status_t
     if (val) {
 	/* valid date string found */
 	mod->version = xml_strdup(val);
-    } else if (!dlq_empty(&mod->revhistQ)) {
-	/* use the first (invalid format) date string */
-	rev = (ncx_revhist_t *)dlq_firstEntry(&mod->revhistQ);
-	if (rev->version) {
-	    mod->version = xml_strdup(rev->version);
-	}
     }
 
     if (!mod->version) {
@@ -2121,6 +2117,9 @@ status_t
 	res = parse_yang_module(tkc, mod, pcb, ptyp, &wasadd);
 	if (res != NO_ERR) {
 	    if (!wasadd) {
+		if (pcb->top == mod) {
+		    pcb->top = NULL;
+		}
 		ncx_free_module(mod);
 	    }
 	} else if (!wasadd && !pcb->diffmode) {
@@ -2137,12 +2136,14 @@ status_t
 		if (pcb->top == mod) {
 		    pcb->top = ncx_find_module(mod->belongs);
 		}
+	    } else if (pcb->top == mod) {
+		pcb->top = NULL;
 	    }
 	    ncx_free_module(mod);
 	    if (!pcb->top && !pcb->with_submods) {
 		res = ERR_NCX_MOD_NOT_FOUND;
 	    }
-	}
+	}  /* else the module went into an alternate mod Q */
     }
 
     fclose(fp);

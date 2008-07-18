@@ -1,0 +1,66 @@
+YangTools Change Log
+--------------------
+	
+0.9.3  2008-07-17      Andy Bierman  <andy@netconfcentral.com>
+  * Fixed print error msg bug that causes segmentation fault
+  * Fixed output for 'identifiers' report in yangdump
+  * Fixed bug in pattern checking; now checking all patterns 
+    in the type chain
+  * Fixed bug in revision-stmt warning output
+  * Fixed output of multiple component list keys 
+  * Fixed incorrect parsing of yang-version statement
+  * Fixed error exit even if the module had only warnings
+  * Cleaned up HTML and YANG nested output formatting
+  * Fixed anchor output in HTML output so empty tags
+    are not used.  This causes incorrect text formatting
+    in the construct that follows the anchor.
+  * Fixed some bugs in CSS style sheet referenced at
+	http://www.netconfcentral.com/static/css/yangdump.css
+  * Added support for filespecs that start with ~user/some/path
+    or $my_env_var/some/path
+  * Added first release of the yangdiff program
+  * Combined yangdump and yangdiff into 1 package called yangtools
+  * updated modules/yang/* to versions in
+    draft-schoenw-netmod-yang-types-01.txt
+  * updated modules/ietf/ipfix-psamp.yang to version in
+    draft-ietf-ipfix-configuration-model-00.txt
+  * updated modules/ietf/netconf-state.yang to version in
+    draft-ietf-netconf-monitoring-model-02.txt
+
+	
+0.9.2  2008-06-05      Andy Bierman  <andy@netconfcentral.com>
+
+  * Fixed bug in ncxmod.c; modpath not always processed correctly
+  * Fixed bugs in HTML output; '&' char not always escaped with &amp;
+	
+0.9.1  2008-05-15      Andy Bierman  <andy@netconfcentral.com>
+
+  * Fixed minor formatting in HTML output; actual public release
+	
+0.9.0  2008-05-07      Andy Bierman  <andy@netconfcentral.com>
+
+  * Changed name from yangto to yangdump
+  * Bugs fixed:
+	* default for uint32 = negative number not rejected
+	* CLI parameter parsing bugs and error messages fixed
+	* XSD generation for list now places 'key' leafs first
+	* Changed config true in notifications from error to warning
+	* Changed XSD extension from ##any to substitutionGroup 
+	* Now generating XSD for top-level augments
+	* module version sometimes set to wrong revision date
+	* augment-stmt was rejecting valid anyxml-stmt 
+  * Enhancements
+	* added initial HTML generation support
+	* added initial canonical YANG generation support
+	* added indent parameter
+	* renamed with-subdirs parameter to unified
+	* added html-toc parameter
+	* added html-div parameter
+	* added objview parameter
+	* added number of errors and warnings summary
+	
+0.8.4   2008-03-07      Andy Bierman  <andy@andybierman.com>
+
+  * Initial public release ; version 0.8.4
+
+	

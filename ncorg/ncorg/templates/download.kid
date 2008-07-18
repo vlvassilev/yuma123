@@ -13,23 +13,31 @@
   <body>
     <div class="download">
       <h1>Free Downloads</h1>
-      <h2>
-	<a href="${tg.url('/yangdump_manual')}">yangdump</a>
-      </h2>
+      <h2>YangTools</h2>
       <div class="tabber">
 	<div class="tabbertab">
           <h2>Summary</h2>
           <p>
-            The yangdump program is used to convert
-            YANG source files
-            to XML Schema 1.0 (XSD),
-	    Extensible HyperText Markup Language 1.0 (XHTML), 
-            and other formats.
+            The yangtools package contains tools to validate,
+            convert, and compare YANG source files.
 	  </p>
+	  <p>
+	    The latest version of the
+	    yangtools package contains the following components:
+	  </p>
+	  <ul>
+	    <li>
+	      <a href="${tg.url('/yangdump_manual')}">yangdump 0.9.3</a>
+	    </li>
+	    <li>
+	      <a href="${tg.url('/yangdiff_manual')}">yangdiff 0.1.0</a>
+	    </li>
+	    <li>modules 0.9.3</li>
+	  </ul>
 	  <p>
             It is available in binary format for the following platforms:
 	    <ul>
-	      <li>Mac OS X 10.4 (MacBook Pro, Intel)</li>
+	      <li>Mac OS X 10.4 (Intel)</li>
 	      <li>Fedora Linux fc9 (i386)</li>
 	      <li>Ubuntu Linux 8.04 (i386)  </li>
 	      <li>OpenSUSE 10.3 (i386)</li>
@@ -52,6 +60,16 @@
 	      <td><b>Release date</b></td>
 	      <td>&nbsp;</td>
 	      <td><b>Filename</b></td>
+	    </tr>
+	    <tr>
+	      <td>2008-07-17</td>
+	      <td>&nbsp;</td>
+	      <td>
+		<a href="${tg.url('/downloads/yangtools/yangtools' +
+			 '-macosx_0.9.3.tar.gz')}">
+		  yangtools-macosx_0.9.3.tar.gz
+		</a>
+	      </td>
 	    </tr>
 	    <tr>
 	      <td>2008-06-05</td>
@@ -85,6 +103,16 @@
 	      <td><b>Release date</b></td>
 	      <td>&nbsp;</td>
 	      <td><b>Filename</b></td>
+	    </tr>
+	    <tr>
+	      <td>2008-07-17</td>
+	      <td>&nbsp;</td>
+	      <td>
+		<a href="${tg.url('/downloads/yangtools/yangtools' +
+			 '-linux_0.9.3.tar.gz')}">
+		  yangtools-linux_0.9.3.tar.gz
+		</a>
+	      </td>
 	    </tr>
 	    <tr>
 	      <td>2008-06-05</td>
@@ -121,6 +149,16 @@
 	      <td><b>Filename</b></td>
 	    </tr>
 	    <tr>
+	      <td>2008-07-17</td>
+	      <td>&nbsp;</td>
+	      <td>
+		<a href="${tg.url('/downloads/yangtools/yangtools' +
+			 '-ubuntu_0.9.3.tar.gz')}">
+		  yangtools-ubuntu_0.9.3.tar.gz
+		</a>
+	      </td>
+	    </tr>
+	    <tr>
 	      <td>2008-06-10</td>
 	      <td>&nbsp;</td>
 	      <td>
@@ -143,6 +181,16 @@
 	      <td><b>Release date</b></td>
 	      <td>&nbsp;</td>
 	      <td><b>Filename</b></td>
+	    </tr>
+	    <tr>
+	      <td>2008-07-17</td>
+	      <td>&nbsp;</td>
+	      <td>
+		<a href="${tg.url('/downloads/yangtools/yangtools' +
+			 '-opensuse_0.9.3.tar.gz')}">
+		  yangtools-opensuse_0.9.3.tar.gz
+		</a>
+	      </td>
 	    </tr>
 	    <tr>
 	      <td>2008-06-15</td>
@@ -174,6 +222,15 @@
 	      <td><b>Release date</b></td>
 	      <td>&nbsp;</td>
 	      <td><b>Filename</b></td>
+	    </tr>
+	    <tr>
+	      <td>2008-07-17</td>
+	      <td>&nbsp;</td>
+	      <td>
+		<a href="${tg.url('/downloads/modules/modules_0.9.3.tar.gz')}">
+		  modules_0.9.3.tar.gz
+		</a>
+	      </td>
 	    </tr>
 	    <tr>
 	      <td>2008-06-05</td>

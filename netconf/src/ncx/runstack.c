@@ -22,34 +22,21 @@ date         init     comment
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <libssh2.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <stdio.h>
-#include <ctype.h>
 
 #ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_def_reg
-#include "def_reg.h"
 #endif
 
 #ifndef _H_log
 #include "log.h"
 #endif
 
-#ifndef _H_ncx
-#include "ncx.h"
-#endif
-
 #ifndef _H_ncxconst
 #include "ncxconst.h"
+#endif
+
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
 #endif
 
 #ifndef _H_runstack
@@ -66,6 +53,10 @@ date         init     comment
 
 #ifndef _H_var
 #include "var.h"
+#endif
+
+#ifndef _H_xml_util
+#include "xml_util.h"
 #endif
 
 

@@ -37,7 +37,7 @@ date	     init     comment
 *			 C O N S T A N T S			    *
 *								    *
 *********************************************************************/
-#define YANGDUMP_PROGVER    (const xmlChar *)"0.9.3"
+#define YANGDUMP_PROGVER    (const xmlChar *)"0.9.4"
 
 #define PROGNAME            "yangdump"
 

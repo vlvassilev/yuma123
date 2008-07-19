@@ -779,6 +779,7 @@ static status_t
     compare_one (yangdiff_diffparms_t *cp)
 {
     yang_pcb_t        *oldpcb, *newpcb;
+    const xmlChar     *logsource;
     status_t           res;
     boolean            skipreport;
 
@@ -802,14 +803,16 @@ static status_t
 	return NO_ERR;
     } else if (res != NO_ERR) {
 	if (newpcb && newpcb->top) {
+	    logsource = (LOGDEBUG) ? newpcb->top->source 
+		: newpcb->top->sourcefn;
 	    if (newpcb->top->errors) {
 		log_error("\n*** %s: %u Errors, %u Warnings\n", 
-			  newpcb->top->sourcefn,
-			  newpcb->top->errors, newpcb->top->warnings);
+			  logsource, newpcb->top->errors, 
+			  newpcb->top->warnings);
 	    } else if (newpcb->top->warnings) {
 		log_warn("\n*** %s: %u Errors, %u Warnings\n", 
-			 newpcb->top->sourcefn,
-			 newpcb->top->errors, newpcb->top->warnings);
+			 logsource, newpcb->top->errors, 
+			 newpcb->top->warnings);
 	    }
 	} else {
 	    /* make sure next task starts on a newline */
@@ -825,9 +828,9 @@ static status_t
 	    /* just warnings reported */
 	    res = NO_ERR;
 	}
-    } else if (LOGDEBUG2 && newpcb && newpcb->top) {
-	log_debug2("\n*** %s: %u Errors, %u Warnings\n", 
-		   newpcb->top->sourcefn,
+    } else if (LOGDEBUG && newpcb && newpcb->top) {
+	log_debug("\n*** %s: %u Errors, %u Warnings\n", 
+		   newpcb->top->source,
 		   newpcb->top->errors, newpcb->top->warnings);
     }
 
@@ -864,15 +867,17 @@ static status_t
 	return NO_ERR;
     } else if (res != NO_ERR) {
 	if (oldpcb && oldpcb->top) {
+	    logsource = (LOGDEBUG) ? oldpcb->top->source 
+		: oldpcb->top->sourcefn;
+
 	    if (oldpcb->top->errors) {
 		log_error("\n*** %s: %u Errors, %u Warnings\n", 
-			  oldpcb->top->sourcefn,
-			  oldpcb->top->errors, oldpcb->top->warnings);
+			  logsource, oldpcb->top->errors, 
+			  oldpcb->top->warnings);
 	    } else if (oldpcb->top->warnings) {
 		log_warn("\n*** %s: %u Errors, %u Warnings\n", 
-			 oldpcb->top->sourcefn,
-			 oldpcb->top->errors, oldpcb->top->warnings);
-
+			 logsource, oldpcb->top->errors, 
+			 oldpcb->top->warnings);
 	    }
 	} else {
 	    /* make sure next task starts on a newline */
@@ -892,10 +897,10 @@ static status_t
 	    res = NO_ERR;
 	}
 	return res;
-    } else if (LOGDEBUG2 && oldpcb && oldpcb->top) {
-	log_debug2("\n*** %s: %u Errors, %u Warnings\n", 
-		   oldpcb->top->sourcefn,
-		   oldpcb->top->errors, oldpcb->top->warnings);
+    } else if (LOGDEBUG && oldpcb && oldpcb->top) {
+	log_debug("\n*** %s: %u Errors, %u Warnings\n", 
+		  oldpcb->top->source,
+		  oldpcb->top->errors, oldpcb->top->warnings);
     }
 
     /* check if old and new files parsed okay */

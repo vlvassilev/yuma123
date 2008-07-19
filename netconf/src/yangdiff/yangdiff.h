@@ -42,7 +42,7 @@ date	     init     comment
 *								    *
 *********************************************************************/
 #define YANGDIFF_PROGNAME   (const xmlChar *)"yangdiff"
-#define YANGDIFF_PROGVER    (const xmlChar *)"0.1.0"
+#define YANGDIFF_PROGVER    (const xmlChar *)"0.1.1"
 
 #define YANGDIFF_BUFFSIZE          0x7fff
 #define YANGDIFF_DEF_MAXSIZE       20

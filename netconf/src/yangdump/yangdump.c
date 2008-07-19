@@ -1167,7 +1167,7 @@ static status_t
     val_value_t       *val;
     yang_pcb_t        *pcb;
     xmlChar           *namebuff;
-    const xmlChar     *modname;
+    const xmlChar     *modname, *logsource;
     xml_attrs_t        attrs;
     status_t           res;
 
@@ -1192,14 +1192,16 @@ static status_t
 	return NO_ERR;
     } else if (res != NO_ERR) {
 	if (pcb && pcb->top) {
+	    logsource = (LOGDEBUG) ? pcb->top->source 
+		: pcb->top->sourcefn;
 	    if (pcb->top->errors) {
 		log_error("\n*** %s: %u Errors, %u Warnings\n", 
-			  pcb->top->sourcefn,
-			  pcb->top->errors, pcb->top->warnings);
+			  logsource, pcb->top->errors, 
+			  pcb->top->warnings);
 	    } else if (pcb->top->warnings) {
 		log_warn("\n*** %s: %u Errors, %u Warnings\n", 
-			 pcb->top->sourcefn,
-			 pcb->top->errors, pcb->top->warnings);
+			 logsource, pcb->top->errors, 
+			 pcb->top->warnings);
 	    }
 	} else {
 	    /* make sure next task starts on a newline */
@@ -1215,9 +1217,11 @@ static status_t
 	    res = NO_ERR;
 	}
     } else if (LOGINFO && pcb && pcb->top) {
+	logsource = (LOGDEBUG) ? pcb->top->source 
+	    : pcb->top->sourcefn;
 	log_info("\n*** %s: %u Errors, %u Warnings\n", 
-		 pcb->top->sourcefn,
-		 pcb->top->errors, pcb->top->warnings);
+		 logsource, pcb->top->errors, 
+		 pcb->top->warnings);
     }
 
     /* check if output session needed, any reports requestd or

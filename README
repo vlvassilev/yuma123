@@ -2,7 +2,7 @@
 Yangtools WEB Site README
 --------------------------
 
-Version:  2008-05-19 (v0.9.2)
+Version:  2008-07-18 (v0.9.3)
 
 Pre-Build steps:
 
@@ -11,17 +11,20 @@ Pre-Build steps:
       - CFLAGS has -DLINUX or -DMACOSX
       - CINC has /sw/include added for MACOSX
 
-Build:
+Current Build Sequence:
 
    - cd netconf/src
-   - make
+   - make *
    - su
-   - make install
+   - make * install
    - cd ../modules
-   - make
+   - make all
    - cd ../../mysql
    - ./redo_mysql.sh
    - ./load_newmod.sh newmod.sql
+
+ * add BLD=BLD for production build w/no debug symbols
+ * add MAC=MAC for MacOSX platform
 
 Run development WEB server
    - cd ../ncorg

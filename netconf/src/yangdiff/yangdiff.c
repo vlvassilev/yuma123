@@ -903,6 +903,9 @@ static status_t
 		  oldpcb->top->errors, oldpcb->top->warnings);
     }
 
+    /* allow new modules to be available fore ncx_find_module */
+    ncx_set_cur_modQ(&cp->newmodQ);
+
     /* check if old and new files parsed okay */
     if (ncx_any_dependency_errors(newpcb->top)) {
 	log_error("\nError: one or more modules imported into new '%s' "
@@ -911,6 +914,9 @@ static status_t
     } else {
 	cp->newmod = newpcb->top;
     }
+
+    /* allow old modules to be available for ncx_find_module */
+    ncx_set_cur_modQ(&cp->oldmodQ);
 
     if (ncx_any_dependency_errors(oldpcb->top)) {
 	log_error("\nError: one or more modules imported into old '%s' "

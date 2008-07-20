@@ -225,6 +225,41 @@ runyangdump_form = widgets.ListForm(
 )
 
 
+
+#################################################################################
+#
+# Run yangdiff Validation Schemas
+#
+class RunDiffFormSchema(validators.Schema):
+    depfile = validators.FieldStorageUploadConverter(not_empty=False)
+
+class RunDiffExpandingFormSchema(validators.Schema):
+    depfiles = validators.ForEach(RunDiffFormSchema(),)
+
+#################################################################################
+#
+# Run yangdump Form Widgets
+#
+# srcfile is the 1 mandatory parameter
+oldfile = widgets.FileField(validator=validators.FieldStorageUploadConverter(not_empty=True),
+                            name='oldfile',
+                            label=_(u'Select older YANG source module\n'))
+
+newfile = widgets.FileField(validator=validators.FieldStorageUploadConverter(not_empty=True),
+                            name='newfile',
+                            label=_(u'Select newer YANG source module\n'))
+
+
+# this creates the entire run yangdump form
+runyangdiff_form = widgets.ListForm(
+    'runyangdiffform',
+    fields = [oldfile, newfile, expform],
+    action = 'runyangdiff',
+    submit_text = _(u'Submit Files'),
+    validator = RunDiffExpandingFormSchema()
+)
+
+
 #################################################################################
 #
 # form fields for the search database form
@@ -940,6 +975,80 @@ class Root(controllers.RootController):
 
         newpath = getYangResultFilename(srcfile.filename)
         redirect(newpath, report=report)
+
+
+
+    #################################################################################
+    #
+    # Run Yangdiff page
+    #
+    @expose(template="ncorg.templates.run_yangdiff")
+    def run_yangdiff(self, *args, **kw):
+
+        return dict(modmenu=moduleJumpMenu,
+                    form=runyangdiff_form)
+
+
+    @expose(template="ncorg.templates.yangdiff_results")
+    def yangdiffresults(self, srcfile, resfile, report, *args, **kw):
+
+        return dict(modmenu=moduleJumpMenu,
+                    srcfile=srcfile,
+                    resfile=resfile,
+                    report=report)
+
+
+    #################################################################################
+    #
+    # Process run yangdiff parameters
+    #
+    @expose()
+    @validate(form=runyangdiff_form)
+    @error_handler(run_yangdiff)
+    def runyangdiff(self, oldfile, newfile, depfiles=None, **kw):
+        """Handle submission from the rundiff form"""
+
+        result = deleteOldYangFiles()
+        if result != 0:
+            flash(result)
+            redirect('/')
+
+        result = copyYangFile(oldfile.filename, oldfile.file)
+        if result != "":
+            flash(result)
+            redirect('/')
+
+
+        result = copyYangFile(newfile.filename, newfile.file)
+        if result != "":
+            flash(result)
+            redirect('/')
+
+        if depfiles:
+            for depfile in depfiles:
+                dep = depfile['depfile']
+                if dep.filename:
+                    result = copyYangFile(dep.filename, dep.file)
+                    if result != "":
+                        flash(result)
+                        redirect('/')
+
+        # setup the command line to call yangdump
+        logfile = getYangLogFilename()
+        ofile = getYangInputFilename(oldfile.filename)
+        nfile = getYangInputFilename(newfile.filename)
+        modpath = getYangModpath()
+        cmdline = "/usr/bin/yangdiff --log-level=info --log=" + logfile \
+            + " --modpath=" + modpath + " --old=" + ofile + " --new=" + nfile + " --output="
+
+        cmdline += getYangOutputFilename()
+
+        log.debug("run yangdiff: " + cmdline)
+
+        yang_result = os.system(cmdline)
+
+        newpath = getYangResultFilename(oldfile.filename)
+        redirect(newpath, report=True)
 
 
 

@@ -87,6 +87,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 	<li><a href="">Online&nbsp;Tools</a>
 	  <ul>
 	    <li><a href="/run_yangdump">Run&nbsp;yangdump</a></li>
+	    <li><a href="/run_yangdiff">Run&nbsp;yangdiff</a></li>
           </ul>
 	</li>
 	<li><a href="">Documentation</a>

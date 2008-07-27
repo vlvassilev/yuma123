@@ -5,6 +5,7 @@ YangTools Change Log
 
  * Added error check for default and mandatory set
    in leaf or choice statements
+ * Fixed bug in mandatory tests for lists
 
 	
 0.9.3  2008-07-17      Andy Bierman  <andy@netconfcentral.com>

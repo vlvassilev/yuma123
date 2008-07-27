@@ -3581,6 +3581,12 @@ boolean
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
+	if (obj->def.container->presence) {
+	    return FALSE;
+	}
+	/* else drop through */
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_RPCIO:
 	for (chobj = (const obj_template_t *)
 		 dlq_firstEntry(obj->def.container->datadefQ);
 	     chobj != NULL;
@@ -3592,31 +3598,16 @@ boolean
 	}
 	return FALSE;
     case OBJ_TYP_LEAF:
-	if (obj->def.leaf->mandatory) {
-	    if (obj->def.leaf->defval) {
-		return FALSE;
-	    } else {
-		return (typ_get_default(obj->def.leaf->typdef)) ?
-		    FALSE : TRUE;
-	    }
-		
-	} else {
-	    return FALSE;
-	}
-	/*NOTREACHED*/
+	return obj->def.leaf->mandatory;
     case OBJ_TYP_LEAF_LIST:
-	return (obj->def.list->minelems) ? TRUE : FALSE;
+	return (obj->def.leaflist->minelems) ? TRUE : FALSE;
     case OBJ_TYP_LIST:
 	return (obj->def.list->minelems) ? TRUE : FALSE;
     case OBJ_TYP_CHOICE:
 	return obj->def.choic->mandatory;
-    case OBJ_TYP_CASE:
-	return (obj->parent) ?
-	    obj_is_required(obj->parent) : TRUE;
     case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
     case OBJ_TYP_RPC:
-    case OBJ_TYP_RPCIO:
     case OBJ_TYP_NOTIF:
 	return FALSE;
     case OBJ_TYP_NONE:

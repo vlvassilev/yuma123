@@ -3553,6 +3553,14 @@ static status_t
 	}
     }
 
+    if (leaf->mandatory && leaf->defval) {
+	log_error("\nError: both mandatory and default statements present"
+		  "'%s'", obj_get_name(obj));
+	retres = ERR_NCX_INVALID_VALUE;
+	tkc->cur = obj->tk;
+	ncx_print_errormsg(tkc, mod, retres);
+    }
+
     res = check_parent(tkc, mod, obj);
     CHK_EXIT;
 
@@ -4146,6 +4154,14 @@ static status_t
 	} else {
 	    choic->config = OBJ_DEF_CONFIG;
 	}
+    }
+
+    if (choic->mandatory && choic->defval) {
+	log_error("\nError: both mandatory and default statements present"
+		  "'%s'", obj_get_name(obj));
+	retres = ERR_NCX_INVALID_VALUE;
+	tkc->cur = obj->tk;
+	ncx_print_errormsg(tkc, mod, retres);
     }
 
     res = check_parent(tkc, mod, obj);

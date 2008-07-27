@@ -1,5 +1,11 @@
 YangTools Change Log
 --------------------
+
+0.9.4 
+
+ * Added error check for default and mandatory set
+   in leaf or choice statements
+
 	
 0.9.3  2008-07-17      Andy Bierman  <andy@netconfcentral.com>
   * Fixed print error msg bug that causes segmentation fault

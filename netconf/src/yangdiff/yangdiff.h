@@ -58,7 +58,7 @@ date	     init     comment
 #define YANGDIFF_DEF_FILENAME      (const xmlChar *)"yangdiff.log"
 
 #define YANGDIFF_MOD               (const xmlChar *)"yangdiff"
-#define YANGDIFF_PARMSET           (const xmlChar *)"yangdiff"
+#define YANGDIFF_CONTAINER         (const xmlChar *)"yangdiff"
 
 #define YANGDIFF_PARM_CONFIG        (const xmlChar *)"config"
 #define YANGDIFF_PARM_OLD           (const xmlChar *)"old"

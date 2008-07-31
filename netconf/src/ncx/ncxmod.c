@@ -39,12 +39,16 @@ date         init     comment
 #include "ncx.h"
 #endif
 
-#ifndef _H_ncxmod
-#include "ncxmod.h"
+#ifndef _H_ncxconst
+#include "ncxconst.h"
 #endif
 
-#ifndef _H_ncx_parse
-#include "ncx_parse.h"
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
+#ifndef _H_ncxmod
+#include "ncxmod.h"
 #endif
 
 #ifndef _H_status
@@ -79,9 +83,7 @@ date         init     comment
 /* Enumeration of the basic value type classifications */
 typedef enum ncxmod_mode_t_ {
     NCXMOD_MODE_NONE,
-    NCXMOD_MODE_NCX,
     NCXMOD_MODE_YANG,
-    NCXMOD_MODE_FILENCX,
     NCXMOD_MODE_FILEYANG
 } ncxmod_mode_t;
 
@@ -228,7 +230,6 @@ static status_t
 *    path2 == optional 2nd piece of path string (may be NULL)
 *    modname == module name without file suffix (may be NULL)
 *    mode == suffix mode
-*           == NCXMOD_MODE_NCX  if NCX module and suffix is .yang
 *           == NCXMOD_MODE_YANG if YANG module and suffix is .yang
 *           == NCXMOD_MODE_FILENCX if NCX filespec
 *           == NCXMOD_MODE_FILEYANG if YANG filespec
@@ -262,7 +263,6 @@ static status_t
 	      yang_pcb_t *pcb,
 	      yang_parsetype_t ptyp)
 {
-    ncx_module_t  *mod;
     xmlChar       *p;
     const xmlChar *suffix;
     uint32         total, modlen, pathlen;
@@ -272,13 +272,9 @@ static status_t
     total = 0;
 
     switch (mode) {
-    case NCXMOD_MODE_NCX:
-	suffix = NCXMOD_NCX_SUFFIX;
-	break;
     case NCXMOD_MODE_YANG:
 	suffix = NCXMOD_YANG_SUFFIX;
 	break;
-    case NCXMOD_MODE_FILENCX:
     case NCXMOD_MODE_FILEYANG:
 	suffix = (const xmlChar *)"";
 	break;
@@ -340,32 +336,13 @@ static status_t
 	}
     }
 
-    switch (mode) {
-    case NCXMOD_MODE_NCX:
-    case NCXMOD_MODE_FILENCX:
-	/* attempt to load this filespec as an NCX module */
-	mod = ncx_parse_from_filespec(buff, &res);
-	if (res==NO_ERR && ptyp==YANG_PT_TOP) {
-	    pcb->top = mod;
-	} else if (mod && (res != NO_ERR) && !mod->added) {
-	    ncx_free_module(mod);
-	    mod = NULL;
-	}
-	break;
-    case NCXMOD_MODE_YANG:
-    case NCXMOD_MODE_FILEYANG:
-	/* attempt to load this filespec as a YANG module */
-	res = yang_parse_from_filespec(buff, pcb, ptyp);
-	break;
-    default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
+    /* attempt to load this filespec as a YANG module */
+    res = yang_parse_from_filespec(buff, pcb, ptyp);
     switch (res) {
     case ERR_XML_READER_START_FAILED:
     case ERR_NCX_MISSING_FILE:
 	/* not an error, *done == FALSE */
-	if (mode==NCXMOD_MODE_NCX || mode==NCXMOD_MODE_YANG) {
+	if (mode==NCXMOD_MODE_YANG) {
 	    res = NO_ERR;
 	}
 	break;
@@ -760,25 +737,13 @@ static status_t
 	str += xml_strcpy(fnamebuff, modname);
 	*str++ = '.';
 
-	/* try YANG file first */
+	/* try YANG file */
 	xml_strcpy(str, NCXMOD_YANG_SUFFIX);
 	res = search_subdirs(buff, bufflen, fnamebuff, done);
 	if (*done) {
 	    if (res == NO_ERR) {
 		res = try_module(buff, bufflen, NULL, NULL,
 				 NULL, NCXMOD_MODE_FILEYANG,
-				 TRUE, done, pcb, ptyp);
-		if (res != NO_ERR) {
-		    res2 = add_failed(modname, pcb, res);
-		}
-	    }
-	} else {
-	    /* try NCX file next */
-	    xml_strcpy(str, NCXMOD_NCX_SUFFIX);
-	    res = search_subdirs(buff, bufflen, fnamebuff, done);
-	    if (*done && res == NO_ERR) {
-		res = try_module(buff, bufflen, NULL, NULL,
-				 NULL, NCXMOD_MODE_FILENCX,
 				 TRUE, done, pcb, ptyp);
 		if (res != NO_ERR) {
 		    res2 = add_failed(modname, pcb, res);
@@ -795,11 +760,6 @@ static status_t
      */
     res = try_module(buff, bufflen, path, path2, modname,
 		     NCXMOD_MODE_YANG, FALSE, done, pcb, ptyp);
-    if (!*done) {
-	res = try_module(buff, bufflen, path, path2, modname,
-			 NCXMOD_MODE_NCX, FALSE, done, pcb, ptyp);
-    }
-
     if (*done) {
 	if (res != NO_ERR) {
 	    res2 = add_failed(modname, pcb, res);
@@ -928,7 +888,7 @@ static status_t
     ncx_module_t   *testmod;
     uint32          modlen, bufflen;
     status_t        res, res2;
-    boolean         done, isfile, isncxfile;
+    boolean         done, isfile;
 
 #ifdef NCXMOD_DEBUG
     log_debug2("\nAttempting to load module (%s)", modname);
@@ -936,7 +896,6 @@ static status_t
 
     res2 = NO_ERR;
     isfile = FALSE;
-    isncxfile = FALSE;
     bufflen = 0;
     modlen = xml_strlen(modname);
 
@@ -970,12 +929,8 @@ static status_t
 	 * this is an NCX or YANG file extension
 	 */
 	str++;
-	if (!xml_strcmp(str, (const xmlChar *)"ncx")) {
+	if (!xml_strcmp(str, (const xmlChar *)"yang")) {
 	    isfile = TRUE;
-	    isncxfile = TRUE;
-	} else if (!xml_strcmp(str, (const xmlChar *)"yang")) {
-	    isfile = TRUE;
-	    isncxfile = FALSE;
 	}
     }
 
@@ -1017,15 +972,9 @@ static status_t
      *    if it does not work, instead of trying other directories
      */
     if (isfile) {
-	if (isncxfile) {
-	    res = try_module(buff, bufflen,  modname, NULL, 
-			     NULL, NCXMOD_MODE_FILENCX,
-			     FALSE, &done, pcb, ptyp);
-	} else {
-	    res = try_module(buff, bufflen,  modname, NULL,
-			     NULL, NCXMOD_MODE_FILEYANG,
-			     FALSE, &done, pcb, ptyp);
-	}
+	res = try_module(buff, bufflen,  modname, NULL,
+			 NULL, NCXMOD_MODE_FILEYANG,
+			 FALSE, &done, pcb, ptyp);
 	m__free(buff);
 	if (res == ERR_NCX_MISSING_FILE) {
 	    log_error("\nError: file not found (%s)", modname);
@@ -1043,14 +992,6 @@ static status_t
     res = try_module(buff, bufflen, NULL, NULL,
 		     modname, NCXMOD_MODE_YANG,
 		     FALSE, &done, pcb, ptyp);
-
-
-    /* 1b) try as module current dir, NCX format  */
-    if (!done) {
-	res = try_module(buff, bufflen, NULL, NULL,
-			 modname, NCXMOD_MODE_NCX,
-			 FALSE, &done, pcb, ptyp);
-    }
 
     /* 2) try YANG_MODPATH environment variable if set */
     if (!done && ncxmod_mod_path) {
@@ -1131,7 +1072,7 @@ static boolean
 	return FALSE;
     }
 
-    return (!strcmp(p+1, "yang") || !strcmp(p+1, "ncx")) 
+    return (!strcmp(p+1, "yang")) 
 	? TRUE : FALSE;
     
 }  /* has_mod_ext */

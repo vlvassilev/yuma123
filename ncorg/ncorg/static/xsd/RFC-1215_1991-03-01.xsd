@@ -8,7 +8,7 @@
    xmlns:smi="urn:ietf:params:xml:ns:yang:yang-smi">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'RFC-1215.yang' by yangdump version 0.9.3
+         Converted from YANG file 'RFC-1215.yang' by yangdump version 0.9.4
          
          Module: RFC-1215
          Organization: 
@@ -18,7 +18,7 @@
       <xs:documentation></xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/ietf/RFC-1215.yang
+            /home/andy/newdev/trunk/netconf/modules/ietf/RFC-1215.yang
          </ncx:source>
          <ncx:organization></ncx:organization>
          <ncx:contact></ncx:contact>

@@ -12,7 +12,7 @@
    xmlns:entity-mib="urn:ietf:params:xml:ns:yang:smiv2:ENTITY-MIB">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'ipfix-psamp.yang' by yangdump version 0.9.3
+         Converted from YANG file 'ipfix-psamp.yang' by yangdump version 0.9.4
          
          Module: ipfix-psamp
          Organization: IPFIX WG
@@ -32,7 +32,7 @@
             </ncx:url>
          </ncx:reference>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/ietf/ipfix-psamp.yang
+            /home/andy/newdev/trunk/netconf/modules/ietf/ipfix-psamp.yang
          </ncx:source>
          <ncx:organization>IPFIX WG</ncx:organization>
          <ncx:contact>

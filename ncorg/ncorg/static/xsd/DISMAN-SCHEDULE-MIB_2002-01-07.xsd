@@ -13,7 +13,7 @@
    xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'DISMAN-SCHEDULE-MIB.yang' by yangdump version 0.9.3
+         Converted from YANG file 'DISMAN-SCHEDULE-MIB.yang' by yangdump version 0.9.4
          
          Module: DISMAN-SCHEDULE-MIB
          Organization: IETF Distributed Management Working Group
@@ -53,7 +53,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/ietf/DISMAN-SCHEDULE-MIB.yang
+            /home/andy/newdev/trunk/netconf/modules/ietf/DISMAN-SCHEDULE-MIB.yang
          </ncx:source>
          <ncx:organization>
             IETF Distributed Management Working Group

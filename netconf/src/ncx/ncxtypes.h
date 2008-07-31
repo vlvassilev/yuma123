@@ -128,9 +128,7 @@ typedef enum ncx_data_class_t_ {
 typedef enum ncx_btype_t_ {
     NCX_BT_NONE,
     NCX_BT_ANY,
-    NCX_BT_ROOT,
     NCX_BT_BITS,    
-    NCX_BT_ENAME,                   /* deprecated */
     NCX_BT_ENUM,
     NCX_BT_EMPTY,
     NCX_BT_BOOLEAN,
@@ -148,21 +146,20 @@ typedef enum ncx_btype_t_ {
     NCX_BT_BINARY,
     NCX_BT_INSTANCE_ID,
     NCX_BT_UNION,
-    NCX_BT_KEYREF,                     /* yang only */
-    NCX_BT_SLIST,                       /* was list */
-    NCX_BT_XLIST,                     /* deprecated */
-    NCX_BT_CONTAINER,                 /* was struct */
+    NCX_BT_KEYREF,
+    NCX_BT_SLIST,                /* simple XSD list */
+    NCX_BT_CONTAINER,
     NCX_BT_CHOICE,
-    NCX_BT_LIST,                       /* was table */
-    NCX_BT_XCONTAINER,             /* was container */
+    NCX_BT_LIST,
     NCX_BT_EXTERN,               /* not a real type */
-    NCX_BT_INTERN                /* not a real type */
+    NCX_BT_INTERN,               /* not a real type */
+    NCX_BT_CASE
 } ncx_btype_t;
 
 
 #define NCX_FIRST_DATATYPE NCX_BT_ANY
-#define NCX_LAST_DATATYPE  NCX_BT_XCONTAINER
-#define NCX_NUM_BASETYPES  (NCX_LAST_DATATYPE-1)
+#define NCX_LAST_DATATYPE  NCX_BT_LIST
+#define NCX_NUM_BASETYPES  (NCX_LAST_DATATYPE-NCX_FIRST_DATATYPE)
 
 
 /* Enumeration of the basic value type classifications */
@@ -196,15 +193,9 @@ typedef enum ncx_indextyp_t_ {
  */
 typedef enum ncx_node_t_ {
     NCX_NT_NONE,
-    NCX_NT_RPC,                   /* NCX RPC Def: rpc_template_t */
     NCX_NT_TYP,                  /* NCX Type Def: typ_template_t */
     NCX_NT_GRP,                 /* YANG grouping: grp_template_t */
-    NCX_NT_PSDPARM,                  /* NCX Parm Def: psd_parm_t */
-    NCX_NT_PSD,               /* NCX Parmset Def: psd_template_t */
     NCX_NT_VAL,                              /* val_value_t node */
-    NCX_NT_PARM,                               /* ps_parm_t node */
-    NCX_NT_PARMSET,                         /* ps_parmset_t node */   
-    NCX_NT_APP,                                /* cfg_app_t node */
     NCX_NT_OBJ,                                /* obj_template_t */
     NCX_NT_STRING,                      /* xmlChar *, error only */
     NCX_NT_CFG,                  /* cfg_template_t *, error only */
@@ -372,14 +363,6 @@ typedef struct ncx_enum_t_ {
 } ncx_enum_t;
 
 
-/* NCX xlist member: union of 2 basic string types used in a list */
-typedef struct ncx_lstr_t_ {
-    dlq_hdr_t    qhdr;
-    ncx_str_t    str;
-    uint32       flags;          /* mark strings with errors */
-} ncx_lstr_t;
-
-
 /* NCX list member: list of string or number */
 typedef struct ncx_lmem_t_ {
     dlq_hdr_t     qhdr;
@@ -397,13 +380,6 @@ typedef struct ncx_list_t_ {
     ncx_btype_t  btyp;
     dlq_hdr_t     memQ;                /* Q of ncx_lmem_t */
 } ncx_list_t;
-
-
-/* header for a NCX Xlist */
-typedef struct ncx_xlist_t_ {
-    ncx_btype_t  btyp;
-    dlq_hdr_t     strQ;                /* Q of ncx_lstr_t */
-} ncx_xlist_t;
 
 
 /* struct for holding r/o pointer to generic internal node 
@@ -442,15 +418,6 @@ typedef struct ncx_revhist_t_ {
 } ncx_revhist_t;
 
 
-/* NCX Application node */
-typedef struct ncx_appnode_t_ {
-    dlq_hdr_t         qhdr;
-    xmlChar          *owner; 
-    xmlChar          *appname; 
-    xmlns_id_t        nsid;
-} ncx_appnode_t;
-
-
 /* representation of one module during parsing.
  * these are registered in the def_reg module to resolve
  * imports from other modules
@@ -459,10 +426,7 @@ typedef struct ncx_module_t_ {
     dlq_hdr_t         qhdr;
     xmlChar          *name; 
     xmlChar          *version;
-    xmlChar          *owner;              /* deprecated */
     xmlChar          *organization;
-    xmlChar          *app;                /* deprecated */
-    xmlChar          *copyright;          /* deprecated */
     xmlChar          *contact_info;
     xmlChar          *descr;
     xmlChar          *ref;
@@ -478,7 +442,6 @@ typedef struct ncx_module_t_ {
     xmlns_id_t        nsid;            /* assigned by xmlns */
     uint32            langver;
     boolean           ismod;     /* module/submodule keyword */
-    boolean           isyang;        /* T:YANG src F:NCX src */
     boolean           stmtmode;       /* T: save yang_stmt_t */
     boolean           diffmode;      /* T: don't use def_reg */
     boolean           added;         /* T: don't free on err */
@@ -489,8 +452,6 @@ typedef struct ncx_module_t_ {
     dlq_hdr_t         importQ;          /* Q of ncx_import_t */
     dlq_hdr_t         includeQ;        /* Q of ncx_include_t */
     dlq_hdr_t         typeQ;          /* Q of typ_template_t */
-    dlq_hdr_t         psdQ;           /* Q of psd_template_t */
-    dlq_hdr_t         rpcQ;           /* Q of rpc_template_t */
     dlq_hdr_t         groupingQ;      /* Q of grp_template_t */
     dlq_hdr_t         datadefQ;       /* Q of obj_template_t */
     dlq_hdr_t         extensionQ;     /* Q of ext_template_t */

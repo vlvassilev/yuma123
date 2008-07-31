@@ -137,10 +137,6 @@ date         init     comment
 #include "obj.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
 #ifndef _H_status
 #include  "status.h"
 #endif
@@ -4190,7 +4186,7 @@ static status_t
 	    for (cobj = (obj_template_t *)dlq_firstEntry(cas->datadefQ);
 		 cobj != NULL;
 		 cobj = (obj_template_t *)dlq_nextEntry(cobj)) {
-		if (obj_is_required(cobj)) {
+		if (obj_is_mandatory(cobj)) {
 		    tkc->cur = cobj->tk;		    
 		    retres = ERR_NCX_DEFCHOICE_NOT_OPTIONAL;
 		    ncx_print_errormsg(tkc, mod, retres);
@@ -4335,7 +4331,7 @@ static status_t
 				 dlq_firstEntry(cas->datadefQ);
 			     cobj != NULL;
 			     cobj = (obj_template_t *)dlq_nextEntry(cobj)) {
-			    if (obj_is_required(cobj)) {
+			    if (obj_is_mandatory(cobj)) {
 				tkc->cur = cobj->tk;		    
 				retres = ERR_NCX_DEFCHOICE_NOT_OPTIONAL;
 				ncx_print_errormsg(tkc, mod, retres);

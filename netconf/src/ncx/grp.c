@@ -211,4 +211,34 @@ boolean
 }  /* grp_has_typedefs */
 
 
+/********************************************************************
+* FUNCTION grp_get_mod_name
+* 
+* Get the module name for a grouping
+*
+* INPUTS:
+*    grp == grp_template_t struct to check
+*
+* RETURNS:
+*    const pointer to module name
+*********************************************************************/
+const xmlChar *
+    grp_get_mod_name (const grp_template_t *grp)
+{
+#ifdef DEBUG
+    if (!grp || !grp->mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (grp->mod->ismod) {
+	return grp->mod->name;
+    } else {
+	return grp->mod->belongs;
+    }
+    /*NOTREACHED*/
+
+} /* grp_get_mod_name */
+
 /* END grp.c */

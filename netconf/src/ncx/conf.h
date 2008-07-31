@@ -28,8 +28,8 @@ date	     init     comment
 #include "status.h"
 #endif
 
-#ifndef _H_ps
-#include "ps.h"
+#ifndef _H_val
+#include "val.h"
 #endif
 
 
@@ -39,10 +39,10 @@ date	     init     comment
 *								    *
 *********************************************************************/
 extern status_t 
-    conf_parse_ps_from_filespec (const xmlChar *filespec,
-				 ps_parmset_t *ps,
-				 boolean keepvals,
-				 boolean fileerr);
+    conf_parse_val_from_filespec (const xmlChar *filespec,
+				  val_value_t *val,
+				  boolean keepvals,
+				  boolean fileerr);
 
 
 #endif	    /* _H_conf */

@@ -19,6 +19,7 @@
 date	     init     comment
 ----------------------------------------------------------------------
 19-dec-05    abb      Begun
+21jul08      abb      start obj-based rewrite
 
 */
 
@@ -63,7 +64,6 @@ date	     init     comment
 
 #define VAL_BENUM_CH      '('
 #define VAL_EENUM_CH      ')'
-
 #define VAL_INST_SEPCH    '.'
 #define VAL_INDEX_SEPCH   ','
 #define VAL_INDEX_CLI_SEPCH   ' '
@@ -81,9 +81,10 @@ date	     init     comment
 #endif
 
 /* val_value_t flags field */
-#define VAL_FL_CONTAB    bit0
-#define VAL_FL_DUPDONE   bit1
-#define VAL_FL_DUPOK     bit2
+#define VAL_FL_DUPDONE   bit0
+#define VAL_FL_DUPOK     bit1
+#define VAL_FL_DEFSET    bit2
+
 
 /* macros to access simple value types */
 #define VAL_BOOL(V)    ((V)->v.bool)
@@ -124,8 +125,6 @@ date	     init     comment
 
 #define VAL_BITS VAL_LIST
 
-#define VAL_XLIST(V)   ((V)->v.xlist)
-
 
 /********************************************************************
 *								    *
@@ -148,17 +147,25 @@ typedef struct val_value_t_ {
     dlq_hdr_t      qhdr;
 
     /* common fields */
-    const typ_def_t *typdef;                 /* back ptr to typdef */
-    const xmlChar *name;                 /* back pointer to elname */
-    xmlChar       *dname;           /* AND malloced name if needed */
-    void          *parent;             /* ps_parm_t or val_value_t */
-    xmlns_id_t     nsid;
-    ncx_btype_t    btyp;                /* base type of this value */
-    uint32         seqid;         /* instance of this sibling node */
-    uint32         flags; 
-    ncx_data_class_t dataclass;
-    ncx_node_t     parent_typ;        /* NCX_NT_PARM or NCX_NT_VAL */
-    dlq_hdr_t      metaQ;                      /* Q of val_value_t */
+    const struct obj_template_t_ *obj;        /* bptr to object def */
+    const typ_def_t *typdef;              /* bptr to typdef if leaf */
+    const xmlChar *name;                  /* back pointer to elname */
+    xmlChar       *dname;            /* AND malloced name if needed */
+    struct val_value_t_ *parent;       /* back-ptr to parent if any */
+    xmlns_id_t     nsid;              /* namespace ID for this node */
+    ncx_btype_t    btyp;                 /* base type of this value */
+
+    /* this field is for supporting unnamed (numbered-only) data */
+    uint32         seqid;          /* instance of this sibling node */
+
+    uint32         flags;                  /* internal status flags */
+    ncx_data_class_t dataclass;             /* config or state data */
+
+    /* YANG does not support meta-data but NCX does, and since
+     * the <get> and <get-config> operations use attributes
+     * in the RPC parameters, the metaQ is still used
+     */
+    dlq_hdr_t      metaQ;                       /* Q of val_value_t */
 
     /* Used by Agent only:
      * if this field is non-NULL, then the entire value node
@@ -166,17 +173,18 @@ typedef struct val_value_t_ {
      * and all read access is done via this callback function;
      * the real data type is getcb_fn_t *
      */
-    void          *getcb;
+    void *getcb;
 
     /* these fields are only used in new values before they are 
      * actually added to the config database (TBD: remove)
+     * curparent == parent of curnode for merge
      */
-    void          *curparent;      /* parent of curnode for merge */
+    struct val_value_t_  *curparent;      
     op_editop_t    editop;            /* effective edit operation */
     status_t       res;      /* edit result for continue-on-error */
     dlq_hdr_t      metaerrQ;                /* Q of val_metaerr_t */
 
-    /* these fields are used for NCX_BT_LIST and NCX_BT_XCONTAINER */
+    /* these fields are used for NCX_BT_LIST */
     struct val_index_t_ *index;   /* back-ptr/flag in use as index */
     dlq_hdr_t       indexQ;    /* Q of val_index_t or ncx_filptr_t */
 
@@ -184,20 +192,44 @@ typedef struct val_value_t_ {
     typ_template_t *untyp;               /* actual union node type */
     ncx_btype_t     unbtyp;              /* union member base type */
 
-    /* union of all the NCX-specific sub-types */
+    /* this field is used for NCX_BT_CHOICE 
+     * If set, the object path for this node is really:
+     *    $this --> casobj --> casobj.parent --> $this.parent
+     */
+    const struct obj_template_t_   *casobj;
+
+    /* union of all the NCX-specific sub-types
+     * note that the following invisible constructs should
+     * never show up in this struct:
+     *     NCX_BT_CHOICE
+     *     NCX_BT_CASE
+     *     NCX_BT_UNION
+     */
     union v_ {
-        dlq_hdr_t   appQ;        /* NCX_BT_ROOT - Q of cfg_app_t */
-        dlq_hdr_t   childQ;         /* NCX_CL_COMPLEX, NCX_BT_ANY  
-                                    *   Q of val_value_t           */
-	ncx_num_t   num;         /* NCX_BT_INT8, NCX_BT_INT16,
-                                  * NCX_BT_INT32, NCX_BT_INT64
-                                  * NCX_BT_UINT8, NCX_BT_UINT16
-                                  * NCX_BT_UINT32, NCX_BT_UINT64
- 		                  * NCX_BT_FLOAT32, NCX_BT_FLOAT64 */
-	ncx_str_t  str;       /* NCX_BT_ENAME, NCX_BT_STRING, 
-			       * NCX_BT_INSTANCE_ID, NCX_BT_BINARY */
+	/* complex types have a Q of val_value_t representing
+	 * the child nodes with values
+	 *   NCX_BT_CONTAINER
+	 *   NCX_BT_LIST
+	 */
+        dlq_hdr_t   childQ;         
+
+        /* Numeric data types:
+	 *   NCX_BT_INT8, NCX_BT_INT16,
+	 *   NCX_BT_INT32, NCX_BT_INT64
+	 *   NCX_BT_UINT8, NCX_BT_UINT16
+	 *   NCX_BT_UINT32, NCX_BT_UINT64
+	 *   NCX_BT_FLOAT32, NCX_BT_FLOAT64 
+	 */
+	ncx_num_t   num; 
+
+	/* String data types:
+	 *   NCX_BT_STRING
+	 *   NCX_BT_INSTANCE_ID
+	 *   NCX_BT_BINARY 
+	 */
+	ncx_str_t  str; 
+
 	ncx_list_t list;              /* NCX_BT_BITS, NCX_BT_SLIST */
-	ncx_xlist_t xlist;                         /* NCX_BT_XLIST */
 	boolean    bool;           /* NCX_BT_EMPTY, NCX_BT_BOOLEAN */
 	ncx_enum_t enu;               /* NCX_BT_UNION, NCX_BT_ENUM */
 	xmlChar   *fname;                         /* NCX_BT_EXTERN */
@@ -244,11 +276,11 @@ extern void
 extern void
     val_init_virtual (val_value_t *val,
 		      void *cbfn,
-		      typ_template_t *typ);
+		      const struct obj_template_t_ *obj);
 
 extern void
     val_init_from_template (val_value_t *val,
-			    typ_template_t *typ);
+			    const struct obj_template_t_ *obj);
 
 extern void 
     val_free_value (val_value_t *val);
@@ -272,15 +304,6 @@ extern status_t
 		   ncx_btype_t  btyp,
 		   const xmlChar *strval);
 
-
-/* validate all the ncx_lstr_t entries in the xlist
- * against the specified typdef.  Mark any errors
- * in the ncx_lstr_t flags field of each string 
- * in the list with an error
- */
-extern status_t
-    val_xlist_ok (const typ_def_t *typdef,
-		  ncx_xlist_t *list);
 
 /* validate all the ncx_lmem_t entries in the list
  * against the specified typdef.  Mark any errors
@@ -382,19 +405,10 @@ extern status_t
 		 val_value_t *copy);
 
 extern status_t
-    val_gen_instance_id (ncx_node_t nodetyp,
-			 const void  *node, 
+    val_gen_instance_id (const val_value_t *val, 
 			 ncx_instfmt_t format,
 			 boolean full,
 			 xmlChar  **buff);
-
-extern status_t 
-    val_gen_index_comp  (const typ_index_t *in,
-			 val_value_t *val);
-
-extern status_t 
-    val_gen_index_chain (const typ_index_t *instart,
-			 val_value_t *val);
 
 extern void
     val_add_child (val_value_t *child,
@@ -416,7 +430,14 @@ extern val_value_t *
 
 extern val_value_t *
     val_find_child (const val_value_t  *parent,
+		    const xmlChar  *prefix,
 		    const xmlChar *childname);
+
+extern val_value_t *
+    val_find_next_child (const val_value_t  *parent,
+			 const xmlChar  *prefix,
+			 const xmlChar *childname,
+			 const val_value_t *curchild);
 
 extern const dlq_hdr_t *
     val_get_metaQ (const val_value_t  *val);
@@ -455,10 +476,6 @@ extern uint32
 extern uint32
     val_liststr_count (const val_value_t *val);
 
-/* strnum is a zero-based index */
-extern const xmlChar *
-    val_get_liststr (const val_value_t *val,
-		     uint32 strnum);
 
 extern val_value_t *
     val_find_meta (const val_value_t *val,
@@ -565,5 +582,11 @@ extern status_t
     val_check_rangeQ (ncx_btype_t  btyp,
 		      const ncx_num_t *num,
 		      const dlq_hdr_t *checkQ);
+
+/* cound child instances of modname:objname within parent 'val' */
+extern uint32
+    val_instance_count (val_value_t  *val,
+			const xmlChar *modname,
+			const xmlChar *objname);
 
 #endif	    /* _H_val */

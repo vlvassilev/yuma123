@@ -144,7 +144,6 @@ static void
     }
 
     switch (errinfo->val_btype) {
-    case NCX_BT_ENAME:
     case NCX_BT_BINARY:
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
@@ -414,11 +413,9 @@ void
     }
     switch (errinfo->val_btype) {
     case NCX_BT_ANY:
-    case NCX_BT_ROOT:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
 	if (errinfo->v.cpxval) {
 	    val_free_value((val_value_t *)errinfo->v.cpxval);
 	}

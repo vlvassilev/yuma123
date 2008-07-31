@@ -7,7 +7,7 @@
    xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'ncx.yang' by yangdump version 0.9.3
+         Converted from YANG file 'ncx.yang' by yangdump version 0.9.4
          
          Module: ncx
          Organization: Netconf Central
@@ -21,7 +21,7 @@
       </xs:documentation>
       <xs:appinfo>
          <source>
-            /home/andy/swdev/trunk/netconf/modules/netconfcentral/ncx.yang
+            /home/andy/newdev/trunk/netconf/modules/netconfcentral/ncx.yang
          </source>
          <organization>Netconf Central</organization>
          <contact>

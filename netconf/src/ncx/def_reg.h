@@ -50,10 +50,9 @@
      Key: module name
      Data: 
        Child node: DEFINITION (keyed by ncx_node_t enum)
-          Child type: NCX_NT_PARMSET
-          Child type: NCX_NT_RPC
-          Child type: NCX_NT_NOT
-          Child type: NCX_NT_APP
+          Child type: NCX_NT_OBJ
+                      NCX_NT_GRP
+                      NCX_NT_TYP
 
    MODULE DEFINITIONS:
 
@@ -62,25 +61,15 @@
      Key: Type name     
      Data: back pointer to typ_template_t struct
 
-   PSD:
-     Parameter Set Definition
-     Key: PSD name
-     Data: back pointer to psd_template_t struct
+   GRP:
+     Grouping Definition
+     Key: GRP name
+     Data: back pointer to grp_template_t struct
 
-   RPC:
-     Remote Procedure Call Method Definition
-     Key: RPC method name
-     Data: back pointer to rpc_template_t struct
-
-   NOT:
-     Notification Definition
-     Key: NOT name
-     Data: back pointer to not_template_t struct
-
-   APP:
-     Application Node Definition
-     Key: APP name
-     Data: back pointer to ncx_appnode_t struct
+   OBJ:
+     Object Node Definition
+     Key: OBJ name
+     Data: back pointer to obj_template_t struct
 
  CONFIG: 
      Configuration database parmset instances
@@ -217,31 +206,6 @@ extern void
     def_reg_del_moddef (const xmlChar *modname,
 			const xmlChar *defname,
 			ncx_node_t dtyp);
-
-/************** CONFIG APPLICATION HDR ****************/
-
-extern status_t 
-    def_reg_add_cfgapp (const xmlChar *ownname,
-			const xmlChar *appname,
-			ncx_cfg_t cfgid,
-			void *dptr);
-
-
-/* find an configuration application header
- * even if the modname is NULL (unknown)
- * returns the cfg_app_t struct that matches
- */
-extern void *
-    def_reg_find_cfgapp (const xmlChar *modname,
-			 const xmlChar *appname,
-			 ncx_cfg_t cfgid);
-
-
-extern void
-    def_reg_del_cfgapp (const xmlChar *modname,
-			const xmlChar *appname,
-			int32 cfgid);
-
 
 /******************** CONFIG DATA *********************/
 

@@ -62,10 +62,6 @@ date         init     comment
 #include "obj.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -666,9 +662,6 @@ static void
 		ses_putstr_indent(scb, END_SEC,  startindent);
 	    }
 	    break;
-	case NCX_BT_ENAME:
-	    /* should not happen */
-	    break;
 	case NCX_BT_EMPTY:
 	case NCX_BT_BOOLEAN:
 	case NCX_BT_INSTANCE_ID:
@@ -727,7 +720,6 @@ static void
 	    }
 	    break;
 	case NCX_BT_SLIST:
-	case NCX_BT_XLIST:
 	    break;
 	case NCX_BT_KEYREF:
 	    str = typ_get_keyref_path(typdef);
@@ -1948,7 +1940,7 @@ static void
     ses_putchar(scb, '\n');
 
     /* imports section */
-    if (cp->unified && mod->isyang) {
+    if (cp->unified) {
 	for (impptr = (const yang_import_ptr_t *)dlq_firstEntry(&mod->saveimpQ);
 	     impptr != NULL;
 	     impptr = (const yang_import_ptr_t *)dlq_nextEntry(impptr)) {
@@ -2215,13 +2207,6 @@ status_t
     mod = pcb->top;
     if (!mod) {
 	return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
-    }
-
-    /* YANG only at this time */
-    if (!mod->isyang) {
-	log_warn("\nWarning: '%s' skipped, YANG translation not supported",
-		 mod->sourcefn);
-	return NO_ERR;
     }
 
     write_cyang_module(scb, mod, cp);

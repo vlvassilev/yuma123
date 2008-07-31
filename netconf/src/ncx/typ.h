@@ -729,6 +729,10 @@ extern ncx_iqual_t
 extern const xmlChar * 
     typ_get_units (const typ_template_t *typ);
 
+/* get units from named type if any */
+extern const xmlChar * 
+    typ_get_units_from_typdef (const typ_def_t *typdef);
+
 extern boolean
     typ_has_children (ncx_btype_t btyp);
 

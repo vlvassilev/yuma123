@@ -88,7 +88,6 @@ static void
     typ_unionnode_t *un;
     typ_rangedef_t  *rv;
     typ_sval_t      *sv;
-    typ_listval_t   *lv;
     ncx_btype_t     rtyp;    /* range base type */
 
 #ifdef DEBUG
@@ -124,22 +123,8 @@ static void
 	break;
     case NCX_BT_SLIST:
 	break;
-    case NCX_BT_XLIST:
-	if (sim->strrest==NCX_SR_PATTERN) {
-	    while (!dlq_empty(&sim->valQ)) {
-		sv = (typ_sval_t *)dlq_deque(&sim->valQ);
-		typ_free_sval(sv);
-	    }
-	} else {
-	    /* this will only be non-empty if strrest==NCX_SR_VALSET */
-	    while (!dlq_empty(&sim->valQ)) {
-		lv = (typ_listval_t *)dlq_deque(&sim->valQ);
-		typ_free_listval(lv);
-	    }
-	}
-	break;
     default:
-	/* this will be non-empty for enums, strings, enames */
+	/* this will be non-empty for enums and strings */
 	while (!dlq_empty(&sim->valQ)) {
 	    sv = (typ_sval_t *)dlq_deque(&sim->valQ);
 	    typ_free_sval(sv);
@@ -1466,8 +1451,6 @@ typ_sval_t *
     switch (btyp) {
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_XLIST:
-    case NCX_BT_ENAME:
         sv->val = xml_strdup(str);
         if (!sv->val) {
             m__free(sv);
@@ -1792,8 +1775,6 @@ ncx_btype_t
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
     case NCX_BT_SLIST:
-    case NCX_BT_XLIST:
-    case NCX_BT_ENAME:
         /* length ranges have to be non-negative uint32 */
         return NCX_BT_UINT32;
     default:
@@ -2059,7 +2040,7 @@ typ_template_t *
 	SET_ERROR(ERR_INTERNAL_INIT_SEQ);
 	return NULL;
     }
-    if (btyp<NCX_BT_ANY || btyp>NCX_BT_XCONTAINER) {
+    if (btyp<NCX_FIRST_DATATYPE || btyp>NCX_LAST_DATATYPE) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }
@@ -3423,12 +3404,57 @@ const xmlChar *
 	return typ->units;
     }
 
-    if (typ->typdef.class == NCX_CL_NAMED) {
-	return typ_get_units(typ->typdef.def.named.typ);
-    } else {
+    return typ_get_units_from_typdef(&typ->typdef);
+
+}  /* typ_get_units */
+
+
+/********************************************************************
+* FUNCTION typ_get_units_from_typdef
+*
+* Find the units string for the specified typdef template
+* Follow any NCX_CL_NAMED typdefs and check for a units
+* clause in the the nearest ancestor typdef
+*
+* INPUTS:
+*  typdef == typ_def_t struct to check
+*
+* RETURNS:
+*   pointer to found units string or NULL if none
+*********************************************************************/
+const xmlChar * 
+    typ_get_units_from_typdef (const typ_def_t *typdef)
+{
+    const typ_template_t *typ;
+    boolean               done;
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }
-}  /* typ_get_units */
+#endif
+
+    if (typdef->class != NCX_CL_NAMED) {
+	return NULL;
+    }
+
+    done = FALSE;
+    while (!done) {
+	typ = typdef->def.named.typ;
+	if (typ->units) {
+	    return typ->units;
+	}
+
+	typdef = &typ->typdef;
+	
+	if (typdef->class != NCX_CL_NAMED) {
+	    done = TRUE;
+	}
+    }
+    return NULL;
+
+}  /* typ_get_units_from_typdef */
 
 
 /********************************************************************
@@ -3448,8 +3474,8 @@ boolean
     switch (btyp) {
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
     case NCX_BT_ANY:
 	return TRUE;
     default:
@@ -3474,7 +3500,6 @@ boolean
 {
     switch (btyp) {
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
 	return TRUE;
     default:
 	return FALSE;
@@ -3498,10 +3523,8 @@ boolean
 {
     switch (btyp) {
     case NCX_BT_ANY:
-    case NCX_BT_ROOT:
 	return FALSE;
     case NCX_BT_BITS:
-    case NCX_BT_ENAME:
     case NCX_BT_ENUM:
     case NCX_BT_EMPTY:
     case NCX_BT_BOOLEAN:
@@ -3519,14 +3542,13 @@ boolean
     case NCX_BT_BINARY:
     case NCX_BT_UNION:
     case NCX_BT_SLIST:
-    case NCX_BT_XLIST:
     case NCX_BT_KEYREF:
     case NCX_BT_INSTANCE_ID:
 	return TRUE;
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
 	return FALSE;
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
@@ -3555,8 +3577,6 @@ boolean
 {
     switch (btyp) {
     case NCX_BT_ANY:
-    case NCX_BT_ROOT:
-    case NCX_BT_ENAME:
     case NCX_BT_EMPTY:
 	return FALSE;
     case NCX_BT_BITS:
@@ -3576,14 +3596,13 @@ boolean
     case NCX_BT_BINARY:
     case NCX_BT_UNION:
     case NCX_BT_SLIST:
-    case NCX_BT_XLIST:
     case NCX_BT_KEYREF:
     case NCX_BT_INSTANCE_ID:
 	return TRUE;
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
 	return FALSE;
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
@@ -3765,7 +3784,6 @@ const typ_sval_t *
 	switch (btyp) {
 	case NCX_BT_STRING:
 	case NCX_BT_BINARY:
-	case NCX_BT_ENAME:
 	case NCX_BT_KEYREF:
 	    retval = (const typ_sval_t *)
 		dlq_firstEntry(&typdef->def.simple.valQ);
@@ -4281,7 +4299,6 @@ boolean
     switch (btyp) {
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
-    case NCX_BT_ENAME:
     case NCX_BT_INSTANCE_ID:
 	return TRUE;
     case NCX_BT_KEYREF:   /***/
@@ -4322,7 +4339,6 @@ status_t
     switch (btyp) {
     case NCX_BT_STRING:
     case NCX_BT_SLIST:
-    case NCX_BT_XLIST:
 	str = sv->val;
 	break;
     default:
@@ -4733,7 +4749,6 @@ boolean
 	case NCX_BT_UNION:
 	case NCX_BT_BITS:
 	case NCX_BT_ENUM:
-	case NCX_BT_ENAME:
 	    return TRUE;
 	case NCX_BT_EMPTY:
 	case NCX_BT_BOOLEAN:
@@ -4757,7 +4772,6 @@ boolean
 	    }
 	    return !dlq_empty(&typdef->def.simple.valQ);
 	case NCX_BT_SLIST:
-	case NCX_BT_XLIST:
 	case NCX_BT_KEYREF:
 	    return TRUE;
 	default:

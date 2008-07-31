@@ -8,7 +8,7 @@
    xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'ieee-types.yang' by yangdump version 0.9.3
+         Converted from YANG file 'ieee-types.yang' by yangdump version 0.9.4
          
          Module: ieee-types
          Organization: YANG Language Design Team
@@ -30,7 +30,7 @@
             </ncx:url>
          </ncx:reference>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/yang/ieee-types.yang
+            /home/andy/newdev/trunk/netconf/modules/yang/ieee-types.yang
          </ncx:source>
          <ncx:organization>
             YANG Language Design Team

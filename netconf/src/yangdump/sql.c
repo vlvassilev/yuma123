@@ -57,14 +57,6 @@ date         init     comment
 #include "obj.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
-#ifndef _H_rpc
-#include "rpc.h"
-#endif
-
 #ifndef _H_ses
 #include "ses.h"
 #endif
@@ -385,42 +377,6 @@ static void
 
 
 /********************************************************************
-* FUNCTION write_psd_list
-* 
-* Write an object list  column from a PSD instead of datadefQ
-*    'objname objname ...'
-*
-* INPUTS:
-*   scb == session control block to use for writing
-*   datadefQ == Q of obj_template_t to use
-*
-*********************************************************************/
-static void
-    write_psd_list (ses_cb_t *scb,
-		    const psd_template_t *psd)
-{
-    const psd_parm_t *parm, *nextparm;
-
-    nextparm = NULL;
-
-    /* column: object list */
-    ses_putstr(scb, (const xmlChar *)"\n    '");
-    for (parm = psd_first_parm(psd);
-	 parm != NULL;
-	 parm = nextparm) {
-
-	nextparm = psd_next_parm(parm);
-	ses_putstr(scb, parm->name);
-	if (nextparm) {
-	    ses_putchar(scb, ' ');
-	}
-    }
-    ses_putstr(scb, (const xmlChar *)"',");
-
-} /* write_psd_list */
-
-
-/********************************************************************
 * FUNCTION write_object_id
 * 
 * Write an object ID (Xpath absolute expression
@@ -653,11 +609,7 @@ static void
 	    ses_putstr(scb, mod->version);
 	}
     }
-    if (mod->isyang) {
-	ses_putstr(scb, (const xmlChar *)".yang',");
-    } else {
-	ses_putstr(scb, (const xmlChar *)".ncx',");
-    }
+    ses_putstr(scb, (const xmlChar *)".yang',");
 
     /* column: sourcespec */
     sprintf(buff, "\n    '%s',", mod->source);
@@ -671,9 +623,8 @@ static void
     ses_putstr(scb, (const xmlChar *)" '1', '1',");
 
     /* columns: ismod, isyang */
-    sprintf(buff, " '%u', '%u',",
-	    (mod->ismod) ? 1 : 0,
-	    (mod->isyang) ? 1 : 0);
+    sprintf(buff, " '%u', '1',",
+	    (mod->ismod) ? 1 : 0);
     ses_putstr(scb, (const xmlChar *)buff);
 
     /* columns: created_on, updated_on */
@@ -898,7 +849,7 @@ static void
     }
 
     /* column: defval */
-    defval = obj_get_defval(obj);
+    defval = obj_get_default(obj);
     if (defval) {
 	sprintf(buff, "\n    '%s',",  defval);	
 	ses_putstr(scb, (const xmlChar *)buff);
@@ -917,7 +868,7 @@ static void
     /* columns: config, mandatory, level */
     sprintf(buff, "\n    '%u', '%u', '%u',",
 	    obj_get_config_flag(obj) ? 1 : 0,
-	    obj_is_required(obj) ? 1 : 0,
+	    obj_is_mandatory(obj) ? 1 : 0,
 	    obj_get_level(obj));
     ses_putstr(scb, (const xmlChar *)buff);
 
@@ -955,91 +906,6 @@ static void
     }
 
 }  /* write_object_entry */
-
-
-/********************************************************************
-* FUNCTION write_rpc_object_entry
-* 
-* Generate the SQL code to add the rpc_template_t to 
-* the 'ncobject' table
-*
-* INPUTS:
-*   mod == module in progress
-*   rpc == NCX RPC template to process
-*   cp == conversion parameters to use
-*   scb == session control block to use for writing
-*   buff == scratch buff to use
-*
-*********************************************************************/
-static void
-    write_rpc_object_entry (const ncx_module_t *mod,
-			    const rpc_template_t *rpc,
-			    const yangdump_cvtparms_t *cp,
-			    ses_cb_t *scb,
-			    char *buff)
-{
-    ses_putstr(scb, (const xmlChar *)"\n\nINSERT INTO ncobject VALUES (");
-
-    /* columns: ID, modname, submodname, version, name, linenum */
-    write_first_tuple(scb, mod, rpc->name, rpc->linenum, buff);
-
-    /* column: objectid */
-    sprintf(buff, "\n    '/%s',",  rpc->name);
-    ses_putstr(scb, (const xmlChar *)buff);
-
-    /* columns: description, reference */
-    write_descr_ref(scb, rpc->descr, NULL);
-
-    /* column: docurl */
-    write_docurl(scb, mod, cp, rpc->name, rpc->linenum);
-
-    /* column: objtyp */
-    ses_putstr(scb, (const xmlChar *)"\n    'rpc',");
-
-    /* column: parentid */
-    write_empty_col(scb);
-
-    /* column: istop */
-    ses_putstr(scb, (const xmlChar *)"\n    '1',");
-
-    /* column: isdata */
-    ses_putstr(scb, (const xmlChar *)"\n    '0',");
-
-    /* column: augwhen */
-    write_empty_col(scb);
-
-    /* column: childlist */
-    if (rpc->in_psd) {
-	write_psd_list(scb, rpc->in_psd);
-    } else {
-	write_empty_col(scb);
-    }
-
-    /* column: defval */
-    write_empty_col(scb);
-
-    /* column: listkey */
-    write_empty_col(scb);
-
-    /* columns: config, mandatory, level */
-    sprintf(buff, "\n    '%u', '%u', '1',",
-	    (rpc->rpc_typ==RPC_TYP_CONFIG) ? 1 : 0,
-	    (rpc->condition) ? 0 : 1);
-    ses_putstr(scb, (const xmlChar *)buff);
-
-    /* columns: minelements, maxelements */
-    ses_putstr(scb, (const xmlChar *)"\n    '0', '0',");
-    
-    /* columns: iscurrent, islatest **** !!!! ****/
-    ses_putstr(scb, (const xmlChar *)"\n    '1', '1',");
-
-    /* columns: created_on, updated_on */
-    write_end_tstamps(scb, buff);
-
-    /* end the VALUES clause */
-    ses_putstr(scb, (const xmlChar *)");");
-
-}  /* write_rpc_object_entry */
 
 
 /********************************************************************
@@ -1117,7 +983,6 @@ static void
     const grp_template_t  *grp;
     const obj_template_t  *obj;
     const ext_template_t  *ext;
-    const rpc_template_t  *rpc;
 
 #ifdef DEBUG
     /* copy namespace ID if this is a submodule */
@@ -1154,13 +1019,6 @@ static void
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 	write_object_entry(mod, obj, cp, scb, cp->buff);
-    }
-
-    /* temp: write the ncobject table entries for NCX RPCs */
-    for (rpc = (const rpc_template_t *)dlq_firstEntry(&mod->rpcQ);
-	 rpc != NULL;
-	 rpc = (const rpc_template_t *)dlq_nextEntry(rpc)) {
-	write_rpc_object_entry(mod, rpc, cp, scb, cp->buff);
     }
 
     /* write the ncextension table entries */

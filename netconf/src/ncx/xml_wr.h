@@ -115,19 +115,6 @@ extern void
 
 
 extern void
-    xml_wr_begin_app_elem (ses_cb_t *scb,
-			   xml_msg_hdr_t *msg,
-			   const cfg_app_t *app,
-			   int32 indent,
-			   boolean empty);
-
-extern void
-    xml_wr_end_app_elem (ses_cb_t *scb,
-			 xml_msg_hdr_t *msg,
-			 const cfg_app_t  *app,
-			 int32 indent);
-
-extern void
     xml_wr_value_elem (ses_cb_t *scb,
 		       xml_msg_hdr_t *msg,
 		       val_value_t *val,
@@ -162,23 +149,6 @@ extern void
 		       int32 indent);
 
 
-/* output entire app node w/ filter */
-extern void
-    xml_wr_check_app (ses_cb_t *scb,
-		      xml_msg_hdr_t *msg,
-		      const cfg_app_t *app,
-		      int32  indent,
-		      ncx_nodetest_fn_t testfn);
-
-
-/* output entire application node */
-extern void
-    xml_wr_app (ses_cb_t *scb,
-		xml_msg_hdr_t *msg,
-		const cfg_app_t *app,
-		int32  indent);
-
-
 /* output val_value_t node contents only (w/filter) */
 extern void
     xml_wr_check_val (ses_cb_t *scb,
@@ -195,22 +165,6 @@ extern void
 		val_value_t *val,
 		int32 indent);
 
-/* output a ps_parm_t node w/filter */
-extern void
-    xml_wr_check_parm (ses_cb_t *scb,
-		       xml_msg_hdr_t *msg,
-		       ps_parm_t *parm,
-		       int32  indent,
-		       ncx_nodetest_fn_t testfn);
-
-
-/* output a complete ps_parm_t node */
-extern void
-    xml_wr_parm (ses_cb_t *scb,
-		 xml_msg_hdr_t *msg,
-		 ps_parm_t *parm,
-		 int32  indent);
-
 /* generate entire val_value_t *w/filter) */
 extern void
     xml_wr_full_check_val (ses_cb_t *scb,
@@ -225,20 +179,6 @@ extern void
 		     xml_msg_hdr_t *msg,
 		     val_value_t *val,
 		     int32  indent);
-
-extern void
-    xml_wr_check_parmset (ses_cb_t *scb,
-			  xml_msg_hdr_t *msg,
-			  ps_parmset_t *ps,
-			  int32  indent,
-			  ncx_nodetest_fn_t testfn);
-
-extern void
-    xml_wr_parmset (ses_cb_t *scb,
-		    xml_msg_hdr_t *msg,
-		    ps_parmset_t *ps,
-		    int32  indent);
-
 
 extern status_t
     xml_wr_check_file (const xmlChar *filespec, 

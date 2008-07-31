@@ -19,6 +19,7 @@
 date	     init     comment
 ----------------------------------------------------------------------
 09-dec-07    abb      Begun
+21jul08      abb      start obj-based rewrite
 
 */
 
@@ -43,6 +44,10 @@ date	     init     comment
 
 #ifndef _H_tk
 #include "tk.h"
+#endif
+
+#ifndef _H_rpc
+#include "rpc.h"
 #endif
 
 #ifndef _H_typ
@@ -324,12 +329,18 @@ typedef struct obj_rpc_t_ {
     xmlChar           *name;
     xmlChar           *descr;
     xmlChar           *ref;
-    void              *rpc;          /* back-ptr rpc_template_t */
     ncx_status_t       status;
     dlq_hdr_t          typedefQ;         /* Q of typ_template_t */
     dlq_hdr_t          groupingQ;        /* Q of gtp_template_t */
     dlq_hdr_t          datadefQ;         /* Q of obj_template_t */
     dlq_hdr_t          appinfoQ;          /* Q of ncx_appinfo_t */
+
+    /* internal fields for manager and agent */
+    rpc_type_t      rpc_typ;
+    xmlns_id_t      nsid;
+    rpc_outtyp_t    out_datatyp;
+    struct rpc_agt_cbset_t_ *cbset;      /* BUILD_AGT: method set */
+    boolean          supported;    /* mod loaded, not implemented */    
 } obj_rpc_t;
 
 
@@ -404,7 +415,7 @@ typedef struct obj_template_t_ {
 *********************************************************************/
 
 
-/****************** ALLOCATION FUNCTIONS **********************/
+/******************  obj_template_t  **********************/
 
 /* malloc and init an NCX database object template */
 extern obj_template_t *
@@ -440,6 +451,29 @@ extern obj_template_t *
 			   const xmlChar *modname,
 			   const xmlChar *objname);
 
+extern const obj_template_t *
+    obj_find_child (const obj_template_t  *obj,
+		    const xmlChar *modname,
+		    const xmlChar *objname);
+
+extern const obj_template_t *
+    obj_find_child_str (const obj_template_t  *obj,
+			const xmlChar *modname,
+			const xmlChar *objname,
+			uint32 objnamelen);
+
+extern const obj_template_t *
+    obj_match_child_str (const obj_template_t *obj,
+			 const xmlChar *modname,
+			 const xmlChar *objname,
+			 uint32 objnamelen);
+
+extern const obj_template_t *
+    obj_first_child (const obj_template_t *obj);
+
+extern const obj_template_t *
+    obj_next_child (const obj_template_t *obj);
+
 extern obj_case_t *
     obj_find_case (obj_choice_t *choic,
 		   const xmlChar *modname,
@@ -460,9 +494,122 @@ extern obj_template_t *
 extern void
     obj_clean_datadefQ (dlq_hdr_t *que);
 
+extern typ_template_t *
+    obj_find_type (const obj_template_t *obj,
+		   const xmlChar *typname);
+
+extern grp_template_t *
+    obj_find_grouping (const obj_template_t *obj,
+		       const xmlChar *grpname);
+
+extern status_t 
+    obj_set_named_type (tk_chain_t *tkc,
+			ncx_module_t *mod,
+			const xmlChar *typname,
+			typ_def_t *typdef,
+			obj_template_t *parent,
+			grp_template_t *grp);
+
+extern obj_template_t *
+    obj_clone_template (ncx_module_t *mod,
+			obj_template_t *srcobj,
+			obj_template_t *mobj);
+
+/* create an OBJ_TYP_CASE wrapper if needed,
+ * for a short-case-stmt data def 
+ */
+extern obj_template_t *
+    obj_clone_template_case (ncx_module_t *mod,
+			     obj_template_t *srcobj,
+			     obj_template_t *mobj);
+
+
+/********************    obj_unique_t   ********************/
+
+/* malloc and init a unique list-node descriptor */
+extern obj_unique_t *
+    obj_new_unique (void);
+
+extern void
+    obj_init_unique (obj_unique_t *un);
+
+/* free a unique list-node descriptor */
+extern void
+    obj_free_unique (obj_unique_t *un);
+
+extern void
+    obj_clean_unique (obj_unique_t *un);
+
+extern obj_unique_comp_t *
+    obj_new_unique_comp (void);
+
+extern void
+    obj_free_unique_comp (obj_unique_comp_t *unc);
+
+extern obj_unique_t *
+    obj_find_unique (dlq_hdr_t *que,
+		     const xmlChar *xpath);
+
+/********************    obj_key_t   ********************/
+extern obj_key_t *
+    obj_new_key (void);
+
+extern void
+    obj_free_key (obj_key_t *key);
+
+extern obj_key_t *
+    obj_find_key (dlq_hdr_t *que,
+		  const xmlChar *keycompname);
+
+extern obj_key_t *
+    obj_find_key2 (dlq_hdr_t *que,
+		   const obj_template_t *keyobj);
+extern obj_key_t *
+    obj_first_key (obj_template_t *obj);
+
+extern const obj_key_t *
+    obj_first_ckey (const obj_template_t *obj);
+
+extern obj_key_t *
+    obj_next_key (obj_key_t *objkey);
+
+extern const obj_key_t *
+    obj_next_ckey (const obj_key_t *objkey);
+
+extern boolean
+    obj_any_rpcs (dlq_hdr_t *datadefQ);
+
+extern boolean
+    obj_any_notifs (dlq_hdr_t *datadefQ);
+
+/******************** OBJECT ID ************************/
+/* malloc an object ID */
+extern status_t
+    obj_gen_object_id (const obj_template_t *obj,
+		       xmlChar  **buff);
+
+/* copy an object ID to a buffer */
+extern status_t
+    obj_copy_object_id (const obj_template_t *obj,
+			xmlChar  *buff,
+			uint32 bufflen,
+			uint32 *reallen);
+
+extern status_t
+    obj_gen_aughook_id (const obj_template_t *obj,
+			xmlChar  **buff);
+
+
+/***************** ACCESS OBJECT PROPERTIES  *******************/
+
 extern const xmlChar * 
     obj_get_name (const obj_template_t *obj);
 
+/* this function is used throughout the code to 
+ * filter out uses and augment nodes from the
+ * real nodes.  Those are the only YANG nodes that
+ * do not have a name assigned to them
+ */
 extern boolean
     obj_has_name (const obj_template_t *obj);
 
@@ -491,25 +638,53 @@ extern dlq_hdr_t *
 extern const xmlChar *
     obj_get_typestr (const obj_template_t *obj);
 
+extern dlq_hdr_t *
+    obj_get_datadefQ (obj_template_t *obj);
 
-extern typ_template_t *
-    obj_find_type (const obj_template_t *obj,
-		   const xmlChar *typname);
+extern const dlq_hdr_t *
+    obj_get_cdatadefQ (const obj_template_t *obj);
 
-extern grp_template_t *
-    obj_find_grouping (const obj_template_t *obj,
-		       const xmlChar *grpname);
+extern uint32
+    obj_get_object_id_len (const obj_template_t *obj);
 
-extern status_t 
-    obj_set_named_type (tk_chain_t *tkc,
-			ncx_module_t *mod,
-			const xmlChar *typname,
-			typ_def_t *typdef,
-			obj_template_t *parent,
-			grp_template_t *grp);
+extern const xmlChar *
+    obj_get_default (const obj_template_t *obj);
+
+extern const obj_template_t *
+    obj_get_default_case (const obj_template_t *obj);
+
+extern uint32
+    obj_get_level (const obj_template_t *obj);
 
 extern boolean
-    obj_is_required (const obj_template_t *obj);
+    obj_has_typedefs (const obj_template_t *obj);
+
+extern typ_def_t *
+    obj_get_typdef (obj_template_t  *obj);
+
+extern const typ_def_t *
+    obj_get_ctypdef (const obj_template_t  *obj);
+
+extern ncx_btype_t
+    obj_get_basetype (const obj_template_t  *obj);
+
+extern const xmlChar *
+    obj_get_mod_prefix (const obj_template_t *obj);
+
+extern const xmlChar *
+    obj_get_mod_name (const obj_template_t  *obj);
+
+extern xmlns_id_t
+    obj_get_nsid (const obj_template_t *);
+
+extern ncx_iqual_t
+    obj_get_iqualval (const obj_template_t  *obj);
+
+extern const xmlChar *
+    obj_get_units (const obj_template_t  *obj);
+
+extern boolean
+    obj_is_mandatory (const obj_template_t *obj);
 
 extern boolean
     obj_is_cloned (const obj_template_t *obj);
@@ -520,103 +695,11 @@ extern boolean
 extern boolean
     obj_is_refine (const obj_template_t *obj);
 
-extern obj_template_t *
-    obj_clone_template (ncx_module_t *mod,
-			obj_template_t *srcobj,
-			obj_template_t *mobj);
-
-/* create an OBJ_TYP_CASE wrapper if needed,
- * for a short-case-stmt data def 
- */
-extern obj_template_t *
-    obj_clone_template_case (ncx_module_t *mod,
-			     obj_template_t *srcobj,
-			     obj_template_t *mobj);
-
-extern dlq_hdr_t *
-    obj_get_datadefQ (obj_template_t *obj);
-
-extern const dlq_hdr_t *
-    obj_get_cdatadefQ (const obj_template_t *obj);
-
-extern void
-    obj_dump_datadefQ (const dlq_hdr_t *datadefQ);
-
-/* malloc and init a unique list-node descriptor */
-extern obj_unique_t *
-    obj_new_unique (void);
-
-extern void
-    obj_init_unique (obj_unique_t *un);
-
-/* free a unique list-node descriptor */
-extern void
-    obj_free_unique (obj_unique_t *un);
-
-extern void
-    obj_clean_unique (obj_unique_t *un);
-
-extern obj_unique_comp_t *
-    obj_new_unique_comp (void);
-
-extern void
-    obj_free_unique_comp (obj_unique_comp_t *unc);
-
-extern obj_unique_t *
-    obj_find_unique (dlq_hdr_t *que,
-		     const xmlChar *xpath);
-
-
-extern obj_key_t *
-    obj_new_key (void);
-
-extern void
-    obj_free_key (obj_key_t *key);
-
-extern obj_key_t *
-    obj_find_key (dlq_hdr_t *que,
-		  const xmlChar *keycompname);
-
-extern obj_key_t *
-    obj_find_key2 (dlq_hdr_t *que,
-		   const obj_template_t *keyobj);
-
-extern boolean
-    obj_any_notifs (dlq_hdr_t *datadefQ);
-
-/* malloc an object ID */
-extern status_t
-    obj_gen_object_id (const obj_template_t *obj,
-		       xmlChar  **buff);
-
-/* copy an object ID to a buffer */
-extern status_t
-    obj_copy_object_id (const obj_template_t *obj,
-			xmlChar  *buff,
-			uint32 bufflen,
-			uint32 *reallen);
-
-extern uint32
-    obj_get_object_id_len (const obj_template_t *obj);
-
-extern status_t
-    obj_gen_aughook_id (const obj_template_t *obj,
-			xmlChar  **buff);
-
 extern boolean
     obj_is_data (const obj_template_t *obj);
 
 extern boolean
     obj_is_data_db (const obj_template_t *obj);
-
-extern const xmlChar *
-    obj_get_defval (const obj_template_t *obj);
-
-extern uint32
-    obj_get_level (const obj_template_t *obj);
-
-extern boolean
-    obj_has_typedefs (const obj_template_t *obj);
 
 extern boolean
     obj_is_empty (const obj_template_t *obj);
@@ -624,5 +707,21 @@ extern boolean
 extern boolean
     obj_is_match (const obj_template_t  *obj1,
 		  const obj_template_t *obj2);
+
+extern boolean
+    obj_ok_for_cli (const obj_template_t *obj);
+
+/*********** HELP functions *****************/
+extern void
+    obj_dump_template (const obj_template_t *obj,
+		       boolean full,
+		       uint32 nestlevel,
+		       uint32 indent);
+
+extern void
+    obj_dump_datadefQ (const dlq_hdr_t *datadefQ,
+		       boolean full,
+		       uint32 nestlevel,
+		       uint32 indent);
 
 #endif	    /* _H_obj */

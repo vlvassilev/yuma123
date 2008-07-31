@@ -10,6 +10,7 @@
 date         init     comment
 ----------------------------------------------------------------------
 19dec05      abb      begun
+21jul08      abb      start obj-based rewrite
 
 *********************************************************************
 *                                                                   *
@@ -52,8 +53,8 @@ date         init     comment
 #include "ncxconst.h"
 #endif
 
-#ifndef _H_ps
-#include "ps.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_ses
@@ -70,6 +71,10 @@ date         init     comment
 
 #ifndef _H_val
 #include "val.h"
+#endif
+
+#ifndef _H_val_util
+#include "val_util.h"
 #endif
 
 #ifndef _H_xml_util
@@ -112,29 +117,6 @@ static boolean
     return FALSE;
 
 }  /* need_quotes */
-
-
-/********************************************************************
-* FUNCTION new_index
-* 
-* Malloc and initialize the fields in a val_index_t
-*
-* RETURNS:
-*   pointer to the malloced and initialized struct or NULL if an error
-*********************************************************************/
-static val_index_t * 
-    new_index (val_value_t *valnode)
-{
-    val_index_t  *in;
-
-    in = m__getObj(val_index_t);
-    if (!in) {
-	return NULL;
-    }
-    in->val = valnode;
-    return in;
-
-}  /* new_index */
 
 
 /********************************************************************
@@ -601,7 +583,6 @@ static status_t
 
     /* get the data type to determine if a quoted string is needed */
     switch (val->btyp) {
-    case NCX_BT_ENAME:
     case NCX_BT_ENUM:
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
@@ -647,16 +628,6 @@ static status_t
 
     /* get the index component value */
     switch (val->btyp) {
-    case NCX_BT_ENAME:
-	/* do not generate XML element version, just the name */
-	if (buff) {
-	    cnt = xml_strcpy(buff, VAL_USTR(val));
-	    buff += cnt;
-	    total += cnt;
-	} else {
-	    total += xml_strlen(VAL_USTR(val));
-	}
-	break;
     case NCX_BT_BOOLEAN:
     case NCX_BT_ENUM:
     case NCX_BT_INT8:
@@ -778,8 +749,6 @@ static status_t
 	contab = FALSE;
 	simval = FALSE;
 	break;
-    case NCX_BT_XCONTAINER:
-	return NO_ERR;
     case NCX_BT_CHOICE:
 	return SET_ERROR(ERR_INTERNAL_VAL);
     case NCX_BT_CONTAINER:
@@ -913,8 +882,7 @@ static status_t
 * INPUTS:
 *   format == desired output format
 *   full == full or partial format
-*   ptyp == node type wrt/ instance ID chain nodes
-*   node == node to generate instance string for
+*   val == value node to generate instance string for
 *   buff = buffer to hold result; NULL == get length only
 *   
 * OUTPUTS:
@@ -926,15 +894,10 @@ static status_t
 static status_t
     get_instance_string (ncx_instfmt_t format,
 			 boolean full,
-			 ncx_node_t  ptyp,
-			 const void *node,
+			 const val_value_t *val,
 			 xmlChar *buff,
 			 uint32  *len)
 {
-    const val_value_t  *val;
-    const ps_parm_t    *parm;
-    const ps_parmset_t *ps;
-    const cfg_app_t    *app;
     const xmlChar      *name;
     uint32              cnt, total;
     status_t            res;
@@ -950,87 +913,19 @@ static status_t
     /* process the specific node type 
      * Recurively find the top node and start there
      */
-    switch (ptyp) {
-    case NCX_NT_VAL:
-	val = (const val_value_t *)node;
-	switch (val->parent_typ) {
-	case NCX_NT_VAL:
-	    res = get_instance_string(format, full, NCX_NT_VAL, 
-		      val->parent, buff, &cnt);
-	    name = val->name;
-	    break;
-	case NCX_NT_PARM:
-	    /* do not add a name component for the value, just the parm */
-	    parm = (const ps_parm_t *)val->parent;
-
-	    /* check if this is a parm from the RPC parmset and
-	     * stop recursing if it is an RPC parm
-	     */
-	    if (!full && parm->parent->psd_type == PSD_TYP_RPC) {
-		*len = 0;
-		return NO_ERR;
-	    }
-	    /* recurse and keep looking for the root */
-	    res = get_instance_string(format, full, NCX_NT_PARMSET, 
-		      parm->parent, buff, &cnt);
-	    name = parm->parm->name;
-	    break;
-	default:
-	    /* no name information to create an instance ID */
-	    name = val->name;
-	}
-	break;
-    case NCX_NT_PARM:
-	/* check if this is a parm from the RPC parmset and
-	 * stop recursing if it is an RPC parm
-	 */
-	parm = (const ps_parm_t *)node;
-	if (!full && parm->parent->psd_type == PSD_TYP_RPC) {
-	    *len = 0;
-	    return NO_ERR;
-	}
-	/* recurse and keep looking for the root */
-	if (parm->parent) {
-	    res = get_instance_string(format, full, NCX_NT_PARMSET, 
-		      parm->parent, buff, &cnt);
-	} 
-	name = parm->parm->name;
-	break;
-    case NCX_NT_PARMSET:
-	ps = (const ps_parmset_t *)node;
-	if (!full && ps->psd_type == PSD_TYP_RPC) {
-	    /* got to the RPC parmset, so need to stop */
-	    *len = 0;
-	    return NO_ERR;
-	}
-	if (ps->parent) {
-	    res = get_instance_string(format, full, NCX_NT_APP, 
-		      ps->parent, buff, &cnt);
-	} 
-	if (ps->psd_type == PSD_TYP_RPC) {
-	    root = TRUE;
-	    name = ps->name;
-	} else {
-	    name = ps->psd->name;
-	}
-
-	break;
-    case NCX_NT_APP:
-	app = (const cfg_app_t *)node;
-	if (app->parent) {
-	    res = get_instance_string(format, full, NCX_NT_VAL, 
-		      app->parent, buff, &cnt);
-	}
-	name = app->appdef->appname;
-	break;
-    default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
+    if (val->parent) {
+	res = get_instance_string(format, full, val->parent, 
+				  buff, &cnt);
+    } else {
+	root = TRUE;
     }
 
-    /* check result from parent -- if any */
     if (res != NO_ERR) {
 	return res;
     }
+
+    name = val->name;
+
     /* else move the buffer pointer to the end to append */
     if (buff) {
 	buff += cnt;
@@ -1076,16 +971,7 @@ static status_t
 
     /* check if this is a value node with an index clause */
     if (val) {
-	switch (val->btyp) {
-	case NCX_BT_XCONTAINER:
-	    /* nothing more to do for the container */
-	    break;
-	default:
-	    if (!(val->flags & VAL_FL_CONTAB)) {
-		break;
-	    }
-	    /* else contab child so fall through and get index */
-	case NCX_BT_LIST:
+	if (val->btyp == NCX_BT_LIST) {
 	    res = get_index_string(format, val, buff, &cnt);
 	    if (res == NO_ERR) {
 		if (buff) {
@@ -1124,7 +1010,6 @@ static void
 {
     val_value_t   *cur;
     val_metaerr_t *merr;
-    cfg_app_t     *app;
     val_index_t   *in;
     ncx_btype_t    btyp;
 
@@ -1152,7 +1037,6 @@ static void
 	ncx_clean_enum(&val->v.enu);
 	break;
     case NCX_BT_STRING:
-    case NCX_BT_ENAME:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
 	ncx_clean_str(&val->v.str);
@@ -1161,10 +1045,6 @@ static void
     case NCX_BT_BITS:
 	ncx_clean_list(&val->v.list);
 	break;
-    case NCX_BT_XLIST:
-	ncx_clean_xlist(&val->v.xlist);
-	break;
-    case NCX_BT_XCONTAINER:
     case NCX_BT_LIST:
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
@@ -1172,12 +1052,6 @@ static void
 	while (!dlq_empty(&val->v.childQ)) {
 	    cur = (val_value_t *)dlq_deque(&val->v.childQ);
 	    val_free_value(cur);
-	}
-	break;
-    case NCX_BT_ROOT:
-	while (!dlq_empty(&val->v.appQ)) {
-	    app = (cfg_app_t *)dlq_deque(&val->v.appQ);
-	    cfg_free_appnode(app);
 	}
 	break;
     case NCX_BT_EXTERN:
@@ -1285,7 +1159,6 @@ static void
 #endif
 	break;
     case NCX_BT_STRING:
-    case NCX_BT_ENAME:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
 	ncx_clean_str(&dest->v.str);
@@ -1305,7 +1178,7 @@ static void
 * Check 2 val_value structs for the same instance ID
 * 
 * The node data types must match, and must be
-*    NCX_BT_LIST or NCX_BT_XCONTAINER
+*    NCX_BT_LIST
 *
 * All index components must exactly match.
 * 
@@ -1326,15 +1199,14 @@ static int32
     const val_index_t *c1, *c2;
     int32              cmp, ret;
 
-    /* only tables and container child nodes have index chains */
-    if (!(typ_get_basetype(val1->typdef)==NCX_BT_LIST ||
-	  val1->flags & VAL_FL_CONTAB)) {
+    /* only lists have index chains */
+    if (val1->obj->objtype != OBJ_TYP_LIST) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return -2;
     }
 
-    /* typdefs must exactly match */
-    if (val1->typdef != val2->typdef) {
+    /* object templates must exactly match */
+    if (val1->obj != val2->obj) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return -2;
     }
@@ -1435,11 +1307,7 @@ void
 		      ncx_btype_t btyp)
 {
     val->btyp = btyp;
-    if (btyp==NCX_BT_ROOT) {
-	dlq_createSQue(&val->v.appQ);
-    } else {
-	dlq_createSQue(&val->v.childQ);
-    }
+    dlq_createSQue(&val->v.childQ);
 
 }  /* val_init_complex */
 
@@ -1458,9 +1326,10 @@ void
 void
     val_init_root (val_value_t *val)
 {
-    val->btyp = NCX_BT_ROOT;
-    dlq_createSQue(&val->v.appQ);
-    val->typdef = typ_get_basetype_typdef(NCX_BT_ROOT);
+    val_init_complex(val, NCX_BT_CONTAINER);
+    val->btyp = NCX_BT_CONTAINER;
+    val->obj = NULL;   /***/
+    val->typdef = NULL;
     val->name = NCX_EL_CONFIG;
     val->nsid = xmlns_nc_id();
 
@@ -1477,14 +1346,14 @@ void
 * INPUTS:
 *   val == pointer to the malloced struct to initialize
 *   cbfn == get callback function to use
-*   typ == type template to use
+*   obj == object template to use
 *********************************************************************/
 void
     val_init_virtual (val_value_t *val,
 		      void  *cbfn,
-		      typ_template_t *typ)
+		      const obj_template_t *obj)
 {
-    val_init_from_template(val, typ);
+    val_init_from_template(val, obj);
     val->getcb = cbfn;
 
 }  /* val_init_virtual */
@@ -1499,26 +1368,28 @@ void
 *
 * INPUTS:
 *   val == pointer to the malloced struct to initialize
-*   typ == type template to use
+*   obj == object template to use
 *********************************************************************/
 void
     val_init_from_template (val_value_t *val,
-			    typ_template_t *typ)
+			    const obj_template_t *obj)
 {
     const typ_template_t  *listtyp;
-    ncx_btype_t      btyp;
+    ncx_btype_t            btyp;
 
-    val->typdef = &typ->typdef;
-    val->btyp = typ_get_basetype(val->typdef);
-
+    val->obj = obj;
+    val->typdef = obj_get_ctypdef(obj);
+    val->btyp = obj_get_basetype(obj);
+    val->name = obj_get_name(obj);
+    if (obj->parent && obj->parent->objtype==OBJ_TYP_CASE) {
+	val->casobj = obj->parent;
+    }
     if (!typ_is_simple(val->btyp)) {
 	val_init_complex(val, val->btyp);
     } else if (val->btyp == NCX_BT_SLIST) {
 	listtyp = typ_get_clisttyp(val->typdef);
 	btyp = typ_get_basetype(&listtyp->typdef);
 	ncx_init_list(&val->v.list, btyp);
-    } else if (val->btyp == NCX_BT_XLIST) {
-	ncx_init_xlist(&val->v.xlist);
     }
 
 }  /* val_init_from_template */
@@ -1696,7 +1567,6 @@ status_t
     switch (btyp) {
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
-    case NCX_BT_ENAME:
 	break;
     case NCX_BT_INSTANCE_ID:
 	return NO_ERR;  /*** BUG: MISSING INSTANCE ID VALIDATION ***/
@@ -1782,192 +1652,6 @@ status_t
     /*NOTREACHED*/
 
 } /* val_string_ok */
-
-
-/********************************************************************
-* FUNCTION val_xlist_ok
-* 
-* Check a list to make sure the all the strings are valid based
-* on the specified typdef
-*
-* Validate all the ncx_lstr_t entries in the list
-* against the specified typdef.  Mark any errors
-* in the ncx_lstr_t flags field of each string 
-* in the list with an error.
-*
-* INPUTS:
-*    typdef == typ_def_t for the designated list type
-*    list == list struct of ncx_lstr_t strings to check
-*
-* OUTPUTS:
-*   If return other than NO_ERR:
-*     each list->lstr.flags field may contain bits set
-*     for errors:
-*        NCX_FL_RANGE_ERR: size out of range
-*        NCX_FL_VALUE_ERR  value not permitted by value set, 
-*                          or pattern
-* RETURNS:
-*    status
-*********************************************************************/
-status_t
-    val_xlist_ok (const typ_def_t *typdef,
-		  ncx_xlist_t *list)
-{
-    const typ_def_t       *randef, *valdef;
-    const typ_listval_t   *lval, *loopstart;
-    const dlq_hdr_t        *restQ, *rangeQ;
-    ncx_lstr_t      *lstr;
-    ncx_strrest_t    strrest;
-    ncx_num_t        len;
-    status_t         res, retres;
-    boolean          done;
-
-#ifdef DEBUG
-    if (!typdef || !list) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    retres = NO_ERR;
-    rangeQ = NULL;
-    restQ = NULL;
-
-    /* get the typdef for the range def, if any 
-     * Only one rangedef is allowed, regardless of 
-     * string position within the list
-     */
-    randef = typ_get_cqual_typdef(typdef, NCX_SQUAL_RANGE);
-    if (randef) {
-	switch (randef->class) {
-	case NCX_CL_SIMPLE:
-	    rangeQ = &randef->def.simple.rangeQ;
-	    break;
-	case NCX_CL_NAMED:
-	    rangeQ = &randef->def.named.newtyp->def.simple.rangeQ;
-	    break;
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-
-    /* check if value restriction processing is needed 
-     * Fot lists, only 1 typdef is allowed to define
-     * value sets, or patterns
-     * This does not have to be the same typdef that defines
-     * a range for all the string lengths in the list
-     */
-    valdef = typ_get_cqual_typdef(typdef, NCX_SQUAL_VAL);
-    if (valdef) {
-	switch (valdef->class) {
-	case NCX_CL_SIMPLE:
-	    restQ = &valdef->def.simple.valQ;
-	    strrest = valdef->def.simple.strrest;
-	    break;
-	case NCX_CL_NAMED:
-	    restQ = &valdef->def.named.newtyp->def.simple.valQ;
-	    strrest = valdef->def.named.newtyp->def.simple.strrest;
-	    break;
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-
-    /* check if there even are any restrictions */
-    if (!randef && !valdef) {
-	return NO_ERR;
-    }
-
-    /* determine the restrictions to check by the
-     * position in the list of each string 
-     * check the pattern or regext for the position
-     * considering the instance qualifiers of the position
-     * The size range (if any) applies regardless of position
-     */
-    retres = NO_ERR;
-    if (restQ) {
-	lval = (const typ_listval_t *)dlq_firstEntry(restQ);
-    }
-
-    for (lstr = (ncx_lstr_t *)dlq_firstEntry(&list->strQ);
-	 lstr != NULL;
-	 lstr = (ncx_lstr_t *)dlq_nextEntry(lstr)) {
-
-	/* check if we already ran out of value restriction positions */
-	if (valdef && !lval) {
-	    retres = (retres==NO_ERR) ? ERR_NCX_EXTRA_LISTSTR : retres;
-	    lstr->flags |= NCX_FL_VALUE_ERR;
-	    continue;
-	}
-	    
-	/* check the string length range if any */
-	if (rangeQ) {
-	    len.u = xml_strlen(lstr->str);
-	    res = val_check_rangeQ(NCX_BT_UINT32, &len, rangeQ);
-	    if (res != NO_ERR) {
-		retres = (retres==NO_ERR) ? res : retres;
-		lstr->flags |= NCX_FL_RANGE_ERR;
-	    }
-	}
-
-	/* check the value restrictions if any */
-	if (restQ) {
-	    done = FALSE;
-	    loopstart = lval;
-	    while (!done) {
-		res = check_svalQ(lstr->str, strrest, &lval->strQ);
-		if (res != NO_ERR) {
-		    /* the string did not match this pattern */
-		    switch (lval->iqual) {
-		    case NCX_IQUAL_ONE:
-		    case NCX_IQUAL_1MORE:
-			/* this is an error because the current
-			 * string position requires exactly 1 instance
-			 * or at least 1 instance
-			 */
-			retres = (retres==NO_ERR) ? res : retres;
-			lstr->flags |= NCX_FL_VALUE_ERR;
-			lval = (typ_listval_t *)dlq_nextEntry(lval);
-			done = TRUE;
-			break;
-		    case NCX_IQUAL_OPT:
-		    case NCX_IQUAL_ZMORE:
-			/* try the next value set or pattern */
-			lval = (typ_listval_t *)dlq_nextEntry(lval);
-			if (!lval) {
-			    /* ran out of value / pattern choices */
-			    retres = (retres==NO_ERR) ? res : retres;
-			    lstr->flags |= NCX_FL_VALUE_ERR;
-			    lval = loopstart;
-			    done = TRUE;
-			} 
-			break;
-		    default:
-			return SET_ERROR(ERR_INTERNAL_VAL);
-		    }
-		} else {
-		    /* the string matched this check */
-		    done = TRUE;
-		    switch (lval->iqual) {
-		    case NCX_IQUAL_ONE:
-		    case NCX_IQUAL_OPT:	
-			/* pattern matched, so time to move to next one */
-			lval = (typ_listval_t *)dlq_nextEntry(lval);	
-			break;
-		    case NCX_IQUAL_1MORE:
-		    case NCX_IQUAL_ZMORE:
-			/* keep using this value set or pattern */
-			break;
-		    default:
-			return SET_ERROR(ERR_INTERNAL_VAL);
-		    }
-		}
-	    }  /* while more patterns to check */
-	}  /* if any value checks */
-    } /* for all the string values in the ncx_xlist_t */
-
-    return retres;
-
-} /* val_xlist_ok */
 
 
 /********************************************************************
@@ -2352,7 +2036,6 @@ status_t
     val_value_t            *unval;
     const typ_template_t   *listtyp;
     ncx_num_t               num;
-    ncx_xlist_t             xlist;
     ncx_list_t              list;
     status_t                res;
     ncx_btype_t             btyp, listbtyp;
@@ -2379,15 +2062,11 @@ status_t
 	res = ERR_NCX_DEF_NOT_FOUND;
 	break;
     case NCX_BT_ANY:
-    case NCX_BT_ROOT:
 	res = ERR_NCX_INVALID_VALUE;
 	break;
     case NCX_BT_BITS:
 	/****/
 	res = NO_ERR;
-	break;
-    case NCX_BT_ENAME:
-	res = val_string_ok(typdef, btyp, simval);
 	break;
     case NCX_BT_ENUM:
 	res = val_enum_ok(typdef, simval, &retval, &retstr);
@@ -2460,18 +2139,9 @@ status_t
 	}
 	ncx_clean_list(&list);
 	break;
-    case NCX_BT_XLIST:
-	ncx_init_xlist(&xlist);
-	res = ncx_set_xlist(simval, &xlist);
-	if (res==NO_ERR) {
-	    res = val_xlist_ok(typdef, &xlist);
-	}
-	ncx_clean_xlist(&xlist);
-	break;
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
 	res = ERR_NCX_INVALID_VALUE;
@@ -2569,10 +2239,7 @@ void
 		    int32 startindent)
 {
     const val_value_t  *chval;
-    const ncx_lstr_t   *liststr;
     const ncx_lmem_t   *listmem;
-    const cfg_app_t    *app;
-    const ps_parmset_t *ps;
     xmlChar            *buff;
     ncx_btype_t         btyp, lbtyp;
     uint32              len;
@@ -2617,7 +2284,7 @@ void
     }
 
     /* check if an index clause needs to be printed next */
-    if (val->flags & VAL_FL_CONTAB || !dlq_empty(&val->indexQ)) {
+    if (!dlq_empty(&val->indexQ)) {
 	res = get_index_string(NCX_IFMT_CLI, val, NULL, &len);
 	if (res == NO_ERR) {
 	    buff = m__getMem(len+1);
@@ -2647,30 +2314,6 @@ void
 	break;
     case NCX_BT_ANY:
 	log_write("(any)");
-	break;
-    case NCX_BT_ROOT:
-	log_write("{");
-	for (app = (cfg_app_t *)dlq_firstEntry(&val->v.appQ);
-	     app != NULL;
-	     app = (cfg_app_t *)dlq_nextEntry(app)) {
-
-	    ncx_printf_indent((startindent >=0) ?
-			      startindent+NCX_DEF_INDENT :
-			      startindent);
-	    log_write("%s {", app->appdef->appname);
-	    for (ps = (const ps_parmset_t *)dlq_firstEntry(&app->parmsetQ);
-		 ps != NULL;
-		 ps = (const ps_parmset_t *)dlq_nextEntry(ps)) {
-		ps_dump_parmset(ps, (startindent >= 0) ?
-				startindent+(NCX_DEF_INDENT*2) : startindent);
-	    }
-	    ncx_printf_indent((startindent >=0) ?
-			      startindent+NCX_DEF_INDENT :
-			      startindent);
-	    log_write("}");
-	}
-	ncx_printf_indent(startindent);
-	log_write("}");
 	break;
     case NCX_BT_ENUM:
 	log_write("%s", (const char *)val->v.enu.name);
@@ -2713,11 +2356,6 @@ void
 	    }
 	}
 	break;
-    case NCX_BT_ENAME:
-	if (VAL_STR(val)) {
-	    log_write("%s", (const char *)VAL_STR(val));
-	}
-	break;
     case NCX_BT_SLIST:
 	if (dlq_empty(&val->v.list.memQ)) {
 	    log_write("{ }");
@@ -2758,44 +2396,7 @@ void
 	    log_write("}");
 	}
 	break;
-    case NCX_BT_XLIST:
-	if (dlq_empty(&val->v.xlist.strQ)) {
-	    log_write("{ }");
-	} else {
-	    log_write("{");
-	    for (liststr = 
-		     (const ncx_lstr_t *)dlq_firstEntry(&val->v.xlist.strQ);
-		 liststr != NULL;
-		 liststr = (const ncx_lstr_t *)dlq_nextEntry(liststr)) {
-		if (!liststr->str) {
-		    continue;
-		}
-		if (startindent >= 0) {
-		    ncx_printf_indent(startindent+NCX_DEF_INDENT);
-		}
-		quotes = need_quotes(liststr->str);
-		if (quotes) {
-		    log_write("%c", VAL_QUOTE_CH);
-		}		    
-		log_write("%s", liststr->str);
-#ifdef VAL_DEBUG
-		if (liststr->flags & NCX_FL_RANGE_ERR) {
-		    log_write(" [RANGE ERR]");
-		}
-		if (liststr->flags & NCX_FL_VALUE_ERR) {
-		    log_write(" [VALUE ERR]");
-		}
-#endif
-		if (quotes) {
-		    log_write("%c", VAL_QUOTE_CH);
-		}	    
-	    }
-	    ncx_printf_indent(startindent);
-	    log_write("}");
-	}
-	break;
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
 	log_write("{");
@@ -2864,10 +2465,7 @@ void
 		      int32 startindent)
 {
     const val_value_t  *chval;
-    const ncx_lstr_t   *liststr;
     const ncx_lmem_t   *listmem;
-    const cfg_app_t    *app;
-    const ps_parmset_t *ps;
     xmlChar            *buff;
     ncx_btype_t         btyp, lbtyp;
     uint32              len;
@@ -2912,7 +2510,7 @@ void
     }
 
     /* check if an index clause needs to be printed next */
-    if (val->flags & VAL_FL_CONTAB || !dlq_empty(&val->indexQ)) {
+    if (!dlq_empty(&val->indexQ)) {
 	res = get_index_string(NCX_IFMT_CLI, val, NULL, &len);
 	if (res == NO_ERR) {
 	    buff = m__getMem(len+1);
@@ -2942,31 +2540,6 @@ void
 	break;
     case NCX_BT_ANY:
 	log_stdout("(any)");
-	break;
-    case NCX_BT_ROOT:
-	log_stdout("{");
-	for (app = (cfg_app_t *)dlq_firstEntry(&val->v.appQ);
-	     app != NULL;
-	     app = (cfg_app_t *)dlq_nextEntry(app)) {
-
-	    ncx_stdout_indent((startindent >=0) ?
-			      startindent+NCX_DEF_INDENT :
-			      startindent);
-	    log_stdout("%s {", app->appdef->appname);
-	    for (ps = (const ps_parmset_t *)dlq_firstEntry(&app->parmsetQ);
-		 ps != NULL;
-		 ps = (const ps_parmset_t *)dlq_nextEntry(ps)) {
-		ps_stdout_parmset(ps, (startindent >= 0) ?
-				  startindent+(NCX_DEF_INDENT*2) 
-				  : startindent);
-	    }
-	    ncx_stdout_indent((startindent >=0) ?
-			       startindent+NCX_DEF_INDENT :
-			       startindent);
-	    log_stdout("}");
-	}
-	ncx_stdout_indent(startindent);
-	log_stdout("}");
 	break;
     case NCX_BT_ENUM:
 	log_stdout("%s", (const char *)val->v.enu.name);
@@ -3000,11 +2573,6 @@ void
 	    if (quotes) {
 		log_stdout("%c", VAL_QUOTE_CH);
 	    }
-	}
-	break;
-    case NCX_BT_ENAME:
-	if (VAL_STR(val)) {
-	    log_stdout("%s", (const char *)VAL_STR(val));
 	}
 	break;
     case NCX_BT_SLIST:
@@ -3047,44 +2615,7 @@ void
 	    log_stdout("}");
 	}
 	break;
-    case NCX_BT_XLIST:
-	if (dlq_empty(&val->v.xlist.strQ)) {
-	    log_stdout("{ }");
-	} else {
-	    log_stdout("{");
-	    for (liststr = 
-		     (const ncx_lstr_t *)dlq_firstEntry(&val->v.xlist.strQ);
-		 liststr != NULL;
-		 liststr = (const ncx_lstr_t *)dlq_nextEntry(liststr)) {
-		if (!liststr->str) {
-		    continue;
-		}
-		if (startindent >= 0) {
-		    ncx_stdout_indent(startindent+NCX_DEF_INDENT);
-		}
-		quotes = need_quotes(liststr->str);
-		if (quotes) {
-		    log_stdout("%c", VAL_QUOTE_CH);
-		}		    
-		log_stdout("%s", liststr->str);
-#ifdef VAL_DEBUG
-		if (liststr->flags & NCX_FL_RANGE_ERR) {
-		    log_stdout(" [RANGE ERR]");
-		}
-		if (liststr->flags & NCX_FL_VALUE_ERR) {
-		    log_stdout(" [VALUE ERR]");
-		}
-#endif
-		if (quotes) {
-		    log_stdout("%c", VAL_QUOTE_CH);
-		}
-	    }
-	    ncx_stdout_indent(startindent);
-	    log_stdout("}");
-	}
-	break;
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
 	log_stdout("{");
@@ -3219,7 +2750,6 @@ status_t
     val->nsid = 0;
 
     switch (val->btyp) {
-    case NCX_BT_ENAME:
     case NCX_BT_BINARY:
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
@@ -3315,7 +2845,6 @@ status_t
 *  NCX_BT_UINT64
 *  NCX_BT_FLOAT32
 *  NCX_BT_FLOAT64
-*  NCX_BT_ENAME
 *  NCX_BT_BINARY
 *  NCX_BT_STRING
 *  NCX_BT_INSTANCE_ID
@@ -3323,7 +2852,6 @@ status_t
 *  NCX_BT_EMPTY
 *  NCX_BT_BOOLEAN
 *  NCX_BT_SLIST
-*  NCX_BT_XLIST
 *  NCX_BT_UNION
 *
 * INPUTS:
@@ -3396,7 +2924,6 @@ status_t
 	    res = ERR_INTERNAL_MEM;
 	}
 	break;
-    case NCX_BT_ENAME:
     case NCX_BT_STRING:
 	VAL_STR(val) = xml_strdup(valstr);
 	if (!VAL_STR(val)) {
@@ -3426,9 +2953,6 @@ status_t
 	break;
     case NCX_BT_SLIST:
 	res = ncx_set_strlist(valstr, &val->v.list);
-	break;
-    case NCX_BT_XLIST:
-	res = ncx_set_xlist(valstr, &val->v.xlist);
 	break;
     case NCX_BT_UNION:
 	/* set as generic string -- parser as other end will
@@ -3557,12 +3081,7 @@ boolean
     case NCX_IQUAL_1MORE:
     case NCX_IQUAL_ZMORE:
 	/* check if parent param is valid */
-	if (dest->parent_typ == NCX_NT_VAL) {
-	    parent = (val_value_t *)dest->parent;
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return TRUE;
-	}
+	parent = dest->parent;
 
 	/* check if entry already exists */
 
@@ -3578,7 +3097,6 @@ boolean
 	    case NCX_MERGE_FIRST:
 		first = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
 		if (first) {
-		    src->parent_typ = NCX_NT_VAL;
 		    src->parent = parent;
 		    dlq_insertAhead(src, first);
 		} else {
@@ -3616,7 +3134,6 @@ boolean
 	case NCX_BT_FLOAT32:
 	case NCX_BT_FLOAT64:
 	case NCX_BT_STRING:
-	case NCX_BT_ENAME:
 	case NCX_BT_BINARY:
 	case NCX_BT_INSTANCE_ID:
 	    merge_simple(btyp, src, dest);
@@ -3644,9 +3161,6 @@ boolean
 	    ncx_merge_list(&src->v.list, &dest->v.list,
 			   mergetyp, dupsok, 
 			   typ_get_crangeQ(dest->typdef));
-	    break;
-	case NCX_BT_XLIST:
-	    ncx_merge_xlist(&src->v.xlist, &dest->v.xlist, mergetyp);
 	    break;
 	case NCX_BT_CHOICE:
 	    /* check if a different choice member is being set */
@@ -3679,10 +3193,8 @@ boolean
 
 	    break;
 	case NCX_BT_ANY:
-	case NCX_BT_ROOT:
 	case NCX_BT_CONTAINER:
 	case NCX_BT_LIST:
-	case NCX_BT_XCONTAINER:
 	    /* TBD: should not happen */
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	    return TRUE;
@@ -3765,7 +3277,6 @@ val_value_t *
     val_clone (const val_value_t *val)
 {
     const val_value_t *ch;
-    const typ_index_t *in;
     val_value_t       *copy, *copych;
     status_t           res;
 
@@ -3783,6 +3294,7 @@ val_value_t *
 
     /* copy all the fields */
     copy->btyp = val->btyp;
+    copy->obj = val->obj;
     copy->typdef = val->typdef;
     copy->nsid = val->nsid;
     if (val->dname) {
@@ -3804,7 +3316,6 @@ val_value_t *
 
     /**** THIS MAY NEED TO CHANGE !!! ****/
     copy->parent = val->parent;
-    copy->parent_typ = val->parent_typ;
 
     /* copy meta-data */
     for (ch = (const val_value_t *)dlq_firstEntry(&val->metaQ);
@@ -3843,7 +3354,6 @@ val_value_t *
 	res = ncx_copy_num(&val->v.num, &copy->v.num, val->btyp);
 	break;
     case NCX_BT_STRING:	
-    case NCX_BT_ENAME:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
 	res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
@@ -3851,12 +3361,7 @@ val_value_t *
     case NCX_BT_SLIST:
 	res = ncx_copy_list(&val->v.list, &copy->v.list);
 	break;
-    case NCX_BT_XLIST:
-	res = ncx_copy_xlist(&val->v.xlist, &copy->v.xlist);
-	break;
-    case NCX_BT_ROOT:
     case NCX_BT_ANY:
-    case NCX_BT_XCONTAINER:
     case NCX_BT_LIST:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
@@ -3868,7 +3373,6 @@ val_value_t *
 	    if (!copych) {
 		res = ERR_INTERNAL_MEM;
 	    } else {
-		copych->parent_typ = NCX_NT_VAL;
 		copych->parent = copy;
 		dlq_enque(copych, &copy->v.childQ);
 	    }
@@ -3897,9 +3401,7 @@ val_value_t *
 
     /* reconstruct index records if needed */
     if (res==NO_ERR && !dlq_empty(&val->indexQ)) {
-	in = (const typ_index_t *)
-	    dlq_firstEntry(&val->typdef->def.complex.indexQ);
-	res = val_gen_index_chain(in, copy);
+	res = val_gen_index_chain(val->obj, copy);
     }
 
     if (res != NO_ERR) {
@@ -3931,7 +3433,6 @@ status_t
 {
     const val_value_t *ch;
     val_value_t       *copych;
-    const typ_index_t *in;
     status_t           res;
 
 #ifdef DEBUG
@@ -3963,7 +3464,6 @@ status_t
 
     /**** THIS MAY NEED TO CHANGE !!! ****/
     copy->parent = val->parent;
-    copy->parent_typ = val->parent_typ;
 
     /* copy meta-data */
     for (ch = (const val_value_t *)dlq_firstEntry(&val->metaQ);
@@ -4000,7 +3500,6 @@ status_t
 	res = ncx_copy_num(&val->v.num, &copy->v.num, val->btyp);
 	break;
     case NCX_BT_STRING:	
-    case NCX_BT_ENAME:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
 	res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
@@ -4008,12 +3507,7 @@ status_t
     case NCX_BT_SLIST:
 	res = ncx_copy_list(&val->v.list, &copy->v.list);
 	break;
-    case NCX_BT_XLIST:
-	res = ncx_copy_xlist(&val->v.xlist, &copy->v.xlist);
-	break;
-    case NCX_BT_ROOT:
     case NCX_BT_ANY:
-    case NCX_BT_XCONTAINER:
     case NCX_BT_LIST:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
@@ -4025,7 +3519,6 @@ status_t
 	    if (!copych) {
 		res = ERR_INTERNAL_MEM;
 	    } else {
-		copych->parent_typ = NCX_NT_VAL;
 		copych->parent = copy;
 		dlq_enque(copych, &copy->v.childQ);
 	    }
@@ -4053,9 +3546,7 @@ status_t
 
     /* reconstruct index records if needed */
     if (res==NO_ERR && !dlq_empty(&val->indexQ)) {
-	in = (const typ_index_t *)
-	    dlq_firstEntry(&val->typdef->def.complex.indexQ);
-	res = val_gen_index_chain(in, copy);
+	res = val_gen_index_chain(val->obj, copy);
     }
 
     return res;
@@ -4086,8 +3577,7 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    val_gen_instance_id (ncx_node_t nodetyp,
-			 const void  *node, 
+    val_gen_instance_id (const val_value_t  *val, 
 			 ncx_instfmt_t format,
 			 boolean full,
 			 xmlChar  **buff)
@@ -4096,13 +3586,13 @@ status_t
     status_t  res;
 
 #ifdef DEBUG 
-    if (!node || !buff) {
+    if (!val || !buff) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* figure out the length of the parmset instance ID */
-    res = get_instance_string(format, full, nodetyp, node, NULL, &len);
+    res = get_instance_string(format, full, val, NULL, &len);
     if (res != NO_ERR) {
 	return res;
     }
@@ -4120,7 +3610,7 @@ status_t
     }
 
     /* get the instance ID string for real this time */
-    res = get_instance_string(format, full, nodetyp, node, *buff, &len);
+    res = get_instance_string(format, full, val, *buff, &len);
     if (res != NO_ERR) {
 	m__free(*buff);
 	*buff = NULL;
@@ -4131,143 +3621,6 @@ status_t
     return NO_ERR;
 
 }  /* val_gen_instance_id */
-
-
-/********************************************************************
- * FUNCTION val_gen_index_comp
- * 
- * Create an index component
- *
- * INPUTS:
- *   in == typ_index_t in the chain to process
- *   val == the just parsed table row with the childQ containing
- *          nodes to check as index nodes
- *
- * OUTPUTS:
- *   val->indexQ will get a val_index_t record added if return NO_ERR
- *
- * RETURNS:
- *   status
- *********************************************************************/
-status_t 
-    val_gen_index_comp  (const typ_index_t *in,
-			 val_value_t *val)
-{
-    val_value_t       *chval, *scopeval;
-    val_index_t       *valin;
-    status_t           res;
-    boolean            found;
-
-#ifdef DEBUG
-    if (!in || !val) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    /* 1 or more index components expected */
-    found = FALSE;
-    res = NO_ERR;
-
-    for (chval = (val_value_t *)dlq_firstEntry(&val->v.childQ);
-	 chval != NULL && !found && res==NO_ERR;
-	 chval = (val_value_t *)dlq_nextEntry(chval)) {
-	switch (in->ityp) {
-	case NCX_IT_INLINE:
-	case NCX_IT_NAMED:
-	case NCX_IT_LOCAL:
-	case NCX_IT_REMOTE:
-	    if (chval->index) {
-		continue;
-	    } else if (!xml_strcmp(in->typch.name, chval->name)) {
-		valin = new_index(chval);
-		if (!valin) {
-		    res = ERR_INTERNAL_MEM;
-		} else {
-		    /* save the index marker record */
-		    chval->index = valin;
-		    dlq_enque(valin, &val->indexQ);
-		    found = TRUE;
-		}
-	    }
-	    break;
-	case NCX_IT_SLOCAL:
-	case NCX_IT_SREMOTE:
-	    res = val_resolve_scoped_name(val, in->sname, &scopeval);
-	    if (res == NO_ERR) {
-		if (scopeval->index) {
-		    /* index value already in use, but should not
-		     * be any duplicates in an index value
-		     */
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		} else {
-		    valin = new_index(scopeval);
-		    if (!valin) {
-			res = ERR_INTERNAL_MEM;
-		    } else {
-			/* save the index marker record */
-			scopeval->index = valin;
-			dlq_enque(valin, &val->indexQ);
-			found = TRUE;
-		    }
-		}
-	    }
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-
-    if (res == NO_ERR && !found) {
-	res = ERR_NCX_MISSING_INDEX;
-    }
-
-    return res;
-
-} /* val_gen_index_comp */
-
-
-/********************************************************************
- * FUNCTION val_gen_index_chain
- * 
- * Create an index chain for the just-parsed table or container struct
- *
- * INPUTS:
- *   instart == first typ_index_t in the chain to process
- *   val == the just parsed table row with the childQ containing
- *          nodes to check as index nodes
- *
- * OUTPUTS:
- *   *val->indexQ has entries added for each index component, if NO_ERR
- *
- * RETURNS:
- *   status
- *********************************************************************/
-status_t 
-    val_gen_index_chain (const typ_index_t *instart,
-			 val_value_t *val)
-{
-    const typ_index_t *in;
-    status_t           res;
-
-#ifdef DEBUG
-    if (!instart || !val) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    /* 1 or more index components expected */
-    for (in = instart; 
-	 in != NULL;
-	 in = (const typ_index_t *)dlq_nextEntry(in)) {
-	res = val_gen_index_comp(in, val);
-	if (res != NO_ERR) {
-	    return res;
-	}
-    }
-
-    return NO_ERR;
-
-} /* val_gen_index_chain */
 
 
 /********************************************************************
@@ -4284,7 +3637,6 @@ void
     val_add_child (val_value_t *child,
 		   val_value_t *parent)
 {
-    child->parent_typ = NCX_NT_VAL;
     child->parent = parent;
     dlq_enque(child, &parent->v.childQ);
 
@@ -4305,14 +3657,12 @@ void
     val_swap_child (val_value_t *newchild,
 		    val_value_t *curchild)
 {
-    newchild->parent_typ = curchild->parent_typ;
     newchild->parent = curchild->parent;
     newchild->getcb = curchild->getcb;
     newchild->seqid = curchild->seqid;
 
     dlq_swap(newchild, curchild);
 
-    curchild->parent_typ = NCX_NT_NONE;
     curchild->parent = NULL;
 
 }   /* val_swap_child */
@@ -4358,8 +3708,7 @@ val_value_t *
 	if (!xml_strcmp(val->name, child->name)) {
 
 	    /* check for table instance match */
-	    if (val->btyp == NCX_BT_LIST || 
-		val->flags & VAL_FL_CONTAB) {
+	    if (val->btyp == NCX_BT_LIST) {
 		/* match the instance identifier if any */
 		if (val_index_match(child, val)) {
 		    return val;
@@ -4445,6 +3794,7 @@ val_value_t *
 * 
 * INPUTS:
 *    parent == parent complex type to check
+*    prefix == optional module prefix
 *    childname == name of child node to find
 *
 * RETURNS:
@@ -4452,6 +3802,7 @@ val_value_t *
 *********************************************************************/
 val_value_t *
     val_find_child (const val_value_t  *parent,
+		    const xmlChar *prefix,
 		    const xmlChar *childname)
 {
     val_value_t *val;
@@ -4470,6 +3821,10 @@ val_value_t *
     for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
 	 val != NULL;
 	 val = (val_value_t *)dlq_nextEntry(val)) {
+	if (prefix && xml_strcmp(prefix, 
+				 obj_get_mod_prefix(val->obj))) {
+	    continue;
+	}
 	if (!xml_strcmp(val->name, childname)) {
 	    return val;
 	}
@@ -4477,6 +3832,57 @@ val_value_t *
     return NULL;
 
 }  /* val_find_child */
+
+
+/********************************************************************
+* FUNCTION val_find_next_child
+* 
+* Find the next instance of the specified child node
+* The namespace ID is assumed to be the same, and is not
+* part of this check!!!
+* 
+* INPUTS:
+*    parent == parent complex type to check
+*    prefix == optional module prefix
+*    childname == name of child node to find
+*    curchild == current child of this object type to start search
+*
+* RETURNS:
+*   pointer to the child if found or NULL if not found
+*********************************************************************/
+val_value_t *
+    val_find_next_child (const val_value_t  *parent,
+			 const xmlChar *prefix,
+			 const xmlChar *childname,
+			 const val_value_t *curchild)
+{
+    val_value_t *val;
+
+#ifdef DEBUG
+    if (!parent || !childname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (!typ_has_children(parent->btyp)) {
+	return NULL;
+    }
+
+    for (val = (val_value_t *)dlq_nextEntry(curchild);
+	 val != NULL;
+	 val = (val_value_t *)dlq_nextEntry(val)) {
+	if (prefix && xml_strcmp(prefix, 
+				 obj_get_mod_prefix(val->obj))) {
+	    continue;
+	}
+	if (!xml_strcmp(val->name, childname)) {
+	    return val;
+	}
+    }
+    return NULL;
+
+}  /* val_find_next_child */
 
 
 /********************************************************************
@@ -4647,7 +4053,6 @@ val_value_t *
 * Child node must be a base type of 
 *   NCX_BT_STRING
 *   NCX_BT_BINARY
-*   NCX_BT_ENAME
 *
 * INPUTS:
 *    parent == parent complex type to check
@@ -4683,7 +4088,6 @@ val_value_t *
 	    switch (val->btyp) {
 	    case NCX_BT_STRING:
 	    case NCX_BT_BINARY:
-	    case NCX_BT_ENAME:
 	    case NCX_BT_INSTANCE_ID:
 		if (!xml_strcmp(val->v.str, strval)) {
 		    return val;
@@ -4817,9 +4221,6 @@ uint32
     case NCX_BT_SLIST:
 	cnt = ncx_list_cnt(&val->v.list);
 	break;
-    case NCX_BT_XLIST:
-	cnt = ncx_xlist_cnt(&val->v.xlist);
-	break;
     default:
         SET_ERROR(ERR_NCX_WRONG_TYPE);
     }
@@ -4827,58 +4228,6 @@ uint32
     return cnt;
 
 }  /* val_liststr_count */
-
-
-/********************************************************************
-* FUNCTION val_get_liststr
-* 
-* Get the specified string in the list type
-* 
-* INPUTS:
-*    val == value to check
-*    strnum == string number to get  (0 to count-1 index)
-*
-* RETURNS:
-*   const pointer to the string value or NULL if some error
-*********************************************************************/
-const xmlChar *
-    val_get_liststr (const val_value_t  *val,
-		     uint32 strnum)
-{
-    const ncx_lstr_t  *lstr;
-    uint32             cnt;
-
-#ifdef DEBUG
-    if (!val) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
-    }
-#endif
-
-    switch (val->btyp) {
-    case NCX_BT_SLIST:
-	/********************************/
-	break;
-    case NCX_BT_XLIST:
-	cnt = 0;
-	for (lstr = (const ncx_lstr_t *)
-		 dlq_firstEntry(&val->v.xlist.strQ);
-	     lstr != NULL;
-	     lstr = (const ncx_lstr_t *)dlq_nextEntry(lstr)) {
-	    if (cnt==strnum) {
-		return lstr->str;
-	    } else {
-		cnt++;
-	    }
-	}
-	break;
-    default:
-        SET_ERROR(ERR_NCX_WRONG_TYPE);
-    }
-
-    return NULL;
-
-}  /* val_get_liststr */
 
 
 /********************************************************************
@@ -4994,7 +4343,7 @@ boolean
 * Check 2 val_value structs for the same instance ID
 * 
 * The node data types must match, and must be
-*    NCX_BT_LIST or NCX_BT_XCONTAINER
+*    NCX_BT_LIST
 *
 * All index components must exactly match.
 * 
@@ -5097,15 +4446,11 @@ int32
     case NCX_BT_FLOAT64:
 	return ncx_compare_nums(&val1->v.num, &val2->v.num, btyp);
     case NCX_BT_STRING:
-    case NCX_BT_ENAME:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
 	return ncx_compare_strs(&val1->v.str, &val2->v.str, btyp);
     case NCX_BT_SLIST:
 	return ncx_compare_lists(&val1->v.list, &val2->v.list);
-    case NCX_BT_XLIST:
-	return ncx_compare_xlists(&val1->v.xlist, &val2->v.xlist);
-    case NCX_BT_XCONTAINER:
     case NCX_BT_LIST:
 	ret = index_match(val1, val2);
 	if (ret) {
@@ -5143,9 +4488,6 @@ int32
 	    ch2 = (val_value_t *)dlq_nextEntry(ch2);
 	}
 	break;
-    case NCX_BT_ROOT:
-	/* do not try to match the app container root !!! */
-	return 0;
     case NCX_BT_EXTERN:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return -1;
@@ -5187,7 +4529,6 @@ status_t
     ncx_btype_t        btyp;
     status_t           res;
     int32              icnt;
-    const ncx_lstr_t  *lstr;
     const ncx_lmem_t  *lmem;
     const xmlChar     *s;
     char               numbuff[VAL_MAX_NUMLEN];
@@ -5267,7 +4608,6 @@ status_t
 	}
 	break;
     case NCX_BT_STRING:	
-    case NCX_BT_ENAME:
     case NCX_BT_INSTANCE_ID:
 	s = VAL_STR(val);
 	if (buff) {
@@ -5325,32 +4665,10 @@ status_t
 	    }
 	}
 	break;
-    case NCX_BT_XLIST:
-	*len = 0;
-	for (lstr = (const ncx_lstr_t *)dlq_firstEntry(&val->v.xlist.strQ);
-	     lstr != NULL;
-	     lstr = (const ncx_lstr_t *)dlq_nextEntry(lstr)) {
-	    s = lstr->str;
-	    if (buff) {
-		/* hardwire double quotes to wrapper list strings */
-		icnt = sprintf((char *)buff, "\"%s\"", 
-			       (s) ? (const char *)s : "");
-		if (icnt < 0) {
-		    return SET_ERROR(ERR_INTERNAL_VAL);
-		} else {
-		    *len += (uint32)icnt;
-		}
-	    } else {
-		*len += (2 + ((s) ? xml_strlen(s) : 0));
-	    }
-	}
-	break;
-    case NCX_BT_XCONTAINER:
     case NCX_BT_LIST:
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
-    case NCX_BT_ROOT:
 	return SET_ERROR(ERR_NCX_OPERATION_NOT_SUPPORTED);
     default:
 	return SET_ERROR(ERR_INTERNAL_VAL);
@@ -5451,10 +4769,6 @@ ncx_iqual_t
     iqual = typ_get_iqualval_def(val->typdef);
 
     if (val->btyp == NCX_BT_LIST && iqual==NCX_IQUAL_ONE) {
-	return NCX_IQUAL_ZMORE;
-    }
-
-    if (val->flags & VAL_FL_CONTAB && iqual==NCX_IQUAL_ONE) {
 	return NCX_IQUAL_ZMORE;
     }
 
@@ -5654,15 +4968,11 @@ boolean
 	btyp = val->btyp;
     }
 
-    if (btyp == NCX_BT_ROOT) {
-	return !dlq_empty(&val->v.appQ);
-    } else if (typ_has_children(btyp)) {
+    if (typ_has_children(btyp)) {
 	return !dlq_empty(&val->v.childQ);
     } else if (btyp == NCX_BT_EMPTY && !val->v.bool) {
 	return FALSE;
     } else if (btyp == NCX_BT_SLIST && ncx_list_empty(&val->v.list)) {
-	return FALSE;
-    } else if (btyp == NCX_BT_XLIST && !ncx_xlist_cnt(&val->v.xlist)) {
 	return FALSE;
     } else {
 	return TRUE;
@@ -5894,8 +5204,6 @@ boolean
     }
 
     switch (btyp) {
-    case NCX_BT_ROOT:
-	return dlq_empty(&val->v.appQ);
     case NCX_BT_ENUM:
     case NCX_BT_EMPTY:
     case NCX_BT_BOOLEAN:
@@ -5910,7 +5218,6 @@ boolean
     case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
 	return TRUE;
-    case NCX_BT_ENAME:
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
 	/* hack: assume some length more than a URI,
@@ -5936,13 +5243,11 @@ boolean
     case NCX_BT_BINARY:
 	return FALSE;  /***/
     case NCX_BT_SLIST:
-    case NCX_BT_XLIST:
 	return TRUE;  /***/
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
 	return dlq_empty(&val->v.childQ);
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
@@ -5983,8 +5288,6 @@ boolean
 
     if (val->btyp == NCX_BT_LIST) {
 	ret = TRUE;
-    } else if (val->flags & VAL_FL_CONTAB) {
-	ret = TRUE;
     } else if (val->index) {
 	ret = FALSE;
     } else {
@@ -6021,8 +5324,6 @@ boolean
 #endif
 
     if (val->btyp == NCX_BT_LIST) {
-	ret = TRUE;
-    } else if (val->flags & VAL_FL_CONTAB) {
 	ret = TRUE;
     } else {
 	switch (typ_get_iqualval_def(val->typdef)) {
@@ -6161,12 +5462,12 @@ void
 
     realval->name = virval->name;
     realval->nsid = virval->nsid;
+    realval->obj = virval->obj;
     realval->typdef = virval->typdef;
     realval->flags = virval->flags;
     realval->btyp = virval->btyp;
     realval->dataclass = virval->dataclass;
     realval->parent = virval->parent;
-    realval->parent_typ = virval->parent_typ;
 
     if (virval->btyp==NCX_BT_UNION) {
 	realval->untyp = virval->untyp;
@@ -6177,8 +5478,6 @@ void
 	listtyp = typ_get_listtyp(realval->typdef);
 	btyp = typ_get_basetype(&listtyp->typdef);
 	ncx_init_list(&realval->v.list, btyp);
-    } else if (virval->btyp == NCX_BT_XLIST) {
-	ncx_init_xlist(&realval->v.xlist);
     }
 
 }  /* val_setup_virtual_retval */
@@ -6236,8 +5535,6 @@ val_value_t *
 	listtyp = typ_get_listtyp(retval->typdef);
 	btyp = typ_get_basetype(&listtyp->typdef);
 	ncx_init_list(&retval->v.list, btyp);
-    } else if (retval->btyp == NCX_BT_XLIST) {
-	ncx_init_xlist(&retval->v.xlist);
     }
 
     val_add_child(retval, parent);
@@ -6346,7 +5643,6 @@ boolean
 	ncx_clean_num(btyp, &num);
 	break;
     case NCX_BT_STRING:
-    case NCX_BT_ENAME:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
 	if (!ncx_compare_strs((const ncx_str_t *)def, 
@@ -6355,13 +5651,10 @@ boolean
 	}
 	break;
     case NCX_BT_SLIST:
-    case NCX_BT_XLIST:
-    case NCX_BT_XCONTAINER:
     case NCX_BT_LIST:
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
-    case NCX_BT_ROOT:
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
 	/*** not supported for default value ***/
@@ -6420,7 +5713,6 @@ xmlns_id_t
     val_get_parent_nsid (const val_value_t *val)
 {
     const val_value_t  *v;
-    const ps_parm_t    *p;
 
 #ifdef DEBUG
     if (!val) {
@@ -6433,18 +5725,8 @@ xmlns_id_t
 	return 0;
     }
 
-    switch (val->parent_typ) {
-    case NCX_NT_VAL:
-	v = (const val_value_t *)val->parent;
-	return v->nsid;
-    case NCX_NT_PARM:
-	p = (const ps_parm_t *)val->parent;
-	return psd_get_parm_nsid(p->parm);
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return 0;
-    }
-    /*NOTREACHED*/
+    v = (const val_value_t *)val->parent;
+    return v->nsid;
 
 }  /* val_get_parent_nsid */
 
@@ -6516,6 +5798,60 @@ status_t
     return ERR_NCX_NOT_IN_RANGE;
 
 } /* val_check_rangeQ */
+
+
+/********************************************************************
+* FUNCTION val_instance_count
+* 
+* Count the number of instances of the specified object name
+* in the parent value struct.  This only checks the first
+* level under the parent, not the entire subtree
+*
+*
+* INPUTS:
+*   val == value to check
+*   modname == name of module which defines the object to count
+*              NULL (do not check module names)
+*   objname == name of object to count
+*
+* RETURNS:
+*   number of instances found
+*********************************************************************/
+uint32
+    val_instance_count (val_value_t  *val,
+			const xmlChar *modname,
+			const xmlChar *objname)
+{
+    val_value_t *chval;
+    uint32       cnt;
+
+#ifdef DEBUG
+    if (!val || !objname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
+    cnt = 0;
+
+    for (chval = val_get_first_child(val);
+	 chval != NULL;
+	 chval = val_get_next_child(chval)) {
+
+	if (modname && 
+	    xml_strcmp(modname,
+		       obj_get_mod_name(chval->obj))) {
+	    continue;
+	}
+
+	if (!xml_strcmp(objname, chval->name)) {
+	    cnt++;
+	}
+    }
+    return cnt;
+    
+}  /* val_instance_count */
+
 
 
 /* END file val.c */

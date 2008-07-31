@@ -25,26 +25,6 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
-#ifndef _H_conf
-#include  "conf.h"
-#endif
-
-#ifndef _H_def_reg
-#include  "def_reg.h"
-#endif
-
-#ifndef _H_ext
-#include  "ext.h"
-#endif
-
-#ifndef _H_help
-#include  "help.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
 #ifndef _H_ncx
 #include  "ncx.h"
 #endif
@@ -53,20 +33,8 @@ date         init     comment
 #include  "ncxconst.h"
 #endif
 
-#ifndef _H_ncxmod
-#include  "ncxmod.h"
-#endif
-
-#ifndef _H_ps
-#include  "ps.h"
-#endif
-
-#ifndef _H_ps_parse
-#include  "ps_parse.h"
-#endif
-
-#ifndef _H_psd
-#include  "psd.h"
+#ifndef _H_ncxtypes
+#include  "ncxtypes.h"
 #endif
 
 #ifndef _H_ses
@@ -77,28 +45,8 @@ date         init     comment
 #include  "status.h"
 #endif
 
-#ifndef _H_tstamp
-#include  "tstamp.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
 #ifndef _H_xml_util
 #include  "xml_util.h"
-#endif
-
-#ifndef _H_xml_wr
-#include  "xml_wr.h"
-#endif
-
-#ifndef _H_yang
-#include  "yang.h"
 #endif
 
 #ifndef _H_yangconst
@@ -107,10 +55,6 @@ date         init     comment
 
 #ifndef _H_yangdiff
 #include  "yangdiff.h"
-#endif
-
-#ifndef _H_yangdiff_typ
-#include  "yangdiff_typ.h"
 #endif
 
 #ifndef _H_yangdiff_util

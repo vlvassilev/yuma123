@@ -65,10 +65,6 @@ date         init     comment
 #include "obj.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -1704,7 +1700,7 @@ static status_t
     case NCX_CL_COMPLEX:
 	switch (typ_get_basetype(typdef)) {
 	case NCX_BT_ANY:
-	case NCX_BT_ROOT:
+	case NCX_BT_CONTAINER:
 	    empty = TRUE;
 	    simtop = FALSE;
 	    break;
@@ -1722,7 +1718,7 @@ static status_t
 	    empty = TRUE;
 	    switch (typ_get_basetype(typdef)) {
 	    case NCX_BT_ANY:
-	    case NCX_BT_ROOT:
+	    case NCX_BT_CONTAINER:
 		simtop = FALSE;
 		break;
 	    default:
@@ -1817,13 +1813,10 @@ static status_t
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_ANY:
-    case NCX_BT_ROOT:
-    case NCX_BT_ENAME:
     case NCX_BT_EMPTY:
     case NCX_BT_BOOLEAN:
 	return do_elem_simple(mod, typch->name, &typch->typdef, val);
     case NCX_BT_SLIST:
-    case NCX_BT_XLIST:
 	return do_elem_list(mod, typch, val);
     case NCX_BT_UNION:
 	return do_elem_union(mod, typch, val);
@@ -1832,7 +1825,6 @@ static status_t
     case NCX_BT_CHOICE:
 	return do_elem_choice(mod, typch, val);
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
 	return do_elem_table(mod, typch, val);
     default:
 	return SET_ERROR(ERR_INTERNAL_VAL);
@@ -1863,9 +1855,8 @@ static status_t
 			const typ_def_t *typdef,
 			val_value_t *val)
 {
-    val_value_t        *topcon, *node, *ext;
+    val_value_t        *topcon, *ext;
     const typ_def_t    *realtypdef, *flagtypdef;
-    const typ_sval_t   *sval;
     xmlChar            *str;
     ncx_btype_t         btyp;
     status_t            res;
@@ -1878,28 +1869,6 @@ static status_t
     flagtypdef = typ_get_basetype_typdef(NCX_BT_EMPTY);
 
     switch (btyp) {
-    case NCX_BT_ENAME:
-	/* an ename is an empty child element node */
-	topcon = xml_val_new_struct(NCX_EL_CHOICE, xsd_id);
-	if (!topcon) {
-	    return ERR_INTERNAL_MEM;
-	}
-	for (sval = typ_first_strdef(realtypdef);
-	     sval != NULL;
-	     sval = (typ_sval_t *)dlq_nextEntry(sval)) {
-	    /* add an empty element to the choice */
-	    node = xsd_new_element(mod, (const xmlChar *)sval->val, 
-				   flagtypdef, typdef,
-				   FALSE, FALSE);
-	    if (!node) {
-		val_free_value(topcon);
-		return ERR_INTERNAL_MEM;
-	    } else {
-		val_add_child(node, topcon);
-	    }
-	}
-	val_add_child(topcon, val);
-	break;
     case NCX_BT_EMPTY:
 	/* this type is represented as an empty element 
 	 * so there is nothing to do but exit.  There cannot
@@ -1910,7 +1879,6 @@ static status_t
 	}
 	/* else fall through and create some content */
     case NCX_BT_ANY:
-    case NCX_BT_ROOT:
 	/* complexContent/extension of a pre-defined base type */
 	topcon = xml_val_new_struct(XSD_CPX_CON, xsd_id);
 	if (!topcon) {
@@ -1959,7 +1927,6 @@ static status_t
 	res = finish_choice(mod, typdef, val);
 	break;
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
 	res = finish_table(mod, typdef, val);
 	break;
     default:
@@ -2041,629 +2008,6 @@ static status_t
     return NO_ERR;
 
 }   /* finish_simpleMetaType */
-
-
-/********************************************************************
-* FUNCTION add_parm
-* 
-*   Add one psd_parm_t as an element
-*
-* INPUTS:
-*    mod == module in progress
-*    parm == parm in progress
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->childQ has entries added for the Data PSDs in this module
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    add_parm (const ncx_module_t *mod,
-	      const psd_parm_t *parm,
-	      val_value_t *val)
-{
-    val_value_t      *elem;
-
-    elem = xsd_new_parm_element(mod, parm);
-    if (!elem) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    val_add_child(elem, val);
-
-    return NO_ERR;
-
-}   /* add_parm */
-
-
-/********************************************************************
-* FUNCTION add_parms
-* 
-*   Add the required choice, group, and element nodes for each 
-*   parm in a PSD
-*
-* INPUTS:
-*    mod == module in progress
-*    psd == parmset template in progress
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->childQ has entries added for the Data PSDs in this module
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    add_parms (const ncx_module_t *mod,
-	       const psd_template_t   *psd,
-	       val_value_t *val)
-{
-    const psd_hdronly_t    *hdr, *hdr2;
-    const psd_parm_t       *parm;
-    const psd_block_t      *block;
-    const psd_choice_t     *choice;
-    val_value_t            *ch, *grp;
-    xmlns_id_t              xsd_id;
-    status_t                res;
-
-    /* init local vars */
-    xsd_id = xmlns_xs_id();
-
-    /* go through all the PSDs and create complexType constructs */
-    for (hdr = (const psd_hdronly_t *)dlq_firstEntry(&psd->parmQ);
-	 hdr != NULL;
-	 hdr = (const psd_hdronly_t *)dlq_nextEntry(hdr)) {
-
-	switch (hdr->ntyp) {
-	case PSD_NT_CHOICE:
-	    choice = (const psd_choice_t *)hdr;
-	    ch = xml_val_new_struct(NCX_EL_CHOICE, xsd_id);
-	    if (!ch) {
-		return ERR_INTERNAL_MEM;
-	    }
-	    for (hdr2 = (const psd_hdronly_t *)dlq_firstEntry(&choice->choiceQ);
-		 hdr2 != NULL;
-		 hdr2 = (const psd_hdronly_t *)dlq_nextEntry(hdr2)) {
-		switch (hdr2->ntyp) {
-		case PSD_NT_BLOCK:
-		    block = (const psd_block_t *)hdr2;
-		    grp = xml_val_new_struct(XSD_GROUP, xsd_id);
-		    if (!grp) {
-			val_free_value(ch);
-			return ERR_INTERNAL_MEM;
-		    } else {
-			val_add_child(grp, ch);
-		    }
-
-		    /* add parms to the group */
-		    for (parm = (const psd_parm_t *)dlq_firstEntry(&block->blockQ);
-			 parm != NULL;
-			 parm = (const psd_parm_t *)dlq_nextEntry(parm)) {
-			res = add_parm(mod, parm, grp);
-			if (res != NO_ERR) {
-			    val_free_value(ch);
-			    return res;
-			}
-		    }
-		    val_add_child(grp, ch);
-		    break;
-		case PSD_NT_PARM:
-		    parm = (const psd_parm_t *)hdr2;
-		    res = add_parm(mod, parm, ch);
-		    if (res != NO_ERR) {
-			val_free_value(ch);
-			return res;
-		    }
-		    break;
-		default:
-		    val_free_value(ch);
-		    return SET_ERROR(ERR_INTERNAL_VAL);
-		}
-	    }
-	    val_add_child(ch, val);
-	    break;
-	case PSD_NT_PARM:
-	    parm = (const psd_parm_t *)hdr;
-	    res = add_parm(mod, parm, val);
-	    if (res != NO_ERR) {
-		return res;
-	    }
-	    break;
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-
-    return NO_ERR;
-
-}   /* add_parms */
-
-
-/********************************************************************
-* FUNCTION make_pstypename
-* 
-*   Malloc and set a type name string for a parmset node
-*
-* INPUTS:
-*    name == name string (app or parmset)
-*    isps == TRUE for fooPSType
-*         == FALSE for fooAppType
-*
-* RETURNS:
-*   malloced string or NULL if memory error
-*********************************************************************/
-static xmlChar *
-    make_pstypename (const xmlChar *name,
-		     boolean isps)
-{
-    xmlChar       *str, *str2;
-
-    if (isps) {
-	str = m__getMem(xml_strlen(name) +
-			xml_strlen(XSD_PS_SUFFIX) + 1);
-    } else {
-	str = m__getMem(xml_strlen(name) +
-			xml_strlen(XSD_APP_SUFFIX) + 1);
-    }
-    if (!str) {
-	return NULL;
-    } else {
-	str2 = str;
-	str2 += xml_strcpy(str2, name);
-	if (isps) {
-	    str2 += xml_strcpy(str2, XSD_PS_SUFFIX);
-	} else {
-	    str2 += xml_strcpy(str2, XSD_APP_SUFFIX);
-	}
-    }
-    return str;
-
-}   /* make_pstypename */
-
-
-/********************************************************************
-* FUNCTION make_psname
-* 
-*   Malloc and set a PSD name string for a parmset node
-*
-* INPUTS:
-*    name == name string (app or parmset)
-*
-* RETURNS:
-*   malloced string or NULL if memory error
-*********************************************************************/
-static xmlChar *
-    make_psname (const xmlChar *name)
-{
-    xmlChar       *str, *str2;
-
-    str = m__getMem(xml_strlen(name) + 3);
-    if (!str) {
-	return NULL;
-    }
-    str2 = str;
-    str2 += xml_strcpy(str2, name);
-    str2 += xml_strcpy(str2, (const xmlChar *)"PS");
-    return str;
-
-}   /* make_psname */
-
-
-/********************************************************************
-* FUNCTION add_appnode
-* 
-*   Add one appnode element and complexType
-*
-* INPUTS:
-*    mod == module in progress
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->childQ has entries added for the Data PSDs in this module
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    add_appnode (const ncx_module_t *mod,
-		 val_value_t *val)
-{
-    val_value_t   *cpxtyp, *seq, *elem;
-    xmlns_id_t     xsd_id;
-    xmlChar       *str, *psname, *elname;
-    status_t       res;
-
-    xsd_id = xmlns_xs_id();
-
-    /* add an empty complex type to be the base of all the
-     * data parmsets for this application
-     */
-    cpxtyp = xml_val_new_flag(XSD_CPX_TYP, xsd_id);
-    if (!cpxtyp) {
-	return ERR_INTERNAL_MEM;
-    }
-    psname = make_pstypename(mod->app, TRUE);
-    if (!psname) {
-	val_free_value(cpxtyp);
-	return ERR_INTERNAL_MEM;
-    }
-    res = xml_val_add_attr(NCX_EL_NAME, 0, psname, cpxtyp);
-    if (res != NO_ERR) {
-	m__free(psname);
-	val_free_value(cpxtyp);
-	return res;
-    }
-    val_add_child(cpxtyp, val);
-
-    /* make an abstract element */
-    elem = xml_val_new_flag(XSD_ELEMENT, xsd_id);
-    if (!elem) {
-	return ERR_INTERNAL_MEM;
-    }
-    elname = make_psname(mod->app);
-    if (!elname) {
-	val_free_value(elem);
-	return ERR_INTERNAL_MEM;
-    }
-    res = xml_val_add_attr(NCX_EL_NAME, 0, elname, elem);
-    if (res != NO_ERR) {
-	m__free(elname);
-	val_free_value(elem);
-	return res;
-    }
-    res = xml_val_add_cattr(NCX_EL_TYPE, 0, psname, elem);
-    if (res != NO_ERR) {
-	val_free_value(elem);
-	return res;
-    }
-    res = xml_val_add_cattr(XSD_ABSTRACT, 0, XSD_TRUE, elem);
-    if (res != NO_ERR) {
-	val_free_value(elem);
-	return res;
-    }
-    val_add_child(elem, val);
-
-    /* make the parmset an extension of the application 
-     * create a complex type for the application PS type
-     */
-    cpxtyp = xml_val_new_struct(XSD_CPX_TYP, xsd_id);
-    if (!cpxtyp) {
-	return ERR_INTERNAL_MEM;
-    }
-    str = make_pstypename(mod->app, FALSE);
-    if (!str) {
-	val_free_value(cpxtyp);
-	return ERR_INTERNAL_MEM;
-    }
-    res = xml_val_add_attr(NCX_EL_NAME, 0, str, cpxtyp);
-    if (res != NO_ERR) {
-	m__free(str);
-	val_free_value(cpxtyp);
-	return res;
-    }
-
-    seq = xml_val_new_struct(XSD_SEQUENCE, xsd_id);
-    if (!seq) {
-	val_free_value(cpxtyp);	
-	return ERR_INTERNAL_MEM;
-    } else {
-	val_add_child(seq, cpxtyp);
-    }
-
-    elem = xml_val_new_flag(XSD_ELEMENT, xsd_id);
-    if (!elem) {
-	val_free_value(cpxtyp);	
-	return ERR_INTERNAL_MEM;
-    } else {
-	val_add_child(elem, seq);
-    }
-    res = xml_val_add_cattr(XSD_REF, 0, elname, elem);
-    if (res != NO_ERR) {
-	val_free_value(cpxtyp);
-	return res;
-    }
-    res = xml_val_add_cattr(XSD_MIN_OCCURS, 0, XSD_ZERO, elem);
-    if (res == NO_ERR) {
-	res = xml_val_add_cattr(XSD_MAX_OCCURS, 0, XSD_UNBOUNDED, elem);
-    }
-
-    val_add_child(cpxtyp, val);
-    return NO_ERR;
-
-}   /* add_appnode */
-
-
-/********************************************************************
-* FUNCTION add_parmset
-* 
-*   Add the required type nodes for one PSD 
-*
-* INPUTS:
-*    mod == module in progress
-*    psd == parmset template in progress
-*    intpsmode == TRUE if this is an internal RPC input PSD
-*              == FALSE if this is a regular named PSD
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->childQ has entries added for the PSD
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    add_parmset (const ncx_module_t *mod,
-		 const psd_template_t *psd,
-		 boolean intpsmode,
-		 val_value_t *val)
-{
-    val_value_t      *cpxtyp, *cpxcon, *ext, *seq, *elem;
-    xmlns_id_t        xsd_id, nc_id;
-    status_t          res;
-    boolean           appdone, isrpc;
-    xmlChar          *qname, *str;
-
-    /* init local vars */
-    xsd_id = xmlns_xs_id();
-    nc_id = xmlns_nc_id();
-    appdone = FALSE;
-
-    if (intpsmode) {
-	isrpc = TRUE;
-    } else {
-	isrpc = (psd->psd_type==PSD_TYP_RPC) ? TRUE : FALSE;
-    }
-
-    /* start a complexType; name is the PSD name for an
-     * RPC parmset and a fooPSType if a data parmset
-     */
-    cpxtyp = xml_val_new_struct(XSD_CPX_TYP, xsd_id);
-    if (!cpxtyp) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* set the type name unless this is an internal unnamed PSD */
-    if (!intpsmode) {
-	if (isrpc) {
-	    str = xml_strdup(psd->name);
-	} else {
-	    str = make_pstypename(psd->name, TRUE);
-	}
-	if (!str) {
-	    val_free_value(cpxtyp);
-	    return ERR_INTERNAL_MEM;
-	}
-
-	/* add the name attribute */
-	res = xml_val_add_attr(NCX_EL_NAME, 0, str, cpxtyp);
-	if (res != NO_ERR) {
-	    m__free(str);
-	    val_free_value(cpxtyp);
-	    return res;
-	}
-    }
-
-    /* add an annotation node if there are any 
-     * description, condition, or appinfo clauses present
-     */
-    res = xsd_do_annotation(psd->descr, psd->condition,
-			    NULL, NCX_ACCESS_NONE, 
-			    NCX_STATUS_CURRENT,
-			    &psd->appinfoQ, cpxtyp);
-    if (res != NO_ERR) {
-	val_free_value(cpxtyp);
-	return res;
-    }
-
-    /* next node is complexContent */
-    cpxcon = xml_val_new_struct(XSD_CPX_CON, xsd_id);
-    if (!cpxcon) {
-	val_free_value(cpxtyp);
-	return ERR_INTERNAL_MEM;
-    } else {
-	val_add_child(cpxcon, cpxtyp);
-    }
-
-    /* next node is extension */
-    ext = xml_val_new_struct(XSD_EXTENSION, xsd_id);
-    if (!ext) {
-	val_free_value(cpxtyp);
-	return ERR_INTERNAL_MEM;
-    } else {
-	val_add_child(ext, cpxcon);
-    }
-
-    /* Set the base attribute
-     * Hook into the NETCONF XSD based on the parmset type 
-     */
-    if (isrpc) {
-	qname = xml_val_make_qname(nc_id, XSD_RPC_OPTYPE);
-    } else {
-	/* make the parmset an extension of the application */
-	qname = m__getMem(xml_strlen(mod->app) +
-			  xml_strlen(XSD_PS_SUFFIX) + 1);
-	if (qname) {
-	    str = qname;
-	    str += xml_strcpy(str, mod->app);
-	    str += xml_strcpy(str, XSD_PS_SUFFIX);
-	}
-    }
-    if (!qname) {
-	val_free_value(cpxtyp);
-	return ERR_INTERNAL_MEM;
-    }
-    res = xml_val_add_attr(XSD_BASE, 0, qname, ext);
-    if (res != NO_ERR) {
-	m__free(qname);
-	val_free_value(cpxtyp);
-	return res;
-    }
-
-    /* next node is sequence */
-    seq = xml_val_new_struct(XSD_SEQUENCE, xsd_id);
-    if (!seq) {
-	val_free_value(cpxtyp);
-	return ERR_INTERNAL_MEM;
-    } else {
-	val_add_child(seq, ext);
-    }
-
-    /* go through all the parameters, choices of params */
-    res = add_parms(mod, psd, seq);
-    if (res != NO_ERR) {
-	val_free_value(cpxtyp);
-	return res;
-    }
-
-    val_add_child(cpxtyp, val);
-
-    /* for data parmsets, add an element to hook into the appnode */
-    if (!isrpc) {
-	/* make a concrete element */
-	elem = xml_val_new_flag(XSD_ELEMENT, xsd_id);
-	if (!elem) {
-	    return ERR_INTERNAL_MEM;
-	}
-	res = xml_val_add_cattr(NCX_EL_NAME, 0, psd->name, elem);
-	if (res != NO_ERR) {
-	    val_free_value(elem);
-	    return res;
-	}
-	str = make_pstypename(psd->name, TRUE);
-	if (!str) {
-	    val_free_value(elem);
-	    return res;
-	}
-	res = xml_val_add_attr(NCX_EL_TYPE, 0, str, elem);
-	if (res != NO_ERR) {
-	    m__free(str);
-	    val_free_value(elem);
-	    return res;
-	}
-	str = make_psname(mod->app);
-	if (!str) {
-	    val_free_value(elem);
-	    return res;
-	}
-	res = xml_val_add_attr(XSD_SUB_GRP, 0, str, elem);
-	if (res != NO_ERR) {
-	    val_free_value(elem);
-	    return res;
-	}
-	val_add_child(elem, val);
-    }
-    return NO_ERR;
-
-}   /* add_parmset */
-
-
-/********************************************************************
-* FUNCTION add_rpc
-* 
-*   Add an element for one RPC method
-*
-* INPUTS:
-*    mod == module in progress
-*    rpc == rpc_template struct in progress
-*    val == struct parent to contain child nodes for each RPC method
-*
-* OUTPUTS:
-*    val->childQ has entries added for the RPC method
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    add_rpc (const ncx_module_t *mod,
-	     const rpc_template_t *rpc,
-	     val_value_t *val)
-{
-    val_value_t      *elem;
-    xmlChar          *str;
-    status_t          res;
-    boolean           intps;
-
-    /* An RPC method is simply an element that
-     * hooks into the NETCONF rpcOperation element
-     */
-    elem = xml_val_new_struct(XSD_ELEMENT, xmlns_xs_id());
-    if (!elem) {
-	return ERR_INTERNAL_MEM;
-    } else {
-	val_add_child(elem, val);
-    }
-
-    /* add the name attribute */
-    res = xml_val_add_cattr(NCX_EL_NAME, 0, rpc->name, elem);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* create the NETCONF rpcOperation QName */
-    str = xml_val_make_qname(xmlns_nc_id(), XSD_RPC_OP);
-    if (!str) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* add the substitutionGroup attribute */
-    res = xml_val_add_attr(XSD_SUB_GRP, 0, str, elem);
-    if (res != NO_ERR) {
-	m__free(str);
-	return res;
-    }
-
-    intps = FALSE;
-
-    /* check if a QName is needed for the type name */
-    if (rpc->in_psd) {
-	if (rpc->in_psd_name) {
-	    if (rpc->in_psd->nsid != rpc->nsid) {
-		str = xml_val_make_qname(rpc->in_psd->nsid, 
-				     rpc->in_psd->name);
-	    } else {
-		str = xml_strdup(rpc->in_psd->name);
-	    }
-	} else {
-	    intps = TRUE;
-	}
-    } else {
-	/* no input so use the base type in the XSD */
-	str = xml_val_make_qname(xmlns_nc_id(), XSD_RPC_OPTYPE);
-    }
-    if (!intps && !str) {
-	return ERR_INTERNAL_MEM;
-    }	
-
-    /* add the type attribute unless the input PSD is internal */
-    if (!intps) {
-	res = xml_val_add_attr(NCX_EL_TYPE, 0, str, elem);
-	if (res != NO_ERR) {
-	    m__free(str);
-	    return res;
-	}
-    }
-
-    /* use special annotation function for RPC appinfo data */
-    res = xsd_do_rpc_annotation(rpc, elem);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* put the unnamed complexType for the input PSD inline
-     * if this RPC has an internal input PSD
-     */
-    if (intps) {
-	res = add_parmset(mod, rpc->in_psd, TRUE, elem);
-	if (res != NO_ERR) {
-	    return res;
-	}
-    }
-
-    return NO_ERR;
-
-}   /* add_rpc */
 
 
 /************* E X T E R N A L   F U N C T I O N S *****************/
@@ -2901,99 +2245,6 @@ status_t
 
 
 /********************************************************************
-* FUNCTION xsd_add_parmsets
-* 
-*   Add the required type nodes for each data PSD in the module
-*
-* INPUTS:
-*    mod == module in progress
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->childQ has entries added for the Data PSDs in this module
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    xsd_add_parmsets (const ncx_module_t *mod,
-		      val_value_t *val)
-{
-    const psd_template_t   *psd;
-    status_t                res;
-    boolean                 appdone;
-
-    appdone = FALSE;
-
-    /* go through all the PSDs and create complexType constructs */
-    for (psd = (const psd_template_t *)dlq_firstEntry(&mod->psdQ);
-	 psd != NULL;
-	 psd = (const psd_template_t *)dlq_nextEntry(psd)) {
-
-	if (psd->psd_type == PSD_TYP_RPC) {
-	    res = add_parmset(mod, psd, FALSE, val);
-	} else {
-	    if (!appdone) {
-		/* add the application node definition before any
-		 * data parmsets that use it
-		 */
-		res = add_appnode(mod, val);
-		if (res != NO_ERR) {
-		    return res;
-		}
-		appdone = TRUE;
-	    }
-	    res = add_parmset(mod, psd, FALSE, val);
-	}
-	if (res != NO_ERR) {
-	    return res;
-	}
-    }
-
-    return NO_ERR;
-
-}   /* xsd_add_parmsets */
-
-
-/********************************************************************
-* FUNCTION xsd_add_rpcs
-* 
-*   Add the required type nodes for each RPC method in the module
-*
-* INPUTS:
-*    mod == module in progress
-*    val == struct parent to contain child nodes for each RPC method
-*
-* OUTPUTS:
-*    val->childQ has entries added for the RPC methods in this module
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    xsd_add_rpcs (const ncx_module_t *mod,
-		  val_value_t *val)
-{
-    const rpc_template_t   *rpc;
-    status_t                res;
-
-    /* go through all the PSDs and create complexType constructs */
-    for (rpc = (const rpc_template_t *)dlq_firstEntry(&mod->rpcQ);
-	 rpc != NULL;
-	 rpc = (const rpc_template_t *)dlq_nextEntry(rpc)) {
-
-	res = add_rpc(mod, rpc, val);
-	if (res != NO_ERR) {
-	    return res;
-	}
-    }
-
-    return NO_ERR;
-
-}   /* xsd_add_rpcs */
-
-
-/********************************************************************
 * FUNCTION xsd_finish_simpleType
 * 
 *   Generate a simpleType elment based on the typdef
@@ -3149,7 +2400,6 @@ status_t
 	}
 	break;
     case NCX_BT_SLIST:
-    case NCX_BT_XLIST:
 	res = finish_list(mod, btyp, typdef, val);
 	break;
     case NCX_BT_UNION:
@@ -3308,20 +2558,16 @@ status_t
 	hasnodes = (rdef || sdef || mdef) ? TRUE : FALSE;
 	break;
     case NCX_BT_ENUM:
-    case NCX_BT_ENAME:
 	hasnodes = (sdef || mdef) ? TRUE : FALSE;
 	isext = hasnodes;
 	break;
     case NCX_BT_UNION:
     case NCX_BT_ANY:
-    case NCX_BT_ROOT:
     case NCX_BT_EMPTY:
     case NCX_BT_SLIST:
-    case NCX_BT_XLIST:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
 	hasnodes = (mdef) ? TRUE : FALSE;
 	isext = hasnodes;
 	break;

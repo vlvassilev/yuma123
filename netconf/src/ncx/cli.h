@@ -1,14 +1,14 @@
-#ifndef _H_ps_parse
-#define _H_ps_parse
+#ifndef _H_cli
+#define _H_cli
 
-/*  FILE: ps_parse.h
+/*  FILE: cli.h
 *********************************************************************
 *								    *
 *			 P U R P O S E				    *
 *								    *
 *********************************************************************
 
-    common parameter set XML parser module
+    command line interpreter parsing to internal val_value_t format
 
 *********************************************************************
 *								    *
@@ -22,37 +22,19 @@ date	     init     comment
 09-feb-06    abb      Change from xmlTextReader to rpc_agt callback
                       API format
 10-feb-07    abb      Split out common functions from agt_ps_parse.h
-
+29-jul-08    abb      change to cli.h; remove all by CLI parsing;
+                      conversion from NCX parmset to YANG object
 */
 
-#ifndef _H_ncxconst
-#include "ncxconst.h"
-#endif
+#include <xmlstring.h>
 
-#ifndef _H_ps
-#include "ps.h"
-#endif
-
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
-#ifndef _H_rpc
-#include "rpc.h"
-#endif
-
-#ifndef _H_ses
-#include "ses.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_status
 #include "status.h"
 #endif
-
-#ifndef _H_xml_msg
-#include "xml_msg.h"
-#endif
-
 
 /********************************************************************
 *								    *
@@ -82,28 +64,20 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-extern ps_parmset_t *
-    ps_parse_cli (int argc, 
-		  const char *argv[],
-		  const psd_template_t *psd,
-		  boolean valonly,
-		  boolean script,
-		  boolean autocomp,
-		  status_t  *status);
+extern val_value_t *
+    cli_parse (int argc, 
+	       const char *argv[],
+	       const obj_template_t *obj,
+	       boolean valonly,
+	       boolean script,
+	       boolean autocomp,
+	       status_t  *status);
 
 
 extern status_t
-    ps_parse_cli_parm (ps_parmset_t *ps,
-		       psd_parm_t *parm,
-		       const xmlChar *strval,
-		       boolean script);
+    cli_parse_parm (val_value_t *val,
+		    const obj_template_t *obj,
+		    const xmlChar *strval,
+		    boolean script);
 
-
-extern status_t
-    ps_parse_add_defaults (ps_parmset_t *ps);
-
-extern status_t
-    ps_parse_add_clone (ps_parmset_t *ps,
-			const ps_parm_t *curparm);
-
-#endif	    /* _H_ps_parse */
+#endif	    /* _H_cli */

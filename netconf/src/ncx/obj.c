@@ -10,6 +10,7 @@
 date         init     comment
 ----------------------------------------------------------------------
 09dec07      abb      begun
+21jul08      abb      start obj-based rewrite
 
 *********************************************************************
 *                                                                   *
@@ -38,6 +39,10 @@ date         init     comment
 #include "grp.h"
 #endif
 
+#ifndef _H_help
+#include "help.h"
+#endif
+
 #ifndef _H_ncxconst
 #include "ncxconst.h"
 #endif
@@ -60,6 +65,10 @@ date         init     comment
 
 #ifndef _H_xml_util
 #include "xml_util.h"
+#endif
+
+#ifndef _H_xmlns
+#include "xmlns.h"
 #endif
 
 #ifndef _H_yang
@@ -226,7 +235,8 @@ static status_t
 
 	mobj = NULL;
 	if (merQ) {
-	    mobj = obj_find_template(merQ, srcobj->mod->name,
+	    mobj = obj_find_template(merQ, 
+				     obj_get_mod_name(srcobj),
 				     obj_get_name(srcobj));
 	}
 
@@ -236,7 +246,8 @@ static status_t
 		      obj_get_name(srcobj));
 	    return ERR_INTERNAL_MEM;
 	} else {
-	    testobj = obj_find_template(newQ, newobj->mod->name,
+	    testobj = obj_find_template(newQ, 
+					obj_get_mod_name(newobj),
 					obj_get_name(newobj));
 	    if (testobj) {
 		log_error("\nError: Object %s on line %s "
@@ -2003,6 +2014,8 @@ static void
 *    objname == object name to find
 *    test == TRUE to check choice object names for name collisions
 *         == FALSE to check just the object names directly in 'que'
+*    match == TRUE if a strncmp test desired
+*             FALSE if a normal strcmp (full match) test desired
 *
 * RETURNS:
 *    pointer to obj_template_t or NULL if not found in 'que'
@@ -2011,40 +2024,102 @@ static obj_template_t *
     find_template (const dlq_hdr_t  *que,
 		   const xmlChar *modname,
 		   const xmlChar *objname,
-		   boolean test)
+		   boolean test,
+		   boolean match)
 {
     obj_template_t *obj, *chobj, *casobj;
     obj_case_t     *cas;
+    const xmlChar  *name, *mname;
+    uint32          len, ret;
 
+    if (match) {
+	len = xml_strlen(objname);
+    }
+
+    /* check all the objects in this datadefQ */
     for (obj = (obj_template_t *)dlq_firstEntry(que);
 	 obj != NULL;
 	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (modname && xml_strcmp(modname, obj->mod->name)) {
+	/* skip augment and uses */
+	if (!obj_has_name(obj)) {
 	    continue;
 	}
 
-	if (obj_has_name(obj)) {
-	    if (!xml_strcmp(objname, obj_get_name(obj))) {
+	name = obj_get_name(obj);
+	mname = obj_get_mod_name(obj);
+
+	if (match) {
+	    ret = xml_strncmp(objname, name, len);
+	} else {
+	    ret = xml_strcmp(objname, name);
+	}
+
+	if (!test) {
+	    if (modname && xml_strcmp(modname, mname)) {
+		continue;
+	    }
+	    if (ret == 0) {
 		return obj;
 	    }
-	    if (test && (obj->objtype == OBJ_TYP_CHOICE)) {
-		/* since the choice and case layers disappear, need
-		 * to check if any real node names would clash
-		 * will also check later that all choice nodes
-		 * within the same sibling set do not clash either
-		 */
-		for (casobj = (obj_template_t *)
-			 dlq_firstEntry(obj->def.choic->caseQ);
-		     casobj != NULL;
-		     casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
-		    cas = casobj->def.cas;
-		    chobj = obj_find_template(cas->datadefQ,
-					      modname, objname);
-		    if (chobj) {
-			return chobj;
-		    }
+	}
+
+	switch (obj->objtype) {
+	case OBJ_TYP_CHOICE:
+	    /* since the choice and case layers disappear, need
+	     * to check if any real node names would clash
+	     * will also check later that all choice nodes
+	     * within the same sibling set do not clash either
+	     */
+	    for (casobj = (obj_template_t *)
+		     dlq_firstEntry(obj->def.choic->caseQ);
+		 casobj != NULL;
+		 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
+		cas = casobj->def.cas;
+		chobj = find_template(cas->datadefQ,
+				      modname, objname,
+				      FALSE, match);
+		if (chobj) {
+		    return chobj;
 		}
+	    }
+
+	    /* case contents did not work, so try the case names
+	     * themselves
+	     */
+	    chobj = find_template(obj->def.choic->caseQ, modname, 
+				  objname, FALSE, match);
+	    if (chobj) {
+		return chobj;
+	    }
+
+	    /* last try: the choice name itself */
+	    if (ret == 0) {
+		return obj;
+	    }
+	    break;
+	case OBJ_TYP_CASE:
+	    cas = obj->def.cas;
+	    chobj = find_template(cas->datadefQ,
+				  modname, objname,
+				  FALSE, match);
+	    if (chobj) {
+		return chobj;
+	    }
+
+	    if (ret == 0) {
+		return obj;
+	    }
+	    break;
+	default:
+	    /* check if a specific module name requested,
+	     * and if so, skip any object not from that module
+	     */
+	    if (modname && xml_strcmp(modname, mname)) {
+		continue;
+	    }
+	    if (ret == 0) {
+		return obj;
 	    }
 	}
     }
@@ -2471,7 +2546,7 @@ obj_template_t *
     }
 #endif
 
-    return find_template(que, modname, objname, FALSE);
+    return find_template(que, modname, objname, FALSE, FALSE);
 
 }  /* obj_find_template */
 
@@ -2505,7 +2580,7 @@ const obj_template_t *
     }
 #endif
 
-    return find_template(que, modname, objname, FALSE);
+    return find_template(que, modname, objname, FALSE, FALSE);
 
 }  /* obj_find_template_con */
 
@@ -2538,7 +2613,7 @@ obj_template_t *
     }
 #endif
 
-    return find_template(que, modname, objname, TRUE);
+    return find_template(que, modname, objname, TRUE, FALSE);
 
 }  /* obj_find_template_test */
 
@@ -2577,7 +2652,7 @@ obj_template_t *
 #endif
 
     /* check the main module */
-    obj = find_template(&mod->datadefQ, modname, objname, FALSE);
+    obj = find_template(&mod->datadefQ, modname, objname, FALSE, FALSE);
     if (obj) {
 	return obj;
     }
@@ -2608,7 +2683,7 @@ obj_template_t *
 
 	/* check the type Q in this submodule */
 	obj = find_template(&inc->submod->datadefQ,
-			    modname, objname, FALSE);
+			    modname, objname, FALSE, FALSE);
 	if (obj) {
 	    return obj;
 	}
@@ -2617,6 +2692,235 @@ obj_template_t *
     return NULL;
 
 }   /* obj_find_template_top */
+
+
+/********************************************************************
+* FUNCTION obj_find_child
+* 
+* Find a child object with the specified Qname
+*
+* !!! This function checks for accessible names only!!!
+* !!! That means child nodes of choice->case will be
+* !!! present instead of the choice name or case name
+*
+* INPUTS:
+*    obj == obj_template_t to check
+*    modname == module name that defines the obj_template_t
+*            == NULL and first match will be done, and the
+*               module ignored (Name instead of QName)
+*    objname == object name to find
+*
+* RETURNS:
+*    pointer to obj_template_t or NULL if not found
+*********************************************************************/
+const obj_template_t *
+    obj_find_child (const obj_template_t *obj,
+		    const xmlChar *modname,
+		    const xmlChar *objname)
+{
+    const dlq_hdr_t  *que;
+
+#ifdef DEBUG
+    if (!obj || !objname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    que = obj_get_cdatadefQ(obj);
+    if (que) {
+	return find_template(que, modname, objname, TRUE, FALSE);
+    }
+
+    return NULL;
+
+}  /* obj_find_child */
+
+
+/********************************************************************
+* FUNCTION obj_find_child_str
+* 
+* Find a child object with the specified Qname
+*
+* INPUTS:
+*    obj == obj_template_t to check
+*    modname == module name that defines the obj_template_t
+*            == NULL and first match will be done, and the
+*               module ignored (Name instead of QName)
+*    objname == object name to find, not Z-terminated
+*    objnamelen == length of objname string
+*
+* RETURNS:
+*    pointer to obj_template_t or NULL if not found
+*********************************************************************/
+const obj_template_t *
+    obj_find_child_str (const obj_template_t *obj,
+			const xmlChar *modname,
+			const xmlChar *objname,
+			uint32 objnamelen)
+{
+    const dlq_hdr_t  *que;
+    xmlChar           buff[NCX_MAX_NLEN+1];
+
+#ifdef DEBUG
+    if (!obj || !objname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (objnamelen > NCX_MAX_NLEN) {
+	return NULL;
+    }
+    
+    que = obj_get_cdatadefQ(obj);
+    if (que) {
+	xml_strncpy(buff, objname, objnamelen);
+	return find_template(que, modname, buff, TRUE, FALSE);
+    }
+
+    return NULL;
+
+}  /* obj_find_child_str */
+
+
+/********************************************************************
+* FUNCTION obj_match_child_str
+* 
+* Match a child object with the specified Qname
+* Find first command that matches all N chars of objname
+*
+* !!! This function checks for accessible names only!!!
+* !!! That means child nodes of choice->case will be
+* !!! present instead of the choice name or case name
+*
+* INPUTS:
+*    obj == obj_template_t to check
+*    modname == module name that defines the obj_template_t
+*            == NULL and first match will be done, and the
+*               module ignored (Name instead of QName)
+*    objname == object name to find, not Z-terminated
+*    objnamelen == length of objname string
+*
+* RETURNS:
+*    pointer to obj_template_t or NULL if not found
+*********************************************************************/
+const obj_template_t *
+    obj_match_child_str (const obj_template_t *obj,
+			 const xmlChar *modname,
+			 const xmlChar *objname,
+			 uint32 objnamelen)
+{
+    const dlq_hdr_t  *que;
+    xmlChar           buff[NCX_MAX_NLEN+1];
+
+#ifdef DEBUG
+    if (!obj || !objname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (objnamelen > NCX_MAX_NLEN) {
+	return NULL;
+    }
+    
+    que = obj_get_cdatadefQ(obj);
+    if (que) {
+	xml_strncpy(buff, objname, objnamelen);
+	return find_template(que, modname, buff, TRUE, TRUE);
+    }
+
+    return NULL;
+
+}  /* obj_match_child_str */
+
+
+/********************************************************************
+* FUNCTION obj_first_child
+* 
+* Get the first child object if the specified object
+* has any children
+*
+*  !!!! SKIPS OVER AUGMENT AND USES !!!!
+*
+* INPUTS:
+*    obj == obj_template_t to check
+
+* RETURNS:
+*    pointer to first child obj_template_t or 
+*    NULL if not found 
+*********************************************************************/
+const obj_template_t *
+    obj_first_child (const obj_template_t *obj)
+{
+    const dlq_hdr_t       *que;
+    const obj_template_t  *chobj;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    que = obj_get_cdatadefQ(obj);
+    if (que) {
+	for (chobj = (const obj_template_t *)dlq_firstEntry(que);
+	     chobj != NULL;
+	     chobj = (const obj_template_t *)dlq_nextEntry(chobj)) {
+	    if (obj_has_name(chobj)) {
+		return chobj;
+	    }
+	}
+    }
+
+    return NULL;
+
+}  /* obj_first_child */
+
+
+/********************************************************************
+* FUNCTION obj_next_child
+* 
+* Get the next child object if the specified object
+* has any children
+*
+*  !!!! SKIPS OVER AUGMENT AND USES !!!!
+*
+* INPUTS:
+*    obj == obj_template_t to check
+
+* RETURNS:
+*    pointer to first child obj_template_t or 
+*    NULL if not found 
+*********************************************************************/
+const obj_template_t *
+    obj_next_child (const obj_template_t *obj)
+{
+    const obj_template_t  *next;
+    boolean                done;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    next = obj;
+    done = FALSE;
+    while (!done) {
+	next = (const obj_template_t *)dlq_nextEntry(next);
+	if (!next) {
+	    done = TRUE;
+	} else if (obj_has_name(next)) {
+	    return next;
+	}
+    }
+    return NULL;
+
+}  /* obj_next_child */
 
 
 /********************************************************************
@@ -2652,7 +2956,7 @@ obj_case_t *
 	 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
 
 	cas = casobj->def.cas;
-	if (modname && xml_strcmp(casobj->mod->name, modname)) {
+	if (modname && xml_strcmp(obj_get_mod_name(casobj), modname)) {
 	    continue;
 	}
 
@@ -2713,7 +3017,8 @@ obj_template_t *
 	    continue;
 	}
 
-	if (xml_strcmp(grp1->mod->name, grp2->mod->name)) {
+	if (xml_strcmp(grp_get_mod_name(grp1),
+		       grp_get_mod_name(grp2)) {
 	    continue;
 	}
 
@@ -2798,6 +3103,1192 @@ void
     }
 
 }  /* obj_clean_datadefQ */
+
+
+
+/********************************************************************
+* FUNCTION obj_find_type
+*
+* Check if a typ_template_t in the obj typedefQ hierarchy
+*
+* INPUTS:
+*   obj == obj_template using the typedef
+*   typname == type name to find
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+typ_template_t *
+    obj_find_type (const obj_template_t *obj,
+		   const xmlChar *typname)
+{
+    dlq_hdr_t      *que;
+    typ_template_t *typ;
+    grp_template_t *testgrp;
+
+#ifdef DEBUG
+    if (!obj || !typname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    /* if this is a direct child of a grouping, try the tryedefQ
+     * in the grouping first
+     */
+    if (obj->grp) {
+	que = &obj->grp->typedefQ;
+	typ = ncx_find_type_que(que, typname);
+	if (typ) {
+	    return typ;
+	}
+
+	testgrp = obj->grp->parentgrp;
+	while (testgrp) {
+	    typ = ncx_find_type_que(&testgrp->typedefQ, typname);
+	    if (typ) {
+		return typ;
+	    }
+	    testgrp = testgrp->parentgrp;
+	}
+    }
+
+    /* object not in directly in a group or nothing found
+     * check if this object has a typedefQ
+     */
+    que = NULL;
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+	que = obj->def.container->typedefQ;
+	break;
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+	break;
+    case OBJ_TYP_LIST:
+	que = obj->def.list->typedefQ;
+	break;
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_USES:
+	break;
+    case OBJ_TYP_AUGMENT:
+	break;
+    case OBJ_TYP_RPC:
+	que = &obj->def.rpc->typedefQ;
+	break;
+    case OBJ_TYP_RPCIO:
+	que = &obj->def.rpcio->typedefQ;
+	break;
+    case OBJ_TYP_NOTIF:
+	que = &obj->def.notif->typedefQ;
+	break;
+    case OBJ_TYP_NONE:
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+
+    if (que) {
+	typ = ncx_find_type_que(que, typname);
+	if (typ) {
+	    return typ;
+	}
+    }
+
+    if (obj->parent) {
+	return obj_find_type(obj->parent, typname);
+    } else {
+	return NULL;
+    }
+
+}   /* obj_find_type */
+
+
+/********************************************************************
+* FUNCTION obj_find_grouping
+*
+* Check if a grp_template_t in the obj groupingQ hierarchy
+*
+* INPUTS:
+*   obj == obj_template using the grouping
+*   grpname == grouping name to find
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+grp_template_t *
+    obj_find_grouping (const obj_template_t *obj,
+		       const xmlChar *grpname)
+{
+    dlq_hdr_t      *que;
+    grp_template_t *grp, *testgrp;
+
+#ifdef DEBUG
+    if (!obj || !grpname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    /* check direct nesting within a grouping chain */
+    if (obj->grp) {
+	grp = ncx_find_grouping_que(&obj->grp->groupingQ, grpname);
+	if (grp) {
+	    return grp;
+	}
+
+	testgrp = obj->grp->parentgrp;
+	while (testgrp) {
+	    if (!xml_strcmp(testgrp->name, grpname)) {
+		return testgrp;
+	    } else {
+		grp = ncx_find_grouping_que(&testgrp->groupingQ, grpname);
+		if (grp) {
+		    return grp;
+		}
+	    }
+	    testgrp = testgrp->parentgrp;
+	}
+    }
+
+    /* check the object has a groupingQ within the object chain */
+    que = NULL;
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+	que = obj->def.container->groupingQ;
+	break;
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+	break;
+    case OBJ_TYP_LIST:
+	que = obj->def.list->groupingQ;
+	break;
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_USES:
+	break;
+    case OBJ_TYP_AUGMENT:
+	break;
+    case OBJ_TYP_RPC:
+	que = &obj->def.rpc->groupingQ;
+	break;
+    case OBJ_TYP_RPCIO:
+	que = &obj->def.rpcio->groupingQ;
+	break;
+    case OBJ_TYP_NOTIF:
+	que = &obj->def.notif->groupingQ;
+	break;
+    case OBJ_TYP_NONE:
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+
+    if (que) {
+	grp = ncx_find_grouping_que(que, grpname);
+	if (grp) {
+	    return grp;
+	}
+    }
+
+    if (obj->parent) {
+	return obj_find_grouping(obj->parent, grpname);
+    } else {
+	return NULL;
+    }
+
+}   /* obj_find_grouping */
+
+
+/********************************************************************
+* FUNCTION obj_set_named_type
+* 
+* Resolve type test 
+* Called during phase 2 of module parsing
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   typname == name field from typ->name  (may be NULL)
+*   typdef == typdef in progress
+*   parent == obj_template containing this typedef
+*          == NULL if this is the top-level, use mod->typeQ
+*   grp == grp_template containing this typedef
+*          == NULL if the typedef is not contained in a grouping
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t 
+    obj_set_named_type (tk_chain_t *tkc,
+			ncx_module_t *mod,
+			const xmlChar *typname,
+			typ_def_t *typdef,
+			obj_template_t *parent,
+			grp_template_t *grp)
+{
+    typ_template_t *testtyp;
+
+    if (typdef->class == NCX_CL_NAMED &&
+	typdef->def.named.typ==NULL) {
+
+	/* assumed to be a named type from this module
+	 * because any named type from another module
+	 * would get resolved OK, or fail due to syntax
+	 * or dependency loop
+	 */
+	if (typname && !xml_strcmp(typname, typdef->typename)) {
+	    log_error("\nError: typedef '%s' cannot use type '%s'",
+		      typname, typname);
+	    tkc->cur = typdef->tk;
+	    return ERR_NCX_WRONG_VAL;
+	}
+
+	testtyp = NULL;
+
+	/* find the type within the specified typedef Q */
+	if (typdef->typename) {
+	    if (grp) {
+		testtyp = find_type_in_grpchain(grp, typdef->typename);
+	    }
+
+	    if (!testtyp && parent) {
+		testtyp = obj_find_type(parent, typdef->typename);
+	    }
+
+	    if (!testtyp) {
+		testtyp = ncx_find_type(mod, typdef->typename);
+	    }
+	}
+
+	if (!testtyp) {
+	    log_error("\nError: type '%s' not found", typdef->typename);
+	    tkc->cur = typdef->tk;
+	    return ERR_NCX_UNKNOWN_TYPE;
+	} else {
+	    typdef->def.named.typ = testtyp;
+	    typdef->linenum = testtyp->linenum;
+	    testtyp->used = TRUE;
+	}
+    }
+    return NO_ERR;
+
+}   /* obj_set_named_type */
+
+
+/********************************************************************
+* FUNCTION obj_clone_template
+*
+* Clone an obj_template_t
+* Copy the pointers from the srcobj into the new obj
+*
+* If the mobj is non-NULL, then the non-NULL revisable
+* fields in the mobj struct will be merged into the new object
+*
+* INPUTS:
+*   mod == module struct that is defining the new cloned data
+*          this may be different than the module that will
+*          contain the cloned data (except top-level objects)
+*   srcobj == obj_template to clone
+*             !!! This struct MUST NOT be deleted!!!
+*             !!! Unless all of its clones are also deleted !!!
+*   mobj == merge object (may be NULL)
+*           only fields allowed to be revised will be checked
+*           even if other fields are set in this struct
+*
+* RETURNS:
+*   pointer to malloced clone obj_template_t
+*   NULL if malloc failer error or internal error
+*********************************************************************/
+obj_template_t *
+    obj_clone_template (ncx_module_t *mod,
+			obj_template_t *srcobj,
+			obj_template_t *mobj)
+{
+    obj_template_t     *newobj;
+    status_t            res;
+
+#ifdef DEBUG
+    if (!srcobj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+    if (srcobj->objtype == OBJ_TYP_NONE ||
+	srcobj->objtype > OBJ_TYP_AUGMENT) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+    if (mobj) {
+	if (mobj->objtype != srcobj->objtype) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return NULL;
+	}
+	if (xml_strcmp(obj_get_name(srcobj),
+			obj_get_name(mobj))) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return NULL;
+	}
+    }
+#endif
+
+    newobj = new_blank_template();
+    if (!newobj) {
+	return NULL;
+    }
+
+    /* set most of the common fields but leave the mod and parent NULL
+     * since the uses or augment calling this fn is going to
+     * re-prent the cloned node under a different part of the tree
+     */
+    newobj->objtype = srcobj->objtype;
+    newobj->tk = srcobj->tk;
+    newobj->linenum = srcobj->linenum;
+    newobj->flags = (srcobj->flags | OBJ_FL_CLONE);
+    newobj->mod = mod;
+    res = NO_ERR;
+
+    /* set the specific object definition type */
+    switch (srcobj->objtype) {
+    case OBJ_TYP_CONTAINER:
+	newobj->def.container = 
+	    clone_container(mod, newobj, srcobj->def.container,
+			    (mobj) ? mobj->def.container : NULL);
+	if (!newobj->def.container) {
+	    res = ERR_INTERNAL_MEM;
+	}
+	break;
+    case OBJ_TYP_LEAF:
+	newobj->def.leaf = 
+	    clone_leaf(srcobj->def.leaf,
+		       (mobj) ? mobj->def.leaf : NULL);
+	if (!newobj->def.leaf) {
+	    res = ERR_INTERNAL_MEM;
+	}
+	break;
+    case OBJ_TYP_LEAF_LIST:
+	newobj->def.leaflist = 
+	    clone_leaflist(srcobj->def.leaflist,
+			   (mobj) ? mobj->def.leaflist : NULL);
+	if (!newobj->def.leaflist) {
+	    res = ERR_INTERNAL_MEM;
+	}
+	break;
+    case OBJ_TYP_LIST:
+	newobj->def.list = 
+	    clone_list(mod, newobj, srcobj->def.list,
+		       (mobj) ? mobj->def.list : NULL);
+	if (!newobj->def.list) {
+	    res = ERR_INTERNAL_MEM;
+	}
+	break;
+    case OBJ_TYP_CHOICE:
+	newobj->def.choic = 
+	    clone_choice(mod, srcobj->def.choic,
+			 (mobj) ? mobj->def.choic : NULL, newobj);
+	if (!newobj->def.choic) {
+	    res = ERR_INTERNAL_MEM;
+	}
+	break;
+    case OBJ_TYP_CASE:
+	newobj->def.cas = 
+	    clone_case(mod, srcobj->def.cas,
+		       (mobj) ? mobj->def.cas : NULL,
+		       newobj);
+	if (!newobj->def.cas) {
+	    res = ERR_INTERNAL_MEM;
+	}
+	break;
+    case OBJ_TYP_USES:
+	if (mobj) {
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	} else {
+	    newobj->def.uses = srcobj->def.uses;
+	    newobj->flags |= OBJ_FL_DEFCLONE;
+	}
+	break;
+    case OBJ_TYP_AUGMENT:
+	if (mobj) {
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	} else {
+	    newobj->def.augment = srcobj->def.augment;
+	    newobj->flags |= OBJ_FL_DEFCLONE;
+	}
+	break;
+    case OBJ_TYP_NONE:
+    default:
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (res != NO_ERR) {
+	free_blank_template(newobj);
+	return NULL;
+    } else {
+	return newobj;
+    }
+
+}   /* obj_clone_template */
+
+
+/********************************************************************
+* FUNCTION obj_clone_template_case
+*
+* Clone an obj_template_t but make sure it is wrapped
+* in a OBJ_TYP_CASE layer
+*
+* Copy the pointers from the srcobj into the new obj
+*
+* If the mobj is non-NULL, then the non-NULL revisable
+* fields in the mobj struct will be merged into the new object
+*
+* INPUTS:
+*   mod == module struct that is defining the new cloned data
+*          this may be different than the module that will
+*          contain the cloned data (except top-level objects)
+*   srcobj == obj_template to clone
+*             !!! This struct MUST NOT be deleted!!!
+*             !!! Unless all of its clones are also deleted !!!
+*   mobj == merge object (may be NULL)
+*           only fields allowed to be revised will be checked
+*           even if other fields are set in this struct
+*
+* RETURNS:
+*   pointer to malloced clone obj_template_t
+*   NULL if malloc failer error or internal error
+*********************************************************************/
+obj_template_t *
+    obj_clone_template_case (ncx_module_t *mod,
+			     obj_template_t *srcobj,
+			     obj_template_t *mobj)
+{
+    obj_template_t     *casobj, *newobj;
+
+#ifdef DEBUG
+    if (!srcobj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+    if (srcobj->objtype == OBJ_TYP_NONE ||
+	srcobj->objtype > OBJ_TYP_AUGMENT) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+    if (mobj) {
+	if (mobj->objtype != srcobj->objtype) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return NULL;
+	}
+	if (xml_strcmp(obj_get_name(srcobj),
+			obj_get_name(mobj))) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return NULL;
+	}
+    }
+#endif
+
+    if (srcobj->objtype == OBJ_TYP_CASE) {
+	return obj_clone_template(mod, srcobj, mobj);
+    }
+
+    casobj = new_blank_template();
+    if (!casobj) {
+	return NULL;
+    }
+
+    /* set most of the common fields but leave the mod and parent NULL
+     * since the uses or augment calling this fn is going to
+     * re-prent the cloned node under a different part of the tree
+     */
+    casobj->objtype = OBJ_TYP_CASE;
+    casobj->tk = srcobj->tk;
+    casobj->linenum = srcobj->linenum;
+    casobj->flags = OBJ_FL_CLONE;
+    casobj->mod = mod;
+    casobj->def.cas = new_case(TRUE);
+    if (!casobj->def.cas) {
+	free_blank_template(casobj);
+	return NULL;
+    }
+    casobj->def.cas->name = xml_strdup(obj_get_name(srcobj));
+    if (!casobj->def.cas->name) {
+	obj_free_template(casobj);
+	return NULL;
+    }
+    casobj->def.cas->status = obj_get_status(srcobj);
+
+    newobj = obj_clone_template(mod, srcobj, mobj);
+    if (!newobj) {
+	obj_free_template(casobj);
+	return NULL;
+    }
+
+    newobj->parent = casobj;
+    dlq_enque(newobj, casobj->def.cas->datadefQ);
+    return casobj;
+
+}   /* obj_clone_template_case */
+
+
+
+/********************************************************************
+* FUNCTION obj_new_unique
+* 
+* Alloc and Init a obj_unique_t struct
+*
+* RETURNS:
+*   pointer to malloced struct or NULL if memory error
+*********************************************************************/
+obj_unique_t *
+    obj_new_unique (void)
+{
+    obj_unique_t  *un;
+
+    un = m__getObj(obj_unique_t);
+    if (!un) {
+        return NULL;
+    }
+    obj_init_unique(un);
+    return un;
+
+}  /* obj_new_unique */
+
+
+/********************************************************************
+* FUNCTION obj_init_unique
+* 
+* Init a obj_unique_t struct
+*
+* INPUTS:
+*   un == obj_unique_t struct to init
+*********************************************************************/
+void
+    obj_init_unique (obj_unique_t *un)
+{
+#ifdef DEBUG
+    if (!un) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+    memset(un, 0, sizeof(obj_unique_t));
+    dlq_createSQue(&un->compQ);
+
+}  /* obj_init_unique */
+
+
+/********************************************************************
+* FUNCTION obj_free_unique
+* 
+* Free a obj_unique_t struct
+*
+* INPUTS:
+*   un == obj_unique_t struct to free
+*********************************************************************/
+void
+    obj_free_unique (obj_unique_t *un)
+{
+#ifdef DEBUG
+    if (!un) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    obj_clean_unique(un);
+    m__free(un);
+
+}  /* obj_free_unique */
+
+
+/********************************************************************
+* FUNCTION obj_clean_unique
+* 
+* Clean a obj_unique_t struct
+*
+* INPUTS:
+*   un == obj_unique_t struct to clean
+*********************************************************************/
+void
+    obj_clean_unique (obj_unique_t *un)
+{
+    obj_unique_comp_t *unc;
+
+#ifdef DEBUG
+    if (!un) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (un->xpath) {
+	m__free(un->xpath);
+	un->xpath = NULL;
+    }
+
+    while (!dlq_empty(&un->compQ)) {
+	unc = (obj_unique_comp_t *)dlq_deque(&un->compQ);
+	obj_free_unique_comp(unc);
+    }
+
+}  /* obj_clean_unique */
+
+
+/********************************************************************
+* FUNCTION obj_new_unique_comp
+* 
+* Alloc and Init a obj_unique_comp_t struct
+*
+* RETURNS:
+*   pointer to malloced struct or NULL if memory error
+*********************************************************************/
+obj_unique_comp_t *
+    obj_new_unique_comp (void)
+{
+    obj_unique_comp_t  *unc;
+
+    unc = m__getObj(obj_unique_comp_t);
+    if (!unc) {
+        return NULL;
+    }
+    memset(unc, 0x0, sizeof(obj_unique_comp_t));
+    return unc;
+
+}  /* obj_new_unique_comp */
+
+
+/********************************************************************
+* FUNCTION obj_free_unique_comp
+* 
+* Free a obj_unique_comp_t struct
+*
+* INPUTS:
+*   unc == obj_unique_comp_t struct to free
+*********************************************************************/
+void
+    obj_free_unique_comp (obj_unique_comp_t *unc)
+{
+#ifdef DEBUG
+    if (!unc) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (unc->xpath) {
+	m__free(unc->xpath);
+    }
+    m__free(unc);
+
+}  /* obj_free_unique_comp */
+
+
+
+/********************************************************************
+* FUNCTION obj_find_unique
+* 
+* Find a specific unique-stmt
+*
+* RETURNS:
+*   pointer to found entry or NULL if not found
+*********************************************************************/
+obj_unique_t *
+    obj_find_unique (dlq_hdr_t *que,
+		     const xmlChar *xpath)
+{
+    obj_unique_t  *un;
+
+#ifdef DEBUG
+    if (!que || !xpath) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (un = (obj_unique_t *)dlq_firstEntry(que);
+	 un != NULL;
+	 un = (obj_unique_t *)dlq_nextEntry(un)) {
+	if (!xml_strcmp(un->xpath, xpath)) {
+	    return un;
+	}
+    }
+    return NULL;
+
+}  /* obj_find_unique */
+
+
+/********************************************************************
+* FUNCTION obj_new_key
+* 
+* Alloc and Init a obj_key_t struct
+*
+* RETURNS:
+*   pointer to malloced struct or NULL if memory error
+*********************************************************************/
+obj_key_t *
+    obj_new_key (void)
+{
+    obj_key_t  *key;
+
+    key = m__getObj(obj_key_t);
+    if (!key) {
+        return NULL;
+    }
+    memset(key, 0x0, sizeof(obj_key_t));
+    return key;
+
+}  /* obj_new_key */
+
+
+/********************************************************************
+* FUNCTION obj_free_key
+* 
+* Free a obj_key_t struct
+*
+* INPUTS:
+*   key == obj_key_t struct to free
+*********************************************************************/
+void
+    obj_free_key (obj_key_t *key)
+{
+#ifdef DEBUG
+    if (!key) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    m__free(key);
+
+}  /* obj_free_key */
+
+
+/********************************************************************
+* FUNCTION obj_find_key
+* 
+* Find a specific key component by key leaf identifier name
+* Assumes deep keys are not supported!!!
+*
+* INPUTS:
+*   que == Q of obj_key_t to check
+*   keycompname == key component name to find
+*
+* RETURNS:
+*   pointer to found key component or NULL if not found
+*********************************************************************/
+obj_key_t *
+    obj_find_key (dlq_hdr_t *que,
+		  const xmlChar *keycompname)
+{
+    obj_key_t  *key;
+
+#ifdef DEBUG
+    if (!que || !keycompname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (key = (obj_key_t *)dlq_firstEntry(que);
+	 key != NULL;
+	 key = (obj_key_t *)dlq_nextEntry(key)) {
+	if (!xml_strcmp(obj_get_name(key->keyobj), keycompname)) {
+	    return key;
+	}
+    }
+    return NULL;
+
+}  /* obj_find_key */
+
+
+/********************************************************************
+* FUNCTION obj_find_key2
+* 
+* Find a specific key component, check for a specific node
+* in case deep keys are supported, and to check for duplicates
+*
+* INPUTS:
+*   que == Q of obj_key_t to check
+*   keyobj == key component object to find
+*
+* RETURNS:
+*   pointer to found key component or NULL if not found
+*********************************************************************/
+obj_key_t *
+    obj_find_key2 (dlq_hdr_t *que,
+		   const obj_template_t *keyobj)
+{
+    obj_key_t  *key;
+
+#ifdef DEBUG
+    if (!que || !keyobj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (key = (obj_key_t *)dlq_firstEntry(que);
+	 key != NULL;
+	 key = (obj_key_t *)dlq_nextEntry(key)) {
+	if (keyobj == key->keyobj) {
+	    return key;
+	}
+    }
+    return NULL;
+
+}  /* obj_find_key2 */
+
+
+/********************************************************************
+* FUNCTION obj_first_key
+* 
+* Get the first key record
+*
+* INPUTS:
+*   obj == object to check
+*
+* RETURNS:
+*   pointer to first key component or NULL if not found
+*********************************************************************/
+obj_key_t *
+    obj_first_key (obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+    if (obj->objtype != OBJ_TYP_LIST) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+#endif
+
+    if (obj->def.list->keyQ) {
+	return (obj_key_t *)dlq_firstEntry(obj->def.list->keyQ);
+    }
+    return NULL;
+
+}  /* obj_first_key */
+
+/********************************************************************
+* FUNCTION obj_first_ckey
+* 
+* Get the first key record: Const version
+*
+* INPUTS:
+*   obj == object to check
+*
+* RETURNS:
+*   pointer to first key component or NULL if not found
+*********************************************************************/
+const obj_key_t *
+    obj_first_ckey (const obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+    if (obj->objtype != OBJ_TYP_LIST) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+#endif
+
+    if (obj->def.list->keyQ) {
+	return (const obj_key_t *)dlq_firstEntry(obj->def.list->keyQ);
+    }
+    return NULL;
+
+}  /* obj_first_ckey */
+
+
+/********************************************************************
+* FUNCTION obj_next_key
+* 
+* Get the next key record
+*
+* INPUTS:
+*   objkey == current key record
+*
+* RETURNS:
+*   pointer to next key component or NULL if not found
+*********************************************************************/
+obj_key_t *
+    obj_next_key (obj_key_t *objkey)
+{
+#ifdef DEBUG
+    if (!objkey) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (obj_key_t *)dlq_nextEntry(objkey);
+
+}  /* obj_next_key */
+
+
+/********************************************************************
+* FUNCTION obj_next_ckey
+* 
+* Get the next key record: Const version
+*
+* INPUTS:
+*   objkey == current key record
+*
+* RETURNS:
+*   pointer to next key component or NULL if not found
+*********************************************************************/
+const obj_key_t *
+    obj_next_ckey (const obj_key_t *objkey)
+{
+#ifdef DEBUG
+    if (!objkey) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (const obj_key_t *)dlq_nextEntry(objkey);
+
+}  /* obj_next_ckey */
+
+
+/********************************************************************
+* FUNCTION obj_any_rpcs
+* 
+* Check if there are any RPC methods in the datadefQ
+*
+* INPUTS:
+*   que == Q of obj_template_t to check
+*
+* RETURNS:
+*   TRUE if any OBJ_TYP_RPC found, FALSE if not
+*********************************************************************/
+boolean
+    obj_any_rpcs (dlq_hdr_t *datadefQ)
+{
+    obj_template_t  *obj;
+
+#ifdef DEBUG
+    if (!datadefQ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
+	 obj != NULL;
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+	if (obj->objtype == OBJ_TYP_RPC) {
+	    return TRUE;
+	}
+    }
+    return FALSE;
+
+}  /* obj_any_rpcs */
+
+
+/********************************************************************
+* FUNCTION obj_any_notifs
+* 
+* Check if there are any notifications in the datadefQ
+*
+* INPUTS:
+*   que == Q of obj_template_t to check
+*
+* RETURNS:
+*   TRUE if any OBJ_TYP_NOTIF found, FALSE if not
+*********************************************************************/
+boolean
+    obj_any_notifs (dlq_hdr_t *datadefQ)
+{
+    obj_template_t  *obj;
+
+#ifdef DEBUG
+    if (!datadefQ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
+	 obj != NULL;
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+	if (obj->objtype == OBJ_TYP_NOTIF) {
+	    return TRUE;
+	}
+    }
+    return FALSE;
+
+}  /* obj_any_notifs */
+
+
+/********************************************************************
+* FUNCTION obj_gen_object_id
+* 
+* Malloc and Generate the object ID for an object node
+* 
+* INPUTS:
+*   obj == node to generate the instance ID for
+*   buff == pointer to address of buffer to use
+*
+* OUTPUTS
+*   *buff == malloced buffer with the instance ID
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    obj_gen_object_id (const obj_template_t *obj,
+		       xmlChar  **buff)
+{
+    uint32    len;
+    status_t  res;
+
+#ifdef DEBUG 
+    if (!obj || !buff) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    *buff = NULL;
+
+    /* figure out the length of the object ID */
+    res = get_object_string(obj, NULL, 0, TRUE, &len);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* get a buffer to fit the instance ID string */
+    *buff = (xmlChar *)m__getMem(len+1);
+    if (!*buff) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    /* get the object ID for real this time */
+    res = get_object_string(obj, *buff, len+1, TRUE, &len);
+    if (res != NO_ERR) {
+	m__free(*buff);
+	*buff = NULL;
+	return SET_ERROR(res);
+    }
+
+    return NO_ERR;
+
+}  /* obj_gen_object_id */
+
+
+/********************************************************************
+* FUNCTION obj_copy_object_id
+* 
+* Generate the object ID for an object node and copy to the buffer
+* 
+* INPUTS:
+*   obj == node to generate the instance ID for
+*   buff == buffer to use
+*   bufflen == size of buff
+*   reallen == address of return length of actual identifier 
+*               (may be NULL)
+*
+* OUTPUTS
+*   buff == filled in with the object ID
+*  if reallen not NULL:
+*     *reallen == length of identifier, even if error occurred
+*  
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    obj_copy_object_id (const obj_template_t *obj,
+			xmlChar  *buff,
+			uint32 bufflen,
+			uint32 *reallen)
+{
+#ifdef DEBUG 
+    if (!obj || !buff) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    return get_object_string(obj, buff, bufflen, TRUE, reallen);
+
+}  /* obj_copy_object_id */
+
+
+
+
+
+
+/********************************************************************
+* FUNCTION obj_gen_aughook_id
+* 
+* Malloc and Generate the augment hook element name for
+* the specified object. This will be a child node of the
+* specified object.
+* 
+* INPUTS:
+*   obj == node to generate the augment hook ID for
+*   buff == pointer to address of buffer to use
+*
+* OUTPUTS
+*   *buff == malloced buffer with the instance ID
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    obj_gen_aughook_id (const obj_template_t *obj,
+			xmlChar  **buff)
+{
+    xmlChar  *p;
+    uint32    len, extra;
+    status_t  res;
+
+#ifdef DEBUG 
+    if (!obj || !buff) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    *buff = NULL;
+
+    /* figure out the length of the aughook ID */
+    res = get_object_string(obj, NULL, 0, FALSE, &len);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* get the length for the aughook prefix and suffix */
+    extra = (xml_strlen(NCX_AUGHOOK_START) + xml_strlen(NCX_AUGHOOK_END));
+
+    /* get a buffer to fit the instance ID string */
+    *buff = (xmlChar *)m__getMem(len+extra+1);
+    if (!*buff) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    /* put prefix in buffer */
+    p = *buff;
+    p += xml_strcpy(p, NCX_AUGHOOK_START);
+    
+    /* add the aughook ID to the buffer */
+    res = get_object_string(obj, p, len+1, FALSE, &len);
+    if (res != NO_ERR) {
+	m__free(*buff);
+	*buff = NULL;
+	return SET_ERROR(res);
+    }
+
+    /* add suffix to the buffer */
+    p += len;
+    xml_strcpy(p, NCX_AUGHOOK_END);
+
+    return NO_ERR;
+
+}  /* obj_gen_aughook_id */
 
 
 /********************************************************************
@@ -3282,682 +4773,6 @@ const xmlChar *
 
 
 /********************************************************************
-* FUNCTION obj_find_type
-*
-* Check if a typ_template_t in the obj typedefQ hierarchy
-*
-* INPUTS:
-*   obj == obj_template using the typedef
-*   typname == type name to find
-*
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
-typ_template_t *
-    obj_find_type (const obj_template_t *obj,
-		   const xmlChar *typname)
-{
-    dlq_hdr_t      *que;
-    typ_template_t *typ;
-    grp_template_t *testgrp;
-
-#ifdef DEBUG
-    if (!obj || !typname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    /* if this is a direct child of a grouping, try the tryedefQ
-     * in the grouping first
-     */
-    if (obj->grp) {
-	que = &obj->grp->typedefQ;
-	typ = ncx_find_type_que(que, typname);
-	if (typ) {
-	    return typ;
-	}
-
-	testgrp = obj->grp->parentgrp;
-	while (testgrp) {
-	    typ = ncx_find_type_que(&testgrp->typedefQ, typname);
-	    if (typ) {
-		return typ;
-	    }
-	    testgrp = testgrp->parentgrp;
-	}
-    }
-
-    /* object not in directly in a group or nothing found
-     * check if this object has a typedefQ
-     */
-    que = NULL;
-
-    switch (obj->objtype) {
-    case OBJ_TYP_CONTAINER:
-	que = obj->def.container->typedefQ;
-	break;
-    case OBJ_TYP_LEAF:
-    case OBJ_TYP_LEAF_LIST:
-	break;
-    case OBJ_TYP_LIST:
-	que = obj->def.list->typedefQ;
-	break;
-    case OBJ_TYP_CHOICE:
-    case OBJ_TYP_CASE:
-    case OBJ_TYP_USES:
-	break;
-    case OBJ_TYP_AUGMENT:
-	break;
-    case OBJ_TYP_RPC:
-	que = &obj->def.rpc->typedefQ;
-	break;
-    case OBJ_TYP_RPCIO:
-	que = &obj->def.rpcio->typedefQ;
-	break;
-    case OBJ_TYP_NOTIF:
-	que = &obj->def.notif->typedefQ;
-	break;
-    case OBJ_TYP_NONE:
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
-    }
-
-    if (que) {
-	typ = ncx_find_type_que(que, typname);
-	if (typ) {
-	    return typ;
-	}
-    }
-
-    if (obj->parent) {
-	return obj_find_type(obj->parent, typname);
-    } else {
-	return NULL;
-    }
-
-}   /* obj_find_type */
-
-
-/********************************************************************
-* FUNCTION obj_find_grouping
-*
-* Check if a grp_template_t in the obj groupingQ hierarchy
-*
-* INPUTS:
-*   obj == obj_template using the grouping
-*   grpname == grouping name to find
-*
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
-grp_template_t *
-    obj_find_grouping (const obj_template_t *obj,
-		       const xmlChar *grpname)
-{
-    dlq_hdr_t      *que;
-    grp_template_t *grp, *testgrp;
-
-#ifdef DEBUG
-    if (!obj || !grpname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    /* check direct nesting within a grouping chain */
-    if (obj->grp) {
-	grp = ncx_find_grouping_que(&obj->grp->groupingQ, grpname);
-	if (grp) {
-	    return grp;
-	}
-
-	testgrp = obj->grp->parentgrp;
-	while (testgrp) {
-	    if (!xml_strcmp(testgrp->name, grpname)) {
-		return testgrp;
-	    } else {
-		grp = ncx_find_grouping_que(&testgrp->groupingQ, grpname);
-		if (grp) {
-		    return grp;
-		}
-	    }
-	    testgrp = testgrp->parentgrp;
-	}
-    }
-
-    /* check the object has a groupingQ within the object chain */
-    que = NULL;
-
-    switch (obj->objtype) {
-    case OBJ_TYP_CONTAINER:
-	que = obj->def.container->groupingQ;
-	break;
-    case OBJ_TYP_LEAF:
-    case OBJ_TYP_LEAF_LIST:
-	break;
-    case OBJ_TYP_LIST:
-	que = obj->def.list->groupingQ;
-	break;
-    case OBJ_TYP_CHOICE:
-    case OBJ_TYP_CASE:
-    case OBJ_TYP_USES:
-	break;
-    case OBJ_TYP_AUGMENT:
-	break;
-    case OBJ_TYP_RPC:
-	que = &obj->def.rpc->groupingQ;
-	break;
-    case OBJ_TYP_RPCIO:
-	que = &obj->def.rpcio->groupingQ;
-	break;
-    case OBJ_TYP_NOTIF:
-	que = &obj->def.notif->groupingQ;
-	break;
-    case OBJ_TYP_NONE:
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
-    }
-
-    if (que) {
-	grp = ncx_find_grouping_que(que, grpname);
-	if (grp) {
-	    return grp;
-	}
-    }
-
-    if (obj->parent) {
-	return obj_find_grouping(obj->parent, grpname);
-    } else {
-	return NULL;
-    }
-
-}   /* obj_find_grouping */
-
-
-/********************************************************************
-* FUNCTION obj_set_named_type
-* 
-* Resolve type test 
-* Called during phase 2 of module parsing
-*
-* INPUTS:
-*   tkc == token chain
-*   mod == module in progress
-*   typname == name field from typ->name  (may be NULL)
-*   typdef == typdef in progress
-*   parent == obj_template containing this typedef
-*          == NULL if this is the top-level, use mod->typeQ
-*   grp == grp_template containing this typedef
-*          == NULL if the typedef is not contained in a grouping
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t 
-    obj_set_named_type (tk_chain_t *tkc,
-			ncx_module_t *mod,
-			const xmlChar *typname,
-			typ_def_t *typdef,
-			obj_template_t *parent,
-			grp_template_t *grp)
-{
-    typ_template_t *testtyp;
-
-    if (typdef->class == NCX_CL_NAMED &&
-	typdef->def.named.typ==NULL) {
-
-	/* assumed to be a named type from this module
-	 * because any named type from another module
-	 * would get resolved OK, or fail due to syntax
-	 * or dependency loop
-	 */
-	if (typname && !xml_strcmp(typname, typdef->typename)) {
-	    log_error("\nError: typedef '%s' cannot use type '%s'",
-		      typname, typname);
-	    tkc->cur = typdef->tk;
-	    return ERR_NCX_WRONG_VAL;
-	}
-
-	testtyp = NULL;
-
-	/* find the type within the specified typedef Q */
-	if (typdef->typename) {
-	    if (grp) {
-		testtyp = find_type_in_grpchain(grp, typdef->typename);
-	    }
-
-	    if (!testtyp && parent) {
-		testtyp = obj_find_type(parent, typdef->typename);
-	    }
-
-	    if (!testtyp) {
-		testtyp = ncx_find_type(mod, typdef->typename);
-	    }
-	}
-
-	if (!testtyp) {
-	    log_error("\nError: type '%s' not found", typdef->typename);
-	    tkc->cur = typdef->tk;
-	    return ERR_NCX_UNKNOWN_TYPE;
-	} else {
-	    typdef->def.named.typ = testtyp;
-	    typdef->linenum = testtyp->linenum;
-	    testtyp->used = TRUE;
-	}
-    }
-    return NO_ERR;
-
-}   /* obj_set_named_type */
-
-
-/********************************************************************
-* FUNCTION obj_is_required
-*
-* Figure out if the obj is required or not
-*
-* Required = mandatory==TRUE && default==NULL
-*
-* INPUTS:
-*   obj == obj_template to check
-*
-* RETURNS:
-*   TRUE if object is required
-*   FALSE if object is not required
-*********************************************************************/
-boolean
-    obj_is_required (const obj_template_t *obj)
-{
-    const obj_template_t *chobj;
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
-    switch (obj->objtype) {
-    case OBJ_TYP_CONTAINER:
-	if (obj->def.container->presence) {
-	    return FALSE;
-	}
-	/* else drop through */
-    case OBJ_TYP_CASE:
-    case OBJ_TYP_RPCIO:
-	for (chobj = (const obj_template_t *)
-		 dlq_firstEntry(obj->def.container->datadefQ);
-	     chobj != NULL;
-	     chobj = (const obj_template_t *)
-		 dlq_nextEntry(chobj)) {
-	    if (obj_is_required(chobj)) {
-		return TRUE;
-	    }
-	}
-	return FALSE;
-    case OBJ_TYP_LEAF:
-	return obj->def.leaf->mandatory;
-    case OBJ_TYP_LEAF_LIST:
-	return (obj->def.leaflist->minelems) ? TRUE : FALSE;
-    case OBJ_TYP_LIST:
-	return (obj->def.list->minelems) ? TRUE : FALSE;
-    case OBJ_TYP_CHOICE:
-	return obj->def.choic->mandatory;
-    case OBJ_TYP_USES:
-    case OBJ_TYP_AUGMENT:
-    case OBJ_TYP_RPC:
-    case OBJ_TYP_NOTIF:
-	return FALSE;
-    case OBJ_TYP_NONE:
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
-    }
-
-}   /* obj_is_required */
-
-
-/********************************************************************
-* FUNCTION obj_is_cloned
-*
-* Figure out if the obj is a cloned object, inserted via uses
-* or augment statements
-*
-* INPUTS:
-*   obj == obj_template to check
-*
-* RETURNS:
-*   TRUE if object is cloned
-*   FALSE if object is not cloned
-*********************************************************************/
-boolean
-    obj_is_cloned (const obj_template_t *obj)
-{
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
-    return (obj->flags & OBJ_FL_CLONE) ? TRUE : FALSE;
-
-}   /* obj_is_cloned */
-
-
-/********************************************************************
-* FUNCTION obj_is_augclone
-*
-* Figure out if the obj is a cloned object, inserted via an
-* augment statement
-*
-* INPUTS:
-*   obj == obj_template to check
-*
-* RETURNS:
-*   TRUE if object is sourced from an augment
-*   FALSE if object is not sourced from an augment
-*********************************************************************/
-boolean
-    obj_is_augclone (const obj_template_t *obj)
-{
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
-    return (obj->flags & OBJ_FL_AUGCLONE) ? TRUE : FALSE;
-
-}   /* obj_is_augclone */
-
-
-/********************************************************************
-* FUNCTION obj_is_refine
-*
-* Figure out if the obj is a refinement object, within a uses-stmt
-*
-* INPUTS:
-*   obj == obj_template to check
-*
-* RETURNS:
-*   TRUE if object is a refinement
-*   FALSE if object is not a refinement
-*********************************************************************/
-boolean
-    obj_is_refine (const obj_template_t *obj)
-{
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
-    return (obj->flags & OBJ_FL_REFINE) ? TRUE : FALSE;
-
-}   /* obj_is_refine */
-
-
-/********************************************************************
-* FUNCTION obj_clone_template
-*
-* Clone an obj_template_t
-* Copy the pointers from the srcobj into the new obj
-*
-* If the mobj is non-NULL, then the non-NULL revisable
-* fields in the mobj struct will be merged into the new object
-*
-* INPUTS:
-*   mod == module struct that is defining the new cloned data
-*          this may be different than the module that will
-*          contain the cloned data (except top-level objects)
-*   srcobj == obj_template to clone
-*             !!! This struct MUST NOT be deleted!!!
-*             !!! Unless all of its clones are also deleted !!!
-*   mobj == merge object (may be NULL)
-*           only fields allowed to be revised will be checked
-*           even if other fields are set in this struct
-*
-* RETURNS:
-*   pointer to malloced clone obj_template_t
-*   NULL if malloc failer error or internal error
-*********************************************************************/
-obj_template_t *
-    obj_clone_template (ncx_module_t *mod,
-			obj_template_t *srcobj,
-			obj_template_t *mobj)
-{
-    obj_template_t     *newobj;
-    status_t            res;
-
-#ifdef DEBUG
-    if (!srcobj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-    if (srcobj->objtype == OBJ_TYP_NONE ||
-	srcobj->objtype > OBJ_TYP_AUGMENT) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return NULL;
-    }
-    if (mobj) {
-	if (mobj->objtype != srcobj->objtype) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-	if (xml_strcmp(obj_get_name(srcobj),
-			obj_get_name(mobj))) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-    }
-#endif
-
-    newobj = new_blank_template();
-    if (!newobj) {
-	return NULL;
-    }
-
-    /* set most of the common fields but leave the mod and parent NULL
-     * since the uses or augment calling this fn is going to
-     * re-prent the cloned node under a different part of the tree
-     */
-    newobj->objtype = srcobj->objtype;
-    newobj->tk = srcobj->tk;
-    newobj->linenum = srcobj->linenum;
-    newobj->flags = (srcobj->flags | OBJ_FL_CLONE);
-    newobj->mod = mod;
-    res = NO_ERR;
-
-    /* set the specific object definition type */
-    switch (srcobj->objtype) {
-    case OBJ_TYP_CONTAINER:
-	newobj->def.container = 
-	    clone_container(mod, newobj, srcobj->def.container,
-			    (mobj) ? mobj->def.container : NULL);
-	if (!newobj->def.container) {
-	    res = ERR_INTERNAL_MEM;
-	}
-	break;
-    case OBJ_TYP_LEAF:
-	newobj->def.leaf = 
-	    clone_leaf(srcobj->def.leaf,
-		       (mobj) ? mobj->def.leaf : NULL);
-	if (!newobj->def.leaf) {
-	    res = ERR_INTERNAL_MEM;
-	}
-	break;
-    case OBJ_TYP_LEAF_LIST:
-	newobj->def.leaflist = 
-	    clone_leaflist(srcobj->def.leaflist,
-			   (mobj) ? mobj->def.leaflist : NULL);
-	if (!newobj->def.leaflist) {
-	    res = ERR_INTERNAL_MEM;
-	}
-	break;
-    case OBJ_TYP_LIST:
-	newobj->def.list = 
-	    clone_list(mod, newobj, srcobj->def.list,
-		       (mobj) ? mobj->def.list : NULL);
-	if (!newobj->def.list) {
-	    res = ERR_INTERNAL_MEM;
-	}
-	break;
-    case OBJ_TYP_CHOICE:
-	newobj->def.choic = 
-	    clone_choice(mod, srcobj->def.choic,
-			 (mobj) ? mobj->def.choic : NULL, newobj);
-	if (!newobj->def.choic) {
-	    res = ERR_INTERNAL_MEM;
-	}
-	break;
-    case OBJ_TYP_CASE:
-	newobj->def.cas = 
-	    clone_case(mod, srcobj->def.cas,
-		       (mobj) ? mobj->def.cas : NULL,
-		       newobj);
-	if (!newobj->def.cas) {
-	    res = ERR_INTERNAL_MEM;
-	}
-	break;
-    case OBJ_TYP_USES:
-	if (mobj) {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	} else {
-	    newobj->def.uses = srcobj->def.uses;
-	    newobj->flags |= OBJ_FL_DEFCLONE;
-	}
-	break;
-    case OBJ_TYP_AUGMENT:
-	if (mobj) {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	} else {
-	    newobj->def.augment = srcobj->def.augment;
-	    newobj->flags |= OBJ_FL_DEFCLONE;
-	}
-	break;
-    case OBJ_TYP_NONE:
-    default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    if (res != NO_ERR) {
-	free_blank_template(newobj);
-	return NULL;
-    } else {
-	return newobj;
-    }
-
-}   /* obj_clone_template */
-
-
-/********************************************************************
-* FUNCTION obj_clone_template_case
-*
-* Clone an obj_template_t but make sure it is wrapped
-* in a OBJ_TYP_CASE layer
-*
-* Copy the pointers from the srcobj into the new obj
-*
-* If the mobj is non-NULL, then the non-NULL revisable
-* fields in the mobj struct will be merged into the new object
-*
-* INPUTS:
-*   mod == module struct that is defining the new cloned data
-*          this may be different than the module that will
-*          contain the cloned data (except top-level objects)
-*   srcobj == obj_template to clone
-*             !!! This struct MUST NOT be deleted!!!
-*             !!! Unless all of its clones are also deleted !!!
-*   mobj == merge object (may be NULL)
-*           only fields allowed to be revised will be checked
-*           even if other fields are set in this struct
-*
-* RETURNS:
-*   pointer to malloced clone obj_template_t
-*   NULL if malloc failer error or internal error
-*********************************************************************/
-obj_template_t *
-    obj_clone_template_case (ncx_module_t *mod,
-			     obj_template_t *srcobj,
-			     obj_template_t *mobj)
-{
-    obj_template_t     *casobj, *newobj;
-
-#ifdef DEBUG
-    if (!srcobj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-    if (srcobj->objtype == OBJ_TYP_NONE ||
-	srcobj->objtype > OBJ_TYP_AUGMENT) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return NULL;
-    }
-    if (mobj) {
-	if (mobj->objtype != srcobj->objtype) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-	if (xml_strcmp(obj_get_name(srcobj),
-			obj_get_name(mobj))) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-    }
-#endif
-
-    if (srcobj->objtype == OBJ_TYP_CASE) {
-	return obj_clone_template(mod, srcobj, mobj);
-    }
-
-    casobj = new_blank_template();
-    if (!casobj) {
-	return NULL;
-    }
-
-    /* set most of the common fields but leave the mod and parent NULL
-     * since the uses or augment calling this fn is going to
-     * re-prent the cloned node under a different part of the tree
-     */
-    casobj->objtype = OBJ_TYP_CASE;
-    casobj->tk = srcobj->tk;
-    casobj->linenum = srcobj->linenum;
-    casobj->flags = OBJ_FL_CLONE;
-    casobj->mod = mod;
-    casobj->def.cas = new_case(TRUE);
-    if (!casobj->def.cas) {
-	free_blank_template(casobj);
-	return NULL;
-    }
-    casobj->def.cas->name = xml_strdup(obj_get_name(srcobj));
-    if (!casobj->def.cas->name) {
-	obj_free_template(casobj);
-	return NULL;
-    }
-    casobj->def.cas->status = obj_get_status(srcobj);
-
-    newobj = obj_clone_template(mod, srcobj, mobj);
-    if (!newobj) {
-	obj_free_template(casobj);
-	return NULL;
-    }
-
-    newobj->parent = casobj;
-    dlq_enque(newobj, casobj->def.cas->datadefQ);
-    return casobj;
-
-}   /* obj_clone_template_case */
-
-
-/********************************************************************
 * FUNCTION obj_get_datadefQ
 *
 * Get the datadefQ (or caseQ) if this object has one
@@ -4062,477 +4877,6 @@ const dlq_hdr_t *
 
 
 /********************************************************************
-* FUNCTION obj_dump_datadefQ
-*
-* Dump the contents of a datadefQ for debugging
-*
-* INPUTS:
-*   datadefQ == Q of obj_template to dump
-*
-*********************************************************************/
-void
-    obj_dump_datadefQ (const dlq_hdr_t *datadefQ)
-{
-
-    const obj_template_t *obj;
-
-#ifdef DEBUG
-    if (!datadefQ) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
-
-	log_debug("\nObj %s, type %s, line %u",
-		  obj_get_name(obj),
-		  obj_get_typestr(obj),
-		  obj->tk->linenum);
-
-    }
-
-}   /* obj_dump_datadefQ */
-
-
-/********************************************************************
-* FUNCTION obj_new_unique
-* 
-* Alloc and Init a obj_unique_t struct
-*
-* RETURNS:
-*   pointer to malloced struct or NULL if memory error
-*********************************************************************/
-obj_unique_t *
-    obj_new_unique (void)
-{
-    obj_unique_t  *un;
-
-    un = m__getObj(obj_unique_t);
-    if (!un) {
-        return NULL;
-    }
-    obj_init_unique(un);
-    return un;
-
-}  /* obj_new_unique */
-
-
-/********************************************************************
-* FUNCTION obj_init_unique
-* 
-* Init a obj_unique_t struct
-*
-* INPUTS:
-*   un == obj_unique_t struct to init
-*********************************************************************/
-void
-    obj_init_unique (obj_unique_t *un)
-{
-#ifdef DEBUG
-    if (!un) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-    memset(un, 0, sizeof(obj_unique_t));
-    dlq_createSQue(&un->compQ);
-
-}  /* obj_init_unique */
-
-
-/********************************************************************
-* FUNCTION obj_free_unique
-* 
-* Free a obj_unique_t struct
-*
-* INPUTS:
-*   un == obj_unique_t struct to free
-*********************************************************************/
-void
-    obj_free_unique (obj_unique_t *un)
-{
-#ifdef DEBUG
-    if (!un) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    obj_clean_unique(un);
-    m__free(un);
-
-}  /* obj_free_unique */
-
-
-/********************************************************************
-* FUNCTION obj_clean_unique
-* 
-* Clean a obj_unique_t struct
-*
-* INPUTS:
-*   un == obj_unique_t struct to clean
-*********************************************************************/
-void
-    obj_clean_unique (obj_unique_t *un)
-{
-    obj_unique_comp_t *unc;
-
-#ifdef DEBUG
-    if (!un) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    if (un->xpath) {
-	m__free(un->xpath);
-	un->xpath = NULL;
-    }
-
-    while (!dlq_empty(&un->compQ)) {
-	unc = (obj_unique_comp_t *)dlq_deque(&un->compQ);
-	obj_free_unique_comp(unc);
-    }
-
-}  /* obj_clean_unique */
-
-
-/********************************************************************
-* FUNCTION obj_new_unique_comp
-* 
-* Alloc and Init a obj_unique_comp_t struct
-*
-* RETURNS:
-*   pointer to malloced struct or NULL if memory error
-*********************************************************************/
-obj_unique_comp_t *
-    obj_new_unique_comp (void)
-{
-    obj_unique_comp_t  *unc;
-
-    unc = m__getObj(obj_unique_comp_t);
-    if (!unc) {
-        return NULL;
-    }
-    memset(unc, 0x0, sizeof(obj_unique_comp_t));
-    return unc;
-
-}  /* obj_new_unique_comp */
-
-
-/********************************************************************
-* FUNCTION obj_free_unique_comp
-* 
-* Free a obj_unique_comp_t struct
-*
-* INPUTS:
-*   unc == obj_unique_comp_t struct to free
-*********************************************************************/
-void
-    obj_free_unique_comp (obj_unique_comp_t *unc)
-{
-#ifdef DEBUG
-    if (!unc) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    if (unc->xpath) {
-	m__free(unc->xpath);
-    }
-    m__free(unc);
-
-}  /* obj_free_unique_comp */
-
-
-
-/********************************************************************
-* FUNCTION obj_find_unique
-* 
-* Find a specific unique-stmt
-*
-* RETURNS:
-*   pointer to found entry or NULL if not found
-*********************************************************************/
-obj_unique_t *
-    obj_find_unique (dlq_hdr_t *que,
-		     const xmlChar *xpath)
-{
-    obj_unique_t  *un;
-
-#ifdef DEBUG
-    if (!que || !xpath) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    for (un = (obj_unique_t *)dlq_firstEntry(que);
-	 un != NULL;
-	 un = (obj_unique_t *)dlq_nextEntry(un)) {
-	if (!xml_strcmp(un->xpath, xpath)) {
-	    return un;
-	}
-    }
-    return NULL;
-
-}  /* obj_find_unique */
-
-
-/********************************************************************
-* FUNCTION obj_new_key
-* 
-* Alloc and Init a obj_key_t struct
-*
-* RETURNS:
-*   pointer to malloced struct or NULL if memory error
-*********************************************************************/
-obj_key_t *
-    obj_new_key (void)
-{
-    obj_key_t  *key;
-
-    key = m__getObj(obj_key_t);
-    if (!key) {
-        return NULL;
-    }
-    memset(key, 0x0, sizeof(obj_key_t));
-    return key;
-
-}  /* obj_new_key */
-
-
-/********************************************************************
-* FUNCTION obj_free_key
-* 
-* Free a obj_key_t struct
-*
-* INPUTS:
-*   key == obj_key_t struct to free
-*********************************************************************/
-void
-    obj_free_key (obj_key_t *key)
-{
-#ifdef DEBUG
-    if (!key) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    m__free(key);
-
-}  /* obj_free_key */
-
-
-/********************************************************************
-* FUNCTION obj_find_key
-* 
-* Find a specific key component by key leaf identifier name
-* Assumes deep keys are not supported!!!
-*
-* INPUTS:
-*   que == Q of obj_key_t to check
-*   keycompname == key component name to find
-*
-* RETURNS:
-*   pointer to found key component or NULL if not found
-*********************************************************************/
-obj_key_t *
-    obj_find_key (dlq_hdr_t *que,
-		  const xmlChar *keycompname)
-{
-    obj_key_t  *key;
-
-#ifdef DEBUG
-    if (!que || !keycompname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    for (key = (obj_key_t *)dlq_firstEntry(que);
-	 key != NULL;
-	 key = (obj_key_t *)dlq_nextEntry(key)) {
-	if (!xml_strcmp(obj_get_name(key->keyobj), keycompname)) {
-	    return key;
-	}
-    }
-    return NULL;
-
-}  /* obj_find_key */
-
-
-/********************************************************************
-* FUNCTION obj_find_key2
-* 
-* Find a specific key component, check for a specific node
-* in case deep keys are supported, and to check for duplicates
-*
-* INPUTS:
-*   que == Q of obj_key_t to check
-*   keyobj == key component object to find
-*
-* RETURNS:
-*   pointer to found key component or NULL if not found
-*********************************************************************/
-obj_key_t *
-    obj_find_key2 (dlq_hdr_t *que,
-		   const obj_template_t *keyobj)
-{
-    obj_key_t  *key;
-
-#ifdef DEBUG
-    if (!que || !keyobj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    for (key = (obj_key_t *)dlq_firstEntry(que);
-	 key != NULL;
-	 key = (obj_key_t *)dlq_nextEntry(key)) {
-	if (keyobj == key->keyobj) {
-	    return key;
-	}
-    }
-    return NULL;
-
-}  /* obj_find_key2 */
-
-
-/********************************************************************
-* FUNCTION obj_any_notifs
-* 
-* Check if there are any notifications in the datadefQ
-*
-* INPUTS:
-*   que == Q of obj_template_t to check
-*
-* RETURNS:
-*   TRUE if any OBJ_TYP_NOTIF found, FALSE if not
-*********************************************************************/
-boolean
-    obj_any_notifs (dlq_hdr_t *datadefQ)
-{
-    obj_template_t  *obj;
-
-#ifdef DEBUG
-    if (!datadefQ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
-    }
-#endif
-
-    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
-	if (obj->objtype == OBJ_TYP_NOTIF) {
-	    return TRUE;
-	}
-    }
-    return FALSE;
-
-}  /* obj_any_notifs */
-
-
-/********************************************************************
-* FUNCTION obj_gen_object_id
-* 
-* Malloc and Generate the object ID for an object node
-* 
-* INPUTS:
-*   obj == node to generate the instance ID for
-*   buff == pointer to address of buffer to use
-*
-* OUTPUTS
-*   *buff == malloced buffer with the instance ID
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    obj_gen_object_id (const obj_template_t *obj,
-		       xmlChar  **buff)
-{
-    uint32    len;
-    status_t  res;
-
-#ifdef DEBUG 
-    if (!obj || !buff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    *buff = NULL;
-
-    /* figure out the length of the object ID */
-    res = get_object_string(obj, NULL, 0, TRUE, &len);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* get a buffer to fit the instance ID string */
-    *buff = (xmlChar *)m__getMem(len+1);
-    if (!*buff) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* get the object ID for real this time */
-    res = get_object_string(obj, *buff, len+1, TRUE, &len);
-    if (res != NO_ERR) {
-	m__free(*buff);
-	*buff = NULL;
-	return SET_ERROR(res);
-    }
-
-    return NO_ERR;
-
-}  /* obj_gen_object_id */
-
-
-/********************************************************************
-* FUNCTION obj_copy_object_id
-* 
-* Generate the object ID for an object node and copy to the buffer
-* 
-* INPUTS:
-*   obj == node to generate the instance ID for
-*   buff == buffer to use
-*   bufflen == size of buff
-*   reallen == address of return length of actual identifier 
-*               (may be NULL)
-*
-* OUTPUTS
-*   buff == filled in with the object ID
-*  if reallen not NULL:
-*     *reallen == length of identifier, even if error occurred
-*  
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    obj_copy_object_id (const obj_template_t *obj,
-			xmlChar  *buff,
-			uint32 bufflen,
-			uint32 *reallen)
-{
-#ifdef DEBUG 
-    if (!obj || !buff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    return get_object_string(obj, buff, bufflen, TRUE, reallen);
-
-}  /* obj_copy_object_id */
-
-
-/********************************************************************
 * FUNCTION obj_get_object_id_len
 * 
 * Get the Object ID length for the specified obj_template_t
@@ -4568,159 +4912,7 @@ uint32
 
 
 /********************************************************************
-* FUNCTION obj_gen_aughook_id
-* 
-* Malloc and Generate the augment hook element name for
-* the specified object. This will be a child node of the
-* specified object.
-* 
-* INPUTS:
-*   obj == node to generate the augment hook ID for
-*   buff == pointer to address of buffer to use
-*
-* OUTPUTS
-*   *buff == malloced buffer with the instance ID
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    obj_gen_aughook_id (const obj_template_t *obj,
-			xmlChar  **buff)
-{
-    xmlChar  *p;
-    uint32    len, extra;
-    status_t  res;
-
-#ifdef DEBUG 
-    if (!obj || !buff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    *buff = NULL;
-
-    /* figure out the length of the aughook ID */
-    res = get_object_string(obj, NULL, 0, FALSE, &len);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* get the length for the aughook prefix and suffix */
-    extra = (xml_strlen(NCX_AUGHOOK_START) + xml_strlen(NCX_AUGHOOK_END));
-
-    /* get a buffer to fit the instance ID string */
-    *buff = (xmlChar *)m__getMem(len+extra+1);
-    if (!*buff) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* put prefix in buffer */
-    p = *buff;
-    p += xml_strcpy(p, NCX_AUGHOOK_START);
-    
-    /* add the aughook ID to the buffer */
-    res = get_object_string(obj, p, len+1, FALSE, &len);
-    if (res != NO_ERR) {
-	m__free(*buff);
-	*buff = NULL;
-	return SET_ERROR(res);
-    }
-
-    /* add suffix to the buffer */
-    p += len;
-    xml_strcpy(p, NCX_AUGHOOK_END);
-
-    return NO_ERR;
-
-}  /* obj_gen_aughook_id */
-
-
-/********************************************************************
-* FUNCTION obj_is_data
-* 
-* Check if the object is defined within data or within a
-* notification or RPC instead
-* 
-* INPUTS:
-*   obj == object to check
-*  
-* RETURNS:
-*   TRUE if data object (could be in a grouping or real data)
-*   FALSE if defined within notification or RPC (or some error)
-*********************************************************************/
-boolean
-    obj_is_data (const obj_template_t *obj)
-{
-#ifdef DEBUG 
-    if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
-    }
-#endif
-
-    switch (obj->objtype) {
-    case OBJ_TYP_RPC:
-    case OBJ_TYP_NOTIF:
-	return FALSE;
-    case OBJ_TYP_RPCIO:
-	return TRUE;  /* hack for yangdump HTML output */
-    default:
-	if (obj->parent) {
-	    return obj_is_data(obj->parent);
-	} else {
-	    return TRUE;
-	}
-    }
-    /*NOTREACHED*/
-
-}  /* obj_is_data */
-
-
-/********************************************************************
-* FUNCTION obj_is_data_db
-* 
-* Check if the object is some sort of data
-* Constrained to only check the config DB objects,
-* not any notification or RPC objects
-*
-* INPUTS:
-*   obj == object to check
-*  
-* RETURNS:
-*   TRUE if data object (could be in a grouping or real data)
-*   FALSE if defined within notification or RPC (or some error)
-*********************************************************************/
-boolean
-    obj_is_data_db (const obj_template_t *obj)
-{
-#ifdef DEBUG 
-    if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
-    }
-#endif
-
-    switch (obj->objtype) {
-    case OBJ_TYP_RPC:
-    case OBJ_TYP_NOTIF:
-	return FALSE;
-    case OBJ_TYP_RPCIO:
-	return FALSE;
-    default:
-	if (obj->parent) {
-	    return obj_is_data_db(obj->parent);
-	} else {
-	    return TRUE;
-	}
-    }
-    /*NOTREACHED*/
-
-}  /* obj_is_data_db */
-
-
-/********************************************************************
-* FUNCTION obj_get_defval
+* FUNCTION obj_get_default
 * 
 * Get the default value for the specified object
 * Only OBJ_TYP_LEAF objtype is supported
@@ -4734,7 +4926,7 @@ boolean
 *   pointer to default value string or NULL if none
 *********************************************************************/
 const xmlChar *
-    obj_get_defval (const obj_template_t *obj)
+    obj_get_default (const obj_template_t *obj)
 {
 #ifdef DEBUG 
     if (!obj) {
@@ -4751,7 +4943,41 @@ const xmlChar *
     }
     return typ_get_default(obj->def.leaf->typdef);
 
-}  /* obj_get_defval */
+}  /* obj_get_default */
+
+
+/********************************************************************
+* FUNCTION obj_get_default_case
+* 
+* Get the default case for the specified OBJ_TYP_CHOICE object
+*
+* INPUTS:
+*   obj == object to check
+*  
+* RETURNS:
+*   pointer to default case object template OBJ_TYP_CASE
+*********************************************************************/
+const obj_template_t *
+    obj_get_default_case (const obj_template_t *obj)
+{
+#ifdef DEBUG 
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+    if (obj->objtype != OBJ_TYP_CHOICE) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+#endif
+
+    if (obj->def.choic->defval) {
+	return obj_find_child(obj, obj_get_mod_name(obj),
+			      obj->def.choic->defval);
+    }
+    return NULL;
+
+}  /* obj_get_default_case */
 
 
 /********************************************************************
@@ -4875,6 +5101,527 @@ boolean
 
 
 /********************************************************************
+* FUNCTION obj_get_typdef
+* 
+* Get the typdef for the leaf or leaf-list
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    pointer to the typdef or NULL if this object type does not
+*    have a typdef
+*********************************************************************/
+typ_def_t *
+    obj_get_typdef (obj_template_t  *obj)
+{
+    if (obj->objtype == OBJ_TYP_LEAF) {
+	return obj->def.leaf->typdef;
+    } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
+	return obj->def.leaflist->typdef;
+    } else {
+	return NULL;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_get_typdef */
+
+
+/********************************************************************
+* FUNCTION obj_get_ctypdef
+* 
+* Get the typdef for the leaf or leaf-list : Const version
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    pointer to the typdef or NULL if this object type does not
+*    have a typdef
+*********************************************************************/
+const typ_def_t *
+    obj_get_ctypdef (const obj_template_t  *obj)
+{
+    if (obj->objtype == OBJ_TYP_LEAF) {
+	return obj->def.leaf->typdef;
+    } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
+	return obj->def.leaflist->typdef;
+    } else {
+	return NULL;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_get_ctypdef */
+
+
+/********************************************************************
+* FUNCTION obj_get_basetype
+* 
+* Get the NCX base type enum for the object type
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    base type enumeration
+*********************************************************************/
+ncx_btype_t
+    obj_get_basetype (const obj_template_t  *obj)
+{
+    switch (obj->objtype) {
+    case OBJ_TYP_LEAF:
+	return typ_get_basetype(obj->def.leaf->typdef);
+    case OBJ_TYP_LEAF_LIST:
+	return typ_get_basetype(obj->def.leaflist->typdef);
+    case OBJ_TYP_CONTAINER:
+	return NCX_BT_CONTAINER;
+    case OBJ_TYP_LIST:
+	return NCX_BT_LIST;
+    case OBJ_TYP_CHOICE:
+	return NCX_BT_CHOICE;
+    case OBJ_TYP_CASE:
+	return NCX_BT_CASE;
+    case OBJ_TYP_RPCIO:
+	return NCX_BT_CONTAINER;
+    case OBJ_TYP_NOTIF:
+	return NCX_BT_CONTAINER;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NCX_BT_NONE;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_get_basetype */
+
+
+/********************************************************************
+* FUNCTION obj_get_mod_prefix
+* 
+* Get the module prefix for this object
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    const pointer to mod prefix
+*********************************************************************/
+const xmlChar *
+    obj_get_mod_prefix (const obj_template_t  *obj)
+{
+
+    return obj->mod->prefix;
+
+}  /* obj_get_mod_prefix */
+
+
+/********************************************************************
+* FUNCTION obj_get_mod_name
+* 
+* Get the module name for this object
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    const pointer to mod prefix
+*********************************************************************/
+const xmlChar *
+    obj_get_mod_name (const obj_template_t  *obj)
+{
+#ifdef DEBUG
+    if (!obj || !obj->mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (obj->mod->ismod) {
+	return obj->mod->name;
+    } else {
+	return obj->mod->belongs;
+    }
+
+}  /* obj_get_mod_name */
+
+
+/********************************************************************
+* FUNCTION obj_get_nsid
+* 
+* Get the namespace ID for this object
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    namespace ID
+*********************************************************************/
+xmlns_id_t
+    obj_get_nsid (const obj_template_t  *obj)
+{
+
+    return obj->mod->nsid;
+
+}  /* obj_get_nsid */
+
+
+/********************************************************************
+* FUNCTION obj_get_iqualval
+* 
+* Get the instance qualifier for this object
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    instance qualifier enumeration
+*********************************************************************/
+ncx_iqual_t
+    obj_get_iqualval (const obj_template_t  *obj)
+{
+    ncx_iqual_t  ret;
+    boolean      required;
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NCX_IQUAL_NONE;
+    }
+#endif
+
+    ret = NCX_IQUAL_NONE;
+    required = obj_is_mandatory(obj);
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_RPCIO:
+	ret = (required) ? NCX_IQUAL_ONE : NCX_IQUAL_OPT;
+	break;
+    case OBJ_TYP_LEAF_LIST:
+	if (obj->def.leaflist->minset) {
+	    if (obj->def.leaflist->maxset && 
+		obj->def.leaflist->maxelems==1) {
+		ret = NCX_IQUAL_ONE;
+	    } else {
+		ret = NCX_IQUAL_1MORE;
+	    }
+	} else {
+	    if (obj->def.leaflist->maxset && 
+		obj->def.leaflist->maxelems==1) {
+		ret = NCX_IQUAL_OPT;
+	    } else {
+		ret = NCX_IQUAL_ZMORE;
+	    }
+	}
+	break;
+    case OBJ_TYP_LIST:
+	if (obj->def.list->minset) {
+	    if (obj->def.list->maxset && obj->def.list->maxelems==1) {
+		ret = NCX_IQUAL_ONE;
+	    } else {
+		ret = NCX_IQUAL_1MORE;
+	    }
+	} else {
+	    if (obj->def.list->maxset && obj->def.list->maxelems==1) {
+		ret = NCX_IQUAL_OPT;
+	    } else {
+		ret = NCX_IQUAL_ZMORE;
+	    }
+	}
+	break;
+    case OBJ_TYP_RPC:
+    case OBJ_TYP_NOTIF:
+	ret = NCX_IQUAL_ONE;
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    return ret;
+
+}  /* obj_get_iqualval */
+
+
+/********************************************************************
+* FUNCTION obj_get_units
+* 
+* Get the units clause for this object, if any
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    pointer to units clause, or NULL if none
+*********************************************************************/
+const xmlChar *
+    obj_get_units (const obj_template_t  *obj)
+{
+    const xmlChar    *units;
+    const typ_def_t  *typdef;
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    units = NULL;
+
+    switch (obj->objtype) {
+    case OBJ_TYP_LEAF:
+	units = obj->def.leaf->units;
+	break;
+    case OBJ_TYP_LEAF_LIST:
+	units = obj->def.leaflist->units;
+	break;
+    default:
+	return NULL;
+    }
+
+    if (!units) {
+	typdef = obj_get_ctypdef(obj);
+	if (typdef) {
+	    units = typ_get_units_from_typdef(typdef);
+	}
+    }
+    return units;
+
+}  /* obj_get_units */
+
+
+/********************************************************************
+* FUNCTION obj_is_mandatory
+*
+* Figure out if the obj is YANG mandatory or not
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is mandatory
+*   FALSE if object is not mandatory
+*********************************************************************/
+boolean
+    obj_is_mandatory (const obj_template_t *obj)
+{
+    const obj_template_t *chobj;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+	if (obj->def.container->presence) {
+	    return FALSE;
+	}
+	/* else drop through and check children */
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_RPCIO:
+	for (chobj = obj_first_child(obj);
+	     chobj != NULL;
+	     chobj = obj_next_child(chobj)) {
+	    if (obj_is_mandatory(chobj)) {
+		return TRUE;
+	    }
+	}
+	return FALSE;
+    case OBJ_TYP_LEAF:
+	return obj->def.leaf->mandatory;
+    case OBJ_TYP_LEAF_LIST:
+	return (obj->def.leaflist->minelems) ? TRUE : FALSE;
+    case OBJ_TYP_LIST:
+	return (obj->def.list->minelems) ? TRUE : FALSE;
+    case OBJ_TYP_CHOICE:
+	return obj->def.choic->mandatory;
+    case OBJ_TYP_USES:
+    case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_RPC:
+    case OBJ_TYP_NOTIF:
+	return FALSE;
+    case OBJ_TYP_NONE:
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+
+}   /* obj_is_mandatory */
+
+
+/********************************************************************
+* FUNCTION obj_is_cloned
+*
+* Figure out if the obj is a cloned object, inserted via uses
+* or augment statements
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is cloned
+*   FALSE if object is not cloned
+*********************************************************************/
+boolean
+    obj_is_cloned (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_CLONE) ? TRUE : FALSE;
+
+}   /* obj_is_cloned */
+
+
+/********************************************************************
+* FUNCTION obj_is_augclone
+*
+* Figure out if the obj is a cloned object, inserted via an
+* augment statement
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is sourced from an augment
+*   FALSE if object is not sourced from an augment
+*********************************************************************/
+boolean
+    obj_is_augclone (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_AUGCLONE) ? TRUE : FALSE;
+
+}   /* obj_is_augclone */
+
+
+/********************************************************************
+* FUNCTION obj_is_refine
+*
+* Figure out if the obj is a refinement object, within a uses-stmt
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is a refinement
+*   FALSE if object is not a refinement
+*********************************************************************/
+boolean
+    obj_is_refine (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_REFINE) ? TRUE : FALSE;
+
+}   /* obj_is_refine */
+
+
+/********************************************************************
+* FUNCTION obj_is_data
+* 
+* Check if the object is defined within data or within a
+* notification or RPC instead
+* 
+* INPUTS:
+*   obj == object to check
+*  
+* RETURNS:
+*   TRUE if data object (could be in a grouping or real data)
+*   FALSE if defined within notification or RPC (or some error)
+*********************************************************************/
+boolean
+    obj_is_data (const obj_template_t *obj)
+{
+#ifdef DEBUG 
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    switch (obj->objtype) {
+    case OBJ_TYP_RPC:
+    case OBJ_TYP_NOTIF:
+	return FALSE;
+    case OBJ_TYP_RPCIO:
+	return TRUE;  /* hack for yangdump HTML output */
+    default:
+	if (obj->parent) {
+	    return obj_is_data(obj->parent);
+	} else {
+	    return TRUE;
+	}
+    }
+    /*NOTREACHED*/
+
+}  /* obj_is_data */
+
+
+/********************************************************************
+* FUNCTION obj_is_data_db
+* 
+* Check if the object is some sort of data
+* Constrained to only check the config DB objects,
+* not any notification or RPC objects
+*
+* INPUTS:
+*   obj == object to check
+*  
+* RETURNS:
+*   TRUE if data object (could be in a grouping or real data)
+*   FALSE if defined within notification or RPC (or some error)
+*********************************************************************/
+boolean
+    obj_is_data_db (const obj_template_t *obj)
+{
+#ifdef DEBUG 
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    switch (obj->objtype) {
+    case OBJ_TYP_RPC:
+    case OBJ_TYP_NOTIF:
+	return FALSE;
+    case OBJ_TYP_RPCIO:
+	return FALSE;
+    default:
+	if (obj->parent) {
+	    return obj_is_data_db(obj->parent);
+	} else {
+	    return TRUE;
+	}
+    }
+    /*NOTREACHED*/
+
+}  /* obj_is_data_db */
+
+
+/********************************************************************
 * FUNCTION obj_is_empty
 *
 * Check if object was entered in empty fashion:
@@ -4920,7 +5667,8 @@ boolean
     obj_is_match (const obj_template_t  *obj1,
 		  const obj_template_t *obj2)
 {
-    if (xml_strcmp(obj1->mod->name, obj2->mod->name)) {
+    if (xml_strcmp(obj_get_mod_name(obj1),
+		   obj_get_mod_name(obj2))) {
 	return FALSE;
     }
 
@@ -4932,6 +5680,289 @@ boolean
     }
 
 }  /* obj_is_match */
+
+
+/********************************************************************
+* FUNCTION obj_ok_for_cli
+*
+* Figure out if the obj is OK for current CLI implementation
+* Top object must be a container
+* Child objects must be only choices of leafs,
+* plain leafs, or leaf lists are allowed
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is OK for CLI
+*   FALSE if object is not OK for CLI
+*********************************************************************/
+boolean
+    obj_ok_for_cli (const obj_template_t *obj)
+{
+    const obj_template_t *chobj, *casobj, *caschild;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    if (obj->objtype != OBJ_TYP_CONTAINER) {
+	return FALSE;
+    }
+
+    for (chobj = obj_first_child(obj);
+	 chobj != NULL;
+	 chobj = obj_next_child(chobj)) {
+
+	switch (chobj->objtype) {
+	case OBJ_TYP_LEAF:
+	case OBJ_TYP_LEAF_LIST:
+	    if (obj_get_basetype(chobj) == NCX_BT_ANY) {
+		return FALSE;
+	    }
+	    break;
+	case OBJ_TYP_CHOICE:
+	    for (casobj = obj_first_child(chobj);
+		 casobj != NULL;
+		 casobj = obj_next_child(casobj)) {
+
+		for (caschild = obj_first_child(casobj);
+		     caschild != NULL;
+		     caschild = obj_next_child(caschild)) {
+		    switch (caschild->objtype) {
+		    case OBJ_TYP_LEAF:
+		    case OBJ_TYP_LEAF_LIST:
+			if (obj_get_basetype(chobj) == NCX_BT_ANY) {
+			    return FALSE;
+			}
+			break;
+		    default:
+			return FALSE;
+		    }
+		}
+	    }
+	    break;
+	default:
+	    return FALSE;
+	}
+    }
+
+    return TRUE;
+
+}   /* obj_ok_for_cli */
+
+
+/********************************************************************
+* FUNCTION obj_dump_template
+*
+* Dump the contents of an obj_template_t struct for help text
+*
+* INPUTS:
+*   obj == obj_template to dump help for
+*    full    == TRUE if a full report desired
+*               FALSE if a partial report desired
+*   nestlevel == number of levels from the top-level
+*                that should be printed; 0 == all levels
+*   indent == start indent count
+*********************************************************************/
+void
+    obj_dump_template (const obj_template_t *obj,
+		       boolean full,
+		       uint32 nestlevel,
+		       uint32 indent)
+{
+    const xmlChar    *val;
+    const typ_def_t  *typdef;
+    char              numbuff[NCX_MAX_NUMLEN];
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (!obj_has_name(obj)) {
+	return;
+    }
+
+    if (nestlevel && (obj_get_level(obj) > nestlevel)) {
+	return;
+    }
+
+    if (obj->objtype == OBJ_TYP_RPCIO) {
+	help_write_lines(obj_get_name(obj), 0, TRUE);
+    } else {
+	help_write_lines(obj_get_typestr(obj), indent, TRUE);
+	help_write_lines((const xmlChar *)" ", 0, FALSE);
+	help_write_lines(obj_get_name(obj), 0, FALSE);
+    }
+
+    typdef = obj_get_ctypdef(obj);
+    if (typdef && typdef->class==NCX_CL_NAMED) {
+	help_write_lines((const xmlChar *)" [", 0, FALSE); 
+	help_write_lines((const xmlChar *)
+			 tk_get_btype_sym(typ_get_basetype(typdef)),
+			 0, FALSE);
+	help_write_lines((const xmlChar *)"]", 0, FALSE); 
+    }
+
+    val = obj_get_default(obj);
+    if (val) {
+	help_write_lines((const xmlChar *)" [", 0, FALSE); 
+	help_write_lines(val, 0, FALSE);
+	help_write_lines((const xmlChar *)"]", 0, FALSE); 
+    }
+
+    val = obj_get_description(obj);
+    if (val) {
+	help_write_lines(val, indent+NCX_DEF_INDENT, TRUE); 
+    }
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+	if (full) {
+	    if (obj->def.container->presence) {
+		help_write_lines((const xmlChar *)"presence: ", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+		help_write_lines(obj->def.container->presence, 0, FALSE);
+	    }
+	    /*** add mustQ ***/
+	}
+	obj_dump_datadefQ(obj->def.container->datadefQ, full, 
+			  nestlevel, indent+NCX_DEF_INDENT);
+	break;
+    case OBJ_TYP_LEAF:
+	if (full) {
+	    val = obj_get_units(obj);
+	    if (val) {
+		help_write_lines((const xmlChar *)"units: ", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+		help_write_lines(val, 0, FALSE);
+	    }
+	}
+	break;
+    case OBJ_TYP_LEAF_LIST:
+	if (full) {
+	    val = obj_get_units(obj);
+	    if (val) {
+		help_write_lines((const xmlChar *)"units: ", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+		help_write_lines(val, 0, FALSE);
+	    }
+	    if (!obj->def.leaflist->ordersys) {
+		help_write_lines((const xmlChar *)"ordered-by: user", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+	    }
+	    if (obj->def.leaflist->minset) {
+		help_write_lines((const xmlChar *)"min-elements: ", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+		sprintf(numbuff, "%u", obj->def.leaflist->minelems);
+		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
+	    }
+	    if (obj->def.leaflist->maxset) {
+		help_write_lines((const xmlChar *)"max-elements: ", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+		sprintf(numbuff, "%u", obj->def.leaflist->maxelems);
+		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
+	    }
+	}
+	break;
+    case OBJ_TYP_CHOICE:
+	obj_dump_datadefQ(obj->def.choic->caseQ, full, 
+			  nestlevel, indent+NCX_DEF_INDENT);
+	break;
+    case OBJ_TYP_CASE:
+	obj_dump_datadefQ(obj->def.cas->datadefQ, full, 
+			  nestlevel, indent+NCX_DEF_INDENT);
+	break;
+    case OBJ_TYP_LIST:
+	if (full) {
+	    if (obj->def.list->keystr) {
+		help_write_lines((const xmlChar *)"key: ", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+		help_write_lines(obj->def.list->keystr, 0, FALSE);
+	    }
+	    if (!obj->def.list->ordersys) {
+		help_write_lines((const xmlChar *)"ordered-by: user", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+	    }
+	    if (obj->def.list->minset) {
+		help_write_lines((const xmlChar *)"min-elements: ", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+		sprintf(numbuff, "%u", obj->def.list->minelems);
+		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
+	    }
+	    if (obj->def.list->maxset) {
+		help_write_lines((const xmlChar *)"max-elements: ", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+		sprintf(numbuff, "%u", obj->def.list->maxelems);
+		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
+	    }
+	}
+	obj_dump_datadefQ(obj->def.list->datadefQ, full, 
+			  nestlevel, indent+NCX_DEF_INDENT);
+	break;
+    case OBJ_TYP_RPC:
+	obj_dump_datadefQ(&obj->def.rpc->datadefQ, full, 
+			  nestlevel, indent+NCX_DEF_INDENT);
+	break;
+    case OBJ_TYP_RPCIO:
+	obj_dump_datadefQ(&obj->def.rpcio->datadefQ, full, 
+			  nestlevel, indent+NCX_DEF_INDENT);
+	break;
+    case OBJ_TYP_NOTIF:
+	obj_dump_datadefQ(&obj->def.notif->datadefQ, full, 
+			  nestlevel, indent+NCX_DEF_INDENT);
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+
+}   /* obj_dump_template */
+
+
+/********************************************************************
+* FUNCTION obj_dump_datadefQ
+*
+* Dump the contents of a datadefQ for debugging
+*
+* INPUTS:
+*   datadefQ == Q of obj_template to dump
+*    full    == TRUE if a full report desired
+*               FALSE if a partial report desired
+*   nestlevel == number of levels from the top-level
+*                that should be printed; 0 == all levels
+*   indent == start indent count
+*********************************************************************/
+void
+    obj_dump_datadefQ (const dlq_hdr_t *datadefQ,
+		       boolean full,
+		       uint32 nestlevel,
+		       uint32 indent)
+{
+
+    const obj_template_t  *obj;
+
+#ifdef DEBUG
+    if (!datadefQ) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
+	 obj != NULL;
+	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	obj_dump_template(obj, full, nestlevel, indent);
+	help_write_lines((const xmlChar *)"\n", 0, FALSE);
+    }
+
+}   /* obj_dump_datadefQ */
 
 
 /* END obj.c */

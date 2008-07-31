@@ -150,6 +150,8 @@ date	     init     comment
 
 #define NCX_DEF_MERGETYPE NCX_MERGE_LAST
 
+#define NCX_DEF_DUMP_LEVEL  3
+
 #define NCX_ROOT_USER       (const xmlChar *)"root"
 
 #define NCX_SUFFIX          (const xmlChar *)"ncx"

@@ -22,12 +22,6 @@ date	     init     comment
 
 */
 
-#include <xmlstring.h>
-
-#ifndef _H_typ
-#include "typ.h"
-#endif
-
 #ifndef _H_yangdiff
 #include "yangdiff.h"
 #endif

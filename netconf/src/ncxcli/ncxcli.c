@@ -695,7 +695,7 @@ static ps_parmset_t *
 * 
 * INPUTS:
 *   buff == bufffer to hold prompt (zero-terminated string)
-*   bulllen == length of buffer (max bufflen-1 chars can be printed
+*   bufflen == length of buffer (max bufflen-1 chars can be printed
 *
 *********************************************************************/
 static void

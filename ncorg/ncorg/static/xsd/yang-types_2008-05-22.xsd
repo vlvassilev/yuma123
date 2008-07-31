@@ -7,7 +7,7 @@
    xmlns:ncx="http://netconfcentral.com/ncx">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'yang-types.yang' by yangdump version 0.9.3
+         Converted from YANG file 'yang-types.yang' by yangdump version 0.9.4
          
          Module: yang-types
          Organization: YANG Language Design Team
@@ -28,7 +28,7 @@
             </ncx:url>
          </ncx:reference>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/yang/yang-types.yang
+            /home/andy/newdev/trunk/netconf/modules/yang/yang-types.yang
          </ncx:source>
          <ncx:organization>
             YANG Language Design Team

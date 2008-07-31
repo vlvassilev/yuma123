@@ -10,6 +10,7 @@
 date         init     comment
 ----------------------------------------------------------------------
 10-jun-08    abb      begun; used yangdump.c as a template
+31-jul-08    abb      convert from NCX based CLI to YANG based CLI
 
 *********************************************************************
 *                                                                   *
@@ -23,6 +24,10 @@ date         init     comment
 
 #ifndef _H_procdefs
 #include  "procdefs.h"
+#endif
+
+#ifndef _H_cli
+#include  "cli.h"
 #endif
 
 #ifndef _H_conf
@@ -57,18 +62,6 @@ date         init     comment
 #include  "ncxmod.h"
 #endif
 
-#ifndef _H_ps
-#include  "ps.h"
-#endif
-
-#ifndef _H_ps_parse
-#include  "ps_parse.h"
-#endif
-
-#ifndef _H_psd
-#include  "psd.h"
-#endif
-
 #ifndef _H_ses
 #include  "ses.h"
 #endif
@@ -85,16 +78,8 @@ date         init     comment
 #include  "val.h"
 #endif
 
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
 #ifndef _H_xml_util
 #include  "xml_util.h"
-#endif
-
-#ifndef _H_xml_wr
-#include  "xml_wr.h"
 #endif
 
 #ifndef _H_yang
@@ -140,7 +125,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-static ps_parmset_t          *cli_ps;
+static val_value_t           *cli_val;
 static yangdiff_diffparms_t   diffparms;
 
 
@@ -728,7 +713,8 @@ static xmlChar *
     /* check length: subtree mode vs 1 file mode */
     if (cp->old_isdir) {
 	len = xml_strlen(cp->full_old);
-	if ((cp->full_old[len-1] != NCXMOD_PSCHAR) && (*newstart != NCXMOD_PSCHAR)) {
+	if ((cp->full_old[len-1] != NCXMOD_PSCHAR) && 
+	    (*newstart != NCXMOD_PSCHAR)) {
 	    pslen = 1;
 	}
 	len += xml_strlen(newstart);
@@ -924,17 +910,6 @@ static status_t
 	skipreport = TRUE;
     } else {
 	cp->oldmod = oldpcb->top;
-    }
-
-    /* skip NCX files */
-    if (!oldpcb->top->isyang) {
-	log_error("\nError: NCX modules not supported (%s)", 
-		  oldpcb->top->sourcefn);
-	skipreport = TRUE;
-    } else if (!newpcb->top->isyang) {
-	log_error("\nError: NCX modules not supported (%s)", 
-		  newpcb->top->sourcefn);
-	skipreport = TRUE;
     }
 
     /* generate compare output to the dummy session */
@@ -1144,7 +1119,7 @@ static status_t
 	log_write("yangdiff %s\n", YANGDIFF_PROGVER);
     }
     if (diffparms.helpmode) {
-	help_program_module(YANGDIFF_MOD, YANGDIFF_PARMSET, FULL);
+	help_program_module(YANGDIFF_MOD, YANGDIFF_CONTAINER, FULL);
     }
     if ((diffparms.helpmode || diffparms.versionmode)) {
 	return res;
@@ -1240,14 +1215,13 @@ static status_t
 		       const char *argv[],
 		       yangdiff_diffparms_t  *cp)
 {
-    psd_template_t  *psd;
-    ps_parmset_t    *ps;
-    val_value_t     *val;
-    ncx_node_t       dtyp;
-    status_t         res;
+    const obj_template_t  *obj;
+    val_value_t           *valset, *val;
+    ncx_node_t             dtyp;
+    status_t               res;
 
     res = NO_ERR;
-    ps = NULL;
+    valset = NULL;
 
     cp->buff = m__getMem(YANGDIFF_BUFFSIZE);
     if (!cp->buff) {
@@ -1258,48 +1232,49 @@ static status_t
     cp->maxlen = YANGDIFF_DEF_MAXSIZE;
 
     /* find the parmset definition in the registry */
-    dtyp = NCX_NT_PSD;
-    psd = (psd_template_t *)
-	def_reg_find_moddef(YANGDIFF_MOD, YANGDIFF_PARMSET, &dtyp);
-    if (!psd) {
+    dtyp = NCX_NT_OBJ;
+    obj = (const obj_template_t *)
+	def_reg_find_moddef(YANGDIFF_MOD, YANGDIFF_CONTAINER, &dtyp);
+    if (!obj) {
 	res = ERR_NCX_NOT_FOUND;
     }
 
     /* parse the command line against the PSD */
     if (res == NO_ERR) {
-	ps = ps_parse_cli(argc, argv, psd,
-			  FULLTEST, PLAINMODE, TRUE, &res);
+	valset = cli_parse(argc, argv, obj,
+			   FULLTEST, PLAINMODE, TRUE, &res);
     }
     if (res != NO_ERR) {
 	return res;
-    } else if (!ps) {
+    } else if (!valset) {
 	pr_usage();
 	return ERR_NCX_SKIPPED;
     } else {
-	cli_ps = ps;
+	cli_val = valset;
     }
 
     /* next get any params from the conf file */
-    res = ps_get_parmval(ps, YANGDIFF_PARM_CONFIG, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, YANGDIFF_PARM_CONFIG);
+    if (val) {
 	/* try the specified config location */
 	cp->config = VAL_STR(val);
-	res = conf_parse_ps_from_filespec(cp->config, ps, TRUE, TRUE);
+	res = conf_parse_val_from_filespec(cp->config, 
+					   valset, TRUE, TRUE);
 	if (res != NO_ERR) {
 	    return res;
 	}
     } else {
 	/* try default config location */
-	res = conf_parse_ps_from_filespec(YANGDIFF_DEF_CONFIG,
-					  ps, TRUE, FALSE);
+	res = conf_parse_val_from_filespec(YANGDIFF_DEF_CONFIG,
+					   valset, TRUE, FALSE);
 	if (res != NO_ERR) {
 	    return res;
 	}
     }
 
     /* get the log-level parameter */
-    res = ps_get_parmval(ps, NCX_EL_LOGLEVEL, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, NCX_EL_LOGLEVEL);
+    if (val) {
 	cp->log_level = 
 	    log_get_debug_level_enum((const char *)VAL_STR(val));
 	if (cp->log_level == LOG_DEBUG_NONE) {
@@ -1312,15 +1287,16 @@ static status_t
     }
 
     /* get the logging parameters */
-    res = ps_get_parmval(ps, NCX_EL_LOG, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, NCX_EL_LOG);
+    if (val) {
 	cp->logfilename = VAL_STR(val);
 	cp->full_logfilename = ncx_get_source(VAL_STR(val));
 	if (!cp->full_logfilename) {
 	    return ERR_INTERNAL_MEM;
 	}
     }
-    if (ps_find_parm(ps, NCX_EL_LOGAPPEND)) {
+    val = val_find_child(valset, NULL, NCX_EL_LOGAPPEND);
+    if (val) {
 	cp->logappend = TRUE;
     }
 
@@ -1336,8 +1312,8 @@ static status_t
     /*** ORDER DOES NOT MATTER FOR REST OF PARAMETERS ***/
 
     /* difftype parameter */
-    res = ps_get_parmval(ps, YANGDIFF_PARM_DIFFTYPE, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, YANGDIFF_PARM_DIFFTYPE);
+    if (val) {
 	cp->difftype = VAL_STR(val);
 	if (!xml_strcmp(cp->difftype, YANGDIFF_DIFFTYPE_TERSE)) {
 	    cp->edifftype = YANGDIFF_DT_TERSE;
@@ -1354,27 +1330,28 @@ static status_t
     }
 
     /* indent parameter */
-    res = ps_get_parmval(ps, YANGDIFF_PARM_INDENT, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, YANGDIFF_PARM_INDENT);
+    if (val) {
 	cp->indent = (int32)VAL_UINT(val);
     } else {
-	cp->indent = 2;
+	cp->indent = NCX_DEF_INDENT;
     }
 
     /* help parameter */
-    if (ps_find_parm(ps, NCX_EL_HELP)) {
+    val = val_find_child(valset, NULL, NCX_EL_HELP);
+    if (val) {
 	cp->helpmode = TRUE;
     }
 
     /* modpath parameter */
-    res = ps_get_parmval(ps, NCX_EL_MODPATH, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, NCX_EL_MODPATH);
+    if (val) {
 	ncxmod_set_modpath(VAL_STR(val));
     }
 
     /* old parameter */
-    res = ps_get_parmval(ps, YANGDIFF_PARM_OLD, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, YANGDIFF_PARM_OLD);
+    if (val) {
 	cp->old = VAL_STR(val);
 	cp->full_old = ncx_get_source(VAL_STR(val));
 	if (!cp->full_old) {
@@ -1385,8 +1362,8 @@ static status_t
     }
 
     /* new parameter */
-    res = ps_get_parmval(ps, YANGDIFF_PARM_NEW, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, YANGDIFF_PARM_NEW);
+    if (val) {
 	cp->new = VAL_STR(val);
 	cp->full_new = ncx_get_source(VAL_STR(val));
 	if (!cp->full_new) {
@@ -1397,18 +1374,20 @@ static status_t
     }
 
     /* no-header parameter */
-    if (ps_find_parm(ps, YANGDIFF_PARM_NO_HEADER)) {
+    val = val_find_child(valset, NULL, YANGDIFF_PARM_NO_HEADER);
+    if (val) {
 	cp->noheader = TRUE;
     }
 
     /* no-subdirs parameter */
-    if (ps_find_parm(ps, YANGDIFF_PARM_NO_SUBDIRS)) {
+    val = val_find_child(valset, NULL, YANGDIFF_PARM_NO_SUBDIRS);
+    if (val) {
 	cp->nosubdirs = TRUE;
     }
 
     /* output parameter */
-    res = ps_get_parmval(ps, YANGDIFF_PARM_OUTPUT, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, YANGDIFF_PARM_OUTPUT);
+    if (val) {
 	cp->output = VAL_STR(val);
 	cp->full_output = ncx_get_source(VAL_STR(val));
 	if (!cp->full_output) {
@@ -1419,7 +1398,8 @@ static status_t
     } /* else use default output -- STDOUT */
 
     /* version parameter */
-    if (ps_find_parm(ps, NCX_EL_VERSION)) {
+    val = val_find_child(valset, NULL, NCX_EL_VERSION);
+    if (val) {
 	cp->versionmode = TRUE;
     }
 
@@ -1445,7 +1425,7 @@ static status_t
     dlq_createSQue(&diffparms.oldmodQ);
     dlq_createSQue(&diffparms.newmodQ);
 
-    cli_ps = NULL;
+    cli_val = NULL;
 
     /* initialize the NCX Library first to allow NCX modules
      * to be processed.  No module can get its internal config
@@ -1461,7 +1441,7 @@ static status_t
 #endif
 		   NULL);
     if (res == NO_ERR) {
-	/* load in the NCX converter parmset definition file */
+	/* load in the YANG converter CLI definition file */
 	res = ncxmod_load_module(YANGDIFF_MOD);
 	if (res == NO_ERR) {
 	    res = process_cli_input(argc, argv, &diffparms);
@@ -1487,8 +1467,8 @@ static void
 {
     ncx_module_t  *mod;
 
-    if (cli_ps) {
-	ps_free_parmset(cli_ps);
+    if (cli_val) {
+	val_free_value(cli_val);
     }
 
     while (!dlq_empty(&diffparms.oldmodQ)) {

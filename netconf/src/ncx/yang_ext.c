@@ -59,10 +59,6 @@ date         init     comment
 #include "ncx.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
 #ifndef _H_status
 #include  "status.h"
 #endif

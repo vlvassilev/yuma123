@@ -61,10 +61,6 @@ date         init     comment
 #include "obj.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -1070,7 +1066,6 @@ static status_t
     case NCX_CL_COMPLEX:
 	switch (typ_get_basetype(typdef)) {
 	case NCX_BT_ANY:
-	case NCX_BT_ROOT:
 	    empty = TRUE;
 	    simtop = FALSE;
 	    break;
@@ -1088,7 +1083,6 @@ static status_t
 	    empty = TRUE;
 	    switch (typ_get_basetype(typdef)) {
 	    case NCX_BT_ANY:
-	    case NCX_BT_ROOT:
 		simtop = FALSE;
 		break;
 	    default:
@@ -2066,7 +2060,7 @@ status_t
     const obj_template_t   *obj;
     status_t                res;
 
-    /* go through all the PSDs and create complexType constructs */
+    /* go through all the objects and create complexType constructs */
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {

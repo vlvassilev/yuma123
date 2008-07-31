@@ -21,22 +21,22 @@
 
             Template/Schema 
           +-----------------+ 
-          | psd_template_t  |
-    +-----|     psd.h       |
+          | obj_template_t  |
+    +-----|     obj.h       |
     |     +-----------------+
     |                   ^
     V  Registry         |      Parameter Instances
   +---------------+     |     +-----------------+
-  |  Definitions  |     +-----|   ps_parmset_t  |
-  |    def_reg.h  |           |      ps.h       |
+  |  Definitions  |     +-----|   val_value_t   |
+  |    def_reg.h  |           |      val.h      |
   +---------------+           +-----------------+
-      ^                               |
-      |        Data Types             |
-      |   +--------------------+      |   +-----------------------+
-      +---| Simple/Complex XSD |      +---| Simple/Complex Values |
-          |   typ_template_t   |          |     val_value_t       |
-          |   typ_def_t  typ.h |          |       val.h           |
-          +--------------------+          +-----------------------+
+      ^                               
+      |   Data Types and Objects
+      |   +--------------------+      
+      +---| Simple/Complex XSD |      
+          |   typ_template_t   |      
+          |   obj_template_t   |      
+          +--------------------+      
 
   This library processes:
 
@@ -44,15 +44,7 @@
 
         - Type definitions
  
-        - Parameter Set definitions
-
-        - RPC Method definitions
-
-        - Notification definitions
-
-        - NETCONF <rpc-error> info generation for parameter set
-          or data value errors
-
+        - utility functions for ncxtypes.h
  
 *********************************************************************
 *								    *
@@ -63,7 +55,7 @@
 date	     init     comment
 ----------------------------------------------------------------------
 29-oct-05    abb      Begun
-
+20-jul-08    abb      Start YANG rewrite; remove PSD and PS
 */
 
 #include <xmlstring.h>
@@ -84,8 +76,8 @@ date	     init     comment
 #include "ncxconst.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_rpc
@@ -165,20 +157,16 @@ extern grp_template_t *
     ncx_find_grouping_que (const dlq_hdr_t *groupingQ,
 			   const xmlChar *grpname);
 
-extern psd_template_t * 
-    ncx_find_psd (const ncx_module_t *mod,
-		  const xmlChar *psdname);
-
-extern rpc_template_t * 
+extern obj_template_t * 
     ncx_find_rpc (const ncx_module_t *mod,
 		  const xmlChar *rpcname);
 
-extern rpc_template_t * 
+extern obj_template_t * 
     ncx_match_rpc (const ncx_module_t *mod,
 		   const xmlChar *rpcname);
 
-extern rpc_template_t * 
-    ncx_match_any_rpc (const xmlChar *owner,
+extern obj_template_t * 
+    ncx_match_any_rpc (const xmlChar *module,
 		       const xmlChar *rpcname);
 
 extern status_t 
@@ -419,68 +407,6 @@ extern void
 
 extern ncx_lmem_t *
     ncx_first_lmem (ncx_list_t *list);
-
-/********************** ncx_xlist_t *********************/
-
-extern ncx_xlist_t *
-    ncx_new_xlist (void);
-
-extern void
-    ncx_init_xlist (ncx_xlist_t *list);
-
-extern void 
-    ncx_clean_xlist (ncx_xlist_t *list);
-
-extern void
-    ncx_free_xlist (ncx_xlist_t *list);
-
-extern uint32
-    ncx_xlist_cnt (const ncx_xlist_t *list);
-
-
-extern int32
-    ncx_compare_xlists (const ncx_xlist_t *list1,
-			const ncx_xlist_t *list2);
-
-extern status_t
-    ncx_copy_xlist (const ncx_xlist_t *list1,
-		    ncx_xlist_t *list2);
-
-extern void
-    ncx_merge_xlist (ncx_xlist_t *src,
-		     ncx_xlist_t *dest,
-		     ncx_merge_t mergetyp);
-
-extern status_t 
-    ncx_set_xlist (const xmlChar *strval,
-		   ncx_xlist_t  *list);
-
-/********************** ncx_lstr_t *********************/
-
-extern ncx_lstr_t *
-    ncx_new_lstr (void);
-
-extern void
-    ncx_free_lstr (ncx_lstr_t *lstr);
-
-extern void
-    ncx_insert_lstr (ncx_xlist_t *list,
-		     ncx_lstr_t *strval,
-		     ncx_merge_t mergetyp);
-
-/********************** ncx_appnode_t *********************/
-
-extern ncx_appnode_t *
-    ncx_new_appnode (const xmlChar *owner,
-		     const xmlChar *appname,
-		     xmlns_id_t  nsid);
-
-extern void
-    ncx_free_appnode (ncx_appnode_t *app);
-
-extern ncx_appnode_t *
-    ncx_find_appnode (const xmlChar *owner,
-		      const xmlChar *appname);
 
 /********************** ncx_appinfo_t *********************/
 

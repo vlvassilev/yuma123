@@ -69,12 +69,8 @@ date         init     comment
 #include "ncxconst.h"
 #endif
 
-#ifndef _H_ps
-#include "ps.h"
-#endif
-
-#ifndef _H_psd
-#include "psd.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_status
@@ -2827,7 +2823,7 @@ static status_t
 *     scb == session control block
 *     msg == incoming RPC message
 *            Errors are appended to msg->errQ
-*     typdef == first non-ptr-only typdef for this type
+*     obj == object template containing meta-data definition
 *     nserr == TRUE if namespace errors should be checked
 *           == FALSE if not, and any attribute is accepted 
 *     node == node of the parameter maybe with attributes to be parsed
@@ -2984,11 +2980,12 @@ static status_t
 static status_t 
     parse_btype_nc (ses_cb_t  *scb,
 		    xml_msg_hdr_t *msg,
-		    typ_def_t *typdef,
+		    obj_template_t *obj,
 		    const xml_node_t *startnode,
 		    ncx_data_class_t parentdc,
 		    val_value_t  *retval)
 {
+    typ_def_t   *typdef;
     ncx_btype_t  btyp;
     status_t     res, res2, res3;
     op_editop_t  editop;
@@ -2997,6 +2994,18 @@ static status_t
     /* get the attribute values from the start node */
     editop = OP_EDITOP_NONE;
     retval->nsid = startnode->nsid;
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+    case OBJ_TYP_LIST:
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_RPCIO:
+    default:
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
 
     /* get the base type */
     btyp = typ_get_basetype(typdef);
@@ -3114,7 +3123,7 @@ static status_t
 * missing or incomplete child nodes.
 *
 * Note that the NETCONF inlineFilterType will be parsed
-* correctly because it is type 'any'.  This type is
+* correctly because it is type 'anyxml'.  This type is
 * parsed as a struct, and no validation other well-formed
 * XML is done.
 *

@@ -22,8 +22,6 @@ date	     init     comment
 
 */
 
-#include <xmlstring.h>
-
 #ifndef _H_typ
 #include "typ.h"
 #endif

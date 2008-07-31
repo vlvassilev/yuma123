@@ -1,14 +1,14 @@
-#ifndef _H_ncx_parse
-#define _H_ncx_parse
+#ifndef _H_val_util
+#define _H_val_util
 
-/*  FILE: ncx_parse.h
+/*  FILE: val_util.h
 *********************************************************************
 *								    *
 *			 P U R P O S E				    *
 *								    *
 *********************************************************************
 
-    NCX Module parser module
+    Value Struct Utilities
 
 *********************************************************************
 *								    *
@@ -18,26 +18,23 @@
 
 date	     init     comment
 ----------------------------------------------------------------------
-13-nov-05    abb      Begun
-22-oct-07    abb      Moved parser utility functions to ncx.h
+19-dec-05    abb      Begun
+21jul08      abb      start obj-based rewrite
+29jul08      abb      split out from val.h
 
 */
 
-#include <xmlstring.h>
-
-#ifndef _H_ncxtypes
-#include "ncxtypes.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_status
 #include "status.h"
 #endif
 
-/********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
-*********************************************************************/
+#ifndef _H_val
+#include "val.h"
+#endif
 
 
 /********************************************************************
@@ -46,9 +43,21 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-extern ncx_module_t *
-    ncx_parse_from_filespec (const xmlChar *filespec,
-			     status_t  *res);
+extern status_t 
+    val_gen_index_comp  (const obj_key_t *in,
+			 val_value_t *val);
 
+extern status_t 
+    val_gen_index_chain (const obj_template_t *obj,
+			 val_value_t *val);
 
-#endif	    /* _H_ncx_parse */
+/* add defaults to an initialized complex value */
+extern status_t 
+    val_add_defaults (val_value_t *val,
+		      boolean scriptmode);
+
+extern status_t
+    val_instance_check (val_value_t  *val,
+			const obj_template_t *obj);
+
+#endif	    /* _H_val_util */

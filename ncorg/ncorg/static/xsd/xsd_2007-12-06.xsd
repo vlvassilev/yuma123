@@ -7,7 +7,7 @@
    xmlns:ncx="http://netconfcentral.com/ncx">
    <annotation>
       <documentation>
-         Converted from YANG file 'xsd.yang' by yangdump version 0.9.3
+         Converted from YANG file 'xsd.yang' by yangdump version 0.9.4
          
          Module: xsd
          Organization: YANG Language Design Team
@@ -19,7 +19,7 @@
       </documentation>
       <appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/netconfcentral/xsd.yang
+            /home/andy/newdev/trunk/netconf/modules/netconfcentral/xsd.yang
          </ncx:source>
          <ncx:organization>
             YANG Language Design Team

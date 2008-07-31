@@ -28,6 +28,7 @@ date	     init     comment
                       and prevented
 16-feb-08   abb       Changed environment variables from NCX to YANG
                       Added YANG_INSTALL envvar as well.
+22-jul-08   abb       Remove NCX support -- YANG only from now on
 */
 
 #include <xmlstring.h>
@@ -60,9 +61,6 @@ date	     init     comment
 #define NCXMOD_ENVCHAR '$'
 
 #define NCXMOD_DOTCHAR '.'
-
-/* file extension for NCX Modules */
-#define NCXMOD_NCX_SUFFIX         (const xmlChar *)"ncx"
 
 /* file extension for YANG Modules */
 #define NCXMOD_YANG_SUFFIX        (const xmlChar *)"yang"

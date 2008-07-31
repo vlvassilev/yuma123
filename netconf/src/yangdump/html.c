@@ -61,10 +61,6 @@ date         init     comment
 #include "obj.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -1055,9 +1051,6 @@ static void
 		ses_putstr_indent(scb, END_SEC,  startindent);
 	    }
 	    break;
-	case NCX_BT_ENAME:
-	    /* should not happen */
-	    break;
 	case NCX_BT_EMPTY:
 	case NCX_BT_BOOLEAN:
 	case NCX_BT_INSTANCE_ID:
@@ -1116,7 +1109,6 @@ static void
 	    }
 	    break;
 	case NCX_BT_SLIST:
-	case NCX_BT_XLIST:
 	    break;
 	case NCX_BT_KEYREF:
 	    str = typ_get_keyref_path(typdef);
@@ -2378,7 +2370,7 @@ static void
     ses_putchar(scb, '\n');
 
     /* imports section */
-    if (cp->unified && mod->isyang) {
+    if (cp->unified) {
 	for (impptr = (const yang_import_ptr_t *)dlq_firstEntry(&mod->saveimpQ);
 	     impptr != NULL;
 	     impptr = (const yang_import_ptr_t *)dlq_nextEntry(impptr)) {
@@ -3048,8 +3040,7 @@ static void
 		      "xmlns=\"http://www.w3.org/1999/xhtml\">", 0);
     ses_putstr_indent(scb, (const xmlChar *)"<head>", 0);
     ses_putstr_indent(scb, (const xmlChar *)"<title>", indent);
-    ses_putstr(scb, (mod->isyang) ? (const xmlChar *)"YANG " :
-	       (const xmlChar *)"NCX ");
+    ses_putstr(scb, (const xmlChar *)"YANG ");
     ses_putstr(scb, (mod->ismod) ?  (const xmlChar *)"Module " :
 	       (const xmlChar *)"Submodule ");
     ses_putstr(scb, mod->name);
@@ -3320,13 +3311,6 @@ status_t
     mod = pcb->top;
     if (!mod) {
 	return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
-    }
-
-    /* YANG only at this time */
-    if (!mod->isyang) {
-	log_warn("\nWarning: '%s' skipped, HTML translation not supported",
-		 mod->sourcefn);
-	return NO_ERR;
     }
 
 #ifdef DEBUG

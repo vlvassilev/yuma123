@@ -38,10 +38,6 @@ date	     init     comment
 #include "obj.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -236,10 +232,6 @@ extern val_value_t *
 		     boolean hasindex);
 
 extern val_value_t *
-    xsd_new_parm_element (const ncx_module_t *mod,
-			  const psd_parm_t *parm);
-
-extern val_value_t *
     xsd_new_leaf_element (const ncx_module_t *mod,
 			  const obj_template_t *obj,
 			  boolean hasnodes,
@@ -265,10 +257,6 @@ extern status_t
 		       const dlq_hdr_t *appinfoQ,
 		       val_value_t  *val);
 
-
-extern status_t
-    xsd_do_rpc_annotation (const rpc_template_t *rpc,
-			   val_value_t  *val);
 
 extern status_t
     xsd_do_type_annotation (const typ_template_t *typ,

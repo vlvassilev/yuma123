@@ -8,7 +8,7 @@
    xmlns:smi="urn:ietf:params:xml:ns:yang:yang-smi">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'IANA-RTPROTO-MIB.yang' by yangdump version 0.9.3
+         Converted from YANG file 'IANA-RTPROTO-MIB.yang' by yangdump version 0.9.4
          
          Module: IANA-RTPROTO-MIB
          Organization: IANA
@@ -36,7 +36,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/ietf/IANA-RTPROTO-MIB.yang
+            /home/andy/newdev/trunk/netconf/modules/ietf/IANA-RTPROTO-MIB.yang
          </ncx:source>
          <ncx:organization>IANA</ncx:organization>
          <ncx:contact>

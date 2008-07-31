@@ -38,6 +38,10 @@ date         init     comment
 #include  "ncxconst.h"
 #endif
 
+#ifndef _H_obj
+#include  "obj.h"
+#endif
+
 #ifndef _H_ses
 #include  "ses.h"
 #endif
@@ -607,6 +611,7 @@ void
 }  /* xml_wr_end_elem */
 
 
+#if 0
 /********************************************************************
 * FUNCTION xml_wr_begin_app_elem
 *
@@ -733,6 +738,7 @@ void
     msg->last_defpfix[0] = 0;
 
 }  /* xml_wr_end_app_elem */
+#endif  /*** 0 ***/
 
 
 /********************************************************************
@@ -918,106 +924,6 @@ void
 
 
 /********************************************************************
-* FUNCTION xml_wr_check_app
-* 
-* Write an NCX application header node data value
-* Check if it should be written first by calling a user-supplied
-* test function.
-*
-* Writes the entire contents of the app node,
-* including the top node (application name)
-*
-* INPUTS:
-*   scb == session control block
-*   msg == header of the msg in progress
-*   app == cfg_app_t to write
-*   indent == start indent amount if indent enabled
-*   testfn == callback function to use, NULL if not used
-*   
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    xml_wr_check_app (ses_cb_t *scb,
-		      xml_msg_hdr_t *msg,
-		      const cfg_app_t *app,
-		      int32  indent,
-		      ncx_nodetest_fn_t testfn)
-{
-    ps_parmset_t *ps;
-    boolean             empty;
-
-#ifdef DEBUG
-    if (!scb || !msg || !app) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    if (testfn) {
-	if (!(*testfn)(msg->withdef, NCX_NT_APP, app)) {
-	    return;  /* returned FALSE -- skip this entry */
-	}
-    }
-    /* write the <ns:appname> node */
-    empty = dlq_empty(&app->parmsetQ);
-    xml_wr_begin_app_elem(scb, msg, app, indent, empty);
-
-    /* check corner-case; empty application placeholder */
-    if (empty) {
-	return;
-    } 
-
-    /* indent all the parmsets */
-    if (indent >= 0) {
-	indent += ses_indent_count(scb);
-    }
-
-    /* write each parmset */
-    for (ps = (ps_parmset_t *)dlq_firstEntry(&app->parmsetQ);
-	 ps != NULL;
-	 ps = (ps_parmset_t *)dlq_nextEntry(ps)) {
-	xml_wr_check_parmset(scb, msg, ps, indent, testfn);
-    }
-
-    /* reset the indent and write the appname end node */
-    if (indent >= 0) {
-	indent -= ses_indent_count(scb);
-    }
-    xml_wr_end_app_elem(scb, msg, app, indent);
-
-}  /* xml_wr_check_app */
-
-
-/********************************************************************
-* FUNCTION xml_wr_app
-* 
-* Write an NCX application header node value
-*
-* Writes the entire contents of the app node,
-* including the top node (application name)
-*
-* INPUTS:
-*   scb == session control block
-*   msg == xml_msg_hdr_t in progress
-*   app == cfg_app_t to write
-*   indent == start indent amount if indent enabled
-*   
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    xml_wr_app (ses_cb_t *scb,
-		xml_msg_hdr_t *msg,
-		const cfg_app_t *app,
-		int32  indent)
-{
-    xml_wr_check_app(scb, msg, app, indent, NULL);
-
-}  /* xml_wr_app */
-
-
-/********************************************************************
 * FUNCTION xml_wr_check_val
 * 
 * Write an NCX value in XML encoding
@@ -1050,9 +956,7 @@ void
 		      int32  indent,
 		      ncx_nodetest_fn_t testfn)
 {
-    const ncx_lstr_t   *liststr;
     const ncx_lmem_t   *listmem;
-    const cfg_app_t    *app;
     val_value_t        *v_val, *v_chval, *chval, *useval, *usechval;
     uint32              len;
     status_t            res;
@@ -1105,17 +1009,6 @@ void
     }
 
     switch (btyp) {
-    case NCX_BT_ROOT:
-	for (app = (const cfg_app_t *)dlq_firstEntry(&useval->v.appQ);
-	     app != NULL;
-	     app = (const cfg_app_t *)dlq_nextEntry(app)) {
-	    xml_wr_check_app(scb, msg, app, indent, testfn);
-	} 
-	break;
-    case NCX_BT_ENAME:
-	xml_wr_empty_elem(scb, msg, val_get_parent_nsid(useval),
-			  useval->nsid, VAL_STR(useval), -1);
-	break;
     case NCX_BT_ENUM:
 	ses_putstr(scb, useval->v.enu.name); 
 	break;
@@ -1229,23 +1122,10 @@ void
 	    }
 	}
 	break;
-    case NCX_BT_XLIST:
-	/* XLIST is deprecated !!!! */
-	for (liststr = (const ncx_lstr_t *)
-		 dlq_firstEntry(&useval->v.xlist.strQ);
-	     liststr != NULL;
-	     liststr = (const ncx_lstr_t *)dlq_nextEntry(liststr)) {
-	    ses_indent(scb, indent);
-	    ses_putchar(scb, '\"');
-	    ses_putcstr(scb, liststr->str, indent);
-	    ses_putchar(scb, '\"');
-	}
-	break;
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
 	for (chval = val_get_first_child(useval);
 	     chval != NULL;
 	     chval = val_get_next_child(chval)) {
@@ -1466,253 +1346,6 @@ void
     xml_wr_full_check_val(scb, msg, val, indent, NULL);
 				
 } /* xml_wr_full_val */
-
-
-/********************************************************************
-* FUNCTION xml_wr_check_parm
-* 
-* Write an NCX parameter as data value output w/filter
-*
-* This function is only used for data parmsets, not RPC parmsets
-*
-* INPUTS:
-*   scb == session control block
-*   msg == xml_msg_hdr_t in progress
-*   parm == parm to write
-*   indent == start indent amount if indent enabled
-*   
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    xml_wr_check_parm (ses_cb_t *scb,
-		       xml_msg_hdr_t *msg,
-		       ps_parm_t *parm,
-		       int32  indent,
-		       ncx_nodetest_fn_t testfn)
-{
-    const xmlChar    *name;  
-    val_value_t      *vir;
-    val_value_t      *val;
-    xmlns_id_t        nsid, parent_nsid;
-    status_t          res;
-
-#ifdef DEBUG
-    if (!scb || !msg || !parm) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-#ifdef REMOVED
-    /* check access control to this application, parm */
-    if (!agt_acm_parm_read_allowed(scb->username, parm)) {
-	return;   /* skip this entry */
-    }
-#endif
-
-    /* check user callback filter test */
-    if (testfn) {
-	if (!(*testfn)(msg->withdef, NCX_NT_PARM, parm)) {
-	    return;    /* skip this entry */
-	}
-    }
-
-    name = parm->parm->name;
-    parent_nsid = psd_get_parmset_nsid((const psd_template_t *)
-				       parm->parent);
-    nsid = psd_get_parm_nsid(parm->parm);
-
-    /* get the virtual value or use the real one */
-    if (val_is_virtual(parm->val)) {
-	vir = val_get_virtual_value(scb, parm->val, &res);
-	if (!vir) {
-	    SET_ERROR(res);
-	    return;
-	}
-	val = vir;
-    } else {
-	vir = NULL;
-	val = parm->val;
-    }
-
-    xml_wr_begin_elem_ex(scb, msg, parent_nsid, nsid, name, 
-			 &val->metaQ, FALSE, indent, FALSE);
-    if (indent >= 0) {
-	indent += ses_indent_count(scb);
-    }
-
-    xml_wr_check_val(scb, msg, val, indent, testfn);
-
-    if (indent >= 0) {
-	indent -= ses_indent_count(scb);
-    }
-
-    xml_wr_end_elem(scb, msg, nsid, name, 
-		    (fit_on_line(scb, val)) ? -1 : indent);
-
-    if (vir) {
-	val_free_value(vir);
-    }
-
-}  /* xml_wr_check_parm */
-
-
-/********************************************************************
-* FUNCTION xml_wr_parm
-* 
-* Write a NETCONF PDU parm as data value output
-*
-* INPUTS:
-*   scb == session control block
-*   msg == xml_msg_hdr_t in progress
-*   parm == parm to write
-*   indent == start indent amount if indent enabled
-*   
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    xml_wr_parm (ses_cb_t *scb,
-		 xml_msg_hdr_t *msg,
-		 ps_parm_t *parm,
-		 int32  indent)
-{
-    xml_wr_check_parm(scb, msg, parm, indent, NULL);
-
-}  /* xml_wr_parm */
-
-
-/********************************************************************
-* FUNCTION xml_wr_check_parmset
-* 
-* Write an NCX parmset as data value output w/filter
-*
-* This function is only used for data parmsets, not RPC parmsets
-*
-* INPUTS:
-*   scb == session control block
-*   msg == xml_msg_hdr_t in progress
-*   ps == parmset to write
-*   indent == start indent amount if indent enabled
-*   
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    xml_wr_check_parmset (ses_cb_t *scb,
-			  xml_msg_hdr_t *msg,
-			  ps_parmset_t *ps,
-			  int32  indent,
-			  ncx_nodetest_fn_t testfn)
-{
-    ps_parm_t  *parm;
-    const xmlChar    *name;  
-    boolean           empty;
-    xmlns_id_t        nsid, parent_nsid;
-    xml_attrs_t       attrs;
-    status_t          res;
-
-#ifdef DEBUG
-    if (!scb || !msg || !ps) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-#ifdef REMOVED
-    /* check access control to this application, parmset */
-    if (!agt_acm_ps_read_allowed(scb->username, ps)) {
-	return;   /* skip this entry */
-    }
-#endif
-
-    /* check user callback filter test */
-    if (testfn) {
-	if (!(*testfn)(msg->withdef, NCX_NT_PARMSET, ps)) {
-	    return;    /* skip this entry */
-	}
-    }
-
-    /* init local vars */
-    xml_init_attrs(&attrs);
-    empty = dlq_empty(&ps->parmQ);
-    name = (ps->name) ? ps->name : ps->psd->name;
-    nsid = psd_get_parmset_nsid(ps->psd);
-    parent_nsid = nsid;  /***/
-    
-    /* check if agent-generated metadata is requested */
-    if (msg->withmeta && ps->lastchange) {
-	/* generate an attribute for the last-changed timestamp */
-	res = xml_add_attr(&attrs, xmlns_ncx_id(),
-			   NCX_EL_LAST_MODIFIED, 
-			   ps->lastchange);
-	if (res != NO_ERR) {
-	    SET_ERROR(res);
-	    xml_clean_attrs(&attrs);
-	    return;
-	}
-    }
-
-    /* write the <parmset-name> node */
-    xml_wr_begin_elem_ex(scb, msg, parent_nsid, nsid, name, &attrs, 
-			 TRUE, indent, empty);
-
-    /* clean attrQ - done with it */
-    xml_clean_attrs(&attrs);
-
-    /* check corner-case; empty parmset placeholder */
-    if (empty) {
-	return;
-    } 
-
-    /* indent all the parameters */
-    if (indent >= 0) {
-	indent += ses_indent_count(scb);
-    }
-
-    /* write each parameter */
-    for (parm = (ps_parm_t *)dlq_firstEntry(&ps->parmQ);
-	 parm != NULL;
-	 parm = (ps_parm_t *)dlq_nextEntry(parm)) {
-
-	xml_wr_check_parm(scb, msg, parm, indent, testfn);
-    }
-
-    /* reset the indent and write the parmset end node */
-    if (indent >= 0) {
-	indent -= ses_indent_count(scb);
-    }
-    xml_wr_end_elem(scb, msg, nsid, name, indent);
-
-}  /* xml_wr_check_parmset */
-
-
-/********************************************************************
-* FUNCTION xml_wr_parmset
-* 
-* Write a NETCONF PDU parmset as data value output
-*
-* This function is only used for data parmsets, not RPC parmsets
-*
-* INPUTS:
-*   scb == session control block
-*   msg == xml_msg_hdr_t in progress
-*   ps == parmset to write
-*   indent == start indent amount if indent enabled
-*   
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    xml_wr_parmset (ses_cb_t *scb,
-		    xml_msg_hdr_t *msg,
-		    ps_parmset_t *ps,
-		    int32  indent)
-{
-    xml_wr_check_parmset(scb, msg, ps, indent, NULL);
-
-}  /* xml_wr_parmset */
 
 
 /********************************************************************

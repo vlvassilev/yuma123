@@ -9,7 +9,7 @@
    xmlns:ncn="urn:ietf:params:xml:ns:netconf:notification:1.0">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'nc-notifications.yang' by yangdump version 0.9.3
+         Converted from YANG file 'nc-notifications.yang' by yangdump version 0.9.4
          
          Module: nc-notifications
          Organization: IETF NETCONF WG
@@ -30,7 +30,7 @@
             </ncx:url>
          </ncx:reference>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/ietf/nc-notifications.yang
+            /home/andy/newdev/trunk/netconf/modules/ietf/nc-notifications.yang
          </ncx:source>
          <ncx:organization>IETF NETCONF WG</ncx:organization>
          <ncx:contact>netconf@ops.ietf.org</ncx:contact>

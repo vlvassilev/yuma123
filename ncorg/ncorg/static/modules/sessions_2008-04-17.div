@@ -196,7 +196,7 @@
             <a name="sessions.144"></a><span class="yang_kw">container</span> <span class="yang_id">sessions</span> {
                <span class="yang_kw">description</span>
                   <span class="yang_str">"Container for active session information and statistics.
-                  There is one entry for each session which is active
+                  There is one entry for each session which is active 
                   or starting up."</span>;
                <a name="session.150"></a><span class="yang_kw">list</span> <span class="yang_id">session</span> {
                   <span class="yang_kw">key</span> "<a href="#id.155">id</a>";

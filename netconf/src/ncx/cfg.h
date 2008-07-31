@@ -11,6 +11,9 @@
 
     Configuration segments are stored in sequential order.
 
+    OLD NCX MODEL
+    =============
+
     Configuration database (running, candidate, startup, etc.)
       +
       |
@@ -28,7 +31,51 @@
 
 
    Parmset A is defined (hard-wired) to belong to application X
-           
+
+
+   NEW YANG OBJECT MODEL
+   =====================
+
+    Configuration database (running, candidate, startup, etc.)
+      +
+      |
+      +-- (root: /)
+           +
+           |
+           +--- object X  (netconf, security, routing, etc.)
+           |         |
+           |         +---- object A , B, C
+           |           
+           +--- object Y
+           |         |
+           |         +---- object D , E
+           V
+
+
+   MODULE USAGE
+   ============
+
+   1) call cfg_init()
+
+   2) call cfg_init_static_db for the various hard-wired databases
+      that need to be created by the agent
+
+   3) call cfg_load_root() with the startup database contents
+      to load into the running config
+
+   4) call cfg_set_target() [NCX_CFGID_CANDIDATE or NCX_CFGID_RUNNING]
+   
+   5) call cfg_set_state() to setup config db access, when ready
+      for NETCONF operations
+
+   6) Use cfg_ok_to_* functions to test config access
+
+   7) use cfg_lock and cfg_unlock as desired to set global write locks
+
+   8) use cfg_release_locks when a session terminates
+
+   9) call cfg_cleanup() when program is terminating
+
 *********************************************************************
 *                                                                   *
 *                   C H A N G E         H I S T O R Y               *
@@ -38,12 +85,10 @@
 date             init     comment
 ----------------------------------------------------------------------
 15-apr-06    abb      Begun.
+29-may-08    abb      Converted NCX database model to simplified
+                      YANG object model
 */
 #include <xmlstring.h>
-
-#ifndef _H_ps
-#include "ps.h"
-#endif
 
 #ifndef _H_dlq
 #include "dlq.h"
@@ -134,19 +179,8 @@ typedef struct cfg_template_t_ {
     ses_id_t       locked_by;
     cfg_source_t   lock_src;
     dlq_hdr_t      load_errQ;    /* Q of rpc_err_rec_t */
-    val_value_t   *root;              /* btyp == anyapp */
+    val_value_t   *root;          /* btyp == container */
 } cfg_template_t;
-
-
-/* a struct holding all the parmsets for an application section */
-typedef struct cfg_app_t_ {
-    dlq_hdr_t            qhdr;
-    const ncx_appnode_t *appdef;
-    void                *parent;      /* val_value_t container */
-    op_editop_t          editop;     /* used during operations */
-    dlq_hdr_t            parmsetQ;
-    struct cfg_app_t_   *last;      /* last value for rollback */
-} cfg_app_t;
 
 
 /********************************************************************
@@ -170,18 +204,6 @@ extern cfg_template_t *
 
 extern void
     cfg_free_template (cfg_template_t *cfg);
-
-extern cfg_app_t *
-    cfg_new_appnode (void);
-
-extern void 
-    cfg_init_appnode (cfg_app_t *app);
-
-extern void 
-    cfg_clean_appnode (cfg_app_t *app);
-
-extern void 
-    cfg_free_appnode (cfg_app_t *app);
 
 extern cfg_state_t
     cfg_get_state (ncx_cfg_t cfg_id);
@@ -223,26 +245,7 @@ extern status_t
 		ses_id_t locked_by);
 
 extern status_t
-    cfg_add_parmset (cfg_template_t *cfg,
-		     ps_parmset_t *ps,
-		     ses_id_t     loadby);
-
-extern ps_parmset_t *
-    cfg_get_parmset (cfg_template_t *cfg,
-		     ps_parmset_t *ps);
-
-extern status_t 
-    cfg_del_parmset (cfg_template_t *cfg,
-		     ps_parmset_t *ps,
-		     boolean  delcheck);
-
-extern status_t
     cfg_load_root (cfg_template_t *cfg);
-
-extern cfg_app_t *
-    cfg_get_appnode (cfg_template_t *cfg,
-		     const xmlChar *module,
-		     const xmlChar *appname);
 
 extern void
     cfg_release_locks (ses_id_t sesid);
@@ -250,8 +253,5 @@ extern void
 extern void
     cfg_get_lock_list (ses_id_t sesid,
 		       val_value_t *retval);
-
-extern ncx_data_class_t
-    cfg_get_app_dataclass (const cfg_app_t *app);
 
 #endif            /* _H_cfg */

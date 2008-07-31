@@ -13,7 +13,7 @@
    xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'ENTITY-MIB.yang' by yangdump version 0.9.3
+         Converted from YANG file 'ENTITY-MIB.yang' by yangdump version 0.9.4
          
          Module: ENTITY-MIB
          Organization: IETF ENTMIB Working Group
@@ -45,7 +45,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/ietf/ENTITY-MIB.yang
+            /home/andy/newdev/trunk/netconf/modules/ietf/ENTITY-MIB.yang
          </ncx:source>
          <ncx:organization>
             IETF ENTMIB Working Group

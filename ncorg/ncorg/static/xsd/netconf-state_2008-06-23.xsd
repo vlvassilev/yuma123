@@ -10,7 +10,7 @@
    xmlns:inet="urn:ietf:params:xml:ns:yang:inet-types">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'netconf-state.yang' by yangdump version 0.9.3
+         Converted from YANG file 'netconf-state.yang' by yangdump version 0.9.4
          
          Module: netconf-state
          Organization: IETF
@@ -30,7 +30,7 @@
             </ncx:url>
          </ncx:reference>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/ietf/netconf-state.yang
+            /home/andy/newdev/trunk/netconf/modules/ietf/netconf-state.yang
          </ncx:source>
          <ncx:organization>IETF</ncx:organization>
       </xs:appinfo>

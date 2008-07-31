@@ -35,16 +35,12 @@ date             init     comment
 #include "op.h"
 #endif
 
-#ifndef _H_ps
-#include "ps.h"
-#endif
-
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
 #ifndef _H_status
 #include "status.h"
+#endif
+
+#ifndef _H_val
+#include "val.h"
 #endif
 
 #ifndef _H_xmlns
@@ -98,28 +94,6 @@ typedef enum rpc_outtyp_t_ {
 } rpc_outtyp_t;
 
 
-/* struct to match a single NCX module <rpc> definition */
-typedef struct rpc_template_t_ {
-    dlq_hdr_t       qhdr;    /* must be first; used for hash table */
-    rpc_type_t      rpc_typ;
-    xmlns_id_t      nsid;
-    xmlChar        *name;
-    xmlChar        *in_modstr;
-    xmlChar        *in_psd_name;
-    psd_template_t *in_psd;               /* back ptr to input PSD */
-    xmlChar        *out_modstr;
-    xmlChar        *out_data_name;
-    rpc_outtyp_t    out_datatyp;
-    void           *out_data;       /* back ptr to output template */
-    xmlChar        *descr;
-    xmlChar        *condition;
-    void           *cbset;     /* BUILD_AGT: BP to rpc_agt_cbset_t */
-    dlq_hdr_t       appinfoQ;
-    boolean         supported;
-    uint32          linenum;
-} rpc_template_t;
-
-
 /* struct of params to undo an edit-config opration
  * The actual nodes used depend on the edit operation value
  */
@@ -164,12 +138,12 @@ typedef struct rpc_msg_t_ {
     const xmlChar   *rpc_meth_name;
 
     /* incoming: RPC method template pointer */
-    const rpc_template_t *rpc_method;
+    const struct obj_rpc_t_ *rpc_method; 
 
     /* incoming: AGENT RPC processing state */
     int              rpc_agt_state;        /* rpc_agt_phase_t */
     op_errop_t       rpc_err_option;       
-    ps_parmset_t     rpc_input;
+    val_value_t      rpc_input;
     status_t         rpc_status;     /* final internal status */
 
     /* incoming:
@@ -186,7 +160,7 @@ typedef struct rpc_msg_t_ {
      * by the rpc_datacb function to generate a reply.
      */
     void           *rpc_datacb;              /* rpc_agt_data_cb_t */
-    void           *rpc_data;       /* val_value_t for data reply */
+    val_value_t    *rpc_data;                       /* data reply */
     op_filter_t     rpc_filter;        /* filter for get* methods */
 
     /* incoming: rollback or commit phase support builtin
@@ -205,29 +179,9 @@ typedef struct rpc_msg_t_ {
 
 /********************************************************************
 *                                                                   *
-*                           M A C R O S                             *
-*                                                                   *
-*********************************************************************/
-#define rpc_get_buff(R)  (&((R)->rpc_buff))
-
-#define rpc_get_attrs(R)  (&((R)->rpc_attrs))
-
-/********************************************************************
-*                                                                   *
 *                        F U N C T I O N S                          *
 *                                                                   *
 *********************************************************************/
-
-
-
-/********************** RPC TEMPLATES **************************/
-extern rpc_template_t * 
-    rpc_new_template (void);
-
-extern void 
-    rpc_free_template (rpc_template_t *rpc);
-
-/* see def_reg.h for the find-an-rpc-template function */
 
 
 /********************** RPC MESSAGES **************************/
@@ -246,7 +200,6 @@ extern void
 
 extern void 
     rpc_clean_msg (rpc_msg_t *msg);
-
 
 extern const xmlChar *
     rpc_get_rpctype_str (rpc_type_t rpctyp);

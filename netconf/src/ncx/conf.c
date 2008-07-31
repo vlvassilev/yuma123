@@ -110,8 +110,8 @@ date         init     comment
 #include "ncxconst.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_status
@@ -124,6 +124,14 @@ date         init     comment
 
 #ifndef _H_typ
 #include  "typ.h"
+#endif
+
+#ifndef _H_val
+#include "val.h"
+#endif
+
+#ifndef _H_val_util
+#include "val_util.h"
 #endif
 
 
@@ -205,8 +213,6 @@ static status_t
 } /* get_tk */
 
 
-
-
 /********************************************************************
 * FUNCTION consume_tk
 * 
@@ -269,9 +275,9 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION skip_parmset
+* FUNCTION skip_object
 * 
-* Skip until the end of the parmset
+* Skip until the end of the object
 * current token is the parmset name
 *
 * INPUTS:
@@ -281,7 +287,7 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    skip_parmset (tk_chain_t  *tkc)
+    skip_object (tk_chain_t  *tkc)
 {
     status_t res;
     uint32   brace_count;
@@ -312,7 +318,7 @@ static status_t
     }
     return NO_ERR;
 
-} /* skip_parmset */
+} /* skip_object */
 
 
 /********************************************************************
@@ -330,7 +336,7 @@ static status_t
 *
 * INPUTS:
 *   tkc == token chain
-*   typdef == the typdef struct to use for filling in 'val'
+*   obj == the object template to use for filling in 'val'
 *   val == initialized value struct, without any value,
 *          which will be filled in by this function
 *   nsid == namespace ID to use for this value
@@ -344,18 +350,18 @@ static status_t
 *********************************************************************/
 static status_t 
     parse_index (tk_chain_t  *tkc,
-		 typ_def_t *typdef,
+		 const obj_template_t *obj,
 		 val_value_t *val,
 		 xmlns_id_t  nsid)
 {
-    typ_index_t   *indef, *infirst;
+    const obj_key_t     *indef, *infirst;
     val_value_t   *inval;
     status_t       res;
 
-    infirst = typ_first_index(TYP_DEF_COMPLEX(typdef));
+    infirst = obj_first_ckey(obj);
 
     /* first make value nodes for all the index values */
-    for (indef = infirst; indef != NULL; indef = typ_next_index(indef)) {
+    for (indef = infirst; indef != NULL; indef = obj_next_ckey(indef)) {
 
 	/* advance to the next non-NEWLINE token */
 	res = get_tk(tkc);
@@ -366,9 +372,9 @@ static status_t
 
 	/* check if a valid token is given for the index value */
 	if (TK_CUR_TEXT(tkc)) {
-	    inval = val_make_simval(typ_get_index_typdef(indef),
+	    inval = val_make_simval(obj_get_typdef(indef->keyobj),
 				    nsid,
-				    typ_get_index_name(indef),
+				    obj_get_name(indef->keyobj),
 				    TK_CUR_VAL(tkc), &res);
 	    if (!inval) {
 		ncx_conf_exp_err(tkc, res, "index value");
@@ -384,7 +390,7 @@ static status_t
     }
 
     /* generate the index chain in the indexQ */
-    res = val_gen_index_chain(infirst, val);
+    res = val_gen_index_chain(obj, val);
     if (res != NO_ERR) {
 	ncx_print_errormsg(tkc, NULL, res);
     }
@@ -409,7 +415,7 @@ static status_t
 *
 * INPUTS:
 *   tkc == token chain
-*   typdef == the typdef struct to use for filling in 'val'
+*   obj == the object template struct to use for filling in 'val'
 *   val == initialized value struct, without any value,
 *          which will be filled in by this function
 *   nsid == namespace ID to use for this value
@@ -420,22 +426,26 @@ static status_t
 *********************************************************************/
 static status_t 
     parse_val (tk_chain_t  *tkc,
-	       typ_def_t *typdef,
-	       val_value_t *val,
-	       xmlns_id_t  nsid,
-	       const xmlChar *valname)
+	       const obj_template_t *obj,
+	       val_value_t *val)
 {
-    typ_def_t       *chdef;
+    const obj_template_t  *chobj;
     val_value_t     *chval;
-    status_t          res;
-    ncx_btype_t       btyp;
-    boolean           done;
+    const xmlChar   *valname;
+    const typ_def_t *typdef;
+    status_t         res;
+    ncx_btype_t      btyp;
+    boolean          done;
+    xmlns_id_t       nsid;
 
-    btyp = typ_get_basetype(typdef);
+    btyp = obj_get_basetype(obj);
+    nsid = obj_get_nsid(obj);
+    valname = obj_get_name(obj);
+    typdef = obj_get_ctypdef(obj);
 
     /* check if there is an index clause expected */
     if (typ_has_index(btyp)) {
-	res = parse_index(tkc, typdef, val, nsid);
+	res = parse_index(tkc, obj, val, nsid);
 	if (res != NO_ERR) {
 	    return res;
 	}
@@ -520,17 +530,16 @@ static status_t
 		    /* parent 'typdef' must have a child with a name
 		     * that matches the current token vale
 		     */
-		    chdef = typ_find_child_typdef(TK_CUR_VAL(tkc),
-						  typdef);
-		    if (chdef) {
+		    chobj = obj_find_child(obj, TK_CUR_MOD(tkc),
+					   TK_CUR_VAL(tkc));
+		    if (chobj) {
 			chval = val_new_value();
 			if (!chval) {
 			    res = ERR_INTERNAL_MEM;
 			    ncx_print_errormsg(tkc, NULL, res);
 			} else {
-			    res = parse_val(tkc, chdef,
-					chval, nsid,
-					TK_CUR_VAL(tkc));
+			    val_init_from_template(chval, chobj);
+			    res = parse_val(tkc, chobj, chval);
 			    if (res == NO_ERR) {
 				val_add_child(chval, val);
 			    } else {
@@ -568,7 +577,7 @@ static status_t
 /********************************************************************
 * FUNCTION parse_parm
 * 
-* Parse, and fill one ps_parm_t struct during
+* Parse, and fill one val_value_t struct during
 * processing of a parmset
 *
 * Error messages are printed by this function!!
@@ -577,7 +586,7 @@ static status_t
 *
 * INPUTS:
 *   tkc == token chain
-*   ps == parmset to fill in
+*   val == container val to fill in
 *   keepvals == TRUE to save existing parms in 'ps', as needed
 *               FALSE to overwrite old parms in 'ps', as needed
 *
@@ -586,15 +595,14 @@ static status_t
 *********************************************************************/
 static status_t 
     parse_parm (tk_chain_t  *tkc,
-		ps_parmset_t *ps,
+		val_value_t *val,
 		boolean keepvals)
 {
-    const psd_parm_t *psd_parm;
-    typ_template_t   *typ;
-    ps_parm_t        *curparm, *newparm;
-    status_t          res;
-    ncx_iqual_t       iqual;
-    boolean           match;
+    const obj_template_t   *obj;
+    val_value_t            *curparm, *newparm;
+    status_t                res;
+    ncx_iqual_t             iqual;
+    boolean                 match;
 
     /* get the next token, which must be a TSTRING
      * representing the parameter name 
@@ -604,16 +612,21 @@ static status_t
 	return res;
     }
 
-    /* check if this TSTRING is a parameter in this parmset */
-    curparm = ps_find_parm(ps, TK_CUR_VAL(tkc));
+    /* check if this TSTRING is a parameter in this parmset
+     * make sure to always check for prefix:identifier
+     * This is automatically processed in tk.c
+     */
+    curparm = val_find_child(val, TK_CUR_MOD(tkc),
+			     TK_CUR_VAL(tkc));
     if (curparm) {
-	psd_parm = curparm->parm;
+	obj = curparm->obj;
     } else {
-	psd_parm = psd_find_parm(ps->psd, TK_CUR_VAL(tkc));
+	obj = obj_find_child(val->obj, TK_CUR_MOD(tkc),
+				  TK_CUR_VAL(tkc));
     }
-    if (!psd_parm) {
+    if (!obj) {
 	res = ERR_NCX_UNKNOWN_PARM;
-	ncx_conf_exp_err(tkc, res, "parameter name");
+	ncx_conf_exp_err(tkc, res, "object name");
 	return res;
     }
 
@@ -622,19 +635,16 @@ static status_t
      * that require the new value be parsed before knowing
      * if a parm value is a duplicate or not
      */
-    newparm = ps_new_parm();
+    newparm = val_new_value();
     if (!newparm) {
 	res = ERR_INTERNAL_MEM;
 	ncx_print_errormsg(tkc, NULL, res);
 	return res;
     }
-    ps_setup_parm(newparm, ps, psd_parm);
-    typ = psd_get_parm_template(psd_parm);
+    val_init_from_template(newparm, obj);
 
     /* parse the parameter value */
-    res = parse_val(tkc, &typ->typdef,
-		    newparm->val, psd_get_parm_nsid(psd_parm),
-		    psd_parm->name);
+    res = parse_val(tkc, obj, newparm);
     if (res != NO_ERR) {
 	return res;
     }
@@ -643,37 +653,37 @@ static status_t
      * add the newparm to the parmset
      */
     if (curparm) {
-	iqual = typ_get_iqualval(typ);
+	iqual = obj_get_iqualval(obj);
 	if (iqual == NCX_IQUAL_ONE || iqual == NCX_IQUAL_OPT) {
 	    /* only one allowed, check really a match */
 	    match = TRUE;
-	    if (val_has_index(curparm->val) &&
-		!val_index_match(newparm->val, curparm->val)) {
+	    if (val_has_index(curparm) &&
+		!val_index_match(newparm, curparm)) {
 		match = FALSE;
 	    }
 
 	    if (!match) {
-		ps_add_parm(newparm, ps, NCX_MERGE_LAST);
+		val_add_child(newparm, val);
 	    } else if (keepvals) {
 		/* keep current value and toss new value */
 		log_warn("\nconf: Parameter %s already exists. "
-			 "Not using new value", curparm->parm->name);
-		ps_free_parm(newparm);
+			 "Not using new value", curparm->name);
+		val_free_value(newparm);
 	    } else {
 		/* replace current value and warn old value tossed */
 		log_warn("\nconf: Parameter %s already exists. "
 			 "Overwriting with new value",
-			 curparm->parm->name);
-		ps_remove_parm(curparm);
-		ps_free_parm(curparm);
-		ps_add_parm(newparm, ps, NCX_MERGE_LAST);
+			 curparm->name);
+		dlq_remove(curparm);
+		val_free_value(curparm);
+		val_add_child(newparm, val);
 	    }
 	} else {
 	    /* mutliple instances allowed */
-	    ps_add_parm(newparm, ps, NCX_MERGE_LAST);
+	    val_add_child(newparm, val);
 	}
     } else {
-	ps_add_parm(newparm, ps, NCX_MERGE_LAST);
+	val_add_child(newparm, val);
     }
 
     return NO_ERR;
@@ -682,9 +692,9 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION parse_parmset
+* FUNCTION parse_top
 * 
-* Parse, and fill one ps_parmset_t struct
+* Parse, and fill one val_value_t struct
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -692,31 +702,31 @@ static status_t
 *
 * INPUTS:
 *   tkc == token chain
-*   ps == parmset iniitalized and could be already filled in
-*   keepvals == TRUE to save existing parms in 'ps', as needed
-*               FALSE to overwrite old parms in 'ps', as needed
+*   val == value iniitalized and could be already filled in
+*   keepvals == TRUE to save existing values in 'val', as needed
+*               FALSE to overwrite old values in 'val', as needed
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
-    parse_parmset (tk_chain_t  *tkc,
-		   ps_parmset_t *ps,
-		   boolean keepvals)
+    parse_top (tk_chain_t  *tkc,
+	       val_value_t *val,
+	       boolean keepvals)
 {
     status_t       res;
     boolean        done;
 
-    /* get the parmset name */
+    /* get the container name */
     done = FALSE;
     while (!done) {
-	res = match_name(tkc, ps->psd->name);
+	res = match_name(tkc, obj_get_name(val->obj));
 	if (res == ERR_NCX_EOF) {
-	    log_debug("\nconf: parmset '%s' not found in file '%s'",
-		      ps->psd->name, tkc->filename);
+	    log_debug("\nconf: object '%s' not found in file '%s'",
+		      obj_get_name(val->obj), tkc->filename);
 	    return NO_ERR;
 	} else if (res != NO_ERR) {
-	    res = skip_parmset(tkc);
+	    res = skip_object(tkc);
 	    if (res != NO_ERR) {
 		return res;
 	    }
@@ -728,7 +738,7 @@ static status_t
     /* get a left brace */
     res = consume_tk(tkc, TK_TT_LBRACE);
     if (res != NO_ERR) {
-	ncx_conf_exp_err(tkc, res, "left brace to start parmset");
+	ncx_conf_exp_err(tkc, res, "left brace to start object");
 	return res;
     }
 
@@ -746,7 +756,7 @@ static status_t
 	if (TK_CUR_TYP(tkc)==TK_TT_RBRACE) {
 	    done = TRUE;
 	} else {
-	    res = parse_parm(tkc, ps, keepvals);
+	    res = parse_parm(tkc, val, keepvals);
 	    if (res != NO_ERR) {
 		done = TRUE;
 	    }
@@ -755,7 +765,7 @@ static status_t
 
     return NO_ERR;
 
-}  /* parse_parmset */
+}  /* parse_top */
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -777,8 +787,8 @@ static status_t
 * INPUTS:
 *   filespec == absolute path or relative path
 *               This string is used as-is without adjustment.
-*   ps       == parmset to fill in, must be initialized
-*               already with ps_setup_parmset
+*   val       == value struct to fill in, must be initialized
+*                already with val_new_value or val_init_value
 *   keepvals == TRUE if old values should always be kept
 *               FALSE if old vals should be overwritten
 *   fileerr == TRUE to generate a missing file error
@@ -788,17 +798,17 @@ static status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    conf_parse_ps_from_filespec (const xmlChar *filespec,
-				 ps_parmset_t *ps,
-				 boolean keepvals,
-				 boolean fileerr)
+    conf_parse_val_from_filespec (const xmlChar *filespec,
+				  val_value_t *val,
+				  boolean keepvals,
+				  boolean fileerr)
 {
     tk_chain_t    *tkc;
     FILE          *fp;
     status_t       res;
 
 #ifdef DEBUG
-    if (!filespec || !ps) {
+    if (!filespec || !val) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     } 
 #endif
@@ -836,7 +846,7 @@ status_t
 #endif
 
     if (res == NO_ERR) {
-	res = parse_parmset(tkc, ps, keepvals);
+	res = parse_top(tkc, val, keepvals);
     }
 
     fclose(fp);
@@ -845,7 +855,7 @@ status_t
 
     return res;
 
-}  /* conf_parse_ps_from_filespec */
+}  /* conf_parse_val_from_filespec */
 
 
 /* END file conf.c */

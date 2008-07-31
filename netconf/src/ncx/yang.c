@@ -66,8 +66,8 @@ date         init     comment
 #include "ncxtypes.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_status

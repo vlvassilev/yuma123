@@ -30,6 +30,10 @@ date         init     comment
 #include  "ncx.h"
 #endif
 
+#ifndef _H_obj
+#include  "obj.h"
+#endif
+
 #ifndef _H_op
 #include  "op.h"
 #endif
@@ -73,89 +77,6 @@ date         init     comment
 *                       V A R I A B L E S			    *
 *                                                                   *
 *********************************************************************/
-
-
-/********************************************************************
-* FUNCTION rpc_new_template
-*
-* Malloc and initialize a new rpc_template_t struct
-*
-* INPUTS:
-*   none
-* RETURNS:
-*   pointer to struct or NULL or memory error
-*********************************************************************/
-rpc_template_t *
-    rpc_new_template (void)
-{
-    rpc_template_t *rpc;
-
-    rpc = m__getObj(rpc_template_t);
-    if (!rpc) {
-        return NULL;
-    }
-    memset(rpc, 0x0, sizeof(rpc_template_t));
-    dlq_createSQue(&rpc->appinfoQ);
-    rpc->supported = TRUE;
-    return rpc;
-
-} /* rpc_new_template */
-
-
-/********************************************************************
-* FUNCTION rpc_free_template
-*
-* Free all the memory used by the specified rpc_template_t
-*
-* INPUTS:
-*   rpc == rpc_template_t to clean and delete
-* RETURNS:
-*   none
-*********************************************************************/
-void 
-    rpc_free_template (rpc_template_t *rpc)
-{
-    ncx_appinfo_t  *appinfo;
-
-#ifdef DEBUG
-    if (!rpc) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    if (rpc->name) {
-        m__free(rpc->name);
-    }
-    if (rpc->in_modstr) {
-        m__free(rpc->in_modstr);
-    }
-    if (rpc->in_psd_name) {
-        m__free(rpc->in_psd_name);
-    } else if (rpc->in_psd) {
-	/* NULL name and non-NULL PSD --> internal parmset */
-	psd_free_template(rpc->in_psd);
-    }
-    if (rpc->out_modstr) {
-        m__free(rpc->out_modstr);
-    }
-    if (rpc->out_data_name) {
-        m__free(rpc->out_data_name);
-    }
-    if (rpc->descr) {
-        m__free(rpc->descr);
-    }
-    if (rpc->condition) {
-        m__free(rpc->condition);
-    }
-    while (!dlq_empty(&rpc->appinfoQ)) {
-	appinfo = (ncx_appinfo_t *)dlq_deque(&rpc->appinfoQ);
-	ncx_free_appinfo(appinfo);
-    }
-	
-    m__free(rpc);
-
-} /* rpc_free_template */
 
 
 /********************************************************************
@@ -239,7 +160,7 @@ void
     memset(msg, 0x0, sizeof(rpc_msg_t));
     xml_msg_init_hdr(&msg->mhdr);
     xml_init_attrs(&msg->rpc_attrs);
-    ps_init_parmset(&msg->rpc_input);
+    val_init_value(&msg->rpc_input);
     dlq_createSQue(&msg->rpc_undoQ);
 
 } /* rpc_init_msg */
@@ -311,14 +232,14 @@ void
     msg->rpc_agt_state = 0;
 
     /* clean input parameter set */
-    ps_clean_parmset(&msg->rpc_input);
+    val_clean_value(&msg->rpc_input);
     msg->rpc_status = NO_ERR;
     msg->rpc_user1 = NULL;
     msg->rpc_user2 = NULL;
 
     
     if (msg->rpc_data) {
-	val_free_value((val_value_t *)msg->rpc_data);
+	val_free_value(msg->rpc_data);
 	msg->rpc_data = NULL;
     }
     
@@ -472,16 +393,7 @@ void
 #endif
 
     if (undo->curnode) {
-	switch (undo->curnodetyp) {
-	case NCX_NT_VAL:
-	    val_free_value((val_value_t *)undo->curnode);
-	    break;
-	case NCX_NT_PARM:
-	    ps_free_parm((ps_parm_t *)undo->curnode);
-	    break;
-	default:
-	    break;
-	}
+	val_free_value((val_value_t *)undo->curnode);
     }
     memset(undo, 0x0, sizeof(rpc_undo_rec_t));
 

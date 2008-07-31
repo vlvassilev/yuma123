@@ -10,7 +10,7 @@
    xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'SNMP-MPD-MIB.yang' by yangdump version 0.9.3
+         Converted from YANG file 'SNMP-MPD-MIB.yang' by yangdump version 0.9.4
          
          Module: SNMP-MPD-MIB
          Organization: SNMPv3 Working Group
@@ -70,7 +70,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/ietf/SNMP-MPD-MIB.yang
+            /home/andy/newdev/trunk/netconf/modules/ietf/SNMP-MPD-MIB.yang
          </ncx:source>
          <ncx:organization>SNMPv3 Working Group</ncx:organization>
          <ncx:contact>

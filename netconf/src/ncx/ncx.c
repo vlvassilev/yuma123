@@ -78,10 +78,6 @@ extern float strtof (const char *str, char **err);
 #include "obj.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -140,8 +136,6 @@ extern float strtof (const char *str, char **err);
 
 static dlq_hdr_t     ncx_modQ, *ncx_curQ;
 
-static dlq_hdr_t     ncx_appQ;
-
 static dlq_hdr_t     ncx_filptrQ;
 
 static uint32        ncx_max_filptrs;
@@ -193,14 +187,13 @@ static xmlChar *
      *
      * This hack is used:
      *
-     *    http://<LIB-LOC>/<owner>/<modname>
+     *    http://<LIB-LOC>/<modname>
      *
      * This NS is expecting in the application element
      * under an 'root' type of node
      */
     len = xml_strlen(NCX_URNP1) + 
 	xml_strlen(NCX_HOSTNAME) + 1 +
-        xml_strlen(modhdr->owner) + 1 +
         xml_strlen(modhdr->name);
 
     str = m__getMem(len+1);
@@ -208,10 +201,9 @@ static xmlChar *
         return NULL;
     }
 
-    ret = sprintf((char *)str, "%s%s/%s/%s",
+    ret = sprintf((char *)str, "%s%s/%s",
 		  (const char *)NCX_URNP1,
 		  (const char *)NCX_HOSTNAME,
-		  (const char *)modhdr->owner,
 		  (const char *)modhdr->name);
     if (ret == -1) {
         m__free(str);
@@ -290,11 +282,6 @@ static status_t
 	case NCX_NT_GRP:
 	    *dptr = ncx_find_grouping(imod, defname);
 	    break;
-	case NCX_NT_PSD:
-	    *dptr = ncx_find_psd(imod, defname);
-	    break;
-	case NCX_NT_RPC:
-	    *dptr = ncx_find_rpc(imod, defname);
 	    break;
 	case NCX_NT_OBJ:
 	    *dptr = obj_find_template(&imod->datadefQ, imod->name, defname);
@@ -308,18 +295,6 @@ static status_t
 		*dptr = ncx_find_grouping(imod, defname);
 		if (*dptr) {
 		    *dtyp = NCX_NT_GRP;
-		}
-	    }
-	    if (!*dptr) {
-		*dptr = ncx_find_psd(imod, defname);
-		if (*dptr) {
-		    *dtyp = NCX_NT_PSD;
-		}
-	    }
-	    if (!*dptr) {
-		*dptr = ncx_find_rpc(imod, defname);
-		if (*dptr) {
-		    *dtyp = NCX_NT_RPC;
 		}
 	    }
 	    if (!*dptr) {
@@ -540,10 +515,6 @@ static status_t
 *   mod == module to add to registry
 *   modname == name of main module being added
 *   nsid == namespace ID of the main module being added
-*   needapp == address of return appnode status
-*
-* OUTPUTS:
-*  *needapp == TRUE if appnode needed, FALSE otherwise
 *
 * RETURNS:
 *   status of the operation
@@ -551,18 +522,13 @@ static status_t
 static status_t 
     add_to_registry (ncx_module_t *mod,
 		     const xmlChar *modname,
-		     xmlns_id_t    nsid,
-		     boolean *needapp)
+		     xmlns_id_t    nsid)
 {
     typ_template_t *typ;
     grp_template_t *grp;
     obj_template_t *obj;
-    psd_template_t *psd;
-    rpc_template_t *rpc;
     ext_template_t *ext;
     status_t        res;
-
-    *needapp = FALSE;
 
     /* add the type definitions to the def_reg hash table */
     for (typ = (typ_template_t *)dlq_firstEntry(&mod->typeQ);
@@ -622,45 +588,6 @@ static status_t
         }
     }
 
-    /* add the PSD definitions to the def_reg hash table */
-    for (psd = (psd_template_t *)dlq_firstEntry(&mod->psdQ);
-         psd != NULL;
-         psd = (psd_template_t *)dlq_nextEntry(psd)) {
-	if (psd->psd_type == PSD_TYP_DATA) {
-	    *needapp = TRUE;
-	}
-	if (!psd->nsid) {
-	    psd->nsid = nsid;
-	}
-	res = def_reg_add_moddef(modname,
-				 psd->name, NCX_NT_PSD, psd);
-        if (res != NO_ERR) {
-	    /* this PSD registration failed */
-	    log_error("\nncx reg: Module '%s' registering "
-		      "parmset '%s' failed (%s)",
-		      modname, psd->name,
-		      get_error_string(res));
-            return res;
-        }
-    }
-
-    /* add the RPC definitions to the def_reg hash table */
-    for (rpc = (rpc_template_t *)dlq_firstEntry(&mod->rpcQ);
-         rpc != NULL;
-         rpc = (rpc_template_t *)dlq_nextEntry(rpc)) {
-	rpc->nsid = nsid;
-	res = def_reg_add_moddef(modname,
-				 rpc->name, NCX_NT_RPC, rpc);
-        if (res != NO_ERR) {
-	    /* this RPC registration failed */
-	    log_error("\nncx reg: Module '%s' registering "
-		      "RPC method '%s' failed (%s)",
-		      modname, rpc->name,
-		      get_error_string(res));
-            return res;
-        }
-    }
-
     /* jsut set the extension namespace ID */
     for (ext = (ext_template_t *)dlq_firstEntry(&mod->extensionQ);
          ext != NULL;
@@ -698,8 +625,6 @@ static void
     ncx_import_t   *import;
     typ_template_t *typ;
     grp_template_t *grp;
-    psd_template_t *psd;
-    rpc_template_t *rpc;
     obj_template_t *obj;
     yang_stmt_t    *stmt;
 
@@ -728,24 +653,6 @@ static void
 	    def_reg_del_moddef(mod->name, typ->name, NCX_NT_TYP);
 	}
 	typ_free_template(typ);
-    }
-
-    /* clear the PSD Que */
-    while (!dlq_empty(&mod->psdQ)) {
-	psd = (psd_template_t *)dlq_deque(&mod->psdQ);
-	if (!mod->diffmode && removereg) {
-	    def_reg_del_moddef(mod->name, psd->name, NCX_NT_PSD);
-	}
-	psd_free_template(psd);
-    }
-
-    /* clear the RPC Que */
-    while (!dlq_empty(&mod->rpcQ)) {
-	rpc = (rpc_template_t *)dlq_deque(&mod->rpcQ);
-	if (!mod->diffmode && removereg) {
-	    def_reg_del_moddef(mod->name, rpc->name, NCX_NT_RPC);
-	}
-	rpc_free_template(rpc);
     }
 
     /* clear the grouping Que */
@@ -795,17 +702,8 @@ static void
     if (mod->version) {
 	m__free(mod->version);
     }
-    if (mod->owner) {
-	m__free(mod->owner);
-    }
     if (mod->organization) {
 	m__free(mod->organization);
-    }
-    if (mod->app) {
-	m__free(mod->app);
-    }
-    if (mod->copyright) {
-	m__free(mod->copyright);
     }
     if (mod->contact_info) {
 	m__free(mod->contact_info);
@@ -826,7 +724,7 @@ static void
 	if (mod->prefix) {
 	    m__free(mod->prefix);
 	}
-    }
+    } /* else these pointers are copied not malloced */
     if (mod->source) {
 	m__free(mod->source);
     }
@@ -884,7 +782,6 @@ status_t
     /* create the module and appnode queues */
     dlq_createSQue(&ncx_modQ);
     ncx_curQ = &ncx_modQ;
-    dlq_createSQue(&ncx_appQ);
     dlq_createSQue(&ncx_filptrQ);
     ncx_max_filptrs = NCX_DEF_FILPTR_CACHESIZE;
     ncx_cur_filptrs = 0;
@@ -977,7 +874,6 @@ void
     ncx_cleanup (void)
 {
     ncx_module_t   *mod;
-    ncx_appnode_t  *app;
     ncx_filptr_t   *filptr;
 
     if (!ncx_init_done) {
@@ -987,11 +883,6 @@ void
     while (!dlq_empty(&ncx_modQ)) {
 	mod = (ncx_module_t *)dlq_deque(&ncx_modQ);
 	free_module(mod, TRUE);
-    }
-
-    while (!dlq_empty(&ncx_appQ)) {
-	app = (ncx_appnode_t *)dlq_deque(&ncx_appQ);
-	ncx_free_appnode(app);
     }
 
     while (!dlq_empty(&ncx_filptrQ)) {
@@ -1037,8 +928,6 @@ ncx_module_t *
     dlq_createSQue(&mod->importQ);
     dlq_createSQue(&mod->includeQ);
     dlq_createSQue(&mod->typeQ);
-    dlq_createSQue(&mod->psdQ);
-    dlq_createSQue(&mod->rpcQ);
     dlq_createSQue(&mod->groupingQ);
     dlq_createSQue(&mod->datadefQ);
     dlq_createSQue(&mod->extensionQ);
@@ -1188,48 +1077,24 @@ boolean
     ncx_any_dependency_errors (const ncx_module_t *mod)
 {
     const ncx_module_t       *testmod;
-    const ncx_import_t       *imp;
     const yang_import_ptr_t  *impptr;
     const dlq_hdr_t          *impQ;
 
     impQ = (mod->allimpQ) ? mod->allimpQ : &mod->saveimpQ;
 
-    if (mod->isyang) {
-	/* Only YANG modules supported at this time */
-	for (impptr = (yang_import_ptr_t *)dlq_firstEntry(impQ);
-	     impptr != NULL;
-	     impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
+    for (impptr = (yang_import_ptr_t *)dlq_firstEntry(impQ);
+	 impptr != NULL;
+	 impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
 
-	    testmod = ncx_find_module(impptr->modname);
-	    if (!testmod) {
-		/* missing import */
-		return TRUE;
-	    }
-	    
-	    if (testmod->status != NO_ERR) {
-		if (get_errtyp(testmod->status) < ERR_TYP_WARN) {
-		    return TRUE;
-		}
-	    }
+	testmod = ncx_find_module(impptr->modname);
+	if (!testmod) {
+	    /* missing import */
+	    return TRUE;
 	}
-    } else {
-	/* NCX module -- not really supported , not checking nested imports */
-	for (imp = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
-	     imp != NULL;
-	     imp = (ncx_import_t *)dlq_nextEntry(imp)) {
-
-	    testmod = ncx_find_module(imp->module);
-	    if (!testmod) {
-		/* this must be an unused import or the 
-		 * NCX parse would have failed 
-		 */
-		continue;
-	    }
 	    
-	    if (testmod->status != NO_ERR) {
-		if (get_errtyp(testmod->status) < ERR_TYP_WARN) {
-		    return TRUE;
-		}
+	if (testmod->status != NO_ERR) {
+	    if (get_errtyp(testmod->status) < ERR_TYP_WARN) {
+		return TRUE;
 	    }
 	}
     }
@@ -1448,42 +1313,6 @@ grp_template_t *
 
 
 /********************************************************************
-* FUNCTION ncx_find_psd
-*
-* Check if a psd_template_t in the mod->psdQ
-*
-* INPUTS:
-*   mod == ncx_module to check
-*   psdname == PSD name
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
-psd_template_t *
-    ncx_find_psd (const ncx_module_t *mod,
-		  const xmlChar *psdname)
-{
-    psd_template_t *psd;
-
-#ifdef DEBUG
-    if (!mod || !psdname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    for (psd = (psd_template_t *)dlq_firstEntry(&mod->psdQ);
-         psd != NULL;
-         psd = (psd_template_t *)dlq_nextEntry(psd)) {
-        if (!xml_strcmp(psd->name, psdname)) {
-            return psd;
-        }
-    }
-    return NULL;
-
-}   /* ncx_find_psd */
-
-
-/********************************************************************
 * FUNCTION ncx_find_rpc
 *
 * Check if a rpc_template_t in the mod->rpcQ
@@ -1494,11 +1323,11 @@ psd_template_t *
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
 *********************************************************************/
-rpc_template_t *
+obj_template_t *
     ncx_find_rpc (const ncx_module_t *mod,
 		  const xmlChar *rpcname)
 {
-    rpc_template_t *rpc;
+    obj_template_t *rpc;
 
 #ifdef DEBUG
     if (!mod || !rpcname) {
@@ -1507,11 +1336,13 @@ rpc_template_t *
     }
 #endif
 
-    for (rpc = (rpc_template_t *)dlq_firstEntry(&mod->rpcQ);
+    for (rpc = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
          rpc != NULL;
-         rpc = (rpc_template_t *)dlq_nextEntry(rpc)) {
-        if (!xml_strcmp(rpc->name, rpcname)) {
-            return rpc;
+         rpc = (obj_template_t *)dlq_nextEntry(rpc)) {
+        if (rpc->objtype == OBJ_TYP_RPC) {
+	    if (!xml_strcmp(obj_get_name(rpc), rpcname)) {
+		return rpc;
+	    }
         }
     }
     return NULL;
@@ -1530,11 +1361,11 @@ rpc_template_t *
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
 *********************************************************************/
-rpc_template_t *
+obj_template_t *
     ncx_match_rpc (const ncx_module_t *mod,
 		   const xmlChar *rpcname)
 {
-    rpc_template_t *rpc;
+    obj_template_t *rpc;
     uint32          len;
 
 #ifdef DEBUG
@@ -1545,11 +1376,13 @@ rpc_template_t *
 #endif
 
     len = xml_strlen(rpcname);
-    for (rpc = (rpc_template_t *)dlq_firstEntry(&mod->rpcQ);
+    for (rpc = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
          rpc != NULL;
-         rpc = (rpc_template_t *)dlq_nextEntry(rpc)) {
-        if (!xml_strncmp(rpc->name, rpcname, len)) {
-            return rpc;
+         rpc = (obj_template_t *)dlq_nextEntry(rpc)) {
+	if (rpc->objtype == OBJ_TYP_RPC) {
+	    if (!xml_strncmp(obj_get_name(rpc), rpcname, len)) {
+		return rpc;
+	    }
         }
     }
     return NULL;
@@ -1564,16 +1397,16 @@ rpc_template_t *
 * matches the rpc name string and maybe the owner
 *
 * INPUTS:
-*   owner == owner name to check (NULL == check all)
+*   module == module name to check (NULL == check all)
 *   rpcname == RPC name to match
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
 *********************************************************************/
-rpc_template_t *
-    ncx_match_any_rpc (const xmlChar *owner,
+obj_template_t *
+    ncx_match_any_rpc (const xmlChar *module,
 		       const xmlChar *rpcname)
 {
-    rpc_template_t *rpc;
+    obj_template_t *rpc;
     ncx_module_t   *mod;
 
 #ifdef DEBUG
@@ -1583,21 +1416,22 @@ rpc_template_t *
     }
 #endif
 
-    for (mod = ncx_get_first_module();
-         mod != NULL;
-         mod =  ncx_get_next_module(mod)) {
-
-	/* check if only one owner is requested */
-	if (owner && xml_strcmp(owner, mod->owner)) {
-	    continue;  /* not the requested owner */
-	}
-
+    rpc = NULL;
+    if (module) {
+	mod = ncx_find_module(module);
 	rpc = ncx_match_rpc(mod, rpcname);
-	if (rpc) {
-	    return rpc;
-        }
+    } else {
+	for (mod = ncx_get_first_module();
+	     mod != NULL;
+	     mod =  ncx_get_next_module(mod)) {
+
+	    rpc = ncx_match_rpc(mod, rpcname);
+	    if (rpc) {
+		return rpc;
+	    }
+	}
     }
-    return NULL;
+    return rpc;
 
 }   /* ncx_match_any_rpc */
 
@@ -1626,8 +1460,7 @@ status_t
 {
     yang_node_t    *node;
     xmlns_t        *ns;
-    ncx_appnode_t  *app;
-    boolean         needapp, needns;
+    boolean         needns;
     status_t        res;
 
 #ifdef DEBUG
@@ -1652,7 +1485,6 @@ status_t
     }
 
     /* setup local vars */
-    needapp = FALSE;
     needns = mod->ismod;
 
     /* if this is the XSD module, then use the NS ID already registered */
@@ -1702,7 +1534,7 @@ status_t
     }
 
     /* add the main module definitions */
-    res = add_to_registry(mod, mod->name, mod->nsid, &needapp);
+    res = add_to_registry(mod, mod->name, mod->nsid);
     if (res != NO_ERR) {
 	return res;
     }
@@ -1714,39 +1546,9 @@ status_t
 
 	node->submod->nsid = mod->nsid;
 	res = add_to_registry(node->submod, mod->name, 
-			      mod->nsid, &needapp);
+			      mod->nsid);
 	if (res != NO_ERR) {
 	    return res;
-	}
-    }
-
-    /* add the application node only if there are data parmsets
-     * actually defined in this module
-     * Add a pointer to the module appnode to the registry
-     */
-    if (needapp) {
-	app = ncx_find_appnode(mod->name, mod->app);
-	if (!app) {
-	    /* create a new appnode, register it, ans save it
-	     * in the ncx_appQ
-	     */
-	    app = ncx_new_appnode(mod->name, mod->app, mod->nsid);
-	    if (!app) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		res = def_reg_add_cfgapp(mod->name, app->appname, 
-					 NCX_CFGID_RUNNING, app);
-	    }
-	    if (res != NO_ERR) {
-		/* this APP node registration failed */
-		log_error("\nncx reg: Module '%s' registering "
-			  "APP node '%s' failed (%s)",
-			  mod->name, mod->app,
-			  get_error_string(res));
-		return res;
-	    } else {
-		dlq_enque(app, &ncx_appQ);
-	    }
 	}
     }
 
@@ -1799,7 +1601,7 @@ status_t
 
 
 /********************************************************************
-* FUNCTION ncx_is_duplicate
+* FUNCTION ncx_is_duplicate  (NCX only)
 * 
 * Search the specific module for the specified definition name.
 * This function is for modules in progress which have not been
@@ -1823,9 +1625,6 @@ boolean
 #endif
 
     if (ncx_find_type(mod, defname)) {
-	return TRUE;
-    }
-    if (ncx_find_psd(mod, defname)) {
 	return TRUE;
     }
     if (ncx_find_rpc(mod, defname)) {
@@ -3651,7 +3450,7 @@ status_t
 *     str1 == first number
 *     str2 == second number
 *     btyp == expected data type 
-*             (NCX_BT_STRING, NCX_BT_BINARY, NCX_BT_ENAME)
+*             (NCX_BT_STRING, NCX_BT_BINARY)
 * RETURNS:
 *     -1 if str1 is < str2
 *      0 if str1 == str2   (also for error, after SET_ERROR called)
@@ -3671,7 +3470,6 @@ int32
 
     switch (btyp) {
     case NCX_BT_STRING:
-    case NCX_BT_ENAME:
     case NCX_BT_BINARY:
 	return xml_strcmp(*str1, *str2);
     default:
@@ -3689,7 +3487,6 @@ int32
 * Supports base types:
 *     NCX_BT_STRING
 *     NCX_BT_BINARY
-*     NCX_BT_ENAME
 *
 * INPUTS:
 *     str1 == first string
@@ -3713,7 +3510,6 @@ status_t
     switch (btyp) {
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
-    case NCX_BT_ENAME:
 	if (*str1) {
 	    *str2 = xml_strdup(*str1);
 	    if (!*str2) {
@@ -3969,7 +3765,6 @@ boolean
     switch (list->btyp) {
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
-    case NCX_BT_ENAME:
     case NCX_BT_ENUM:
 	break;
     default:
@@ -4744,670 +4539,6 @@ ncx_lmem_t *
     return (ncx_lmem_t *)dlq_firstEntry(&list->memQ);
 
 }  /* ncx_first_lmem */
-
-
-/********************************************************************
-* FUNCTION ncx_new_xlist
-* 
-* Malloc Initialize an allocated ncx_xlist_t
-*
-* RETURNS:
-*   pointer to new entry, or NULL if memory error
-*********************************************************************/
-ncx_xlist_t *
-    ncx_new_xlist (void)
-{
-    ncx_xlist_t *list;
-
-    list = m__getObj(ncx_xlist_t);
-    if (list) {
-	ncx_init_xlist(list);
-    }
-    return list;
-
-} /* ncx_new_xlist */
-
-
-/********************************************************************
-* FUNCTION ncx_init_xlist
-* 
-* Initialize an allocated ncx_xlist_t
-*
-* INPUTS:
-*    list == pointer to ncx_xlist_t memory
-*********************************************************************/
-void
-    ncx_init_xlist (ncx_xlist_t *list)
-{
-#ifdef DEBUG
-    if (!list) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    list->btyp = NCX_BT_STRING;
-    dlq_createSQue(&list->strQ);
-
-} /* ncx_init_xlist */
-
-
-/********************************************************************
-* FUNCTION ncx_clean_xlist
-* 
-* Scrub the memory of a ncx_xlist_t but do not delete it
-*
-* INPUTS:
-*    list == ncx_xlist_t struct to clean
-*********************************************************************/
-void
-    ncx_clean_xlist (ncx_xlist_t *list)
-{
-    ncx_lstr_t  *lstr;
-
-#ifdef DEBUG
-    if (!list) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    /* clean the string Q */
-    while (!dlq_empty(&list->strQ)) {
-	lstr = (ncx_lstr_t *)dlq_deque(&list->strQ);
-	if (lstr->str) {
-	    m__free(lstr->str);
-	}
-	m__free(lstr);
-    }
-
-    list->btyp = NCX_BT_NONE;
-    /* leave the list->strQ ready to use again */
-
-} /* ncx_clean_xlist */
-
-
-/********************************************************************
-* FUNCTION ncx_free_xlist
-* 
-* Clean and free an allocated ncx_xlist_t
-*
-* INPUTS:
-*    list == pointer to ncx_xlist_t memory
-*********************************************************************/
-void
-    ncx_free_xlist (ncx_xlist_t *list)
-{
-#ifdef DEBUG
-    if (!list) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    ncx_clean_xlist(list);
-    m__free(list);
-
-} /* ncx_free_xlist */
-
-
-/********************************************************************
-* FUNCTION ncx_xlist_cnt
-* 
-* Get the number of entries in the xlist
-*
-* INPUTS:
-*    list == pointer to ncx_xlist_t memory
-* RETURNS:
-*    number of entries counted
-*********************************************************************/
-uint32
-    ncx_xlist_cnt (const ncx_xlist_t *list)
-{
-    const ncx_lstr_t *lstr;
-    uint32      cnt;
-
-#ifdef DEBUG
-    if (!list) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
-    }
-#endif
-
-    cnt = 0;
-    for (lstr = (const ncx_lstr_t *)dlq_firstEntry(&list->strQ);
-	 lstr != NULL;
-	 lstr = (const ncx_lstr_t *)dlq_nextEntry(lstr)) {
-	cnt++;
-    }
-    return cnt;
-
-} /* ncx_xlist_cnt */
-
-
-/********************************************************************
-* FUNCTION ncx_compare_xlists
-* 
-* Compare 2 ncx_xlist_t struct contents
-*
-* Expected data type (NCX_BT_XLIST)
-*
-* INPUTS:
-*     list1 == first number
-*     list2 == second number
-* RETURNS:
-*     -1 if list1 is < list2
-*      0 if list1 == list2   (also for error, after SET_ERROR called)
-*      1 if list1 is > list2
-*********************************************************************/
-int32
-    ncx_compare_xlists (const ncx_xlist_t *list1,
-			const ncx_xlist_t *list2)
-{
-    const ncx_lstr_t  *s1, *s2;
-
-#ifdef DEBUG
-    if (!list1 || !list2) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
-    }
-    if (list1->btyp != list2->btyp) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return 0;
-    }	
-#endif
-
-    /* get start strings */
-    s1 = (const ncx_lstr_t *)dlq_firstEntry(&list1->strQ);
-    s2 = (const ncx_lstr_t *)dlq_firstEntry(&list2->strQ);
-	
-    /* have 2 start strings to compare */
-    for (;;) {
-	if (!s1 && !s2) {
-	    return 0;
-	} else if (!s1) {
-	    return -1;
-	} else if (!s2) {
-	    return 1;
-	}
-	switch (ncx_compare_strs(&s1->str, &s2->str, list1->btyp)) {
-	case -1:
-	    return -1;
-	case 0:
-	    s1 = (const ncx_lstr_t *)dlq_nextEntry(s1);
-	    s2 = (const ncx_lstr_t *)dlq_nextEntry(s2);
-	    break;
-	case 1:
-	    return 1;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return 0;
-	}
-    }
-    /*NOTREACHED*/
-
-}  /* ncx_compare_xlists */
-
-
-/********************************************************************
-* FUNCTION ncx_copy_xlist
-* 
-* Copy the contents of list1 to list2
-* Supports base type NCX_BT_XLIST
-*
-* INPUTS:
-*     list1 == first list
-*     list2 == second list
-*
-* RETURNS:
-*     status
-*********************************************************************/
-status_t
-    ncx_copy_xlist (const ncx_xlist_t *list1,
-		    ncx_xlist_t *list2)
-{
-    const ncx_lstr_t *lstr;
-    ncx_lstr_t       *copylstr;
-    status_t          res;
-
-#ifdef DEBUG
-    if (!list1 || !list2) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    res = NO_ERR;
-    list2->btyp = list1->btyp;
-    dlq_createSQue(&list2->strQ);
-
-    for (lstr = (const ncx_lstr_t *)dlq_firstEntry(&list1->strQ);
-	 lstr != NULL && res==NO_ERR;
-	 lstr = (const ncx_lstr_t *)dlq_nextEntry(lstr)) {
-
-	copylstr = ncx_new_lstr();
-	if (!copylstr) {
-	    res = ERR_INTERNAL_MEM;
-	} else {
-	    res = ncx_copy_str(&lstr->str, &copylstr->str, NCX_BT_STRING);
-	    if (res == NO_ERR) {
-		copylstr->flags = lstr->flags;
-		dlq_enque(copylstr, &list2->strQ);
-	    } else {
-		ncx_free_lstr(copylstr);
-	    }
-	}
-    }
-    return res;
-}  /* ncx_copy_xlist */
-
-
-/********************************************************************
-* FUNCTION ncx_merge_xlist
-* 
-* !!! xlist is deprecated!!! Use list instead!!!
-*
-* The merge function is handled specially for lists.
-* The contents are not completely replaced like a string.
-* Instead, only new entries from src are added to the dest list.
-*
-* NCX merge algorithm for xlists:
-*
-* If allow_dups == FALSE:
-*    check if entry exists; if so, exit;
-*
-* For each member in the src list {
-*
-*   If rangeQ not NULL:
-*      check if merging will violate the range restrictions
-*      as each entry is added. If so, then merge type will
-*      take note of this condition and overwrite dest list
-*      members as needed to keep the length within the maxLength
-*
-*   Merge src list member into dest, based on mergetyp enum
-* }
-*
-* OK exit
-*
-* INPUTS:
-*    src == ncx_xlist_t struct to merge from
-*    dest == ncx_xlist_t struct to merge into
-*    mergetyp == type of merge used for this list
-*    allow_dups == TRUE if this list allows duplicate values
-*
-* OUTPUTS:
-*    ncx_lstr_t structs will be moved from the src to dest as needed
-*
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    ncx_merge_xlist (ncx_xlist_t *src,
-		     ncx_xlist_t *dest,
-		     ncx_merge_t mergetyp)
-{
-    ncx_lstr_t      *lstr;
-
-#ifdef DEBUG
-    if (!src || !dest) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    /* transfer the source members to the dest list */
-    while (!dlq_empty(&src->strQ)) {
-
-	/* pick an entry to merge, reverse of the merge type
-	 * to preserve the source order in the dest list
-	 */
-	switch (mergetyp) {
-	case NCX_MERGE_FIRST:
-	    lstr = (ncx_lstr_t *)dlq_lastEntry(&src->strQ);
-	    break;
-	case NCX_MERGE_LAST:
-	case NCX_MERGE_SORT:
-	    lstr = (ncx_lstr_t *)dlq_firstEntry(&src->strQ);
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return;
-	}
-	dlq_remove(lstr);
-
-	/* merge lmem into the dest list */
-	ncx_insert_lstr(dest, lstr, mergetyp);
-    }
-
-}  /* ncx_merge_xlist */
-
-
-/********************************************************************
-* FUNCTION ncx_set_xlist
-* 
-* Parse the XML input as an NCX_BT_XLIST
-* Do not check the individual strings against any restrictions
-*
-* INPUTS:
-*     strval == cleaned XML string to parse into ncx_str_t values
-*     list == ncx_xlist_t in progress that will get the ncx_lstr_t 
-*             structs added to it, as they are parsed
-*
-* OUTPUTS:
-*     list->strQ has 0 or more ncx_lstr_t structs appended to it
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t 
-    ncx_set_xlist (const xmlChar *strval,
-		   ncx_xlist_t  *list)
-{
-    status_t           res;
-    boolean            done;
-    const xmlChar     *str1, *str2;
-    ncx_lstr_t        *lstr;
-
-    if (!*strval) {
-	return NO_ERR;
-    }
-
-    str1 = strval;
-    done = FALSE;
-
-    while (!done) {
-	/* skip any leading whitespace */
-	while (xml_isspace(*str1)) {
-	    str1++;
-	}
-	if (!*str1) {
-	    done = TRUE;
-	    continue;
-	}
-
-	/* set up a new list string struct */
-	lstr = ncx_new_lstr();
-	if (!lstr) {
-	    return ERR_INTERNAL_MEM;
-	}
-
-	/* parse the string either as whitespace-allowed
-	 * or whitespace-not-allowed string
-	 */
-	if (*str1==NCX_STR_START) {
-	    /* The XML string starts with a double quote
-	     * so interpret the string as whitespace-allowed
-	     * do not save the double quote char 
-	     */
-	    str2 = ++str1;
-	    while (*str2 && (*str2 != NCX_STR_END)) {
-		str2++;
-	    }
-	    if (!*str2) {
-		/*** add warning for missing EOS marker ***/
-		    
-	    }
-	} else {
-	    /* consume string until a WS, str-start, or EOS seen */
-	    str2 = str1+1;
-	    while (*str2 && !xml_isspace(*str2) && 
-		   (*str2 != NCX_STR_START)) {
-		str2++;
-	    }
-	}
-
-	/* copy the string just parsed */
-	res = NO_ERR;
-	lstr->str = xml_strndup(str1, (uint32)(str2-str1));
-	if (!lstr->str) {
-	    res = ERR_INTERNAL_MEM;
-	} 
-	if (res != NO_ERR) {
-	    ncx_free_lstr(lstr);
-	    return res;
-	}
-
-	/* save the string in the list string Q */
-	dlq_enque(lstr, &list->strQ);
-
-	/* reset the string pointer and loop */
-	str1 = str2;
-    }
-
-    return NO_ERR;
-
-}  /* ncx_set_xlist */
-
-
-/********************************************************************
-* FUNCTION ncx_new_lstr
-*
-* Malloc and fill in a new ncx_lstr_t struct
-*
-* INPUTS:
-*   none
-* RETURNS:
-*   pointer to malloced and initialized ncx_lstr_t struct
-*   NULL if malloc error
-*********************************************************************/
-ncx_lstr_t *
-    ncx_new_lstr (void)
-{
-    ncx_lstr_t  *lstr;
-    
-
-    lstr = m__getObj(ncx_lstr_t);
-    if (!lstr) {
-	return NULL;
-    }
-    memset(lstr, 0x0, sizeof(ncx_lstr_t));
-    return lstr;
-
-}  /* ncx_new_lstr */
-
-
-/********************************************************************
-* FUNCTION ncx_free_lstr
-*
-* Free all the memory in a  ncx_lstr_t struct
-*
-* INPUTS:
-*   lstr == struct to clean and free
-*   btyp == base type of the string
-*
-*********************************************************************/
-void
-    ncx_free_lstr (ncx_lstr_t *lstr)
-{
-#ifdef DEBUG
-    if (!lstr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    if (lstr->str) {
-	m__free(lstr->str);
-    } 
-    m__free(lstr);
-
-}  /* ncx_free_lstr */
-
-
-/********************************************************************
-* FUNCTION ncx_insert_lstr
-*
-* !!! xlist is deprecated!!! Use list instead!!!
-*
-* Insert an xlist entry into the specified xlist
-*
-* INPUTS:
-*   list == xlist to insert into
-*   strval == value to insert, based on list->btyp
-*   mergetyp == requested merge type for the insertion
-*
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    ncx_insert_lstr (ncx_xlist_t *list,
-		     ncx_lstr_t *strval,
-		     ncx_merge_t mergetyp)
-{
-    ncx_lstr_t      *lstr;
-    int32            cmpval;
-
-#ifdef DEBUG
-    if (!list || !strval) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    switch (mergetyp) {
-    case NCX_MERGE_FIRST:
-	lstr = (ncx_lstr_t *)dlq_firstEntry(&list->strQ);
-	if (lstr) {
-	    dlq_insertAhead(strval, lstr);
-	} else {
-	    dlq_enque(strval, &list->strQ);
-	}
-	break;
-    case NCX_MERGE_LAST:
-	dlq_enque(lstr, &list->strQ);
-	break;
-    case NCX_MERGE_SORT:
-	for (lstr = (ncx_lstr_t *)dlq_firstEntry(&list->strQ);
-	     lstr != NULL;
-	     lstr = (ncx_lstr_t *)dlq_nextEntry(lstr)) {
-	    cmpval = ncx_compare_strs(&lstr->str, &strval->str, list->btyp);
-	    if (cmpval >= 0) {
-		dlq_insertAhead(strval, lstr);
-		return;
-	    }
-	}
-
-	/* make new last entry */
-	dlq_enque(strval, &list->strQ);
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
-    }	
-
-}  /* ncx_insert_lstr */
-
-
-/********************************************************************
-* FUNCTION ncx_new_appnode
-*
-* Malloc and fill in a new ncx_appnode_t struct
-*
-* INPUTS:
-*   owner == owner name
-*   appname == application name
-*   nsid  == application namespace ID
-* RETURNS:
-*  const pointer to the string value
-*********************************************************************/
-ncx_appnode_t *
-    ncx_new_appnode (const xmlChar *owner,
-		     const xmlChar *appname,
-		     xmlns_id_t  nsid)
-{
-    ncx_appnode_t  *app;
-    
-
-    app = m__getObj(ncx_appnode_t);
-    if (!app) {
-	return NULL;
-    }
-    app->owner = xml_strdup(owner);
-    if (!app->owner) {
-	m__free(app);
-	return NULL;
-    }
-    app->appname = xml_strdup(appname);
-    if (!app->appname) {
-	m__free(app->owner);
-	m__free(app);
-	return NULL;
-    }
-    app->nsid = nsid;
-
-    return app;
-
-}  /* ncx_new_appnode */
-
-
-/********************************************************************
-* FUNCTION ncx_free_appnode
-*
-* Free all the memory in a new ncx_appnode_t struct
-*
-* INPUTS:
-*   app == ncx_appnode_t to destroy
-*
-*********************************************************************/
-void
-    ncx_free_appnode (ncx_appnode_t *app)
-{
-#ifdef DEBUG
-    if (!app) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    if (app->owner && app->appname) {
-	def_reg_del_cfgapp(app->owner, app->appname, NCX_CFGID_RUNNING);
-    }
-    if (app->owner) {
-	m__free(app->owner);
-    }
-    if (app->appname) {
-	m__free(app->appname);
-    }
-    m__free(app);
-
-}  /* ncx_free_appnode */
-
-
-/********************************************************************
-* FUNCTION ncx_find_appnode
-*
-* Find an ncx_appnode_t struct in the ncx_appQ
-*
-* INPUTS:
-*   owner == owner name to find
-*   appname == application name to find
-*
-* RETURNS:
-*  pointer to the struct if found
-*********************************************************************/
-ncx_appnode_t *
-    ncx_find_appnode (const xmlChar *owner,
-		      const xmlChar *appname)
-{
-    ncx_appnode_t  *app;
-
-#ifdef DEBUG
-    if (!owner|| !appname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    for (app = (ncx_appnode_t *)dlq_firstEntry(&ncx_appQ);
-	 app != NULL;
-	 app = (ncx_appnode_t *)dlq_nextEntry(app)) {
-	if (!xml_strcmp(app->owner, owner) &&
-	    !xml_strcmp(app->appname, appname)) {
-	    return app;
-	}
-    }
-    return NULL;
-
-}  /* ncx_find_appnode */
 
 
 /********************************************************************
@@ -6813,32 +5944,14 @@ void
     case NCX_NT_NONE:                          /* uninitialized */
 	m__free(node);
 	break;
-    case NCX_NT_RPC:                          /* rpc_template_t */
-	rpc_free_template(node);
-	break;
     case NCX_NT_TYP:                          /* typ_template_t */
 	typ_free_template(node);
 	break;
     case NCX_NT_GRP:                          /* grp_template_t */
 	grp_free_template(node);
 	break;
-    case NCX_NT_PSDPARM:                          /* psd_parm_t */
-	psd_free_parm(node);
-	break;
-    case NCX_NT_PSD:                          /* psd_template_t */
-	psd_free_template(node);              
-	break;
     case NCX_NT_VAL:                             /* val_value_t */
 	val_free_value(node);
-	break;
-    case NCX_NT_PARM:                              /* ps_parm_t */
-	ps_free_parm(node);
-	break;
-    case NCX_NT_PARMSET:                        /* ps_parmset_t */   
-	ps_free_parmset(node);
-	break;
-    case NCX_NT_APP:                               /* cfg_app_t */
-	cfg_free_appnode(node);
 	break;
     case NCX_NT_OBJ:                          /* obj_template_t */
 	obj_free_template(node);
@@ -7012,9 +6125,7 @@ ncx_tclass_t
     case NCX_BT_NONE:
         return NCX_CL_NONE;
     case NCX_BT_ANY:
-    case NCX_BT_ROOT:
     case NCX_BT_ENUM:
-    case NCX_BT_ENAME:
     case NCX_BT_EMPTY:
     case NCX_BT_INT8:
     case NCX_BT_INT16:
@@ -7029,7 +6140,6 @@ ncx_tclass_t
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
     case NCX_BT_SLIST:
-    case NCX_BT_XLIST:
         return NCX_CL_SIMPLE;
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:

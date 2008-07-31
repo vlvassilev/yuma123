@@ -57,10 +57,6 @@ date         init     comment
 #include "obj.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -815,13 +811,10 @@ static val_value_t *
      * A container is always allowed to be empty, so
      * it can have a consistent start state validatation check
      */
-    if (btyp==NCX_BT_XCONTAINER) {
-	iqual = typ_get_iqualval_def(typdef);
-	maxrows = 0;
-    } else if (parent) {
+
+    if (parent) {
 	switch (typ_get_basetype(parent)) {
-	case NCX_BT_XCONTAINER:
-        /* case NCX_BT_LIST: */
+        case NCX_BT_LIST:      /************/
 	    iqual = NCX_IQUAL_ZMORE;
 	    maxrows = typ_get_maxrows(parent);
 	    break;
@@ -919,7 +912,6 @@ static status_t
 	btyp = typ_get_basetype(typdef);
 	switch (btyp) {
 	case NCX_BT_ANY:
-	case NCX_BT_ROOT:
 	    typ_id = xmlns_xs_id();
 	    name = xsd_typename(btyp);	    
 	    break;
@@ -1474,10 +1466,6 @@ const xmlChar *
     switch (btyp) {
     case NCX_BT_ANY:
 	return XSD_ANY_TYPE;
-    case NCX_BT_ROOT:
-	return XSD_ANY_TYPE;    /***/
-    case NCX_BT_ENAME:
-	return NCX_EL_ANY;   /***/
     case NCX_BT_BITS:
     case NCX_BT_ENUM:
 	return NCX_EL_STRING;
@@ -1513,12 +1501,9 @@ const xmlChar *
 	return XSD_BASE64;
     case NCX_BT_SLIST:
 	return XSD_LIST;
-    case NCX_BT_XLIST:
-	return XSD_LIST;
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
 	return NCX_EL_NONE;   /***/
     case NCX_BT_UNION:
 	return NCX_EL_UNION;
@@ -1889,11 +1874,7 @@ xmlChar *
 	ext = (const xmlChar *)".yang";
 	break;
     case NCX_CVTTYP_COPY:
-	if (mod->isyang) {
-	    ext = (const xmlChar *)".yang";
-	} else {
-	    ext = (const xmlChar *)".ncx";
-	}
+	ext = (const xmlChar *)".yang";
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -2063,7 +2044,7 @@ status_t
     ncx_id = xmlns_ncx_id();
 
     /* create first <documentation> element */
-    banner0 = (mod->isyang) ? XSD_BANNER_0Y : XSD_BANNER_0;
+    banner0 = XSD_BANNER_0Y;
     banner1 = (mod->ismod) ? XSD_BANNER_1 : XSD_BANNER_1S;
     banner1b = (mod->ismod) ? NULL : XSD_BANNER_1B;
 
@@ -2085,10 +2066,6 @@ status_t
     }
 
     len += xml_strlen(mod->name) + xml_strlen(mod->version);
-
-    if (mod->copyright) {
-	len += (xml_strlen(XSD_BANNER_4) + xml_strlen(mod->copyright));
-    }
 
     if (mod->contact_info) {
 	len += (xml_strlen(XSD_BANNER_5) + xml_strlen(mod->contact_info));
@@ -2120,11 +2097,6 @@ status_t
 
     str2 += xml_strcpy(str2, XSD_BANNER_3);
     str2 += xml_strcpy(str2, mod->version);
-
-    if (mod->copyright) {
-	str2 += xml_strcpy(str2, XSD_BANNER_4);
-	str2 += xml_strcpy(str2, mod->copyright);
-    }
 
     if (mod->contact_info) {
 	str2 += xml_strcpy(str2, XSD_BANNER_5);
@@ -2427,81 +2399,6 @@ val_value_t *
 
 
 /********************************************************************
-* FUNCTION xsd_new_parm_element
-* 
-*   Set up a new psd_parm_t as an element
-*   Deprecated -- used by NCX only
-*
-* INPUTS:
-*    mod == module conversion in progress
-*    parm == parm in progress
-*    
-* RETURNS:
-*   new element data struct or NULL if malloc error
-*********************************************************************/
-val_value_t *
-    xsd_new_parm_element (const ncx_module_t *mod,
-			  const psd_parm_t   *parm)
-{
-    const typ_template_t   *typ;
-    val_value_t            *elem;
-    const xmlChar          *def;
-    boolean                 hasnodes, hasindex;
-    status_t                res;
-    ncx_btype_t             btyp;
-
-    typ = (const typ_template_t *)parm->pdef;
-    if (!typ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-    btyp = typ_get_basetype(&typ->typdef);
-
-    hasnodes = (parm->descr || parm->condition || 
-		parm->access != NCX_ACCESS_NONE);
-
-    hasindex = (btyp==NCX_BT_LIST || btyp==NCX_BT_XCONTAINER);
-
-    elem = new_element(mod, parm->name, &typ->typdef, NULL, 
-		       hasnodes, hasindex, typ);
-    if (!elem) {
-	return NULL;
-    }
-
-    /* check if a default attribute is needed */
-    def = typ_get_defval(typ);
-    if (def) {
-	res = xml_val_add_cattr(NCX_EL_DEFAULT, 0, def, elem);
-	if (res != NO_ERR) {
-	    val_free_value(elem);
-	    return NULL;
-	}
-    }
-
-    if (hasnodes) {
-	res = xsd_do_annotation(parm->descr, parm->condition, NULL,
-				parm->access, NCX_STATUS_CURRENT,
-				NULL, elem);
-	if (res != NO_ERR) {
-	    val_free_value(elem);
-	    return NULL;
-	}
-    }
-
-    if (hasindex) {
-	res = xsd_add_key(parm->name, &typ->typdef, elem);
-	if (res != NO_ERR) {
-	    val_free_value(elem);
-	    return NULL;
-	}
-    }
-
-    return elem;
-
-}   /* xsd_new_parm_element */
-
-
-/********************************************************************
 * FUNCTION xsd_new_leaf_element
 * 
 *   Set up a new YANG leaf or leaf-list as an element
@@ -2638,7 +2535,7 @@ val_value_t *
 /********************************************************************
 * FUNCTION xsd_add_parmtype_attr
 * 
-*   Generate a type attribute for a psd_parm_t
+*   Generate a type attribute for a type template
 *
 * INPUTS:
 *    targns == targetNamespace ID
@@ -2918,6 +2815,7 @@ status_t
 } /* xsd_do_annotation */
 
 
+#if 0
 /********************************************************************
 * FUNCTION xsd_do_rpc_annotation
 * 
@@ -3011,6 +2909,7 @@ status_t
     return NO_ERR;
 
 } /* xsd_do_rpc_annotation */
+#endif
 
 
 /********************************************************************

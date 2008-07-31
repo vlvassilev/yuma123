@@ -78,12 +78,8 @@ date         init     comment
 #include  "ncxconst.h"
 #endif
 
-#ifndef _H_ps
-#include  "ps.h"
-#endif
-
-#ifndef _H_ps_parse
-#include  "ps_parse.h"
+#ifndef _H_obj
+#include  "obj.h"
 #endif
 
 #ifndef _H_rpc
@@ -104,6 +100,10 @@ date         init     comment
 
 #ifndef _H_top
 #include  "top.h"
+#endif
+
+#ifndef _H_val
+#include  "val.h"
 #endif
 
 #ifndef _H_xmlns
@@ -523,28 +523,28 @@ static void
 *   rpcname == RPC method name to find
 *
 * RETURNS:
-*   pointer to retrieved rpc_template_t or NULL if not found
+*   pointer to retrieved obj_rpc_t or NULL if not found
 *********************************************************************/
-static rpc_template_t *
+static obj_rpc_t *
     find_rpc (const xmlChar *modname,
 	      const xmlChar *rpcname)
 {
-    rpc_template_t  *rpc;
+    obj_template_t  *rpc;
     ncx_node_t       deftyp;
 
     /* look for the RPC method in the definition registry */
-    deftyp = NCX_NT_RPC;
-    rpc = (rpc_template_t *)
+    deftyp = NCX_NT_OBJ;
+    rpc = (obj_template_t *)
 	def_reg_find_moddef(modname, rpcname, &deftyp);
-    return rpc;
+    return (rpc) ? rpc->def.rpc : NULL;
 
 }  /* find_rpc */
 
 
 /********************************************************************
-* FUNCTION psd_state
+* FUNCTION parse_rpc_input
 *
-* RPC invoke parse parmset state
+* RPC received, parse parameters against rpcio for 'input'
 * 
 * INPUTS:
 *   scb == session control block
@@ -557,32 +557,36 @@ static rpc_template_t *
 *   status
 *********************************************************************/
 static status_t
-    psd_state (ses_cb_t *scb,
+    parse_rpc_input (ses_cb_t *scb,
 	       rpc_msg_t  *msg,
-	       rpc_template_t *rpc,
+	       obj_rpc_t *rpc,
 	       agt_rpc_cbset_t *cbset,
 	       xml_node_t  *method)
 
 {
     status_t  res;
-
+    obj_template_t  *obj;
+    obj_rpcio_t  *rpcio;
     res = NO_ERR;
 
     /* check if there is an input parmset specified */
-    if (rpc->in_psd) {
+    obj = obj_find_template(&rpc->datadefQ, NULL, YANG_K_INPUT);
+    if (obj) {
+	rpcio = obj->def.rpcio;
+
 	msg->rpc_agt_state = AGT_RPC_PH_PSD;
 
 	/* check if there is a manual PSD parse callback */
 	if (cbset && cbset->acb[AGT_RPC_PH_PSD]) {
 	    res = (*cbset->acb[AGT_RPC_PH_PSD])(scb, msg, method);
 	} else {
-	    res = agt_ps_parse_rpc(scb, msg, rpc->in_psd, method,
-				   &msg->rpc_input);
+	    res = agt_val_parse_rpcin(scb, msg, rpcio, method,
+				      &msg->rpc_input);
 	}
 
 #ifdef AGT_RPC_DEBUG
 	if (LOGDEBUG3) {
-	    log_debug3("\nagt_rpc: PSD state");
+	    log_debug3("\nagt_rpc: parse RPC input state");
 	    rpc_err_dump_errors(msg);
 	    ps_dump_parmset(&msg->rpc_input, 0);
 	}
@@ -591,7 +595,7 @@ static status_t
 
     return res;
 
-}  /* psd_state */
+}  /* parse_rpc_input */
 
 
 /********************************************************************
@@ -711,7 +715,7 @@ status_t
 			     agt_rpc_phase_t  phase,
 			     agt_rpc_method_t method)
 {
-    rpc_template_t  *rpc;
+    obj_rpc_t       *rpc;
     agt_rpc_cbset_t *cbset;
 
     if (!module || !method_name || !method) {
@@ -757,7 +761,7 @@ void
     agt_rpc_unsupport_method (const xmlChar *module,
 			      const xmlChar *method_name)
 {
-    rpc_template_t  *rpc;
+    obj_rpc_t       *rpc;
 
     if (!module || !method_name) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -790,7 +794,7 @@ void
     agt_rpc_unregister_method (const xmlChar *module,
 			       const xmlChar *method_name)
 {
-    rpc_template_t  *rpc;
+    obj_rpc_t       *rpc;
 
     if (!module || !method_name) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -828,7 +832,7 @@ void
 {
     rpc_msg_t       *msg;
     xml_attr_t      *attr;
-    rpc_template_t  *rpc;
+    obj_rpc_t       *rpc;
     agt_rpc_cbset_t *cbset;
     xmlChar         *buff;
     xml_node_t       method, testnode;
@@ -879,7 +883,6 @@ void
     msg->rpc_incoming = TRUE;
     msg->rpc_module = top->module;
     msg->rpc_nsid = top->nsid;
-    ps_init_parmset(&msg->rpc_input);
 
     /* borrow the top->attrs queue without copying it 
      * The rpc-reply phase may add attributes to this list
@@ -935,7 +938,6 @@ void
 	/* with-metadata not explicitly set, so get the default */
 	msg->mhdr.withmeta = ses_withmeta(scb);	
     }
-
 
     /* get the NC RPC message-id attribute; must be present */
     attr = xml_find_attr(top, xmlns_nc_id(), NCX_EL_MESSAGE_ID);
@@ -1037,7 +1039,7 @@ void
 
     /* parameter set parse state */
     if (res == NO_ERR) {
-	res = psd_state(scb, msg, rpc, cbset, &method);
+	res = parse_rpc_input(scb, msg, rpc, cbset, &method);
     }
 
     /* read in a node which should be the endnode to match 'top' */
@@ -1170,7 +1172,7 @@ status_t
 {
     ses_cb_t        *scb;
     rpc_msg_t       *msg;
-    rpc_template_t  *rpc;
+    obj_rpc_t       *rpc;
     agt_rpc_cbset_t *cbset;
     xml_node_t       method;
     status_t         res;
@@ -1227,7 +1229,6 @@ status_t
     msg->rpc_in_attrs = NULL;
     msg->rpc_group.u = 0;
     msg->rpc_msg_id = (const xmlChar *)"1";
-    ps_init_parmset(&msg->rpc_input);
 
     /* create a dummy method XML node */
     xml_init_node(&method);
@@ -1249,7 +1250,7 @@ status_t
 
     /* parse the config file as a parameter set */
     if (res == NO_ERR) {
-	res = psd_state(scb, msg, rpc, cbset, &method);
+	res = parse_rpc_input(scb, msg, rpc, cbset, &method);
 	if (res == NO_ERR) {
 	    res = post_psd_state(scb, msg);
 	}

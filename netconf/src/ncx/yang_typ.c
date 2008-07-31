@@ -8,9 +8,7 @@
     Current NCX base type   YANG builtin type
 
     NCX_BT_ANY              anyxml
-    NCX_BT_ROOT             N/A
     NCX_BT_BITS             bits
-    NCX_BT_ENAME            N/A
     NCX_BT_ENUM             enumeration
     NCX_BT_EMPTY            empty
     NCX_BT_INT8             int8
@@ -27,14 +25,15 @@
     NCX_BT_USTRING          binary
     NCX_BT_UNION            union
     NCX_BT_SLIST            N/A
-    NCX_BT_XLIST            N/A
     NCX_BT_CONTAINER        container ** Not a type **
     NCX_BT_CHOICE           choice ** Not a type **
     NCX_BT_LIST             list ** Not a type **
-    NCX_BT_XCONTAINER       N/A
     NCX_BT_KEYREF           keyref
     NCX_BT_INSTANCE_ID      instance-identifier
-  
+
+    NCX_BT_CHOICE           meta-type for YANG choice
+    NCX_BT_CASE             meta-type for YANG case
+
     sim-typ w/ '*' iqual    leaf-list
 
 
@@ -92,10 +91,6 @@ date         init     comment
 
 #ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_psd
-#include "psd.h"
 #endif
 
 #ifndef _H_status

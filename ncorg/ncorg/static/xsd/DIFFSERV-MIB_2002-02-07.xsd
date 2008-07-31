@@ -15,7 +15,7 @@
    xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
    <xs:annotation>
       <xs:documentation>
-         Converted from YANG file 'DIFFSERV-MIB.yang' by yangdump version 0.9.3
+         Converted from YANG file 'DIFFSERV-MIB.yang' by yangdump version 0.9.4
          
          Module: DIFFSERV-MIB
          Organization: IETF Differentiated Services WG
@@ -52,7 +52,7 @@
       </xs:documentation>
       <xs:appinfo>
          <ncx:source>
-            /home/andy/swdev/trunk/netconf/modules/ietf/DIFFSERV-MIB.yang
+            /home/andy/newdev/trunk/netconf/modules/ietf/DIFFSERV-MIB.yang
          </ncx:source>
          <ncx:organization>
             IETF Differentiated Services WG

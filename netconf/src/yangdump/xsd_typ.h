@@ -67,14 +67,6 @@ extern status_t
 			 val_value_t *val);
 
 extern status_t
-    xsd_add_parmsets (const ncx_module_t *mod,
-		      val_value_t *val);
-
-extern status_t
-    xsd_add_rpcs (const ncx_module_t *mod,
-		  val_value_t *val);
-
-extern status_t
     xsd_finish_simpleType (const ncx_module_t *mod,
 			   const typ_def_t *typdef,
 			   val_value_t *val);

@@ -54,10 +54,6 @@ date         init     comment
 #include "ncxmod.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
 #ifndef _H_rpc
 #include "rpc.h"
 #endif

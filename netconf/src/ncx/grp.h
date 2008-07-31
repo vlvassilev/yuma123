@@ -109,4 +109,7 @@ extern void
 extern boolean
     grp_has_typedefs (const grp_template_t *grp);
 
+extern const xmlChar *
+    grp_get_mod_name (const grp_template_t *grp);
+
 #endif	    /* _H_grp */

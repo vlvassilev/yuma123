@@ -22,17 +22,7 @@ date	     init     comment
 16-jan-07    abb      Moved from ncxdump/xml_val_util.h
 */
 
-#ifndef _H_ncxconst
-#include "ncxconst.h"
-#endif
-
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
-#ifndef _H_rpc
-#include "rpc.h"
-#endif
+#include <xmlstring.h>
 
 #ifndef _H_status
 #include "status.h"
@@ -42,21 +32,9 @@ date	     init     comment
 #include "val.h"
 #endif
 
-#ifndef _H_xml_util
-#include "xml_util.h"
+#ifndef _H_xmlns
+#include "xmlns.h"
 #endif
-
-/********************************************************************
-*								    *
-*			 C O N S T A N T S			    *
-*								    *
-*********************************************************************/
-
-/********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
-*********************************************************************/
 
 /********************************************************************
 *								    *

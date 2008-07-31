@@ -57,10 +57,6 @@ date         init     comment
 #include "obj.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -254,18 +250,6 @@ static status_t
 	return res;
     }
 
-    /* convert NCX parmsets to XSD types */
-    res = xsd_add_parmsets(mod, val);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* convert NCX RPC methods to XSD types */
-    res = xsd_add_rpcs(mod, val);
-    if (res != NO_ERR) {
-	return res;
-    }
-
     /* convert YANG Objects to XSD elements */
     res = xsd_add_objects(mod, val);
     if (res != NO_ERR) {
@@ -437,10 +421,7 @@ status_t
 
     /* add the NETCONF NS if any PARMSET, RPC or OBJECT definitions */
     nc_id = xmlns_nc_id();
-    if (mod->nsid != nc_id &&
-	(!dlq_empty(&mod->psdQ) || 
-	 !dlq_empty(&mod->rpcQ) ||
-	 !dlq_empty(&mod->datadefQ))) {
+    if (mod->nsid != nc_id && !dlq_empty(&mod->datadefQ)) {
 	res = xml_add_xmlns_attr(top_attrs, nc_id, 
 				 xmlns_get_ns_prefix(nc_id));
 	if (res != NO_ERR) {

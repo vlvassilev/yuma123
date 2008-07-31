@@ -53,16 +53,16 @@ date         init     comment
 #include "ncxmod.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
-#ifndef _H_rpc
-#include "rpc.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_status
 #include  "status.h"
+#endif
+
+#ifndef _H_val
+#include "val.h"
 #endif
 
 
@@ -118,53 +118,6 @@ static void
 
 
 /********************************************************************
- * FUNCTION dump_rpc
- * 
- * List one RPC method
- *
- * INPUTS:
- *    rpc == rpc_template_t to show
- *    fullreport == TRUE for full dump of each RPC
- *               == FALSE for 1 line report on each RPC
- *********************************************************************/
-static void
-    dump_rpc (const rpc_template_t *rpc,
-	      boolean fullreport,
-	      uint32 indent)
-{
-    if (fullreport) {
-	log_stdout("\n");
-    }
-    help_write_lines(rpc->name, indent, TRUE);
-
-    if (fullreport) {
-	log_stdout(" (%s)", rpc_get_rpctype_str(rpc->rpc_typ));
-    }
-
-    if (rpc->descr) {
-	help_write_lines(rpc->descr, indent+4, TRUE);
-    }
-
-    if (!fullreport) {
-	return;
-    }
-
-    if (rpc->in_psd) {
-	help_write_lines((const xmlChar *)"input:\n", indent+2, TRUE);
-	psd_dump_parms(rpc->in_psd, PARTIAL, indent+4);
-    } else {
-	log_stdout("\n");
-    }
-    help_write_lines((const xmlChar *)"output: ", indent+2, TRUE);
-    log_stdout("%s", (rpc->out_data_name) ?
-	       (const char *)rpc->out_data_name : "<ok/>");
-
-    dump_appinfoQ(&rpc->appinfoQ, indent+4);
-
-} /* dump_rpc */
-
-
-/********************************************************************
  * FUNCTION dump_rpcQ (sub-mode of show RPC)
  * 
  * List all the RPC methods defined in the specified module
@@ -181,16 +134,21 @@ static void
 	       uint32 indent)
 {
 
-    const rpc_template_t *rpc;
+    const obj_template_t *rpc;
     boolean               anyout;
 
     anyout = FALSE;
-    for (rpc = (const rpc_template_t *)dlq_firstEntry(hdr);
+    for (rpc = (const obj_template_t *)dlq_firstEntry(hdr);
 	 rpc != NULL;
-	 rpc = (const rpc_template_t *)dlq_nextEntry(rpc)) {
+	 rpc = (const obj_template_t *)dlq_nextEntry(rpc)) {
 
-	anyout = TRUE;
-	dump_rpc(rpc, fullreport, indent);
+	if (rpc->objtype == OBJ_TYP_RPC) {
+	    anyout = TRUE;
+	    obj_dump_template(rpc, fullreport, 
+			      (uint32)
+			      ((fullreport) ? 0 : NCX_DEF_DUMP_LEVEL),
+			      indent);
+	}
     }
 
     if (anyout) {
@@ -240,9 +198,9 @@ void
 			 const xmlChar *cliname,
 			 boolean full)
 {
-    ncx_module_t *mod;
-    psd_template_t *clipsd;
-    ncx_node_t     dtyp;
+    ncx_module_t   *mod;
+    obj_template_t *cli;
+    ncx_node_t      dtyp;
 
     mod = ncx_find_module(modname);
     if (!mod) {
@@ -275,25 +233,27 @@ void
     }
 
     if (cliname) {
-	dtyp = NCX_NT_PSD;
-	clipsd = (psd_template_t *)
+	dtyp = NCX_NT_OBJ;
+	cli = (obj_template_t *)
 	    def_reg_find_moddef(mod->name, cliname, &dtyp);
-	if (!clipsd) {
-	    log_error("\nhelp: CLI Parmset %s not found", cliname);
+	if (!cli) {
+	    log_error("\nhelp: CLI Object %s not found", cliname);
 	    SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
 	    return;
-	} else {
+	} else if (cli->objtype == OBJ_TYP_CONTAINER) {
 	    log_stdout("\n\n  Command Line Parameters");
-	    log_stdout("\n\n    Key:  name type [built-in-type] [default]");
+	    log_stdout("\n\n    Key:  type name [built-in-type] [default]");
 	    log_stdout("\n          built-in YANG type is present for "
 		       "derived types only\n");
-	    psd_dump_parms(clipsd, full, 4);
+
+	    obj_dump_datadefQ(obj_get_datadefQ(cli), full, 
+			      (uint32)(full ? 0 : NCX_DEF_DUMP_LEVEL), 4);
 	}
     }
 
-    if (!dlq_empty(&mod->rpcQ)) {
+    if (obj_any_rpcs(&mod->datadefQ)) {
 	log_stdout("\n\n  Local Commands\n");
-	dump_rpcQ(&mod->rpcQ, PARTIAL, 4);
+	dump_rpcQ(&mod->datadefQ, PARTIAL, 4);
     }
 
 }  /* help_program_module */
@@ -326,9 +286,11 @@ void
     if (mod->descr) {
 	log_stdout("\nDescription:\n %s", mod->descr);
     }
-    dump_appinfoQ(&mod->appinfoQ, 2);
+    dump_rpcQ(&mod->datadefQ, full, 2);
 
-    dump_rpcQ(&mod->rpcQ, full, 2);
+    if (full) {
+	dump_appinfoQ(&mod->appinfoQ, 2);
+    }
 
 }  /* help_data_module */
 
@@ -378,84 +340,23 @@ void
 
 
 /********************************************************************
-* FUNCTION help_parmset
-*
-* Print the full help text for a parmset template to STDOUT
-*
-* INPUTS:
-*    psd     == parmset template struct
-*    full    == TRUE if a full report desired
-*               FALSE if a partial report desired
-*********************************************************************/
-void
-    help_parmset (const psd_template_t *psd,
-		  boolean full)
-{
-    log_stdout("\n  PSD: %s", psd->name);
-
-    if (psd->descr) {
-	help_write_lines(psd->descr, 4, TRUE);
-    }
-
-    psd_dump_parms(psd, full, 2);
-
-    if (full) {
-	dump_appinfoQ(&psd->appinfoQ, 2);
-    }
-
-
-}  /* help_parmset */
-
-
-/********************************************************************
-* FUNCTION help_rpc
+* FUNCTION help_object
 *
 * Print the full help text for a RPC method template to STDOUT
 *
 * INPUTS:
-*    rpc     == RPC method template struct
+*    obj     == object template
 *    full    == TRUE if a full report desired
 *               FALSE if a partial report desired
 *********************************************************************/
 void
-    help_rpc (const rpc_template_t *rpc,
-	      boolean full)
+    help_object (const obj_template_t *obj,
+		 boolean full)
 {
-    dump_rpc(rpc, full, 0);
+    obj_dump_template(obj, full, 
+		      (uint32)(full ? 0 : NCX_DEF_DUMP_LEVEL), 0);
 
-}  /* help_rpc */
-
-
-#ifdef NOT_YET
-/********************************************************************
-* FUNCTION help_notif
-*
-* Print the full help text for a notification template to STDOUT
-*
-* INPUTS:
-*    not     == notification template struct
-*    full    == TRUE if a full report desired
-*               FALSE if a partial report desired
-*********************************************************************/
-void
-    help_notif (const obj_template_t *notif,
-		boolean full)
-{
-    log_stdout("\n  Notif: %s", notif->name);
-
-    if (not->descr) {
-	log_stdout("\n %s", notif->descr);
-    }
-
-    /***/
-
-    if (full) {
-	dump_appinfoQ(&notif->appinfoQ);
-    }
-
-
-}  /* help_notif */
-#endif
+}  /* help_object */
 
 
 /********************************************************************

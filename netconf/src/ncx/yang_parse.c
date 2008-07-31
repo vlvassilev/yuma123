@@ -68,8 +68,8 @@ date         init     comment
 #include "ncxtypes.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_status
@@ -1652,24 +1652,6 @@ static status_t
     ismain = TRUE;
     retres = NO_ERR;
     *wasadded = FALSE;
-
-    mod->isyang = TRUE;
-
-    /* set all YANG owner strings to the same value */
-    mod->owner = xml_strdup(NCX_OWNER);
-    if (!mod->owner) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
-    }
-
-    /* set all YANG application strings to the same value */
-    mod->app = xml_strdup((const xmlChar *)"yang");
-    if (!mod->app) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
-    }
 
     /* could be module or submodule -- get the first keyword */
     res = TK_ADV(tkc);

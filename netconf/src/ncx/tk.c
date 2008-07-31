@@ -186,9 +186,7 @@ static tk_ent_t tlist [] = {
 static tk_btyp_t blist [] = {
     { NCX_BT_NONE, 4, (const xmlChar *)"NONE", 0 },
     { NCX_BT_ANY, 6, NCX_EL_ANYXML, FL_NCX },  /* YANG, sep. keyword */
-    { NCX_BT_ROOT, 4, NCX_EL_ROOT, FL_NCX },
     { NCX_BT_BITS, 4, NCX_EL_BITS, FL_YANG },
-    { NCX_BT_ENAME, 5, NCX_EL_ENAME, FL_NCX },
     { NCX_BT_ENUM, 4, NCX_EL_ENUM, FL_NCX },
     { NCX_BT_EMPTY, 5, NCX_EL_EMPTY, (FL_NCX|FL_YANG) },
     { NCX_BT_BOOLEAN, 7, NCX_EL_BOOLEAN, (FL_NCX|FL_YANG) },
@@ -208,11 +206,9 @@ static tk_btyp_t blist [] = {
     { NCX_BT_UNION, 5, NCX_EL_UNION, (FL_NCX|FL_YANG) },
     { NCX_BT_KEYREF, 6, NCX_EL_KEYREF, FL_YANG },
     { NCX_BT_SLIST, 5, NCX_EL_SLIST, FL_NCX },
-    { NCX_BT_XLIST, 5, NCX_EL_XLIST, FL_NCX },
     { NCX_BT_CONTAINER, 9, NCX_EL_CONTAINER, FL_NCX },
     { NCX_BT_CHOICE, 6, NCX_EL_CHOICE, FL_NCX },
     { NCX_BT_LIST, 4, NCX_EL_LIST, FL_NCX },
-    { NCX_BT_XCONTAINER, 10, NCX_EL_XCONTAINER, FL_NCX },
     { NCX_BT_NONE, 4, (const xmlChar *)"NONE", 0 }
 };
 

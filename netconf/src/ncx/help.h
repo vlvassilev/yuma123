@@ -28,27 +28,13 @@ date	     init     comment
 #include "ncxconst.h"
 #endif
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
-#ifndef _H_status
-#include "status.h"
-#endif
-
-#ifndef _H_rpc
-#include "rpc.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_typ
 #include "typ.h"
 #endif
-
-/********************************************************************
-*								    *
-*			 C O N S T A N T S			    *
-*								    *
-*********************************************************************/
 
 /********************************************************************
 *								    *
@@ -70,19 +56,8 @@ extern void
 	       boolean full);
 
 extern void
-    help_parmset (const psd_template_t *psd,
-		  boolean full);
-
-
-extern void
-    help_rpc (const rpc_template_t *rpc,
-	      boolean full);
-
-#ifdef NOT_YET
-extern void
-    help_notif (const obj_template_t *notif,
-		boolean full);
-#endif
+    help_object (const obj_template_t *obj,
+		 boolean full);
 
 extern void
     help_write_lines (const xmlChar *str,

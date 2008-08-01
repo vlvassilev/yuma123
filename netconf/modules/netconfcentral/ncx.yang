@@ -14,6 +14,11 @@ module ncx {
      These elements will be present in appinfo elements,
      used in YANG or NCX to XSD translation.";
 
+  revision 2008-08-01 {
+    description 
+       "Added password, hidden, and xsdlist extensions.";
+  }
+
   revision 2008-04-16 {
     description 
        "Added metadata and rpc-type extensions.";
@@ -282,5 +287,30 @@ module ncx {
     }
   }
 
+  extension password {
+   description
+    "Used to indicate the data type for the leaf is really
+     a password.  Only the encrypted version of the password
+     is allowed to be generated in any output.";
+  }
+
+  extension hidden {
+   description
+    "Used to prevent publication of an object or grouping.
+     Will be ignored for typedefs and other constructs.
+     If present, that node and any sub-nodes will be ignored
+     when generating HTML documentation or help text.";
+  }
+
+  extension xsdlist {
+    description
+      "Used to indicate the leaf string type is really an
+       XSD list, which is a series of whitespace separated
+       strings. The type argument represents the data type
+       to use for the list members, for validation purposes.";
+    argument type {
+      yin-element true;
+    }
+  }
 }
 

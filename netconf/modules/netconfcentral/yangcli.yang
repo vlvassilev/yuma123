@@ -1,0 +1,362 @@
+module yangcli {
+
+    namespace "http://netconfcentral.com/ns/yangcli";
+
+    prefix "yc";
+
+    import ncx { prefix ncx; }
+
+    import ncxtypes { prefix nt; }
+
+    organization  "Netconf Central";
+
+    contact "Andy Bierman <support@netconfcentral.com>.";
+
+    description 
+       "
+        Command Line Interface for the NETCONF protocol: Manager side
+
+        Usage:
+           yangcli [parameters]
+
+        Normal Mode:
+           An interactive CLI shell with command line history.
+
+        Autostart-mode:
+           If the 'agent' parameter is present, then yangcli will
+ 	   attempt to connect to that agent upon startup.  If the
+           'user' and 'password' parameters are also present, then
+           the user will not be prompted before the connection 
+           is attempted.
+
+         Script-mode:
+            If the 'run-script' parameter is present, then the
+            specified script will be run automatically upon startup
+      
+         ";
+
+    revision 2008-08-01 {
+       description "Initial yang version started from ncxcli v 0.2";
+    }
+
+    grouping KorP {
+      choice k-or-p {
+        leaf key {
+          description
+           "The full filespec for the key the program should use
+            when connecting to the agent";
+          type string;
+        }
+
+        leaf password {
+          description
+            "User password to use for NETCONF sessions.
+             If none, then user will be prompted before connecting.";
+          type string;
+          ncx:password;
+        }
+      }
+    }
+
+    container ncxcli {
+      description
+        "CLI Parameter Set for the NETCONF Manager Application.";
+
+      leaf agent {
+        description
+          "IP address or DNS name of the NETCONF agent target.
+           If none, then the program will not try to auto-connect
+           upon startup";
+        type string;
+      }
+
+      leaf batch-mode {
+        description
+          "If present, the interactive CLI will not be used.
+           A script should be provided with the 'run-script'
+           parameter, or else the program will simply exit.";
+         type empty;
+      }
+
+      leaf conf {
+        description
+          "The name of the text config file to use for CLI params.
+           Any parameter except this one can be set via the
+           command line of the config file.";
+         type string;
+      }
+
+      leaf default-module {
+        description
+           "Default module name string to use before 'netconf' 
+            and 'ncx' are tried.  The module prefix must be
+            used for other modules.";
+         type nt:NcxName;
+      }
+
+      leaf help {
+        description
+          "Print help text for the program.
+           Will cause the program to terminate after
+           the help text is printed.";
+        type empty;
+      }
+
+      uses KorP;
+
+      leaf log {
+        description
+           "Filespec for the log file to use instead of STDOUT.";
+        type string;
+      }
+
+      leaf log-append {
+        description
+           "If present, the log will be appended not over-written.
+            If not, the log will be over-written.
+            Only meaningful if the 'logfile' parameter is
+            also present.";
+        type empty;
+      }
+
+      leaf log-level {
+        description
+          "Sets the debug logging level for the program.";
+        type nt:NcDebugType;
+      }
+
+      leaf-list modules {
+        description
+           "List of NCX module names to load at boot-time.
+            Any imported modules required will be loaded automatically.";
+        type nt:NcModuleSpec;
+      }
+
+      leaf no-autocomp {
+        description
+          "If present, then no partial keywords will be 
+           checked for interactive or script commands.
+           By default, the first match for a partial keyword
+           will be used if no definition is found for
+           a command name or parameter name.";
+        type empty;
+      }
+ 
+      leaf no-autoload {
+        description
+          "If present, then no modules (except this one)
+           will be automatically loaded upon startup or
+           upon session startup with an agent. Instead,
+           the 'load-module' command must be used to
+           explicitly load all the desired definition modules.";
+        type empty;
+      }
+
+      leaf no-fixorder {
+        description
+          "If present, then parameters will not be
+           automatically sent to the agent in the
+           correct order.  Instead, the specified order
+           will be used.";
+        type empty;
+      }
+ 
+      leaf run-script {
+        description
+          "The specified script will be invoked upon startup.
+           If the auto-connect parameters are provided, then
+           a session will be established before running the
+           script.  If a quoted string is used, then any parameters
+           after the script name will be passed to the script.";
+         type string;
+      }
+
+      leaf user {
+        description
+           "User name to use for NETCONF sessions.
+            If none, then user will be prompted before connecting.";
+        type nt:NcxUserName;
+      }
+
+      leaf version {
+        description
+          "Print version info for the program.
+           Will cause the program to terminate after
+           the version text is printed.";
+        type empty;
+      }
+    }
+
+    rpc connect {
+      description "Connect to a NETCONF agent.";
+      ncx:rpc-type exec;
+      input {
+        leaf user {
+          description
+             "User name to use for NETCONF sessions.";
+          type nt:NcxUserName;
+        }
+
+        uses KorP;
+
+        leaf agent {
+           description
+             "IP address or DNS name of the NETCONF agent target.";
+          type string;
+        }
+      }
+    }
+
+    rpc help {
+      description "Print the ncxcli help text";
+      ncx:rpc-type exec;
+      input {
+        choice helptype {
+          leaf type {
+            description "Show help for the specified type";
+            type nt:NcxIdentifier;
+          }
+          leaf object {
+            description "Show help for the specified object";
+            type nt:NcxIdentifier;
+          }
+          leaf rpc {
+            description "Show help for the specified RPC method";
+            type nt:NcxIdentifier;
+          }
+          leaf notif {
+            description "Show help for the specified notification";
+            type nt:NcxIdentifier;
+          }
+        }
+        leaf brief {
+          type empty;
+        }
+      }
+    }
+
+    rpc load {
+      description "Internal command to load a module or other file.";
+      ncx:rpc-type exec;
+      input {
+        leaf module {
+          description
+             "Module name to load";
+          type nt:NcxName;
+        }
+      }
+    }
+
+    rpc quit {
+      description "Quit the NCXCLI application";
+      ncx:rpc-type exec;
+    }
+
+    rpc run {
+      description "Internal command to run a script.";
+      ncx:rpc-type exec;
+      input {
+        leaf script {
+           description "script filespec to run";
+           type string;
+        }
+
+        // hardwired parameter names required at this time
+        // just allow 9 parameter/value pairs
+        // P0 is reserved for the name of the called script
+
+        leaf P1 {
+           description "script parameter $1";
+           type string;
+        }
+        leaf P2 {
+           description "script parameter $2";
+           type string;
+        }
+        leaf P3 {
+           description "script parameter $3";
+           type string;
+        }
+        leaf P4 {
+           description "script parameter $4";
+           type string;
+        }
+        leaf P5 {
+           description "script parameter $5";
+           type string;
+        }
+        leaf P6 {
+           description "script parameter $6";
+           type string;
+        }
+        leaf P7 {
+           description "script parameter $7";
+           type string;
+        }
+        leaf P8 {
+           description "script parameter $8";
+           type string;
+        }
+        leaf P9 {
+           description "script parameter $9";
+           type string;
+        }
+      }
+    }
+
+    rpc save {
+      description "Meta command to save configuration edits.";
+      ncx:rpc-type exec;
+    }
+
+    rpc show {
+      description "Local show command for ncxcli info.";
+      ncx:rpc-type exec;
+      input {
+        choice showtype {
+          leaf module {
+            description "Show full info for one module";
+            type nt:NcxIdentifier;
+          }
+
+          leaf modulelist {
+            description "Show brief info for all modules";
+            type empty;
+          }
+
+          leaf modules {
+            description "Show info for all modules";
+            type empty;
+          }
+
+          leaf local {
+            description "Show full info for one local user variable";
+            type nt:NcxName;
+          }
+
+          leaf global {
+            description "Show full info for one global user variable";
+            type nt:NcxName;
+          }
+         
+          leaf vars {
+            description "Show truncated info for all user variables";
+            type empty;
+          }
+
+          leaf version {
+            description "Show ncxcli version info";
+            type empty;
+          }
+        }
+
+        leaf brief {
+          description"Show brief version of the requested help info.";
+          type empty;
+        }
+      }
+    }
+
+}
+
+

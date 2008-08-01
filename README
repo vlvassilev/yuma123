@@ -11,6 +11,15 @@ Pre-Build steps:
       - CFLAGS has -DLINUX or -DMACOSX
       - CINC has /sw/include added for MACOSX
 
+Build Variables:
+
+  BLD: set to remove gdb synbols
+  MAC: set to compile for MacOsX
+
+  make BLD=BLD to make no-debug build on linux variants
+
+  make BLD=BLD MAC=MAC to make no-debug on MacOsX
+
 Current Build Sequence:
 
    - cd netconf/src
@@ -23,8 +32,8 @@ Current Build Sequence:
    - ./redo_mysql.sh
    - ./load_newmod.sh newmod.sql
 
- * add BLD=BLD for production build w/no debug symbols
- * add MAC=MAC for MacOSX platform
+ This will reset the entire WEBDOCS server
+ TBD: incremental additions of modules
 
 Run development WEB server
    - cd ../ncorg

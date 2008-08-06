@@ -79,4 +79,21 @@ extern status_t
 			     val_value_t  *curval);
 
 
+extern status_t
+    agt_val_validate_write (ses_cb_t  *scb,
+			    rpc_msg_t  *msg,
+			    cfg_template_t *target,
+			    val_value_t *valroot,
+			    op_editop_t  editop);
+
+
+extern status_t
+    agt_val_apply_write (ses_cb_t  *scb,
+			 rpc_msg_t  *msg,
+			 cfg_template_t *target,
+			 val_value_t    *pducfg,
+			 op_editop_t  editop,
+			 op_errop_t  errop);
+
+
 #endif	    /* _H_agt_val */

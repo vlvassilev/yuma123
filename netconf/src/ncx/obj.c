@@ -5683,6 +5683,164 @@ boolean
 
 
 /********************************************************************
+* FUNCTION obj_set_ncx_flags
+*
+* Check the NCX appinfo extensions and set flags as needed
+*
+** INPUTS:
+*   obj == obj_template to check
+*
+* OUTPUTS:
+*   may set additional bits in the obj->flags field
+*
+*********************************************************************/
+void
+    obj_set_ncx_flags (obj_template_t *obj)
+{
+
+    const dlq_hdr_t  *appinfoQ;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    appinfoQ = obj_get_appinfoQ(obj);
+
+    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_HIDDEN)) {
+	obj->flags |= OBJ_FL_HIDDEN;
+    }
+
+    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_PASSWORD)) {
+	obj->flags |= OBJ_FL_PASSWD;
+    }
+
+    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_ROOT)) {
+	obj->flags |= OBJ_FL_ROOT;
+    }
+
+    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_CLI)) {
+	obj->flags |= OBJ_FL_CLI;
+    }
+
+}   /* obj_set_ncx_flags */
+
+
+/********************************************************************
+* FUNCTION obj_is_hidden
+*
+* Check if object is marked as a hidden object
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:hidden
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_hidden (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_HIDDEN) ? TRUE : FALSE;
+
+}   /* obj_is_hidden */
+
+
+/********************************************************************
+* FUNCTION obj_is_root
+*
+* Check if object is marked as a root object
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:root
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_root (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_ROOT) ? TRUE : FALSE;
+
+}   /* obj_is_root */
+
+
+/********************************************************************
+* FUNCTION obj_is_password
+*
+* Check if object is marked as a password object
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:password
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_password (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_PASSWD) ? TRUE : FALSE;
+
+}   /* obj_is_password */
+
+
+/********************************************************************
+* FUNCTION obj_is_cli
+*
+* Check if object is marked as a CLI object
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:cli
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_cli (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_CLI) ? TRUE : FALSE;
+
+}   /* obj_is_cli */
+
+
+/********************************************************************
 * FUNCTION obj_ok_for_cli
 *
 * Figure out if the obj is OK for current CLI implementation

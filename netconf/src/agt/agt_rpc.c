@@ -34,10 +34,6 @@ date         init     comment
 #include  "agt_cli.h"
 #endif
 
-#ifndef _H_agt_ps_parse
-#include  "agt_ps_parse.h"
-#endif
-
 #ifndef _H_agt_rpc
 #include  "agt_rpc.h"
 #endif
@@ -52,6 +48,14 @@ date         init     comment
 
 #ifndef _H_agt_util
 #include  "agt_util.h"
+#endif
+
+#ifndef _H_agt_val
+#include  "agt_val.h"
+#endif
+
+#ifndef _H_agt_val_parse
+#include  "agt_val_parse.h"
 #endif
 
 #ifndef _H_agt_xml
@@ -106,6 +110,10 @@ date         init     comment
 #include  "val.h"
 #endif
 
+#ifndef _H_val_util
+#include  "val_util.h"
+#endif
+
 #ifndef _H_xmlns
 #include  "xmlns.h"
 #endif
@@ -122,6 +130,10 @@ date         init     comment
 #include  "xml_wr.h"
 #endif
 
+#ifndef _H_yangconst
+#include  "yangconst.h"
+#endif
+
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
@@ -134,7 +146,7 @@ date         init     comment
 
 
 /* hack for <error-path> for a couple corner case errors */
-#define RPC_ROOT ((const xmlChar *)"/rpc")
+#define RPC_ROOT ((const xmlChar *)"/nc:rpc")
 
 
 /********************************************************************
@@ -203,7 +215,6 @@ static void
 	 errinfo = (rpc_err_info_t *)dlq_nextEntry(errinfo)) {
 
 	switch (errinfo->val_btype) {
-	case NCX_BT_ENAME:
 	case NCX_BT_BINARY:
 	case NCX_BT_STRING:
 	    if (errinfo->v.strval) {
@@ -523,9 +534,9 @@ static void
 *   rpcname == RPC method name to find
 *
 * RETURNS:
-*   pointer to retrieved obj_rpc_t or NULL if not found
+*   pointer to retrieved obj_template_t or NULL if not found
 *********************************************************************/
-static obj_rpc_t *
+static obj_template_t *
     find_rpc (const xmlChar *modname,
 	      const xmlChar *rpcname)
 {
@@ -536,7 +547,7 @@ static obj_rpc_t *
     deftyp = NCX_NT_OBJ;
     rpc = (obj_template_t *)
 	def_reg_find_moddef(modname, rpcname, &deftyp);
-    return (rpc) ? rpc->def.rpc : NULL;
+    return rpc;
 
 }  /* find_rpc */
 
@@ -580,15 +591,15 @@ static status_t
 	if (cbset && cbset->acb[AGT_RPC_PH_PSD]) {
 	    res = (*cbset->acb[AGT_RPC_PH_PSD])(scb, msg, method);
 	} else {
-	    res = agt_val_parse_rpcin(scb, msg, rpcio, method,
-				      &msg->rpc_input);
+	    res = agt_val_parse_nc(scb, &msg->mhdr, obj, method,
+				   NCX_DC_CONFIG, &msg->rpc_input);
 	}
 
 #ifdef AGT_RPC_DEBUG
 	if (LOGDEBUG3) {
 	    log_debug3("\nagt_rpc: parse RPC input state");
 	    rpc_err_dump_errors(msg);
-	    ps_dump_parmset(&msg->rpc_input, 0);
+	    val_dump_value(&msg->rpc_input, 0);
 	}
 #endif
     }
@@ -621,7 +632,7 @@ static status_t
      * the syntax is valid.  Now add any missing defaults
      * to the RPC Parmset. 
      */
-    res = ps_parse_add_defaults(&msg->rpc_input);
+    res = val_add_defaults(&msg->rpc_input, FALSE);
     if (res == NO_ERR) {
 	/* check that the number of instances of the parameters
 	 * is reasonable and only one member from any choice is
@@ -631,14 +642,9 @@ static status_t
 	 * any missing choices would be incorrectly interpreted
 	 * as multiple missing parameter errors
 	 */
-	res = agt_ps_parse_choice_check(scb, &msg->mhdr,
-					&msg->rpc_input, 
-					NCX_LAYER_OPERATION);
-	if (res == NO_ERR) {
-	    res = agt_ps_parse_instance_check(scb, &msg->mhdr, 
-					      &msg->rpc_input, 
-					      NCX_LAYER_OPERATION);
-	}
+	res = agt_val_parse_instance_check(scb, &msg->mhdr, 
+					   &msg->rpc_input, 
+					   NCX_LAYER_OPERATION);
     }
 
     return res;
@@ -715,7 +721,7 @@ status_t
 			     agt_rpc_phase_t  phase,
 			     agt_rpc_method_t method)
 {
-    obj_rpc_t       *rpc;
+    obj_template_t  *rpcobj;
     agt_rpc_cbset_t *cbset;
 
     if (!module || !method_name || !method) {
@@ -723,21 +729,21 @@ status_t
     }
 
     /* find the RPC template */
-    rpc = find_rpc(module, method_name);
-    if (!rpc) {
+    rpcobj = find_rpc(module, method_name);
+    if (!rpcobj) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     /* get the agent CB set, or create a new one */
-    if (rpc->cbset) {
-	cbset = (agt_rpc_cbset_t *)rpc->cbset;
+    if (rpcobj->cbset) {
+	cbset = (agt_rpc_cbset_t *)rpcobj->cbset;
     } else {
 	cbset = m__getObj(agt_rpc_cbset_t);
 	if (!cbset) {
 	    return SET_ERROR(ERR_INTERNAL_MEM);
 	}
 	memset(cbset, 0x0, sizeof(agt_rpc_cbset_t));
-	rpc->cbset = (void *)cbset;
+	rpcobj->cbset = (void *)cbset;
     }
 
     /* add the specified method */
@@ -761,7 +767,7 @@ void
     agt_rpc_unsupport_method (const xmlChar *module,
 			      const xmlChar *method_name)
 {
-    obj_rpc_t       *rpc;
+    obj_template_t  *rpcobj;
 
     if (!module || !method_name) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -769,13 +775,13 @@ void
     }
 
     /* find the RPC template */
-    rpc = find_rpc(module, method_name);
-    if (!rpc) {
+    rpcobj = find_rpc(module, method_name);
+    if (!rpcobj) {
 	SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
 	return;
     }
 
-    rpc->supported = FALSE;
+    rpcobj->def.rpc->supported = FALSE;
 
 } /* agt_rpc_unsupport_method */
 
@@ -794,7 +800,7 @@ void
     agt_rpc_unregister_method (const xmlChar *module,
 			       const xmlChar *method_name)
 {
-    obj_rpc_t       *rpc;
+    obj_template_t       *rpcobj;
 
     if (!module || !method_name) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -802,16 +808,16 @@ void
     }
 
     /* find the RPC template */
-    rpc = find_rpc(module, method_name);
-    if (!rpc) {
+    rpcobj = find_rpc(module, method_name);
+    if (!rpcobj) {
 	SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
 	return;
     }
 
     /* get the agent CB set and delete it */
-    if (rpc->cbset) {
-	m__free(rpc->cbset);
-	rpc->cbset = NULL;
+    if (rpcobj->cbset) {
+	m__free(rpcobj->cbset);
+	rpcobj->cbset = NULL;
     }
 
 } /* agt_rpc_unregister_method */
@@ -832,6 +838,7 @@ void
 {
     rpc_msg_t       *msg;
     xml_attr_t      *attr;
+    obj_template_t  *rpcobj;
     obj_rpc_t       *rpc;
     agt_rpc_cbset_t *cbset;
     xmlChar         *buff;
@@ -986,19 +993,20 @@ void
 	    res = ERR_NCX_WRONG_NODETYP;
 	} else {
 	    /* look for the RPC method in the definition registry */
-	    rpc = find_rpc(method.module, method.elname);
+	    rpcobj = find_rpc(method.module, method.elname);
+	    rpc = (rpcobj) ? rpcobj->def.rpc : NULL;
 	    if (!rpc) {
 		res = ERR_NCX_DEF_NOT_FOUND;
 	    } else if (!rpc->supported) {
 		res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    } else if (!agt_acm_rpc_allowed(scb->username, rpc)) {
+	    } else if (!agt_acm_rpc_allowed(scb->username, rpcobj)) {
 		res = ERR_NCX_ACCESS_DENIED;
 	    } else {
 		/* get the agent callback set for this RPC 
 		 * if NULL, no agent instrumentation has been 
 		 * registered yet for this RPC method
 		 */
-		cbset = (agt_rpc_cbset_t *)rpc->cbset;
+		cbset = (agt_rpc_cbset_t *)rpcobj->cbset;
 
 		/* finish setting up the rpc_msg_t struct */
 		msg->rpc_meth_nsid = method.nsid;
@@ -1083,7 +1091,7 @@ void
     xml_clean_node(&testnode);
 
     /* check the defaults and any choices if there is an input PS */
-    if (res == NO_ERR && rpc->in_psd) {
+    if (res == NO_ERR && obj_find_child(rpcobj, NULL, YANG_K_INPUT)) {
 	res = post_psd_state(scb, msg);
     }
 
@@ -1172,6 +1180,7 @@ status_t
 {
     ses_cb_t        *scb;
     rpc_msg_t       *msg;
+    obj_template_t  *rpcobj;
     obj_rpc_t       *rpc;
     agt_rpc_cbset_t *cbset;
     xml_node_t       method;
@@ -1185,16 +1194,17 @@ status_t
 #endif
 
     /* first make sure the load-config RPC is registered */
-    rpc = find_rpc(AGT_CLI_MODULE, NCX_EL_LOAD_CONFIG);
-    if (!rpc) {
+    rpcobj = find_rpc(AGT_CLI_MODULE, NCX_EL_LOAD_CONFIG);
+    if (!rpcobj) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* make sure the agent callback set for this RPC is ok */
-    cbset = (agt_rpc_cbset_t *)rpc->cbset;
+    cbset = (agt_rpc_cbset_t *)rpcobj->cbset;
     if (!cbset) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
+    rpc = rpcobj->def.rpc;
 
     /* make sure the config is in the init state */
     if (cfg->cfg_state != CFG_ST_INIT) {

@@ -65,6 +65,10 @@ date         init     comment
 #include "ncx.h"
 #endif
 
+#ifndef _H_obj
+#include "obj.h"
+#endif
+
 #ifndef _H_op
 #include "op.h"
 #endif
@@ -100,7 +104,7 @@ date         init     comment
 #define AGT_HELLO_DEBUG 1
 #endif
 
-#define MGR_HELLO_TYP ((const xmlChar *)"NcManagerHello")
+#define MGR_HELLO_CON ((const xmlChar *)"mgr-hello")
 
 /********************************************************************
 *                                                                   *
@@ -128,8 +132,9 @@ static status_t
     val_value_t  *caps;
 
     /* look for the NETCONF base capability string */
-    caps = val_first_child_name(val, NCX_EL_CAPABILITIES);
+    caps = val_find_child(val, NC_PREFIX, NCX_EL_CAPABILITIES);
     if (caps) {
+	/*** !!! should check prefix as well !!! ***/
 	if (val_first_child_string(caps, NCX_EL_CAPABILITY,
 				   CAP_BASE_URN)) {
 	    return NO_ERR;
@@ -205,7 +210,7 @@ void
     status_t         res;
     xml_msg_hdr_t    msg;
     val_value_t     *val;
-    typ_template_t  *typ;
+    const obj_template_t  *obj;
     ncx_node_t       dtyp;
 
 #ifdef DEBUG
@@ -232,9 +237,8 @@ void
 
     /* init local vars */
     res = NO_ERR;
-    val = NULL;
-    typ = NULL;
-    dtyp = NCX_NT_TYP;
+    obj = NULL;
+    dtyp = NCX_NT_OBJ;
     xml_msg_init_hdr(&msg);
 
     /* get a value struct to hold the client hello msg */
@@ -245,9 +249,9 @@ void
 
     /* get the type definition from the registry */
     if (res == NO_ERR) {
-	typ = (typ_template_t *)
-	    def_reg_find_moddef(NC_MODULE, MGR_HELLO_TYP, &dtyp);
-	if (!typ) {
+	obj = (const obj_template_t *)
+	    def_reg_find_moddef(NC_MODULE, MGR_HELLO_CON, &dtyp);
+	if (!obj) {
 	    /* netconf module should have loaded this definition */
 	    res = SET_ERROR(ERR_INTERNAL_PTR);
 	}
@@ -255,7 +259,7 @@ void
 
     /* parse a manager hello message */
     if (res == NO_ERR) {
-	res = agt_val_parse(scb, &msg, typ, top, NCX_DC_STATE, val);
+	res = agt_val_parse_nc(scb, &msg, obj, top, NCX_DC_STATE, val);
     }
     
     /* check that the NETCONF base capability is included

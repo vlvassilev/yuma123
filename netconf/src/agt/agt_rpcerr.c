@@ -798,19 +798,17 @@ rpc_err_rec_t *
 			  const void *error_parm,
 			  xmlChar *error_path)
 {
-    rpc_err_rec_t  *err;
-    rpc_err_sev_t   errsev;
-    xmlChar        *error_msg;
-    const xmlChar  *badval, *badns;
-    const void     *err1, *err2, *err3, *err4;
-    rpc_err_t       rpcerr;
-    const xmlChar  *msg;
-    status_t        res;
-    const psd_parm_t *parm;
-    const cfg_template_t *cfg;
-    const typ_index_t    *in;
-    const xmlns_qname_t *qname;
-
+    rpc_err_rec_t            *err;
+    const obj_template_t     *parm, *in;
+    const cfg_template_t     *cfg;
+    const xmlns_qname_t      *qname;
+    xmlChar                  *error_msg;
+    const xmlChar            *badval, *badns, *msg;
+    const void               *err1, *err2, *err3, *err4;
+    rpc_err_t                 rpcerr;
+    status_t                  res;
+    rpc_err_sev_t             errsev;
+    xmlns_id_t                nsid;
     
     badval = NULL;
     badns = NULL;
@@ -826,10 +824,12 @@ rpc_err_rec_t *
 	if (!error_parm) {
 	    SET_ERROR(ERR_INTERNAL_PTR);
 	} else {
-	    if  (parmtyp == NCX_NT_PSDPARM) {
-		parm = (const psd_parm_t *)error_parm;
-		err1 = (const void *)parm->parent->nsid;
-		err2 = (const void *)parm->name;
+	    if (parmtyp == NCX_NT_OBJ) {
+		parm = (const obj_template_t *)error_parm;
+		if (parm) {
+		    nsid = obj_get_nsid(parm);
+		    err2 = (const void *)obj_get_name(parm);
+		}
 	    } else if (parmtyp == NCX_NT_STRING) {
 		err1 = (const void *)0;
 		err2 = (const void *)error_parm;
@@ -848,13 +848,15 @@ rpc_err_rec_t *
 	}
 	break;
     case ERR_NCX_MISSING_INDEX:
-	if (!error_parm || parmtyp != NCX_NT_INDEX) {
+	if (!error_parm || parmtyp != NCX_NT_OBJ) {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	} else {
-	    in = (const typ_index_t *)error_parm;
-	    err1 = (const void *)0;      /***  NSID not right ***/
-	    err2 = (const void *)(in->sname) ? 
-		in->sname : in->typch.name;
+	    in = (const obj_template_t *)error_parm;
+	    if (in) {
+		nsid = obj_get_nsid(in);
+		err1 = (const void *)nsid;
+		err2 = (const void *)obj_get_name(in);
+	    }
 	}
 	break;
     case ERR_NCX_MISSING_ATTR:

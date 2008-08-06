@@ -131,9 +131,6 @@ static void
     if (cap->cap_mod_malloc) {
 	m__free(cap->cap_mod_malloc);
     }
-    if (cap->cap_owner_malloc) {
-	m__free(cap->cap_owner_malloc);
-    }
     m__free(cap);
 
 }  /* free_cap */
@@ -455,28 +452,12 @@ status_t
         return ERR_INTERNAL_MEM;
     }
 
-    /* parse out the owner and module names
+    /* parse out the module name
      * get the 'p' var to point at the start of the owner
      */
     p = cap->cap_uri;
     p += len;
-    cap->cap_owner = p;
-
-    /* skip over the owner name */
-    while (*p && *p != CAP_SEP_CH) {
-	p++;
-    }
-    if (!*p) {
-	/* reached end of string */
-	free_cap(cap);
-	return ERR_NCX_INVALID_VALUE;
-    }
-    cap->cap_owner_len = (uint32)(p - cap->cap_owner);
-    
-    /* should be on the start of the module name,
-     * after skipping past capability sep char 
-     */
-    cap->cap_mod = ++p;	
+    cap->cap_mod = p;
 
     /* find the end of the module name */
     while (*p && *p != CAP_SEP_CH) {
@@ -538,7 +519,6 @@ status_t
 *
 * INPUTS:
 *    caplist == capability list that will contain the module caps
-*    owner == module owner name
 *    modname == module name
 *    modversion == module version string (MAY BE NULL)
 *
@@ -547,7 +527,6 @@ status_t
 *********************************************************************/
 status_t 
     cap_add_mod (cap_list_t *caplist, 
-		 const xmlChar *owner,
 		 const xmlChar *modname,
 		 const xmlChar *modversion)
 {
@@ -555,13 +534,13 @@ status_t
     cap_rec_t    *cap;
 
 #ifdef DEBUG
-    if (!caplist || !owner || !modname) {
+    if (!caplist || !modname) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* construct the module URN string */
-    str = cap_make_mod_urn(owner, modname, modversion);
+    str = cap_make_mod_urn(modname, modversion);
     if (!str) {
 	return ERR_INTERNAL_MEM;
     }
@@ -585,15 +564,6 @@ status_t
     } else {
 	cap->cap_mod = cap->cap_mod_malloc;
 	cap->cap_mod_len = xml_strlen(cap->cap_mod);
-    }
-
-    cap->cap_owner_malloc = xml_strdup(owner);
-    if (!cap->cap_owner_malloc) {
-	free_cap(cap);
-	return ERR_INTERNAL_MEM;
-    } else {
-	cap->cap_owner = cap->cap_owner_malloc;
-	cap->cap_owner_len = xml_strlen(cap->cap_owner);
     }
 
     if (modversion) {
@@ -645,9 +615,6 @@ status_t
 	return ERR_INTERNAL_MEM;
     }
 
-    cap->cap_owner = NCX_DEF_OWNER;
-    cap->cap_owner_len = xml_strlen(NCX_DEF_OWNER);
-
     dlq_enque(cap, &caplist->capQ);
     return NO_ERR;
 
@@ -661,7 +628,6 @@ status_t
 *
 * INPUTS:
 *    caplist == capability list that will contain the enterprise cap 
-*    owner == module owner name
 *    modname == module name
 *    modversion == module version string
 *
@@ -670,7 +636,6 @@ status_t
 *********************************************************************/
 status_t 
     cap_add_modval (val_value_t *caplist, 
-		    const xmlChar *owner,
 		    const xmlChar *modname,
 		    const xmlChar *modversion)
 {
@@ -678,13 +643,13 @@ status_t
     val_value_t  *capval;
 
 #ifdef DEBUG
-    if (!caplist || !owner || !modname) {
+    if (!caplist || !modname) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* construct the module URN string */
-    str = cap_make_mod_urn(owner, modname, modversion);
+    str = cap_make_mod_urn(modname, modversion);
     if (!str) {
 	return ERR_INTERNAL_MEM;
     }
@@ -713,7 +678,6 @@ status_t
 *
 * INPUTS:
 *    caplist == capability list that will contain the module caps
-*    owner == module owner name
 *    modname == module name
 *    modversion == module version string (MAY BE NULL)
 *
@@ -721,15 +685,14 @@ status_t
 *    status
 *********************************************************************/
 xmlChar *
-    cap_make_mod_urn (const xmlChar *owner,
-		      const xmlChar *modname,
+    cap_make_mod_urn (const xmlChar *modname,
 		      const xmlChar *modversion)
 {
     uint32        len;
     xmlChar      *str, *p;
 
 #ifdef DEBUG
-    if (!owner || !modname) {
+    if (!modname) {
 	SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
@@ -737,11 +700,10 @@ xmlChar *
 
     /* construct the module URN string */
     if (modversion) {
-	len = xml_strlen(CAP_MODURN) + xml_strlen(owner) + 1
-	    + xml_strlen(modname) + 1 + xml_strlen(modversion);
+	len = xml_strlen(CAP_MODURN) + 
+	    xml_strlen(modname) + 1 + xml_strlen(modversion);
     } else {
-	len = xml_strlen(CAP_MODURN) + xml_strlen(owner) + 1
-	    + xml_strlen(modname);
+	len = xml_strlen(CAP_MODURN) + xml_strlen(modname);
     }
     str = m__getMem(len+1);
     if (!str) {
@@ -749,8 +711,6 @@ xmlChar *
     }
     p = str;
     p += xml_strcpy(p, CAP_MODURN);
-    p += xml_strcpy(p, owner);
-    *p++ = CAP_SEP_CH;
     p += xml_strcpy(p, modname);
     if (modversion) {
 	*p++ = CAP_SEP_CH;
@@ -768,30 +728,27 @@ xmlChar *
 * Construct and malloc a module schema URL string
 *
 * INPUTS:
-*    owner == module owner name
 *    caprec == cap_rec_t for the module capability
 *
 * RETURNS:
 *    status
 *********************************************************************/
 xmlChar *
-    cap_make_mod_url (const xmlChar *owner,
-		      const cap_rec_t *caprec)
+    cap_make_mod_url (const cap_rec_t *caprec)
 {
     uint32        len;
     xmlChar      *str, *p;
 
 #ifdef DEBUG
-    if (!owner || !caprec) {
+    if (!caprec) {
 	SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
-    /* http://netconfcentral.com/xsd/owner/module.xsd */
+    /* http://netconfcentral.com/xsd/module.xsd */
     len = xml_strlen(URL_ORG) + 
-	xml_strlen(URL_START) + xml_strlen(owner) + 1
-	+ caprec->cap_mod_len + 4;
+	xml_strlen(URL_START) + caprec->cap_mod_len + 4;
 
     str = m__getMem(len+1);
     if (!str) {
@@ -801,8 +758,6 @@ xmlChar *
     p = str;
     p += xml_strcpy(p, URL_ORG);
     p += xml_strcpy(p, URL_START);
-    p += xml_strcpy(p, owner);
-    *p++ = '/';
     p += xml_strncpy(p, caprec->cap_mod, caprec->cap_mod_len);
     p += xml_strcpy(p, (const xmlChar *)".xsd");
 
@@ -1119,23 +1074,18 @@ const cap_rec_t *
 *********************************************************************/
 void
     cap_split_modcap (const cap_rec_t *cap,
-		      const xmlChar **owner,
-		      uint32 *ownerlen,
 		      const xmlChar **module,
 		      uint32 *modlen,
 		      const xmlChar **version)
 {
 
 #ifdef DEBUG
-    if (!cap || !owner || !ownerlen || !module ||
-	!modlen || !version) {
+    if (!cap || !module || !modlen || !version) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return;
     }
 #endif
 
-    *owner = cap->cap_owner;
-    *ownerlen = cap->cap_owner_len;
     *module = cap->cap_mod;
     *modlen = cap->cap_mod_len;
     *version = cap->cap_ver;

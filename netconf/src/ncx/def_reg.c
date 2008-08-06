@@ -8,7 +8,7 @@
 
    Registry node types
 
-     DEF_NT_NSNODE  : Namespace to application pointer
+     DEF_NT_NSNODE  : Namespace to module pointer
 
      DEF_NT_FDNODE  : File Descriptor to session control block
 
@@ -99,8 +99,9 @@ date         init     comment
 /* top-level registry node type */
 typedef enum def_nodetyp_t_ {
     DEF_NT_NONE,
-    DEF_NT_MODNODE,         /* topht ncx-module name */
+    DEF_NT_MODNODE,         /* topht module name */
     DEF_NT_NSNODE,          /* topht namespace URI */
+    DEF_NT_PRENODE,         /* topht module prefix */
     DEF_NT_FDNODE,          /* topht file descriptor integer */
     DEF_NT_OWNNODE,         /* topht module name */
     DEF_NT_DEFNODE,         /* ownht module object name */
@@ -123,6 +124,7 @@ typedef struct def_hdr_t_ {
 
 /* DEF_NT_MODNODE
  * DEF_NT_NSNODE
+ * DEF_NT_PRENODE
  *
  * Top tier: Entries that don't have any children 
  */
@@ -571,6 +573,7 @@ static void
 }  /* free_modnode */
 
 
+#if 0
 /********************************************************************
 * FUNCTION find_cfgdef
 *   
@@ -655,6 +658,7 @@ static def_cfgnode_t *
     return NULL;
 
 } /* find_cfgdef */
+#endif
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -716,6 +720,7 @@ void
 	    switch (hdr->nodetyp) {
 	    case DEF_NT_MODNODE:
 	    case DEF_NT_NSNODE:
+	    case DEF_NT_PRENODE:
 		m__free(hdr);
 		break;
 	    case DEF_NT_FDNODE:
@@ -759,10 +764,6 @@ void
 status_t 
     def_reg_add_ns (xmlns_t *ns)
 {
-    if (!def_reg_init_done) {
-        def_reg_init();
-    }
-
 #ifdef DEBUG
     if (!ns) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
@@ -788,10 +789,6 @@ xmlns_t *
     def_reg_find_ns (const xmlChar *nsname)
 {
     def_topnode_t *nsdef;
-
-    if (!def_reg_init_done) {
-        def_reg_init();
-    }
 
 #ifdef DEBUG
     if (!nsname) {
@@ -820,11 +817,6 @@ void
     def_reg_del_ns (const xmlChar *nsname)
 {
     def_topnode_t *nsdef;
-
-    if (!def_reg_init_done) {
-        def_reg_init();
-        return;
-    }
 
 #ifdef DEBUG
     if (!nsname) {
@@ -865,10 +857,6 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
-
-    if (!def_reg_init_done) {
-        def_reg_init();
-    }
 
     /* create an FD-to-SCB mapping */
     fdmap = m__getObj(def_fdmap_t);
@@ -916,11 +904,6 @@ ses_cb_t *
     int            ret;
     xmlChar        buff[NCX_MAX_NLEN];
 
-    if (!def_reg_init_done) {
-        def_reg_init();
-	return NULL;
-    }
-
     ret = sprintf((char *)buff, "%d", fd);
     if (ret <= 0) {
 	return NULL;
@@ -953,11 +936,6 @@ void
     int            ret;
     xmlChar        buff[NCX_MAX_NLEN];
 
-    if (!def_reg_init_done) {
-        def_reg_init();
-        return;
-    }
-
     ret = sprintf((char *)buff, "%d", fd);
     if (ret <= 0) {
 	return;
@@ -985,9 +963,8 @@ void
 status_t 
     def_reg_add_module (ncx_module_t *mod)
 {
-    if (!def_reg_init_done) {
-        def_reg_init();
-    }
+
+    status_t  res;
 
 #ifdef DEBUG
     if (!mod) {
@@ -995,7 +972,11 @@ status_t
     }
 #endif
 
-    return add_top_node(DEF_NT_MODNODE, mod->name, mod);
+    res = add_top_node(DEF_NT_MODNODE, mod->name, mod);
+    if (res == NO_ERR) {
+	res = add_top_node(DEF_NT_PRENODE, mod->prefix, mod);
+    }
+    return res;
 
 } /* def_reg_add_module */
 
@@ -1016,11 +997,6 @@ ncx_module_t *
 {
     def_topnode_t *moddef;
 
-    if (!def_reg_init_done) {
-        def_reg_init();
-        return NULL;
-    }
-
 #ifdef DEBUG
     if (!modname) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1032,6 +1008,35 @@ ncx_module_t *
     return (moddef) ? (ncx_module_t *)moddef->dptr : NULL;
 
 } /* def_reg_find_module */
+
+
+/********************************************************************
+* FUNCTION def_reg_find_module_prefix
+*   
+* find one ncx_modulet in the registry
+*
+* INPUTS:
+*    prefix == official prefix for module to find
+*
+* RETURNS:
+*    pointer to struct or NULL if not found
+*********************************************************************/
+ncx_module_t * 
+    def_reg_find_module_prefix (const xmlChar *prefix)
+{
+    def_topnode_t *predef;
+
+#ifdef DEBUG
+    if (!prefix) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    predef = find_top_node(DEF_NT_PRENODE, prefix);
+    return (predef) ? (ncx_module_t *)predef->dptr : NULL;
+
+} /* def_reg_find_module_prefix */
 
 
 /********************************************************************
@@ -1047,12 +1052,8 @@ ncx_module_t *
 void
     def_reg_del_module (const xmlChar *modname)
 {
-    def_topnode_t *moddef;
-
-    if (!def_reg_init_done) {
-        def_reg_init();
-        return;
-    } 
+    def_topnode_t *moddef, *predef;
+    ncx_module_t  *mod;
 
 #ifdef DEBUG
     if (!modname) {
@@ -1064,8 +1065,17 @@ void
     moddef = find_top_node(DEF_NT_MODNODE, modname);
     if (moddef) {
         dlq_remove(moddef);
+	mod = (ncx_module_t *)moddef->dptr;
+
+	predef = find_top_node(DEF_NT_PRENODE, mod->prefix);
+	if (predef) {
+	    dlq_remove(predef);
+	    m__free(predef);
+	}
+
         m__free(moddef);
     }
+
 } /* def_reg_del_module */
 
 
@@ -1183,11 +1193,6 @@ void *
     def_defnode_t *def;
     def_nodetyp_t  ntyp;
 
-    if (!def_reg_init_done) {
-        def_reg_init();
-	return NULL;
-    }
-
 #ifdef DEBUG
     if (!modname || !defname || !dtyp) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1245,11 +1250,6 @@ void *
     def_module_t   *modulenode;
     def_defnode_t *def;
     def_nodetyp_t  ntyp;
-
-    if (!def_reg_init_done) {
-        def_reg_init();
-	return NULL;
-    }
 
 #ifdef DEBUG
     if (!modname || !defname || !dtyp) {
@@ -1312,11 +1312,6 @@ void
     def_defnode_t *def;
     def_nodetyp_t  ntyp;
 
-    if (!def_reg_init_done) {
-        def_reg_init();
-        return;   /* can't possibly find the entry to delete */
-    }
-
 #ifdef DEBUG
     if (!modname || !defname) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1337,7 +1332,7 @@ void
     }
 }  /* def_reg_del_moddef */
 
-
+#if 0
 /********************************************************************
 * FUNCTION def_reg_add_cfgdef
 *   
@@ -1345,7 +1340,6 @@ void
 *
 * INPUTS:
 *    modname == registry module to add
-*    appname == registry application to add
 *    defname == definition name to add
 *    instance == instance string ID of this definition 
 *                NULL means it is a static parmset
@@ -1357,7 +1351,6 @@ void
 *********************************************************************/
 status_t 
     def_reg_add_cfgdef (const xmlChar *modname,
-			const xmlChar *appname,
 			const xmlChar *defname,
 			const xmlChar *instance,
 			ncx_cfg_t cfgid, 
@@ -1367,10 +1360,6 @@ status_t
     def_ownnode_t *own;
     def_cfgnode_t *def;
     uint32 h, len1, len2, len3;
-
-    if (!def_reg_init_done) {
-        def_reg_init();
-    }
 
 #ifdef DEBUG
     /* check the parameters */
@@ -1482,11 +1471,6 @@ void *
     def_cfgnode_t *def;
     uint32         len;
 
-    if (!def_reg_init_done) {
-        def_reg_init();
-	return NULL;   /* def cannot possibly be found */
-    }
-
 #ifdef DEBUG
     /* check the parameters */
     if (!modname || !appname || !defname || !dtyp) {
@@ -1550,11 +1534,6 @@ void
     def_cfgnode_t *def;
     uint32         len;
 
-    if (!def_reg_init_done) {
-        def_reg_init();
-        return;   /* can't possibly find the entry to delete */
-    }
-
 #ifdef DEBUG
     if (!modname || !appname || !defname) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1588,6 +1567,6 @@ void
     }
 
 }  /* def_reg_del_cfgdef */
-
+#endif
 
 /* END file def_reg.c */

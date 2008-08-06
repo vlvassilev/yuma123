@@ -40,10 +40,6 @@ date         init     comment
 #include  "agt_connect.h"
 #endif
 
-#ifndef _H_agt_ps
-#include  "agt_ps.h"
-#endif
-
 #ifndef _H_agt_ses
 #include  "agt_ses.h"
 #endif
@@ -157,9 +153,10 @@ static uint32     next_sesid;
 
 static total_stats_t totals;
 
-static ps_parmset_t *sesinfo, *mySession;
+/* static ps_parmset_t *sesinfo, *mySession; */
 
 static ses_cb_t  *agtses[AGT_SES_MAX_SESSIONS];
+
 
 /********************************************************************
 * FUNCTION add_ses_stats
@@ -185,6 +182,7 @@ static void
 }  /* add_ses_stats */
 
 
+#if 0
 /********************************************************************
 * FUNCTION make_stats_val
 *
@@ -987,6 +985,8 @@ static status_t
 
 }   /* get_mySession */
 
+#endif  /* 0 */
+
 
 /************* E X T E R N A L    F U N C T I O N S ***************/
 
@@ -1006,7 +1006,7 @@ status_t
     agt_ses_init (void)
 {
     uint32    i;
-    status_t  res;
+    /* status_t  res; */
 
     if (agt_ses_init_done) {
 	return ERR_INTERNAL_INIT_SEQ;
@@ -1016,6 +1016,8 @@ status_t
 	agtses[i] = NULL;
     }
     next_sesid = 1;
+
+#if 0
     memset(&totals, 0x0, sizeof(total_stats_t));
 
 #ifdef AGT_SES_DEBUG
@@ -1027,6 +1029,8 @@ status_t
     if (res != NO_ERR) {
 	return res;
     }
+#endif
+
 
     agt_ses_init_done = TRUE;
     return NO_ERR;
@@ -1049,6 +1053,7 @@ status_t
 status_t
     agt_ses_init2 (void)
 {
+#if 0
     status_t  res;
 
     if (!agt_ses_init_done) {
@@ -1100,6 +1105,8 @@ status_t
 					set_withMetaDefault);
 
     return res;
+#endif
+    return NO_ERR;
 
 }  /* agt_ses_init2 */
 
@@ -1128,6 +1135,7 @@ void
 
 	next_sesid = 0;
 
+#if 0
 	if (sesinfo) {
 	    /* ps_free_parmset(sesinfo); */
 	    sesinfo = NULL;
@@ -1148,6 +1156,8 @@ void
 	agt_cb_unregister_parm_callback(AGT_SES_MODULE,
 					AGT_SES_MY_SESSION,
 					AGT_SES_WITHMETA_DEFAULT);
+
+#endif
 
 	agt_ses_init_done = FALSE;
     }

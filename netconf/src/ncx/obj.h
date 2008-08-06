@@ -108,9 +108,20 @@ date	     init     comment
 /* object has been visited by the yangdiff program */
 #define OBJ_FL_SEEN         bit7
 
-
 /* object marked as changed by the yangdiff program */
 #define OBJ_FL_DIFF         bit8
+
+/* object is marked as ncx:hidden */
+#define OBJ_FL_HIDDEN       bit9
+
+/* object is marked as ncx:root */
+#define OBJ_FL_ROOT         bit10
+
+/* object is marked as a password */
+#define OBJ_FL_PASSWD       bit11
+
+/* object is marked as a CLI-only node */
+#define OBJ_FL_CLI          bit12
 
 
 /********************************************************************
@@ -339,7 +350,6 @@ typedef struct obj_rpc_t_ {
     rpc_type_t      rpc_typ;
     xmlns_id_t      nsid;
     rpc_outtyp_t    out_datatyp;
-    struct rpc_agt_cbset_t_ *cbset;      /* BUILD_AGT: method set */
     boolean          supported;    /* mod loaded, not implemented */    
 } obj_rpc_t;
 
@@ -391,6 +401,7 @@ typedef struct obj_template_t_ {
     struct obj_template_t_ *parent;
     struct obj_template_t_ *usesobj;
     const obj_when_t  *augwhen;   /* augment when clause backptr */
+    void   *cbset;   /* agt_rpc_cbset_t for RPC or agt_cb_fnset_t for OBJ */
     union def_ {
 	obj_container_t   *container;
 	obj_leaf_t        *leaf;
@@ -599,6 +610,10 @@ extern status_t
     obj_gen_aughook_id (const obj_template_t *obj,
 			xmlChar  **buff);
 
+/* set the ncx:hidden, root, and password flags */
+extern void
+    obj_set_ncx_flags (obj_template_t *obj);
+
 
 /***************** ACCESS OBJECT PROPERTIES  *******************/
 
@@ -707,6 +722,18 @@ extern boolean
 extern boolean
     obj_is_match (const obj_template_t  *obj1,
 		  const obj_template_t *obj2);
+
+extern boolean
+    obj_is_hidden (const obj_template_t *obj);
+
+extern boolean
+    obj_is_root (const obj_template_t *obj);
+
+extern boolean
+    obj_is_password (const obj_template_t *obj);
+
+extern boolean
+    obj_is_cli (const obj_template_t *obj);
 
 extern boolean
     obj_ok_for_cli (const obj_template_t *obj);

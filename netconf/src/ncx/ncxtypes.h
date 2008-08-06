@@ -117,7 +117,6 @@ typedef enum ncx_access_t_ {
 typedef enum ncx_data_class_t_ {
     NCX_DC_NONE,
     NCX_DC_CONFIG,        /* persistent config */
-    NCX_DC_TCONFIG,       /* transient config */
     NCX_DC_STATE          /* state or statistics */
 } ncx_data_class_t;
 

@@ -36,6 +36,10 @@ date         init     comment
 #include "def_reg.h"
 #endif
 
+#ifndef _H_cli
+#include "cli.h"
+#endif
+
 #ifndef _H_ncx
 #include "ncx.h"
 #endif
@@ -44,16 +48,8 @@ date         init     comment
 #include "ncxconst.h"
 #endif
 
-#ifndef _H_ps
-#include "ps.h"
-#endif
-
-#ifndef _H_ps_parse
-#include "ps_parse.h"
-#endif
-
-#ifndef _H_psd
-#include "psd.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_status
@@ -78,7 +74,7 @@ date         init     comment
 *                       V A R I A B L E S			    *
 *                                                                   *
 *********************************************************************/
-static ps_parmset_t *cli_ps = NULL;
+static val_value_t *cli_val = NULL;
 
 
 /********************************************************************
@@ -88,71 +84,73 @@ static ps_parmset_t *cli_ps = NULL;
 * Set the agt_profile data structure
 *
 * INPUTS:
-*   ps == parmset from CLI parsing or NULL if none
+*   valset == value set for CLI parsing or NULL if none
 *   agt_profile == pointer to profile struct to fill in
 *
 * OUTPUTS:
-*  *agt_profile is filled in with params of defaults
+*   *agt_profile is filled in with params of defaults
 *
 * RETURNS:
 *   none
 *********************************************************************/
 static void
-    set_agent_profile (ps_parmset_t *ps,
+    set_agent_profile (val_value_t *valset,
 		       agt_profile_t *agt_profile)
 {
     val_value_t  *val;
-    status_t      res;
 
     /* check if there is any CLI data to read */
-    if (!ps) {
+    if (!valset) {
+	/* assumes agt_profile already has default values */
 	return;
     }
 
     /* get log param */
-    res = ps_get_parmval(ps, NCX_EL_LOG, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, NCX_EL_LOG);
+    if (val) {
 	agt_profile->agt_logfile = VAL_STR(val);
     }
 
     /* get log-append param */
-    if (ps_find_parm(ps, NCX_EL_LOGAPPEND)) {
+    val = val_find_child(valset, NULL, NCX_EL_LOGAPPEND);
+    if (val) {
 	agt_profile->agt_logappend = TRUE;
     }
 
     /* get log-level param */
-    res = ps_get_parmval(ps, NCX_EL_LOGLEVEL, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, NCX_EL_LOGLEVEL);
+    if (val) {
 	agt_profile->agt_loglevel = 
 	    log_get_debug_level_enum((const char *)VAL_STR(val));
     }
 
     /* get no-startup startup param choice */
-    if (ps_find_parm(ps, AGT_CLI_NOSTARTUP)) {
+    val = val_find_child(valset, NULL, AGT_CLI_NOSTARTUP);
+    if (val) {
 	agt_profile->agt_usestartup = FALSE;
-    } else {
-	/* get startup param */
-	res = ps_get_parmval(ps, AGT_CLI_STARTUP, &val);
-	if (res == NO_ERR) {
-	    agt_profile->agt_startup = VAL_STR(val);
-	}
+    }
+
+    /* OR get startup param */
+    val = val_find_child(valset, NULL, AGT_CLI_STARTUP);
+    if (val) {
+	agt_profile->agt_startup = VAL_STR(val);
     }
 
     /* get modpath param */
-    res = ps_get_parmval(ps, NCX_EL_MODPATH, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, NCX_EL_MODPATH);
+    if (val) {
 	agt_profile->agt_modpath = VAL_STR(val);
     }
 
     /* get datapath param */
-    res = ps_get_parmval(ps, NCX_EL_DATAPATH, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, NCX_EL_DATAPATH);
+    if (val) {
 	agt_profile->agt_datapath = VAL_STR(val);
     }
 
     /* get runpath param */
-    res = ps_get_parmval(ps, NCX_EL_RUNPATH, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(valset, NULL, NCX_EL_RUNPATH);
+    if (val) {
 	agt_profile->agt_runpath = VAL_STR(val);
     }
 
@@ -191,52 +189,50 @@ status_t
 			   boolean *showver,
 			   boolean *showhelp)
 {
-    psd_template_t  *psd;
-    ps_parmset_t    *ps;
-    ps_parm_t       *parm;
-    ncx_node_t       dtyp;
-    status_t         res;
+    const obj_template_t  *obj;
+    val_value_t           *valset, *val;
+    ncx_node_t             dtyp;
+    status_t               res;
 
     /* find the parmset definition in the registry */
-    dtyp = NCX_NT_PSD;
-    psd = (psd_template_t *)
-	def_reg_find_moddef(AGT_CLI_MODULE, AGT_CLI_PSD, &dtyp);
-    if (!psd) {
+    dtyp = NCX_NT_OBJ;
+    obj = (const obj_template_t *)
+	def_reg_find_moddef(AGT_CLI_MODULE, 
+			    AGT_CLI_CONTAINER, &dtyp);
+    if (!obj) {
 	return ERR_NCX_NOT_FOUND;
     }
 
     /* parse the command line against the PSD */
     res = NO_ERR;
-    ps = NULL;
+    valset = NULL;
     if (argc > 1) {
-	ps = ps_parse_cli(argc, argv, psd,
-			  FULLTEST, PLAINMODE, TRUE, &res);
+	valset = cli_parse(argc, argv, obj,
+			   FULLTEST, PLAINMODE, TRUE, &res);
 	if (res != NO_ERR) {
 	    return res;
 	}
     }
 
     /* transfer the parmset values */
-    set_agent_profile(ps, agt_profile);
+    set_agent_profile(valset, agt_profile);
 
     /* check the quick exit parameters */
-    if (ps) {
+    if (valset) {
 	/* check if version mode requested */
-	parm = ps_find_parm(ps, NCX_EL_VERSION);
-	*showver = (parm) ? TRUE : FALSE;
+	val = val_find_child(valset, NULL, NCX_EL_VERSION);
+	*showver = (val) ? TRUE : FALSE;
 
 	/* check if help mode requested */
-	parm = ps_find_parm(ps, NCX_EL_HELP);
-	*showhelp = (parm) ? TRUE : FALSE;
+	val = val_find_child(valset, NULL, NCX_EL_HELP);
+	*showhelp = (val) ? TRUE : FALSE;
     } else {
 	*showver = FALSE;
 	*showhelp = FALSE;
     }
 
     /* cleanup and exit */
-    if (ps) {
-	cli_ps = ps;
-    }
+    cli_val = valset;
 
     return res;
 
@@ -244,18 +240,18 @@ status_t
 
 
 /********************************************************************
-* FUNCTION agt_cli_get_parmset
+* FUNCTION agt_cli_get_valset
 *
 *   Retrieve the command line parameter set from boot time
 *
 * RETURNS:
 *    pointer to parmset or NULL if none
 *********************************************************************/
-const ps_parmset_t *
-    agt_cli_get_parmset (void)
+const val_value_t *
+    agt_cli_get_valset (void)
 {
-    return cli_ps;
-} /* agt_cli_get_parmset */
+    return cli_val;
+} /* agt_cli_get_valset */
 
 
 /********************************************************************
@@ -267,9 +263,9 @@ const ps_parmset_t *
 void
     agt_cli_cleanup (void)
 {
-    if (cli_ps) {
-	ps_free_parmset(cli_ps);
-	cli_ps = NULL;
+    if (cli_val) {
+	val_free_value(cli_val);
+	cli_val = NULL;
     }
 
 } /* agt_cli_cleanup */

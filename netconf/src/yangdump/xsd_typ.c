@@ -115,12 +115,6 @@ date         init     comment
 /* memberTypes per line hack */
 #define PER_LINE 2
 
-/* forward declarations for recursive child node processor */
-static status_t
-    do_elem_btype (const ncx_module_t *mod,
-		   const typ_child_t *typch,
-		   val_value_t *val);
-
 
 /********************************************************************
 * FUNCTION add_err_annotation
@@ -811,7 +805,7 @@ static val_value_t *
 *
 * INPUTS:
 *    mod == module in progress
-*    btyp == type of the typedef (NCX_BT_SLIST or NCX_BT_XLIST)
+*    btyp == type of the typedef (NCX_BT_SLIST)
 *    typdef == typdef for the list
 *    val == struct parent to contain child nodes for each type
 *
@@ -974,139 +968,7 @@ static status_t
 
 }   /* finish_list */
 
-
-/********************************************************************
-* FUNCTION do_elem_list
-* 
-*   Generate the element node for a list child type
-*
-* INPUTS:
-*    mod == module conversion in progress
-*    typch == typ_child_t for the child node to use
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->v.childQ has entries added for the child type
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    do_elem_list (const ncx_module_t *mod,
-		  const typ_child_t *typch,
-		  val_value_t *val)
-{
-    val_value_t    *elem, *typnode;
-    status_t        res;
-    ncx_btype_t     btyp;
-
-    /* check if this is a named type with a struct base type */
-    if (typch->typdef.class == NCX_CL_NAMED) {
-	elem = xsd_new_element(mod, typch->name, &typch->typdef, 
-			       typch->parent, FALSE, FALSE);
-	if (elem) {
-	    val_add_child(elem, val);
-	    return NO_ERR;
-	} else {
-	    return ERR_INTERNAL_MEM;
-	}
-    }
-
-    /* element list of 1 simple content node */
-    elem = xsd_new_element(mod, typch->name, &typch->typdef, 
-			   typch->parent, TRUE, FALSE);
-    if (!elem) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* next level is simpleType */
-    typnode = xml_val_new_struct(XSD_SIM_TYP, xmlns_xs_id());
-    if (!typnode) {
-	val_free_value(elem);
-	return ERR_INTERNAL_MEM;
-    } else {
-	val_add_child(typnode, elem);  /* add early */
-    }
-
-    /* generate the list element */
-    btyp = typ_get_basetype(&typch->typdef);
-    res = finish_list(mod, btyp, &typch->typdef, typnode);
-    if (res != NO_ERR) {
-	val_free_value(elem);
-    } else {
-	val_add_child(elem, val);
-    }
-
-    return res;
-
-}   /* do_elem_list */
-
-
-/********************************************************************
-* FUNCTION do_elem_union
-* 
-*   Generate the element node for a union child type
-*
-* INPUTS:
-*    mod == module conversion in progress
-*    typch == typ_child_t for the child node to use
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->v.childQ has entries added for the child type
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    do_elem_union (const ncx_module_t *mod,
-		   const typ_child_t *typch,
-		   val_value_t *val)
-{
-    val_value_t    *elem, *typnode;
-    status_t        res;
-
-    /* check if this is a named type with a struct base type */
-    if (typch->typdef.class == NCX_CL_NAMED) {
-	elem = xsd_new_element(mod, typch->name, &typch->typdef, 
-			       typch->parent, FALSE, FALSE);
-	if (elem) {
-	    val_add_child(elem, val);
-	    return NO_ERR;
-	} else {
-	    return ERR_INTERNAL_MEM;
-	}
-    }
-
-    /* element union of N simple types */
-    elem = xsd_new_element(mod, typch->name, &typch->typdef, 
-			   typch->parent, TRUE, FALSE);
-    if (!elem) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* next level is simpleType */
-    typnode = xml_val_new_struct(XSD_SIM_TYP, xmlns_xs_id());
-    if (!typnode) {
-	val_free_value(elem);
-	return ERR_INTERNAL_MEM;
-    } else {
-	val_add_child(typnode, elem);  /* add early */
-    }
-
-    /* generate the union element */
-    res = xsd_finish_union(mod, &typch->typdef, typnode);
-    if (res != NO_ERR) {
-	val_free_value(elem);
-    } else {
-	val_add_child(elem, val);
-    }
-
-    return res;
-
-}   /* do_elem_union */
-
-
+#if 0
 /********************************************************************
 * FUNCTION finish_attributes
 * 
@@ -1202,740 +1064,8 @@ static status_t
     return NO_ERR;
 
 }   /* finish_attributes */
+#endif
 
-
-
-/********************************************************************
-* FUNCTION finish_struct
-* 
-*   Generate the XSD for a struct data type
-*
-* INPUTS:
-*    mod == module conversion in progress
-*    typdef == typ_def for the typ_template struct to use
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->v.childQ has entries added for the attributes in this typdef
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    finish_struct (const ncx_module_t *mod,
-		   const typ_def_t *typdef,
-		   val_value_t *val)
-{
-    val_value_t            *top;
-    const typ_child_t      *child;
-    status_t                res;
-    xmlns_id_t              xsd_id;
-
-    res = NO_ERR;
-    xsd_id = xmlns_xs_id();
-
-    /* struct of N arbitrary nodes */
-    top = xml_val_new_struct(XSD_SEQUENCE, xsd_id);
-    if (!top) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* go through all the child nodes and generate elements for them */
-    for (child = typ_first_child(&typdef->def.complex);
-	 child != NULL && res==NO_ERR;
-	 child = typ_next_con_child(child)) {
-	res = do_elem_btype(mod, child, top);
-    }
-
-    if (res != NO_ERR) {
-	val_free_value(top);
-    } else {
-	val_add_child(top, val);
-    }
-
-    /* generate the attributes allowed in the struct node */
-    if (res == NO_ERR) {
-	res = finish_attributes(mod, typdef, val);
-    }
-
-    return res;
-
-}   /* finish_struct */
-
-
-/********************************************************************
-* FUNCTION do_elem_struct
-* 
-*   Generate the element node for a struct child type
-*
-* INPUTS:
-*    mod == module conversion in progress
-*    typch == typ_child_t for the child node to use
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->v.childQ has entries added for the child type
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    do_elem_struct (const ncx_module_t *mod,
-		    const typ_child_t *typch,
-		    val_value_t *val)
-{
-    val_value_t    *elem, *cpx;
-    status_t        res;
-    xmlns_id_t      xsd_id;
-
-    /* check if this is a named type with a struct base type */
-    if (typch->typdef.class == NCX_CL_NAMED) {
-	elem = xsd_new_element(mod, typch->name, &typch->typdef, 
-			       typch->parent, FALSE, FALSE);
-	if (elem) {
-	    val_add_child(elem, val);
-	    return NO_ERR;
-	} else {
-	    return ERR_INTERNAL_MEM;
-	}
-    }
-
-    xsd_id = xmlns_xs_id();
-
-    /* element struct of N arbitrary nodes */
-    elem = xsd_new_element(mod, typch->name, &typch->typdef, 
-			   typch->parent, TRUE, FALSE);
-    if (!elem) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* next level is complexType */
-    cpx = xml_val_new_struct(XSD_CPX_TYP, xsd_id);
-    if (!cpx) {
-	val_free_value(elem);
-	return ERR_INTERNAL_MEM;
-    } else {
-	val_add_child(cpx, elem);  /* add early */
-    }
-
-    /* finish the complexType */
-    res = finish_struct(mod, &typch->typdef, cpx);
-    if (res != NO_ERR) {
-	val_free_value(elem);
-    } else {
-	val_add_child(elem, val);
-    }
-
-    return res;
-
-}   /* do_elem_struct */
-
-
-/********************************************************************
-* FUNCTION finish_choice
-* 
-*   Generate the XSD for a choice data type
-*
-* INPUTS:
-*    mod == module conversion in progress
-*    typdef == typ_def for the typ_template struct to use
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->v.childQ has entries added for this typdef
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    finish_choice (const ncx_module_t *mod,
-		   const typ_def_t *typdef,
-		   val_value_t *val)
-{
-    val_value_t            *top, *grp;
-    const typ_child_t      *child, *grchild;
-    status_t                res;
-    xmlns_id_t              xsd_id;
-
-    xsd_id = xmlns_xs_id();
-    res = NO_ERR;
-
-    /* choice of N arbitrary nodes or groups */
-    top = xml_val_new_struct(NCX_EL_CHOICE, xsd_id);
-    if (!top) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* go through all the child nodes and generate elements 
-     * for them.  The raw queue access functions are used
-     * which should be changed to typ.h functions
-     */
-    for (child = (const typ_child_t *)
-	     dlq_firstEntry(&typdef->def.complex.childQ);
-	 child != NULL && res == NO_ERR;
-	 child = (const typ_child_t *)dlq_nextEntry(child)) {
-
-	/* check if this is a group or a simple node */
-	if (!dlq_empty(&child->groupQ)) {
-	    /* group of simple nodes */
-	    grp = xml_val_new_struct(XSD_GROUP, xsd_id);
-	    if (!grp) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		val_add_child(grp, top);  /* add early */
-	    }
-	    for (grchild = (typ_child_t *)dlq_firstEntry(&child->groupQ);
-		 grchild != NULL && res == NO_ERR;
-		 grchild = (typ_child_t *)dlq_nextEntry(grchild)) {
-		res = do_elem_btype(mod, grchild, grp);
-	    }
-	} else {
-	    /* simple node */
-	    res = do_elem_btype(mod, child, top);
-	}
-    }
-
-    if (res != NO_ERR) {
-	val_free_value(top);
-    } else {
-	val_add_child(top, val);
-    }
-
-    if (res == NO_ERR) {
-	res = finish_attributes(mod, typdef, val);
-    }
-
-    return res;
-
-}   /* finish_choice */
-
-
-/********************************************************************
-* FUNCTION do_elem_choice
-* 
-*   Generate the element node for a choice child type
-*
-* INPUTS:
-*    mod == module conversion in progress
-*    typch == typ_child_t for the child node to use
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->v.childQ has entries added for the child type
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    do_elem_choice (const ncx_module_t *mod,
-		    const typ_child_t *typch,
-		    val_value_t *val)
-{
-    val_value_t    *elem, *cpx;
-    status_t        res;
-    xmlns_id_t      xsd_id;
-
-    /* check if this is a named type with a choice base type */
-    if (typch->typdef.class == NCX_CL_NAMED) {
-	elem = xsd_new_element(mod, typch->name, &typch->typdef, 
-			       typch->parent, FALSE, FALSE);
-	if (elem) {
-	    val_add_child(elem, val);
-	    return NO_ERR;
-	} else {
-	    return ERR_INTERNAL_MEM;
-	}
-    }
-
-    xsd_id = xmlns_xs_id();
-
-    /* element choice of N arbitrary nodes */
-    elem = xsd_new_element(mod, typch->name, &typch->typdef, 
-			   typch->parent, TRUE, FALSE);
-    if (!elem) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* next level is complexType */
-    cpx = xml_val_new_struct(XSD_CPX_TYP, xsd_id);
-    if (!cpx) {
-	val_free_value(elem);
-	return ERR_INTERNAL_MEM;
-    } else {
-	val_add_child(cpx, elem);  /* add early */
-    }
-
-    res = finish_choice(mod, &typch->typdef, cpx);
-
-    /* generate the attributes allowed in the struct node */
-    if (res != NO_ERR) {
-	val_free_value(elem);
-    } else {
-	val_add_child(elem, val);
-    }
-
-    return res;
-
-}   /* do_elem_choice */
-
-
-/********************************************************************
-* FUNCTION finish_table
-* 
-*   Generate the XSD for a table data type
-*
-* INPUTS:
-*    mod == module in progress
-*    typdef == typ_def for the typ_template struct to use
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->v.childQ has entries added for this data type
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    finish_table (const ncx_module_t *mod,
-		  const typ_def_t *typdef,
-		  val_value_t *val)
-{
-    val_value_t          *seq;
-    const typ_child_t    *child;
-    const typ_index_t    *idx;
-    status_t              res;
-    xmlns_id_t            xsd_id;
-
-    res = NO_ERR;
-    xsd_id = xmlns_xs_id();
-
-    /* next level is sequence */
-    seq = xml_val_new_struct(XSD_SEQUENCE, xsd_id);
-    if (!seq) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* go through all the index nodes and generate elements for them */
-    for (idx = typ_first_index(&typdef->def.complex);
-	 idx != NULL;
-	 idx = typ_next_index(idx)) {
-
-	switch (idx->ityp) {
-	case NCX_IT_INLINE:
-	case NCX_IT_NAMED:
-	    res = do_elem_btype(mod, &idx->typch, seq);
-	    break;
-	case NCX_IT_LOCAL:
-	case NCX_IT_SLOCAL:
-	    /* skip these local index components; they will be
-	     * handled later whild the child nodes are processed
-	     */
-	    res = NO_ERR;
-	    break;
-	case NCX_IT_REMOTE:   /* never used in typ_parse.c! */
-	case NCX_IT_SREMOTE:
-	    res = do_elem_btype(mod, &idx->typch, seq);
-	    break;
-	default:
-	    val_free_value(seq);
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-
-	if (res != NO_ERR) {
-	    val_free_value(seq);
-	    return res;
-	}
-    }
-
-    /* go through all the child nodes and generate elements for them */
-    for (child = typ_first_child(&typdef->def.complex);
-	 child != NULL && res==NO_ERR;
-	 child = typ_next_con_child(child)) {
-	res = do_elem_btype(mod, child, seq);
-    }
-
-    if (res != NO_ERR) {
-	val_free_value(seq);
-    } else {
-	val_add_child(seq, val);
-    }
-
-    /* generate the attributes allowed in the table node */
-    if (res == NO_ERR) {
-	res = finish_attributes(mod, typdef, val);
-    }
-
-    return res;
-
-}   /* finish_table */
-
-
-/********************************************************************
-* FUNCTION do_elem_table
-* 
-*   Generate the element node for a table child type
-*
-* INPUTS:
-*    mod == module conversion in progress
-*    typch == typ_child_t for the child node to use
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->v.childQ has entries added for the child type
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    do_elem_table (const ncx_module_t *mod,
-		   const typ_child_t *typch,
-		   val_value_t *val)
-{
-    val_value_t    *elem, *cpx;
-    status_t        res;
-    xmlns_id_t      xsd_id;
-
-    /* check if this is a named type with a struct base type */
-    if (typch->typdef.class == NCX_CL_NAMED) {
-	/* there is some index so generate a key node */
-	elem = xsd_new_element(mod, typch->name, &typch->typdef, 
-			       typch->parent, FALSE, TRUE);
-	if (!elem) {
-	    return ERR_INTERNAL_MEM;
-	} 
-
-	res = xsd_add_key(typch->name, &typch->typdef, elem);
-	if (res != NO_ERR) {
-	    val_free_value(elem);
-	    return res;
-	}
-
-	val_add_child(elem, val);
-	return NO_ERR;
-    }
-
-
-    res = NO_ERR;
-    xsd_id = xmlns_xs_id();
-
-    /* element table of N arbitrary nodes */
-    elem = xsd_new_element(mod, typch->name, &typch->typdef, 
-			   typch->parent, TRUE, TRUE);
-    if (!elem) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* next level is complexType */
-    cpx = xml_val_new_struct(XSD_CPX_TYP, xsd_id);
-    if (!cpx) {
-	res = ERR_INTERNAL_MEM;
-    } else {
-	val_add_child(cpx, elem);  /* add early */
-    }
-
-    if (res == NO_ERR) {
-	res = finish_table(mod, &typch->typdef, cpx);
-    }
-
-    /* check if a key node is needed */
-    if (res==NO_ERR) {
-	/* there is some index so generate a key node */
-	res = xsd_add_key(typch->name, &typch->typdef, elem);
-    }
-
-
-    if (res != NO_ERR) {
-	val_free_value(elem);
-    } else {
-	val_add_child(elem, val);
-    }
-
-    return res;
-
-}   /* do_elem_table */
-
-
-/********************************************************************
-* FUNCTION do_elem_simple
-* 
-*   Generate the element node for a simple child type
-*
-* INPUTS:
-*    mod == module conversion in progress
-*    name == element name
-*    typdef == typ_def_t for the node to use
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->v.childQ has entries added for the child type
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    do_elem_simple (const ncx_module_t *mod,
-		    const xmlChar *name,
-		    const typ_def_t *typdef,
-		    val_value_t *val)
-{
-    val_value_t          *elem, *toptyp;
-    const typ_simple_t   *simtyp;
-    boolean               empty, simtop;
-    status_t              res;
-
-    empty = FALSE;
-    simtop = TRUE;
-
-    switch (typdef->class) {
-    case NCX_CL_BASE:
-	empty = TRUE;
-	break;
-    case NCX_CL_SIMPLE:
-	simtyp = &typdef->def.simple;
-	empty = (dlq_empty(&simtyp->rangeQ) &&
-		 dlq_empty(&simtyp->unionQ) &&
-		 dlq_empty(&simtyp->valQ) &&
-		 dlq_empty(&simtyp->metaQ));
-	break;
-    case NCX_CL_COMPLEX:
-	switch (typ_get_basetype(typdef)) {
-	case NCX_BT_ANY:
-	case NCX_BT_CONTAINER:
-	    empty = TRUE;
-	    simtop = FALSE;
-	    break;
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	break;
-    case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    simtyp = &typdef->def.named.newtyp->def.simple;
-	    empty = (dlq_empty(&simtyp->rangeQ) &&
-		     dlq_empty(&simtyp->valQ) &&
-		     dlq_empty(&simtyp->metaQ));
-	} else {
-	    empty = TRUE;
-	    switch (typ_get_basetype(typdef)) {
-	    case NCX_BT_ANY:
-	    case NCX_BT_CONTAINER:
-		simtop = FALSE;
-		break;
-	    default:
-		break;
-	    }
-	}
-	break;
-    default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    if (empty) {
-	/* get an empty element */
-	elem = xsd_new_element(mod, name, typdef, NULL, FALSE, FALSE);
-	if (!elem) {
-	    return ERR_INTERNAL_MEM;
-	}
-    } else {
-	elem = xsd_new_element(mod, name, typdef, NULL, TRUE, FALSE);
-	if (!elem) {
-	    return ERR_INTERNAL_MEM;
-	}
-
-	if (simtop) {
-	    toptyp = xml_val_new_struct(XSD_SIM_TYP, xmlns_xs_id());
-	} else {
-	    toptyp = xml_val_new_struct(XSD_CPX_TYP, xmlns_xs_id());
-	}
-	if (!toptyp) {
-	    val_free_value(elem);
-	    return ERR_INTERNAL_MEM;
-	} else {
-	    val_add_child(toptyp, elem);  /* add early */
-	}
-
-	switch (typdef->class) {
-	case NCX_CL_SIMPLE:
-	    res = xsd_finish_simpleType(mod, typdef, toptyp);
-	    break;
-	case NCX_CL_NAMED:
-	    res = xsd_finish_namedType(mod, typdef, toptyp);
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	if (res != NO_ERR) {
-	    val_free_value(elem);
-	    return res;
-	}
-    }
-
-    val_add_child(elem, val);
-    return NO_ERR;
-
-}   /* do_elem_simple */
-
-
-/********************************************************************
-* FUNCTION do_elem_btype
-* 
-*   Generate the element node for any child type
-*
-* INPUTS:
-*    mod == module conversion in progress
-*    typch == typ_child_t for the child node to use
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->v.childQ has entries added for the child type
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    do_elem_btype (const ncx_module_t *mod,
-		   const typ_child_t *typch,
-		   val_value_t *val)
-{
-    switch (typ_get_basetype(&typch->typdef)) {
-    case NCX_BT_ENUM:
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
-    case NCX_BT_FLOAT64:
-    case NCX_BT_STRING:
-    case NCX_BT_BINARY:
-    case NCX_BT_INSTANCE_ID:
-    case NCX_BT_ANY:
-    case NCX_BT_EMPTY:
-    case NCX_BT_BOOLEAN:
-	return do_elem_simple(mod, typch->name, &typch->typdef, val);
-    case NCX_BT_SLIST:
-	return do_elem_list(mod, typch, val);
-    case NCX_BT_UNION:
-	return do_elem_union(mod, typch, val);
-    case NCX_BT_CONTAINER:
-	return do_elem_struct(mod, typch, val);
-    case NCX_BT_CHOICE:
-	return do_elem_choice(mod, typch, val);
-    case NCX_BT_LIST:
-	return do_elem_table(mod, typch, val);
-    default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-    /*NOTREACHED*/
-
-}   /* do_elem_btype */
-
-
-/********************************************************************
-* FUNCTION finish_complexType
-* 
-*   Generate a complexType elment based on the typdef
-*
-* INPUTS:
-*    mod == module in progress
-*    typdef == typ def for the typ_template struct to convert
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->v.childQ has entries added for the types in this module
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    finish_complexType (const ncx_module_t *mod,
-			const typ_def_t *typdef,
-			val_value_t *val)
-{
-    val_value_t        *topcon, *ext;
-    const typ_def_t    *realtypdef, *flagtypdef;
-    xmlChar            *str;
-    ncx_btype_t         btyp;
-    status_t            res;
-    xmlns_id_t          xsd_id;
-
-    xsd_id = xmlns_xs_id();
-    res = NO_ERR;
-    btyp = typ_get_basetype(typdef);
-    realtypdef = typ_get_cbase_typdef(typdef);
-    flagtypdef = typ_get_basetype_typdef(NCX_BT_EMPTY);
-
-    switch (btyp) {
-    case NCX_BT_EMPTY:
-	/* this type is represented as an empty element 
-	 * so there is nothing to do but exit.  There cannot
-	 * be any extensions, but there can be meta deta defined
-	 */
-	if (!typ_first_meta_con(typdef)) {
-	    break;
-	}
-	/* else fall through and create some content */
-    case NCX_BT_ANY:
-	/* complexContent/extension of a pre-defined base type */
-	topcon = xml_val_new_struct(XSD_CPX_CON, xsd_id);
-	if (!topcon) {
-	    return ERR_INTERNAL_MEM;
-	}
-
-	/* create an extension node */
-	if (typ_first_meta_con(typdef)) {
-	    ext = xml_val_new_struct(XSD_EXTENSION, xsd_id);
-	} else {
-	    ext = xml_val_new_flag(XSD_EXTENSION, xsd_id);
-	}
-	if (!ext) {
-	    val_free_value(topcon);
-	    return ERR_INTERNAL_MEM;
-	} else {
-	    val_add_child(ext, topcon);  /* add early */
-	}
-
-	/* add base=QName attribute */
-	str = xml_val_make_qname(xsd_id, xsd_typename(btyp));
-	if (!str) {
-	    val_free_value(topcon);
-	    return ERR_INTERNAL_MEM;
-	}
-	res = xml_val_add_cattr(XSD_BASE, 0, str, ext);
-	if (res != NO_ERR) {
-	    m__free(str);
-	    val_free_value(topcon);
-	    return ERR_INTERNAL_MEM;
-	}
-	
-	/* add any attributes defined for this type */
-	res = finish_attributes(mod, typdef, ext);
-	if (res != NO_ERR) {
-	    val_free_value(topcon);
-	    return ERR_INTERNAL_MEM;
-	}
-
-	val_add_child(topcon, val);
-	break;
-    case NCX_BT_CONTAINER:
-	res = finish_struct(mod, typdef, val);
-	break;
-    case NCX_BT_CHOICE:
-	res = finish_choice(mod, typdef, val);
-	break;
-    case NCX_BT_LIST:
-	res = finish_table(mod, typdef, val);
-	break;
-    default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    return res;
-
-}   /* finish_complexType */
 
 
 /********************************************************************
@@ -1965,6 +1095,7 @@ static status_t
     xmlChar     *basename;
     status_t     res;
 
+    mod = mod;   /*** lint error **/
     xsd_id = xmlns_xs_id();
 
     simcon = xml_val_new_struct(XSD_SIM_CON, xsd_id);
@@ -1996,12 +1127,14 @@ static status_t
 	return ERR_INTERNAL_MEM;
     }
 
+#if 0
     /* convert all the metadata to attribute nodes */
     res = finish_attributes(mod, &typ->typdef, ext);
     if (res != NO_ERR) {
 	val_free_value(simcon);
 	return ERR_INTERNAL_MEM;
     }
+#endif
 
     /* add the simpleContent node and exit */
     val_add_child(simcon, val); 
@@ -2058,7 +1191,8 @@ status_t
          * any attributes, and a complexType that is an extension
 	 * of the base type
 	 */
-	base = (typ_first_meta(&typ->typdef)) ? TRUE : FALSE;
+	/* base = (typ_first_meta(&typ->typdef)) ? TRUE : FALSE; */
+	base = FALSE;
 
 	/* figure out if this is a complexType or a simpleType
 	 * The ename and flag data types are simple in NCX but
@@ -2141,7 +1275,8 @@ status_t
 	} else if (sim) {
 	    res = xsd_finish_simpleType(mod, &typ->typdef, tval);
 	} else {
-	    res = finish_complexType(mod, &typ->typdef, tval);
+	    /* res = finish_complexType(mod, &typ->typdef, tval); */
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	}
 	if (res != NO_ERR) {
 	    val_free_value(tval);
@@ -2235,7 +1370,8 @@ status_t
 	} else if (sim) {
 	    res = xsd_finish_simpleType(mod, &typ->typdef, tval);
 	} else {
-	    res = finish_complexType(mod, &typ->typdef, tval);
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	    /* res = finish_complexType(mod, &typ->typdef, tval); */
 	}
     }
 
@@ -2487,10 +1623,10 @@ status_t
 			  val_value_t *val)
 {
     val_value_t          *topcon, *chval;
-    const typ_child_t    *mdef;
     const dlq_hdr_t      *rangeQ;
     const typ_rangedef_t *rdef;
     const typ_sval_t     *sdef;
+    const obj_template_t *mdef;   /**** not used yet ****/
     xmlChar              *str;
     ncx_btype_t           btyp;
     status_t              res;
@@ -2501,8 +1637,8 @@ status_t
     res = NO_ERR;
     xsd_id = xmlns_xs_id();
     btyp = typ_get_basetype(typdef);            /* NCX base type */
-    mdef = typ_first_meta_con(typdef);            /* attribute Q */
     rdef = typ_first_rangedef_con(typdef);        /* range def Q */
+    mdef = NULL;
     sdef = typ_first_strdef(typdef);         /* string/pattern Q */
     issim = typ_is_xsd_simple(btyp);           /* container type */
     test_id = typdef->def.named.typ->nsid;     /* NS of the name */
@@ -2662,11 +1798,14 @@ status_t
 	    res = finish_range(typdef, rdef, chval);
 	}
 
+#if 0
 	/* check if this is an attribute extension */
 	if (res==NO_ERR && isext && mdef) {
 	    /* add any attributes defined for this type */
 	    res = finish_attributes(mod, typdef->def.named.newtyp, chval);
 	} 
+#endif
+
     }
 
     return res;

@@ -51,16 +51,16 @@ date         init     comment
 #include "agt_ncx.h"
 #endif
 
-#ifndef _H_agt_ps
-#include "agt_ps.h"
-#endif
-
 #ifndef _H_agt_rpc
 #include "agt_rpc.h"
 #endif
 
 #ifndef _H_agt_ses
 #include "agt_ses.h"
+#endif
+
+#ifndef _H_agt_val
+#include "agt_val.h"
 #endif
 
 #ifndef _H_agt_signal
@@ -169,7 +169,6 @@ static void
     cfg_template_t  *cfg;
     xmlChar         *fname;
     status_t         res;
-    boolean          usefname;
 
     cfg = cfg_get_config(NCX_CFG_RUNNING);
     if (!cfg) {
@@ -180,46 +179,40 @@ static void
 
     /* use the user-set startup or default filename */
     if (startup) {
-	if (*startup != '/') {
-	    /* relative filespec, use search path */
-	    fname = ncxmod_find_data_file(startup, FALSE, &res);
-	    usefname = TRUE;
-	} else {
-	    /* absolute filespec, use startup as-is */
-	    fname = NULL;
-	    usefname = FALSE;
-	}
+	/* relative filespec, use search path */
+	fname = ncxmod_find_data_file(startup, FALSE, &res);
     } else {
 	/* search for the default startup-cfg.xml filename */
 	fname = ncxmod_find_data_file(NCX_DEF_STARTUP_FILE, FALSE, &res);
-	usefname = TRUE;
     }
 
     /* check if error finding the filespec */
-    if (usefname && !fname) {
-	log_error("\nagt: Startup config file (%s) not found."
-		  "\n     Booting with empty configuration!!",
-		  NCX_DEF_STARTUP_FILE);
-	return;
+    if (startup && !fname) {
+	log_error("\nWarning: Startup config file (%s) not found."
+		 "\n   Booting with empty configuration!",
+		  startup);
     }
 
+    if (!fname) {
+	return;
+    }
+    
     /* try to load the config file that was found or given */
-    res = agt_ncx_cfg_load(cfg, CFG_LOC_FILE,
-			   (usefname) ? fname : startup);
+    res = agt_ncx_cfg_load(cfg, CFG_LOC_FILE, fname);
     if (res != NO_ERR) {
 	if (!dlq_empty(&cfg->load_errQ)) {
-	    log_warn("\nagt: Warning: Errors occurred loading the "
-		     "<running> config from NV-storage"
-		     "\n     (%s)", (usefname) ? fname : startup);
+	    log_error("\nError: configuration errors occurred loading the "
+		     "<running> database from NV-storage"
+		     "\n     (%s)", fname);
 	} else if (res == ERR_XML_READER_START_FAILED) {
 	    log_error("\nagt: Error: Could not open startup config file"
-		      "\n     (%s)", (usefname) ? fname : startup);
+		      "\n     (%s)", fname);
 	}
     }
 
     if (res == NO_ERR) {
 	log_info("\nagt: Startup config loaded OK\n     Source: %s",
-		 (usefname) ? fname : startup);
+		 fname);
     }
 
     if (fname) {
@@ -487,6 +480,8 @@ void
 	agt_signal_cleanup();
 	agt_timer_cleanup();
 	agt_connect_cleanup();
+
+	print_errors();
 
 	log_close();
 

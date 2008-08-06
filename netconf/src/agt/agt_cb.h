@@ -19,23 +19,15 @@
 date	     init     comment
 ----------------------------------------------------------------------
 16-apr-07    abb      Begun; split out from agt_ps.h
-
+01-aug-08    abb      Remove NCX specific stuff; YANG only now
 */
 
 #ifndef _H_agt
 #include "agt.h"
 #endif
 
-#ifndef _H_cfg
-#include "cfg.h"
-#endif
-
 #ifndef _H_op
 #include "op.h"
-#endif
-
-#ifndef _H_ps
-#include "ps.h"
 #endif
 
 #ifndef _H_rpc
@@ -48,6 +40,10 @@ date	     init     comment
 
 #ifndef _H_status
 #include "status.h"
+#endif
+
+#ifndef _H_val
+#include "val.h"
 #endif
 
 /********************************************************************
@@ -66,9 +62,9 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-/* Callback function for agent parmset handler 
- * Used to provide a PS callback sub-mode for
- * a specific named parmset
+/* Callback function for agent object handler 
+ * Used to provide a callback sub-mode for
+ * a specific named object
  * 
  * INPUTS:
  *   scb == session control block
@@ -76,11 +72,11 @@ date	     init     comment
  *   cbtyp == reason for the callback
  *   editop == the parent edit-config operation type, which
  *             is also used for all other callbacks
- *             that operate on parmsets
- *   newps == parmset holding the proposed changes to
+ *             that operate on objects
+ *   newobj == container object holding the proposed changes to
  *           apply to the current config, depending on
  *           the editop value. Will not be NULL.
- *   curps == current parmset values from the <running> 
+ *   curobj == current container values from the <running> 
  *           or <candidate> configuration, if any. Could be NULL
  *           for create and other operations.
  *
@@ -88,90 +84,19 @@ date	     init     comment
  *    status:
  */
 typedef status_t 
-    (*agt_cb_pscb_t) (ses_cb_t  *scb,
-		      rpc_msg_t *msg,
-		      agt_cbtyp_t cbtyp,
-		      op_editop_t  editop,
-		      ps_parmset_t  *newps,
-		      ps_parmset_t  *curps);
+    (*agt_cb_fn_t) (ses_cb_t  *scb,
+		    rpc_msg_t *msg,
+		    agt_cbtyp_t cbtyp,
+		    op_editop_t  editop,
+		    val_value_t  *newval,
+		    val_value_t  *curval);
 
 
+/* set of agent object callback functions */
+typedef struct agt_cb_fnset_t_ {
+    agt_cb_fn_t    cbfn[AGT_NUM_CB];
+} agt_cb_fnset_t;
 
-/* set of agent parmset callback functions */
-typedef struct agt_cb_pscbset_t_ {
-    agt_cb_pscb_t    pscb[AGT_NUM_CB];
-} agt_cb_pscbset_t;
-
-
-/* Callback function for agent parm handler 
- * Used to provide a parm callback sub-mode for
- * a specific named parm
- * 
- * INPUTS:
- *   scb == session control block
- *   msg == incoming rpc_msg_t in progress
- *   cbtyp == reason for the callback
- *   editop == the parent edit-config operation type, which
- *             is also used for all other callbacks
- *             that operate on parmsets
- *   newp == parm holding the proposed changes to
- *           apply to the current config, depending on
- *           the editop value.  Will not be NULL.
- *   curp == current parm value from the <running> 
- *           or <candidate> configuration, if any. Could be NULL
- *           for create and other operations.
- *
- * RETURNS:
- *    status:
- */
-typedef status_t 
-    (*agt_cb_pcb_t) (ses_cb_t  *scb,
-		     rpc_msg_t *msg,
-		     agt_cbtyp_t cbtyp,
-		     op_editop_t  editop,
-		     ps_parm_t *newp,
-		     ps_parm_t *curp);
-
-
-/* set of agent parm callback functions */
-typedef struct agt_cb_pcbset_t_ {
-    agt_cb_pcb_t    pcb[AGT_NUM_CB];
-} agt_cb_pcbset_t;
-
-
-/* Callback function for agent typedef handler 
- * Used to provide a PS callback sub-mode for
- * a specific named type
- *
- * INPUTS:
- *   scb == session control block
- *   msg == incoming rpc_msg_t in progress
- *   cbtyp == reason for the callback
- *   editop == the edit-config operation type, which
- *             is also used for all other callbacks
- *             that operate on data types
- *   newval == value struct holding the proposed changes to
- *           apply to the current config, depending on
- *           the editop value.  Will not be NULL.
- *   curval == current value from the <running> 
- *           or <candidate> configuration, if any. Could be NULL
- *           for create and other operations.
- *
- * RETURNS:
- *    status:
- */
-typedef status_t 
-    (*agt_cb_tcb_t) (ses_cb_t  *scb,
-		     rpc_msg_t *msg,
-		     agt_cbtyp_t cbtyp,
-		     op_editop_t  editop,
-		     val_value_t  *newval,
-		     val_value_t  *curval);
-
-/* set of agent typedef callback functions */
-typedef struct agt_cb_tcbset_t_ {
-    agt_cb_tcb_t    tcb[AGT_NUM_CB];
-} agt_cb_tcbset_t;
 
 
 /********************************************************************
@@ -181,42 +106,14 @@ typedef struct agt_cb_tcbset_t_ {
 *********************************************************************/
 
 extern status_t 
-    agt_cb_register_ps_callback (const xmlChar *module,
-				 const xmlChar *defname,
-				 boolean forall,
-				 agt_cbtyp_t cbtyp,
-				 agt_cb_pscb_t    cbfn);
-
-
-extern status_t 
-    agt_cb_register_parm_callback (const xmlChar *module,
-				   const xmlChar *psdname,
-				   const xmlChar *defname,
-				   boolean forall,
-				   agt_cbtyp_t cbtyp,
-				   agt_cb_pcb_t    cbfn);
-
-
-extern status_t 
-    agt_cb_register_typ_callback (const xmlChar *module,
-				  const xmlChar *defname,
-				  boolean forall,
-				  agt_cbtyp_t cbtyp,
-				  agt_cb_tcb_t    cbfn);
+    agt_cb_register_callback (const xmlChar *defpath,
+			      boolean forall,
+			      agt_cbtyp_t cbtyp,
+			      agt_cb_fn_t    cbfn);
 
 
 extern void
-    agt_cb_unregister_ps_callback (const xmlChar *module,
-				const xmlChar *defname);
-
-extern void
-    agt_cb_unregister_parm_callback (const xmlChar *module,
-				     const xmlChar *psdname,
-				     const xmlChar *defname);
-
-extern void
-    agt_cb_unregister_typ_callback (const xmlChar *module,
-				    const xmlChar *defname);
+    agt_cb_unregister_callback (const xmlChar *defpath);
 
 
 #endif	    /* _H_agt_cb */

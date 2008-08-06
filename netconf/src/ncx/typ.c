@@ -138,6 +138,7 @@ static void
 }  /* clean_simple */
 
 
+#if 0
 /********************************************************************
 * FUNCTION clean_complex
 * 
@@ -175,6 +176,7 @@ static void
     cpx->flags = 0;
 
 }  /* clean_complex */
+#endif
 
 
 /********************************************************************
@@ -204,7 +206,7 @@ static void
 
 }  /* clean_named */
 
-
+#if 0
 /********************************************************************
 * FUNCTION clean_child
 * 
@@ -240,6 +242,7 @@ static void
     }
 
 }  /* clean_child */
+#endif
 
 
 /************* E X T E R N A L    F U N C T I O N S  *****************/
@@ -480,6 +483,7 @@ void
 }  /* typ_init_simple */
 
 
+#if 0
 /********************************************************************
 * FUNCTION typ_init_complex
 * 
@@ -502,6 +506,7 @@ void
     tdef->def.complex.flags = 0;
 
 }  /* typ_init_complex */
+#endif
 
 
 /********************************************************************
@@ -597,9 +602,11 @@ void
     case NCX_CL_SIMPLE:
         clean_simple(&typdef->def.simple);
         break;
+#if 0
     case NCX_CL_COMPLEX:
         clean_complex(&typdef->def.complex);
         break;
+#endif
     case NCX_CL_NAMED:
         clean_named(&typdef->def.named);
         break;
@@ -1558,7 +1565,7 @@ void
     m__free(lv);
 }  /* typ_free_listval */
 
-
+#if 0
 /********************************************************************
 * FUNCTION typ_new_index
 * 
@@ -1743,6 +1750,7 @@ void
     clean_child(ch, TRUE);
 
 }  /* typ_clean_child */
+#endif   /* 0 */
 
 
 /********************************************************************
@@ -1880,8 +1888,10 @@ ncx_btype_t
         return typdef->def.base;
     case NCX_CL_SIMPLE:
         return typdef->def.simple.btyp; 
+#if 0
     case NCX_CL_COMPLEX:
         return typdef->def.complex.btyp;
+#endif
     case NCX_CL_NAMED:
 	if (typdef->def.named.typ) {
 	    return typ_get_basetype(&typdef->def.named.typ->typdef);
@@ -1925,8 +1935,11 @@ const xmlChar *
     case NCX_CL_SIMPLE:
 	return (const xmlChar *)
 	    tk_get_btype_sym(typdef->def.simple.btyp);
+#if 0
     case NCX_CL_COMPLEX:
 	return (const xmlChar *)"";
+#endif
+
     case NCX_CL_NAMED:
 	return typdef->def.named.typ->name;
     case NCX_CL_REF:
@@ -2370,6 +2383,7 @@ typ_def_t *
 	    return NULL;
 	}
 	/*NOTREACHED*/
+#if 0
     case NCX_CL_COMPLEX:
 	switch (squal) {
 	case NCX_SQUAL_NONE:
@@ -2387,6 +2401,7 @@ typ_def_t *
 	    return NULL;
 	}
 	/*NOTREACHED*/
+#endif
     case NCX_CL_NAMED:
 	ntypdef = typdef->def.named.newtyp;
 	if (!ntypdef) {
@@ -2490,6 +2505,7 @@ const typ_def_t *
 	    return NULL;
 	}
 	/*NOTREACHED*/
+#if 0
     case NCX_CL_COMPLEX:
 	switch (squal) {
 	case NCX_SQUAL_NONE:
@@ -2507,6 +2523,7 @@ const typ_def_t *
 	    return NULL;
 	}
 	/*NOTREACHED*/
+#endif
     case NCX_CL_NAMED:
 	ntypdef = typdef->def.named.newtyp;
 	if (!ntypdef) {
@@ -2552,6 +2569,7 @@ const typ_def_t *
 }  /* typ_get_cqual_typdef */
 
 
+#if 0
 /********************************************************************
 * FUNCTION typ_find_child
 *
@@ -2646,7 +2664,7 @@ typ_def_t *
     }
     return NULL;
 
-}  /* typ_find_child */
+}  /* typ_find_child_typdef */
 
 
 /********************************************************************
@@ -2987,8 +3005,10 @@ const xmlChar *
     return indx->typch.name;
 
 }  /* typ_get_index_name */
+#endif   /* 0 */
 
 
+#if 0
 /********************************************************************
 * FUNCTION typ_first_meta
 *
@@ -3151,6 +3171,8 @@ typ_child_t *
     return NULL;
 
 }  /* typ_find_meta */
+#endif  /* 0 */
+
 
 
 /********************************************************************
@@ -3160,6 +3182,7 @@ typ_child_t *
 *
 * INPUTS:
 *  typdef ==  typedef to check
+*  prefix == module prefix (may be NULL)
 *  name == name of the appinfo var to find
 *
 * RETURNS:
@@ -3167,6 +3190,7 @@ typ_child_t *
 *********************************************************************/
 const ncx_appinfo_t *
     typ_find_appinfo (const typ_def_t *typdef,
+		      const xmlChar *prefix,
 		      const xmlChar *name)		      
 {
     const typ_def_t        *appdef;
@@ -3186,7 +3210,8 @@ const ncx_appinfo_t *
     while (!done) {
 	appdef = typ_get_cqual_typdef(typdef, NCX_SQUAL_APPINFO);
 	if (appdef) {
-	    appinfo = ncx_find_appinfo(&appdef->appinfoQ, name);
+	    appinfo = ncx_find_appinfo(&appdef->appinfoQ, 
+				       prefix, name);
 	    if (appinfo) {
 		done = TRUE;
 	    } else if (appdef->class == NCX_CL_NAMED) {
@@ -3211,6 +3236,7 @@ const ncx_appinfo_t *
 *
 * INPUTS:
 *  typdef ==  typedef to check
+*  prefix == appinfo module prefix (may be NULL)
 *  name == name of the appinfo var to find
 *
 * RETURNS:
@@ -3218,6 +3244,7 @@ const ncx_appinfo_t *
 *********************************************************************/
 const ncx_appinfo_t *
     typ_find_appinfo_con (const typ_def_t *typdef,
+			  const xmlChar *prefix,
 			  const xmlChar *name)		      
 {
 #ifdef DEBUG
@@ -3227,7 +3254,8 @@ const ncx_appinfo_t *
     }
 #endif
 
-    return ncx_find_appinfo(&typdef->appinfoQ, name);
+    return ncx_find_appinfo(&typdef->appinfoQ, 
+			    prefix, name);
 
 }  /* typ_find_appinfo_con */
 
@@ -3830,8 +3858,10 @@ uint32
     case NCX_CL_BASE:
     case NCX_CL_SIMPLE:
 	return 0;
+#if 0
     case NCX_CL_COMPLEX:
 	return typdef->def.complex.maxrows;
+#endif
     case NCX_CL_NAMED:
         return typ_get_maxrows(&typdef->def.named.typ->typdef);
     case NCX_CL_REF:
@@ -4464,7 +4494,7 @@ void
 
 }  /* typ_clean_typeQ */
 
-
+#if 0
 /********************************************************************
 * FUNCTION typ_clean_indexQ
 * 
@@ -4492,6 +4522,7 @@ void
     }
 
 }  /* typ_clean_indexQ */
+#endif
 
 
 /********************************************************************

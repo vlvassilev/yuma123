@@ -19,6 +19,7 @@
 date	     init     comment
 ----------------------------------------------------------------------
 27-oct-06    abb      Begun
+01-aug-08    abb      Convert from NCX PSD to YANG OBJ
 
 */
 
@@ -26,12 +27,8 @@ date	     init     comment
 #include "agt.h"
 #endif
 
-#ifndef _H_dlq
-#include "dlq.h"
-#endif
-
-#ifndef _H_ps
-#include "ps.h"
+#ifndef _H_val
+#include "val.h"
 #endif
 
 #ifndef _H_status
@@ -45,9 +42,8 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-#define AGT_CLI_MODULE    (const xmlChar *)"netconfd"
-#define AGT_CLI_APP       (const xmlChar *)"netconfd"
-#define AGT_CLI_PSD       (const xmlChar *)"netconfd"
+#define AGT_CLI_MODULE     (const xmlChar *)"netconfd"
+#define AGT_CLI_CONTAINER  (const xmlChar *)"netconfd"
 
 
 #define AGT_CLI_NOSTARTUP (const xmlChar *)"no-startup"
@@ -67,8 +63,8 @@ extern status_t
 			   boolean *showver,
 			   boolean *showhelp);
 
-extern const ps_parmset_t *
-    agt_cli_get_parmset (void);
+extern const val_value_t *
+    agt_cli_get_valset (void);
 
 extern void
     agt_cli_cleanup (void);

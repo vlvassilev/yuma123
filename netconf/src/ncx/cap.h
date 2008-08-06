@@ -135,9 +135,6 @@ typedef struct cap_rec_t_ {
     dlq_hdr_t      cap_qhdr;
     cap_subjtyp_t  cap_subj;
     xmlChar       *cap_uri;
-    const xmlChar *cap_owner;
-    uint32         cap_owner_len;
-    xmlChar       *cap_owner_malloc;  /* malloced, <<-- cap_owner */
     const xmlChar *cap_mod;      /* points inside cap_uri if used */
     uint32         cap_mod_len;
     xmlChar       *cap_mod_malloc;      /* malloced, <<-- cap_mod */
@@ -194,7 +191,6 @@ extern status_t
 
 extern status_t 
     cap_add_mod (cap_list_t *caplist, 
-		 const xmlChar *owner,
 		 const xmlChar *modname,
 		 const xmlChar *modversion);
 
@@ -205,18 +201,15 @@ extern status_t
 /* add a capability string for a data model module */
 extern status_t 
     cap_add_modval (val_value_t *caplist, 
-		    const xmlChar *owner,
 		    const xmlChar *modname,
 		    const xmlChar *modversion);
 
 extern xmlChar *
-    cap_make_mod_urn (const xmlChar *owner,
-		      const xmlChar *modname,
+    cap_make_mod_urn (const xmlChar *modname,
 		      const xmlChar *modversion);
 
 extern xmlChar *
-    cap_make_mod_url (const xmlChar *owner,
-		      const cap_rec_t *caprec);
+    cap_make_mod_url (const cap_rec_t *caprec);
 
 
 /* fast search of standard protocol capability set */
@@ -252,8 +245,6 @@ extern const cap_rec_t *
 
 extern void
     cap_split_modcap (const cap_rec_t *cap,
-		      const xmlChar **owner,
-		      uint32 *ownerlen,
 		      const xmlChar **module,
 		      uint32 *modlen,
 		      const xmlChar **version);

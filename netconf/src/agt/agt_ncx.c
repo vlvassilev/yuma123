@@ -43,10 +43,6 @@ date         init     comment
 #include "agt_ncx.h"
 #endif
 
-#ifndef _H_agt_ps
-#include "agt_ps.h"
-#endif
-
 #ifndef _H_agt_rpc
 #include "agt_rpc.h"
 #endif
@@ -63,12 +59,21 @@ date         init     comment
 #include "agt_util.h"
 #endif
 
+#ifndef _H_agt_val
+#include "agt_val.h"
+#endif
+
+
 #ifndef _H_cap
 #include "cap.h"
 #endif
 
 #ifndef _H_cfg
 #include "cfg.h"
+#endif
+
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_op
@@ -260,21 +265,23 @@ static status_t
     } 
 
     /* get the default-operation parameter */
-    res = ps_get_parmval(&msg->rpc_input, NCX_EL_DEFAULT_OPERATION, &val);
-    if (res != NO_ERR) {
+    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+			 NCX_EL_DEFAULT_OPERATION);
+    if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
 	defop = OP_EDITOP_MERGE;
     } else {
-	defop = op_defop_id((const xmlChar *)VAL_STR(val));
+	defop = op_defop_id(VAL_STR(val));
     }
 
     /* get the error-option parameter */
-    res = ps_get_parmval(&msg->rpc_input, NCX_EL_ERROR_OPTION, &val);
-    if (res != NO_ERR) {
+    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+			 NCX_EL_ERROR_OPTION);
+    if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
 	errop = OP_ERROP_STOP;
     } else {
-	errop = op_errop_id((const xmlChar *)VAL_STR(val));
+	errop = op_errop_id(VAL_STR(val));
     }
 
     /* the internal processing needs to know if rollback is
@@ -294,26 +301,28 @@ static status_t
      *
      * Get the value to check for the test-only extension
      */
-    res = ps_get_parmval(&msg->rpc_input, NCX_EL_TESTOP, &val);
-    if (res != NO_ERR) {
+    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+			 NCX_EL_TESTOP);
+    if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
 	testop = OP_TESTOP_SET;
     } else {
-	testop = op_testop_enum((const xmlChar *)VAL_STR(val));
+	testop = op_testop_enum(VAL_STR(val));
     }
 
     /* get the config parameter */
-    res = ps_get_parmval(&msg->rpc_input, NCX_EL_CONFIG, &val);
-    if (res != NO_ERR) {
+    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+			 NCX_EL_CONFIG);
+    if (!val || val->res != NO_ERR) {
 	/* we shouldn't get here if the config param is missing */
-	return SET_ERROR(res);
+	return SET_ERROR(ERR_NCX_OPERATION_FAILED);
     }
 
     /* validate the <config> element (wrt/ embedded operation
      * attributes) against the existing data model.
      * <rpc-error> records will be added as needed 
      */
-    res = agt_ps_validate_write(scb, msg, target, val, defop);
+    res = agt_val_validate_write(scb, msg, target, val, defop);
 
     /* save the default operation in 'user1' */
     msg->rpc_user1 = (void *)defop;
@@ -377,15 +386,15 @@ static status_t
 
 
     /* get pointer to the config parameter */
-    res = ps_get_parmval(&msg->rpc_input, NCX_EL_CONFIG, &val);
-    if (res != NO_ERR) {
+    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+			 NCX_EL_CONFIG);
+    if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
-	return SET_ERROR(res);
+	return SET_ERROR(ERR_NCX_OPERATION_FAILED);
     }
 
     /* apply the <config> into the target config */
-    res = agt_ps_apply_write(scb, msg, target, val, defop, errop);
-
+    res = agt_val_apply_write(scb, msg, target, val, defop, errop);
     return res;
 
 } /* edit_config_invoke */
@@ -618,7 +627,11 @@ static status_t
 			  rpc_msg_t *msg,
 			  xml_node_t *methnode)
 {
-    /***/
+    (void)scb;
+    (void)msg;
+    (void)methnode;
+
+    /*** NEED TO ADD SUPPORT FOR DELETE startup ***/
     return NO_ERR;
 
 } /* delete_config_invoke */
@@ -811,10 +824,15 @@ static status_t
     val_value_t     *val;
 
     /* get the session-id parameter */
-    res = ps_get_parmval(&msg->rpc_input, NCX_EL_SESSION_ID, &val);
-    if (res != NO_ERR) {
+    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+			 NCX_EL_SESSION_ID);
+    if (!val || val->res != NO_ERR) {
 	/* error already recorded in parse phase */
-	return res;
+	if (val) {
+	    return val->res;
+	} else {
+	    return ERR_NCX_OPERATION_FAILED;
+	}
     }
 
     /* make sure the session-id is valid 
@@ -893,13 +911,17 @@ static status_t
     (void)methnode;
 
     /* get the source parameter */
-    res = ps_get_parmval(&msg->rpc_input, NCX_EL_SOURCE, &val);
-    if (res != NO_ERR) {
-	return res;
+    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+			 NCX_EL_SOURCE);
+    if (!val || val->res != NO_ERR) {
+	if (val) {
+	    return val->res;
+	} else {
+	    return ERR_NCX_OPERATION_FAILED;
+	}
     }
 
     /* determine which variant of the input parameter is present */
-
 
     /* set the error parameter to gather the most errors */
     msg->rpc_err_option = OP_ERROP_CONTINUE;
@@ -908,7 +930,7 @@ static status_t
      * attributes) against the existing data model.
      * <rpc-error> records will be added as needed 
      */
-    res = agt_ps_validate_write(scb, msg, target, val, OP_EDITOP_NONE);
+    res = agt_val_validate_write(scb, msg, target, val, OP_EDITOP_NONE);
 
     /* save the default operation in 'user1' */
     msg->rpc_user1 = (void *)defop;
@@ -958,17 +980,17 @@ static status_t
     }
 
     /* get the config parameter */
-    res = ps_get_parmval(&msg->rpc_input, NCX_EL_CONFIG, &val);
-    if (res != NO_ERR) {
+    val = val_find_child(&msg->rpc_input, NULL, NCX_EL_CONFIG);
+    if (!val || val->res != NO_ERR) {
 	/* we shouldn't get here if the config param is missing */
-	return SET_ERROR(res);
+	return SET_ERROR(ERR_NCX_OPERATION_FAILED);
     }
 
     /* Startup config load mode is always continue-on-error */
     msg->rpc_err_option = OP_ERROP_CONTINUE;
 
     /* errors will be added as needed */
-    res = agt_ps_validate_write(scb, msg, target, val, OP_EDITOP_LOAD);
+    res = agt_val_validate_write(scb, msg, target, val, OP_EDITOP_LOAD);
     msg->rpc_user2 = val;
 
     return res;
@@ -1011,8 +1033,8 @@ static status_t
 
     /* load the <config> into the target config */
     if (res == NO_ERR) {
-	res = agt_ps_apply_write(scb, msg, target, val, 
-				 OP_EDITOP_LOAD, OP_ERROP_CONTINUE);
+	res = agt_val_apply_write(scb, msg, target, val, 
+				  OP_EDITOP_LOAD, OP_ERROP_CONTINUE);
     }
 
     return res;
@@ -1363,18 +1385,6 @@ status_t
 	res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    /* make sure there is something for the <running> config
-     * even if the startup config load totally failed
-     */
-    if (!cfg->root) {
-	cfg->root = val_new_value();
-	if (cfg->root) {
-	    val_init_root(cfg->root);
-	} else {
-	    SET_ERROR(ERR_INTERNAL_MEM);
-	}
-    }
-	
     return res;
 
 } /* agt_ncx_cfg_load */

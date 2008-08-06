@@ -47,14 +47,6 @@ date         init     comment
 #include "ncxmod.h"
 #endif
 
-#ifndef _H_ps
-#include  "ps.h"
-#endif
-
-#ifndef _H_psd
-#include  "psd.h"
-#endif
-
 #ifndef _H_ses
 #include  "ses.h"
 #endif
@@ -97,7 +89,7 @@ date         init     comment
 static val_value_t   *agt_caps = NULL;
 static cap_list_t    *my_agt_caps = NULL;
 
-
+#if 0
 /********************************************************************
 * FUNCTION add_schema_parm
 *
@@ -113,31 +105,32 @@ static cap_list_t    *my_agt_caps = NULL;
 *    status
 *********************************************************************/
 static status_t
-    add_schema_parm (ps_parmset_t *ps,
-		      const cap_rec_t *modcap)
+    add_schema_parm (val_value_t *valset,
+		     const cap_rec_t *modcap)
 {
-    ps_parm_t      *parm;
-    val_value_t    *val;
-    typ_def_t      *parentdef, *typdef;
+    val_value_t    *parm, *val;
     xmlChar        *str;
     xmlns_id_t      nsid;
     status_t        res;
 
+    chobj = obj_find_child(valset->obj, 
+			   AGT_CAP_PREFIX,
+			   AGT_CAP_SDISC_PARM);			   
+    if (!chobj) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /*******  CONVERSION STOPPED HERE *************/
+
     /* create a new parm struct */
-    parm = ps_make_new_parm(ps, AGT_CAP_SDISC_PARM);
+    parm = val_new_value();
     if (!parm) {
 	return ERR_INTERNAL_MEM;
     }
+    val_init_from_template(parm, chobj);
 
     /* get namespace for all nodes */
-    nsid = psd_get_parm_nsid(parm->parm);
-
-    /* get typdef for the struct */
-    parentdef = psd_get_typdef(parm->parm);
-    if (!parentdef) {
-	ps_free_parm(parm);
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
+    nsid = obj_get_nsid(parm->obj);
 
     /* add identifier node */
     typdef = typ_find_child_typdef(LEAF_SCHEMA_IDENTIFIER,
@@ -199,6 +192,8 @@ static status_t
     return NO_ERR;
 
 } /* add_schema_parm */
+#endif
+
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -431,12 +426,10 @@ status_t
     /* add capability for each module loaded in ncxmod */
     while (mod && res == NO_ERR) {
 	res = cap_add_mod(my_agt_caps,
-			  mod->owner,
 			  mod->name,
 			  mod->version);
 	if (res == NO_ERR) {
 	    res = cap_add_modval(agt_caps,
-				 mod->owner,
 				 mod->name,
 				 mod->version);
 	}
@@ -450,10 +443,11 @@ status_t
 } /* agt_cap_set_modules */
 
 
+#if 0
 /********************************************************************
 * FUNCTION agt_cap_set_modcaps_parmset
 *
-* Setup the schema-discovert 'modules' parmset
+* Setup the schema-discovery 'modules' parmset
 * MUST call after agt_cap_set_modules and after the
 * <running> configuration is loaded
 *
@@ -516,6 +510,7 @@ void
     }
 
 } /* agt_cap_set_modcaps_parmset */
+#endif
 
 
 /********************************************************************

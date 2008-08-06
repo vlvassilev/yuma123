@@ -271,9 +271,6 @@ extern void
 		      ncx_btype_t btyp);
 
 extern void
-    val_init_root (val_value_t *val);
-
-extern void
     val_init_virtual (val_value_t *val,
 		      void *cbfn,
 		      const struct obj_template_t_ *obj);

@@ -119,6 +119,113 @@ static status_t
 
 
 
+
+/********************************************************************
+* FUNCTION check_block_err
+* 
+* Check for errors in the choice block
+* Generate RPC errors as needed if errQ non-NULL
+*
+* INPUTS:
+*   scb == session control block (may be NULL)
+*   errQ == errQ to receive any errors
+*          (NULL == NO RPC ERRORS RECORDED)
+*   setval == TRUE if block supposed to be set
+*       check for any missing parameters
+*          == FALSE if block supposed to be not set
+*       check for any set parameters
+*   layer == NCX layer enum to use in rpc-error
+*   ps == parmset to check
+*   block == block to check
+
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    check_block_err (ses_cb_t *scb,
+		     dlq_hdr_t *errQ,
+		     boolean setval,
+		     ncx_layer_t  layer,
+		     const ps_parmset_t *ps,
+		     const psd_block_t  *block)
+{
+    const psd_parm_t *parm;
+    status_t          res, retres;
+
+
+    retres = NO_ERR;
+
+    /* check all the parms in this block for missing or extra error */
+    for (parm = (const psd_parm_t *)dlq_firstEntry(&block->blockQ);
+	 parm != NULL;
+	 parm = (const psd_parm_t *)dlq_nextEntry(parm)) {
+	res = NO_ERR;
+	if (setval) {
+	    /* check for missing parm */
+	    if (psd_parm_required(parm) && 
+		!ps_parmnum_set(ps, parm->parm_id)) {
+		/* parm is supposed to be set but is not */
+		res = ERR_NCX_MISSING_PARM;
+	    }
+	} else {
+	    /* check for extra parm */
+	    if (ps_parmnum_set(ps, parm->parm_id)) {
+		/* parm is supposed to be missing but it is set */
+		res = ERR_NCX_EXTRA_CHOICE;
+	    }
+	}
+	if (res != NO_ERR) {
+	    if (errQ) {
+		if (scb) {
+		    agt_record_error(scb, errQ, layer, res, NULL, 
+				     NCX_NT_PARM, parm, NCX_NT_PARM, parm);
+		} else {
+		    /****/;
+		}
+	    }
+	    retres = res;
+	}
+    }
+
+    return retres;
+    
+}  /* check_block_err */
+
+
+/********************************************************************
+* FUNCTION mark_errors
+* 
+* Set the proper flags field in the ps_parmset_t 
+* Check the error queue for errors and/or warnings
+*
+* INPUTS:
+*   ps == ps_parmset_t struct in progress
+*   errQ == Q of rpc_err_rec_t to check
+*
+*********************************************************************/
+static void
+    mark_errors (ps_parmset_t *ps,
+		 const dlq_hdr_t  *errQ)
+{
+    const rpc_err_rec_t *err;
+
+    for (err = (const rpc_err_rec_t *)dlq_firstEntry(errQ);
+	 err != NULL;
+	 err = (const rpc_err_rec_t *)dlq_nextEntry(err)) {
+	switch (err->error_severity) {
+	case RPC_ERR_SEV_WARNING:
+	    SET_PS_WARNING(ps);
+	    break;
+	case RPC_ERR_SEV_ERROR:
+	    SET_PS_ERROR(ps);
+	    break;
+	default:
+	    ;
+	}
+    }
+}  /* mark_errors */
+
+
 /********************************************************************
  * FUNCTION gen_index_chain
  * 
@@ -3108,7 +3215,7 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION agt_val_parse
+* FUNCTION agt_val_parse_nc
 * 
 * Parse NETCONF PDU sub-contents into value fields
 * This module does not enforce complex type completeness.
@@ -3130,7 +3237,7 @@ static status_t
 * INPUTS:
 *     scb == session control block
 *     msg == incoming RPC message
-*     typ == typ_template_t for the parm or object type to parse
+*     obj == obj_template_t for the object to parse
 *     startnode == top node of the parameter to be parsed
 *     parentdc == parent data class
 *                 For the first call to this function, this will
@@ -3146,35 +3253,459 @@ static status_t
 *********************************************************************/
 /* parse a value for an NCX type from a NETCONF PDU XML stream */
 status_t 
-    agt_val_parse (ses_cb_t  *scb,
-		   xml_msg_hdr_t *msg,
-		   typ_template_t *typ,
-		   const xml_node_t *startnode,
-		   ncx_data_class_t  parentdc,
-		   val_value_t  *retval)
+    agt_val_parse_nc (ses_cb_t  *scb,
+		      xml_msg_hdr_t *msg,
+		      const obj_template_t *obj,
+		      const xml_node_t *startnode,
+		      ncx_data_class_t  parentdc,
+		      val_value_t  *retval)
 {
-    typ_def_t    *typdef;
-
 #ifdef DEBUG
-    if (!scb || !msg || !typ || !startnode || !retval) {
+    if (!scb || !msg || !obj || !startnode || !retval) {
 	/* non-recoverable error */
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    typdef = &typ->typdef;
-
 #ifdef AGT_VAL_PARSE_DEBUG
-    log_debug3("\nparse_btype: name:%s btyp:%s", 
-	   typ->name, tk_get_btype_sym(typ_get_basetype(typdef)));
+    log_debug3("\nagt_val_parse: %s:%s btyp:%s", 
+	       obj_get_mod_prefix(obj),
+	       name, tk_get_btype_sym(obj_get_basetype(obj)));
 #endif
 
     /* get the element values */
-    return parse_btype_nc(scb, msg, typdef, startnode, parentdc, retval);
+    return parse_btype_nc(scb, msg, obj, startnode, parentdc, retval);
 
-}  /* agt_val_parse */
+}  /* agt_val_parse_nc */
 
 
+/********************************************************************
+* FUNCTION agt_ps_parse_instance_check
+* 
+* Check a ps_parmset_t struct against its expected PSD 
+* for instance validation:
+*
+*    - instance qualifiers: 
+*      FULL: validate expected instances for any nested parmsets
+*      TOP:  validate expected instances for the top level only
+*            This mode allows the RPC parmset to be completely
+*            validated, but will treat nested parmsets as simple
+*            parameters (within the current level)
+*      PARTIAL: only check for too many instances. Do not check
+*            for missing instances (NCX_IQUAL_ONE or NCX_IQUAL_1MORE)
+*      NONE: do not perform any instance qualifier validation
+*
+* The input is checked against the specified PSD.
+*
+* Any generated <rpc-error> elements will be added to the errQ
+*
+* INPUTS:
+*   scb == session control block
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   valset == val_value_t container to check
+*   layer == NCX layer calling this function
+*
+* OUTPUTS:
+*    rpc->msg_errQ may have rpc_err_rec_t structs added to it 
+*    which must be freed by the called with the 
+*    rpc_err_free_record function
+*
+* RETURNS:
+*   status of the operation, NO_ERR if no validation errors found
+*********************************************************************/
+status_t 
+    agt_val_parse_instance_check (ses_cb_t *scb,
+				  xml_msg_hdr_t *msg,
+				  val_value_t *valset,
+				  ncx_layer_t   layer)
+{
+    const psd_parm_t     *psd_parm;
+    const typ_template_t *psd_type;
+    psd_parmid_t          parmid;
+    status_t              res, retres;
+    ncx_iqual_t           iqual;
+
+#ifdef DEBUG
+    if (!ps) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    retres = NO_ERR;
+
+    /* Go through all the parameters in the PSD and check
+     * the parmset to see if each parm (or choice block)
+     * is present the correct number of instances
+     * In NCX, only the RelaxNG instance qualifiers
+     * are checked per parameter.  Specific number
+     * of instances is supported through the table index
+     *
+     * The PSD node can be a choice or a simple parameter 
+     */
+    for (parmid = 1; parmid <= ps->psd->parmcnt; parmid++) {
+	/* get the parameter descriptor */
+	psd_parm = psd_find_parmnum(ps->psd, parmid);
+	if (!psd_parm) {
+	    return SET_ERROR(ERR_INTERNAL_PTR);
+	}
+
+	/* check for missing parameter only for plain parameters
+	 * and all test types except partial
+	 */
+	if (!psd_parm->choice_id) {
+	    if (psd_parm_required(psd_parm)) {
+		if (!ps_parmnum_seterr(ps, parmid)) {
+		    /* param is not set */
+		    retres = ERR_NCX_MISSING_PARM;
+		    if (msg) {
+			agt_record_error(scb, &msg->errQ, layer, retres, 
+			    NULL, NCX_NT_PSDPARM, psd_parm, 
+			    NCX_NT_PARMSET, ps);
+		    }
+		}
+	    }
+	}
+
+	/* check too many instances for all test types */
+	res = NO_ERR;
+	psd_type = (const typ_template_t *)psd_parm->pdef;
+
+	iqual = typ_get_iqualval((const typ_template_t *)
+				     psd_parm->pdef);
+	if ((iqual==NCX_IQUAL_ONE || iqual==NCX_IQUAL_OPT) &&
+	    ps_parmnum_mset(ps, parmid)) {
+	    /* max 1 allowed, but more than 1 set 
+	     * generate an error 
+	     */
+	    res = ERR_NCX_EXTRA_PARMINST;
+	}
+
+	if (res != NO_ERR) {
+	    retres = res;
+	    if (msg) {
+		agt_record_error(scb, &msg->errQ, layer, retres, 
+		    NULL, NCX_NT_PSDPARM, psd_parm, NCX_NT_PARMSET, ps);
+	    }
+	}		
+    }
+
+    return retres;
+
+}  /* agt_val_parse_instance_check */
+
+
+/********************************************************************
+* FUNCTION agt_ps_parse_choice_check
+* 
+* Check a ps_parmset_t struct against its expected PSD 
+* for instance validation:
+*
+*    - choice validation: 
+*      only one member (or block) allowed if the data type is choice
+*      Only issue errors based on the instance test qualifiers
+*
+*    - instance qualifiers: 
+*      validate expected choices for the top level only
+*
+* The input is checked against the specified PSD.
+*
+* Any generated <rpc-error> elements will be added to the errQ
+*
+* INPUTS:
+*   scb == session control block
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   ps == ps_parmset_t to check
+*   layer == NCX layer calling this function
+*
+* OUTPUTS:
+*   *errQ may have rpc_err_rec_t structs added to it which must be
+*    freed by the called with the rpc_err_free_record function
+*
+* RETURNS:
+*   status of the operation, NO_ERR if no validation errors found
+*********************************************************************/
+status_t 
+    agt_ps_parse_choice_check (ses_cb_t  *scb,
+			       xml_msg_hdr_t *msg,
+			       const ps_parmset_t *ps,
+			       ncx_layer_t     layer)
+{
+    const psd_hdronly_t  *psd_hdr, *choice_hdr;
+    const psd_choice_t   *psd_choice;
+    const psd_block_t    *psd_block;
+    const psd_parm_t     *psd_parm, *set_parm;
+    status_t              res, retres;
+    boolean               choicereq;
+
+#ifdef DEBUG
+    if (!ps) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* check if there is any work to do at all */
+    if (!ps->psd->choicecnt) {
+	return NO_ERR;
+    }
+
+    retres = NO_ERR;
+
+    /* Go through all the entries in the PSD parmQ and check
+     * the choices against the parmset to see if each 
+     * choice parm or choice block is present in the correct 
+     * number of instances.
+     *
+     * The parmQ contains PSD_NT_PARM and PSD_NT_CHOICE entries
+     */
+    for (psd_hdr = (const psd_hdronly_t *)dlq_firstEntry(&ps->psd->parmQ);
+	 psd_hdr != NULL;
+	 psd_hdr = (const psd_hdronly_t *)dlq_nextEntry(psd_hdr)) {
+
+	if (psd_hdr->ntyp != PSD_NT_CHOICE) {
+	    /* skip PSD_NT_PARM entry */
+	    continue;
+	}
+
+	psd_choice = (const psd_choice_t *)psd_hdr;
+	set_parm = NULL;
+	choicereq = TRUE;
+
+	/* go through all the entries in this choice and validate them 
+	 * The choiceQ contains PSD_NT_BLOCK or PSD_NT_PARM entries
+	 */
+	for (choice_hdr = (const psd_hdronly_t *)
+		 dlq_firstEntry(&psd_choice->choiceQ);
+	     choice_hdr != NULL;
+	     choice_hdr = (const psd_hdronly_t *)
+		 dlq_nextEntry(choice_hdr)) {
+	    if (choice_hdr->ntyp==PSD_NT_BLOCK) {
+		/* this entire block should be present or absent
+		 * unless any of the parameters are optional
+		 */
+		psd_block = (const psd_block_t *)choice_hdr;
+
+		if (!psd_block_required(psd_block)) {
+		    choicereq = FALSE;
+		}
+		    
+		if (ps_check_block_set(ps, psd_block)) {
+		    /* at least 1 parm in the block is set */
+		    if (set_parm) {
+			/* this is an error for all the parms set */
+			res = check_block_err(scb, &msg->errQ, 
+					      FALSE, layer, 
+					      ps, psd_block);
+			if (res != NO_ERR) {
+			    retres = res;
+			}
+		    } else {
+			/* this becomes the selected choice member */
+			set_parm = (const psd_parm_t *)
+			    dlq_firstEntry(&psd_block->blockQ);
+
+			/* check for any parms that should be set 
+			 * but are not
+			 */
+			res = check_block_err(scb, &msg->errQ, 
+					      TRUE, layer,
+					      ps, psd_block);
+			if (res != NO_ERR) {
+			    retres = res;
+			}
+		    }
+		} else {
+		    /* nothing in this block was set */
+		    continue;
+		}
+	    } else {
+		/* this choice member is a simple parm */
+		psd_parm = (const psd_parm_t *)choice_hdr;
+
+		/* if any choice member is optional, then
+		 * the entire choice is optional
+		 */
+		if (!psd_parm_required(psd_parm)) {
+		    choicereq = FALSE;
+		}
+
+		/* check too many choices set error */
+		if (ps_parmnum_set(ps, psd_parm->parm_id)) {
+		    /* this parm is set */
+		    if (set_parm) {
+			/* choice already set elsewhere */
+			retres = ERR_NCX_EXTRA_CHOICE;
+			if (msg) {
+			    agt_record_error(scb, &msg->errQ, 
+					     layer, retres, NULL, 
+					     NCX_NT_PSDPARM, psd_parm, 
+					     NCX_NT_PARMSET, ps);
+			}
+		    } else {
+			/* make this the selected choice */
+			set_parm = psd_parm;
+		    }
+		} 
+	    }
+	}
+
+	/* check for 'no choice made' error
+	 * Do not generate error if any choice members are optional
+	 */
+	if (choicereq && !set_parm) {
+	    retres = ERR_NCX_MISSING_CHOICE;
+	    if (msg) {
+		agt_record_error(scb, &msg->errQ, layer, retres, NULL, 
+				 NCX_NT_PSDPARM, 
+				 psd_first_choice_parm(ps->psd, psd_choice),
+				 NCX_NT_PARMSET, ps);
+	    }
+	}
+
+    }
+
+    return retres;
+
+}  /* agt_ps_parse_choice_check */
+
+
+/********************************************************************
+* FUNCTION agt_ps_parse_error_subtree
+* 
+* Generate an error during parmset processing for an element
+* Add rpc_err_rec_t structs to the msg->errQ
+*
+* INPUTS:
+*   scb == session control block (NULL means call is a no-op)
+*   msg = xml_msg_hdr_t from msg in progress  (NULL means call is a no-op)
+*   startnode == parent start node to match on exit
+*         If this is NULL then the reader will not be advanced
+*   errnode == error node being processed
+*         If this is NULL then the current node will be
+*         used if it can be retrieved with no errors,
+*         and the node has naming properties.
+*   errcode == error status_t of initial internal error
+*         This will be used to pick the error-tag and
+*         default error message
+*   errnodetyp == internal VAL_PCH node type used for error_parm
+*   error_parm == pointer to attribute name or namespace name, etc.
+*         used in the specific error in agt_rpcerr.c
+*   intnodetyp == internal VAL_PCH node type used for intnode
+*   intnode == internal VAL_PCH node used for error_path
+* RETURNS:
+*   status of the operation; only fatal errors will be returned
+*********************************************************************/
+status_t 
+    agt_ps_parse_error_subtree (ses_cb_t *scb,
+			    xml_msg_hdr_t *msg,
+			    const xml_node_t *startnode,
+			    const xml_node_t *errnode,
+			    status_t errcode,
+			    ncx_node_t errnodetyp,			    
+			    const void *error_parm,
+			    ncx_node_t intnodetyp,
+			    const void *intnode)
+{
+    status_t        res;
+
+    res = NO_ERR;
+
+    if (msg) {
+	agt_record_error(scb, &msg->errQ, NCX_LAYER_OPERATION, errcode, 
+		 errnode, errnodetyp, error_parm, intnodetyp, intnode);
+    }
+
+    if (scb && startnode) {
+	res = agt_xml_skip_subtree(scb->reader, startnode);
+    }
+
+    return res;
+
+}  /* agt_ps_parse_error_subtree */
+
+
+/********************************************************************
+* FUNCTION agt_ps_parse_error_attr
+* 
+* Generate an error during parmset processing for an attribute
+* Add rpc_err_rec_t structs to the msg->rpc_errQ
+*
+* INPUTS:
+*   scb == session control block
+*   msg == xml_msg_hdr_t from msg in progress (NULL == NO RPC-ERRORS RECORDED)
+*   errattr == attribute with the error
+*   errnode == error node being processed
+*         If this is NULL then the current node will be
+*         used if it can be retrieved with no errors,
+*         and the node has naming properties.
+*   errcode == error status_t of initial internal error
+*         This will be used to pick the error-tag and
+*         default error message
+*   nodetyp == internal VAL_PCH node type used for error_path
+*   intnode == internal VAL_PCH node used for error_path
+*
+*********************************************************************/
+void
+    agt_ps_parse_error_attr (ses_cb_t *scb,
+			 xml_msg_hdr_t  *msg,
+			 const xml_attr_t *errattr,
+			 const xml_node_t *errnode,
+			 status_t errcode,
+			 ncx_node_t nodetyp,
+			 const void *intnode)
+{
+    /* this function would only be called after namespace errors 
+     * have been checked, so the 'badns' param is hard-wired to NULL
+     */
+    if (msg) {
+	agt_record_attr_error(scb, &msg->errQ, 
+			      NCX_LAYER_OPERATION, errcode,  
+			      errattr, errnode, NULL, nodetyp, intnode);
+    }
+
+}  /* agt_ps_parse_error_attr */
+
+
+#ifdef DEBUG
+/********************************************************************
+* FUNCTION agt_ps_parse_test
+* 
+* scaffold code to get agt_ps_parse tested 
+*
+* INPUTS:
+*   testfile == NETCONF PDU in a test file
+*
+*********************************************************************/
+void
+    agt_ps_parse_test (const char *testfile)
+{
+    ses_cb_t  *scb;
+    status_t   res;
+
+    /* create a dummy session control block */
+    scb = agt_ses_new_dummy_session();
+    if (!scb) {
+	SET_ERROR(ERR_INTERNAL_MEM);
+	return;
+    }
+
+    /* open the XML reader */
+    res = xml_get_reader_from_filespec(testfile, &scb->reader);
+    if (res != NO_ERR) {
+	SET_ERROR(res);
+	agt_ses_free_dummy_session(scb);
+	return;
+    }
+
+    /* dispatch the test PDU */
+    agt_top_dispatch_msg(scb);
+
+    /* clean up and exit */
+    agt_ses_free_dummy_session(scb);
+
+}  /* agt_ps_parse_test */
+#endif
 
 
 /* END file agt_val_parse.c */

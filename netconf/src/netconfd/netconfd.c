@@ -121,7 +121,7 @@ static status_t
     /* initialize the NETCONF operation attribute 
      * MUST be after the netconf.ncx module is loaded
      */
-    res = ncx_init_operation_attr();
+    res = ncx_stage2_init();
     if (res != NO_ERR) {
 	return res;
     }
@@ -273,9 +273,6 @@ static void
 
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
-
-    /* cleanup the NETCONF operation attribute */
-    ncx_clean_operation_attr();
 
 }  /* netconfd_cleanup */
 

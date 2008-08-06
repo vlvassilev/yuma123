@@ -76,7 +76,7 @@ date	     init     comment
 #define TYP_FL_REPLACE   bit0         /* Replace if set; extend if not */
 
 /* access the typ_complex_t struct within the typdef */
-#define TYP_DEF_COMPLEX(T) (&((T)->def.complex))
+/* #define TYP_DEF_COMPLEX(T) (&((T)->def.complex)) */
 
 
 /********************************************************************
@@ -214,7 +214,7 @@ typedef struct typ_simple_t_ {
     typ_range_t      range;            /* YANG saves errinfo for pass 2 */
     dlq_hdr_t        rangeQ;                     /* Q of typ_rangedef_t */
     dlq_hdr_t        valQ;     /* bit, enum, string, list vals/patterns */
-    dlq_hdr_t        metaQ;                 /* Q of typ_child_t structs */
+    dlq_hdr_t        metaQ;              /* Q of obj_template_t structs */
     dlq_hdr_t        unionQ;   /* Q of typ_unionnode_t for NCX_BT_UNION */
     ncx_strrest_t    strrest;   /* string/type restriction type in valQ */
     uint32           flags;
@@ -224,14 +224,16 @@ typedef struct typ_simple_t_ {
 
 /* NCX_CL_COMPLEX
  *
- * typ_complex_t
+ * typ_complex_t   !!! removed !!!
  *      - struct containing a pointer to complex type
  *
  *  NCX_BT_CONTAINER -- struct of arbitrary types
  *  NCX_BT_CHOICE -- choice of arbitrary types
  *  NCX_BT_LIST  -- table of arbitrary types
  *  NCX_BT_XCONTAINER -- containerized object of 1 arbitrary type
+ *
  */
+#if 0
 typedef struct typ_complex_t_ {
     ncx_btype_t        btyp;                   /* node type */
     dlq_hdr_t          indexQ;          /* Q of typ_index_t */
@@ -240,6 +242,7 @@ typedef struct typ_complex_t_ {
     uint32             flags;
     uint32             maxrows;      /* 0 == no max for con/tab */
 } typ_complex_t;
+#endif
 
 
 /* NCX_CL_NAMED
@@ -273,7 +276,7 @@ typedef struct typ_ref_t_ {
 typedef union typ_def_u_t_ {
     ncx_btype_t     base;
     typ_simple_t    simple;
-    typ_complex_t   complex;
+    /* typ_complex_t   complex; */
     typ_named_t     named;
     typ_ref_t       ref;
 } typ_def_u_t;
@@ -306,7 +309,10 @@ typedef struct typ_def_t_ {
 /* When I get to the bottom I go back to the top of the slide... 
  * Each member of a complex type is allocated as a typ_child_t
  * which of course can also contain a complex type
+ *
+ * !!! REMOVED: REPLACED WITH obj_template_t !!!
  */
+#if 0
 typedef struct typ_child_t_ {
     dlq_hdr_t            qhdr;
     xmlChar             *name;
@@ -315,15 +321,18 @@ typedef struct typ_child_t_ {
     struct typ_child_t_ *grouptop;      /* if node is in a choice group */
     typ_def_t            typdef;
 } typ_child_t;
+#endif
 
 
 /* One table or container index component */
+#if 0
 typedef struct typ_index_t_ {
     dlq_hdr_t       qhdr;
     xmlChar        *sname;       /* scoped name stored here */
     ncx_indextyp_t  ityp;
     typ_child_t     typch;       /* base name stored in typch.name */
 } typ_index_t;
+#endif
 
 
 /* One NCX 'type' definition -- top-level type template */
@@ -514,35 +523,36 @@ extern typ_listval_t *
 extern void
     typ_free_listval (typ_listval_t *lv);
 
-/* malloc and init an index descriptor */
-extern typ_index_t *
-    typ_new_index (void);
-
-extern void
-    typ_init_index (typ_index_t *in);
-
-/* free an index descriptor */
-extern void
-    typ_free_index (typ_index_t *in);
-
-extern void
-    typ_clean_index (typ_index_t *in);
-
+/* malloc and init an index descriptor
+ * extern typ_index_t *
+ *    typ_new_index (void);
+ *
+ *
+ * extern void
+ *    typ_init_index (typ_index_t *in);
+ *
+ ** free an index descriptor **
+ * extern void
+ *    typ_free_index (typ_index_t *in);
+ *
+ * extern void
+ *    typ_clean_index (typ_index_t *in);
+ */
 
 /* malloc and init a child (within a complex type) descriptor */
-extern typ_child_t *
-    typ_new_child (void);
-
-extern void
-    typ_init_child (typ_child_t *ch);
-
-/* free a child (within a complex type) descriptor */
-extern void
-    typ_free_child (typ_child_t *ch);
-
-extern void
-    typ_clean_child (typ_child_t *ch);
-
+/* extern typ_child_t *
+ *    typ_new_child (void);
+ *
+ * extern void
+ *    typ_init_child (typ_child_t *ch);
+ *
+ ** free a child (within a complex type) descriptor 
+ * extern void
+ *    typ_free_child (typ_child_t *ch);
+ *
+ * extern void
+ *    typ_clean_child (typ_child_t *ch);
+ */
 
 /***************** ACCESS FUNCTIONS *****************/
 
@@ -634,29 +644,36 @@ extern const typ_def_t *
     typ_get_cqual_typdef (const typ_def_t  *typdef,
 			  ncx_squal_t  squal);
 
+
+
 /* find the specified child node in a struct or choice
  * ignores any local members declared in the indexQ
  * use typ_find_type_member to find inline index typdefs
+ *
+ *
+ * extern typ_child_t *
+ *    typ_find_child (const xmlChar *name,
+ *		    const typ_complex_t *cpx);
+ *
+ * extern typ_def_t *
+ *    typ_find_child_typdef (const xmlChar *name,
+ *			   typ_def_t *typdef);
+ *
+ *
+ ** get the first child member
+ * extern typ_child_t *
+ *    typ_first_child (const typ_complex_t *cpx);
+ *
+ * ** get the next child member **
+ * extern typ_child_t *
+ *    typ_next_child (typ_child_t *ch);
+ *
+ * extern const typ_child_t *
+ *    typ_next_con_child (const typ_child_t *ch);
  */
-extern typ_child_t *
-    typ_find_child (const xmlChar *name,
-		    const typ_complex_t *cpx);
-
-extern typ_def_t *
-    typ_find_child_typdef (const xmlChar *name,
-			   typ_def_t *typdef);
 
 
-/* get the first child member */
-extern typ_child_t *
-    typ_first_child (const typ_complex_t *cpx);
 
-/* get the next child member */
-extern typ_child_t *
-    typ_next_child (typ_child_t *ch);
-
-extern const typ_child_t *
-    typ_next_con_child (const typ_child_t *ch);
 
 /* find the specified child node in any complex type
  * This function checks the inline index fields for tables
@@ -666,50 +683,59 @@ extern typ_def_t *
     typ_find_type_member (typ_def_t  *typdef,
 			  const xmlChar *name);
 
-/* get the first index descriptor */
-extern typ_index_t *
-    typ_first_index (const typ_complex_t *cpx);
-
-/* get the next index descriptor */
-extern typ_index_t *
-    typ_next_index (const typ_index_t *in);
-
-/* find a specified index descriptor */
-extern typ_index_t *
-    typ_find_index (const xmlChar *name,
-		    const typ_complex_t *cpx);
-
-extern typ_def_t *
-    typ_get_index_typdef (typ_index_t *indx);
-
-extern const xmlChar *
-    typ_get_index_name (const typ_index_t *indx);
+/* get the first index descriptor 
+ * extern typ_index_t *
+ *    typ_first_index (const typ_complex_t *cpx);
+ *
+ * get the next index descriptor 
+ * extern typ_index_t *
+ *    typ_next_index (const typ_index_t *in);
+ *
+ *
+ *
+ *** find a specified index descriptor **
+ * extern typ_index_t *
+ *    typ_find_index (const xmlChar *name,
+ *		    const typ_complex_t *cpx);
+ *
+ * extern typ_def_t *
+ *    typ_get_index_typdef (typ_index_t *indx);
+ *
+ *
+ * extern const xmlChar *
+ *    typ_get_index_name (const typ_index_t *indx);
+ */
 
 /* get the first metadata descriptor, will follow the typdef chain */
-extern typ_child_t *
+extern void *   /* obj_template_t *   */
     typ_first_meta (const typ_def_t *typdef);
 
 /* get the first metadata descriptor, will not follow the typdef chain */
-extern typ_child_t *
+extern void *  /* obj_template *   */
     typ_first_meta_con (const typ_def_t *typdef);
 
-/* get the next metadata descriptor */
-extern typ_child_t *
-    typ_next_meta (typ_child_t *meta);
+/* get the next metadata descriptor *
+ * extern typ_child_t * 
+ *    typ_next_meta (typ_child_t *meta);
+ *
+ *
+ ** find a specified metadata descriptor **
+ * extern typ_child_t *
+ *    typ_find_meta (typ_def_t *typdef,
+ *		   const xmlChar *name);
+ */
 
-/* find a specified metadata descriptor */
-extern typ_child_t *
-    typ_find_meta (typ_def_t *typdef,
-		   const xmlChar *name);
 
 /* find a specified appinfo variable */
 extern const ncx_appinfo_t *
     typ_find_appinfo (const typ_def_t *typdef,
+		      const xmlChar *prefix,
 		      const xmlChar *name);
 
 /* find a specified appinfo variable constrined to the typdef */
 extern const ncx_appinfo_t *
     typ_find_appinfo_con (const typ_def_t *typdef,
+			  const xmlChar *prefix,
 			  const xmlChar *name);
 
 /* get default from template */
@@ -825,9 +851,10 @@ extern const ncx_errinfo_t *
 extern void
     typ_clean_typeQ (dlq_hdr_t *que);
 
-/* clean Q of typ_index_t */
-extern void
-    typ_clean_indexQ (dlq_hdr_t *que);
+/* clean Q of typ_index_t
+ * extern void
+ *    typ_clean_indexQ (dlq_hdr_t *que);
+ */
 
 extern boolean
     typ_ok_for_inline_index (ncx_btype_t btyp);

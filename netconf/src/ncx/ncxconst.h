@@ -64,6 +64,7 @@ date	     init     comment
 #define NCX_NCSSH_PORT  830
 
 #define NCX_MODULE       (const xmlChar *)"ncx"
+#define NCX_PREFIX       (const xmlChar *)"ncx"
 
 #define INVALID_URN    (const xmlChar *)"INVALID"
 
@@ -345,6 +346,7 @@ date	     init     comment
 #define NCX_EL_CHOICE          ((const xmlChar *)"choice")
 #define NCX_EL_CHOICE_NAME     ((const xmlChar *)"choice-name")
 #define NCX_EL_CLASS           ((const xmlChar *)"class")
+#define NCX_EL_CLI             ((const xmlChar *)"cli")
 #define NCX_EL_CLOSE_SESSION   ((const xmlChar *)"close-session")
 #define NCX_EL_COMMIT          ((const xmlChar *)"commit")
 #define NCX_EL_CONDITION       ((const xmlChar *)"condition")
@@ -407,6 +409,7 @@ date	     init     comment
 #define NCX_EL_HEADER          ((const xmlChar *)"header")
 #define NCX_EL_HELLO           ((const xmlChar *)"hello")
 #define NCX_EL_HELP            ((const xmlChar *)"help")
+#define NCX_EL_HIDDEN          ((const xmlChar *)"hidden")
 #define NCX_EL_HTML            ((const xmlChar *)"html")
 #define NCX_EL_ILLEGAL         ((const xmlChar *)"illegal")
 #define NCX_EL_IMPORT          ((const xmlChar *)"import")
@@ -447,9 +450,10 @@ date	     init     comment
 #define NCX_EL_MODULES         ((const xmlChar *)"modules")
 #define NCX_EL_MONITOR         ((const xmlChar *)"monitor")
 #define NCX_EL_NAME            ((const xmlChar *)"name")
+#define NCX_EL_NCX             ((const xmlChar *)"ncx")
 #define NCX_EL_NCXCONNECT      ((const xmlChar *)"ncx-connect")
 #define NCX_EL_NAMESPACE       ((const xmlChar *)"namespace")
-#define NCX_EL_NCXMODULE       ((const xmlChar *)"ncx-module")
+#define NCX_EL_NETCONF         ((const xmlChar *)"netconf")
 #define NCX_EL_NONE            ((const xmlChar *)"none")
 #define NCX_EL_NODUPLICATES    ((const xmlChar *)"no-duplicates")
 #define NCX_EL_NOOP_ELEMENT    ((const xmlChar *)"noop-element")
@@ -472,6 +476,7 @@ date	     init     comment
 #define NCX_EL_PARM            ((const xmlChar *)"parm")
 #define NCX_EL_PARMSET         ((const xmlChar *)"parmset")
 #define NCX_EL_PARMS           ((const xmlChar *)"parms")
+#define NCX_EL_PASSWORD        ((const xmlChar *)"password")
 #define NCX_EL_PATH            ((const xmlChar *)"path")
 #define NCX_EL_PATTERN         ((const xmlChar *)"pattern")
 #define NCX_EL_PORT            ((const xmlChar *)"port")
@@ -508,7 +513,6 @@ date	     init     comment
 #define NCX_EL_SYNTAX          ((const xmlChar *)"syntax")
 #define NCX_EL_TABLE           ((const xmlChar *)"table")
 #define NCX_EL_TARGET          ((const xmlChar *)"target")
-#define NCX_EL_TCONFIG         ((const xmlChar *)"tconfig")
 #define NCX_EL_TESTONLY        ((const xmlChar *)"test-only")
 #define NCX_EL_TESTOP          ((const xmlChar *)"test-option")
 #define NCX_EL_TESTTHENSET     ((const xmlChar *)"test-then-set")

@@ -77,6 +77,10 @@ date         init     comment
 #include  "xml_util.h"
 #endif
 
+#ifndef _H_xpath
+#include  "xpath.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -162,47 +166,6 @@ static cfg_template_t *
 
 
 /********************************************************************
-* FUNCTION new_template
-*
-* Malloc and initialize a cfg_template_t struct
-*
-* INPUTS:
-*    name == cfg name
-*    cfg_id   == cfg ID
-* RETURNS:
-*    malloced struct or NULL if some error
-*    This struct needs to be freed by the caller
-*********************************************************************/
-static cfg_template_t *
-    new_template (const xmlChar *name,
-		  ncx_cfg_t cfg_id)
-{
-    cfg_template_t *cfg;
-
-    cfg = m__getObj(cfg_template_t);
-    if (!cfg) {
-	return NULL;
-    }
-
-    memset(cfg, 0x0, sizeof(cfg_template_t));
-
-    cfg->name = xml_strdup(name);
-    if (!cfg->name) {
-	m__free(cfg);
-	return NULL;
-    }
-
-    cfg->cfg_id = cfg_id;
-    cfg->cfg_state = CFG_ST_INIT;
-    dlq_createSQue(&cfg->load_errQ);
-    /* root is still NULL; indicates empty cfg */
-
-    return cfg;
-
-} /* new_template */
-
-
-/********************************************************************
 * FUNCTION free_template
 *
 * Clean and free the cfg_template_t struct
@@ -250,6 +213,79 @@ static void
     m__free(cfg);
 
 } /* free_template */
+
+
+/********************************************************************
+* FUNCTION new_template
+*
+* Malloc and initialize a cfg_template_t struct
+*
+* INPUTS:
+*    name == cfg name
+*    cfg_id   == cfg ID
+* RETURNS:
+*    malloced struct or NULL if some error
+*    This struct needs to be freed by the caller
+*********************************************************************/
+static cfg_template_t *
+    new_template (const xmlChar *name,
+		  ncx_cfg_t cfg_id)
+{
+    cfg_template_t        *cfg;
+    const obj_template_t  *cfgobj;
+    ncx_node_t             dtyp;
+
+    dtyp = NCX_NT_OBJ;
+    cfgobj = def_reg_find_moddef(NCX_EL_NETCONF,
+				 NCX_EL_CONFIG,
+				 &dtyp);
+    if (!cfgobj) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+
+    cfg = m__getObj(cfg_template_t);
+    if (!cfg) {
+	return NULL;
+    }
+
+    memset(cfg, 0x0, sizeof(cfg_template_t));
+
+    cfg->name = xml_strdup(name);
+    if (!cfg->name) {
+	m__free(cfg);
+	return NULL;
+    }
+
+    cfg->cfg_id = cfg_id;
+    cfg->cfg_state = CFG_ST_INIT;
+    dlq_createSQue(&cfg->load_errQ);
+
+    cfg->root = val_new_value();
+    if (!cfg->root) {
+	free_template(cfg);
+	return NULL;
+    }
+	
+    /* finish setting up the <config> root value */
+    val_init_from_template(cfg->root, cfgobj);
+
+    /* set the load_time and last_ch_time timestamps */
+    cfg->load_time = new_cur_datetime();
+    if (cfg->load_time) {
+	cfg->last_ch_time = xml_strdup(cfg->load_time);
+	if (!cfg->last_ch_time) {
+	    free_template(cfg);
+	    return NULL;
+	}
+    } else {
+	free_template(cfg);
+	return NULL;
+    }
+
+    return cfg;
+
+} /* new_template */
 
 
 /***************** E X P O R T E D    F U N C T I O N S  ***********/
@@ -890,63 +926,6 @@ status_t
 
 
 /********************************************************************
-* FUNCTION cfg_load_root
-*
-* Called via cfg_load, after the config data has been parsed
-* and validated.
-*
-* This function should only be used to load an empty config
-* in CFG_ST_INIT state
-*
-* INPUTS:
-*    cfg = Config template to load data into
-*    cfg->root is ready to load into the definition registry
-* 
-* OUTPUTS:
-*    errQ contains any rpc_err_rec_t structs (if non-NULL)
-*    def_reg calls are made to add the top-level parmsets to the
-*    registry 
-*
-*   *** TBD NESTED PARMSET ROOTS ****
-*
-* RETURNS:
-*    overall status; may be the last of multiple error conditions
-*********************************************************************/
-status_t
-    cfg_load_root (cfg_template_t *cfg)
-{
-
-#ifdef DEBUG
-    if (!cfg || !cfg->root) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-    if (cfg->cfg_state != CFG_ST_INIT) {
-	return SET_ERROR(ERR_NCX_CFG_STATE);
-    }
-#endif
-
-    /* finish setting up the <config> root value */
-    cfg->root->name = NCX_EL_CONFIG;
-    cfg->root->nsid = xmlns_nc_id();
-    cfg->root->typdef = typ_get_basetype_typdef(NCX_BT_CONTAINER);
-
-    /* set the load_time and last_ch_time timestamps */
-    cfg->load_time = new_cur_datetime();
-    if (cfg->load_time) {
-	cfg->last_ch_time = xml_strdup(cfg->load_time);
-	if (!cfg->last_ch_time) {
-	    return ERR_INTERNAL_MEM;
-	}
-    } else {
-	return ERR_INTERNAL_MEM;
-    }
-
-    return NO_ERR;
-
-} /* cfg_load_root */
-
-
-/********************************************************************
 * FUNCTION cfg_release_locks
 *
 * Release any configuration locks held by the specified session
@@ -1029,5 +1008,100 @@ void
 
 } /* cfg_get_lock_list */
 
+
+
+/********************************************************************
+* FUNCTION cfg_find_datanode
+*
+* Find the specified data node instance,
+* using absolute path XPath and default prefix names.
+* A missing prefix is an error
+* The expression must start from root
+*
+* INPUTS:
+*   target == XPath expression for single target to find
+*   cfgid == ID of configuration to use
+*
+* RETURNS:
+*   pointer to found node, or NULL if not found
+*********************************************************************/
+val_value_t *
+    cfg_find_datanode (const xmlChar *target,
+		       ncx_cfg_t  cfgid)
+{
+    cfg_template_t  *cfg;
+    val_value_t     *retval;
+    status_t         res;
+
+#ifdef DEBUG
+    if (!target) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    cfg = cfg_get_config_id(cfgid);
+    if (!cfg) {
+	return NULL;
+    }
+
+    res = xpath_find_val_target(cfg->root, NULL,
+				target, &retval);
+    if (res == NO_ERR) {
+	return retval;
+    } else {
+	return NULL;
+    }
+    
+
+} /* cfg_find_datanode */
+
+
+/********************************************************************
+* FUNCTION cfg_find_modrel_datanode
+*
+* Find the specified data node instance,
+* using absolute path XPath and module-relative prefix names.
+* A missing prefix is defaulted to the specified module
+* The expression must start from root
+*
+* INPUTS:
+*   mod  == module to use for the default and prefix evaluation
+*   target == XPath expression for single target to find
+*   cfgid == ID of configuration to use
+*
+* RETURNS:
+*   pointer to found node, or NULL if not found
+*********************************************************************/
+val_value_t *
+    cfg_find_modrel_datanode (ncx_module_t *mod,
+			      const xmlChar *target,
+			      ncx_cfg_t  cfgid)
+{
+    cfg_template_t  *cfg;
+    val_value_t     *retval;
+    status_t         res;
+
+#ifdef DEBUG
+    if (!target) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    cfg = cfg_get_config_id(cfgid);
+    if (!cfg) {
+	return NULL;
+    }
+
+    res = xpath_find_val_target(cfg->root, mod,
+				target, &retval);
+    if (res == NO_ERR) {
+	return retval;
+    } else {
+	return NULL;
+    }
+
+} /* cfg_find_modrel_datanode */
 
 /* END file cfg.c */

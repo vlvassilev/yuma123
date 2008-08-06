@@ -12,11 +12,11 @@
 
      - NETCONF PDUs
 
-        - Parmameter Set instance document parsing
+        - PDU instance document parsing
 
-        - Parmameter Set syntax validation
+        - Object instance syntax validation
 
-        - Parmameter Set basic referential integrity
+        - Basic object-level referential integrity
 
         - Value instance document parsing 
 
@@ -27,15 +27,16 @@
         - Value instance default value insertion
 
 
-    The NCX agent <edit-config> handler registers callbacks
-    with the agt_ps module that can be called IN ADDITION
+    The netconfd agent <edit-config> handler registers callbacks
+    with the agt_val module that can be called IN ADDITION
     to the automated callback, for referential integrity checking,
     resource reservation, etc.
 
     NCX Write Model
     ---------------
 
-    NCX uses a 3 pass callback model to process <edit-config> PDUs.
+    netconfd uses a 3 pass callback model to process 
+    <edit-config> PDUs.
     
   Pass 1:  Validation : AGT_CB_VALIDATE
 
@@ -50,21 +51,16 @@
        - insertion by default validation
        - nested 'operation' attribute validation
 
-    If any errors occur within a parameter set (within the 
-    /config/appname/ container) then that entire parameter set
+    If any errors occur within a value node (within the 
+    /config/ container) then that entire value node
     is considered unusable and it is not applied.
 
-    If continue-on-error is requested, then all sibling parameter
-    sets within an application node, and all sibling
-    application nodes will be processed if the validation tests
-    all pass.
-
-    Managers should be careful wrt/ the parmsets and applications
-    that are edited simultaneously within a single <edit-config> operation.
+    If continue-on-error is requested, then all sibling nodes
+    will be processed if the validation tests all pass.
 
   Pass 2: Apply : AGT_CB_APPLY
 
-    On a per-parmset granularity, an operation is processed only
+    On a per-node granularity, an operation is processed only
     if no errors occurred during the validation phase.
 
     The target database is modified.  User callbacks should
@@ -80,13 +76,13 @@
     If error-option is 'stop-on-error' then phase 3 is not executed
     if this phase terminates with an error.
 
-  Pass 3-pos: Commit (Positive Outcome) :  AGT_CB_COMMIT
+  Pass 3-OK: Commit (Positive Outcome) :  AGT_CB_COMMIT
        
     The database edits are automatically completed during this phase.
     The user callbacks must not edit the database -- only modify
     their own data structures, send PDUs, etc.
 
-  Pass 3-neg: Rollback (Negative Outcome) : AGT_CB_ROLLBACK
+  Pass 3-ERR: Rollback (Negative Outcome) : AGT_CB_ROLLBACK
 
     If rollback-on-error is requested, then this phase will be
     executed for only the application nodes (and sibling parmsets 
@@ -104,7 +100,9 @@
 date	     init     comment
 ----------------------------------------------------------------------
 04-nov-05    abb      Begun
-
+02-aug-08    abb      Convert from NCX typdef to YANG object design
+03-oct-08    abb      Convert to YANG only, remove app, parmset, 
+                      and parm layers in the NETCONF database
 */
 
 #ifndef _H_log

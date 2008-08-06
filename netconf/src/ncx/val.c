@@ -1313,30 +1313,6 @@ void
 
 
 /********************************************************************
-* FUNCTION val_init_root
-* 
-* Special function to initialize the <running> root
-* in case there is none loaded from a startup config
-*
-* MUST CALL val_init_value FIRST
-*
-* INPUTS:
-*   val == pointer to the malloced struct to initialize
-*********************************************************************/
-void
-    val_init_root (val_value_t *val)
-{
-    val_init_complex(val, NCX_BT_CONTAINER);
-    val->btyp = NCX_BT_CONTAINER;
-    val->obj = NULL;   /***/
-    val->typdef = NULL;
-    val->name = NCX_EL_CONFIG;
-    val->nsid = xmlns_nc_id();
-
-}  /* val_init_root */
-
-
-/********************************************************************
 * FUNCTION val_init_virtual
 * 
 * Special function to initialize a virtual value node
@@ -1381,6 +1357,8 @@ void
     val->typdef = obj_get_ctypdef(obj);
     val->btyp = obj_get_basetype(obj);
     val->name = obj_get_name(obj);
+    val->dataclass = obj_get_config_flag(obj) ?
+	NCX_DC_CONFIG : NCX_DC_STATE;
     if (obj->parent && obj->parent->objtype==OBJ_TYP_CASE) {
 	val->casobj = obj->parent;
     }
@@ -4929,7 +4907,8 @@ boolean
     }
 
     /* check for no-duplicates in the type appinfo */
-    if (typ_find_appinfo(val->typdef, NCX_EL_NODUPLICATES)) {
+    if (typ_find_appinfo(val->typdef, NCX_PREFIX, 
+			 NCX_EL_NODUPLICATES)) {
 	val->flags |= VAL_FL_DUPDONE;
 	return FALSE;
     }

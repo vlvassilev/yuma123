@@ -22,16 +22,10 @@ date	     init     comment
 
 */
 
-#ifndef _H_op
-#include "op.h"
-#endif
+#include <xmlstring.h>
 
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
-#ifndef _H_rpc
-#include "rpc.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_status
@@ -86,35 +80,15 @@ extern void
 
 extern boolean 
     agt_acm_rpc_allowed (const xmlChar *user,
-			 const rpc_template_t *rpc);
+			 const obj_template_t *rpcobj);
 
 extern boolean 
-    agt_acm_app_allowed (const xmlChar *user,
-			 const xmlChar *owner,
-			 const xmlChar *app,
-			 op_t reqop);
+    agt_acm_val_write_allowed (const xmlChar *user,
+			       const val_value_t *val);
 
 extern boolean 
-    agt_acm_ps_write_allowed (const xmlChar *user,
-			      const ps_parmset_t *ps);
+    agt_acm_val_read_allowed (const xmlChar *user,
+			      const val_value_t *val);
 
-extern boolean 
-    agt_acm_ps_read_allowed (const xmlChar *user,
-			     const ps_parmset_t *ps);
-
-extern boolean 
-    agt_acm_parm_write_allowed (const xmlChar *user,
-				const ps_parm_t *parm);
-
-extern boolean 
-    agt_acm_parm_read_allowed (const xmlChar *user,
-			       const ps_parm_t *parm);
-
-#ifdef NOT_YET
-extern boolean 
-    agt_acm_data_allowed (const xmlChar *user,
-			  const rpc_template_t *rpc,
-			  const void *data);
-#endif
 
 #endif	    /* _H_agt_acm */

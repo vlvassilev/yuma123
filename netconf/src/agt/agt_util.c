@@ -69,8 +69,17 @@ date         init     comment
 #include  "ncxconst.h"
 #endif
 
+<<<<<<< .mine
 #ifndef _H_obj
 #include  "obj.h"
+#endif
+
+#ifndef _H_op
+#include  "op.h"
+=======
+#ifndef _H_obj
+#include  "obj.h"
+>>>>>>> .r81
 #endif
 
 #ifndef _H_rpc
@@ -145,6 +154,7 @@ static ncx_data_class_t
     const val_value_t *val;
 
     switch (nodetyp) {
+    case NCX_NT_VAL:
 	val = node;
 	return val->dataclass;
     default:
@@ -214,23 +224,30 @@ status_t
 			   cfg_template_t  **retcfg)
 {
     cfg_template_t    *cfg;
-    val_value_t       *val;
-    const val_value_t *chval, *errval;
+    val_value_t       *val, *chval;
+    const val_value_t *errval;
     const xmlChar     *cfgname;
     status_t           res;
 
-    val = val_find_child(&msg->rpc_input, 
-			 obj_get_prefix(&msg->rpc_input->obj),
+    /*** should really provide the exact prefix ***/
+    val = val_find_child(msg->rpc_input, 
+			 obj_get_prefix(msg->rpc_input->obj), 
 			 parmname);
     if (!val || val->res != NO_ERR) {
+	if (!val) {
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	} else {
+	    res = val->res;
+	}
 	agt_record_error(NULL, &msg->mhdr.errQ, NCX_LAYER_OPERATION,
-		 res, methnode, NCX_NT_NONE, NULL, NCX_NT_VAL, 
-		 &msg->rpc_input);
+			 res, methnode, NCX_NT_NONE, NULL, NCX_NT_VAL, 
+			 msg->rpc_input);
 	return res;
     }
 
     errval = val;
     cfgname = NULL;
+    res = NO_ERR;
 
     /* got some value in *val */
     switch (val->btyp) {
@@ -244,7 +261,7 @@ status_t
 	res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    if (res == NO_ERR) {
+    if (cfgname) {
 	/* get the config template from the config name */
 	cfg = cfg_get_config(cfgname);
 	if (!cfg) {
@@ -283,11 +300,8 @@ const val_value_t *
     agt_get_parmval (const xmlChar *parmname,
 		     rpc_msg_t *msg)
 {
-    val_value_t       *val;
-    status_t           res;
-
-    val =  val_find_child(&msg->rpc_input,
-			  obj_get_mod_prefix(&msg->rpc_input->obj),
+    val =  val_find_child(msg->rpc_input,
+			  obj_get_mod_prefix(msg->rpc_input->obj),
 			  parmname);
     return val;
 
@@ -475,12 +489,12 @@ status_t
     res = NO_ERR;
 
     /* filter parm is optional */
-    filter = val_find_parmval(&msg->rpc_input, NCX_EL_FILTER, &filter);
-    if (res == ERR_NCX_NOT_FOUND) {
+    filter = val_find_child(&msg->rpc_input, NC_PREFIX, NCX_EL_FILTER);
+    if (!filter) {
 	msg->rpc_filter.op_filtyp = OP_FILTER_NONE;
 	msg->rpc_filter.op_filter = NULL;
 	return NO_ERR;   /* not an error */
-    } else if (res == NO_ERR) {
+    } else if (filter->res == NO_ERR) {
 	/* setup the filter parameters */
 	filtertype = val_find_meta(filter, nsid, NCX_EL_TYPE);
 	if (!filtertype) {
@@ -523,7 +537,7 @@ status_t
 
 	if (res != NO_ERR) {
 	    agt_record_error(scb, &msg->mhdr.errQ, 
-		  NCX_LAYER_OPERATION, res, NULL,
+			     NCX_LAYER_OPERATION, res, NULL,
 			     (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
 			     errstr, NCX_NT_VAL, filter);
 	}
@@ -534,7 +548,7 @@ status_t
 #ifdef AGT_UTIL_DEBUG
 	if (LOGDEBUG3) {
 	    log_debug3("\nagt_util_validate_filter:");
-	    ps_dump_parmset(&msg->rpc_input, 0);
+	    val_dump_value(&msg->rpc_input, 0);
 	}
 #endif
 
@@ -556,7 +570,7 @@ status_t
 * configuration data
 *
 * INPUTS:
-*    see ncx/ncxconst.h   (ncx_nodetest_fn_t)
+*    see ncx/ncxtypes.h   (ncx_nodetest_fn_t)
 * RETURNS:
 *    status
 *********************************************************************/
@@ -569,7 +583,7 @@ boolean
     boolean ret;
 
     dataclass = get_dataclass(nodetyp, node);
-    if (dataclass==NCX_DC_CONFIG || dataclass==NCX_DC_TCONFIG) {
+    if (dataclass==NCX_DC_CONFIG) {
 	ret = TRUE;
 
 	/* check if defaults are suppressed */
@@ -794,8 +808,7 @@ status_t
 *   cop == address of child operation (MAY BE ADJUSTED ON EXIT!!!)
 *          This is the edit-op field in the new node corresponding
 *          to the curnode position in the data model
-*   nodetyp == node type of the newnode and curnode parameters;
-*   newnode == pointer to current node in the edit-config PDU
+*   newnode == pointer to new node in the edit-config PDU
 *   curnode == pointer to the current node in the data model
 *              being affected by this operation, if any.
 *           == NULL if no current node exists
@@ -821,9 +834,8 @@ status_t
 status_t
     agt_check_editop (op_editop_t   pop,
 		      op_editop_t  *cop,
-		      ncx_node_t nodetyp,
-		      const void *newnode,
-		      const void *curnode,
+		      const val_value_t *newnode,
+		      const val_value_t *curnode,
 		      ncx_iqual_t iqual)
 {
     const val_value_t *val;
@@ -919,22 +931,8 @@ status_t
 	switch (pop) {
 	case OP_EDITOP_NONE:
 	    /* make sure the create edit-op is in a correct place */
-	    switch (nodetyp) {
-	    case NCX_NT_APP:
-	    case NCX_NT_PARMSET:
-	    case NCX_NT_PARM:
-		/* always okay to create a new one of these,
-		 * since it passed the curnode check
-		 */
-		break;
-	    case NCX_NT_VAL:
-		val = (const val_value_t *)newnode;
-		res = (val_create_allowed(val)) ?
-			NO_ERR : ERR_NCX_OPERATION_FAILED;
-		break;
-	    default:
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-	    }		
+	    res = (val_create_allowed(newnode)) ?
+		NO_ERR : ERR_NCX_OPERATION_FAILED;
 	    break;
 	case OP_EDITOP_MERGE:
 	case OP_EDITOP_REPLACE:
@@ -971,26 +969,8 @@ status_t
 	    switch (pop) {
 	    case OP_EDITOP_NONE:
 		/* make sure the create edit-op is in a correct place */
-		switch (nodetyp) {
-		case NCX_NT_APP:
-		case NCX_NT_PARMSET:
-		    /* always okay to delete one of these if it exists */
-		    break;
-		case NCX_NT_PARM:
-		    /* delete a parm ok if it is optional */
-		    parm = (const ps_parm_t *)curnode;
-		    if (psd_parm_required(parm->parm)) {
-			res = ERR_NCX_OPERATION_FAILED;
-		    }
-		    break;
-		case NCX_NT_VAL:
-		    val = (const val_value_t *)curnode;
-		    res = (val_delete_allowed(val)) ?
-			NO_ERR : ERR_NCX_OPERATION_FAILED;
-		    break;
-		default:
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		}		
+		res = (val_delete_allowed(curnode)) ?
+		    NO_ERR : ERR_NCX_OPERATION_FAILED;
 		break;
 	    case OP_EDITOP_MERGE:
 		/* delete within merge or ok */
@@ -1028,66 +1008,6 @@ status_t
     return res;
 
 } /* agt_check_editop */
-
-
-/********************************************************************
-* FUNCTION agt_get_parent_node
-* 
-* Determine the parent node of a specified NCX node
-* Set the parent_typ and parent pointers
-*
-* INPUTS:
-*   nodetyp == node type of node
-*   node == node to check (may be NULL)
-* OUTPUTS:
-*   *partyp is set to the parent node type
-*   *parent is set to the parent node (may be NULL)
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    agt_get_parent_node (ncx_node_t nodetyp,
-			 void *node,
-			 ncx_node_t  *partyp,
-			 void **parent)
-{
-    val_value_t  *val;
-    ps_parm_t    *parm;
-    ps_parmset_t *parmset;
-    cfg_app_t    *app;
-
-    if (!node) {
-	*partyp = NCX_NT_NONE;
-	*parent = NULL;
-	return;
-    }
-
-    switch (nodetyp) {
-    case NCX_NT_VAL:
-	val = (val_value_t *)node;
-	*partyp = val->parent_typ;
-	*parent = val->parent;
-	break;
-    case NCX_NT_PARM:
-	parm = (ps_parm_t *)node;
-	*partyp = NCX_NT_PARMSET;
-	*parent = parm->parent;
-	break;
-    case NCX_NT_PARMSET:
-	parmset = (ps_parmset_t *)node;
-	*partyp = NCX_NT_APP;
-	*parent = parmset->parent;
-	break;
-    case NCX_NT_APP:
-	*partyp = NCX_NT_VAL;
-	*parent = app->parent;
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	*partyp = NCX_NT_NONE;
-	*parent = NULL;
-    }
-} /* agt_get_parent_node */
 
 
 /* END file agt_util.c */

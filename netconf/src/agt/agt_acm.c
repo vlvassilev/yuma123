@@ -1,3 +1,4 @@
+#if 0
 /*  FILE: agt_acm.c
 
 		
@@ -10,6 +11,7 @@
 date         init     comment
 ----------------------------------------------------------------------
 04feb06      abb      begun
+01aug08      abb      convert from NCX PSD to YANG OBJ design
 
 *********************************************************************
 *                                                                   *
@@ -36,12 +38,12 @@ date         init     comment
 #include  "agt_cb.h"
 #endif
 
-#ifndef _H_agt_ps
-#include  "agt_ps.h"
-#endif
-
 #ifndef _H_agt_util
 #include  "agt_util.h"
+#endif
+
+#ifndef _H_agt_val
+#include  "agt_val.h"
 #endif
 
 #ifndef _H_def_reg
@@ -64,16 +66,16 @@ date         init     comment
 #include "ncxmod.h"
 #endif
 
-#ifndef _H_ps
-#include "ps.h"
-#endif
-
-#ifndef _H_psd
-#include "psd.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_status
 #include  "status.h"
+#endif
+
+#ifndef _H_val
+#include "val.h"
 #endif
 
 
@@ -85,10 +87,13 @@ date         init     comment
 
 #define AGT_ACM_DEBUG 1
 
-#define AGT_ACM_MODULE  (const xmlChar *)"ncx-acm"
-#define AGT_ACM_APP     (const xmlChar *)"security"
-#define AGT_ACM_PARMSET (const xmlChar *)"accessControl"
-#define AGT_ACM_INSTANCE_ID (const xmlChar *)"security.accessControl"
+#define AGT_ACM_MODULE      (const xmlChar *)"nacm"
+#define AGT_ACM_PREFIX      (const xmlChar *)"nacm"
+
+#define AGT_ACM_CBPATH    (const xmlChar *)"/nacm:accessControl"
+
+#define AGT_ACM_CONTAINER   (const xmlChar *)"accessControl"
+#define AGT_ACM_INSTANCE_ID (const xmlChar *)"/accessControl"
 
 #define PARM_CONFIGCAPS (const xmlChar *)"configCapabilities"
 #define PARM_PROFILE    (const xmlChar *)"profile"
@@ -155,7 +160,7 @@ static boolean agt_acm_init_done = FALSE;
 static agt_acm_config_caps_t configCaps;
 
 static agt_acm_control_mode_t accessControlMode;
-static ps_parmset_t  *accessControl;
+static val_value_t   *accessControl;
 static boolean        acStale;
 static boolean        acModeStale;
 static boolean        userQStale;
@@ -268,27 +273,21 @@ static void
 
 
 /********************************************************************
-* FUNCTION get_ac_parmset
+* FUNCTION get_ac_valset
 *
-* get the cached parmset pointer
+* get the cached value set pointer
 *
 * RETURNS:
 *    accessControl pointer
 *********************************************************************/
-static ps_parmset_t *
-    get_ac_parmset (void)
+static val_value_t *
+    get_ac_valset (void)
 {
-    ncx_node_t dtyp;
-
     if (!accessControl || acStale) {
-	dtyp = NCX_NT_PARMSET;
-	accessControl = (ps_parmset_t *)
-	    def_reg_find_cfgdef(AGT_ACM_MODULE,
-				AGT_ACM_APP,
-				AGT_ACM_PARMSET,
-				AGT_ACM_INSTANCE_ID,
-				NCX_CFGID_RUNNING,
-				&dtyp);
+
+	accessControl = 
+	    cfg_find_datanode(AGT_ACM_INSTANCE_ID,
+			      NCX_CFGID_RUNNING);
 	if (accessControl) {
 	    acStale = FALSE;
 	    acModeStale = TRUE;
@@ -298,7 +297,7 @@ static ps_parmset_t *
 
     return accessControl;
 
-} /* get_ac_parmset */
+} /* get_ac_valset */
 
 
 /********************************************************************
@@ -312,28 +311,26 @@ static ps_parmset_t *
 static agt_acm_control_mode_t
     get_ac_mode (void)
 {
-    ps_parmset_t *ac;
-    val_value_t  *val, *chval;
-    status_t   res;
+    val_value_t            *valset, *val, *chval;
 
     if (acModeStale) {
 	/* get the accessControl parmset */
-	ac = get_ac_parmset();
-	if (!ac) {
+	valset = get_ac_valset();
+	if (!valset) {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	    return AGT_ACM_CM_NONE;
 	}
 
 	/* get the accessControlMode value struct */
-	res = ps_get_parmval(accessControl, PARM_PROFILE, &val);
-	if (res == NO_ERR) {
-	    chval = val_find_child(val, LEAF_AC_MODE);
+	val = val_find_child(valset, AGT_ACM_PREFIX, PARM_PROFILE);
+	if (val) {
+	    chval = val_find_child(val, AGT_ACM_PREFIX, LEAF_AC_MODE);
 	    if (!chval) {
 		SET_ERROR(ERR_INTERNAL_VAL);
 		return AGT_ACM_CM_NONE;
 	    }
 	} else {
-	    SET_ERROR(res);
+	    SET_ERROR(ERR_INTERNAL_VAL);
 	    return AGT_ACM_CM_NONE;
 	}	    
 
@@ -384,10 +381,8 @@ static status_t
 			 const xmlChar **groupname,
 			 const xmlChar **rolestr)
 {
-    ps_parmset_t  *ac;
-    val_value_t   *groups, *group, *users, *user, *role, *name;
+    val_value_t   *valset, *groups, *group, *users, *user, *role, *name;
     user_ent_t    *userent;
-    status_t       res;
 
     /* first check the userQ cache */
     userent = find_user_ent(username);
@@ -400,15 +395,15 @@ static status_t
     /* not in the queue, so check the groups value struct
      * get tha accessControl parmset
      */
-    ac = get_ac_parmset();
-    if (!ac) {
+    valset = get_ac_valset();
+    if (!valset) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
     
     /* get the groups parameter */
-    res = ps_get_parmval(ac, PARM_GROUPS, &groups);
-    if (res != NO_ERR) {
-	return res;
+    groups = val_find_child(valset, AGT_ACM_PREFIX, PARM_GROUPS);
+    if (!groups) {
+	return ERR_NCX_DEF_NOT_FOUND;
     }
 
     /* go through the groups in order and check the user list */
@@ -416,17 +411,17 @@ static status_t
 	 group != NULL;
 	 group = val_get_next_child(group)) {
 
-	name = val_find_child(group, LEAF_NAME);
+	name = val_find_child(group, AGT_ACM_PREFIX, LEAF_NAME);
 	if (!name) {
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
 	    
-	role = val_find_child(group, LEAF_ROLE);
+	role = val_find_child(group, AGT_ACM_PREFIX, LEAF_ROLE);
 	if (!role) {
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
 
-	users = val_find_child(group, LEAF_USERS);
+	users = val_find_child(group, AGT_ACM_PREFIX, LEAF_USERS);
 	if (users) {
 	    for (user = val_get_first_child(users);
 		 user != NULL;
@@ -476,7 +471,8 @@ static boolean
     val_value_t *grouplist;
 
     /* get the groupList field */
-    grouplist = val_find_child(ruleval, LEAF_GROUPLIST);
+    grouplist = val_find_child(ruleval, AGT_ACM_PREFIX, 
+			       LEAF_GROUPLIST);
     if (!grouplist) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
@@ -512,7 +508,7 @@ static boolean
     xmlns_id_t   valnsid;
 
     /* get the namespace URI */
-    val = val_find_child(listval, LEAF_NSURI);
+    val = val_find_child(listval, AGT_ACM_PREFIX, LEAF_NSURI);
     if (!val) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
@@ -525,7 +521,7 @@ static boolean
     }
 
     /* get the optional element names list */
-    val = val_find_child(listval, LEAF_ELNAMES);
+    val = val_find_child(listval, AGT_ACM_PREFIX, LEAF_ELNAMES);
     if (!val) {
 	return TRUE;  /* matched namespace URI */
     }
@@ -543,7 +539,7 @@ static boolean
 * group list is allowed to invoke the specified RPC method
 *
 * INPUTS:
-*    rpc == RPC template requested
+*    rpcobj == RPC object template requested
 *    groupname == group name for this user
 *    ruleval == value struct representing the current rpcRule
 *    granted == address of return access granted status
@@ -558,13 +554,16 @@ static boolean
 *    FALSE if the rule did not apply to this group list
 *********************************************************************/
 static boolean
-    check_rpc_rule (const rpc_template_t *rpc,
+    check_rpc_rule (const obj_template_t *rpcobj,
 		    const xmlChar *groupname,
 		    val_value_t *ruleval,
 		    boolean *granted)
 {
-    val_value_t *target, *chval, *actype;
-    boolean      match;
+    const obj_rpc_t   *rpc;
+    val_value_t       *target, *chval, *actype;
+    boolean            match;
+
+    rpc = rpcobj->def.rpc;
 
     /* check if this rule applies to the groupname */
     if (!group_in_list(groupname, ruleval)) {
@@ -574,7 +573,7 @@ static boolean
     /* group applies to check the rpcTarget
      * get the rpcTarget choice 
      */
-    target = val_find_child(ruleval, LEAF_RPCTARGET);
+    target = val_find_child(ruleval, AGT_ACM_PREFIX, LEAF_RPCTARGET);
     if (!target) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
@@ -606,7 +605,7 @@ static boolean
      * check if the rule is permit or deny and set the
      * *granted return value
      */
-    actype = val_find_child(ruleval, LEAF_RULETYPE);
+    actype = val_find_child(ruleval, AGT_ACM_PREFIX, LEAF_RULETYPE);
     if (!actype) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
@@ -632,7 +631,7 @@ static boolean
 * user is allowed to invoke the specified RPC method
 *
 * INPUTS:
-*    rpc == RPC template requested
+*    rpcobj == RPC template requested
 *    user == username requesting access
 *    cmode == current access control mode (warn, loose, strict)
 *
@@ -641,22 +640,23 @@ static boolean
 *    FALSE if the user is not allowed to invoke the RPC (or some error)
 *********************************************************************/
 static boolean
-    check_rpc_rules (const rpc_template_t *rpc,
+    check_rpc_rules (const obj_template_t *rpcobj,
 		     const xmlChar *user,
 		     agt_acm_control_mode_t cmode)
 {
-    ps_parmset_t *ac;
-    val_value_t  *val, *chval;
-    const xmlChar *group, *role;
-    status_t      res;
-    boolean       granted, done;
+    val_value_t      *valset, *val, *chval;
+    const xmlChar    *group, *role;
+    const obj_rpc_t  *rpc;
+    status_t          res;
+    boolean           granted, done;
 
     done = FALSE;
     granted = FALSE;
-    
+    rpc = rpcobj->def.rpc;
+
     /* get the accessControl parmset */
-    ac = get_ac_parmset();
-    if (!ac) {
+    valset = get_ac_valset();
+    if (!valset) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
     }
@@ -674,8 +674,8 @@ static boolean
     }
 
     /* get the rpcRules value struct */
-    res = ps_get_parmval(accessControl, PARM_RPCRULES, &val);
-    if (res != NO_ERR) {
+    val = val_find_child(accessControl, AGT_ACM_PREFIX, PARM_RPCRULES);
+    if (!val) {
 	log_warn("\nagt_acm: No RPC Rules found");
 	return FALSE;
     }
@@ -684,13 +684,13 @@ static boolean
     for (chval = val_get_first_child(val);
 	 chval != NULL && !done;
 	 chval = val_get_next_child(chval)) {
-	done = check_rpc_rule(rpc, group, chval, &granted);
+	done = check_rpc_rule(rpcobj, group, chval, &granted);
     }
 
     /* check if any rule found */
     if (!done) {
 	log_warn("\nagt_acm: RPC %s -- no rule found for user %s",
-		 rpc->name, user);
+		 obj_get_name(rpcobj), user);
     }
 
     /* generate return value based on global control mode */
@@ -721,7 +721,7 @@ static boolean
     case AGT_ACM_CM_STRICT:
 	if (!done) {
 	    /* always allow the close-session command to be invoked */
-	    if (rpc->nsid == xmlns_nc_id() &&
+	    if (obj_get_nsid(rpcobj) == xmlns_nc_id() &&
 		!xml_strcmp(rpc->name, NCX_EL_CLOSE_SESSION)) {
 		granted = TRUE;
 	    } else {
@@ -759,14 +759,12 @@ static status_t
 		       rpc_msg_t *msg,
 		       agt_cbtyp_t cbtyp,
 		       op_editop_t  editop,
-		       ps_parmset_t *newps,
-		       ps_parmset_t *curps)
+		       val_value_t *newval,
+		       val_value_t *curval)
 {
-    ps_parm_t   *caps;
-    psd_parm_t  *psd_parm;
-    val_value_t *val;
+    val_value_t           *caps, *val;
+    const obj_template_t  *obj, *chobj;
     typ_template_t *typ;
-    typ_child_t *child;
     typ_def_t   *typdef;
     const xmlChar *str;
     status_t     res;
@@ -792,13 +790,14 @@ static status_t
     case OP_EDITOP_REPLACE:
     case OP_EDITOP_CREATE:
     case OP_EDITOP_LOAD:
-	/* check if the current parmset already has a
-	 * parm entry for the configCapabilities
+	/* check if the current valset already has an
+	 * entry for the configCapabilities
 	 */
-	if (curps && ps_find_parm(curps, PARM_CONFIGCAPS)) {
+	if (curval && val_find_child(curval, AGT_ACM_PREFIX, 
+				     PARM_CONFIGCAPS)) {
 	    res = NO_ERR;
 	    break;
-	} else if (!newps) {
+	} else if (!newval) {
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	    break;
 	}
@@ -806,35 +805,36 @@ static status_t
 	/* hardwired code !! expecting only boolean objects
 	 * in the configCapabilities struct
 	 */
-	psd_parm = psd_find_parm(newps->psd, PARM_CONFIGCAPS);
-	if (!psd_parm) {
+	obj = obj_find_child(newval->obj, AGT_ACM_PREFIX, 
+			     PARM_CONFIGCAPS);
+	if (!obj) {
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	    break;
 	}
 
-	/* get the configCapabilities typdef */
-	typ = psd_get_parm_template(psd_parm);
-	typdef = &typ->typdef;
-
-	/* get the globalCapabilities typdef */
-	child = typ_find_child(LEAF_GLOBAL_CONFIG,
-			       TYP_DEF_COMPLEX(typdef));
-	if (!child) {
+	/* get the nacm:globalCapabilities object */
+	chobj = obj_find_child(obj, AGT_ACM_PREFIX,
+			       LEAF_GLOBAL_CONFIG);
+	if (!chobj) {
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	    break;
 	} 
-	typdef = &child->typdef;
+
+
+	/************ STOPPED CONVERION HERE ************/
 
 	/* start the configCapabilities parm */
-	caps = ps_start_complex_parm(newps, PARM_CONFIGCAPS, &res);
+	caps = val_new_value()
 	if (!caps) {
+	    res = ERR_INTERNAL_MEM;
 	    break;
 	}
-		 
+	
 	/* add globalConfig field */
 	str = (configCaps.globalConfig) ? NCX_EL_TRUE : 
 	    NCX_EL_FALSE;
-	val = val_make_simval(typdef, caps->val->nsid,
+	val = val_make_simval(obj_get_typdef(chobj), 
+			      caps->val->nsid,
 			      LEAF_GLOBAL_CONFIG, str, &res);
 	if (val) {
 	    val_add_child(val, caps->val);
@@ -1165,11 +1165,10 @@ status_t
     }
 
     /* register callback function for the accessControl parmset */
-    res = agt_cb_register_ps_callback(AGT_ACM_MODULE,
-				      AGT_ACM_PARMSET,
-				      FORONE,
-				      AGT_CB_APPLY,
-				      set_accessControl);
+    res = agt_cb_register_callback(AGT_ACM_CBPATH,
+				   FORONE,
+				   AGT_CB_APPLY,
+				   set_accessControl);
     if (res != NO_ERR) {
 	return res;
     }
@@ -1288,13 +1287,14 @@ void
 * 
 * INPUTS:
 *   user == user name string
-*   rpc == rpc_template_t to check
+*   rpcobj == obj_template_t for the RPC method to check
+*
 * RETURNS:
 *   TRUE if user allowed invoke this RPC; FALSE otherwise
 *********************************************************************/
 boolean 
     agt_acm_rpc_allowed (const xmlChar *user,
-			 const rpc_template_t *rpc)
+			 const obj_template_t *rpcobj)
 {
     agt_acm_control_mode_t acmode;
 
@@ -1304,10 +1304,6 @@ boolean
 	return FALSE;
     }
 #endif
-
-    if (!agt_acm_init_done) {
-	agt_acm_init();
-    }
 
     /* check the access control mode */
     acmode = get_ac_mode();
@@ -1324,85 +1320,31 @@ boolean
 	return TRUE;
     }
 
-    return check_rpc_rules(rpc, user, acmode);
+    return check_rpc_rules(rpcobj, user, acmode);
 
 }   /* agt_acm_rpc_allowed */
 
 
 /********************************************************************
-* FUNCTION agt_acm_app_allowed
+* FUNCTION agt_acm_val_write_allowed
 *
-* Check if the specified user is allowed to access an application
-* The application name will be checked against the 
+* Check if the specified user is allowed to access a value node
+* The val->obj template will be checked against the val->editop
 * requested access and the user's configured max-access
 * 
-* !! Need to put dummy versin of this function in mgr_acl.c !!
-*
 * INPUTS:
 *   user == user name string
-*   owner == app owner name
-*   app == app name
-*   op == requested operation
+*   val  == val_value_t in progress to check
+*
 * RETURNS:
-*   TRUE if user allowed this level of access to this application
+*   TRUE if user allowed this level of access to the value node
 *********************************************************************/
 boolean 
-    agt_acm_app_allowed (const xmlChar *user,
-			 const xmlChar *owner,
-			 const xmlChar *app,
-			 op_t reqop)
+    agt_acm_val_write_allowed (const xmlChar *user,
+			       const val_value_t *val)
 {
-    if (!agt_acm_init_done) {
-	agt_acm_init();
-    }
-
 #ifdef DEBUG
-    if (!user || !owner || !app) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
-    }
-#endif
-
-    /* root user is allowed to access anything */
-    if (!xml_strcmp(user, NCX_ROOT_USER)) {
-	return TRUE;
-    }
-
-    switch (reqop) {
-    case OP_EDITOP_NONE:
-	return TRUE;
-    default:
-	return TRUE;  /**** TEMP ****/
-    }
-
-}   /* agt_acm_app_allowed */
-
-
-/********************************************************************
-* FUNCTION agt_acm_ps_write_allowed
-*
-* Check if the specified user is allowed to access a parmset
-* The ps->psd template will be checked against the ps->editop
-* requested access and the user's configured max-access
-* 
-* !! Need to put dummy versin of this function in mgr_acl.c !!
-*
-* INPUTS:
-*   user == user name string
-*   ps  == ps_parmset_t in progress to check
-* RETURNS:
-*   TRUE if user allowed this level of access to the parmset
-*********************************************************************/
-boolean 
-    agt_acm_ps_write_allowed (const xmlChar *user,
-			      const ps_parmset_t *ps)
-{
-    if (!agt_acm_init_done) {
-	agt_acm_init();
-    }
-
-#ifdef DEBUG
-    if (!user || !ps) {
+    if (!user || !val) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return FALSE;
     }
@@ -1415,33 +1357,27 @@ boolean
 
     return TRUE;   /* !!! TEMP !!! */
 
-}   /* agt_acm_ps_write_allowed */
+}   /* agt_acm_val_write_allowed */
 
 
 /********************************************************************
-* FUNCTION agt_acm_ps_read_allowed
+* FUNCTION agt_acm_val_read_allowed
 *
-* Check if the specified user is allowed to read a parmset
-* in the indicated application
+* Check if the specified user is allowed to read a value node
 * 
-* !! Need to put dummy version of this function in mgr_acl.c !!
-*
 * INPUTS:
 *   user == user name string
-*   ps  == ps_parmset_t in progress to check
+*   val  == val_value_t in progress to check
+*
 * RETURNS:
-*   TRUE if user allowed read access to the (app, parmset) tuple
+*   TRUE if user allowed read access to the value node
 *********************************************************************/
 boolean 
     agt_acm_ps_read_allowed (const xmlChar *user,
-			     const ps_parmset_t *ps)
+			     const val_value_t *val)
 {
-    if (!agt_acm_init_done) {
-	agt_acm_init();
-    }
-
 #ifdef DEBUG
-    if (!user || !ps) {
+    if (!user || !val) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return FALSE;
     }
@@ -1454,86 +1390,8 @@ boolean
 
     return TRUE;   /* !!! TEMP !!! */
 
-}   /* agt_acm_ps_read_allowed */
-
-
-/********************************************************************
-* FUNCTION agt_acm_parm_write_allowed
-*
-* Check if the specified user is allowed to access a parm
-* The parent ps->psd template will be checked against the parm->editop
-* requested access and the user's configured max-access
-* 
-* !! Need to put dummy versin of this function in mgr_acl.c !!
-*
-* INPUTS:
-*   user == user name string
-*   parm  == ps_parm_t in progress to check
-* RETURNS:
-*   TRUE if user allowed this level of access to the parm
-*********************************************************************/
-boolean 
-    agt_acm_parm_write_allowed (const xmlChar *user,
-				const ps_parm_t *parm)
-{
-    if (!agt_acm_init_done) {
-	agt_acm_init();
-    }
-
-#ifdef DEBUG
-    if (!user || !parm) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
-    }
-#endif
-
-    /* root user is allowed to access anything */
-    if (!xml_strcmp(user, NCX_ROOT_USER)) {
-	return TRUE;
-    }
-
-    return TRUE;   /* !!! TEMP !!! */
-
-}   /* agt_acm_parm_write_allowed */
-
-
-/********************************************************************
-* FUNCTION agt_acm_parm_read_allowed
-*
-* Check if the specified user is allowed to read a parm
-* in the indicated parmset 
-* 
-* !! Need to put dummy version of this function in mgr_acl.c !!
-*
-* INPUTS:
-*   user == user name string
-*   parm  == ps_parm_t in progress to check
-* RETURNS:
-*   TRUE if user allowed read access to the (app, parmset, parm) tuple
-*********************************************************************/
-boolean 
-    agt_acm_parm_read_allowed (const xmlChar *user,
-			       const ps_parm_t *parm)
-{
-    if (!agt_acm_init_done) {
-	agt_acm_init();
-    }
-
-#ifdef DEBUG
-    if (!user || !parm) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
-    }
-#endif
-
-    /* root user is allowed to access anything */
-    if (!xml_strcmp(user, NCX_ROOT_USER)) {
-	return TRUE;
-    }
-
-    return TRUE;   /* !!! TEMP !!! */
-
-}   /* agt_acm_parm_read_allowed */
+}   /* agt_acm_val_read_allowed */
 
 
 /* END file agt_acm.c */
+#endif

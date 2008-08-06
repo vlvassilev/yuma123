@@ -111,6 +111,10 @@ extern status_t
 	      log_debug_t dlevel,
 	      const char *startmsg);
 
+extern status_t
+    ncx_stage2_init (void);
+
+
 extern void 
     ncx_cleanup (void);
 
@@ -418,6 +422,7 @@ extern void
 
 extern const ncx_appinfo_t *
     ncx_find_appinfo (const dlq_hdr_t *appinfoQ,
+		      const xmlChar *prefix,
 		      const xmlChar *varname);
 
 extern ncx_appinfo_t *
@@ -512,15 +517,19 @@ extern void
 extern void
     ncx_stdout_indent (int32 indentcnt);
 
-extern status_t
-    ncx_init_operation_attr (void);
-
-extern void
-    ncx_clean_operation_attr (void);
-
-extern typ_child_t *
+/* internal operation object for processing edit-config PDUs */
+extern obj_template_t *
     ncx_get_operation_attr (void);
 
+/* 3 internal objects for subtree filter processing */
+extern obj_template_t *
+    ncx_get_gen_container (void);
+
+extern obj_template_t *
+    ncx_get_gen_string (void);
+
+extern obj_template_t *
+    ncx_get_gen_empty (void);
 
 /* translate ncx_layer_t enum to a string */
 extern const xmlChar *
@@ -612,7 +621,6 @@ extern boolean
 
 
 /** parse utilities **/
-
 extern status_t 
     ncx_consume_tstring (tk_chain_t *tkc,
 			 ncx_module_t  *mod,
@@ -621,31 +629,12 @@ extern status_t
 
 
 extern status_t 
-    ncx_consume_dyn_string (tk_chain_t *tkc,
-			    ncx_module_t *mod,
-			    const xmlChar *name,
-			    xmlChar **strbuff,
-			    ncx_opt_t opt,
-			    ncx_strtyp_t wsp,
-			    tk_type_t  ctyp);
-
-extern status_t 
     ncx_consume_name (tk_chain_t *tkc,
 		      ncx_module_t *mod,
 		      const xmlChar *name,
 		      xmlChar **namebuff,
 		      ncx_opt_t opt,
 		      tk_type_t  ctyp);
-
-extern status_t 
-    ncx_consume_mname (tk_chain_t *tkc,
-		       ncx_module_t  *mod,
-		       const xmlChar *name,
-		       xmlChar **namebuff,
-		       xmlChar **modstr,
-		       ncx_opt_t opt,
-		       tk_type_t  ctyp);
-
 
 extern status_t 
     ncx_consume_token (tk_chain_t *tkc,

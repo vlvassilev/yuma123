@@ -134,21 +134,30 @@ extern float strtof (const char *str, char **err);
 *                                                                   *
 *********************************************************************/
 
-static dlq_hdr_t     ncx_modQ, *ncx_curQ;
+static dlq_hdr_t         ncx_modQ;
 
-static dlq_hdr_t     ncx_filptrQ;
+static dlq_hdr_t        *ncx_curQ;
 
-static uint32        ncx_max_filptrs;
+static dlq_hdr_t         ncx_filptrQ;
 
-static uint32        ncx_cur_filptrs;
+static uint32            ncx_max_filptrs;
 
-static typ_child_t   operation_attr;
+static uint32            ncx_cur_filptrs;
+
+static obj_template_t   *operation_attr;
+
+static obj_template_t   *gen_container;
+
+static obj_template_t   *gen_string;
+
+static obj_template_t   *gen_empty;
+
 
 /* 1st stage init */
 static boolean       ncx_init_done = FALSE;
 
 /* 2nd stage init */
-static boolean       operation_attr_init_done = FALSE;
+static boolean       stage2_init_done = FALSE;
 
 static boolean       save_descr = FALSE;
 
@@ -866,6 +875,57 @@ status_t
 
 
 /********************************************************************
+* FUNCTION ncx_stage2_init
+* 
+* Initialize the NCX module during stage 2 startup,
+* after the object database has been loaded, but before the 
+* agent has started accepting PDUs
+*
+* RETURNS:
+*   status of the initialization procedure
+*********************************************************************/
+status_t 
+    ncx_stage2_init (void)
+{
+    ncx_node_t        deftyp;
+
+    if (stage2_init_done) {
+	return NO_ERR;
+    }
+
+    /* find all 4 required object templates */
+    deftyp = NCX_NT_OBJ;
+    operation_attr = (obj_template_t *)
+	def_reg_find_moddef(NC_MODULE, NC_OPERATION_ATTR_NAME, &deftyp);
+    if (!operation_attr) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    gen_container = (obj_template_t *)
+	def_reg_find_moddef(NCX_MODULE, NCX_EL_STRUCT, &deftyp);
+    if (!gen_container) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    gen_string = (obj_template_t *)
+	def_reg_find_moddef(NCX_MODULE, NCX_EL_STRING, &deftyp);
+    if (!gen_string) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    gen_empty = (obj_template_t *)
+	def_reg_find_moddef(NCX_MODULE, NCX_EL_EMPTY, &deftyp);
+    if (!gen_empty) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    stage2_init_done = TRUE;
+    return NO_ERR;
+
+}  /* ncx_stage2_init */
+
+
+/********************************************************************
 * FUNCTION ncx_cleanup
 *
 *  cleanup NCX module
@@ -890,6 +950,25 @@ void
 	m__free(filptr);
     }
 
+    if (stage2_init_done) {
+	if (operation_attr) {
+	    obj_free_template(operation_attr);
+	    operation_attr = NULL;
+	}
+	if (gen_container) {
+	    obj_free_template(gen_container);
+	    gen_container = NULL;
+	}
+	if (gen_string) {
+	    obj_free_template(gen_string);
+	    gen_string = NULL;
+	}
+	if (gen_empty) {
+	    obj_free_template(gen_empty);
+	    gen_empty = NULL;
+	}
+    }
+
     typ_unload_basetypes();
     xmlns_cleanup();
     def_reg_cleanup();
@@ -900,6 +979,7 @@ void
     ncxmod_cleanup();
     xmlCleanupParser();
     ncx_init_done = FALSE;
+    stage2_init_done = FALSE;
 
 }   /* ncx_cleanup */
 
@@ -4623,6 +4703,9 @@ void
 *
 * INPUTS:
 *    appinfoQ == pointer to Q of ncx_appinfo_t data structure to check
+*    prefix == module prefix that defines the extension 
+*            == NULL to pick the first match (not expecting
+*               appinfo name collisions)
 *    varname == name string of the appinfo variable to find
 *
 * RETURNS:
@@ -4631,6 +4714,7 @@ void
 *********************************************************************/
 const ncx_appinfo_t *
     ncx_find_appinfo (const dlq_hdr_t *appinfoQ,
+		      const xmlChar *prefix,
 		      const xmlChar *varname)
 {
     ncx_appinfo_t *appinfo;
@@ -4645,6 +4729,12 @@ const ncx_appinfo_t *
     for (appinfo = (ncx_appinfo_t *)dlq_firstEntry(appinfoQ);
 	 appinfo != NULL;
 	 appinfo = (ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
+
+	if (prefix && appinfo->prefix &&
+	    xml_strcmp(prefix, appinfo->prefix)) {
+	    continue;
+	}
+
 	if (!xml_strcmp(varname, appinfo->name)) {
 	    return appinfo;
 	}
@@ -5479,90 +5569,91 @@ void
 
 
 /********************************************************************
-* FUNCTION ncx_init_operation_attr
-* 
-* Create typ_child_t struct for the NETCONF operation attribute
-* Must be called after NETCONF module is loaded
-*
-* RETURNS:
-*     status
-*********************************************************************/
-status_t
-    ncx_init_operation_attr (void)
-{
-    typ_template_t  *typ;
-    ncx_node_t        deftyp;
-
-    if (operation_attr_init_done) {
-	return NO_ERR;
-    }
-
-    deftyp = NCX_NT_TYP;
-    typ = (typ_template_t *)
-	def_reg_find_moddef(NC_MODULE, NC_OPERATION_ATTR_TYPE, &deftyp);
-    if (!typ) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
-    memset(&operation_attr, 0x0, sizeof(typ_child_t));
-    operation_attr.name = xml_strdup(NC_OPERATION_ATTR_NAME);
-    if (!operation_attr.name) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    operation_attr.typdef.iqual = NCX_IQUAL_ONE;
-    operation_attr.typdef.class = NCX_CL_NAMED;
-    operation_attr.typdef.def.named.typ = typ;
-    operation_attr.typdef.def.named.newtyp = NULL;
-    operation_attr.typdef.def.named.flags = 0;
-
-    operation_attr_init_done = TRUE;
-    return NO_ERR;
-
-} /* ncx_init_operation_attr */
-
-
-/********************************************************************
-* FUNCTION ncx_clean_operation_attr
-* 
-* Clean the typ_child_t struct for the NETCONF operation attribute
-*
-*********************************************************************/
-void
-    ncx_clean_operation_attr (void)
-{
-    if (!operation_attr_init_done) {
-	return;
-    }
-    if (operation_attr.name) {
-	m__free(operation_attr.name);
-    }
-    memset(&operation_attr, 0x0, sizeof(typ_child_t));
-    operation_attr_init_done = FALSE;
-
-} /* ncx_clean_operation_attr */
-
-
-/********************************************************************
 * FUNCTION ncx_get_operation_attr
 * 
-* Get the typ_child_t struct for the NETCONF operation attribute
+* Get the object template for the NETCONF operation attribute
 *
 *********************************************************************/
-typ_child_t *
+obj_template_t *
     ncx_get_operation_attr (void)
 {
     status_t  res;
 
-    if (!operation_attr_init_done) {
-	res = ncx_init_operation_attr();
+    if (!stage2_init_done) {
+	res = ncx_stage2_init();
 	if (res != NO_ERR) {
 	    return NULL;
 	}
     }
-    return &operation_attr;
+    return operation_attr;
 
 } /* ncx_get_operation_attr */
+
+
+/********************************************************************
+* FUNCTION ncx_get_gen_container
+* 
+* Get the object template for the NCX generic container
+*
+*********************************************************************/
+obj_template_t *
+    ncx_get_gen_container (void)
+{
+    status_t  res;
+
+    if (!stage2_init_done) {
+	res = ncx_stage2_init();
+	if (res != NO_ERR) {
+	    return NULL;
+	}
+    }
+    return gen_container;
+
+} /* ncx_get_gen_container */
+
+
+/********************************************************************
+* FUNCTION ncx_get_gen_string
+* 
+* Get the object template for the NCX generic string leaf
+*
+*********************************************************************/
+obj_template_t *
+    ncx_get_gen_string (void)
+{
+    status_t  res;
+
+    if (!stage2_init_done) {
+	res = ncx_stage2_init();
+	if (res != NO_ERR) {
+	    return NULL;
+	}
+    }
+    return gen_string;
+
+} /* ncx_get_gen_string */
+
+
+/********************************************************************
+* FUNCTION ncx_get_gen_empty
+* 
+* Get the object template for the NCX generic empty leaf
+*
+*********************************************************************/
+obj_template_t *
+    ncx_get_gen_empty (void)
+{
+    status_t  res;
+
+    if (!stage2_init_done) {
+	res = ncx_stage2_init();
+	if (res != NO_ERR) {
+	    return NULL;
+	}
+    }
+    return gen_empty;
+
+} /* ncx_get_gen_empty */
 
 
 /********************************************************************
@@ -5962,9 +6053,6 @@ void
     case NCX_NT_CFG:                          /* cfg_template_t */
 	cfg_free_template(node);
 	break;
-    case NCX_NT_INDEX:                          /* typ_index_t  */
-	typ_free_index(node);
-	break;
     case NCX_NT_QNAME:                         /* xmlns_qname_t */
 	xmlns_free_qname(node);
 	break;
@@ -6001,8 +6089,6 @@ ncx_data_class_t
         return NCX_DC_NONE;
     } else if (!xml_strcmp(NCX_EL_CONFIG, str)) {
         return NCX_DC_CONFIG;
-    } else if (!xml_strcmp(NCX_EL_TCONFIG, str)) {
-        return NCX_DC_TCONFIG;
     } else if (!xml_strcmp(NCX_EL_STATE, str)) {
         return NCX_DC_STATE;
     } else {
@@ -6033,8 +6119,6 @@ const xmlChar *
 	return NULL;
     case NCX_DC_CONFIG:
 	return NCX_EL_CONFIG;
-    case NCX_DC_TCONFIG:
-	return NCX_EL_TCONFIG;
     case NCX_DC_STATE:
 	return NCX_EL_STATE;
     default:
@@ -6461,119 +6545,6 @@ status_t
 
 
 /********************************************************************
-* FUNCTION ncx_consume_dyn_string
-* 
-* Consume a TK_TT_TSTRING identifier matching 'name', then
-* Consume any kind of string token:
-*   TK_TT_STRING, TK_TT_SSTRING, TK_TT_TSTRING, or TK_TT_QSTRING 
-* If ctk specified, then consume the specified close token
-*
-* Store the results in the specified buffer
-*
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
-*
-* INPUTS:
-*   tkc == token chain 
-*   mod == module in progress (NULL if none)
-*   name == token name
-*   strbuff == address of pointer to buffer to store the string value
-*           == NULL if the string should not be saved, just parsed
-*   opt == NCX_OPT for optional param
-*       == NCX_REQ for mandatory param
-*   wsp == NCX_WSP for whitespace allowed (TK_TT_QSTRING allowed)
-*       == NCX_NO_WSP for whitespace not allowed
-*   ctyp == close token (use TK_TT_NONE to skip this part)
-*
-* OUTPUTS:
-*   strbuff is filled in, if NO_ERR
-* RETURNS:
-*   status of the operation
-*********************************************************************/
-status_t 
-    ncx_consume_dyn_string (tk_chain_t *tkc,
-			    ncx_module_t  *mod,
-			    const xmlChar *name,
-			    xmlChar **strbuff,
-			    ncx_opt_t opt,
-			    ncx_strtyp_t wsp,
-			    tk_type_t  ctyp)
-{
-    status_t     res;
-
-#ifdef DEBUG
-    if (!tkc || !name) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    /* check the identifier token */
-    res = TK_ADV(tkc);
-    if (res == NO_ERR) {
-	if (TK_CUR_TYP(tkc) != TK_TT_TSTRING) {
-	    if (opt == NCX_OPT) {
-		TK_BKUP(tkc);
-		return ERR_NCX_SKIPPED;
-	    } else {
-		res = ERR_NCX_WRONG_TKTYPE;
-	    }
-	} else if (xml_strcmp(TK_CUR_VAL(tkc), name)) {
-	    if (opt == NCX_OPT) {
-		TK_BKUP(tkc);
-		return ERR_NCX_SKIPPED;
-	    } else {
-		res = ERR_NCX_WRONG_TKVAL;
-	    }
-	}
-    }
-
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
-    }
-
-    /* get the string token */
-    res = TK_ADV(tkc);
-    if (res == NO_ERR) {
-	if (wsp==NCX_WSP) {
-	    if (!TK_CUR_WSTR(tkc)) {
-		res = ERR_NCX_WRONG_TKTYPE;
-	    }
-	} else if (!TK_CUR_NOWSTR(tkc)) {
-	    res = ERR_NCX_WRONG_TKTYPE;
-	}
-
-	if (res == NO_ERR && strbuff) {
-	    *strbuff = xml_strdup(TK_CUR_VAL(tkc));
-	    if (!*strbuff) {
-		res = ERR_INTERNAL_MEM;
-	    }
-	}
-    }
-
-    /* check for a closing token */
-    if (res == NO_ERR && ctyp != TK_TT_NONE) {
-        res = TK_ADV(tkc);
-        if (res == NO_ERR) {
-	    if (TK_CUR_TYP(tkc) != ctyp) {
-		if (strbuff && *strbuff) {
-		    m__free(*strbuff);
-		    *strbuff = NULL;
-		}
-		res = ERR_NCX_WRONG_TKTYPE;
-	    }
-	}
-    }
-
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-    }
-    return res;
-
-} /* ncx_consume_dyn_string */
-
-
-/********************************************************************
 * FUNCTION ncx_consume_name
 * 
 * Consume a TK_TSTRING that matches the 'name', then
@@ -6687,144 +6658,6 @@ status_t
     return res;
 
 } /* ncx_consume_name */
-
-
-/********************************************************************
-* FUNCTION ncx_consume_mname
-* 
-* Consume a TK_TSTRING that matches the 'name', then
-* retrieve the 'value' (TK_TSTRING or TK_TT_MSTRING) token 
-* into the namebuff.
-*
-* If ctk specified, then consume the specified close token
-*
-* Store the results in the specified buffers
-*
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
-*
-* If name is NULL, then the opt parameter is not used,
-* and an mname token must be present. Otherwise, the
-* name string is checked against the first token, and
-* if optional, the token chain will back up and return NO_ERR.
-
-* INPUTS:
-*   tkc == token chain 
-*   mod == module in progress (NULL if none)
-*   name == first token name
-*   namebuff == pointer to output name string
-*   modstr == pointer to output module name string
-*   opt == NCX_OPT for optional param
-*       == NCX_REQ for mandatory param
-*   ctyp == close token (use TK_TT_NONE to skip this part)
-*
-* OUTPUTS:
-*   *namebuff points at the malloced name buffer
-*   *modstr points to a strdup of the module name if this
-*      is a TK_TT_MSTRING token
-*
-* RETURNS:
-*   status of the operation
-*********************************************************************/
-status_t 
-    ncx_consume_mname (tk_chain_t *tkc,
-		       ncx_module_t *mod,
-		       const xmlChar *name,
-		       xmlChar **namebuff,
-		       xmlChar **modstr,
-		       ncx_opt_t opt,
-		       tk_type_t  ctyp)
-{
-    status_t     res;
-
-#ifdef DEBUG
-    if (!tkc || !name || !namebuff || !modstr) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    res = NO_ERR;
-
-    /* check 'name' token if it is supplied */
-    if (name) {
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	} else {
-	    if (TK_CUR_TYP(tkc) != TK_TT_TSTRING) {
-		/* wrong token type -- backup if this is optional */
-		if (opt==NCX_OPT) {
-		    TK_BKUP(tkc);
-		    return ERR_NCX_SKIPPED;
-		} else {
-		    res = ERR_NCX_WRONG_TKTYPE;
-		}
-	    }
-	}
-	if (res==NO_ERR && xml_strcmp(TK_CUR_VAL(tkc), name)) {
-	    /* wrong name value -- backup if this is optional */
-	    if (opt==NCX_OPT) {
-		TK_BKUP(tkc);
-		return ERR_NCX_SKIPPED;
-	    } else {
-		res = ERR_NCX_WRONG_TKVAL;
-	    }
-	}
-    }
-
-    /* check string value token */
-    if (res == NO_ERR) {
-	res = TK_ADV(tkc);
-	if (res == NO_ERR) {
-	    if (!TK_CUR_ID(tkc)) {
-		res = ERR_NCX_WRONG_TKTYPE;
-	    } else {
-		*namebuff = xml_strdup(TK_CUR_VAL(tkc));
-		if (!*namebuff) {
-		    res = ERR_INTERNAL_MEM;
-		}
-	    }
-	}
-    }
-    
-    if (res==NO_ERR && TK_CUR_MOD(tkc)) {
-        /* module-qualified identifier */
-        *modstr = xml_strdup(TK_CUR_MOD(tkc));
-        if (!*modstr) {
-	    if (*namebuff) {
-		m__free(*namebuff);
-		*namebuff = NULL;
-	    }
-            res = ERR_INTERNAL_MEM;
-        }
-    }
-
-    /* check for a closing token */
-    if (res==NO_ERR && ctyp != TK_TT_NONE) {
-        res = TK_ADV(tkc);
-        if (res == NO_ERR) {
-	    if (TK_CUR_TYP(tkc) != ctyp) {
-		if (*namebuff) {
-		    m__free(*namebuff);
-		    *namebuff = NULL;
-		}
-		if (*modstr) {
-		    m__free(*modstr);
-		    *modstr = NULL;
-		}
-		res = ERR_NCX_WRONG_TKTYPE;
-	    }
-	}
-    }
-
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-    }
-
-    return res;
-
-} /* ncx_consume_mname */
 
 
 /********************************************************************

@@ -244,14 +244,21 @@ extern status_t
     cfg_unlock (cfg_template_t *cfg,
 		ses_id_t locked_by);
 
-extern status_t
-    cfg_load_root (cfg_template_t *cfg);
-
 extern void
     cfg_release_locks (ses_id_t sesid);
 
 extern void
     cfg_get_lock_list (ses_id_t sesid,
 		       val_value_t *retval);
+
+
+extern val_value_t *
+    cfg_find_datanode (const xmlChar *target,
+		       ncx_cfg_t  cfgid);
+
+extern val_value_t *
+    cfg_find_modrel_datanode (ncx_module_t *mod,
+			      const xmlChar *target,
+			      ncx_cfg_t  cfgid);
 
 #endif            /* _H_cfg */

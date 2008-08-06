@@ -176,6 +176,10 @@ extern status_t
 extern ncx_module_t * 
     def_reg_find_module (const xmlChar *modname);
 
+/* find an ncx_module_t by its prefix */
+extern ncx_module_t * 
+    def_reg_find_module_prefix (const xmlChar *prefix);
+
 /* remove a module pointer rec from the registry */
 extern void
     def_reg_del_module (const xmlChar *modname);
@@ -207,13 +211,13 @@ extern void
 			const xmlChar *defname,
 			ncx_node_t dtyp);
 
+#if 0
 /******************** CONFIG DATA *********************/
 
 /* add an configuration definition */
 extern status_t 
-    def_reg_add_cfgdef (const xmlChar *ownname,
-			const xmlChar *appname,
-			const xmlChar *defname,
+    def_reg_add_cfgdef (const xmlChar *modname,
+			const xmlChar *defpath,
 			const xmlChar *instance,
 			ncx_cfg_t cfgid, 
 			ncx_node_t dtyp,
@@ -244,5 +248,6 @@ extern void
 			const xmlChar *instance,
 			int32 cfgid);
 
+#endif
 
 #endif	    /* _H_def_reg */

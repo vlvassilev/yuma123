@@ -84,6 +84,37 @@ date         init     comment
 
 
 /********************************************************************
+* FUNCTION do_errmsg
+* 
+* Generate the errormsg
+*
+* INPUTS:
+*    tkc == token chain in progress (may be NULL)
+*    mod == module in progress
+*    errtk == error tk_token_t to temp. set
+*    res == error enumeration
+*
+*********************************************************************/
+static void
+    do_errmsg (tk_chain_t *tkc,
+	       ncx_module_t *mod,
+	       tk_token_t *errtk,
+	       status_t  res)
+{
+    tk_token_t  *savetk;
+
+    if (tkc) {
+	savetk = tkc->cur;
+	tkc->cur = errtk;
+    }
+    ncx_print_errormsg(tkc, mod, res);
+    if (tkc) {
+	tkc->cur = savetk;
+    }
+}  /* do_errmsg */
+
+
+/********************************************************************
 * FUNCTION next_nodeid
 * 
 * Get the next Name of QName segment of an Xpath schema-nodeid
@@ -92,7 +123,7 @@ date         init     comment
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
-*    tkc == token chain in progress
+*    tkc == token chain in progress  (may be NULL)
 *    mod == module in progress
 *    obj == object calling this fn (for error purposes)
 *    target == Xpath expression string to evaluate
@@ -118,7 +149,6 @@ static status_t
 		 uint32 *len)
 {
     const xmlChar *p, *q;
-    tk_token_t    *savetk;
     uint32         cnt;
     status_t       res;
 
@@ -133,10 +163,7 @@ static status_t
 	xml_strncpy(prefix, target, min(cnt, NCX_MAX_NLEN));
 	log_error("\nError: invalid name string (%s)", prefix);
 	res = ERR_NCX_INVALID_NAME;
-	savetk = tkc->cur;
-	tkc->cur = obj->tk;
-	ncx_print_errormsg(tkc, mod, res);
-	tkc->cur = savetk;
+	do_errmsg(tkc, mod, obj->tk, res);
 	return res;
     }
 
@@ -154,10 +181,7 @@ static status_t
 	    xml_strncpy(name, p, min(cnt, NCX_MAX_NLEN));
 	    log_error("\nError: invalid name string (%s)", name);
 	    res = ERR_NCX_INVALID_NAME;
-	    savetk = tkc->cur;
-	    tkc->cur = obj->tk;
-	    ncx_print_errormsg(tkc, mod, res);
-	    tkc->cur = savetk;
+	    do_errmsg(tkc, mod, obj->tk, res);
 	    return res;
 	}
 
@@ -172,6 +196,147 @@ static status_t
     return NO_ERR;
 
 }  /* next_nodeid */
+
+
+/********************************************************************
+* FUNCTION next_nodeid_noerr
+* 
+* Get the next Name of QName segment of an Xpath schema-nodeid
+*
+* Error messages are not printed by this function!!
+*
+* INPUTS:
+*    target == Xpath expression string in progress to evaluate
+*    prefix == buffer to store prefix portion of QName (if any)
+*    name == buffer to store name portion of segment
+*    len == address of return byte count
+*
+* OUTPUTS:
+*   prefix[] == prefix portion of QName
+*   name[] == name portion of QName
+*   *cnt == number of bytes used in target
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    next_nodeid_noerr (const xmlChar *target,
+		       xmlChar *prefix,
+		       xmlChar *name,
+		       uint32 *len)
+{
+    const xmlChar *p, *q;
+    uint32         cnt;
+
+    /* find the EOS or a separator */
+    p = target;
+    while (*p && *p != ':' && *p != '/') {
+	p++;
+    }
+    cnt = (uint32)(p-target);
+
+    if (!ncx_valid_name(target, cnt)) {
+	return ERR_NCX_INVALID_NAME;
+    }
+
+    if (*p==':') {
+	/* copy prefix, then get name portion */
+	xml_strncpy(prefix, target, cnt);
+
+	q = ++p;
+	while (*q && *q != '/') {
+	    q++;
+	}
+	cnt = (uint32)(q-p);
+
+	if (!ncx_valid_name(p, cnt)) {
+	    return ERR_NCX_INVALID_NAME;
+	}
+
+	xml_strncpy(name, p, cnt);
+	*len = (uint32)(q-target);
+    } else  {
+	/* found EOS or pathsep, got just one 'name' string */
+	xml_strncpy(name, target, cnt);
+	*prefix = '\0';
+	*len = cnt;
+    }
+    return NO_ERR;
+
+}  /* next_nodeid_noerr */
+
+
+/********************************************************************
+* FUNCTION next_val_nodeid
+* 
+* Get the next Name of QName segment of an Xpath schema-nodeid
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    target == Xpath expression string to evaluate
+*    prefix == buffer to store prefix portion of QName (if any)
+*    name == buffer to store name portion of segment
+*    len == address of return byte count
+*
+* OUTPUTS:
+*   prefix[] == prefix portion of QName
+*   name[] == name portion of QName
+*   *cnt == number of bytes used in target
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    next_val_nodeid (const xmlChar *target,
+		     xmlChar *prefix,
+		     xmlChar *name,
+		     uint32 *len)
+{
+    const xmlChar *p, *q;
+    uint32         cnt;
+
+    /* find the EOS or a separator */
+    p = target;
+    while (*p && *p != ':' && *p != '/') {
+	p++;
+    }
+    cnt = (uint32)(p-target);
+
+    if (!ncx_valid_name(target, cnt)) {
+	xml_strncpy(prefix, target, min(cnt, NCX_MAX_NLEN));
+	log_error("\nError: invalid name string (%s)", prefix);
+	return ERR_NCX_INVALID_NAME;
+    }
+
+    if (*p==':') {
+	/* copy prefix, then get name portion */
+	xml_strncpy(prefix, target, cnt);
+
+	q = ++p;
+	while (*q && *q != '/') {
+	    q++;
+	}
+	cnt = (uint32)(q-p);
+
+	if (!ncx_valid_name(p, cnt)) {
+	    xml_strncpy(name, p, min(cnt, NCX_MAX_NLEN));
+	    log_error("\nError: invalid name string (%s)", name);
+	    return ERR_NCX_INVALID_NAME;
+	}
+
+	xml_strncpy(name, p, cnt);
+	*len = (uint32)(q-target);
+    } else  {
+	/* found EOS or pathsep, got just one 'name' string */
+	xml_strncpy(name, target, cnt);
+	*prefix = '\0';
+	*len = cnt;
+    }
+    return NO_ERR;
+
+}  /* next_val_nodeid */
 
 
 /********************************************************************
@@ -215,8 +380,7 @@ static status_t
     ncx_import_t   *imp;
     ncx_module_t   *impmod;
     obj_template_t *curobj, *nextobj;
-    obj_rpc_t      *rpc;
-    tk_token_t     *savetk;
+    dlq_hdr_t      *curQ;
     const xmlChar  *str;
     uint32          len;
     status_t        res;
@@ -250,10 +414,7 @@ static status_t
 	    log_error("\nError: prefix '%s' not found in module imports"
 		      " in Xpath target %s", prefix, target);
 	    res = ERR_NCX_INVALID_NAME;
-	    savetk = tkc->cur;
-	    tkc->cur = errtk;
-	    ncx_print_errormsg(tkc, mod, res);
-	    tkc->cur = savetk;
+	    do_errmsg(tkc, mod, errtk, res);
 	    return res;
 	}
 	impmod = ncx_find_module(imp->module);
@@ -262,10 +423,7 @@ static status_t
 		      " in Xpath target %s",
 		      imp->module, prefix, target);
 	    res = ERR_NCX_MOD_NOT_FOUND;
-	    savetk = tkc->cur;
-	    tkc->cur = errtk;
-	    ncx_print_errormsg(tkc, mod, res);
-	    tkc->cur = savetk;
+	    do_errmsg(tkc, mod, errtk, res);
 	    return res;
 	}
     }
@@ -290,10 +448,7 @@ static status_t
 		  " in Xpath target %s",
 		  name, (imp) ? imp->module : mod->name,
 		  target);
-	savetk = tkc->cur;
-	tkc->cur = errtk;
-	ncx_print_errormsg(tkc, mod, res);
-	tkc->cur = savetk;
+	do_errmsg(tkc, mod, errtk, res);
 	return res;
     }
 
@@ -303,10 +458,7 @@ static status_t
 		  " from module %s, line %u in Xpath target %s",
 		  name, curobj->mod->name,
 		  curobj->tk->linenum, target);
-	savetk = tkc->cur;
-	tkc->cur = errtk;
-	ncx_print_errormsg(tkc, mod, res);
-	tkc->cur = savetk;
+	do_errmsg(tkc, mod, errtk, res);
 	return res;
     }
 
@@ -331,10 +483,7 @@ static status_t
 			  " imports in Xpath target %s",
 			  prefix, target);
 		res = ERR_NCX_INVALID_NAME;
-		savetk = tkc->cur;
-		tkc->cur = errtk;
-		ncx_print_errormsg(tkc, mod, res);
-		tkc->cur = savetk;
+		do_errmsg(tkc, mod, errtk, res);
 		return res;
 	    }
 	} else {
@@ -347,88 +496,24 @@ static status_t
 		      "identifier in Xpath target %s",
 		      name, target);
 	    res = ERR_NCX_INVALID_NAME;
-	    savetk = tkc->cur;
-	    tkc->cur = errtk;
-	    ncx_print_errormsg(tkc, mod, res);
-	    tkc->cur = savetk;
+	    do_errmsg(tkc, mod, errtk, res);
 	    return res;
 	}
 
 	/* determine 'nextval' based on [curval, prefix, name] */
-	switch (curobj->objtype) {
-	case OBJ_TYP_CONTAINER:
-	    nextobj = obj_find_template(curobj->def.container->datadefQ,
+	curQ = obj_get_datadefQ(curobj);
+
+	if (curQ) {
+	    nextobj = obj_find_template(curQ,
 					(imp) ? imp->module : 
 					mod->name, name);
-	    break;
-	case OBJ_TYP_LIST:
-	    nextobj = obj_find_template(curobj->def.list->datadefQ,
-					(imp) ? imp->module : 
-					mod->name, name);
-	    break;
-	case OBJ_TYP_LEAF:
-	case OBJ_TYP_LEAF_LIST:
+	} else {
 	    res = ERR_NCX_DEFSEG_NOT_FOUND;
 	    log_error("\nError: '%s' in Xpath target '%s' invalid: "
 		      "%s on line %u is a %s",
 		      name, target, obj_get_name(curobj),
 		      curobj->tk->linenum, obj_get_typestr(curobj));
-	    savetk = tkc->cur;
-	    tkc->cur = errtk;
-	    ncx_print_errormsg(tkc, mod, res);
-	    tkc->cur = savetk;
-	    return res;
-	case OBJ_TYP_CHOICE:
-	    nextobj = obj_find_template(curobj->def.choic->caseQ,
-					(imp) ? imp->module : 
-					mod->name, name);
-	    break;
-	case OBJ_TYP_CASE:
-	    nextobj = obj_find_template(curobj->def.cas->datadefQ,
-					(imp) ? imp->module : 
-					mod->name, name);
-	    break;
-	case OBJ_TYP_RPC:
-	    rpc = curobj->def.rpc;
-	    if (*prefix) {
-		log_error("\nError: prefix '%s' not allowed for "
-			  "input/output node in Xpath target %s",
-			  prefix, target);
-		savetk = tkc->cur;
-		tkc->cur = errtk;
-		ncx_print_errormsg(tkc, mod, res);
-		tkc->cur = savetk;
-		return res;
-	    }
-	    if (!xml_strcmp(name, YANG_K_INPUT) ||
-		!xml_strcmp(name, YANG_K_OUTPUT)) {
-		nextobj = obj_find_template(&rpc->datadefQ, NULL, name);
-	    } else {
-		log_error("\nError: object '%s' not allowed for rpc"
-			  " in Xpath target %s", name, target);
-		savetk = tkc->cur;
-		tkc->cur = errtk;
-		ncx_print_errormsg(tkc, mod, res);
-		tkc->cur = savetk;
-		return res;
-	    }
-	    break;
-	case OBJ_TYP_RPCIO:
-	    nextobj = obj_find_template(&curobj->def.rpcio->datadefQ,
-					(imp) ? imp->module : 
-					mod->name, name);
-	    break;
-	case OBJ_TYP_NOTIF:
-	    nextobj = obj_find_template(&curobj->def.notif->datadefQ,
-					(imp) ? imp->module : 
-					mod->name, name);
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	    savetk = tkc->cur;
-	    tkc->cur = errtk;
-	    ncx_print_errormsg(tkc, mod, res);
-	    tkc->cur = savetk;
+	    do_errmsg(tkc, mod, errtk, res);
 	    return res;
 	}
 
@@ -438,10 +523,7 @@ static status_t
 	    res = ERR_NCX_DEFSEG_NOT_FOUND;
 	    log_error("\nError: object '%s' not found in module %s",
 		      name, (imp) ? imp->module : mod->name);
-	    savetk = tkc->cur;
-	    tkc->cur = errtk;
-	    ncx_print_errormsg(tkc, mod, res);
-	    tkc->cur = savetk;
+	    do_errmsg(tkc, mod, errtk, res);
 	    return res;
 	}
     }
@@ -450,53 +532,369 @@ static status_t
 	*targobj = curobj;
     }
     if (targQ) {
-	switch (curobj->objtype) {
-	case OBJ_TYP_CONTAINER:
-	    *targQ = curobj->def.container->datadefQ;
-	    break;
-	case OBJ_TYP_LIST:
-	    *targQ = curobj->def.list->datadefQ;
-	    break;
-	case OBJ_TYP_LEAF:
-	case OBJ_TYP_LEAF_LIST:
-	    res = ERR_NCX_DEFSEG_NOT_FOUND;
-	    log_error("\nError: path '%s' invalid: %s on line %u"
-		      " is a %s", name, obj_get_name(curobj),
-		      curobj->tk->linenum,
-		      obj_get_typestr(curobj));
-	    savetk = tkc->cur;
-	    tkc->cur = errtk;
-	    ncx_print_errormsg(tkc, mod, res);
-	    tkc->cur = savetk;
-	    return res;
-	case OBJ_TYP_CHOICE:
-	    *targQ = curobj->def.choic->caseQ;
-	    break;
-	case OBJ_TYP_CASE:
-	    *targQ = curobj->def.cas->datadefQ;
-	    break;
-	case OBJ_TYP_RPC:
-	    *targQ = &curobj->def.rpc->datadefQ;
-	    break;
-	case OBJ_TYP_RPCIO:
-	    *targQ = &curobj->def.rpcio->datadefQ;
-	    break;
-	case OBJ_TYP_NOTIF:
-	    *targQ = &curobj->def.notif->datadefQ;
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    savetk = tkc->cur;
-	    tkc->cur = errtk;
-	    ncx_print_errormsg(tkc, mod, res);
-	    tkc->cur = savetk;
-	    return res;
-	}
+	*targQ = curQ;
     }
 
     return NO_ERR;
 
 }  /* find_schema_node */
+
+
+/********************************************************************
+* FUNCTION find_schema_node_int
+* 
+* Follow the absolute-path expression
+* and return the obj_template_t that it indicates
+*
+* !!! Internal version !!!
+* !!! Error messages are not printed by this function!!
+*
+* INPUTS:
+*    target == Absolute Xpath expression string to evaluate
+*    targobj == address of return object  (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL inputs:
+*      *targobj == target object
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    find_schema_node_int (const xmlChar *target,
+			  obj_template_t **targobj)
+{
+    obj_template_t *curobj, *nextobj;
+    dlq_hdr_t      *curQ;
+    ncx_module_t   *mod;
+    const xmlChar  *str;
+    uint32          len;
+    status_t        res;
+    xmlChar         prefix[NCX_MAX_NLEN+1];
+    xmlChar         name[NCX_MAX_NLEN+1];
+
+
+    /* skip the first fwd slash, if any */
+    if (*target == '/') {
+	str = ++target;
+    } else {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* get the first QName (prefix, name) */
+    res = next_nodeid_noerr(str, prefix, name, &len);
+    if (res != NO_ERR) {
+	return res;
+    } else {
+	str += len;
+    }
+
+    /* get the import if there is a real prefix entered */
+    if (*prefix) {
+	mod = def_reg_find_module_prefix(prefix);
+	if (!mod) {
+	    return ERR_NCX_INVALID_NAME;
+	}
+    } else {
+	return ERR_NCX_DATA_MISSING;
+    }
+
+    /* get the first object template */
+    curobj = obj_find_template_top(mod, mod->name, name);
+    if (!curobj) {
+	if (ncx_valid_name2(name)) {
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	} else {
+	    res = ERR_NCX_INVALID_NAME;
+	}
+	return res;
+    }
+
+    if (obj_is_augclone(curobj)) {
+	return ERR_NCX_INVALID_VALUE;
+    }
+
+    /* got the first object; keep parsing node IDs
+     * until the Xpath expression is done or an error occurs
+     */
+    while (*str == '/') {
+	str++;
+	/* get the next QName (prefix, name) */
+	res = next_nodeid_noerr(str, prefix, name, &len);
+	if (res != NO_ERR) {
+	    return res;
+	} else {
+	    str += len;
+	}
+
+	/* make sure the prefix is valid, if present */
+	if (*prefix) {
+	    mod = def_reg_find_module_prefix(prefix);
+	    if (!mod) {
+		return ERR_NCX_INVALID_NAME;
+	    }
+	} else {
+	    return ERR_NCX_DATA_MISSING;
+	}
+
+	/* make sure the name is a valid name string */
+	if (!ncx_valid_name2(name)) {
+	    return ERR_NCX_INVALID_NAME;
+	}
+
+	/* determine 'nextval' based on [curval, prefix, name] */
+	curQ = obj_get_datadefQ(curobj);
+
+	if (curQ) {
+	    nextobj = obj_find_template(curQ, mod->name, name);
+	} else {
+	    return ERR_NCX_DEFSEG_NOT_FOUND;
+	}
+
+	if (nextobj) {
+	    curobj = nextobj;
+	} else {
+	    return ERR_NCX_DEFSEG_NOT_FOUND;
+	}
+    }
+
+    if (targobj) {
+	*targobj = curobj;
+    }
+
+    return NO_ERR;
+
+}  /* find_schema_node_int */
+
+
+/********************************************************************
+* FUNCTION get_curmod_from_prefix
+* 
+* Get the correct module to use for a given prefix
+*
+* INPUTS:
+*    prefix == string to check
+*    mod == module to use for the default context
+*           and prefixes will be relative to this module's
+*           import statements.
+*        == NULL and the default registered prefixes
+*           will be used
+*    targmod == address of return module
+*
+* OUTPUTS:
+*    *targmod == target moduke to use
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    get_curmod_from_prefix (const xmlChar *prefix,
+			    ncx_module_t *mod,
+			    ncx_module_t **targmod)
+{
+    ncx_import_t   *imp;
+    status_t        res;
+
+    /* get the import if there is a real prefix entered */
+    if (prefix && *prefix) {
+	if (!mod) {
+	    *targmod = def_reg_find_module_prefix(prefix);
+	    if (!*targmod) {
+		res = ERR_NCX_MOD_NOT_FOUND;
+	    }
+	} else if (xml_strcmp(prefix, mod->prefix)) {
+	    imp = ncx_find_pre_import(mod, prefix);
+	    if (!imp) {
+		res = ERR_NCX_INVALID_NAME;
+	    }
+	    *targmod = ncx_find_module(imp->module);
+	    if (!*targmod) {
+		res = ERR_NCX_MOD_NOT_FOUND;
+	    }
+	} else {
+	    *targmod = mod;
+	    res = NO_ERR;
+	}
+    } else if (mod) {
+	*targmod = mod;
+	res = NO_ERR;
+    } else {
+	*targmod = NULL;
+	res = ERR_NCX_DATA_MISSING;
+    }
+    return res;
+
+}   /* get_curmod_from_prefix */
+
+
+/********************************************************************
+* FUNCTION find_val_node
+* 
+* Follow the Xpath expression
+* and return the val_value_t that it indicates, if any
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    startval == val_value_t node to start search
+*    mod == module to use for the default context
+*           and prefixes will be relative to this module's
+*           import statements.
+*        == NULL and the default registered prefixes
+*           will be used
+*    target == Xpath expression string to evaluate
+*    targval == address of return value  (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL inputs:
+*      *targval == target value node
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    find_val_node (val_value_t *startval,
+		   ncx_module_t *mod,
+		   const xmlChar *target,
+		   val_value_t **targval)
+{
+    val_value_t    *curval;
+    ncx_module_t   *usemod;
+    const xmlChar  *str;
+    uint32          len;
+    status_t        res;
+    xmlChar         prefix[NCX_MAX_NLEN+1];
+    xmlChar         name[NCX_MAX_NLEN+1];
+
+    /* check absolute path starting with root val */
+    if (*target == '/' && !obj_is_root(startval->obj)) {
+	log_error("\nError: Absolute path given but startval is not "
+		  "root in Xpath target %s", target);
+	return ERR_NCX_DEF_NOT_FOUND;
+    }
+
+    /* check '/' corner-case */
+    if (!xml_strcmp(target, (const xmlChar *)"/")) {
+	if (targval) {
+	    *targval = startval;
+	}
+	return NO_ERR;
+    }
+
+    /* skip the first fwd slash, if any */
+    if (*target == '/') {
+	str = ++target;
+    } else {
+	str = target;
+    }
+
+    /* get the first QName (prefix, name) */
+    res = next_val_nodeid(str, prefix, name, &len);
+    if (res != NO_ERR) {
+	return res;
+    } else {
+	str += len;
+    }
+
+    res = get_curmod_from_prefix(prefix, mod, &usemod);
+    if (res != NO_ERR) {
+	if (*prefix) {
+	    log_error("\nError: module not found for prefix %s"
+		      " in Xpath target %s",
+		      prefix, target);
+	    return ERR_NCX_MOD_NOT_FOUND;
+	} else {
+	    log_error("\nError: no module prefix specified"
+			  " in Xpath target %s", target);
+	    return ERR_NCX_MOD_NOT_FOUND;
+	}
+    }
+
+    /* get the first value node */
+    curval = val_find_child(startval, usemod->prefix, name);
+    if (!curval) {
+	if (ncx_valid_name2(name)) {
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	} else {
+	    res = ERR_NCX_INVALID_NAME;
+	}
+	log_error("\nError: value node '%s' not found for module %s"
+		  " in Xpath target %s",
+		  name, usemod->name, target);
+	return res;
+    }
+
+    /* got the first object; keep parsing node IDs
+     * until the Xpath expression is done or an error occurs
+     */
+    while (*str == '/') {
+	str++;
+	/* get the next QName (prefix, name) */
+	res = next_val_nodeid(str, prefix, name, &len);
+	if (res != NO_ERR) {
+	    return res;
+	} else {
+	    str += len;
+	}
+
+	res = get_curmod_from_prefix(prefix, mod, &usemod);
+	if (res != NO_ERR) {
+	    if (*prefix) {
+		log_error("\nError: module not found for prefix %s"
+			  " in Xpath target %s",
+			  prefix, target);
+		return ERR_NCX_MOD_NOT_FOUND;
+	    } else {
+		log_error("\nError: no module prefix specified"
+			  " in Xpath target %s", target);
+		return ERR_NCX_MOD_NOT_FOUND;
+	    }
+	}
+
+	/* determine 'nextval' based on [curval, prefix, name] */
+	switch (curval->obj->objtype) {
+	case OBJ_TYP_CONTAINER:
+	case OBJ_TYP_LIST:
+	case OBJ_TYP_CHOICE:
+	case OBJ_TYP_CASE:
+	case OBJ_TYP_RPC:
+	case OBJ_TYP_RPCIO:
+	case OBJ_TYP_NOTIF:
+	    curval = val_find_child(curval, usemod->prefix, name);
+	    if (!curval) {
+		if (ncx_valid_name2(name)) {
+		    res = ERR_NCX_DEF_NOT_FOUND;
+		} else {
+		    res = ERR_NCX_INVALID_NAME;
+		}
+		log_error("\nError: value node '%s' not found for module %s"
+			  " in Xpath target %s",
+			  name, usemod->name, target);
+		return res;
+	    }
+	    break;
+	case OBJ_TYP_LEAF:
+	case OBJ_TYP_LEAF_LIST:
+	    res = ERR_NCX_DEFSEG_NOT_FOUND;
+	    log_error("\nError: '%s' in Xpath target '%s' invalid: "
+		      "%s is a %s",
+		      name, target, curval->name,
+		      obj_get_typestr(curval->obj));
+	    return res;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	    do_errmsg(NULL, mod, NULL, res);
+	    return res;
+	}
+    }
+
+    if (targval) {
+	*targval = curval;
+    }
+    return NO_ERR;
+
+}  /* find_val_node */
 
 
 /************    E X T E R N A L   F U N C T I O N S    ************/
@@ -513,7 +911,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
-*    tkc == token chain in progress
+*    tkc == token chain in progress  (may be NULL: errmsg only)
 *    mod == module in progress
 *    obj == augment object initiating search, NULL to start at top
 *    datadefQ == Q of obj_template_t containing 'obj'
@@ -538,7 +936,6 @@ status_t
 			      obj_template_t **targobj,
 			      dlq_hdr_t **targQ)
 {
-    tk_token_t *savetk;
     status_t    res;
 
 #ifdef DEBUG
@@ -553,10 +950,7 @@ status_t
 	    log_error("\nError: Absolute Xpath expression not "
 		      "allowed here (%s)", target);
 	    res = ERR_NCX_INVALID_VALUE;
-	    savetk = tkc->cur;
-	    tkc->cur = obj->tk;
-	    ncx_print_errormsg(tkc, mod, res);
-	    tkc->cur = savetk;
+	    do_errmsg(tkc, mod, obj->tk, res);
 	    return res;
 	}
     }
@@ -578,7 +972,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
-*    tkc == token chain in progress
+*    tkc == token chain in progress (may be NULL: errmsg only)
 *    mod == module in progress
 *    obj == augment object initiating search, NULL to start at top
 *    datadefQ == Q of obj_template_t containing 'obj'
@@ -605,7 +999,6 @@ status_t
 				  dlq_hdr_t **targQ,
 				  tk_token_t *errtk)
 {
-    tk_token_t *savetk;
     status_t    res;
 
 #ifdef DEBUG
@@ -620,10 +1013,7 @@ status_t
 	    log_error("\nError: Absolute Xpath expression not "
 		      "allowed here (%s)", target);
 	    res = ERR_NCX_INVALID_VALUE;
-	    savetk = tkc->cur;
-	    tkc->cur = obj->tk;
-	    ncx_print_errormsg(tkc, mod, res);
-	    tkc->cur = savetk;
+	    do_errmsg(tkc, mod, obj->tk, res);
 	    return res;
 	}
     }
@@ -633,6 +1023,91 @@ status_t
     return res;
 
 }  /* xpath_find_schema_target_err */
+
+
+/********************************************************************
+* FUNCTION xpath_find_schema_int
+* 
+* Follow the absolute-path expression
+* and return the obj_template_t that it indicates
+*
+* Internal access version
+* Error messages are not printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    target == absolute Xpath expression string to evaluate
+*    targobj == address of return object  (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL inputs:
+*      *targobj == target object
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_find_schema_target_int (const xmlChar *target,
+				  obj_template_t **targobj)
+{
+#ifdef DEBUG
+    if (!target) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    return find_schema_node_int(target, targobj);
+
+}  /* xpath_find_schema_target_int */
+
+
+/********************************************************************
+* FUNCTION xpath_find_val_target
+* 
+* Follow the absolute-path Xpath expression as used
+* internally to identify a config DB node
+* and return the obj_template_t that it indicates
+*
+* Expression must be the node-path from root for
+* the desired node.
+*
+* Error messages are logged by this function
+*
+* INPUTS:
+*    cfg == configuration to search
+*    mod == module to use for the default context
+*           and prefixes will be relative to this module's
+*           import statements.
+*        == NULL and the default registered prefixes
+*           will be used
+*    target == Xpath expression string to evaluate
+*    targval == address of return value  (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL inputs and value node found:
+*      *targval == target value node
+*   If non-NULL targval and error exit:
+*      *targval == last good node visited in expression (if any)
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_find_val_target (val_value_t *startval,
+			   ncx_module_t *mod,
+			   const xmlChar *target,
+			   val_value_t **targval)
+{
+
+#ifdef DEBUG
+    if (!startval || !target) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    return find_val_node(startval, mod, target, targval);
+
+}  /* xpath_find_val_target */
 			      
 
 /* END xpath.c */

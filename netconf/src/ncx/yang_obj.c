@@ -288,6 +288,7 @@ static status_t
 	ncx_print_errormsg(tkc, mod, res);
 	obj_free_template(obj);
     } else {
+	obj_set_ncx_flags(obj);
 	dlq_enque(obj, que);  /* may have some errors */
 	if (mod->stmtmode && que==&mod->datadefQ) {
 	    /* save top-level object order only */
@@ -1926,6 +1927,7 @@ static status_t
 	
     /* save or delete the obj_template_t struct */
     if (res==NO_ERR && cas->name && ncx_valid_name2(cas->name)) {
+	obj_set_ncx_flags(obj);
 	dlq_enque(obj, caseQ);
     } else {
 	obj_free_template(obj);
@@ -2200,6 +2202,7 @@ static status_t
 	}
 
 	if (res==NO_ERR) {
+	    obj_set_ncx_flags(obj);
 	    dlq_enque(obj, que);  /* may have some errors */	    
 	} else {
 	    obj_free_template(obj);
@@ -2486,6 +2489,7 @@ static status_t
 	    ncx_print_errormsg(tkc, mod, retres);
 	    obj_free_template(obj);
 	} else {
+	    obj_set_ncx_flags(obj);
 	    dlq_enque(obj, que);  /* may have some errors */
 	    if (mod->stmtmode && que==&mod->datadefQ) {
 		/* save top-level object order only */
@@ -2646,6 +2650,7 @@ static status_t
 	ncx_print_errormsg(tkc, mod, retres);
 	obj_free_template(obj);
     } else {
+	obj_set_ncx_flags(obj);
 	dlq_enque(obj, que);  /* may have some errors */
     }
 
@@ -2904,6 +2909,7 @@ static status_t
 
     /* save or delete the obj_template_t struct */
     if (retres == NO_ERR) {
+	obj_set_ncx_flags(obj);
 	dlq_enque(obj, que);
 	if (mod->stmtmode && que==&mod->datadefQ) {
 	    /* save top-level object order only */
@@ -4701,6 +4707,7 @@ static status_t
 			newobj->augwhen = &aug->when;
 			
 		    }
+		    obj_set_ncx_flags(newobj);
 		    dlq_enque(newobj, targQ);
 
 #ifdef YANG_OBJ_DEBUG

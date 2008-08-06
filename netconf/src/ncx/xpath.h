@@ -45,6 +45,10 @@ date	     init     comment
 #include "tk.h"
 #endif
 
+#ifndef _H_val
+#include "val.h"
+#endif
+
 
 /********************************************************************
 *								    *
@@ -86,5 +90,15 @@ extern status_t
 				  dlq_hdr_t **targQ,
 				  tk_token_t *errtk);
 
+
+extern status_t
+    xpath_find_schema_target_int (const xmlChar *target,
+				  obj_template_t **targobj);
+
+extern status_t
+    xpath_find_val_target (val_value_t *startval,
+			   ncx_module_t *mod,
+			   const xmlChar *target,
+			   val_value_t **targval);
 
 #endif	    /* _H_xpath */

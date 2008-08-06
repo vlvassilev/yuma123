@@ -243,10 +243,12 @@ extern status_t
 			   const typ_template_t *typ,
 			   val_value_t *val);
 
-extern status_t
-    xsd_add_key (const xmlChar *name,
-		 const typ_def_t *typdef,
-		 val_value_t *val);
+/**** REMOVED *** no deep keys in YANG!
+ * extern status_t
+ *    xsd_add_key (const xmlChar *name,
+ *		 const typ_def_t *typdef,
+ *		 val_value_t *val);
+ */
 
 extern status_t
     xsd_do_annotation (const xmlChar *descr,

@@ -130,16 +130,9 @@ extern status_t
 extern status_t
     agt_check_editop (op_editop_t pop,
 		      op_editop_t *cop,
-		      ncx_node_t nodetyp,
-		      const void *newnode,
-		      const void *curnode,
+		      const val_value_t *newnode,
+		      const val_value_t *curnode,
 		      ncx_iqual_t  iqual);
 
-
-extern void
-    agt_get_parent_node (ncx_node_t nodetyp,
-			 void *node,
-			 ncx_node_t  *partyp,
-			 void **parent);
 
 #endif	    /* _H_agt_util */

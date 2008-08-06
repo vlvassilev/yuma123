@@ -151,7 +151,12 @@ module netconf {
        enum create;
        enum delete;
      }
-    default "merge";
+     default "merge";
+   }
+
+   leaf operation {
+      ncx:hidden;
+      type EditOperationType;
    }
 
    typedef DefaultOperationType {
@@ -192,7 +197,8 @@ module netconf {
      }
    }
 
-   grouping NcAgentHello {
+   container agent-hello {
+     ncx:hidden;
      description "Generic Agent Hello Message Parameters.";
 
      uses NcCapabilities;
@@ -203,7 +209,8 @@ module netconf {
      }
    }
 
-   grouping NcManagerHello {
+   container mgr-hello {
+     ncx:hidden;
      description "Generic Manager Hello Message Parameters.";
 
      uses NcCapabilities;
@@ -454,8 +461,9 @@ module netconf {
           type ConfigURIType;
         }
 
-        anyxml config {
+        container config {
           description "Inline configuration data";
+	  ncx:root;
         }
       }
    }
@@ -868,6 +876,12 @@ module netconf {
       }
    }
 
+   container config {
+     description 
+       "Used as the container for NETCONF object definitions.";
+     ncx:root;
+   }
+        
 }
 
 

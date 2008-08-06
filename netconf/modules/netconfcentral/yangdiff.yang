@@ -214,6 +214,8 @@ module yangdiff {
     }
 
     container yangdiff {
+        ncx:cli;
+
         description 
            "CLI Parameter Set for the YANG Module Compare Application.";
 

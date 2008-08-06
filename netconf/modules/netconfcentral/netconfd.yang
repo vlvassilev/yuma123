@@ -19,6 +19,8 @@ module netconfd {
     }
 
     container netconfd {
+      ncx:cli;
+
       description
          "Agent CLI for the NETCONF protocol.
           Usage:

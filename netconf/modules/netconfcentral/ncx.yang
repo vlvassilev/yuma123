@@ -16,7 +16,7 @@ module ncx {
 
   revision 2008-08-01 {
     description 
-       "Added password, hidden, and xsdlist extensions.";
+       "Added password, hidden, xsdlist, and root extensions.";
   }
 
   revision 2008-04-16 {
@@ -87,7 +87,6 @@ module ncx {
     type boolean;
   }
 
-
   leaf min-elements {
     description 
        "Contains the value from the min-elements-stmt.
@@ -96,7 +95,6 @@ module ncx {
         in the object definition.";
     type uint32;
   }
-
 
   leaf max-elements {
     description 
@@ -253,7 +251,6 @@ module ncx {
     type string;
   }
 
-
   leaf value {
     description 
        "Contains the value-stmt value for an enum definition.
@@ -307,10 +304,45 @@ module ncx {
       "Used to indicate the leaf string type is really an
        XSD list, which is a series of whitespace separated
        strings. The type argument represents the data type
-       to use for the list members, for validation purposes.";
+       to use for the list members, for validation purposes.
+
+       Allowed to be present within the type sub-section
+       for a string.";
     argument type {
       yin-element true;
     }
   }
+
+  extension root {
+   description
+     "Used within a container definition to indicate it is
+      really a root container for a conceptual NETCONF database,
+      instead of just an empty container.  This is needed
+      for yangtools to correctly process any RPC method
+      that contains a 'config' parameter.";
+  }
+
+  extension cli {
+   description
+     "Used within a container definition to indicate it is
+      only used as a conceptual container for a set of CLI parameters.
+      A top-level container containing this extension will not
+      be included in any NETCONF configuration databases.";
+  }
+
+  container struct {
+     ncx:hidden;
+  }
+
+  leaf string { 
+     type string;
+     ncx:hidden;
+  }
+
+  leaf empty {
+     type empty;
+     ncx:hidden;
+  }
+
 }
 

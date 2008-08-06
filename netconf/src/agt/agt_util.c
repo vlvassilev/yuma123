@@ -33,10 +33,6 @@ date         init     comment
 #include "agt_cap.h"
 #endif
 
-#ifndef _H_agt_ps
-#include "agt_ps.h"
-#endif
-
 #ifndef _H_agt_rpc
 #include "agt_rpc.h"
 #endif
@@ -51,6 +47,10 @@ date         init     comment
 
 #ifndef _H_agt_util
 #include "agt_util.h"
+#endif
+
+#ifndef _H_agt_val
+#include "agt_val.h"
 #endif
 
 #ifndef _H_cfg
@@ -69,16 +69,8 @@ date         init     comment
 #include  "ncxconst.h"
 #endif
 
-#ifndef _H_op
-#include  "op.h"
-#endif
-
-#ifndef _H_ps
-#include  "ps.h"
-#endif
-
-#ifndef _H_psd
-#include  "psd.h"
+#ifndef _H_obj
+#include  "obj.h"
 #endif
 
 #ifndef _H_rpc
@@ -151,21 +143,8 @@ static ncx_data_class_t
 		   const void *node)
 {
     const val_value_t *val;
-    const ps_parm_t *parm;
-    const ps_parmset_t *parmset;
-    const cfg_app_t *app;
 
     switch (nodetyp) {
-    case NCX_NT_APP:
-	app = (const cfg_app_t *)node;
-	return cfg_get_app_dataclass(app);
-    case NCX_NT_PARMSET:
-	parmset = node;
-	return parmset->psd->dataclass;
-    case NCX_NT_PARM:
-	parm = node;
-	return parm->parm->dataclass;
-    case NCX_NT_VAL:
 	val = node;
 	return val->dataclass;
     default:
@@ -195,16 +174,8 @@ static boolean
 		const void *node)
 {
     const val_value_t *val;
-    const ps_parm_t *parm;
 
     switch (nodetyp) {
-    case NCX_NT_APP:
-    case NCX_NT_PARMSET:
-	/* these node types have no default */
-	return FALSE;
-    case NCX_NT_PARM:
-	parm = node;
-	return val_is_default(parm->val);
     case NCX_NT_VAL:
 	val = node;
 	return val_is_default(val);
@@ -248,10 +219,12 @@ status_t
     const xmlChar     *cfgname;
     status_t           res;
 
-    res = ps_get_parmval(&msg->rpc_input, parmname, &val);
-    if (res != NO_ERR) {
+    val = val_find_child(&msg->rpc_input, 
+			 obj_get_prefix(&msg->rpc_input->obj),
+			 parmname);
+    if (!val || val->res != NO_ERR) {
 	agt_record_error(NULL, &msg->mhdr.errQ, NCX_LAYER_OPERATION,
-		 res, methnode, NCX_NT_NONE, NULL, NCX_NT_PARMSET, 
+		 res, methnode, NCX_NT_NONE, NULL, NCX_NT_VAL, 
 		 &msg->rpc_input);
 	return res;
     }
@@ -261,34 +234,11 @@ status_t
 
     /* got some value in *val */
     switch (val->btyp) {
-    case NCX_BT_ENAME:
     case NCX_BT_STRING:
 	cfgname = VAL_STR(val);
 	break;
-    case NCX_BT_BINARY:
-	cfgname = VAL_USTR(val);
-	break;
-    case NCX_BT_CHOICE:
-	/* there should just be one choice */
-	chval = val_get_first_child(val);
-	errval = chval;
-	if (!chval) {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	} else {
-	    if (!xml_strcmp(chval->name, NCX_EL_URL)) {
-		res = ERR_NCX_OPERATION_NOT_SUPPORTED;  
-
-		/*** TBD: get the URL, and read it into a new config
-		 *** and put the named-config-handle in target 
-		 ***/
-	    } else if (chval->btyp==NCX_BT_EMPTY) {
-		cfgname = chval->name;
-	    } else if (chval->btyp==NCX_BT_ENAME) {
-		cfgname = VAL_STR(chval);
-	    } else {
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	}
+    case NCX_BT_EMPTY:
+	cfgname = val->name;
 	break;
     default:
 	res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -336,8 +286,10 @@ const val_value_t *
     val_value_t       *val;
     status_t           res;
 
-    res = ps_get_parmval(&msg->rpc_input, parmname, &val);
-    return (res == NO_ERR) ? val : NULL;
+    val =  val_find_child(&msg->rpc_input,
+			  obj_get_mod_prefix(&msg->rpc_input->obj),
+			  parmname);
+    return val;
 
 } /* agt_get_parmval */
 
@@ -523,7 +475,7 @@ status_t
     res = NO_ERR;
 
     /* filter parm is optional */
-    res = ps_get_parmval(&msg->rpc_input, NCX_EL_FILTER, &filter);
+    filter = val_find_parmval(&msg->rpc_input, NCX_EL_FILTER, &filter);
     if (res == ERR_NCX_NOT_FOUND) {
 	msg->rpc_filter.op_filtyp = OP_FILTER_NONE;
 	msg->rpc_filter.op_filter = NULL;

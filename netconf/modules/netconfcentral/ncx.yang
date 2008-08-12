@@ -330,6 +330,10 @@ module ncx {
       be included in any NETCONF configuration databases.";
   }
 
+  anyxml any {
+    ncx:hidden;
+  }
+
   container struct {
      ncx:hidden;
   }

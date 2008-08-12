@@ -96,6 +96,15 @@ module netconfd {
 	  "Print netconfd version string and exit";
         type empty;
       }
+
+      leaf xmlorder {
+        description
+          "If true, then XML element order will be enforced.
+           Otherwise, XML element order errors will not be
+           generated if possible.";
+        type boolean;
+        default false;
+      }
     }
 
     rpc load-config {
@@ -103,6 +112,7 @@ module netconfd {
       ncx:rpc-type config;
       input {
         container config {
+          ncx:root;
           description "XML Config contents.";
         }
       }

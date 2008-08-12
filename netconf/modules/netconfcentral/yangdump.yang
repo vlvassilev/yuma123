@@ -5,6 +5,7 @@ module yangdump {
     prefix "yd";
 
     import ncxtypes { prefix "nt"; }
+    import ncx { prefix "ncx"; }
 
     organization "Netconf Central";
 

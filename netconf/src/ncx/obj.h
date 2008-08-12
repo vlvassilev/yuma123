@@ -123,6 +123,9 @@ date	     init     comment
 /* object is marked as a CLI-only node */
 #define OBJ_FL_CLI          bit12
 
+/* object is marked as an XSD list data type */
+#define OBJ_FL_XSDLIST      bit13
+
 
 /********************************************************************
 *								    *
@@ -479,9 +482,11 @@ extern const obj_template_t *
 			 const xmlChar *objname,
 			 uint32 objnamelen);
 
+/* skips augment and uses */
 extern const obj_template_t *
     obj_first_child (const obj_template_t *obj);
 
+/* skips augment and uses */
 extern const obj_template_t *
     obj_next_child (const obj_template_t *obj);
 
@@ -575,8 +580,9 @@ extern obj_key_t *
 extern obj_key_t *
     obj_find_key2 (dlq_hdr_t *que,
 		   const obj_template_t *keyobj);
+
 extern obj_key_t *
-    obj_first_key (obj_template_t *obj);
+    obj_first_key (const obj_template_t *obj);
 
 extern const obj_key_t *
     obj_first_ckey (const obj_template_t *obj);
@@ -644,6 +650,9 @@ extern boolean
     obj_get_config_flag2 (const obj_template_t *obj,
 			  boolean *setflag);
 
+extern ncx_access_t
+    obj_get_max_access (const obj_template_t *obj);
+
 extern dlq_hdr_t *
     obj_get_appinfoQ (const obj_template_t *obj);
 
@@ -683,6 +692,9 @@ extern const typ_def_t *
 extern ncx_btype_t
     obj_get_basetype (const obj_template_t  *obj);
 
+extern ncx_btype_t
+    obj_get_primary_basetype (const obj_template_t  *obj);
+
 extern const xmlChar *
     obj_get_mod_prefix (const obj_template_t *obj);
 
@@ -694,6 +706,17 @@ extern xmlns_id_t
 
 extern ncx_iqual_t
     obj_get_iqualval (const obj_template_t  *obj);
+
+/* return TRUE if min is set */
+extern boolean
+    obj_get_min_elements (const obj_template_t  *obj,
+			  uint32 *minelems);
+
+/* return TRUE if max is set */
+extern boolean
+    obj_get_max_elements (const obj_template_t  *obj,
+			  uint32 *maxelems);
+
 
 extern const xmlChar *
     obj_get_units (const obj_template_t  *obj);
@@ -731,6 +754,9 @@ extern boolean
 
 extern boolean
     obj_is_password (const obj_template_t *obj);
+
+extern boolean
+    obj_is_xsdlist (const obj_template_t *obj);
 
 extern boolean
     obj_is_cli (const obj_template_t *obj);

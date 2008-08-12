@@ -69,17 +69,12 @@ date         init     comment
 #include  "ncxconst.h"
 #endif
 
-<<<<<<< .mine
 #ifndef _H_obj
 #include  "obj.h"
 #endif
 
 #ifndef _H_op
 #include  "op.h"
-=======
-#ifndef _H_obj
-#include  "obj.h"
->>>>>>> .r81
 #endif
 
 #ifndef _H_rpc
@@ -224,14 +219,13 @@ status_t
 			   cfg_template_t  **retcfg)
 {
     cfg_template_t    *cfg;
-    val_value_t       *val, *chval;
+    val_value_t       *val;
     const val_value_t *errval;
     const xmlChar     *cfgname;
     status_t           res;
 
-    /*** should really provide the exact prefix ***/
-    val = val_find_child(msg->rpc_input, 
-			 obj_get_prefix(msg->rpc_input->obj), 
+    val = val_find_child(&msg->rpc_input, 
+			 obj_get_mod_name(msg->rpc_input.obj), 
 			 parmname);
     if (!val || val->res != NO_ERR) {
 	if (!val) {
@@ -241,7 +235,7 @@ status_t
 	}
 	agt_record_error(NULL, &msg->mhdr.errQ, NCX_LAYER_OPERATION,
 			 res, methnode, NCX_NT_NONE, NULL, NCX_NT_VAL, 
-			 msg->rpc_input);
+			 &msg->rpc_input);
 	return res;
     }
 
@@ -300,8 +294,10 @@ const val_value_t *
     agt_get_parmval (const xmlChar *parmname,
 		     rpc_msg_t *msg)
 {
-    val =  val_find_child(msg->rpc_input,
-			  obj_get_mod_prefix(msg->rpc_input->obj),
+    val_value_t *val;
+
+    val =  val_find_child(&msg->rpc_input,
+			  obj_get_mod_name(msg->rpc_input.obj),
 			  parmname);
     return val;
 
@@ -355,8 +351,9 @@ void
 	    if (nodetyp==NCX_NT_STRING) {
 		buff = xml_strdup((const xmlChar *)errnode);
 	    } else {
-		(void)val_gen_instance_id(nodetyp, errnode, 
-			  NCX_IFMT_XPATH1, TRUE, &buff);
+		(void)val_gen_instance_id(errnode, 
+					  NCX_IFMT_XPATH1, 
+					  TRUE, &buff);
 	    }
 	}
 
@@ -423,8 +420,9 @@ void
 	    if (nodetyp==NCX_NT_STRING) {
 		buff = xml_strdup((const xmlChar *)errnode);
 	    } else {
-		(void)val_gen_instance_id(nodetyp, errnode, 
-			  NCX_IFMT_XPATH2, TRUE, &buff);
+		(void)val_gen_instance_id(errnode, 
+					  NCX_IFMT_XPATH2, 
+					  TRUE, &buff);
 	    }
 	}
 	err = agt_rpcerr_gen_attr_error(layer, res, xmlattr, 
@@ -489,7 +487,8 @@ status_t
     res = NO_ERR;
 
     /* filter parm is optional */
-    filter = val_find_child(&msg->rpc_input, NC_PREFIX, NCX_EL_FILTER);
+    filter = val_find_child(&msg->rpc_input, 
+			    NC_MODULE, NCX_EL_FILTER);
     if (!filter) {
 	msg->rpc_filter.op_filtyp = OP_FILTER_NONE;
 	msg->rpc_filter.op_filter = NULL;
@@ -838,8 +837,6 @@ status_t
 		      const val_value_t *curnode,
 		      ncx_iqual_t iqual)
 {
-    const val_value_t *val;
-    const ps_parm_t   *parm;
     status_t           res;
 
     res = NO_ERR;

@@ -708,9 +708,6 @@ void
     }
 #endif
 
-    if (qname->name) {
-	m__free(qname->name);
-    }
     m__free(qname);
 
 }  /* xmlns_free_qname */

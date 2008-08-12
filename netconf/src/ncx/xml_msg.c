@@ -300,10 +300,12 @@ void
     /* clean error queue */
     rpc_err_clean_errQ(&msg->errQ);
 
+    msg->defns = 0;
+    msg->cur_defns = 0;
     msg->last_defns = 0;
     msg->last_defpfix[0] = 0;
-    msg->defns = 0;
     msg->withdef = NCX_DEF_WITHDEF;
+    msg->withmeta = NCX_DEF_WITHMETA;
 
 } /* xml_msg_clean_hdr */
 

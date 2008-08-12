@@ -261,4 +261,9 @@ extern val_value_t *
 			      const xmlChar *target,
 			      ncx_cfg_t  cfgid);
 
+
+extern status_t
+    cfg_apply_load_root (cfg_template_t *cfg,
+			 val_value_t *newroot);
+
 #endif            /* _H_cfg */

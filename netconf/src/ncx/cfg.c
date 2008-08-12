@@ -270,18 +270,6 @@ static cfg_template_t *
     /* finish setting up the <config> root value */
     val_init_from_template(cfg->root, cfgobj);
 
-    /* set the load_time and last_ch_time timestamps */
-    cfg->load_time = new_cur_datetime();
-    if (cfg->load_time) {
-	cfg->last_ch_time = xml_strdup(cfg->load_time);
-	if (!cfg->last_ch_time) {
-	    free_template(cfg);
-	    return NULL;
-	}
-    } else {
-	free_template(cfg);
-	return NULL;
-    }
 
     return cfg;
 
@@ -1103,5 +1091,50 @@ val_value_t *
     }
 
 } /* cfg_find_modrel_datanode */
+
+
+/********************************************************************
+* FUNCTION cfg_apply_load_root
+*
+* Apply the AGT_CB_APPLY function for the OP_EDITOP_LOAD operation
+*
+* INPUTS:
+*    cfg == config target
+*    newroot == new config tree
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    cfg_apply_load_root (cfg_template_t *cfg,
+			 val_value_t *newroot)
+{
+    if (cfg->root) {
+	if (val_child_cnt(cfg->root)) {
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	val_free_value(cfg->root);
+	cfg->root = NULL;
+    }
+
+    cfg->root = newroot;
+
+    /* set the load_time and last_ch_time timestamps */
+
+    /* set the load_time and last_ch_time timestamps */
+    cfg->load_time = new_cur_datetime();
+    if (cfg->load_time) {
+	cfg->last_ch_time = xml_strdup(cfg->load_time);
+	if (!cfg->last_ch_time) {
+	    return ERR_INTERNAL_MEM;
+	}
+    } else {
+	return ERR_INTERNAL_MEM;
+    }
+
+    return NO_ERR;
+
+} /* cfg_apply_load_root */
+
 
 /* END file cfg.c */

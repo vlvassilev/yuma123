@@ -3951,7 +3951,7 @@ obj_key_t *
 *   pointer to first key component or NULL if not found
 *********************************************************************/
 obj_key_t *
-    obj_first_key (obj_template_t *obj)
+    obj_first_key (const obj_template_t *obj)
 {
 #ifdef DEBUG
     if (!obj) {
@@ -4626,6 +4626,41 @@ boolean
 
 
 /********************************************************************
+* FUNCTION obj_get_max_access
+*
+* Get the NCX max-access enum for an obj_template_t 
+* Return the explicit value or the inherited value
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   ncx_access_t enumeration
+*********************************************************************/
+ncx_access_t
+    obj_get_max_access (const obj_template_t *obj)
+{
+    boolean      setflag;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_ACCESS_NONE;
+    }
+#endif
+
+    if (!get_config_flag(obj, &setflag)) {
+	return NCX_ACCESS_RO;
+    } else {
+	return NCX_ACCESS_RW;
+    }
+
+    /*** !!! no support for read-write at this time !!! ***/
+
+}   /* obj_get_max_access */
+
+
+/********************************************************************
 * FUNCTION obj_get_appinfoQ
 * 
 * Get the appinfoQ for this obj
@@ -5195,6 +5230,52 @@ ncx_btype_t
 
 
 /********************************************************************
+* FUNCTION obj_get_primary_basetype
+* 
+* Get the NCX base type enum for the object type
+* Return the primary type NCX_BT_LEAF_LIST instead
+*  of the underlying list element type
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    base type enumeration
+*********************************************************************/
+ncx_btype_t
+    obj_get_primary_basetype (const obj_template_t  *obj)
+{
+    switch (obj->objtype) {
+    case OBJ_TYP_LEAF:
+	if (obj_is_xsdlist(obj)) {
+	    return NCX_BT_SLIST;
+	} else {
+	    return typ_get_basetype(obj->def.leaf->typdef);
+	}
+    case OBJ_TYP_LEAF_LIST:
+	return NCX_BT_LEAF_LIST;
+    case OBJ_TYP_CONTAINER:
+	return NCX_BT_CONTAINER;
+    case OBJ_TYP_LIST:
+	return NCX_BT_LIST;
+    case OBJ_TYP_CHOICE:
+	return NCX_BT_CHOICE;
+    case OBJ_TYP_CASE:
+	return NCX_BT_CASE;
+    case OBJ_TYP_RPCIO:
+	return NCX_BT_CONTAINER;
+    case OBJ_TYP_NOTIF:
+	return NCX_BT_CONTAINER;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NCX_BT_NONE;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_get_primary_basetype */
+
+
+/********************************************************************
 * FUNCTION obj_get_mod_prefix
 * 
 * Get the module prefix for this object
@@ -5340,6 +5421,90 @@ ncx_iqual_t
     return ret;
 
 }  /* obj_get_iqualval */
+
+
+/********************************************************************
+* FUNCTION obj_get_min_elements
+* 
+* Get the min-elements clause for this object, if any
+*
+* INPUTS:
+*    obj  == object to check
+*    minelems == address of return min-elements value
+*
+* OUTPUTS:
+*   *minelems == min-elements value if it is set for this object
+*   
+* RETURNS:
+*    TRUE if min-elements is set, FALSE if not or N/A
+*********************************************************************/
+boolean
+    obj_get_min_elements (const obj_template_t  *obj,
+			  uint32 *minelems)
+{
+
+#ifdef DEBUG
+    if (!obj || !minelems) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    switch (obj->objtype) {
+    case OBJ_TYP_LEAF_LIST:
+	*minelems = obj->def.leaflist->minelems;
+	return obj->def.leaflist->minset;
+    case OBJ_TYP_LIST:
+	*minelems = obj->def.list->minelems;
+	return obj->def.list->minset;
+    default:
+	return FALSE;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_get_min_elements */
+
+
+/********************************************************************
+* FUNCTION obj_get_max_elements
+* 
+* Get the max-elements clause for this object, if any
+*
+* INPUTS:
+*    obj  == object to check
+*    maxelems == address of return max-elements value
+*
+* OUTPUTS:
+*   *maxelems == max-elements value if it is set for this object
+*
+* RETURNS:
+*    TRUE if max-elements is set, FALSE if not or N/A
+*********************************************************************/
+boolean
+    obj_get_max_elements (const obj_template_t  *obj,
+			  uint32 *maxelems)
+{
+
+#ifdef DEBUG
+    if (!obj || !maxelems) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    switch (obj->objtype) {
+    case OBJ_TYP_LEAF_LIST:
+	*maxelems = obj->def.leaflist->maxelems;
+	return obj->def.leaflist->maxset;
+    case OBJ_TYP_LIST:
+	*maxelems = obj->def.list->maxelems;
+	return obj->def.list->maxset;
+    default:
+	return FALSE;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_get_max_elements */
 
 
 /********************************************************************
@@ -5709,12 +5874,16 @@ void
 
     appinfoQ = obj_get_appinfoQ(obj);
 
+    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_PASSWORD)) {
+	obj->flags |= OBJ_FL_PASSWD;
+    }
+
     if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_HIDDEN)) {
 	obj->flags |= OBJ_FL_HIDDEN;
     }
 
-    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_PASSWORD)) {
-	obj->flags |= OBJ_FL_PASSWD;
+    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_XSDLIST)) {
+	obj->flags |= OBJ_FL_XSDLIST;
     }
 
     if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_ROOT)) {
@@ -5810,6 +5979,34 @@ boolean
     return (obj->flags & OBJ_FL_PASSWD) ? TRUE : FALSE;
 
 }   /* obj_is_password */
+
+
+/********************************************************************
+* FUNCTION obj_is_xsdlist
+*
+* Check if object is marked as an XSD list
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:xsdlist
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_xsdlist (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_XSDLIST) ? TRUE : FALSE;
+
+}   /* obj_is_xsdlist */
 
 
 /********************************************************************

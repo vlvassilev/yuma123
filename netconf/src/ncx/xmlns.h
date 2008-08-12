@@ -71,8 +71,8 @@ typedef uint32 xmlns_id_t;
 
 /* represents one QName data element */
 typedef struct xmlns_qname_t_ {
-    xmlns_id_t   nsid;
-    xmlChar     *name;
+    xmlns_id_t       nsid;
+    const xmlChar   *name;
 } xmlns_qname_t;
 
 /* represents one registered namespace */
@@ -151,6 +151,7 @@ extern xmlns_id_t
 extern xmlns_id_t 
     xmlns_ncn_id (void);
 
+/* get module name that registered this namespace */
 extern const xmlChar *
     xmlns_get_module (xmlns_id_t  nsid);
 

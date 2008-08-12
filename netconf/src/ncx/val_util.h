@@ -60,4 +60,14 @@ extern status_t
     val_instance_check (val_value_t  *val,
 			const obj_template_t *obj);
 
+extern val_value_t *
+    val_get_choice_first_set (val_value_t *val,
+			      const obj_template_t *obj);
+
+extern val_value_t *
+    val_get_choice_next_set (val_value_t *val,
+			     const obj_template_t *obj,
+			     val_value_t *curchild);
+
+
 #endif	    /* _H_val_util */

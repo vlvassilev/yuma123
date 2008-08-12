@@ -361,6 +361,7 @@ ses_cb_t *
     scb->withdef = NCX_DEF_WITHDEF;
     scb->withmeta = NCX_DEF_WITHMETA;
     scb->indent = NCX_DEF_INDENT;
+    scb->xmladvance = TRUE;
     return scb;
 
 }  /* ses_new_scb */

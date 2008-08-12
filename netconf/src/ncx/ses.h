@@ -190,6 +190,7 @@ typedef struct ses_cb_t_ {
     xmlChar         *username;                       /* user ID */
     xmlChar         *peeraddr;           /* Inet address string */
     boolean          active;            /* <hello> completed ok */
+    boolean          xmladvance;    /* reader hack for leaflist */
     xmlTextReaderPtr reader;             /* input stream reader */
     FILE            *fp;             /* set if output to a file */
     int              fd;           /* set if output to a socket */

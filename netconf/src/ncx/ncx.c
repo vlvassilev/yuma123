@@ -146,6 +146,8 @@ static uint32            ncx_cur_filptrs;
 
 static obj_template_t   *operation_attr;
 
+static obj_template_t   *gen_anyxml;
+
 static obj_template_t   *gen_container;
 
 static obj_template_t   *gen_string;
@@ -893,11 +895,18 @@ status_t
 	return NO_ERR;
     }
 
-    /* find all 4 required object templates */
+    /* find all 5 required object templates */
     deftyp = NCX_NT_OBJ;
+
     operation_attr = (obj_template_t *)
 	def_reg_find_moddef(NC_MODULE, NC_OPERATION_ATTR_NAME, &deftyp);
     if (!operation_attr) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    gen_anyxml = (obj_template_t *)
+	def_reg_find_moddef(NCX_MODULE, NCX_EL_ANY, &deftyp);
+    if (!gen_anyxml) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
@@ -951,22 +960,10 @@ void
     }
 
     if (stage2_init_done) {
-	if (operation_attr) {
-	    obj_free_template(operation_attr);
-	    operation_attr = NULL;
-	}
-	if (gen_container) {
-	    obj_free_template(gen_container);
-	    gen_container = NULL;
-	}
-	if (gen_string) {
-	    obj_free_template(gen_string);
-	    gen_string = NULL;
-	}
-	if (gen_empty) {
-	    obj_free_template(gen_empty);
-	    gen_empty = NULL;
-	}
+	operation_attr = NULL;
+	gen_container = NULL;
+	gen_string = NULL;
+	gen_empty = NULL;
     }
 
     typ_unload_basetypes();
@@ -5588,6 +5585,28 @@ obj_template_t *
     return operation_attr;
 
 } /* ncx_get_operation_attr */
+
+
+/********************************************************************
+* FUNCTION ncx_get_gen_anyxml
+* 
+* Get the object template for the NCX generic anyxml container
+*
+*********************************************************************/
+obj_template_t *
+    ncx_get_gen_anyxml (void)
+{
+    status_t  res;
+
+    if (!stage2_init_done) {
+	res = ncx_stage2_init();
+	if (res != NO_ERR) {
+	    return NULL;
+	}
+    }
+    return gen_anyxml;
+
+} /* ncx_get_gen_anyxml */
 
 
 /********************************************************************

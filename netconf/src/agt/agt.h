@@ -159,6 +159,7 @@ typedef struct agt_profile_t_ {
     log_debug_t      agt_loglevel;
     boolean          agt_usestartup;
     boolean          agt_logappend;
+    boolean          agt_xmlorder;
     const xmlChar   *agt_logfile;
     const xmlChar   *agt_startup;
     const xmlChar   *agt_modpath;

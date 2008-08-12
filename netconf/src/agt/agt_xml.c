@@ -346,7 +346,7 @@ static status_t
 * see agt_xml_consume_node for details.
 *
 * EXTRA INPUTS:
-*   eoferr == TRUE if an OEF error should be generated
+*   eoferr == TRUE if an End of File error should be generated
 *          == FALSE if not
 *    nserr == TRUE if bad namespace should be checked
 *          == FALSE if not
@@ -648,6 +648,18 @@ status_t
 			TRUE, TRUE, TRUE);
 
 }  /* agt_xml_consume_node_noadv */
+
+
+status_t 
+    agt_xml_consume_node_nons_noadv (xmlTextReaderPtr reader,
+				     xml_node_t      *node,
+				     ncx_layer_t      layer,
+				     dlq_hdr_t        *errQ)
+{
+    return consume_node(reader, FALSE, node, layer, errQ, 
+			TRUE, FALSE, TRUE);
+
+}  /* agt_xml_consume_node_nons_noadv */
 
 
 /********************************************************************

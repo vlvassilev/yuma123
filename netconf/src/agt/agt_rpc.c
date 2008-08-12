@@ -58,6 +58,10 @@ date         init     comment
 #include  "agt_val_parse.h"
 #endif
 
+#ifndef _H_agt_val_util
+#include  "agt_val_util.h"
+#endif
+
 #ifndef _H_agt_xml
 #include  "agt_xml.h"
 #endif
@@ -569,15 +573,15 @@ static obj_template_t *
 *********************************************************************/
 static status_t
     parse_rpc_input (ses_cb_t *scb,
-	       rpc_msg_t  *msg,
-	       obj_rpc_t *rpc,
-	       agt_rpc_cbset_t *cbset,
-	       xml_node_t  *method)
-
+		     rpc_msg_t  *msg,
+		     obj_rpc_t *rpc,
+		     agt_rpc_cbset_t *cbset,
+		     xml_node_t  *method)
 {
-    status_t  res;
-    obj_template_t  *obj;
-    obj_rpcio_t  *rpcio;
+    const obj_template_t  *obj;
+    const obj_rpcio_t     *rpcio;
+    status_t               res;
+
     res = NO_ERR;
 
     /* check if there is an input parmset specified */
@@ -642,9 +646,9 @@ static status_t
 	 * any missing choices would be incorrectly interpreted
 	 * as multiple missing parameter errors
 	 */
-	res = agt_val_parse_instance_check(scb, &msg->mhdr, 
-					   &msg->rpc_input, 
-					   NCX_LAYER_OPERATION);
+	res = agt_val_instance_check(scb, &msg->mhdr, 
+				     &msg->rpc_input, 
+				     NCX_LAYER_OPERATION);
     }
 
     return res;

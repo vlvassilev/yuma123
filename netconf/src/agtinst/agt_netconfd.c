@@ -47,8 +47,8 @@ date         init     comment
 #include "agt_netconfd.h"
 #endif
 
-#ifndef _H_agt_ps
-#include "agt_ps.h"
+#ifndef _H_agt_val
+#include "agt_val.h"
 #endif
 
 #ifndef _H_cap
@@ -71,16 +71,12 @@ date         init     comment
 #include "ncxconst.h"
 #endif
 
+#ifndef _H_obj
+#include "obj.h"
+#endif
+
 #ifndef _H_op
 #include "op.h"
-#endif
-
-#ifndef _H_ps
-#include "ps.h"
-#endif
-
-#ifndef _H_psd
-#include "psd.h"
 #endif
 
 #ifndef _H_rpc
@@ -108,6 +104,7 @@ date         init     comment
 
 #define AGT_NETCONFD_DEBUG 1
 
+#define TEST_PATH (const xmlChar *)"/nd:netconfd"
 
 /********************************************************************
 *                                                                   *
@@ -193,18 +190,23 @@ static status_t
 		     rpc_msg_t  *msg,
 		     agt_cbtyp_t cbtyp,
 		     op_editop_t  editop,
-		     ps_parmset_t  *newps,
-		     ps_parmset_t  *curps)
+		     val_value_t  *newval,
+		     val_value_t  *curval)
 {
+
+    (void)scb;
+    (void)msg;
+    (void)editop;
+    (void)curval;
 
 #ifdef AGT_NETCONFD_DEBUG
     log_debug("\nagt_netconfd: ncboot_cb n:%s s:%d", 
-	   newps->psd->name, cbtyp);
+	      obj_get_name(newval->obj), cbtyp);
 #endif
 
     switch (cbtyp) {
     case AGT_CB_LOAD:
-	/* this parmset has static values and does not
+	/* this value set has static values and does not
 	 * need any setup or cleanup callbacks
 	 */
 	break;
@@ -236,23 +238,14 @@ static status_t
 {
     status_t  res;
 
-    /* netconfd parmset : 1 callback for all cb types */
-    res = agt_cb_register_ps_callback(AGT_CLI_MODULE, NCX_PS_NC_BOOT,
-				      FORALL, 0, ncboot_callback);
-    if (res != NO_ERR) {
-	return SET_ERROR(res);
-    }
+    /****** TEST !!!! ************/
 
-#ifdef NOT_YET
-    /* register the FileList validate callback function */
-    res = agt_cb_register_typ_callback(AGT_CLI_MODULE,
-				       NCX_TYP_FILELIST, 
-				       FORONE, AGT_CB_VALIDATE,
-				       filelist_callback);
+    /* netconfd parmset : 1 callback for all cb types */
+    res = agt_cb_register_callback(TEST_PATH,
+				   FORALL, 0, ncboot_callback);
     if (res != NO_ERR) {
 	return SET_ERROR(res);
     }
-#endif
 
     return NO_ERR;
 
@@ -270,11 +263,7 @@ static void
 {
 
     /* netconfd parmset : 1 callback for all cb types */
-    agt_cb_unregister_ps_callback(NCX_APP_NCAGENT, NCX_PS_NC_BOOT);
-
-#ifdef NOT_YET
-    agt_cb_unregister_typ_callback(NCX_APP_NCAGENT, NCX_TYP_FILELIST);
-#endif
+    agt_cb_unregister_callback(TEST_PATH);
 
 } /* unregister_netconfd_callbacks */
 

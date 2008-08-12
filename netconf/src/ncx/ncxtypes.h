@@ -127,7 +127,7 @@ typedef enum ncx_data_class_t_ {
 typedef enum ncx_btype_t_ {
     NCX_BT_NONE,
     NCX_BT_ANY,
-    NCX_BT_BITS,    
+    NCX_BT_BITS,        /* mapped to NCX_BT_SLIST */
     NCX_BT_ENUM,
     NCX_BT_EMPTY,
     NCX_BT_BOOLEAN,
@@ -146,13 +146,16 @@ typedef enum ncx_btype_t_ {
     NCX_BT_INSTANCE_ID,
     NCX_BT_UNION,
     NCX_BT_KEYREF,
-    NCX_BT_SLIST,                /* simple XSD list */
+    NCX_BT_SLIST,                 /* simple XSD list */
+
     NCX_BT_CONTAINER,
     NCX_BT_CHOICE,
+    NCX_BT_CASE,                   /* not a real type */
     NCX_BT_LIST,
-    NCX_BT_EXTERN,               /* not a real type */
-    NCX_BT_INTERN,               /* not a real type */
-    NCX_BT_CASE
+    NCX_BT_EXTERN,                 /* not a real type */
+    NCX_BT_INTERN,                 /* not a real type */
+    NCX_BT_LEAF_LIST          /* YANG multi-elem list */
+
 } ncx_btype_t;
 
 
@@ -172,7 +175,9 @@ typedef enum ncx_tclass_t_ {
 } ncx_tclass_t;
 
 
-/* Enumeration of the different types of index components */
+/* Enumeration of the different types of index components 
+ * YANG ONLY SUPPORTS NCX_IT_LOCAL
+ */
 typedef enum ncx_indextyp_t_ {
     NCX_IT_NONE,               
     NCX_IT_INLINE,          /* index simple type declared inline */
@@ -192,13 +197,14 @@ typedef enum ncx_indextyp_t_ {
  */
 typedef enum ncx_node_t_ {
     NCX_NT_NONE,
-    NCX_NT_TYP,                  /* NCX Type Def: typ_template_t */
-    NCX_NT_GRP,                 /* YANG grouping: grp_template_t */
-    NCX_NT_VAL,                              /* val_value_t node */
+    NCX_NT_TYP,                                /* typ_template_t */
+    NCX_NT_GRP,                                /* grp_template_t */
+    NCX_NT_VAL,                                   /* val_value_t */
     NCX_NT_OBJ,                                /* obj_template_t */
+    NCX_NT_ERRINFO,                 /* ncx_errinfo_t, error only */
     NCX_NT_STRING,                      /* xmlChar *, error only */
     NCX_NT_CFG,                  /* cfg_template_t *, error only */
-    NCX_NT_INDEX,                   /* typ_index_t *, error only */
+    NCX_NT_INDEX,                     /* obj_key_t *, error only */
     NCX_NT_QNAME,                 /* xmlns_qname_t *, error only */
     NCX_NT_TOP,                 /* ncx_filptr_t used for cfg top */
     NCX_NT_CHILD             /* ncx_filptr_t used for child root */

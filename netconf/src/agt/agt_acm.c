@@ -1,4 +1,3 @@
-#if 0
 /*  FILE: agt_acm.c
 
 		
@@ -88,9 +87,10 @@ date         init     comment
 #define AGT_ACM_DEBUG 1
 
 #define AGT_ACM_MODULE      (const xmlChar *)"nacm"
-#define AGT_ACM_PREFIX      (const xmlChar *)"nacm"
 
 #define AGT_ACM_CBPATH    (const xmlChar *)"/nacm:accessControl"
+
+#define AGT_ACM_DEF_MODE  AGT_ACM_CM_LOOSE
 
 #define AGT_ACM_CONTAINER   (const xmlChar *)"accessControl"
 #define AGT_ACM_INSTANCE_ID (const xmlChar *)"/accessControl"
@@ -166,7 +166,7 @@ static boolean        acModeStale;
 static boolean        userQStale;
 static dlq_hdr_t      userQ;
 
-
+#if 0
 /********************************************************************
 * FUNCTION new_user_ent
 *
@@ -322,9 +322,9 @@ static agt_acm_control_mode_t
 	}
 
 	/* get the accessControlMode value struct */
-	val = val_find_child(valset, AGT_ACM_PREFIX, PARM_PROFILE);
+	val = val_find_child(valset, AGT_ACM_MODULE, PARM_PROFILE);
 	if (val) {
-	    chval = val_find_child(val, AGT_ACM_PREFIX, LEAF_AC_MODE);
+	    chval = val_find_child(val, AGT_ACM_MODULE, LEAF_AC_MODE);
 	    if (!chval) {
 		SET_ERROR(ERR_INTERNAL_VAL);
 		return AGT_ACM_CM_NONE;
@@ -401,7 +401,7 @@ static status_t
     }
     
     /* get the groups parameter */
-    groups = val_find_child(valset, AGT_ACM_PREFIX, PARM_GROUPS);
+    groups = val_find_child(valset, AGT_ACM_MODULE, PARM_GROUPS);
     if (!groups) {
 	return ERR_NCX_DEF_NOT_FOUND;
     }
@@ -411,17 +411,17 @@ static status_t
 	 group != NULL;
 	 group = val_get_next_child(group)) {
 
-	name = val_find_child(group, AGT_ACM_PREFIX, LEAF_NAME);
+	name = val_find_child(group, AGT_ACM_MODULE, LEAF_NAME);
 	if (!name) {
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
 	    
-	role = val_find_child(group, AGT_ACM_PREFIX, LEAF_ROLE);
+	role = val_find_child(group, AGT_ACM_MODULE, LEAF_ROLE);
 	if (!role) {
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
 
-	users = val_find_child(group, AGT_ACM_PREFIX, LEAF_USERS);
+	users = val_find_child(group, AGT_ACM_MODULE, LEAF_USERS);
 	if (users) {
 	    for (user = val_get_first_child(users);
 		 user != NULL;
@@ -471,7 +471,7 @@ static boolean
     val_value_t *grouplist;
 
     /* get the groupList field */
-    grouplist = val_find_child(ruleval, AGT_ACM_PREFIX, 
+    grouplist = val_find_child(ruleval, AGT_ACM_MODULE, 
 			       LEAF_GROUPLIST);
     if (!grouplist) {
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -508,7 +508,7 @@ static boolean
     xmlns_id_t   valnsid;
 
     /* get the namespace URI */
-    val = val_find_child(listval, AGT_ACM_PREFIX, LEAF_NSURI);
+    val = val_find_child(listval, AGT_ACM_MODULE, LEAF_NSURI);
     if (!val) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
@@ -521,7 +521,7 @@ static boolean
     }
 
     /* get the optional element names list */
-    val = val_find_child(listval, AGT_ACM_PREFIX, LEAF_ELNAMES);
+    val = val_find_child(listval, AGT_ACM_MODULE, LEAF_ELNAMES);
     if (!val) {
 	return TRUE;  /* matched namespace URI */
     }
@@ -573,7 +573,7 @@ static boolean
     /* group applies to check the rpcTarget
      * get the rpcTarget choice 
      */
-    target = val_find_child(ruleval, AGT_ACM_PREFIX, LEAF_RPCTARGET);
+    target = val_find_child(ruleval, AGT_ACM_MODULE, LEAF_RPCTARGET);
     if (!target) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
@@ -605,7 +605,7 @@ static boolean
      * check if the rule is permit or deny and set the
      * *granted return value
      */
-    actype = val_find_child(ruleval, AGT_ACM_PREFIX, LEAF_RULETYPE);
+    actype = val_find_child(ruleval, AGT_ACM_MODULE, LEAF_RULETYPE);
     if (!actype) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
@@ -674,7 +674,7 @@ static boolean
     }
 
     /* get the rpcRules value struct */
-    val = val_find_child(accessControl, AGT_ACM_PREFIX, PARM_RPCRULES);
+    val = val_find_child(accessControl, AGT_ACM_MODULE, PARM_RPCRULES);
     if (!val) {
 	log_warn("\nagt_acm: No RPC Rules found");
 	return FALSE;
@@ -793,7 +793,7 @@ static status_t
 	/* check if the current valset already has an
 	 * entry for the configCapabilities
 	 */
-	if (curval && val_find_child(curval, AGT_ACM_PREFIX, 
+	if (curval && val_find_child(curval, AGT_ACM_MODULE, 
 				     PARM_CONFIGCAPS)) {
 	    res = NO_ERR;
 	    break;
@@ -805,7 +805,7 @@ static status_t
 	/* hardwired code !! expecting only boolean objects
 	 * in the configCapabilities struct
 	 */
-	obj = obj_find_child(newval->obj, AGT_ACM_PREFIX, 
+	obj = obj_find_child(newval->obj, AGT_ACM_MODULE, 
 			     PARM_CONFIGCAPS);
 	if (!obj) {
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -813,7 +813,7 @@ static status_t
 	}
 
 	/* get the nacm:globalCapabilities object */
-	chobj = obj_find_child(obj, AGT_ACM_PREFIX,
+	chobj = obj_find_child(obj, AGT_ACM_MODULE,
 			       LEAF_GLOBAL_CONFIG);
 	if (!chobj) {
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -1128,6 +1128,7 @@ static status_t
     return res;
 			     
 } /* validate_notificationRules */
+#endif   /*** 0 ***/
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -1146,14 +1147,19 @@ static status_t
 status_t 
     agt_acm_init (void)
 {
+#if 0
     status_t  res;
+#endif
 
+    accessControlMode = AGT_ACM_DEF_MODE;
     accessControl = NULL;
     dlq_createSQue(&userQ);
     accessControl = NULL;
     acStale = TRUE;
     acModeStale = TRUE;
+    userQStale = TRUE;
 
+#if 0
 #ifdef AGT_ACM_DEBUG
     log_debug2("\nagt: Loading NCX Access Control module");
 #endif
@@ -1228,6 +1234,8 @@ status_t
 	return res;
     }
 
+#endif
+
     /* set the agent config capabilities by hand here!!! */
     configCaps.globalConfig = TRUE;
     configCaps.groupConfig = TRUE;
@@ -1255,6 +1263,7 @@ void
 	return;
     }
 
+#if 0
     agt_cb_unregister_parm_callback(AGT_ACM_MODULE,
 				    AGT_ACM_PARMSET,
 				    PARM_PROFILE);
@@ -1274,6 +1283,7 @@ void
 				  AGT_ACM_PARMSET);
 
     flush_user_entQ();
+#endif
 
     agt_acm_init_done = FALSE;
 
@@ -1296,15 +1306,16 @@ boolean
     agt_acm_rpc_allowed (const xmlChar *user,
 			 const obj_template_t *rpcobj)
 {
-    agt_acm_control_mode_t acmode;
+    /* agt_acm_control_mode_t acmode; */
 
 #ifdef DEBUG
-    if (!user || !rpc) {
+    if (!user || !rpcobj) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return FALSE;
     }
 #endif
 
+#if 0
     /* check the access control mode */
     acmode = get_ac_mode();
     switch (acmode) {
@@ -1314,13 +1325,16 @@ boolean
     default:
 	;
     }
+#endif
 
     /* root user is allowed to access anything */
     if (!xml_strcmp(user, NCX_ROOT_USER)) {
 	return TRUE;
     }
 
-    return check_rpc_rules(rpcobj, user, acmode);
+    /*** TEMP ***/
+    /* return check_rpc_rules(rpcobj, user, acmode); */
+    return TRUE;
 
 }   /* agt_acm_rpc_allowed */
 
@@ -1373,7 +1387,7 @@ boolean
 *   TRUE if user allowed read access to the value node
 *********************************************************************/
 boolean 
-    agt_acm_ps_read_allowed (const xmlChar *user,
+    agt_acm_val_read_allowed (const xmlChar *user,
 			     const val_value_t *val)
 {
 #ifdef DEBUG
@@ -1394,4 +1408,3 @@ boolean
 
 
 /* END file agt_acm.c */
-#endif

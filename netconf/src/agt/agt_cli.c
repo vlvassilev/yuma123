@@ -106,50 +106,56 @@ static void
     }
 
     /* get log param */
-    val = val_find_child(valset, NULL, NCX_EL_LOG);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOG);
     if (val) {
 	agt_profile->agt_logfile = VAL_STR(val);
     }
 
     /* get log-append param */
-    val = val_find_child(valset, NULL, NCX_EL_LOGAPPEND);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOGAPPEND);
     if (val) {
 	agt_profile->agt_logappend = TRUE;
     }
 
+    /* get xmlorder param */
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_XMLORDER);
+    if (val) {
+	agt_profile->agt_xmlorder = TRUE;
+    }
+
     /* get log-level param */
-    val = val_find_child(valset, NULL, NCX_EL_LOGLEVEL);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOGLEVEL);
     if (val) {
 	agt_profile->agt_loglevel = 
 	    log_get_debug_level_enum((const char *)VAL_STR(val));
     }
 
     /* get no-startup startup param choice */
-    val = val_find_child(valset, NULL, AGT_CLI_NOSTARTUP);
+    val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_NOSTARTUP);
     if (val) {
 	agt_profile->agt_usestartup = FALSE;
     }
 
     /* OR get startup param */
-    val = val_find_child(valset, NULL, AGT_CLI_STARTUP);
+    val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_STARTUP);
     if (val) {
 	agt_profile->agt_startup = VAL_STR(val);
     }
 
     /* get modpath param */
-    val = val_find_child(valset, NULL, NCX_EL_MODPATH);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_MODPATH);
     if (val) {
 	agt_profile->agt_modpath = VAL_STR(val);
     }
 
     /* get datapath param */
-    val = val_find_child(valset, NULL, NCX_EL_DATAPATH);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DATAPATH);
     if (val) {
 	agt_profile->agt_datapath = VAL_STR(val);
     }
 
     /* get runpath param */
-    val = val_find_child(valset, NULL, NCX_EL_RUNPATH);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_RUNPATH);
     if (val) {
 	agt_profile->agt_runpath = VAL_STR(val);
     }
@@ -220,11 +226,11 @@ status_t
     /* check the quick exit parameters */
     if (valset) {
 	/* check if version mode requested */
-	val = val_find_child(valset, NULL, NCX_EL_VERSION);
+	val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_VERSION);
 	*showver = (val) ? TRUE : FALSE;
 
 	/* check if help mode requested */
-	val = val_find_child(valset, NULL, NCX_EL_HELP);
+	val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_HELP);
 	*showhelp = (val) ? TRUE : FALSE;
     } else {
 	*showver = FALSE;

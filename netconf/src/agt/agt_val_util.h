@@ -1,14 +1,14 @@
-#ifndef _H_agt_val_parse
-#define _H_agt_val_parse
+#ifndef _H_agt_val_util
+#define _H_agt_val_util
 
-/*  FILE: agt_val_parse.h
+/*  FILE: agt_val_util.h
 *********************************************************************
 *								    *
 *			 P U R P O S E				    *
 *								    *
 *********************************************************************
 
-    Parameter Value Parser Module
+    Agent Value Struct Utilities
 
 *********************************************************************
 *								    *
@@ -20,11 +20,13 @@ date	     init     comment
 ----------------------------------------------------------------------
 11-feb-06    abb      Begun
 06-aug-08    abb      Rewrite for OBJ/VAL only model in YANG
-                     Remove app, parmset, and parm from database model
+                      Remove app, parmset, and parm from database model
+08aug08      abb      Clone val_util functions for agent error reporting
+
 */
 
-#ifndef _H_rpc
-#include "rpc.h"
+#ifndef _H_ncxtypes
+#include "ncxtypes.h.h"
 #endif
 
 #ifndef _H_ses
@@ -35,12 +37,12 @@ date	     init     comment
 #include "status.h"
 #endif
 
-#ifndef _H_typ
-#include "typ.h"
+#ifndef _H_val
+#include "val.h"
 #endif
 
-#ifndef _H_xml_util
-#include "xml_util.h"
+#ifndef _H_xml_msg
+#include "xml_msg.h"
 #endif
 
 /********************************************************************
@@ -49,28 +51,11 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-extern status_t
-    agt_val_parse_nc (ses_cb_t  *scb,
-		      xml_msg_hdr_t *msg,
-		      const obj_template_t *obj,
-		      const xml_node_t *startnode,
-		      ncx_data_class_t  parentdc,
-		      val_value_t *retval);
+extern status_t 
+    agt_val_instance_check (ses_cb_t *scb,
+			    xml_msg_hdr_t *msg,
+			    val_value_t *valset,
+			    ncx_layer_t   layer);
 
 
-/* hack entry point for internal load-config RPC */
-extern status_t
-    agt_val_parse_load (ses_cb_t  *scb,
-			xml_msg_hdr_t *msg,
-			const obj_template_t *obj,
-			const xml_node_t *startnode,
-			ncx_data_class_t  parentdc,
-			val_value_t *retval);
-
-
-#ifdef DEBUG
-extern void
-    agt_val_parse_test (const char *testfile);
-#endif
-
-#endif	    /* _H_agt_val_parse */
+#endif	    /* _H_agt_val_util */

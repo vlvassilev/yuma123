@@ -521,7 +521,10 @@ extern void
 extern obj_template_t *
     ncx_get_operation_attr (void);
 
-/* 3 internal objects for subtree filter processing */
+/* 4 internal objects for subtree filter processing */
+extern obj_template_t *
+    ncx_get_gen_anyxml (void);
+
 extern obj_template_t *
     ncx_get_gen_container (void);
 

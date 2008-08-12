@@ -30,6 +30,10 @@ date         init     comment
 #include  "agt.h"
 #endif
 
+#ifndef _H_agt_cb
+#include  "agt_cb.h"
+#endif
+
 #ifndef _H_agt_ncxserver
 #include  "agt_ncxserver.h"
 #endif
@@ -70,7 +74,7 @@ date         init     comment
 *********************************************************************/
 #ifdef DEBUG
 #define NETCONFD_DEBUG   1
-/* #define NETCONFD_DEBUG_TEST 1 */
+#define NETCONFD_DEBUG_TEST 1
 #endif
 
 #define NETCONFD_MOD       (const xmlChar *)"netconfd"
@@ -84,7 +88,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 /* program version string */
-static char progver[] = "0.7";
+static char progver[] = "0.8.1";
 
 
 /********************************************************************
@@ -141,6 +145,27 @@ static status_t
     return NO_ERR;
 
 }  /* load_core_schema */
+
+
+#ifdef NETCONFD_DEBUG_TEST
+static status_t 
+    test_callback (ses_cb_t  *scb,
+		   rpc_msg_t *msg,
+		   agt_cbtyp_t cbtyp,
+		   op_editop_t  editop,
+		   val_value_t  *newval,
+		   val_value_t  *curval)
+{
+    (void)scb;
+    (void)msg;
+    (void)cbtyp;
+    (void)editop;
+    (void)newval;
+    (void)curval;
+    return NO_ERR;
+}
+#endif
+
 
 
 /********************************************************************
@@ -220,9 +245,19 @@ static status_t
     /* CMD-P3) Get any PS file parameters */
     /***/
 
+
+#ifdef NETCONFD_DEBUG_TEST
+    (void)agt_cb_register_callback((const xmlChar *)"/test:test1",
+				   TRUE, AGT_CB_APPLY,
+				   test_callback);
+#endif
+
 #ifdef NETCONFD_DEBUG
     log_debug("\nnetconfd init OK, ready for sessions\n");
 #endif
+
+
+
 
     return NO_ERR;
 
@@ -266,6 +301,10 @@ static void
 
 #ifdef NETCONFD_DEBUG
     log_debug2("\nShutting down netconf agent\n");
+#endif
+
+#ifdef NETCONFD_DEBUG_TEST
+    agt_cb_unregister_callback((const xmlChar *)"/test:test1");
 #endif
 
     /* Cleanup the Netconf Agent Library */

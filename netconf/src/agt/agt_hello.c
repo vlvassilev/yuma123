@@ -132,7 +132,7 @@ static status_t
     val_value_t  *caps;
 
     /* look for the NETCONF base capability string */
-    caps = val_find_child(val, NC_PREFIX, NCX_EL_CAPABILITIES);
+    caps = val_find_child(val, NC_MODULE, NCX_EL_CAPABILITIES);
     if (caps) {
 	/*** !!! should check prefix as well !!! ***/
 	if (val_first_child_string(caps, NCX_EL_CAPABILITY,

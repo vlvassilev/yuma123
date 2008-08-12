@@ -907,7 +907,6 @@ static status_t
     res = NO_ERR;
     total = 0;
     cnt = 0;
-    val = NULL;
     root = FALSE;
 
     /* process the specific node type 
@@ -970,15 +969,13 @@ static status_t
     total = cnt + xml_strlen(name);
 
     /* check if this is a value node with an index clause */
-    if (val) {
-	if (val->btyp == NCX_BT_LIST) {
-	    res = get_index_string(format, val, buff, &cnt);
-	    if (res == NO_ERR) {
-		if (buff) {
-		    buff[cnt] = 0;
-		}
-		total += cnt;
+    if (val->btyp == NCX_BT_LIST) {
+	res = get_index_string(format, val, buff, &cnt);
+	if (res == NO_ERR) {
+	    if (buff) {
+		buff[cnt] = 0;
 	    }
+	    total += cnt;
 	}
     }
 
@@ -1247,6 +1244,58 @@ static int32
 }  /* index_match */
 
 
+/********************************************************************
+* FUNCTION init_from_template
+* 
+* Initialize a value node from its object template
+*
+* MUST CALL val_new_value OR val_init_value FIRST
+*
+* INPUTS:
+*   val == pointer to the malloced struct to initialize
+*   obj == object template to use
+*   btyp == builtin type to use
+*********************************************************************/
+static void
+    init_from_template (val_value_t *val,
+			const obj_template_t *obj,
+			ncx_btype_t  btyp)
+{
+    const typ_template_t  *listtyp;
+    ncx_btype_t            listbtyp;
+
+    val->obj = obj;
+    val->typdef = obj_get_ctypdef(obj);
+    val->btyp = btyp;
+
+    /* the agent new_child_val function may have already
+     * set the name field in agt_val_parse.c
+     */
+    if (!val->name) {
+	val->name = obj_get_name(obj);
+    }
+
+    /* set the case object field if this is a node from a
+     * choice.  This will be used to validate and manipulate
+     * the choice that is not actually taking up a node
+     * in the value tree
+     */
+    val->dataclass = obj_get_config_flag(obj) ?
+	NCX_DC_CONFIG : NCX_DC_STATE;
+    if (obj->parent && obj->parent->objtype==OBJ_TYP_CASE) {
+	val->casobj = obj->parent;
+    }
+    if (!typ_is_simple(val->btyp)) {
+	val_init_complex(val, btyp);
+    } else if (val->btyp == NCX_BT_SLIST) {
+	listtyp = typ_get_clisttyp(val->typdef);
+	listbtyp = typ_get_basetype(&listtyp->typdef);
+	ncx_init_list(&val->v.list, listbtyp);
+    }
+
+}  /* init_from_template */
+
+
 /*************** E X T E R N A L    F U N C T I O N S  *************/
 
 
@@ -1338,6 +1387,27 @@ void
 /********************************************************************
 * FUNCTION val_init_from_template
 * 
+* Initialize a value node from its object template
+*
+* MUST CALL val_new_value OR val_init_value FIRST
+*
+* INPUTS:
+*   val == pointer to the initialized value struct to bind
+*   obj == object template to use
+*********************************************************************/
+void
+    val_init_from_template (val_value_t *val,
+			    const obj_template_t *obj)
+{
+
+    init_from_template(val, obj, obj_get_basetype(obj));
+
+}  /* val_init_from_template */
+
+
+/********************************************************************
+* FUNCTION val_init_from_template_primary
+* 
 * Special function to initialize a tconfig value node
 *
 * MUST CALL val_init_value FIRST
@@ -1347,30 +1417,14 @@ void
 *   obj == object template to use
 *********************************************************************/
 void
-    val_init_from_template (val_value_t *val,
-			    const obj_template_t *obj)
+    val_init_from_template_primary (val_value_t *val,
+				    const obj_template_t *obj)
 {
-    const typ_template_t  *listtyp;
-    ncx_btype_t            btyp;
 
-    val->obj = obj;
-    val->typdef = obj_get_ctypdef(obj);
-    val->btyp = obj_get_basetype(obj);
-    val->name = obj_get_name(obj);
-    val->dataclass = obj_get_config_flag(obj) ?
-	NCX_DC_CONFIG : NCX_DC_STATE;
-    if (obj->parent && obj->parent->objtype==OBJ_TYP_CASE) {
-	val->casobj = obj->parent;
-    }
-    if (!typ_is_simple(val->btyp)) {
-	val_init_complex(val, val->btyp);
-    } else if (val->btyp == NCX_BT_SLIST) {
-	listtyp = typ_get_clisttyp(val->typdef);
-	btyp = typ_get_basetype(&listtyp->typdef);
-	ncx_init_list(&val->v.list, btyp);
-    }
+    init_from_template(val, obj, 
+		       obj_get_primary_basetype(obj));
 
-}  /* val_init_from_template */
+}  /* val_init_from_template_primary */
 
 
 /********************************************************************
@@ -3538,8 +3592,7 @@ status_t
 * Malloc and Generate the instance ID string for this value node, 
 * 
 * INPUTS:
-*   nodetyp == starting parent chain node type
-*   node == node to generate the instance ID for
+*   val == node to generate the instance ID for
 *   format == desired output format (NCX or Xpath)
 *   full == TRUE if the full path should be generated
 *           This is usually only needed for <error-path>
@@ -3615,6 +3668,13 @@ void
     val_add_child (val_value_t *child,
 		   val_value_t *parent)
 {
+#ifdef DEBUG
+    if (!child || !parent) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
     child->parent = parent;
     dlq_enque(child, &parent->v.childQ);
 
@@ -3635,6 +3695,13 @@ void
     val_swap_child (val_value_t *newchild,
 		    val_value_t *curchild)
 {
+#ifdef DEBUG
+    if (!newchild || !curchild) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
     newchild->parent = curchild->parent;
     newchild->getcb = curchild->getcb;
     newchild->seqid = curchild->seqid;
@@ -3767,12 +3834,15 @@ val_value_t *
 * FUNCTION val_find_child
 * 
 * Find the first instance of the specified child node
-* The namespace ID is assumed to be the same, and is not
-* part of this check!!!
-* 
+*
 * INPUTS:
 *    parent == parent complex type to check
-*    prefix == optional module prefix
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
 *    childname == name of child node to find
 *
 * RETURNS:
@@ -3780,7 +3850,7 @@ val_value_t *
 *********************************************************************/
 val_value_t *
     val_find_child (const val_value_t  *parent,
-		    const xmlChar *prefix,
+		    const xmlChar *modname,
 		    const xmlChar *childname)
 {
     val_value_t *val;
@@ -3799,8 +3869,9 @@ val_value_t *
     for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
 	 val != NULL;
 	 val = (val_value_t *)dlq_nextEntry(val)) {
-	if (prefix && xml_strcmp(prefix, 
-				 obj_get_mod_prefix(val->obj))) {
+	if (modname && 
+	    xml_strcmp(modname, 
+		       obj_get_mod_name(val->obj))) {
 	    continue;
 	}
 	if (!xml_strcmp(val->name, childname)) {
@@ -3816,12 +3887,15 @@ val_value_t *
 * FUNCTION val_find_next_child
 * 
 * Find the next instance of the specified child node
-* The namespace ID is assumed to be the same, and is not
-* part of this check!!!
 * 
 * INPUTS:
 *    parent == parent complex type to check
-*    prefix == optional module prefix
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
 *    childname == name of child node to find
 *    curchild == current child of this object type to start search
 *
@@ -3830,7 +3904,7 @@ val_value_t *
 *********************************************************************/
 val_value_t *
     val_find_next_child (const val_value_t  *parent,
-			 const xmlChar *prefix,
+			 const xmlChar *modname,
 			 const xmlChar *childname,
 			 const val_value_t *curchild)
 {
@@ -3850,8 +3924,9 @@ val_value_t *
     for (val = (val_value_t *)dlq_nextEntry(curchild);
 	 val != NULL;
 	 val = (val_value_t *)dlq_nextEntry(val)) {
-	if (prefix && xml_strcmp(prefix, 
-				 obj_get_mod_prefix(val->obj))) {
+	if (modname && 
+	    xml_strcmp(modname, 
+		       obj_get_mod_name(val->obj))) {
 	    continue;
 	}
 	if (!xml_strcmp(val->name, childname)) {
@@ -4129,6 +4204,7 @@ uint32
 * 
 * INPUTS:
 *    parent == parent complex type to check
+*    modname == module name defining the child (may be NULL)
 *    name == child name to find and count
 *
 * RETURNS:
@@ -4136,6 +4212,7 @@ uint32
 *********************************************************************/
 uint32
     val_child_inst_cnt (val_value_t  *parent,
+			const xmlChar *modname,
 			const xmlChar *name)
 {
     val_value_t *val;
@@ -4157,13 +4234,16 @@ uint32
 	 val != NULL;
 	 val = (val_value_t *)dlq_nextEntry(val)) {
 
+	if (modname &&
+	    xml_strcmp(modname,
+		       obj_get_mod_name(val->obj))) {
+	    continue;
+	}
+
 	/* check the node if the name matches */
 	if (!xml_strcmp(val->name, name)) {
 	    cnt++;
-	} else if (cnt) {
-	    /* went past the end of the group of instances of this child */
-	    return cnt;
-	}
+	} 
     }
 
     return cnt;
@@ -4741,16 +4821,7 @@ status_t
 ncx_iqual_t 
     val_get_iqualval (const val_value_t *val)
 {
-
-    ncx_iqual_t iqual;
-
-    iqual = typ_get_iqualval_def(val->typdef);
-
-    if (val->btyp == NCX_BT_LIST && iqual==NCX_IQUAL_ONE) {
-	return NCX_IQUAL_ZMORE;
-    }
-
-    return iqual;
+    return obj_get_iqualval(val->obj);
 
 } /* val_get_iqualval */
 

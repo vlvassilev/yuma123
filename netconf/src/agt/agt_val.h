@@ -68,17 +68,6 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-/* recursive callback to validate or apply write operations */
-extern status_t
-    agt_val_handle_callback (agt_cbtyp_t cbtyp,
-			     op_editop_t  editop,
-			     ses_cb_t  *scb,
-			     rpc_msg_t  *msg,
-			     cfg_template_t *target,
-			     val_value_t  *newval,
-			     val_value_t  *curval);
-
-
 extern status_t
     agt_val_validate_write (ses_cb_t  *scb,
 			    rpc_msg_t  *msg,

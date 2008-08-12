@@ -8,7 +8,65 @@
 *								    *
 *********************************************************************
 
-    Parameter Value Handler
+    Value Node Basic Support
+
+  Value nodes used in thoughout the system are complex
+  'automation depositories', which contain all the glue
+  to automate the NETCONF functions.
+
+  Almost all value node variants provide user callback
+  hooks for CRUD operations on the node.  The read
+  operations are usually driven from centrally stored
+  data, unless the value node is a 'virtual' value.
+
+  Basic Value Node Usage:
+  -----------------------
+
+  1a) Malloc a new value with val_new_value()
+        or
+  1b)  Initialize a static val_value_t with val_init_value
+
+  2) Bind the value to an object template:
+      val_init_from_template
+
+     The leaf-list object uses a special function instead:
+      val_init_from_template_primary 
+
+  3) set simple values with various functions, such as
+     val_set_simval
+
+  4) When constructing complex values, use val_add_child
+     to add them to the parent
+
+  5a) Use val_free_value to free the memory for a value
+ 
+  5b) Use val_clean_value to clean and reuse a value struct
+
+  Internal Value Nodes
+  --------------------
+
+  A special developer-level feature to assign arbitrary
+  internal values, not in the encoded format. 
+  Not used within the configuration database.
+  (More TBD)
+
+  External Value Nodes
+  --------------------
+
+  The yangcli program allows the user to assign values
+  from user and system defined script variables to a
+  value node.    Not used within the configuration database.
+  (More TBD)
+
+  Virtual Value Nodes
+  -------------------
+
+  If a value node does not store its data locally, then it
+  is called a virtual node.  Callback functions are used
+  for almost all protocol operation support.
+
+
+
 
 *********************************************************************
 *								    *
@@ -149,12 +207,13 @@ typedef struct val_value_t_ {
     /* common fields */
     const struct obj_template_t_ *obj;        /* bptr to object def */
     const typ_def_t *typdef;              /* bptr to typdef if leaf */
-    const xmlChar *name;                  /* back pointer to elname */
-    xmlChar       *dname;            /* AND malloced name if needed */
+    const xmlChar   *name;                /* back pointer to elname */
+    xmlChar         *dname;          /* AND malloced name if needed */
     struct val_value_t_ *parent;       /* back-ptr to parent if any */
     xmlns_id_t     nsid;              /* namespace ID for this node */
     ncx_btype_t    btyp;                 /* base type of this value */
 
+    /**** NOT USED YET ****/
     /* this field is for supporting unnamed (numbered-only) data */
     uint32         seqid;          /* instance of this sibling node */
 
@@ -266,6 +325,9 @@ extern val_value_t *
 extern void 
     val_init_value (val_value_t *val);
 
+/* this is deprecated and should only be called 
+ * by val_init_from_template
+ */
 extern void
     val_init_complex (val_value_t *val, 
 		      ncx_btype_t btyp);
@@ -278,6 +340,11 @@ extern void
 extern void
     val_init_from_template (val_value_t *val,
 			    const struct obj_template_t_ *obj);
+
+/* special version for leaf-list */
+extern void
+    val_init_from_template_primary (val_value_t *val,
+				    const struct obj_template_t_ *obj);
 
 extern void 
     val_free_value (val_value_t *val);
@@ -295,6 +362,10 @@ extern void
 		   xmlns_id_t   nsid,
 		   const xmlChar *name,
 		   uint32 namelen);
+
+
+
+
 
 extern status_t
     val_string_ok (const typ_def_t *typdef,
@@ -330,6 +401,8 @@ extern status_t
     val_simval_ok (const typ_def_t *typdef,
 		   const xmlChar *simval);
 		   
+
+
 extern val_metaerr_t * 
     val_new_metaerr (xmlns_id_t nsid,
 		     const xmlChar *name,
@@ -337,6 +410,8 @@ extern val_metaerr_t *
 
 extern void
     val_free_metaerr (val_metaerr_t *merr);
+
+
 
 
 /* print a val_value_t struct contents to logfile or stdout */
@@ -427,12 +502,12 @@ extern val_value_t *
 
 extern val_value_t *
     val_find_child (const val_value_t  *parent,
-		    const xmlChar  *prefix,
+		    const xmlChar  *modname,
 		    const xmlChar *childname);
 
 extern val_value_t *
     val_find_next_child (const val_value_t  *parent,
-			 const xmlChar  *prefix,
+			 const xmlChar  *modname,
 			 const xmlChar *childname,
 			 const val_value_t *curchild);
 
@@ -468,6 +543,7 @@ extern uint32
 /* get instance count -- for instance qualifer checking */
 extern uint32
     val_child_inst_cnt (val_value_t *parent,
+			const xmlChar *modname,
 			const xmlChar *name);
 
 extern uint32

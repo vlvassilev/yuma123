@@ -424,8 +424,9 @@ status_t
     /* load the agtent sessions callback functions and vPS instance */
     agt_ses_init2();
 
+    /*** TEMP: NEED TO CONVERT TO WG DM ***/
     /* load the schema-discovery:modules parmset */
-    agt_cap_set_modcaps_parmset();
+    /*** agt_cap_set_modcaps_parmset(); ***/
 
     /* allow users to access the configuration databases now */
     cfg_set_state(NCX_CFGID_RUNNING, CFG_ST_READY);

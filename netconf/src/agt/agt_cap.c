@@ -213,7 +213,8 @@ status_t
     agt_cap_init (void)
 {
 
-    return ncxmod_load_module(AGT_CAP_SDISC_MODULE);
+    /*  return ncxmod_load_module(AGT_CAP_SDISC_MODULE); */
+    return NO_ERR;
 	
 } /* agt_cap_init */
 
@@ -442,7 +443,6 @@ status_t
 
 } /* agt_cap_set_modules */
 
-
 #if 0
 /********************************************************************
 * FUNCTION agt_cap_set_modcaps_parmset
@@ -456,7 +456,7 @@ void
     agt_cap_set_modcaps_parmset (void)
 {
     const cap_rec_t  *modcap;
-    ps_parmset_t     *ps;
+    val_value_t      *val;
     status_t          res;
 
     if (!agt_caps || !my_agt_caps) {
@@ -472,9 +472,8 @@ void
     }
 
     /* create a new parmset struct for schemaList */
-    ps = ps_make_new_parmset(AGT_CAP_SDISC_MODULE,
-			     AGT_CAP_SDISC_PARMSET);
-    if (!ps) {
+    val = val_new_value();
+    if (!val) {
 	SET_ERROR(ERR_INTERNAL_MEM);
 	return;
     }

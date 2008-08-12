@@ -3568,16 +3568,16 @@ boolean
     case NCX_BT_FLOAT64:
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
-    case NCX_BT_UNION:
-    case NCX_BT_SLIST:
-    case NCX_BT_KEYREF:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_UNION:
+    case NCX_BT_KEYREF:
+    case NCX_BT_SLIST:
 	return TRUE;
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
     case NCX_BT_LIST:
-	return FALSE;
+    case NCX_BT_LEAF_LIST:
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
 	return FALSE;
@@ -3626,12 +3626,12 @@ boolean
     case NCX_BT_SLIST:
     case NCX_BT_KEYREF:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_LEAF_LIST:
 	return TRUE;
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
     case NCX_BT_LIST:
-	return FALSE;
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
 	return FALSE;

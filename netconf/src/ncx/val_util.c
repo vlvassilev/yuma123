@@ -1,5 +1,6 @@
-/*  FILE: val.c
+/*  FILE: val_util.c
 
+   val_value_t struct utilities for object validateion support
 		
 *********************************************************************
 *                                                                   *
@@ -107,88 +108,6 @@ static val_index_t *
 }  /* new_index */
 
 
-/********************************************************************
-* FUNCTION get_choice_first_set
-* 
-* Check a val_value_t struct against its expected OBJ
-* to determine if a specific choice has already been set
-* Get the value struct for the first value set for
-* the specified choice
-*
-* INPUTS:
-*   val == val_value_t to check
-*   obj == choice object to check
-*
-* RETURNS:
-*   pointer to first value struct or NULL if choice not set
-*********************************************************************/
-static val_value_t *
-    get_choice_first_set (val_value_t *val,
-			  const obj_template_t *obj)
-{
-    val_value_t  *chval;
-
-#ifdef DEBUG
-    if (!val || !obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    for (chval = val_get_first_child(val);
-	 chval != NULL;
-	 chval = val_get_next_child(chval)) {
-
-	if (chval->casobj && chval->casobj->parent==obj) {
-	    return chval;
-	}
-    }
-    return NULL;
-
-}  /* get_choice_first_set */
-
-
-/********************************************************************
-* FUNCTION get_choice_next_set
-* 
-* Check a val_value_t struct against its expected OBJ
-* to determine if a specific choice has already been set
-* Get the value struct for the next value set from the
-* specified choice, afvter 'curval'
-*
-* INPUTS:
-*   val == val_value_t to check
-*   obj == choice object to check
-*   curchild == current child selected from this choice (obj)
-*
-* RETURNS:
-*   pointer to first value struct or NULL if choice not set
-*********************************************************************/
-static val_value_t *
-    get_choice_next_set (val_value_t *val,
-			 const obj_template_t *obj,
-			 val_value_t *curchild)
-{
-    val_value_t  *chval;
-
-#ifdef DEBUG
-    if (!val || !obj || !curchild) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
-    }
-#endif
-
-    for (chval = val_get_next_child(curchild);
-	 chval != NULL;
-	 chval = val_get_next_child(chval)) {
-
-	if (chval->casobj && chval->casobj->parent==obj) {
-	    return chval;
-	}
-    }
-    return NULL;
-
-}  /* get_choice_next_set */
 
 
 /********************************************************************
@@ -232,7 +151,7 @@ static status_t
      * and the accessible case nodes will be child nodes
      * of that complex parent type
      */
-    chval = get_choice_first_set(val, choicobj);
+    chval = val_get_choice_first_set(val, choicobj);
     if (!chval) {
 	if (obj_is_mandatory(choicobj)) {
 	    /* error missing choice */
@@ -255,7 +174,7 @@ static status_t
     }
 
     /* check if any objects from other cases are present */
-    testval = get_choice_next_set(val, choicobj, chval);
+    testval = val_get_choice_next_set(val, choicobj, chval);
     while (testval) {
 	if (testval->casobj != chval->casobj) {
 	    /* error: extra case object in this choice */
@@ -267,7 +186,7 @@ static status_t
 		      obj_get_name(chval->casobj));
 	    ncx_print_errormsg(NULL, NULL, retres);
 	}
-	testval = get_choice_next_set(val, choicobj, testval);
+	testval = val_get_choice_next_set(val, choicobj, testval);
     }
     return retres;
 
@@ -358,8 +277,7 @@ static status_t
 	     * If mandatory, then default is ignored
 	     */
 	    if (!obj_is_mandatory(chobj)) {
-		chval = val_find_child(val, 
-				       obj_get_mod_prefix(chobj),
+		chval = val_find_child(val, obj_get_mod_name(chobj),
 				       obj_get_name(chobj));
 		if (!chval) {
 		    defval = obj_get_default(chobj);
@@ -392,7 +310,7 @@ static status_t
 	    casobj = obj_get_default_case(chobj);
 
 	    /* check if the choice has been set at all */
-	    testval = get_choice_first_set(val, chobj);
+	    testval = val_get_choice_first_set(val, chobj);
 	    if (testval) {
 		/* use the selected case instead of the default case */
 		casobj = testval->casobj;
@@ -416,8 +334,7 @@ static status_t
 	    /* add defaults to the subtrees of existing
 	     * complex nodes, but do not add any new ones
 	     */
-	    chval = val_find_child(val, 
-				   obj_get_mod_prefix(chobj),
+	    chval = val_find_child(val, obj_get_mod_name(chobj),
 				   obj_get_name(chobj));
 	    if (chval) {
 		res = add_defaults(chval, scriptmode, NULL);		
@@ -749,6 +666,90 @@ status_t
     return retres;
     
 }  /* val_instance_check */
+
+
+/********************************************************************
+* FUNCTION val_get_choice_first_set
+* 
+* Check a val_value_t struct against its expected OBJ
+* to determine if a specific choice has already been set
+* Get the value struct for the first value set for
+* the specified choice
+*
+* INPUTS:
+*   val == val_value_t to check
+*   obj == choice object to check
+*
+* RETURNS:
+*   pointer to first value struct or NULL if choice not set
+*********************************************************************/
+val_value_t *
+    val_get_choice_first_set (val_value_t *val,
+			      const obj_template_t *obj)
+{
+    val_value_t  *chval;
+
+#ifdef DEBUG
+    if (!val || !obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (chval = val_get_first_child(val);
+	 chval != NULL;
+	 chval = val_get_next_child(chval)) {
+
+	if (chval->casobj && chval->casobj->parent==obj) {
+	    return chval;
+	}
+    }
+    return NULL;
+
+}  /* val_get_choice_first_set */
+
+
+/********************************************************************
+* FUNCTION val_get_choice_next_set
+* 
+* Check a val_value_t struct against its expected OBJ
+* to determine if a specific choice has already been set
+* Get the value struct for the next value set from the
+* specified choice, afvter 'curval'
+*
+* INPUTS:
+*   val == val_value_t to check
+*   obj == choice object to check
+*   curchild == current child selected from this choice (obj)
+*
+* RETURNS:
+*   pointer to first value struct or NULL if choice not set
+*********************************************************************/
+val_value_t *
+    val_get_choice_next_set (val_value_t *val,
+			     const obj_template_t *obj,
+			     val_value_t *curchild)
+{
+    val_value_t  *chval;
+
+#ifdef DEBUG
+    if (!val || !obj || !curchild) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    for (chval = val_get_next_child(curchild);
+	 chval != NULL;
+	 chval = val_get_next_child(chval)) {
+
+	if (chval->casobj && chval->casobj->parent==obj) {
+	    return chval;
+	}
+    }
+    return NULL;
+
+}  /* val_get_choice_next_set */
 
 
 /* END file val_util.c */

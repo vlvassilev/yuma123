@@ -64,15 +64,14 @@ typedef struct xml_msg_hdr_t_ {
      * will be used, and the XML on the wire will be easier to debug
      */
     xmlns_id_t      defns;       /* req. default namespace ID */
-    xmlns_id_t      cur_appns;        /* minimize xmlns decls */
+    xmlns_id_t      cur_defns;        /* minimize xmlns decls */
+    xmlns_id_t      last_defns;       /* hack for NS handling */
     boolean         withdef;           /* with-defaults value */
     boolean         withmeta;          /* with-metadata value */
     dlq_hdr_t       prefixQ;             /* Q of xmlns_pmap_t */
     dlq_hdr_t       prefix2Q;            /* Q of xmlns_pmap_t */
     dlq_hdr_t       errQ;               /* Q of rpc_err_rec_t */
-    xmlns_id_t      last_defns;       /* hack for NS handling */
     xmlChar         last_defpfix[XMLNS_MAX_PREFIX_SIZE+1];
-
 } xml_msg_hdr_t;
 
 				      

@@ -33,8 +33,9 @@ LIBS = 	-lagt \
 # to match the project dirs in the LIBS directive
 
 LIBTARGS= $(LBASE)/libagt.a \
-	$(LBASE)/libncx.a \
-	$(LBASE)/libagtinst.a
+	$(LBASE)/libagtinst.a \
+	$(LBASE)/libncx.a
+
 
 ############################# MAKE RULES ##################
 all: netconfd

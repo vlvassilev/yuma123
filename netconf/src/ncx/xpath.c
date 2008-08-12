@@ -450,6 +450,8 @@ static status_t
 		  target);
 	do_errmsg(tkc, mod, errtk, res);
 	return res;
+    } else {
+	curQ = datadefQ;
     }
 
     if (obj_is_augclone(curobj)) {
@@ -812,7 +814,7 @@ static status_t
     }
 
     /* get the first value node */
-    curval = val_find_child(startval, usemod->prefix, name);
+    curval = val_find_child(startval, usemod->name, name);
     if (!curval) {
 	if (ncx_valid_name2(name)) {
 	    res = ERR_NCX_DEF_NOT_FOUND;
@@ -861,7 +863,7 @@ static status_t
 	case OBJ_TYP_RPC:
 	case OBJ_TYP_RPCIO:
 	case OBJ_TYP_NOTIF:
-	    curval = val_find_child(curval, usemod->prefix, name);
+	    curval = val_find_child(curval, usemod->name, name);
 	    if (!curval) {
 		if (ncx_valid_name2(name)) {
 		    res = ERR_NCX_DEF_NOT_FOUND;

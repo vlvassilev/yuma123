@@ -101,6 +101,12 @@ extern status_t
     agt_xml_skip_subtree (xmlTextReaderPtr reader,
 			  const xml_node_t *startnode);
 
+extern status_t 
+    agt_xml_consume_node_nons_noadv (xmlTextReaderPtr reader,
+				     xml_node_t      *node,
+				     ncx_layer_t      layer,
+				     dlq_hdr_t        *errQ);
+
 
 #endif	    /* _H_agt_xml */
 

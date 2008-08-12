@@ -1254,7 +1254,8 @@ static status_t
     }
 
     /* next get any params from the conf file */
-    val = val_find_child(valset, NULL, YANGDIFF_PARM_CONFIG);
+    val = val_find_child(valset, YANGDIFF_MOD, 
+			 YANGDIFF_PARM_CONFIG);
     if (val) {
 	/* try the specified config location */
 	cp->config = VAL_STR(val);
@@ -1273,7 +1274,7 @@ static status_t
     }
 
     /* get the log-level parameter */
-    val = val_find_child(valset, NULL, NCX_EL_LOGLEVEL);
+    val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_LOGLEVEL);
     if (val) {
 	cp->log_level = 
 	    log_get_debug_level_enum((const char *)VAL_STR(val));
@@ -1287,7 +1288,7 @@ static status_t
     }
 
     /* get the logging parameters */
-    val = val_find_child(valset, NULL, NCX_EL_LOG);
+    val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_LOG);
     if (val) {
 	cp->logfilename = VAL_STR(val);
 	cp->full_logfilename = ncx_get_source(VAL_STR(val));
@@ -1295,7 +1296,7 @@ static status_t
 	    return ERR_INTERNAL_MEM;
 	}
     }
-    val = val_find_child(valset, NULL, NCX_EL_LOGAPPEND);
+    val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_LOGAPPEND);
     if (val) {
 	cp->logappend = TRUE;
     }
@@ -1312,7 +1313,7 @@ static status_t
     /*** ORDER DOES NOT MATTER FOR REST OF PARAMETERS ***/
 
     /* difftype parameter */
-    val = val_find_child(valset, NULL, YANGDIFF_PARM_DIFFTYPE);
+    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_DIFFTYPE);
     if (val) {
 	cp->difftype = VAL_STR(val);
 	if (!xml_strcmp(cp->difftype, YANGDIFF_DIFFTYPE_TERSE)) {
@@ -1330,7 +1331,7 @@ static status_t
     }
 
     /* indent parameter */
-    val = val_find_child(valset, NULL, YANGDIFF_PARM_INDENT);
+    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_INDENT);
     if (val) {
 	cp->indent = (int32)VAL_UINT(val);
     } else {
@@ -1338,19 +1339,19 @@ static status_t
     }
 
     /* help parameter */
-    val = val_find_child(valset, NULL, NCX_EL_HELP);
+    val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_HELP);
     if (val) {
 	cp->helpmode = TRUE;
     }
 
     /* modpath parameter */
-    val = val_find_child(valset, NULL, NCX_EL_MODPATH);
+    val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_MODPATH);
     if (val) {
 	ncxmod_set_modpath(VAL_STR(val));
     }
 
     /* old parameter */
-    val = val_find_child(valset, NULL, YANGDIFF_PARM_OLD);
+    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_OLD);
     if (val) {
 	cp->old = VAL_STR(val);
 	cp->full_old = ncx_get_source(VAL_STR(val));
@@ -1362,7 +1363,7 @@ static status_t
     }
 
     /* new parameter */
-    val = val_find_child(valset, NULL, YANGDIFF_PARM_NEW);
+    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NEW);
     if (val) {
 	cp->new = VAL_STR(val);
 	cp->full_new = ncx_get_source(VAL_STR(val));
@@ -1374,19 +1375,19 @@ static status_t
     }
 
     /* no-header parameter */
-    val = val_find_child(valset, NULL, YANGDIFF_PARM_NO_HEADER);
+    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NO_HEADER);
     if (val) {
 	cp->noheader = TRUE;
     }
 
     /* no-subdirs parameter */
-    val = val_find_child(valset, NULL, YANGDIFF_PARM_NO_SUBDIRS);
+    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NO_SUBDIRS);
     if (val) {
 	cp->nosubdirs = TRUE;
     }
 
     /* output parameter */
-    val = val_find_child(valset, NULL, YANGDIFF_PARM_OUTPUT);
+    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_OUTPUT);
     if (val) {
 	cp->output = VAL_STR(val);
 	cp->full_output = ncx_get_source(VAL_STR(val));
@@ -1398,7 +1399,7 @@ static status_t
     } /* else use default output -- STDOUT */
 
     /* version parameter */
-    val = val_find_child(valset, NULL, NCX_EL_VERSION);
+    val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_VERSION);
     if (val) {
 	cp->versionmode = TRUE;
     }

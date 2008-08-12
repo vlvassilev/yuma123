@@ -265,7 +265,7 @@ static status_t
     } 
 
     /* get the default-operation parameter */
-    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+    val = val_find_child(&msg->rpc_input, NC_MODULE,
 			 NCX_EL_DEFAULT_OPERATION);
     if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
@@ -275,7 +275,7 @@ static status_t
     }
 
     /* get the error-option parameter */
-    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+    val = val_find_child(&msg->rpc_input, NC_MODULE,
 			 NCX_EL_ERROR_OPTION);
     if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
@@ -301,7 +301,7 @@ static status_t
      *
      * Get the value to check for the test-only extension
      */
-    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+    val = val_find_child(&msg->rpc_input, NC_MODULE,
 			 NCX_EL_TESTOP);
     if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
@@ -311,7 +311,7 @@ static status_t
     }
 
     /* get the config parameter */
-    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+    val = val_find_child(&msg->rpc_input, NC_MODULE,
 			 NCX_EL_CONFIG);
     if (!val || val->res != NO_ERR) {
 	/* we shouldn't get here if the config param is missing */
@@ -386,7 +386,7 @@ static status_t
 
 
     /* get pointer to the config parameter */
-    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+    val = val_find_child(&msg->rpc_input, NC_MODULE,
 			 NCX_EL_CONFIG);
     if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
@@ -824,7 +824,7 @@ static status_t
     val_value_t     *val;
 
     /* get the session-id parameter */
-    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+    val = val_find_child(&msg->rpc_input, NC_MODULE,
 			 NCX_EL_SESSION_ID);
     if (!val || val->res != NO_ERR) {
 	/* error already recorded in parse phase */
@@ -911,7 +911,7 @@ static status_t
     (void)methnode;
 
     /* get the source parameter */
-    val = val_find_child(&msg->rpc_input, NC_PREFIX,
+    val = val_find_child(&msg->rpc_input, NC_MODULE,
 			 NCX_EL_SOURCE);
     if (!val || val->res != NO_ERR) {
 	if (val) {

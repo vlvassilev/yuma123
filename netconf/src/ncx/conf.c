@@ -599,6 +599,7 @@ static status_t
 		boolean keepvals)
 {
     const obj_template_t   *obj;
+    const ncx_module_t     *mod;
     val_value_t            *curparm, *newparm;
     status_t                res;
     ncx_iqual_t             iqual;
@@ -612,12 +613,23 @@ static status_t
 	return res;
     }
 
+    curparm = NULL;
+
     /* check if this TSTRING is a parameter in this parmset
      * make sure to always check for prefix:identifier
      * This is automatically processed in tk.c
      */
-    curparm = val_find_child(val, TK_CUR_MOD(tkc),
-			     TK_CUR_VAL(tkc));
+    if (TK_CUR_MOD(tkc)) {
+	mod = def_reg_find_module_prefix(TK_CUR_MOD(tkc));
+	if (mod) {
+	    curparm = val_find_child(val, mod->name,
+				     TK_CUR_VAL(tkc));
+	}
+    }  else {
+	curparm = val_find_child(val, obj_get_mod_name(val->obj),
+				 TK_CUR_VAL(tkc));
+    }
+	
     if (curparm) {
 	obj = curparm->obj;
     } else {

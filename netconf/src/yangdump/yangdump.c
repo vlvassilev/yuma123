@@ -260,7 +260,7 @@ static status_t
     }
 
     /* next get any params from the conf file */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_CONFIG);
+    val = val_find_child(valset, YANGDUMP_MOD, YANGDUMP_PARM_CONFIG);
     if (val) {
 	if (val->res == NO_ERR) {
 	    /* try the specified config location */
@@ -281,7 +281,7 @@ static status_t
     }
 
     /* get the log-level parameter */
-    val = val_find_child(valset, NULL, NCX_EL_LOGLEVEL);
+    val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_LOGLEVEL);
     if (val) {
 	cp->log_level = 
 	    log_get_debug_level_enum((const char *)VAL_STR(val));
@@ -295,7 +295,7 @@ static status_t
     }
 
     /* get the logging parameters */
-    val = val_find_child(valset, NULL, NCX_EL_LOG);
+    val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_LOG);
     if (val) {
 	cp->logfilename = VAL_STR(val);
 	cp->full_logfilename = ncx_get_source(VAL_STR(val));
@@ -303,7 +303,7 @@ static status_t
 	    return ERR_INTERNAL_MEM;
 	}
     }
-    val = val_find_child(valset, NULL, NCX_EL_LOGAPPEND);
+    val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_LOGAPPEND);
     if (val) {
 	cp->logappend = TRUE;
     }
@@ -320,25 +320,28 @@ static status_t
     /*** ORDER DOES NOT MATTER FOR REST OF PARAMETERS ***/
 
     /* defnames parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_DEFNAMES);
+    val = val_find_child(valset, YANGDUMP_MOD, YANGDUMP_PARM_DEFNAMES);
     if (val) {
 	cp->defnames = TRUE;
     }
 
     /* dependencies parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_DEPENDENCIES);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_DEPENDENCIES);
     if (val) {
 	cp->dependencies = TRUE;
     }
 
     /* exports parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_EXPORTS);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_EXPORTS);
     if (val) {
 	cp->exports = TRUE;
     }
 
     /* format parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_FORMAT);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_FORMAT);
     if (val) {
 	/* format -- use string provided */
 	cp->format = ncx_get_cvttyp_enum((char *)VAL_STR(val));
@@ -347,13 +350,15 @@ static status_t
     }
 
     /* identifiers parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_IDENTIFIERS);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_IDENTIFIERS);
     if (val) {
 	cp->identifiers = TRUE;
     }
 
     /* indent parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_INDENT);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_INDENT);
     if (val) {
 	cp->indent = (int32)VAL_UINT(val);
     } else {
@@ -361,19 +366,21 @@ static status_t
     }
 
     /* help parameter */
-    val = val_find_child(valset, NULL, NCX_EL_HELP);
+    val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_HELP);
     if (val) {
 	cp->helpmode = TRUE;
     }
 
     /* html-div parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_HTML_DIV);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_HTML_DIV);
     if (val) {
 	cp->html_div = TRUE;
     }
 
     /* html-toc parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_HTML_TOC);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_HTML_TOC);
     if (val) {
 	cp->html_toc = VAL_STR(val);
     } else {
@@ -381,7 +388,8 @@ static status_t
     }
 
     /* modpath parameter */
-    val = val_find_child(valset, NULL, NCX_EL_MODPATH);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 NCX_EL_MODPATH);
     if (val) {
 	ncxmod_set_modpath(VAL_STR(val));
     }
@@ -390,7 +398,8 @@ static status_t
     cp->modcount = val_instance_count(valset, NULL, 
 				      YANGDUMP_PARM_MODULE);
     if (cp->modcount == 1) {
-	val = val_find_child(valset, NULL, YANGDUMP_PARM_MODULE);
+	val = val_find_child(valset, YANGDUMP_MOD, 
+			     YANGDUMP_PARM_MODULE);
 	if (val) {
 	    cp->module = strdup((const char *)VAL_STR(val));
 	    if (!cp->module) {
@@ -400,25 +409,29 @@ static status_t
     }
 
     /* modversion parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_MODVERSION);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_MODVERSION);
     if (val) {
 	cp->modversion = TRUE;
     }
 
     /* no-subdirs parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_NO_SUBDIRS);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_NO_SUBDIRS);
     if (val) {
 	cp->nosubdirs = TRUE;
     }
 
     /* no-versionnames */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_NO_VERSIONNAMES);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_NO_VERSIONNAMES);
     if (val) {
 	cp->noversionnames = TRUE;
     }
 
     /* objview parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_OBJVIEW);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_OBJVIEW);
     if (val) {
 	cp->objview = (const char *)VAL_STR(val);
     } else {
@@ -426,7 +439,8 @@ static status_t
     }
 
     /* output parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_OUTPUT);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_OUTPUT);
     if (val) {
 	/* output -- use filename provided */
 	cp->output = (const char *)VAL_STR(val);
@@ -438,37 +452,43 @@ static status_t
     }
 
     /* simurls parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_SIMURLS);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_SIMURLS);
     if (val) {
 	cp->simurls = TRUE;
     }
 
     /* subtree parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_SUBTREE);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_SUBTREE);
     if (val) {
 	cp->subtree = (const char *)VAL_STR(val);
     }
 
     /* unified parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_UNIFIED);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_UNIFIED);
     if (val) {
 	cp->unified = TRUE;
     }
 
     /* urlstart parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_URLSTART);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_URLSTART);
     if (val) {
 	cp->urlstart = VAL_STR(val);
     }
 
     /* version parameter */
-    val = val_find_child(valset, NULL, NCX_EL_VERSION);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 NCX_EL_VERSION);
     if (val) {
 	cp->versionmode = TRUE;
     }
 
     /* xsd-schemaloc parameter */
-    val = val_find_child(valset, NULL, YANGDUMP_PARM_XSD_SCHEMALOC);
+    val = val_find_child(valset, YANGDUMP_MOD, 
+			 YANGDUMP_PARM_XSD_SCHEMALOC);
     if (val) {
 	cp->schemaloc = VAL_STR(val);
     }
@@ -1488,7 +1508,9 @@ int
 		res = convert_one(&cvtparms);
 	    } else if (cvtparms.modcount > 1) {
 		res = NO_ERR;
-		val = val_find_child(cli_val, NULL, YANGDUMP_PARM_MODULE);
+		val = val_find_child(cli_val, 
+				     YANGDUMP_MOD, 
+				     YANGDUMP_PARM_MODULE);
 		while (val) {
 		    cvtparms.curmodule = (const char *)VAL_STR(val);
 		    res = convert_one(&cvtparms);
@@ -1496,7 +1518,7 @@ int
 			val = NULL;
 		    } else {
 			val = val_find_next_child(cli_val,
-						  NULL,
+						  YANGDUMP_MOD,
 						  YANGDUMP_PARM_MODULE,
 						  val);
 		    }

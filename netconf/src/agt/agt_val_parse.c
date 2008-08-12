@@ -10,6 +10,7 @@
 date         init     comment
 ----------------------------------------------------------------------
 11feb06      abb      begun
+06aug08      abb      YANG redesign
 
 *********************************************************************
 *                                                                   *
@@ -29,8 +30,16 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
-#ifndef _H_agt_ps_parse
-#include "agt_ps_parse.h"
+#ifndef _H_agt
+#include "agt.h"
+#endif
+
+#ifndef _H_agt_ses
+#include "agt_ses.h"
+#endif
+
+#ifndef _H_agt_top
+#include "agt_top.h"
 #endif
 
 #ifndef _H_agt_util
@@ -69,6 +78,10 @@ date         init     comment
 #include "ncxconst.h"
 #endif
 
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
 #ifndef _H_obj
 #include "obj.h"
 #endif
@@ -89,12 +102,20 @@ date         init     comment
 #include "val.h"
 #endif
 
+#ifndef _H_val_util
+#include "val_util.h"
+#endif
+
 #ifndef _H_xmlns
 #include "xmlns.h"
 #endif
 
 #ifndef _H_xml_util
 #include "xml_util.h"
+#endif
+
+#ifndef _H_yangconst
+#include "yangconst.h"
 #endif
 
 /********************************************************************
@@ -112,118 +133,146 @@ date         init     comment
 static status_t 
     parse_btype_nc (ses_cb_t  *scb,
 		    xml_msg_hdr_t *msg,
-		    typ_def_t *typdef,
+		    const obj_template_t *obj,
 		    const xml_node_t *startnode,
 		    ncx_data_class_t parentdc,
 		    val_value_t  *retval);
 
 
+static status_t 
+    parse_one_btype (ses_cb_t  *scb,
+		     xml_msg_hdr_t *msg,
+		     const obj_template_t *obj,
+		     ncx_btype_t  btyp,
+		     const xml_node_t *startnode,
+		     ncx_data_class_t parentdc,
+		     val_value_t  *retval);
+
 
 
 /********************************************************************
-* FUNCTION check_block_err
+* FUNCTION parse_error_subtree
 * 
-* Check for errors in the choice block
-* Generate RPC errors as needed if errQ non-NULL
+* Generate an error during parmset processing for an element
+* Add rpc_err_rec_t structs to the msg->errQ
 *
 * INPUTS:
-*   scb == session control block (may be NULL)
-*   errQ == errQ to receive any errors
-*          (NULL == NO RPC ERRORS RECORDED)
-*   setval == TRUE if block supposed to be set
-*       check for any missing parameters
-*          == FALSE if block supposed to be not set
-*       check for any set parameters
-*   layer == NCX layer enum to use in rpc-error
-*   ps == parmset to check
-*   block == block to check
-
+*   scb == session control block (NULL means call is a no-op)
+*   msg = xml_msg_hdr_t from msg in progress  (NULL means call is a no-op)
+*   startnode == parent start node to match on exit
+*         If this is NULL then the reader will not be advanced
+*   errnode == error node being processed
+*         If this is NULL then the current node will be
+*         used if it can be retrieved with no errors,
+*         and the node has naming properties.
+*   errcode == error status_t of initial internal error
+*         This will be used to pick the error-tag and
+*         default error message
+*   errnodetyp == internal VAL_PCH node type used for error_parm
+*   error_parm == pointer to attribute name or namespace name, etc.
+*         used in the specific error in agt_rpcerr.c
+*   intnodetyp == internal VAL_PCH node type used for intnode
+*   intnode == internal VAL_PCH node used for error_path
 * RETURNS:
-*   status
+*   status of the operation; only fatal errors will be returned
 *********************************************************************/
-static status_t
-    check_block_err (ses_cb_t *scb,
-		     dlq_hdr_t *errQ,
-		     boolean setval,
-		     ncx_layer_t  layer,
-		     const ps_parmset_t *ps,
-		     const psd_block_t  *block)
+static status_t 
+    parse_error_subtree (ses_cb_t *scb,
+			 xml_msg_hdr_t *msg,
+			 const xml_node_t *startnode,
+			 const xml_node_t *errnode,
+			 status_t errcode,
+			 ncx_node_t errnodetyp,			    
+			 const void *error_parm,
+			 ncx_node_t intnodetyp,
+			 const void *intnode)
 {
-    const psd_parm_t *parm;
-    status_t          res, retres;
+    status_t        res;
 
+    res = NO_ERR;
 
-    retres = NO_ERR;
-
-    /* check all the parms in this block for missing or extra error */
-    for (parm = (const psd_parm_t *)dlq_firstEntry(&block->blockQ);
-	 parm != NULL;
-	 parm = (const psd_parm_t *)dlq_nextEntry(parm)) {
-	res = NO_ERR;
-	if (setval) {
-	    /* check for missing parm */
-	    if (psd_parm_required(parm) && 
-		!ps_parmnum_set(ps, parm->parm_id)) {
-		/* parm is supposed to be set but is not */
-		res = ERR_NCX_MISSING_PARM;
-	    }
-	} else {
-	    /* check for extra parm */
-	    if (ps_parmnum_set(ps, parm->parm_id)) {
-		/* parm is supposed to be missing but it is set */
-		res = ERR_NCX_EXTRA_CHOICE;
-	    }
-	}
-	if (res != NO_ERR) {
-	    if (errQ) {
-		if (scb) {
-		    agt_record_error(scb, errQ, layer, res, NULL, 
-				     NCX_NT_PARM, parm, NCX_NT_PARM, parm);
-		} else {
-		    /****/;
-		}
-	    }
-	    retres = res;
-	}
+    if (msg) {
+	agt_record_error(scb, &msg->errQ, NCX_LAYER_OPERATION, errcode, 
+			 errnode, errnodetyp, error_parm, 
+			 intnodetyp, intnode);
     }
 
-    return retres;
-    
-}  /* check_block_err */
+    if (scb && startnode) {
+	res = agt_xml_skip_subtree(scb->reader, startnode);
+    }
+
+    return res;
+
+}  /* parse_error_subtree */
 
 
 /********************************************************************
-* FUNCTION mark_errors
-* 
-* Set the proper flags field in the ps_parmset_t 
-* Check the error queue for errors and/or warnings
-*
-* INPUTS:
-*   ps == ps_parmset_t struct in progress
-*   errQ == Q of rpc_err_rec_t to check
-*
-*********************************************************************/
-static void
-    mark_errors (ps_parmset_t *ps,
-		 const dlq_hdr_t  *errQ)
-{
-    const rpc_err_rec_t *err;
+ * FUNCTION get_xml_node
+ * 
+ * Get the next (or maybe current) XML node in the reader stream
+ * This hack needed because xmlTextReader cannot look ahead or
+ * back up during processing.
+ * 
+ * The YANG leaf-list is really a collection of sibling nodes
+ * and there is no way to tell where it ends without reading
+ * past the end of it.
+ *
+ * This hack relies on the fact that a top-levelleaf-list could
+ * never show up in a real NETCONF PDU
+ *
+ * INPUTS:
+ *   scb == session control block
+ *   msg == xml_msg_hdr_t in progress (NULL means don't record errors)
+ *   xmlnode == xml_node_t to fill in
+ *   usens == TRUE if regular NS checking mode
+ *         == FALSE if _nons version should be used
+ *
+ * OUTPUTS:
+ *   *xmlnode filled in
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t 
+    get_xml_node (ses_cb_t  *scb,
+		  xml_msg_hdr_t *msg,
+		  xml_node_t *xmlnode,
+		  boolean usens)
 
-    for (err = (const rpc_err_rec_t *)dlq_firstEntry(errQ);
-	 err != NULL;
-	 err = (const rpc_err_rec_t *)dlq_nextEntry(err)) {
-	switch (err->error_severity) {
-	case RPC_ERR_SEV_WARNING:
-	    SET_PS_WARNING(ps);
-	    break;
-	case RPC_ERR_SEV_ERROR:
-	    SET_PS_ERROR(ps);
-	    break;
-	default:
-	    ;
+{
+    status_t   res;
+
+    if (scb->xmladvance) {
+	/* get a new node */
+	if (usens) {
+	    res = agt_xml_consume_node(scb->reader, 
+				       xmlnode,
+				       NCX_LAYER_OPERATION, 
+				       &msg->errQ);
+	} else {
+	    res = agt_xml_consume_node_nons(scb->reader, 
+					    xmlnode,
+					    NCX_LAYER_OPERATION, 
+					    &msg->errQ);
+	}
+    } else {
+	/* get current node, not a new node */
+	if (usens) {
+	    res = agt_xml_consume_node_noadv(scb->reader, 
+					     xmlnode,
+					     NCX_LAYER_OPERATION, 
+					     &msg->errQ);
+	} else {
+	    res = agt_xml_consume_node_nons_noadv(scb->reader, 
+						  xmlnode,
+						  NCX_LAYER_OPERATION, 
+						  &msg->errQ);
 	}
     }
-}  /* mark_errors */
+    scb->xmladvance = TRUE;
+    return res;
+
+}   /* get_xml_node */
 
 
 /********************************************************************
@@ -234,33 +283,35 @@ static void
  * INPUTS:
  *   scb == session control block (NULL means don't record errors)
  *   msg == xml_msg_hdr_t in progress (NULL means don't record errors)
- *   instart == first typ_index_t in the chain to process
- *   val == the just parsed table row with the childQ containing
+ *   instart == first obj_key_t in the chain to process
+ *   val == the just parsed list entry with the childQ containing
  *          nodes to check as index nodes
+ *
  * RETURNS:
  *   status
  *********************************************************************/
 static status_t 
     gen_index_chain (ses_cb_t  *scb,
 		     xml_msg_hdr_t *msg,
-		     const typ_index_t *instart,
+		     const obj_key_t *instart,
 		     val_value_t *val)
 {
+    const obj_key_t    *key;
     status_t            res, retres;
-    const typ_index_t  *in;
 
     retres = NO_ERR;
 
-    /* 1 or more index components expected */
-    for (in = instart; 
-	 in != NULL;
-	 in = (const typ_index_t *)dlq_nextEntry(in)) {
-	res = val_gen_index_comp(in, val);
+    /* 0 or more index components expected */
+    for (key = instart; 
+	 key != NULL;
+	 key = (const obj_key_t *)dlq_nextEntry(key)) {
+
+	res = val_gen_index_comp(key, val);
 	if (res != NO_ERR) {
 	    if (msg) {
 		agt_record_error(scb, &msg->errQ, 
 				 NCX_LAYER_OPERATION, res, 
-				 NULL, NCX_NT_INDEX, in, 
+				 NULL, NCX_NT_INDEX, key, 
 				 NCX_NT_VAL, val);
 	    }
 	    retres = res;
@@ -270,6 +321,7 @@ static status_t
     return retres;
 
 }   /* gen_index_chain */
+
 
 /********************************************************************
  * FUNCTION new_child_val
@@ -295,7 +347,6 @@ static val_value_t *
 
     chval = val_new_value();
     if (!chval) {
-	SET_ERROR(ERR_INTERNAL_MEM);
 	return NULL;
     }
 
@@ -305,7 +356,6 @@ static val_value_t *
 	if (chval->dname) {
 	    chval->name = chval->dname;
 	} else {
-	    SET_ERROR(ERR_INTERNAL_MEM);
 	    val_free_value(chval);
 	    return NULL;
 	}
@@ -313,7 +363,6 @@ static val_value_t *
 	chval->name = name;
     }
 
-    chval->parent_typ = NCX_NT_VAL;
     chval->parent = parent;
     chval->editop = editop;
     chval->nsid = nsid;
@@ -331,58 +380,53 @@ static val_value_t *
  *
  * Example:
  *  
- *  struct foo { 
- *    int a?;
- *    int b?;
- *    int c*;
+ *  container foo { 
+ *    leaf a { type int32; }
+ *    leaf b { type int32; }
+ *    leaf-list c { type int32; }
  *
- * Since a, b, and c are optional, all of them have to be
+ * Since a, b, and c are all optional, all of them have to be
  * checked, even while node 'a' is expected
  * The caller will save the current child in case the pointer
  * needs to be backed up.
  *
  * INPUTS:
- *   ch   == current typ_child_t
- *   nsid == expected namespace ID
- *   chnode == xml_node_t of start element 
- *   useiqual == TRUE if the instance qualifiers
- *                   should be used
- *                == FALSE == if they should be honored
+ *   chobj == current child object template
+ *   chnode == xml_node_t of start element to match
+ *
  * RETURNS:
  *   pointer to child that matched or NULL if no valid next child
  *********************************************************************/
-static typ_child_t *
-    find_next_child (typ_child_t *ch,
-		     xmlns_id_t nsid,
-		     const xml_node_t *chnode,
-		     boolean useiqual)
+static const obj_template_t *
+    find_next_child (const obj_template_t *chobj,
+		     const xml_node_t *chnode)
 {
 
-    typ_child_t *chnext;
-    status_t     res;
+    const obj_template_t *chnext;
+    status_t              res;
 
-    chnext = ch;
+    chnext = chobj;
 
     for (;;) {
-	switch (chnext->typdef.iqual) {
+	switch (obj_get_iqualval(chnext)) {
 	case NCX_IQUAL_ONE:
 	case NCX_IQUAL_1MORE:
 	    /* the current child is mandatory; this is an error */
-	    if (useiqual) {
-		return NULL;
-	    }
+	    return NULL;
 	    /* else fall through to next case */
 	case NCX_IQUAL_OPT:
 	case NCX_IQUAL_ZMORE:
 	    /* the current child is optional; keep trying
 	     * try to get the next child in the complex type 
 	     */
-	    chnext = typ_next_child(chnext);
+	    chnext = obj_next_child(chnext);
 	    if (!chnext) {
 		return NULL;
 	    } else {
-		res = xml_node_match(chnode, nsid, chnext->name, 
-		     XML_NT_NONE);
+		res = xml_node_match(chnode,
+				     obj_get_nsid(chnext), 
+				     obj_get_name(chnext), 
+				     XML_NT_NONE);
 		if (res == NO_ERR) {
 		    return chnext;
 		}
@@ -399,32 +443,118 @@ static typ_child_t *
 
 
 /********************************************************************
- * FUNCTION index_node_match
+ * FUNCTION get_child_node
  * 
+ * Get the correct child node for the specified parent and
+ * current XML node
+ *
  * INPUTS:
- *   in   == current typ_index_t
- *   nsid == current namespace ID
- *   chnode == xml_node_t of start element 
+ *    obj == parent object template
+ *    chobj == current child node (may be NULL if the
+ *             xmlorder param is true
+ *    curnode == current XML start or empty node to check
+ *    retobj == address of return object
+ *
+ * OUTPUTS:
+ *    *retobj set to found object if return OK
  *
  * RETURNS:
  *   status
  *********************************************************************/
-static status_t
-    index_node_match (typ_index_t *in,
-		      xmlns_id_t   nsid,
-		      const xml_node_t *chnode)
+static status_t 
+    get_child_node (const obj_template_t *obj,
+		    const obj_template_t *chobj,
+		    const xml_node_t *curnode,
+		    const obj_template_t **retobj)
 {
-    status_t  res;
+    const obj_template_t  *foundobj, *nextchobj;
+    const xmlChar         *foundmodname;
+    const agt_profile_t   *profile;    
+    status_t               res;
+    ncx_node_t             dtyp;
+    boolean                xmlorder;
 
-    res = xml_node_match(chnode, nsid, in->typch.name, XML_NT_NONE);
-    if (res != NO_ERR) {
-	if (in->sname) {
-	    res = xml_node_match(chnode, nsid, in->sname, XML_NT_NONE);
+    foundobj = NULL;
+    dtyp = NCX_NT_OBJ;
+    res = NO_ERR;
+
+    profile = agt_get_profile();
+    if (profile) {
+	xmlorder = profile->agt_xmlorder;
+    } else {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (obj_is_root(obj)) {
+	/* the child node can be any top-level object
+	 * in the configuration database
+	 */
+	if (curnode->nsid) {
+	    /* get the name from 1 module */
+	    foundmodname = xmlns_get_module(curnode->nsid);
+	    if (foundmodname) {
+		foundobj = (const obj_template_t *)
+		    def_reg_find_moddef(foundmodname,
+					curnode->elname,
+					&dtyp);
+	    }
+	} else {
+	    /* NSID not set, get the name from any module */
+	    foundobj = (const obj_template_t *)
+		def_reg_find_any_moddef(&foundmodname,
+					curnode->elname,
+					&dtyp);
+	}
+    } else if (xmlorder) {
+	/* the current node must match or one of the
+	 * subsequent child nodes must match
+	 */
+	res = xml_node_match(curnode, 
+			     obj_get_nsid(chobj), 
+			     obj_get_name(chobj), 
+			     XML_NT_NONE);
+	if (res == NO_ERR) {
+	    foundobj = chobj;
+	} else {
+	    /* check if there are other child nodes that could
+	     * match, due to instance qualifiers 
+	     */
+	    nextchobj = find_next_child(chobj, curnode);
+	    if (nextchobj) {
+		res = NO_ERR;
+		foundobj = nextchobj;
+	    }
+	}
+    } else {
+	/* do not care about XML order, just match any node
+	 * within the current parent object
+	 */
+	if (curnode->nsid) {
+	    /* find the specified module first */
+	    foundmodname = xmlns_get_module(curnode->nsid);
+	    if (foundmodname) {
+		foundobj = obj_find_child(obj, 
+					  foundmodname,
+					  curnode->elname);
+	    }
+	} else {
+	    /* get the object from first match module */
+	    foundobj = obj_find_child(obj, NULL,
+				      curnode->elname);
 	}
     }
-    return res;
 
-} /* index_node_match */
+    if (foundobj) {
+	*retobj = foundobj;
+	return NO_ERR;
+    } else if (res != NO_ERR) {
+	return res;
+    } else {
+	return ERR_NCX_DEF_NOT_FOUND;
+    }
+    /*NOTREACHED*/
+
+}  /* get_child_node */
 
 
 /********************************************************************
@@ -460,22 +590,26 @@ static op_editop_t
  *
  * INPUTS:
  *   parentdc == parent data class
- *   typdef == type definition struct for the value node
+ *   obj == object template definition struct for the value node
  *
  * RETURNS:
  *   data class for this value node
  *********************************************************************/
 static ncx_data_class_t
     pick_dataclass (ncx_data_class_t parentdc,
-		    const typ_def_t *typdef)
+		    const obj_template_t *obj)
 {
-    ncx_data_class_t  dc;
+    boolean  ret, setflag;
 
-    dc = typ_get_dataclass(typdef);
-    if (dc == NCX_DC_NONE) {
-	dc = parentdc;
+    setflag = FALSE;
+    ret = obj_get_config_flag2(obj, &setflag);
+
+    if (setflag) {
+	return (ret) ? NCX_DC_CONFIG : NCX_DC_STATE;
+    } else {
+	return parentdc;
     }
-    return dc;
+    /*NOTREACHED*/
 
 } /* pick_dataclass */
 
@@ -497,33 +631,35 @@ static status_t
 		  ncx_data_class_t parentdc,
 		  val_value_t  *retval)
 {
-    xml_node_t         nextnode;
-    const xml_node_t  *errnode;
-    val_value_t       *chval, *lastval;
-    status_t           res, res2;
-    boolean            done, getstrend, errdone;
-    typ_def_t         *anytypdef;
+    const xml_node_t        *errnode;
+    val_value_t             *chval;
+    status_t                 res, res2;
+    boolean                  done, getstrend, errdone;
+    xml_node_t               nextnode;
 
     /* init local vars */
-    getstrend = FALSE;
     errnode = startnode;
-    done = FALSE;
-    errdone = FALSE;
-    anytypdef = typ_get_basetype_typdef(NCX_BT_ANY);
-    xml_init_node(&nextnode);
+    chval = NULL;
     res = NO_ERR;
     res2 = NO_ERR;
-    lastval = NULL;
+    done = FALSE;
+    getstrend = FALSE;
+    errdone = FALSE;
+    xml_init_node(&nextnode);
+
     retval->dataclass = parentdc;
 
     /* make sure the startnode is correct */
     switch (startnode->nodetyp) {
     case XML_NT_START:
+	/* do not set the object template yet, in case
+	 * there is a <foo></foo> form of empty element
+	 * or another start (child) node
+	 */
 	break;
     case XML_NT_EMPTY:
-	/* treat this 'any' is a 'flag' data type  */
-	retval->btyp = NCX_BT_EMPTY;
-	retval->typdef = typ_get_basetype_typdef(NCX_BT_EMPTY);
+	/* treat this 'any' is an 'empty' data type  */
+	val_init_from_template(retval, ncx_get_gen_empty());
 	retval->v.bool = TRUE;
 	return NO_ERR;
     default:
@@ -534,14 +670,14 @@ static status_t
 	/* at this point have either a simple type or a complex type
 	 * get the next node which could be any type 
 	 */
-	res = agt_xml_consume_node_nons(scb->reader, &nextnode,
-	       NCX_LAYER_OPERATION, &msg->errQ);
+	res = get_xml_node(scb, msg, &nextnode, FALSE);
 	if (res != NO_ERR) {
 	    errdone = TRUE;
 	}
     }
 
     if (res == NO_ERR) {
+
 #ifdef AGT_VAL_PARSE_DEBUG
 	log_debug3("\nparse_any: expecting any node type");
 	if (LOGDEBUG3) {
@@ -554,17 +690,15 @@ static status_t
 	case XML_NT_START:
 	case XML_NT_EMPTY:
 	    /* A nested start or empty element means the parent is
-	     * treated as a 'struct' data type
+	     * treated as a 'container' data type
 	     */
-	    retval->btyp = NCX_BT_CONTAINER;
-	    retval->typdef = typ_get_basetype_typdef(NCX_BT_CONTAINER);
+	    val_init_from_template(retval, ncx_get_gen_container());
 	    break;
 	case XML_NT_STRING:
 	    /* treat this string child node as the string
 	     * content for the parent node
 	     */
-	    retval->btyp = NCX_BT_STRING;
-	    retval->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
+	    val_init_from_template(retval, ncx_get_gen_string());
 	    retval->v.str = xml_strdup(nextnode.simval);
 	    res = (retval->v.str) ? NO_ERR : ERR_INTERNAL_MEM;
 	    getstrend = TRUE;
@@ -572,9 +706,8 @@ static status_t
 	case XML_NT_END:
 	    res = xml_endnode_match(startnode, &nextnode);
 	    if (res == NO_ERR) {
-		/* treat this start + end pair as a 'flag' data type */
-		retval->btyp = NCX_BT_EMPTY;
-		retval->typdef = typ_get_basetype_typdef(NCX_BT_EMPTY);
+		/* treat this start + end pair as an 'empty' data type */
+		val_init_from_template(retval, ncx_get_gen_empty());
 		retval->v.bool = TRUE;
 		return NO_ERR;
 	    } else {
@@ -591,8 +724,7 @@ static status_t
     if (getstrend) {
 	/* need to get the endnode for startnode then exit */
 	xml_clean_node(&nextnode);
-	res2 = agt_xml_consume_node_nons(scb->reader, &nextnode,
-		NCX_LAYER_OPERATION, &msg->errQ);
+	res2 = get_xml_node(scb, msg, &nextnode, FALSE);
 	if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
 	    log_debug3("\nparse_any: expecting end node for %s", 
@@ -614,8 +746,9 @@ static status_t
     if (res != NO_ERR || res2 != NO_ERR) {
 	if (!errdone) {
 	    /* add rpc-error to msg->errQ */
-	    (void)agt_ps_parse_error_subtree(scb, msg, startnode,
-		 errnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
+	    (void)parse_error_subtree(scb, msg, startnode,
+				      errnode, res, NCX_NT_NONE, 
+				      NULL, NCX_NT_VAL, retval);
 	}
 	xml_clean_node(&nextnode);
 	return (res==NO_ERR) ? res2 : res;
@@ -625,9 +758,7 @@ static status_t
 	return NO_ERR;
     }
 
-    /* if we get here, then the startnode is a struct */
-    val_init_complex(retval, NCX_BT_CONTAINER);
-
+    /* if we get here, then the startnode is a container */
     while (!done) {
 	/* At this point have a nested start node
 	 *  Allocate a new val_value_t for the child value node 
@@ -645,24 +776,18 @@ static status_t
 	     * in the child node; call it an 'any' type
 	     * make sure this function gets called again
 	     * so the namespace errors can be ignored properly ;-)
+	     *
+	     * Cannot call this function directly or the
+	     * XML attributes will not get processed
 	     */
-	    res = parse_btype_nc(scb, msg, anytypdef, &nextnode, 
-				 retval->dataclass, chval);
+	    res = parse_btype_nc(scb, msg, 
+				 ncx_get_gen_anyxml(), 
+				 &nextnode, 
+				 retval->dataclass, 
+				 chval);
 	    xml_clean_node(&nextnode);
 	    if (res == NO_ERR) {
-		/* success - save the child value node 
-		 * check the lastval and set the seqid if needed
-		 */
-		if (lastval) {
-		    if (!xml_strcmp(lastval->name, chval->name)) {
-			if (lastval->seqid == 0) {
-			    lastval->seqid = 1;
-			}
-			chval->seqid = lastval->seqid+1;
-		    } 
-		}
-		lastval = chval;
-
+		/* success - save the child value node */
 		val_add_child(chval, retval);
 	    } else {
 		errdone = TRUE;
@@ -673,8 +798,10 @@ static status_t
 	if (res != NO_ERR) {
 	    if (!errdone) {
 		/* add rpc-error to msg->errQ */
-		(void)agt_ps_parse_error_subtree(scb, msg, startnode,
-		     errnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
+		(void)parse_error_subtree(scb, msg, startnode,
+					  errnode, res, 
+					  NCX_NT_NONE, NULL, 
+					  NCX_NT_VAL, retval);
 	    }
 	    xml_clean_node(&nextnode);
 	    if (chval) {
@@ -684,8 +811,7 @@ static status_t
 	}
 
 	/* get the next node */
-	res = agt_xml_consume_node_nons(scb->reader, &nextnode,
-	       NCX_LAYER_OPERATION, &msg->errQ);
+	res = get_xml_node(scb, msg, &nextnode, FALSE);
 	if (res == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
 	    log_debug3("\nparse_any: expecting start, empty, or end node");
@@ -710,578 +836,16 @@ static status_t
 
 
 /********************************************************************
- * FUNCTION parse_root_appnode_nc
- * 
- * Parse the XML input as an 'root' appnode 
- *
- *   <appname>
- *     <parmset-name> ... </parmset-name>
- *     <parmset-name> ... </parmset-name>
- *   </appname>
- *
- * INPUTS:
- *   see parse_btype_nc parameter list
- *
- *   startnode == <app-name> container start node
- * RETURNS:
- *   status
- *********************************************************************/
-static status_t 
-    parse_root_appnode_nc (ses_cb_t  *scb,
-			   xml_msg_hdr_t *msg,
-			   const xml_node_t *startnode,
-			   const ncx_appnode_t *appdefnode,
-			   val_value_t  *retval)
-{
-    xml_node_t           chnode;
-    boolean              psdone, empty;
-    cfg_app_t           *app;
-    psd_template_t      *psd;
-    ps_parmset_t        *ps;
-    status_t             res, retres;
-    ncx_node_t           deftyp;
-
-    /* make sure the node is a start node 
-     * this should be the application container
-     */
-    if (startnode->nodetyp != XML_NT_START) {
-	/* add rpc-error to msg->errQ */
-	res = ERR_NCX_WRONG_NODETYP;
-	(void)agt_ps_parse_error_subtree(scb, msg, startnode,
-	     startnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
-	return res;
-    }
-
-    /* get a new config application node */
-    app = cfg_new_appnode();
-    if (!app) {
-	/* add rpc-error to msg->errQ */
-	res = ERR_INTERNAL_MEM;
-	(void)agt_ps_parse_error_subtree(scb, msg, startnode,
-		     startnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
-	return res;
-    }
-    app->appdef = appdefnode;
-    app->editop = get_editop(startnode);
-    app->parent = retval;
-
-    /* save the current expected namespace for nested complex types 
-     * don't need to reset, since it only matters on the way down
-     * the XML tree during parsing
-     */
-    msg->cur_appns = appdefnode->nsid;
-
-    /* queue the appnode now, even if errors, and even if empty */
-    dlq_enque(app, &retval->v.appQ);
-
-    /* loop through all the parmset nodes and create ps_parmset_t nodes */
-    psdone = FALSE;
-    retres = NO_ERR;
-    xml_init_node(&chnode);
-    while (!psdone) {
-	/* get the next node which should be an parmset
-	 * start node or the application container end node 
-	 *
-	 * hard-wiring the layer to 'content' 
-	 * since all usage of this data type is for
-	 * nesting content-level data models
-	 */
-	xml_clean_node(&chnode);
-	res = agt_xml_consume_node(scb->reader, &chnode,
-	       NCX_LAYER_CONTENT, &msg->errQ);
-	if (res != NO_ERR) {
-	    (void)agt_ps_parse_error_subtree(scb, msg, startnode,
-		     &chnode, res, NCX_NT_NONE, NULL, NCX_NT_APP, app);
-	    xml_clean_node(&chnode);
-	    return res;
-	} 
-
-	/* else got an XML node to examine */
-#ifdef AGT_VAL_PARSE_DEBUG
-	log_debug3("\nparse_root: expecting parmset-start or app-end node.");
-	if (LOGDEBUG3) {
-	    xml_dump_node(&chnode);
-	}
-#endif
-	/* validate the node type and namespace */
-	switch (chnode.nodetyp) {
-	case XML_NT_START:
-	    empty = FALSE;
-	    res = xml_node_match(&chnode, msg->cur_appns, 
-				 NULL, XML_NT_NONE);
-	    break;
-	case XML_NT_EMPTY:
-	    /* empty parmset node is allowed; exit */
-	    empty = TRUE;
-	    res = xml_node_match(&chnode, msg->cur_appns, 
-				 NULL, XML_NT_NONE);
-	    break;
-	case XML_NT_STRING:
-	    res = ERR_NCX_WRONG_NODETYP_SIM;
-	    break;
-	case XML_NT_END:
-	    res = xml_endnode_match(startnode, &chnode);
-	    if (res == NO_ERR) {
-		/* no error exit */
-		psdone = TRUE;
-		continue;
-	    }
-	    break;
-	default:
-	    res = ERR_NCX_WRONG_NODETYP;
-	}
-
-	/* if node ok,
-	 * look for a parmset definition for this (owner, elname) 
-	 */
-	if (res == NO_ERR) {
-	    deftyp = NCX_NT_PSD;
-	    psd = def_reg_find_moddef(chnode.module, 
-		      chnode.elname, &deftyp);
-	    res = (psd) ? NO_ERR : ERR_NCX_UNKNOWN_PSD;
-	}
-
-	/* check any errors with the app container node so far */
-	if (res != NO_ERR) {
-	    /* try to skip just this application node and continue */
-	    (void)agt_ps_parse_error_subtree(scb, msg, 
-			 (empty) ? NULL : &chnode,
-			 &chnode, res, NCX_NT_NONE, NULL, NCX_NT_APP, app);
-	    /* try the next app node */
-	    retres = res;
-	    continue;  
-	}
-
-	/* have a parmset definition node 
-	 * malloc a new parmset 
-	 */
-	ps = ps_new_parmset();
-	if (!ps) {
-	    res = ERR_INTERNAL_MEM;
-	} else {
-	    res = NO_ERR;
-	    ps->editop = get_editop(&chnode);
-	    ps->parent = app;
-	    if (!empty) {
-		res = agt_ps_parse_val(scb, msg, psd, &chnode, ps);
-	    } else {
-		ps_setup_parmset(ps, psd, psd->psd_type);
-	    }
-	}
-	if (res != NO_ERR) {
-	    retres = res;
-	}
-
-	/* set the parmset instance ID even if there are errors */
-	res = val_gen_instance_id(NCX_NT_PARMSET, ps, 
-		  NCX_IFMT_C, FALSE, &ps->instance);
-	if (res != NO_ERR && res != ERR_NCX_NO_INSTANCE) {
-	    retres = res;
-	}
-
-	/* don't know what kind of error processing requested, 
-	 * so save the PS even though there are errors.
-	 * This could also be an empty parmset, or a
-	 * filled in parmset (normal case)
-	 */
-	ps->res = retres;
-	dlq_enque(ps, &app->parmsetQ);
-	
-    }  /* psnode loop */
-
-    /* it is okay to clean an already clean xml_node_t */
-    xml_clean_node(&chnode);
-    return retres;
-
-} /* parse_root_appnode_nc */
-
-
-/********************************************************************
- * FUNCTION parse_root_nc
- * 
- * Parse the XML input as an 'root' type , E.g.:
- *
- * <config>
- *   <appname>
- *     <parmset-name> ... </parmset-name>
- *     <parmset-name> ... </parmset-name>
- *   </appname>
- *   <appname>
- *     <parmset-name> ... </parmset-name>
- *     <parmset-name> ... </parmset-name>
- *   </appname>
- * </config>
- *
- * INPUTS:
- *   see parse_btype_nc parameter list
- * RETURNS:
- *   status
- *********************************************************************/
-static status_t 
-    parse_root_nc (ses_cb_t  *scb,
-		   xml_msg_hdr_t *msg,
-		   const xml_node_t *startnode,
-		   ncx_data_class_t parentdc,
-		   val_value_t  *retval)
-{
-    xml_node_t           chnode;
-    boolean              appdone, empty;
-    const ncx_appnode_t *appdefnode;
-    status_t             res, retres;
-    cfg_app_t           *app;
-
-    /* make sure the node is a start node 
-     * this should be the <config> or <data> container, 
-     * or other container nested inside the data model
-     */
-    res = xml_node_match(startnode, msg->cur_appns,
-			 NULL, XML_NT_START); 
-    if (res != NO_ERR) {
-	/* add rpc-error to msg->errQ */
-	(void)agt_ps_parse_error_subtree(scb, msg, startnode,
-	     startnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
-	return res;
-    }
-
-    /* setup the return value as a NCX_BT_ROOT */
-    retval->btyp = NCX_BT_ROOT;
-    retval->typdef = typ_get_basetype_typdef(NCX_BT_ROOT);
-    retval->name = startnode->elname;
-    retval->dname = NULL;
-    retval->editop = get_editop(startnode);
-
-    /* avoid a compiler warning */
-    if (parentdc == NCX_DC_CONFIG) {
-	retval->dataclass = parentdc;
-    } else {
-	retval->dataclass = NCX_DC_CONFIG;
-    }	
-
-    dlq_createSQue(&retval->v.appQ);
-    
-    /* loop through all the application nodes and create
-     * N cfg_app_t nodes, each containing M parmsets
-     */
-    appdone = FALSE;
-    retres = NO_ERR;
-    xml_init_node(&chnode);
-    while (!appdone) {
-	/* get the next node which should be an application 
-	 * start node or the container end node 
-	 *
-	 * hard-wiring the layer to 'content' is a not a hack
-	 * since all usage of this data type is for
-	 * nesting content-level data models
-	 */
-	xml_clean_node(&chnode);
-	res = agt_xml_consume_node(scb->reader, &chnode,
-	       NCX_LAYER_CONTENT, &msg->errQ);
-	if (res != NO_ERR) {
-	    (void)agt_ps_parse_error_subtree(scb, msg, startnode,
-		 &chnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
-	    xml_clean_node(&chnode);
-	    return res;
-	} 
-
-	/* else got an XML node to examine 
-	 * this is the application header node, which should declare
-	 * a namespace for the application
-	 */
-
-#ifdef AGT_VAL_PARSE_DEBUG
-	log_debug3("\nparse_root: expecting app-start or end node.");
-	if (LOGDEBUG3) {
-	    xml_dump_node(&chnode);
-	}
-#endif
-
-	/* validate the child node type and namespace */
-	switch (chnode.nodetyp) {
-	case XML_NT_START:
-	    empty = FALSE;
-	    break;
-	case XML_NT_EMPTY:
-	    /* special case -- empty application node
-	     * this could be an edit-config 'delete'
-	     * or a get-config subtree filter
-	     */
-	    empty = TRUE;
-	    break;
-	case XML_NT_STRING:
-	    res = ERR_NCX_WRONG_NODETYP_SIM;
-	    break;
-	case XML_NT_END:
-	    res = xml_endnode_match(startnode, &chnode);
-	    if (res == NO_ERR) {
-		/* no error exit */
-		appdone = TRUE;
-		continue;
-	    } 
-	    break;
-	default:
-	    res = ERR_NCX_WRONG_NODETYP;
-	}
-
-	/* if node ok,
-	 * look for an application node for this (owner, elname) 
-	 */
-	if (res == NO_ERR) {
-	    appdefnode = def_reg_find_cfgapp(chnode.module, 
-			  chnode.elname, NCX_CFGID_RUNNING);
-	    res = (appdefnode) ? NO_ERR : ERR_NCX_UNKNOWN_APP;
-	}
-
-	/* check any errors with the app container node so far */
-	if (res != NO_ERR) {
-	    /* try to skip just this application node and continue */
-	    (void)agt_ps_parse_error_subtree(scb, msg, 
-		 (empty) ? NULL : &chnode,
-		 &chnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
-	    /* try the next app node */
-	    retres = res;
-	    continue;  
-	}
-
-	/* consume all the parmsets in this application container */
-	if (!empty) {
-	    res = parse_root_appnode_nc(scb, msg, &chnode, 
-					appdefnode, retval);
-	    if (res != NO_ERR) {
-		retres = res;
-	    }
-	} else {
-	    /* create and store an empty cfg_app_t node */
-	    app = cfg_new_appnode();
-	    app->appdef = appdefnode;
-	    app->editop = get_editop(&chnode);
-	    app->parent = retval;
-	    dlq_enque(app, &retval->v.appQ);
-	}
-    } /* appnode loop */
-
-    xml_clean_node(&chnode);
-    return retres;
-
-} /* parse_root_nc */
-
-
-/********************************************************************
-* FUNCTION parse_ename_nc
-* 
-* Parse the XML input as a 'ename' type 
-* e.g..
-*
-* <foo><bar/></foo>
-* <foo><bar></bar></foo>
-* <foo><bar>    </bar></foo>
-*
-* INPUTS:
-*   see parse_btype_nc parameter list
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t 
-    parse_ename_nc (ses_cb_t  *scb,
-		    xml_msg_hdr_t *msg,
-		    typ_def_t *typdef,
-		    const xml_node_t *startnode,
-		    ncx_data_class_t parentdc,
-		    val_value_t  *retval)
-{
-    xml_node_t ename, endnode;
-    const xml_node_t *errnode;
-    const xmlChar *badval;
-    status_t   res, res2;
-    boolean errdone;
-
-    /* init local vars */
-    xml_init_node(&ename);
-    xml_init_node(&endnode);
-    errnode = startnode;
-    badval = NULL;
-    errdone = FALSE;
-    res = NO_ERR;
-    res2 = NO_ERR;
-
-    /* make sure the startnode is correct */
-    res = xml_node_match(startnode, msg->cur_appns,
-			 NULL, XML_NT_START); 
-    if (res == NO_ERR) {
-	/* get the next node which should be an empty element */
-	res = agt_xml_consume_node(scb->reader, &ename, 
-	       NCX_LAYER_OPERATION, &msg->errQ);
-	if (res != NO_ERR) {
-	    errdone = TRUE;
-	    errnode = &ename;
-	}
-    }
-
-    if (res != NO_ERR) {
-	if (!errdone) {
-	    /* add rpc-error to msg->errQ */
-	    (void)agt_ps_parse_error_subtree(scb, msg, startnode,
-		 errnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
-	}
-	xml_clean_node(&ename);
-	return res;
-    }
-
-#ifdef AGT_VAL_PARSE_DEBUG
-    log_debug3("\nparse_ename: expecting empty node.");
-    if (LOGDEBUG3) {
-	xml_dump_node(&ename);
-    }
-#endif
-
-    /* validate the node type and empty content */
-    switch (ename.nodetyp) {
-    case XML_NT_START:
-	/* check for alternate version with end node */
-	res = agt_xml_consume_node(scb->reader, &endnode,
-	       NCX_LAYER_OPERATION, &msg->errQ);
-	if (res != NO_ERR) {
-	    errdone = TRUE;
-	} else {
-#ifdef AGT_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_ename: expecting end node");
-	    if (LOGDEBUG3) {
-		xml_dump_node(&endnode);
-	    }
-#endif
-	    switch (endnode.nodetyp) {
-	    case XML_NT_END:
-		res = xml_endnode_match(&ename, &endnode);
-		if (res != NO_ERR) {
-		    errnode = &endnode;
-		} /* else success, consider this an empty el */
-		break;
-	    case XML_NT_STRING:
-		/* allow an empty whitespace-only string here;
-		 * if any non-whitespace then got a simple type
-		 * instead of an empty element
-		 */
-		res = (xml_isspace_str(endnode.simval)) ?
-		    NO_ERR : ERR_NCX_WRONG_NODETYP_SIM;
-		if (res != NO_ERR) {
-		    errnode = &ename;
-		} else {
-		    /* got an empty string; try again for the endnode */
-		    xml_clean_node(&endnode);
-		    res = agt_xml_consume_node(scb->reader, &endnode,
-			   NCX_LAYER_OPERATION, &msg->errQ);
-		    if (res != NO_ERR) {
-			errdone = TRUE;
-		    } else {
-#ifdef AGT_VAL_PARSE_DEBUG
-			log_debug3("\nparse_ename: expecting end node2");
-			if (LOGDEBUG3) {
-			    xml_dump_node(&endnode);
-			}
-#endif
-
-			/* got a node; is it the matching endnode */
-			res = xml_endnode_match(&ename, &endnode);
-			if (res != NO_ERR) {
-			    errnode = &endnode;
-			}  /* else success, consider this an empty el */
-		    }
-		}
-		break;
-	    case XML_NT_START:
-		/* got a start of a nested struct instead of
-		 * an empty element 
-		 */
-		res = ERR_NCX_WRONG_NODETYP_CPX;
-		errnode = &endnode;
-		break;
-	    default:
-		res = ERR_NCX_WRONG_NODETYP;
-		errnode = &endnode;
-	    }
-	}
-	break;
-    case XML_NT_EMPTY:
-	/* got the simple case;  a real empty element 
-	 * check the namespace
-	 */
-	res = xml_node_match(&ename, msg->cur_appns, 
-			     NULL, XML_NT_NONE);
-	break;
-    default:
-	res = ERR_NCX_WRONG_NODETYP;
-	errnode = &ename;
-    }
-
-    /* check if ename content matched */
-    if (res == NO_ERR) {
-	/* check if the ename element is one of the correct values */
-	res = val_string_ok(typdef, NCX_BT_ENAME, ename.elname);
-	if (res == NO_ERR) {
-	    /* record the value even if there are errors after this */
-	    retval->btyp = NCX_BT_ENAME;
-	    retval->typdef = typdef;
-	    retval->dataclass = pick_dataclass(parentdc, typdef);
-	    retval->v.str = xml_strdup(ename.elname);
-	    if (!retval->v.str) {
-		res = ERR_INTERNAL_MEM;
-	    }
-	} else {
-	    badval = ename.elname;
-	}
-    } 
-
-    if (res == NO_ERR) {
-	/* get the matching end node for startnode */
-	xml_clean_node(&endnode);
-	res2 = agt_xml_consume_node(scb->reader, &endnode,
-		NCX_LAYER_OPERATION, &msg->errQ);
-	if (res2 == NO_ERR) {
-#ifdef AGT_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_ename: expecting end for %s",
-		       startnode->qname);
-	    if (LOGDEBUG3) {
-		xml_dump_node(startnode);
-	    }
-#endif
-	    res2 = xml_endnode_match(startnode, &endnode);
-	    if (res2 != NO_ERR) {
-		errnode = &endnode;
-	    }
-	} else {
-	    errdone = TRUE;
-	}
-    }
-
-    if (res == NO_ERR) {
-	res = res2;
-    }
-
-    /* check if any errors; record the first error */
-    if (res != NO_ERR)  {
-	if (!errdone) {
-	    /* add rpc-error to msg->errQ */
-	    (void)agt_ps_parse_error_subtree(scb, msg, startnode,
-		 errnode, res, NCX_NT_STRING, badval, NCX_NT_VAL, retval);
-	}
-    }
-
-    xml_clean_node(&ename);
-    xml_clean_node(&endnode);
-
-    return res;
-
-} /* parse_ename_nc */
-
-
-/********************************************************************
  * FUNCTION parse_enum_nc
  * 
- * Parse the XML input as a 'enum' type 
+ * Parse the XML input as a 'enumeration' type 
  * e.g..
  *
  * <foo>fred</foo>
- * <foo>11</foo>
- * <foo>fred(11)</foo>
+ * 
+ * These NCX variants are no longer supported:
+ *    <foo>11</foo>
+ *    <foo>fred(11)</foo>
  *
  * INPUTS:
  *   see parse_btype_nc parameter list
@@ -1291,17 +855,16 @@ static status_t
 static status_t 
     parse_enum_nc (ses_cb_t  *scb,
 		   xml_msg_hdr_t *msg,
-		   typ_def_t *typdef,
+		   const obj_template_t *obj,
 		   const xml_node_t *startnode,
 		   ncx_data_class_t parentdc,
 		   val_value_t  *retval)
 {
-    xml_node_t valnode, endnode;
     const xml_node_t  *errnode;
-    const xmlChar *badval;
-    status_t   res, res2;
-    boolean    errdone;
-
+    const xmlChar     *badval;
+    xml_node_t         valnode, endnode;
+    status_t           res, res2;
+    boolean            errdone;
 
     /* init local vars */
     xml_init_node(&valnode);
@@ -1311,16 +874,15 @@ static status_t
     badval = NULL;
     res2 = NO_ERR;
 
-    retval->typdef = typdef;
-    retval->dataclass = pick_dataclass(parentdc, typdef);
+    val_init_from_template(retval, obj);
+    retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, msg->cur_appns, 
+    res = xml_node_match(startnode, obj_get_nsid(obj), 
 			 NULL, XML_NT_START); 
     if (res == NO_ERR) {
 	/* get the next node which should be a string node */
-	res = agt_xml_consume_node(scb->reader, &valnode,
-	       NCX_LAYER_OPERATION, &msg->errQ);
+	res = get_xml_node(scb, msg, &valnode, TRUE);
 	if (res != NO_ERR) {
 	    errdone = TRUE;
 	}
@@ -1328,7 +890,7 @@ static status_t
 
     if (res == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-	log_debug3("\nparse_enum: expecting string node.");
+	log_debug3("\nparse_enum: expecting string node");
 	if (LOGDEBUG3) {
 	    xml_dump_node(&valnode);
 	}
@@ -1342,8 +904,10 @@ static status_t
 	    break;
 	case XML_NT_STRING:
 	    /* get the non-whitespace string here */
-	    res = val_enum_ok(typdef, valnode.simval, 
-		      &retval->v.enu.val, &retval->v.enu.name);
+	    res = val_enum_ok(obj_get_ctypdef(obj), 
+			      valnode.simval, 
+			      &retval->v.enu.val, 
+			      &retval->v.enu.name);
 	    if (res == NO_ERR) {
 		/* record the value even if there are errors after this */
 		retval->btyp = NCX_BT_ENUM;
@@ -1357,11 +921,10 @@ static status_t
 	}
 
 	/* get the matching end node for startnode */
-	res2 = agt_xml_consume_node(scb->reader, &endnode,
-		NCX_LAYER_OPERATION, &msg->errQ);
+	res2 = get_xml_node(scb, msg, &endnode, TRUE);
 	if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_ename: expecting end for %s", 
+	    log_debug3("\nparse_enum: expecting end for %s", 
 		       startnode->qname);
 	    if (LOGDEBUG3) {
 		xml_dump_node(&endnode);
@@ -1383,8 +946,9 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR) && !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)agt_ps_parse_error_subtree(scb, msg, startnode,
-	     errnode, res, NCX_NT_STRING, badval, NCX_NT_VAL, retval);
+	(void)parse_error_subtree(scb, msg, startnode,
+				  errnode, res, NCX_NT_STRING, 
+				  badval, NCX_NT_VAL, retval);
     }
 
     xml_clean_node(&valnode);
@@ -1414,13 +978,13 @@ static status_t
 static status_t 
     parse_empty_nc (ses_cb_t  *scb,
 		    xml_msg_hdr_t *msg,
-		    typ_def_t *typdef,
+		    const obj_template_t *obj,
 		    const xml_node_t *startnode,
 		    ncx_data_class_t parentdc,
 		    val_value_t  *retval)
 {
-    xml_node_t        endnode;
     const xml_node_t *errnode;
+    xml_node_t        endnode;
     status_t          res;
     boolean           errdone;
 
@@ -1429,23 +993,25 @@ static status_t
     errnode = startnode;
     errdone = FALSE;
 
+    val_init_from_template(retval, obj);
+    retval->dataclass = pick_dataclass(parentdc, obj);
+
     /* validate the node type and enum string or number content */
     switch (startnode->nodetyp) {
     case XML_NT_EMPTY:
-	res = xml_node_match(startnode, msg->cur_appns,
+	res = xml_node_match(startnode, obj_get_nsid(obj),
 	     NULL, XML_NT_NONE);
 	break;
     case XML_NT_START:
-	res = xml_node_match(startnode, msg->cur_appns,
+	res = xml_node_match(startnode, obj_get_nsid(obj),
 	     NULL, XML_NT_NONE);
 	if (res == NO_ERR) {
-	    res = agt_xml_consume_node(scb->reader, &endnode,
-		   NCX_LAYER_OPERATION, &msg->errQ);
+	    res = get_xml_node(scb, msg, &endnode, TRUE);
 	    if (res != NO_ERR) {
 		errdone = TRUE;
 	    } else {
 #ifdef AGT_VAL_PARSE_DEBUG
-		log_debug3("\nparse_ename: expecting end for %s", 
+		log_debug3("\nparse_empty: expecting end for %s", 
 		       startnode->qname);
 		if (LOGDEBUG3) {
 		    xml_dump_node(&endnode);
@@ -1460,11 +1026,10 @@ static status_t
 		    } else {
 			/* that was an empty string -- try again */
 			xml_clean_node(&endnode);
-			res = agt_xml_consume_node(scb->reader, &endnode,
-	                    NCX_LAYER_OPERATION, &msg->errQ);
+			res = get_xml_node(scb, msg, &endnode, TRUE);
 			if (res == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-			    log_debug3("\nparse_enum: expecting end for %s", 
+			    log_debug3("\nparse_empty: expecting end for %s", 
 				   startnode->qname);
 			    if (LOGDEBUG3) {
 				xml_dump_node(&endnode);
@@ -1488,14 +1053,13 @@ static status_t
 
     /* record the value if no errors */
     if (res == NO_ERR) {
-	retval->btyp = NCX_BT_EMPTY;
-	retval->typdef = typdef;
 	retval->v.bool = TRUE;
-	retval->dataclass = pick_dataclass(parentdc, typdef);
     } else if (!errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)agt_ps_parse_error_subtree(scb, msg, startnode,
-	     errnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
+	(void)parse_error_subtree(scb, msg, startnode,
+				  errnode, res, 
+				  NCX_NT_NONE, NULL, 
+				  NCX_NT_VAL, retval);
     }
 
     xml_clean_node(&endnode);
@@ -1523,17 +1087,16 @@ static status_t
 static status_t 
     parse_boolean_nc (ses_cb_t  *scb,
 		      xml_msg_hdr_t *msg,
-		      typ_def_t *typdef,
+		      const obj_template_t *obj,
 		      const xml_node_t *startnode,
 		      ncx_data_class_t parentdc,
 		      val_value_t  *retval)
 {
-    xml_node_t valnode, endnode;
     const xml_node_t  *errnode;
-    const xmlChar *badval;
-    status_t   res, res2;
-    boolean    errdone;
-
+    const xmlChar     *badval;
+    xml_node_t         valnode, endnode;
+    status_t           res, res2;
+    boolean            errdone;
 
     /* init local vars */
     xml_init_node(&valnode);
@@ -1543,16 +1106,15 @@ static status_t
     badval = NULL;
     res2 = NO_ERR;
 
-    retval->typdef = typdef;
-    retval->dataclass = pick_dataclass(parentdc, typdef);
+    val_init_from_template(retval, obj);
+    retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, msg->cur_appns, 
+    res = xml_node_match(startnode, obj_get_nsid(obj), 
 			 NULL, XML_NT_START); 
     if (res == NO_ERR) {
 	/* get the next node which should be a string node */
-	res = agt_xml_consume_node(scb->reader, &valnode,
-	       NCX_LAYER_OPERATION, &msg->errQ);
+	res = get_xml_node(scb, msg, &valnode, TRUE);
 	if (res != NO_ERR) {
 	    errdone = TRUE;
 	}
@@ -1574,7 +1136,6 @@ static status_t
 	    break;
 	case XML_NT_STRING:
 	    /* get the non-whitespace string here */
-	    retval->btyp = NCX_BT_BOOLEAN;
 	    if (ncx_is_true(valnode.simval)) {
 		retval->v.bool = TRUE;
 	    } else if (ncx_is_false(valnode.simval)) {
@@ -1590,11 +1151,10 @@ static status_t
 	}
 
 	/* get the matching end node for startnode */
-	res2 = agt_xml_consume_node(scb->reader, &endnode,
-		NCX_LAYER_OPERATION, &msg->errQ);
+	res2 = get_xml_node(scb, msg, &endnode, TRUE);
 	if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_ename: expecting end for %s", 
+	    log_debug3("\nparse_boolean: expecting end for %s", 
 		       startnode->qname);
 	    if (LOGDEBUG3) {
 		xml_dump_node(&endnode);
@@ -1616,8 +1176,10 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR) && !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)agt_ps_parse_error_subtree(scb, msg, startnode,
-	     errnode, res, NCX_NT_STRING, badval, NCX_NT_VAL, retval);
+	(void)parse_error_subtree(scb, msg, startnode,
+				  errnode, res, 
+				  NCX_NT_STRING, badval, 
+				  NCX_NT_VAL, retval);
     }
 
     xml_clean_node(&valnode);
@@ -1637,7 +1199,7 @@ static status_t
 *            Input is read from scb->reader.
 *     msg == incoming RPC message
 *            Errors are appended to msg->errQ
-*     typdef == first non-ptr-only typdef for this type
+*     obj == object template for this number type
 *     btyp == base type of the expected ordinal number type
 *     startnode == top node of the parameter to be parsed
 *            Parser function will attempt to consume all the
@@ -1655,17 +1217,17 @@ static status_t
 static status_t 
     parse_num_nc (ses_cb_t  *scb,
 		  xml_msg_hdr_t *msg,
-		  typ_def_t *typdef,
+		  const obj_template_t *obj,
 		  ncx_btype_t  btyp,
 		  const xml_node_t *startnode,
 		  ncx_data_class_t parentdc,
 		  val_value_t  *retval)
 {
-    xml_node_t valnode, endnode;
     const xml_node_t  *errnode;
-    const xmlChar *badval;
-    status_t   res, res2;
-    boolean   errdone;
+    const xmlChar     *badval;
+    xml_node_t         valnode, endnode;
+    status_t           res, res2;
+    boolean            errdone;
 
     /* init local vars */
     xml_init_node(&valnode);
@@ -1674,13 +1236,15 @@ static status_t
     errnode = startnode;
     errdone = FALSE;
 
+    val_init_from_template(retval, obj);
+    retval->dataclass = pick_dataclass(parentdc, obj);
+    
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, msg->cur_appns,
+    res = xml_node_match(startnode, obj_get_nsid(obj),
 			 NULL, XML_NT_START); 
     if (res == NO_ERR) {
 	/* get the next node which should be a string node */
-	res = agt_xml_consume_node(scb->reader, &valnode,
-	       NCX_LAYER_OPERATION, &msg->errQ);
+	res = get_xml_node(scb, msg, &valnode, TRUE);
 	if (res != NO_ERR) {
 	    errdone = TRUE;
 	}
@@ -1689,8 +1253,9 @@ static status_t
     if (res != NO_ERR) {
 	/* fatal error */
 	if (!errdone) {
-	    (void)agt_ps_parse_error_subtree(scb, msg, startnode,
-		 errnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
+	    (void)parse_error_subtree(scb, msg, startnode,
+				      errnode, res, NCX_NT_NONE, 
+				      NULL, NCX_NT_VAL, retval);
 	}
 	xml_clean_node(&valnode);
 	return res;
@@ -1713,13 +1278,7 @@ static status_t
 	/* get the non-whitespace string here */
 	res = ncx_decode_num(valnode.simval, btyp, &retval->v.num);
 	if (res == NO_ERR) {
-	    res = val_range_ok(typdef, btyp, &retval->v.num);
-	    if (res == NO_ERR) {
-		/* record the value even if there are errors after this */
-		retval->btyp = btyp;
-		retval->typdef = typdef;
-		retval->dataclass = pick_dataclass(parentdc, typdef);
-	    }
+	    res = val_range_ok(obj_get_ctypdef(obj), btyp, &retval->v.num);
 	}
 	if (res != NO_ERR) {
 	    badval = valnode.simval;
@@ -1731,8 +1290,7 @@ static status_t
     }
 
     /* get the matching end node for startnode */
-    res2 = agt_xml_consume_node(scb->reader, &endnode,
-	    NCX_LAYER_OPERATION, &msg->errQ);
+    res2 = get_xml_node(scb, msg, &endnode, TRUE);
     if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
 	log_debug3("\nparse_num: expecting end for %s", startnode->qname);
@@ -1755,8 +1313,9 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR) && !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)agt_ps_parse_error_subtree(scb, msg, startnode,
-	     errnode, res, NCX_NT_STRING, badval, NCX_NT_VAL, retval);
+	(void)parse_error_subtree(scb, msg, startnode,
+				  errnode, res, NCX_NT_STRING, 
+				  badval, NCX_NT_VAL, retval);
     }
 
     xml_clean_node(&valnode);
@@ -1776,7 +1335,7 @@ static status_t
 *            Input is read from scb->reader.
 *     msg == incoming RPC message
 *            Errors are appended to msg->errQ
-*     typdef == first non-ptr-only typdef for this type
+*     obj == object template for this string type
 *     btyp == base type of the expected ordinal number type
 *     startnode == top node of the parameter to be parsed
 *            Parser function will attempt to consume all the
@@ -1793,20 +1352,19 @@ static status_t
 static status_t 
     parse_string_nc (ses_cb_t  *scb,
 		     xml_msg_hdr_t *msg,
-		     typ_def_t *typdef,
+		     const obj_template_t *obj,
 		     ncx_btype_t  btyp,
 		     const xml_node_t *startnode,
 		     ncx_data_class_t parentdc,
 		     val_value_t  *retval)
 {
-    xml_node_t         valnode, endnode;
-    const xml_node_t  *errnode;
-    const xmlChar     *badval;
+    const xml_node_t     *errnode;
+    const xmlChar        *badval;
     const typ_template_t *listtyp;
-    status_t           res, res2;
-    boolean            errdone, empty;
-    ncx_btype_t        listbtyp;
-
+    xml_node_t            valnode, endnode;
+    status_t              res, res2;
+    boolean               errdone, empty;
+    ncx_btype_t           listbtyp;
 
     /* init local vars */
     xml_init_node(&valnode);
@@ -1815,15 +1373,15 @@ static status_t
     badval = NULL;
     errdone = FALSE;
     empty = FALSE;
-    retval->btyp = btyp;
-    retval->typdef = typdef;
-    retval->dataclass = pick_dataclass(parentdc, typdef);
+
+    val_init_from_template(retval, obj);
+    retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, msg->cur_appns,
+    res = xml_node_match(startnode, obj_get_nsid(obj),
 			 NULL, XML_NT_START); 
     if (res != NO_ERR) {
-	res = xml_node_match(startnode, msg->cur_appns,
+	res = xml_node_match(startnode, obj_get_nsid(obj),
 			     NULL, XML_NT_EMPTY); 
 	if (res == NO_ERR) {
 	    empty = TRUE;
@@ -1833,8 +1391,7 @@ static status_t
     /* get the value string node */
     if (res == NO_ERR && !empty) {
 	/* get the next node which should be a string node */
-	res = agt_xml_consume_node(scb->reader, &valnode,
-	       NCX_LAYER_OPERATION, &msg->errQ);
+	res = get_xml_node(scb, msg, &valnode, TRUE);
 	if (res != NO_ERR) {
 	    errdone = TRUE;
 	}
@@ -1842,19 +1399,14 @@ static status_t
 
     /* check empty string corner case */
     if (empty) {
-	if (btyp==NCX_BT_XLIST) {
-	    /* check the empty xlist */
-	    ncx_init_xlist(&retval->v.xlist);
-	    res = val_xlist_ok(typdef, &retval->v.xlist);
-	} else if (btyp==NCX_BT_SLIST) {
+	if (btyp==NCX_BT_SLIST || btyp==NCX_BT_BITS) {
 	    /* check the empty list */
-	    listtyp = typ_get_listtyp(typdef);
-	    listbtyp = typ_get_basetype(&listtyp->typdef);
-	    ncx_init_list(&retval->v.list, listbtyp);
-	    res = val_list_ok(typdef, &retval->v.list);
+	    res = val_list_ok(obj_get_ctypdef(obj), 
+			      &retval->v.list);
 	} else {
 	    /* check the empty string */
-	    res = val_string_ok(typdef, btyp, (const xmlChar *)"");
+	    res = val_string_ok(obj_get_ctypdef(obj), 
+				btyp, (const xmlChar *)"");
 	    if (res == NO_ERR) {
 		retval->v.str = xml_strdup((const xmlChar *)"");
 		if (!retval->v.str) {
@@ -1867,8 +1419,10 @@ static status_t
     if (res != NO_ERR) {
 	if (!errdone) {
 	    /* add rpc-error to msg->errQ */
-	    (void)agt_ps_parse_error_subtree(scb, msg, startnode,
-		 errnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
+	    (void)parse_error_subtree(scb, msg, startnode,
+				      errnode, res, 
+				      NCX_NT_NONE, NULL, 
+				      NCX_NT_VAL, retval);
 	}
 	xml_clean_node(&valnode);
 	return res;
@@ -1892,29 +1446,25 @@ static status_t
 	errnode = &valnode;
 	break;
     case XML_NT_STRING:
-	if (btyp==NCX_BT_XLIST) {
+	if (btyp==NCX_BT_SLIST || btyp==NCX_BT_BITS) {
 	    /* get the list of strings, then check them */
-	    ncx_init_xlist(&retval->v.xlist);
-	    res = ncx_set_xlist(valnode.simval, &retval->v.xlist);
-	    if (res==NO_ERR) {
-		res = val_xlist_ok(typdef, &retval->v.xlist);
-	    }
-	} else if (btyp==NCX_BT_SLIST) {
-	    /* get the list of strings, then check them */
-	    listtyp = typ_get_listtyp(typdef);
+	    listtyp = typ_get_listtyp(obj_get_ctypdef(obj));
 	    listbtyp = typ_get_basetype(&listtyp->typdef);
-	    ncx_init_list(&retval->v.list, listbtyp);
+
 	    res = ncx_set_list(listbtyp, valnode.simval, 
 			       &retval->v.list);
 	    if (res == NO_ERR) {
 		res = ncx_finish_list(&listtyp->typdef, &retval->v.list);
 	    }
+
 	    if (res == NO_ERR) {
-		res = val_list_ok(typdef, &retval->v.list);
+		res = val_list_ok(obj_get_ctypdef(obj), 
+				  &retval->v.list);
 	    }
 	} else {
 	    /* check the non-whitespace string */
-	    res = val_string_ok(typdef, btyp, valnode.simval);
+	    res = val_string_ok(obj_get_ctypdef(obj), 
+				btyp, valnode.simval);
 	}
 
 	if (res != NO_ERR) {
@@ -1924,14 +1474,12 @@ static status_t
 	    switch (btyp) {
 	    case NCX_BT_STRING:
 	    case NCX_BT_BINARY:
-	    case NCX_BT_ENAME:
 		retval->v.str = xml_strdup(valnode.simval);
 		if (!retval->v.str) {
 		    res = ERR_INTERNAL_MEM;
 		}
 		break;
 	    case NCX_BT_SLIST:
-	    case NCX_BT_XLIST:
 		break;   /* value already set */
 	    default:
 		res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -1944,11 +1492,11 @@ static status_t
     }
 
     /* get the matching end node for startnode */
-    res2 = agt_xml_consume_node(scb->reader, &endnode,
-	    NCX_LAYER_OPERATION, &msg->errQ);
+    res2 = get_xml_node(scb, msg, &endnode, TRUE);
     if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-	log_debug3("\nparse_string: expecting end for %s", startnode->qname);
+	log_debug3("\nparse_string: expecting end for %s", 
+		   startnode->qname);
 	if (LOGDEBUG3) {
 	    xml_dump_node(&endnode);
 	}
@@ -1966,8 +1514,9 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR)	&& !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)agt_ps_parse_error_subtree(scb, msg, startnode,
-	     errnode, res, NCX_NT_STRING, badval, NCX_NT_VAL, retval);
+	(void)parse_error_subtree(scb, msg, startnode,
+				  errnode, res, NCX_NT_STRING,
+				  badval, NCX_NT_VAL, retval);
     }
 
     xml_clean_node(&valnode);
@@ -1994,17 +1543,16 @@ static status_t
 static status_t 
     parse_union_nc (ses_cb_t  *scb,
 		    xml_msg_hdr_t *msg,
-		    typ_def_t *typdef,
+		    const obj_template_t *obj,
 		    const xml_node_t *startnode,
 		    ncx_data_class_t parentdc,
 		    val_value_t  *retval)
 {
-    xml_node_t valnode, endnode;
     const xml_node_t  *errnode;
-    const xmlChar *badval;
-    status_t   res, res2;
-    boolean    errdone;
-
+    const xmlChar     *badval;
+    xml_node_t         valnode, endnode;
+    status_t           res, res2;
+    boolean            errdone;
 
     /* init local vars */
     xml_init_node(&valnode);
@@ -2014,19 +1562,17 @@ static status_t
     badval = NULL;
     res2 = NO_ERR;
 
-    retval->btyp = NCX_BT_UNION;
-    retval->typdef = typdef;
-    retval->dataclass = pick_dataclass(parentdc, typdef);
+    val_init_from_template(retval, obj);
+    retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
     if (res == NO_ERR) {
-	res = xml_node_match(startnode, msg->cur_appns, 
+	res = xml_node_match(startnode, obj_get_nsid(obj), 
 			     NULL, XML_NT_START); 
     }
     if (res == NO_ERR) {
 	/* get the next node which should be a string node */
-	res = agt_xml_consume_node(scb->reader, &valnode,
-	       NCX_LAYER_OPERATION, &msg->errQ);
+	res = get_xml_node(scb, msg, &valnode, TRUE);
 	if (res != NO_ERR) {
 	    errdone = TRUE;
 	}
@@ -2048,7 +1594,8 @@ static status_t
 	    break;
 	case XML_NT_STRING:
 	    /* get the non-whitespace string here */
-	    res = val_union_ok(typdef, valnode.simval, retval);
+	    res = val_union_ok(obj_get_ctypdef(obj), 
+			       valnode.simval, retval);
 	    if (res != NO_ERR) {
 		badval = valnode.simval;
 	    }
@@ -2059,11 +1606,10 @@ static status_t
 	}
 
 	/* get the matching end node for startnode */
-	res2 = agt_xml_consume_node(scb->reader, &endnode,
-		NCX_LAYER_OPERATION, &msg->errQ);
+	res2 = get_xml_node(scb, msg, &endnode, TRUE);
 	if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_ename: expecting end for %s", 
+	    log_debug3("\nparse_union: expecting end for %s", 
 		       startnode->qname);
 	    if (LOGDEBUG3) {
 		xml_dump_node(&endnode);
@@ -2085,8 +1631,10 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR) && !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)agt_ps_parse_error_subtree(scb, msg, startnode,
-	     errnode, res, NCX_NT_STRING, badval, NCX_NT_VAL, retval);
+	(void)parse_error_subtree(scb, msg, startnode,
+				  errnode, res, 
+				  NCX_NT_STRING, badval, 
+				  NCX_NT_VAL, retval);
     }
 
     xml_clean_node(&valnode);
@@ -2097,38 +1645,166 @@ static status_t
 
 
 /********************************************************************
- * FUNCTION finish_table_index
+ * FUNCTION parse_leaflist_nc
  * 
- * Create an index chain for the just-parsed table
+ * Parse the XML input as a pseudo-complex type
+ *
+ * Handles the following base types:
+ *   NCX_BT_LEAF_LIST
+ *
+ *
+ * <foo>fred</foo>
+ * <foo>barney</foo>
+ * <foo>wilma</foo>
  *
  * INPUTS:
- *   scb == session control block
- *   msg == xml_msg_hdr_t in progress
- *   typdef == typdef of the table 
- *   val == the just parsed table row with the childQ containing
- *          nodes to check as index nodes
+ *   see parse_btype_nc parameter list
  * RETURNS:
  *   status
  *********************************************************************/
 static status_t 
-    finish_table_index (ses_cb_t  *scb,
-			xml_msg_hdr_t *msg,
-			typ_def_t *typdef,
-			val_value_t *val)
+    parse_leaflist_nc (ses_cb_t  *scb,
+		       xml_msg_hdr_t *msg,
+		       const obj_template_t *obj,
+		       const xml_node_t *startnode,
+		       ncx_data_class_t parentdc,
+		       val_value_t  *retval)
 {
-    status_t           res;
+    const xml_node_t     *errnode;
+    val_value_t          *chval;
+    xml_node_t            testnode;
+    status_t              res, retres;
+    boolean               done, errdone, empty;
+    ncx_btype_t           btyp;
 
-    if (dlq_empty(&typdef->def.complex.indexQ)) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+    /* setup local vars */
+    errnode = startnode;
+    res = NO_ERR;
+    retres = NO_ERR;
+    done = FALSE;
+    empty = FALSE;
+
+    /* first set up a complex type (NCX_BT_LEAF_LIST
+     * that will hold all the simple leafs
+     */
+    val_init_from_template_primary(retval, obj);
+    retval->dataclass = pick_dataclass(parentdc, obj);
+    retval->editop = get_editop(startnode);
+
+    switch (startnode->nodetyp) {
+    case XML_NT_START:
+	break;
+    case XML_NT_EMPTY:
+	empty = TRUE;
+	break;
+    case XML_NT_STRING:
+    case XML_NT_END:
+	res = ERR_NCX_WRONG_NODETYP_SIM;
+	break;
+    default:
+	res = ERR_NCX_WRONG_NODETYP;
     }
 
-    res = gen_index_chain(scb, msg,
-			  typ_first_index(TYP_DEF_COMPLEX(typdef)),
-			  val);
+    if (res != NO_ERR) {
+	(void)parse_error_subtree(scb, msg, startnode,
+				  errnode, res, 
+				  NCX_NT_NONE, NULL, 
+				  NCX_NT_VAL, retval);
+	return res;
+    }
 
-    return res;
+    xml_init_node(&testnode);
 
-} /* finish_table_index */
+    /* get the basetype of the individual leafs */
+    btyp = obj_get_basetype(obj);
+
+    /* go through sibling nodes until a different element shows up
+     * indicating the end of the leaf list
+     * gather all the leafs as children of the leaf-list
+     */
+    while (!done) {
+	/* init per-loop vars */
+	errdone = FALSE;
+	res = NO_ERR;
+
+	/* try to create a new child node for the leaf-list */
+	chval = new_child_val(obj_get_nsid(obj),
+			      obj_get_name(obj), 
+			      FALSE, retval, 
+			      get_editop(startnode));
+	if (!chval) {
+	    res = ERR_INTERNAL_MEM;
+	} else if (empty) {
+	    val_init_from_template(chval, obj);
+	    val_add_child(chval, retval);
+	    done = TRUE;
+	    continue;
+	} else {
+	    /* get one leaf parsed */
+	    res = parse_one_btype(scb, msg, obj, btyp,
+				  startnode, parentdc, chval);
+	    if (res == NO_ERR) {
+		/* success - save the child value node */
+		val_add_child(chval, retval);
+	    } else {
+		/* did not parse the child node correctly */
+		val_free_value(chval);
+		errdone = TRUE;
+	    }
+	}
+
+	/* check any errors in setting up the child or index nodes */
+	if (res != NO_ERR) {
+	    retres = res;
+	    if (!errdone) {
+		/* add rpc-error to msg->errQ */
+		(void)parse_error_subtree(scb, msg, startnode,
+					  errnode, res, 
+					  NCX_NT_NONE, NULL, 
+					  NCX_NT_VAL, retval);
+	    }
+	    if (NEED_EXIT) {
+		done = TRUE;
+		continue;
+	    }
+	}
+
+	/* peek ahead at the next node to see if it matches this 
+	 * leaflist or not 
+	 */
+	res = get_xml_node(scb, msg, &testnode, TRUE);
+	if (res == NO_ERR) {
+	    if (testnode.nodetyp==XML_NT_START ||
+		testnode.nodetyp==XML_NT_EMPTY) {
+		res = xml_node_match(&testnode, 
+				     obj_get_nsid(obj), 
+				     obj_get_name(obj), 
+				     XML_NT_NONE);
+	    } else {
+		/* not really an error */
+		res = ERR_NCX_WRONG_ELEMENT;
+	    }
+
+	    if (res != NO_ERR) {
+		/* this is part of the next object, or maybe the
+		 * end of a parent object
+		 */
+		scb->xmladvance = FALSE;
+		done = TRUE;
+		continue;
+	    }
+	}
+	if (res != NO_ERR) {
+	    done = TRUE;
+	    continue;
+	}
+	xml_clean_node(&testnode);
+    }
+
+    xml_clean_node(&testnode);
+    return retres;
+
+} /* parse_leaflist_nc */
 
 
 /********************************************************************
@@ -2138,10 +1814,9 @@ static status_t
  *
  * Handles the following base types:
  *   NCX_BT_CONTAINER
- *   NCX_BT_CHOICE
  *   NCX_BT_LIST
  *
- * E.g., struct:
+ * E.g., container:
  *
  * <foo>
  *   <a>blah</a>
@@ -2149,7 +1824,7 @@ static status_t
  *   <c/>
  * </foo>
  *
- * In an instance document, structs, choices, and tables look 
+ * In an instance document, containers and lists look 
  * the same.  The validation is different of course, but the
  * parsing is basically the same.
  *
@@ -2161,80 +1836,92 @@ static status_t
 static status_t 
     parse_complex_nc (ses_cb_t  *scb,
 		      xml_msg_hdr_t *msg,
-		      typ_def_t *typdef,
+		      const obj_template_t *obj,
 		      ncx_btype_t btyp,
 		      const xml_node_t *startnode,
 		      ncx_data_class_t parentdc,
 		      val_value_t  *retval)
 {
-    xml_node_t         chnode;
-    const xml_node_t  *errnode;
-    val_value_t       *chval, *lastval;
-    typ_child_t       *ch, *nextch;
-    typ_index_t       *instart, *infind, *in;
-    typ_def_t         *realtypdef;
-    status_t           res, res2, retres;
-    boolean            done, usein, errdone;
-    ncx_btype_t        chbtyp;
+    const xml_node_t     *errnode;
+    const obj_template_t *chobj, *curchild, *nextchobj;
+    val_value_t          *chval;
+    xml_node_t            chnode;
+    status_t              res, res2, retres;
+    boolean               done, errdone, empty;
+    ncx_btype_t           chbtyp;
 
     /* setup local vars */
-    xml_init_node(&chnode);
     errnode = startnode;
-    in = NULL;
-    instart = NULL;
-    ch = NULL;
-    lastval = NULL;
+    chobj = NULL;
+    curchild = NULL;
+    nextchobj = NULL;
     res = NO_ERR;
     res2 = NO_ERR;
     retres = NO_ERR;
     done = FALSE;
+    errdone = FALSE;
+    empty = FALSE;
+
+    val_init_from_template(retval, obj);
+    retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, msg->cur_appns,
-			 NULL, XML_NT_START); 
+
+    /*** HANDLE EMPTY CONTAINER ***/
+
+
+    /* do not really need to validate the start node type
+     * since it is probably a virtual container at the
+     * very start, and after that, a node match must have
+     * occurred to call this function recursively
+     */
+    switch (startnode->nodetyp) {
+    case XML_NT_START:
+	break;
+    case XML_NT_EMPTY:
+	empty = TRUE;
+	break;
+    case XML_NT_STRING:
+    case XML_NT_END:
+	res = ERR_NCX_WRONG_NODETYP_SIM;
+	break;
+    default:
+	res = ERR_NCX_WRONG_NODETYP;
+    }
+
     if (res == NO_ERR) {
 	/* start setting up the return value */
-	val_init_complex(retval, btyp);
-	retval->typdef = typdef;
-	retval->name = startnode->elname;
-	retval->dname = NULL;
 	retval->editop = get_editop(startnode);
-	retval->dataclass = pick_dataclass(parentdc, typdef);
-	realtypdef = typ_get_base_typdef(typdef);
-	
 
-	/* check if an index pointer needs to be setup */
-	if (btyp==NCX_BT_LIST) {
-	    instart = typ_first_index(&realtypdef->def.complex);
-	}
-
-	/* setup the first child in the struct typedef */
-	ch = typ_first_child(&realtypdef->def.complex);
-
-	/* make sure there is at least 1 index or child node defined */
-	if (!instart && !ch) {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-
-    /* check any errors in the startnode */
-    if (res != NO_ERR) {
+	/* setup the first child in the complex object
+	 * Allowed be NULL in some cases so do not check
+	 * the result yet
+	 */
+	chobj = obj_first_child(obj);
+    } else {
 	/* add rpc-error to msg->errQ */
-	(void)agt_ps_parse_error_subtree(scb, msg, startnode,
-	     errnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
+	(void)parse_error_subtree(scb, msg, startnode,
+				  errnode, res, 
+				  NCX_NT_NONE, NULL, 
+				  NCX_NT_VAL, retval);
 	return res;
     }
+
+    if (empty) {
+	return NO_ERR;
+    }
+
+    xml_init_node(&chnode);
 
     /* go through each child node until the parent end node */
     while (!done) {
 	/* init per-loop vars */
-	usein = FALSE;
 	res2 = NO_ERR;
 	errdone = FALSE;
+	empty = FALSE;
 
 	/* get the next node which should be a child or end node */
-	res = agt_xml_consume_node(scb->reader, &chnode,
-	       NCX_LAYER_OPERATION, &msg->errQ);
+	res = get_xml_node(scb, msg, &chnode, TRUE);
 	if (res != NO_ERR) {
 	    errdone = TRUE;
 	    done = TRUE;
@@ -2245,12 +1932,11 @@ static status_t
 		xml_dump_node(&chnode);
 	    }
 #endif
-	    /* validate the struct member node type and namespace */
+	    /* validate the child member node type */
 	    switch (chnode.nodetyp) {
 	    case XML_NT_START:
 	    case XML_NT_EMPTY:
-		res = xml_node_match(&chnode, msg->cur_appns,
-				     NULL, XML_NT_NONE);
+		/* any namespace OK for now, check it in get_child_node */
 		break;
 	    case XML_NT_STRING:
 		res = ERR_NCX_WRONG_NODETYP_SIM;
@@ -2272,64 +1958,44 @@ static status_t
 	    }
 	}
 
-	/* check if a child member should be used */
+	/* if we get here, there is a START or EMPTY node
+	 * that could be a valid child node
+	 *
+	 * if xmlorder enforced then check if the 
+	 * node is the correct child node
+	 *
+	 * if no xmlorder, then check for any valid child
+	 */
 	if (res==NO_ERR) {
-	    if (ch) {
-		res = xml_node_match(&chnode, msg->cur_appns, 
-				     ch->name, XML_NT_NONE);
-		if (res != NO_ERR) {
-		    /* check if there are other child nodes that could
-		     * match, due to instance qualifiers 
-		     */
-		    nextch = find_next_child(ch, msg->cur_appns, 
-				     &chnode, FALSE);
-		    if (nextch) {
-			/* found a valid next child */
-			res = NO_ERR;
-			ch = nextch;
-		    }
-		}
-	    }
-	    if (res != NO_ERR) {
-		/* try to find a matching index */
-		for (infind = instart;
-		     infind != NULL && !usein;
-		     infind = typ_next_index(infind)) {
-		    res = index_node_match(infind, msg->cur_appns, 
-				   &chnode);
-		    if (res == NO_ERR) {
-			in = infind;
-			usein = TRUE;
-		    }
-		}
-	    }
+	    res = get_child_node(obj, chobj, &chnode, &curchild);
 	}
 
 	/* try to setup a new child node */
 	if (res == NO_ERR) {
 	    /* save the child base type */
-	    chbtyp = typ_get_basetype((usein) ? 
-				      &in->typch.typdef : &ch->typdef);
+	    chbtyp = obj_get_basetype(curchild);
 
-	    /* at this point, the 'in' or 'ch' template matches the
-	     * 'chnode' owner and name;
+	    /* at this point, the 'curchild' template matches the
+	     * 'chnode' namespace and name;
 	     * Allocate a new val_value_t for the child value node
 	     */
-	    chval = new_child_val(chnode.nsid,
-		  (usein) ? in->typch.name : ch->name, FALSE,
-		  retval, get_editop(&chnode));
+	    chval = new_child_val(obj_get_nsid(curchild),
+				  obj_get_name(curchild), 
+				  FALSE, retval, 
+				  get_editop(&chnode));
 	    if (!chval) {
 		res = ERR_INTERNAL_MEM;
 	    }
 	}
 
-	/* check any errors in setting up the child or index nodes */
+	/* check any errors in setting up the child node */
 	if (res != NO_ERR) {
 	    /* try to skip just the child node sub-tree */
 	    if (!errdone) {
 		/* add rpc-error to msg->errQ */
-		res2 = agt_ps_parse_error_subtree(scb, msg, &chnode,
-		      errnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
+		res2 = parse_error_subtree(scb, msg, &chnode,
+					   errnode, res, NCX_NT_NONE, 
+					   NULL, NCX_NT_VAL, retval);
 	    }
 	    xml_clean_node(&chnode);
 	    if (res2 != NO_ERR) {
@@ -2346,33 +2012,23 @@ static status_t
 	/* recurse through and get whatever nodes are present
 	 * in the child node
 	 */
-	
-	res = parse_btype_nc(scb, msg, (usein) 
-			     ? &in->typch.typdef : &ch->typdef, 
+	res = parse_btype_nc(scb, msg, curchild,
 			     &chnode, retval->dataclass, chval);
 	if (res == NO_ERR) {
-	    /* success - save the child value node 
-	     * check the lastval and set the seqid if needed;
-	     * unnamed table entries and instance qualifiers create
-	     * duplicates which need to be identified by ordinal value
-	     */
-	    if (lastval) {
-		if (!xml_strcmp(lastval->name, chval->name)) {
-		    if (lastval->seqid == 0) {
-			lastval->seqid = 1;
-		    }
-		    chval->seqid = lastval->seqid+1;
-		} 
-	    }
-	    lastval = chval;
+	    /* success - save the child value node */
 	    val_add_child(chval, retval);
 
+	    /* setup the next child unless the current child
+	     * is a list
+	     */
 	    if (chbtyp != NCX_BT_LIST) {
 		/* setup next child if the cur child is 0 - 1 instance */
-		switch (ch->typdef.iqual) {
+		switch (obj_get_iqualval(curchild)) {
 		case NCX_IQUAL_ONE:
 		case NCX_IQUAL_OPT:
-		    ch = typ_next_child(ch);
+		    if (chobj) {
+			chobj = obj_next_child(chobj);
+		    }
 		    break;
 		default:
 		    break;
@@ -2384,11 +2040,27 @@ static status_t
 	    retres = res;
 	}
 	xml_clean_node(&chnode);
+
+	/* check if this is the special internal load-config RPC method,
+	 * in which case there will not be an end tag for the <load-config>
+	 * start tag passed to this function.  Need to quick exit
+	 * to prevent reading past the end of the XML config file,
+	 * which just contains the <config> element
+	 *
+	 * know there is just one parameter named <config> so just
+	 * go through the loop once because the </load-config> tag
+	 * will not be present
+	 */
+	if ((startnode->nsid == xmlns_ncx_id() || startnode->nsid == 0) && 
+	    !xml_strcmp(startnode->elname, NCX_EL_LOAD_CONFIG)) {
+	    done = TRUE;
+	}
     }
 
     /* check if the index ID needs to be set */
     if (btyp==NCX_BT_LIST) {
-	res = finish_table_index(scb, msg, realtypdef, retval);
+	res = gen_index_chain(scb, msg, 
+			      obj_first_key(obj), retval);
 	if (res != NO_ERR) {
 	    retres = res;
 	}
@@ -2401,524 +2073,345 @@ static status_t
 
 
 /********************************************************************
- * FUNCTION finish_container_index
- * 
- * Create an index chain for the just-parsed container child node
- *
- * INPUTS:
- *   scb == session control block
- *   msg == xml_msg_hdr_t in progress
- *   typdef == typdef of the table 
- *   contab == the just parsed container tree that should contain the
- *            index components if complex type; 
- *            The childQ contains 0 - N nodes, each representing
- *            one row in the container.
- *            This child node could be a simple or complex type
- *
- * OUTPUTS:
- *   The indexQ in each child node is set
- * RETURNS:
- *   status
- *********************************************************************/
-static status_t 
-    finish_container_index (ses_cb_t  *scb,
-			   xml_msg_hdr_t *msg,
-			   typ_def_t *typdef,
-			   val_value_t *contab)
-{
-    typ_index_t       *instart;
-    val_value_t       *chval;
-    status_t           res, retres;
-    uint32             ordindex;
-
-    /* check what kind of index is present */
-    instart = typ_first_index(TYP_DEF_COMPLEX(typdef));
-
-    /* Set the contab flags in all child nodes
-     * For noindex:
-     *    treat the order of each entry as an index
-     *    duplicates are allowed so the type or value of 
-     *    the child node does not matter
-     * For other index types, the ordindex will be ignored
-     */
-    ordindex = 0;
-    for (chval = val_get_first_child(contab);
-	 chval != NULL;
-	 chval = val_get_next_child(chval)) {
-	chval->seqid = ordindex++;
-	chval->flags |= VAL_FL_CONTAB;
-    }
-
-    if (!instart) {
-	return NO_ERR;
-    }
-
-    /* only structs can even have more than one index here so
-     * just generate index chains for them
-     */
-    retres = NO_ERR;
-    for (chval = val_get_first_child(contab);
-	 chval != NULL;
-	 chval = val_get_next_child(chval)) {
-	if (chval->btyp==NCX_BT_CONTAINER) {
-	    res = gen_index_chain(scb, msg, instart, chval);
-	    if (res != NO_ERR) {
-		retres = res;
-	    }
-	}
-    }
-
-    return retres;
-
-} /* finish_container_index */
-
-
-/********************************************************************
- * FUNCTION parse_container_nc
- * 
- * Parse the XML input as an 'container' type 
- *
- * INPUTS:
- *   see parse_btype_nc parameter list
- * RETURNS:
- *   status
- *********************************************************************/
-static status_t 
-    parse_container_nc (ses_cb_t  *scb,
-			xml_msg_hdr_t *msg,
-			typ_def_t *typdef,
-			const xml_node_t *startnode,
-			ncx_data_class_t  parentdc,
-			val_value_t  *retval)
-{
-    xml_node_t         chnode;
-    status_t           res, res2, retres;
-    boolean            empty, done, errdone;
-    typ_child_t       *ch;
-    typ_def_t         *realtypdef;
-    val_value_t       *chval, *lastval;
-
-    /* make sure the startnode is correct */
-    switch (startnode->nodetyp) {
-    case XML_NT_EMPTY:
-	/* OK special case -- treat as an empty container */
-	empty = TRUE;
-	res = xml_node_match(startnode, msg->cur_appns,
-			     NULL, XML_NT_NONE);
-	break;
-    case XML_NT_START:
-	empty = FALSE;
-	res = xml_node_match(startnode, msg->cur_appns,
-			     NULL, XML_NT_NONE);
-	break;
-    default:
-	res = ERR_NCX_WRONG_NODETYP;
-    }
-
-    /* check any errors in the startnode */
-    if (res != NO_ERR) {
-	/* add rpc-error to msg->errQ */
-	(void)agt_ps_parse_error_subtree(scb, msg, startnode,
-	     startnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
-	return res;
-    }
-
-    /* start setting up the return value */
-    val_init_complex(retval, NCX_BT_XCONTAINER);
-    retval->typdef = typdef;
-    retval->name = startnode->elname;
-    retval->dname = NULL;
-    retval->editop = get_editop(startnode);
-    retval->dataclass = pick_dataclass(parentdc, typdef);
-
-    /* if this is an empty node, then nothing left to parse */
-    if (empty) {
-	return NO_ERR;
-    }
-
-    /* setup local vars */
-    lastval = NULL;
-    retres = NO_ERR;
-    done = FALSE;
-    xml_init_node(&chnode);
-
-    realtypdef = typ_get_base_typdef(typdef);
-
-    ch = (typ_child_t *)dlq_firstEntry(&realtypdef->def.complex.childQ);
-
-    /* go through each child node until the parent end node */
-    while (!done) {
-	errdone = FALSE;
-	xml_clean_node(&chnode);
-
-	/* get the next node which should be the child or end node 
-	 * There should be 0 to N instances of a single type of
-	 * child node present, indicated by ch->typdef
-	 */
-	res = agt_xml_consume_node(scb->reader, &chnode,
-	       NCX_LAYER_OPERATION, &msg->errQ);
-	if (res != NO_ERR) {
-	    errdone = TRUE;
-	} else {
-#ifdef AGT_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_container:expecting start-child or end node.");
-	    if (LOGDEBUG3) {
-		xml_dump_node(&chnode);
-	    }
-#endif
-	    /* validate the node type */
-	    switch (chnode.nodetyp) {
-	    case XML_NT_START:
-		break;
-	    case XML_NT_EMPTY:
-		res = ERR_NCX_WRONG_NODETYP;
-		break;
-	    case XML_NT_STRING:
-		res = ERR_NCX_WRONG_NODETYP_SIM;
-		break;
-	    case XML_NT_END:
-		res = xml_endnode_match(startnode, &chnode);
-		if (res == NO_ERR) {
-		    done = TRUE;
-		    continue;
-		}
-		break;
-	    default:
-		res = ERR_NCX_WRONG_NODETYP;
-	    }
-	}
-
-	/* check if the child node is the correct name and namespace */
-	if (res==NO_ERR) {
-	    res = xml_node_match(&chnode, msg->cur_appns, 
-			 ch->name, XML_NT_NONE);
-	}
-
-	/* start a child node if it was the correct name */
-	if (res == NO_ERR) {
-	    chval = val_new_value();
-	    if (!chval) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		/* save a const pointer to the name of this field */
-		chval->name = ch->name;
-		chval->dname = NULL;
-		chval->editop = get_editop(&chnode);
-		chval->btyp = typ_get_basetype(&ch->typdef);
-		chval->parent_typ = NCX_NT_VAL;
-		chval->parent = retval;
-	    }
-	}
-
-	/* if any errors so far, try to skip to the next sibling */
-	if (res != NO_ERR) {
-	    if (!errdone) {
-		/* add rpc-error to msg->errQ */
-		res2 = agt_ps_parse_error_subtree(scb, msg, &chnode,
-		      &chnode, res, NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
-	    }
-	    if (res2 != NO_ERR) {
-		(void)agt_xml_skip_subtree(scb->reader, startnode);
-		xml_clean_node(&chnode);
-		return res;
-	    } else {
-		retres = res;
-		continue;
-	    }
-	}
-
-	/* recurse through and get whatever nodes are present
-	 * in the child node
-	 */
-	res = parse_btype_nc(scb, msg, &ch->typdef, &chnode, 
-			     retval->dataclass, chval);
-	if (res == NO_ERR) {
-	    /* success - save the child value node 
-	     * check the lastval and set the seqid if needed
-	     */
-	    if (lastval) {
-		if (!xml_strcmp(lastval->name, chval->name)) {
-		    if (lastval->seqid == 0) {
-			lastval->seqid = 1;
-		    }
-		    chval->seqid = lastval->seqid+1;
-		} 
-	    }
-	    lastval = chval;
-	    val_add_child(chval, retval);
-	} else {
-	    /* do not save the child node if there are parse errors */
-	    val_free_value(chval);
-	    retres = res;
-	}
-
-
-	/* Note that instance qualifiers on the container child type
-	 * are not allowed, and ignored if the named type allows
-	 * multiple or optional instances.
-	 * By definition, a table or container with index components 
-	 * already allows for 0 - N instances
-	 */
-
-    } /* loop through container item */
-
-    /* Check the index and set the val_index_t chains as needed */
-    res = finish_container_index(scb, msg, realtypdef, retval);
-    if (res != NO_ERR) {
-	retres = res;
-    }
-
-    xml_clean_node(&chnode);
-    return retres;
-
-} /* parse_container_nc */
-
-
-/********************************************************************
-* FUNCTION find_metadef
+* FUNCTION parse_one_btype
 * 
-* Find the metadata descriptor, if any, in the typdef chain
-*
-* INPUTS:
-*     typdef == typdef to check
-*     name == attribute name to find
-*
-* RETURNS:
-*   pointer to metadata descriptor or NULL of not found
-*********************************************************************/
-static typ_child_t *
-    find_metadef (typ_def_t *typdef,
-		  const xmlChar *name)
-{
-    typ_child_t  *meta;
-
-    for (;;) {
-	meta = typ_find_meta(typdef, name);
-	if (meta) {
-	    return meta;
-	}
-	
-	typdef = typ_get_parent_typdef(typdef);
-	if (!typdef) {
-	    return NULL;
-	}
-    }
-    /*NOTREACHED*/
-
-} /* find_metadef */
-
-
-/********************************************************************
-* FUNCTION metaerr_count
-* 
-* Count the number of the specified meta error records
-*
-* INPUTS:
-*     val == value to check
-*     nsid == mamespace ID to match against
-*     name == attribute name to match against
-*
-* RETURNS:
-*     number of matching records found
-*********************************************************************/
-static uint32
-    metaerr_count (const val_value_t *val,
-		   xmlns_id_t  nsid,
-		   const xmlChar *name)
-{
-    const val_metaerr_t *merr;
-    uint32               cnt;
-
-    cnt = 0;
-    for (merr = (const val_metaerr_t *)dlq_firstEntry(&val->metaerrQ);
-	 merr != NULL;
-	 merr = (const val_metaerr_t *)dlq_nextEntry(merr)) {
-	if (xml_strcmp(merr->name, name)) {
-	    continue;
-	}
-	if (nsid) {
-	    if (merr->nsid == nsid) {
-		cnt++;
-	    }
-	} else {
-	    cnt++;
-	}
-    }
-    return cnt;
-
-} /* metaerr_count */
-
-
-/********************************************************************
-* FUNCTION match_metaval
-* 
-* Match the specific attribute value and namespace ID
-*
-* INPUTS:
-*     attr == attr to check
-*     nsid == mamespace ID to match against
-*     name == attribute name to match against
-*
-* RETURNS:
-*     TRUE if attr is a match; FALSE otherwise
-*********************************************************************/
-static boolean
-    match_metaval (const xml_attr_t *attr,
-		   xmlns_id_t  nsid,
-		   const xmlChar *name)
-{
-    if (xml_strcmp(attr->attr_name, name)) {
-	return FALSE;
-    }
-    if (attr->attr_ns) {
-	return (attr->attr_ns==nsid);
-    } else {
-	/* unqualified match */
-	return TRUE;
-    }
-} /* match_metaval */
-
-
-/********************************************************************
-* FUNCTION clean_metaerrs
-* 
-* Clean the val->metaerrQ
-*
-* INPUTS:
-*     val == value to check
-*
-*********************************************************************/
-static void
-    clean_metaerrs (val_value_t *val)
-{
-    val_metaerr_t *merr;
-
-    while (!dlq_empty(&val->metaerrQ)) {
-	merr = (val_metaerr_t *)dlq_deque(&val->metaerrQ);
-	val_free_metaerr(merr);
-    }
-} /* clean_metaerrs */
-
-
-/********************************************************************
-* FUNCTION metadata_inst_check
-* 
-* Validate that all the XML attributes in the specified 
-* xml_node_t struct are pesent in appropriate numbers
-*
-* Since attributes are unordered, they all have to be parsed
-* before they can be checked for instance count
+* Switch to dispatch to specific base type handler
+* for one element; needed so leaf-list can be handled properly
 *
 * INPUTS:
 *     scb == session control block
+*            Input is read from scb->reader.
 *     msg == incoming RPC message
 *            Errors are appended to msg->errQ
-*     val == value to check for metadata errors
+*     obj == object template for expected node
+*     btyp == forced base type to use
+*     startnode == top node of the parameter to be parsed
+*            Parser function will attempt to consume all the
+*            nodes until the matching endnode is reached
+*     parentdc == data class of the parent node, which will get
+*                 used if it is not explicitly set for the typdef
+*     retval ==  val_value_t that should get the results of the parsing
 *     
 * OUTPUTS:
+*    *retval will be filled in
 *    msg->errQ may be appended with new errors or warnings
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t 
-    metadata_inst_check (ses_cb_t *scb,
-			 xml_msg_hdr_t *msg,
-			 val_value_t  *val)
+    parse_one_btype (ses_cb_t  *scb,
+		     xml_msg_hdr_t *msg,
+		     const obj_template_t *obj,
+		     ncx_btype_t  btyp,
+		     const xml_node_t *startnode,
+		     ncx_data_class_t parentdc,
+		     val_value_t  *retval)
 {
-    const typ_def_t   *typdef;
-    typ_child_t       *metadef;
-    uint32             cnt;
-    status_t           res, retres;
-    boolean            first;
-    xmlns_qname_t      qname;
+    status_t     res, res2, res3;
+    op_editop_t  editop;
+    boolean      nserr;
 
-    retres = NO_ERR;
+    /* get the attribute values from the start node */
+    editop = OP_EDITOP_NONE;
+    retval->nsid = startnode->nsid;
 
-    /* first check the inst count of the operation attribute */
-    cnt = val_metadata_inst_count(val, xmlns_nc_id(), NC_OPERATION_ATTR_NAME);
-    cnt += metaerr_count(val, xmlns_nc_id(), NC_OPERATION_ATTR_NAME);
-    if (cnt > 1) {
-	res = ERR_NCX_EXTRA_ATTR;
-	agt_record_error(scb, &msg->errQ, NCX_LAYER_CONTENT, res, 
-	     NULL, NCX_NT_STRING, NC_OPERATION_ATTR_NAME, NCX_NT_VAL, val);
+    /* check namespace errors except if the type is ANY */
+    nserr = (btyp != NCX_BT_ANY);
+
+#if 0  /**** TEMP!!! GETTING STARTED !!! ****/
+    /* parse the attributes, if any; do not quick exit on this error */
+    res2 = parse_metadata_nc(scb, msg, obj, startnode, 
+	   nserr, retval, &editop);
+#else
+    res2 = NO_ERR;
+#endif
+
+
+    /* continue to parse the startnode depending on the base type 
+     * to record as many errors as possible
+     */
+    switch (btyp) {
+    case NCX_BT_ANY:
+	res = parse_any_nc(scb, msg, startnode, parentdc, retval);
+	break;
+    case NCX_BT_ENUM:
+	res = parse_enum_nc(scb, msg, obj, startnode, parentdc, retval);
+	break;
+    case NCX_BT_EMPTY:
+	res = parse_empty_nc(scb, msg, obj, startnode, parentdc, retval);
+	break;
+    case NCX_BT_BOOLEAN:
+	res = parse_boolean_nc(scb, msg, obj, startnode, parentdc, retval);
+	break;
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+    case NCX_BT_INT64:
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+    case NCX_BT_UINT64:
+    case NCX_BT_FLOAT32:
+    case NCX_BT_FLOAT64:
+	res = parse_num_nc(scb, msg, obj, btyp, startnode, 
+			   parentdc, retval);
+	break;
+    case NCX_BT_KEYREF:
+    case NCX_BT_STRING:
+    case NCX_BT_BINARY:
+    case NCX_BT_SLIST:
+    case NCX_BT_BITS:
+    case NCX_BT_INSTANCE_ID:
+	res = parse_string_nc(scb, msg, obj, btyp, startnode, 
+			      parentdc, retval);
+	break;
+    case NCX_BT_UNION:
+	res = parse_union_nc(scb, msg, obj, startnode, parentdc, retval);
+	break;
+    case NCX_BT_LEAF_LIST:
+	res = parse_leaflist_nc(scb, msg, obj, startnode, 
+				parentdc, retval);
+	break;
+    case NCX_BT_CONTAINER:
+    case NCX_BT_LIST:
+	res = parse_complex_nc(scb, msg, obj, btyp, startnode, 
+			       parentdc, retval);
+	break;
+    default:
+	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    /* get the typdef for the first in the chain with 
-     * some meta data defined; may be NULL, in which
-     * case just the operation attribute will be checked
+    /* this will only be non-zero if the operation attribute
+     * was seen in XML subtree for the value
      */
-    typdef = typ_get_cqual_typdef(val->typdef, NCX_SQUAL_META);
+    retval->editop = editop;
 
-    /* go through the entire typdef chain checking proper
-     * attribute instance count, and record errors
-     */
-    first = TRUE;
-    while (typdef) {
-	if (first) {
-	    metadef = typ_first_meta(typdef);
-	    first = FALSE;
-	} else {
-	    metadef = typ_next_meta(metadef);
-	}
-	if (!metadef) {
-	    typdef = typ_get_cparent_typdef(typdef);
-	    first = TRUE;
-	} else {
-	    /* got something to check 
-	     * 
-	     * limitation for now!!!
-	     * attribute namespace must be the same as the
-	     * value that holds it, except for the netconf
-	     * operation attribute
-	     */
-	    res = NO_ERR;
-	    cnt = val_metadata_inst_count(val, val->nsid, metadef->name);
-	    cnt += metaerr_count(val, val->nsid, metadef->name);
+    /* set the config flag for this value */
+    res3 = NO_ERR;
 
-	    /* check the instance qualifier from the typdef 
-	     * continue the loop if there is no error
-	     */
-	    switch (metadef->typdef.iqual) {
-	    case NCX_IQUAL_ONE:
-		if (!cnt) {
-		    res = ERR_NCX_MISSING_ATTR;
-		} else if (cnt > 1) {
-		    res = ERR_NCX_EXTRA_ATTR;
-		}
-		break;
-	    case NCX_IQUAL_OPT:
-		if (cnt > 1) {
-		    res = ERR_NCX_EXTRA_ATTR;
-		}
-		break;
-	    case NCX_IQUAL_1MORE:
-		if (!cnt) {
-		    res = ERR_NCX_MISSING_ATTR;
-		}
-		break;
-	    case NCX_IQUAL_ZMORE:
-		break;
-	    default:
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-
-	    if (res != NO_ERR) {
-		qname.nsid = val->nsid;
-		qname.name = metadef->name;
-		agt_record_error(scb, &msg->errQ, 
-			 NCX_LAYER_CONTENT, res,
-			 (const xml_node_t *)val->name,
-			 NCX_NT_QNAME, &qname, 
-			 NCX_NT_VAL, val);
-	    }
-	}
+#if 0   /**** TEMP ****/
+    if (res == NO_ERR) {
+	/* this has to be after the retval typdef is set */
+	res3 = metadata_inst_check(scb, msg, retval);
+	clean_metaerrs(retval);
     }
-    return retres;
+#endif
 
-} /* metadata_inst_check */
+    if (res != NO_ERR) {
+	retval->res = res;
+	return res;
+    } else if (res2 != NO_ERR) {
+	retval->res = res2;
+	return res2;
+    }
+
+    retval->res = res3;
+    return res3;
+
+} /* parse_one_btype */
 
 
+/********************************************************************
+* FUNCTION parse_btype_nc
+* 
+* Switch to dispatch to specific base type handler
+*
+* INPUTS:
+*     scb == session control block
+*            Input is read from scb->reader.
+*     msg == incoming RPC message
+*            Errors are appended to msg->errQ
+*     typdef == first non-ptr-only typdef for this type
+*     startnode == top node of the parameter to be parsed
+*            Parser function will attempt to consume all the
+*            nodes until the matching endnode is reached
+*     parentdc == data class of the parent node, which will get
+*                 used if it is not explicitly set for the typdef
+*     retval ==  val_value_t that should get the results of the parsing
+*     
+* OUTPUTS:
+*    *retval will be filled in
+*    msg->errQ may be appended with new errors or warnings
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    parse_btype_nc (ses_cb_t  *scb,
+		    xml_msg_hdr_t *msg,
+		    const obj_template_t *obj,
+		    const xml_node_t *startnode,
+		    ncx_data_class_t parentdc,
+		    val_value_t  *retval)
+{
+    ncx_btype_t  btyp;
+
+    btyp = obj_get_primary_basetype(obj);
+    return parse_one_btype(scb, msg, obj, btyp,
+			   startnode, parentdc, retval);
+
+} /* parse_btype_nc */
+
+
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
+/********************************************************************
+* FUNCTION agt_val_parse_nc
+* 
+* Parse NETCONF PDU sub-contents into value fields
+* This module does not enforce complex type completeness.
+* Different subsets of configuration data are permitted
+* in several standard (and any proprietary) RPC methods
+*
+* Makes sure that only allowed value strings
+* or child nodes (and their values) are entered.
+*
+* Defaults are not added to any objects
+* Missing objects are not checked
+*
+* A seperate parsing phase is used to fully validate the input
+* contained in the returned val_value_t struct.
+*
+* This parsing phase checks that simple types are complete
+* and child members of complex types are valid (but maybe 
+* missing or incomplete child nodes.
+*
+* Note that the NETCONF inlineFilterType will be parsed
+* correctly because it is type 'anyxml'.  This type is
+* parsed as a struct, and no validation other well-formed
+* XML is done.
+*
+* INPUTS:
+*     scb == session control block
+*     msg == incoming RPC message
+*     obj == obj_template_t for the object to parse
+*     startnode == top node of the parameter to be parsed
+*     parentdc == parent data class
+*                 For the first call to this function, this will
+*                 be the data class of a parameter.
+*     retval == address of initialized return value
+*     
+* OUTPUTS:
+*    *status will be filled in
+*     msg->errQ may be appended with new errors
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    agt_val_parse_nc (ses_cb_t  *scb,
+		      xml_msg_hdr_t *msg,
+		      const obj_template_t *obj,
+		      const xml_node_t *startnode,
+		      ncx_data_class_t  parentdc,
+		      val_value_t  *retval)
+{
+    status_t res;
+
+#ifdef DEBUG
+    if (!scb || !msg || !obj || !startnode || !retval) {
+	/* non-recoverable error */
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+#ifdef AGT_VAL_PARSE_DEBUG
+    log_debug3("\nagt_val_parse: %s:%s btyp:%s", 
+	       obj_get_mod_prefix(obj),
+	       obj_get_name(obj), 
+	       tk_get_btype_sym(obj_get_basetype(obj)));
+#endif
+
+    /* get the element values */
+    res = parse_btype_nc(scb, msg, obj, startnode, 
+			 parentdc, retval);
+    return res;
+
+}  /* agt_val_parse_nc */
+
+
+/********************************************************************
+* FUNCTION agt_val_parse_load
+* 
+* Special load-config version of agt_val_parse_nc
+*********************************************************************/
+status_t
+    agt_val_parse_load (ses_cb_t  *scb,
+			xml_msg_hdr_t *msg,
+			const obj_template_t *obj,
+			const xml_node_t *startnode,
+			ncx_data_class_t  parentdc,
+			val_value_t  *retval)
+{
+    status_t res;
+
+#ifdef DEBUG
+    if (!scb || !msg || !obj || !startnode || !retval) {
+	/* non-recoverable error */
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+#ifdef AGT_VAL_PARSE_DEBUG
+    log_debug3("\nagt_val_parse: %s:%s btyp:%s", 
+	       obj_get_mod_prefix(obj),
+	       obj_get_name(obj), 
+	       tk_get_btype_sym(obj_get_basetype(obj)));
+#endif
+
+    /* get the element values */
+    res = parse_btype_nc(scb, msg, obj, startnode, 
+			 parentdc, retval);
+    return res;
+
+}  /* agt_val_parse_load */
+
+
+#ifdef DEBUG
+/********************************************************************
+* FUNCTION agt_val_parse_test
+* 
+* scaffold code to get agt_val_parse tested 
+*
+* INPUTS:
+*   testfile == NETCONF PDU in a test file
+*
+*********************************************************************/
+void
+    agt_val_parse_test (const char *testfile)
+{
+    ses_cb_t  *scb;
+    status_t   res;
+
+    /* create a dummy session control block */
+    scb = agt_ses_new_dummy_session();
+    if (!scb) {
+	SET_ERROR(ERR_INTERNAL_MEM);
+	return;
+    }
+
+    /* open the XML reader */
+    res = xml_get_reader_from_filespec(testfile, &scb->reader);
+    if (res != NO_ERR) {
+	SET_ERROR(res);
+	agt_ses_free_dummy_session(scb);
+	return;
+    }
+
+    /* dispatch the test PDU */
+    agt_top_dispatch_msg(scb);
+
+    /* clean up and exit */
+    agt_ses_free_dummy_session(scb);
+
+}  /* agt_val_parse_test */
+#endif
+
+
+
+#if 0
 /********************************************************************
 * FUNCTION parse_metadata_nc
 * 
@@ -3049,662 +2542,18 @@ static status_t
 	    } else {
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
-	    agt_ps_parse_error_attr(scb, msg, attr, node, 
-		res, NCX_NT_VAL, retval);
+	    if (msg) {
+		agt_record_attr_error(scb, &msg->errQ, 
+				      NCX_LAYER_OPERATION, res,  
+				      attr, node, NULL, 
+				      NCX_NT_VAL, retval);
+	    }
 	    retres = res;
 	}
     }
     return retres;
 
 } /* parse_metadata_nc */
-
-
-/********************************************************************
-* FUNCTION parse_btype_nc
-* 
-* Switch to dispatch to specific base type handler
-*
-* INPUTS:
-*     scb == session control block
-*            Input is read from scb->reader.
-*     msg == incoming RPC message
-*            Errors are appended to msg->errQ
-*     typdef == first non-ptr-only typdef for this type
-*     startnode == top node of the parameter to be parsed
-*            Parser function will attempt to consume all the
-*            nodes until the matching endnode is reached
-*     parentdc == data class of the parent node, which will get
-*                 used if it is not explicitly set for the typdef
-*     retval ==  val_value_t that should get the results of the parsing
-*     
-* OUTPUTS:
-*    *retval will be filled in
-*    msg->errQ may be appended with new errors or warnings
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t 
-    parse_btype_nc (ses_cb_t  *scb,
-		    xml_msg_hdr_t *msg,
-		    obj_template_t *obj,
-		    const xml_node_t *startnode,
-		    ncx_data_class_t parentdc,
-		    val_value_t  *retval)
-{
-    typ_def_t   *typdef;
-    ncx_btype_t  btyp;
-    status_t     res, res2, res3;
-    op_editop_t  editop;
-    boolean      nserr;
-
-    /* get the attribute values from the start node */
-    editop = OP_EDITOP_NONE;
-    retval->nsid = startnode->nsid;
-
-    switch (obj->objtype) {
-    case OBJ_TYP_CONTAINER:
-    case OBJ_TYP_LEAF:
-    case OBJ_TYP_LEAF_LIST:
-    case OBJ_TYP_LIST:
-    case OBJ_TYP_CHOICE:
-    case OBJ_TYP_CASE:
-    case OBJ_TYP_RPCIO:
-    default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    /* get the base type */
-    btyp = typ_get_basetype(typdef);
-
-    /* check namespace errors except if the type is ANY */
-    nserr = (btyp != NCX_BT_ANY);
-
-    /* parse the attributes, if any; do not quick exit on this error */
-    res2 = parse_metadata_nc(scb, msg, typdef, startnode, 
-	   nserr, retval, &editop);
-
-    /* continue to parse the startnode depending on the base type 
-     * to record as many errors as possible
-     */
-    switch (btyp) {
-    case NCX_BT_ANY:
-	res = parse_any_nc(scb, msg, startnode, parentdc, retval);
-	break;
-    case NCX_BT_ROOT:
-	res = parse_root_nc(scb, msg, startnode, parentdc, retval);
-	break;
-    case NCX_BT_ENAME:
-	res = parse_ename_nc(scb, msg, typdef, startnode, parentdc, retval);
-	break;
-    case NCX_BT_ENUM:
-	res = parse_enum_nc(scb, msg, typdef, startnode, parentdc, retval);
-	break;
-    case NCX_BT_EMPTY:
-	res = parse_empty_nc(scb, msg, typdef, startnode, parentdc, retval);
-	break;
-    case NCX_BT_BOOLEAN:
-	res = parse_boolean_nc(scb, msg, typdef, startnode, parentdc, retval);
-	break;
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
-    case NCX_BT_FLOAT64:
-	res = parse_num_nc(scb, msg, typdef, btyp, startnode, 
-			   parentdc, retval);
-	break;
-    case NCX_BT_STRING:
-    case NCX_BT_BINARY:
-    case NCX_BT_SLIST:
-    case NCX_BT_XLIST:
-    case NCX_BT_INSTANCE_ID:
-	res = parse_string_nc(scb, msg, typdef, btyp, startnode, 
-			      parentdc, retval);
-	break;
-    case NCX_BT_UNION:
-	res = parse_union_nc(scb, msg, typdef, startnode, parentdc, retval);
-	break;
-    case NCX_BT_CONTAINER:
-    case NCX_BT_CHOICE:
-    case NCX_BT_LIST:
-	res = parse_complex_nc(scb, msg, typdef, btyp, startnode, 
-			       parentdc, retval);
-	break;
-    case NCX_BT_XCONTAINER:
-	res = parse_container_nc(scb, msg, typdef, startnode, 
-				 parentdc, retval);
-	break;
-    case NCX_BT_KEYREF:
-	res = SET_ERROR(ERR_NCX_OPERATION_NOT_SUPPORTED);
-	break;
-    default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    /* this will only be non-zero if the operation attribute
-     * was seen in XML subtree for the value
-     */
-    retval->editop = editop;
-
-    /* set the config flag for this value */
-    res3 = NO_ERR;
-    if (res == NO_ERR) {
-	/* this has to be after the retval typdef is set */
-	res3 = metadata_inst_check(scb, msg, retval);
-	clean_metaerrs(retval);
-    }
-
-    if (res != NO_ERR) {
-	return res;
-    } else if (res2 != NO_ERR) {
-	return res2;
-    } else {
-	return res3;
-    }
-
-} /* parse_btype_nc */
-
-
-/**************    E X T E R N A L   F U N C T I O N S **********/
-
-
-/********************************************************************
-* FUNCTION agt_val_parse_nc
-* 
-* Parse NETCONF PDU sub-contents into value fields
-* This module does not enforce complex type completeness.
-* Different subsets of configuration data are permitted
-* in several standard (and any proprietary) RPC methods
-*
-* A seperate parsing phase is used to validate the input
-* contained in the returned val_value_t struct.
-*
-* This parsing phase checks that simple types are complete
-* and child members of complex types are valid (but maybe 
-* missing or incomplete child nodes.
-*
-* Note that the NETCONF inlineFilterType will be parsed
-* correctly because it is type 'anyxml'.  This type is
-* parsed as a struct, and no validation other well-formed
-* XML is done.
-*
-* INPUTS:
-*     scb == session control block
-*     msg == incoming RPC message
-*     obj == obj_template_t for the object to parse
-*     startnode == top node of the parameter to be parsed
-*     parentdc == parent data class
-*                 For the first call to this function, this will
-*                 be the data class of a parameter.
-*     retval ==  val_value_t that should get the results of the parsing
-*     
-* OUTPUTS:
-*    *retval will be filled in
-*    msg->errQ may be appended with new errors
-*
-* RETURNS:
-*    status
-*********************************************************************/
-/* parse a value for an NCX type from a NETCONF PDU XML stream */
-status_t 
-    agt_val_parse_nc (ses_cb_t  *scb,
-		      xml_msg_hdr_t *msg,
-		      const obj_template_t *obj,
-		      const xml_node_t *startnode,
-		      ncx_data_class_t  parentdc,
-		      val_value_t  *retval)
-{
-#ifdef DEBUG
-    if (!scb || !msg || !obj || !startnode || !retval) {
-	/* non-recoverable error */
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-#ifdef AGT_VAL_PARSE_DEBUG
-    log_debug3("\nagt_val_parse: %s:%s btyp:%s", 
-	       obj_get_mod_prefix(obj),
-	       name, tk_get_btype_sym(obj_get_basetype(obj)));
-#endif
-
-    /* get the element values */
-    return parse_btype_nc(scb, msg, obj, startnode, parentdc, retval);
-
-}  /* agt_val_parse_nc */
-
-
-/********************************************************************
-* FUNCTION agt_ps_parse_instance_check
-* 
-* Check a ps_parmset_t struct against its expected PSD 
-* for instance validation:
-*
-*    - instance qualifiers: 
-*      FULL: validate expected instances for any nested parmsets
-*      TOP:  validate expected instances for the top level only
-*            This mode allows the RPC parmset to be completely
-*            validated, but will treat nested parmsets as simple
-*            parameters (within the current level)
-*      PARTIAL: only check for too many instances. Do not check
-*            for missing instances (NCX_IQUAL_ONE or NCX_IQUAL_1MORE)
-*      NONE: do not perform any instance qualifier validation
-*
-* The input is checked against the specified PSD.
-*
-* Any generated <rpc-error> elements will be added to the errQ
-*
-* INPUTS:
-*   scb == session control block
-*   msg == xml_msg_hdr t from msg in progress 
-*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
-*   valset == val_value_t container to check
-*   layer == NCX layer calling this function
-*
-* OUTPUTS:
-*    rpc->msg_errQ may have rpc_err_rec_t structs added to it 
-*    which must be freed by the called with the 
-*    rpc_err_free_record function
-*
-* RETURNS:
-*   status of the operation, NO_ERR if no validation errors found
-*********************************************************************/
-status_t 
-    agt_val_parse_instance_check (ses_cb_t *scb,
-				  xml_msg_hdr_t *msg,
-				  val_value_t *valset,
-				  ncx_layer_t   layer)
-{
-    const psd_parm_t     *psd_parm;
-    const typ_template_t *psd_type;
-    psd_parmid_t          parmid;
-    status_t              res, retres;
-    ncx_iqual_t           iqual;
-
-#ifdef DEBUG
-    if (!ps) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    retres = NO_ERR;
-
-    /* Go through all the parameters in the PSD and check
-     * the parmset to see if each parm (or choice block)
-     * is present the correct number of instances
-     * In NCX, only the RelaxNG instance qualifiers
-     * are checked per parameter.  Specific number
-     * of instances is supported through the table index
-     *
-     * The PSD node can be a choice or a simple parameter 
-     */
-    for (parmid = 1; parmid <= ps->psd->parmcnt; parmid++) {
-	/* get the parameter descriptor */
-	psd_parm = psd_find_parmnum(ps->psd, parmid);
-	if (!psd_parm) {
-	    return SET_ERROR(ERR_INTERNAL_PTR);
-	}
-
-	/* check for missing parameter only for plain parameters
-	 * and all test types except partial
-	 */
-	if (!psd_parm->choice_id) {
-	    if (psd_parm_required(psd_parm)) {
-		if (!ps_parmnum_seterr(ps, parmid)) {
-		    /* param is not set */
-		    retres = ERR_NCX_MISSING_PARM;
-		    if (msg) {
-			agt_record_error(scb, &msg->errQ, layer, retres, 
-			    NULL, NCX_NT_PSDPARM, psd_parm, 
-			    NCX_NT_PARMSET, ps);
-		    }
-		}
-	    }
-	}
-
-	/* check too many instances for all test types */
-	res = NO_ERR;
-	psd_type = (const typ_template_t *)psd_parm->pdef;
-
-	iqual = typ_get_iqualval((const typ_template_t *)
-				     psd_parm->pdef);
-	if ((iqual==NCX_IQUAL_ONE || iqual==NCX_IQUAL_OPT) &&
-	    ps_parmnum_mset(ps, parmid)) {
-	    /* max 1 allowed, but more than 1 set 
-	     * generate an error 
-	     */
-	    res = ERR_NCX_EXTRA_PARMINST;
-	}
-
-	if (res != NO_ERR) {
-	    retres = res;
-	    if (msg) {
-		agt_record_error(scb, &msg->errQ, layer, retres, 
-		    NULL, NCX_NT_PSDPARM, psd_parm, NCX_NT_PARMSET, ps);
-	    }
-	}		
-    }
-
-    return retres;
-
-}  /* agt_val_parse_instance_check */
-
-
-/********************************************************************
-* FUNCTION agt_ps_parse_choice_check
-* 
-* Check a ps_parmset_t struct against its expected PSD 
-* for instance validation:
-*
-*    - choice validation: 
-*      only one member (or block) allowed if the data type is choice
-*      Only issue errors based on the instance test qualifiers
-*
-*    - instance qualifiers: 
-*      validate expected choices for the top level only
-*
-* The input is checked against the specified PSD.
-*
-* Any generated <rpc-error> elements will be added to the errQ
-*
-* INPUTS:
-*   scb == session control block
-*   msg == xml_msg_hdr t from msg in progress 
-*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
-*   ps == ps_parmset_t to check
-*   layer == NCX layer calling this function
-*
-* OUTPUTS:
-*   *errQ may have rpc_err_rec_t structs added to it which must be
-*    freed by the called with the rpc_err_free_record function
-*
-* RETURNS:
-*   status of the operation, NO_ERR if no validation errors found
-*********************************************************************/
-status_t 
-    agt_ps_parse_choice_check (ses_cb_t  *scb,
-			       xml_msg_hdr_t *msg,
-			       const ps_parmset_t *ps,
-			       ncx_layer_t     layer)
-{
-    const psd_hdronly_t  *psd_hdr, *choice_hdr;
-    const psd_choice_t   *psd_choice;
-    const psd_block_t    *psd_block;
-    const psd_parm_t     *psd_parm, *set_parm;
-    status_t              res, retres;
-    boolean               choicereq;
-
-#ifdef DEBUG
-    if (!ps) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    /* check if there is any work to do at all */
-    if (!ps->psd->choicecnt) {
-	return NO_ERR;
-    }
-
-    retres = NO_ERR;
-
-    /* Go through all the entries in the PSD parmQ and check
-     * the choices against the parmset to see if each 
-     * choice parm or choice block is present in the correct 
-     * number of instances.
-     *
-     * The parmQ contains PSD_NT_PARM and PSD_NT_CHOICE entries
-     */
-    for (psd_hdr = (const psd_hdronly_t *)dlq_firstEntry(&ps->psd->parmQ);
-	 psd_hdr != NULL;
-	 psd_hdr = (const psd_hdronly_t *)dlq_nextEntry(psd_hdr)) {
-
-	if (psd_hdr->ntyp != PSD_NT_CHOICE) {
-	    /* skip PSD_NT_PARM entry */
-	    continue;
-	}
-
-	psd_choice = (const psd_choice_t *)psd_hdr;
-	set_parm = NULL;
-	choicereq = TRUE;
-
-	/* go through all the entries in this choice and validate them 
-	 * The choiceQ contains PSD_NT_BLOCK or PSD_NT_PARM entries
-	 */
-	for (choice_hdr = (const psd_hdronly_t *)
-		 dlq_firstEntry(&psd_choice->choiceQ);
-	     choice_hdr != NULL;
-	     choice_hdr = (const psd_hdronly_t *)
-		 dlq_nextEntry(choice_hdr)) {
-	    if (choice_hdr->ntyp==PSD_NT_BLOCK) {
-		/* this entire block should be present or absent
-		 * unless any of the parameters are optional
-		 */
-		psd_block = (const psd_block_t *)choice_hdr;
-
-		if (!psd_block_required(psd_block)) {
-		    choicereq = FALSE;
-		}
-		    
-		if (ps_check_block_set(ps, psd_block)) {
-		    /* at least 1 parm in the block is set */
-		    if (set_parm) {
-			/* this is an error for all the parms set */
-			res = check_block_err(scb, &msg->errQ, 
-					      FALSE, layer, 
-					      ps, psd_block);
-			if (res != NO_ERR) {
-			    retres = res;
-			}
-		    } else {
-			/* this becomes the selected choice member */
-			set_parm = (const psd_parm_t *)
-			    dlq_firstEntry(&psd_block->blockQ);
-
-			/* check for any parms that should be set 
-			 * but are not
-			 */
-			res = check_block_err(scb, &msg->errQ, 
-					      TRUE, layer,
-					      ps, psd_block);
-			if (res != NO_ERR) {
-			    retres = res;
-			}
-		    }
-		} else {
-		    /* nothing in this block was set */
-		    continue;
-		}
-	    } else {
-		/* this choice member is a simple parm */
-		psd_parm = (const psd_parm_t *)choice_hdr;
-
-		/* if any choice member is optional, then
-		 * the entire choice is optional
-		 */
-		if (!psd_parm_required(psd_parm)) {
-		    choicereq = FALSE;
-		}
-
-		/* check too many choices set error */
-		if (ps_parmnum_set(ps, psd_parm->parm_id)) {
-		    /* this parm is set */
-		    if (set_parm) {
-			/* choice already set elsewhere */
-			retres = ERR_NCX_EXTRA_CHOICE;
-			if (msg) {
-			    agt_record_error(scb, &msg->errQ, 
-					     layer, retres, NULL, 
-					     NCX_NT_PSDPARM, psd_parm, 
-					     NCX_NT_PARMSET, ps);
-			}
-		    } else {
-			/* make this the selected choice */
-			set_parm = psd_parm;
-		    }
-		} 
-	    }
-	}
-
-	/* check for 'no choice made' error
-	 * Do not generate error if any choice members are optional
-	 */
-	if (choicereq && !set_parm) {
-	    retres = ERR_NCX_MISSING_CHOICE;
-	    if (msg) {
-		agt_record_error(scb, &msg->errQ, layer, retres, NULL, 
-				 NCX_NT_PSDPARM, 
-				 psd_first_choice_parm(ps->psd, psd_choice),
-				 NCX_NT_PARMSET, ps);
-	    }
-	}
-
-    }
-
-    return retres;
-
-}  /* agt_ps_parse_choice_check */
-
-
-/********************************************************************
-* FUNCTION agt_ps_parse_error_subtree
-* 
-* Generate an error during parmset processing for an element
-* Add rpc_err_rec_t structs to the msg->errQ
-*
-* INPUTS:
-*   scb == session control block (NULL means call is a no-op)
-*   msg = xml_msg_hdr_t from msg in progress  (NULL means call is a no-op)
-*   startnode == parent start node to match on exit
-*         If this is NULL then the reader will not be advanced
-*   errnode == error node being processed
-*         If this is NULL then the current node will be
-*         used if it can be retrieved with no errors,
-*         and the node has naming properties.
-*   errcode == error status_t of initial internal error
-*         This will be used to pick the error-tag and
-*         default error message
-*   errnodetyp == internal VAL_PCH node type used for error_parm
-*   error_parm == pointer to attribute name or namespace name, etc.
-*         used in the specific error in agt_rpcerr.c
-*   intnodetyp == internal VAL_PCH node type used for intnode
-*   intnode == internal VAL_PCH node used for error_path
-* RETURNS:
-*   status of the operation; only fatal errors will be returned
-*********************************************************************/
-status_t 
-    agt_ps_parse_error_subtree (ses_cb_t *scb,
-			    xml_msg_hdr_t *msg,
-			    const xml_node_t *startnode,
-			    const xml_node_t *errnode,
-			    status_t errcode,
-			    ncx_node_t errnodetyp,			    
-			    const void *error_parm,
-			    ncx_node_t intnodetyp,
-			    const void *intnode)
-{
-    status_t        res;
-
-    res = NO_ERR;
-
-    if (msg) {
-	agt_record_error(scb, &msg->errQ, NCX_LAYER_OPERATION, errcode, 
-		 errnode, errnodetyp, error_parm, intnodetyp, intnode);
-    }
-
-    if (scb && startnode) {
-	res = agt_xml_skip_subtree(scb->reader, startnode);
-    }
-
-    return res;
-
-}  /* agt_ps_parse_error_subtree */
-
-
-/********************************************************************
-* FUNCTION agt_ps_parse_error_attr
-* 
-* Generate an error during parmset processing for an attribute
-* Add rpc_err_rec_t structs to the msg->rpc_errQ
-*
-* INPUTS:
-*   scb == session control block
-*   msg == xml_msg_hdr_t from msg in progress (NULL == NO RPC-ERRORS RECORDED)
-*   errattr == attribute with the error
-*   errnode == error node being processed
-*         If this is NULL then the current node will be
-*         used if it can be retrieved with no errors,
-*         and the node has naming properties.
-*   errcode == error status_t of initial internal error
-*         This will be used to pick the error-tag and
-*         default error message
-*   nodetyp == internal VAL_PCH node type used for error_path
-*   intnode == internal VAL_PCH node used for error_path
-*
-*********************************************************************/
-void
-    agt_ps_parse_error_attr (ses_cb_t *scb,
-			 xml_msg_hdr_t  *msg,
-			 const xml_attr_t *errattr,
-			 const xml_node_t *errnode,
-			 status_t errcode,
-			 ncx_node_t nodetyp,
-			 const void *intnode)
-{
-    /* this function would only be called after namespace errors 
-     * have been checked, so the 'badns' param is hard-wired to NULL
-     */
-    if (msg) {
-	agt_record_attr_error(scb, &msg->errQ, 
-			      NCX_LAYER_OPERATION, errcode,  
-			      errattr, errnode, NULL, nodetyp, intnode);
-    }
-
-}  /* agt_ps_parse_error_attr */
-
-
-#ifdef DEBUG
-/********************************************************************
-* FUNCTION agt_ps_parse_test
-* 
-* scaffold code to get agt_ps_parse tested 
-*
-* INPUTS:
-*   testfile == NETCONF PDU in a test file
-*
-*********************************************************************/
-void
-    agt_ps_parse_test (const char *testfile)
-{
-    ses_cb_t  *scb;
-    status_t   res;
-
-    /* create a dummy session control block */
-    scb = agt_ses_new_dummy_session();
-    if (!scb) {
-	SET_ERROR(ERR_INTERNAL_MEM);
-	return;
-    }
-
-    /* open the XML reader */
-    res = xml_get_reader_from_filespec(testfile, &scb->reader);
-    if (res != NO_ERR) {
-	SET_ERROR(res);
-	agt_ses_free_dummy_session(scb);
-	return;
-    }
-
-    /* dispatch the test PDU */
-    agt_top_dispatch_msg(scb);
-
-    /* clean up and exit */
-    agt_ses_free_dummy_session(scb);
-
-}  /* agt_ps_parse_test */
 #endif
 
 

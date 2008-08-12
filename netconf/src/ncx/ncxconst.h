@@ -550,8 +550,10 @@ date	     init     comment
 #define NCX_EL_WITH_METADATA   ((const xmlChar *)"with-metadata")
 #define NCX_EL_XCONTAINER      ((const xmlChar *)"xcontainer")
 #define NCX_EL_XLIST           ((const xmlChar *)"xlist")
+#define NCX_EL_XMLORDER        ((const xmlChar *)"xmlorder")
 #define NCX_EL_XPATH           ((const xmlChar *)"xpath")
 #define NCX_EL_XSD             ((const xmlChar *)"xsd")
+#define NCX_EL_XSDLIST         ((const xmlChar *)"xsdlist")
 #define NCX_EL_YANG            ((const xmlChar *)"yang")
 #define NCX_EL_ZERO            ((const xmlChar *)"0.0")
 

@@ -45,16 +45,16 @@ date         init     comment
 #include "agt_ncx.h"
 #endif
 
-#ifndef _H_agt_ps_parse
-#include "agt_ps_parse.h"
-#endif
-
 #ifndef _H_agt_util
 #include "agt_util.h"
 #endif
 
 #ifndef _H_agt_val
 #include "agt_val.h"
+#endif
+
+#ifndef _H_agt_val_parse
+#include "agt_val_parse.h"
 #endif
 
 #ifndef _H_cap
@@ -85,20 +85,12 @@ date         init     comment
 #include "ncxconst.h"
 #endif
 
+#ifndef _H_obj
+#include "obj.h"
+#endif
+
 #ifndef _H_op
 #include "op.h"
-#endif
-
-#ifndef _H_ps
-#include "ps.h"
-#endif
-
-#ifndef _H_ps_parse
-#include "ps_parse.h"
-#endif
-
-#ifndef _H_psd
-#include "psd.h"
 #endif
 
 #ifndef _H_rpc
@@ -161,8 +153,7 @@ static status_t
 *   editop == edit operation requested
 *   scb == session control block
 *   target == config database target 
-*   nodetyp == type of node of the start of imparted data
-*   node == start of imparted data
+*   node == top value node involved in edit
 *   res == result of edit operation
 *
 * OUTPUTS:
@@ -172,8 +163,7 @@ static void
     handle_audit_record (op_editop_t editop,
 			 ses_cb_t  *scb,
 			 cfg_template_t *target,
-			 ncx_node_t nodetyp,
-			 void *node,
+			 val_value_t *node,
 			 status_t res)
 {
     xmlChar  *ibuff, tbuff[TSTAMP_MIN_SIZE+1];
@@ -186,8 +176,8 @@ static void
     tstamp_datetime(tbuff);
 
     if (node) {
-	(void)val_gen_instance_id(nodetyp, node, 
-				  NCX_IFMT_XPATH1, FALSE, &ibuff);
+	(void)val_gen_instance_id(node, NCX_IFMT_XPATH1, 
+				  FALSE, &ibuff);
     }
 
     log_info("\nedit-config: operation %s on session %d by %s@%s"
@@ -219,10 +209,8 @@ static void
 *    editop == edit operation applied to newnode oand/or curnode
 *    scb == session control block invoking the callback
 *    msg == RPC message in progress
-*    newnodetyp == NCX node enumeration for newnode
-*                 curnode must be the same type as newnode
 *    newnode == new node in operation
-*     curnode == current node in operation
+*    curnode == current node in operation
 *
 * RETURNS:
 *   status of the operation (usually returned from the callback)
@@ -233,67 +221,24 @@ static status_t
 			  op_editop_t editop,
 			  ses_cb_t  *scb,
 			  rpc_msg_t  *msg,
-			  ncx_node_t newnodetyp,
-			  void *newnode,
-			  void *curnode)
+			  val_value_t *newnode,
+			  val_value_t *curnode)
 {
-    agt_cb_pscbset_t  *pscbset;    /* parmset callback set */
-    agt_cb_pcbset_t   *pcbset;     /* parm callback set */
-    agt_cb_tcbset_t   *tcbset;     /* type callback set */
-    ps_parmset_t      *ps;
-    ps_parm_t         *parm;
+    agt_cb_fnset_t    *cbset;
     val_value_t       *val;
     status_t           res;
 
-    switch (newnodetyp) {
-    case NCX_NT_VAL:
-	val = (val_value_t *)newnode;
-	if (val->typdef->cbset) {
-	    tcbset = val->typdef->cbset;
-	    if (tcbset->tcb[cbtyp]) {
-		res = (*tcbset->tcb[cbtyp])
-		    (scb, msg, cbtyp, editop, newnode, curnode);
-		val->res = res;
-		return res;
-	    }
+    val = newnode;
+    if (val->obj->cbset) {
+	cbset = val->obj->cbset;
+	if (cbset->cbfn[cbtyp]) {
+	    res = (*cbset->cbfn[cbtyp])
+		(scb, msg, cbtyp, editop, newnode, curnode);
+	    val->res = res;
+	    return res;
 	}
-	return NO_ERR;
-    case NCX_NT_PARM:
-	parm = (ps_parm_t *)newnode;
-	if (parm->parm->cbset) {
-	    pcbset = parm->parm->cbset;
-	    if (pcbset->pcb[cbtyp]) {
-		res = (*pcbset->pcb[cbtyp])
-		    (scb, msg, cbtyp, editop, newnode, curnode);
-		parm->res = res;
-		return res;
-	    }
-	}
-	return NO_ERR;   /* did not execute a callback */
-    case NCX_NT_PARMSET:
-	if (newnodetyp==NCX_NT_PARMSET) {
-	    ps = (ps_parmset_t *)newnode;
-	}
-	if (ps->psd->cbset) {
-	    pscbset = ps->psd->cbset;
-	    if (pscbset->pscb[cbtyp]) {
-		res = (*pscbset->pscb[cbtyp])
-		    (scb, msg, cbtyp, editop, newnode, curnode);
-		ps->res = res;
-		return res;
-	    }
-	}
-	return NO_ERR;  /* did not execute a callback */
-    case NCX_NT_APP:
-	/* app nodes do not have callback handlers and there
-	 * cannot be a parent callback across this application 
-	 * node boundary -- just exist, no-op
-	 */
-	return NO_ERR;   /* did not execute a callback */
-    default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
     }
-    /*NOTREACHED*/
+    return NO_ERR;
 
 } /* handle_user_callback */
 
@@ -352,163 +297,6 @@ static boolean
 
 } /* merge_valnode */
 
-/********************************************************************
-* FUNCTION add_parmnode
-* 
-* Add a parm node to the parent parmset node
-*
-* INPUTS:
-*    parmnode == ps_parm_t struct to add to the parent app
-*    parent == ps_parmset_t to add the parmnode as a child
-*********************************************************************/
-static void
-    add_parmnode (ps_parm_t *parmnode,
-		  ps_parmset_t *parent)
-{
-
-    parmnode->parent = parent;
-    dlq_enque(parmnode, &parent->parmQ);
-
-} /* add_parmnode */
-
-
-/********************************************************************
-* FUNCTION swap_parmnode
-* 
-* Swap a parm node in the parent parmset node
-*
-* INPUTS:
-*    newparm == ps_parm_t struct to add to the parent parmset
-*    curparm == current parm node to replace
-*********************************************************************/
-static void
-    swap_parmnode (ps_parm_t *newparm,
-		   ps_parm_t *curparm)
-{
-    newparm->parent = curparm->parent;
-    dlq_swap(newparm, curparm);
-
-} /* swap_parmnode */
-
-
-/********************************************************************
-* FUNCTION merge_parmnode
-* 
-* Merge a parm node to the parent parmset node
-*
-* INPUTS:
-*    newparm == ps_parm_t struct to merge into the parent parmset
-*    curparm == (first) current value found to merge with
-*
-* RETURNS:
-*    TRUE if src should now be freed
-*    FALSE if source should not be freed
-*********************************************************************/
-static boolean
-    merge_parmnode (ps_parm_t *newparm,
-		    ps_parm_t *curparm)
-{
-    return ps_merge_parm(newparm, curparm);
-
-} /* merge_parmnode */
-
-
-/********************************************************************
-* FUNCTION add_psnode
-* 
-* Add a parmset node to the parent app node
-*
-* INPUTS:
-*    psnode == ps_parmset_t struct to add to the parent app
-*    parent == cfg_app_t to add the psnode as a child
-*********************************************************************/
-static void
-    add_psnode (ps_parmset_t *psnode,
-		cfg_app_t *parent)
-{
-    psnode->parent = parent;
-    dlq_enque(psnode, &parent->parmsetQ);
-
-} /* add_psnode */
-
-
-/********************************************************************
-* FUNCTION swap_psnode
-* 
-* Swap a parmset node in the parent app header node
-*
-* INPUTS:
-*    newps == ps_parmset_t struct to add to the parent app
-*    curps == current parmset node to replace
-*********************************************************************/
-static void
-    swap_psnode (ps_parmset_t *newps,
-		 ps_parmset_t *curps)
-{
-    newps->parent = curps->parent;
-    dlq_swap(newps, curps);
-
-} /* swap_psnode */
-
-
-/********************************************************************
-* FUNCTION merge_psnode
-* 
-* Merge a parmset node to the current parmset node
-*
-* INPUTS:
-*    newps == ps_parmset_t struct to merge into the current one
-*    curps == current parmset struct to merge with
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    merge_psnode (ps_parmset_t *newps,
-		  ps_parmset_t *curps)
-{
-    return ps_merge_parmset(newps, curps);
-
-} /* merge_psnode */
-
-
-/********************************************************************
-* FUNCTION add_appnode
-* 
-* Add an appnode to the parent value node
-*
-* INPUTS:
-*    appnode == cfg_app_t struct to add to the parent value
-*    parent == complex value node with a childQ
-*********************************************************************/
-static void
-    add_appnode (cfg_app_t *appnode,
-		 val_value_t *parent)
-{
-    appnode->parent = parent;
-    dlq_enque(appnode, &parent->v.appQ);
-
-} /* add_appnode */
-
-
-/********************************************************************
-* FUNCTION swap_appnode
-* 
-* Swap an appnode to the parent value node
-*
-* INPUTS:
-*    newapp == cfg_app_t struct to add to the parent value
-*    curapp == current cfg_app_t node to replace
-*********************************************************************/
-static void
-    swap_appnode (cfg_app_t *newapp,
-		  cfg_app_t *curapp)
-{
-    newapp->parent = curapp->parent;
-    dlq_swap(newapp, curapp);
-
-} /* swap_appnode */
-
 
 /********************************************************************
 * FUNCTION add_undo_node
@@ -527,12 +315,9 @@ static void
 static status_t
     add_undo_node (rpc_msg_t *msg,
 		   op_editop_t editop,
-		   ncx_node_t  newnodetyp,
-		   void *newnode,
-		   ncx_node_t curnodetyp,
-		   void *curnode,
-		   ncx_node_t parenttyp,
-		   void *parentnode,
+		   val_value_t *newnode,
+		   val_value_t *curnode,
+		   val_value_t *parentnode,
 		   status_t  res)
 {
     rpc_undo_rec_t *undo;
@@ -544,26 +329,18 @@ static status_t
     }
     undo->ismeta = FALSE;
     undo->editop = editop;
-    undo->newnodetyp = newnodetyp;
     undo->newnode = newnode;
-    undo->curnodetyp = curnodetyp;
 
     /* save a copy of the current value in case it gets modified
      * in a merge operation
      */
     if (curnode) {
-	switch (curnodetyp) {
-	case NCX_NT_VAL:
-	    undo->curnode = val_clone((val_value_t *)curnode);
-	    break;
-	case NCX_NT_PARM:
-	    undo->curnode = ps_clone_parm((ps_parm_t *)curnode);
-	    break;
-	default:
-	    undo->curnode = curnode;
+	undo->curnode = val_clone(curnode);
+	if (!undo->curnode) {
+	    rpc_free_undorec(undo);
+	    return ERR_INTERNAL_MEM;
 	}
     }
-    undo->parentnodetyp = parenttyp;
     undo->parentnode = parentnode;
     undo->res = res;
 
@@ -580,8 +357,8 @@ static status_t
 *
 * INPUTS:
 *    editop == edit operation value
-*    nodetyp == type of node in 'curnode' 
-*    curnode == pointer to current node (just used to check if non-NULL)
+*    curnode == pointer to current value node 
+*                   (just used to check if non-NULL)
 *
 * RETURNS:
 *    TRUE if the current node needs the write operation applied
@@ -589,12 +366,10 @@ static status_t
 *********************************************************************/
 static boolean
     apply_this_node (op_editop_t editop,
-		     ncx_node_t nodetyp,
-		     const void *curnode)
+		     const val_value_t *curnode)
 {
     boolean retval;
     const val_value_t *val;
-    const ps_parm_t   *parm;
 
     retval = FALSE;
     switch (editop) {
@@ -609,26 +384,13 @@ static boolean
 	if (!curnode) {
 	    retval = TRUE;
 	} else {
-	    switch (nodetyp) {
-	    case NCX_NT_PARM:
-		parm = (const ps_parm_t *)curnode;
-		val = parm->val;
-		break;
-	    case NCX_NT_VAL:
-		val = (const val_value_t *)curnode;
-		break;
-	    default:
-		/* all parmset and app node merges keep the 
-		 * current parmset container 
-		 */
-		val = NULL;
-	    }
+	    val = (const val_value_t *)curnode;
 
 	    /* if this is a leaf and not an index leaf, then
 	     * apply the merge here
 	     */
 	    if (val && !val->index) {
-		retval = typ_is_simple(typ_get_basetype(val->typdef));
+		retval = typ_is_simple(obj_get_basetype(val->obj));
 	    }
 	}
 	break;
@@ -679,9 +441,7 @@ static status_t
     /* something requested, so check if an undo record is needed */
     if (msg->rpc_need_undo) {
 	res = add_undo_node(msg, editop,
-			    NCX_NT_VAL, newval,
-			    NCX_NT_VAL, curval,
-			    NCX_NT_VAL, curparent, NO_ERR);
+			    newval, curval, /*curparent*/  NO_ERR);
 	if (res != NO_ERR) {
 	    return res;
 	}
@@ -690,77 +450,11 @@ static status_t
     val_merge_meta(newval, curval);
     return res;
 #else
+    (void)msg;
     val_merge_meta(newval, curval);
     return NO_ERR;
 #endif
 }   /* merge_metadata */
-
-
-/********************************************************************
-* FUNCTION get_parmset_node
-* 
-* Find the specified parmset node in the parent
-*
-* INPUTS:
-*    newps == parmset to match in the parent node
-*    curapp == current cfg_app_t node (or NULL if none)
-*
-* RETURNS:
-*    pointer to current parmset from parent or NULL if none
-*********************************************************************/
-static ps_parmset_t *
-    get_parmset_node (ps_parmset_t *newps,
-		      cfg_app_t *curapp)
-{
-    ps_parmset_t *ps;
-
-    if (!curapp) {
-	return NULL;
-    }
-
-    for (ps = (ps_parmset_t *)dlq_firstEntry(&curapp->parmsetQ);
-	 ps != NULL;
-	 ps = (ps_parmset_t *)dlq_nextEntry(ps)) {
-	if (!xml_strcmp(ps->name, newps->name)) {
-	    return ps;
-	}
-    }
-    return NULL;
-
-} /* get_parmset_node */
-
-
-/********************************************************************
-* FUNCTION get_app_node
-* 
-* Find the appnode in the appQ of the parent value
-*
-* INPUTS:
-*   val == data root node to check for cfg_app_t nodes
-*   owner == owner name to find
-*   appname == application node name to find
-*
-* RETURNS:
-*   pointer to found node, or NULL if not found
-*********************************************************************/
-static cfg_app_t *
-    get_app_node (val_value_t  *val,
-		  const xmlChar *owner,
-		  const xmlChar *appname)
-{
-    cfg_app_t  *app;
-
-    for (app = (cfg_app_t *)dlq_firstEntry(&val->v.appQ);
-	 app != NULL;
-	 app = (cfg_app_t *)dlq_nextEntry(app)) {
-	if (!xml_strcmp(owner, app->appdef->owner) &&
-	    !xml_strcmp(appname, app->appdef->appname)) {
-	    return app;
-	}
-    }
-    return NULL;
-
-} /* get_app_node */
 
 
 /*****************   V A L I D A T E    P H A S E   ****************/
@@ -779,7 +473,7 @@ static cfg_app_t *
 *
 * INPUTS:
 *   cnt == number of instances of this child node
-*   chtyp == typ_child_t struct to check for this value node
+*   chobj == obj_template_t struct to check for this value node
 *   curval == current data object in the target (or NULL if none)
 *   adddef == TRUE if one child node instance should be added
 *             if it is required, and a default is available
@@ -789,7 +483,7 @@ static cfg_app_t *
 *********************************************************************/
 static status_t
     check_inst_cnt (uint32 cnt,
-		    typ_child_t  *chtyp,
+		    const obj_template_t  *chobj,
 		    val_value_t  *curval,
 		    boolean adddef)
 {
@@ -797,7 +491,7 @@ static status_t
     ncx_iqual_t   iqual;
 
     res = NO_ERR;
-    iqual = typ_get_iqualval_def(&chtyp->typdef);
+    iqual = obj_get_iqualval(chobj);
 
     /* validate this child node instance count */
     switch (iqual) {
@@ -831,14 +525,16 @@ static status_t
     /* if newval->child is missing, then check further */
     if (res == ERR_NCX_MISSING_VAL_INST) {
 	if (curval) {
-	    if (val_child_inst_cnt(curval, chtyp->name)) {
+	    if (val_child_inst_cnt(curval,
+				   obj_get_mod_name(chobj),
+				   obj_get_name(chobj))) {
 		/* this is a merge, and a current value exists */
 		res = NO_ERR;
 	    }
 	}
 	if (res != NO_ERR && adddef) {
 	    /* not a valid merge so check if a default exists */
-	    if (typ_get_default(&chtyp->typdef)) {
+	    if (obj_get_default(chobj)) {
 		res = NO_ERR;
 	    }
 	}
@@ -879,30 +575,25 @@ static status_t
 			  val_value_t *curval,
 			  boolean adddef)
 {
-    status_t      res, retres;
-    uint32        cnt;
-    const typ_def_t    *typdef;
-    typ_child_t  *chtyp;
-    xmlns_qname_t qname;
+    const obj_template_t  *chobj;
+    xmlns_qname_t          qname;
+    status_t               res, retres;
+    uint32                 cnt;
 
     retres = NO_ERR;
-
-    /* get the real typdef in case this is a named type */
-    typdef = typ_get_cbase_typdef(newval->typdef);
 
     /* go through each child node in the typdef to see how many
      * instances of each child are present
      */
-    for (chtyp = typ_first_child(&typdef->def.complex);
-	 chtyp != NULL;
-	 chtyp = typ_next_child(chtyp)) {
+    for (chobj = obj_first_child(newval->obj);
+	 chobj != NULL;
+	 chobj = obj_next_child(chobj)) {
 
-	/* TBD:
-	 * this doesn't allow for child nodes in different namespaces 
-	 */
-	cnt = val_child_inst_cnt(newval, chtyp->name);
+	cnt = val_child_inst_cnt(newval,
+				 obj_get_mod_name(chobj),
+				 obj_get_name(chobj));
 
-	switch (typ_get_basetype(&chtyp->typdef)) {
+	switch (obj_get_basetype(chobj)) {
 	case NCX_BT_LIST:
 	    /* tables are always allowed to have zero or more instances 
 	     * any invalid instance IDs will be checked seperately
@@ -915,22 +606,16 @@ static status_t
 	    }
 	    break;
 	default:
-	    /* if the parent is a container, then the one and only
-	     * child node can have zero or more instances
-	     */
-	    if (newval->btyp==NCX_BT_XCONTAINER) {
-		continue;
-	    }
 	    break;
 	}
 
 	/* need to validate this child node instance count */
-	res = check_inst_cnt(cnt, chtyp, curval, adddef);
+	res = check_inst_cnt(cnt, chobj, curval, adddef);
 	    
 	/* check any errors for this child node */
 	if (res != NO_ERR) {
 	    qname.nsid = newval->nsid;
-	    qname.name = chtyp->name;
+	    qname.name = obj_get_name(chobj);
 	    agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_CONTENT, 
 		res, NULL, NCX_NT_QNAME, &qname, NCX_NT_VAL, newval);
 	    retres = res;
@@ -942,6 +627,7 @@ static status_t
 } /* check_child_inst_cnt */
 
 
+#if 0
 /********************************************************************
 * FUNCTION check_choice_group
 * 
@@ -954,7 +640,7 @@ static status_t
 *   newval == current data object to check
 *             If this is non-NULL, the MERGE operation will be checked
 *             If this is NULL, then a CREATE, REPLACE, or LOAD is assumed
-*   chtyp == the child type node for chval, contains the group info
+*   chobj == the child object template for chval, contains the group info
 *   adddef == TRUE if one child node instance should be added
 *             if it is required, and a default is available
 *          == FALSE if any default value should be ignored
@@ -965,14 +651,16 @@ static status_t
 static status_t
     check_choice_group (val_value_t *newval,
 			val_value_t *curval,
-			typ_child_t *chtyp,
+			const obj_template_t *chobj,
 			boolean adddef,
 			uint32  total)
 {
-    status_t      res;
-    uint32        cnt, chtotal;
-    typ_child_t  *grch;
+    const obj_template_t  *grch;
+    status_t               res;
+    uint32                 cnt, chtotal;
 
+
+#if 0
     /* Since groups cannot be nested, it is okay to assume
      * none of these child nodes will be another nested group
      */
@@ -997,6 +685,10 @@ static status_t
     } else {
 	return NO_ERR;
     }
+
+#endif
+
+    return SET_ERROR(ERR_INTERNAL_VAL);
 
 } /* check_choice_group */
 
@@ -1118,6 +810,7 @@ static status_t
     return res;
 
 } /* check_choice_inst_cnt */
+#endif
 
 
 /********************************************************************
@@ -1158,16 +851,14 @@ static status_t
 	break;
     case NCX_BT_CHOICE:
 	/* check that 1 choice or choice group is selected */
-	res = check_choice_inst_cnt(scb, msg, newval, curval, adddef);
+	/* res = check_choice_inst_cnt(scb, msg, newval, curval, adddef); */
+	res = SET_ERROR(ERR_INTERNAL_VAL);
 	break;
     case NCX_BT_LIST:
 	/* check that table instance and non-instance columns 
 	 * are present 
 	 */	    
 	res = check_child_inst_cnt(scb, msg, newval, curval, adddef);
-	break;
-    case NCX_BT_XCONTAINER:
-	res = NO_ERR;
 	break;
     default:
 	res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -1178,8 +869,9 @@ static status_t
 } /* check_edit_instance */
 
 
+#if 0
 /********************************************************************
-* FUNCTION validate_write_parm
+* FUNCTION validate_write_val
 * 
 * Invoke all the AGT_CB_VALIDATE callbacks for a 
 * source and target and write operation
@@ -1189,74 +881,70 @@ static status_t
 *   msg == incoming rpc_msg_t in progress
 *   target == cfg_template_t for the config database to write
 *   pop == parent requested edit op
-*   newparm == parm to apply
-*   curps == current parmset containing this parm from target (if any)
+*   newval == parm to apply
+*   curvalset == current valset containing this parm from target (if any)
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
-    validate_write_parm (ses_cb_t  *scb,
-			 rpc_msg_t  *msg,
-			 cfg_template_t *target,
-			 op_editop_t  pop,
-			 ps_parm_t     *newparm,
-			 ps_parmset_t  *curps)
+    validate_write_val (ses_cb_t  *scb,
+			rpc_msg_t  *msg,
+			cfg_template_t *target,
+			op_editop_t  pop,
+			val_value_t    *newval,
+			val_value_t  *curvalset)
 {
-    ps_parm_t       *curparm;
     val_value_t     *curval, *v_val;
     status_t         res;
     ncx_iqual_t      iqual;
 
 #ifdef AGT_VAL_DEBUG
-    log_debug2("\nagt_val_parm: %s start", newparm->parm->name);
+    log_debug2("\nvalidate_write_val: %s start", newval->name);
 #endif
 
-    curparm = NULL;
     curval = NULL;
     v_val = NULL;
     res = NO_ERR;
 
     /* try to find the current parm in the target config */
-    if (curps) {
-	curparm = ps_find_parm(curps, newparm->parm->name);
-	if (curparm) {
-	    /* check if the hdr is a parm or a nested parmset */
-	    curval = curparm->val;
-	    if (curval && val_is_virtual(curval)) {
-		v_val = val_get_virtual_value(scb, curval, &res);
-	    }
+    if (curvalset) {
+	curval = val_find_child(curvalset,
+				obj_get_mod_prefix(newval->obj),
+				newval->name);
+	if (curval && val_is_virtual(curval)) {
+	    v_val = val_get_virtual_value(scb, curval, &res);
 	}
     }
 
     if (res == NO_ERR) {
 	/* check and adjust the operation attribute */
-	iqual = val_get_iqualval(newparm->val);
+	iqual = val_get_iqualval(newval);
 
 	/* check edit-op does not need to check the
 	 * parm value, so pass the curparm, not curval or v_val
 	 */
-	res = agt_check_editop(pop, &newparm->val->editop,
-			       NCX_NT_PARM, newparm, curparm, iqual);
+	res = agt_check_editop(pop, &newval->editop,
+			       newval, curval, iqual);
 
 	/* check the max-access for this param */
 	if (res == NO_ERR) {
-	    res = agt_check_max_access(newparm->val->editop, 
-				       newparm->parm->access, 
-				       (curparm != NULL));
+	    res = agt_check_max_access(newval->editop, 
+				       obj_get_max_access(newval->obj), 
+				       (curval != NULL));
 	}
     }
 
     /* record any error so far */
     if (res != NO_ERR) {
 	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_CONTENT, res,
-		 NULL, NCX_NT_PARM, newparm, NCX_NT_PARM, newparm);
+		 NULL, NCX_NT_VAL, newval, NCX_NT_VAL, newval);
     } else {
 	/* check for any typedef callbacks for this param;
 	 * process the edit operation along the way
 	 */
 	res = invoke_btype_cb(AGT_CB_VALIDATE, pop, scb, msg, 
-			      target, newparm->val, 
+			      target, newval, 
 			      (v_val) ? v_val : curval, FALSE);
     }
 
@@ -1265,8 +953,7 @@ static status_t
      */
     if (res == NO_ERR) {
 	res = handle_user_callback(AGT_CB_VALIDATE,
-				   pop, scb, msg, NCX_NT_PARM,
-				   newparm, curparm);
+				   pop, scb, msg, newval, curval);
     }
 
     if (v_val) {
@@ -1275,245 +962,8 @@ static status_t
 
     return res;
 
-}  /* validate_write_parm */
-
-
-/********************************************************************
-* FUNCTION validate_write_ps
-* 
-* Invoke all the AGT_CB_VALIDATE callbacks for a 
-* source and target and write operation
-*
-* INPUTS:
-*   scb == session control block
-*   msg == incoming rpc_msg_t in progress
-*   target == cfg_template_t for the config database to write
-*   editop == requested write operation
-*   newps == parmset to validate
-*   curps == corresponding parrmset from the target (may be NULL)
-*
-* RETURNS:
-*   status; rpc-errors are recorded for any errors found
-*********************************************************************/
-static status_t
-    validate_write_ps (ses_cb_t  *scb,
-		       rpc_msg_t  *msg,
-		       cfg_template_t *target,
-		       op_editop_t  editop,
-		       ps_parmset_t  *newps,
-		       ps_parmset_t  *curps)  
-{
-    ps_parm_t        *newparm;
-    status_t          res, retres;
-    boolean           errdone; 
-
-#ifdef AGT_VAL_DEBUG
-    log_debug2("\nagt_val_ps: %s start", newps->name);
+}  /* validate_write_val */
 #endif
-
-    errdone = FALSE;
-
-    /* check and adjust the operation attribute */
-    res = agt_check_editop(editop, &newps->editop, NCX_NT_PARMSET,
-			   newps, curps, NCX_IQUAL_ONE);
-    if (res == NO_ERR) {
-	/* first check access control, only if it is a data model
-	 * parameter set; RPC access has already been checked
-	 */
-	if (newps->psd->psd_type == PSD_TYP_DATA) {
-	    if (!agt_acm_ps_write_allowed(scb->username, newps)) {
-		res = ERR_NCX_ACCESS_DENIED;
-	    }
-	}
-    }
-
-    /* try to call the user validate function for this parmset */
-    if (res==NO_ERR) {
-	res = handle_user_callback(AGT_CB_VALIDATE, editop,
-				   scb, msg, NCX_NT_PARMSET,
-				   newps, curps);
-	errdone = TRUE;
-    }
-
-    /* record any errors and exit if so */
-    if (res != NO_ERR) {
-	if (!errdone) {
-	    agt_record_error(scb, &msg->mhdr.errQ, 
-			     NCX_LAYER_CONTENT, res,
-			     NULL, NCX_NT_PARMSET, newps, 
-			     NCX_NT_PARMSET, newps);
-	}
-
-	return res;
-    }
-
-    /* go through each parameter and call all the validate
-     * callback functions that exist.  Check the editop as well.
-     */
-    retres = NO_ERR;
-    for (newparm = (ps_parm_t *)dlq_firstEntry(&newps->parmQ);
-	 newparm != NULL;
-	 newparm = (ps_parm_t *)dlq_nextEntry(newparm)) {
-
-	res = validate_write_parm(scb, msg, target, 
-				  editop, newparm, curps);
-	newparm->res = res;
-	if (res != NO_ERR) {
-	    retres = res;
-	    errdone = TRUE;
-	}
-    } 
-
-    /* check the editop against the current node 
-     * and add defaults if needed (create or load)
-     */
-    if (retres == NO_ERR) {
-	errdone = FALSE;
-	switch (newps->editop) {
-	case OP_EDITOP_CREATE:
-	    if (curps) {
-		retres = ERR_NCX_DATA_EXISTS;
-	    } else {
-		retres = ps_parse_add_defaults(newps);
-	    }
-	    break;
-	case OP_EDITOP_DELETE:
-	    if (!curps) {
-		retres = ERR_NCX_DATA_MISSING;
-	    }
-	    break;
-	case OP_EDITOP_MERGE:
-	    if (!curps) {
-		retres = ps_parse_add_defaults(newps);
-	    }
-	    break;
-	case OP_EDITOP_REPLACE:
-	case OP_EDITOP_LOAD:
-	    retres = ps_parse_add_defaults(newps);
-	    break;
-	default:
-	    ;
-	}
-    }
-
-    /* check if the operation is leaving a valid choices */
-    if (retres == NO_ERR) {
-	errdone = FALSE;
-	switch (newps->editop) {
-	case OP_EDITOP_MERGE:
-	    if (curps) {
-		/*** not checking valid choices after merge !!! ***/
-		break;   
-	    } /* else drop through */
-	case OP_EDITOP_CREATE:
-	case OP_EDITOP_REPLACE:
-	case OP_EDITOP_LOAD:
-	    retres = agt_ps_parse_choice_check(scb, &msg->mhdr,
-					       newps, NCX_LAYER_CONTENT);
-	    errdone = TRUE;
-	    break;
-	default:
-	    ;
-	}
-    }
-
-    /* check if the operation is leaving a full parmset */
-    if (retres == NO_ERR) {
-	errdone = FALSE;
-	switch (newps->editop) {
-	case OP_EDITOP_MERGE:
-	    if (curps) {
-		/*** not checking full parmset after merge !!! ***/
-		break;   
-	    } /* else drop through */
-	case OP_EDITOP_CREATE:
-	case OP_EDITOP_REPLACE:
-	case OP_EDITOP_LOAD:
-	    retres = agt_ps_parse_instance_check(scb, &msg->mhdr,
-						 newps, NCX_LAYER_CONTENT);
-	    errdone = TRUE;
-	    break;
-	default:
-	    ;
-	}
-    }
-
-
-    /* check if error output needed */
-    if (retres != NO_ERR && !errdone) {
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_CONTENT, 
-			 retres, NULL, NCX_NT_PARMSET, newps, 
-			 NCX_NT_PARMSET, newps);
-    }
-
-    return retres;
-
-}  /* validate_write_ps */
-
-
-/********************************************************************
-* FUNCTION validate_write_app
-* 
-* Invoke all the AGT_CB_VALIDATE callbacks for a 
-* source and target and write operation
-*
-* INPUTS:
-*   scb == session control block
-*   msg == incoming rpc_msg_t in progress
-*   target == cfg_template_t for the config database to write
-*   editop == requested write operation
-*   app == application node to validate
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    validate_write_app (ses_cb_t  *scb,
-			rpc_msg_t  *msg,
-			cfg_template_t *target,
-			op_editop_t  editop,
-			cfg_app_t  *newapp,
-			cfg_app_t  *curapp)  
-{
-    ps_parmset_t    *newps, *curps;
-    status_t        res, retres;
-
-    retres = NO_ERR;
-
-#ifdef AGT_VAL_DEBUG
-    log_debug2("\nagt_val_app: %s start", newapp->appdef->appname);
-#endif
-
-    /* go through all the parmsets specified in the new config 
-     * data.  This code will not recognize monitoring
-     * data objects in the <edit-config> RPC method.
-     * This is consistent with the <get-config> RPC method
-     * which also filters out all non-config data models
-     */
-    for (newps = (ps_parmset_t *)dlq_firstEntry(&newapp->parmsetQ);
-	 newps != NULL;
-	 newps = (ps_parmset_t *)dlq_nextEntry(newps)) {
-
-	res = NO_ERR;
-	if (curapp) {
-	    /* try to find this parmset in the target config */
-	    curps = cfg_get_parmset(target, newps);
-	} else {
-	    curps = NULL;
-	}
-
-	res = validate_write_ps(scb, msg, target, 
-				editop, newps, curps);
-	newps->res = res;
-
-	if (res != NO_ERR) {
-	    retres = res;
-	}
-    }
-
-    return retres;
-
-}  /* validate_write_app */
 
 
 /*******************   A P P L Y    P H A S E   ********************/
@@ -1538,8 +988,8 @@ static status_t
 *             edited the config nodes; just do user callbacks
 *
 * OUTPUTS:
-*   curparent, newval, and curval may be moved around to
-*   different queues, or get modified
+*   newval and curval may be moved around to
+*       different queues, or get modified
 *   *done may be changed from FALSE to TRUE if node is applied here
 * RETURNS:
 *   status
@@ -1568,7 +1018,6 @@ static status_t
     /* call the user callback apply function for this parm */
     res = handle_user_callback(AGT_CB_APPLY,
 			       newval->editop, scb, msg,
-			       NCX_NT_VAL,
 			       newval, curval);
     if (res != NO_ERR) {
 	return res;
@@ -1578,24 +1027,21 @@ static status_t
     if (*done) {
 	applyhere = FALSE;
     } else {
-	applyhere = apply_this_node(newval->editop, NCX_NT_VAL, curval);
+	applyhere = apply_this_node(newval->editop, curval);
 	*done = applyhere;
     }
 
     /* apply the requested edit operation */
     if (applyhere) {
 	if (msg->rpc_need_undo) {
-	    res = add_undo_node(msg, editop,
-				NCX_NT_VAL, newval,
-				NCX_NT_VAL, curval,
-				NCX_NT_VAL, parent, NO_ERR);
+	    res = add_undo_node(msg, editop, newval,
+				curval, parent, NO_ERR);
 	    if (res != NO_ERR) {
 		return res;
 	    }
 	}
 
 	handle_audit_record(newval->editop, scb, target, 
-			    NCX_NT_VAL,
 			    (curval) ? curval : newval, res);
 
 	/* make sure the node is not a virtual value */
@@ -1624,9 +1070,12 @@ static status_t
 	    }
 	    break;
 	case OP_EDITOP_CREATE:
-	case OP_EDITOP_LOAD:
 	    dlq_remove(newval);
 	    add_valnode(newval, parent);
+	    break;
+	case OP_EDITOP_LOAD:
+	    dlq_remove(newval);
+	    res = cfg_apply_load_root(target, newval);
 	    break;
 	case OP_EDITOP_DELETE:
 	    if (curval) {
@@ -1652,544 +1101,7 @@ static status_t
 }  /* apply_write_val */
 
 
-/********************************************************************
-* FUNCTION apply_write_parm
-* 
-* Invoke all the AGT_CB_APPLY callbacks for a 
-* source and target and write operation
-*
-* INPUTS:
-*   scb == session control block
-*   msg == incoming rpc_msg_t in progress
-*   target == cfg_template_t for the config database to write
-*   newps == parent of new parmset to apply
-*   curps == current parent parmset of parm
-*   newparm == new parm to apply
-*   curparm == current instance of parm (may be NULL if none)
-*   done   == TRUE if the node manipulation is done
-*          == FALSE if none of the parent nodes have already
-*             edited the config nodes; just do user callbacks
-*         Processing continues to the leaf nodes in case there
-*         are nested user callbacks related to embedded named types
-*
-* OUTPUTS:
-*   newps, curps, newparm, and curparm may be moved around to
-*   different queues, get modified
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    apply_write_parm (ses_cb_t  *scb,
-		      rpc_msg_t  *msg,
-		      cfg_template_t *target,
-		      ps_parmset_t  *newps,
-		      ps_parmset_t  *curps,
-		      ps_parm_t     *newparm,
-		      ps_parm_t     *curparm,
-		      boolean        done)
-{
-    status_t          res;
-    boolean           applyhere, freenew;
-    op_editop_t       editop;
-
-#ifdef AGT_VAL_DEBUG
-    log_debug2("\nagt_write_parm: %s start", newparm->parm->name);
-#endif
-
-    res = NO_ERR;
-    freenew = FALSE;
-    editop = newparm->val->editop;
-    newparm->val->curparent = curparm;
-
-    /* call the user callback apply function for this parm */
-    res = handle_user_callback(AGT_CB_APPLY,
-			       newparm->editop, scb, msg,
-			       NCX_NT_PARM,
-			       newparm, curparm);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* check if this node needs the edit operation applied */
-    applyhere = (done) ? FALSE : 
-	apply_this_node(editop, NCX_NT_VAL, curparm->val);
-
-    /* try to call the apply function for this parm */
-    if (!applyhere) {
-	/* process all the way to the leaf */
-	res = invoke_btype_cb(AGT_CB_APPLY, newps->editop, 
-			      scb, msg, target, 
-			      newparm->val, 
-			      (curparm) ? curparm->val : NULL, done);
-    } else {
-	/* apply the requested edit operation */
-	if (msg->rpc_need_undo) {
-	    res = add_undo_node(msg, editop,
-				NCX_NT_PARM, newparm,
-				NCX_NT_PARM, curparm,
-				NCX_NT_PARMSET, curps, NO_ERR);
-	    if (res != NO_ERR) {
-		return res;
-	    }
-	}
-
-	handle_audit_record(editop, scb, target, 
-			    NCX_NT_PARM, 
-			    (curparm) ? curparm : newparm, res);
-
-	res = handle_user_callback(AGT_CB_APPLY,
-				   editop, scb, msg,
-				   NCX_NT_PARM,
-				   newparm, curparm);
-
-	if (curparm && val_is_virtual(curparm->val)) {
-	    freenew = FALSE;
-	} else {
-	    switch (editop) {
-	    case OP_EDITOP_MERGE:
-		dlq_remove(newparm);
-		if (curparm) {
-		    freenew = merge_parmnode(newparm, curparm);
-		} else {
-		    add_parmnode(newparm, curps);
-		}
-		break;
-	    case OP_EDITOP_REPLACE:
-		if (curparm) {
-		    dlq_remove(newparm);
-		    swap_parmnode(newparm, curparm);
-		    if (!msg->rpc_need_undo) {
-			ps_free_parm(curparm);
-		    } /* else curparm not freed yet, hold in undo record */
-		} else {
-		    dlq_remove(newparm);
-		    add_parmnode(newparm, curps);
-		}
-		break;
-	    case OP_EDITOP_CREATE:
-	    case OP_EDITOP_LOAD:
-		dlq_remove(newparm);
-		add_parmnode(newparm, curps);
-		break;
-	    case OP_EDITOP_DELETE:
-		if (curparm) {
-		    dlq_remove(curparm);
-		    if (!msg->rpc_need_undo) {
-			ps_free_parm(curparm);
-		    } /* else curparm not freed yet, hold in undo record */
-		}
-		done = TRUE;
-		break;
-	    default:
-		freenew = TRUE;
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	}
-    }
-
-    if (freenew) {
-	ps_free_parm(newparm);
-    }
-
-    return res;
-
-}  /* apply_write_parm */
-
-
-/********************************************************************
-* FUNCTION apply_write_ps
-* 
-* Invoke all the AGT_CB_APPLY callbacks for a 
-* source and target and write operation
-*
-* INPUTS:
-*   scb == session control block
-*   msg == incoming rpc_msg_t in progress
-*   target == cfg_template_t for the config database to write
-*   curapp == parent node of the current instance of parmset
-*             This must not be NULL, even if curps is NULL
-*   newps == new parmset to apply
-*   curps == current instance of parmset (may be NULL if none)
-*   done   == TRUE if the node manipulation is done
-*          == FALSE if none of the parent nodes have already
-*             edited the config nodes; just do user callbacks
-*
-* OUTPUTS:
-*   newapp, curapp, newps, and curps may be moved around to
-*   different queues, get modified
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    apply_write_ps (ses_cb_t  *scb,
-		    rpc_msg_t  *msg,
-		    cfg_template_t *target,
-		    cfg_app_t     *curapp,
-		    ps_parmset_t  *newps,
-		    ps_parmset_t  *curps,
-		    boolean done)
-{
-    ps_parm_t        *newparm, *curparm, *nextparm;
-    status_t          res, retres;
-    boolean           applyhere;
-
-#ifdef AGT_VAL_DEBUG
-    log_debug2("\nagt_apply_ps: %s start", newps->name);
-#endif
-
-    retres = NO_ERR;
-    res = NO_ERR;
-
-    /* call the user callback apply function for this parm */
-    res = handle_user_callback(AGT_CB_APPLY,
-			       newps->editop, scb, msg,
-			       NCX_NT_PARMSET,
-			       newps, curps);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* check if this node needs to apply the requested edit operation */
-    applyhere = (done) ? FALSE : 
-	apply_this_node(newps->editop, NCX_NT_PARMSET, curps);
-
-    /* check user callback 
-    * !!! what if there is no parmset handler 
-    */
-    if (!applyhere) {
-	/* go through all the parameters */
-	newparm = (ps_parm_t *)dlq_firstEntry(&newps->parmQ);
-	while (newparm) {
-	    nextparm = (ps_parm_t *)dlq_nextEntry(newparm);
-
-	    /* find current value */
-	    if (curps) {
-		curparm = ps_find_parm(curps, newparm->parm->name);
-	    } else {
-		curparm = NULL;
-	    }
-
-	    /* apply this parameter */
-	    res = apply_write_parm(scb, msg, target, 
-				   newps, curps, 
-				   newparm, curparm, done);
-	    if (res != NO_ERR) {
-		if (msg->rpc_err_option != OP_ERROP_CONTINUE) {
-		    return res;
-		} else {
-		    retres = res;
-		}
-	    }
-	    newparm = nextparm;
-	}
-    }
-
-    /* check if continue on error is requested */
-    if (retres != NO_ERR && msg->rpc_err_option==OP_ERROP_CONTINUE) {
-	retres = NO_ERR;
-    }
-
-    /* apply the edit operation to this node if needed */
-    if (retres == NO_ERR && applyhere) {
-	if (msg->rpc_need_undo) {
-	    res = add_undo_node(msg, newps->editop,
-				NCX_NT_PARMSET, newps,
-				NCX_NT_PARMSET, curps,
-				NCX_NT_APP, curapp, NO_ERR);
-	    if (res != NO_ERR) {
-		return res;
-	    }
-	}
-
-	handle_audit_record(newps->editop, scb, target, 
-			    NCX_NT_PARMSET, 
-			    (curps) ? curps : newps, retres);
-
-	switch (newps->editop) {
-	case OP_EDITOP_MERGE:
-	    if (curps) {
-		/* leave newps queued and it will be freed
-		 * along with the rest of the request PDU
-		 */
-		res = merge_psnode(newps, curps);
-		if (res != NO_ERR) {
-		    SET_ERROR(res);
-		}
-	    } else {
-		dlq_remove(newps);
-		add_psnode(newps, curapp);
-	    }
-	    break;
-	case OP_EDITOP_REPLACE:
-	    if (curps) {
-		if (ps_is_vparmset(curps)) {
-		    /* leave newps queued and it will be freed
-		     * along with the rest of the request PDU
-		     */
-		    ps_replace_vparmset(newps, curps);
-		} else {
-		    dlq_remove(newps);
-		    swap_psnode(newps, curps);
-		    if (!msg->rpc_need_undo) {
-			ps_free_parmset(curps);
-		    } /* else curps is not deleted yet -- hold in undo */
-		}
-	    } else {
-		dlq_remove(newps);
-		add_psnode(newps, curapp);
-	    }
-	    break;
-	case OP_EDITOP_CREATE:
-	case OP_EDITOP_LOAD:
-	    dlq_remove(newps);
-	    add_psnode(newps, curapp);
-	    break;
-	case OP_EDITOP_DELETE:
-	    if (curps) {
-		dlq_remove(curps);
-		if (!msg->rpc_need_undo) {
-		    ps_free_parmset(curps);
-		} /* else curps is not deleted yet -- hold in undo */
-	    }
-	    break;
-	default:
-	    retres = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-
-    return retres;
-
-}  /* apply_write_ps */
-
-
-/********************************************************************
-* FUNCTION apply_write_app
-* 
-* Invoke all the AGT_CB_APPLY callbacks for a 
-* source and target and write operation
-*
-* INPUTS:
-*   scb == session control block
-*   msg == incoming rpc_msg_t in progress
-*   target == cfg_template_t for the config database to write
-*   newapp == application node to apply
-*   curval == parent node of 'curapp' node
-*   curapp == current application node from target (may be NULL)
-*   done   == TRUE if the node manipulation is done
-*          == FALSE if none of the parent nodes have already
-*             edited the config nodes; just do user callbacks
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    apply_write_app (ses_cb_t  *scb,
-		     rpc_msg_t  *msg,
-		     cfg_template_t *target,
-		     cfg_app_t  *newapp,
-		     val_value_t *curval,
-		     cfg_app_t  *curapp,
-		     boolean     done)
-{
-    ps_parmset_t    *newps, *curps, *nextps;
-    status_t        res, retres;
-    boolean         applyhere;
-
-#ifdef AGT_VAL_DEBUG
-    log_debug2("\nagt_apply_app: %s start", newapp->appdef->appname);
-#endif
-
-    retres = NO_ERR;
-    res = NO_ERR;
-
-    /* check if this node needs the edit operation applied */
-    applyhere = (done) ? FALSE :
-	apply_this_node(newapp->editop, NCX_NT_APP, curapp);
-
-
-    /* Go through all the parmsets specified in the new config 
-     * data. Since app nodes do not have callback functions
-     * each parmset must be handled individually
-     */
-    newps = (ps_parmset_t *)dlq_firstEntry(&newapp->parmsetQ);
-    while (newps) {
-	/* save the next parmset */
-	nextps = (ps_parmset_t *)dlq_nextEntry(newps);
-
-	/* skip any parmsets that failed the validate phase */
-	if (newps->res != NO_ERR) {
-	    newps = nextps;
-	    continue;
-	}
-
-	/* try to find this parmset in the target config */
-	curps = get_parmset_node(newps, curapp);
-
-	/* newapp may get moved to a different queue */
-	res = apply_write_ps(scb, msg, target, 
-			     curapp, newps, curps,
-			     applyhere || done);
-	if (res != NO_ERR) {
-	    retres = res;
-	}
-	newps = nextps;
-    }
-
-    /* check if continue on error is requested */
-    if (retres != NO_ERR && msg->rpc_err_option==OP_ERROP_CONTINUE) {
-	retres = NO_ERR;
-    }
-
-    /* now apply the edit operation to this node if needed */
-    if (retres == NO_ERR && applyhere) {
-	if (msg->rpc_need_undo) {
-	    res = add_undo_node(msg, newapp->editop,
-				NCX_NT_APP, newapp,
-				NCX_NT_APP, curapp,
-				NCX_NT_VAL, curval, NO_ERR);
-	    if (res != NO_ERR) {
-		return res;
-	    }
-	}
-
-	handle_audit_record(newapp->editop, scb, target, 
-			    NCX_NT_APP, 
-			    (curapp) ? curapp : newapp, retres);
-
-	switch (newapp->editop) {
-	case OP_EDITOP_MERGE:
-	    /* no current app node
-	     * this new app is being inserted in the target
-	     * the parent of curapp should not be NULL 
-	     */
-	    dlq_remove(newapp);
-	    add_appnode(newapp, curval);
-	    break;
-	case OP_EDITOP_REPLACE:
-	    /* grab the new val for replacement of the app in the target */
-	    if (curapp) {
-		dlq_remove(newapp);
-		swap_appnode(newapp, curapp);
-		if (!msg->rpc_need_undo) {
-		    cfg_free_appnode(curapp);
-		} /* else curapp is not deleted yet -- hold in undo */
-	    } else {
-		dlq_remove(newapp);
-		add_appnode(newapp, curval);
-	    }
-	    break;
-	case OP_EDITOP_CREATE:
-	case OP_EDITOP_LOAD:
-	    dlq_remove(newapp);
-	    add_appnode(newapp, curval);
-	    break;
-	case OP_EDITOP_DELETE:
-	    if (curapp) {
-		dlq_remove(curapp);
-		if (!msg->rpc_need_undo) {
-		    cfg_free_appnode(curapp);
-		} /* else curapp is not deleted yet -- hold in undo */
-	    }
-	    break;
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-
-    return retres;
-
-}  /* apply_write_app */
-
-
 /*********   B A S E   T Y P E   S P E C I F I C    ***************/
-
-
-/********************************************************************
-* FUNCTION invoke_root_cb
-* 
-* Invoke all the specified agent simple type callbacks for a 
-* source and target and write operation
-*
-* INPUTS:
-*   cbtyp == callback type being invoked
-*   editop == parent node edit operation
-*   scb == session control block
-*   msg == incoming rpc_msg_t in progress
-*   target == cfg_template_t for the config database to write
-*   newval == val_value_t from the PDU
-*   curval == current value (if any) from the target config
-*   done   == TRUE if the node manipulation is done
-*          == FALSE if none of the parent nodes have already
-*             edited the config nodes; just do user callbacks
-*   
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    invoke_root_cb (agt_cbtyp_t cbtyp,
-		    op_editop_t editop,
-		    ses_cb_t  *scb,
-		    rpc_msg_t  *msg,
-		    cfg_template_t *target,
-		    val_value_t  *newval,
-		    val_value_t  *curval,
-		    boolean done)
-{
-    cfg_app_t        *newapp, *curapp, *nextapp;
-    status_t          res, retres;
-
-    retres = NO_ERR;
-
-    /* go through the root value and invoke any callbacks that
-     * need to process the requested write operation internally
-     */
-
-    newapp = (cfg_app_t *)dlq_firstEntry(&newval->v.appQ);
-    while (newapp) {
-
-	nextapp = (cfg_app_t *)dlq_nextEntry(newapp);
-
-	/* find out if this application exists in the parent root node */
-	if (curval) {
-	    curapp = get_app_node(curval,
-				  newapp->appdef->owner,
-				  newapp->appdef->appname);
-	} else {
-	    curapp = NULL;
-	}
-
-	switch (cbtyp) {
-	case AGT_CB_VALIDATE:
-	    /* check and adjust the operation attribute */
-	    res = agt_check_editop(editop, &newapp->editop, NCX_NT_APP,
-				   newapp, curapp, NCX_IQUAL_ONE);
-	    if (res != NO_ERR) {
-		agt_record_error(scb, &msg->mhdr.errQ, 
-				 NCX_LAYER_CONTENT, res, 
-				 NULL, NCX_NT_VAL, newval, 
-				 NCX_NT_VAL, newval);
-	    } else {
-		res = validate_write_app(scb, msg, target, 
-					 editop, newapp, curapp);
-	    }
-	    break;
-	case AGT_CB_APPLY:
-	    res = apply_write_app(scb, msg, target, 
-				  newapp, curval, curapp, done);
-	    break;
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-
-	if (res != NO_ERR) {
-	    retres = res;
-	}
-
-	newapp = nextapp;
-    }
-	
-    return retres;
-
-}  /* invoke_root_cb */
 
 
 /********************************************************************
@@ -2231,10 +1143,15 @@ static status_t
     /* check the 'operation' attribute in VALIDATE phase */
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
+
+#ifdef AGT_VAL_DEBUG
+    log_debug2("\ninvoke_simval:validate: %s start", newval->name);
+#endif
+
 	/* check and adjust the operation attribute */
 	iqual = val_get_iqualval(newval);
 	res = agt_check_editop(editop, &newval->editop, 
-			       NCX_NT_VAL, newval, curval, iqual);
+			       newval, curval, iqual);
 	if (res != NO_ERR) {
 	    agt_record_error(scb, &msg->mhdr.errQ, 
 			     NCX_LAYER_CONTENT, res, 
@@ -2253,7 +1170,7 @@ static status_t
     /* check if the typdef for this value has a callback */
     if (res == NO_ERR) {
 	res = handle_user_callback(cbtyp, editop, scb, msg, 
-				   NCX_NT_VAL, newval, curval);
+				   newval, curval);
     }
 
     return res;
@@ -2301,10 +1218,15 @@ static status_t
     /* check the 'operation' attribute in VALIDATE phase */
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
+
+#ifdef AGT_VAL_DEBUG
+    log_debug2("\ninvoke_cpxval:validate: %s start", newval->name);
+#endif
+
 	/* check and adjust the operation attribute */
 	iqual = val_get_iqualval(newval);
 	res = agt_check_editop(editop, &newval->editop, 
-			       NCX_NT_VAL, newval, curval, iqual);
+			       newval, curval, iqual);
 	if (res != NO_ERR) {
 	    agt_record_error(scb, &msg->mhdr.errQ, 
 			     NCX_LAYER_CONTENT, res, 
@@ -2364,7 +1286,7 @@ static status_t
     /* check if the typdef for this value has a callback */
     if (retres == NO_ERR) {
 	retres = handle_user_callback(cbtyp, editop, scb, msg,
-				      NCX_NT_VAL, newval, curval);
+				      newval, curval);
     }
 	
     return retres;
@@ -2420,40 +1342,18 @@ static status_t
     }
 
     /* first traverse all the nodes until leaf nodes are reached */
-    switch (newval->btyp) {
-    case NCX_BT_ROOT:
-	res = invoke_root_cb(cbtyp, editop, scb, msg, 
-			     target, newval, 
-			     (v_val) ? v_val : curval, done);
-	break;
-    case NCX_BT_ANY:
-    case NCX_BT_ENAME:
-    case NCX_BT_ENUM:
-    case NCX_BT_EMPTY:
-    case NCX_BT_BOOLEAN:
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
-    case NCX_BT_FLOAT64:
-    case NCX_BT_STRING:
-    case NCX_BT_BINARY:
-    case NCX_BT_INSTANCE_ID:
-    case NCX_BT_SLIST:
-    case NCX_BT_XLIST:
+    switch (newval->obj->objtype) {
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
 	res = invoke_simval_cb(cbtyp, editop, scb, msg,
 			       target, newval, 
 			       (v_val) ? v_val : curval, done);
 	break;
-    case NCX_BT_CONTAINER:
-    case NCX_BT_CHOICE:
-    case NCX_BT_LIST:
-    case NCX_BT_XCONTAINER:
+    case OBJ_TYP_CONTAINER:
+    case OBJ_TYP_LIST:
+    case OBJ_TYP_RPC:
+    case OBJ_TYP_RPCIO:
+    case OBJ_TYP_NOTIF:
 	res = invoke_cpxval_cb(cbtyp, editop, scb, msg, 
 			       target, newval, 
 			       (v_val) ? v_val : curval, done);
@@ -2491,6 +1391,8 @@ static void
 {
     status_t   res;
 
+    (void)target;
+
     switch (undo->editop) {
     case OP_EDITOP_LOAD:
 	/* not supported for internal load operation */
@@ -2500,22 +1402,20 @@ static void
 	 * the metadata is not checked
 	 */
 	res = handle_user_callback(AGT_CB_ROLLBACK, undo->editop,
-				   scb, msg, undo->newnodetyp, 
-				   undo->newnode, undo->curnode);
+				   scb, msg, undo->newnode, undo->curnode);
 
 #ifdef NOT_YET
 	/**** SET done !!! ***/
 	if (!done) {
 	    /* no rollback callback, so apply a delete operation */
 	    res = handle_user_callback(AGT_CB_APPLY, OP_EDITOP_DELETE,
-				       scb, msg, undo->newnodetyp, 
-				       undo->newnode, NULL);
+				       scb, msg, undo->newnode, NULL);
 	}
 #endif
 
 	/* delete the node from the tree */
 	dlq_remove(undo->newnode);
-	ncx_free_node(undo->newnodetyp, undo->newnode);
+	val_free_value(undo->newnode);
 	break;
     case OP_EDITOP_DELETE:
 	/* Since 'delete' cannot apply to an attribute,
@@ -2523,35 +1423,19 @@ static void
 	 */
 	res = handle_user_callback(AGT_CB_ROLLBACK, 
 				   undo->editop, scb, msg, 
-				   undo->newnodetyp, undo->newnode,
-				   undo->curnode);
+				   undo->newnode, undo->curnode);
+
 #ifdef NOT_YET
 	/**** SET done !!! ***/
 	if (!done) {
 	    /* no rollback callback, so apply a create operation */
 	    res = handle_user_callback(AGT_CB_APPLY, OP_EDITOP_CREATE,
-				       scb, msg, undo->curnodetyp, 
-				       undo->curnode, NULL);
+				       scb, msg, undo->curnode, NULL);
 	}
 #endif
 
 	/* add the node back in the tree */
-	switch (undo->curnodetyp) {
-	case NCX_NT_VAL:
-	    add_valnode(undo->curnode, undo->parentnode);
-	    break;
-	case NCX_NT_PARM:
-	    add_parmnode(undo->curnode, undo->parentnode);
-	    break;
-	case NCX_NT_PARMSET:
-	    add_psnode(undo->curnode, undo->parentnode);
-	    break;
-	case NCX_NT_APP:
-	    add_appnode(undo->curnode, undo->parentnode);
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
+	add_valnode(undo->curnode, undo->parentnode);
 	break;
     case OP_EDITOP_MERGE:
     case OP_EDITOP_REPLACE:
@@ -2560,15 +1444,14 @@ static void
 	/* call the user rollback handler, if any */
 	res = handle_user_callback(AGT_CB_ROLLBACK, 
 				   undo->editop, scb, msg, 
-				   undo->newnodetyp, undo->newnode,
-				   undo->curnode);
+				   undo->newnode, undo->curnode);
 #ifdef NOT_YET
 	/**** SET done !!! ***/
 	if (!done) {
 	    /* no rollback callback, so apply a create operation */
 	    res = handle_user_callback(AGT_CB_APPLY, OP_EDITOP_DELETE,
-				       scb, msg, undo->newnodetyp,
-				       undo->newnode, undo->curnode);
+				       scb, msg, undo->newnode,
+				       undo->curnode);
 	}
 #endif
 
@@ -2578,26 +1461,10 @@ static void
 	if (undo->newnode) {
 	    dlq_remove(undo->newnode);
 	    if (undo->curnode) {
-		/* remove new node and put back old node */
-		switch (undo->newnodetyp) {
-		case NCX_NT_VAL:
-		    swap_valnode(undo->curnode, undo->newnode);
-		    break;
-		case NCX_NT_PARM:
-		    swap_parmnode(undo->curnode, undo->newnode);
-		    break;
-		case NCX_NT_PARMSET:
-		    swap_psnode(undo->curnode, undo->newnode);
-		    break;
-		case NCX_NT_APP:
-		    swap_appnode(undo->curnode, undo->newnode);
-		    break;
-		default:
-		    SET_ERROR(ERR_INTERNAL_VAL);
-		} 
+		swap_valnode(undo->curnode, undo->newnode);
 	    } 
 	    /* remove new node */
-	    ncx_free_node(undo->newnodetyp, undo->newnode);
+	    val_free_value(undo->newnode);
 
 	} /* else should not happen */
 	break;
@@ -2605,10 +1472,9 @@ static void
 	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    /****
+    /***** !!!!!  ****
     handle_undo_audit_record(undo->editop,
                              scb, target,
-			     undo->curnodetyp,
   			     undo->curnode,
 			     undo->res);
     ***/
@@ -2648,8 +1514,8 @@ static void
 	undo = (rpc_undo_rec_t *)dlq_deque(&msg->rpc_undoQ);
 	if (cbtyp==AGT_CB_COMMIT) {
 	    res = handle_user_callback(AGT_CB_COMMIT, undo->editop, 
-				       scb, msg, undo->newnodetyp, 
-				       undo->newnode, undo->curnode);
+				       scb, msg, undo->newnode, 
+				       undo->curnode);
 
 	    /* just clean up 'curnode' if it was held instead of deleted */
 	    switch (undo->editop) {
@@ -2679,11 +1545,8 @@ static void
 }  /* process_undo_list */
 
 
-/******************* E X T E R N   F U N C T I O N S ***************/
-
-
 /********************************************************************
-* FUNCTION agt_val_handle_callback
+* FUNCTION handle_callback
 * 
 * Invoke all the specified agent typedef callbacks for a 
 * source and target and write operation
@@ -2699,14 +1562,14 @@ static void
 * RETURNS:
 *   status
 *********************************************************************/
-status_t
-    agt_val_handle_callback (agt_cbtyp_t cbtyp,
-			     op_editop_t editop,
-			     ses_cb_t  *scb,
-			     rpc_msg_t  *msg,
-			     cfg_template_t *target,
-			     val_value_t  *newval,
-			     val_value_t  *curval)
+static status_t
+    handle_callback (agt_cbtyp_t cbtyp,
+		     op_editop_t editop,
+		     ses_cb_t  *scb,
+		     rpc_msg_t  *msg,
+		     cfg_template_t *target,
+		     val_value_t  *newval,
+		     val_value_t  *curval)
 {
     status_t  res;
 
@@ -2735,7 +1598,202 @@ status_t
 
     return res;
 
-}  /* agt_val_handle_callback */
+}  /* handle_callback */
+
+
+/******************* E X T E R N   F U N C T I O N S ***************/
+
+
+/********************************************************************
+* FUNCTION agt_val_validate_write
+* 
+* Validate the requested <edit-config> write operation
+*
+* Check all the embedded operation attributes against
+* the default-operation and maintained current operation.
+*
+* Invoke all the user AGT_CB_VALIDATE callbacks for a 
+* 'new value' and 'existing value' pairs, for a given write operation, 
+*
+* These callbacks are invoked bottom-up, so the first step is to
+* step through all the child nodes and traverse the
+* 'new' data model (from the PDU) all the way to the leaf nodes
+*
+* The operation attribute is checked against the real data model
+* on the way down the tree, and the user callbacks are invoked
+* bottom-up on the way back.  This way, the user callbacks can
+* share sub-tree validation routines, and perhaps add additional
+* <rpc-error> information, based on the context and specific errors
+* reported from 'below'.
+*
+* INPUTS:
+*   scb == session control block
+*   msg == incoming rpc_msg_t in progress
+*   target == cfg_template_t for the config database to write
+*   valroot == the val_value_t struct containing the root
+*              (NCX_BT_CONTAINER, ncx:root)
+*              datatype representing the config root with
+*              proposed changes to the target
+*   editop == requested start-state write operation
+*             (usually from the default-operation parameter)
+* OUTPUTS:
+*   rpc_err_rec_t structs may be malloced and added to the msg->rpc_errQ
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t
+    agt_val_validate_write (ses_cb_t  *scb,
+			    rpc_msg_t  *msg,
+			    cfg_template_t *target,
+			    val_value_t  *valroot,
+			    op_editop_t  editop)
+{
+    status_t        res;
+
+#ifdef DEBUG
+    if (!scb || !msg || !target || !valroot) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (!obj_is_root(valroot->obj)) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }	
+#endif
+
+    /* check the lock first */
+    res = cfg_ok_to_write(target, scb->sid);
+    if (res != NO_ERR) {
+	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_CONTENT, res, NULL,
+		 NCX_NT_NONE, NULL, NCX_NT_VAL, valroot);
+	return res;
+    }
+
+    /* the <config> root is just a value node of type 'root'
+     * traverse all nodes and check the <edit-config> request
+     */
+    res = handle_callback(AGT_CB_VALIDATE, editop, scb, 
+			  msg, target, valroot, target->root);
+
+    return res;
+
+}  /* agt_val_validate_write */
+
+
+/********************************************************************
+* FUNCTION agt_val_apply_write
+* 
+* Apply the requested write operation
+*
+* Invoke all the AGT_CB_APPLY callbacks for a 
+* source and target and write operation
+*
+* TBD: support for handling nested parmsets independently
+*      of the parent parmset is not supported.  This means
+*      that independent parmset instances nested within the
+*      parent parmset all have to be applied, or none applied
+*
+* INPUTS:
+*   scb == session control block
+*   msg == incoming rpc_msg_t in progress
+*   target == cfg_template_t for the config database to write
+*   pducfg == the 'root' value struct that represents the
+*             tree of changes to apply to the target
+*   editop == requested start-state write operation
+*             (usually from the default-operation parameter)
+*   errop == requested error handling
+* OUTPUTS:
+*   rpc_err_rec_t structs may be malloced and added to the msg->mhsr.errQ
+*
+* RETURNS:
+*   none
+*********************************************************************/
+status_t
+    agt_val_apply_write (ses_cb_t  *scb,
+			 rpc_msg_t  *msg,
+			 cfg_template_t *target,
+			 val_value_t    *pducfg,
+			 op_editop_t  editop,
+			 op_errop_t  errop)
+{
+#if 0
+    const obj_template_t *obj;
+    ncx_node_t            dtyp;
+#endif
+    status_t              res;
+
+
+#ifdef DEBUG
+    if (!scb || !msg || !target || !pducfg) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (!obj_is_root(pducfg->obj)) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }	
+#endif
+
+    /* check the lock first */
+    res = cfg_ok_to_write(target, scb->sid);
+    if (res != NO_ERR) {
+	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_CONTENT, 
+			 res, NULL,
+			 NCX_NT_NONE, NULL, NCX_NT_VAL, pducfg);
+	return res;
+    }
+
+#if 0
+    /* make sure the target root is not NULL */
+    if (!target->root) {
+	dtyp = NCX_NT_OBJ;
+	obj = (const obj_template_t *)
+	    def_reg_find_moddef(NC_MODULE, NCX_EL_CONFIG, &dtyp);
+	if (!obj) {
+	    return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+	}
+							  
+	target->root = val_new_value();
+	if (!target->root) {
+	    return ERR_INTERNAL_MEM;
+	}
+	val_init_from_template(target->root, obj);
+    }
+#endif
+
+    /* start with the config root, which is a val_value_t node */
+    res = handle_callback(AGT_CB_APPLY, editop, scb, 
+			  msg, target, pducfg, target->root);
+
+    /* check if undo was in effect */
+    if (msg->rpc_need_undo) {
+	if (res==NO_ERR) {
+	    /* complete the operation */
+	    res = handle_callback(AGT_CB_COMMIT, editop, scb, 
+				  msg, target, pducfg, target->root);
+	} else {
+	    /* rollback the operation */
+	    res = handle_callback(AGT_CB_ROLLBACK, editop, scb, 
+				  msg, target, pducfg, target->root);
+	}
+    }  /* else there was no rollback, so APPLY is the final phase */
+
+
+    /* handle the LOAD operation here based on start state edit mode */
+    if (editop==OP_EDITOP_LOAD && (res==NO_ERR || errop==OP_ERROP_CONTINUE)) {
+#if 0
+	/* fast-track API for the internal load command 
+	 * The pducfg struct will be handed off to cfg->root
+	 */
+	res = cfg_load_root(target);
+	if (res != NO_ERR) {
+	    agt_record_error(scb, &msg->mhdr.errQ, 
+			     NCX_LAYER_OPERATION, res, NULL,
+			     NCX_NT_NONE, NULL, NCX_NT_VAL, pducfg);
+	}
+#endif
+    }
+
+    return res;
+
+}  /* agt_val_apply_write */
 
 
 /* END file agt_val.c */

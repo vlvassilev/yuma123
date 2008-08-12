@@ -40,8 +40,8 @@ date	     init     comment
  * defined in the netconfd module
  */
 #define NCX_PS_NC_BOOT      ((const xmlChar *)"netconfd")
-#define NCX_PS_NC_SECURITY  ((const xmlChar *)"nc-security")
-#define NCX_PS_NC_TRANSPORT ((const xmlChar *)"nc-transport")
+/* #define NCX_PS_NC_SECURITY  ((const xmlChar *)"nc-security") */
+/* #define NCX_PS_NC_TRANSPORT ((const xmlChar *)"nc-transport") */
 #define NCX_PAR_CFG_PATH    ((const xmlChar *)"cfg-path")
 
 #define NCX_TYP_FILELIST    ((const xmlChar *)"FileSpecList")

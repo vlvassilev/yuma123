@@ -124,7 +124,7 @@ status_t
 
     /* this may overwrite the old callback function, if any */
     if (forall) {
-	for (id = AGT_CB_LOAD; id <= AGT_CB_ROLLBACK; id++) {
+	for (id = 0; id < AGT_NUM_CB; id++) {
 	    cbset->cbfn[id] = cbfn;
 	}
     } else {

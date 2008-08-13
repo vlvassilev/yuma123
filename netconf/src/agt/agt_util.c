@@ -61,6 +61,10 @@ date         init     comment
 #include "dlq.h"
 #endif
 
+#ifndef _H_log
+#include  "log.h"
+#endif
+
 #ifndef _H_ncx
 #include  "ncx.h"
 #endif
@@ -345,15 +349,37 @@ void
     rpc_err_rec_t   *err;
     xmlChar         *buff;
 
+    if (LOGDEBUG3) {
+	log_debug3("\nagt_record_error: ");
+	if (xmlnode) {
+	    log_debug3(" xml: %u:%s", 
+		       xmlns_get_ns_prefix(xmlnode->nsid),
+		       xmlnode->elname ? xmlnode->elname : (const xmlChar *)"--");
+	}
+	if (nodetyp == NCX_NT_VAL && errnode) {
+	    log_debug3(" errnode: \n");
+	    val_dump_value((const val_value_t *)errnode, NCX_DEF_INDENT);
+	    log_debug3("\n");
+	}
+    }
+
     if (errQ) {
 	buff = NULL;
 	if (errnode) {
-	    if (nodetyp==NCX_NT_STRING) {
+	    switch (nodetyp) {
+	    case NCX_NT_STRING:
 		buff = xml_strdup((const xmlChar *)errnode);
-	    } else {
+		break;
+	    case NCX_NT_VAL:
 		(void)val_gen_instance_id(errnode, 
 					  NCX_IFMT_XPATH1, 
 					  TRUE, &buff);
+		break;
+	    case NCX_NT_OBJ:
+		(void)obj_gen_object_id(errnode, &buff);
+		break;
+	    default:
+		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 	}
 

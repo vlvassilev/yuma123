@@ -63,7 +63,6 @@ date         init     comment
 #include "agt_val.h"
 #endif
 
-
 #ifndef _H_cap
 #include "cap.h"
 #endif
@@ -102,6 +101,10 @@ date         init     comment
 
 #ifndef _H_xml_wr
 #include  "xml_wr.h"
+#endif
+
+#ifndef _H_yangconst
+#include  "yangconst.h"
 #endif
 
 /********************************************************************
@@ -324,6 +327,11 @@ static status_t
      */
     res = agt_val_validate_write(scb, msg, target, val, defop);
 
+    if (target->cfg_id == NCX_CFGID_RUNNING && res==NO_ERR) {
+	res = agt_val_split_root_check(scb, &msg->mhdr, 
+				       val, target->root);
+    }
+
     /* save the default operation in 'user1' */
     msg->rpc_user1 = (void *)defop;
 
@@ -337,8 +345,10 @@ static status_t
      * in case there are multiple parmsets and not all of them
      * had errors.  Force a NO_ERR return.
      */
-    if (errop == OP_ERROP_CONTINUE) {
-	res = NO_ERR;
+    if (!NEED_EXIT) {
+	if (errop == OP_ERROP_CONTINUE) {
+	    res = NO_ERR;
+	}
     }
     
     return res;
@@ -909,6 +919,9 @@ static status_t
 
 
     (void)methnode;
+    target = NULL;
+    defop = OP_EDITOP_NONE;
+    res = NO_ERR;
 
     /* get the source parameter */
     val = val_find_child(&msg->rpc_input, NC_MODULE,
@@ -922,6 +935,13 @@ static status_t
     }
 
     /* determine which variant of the input parameter is present */
+    
+    /****/
+    return ERR_NCX_OPERATION_FAILED;
+    /****/
+
+#if 0
+    /*** set the target config variable *****/
 
     /* set the error parameter to gather the most errors */
     msg->rpc_err_option = OP_ERROP_CONTINUE;
@@ -932,6 +952,10 @@ static status_t
      */
     res = agt_val_validate_write(scb, msg, target, val, OP_EDITOP_NONE);
 
+    if (res == NO_ERR) {
+	res = agt_val_root_check(scb, msg, val);
+    }
+
     /* save the default operation in 'user1' */
     msg->rpc_user1 = (void *)defop;
 
@@ -939,6 +963,7 @@ static status_t
     msg->rpc_status = res;
 
     return res;
+#endif
 
 } /* validate_validate */
 
@@ -969,10 +994,8 @@ static status_t
      * has already been set to the address of the cfg_template_t
      * to fill in.
      *
-     * NOTE: THIS IS A HACK!!!!
-     * DEPENDS ON THE agt_rpc_load_config_file to setup
+     * NOTE: HACK DEPENDS ON THE agt_rpc_load_config_file to setup
      * the rpc->rpc_user1 parameter
-     * 
      */
     target = (cfg_template_t *)msg->rpc_user1;
     if (!target) {
@@ -991,6 +1014,10 @@ static status_t
 
     /* errors will be added as needed */
     res = agt_val_validate_write(scb, msg, target, val, OP_EDITOP_LOAD);
+
+    if (res == NO_ERR) {
+	res = agt_val_root_check(scb, &msg->mhdr, val);
+    }
     msg->rpc_user2 = val;
 
     return res;

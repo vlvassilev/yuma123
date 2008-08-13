@@ -1719,7 +1719,7 @@ boolean
 * Get the first module in the ncx_modQ
 * 
 * RETURNS:
-*   pointer to the first entry of NULL if empty Q
+*   pointer to the first entry or NULL if empty Q
 *********************************************************************/
 ncx_module_t *
     ncx_get_first_module (void)
@@ -1735,7 +1735,7 @@ ncx_module_t *
 * Get the next module in the ncx_modQ
 * 
 * RETURNS:
-*   pointer to the first entry of NULL if empty Q
+*   pointer to the first entry or NULL if empty Q
 *********************************************************************/
 ncx_module_t *
     ncx_get_next_module (const ncx_module_t *mod)
@@ -1744,6 +1744,130 @@ ncx_module_t *
 	(ncx_module_t *)dlq_nextEntry(mod) : NULL;
 
 }  /* ncx_get_next_module */
+
+
+/********************************************************************
+* FUNCTION ncx_get_first_object
+* 
+* Get the first object in the datadefQs for the specified module
+* 
+* INPUTS:
+*   mod == module to search for the first object
+*
+* RETURNS:
+*   pointer to the first object or NULL if empty Q
+*********************************************************************/
+const obj_template_t *
+    ncx_get_first_object (const ncx_module_t *mod)
+{
+    const obj_template_t *obj;
+    const yang_node_t    *node;
+
+    for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+	 obj != NULL;
+	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	if (!obj_has_name(obj) || obj_is_cli(obj)) {
+	    continue;
+	}
+	if (obj_is_data_db(obj)) {
+	    return obj;
+	}
+    }
+
+    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	 node != NULL;
+	 node = (const yang_node_t *)dlq_nextEntry(node)) {
+
+	if (!node->submod) {
+	    SET_ERROR(ERR_INTERNAL_PTR);
+	    continue;
+	}
+
+	for (obj = (const obj_template_t *)
+		 dlq_firstEntry(&node->submod->datadefQ);
+	     obj != NULL;
+	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	    if (!obj_has_name(obj)  || obj_is_cli(obj)) {
+		continue;
+	    }
+
+	    if (obj_is_data_db(obj)) {
+		return obj;
+	    }
+	}
+    }
+
+    return NULL;
+
+}  /* ncx_get_first_object */
+
+
+/********************************************************************
+* FUNCTION ncx_get_next_object
+* 
+* Get the next object in the specified module
+* 
+* RETURNS:
+*   pointer to the next object or NULL if none
+*********************************************************************/
+const obj_template_t *
+    ncx_get_next_object (const ncx_module_t *mod,
+			 const obj_template_t *curobj)
+{
+    const obj_template_t *obj;
+    const yang_node_t    *node;
+    boolean               start;
+
+    for (obj = (const obj_template_t *)dlq_nextEntry(curobj);
+	 obj != NULL;
+	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	if (!obj_has_name(obj) || obj_is_cli(obj)) {
+	    continue;
+	}
+
+	if (obj_is_data_db(obj)) {
+	    return obj;
+	}
+    }
+
+    start = (curobj->mod == mod) ? TRUE : FALSE;
+
+    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	 node != NULL;
+	 node = (const yang_node_t *)dlq_nextEntry(node)) {
+
+	if (!node->submod) {
+	    SET_ERROR(ERR_INTERNAL_PTR);
+	    continue;
+	}
+
+	if (!start) {
+	    if (node->submod == curobj->mod) {
+		start = TRUE;
+	    }
+	    continue;
+	}
+
+	for (obj = (const obj_template_t *)
+		 dlq_firstEntry(&node->submod->datadefQ);
+	     obj != NULL;
+	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	    if (!obj_has_name(obj)  || obj_is_cli(obj)) {
+		continue;
+	    }
+
+	    if (obj_is_data_db(obj)) {
+		return obj;
+	    }
+	}
+    }
+
+    return NULL;
+
+}  /* ncx_get_next_object */
 
 
 /********************************************************************
@@ -2928,6 +3052,10 @@ status_t
 		;
 	    }
 
+	    if (*numstr == '-') {
+		return ERR_NCX_NOT_IN_RANGE;
+	    }
+
             val->u = (uint32)ul;
             break;
         case NCX_NF_HEX:
@@ -2951,6 +3079,10 @@ status_t
 		;
 	    }
 
+	    if (*numstr == '-') {
+		return ERR_NCX_NOT_IN_RANGE;
+	    }
+
             val->u = (uint32)ul;
             break;
         case TK_TT_RNUM:
@@ -2966,6 +3098,11 @@ status_t
             if (err && *err) {
                 return ERR_NCX_INVALID_NUM;
             }
+
+	    if (*numstr == '-') {
+		return ERR_NCX_NOT_IN_RANGE;
+	    }
+
             val->ul = (uint64)ull;
             break;
         case NCX_NF_HEX:
@@ -2973,6 +3110,11 @@ status_t
             if (err && *err) {
                 return ERR_NCX_INVALID_HEXNUM;
             }
+
+	    if (*numstr == '-') {
+		return ERR_NCX_NOT_IN_RANGE;
+	    }
+
             val->ul = (uint64)ull;
             break;
         case NCX_NF_REAL:

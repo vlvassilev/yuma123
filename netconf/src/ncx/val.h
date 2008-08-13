@@ -213,10 +213,6 @@ typedef struct val_value_t_ {
     xmlns_id_t     nsid;              /* namespace ID for this node */
     ncx_btype_t    btyp;                 /* base type of this value */
 
-    /**** NOT USED YET ****/
-    /* this field is for supporting unnamed (numbered-only) data */
-    uint32         seqid;          /* instance of this sibling node */
-
     uint32         flags;                  /* internal status flags */
     ncx_data_class_t dataclass;             /* config or state data */
 

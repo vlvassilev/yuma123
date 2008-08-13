@@ -799,7 +799,7 @@ rpc_err_rec_t *
 			  xmlChar *error_path)
 {
     rpc_err_rec_t            *err;
-    const obj_template_t     *parm, *in;
+    const obj_template_t     *parm, *in, *obj;
     const cfg_template_t     *cfg;
     const xmlns_qname_t      *qname;
     xmlChar                  *error_msg;
@@ -868,12 +868,21 @@ rpc_err_rec_t *
 	 *
 	 * First set the bad-attribute NS and name
 	 */
-	if (!error_parm || parmtyp != NCX_NT_QNAME) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
+	if (error_parm) {
+	    if (parmtyp == NCX_NT_QNAME) {
+		qname = (const xmlns_qname_t *)error_parm;
+		err1 = (const void *)qname->nsid;
+		err2 = (const void *)qname->name;
+	    } else if (parmtyp == NCX_NT_OBJ) {
+		obj = (const obj_template_t *)error_parm;
+		nsid = obj_get_nsid(obj);
+		err1 = (const void *)nsid;
+		err2 = (const void *)obj_get_name(obj);
+	    } else {
+		SET_ERROR(ERR_INTERNAL_VAL);
+	    }
 	} else {
-	    qname = (const xmlns_qname_t *)error_parm;
-	    err1 = (const void *)qname->nsid;
-	    err2 = (const void *)qname->name;
+	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
 
 	/* hack: borrow the errnode pointer to use as a string 

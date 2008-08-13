@@ -189,6 +189,13 @@ extern ncx_module_t *
 extern ncx_module_t *
     ncx_get_next_module (const ncx_module_t *mod);
 
+/************* top obj_template_t in module **************/
+extern const obj_template_t *
+    ncx_get_first_object (const ncx_module_t *mod);
+
+extern const obj_template_t *
+    ncx_get_next_object (const ncx_module_t *mod,
+			 const obj_template_t *curobj);
 
 /******************** ncx_import_t ******************/
 

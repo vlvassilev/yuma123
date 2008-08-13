@@ -58,16 +58,6 @@ extern status_t
 		      val_value_t *retval);
 
 
-/* hack entry point for internal load-config RPC */
-extern status_t
-    agt_val_parse_load (ses_cb_t  *scb,
-			xml_msg_hdr_t *msg,
-			const obj_template_t *obj,
-			const xml_node_t *startnode,
-			ncx_data_class_t  parentdc,
-			val_value_t *retval);
-
-
 #ifdef DEBUG
 extern void
     agt_val_parse_test (const char *testfile);

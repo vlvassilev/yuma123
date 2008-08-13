@@ -3341,7 +3341,6 @@ val_value_t *
 	copy->dname = NULL;
 	copy->name = val->name;
     }
-    copy->seqid = val->seqid;
     copy->editop = val->editop;
     copy->res = val->res;
     copy->flags = val->flags;
@@ -3489,7 +3488,6 @@ status_t
 	copy->dname = NULL;
 	copy->name = val->name;
     }
-    copy->seqid = val->seqid;
     copy->editop = val->editop;
     copy->res = val->res;
     copy->flags = val->flags;
@@ -3704,7 +3702,6 @@ void
 
     newchild->parent = curchild->parent;
     newchild->getcb = curchild->getcb;
-    newchild->seqid = curchild->seqid;
 
     dlq_swap(newchild, curchild);
 

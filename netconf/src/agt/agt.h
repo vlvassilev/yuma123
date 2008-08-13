@@ -140,7 +140,6 @@ date	     init     comment
  * These are used are array indices so there is no dummy zero enum
  */
 typedef enum agt_cbtyp_t_ {
-    AGT_CB_LOAD,           /* internal PS handler startup/shutdown */
     AGT_CB_VALIDATE,               /* P1: write operation validate */
     AGT_CB_APPLY,                     /* P2: write operation apply */
     AGT_CB_COMMIT,               /* P3-pos: write operation commit */

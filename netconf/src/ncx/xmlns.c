@@ -355,7 +355,7 @@ const xmlChar *
     xmlns_get_ns_prefix (xmlns_id_t  ns_id)
 {
     if (!valid_id(ns_id)) {
-	return NULL;
+	return (const xmlChar *)"--";
     } else {
 	return (const xmlChar *)xmlns[ns_id-1]->ns_pfix;
     }

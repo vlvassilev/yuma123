@@ -3,7 +3,8 @@
 #   src directory
 
 ##################### PROGRAMS ########################
-APPS = netconfd yangdump yangdiff subsys ncxcli
+###APPS = netconfd yangdump yangdiff subsys ncxcli
+APPS = netconfd yangdump yangdiff subsys
 
 ##################### LIBRARIES ########################
 #
@@ -12,7 +13,8 @@ APPS = netconfd yangdump yangdiff subsys ncxcli
 # Put only the directories that build object files in the list
 
 # make all targets
-DIRS = agt agtinst mgr ncx $(APPS)
+####DIRS = agt agtinst mgr ncx $(APPS)
+DIRS = agt agtinst ncx $(APPS)
 
 # make agent without other targets
 AGTDIRS = agt agtinst ncx netconfd

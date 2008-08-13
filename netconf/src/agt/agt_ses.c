@@ -649,9 +649,6 @@ static status_t
     res = NO_ERR;
 
     switch (cbtyp) {
-    case AGT_CB_LOAD:
-	/* nothing to do when the parmset is loaded */
-	break;
     case AGT_CB_VALIDATE:
 
 #ifdef REMOVED
@@ -765,9 +762,6 @@ static status_t
     res = NO_ERR;
 
     switch (cbtyp) {
-    case AGT_CB_LOAD:
-	/* nothing to do when the parmset is loaded */
-	break;
     case AGT_CB_VALIDATE:
 
 #ifdef REMOVED
@@ -886,9 +880,6 @@ static status_t
     res = NO_ERR;
 
     switch (cbtyp) {
-    case AGT_CB_LOAD:
-	/* nothing to do when the parmset is loaded */
-	break;
     case AGT_CB_VALIDATE:
 
 #ifdef REMOVED

@@ -111,6 +111,8 @@ module ncx {
   }
 
   container must {
+    presence "Indicates a must statement is configured.";
+
     description 
      "Contains the fields from one must-stmt.  Will be present
       in appinfo for each must-stmt defined within an object.";
@@ -184,6 +186,8 @@ module ncx {
 
   grouping reference {
     container reference {
+      presence "Indicates a reference statement is configured.";
+
       description 
         "Contains information from the reference-stmt.  Will
          be present in appinfo for objects which contain a
@@ -207,6 +211,8 @@ module ncx {
   uses reference;
 
   container revision {
+
+    presence "Indicates a revision statement is configured.";
     description 
      "Contains the fields from one revision-stmt.  Will be present
       in appinfo for each revision-stmt defined within the module.";

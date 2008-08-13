@@ -113,6 +113,22 @@ date         init     comment
 #include  "tstamp.h"
 #endif
 
+#ifndef _H_val
+#include  "val.h"
+#endif
+
+#ifndef _H_val_util
+#include  "val_util.h"
+#endif
+
+#ifndef _H_xmlns
+#include  "xmlns.h"
+#endif
+
+#ifndef _H_yangconst
+#include  "yangconst.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -459,7 +475,7 @@ static status_t
 
 /*****************   V A L I D A T E    P H A S E   ****************/
 
-
+#if 0
 /********************************************************************
 * FUNCTION check_inst_cnt
 * 
@@ -627,7 +643,6 @@ static status_t
 } /* check_child_inst_cnt */
 
 
-#if 0
 /********************************************************************
 * FUNCTION check_choice_group
 * 
@@ -810,7 +825,6 @@ static status_t
     return res;
 
 } /* check_choice_inst_cnt */
-#endif
 
 
 /********************************************************************
@@ -869,7 +883,6 @@ static status_t
 } /* check_edit_instance */
 
 
-#if 0
 /********************************************************************
 * FUNCTION validate_write_val
 * 
@@ -948,14 +961,6 @@ static status_t
 			      (v_val) ? v_val : curval, FALSE);
     }
 
-    /* if there are no errors so far in the parm, then
-     * try to call the validate function for this parm 
-     */
-    if (res == NO_ERR) {
-	res = handle_user_callback(AGT_CB_VALIDATE,
-				   pop, scb, msg, newval, curval);
-    }
-
     if (v_val) {
 	val_free_value(v_val);
     }
@@ -964,9 +969,6 @@ static status_t
 
 }  /* validate_write_val */
 #endif
-
-
-/*******************   A P P L Y    P H A S E   ********************/
 
 
 /********************************************************************
@@ -1014,14 +1016,6 @@ static status_t
     res = NO_ERR;
     mergehere = FALSE;
     freenew = FALSE;
-
-    /* call the user callback apply function for this parm */
-    res = handle_user_callback(AGT_CB_APPLY,
-			       newval->editop, scb, msg,
-			       newval, curval);
-    if (res != NO_ERR) {
-	return res;
-    }
 
     /* check if this node needs the edit operation applied */
     if (*done) {
@@ -1101,9 +1095,6 @@ static status_t
 }  /* apply_write_val */
 
 
-/*********   B A S E   T Y P E   S P E C I F I C    ***************/
-
-
 /********************************************************************
 * FUNCTION invoke_simval_cb
 * 
@@ -1152,6 +1143,13 @@ static status_t
 	iqual = val_get_iqualval(newval);
 	res = agt_check_editop(editop, &newval->editop, 
 			       newval, curval, iqual);
+
+	if (res == NO_ERR) {
+	    res = agt_check_max_access(newval->editop, 
+				       obj_get_max_access(newval->obj), 
+				       (curval != NULL));
+	}
+
 	if (res != NO_ERR) {
 	    agt_record_error(scb, &msg->mhdr.errQ, 
 			     NCX_LAYER_CONTENT, res, 
@@ -1227,28 +1225,18 @@ static status_t
 	iqual = val_get_iqualval(newval);
 	res = agt_check_editop(editop, &newval->editop, 
 			       newval, curval, iqual);
+	if (res == NO_ERR) {
+	    res = agt_check_max_access(newval->editop, 
+				       obj_get_max_access(newval->obj), 
+				       (curval != NULL));
+	}
+
 	if (res != NO_ERR) {
 	    agt_record_error(scb, &msg->mhdr.errQ, 
 			     NCX_LAYER_CONTENT, res, 
 			     NULL, NCX_NT_VAL, newval, 
 			     NCX_NT_VAL, newval);
 	    return res;
-	}
-
-	switch (newval->editop) {
-	case OP_EDITOP_CREATE:
-	case OP_EDITOP_LOAD:
-	    res = check_edit_instance(scb, msg, newval, NULL, TRUE);
-	    break;
-	case OP_EDITOP_REPLACE:
-	    res = check_edit_instance(scb, msg, newval, NULL, FALSE);
-	    break;
-	case OP_EDITOP_MERGE:
-	    res = check_edit_instance(scb, msg, newval, curval, FALSE);
-	    break;
-	default:
-	    res = NO_ERR;
-	    break;
 	}
 	retres = res;
 	break;
@@ -1344,11 +1332,11 @@ static status_t
     /* first traverse all the nodes until leaf nodes are reached */
     switch (newval->obj->objtype) {
     case OBJ_TYP_LEAF:
-    case OBJ_TYP_LEAF_LIST:
 	res = invoke_simval_cb(cbtyp, editop, scb, msg,
 			       target, newval, 
 			       (v_val) ? v_val : curval, done);
 	break;
+    case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_CONTAINER:
     case OBJ_TYP_LIST:
     case OBJ_TYP_RPC:
@@ -1580,7 +1568,6 @@ static status_t
 #endif
 
     switch (cbtyp) {
-    case AGT_CB_LOAD:
     case AGT_CB_VALIDATE:
     case AGT_CB_APPLY:
 	/* keep checking until all the child nodes have been processed */
@@ -1601,7 +1588,573 @@ static status_t
 }  /* handle_callback */
 
 
+
+/********************************************************************
+* FUNCTION instance_check
+* 
+* Check for the proper number of object instances for
+* the specified value struct. Checks the direct accessible
+* children of 'val' only!!!
+* 
+* The top-level value set passed cannot represent a choice
+* or a case within a choice.
+*
+* INPUTS:
+*   scb == session control block (may be NULL; no session stats)
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   obj == object template for child node in valset to check
+*   val == val_value_t list, leaf-list, or container to check
+*   layer == NCX layer calling this function (for error purposes only)
+*
+* OUTPUTS:
+*   if msg not NULL:
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+
+*      which must be freed by the called with the 
+*      rpc_err_free_record function
+*
+* RETURNS:
+*   status of the operation, NO_ERR if no validation errors found
+*********************************************************************/
+static status_t 
+    instance_check (ses_cb_t *scb,
+		    xml_msg_hdr_t *msg,
+		    const obj_template_t *obj,
+		    val_value_t *val,
+		    ncx_layer_t   layer)
+{
+    ncx_iqual_t            iqual;
+    uint32                 cnt, minelems, maxelems;
+    boolean                minset, maxset, minerr, maxerr;
+    status_t               res;
+
+    res = NO_ERR;
+    iqual = obj_get_iqualval(obj);
+    minerr = FALSE;
+    maxerr = FALSE;
+
+    minset = obj_get_min_elements(obj, &minelems);
+    maxset = obj_get_max_elements(obj, &maxelems);
+
+    cnt = val_instance_count(val, obj_get_mod_name(obj),
+			     obj_get_name(obj));
+
+    if (minset) {
+	if (cnt < minelems) {
+	    /* not enough instances error */
+	    minerr = TRUE;
+	    res = ERR_NCX_MISSING_VAL_INST;
+	    if (msg) {
+		agt_record_error(scb, &msg->errQ, layer, res, 
+				 NULL, NCX_NT_OBJ, obj, 
+				 NCX_NT_OBJ, obj);
+	    }
+	    res = NO_ERR;
+	}
+    }
+
+    if (maxset) {
+	if (cnt > maxelems) {
+	    /* too many instances error */
+	    maxerr = TRUE;
+	    res = ERR_NCX_EXTRA_VAL_INST;
+	    if (msg) {
+		agt_record_error(scb, &msg->errQ, layer, res, 
+				 NULL, NCX_NT_OBJ, obj, 
+				 NCX_NT_OBJ, obj);
+	    }
+	    res = NO_ERR;
+	}
+    }
+
+    switch (iqual) {
+    case NCX_IQUAL_ONE:
+	if (cnt < 1 && !minerr) {
+	    /* missing single parameter */
+	    res = ERR_NCX_MISSING_VAL_INST;
+	} else if (cnt > 1 && !maxerr) {
+	    /* too many parameters */
+	    res = ERR_NCX_EXTRA_VAL_INST;
+	}
+	break;
+    case NCX_IQUAL_OPT:
+	if (cnt > 1 && !maxerr) {
+	    /* too many parameters */
+	    res = ERR_NCX_EXTRA_VAL_INST;
+
+	}
+	break;
+    case NCX_IQUAL_1MORE:
+	if (cnt < 1 && !minerr) {
+	    /* missing parameter error */
+	    res = ERR_NCX_MISSING_VAL_INST;
+
+	}
+	break;
+    case NCX_IQUAL_ZMORE:
+	break;
+    default:
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (res != NO_ERR && msg) {
+	agt_record_error(scb, &msg->errQ, layer, res, 
+			 NULL, NCX_NT_OBJ, obj, 
+			 NCX_NT_OBJ, obj);
+    }
+
+    return res;
+    
+}  /* instance_check */
+
+
+/********************************************************************
+* FUNCTION choice_check_agt
+* 
+* Agent version of ncx/val_util.c/choice_check
+*
+* Check a val_value_t struct against its expected OBJ
+* for instance validation:
+*
+*    - choice validation: 
+*      only one case allowed if the data type is choice
+*      Only issue errors based on the instance test qualifiers
+*
+* The input is checked against the specified obj_template_t.
+*
+* INPUTS:
+*   scb == session control block (may be NULL; no session stats)
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   choicobj == object template for the choice to check
+*   val == parent val_value_t list or container to check
+*   layer == NCX layer calling this function (for error purposes only)
+*
+* OUTPUTS:
+*   if msg not NULL:
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+*      which must be freed by the called with the 
+*      rpc_err_free_record function
+*
+* RETURNS:
+*   status of the operation, NO_ERR if no validation errors found
+*********************************************************************/
+static status_t 
+    choice_check_agt (ses_cb_t  *scb,
+		      xml_msg_hdr_t *msg,
+		      const obj_template_t *choicobj,
+		      val_value_t *val,
+		      ncx_layer_t   layer)
+{
+    val_value_t           *chval, *testval;
+    status_t               res;
+
+    res = NO_ERR;
+
+    /* Go through all the child nodes for this object
+     * and look for choices against the value set to see if each 
+     * a choice case is present in the correct number of instances.
+     *
+     * The current value could never be a OBJ_TYP_CHOICE since
+     * those nodes are not stored in the val_value_t tree
+     * Instead, it is the parent of the choice object,
+     * and the accessible case nodes will be child nodes
+     * of that complex parent type
+     */
+    chval = val_get_choice_first_set(val, choicobj);
+    if (!chval) {
+	if (obj_is_mandatory(choicobj)) {
+	    /* error missing choice */
+	    res = ERR_NCX_MISSING_CHOICE;
+	    if (msg) {
+		agt_record_error(scb, &msg->errQ, layer, res, 
+				 NULL, NCX_NT_OBJ, choicobj, 
+				 NCX_NT_VAL, val);
+	    }
+	}
+	return res;
+    }
+
+    /* else a choice was selected
+     * first make sure all the mandatory case 
+     * objects are present
+     */
+    res = instance_check(scb, msg, chval->casobj, val, layer);
+    /* errors already recorded if other than NO_ERR */
+
+    /* check if any objects from other cases are present */
+    testval = val_get_choice_next_set(val, choicobj, chval);
+    while (testval) {
+	if (testval->casobj != chval->casobj) {
+	    /* error: extra case object in this choice */
+	    res = ERR_NCX_EXTRA_CHOICE;
+	    if (msg) {
+		agt_record_error(scb, &msg->errQ, layer, res, 
+				 NULL, NCX_NT_OBJ, choicobj, 
+				 NCX_NT_VAL, testval);
+	    }
+	}
+	testval = val_get_choice_next_set(val, choicobj, testval);
+    }
+
+    val->res = res;
+
+    return res;
+
+}  /* choice_check_agt */
+
+
+/********************************************************************
+* FUNCTION must_stmt_check
+* 
+* Check for any must-stmts in the object tree and validate the Xpath
+* expression against the complete database 'root' and current
+* context node 'curval'
+* 
+* INPUTS:
+*   scb == session control block (may be NULL; no session stats)
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   root == val_value_t or the target database root to validate
+*   curval == val_value_t for the current context node in the tree
+*   layer == NCX layer calling this function (for error purposes only)
+*
+* OUTPUTS:
+*   if msg not NULL:
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+*      which must be freed by the called with the 
+*      rpc_err_free_record function
+*
+* RETURNS:
+*   status of the operation, NO_ERR if no validation errors found
+*********************************************************************/
+static status_t 
+    must_stmt_check (ses_cb_t *scb,
+		     xml_msg_hdr_t *msg,
+		     val_value_t *root,
+		     val_value_t *curval,
+		     ncx_layer_t   layer)
+{
+    const obj_template_t  *obj;
+    const dlq_hdr_t       *mustQ;
+    const ncx_errinfo_t   *errinfo;
+    val_value_t           *chval;
+    status_t               res, retres;
+
+#ifdef AGT_VAL_DEBUG
+    log_debug2("\nmst_stmt_check: %s start", curval->name);
+#endif
+
+    retres = NO_ERR;
+
+    obj = curval->obj;
+
+    for (chval = val_get_first_child(curval);
+	 chval != NULL;
+	 chval = val_get_next_child(chval)) {
+
+	res = must_stmt_check(scb, msg, root, chval, layer);
+	CHK_EXIT;
+    }
+
+    mustQ = obj_get_mustQ(obj);
+    if (mustQ) {
+	for (errinfo = (const ncx_errinfo_t *)dlq_firstEntry(mustQ);
+	     errinfo != NULL;
+	     errinfo = (const ncx_errinfo_t *)dlq_nextEntry(errinfo)) {
+	    /*** agt_xpath_eval(scb, msg, root, curval, errinfo, layer);  ***/
+	}
+
+    }
+
+    return retres;
+    
+}  /* must_stmt_check */
+
+
 /******************* E X T E R N   F U N C T I O N S ***************/
+
+
+/********************************************************************
+* FUNCTION agt_val_instance_check
+* 
+* Check for the proper number of object instances for
+* the specified value struct.
+* 
+* The top-level value set passed cannot represent a choice
+* or a case within a choice.
+*
+* This function is intended for validating PDUs (RPC requests)
+* during the PDU processing.  It does not check the instance
+* count or must-stmt expressions for any <config> (ncx:root)
+* container.  This must be dome with the agt_val_root_check function.
+*
+* INPUTS:
+*   scb == session control block (may be NULL; no session stats)
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   valset == val_value_t list, leaf-list, or container to check
+*   layer == NCX layer calling this function (for error purposes only)
+*
+* OUTPUTS:
+*   if msg not NULL:
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+*      which must be freed by the called with the 
+*      rpc_err_free_record function
+*
+* RETURNS:
+*   status of the operation, NO_ERR if no validation errors found
+*********************************************************************/
+status_t 
+    agt_val_instance_check (ses_cb_t *scb,
+			    xml_msg_hdr_t *msg,
+			    val_value_t *valset,
+			    ncx_layer_t   layer)
+{
+    const obj_template_t  *obj, *chobj;
+    val_value_t           *chval;
+    status_t               res, retres;
+
+#ifdef DEBUG
+    if (!valset) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+#ifdef AGT_VAL_DEBUG
+    log_debug2("\nagt_val_instchk: %s start", valset->name);
+#endif
+
+    retres = NO_ERR;
+
+    obj = valset->obj;
+
+
+    if (obj->objtype == OBJ_TYP_LEAF_LIST) {
+	retres = instance_check(scb, msg, obj, valset, layer);
+    } else if (val_child_cnt(valset)) {
+	for (chval = val_get_first_child(valset);
+	     chval != NULL;
+	     chval = val_get_next_child(chval)) {
+
+	    if (obj_is_root(chval->obj)) {
+		continue;
+	    } else if (chval->obj->objtype != OBJ_TYP_LEAF) {
+		res = agt_val_instance_check(scb, msg, chval, layer);
+		CHK_EXIT;
+	    }
+	}
+    }
+
+    /* check all the child nodes for correct number of instances */
+    for (chobj = obj_first_child(obj);
+	 chobj != NULL;
+	 chobj = obj_next_child(chobj)) {
+	
+	if (obj_is_root(chobj)) {
+	    continue;
+	}
+
+	if (chobj->objtype == OBJ_TYP_CHOICE) {
+	    res = choice_check_agt(scb, msg, chobj, valset, layer);
+	} else {
+	    res = instance_check(scb, msg, chobj, valset, layer);
+	}
+	CHK_EXIT;
+    }
+
+    return retres;
+    
+}  /* agt_val_instance_check */
+
+
+/********************************************************************
+* FUNCTION agt_val_root_check
+* 
+* Check for the proper number of object instances for
+* the specified configuration database
+* 
+* The top-level value set passed cannot represent a choice
+* or a case within a choice.
+*
+* INPUTS:
+*   scb == session control block (may be NULL; no session stats)
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   root == val_value_t for the target config being checked
+*
+* OUTPUTS:
+*   if msg not NULL:
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+*      which must be freed by the called with the 
+*      rpc_err_free_record function
+*
+* RETURNS:
+*   status of the operation, NO_ERR if no validation errors found
+*********************************************************************/
+status_t 
+    agt_val_root_check (ses_cb_t *scb,
+			xml_msg_hdr_t *msg,
+			val_value_t *root)
+{
+    const ncx_module_t    *mod;
+    const obj_template_t  *obj, *chobj;
+    val_value_t           *chval;
+    status_t               res, retres;
+
+#ifdef DEBUG
+    if (!root) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (!obj_is_root(root->obj)) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    retres = NO_ERR;
+
+    obj = root->obj;
+
+    /* check the instance counts for the subtrees that are present */
+    res = agt_val_instance_check(scb, msg, root, NCX_LAYER_CONTENT);
+    CHK_EXIT;
+
+    /* check the must-stmt expressions for the subtrees that are present */
+    for (chval = val_get_first_child(root);
+	 chval != NULL;
+	 chval = val_get_next_child(chval)) {
+
+	res = must_stmt_check(scb, msg, root, chval, NCX_LAYER_CONTENT);
+	CHK_EXIT;
+    }
+
+    /* check all the modules in the system for top-level objects and
+     * check the instance count and any missing mandatory top-level nodes
+     * this is CPU intensive if the agent has a lot of objects
+     *
+     */
+    for (mod = ncx_get_first_module();
+	 mod != NULL;
+	 mod = ncx_get_next_module(mod)) {
+
+	/* hack: skip the NCX extensions module that defines objects
+	 * just for the XSD generation usage
+	 */
+	if (mod->nsid == xmlns_ncx_id()) {
+	    continue;
+	}
+
+	for (chobj = ncx_get_first_object(mod);
+	     chobj != NULL;
+	     chobj = ncx_get_next_object(mod, chobj)) {
+
+	    if (chobj->objtype == OBJ_TYP_CHOICE) {
+		res = choice_check_agt(scb, msg, chobj, root, NCX_LAYER_CONTENT);
+	    } else {
+		res = instance_check(scb, msg, chobj, root, NCX_LAYER_CONTENT);
+	    }
+	    CHK_EXIT;
+	}
+    }
+
+    return retres;
+    
+}  /* agt_val_root_check */
+
+
+/********************************************************************
+* FUNCTION agt_val_split_root_check
+* 
+* Check for the proper number of object instances for
+* the specified configuration database.  Conceptually
+* combine the newroot and root and check that.
+* 
+* The top-level value set passed cannot represent a choice
+* or a case within a choice.
+*
+* INPUTS:
+*   scb == session control block (may be NULL; no session stats)
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   newroot == val_value_t for the edit-config config contents
+*   root == val_value_t for the target config being checked
+*
+* OUTPUTS:
+*   if msg not NULL:
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+*      which must be freed by the called with the 
+*      rpc_err_free_record function
+*
+* RETURNS:
+*   status of the operation, NO_ERR if no validation errors found
+*********************************************************************/
+status_t 
+    agt_val_split_root_check (ses_cb_t *scb,
+			      xml_msg_hdr_t *msg,
+			      val_value_t *newroot,
+			      val_value_t *root)
+{
+
+    return ERR_NCX_OPERATION_NOT_SUPPORTED;
+
+#if 0
+    const obj_template_t  *obj, *chobj;
+    val_value_t           *chval;
+    status_t               res, retres;
+
+#ifdef DEBUG
+    if (!newroot || !root) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (!obj_is_root(root->obj)) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    retres = NO_ERR;
+
+    obj = root->obj;
+
+    /* check the instance counts for the subtrees that are present */
+    res = agt_val_instance_check(scb, msg, root, NCX_LAYER_CONTENT);
+    CHK_EXIT;
+
+    /* check the must-stmt expressions for the subtrees that are present */
+    for (chval = val_get_first_child(root);
+	 chval != NULL;
+	 chval = val_get_next_child(chval)) {
+
+	res = must_stmt_check(scb, msg, root, chval, NCX_LAYER_CONTENT);
+	CHK_EXIT;
+    }
+
+    /* check all the modules in the system for top-level objects and
+     * check the instance count and any missing mandatory top-level nodes
+     * this is CPU intensive if the agent has a lot of objects
+     *
+     */
+    for (mod = ncx_get_first_module();
+	 mod != NULL;
+	 mod = ncx_get_next_module(mod)) {
+
+	for (chobj = ncx_get_first_object(mod);
+	     chobj != NULL;
+	     chobj = ncx_get_next_object(mod, chobj)) {
+
+	    if (chobj->objtype == OBJ_TYP_CHOICE) {
+		res = choice_check_agt(scb, msg, chobj, root, layer);
+	    } else {
+		res = instance_test(scb, msg, chobj, root, layer);
+	    }
+	    CHK_EXIT;
+	}
+    }
+
+    return retres;
+#endif
+    
+}  /* agt_val_split_root_check */
 
 
 /********************************************************************
@@ -1794,6 +2347,230 @@ status_t
     return res;
 
 }  /* agt_val_apply_write */
+
+#if 0
+/********************************************************************
+* FUNCTION metaerr_count
+* 
+* Count the number of the specified meta error records
+*
+* INPUTS:
+*     val == value to check
+*     nsid == mamespace ID to match against
+*     name == attribute name to match against
+*
+* RETURNS:
+*     number of matching records found
+*********************************************************************/
+static uint32
+    metaerr_count (const val_value_t *val,
+		   xmlns_id_t  nsid,
+		   const xmlChar *name)
+{
+    const val_metaerr_t *merr;
+    uint32               cnt;
+
+    cnt = 0;
+    for (merr = (const val_metaerr_t *)dlq_firstEntry(&val->metaerrQ);
+	 merr != NULL;
+	 merr = (const val_metaerr_t *)dlq_nextEntry(merr)) {
+	if (xml_strcmp(merr->name, name)) {
+	    continue;
+	}
+	if (nsid) {
+	    if (merr->nsid == nsid) {
+		cnt++;
+	    }
+	} else {
+	    cnt++;
+	}
+    }
+    return cnt;
+
+} /* metaerr_count */
+
+
+/********************************************************************
+* FUNCTION match_metaval
+* 
+* Match the specific attribute value and namespace ID
+*
+* INPUTS:
+*     attr == attr to check
+*     nsid == mamespace ID to match against
+*     name == attribute name to match against
+*
+* RETURNS:
+*     TRUE if attr is a match; FALSE otherwise
+*********************************************************************/
+static boolean
+    match_metaval (const xml_attr_t *attr,
+		   xmlns_id_t  nsid,
+		   const xmlChar *name)
+{
+    if (xml_strcmp(attr->attr_name, name)) {
+	return FALSE;
+    }
+    if (attr->attr_ns) {
+	return (attr->attr_ns==nsid);
+    } else {
+	/* unqualified match */
+	return TRUE;
+    }
+} /* match_metaval */
+
+
+/********************************************************************
+* FUNCTION clean_metaerrs
+* 
+* Clean the val->metaerrQ
+*
+* INPUTS:
+*     val == value to check
+*
+*********************************************************************/
+static void
+    clean_metaerrs (val_value_t *val)
+{
+    val_metaerr_t *merr;
+
+    while (!dlq_empty(&val->metaerrQ)) {
+	merr = (val_metaerr_t *)dlq_deque(&val->metaerrQ);
+	val_free_metaerr(merr);
+    }
+} /* clean_metaerrs */
+
+
+/********************************************************************
+* FUNCTION metadata_inst_check
+* 
+* Validate that all the XML attributes in the specified 
+* xml_node_t struct are pesent in appropriate numbers
+*
+* Since attributes are unordered, they all have to be parsed
+* before they can be checked for instance count
+*
+* INPUTS:
+*     scb == session control block
+*     msg == incoming RPC message
+*            Errors are appended to msg->errQ
+*     val == value to check for metadata errors
+*     
+* OUTPUTS:
+*    msg->errQ may be appended with new errors or warnings
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    metadata_inst_check (ses_cb_t *scb,
+			 xml_msg_hdr_t *msg,
+			 val_value_t  *val)
+{
+    const typ_def_t   *typdef;
+    typ_child_t       *metadef;
+    uint32             cnt;
+    status_t           res, retres;
+    boolean            first;
+    xmlns_qname_t      qname;
+
+    retres = NO_ERR;
+
+    /* first check the inst count of the operation attribute */
+    cnt = val_metadata_inst_count(val, xmlns_nc_id(), NC_OPERATION_ATTR_NAME);
+    cnt += metaerr_count(val, xmlns_nc_id(), NC_OPERATION_ATTR_NAME);
+    if (cnt > 1) {
+	res = ERR_NCX_EXTRA_ATTR;
+	agt_record_error(scb, &msg->errQ, NCX_LAYER_CONTENT, res, 
+	     NULL, NCX_NT_STRING, NC_OPERATION_ATTR_NAME, NCX_NT_VAL, val);
+    }
+
+    /* get the typdef for the first in the chain with 
+     * some meta data defined; may be NULL, in which
+     * case just the operation attribute will be checked
+     */
+    typdef = typ_get_cqual_typdef(val->typdef, NCX_SQUAL_META);
+
+    /* go through the entire typdef chain checking proper
+     * attribute instance count, and record errors
+     */
+    first = TRUE;
+    while (typdef) {
+	if (first) {
+	    metadef = typ_first_meta(typdef);
+	    first = FALSE;
+	} else {
+	    metadef = typ_next_meta(metadef);
+	}
+	if (!metadef) {
+	    typdef = typ_get_cparent_typdef(typdef);
+	    first = TRUE;
+	} else {
+	    /* got something to check 
+	     * 
+	     * limitation for now!!!
+	     * attribute namespace must be the same as the
+	     * value that holds it, except for the netconf
+	     * operation attribute
+	     */
+	    res = NO_ERR;
+	    cnt = val_metadata_inst_count(val, val->nsid, metadef->name);
+	    cnt += metaerr_count(val, val->nsid, metadef->name);
+
+	    /* check the instance qualifier from the typdef 
+	     * continue the loop if there is no error
+	     */
+	    switch (metadef->typdef.iqual) {
+	    case NCX_IQUAL_ONE:
+		if (!cnt) {
+		    res = ERR_NCX_MISSING_ATTR;
+		} else if (cnt > 1) {
+		    res = ERR_NCX_EXTRA_ATTR;
+		}
+		break;
+	    case NCX_IQUAL_OPT:
+		if (cnt > 1) {
+		    res = ERR_NCX_EXTRA_ATTR;
+		}
+		break;
+	    case NCX_IQUAL_1MORE:
+		if (!cnt) {
+		    res = ERR_NCX_MISSING_ATTR;
+		}
+		break;
+	    case NCX_IQUAL_ZMORE:
+		break;
+	    default:
+		res = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    if (res != NO_ERR) {
+		qname.nsid = val->nsid;
+		qname.name = metadef->name;
+		agt_record_error(scb, &msg->errQ, 
+			 NCX_LAYER_CONTENT, res,
+			 (const xml_node_t *)val->name,
+			 NCX_NT_QNAME, &qname, 
+			 NCX_NT_VAL, val);
+	    }
+	}
+    }
+    return retres;
+
+} /* metadata_inst_check */
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* END file agt_val.c */

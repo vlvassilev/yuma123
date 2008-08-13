@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nd:config xmlns:nd="http://netconfcentral.com/ns/netconfd">
   <test1  xmlns="urn:ietf:params:xml:ns:yang:test">
-   <a>foo</a>
+   <a> 1  </a>
    <b>77</b>
    <c>aeddd34</c>
-   <d>z</d>
+   <d>y</d>
   </test1>
+  <test1/>
   <test2  xmlns="urn:ietf:params:xml:ns:yang:test">
    <a2>fred flintstone</a2>
    <b2>7</b2>

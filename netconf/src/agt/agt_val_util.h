@@ -25,9 +25,6 @@ date	     init     comment
 
 */
 
-#ifndef _H_ncxtypes
-#include "ncxtypes.h.h"
-#endif
 
 #ifndef _H_ses
 #include "ses.h"
@@ -41,21 +38,12 @@ date	     init     comment
 #include "val.h"
 #endif
 
-#ifndef _H_xml_msg
-#include "xml_msg.h"
-#endif
 
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
-
-extern status_t 
-    agt_val_instance_check (ses_cb_t *scb,
-			    xml_msg_hdr_t *msg,
-			    val_value_t *valset,
-			    ncx_layer_t   layer);
 
 
 #endif	    /* _H_agt_val_util */

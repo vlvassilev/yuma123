@@ -30,6 +30,10 @@ date	     init     comment
 #include "cfg.h"
 #endif
 
+#ifndef _H_ncxtypes
+#include "ncxtypes.h.h"
+#endif
+
 #ifndef _H_op
 #include "op.h"
 #endif
@@ -50,6 +54,10 @@ date	     init     comment
 #include "val.h"
 #endif
 
+#ifndef _H_xml_msg
+#include "xml_msg.h"
+#endif
+
 /********************************************************************
 *								    *
 *			 C O N S T A N T S			    *
@@ -67,6 +75,35 @@ date	     init     comment
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
+
+/* General val_value_t processing
+ *
+ * step 1: call agt_val_parse_nc
+ * step 2: call val_add_defaults
+ * step 3: call agt_val_instance_check
+ *
+ * Additional steps to write to a config database
+ *
+ * step 4: call agt_val_validate_write
+ * step 5: call agt_vall_apply_write
+ */
+extern status_t 
+    agt_val_instance_check (ses_cb_t *scb,
+			    xml_msg_hdr_t *msg,
+			    val_value_t *valset,
+			    ncx_layer_t   layer);
+
+
+extern status_t 
+    agt_val_root_check (ses_cb_t *scb,
+			xml_msg_hdr_t *msg,
+			val_value_t *root);
+
+extern status_t 
+    agt_val_split_root_check (ses_cb_t *scb,
+			      xml_msg_hdr_t *msg,
+			      val_value_t *newroot,
+			      val_value_t *root);
 
 extern status_t
     agt_val_validate_write (ses_cb_t  *scb,

@@ -140,28 +140,19 @@ static status_t
 #endif
 
     switch (cbtyp) {
-    case AGT_CB_LOAD:
-	/* this data type has static values and does not
-	 * need any setup or cleanup callbacks
-	 */
-	break;
     case AGT_CB_VALIDATE:
-    case AGT_CB_APPLY:
 	/* validate the cfg-path parm if present */
+	/*** junk below ****/
 	strcnt = val_liststr_count(newval);
 	for (i = 0; i < strcnt; i++) {
 	    str = val_get_liststr(newval, i);
 	    if (!str) {
 		return SET_ERROR(ERR_INTERNAL_PTR);
 	    }
-	    if (cbtyp==AGT_CB_VALIDATE) {
-		; /* check if the directory exists */
-
-	    } else {
-		; /* apply stage */
-	    }
 	}
 	break;
+    case AGT_CB_APPLY:
+	break;   /****/
     case AGT_CB_ROLLBACK:
 	/* the automatic rollback is sufficient for this parmset */
 	break;
@@ -205,13 +196,11 @@ static status_t
 #endif
 
     switch (cbtyp) {
-    case AGT_CB_LOAD:
+    case AGT_CB_VALIDATE:
+    case AGT_CB_APPLY:
 	/* this value set has static values and does not
 	 * need any setup or cleanup callbacks
 	 */
-	break;
-    case AGT_CB_VALIDATE:
-    case AGT_CB_APPLY:
 	break;
     case AGT_CB_ROLLBACK:
 	/* the automatic rollback is sufficient for this parmset */

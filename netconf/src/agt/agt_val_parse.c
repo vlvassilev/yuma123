@@ -1394,9 +1394,11 @@ static status_t
 	res = get_xml_node(scb, msg, &valnode, TRUE);
 	if (res != NO_ERR) {
 	    errdone = TRUE;
+	} else if (valnode.nodetyp == XML_NT_END) {
+	    empty = TRUE;
 	}
     }
-
+  
     /* check empty string corner case */
     if (empty) {
 	if (btyp==NCX_BT_SLIST || btyp==NCX_BT_BITS) {
@@ -1865,11 +1867,6 @@ static status_t
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
 
-    /* make sure the startnode is correct */
-
-    /*** HANDLE EMPTY CONTAINER ***/
-
-
     /* do not really need to validate the start node type
      * since it is probably a virtual container at the
      * very start, and after that, a node match must have
@@ -2330,43 +2327,6 @@ status_t
     return res;
 
 }  /* agt_val_parse_nc */
-
-
-/********************************************************************
-* FUNCTION agt_val_parse_load
-* 
-* Special load-config version of agt_val_parse_nc
-*********************************************************************/
-status_t
-    agt_val_parse_load (ses_cb_t  *scb,
-			xml_msg_hdr_t *msg,
-			const obj_template_t *obj,
-			const xml_node_t *startnode,
-			ncx_data_class_t  parentdc,
-			val_value_t  *retval)
-{
-    status_t res;
-
-#ifdef DEBUG
-    if (!scb || !msg || !obj || !startnode || !retval) {
-	/* non-recoverable error */
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-#ifdef AGT_VAL_PARSE_DEBUG
-    log_debug3("\nagt_val_parse: %s:%s btyp:%s", 
-	       obj_get_mod_prefix(obj),
-	       obj_get_name(obj), 
-	       tk_get_btype_sym(obj_get_basetype(obj)));
-#endif
-
-    /* get the element values */
-    res = parse_btype_nc(scb, msg, obj, startnode, 
-			 parentdc, retval);
-    return res;
-
-}  /* agt_val_parse_load */
 
 
 #ifdef DEBUG

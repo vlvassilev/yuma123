@@ -359,14 +359,17 @@ extern void
 		   const xmlChar *name,
 		   uint32 namelen);
 
-
-
-
-
 extern status_t
     val_string_ok (const typ_def_t *typdef,
 		   ncx_btype_t  btyp,
 		   const xmlChar *strval);
+
+/* retrieve the YANG custom error info if any */
+extern status_t
+    val_string_ok_errinfo (const typ_def_t *typdef,
+			   ncx_btype_t  btyp,
+			   const xmlChar *strval,
+			   const ncx_errinfo_t **errinfo);
 
 
 /* validate all the ncx_lmem_t entries in the list
@@ -379,6 +382,11 @@ extern status_t
 		 ncx_list_t *list);
 
 extern status_t
+    val_list_ok_errinfo (const typ_def_t *typdef,
+			 ncx_list_t *list,
+			 const ncx_errinfo_t **errinfo);
+
+extern status_t
     val_enum_ok (const typ_def_t *typdef,
 		 const xmlChar *enumval,
 		 int32 *retval,
@@ -389,6 +397,12 @@ extern status_t
 		  ncx_btype_t  btyp,
 		  const ncx_num_t *num);
 
+extern status_t
+    val_range_ok_errinfo (const typ_def_t *typdef,
+			  ncx_btype_t  btyp,
+			  const ncx_num_t *num,
+			  const ncx_errinfo_t **errinfo);
+
 /* check any simple type to see if it is valid,
  * but do not retrieve the value; used to check the
  * default parameter for example
@@ -397,7 +411,21 @@ extern status_t
     val_simval_ok (const typ_def_t *typdef,
 		   const xmlChar *simval);
 		   
+extern status_t
+    val_simval_ok_errinfo (const typ_def_t *typdef,
+			   const xmlChar *simval,
+			   const ncx_errinfo_t **errinfo);
 
+extern status_t
+    val_union_ok (const typ_def_t *typdef,
+		  const xmlChar *strval,
+		  val_value_t *retval);
+
+extern status_t
+    val_union_ok_errinfo (const typ_def_t *typdef,
+			  const xmlChar *strval,
+			  val_value_t *retval,
+			  const ncx_errinfo_t **errinfo);
 
 extern val_metaerr_t * 
     val_new_metaerr (xmlns_id_t nsid,
@@ -576,10 +604,6 @@ extern status_t
 extern ncx_iqual_t 
     val_get_iqualval (const val_value_t *val);
 
-extern status_t
-    val_union_ok (const typ_def_t *typdef,
-		  const xmlChar *strval,
-		  val_value_t *retval);
 
 extern boolean
     val_duplicates_allowed (val_value_t *val);

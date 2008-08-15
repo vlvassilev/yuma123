@@ -554,6 +554,20 @@ const char *
 	return "pattern match failed";
     case ERR_NCX_INVALID_TYPE_CHANGE:
 	return "invalid data type change";
+    case ERR_NCX_MANDATORY_NOT_ALLOWED:
+	return "mandatory object not allowed";
+    case ERR_NCX_UNIQUE_TEST_FAILED:
+	return "unique-stmt test failed";
+    case ERR_NCX_MAX_ELEMS_VIOLATION:
+	return "max-elements exceeded";
+    case ERR_NCX_MIN_ELEMS_VIOLATION:
+	return "min-elements not reached";
+    case ERR_NCX_MUST_TEST_FAILED:
+	return "must-stmt test failed";
+    case ERR_NCX_DATA_REST_VIOLATION:
+	return "data restriction violation";
+    case ERR_NCX_INSERT_MISSING_INSTANCE:
+	return "missing instance for insert operation";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

@@ -738,7 +738,7 @@ static status_t
     const val_index_t  *valin;
     uint32              cnt, total;
     status_t            res;
-    boolean             contab, simval;
+    boolean             simval;
 
     total = 0;
     *len = 0;
@@ -746,17 +746,14 @@ static status_t
     /* check the value base type first */
     switch (val->btyp) {
     case NCX_BT_LIST:
-	contab = FALSE;
 	simval = FALSE;
 	break;
     case NCX_BT_CHOICE:
 	return SET_ERROR(ERR_INTERNAL_VAL);
     case NCX_BT_CONTAINER:
-	contab = TRUE;
 	simval = FALSE;
 	break;
     default:
-	contab = TRUE;
 	simval = TRUE;
     }
 
@@ -969,7 +966,7 @@ static status_t
     total = cnt + xml_strlen(name);
 
     /* check if this is a value node with an index clause */
-    if (val->btyp == NCX_BT_LIST) {
+    if (!dlq_empty(&val->indexQ)) {
 	res = get_index_string(format, val, buff, &cnt);
 	if (res == NO_ERR) {
 	    if (buff) {
@@ -1572,6 +1569,7 @@ void
 *
 * INPUTS:
 *    typdef == typ_def_t for the designated string type
+*    btyp == basetype of the string
 *    strval == string value to check
 *
 * RETURNS:
@@ -1582,8 +1580,41 @@ status_t
 		   ncx_btype_t btyp,
 		   const xmlChar *strval)
 {
+
+    return val_string_ok_errinfo(typdef, btyp, strval, NULL);
+
+} /* val_string_ok */
+
+
+/********************************************************************
+* FUNCTION val_string_ok_errinfo
+* 
+* Check a string to make sure the value is valid based
+* on the restrictions in the specified typdef
+* Retrieve the configured error info struct if any error
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated string type
+*    btyp == basetype of the string
+*    strval == string value to check
+*    errinfo == address of return errinfo block (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL: 
+*       *errinfo == error record to use if return error
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_string_ok_errinfo (const typ_def_t *typdef,
+			   ncx_btype_t btyp,
+			   const xmlChar *strval,
+			   const ncx_errinfo_t **errinfo)
+{
     const dlq_hdr_t *restQ;
     const dlq_hdr_t *rangeQ;
+    const typ_def_t *rangdef;
     ncx_strrest_t   strrest;
     status_t        res;
     ncx_num_t       len;
@@ -1594,6 +1625,10 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
+
+    if (errinfo) {
+	*errinfo = NULL;
+    }
 
     /* make sure the data type is correct */
     switch (btyp) {
@@ -1607,11 +1642,18 @@ status_t
     }
 
     /* get the typdef for the range def to check the length */
-    rangeQ = typ_get_crangeQ(typdef);
+    rangeQ = NULL;
+    rangdef = typ_get_cqual_typdef(typdef, NCX_SQUAL_RANGE);
+    if (rangdef) {
+	rangeQ = typ_get_crangeQ(rangdef);
+    }
     if (rangeQ && !dlq_empty(rangeQ)) {
 	len.u = xml_strlen(strval);
 	res = val_check_rangeQ(NCX_BT_UINT32, &len, rangeQ);
 	if (res != NO_ERR) {
+	    if (errinfo) {
+		*errinfo = rangdef->range_errinfo;
+	    }
 	    return res;
 	}
     }
@@ -1625,6 +1667,7 @@ status_t
     }
 
     /* loop if this is a named derived type */
+    last = FALSE;
     for (;;) {
 	switch (typdef->class) {
 	case NCX_CL_SIMPLE:
@@ -1635,13 +1678,6 @@ status_t
 	case NCX_CL_NAMED:
 	    restQ = &typdef->def.named.newtyp->def.simple.valQ;
 	    strrest = typdef->def.named.newtyp->def.simple.strrest;
-
-	    /* the NCX = or += operators are not supported in YANG
-	     * this flag is ignored if the string restriction is
-	     * a 'pattern'
-	     */
-	    last = (typdef->def.named.newtyp->def.simple.flags 
-		    & TYP_FL_REPLACE) ? TRUE : FALSE;
 	    break;
 	default:
 	    return ERR_NCX_WRONG_DATATYP;  /* should not happen */
@@ -1651,6 +1687,9 @@ status_t
 	res = check_svalQ(strval, strrest, restQ);
 	if (strrest == NCX_SR_PATTERN) {
 	    if (res != NO_ERR) {
+		if (errinfo) {
+		    *errinfo = typdef->pat_errinfo;
+		}
 		return res;
 	    } /* else keep looking for more patterns in the type chain */
 	} else {
@@ -1683,7 +1722,7 @@ status_t
     }
     /*NOTREACHED*/
 
-} /* val_string_ok */
+} /* val_string_ok_errinfo */
 
 
 /********************************************************************
@@ -1710,6 +1749,37 @@ status_t
     val_list_ok (const typ_def_t *typdef,
 		 ncx_list_t *list)
 {
+
+    return val_list_ok_errinfo(typdef, list, NULL);
+
+} /* val_list_ok */
+
+
+/********************************************************************
+* FUNCTION val_list_ok_errinfo
+* 
+* Check a list to make sure the all the strings are valid based
+* on the specified typdef
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated list type
+*    list == list struct with ncx_lmem_t structs to check
+*
+* OUTPUTS:
+*   If return other than NO_ERR:
+*     each list->lmem.flags field may contain bits set
+*     for errors:
+*        NCX_FL_RANGE_ERR: size out of range
+*        NCX_FL_VALUE_ERR  value not permitted by value set, 
+*                          or pattern
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_list_ok_errinfo (const typ_def_t *typdef,
+			 ncx_list_t *list,
+			 const ncx_errinfo_t **errinfo)
+{
     const typ_template_t *listtyp;
     const typ_def_t      *listdef, *randef, *valdef;
     typ_enum_t           *enuval;
@@ -1726,6 +1796,10 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
+
+    if (errinfo) {
+	*errinfo = NULL;
+    }
 
     /* listtyp is for the list members, not the list itself */
     listtyp = typ_get_clisttyp(typdef);
@@ -1755,7 +1829,10 @@ status_t
 	res = val_check_rangeQ(NCX_BT_UINT32, &len, rangeQ);	
 	if (res != NO_ERR) {
 	    /* wrong number of list elements */
-	    retres = res;
+	    if (errinfo) {
+		*errinfo = randef->range_errinfo;
+	    }
+	    return res;
 	}
 	rangeQ = NULL;
     }
@@ -1822,12 +1899,15 @@ status_t
 	    len.u = xml_strlen(lmem->val.str);
 	    res = val_check_rangeQ(NCX_BT_UINT32, &len, rangeQ);
 	    if (res != NO_ERR) {
-		retres = (retres==NO_ERR) ? res : retres;
-		lmem->flags |= NCX_FL_RANGE_ERR;
+		if (errinfo) {
+		    *errinfo = randef->range_errinfo;
+		}
+		return res;
 	    }
 	}
 
 	/* check the value restrictions if any */
+        /***** THIS IS NOT CORRECT FOR MULTI-TYPDEF PATTERNS ****/
 	if (restQ) {
 	    switch (btyp) {
 	    case NCX_BT_ENUM:
@@ -1844,12 +1924,14 @@ status_t
 				  strrest, restQ);
 		break;
 	    default:
-		res = SET_ERROR(ERR_INTERNAL_VAL);
+		return SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 	    if (res != NO_ERR) {
 		/* the string did not match this pattern */
-		retres = (retres==NO_ERR) ? res : retres;
-		lmem->flags |= NCX_FL_VALUE_ERR;
+		if (errinfo) {
+		    *errinfo = valdef->pat_errinfo;
+		}
+		return res;
 	    } 
 	}  /* if any value checks */
     } /* for all the member values in the ncx_list_t */
@@ -1994,6 +2076,37 @@ status_t
 		  ncx_btype_t  btyp,
 		  const ncx_num_t *num)
 {
+
+    return val_range_ok_errinfo(typdef, btyp, num, NULL);
+
+} /* val_range_ok */
+
+
+/********************************************************************
+* FUNCTION val_range_ok_errinfo
+* 
+* Check a number to see if it is in range or not
+* Could be a number or size range
+*
+* INPUTS:
+*    typdef == typ_def_t for the simple type to check
+*    btyp == base type of num
+*    num == number to check
+*    errinfo == address of return error struct
+*
+* OUTPUTS:
+*   if non-NULL:
+*     *errinfo == errinfo record on error exit
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_range_ok_errinfo (const typ_def_t *typdef,
+			  ncx_btype_t  btyp,
+			  const ncx_num_t *num,
+			  const ncx_errinfo_t **errinfo)
+{
     const typ_def_t  *td;
     const dlq_hdr_t  *checkQ;
     status_t          res;
@@ -2004,6 +2117,10 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
+
+    if (errinfo) {
+	*errinfo = NULL;
+    }
 
     /* find the real typdef to check */
     td = typ_get_cqual_typdef(typdef, NCX_SQUAL_RANGE);
@@ -2022,9 +2139,6 @@ status_t
 	checkQ = &td->def.simple.rangeQ;
 	break;
     case NCX_CL_NAMED:
-	/* need to cycle backwards through the named type chain
-	 * and look for the first non empty rangeQ
-	 */
 	checkQ = &td->def.named.newtyp->def.simple.rangeQ;
 	break;
     case NCX_CL_REF:
@@ -2041,9 +2155,12 @@ status_t
      * the most derived typdef that declares a range
      */
     res = val_check_rangeQ(btyp, num, checkQ);
+    if (res != NO_ERR && errinfo) {
+	*errinfo = td->range_errinfo;
+    }
     return res;
 
-} /* val_range_ok */
+} /* val_range_ok_errinfo */
 
 
 /********************************************************************
@@ -2064,6 +2181,36 @@ status_t
     val_simval_ok (const typ_def_t *typdef,
 		   const xmlChar *simval)
 {
+    return val_simval_ok_errinfo(typdef, simval, NULL);
+
+} /* val_simval_ok */
+
+
+
+/********************************************************************
+* FUNCTION val_simval_ok_errinfo
+* 
+* check any simple type to see if it is valid,
+* but do not retrieve the value; used to check the
+* default parameter for example
+*
+* INPUTS:
+*    typdef == typ_def_t for the simple type to check
+*    simval == value string to check (NULL means empty string)
+*    errinfo == address of return error struct
+*
+* OUTPUTS:
+*   if non-NULL:
+*      *errinfo == error struct on error exit
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_simval_ok_errinfo (const typ_def_t *typdef,
+			   const xmlChar *simval,
+			   const ncx_errinfo_t **errinfo)
+{
     const xmlChar          *retstr;
     val_value_t            *unval;
     const typ_template_t   *listtyp;
@@ -2079,6 +2226,10 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
+
+    if (errinfo) {
+	*errinfo = NULL;
+    }
 
     if (!simval) {
 	forced = TRUE;
@@ -2134,14 +2285,14 @@ status_t
     case NCX_BT_FLOAT64:
 	res = ncx_decode_num(simval, btyp, &num);
 	if (res == NO_ERR) {
-	    res = val_range_ok(typdef, btyp, &num);
+	    res = val_range_ok_errinfo(typdef, btyp, &num, errinfo);
 	}
 	ncx_clean_num(btyp, &num);
 	break;
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
-	res = val_string_ok(typdef, btyp, simval);
+	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
 	break;
     case NCX_BT_UNION:
 	unval = val_new_value();
@@ -2156,7 +2307,7 @@ status_t
 	break;
     case NCX_BT_KEYREF:
 	/*****/
-	res = val_string_ok(typdef, btyp, simval);
+	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
 	break;
     case NCX_BT_SLIST:
 	listtyp = typ_get_clisttyp(typdef);
@@ -2166,7 +2317,7 @@ status_t
 	if (res == NO_ERR) {
 	    res = ncx_finish_list(&listtyp->typdef, &list);
 	    if (res == NO_ERR) {
-		res = val_list_ok(typdef, &list);
+		res = val_list_ok_errinfo(typdef, &list, errinfo);
 	    }
 	}
 	ncx_clean_list(&list);
@@ -2184,7 +2335,168 @@ status_t
 
     return res;
 
-} /* val_simval_ok */
+} /* val_simval_ok_errinfo */
+
+
+/********************************************************************
+* FUNCTION val_union_ok
+* 
+* Check a union to make sure the string is valid based
+* on the specified typdef, and convert the string to
+* an NCX internal format
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated union type
+*    strval == the value to check against the member typ defs
+*    retval == pointer to output struct for converted value
+*
+* OUTPUTS:
+*   If return NO_ERR:
+*   retval->str or retval->num will be set with the converted value
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_union_ok (const typ_def_t *typdef,
+		  const xmlChar *strval,
+		  val_value_t *retval)
+{
+
+    return val_union_ok_errinfo(typdef, strval, retval, NULL);
+
+} /* val_union_ok */
+
+
+/********************************************************************
+* FUNCTION val_union_ok_errinfo
+* 
+* Check a union to make sure the string is valid based
+* on the specified typdef, and convert the string to
+* an NCX internal format
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated union type
+*    strval == the value to check against the member typ defs
+*    retval == pointer to output struct for converted value
+*    errinfo == address of error struct
+*
+* OUTPUTS:
+*   If return NO_ERR:
+*   retval->str or retval->num will be set with the converted value
+*   *errinfo == error struct on error exit
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_union_ok_errinfo (const typ_def_t *typdef,
+			  const xmlChar *strval,
+			  val_value_t *retval,
+			  const ncx_errinfo_t **errinfo)
+{
+    const typ_def_t        *undef;
+    const typ_unionnode_t  *un;
+    ncx_btype_t      btyp;
+    status_t         res;
+    boolean          done, retdone;
+
+#ifdef DEBUG
+    if (!typdef || !strval || !retval) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (errinfo) {
+	*errinfo = NULL;
+    }
+
+    /* get the first union member type */
+    un = typ_first_unionnode(typdef);
+
+#ifdef DEBUG
+    if (!un || (!un->typ && !un->typdef)) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    retdone = FALSE;
+    done = FALSE;
+
+    /* go through all the union member typdefs until
+     * the first match (decodes as a valid value for that typdef)
+     */
+    while (!done) {
+
+	/* get type info for this member typedef */
+	if (un->typ) {
+	    undef = &un->typ->typdef;
+	} else if (un->typdef) {
+	    undef = un->typdef;
+	} else {
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	    done = TRUE;
+	    continue;
+	}
+
+	btyp = typ_get_basetype(undef);
+
+	/* figure out the type and validate+convert the string */
+	if (typ_is_number(btyp)) {
+	    res = ncx_decode_num(strval, btyp, &retval->v.num);
+	    if (res == NO_ERR) {
+		res = val_range_ok_errinfo(undef, btyp, 
+					   &retval->v.num,
+					   errinfo);
+	    }
+	} else if (typ_is_string(btyp)) {
+	    res = val_string_ok_errinfo(undef, btyp, strval, errinfo);
+	    if (res == NO_ERR) {
+		retval->v.str = xml_strdup(strval);
+		if (!retval->v.str) {
+		    res = ERR_INTERNAL_VAL;
+		}
+	    }
+	} else if (btyp==NCX_BT_ENUM) {
+	    res = val_enum_ok(undef, strval,
+			      &retval->v.enu.val, 
+			      &retval->v.enu.name);
+	} else if (btyp==NCX_BT_UNION) {
+	    res = val_union_ok_errinfo(undef, strval, retval, errinfo);
+	    if (res==NO_ERR) {
+		retdone = TRUE;
+	    }
+	} else {
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+
+	if (res == NO_ERR) {
+	    /* the un->typ field may be NULL for YANG unions in progress
+	     * When the default is checked this ptr may be NULL, but the
+	     * retval is not used by that fn.  After the module is
+	     * registered, the un->typ field should be set
+	     *
+	     * (!!! make sure unnamed types from YANG work OK !!!)
+	     */
+	    if (!retdone) {
+		retval->untyp = un->typ;   /***/
+		retval->unbtyp = btyp;
+	    }
+	    done = TRUE;
+	} else if (res != ERR_INTERNAL_MEM) {
+	    un = (const typ_unionnode_t *)dlq_nextEntry(un);
+	    if (!un) {
+		res = ERR_NCX_WRONG_NODETYP;
+		done = TRUE;
+	    }
+	} else {
+	    done = TRUE;
+	}
+    }
+
+    return res;
+
+} /* val_union_ok_errinfo */
 
 
 /********************************************************************
@@ -4823,126 +5135,6 @@ ncx_iqual_t
 } /* val_get_iqualval */
 
 
-/********************************************************************
-* FUNCTION val_union_ok
-* 
-* Check a union to make sure the string is valid based
-* on the specified typdef, and convert the string to
-* an NCX internal format
-*
-* INPUTS:
-*    typdef == typ_def_t for the designated union type
-*    strval == the value to check against the member typ defs
-*    retval == pointer to output struct for converted value
-*
-* OUTPUTS:
-*   If return NO_ERR:
-*   retval->str or retval->num will be set with the converted value
-*
-* RETURNS:
-*    status
-*********************************************************************/
-status_t
-    val_union_ok (const typ_def_t *typdef,
-		  const xmlChar *strval,
-		  val_value_t *retval)
-{
-    const typ_def_t        *undef;
-    const typ_unionnode_t  *un;
-    ncx_btype_t      btyp;
-    status_t         res;
-    boolean          done, retdone;
-
-#ifdef DEBUG
-    if (!typdef || !strval || !retval) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    /* get the first union member type */
-    un = typ_first_unionnode(typdef);
-
-#ifdef DEBUG
-    if (!un || (!un->typ && !un->typdef)) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-#endif
-
-    retdone = FALSE;
-    done = FALSE;
-
-    /* go through all the union member typdefs until
-     * the first match (decodes as a valid value for that typdef)
-     */
-    while (!done) {
-
-	/* get type info for this member typedef */
-	if (un->typ) {
-	    undef = &un->typ->typdef;
-	} else if (un->typdef) {
-	    undef = un->typdef;
-	} else {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	    done = TRUE;
-	    continue;
-	}
-
-	btyp = typ_get_basetype(undef);
-
-	/* figure out the type and validate+convert the string */
-	if (typ_is_number(btyp)) {
-	    res = ncx_decode_num(strval, btyp, &retval->v.num);
-	    if (res == NO_ERR) {
-		res = val_range_ok(undef, btyp, &retval->v.num);
-	    }
-	} else if (typ_is_string(btyp)) {
-	    res = val_string_ok(undef, btyp, strval);
-	    if (res == NO_ERR) {
-		retval->v.str = xml_strdup(strval);
-		if (!retval->v.str) {
-		    res = ERR_INTERNAL_VAL;
-		}
-	    }
-	} else if (btyp==NCX_BT_ENUM) {
-	    res = val_enum_ok(undef, strval,
-			      &retval->v.enu.val, 
-			      &retval->v.enu.name);
-	} else if (btyp==NCX_BT_UNION) {
-	    res = val_union_ok(undef, strval, retval);
-	    if (res==NO_ERR) {
-		retdone = TRUE;
-	    }
-	} else {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-
-	if (res == NO_ERR) {
-	    /* the un->typ field may be NULL for YANG unions in progress
-	     * When the default is checked this ptr may be NULL, but the
-	     * retval is not used by that fn.  After the module is
-	     * registered, the un->typ field should be set
-	     *
-	     * (!!! make sure unnamed types from YANG work OK !!!)
-	     */
-	    if (!retdone) {
-		retval->untyp = un->typ;   /***/
-		retval->unbtyp = btyp;
-	    }
-	    done = TRUE;
-	} else if (res != ERR_INTERNAL_MEM) {
-	    un = (const typ_unionnode_t *)dlq_nextEntry(un);
-	    if (!un) {
-		res = ERR_NCX_WRONG_NODETYP;
-		done = TRUE;
-	    }
-	} else {
-	    done = TRUE;
-	}
-    }
-
-    return res;
-
-} /* val_union_ok */
 
 
 /********************************************************************

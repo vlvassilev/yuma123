@@ -460,14 +460,14 @@ static status_t
 	    res = yang_consume_boolean(tkc, mod,
 				       &leaf->config,
 				       &conf, &leaf->appinfoQ);
-	    CHK_OBJ_EXIT;
 	    leaf->confset = TRUE;
+	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &leaf->mandatory,
 				       &mand, &leaf->appinfoQ);
-	    CHK_OBJ_EXIT;
 	    leaf->mandset = TRUE;
+	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    if (refi) {
 		retres = ERR_NCX_REFINE_NOT_ALLOWED;
@@ -1975,7 +1975,7 @@ static status_t
     const char      *expstr;
     const xmlChar   *str;
     tk_type_t        tktyp;
-    boolean          done, def, mand, stat, desc, ref, errbool, refi;
+    boolean          done, def, mand, conf, stat, desc, ref, errbool, refi;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -1992,6 +1992,7 @@ static status_t
     done = FALSE;
     def = FALSE;
     mand = FALSE;
+    conf = FALSE;
     stat = FALSE;
     desc = FALSE;
     ref = FALSE;
@@ -2122,6 +2123,12 @@ static status_t
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &choic->ref,
 				     &ref, &choic->appinfoQ);
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+	    res = yang_consume_boolean(tkc, mod,
+				       &choic->config,
+				       &conf, &choic->appinfoQ);
+	    choic->confset = TRUE;
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
 	    res = consume_yang_case(tkc, mod,
@@ -4482,8 +4489,10 @@ static status_t
 		     obj_augment_t *aug,
 		     obj_template_t *obj)
 {
+    obj_template_t   *testobj;
     status_t          res, retres;
 
+    
     retres = NO_ERR;
 
     res = ncx_resolve_appinfoQ(tkc, mod, &aug->appinfoQ);
@@ -4509,8 +4518,29 @@ static status_t
     CHK_EXIT;
 
     /*** validate well-formed Xpath in when clause ***/
-    /***/
+    /*** XPATH TBD ***/
 
+    /* check that all the augment nodes are optional */
+    for (testobj = (obj_template_t *)
+	     dlq_firstEntry(&aug->datadefQ);
+	 testobj != NO_ERR;
+	 testobj = (obj_template_t *)
+	     dlq_nextEntry(testobj)) {
+
+	if (!obj_has_name(testobj)) {
+	    continue;
+	}
+	
+	if (aug->when.xpath && obj_is_mandatory(testobj)) {
+	    log_error("\nError: Mandatory object '%s' not allowed "
+		      "in conditional augment statement",
+		      obj_get_name(testobj));
+	    retres = ERR_NCX_MANDATORY_NOT_ALLOWED;
+	    tkc->cur = testobj->tk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+    }
+    
     return retres;
 				    
 }  /* resolve_augment */
@@ -4550,7 +4580,8 @@ static status_t
     const xmlChar     *name;
     dlq_hdr_t         *targQ;
     status_t           res, retres;
-
+    boolean            augextern, augdefcase;
+    
     aug = obj->def.augment;
     if (!aug->target) {
 	/* this node has errors, currently proccessing for
@@ -4573,6 +4604,46 @@ static status_t
     }
 
     aug->targobj = targobj;
+
+    augextern = (mod->nsid != obj_get_nsid(targobj)) ? TRUE : FALSE;
+
+    augdefcase = (targobj->objtype == OBJ_TYP_CASE && targobj->parent
+		  && targobj->parent->def.choic->defval &&
+		  !xml_strcmp(obj_get_name(targobj),
+			      targobj->parent->def.choic->defval)) ? TRUE : FALSE;
+    
+
+    /* check external augment for mandatory nodes */
+    if (augextern || augdefcase) {
+
+	/* check that all the augment nodes are optional */
+	for (testobj = (obj_template_t *)
+		 dlq_firstEntry(&aug->datadefQ);
+	     testobj != NO_ERR;
+	     testobj = (obj_template_t *)
+		 dlq_nextEntry(testobj)) {
+
+	    if (!obj_has_name(testobj)) {
+		continue;
+	    }
+	
+	    if (obj_is_mandatory(testobj)) {
+		if (augextern) {
+		    log_error("\nError: Mandatory object '%s' not allowed "
+			      "in external augment statement",
+			      obj_get_name(testobj));
+		} else {
+		    log_error("\nError: Mandatory object '%s' not allowed "
+			      "in default case '%s'",
+			      obj_get_name(testobj), obj_get_name(targobj));
+		}
+		
+		retres = ERR_NCX_MANDATORY_NOT_ALLOWED;
+		tkc->cur = testobj->tk;
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
+    }
 
     switch (targobj->objtype) {
     case OBJ_TYP_RPC:

@@ -58,7 +58,7 @@ date	     init     comment
 
 #define NC_OPERATION_ATTR_TYPE (const xmlChar *)"EditOperationType"
 
-#define NC_RPC_REPLY_TYPE (const xmlChar *)"RpcReplyType"
+#define NC_RPC_REPLY_TYPE (const xmlChar *)"rpc-reply"
 
 #define NCX_SSH_PORT    22
 #define NCX_NCSSH_PORT  830

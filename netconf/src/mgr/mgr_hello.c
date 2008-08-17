@@ -99,9 +99,7 @@ date         init     comment
 #define MGR_HELLO_DEBUG 1
 #endif
 
-#define MGR_HELLO_TYP ((const xmlChar *)"NcManagerHello")
-
-#define MGR_AGENT_HELLO_TYP ((const xmlChar *)"NcAgentHello")
+#define MGR_AGENT_HELLO_OBJ ((const xmlChar *)"agent-hello")
 
 
 /********************************************************************
@@ -274,11 +272,11 @@ void
     mgr_hello_dispatch (ses_cb_t *scb,
 			xml_node_t *top)
 {
-    status_t         res;
-    xml_msg_hdr_t    msg;
-    val_value_t     *val;
-    typ_template_t  *typ;
-    ncx_node_t       dtyp;
+    val_value_t           *val;
+    const obj_template_t  *obj;
+    xml_msg_hdr_t          msg;
+    status_t               res;
+    ncx_node_t             dtyp;
 
 #ifdef DEBUG
     if (!scb || !top) {
@@ -305,8 +303,8 @@ void
     /* init local vars */
     res = NO_ERR;
     val = NULL;
-    typ = NULL;
-    dtyp = NCX_NT_TYP;
+    obj = NULL;
+    dtyp = NCX_NT_OBJ;
     xml_msg_init_hdr(&msg);
 
     /* get a value struct to hold the agent hello msg */
@@ -317,9 +315,9 @@ void
 
     /* get the type definition from the registry */
     if (res == NO_ERR) {
-	typ = (typ_template_t *)
-	    def_reg_find_moddef(NC_MODULE, MGR_AGENT_HELLO_TYP, &dtyp);
-	if (!typ) {
+	obj = (const obj_template_t *)
+	    def_reg_find_moddef(NC_MODULE, MGR_AGENT_HELLO_OBJ, &dtyp);
+	if (!obj) {
 	    /* netconf module should have loaded this definition */
 	    res = SET_ERROR(ERR_INTERNAL_PTR);
 	}
@@ -327,7 +325,7 @@ void
 
     /* parse an agent hello message */
     if (res == NO_ERR) {
-	res = mgr_val_parse(scb, &msg, typ, top, val);
+	res = mgr_val_parse(scb, obj, top, val);
     }
     
     /* examine the agent capability list

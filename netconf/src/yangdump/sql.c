@@ -1018,6 +1018,11 @@ static void
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	if (obj_is_hidden(obj)) {
+	    continue;
+	}
+
 	write_object_entry(mod, obj, cp, scb, cp->buff);
     }
 

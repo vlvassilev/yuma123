@@ -34,6 +34,10 @@ date	     init     comment
 #include "ncxconst.h"
 #endif
 
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -84,6 +88,18 @@ extern void
 		      const void *error_parm,
 		      ncx_node_t nodetyp,
 		      const void *errnode);
+
+extern void
+    agt_record_error_errinfo (ses_cb_t *scb,
+			      dlq_hdr_t *errQ,
+			      ncx_layer_t layer,
+			      status_t  res,
+			      const xml_node_t *xmlnode,
+			      ncx_node_t parmtyp,
+			      const void *error_parm,
+			      ncx_node_t nodetyp,
+			      const void *errnode,
+			      const ncx_errinfo_t *errinfo);
 
 extern void
     agt_record_attr_error (ses_cb_t *scb,

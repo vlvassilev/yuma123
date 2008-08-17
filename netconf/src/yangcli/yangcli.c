@@ -38,6 +38,10 @@ date         init     comment
 #include "procdefs.h"
 #endif
 
+#ifndef _H_cli
+#include "cli.h"
+#endif
+
 #ifndef _H_conf
 #include "conf.h"
 #endif
@@ -90,18 +94,6 @@ date         init     comment
 #include "obj.h"
 #endif
 
-#ifndef _H_ps
-#include "ps.h"
-#endif
-
-#ifndef _H_psd
-#include "psd.h"
-#endif
-
-#ifndef _H_ps_parse
-#include "ps_parse.h"
-#endif
-
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -118,6 +110,10 @@ date         init     comment
 #include "val.h"
 #endif
 
+#ifndef _H_val_util
+#include "val_util.h"
+#endif
+
 #ifndef _H_var
 #include "var.h"
 #endif
@@ -132,6 +128,10 @@ date         init     comment
 
 #ifndef _H_xml_val
 #include "xml_val.h"
+#endif
+
+#ifndef _H_yangconst
+#include "yangconst.h"
 #endif
 
 
@@ -156,17 +156,18 @@ date         init     comment
 
 #define YANGCLI_HISTLEN  64000
 
+#define YANGCLI_MOD  (const xmlChar *)"yangcli"
+
+/* CLI parmset for the ncxcli application */
+#define YANGCLI_BOOT YANGCLI_MOD
+
 /* core modules auto-loaded at startup */
-#define NCXCLIMOD    ((const xmlChar *)"ncxcli")
 #define NCMOD        ((const xmlChar *)"netconf")
 #define NCXDTMOD     ((const xmlChar *)"ncxtypes")
 #define XSDMOD       ((const xmlChar *)"xsd")
-#define SMIMOD       ((const xmlChar *)"smi")
 
-/* CLI parmset for the ncxcli application */
-#define YANGCLI_BOOT ((const xmlChar *)"ncxcli")
 
-/* NCXCLI boot parameter names 
+/* YANGCLI boot parameter names 
  * matches parm clauses in ncxcli-boot parmset in ncxcli.ncx
  */
 #define YANGCLI_AGENT       (const xmlChar *)"agent"
@@ -188,13 +189,12 @@ date         init     comment
 /* NCX_EL_VERSION */
 
 #define YANGCLI_BRIEF  (const xmlChar *)"brief"
-
-
+#define YANGCLI_FULL   (const xmlChar *)"full"
 
 #define DEF_PROMPT ((const xmlChar *)"ncx> ")
 #define MORE_PROMPT ((const xmlChar *)"   more> ")
 
-/* NCXCLI top level commands */
+/* YANGCLI top level commands */
 #define YANGCLI_CONNECT ((const xmlChar *)"connect")
 #define YANGCLI_HELP    ((const xmlChar *)"help")
 #define YANGCLI_LOAD    ((const xmlChar *)"load")
@@ -203,6 +203,7 @@ date         init     comment
 #define YANGCLI_SAVE    ((const xmlChar *)"save")
 #define YANGCLI_SET     ((const xmlChar *)"set")
 #define YANGCLI_SHOW    ((const xmlChar *)"show")
+
 
 #define YANGCLI_NS_URI \
     ((const xmlChar *)"http://netconfcentral.com/ncx/ncxcli")
@@ -217,7 +218,7 @@ static void
 
 /* forward decl needed by conn_command */
 static void
-    do_local_command (const rpc_template_t *rpc,
+    do_local_command (const obj_template_t *rpc,
 		      xmlChar *line,
 		      uint32  len);
 
@@ -240,9 +241,8 @@ static mgr_io_state_t  state;
 static ses_id_t        mysid;
 
 /* CLI and connect parameters */
-static ps_parmset_t   *mgr_cli_ps;
-static ps_parmset_t   *connect_ps;
-
+static val_value_t   *mgr_cli_valset;
+static val_value_t   *connect_valset;
 static boolean         batchmode;
 
 /* really set to default-module [netconf] */
@@ -275,7 +275,7 @@ static boolean         climore;
 static GetLine        *cli_gl;
 
 /* program version string */
-static char progver[] = "0.6";
+static char progver[] = "0.7.1";
 
 
 /********************************************************************
@@ -301,25 +301,27 @@ static boolean
 * make a strdup of the value
 *
 * INPUTS:
-*   ps == parmset to check (may be NULL)
-*   parmname  == name of parm to get of partial name to get
+*   valset == value set to search
+*   modname == optional module name defining the parameter to find
+*   parmname  == name of parm to get, or partial name to get
 *
 * RETURNS:
-*   pointer to ps_parm_t if found
+*   pointer to val_value_t if found
 *********************************************************************/
-static ps_parm_t *
-    findparm (ps_parmset_t *ps,
+static val_value_t *
+    findparm (val_value_t *valset,
+	      const xmlChar *modname,
 	      const xmlChar *parmname)
 {
-    ps_parm_t *parm;
+    val_value_t *parm;
 
-    if (!ps) {
+    if (!valset) {
 	return NULL;
     }
 
-    parm = ps_find_parm(ps, parmname);
+    parm = val_find_child(valset, modname, parmname);
     if (!parm && autocomp) {
-	parm = ps_match_parm(ps, parmname);
+	parm = val_match_child(valset, modname, parmname);
     }
     return parm;
 
@@ -333,25 +335,27 @@ static ps_parm_t *
 * make a strdup of the value
 *
 * INPUTS:
-*   ps == parmset to check if not NULL
+*   valset == value set to check if not NULL
+*   modname == module defining parmname
 *   parmname  == name of parm to get
 *
 * RETURNS:
 *   pointer to string !!! THIS IS A MALLOCED COPY !!!
 *********************************************************************/
 static xmlChar *
-    get_strparm (ps_parmset_t *ps,
+    get_strparm (val_value_t *valset,
+		 const xmlChar *modname,
 		 const xmlChar *parmname)
 {
-    ps_parm_t    *parm;
-    xmlChar      *str;
-
+    val_value_t    *parm;
+    xmlChar        *str;
+    
     str = NULL;
-    parm = findparm(ps, parmname);
+    parm = findparm(valset, modname, parmname);
     if (parm) {
-	str = xml_strdup(VAL_STR(parm->val));
+	str = xml_strdup(VAL_STR(parm));
 	if (!str) {
-	    log_error("\nncxcli: Out of Memory error");
+	    log_error("\nyangcli: Out of Memory error");
 	}
     }
     return str;
@@ -360,74 +364,47 @@ static xmlChar *
 
 
 /********************************************************************
-* FUNCTION add_parm
-* 
-*  Add a parm to a ps_parmset_t based on the
-*  value of the 'fixorder' global parameter
-* 
-* INPUTS:
-*   parm == parm to add
-*   ps == parmset to add parm to
-*
-*********************************************************************/
-static void
-    add_parm (ps_parm_t *parm,
-	      ps_parmset_t *ps)
-{
-    if (fixorder) {
-	ps_add_parm(parm, ps, NCX_MERGE_FIRST);
-    } else {
-	ps_add_parm_last(parm, ps);
-    }
-
-}  /* add_parm */
-
-
-/********************************************************************
 * FUNCTION add_clone_parm
 * 
 *  Create a parm 
 * 
 * INPUTS:
-*   psd_parm == parm def to add
-*   ps == parmset to add parm to
+*   obj == object template for the parameter to clone
+*   valset == value set to add parm to
 *   valstr == string value of the value to add
 *
 * RETURNS:
 *    status
 *********************************************************************/
 static status_t
-    add_clone_parm (psd_parm_t *psd_parm,
-		    ps_parmset_t *ps,
+    add_clone_parm (const obj_template_t *obj,
+		    val_value_t *valset,
 		    const xmlChar *valstr)
 {
-    typ_template_t *typ;
-    ps_parm_t *parm;
-    status_t   res;
+    val_value_t    *parm;
+    status_t        res;
 
-    parm = ps_new_parm();
+    parm = val_new_value();
     if (!parm) {
-	log_error("\nncxcli: malloc failed in clone value");
+	log_error("\nyangcli: malloc failed in clone value");
 	return ERR_INTERNAL_MEM;
     }
-    ps_setup_parm(parm, ps, psd_parm); 
+    val_init_from_template(parm, obj); 
 
-    typ = psd_get_parm_template(psd_parm);
-    res = val_set_simval(parm->val,
-			 &typ->typdef,
-			 psd_get_parm_nsid(psd_parm),
-			 psd_parm->name,
+    res = val_set_simval(parm,
+			 obj_get_ctypdef(obj),
+			 obj_get_nsid(obj),
+			 obj_get_name(obj),
 			 valstr);
     if (res != NO_ERR) {
-	log_error("\nncxcli: set value failed %s (%s)",
+	log_error("\nyangcli: set value failed %s (%s)",
 		  (valstr) ? valstr : (const xmlChar *)"--",
 		  get_error_string(res));
-	ps_free_parm(parm);
-	return res;
+	val_free_value(parm);
+    } else {
+	val_add_child(parm, valset);
     }
-
-    add_parm(parm, ps);
-    return NO_ERR;
+    return res;
 
 }  /* add_clone_parm */
 
@@ -435,21 +412,21 @@ static status_t
 /********************************************************************
 * FUNCTION is_yangcli_ns
 * 
-*  Check the namespace and make sure this is an NCXCLI command
+*  Check the namespace and make sure this is an YANGCLI command
 * 
 * INPUTS:
 *   ns == namespace ID to check
 *
 * RETURNS:
-*  TRUE if this is the NCXCLI namespace ID
+*  TRUE if this is the YANGCLI namespace ID
 *********************************************************************/
 static boolean
     is_yangcli_ns (xmlns_id_t ns)
 {
-    const xmlChar *uri;
+    const xmlChar *modname;
 
-    uri = xmlns_get_ns_name(ns);
-    if (uri && !xml_strcmp(uri, YANGCLI_NS_URI)) {
+    modname = xmlns_get_module(ns);
+    if (modname && !xml_strcmp(modname, YANGCLI_MOD)) {
 	return TRUE;
     } else {
 	return FALSE;
@@ -606,7 +583,7 @@ static status_t
      *             ^
      */
     if (curval) {
-	typdef = curval->typdef;
+	typdef = obj_get_ctypdef(curval->obj);
     } else {
 	typdef = NULL;
     }
@@ -625,7 +602,7 @@ static status_t
 	 * of an RPC function call 
 	 */
 	if (result_name) {
-	    log_error("\nncxcli: result already pending for %s",
+	    log_error("\nyangcli: result already pending for %s",
 		      result_name);
 	    m__free(result_name);
 	    result_name = NULL;
@@ -665,29 +642,30 @@ static status_t
 *   *res == status
 *
 * RETURNS:
-*  pointer to malloced parmset or NULL if none created,
-*  may have errors, check *res
+*    pointer to malloced value set or NULL if none created,
+*    may have errors, check *res
 *********************************************************************/
-static ps_parmset_t *
-    parse_rpc_cli (const rpc_template_t *rpc,
+static val_value_t *
+    parse_rpc_cli (const obj_template_t *rpc,
 		   const xmlChar *args,
 		   status_t  *res)
 {
-    const xmlChar    *myargv[2];
+    const obj_template_t   *obj;
+    const xmlChar          *myargv[2];
 
     /* construct an argv array, 
      * convert the CLI into a parmset 
      */
-    if (!rpc->in_psd) {
-	SET_ERROR(ERR_INTERNAL_PTR);
+    obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
+    if (!obj) {
+	*res = ERR_NCX_SKIPPED;
 	return NULL;
     }
 
-    myargv[0] = rpc->name;
+    myargv[0] = obj_get_name(rpc);
     myargv[1] = args;
-    return ps_parse_cli(2, (const char **)myargv, 
-			rpc->in_psd,
-			VALONLY, SCRIPTMODE, autocomp, res);
+    return cli_parse(2, (const char **)myargv, 
+		     obj, VALONLY, SCRIPTMODE, autocomp, res);
 
 }  /* parse_rpc_cli */
 
@@ -706,9 +684,9 @@ static void
     get_prompt (xmlChar *buff,
 		uint32 bufflen)
 {
-    xmlChar      *p;
-    ps_parm_t    *parm;
-    uint32        len;
+    xmlChar        *p;
+    val_value_t    *parm;
+    uint32          len;
 
     if (!buff || !bufflen) {
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -734,22 +712,28 @@ static void
     case MGR_IO_ST_CONN_CLOSEWAIT:
     case MGR_IO_ST_CONN_SHUT:
 	p = buff;
-	len = xml_strcpy(p, (const xmlChar *)"ncx ");
+	len = xml_strcpy(p, (const xmlChar *)"yangcli ");
 	p += len;
 	bufflen -= len;
 
-	parm = ps_find_parm(connect_ps, YANGCLI_USER);
+	parm = NULL;
+	if (connect_valset) {
+	    parm = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_USER);
+	}
 	if (parm) {
-	    len = xml_strncpy(p, VAL_STR(parm->val), bufflen);
+	    len = xml_strncpy(p, VAL_STR(parm), bufflen);
 	    p += len;
 	    bufflen -= len;
 	    *p++ = NCX_AT_CH;
 	    --bufflen;
 	}
 
-	parm= ps_find_parm(connect_ps, YANGCLI_AGENT);
+	parm = NULL;
+	if (connect_valset) {
+	    parm= val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_AGENT);
+	}
 	if (parm) {
-	    len = xml_strncpy(p, VAL_STR(parm->val), bufflen-3);
+	    len = xml_strncpy(p, VAL_STR(parm), bufflen-3);
 	    p += len;
 	    bufflen -= len;
 	}
@@ -797,7 +781,7 @@ static xmlChar *
 				  (const char *)prompt,
 				  NULL, -1);
     if (!line) {
-	log_stdout("\nncxcli: Error: Readline failed");
+	log_stdout("\nyangcli: Error: gl_get_line failed");
     }
 
     return line;
@@ -905,7 +889,7 @@ static xmlChar *
 *
 * INPUTS:
 *   dtyp == definition type 
-*       (NCX_NT_RPC, NCX_NT_PSD, NCX_NT_TYP, etc)
+*       (NCX_NT_OBJ or  NCX_NT_TYP)
 *   line == input command line from user
 *   len  == pointer to output var for number of bytes parsed
 *
@@ -993,10 +977,10 @@ static void *
 	if (!def && autoload) {
 	    switch (*dtyp) {
 	    case NCX_NT_NONE:
-	    case NCX_NT_RPC:
+	    case NCX_NT_OBJ:
 		def = ncx_match_any_rpc(module, defname);
 		if (def) {
-		    *dtyp = NCX_NT_RPC;
+		    *dtyp = NCX_NT_OBJ;
 		}
 	    default:
 		;
@@ -1016,8 +1000,8 @@ static void *
 
 	/* if not found, try module 'ncx' if not already done */
 	if (!def && (!default_module || 
-		     xml_strcmp(default_module, NCXCLIMOD))) {
-	    def = def_reg_find_moddef(NCXCLIMOD, defname, dtyp);
+		     xml_strcmp(default_module, YANGCLI_MOD))) {
+	    def = def_reg_find_moddef(YANGCLI_MOD, defname, dtyp);
 	}
 
 	/* if not found, try any module */
@@ -1029,10 +1013,10 @@ static void *
 	if (!def && autoload) {
 	    switch (*dtyp) {
 	    case NCX_NT_NONE:
-	    case NCX_NT_RPC:
+	    case NCX_NT_OBJ:
 		def = ncx_match_any_rpc(NULL, defname);
 		if (def) {
-		    *dtyp = NCX_NT_RPC;
+		    *dtyp = NCX_NT_OBJ;
 		}
 	    default:
 		;
@@ -1059,26 +1043,27 @@ static void *
 *
 * INPUTS:
 *   parm == parm to get from the CLI
-*   ps == parmset being filled
+*   valset == value set being filled
 *
 * OUTPUTS:
-*    new ps_parm_t node will be added to ps of NO_ERR
+*    new val_value_t node will be added to valset if NO_ERR
 *
 * RETURNS:
 *    status
 *********************************************************************/
 static status_t
-    get_complex_parm (psd_parm_t *parm,
-		      ps_parmset_t *ps)
+    get_complex_parm (const obj_template_t *parm,
+		      val_value_t *valset)
 {
-    xmlChar       *line;
-    ps_parm_t     *new_parm;
-    status_t       res;
+    xmlChar          *line;
+    val_value_t      *new_parm;
+    status_t          res;
 
     res = NO_ERR;
 
     log_stdout("\nEnter complex value %s (%s)", 
-	       parm->name, parm->typname);
+	       obj_get_name(parm), 
+	       tk_get_btype_sym(obj_get_basetype(parm)));
 
     /* get a line of input from the user */
     line = get_cmd_line(&res);
@@ -1086,25 +1071,25 @@ static status_t
 	return res;
     }
 
-    new_parm = ps_new_parm();
+    new_parm = val_new_value();
     if (!new_parm) {
 	res = ERR_INTERNAL_MEM;
     } else {
-	ps_setup_parm(new_parm, ps, parm);
-	(void)var_get_script_val(psd_get_typdef(parm),
-				 new_parm->val,
-				 psd_get_parm_nsid(parm),
-				 parm->name, line,
-				 ISPARM, &res);
+	val_init_from_template(new_parm, parm);
+	(void)var_get_script_val(obj_get_ctypdef(parm),
+				 new_parm,
+				 obj_get_nsid(parm),
+				 obj_get_name(parm), 
+				 line, ISPARM, &res);
 	if (res == NO_ERR) {
 	    /* add the parm to the parmset */
-	    add_parm(new_parm, ps);
+	    val_add_child(new_parm, valset);
 	}
     }
 
     if (res != NO_ERR) {
-	log_stdout("\nncxcli: Error in %s (%s)",
-		   parm->name, get_error_string(res));
+	log_stdout("\nyangcli: Error in %s (%s)",
+		   obj_get_name(parm), get_error_string(res));
     }
 
     return res;
@@ -1122,37 +1107,38 @@ static status_t
 * INPUTS:
 *   rpc == RPC method that is being called
 *   parm == parm to get from the CLI
-*   ps == parmset being filled
-*   oldps == last set of values (NULL if none)
+*   valset == value set being filled
+*   oldvalset == last set of values (NULL if none)
 *
 * OUTPUTS:
-*    new ps_parm_t node will be added to ps of NO_ERR
+*    new val_value_t node will be added to valset if NO_ERR
 *
 * RETURNS:
 *    status
 *********************************************************************/
 static status_t
-    get_parm (const rpc_template_t *rpc,
-	      psd_parm_t *parm,
-	      ps_parmset_t *ps,
-	      ps_parmset_t *oldps)
+    get_parm (const obj_template_t *rpc,
+	      const obj_template_t *parm,
+	      val_value_t *valset,
+	      val_value_t *oldvalset)
 {
-    const xmlChar *def;
-    ps_parm_t     *oldparm;
+    const xmlChar *def, *parmname;
+    val_value_t   *oldparm, *newparm;
     xmlChar       *line, *start;
     status_t       res;
     ncx_btype_t    btyp;
 
-    if (parm->usage==PSD_UT_OPTIONAL && !get_optional) {
+    if (!obj_is_mandatory(parm) && !get_optional) {
 	return NO_ERR;
     }
 
-    btyp = psd_parm_basetype(parm);
+    parmname = obj_get_name(parm);
+    btyp = obj_get_basetype(parm);
 
     switch (btyp) {
     case NCX_BT_ANY:
-    case NCX_BT_ROOT:
-	return get_complex_parm(parm, ps);
+    case NCX_BT_CONTAINER:
+	return get_complex_parm(parm, valset);
     default:
 	;
     }
@@ -1162,22 +1148,25 @@ static status_t
     def = NULL;
   
     if (btyp==NCX_BT_EMPTY) {
-	log_stdout("\nShould flag %s be set?", parm->name);
+	log_stdout("\nShould flag %s be set?", parmname);
     } else {
-	log_stdout("\nEnter value for %s (%s)", parm->name, parm->typname);
+	log_stdout("\nEnter value for %s (%s)", parmname, 
+		   tk_get_btype_sym(btyp));
     }
-    if (oldps) {
-	oldparm = ps_find_parm(oldps, parm->name);
+    if (oldvalset) {
+	oldparm = val_find_child(oldvalset, 
+				 obj_get_mod_name(parm),
+				 parmname);
     }
 
     /* pick a default value, either old value or default clause */
     if (!oldparm) {
 	/* try to get the defined default value */
 	if (btyp != NCX_BT_EMPTY) {
-	    def = typ_get_defval(parm->pdef);
-	    if (!def && (rpc->nsid == xmlns_nc_id() &&
-			 (!xml_strcmp(parm->name, NCX_EL_TARGET) ||
-			  !xml_strcmp(parm->name, NCX_EL_SOURCE)))) {
+	    def = obj_get_default(parm);
+	    if (!def && (obj_get_nsid(rpc) == xmlns_nc_id() &&
+			 (!xml_strcmp(parmname, NCX_EL_TARGET) ||
+			  !xml_strcmp(parmname, NCX_EL_SOURCE)))) {
 		def = default_target;
 	    }
 	}
@@ -1192,7 +1181,7 @@ static status_t
 	if (btyp==NCX_BT_EMPTY) {
 	    log_stdout("Y");
 	} else {
-	    val_dump_value(oldparm->val, -1);
+	    val_dump_value(oldparm, -1);
 	}
 	log_stdout("]\n");
     }
@@ -1214,30 +1203,35 @@ static status_t
 	/* no input, use default or old value */
 	if (def) {
 	    /* use default */
-	    res = ps_parse_cli_parm(ps, parm, def, SCRIPTMODE);
+	    res = cli_parse_parm(valset, parm, def, SCRIPTMODE);
 	} else if (oldparm) {
 	    if (btyp==NCX_BT_EMPTY) {
-		res = ps_parse_cli_parm(ps, parm, NULL, SCRIPTMODE);
+		res = cli_parse_parm(valset, parm, NULL, SCRIPTMODE);
 	    } else {
 		/* use a copy of the last value */
-		res = ps_parse_add_clone(ps, oldparm);
+		newparm = val_clone(oldparm);
+		if (!newparm) {
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    val_add_child(newparm, valset);
+		}
 	    }
 	} else if (btyp != NCX_BT_EMPTY) {
 	    res = ERR_NCX_DATA_MISSING;
 	}  /* else flag should not be set */
     } else if (btyp==NCX_BT_EMPTY) {
 	if (*start=='Y' || *start=='y') {
-	    res = ps_parse_cli_parm(ps, parm, NULL, SCRIPTMODE);
+	    res = cli_parse_parm(valset, parm, NULL, SCRIPTMODE);
 	} else if (*start=='N' || *start=='n') {
 	    ; /* skip; so not add the flag */
 	} else if (!*start && oldparm) {
 	    /* default was set, so add this flag */
-	    res = ps_parse_cli_parm(ps, parm, NULL, SCRIPTMODE);
+	    res = cli_parse_parm(valset, parm, NULL, SCRIPTMODE);
 	} else {
 	    res = ERR_NCX_WRONG_VAL;
 	}
     } else {
-	res = ps_parse_cli_parm(ps, parm, start, SCRIPTMODE);
+	res = cli_parse_parm(valset, parm, start, SCRIPTMODE);
     }
 
     return res;
@@ -1255,171 +1249,233 @@ static status_t
 *
 * INPUTS:
 *   rpc == RPC template in progress
-*   pch == PSD Choice template header
-*   ps == parmset to fill
-*   oldps == last set of values (or NULL if none)
+*   choic == choice object template header
+*   valset == value set to fill
+*   oldvalset == last set of values (or NULL if none)
 *
 * OUTPUTS:
-*    new ps_parm_t nodes may be added to ps
+*    new val_value_t nodes may be added to valset
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
-    get_choice (const rpc_template_t *rpc,
-		const psd_choice_t *pch,
-		ps_parmset_t *ps,
-		ps_parmset_t *oldps)
+    get_choice (const obj_template_t *rpc,
+		const obj_template_t *choic,
+		val_value_t *valset,
+		val_value_t *oldvalset)
 {
-    psd_parm_t    *parm;
-    psd_hdronly_t *phdr;
-    const psd_block_t *pb;
-    ps_parm_t     *pval;
-    xmlChar       *myline, *str;
-    status_t       res;
-    int            i, num;
-    psd_parmid_t   parmid;
+    const obj_template_t    *parm, *cas;
+    val_value_t             *pval;
+    xmlChar                 *myline, *str;
+    status_t                 res;
+    int                      i, num;
+    boolean                  first, done, done2, usedef;
 
+
+    res = NO_ERR;
+
+    if (!obj_is_config(choic)) {
+	log_stdout("\nError: choice '%s' has no configurable parameters",
+		   obj_get_name(choic));
+	return ERR_NCX_ACCESS_DENIED;
+    }
 
     /* first check the partial block corner case */
-    pval = ps_choice_first_set(ps, pch);
+    pval = val_get_choice_first_set(valset, choic);
     if (pval) {
-	/* finish the block */
+	/* found something set from this choice, finish the case */
 	log_stdout("\nEnter more parameters to complete the choice:");
 
-	pb = psd_find_blocknum(ps->psd, pval->parm->choice_id,
-			       pval->parm->block_id);
-	if (!pb) {
+	cas = pval->casobj;
+	if (!cas) {
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
-	for (parmid = pb->start_parm; 
-	     parmid <= pb->end_parm; parmid++) {
-	    if (ps_parmnum_set(ps, parmid)) {
+	for (parm = obj_first_child(cas); 
+	     parm != NULL;
+	     parm = obj_next_child(parm)) {
+
+	    if (!obj_is_config(parm)) {
 		continue;
 	    }
-	    parm = psd_find_parmnum(ps->psd, parmid);
-	    if (!parm) {
-		return SET_ERROR(ERR_INTERNAL_VAL);
+
+	    pval = val_find_child(valset,
+				  obj_get_mod_name(parm),
+				  obj_get_name(parm));
+	    if (pval) {
+		continue;   /* node within case already set */
 	    }
-	    if (!psd_parm_writable(parm)) {
-		continue;
-	    }
-	    res = get_parm(rpc, parm, ps, oldps);
+
+	    res = get_parm(rpc, parm, valset, oldvalset);
 	    if (res != NO_ERR) {
-		ncx_print_errormsg(NULL, NULL, res);
+		log_stdout("\nError: get parm '%s' failed (%s)",
+			   obj_get_name(parm),
+			   get_error_string(res));
+		return res;
 	    }
 	}
 	return NO_ERR;
     }
 
+    /* check corner-case -- choice with no cases defined */
+    cas = obj_first_child(choic);
+    if (!cas) {
+	log_stdout("\nNo case nodes defined for choice %s\n",
+		   obj_get_name(choic));
+	return NO_ERR;
+    }
+
+
     /* else not a partial block corner case but a normal
-     * case whre no choice has been made at all
+     * situation where no case has been selected at all
      */
-    log_stdout("\nEnter a number of the selected choice:\n");
+    log_stdout("\nEnter a number of the selected case statement:\n");
 
-    for (num = 1, phdr = (psd_hdronly_t *)dlq_firstEntry(&pch->choiceQ);
-         phdr != NULL;
-         phdr = (psd_hdronly_t *)dlq_nextEntry(phdr), num++) {
-        switch (phdr->ntyp) {
-        case PSD_NT_BLOCK:
-            pb = (psd_block_t *)phdr;
-	    log_stdout("\n  %d: block %d:", num, pb->block_id);
-	    for (parmid = pb->start_parm; 
-		 parmid <= pb->end_parm; parmid++) {
-		parm = psd_find_parmnum(ps->psd, parmid);
-		if (!parm) {
-		    return SET_ERROR(ERR_INTERNAL_VAL);
-		}
-		log_stdout("\n    %s (%s)", parm->name, parm->typname);
+    num = 1;
+    usedef = FALSE;
+
+    for (; cas != NULL;
+         cas = obj_next_child(cas)) {
+
+	first = TRUE;
+	for (parm = obj_first_child(cas);
+	     parm != NULL;
+	     parm = obj_next_child(parm)) {
+
+	    if (!obj_is_config(parm)) {
+		continue;
 	    }
-            break;
-        case PSD_NT_PARM:
-            parm = (psd_parm_t *)phdr;
-	    log_stdout("\n  %d: parm %s (%s)", 
-		   num, parm->name, parm->typname);
-            break;
-        case PSD_NT_CHOICE:
-	    /* should not see a CHOICE node at this level */
-	    /* fall through */
-        default: 
-            return SET_ERROR(ERR_INTERNAL_VAL);
-        }
+
+	    if (first) {
+		log_stdout("\n  %d: case %s:", 
+			   num++, obj_get_name(cas));
+		first = FALSE;
+	    }
+
+	    log_stdout("\n   %s %s",
+		       obj_get_typestr(parm),
+		       obj_get_name(parm));
+	}
     }
 
-    /* Get a line of input which should just be a number */
-    log_stdout("\n\nEnter choice number (%d - %d)", 1, num-1);
-    myline = get_cmd_line(&res);
-    if (!myline) {
-	return res;
+    done = FALSE;
+    log_stdout("\n");
+    while (!done) {
+	/* Pick a prompt, depending on the choice default case */
+	if (obj_get_default(choic)) {
+	    log_stdout("\nEnter choice number (%d - %d), [ENTER] for default (%s),"
+		       " or 0 to cancel", 1, num-1, 
+		       obj_get_default(choic));
+	} else {
+	    log_stdout("\nEnter choice number (%d - %d), or 0 to cancel", 1, num-1);
+	}
+
+	/* get input from the user STDIN */
+	myline = get_cmd_line(&res);
+	if (!myline) {
+	    return res;
+	}
+
+	/* strip leading whitespace */
+	str = myline;
+	while (*str && xml_isspace(*str)) {
+	    str++;
+	}
+
+	/* convert to a number, check [ENTER] for default */
+	if (*str) {
+	    i = atoi((const char *)str);
+	    usedef = FALSE;
+	} else {
+	    usedef = TRUE;
+	}
+
+	/* check if default requested */
+	if (usedef) {
+	    if (obj_get_default(choic)) {
+		done = TRUE;
+	    } else {
+		log_stdout("\nError: Choice does not have a default case\n");
+		usedef = FALSE;
+	    }
+	} else if (i == 0) {
+	    log_stdout("\nChoice canceled\n");
+	    return ERR_NCX_SKIPPED;
+	} else if (i < 0 || i >= num) {
+	    log_stdout("\nError: invalid value '%s'\n", str);
+	}
     }
-    str = myline;
-    while (*str && xml_isspace(*str)) {
-	str++;
-    }
-    if (*str) {
-	i = atoi((const char *)str);
+
+    /* got a valid choice number or use the default case
+     * now get the object template for the correct case 
+     */
+    if (usedef) {
+	cas = obj_find_child(choic,
+			     obj_get_mod_name(choic),
+			     obj_get_default(choic));
     } else {
-	i = 0;
-    }
 
-    if (i < 1 || i >= num) {
-	res = ERR_NCX_DATA_MISSING;
-	ncx_print_errormsg(NULL, NULL, res);
-	return res;
-    }
+	num = 1;
+	done = FALSE;
 
-    /* got a valid choice number, now get the corr. choice header */
-    phdr = (psd_hdronly_t *)dlq_firstEntry(&pch->choiceQ);
-    for (num = 1; num < i; num++) {
-	phdr = (psd_hdronly_t *)dlq_nextEntry(phdr);
-    }
+	for (cas = obj_first_child(choic); 
+	     cas != NULL && !done;
+	     cas = obj_next_child(cas)) {
 
-    /* get the parameter or finish the block specified */
-    switch (phdr->ntyp) {
-    case PSD_NT_BLOCK:
-	pb = (psd_block_t *)phdr;
-	for (parmid = pb->start_parm; 
-	     parmid <= pb->end_parm; parmid++) {
-	    if (ps_parmnum_set(ps, parmid)) {
-		continue;
-	    }
-	    parm = psd_find_parmnum(ps->psd, parmid);
-	    if (!parm) {
-		return SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	    if (!psd_parm_writable(parm)) {
-		continue;
-	    }
-	    res = get_parm(rpc, parm, ps, oldps);
-	    if (res != NO_ERR) {
-		ncx_print_errormsg(NULL, NULL, res);
-	    }
-	}
-	break;
-    case PSD_NT_PARM:
-	/* if the parm is not already set and is not read-only
-	 * then try to get a value from the user at the CLI
-	 */
-	parm = (psd_parm_t *)phdr;
-	if (!ps_parmnum_set(ps, parm->parm_id)) {
-	    if (psd_parm_writable(parm)) {
-		if (psd_parm_basetype(parm) == NCX_BT_EMPTY) {
-		    /* user selected a flag, so no need to get a value */
-		    res = ps_parse_cli_parm(ps, parm, NULL, SCRIPTMODE);
+	    done2 = FALSE;
+	    for (parm = obj_first_child(cas);
+		 parm != NULL && !done2;
+		 parm = obj_next_child(parm)) {
+
+		if (!obj_is_config(parm)) {
+		    continue;
+		}
+
+		if (i == num) {
+		    done = TRUE;
+		    done2 = TRUE;
 		} else {
-		    res = get_parm(rpc, parm, ps, oldps);
-		    if (res != NO_ERR) {
-			ncx_print_errormsg(NULL, NULL, res);
-		    }
+		    num++;
+		    done2 = TRUE;
 		}
 	    }
 	}
-	break;
-    case PSD_NT_CHOICE:
-	/* should not see a CHOICE node at this level */
-	/* fall through */
-    default: 
-	return SET_ERROR(ERR_INTERNAL_VAL);
+
+	if (!done) {
+	    cas = NULL;
+	}
+    }
+
+    /* make sure a case was selected or found */
+    if (!cas || !obj_is_config(cas)) {
+	log_stdout("\nError: No case to fill for this choice");
+	return ERR_NCX_SKIPPED;
+    }
+
+    /* finish the seclected case */
+    for (parm = obj_first_child(cas);
+	 parm != NULL;
+	 parm = obj_next_child(parm)) {
+
+	if (!obj_is_config(parm)) {
+	    continue;
+	}
+
+	pval = val_find_child(valset, 
+			      obj_get_mod_name(parm),
+			      obj_get_name(parm));
+	if (pval) {
+	    continue;
+	}
+
+	/* node is config and not already set */
+	res = get_parm(rpc, parm, valset, oldvalset);
+	if (res != NO_ERR) {
+	    log_stdout("\nError: get parm '%s' failed (%s)",
+		       obj_get_name(parm),
+		       get_error_string(res));
+	    return res;
+	}
     }
 
     return NO_ERR;
@@ -1428,76 +1484,88 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION fill_parmset
+* FUNCTION fill_valset
 * 
-* Fill the specified parmset with any missing parameters.
+* Fill the specified value set with any missing parameters.
 * Use values from the last set (if any) for defaults.
 * This function will block on readline if mandatory parms
 * are needed from the CLI
 *
 * INPUTS:
 *   rpc == RPC method that is being called
-*   ps == parmset to fill
-*   oldps == last set of values (or NULL if none)
+*   valset == value set to fill
+*   oldvalset == last set of values (or NULL if none)
 *
 * OUTPUTS:
-*    new ps_parm_t nodes may be added to ps
+*    new val_value_t nodes may be added to valset
 *
 * RETURNS:
-*    status,, ps may be partially filled if not NO_ERR
+*    status,, valset may be partially filled if not NO_ERR
 *********************************************************************/
 static status_t
-    fill_parmset (const rpc_template_t *rpc,
-		  ps_parmset_t *ps,
-		  ps_parmset_t *oldps)
+    fill_valset (const obj_template_t *rpc,
+		 val_value_t *valset,
+		 val_value_t *oldvalset)
 {
-    psd_hdronly_t *phdr;
-    const psd_choice_t  *pch;
-    psd_parm_t    *parm;
-    status_t       res, retres;
+    const obj_template_t  *parm;
+    val_value_t           *val;
+    status_t               res, retres;
 
     retres = NO_ERR;
-    for (phdr = (psd_hdronly_t *)dlq_firstEntry(&ps->psd->parmQ);
-         phdr != NULL;
-         phdr = (psd_hdronly_t *)dlq_nextEntry(phdr)) {
-        switch (phdr->ntyp) {
-        case PSD_NT_CHOICE:
-            pch = (const psd_choice_t *)phdr;
-	    if (!ps_check_choice_set(ps, pch->choice_id)) {
-		if (get_optional || psd_choice_required(pch)) {
-		    res = get_choice(rpc, pch, ps, oldps);
-		    if (res != NO_ERR) {
-			retres = res;
-		    }
+    for (parm = obj_first_child(valset->obj);
+         parm != NULL;
+         parm = obj_next_child(parm)) {
+
+	if (!obj_is_config(parm)) {
+	    continue;
+	}
+
+        switch (parm->objtype) {
+        case OBJ_TYP_CHOICE:
+	    if (val_choice_is_set(valset, parm)) {
+		continue;
+	    }
+
+	    if (get_optional || obj_is_mandatory(parm)) {
+		res = get_choice(rpc, parm, valset, oldvalset);
+		if (res != NO_ERR) {
+		    retres = res;
 		}
 	    }
             break;
-        case PSD_NT_PARM:
+        case OBJ_TYP_LEAF:
 	    /* if the parm is not already set and is not read-only
 	     * then try to get a value from the user at the CLI
 	     */
-            parm = (psd_parm_t *)phdr;
-	    if (!ps_find_parmnum(ps, parm->parm_id)) {
-		if (psd_parm_writable(parm)) {
-		    res = get_parm(rpc, parm, ps, oldps);
-		    if (res != NO_ERR) {
-			log_stdout("\nWarning: Parameter %s has errors (%s)",
-			       parm->name, get_error_string(res));
-			retres = res;
-		    }
+	    val = val_find_child(valset, 
+				 obj_get_mod_name(parm),
+				 obj_get_name(parm));
+
+	    if (!val) {
+		res = get_parm(rpc, parm, valset, oldvalset);
+		if (res != NO_ERR) {
+		    log_stdout("\nWarning: Parameter %s has errors (%s)",
+			       obj_get_name(parm), 
+			       get_error_string(res));
+		    retres = res;
 		}
 	    }
             break;
-        case PSD_NT_BLOCK:
-	    /* should not see a BLOCK node at this level */
-	    /* fall through */
+	case OBJ_TYP_LEAF_LIST:
+	case OBJ_TYP_CONTAINER:
+	case OBJ_TYP_LIST:
+	case OBJ_TYP_RPCIO:
+	case OBJ_TYP_NOTIF:
+	    retres = ERR_NCX_OPERATION_FAILED;   /****/
+	    break;
+	case OBJ_TYP_RPC:
         default: 
             retres = SET_ERROR(ERR_INTERNAL_VAL);
         }
     }
     return retres;
 
-} /* fill_parmset */
+} /* fill_valset */
 
 
 /********************************************************************
@@ -1510,7 +1578,7 @@ static status_t
 * The STDIN handler will not do anything with incoming chars
 * while state == MGR_IO_ST_CONNECT
 * 
-* Inputs are derived from the module variables in connect_ps:
+* Inputs are derived from the module variables in connect_valset:
 *    agent == NETCONF agent address string
 *    username == SSH2 user name string
 *    password == SSH2 password
@@ -1523,9 +1591,9 @@ static status_t
 static void
     create_session (void)
 {
-    status_t    res;
     const xmlChar *agent, *username, *password;
-    val_value_t *val;
+    val_value_t   *val;
+    status_t       res;
 
     if (mysid) {
 	if (mgr_ses_get_scb(mysid)) {
@@ -1538,23 +1606,23 @@ static void
     }
 
     /* retrieving the parameters should not fail */
-    res = ps_get_parmval(connect_ps, YANGCLI_USER, &val);
-    if (res == NO_ERR) {
+    val =  val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_USER);
+    if (val && val->res == NO_ERR) {
 	username = VAL_STR(val);
     } else {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return;
     }
 
-    res = ps_get_parmval(connect_ps, YANGCLI_AGENT, &val);
-    if (res == NO_ERR) {
+    val = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_AGENT);
+    if (val && val->res == NO_ERR) {
 	agent = VAL_STR(val);
     } else {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return;
     }
 
-    res = ps_get_parmval(connect_ps, YANGCLI_PASSWORD, &val);
+    val = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_PASSWORD);
     if (res == NO_ERR) {
 	password = VAL_STR(val);
     } else {
@@ -1562,7 +1630,7 @@ static void
 	return;
     }
 
-    log_info("\nncxcli: Starting NETCONF session for %s on %s",
+    log_info("\nyangcli: Starting NETCONF session for %s on %s",
 	     username, agent);
 
     state = MGR_IO_ST_CONNECT;
@@ -1573,9 +1641,9 @@ static void
     res = mgr_ses_new_session(username, password, agent, &mysid);
     if (res == NO_ERR) {
 	state = MGR_IO_ST_CONN_START;
-	log_debug("\nncxcli: Start session %d OK", mysid);
+	log_debug("\nyangcli: Start session %d OK", mysid);
     } else {
-	log_info("\nncxcli: Start session failed for user %s on "
+	log_info("\nyangcli: Start session failed for user %s on "
 		 "%s (%s)\n", username, agent, get_error_string(res));
 	state = MGR_IO_ST_IDLE;
     }
@@ -1584,10 +1652,10 @@ static void
 
 
 /********************************************************************
- * FUNCTION get_parmset
+ * FUNCTION get_valset
  * 
  * INPUTS:
- *    rpc == RPC method for the load command
+ *    rpc == RPC method for the command being processed
  *    line == CLI input in progress
  *    res == address of status result
  *
@@ -1595,20 +1663,21 @@ static void
  *    *res is set to the status
  *
  * RETURNS:
- *   malloced parmset filled in with the parameters for 
+ *   malloced valset filled in with the parameters for 
  *   the specified RPC
  *
  *********************************************************************/
-static ps_parmset_t *
-    get_parmset (const rpc_template_t *rpc,
+static val_value_t *
+    get_valset (const obj_template_t *rpc,
 		 const xmlChar *line,
 		 status_t  *res)
 {
-    ps_parmset_t *ps;
-    uint32        len;
+    const obj_template_t  *obj;
+    val_value_t           *valset;
+    uint32                 len;
 
     *res = NO_ERR;
-    ps = NULL;
+    valset = NULL;
     len = 0;
 
     /* skip leading whitespace */
@@ -1616,33 +1685,42 @@ static ps_parmset_t *
 	len++;
     }
 
-    /* check only whitespace entered after RPC method name */
+    /* check any non-whitespace entered after RPC method name */
     if (line[len]) {
-	ps = parse_rpc_cli(rpc, &line[len], res);
-	if (*res != NO_ERR) {
+	valset = parse_rpc_cli(rpc, &line[len], res);
+	if (*res == ERR_NCX_SKIPPED) {
+	    log_stdout("\nError: no parameters defined for RPC %s",
+		       obj_get_name(rpc));
+	} else if (*res != NO_ERR) {
 	    log_stdout("\nError in the parameters for RPC %s (%s)",
-		   rpc->name, get_error_string(*res));
+		       obj_get_name(rpc), get_error_string(*res));
 	}
     }
 
+    obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
+    if (!obj) {
+	*res = ERR_NCX_SKIPPED;
+	return NULL;
+    }
+
     /* check no input from user, so start a parmset */
-    if (*res == NO_ERR && !ps) {
-	ps = ps_new_parmset();
-	if (!ps) {
+    if (*res == NO_ERR && !valset) {
+	valset = val_new_value();
+	if (!valset) {
 	    *res = ERR_INTERNAL_MEM;
 	} else {
-	    *res = ps_setup_parmset(ps, rpc->in_psd, PSD_TYP_RPC);
+	    val_init_from_template(valset, obj);
 	}
     }
 
     /* fill in any missing parameters from the CLI */
     if (*res==NO_ERR && interactive_mode()) {
-	*res = fill_parmset(rpc, ps, NULL);
+	*res = fill_valset(rpc, valset, NULL);
     }
 
-    return ps;
+    return valset;
 
-}  /* get_parmset */
+}  /* get_valset */
 
 
 /********************************************************************
@@ -1658,43 +1736,51 @@ static ps_parmset_t *
  *       == FALSE if this is from top-level command input
  *
  * OUTPUTS:
- *   connect_psparms may be set 
+ *   connect_valsetparms may be set 
  *   create_session may be called
  *
  *********************************************************************/
 static void
-    do_connect (const rpc_template_t *rpc,
+    do_connect (const obj_template_t *rpc,
 		const xmlChar *line,
 		uint32 start,
 		boolean  cli)
 {
-    status_t   res;
-    ps_parmset_t *ps;
-    boolean    s1, s2, s3;
-    ncx_node_t   dtyp;
+    const obj_template_t  *obj;
+    val_value_t           *valset;
+    status_t               res;
+    boolean       s1, s2, s3;
+    ncx_node_t    dtyp;
 
     /* retrieve the 'connect' RPC template, if not done already */
     if (!rpc) {
-	dtyp = NCX_NT_RPC;
-	rpc = (const rpc_template_t *)
-	    def_reg_find_moddef(NCXCLIMOD, YANGCLI_CONNECT, &dtyp);
+	dtyp = NCX_NT_OBJ;
+	rpc = (const obj_template_t *)
+	    def_reg_find_moddef(YANGCLI_MOD, YANGCLI_CONNECT, &dtyp);
 	if (!rpc) {
 	    log_write("\nError finding the 'connect' RPC method");
 	    return;
 	}
     }	    
 
+    obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	log_write("\nError finding the connect RPC 'input' node");	
+	return;
+    }
+
     /* process any parameters entered on the command line */
-    ps = NULL;
+    valset = NULL;
     if (line) {
 	while (line[start] && xml_isspace(line[start])) {
 	    start++;
 	}
 	if (line[start]) {
-	    ps = parse_rpc_cli(rpc, &line[start], &res);
-	    if (!ps || res != NO_ERR) {
+	    valset = parse_rpc_cli(rpc, &line[start], &res);
+	    if (!valset || res != NO_ERR) {
 		log_write("\nError in the parameters for RPC %s (%s)",
-		       rpc->name, get_error_string(res));
+			  obj_get_name(rpc), get_error_string(res));
 		return;
 	    }
 	}
@@ -1704,44 +1790,55 @@ static void
      * unless this is a cll from the program startup and all
      * of the parameters are entered
      */
-    if (!ps) {
+    if (!valset) {
 	s1 = s2 = s3 = FALSE;
 	if (cli) {
-	    s1 = ps_find_parm(connect_ps, YANGCLI_AGENT) ? TRUE : FALSE;
-	    s2 = ps_find_parm(connect_ps, YANGCLI_USER) ? TRUE : FALSE;
-	    s3 = (ps_find_parm(connect_ps, YANGCLI_PASSWORD) ||
-		  ps_find_parm(connect_ps, YANGCLI_KEY)) ? TRUE : FALSE;
+	    s1 = val_find_child(connect_valset, YANGCLI_MOD, 
+				YANGCLI_AGENT) ? TRUE : FALSE;
+	    s2 = val_find_child(connect_valset, YANGCLI_MOD,
+				YANGCLI_USER) ? TRUE : FALSE;
+	    s3 = (val_find_child(connect_valset, 
+				 YANGCLI_MOD, YANGCLI_PASSWORD) ||
+		  val_find_child(connect_valset, 
+				 YANGCLI_MOD, YANGCLI_KEY)) ? TRUE : FALSE;
 	}
 	if (!(s1 && s2 && s3)) {
-	    ps = ps_new_parmset();
-	    if (ps) {
-		ps_setup_parmset(ps, rpc->in_psd, PSD_TYP_RPC);
-	    } /* else out of memory error !!! */
-	} /* else use all of connect_ps */
+	    valset = val_new_value();
+	    if (!valset) {
+		log_write("\nError: malloc failure");
+		return;
+	    } else {
+		val_init_from_template(valset, obj);
+	    }
+	} /* else use all of connect_valset */
     }
 
     /* if anything entered, try to get any missing params in ps */
-    if (ps) {
+    if (valset) {
 	if (interactive_mode()) {
-	    (void)fill_parmset(rpc, ps, connect_ps);
+	    (void)fill_valset(rpc, valset, connect_valset);
 	}
-	if (connect_ps) {
-	    ps_free_parmset(connect_ps);
+	if (connect_valset) {
+	    val_free_value(connect_valset);
 	}
-	connect_ps = ps;
+	connect_valset = valset;
     } else if (!cli) {
 	if (interactive_mode()) {
-	    (void)fill_parmset(rpc, connect_ps, NULL);
+	    (void)fill_valset(rpc, connect_valset, NULL);
 	}
     }
 	
     /* hack: make sure the 3 required parms are set instead of
      * full validation of the parmset
      */
-    s1 = ps_find_parm(connect_ps, YANGCLI_AGENT) ? TRUE : FALSE;
-    s2 = ps_find_parm(connect_ps, YANGCLI_USER) ? TRUE : FALSE;
-    s3 = (ps_find_parm(connect_ps, YANGCLI_PASSWORD) ||
-	  ps_find_parm(connect_ps, YANGCLI_KEY)) ? TRUE : FALSE;
+    s1 = val_find_child(connect_valset, YANGCLI_MOD, 
+			YANGCLI_AGENT) ? TRUE : FALSE;
+    s2 = val_find_child(connect_valset, YANGCLI_MOD,
+			YANGCLI_USER) ? TRUE : FALSE;
+    s3 = (val_find_child(connect_valset, 
+			 YANGCLI_MOD, YANGCLI_PASSWORD) ||
+	  val_find_child(connect_valset, 
+			 YANGCLI_MOD, YANGCLI_KEY)) ? TRUE : FALSE;
 
     /* check if all params present yet */
     if (s1 && s2 && s3) {
@@ -1758,7 +1855,7 @@ static void
  * FUNCTION do_save
  * 
  * INPUTS:
- *    none (connect_ps needs to be valid)
+ *    none (connect_valset needs to be valid)
  *
  * OUTPUTS:
  *   copy-config and/or commit operation will be sent to agent
@@ -1845,19 +1942,28 @@ static void
  *
  *********************************************************************/
 static void
-    do_load (const rpc_template_t *rpc,
+    do_load (const obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
-    ps_parmset_t *ps;
-    val_value_t  *val;
+    val_value_t  *valset, *val;
     status_t      res;
 
-    ps = get_parmset(rpc, &line[len], &res);
+    val = NULL;
+    res = NO_ERR;
+
+    valset = get_valset(rpc, &line[len], &res);
 
     /* get the module name */
     if (res == NO_ERR) {
-	res = ps_get_parmval(ps, NCX_EL_MODULE, &val);
+	if (valset) {
+	    val = val_find_child(valset, YANGCLI_MOD, NCX_EL_MODULE);
+	}
+	if (!val) {
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	} else if (val->res != NO_ERR) {
+	    res = val->res;
+	}
     }
 
     /* load the module */
@@ -1873,8 +1979,8 @@ static void
 	       get_error_string(res));
     }
 
-    if (ps) {
-	ps_free_parmset(ps);
+    if (valset) {
+	val_free_value(valset);
     }
 
 }  /* do_load */
@@ -1917,11 +2023,10 @@ static void
  * show brief info for all user variables
  *
  * INPUTS:
- *  brief == TRUE if brief report desired
- *           FALSE if full report desired
+ *  mode == help mode requested
  *********************************************************************/
 static void
-    do_show_vars (boolean brief)
+    do_show_vars (help_mode_t mode)
 {
     ncx_var_t  *var;
     dlq_hdr_t  *que;
@@ -1929,16 +2034,16 @@ static void
 
     imode = interactive_mode();
 
-    if (!brief) {
+    if (mode > HELP_MODE_BRIEF) {
 	/* CLI Parameters */
-	if (mgr_cli_ps && !ps_is_empty(mgr_cli_ps)) {
+	if (mgr_cli_valset && val_child_cnt(mgr_cli_valset)) {
 	    if (imode) {
 		log_stdout("\nCLI Variables\n");
-		ps_stdout_parmset(mgr_cli_ps, NCX_DEF_INDENT);
+		val_stdout_value(mgr_cli_valset, NCX_DEF_INDENT);
 		log_stdout("\n");
 	    } else {
 		log_write("\nCLI Variables\n");
-		ps_dump_parmset(mgr_cli_ps, NCX_DEF_INDENT);
+		val_dump_value(mgr_cli_valset, NCX_DEF_INDENT);
 		log_write("\n");
 	    }
 	} else {
@@ -2011,6 +2116,11 @@ static void
 	log_write("\n");
     }
 
+    if (mode == HELP_MODE_BRIEF) {
+	return;
+    }
+
+    /* Local Script Variables */
     que = runstack_get_que(ISLOCAL);
     first = TRUE;
     for (var = (ncx_var_t *)dlq_firstEntry(que);
@@ -2067,13 +2177,12 @@ static void
  * INPUTS:
  *   name == variable name to find 
  *   isglobal == TRUE if global var, FALSE if local var
- *   brief == TRUE to print brief info
- *         == FALSE to print complete value
+ *   mode == help mode requested
  *********************************************************************/
 static void
     do_show_var (const xmlChar *name,
 		 boolean isglobal,
-		 boolean brief)
+		 help_mode_t mode)
 {
     const val_value_t *val;
     boolean            imode;
@@ -2082,7 +2191,7 @@ static void
 
     val = var_get(name, isglobal);
     if (val) {
-	if (brief) {
+	if (mode == HELP_MODE_BRIEF) {
 	    if (typ_is_simple(val->btyp)) {
 		if (imode) {
 		    val_stdout_value(val, NCX_DEF_INDENT);
@@ -2121,14 +2230,14 @@ static void
  *
  * INPUTS:
  *    mod == module to show
- *    brief == TRUE if brief report desired
- *             FALSE if full report desired
+ *    mode == requested help mode
+ * 
  *********************************************************************/
 static void
     do_show_module (const ncx_module_t *mod,
-		    boolean brief)
+		    help_mode_t mode)
 {
-    help_data_module(mod, !brief);
+    help_data_module(mod, mode);
 
 } /* do_show_module */
 
@@ -2140,12 +2249,12 @@ static void
  *
  * INPUTS:
  *    mod == first module to show
- *    brief == TRUE if brief report
- *          == FALSE if full report
+ *    mode == requested help mode
+ *
  *********************************************************************/
 static void
     do_show_modules (const ncx_module_t *mod,
-		     boolean brief)
+		     help_mode_t mode)
 {
     boolean anyout, imode;
 
@@ -2153,16 +2262,14 @@ static void
     anyout = FALSE;
 
     while (mod) {
-	if (brief) {
+	if (mode == HELP_MODE_BRIEF) {
 	    if (imode) {
-		log_stdout("\n  %s/%s/%s", mod->owner,
-			   mod->name, mod->version);
+		log_stdout("\n  %s/%s", mod->name, mod->version);
 	    } else {
-		log_write("\n  %s/%s/%s", mod->owner,
-			  mod->name, mod->version);
+		log_write("\n  %s/%s", mod->name, mod->version);
 	    }
 	} else {
-	    help_data_module(mod, PARTIAL);
+	    help_data_module(mod, mode);
 	}
 	anyout = TRUE;
 	mod = (const ncx_module_t *)ncx_get_next_module(mod);
@@ -2196,76 +2303,82 @@ static void
  *
  *********************************************************************/
 static void
-    do_show (const rpc_template_t *rpc,
+    do_show (const obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
-    ps_parmset_t *ps;
-    ps_parm_t    *parm;
+    val_value_t        *valset, *parm;
     const ncx_module_t *mod;
-    status_t      res;
-    boolean       brief, imode;
+    status_t            res;
+    boolean             imode;
+    help_mode_t         mode;
 
     imode = interactive_mode();
-    ps = get_parmset(rpc, &line[len], &res);
+    valset = get_valset(rpc, &line[len], &res);
 
-    if (ps && res == NO_ERR) {
-	brief = FALSE;
+    if (valset && res == NO_ERR) {
+	mode = HELP_MODE_NORMAL;
 
 	/* check if the 'brief' flag is set first */
-	if (ps_find_parm(ps, YANGCLI_BRIEF)) {
-	    brief = TRUE;
+	parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_BRIEF);
+	if (parm && parm->res == NO_ERR) {
+	    mode = HELP_MODE_BRIEF;
+	} else {
+	    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_FULL);
+	    if (parm && parm->res == NO_ERR) {
+		mode = HELP_MODE_FULL;
+	    }
 	}
 	    
 	/* there is 1 parm which is a choice of N */
-	parm = (ps_parm_t *)dlq_firstEntry(&ps->parmQ);
+	parm = val_get_first_child(valset);
 	if (parm) {
-	    if (!xml_strcmp(parm->parm->name, NCX_EL_LOCAL)) {
-		do_show_var(VAL_STR(parm->val), ISLOCAL, brief);
-	    } else if (!xml_strcmp(parm->parm->name, NCX_EL_GLOBAL)) {
-		do_show_var(VAL_STR(parm->val), ISGLOBAL, brief);
-	    } else if (!xml_strcmp(parm->parm->name, NCX_EL_VARS)) {
-		do_show_vars(brief);
-	    } else if (!xml_strcmp(parm->parm->name, NCX_EL_MODULE)) {
-		mod = ncx_find_module(VAL_STR(parm->val));
+	    if (!xml_strcmp(parm->name, NCX_EL_LOCAL)) {
+		do_show_var(VAL_STR(parm), ISLOCAL, mode);
+	    } else if (!xml_strcmp(parm->name, NCX_EL_GLOBAL)) {
+		do_show_var(VAL_STR(parm), ISGLOBAL, mode);
+	    } else if (!xml_strcmp(parm->name, NCX_EL_VARS)) {
+		do_show_vars(mode);
+	    } else if (!xml_strcmp(parm->name, NCX_EL_MODULE)) {
+		mod = ncx_find_module(VAL_STR(parm));
 		if (mod) {
-		    do_show_module(mod, brief);
+		    do_show_module(mod, mode);
 		} else {
 		    if (imode) {
-			log_stdout("\nncxcli: module (%s) not loaded",
-				   VAL_STR(parm->val));
+			log_stdout("\nyangcli: module (%s) not loaded",
+				   VAL_STR(parm));
 		    } else {
-			log_error("\nncxcli: module (%s) not loaded",
-				  VAL_STR(parm->val));
+			log_error("\nyangcli: module (%s) not loaded",
+				  VAL_STR(parm));
 		    }
 		}
-	    } else if (!xml_strcmp(parm->parm->name, NCX_EL_MODULELIST)) {
+	    } else if (!xml_strcmp(parm->name, NCX_EL_MODULELIST)) {
 		mod = ncx_get_first_module();
 		if (mod) {
 		    do_show_modules(mod, TRUE);
 		} else {
 		    if (imode) {
-			log_stdout("\nncxcli: no modules loaded");
+			log_stdout("\nyangcli: no modules loaded");
 		    } else {
-			log_error("\nncxcli: no modules loaded");
+			log_error("\nyangcli: no modules loaded");
 		    }
 		}
-	    } else if (!xml_strcmp(parm->parm->name, NCX_EL_MODULES)) {
+	    } else if (!xml_strcmp(parm->name, NCX_EL_MODULES)) {
 		mod = ncx_get_first_module();
 		if (mod) {
-		    do_show_modules(mod, brief);
+		    do_show_modules(mod, mode);
 		} else {
 		    if (imode) {
-			log_stdout("\nncxcli: no modules loaded");
+			log_stdout("\nyangcli: no modules loaded");
 		    } else {
-			log_error("\nncxcli: no modules loaded");
+			log_error("\nyangcli: no modules loaded");
 		    }
 		}
-	    } else if (!xml_strcmp(parm->parm->name, NCX_EL_VERSION)) {
+	    } else if (!xml_strcmp(parm->name, NCX_EL_VERSION)) {
 		if (imode) {
-		    log_stdout("\nncxcli version %s\n", progver);
+		    log_stdout("\nyangcli version %s\n", progver);
 		} else {
-		    log_write("\nncxcli version %s\n", progver);
+		    log_write("\nyangcli version %s\n", progver);
 		}
 	    } else {
 		/* else some internal error */
@@ -2276,8 +2389,8 @@ static void
 	}
     }
 
-    if (ps) {
-	ps_free_parmset(ps);
+    if (valset) {
+	val_free_value(valset);
     }
 
 }  /* do_show */
@@ -2286,7 +2399,7 @@ static void
 /********************************************************************
  * FUNCTION do_help
  * 
- * Print the general ncxcli help text to STDOUT
+ * Print the general yangcli help text to STDOUT
  *
  * INPUTS:
  *    rpc == RPC method for the load command
@@ -2298,111 +2411,133 @@ static void
  *
  *********************************************************************/
 static void
-    do_help (const rpc_template_t *rpc,
+    do_help (const obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
-    typ_template_t *typ;
-    psd_template_t *psd;
-    rpc_template_t *rpcdef;
-    ps_parmset_t   *ps;
-    ps_parm_t      *parm;
-    status_t        res;
-    boolean         full, imode;
-    ncx_node_t      dtyp;
-    uint32          dlen;
+    const typ_template_t *typ;
+    const obj_template_t *obj;
+    val_value_t          *valset, *parm;
+    status_t              res;
+    help_mode_t           mode;
+    boolean               imode;
+    ncx_node_t            dtyp;
+    uint32                dlen;
 
     imode = interactive_mode();
-    ps = get_parmset(rpc, &line[len], &res);
+    valset = get_valset(rpc, &line[len], &res);
+    if (!valset || valset->res != NO_ERR) {
+	return;
+    }
+
+    mode = HELP_MODE_NORMAL;
 
     /* look for the 'brief' parameter */
-    parm = ps_find_parm(ps, YANGCLI_BRIEF);
-    full = (parm) ? FALSE : TRUE;
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_BRIEF);
+    if (parm && parm->res == NO_ERR) {
+	mode = HELP_MODE_BRIEF;
+    } else {
+	/* look for the 'full' parameter */
+	parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_FULL);
+	if (parm && parm->res == NO_ERR) {
+	    mode = HELP_MODE_FULL;
+	}
+    }
 
     /* look for the specific definition parameters */
-    parm = ps_find_parm(ps, NCX_EL_TYPE);
-    if (parm) {
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_TYPE);
+    if (parm && parm->res==NO_ERR) {
 	dtyp = NCX_NT_TYP;
-	typ = parse_def(&dtyp, VAL_STR(parm->val), &dlen);
+	typ = parse_def(&dtyp, VAL_STR(parm), &dlen);
 	if (typ) {
-	    help_type(typ, full);
+	    help_type(typ, mode);
 	} else {
 	    if (imode) {
-		log_stdout("\nncxcli: type definition (%s) not found",
-			   VAL_STR(parm->val));
+		log_stdout("\nyangcli: type definition (%s) not found",
+			   VAL_STR(parm));
 	    } else {
-		log_error("\nncxcli: type definition (%s) not found",
-			  VAL_STR(parm->val));
+		log_error("\nyangcli: type definition (%s) not found",
+			  VAL_STR(parm));
 	    }
 	}
 	return;
     }
 
-    parm = ps_find_parm(ps, NCX_EL_PARMSET);
-    if (parm) {
-	dtyp = NCX_NT_PSD;
-	psd = parse_def(&dtyp, VAL_STR(parm->val), &dlen);
-	if (psd) {
-	    help_parmset(psd, full);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_OBJECT);
+    if (parm && parm->res == NO_ERR) {
+	dtyp = NCX_NT_OBJ;
+	obj = parse_def(&dtyp, VAL_STR(parm), &dlen);
+	if (obj && obj_is_data(obj)) {
+	    help_object(obj, mode);
 	} else {
 	    if (imode) {
-		log_stdout("\nncxcli: parmset definition (%s) not found",
-			   VAL_STR(parm->val));
+		log_stdout("\nyangcli: object definition (%s) not found",
+			   VAL_STR(parm));
 	    } else {
-		log_error("\nncxcli: parmset definition (%s) not found",
-			  VAL_STR(parm->val));
+		log_error("\nyangcli: object definition (%s) not found",
+			  VAL_STR(parm));
 	    }
 	}
 	return;
     }
 
-    parm = ps_find_parm(ps, NCX_EL_RPC);
-    if (parm) {
-	dtyp = NCX_NT_RPC;
-	rpcdef = parse_def(&dtyp, VAL_STR(parm->val), &dlen);
-	if (rpcdef) {
-	    help_rpc(rpcdef, full);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_RPC);
+    if (parm && parm->res == NO_ERR) {
+	dtyp = NCX_NT_OBJ;
+	obj = parse_def(&dtyp, VAL_STR(parm), &dlen);
+	if (obj && obj->objtype == OBJ_TYP_RPC) {
+	    help_object(obj, mode);
 	} else {
 	    if (imode) {
-		log_stdout("\nncxcli: type definition (%s) not found",
-			   VAL_STR(parm->val));
+		log_stdout("\nyangcli: RPC definition (%s) not found",
+			   VAL_STR(parm));
 	    } else {
-		log_error("\nncxcli: type definition (%s) not found",
-			  VAL_STR(parm->val));
+		log_error("\nyangcli: RPC definition (%s) not found",
+			  VAL_STR(parm));
 	    }
 	}
 	return;
     }
 
-#ifdef NOT_YET
-    parm = ps_find_parm(ps, NCX_EL_NOTIF);
-    if (parm) {
-	dtyp = NCX_NT_NOT;
-	not = parse_def(&dtyp, VAL_STR(parm->val), &dlen);
-	if (not) {
-	    help_notif(not, full);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_NOTIF);
+    if (parm && parm->res == NO_ERR) {
+	dtyp = NCX_NT_OBJ;
+	obj = parse_def(&dtyp, VAL_STR(parm), &dlen);
+	if (obj && obj->objtype == OBJ_TYP_NOTIF) {
+	    help_object(obj, mode);
 	} else {
 	    if (imode) {
-		log_stdout("\nncxcli: notification definition (%s) not found",
-			   VAL_STR(parm->val));
+		log_stdout("\nyangcli: notification definition (%s) not found",
+			   VAL_STR(parm));
 	    } else {
-		log_error("\nncxcli: notification definition (%s) not found",
-			  VAL_STR(parm->val));
+		log_error("\nyangcli: notification definition (%s) not found",
+			  VAL_STR(parm));
 	    }
 	}
 	return;
     }
-#endif
 
     /* none of the definition parameters are present, so 
      * print the general program help text
      */
     if (imode) {
-	log_stdout("\nncxcli version %s", progver);
+	log_stdout("\nyangcli version %s", progver);
     } else {
-	log_write("\nncxcli version %s", progver);
+	log_write("\nyangcli version %s", progver);
     }
-    help_program_module(NCXCLIMOD, YANGCLI_BOOT, full);
+
+    if (mode == HELP_MODE_FULL) {
+	help_program_module(YANGCLI_MOD, YANGCLI_BOOT, mode);
+    } else {
+	dtyp = NCX_NT_OBJ;
+	obj = (const obj_template_t *)
+	    def_reg_find_moddef(YANGCLI_MOD, YANGCLI_HELP, &dtyp);
+	if (obj && obj->objtype == OBJ_TYP_RPC) {
+	    help_object(obj, mode);
+	} else {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	}
+    }
 
 }  /* do_help */
 
@@ -2416,21 +2551,21 @@ static void
  *
  * INPUTS:
  *   source == file source
- *   ps == parmset for the run script parameters
+ *   valset == value set for the run script parameters
  *
  * RETURNS:
  *   status
  *********************************************************************/
 static status_t
     do_start_script (const xmlChar *source,
-		     ps_parmset_t *ps)
+		     val_value_t *valset)
 {
-    xmlChar     *str, *fspec;
-    FILE        *fp;
-    ps_parm_t   *parm;
-    status_t     res;
-    int          num;
-    xmlChar      buff[4];
+    xmlChar       *str, *fspec;
+    FILE          *fp;
+    val_value_t   *parm;
+    status_t       res;
+    int            num;
+    xmlChar        buff[4];
 
     /* saerch for the script */
     fspec = ncxmod_find_script_file(source, &res);
@@ -2459,10 +2594,10 @@ static status_t
     /* add the P1 through P9 parameters that are present */
     for (num=1; num<=YANGCLI_MAX_RUNPARMS; num++) {
 	buff[1] = '0' + num;
-	parm = ps_find_parm(ps, buff);
+	parm = (valset) ? val_find_child(valset, YANGCLI_MOD, buff) : NULL;
 	if (parm) {
 	    /* store P7 named as ASCII 7 */
-	    res = var_set_str(buff+1, 1, parm->val, ISLOCAL);
+	    res = var_set_str(buff+1, 1, parm, ISLOCAL);
 	    if (res != NO_ERR) {
 		runstack_pop();
 		return res;
@@ -2499,41 +2634,45 @@ static status_t
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
  *
+ * RETURNS:
+ *    status
  *********************************************************************/
-static void
-    do_run (const rpc_template_t *rpc,
+static status_t
+    do_run (const obj_template_t *rpc,
 	    const xmlChar *line,
 	    uint32  len)
 {
-    ps_parmset_t *ps;
-    ps_parm_t    *parm;
+    val_value_t  *valset, *parm;
     status_t      res;
 
+    res = NO_ERR;
+
     /* get the 'script' parameter */
-    ps = get_parmset(rpc, &line[len], &res);
+    valset = get_valset(rpc, &line[len], &res);
 
-    if (ps && res == NO_ERR) {
+    if (valset && res == NO_ERR) {
 	/* there is 1 parm */
-	parm = (ps_parm_t *)dlq_firstEntry(&ps->parmQ);
-	if (parm) {
-	    if (!xml_strcmp(parm->parm->name, NCX_EL_SCRIPT)) {
-		/* the parm val is the script filespec */
-		res = do_start_script(VAL_STR(parm->val), ps);
-		if (res != NO_ERR) {
-		    ncx_print_errormsg(NULL, NULL, res);
-		}
-	    } else {
-		/* else some internal error */
-		SET_ERROR(ERR_INTERNAL_VAL);
-	    }
+	parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_SCRIPT);
+	if (!parm) {
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	} else if (parm->res != NO_ERR) {
+	    res = parm->res;
 	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
+	    /* the parm val is the script filespec */
+	    res = do_start_script(VAL_STR(parm), valset);
+	    if (res != NO_ERR) {
+		log_write("\nError: start script %s failed (%s)",
+			  obj_get_name(rpc),
+			  get_error_string(res));
+	    }
 	}
-    } /* else error already handled */
-
-    if (ps) {
-	ps_free_parmset(ps);
     }
+
+    if (valset) {
+	val_free_value(valset);
+    }
+
+    return res;
 
 }  /* do_run */
 
@@ -2551,13 +2690,11 @@ static void
 static status_t
     do_startup_script (void)
 {
-    rpc_template_t *rpc;
-    ps_parmset_t *ps;
-    ps_parm_t    *parm;
-    xmlChar      *line, *p;
-    status_t      res;
-    ncx_node_t    dtyp;
-    uint32        linelen;
+    const obj_template_t *rpc;
+    xmlChar              *line, *p;
+    status_t              res;
+    ncx_node_t            dtyp;
+    uint32                linelen;
 
     /* make sure there is a runscript string */
     if (!runscript || !*runscript) {
@@ -2565,9 +2702,9 @@ static status_t
     }
 
     /* get the 'run' RPC method template */
-    dtyp = NCX_NT_RPC;
-    rpc = (rpc_template_t *)
-	def_reg_find_moddef(NCXCLIMOD, YANGCLI_RUN, &dtyp);
+    dtyp = NCX_NT_OBJ;
+    rpc = (const obj_template_t *)
+	def_reg_find_moddef(YANGCLI_MOD, YANGCLI_RUN, &dtyp);
     if (!rpc) {
 	return ERR_NCX_DEF_NOT_FOUND;
     }
@@ -2583,36 +2720,8 @@ static status_t
     *p++ = ' ';
     xml_strcpy(p, runscript);
     
-    /* fill=in the parmset for the input parameters */
-    res = NO_ERR;
-    ps = get_parmset(rpc, line, &res);
-
-    m__free(line);
-    line = NULL;
-
-    if (ps && res == NO_ERR) {
-	/* there is 1 parm */
-	parm = (ps_parm_t *)dlq_firstEntry(&ps->parmQ);
-	if (parm) {
-	    if (!xml_strcmp(parm->parm->name, NCX_EL_SCRIPT)) {
-		/* the parm val is the script filespec */
-		res = do_start_script(VAL_STR(parm->val), ps);
-		if (res != NO_ERR) {
-		    ncx_print_errormsg(NULL, NULL, res);
-		}
-	    } else {
-		/* else some internal error */
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	} else {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    } /* else error already handled */
-
-    if (ps) {
-	ps_free_parmset(ps);
-    }
-
+    /* fill in the value set for the input parameters */
+    res = do_run(rpc, line, 0);
     return res;
 
 }  /* do_startup_script */
@@ -2621,7 +2730,7 @@ static status_t
 /********************************************************************
 * FUNCTION do_local_command
 * 
-* Handle local RPC operations from ncxcli.ncx
+* Handle local RPC operations from yangcli.ncx
 *
 * INPUTS:
 *   rpc == template for the local RPC
@@ -2633,26 +2742,30 @@ static status_t
 *
 *********************************************************************/
 static void
-    do_local_command (const rpc_template_t *rpc,
-		   xmlChar *line,
-		   uint32  len)
+    do_local_command (const obj_template_t *rpc,
+		      xmlChar *line,
+		      uint32  len)
 {
-    if (!xml_strcmp(rpc->name, YANGCLI_CONNECT)) {
+    const xmlChar *rpcname;
+
+    rpcname = obj_get_name(rpc);
+
+    if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
 	do_connect(rpc, line, len, FALSE);
-    } else if (!xml_strcmp(rpc->name, YANGCLI_HELP)) {
+    } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
 	do_help(rpc, line, len);
-    } else if (!xml_strcmp(rpc->name, YANGCLI_LOAD)) {
+    } else if (!xml_strcmp(rpcname, YANGCLI_LOAD)) {
 	do_load(rpc, line, len);
-    } else if (!xml_strcmp(rpc->name, YANGCLI_QUIT)) {
+    } else if (!xml_strcmp(rpcname, YANGCLI_QUIT)) {
 	state = MGR_IO_ST_SHUT;
 	mgr_request_shutdown();
-    } else if (!xml_strcmp(rpc->name, YANGCLI_RUN)) {
-	do_run(rpc, line, len);
-    } else if (!xml_strcmp(rpc->name, YANGCLI_SHOW)) {
+    } else if (!xml_strcmp(rpcname, YANGCLI_RUN)) {
+	(void)do_run(rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {
 	do_show(rpc, line, len);
     } else {
 	log_error("\nError: The %s command is not allowed in this mode",
-		   rpc->name);
+		   rpcname);
     }
 } /* do_local_command */
 
@@ -2673,7 +2786,7 @@ static void
 static void
     top_command (xmlChar *line)
 {
-    const rpc_template_t  *rpc;
+    const obj_template_t  *rpc;
     uint32                 len;
     ncx_node_t             dtyp;
     status_t               res;
@@ -2682,15 +2795,15 @@ static void
 	return;
     }
 
-    dtyp = NCX_NT_RPC;
-    rpc = (const rpc_template_t *)parse_def(&dtyp, line, &len);
+    dtyp = NCX_NT_OBJ;
+    rpc = (const obj_template_t *)parse_def(&dtyp, line, &len);
     if (!rpc) {
 	if (result_name) {
 	    /* this is just a string assignment */
 	    res = var_set_from_string(result_name,
 				      line, result_isglobal);
 	    if (res != NO_ERR) {
-		log_error("\nncxcli: Error setting variable %s (%s)",
+		log_error("\nyangcli: Error setting variable %s (%s)",
 			  result_name, get_error_string(res));
 	    }
 
@@ -2704,8 +2817,8 @@ static void
 	return;
     }
 
-    /* check  handful of ncxcli commands */
-    if (is_yangcli_ns(rpc->nsid)) {
+    /* check  handful of yangcli commands */
+    if (is_yangcli_ns(obj_get_nsid(rpc))) {
 	do_local_command(rpc, line, len);
     } else {
 	log_error("\nError: Not connected to agent."
@@ -2756,7 +2869,7 @@ static void
 	    res = var_set_move(result_name, xml_strlen(result_name),
 			       result_isglobal, val);
 	    if (res != NO_ERR) {
-		log_error("\nncxcli reply: set result failed (%s)",
+		log_error("\nyangcli reply: set result failed (%s)",
 			  get_error_string(res));
 	    }
 
@@ -2798,11 +2911,9 @@ static void
 static void
     conn_command (xmlChar *line)
 {
-    const rpc_template_t  *rpc;
+    const obj_template_t  *rpc, *input;
     mgr_rpc_req_t         *req;
-    val_value_t           *reqdata;
-    ps_parmset_t          *ps;
-    ps_parm_t             *parm;
+    val_value_t           *reqdata, *valset, *parm;
     ses_cb_t              *scb;
     uint32                 len, linelen;
     status_t               res;
@@ -2811,7 +2922,7 @@ static void
 
     req = NULL;
     reqdata = NULL;
-    ps = NULL;
+    valset = NULL;
     res = NO_ERR;
     shut = FALSE;
     load = FALSE;
@@ -2823,15 +2934,15 @@ static void
     }
 
     /* get the RPC method template */
-    dtyp = NCX_NT_RPC;
-    rpc = (const rpc_template_t *)parse_def(&dtyp, line, &len);
+    dtyp = NCX_NT_OBJ;
+    rpc = (const obj_template_t *)parse_def(&dtyp, line, &len);
     if (!rpc) {
 	if (result_name) {
 	    /* this is just a string assignment */
 	    res = var_set_from_string(result_name,
 				      line, result_isglobal);
 	    if (res != NO_ERR) {
-		log_error("\nncxcli: Error setting variable %s (%s)",
+		log_error("\nyangcli: Error setting variable %s (%s)",
 			  result_name, get_error_string(res));
 	    }
 
@@ -2846,10 +2957,10 @@ static void
     }
 
     /* check local commands */
-    if (is_yangcli_ns(rpc->nsid)) {
-	if (!xml_strcmp(rpc->name, YANGCLI_CONNECT)) {
+    if (is_yangcli_ns(obj_get_nsid(rpc))) {
+	if (!xml_strcmp(obj_get_name(rpc), YANGCLI_CONNECT)) {
 	    log_stdout("\nError: Already connected");
-	} else if (!xml_strcmp(rpc->name, YANGCLI_SAVE)) {
+	} else if (!xml_strcmp(obj_get_name(rpc), YANGCLI_SAVE)) {
 	    if (len < linelen) {
 		log_error("\nWarning: Extra characters ignored (%s)",
 		       &line[len]);
@@ -2864,63 +2975,62 @@ static void
     /* else treat this as an RPC request going to the agent
      * first construct a method + parameter tree 
      */
-    reqdata = xml_val_new_struct(rpc->name, rpc->nsid);
+    reqdata = xml_val_new_struct(obj_get_name(rpc), 
+				 obj_get_nsid(rpc));
     if (!reqdata) {
 	log_error("\nError allocating a new RPC request");
 	res = ERR_INTERNAL_MEM;
     }
-	
+
+    input = obj_find_child(rpc, NULL, YANG_K_INPUT);
+
     /* check if any params are expected */
-    if (res == NO_ERR && rpc->in_psd) {
+    if (res == NO_ERR && input) {
 	while (line[len] && xml_isspace(line[len])) {
 	    len++;
 	}
 
 	if (len < linelen) {
-	    ps = parse_rpc_cli(rpc, &line[len], &res);
+	    valset = parse_rpc_cli(rpc, &line[len], &res);
 	    if (res != NO_ERR) {
 		log_error("\nError in the parameters for RPC %s (%s)",
-		       rpc->name, get_error_string(res));
+			  obj_get_name(rpc), get_error_string(res));
 	    }
 	}
 
 	/* check no input from user, so start a parmset */
-	if (res == NO_ERR && !ps) {
-	    ps = ps_new_parmset();
-	    if (!ps) {
+	if (res == NO_ERR && !valset && input) {
+	    valset = val_new_value();
+	    if (!valset) {
 		res = ERR_INTERNAL_MEM;
 	    } else {
-		res = ps_setup_parmset(ps, rpc->in_psd, PSD_TYP_RPC);
+		val_init_from_template(valset, input);
 	    }
 	}
 
 	/* fill in any missing parameters from the CLI */
 	if (res == NO_ERR) {
 	    if (interactive_mode()) {
-		res = fill_parmset(rpc, ps, NULL);
+		res = fill_valset(rpc, valset, NULL);
 	    }
 	}
 
 	/* go through the parm list and move the values 
-	 * to the reqdata struct. The ps_parm_t is
-	 * designed to allow the parm->val node 
-	 * to be moved to another tree and persist
-	 * after the ps_parm_t node has been freed
+	 * to the reqdata struct. 
 	 */
 	if (res == NO_ERR) {
-	    for (parm = (ps_parm_t *)dlq_firstEntry(&ps->parmQ);
-		 parm != NULL;
-		 parm = (ps_parm_t *)dlq_nextEntry(parm)) {
-		if (parm->val) {
-		    val_add_child(parm->val, reqdata);
-		    parm->val = NULL;
-		}
+	    parm = val_get_first_child(valset);
+	    while (parm) {
+		val_remove_child(parm);
+		val_add_child(parm, reqdata);
+		parm = val_get_first_child(valset);
 	    }
 	}
     }
 
     /* check the close-session corner cases */
-    if (res == NO_ERR && !xml_strcmp(rpc->name, NCX_EL_CLOSE_SESSION)) {
+    if (res == NO_ERR && !xml_strcmp(obj_get_name(rpc), 
+				     NCX_EL_CLOSE_SESSION)) {
 	shut = TRUE;
     }
 	    
@@ -2945,8 +3055,8 @@ static void
 	}
     }
 
-    if (ps) {
-	ps_free_parmset(ps);
+    if (valset) {
+	val_free_value(valset);
     }
 
     if (res != NO_ERR) {
@@ -2985,55 +3095,54 @@ static status_t
     process_cli_input (int argc,
 		       const char *argv[])
 {
-    psd_template_t  *psd;
-    ps_parm_t       *parm;
-    psd_parm_t      *psd_parm;
-    status_t         res;
-    ncx_node_t       dtyp;
+    const obj_template_t  *obj;
+    val_value_t           *parm;
+    status_t               res;
+    ncx_node_t             dtyp;
 
     /* check no command line parms */
     if (argc <= 1) {
-	mgr_cli_ps = NULL;
+	mgr_cli_valset = NULL;
 	return NO_ERR;
     }
 
     /* find the parmset definition in the registry */
-    dtyp = NCX_NT_PSD;
-    psd = (psd_template_t *)
-	def_reg_find_moddef(NCXCLIMOD, YANGCLI_BOOT, &dtyp);
-    if (!psd) {
+    dtyp = NCX_NT_OBJ;
+    obj = (const obj_template_t *)
+	def_reg_find_moddef(YANGCLI_MOD, YANGCLI_BOOT, &dtyp);
+    if (!obj) {
 	res = ERR_NCX_NOT_FOUND;
-	
     }
 
     /* parse the command line against the PSD */    
-    mgr_cli_ps = ps_parse_cli(argc, argv, psd, 
-			      FULLTEST, PLAINMODE,
-			      autocomp, &res);
-    if (!mgr_cli_ps) {
+    mgr_cli_valset = cli_parse(argc, argv, obj,
+			       FULLTEST, PLAINMODE,
+			       autocomp, &res);
+    if (!mgr_cli_valset || res != NO_ERR) {
 	return res;
     }
 
     /* next get any params from the conf file */
-    confname = get_strparm(mgr_cli_ps, YANGCLI_CONF);
+    confname = get_strparm(mgr_cli_valset, YANGCLI_MOD, YANGCLI_CONF);
     if (confname) {
-	res = conf_parse_ps_from_filespec(confname, 
-					  mgr_cli_ps, TRUE, TRUE);
+	res = conf_parse_val_from_filespec(confname, 
+					   mgr_cli_valset,
+					   TRUE, TRUE);
 	if (res != NO_ERR) {
 	    return res;
 	}
     }
 
     /****************************************************
-     * go through the ncxcli params in order,
+     * go through the yangcli params in order,
      * after setting up the logging parameters
      ****************************************************/
 
     /* get the log-level parameter */
-    parm = ps_find_parm(mgr_cli_ps, NCX_EL_LOGLEVEL);
-    if (parm) {
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_LOGLEVEL);
+    if (parm && parm->res == NO_ERR) {
 	log_level = 
-	    log_get_debug_level_enum((const char *)VAL_STR(parm->val));
+	    log_get_debug_level_enum((const char *)VAL_STR(parm));
 	if (log_level == LOG_DEBUG_NONE) {
 	    return ERR_NCX_INVALID_VALUE;
 	} else {
@@ -3042,23 +3151,23 @@ static status_t
     }
 
     /* get the log-append parameter */
-    parm = ps_find_parm(mgr_cli_ps, NCX_EL_LOGAPPEND);
-    if (parm) {
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_LOGAPPEND);
+    if (parm && parm->res == NO_ERR) {
 	logappend = TRUE;
     }
 
     /* get the log parameter if present */
-    parm = ps_find_parm(mgr_cli_ps, NCX_EL_LOG);
-    if (parm && VAL_STR(parm->val)) {
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_LOG);
+    if (parm && parm->res == NO_ERR) {
 	res = NO_ERR;
-	logfilename = xml_strdup(VAL_STR(parm->val));
+	logfilename = xml_strdup(VAL_STR(parm));
 	if (!logfilename) {
 	    res = ERR_INTERNAL_MEM;
-	    log_error("\nncxcli: Out of Memory error");
+	    log_error("\nyangcli: Out of Memory error");
 	} else {
 	    res = log_open((const char *)logfilename, logappend, FALSE);
 	    if (res != NO_ERR) {
-		log_error("\nncxcli: Could not open logfile %s",
+		log_error("\nyangcli: Could not open logfile %s",
 			  logfilename);
 	    }
 	}
@@ -3067,95 +3176,95 @@ static status_t
 	}
     }
 
-
     /* get the agent parameter */
-    parm = ps_find_parm(mgr_cli_ps, YANGCLI_AGENT);
-    if (parm) {
-	/* save to the connect_ps parmset */
-	psd_parm = psd_find_parm(connect_ps->psd, YANGCLI_AGENT);
-	res = add_clone_parm(psd_parm, connect_ps, VAL_STR(parm->val));
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AGENT);
+    if (parm && parm->res == NO_ERR) {
+	/* save to the connect_valset parmset */
+	res = add_clone_parm(parm->obj, connect_valset, VAL_STR(parm));
 	if (res != NO_ERR) {
 	    return res;
 	}
     }
 
     /* get the batch-mode parameter */
-    parm = ps_find_parm(mgr_cli_ps, YANGCLI_BATCHMODE);
-    if (parm) {
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_BATCHMODE);
+    if (parm && parm->res == NO_ERR) {
 	batchmode = TRUE;
     }
 
     /* get the default module for unqualified module addesses */
-    default_module = get_strparm(mgr_cli_ps, YANGCLI_DEF_MODULE);
+    default_module = get_strparm(mgr_cli_valset, 
+				 YANGCLI_MOD, 
+				 YANGCLI_DEF_MODULE);
 
     /* get the help flag */
-    parm = ps_find_parm(mgr_cli_ps, YANGCLI_HELP);
-    if (parm) {
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_HELP);
+    if (parm && parm->res == NO_ERR) {
 	helpmode = TRUE;
     }
 
     /* get the key parameter */
-    parm = ps_find_parm(mgr_cli_ps, YANGCLI_KEY);
-    if (parm) {
-	/* save to the connect_ps parmset */
-	psd_parm = psd_find_parm(connect_ps->psd, YANGCLI_KEY);
-	res = add_clone_parm(psd_parm, connect_ps, VAL_STR(parm->val));
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_KEY);
+    if (parm && parm->res == NO_ERR) {
+	/* save to the connect_valset parmset */
+	res = add_clone_parm(parm->obj, connect_valset, VAL_STR(parm));
 	if (res != NO_ERR) {
 	    return res;
 	}
     }
 
     /* get the password parameter */
-    parm = ps_find_parm(mgr_cli_ps, YANGCLI_PASSWORD);
-    if (parm) {
-	/* save to the connect_ps parmset */
-	psd_parm = psd_find_parm(connect_ps->psd, YANGCLI_PASSWORD);	
-	res = add_clone_parm(psd_parm, connect_ps, VAL_STR(parm->val));
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_PASSWORD);
+    if (parm && parm->res == NO_ERR) {
+	/* save to the connect_valset parmset */
+	res = add_clone_parm(parm->obj, connect_valset, VAL_STR(parm));
 	if (res != NO_ERR) {
 	    return res;
 	}
     }
 
     /* get the modules parameter */
-    parm = ps_find_parm(mgr_cli_ps, NCX_EL_MODULES);
-    if (parm) {
-	modules = val_clone(parm->val);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_MODULES);
+    if (parm && parm->res == NO_ERR) {
+	modules = val_clone(parm);
+	if (!modules) {
+	    return ERR_INTERNAL_MEM;
+	}
     }
 
     /* get the no-autocomp parameter */
-    parm = ps_find_parm(mgr_cli_ps, YANGCLI_NO_AUTOCOMP);
-    if (parm) {
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_NO_AUTOCOMP);
+    if (parm && parm->res == NO_ERR) {
 	autocomp = FALSE;
     }
 
     /* get the no-autoload parameter */
-    parm = ps_find_parm(mgr_cli_ps, YANGCLI_NO_AUTOLOAD);
-    if (parm) {
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_NO_AUTOLOAD);
+    if (parm && parm->res == NO_ERR) {
 	autoload = FALSE;
     }
 
     /* get the no-fixorder parameter */
-    parm = ps_find_parm(mgr_cli_ps, YANGCLI_NO_FIXORDER);
-    if (parm) {
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_NO_FIXORDER);
+    if (parm && parm->res == NO_ERR) {
 	fixorder = FALSE;
     }
 
     /* get the run-script parameter */
-    runscript = get_strparm(mgr_cli_ps, YANGCLI_RUN_SCRIPT);
+    runscript = get_strparm(mgr_cli_valset, YANGCLI_MOD, YANGCLI_RUN_SCRIPT);
 
     /* get the user name */
-    parm = ps_find_parm(mgr_cli_ps, YANGCLI_USER);
-    if (parm) {
-	psd_parm = psd_find_parm(connect_ps->psd, YANGCLI_USER);	
-	res = add_clone_parm(psd_parm, connect_ps, VAL_STR(parm->val));
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_USER);
+    if (parm && parm->res == NO_ERR) {
+	res = add_clone_parm(parm->obj, connect_valset, VAL_STR(parm));
 	if (res != NO_ERR) {
 	    return res;
 	}
     }
 
     /* get the version parameter */
-    parm = ps_find_parm(mgr_cli_ps, NCX_EL_VERSION);
-    if (parm) {
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_VERSION);
+    if (parm && parm->res == NO_ERR) {
 	versionmode = TRUE;
     }
 
@@ -3168,7 +3277,7 @@ static status_t
  * FUNCTION load_base_schema 
  * 
  * Load the following NCX modules:
- *   ncxcli
+ *   yangcli
  *
  * RETURNS:
  *     status
@@ -3178,15 +3287,12 @@ static status_t
 {
     status_t   res;
 
-    log_debug2("\nNcxcli: Loading NCX ncxcli-cli Parmset");
+    log_debug2("\nYangcli: Loading NCX yangcli-cli Parmset");
 
     /* load in the agent boot parameter definition file */
-    res = ncxmod_load_module(NCXCLIMOD);
-    if (res != NO_ERR) {
-	return res;
-    }
+    res = ncxmod_load_module(YANGCLI_MOD);
 
-    return NO_ERR;
+    return res;
 
 }  /* load_base_schema */
 
@@ -3196,7 +3302,6 @@ static status_t
  * 
  * Load the following NCX modules:
  *   xsd
- *   smi
  *   ncxtypes
  *   netconf
  *   inetAddress
@@ -3213,12 +3318,6 @@ static status_t
 
     /* load in the XSD data types */
     res = ncxmod_load_module(XSDMOD);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* load in the SMI data types */
-    res = ncxmod_load_module(SMIMOD);
     if (res != NO_ERR) {
 	return res;
     }
@@ -3253,15 +3352,15 @@ static status_t
 static void
     report_capabilities (const ses_cb_t *scb)
 {
-    const mgr_scb_t  *mscb;
-    const xmlChar *agent;
-    const ps_parm_t *parm;
+    const mgr_scb_t    *mscb;
+    const xmlChar      *agent;
+    const val_value_t  *parm;
 
     mscb = (const mgr_scb_t *)scb->mgrcb;
 
-    parm = ps_find_parm(connect_ps, YANGCLI_AGENT);
-    if (parm) {
-	agent = VAL_STR(parm->val);
+    parm = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_AGENT);
+    if (parm && parm->res == NO_ERR) {
+	agent = VAL_STR(parm);
     } else {
 	agent = (const xmlChar *)"--";
     }
@@ -3367,8 +3466,8 @@ static void
     const mgr_scb_t    *mscb;
     const ncx_module_t *mod;
     const cap_rec_t    *cap;
-    const xmlChar      *owner, *module, *version;
-    uint32              ownerlen, modlen;
+    const xmlChar      *module, *version;
+    uint32              modlen;
     status_t            res;
     xmlChar             namebuff[NCX_MAX_NLEN+1];
 
@@ -3380,8 +3479,6 @@ static void
 
     while (cap) {
 	cap_split_modcap(cap,
-			 &owner,
-			 &ownerlen,
 			 &module,
 			 &modlen,
 			 &version);
@@ -3392,23 +3489,18 @@ static void
 	    if (autoload) {
 		res = ncxmod_load_module(namebuff);
 		if (res != NO_ERR) {
-		    log_error("\nncxcli error: Module %s not loaded (%s)!!",
+		    log_error("\nyangcli error: Module %s not loaded (%s)!!",
 			      namebuff, get_error_string(res));
 		}
 	    } else {
-		log_info("\nncxcli warning: Module %s not loaded!!",
+		log_info("\nyangcli warning: Module %s not loaded!!",
 			 namebuff);
 	    }
 	}
 
 	if (mod) {
-	    if (xml_strncmp(mod->owner, owner, ownerlen)) {
-		log_warn("\nncxcli warning: Module %s "
-			 "has different owner on agent!! (%s)",
-			 namebuff, mod->owner);
-	    }
 	    if (xml_strcmp(mod->version, version)) {
-		log_warn("\nncxcli warning: Module %s "
+		log_warn("\nyangcli warning: Module %s "
 			 "has different version on agent!! (%s)",
 			 namebuff, mod->version);
 	    }
@@ -3524,7 +3616,7 @@ static mgr_io_state_t
     /* check if this is an assignment statement */
     res = check_assign_statement(line, &len, &getrpc);
     if (res != NO_ERR) {
-	log_error("\nncxcli: Variable assignment failed (%s) (%s)",
+	log_error("\nyangcli: Variable assignment failed (%s) (%s)",
 		  line, get_error_string(res));
     } else if (getrpc) {
 	switch (state) {
@@ -3567,11 +3659,11 @@ static status_t
     yangcli_init (int argc,
 	      const char *argv[])
 {
-    status_t    res;
-    ncx_lmem_t *lmem;
-    ps_parm_t  *parm;
-    ncx_node_t  dtyp;
-    const psd_template_t *psd;
+    const obj_template_t *obj;
+    ncx_lmem_t           *lmem;
+    val_value_t          *parm;
+    ncx_node_t            dtyp;
+    status_t              res;
 
 #ifdef YANGCLI_DEBUG
     int   i;
@@ -3587,8 +3679,8 @@ static status_t
     /* init the module static vars */
     state = MGR_IO_ST_INIT;
     mysid = 0;
-    mgr_cli_ps = NULL;
-    connect_ps = NULL;
+    mgr_cli_valset = NULL;
+    connect_valset = NULL;
     batchmode = FALSE;
     default_module = NULL;
     helpmode = FALSE;
@@ -3620,7 +3712,7 @@ static status_t
      * to be processed.  No module can get its internal config
      * until the NCX module parser and definition registry is up
      */
-    res = ncx_init(NCX_SAVESTR, log_level, "\nStarting ncxcli...");
+    res = ncx_init(NCX_SAVESTR, log_level, "\nStarting yangcli...");
     if (res != NO_ERR) {
 	return res;
     }
@@ -3638,7 +3730,7 @@ static status_t
      * params can be initialized
      */
 
-    /* Load the ncxcli base module */
+    /* Load the yangcli base module */
     res = load_base_schema();
     if (res != NO_ERR) {
 	return res;
@@ -3651,12 +3743,15 @@ static status_t
     }
 
     /* init the connect parmset */
-    dtyp = NCX_NT_PSD;
-    psd = (const psd_template_t *)
-	def_reg_find_moddef(NCXCLIMOD,
-			    (const xmlChar *)"NcxCliConnectPS",
-			    &dtyp);
-    if (!psd) {
+    dtyp = NCX_NT_OBJ;
+    obj = (const obj_template_t *)
+	def_reg_find_moddef(YANGCLI_MOD, YANGCLI_CONNECT, &dtyp);
+    if (!obj) {
+	return ERR_NCX_DEF_NOT_FOUND;
+    }
+
+    obj = obj_find_child(obj, NULL, YANG_K_INPUT);
+    if (!obj) {
 	return ERR_NCX_DEF_NOT_FOUND;
     }
 
@@ -3664,14 +3759,11 @@ static status_t
      * it is saved for auto-start plus restart parameters
      * Setup an empty parmset to hold the connect parameters
      */
-    connect_ps = ps_new_parmset();
-    if (!connect_ps) {
+    connect_valset = val_new_value();
+    if (!connect_valset) {
 	return ERR_INTERNAL_MEM;
     } else {
-	res = ps_setup_parmset(connect_ps, psd, PSD_TYP_RPC);
-	if (res != NO_ERR) {
-	    return res;
-	}
+	val_init_from_template(connect_valset, obj);
     }
 
     /* CMD-P1) Get any command line parameters */
@@ -3688,13 +3780,13 @@ static status_t
 
     /* check print version */
     if (versionmode && !helpmode) {
-	log_stdout("\nncxcli version %s\n", progver);
+	log_stdout("\nyangcli version %s\n", progver);
     }
 
     /* check print help and exit */
     if (helpmode) {
-	log_stdout("\nncxcli version %s", progver);
-	help_program_module(NCXCLIMOD, YANGCLI_BOOT, FULL);
+	log_stdout("\nyangcli version %s", progver);
+	help_program_module(YANGCLI_MOD, YANGCLI_BOOT, HELP_MODE_FULL);
     }
 
     /* check quick exit */
@@ -3718,7 +3810,7 @@ static status_t
 	lmem = ncx_first_lmem(&VAL_LIST(modules));
 	while (lmem) {
 
-	    log_info("\nncxcli: Loading requested module %s", 
+	    log_info("\nyangcli: Loading requested module %s", 
 		     NCX_LMEM_STRVAL(lmem));
 
 	    res = ncxmod_load_module((const xmlChar *)NCX_LMEM_STRVAL(lmem));
@@ -3738,9 +3830,9 @@ static status_t
      * function when the user enters a line of keyboard text
      */
     state = MGR_IO_ST_IDLE;
-    if (connect_ps) {
-	parm = ps_find_parm(connect_ps, YANGCLI_AGENT);
-	if (parm) {
+    if (connect_valset) {
+	parm = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_AGENT);
+	if (parm && parm->res == NO_ERR) {
 	    do_connect(NULL, NULL, 0, TRUE);
 	}
     }
@@ -3759,7 +3851,7 @@ static status_t
 static void
     yangcli_cleanup (void)
 {
-    log_debug2("\nShutting down ncxcli\n");
+    log_debug2("\nShutting down yangcli\n");
 
     /* cleanup the user edit buffer */
     if (cli_gl) {
@@ -3773,21 +3865,18 @@ static void
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
 
-    /* cleanup the NETCONF operation attribute */
-    ncx_clean_operation_attr();
-
     /* clean and reset all module static vars */
     state = MGR_IO_ST_NONE;
     mysid = 0;
 
-    if (mgr_cli_ps) {
-	ps_free_parmset(mgr_cli_ps);
-	mgr_cli_ps = NULL;
+    if (mgr_cli_valset) {
+	val_free_value(mgr_cli_valset);
+	mgr_cli_valset = NULL;
     }
 
-    if (connect_ps) {
-	ps_free_parmset(connect_ps);
-	connect_ps = NULL;
+    if (connect_valset) {
+	val_free_value(connect_valset);
+	connect_valset = NULL;
     }
 
     if (default_module) {
@@ -3843,10 +3932,10 @@ int
 
     res = yangcli_init(argc, argv);
     if (res != NO_ERR) {
-	log_error("\nNcxcli: init returned error (%s)\n", 
+	log_error("\nYangcli: init returned error (%s)\n", 
 		  get_error_string(res));
     } else if (!(helpmode || versionmode)) {
-	log_stdout("\nncxcli version %s\n", progver);
+	log_stdout("\nyangcli version %s\n", progver);
 	res = mgr_io_run();
 	if (res != NO_ERR) {
 	    log_error("\nmgr_io failed (%d)\n", res);
@@ -3861,4 +3950,4 @@ int
 } /* main */
 
 
-/* END ncxcli.c */
+/* END yangcli.c */

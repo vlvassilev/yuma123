@@ -594,10 +594,10 @@ extern const obj_key_t *
     obj_next_ckey (const obj_key_t *objkey);
 
 extern boolean
-    obj_any_rpcs (dlq_hdr_t *datadefQ);
+    obj_any_rpcs (const dlq_hdr_t *datadefQ);
 
 extern boolean
-    obj_any_notifs (dlq_hdr_t *datadefQ);
+    obj_any_notifs (const dlq_hdr_t *datadefQ);
 
 /******************** OBJECT ID ************************/
 /* malloc an object ID */
@@ -642,6 +642,8 @@ extern const xmlChar *
 
 extern const xmlChar *
     obj_get_reference (const obj_template_t *obj);
+
+#define obj_is_config obj_get_config_flag
 
 extern boolean
     obj_get_config_flag (const obj_template_t *obj);
@@ -763,18 +765,5 @@ extern boolean
 
 extern boolean
     obj_ok_for_cli (const obj_template_t *obj);
-
-/*********** HELP functions *****************/
-extern void
-    obj_dump_template (const obj_template_t *obj,
-		       boolean full,
-		       uint32 nestlevel,
-		       uint32 indent);
-
-extern void
-    obj_dump_datadefQ (const dlq_hdr_t *datadefQ,
-		       boolean full,
-		       uint32 nestlevel,
-		       uint32 indent);
 
 #endif	    /* _H_obj */

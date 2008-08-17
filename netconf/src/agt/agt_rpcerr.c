@@ -426,6 +426,21 @@ static rpc_err_t
 	return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_INVALID_TYPE_CHANGE:
 	return RPC_ERR_INVALID_VALUE;
+    case ERR_NCX_MANDATORY_NOT_ALLOWED:
+	return RPC_ERR_OPERATION_FAILED;
+    case ERR_NCX_UNIQUE_TEST_FAILED:
+	return RPC_ERR_OPERATION_FAILED;   /* E.1 */
+    case ERR_NCX_MAX_ELEMS_VIOLATION:
+	return RPC_ERR_OPERATION_FAILED;   /* E.2 */
+    case ERR_NCX_MIN_ELEMS_VIOLATION:
+	return RPC_ERR_OPERATION_FAILED;   /* E.3 */
+    case ERR_NCX_MUST_TEST_FAILED:
+	return RPC_ERR_OPERATION_FAILED;   /* E.4 */
+    case ERR_NCX_DATA_REST_VIOLATION:
+	return RPC_ERR_OPERATION_FAILED;   /* E.4 */
+    case ERR_NCX_INSERT_MISSING_INSTANCE:
+	return RPC_ERR_BAD_ATTRIBUTE;      /* E.5 */
+
 	
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:
@@ -798,12 +813,58 @@ rpc_err_rec_t *
 			  const void *error_parm,
 			  xmlChar *error_path)
 {
+    return agt_rpcerr_gen_error_errinfo(layer, interr, errnode, parmtyp, 
+					error_parm, error_path, NULL);
+
+} /* agt_rpcerr_gen_error */
+
+
+/********************************************************************
+* FUNCTION agt_rpc_gen_error_errinfo
+*
+* Generate an internal <rpc-error> record for an element
+*
+* INPUTS:
+*   layer == protocol layer where the error occurred
+*   interr == internal error code
+*             if NO_ERR than use the rpcerr only
+*   errnode == XML node where error occurred
+*           == NULL then there is no valid XML node (maybe the error!)
+*   parmtyp == type of node contained in error_parm
+*   error_parm == pointer to the extra parameter expected for
+*                this type of error.  
+*
+*                == (void *)pointer to session_id for lock-denied errors
+*                == (void *) pointer to the bad-value string to use
+*                   for some other errors
+*
+*  error_path == malloced string of the value (or type, etc.) instance
+*                ID string in NCX_IFMT_XPATH format; this will be added
+*                to the rpc_err_rec_t and freed later
+*             == NULL if not available
+*  errinfo == error info struct to use for whatever fields are set
+*
+* RETURNS:
+*   pointer to allocated and filled in rpc_err_rec_t struct
+*     ready to add to the msg->rpc_errQ
+*   NULL if a record could not be allocated or not enough
+*     val;id info in the parameters 
+*********************************************************************/
+rpc_err_rec_t *
+    agt_rpcerr_gen_error_errinfo (ncx_layer_t layer,
+				  status_t   interr,
+				  const xml_node_t *errnode,
+				  ncx_node_t  parmtyp,
+				  const void *error_parm,
+				  xmlChar *error_path,
+				  const ncx_errinfo_t *errinfo)
+{
     rpc_err_rec_t            *err;
     const obj_template_t     *parm, *in, *obj;
     const cfg_template_t     *cfg;
     const xmlns_qname_t      *qname;
     xmlChar                  *error_msg;
-    const xmlChar            *badval, *badns, *msg;
+    const xmlChar            *badval, *badns, *msg, *apptag;
     const void               *err1, *err2, *err3, *err4;
     rpc_err_t                 rpcerr;
     status_t                  res;
@@ -904,11 +965,43 @@ rpc_err_rec_t *
     /* generate a default error message, and continue anyway
      * if the xml_strdup fails with a malloc error
      */
-    msg = (const xmlChar *)get_error_string(interr);
+    if (errinfo && errinfo->error_message) {
+	msg = errinfo->error_message;
+    } else {
+	msg = (const xmlChar *)get_error_string(interr);
+    }
     error_msg = (msg) ? xml_strdup(msg) : NULL;
 
+    if (errinfo && errinfo->error_app_tag) {
+	apptag = errinfo->error_app_tag;
+    } else {
+	switch (interr) {
+	case ERR_NCX_UNIQUE_TEST_FAILED:
+	    apptag = (const xmlChar *)"data-not-unique";
+	    break;
+	case ERR_NCX_MAX_ELEMS_VIOLATION:
+	    apptag = (const xmlChar *)"too-many-elements";
+	    break;
+	case ERR_NCX_MIN_ELEMS_VIOLATION:
+	    apptag = (const xmlChar *)"too-few-elements";
+	    break;
+	case ERR_NCX_NOT_IN_RANGE:
+	case ERR_NCX_VAL_NOTINSET:
+	case ERR_NCX_PATTERN_FAILED:
+	case ERR_NCX_MUST_TEST_FAILED:
+	case ERR_NCX_DATA_REST_VIOLATION:
+	    apptag = (const xmlChar *)"data-restriction-violation";
+	    break;
+	case ERR_NCX_INSERT_MISSING_INSTANCE:
+	    apptag = (const xmlChar *)"missing-instance";
+	    break;
+	default:
+	    apptag = NULL;
+	}
+    }
+
     /* get a new error record */
-    err = start_err(layer, interr, rpcerr, errsev, NULL, error_path, 
+    err = start_err(layer, interr, rpcerr, errsev, apptag, error_path, 
 		    error_msg, NULL);
     if (!err) {
 	return NULL;
@@ -957,7 +1050,7 @@ rpc_err_rec_t *
 
     return err;
 
-} /* agt_rpcerr_gen_error */
+} /* agt_rpcerr_gen_error_errinfo */
 
 
 /********************************************************************

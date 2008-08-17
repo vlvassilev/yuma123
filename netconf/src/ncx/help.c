@@ -57,6 +57,10 @@ date         init     comment
 #include "obj.h"
 #endif
 
+#ifndef _H_obj_help
+#include "obj_help.h"
+#endif
+
 #ifndef _H_status
 #include  "status.h"
 #endif
@@ -75,6 +79,38 @@ date         init     comment
 #ifdef DEBUG
 #define HELP_DEBUG 1
 #endif
+
+
+
+/********************************************************************
+ * FUNCTION get_nestlevel
+ * 
+ * Get the appropriate nestlevel for the help mode
+ *
+ * INPUTS:
+ *    mode == help mode requested
+ *
+ * RETURNS:
+ *   nestlevel to use for obj_dump_template
+ *********************************************************************/
+static uint32
+    get_nestlevel (help_mode_t mode)
+{
+    switch (mode) {
+    case HELP_MODE_BRIEF:
+	return 1;
+    case HELP_MODE_NORMAL:
+	return NCX_DEF_DUMP_LEVEL;
+    case HELP_MODE_FULL:
+	return 0;
+    case HELP_MODE_NONE:
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return 1;
+    }
+    /*NOTREACHED*/
+
+} /* get_nestlevel */
 
 
 /********************************************************************
@@ -99,7 +135,8 @@ static void
 	 appinfo = (const ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
 
 	if (first) {
-	    help_write_lines((const xmlChar *)"Appinfo Queue:\n", indent, TRUE);
+	    help_write_lines((const xmlChar *)"Appinfo Queue:\n", 
+			     indent, TRUE);
 	    first = FALSE;
 	}
 
@@ -124,19 +161,23 @@ static void
  *
  * INPUTS:
  *    hdr == Queue header of RPC methods to show
- *    fullreport == TRUE for full dump of each RPC
- *               == FALSE for 1 line report on each RPC
+ *    mode == help mode requisted
+ *            HELP_MODE_FULL for full dump of each RPC
+ *            HELP_MODE_NORMAL for normal dump of each RPC
+ *            HELP_MODE_BRIEF for 1 line report on each RPC
  *    indent == start indent count
  *********************************************************************/
 static void
     dump_rpcQ (const dlq_hdr_t *hdr,
-	       boolean fullreport,
+	       help_mode_t mode,
 	       uint32 indent)
 {
 
     const obj_template_t *rpc;
     boolean               anyout;
+    uint32                nestlevel;
 
+    nestlevel = get_nestlevel(mode);
     anyout = FALSE;
     for (rpc = (const obj_template_t *)dlq_firstEntry(hdr);
 	 rpc != NULL;
@@ -144,10 +185,7 @@ static void
 
 	if (rpc->objtype == OBJ_TYP_RPC) {
 	    anyout = TRUE;
-	    obj_dump_template(rpc, fullreport, 
-			      (uint32)
-			      ((fullreport) ? 0 : NCX_DEF_DUMP_LEVEL),
-			      indent);
+	    obj_dump_template(rpc, mode, nestlevel, indent);
 	}
     }
 
@@ -196,11 +234,25 @@ static void
 void
     help_program_module (const xmlChar *modname,
 			 const xmlChar *cliname,
-			 boolean full)
+			 help_mode_t mode)
 {
-    ncx_module_t   *mod;
-    obj_template_t *cli;
-    ncx_node_t      dtyp;
+    const ncx_module_t   *mod;
+    const obj_template_t *cli;
+    ncx_node_t            dtyp;
+    uint32                nestlevel;
+
+#ifdef DEBUG
+    if (!modname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+    if (mode == HELP_MODE_NONE || mode > HELP_MODE_FULL) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+#endif
+
+    nestlevel = get_nestlevel(mode);
 
     mod = ncx_find_module(modname);
     if (!mod) {
@@ -227,14 +279,14 @@ void
     log_stdout("\n         Strings with whitespace need to be double quoted "
 	       "\n         (--foo=\"some string\")");
 
-    log_stdout("\n\n  Description:\n");
-    if (mod->descr) {
+    if (mode == HELP_MODE_FULL && mod->descr) {
+	log_stdout("\n\n  Description:");
 	help_write_lines(mod->descr, 4, TRUE);
     }
 
     if (cliname) {
 	dtyp = NCX_NT_OBJ;
-	cli = (obj_template_t *)
+	cli = (const obj_template_t *)
 	    def_reg_find_moddef(mod->name, cliname, &dtyp);
 	if (!cli) {
 	    log_error("\nhelp: CLI Object %s not found", cliname);
@@ -246,14 +298,14 @@ void
 	    log_stdout("\n          built-in YANG type is present for "
 		       "derived types only\n");
 
-	    obj_dump_datadefQ(obj_get_datadefQ(cli), full, 
-			      (uint32)(full ? 0 : NCX_DEF_DUMP_LEVEL), 4);
+	    obj_dump_datadefQ(obj_get_cdatadefQ(cli), mode, 
+			      nestlevel, 4);
 	}
     }
 
     if (obj_any_rpcs(&mod->datadefQ)) {
 	log_stdout("\n\n  Local Commands\n");
-	dump_rpcQ(&mod->datadefQ, PARTIAL, 4);
+	dump_rpcQ(&mod->datadefQ, mode, 4);
     }
 
 }  /* help_program_module */
@@ -266,29 +318,26 @@ void
 *
 * INPUTS:
 *    mod     == data module struct
-*    full    == TRUE if a full report desired
-*               FALSE if a partial report desired
+*    mode == help mode requested
 *********************************************************************/
 void
     help_data_module (const ncx_module_t *mod,
-		      boolean full)
+		      help_mode_t mode)
 {
 
     dump_mod_hdr(mod);
 
-    if (!full) {
+    if (mode == HELP_MODE_BRIEF) {
 	return;
     }
 
-    if (mod->last_update) {
-	log_stdout("\nLast Update: %s", mod->last_update);
-    }
-    if (mod->descr) {
+    if (mode == HELP_MODE_FULL && mod->descr) {
 	log_stdout("\nDescription:\n %s", mod->descr);
     }
-    dump_rpcQ(&mod->datadefQ, full, 2);
 
-    if (full) {
+    dump_rpcQ(&mod->datadefQ, mode, 2);
+
+    if (mode == HELP_MODE_FULL) {
 	dump_appinfoQ(&mod->appinfoQ, 2);
     }
 
@@ -302,24 +351,19 @@ void
 *
 * INPUTS:
 *    typ     == type template struct
-*    full    == TRUE if a full report desired
-*               FALSE if a partial report desired
+*    mode == help mode requested
 *********************************************************************/
 void
     help_type (const typ_template_t *typ,
-		      boolean full)
+	       help_mode_t mode)
 {
     log_stdout("\n  Type: %s", typ->name);
     log_stdout(" (%s)",
 	       tk_get_btype_sym(typ_get_basetype
 				((const typ_def_t *)&typ->typdef)));
 
-    if (typ->descr) {
+    if (mode > HELP_MODE_BRIEF && typ->descr) {
 	log_stdout("\n Description: %s", typ->descr);
-    }
-
-    if (typ->condition) {
-	log_stdout("\n Condition: %s", typ->condition);
     }
 
     if (typ->defval) {
@@ -330,9 +374,7 @@ void
 	log_stdout("\n Units: %s", typ->units);
     }
 
-    /***/
-
-    if (full) {
+    if (mode == HELP_MODE_FULL) {
 	dump_appinfoQ(&typ->typdef.appinfoQ, 1);
     }
 
@@ -346,15 +388,13 @@ void
 *
 * INPUTS:
 *    obj     == object template
-*    full    == TRUE if a full report desired
-*               FALSE if a partial report desired
+*    mode == help mode requested
 *********************************************************************/
 void
     help_object (const obj_template_t *obj,
-		 boolean full)
+		 help_mode_t mode)
 {
-    obj_dump_template(obj, full, 
-		      (uint32)(full ? 0 : NCX_DEF_DUMP_LEVEL), 0);
+    obj_dump_template(obj, mode, get_nestlevel(mode), 0);
 
 }  /* help_object */
 

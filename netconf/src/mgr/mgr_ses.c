@@ -18,15 +18,20 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include <fcntl.h>
+/*
+
 #include <memory.h>
-#include <netdb.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+*/
+
+#include <fcntl.h>
+#include <netdb.h>
 
 #include <libssh2.h>
 
@@ -149,7 +154,9 @@ static status_t
 		      struct hostent *hent)
 {
     struct sockaddr_in  targ;
-    int ret;
+    int                 ret;
+    uint16_t            port;
+
 
     /* get a file descriptor for the new socket */
     scb->fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -173,7 +180,8 @@ static status_t
 	   (size_t)hent->h_length);
 
     /* try to connect to port 830 */
-    targ.sin_port = htons(NCX_NCSSH_PORT);
+    port = NCX_NCSSH_PORT;
+    targ.sin_port = htons(port);
     ret = connect(scb->fd, 
 		  (struct sockaddr *)&targ,
 		  sizeof(struct sockaddr_in));
@@ -182,7 +190,8 @@ static status_t
     }
 
     /* try SSH (port 22) next */
-    targ.sin_port = htons(NCX_SSH_PORT);
+    port = NCX_SSH_PORT;
+    targ.sin_port = htons(port);
     ret = connect(scb->fd, 
 		  (struct sockaddr *)&targ,
 		  sizeof(struct sockaddr_in));

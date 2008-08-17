@@ -511,6 +511,9 @@ extern void
 		   val_value_t *parent);
 
 extern void
+    val_remove_child (val_value_t *child);
+
+extern void
     val_swap_child (val_value_t *newchild,
 		    val_value_t *curchild);
 
@@ -528,6 +531,11 @@ extern val_value_t *
     val_find_child (const val_value_t  *parent,
 		    const xmlChar  *modname,
 		    const xmlChar *childname);
+
+extern val_value_t *
+    val_match_child (const val_value_t  *parent,
+		     const xmlChar  *modname,
+		     const xmlChar *childname);
 
 extern val_value_t *
     val_find_next_child (const val_value_t  *parent,

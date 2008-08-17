@@ -66,8 +66,12 @@ date         init     comment
 #include  "ncxconst.h"
 #endif
 
-#ifndef _H_ps
-#include  "ps.h"
+#ifndef _H_ncxtypes
+#include  "ncxtypes.h"
+#endif
+
+#ifndef _H_obj
+#include  "obj.h"
 #endif
 
 #ifndef _H_rpc
@@ -94,6 +98,10 @@ date         init     comment
 #include  "typ.h"
 #endif
 
+#ifndef _H_val
+#include  "val.h"
+#endif
+
 #ifndef _H_xmlns
 #include  "xmlns.h"
 #endif
@@ -116,7 +124,9 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-/* #define MGR_RPC_DEBUG 1 */
+#ifdef DEBUG
+#define MGR_RPC_DEBUG 1
+#endif
 
 
 /********************************************************************
@@ -133,7 +143,7 @@ date         init     comment
 *********************************************************************/
 static boolean mgr_rpc_init_done = FALSE;
 
-static typ_template_t *reply_typ = NULL;
+static const obj_template_t *reply_obj = NULL;
 
 
 /********************************************************************
@@ -528,15 +538,15 @@ void
     mgr_rpc_dispatch (ses_cb_t *scb,
 		      xml_node_t *top)
 {
-    mgr_rpc_rpy_t     *rpy;
-    mgr_rpc_req_t     *req;
-    xml_attr_t        *attr;
-    typ_template_t    *rpytyp;
-    ncx_node_t         dtyp;
-    status_t           res;
-    xmlChar           *msg_id;
-    ncx_num_t          num;
-    mgr_rpc_cbfn_t     handler;
+    const obj_template_t    *rpyobj;
+    mgr_rpc_rpy_t           *rpy;
+    mgr_rpc_req_t           *req;
+    xml_attr_t              *attr;
+    xmlChar                 *msg_id;
+    mgr_rpc_cbfn_t           handler;
+    ncx_num_t                num;
+    ncx_node_t               dtyp;
+    status_t                 res;
 
 #ifdef DEBUG
     if (!scb || !top) {
@@ -564,15 +574,15 @@ void
     }
 
     /* check if the reply template is already cacjed */
-    if (reply_typ) {
-	rpytyp = reply_typ;
+    if (reply_obj) {
+	rpyobj = reply_obj;
     } else {
 	/* get the rpcReply template from the registry */
-	dtyp = NCX_NT_TYP;
-	rpytyp = (typ_template_t *)
+	dtyp = NCX_NT_OBJ;
+	rpyobj = (const obj_template_t *)
 	    def_reg_find_moddef(NC_MODULE, NC_RPC_REPLY_TYPE, &dtyp);
-	if (rpytyp) {
-	    reply_typ = rpytyp;
+	if (rpyobj) {
+	    reply_obj = rpyobj;
 	} else {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	    scb->stats.in_err_msgs++;
@@ -631,7 +641,7 @@ void
     /* have a request/reply pair, so parse the reply 
      * as a val_value_t tree, stored in rpy->reply
      */
-    rpy->res = mgr_val_parse(scb, &rpy->mhdr, rpytyp, top, rpy->reply);
+    rpy->res = mgr_val_parse(scb, rpyobj, top, rpy->reply);
     if (rpy->res != NO_ERR) {
 	log_info("\nmgr_rpc: got invalid reply on session %d (%s)",
 		 scb->sid, get_error_string(rpy->res));

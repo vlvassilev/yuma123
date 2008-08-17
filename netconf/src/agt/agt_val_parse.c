@@ -207,6 +207,65 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION parse_error_subtree_errinfo
+* 
+* Generate an error during parmset processing for an element
+* Add rpc_err_rec_t structs to the msg->errQ
+*
+* INPUTS:
+*   scb == session control block (NULL means call is a no-op)
+*   msg = xml_msg_hdr_t from msg in progress  (NULL means call is a no-op)
+*   startnode == parent start node to match on exit
+*         If this is NULL then the reader will not be advanced
+*   errnode == error node being processed
+*         If this is NULL then the current node will be
+*         used if it can be retrieved with no errors,
+*         and the node has naming properties.
+*   errcode == error status_t of initial internal error
+*         This will be used to pick the error-tag and
+*         default error message
+*   errnodetyp == internal VAL_PCH node type used for error_parm
+*   error_parm == pointer to attribute name or namespace name, etc.
+*         used in the specific error in agt_rpcerr.c
+*   intnodetyp == internal VAL_PCH node type used for intnode
+*   intnode == internal VAL_PCH node used for error_path
+*   errinfo == errinfo struct to use for <rpc-error> details
+*
+* RETURNS:
+*   status of the operation; only fatal errors will be returned
+*********************************************************************/
+static status_t 
+    parse_error_subtree_errinfo (ses_cb_t *scb,
+				 xml_msg_hdr_t *msg,
+				 const xml_node_t *startnode,
+				 const xml_node_t *errnode,
+				 status_t errcode,
+				 ncx_node_t errnodetyp,	    
+				 const void *error_parm,
+				 ncx_node_t intnodetyp,
+				 const void *intnode,
+				 const ncx_errinfo_t *errinfo)
+{
+    status_t        res;
+
+    res = NO_ERR;
+
+    if (msg) {
+	agt_record_error_errinfo(scb, &msg->errQ, NCX_LAYER_OPERATION, errcode, 
+				 errnode, errnodetyp, error_parm, 
+				 intnodetyp, intnode, errinfo);
+    }
+
+    if (scb && startnode) {
+	res = agt_xml_skip_subtree(scb->reader, startnode);
+    }
+
+    return res;
+
+}  /* parse_error_subtree_errinfo */
+
+
+/********************************************************************
  * FUNCTION get_xml_node
  * 
  * Get the next (or maybe current) XML node in the reader stream
@@ -311,7 +370,7 @@ static status_t
 	    if (msg) {
 		agt_record_error(scb, &msg->errQ, 
 				 NCX_LAYER_OPERATION, res, 
-				 NULL, NCX_NT_INDEX, key, 
+				 NULL, NCX_NT_OBJ, key->keyobj, 
 				 NCX_NT_VAL, val);
 	    }
 	    retres = res;
@@ -1223,11 +1282,12 @@ static status_t
 		  ncx_data_class_t parentdc,
 		  val_value_t  *retval)
 {
-    const xml_node_t  *errnode;
-    const xmlChar     *badval;
-    xml_node_t         valnode, endnode;
-    status_t           res, res2;
-    boolean            errdone;
+    const xml_node_t    *errnode;
+    const xmlChar       *badval;
+    const ncx_errinfo_t *errinfo;
+    xml_node_t           valnode, endnode;
+    status_t             res, res2;
+    boolean              errdone;
 
     /* init local vars */
     xml_init_node(&valnode);
@@ -1235,6 +1295,7 @@ static status_t
     badval = NULL;
     errnode = startnode;
     errdone = FALSE;
+    errinfo = NULL;
 
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
@@ -1278,7 +1339,8 @@ static status_t
 	/* get the non-whitespace string here */
 	res = ncx_decode_num(valnode.simval, btyp, &retval->v.num);
 	if (res == NO_ERR) {
-	    res = val_range_ok(obj_get_ctypdef(obj), btyp, &retval->v.num);
+	    res = val_range_ok_errinfo(obj_get_ctypdef(obj), btyp, 
+				       &retval->v.num, &errinfo);
 	}
 	if (res != NO_ERR) {
 	    badval = valnode.simval;
@@ -1313,9 +1375,9 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR) && !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)parse_error_subtree(scb, msg, startnode,
-				  errnode, res, NCX_NT_STRING, 
-				  badval, NCX_NT_VAL, retval);
+	(void)parse_error_subtree_errinfo(scb, msg, startnode,
+					  errnode, res, NCX_NT_STRING, 
+					  badval, NCX_NT_VAL, retval, errinfo);
     }
 
     xml_clean_node(&valnode);
@@ -1361,6 +1423,7 @@ static status_t
     const xml_node_t     *errnode;
     const xmlChar        *badval;
     const typ_template_t *listtyp;
+    const ncx_errinfo_t  *errinfo;
     xml_node_t            valnode, endnode;
     status_t              res, res2;
     boolean               errdone, empty;
@@ -1373,6 +1436,7 @@ static status_t
     badval = NULL;
     errdone = FALSE;
     empty = FALSE;
+    errinfo = NULL;
 
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
@@ -1403,12 +1467,14 @@ static status_t
     if (empty) {
 	if (btyp==NCX_BT_SLIST || btyp==NCX_BT_BITS) {
 	    /* check the empty list */
-	    res = val_list_ok(obj_get_ctypdef(obj), 
-			      &retval->v.list);
+	    res = val_list_ok_errinfo(obj_get_ctypdef(obj), 
+				      &retval->v.list,
+				      &errinfo);
 	} else {
 	    /* check the empty string */
-	    res = val_string_ok(obj_get_ctypdef(obj), 
-				btyp, (const xmlChar *)"");
+	    res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
+					btyp, (const xmlChar *)"",
+					&errinfo);
 	    if (res == NO_ERR) {
 		retval->v.str = xml_strdup((const xmlChar *)"");
 		if (!retval->v.str) {
@@ -1421,10 +1487,10 @@ static status_t
     if (res != NO_ERR) {
 	if (!errdone) {
 	    /* add rpc-error to msg->errQ */
-	    (void)parse_error_subtree(scb, msg, startnode,
-				      errnode, res, 
-				      NCX_NT_NONE, NULL, 
-				      NCX_NT_VAL, retval);
+	    (void)parse_error_subtree_errinfo(scb, msg, startnode,
+					      errnode, res, 
+					      NCX_NT_NONE, NULL, 
+					      NCX_NT_VAL, retval, errinfo);
 	}
 	xml_clean_node(&valnode);
 	return res;
@@ -1460,13 +1526,13 @@ static status_t
 	    }
 
 	    if (res == NO_ERR) {
-		res = val_list_ok(obj_get_ctypdef(obj), 
-				  &retval->v.list);
+		res = val_list_ok_errinfo(obj_get_ctypdef(obj), 
+					  &retval->v.list, &errinfo);
 	    }
 	} else {
 	    /* check the non-whitespace string */
-	    res = val_string_ok(obj_get_ctypdef(obj), 
-				btyp, valnode.simval);
+	    res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
+					btyp, valnode.simval, &errinfo);
 	}
 
 	if (res != NO_ERR) {
@@ -1516,9 +1582,9 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR)	&& !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)parse_error_subtree(scb, msg, startnode,
-				  errnode, res, NCX_NT_STRING,
-				  badval, NCX_NT_VAL, retval);
+	(void)parse_error_subtree_errinfo(scb, msg, startnode,
+					  errnode, res, NCX_NT_STRING,
+					  badval, NCX_NT_VAL, retval, errinfo);
     }
 
     xml_clean_node(&valnode);
@@ -1550,11 +1616,12 @@ static status_t
 		    ncx_data_class_t parentdc,
 		    val_value_t  *retval)
 {
-    const xml_node_t  *errnode;
-    const xmlChar     *badval;
-    xml_node_t         valnode, endnode;
-    status_t           res, res2;
-    boolean            errdone;
+    const xml_node_t    *errnode;
+    const xmlChar       *badval;
+    const ncx_errinfo_t *errinfo;
+    xml_node_t           valnode, endnode;
+    status_t             res, res2;
+    boolean              errdone;
 
     /* init local vars */
     xml_init_node(&valnode);
@@ -1563,6 +1630,7 @@ static status_t
     errdone = FALSE;
     badval = NULL;
     res2 = NO_ERR;
+    errinfo = NULL;
 
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
@@ -1596,8 +1664,8 @@ static status_t
 	    break;
 	case XML_NT_STRING:
 	    /* get the non-whitespace string here */
-	    res = val_union_ok(obj_get_ctypdef(obj), 
-			       valnode.simval, retval);
+	    res = val_union_ok_errinfo(obj_get_ctypdef(obj), 
+				       valnode.simval, retval, &errinfo);
 	    if (res != NO_ERR) {
 		badval = valnode.simval;
 	    }
@@ -1633,10 +1701,10 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR) && !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)parse_error_subtree(scb, msg, startnode,
-				  errnode, res, 
-				  NCX_NT_STRING, badval, 
-				  NCX_NT_VAL, retval);
+	(void)parse_error_subtree_errinfo(scb, msg, startnode,
+					  errnode, res, 
+					  NCX_NT_STRING, badval, 
+					  NCX_NT_VAL, retval, errinfo);
     }
 
     xml_clean_node(&valnode);
@@ -2219,7 +2287,7 @@ static status_t
 *            Input is read from scb->reader.
 *     msg == incoming RPC message
 *            Errors are appended to msg->errQ
-*     typdef == first non-ptr-only typdef for this type
+*     obj == object template to use for parsing
 *     startnode == top node of the parameter to be parsed
 *            Parser function will attempt to consume all the
 *            nodes until the matching endnode is reached

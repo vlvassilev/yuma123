@@ -396,9 +396,6 @@ void
     if (typ->ref) {
         m__free(typ->ref);
     }
-    if (typ->condition) {
-        m__free(typ->condition);
-    }
     if (typ->defval) {
         m__free(typ->defval);
     }

@@ -1922,7 +1922,8 @@ static status_t
     aug = obj->def.augment;
 
     /* check that the target is in another namespace */
-    if (!aug->targobj || !aug->targobj->mod || (aug->targobj->mod->nsid == mod->nsid)) {
+    if (!aug->targobj || !aug->targobj->mod ||
+	(aug->targobj->mod->nsid == mod->nsid)) {
 	return NO_ERR;
     }
 
@@ -2064,6 +2065,10 @@ status_t
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	if (obj_is_hidden(obj)) {
+	    continue;
+	}
 
 	switch (obj->objtype) {
 	case OBJ_TYP_RPC:

@@ -5,6 +5,7 @@
    <b>77</b>
    <c>aeddd34</c>
    <d>y</d>
+   <d>z</d>
   </test1>
   <test1/>
   <test2  xmlns="urn:ietf:params:xml:ns:yang:test">
@@ -12,7 +13,7 @@
    <b2>7</b2>
   </test2>
   <test2  xmlns="urn:ietf:params:xml:ns:yang:test">
-   <a2>wilma flintstone</a2>
+   <a2>wilma</a2>
    <b2>8</b2>
   </test2>
 </nd:config>

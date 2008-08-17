@@ -14,7 +14,7 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Waggregate-return -Wstrict-prototypes -Wold-style-definition \
 	-Wmissing-prototypes -Wmissing-declarations \
 	-Wpacked -Wunreachable-code -Winvalid-pch \
-	-Wredundant-decls -Wnested-externs -Winline -Wconversion
+	-Wredundant-decls -Wnested-externs -Winline
 
 # debug
 ifdef BLD

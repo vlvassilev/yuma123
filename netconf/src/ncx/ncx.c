@@ -725,9 +725,6 @@ static void
     if (mod->ref) {
 	m__free(mod->ref);
     }
-    if (mod->last_update) {
-	m__free(mod->last_update);
-    }
     if (mod->ismod) {
 	if (mod->ns) {
 	    m__free(mod->ns);

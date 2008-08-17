@@ -69,5 +69,8 @@ extern val_value_t *
 			     const obj_template_t *obj,
 			     val_value_t *curchild);
 
+extern boolean
+    val_choice_is_set (val_value_t *val,
+		       const obj_template_t *obj);
 
 #endif	    /* _H_val_util */

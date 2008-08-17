@@ -116,6 +116,9 @@ extern const xmlChar *
 extern const xmlChar * 
     xmlns_get_ns_name (xmlns_id_t ns_id);
 
+extern xmlns_id_t
+    xmlns_find_ns_by_module (const xmlChar *modname);
+
 extern xmlns_id_t  
     xmlns_find_ns_by_prefix (const xmlChar *pfix);
 

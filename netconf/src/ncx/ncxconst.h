@@ -298,14 +298,6 @@ date	     init     comment
 #define NCX_CFG_ROLLBACK     (const xmlChar *)"rollback"
 
 
-/* alias values for the agt_ses_new_vparmset 'full' parameter
- * and help module 'full' parameters
- */
-#define FULL    TRUE
-#define PARTIAL FALSE
-
-
-
 /* NCX and NETCONF element and attribute names
  *
  * NETCONF common parameter names 

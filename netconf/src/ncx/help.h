@@ -36,6 +36,22 @@ date	     init     comment
 #include "typ.h"
 #endif
 
+
+/********************************************************************
+*                                                                   *
+*                            T Y P E S                              *
+*                                                                   *
+*********************************************************************/
+
+typedef enum help_mode_t_ {
+    HELP_MODE_NONE,
+    HELP_MODE_BRIEF,
+    HELP_MODE_NORMAL,
+    HELP_MODE_FULL
+} help_mode_t;
+
+
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
@@ -45,19 +61,19 @@ date	     init     comment
 extern void
     help_program_module (const xmlChar *modname,
 			 const xmlChar *cliname,
-			 boolean full);
+			 help_mode_t mode);
 
 extern void
     help_data_module (const ncx_module_t *mod,
-		      boolean full);
+		      help_mode_t mode);
 
 extern void
     help_type (const typ_template_t *typ,
-	       boolean full);
+	       help_mode_t mode);
 
 extern void
     help_object (const obj_template_t *obj,
-		 boolean full);
+		 help_mode_t mode);
 
 extern void
     help_write_lines (const xmlChar *str,

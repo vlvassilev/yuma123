@@ -22,8 +22,8 @@ date	     init     comment
 
 */
 
-#ifndef _H_rpc
-#include "rpc.h"
+#ifndef _H_obj
+#include "obj.h"
 #endif
 
 #ifndef _H_ses
@@ -34,8 +34,8 @@ date	     init     comment
 #include "status.h"
 #endif
 
-#ifndef _H_typ
-#include "typ.h"
+#ifndef _H_val
+#include "val.h"
 #endif
 
 #ifndef _H_xml_util
@@ -48,13 +48,11 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-/* parse a value for an NCX type from a NETCONF PDU XML stream */
+/* parse a value for a YANG object from a NETCONF PDU XML stream */
 extern status_t 
     mgr_val_parse (ses_cb_t  *scb,
-		   xml_msg_hdr_t *msg,
-		   typ_template_t *typ,
+		   const obj_template_t *obj,
 		   const xml_node_t *startnode,
-		   val_value_t *parmval);
-
+		   val_value_t  *retval);
 
 #endif	    /* _H_mgr_val_parse */

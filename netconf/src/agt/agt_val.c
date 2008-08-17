@@ -946,6 +946,11 @@ static status_t
 				       obj_get_max_access(newval->obj), 
 				       (curval != NULL));
 	}
+
+	if (res==NO_ERR && newval->obj->objtype==OBJ_TYP_LIST) {
+	    /**** unique test ****/
+	}
+
     }
 
     /* record any error so far */
@@ -1229,6 +1234,10 @@ static status_t
 	    res = agt_check_max_access(newval->editop, 
 				       obj_get_max_access(newval->obj), 
 				       (curval != NULL));
+	}
+
+	if (res==NO_ERR && newval->obj->objtype==OBJ_TYP_LIST) {
+	    /**** unique test ****/
 	}
 
 	if (res != NO_ERR) {
@@ -1644,7 +1653,7 @@ static status_t
 	if (cnt < minelems) {
 	    /* not enough instances error */
 	    minerr = TRUE;
-	    res = ERR_NCX_MISSING_VAL_INST;
+	    res = ERR_NCX_MIN_ELEMS_VIOLATION;
 	    if (msg) {
 		agt_record_error(scb, &msg->errQ, layer, res, 
 				 NULL, NCX_NT_OBJ, obj, 
@@ -1658,7 +1667,7 @@ static status_t
 	if (cnt > maxelems) {
 	    /* too many instances error */
 	    maxerr = TRUE;
-	    res = ERR_NCX_EXTRA_VAL_INST;
+	    res = ERR_NCX_MAX_ELEMS_VIOLATION;
 	    if (msg) {
 		agt_record_error(scb, &msg->errQ, layer, res, 
 				 NULL, NCX_NT_OBJ, obj, 

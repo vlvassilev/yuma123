@@ -383,6 +383,44 @@ const xmlChar *
 } /* xmlns_get_ns_name */
 
 
+
+/********************************************************************
+* FUNCTION xmlns_find_ns_by_module
+*
+* Find the NS ID from its module name that registered it
+*
+* INPUTS:
+*    modname == module name string to find
+*
+* RETURNS:
+*    namespace ID or XMLNS_NULL_NS_ID if error
+*********************************************************************/
+xmlns_id_t 
+    xmlns_find_ns_by_module (const xmlChar *modname)
+{
+    uint32    i;
+    xmlns_t  *rec;
+
+#ifdef DEBUG
+    if (!modname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return XMLNS_NULL_NS_ID;
+    } 
+#endif
+
+    for (i=0; i<xmlns_next_id-1; i++) {
+	rec = xmlns[i];
+	if (rec->ns_module[0]) {
+            if (!xml_strcmp(rec->ns_module, modname)) {
+                return rec->ns_id;
+            }
+	}
+    }
+    return XMLNS_NULL_NS_ID;
+
+} /* xmlns_find_ns_by_module */
+
+
 /********************************************************************
 * FUNCTION xmlns_find_ns_by_prefix
 *
@@ -435,6 +473,7 @@ xmlns_id_t
 
 #ifdef DEBUG
     if (!name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
 	return XMLNS_NULL_NS_ID;
     } 
 #endif

@@ -489,7 +489,8 @@ module netconf {
    
      reference "RFC 4741, section 4.1";
 
-     ncx:metadata  "MessageId message-id";
+     // do not treat missing message-id as an error
+     ncx:metadata  "MessageId message-id?";
    }
 
    container rpc-reply {
@@ -499,7 +500,8 @@ module netconf {
 
      uses RpcReplyType;
 
-     ncx:metadata  "MessageId message-id";
+     // do not treat missing message-id as an error
+     ncx:metadata  "MessageId message-id?";
    }
 
    // NETCONF Standard RPC Methods

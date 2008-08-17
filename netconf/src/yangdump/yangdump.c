@@ -1495,7 +1495,9 @@ int
 	    log_write("yangdump %s\n", YANGDUMP_PROGVER);
 	}
 	if (cvtparms.helpmode) {
-	    help_program_module(YANGDUMP_MOD, YANGDUMP_CONTAINER, FULL);
+	    help_program_module(YANGDUMP_MOD, 
+				YANGDUMP_CONTAINER, 
+				HELP_MODE_FULL);
 	}
 	if (!(cvtparms.helpmode || cvtparms.versionmode)) {
 	    /* check if subdir search suppression is requested */

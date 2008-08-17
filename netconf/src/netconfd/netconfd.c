@@ -339,7 +339,8 @@ int
 	    log_write("\nnetconfd version %s\n", progver);
 	} else if (showhelp) {
 	    help_program_module(NETCONFD_MOD,
-				NETCONFD_CLI, FULL);
+				NETCONFD_CLI,
+				HELP_MODE_FULL);
 	} else {
 	    netconfd_run();
 	}

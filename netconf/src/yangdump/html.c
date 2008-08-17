@@ -2143,6 +2143,9 @@ static void
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 	
+	if (obj_is_hidden(obj)) {
+	    continue;
+	}
 	write_object(scb, mod, cp, obj, startindent, first);
 	first = FALSE;
     }
@@ -2499,6 +2502,9 @@ static boolean
     for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	if (obj_is_hidden(obj)) {
+	    continue;
+	}
 	if (cooked) {
 	    if (obj_is_data(obj) && obj_has_name(obj)) {
 		return TRUE;
@@ -2544,6 +2550,10 @@ static void
     for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	if (obj_is_hidden(obj)) {
+	    continue;
+	}
 
 	if (!obj_is_data(obj)) {
 	    continue;
@@ -2649,9 +2659,17 @@ static void
 {
     const obj_template_t *obj;
 
+    *anyobj = FALSE;
+    *anyrpc = FALSE;
+    *anynotif = FALSE;
+
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	if (obj_is_hidden(obj)) {
+	    continue;
+	}
 
 	if (cooked) {
 	    if (obj_is_data(obj)) {
@@ -2699,6 +2717,10 @@ static void
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (obj->objtype != OBJ_TYP_RPC) {
+	    continue;
+	}
+
+	if (obj_is_hidden(obj)) {
 	    continue;
 	}
 
@@ -2750,6 +2772,10 @@ static void
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (obj->objtype != OBJ_TYP_NOTIF) {
+	    continue;
+	}
+
+	if (obj_is_hidden(obj)) {
 	    continue;
 	}
 

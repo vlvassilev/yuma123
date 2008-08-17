@@ -435,7 +435,6 @@ typedef struct ncx_module_t_ {
     xmlChar          *contact_info;
     xmlChar          *descr;
     xmlChar          *ref;
-    xmlChar          *last_update;
     xmlChar          *ns;       /* malloc:main, copy:submod */
     xmlChar          *prefix;   /* malloc:main, copy:submod */  
     xmlChar          *source;              /* full filespec */

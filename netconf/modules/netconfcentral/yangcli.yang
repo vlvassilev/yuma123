@@ -58,7 +58,22 @@ module yangcli {
       }
     }
 
-    container ncxcli {
+    grouping HelpMode {
+      choice brief-full {
+        leaf brief {
+          description "Show brief help text";
+          type empty;
+        }
+        leaf full {
+          description "Show full help text";
+          type empty;
+        }
+      }
+    }
+
+    container yangcli {
+      ncx:cli;
+
       description
         "CLI Parameter Set for the NETCONF Manager Application.";
 
@@ -229,9 +244,7 @@ module yangcli {
             type nt:NcxIdentifier;
           }
         }
-        leaf brief {
-          type empty;
-        }
+        uses HelpMode;
       }
     }
 
@@ -349,11 +362,7 @@ module yangcli {
             type empty;
           }
         }
-
-        leaf brief {
-          description"Show brief version of the requested help info.";
-          type empty;
-        }
+        uses HelpMode;
       }
     }
 

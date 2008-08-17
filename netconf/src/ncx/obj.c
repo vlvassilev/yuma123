@@ -39,10 +39,6 @@ date         init     comment
 #include "grp.h"
 #endif
 
-#ifndef _H_help
-#include "help.h"
-#endif
-
 #ifndef _H_ncxconst
 #include "ncxconst.h"
 #endif
@@ -4068,9 +4064,9 @@ const obj_key_t *
 *   TRUE if any OBJ_TYP_RPC found, FALSE if not
 *********************************************************************/
 boolean
-    obj_any_rpcs (dlq_hdr_t *datadefQ)
+    obj_any_rpcs (const dlq_hdr_t *datadefQ)
 {
-    obj_template_t  *obj;
+    const obj_template_t  *obj;
 
 #ifdef DEBUG
     if (!datadefQ) {
@@ -4079,9 +4075,9 @@ boolean
     }
 #endif
 
-    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
+    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
 	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 	if (obj->objtype == OBJ_TYP_RPC) {
 	    return TRUE;
 	}
@@ -4103,9 +4099,9 @@ boolean
 *   TRUE if any OBJ_TYP_NOTIF found, FALSE if not
 *********************************************************************/
 boolean
-    obj_any_notifs (dlq_hdr_t *datadefQ)
+    obj_any_notifs (const dlq_hdr_t *datadefQ)
 {
-    obj_template_t  *obj;
+    const obj_template_t  *obj;
 
 #ifdef DEBUG
     if (!datadefQ) {
@@ -4114,9 +4110,9 @@ boolean
     }
 #endif
 
-    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
+    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
 	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 	if (obj->objtype == OBJ_TYP_NOTIF) {
 	    return TRUE;
 	}
@@ -6108,216 +6104,5 @@ boolean
     return TRUE;
 
 }   /* obj_ok_for_cli */
-
-
-/********************************************************************
-* FUNCTION obj_dump_template
-*
-* Dump the contents of an obj_template_t struct for help text
-*
-* INPUTS:
-*   obj == obj_template to dump help for
-*    full    == TRUE if a full report desired
-*               FALSE if a partial report desired
-*   nestlevel == number of levels from the top-level
-*                that should be printed; 0 == all levels
-*   indent == start indent count
-*********************************************************************/
-void
-    obj_dump_template (const obj_template_t *obj,
-		       boolean full,
-		       uint32 nestlevel,
-		       uint32 indent)
-{
-    const xmlChar    *val;
-    const typ_def_t  *typdef;
-    char              numbuff[NCX_MAX_NUMLEN];
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    if (!obj_has_name(obj)) {
-	return;
-    }
-
-    if (nestlevel && (obj_get_level(obj) > nestlevel)) {
-	return;
-    }
-
-    if (obj->objtype == OBJ_TYP_RPCIO) {
-	help_write_lines(obj_get_name(obj), 0, TRUE);
-    } else {
-	help_write_lines(obj_get_typestr(obj), indent, TRUE);
-	help_write_lines((const xmlChar *)" ", 0, FALSE);
-	help_write_lines(obj_get_name(obj), 0, FALSE);
-    }
-
-    typdef = obj_get_ctypdef(obj);
-    if (typdef && typdef->class==NCX_CL_NAMED) {
-	help_write_lines((const xmlChar *)" [", 0, FALSE); 
-	help_write_lines((const xmlChar *)
-			 tk_get_btype_sym(typ_get_basetype(typdef)),
-			 0, FALSE);
-	help_write_lines((const xmlChar *)"]", 0, FALSE); 
-    }
-
-    val = obj_get_default(obj);
-    if (val) {
-	help_write_lines((const xmlChar *)" [", 0, FALSE); 
-	help_write_lines(val, 0, FALSE);
-	help_write_lines((const xmlChar *)"]", 0, FALSE); 
-    }
-
-    val = obj_get_description(obj);
-    if (val) {
-	help_write_lines(val, indent+NCX_DEF_INDENT, TRUE); 
-    }
-
-    switch (obj->objtype) {
-    case OBJ_TYP_CONTAINER:
-	if (full) {
-	    if (obj->def.container->presence) {
-		help_write_lines((const xmlChar *)"presence: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
-		help_write_lines(obj->def.container->presence, 0, FALSE);
-	    }
-	    /*** add mustQ ***/
-	}
-	obj_dump_datadefQ(obj->def.container->datadefQ, full, 
-			  nestlevel, indent+NCX_DEF_INDENT);
-	break;
-    case OBJ_TYP_LEAF:
-	if (full) {
-	    val = obj_get_units(obj);
-	    if (val) {
-		help_write_lines((const xmlChar *)"units: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
-		help_write_lines(val, 0, FALSE);
-	    }
-	}
-	break;
-    case OBJ_TYP_LEAF_LIST:
-	if (full) {
-	    val = obj_get_units(obj);
-	    if (val) {
-		help_write_lines((const xmlChar *)"units: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
-		help_write_lines(val, 0, FALSE);
-	    }
-	    if (!obj->def.leaflist->ordersys) {
-		help_write_lines((const xmlChar *)"ordered-by: user", 
-				 indent+NCX_DEF_INDENT, TRUE); 
-	    }
-	    if (obj->def.leaflist->minset) {
-		help_write_lines((const xmlChar *)"min-elements: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
-		sprintf(numbuff, "%u", obj->def.leaflist->minelems);
-		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
-	    }
-	    if (obj->def.leaflist->maxset) {
-		help_write_lines((const xmlChar *)"max-elements: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
-		sprintf(numbuff, "%u", obj->def.leaflist->maxelems);
-		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
-	    }
-	}
-	break;
-    case OBJ_TYP_CHOICE:
-	obj_dump_datadefQ(obj->def.choic->caseQ, full, 
-			  nestlevel, indent+NCX_DEF_INDENT);
-	break;
-    case OBJ_TYP_CASE:
-	obj_dump_datadefQ(obj->def.cas->datadefQ, full, 
-			  nestlevel, indent+NCX_DEF_INDENT);
-	break;
-    case OBJ_TYP_LIST:
-	if (full) {
-	    if (obj->def.list->keystr) {
-		help_write_lines((const xmlChar *)"key: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
-		help_write_lines(obj->def.list->keystr, 0, FALSE);
-	    }
-	    if (!obj->def.list->ordersys) {
-		help_write_lines((const xmlChar *)"ordered-by: user", 
-				 indent+NCX_DEF_INDENT, TRUE); 
-	    }
-	    if (obj->def.list->minset) {
-		help_write_lines((const xmlChar *)"min-elements: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
-		sprintf(numbuff, "%u", obj->def.list->minelems);
-		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
-	    }
-	    if (obj->def.list->maxset) {
-		help_write_lines((const xmlChar *)"max-elements: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
-		sprintf(numbuff, "%u", obj->def.list->maxelems);
-		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
-	    }
-	}
-	obj_dump_datadefQ(obj->def.list->datadefQ, full, 
-			  nestlevel, indent+NCX_DEF_INDENT);
-	break;
-    case OBJ_TYP_RPC:
-	obj_dump_datadefQ(&obj->def.rpc->datadefQ, full, 
-			  nestlevel, indent+NCX_DEF_INDENT);
-	break;
-    case OBJ_TYP_RPCIO:
-	obj_dump_datadefQ(&obj->def.rpcio->datadefQ, full, 
-			  nestlevel, indent+NCX_DEF_INDENT);
-	break;
-    case OBJ_TYP_NOTIF:
-	obj_dump_datadefQ(&obj->def.notif->datadefQ, full, 
-			  nestlevel, indent+NCX_DEF_INDENT);
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-
-}   /* obj_dump_template */
-
-
-/********************************************************************
-* FUNCTION obj_dump_datadefQ
-*
-* Dump the contents of a datadefQ for debugging
-*
-* INPUTS:
-*   datadefQ == Q of obj_template to dump
-*    full    == TRUE if a full report desired
-*               FALSE if a partial report desired
-*   nestlevel == number of levels from the top-level
-*                that should be printed; 0 == all levels
-*   indent == start indent count
-*********************************************************************/
-void
-    obj_dump_datadefQ (const dlq_hdr_t *datadefQ,
-		       boolean full,
-		       uint32 nestlevel,
-		       uint32 indent)
-{
-
-    const obj_template_t  *obj;
-
-#ifdef DEBUG
-    if (!datadefQ) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
-
-	obj_dump_template(obj, full, nestlevel, indent);
-	help_write_lines((const xmlChar *)"\n", 0, FALSE);
-    }
-
-}   /* obj_dump_datadefQ */
-
 
 /* END obj.c */

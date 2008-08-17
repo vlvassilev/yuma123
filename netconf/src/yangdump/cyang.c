@@ -1723,6 +1723,10 @@ static void
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
+	if (obj_is_hidden(obj)) {
+	    continue;
+	}
+
 	write_cyang_object(scb, mod, cp, obj, startindent, first);
 	first = FALSE;
     }

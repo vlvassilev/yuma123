@@ -6,6 +6,8 @@ module yangdiff {
 
     import ncxtypes { prefix "nt"; }
 
+    import ncx { prefix "ncx"; }
+
     organization "Netconf Central";
 
     contact
@@ -201,6 +203,11 @@ module yangdiff {
              Please send a bug report to support@netconfcentral.com
              if any messages of this type appear in the error log.
         ";
+
+    revision 2008-08-17 {
+       description 
+          "Initial version";
+    }
 
     typedef DiffType {
         description

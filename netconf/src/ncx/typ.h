@@ -341,7 +341,6 @@ typedef struct typ_template_t_ {
     xmlChar     *name;
     xmlChar     *descr;
     xmlChar     *ref;
-    xmlChar     *condition;                         /* deprecated */
     xmlChar     *defval;
     xmlChar     *units;
     ncx_module_t *mod;   /* const back-ptr to module defining type */

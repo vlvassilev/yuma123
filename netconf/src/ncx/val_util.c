@@ -366,6 +366,102 @@ static status_t
 
 /*************** E X T E R N A L    F U N C T I O N S  *************/
 
+#if 0   /*   ***** TBD ******/
+/********************************************************************
+ * FUNCTION val_set_canonical_order
+ * 
+ * Change the child XML nodes throughout an entire subtree
+ * to the canonical order defined in the object template
+ *
+ * Note that there is no canonical order defined for 
+ * the contents of an ncx:root container
+ *
+ * Leaf objects will not be processed, if val is OBJ_TYP_LEAF
+ *
+ * INPUTS:
+ *   val == value node to change to canonical order
+ *
+ * OUTPUTS:
+ *   val->v.childQ may be reordered, for all complex types
+ *   in the subtree
+ *
+ *********************************************************************/
+void
+    val_set_canonical_order (val_value_t *val)
+{
+    const obj_template_t  *chobj;
+    dlq_hdr_t              tempQ;
+    val_value_t           *chval;
+
+#ifdef DEBUG
+    if (!val || !val->obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    dlq_createSQue(&tempQ);
+
+    switch (val->obj->objtype) {
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+    case OBJ_TYP_USES:
+    case OBJ_TYP_AUGMENT:
+	break;
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_RPC:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	break;
+    case OBJ_TYP_CONTAINER:
+    case OBJ_TYP_LIST:
+    case OBJ_TYP_RPCIO:
+    case OBJ_TYP_NOTIF:
+	for (chobj = obj_get_first_child(obj);
+	     chobj != NULL;
+	     chobj = obj_get_next_child(chobj)) {
+
+	    if (!obj_has_name(chobj)) {
+		continue;
+	    }
+
+	    chval = val_find_child(val, 
+				   obj_get_mod_name(chobj),
+				   obj_get_name(chobj));
+	    while (chval) {
+		val_remove_child(chval);
+		dlq_enque(chval, &tempQ);
+
+		switch (chval->obj->objtype) {
+		case OBJ_TYP_LEAF:
+		case OBJ_TYP_LEAF_LIST:
+		    break;
+		case OBJ_TYP_CHOICE:
+		    chval = val_get_choice_first_set(val, chval->obj);
+
+
+		    break;
+		case OBJ_TYP_CONTAINER:
+		case OBJ_TYP_LIST:
+		    val_set_canonical_order(chval);
+		    break;
+		default:
+		    ;
+		}
+		chval = val_find_child(val, 
+				       obj_get_mod_name(chobj),
+				       obj_get_name(chobj));
+	    }
+	}
+    }
+
+
+    for (chval = (val_value_t *)dlq_firstEntry(&tempQ);
+	 chval
+
+}  /* val_set_canonical_order */
+#endif
+
 
 /********************************************************************
  * FUNCTION val_gen_index_comp
@@ -750,6 +846,74 @@ val_value_t *
     return NULL;
 
 }  /* val_get_choice_next_set */
+
+
+/********************************************************************
+* FUNCTION val_choice_is_set
+* 
+* Check a val_value_t struct against its expected OBJ
+* to determine if a specific choice has already been set
+* Check that all the mandatory config fields in the selected
+* case are set
+*
+* INPUTS:
+*   val == parent of the choice object to check
+*   obj == choice object to check
+*
+* RETURNS:
+*   pointer to first value struct or NULL if choice not set
+*********************************************************************/
+boolean
+    val_choice_is_set (val_value_t *val,
+		       const obj_template_t *obj)
+{
+    const obj_template_t  *cas, *child;
+    val_value_t           *testval, *chval;
+    boolean                done;
+
+#ifdef DEBUG
+    if (!val || !obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    done = FALSE;
+    for (testval = val_get_first_child(val);
+	 testval != NULL && !done;
+	 testval = val_get_next_child(testval)) {
+
+	if (testval->casobj && testval->casobj->parent==obj) {
+	    chval = testval;
+	    done = TRUE;
+	}
+    }
+
+    if (!done) {
+	return FALSE;
+    }
+
+    cas = chval->casobj;
+
+    /* check if all the mandatory parms are present in this case */
+    for (child = obj_first_child(cas);
+	 child != NULL;
+	 child = obj_next_child(child)) {
+
+	if (!obj_is_config(child)) {
+	    continue;
+	}
+	if (!obj_is_mandatory(child)) {
+	    continue;
+	}
+	if (!val_find_child(val, obj_get_mod_name(child),
+			   obj_get_name(child))) {
+	    return FALSE;
+	}
+    }
+    return TRUE;
+
+}  /* val_choice_is_set */
 
 
 /* END file val_util.c */

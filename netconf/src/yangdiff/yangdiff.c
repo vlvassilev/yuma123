@@ -1119,7 +1119,9 @@ static status_t
 	log_write("yangdiff %s\n", YANGDIFF_PROGVER);
     }
     if (diffparms.helpmode) {
-	help_program_module(YANGDIFF_MOD, YANGDIFF_CONTAINER, FULL);
+	help_program_module(YANGDIFF_MOD, 
+			    YANGDIFF_CONTAINER, 
+			    HELP_MODE_FULL);
     }
     if ((diffparms.helpmode || diffparms.versionmode)) {
 	return res;

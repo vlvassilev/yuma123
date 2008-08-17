@@ -63,6 +63,15 @@ extern rpc_err_rec_t *
 			  xmlChar *error_path);
 
 
+extern rpc_err_rec_t *
+    agt_rpcerr_gen_error_errinfo (ncx_layer_t layer,
+				  status_t   interr,
+				  const xml_node_t *errnode,
+				  ncx_node_t  parmtyp,
+				  const void *error_parm,
+				  xmlChar *error_path,
+				  const ncx_errinfo_t *errinfo);
+
 /* generate an attribute related error for any layer. 
  *  Does not use the application layer fields
  */

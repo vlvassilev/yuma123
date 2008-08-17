@@ -58,10 +58,6 @@ date         init     comment
 #include  "agt_val_parse.h"
 #endif
 
-#ifndef _H_agt_val_util
-#include  "agt_val_util.h"
-#endif
-
 #ifndef _H_agt_xml
 #include  "agt_xml.h"
 #endif

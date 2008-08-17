@@ -3992,6 +3992,32 @@ void
 
 
 /********************************************************************
+* FUNCTION val_remove_child
+* 
+*   Remove a child value node from its parent value node
+*
+* INPUTS:
+*    child == node to store in the parent
+*    parent == complex value node with a childQ
+*
+*********************************************************************/
+void
+    val_remove_child (val_value_t *child)
+{
+#ifdef DEBUG
+    if (!child) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    dlq_remove(child);
+    child->parent = NULL;
+
+}   /* val_remove_child */
+
+
+/********************************************************************
 * FUNCTION val_swap_child
 * 
 *   Swap a child value node with a current value node
@@ -4190,6 +4216,59 @@ val_value_t *
     return NULL;
 
 }  /* val_find_child */
+
+
+/********************************************************************
+* FUNCTION val_match_child
+* 
+* Match the first instance of the specified child node
+*
+* INPUTS:
+*    parent == parent complex type to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    childname == name of child node to find
+*
+* RETURNS:
+*   pointer to the child if found or NULL if not found
+*********************************************************************/
+val_value_t *
+    val_match_child (const val_value_t  *parent,
+		     const xmlChar *modname,
+		     const xmlChar *childname)
+{
+    val_value_t *val;
+
+#ifdef DEBUG
+    if (!parent || !childname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (!typ_has_children(parent->btyp)) {
+	return NULL;
+    }
+
+    for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
+	 val != NULL;
+	 val = (val_value_t *)dlq_nextEntry(val)) {
+	if (modname && 
+	    xml_strcmp(modname, obj_get_mod_name(val->obj))) {
+	    continue;
+	}
+	if (!xml_strncmp(val->name, childname,
+			 xml_strlen(childname))) {
+	    return val;
+	}
+    }
+    return NULL;
+
+}  /* val_match_child */
 
 
 /********************************************************************

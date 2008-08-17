@@ -407,6 +407,110 @@ void
 
 
 /********************************************************************
+* FUNCTION agt_record_error_errinfo
+*
+* Generate an rpc_err_rec_t and save it in the msg
+* Use the provided error info record for <rpc-error> fields
+*
+* INPUTS:
+*    scb == session control block 
+*        == NULL and no stats will be recorded
+*    errQ == errQ to record error 
+*         == NULL, no error will be recorded!
+*    layer == netconf layer error occured               <error-type>
+*    res == internal error code                      <error-app-tag>
+*    xmlnode == XML node causing error  <bad-element>   <error-path> 
+*            == NULL if not available 
+*    parmtyp == type of node in 'error_parm'
+*    error_parm == error data, specific to 'res'        <error-info>
+*               == NULL if not available (then nodetyp ignred)
+*    nodetyp == type of node in 'errnode'
+*    errnode == internal data node with the error       <error-path>
+*            == NULL if not available or not used  
+*    errinfo == error info record to use
+*
+* OUTPUTS:
+*   errQ has error message added if no malloc errors
+*   scb->stats may be updated if scb non-NULL
+
+* RETURNS:
+*    none
+*********************************************************************/
+void
+    agt_record_error_errinfo (ses_cb_t *scb,
+			      dlq_hdr_t *errQ,
+			      ncx_layer_t layer,
+			      status_t  res,
+			      const xml_node_t *xmlnode,
+			      ncx_node_t parmtyp,
+			      const void *error_parm,
+			      ncx_node_t nodetyp,
+			      const void *errnode,
+			      const ncx_errinfo_t *errinfo)
+{
+    rpc_err_rec_t   *err;
+    xmlChar         *buff;
+
+    if (LOGDEBUG3) {
+	log_debug3("\nagt_record_error: ");
+	if (xmlnode) {
+	    log_debug3(" xml: %u:%s", 
+		       xmlns_get_ns_prefix(xmlnode->nsid),
+		       xmlnode->elname ? 
+		       xmlnode->elname : (const xmlChar *)"--");
+	}
+	if (nodetyp == NCX_NT_VAL && errnode) {
+	    log_debug3(" errnode: \n");
+	    val_dump_value((const val_value_t *)errnode, NCX_DEF_INDENT);
+	    log_debug3("\n");
+	}
+    }
+
+    if (errQ) {
+	buff = NULL;
+	if (errnode) {
+	    switch (nodetyp) {
+	    case NCX_NT_STRING:
+		buff = xml_strdup((const xmlChar *)errnode);
+		break;
+	    case NCX_NT_VAL:
+		(void)val_gen_instance_id(errnode, 
+					  NCX_IFMT_XPATH1, 
+					  TRUE, &buff);
+		break;
+	    case NCX_NT_OBJ:
+		(void)obj_gen_object_id(errnode, &buff);
+		break;
+	    default:
+		SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	}
+
+	err = agt_rpcerr_gen_error_errinfo(layer, res, xmlnode, 
+					   parmtyp, error_parm, 
+					   buff, errinfo);
+	if (err) {
+	    dlq_enque(err, errQ);
+	} else {
+	    if (buff) {
+		m__free(buff);
+	    }
+	    /*** inc error-dropped counter for the session stats ***/
+	    if (scb) {
+		;
+	    }
+	}
+    }
+
+    /* TBD: inc the specific error type for the session stats */
+    if (scb) {
+	scb->stats.in_err_msgs++;
+    }
+
+} /* agt_record_error_errinfo */
+
+
+/********************************************************************
 * FUNCTION agt_record_attr_error
 *
 * Generate an rpc_err_rec_t and save it in the msg

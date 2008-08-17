@@ -419,7 +419,7 @@ status_t
 	}
     }
 
-    /* add the NETCONF NS if any PARMSET, RPC or OBJECT definitions */
+    /* add the NETCONF NS if any RPC or OBJECT definitions */
     nc_id = xmlns_nc_id();
     if (mod->nsid != nc_id && !dlq_empty(&mod->datadefQ)) {
 	res = xml_add_xmlns_attr(top_attrs, nc_id, 

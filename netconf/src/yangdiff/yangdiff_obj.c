@@ -1752,6 +1752,10 @@ uint32
 	 oldobj != NULL;
 	 oldobj = (obj_template_t *)dlq_nextEntry(oldobj)) {
 
+	if (obj_is_hidden(oldobj)) {
+	    continue;
+	}
+
 	if (obj_has_name(oldobj)) {
 	    newobj = obj_find_template(newQ, cp->newmod->name, 
 				       obj_get_name(oldobj));
@@ -1760,15 +1764,17 @@ uint32
 	}
 
 	if (newobj) {
-	    if (object_changed(cp, oldobj, newobj)) {
-		/* use the seen flag in the old tree to indicate
-		 * that a node has been visited and the 'diff' flag 
-		 * to indicate a node has changed
-		 */
-		oldobj->flags |= (OBJ_FL_SEEN | OBJ_FL_DIFF);
-		return 1;
-	    } else {
-		newobj->flags |= OBJ_FL_SEEN;
+	    if (!obj_is_hidden(newobj)) {
+		if (object_changed(cp, oldobj, newobj)) {
+		    /* use the seen flag in the old tree to indicate
+		     * that a node has been visited and the 'diff' flag 
+		     * to indicate a node has changed
+		     */
+		    oldobj->flags |= (OBJ_FL_SEEN | OBJ_FL_DIFF);
+		    return 1;
+		} else {
+		    newobj->flags |= OBJ_FL_SEEN;
+		}
 	    }
 	} else {
 	    return 1;
@@ -1779,7 +1785,7 @@ uint32
     for (newobj = (obj_template_t *)dlq_firstEntry(newQ);
 	 newobj != NULL;
 	 newobj = (obj_template_t *)dlq_nextEntry(newobj)) {
-	if (!obj_has_name(newobj)) {
+	if (!obj_has_name(newobj) || obj_is_hidden(newobj)) {
 	    continue;
 	}
 	if (!(newobj->flags & OBJ_FL_SEEN)) {
@@ -1794,7 +1800,8 @@ uint32
 	oldobj = (obj_template_t *)dlq_firstEntry(oldQ);
 	newobj = (obj_template_t *)dlq_firstEntry(newQ);
 	while (oldobj && newobj) {
-	    if (obj_has_name(oldobj)) {
+	    if (obj_has_name(oldobj) && obj_has_name(newobj) &&
+		!(obj_is_hidden(oldobj) || obj_is_hidden(newobj))) {
 		if (!obj_is_match(oldobj, newobj)) {
 		    return 1;
 		}

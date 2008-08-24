@@ -101,6 +101,10 @@ date         init     comment
 #include  "val.h"
 #endif
 
+#ifndef _H_val_util
+#include  "val_util.h"
+#endif
+
 #ifndef _H_xmlns
 #include  "xmlns.h"
 #endif
@@ -237,7 +241,7 @@ status_t
 	} else {
 	    res = val->res;
 	}
-	agt_record_error(NULL, &msg->mhdr.errQ, NCX_LAYER_OPERATION,
+	agt_record_error(NULL, &msg->mhdr, NCX_LAYER_OPERATION,
 			 res, methnode, NCX_NT_NONE, NULL, NCX_NT_VAL, 
 			 &msg->rpc_input);
 	return res;
@@ -255,6 +259,22 @@ status_t
     case NCX_BT_EMPTY:
 	cfgname = val->name;
 	break;
+    case NCX_BT_CONTAINER:
+	val = val_get_first_child(val);
+	if (val) {
+	    switch (val->btyp) {
+	    case NCX_BT_STRING:
+		cfgname = VAL_STR(val);
+		break;
+	    case NCX_BT_EMPTY:
+		cfgname = val->name;
+		break;
+	    default:
+		SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	}
+	break;
     default:
 	res = SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -268,7 +288,7 @@ status_t
     }
 
     if (res != NO_ERR) {
-	agt_record_error(NULL, &msg->mhdr.errQ, NCX_LAYER_OPERATION,
+	agt_record_error(NULL, &msg->mhdr, NCX_LAYER_OPERATION,
 			 res, methnode,
 			 (cfgname) ? NCX_NT_STRING : NCX_NT_NONE,
 			 (const void *)cfgname, 
@@ -316,28 +336,28 @@ const val_value_t *
 * INPUTS:
 *    scb == session control block 
 *        == NULL and no stats will be recorded
-*    errQ == errQ to record error 
-*         == NULL, no error will be recorded!
+*    msghdr == XML msg header with error Q
+*          == NULL, no errors will be recorded!
 *    layer == netconf layer error occured               <error-type>
 *    res == internal error code                      <error-app-tag>
 *    xmlnode == XML node causing error  <bad-element>   <error-path> 
 *            == NULL if not available 
 *    parmtyp == type of node in 'error_parm'
 *    error_parm == error data, specific to 'res'        <error-info>
-*               == NULL if not available (then nodetyp ignred)
+*               == NULL if not available
 *    nodetyp == type of node in 'errnode'
 *    errnode == internal data node with the error       <error-path>
 *            == NULL if not available or not used  
 * OUTPUTS:
 *   errQ has error message added if no malloc errors
 *   scb->stats may be updated if scb non-NULL
-
+*
 * RETURNS:
 *    none
 *********************************************************************/
 void
     agt_record_error (ses_cb_t *scb,
-		      dlq_hdr_t *errQ,
+		      xml_msg_hdr_t *msghdr,
 		      ncx_layer_t layer,
 		      status_t  res,
 		      const xml_node_t *xmlnode,
@@ -346,62 +366,9 @@ void
 		      ncx_node_t nodetyp,
 		      const void *errnode)
 {
-    rpc_err_rec_t   *err;
-    xmlChar         *buff;
-
-    if (LOGDEBUG3) {
-	log_debug3("\nagt_record_error: ");
-	if (xmlnode) {
-	    log_debug3(" xml: %u:%s", 
-		       xmlns_get_ns_prefix(xmlnode->nsid),
-		       xmlnode->elname ? xmlnode->elname : (const xmlChar *)"--");
-	}
-	if (nodetyp == NCX_NT_VAL && errnode) {
-	    log_debug3(" errnode: \n");
-	    val_dump_value((const val_value_t *)errnode, NCX_DEF_INDENT);
-	    log_debug3("\n");
-	}
-    }
-
-    if (errQ) {
-	buff = NULL;
-	if (errnode) {
-	    switch (nodetyp) {
-	    case NCX_NT_STRING:
-		buff = xml_strdup((const xmlChar *)errnode);
-		break;
-	    case NCX_NT_VAL:
-		(void)val_gen_instance_id(errnode, 
-					  NCX_IFMT_XPATH1, 
-					  TRUE, &buff);
-		break;
-	    case NCX_NT_OBJ:
-		(void)obj_gen_object_id(errnode, &buff);
-		break;
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	}
-
-	err = agt_rpcerr_gen_error(layer, res, xmlnode, 
-				   parmtyp, error_parm, buff);
-	if (err) {
-	    dlq_enque(err, errQ);
-	} else {
-	    if (buff) {
-		m__free(buff);
-	    }
-	    /*** inc error-dropped counter for the session stats ***/
-	    if (scb) {
-		;
-	    }
-	}
-    }
-
-    /* TBD: inc the specific error type for the session stats */
-    if (scb) {
-	scb->stats.in_err_msgs++;
-    }
+    agt_record_error_errinfo(scb, msghdr, layer, res, xmlnode,
+			     parmtyp, error_parm, nodetyp,
+			     errnode, NULL);
 
 } /* agt_record_error */
 
@@ -415,8 +382,8 @@ void
 * INPUTS:
 *    scb == session control block 
 *        == NULL and no stats will be recorded
-*    errQ == errQ to record error 
-*         == NULL, no error will be recorded!
+*    msghdr == XML msg header with error Q
+*          == NULL, no errors will be recorded!
 *    layer == netconf layer error occured               <error-type>
 *    res == internal error code                      <error-app-tag>
 *    xmlnode == XML node causing error  <bad-element>   <error-path> 
@@ -438,7 +405,7 @@ void
 *********************************************************************/
 void
     agt_record_error_errinfo (ses_cb_t *scb,
-			      dlq_hdr_t *errQ,
+			      xml_msg_hdr_t *msghdr,
 			      ncx_layer_t layer,
 			      status_t  res,
 			      const xml_node_t *xmlnode,
@@ -449,12 +416,15 @@ void
 			      const ncx_errinfo_t *errinfo)
 {
     rpc_err_rec_t   *err;
-    xmlChar         *buff;
+    dlq_hdr_t       *errQ;
+    xmlChar         *pathbuff;
+
+    errQ = (msghdr) ? &msghdr->errQ : NULL;
 
     if (LOGDEBUG3) {
 	log_debug3("\nagt_record_error: ");
 	if (xmlnode) {
-	    log_debug3(" xml: %u:%s", 
+	    log_debug3(" xml: %s:%s", 
 		       xmlns_get_ns_prefix(xmlnode->nsid),
 		       xmlnode->elname ? 
 		       xmlnode->elname : (const xmlChar *)"--");
@@ -467,33 +437,40 @@ void
     }
 
     if (errQ) {
-	buff = NULL;
+	pathbuff = NULL;
 	if (errnode) {
 	    switch (nodetyp) {
 	    case NCX_NT_STRING:
-		buff = xml_strdup((const xmlChar *)errnode);
+		pathbuff = xml_strdup((const xmlChar *)errnode);
 		break;
 	    case NCX_NT_VAL:
-		(void)val_gen_instance_id(errnode, 
+		(void)val_gen_instance_id(msghdr, errnode, 
 					  NCX_IFMT_XPATH1, 
-					  TRUE, &buff);
+					  &pathbuff);
 		break;
 	    case NCX_NT_OBJ:
-		(void)obj_gen_object_id(errnode, &buff);
+		(void)obj_gen_object_id(errnode, &pathbuff);
 		break;
 	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 	}
 
-	err = agt_rpcerr_gen_error_errinfo(layer, res, xmlnode, 
-					   parmtyp, error_parm, 
-					   buff, errinfo);
+	if (errinfo) {
+	    err = agt_rpcerr_gen_error_errinfo(layer, res, xmlnode, 
+					       parmtyp, error_parm, 
+					       pathbuff, errinfo);
+	} else {
+	    err = agt_rpcerr_gen_error(layer, res, xmlnode, 
+				       parmtyp, error_parm, 
+				       pathbuff);
+	}
+
 	if (err) {
 	    dlq_enque(err, errQ);
 	} else {
-	    if (buff) {
-		m__free(buff);
+	    if (pathbuff) {
+		m__free(pathbuff);
 	    }
 	    /*** inc error-dropped counter for the session stats ***/
 	    if (scb) {
@@ -517,7 +494,8 @@ void
 *
 * INPUTS:
 *    scb == session control block
-*    errQ == error Q to record error
+*    msghdr == XML msg header with error Q
+*          == NULL, no errors will be recorded!
 *    layer == netconf layer error occured
 *    res == internal error code
 *    xmlnode == XML node causing error (NULL if not available)
@@ -532,7 +510,7 @@ void
 *********************************************************************/
 void
     agt_record_attr_error (ses_cb_t *scb,
-			   dlq_hdr_t *errQ,
+			   xml_msg_hdr_t *msghdr,
 			   ncx_layer_t layer,
 			   status_t  res,
 			   const xml_attr_t *xmlattr,
@@ -543,6 +521,9 @@ void
 {
     rpc_err_rec_t   *err;
     xmlChar         *buff;
+    dlq_hdr_t       *errQ;
+
+    errQ = (msghdr) ? &msghdr->errQ : NULL;
 
     if (errQ) {
 	buff = NULL;
@@ -550,9 +531,9 @@ void
 	    if (nodetyp==NCX_NT_STRING) {
 		buff = xml_strdup((const xmlChar *)errnode);
 	    } else {
-		(void)val_gen_instance_id(errnode, 
-					  NCX_IFMT_XPATH2, 
-					  TRUE, &buff);
+		(void)val_gen_instance_id(msghdr, errnode, 
+					  NCX_IFMT_XPATH1, 
+					  &buff);
 	    }
 	}
 	err = agt_rpcerr_gen_attr_error(layer, res, xmlattr, 
@@ -648,7 +629,7 @@ status_t
 		    selattr.attr_ns = xmlns_nc_id();
 		    selattr.attr_name = NCX_EL_SELECT;
 		    res = ERR_NCX_MISSING_ATTRIBUTE;
-		    agt_record_attr_error(scb, &msg->mhdr.errQ, 
+		    agt_record_attr_error(scb, &msg->mhdr, 
 					  NCX_LAYER_OPERATION, res,
 					  &selattr, NULL, NULL,
 					  NCX_NT_VAL, filter);
@@ -665,7 +646,7 @@ status_t
 	}
 
 	if (res != NO_ERR) {
-	    agt_record_error(scb, &msg->mhdr.errQ, 
+	    agt_record_error(scb, &msg->mhdr, 
 			     NCX_LAYER_OPERATION, res, NULL,
 			     (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
 			     errstr, NCX_NT_VAL, filter);
@@ -801,7 +782,7 @@ status_t
     ncx_filptr_t   *top;
     boolean         getop;
 
-    getop = !xml_strcmp(msg->rpc_meth_name, NCX_EL_GET);
+    getop = !xml_strcmp(msg->rpc_method->name, NCX_EL_GET);
 
     if (getop) {
 	source = cfg_get_config_id(NCX_CFGID_RUNNING);

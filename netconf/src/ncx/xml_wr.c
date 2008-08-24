@@ -655,7 +655,8 @@ void
     msg->defns = nsid;
 
     res = xml_msg_gen_new_prefix(msg, msg->last_defns, 
-				 msg->last_defpfix);
+				 &msg->last_defpfix,
+				 XML_MSG_PREFIX_SIZE+1);
     if (res != NO_ERR) {
 	msg->defns = msg->last_defns;
 	msg->last_defns = lastdef;

@@ -47,7 +47,7 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-#define AGT_RPC_NUM_PHASES   6
+#define AGT_RPC_NUM_PHASES   4
 
 /********************************************************************
 *                                                                   *
@@ -68,12 +68,12 @@ date             init     comment
  *
  */
 typedef enum agt_rpc_phase_t_ {
-    AGT_RPC_PH_SETUP,      /* cb before the input PSD is parsed */
-    AGT_RPC_PH_PSD,        /* cb to manually parse the input PSD */
-    AGT_RPC_PH_VALIDATE,     /* cb after the input PSD is parsed */
-    AGT_RPC_PH_INVOKE,      /* cb to invoke the requested method */
-    AGT_RPC_PH_PRERPY,       /* cb before the reply is generated */ 
-    AGT_RPC_PH_RPY          /* cb to manually generate the reply */ 
+    AGT_RPC_PH_SETUP,       /* (1) cb before the input PSD is parsed */
+    AGT_RPC_PH_VALIDATE,     /* (3) cb after the input PSD is parsed */
+    AGT_RPC_PH_INVOKE,      /* (4) cb to invoke the requested method */
+    AGT_RPC_PH_PRERPY,       /* (5) cb before the reply is generated */ 
+    AGT_RPC_PH_PARSE,                    /* (2) NO CB FOR THIS STATE */ 
+    AGT_RPC_PH_REPLY                     /* (6) NO CB FOR THIS STATE */ 
 } agt_rpc_phase_t;
 
 

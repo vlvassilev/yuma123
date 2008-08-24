@@ -1638,6 +1638,22 @@ static obj_choice_t *
 	}
     }
 
+    if (mchoic && mchoic->confset) {
+	newchoic->config = mchoic->config;
+	newchoic->confset = TRUE;
+    } else {
+	newchoic->config = choic->config;
+	newchoic->confset = choic->confset;
+    }
+
+    if (mchoic && mchoic->mandset) {
+	newchoic->mandatory = mchoic->mandatory;
+	newchoic->mandset = TRUE;
+    } else {
+	newchoic->mandatory = choic->mandatory;
+	newchoic->mandset = choic->mandset;
+    }
+
     res = clone_datadefQ(mod, newchoic->caseQ,
 			 choic->caseQ,
 			 (mchoic) ? mchoic->caseQ : NULL, obj);
@@ -2186,12 +2202,14 @@ static boolean
 	} else {
 	    *setflag = TRUE;
 	}
+	/* *setflag = obj->def.choic->confset; */
 	return obj->def.choic->config;
     case OBJ_TYP_CASE:
 	*setflag = FALSE;
 	if (obj->parent) {
 	    return obj->parent->def.choic->config;
 	} else {
+	    /* should not happen */
 	    return FALSE;
 	}
 	/*NOTREACHED*/
@@ -2222,6 +2240,7 @@ static boolean
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
     }
+
     /*NOTREACHED*/
 
 }   /* get_config_flag */
@@ -2298,6 +2317,91 @@ static status_t
     return NO_ERR;
 
 }  /* get_object_string */
+
+
+/********************************************************************
+ * FUNCTION find_next_child
+ * 
+ * Check the instance qualifiers and see if the specified node
+ * is a valid (subsequent) child node.
+ *
+ * Example:
+ *  
+ *  container foo { 
+ *    leaf a { type int32; }
+ *    leaf b { type int32; }
+ *    leaf-list c { type int32; }
+ *
+ * Since a, b, and c are all optional, all of them have to be
+ * checked, even while node 'a' is expected
+ * The caller will save the current child in case the pointer
+ * needs to be backed up.
+ *
+ * INPUTS:
+ *   chobj == current child object template
+ *   chnode == xml_node_t of start element to match
+ *
+ * RETURNS:
+ *   pointer to child that matched or NULL if no valid next child
+ *********************************************************************/
+static const obj_template_t *
+    find_next_child (const obj_template_t *chobj,
+		     const xml_node_t *chnode)
+{
+
+    const obj_template_t *chnext, *foundobj;
+    status_t              res;
+
+    chnext = chobj;
+
+    for (;;) {
+	switch (obj_get_iqualval(chnext)) {
+	case NCX_IQUAL_ONE:
+	case NCX_IQUAL_1MORE:
+	    /* the current child is mandatory; this is an error */
+	    return NULL;
+	    /* else fall through to next case */
+	case NCX_IQUAL_OPT:
+	case NCX_IQUAL_ZMORE:
+	    /* the current child is optional; keep trying
+	     * try to get the next child in the complex type 
+	     */
+	    chnext = obj_next_child(chnext);
+	    if (!chnext) {
+		return NULL;
+	    } else {
+		if (chnext->objtype==OBJ_TYP_CHOICE ||
+		    chnext->objtype==OBJ_TYP_CASE) {
+		    foundobj = obj_find_child(chnext,
+					      xmlns_get_module(chnode->nsid),
+					      chnode->elname);
+		    if (foundobj && 
+			(foundobj->objtype==OBJ_TYP_CHOICE ||
+			 foundobj->objtype==OBJ_TYP_CASE)) {
+			foundobj = NULL;
+		    }
+		    if (foundobj) {
+			return chnext;  /* not the nested foundobj! */
+		    }
+		} else {
+		    res = xml_node_match(chnode,
+					 obj_get_nsid(chnext), 
+					 obj_get_name(chnext), 
+					 XML_NT_NONE);
+		    if (res == NO_ERR) {
+			return chnext;
+		    }
+		}
+	    }
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return NULL;
+	}
+    }
+    /*NOTREACHED*/
+
+} /* find_next_child */
 
 
 /**************** E X T E R N A L    F U N C T I O N S    **********/
@@ -2615,7 +2719,7 @@ obj_template_t *
 
 
 /********************************************************************
-* FUNCTION ncx_find_template_top
+* FUNCTION obj_find_template_top
 *
 * Check if an obj_template_t in the mod->datadefQ or any
 * of the include files visible to this module
@@ -3063,7 +3167,6 @@ obj_template_t *
 	obj_free_template(rpcio);
 	return NULL;
     }
-    rpcio->qtype = OBJ_QUE_RPCIO;
     rpcio->mod = rpcobj->mod;
     rpcio->tk = rpcobj->tk;
     rpcio->parent = rpcobj;
@@ -4622,6 +4725,61 @@ boolean
 
 
 /********************************************************************
+* FUNCTION obj_set_config_flag
+*
+* Set the config flag for an obj_template_t 
+*
+* INPUTS:
+*   obj == obj_template to set
+*
+*********************************************************************/
+void
+    obj_set_config_flag (obj_template_t *obj)
+{
+    boolean parentconf;
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    parentconf = (obj->parent) ? obj_get_config_flag(obj->parent) : TRUE;
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+	obj->def.container->config = parentconf;
+	break;
+    case OBJ_TYP_LEAF:
+	obj->def.leaf->config = parentconf;
+	break;
+    case OBJ_TYP_LEAF_LIST:
+	obj->def.leaflist->config = parentconf;
+	break;
+    case OBJ_TYP_LIST:
+	obj->def.list->config = parentconf;
+	break;
+    case OBJ_TYP_CHOICE:
+	obj->def.choic->config = parentconf;
+	break;
+    case OBJ_TYP_CASE:
+	break;
+    case OBJ_TYP_USES:
+    case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_RPC:
+    case OBJ_TYP_RPCIO:
+    case OBJ_TYP_NOTIF:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+}   /* obj_set_config_flag */
+
+
+/********************************************************************
 * FUNCTION obj_get_max_access
 *
 * Get the NCX max-access enum for an obj_template_t 
@@ -5335,6 +5493,12 @@ const xmlChar *
 xmlns_id_t
     obj_get_nsid (const obj_template_t  *obj)
 {
+#ifdef DEBUG
+    if (!obj || !obj->mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
 
     return obj->mod->nsid;
 
@@ -5372,6 +5536,7 @@ ncx_iqual_t
     case OBJ_TYP_CONTAINER:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
     case OBJ_TYP_RPCIO:
 	ret = (required) ? NCX_IQUAL_ONE : NCX_IQUAL_OPT;
 	break;
@@ -5890,6 +6055,10 @@ void
 	obj->flags |= OBJ_FL_CLI;
     }
 
+    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_ABSTRACT)) {
+	obj->flags |= OBJ_FL_ABSTRACT;
+    }
+
 }   /* obj_set_ncx_flags */
 
 
@@ -6034,6 +6203,62 @@ boolean
 
 
 /********************************************************************
+* FUNCTION obj_is_key
+*
+* Check if object is being used as a key leaf within a list
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is a key leaf
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_key (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_KEY) ? TRUE : FALSE;
+
+}   /* obj_is_key */
+
+
+/********************************************************************
+* FUNCTION obj_is_abstract
+*
+* Check if object is being used as an object identifier or error-info
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:abstract
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_abstract (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_ABSTRACT) ? TRUE : FALSE;
+
+}   /* obj_is_abstract */
+
+
+/********************************************************************
 * FUNCTION obj_ok_for_cli
 *
 * Figure out if the obj is OK for current CLI implementation
@@ -6104,5 +6329,181 @@ boolean
     return TRUE;
 
 }   /* obj_ok_for_cli */
+
+
+/********************************************************************
+ * FUNCTION obj_get_child_node
+ * 
+ * Get the correct child node for the specified parent and
+ * current XML node
+ *
+ * INPUTS:
+ *    obj == parent object template
+ *    chobj == current child node (may be NULL if the
+ *             xmlorder param is true
+ *     xmlorder == TRUE if should follow strict XML element order
+ *              == FALSE if sibling node order errors should be 
+ *                 ignored; find child nodes out of order
+ *                 and check too-many-instances later
+ *    curnode == current XML start or empty node to check
+ *    rettop == address of return topchild object
+ *    retobj == address of return object to use
+ *
+ * OUTPUTS:
+ *    *rettop set to top-level found object if return OK
+ *     and currently within a choice
+ *    *retobj set to found object if return OK
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+status_t 
+    obj_get_child_node (const obj_template_t *obj,
+			const obj_template_t *chobj,
+			const xml_node_t *curnode,
+			boolean xmlorder,
+			const obj_template_t **rettop,
+			const obj_template_t **retobj)
+{
+    const obj_template_t  *foundobj, *nextchobj;
+    const xmlChar         *foundmodname;
+    status_t               res;
+    ncx_node_t             dtyp;
+    boolean                topdone;
+
+#ifdef DEBUG
+    if (!obj || !curnode || !rettop || !retobj) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    foundobj = NULL;
+    foundmodname = NULL;
+    dtyp = NCX_NT_OBJ;
+    res = NO_ERR;
+    topdone = FALSE;
+
+    if (curnode->nsid) {
+	foundmodname = xmlns_get_module(curnode->nsid);
+    } 
+
+    if (obj_is_root(obj)) {
+	/* the child node can be any top-level object
+	 * in the configuration database
+	 */
+	if (foundmodname) {
+	    /* get the name from 1 module */
+	    foundobj = (const obj_template_t *)
+		def_reg_find_moddef(foundmodname,
+				    curnode->elname,
+				    &dtyp);
+	} else {
+	    /* NSID not set, get the name from any module */
+	    foundobj = (const obj_template_t *)
+		def_reg_find_any_moddef(&foundmodname,
+					curnode->elname,
+					&dtyp);
+	}
+    } else if (xmlorder) {
+	/* the current node must match or one of the
+	 * subsequent child nodes must match
+	 */
+	if (chobj) {
+	    switch (chobj->objtype) {
+	    case OBJ_TYP_CHOICE:
+	    case OBJ_TYP_CASE:
+		/* these nodes are not really in the XML so
+		 * check all the child nodes of the
+		 * cases.  When found, need to remember
+		 * the current child node at the choice
+		 * or case level, so when the lower
+		 * level child pointer runs out, the
+		 * search can continue at the next
+		 * sibling of 'rettop'
+		 */
+		foundobj = obj_find_child(chobj,
+					  foundmodname,
+					  curnode->elname);
+		if (foundobj) {
+		    /* make sure this matched a real node instead
+		     * of match of choice or case name
+		     */
+		    if (foundobj->objtype==OBJ_TYP_CHOICE ||
+			foundobj->objtype==OBJ_TYP_CASE) {
+			foundobj = NULL;
+		    } else {
+			*rettop = chobj;
+			topdone = TRUE;
+		    }
+		}		    
+		break;
+	    default:
+		/* the YANG node and XML node line up,
+		 * so it is OK to compare them directly
+		 */
+		res = xml_node_match(curnode, 
+				     obj_get_nsid(chobj), 
+				     obj_get_name(chobj), 
+				     XML_NT_NONE);
+
+		if (res == NO_ERR) {
+		    foundobj = chobj;
+		} else {
+		    foundobj = NULL;
+		}
+	    }
+
+	    if (!foundobj) {
+		/* check if there are other child nodes that could
+		 * match, due to instance qualifiers 
+		 */
+		nextchobj = find_next_child(chobj, curnode);
+		if (nextchobj) {
+		    res = NO_ERR;
+		    foundobj = nextchobj;
+		} else if (*rettop) {
+		    nextchobj = find_next_child(*rettop, curnode);
+		    if (nextchobj) {
+			res = NO_ERR;
+			foundobj = nextchobj;
+		    }
+		}
+	    }
+	}
+    } else {
+	/* do not care about XML order, just match any node
+	 * within the current parent object
+	 */
+	if (curnode->nsid) {
+	    /* find the specified module first */
+	    foundmodname = xmlns_get_module(curnode->nsid);
+	    if (foundmodname) {
+		foundobj = obj_find_child(obj, 
+					  foundmodname,
+					  curnode->elname);
+	    }
+	} else {
+	    /* get the object from first match module */
+	    foundobj = obj_find_child(obj, NULL,
+				      curnode->elname);
+	}
+    }
+
+    if (foundobj) {
+	*retobj = foundobj;
+	if (!topdone) {
+	    *rettop = foundobj;
+	}
+	return NO_ERR;
+    } else if (res != NO_ERR) {
+	return res;
+    } else {
+	return ERR_NCX_DEF_NOT_FOUND;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_get_child_node */
+
+
 
 /* END obj.c */

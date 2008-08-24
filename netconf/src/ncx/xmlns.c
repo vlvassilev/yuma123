@@ -249,6 +249,8 @@ status_t
 #endif
 
     nlen = xml_strlen(ns);
+    mlen = xml_strlen(modname);
+
     if (pfix) {
         plen = xml_strlen(pfix);
     } else {
@@ -258,10 +260,11 @@ status_t
         plen = xml_strlen(pfix);
     }
 
-    mlen = xml_strlen(modname);
-    if (!nlen || plen > XMLNS_MAX_PREFIX_SIZE || !mlen) {
+#ifdef DEBUG
+    if (!nlen || !mlen || !plen) {
 	return ERR_NCX_WRONG_LEN;
     }
+#endif
 
     if (!xmlns_next_id || xmlns_next_id > XMLNS_MAX_NS) {
 	return ERR_TOO_MANY_ENTRIES;
@@ -663,11 +666,15 @@ xmlns_id_t
 *
 * malloc and initialize a new xmlns_pmap_t struct
 *
+* INPUTS:
+*   buffsize == size of the prefix buffer to allocate 
+*               within this pmap (0 == do not malloc yet)
+*
 * RETURNS:
 *    pointer to new struct or NULL if malloc error
 *********************************************************************/
 xmlns_pmap_t *
-    xmlns_new_pmap (void)
+    xmlns_new_pmap (uint32 buffsize)
 {
     xmlns_pmap_t *pmap;
 
@@ -676,6 +683,17 @@ xmlns_pmap_t *
 	return NULL;
     }
     memset(pmap, 0x0, sizeof(xmlns_pmap_t));
+
+    if (buffsize) {
+	pmap->nm_pfix = m__getMem(buffsize);
+	if (!pmap->nm_pfix) {
+	    m__free(pmap);
+	    return NULL;
+	} else {
+	    memset(pmap->nm_pfix, 0x0, buffsize);
+	}
+    }
+
     return pmap;
 
 }  /* xmlns_new_pmap */

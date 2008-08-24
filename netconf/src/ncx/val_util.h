@@ -24,8 +24,18 @@ date	     init     comment
 
 */
 
+#include <xmlstring.h>
+
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
 #ifndef _H_obj
 #include "obj.h"
+#endif
+
+#ifndef _H_op
+#include "op.h"
 #endif
 
 #ifndef _H_status
@@ -34,6 +44,10 @@ date	     init     comment
 
 #ifndef _H_val
 #include "val.h"
+#endif
+
+#ifndef _H_xmlns
+#include "xmlns.h"
 #endif
 
 
@@ -46,6 +60,9 @@ date	     init     comment
 extern status_t 
     val_gen_index_comp  (const obj_key_t *in,
 			 val_value_t *val);
+
+extern status_t 
+    val_gen_key_entry  (val_value_t *keyval);
 
 extern status_t 
     val_gen_index_chain (const obj_template_t *obj,
@@ -72,5 +89,29 @@ extern val_value_t *
 extern boolean
     val_choice_is_set (val_value_t *val,
 		       const obj_template_t *obj);
+
+extern void
+    val_purge_errors_from_root (val_value_t *val);
+
+extern val_value_t *
+    val_new_child_val (xmlns_id_t   nsid,
+		       const xmlChar *name,
+		       boolean copyname,
+		       val_value_t *parent,
+		       op_editop_t editop);
+
+
+extern status_t
+    val_gen_instance_id (xml_msg_hdr_t *mhdr,
+			 const val_value_t  *val, 
+			 ncx_instfmt_t format,
+			 xmlChar  **buff);
+
+extern status_t
+    val_get_index_string (xml_msg_hdr_t *mhdr,
+			  ncx_instfmt_t format,
+			  const val_value_t *val,
+			  xmlChar *buff,
+			  uint32  *len);
 
 #endif	    /* _H_val_util */

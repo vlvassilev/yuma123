@@ -339,13 +339,14 @@ static rpc_err_t
     case ERR_NCX_WRONG_DATATYP:
     case ERR_NCX_WRONG_DATAVAL:
     case ERR_NCX_NUMLEN_TOOBIG:
-    case ERR_NCX_NOT_IN_RANGE:
     case ERR_NCX_WRONG_NUMTYP:
     case ERR_NCX_EXTRA_ENUMCH:
-    case ERR_NCX_VAL_NOTINSET:
     case ERR_NCX_EXTRA_LISTSTR:
 	return (isel) ? RPC_ERR_BAD_ELEMENT 
 	    : RPC_ERR_BAD_ATTRIBUTE;
+    case ERR_NCX_NOT_IN_RANGE:
+    case ERR_NCX_VAL_NOTINSET:
+	return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_UNKNOWN_PSD:
 	return RPC_ERR_UNKNOWN_ELEMENT;
     case ERR_NCX_EXTRA_PARMINST:
@@ -437,7 +438,7 @@ static rpc_err_t
     case ERR_NCX_MUST_TEST_FAILED:
 	return RPC_ERR_OPERATION_FAILED;   /* E.4 */
     case ERR_NCX_DATA_REST_VIOLATION:
-	return RPC_ERR_OPERATION_FAILED;   /* E.4 */
+	return RPC_ERR_INVALID_VALUE;      /* E.4 */
     case ERR_NCX_INSERT_MISSING_INSTANCE:
 	return RPC_ERR_BAD_ATTRIBUTE;      /* E.5 */
 

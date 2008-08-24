@@ -46,7 +46,6 @@ date             init     comment
  */
 #define XMLNS_MAX_NS   16384
 
-#define XMLNS_MAX_PREFIX_SIZE     63
 #define XMLNS_NULL_NS_ID          0
 
 #define XMLNS                     ((const xmlChar *)"xmlns")
@@ -88,7 +87,8 @@ typedef struct xmlns_t_ {
 typedef struct xmlns_pmap_t_ {
     dlq_hdr_t      qhdr;
     xmlns_id_t     nm_id;
-    xmlChar        nm_pfix[XMLNS_MAX_PREFIX_SIZE+1];
+    xmlChar       *nm_pfix;
+    boolean        nm_topattr;
 } xmlns_pmap_t;
 
 
@@ -159,7 +159,7 @@ extern const xmlChar *
     xmlns_get_module (xmlns_id_t  nsid);
 
 extern xmlns_pmap_t *
-    xmlns_new_pmap (void);
+    xmlns_new_pmap (uint32 buffsize);
 
 extern void
     xmlns_free_pmap (xmlns_pmap_t *pmap);

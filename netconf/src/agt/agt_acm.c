@@ -910,7 +910,7 @@ static status_t
     }
 
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr.errQ, 
+	agt_record_error(scb, &msg->mhdr, 
 			 NCX_LAYER_CONTENT, res, NULL,
 			 NCX_NT_NONE, NULL,
 			 (caps) ? NCX_NT_PARM : NCX_NT_NONE, caps);
@@ -953,7 +953,7 @@ static status_t
     if (cbtyp==AGT_CB_VALIDATE) {
 	if (!configCaps.globalConfig) {
 	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    agt_record_error(scb, &msg->mhdr.errQ,
+	    agt_record_error(scb, &msg->mhdr,
 			     NCX_LAYER_CONTENT,
 			     res,
 			     NULL,
@@ -994,7 +994,7 @@ static status_t
     if (cbtyp==AGT_CB_VALIDATE) {
 	if (!configCaps.groupConfig) {
 	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    agt_record_error(scb, &msg->mhdr.errQ,
+	    agt_record_error(scb, &msg->mhdr,
 			     NCX_LAYER_CONTENT,
 			     res,
 			     NULL,
@@ -1035,7 +1035,7 @@ static status_t
     if (cbtyp==AGT_CB_VALIDATE) {
 	if (!configCaps.rpcAccessConfig) {
 	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    agt_record_error(scb, &msg->mhdr.errQ,
+	    agt_record_error(scb, &msg->mhdr,
 			     NCX_LAYER_CONTENT,
 			     res,
 			     NULL,
@@ -1076,7 +1076,7 @@ static status_t
     if (cbtyp==AGT_CB_VALIDATE) {
 	if (!configCaps.databaseAccessConfig) {
 	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    agt_record_error(scb, &msg->mhdr.errQ,
+	    agt_record_error(scb, &msg->mhdr,
 			     NCX_LAYER_CONTENT,
 			     res,
 			     NULL,
@@ -1117,7 +1117,7 @@ static status_t
     if (cbtyp==AGT_CB_VALIDATE) {
 	if (!configCaps.notificationAccessConfig) {
 	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    agt_record_error(scb, &msg->mhdr.errQ,
+	    agt_record_error(scb, &msg->mhdr,
 			     NCX_LAYER_CONTENT,
 			     res,
 			     NULL,

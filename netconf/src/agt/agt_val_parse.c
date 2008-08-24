@@ -192,13 +192,13 @@ static status_t
     res = NO_ERR;
 
     if (msg) {
-	agt_record_error(scb, &msg->errQ, NCX_LAYER_OPERATION, errcode, 
+	agt_record_error(scb, msg, NCX_LAYER_OPERATION, errcode, 
 			 errnode, errnodetyp, error_parm, 
 			 intnodetyp, intnode);
     }
 
     if (scb && startnode) {
-	res = agt_xml_skip_subtree(scb->reader, startnode);
+	res = agt_xml_skip_subtree(scb, startnode);
     }
 
     return res;
@@ -251,13 +251,13 @@ static status_t
     res = NO_ERR;
 
     if (msg) {
-	agt_record_error_errinfo(scb, &msg->errQ, NCX_LAYER_OPERATION, errcode, 
+	agt_record_error_errinfo(scb, msg, NCX_LAYER_OPERATION, errcode, 
 				 errnode, errnodetyp, error_parm, 
 				 intnodetyp, intnode, errinfo);
     }
 
     if (scb && startnode) {
-	res = agt_xml_skip_subtree(scb->reader, startnode);
+	res = agt_xml_skip_subtree(scb, startnode);
     }
 
     return res;
@@ -304,316 +304,30 @@ static status_t
     if (scb->xmladvance) {
 	/* get a new node */
 	if (usens) {
-	    res = agt_xml_consume_node(scb->reader, 
-				       xmlnode,
+	    res = agt_xml_consume_node(scb, xmlnode,
 				       NCX_LAYER_OPERATION, 
-				       &msg->errQ);
+				       msg);
 	} else {
-	    res = agt_xml_consume_node_nons(scb->reader, 
-					    xmlnode,
+	    res = agt_xml_consume_node_nons(scb, xmlnode,
 					    NCX_LAYER_OPERATION, 
-					    &msg->errQ);
+					    msg);
 	}
     } else {
 	/* get current node, not a new node */
 	if (usens) {
-	    res = agt_xml_consume_node_noadv(scb->reader, 
-					     xmlnode,
+	    res = agt_xml_consume_node_noadv(scb, xmlnode,
 					     NCX_LAYER_OPERATION, 
-					     &msg->errQ);
+					     msg);
 	} else {
-	    res = agt_xml_consume_node_nons_noadv(scb->reader, 
-						  xmlnode,
+	    res = agt_xml_consume_node_nons_noadv(scb, xmlnode,
 						  NCX_LAYER_OPERATION, 
-						  &msg->errQ);
+						  msg);
 	}
     }
     scb->xmladvance = TRUE;
     return res;
 
 }   /* get_xml_node */
-
-
-/********************************************************************
- * FUNCTION gen_index_chain
- * 
- * Create an index chain for the just-parsed table or container struct
- *
- * INPUTS:
- *   scb == session control block (NULL means don't record errors)
- *   msg == xml_msg_hdr_t in progress (NULL means don't record errors)
- *   instart == first obj_key_t in the chain to process
- *   val == the just parsed list entry with the childQ containing
- *          nodes to check as index nodes
- *
- * RETURNS:
- *   status
- *********************************************************************/
-static status_t 
-    gen_index_chain (ses_cb_t  *scb,
-		     xml_msg_hdr_t *msg,
-		     const obj_key_t *instart,
-		     val_value_t *val)
-{
-    const obj_key_t    *key;
-    status_t            res, retres;
-
-    retres = NO_ERR;
-
-    /* 0 or more index components expected */
-    for (key = instart; 
-	 key != NULL;
-	 key = (const obj_key_t *)dlq_nextEntry(key)) {
-
-	res = val_gen_index_comp(key, val);
-	if (res != NO_ERR) {
-	    if (msg) {
-		agt_record_error(scb, &msg->errQ, 
-				 NCX_LAYER_OPERATION, res, 
-				 NULL, NCX_NT_OBJ, key->keyobj, 
-				 NCX_NT_VAL, val);
-	    }
-	    retres = res;
-	}
-    }
-
-    return retres;
-
-}   /* gen_index_chain */
-
-
-/********************************************************************
- * FUNCTION new_child_val
- * 
- * INPUTS:
- *   nsid == namespace ID of name
- *   name == name string (direct or strdup, based on copyname)
- *   copyname == TRUE is dname strdup should be used
- *   parent == parent node
- *   editop == requested edit operation
- *   
- * RETURNS:
- *   status
- *********************************************************************/
-static val_value_t *
-    new_child_val (xmlns_id_t   nsid,
-		   const xmlChar *name,
-		   boolean copyname,
-		   val_value_t *parent,
-		   op_editop_t editop)
-{
-    val_value_t *chval;
-
-    chval = val_new_value();
-    if (!chval) {
-	return NULL;
-    }
-
-    /* save a const pointer to the name of this field */
-    if (copyname) {
-	chval->dname = xml_strdup(name);
-	if (chval->dname) {
-	    chval->name = chval->dname;
-	} else {
-	    val_free_value(chval);
-	    return NULL;
-	}
-    } else {
-	chval->name = name;
-    }
-
-    chval->parent = parent;
-    chval->editop = editop;
-    chval->nsid = nsid;
-
-    return chval;
-
-} /* new_child_val */
-
-
-/********************************************************************
- * FUNCTION find_next_child
- * 
- * Check the instance qualifiers and see if the specified node
- * is a valid (subsequent) child node.
- *
- * Example:
- *  
- *  container foo { 
- *    leaf a { type int32; }
- *    leaf b { type int32; }
- *    leaf-list c { type int32; }
- *
- * Since a, b, and c are all optional, all of them have to be
- * checked, even while node 'a' is expected
- * The caller will save the current child in case the pointer
- * needs to be backed up.
- *
- * INPUTS:
- *   chobj == current child object template
- *   chnode == xml_node_t of start element to match
- *
- * RETURNS:
- *   pointer to child that matched or NULL if no valid next child
- *********************************************************************/
-static const obj_template_t *
-    find_next_child (const obj_template_t *chobj,
-		     const xml_node_t *chnode)
-{
-
-    const obj_template_t *chnext;
-    status_t              res;
-
-    chnext = chobj;
-
-    for (;;) {
-	switch (obj_get_iqualval(chnext)) {
-	case NCX_IQUAL_ONE:
-	case NCX_IQUAL_1MORE:
-	    /* the current child is mandatory; this is an error */
-	    return NULL;
-	    /* else fall through to next case */
-	case NCX_IQUAL_OPT:
-	case NCX_IQUAL_ZMORE:
-	    /* the current child is optional; keep trying
-	     * try to get the next child in the complex type 
-	     */
-	    chnext = obj_next_child(chnext);
-	    if (!chnext) {
-		return NULL;
-	    } else {
-		res = xml_node_match(chnode,
-				     obj_get_nsid(chnext), 
-				     obj_get_name(chnext), 
-				     XML_NT_NONE);
-		if (res == NO_ERR) {
-		    return chnext;
-		}
-	    }
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-    }
-    /*NOTREACHED*/
-
-} /* find_next_child */
-
-
-/********************************************************************
- * FUNCTION get_child_node
- * 
- * Get the correct child node for the specified parent and
- * current XML node
- *
- * INPUTS:
- *    obj == parent object template
- *    chobj == current child node (may be NULL if the
- *             xmlorder param is true
- *    curnode == current XML start or empty node to check
- *    retobj == address of return object
- *
- * OUTPUTS:
- *    *retobj set to found object if return OK
- *
- * RETURNS:
- *   status
- *********************************************************************/
-static status_t 
-    get_child_node (const obj_template_t *obj,
-		    const obj_template_t *chobj,
-		    const xml_node_t *curnode,
-		    const obj_template_t **retobj)
-{
-    const obj_template_t  *foundobj, *nextchobj;
-    const xmlChar         *foundmodname;
-    const agt_profile_t   *profile;    
-    status_t               res;
-    ncx_node_t             dtyp;
-    boolean                xmlorder;
-
-    foundobj = NULL;
-    dtyp = NCX_NT_OBJ;
-    res = NO_ERR;
-
-    profile = agt_get_profile();
-    if (profile) {
-	xmlorder = profile->agt_xmlorder;
-    } else {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    if (obj_is_root(obj)) {
-	/* the child node can be any top-level object
-	 * in the configuration database
-	 */
-	if (curnode->nsid) {
-	    /* get the name from 1 module */
-	    foundmodname = xmlns_get_module(curnode->nsid);
-	    if (foundmodname) {
-		foundobj = (const obj_template_t *)
-		    def_reg_find_moddef(foundmodname,
-					curnode->elname,
-					&dtyp);
-	    }
-	} else {
-	    /* NSID not set, get the name from any module */
-	    foundobj = (const obj_template_t *)
-		def_reg_find_any_moddef(&foundmodname,
-					curnode->elname,
-					&dtyp);
-	}
-    } else if (xmlorder) {
-	/* the current node must match or one of the
-	 * subsequent child nodes must match
-	 */
-	res = xml_node_match(curnode, 
-			     obj_get_nsid(chobj), 
-			     obj_get_name(chobj), 
-			     XML_NT_NONE);
-	if (res == NO_ERR) {
-	    foundobj = chobj;
-	} else {
-	    /* check if there are other child nodes that could
-	     * match, due to instance qualifiers 
-	     */
-	    nextchobj = find_next_child(chobj, curnode);
-	    if (nextchobj) {
-		res = NO_ERR;
-		foundobj = nextchobj;
-	    }
-	}
-    } else {
-	/* do not care about XML order, just match any node
-	 * within the current parent object
-	 */
-	if (curnode->nsid) {
-	    /* find the specified module first */
-	    foundmodname = xmlns_get_module(curnode->nsid);
-	    if (foundmodname) {
-		foundobj = obj_find_child(obj, 
-					  foundmodname,
-					  curnode->elname);
-	    }
-	} else {
-	    /* get the object from first match module */
-	    foundobj = obj_find_child(obj, NULL,
-				      curnode->elname);
-	}
-    }
-
-    if (foundobj) {
-	*retobj = foundobj;
-	return NO_ERR;
-    } else if (res != NO_ERR) {
-	return res;
-    } else {
-	return ERR_NCX_DEF_NOT_FOUND;
-    }
-    /*NOTREACHED*/
-
-}  /* get_child_node */
 
 
 /********************************************************************
@@ -823,14 +537,16 @@ static status_t
 	 *  Allocate a new val_value_t for the child value node 
 	 */
 	res = NO_ERR;
-	chval = new_child_val(nextnode.nsid, nextnode.elname, 
-	      TRUE, retval, get_editop(&nextnode));
+	chval = val_new_child_val(nextnode.nsid, nextnode.elname, 
+				  TRUE, retval, get_editop(&nextnode));
 	if (!chval) {
 	    res = ERR_INTERNAL_MEM;
 	}
 
 	/* check any error setting up the child node */
 	if (res == NO_ERR) {
+	    val_add_child(chval, retval);
+
 	    /* recurse through and get whatever nodes are present
 	     * in the child node; call it an 'any' type
 	     * make sure this function gets called again
@@ -844,12 +560,12 @@ static status_t
 				 &nextnode, 
 				 retval->dataclass, 
 				 chval);
+	    chval->res = res;
 	    xml_clean_node(&nextnode);
-	    if (res == NO_ERR) {
-		/* success - save the child value node */
-		val_add_child(chval, retval);
-	    } else {
+
+	    if (res != NO_ERR) {
 		errdone = TRUE;
+		chval = NULL;
 	    }
 	}
 
@@ -922,7 +638,7 @@ static status_t
     const xml_node_t  *errnode;
     const xmlChar     *badval;
     xml_node_t         valnode, endnode;
-    status_t           res, res2;
+    status_t           res, res2, res3;
     boolean            errdone;
 
     /* init local vars */
@@ -932,6 +648,7 @@ static status_t
     errdone = FALSE;
     badval = NULL;
     res2 = NO_ERR;
+    res3 = NO_ERR;
 
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
@@ -998,8 +715,19 @@ static status_t
 	}
     }
 
+    /* check if this is a list index, add it now so
+     * error-path info will be as complete as possible
+     */
+    if (obj_is_key(retval->obj)) {
+	res3 = val_gen_key_entry(retval);
+    }
+
     if (res == NO_ERR) {
 	res = res2;
+    }
+
+    if (res == NO_ERR) {
+	res = res3;
     }
 
     /* check if any errors; record the first error */
@@ -1154,7 +882,7 @@ static status_t
     const xml_node_t  *errnode;
     const xmlChar     *badval;
     xml_node_t         valnode, endnode;
-    status_t           res, res2;
+    status_t           res, res2, res3;
     boolean            errdone;
 
     /* init local vars */
@@ -1164,6 +892,7 @@ static status_t
     errdone = FALSE;
     badval = NULL;
     res2 = NO_ERR;
+    res3 = NO_ERR;
 
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
@@ -1228,8 +957,19 @@ static status_t
 	}
     }
 
+    /* check if this is a list index, add it now so
+     * error-path info will be as complete as possible
+     */
+    if (obj_is_key(retval->obj)) {
+	res3 = val_gen_key_entry(retval);
+    }
+
     if (res == NO_ERR) {
 	res = res2;
+    }
+
+    if (res == NO_ERR) {
+	res = res3;
     }
 
     /* check if any errors; record the first error */
@@ -1286,7 +1026,7 @@ static status_t
     const xmlChar       *badval;
     const ncx_errinfo_t *errinfo;
     xml_node_t           valnode, endnode;
-    status_t             res, res2;
+    status_t             res, res2, res3;
     boolean              errdone;
 
     /* init local vars */
@@ -1296,6 +1036,8 @@ static status_t
     errnode = startnode;
     errdone = FALSE;
     errinfo = NULL;
+    res2 = NO_ERR;
+    res3 = NO_ERR;
 
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
@@ -1368,8 +1110,19 @@ static status_t
 	errdone = TRUE;
     }
 
+    /* check if this is a list index, add it now so
+     * error-path info will be as complete as possible
+     */
+    if (obj_is_key(retval->obj)) {
+	res3 = val_gen_key_entry(retval);
+    }
+
     if (res == NO_ERR) {
 	res = res2;
+    }
+
+    if (res == NO_ERR) {
+	res = res3;
     }
 
     /* check if any errors; record the first error */
@@ -1425,7 +1178,7 @@ static status_t
     const typ_template_t *listtyp;
     const ncx_errinfo_t  *errinfo;
     xml_node_t            valnode, endnode;
-    status_t              res, res2;
+    status_t              res, res2, res3;
     boolean               errdone, empty;
     ncx_btype_t           listbtyp;
 
@@ -1437,6 +1190,8 @@ static status_t
     errdone = FALSE;
     empty = FALSE;
     errinfo = NULL;
+    res2 = NO_ERR;
+    res3 = NO_ERR;
 
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
@@ -1475,11 +1230,9 @@ static status_t
 	    res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
 					btyp, (const xmlChar *)"",
 					&errinfo);
-	    if (res == NO_ERR) {
-		retval->v.str = xml_strdup((const xmlChar *)"");
-		if (!retval->v.str) {
-		    res = ERR_INTERNAL_MEM;
-		}
+	    retval->v.str = xml_strdup((const xmlChar *)"");
+	    if (!retval->v.str) {
+		res = ERR_INTERNAL_MEM;
 	    }
 	}
     }
@@ -1537,21 +1290,23 @@ static status_t
 
 	if (res != NO_ERR) {
 	    badval = valnode.simval;
-	} else {
-	    /* record the value even if there are errors after this */
-	    switch (btyp) {
-	    case NCX_BT_STRING:
-	    case NCX_BT_BINARY:
-		retval->v.str = xml_strdup(valnode.simval);
-		if (!retval->v.str) {
-		    res = ERR_INTERNAL_MEM;
-		}
-		break;
-	    case NCX_BT_SLIST:
-		break;   /* value already set */
-	    default:
-		res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+
+	/* record the value even if there are errors */
+	switch (btyp) {
+	case NCX_BT_STRING:
+	case NCX_BT_BINARY:
+	case NCX_BT_INSTANCE_ID:
+	case NCX_BT_KEYREF:
+	    retval->v.str = xml_strdup(valnode.simval);
+	    if (!retval->v.str) {
+		res = ERR_INTERNAL_MEM;
 	    }
+	    break;
+	case NCX_BT_SLIST:
+	    break;   /* value already set */
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	}
 	break;
     default:
@@ -1575,8 +1330,19 @@ static status_t
 	errdone = TRUE;
     }
 
+    /* check if this is a list index, add it now so
+     * error-path info will be as complete as possible
+     */
+    if (obj_is_key(retval->obj)) {
+	res3 = val_gen_key_entry(retval);
+    }
+
     if (res == NO_ERR) {
 	res = res2;
+    }
+
+    if (res == NO_ERR) {
+	res = res3;
     }
 
     /* check if any errors; record the first error */
@@ -1620,7 +1386,7 @@ static status_t
     const xmlChar       *badval;
     const ncx_errinfo_t *errinfo;
     xml_node_t           valnode, endnode;
-    status_t             res, res2;
+    status_t             res, res2, res3;
     boolean              errdone;
 
     /* init local vars */
@@ -1630,6 +1396,7 @@ static status_t
     errdone = FALSE;
     badval = NULL;
     res2 = NO_ERR;
+    res3 = NO_ERR;
     errinfo = NULL;
 
     val_init_from_template(retval, obj);
@@ -1694,8 +1461,19 @@ static status_t
 	}
     }
 
+    /* check if this is a list index, add it now so
+     * error-path info will be as complete as possible
+     */
+    if (obj_is_key(retval->obj)) {
+	res3 = val_gen_key_entry(retval);
+    }
+
     if (res == NO_ERR) {
 	res = res2;
+    }
+
+    if (res == NO_ERR) {
+	res = res3;
     }
 
     /* check if any errors; record the first error */
@@ -1798,10 +1576,10 @@ static status_t
 	res = NO_ERR;
 
 	/* try to create a new child node for the leaf-list */
-	chval = new_child_val(obj_get_nsid(obj),
-			      obj_get_name(obj), 
-			      FALSE, retval, 
-			      get_editop(startnode));
+	chval = val_new_child_val(obj_get_nsid(obj),
+				  obj_get_name(obj), 
+				  FALSE, retval, 
+				  get_editop(startnode));
 	if (!chval) {
 	    res = ERR_INTERNAL_MEM;
 	} else if (empty) {
@@ -1811,14 +1589,12 @@ static status_t
 	    continue;
 	} else {
 	    /* get one leaf parsed */
+	    val_add_child(chval, retval);
 	    res = parse_one_btype(scb, msg, obj, btyp,
 				  startnode, parentdc, chval);
-	    if (res == NO_ERR) {
-		/* success - save the child value node */
-		val_add_child(chval, retval);
-	    } else {
+	    chval->res = res;
+	    if (res != NO_ERR) {
 		/* did not parse the child node correctly */
-		val_free_value(chval);
 		errdone = TRUE;
 	    }
 	}
@@ -1907,22 +1683,23 @@ static status_t
     parse_complex_nc (ses_cb_t  *scb,
 		      xml_msg_hdr_t *msg,
 		      const obj_template_t *obj,
-		      ncx_btype_t btyp,
 		      const xml_node_t *startnode,
 		      ncx_data_class_t parentdc,
 		      val_value_t  *retval)
 {
     const xml_node_t     *errnode;
-    const obj_template_t *chobj, *curchild, *nextchobj;
+    const obj_template_t *chobj, *topchild, *curchild, *nextchobj;
+    const agt_profile_t  *profile;
     val_value_t          *chval;
     xml_node_t            chnode;
     status_t              res, res2, retres;
-    boolean               done, errdone, empty;
+    boolean               done, errdone, empty, xmlorder;
     ncx_btype_t           chbtyp;
 
     /* setup local vars */
     errnode = startnode;
     chobj = NULL;
+    topchild = NULL;
     curchild = NULL;
     nextchobj = NULL;
     res = NO_ERR;
@@ -1931,6 +1708,12 @@ static status_t
     done = FALSE;
     errdone = FALSE;
     empty = FALSE;
+
+    profile = agt_get_profile();
+    if (!profile) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    xmlorder = profile->agt_xmlorder;
 
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
@@ -2032,7 +1815,16 @@ static status_t
 	 * if no xmlorder, then check for any valid child
 	 */
 	if (res==NO_ERR) {
-	    res = get_child_node(obj, chobj, &chnode, &curchild);
+	    res = obj_get_child_node(obj, chobj, &chnode, xmlorder,
+				     &topchild, &curchild);
+	    if (res != NO_ERR) {
+		/* have no expected child element to match to this XML node
+		 * if xmlorder == TRUE, then this could indicate an extra
+		 * instance of the last child node
+		 */
+		res = ERR_NCX_EXTRA_NODE;
+		errnode = &chnode;
+	    }
 	}
 
 	/* try to setup a new child node */
@@ -2044,10 +1836,10 @@ static status_t
 	     * 'chnode' namespace and name;
 	     * Allocate a new val_value_t for the child value node
 	     */
-	    chval = new_child_val(obj_get_nsid(curchild),
-				  obj_get_name(curchild), 
-				  FALSE, retval, 
-				  get_editop(&chnode));
+	    chval = val_new_child_val(obj_get_nsid(curchild),
+				      obj_get_name(curchild), 
+				      FALSE, retval, 
+				      get_editop(&chnode));
 	    if (!chval) {
 		res = ERR_INTERNAL_MEM;
 	    }
@@ -2065,7 +1857,7 @@ static status_t
 	    xml_clean_node(&chnode);
 	    if (res2 != NO_ERR) {
 		/* skip child didn't work, now skip the entire value subtree */
-		(void)agt_xml_skip_subtree(scb->reader, startnode);
+		(void)agt_xml_skip_subtree(scb, startnode);
 		return res;
 	    } else {
 		/* skip child worked, go on to next child, parse for errors */
@@ -2077,32 +1869,30 @@ static status_t
 	/* recurse through and get whatever nodes are present
 	 * in the child node
 	 */
+
+	val_add_child(chval, retval);
 	res = parse_btype_nc(scb, msg, curchild,
 			     &chnode, retval->dataclass, chval);
-	if (res == NO_ERR) {
-	    /* success - save the child value node */
-	    val_add_child(chval, retval);
-
-	    /* setup the next child unless the current child
-	     * is a list
-	     */
-	    if (chbtyp != NCX_BT_LIST) {
-		/* setup next child if the cur child is 0 - 1 instance */
-		switch (obj_get_iqualval(curchild)) {
-		case NCX_IQUAL_ONE:
-		case NCX_IQUAL_OPT:
-		    if (chobj) {
-			chobj = obj_next_child(chobj);
-		    }
-		    break;
-		default:
-		    break;
-		}
-	    }
-	} else {
-	    /* did not parse the child node correctly */
-	    val_free_value(chval);
+	chval->res = res;
+	if (res != NO_ERR) {
 	    retres = res;
+	}
+
+	/* setup the next child unless the current child
+	 * is a list
+	 */
+	if (chbtyp != NCX_BT_LIST) {
+	    /* setup next child if the cur child is 0 - 1 instance */
+	    switch (obj_get_iqualval(curchild)) {
+	    case NCX_IQUAL_ONE:
+	    case NCX_IQUAL_OPT:
+		if (chobj) {
+		    chobj = obj_next_child(chobj);
+		}
+		break;
+	    default:
+		break;
+	    }
 	}
 	xml_clean_node(&chnode);
 
@@ -2119,15 +1909,6 @@ static status_t
 	if ((startnode->nsid == xmlns_ncx_id() || startnode->nsid == 0) && 
 	    !xml_strcmp(startnode->elname, NCX_EL_LOAD_CONFIG)) {
 	    done = TRUE;
-	}
-    }
-
-    /* check if the index ID needs to be set */
-    if (btyp==NCX_BT_LIST) {
-	res = gen_index_chain(scb, msg, 
-			      obj_first_key(obj), retval);
-	if (res != NO_ERR) {
-	    retres = res;
 	}
     }
 
@@ -2240,7 +2021,7 @@ static status_t
 	break;
     case NCX_BT_CONTAINER:
     case NCX_BT_LIST:
-	res = parse_complex_nc(scb, msg, obj, btyp, startnode, 
+	res = parse_complex_nc(scb, msg, obj, startnode, 
 			       parentdc, retval);
 	break;
     default:
@@ -2571,7 +2352,7 @@ static status_t
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 	    if (msg) {
-		agt_record_attr_error(scb, &msg->errQ, 
+		agt_record_attr_error(scb, msg, 
 				      NCX_LAYER_OPERATION, res,  
 				      attr, node, NULL, 
 				      NCX_NT_VAL, retval);

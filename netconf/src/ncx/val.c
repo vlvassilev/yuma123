@@ -92,34 +92,6 @@ date         init     comment
 
 
 /********************************************************************
-* FUNCTION need_quotes
-* 
-* Check if a string needs to be quoted to be output
-* within a conf file or ncxcli stdout output
-*
-* INPUTS:
-*    str == string to check
-*
-* RETURNS:
-*    TRUE if double quoted string is needed
-*    FALSE if not needed
-*********************************************************************/
-static boolean
-    need_quotes (const xmlChar *str)
-{
-    /* any whitespace or newline needs quotes */
-    while (*str) {
-	if (isspace(*str) || *str == '\n') {
-	    return TRUE;
-	}
-	str++;
-    }
-    return FALSE;
-
-}  /* need_quotes */
-
-
-/********************************************************************
 * FUNCTION dump_num
 * 
 * Printf the specified ncx_num_t 
@@ -554,436 +526,6 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION get_index_comp
-* 
-* Get the index component string for the specified value
-* 
-* INPUTS:
-*   format == desired output format
-*   val == val_value_t for table or container
-*   buff = buffer to hold result; NULL == get length only
-*   
-* OUTPUTS:
-*   *len = number of bytes that were (or would have been) written 
-*          to buff
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    get_index_comp (ncx_instfmt_t format,
-		    const val_value_t *val,
-		    xmlChar *buff,
-		    uint32  *len)
-{
-    uint32              cnt, total;
-    status_t            res;
-    boolean             strval, quotes;
-
-    total = 0;
-
-    /* get the data type to determine if a quoted string is needed */
-    switch (val->btyp) {
-    case NCX_BT_ENUM:
-    case NCX_BT_STRING:
-    case NCX_BT_BINARY:
-    case NCX_BT_INSTANCE_ID:
-    case NCX_BT_BOOLEAN:
-	strval = TRUE;
-	break;
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
-    case NCX_BT_FLOAT64:
-	strval = FALSE;
-	break;
-    default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    /* check if parmname='parmval' format is needed */
-    if (format==NCX_IFMT_XPATH1 || format==NCX_IFMT_XPATH2) {
-	if (buff) {
-	    cnt = xml_strcpy(buff, val->name);
-	    buff += cnt;
-	    *buff++ = VAL_EQUAL_CH;
-	    if (strval) {
-		*buff++ = (xmlChar)((format==NCX_IFMT_XPATH1) ?
-				    VAL_QUOTE_CH : VAL_DBLQUOTE_CH);
-		/* account for equal, quote-char */
-		total = cnt+2;  
-	    } else {
-		total = cnt+1;
-	    }
-	    *buff = 0;
-	} else {
-	    total = xml_strlen(val->name) + (uint32)((strval) ? 2 : 1);
-	}
-    }
-
-    /* get the index component value */
-    switch (val->btyp) {
-    case NCX_BT_BOOLEAN:
-    case NCX_BT_ENUM:
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
-    case NCX_BT_FLOAT64:
-	res = val_sprintf_simval_nc(buff, val, &cnt);
-	if (res != NO_ERR) {
-	    return SET_ERROR(res);
-	}
-	if (buff) {
-	    buff += cnt;
-	}
-	total += cnt;
-	break;
-    case NCX_BT_STRING:
-    case NCX_BT_BINARY:
-    case NCX_BT_INSTANCE_ID:
-	/* CLI index components need to be quoted sometimes */
-	quotes = (format==NCX_IFMT_CLI) ?
-	    need_quotes(VAL_STR(val)) : FALSE;
-
-	if (quotes) {
-	    if (buff) {
-		*buff++ = VAL_QUOTE_CH;
-	    }
-	    total++;
-	}
-
-	res = val_sprintf_simval_nc(buff, val, &cnt);
-	if (res != NO_ERR) {
-	    return SET_ERROR(res);
-	}
-	if (buff) {
-	    buff += cnt;
-	}
-	total += cnt;
-
-	if (quotes) {
-	    if (buff) {
-		*buff++ = VAL_QUOTE_CH;
-	    }
-	    total++;
-	}
-	break;
-    default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    /* check if closing qoute char is needed */
-    if (format==NCX_IFMT_XPATH1) {
-	if (strval) {
-	    if (buff) {
-		*buff++ = VAL_QUOTE_CH;
-	    }
-	    total++;
-	}
-    } else if (format==NCX_IFMT_XPATH2) {
-	if (strval) {
-	    if (buff) {
-		*buff++ = VAL_DBLQUOTE_CH;
-	    }
-	    total++;
-	}
-    }
-
-    /* end the string */
-    if (buff) {
-	*buff = 0;
-    }
-
-    *len = total;
-    return NO_ERR;
-
-}  /* get_index_comp */
-
-
-/********************************************************************
-* FUNCTION get_index_string
-* 
-* Get the index string for the specified table or container entry
-* 
-* INPUTS:
-*   format == desired output format
-*   val == val_value_t for table or container
-*   buff == buffer to hold result; 
-         == NULL means get length only
-*   
-* OUTPUTS:
-*   *len = number of bytes that were (or would have been) written 
-*          to buff
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    get_index_string (ncx_instfmt_t format,
-		      const val_value_t *val,
-		      xmlChar *buff,
-		      uint32  *len)
-{
-    const val_value_t  *ival, *nextival;
-    const val_index_t  *valin;
-    uint32              cnt, total;
-    status_t            res;
-    boolean             simval;
-
-    total = 0;
-    *len = 0;
-
-    /* check the value base type first */
-    switch (val->btyp) {
-    case NCX_BT_LIST:
-	simval = FALSE;
-	break;
-    case NCX_BT_CHOICE:
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    case NCX_BT_CONTAINER:
-	simval = FALSE;
-	break;
-    default:
-	simval = TRUE;
-    }
-
-    if (simval) {
-	valin = NULL;
-	ival = NULL;
-    } else {
-	/* get the first index node value struct */
-	valin = (const val_index_t *)dlq_firstEntry(&val->indexQ);
-	if (valin) {
-	    ival = valin->val;
-	} else {
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-
-    /* check that there is at least one index component */
-    if (ival || simval) {
-	if (format != NCX_IFMT_CLI) {
-	    /* start with the left bracket */
-	    if (buff) {
-		*buff++ = (xmlChar)VAL_BINDEX_CH;
-	    }
-	    total++;
-	}
-    } else {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    /* check special case for container; simple value is the index */
-    if (simval) {
-	res = get_index_comp(format, val, buff, &cnt);
-	if (res != NO_ERR) {
-	    return SET_ERROR(res);
-	}
-	if (buff) {
-	    buff += cnt;
-	}
-	total += cnt;
-    } else {
-	/* at least one real index component; generate entire index */
-	while (ival) {
-	    /* generate one component, or N if it is a struct */
-	    res = get_index_comp(format, ival, buff, &cnt);
-	    if (res != NO_ERR) {
-		return SET_ERROR(res);
-	    } else {
-		if (buff) {
-		    buff += cnt;
-		}
-		total += cnt;
-	    }
-
-	    /* setup next index component */
-	    if (valin) {
-		nextival = NULL;
-		valin = (const val_index_t *)dlq_nextEntry(valin);
-		if (valin) {
-		    nextival = valin->val;
-		} 
-	    } else {
-		nextival = NULL;
-	    }
-
-	    /* check if an index separator string is needed */
-	    if (nextival) {
-		switch (format) {
-		case NCX_IFMT_C:
-		    /* add the index separator char ',' */
-		    if (buff) {
-			*buff++ = VAL_INDEX_SEPCH;
-		    }
-		    total++;
-		    break;
-		case NCX_IFMT_XPATH1:
-		case NCX_IFMT_XPATH2:
-		    /* format is one of the Xpath variants 
-		     * add the index separator string ' and ' 
-		     */
-		    if (buff) {
-			buff += xml_strcpy(buff, VAL_XPATH_INDEX_SEPSTR);
-		    }
-		    total += VAL_XPATH_INDEX_SEPLEN;
-		    break;
-		case NCX_IFMT_CLI:
-		    /* add the CLI index separator char ' ' */
-		    if (buff) {
-			*buff++ = VAL_INDEX_CLI_SEPCH;
-		    }
-		    total++;
-		    break;
-		default:
-		    SET_ERROR(ERR_INTERNAL_VAL);
-		}
-	    }
-
-	    /* setup the next index component */
-	    ival = nextival;
-	}
-    }
-
-    /* add the closing right bracket */
-    if (format != NCX_IFMT_CLI) {
-	if (buff) {
-	    *buff++ = VAL_EINDEX_CH;
-	    *buff = 0;
-	}
-	total++;
-    }
-
-    /* return success */
-    *len = total;
-    return NO_ERR;
-
-}  /* get_index_string */
-
-
-/********************************************************************
-* FUNCTION get_instance_string
-* 
-* Get the instance ID string for the specified value
-* 
-* INPUTS:
-*   format == desired output format
-*   full == full or partial format
-*   val == value node to generate instance string for
-*   buff = buffer to hold result; NULL == get length only
-*   
-* OUTPUTS:
-*   *len = number of bytes that were (or would have been) written 
-*          to buff
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    get_instance_string (ncx_instfmt_t format,
-			 boolean full,
-			 const val_value_t *val,
-			 xmlChar *buff,
-			 uint32  *len)
-{
-    const xmlChar      *name;
-    uint32              cnt, total;
-    status_t            res;
-    boolean             root;
-
-    /* init local vars */
-    res = NO_ERR;
-    total = 0;
-    cnt = 0;
-    root = FALSE;
-
-    /* process the specific node type 
-     * Recurively find the top node and start there
-     */
-    if (val->parent) {
-	res = get_instance_string(format, full, val->parent, 
-				  buff, &cnt);
-    } else {
-	root = TRUE;
-    }
-
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    name = val->name;
-
-    /* else move the buffer pointer to the end to append */
-    if (buff) {
-	buff += cnt;
-    }
-
-    /* check if a path sep char is needed */
-    switch (format) {
-    case NCX_IFMT_C:
-	if (cnt) {
-	    if (buff) {
-		*buff++ = VAL_INST_SEPCH;
-	    }
-	    cnt++;
-	}
-	break;
-    default:
-	if (buff) {
-	    *buff++ = VAL_XPATH_SEPCH;
-	}
-	cnt++;
-    }
-
-    /* check if the 'rpc' root element needs to be added here */
-    if (root) {
-	if (buff) {
-	    buff += xml_strcpy(buff, NCX_EL_RPC);
-	}
-	cnt += xml_strlen(NCX_EL_RPC);
-
-	/* add another path sep char */
-	if (buff) {
-	    *buff++ = (xmlChar)((format==NCX_IFMT_C) ? 
-				VAL_INST_SEPCH : VAL_XPATH_SEPCH);
-	}
-	cnt++;
-    }
-
-    /* add name string for this component */
-    if (buff) {
-	buff += xml_strcpy(buff, name);
-    }
-    total = cnt + xml_strlen(name);
-
-    /* check if this is a value node with an index clause */
-    if (!dlq_empty(&val->indexQ)) {
-	res = get_index_string(format, val, buff, &cnt);
-	if (res == NO_ERR) {
-	    if (buff) {
-		buff[cnt] = 0;
-	    }
-	    total += cnt;
-	}
-    }
-
-    /* set the length even if index error, and exit */
-    *len = total;
-    return res;
-
-}  /* get_instance_string */
-
-
-/********************************************************************
 * FUNCTION clean_value
 * 
 * Scrub the memory in a ncx_value_t by freeing all
@@ -1043,6 +585,7 @@ static void
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
+    case NCX_BT_LEAF_LIST:
 	while (!dlq_empty(&val->v.childQ)) {
 	    cur = (val_value_t *)dlq_deque(&val->v.childQ);
 	    val_free_value(cur);
@@ -1264,6 +807,7 @@ static void
     val->obj = obj;
     val->typdef = obj_get_ctypdef(obj);
     val->btyp = btyp;
+    val->nsid = obj_get_nsid(obj);
 
     /* the agent new_child_val function may have already
      * set the name field in agt_val_parse.c
@@ -2629,11 +2173,12 @@ void
 
     /* check if an index clause needs to be printed next */
     if (!dlq_empty(&val->indexQ)) {
-	res = get_index_string(NCX_IFMT_CLI, val, NULL, &len);
+	res = val_get_index_string(NULL, NCX_IFMT_CLI, val, NULL, &len);
 	if (res == NO_ERR) {
 	    buff = m__getMem(len+1);
 	    if (buff) {
-		res = get_index_string(NCX_IFMT_CLI, val, buff, &len);
+		res = val_get_index_string(NULL, NCX_IFMT_CLI, 
+					   val, buff, &len);
 		if (res == NO_ERR) {
 		    log_write("%s ", buff);
 		} else {
@@ -2690,7 +2235,7 @@ void
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
 	if (VAL_STR(val)) {
-	    quotes = need_quotes(VAL_STR(val));
+	    quotes = val_need_quotes(VAL_STR(val));
 	    if (quotes) {
 		log_write("%c", VAL_QUOTE_CH);
 	    }
@@ -2718,7 +2263,7 @@ void
 		case NCX_BT_BINARY:
 		case NCX_BT_INSTANCE_ID:
 		    if (listmem->val.str) {
-			quotes = need_quotes(listmem->val.str);
+			quotes = val_need_quotes(listmem->val.str);
 			if (quotes) {
 			    log_write("%c", VAL_QUOTE_CH);
 			}
@@ -2855,11 +2400,12 @@ void
 
     /* check if an index clause needs to be printed next */
     if (!dlq_empty(&val->indexQ)) {
-	res = get_index_string(NCX_IFMT_CLI, val, NULL, &len);
+	res = val_get_index_string(NULL, NCX_IFMT_CLI, val, NULL, &len);
 	if (res == NO_ERR) {
 	    buff = m__getMem(len+1);
 	    if (buff) {
-		res = get_index_string(NCX_IFMT_CLI, val, buff, &len);
+		res = val_get_index_string(NULL, NCX_IFMT_CLI, 
+					   val, buff, &len);
 		if (res == NO_ERR) {
 		    log_stdout("%s ", buff);
 		} else {
@@ -2909,7 +2455,7 @@ void
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
 	if (VAL_STR(val)) {
-	    quotes = need_quotes(VAL_STR(val));
+	    quotes = val_need_quotes(VAL_STR(val));
 	    if (quotes) {
 		log_stdout("%c", VAL_QUOTE_CH);
 	    }
@@ -2937,7 +2483,7 @@ void
 		case NCX_BT_BINARY:
 		case NCX_BT_INSTANCE_ID:
 		    if (listmem->val.str) {
-			quotes = need_quotes(listmem->val.str);
+			quotes = val_need_quotes(listmem->val.str);
 			if (quotes) {
 			    log_stdout("%c", VAL_QUOTE_CH);
 			}
@@ -3897,74 +3443,6 @@ status_t
 
 
 /********************************************************************
-* FUNCTION val_gen_instance_id
-* 
-* Malloc and Generate the instance ID string for this value node, 
-* 
-* INPUTS:
-*   val == node to generate the instance ID for
-*   format == desired output format (NCX or Xpath)
-*   full == TRUE if the full path should be generated
-*           This is usually only needed for <error-path>
-*           FALSE if the partial instance ID used internally
-*           and does not include any RPC method details.
-*           Hash table instance strings should use this value.
-*   buff == pointer to address of buffer to use
-*
-* OUTPUTS
-*   *buff == malloced buffer with the instance ID
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    val_gen_instance_id (const val_value_t  *val, 
-			 ncx_instfmt_t format,
-			 boolean full,
-			 xmlChar  **buff)
-{
-    uint32    len;
-    status_t  res;
-
-#ifdef DEBUG 
-    if (!val || !buff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    /* figure out the length of the parmset instance ID */
-    res = get_instance_string(format, full, val, NULL, &len);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* check no instance ID */
-    if (len==0) {
-	*buff = NULL;
-	return ERR_NCX_NO_INSTANCE;
-    }
-
-    /* get a buffer to fit the instance ID string */
-    *buff = (xmlChar *)m__getMem(len+1);
-    if (!*buff) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* get the instance ID string for real this time */
-    res = get_instance_string(format, full, val, *buff, &len);
-    if (res != NO_ERR) {
-	m__free(*buff);
-	*buff = NULL;
-	return SET_ERROR(res);
-    }
-
-    /* no errors */
-    return NO_ERR;
-
-}  /* val_gen_instance_id */
-
-
-/********************************************************************
 * FUNCTION val_add_child
 * 
 *   Add a child value node to a parent value node
@@ -4599,11 +4077,11 @@ uint32
 *   the instance count
 *********************************************************************/
 uint32
-    val_child_inst_cnt (val_value_t  *parent,
+    val_child_inst_cnt (const val_value_t  *parent,
 			const xmlChar *modname,
 			const xmlChar *name)
 {
-    val_value_t *val;
+    const val_value_t *val;
     uint32       cnt;
 
 #ifdef DEBUG
@@ -4618,9 +4096,9 @@ uint32
     }
 	
     cnt = 0;
-    for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
+    for (val = (const val_value_t *)dlq_firstEntry(&parent->v.childQ);
 	 val != NULL;
-	 val = (val_value_t *)dlq_nextEntry(val)) {
+	 val = (const val_value_t *)dlq_nextEntry(val)) {
 
 	if (modname &&
 	    xml_strcmp(modname,
@@ -4637,6 +4115,61 @@ uint32
     return cnt;
 
 }  /* val_child_inst_cnt */
+
+
+/********************************************************************
+* FUNCTION val_get_child_inst_id
+* 
+* Get the instance ID for this child node within the parent context
+* 
+* INPUTS:
+*    parent == parent complex type to check
+*    child == child node to find ID for
+*
+* RETURNS:
+*   the instance ID num (1 .. N), or 0 if some error
+*********************************************************************/
+uint32
+    val_get_child_inst_id (const val_value_t  *parent,
+			   const val_value_t *child)
+{
+    const val_value_t *val;
+    uint32             cnt;
+
+#ifdef DEBUG
+    if (!parent || !child) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+    if (!typ_has_children(parent->btyp)) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return 0;
+    }
+#endif
+
+    cnt = 0;
+    for (val = (const val_value_t *)dlq_firstEntry(&parent->v.childQ);
+	 val != NULL;
+	 val = (const val_value_t *)dlq_nextEntry(val)) {
+
+	if (xml_strcmp(obj_get_mod_name(child->obj),
+		       obj_get_mod_name(val->obj))) {
+	    continue;
+	}
+
+	/* check the node if the name matches */
+	if (!xml_strcmp(val->name, child->name)) {
+	    cnt++;
+	    if (val == child) {
+		return cnt;
+	    }
+	}
+    }
+
+    SET_ERROR(ERR_INTERNAL_VAL);
+    return 0;
+
+}  /* val_get_child_inst_id */
 
 
 /********************************************************************
@@ -6170,6 +5703,92 @@ uint32
     
 }  /* val_instance_count */
 
+
+/********************************************************************
+* FUNCTION val_set_extra_instance_errors
+* 
+* Count the number of instances of the specified object name
+* in the parent value struct.  This only checks the first
+* level under the parent, not the entire subtree
+* Set the val-res status for all instances beyond the 
+* specified 'maxelems' count to ERR_NCX_EXTRA_VAL_INST
+*
+* INPUTS:
+*   val == value to check
+*   modname == name of module which defines the object to count
+*              NULL (do not check module names)
+*   objname == name of object to count
+*   maxelems == number of allowed instances
+*
+*********************************************************************/
+void
+    val_set_extra_instance_errors (val_value_t  *val,
+				   const xmlChar *modname,
+				   const xmlChar *objname,
+				   uint32 maxelems)
+{
+    val_value_t *chval;
+    uint32       cnt;
+
+#ifdef DEBUG
+    if (!val || !objname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+    if (maxelems == 0) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+#endif
+
+    cnt = 0;
+
+    for (chval = val_get_first_child(val);
+	 chval != NULL;
+	 chval = val_get_next_child(chval)) {
+
+	if (modname && 
+	    xml_strcmp(modname,
+		       obj_get_mod_name(chval->obj))) {
+	    continue;
+	}
+
+	if (!xml_strcmp(objname, chval->name)) {
+	    if (++cnt > maxelems) {
+		chval->res = ERR_NCX_EXTRA_VAL_INST;
+	    }
+	}
+    }
+    
+}  /* val_set_extra_instance_errors */
+
+
+/********************************************************************
+* FUNCTION val_need_quotes
+* 
+* Check if a string needs to be quoted to be output
+* within a conf file or ncxcli stdout output
+*
+* INPUTS:
+*    str == string to check
+*
+* RETURNS:
+*    TRUE if double quoted string is needed
+*    FALSE if not needed
+*********************************************************************/
+boolean
+    val_need_quotes (const xmlChar *str)
+{
+    /* any whitespace or newline needs quotes */
+    while (*str) {
+	if (isspace(*str) || *str == '\n') {
+	    return TRUE;
+	}
+	str++;
+    }
+    return FALSE;
+
+}  /* val_need_quotes */
 
 
 /* END file val.c */

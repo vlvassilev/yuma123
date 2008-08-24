@@ -659,14 +659,14 @@ static status_t
 	case OP_EDITOP_CREATE:
 	    /* should not happen ... */
 	    res = ERR_NCX_DATA_EXISTS;
-	    agt_record_error(scb, &msg->mhdr.errQ, 
+	    agt_record_error(scb, &msg->mhdr, 
 			     NCX_LAYER_CONTENT, res, NULL,
 			     NCX_NT_PARM, newp, NCX_NT_PARM, newp);
 	    break;
 	case OP_EDITOP_DELETE:
 	    /* should not happen since max-access exceeded */
 	    res = ERR_NCX_NO_ACCESS_MAX;
-	    agt_record_error(scb, &msg->mhdr.errQ, 
+	    agt_record_error(scb, &msg->mhdr, 
 			     NCX_LAYER_CONTENT, res, NULL,
 			     NCX_NT_PARM, newp, NCX_NT_PARM, newp);
 	    break;
@@ -773,14 +773,14 @@ static status_t
 	case OP_EDITOP_CREATE:
 	    /* should not happen ... */
 	    res = ERR_NCX_DATA_EXISTS;
-	    agt_record_error(scb, &msg->mhdr.errQ, 
+	    agt_record_error(scb, &msg->mhdr, 
 			     NCX_LAYER_CONTENT, res, NULL,
 			     NCX_NT_PARM, newp, NCX_NT_PARM, newp);
 	    break;
 	case OP_EDITOP_DELETE:
 	    /* should not happen since max-access exceeded */
 	    res = ERR_NCX_NO_ACCESS_MAX;
-	    agt_record_error(scb, &msg->mhdr.errQ, 
+	    agt_record_error(scb, &msg->mhdr, 
 			     NCX_LAYER_CONTENT, res, NULL,
 			     NCX_NT_PARM, newp, NCX_NT_PARM, newp);
 	    break;
@@ -890,14 +890,14 @@ static status_t
 	case OP_EDITOP_CREATE:
 	    /* should not happen ... */
 	    res = ERR_NCX_DATA_EXISTS;
-	    agt_record_error(scb, &msg->mhdr.errQ, 
+	    agt_record_error(scb, &msg->mhdr, 
 			     NCX_LAYER_CONTENT, res, NULL,
 			     NCX_NT_PARM, newp, NCX_NT_PARM, newp);
 	    break;
 	case OP_EDITOP_DELETE:
 	    /* should not happen since max-access exceeded */
 	    res = ERR_NCX_NO_ACCESS_MAX;
-	    agt_record_error(scb, &msg->mhdr.errQ, 
+	    agt_record_error(scb, &msg->mhdr, 
 			     NCX_LAYER_CONTENT, res, NULL,
 			     NCX_NT_PARM, newp, NCX_NT_PARM, newp);
 	    break;

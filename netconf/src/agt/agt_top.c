@@ -128,7 +128,7 @@ void
     xml_init_node(&top);
 
     /* get the first node */
-    res = agt_xml_consume_node(scb->reader, &top, 
+    res = agt_xml_consume_node(scb, &top, 
 			       NCX_LAYER_TRANSPORT, NULL);
     if (res != NO_ERR) {
 	scb->stats.in_err_msgs++;

@@ -47,6 +47,7 @@ date             init     comment
 *                         C O N S T A N T S                         *
 *                                                                   *
 *********************************************************************/
+#define XML_MSG_PREFIX_SIZE NCX_MAX_NLEN
 
 
 /********************************************************************
@@ -58,10 +59,10 @@ date             init     comment
 /* Common XML Message Header */
 typedef struct xml_msg_hdr_t_ {
     /* incoming: 
-     * See ??? for details on rpc-reply NS prefix minimization
-     * Special hack: any namespace decls that were in the <rpc>
+     * All the namespace decls that were in the <rpc>
      * request are used in the <rpc-reply>, so the same prefixes
      * will be used, and the XML on the wire will be easier to debug
+     * by examining packet traces
      */
     xmlns_id_t      defns;       /* req. default namespace ID */
     xmlns_id_t      cur_defns;        /* minimize xmlns decls */
@@ -69,9 +70,8 @@ typedef struct xml_msg_hdr_t_ {
     boolean         withdef;           /* with-defaults value */
     boolean         withmeta;          /* with-metadata value */
     dlq_hdr_t       prefixQ;             /* Q of xmlns_pmap_t */
-    dlq_hdr_t       prefix2Q;            /* Q of xmlns_pmap_t */
     dlq_hdr_t       errQ;               /* Q of rpc_err_rec_t */
-    xmlChar         last_defpfix[XMLNS_MAX_PREFIX_SIZE+1];
+    xmlChar         last_defpfix[XML_MSG_PREFIX_SIZE+1];
 } xml_msg_hdr_t;
 
 				      
@@ -93,10 +93,15 @@ extern const xmlChar *
 			xmlns_id_t nsid,
 			boolean  *xneeded);
 
+extern const xmlChar *
+    xml_msg_get_prefix_xpath (xml_msg_hdr_t *msg,
+			      xmlns_id_t nsid);
+
 extern status_t 
     xml_msg_gen_new_prefix (xml_msg_hdr_t *msg,
 			    xmlns_id_t  nsid,
-			    xmlChar *retbuff);
+			    xmlChar **retbuff,
+			    uint32 buffsize);
 
 extern status_t
     xml_msg_build_prefix_map (xml_msg_hdr_t *msg,
@@ -112,7 +117,8 @@ extern status_t
 			      xml_attrs_t  *attrs);
 
 
-extern void
-    xml_msg_clean_prefixq (dlq_hdr_t *prefixQ);
+extern status_t
+    xml_msg_gen_xmlns_attrs (xml_msg_hdr_t *msg, 
+			     xml_attrs_t *attrs);
 
 #endif            /* _H_xml_msg */

@@ -129,15 +129,26 @@ static boolean agt_hello_init_done = FALSE;
 static status_t
     check_manager_hello (val_value_t *val)
 {
-    val_value_t  *caps;
+    val_value_t  *caps, *cap, *capchild;
 
     /* look for the NETCONF base capability string */
     caps = val_find_child(val, NC_MODULE, NCX_EL_CAPABILITIES);
-    if (caps) {
-	/*** !!! should check prefix as well !!! ***/
-	if (val_first_child_string(caps, NCX_EL_CAPABILITY,
-				   CAP_BASE_URN)) {
-	    return NO_ERR;
+    if (caps && caps->res == NO_ERR) {
+
+	cap = val_find_child(caps, NC_MODULE, NCX_EL_CAPABILITY);
+	if (cap && cap->res == NO_ERR) {
+
+	    /* cap is a leaf-list */
+	    for (capchild = val_get_first_child(cap);
+		 capchild != NULL;
+		 capchild = val_get_next_child(capchild)) {
+
+		if (capchild->res == NO_ERR) {
+		    if (!xml_strcmp(VAL_STR(capchild), CAP_BASE_URN)) {
+			return NO_ERR;
+		    }
+		}
+	    }
 	}
     }
 

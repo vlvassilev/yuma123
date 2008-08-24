@@ -435,7 +435,7 @@ val_value_t *
      * with the provided object template.
      */
     if (!script && !obj_ok_for_cli(obj)) {
-	*status = ERR_NCX_OPERATION_FAILED;
+	*status = SET_ERROR(ERR_NCX_OPERATION_FAILED);
 	return NULL;
     }
 

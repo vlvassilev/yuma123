@@ -500,12 +500,6 @@ extern status_t
     val_replace (const val_value_t *val,
 		 val_value_t *copy);
 
-extern status_t
-    val_gen_instance_id (const val_value_t *val, 
-			 ncx_instfmt_t format,
-			 boolean full,
-			 xmlChar  **buff);
-
 extern void
     val_add_child (val_value_t *child,
 		   val_value_t *parent);
@@ -574,9 +568,15 @@ extern uint32
 
 /* get instance count -- for instance qualifer checking */
 extern uint32
-    val_child_inst_cnt (val_value_t *parent,
+    val_child_inst_cnt (const val_value_t *parent,
 			const xmlChar *modname,
 			const xmlChar *name);
+
+
+extern uint32
+    val_get_child_inst_id (const val_value_t *parent,
+			   const val_value_t *child);
+
 
 extern uint32
     val_liststr_count (const val_value_t *val);
@@ -684,10 +684,21 @@ extern status_t
 		      const ncx_num_t *num,
 		      const dlq_hdr_t *checkQ);
 
-/* cound child instances of modname:objname within parent 'val' */
+/* count child instances of modname:objname within parent 'val' */
 extern uint32
     val_instance_count (val_value_t  *val,
 			const xmlChar *modname,
 			const xmlChar *objname);
+
+/* mark ERR_NCX_EXTRA_VAL_INST errors for nodes > 'maxelems' */
+extern void
+    val_set_extra_instance_errors (val_value_t  *val,
+				   const xmlChar *modname,
+				   const xmlChar *objname,
+				   uint32 maxelems);
+
+
+extern boolean
+    val_need_quotes (const xmlChar *str);
 
 #endif	    /* _H_val */

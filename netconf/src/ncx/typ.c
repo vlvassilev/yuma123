@@ -3502,6 +3502,7 @@ boolean
     case NCX_BT_CASE:
     case NCX_BT_LIST:
     case NCX_BT_ANY:
+    case NCX_BT_LEAF_LIST:
 	return TRUE;
     default:
 	return FALSE;

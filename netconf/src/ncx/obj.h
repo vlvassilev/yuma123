@@ -58,6 +58,10 @@ date	     init     comment
 #include "xmlns.h"
 #endif
 
+#ifndef _H_xml_util
+#include "xml_util.h"
+#endif
+
 
 /********************************************************************
 *								    *
@@ -125,6 +129,12 @@ date	     init     comment
 
 /* object is marked as an XSD list data type */
 #define OBJ_FL_XSDLIST      bit13
+
+/* OBJ_TYP_LEAF object is being uses as a key */
+#define OBJ_FL_KEY          bit14
+
+/* object is marked as abstract: not CLI or config data */
+#define OBJ_FL_ABSTRACT     bit15
 
 
 /********************************************************************
@@ -394,13 +404,11 @@ typedef struct obj_notif_t_ {
 typedef struct obj_template_t_ {
     dlq_hdr_t      qhdr;
     obj_type_t     objtype;
-    obj_qtype_t    qtype;
-    uint32         flags;
-    uint32         linenum;
-    xmlns_id_t     nsid;
-    ncx_module_t  *mod;         /* mod or submod containing obj */
-    tk_token_t    *tk;          /* tk valid only during parsing */
-    grp_template_t *grp;        /* non-NULL == in a grp.datadefQ */
+    uint32         flags;              /* see OBJ_FL_* definitions */
+    uint32         linenum;    /* saved from tk->linenum, persists */
+    ncx_module_t  *mod;            /* mod or submod containing obj */
+    tk_token_t    *tk;             /* tk valid only during parsing */
+    grp_template_t *grp;          /* non-NULL == in a grp.datadefQ */
     struct obj_template_t_ *parent;
     struct obj_template_t_ *usesobj;
     const obj_when_t  *augwhen;   /* augment when clause backptr */
@@ -652,6 +660,9 @@ extern boolean
     obj_get_config_flag2 (const obj_template_t *obj,
 			  boolean *setflag);
 
+extern void
+    obj_set_config_flag (obj_template_t *obj);
+
 extern ncx_access_t
     obj_get_max_access (const obj_template_t *obj);
 
@@ -764,6 +775,20 @@ extern boolean
     obj_is_cli (const obj_template_t *obj);
 
 extern boolean
+    obj_is_key (const obj_template_t *obj);
+
+extern boolean
+    obj_is_abstract (const obj_template_t *obj);
+
+extern boolean
     obj_ok_for_cli (const obj_template_t *obj);
+
+extern status_t 
+    obj_get_child_node (const obj_template_t *obj,
+			const obj_template_t *chobj,
+			const xml_node_t *curnode,
+			boolean xmlorder,
+			const obj_template_t **rettop,
+			const obj_template_t **retobj);
 
 #endif	    /* _H_obj */

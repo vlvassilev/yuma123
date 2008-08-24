@@ -924,7 +924,7 @@ static status_t
 * OUTPUTS:
 *   if non-NULL inputs:
 *      *targobj == target object
-*      *targQ == datadefQ header for targobj
+*      *targQ == datadefQ Q header which contains targobj
 *
 * RETURNS:
 *   status

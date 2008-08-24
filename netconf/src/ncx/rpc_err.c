@@ -188,10 +188,11 @@ static void
 {
     const rpc_err_info_t  *errinfo;
 
-    log_write("\nrpc-error: %s L:%s S:%s ", 
-	   (err->error_tag) ? (const char *)err->error_tag : "--",
-	   ncx_get_layer(err->error_type),
-	   rpc_err_get_severity(err->error_severity));
+    log_write("\nrpc-error: (%u) %s L:%s S:%s ", 
+	      err->error_res,
+	      (err->error_tag) ? (const char *)err->error_tag : "--",
+	      ncx_get_layer(err->error_type),
+	      rpc_err_get_severity(err->error_severity));
     if (err->error_app_tag) {
 	log_write("app-tag:%s ", err->error_app_tag);
     }

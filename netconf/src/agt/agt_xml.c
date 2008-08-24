@@ -203,9 +203,9 @@ static void
 *  the xml_attrs_t queue
 *
 * INPUTS:
-*   reader == XmlReader already initialized from File, Memory,
-*             or whatever
-*   errQ == Q to get any rpc-errors as found, NULL if not used
+*    scb == session control block
+*    msghdr  == msg hdr w/ Q to get any rpc-errors as found, 
+*               NULL if not used
 *    nserr == TRUE if unknown namespace should cause the
 *             function to fail and the attr not to be saved 
 *             This is the normal mode.
@@ -214,17 +214,17 @@ static void
 *
 * OUTPUTS:
 *   attrs Q contains 0 or more entries
-*   *errQ may have rpc-errors added to it
+*   *msghdr.errQ may have rpc-errors added to it
 *
 * RETURNS:
 *   status of the operation
 *   returns NO_ERR if all copied okay or even zero copied
 *********************************************************************/
 static status_t
-    get_all_attrs (xmlTextReaderPtr reader,
-		   xml_attrs_t  *attrs,
-		   ncx_layer_t   layer,
-		   dlq_hdr_t     *errQ,
+    get_all_attrs (ses_cb_t *scb,
+		   xml_attrs_t *attrs,
+		   ncx_layer_t layer,
+		   xml_msg_hdr_t *msghdr,
 		   boolean nserr)
 {
     int            i, cnt, ret;
@@ -238,7 +238,7 @@ static status_t
     uint32         plen;
 
     /* check the attribute count first */
-    cnt = xmlTextReaderAttributeCount(reader);
+    cnt = xmlTextReaderAttributeCount(scb->reader);
     if (cnt==0) {
 	return NO_ERR;
     }
@@ -254,21 +254,22 @@ static status_t
 
 	/* get the next attribute */
 	if (i==0) {
-	    ret = xmlTextReaderMoveToFirstAttribute(reader);
+	    ret = xmlTextReaderMoveToFirstAttribute(scb->reader);
 	} else {
-	    ret = xmlTextReaderMoveToNextAttribute(reader);
+	    ret = xmlTextReaderMoveToNextAttribute(scb->reader);
 	}
 	if (ret != 1) {
 	    res = ERR_XML_READER_INTERNAL;
 	    done = TRUE;
 	} else {
 	    /* get the attribute name */
-	    name = xmlTextReaderName(reader);
+	    name = xmlTextReaderName(scb->reader);
 	    if (!name) {
 		res = ERR_XML_READER_NULLNAME;
 	    } else {
 		value = NULL;
-		res = xml_check_ns(reader, name, &nsid, &plen, &badns);
+		res = xml_check_ns(scb->reader, name, 
+				   &nsid, &plen, &badns);
 		if (!nserr && res != NO_ERR) {
 		    nsid = xmlns_inv_id();
 		    plen = 0;
@@ -276,7 +277,7 @@ static status_t
 		}
 
 		/* get the attribute value even if a NS error */
-		value = xmlTextReaderValue(reader);
+		value = xmlTextReaderValue(scb->reader);
 		if (value) {
 		    /* save the values as received, may be QName 
 		     * only error that can occur is a malloc fail
@@ -290,9 +291,9 @@ static status_t
 	}
 
 	/* check the result */
-	if (res != NO_ERR && errQ) {
+	if (res != NO_ERR && msghdr) {
 	    xml_init_node(&errnode);
-	    get_errnode(reader, &errnode);
+	    get_errnode(scb->reader, &errnode);
 
 	    /* save the error info */
 	    if (res==ERR_XML_READER_NULLVAL ||
@@ -305,13 +306,13 @@ static status_t
 		errattr.attr_val = value;
 
 		/* generate an attribute error */
-		agt_record_attr_error(NULL, errQ, 
+		agt_record_attr_error(scb, msghdr, 
 				      layer, res, &errattr, 
 				      &errnode, badns,
 				      NCX_NT_NONE, NULL);
 	    } else {
 		/* generate an operation-failed error */
-		agt_record_error(NULL, errQ, layer, res, 
+		agt_record_error(scb, msghdr, layer, res, 
 				 &errnode, NCX_NT_STRING, 
 				 name, NCX_NT_NONE, NULL);
 	    }
@@ -320,14 +321,14 @@ static status_t
     }
 
     /* reset the current node to where we started */
-    ret = xmlTextReaderMoveToElement(reader);
+    ret = xmlTextReaderMoveToElement(scb->reader);
     if (ret != 1) {
-	if (errQ) {
+	if (msghdr) {
 	    res = ERR_XML_READER_INTERNAL;
 	    xml_init_node(&errnode);
-	    get_errnode(reader, &errnode);
+	    get_errnode(scb->reader, &errnode);
 
-	    agt_record_error(NULL, errQ, layer, res, 
+	    agt_record_error(scb, msghdr, layer, res, 
 			     &errnode, NCX_NT_STRING, 
 			     name, NCX_NT_NONE, NULL);
 	    xml_clean_node(&errnode);
@@ -358,14 +359,14 @@ static status_t
 *   Try to fail on fatal errors only
 *********************************************************************/
 static status_t 
-    consume_node (xmlTextReaderPtr reader,
-		  boolean          advance,
-		  xml_node_t      *node,
-		  ncx_layer_t      layer,
-		  dlq_hdr_t        *errQ,
-		  boolean          eoferr,
-		  boolean          nserr,
-		  boolean          clean)
+    consume_node (ses_cb_t *scb,
+		  boolean advance,
+		  xml_node_t *node,
+		  ncx_layer_t layer,
+		  xml_msg_hdr_t *msghdr,
+		  boolean eoferr,
+		  boolean nserr,
+		  boolean clean)
 {
     int             ret, nodetyp;
     const xmlChar  *str, *badns;
@@ -385,22 +386,22 @@ static status_t
 	/* check if a new node should be read */
 	if (advance) {
 	    /* advance the node pointer */
-	    ret = xmlTextReaderRead(reader);
+	    ret = xmlTextReaderRead(scb->reader);
 	    if (ret != 1) {
 		/* do not treat this as an internal error */
 		res = ERR_XML_READER_EOF;
-		if (errQ && eoferr) {
+		if (msghdr && eoferr) {
 		    /* generate an operation-failed error */
-		    agt_record_error(NULL, errQ, layer, res, 
-			      NULL, NCX_NT_NONE, NULL, 
-			      NCX_NT_NONE, NULL);
+		    agt_record_error(scb, msghdr, layer, res, 
+				     NULL, NCX_NT_NONE, NULL, 
+				     NCX_NT_NONE, NULL);
 		}
 		return res;
 	    }
 	}
 
 	/* get the node depth to match the end node correctly */
-	node->depth = xmlTextReaderDepth(reader);
+	node->depth = xmlTextReaderDepth(scb->reader);
 	if (node->depth == -1) {
 	    /* this never actaully happens */
 	    SET_ERROR(ERR_XML_READER_INTERNAL);
@@ -408,11 +409,11 @@ static status_t
 	}
 
 	/* get the internal nodetype, check it and convert it */
-	nodetyp = xmlTextReaderNodeType(reader);
+	nodetyp = xmlTextReaderNodeType(scb->reader);
 	switch (nodetyp) {
 	case XML_ELEMENT_NODE:
 	    /* classify element as empty or start */
-	    if (xmlTextReaderIsEmptyElement(reader)) {
+	    if (xmlTextReaderIsEmptyElement(scb->reader)) {
 		node->nodetyp = XML_NT_EMPTY;
 	    } else {
 		node->nodetyp = XML_NT_START;
@@ -444,7 +445,7 @@ static status_t
     case XML_NT_END:
     case XML_NT_EMPTY:
 	/* get the element QName */
-	str = xmlTextReaderName(reader);
+	str = xmlTextReaderName(scb->reader);
 	if (!str) {
 	    /* this never really happens */
 	    SET_ERROR(ERR_XML_READER_NULLNAME);
@@ -456,7 +457,7 @@ static status_t
 	 * only error returned is unknown-namespace 
 	 */
 	len = 0;
-	res = xml_check_ns(reader, str, &node->nsid, &len, &badns);
+	res = xml_check_ns(scb->reader, str, &node->nsid, &len, &badns);
 	if (!nserr && res != NO_ERR) {
 	    node->nsid = xmlns_inv_id();
 	    len = 0;
@@ -468,8 +469,8 @@ static status_t
 	
 	/* get all the attributes -- should be none for XML_NT_END */
 	if (res == NO_ERR) {
-	    res2 = get_all_attrs(reader, &node->attrs, 
-				 layer, errQ, nserr);
+	    res2 = get_all_attrs(scb, &node->attrs, 
+				 layer, msghdr, nserr);
 	}
 
 	/* Set the node module */
@@ -485,7 +486,7 @@ static status_t
     case XML_NT_STRING:
 	/* get the text value -- this is a malloced string */
 	node->simval = NULL;
-	valstr = xmlTextReaderValue(reader);
+	valstr = xmlTextReaderValue(scb->reader);
 	if (valstr) {
 	    if (clean) {
 		node->simfree = xml_copy_clean_string(valstr);
@@ -509,14 +510,14 @@ static status_t
 	break;
     }
 
-    if ((res != NO_ERR) && errQ) {
+    if ((res != NO_ERR) && msghdr) {
 	if (badns) {
 	    /* generate an operation-failed error */
-	    agt_record_error(NULL, errQ, layer, res, 
+	    agt_record_error(NULL, msghdr, layer, res, 
 			     node, NCX_NT_STRING, badns, 
 			     NCX_NT_NONE, NULL);
 	} else {
-	    agt_record_error(NULL, errQ, layer, res, 
+	    agt_record_error(NULL, msghdr, layer, res, 
 			     node, NCX_NT_NONE, NULL, 
 			     NCX_NT_NONE, NULL);
 	}
@@ -580,19 +581,17 @@ static status_t
 * function should be used to confirm that the XML_NT_START and
 * XML_NT_END nodes are paired correctly.
 *
-* The node pointer for the reader will be advanced before the
+* The node pointer for the scb->reader will be advanced before the
 * node is read.
 * 
 * INPUTS:
-*   reader == XmlReader already initialized from File, Memory,
-*             or whatever
+*   scb == session control block containing XmlTextReader
+*
 *   node    == pointer to an initialized xml_node_t struct
 *              to be filled in
 *   layer == protocol layer of caller (only used if errQ != NULL)
-*   errQ    == initialized queue header that will get any
-*              rpc_err_rec_t structs added to it, if errors
-*              are found
-*           == NULL if rpc-error processing should not be done
+*    msghdr  == msg hdr w/ Q to get any rpc-errors as found, 
+*               NULL if not used
 *   
 * OUTPUTS:
 *   *node == xml_node_t struct filled in 
@@ -603,60 +602,60 @@ static status_t
 *   Try to fail on fatal errors only
 *********************************************************************/
 status_t 
-    agt_xml_consume_node (xmlTextReaderPtr reader,
-			  xml_node_t      *node,
-			  ncx_layer_t      layer,
-			  dlq_hdr_t        *errQ)
+    agt_xml_consume_node (ses_cb_t *scb,
+			  xml_node_t *node,
+			  ncx_layer_t layer,
+			  xml_msg_hdr_t *msghdr)
 {
-    return consume_node(reader, TRUE, node, layer, errQ, 
+    return consume_node(scb, TRUE, node, layer, msghdr, 
 			TRUE, TRUE, TRUE);
 
 }  /* agt_xml_consume_node */
 
 
 status_t 
-    agt_xml_consume_node_noeof (xmlTextReaderPtr reader,
-				xml_node_t      *node,
-				ncx_layer_t      layer,
-				dlq_hdr_t        *errQ)
+    agt_xml_consume_node_noeof (ses_cb_t *scb,
+				xml_node_t *node,
+				ncx_layer_t layer,
+				xml_msg_hdr_t *msghdr)
 {
-    return consume_node(reader, TRUE, node, layer, errQ, 
+    return consume_node(scb, TRUE, node, layer, msghdr, 
 			FALSE, TRUE, TRUE);
 
 }  /* agt_xml_consume_node_noeof */
 
 
 status_t 
-    agt_xml_consume_node_nons (xmlTextReaderPtr reader,
-			       xml_node_t      *node,
-			       ncx_layer_t      layer,
-			       dlq_hdr_t        *errQ)
+    agt_xml_consume_node_nons (ses_cb_t *scb,
+			       xml_node_t *node,
+			       ncx_layer_t layer,
+			       xml_msg_hdr_t *msghdr)
 {
-    return consume_node(reader, TRUE, node, layer, errQ, 
+    return consume_node(scb, TRUE, node, layer, msghdr, 
 			FALSE, FALSE, TRUE);
 
 }  /* agt_xml_consume_node_nons */
 
 
 status_t 
-    agt_xml_consume_node_noadv (xmlTextReaderPtr reader,
-				xml_node_t      *node,
-				ncx_layer_t      layer,
-				dlq_hdr_t        *errQ)
+    agt_xml_consume_node_noadv (ses_cb_t *scb,
+				xml_node_t *node,
+				ncx_layer_t layer,
+				xml_msg_hdr_t *msghdr)
 {
-    return consume_node(reader, FALSE, node, layer, errQ, 
+    return consume_node(scb, FALSE, node, layer, msghdr, 
 			TRUE, TRUE, TRUE);
 
 }  /* agt_xml_consume_node_noadv */
 
 
 status_t 
-    agt_xml_consume_node_nons_noadv (xmlTextReaderPtr reader,
-				     xml_node_t      *node,
-				     ncx_layer_t      layer,
-				     dlq_hdr_t        *errQ)
+    agt_xml_consume_node_nons_noadv (ses_cb_t *scb,
+				     xml_node_t *node,
+				     ncx_layer_t layer,
+				     xml_msg_hdr_t *msghdr)
 {
-    return consume_node(reader, FALSE, node, layer, errQ, 
+    return consume_node(scb, FALSE, node, layer, msghdr, 
 			TRUE, FALSE, TRUE);
 
 }  /* agt_xml_consume_node_nons_noadv */
@@ -681,7 +680,7 @@ status_t
 *   end node of the specified start node or a fatal error occurs
 *********************************************************************/
 status_t 
-    agt_xml_skip_subtree (xmlTextReaderPtr reader,
+    agt_xml_skip_subtree (ses_cb_t *scb,
 			  const xml_node_t *startnode)
 {
     xml_node_t       node;
@@ -693,7 +692,7 @@ status_t
     status_t         res;
 
 #ifdef DEBUG
-    if (!reader || !startnode) {
+    if (!scb || !startnode) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -714,7 +713,8 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
     xml_init_node(&node);
-    res = agt_xml_consume_node_noadv(reader, &node, NCX_LAYER_NONE, NULL);
+    res = agt_xml_consume_node_noadv(scb, &node, 
+				     NCX_LAYER_NONE, NULL);
     if (res == NO_ERR) {
 	res = xml_endnode_match(startnode, &node);
 	xml_clean_node(&node);
@@ -731,14 +731,14 @@ status_t
     while (!done) {
 
 	/* advance the node pointer */
-	ret = xmlTextReaderRead(reader);
+	ret = xmlTextReaderRead(scb->reader);
 	if (ret != 1) {
 	    /* fatal error */
 	    return SET_ERROR(ERR_XML_READER_EOF);
 	}
 
 	/* get the node depth to match the end node correctly */
-	depth = xmlTextReaderDepth(reader);
+	depth = xmlTextReaderDepth(scb->reader);
 	if (depth == -1) {
 	    /* not sure if this can happen, treat as fatal error */
 	    return SET_ERROR(ERR_XML_READER_INTERNAL);
@@ -752,17 +752,18 @@ status_t
 	}
 
 	/* get the internal nodetype, check it and convert it */
-	nodetyp = xmlTextReaderNodeType(reader);
+	nodetyp = xmlTextReaderNodeType(scb->reader);
 
 	/* get the element QName */
-	qname = xmlTextReaderName(reader);
+	qname = xmlTextReaderName(scb->reader);
 	if (qname) {
 	    /* check for namespace prefix in the name 
 	     * only error is 'unregistered namespace ID'
 	     * which doesn't matter in this case
 	     */
 	    nsid = 0;
-	    (void)xml_check_ns(reader, qname, &nsid, &len, &badns);
+	    (void)xml_check_ns(scb->reader, qname, &nsid, 
+			       &len, &badns);
 
 	    /* set the element name to the char after the prefix */
 	    elname = qname+len;

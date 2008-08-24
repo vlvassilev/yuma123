@@ -164,40 +164,6 @@ static const xmlChar *
 
 
 /********************************************************************
-* FUNCTION find_prefix2
-*
-* Find the namespace prefix for the specified namespace ID
-* Search only in the prefix overflow Q
-*
-* INPUTS:
-*    msg  == message to search
-*    nsid == namespace ID to find
-*
-* RETURNS:
-*   pointer to prefix if found, else NULL if not found
-*********************************************************************/
-static const xmlChar *
-    find_prefix2 (xml_msg_hdr_t *msg,
-		  xmlns_id_t nsid)
-{
-    const xmlns_pmap_t  *pmap;
-
-    for (pmap = (const xmlns_pmap_t *)dlq_firstEntry(&msg->prefix2Q);
-	 pmap != NULL;
-	 pmap = (const xmlns_pmap_t *)dlq_nextEntry(pmap)) {
-
-	if (pmap->nm_id == nsid) {
-	    return (const xmlChar *)pmap->nm_pfix;
-	} else if (pmap->nm_id > nsid) {
-	    return NULL;
-	}
-    }
-    return NULL;
-
-}  /* find_prefix2 */
-
-
-/********************************************************************
 * FUNCTION find_prefix_val
 *
 * Find the namespace prefix for the specified namespace ID
@@ -255,7 +221,6 @@ void
 
     memset(msg, 0x0, sizeof(xml_msg_hdr_t));
     dlq_createSQue(&msg->prefixQ);
-    dlq_createSQue(&msg->prefix2Q);
     dlq_createSQue(&msg->errQ);
     msg->withdef = NCX_DEF_WITHDEF;
 
@@ -288,12 +253,6 @@ void
     /* clean prefix queue */
     while (!dlq_empty(&msg->prefixQ)) {
 	pmap = (xmlns_pmap_t *)dlq_deque(&msg->prefixQ);
-	xmlns_free_pmap(pmap);
-    }
-
-    /* clean orphan prefix queue */
-    while (!dlq_empty(&msg->prefix2Q)) {
-	pmap = (xmlns_pmap_t *)dlq_deque(&msg->prefix2Q);
 	xmlns_free_pmap(pmap);
     }
 
@@ -335,11 +294,9 @@ const xmlChar *
 			xmlns_id_t nsid,
 			boolean  *xneeded)
 {
-    xmlns_pmap_t   *pmap;
     xmlns_pmap_t   *newpmap;
     const xmlChar  *pfix;
     status_t        res;
-    boolean         done;
 
 #ifdef DEBUG
     if (!msg || !xneeded) {
@@ -366,16 +323,8 @@ const xmlChar *
 	return pfix;
     }
 
-    pfix = find_prefix2(msg, nsid);
-    if (pfix) {
-	if (parent_nsid != nsid) {
-	    *xneeded = TRUE;
-	}
-	return pfix;
-    }
-
     /* need to create a new prefix map and save it for real */
-    newpmap = xmlns_new_pmap();
+    newpmap = xmlns_new_pmap(0);
     if (!newpmap) {
 	SET_ERROR(ERR_INTERNAL_MEM);
 	return NULL;
@@ -383,26 +332,16 @@ const xmlChar *
 
     /* generate a prefix ID */
     newpmap->nm_id = nsid;
-    res = xml_msg_gen_new_prefix(msg, nsid, newpmap->nm_pfix);
+    res = xml_msg_gen_new_prefix(msg, nsid, 
+				 &newpmap->nm_pfix, 0);
     if (res != NO_ERR) {
 	SET_ERROR(res);
 	xmlns_free_pmap(newpmap);
 	return NULL;
     }
 
-    /* add the new prefix mapping to the prefix2Q */
-    done = FALSE;
-    for (pmap = (xmlns_pmap_t *)dlq_firstEntry(&msg->prefix2Q);
-	 pmap != NULL && !done;
-	 pmap = (xmlns_pmap_t *)dlq_nextEntry(pmap)) {
-	if (nsid < pmap->nm_id) {
-	    dlq_insertAhead(newpmap, pmap);
-	    done = TRUE;
-	}
-    }
-    if (!done) {
-	dlq_enque(newpmap, &msg->prefix2Q);
-    }
+    /* add the new prefix mapping to the prefixQ */
+    add_pmap(msg, newpmap);
 
     /* xmlns directive will be needed for this new prefix */
     if (parent_nsid != nsid) {
@@ -414,6 +353,73 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION xml_msg_get_prefix_xpath
+*
+* Find the namespace prefix for the specified namespace ID
+* If it is not there then create one in the msg prefix map
+* Always returns a prefix, instead of using a default
+*
+* !!! MUST BE CALLED BEFORE THE <rpc-reply> XML OUTPUT
+* !!! HAS BEGUN.  CANNOT BE CALLED BY OUTPUT FUNCTIONS
+* !!! DURING THE <get> OR <get-config> OUTPUT GENERATION
+*
+* INPUTS:
+*    msg  == message to search
+*    nsid == namespace ID to find
+*
+* RETURNS:
+*   pointer to prefix if found, else NULL if not found
+*********************************************************************/
+const xmlChar *
+    xml_msg_get_prefix_xpath (xml_msg_hdr_t *msg,
+			      xmlns_id_t nsid)
+{
+    xmlns_pmap_t   *newpmap;
+    const xmlChar  *pfix;
+    status_t        res;
+
+#ifdef DEBUG
+    if (!msg) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+    if (!nsid) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+#endif
+
+    /* see if a prefix is already present in the rpc-reply element */
+    pfix = find_prefix(msg, nsid);
+    if (pfix) {
+	return pfix;
+    }
+
+    /* need to create a new prefix map and save it for real */
+    newpmap = xmlns_new_pmap(0);
+    if (!newpmap) {
+	SET_ERROR(ERR_INTERNAL_MEM);
+	return NULL;
+    }
+
+    /* generate a prefix ID */
+    newpmap->nm_id = nsid;
+    res = xml_msg_gen_new_prefix(msg, nsid, 
+				 &newpmap->nm_pfix, 0);
+    if (res != NO_ERR) {
+	xmlns_free_pmap(newpmap);
+	return NULL;
+    }
+
+    /* add the new prefix mapping to the prefixQ */
+    add_pmap(msg, newpmap);
+
+    return newpmap->nm_pfix;
+
+}  /* xml_msg_get_prefix_xpath */
+
+
+/********************************************************************
 * FUNCTION xml_msg_gen_new_prefix
 *
 * Generate a new namespace prefix
@@ -421,9 +427,11 @@ const xmlChar *
 * INPUTS:
 *    msg  == message to search and generate a prefix for
 *    nsid == namespace ID to generate prefix for
+*    retbuff == address of return buffer
 *
 * OUTPUTS:
-*   retbuff is filled in with the new prefix if NO_ERR
+*   if *retbuff is NULL it will be created
+*   else *retbuff is filled in with the new prefix if NO_ERR
 *
 * RETURNS:
 *    status
@@ -431,34 +439,60 @@ const xmlChar *
 status_t 
     xml_msg_gen_new_prefix (xml_msg_hdr_t *msg,
 			    xmlns_id_t  nsid,
-			    xmlChar *retbuff)
+			    xmlChar **retbuff,
+			    uint32 buffsize)
 {
     const xmlChar      *defpfix;
     xmlChar             startch;
     int32               nlen, i;
-    xmlChar             numbuff[NCX_MAX_NUMLEN];
+    xmlChar             numbuff[NCX_MAX_NUMLEN], *buff;
 
+#ifdef DEBUG
+    if (!msg || !retbuff) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
-    /* first see if a default prefix exists and is available */
-    defpfix = xmlns_get_ns_prefix(nsid);
-    if (defpfix && *defpfix) {
-	if (!find_prefix_val(msg, defpfix)) {
-	    xml_strcpy(retbuff, defpfix);
-	    return NO_ERR;
+    if (*retbuff) {
+	buff = *retbuff;
+    } else {
+	buff = m__getMem(NCX_MAX_NUMLEN+1);
+	if (!buff) {
+	    return ERR_INTERNAL_MEM;
+	} else {
+	    buffsize = NCX_MAX_NUMLEN+1;
+	    *retbuff = buff;
 	}
     }
 
-    /* default didn't work so generate a prefix
-     * ; sprintf the namespace ID 
+    /* first see if a default prefix was registered with the namespace
+     * and use it if not already in the prefix map
      */
+    defpfix = xmlns_get_ns_prefix(nsid);
+    if (defpfix && *defpfix) {
+	if (!find_prefix_val(msg, defpfix)) {
+	    if (xml_strlen(defpfix) < buffsize) {
+		xml_strcpy(buff, defpfix);
+		return NO_ERR;
+	    } else {
+		return SET_ERROR(ERR_BUFF_OVFL);
+	    }
+	}
+    }
+
+    /* default already in use so generate a prefix */
     nlen = sprintf((char *)numbuff, "%u", (uint32)nsid);
     if (nlen < 0) {
-	return ERR_NCX_INVALID_NUM;
+	return SET_ERROR(ERR_NCX_INVALID_NUM);
+    }
+
+    if ((uint32)(nlen+2) >= buffsize) {
+	return SET_ERROR(ERR_BUFF_OVFL);
     }
 
     /* copy the number to the prefix buffer w/ trailing zero */
     for (i=0; i<=nlen; i++) {
-	retbuff[i+1] = numbuff[i];
+	buff[i+1] = numbuff[i];
     }
 
     /* set the start letter in the prefix buffer */
@@ -467,13 +501,13 @@ status_t
     /* try to generate a unique prefix */
     for (i=0; i<=MAX_PREFIX_TRIES; i++) {
 	/* adjust the label value */
-	retbuff[0] = startch++;
+	buff[0] = startch++;
 	if (startch > 'z') {
 	    startch = 'a';
 	}
 
 	/* check if the prefix is in use */
-	if (!find_prefix_val(msg, retbuff)) {
+	if (!find_prefix_val(msg, buff)) {
 	    return NO_ERR;
 	}
     }
@@ -514,18 +548,20 @@ status_t
 			      boolean addncxid)
 {
     xml_attr_t      *attr;
-    xmlns_pmap_t    *pmap, *newpmap;
+    xmlns_pmap_t    *newpmap;
     xmlns_t         *nsrec;
-    xmlns_id_t       ncid, ncxid, nsid;
+    xmlChar         *buff;
+    xmlns_id_t       ncid, ncxid, nsid, invid;
     uint32           plen;
-    boolean          found;
+    boolean          invalid;
     status_t         res, retres;
-    xmlChar          buff[XMLNS_MAX_PREFIX_SIZE+1];
 
     retres = NO_ERR;
+    invid = xmlns_inv_id();
 
     /* look for any xmlns directives in the attrs list
-     * and reuse the prefix that was used in the request
+     * and build a prefix map entry so they will be reused
+     * in the reply.  Deal with foreign namespace decls as well
      */
     for (attr = (xml_attr_t *)xml_first_attr(attrs);
 	 attr != NULL;
@@ -539,11 +575,13 @@ status_t
 	/* find the namespace associated with the prefix */
 	nsrec = def_reg_find_ns(attr->attr_val);
 	if (!nsrec) {
-	    /* this is an unknown namespace; error already
-	     * handled, or possibly not error if not used
+	    /* this is not an error to have extra xmlns decls
+	     * in the <rpc> element; still need to make sure
+	     * not to reuse the prefix anyway
 	     */
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    continue;
+	    invalid = TRUE;
+	} else {
+	    invalid = FALSE;
 	}
 
 	/* check if this attribute has a prefix */
@@ -551,33 +589,26 @@ status_t
 	    /* no prefix in the name so this must be the
 	     * default namespace; set the msg->defns
 	     */
-	    attr->attr_xmlns_ns = nsrec->ns_id;
-	    msg->defns = nsrec->ns_id;
-	    continue;
-	}
-
-	/* make sure there isn't an entry for this namespace already
-	 * The manager can enter multiple prefixed xmlns decls
-	 * but the agent will use only one mapping per namespace
-	 */
-	found = FALSE;
-	for (pmap = (xmlns_pmap_t *)dlq_firstEntry(&msg->prefixQ);
-	     pmap != NULL && !found;
-	     pmap = (xmlns_pmap_t *)dlq_nextEntry(pmap)) {
-	    if (pmap->nm_id == nsrec->ns_id) {
-		found = TRUE;
+	    if (invalid) {
+		/* the default namespace is not one of ours,
+		 * so it will not be used in the reply
+		 */
+		attr->attr_xmlns_ns = invid;
+		msg->defns = invid;
+	    } else {
+		attr->attr_xmlns_ns = nsrec->ns_id;
+		msg->defns = nsrec->ns_id;
 	    }
-	}
-	if (found) {
 	    continue;
 	}
 
-	/* all okay so far; get the prefix len */
+	/* there is a prefix, so get the prefix len
+	 * the entire prefix was saved as the attr_name 
+	 */
 	plen = xml_strlen(attr->attr_name);
-	plen = min(plen, XMLNS_MAX_PREFIX_SIZE);
 
 	/* get a new prefix map */
-	newpmap = xmlns_new_pmap();
+	newpmap = xmlns_new_pmap(plen+1);
 	if (!newpmap) {
 	    retres = ERR_INTERNAL_MEM;
 	    continue;
@@ -585,12 +616,14 @@ status_t
 
 	/* save the prefix and the xmlns ID */
 	xml_strncpy(newpmap->nm_pfix, attr->attr_name, plen);
-	newpmap->nm_id = nsrec->ns_id;
-	attr->attr_xmlns_ns = nsrec->ns_id;
-
-	/* keep the queue in ascending namespace ID order
-	 * to speed up searches a little bit on large rpc-replys
-	 */
+	if (invalid) {
+	    newpmap->nm_id = invid;
+	    attr->attr_xmlns_ns = invid;
+	} else {
+	    newpmap->nm_id = nsrec->ns_id;
+	    attr->attr_xmlns_ns = nsrec->ns_id;
+	}
+	newpmap->nm_topattr = TRUE;
 	add_pmap(msg, newpmap);
     }
 
@@ -602,31 +635,31 @@ status_t
     nsid = xmlns_ns_id();
     ncxid = xmlns_ncx_id();
 
-    /* make sure XMLNS decl for NETCONF is in the map */
-    if (addncid &&
-	msg->defns != ncid && !find_prefix(msg, ncid)) {
-	if (!msg->defns) {
-	    /* make NETCONF the default NS */
-	    res = xml_add_xmlns_attr(attrs, ncid, NULL);
-	    if (res == NO_ERR) {
-		msg->defns = ncid;
-	    }
-	} else {
-	    /* add a prefix an xmlns attr for NETCONF */
-	    res = xml_msg_gen_new_prefix(msg, ncid, buff);
-	    if (res == NO_ERR) {
-		res = xml_add_xmlns_attr(attrs, ncid, buff);
-	    }
-	    if (res == NO_ERR) {
-		/* create a new prefix map */
-		newpmap = xmlns_new_pmap();
-		if (!newpmap) {
-		    res = SET_ERROR(ERR_INTERNAL_MEM);
-		} else {
-		    newpmap->nm_id = ncid;
-		    xml_strcpy(newpmap->nm_pfix, buff);
-		    add_pmap(msg, newpmap);
-		}
+    /* make sure XMLNS decl for NETCONF is in the map
+     * make sure it is not the default, by forcing a new
+     * xmlns with a prefix -- needed by XPath 1.0 
+     */
+    if (addncid) {
+	if (msg->defns == ncid) {
+	    msg->defns = 0;
+	}
+
+	/* add a prefix an xmlns attr for NETCONF */
+	buff = NULL;
+	res = xml_msg_gen_new_prefix(msg, ncid, &buff, 0);
+	if (res == NO_ERR) {
+	    res = xml_add_xmlns_attr(attrs, ncid, buff);
+	}
+	if (res == NO_ERR) {
+	    /* create a new prefix map */
+	    newpmap = xmlns_new_pmap(0);
+	    if (!newpmap) {
+		res = SET_ERROR(ERR_INTERNAL_MEM);
+	    } else {
+		newpmap->nm_id = ncid;
+		newpmap->nm_pfix = buff;
+		newpmap->nm_topattr = TRUE;
+		add_pmap(msg, newpmap);
 	    }
 	}
     }
@@ -636,23 +669,25 @@ status_t
 
     /* make sure XMLNS decl for NCX is in the map 
      * try even if errors in setting up the NETCONF pmap 
-     * Only add this NS decl if there are errors to generate
      */
-    if (addncxid &&
-	msg->defns != ncxid && !find_prefix(msg, ncxid)) {
+    if (addncxid && msg->defns != ncxid 
+	&& !find_prefix(msg, ncxid)) {
+
 	/* add a prefix an xmlns attr for NCX */
-	res = xml_msg_gen_new_prefix(msg, ncxid, buff);
+	buff = NULL;
+	res = xml_msg_gen_new_prefix(msg, ncxid, &buff, 0);
 	if (res == NO_ERR) {
 	    res = xml_add_xmlns_attr(attrs, ncxid, buff);
 	}
 	if (res == NO_ERR) {
 	    /* create a new prefix map */
-	    newpmap = xmlns_new_pmap();
+	    newpmap = xmlns_new_pmap(0);
 	    if (!newpmap) {
 		res = SET_ERROR(ERR_INTERNAL_MEM);
 	    } else {
 		newpmap->nm_id = ncxid;
-		xml_strcpy(newpmap->nm_pfix, buff);
+		newpmap->nm_pfix = buff;
+		newpmap->nm_topattr = TRUE;
 		add_pmap(msg, newpmap);
 	    }
 	}
@@ -692,9 +727,9 @@ status_t
 
 {		      
     const xmlChar *pfix;
-    xmlChar        buff[XMLNS_MAX_PREFIX_SIZE+1];
-    status_t       res;
+    xmlChar       *buff;
     xml_attr_t    *attr;
+    status_t       res;
 
     /* no namespace is always ok, and if it is the same as the
      * current default, then nothing to do
@@ -721,13 +756,15 @@ status_t
     }
 
     /* not already covered */
-    res = xml_msg_gen_new_prefix(msg, nsid, buff);
+    buff = NULL;
+    res = xml_msg_gen_new_prefix(msg, nsid, &buff, 0);
     if (res == NO_ERR) {
 	if (nsid == xmlns_inv_id()) {
 	    res = xml_add_inv_xmlns_attr(attrs, nsid, buff, badns);
 	} else {
 	    res = xml_add_xmlns_attr(attrs, nsid, buff);
 	}
+	m__free(buff);
     }
 
     return res;
@@ -736,32 +773,56 @@ status_t
 
 
 /********************************************************************
-* FUNCTION xml_msg_clean_prefixq
+* FUNCTION xml_msg_gen_xmlns_attrs
 *
-* Clean a Q of xmlns_pmap_t structs
+* Generate any xmlns directives in the top-level
+* attribute Q
 *
 * INPUTS:
-*   prefixQ == queue to clean
+*    msg == message in progress
+*    attrs == xmlns_attrs_t Q to process
 *
+* OUTPUTS:
+*   *attrs will be populated as needed,
+*
+* RETURNS:
+*   status
 *********************************************************************/
-void
-    xml_msg_clean_prefixq (dlq_hdr_t *prefixQ) 
+status_t
+    xml_msg_gen_xmlns_attrs (xml_msg_hdr_t *msg, 
+			     xml_attrs_t *attrs)
 {
     xmlns_pmap_t *pmap;
+    xmlChar      *buff;
+    status_t      res, retres;
 
-#ifdef DEBUG
-    if (!prefixQ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+    retres = NO_ERR;
+
+    for (pmap = (xmlns_pmap_t *)dlq_firstEntry(&msg->prefixQ);
+	 pmap != NULL;
+	 pmap = (xmlns_pmap_t *)dlq_nextEntry(pmap)) {
+
+	if (pmap->nm_topattr) {
+	    continue;
+	}
+
+	buff = NULL;
+	res = xml_msg_gen_new_prefix(msg, pmap->nm_id, &buff, 0);
+	if (res == NO_ERR) {
+	    res = xml_add_xmlns_attr(attrs, pmap->nm_id, buff);
+	}
+
+	if (res != NO_ERR) {
+	    retres = res;
+	} else {
+	    pmap->nm_topattr = TRUE;
+	}
     }
-#endif
 
-    while (!dlq_empty(prefixQ)) {
-	pmap = (xmlns_pmap_t *)dlq_deque(prefixQ);
-	xmlns_free_pmap(pmap);
-    }
+    return retres;
 
-}  /* xml_msg_clean_prefixq */
+}  /* xml_msg_gen_xmlns_attrs */
+
 
 
 /* END file xml_msg.c */

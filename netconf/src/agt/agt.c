@@ -16,8 +16,9 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"
@@ -131,6 +132,8 @@ static ncx_shutdowntyp_t agt_shutmode;
 static void
     init_agent_profile (void)
 {
+    memset(&agt_profile, 0x0, sizeof(agt_profile_t));
+
     /* First set the hard-wired values */
     agt_profile.agt_targ = NCX_AGT_TARG_RUNNING;
     agt_profile.agt_start = NCX_AGT_START_DISTINCT;
@@ -140,6 +143,7 @@ static void
     agt_profile.agt_loglevel = log_get_debug_level();
     agt_profile.agt_usestartup = TRUE;
     agt_profile.agt_logappend = FALSE;
+    agt_profile.agt_xmlorder = FALSE;
     agt_profile.agt_logfile = NULL;
     agt_profile.agt_startup = NULL;
     agt_profile.agt_modpath = NULL;
@@ -213,6 +217,11 @@ static void
     if (res == NO_ERR) {
 	log_info("\nagt: Startup config loaded OK\n     Source: %s",
 		 fname);
+    }
+
+    if (LOGDEBUG2) {
+	log_debug2("\nContents of %s configuration:", cfg->name);
+	val_dump_value(cfg->root, 0);
     }
 
     if (fname) {

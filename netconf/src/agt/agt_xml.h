@@ -21,23 +21,26 @@ date	     init     comment
 2-jan-06     abb      rewrite xml_consume_* API to use simpler 
                       xml_node_t
 11-feb-07    abb      moved consume_node fns to agt_xml.h
+22-aug-08    abb      changed reader parameter to the session
+                      control block to record error stats;
+                      also errQ to msghdr to record xmlns directives 
 */
 
-
-/* From /usr/include/libxml2/libxml/ */
-#include <xmlreader.h>
-#include <xmlstring.h>
-
-#ifndef _H_dlq
-#include "dlq.h"
-#endif
 
 #ifndef _H_ncxtypes
 #include "ncxtypes.h"
 #endif
 
+#ifndef _H_ses
+#include "ses.h"
+#endif
+
 #ifndef _H_xmlns
 #include "xmlns.h"
+#endif
+
+#ifndef _H_xml_msg
+#include "xml_msg.h"
 #endif
 
 #ifndef _H_xml_util
@@ -45,67 +48,51 @@ date	     init     comment
 #endif
 
 /********************************************************************
-*                                                                   *
-*                       C O N S T A N T S                           *
-*                                                                   *
-*********************************************************************/
-
-/********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
-*********************************************************************/
-
-/********************************************************************
 *								    *
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
 
-
-/**************** XMLTextReader APIs ******************/
-
 extern status_t 
-    agt_xml_consume_node (xmlTextReaderPtr reader,
-			  xml_node_t       *node,
-			  ncx_layer_t       layer,
-			  dlq_hdr_t         *errQ);
+    agt_xml_consume_node (ses_cb_t *scb,
+			  xml_node_t *node,
+			  ncx_layer_t layer,
+			  xml_msg_hdr_t *msghdr);
 
 
 /* do not generate an EOF error if seen */
 extern status_t 
-    agt_xml_consume_node_noeof (xmlTextReaderPtr reader,
-				xml_node_t       *node,
-				ncx_layer_t       layer,
-				dlq_hdr_t        *errQ);
+    agt_xml_consume_node_noeof (ses_cb_t *scb,
+				xml_node_t *node,
+				ncx_layer_t layer,
+				xml_msg_hdr_t *msghdr);
 
 
 /* do not generate namespace errors if seen 
  * needed to process subtree filters properly
  */
 extern status_t 
-    agt_xml_consume_node_nons (xmlTextReaderPtr reader,
-			       xml_node_t      *node,
-			       ncx_layer_t      layer,
-			       dlq_hdr_t       *errQ);
+    agt_xml_consume_node_nons (ses_cb_t *scb,
+			       xml_node_t *node,
+			       ncx_layer_t layer,
+			       xml_msg_hdr_t *msghdr);
 
 /* do not advance the node pointer */
 extern status_t 
-    agt_xml_consume_node_noadv (xmlTextReaderPtr reader,
-				xml_node_t       *node,
-				ncx_layer_t       layer,
-				dlq_hdr_t        *errQ);
-
+    agt_xml_consume_node_noadv (ses_cb_t *scb,
+				xml_node_t *node,
+				ncx_layer_t layer,
+				xml_msg_hdr_t *msghdr);
 
 extern status_t 
-    agt_xml_skip_subtree (xmlTextReaderPtr reader,
+    agt_xml_consume_node_nons_noadv (ses_cb_t *scb,
+				     xml_node_t *node,
+				     ncx_layer_t layer,
+				     xml_msg_hdr_t *msghdr);
+
+extern status_t 
+    agt_xml_skip_subtree (ses_cb_t *scb,
 			  const xml_node_t *startnode);
-
-extern status_t 
-    agt_xml_consume_node_nons_noadv (xmlTextReaderPtr reader,
-				     xml_node_t      *node,
-				     ncx_layer_t      layer,
-				     dlq_hdr_t        *errQ);
 
 
 #endif	    /* _H_agt_xml */

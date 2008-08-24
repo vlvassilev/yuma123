@@ -152,7 +152,7 @@ static status_t
 	res = cfg_ok_to_read(source);
     }
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_OPERATION, res,
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
 		 methnode, NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
 	return res;
     }
@@ -207,7 +207,7 @@ static status_t
      */
     if (source->cfg_id == NCX_CFGID_STARTUP) {
 	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_OPERATION, res,
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
 		 methnode, NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
 	return res;
     }
@@ -215,7 +215,7 @@ static status_t
     /* check if this config can be read right now */
     res = cfg_ok_to_read(source);
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_OPERATION, res,
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
 		 methnode, NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
 	return res;
     }
@@ -442,7 +442,7 @@ static status_t
          * *** update in the future if copy to <running> ever supported
 	 */
 	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_OPERATION, res,
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
 	      methnode, NCX_NT_CFG, (const void *)destcfg, NCX_NT_NONE, NULL);
 	return res;
     }
@@ -472,7 +472,7 @@ static status_t
 
     if (res != NO_ERR) {
 	/* cannot write to this configuration datastore */
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_OPERATION, res,
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
 	      methnode, NCX_NT_CFG, (const void *)destcfg, NCX_NT_NONE, NULL);
     } else {
 	/* save the source and destination config */
@@ -513,7 +513,7 @@ static status_t
 	res = agt_ncx_cfg_save(source, FALSE);
 	if (res != NO_ERR) {
 	    /* config save failed */
-	    agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_OPERATION, res,
+	    agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
 			     methnode, NCX_NT_CFG, 
 			     (const void *)target, NCX_NT_NONE, NULL);
 	}
@@ -612,7 +612,7 @@ static status_t
 	    errval = NCX_EL_TARGET;
 	    errtyp = NCX_NT_STRING;
 	}
-	agt_record_error(scb, &msg->mhdr.errQ,
+	agt_record_error(scb, &msg->mhdr,
 			 NCX_LAYER_OPERATION, res, methnode, 
 			 errtyp, errval,
 			 NCX_NT_STRING, "/rpc/delete-config/target");
@@ -683,7 +683,7 @@ static status_t
 	msg->rpc_user1 = (void *)cfg;
     } else {
 	/* lock probably already held */
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_OPERATION, res,
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
 	      methnode, NCX_NT_CFG, (const void *)cfg, NCX_NT_NONE, NULL);
     }
     return res;
@@ -713,7 +713,7 @@ static status_t
     res = cfg_lock(cfg, SES_MY_SID(scb), CFG_SRC_NETCONF);
     if (res != NO_ERR) {
 	/* config is in a state where locks cannot be granted */
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_OPERATION, res, 
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res, 
 		 methnode, NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
     }
 
@@ -753,7 +753,7 @@ static status_t
     if (res == NO_ERR) {
 	msg->rpc_user1 = (void *)cfg;
     } else {
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_OPERATION, res, 
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res, 
 		 methnode, NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
     }
 
@@ -783,7 +783,7 @@ static status_t
     cfg = (cfg_template_t *)msg->rpc_user1;
     res = cfg_unlock(cfg, SES_MY_SID(scb));
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_OPERATION, res, 
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res, 
 		 methnode, NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
     }
     return res;
@@ -853,7 +853,7 @@ static status_t
     if (VAL_UINT(val) == scb->sid
 	|| !agt_ses_session_id_valid(VAL_UINT(val))) {
 	res = ERR_NCX_INVALID_VALUE;
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_OPERATION, res,
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
 		 methnode, NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
     } else {
 	/* save the session-id to kill */
@@ -1004,7 +1004,7 @@ static status_t
 
     /* get the config parameter */
     val = val_find_child(&msg->rpc_input, NULL, NCX_EL_CONFIG);
-    if (!val || val->res != NO_ERR) {
+    if (!val) {
 	/* we shouldn't get here if the config param is missing */
 	return SET_ERROR(ERR_NCX_OPERATION_FAILED);
     }

@@ -125,12 +125,7 @@ rpc_msg_t *
         return NULL;
     }
 
-    msg->rpc_incoming = FALSE;
-    msg->rpc_nsid = 0;    /* no default NS !! */
-    msg->rpc_module = NCX_DEF_MODULE;
     msg->rpc_in_attrs = NULL;
-    msg->rpc_group.u = 0;
-    msg->rpc_msg_id = (const xmlChar *)"1";
 
     return msg;
 
@@ -159,7 +154,6 @@ void
 
     memset(msg, 0x0, sizeof(rpc_msg_t));
     xml_msg_init_hdr(&msg->mhdr);
-    xml_init_attrs(&msg->rpc_attrs);
     val_init_value(&msg->rpc_input);
     dlq_createSQue(&msg->rpc_undoQ);
 
@@ -217,17 +211,7 @@ void
 
     xml_msg_clean_hdr(&msg->mhdr);
 
-    msg->rpc_group.u = 0;
-    msg->rpc_msg_id = NULL;
-    msg->rpc_nsid = 0;
-    msg->rpc_module = NULL;
     msg->rpc_in_attrs = NULL;
-
-    /* clean rpc_attrs -- used by manager only */
-    xml_clean_attrs(&msg->rpc_attrs);
-
-    msg->rpc_meth_nsid = 0;
-    msg->rpc_meth_name = NULL;
     msg->rpc_method = NULL;
     msg->rpc_agt_state = 0;
 
@@ -252,8 +236,6 @@ void
 	undo = (rpc_undo_rec_t *)dlq_deque(&msg->rpc_undoQ);
 	rpc_free_undorec(undo);
     }
-
-    msg->rpc_incoming = FALSE;
 
 } /* rpc_clean_msg */
 

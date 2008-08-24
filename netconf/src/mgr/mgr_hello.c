@@ -134,7 +134,7 @@ static status_t
 			 val_value_t *hello)
 {
 
-    val_value_t  *caps, *cap, *sidval;
+    val_value_t  *caps, *sidval, *cap, *capchild;
     mgr_scb_t    *mscb;
     boolean       c1, c2;
     status_t      res;
@@ -144,33 +144,38 @@ static status_t
     /* make sure the capabilities element is present
      * This should not fail, since already parsed this far 
      */
-    caps = val_first_child_name(hello, NCX_EL_CAPABILITIES);
-    if (!caps || !typ_has_children(caps->btyp)) {
+    caps = val_find_child(hello, NC_MODULE, NCX_EL_CAPABILITIES);
+    if (!caps || caps->res != NO_ERR) {
 	return ERR_NCX_MISSING_VAL_INST;
     }	
 
     /* make sure the session-id element is present
      * This should not fail, since already parsed this far 
      */
-    sidval = val_first_child_name(hello, NCX_EL_SESSION_ID);
-    if (!sidval || sidval->btyp != NCX_BT_UINT32) {
+    sidval = val_find_child(hello, NC_MODULE, NCX_EL_SESSION_ID);
+    if (!sidval || sidval->res != NO_ERR) {
 	return ERR_NCX_MISSING_VAL_INST;
     } else {
 	mscb->agtsid = VAL_UINT(sidval);
     }
 
-
+    cap = val_find_child(caps, NC_MODULE, NCX_EL_CAPABILITY);
+    if (!cap || cap->res != NO_ERR) {
+	return ERR_NCX_MISSING_VAL_INST;
+    }
+	
     /* go through the caps child nodes and construct a caplist */
-    for (cap = (val_value_t *)dlq_firstEntry(&caps->v.childQ);
-	 cap != NULL;
-	 cap = (val_value_t *)dlq_nextEntry(cap)) {
+    for (capchild = val_get_first_child(cap);
+	 capchild != NULL;
+	 capchild = val_get_next_child(capchild)) {
+
 	res = cap_add_std_string(&mscb->caplist, 
-				 (const xmlChar *)VAL_STR(cap));
+				 (const xmlChar *)VAL_STR(capchild));
 	if (res == ERR_NCX_SKIPPED) {
 	    res = cap_add_module_string(&mscb->caplist,
-					(const xmlChar *)VAL_STR(cap));
+					(const xmlChar *)VAL_STR(capchild));
 	    if (res == ERR_NCX_SKIPPED) {
-		res = cap_add_ent(&mscb->caplist, VAL_STR(cap));
+		res = cap_add_ent(&mscb->caplist, VAL_STR(capchild));
 		if (res != NO_ERR) {
 		    return res;
 		}

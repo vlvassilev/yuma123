@@ -107,56 +107,56 @@ static void
 
     /* get log param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOG);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	agt_profile->agt_logfile = VAL_STR(val);
     }
 
     /* get log-append param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOGAPPEND);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	agt_profile->agt_logappend = TRUE;
     }
 
     /* get xmlorder param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_XMLORDER);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	agt_profile->agt_xmlorder = TRUE;
     }
 
     /* get log-level param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOGLEVEL);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	agt_profile->agt_loglevel = 
 	    log_get_debug_level_enum((const char *)VAL_STR(val));
     }
 
     /* get no-startup startup param choice */
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_NOSTARTUP);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	agt_profile->agt_usestartup = FALSE;
     }
 
     /* OR get startup param */
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_STARTUP);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	agt_profile->agt_startup = VAL_STR(val);
     }
 
     /* get modpath param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_MODPATH);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	agt_profile->agt_modpath = VAL_STR(val);
     }
 
     /* get datapath param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DATAPATH);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	agt_profile->agt_datapath = VAL_STR(val);
     }
 
     /* get runpath param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_RUNPATH);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	agt_profile->agt_runpath = VAL_STR(val);
     }
 
@@ -206,7 +206,7 @@ status_t
 	def_reg_find_moddef(AGT_CLI_MODULE, 
 			    AGT_CLI_CONTAINER, &dtyp);
     if (!obj) {
-	return ERR_NCX_NOT_FOUND;
+	return SET_ERROR(ERR_NCX_NOT_FOUND);
     }
 
     /* parse the command line against the PSD */

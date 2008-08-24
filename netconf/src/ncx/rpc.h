@@ -113,31 +113,18 @@ typedef struct rpc_undo_rec_t_ {
 
 /* NCX Agent RPC Request/Reply Message Header */
 typedef struct rpc_msg_t_ {
-
     dlq_hdr_t        qhdr;
 
     /* generic XML message header */
     xml_msg_hdr_t    mhdr; 
 
-    /* message identifiers */
-    boolean          rpc_incoming;   
-    ncx_num_t        rpc_group;     /* support batch grouping TBD */
-    const xmlChar   *rpc_msg_id;    /* usually backptr to attr str */
-
     /* incoming: top-level rpc element data */
-    xmlns_id_t       rpc_nsid;
-    const xmlChar   *rpc_module;
     xml_attrs_t     *rpc_in_attrs;     /* borrowed from <rpc> elem */
-    xml_attrs_t      rpc_attrs;
 
     /* incoming: 
-     * 2nd-level method name element data, not really used except
-     * to pass as a param in the error generation functions
+     * 2nd-level method name element data, used in agt_output_filter
+     * to check get or get-config
      */
-    xmlns_id_t       rpc_meth_nsid;    
-    const xmlChar   *rpc_meth_name;
-
-    /* incoming: RPC method template pointer */
     const struct obj_rpc_t_ *rpc_method; 
 
     /* incoming: AGENT RPC processing state */

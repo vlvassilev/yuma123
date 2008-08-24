@@ -216,7 +216,7 @@ static status_t
 		     ncx_module_t  *mod,
 		     dlq_hdr_t *que,
 		     obj_template_t *parent,
-		     obj_qtype_t qtype,
+		     boolean refi,
 		     grp_template_t *grp);
 
 static status_t 
@@ -224,7 +224,7 @@ static status_t
 			  ncx_module_t  *mod,
 			  dlq_hdr_t *que,
 			  obj_template_t *parent,
-			  obj_qtype_t qtype);
+			  boolean refi);
 
 static status_t 
     consume_yang_refine (tk_chain_t *tkc,
@@ -323,7 +323,7 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level anyxml-stmt
-*   qtype == type of construct containing 'que'
+*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == parent grp_template_t or NULL if not child of grp
 *   
 * RETURNS:
@@ -334,7 +334,7 @@ static status_t
 			 ncx_module_t  *mod,
 			 dlq_hdr_t  *que,
 			 obj_template_t *parent,
-			 obj_qtype_t qtype,
+			 boolean refi,
 			 grp_template_t *grp)
 {
     obj_template_t  *obj;
@@ -342,7 +342,7 @@ static status_t
     const xmlChar   *val;
     const char      *expstr;
     tk_type_t        tktyp;
-    boolean          done, conf, mand, stat, desc, ref, refi;
+    boolean          done, conf, mand, stat, desc, ref;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -364,7 +364,6 @@ static status_t
     ref = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
-    refi = (qtype==OBJ_QUE_USES) ? TRUE : FALSE;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_LEAF);
@@ -378,7 +377,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    obj->qtype = qtype;
     obj->grp = grp;
     if (refi) {
 	obj->flags |= OBJ_FL_REFINE;
@@ -522,7 +520,7 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level
-*   qtype == type of construct containing 'que'
+*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
@@ -533,7 +531,7 @@ static status_t
 			    ncx_module_t  *mod,
 			    dlq_hdr_t  *que,
 			    obj_template_t *parent,
-			    obj_qtype_t qtype,
+			    boolean refi,
 			    grp_template_t *grp)
 {
     obj_template_t  *obj;
@@ -543,7 +541,7 @@ static status_t
     dlq_hdr_t        errQ;
     ncx_status_t     errstatus;
     tk_type_t        tktyp;
-    boolean          done, pres, conf, stat, desc, ref, refi;
+    boolean          done, pres, conf, stat, desc, ref;
     status_t         res, retres;
 
 #ifdef DEBUG
@@ -564,7 +562,6 @@ static status_t
     ref = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
-    refi = (qtype==OBJ_QUE_USES) ? TRUE : FALSE;
     dlq_createSQue(&errQ);
 
     /* Get a new obj_template_t to fill in */
@@ -579,7 +576,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    obj->qtype = qtype;
     obj->grp = grp;
     if (refi) {
 	obj->flags |= OBJ_FL_REFINE;
@@ -752,7 +748,7 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level data-def-stmt
-*   qtype == type of construct containing 'que'
+*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == parent grp_template_t or NULL if not child of grp
 *   
 * RETURNS:
@@ -763,7 +759,7 @@ static status_t
 		       ncx_module_t  *mod,
 		       dlq_hdr_t  *que,
 		       obj_template_t *parent,
-		       obj_qtype_t qtype,
+		       boolean refi,
 		       grp_template_t *grp)
 {
     obj_template_t  *obj;
@@ -772,7 +768,7 @@ static status_t
     const char      *expstr;
     tk_type_t        tktyp;
     boolean          done, typ, units, def, conf;
-    boolean          mand, stat, desc, ref, typeok, refi;
+    boolean          mand, stat, desc, ref, typeok;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -798,7 +794,6 @@ static status_t
     typeok = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
-    refi = (qtype==OBJ_QUE_USES) ? TRUE : FALSE;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_LEAF);
@@ -812,7 +807,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    obj->qtype = qtype;
     obj->grp = grp;
     if (refi) {
 	obj->flags |= OBJ_FL_REFINE;
@@ -1007,7 +1001,7 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level data-def-stmt
-*   qtype == type of construct containing 'que'
+*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
@@ -1018,7 +1012,7 @@ static status_t
 			   ncx_module_t  *mod,
 			   dlq_hdr_t  *que,
 			   obj_template_t *parent,
-			   obj_qtype_t qtype,
+			   boolean refi,
 			   grp_template_t *grp)
 {
     obj_template_t  *obj;
@@ -1027,7 +1021,7 @@ static status_t
     const char      *expstr;
     xmlChar         *str;
     tk_type_t        tktyp, nexttk;
-    boolean          done, typ, units, conf, refi;
+    boolean          done, typ, units, conf;
     boolean          minel, maxel, ord, stat, desc, ref, typeok;
     status_t         res, retres;
     ncx_status_t     errstatus;
@@ -1056,7 +1050,6 @@ static status_t
     typeok = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
-    refi = (qtype==OBJ_QUE_USES) ? TRUE : FALSE;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_LEAF_LIST);
@@ -1070,7 +1063,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    obj->qtype = qtype;
     obj->grp = grp;
     if (refi) {
 	obj->flags |= OBJ_FL_REFINE;
@@ -1319,7 +1311,7 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level data-def-stmt
-*   qtype == type of construct containing 'que'
+*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
@@ -1330,7 +1322,7 @@ static status_t
 		       ncx_module_t  *mod,
 		       dlq_hdr_t  *que,
 		       obj_template_t *parent,
-		       obj_qtype_t qtype,
+		       boolean refi,
 		       grp_template_t *grp)
 {
     obj_template_t  *obj;
@@ -1343,7 +1335,7 @@ static status_t
     dlq_hdr_t        errQ;
     tk_type_t        tktyp, nexttk;
     boolean          done, key, conf;
-    boolean          minel, maxel, ord, stat, desc, ref, refi;
+    boolean          minel, maxel, ord, stat, desc, ref;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -1370,7 +1362,6 @@ static status_t
     res = NO_ERR;
     retres = NO_ERR;
     dlq_createSQue(&errQ);
-    refi = (qtype==OBJ_QUE_USES) ? TRUE : FALSE;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_LIST);
@@ -1384,7 +1375,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    obj->qtype = qtype;
     obj->grp = grp;
     if (refi) {
 	obj->flags |= OBJ_FL_REFINE;
@@ -1687,7 +1677,7 @@ static status_t
 *   parent == the obj_template_t containing the 'choic' param
 *             In YANG, a top-level object cannot be a 'choice',
 *             so this param should not be NULL
-*   qtype == type of contruct containing 'que'
+*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   withcase == TRUE if a case arm was entered and the normal
 *               (full) syntax for a case arm is used
 *            == FALSE if the case arm is the shorthand implied
@@ -1703,7 +1693,7 @@ static status_t
 		       dlq_hdr_t *caseQ,
 		       dlq_hdr_t *appinfoQ,
 		       obj_template_t *parent,
-		       obj_qtype_t qtype,
+		       boolean refi,
 		       boolean withcase)
 {
     obj_case_t      *cas, *testcas;
@@ -1711,7 +1701,7 @@ static status_t
     const xmlChar   *val, *str;
     const char      *expstr;
     tk_type_t        tktyp;
-    boolean          done, stat, desc, ref, anydone, refi;
+    boolean          done, stat, desc, ref, anydone;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -1731,7 +1721,6 @@ static status_t
     anydone = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
-    refi = (qtype==OBJ_QUE_USES) ? TRUE : FALSE;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_CASE);
@@ -1745,7 +1734,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    obj->qtype = qtype;
     if (refi) {
 	obj->flags |= OBJ_FL_REFINE;
     }
@@ -1788,7 +1776,7 @@ static status_t
 				      cas->datadefQ, obj);
 	} else {
 	    res = consume_case_datadef(tkc, mod,
-				       cas->datadefQ, obj, qtype);
+				       cas->datadefQ, obj, refi);
 	}
 	CHK_OBJ_EXIT;
 	done = TRUE;
@@ -1853,7 +1841,7 @@ static status_t
 					  cas->datadefQ, parent);
 	    } else {
 		res = consume_case_datadef(tkc, mod,
-					   cas->datadefQ, parent, qtype);
+					   cas->datadefQ, parent, refi);
 	    }
 	}
 	CHK_OBJ_EXIT;
@@ -1954,7 +1942,7 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object
-*   qtype == type of construct containing 'que'
+*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
@@ -1965,7 +1953,7 @@ static status_t
 			 ncx_module_t  *mod,
 			 dlq_hdr_t  *que,
 			 obj_template_t *parent,
-			 obj_qtype_t qtype,
+			 boolean refi,
 			 grp_template_t *grp)
 {
     obj_template_t  *obj, *testobj, *test2obj, *casobj;
@@ -1975,7 +1963,7 @@ static status_t
     const char      *expstr;
     const xmlChar   *str;
     tk_type_t        tktyp;
-    boolean          done, def, mand, conf, stat, desc, ref, errbool, refi;
+    boolean          done, def, mand, conf, stat, desc, ref;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -1998,7 +1986,6 @@ static status_t
     ref = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
-    refi = (qtype==OBJ_QUE_USES) ? TRUE : FALSE;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_CHOICE);
@@ -2012,7 +1999,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    obj->qtype = qtype;
     obj->grp = grp;
     if (refi) {
 	obj->flags |= OBJ_FL_REFINE;
@@ -2095,16 +2081,10 @@ static status_t
 					 &def, &choic->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_boolean(tkc, mod, &errbool, NULL, NULL);
-	    } else {
-		res = yang_consume_boolean(tkc, mod,
-					   &choic->mandatory,
-					   &mand, &choic->appinfoQ);
-		choic->mandset = TRUE;
-	    }
+	    res = yang_consume_boolean(tkc, mod,
+				       &choic->mandatory,
+				       &mand, &choic->appinfoQ);
+	    choic->mandset = TRUE;
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    if (refi) {
@@ -2125,6 +2105,7 @@ static status_t
 				     &ref, &choic->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+	    /*** not in yang-00, expected in yang-01 ***/
 	    res = yang_consume_boolean(tkc, mod,
 				       &choic->config,
 				       &conf, &choic->appinfoQ);
@@ -2282,22 +2263,22 @@ static status_t
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_ANYXML)) {
 	    res = consume_yang_anyxml(tkc, mod, que, parent,
-				      OBJ_QUE_USES, NULL);
+				      TRUE, NULL);
 	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
 	    res = consume_yang_container(tkc, mod, que, parent,
-					 OBJ_QUE_USES, NULL);
+					 TRUE, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
 	    res = consume_yang_leaf(tkc, mod, que, parent,
-				    OBJ_QUE_USES, NULL);
+				    TRUE, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
 	    res = consume_yang_leaflist(tkc, mod, que, parent,
-					OBJ_QUE_USES, NULL);
+					TRUE, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
 	    res = consume_yang_list(tkc, mod, que, parent,
-				    OBJ_QUE_USES, NULL);
+				    TRUE, NULL);
 	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
 	    res = consume_yang_choice(tkc, mod, que, parent,
-				      OBJ_QUE_USES, NULL);
+				      TRUE, NULL);
 	} else {
 	    errdone = FALSE;
 	    res = ERR_NCX_WRONG_TKVAL;
@@ -2331,7 +2312,6 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object
-*   qtype == type of contruct containing 'que'
 *   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
@@ -2342,7 +2322,6 @@ static status_t
 		       ncx_module_t  *mod,
 		       dlq_hdr_t  *que,
 		       obj_template_t *parent,
-		       obj_qtype_t qtype,
 		       grp_template_t *grp)
 {
     obj_template_t  *obj, *testobj;
@@ -2386,7 +2365,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    obj->qtype = qtype;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
 	obj->flags |= OBJ_FL_TOP;
@@ -2479,8 +2457,7 @@ static status_t
 	    res = yang_consume_descr(tkc, mod, &uses->ref,
 				     &ref, &uses->appinfoQ);
 	} else {
-	    res = consume_yang_refine(tkc, mod,
-				      uses->datadefQ, obj);
+	    res = consume_yang_refine(tkc, mod, uses->datadefQ, obj);
 	}
 	CHK_OBJ_EXIT;
     }
@@ -2543,8 +2520,7 @@ static status_t
     consume_yang_rpcio (tk_chain_t *tkc,
 			ncx_module_t  *mod,
 			dlq_hdr_t  *que,
-			obj_template_t *parent,
-			obj_qtype_t  qtype)
+			obj_template_t *parent)
 {
     obj_template_t  *obj, *testobj;
     obj_rpcio_t     *rpcio;
@@ -2581,7 +2557,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    obj->qtype = qtype;
 
     rpcio = obj->def.rpcio;
 	
@@ -2593,7 +2568,7 @@ static status_t
 	obj_free_template(obj);
 	return res;
     }
-	
+
     /* Get the starting left brace for the sub-clauses */
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
     CHK_OBJ_EXIT;
@@ -2725,25 +2700,24 @@ static status_t
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_ANYXML)) {
 	    res = consume_yang_anyxml(tkc, mod, que, parent,
-				      OBJ_QUE_AUG, NULL);
+				      FALSE, NULL);
 	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
 	    res = consume_yang_container(tkc, mod, que, parent,
-					 OBJ_QUE_AUG, NULL);
+					 FALSE, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
 	    res = consume_yang_leaf(tkc, mod, que, parent,
-				    OBJ_QUE_AUG, NULL);
+				    FALSE, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
 	    res = consume_yang_leaflist(tkc, mod, que, parent,
-					OBJ_QUE_AUG, NULL);
+					FALSE, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
 	    res = consume_yang_list(tkc, mod, que, parent,
-				    OBJ_QUE_AUG, NULL);
+				    FALSE, NULL);
 	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
 	    res = consume_yang_choice(tkc, mod, que, parent,
-				      OBJ_QUE_AUG, NULL);
+				      FALSE, NULL);
 	} else if (!xml_strcmp(val, YANG_K_USES)) {
-	    res = consume_yang_uses(tkc, mod, que, parent,
-				    OBJ_QUE_AUG, NULL);
+	    res = consume_yang_uses(tkc, mod, que, parent, NULL);
 	} else {
 	    errdone = FALSE;
 	    res = ERR_NCX_WRONG_TKVAL;
@@ -2777,7 +2751,6 @@ static status_t
 *   mod == module in progress
 *   que == queue will get the obj_template_t 
 *   parent == parent object or NULL if top-level augment
-*   qtype == type of contruct containing 'que'
 *   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
@@ -2788,7 +2761,6 @@ static status_t
 			  ncx_module_t  *mod,
 			  dlq_hdr_t *que,
 			  obj_template_t *parent,
-			  obj_qtype_t qtype,
 			  grp_template_t *grp)
 {
 
@@ -2836,7 +2808,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    obj->qtype = qtype;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
 	obj->flags |= OBJ_FL_TOP;
@@ -2903,8 +2874,7 @@ static status_t
 				     &ref, &aug->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_INPUT) ||
 		   !xml_strcmp(val, YANG_K_OUTPUT)) {
-	    res = consume_yang_rpcio(tkc, mod, &aug->datadefQ,
-				     obj, OBJ_QUE_AUG);
+	    res = consume_yang_rpcio(tkc, mod, &aug->datadefQ, obj);
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
 	    res = consume_yang_case(tkc, mod, &aug->datadefQ,
 				    &aug->appinfoQ, obj, FALSE, TRUE);
@@ -2955,7 +2925,8 @@ static status_t
 *   mod == module in progress
 *   que == queue will get the obj_template_t 
 *   parent == parent object or NULL if top-level data-def-stmt
-*   qtype == type of construct containing 'que'
+*   refi == TRUE if uses refinement, FALSE if normal anyxml
+*
 * RETURNS:
 *   status of the operation
 *********************************************************************/
@@ -2964,7 +2935,7 @@ static status_t
 			  ncx_module_t  *mod,
 			  dlq_hdr_t *que,
 			  obj_template_t *parent,
-			  obj_qtype_t qtype)
+			  boolean refi)
 {
     const xmlChar   *val;
     const char      *expstr;
@@ -2993,25 +2964,23 @@ static status_t
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_ANYXML)) {
 	    res = consume_yang_anyxml(tkc, mod, que,
-				      parent, qtype, NULL);
+				      parent, refi, NULL);
 	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
 	    res = consume_yang_container(tkc, mod, que,
-					 parent, qtype, NULL);
+					 parent, refi, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
 	    res = consume_yang_leaf(tkc, mod, que,
-				    parent, qtype, NULL);
+				    parent, refi, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
 	    res = consume_yang_leaflist(tkc, mod, que,
-					parent, qtype, NULL);
+					parent, refi, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
 	    res = consume_yang_list(tkc, mod, que,
-				    parent, qtype, NULL);
+				    parent, refi, NULL);
 	} else if (!xml_strcmp(val, YANG_K_USES)) {
-	    res = consume_yang_uses(tkc, mod, que,
-				    parent, qtype, NULL);
+	    res = consume_yang_uses(tkc, mod, que, parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
-	    res = consume_yang_augment(tkc, mod, que,
-				       parent, qtype, NULL);
+	    res = consume_yang_augment(tkc, mod, que, parent, NULL);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    errdone = FALSE;
@@ -3043,7 +3012,6 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level
-*   qtype == type of construct containing 'que'
 *   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
@@ -3054,7 +3022,6 @@ static status_t
 		      ncx_module_t  *mod,
 		      dlq_hdr_t  *que,
 		      obj_template_t *parent,
-		      obj_qtype_t qtype,
 		      grp_template_t *grp)
 {
     obj_template_t  *obj;
@@ -3094,7 +3061,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    obj->qtype = qtype;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
 	obj->flags |= OBJ_FL_TOP;
@@ -3182,8 +3148,7 @@ static status_t
 				     &ref, &rpc->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_INPUT) ||
 		   !xml_strcmp(val, YANG_K_OUTPUT)) {
-	    res = consume_yang_rpcio(tkc, mod, &rpc->datadefQ,
-				     obj, OBJ_QUE_RPC);
+	    res = consume_yang_rpcio(tkc, mod, &rpc->datadefQ, obj);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
@@ -3220,7 +3185,6 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level
-*   qtype == type of construct containing 'que'
 *   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
@@ -3231,7 +3195,6 @@ static status_t
 			ncx_module_t  *mod,
 			dlq_hdr_t  *que,
 			obj_template_t *parent,
-			obj_qtype_t qtype,
 			grp_template_t *grp)
 {
     obj_template_t  *obj;
@@ -3271,7 +3234,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    obj->qtype = qtype;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
 	obj->flags |= OBJ_FL_TOP;
@@ -3359,7 +3321,7 @@ static status_t
 				     &ref, &notif->appinfoQ);
 	} else {
 	    res = consume_datadef(tkc, mod, &notif->datadefQ,
-				  obj, OBJ_QUE_NOTIF, NULL);
+				  obj, FALSE, NULL);
 	}
 	CHK_OBJ_EXIT;
     }
@@ -3811,6 +3773,8 @@ static status_t
 		p++;
 	    }
 	    continue;
+	} else {
+	    key->flags |= OBJ_FL_KEY;
 	}
 
 	/* skip any whitespace between key components */
@@ -4580,7 +4544,7 @@ static status_t
     const xmlChar     *name;
     dlq_hdr_t         *targQ;
     status_t           res, retres;
-    boolean            augextern, augdefcase;
+    boolean            augextern, augdefcase, config, confset;
     
     aug = obj->def.augment;
     if (!aug->target) {
@@ -4598,11 +4562,13 @@ static status_t
      * the node being augmented MUST exist to be valid
      */
     res = xpath_find_schema_target(tkc, mod, obj, datadefQ,
-				   aug->target, &targobj, &targQ);
+				   aug->target, &targobj, NULL);
     if (res != NO_ERR) {
 	return res;
     }
 
+
+	
     aug->targobj = targobj;
 
     augextern = (mod->nsid != obj_get_nsid(targobj)) ? TRUE : FALSE;
@@ -4610,7 +4576,8 @@ static status_t
     augdefcase = (targobj->objtype == OBJ_TYP_CASE && targobj->parent
 		  && targobj->parent->def.choic->defval &&
 		  !xml_strcmp(obj_get_name(targobj),
-			      targobj->parent->def.choic->defval)) ? TRUE : FALSE;
+			      targobj->parent->def.choic->defval)) 
+	? TRUE : FALSE;
     
 
     /* check external augment for mandatory nodes */
@@ -4675,6 +4642,8 @@ static status_t
 	    case OBJ_TYP_RPC:
 	    case OBJ_TYP_RPCIO:
 	    case OBJ_TYP_NOTIF:
+	    case OBJ_TYP_CHOICE:
+	    case OBJ_TYP_USES:
 		retres = ERR_NCX_INVALID_VALUE;
 		log_error("\nError: invalid object '%s' augmenting choice node",
 			  obj_get_name(testobj));
@@ -4707,8 +4676,23 @@ static status_t
 	}
     }
 
+    /* get the augment target datadefQ */
+    targQ = obj_get_datadefQ(targobj);
+    if (!targQ || targobj->objtype==OBJ_TYP_LEAF
+	|| targobj->objtype==OBJ_TYP_LEAF_LIST) {
+	log_error("\nError: &s '%s' cannot be augmented",
+		  obj_get_typestr(targobj),
+		  obj_get_name(targobj));
+	retres = ERR_NCX_WRONG_NODETYP;
+	tkc->cur = targobj->tk;
+	ncx_print_errormsg(tkc, mod, retres);
+	return retres;
+    }
+
     /* go through each node in the augment
      * make sure it is not already in the same datadefQ
+     * if not, then clone the grouping object and add it
+     * to the augment target
      */
     for (chobj = (obj_template_t *)dlq_firstEntry(&aug->datadefQ);
 	 chobj != NULL;
@@ -4780,6 +4764,14 @@ static status_t
 		    }
 		    obj_set_ncx_flags(newobj);
 		    dlq_enque(newobj, targQ);
+
+		    /* may need to set the config flag now, under the context
+		     * of the actual target, not within the grouping
+		     */
+		    config = obj_get_config_flag2(newobj, &confset);
+		    if (!confset) {
+			obj_set_config_flag(newobj);
+		    }
 
 #ifdef YANG_OBJ_DEBUG
 		    log_debug3("\nexpand_aug: add new obj %s to target %s.%u,"
@@ -4954,7 +4946,7 @@ static status_t
 *   mod == module in progress
 *   que == queue will get the obj_template_t 
 *   parent == parent object or NULL if top-level data-def-stmt
-*   qtype == type of construct containing 'que'
+*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == grp_template_t parent or NULL if parent is not a grouping
 *
 * RETURNS:
@@ -4965,7 +4957,7 @@ static status_t
 		     ncx_module_t  *mod,
 		     dlq_hdr_t *que,
 		     obj_template_t *parent,
-		     obj_qtype_t qtype,
+		     boolean refi,
 		     grp_template_t *grp)
 {
     const xmlChar   *val;
@@ -4988,49 +4980,47 @@ static status_t
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_ANYXML)) {
 	    res = consume_yang_anyxml(tkc, mod, que,
-				      parent, qtype, grp);
+				      parent, refi, grp);
 	    if (res != NO_ERR) {
 		errdone = TRUE;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
 	    res = consume_yang_container(tkc, mod, que,
-					 parent, qtype, grp);
+					 parent, refi, grp);
 	    if (res != NO_ERR) {
 		errdone = TRUE;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
 	    res = consume_yang_leaf(tkc, mod, que,
-				    parent, qtype, grp);
+				    parent, refi, grp);
 	    if (res != NO_ERR) {
 		errdone = TRUE;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
 	    res = consume_yang_leaflist(tkc, mod, que,
-					parent, qtype, grp);
+					parent, refi, grp);
 	    if (res != NO_ERR) {
 		errdone = TRUE;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
 	    res = consume_yang_list(tkc, mod, que,
-				    parent, qtype, grp);
+				    parent, refi, grp);
 	    if (res != NO_ERR) {
 		errdone = TRUE;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
 	    res = consume_yang_choice(tkc, mod, que,
-				      parent, qtype, grp);
+				      parent, refi, grp);
 	    if (res != NO_ERR) {
 		errdone = TRUE;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_USES)) {
-	    res = consume_yang_uses(tkc, mod, que,
-				    parent, qtype, grp);
+	    res = consume_yang_uses(tkc, mod, que, parent, grp);
 	    if (res != NO_ERR) {
 		errdone = TRUE;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
-	    res = consume_yang_augment(tkc, mod, que,
-				       parent, qtype, grp);
+	    res = consume_yang_augment(tkc, mod, que, parent, grp);
 	    if (res != NO_ERR) {
 		errdone = TRUE;
 	    }
@@ -5091,7 +5081,7 @@ status_t
     }
 #endif
 
-    res = consume_datadef(tkc, mod, que, parent, OBJ_QUE_DATA, NULL);
+    res = consume_datadef(tkc, mod, que, parent, FALSE, NULL);
     return res;
 
 }  /* yang_obj_consume_datadef */
@@ -5136,7 +5126,7 @@ status_t
     }
 #endif
 
-    res = consume_datadef(tkc, mod, que, parent, OBJ_QUE_GRP, grp);
+    res = consume_datadef(tkc, mod, que, parent, FALSE, grp);
     return res;
 
 }  /* yang_obj_consume_datadef_grp */
@@ -5177,8 +5167,7 @@ status_t
     }
 #endif
 
-    res = consume_yang_rpc(tkc, mod, &mod->datadefQ,
-			   NULL, OBJ_QUE_DATA, NULL);
+    res = consume_yang_rpc(tkc, mod, &mod->datadefQ, NULL, NULL);
     return res;
 
 }  /* yang_obj_consume_rpc */
@@ -5219,8 +5208,7 @@ status_t
     }
 #endif
 
-    res = consume_yang_notif(tkc, mod, &mod->datadefQ,
-			     NULL, OBJ_QUE_DATA, NULL);
+    res = consume_yang_notif(tkc, mod, &mod->datadefQ, NULL, NULL);
     return res;
 
 }  /* yang_obj_consume_notification */

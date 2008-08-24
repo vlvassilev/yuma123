@@ -586,7 +586,6 @@ static status_t
 	    continue;
 	}
 
-	obj->nsid = nsid;
 	res = def_reg_add_moddef(modname,
 				 obj_get_name(obj), NCX_NT_OBJ, obj);
         if (res != NO_ERR) {

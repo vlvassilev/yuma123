@@ -192,8 +192,8 @@ static void
     tstamp_datetime(tbuff);
 
     if (node) {
-	(void)val_gen_instance_id(node, NCX_IFMT_XPATH1, 
-				  FALSE, &ibuff);
+	(void)val_gen_instance_id(NULL, node, NCX_IFMT_XPATH1, 
+				  &ibuff);
     }
 
     log_info("\nedit-config: operation %s on session %d by %s@%s"
@@ -632,8 +632,9 @@ static status_t
 	if (res != NO_ERR) {
 	    qname.nsid = newval->nsid;
 	    qname.name = obj_get_name(chobj);
-	    agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_CONTENT, 
-		res, NULL, NCX_NT_QNAME, &qname, NCX_NT_VAL, newval);
+	    agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, 
+			     res, NULL, NCX_NT_QNAME, &qname, 
+			     NCX_NT_VAL, newval);
 	    retres = res;
 	}
     }
@@ -817,7 +818,7 @@ static status_t
 
     /* check any errors for this child node */
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_CONTENT, 
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, 
 			 res, NULL, NCX_NT_STRING, chtyp->name, 
 			 NCX_NT_VAL, newval);
     }
@@ -955,8 +956,9 @@ static status_t
 
     /* record any error so far */
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_CONTENT, res,
-		 NULL, NCX_NT_VAL, newval, NCX_NT_VAL, newval);
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, res,
+			 NULL, NCX_NT_VAL, newval, 
+			 NCX_NT_VAL, newval);
     } else {
 	/* check for any typedef callbacks for this param;
 	 * process the edit operation along the way
@@ -1156,7 +1158,7 @@ static status_t
 	}
 
 	if (res != NO_ERR) {
-	    agt_record_error(scb, &msg->mhdr.errQ, 
+	    agt_record_error(scb, &msg->mhdr, 
 			     NCX_LAYER_CONTENT, res, 
 			     NULL, NCX_NT_VAL, newval, 
 			     NCX_NT_VAL, newval);
@@ -1241,7 +1243,7 @@ static status_t
 	}
 
 	if (res != NO_ERR) {
-	    agt_record_error(scb, &msg->mhdr.errQ, 
+	    agt_record_error(scb, &msg->mhdr, 
 			     NCX_LAYER_CONTENT, res, 
 			     NULL, NCX_NT_VAL, newval, 
 			     NCX_NT_VAL, newval);
@@ -1642,6 +1644,8 @@ static status_t
     iqual = obj_get_iqualval(obj);
     minerr = FALSE;
     maxerr = FALSE;
+    minelems = 0;
+    maxelems = 0;
 
     minset = obj_get_min_elements(obj, &minelems);
     maxset = obj_get_max_elements(obj, &maxelems);
@@ -1649,15 +1653,20 @@ static status_t
     cnt = val_instance_count(val, obj_get_mod_name(obj),
 			     obj_get_name(obj));
 
+    if (LOGDEBUG2) {
+	log_debug2("\ninstance_check '%s' against '%s' (cnt=%u, min=%u, max=%u)",
+		   obj_get_name(obj), val->name, cnt, minelems, maxelems);
+    }
+
     if (minset) {
 	if (cnt < minelems) {
 	    /* not enough instances error */
 	    minerr = TRUE;
 	    res = ERR_NCX_MIN_ELEMS_VIOLATION;
 	    if (msg) {
-		agt_record_error(scb, &msg->errQ, layer, res, 
+		agt_record_error(scb, msg, layer, res, 
 				 NULL, NCX_NT_OBJ, obj, 
-				 NCX_NT_OBJ, obj);
+				 NCX_NT_VAL, val);
 	    }
 	    res = NO_ERR;
 	}
@@ -1665,13 +1674,22 @@ static status_t
 
     if (maxset) {
 	if (cnt > maxelems) {
-	    /* too many instances error */
+	    /* too many instances error
+	     * need to find all the extra instances
+	     * and mark the extras as errors or they will
+	     * not get removed later
+	     */
+	    val_set_extra_instance_errors(val, 
+					  obj_get_mod_name(obj),
+					  obj_get_name(obj),
+					  maxelems);
+
 	    maxerr = TRUE;
 	    res = ERR_NCX_MAX_ELEMS_VIOLATION;
 	    if (msg) {
-		agt_record_error(scb, &msg->errQ, layer, res, 
+		agt_record_error(scb, msg, layer, res, 
 				 NULL, NCX_NT_OBJ, obj, 
-				 NCX_NT_OBJ, obj);
+				 NCX_NT_VAL, val);
 	    }
 	    res = NO_ERR;
 	}
@@ -1682,16 +1700,15 @@ static status_t
 	if (cnt < 1 && !minerr) {
 	    /* missing single parameter */
 	    res = ERR_NCX_MISSING_VAL_INST;
-	} else if (cnt > 1 && !maxerr) {
-	    /* too many parameters */
-	    res = ERR_NCX_EXTRA_VAL_INST;
 	}
-	break;
+	/* fall through */
     case NCX_IQUAL_OPT:
 	if (cnt > 1 && !maxerr) {
 	    /* too many parameters */
+	    val_set_extra_instance_errors(val, 
+					  obj_get_mod_name(obj),
+					  obj_get_name(obj), 1);
 	    res = ERR_NCX_EXTRA_VAL_INST;
-
 	}
 	break;
     case NCX_IQUAL_1MORE:
@@ -1708,9 +1725,9 @@ static status_t
     }
 
     if (res != NO_ERR && msg) {
-	agt_record_error(scb, &msg->errQ, layer, res, 
+	agt_record_error(scb, msg, layer, res, 
 			 NULL, NCX_NT_OBJ, obj, 
-			 NCX_NT_OBJ, obj);
+			 NCX_NT_VAL, val);
     }
 
     return res;
@@ -1761,6 +1778,11 @@ static status_t
 
     res = NO_ERR;
 
+    if (LOGDEBUG2) {
+	log_debug2("\nichoice_check_agt: check '%s' against '%s'",
+		   obj_get_name(choicobj), val->name);
+    }
+
     /* Go through all the child nodes for this object
      * and look for choices against the value set to see if each 
      * a choice case is present in the correct number of instances.
@@ -1777,7 +1799,7 @@ static status_t
 	    /* error missing choice */
 	    res = ERR_NCX_MISSING_CHOICE;
 	    if (msg) {
-		agt_record_error(scb, &msg->errQ, layer, res, 
+		agt_record_error(scb, msg, layer, res, 
 				 NULL, NCX_NT_OBJ, choicobj, 
 				 NCX_NT_VAL, val);
 	    }
@@ -1799,7 +1821,7 @@ static status_t
 	    /* error: extra case object in this choice */
 	    res = ERR_NCX_EXTRA_CHOICE;
 	    if (msg) {
-		agt_record_error(scb, &msg->errQ, layer, res, 
+		agt_record_error(scb, msg, layer, res, 
 				 NULL, NCX_NT_OBJ, choicobj, 
 				 NCX_NT_VAL, testval);
 	    }
@@ -1939,6 +1961,9 @@ status_t
 
     obj = valset->obj;
 
+    if (obj_is_cli(obj) || obj_is_abstract(obj)) {
+	return NO_ERR;
+    }
 
     if (obj->objtype == OBJ_TYP_LEAF_LIST) {
 	retres = instance_check(scb, msg, obj, valset, layer);
@@ -1969,6 +1994,9 @@ status_t
 	    res = choice_check_agt(scb, msg, chobj, valset, layer);
 	} else {
 	    res = instance_check(scb, msg, chobj, valset, layer);
+	}
+	if (res != NO_ERR) {
+	    valset->res = res;
 	}
 	CHK_EXIT;
     }
@@ -2058,10 +2086,16 @@ status_t
 	     chobj != NULL;
 	     chobj = ncx_get_next_object(mod, chobj)) {
 
+	    if (obj_is_cli(chobj) || obj_is_abstract(chobj)) {
+		continue;
+	    }
+
 	    if (chobj->objtype == OBJ_TYP_CHOICE) {
-		res = choice_check_agt(scb, msg, chobj, root, NCX_LAYER_CONTENT);
+		res = choice_check_agt(scb, msg, chobj, 
+				       root, NCX_LAYER_CONTENT);
 	    } else {
-		res = instance_check(scb, msg, chobj, root, NCX_LAYER_CONTENT);
+		res = instance_check(scb, msg, chobj, 
+				     root, NCX_LAYER_CONTENT);
 	    }
 	    CHK_EXIT;
 	}
@@ -2225,8 +2259,9 @@ status_t
     /* check the lock first */
     res = cfg_ok_to_write(target, scb->sid);
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_CONTENT, res, NULL,
-		 NCX_NT_NONE, NULL, NCX_NT_VAL, valroot);
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, res, NULL,
+			 NCX_NT_NONE, NULL, 
+			 NCX_NT_VAL, valroot);
 	return res;
     }
 
@@ -2296,9 +2331,10 @@ status_t
     /* check the lock first */
     res = cfg_ok_to_write(target, scb->sid);
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr.errQ, NCX_LAYER_CONTENT, 
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, 
 			 res, NULL,
-			 NCX_NT_NONE, NULL, NCX_NT_VAL, pducfg);
+			 NCX_NT_NONE, NULL, 
+			 NCX_NT_VAL, pducfg);
 	return res;
     }
 
@@ -2346,7 +2382,7 @@ status_t
 	 */
 	res = cfg_load_root(target);
 	if (res != NO_ERR) {
-	    agt_record_error(scb, &msg->mhdr.errQ, 
+	    agt_record_error(scb, &msg->mhdr, 
 			     NCX_LAYER_OPERATION, res, NULL,
 			     NCX_NT_NONE, NULL, NCX_NT_VAL, pducfg);
 	}
@@ -2490,8 +2526,9 @@ static status_t
     cnt += metaerr_count(val, xmlns_nc_id(), NC_OPERATION_ATTR_NAME);
     if (cnt > 1) {
 	res = ERR_NCX_EXTRA_ATTR;
-	agt_record_error(scb, &msg->errQ, NCX_LAYER_CONTENT, res, 
-	     NULL, NCX_NT_STRING, NC_OPERATION_ATTR_NAME, NCX_NT_VAL, val);
+	agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
+			 NULL, NCX_NT_STRING, NC_OPERATION_ATTR_NAME, 
+			 NCX_NT_VAL, val);
     }
 
     /* get the typdef for the first in the chain with 
@@ -2556,11 +2593,11 @@ static status_t
 	    if (res != NO_ERR) {
 		qname.nsid = val->nsid;
 		qname.name = metadef->name;
-		agt_record_error(scb, &msg->errQ, 
-			 NCX_LAYER_CONTENT, res,
-			 (const xml_node_t *)val->name,
-			 NCX_NT_QNAME, &qname, 
-			 NCX_NT_VAL, val);
+		agt_record_error(scb, msg, 
+				 NCX_LAYER_CONTENT, res,
+				 (const xml_node_t *)val->name,
+				 NCX_NT_QNAME, &qname, 
+				 NCX_NT_VAL, val);
 	    }
 	}
     }
@@ -2568,18 +2605,6 @@ static status_t
 
 } /* metadata_inst_check */
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /* END file agt_val.c */

@@ -963,8 +963,8 @@ void
 status_t 
     def_reg_add_module (ncx_module_t *mod)
 {
-
     status_t  res;
+
 
 #ifdef DEBUG
     if (!mod) {

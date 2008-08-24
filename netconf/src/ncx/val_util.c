@@ -331,6 +331,7 @@ static status_t
 	case OBJ_TYP_CONTAINER:
 	case OBJ_TYP_RPCIO:
 	case OBJ_TYP_LIST:
+	case OBJ_TYP_CASE:
 	    /* add defaults to the subtrees of existing
 	     * complex nodes, but do not add any new ones
 	     */
@@ -354,7 +355,6 @@ static status_t
 	    break;
 	case OBJ_TYP_RPC:
 	case OBJ_TYP_NOTIF:
-	case OBJ_TYP_CASE:
 	default:
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	}
@@ -362,6 +362,352 @@ static status_t
     return res;
 
 } /* add_defaults */
+
+
+/********************************************************************
+* FUNCTION get_index_comp
+* 
+* Get the index component string for the specified value
+* 
+* INPUTS:
+*   mhdr == message hdr w/ prefix map or NULL to just use
+*           the internal prefix mappings
+*   format == desired output format
+*   val == val_value_t for table or container
+*   buff = buffer to hold result; NULL == get length only
+*   
+* OUTPUTS:
+*   mhdr.pmap may have entries added if prefixes used
+*      in the instance identifier which are not already in the pmap
+*   *len = number of bytes that were (or would have been) written 
+*          to buff
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    get_index_comp (xml_msg_hdr_t *mhdr,
+		    ncx_instfmt_t format,
+		    const val_value_t *val,
+		    xmlChar *buff,
+		    uint32  *len)
+{
+    const xmlChar      *prefix;
+    uint32              cnt, total;
+    status_t            res;
+    boolean             quotes;
+
+    total = 0;
+
+    /* get the data type to determine if a quoted string is needed */
+    switch (val->btyp) {
+    case NCX_BT_ENUM:
+    case NCX_BT_STRING:
+    case NCX_BT_BINARY:
+    case NCX_BT_INSTANCE_ID:
+    case NCX_BT_BOOLEAN:
+    case NCX_BT_KEYREF:
+    case NCX_BT_UNION:
+	quotes = (format==NCX_IFMT_CLI) ?
+	    val_need_quotes(VAL_STR(val)) : TRUE;
+	break;
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+    case NCX_BT_INT64:
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+    case NCX_BT_UINT64:
+    case NCX_BT_FLOAT32:
+    case NCX_BT_FLOAT64:
+	quotes = FALSE;
+	break;
+    default:
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* check if foo:parmname='parmval' format is needed */
+    if (format==NCX_IFMT_XPATH1 || format==NCX_IFMT_XPATH2) {
+	if (mhdr) {
+	    prefix = xml_msg_get_prefix_xpath(mhdr, val->nsid);
+	} else {
+	    prefix = xmlns_get_ns_prefix(val->nsid);
+	}
+	if (!prefix) {
+	    return ERR_INTERNAL_MEM;
+	}
+
+	if (buff) {
+	    buff += xml_strcpy(buff, prefix);
+	    *buff++ = ':';
+	}
+	total += xml_strlen(prefix);
+	total++;
+
+	if (buff) {
+	    buff += xml_strcpy(buff, val->name);
+	}
+	total += xml_strlen(val->name);
+
+	if (buff) {
+	    *buff++ = VAL_EQUAL_CH;
+	}
+	total++;
+
+    }
+
+    if (quotes) {
+	if (buff) {
+	    *buff++ = (xmlChar)((format==NCX_IFMT_XPATH1) ?
+				VAL_QUOTE_CH : VAL_DBLQUOTE_CH);
+	}
+	total++;  
+    }
+
+    res = val_sprintf_simval_nc(buff, val, &cnt);
+    if (res != NO_ERR) {
+	return SET_ERROR(res);
+    }
+    if (buff) {
+	buff += cnt;
+    }
+    total += cnt;
+
+    if (quotes) {
+	if (buff) {
+	    *buff++ = (xmlChar)((format==NCX_IFMT_XPATH1) ?
+				VAL_QUOTE_CH : VAL_DBLQUOTE_CH);
+	}
+	total++;  
+    }
+
+    /* end the string */
+    if (buff) {
+	*buff = 0;
+    }
+
+    *len = total;
+    return NO_ERR;
+
+}  /* get_index_comp */
+
+
+/********************************************************************
+* FUNCTION get_instance_string
+* 
+* Get the instance ID string for the specified value
+* 
+* INPUTS:
+*   mhdr == message hdr w/ prefix map or NULL to just use
+*           the internal prefix mappings
+*   format == desired output format
+*   val == value node to generate instance string for
+*   buff = buffer to hold result; NULL == get length only
+*   len == address of return length
+*
+* OUTPUTS:
+*   mhdr.pmap may have entries added if prefixes used
+*      in the instance identifier which are not already in the pmap
+*   *len = number of bytes that were (or would have been) written 
+*          to buff
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    get_instance_string (xml_msg_hdr_t *mhdr,
+			 ncx_instfmt_t format,
+			 const val_value_t *val,
+			 xmlChar *buff,
+			 uint32  *len)
+{
+    const xmlChar      *name, *prefix, *ncprefix;
+    xmlChar             numbuff[NCX_MAX_NUMLEN+1];
+    uint32              cnt, childcnt, total;
+    status_t            res;
+    boolean             root;
+    xmlns_id_t          rpcid;
+
+    /* init local vars */
+    res = NO_ERR;
+    total = 0;
+    cnt = 0;
+    root = FALSE;
+    prefix = NULL;
+    name = NULL;
+
+    /* process the specific node type 
+     * Recurively find the top node and start there
+     */
+    if (val->parent) {
+	res = get_instance_string(mhdr, format, val->parent, 
+				  buff, &cnt);
+    } else {
+	root = TRUE;
+    }
+
+    *len = 0;
+
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* move the buffer pointer to the end to append */
+    if (buff) {
+	buff += cnt;
+    }
+
+    /* skip this node if it is the virtual leaf-list header */
+    if (val->btyp == NCX_BT_LEAF_LIST) {
+	return NO_ERR;
+    } else if (val->obj->objtype == OBJ_TYP_RPCIO) {
+	/* get the prefix and name of the RPC method 
+	 * instead of this node named 'input'
+	 */
+	rpcid = obj_get_nsid(val->obj->parent);
+	if (rpcid) {
+	    if (mhdr) {
+		prefix = xml_msg_get_prefix_xpath(mhdr, rpcid);
+	    } else {
+		prefix = xmlns_get_ns_prefix(rpcid);
+	    }
+	}
+	name = obj_get_name(val->obj->parent);
+    } else {
+	/* make sure the prefix is in the message header so
+	 * an xmlns directive will be generated for this prefix
+	 */
+	if (mhdr) {
+	    prefix = xml_msg_get_prefix_xpath(mhdr, val->nsid);
+	} else {
+	    prefix = xmlns_get_ns_prefix(val->nsid);
+	}
+	name = val->name;
+    }
+
+#ifdef DEBUG
+    if (!prefix || !*prefix || !name || !*name) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    /* check if a path sep char is needed */
+    switch (format) {
+    case NCX_IFMT_C:
+	if (cnt) {
+	    if (buff) {
+		*buff++ = VAL_INST_SEPCH;
+	    }
+	    cnt++;
+	}
+	break;
+    default:
+	if (buff) {
+	    *buff++ = VAL_XPATH_SEPCH;   /*   starting '/' */
+	}
+	cnt++;
+    }
+
+    /* check if the 'rpc' root element needs to be added here */
+    if (root) {
+	/* copy prefix */
+	if (mhdr) {
+	    ncprefix = xml_msg_get_prefix_xpath(mhdr, xmlns_nc_id());
+	    if (!ncprefix) {
+		return ERR_INTERNAL_MEM;
+	    }
+	} else {
+	    ncprefix = xmlns_get_ns_prefix(xmlns_nc_id());
+	    if (!ncprefix) {
+		return SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	}
+	if (buff) {
+	    buff += xml_strcpy(buff, ncprefix);
+	    *buff++ = ':';
+	}
+	cnt += xml_strlen(ncprefix);
+	cnt++;
+
+	/* copy name */
+	if (buff) {
+	    buff += xml_strcpy(buff, NCX_EL_RPC);
+	}
+	cnt += xml_strlen(NCX_EL_RPC);
+
+	/* add another path sep char */
+	if (buff) {
+	    *buff++ = (xmlChar)((format==NCX_IFMT_C) ? 
+				VAL_INST_SEPCH : VAL_XPATH_SEPCH);
+	}
+	cnt++;
+    }
+
+
+    /* add prefix string for this component */
+    if (buff) {
+	buff += xml_strcpy(buff, prefix);
+	*buff++ = ':';
+    }
+    cnt += xml_strlen(prefix);
+    cnt++;
+
+    /* add name string for this component */
+    if (buff) {
+	buff += xml_strcpy(buff, name);
+    }
+    cnt += xml_strlen(name);
+
+    total = cnt;
+
+    /* check if this is a value node with an index clause */
+    if (!dlq_empty(&val->indexQ)) {
+	cnt = 0;
+	res = val_get_index_string(mhdr, format, val, buff, &cnt);
+	if (res == NO_ERR) {
+	    if (buff) {
+		buff[cnt] = 0;
+	    }
+	    total += cnt;
+	}
+    } else if (val->parent) {
+	childcnt = val_child_inst_cnt(val->parent,
+				      obj_get_mod_name(val->obj),
+				      val->name);
+	if (childcnt > 1) {	
+	    /* there are multiple unnamed instances, so force
+	     * an instance ID on any of them
+	     */
+	    cnt = val_get_child_inst_id(val->parent, val);
+	    if (cnt > 0) {
+		/* add an instance ID like foo[3] */
+		if (buff) {
+		    *buff++ = '[';
+		}
+		total++;
+
+		sprintf((char *)numbuff, "%u", cnt);
+
+		if (buff) {
+		    buff += xml_strcpy(buff, numbuff);
+		}
+		total += xml_strlen(numbuff);
+
+		if (buff) {
+		    *buff++ = ']';
+		}
+		total++;
+	    } else {
+		SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	}
+    }
+
+    /* set the length even if index error, and exit */
+    *len = total;
+    return res;
+
+}  /* get_instance_string */
 
 
 /*************** E X T E R N A L    F U N C T I O N S  *************/
@@ -484,7 +830,6 @@ status_t
 			 val_value_t *val)
 {
     val_value_t       *chval;
-    val_index_t       *valin;
     status_t           res;
     boolean            found;
 
@@ -508,13 +853,8 @@ status_t
 	    continue;
 	} else if (!xml_strcmp(obj_get_name(in->keyobj), 
 			       chval->name)) {
-	    valin = new_index(chval);
-	    if (!valin) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		/* save the index marker record */
-		chval->index = valin;
-		dlq_enque(valin, &val->indexQ);
+	    res = val_gen_key_entry(chval);
+	    if (res == NO_ERR) {
 		found = TRUE;
 	    }
 	}
@@ -527,6 +867,49 @@ status_t
     return res;
 
 }  /* val_gen_index_comp */
+
+
+/********************************************************************
+ * FUNCTION val_gen_key_entry
+ * 
+ * Create a key record within an index comp
+ *
+ * INPUTS:
+ *   in == obj_key_t in the chain to process
+ *   keyval == the just parsed table row with the childQ containing
+ *          nodes to check as index nodes
+ *
+ * OUTPUTS:
+ *   val->indexQ will get a val_index_t record added if return NO_ERR
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+status_t 
+    val_gen_key_entry  (val_value_t *keyval)
+{
+    val_index_t       *valin;
+    status_t           res;
+
+#ifdef DEBUG
+    if (!keyval || !keyval->parent) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    valin = new_index(keyval);
+    if (!valin) {
+	res = ERR_INTERNAL_MEM;
+    } else {
+	/* save the index marker record */
+	keyval->index = valin;
+	dlq_enque(valin, &keyval->parent->indexQ);
+    }
+
+    return res;
+
+}  /* val_gen_key_entry */
 
 
 /********************************************************************
@@ -914,6 +1297,296 @@ boolean
     return TRUE;
 
 }  /* val_choice_is_set */
+
+
+/********************************************************************
+* FUNCTION val_purge_errors_from_root
+* 
+* Remove any error nodes under a root container
+* that were saved for error recording purposes
+*
+* INPUTS:
+*   val == root container to purge
+*
+*********************************************************************/
+void
+    val_purge_errors_from_root (val_value_t *val)
+{
+    val_value_t           *chval, *nextval;
+
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+    if (!obj_is_root(val->obj)) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+#endif
+
+    for (chval = val_get_first_child(val);
+	 chval != NULL; 
+	 chval = nextval) {
+
+	nextval = val_get_next_child(chval);
+
+	if (chval->res != NO_ERR) {
+	    val_remove_child(chval);
+	    val_free_value(chval);
+	}
+    }
+    val->res = NO_ERR;
+
+}  /* val_purge_errors_from_root */
+
+
+/********************************************************************
+ * FUNCTION val_new_child_val
+ * 
+ * INPUTS:
+ *   nsid == namespace ID of name
+ *   name == name string (direct or strdup, based on copyname)
+ *   copyname == TRUE is dname strdup should be used
+ *   parent == parent node
+ *   editop == requested edit operation
+ *   
+ * RETURNS:
+ *   status
+ *********************************************************************/
+val_value_t *
+    val_new_child_val (xmlns_id_t   nsid,
+		       const xmlChar *name,
+		       boolean copyname,
+		       val_value_t *parent,
+		       op_editop_t editop)
+{
+    val_value_t *chval;
+
+    chval = val_new_value();
+    if (!chval) {
+	return NULL;
+    }
+
+    /* save a const pointer to the name of this field */
+    if (copyname) {
+	chval->dname = xml_strdup(name);
+	if (chval->dname) {
+	    chval->name = chval->dname;
+	} else {
+	    val_free_value(chval);
+	    return NULL;
+	}
+    } else {
+	chval->name = name;
+    }
+
+    chval->parent = parent;
+    chval->editop = editop;
+    chval->nsid = nsid;
+
+    return chval;
+
+} /* val_new_child_val */
+
+
+
+/********************************************************************
+* FUNCTION val_gen_instance_id
+* 
+* Malloc and Generate the instance ID string for this value node, 
+* 
+* INPUTS:
+*   mhdr == message hdr w/ prefix map or NULL to just use
+*           the internal prefix mappings
+*   val == node to generate the instance ID for
+*   format == desired output format (NCX or Xpath)
+*   buff == pointer to address of buffer to use
+*
+* OUTPUTS
+*   mhdr.pmap may have entries added if prefixes used
+*      in the instance identifier which are not already in the pmap
+*   *buff == malloced buffer with the instance ID
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_gen_instance_id (xml_msg_hdr_t *mhdr,
+			 const val_value_t  *val, 
+			 ncx_instfmt_t format,
+			 xmlChar  **buff)
+{
+    uint32    len;
+    status_t  res;
+
+#ifdef DEBUG 
+    if (!val || !buff) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* figure out the length of the parmset instance ID */
+    res = get_instance_string(mhdr, format, val, NULL, &len);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* check no instance ID */
+    if (len==0) {
+	*buff = NULL;
+	return ERR_NCX_NO_INSTANCE;
+    }
+
+    /* get a buffer to fit the instance ID string */
+    *buff = (xmlChar *)m__getMem(len+1);
+    if (!*buff) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    /* get the instance ID string for real this time */
+    res = get_instance_string(mhdr, format, val, *buff, &len);
+    if (res != NO_ERR) {
+	m__free(*buff);
+	*buff = NULL;
+    }
+
+    return res;
+
+}  /* val_gen_instance_id */
+
+
+/********************************************************************
+* FUNCTION val_get_index_string
+* 
+* Get the index string for the specified table or container entry
+* 
+* INPUTS:
+*   mhdr == message hdr w/ prefix map or NULL to just use
+*           the internal prefix mappings
+*   format == desired output format
+*   val == val_value_t for table or container
+*   buff == buffer to hold result; 
+         == NULL means get length only
+*   
+* OUTPUTS:
+*   mhdr.pmap may have entries added if prefixes used
+*      in the instance identifier which are not already in the pmap
+*   *len = number of bytes that were (or would have been) written 
+*          to buff
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_get_index_string (xml_msg_hdr_t *mhdr,
+			  ncx_instfmt_t format,
+			  const val_value_t *val,
+			  xmlChar *buff,
+			  uint32  *len)
+{
+    const val_value_t  *ival, *nextival;
+    const val_index_t  *valin;
+    uint32              cnt, total;
+    status_t            res;
+
+#ifdef DEBUG
+    if (!val) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+	
+    total = 0;
+    *len = 0;
+
+    /* get the first index node value struct */
+    valin = (const val_index_t *)dlq_firstEntry(&val->indexQ);
+    if (valin) {
+	ival = valin->val;
+    } else {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* check that there is at least one index component */
+    if (format != NCX_IFMT_CLI) {
+	/* start with the left bracket */
+	if (buff) {
+	    *buff++ = (xmlChar)VAL_BINDEX_CH;
+	}
+	total++;
+    }
+
+    /* at least one real index component; generate entire index */
+    while (ival) {
+	/* generate one component, or N if it is a struct */
+	res = get_index_comp(mhdr, format, ival, buff, &cnt);
+	if (res != NO_ERR) {
+	    return res;
+	} else {
+	    if (buff) {
+		buff += cnt;
+	    }
+	    total += cnt;
+	}
+
+	/* setup next index component */
+	nextival = NULL;
+	valin = (const val_index_t *)dlq_nextEntry(valin);
+	if (valin) {
+	    nextival = valin->val;
+	} 
+
+	/* check if an index separator string is needed */
+	if (nextival) {
+	    switch (format) {
+	    case NCX_IFMT_C:
+		/* add the index separator char ',' */
+		if (buff) {
+		    *buff++ = VAL_INDEX_SEPCH;
+		}
+		total++;
+		break;
+	    case NCX_IFMT_XPATH1:
+	    case NCX_IFMT_XPATH2:
+		/* format is one of the Xpath variants 
+		 * add the index separator string ' and ' 
+		 */
+		if (buff) {
+		    buff += xml_strcpy(buff, VAL_XPATH_INDEX_SEPSTR);
+		}
+		total += VAL_XPATH_INDEX_SEPLEN;
+		break;
+	    case NCX_IFMT_CLI:
+		/* add the CLI index separator char ' ' */
+		if (buff) {
+		    *buff++ = VAL_INDEX_CLI_SEPCH;
+		}
+		total++;
+		break;
+	    default:
+		SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	}
+
+	/* setup the next index component */
+	ival = nextival;
+    }
+
+    /* add the closing right bracket */
+    if (format != NCX_IFMT_CLI) {
+	if (buff) {
+	    *buff++ = VAL_EINDEX_CH;
+	    *buff = 0;
+	}
+	total++;
+    }
+
+    /* return success */
+    *len = total;
+    return NO_ERR;
+
+    }  /* val_get_index_string */
+
 
 
 /* END file val_util.c */

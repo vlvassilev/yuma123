@@ -80,7 +80,7 @@ extern const val_value_t *
 
 extern void
     agt_record_error (ses_cb_t *scb,
-		      dlq_hdr_t *errQ,
+		      xml_msg_hdr_t *msghdr,
 		      ncx_layer_t layer,
 		      status_t  res,
 		      const xml_node_t *xmlnode,
@@ -91,7 +91,7 @@ extern void
 
 extern void
     agt_record_error_errinfo (ses_cb_t *scb,
-			      dlq_hdr_t *errQ,
+			      xml_msg_hdr_t *msghdr,
 			      ncx_layer_t layer,
 			      status_t  res,
 			      const xml_node_t *xmlnode,
@@ -103,7 +103,7 @@ extern void
 
 extern void
     agt_record_attr_error (ses_cb_t *scb,
-			   dlq_hdr_t *errQ,
+			   xml_msg_hdr_t *msghdr,
 			   ncx_layer_t layer,
 			   status_t  res,
 			   const xml_attr_t *xmlattr,

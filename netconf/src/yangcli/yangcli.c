@@ -191,7 +191,7 @@ date         init     comment
 #define YANGCLI_BRIEF  (const xmlChar *)"brief"
 #define YANGCLI_FULL   (const xmlChar *)"full"
 
-#define DEF_PROMPT ((const xmlChar *)"ncx> ")
+#define DEF_PROMPT ((const xmlChar *)"yangcli> ")
 #define MORE_PROMPT ((const xmlChar *)"   more> ")
 
 /* YANGCLI top level commands */
@@ -1265,12 +1265,12 @@ static status_t
 		val_value_t *valset,
 		val_value_t *oldvalset)
 {
-    const obj_template_t    *parm, *cas;
+    const obj_template_t    *parm, *cas, *usecase;
     val_value_t             *pval;
     xmlChar                 *myline, *str;
     status_t                 res;
-    int                      i, num;
-    boolean                  first, done, done2, usedef;
+    int                      casenum, num;
+    boolean                  first, done, usedef;
 
 
     res = NO_ERR;
@@ -1352,7 +1352,7 @@ static status_t
 		first = FALSE;
 	    }
 
-	    log_stdout("\n   %s %s",
+	    log_stdout("\n       %s %s",
 		       obj_get_typestr(parm),
 		       obj_get_name(parm));
 	}
@@ -1363,11 +1363,13 @@ static status_t
     while (!done) {
 	/* Pick a prompt, depending on the choice default case */
 	if (obj_get_default(choic)) {
-	    log_stdout("\nEnter choice number (%d - %d), [ENTER] for default (%s),"
+	    log_stdout("\nEnter choice number (%d - %d), "
+		       "[ENTER] for default (%s),"
 		       " or 0 to cancel", 1, num-1, 
 		       obj_get_default(choic));
 	} else {
-	    log_stdout("\nEnter choice number (%d - %d), or 0 to cancel", 1, num-1);
+	    log_stdout("\nEnter choice number (%d - %d),"
+		       "or 0 to cancel", 1, num-1);
 	}
 
 	/* get input from the user STDIN */
@@ -1384,7 +1386,7 @@ static status_t
 
 	/* convert to a number, check [ENTER] for default */
 	if (*str) {
-	    i = atoi((const char *)str);
+	    casenum = atoi((const char *)str);
 	    usedef = FALSE;
 	} else {
 	    usedef = TRUE;
@@ -1398,11 +1400,13 @@ static status_t
 		log_stdout("\nError: Choice does not have a default case\n");
 		usedef = FALSE;
 	    }
-	} else if (i == 0) {
+	} else if (casenum == 0) {
 	    log_stdout("\nChoice canceled\n");
 	    return ERR_NCX_SKIPPED;
-	} else if (i < 0 || i >= num) {
+	} else if (casenum < 0 || casenum >= num) {
 	    log_stdout("\nError: invalid value '%s'\n", str);
+	} else {
+	    done = TRUE;
 	}
     }
 
@@ -1417,33 +1421,25 @@ static status_t
 
 	num = 1;
 	done = FALSE;
+	usecase = NULL;
 
 	for (cas = obj_first_child(choic); 
 	     cas != NULL && !done;
 	     cas = obj_next_child(cas)) {
 
-	    done2 = FALSE;
-	    for (parm = obj_first_child(cas);
-		 parm != NULL && !done2;
-		 parm = obj_next_child(parm)) {
+	    if (!obj_is_config(cas)) {
+		continue;
+	    }
 
-		if (!obj_is_config(parm)) {
-		    continue;
-		}
-
-		if (i == num) {
-		    done = TRUE;
-		    done2 = TRUE;
-		} else {
-		    num++;
-		    done2 = TRUE;
-		}
+	    if (casenum == num) {
+		done = TRUE;
+		usecase = cas;
+	    } else {
+		num++;
 	    }
 	}
 
-	if (!done) {
-	    cas = NULL;
-	}
+	cas = usecase;
     }
 
     /* make sure a case was selected or found */
@@ -1469,7 +1465,12 @@ static status_t
 	}
 
 	/* node is config and not already set */
-	res = get_parm(rpc, parm, valset, oldvalset);
+	if (obj_get_basetype(parm) == NCX_BT_EMPTY) {
+	    res = cli_parse_parm(valset, parm, NULL, SCRIPTMODE);
+	} else {
+	    res = get_parm(rpc, parm, valset, oldvalset);
+	}
+
 	if (res != NO_ERR) {
 	    log_stdout("\nError: get parm '%s' failed (%s)",
 		       obj_get_name(parm),
@@ -1508,8 +1509,9 @@ static status_t
 		 val_value_t *oldvalset)
 {
     const obj_template_t  *parm;
-    val_value_t           *val;
+    val_value_t           *val, *oldval;
     status_t               res, retres;
+    boolean                done;
 
     retres = NO_ERR;
     for (parm = obj_first_child(valset->obj);
@@ -1552,12 +1554,51 @@ static status_t
 	    }
             break;
 	case OBJ_TYP_LEAF_LIST:
-	case OBJ_TYP_CONTAINER:
-	case OBJ_TYP_LIST:
-	case OBJ_TYP_RPCIO:
-	case OBJ_TYP_NOTIF:
 	    retres = ERR_NCX_OPERATION_FAILED;   /****/
 	    break;
+	case OBJ_TYP_CONTAINER:
+	case OBJ_TYP_NOTIF:
+	case OBJ_TYP_RPCIO:
+	case OBJ_TYP_LIST:
+	    done = FALSE;
+	    while (!done) {
+		/* if the parm is not already set and is not read-only
+		 * then try to get a value from the user at the CLI
+		 */
+		if (get_optional || obj_is_mandatory(parm)) {
+		    if (oldvalset) {
+			oldval = val_find_child(oldvalset, 
+						obj_get_mod_name(parm),
+						obj_get_name(parm));
+		    } else {
+			oldval = NULL;
+		    }
+
+		    val = val_find_child(valset, 
+					 obj_get_mod_name(parm),
+					 obj_get_name(parm));
+		    if (!val) {
+			val = val_new_value();
+			if (!val) {
+			    retres = ERR_INTERNAL_MEM;
+			    break;
+			} else {
+			    val_init_from_template(val, parm);
+			    val_add_child(val, valset);
+			}
+		    }
+
+		    res = fill_valset(rpc, val, oldval);
+		}
+
+		if (parm->objtype == OBJ_TYP_LIST) {
+		    /*** !!! need to prompt for more list entries ***/
+		    done = TRUE;  
+		} else {
+		    done = TRUE;
+		}
+	    }
+            break;
 	case OBJ_TYP_RPC:
         default: 
             retres = SET_ERROR(ERR_INTERNAL_VAL);
@@ -1623,7 +1664,7 @@ static void
     }
 
     val = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_PASSWORD);
-    if (res == NO_ERR) {
+    if (val && val->res == NO_ERR) {
 	password = VAL_STR(val);
     } else {
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -2517,15 +2558,6 @@ static void
 	return;
     }
 
-    /* none of the definition parameters are present, so 
-     * print the general program help text
-     */
-    if (imode) {
-	log_stdout("\nyangcli version %s", progver);
-    } else {
-	log_write("\nyangcli version %s", progver);
-    }
-
     if (mode == HELP_MODE_FULL) {
 	help_program_module(YANGCLI_MOD, YANGCLI_BOOT, mode);
     } else {
@@ -2533,7 +2565,7 @@ static void
 	obj = (const obj_template_t *)
 	    def_reg_find_moddef(YANGCLI_MOD, YANGCLI_HELP, &dtyp);
 	if (obj && obj->objtype == OBJ_TYP_RPC) {
-	    help_object(obj, mode);
+	    help_object(obj, HELP_MODE_FULL);
 	} else {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
@@ -3050,6 +3082,12 @@ static void
 	}
 	
 	if (res == NO_ERR) {
+
+	    if (LOGDEBUG2) {
+		log_debug2("\nabout to send RPC request with reqdata:");
+		val_dump_value(reqdata, NCX_DEF_INDENT);
+	    }
+
 	    /* the request will be stored if this returns NO_ERR */
 	    res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
 	}

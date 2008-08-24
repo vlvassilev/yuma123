@@ -78,7 +78,7 @@ date         init     comment
 #endif
 
 #define NETCONFD_MOD       (const xmlChar *)"netconfd"
-#define NETCONFD_CLI       (const xmlChar *)"nc-cli"
+#define NETCONFD_CLI       (const xmlChar *)"netconfd"
 
 #define MAX_FILESPEC_LEN  1023
 
@@ -247,17 +247,19 @@ static status_t
 
 
 #ifdef NETCONFD_DEBUG_TEST
-    (void)agt_cb_register_callback((const xmlChar *)"/test:test1",
+    res = agt_cb_register_callback((const xmlChar *)"/t:test1",
 				   TRUE, AGT_CB_APPLY,
 				   test_callback);
+    if (res != NO_ERR) {
+	SET_ERROR(res);
+	return res;
+    }
+
 #endif
 
 #ifdef NETCONFD_DEBUG
     log_debug("\nnetconfd init OK, ready for sessions\n");
 #endif
-
-
-
 
     return NO_ERR;
 
@@ -304,7 +306,7 @@ static void
 #endif
 
 #ifdef NETCONFD_DEBUG_TEST
-    agt_cb_unregister_callback((const xmlChar *)"/test:test1");
+    agt_cb_unregister_callback((const xmlChar *)"/t:test1");
 #endif
 
     /* Cleanup the Netconf Agent Library */

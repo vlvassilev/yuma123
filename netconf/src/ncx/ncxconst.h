@@ -151,7 +151,7 @@ date	     init     comment
 
 #define NCX_DEF_MERGETYPE NCX_MERGE_LAST
 
-#define NCX_DEF_DUMP_LEVEL  3
+#define NCX_DEF_DUMP_LEVEL  4
 
 #define NCX_ROOT_USER       (const xmlChar *)"root"
 
@@ -307,10 +307,11 @@ date	     init     comment
  * NCX token names of the builtin types used in the <syntax> clause 
  *
  */
+
 #define NCX_AUGHOOK_START      (const xmlChar *)"__"
 #define NCX_AUGHOOK_END        (const xmlChar *)".A__"
 
-
+#define NCX_EL_ABSTRACT        ((const xmlChar *)"abstract")
 #define NCX_EL_ACCESS_RC       ((const xmlChar *)"read-create")
 #define NCX_EL_ACCESS_RO       ((const xmlChar *)"read-only")
 #define NCX_EL_ACCESS_RW       ((const xmlChar *)"read-write")

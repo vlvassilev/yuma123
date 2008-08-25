@@ -366,7 +366,7 @@ module netconf {
    grouping RpcDataReplyType {
       description "NETCONF 'rpc-reply' Error and/or Data Content";
 
-      container rpc-error {
+      list rpc-error {
         config false;
         uses RpcErrorType;
       }
@@ -375,6 +375,14 @@ module netconf {
         presence "Indicates some data returned in the reply.
                   An empty container indicates the request produced
                   no response data.";
+
+        /* this tag is only valid for NETCONF RPC methods
+         * that return a data element.  It will not support
+         * arbitrary data returned within the rpc-reply
+         * container.  It will only support top-level
+         * elements within the config database as child nodes
+         */
+        ncx:root;
       }
    }
 
@@ -401,12 +409,14 @@ module netconf {
       description "Generic NETCONF 'rpc-reply' content. ";
 
       choice ok-or-data-error {
+        mandatory true;
+        config false;
+
         leaf ok {
           description
             "Sent in 'rpc-reply' messages if no errors or
              warnings occurred during the processing of an 'rpc' request.";
           type empty;
-          config false;
         }
 
         case data-error {
@@ -419,6 +429,8 @@ module netconf {
       description "Common NETCONF config parameter contents.";
 
       choice config-source {
+        mandatory true;
+
         leaf candidate {
           description 
             "Only available if 'candidate' capability supported.";
@@ -439,6 +451,7 @@ module netconf {
       description "NETCONF config 'source' Parameter contents.";
 
       uses CommonConfigSourceType;
+
       augment config-source {
         leaf url {
           description 
@@ -491,6 +504,7 @@ module netconf {
 
      // do not treat missing message-id as an error
      ncx:metadata  "MessageId message-id?";
+     ncx:abstract;
    }
 
    container rpc-reply {
@@ -502,6 +516,7 @@ module netconf {
 
      // do not treat missing message-id as an error
      ncx:metadata  "MessageId message-id?";
+     ncx:abstract;
    }
 
    // NETCONF Standard RPC Methods
@@ -517,7 +532,6 @@ module netconf {
       input {
         container source {
           description "Particular configuration to retrieve.";
-          // mandatory true;
           uses GetConfigSourceType;
         }
 

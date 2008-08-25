@@ -11,8 +11,16 @@ module ncx {
 
   description
     "This module contains definitions for Netconf Central extensions.
-     These elements will be present in appinfo elements,
-     used in YANG or NCX to XSD translation.";
+     The elements will be present in appinfo elements,
+     used in YANG or NCX to XSD translation.
+     The extensions are used within YANG modules to add features
+     in YangTools that use particular extensions.";
+
+  revision 2008-08-23 {
+    description 
+       "Added abstract extension.  Marked all objects as abstract
+        so they will not be included in the NETCONF database.";
+  }
 
   revision 2008-08-01 {
     description 
@@ -39,6 +47,7 @@ module ncx {
        "Contains the module name value for a belongs-to-stmt.
         Will be present in appinfo for a YANG submodule.";
     type string;
+    ncx:abstract;
   }
 
   leaf case-name {
@@ -46,6 +55,7 @@ module ncx {
        "Contains the identifier-str value for a YANG case name.
         Will be present in appinfo for all choice case definitions.";
     type string;
+    ncx:abstract;
   }
        
   leaf choice-name {
@@ -53,6 +63,7 @@ module ncx {
        "Contains the identifier-str value for a YANG choice name.
         Will be present in appinfo for all choice object definitions.";
     type string;
+    ncx:abstract;
   }
 
   leaf config {
@@ -61,6 +72,7 @@ module ncx {
         Will be present in appinfo for top-level objects
         or if config-stmt is present in the object definition.";
     type boolean;
+    ncx:abstract;
   }
 
   leaf contact {
@@ -69,6 +81,7 @@ module ncx {
         Will be present in appinfo for the module.
         if defined in the module.";
     type string;
+    ncx:abstract;
   }
 
   leaf default {
@@ -77,6 +90,7 @@ module ncx {
         Will be present in appinfo for a typedef that includes
         a default-stmt.";
     type string;
+    ncx:abstract;
   }
 
   leaf mandatory {
@@ -85,6 +99,7 @@ module ncx {
         Will be present in appinfo if mandatory-stmt is 
         present in the object definition.";
     type boolean;
+    ncx:abstract;
   }
 
   leaf min-elements {
@@ -94,6 +109,7 @@ module ncx {
         object, if the min-elements-stmt is present
         in the object definition.";
     type uint32;
+    ncx:abstract;
   }
 
   leaf max-elements {
@@ -108,10 +124,12 @@ module ncx {
         enum unbounded;
       }
     }
+    ncx:abstract;
   }
 
   container must {
     presence "Indicates a must statement is configured.";
+    ncx:abstract;
 
     description 
      "Contains the fields from one must-stmt.  Will be present
@@ -158,6 +176,7 @@ module ncx {
       enum system;
       enum user;
     } 
+    ncx:abstract;
   }
 
   leaf organization {
@@ -166,6 +185,7 @@ module ncx {
         Will be present in appinfo if oraganization-stmt is 
         present in the module.";
     type string;
+    ncx:abstract;
   }
 
   leaf path {
@@ -174,6 +194,7 @@ module ncx {
         Will be present in appinfo for all keyref typedefs, and
         inline type-stmts for leafs and leaf-lists.";
     type string;
+    ncx:abstract;
   }
 
   leaf position {
@@ -182,10 +203,12 @@ module ncx {
         Will be present in appinfo for all 'bits' typedefs, and
         inline type-stmts for leafs and leaf-lists.";
     type uint32;
+    ncx:abstract;
   }
 
   grouping reference {
     container reference {
+      ncx:abstract;
       presence "Indicates a reference statement is configured.";
 
       description 
@@ -211,6 +234,7 @@ module ncx {
   uses reference;
 
   container revision {
+    ncx:abstract;
 
     presence "Indicates a revision statement is configured.";
     description 
@@ -222,6 +246,7 @@ module ncx {
         "Contains the date string value from the revision-stmt.";
       type string;
       mandatory true;
+      ncx:abstract;
     }
    
     leaf description {
@@ -229,6 +254,7 @@ module ncx {
         "Contains the description-stmt value from the revision-stmt.";
       type string;
       mandatory true;
+      ncx:abstract;
     }
   }
 
@@ -238,6 +264,7 @@ module ncx {
         for one RPC method.  Will be present in appinfo for 
         all rpc definitions which contain an output-stmt.";
     type string;
+    ncx:abstract;
   }
 
   leaf source {
@@ -246,6 +273,7 @@ module ncx {
         for the XSD translation. Will be present in the appinfo
         for the module header.";
     type string;
+    ncx:abstract;
   }
 
   leaf units {
@@ -255,6 +283,7 @@ module ncx {
         inline type-stmts for leafs and leaf-lists,
         which contain a units-stmt.";
     type string;
+    ncx:abstract;
   }
 
   leaf value {
@@ -263,46 +292,124 @@ module ncx {
         Will be present in appinfo for all 'enumeration' 
         typedefs, and inline type-stmts for leafs and leaf-lists.";
     type int32;
+    ncx:abstract;
   }
 
-  extension no-duplicates {
-    description 
-       "Used to indicate that no duplicate values are allowed
-        in a leaf-list.";
-  }    
+
+  // Internal objects for anyxml parsing
+  // every value node must be assigned an object template
+  // even within the anyxml implementation
+  
+  anyxml any {
+    ncx:hidden;
+    ncx:abstract;
+  }
+
+  container struct {
+     ncx:hidden;
+     ncx:abstract;
+  }
+
+  leaf string { 
+     type string;
+     ncx:hidden;
+     ncx:abstract;
+  }
+
+  leaf empty {
+     type empty;
+     ncx:hidden;
+     ncx:abstract;
+  }
+
+
+  // Netconf Central Extensions
+
+  extension abstract {
+    description
+      "Used with object definitions to indicate that they
+       do not represent CLI or NETCONF configuration database
+       data instances.  Instead, the node is simply an object
+       identifier, an 'error-info' extension, or some other
+       abstract data structure.";
+  }
+
+  extension cli {
+    description
+     "Used within a container definition to indicate it is
+      only used as a conceptual container for a set of CLI parameters.
+      A top-level container containing this extension will not
+      be included in any NETCONF configuration databases.";
+  }
+
+  extension cli-default {
+    description
+     "Used within a CLI container definition to specify a
+      leaf parameter within the CLI container that is used
+      as the default if no parameter name is entered.
+
+      These values must not begin with a dash (-) or 
+      double dash (--) sequence or they will be mistaken
+      for CLI parameter names.
+
+      This option is somewhat risky because any unrecognized
+      parameter without any prefix (- or --) will try
+      to be assigned to the default parameter.
+      It can also be useful though, for assigning file name
+      parameters through shell expansion.";
+
+    argument parm {
+     yin-element true;
+    }
+  }
+
+  extension hidden {
+    description
+      "Used to prevent publication of an object or grouping.
+       Will be ignored for typedefs and other constructs.
+       If present, that node and any sub-nodes will be ignored
+       when generating HTML documentation or help text.";
+  }
 
   extension metadata {
     description 
-       "Used to define an XML attribute to be associated with a
-        data-def-stmt node.";
+      "Used to define an XML attribute to be associated with a
+       data-def-stmt node.";
     argument syntax-string {
       yin-element true;
     }
   }
 
+  extension no-duplicates {
+    description 
+      "Used to indicate that no duplicate values are allowed
+       in a leaf-list.";
+  }    
+
+  extension password {
+    description
+      "Used to indicate the data type for the leaf is really
+       a password.  Only the encrypted version of the password
+       is allowed to be generated in any output.";
+  }
+
+  extension root {
+    description
+      "Used within a container definition to indicate it is
+       really a root container for a conceptual NETCONF database,
+       instead of just an empty container.  This is needed
+       for yangtools to correctly process any RPC method
+       that contains a 'config' parameter.";
+  }
+
   extension rpc-type {
     description 
-       "Used to classify an RPC method. Used within an rpc-stmt node.
-        Suggested argument values:
-          config, monitor, exec, debug, other";
+      "Used to classify an RPC method. Used within an rpc-stmt node.
+       Suggested argument values:
+         config, monitor, exec, debug, other";
     argument type-string {
       yin-element true;
     }
-  }
-
-  extension password {
-   description
-    "Used to indicate the data type for the leaf is really
-     a password.  Only the encrypted version of the password
-     is allowed to be generated in any output.";
-  }
-
-  extension hidden {
-   description
-    "Used to prevent publication of an object or grouping.
-     Will be ignored for typedefs and other constructs.
-     If present, that node and any sub-nodes will be ignored
-     when generating HTML documentation or help text.";
   }
 
   extension xsdlist {
@@ -319,40 +426,8 @@ module ncx {
     }
   }
 
-  extension root {
-   description
-     "Used within a container definition to indicate it is
-      really a root container for a conceptual NETCONF database,
-      instead of just an empty container.  This is needed
-      for yangtools to correctly process any RPC method
-      that contains a 'config' parameter.";
-  }
 
-  extension cli {
-   description
-     "Used within a container definition to indicate it is
-      only used as a conceptual container for a set of CLI parameters.
-      A top-level container containing this extension will not
-      be included in any NETCONF configuration databases.";
-  }
 
-  anyxml any {
-    ncx:hidden;
-  }
-
-  container struct {
-     ncx:hidden;
-  }
-
-  leaf string { 
-     type string;
-     ncx:hidden;
-  }
-
-  leaf empty {
-     type empty;
-     ncx:hidden;
-  }
 
 }
 

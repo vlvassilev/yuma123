@@ -99,11 +99,10 @@ module netconfd {
 
       leaf xmlorder {
         description
-          "If true, then XML element order will be enforced.
+          "If present, then XML element order will be enforced.
            Otherwise, XML element order errors will not be
            generated if possible.";
-        type boolean;
-        default false;
+        type empty;
       }
     }
 

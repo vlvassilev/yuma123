@@ -210,14 +210,22 @@ module yangcli {
           description
              "User name to use for NETCONF sessions.";
           type nt:NcxUserName;
+	  mandatory true;
         }
 
-        uses KorP;
+        uses KorP {
+          choice k-or-p {
+            mandatory true;
+            leaf key { mandatory true; }
+            leaf password { mandatory true; }
+          }
+        }
 
         leaf agent {
            description
              "IP address or DNS name of the NETCONF agent target.";
           type string;
+	  mandatory true;
         }
       }
     }
@@ -256,6 +264,7 @@ module yangcli {
           description
              "Module name to load";
           type nt:NcxName;
+          mandatory true;
         }
       }
     }
@@ -272,6 +281,7 @@ module yangcli {
         leaf script {
            description "script filespec to run";
            type string;
+           mandatory true;
         }
 
         // hardwired parameter names required at this time

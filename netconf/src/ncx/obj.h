@@ -574,6 +574,12 @@ extern obj_unique_t *
     obj_find_unique (dlq_hdr_t *que,
 		     const xmlChar *xpath);
 
+extern const obj_unique_t *
+    obj_first_unique (const obj_template_t *listobj);
+
+extern const obj_unique_t *
+    obj_next_unique (const obj_unique_t *un);
+
 /********************    obj_key_t   ********************/
 extern obj_key_t *
     obj_new_key (void);

@@ -3917,6 +3917,62 @@ obj_unique_t *
 
 
 /********************************************************************
+* FUNCTION obj_first_unique
+* 
+* Get the first unique-stmt for a list
+*
+* RETURNS:
+*   pointer to found entry or NULL if not found
+*********************************************************************/
+const obj_unique_t *
+    obj_first_unique (const obj_template_t *listobj)
+{
+    obj_unique_t  *un;
+
+#ifdef DEBUG
+    if (!listobj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+    if (listobj->objtype != OBJ_TYP_LIST) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+#endif
+
+    return (const obj_unique_t *)
+	dlq_firstEntry(&listobj->def.list->uniqueQ);
+
+}  /* obj_first_unique */
+
+
+/********************************************************************
+* FUNCTION obj_next_unique
+* 
+* Get the next unique-stmt for a list
+*
+* INPUTS:
+*  un == current unique node
+*
+* RETURNS:
+*   pointer to found entry or NULL if not found
+*********************************************************************/
+const obj_unique_t *
+    obj_next_unique (const obj_unique_t *un)
+{
+#ifdef DEBUG
+    if (!un) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (const obj_unique_t *)dlq_nextEntry(un);
+
+}  /* obj_next_unique */
+
+
+/********************************************************************
 * FUNCTION obj_new_key
 * 
 * Alloc and Init a obj_key_t struct

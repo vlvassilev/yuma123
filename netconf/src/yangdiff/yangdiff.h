@@ -61,8 +61,11 @@ date	     init     comment
 #define YANGDIFF_CONTAINER         (const xmlChar *)"yangdiff"
 
 #define YANGDIFF_PARM_CONFIG        (const xmlChar *)"config"
-#define YANGDIFF_PARM_OLD           (const xmlChar *)"old"
 #define YANGDIFF_PARM_NEW           (const xmlChar *)"new"
+#define YANGDIFF_PARM_NEWPATH       (const xmlChar *)"newpath"
+#define YANGDIFF_PARM_OLD           (const xmlChar *)"old"
+#define YANGDIFF_PARM_OLDPATH       (const xmlChar *)"oldpath"
+
 #define YANGDIFF_PARM_DIFFTYPE      (const xmlChar *)"difftype"
 #define YANGDIFF_PARM_OUTPUT        (const xmlChar *)"output"
 #define YANGDIFF_PARM_INDENT        (const xmlChar *)"indent"
@@ -99,10 +102,12 @@ typedef struct yangdiff_diffparms_t_ {
     /* external parameters */
     const xmlChar  *old;
     const xmlChar  *new;
+    const xmlChar  *oldpath;
+    const xmlChar  *modpath;
+    const xmlChar  *newpath;
     const xmlChar  *output;
     const xmlChar  *difftype;
     const xmlChar  *logfilename;
-    const xmlChar  *modpath;
     const xmlChar  *config;
     boolean         helpmode;
     int32           indent;

@@ -765,7 +765,7 @@ static status_t
     compare_one (yangdiff_diffparms_t *cp)
 {
     yang_pcb_t        *oldpcb, *newpcb;
-    const xmlChar     *logsource;
+    const xmlChar     *logsource, *modpath;
     status_t           res;
     boolean            skipreport;
 
@@ -776,12 +776,21 @@ static status_t
     /* force modules to be reloaded */
     ncx_set_cur_modQ(&cp->newmodQ);
 
+    /* pick which module source path to use */
+    modpath = NULL;
+    if (cp->newpath) {
+	ncxmod_set_modpath(cp->newpath);
+    } else if (cp->curnew) {
+	modpath = cp->full_new;
+    } else if (cp->modpath) {
+	ncxmod_set_modpath(cp->modpath);
+    } else {
+	ncxmod_set_modpath((const xmlChar *)"");
+    }
+
     newpcb = ncxmod_load_module_diff((cp->curnew) ? cp->curnew : cp->new,
-				     /* subtree mode */
 				     (cp->curnew) ? TRUE : FALSE,
-				     FALSE  /* cp->unified */, 
-				     (cp->curnew) ? cp->full_new : NULL,
-				     &res);
+				     FALSE, modpath, &res);
     if (res == ERR_NCX_SKIPPED) {
 	if (newpcb) {
 	    yang_free_pcb(newpcb);
@@ -833,15 +842,25 @@ static status_t
     /* force modules to be reloaded */
     ncx_set_cur_modQ(&cp->oldmodQ);
 
+    /* pick which module source path to use */
+    modpath = NULL;
+    if (cp->oldpath) {
+	ncxmod_set_modpath(cp->oldpath);
+    } else if (cp->full_old) {
+	modpath = cp->full_old;
+    } else if (cp->modpath) {
+	ncxmod_set_modpath(cp->modpath);
+    } else {
+	ncxmod_set_modpath((const xmlChar *)"");
+    }
+
     /* load in the requested 'old' module to compare
      * if this is a subtree call, then the curnew pointer
      * will be set, otherwise the 'new' pointer must be set
      */
     oldpcb = ncxmod_load_module_diff(cp->curold, 
 				     (cp->new_isdir) ? TRUE : FALSE,
-				     FALSE  /* cp->unified */,
-				     (cp->old_isdir) ? cp->full_old : NULL,
-				     &res);
+				     FALSE, modpath, &res);
     if (res == ERR_NCX_SKIPPED) {
 	/* this is probably a submodule being skipped in subtree mode */
 	log_debug("\nyangdiff: New PCB OK but old PCB skipped (%s)",
@@ -1349,6 +1368,7 @@ static status_t
     /* modpath parameter */
     val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_MODPATH);
     if (val) {
+	cp->modpath = VAL_STR(val);
 	ncxmod_set_modpath(VAL_STR(val));
     }
 
@@ -1375,6 +1395,31 @@ static status_t
 	    cp->new_isdir = ncxmod_test_subdir(cp->full_new);
 	}
     }
+
+    /* oldpath parameter */
+    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_OLDPATH);
+    if (val) {
+	cp->oldpath = VAL_STR(val);
+    }
+
+    /* newpath parameter */
+    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NEWPATH);
+    if (val) {
+	cp->newpath = VAL_STR(val);
+    }
+
+    /* new parameter */
+    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NEW);
+    if (val) {
+	cp->new = VAL_STR(val);
+	cp->full_new = ncx_get_source(VAL_STR(val));
+	if (!cp->full_new) {
+	    return ERR_INTERNAL_MEM;
+	} else {
+	    cp->new_isdir = ncxmod_test_subdir(cp->full_new);
+	}
+    }
+
 
     /* no-header parameter */
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NO_HEADER);

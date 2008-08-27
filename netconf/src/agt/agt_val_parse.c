@@ -191,11 +191,9 @@ static status_t
 
     res = NO_ERR;
 
-    if (msg) {
-	agt_record_error(scb, msg, NCX_LAYER_OPERATION, errcode, 
-			 errnode, errnodetyp, error_parm, 
-			 intnodetyp, intnode);
-    }
+    agt_record_error(scb, msg, NCX_LAYER_OPERATION, errcode, 
+		     errnode, errnodetyp, error_parm, 
+		     intnodetyp, intnode);
 
     if (scb && startnode) {
 	res = agt_xml_skip_subtree(scb, startnode);
@@ -250,11 +248,9 @@ static status_t
 
     res = NO_ERR;
 
-    if (msg) {
-	agt_record_error_errinfo(scb, msg, NCX_LAYER_OPERATION, errcode, 
-				 errnode, errnodetyp, error_parm, 
-				 intnodetyp, intnode, errinfo);
-    }
+    agt_record_error_errinfo(scb, msg, NCX_LAYER_OPERATION, errcode, 
+			     errnode, errnodetyp, error_parm, 
+			     intnodetyp, intnode, errinfo);
 
     if (scb && startnode) {
 	res = agt_xml_skip_subtree(scb, startnode);
@@ -2351,12 +2347,11 @@ static status_t
 	    } else {
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
-	    if (msg) {
-		agt_record_attr_error(scb, msg, 
-				      NCX_LAYER_OPERATION, res,  
-				      attr, node, NULL, 
-				      NCX_NT_VAL, retval);
-	    }
+
+	    agt_record_attr_error(scb, msg, 
+				  NCX_LAYER_OPERATION, res,  
+				  attr, node, NULL, 
+				  NCX_NT_VAL, retval);
 	    retres = res;
 	}
     }

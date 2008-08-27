@@ -1599,6 +1599,131 @@ static status_t
 }  /* handle_callback */
 
 
+#ifdef NOT_YET
+/********************************************************************
+* FUNCTION unique_check
+* 
+* Check for the proper number of unique tuples within
+* the list instances for the specified list entry
+*
+* INPUTS:
+*   scb == session control block (may be NULL; no session stats)
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   obj == object template for child node in valset to check
+*          This must represent an OBJ_TYP_LIST object
+*          If the unique Q is empty, return NO_ERR
+*   valset == val_value_t of the parent of the 'obj' child type
+*   layer == NCX layer calling this function (for error purposes only)
+*
+* OUTPUTS:
+*   if msg not NULL:
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+*      which must be freed by the called with the 
+*      rpc_err_free_record function
+*
+* RETURNS:
+*   status of the operation, NO_ERR if no validation errors found
+*********************************************************************/
+static status_t 
+    unique_check (ses_cb_t *scb,
+		  xml_msg_hdr_t *msg,
+		  const obj_template_t *obj,
+		  val_value_t *valset,
+		  ncx_layer_t   layer)
+{
+    const obj_template_t  *chobj;
+    const obj_unique_t    *uni;
+    const xmlChar         *modname, objname;
+    val_value_t           *compset1, *compset2, *startchild, *curchild;
+    uint32                 uninum, listcnt;
+    status_t               res, retres;
+
+    uni = obj_get_first_unique(obj);
+    if (!uni) {
+	return NO_ERR;
+    }
+
+    listcnt = val_child_inst_cnt(valset,
+				 obj_get_mod_name(obj),
+				 obj_get_name(obj));
+    if (listcnt < 2) {
+	return NO_ERR;
+    }
+
+    compset1 = NULL;
+    compset2 = NULL;
+    res = NO_ERR;
+    retres = NO_ERR;
+    uninum = 1;
+    modname = obj_get_mod_name(obj);
+    objname = obj_get_name(obj);
+
+    compset1 = val_new_value();
+    if (!compset) {
+	res = ERR_INTERNAL_MEM;
+    } else {
+	val_init_from_template(compset1, obj);
+    }
+
+    compset2 = val_new_value();
+    if (!compset) {
+	res = ERR_INTERNAL_MEM;
+    } else {
+	val_init_from_template(compset2, obj);
+    }
+
+    if (res != NO_ERR) {
+	agt_record_error(scb, msg, layer, res, 
+			 NULL, NCX_NT_OBJ, obj, 
+			 NCX_NT_VAL, valset);
+	retres = res;
+	uni = NULL;
+    }
+
+    /* go through each unique test for the list
+     * they do not have names, so just give them numbers
+     * in the unique test 'bad-value' clause
+     */
+    while (uni) {
+	res = NO_ERR;
+	cnt = 0;
+
+	if (LOGDEBUG2) {
+	    log_debug2("\nunique_check '%s' against '%s'",
+		       objname, valset->name);
+	}
+
+	/* save the values in a temp list entry of the same type as
+	 * the real list being checked.
+	 */
+	firstchild = val_find_child(valset, modname, objname);
+
+
+
+	if (res != NO_ERR) {
+	    agt_record_error(scb, msg, layer, res, 
+			     NULL, NCX_NT_OBJ, obj, 
+			     NCX_NT_VAL, val);
+	}
+
+	uni = obj_next_unique(uni);
+	uninum++;
+    }
+
+
+    if (compset1) {
+	val_free_value(compset1);
+    }
+    if (compset2) {
+	val_free_value(compset1);
+    }
+
+    return res;
+    
+}  /* unique_check */
+#endif
+
 
 /********************************************************************
 * FUNCTION instance_check

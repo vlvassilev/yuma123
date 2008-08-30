@@ -3011,6 +3011,12 @@ static status_t
 	    retres = ERR_NCX_MISSING_TYPE;
 	    expstr = "path specifier";
 	    break;
+	case NCX_BT_NONE:
+	    if (metamode && typ_get_basetype(intypdef) == NCX_BT_NONE) {
+		retres = obj_set_named_type(tkc, mod, NULL,
+					    intypdef, NULL, NULL);
+	    }
+	    return retres;
 	default:
 	    return NO_ERR;
 	}
@@ -3039,6 +3045,7 @@ static status_t
     } else {
 	typdef = intypdef;
     }
+
 
     /* check for hard-wired builtin type sub-sections */
     switch (btyp) {

@@ -103,6 +103,10 @@ date	     init     comment
 #include "typ.h"
 #endif
 
+#ifndef _H_xml_util
+#include "xml_util.h"
+#endif
+
 #ifndef _H_xmlns
 #include "xmlns.h"
 #endif
@@ -142,6 +146,7 @@ date	     init     comment
 #define VAL_FL_DUPDONE   bit0
 #define VAL_FL_DUPOK     bit1
 #define VAL_FL_DEFSET    bit2
+#define VAL_FL_META      bit3
 
 
 /* macros to access simple value types */
@@ -191,15 +196,6 @@ date	     init     comment
 *********************************************************************/
 
 
-/* error record for one meta data variable */
-typedef struct val_metaerr_t_ {
-    dlq_hdr_t       qhdr;
-    const xmlChar *name;  
-    xmlChar       *dname; 
-    xmlns_id_t     nsid;
-} val_metaerr_t;
-
-
 /* one value to match one type */
 typedef struct val_value_t_ {
     dlq_hdr_t      qhdr;
@@ -216,11 +212,25 @@ typedef struct val_value_t_ {
     uint32         flags;                  /* internal status flags */
     ncx_data_class_t dataclass;             /* config or state data */
 
-    /* YANG does not support meta-data but NCX does, and since
-     * the <get> and <get-config> operations use attributes
-     * in the RPC parameters, the metaQ is still used
+    /* YANG does not support user-defined meta-data but NCX does.
+     * The <edit-config>, <get> and <get-config> operations 
+     * use attributes in the RPC parameters, the metaQ is still used
+     *
+     * The ncx:metadata extension allows optional attributes
+     * to be added to object nodes for anyxml, leaf, leaf-list,
+     * list, and container nodes.  The config property will
+     * be inherited from the object that contains the metadata
      */
     dlq_hdr_t      metaQ;                       /* Q of val_value_t */
+
+    /* these fields are only used in new values before they are 
+     * actually added to the config database (TBD: remove)
+     * curparent == parent of curnode for merge
+     */
+    struct val_value_t_  *curparent;      
+    op_editop_t    editop;            /* effective edit operation */
+    op_insertop_t  insertop;             /* YANG insert operation */
+    status_t       res;      /* edit result for continue-on-error */
 
     /* Used by Agent only:
      * if this field is non-NULL, then the entire value node
@@ -229,15 +239,6 @@ typedef struct val_value_t_ {
      * the real data type is getcb_fn_t *
      */
     void *getcb;
-
-    /* these fields are only used in new values before they are 
-     * actually added to the config database (TBD: remove)
-     * curparent == parent of curnode for merge
-     */
-    struct val_value_t_  *curparent;      
-    op_editop_t    editop;            /* effective edit operation */
-    status_t       res;      /* edit result for continue-on-error */
-    dlq_hdr_t      metaerrQ;                /* Q of val_metaerr_t */
 
     /* these fields are used for NCX_BT_LIST */
     struct val_index_t_ *index;   /* back-ptr/flag in use as index */
@@ -427,13 +428,37 @@ extern status_t
 			  val_value_t *retval,
 			  const ncx_errinfo_t **errinfo);
 
-extern val_metaerr_t * 
-    val_new_metaerr (xmlns_id_t nsid,
-		     const xmlChar *name,
-		     boolean copy);
 
-extern void
-    val_free_metaerr (val_metaerr_t *merr);
+extern const dlq_hdr_t *
+    val_get_metaQ (const val_value_t  *val);
+
+extern const val_value_t *
+    val_get_first_meta (const dlq_hdr_t *queue);
+
+extern const val_value_t *
+    val_get_next_meta (const val_value_t *curmeta);
+
+extern boolean
+    val_meta_empty (const val_value_t *val);
+
+extern val_value_t *
+    val_find_meta (const val_value_t *val,
+		   xmlns_id_t   nsid,
+		   const xmlChar *name);
+
+extern boolean
+    val_meta_match (const val_value_t *val,
+		    const val_value_t *metaval);
+
+
+extern uint32
+    val_metadata_inst_count (const val_value_t  *val,
+			     xmlns_id_t nsid,
+			     const xmlChar *name);
+
+
+
+
 
 
 
@@ -447,6 +472,10 @@ extern void
 extern void
     val_stdout_value (const val_value_t *val,
 		      int32 startindent);
+
+
+
+
 
 
 extern status_t 
@@ -537,18 +566,6 @@ extern val_value_t *
 			 const xmlChar *childname,
 			 const val_value_t *curchild);
 
-extern const dlq_hdr_t *
-    val_get_metaQ (const val_value_t  *val);
-
-extern const val_value_t *
-    val_get_first_meta (const dlq_hdr_t *queue);
-
-extern const val_value_t *
-    val_get_next_meta (const val_value_t *curmeta);
-
-extern boolean
-    val_meta_empty (const val_value_t *val);
-
 
 /* find first -- really for resolve index function */
 extern val_value_t *
@@ -582,15 +599,6 @@ extern uint32
     val_liststr_count (const val_value_t *val);
 
 
-extern val_value_t *
-    val_find_meta (const val_value_t *val,
-		   xmlns_id_t   nsid,
-		   const xmlChar *name);
-
-extern boolean
-    val_meta_match (const val_value_t *val,
-		    const val_value_t *metaval);
-
 extern boolean
     val_index_match (const val_value_t *val1,
 		     const val_value_t *val2);
@@ -623,16 +631,11 @@ extern boolean
     val_has_index (const val_value_t *val);
 
 extern status_t
-    val_parse_meta (typ_def_t *typdef,
+    val_parse_meta (const typ_def_t *typdef,
 		    xmlns_id_t    nsid,
 		    const xmlChar *attrname,
 		    const xmlChar *attrval,
 		    val_value_t *retval);
-
-extern uint32
-    val_metadata_inst_count (const val_value_t  *val,
-			     xmlns_id_t nsid,
-			     const xmlChar *name);
 
 extern void
     val_set_extern (val_value_t  *val,
@@ -700,5 +703,10 @@ extern void
 
 extern boolean
     val_need_quotes (const xmlChar *str);
+
+extern boolean
+    val_match_metaval (const xml_attr_t *attr,
+		       xmlns_id_t  nsid,
+		       const xmlChar *name);
 
 #endif	    /* _H_val */

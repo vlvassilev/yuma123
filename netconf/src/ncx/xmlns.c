@@ -59,6 +59,10 @@ date         init     comment
 #include  "xmlns.h"
 #endif
 
+#ifndef _H_yangconst
+#include  "yangconst.h"
+#endif
+
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
@@ -102,6 +106,9 @@ static xmlns_id_t xmlns_xsiid = 0;
 
 /* NETCONF Notifications namespace ID */
 static xmlns_id_t xmlns_ncnid = 0;
+
+/* YANG namespace ID */
+static xmlns_id_t xmlns_yangid = 0;
 
 /* next ID to allocate */
 static xmlns_id_t xmlns_next_id = 1;
@@ -331,6 +338,8 @@ status_t
 	xmlns_xsiid = xmlns_next_id;
     } else if (!xml_strcmp(ns, NCN_URN)) {
 	xmlns_ncnid = xmlns_next_id;
+    } else if (!xml_strcmp(ns, YANG_URN)) {
+	xmlns_yangid = xmlns_next_id;
     }
 
     log_debug2("\nxmlns_reg: id:%2d mod:%s\turi: %s",
@@ -611,13 +620,31 @@ xmlns_id_t
 * INPUTS:
 *    none
 * RETURNS:
-*    XSI ID or 0 if not found
+*    NCN ID or 0 if not found
 *********************************************************************/
 xmlns_id_t 
     xmlns_ncn_id (void)
 {
     return xmlns_ncnid;
 }  /* xmlns_ncn_id */
+
+
+/********************************************************************
+* FUNCTION xmlns_yang_id
+*
+* Get the ID for the YANG namespace or 0 if it 
+* doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    YANG ID or 0 if not found
+*********************************************************************/
+xmlns_id_t 
+    xmlns_yang_id (void)
+{
+    return xmlns_yangid;
+}  /* xmlns_yang_id */
 
 
 /********************************************************************

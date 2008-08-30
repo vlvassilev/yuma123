@@ -2886,8 +2886,6 @@ static status_t
 }  /* resolve_typedef */
 
 
-/**************  E X T E R N A L   F U N C T I O N S  **************/
-
 
 /********************************************************************
 * FUNCTION yang_typ_consume_type
@@ -2908,10 +2906,11 @@ static status_t
 * RETURNS:
 *   status of the operation
 *********************************************************************/
-status_t 
-    yang_typ_consume_type (tk_chain_t *tkc,
-			   ncx_module_t  *mod,
-			   typ_def_t *intypdef)
+static status_t 
+    consume_type (tk_chain_t *tkc,
+		  ncx_module_t  *mod,
+		  typ_def_t *intypdef,
+		  boolean metamode)
 {
     const char     *expstr;
     typ_template_t *imptyp;
@@ -2976,13 +2975,15 @@ status_t
     }	
 		
     /* check for ending semi-colon or starting left brace */
-    res = TK_ADV(tkc);
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+    if (!metamode) {
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
     }
 
-    if (TK_CUR_TYP(tkc) == TK_TT_SEMICOL) {
+    if (TK_CUR_TYP(tkc) == TK_TT_SEMICOL || metamode) {
 	/* got the type name and that's all.
 	 * Check if a named imported type is given
 	 * or a builtin type name, and gen an error
@@ -3120,7 +3121,78 @@ status_t
 
     return retres;
 
+}  /* consume_type */
+
+
+/**************  E X T E R N A L   F U N C T I O N S  **************/
+
+
+/********************************************************************
+* FUNCTION yang_typ_consume_type
+* 
+* Parse the next N tokens as a type clause
+* Add to the typ_template_t struct in progress
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'type' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod   == module in progress
+*   intypdef == struct that will get the type info
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_typ_consume_type (tk_chain_t *tkc,
+			   ncx_module_t  *mod,
+			   typ_def_t *intypdef)
+{
+#ifdef DEBUG
+    if (!tkc || !mod || !intypdef) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    return consume_type(tkc, mod, intypdef, FALSE);
+
 }  /* yang_typ_consume_type */
+
+
+/********************************************************************
+* FUNCTION yang_typ_consume_metadata_type
+* 
+* Parse the next token as a type declaration
+* for an ncx:metadata definition
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod   == module in progress
+*   intypdef == struct that will get the type info
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_typ_consume_metadata_type (tk_chain_t *tkc,
+				    ncx_module_t  *mod,
+				    typ_def_t *intypdef)
+{
+#ifdef DEBUG
+    if (!tkc || !mod || !intypdef) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    return consume_type(tkc, mod, intypdef, TRUE);
+
+}  /* yang_typ_consume_metadata_type */
 
 
 /********************************************************************

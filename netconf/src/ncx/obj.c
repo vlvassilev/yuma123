@@ -198,6 +198,28 @@ static void
 
 
 /********************************************************************
+* FUNCTION clean_metadataQ
+* 
+* Clean a Q of obj_metadata_t
+*
+* INPUTS:
+*   metadataQ == Q of obj_metadata_t to delete
+*
+*********************************************************************/
+static void
+    clean_metadataQ (dlq_hdr_t *metadataQ)
+{
+    obj_metadata_t *meta;
+
+    while (!dlq_empty(metadataQ)) {
+	meta = (obj_metadata_t *)dlq_deque(metadataQ);
+	obj_free_metadata(meta);
+    }
+
+}  /* clean_metadataQ */
+
+
+/********************************************************************
 * FUNCTION clone_datadefQ
 * 
 * Clone a Q of obj_template_t
@@ -317,6 +339,9 @@ static status_t
     return NO_ERR;
 
 }  /* clone_appinfoQ */
+
+
+
 
 
 /********************************************************************
@@ -2434,8 +2459,10 @@ obj_template_t *
     if (!obj) {
 	return NULL;
     }
+
     (void)memset(obj, 0x0, sizeof(obj_template_t));
     obj->objtype = objtype;
+    dlq_createSQue(&obj->metadataQ);
 
     switch (objtype) {
     case OBJ_TYP_CONTAINER:
@@ -2551,6 +2578,8 @@ void
 	m__free(obj);
 	return;
     }
+
+    clean_metadataQ(&obj->metadataQ);
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
@@ -3927,7 +3956,6 @@ obj_unique_t *
 const obj_unique_t *
     obj_first_unique (const obj_template_t *listobj)
 {
-    obj_unique_t  *un;
 
 #ifdef DEBUG
     if (!listobj) {
@@ -3941,7 +3969,7 @@ const obj_unique_t *
 #endif
 
     return (const obj_unique_t *)
-	dlq_firstEntry(&listobj->def.list->uniqueQ);
+	dlq_firstEntry(listobj->def.list->uniqueQ);
 
 }  /* obj_first_unique */
 
@@ -5536,6 +5564,46 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION obj_get_type_name
+* 
+* Get the typename for an object
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    const pointer to type name string
+*********************************************************************/
+const xmlChar *
+    obj_get_type_name (const obj_template_t  *obj)
+{
+    const typ_def_t *typdef;
+
+
+
+#ifdef DEBUG
+    if (!obj || !obj->mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    typdef = obj_get_ctypdef(obj);
+    if (typdef) {
+	if (typdef->typename) {
+	    return typdef->typename;
+	} else {
+	    return (const xmlChar *)
+		tk_get_btype_sym(obj_get_basetype(obj));
+	}
+    } else {
+	return obj_get_typestr(obj);
+    }
+
+}  /* obj_get_type_name */
+
+
+/********************************************************************
 * FUNCTION obj_get_nsid
 * 
 * Get the namespace ID for this object
@@ -6001,6 +6069,33 @@ boolean
     /*NOTREACHED*/
 
 }  /* obj_is_data_db */
+
+
+/********************************************************************
+* FUNCTION obj_is_rpc
+* 
+* Check if the object is an RPC method
+* 
+* INPUTS:
+*   obj == object to check
+*  
+* RETURNS:
+*   TRUE if RPC method
+*   FALSE if not an RPC method
+*********************************************************************/
+boolean
+    obj_is_rpc (const obj_template_t *obj)
+{
+#ifdef DEBUG 
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    return (obj->objtype == OBJ_TYP_RPC) ? TRUE : FALSE;
+
+}  /* obj_is_rpc */
 
 
 /********************************************************************
@@ -6560,6 +6655,205 @@ status_t
 
 }  /* obj_get_child_node */
 
+
+/********************************************************************
+* FUNCTION obj_new_metadata
+* 
+* Malloc and initialize the fields in a an obj_metadata_t
+*
+* INPUTS:
+*  isreal == TRUE if this is for a real object
+*          == FALSE if this is a cloned object
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
+obj_metadata_t * 
+    obj_new_metadata (void)
+{
+    obj_metadata_t  *meta;
+
+    meta = m__getObj(obj_metadata_t);
+    if (!meta) {
+	return NULL;
+    }
+
+    (void)memset(meta, 0x0, sizeof(obj_metadata_t));
+
+    meta->typdef = typ_new_typdef();
+    if (!meta->typdef) {
+	m__free(meta);
+	return NULL;
+    }
+
+    return meta;
+
+}  /* obj_new_metadata */
+
+
+/********************************************************************
+* FUNCTION obj_free_metadata
+* 
+* Scrub the memory in a obj_metadata_t by freeing all
+* the sub-fields and then freeing the entire struct itself 
+* The struct must be removed from any queue it is in before
+* this function is called.
+*
+* INPUTS:
+*    meta == obj_metadata_t data structure to free
+*********************************************************************/
+void 
+    obj_free_metadata (obj_metadata_t *meta)
+{
+#ifdef DEBUG
+    if (!meta) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (meta->name) {
+	m__free(meta->name);
+    }
+    if (meta->typdef) {
+	typ_free_typdef(meta->typdef);
+    }
+    m__free(meta);
+
+}  /* obj_free_metadata */
+
+
+/********************************************************************
+* FUNCTION obj_add_metadata
+* 
+* Add the filled out object metadata definition to the object
+*
+* INPUTS:
+*    meta == obj_metadata_t data structure to add
+*    obj == object template to add meta to
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    obj_add_metadata (obj_metadata_t *meta,
+		      obj_template_t *obj)
+{
+    obj_metadata_t *testmeta;
+
+#ifdef DEBUG
+    if (!meta || !obj) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    testmeta = obj_find_metadata(obj, meta->name);
+    if (testmeta) {
+	return ERR_NCX_ENTRY_EXISTS;
+    }
+
+    meta->parent = obj;
+    meta->nsid = obj_get_nsid(obj);
+    dlq_enque(meta, &obj->metadataQ);
+    return NO_ERR;
+
+}  /* obj_add_metadata */
+
+
+/********************************************************************
+* FUNCTION obj_find_metadata
+* 
+* Find the object metadata definition in the object
+*
+* INPUTS:
+*    obj == object template to check
+*    name == name of obj_metadata_t data structure to find
+*
+* RETURNS:
+*    pointer to found entry, NULL if not found
+*********************************************************************/
+obj_metadata_t *
+    obj_find_metadata (const obj_template_t *obj,
+		       const xmlChar *name)
+{
+    obj_metadata_t *testmeta;
+
+#ifdef DEBUG
+    if (!obj || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (testmeta = (obj_metadata_t *)
+	     dlq_firstEntry(&obj->metadataQ);
+	 testmeta != NULL;
+	 testmeta = (obj_metadata_t *)
+	     dlq_nextEntry(testmeta)) {
+
+	if (!xml_strcmp(testmeta->name, name)) {
+	    return testmeta;
+	}
+    }
+
+    return NULL;
+
+}  /* obj_find_metadata */
+
+
+/********************************************************************
+* FUNCTION obj_first_metadata
+* 
+* Get the first object metadata definition in the object
+*
+* INPUTS:
+*    obj == object template to check
+*
+* RETURNS:
+*    pointer to first entry, NULL if none
+*********************************************************************/
+obj_metadata_t *
+    obj_first_metadata (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (obj_metadata_t *)
+	dlq_firstEntry(&obj->metadataQ);
+
+}  /* obj_first_metadata */
+
+
+/********************************************************************
+* FUNCTION obj_next_metadata
+* 
+* Get the next object metadata definition in the object
+*
+* INPUTS:
+*    meta == current meta object template
+*
+* RETURNS:
+*    pointer to next entry, NULL if none
+*********************************************************************/
+obj_metadata_t *
+    obj_next_metadata (const obj_metadata_t *meta)
+{
+
+#ifdef DEBUG
+    if (!meta) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (obj_metadata_t *)dlq_nextEntry(meta);
+
+}  /* obj_next_metadata */
 
 
 /* END obj.c */

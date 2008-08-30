@@ -135,6 +135,7 @@ void
 	log_info("\nagt_top: bad msg for session %d (%s)",
 		 scb->sid, get_error_string(res));
 	xml_clean_node(&top);
+	/****  agt_ses_kill_session(scb->sid);  ****/
         return;
     }
 

@@ -136,7 +136,10 @@ void
     res = mgr_xml_consume_node(scb->reader, &top);
     if (res != NO_ERR) {
 	scb->stats.in_err_msgs++;
-	log_info("\nmgr_top: get node failed (%d)", res);
+	log_info("\nmgr_top: get node failed (%s); session dropped", 
+		 get_error_string(res));
+	xml_clean_node(&top);
+	scb->state = SES_ST_SHUTDOWN_REQ;
         return;
     }
 
@@ -164,8 +167,8 @@ void
     /* check any error trying to invoke the top handler */
     if (res != NO_ERR) {
 	scb->stats.in_err_msgs++;
-	log_info("\nagt_top: bad msg for session %d (%s)",
-		 scb->sid, get_error_string(res));
+	log_error("\nagt_top: bad msg for session %d (%s)",
+		  scb->sid, get_error_string(res));
     }
 
     xml_clean_node(&top);

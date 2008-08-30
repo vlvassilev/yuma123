@@ -34,6 +34,10 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+#define YANG_URN (const xmlChar *)"urn:ietf:params:xml:ns:yang:1"
+#define YANG_PREFIX (const xmlChar *)"yang"
+#define YANG_MODULE (const xmlChar *)"yang"   /***  no mod ! ***/
+
 #define YANG_VERSION_STR          (const xmlChar *)"1"
 #define YANG_VERSION_NUM          1
 
@@ -60,6 +64,7 @@ date	     init     comment
 #define YANG_K_IMPORT            (const xmlChar *)"import"
 #define YANG_K_INCLUDE           (const xmlChar *)"include"
 #define YANG_K_INPUT             (const xmlChar *)"input"
+#define YANG_K_INSERT            (const xmlChar *)"insert"
 #define YANG_K_KEY               (const xmlChar *)"key"
 #define YANG_K_LEAF              (const xmlChar *)"leaf"
 #define YANG_K_LEAF_LIST         (const xmlChar *)"leaf-list"

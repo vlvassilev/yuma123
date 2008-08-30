@@ -545,7 +545,6 @@ static void
 		 boolean redo)
 {
     val_value_t   *cur;
-    val_metaerr_t *merr;
     val_index_t   *in;
     ncx_btype_t    btyp;
 
@@ -617,11 +616,6 @@ static void
     while (!dlq_empty(&val->metaQ)) {
 	cur = (val_value_t *)dlq_deque(&val->metaQ);
 	val_free_value(cur);
-    }
-
-    while (!dlq_empty(&val->metaerrQ)) {
-	merr = (val_metaerr_t *)dlq_deque(&val->metaerrQ);
-	val_free_metaerr(merr);
     }
 
     while (!dlq_empty(&val->indexQ)) {
@@ -876,7 +870,6 @@ void
 {
     (void)memset(val, 0x0, sizeof(val_value_t));
     dlq_createSQue(&val->metaQ);
-    dlq_createSQue(&val->metaerrQ);
     dlq_createSQue(&val->indexQ);
 
 }  /* val_init_value */
@@ -2044,70 +2037,268 @@ status_t
 
 
 /********************************************************************
-* FUNCTION val_new_metaerr
+* FUNCTION val_get_metaQ
 * 
-* Malloc and initialize the fields in a val_metaerr_t
-*
+* Get the meta Q header for the value
+* 
 * INPUTS:
-*    nsid == namespace ID of error attribute
-*    name == name of error attribute
-*    copy == TRUE for strdup or FALSE to use directly
+*    val == value node to check
+*
 * RETURNS:
-*   pointer to the malloced and initialized struct or NULL if an error
+*   pointer to the metaQ for this value
 *********************************************************************/
-val_metaerr_t * 
-    val_new_metaerr (xmlns_id_t nsid,
-		     const xmlChar *name,
-		     boolean copy)
+const dlq_hdr_t *
+    val_get_metaQ (const val_value_t  *val)
 {
-    val_metaerr_t  *merr;
-
-    merr = m__getObj(val_metaerr_t);
-    if (!merr) {
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }
-    memset(merr, 0x0, sizeof(val_metaerr_t));
-    if (copy) {
-	merr->dname = xml_strdup(name);
-	if (!merr->dname) {
-	    m__free(merr);
-	    return NULL;
-	}
-	merr->name = merr->dname;
-    } else {
-	merr->name = name;
-    }
-    merr->nsid = nsid;
-    return merr;
+#endif
 
-}  /* val_new_metaerr */
+    if (val->getcb) {
+	/***/ return NULL;
+    } else {
+	return &val->metaQ;
+    }
+
+}  /* val_get_metaQ */
 
 
 /********************************************************************
-* FUNCTION val_free_metaerr
+* FUNCTION val_get_first_meta
 * 
-* Free the val_metaerr_t struct
+* Get the first metaQ entry from the specified Queue
+* 
+* INPUTS:
+*    queue == queue of meta-vals to check
+*
+* RETURNS:
+*   pointer to the first meta-var in the Queue if found, 
+*   or NULL if none
+*********************************************************************/
+const val_value_t *
+    val_get_first_meta (const dlq_hdr_t *queue)
+{
+#ifdef DEBUG
+    if (!queue) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (const val_value_t *)dlq_firstEntry(queue);
+
+}  /* val_get_first_meta */
+
+
+/********************************************************************
+* FUNCTION val_get_next_meta
+* 
+* Get the next metaQ entry from the specified entry
+* 
+* INPUTS:
+*    curnode == current meta-var node
+*
+* RETURNS:
+*   pointer to the next meta-var in the Queue if found, 
+*   or NULL if none
+*********************************************************************/
+const val_value_t *
+    val_get_next_meta (const val_value_t *curnode)
+{
+#ifdef DEBUG
+    if (!curnode) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (const val_value_t *)dlq_nextEntry(curnode);
+
+}  /* val_get_next_meta */
+
+
+/********************************************************************
+* FUNCTION val_meta_empty
+* 
+* Check if the metaQ is empty for the value node
 *
 * INPUTS:
-*   merr == mval_metaerr_t to free
+*   val == value to check
+*   
+* RETURNS:
+*   TRUE if the metaQ for the value is empty
+*   FALSE otherwise
 *********************************************************************/
-void
-    val_free_metaerr (val_metaerr_t *merr)
+boolean
+    val_meta_empty (const val_value_t *val)
 {
 
 #ifdef DEBUG
-    if (!merr) {
+    if (!val) {
 	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+	return TRUE;
     }
 #endif
-    if (merr->dname) {
-	m__free(merr->dname);
+
+    if (val->getcb) {
+	/***/ return TRUE;
+    } else {
+	return dlq_empty(&val->metaQ);
     }
-    m__free(merr);
 
-}  /* val_free_metaerr */
+}  /* val_meta_empty */
 
+
+/********************************************************************
+* FUNCTION val_find_meta
+* 
+* Get the corresponding meta data node 
+* 
+* INPUTS:
+*    val == value to check for metadata
+*    nsid == namespace ID of 'name'; 0 == don't use
+*    name == name of metadata variable name
+*
+* RETURNS:
+*   pointer to the child if found or NULL if not found
+*********************************************************************/
+val_value_t *
+    val_find_meta (const val_value_t  *val,
+		   xmlns_id_t    nsid,
+		   const xmlChar *name)
+{
+    val_value_t *metaval;
+
+#ifdef DEBUG
+    if (!val || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+	
+    for (metaval = (val_value_t *)dlq_firstEntry(&val->metaQ);
+	 metaval != NULL;
+	 metaval = (val_value_t *)dlq_nextEntry(metaval)) {
+
+	/* check the node if the name matches and
+	 * check for position instance match 
+	 */
+	if (!xml_strcmp(metaval->name, name)) {
+	    if (xmlns_ids_equal(nsid, metaval->nsid)) {
+		return metaval;
+	    }
+	}
+    }
+
+    return NULL;
+
+}  /* val_find_meta */
+
+
+/********************************************************************
+* FUNCTION val_meta_match
+* 
+* Return true if the corresponding attribute exists and has
+* the same value 
+* 
+* INPUTS:
+*    val == value to check for metadata
+*    metaval == value to match in the val->metaQ 
+*
+* RETURNS:
+*   TRUE if the specified attr if found and has the same value
+*   FALSE otherwise
+*********************************************************************/
+boolean
+    val_meta_match (const val_value_t *val,
+		    const val_value_t *metaval)
+{
+    const val_value_t *m1;
+    const dlq_hdr_t   *queue;
+    boolean            ret, done;
+
+#ifdef DEBUG
+    if (!val || !metaval) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    queue = val_get_metaQ(val);
+    if (!queue) {
+	return FALSE;
+    }
+
+    ret = FALSE;
+    done = FALSE;
+
+    /* check all the metavars in the val->metaQ until
+     * the specified entry is found or list ends
+     */
+    for (m1 = val_get_first_meta(queue);
+	 m1 != NULL && !done;
+	 m1 = val_get_next_meta(m1)) {
+
+	/* check the node if the name matches and
+	 * then if the namespace matches
+	 */
+	if (!xml_strcmp(metaval->name, m1->name)) {
+	    if (!xmlns_ids_equal(metaval->nsid, m1->nsid)) {
+		continue;
+	    }
+	    ret = (val_compare(metaval, m1)) ? FALSE : TRUE;
+	    done = TRUE;
+	}
+    }
+
+    return ret;
+
+}  /* val_meta_match */
+
+
+/********************************************************************
+* FUNCTION val_metadata_inst_count
+* 
+* Get the number of instances of the specified attribute
+*
+* INPUTS:
+*     val == value to check for metadata instance count
+*     nsid == namespace ID of the meta data variable
+*     name == name of the meta data variable
+*
+* RETURNS:
+*   number of instances found in val->metaQ
+*********************************************************************/
+uint32
+    val_metadata_inst_count (const val_value_t  *val,
+			     xmlns_id_t nsid,
+			     const xmlChar *name)
+{
+    const val_value_t *metaval;
+    uint32             cnt;
+
+    cnt = 0;
+
+    for (metaval = (const val_value_t *)dlq_firstEntry(&val->metaQ);
+	 metaval != NULL;
+	 metaval = (const val_value_t *)dlq_nextEntry(metaval)) {
+	if (xml_strcmp(metaval->name, name)) {
+	    continue;
+	}
+	if (nsid && metaval->nsid) {
+	    if (metaval->nsid == nsid) {
+		cnt++;
+	    }
+	} else {
+	    cnt++;
+	}
+    }
+    return cnt;
+
+} /* val_metadata_inst_count */
 
 
 /********************************************************************
@@ -2239,7 +2430,11 @@ void
 	    if (quotes) {
 		log_write("%c", VAL_QUOTE_CH);
 	    }
-	    log_write("%s", (const char *)VAL_STR(val));
+	    if (obj_is_password(val->obj)) {
+		log_write("%s", (const char *)"****");
+	    } else {
+		log_write("%s", (const char *)VAL_STR(val));
+	    }
 	    if (quotes) {
 		log_write("%c", VAL_QUOTE_CH);
 	    }
@@ -2459,7 +2654,11 @@ void
 	    if (quotes) {
 		log_stdout("%c", VAL_QUOTE_CH);
 	    }
-	    log_stdout("%s", (const char *)VAL_STR(val));
+	    if (obj_is_password(val->obj)) {
+		log_stdout("%s", (const char *)"****");
+	    } else {
+		log_stdout("%s", (const char *)VAL_STR(val));
+	    }
 	    if (quotes) {
 		log_stdout("%c", VAL_QUOTE_CH);
 	    }
@@ -3804,121 +4003,6 @@ val_value_t *
 }  /* val_find_next_child */
 
 
-/********************************************************************
-* FUNCTION val_get_metaQ
-* 
-* Get the meta Q header for the value
-* 
-* INPUTS:
-*    val == value node to check
-*
-* RETURNS:
-*   pointer to the metaQ for this value
-*********************************************************************/
-const dlq_hdr_t *
-    val_get_metaQ (const val_value_t  *val)
-{
-#ifdef DEBUG
-    if (!val) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    if (val->getcb) {
-	/***/ return NULL;
-    } else {
-	return &val->metaQ;
-    }
-
-}  /* val_get_metaQ */
-
-
-/********************************************************************
-* FUNCTION val_get_first_meta
-* 
-* Get the first metaQ entry from the specified Queue
-* 
-* INPUTS:
-*    queue == queue of meta-vals to check
-*
-* RETURNS:
-*   pointer to the first meta-var in the Queue if found, 
-*   or NULL if none
-*********************************************************************/
-const val_value_t *
-    val_get_first_meta (const dlq_hdr_t *queue)
-{
-#ifdef DEBUG
-    if (!queue) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    return (const val_value_t *)dlq_firstEntry(queue);
-
-}  /* val_get_first_meta */
-
-
-/********************************************************************
-* FUNCTION val_get_next_meta
-* 
-* Get the next metaQ entry from the specified entry
-* 
-* INPUTS:
-*    curnode == current meta-var node
-*
-* RETURNS:
-*   pointer to the next meta-var in the Queue if found, 
-*   or NULL if none
-*********************************************************************/
-const val_value_t *
-    val_get_next_meta (const val_value_t *curnode)
-{
-#ifdef DEBUG
-    if (!curnode) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    return (const val_value_t *)dlq_nextEntry(curnode);
-
-}  /* val_get_next_meta */
-
-
-/********************************************************************
-* FUNCTION val_meta_empty
-* 
-* Check if the metaQ is empty for the value node
-*
-* INPUTS:
-*   val == value to check
-*   
-* RETURNS:
-*   TRUE if the metaQ for the value is empty
-*   FALSE otherwise
-*********************************************************************/
-boolean
-    val_meta_empty (const val_value_t *val)
-{
-
-#ifdef DEBUG
-    if (!val) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return TRUE;
-    }
-#endif
-
-    if (val->getcb) {
-	/***/ return TRUE;
-    } else {
-	return dlq_empty(&val->metaQ);
-    }
-
-}  /* val_meta_empty */
-
 
 /********************************************************************
 * FUNCTION val_first_child_name
@@ -4209,111 +4293,6 @@ uint32
 }  /* val_liststr_count */
 
 
-/********************************************************************
-* FUNCTION val_find_meta
-* 
-* Get the corresponding meta data node 
-* 
-* INPUTS:
-*    val == value to check for metadata
-*    nsid == namespace ID of 'name'; 0 == don't use
-*    name == name of metadata variable name
-*
-* RETURNS:
-*   pointer to the child if found or NULL if not found
-*********************************************************************/
-val_value_t *
-    val_find_meta (const val_value_t  *val,
-		   xmlns_id_t    nsid,
-		   const xmlChar *name)
-{
-    val_value_t *metaval;
-
-#ifdef DEBUG
-    if (!val || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-	
-    for (metaval = (val_value_t *)dlq_firstEntry(&val->metaQ);
-	 metaval != NULL;
-	 metaval = (val_value_t *)dlq_nextEntry(metaval)) {
-
-	/* check the node if the name matches and
-	 * check for position instance match 
-	 */
-	if (!xml_strcmp(metaval->name, name)) {
-	    if (xmlns_ids_equal(nsid, metaval->nsid)) {
-		return metaval;
-	    }
-	}
-    }
-
-    return NULL;
-
-}  /* val_find_meta */
-
-
-/********************************************************************
-* FUNCTION val_meta_match
-* 
-* Return true if the corresponding attribute exists and has
-* the same value 
-* 
-* INPUTS:
-*    val == value to check for metadata
-*    metaval == value to match in the val->metaQ 
-*
-* RETURNS:
-*   TRUE if the specified attr if found and has the same value
-*   FALSE otherwise
-*********************************************************************/
-boolean
-    val_meta_match (const val_value_t *val,
-		    const val_value_t *metaval)
-{
-    const val_value_t *m1;
-    const dlq_hdr_t   *queue;
-    boolean            ret, done;
-
-#ifdef DEBUG
-    if (!val || !metaval) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
-    }
-#endif
-
-    queue = val_get_metaQ(val);
-    if (!queue) {
-	return FALSE;
-    }
-
-    ret = FALSE;
-    done = FALSE;
-
-    /* check all the metavars in the val->metaQ until
-     * the specified entry is found or list ends
-     */
-    for (m1 = val_get_first_meta(queue);
-	 m1 != NULL && !done;
-	 m1 = val_get_next_meta(m1)) {
-
-	/* check the node if the name matches and
-	 * then if the namespace matches
-	 */
-	if (!xml_strcmp(metaval->name, m1->name)) {
-	    if (!xmlns_ids_equal(metaval->nsid, m1->nsid)) {
-		continue;
-	    }
-	    ret = (val_compare(metaval, m1)) ? FALSE : TRUE;
-	    done = TRUE;
-	}
-    }
-
-    return ret;
-
-}  /* val_meta_match */
 
 
 /********************************************************************
@@ -4871,7 +4850,7 @@ boolean
 *   status of the operation
 *********************************************************************/
 status_t
-    val_parse_meta (typ_def_t *typdef,
+    val_parse_meta (const typ_def_t *typdef,
 		xmlns_id_t    nsid,
 		const xmlChar *attrname,
 		const xmlChar *attrval,
@@ -4881,11 +4860,17 @@ status_t
     int32        enuval;
     const xmlChar *enustr;
     status_t     res;
-	
+
+#ifdef DEBUG
+    if (!typdef || !attrname || !attrval) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     btyp = typ_get_basetype(typdef);
 
     /* setup the return value */
+    retval->flags |= VAL_FL_META;  /* obj field is NULL in meta */
     retval->btyp = btyp;
     retval->typdef = typdef;
     retval->dname = xml_strdup(attrname);
@@ -4938,47 +4923,6 @@ status_t
 
 } /* val_parse_meta */
 
-
-/********************************************************************
-* FUNCTION val_metadata_inst_count
-* 
-* Get the number of instances of the specified attribute
-*
-* INPUTS:
-*     val == value to check for metadata instance count
-*     nsid == namespace ID of the meta data variable
-*     name == name of the meta data variable
-*
-* RETURNS:
-*   number of instances found in val->metaQ
-*********************************************************************/
-uint32
-    val_metadata_inst_count (const val_value_t  *val,
-			     xmlns_id_t nsid,
-			     const xmlChar *name)
-{
-    const val_value_t *metaval;
-    uint32             cnt;
-
-    cnt = 0;
-
-    for (metaval = (const val_value_t *)dlq_firstEntry(&val->metaQ);
-	 metaval != NULL;
-	 metaval = (const val_value_t *)dlq_nextEntry(metaval)) {
-	if (xml_strcmp(metaval->name, name)) {
-	    continue;
-	}
-	if (nsid && metaval->nsid) {
-	    if (metaval->nsid == nsid) {
-		cnt++;
-	    }
-	} else {
-	    cnt++;
-	}
-    }
-    return cnt;
-
-} /* val_metadata_inst_count */
 
 
 /********************************************************************
@@ -5071,6 +5015,7 @@ boolean
 	return TRUE;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_BINARY:
 	/* hack: assume some length more than a URI,
 	 * and less than enough to cause line wrap
 	 */
@@ -5091,8 +5036,6 @@ boolean
 	    }
 	}
 	return (cnt < 2) ? TRUE : FALSE;
-    case NCX_BT_BINARY:
-	return FALSE;  /***/
     case NCX_BT_SLIST:
 	return TRUE;  /***/
     case NCX_BT_ANY:
@@ -5789,6 +5732,36 @@ boolean
     return FALSE;
 
 }  /* val_need_quotes */
+
+
+/********************************************************************
+* FUNCTION val_match_metaval
+* 
+* Match the specific attribute value and namespace ID
+*
+* INPUTS:
+*     attr == attr to check
+*     nsid == mamespace ID to match against
+*     name == attribute name to match against
+*
+* RETURNS:
+*     TRUE if attr is a match; FALSE otherwise
+*********************************************************************/
+boolean
+    val_match_metaval (const xml_attr_t *attr,
+		       xmlns_id_t  nsid,
+		       const xmlChar *name)
+{
+    if (xml_strcmp(attr->attr_name, name)) {
+	return FALSE;
+    }
+    if (attr->attr_ns) {
+	return (attr->attr_ns==nsid);
+    } else {
+	/* unqualified match */
+	return TRUE;
+    }
+} /* val_match_metaval */
 
 
 /* END file val.c */

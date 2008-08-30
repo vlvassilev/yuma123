@@ -2311,7 +2311,7 @@ status_t
 * RETURNS:
 *   status of the operation
 *********************************************************************/
-extern status_t 
+status_t 
     tk_retokenize_cur_string (tk_chain_t *tkc,
 			      ncx_module_t *mod)
 {
@@ -2366,6 +2366,52 @@ extern status_t
     return res;
 
 } /* tk_retokenize_cur_string */
+
+
+/********************************************************************
+* FUNCTION tk_tokenize_metadata_string
+* 
+* The specified ncx:metadata string is parsed into tokens
+*
+* INPUTS:
+*   mod == module in progress for error purposes
+*   str == string to tokenize
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == error status, if return NULL or non-NULL
+*
+* RETURNS:
+*   pointer to malloced and filled in token chain
+*   ready to be traversed; always check *res for valid syntax
+*********************************************************************/
+tk_chain_t *
+    tk_tokenize_metadata_string (ncx_module_t *mod,
+				 xmlChar *str,
+				 status_t *res)
+{
+    tk_chain_t *tkc;
+
+#ifdef DEBUG
+    if (!mod || !str || !res) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }	
+#endif
+
+    /* create a new chain and parse the string */
+    tkc = tk_new_chain();
+    if (!tkc) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+    tkc->source = TK_SOURCE_YANG;
+    tkc->flags |= TK_FL_REDO;
+    tkc->bptr = tkc->buff = str;
+    *res = tk_tokenize_input(tkc, mod);
+    return tkc;
+
+} /* tk_tokenize_metadata_string */
 
 
 /********************************************************************

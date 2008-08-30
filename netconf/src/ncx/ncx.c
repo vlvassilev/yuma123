@@ -144,8 +144,6 @@ static uint32            ncx_max_filptrs;
 
 static uint32            ncx_cur_filptrs;
 
-static obj_template_t   *operation_attr;
-
 static obj_template_t   *gen_anyxml;
 
 static obj_template_t   *gen_container;
@@ -823,6 +821,12 @@ status_t
 	return res;
     }
 
+    /* Initialize the XML namespace for YANG */
+    res = xmlns_register_ns(YANG_URN, YANG_PREFIX, YANG_MODULE, &nsid);
+    if (res != NO_ERR) {
+	return res;
+    }
+
     /* Initialize the NCX namespace for NCX specific extensions */
     res = xmlns_register_ns(NCX_URN, NCX_PREFIX, NCX_MODULE, &nsid);
     if (res != NO_ERR) {
@@ -891,14 +895,8 @@ status_t
 	return NO_ERR;
     }
 
-    /* find all 5 required object templates */
+    /* find all 4 required object templates */
     deftyp = NCX_NT_OBJ;
-
-    operation_attr = (obj_template_t *)
-	def_reg_find_moddef(NC_MODULE, NC_OPERATION_ATTR_NAME, &deftyp);
-    if (!operation_attr) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
 
     gen_anyxml = (obj_template_t *)
 	def_reg_find_moddef(NCX_MODULE, NCX_EL_ANY, &deftyp);
@@ -956,7 +954,7 @@ void
     }
 
     if (stage2_init_done) {
-	operation_attr = NULL;
+	gen_anyxml = NULL;
 	gen_container = NULL;
 	gen_string = NULL;
 	gen_empty = NULL;
@@ -1746,6 +1744,7 @@ ncx_module_t *
 * FUNCTION ncx_get_first_object
 * 
 * Get the first object in the datadefQs for the specified module
+* Get any object with a name
 * 
 * INPUTS:
 *   mod == module to search for the first object
@@ -1755,6 +1754,124 @@ ncx_module_t *
 *********************************************************************/
 const obj_template_t *
     ncx_get_first_object (const ncx_module_t *mod)
+{
+    const obj_template_t *obj;
+    const yang_node_t    *node;
+
+    for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+	 obj != NULL;
+	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	if (!obj_has_name(obj) || obj_is_cli(obj)) {
+	    continue;
+	}
+	return obj;
+    }
+
+    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	 node != NULL;
+	 node = (const yang_node_t *)dlq_nextEntry(node)) {
+
+	if (!node->submod) {
+	    SET_ERROR(ERR_INTERNAL_PTR);
+	    continue;
+	}
+
+	for (obj = (const obj_template_t *)
+		 dlq_firstEntry(&node->submod->datadefQ);
+	     obj != NULL;
+	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	    if (!obj_has_name(obj)  || obj_is_cli(obj)) {
+		continue;
+	    }
+
+	    return obj;
+	}
+    }
+
+    return NULL;
+
+}  /* ncx_get_first_object */
+
+
+/********************************************************************
+* FUNCTION ncx_get_next_object
+* 
+* Get the next object in the specified module
+* Get any object with a name
+*
+* RETURNS:
+*   pointer to the next object or NULL if none
+*********************************************************************/
+const obj_template_t *
+    ncx_get_next_object (const ncx_module_t *mod,
+			 const obj_template_t *curobj)
+{
+    const obj_template_t *obj;
+    const yang_node_t    *node;
+    boolean               start;
+
+    for (obj = (const obj_template_t *)dlq_nextEntry(curobj);
+	 obj != NULL;
+	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	if (!obj_has_name(obj) || obj_is_cli(obj)) {
+	    continue;
+	}
+
+	return obj;
+    }
+
+    start = (curobj->mod == mod) ? TRUE : FALSE;
+
+    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	 node != NULL;
+	 node = (const yang_node_t *)dlq_nextEntry(node)) {
+
+	if (!node->submod) {
+	    SET_ERROR(ERR_INTERNAL_PTR);
+	    continue;
+	}
+
+	if (!start) {
+	    if (node->submod == curobj->mod) {
+		start = TRUE;
+	    }
+	    continue;
+	}
+
+	for (obj = (const obj_template_t *)
+		 dlq_firstEntry(&node->submod->datadefQ);
+	     obj != NULL;
+	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	    if (!obj_has_name(obj)  || obj_is_cli(obj)) {
+		continue;
+	    }
+
+	    return obj;
+	}
+    }
+
+    return NULL;
+
+}  /* ncx_get_next_object */
+
+
+/********************************************************************
+* FUNCTION ncx_get_first_data_object
+* 
+* Get the first database object in the datadefQs 
+* for the specified module
+* 
+* INPUTS:
+*   mod == module to search for the first object
+*
+* RETURNS:
+*   pointer to the first object or NULL if empty Q
+*********************************************************************/
+const obj_template_t *
+    ncx_get_first_data_object (const ncx_module_t *mod)
 {
     const obj_template_t *obj;
     const yang_node_t    *node;
@@ -1796,20 +1913,20 @@ const obj_template_t *
 
     return NULL;
 
-}  /* ncx_get_first_object */
+}  /* ncx_get_first_data_object */
 
 
 /********************************************************************
-* FUNCTION ncx_get_next_object
+* FUNCTION ncx_get_next_data_object
 * 
-* Get the next object in the specified module
+* Get the next database object in the specified module
 * 
 * RETURNS:
 *   pointer to the next object or NULL if none
 *********************************************************************/
 const obj_template_t *
-    ncx_get_next_object (const ncx_module_t *mod,
-			 const obj_template_t *curobj)
+    ncx_get_next_data_object (const ncx_module_t *mod,
+			      const obj_template_t *curobj)
 {
     const obj_template_t *obj;
     const yang_node_t    *node;
@@ -1863,7 +1980,7 @@ const obj_template_t *
 
     return NULL;
 
-}  /* ncx_get_next_object */
+}  /* ncx_get_next_data_object */
 
 
 /********************************************************************
@@ -4880,6 +4997,56 @@ const ncx_appinfo_t *
 
 
 /********************************************************************
+* FUNCTION ncx_find_next_appinfo
+* 
+* Find the next instance of an appinfo entry by name
+* (First match is returned)
+* The entry returned is not removed from the Q
+*
+* INPUTS:
+*    current == pointer to current ncx_appinfo_t data structure to check
+*    prefix == module prefix that defines the extension 
+*            == NULL to pick the first match (not expecting
+*               appinfo name collisions)
+*    varname == name string of the appinfo variable to find
+*
+* RETURNS:
+*    pointer to the ncx_appinfo_t struct for the entry if found
+*    NULL if the entry is not found
+*********************************************************************/
+const ncx_appinfo_t *
+    ncx_find_next_appinfo (const ncx_appinfo_t *current,
+			   const xmlChar *prefix,
+			   const xmlChar *varname)
+{
+    ncx_appinfo_t *appinfo;
+
+#ifdef DEBUG
+    if (!current || !varname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (appinfo = (ncx_appinfo_t *)dlq_nextEntry(current);
+	 appinfo != NULL;
+	 appinfo = (ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
+
+	if (prefix && appinfo->prefix &&
+	    xml_strcmp(prefix, appinfo->prefix)) {
+	    continue;
+	}
+
+	if (!xml_strcmp(varname, appinfo->name)) {
+	    return appinfo;
+	}
+    }
+    return NULL;
+
+}  /* ncx_find_next_appinfo */
+
+
+/********************************************************************
 * FUNCTION ncx_clone_appinfo
 * 
 * Clone an appinfo value
@@ -5701,28 +5868,6 @@ void
     }
 
 } /* ncx_stdout_indent */
-
-
-/********************************************************************
-* FUNCTION ncx_get_operation_attr
-* 
-* Get the object template for the NETCONF operation attribute
-*
-*********************************************************************/
-obj_template_t *
-    ncx_get_operation_attr (void)
-{
-    status_t  res;
-
-    if (!stage2_init_done) {
-	res = ncx_stage2_init();
-	if (res != NO_ERR) {
-	    return NULL;
-	}
-    }
-    return operation_attr;
-
-} /* ncx_get_operation_attr */
 
 
 /********************************************************************

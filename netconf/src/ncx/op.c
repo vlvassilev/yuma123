@@ -128,7 +128,7 @@ const xmlChar *
 * Get the keyword for the specified op_editop_t enumeration
 *
 * INPUTS:  
-*    cfg_id == config ID
+*    ed_id == edit operation ID
 * RETURNS:
 *    string for the edit operation type, or "none" or "illegal"
 *********************************************************************/
@@ -198,6 +198,74 @@ op_editop_t
     return OP_EDITOP_NONE;
 
 } /* op_editop_id */
+
+
+/********************************************************************
+* FUNCTION op_insertop_name
+*
+* Get the keyword for the specified op_insertop_t enumeration
+*
+* INPUTS:  
+*    ed_id == insert operation ID
+*
+* RETURNS:
+*    string for the insert operation type, or "none" or "illegal"
+*********************************************************************/
+const xmlChar * 
+    op_insertop_name (op_insertop_t ins_id) 
+{
+    switch (ins_id) {
+    case OP_INSOP_NONE:
+	return NCX_EL_NONE;
+    case OP_INSOP_FIRST:
+	return (const xmlChar *)"first";
+    case OP_INSOP_LAST:
+	return (const xmlChar *)"last";
+    case OP_INSOP_BEFORE:
+	return (const xmlChar *)"before";
+    case OP_INSOP_AFTER:
+	return (const xmlChar *)"after";
+    default:
+	return (const xmlChar *) "illegal";
+    }
+} /* op_insertop_name */
+
+
+/********************************************************************
+* FUNCTION op_insertop_id
+*
+* Get the ID for the insert operation from its keyword
+*
+* INPUTS:  
+*    opstr == string for the insert operation type
+* RETURNS:
+*    the op_insertop_t enumeration value for the string
+*********************************************************************/
+op_insertop_t 
+    op_insertop_id (const xmlChar *opstr)
+{
+#ifdef DEBUG
+    if (!opstr) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return OP_INSOP_NONE;
+    }
+#endif
+
+    if (!xml_strcmp(opstr, (const xmlChar *)"first")) {
+	return OP_INSOP_FIRST;
+    }
+    if (!xml_strcmp(opstr, (const xmlChar *)"last")) {
+	return OP_INSOP_LAST;
+    }
+    if (!xml_strcmp(opstr, (const xmlChar *)"before")) {
+	return OP_INSOP_BEFORE;
+    }
+    if (!xml_strcmp(opstr, (const xmlChar *)"after")) {
+	return OP_INSOP_AFTER;
+    }
+    return OP_INSOP_NONE;
+
+} /* op_insertop_id */
 
 
 /********************************************************************

@@ -63,6 +63,11 @@ extern status_t
 			   typ_def_t *typdef);
 
 extern status_t 
+    yang_typ_consume_metadata_type (tk_chain_t *tkc,
+				    ncx_module_t  *mod,
+				    typ_def_t *intypdef);
+
+extern status_t 
     yang_typ_consume_typedef (tk_chain_t *tkc,
 			      ncx_module_t  *mod,
 			      dlq_hdr_t *que);

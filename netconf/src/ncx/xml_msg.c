@@ -131,6 +131,39 @@ static void
 
 
 /********************************************************************
+* FUNCTION find_pmap
+*
+* Find the pmap entry for the specified namespace ID
+* 
+* INPUTS:
+*    msg  == message to search
+*    nsid == namespace ID to find
+*
+* RETURNS:
+*   pointer to prefix if found, else NULL if not found
+*********************************************************************/
+static xmlns_pmap_t *
+    find_pmap (xml_msg_hdr_t *msg,
+	       xmlns_id_t nsid)
+{
+    xmlns_pmap_t  *pmap;
+
+    for (pmap = (xmlns_pmap_t *)dlq_firstEntry(&msg->prefixQ);
+	 pmap != NULL;
+	 pmap = (xmlns_pmap_t *)dlq_nextEntry(pmap)) {
+
+	if (pmap->nm_id == nsid) {
+	    return pmap;
+	} else if (pmap->nm_id > nsid) {
+	    return NULL;
+	}
+    }
+    return NULL;
+
+}  /* find_pmap */
+
+
+/********************************************************************
 * FUNCTION find_prefix
 *
 * Find the namespace prefix for the specified namespace ID
@@ -294,7 +327,7 @@ const xmlChar *
 			xmlns_id_t nsid,
 			boolean  *xneeded)
 {
-    xmlns_pmap_t   *newpmap;
+    xmlns_pmap_t   *pmap, *newpmap;
     const xmlChar  *pfix;
     status_t        res;
 
@@ -318,36 +351,43 @@ const xmlChar *
     }
 
     /* see if a prefix is already present in the rpc-reply element */
-    pfix = find_prefix(msg, nsid);
-    if (pfix) {
-	return pfix;
-    }
+    pfix = NULL;
+    pmap = find_pmap(msg, nsid);
+    if (!pmap) {
 
-    /* need to create a new prefix map and save it for real */
-    newpmap = xmlns_new_pmap(0);
-    if (!newpmap) {
-	SET_ERROR(ERR_INTERNAL_MEM);
-	return NULL;
-    }
+	/* need to create a new prefix map and save it for real */
+	newpmap = xmlns_new_pmap(0);
+	if (!newpmap) {
+	    SET_ERROR(ERR_INTERNAL_MEM);
+	    return NULL;
+	}
 
-    /* generate a prefix ID */
-    newpmap->nm_id = nsid;
-    res = xml_msg_gen_new_prefix(msg, nsid, 
-				 &newpmap->nm_pfix, 0);
-    if (res != NO_ERR) {
-	SET_ERROR(res);
-	xmlns_free_pmap(newpmap);
-	return NULL;
-    }
+	/* generate a prefix ID */
+	newpmap->nm_id = nsid;
+	res = xml_msg_gen_new_prefix(msg, nsid, 
+				     &newpmap->nm_pfix, 0);
+	if (res != NO_ERR) {
+	    SET_ERROR(res);
+	    xmlns_free_pmap(newpmap);
+	    return NULL;
+	}
 
-    /* add the new prefix mapping to the prefixQ */
-    add_pmap(msg, newpmap);
+	pfix = newpmap->nm_pfix;
+
+	/* add the new prefix mapping to the prefixQ */
+	add_pmap(msg, newpmap);
+    } else {
+	pfix = pmap->nm_pfix;
+    }
 
     /* xmlns directive will be needed for this new prefix */
-    if (parent_nsid != nsid) {
-	*xneeded = TRUE;
+    if (!pmap || !pmap->nm_topattr) {
+	if (parent_nsid != nsid) {
+	    *xneeded = TRUE;
+	}
     }
-    return newpmap->nm_pfix;
+
+    return pfix;
 
 }  /* xml_msg_get_prefix */
 
@@ -639,7 +679,7 @@ status_t
      * make sure it is not the default, by forcing a new
      * xmlns with a prefix -- needed by XPath 1.0 
      */
-    if (addncid) {
+    if (addncid && !find_prefix(msg, ncid)) {
 	if (msg->defns == ncid) {
 	    msg->defns = 0;
 	}

@@ -288,6 +288,10 @@ extern status_t
 extern status_t 
     tk_retokenize_cur_string (tk_chain_t *tkc,
 			      ncx_module_t *mod);
+extern tk_chain_t *
+    tk_tokenize_metadata_string (ncx_module_t *mod,
+				 xmlChar *str,
+				 status_t *res);
 
 
 extern uint32

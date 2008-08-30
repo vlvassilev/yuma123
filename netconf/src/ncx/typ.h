@@ -705,6 +705,7 @@ extern typ_def_t *
  *    typ_get_index_name (const typ_index_t *indx);
  */
 
+#if 0
 /* get the first metadata descriptor, will follow the typdef chain */
 extern void *   /* obj_template_t *   */
     typ_first_meta (const typ_def_t *typdef);
@@ -723,6 +724,7 @@ extern void *  /* obj_template *   */
  *    typ_find_meta (typ_def_t *typdef,
  *		   const xmlChar *name);
  */
+#endif
 
 
 /* find a specified appinfo variable */
@@ -857,6 +859,9 @@ extern void
 
 extern boolean
     typ_ok_for_inline_index (ncx_btype_t btyp);
+
+extern boolean
+    typ_ok_for_metadata (ncx_btype_t btyp);
 
 extern boolean
     typ_ok_for_index (const typ_def_t  *typdef);

@@ -197,6 +197,13 @@ extern const obj_template_t *
     ncx_get_next_object (const ncx_module_t *mod,
 			 const obj_template_t *curobj);
 
+extern const obj_template_t *
+    ncx_get_first_data_object (const ncx_module_t *mod);
+
+extern const obj_template_t *
+    ncx_get_next_data_object (const ncx_module_t *mod,
+			      const obj_template_t *curobj);
+
 /******************** ncx_import_t ******************/
 
 extern ncx_import_t * 
@@ -432,6 +439,11 @@ extern const ncx_appinfo_t *
 		      const xmlChar *prefix,
 		      const xmlChar *varname);
 
+extern const ncx_appinfo_t *
+    ncx_find_next_appinfo (const ncx_appinfo_t *current,
+			   const xmlChar *prefix,
+			   const xmlChar *varname);
+
 extern ncx_appinfo_t *
     ncx_clone_appinfo (ncx_appinfo_t *appinfo);
 
@@ -523,10 +535,6 @@ extern void
 
 extern void
     ncx_stdout_indent (int32 indentcnt);
-
-/* internal operation object for processing edit-config PDUs */
-extern obj_template_t *
-    ncx_get_operation_attr (void);
 
 /* 4 internal objects for subtree filter processing */
 extern obj_template_t *

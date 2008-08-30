@@ -132,14 +132,18 @@ static boolean        staterr_inuse = FALSE;
 static void
     dump_error_info (const rpc_err_info_t  *errinfo)
 {
+    const xmlChar *prefix;
+
     log_write("\n  error-info: %s T:%s = ", 
 	   (errinfo->name) ? (const char *)errinfo->name : "--",
 	   tk_get_btype_sym(errinfo->val_btype));
 
     if (errinfo->isqname) {
-	log_write("%u:%s", errinfo->val_nsid,
-	       (errinfo->v.strval) ? 
-	       (const char *)errinfo->v.strval : "--");
+	prefix = xmlns_get_ns_prefix(errinfo->val_nsid);
+	log_write("%s:%s", 
+		  (prefix) ? prefix : (const xmlChar *)"--",
+		  (errinfo->v.strval) ? 
+		  (const char *)errinfo->v.strval : "--");
 	return;
     }
 

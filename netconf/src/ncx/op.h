@@ -111,6 +111,16 @@ typedef enum op_editop_t_ {
 } op_editop_t;
 
 
+/* YANG insert operation types */
+typedef enum op_insertop_t_ {
+    OP_INSOP_NONE,
+    OP_INSOP_FIRST,
+    OP_INSOP_LAST,
+    OP_INSOP_BEFORE,
+    OP_INSOP_AFTER
+} op_insertop_t;
+
+
 /* NETCONF full operation list for access control */
 typedef enum op_t_ {
     OP_NONE,
@@ -195,6 +205,12 @@ extern const xmlChar *
 
 extern op_editop_t 
     op_editop_id (const xmlChar *opstr);
+
+extern const xmlChar * 
+    op_insertop_name (op_insertop_t ins_id);
+
+extern op_insertop_t 
+    op_insertop_id (const xmlChar *opstr);
 
 extern op_filtertyp_t 
     op_filtertyp_id (const xmlChar *filstr);

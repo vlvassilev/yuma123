@@ -4558,12 +4558,35 @@ boolean
 	return TRUE;
     case NCX_BT_EMPTY:
     case NCX_BT_ANY:
+    case NCX_BT_SLIST:
+    case NCX_BT_CONTAINER:
+    case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
+    case NCX_BT_LEAF_LIST:
         return FALSE;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
         return FALSE;
     }
 }  /* typ_ok_for_inline_index */
+
+
+/********************************************************************
+* FUNCTION typ_ok_for_metadata
+* 
+* Check if the base type is okay to use in an XML attribute
+*
+* INPUTS:
+*     btyp == base type enum
+* RETURNS:
+*     TRUE if okay, FALSE if not
+*********************************************************************/
+boolean
+    typ_ok_for_metadata (ncx_btype_t btyp)
+{
+    return typ_ok_for_inline_index(btyp);
+
+}  /* typ_ok_for_metadata */
 
 
 /********************************************************************

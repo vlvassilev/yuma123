@@ -211,6 +211,7 @@ static void
 
     /* dump some header info */
     log_stdout("\n\nModule: %s (%s)", mod->name, mod->version);
+    log_stdout("\nPrefix: %s", mod->prefix);
     log_stdout("\nNamespace: %s", (mod->ns) ?
 	       (const char *)mod->ns : "(none)");
     log_stdout("\nSource: %s", mod->source);

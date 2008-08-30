@@ -1,4 +1,6 @@
+yangcli README version 1
 
+Overview
 
     Simple single-threaded, single-session NETCONF manager
     Provides CLI interface to NETCONF operations for testing purposes
@@ -7,9 +9,15 @@
     NETCONF operations. Commands are defined in ncxcli.ncx
     as RPC methods.
 
-    NETCONF operations defined in netconf.ncx
+    Commands in yangcli are defined with the 'rpc' construct
+    in YANG data models.
+
+    NETCONF operations defined in netconf.yang
     (rpc constructs) are available as commands when connected
     to an agent.
+
+    Local commands available at any time are defined in
+    yangcli.yang.
 
     Any RPC method defined in any NCX module is available
     as a command when connected to an agent.
@@ -27,7 +35,7 @@
       run script=test-interface P1=eth0 P2=300 P3="my itf test"
 
     Interactive and CLI syntax is virtually the same
-    Interactive CLI mode is script level 0.)   
+    Interactive CLI mode is script level 0.
     There are 2 types of statements:
  
       - Assignment statements
@@ -36,6 +44,7 @@
 
     An assignment statement assigns some value to a user variable.
     There are 2 user variable namespaces:
+
       - global (visible to all scripts and interactive CLI mode)
       - local  (visible just to the current script run level)
 
@@ -44,14 +53,22 @@
 
         $foo = assign-expression
 
+    An assignment expression can span multiple lines if each
+    line except the last ends with a backslash '\' char, 
+    followed by a newline '\n' char.
 
+    Lines within a quoted string do not need to be escaped
+    in this manner.
+ 
+    Double quoted or single quoted strings are permitted.
+        
     An assignment statement for a global variable has the form:
 
         $$foo = assign-expression
 
     An assignment expression has several forms:
  
-       # all examples could be $foo or $$foo
+       # Note: all examples could be local ($foo) or global ($$foo)
 
        # set to the contents of another var
        $foo = $bar
@@ -65,9 +82,9 @@
        # set an NCX_BT_INTERNAL raw XML variable
        # The 2 char sequence [< must start the raw XML value
        # The 2 char sequence >] must end the raw XML value
-       $foo = [[<some baz="7"> \
+       $foo = [<some baz="7"> \
                  <multi-line-xml/> \
-                </some>]]
+                </some>]
 
        $filter = [<filter type="xpath" select="/netconf"/>]
 
@@ -77,13 +94,13 @@
 
     A command expression has the form
  
-      [owner-name:]command-name [parm]*
+      [module-prefix:]command-name [parm]*
 
-    There cannot be any whitespace between the owner-name,
+    There cannot be any whitespace between the module-prefix,
     colon, and command name.  
 
-    If the owner name is present, then only RPC methods
-    for that owner will be checked.
+    If the module name is present, then only RPC methods
+    from the associated module will be checked.
 
         acme:reset-subsystem reset-target="/foo/bar[i=23]"
 

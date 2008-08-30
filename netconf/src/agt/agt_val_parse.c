@@ -1915,6 +1915,227 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION parse_metadata_nc
+* 
+* Parse all the XML attributes in the specified xml_node_t struct
+*
+* Only XML_NT_START or XML_NT_EMPTY nodes will have attributes
+*
+* INPUTS:
+*     scb == session control block
+*     msg == incoming RPC message
+*            Errors are appended to msg->errQ
+*     obj == object template containing meta-data definition
+*     nserr == TRUE if namespace errors should be checked
+*           == FALSE if not, and any attribute is accepted 
+*     node == node of the parameter maybe with attributes to be parsed
+*     retval ==  val_value_t that should get the results of the parsing
+*     
+* OUTPUTS:
+*    *retval will be filled in
+*    msg->errQ may be appended with new errors or warnings
+*    retval->editop contains the last value of the operation attribute
+*      seen, if any; will be OP_EDITOP_NONE if not set
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    parse_metadata_nc (ses_cb_t *scb,
+		       xml_msg_hdr_t *msg,
+		       const obj_template_t *obj,
+		       const xml_node_t *node,
+		       boolean nserr,
+		       val_value_t  *retval)
+{
+    const obj_metadata_t    *meta;
+    const typ_def_t         *metadef;
+    xml_attr_t              *attr;
+    val_value_t             *metaval;
+    xmlns_id_t               ncid, yangid;
+    status_t                 res, retres;
+    boolean                  iskey, isvalue;
+
+    retres = NO_ERR;
+    ncid =  xmlns_nc_id();
+    yangid =  xmlns_yang_id();
+
+    /* go through all the attributes in the node and convert
+     * to val_value_t structs
+     * find the correct typedef to match each attribute
+     */
+    for (attr = xml_get_first_attr(node);
+	 attr != NULL;
+	 attr = xml_next_attr(attr)) {
+
+	if (attr->attr_dname && 
+	    !xml_strncmp(attr->attr_dname, 
+			 XMLNS, xml_strlen(XMLNS))) {
+	    /* skip this 'xmlns' attribute */
+	    continue;   
+	}
+
+	/* init per-loop locals */
+	res = NO_ERR;
+	meta = NULL;
+	metadef = NULL;
+	iskey = FALSE;
+	isvalue = FALSE;
+
+	/* check qualified and unqualified operation attribute,
+	 * then the 'xmlns' attribute, then a defined attribute
+	 */
+	if (val_match_metaval(attr, ncid, NC_OPERATION_ATTR_NAME)) {
+	    retval->editop = op_editop_id(attr->attr_val);
+	    if (retval->editop == OP_EDITOP_NONE) {
+		res = ERR_NCX_INVALID_VALUE;
+	    } else {
+		continue;
+	    }
+	} else if (val_match_metaval(attr, yangid, YANG_K_INSERT)) {
+	    retval->insertop = op_insertop_id(attr->attr_val);
+	    if (retval->insertop == OP_INSOP_NONE) {
+		res = ERR_NCX_INVALID_VALUE;
+	    } else {
+		continue;
+	    }
+	} else if (val_match_metaval(attr, yangid, YANG_K_KEY)) {
+	    iskey = TRUE;
+	} else if (val_match_metaval(attr, yangid, YANG_K_VALUE)) {
+	    isvalue = TRUE;
+	} else {
+	    /* find the attribute definition in this typdef */
+	    meta = obj_find_metadata(obj, attr->attr_name);
+	    if (meta) {
+		metadef = meta->typdef;
+	    } else if (!nserr) {
+		metadef = typ_get_basetype_typdef(NCX_BT_STRING);
+	    }
+	}
+
+	if (iskey || isvalue) {
+	    metadef = typ_get_basetype_typdef(NCX_BT_STRING);
+	}
+
+	if (metadef) {
+	    /* alloc a new value struct for rhe attribute */
+	    metaval = val_new_value();
+	    if (!metaval) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		/* parse the attribute string against the typdef */
+		res = val_parse_meta(metadef, attr->attr_ns,
+				     attr->attr_name, 
+				     attr->attr_val, metaval);
+		if (res == NO_ERR) {
+		    dlq_enque(metaval, &retval->metaQ);
+		} else {
+		    val_free_value(metaval);
+		}
+	    }
+	} else {
+	    res = ERR_NCX_UNKNOWN_ATTRIBUTE;
+	}
+
+	if (res != NO_ERR) {
+	    agt_record_attr_error(scb, msg, 
+				  NCX_LAYER_OPERATION, res,  
+				  attr, node, NULL, 
+				  NCX_NT_VAL, retval);
+	    CHK_EXIT;
+	}
+    }
+    return retres;
+
+} /* parse_metadata_nc */
+
+
+/********************************************************************
+* FUNCTION metadata_inst_check
+* 
+* Validate that all the XML attributes in the specified 
+* xml_node_t struct are pesent in appropriate numbers
+*
+* Since attributes are unordered, they all have to be parsed
+* before they can be checked for instance count
+*
+* INPUTS:
+*     scb == session control block
+*     msg == incoming RPC message
+*            Errors are appended to msg->errQ
+*     val == value to check for metadata errors
+*     
+* OUTPUTS:
+*    msg->errQ may be appended with new errors or warnings
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    metadata_inst_check (ses_cb_t *scb,
+			 xml_msg_hdr_t *msg,
+			 val_value_t  *val)
+{
+    const obj_metadata_t *meta;
+    uint32                cnt;
+    status_t              res, retres;
+    xmlns_qname_t         qname;
+    xmlns_id_t            yangid;
+
+    retres = NO_ERR;
+    yangid = xmlns_yang_id();
+
+    /* first check the inst count of the YANG attributes
+     * may not need to do this at all if XmlTextReader
+     * rejects duplicate XML attributes
+     */
+    cnt = val_metadata_inst_count(val, yangid, YANG_K_KEY);
+    if (cnt > 1) {
+	retres = ERR_NCX_EXTRA_ATTR;
+	agt_record_error(scb, msg, NCX_LAYER_CONTENT, retres, 
+			 NULL, NCX_NT_STRING, YANG_K_KEY, 
+			 NCX_NT_VAL, val);
+    }
+
+    cnt = val_metadata_inst_count(val, yangid, YANG_K_VALUE);
+    if (cnt > 1) {
+	retres = ERR_NCX_EXTRA_ATTR;
+	agt_record_error(scb, msg, NCX_LAYER_CONTENT, retres, 
+			 NULL, NCX_NT_STRING, YANG_K_VALUE, 
+			 NCX_NT_VAL, val);
+    }
+
+    if (!val->obj) {
+	return retres;
+    }
+
+    for (meta = obj_first_metadata(val->obj);
+	 meta != NO_ERR;
+	 meta = obj_next_metadata(meta)) {
+
+	res = NO_ERR;
+	cnt = val_metadata_inst_count(val, meta->nsid, meta->name);
+
+	/* check the instance qualifier from the metadata
+	 * continue the loop if there is no error
+	 */
+	if (cnt > 1) {
+	    res = ERR_NCX_EXTRA_ATTR;
+	    qname.nsid = meta->nsid;
+	    qname.name = meta->name;
+	    agt_record_error(scb, msg, NCX_LAYER_CONTENT, 
+			     res, NULL,
+			     NCX_NT_QNAME, &qname, 
+			     NCX_NT_VAL, val);
+	    retres = res;
+	}
+    }
+    return retres;
+
+} /* metadata_inst_check */
+
+
+/********************************************************************
 * FUNCTION parse_one_btype
 * 
 * Switch to dispatch to specific base type handler
@@ -1951,24 +2172,18 @@ static status_t
 		     val_value_t  *retval)
 {
     status_t     res, res2, res3;
-    op_editop_t  editop;
     boolean      nserr;
 
     /* get the attribute values from the start node */
-    editop = OP_EDITOP_NONE;
+    retval->editop = OP_EDITOP_NONE;
     retval->nsid = startnode->nsid;
 
     /* check namespace errors except if the type is ANY */
     nserr = (btyp != NCX_BT_ANY);
 
-#if 0  /**** TEMP!!! GETTING STARTED !!! ****/
     /* parse the attributes, if any; do not quick exit on this error */
     res2 = parse_metadata_nc(scb, msg, obj, startnode, 
-	   nserr, retval, &editop);
-#else
-    res2 = NO_ERR;
-#endif
-
+			     nserr, retval);
 
     /* continue to parse the startnode depending on the base type 
      * to record as many errors as possible
@@ -2024,21 +2239,13 @@ static status_t
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    /* this will only be non-zero if the operation attribute
-     * was seen in XML subtree for the value
-     */
-    retval->editop = editop;
-
     /* set the config flag for this value */
     res3 = NO_ERR;
 
-#if 0   /**** TEMP ****/
     if (res == NO_ERR) {
 	/* this has to be after the retval typdef is set */
 	res3 = metadata_inst_check(scb, msg, retval);
-	clean_metaerrs(retval);
     }
-#endif
 
     if (res != NO_ERR) {
 	retval->res = res;
@@ -2214,151 +2421,6 @@ void
 }  /* agt_val_parse_test */
 #endif
 
-
-
-#if 0
-/********************************************************************
-* FUNCTION parse_metadata_nc
-* 
-* Parse all the XML attributes in the specified xml_node_t struct
-*
-* Only XML_NT_START or XML_NT_EMPTY nodes will have attributes
-*
-* INPUTS:
-*     scb == session control block
-*     msg == incoming RPC message
-*            Errors are appended to msg->errQ
-*     obj == object template containing meta-data definition
-*     nserr == TRUE if namespace errors should be checked
-*           == FALSE if not, and any attribute is accepted 
-*     node == node of the parameter maybe with attributes to be parsed
-*     retval ==  val_value_t that should get the results of the parsing
-*     
-* OUTPUTS:
-*    *retval will be filled in
-*    msg->errQ may be appended with new errors or warnings
-*    *editop contains the last value of the operation attribute
-*      seen, if any; will be OP_EDITOP_NONE if not set
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t 
-    parse_metadata_nc (ses_cb_t *scb,
-		       xml_msg_hdr_t *msg,
-		       typ_def_t *typdef,
-		       const xml_node_t *node,
-		       boolean nserr,
-		       val_value_t  *retval,
-		       op_editop_t  *editop)
-{
-    typ_child_t    *oper, *meta;
-    xml_attr_t     *attr;
-    typ_def_t      *metadef;
-    val_value_t    *metaval;
-    val_metaerr_t  *merr;
-    xmlns_id_t      ncid;
-    status_t        res, retres;
-    boolean         isoper, copy;
-    const xmlChar  *errname;
-
-    /* setup the NETCONF operation attribute */
-    oper = ncx_get_operation_attr();
-    retres = NO_ERR;
-    ncid =  xmlns_nc_id();
-
-    /* go through all the attributes in the node and convert
-     * to val_value_t structs
-     * find the correct typedef to match each attribute
-     */
-    for (attr = xml_get_first_attr(node);
-	 attr != NULL;
-	 attr = xml_next_attr(attr)) {
-
-	res = NO_ERR;
-	meta = NULL;
-	metadef = NULL;
-	isoper = FALSE;
-	errname = NULL;
-
-	/* check qualified and unqualified operation attribute,
-	 * then the 'xmlns' attribute, then a defined attribute
-	 */
-	if (match_metaval(attr, ncid, NC_OPERATION_ATTR_NAME)) {
-	    metadef = &oper->typdef;
-	    isoper = TRUE;
-	} else if (attr->attr_dname && 
-		   !xml_strncmp(attr->attr_dname, 
-				XMLNS, xml_strlen(XMLNS))) {
-	    continue;   /* skip this 'xmlns' attribute */
-	} else {
-	    /* find the attribute definition in this typdef */
-	    meta = find_metadef(typdef, attr->attr_name);
-	    if (meta) {
-		metadef = &meta->typdef;
-	    } else if (!nserr) {
-		metadef = typ_get_basetype_typdef(NCX_BT_STRING);
-	    }
-	}
-
-	if (metadef) {
-	    /* alloc a new value struct for rhe attribute */
-	    metaval = val_new_value();
-	    if (!metaval) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		/* parse the attribute string against the typdef */
-		res = val_parse_meta(metadef, attr->attr_ns,
-				     attr->attr_name, 
-				     attr->attr_val, metaval);
-		if (res == NO_ERR) {
-		    if (isoper) {
-			*editop = op_editop_id(attr->attr_val);
-			/* don't save operation attr */
-			val_free_value(metaval);
-		    } else {
-			dlq_enque(metaval, &retval->metaQ);
-		    }
-		} else {
-		    if (isoper) {
-			errname = NC_OPERATION_ATTR_NAME;
-		    } else {
-			errname = meta->name;
-		    }
-		    copy = FALSE;
-		    val_free_value(metaval);
-		}
-	    }
-	} else {
-	    errname = attr->attr_name;
-	    copy = TRUE;
-	    res = ERR_NCX_UNKNOWN_ATTRIBUTE;
-	}
-
-	if (res != NO_ERR) {
-	    if (errname) {
-		merr = val_new_metaerr(retval->nsid, errname, copy);
-		if (!merr) {
-		    /* continue on without it */
-		    SET_ERROR(ERR_INTERNAL_MEM);
-		} else {
-		    dlq_enque(merr, &retval->metaerrQ);
-		}
-	    } else {
-		SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-
-	    agt_record_attr_error(scb, msg, 
-				  NCX_LAYER_OPERATION, res,  
-				  attr, node, NULL, 
-				  NCX_NT_VAL, retval);
-	    retres = res;
-	}
-    }
-    return retres;
-
-} /* parse_metadata_nc */
-#endif
 
 
 /* END file agt_val_parse.c */

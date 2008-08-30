@@ -1751,35 +1751,6 @@ static typ_child_t *
 } /* find_metadef */
 
 
-/********************************************************************
-* FUNCTION match_metaval
-* 
-* Match the specific attribute value and namespace ID
-*
-* INPUTS:
-*     attr == attr to check
-*     nsid == mamespace ID to match against
-*     name == attribute name to match against
-*
-* RETURNS:
-*     TRUE if attr is a match; FALSE otherwise
-*********************************************************************/
-static boolean
-    match_metaval (const xml_attr_t *attr,
-		   xmlns_id_t  nsid,
-		   const xmlChar *name)
-{
-    if (xml_strcmp(attr->attr_name, name)) {
-	return FALSE;
-    }
-    if (attr->attr_ns) {
-	return (attr->attr_ns==nsid);
-    } else {
-	/* unqualified match */
-	return TRUE;
-    }
-} /* match_metaval */
-
 
 /********************************************************************
 * FUNCTION metadata_inst_check

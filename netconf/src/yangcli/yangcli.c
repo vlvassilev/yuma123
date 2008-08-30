@@ -94,6 +94,10 @@ date         init     comment
 #include "obj.h"
 #endif
 
+#ifndef _H_obj_help
+#include "obj_help.h"
+#endif
+
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -162,9 +166,9 @@ date         init     comment
 #define YANGCLI_BOOT YANGCLI_MOD
 
 /* core modules auto-loaded at startup */
-#define NCMOD        ((const xmlChar *)"netconf")
-#define NCXDTMOD     ((const xmlChar *)"ncxtypes")
-#define XSDMOD       ((const xmlChar *)"xsd")
+#define NCMOD        (const xmlChar *)"netconf"
+#define NCXDTMOD     (const xmlChar *)"ncxtypes"
+#define XSDMOD       (const xmlChar *)"xsd"
 
 
 /* YANGCLI boot parameter names 
@@ -173,6 +177,7 @@ date         init     comment
 #define YANGCLI_AGENT       (const xmlChar *)"agent"
 #define YANGCLI_BATCHMODE   (const xmlChar *)"batch-mode"
 #define YANGCLI_CONF        (const xmlChar *)"conf"
+#define YANGCLI_DIR         (const xmlChar *)"dir"
 #define YANGCLI_DEF_MODULE  (const xmlChar *)"default-module"
 #define YANGCLI_KEY         (const xmlChar *)"key"
 /* YANGCLI_HELP */
@@ -186,23 +191,28 @@ date         init     comment
 #define YANGCLI_NO_FIXORDER (const xmlChar *)"no-fixorder"
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
 #define YANGCLI_USER        (const xmlChar *)"user"
+
+#define YANGCLI_COMMANDS    (const xmlChar *)"commands"
 /* NCX_EL_VERSION */
 
 #define YANGCLI_BRIEF  (const xmlChar *)"brief"
 #define YANGCLI_FULL   (const xmlChar *)"full"
 
-#define DEF_PROMPT ((const xmlChar *)"yangcli> ")
-#define MORE_PROMPT ((const xmlChar *)"   more> ")
+#define DEF_PROMPT     (const xmlChar *)"yangcli> "
+#define MORE_PROMPT    (const xmlChar *)"   more> "
 
 /* YANGCLI top level commands */
-#define YANGCLI_CONNECT ((const xmlChar *)"connect")
-#define YANGCLI_HELP    ((const xmlChar *)"help")
-#define YANGCLI_LOAD    ((const xmlChar *)"load")
-#define YANGCLI_QUIT    ((const xmlChar *)"quit")
-#define YANGCLI_RUN     ((const xmlChar *)"run")
-#define YANGCLI_SAVE    ((const xmlChar *)"save")
-#define YANGCLI_SET     ((const xmlChar *)"set")
-#define YANGCLI_SHOW    ((const xmlChar *)"show")
+#define YANGCLI_CD      (const xmlChar *)"cd"
+#define YANGCLI_CONNECT (const xmlChar *)"connect"
+#define YANGCLI_HELP    (const xmlChar *)"help"
+#define YANGCLI_LOAD    (const xmlChar *)"load"
+#define YANGCLI_PWD     (const xmlChar *)"pwd"
+#define YANGCLI_QUIT    (const xmlChar *)"quit"
+#define YANGCLI_RUN     (const xmlChar *)"run"
+#define YANGCLI_SAVE    (const xmlChar *)"save"
+#define YANGCLI_SET     (const xmlChar *)"set"
+#define YANGCLI_SHOW    (const xmlChar *)"show"
+
 
 
 #define YANGCLI_NS_URI \
@@ -2310,7 +2320,7 @@ static void
 		log_write("\n  %s/%s", mod->name, mod->version);
 	    }
 	} else {
-	    help_data_module(mod, mode);
+	    help_data_module(mod, HELP_MODE_BRIEF);
 	}
 	anyout = TRUE;
 	mod = (const ncx_module_t *)ncx_get_next_module(mod);
@@ -2325,6 +2335,61 @@ static void
     }
 
 } /* do_show_modules */
+
+
+/********************************************************************
+ * FUNCTION do_show_commands (sub-mode of local RPC)
+ * 
+ * show commands
+ *
+ * INPUTS:
+ *    mod == first module to show
+ *    mode == requested help mode
+ *
+ *********************************************************************/
+static void
+    do_show_commands (help_mode_t mode)
+{
+    const ncx_module_t    *mod;
+    const obj_template_t  *obj;
+    boolean anyout, imode;
+
+
+    mod = ncx_find_module(YANGCLI_MOD);
+    if (!mod) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+
+    imode = interactive_mode();
+    anyout = FALSE;
+
+    obj = ncx_get_first_object(mod);
+    while (obj) {
+	if (obj_is_rpc(obj)) {
+	    if (mode == HELP_MODE_BRIEF) {
+		if (imode) {
+		    log_stdout("\n  %s", obj_get_name(obj));
+		} else {
+		    log_write("\n  %s", obj_get_name(obj));
+		}
+	    } else {
+		obj_dump_template(obj, mode-1, 0, 0);
+	    }
+	    anyout = TRUE;
+	}
+	obj = ncx_get_next_object(mod, obj);
+    }
+
+    if (anyout) {
+	if (imode) {
+	    log_stdout("\n");
+	} else {
+	    log_write("\n");
+	}
+    }
+
+} /* do_show_commands */
 
 
 /********************************************************************
@@ -2415,6 +2480,8 @@ static void
 			log_error("\nyangcli: no modules loaded");
 		    }
 		}
+	    } else if (!xml_strcmp(parm->name, YANGCLI_COMMANDS)) {
+		do_show_commands(mode);
 	    } else if (!xml_strcmp(parm->name, NCX_EL_VERSION)) {
 		if (imode) {
 		    log_stdout("\nyangcli version %s\n", progver);
@@ -2426,7 +2493,7 @@ static void
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
+	    log_write("\nError: at least one parameter expected");
 	}
     }
 
@@ -2760,6 +2827,142 @@ static status_t
 
 
 /********************************************************************
+ * FUNCTION pwd
+ * 
+ * Print the current working directory
+ *
+ * INPUTS:
+ *    rpc == RPC method for the load command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * OUTPUTS:
+ *   log_stdout global help message
+ *
+ *********************************************************************/
+static void
+    pwd (void)
+{
+    char             *buff;
+    boolean           imode;
+
+    imode = interactive_mode();
+
+    buff = m__getMem(YANGCLI_BUFFLEN);
+    if (!buff) {
+	if (imode) {
+	    log_stdout("\nMalloc failure\n");
+	} else {
+	    log_write("\nMalloc failure\n");
+	}
+	return;
+    }
+
+    if (!getcwd(buff, YANGCLI_BUFFLEN)) {
+	if (imode) {
+	    log_stdout("\nGet CWD failure\n");
+	} else {
+	    log_write("\nGet CWD failure\n");
+	}
+	m__free(buff);
+	return;
+    }
+
+    if (imode) {
+	log_stdout("\nCurrent working directory is %s\n", buff);
+    } else {
+	log_write("\nCurrent working directory is %s\n", buff);
+    }
+
+    m__free(buff);
+
+}  /* pwd */
+
+
+/********************************************************************
+ * FUNCTION do_pwd
+ * 
+ * Print the current working directory
+ *
+ * INPUTS:
+ *    rpc == RPC method for the load command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * OUTPUTS:
+ *   log_stdout global help message
+ *
+ *********************************************************************/
+static void
+    do_pwd (const obj_template_t *rpc,
+	    const xmlChar *line,
+	    uint32  len)
+{
+    val_value_t      *valset;
+    status_t          res;
+    boolean           imode;
+
+    imode = interactive_mode();
+    valset = get_valset(rpc, &line[len], &res);
+    if (res == NO_ERR || res == ERR_NCX_SKIPPED) {
+	pwd();
+    }
+
+}  /* do_pwd */
+
+
+/********************************************************************
+ * FUNCTION do_cd
+ * 
+ * Change the current working directory
+ *
+ * INPUTS:
+ *    rpc == RPC method for the load command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * OUTPUTS:
+ *   log_stdout global help message
+ *
+ *********************************************************************/
+static void
+    do_cd (const obj_template_t *rpc,
+	   const xmlChar *line,
+	   uint32  len)
+{
+    val_value_t      *valset, *parm;
+    status_t          res;
+    int               ret;
+    boolean           imode;
+
+    imode = interactive_mode();
+    valset = get_valset(rpc, &line[len], &res);
+    if (!valset || valset->res != NO_ERR) {
+	return;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_DIR);
+    if (!parm || parm->res != NO_ERR) {
+	return;
+    }
+
+    ret = chdir((const char *)VAL_STR(parm));
+    if (ret) {
+	if (imode) {
+	    log_stdout("\nChange CWD failure (%s)\n",
+		       get_error_string(errno_to_status()));
+	} else {
+	    log_write("\nChange CWD failure (%s)\n",
+		      get_error_string(errno_to_status()));
+	}
+    } else {
+	pwd();
+    }
+    
+}  /* do_cd */
+
+
+/********************************************************************
 * FUNCTION do_local_command
 * 
 * Handle local RPC operations from yangcli.ncx
@@ -2795,6 +2998,10 @@ static void
 	(void)do_run(rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {
 	do_show(rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_PWD)) {
+	do_pwd(rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_CD)) {
+	do_cd(rpc, line, len);
     } else {
 	log_error("\nError: The %s command is not allowed in this mode",
 		   rpcname);
@@ -3597,10 +3804,14 @@ static mgr_io_state_t
 	break;
     case MGR_IO_ST_CONN_RPYWAIT:
 	/* check if session was dropped by remote peer */
-	if (!mgr_ses_get_scb(mysid)) {
+	scb = mgr_ses_get_scb(mysid);
+	if (!scb || scb->state == SES_ST_SHUTDOWN_REQ) {
+	    if (scb) {
+		(void)mgr_ses_free_session(mysid);
+	    }
 	    mysid = 0;
 	    state = MGR_IO_ST_IDLE;
-	} else {
+	} else  {
 	    /* keep waiting for reply */
 	    return state;
 	}

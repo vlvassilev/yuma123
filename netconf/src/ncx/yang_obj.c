@@ -3422,6 +3422,155 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION resolve_metadata
+* 
+* Check the object for ncx:metadata definitions
+* Convert any clauses to metadata nodes within
+* the the object struct
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   obj == object to check for ncx:metadata clauses
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_metadata (tk_chain_t *tkc,
+		      ncx_module_t  *mod,
+		      obj_template_t *obj)
+{
+    const dlq_hdr_t      *que;
+    const ncx_appinfo_t  *appinfo;
+    tk_chain_t           *newchain;
+    obj_metadata_t       *meta;
+    status_t              res, retres;
+
+    retres = NO_ERR;
+    
+    que = obj_get_appinfoQ(obj);
+    if (!que) {
+	return NO_ERR;
+    }
+
+    for (appinfo = 
+	     ncx_find_appinfo(que, NCX_PREFIX, NCX_EL_METADATA);
+	 appinfo != NULL;
+	 appinfo = ncx_find_next_appinfo(appinfo, NCX_PREFIX,
+					 NCX_EL_METADATA)) {
+
+	/* parse the value string into 2 or 3 fields */
+	newchain = NULL;
+	meta = NULL;
+	res = NO_ERR;
+
+	/* turn the string into a Q of tokens */
+	newchain = tk_tokenize_metadata_string(mod,
+					       appinfo->value,
+					       &res);
+	if (res != NO_ERR) {
+	    log_error("\nError: Invalid metadata value string");
+	} else {
+	    meta = obj_new_metadata();
+	    if (!meta) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		/* check the tokens that are in the chain for
+		 * a YANG QName for the datatype and a YANG
+		 * identifier for the XML attribute name
+		 */
+		res = yang_typ_consume_metadata_type(newchain, mod, 
+						     meta->typdef);
+		if (res == NO_ERR) {
+		    /* make sure type OK for XML attribute */
+		    if (!typ_ok_for_metadata
+			(typ_get_basetype(meta->typdef))) {
+			log_error("\nError: Builtin type %s not "
+				  "allowed for metadata in object %s",
+				  tk_get_btype_sym
+				  (typ_get_basetype(meta->typdef)),
+				  obj_get_name(obj));
+			res = ERR_NCX_WRONG_TYPE;
+		    }
+		}
+
+		if (res == NO_ERR) {
+		    /* got a type for the attribute
+		     * now need to get a valid name
+		     */
+		    res = yang_consume_id_string(newchain,
+						 mod,
+						 &meta->name);
+		    if (res == NO_ERR) {
+			/* check if the name clashes
+			 * with any standard attributes
+			 */
+			if (!xml_strcmp(meta->name, 
+					NC_OPERATION_ATTR_NAME)) {
+			    log_warn("\nWarning: metadata using "
+				     "reserved name 'operation' "
+				     "for object %s",
+				     obj_get_name(obj));
+			} else if (!xml_strcmp(meta->name, 
+					       YANG_K_KEY)) {
+			    log_warn("\nWarning: metadata using "
+				     "reserved name 'key' "
+				     "for object %s",
+				     obj_get_name(obj));
+			} else if (!xml_strcmp(meta->name, 
+					       YANG_K_INSERT)) {
+			    log_warn("\nWarning: metadata using "
+				     "reserved name 'insert' "
+				     "for object %s",
+				     obj_get_name(obj));
+			} else if (!xml_strcmp(meta->name, 
+					       YANG_K_VALUE)) {
+			    log_warn("\nWarning: metadata using "
+				     "reserved name 'value' "
+				     "for object %s",
+				     obj_get_name(obj));
+			}
+
+			/* save the metadata even if the name clashes
+			 * because it is supposed to be used
+			 * with a namespace;  However, the
+			 * standard attribbutes are often used
+			 * without any prefix
+			 */
+			res = obj_add_metadata(meta, obj);
+		    }
+		}
+	    }
+	}
+
+	if (res != NO_ERR) {
+	    log_error("\nError: Invalid ncx:metadata string");
+	    res = ERR_NCX_INVALID_VALUE;
+	    tkc->cur = appinfo->tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	    retres = res;
+	}
+
+	if (newchain) {
+	    tk_free_chain(newchain);
+	}
+
+	if (res != NO_ERR && meta) {
+	    obj_free_metadata(meta);
+	}
+    }
+
+    return retres;
+
+
+} /* resolve_metadata */
+
+
+/********************************************************************
 * FUNCTION resolve_container
 * 
 * Check the container object type
@@ -3447,6 +3596,9 @@ static status_t
     status_t      res, retres;
 
     retres = NO_ERR;
+
+    res = resolve_metadata(tkc, mod, obj);
+    CHK_EXIT;
 
     res = ncx_resolve_appinfoQ(tkc, mod, &con->appinfoQ);
     CHK_EXIT;
@@ -3510,6 +3662,9 @@ static status_t
     res = ncx_resolve_appinfoQ(tkc, mod, &leaf->appinfoQ);
     CHK_EXIT;
 
+    res = resolve_metadata(tkc, mod, obj);
+    CHK_EXIT;
+
     if (!obj_is_refine(obj)) {
 	res = yang_typ_resolve_type(tkc, mod, leaf->typdef,
 				    leaf->defval, obj);
@@ -3568,6 +3723,9 @@ static status_t
     status_t res, retres;
 
     retres = NO_ERR;
+
+    res = resolve_metadata(tkc, mod, obj);
+    CHK_EXIT;
 
     res = ncx_resolve_appinfoQ(tkc, mod, &llist->appinfoQ);
     CHK_EXIT;
@@ -3639,6 +3797,9 @@ static status_t
     status_t res, retres;
 
     retres = NO_ERR;
+
+    res = resolve_metadata(tkc, mod, obj);
+    CHK_EXIT;
 
     res = ncx_resolve_appinfoQ(tkc, mod, &list->appinfoQ);
     CHK_EXIT;

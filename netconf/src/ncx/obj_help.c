@@ -95,7 +95,6 @@ void
 		       uint32 indent)
 {
     const xmlChar    *val;
-    const typ_def_t  *typdef;
     char              numbuff[NCX_MAX_NUMLEN];
     uint32            count;
 
@@ -142,11 +141,10 @@ void
     case OBJ_TYP_CASE:
 	break;
     default:
-	typdef = obj_get_ctypdef(obj);
-	if (typdef && typdef->class==NCX_CL_NAMED) {
+	if (obj->objtype != OBJ_TYP_CHOICE) {
 	    help_write_lines((const xmlChar *)" [", 0, FALSE); 
 	    help_write_lines((const xmlChar *)
-			     tk_get_btype_sym(typ_get_basetype(typdef)),
+			     obj_get_type_name(obj),
 			     0, FALSE);
 	    help_write_lines((const xmlChar *)"]", 0, FALSE); 
 	}
@@ -157,12 +155,13 @@ void
 	    help_write_lines(val, 0, FALSE);
 	    help_write_lines((const xmlChar *)"]", 0, FALSE); 
 	}
-
-	val = obj_get_description(obj);
-	if (val) {
-	    help_write_lines(val, indent+NCX_DEF_INDENT, TRUE); 
-	}
     }
+
+    val = obj_get_description(obj);
+    if (val) {
+	help_write_lines(val, indent+NCX_DEF_INDENT, TRUE); 
+    }
+
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
@@ -280,7 +279,8 @@ void
 			  nestlevel, indent+NCX_DEF_INDENT);
 	break;
     case OBJ_TYP_RPC:
-	if (!dlq_empty(&obj->def.rpc->datadefQ)) {
+	if (mode != HELP_MODE_BRIEF &&
+	    !dlq_empty(&obj->def.rpc->datadefQ)) {
 	    obj_dump_datadefQ(&obj->def.rpc->datadefQ, mode, 
 			      nestlevel, indent+NCX_DEF_INDENT);
 	} else {

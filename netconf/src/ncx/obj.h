@@ -162,18 +162,6 @@ typedef enum obj_type_t_ {
     OBJ_TYP_NOTIF
 } obj_type_t;
 
-/* enumeration for different Queue types that hold obj_template_t structs */
-typedef enum obj_qtype_t_ {
-    OBJ_QUE_NONE,
-    OBJ_QUE_DATA,                    /* data node datadefQ */
-    OBJ_QUE_GRP,                 /* grouping node datadefQ */
-    OBJ_QUE_USES,                    /* uses node datadefQ */
-    OBJ_QUE_AUG,                  /* augment node datadefQ */
-    OBJ_QUE_RPC,                           /* RPC datadefQ */
-    OBJ_QUE_RPCIO,         /* RPC input or output datadefQ */
-    OBJ_QUE_NOTIF                 /* notification datadefQ */
-} obj_qtype_t;
-
 
 /* enumeration for different YANG augment statement types */
 typedef enum obj_augtype_t_ {
@@ -411,7 +399,8 @@ typedef struct obj_template_t_ {
     grp_template_t *grp;          /* non-NULL == in a grp.datadefQ */
     struct obj_template_t_ *parent;
     struct obj_template_t_ *usesobj;
-    const obj_when_t  *augwhen;   /* augment when clause backptr */
+    const obj_when_t  *augwhen;     /* augment when clause backptr */
+    dlq_hdr_t    metadataQ;                 /* Q of obj_metadata_t */
     void   *cbset;   /* agt_rpc_cbset_t for RPC or agt_cb_fnset_t for OBJ */
     union def_ {
 	obj_container_t   *container;
@@ -428,6 +417,18 @@ typedef struct obj_template_t_ {
     } def;
 
 } obj_template_t;
+
+
+/* One YANG metadata (XML attribute) node */
+typedef struct obj_metadata_t_ {
+    dlq_hdr_t      qhdr;
+    struct obj_template_t_ *parent;     /* obj containing metadata */
+    ncx_module_t  *mod;                 /* mod or submod container */
+    xmlChar       *name;
+    typ_def_t     *typdef;
+    uint32         linenum;              /* saved from tk->linenum */
+    xmlns_id_t     nsid;                 /* in case parent == NULL */
+} obj_metadata_t;
 
 
 /********************************************************************
@@ -720,6 +721,9 @@ extern const xmlChar *
 extern const xmlChar *
     obj_get_mod_name (const obj_template_t  *obj);
 
+extern const xmlChar *
+    obj_get_type_name (const obj_template_t  *obj);
+
 extern xmlns_id_t
     obj_get_nsid (const obj_template_t *);
 
@@ -759,6 +763,9 @@ extern boolean
     obj_is_data_db (const obj_template_t *obj);
 
 extern boolean
+    obj_is_rpc (const obj_template_t *obj);
+
+extern boolean
     obj_is_empty (const obj_template_t *obj);
 
 extern boolean
@@ -796,5 +803,29 @@ extern status_t
 			boolean xmlorder,
 			const obj_template_t **rettop,
 			const obj_template_t **retobj);
+
+
+
+extern obj_metadata_t * 
+    obj_new_metadata (void);
+
+extern void 
+    obj_free_metadata (obj_metadata_t *meta);
+
+
+extern status_t
+    obj_add_metadata (obj_metadata_t *meta,
+		      obj_template_t *obj);
+
+extern obj_metadata_t *
+    obj_find_metadata (const obj_template_t *obj,
+		       const xmlChar *name);
+
+extern obj_metadata_t *
+    obj_first_metadata (const obj_template_t *obj);
+
+extern obj_metadata_t *
+    obj_next_metadata (const obj_metadata_t *meta);
+
 
 #endif	    /* _H_obj */

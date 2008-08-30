@@ -651,7 +651,7 @@ const char *
 *     status_t for the errno enum
 *********************************************************************/
 
-extern status_t
+status_t
     errno_to_status (void)
 {
     switch (errno) {

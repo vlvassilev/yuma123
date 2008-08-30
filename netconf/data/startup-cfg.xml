@@ -1,20 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<nd:config xmlns:nd="http://netconfcentral.com/ns/netconfd">
-  <test1  xmlns="urn:ietf:params:xml:ns:yang:test">
+<nd:config xmlns:nd="http://netconfcentral.com/ns/netconfd"
+  xmlns="urn:ietf:params:xml:ns:yang:test">
+  <test1>
    <a> 1  </a>
    <b>77</b>
    <c>aeddd34</c>
-   <d>y</d>
    <d>z</d>
   </test1>
   <test1/>
-  <test2  xmlns="urn:ietf:params:xml:ns:yang:test">
-   <a2>fred flintstone</a2>
+  <test2>
+   <a2>fred</a2>
    <b2>7</b2>
+   <foo/>
   </test2>
-  <test2  xmlns="urn:ietf:params:xml:ns:yang:test">
+  <test2>
    <a2>wilma</a2>
    <b2>8</b2>
+   <foo>69 bugs to go!</foo>
+  </test2>
+  <test2>
+   <a2>bambi</a2>
+   <b2>2</b2>
+   <foo>/t:test2[t:a2=wilma]/t:b2</foo>
   </test2>
 </nd:config>
 

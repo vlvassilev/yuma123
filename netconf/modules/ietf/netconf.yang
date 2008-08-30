@@ -13,13 +13,18 @@ module netconf {
    description 
       "NETCONF Protocol 
         * Data Types
-        * Parmsets
+        * Abstract object for PDU components
         * RPCs
        Translated from RFC 4741.";
 
    contact
      "Translated by Andy Bierman.
-      Send comments to <ietf@andybierman.com>.";
+      Send comments to <andy@netconfcentral.com>.";
+
+   revision "2008-08-30" {
+     description 
+       "Add some NCX extensions to automate some agent processing.";
+   }
 
    revision "2008-04-26" {
      description 
@@ -56,7 +61,7 @@ module netconf {
    typedef LangString {
      description "XML string with a language attribute.";
      type string;
-     ncx:metadata "Language lang?";
+     ncx:metadata "Language lang";
    }
 
    typedef MessageId {
@@ -152,11 +157,6 @@ module netconf {
        enum delete;
      }
      default "merge";
-   }
-
-   leaf operation {
-      ncx:hidden;
-      type EditOperationType;
    }
 
    typedef DefaultOperationType {
@@ -503,7 +503,7 @@ module netconf {
      reference "RFC 4741, section 4.1";
 
      // do not treat missing message-id as an error
-     ncx:metadata  "MessageId message-id?";
+     ncx:metadata  "MessageId message-id";
      ncx:abstract;
    }
 
@@ -515,7 +515,7 @@ module netconf {
      uses RpcReplyType;
 
      // do not treat missing message-id as an error
-     ncx:metadata  "MessageId message-id?";
+     ncx:metadata  "MessageId message-id";
      ncx:abstract;
    }
 
@@ -538,7 +538,7 @@ module netconf {
         anyxml filter {
           description "Subtree or Xpath filter to use.";
           ncx:metadata "FilterType type";
-          ncx:metadata "string select?";
+          ncx:metadata "string select";
         }
       }
 
@@ -751,7 +751,7 @@ module netconf {
              the select attribute of the filter element contains an XPath
              expression.";
           ncx:metadata "FilterType type";
-          ncx:metadata "string select?";
+          ncx:metadata "string select";
         }
       }
 

@@ -352,6 +352,11 @@ module yangcli {
             type empty;
           }
 
+          leaf commands {
+            description "Show info for all local commands";
+            type empty;
+          }
+
           leaf local {
             description "Show full info for one local user variable";
             type nt:NcxName;
@@ -375,6 +380,23 @@ module yangcli {
         uses HelpMode;
       }
     }
+
+    rpc pwd {
+      description "Print the current working directory.";
+      ncx:rpc-type exec;
+    }
+
+    rpc cd {
+      description "Change the current working directory.";
+      ncx:rpc-type exec;
+      input {
+        leaf dir { 
+           description "Directory path to use.";
+           type string;
+           mandatory true;
+        }
+      }
+   }
 
 }
 

@@ -365,16 +365,33 @@ module ncx {
 
   extension hidden {
     description
-      "Used to prevent publication of an object or grouping.
+      "Used to prevent publication of a YANG data object.
        Will be ignored for typedefs and other constructs.
        If present, that node and any sub-nodes will be ignored
-       when generating HTML documentation or help text.";
+       when generating HTML documentation or cYANG output.
+
+       The yangdump -f=copy mode will not be affected by
+       this extension. ";
   }
 
   extension metadata {
     description 
       "Used to define an XML attribute to be associated with a
-       data-def-stmt node.";
+       data-def-stmt node.  Only optional metadata can be
+       defined.  Errors for missing XML attributes (except
+       as specified by the YANG language) will not be
+       checked automatically.
+
+       The syntax string has the following format:
+
+          [prefix:]typename  attribute-name
+
+       Any YANG typedef of builtin type can be specified as
+       the type name, except 'empty'.
+
+       Example from get command in netconf.yang:
+          ncx:metadata 'FilterType type';   ";
+
     argument syntax-string {
       yin-element true;
     }

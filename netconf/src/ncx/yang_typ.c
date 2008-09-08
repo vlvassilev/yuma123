@@ -257,6 +257,14 @@ static status_t
 		doerr = TRUE;
 	    }
 	    break;
+	case NCX_SR_PATH:
+	    if (btyp != NCX_BT_KEYREF) {
+		log_error("\nError: keyword 'path' "
+			  "within a restriction for a %s type",
+			  tk_get_btype_sym(btyp));
+		doerr = TRUE;
+	    }
+	    break;
 	default:
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
@@ -2059,6 +2067,7 @@ static status_t
 		    return res;
 		} else {
 		    dlq_enque(sv, &typdef->def.simple.valQ);
+		    typdef->def.simple.strrest = NCX_SR_PATH;
 		}
 	    } else {
 		retres = ERR_NCX_WRONG_TKTYPE;

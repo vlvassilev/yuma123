@@ -245,7 +245,8 @@ typedef enum ncx_strrest_t_ {
     NCX_SR_VALSET,  
     NCX_SR_PATTERN,
     NCX_SR_ENUM,
-    NCX_SR_BIT
+    NCX_SR_BIT,
+    NCX_SR_PATH
 }  ncx_strrest_t;
 
 

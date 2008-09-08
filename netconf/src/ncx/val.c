@@ -388,7 +388,7 @@ static status_t
 {
     switch (strrest) {
     case NCX_SR_NONE:
-	    return NO_ERR;
+	return NO_ERR;
     case NCX_SR_VALSET:
 	/* check this typdef for restrictions */
 	if (!xml_strcmp(sval->val, strval)) {
@@ -396,6 +396,7 @@ static status_t
 	} else {
 	    return ERR_NCX_VAL_NOTINSET;
 	}
+	/*NOTREACHED*/
     case NCX_SR_PATTERN:
 	/* check this typdef against the specified pattern */
 	if (sval->pattern) {
@@ -406,7 +407,10 @@ static status_t
 	    }
 	} else {
 	    return SET_ERROR(ERR_INTERNAL_PTR);
-	}	    
+	}
+	/*NOTREACHED*/
+    case NCX_SR_PATH:
+	return NO_ERR;
     default:
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -439,7 +443,7 @@ static status_t
 
     switch (strrest) {
     case NCX_SR_NONE:
-	    return NO_ERR;
+	return NO_ERR;
     case NCX_SR_VALSET:
 	/* check this typdef for restrictions */
 	for (sval = (const typ_sval_t *)dlq_firstEntry(checkQ);
@@ -459,6 +463,8 @@ static status_t
 	} else {
 	    return NO_ERR;
 	}
+    case NCX_SR_PATH:
+	return NO_ERR;
     default:
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }

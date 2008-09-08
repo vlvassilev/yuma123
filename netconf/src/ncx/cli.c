@@ -95,135 +95,6 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-#if 0
-/********************************************************************
-* FUNCTION parse_complex_parm
-* 
-* Create a ps_parm_t struct for the specified parm value,
-* and insert it into the parmset (complex)
-*
-* Called only by parse_parm
-*
-* INPUTS:
-*   parm == psd_parm_t descriptor for the missing parm
-*   strval == string representation of the parm value
-*             (may be NULL if parm btype is NCX_BT_EMPTY
-*   new_parm == initialized return parm struct to be
-*               filled in and added to the parmset (ps)
-*   script == TRUE if parsing a script (in the manager)
-*          == FALSE if parsing XML (in the agent)
-*
-* OUTPUTS:
-*   If the specified parm is mandatory w/defval defined, then a 
-*   new ps_parm_t will be inserted in the ps->parmQ as required
-*   to fill in the parmset.
-*
-* RETURNS:
-*   status 
-*********************************************************************/
-static status_t
-    parse_complex_parm (const obj_template_t *obj,
-			const xmlChar *strval,
-			val_value_t  *new_parm,
-			boolean script)
-{
-
-    val_value_t          *chval;
-    const obj_template_t *chobj;
-    const typ_def_t      *typdef;
-    ncx_btype_t           btyp, chbtyp;
-    status_t              res;
-    boolean               done;
-
-    res = NO_ERR;
-    typdef = obj_get_ctypdef(obj);
-    btyp = obj_get_basetype(obj);
-
-    switch (obj->objtype) {
-    case OBJ_TYP_LEAF:
-	if (btyp==NCX_BT_ANY) {
-	    if (script) {
-		(void)var_get_script_val(typdef,  new_parm,
-					 obj_get_nsid(obj),
-					 obj_get_name(obj),
-					 strval, ISPARM, &res);
-	    } else {
-		res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    }
-	} else {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	break;
-    case OBJ_TYP_CONTAINER:
-	/* other complex types not supported yet */
-	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	break;
-    case NCX_BT_CHOICE:
-	/* look for a valid 'choice' match */
-	done = FALSE;
-	for (chobj = obj_first_child(obj);
-	     chobj != NULL && !done;
-	     chobj = obj_next_child(chobj)) {
-
-	    chbtyp = typ_get_basetype(&chtyp->typdef);
-
-	    /* keep trying nodes in the choice until one matches */
-	    if (chbtyp == NCX_BT_EMPTY) {
-		if (!xml_strcmp(strval, chtyp->name)) {
-		    res = val_set_simval(chval,
-					 &chtyp->typdef,
-					 psd_get_parm_nsid(parm),
-					 chtyp->name,
-					 strval);
-		    done = TRUE;
-		} else {
-		    continue;
-		}
-	    } else if (typ_is_simple(chbtyp)) {
-		if (script) {
-		    (void)var_get_script_val(&chtyp->typdef,
-					     chval,
-					     psd_get_parm_nsid(parm),
-					     chtyp->name,
-					     strval,
-					     ISPARM,
-					     &res);
-		} else {
-		    res = val_set_simval(chval,
-					 &chtyp->typdef,  
-					 psd_get_parm_nsid(parm), 
-					 chtyp->name,
-					 strval);
-		}
-
-		/* check if the string parsed okay for this choice */
-		if (res==NO_ERR && chval->res==NO_ERR) {
-		    done = TRUE;
-		} else {
-		    val_clean_value(chval);
-		}
-	    }  /* else complex child nodes skipped !!! */
-	}
-
-	if (!done) {
-	    /* didn't finnd any simvals that accepted or no sim types */
-	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    val_free_value(chval);
-	} else {
-	    res = NO_ERR;
-	    val_add_child(chval, new_parm->val);
-	}
-	break;
-    case NCX_BT_LIST:
-    default:
-	/* other complex types not supported yet */
-	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-    return res;
-
-}  /* parse_complex_parm */
-#endif
 
 /********************************************************************
 * FUNCTION parse_parm
@@ -279,9 +150,7 @@ static status_t
 	res = val_simval_ok(typdef, strval);
 	if (res == NO_ERR) {
 	    if (script) {
-		(void)var_get_script_val(typdef, new_parm,
-					 obj_get_nsid(obj),
-					 obj_get_name(obj),
+		(void)var_get_script_val(obj, new_parm,
 					 strval, ISPARM, &res);
 	    } else {
 		res = val_set_simval(new_parm,

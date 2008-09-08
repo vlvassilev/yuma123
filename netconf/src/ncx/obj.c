@@ -746,14 +746,6 @@ static obj_container_t *
 	return NULL;
     }
 
-    if (mcon && mcon->confset) {
-	newcon->config = mcon->config;
-	newcon->confset = TRUE;
-    } else {
-	newcon->config = con->config;
-	newcon->confset = con->confset;
-    }
-
     res = clone_datadefQ(mod, newcon->datadefQ, con->datadefQ,
 			 (mcon) ? mcon->datadefQ : NULL, parent);
     if (res != NO_ERR) {
@@ -947,22 +939,6 @@ static obj_leaf_t *
 	return NULL;
     }
 
-    if (mleaf && mleaf->confset) {
-	newleaf->config = mleaf->config;
-	newleaf->confset = TRUE;
-    } else {
-	newleaf->config = leaf->config;
-	newleaf->confset = leaf->confset;
-    }
-
-    if (mleaf && mleaf->mandset) {
-	newleaf->mandatory = mleaf->mandatory;
-	newleaf->mandset = TRUE;
-    } else {
-	newleaf->mandatory = leaf->mandatory;
-	newleaf->mandset = leaf->mandset;
-    }
-
     res = clone_appinfoQ(&newleaf->appinfoQ,
 			 &leaf->appinfoQ,
 			 (mleaf) ? &mleaf->appinfoQ : NULL);
@@ -1131,14 +1107,6 @@ static obj_leaflist_t *
     if (res != NO_ERR) {
 	free_leaflist(newleaflist, OBJ_FL_CLONE);
 	return NULL;
-    }
-
-    if (mleaflist && mleaflist->confset) {
-	newleaflist->config = mleaflist->config;
-	newleaflist->confset = TRUE;
-    } else {
-	newleaflist->config = leaflist->config;
-	newleaflist->confset = leaflist->confset;
     }
 
     if (mleaflist && mleaflist->minset) {
@@ -1385,14 +1353,6 @@ static obj_list_t *
 	return NULL;
     }
 
-    if (mlist && mlist->confset) {
-	newlist->config = mlist->config;
-	newlist->confset = TRUE;
-    } else {
-	newlist->config = list->config;
-	newlist->confset = list->confset;
-    }
-
     if (mlist && mlist->minset) {
 	newlist->minelems = mlist->minelems;
 	newlist->minset = TRUE;
@@ -1532,7 +1492,6 @@ static obj_choice_t *
     dlq_createSQue(&ch->appinfoQ);
     if (isreal) {
 	ch->status = NCX_STATUS_CURRENT;
-	ch->mandatory = TRUE;
     }
 
     return ch;
@@ -1661,22 +1620,6 @@ static obj_choice_t *
 	    free_choice(newchoic, OBJ_FL_CLONE);
 	    return NULL;
 	}
-    }
-
-    if (mchoic && mchoic->confset) {
-	newchoic->config = mchoic->config;
-	newchoic->confset = TRUE;
-    } else {
-	newchoic->config = choic->config;
-	newchoic->confset = choic->confset;
-    }
-
-    if (mchoic && mchoic->mandset) {
-	newchoic->mandatory = mchoic->mandatory;
-	newchoic->mandset = TRUE;
-    } else {
-	newchoic->mandatory = choic->mandatory;
-	newchoic->mandset = choic->mandset;
     }
 
     res = clone_datadefQ(mod, newchoic->caseQ,
@@ -2193,46 +2136,22 @@ static boolean
 {
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	if (obj->parent || obj->grp) {
-	    *setflag = obj->def.container->confset;
-	} else {
-	    *setflag = TRUE;
-	}
-	return obj->def.container->config;
     case OBJ_TYP_LEAF:
-	if (obj->parent || obj->grp) {
-	    *setflag = obj->def.leaf->confset;
-	} else {
-	    *setflag = TRUE;
-	}
-	return obj->def.leaf->config;
     case OBJ_TYP_LEAF_LIST:
-	if (obj->parent || obj->grp) {
-	    *setflag = obj->def.leaflist->confset;
-	} else {
-	    *setflag = TRUE;
-	}
-	return obj->def.leaflist->config;
     case OBJ_TYP_LIST:
-	if (obj->parent || obj->grp) {
-	    *setflag = obj->def.list->confset;
-	} else {
-	    *setflag = TRUE;
-	}
-	return obj->def.list->config;
     case OBJ_TYP_CHOICE:
-	/* should have a config flag in the spec */
 	if (obj->parent || obj->grp) {
-	    *setflag = obj->def.choic->confset;
+	    *setflag = (obj->flags & OBJ_FL_CONFSET) 
+		? TRUE : FALSE;
 	} else {
 	    *setflag = TRUE;
 	}
-	/* *setflag = obj->def.choic->confset; */
-	return obj->def.choic->config;
+	return (obj->flags & OBJ_FL_CONFIG) ? TRUE : FALSE;
     case OBJ_TYP_CASE:
 	*setflag = FALSE;
 	if (obj->parent) {
-	    return obj->parent->def.choic->config;
+	    return (obj->parent->flags & OBJ_FL_CONFIG)
+		? TRUE : FALSE;
 	} else {
 	    /* should not happen */
 	    return FALSE;
@@ -4833,19 +4752,11 @@ void
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	obj->def.container->config = parentconf;
-	break;
     case OBJ_TYP_LEAF:
-	obj->def.leaf->config = parentconf;
-	break;
     case OBJ_TYP_LEAF_LIST:
-	obj->def.leaflist->config = parentconf;
-	break;
     case OBJ_TYP_LIST:
-	obj->def.list->config = parentconf;
-	break;
     case OBJ_TYP_CHOICE:
-	obj->def.choic->config = parentconf;
+	obj->flags |= OBJ_FL_CONFIG;
 	break;
     case OBJ_TYP_CASE:
 	break;
@@ -5881,13 +5792,12 @@ boolean
 	}
 	return FALSE;
     case OBJ_TYP_LEAF:
-	return obj->def.leaf->mandatory;
+    case OBJ_TYP_CHOICE:
+	return (obj->flags & OBJ_FL_MANDATORY) ? TRUE : FALSE;
     case OBJ_TYP_LEAF_LIST:
 	return (obj->def.leaflist->minelems) ? TRUE : FALSE;
     case OBJ_TYP_LIST:
 	return (obj->def.list->minelems) ? TRUE : FALSE;
-    case OBJ_TYP_CHOICE:
-	return obj->def.choic->mandatory;
     case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
     case OBJ_TYP_RPC:

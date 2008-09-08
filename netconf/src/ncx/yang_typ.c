@@ -180,6 +180,100 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION one_restriction_test
+* 
+* Check 1 restriction Q
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   newdef == new typdef in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    one_restriction_test (tk_chain_t *tkc,
+		      ncx_module_t *mod,
+		      typ_def_t *newdef)
+{
+    status_t      res, retres;
+    ncx_btype_t   btyp;
+    boolean       doerr;
+
+    res = NO_ERR;
+    retres = NO_ERR;
+    btyp = typ_get_basetype(newdef);
+    doerr = FALSE;
+
+    /* check if proper base type restrictions
+     * are present. Range allowed for numbers
+     * and strings only
+     */
+    if (!dlq_empty(&newdef->def.simple.rangeQ)) {
+	if (!(typ_is_number(btyp) || typ_is_string(btyp))) {
+	    log_error("\nError: Range or length not "
+			  "allowed for the %s builtin type",
+		      tk_get_btype_sym(btyp));
+	    retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
+	    tkc->cur = newdef->tk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+    }
+
+    /* Check that a pattern was actually entered
+     * Check Pattern allowed for NCX_BT_STRING only
+     */
+    if (!dlq_empty(&newdef->def.simple.valQ)) {
+	switch (newdef->def.simple.strrest) {
+	case NCX_SR_NONE:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    break;
+	case NCX_SR_VALSET:
+	    /* deprecated NCX construct   foo = { red white blue }; */
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    break;
+	case NCX_SR_PATTERN:
+	    if (!(btyp == NCX_BT_STRING || btyp == NCX_BT_KEYREF)) {
+		log_error("\nError: keyword 'pattern' "
+			  "within a restriction for a %s type",
+			  tk_get_btype_sym(btyp));
+		doerr = TRUE;
+	    }
+	    break;
+	case NCX_SR_ENUM:
+	    if (btyp != NCX_BT_ENUM) {
+		log_error("\nError: keyword 'enumeration' "
+			  "within a restriction for a %s type",
+			  tk_get_btype_sym(btyp));
+		doerr = TRUE;
+	    }
+	    break;
+	case NCX_SR_BIT:
+	    if (btyp != NCX_BT_BITS) {
+		log_error("\nError: keyword 'bit' "
+			  "within a restriction for a %s type",
+			  tk_get_btype_sym(btyp));
+		doerr = TRUE;
+	    }
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	}
+    }
+
+    if (doerr) {
+	retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
+	tkc->cur = newdef->tk;
+	ncx_print_errormsg(tkc, mod, retres);
+    }
+
+    return retres;
+
+}   /* one_restriction_test */
+
+
+/********************************************************************
 * FUNCTION restriction_test
 * 
 * Check for proper restrictions to a data type definition
@@ -202,13 +296,17 @@ static status_t
     ncx_btype_t   btyp, testbtyp;
     status_t      res, retres;
 
-    if (typdef->class != NCX_CL_NAMED) {
+
+    if (typdef->class == NCX_CL_SIMPLE) {
+	return one_restriction_test(tkc, mod, typdef);
+    } else if (typdef->class != NCX_CL_NAMED) {
 	return NO_ERR;
     }
 
     res = NO_ERR;
     retres = NO_ERR;
     btyp = typ_get_basetype(typdef);
+
 
     /* if there is a 'newtyp', then restrictions were
      * added; If NULL, then just a type name was given
@@ -225,51 +323,8 @@ static status_t
 	testbtyp = typ_get_basetype(newdef);
 	if (testbtyp==NCX_BT_NONE) {
 	    newdef->def.simple.btyp = btyp;
-
-	    /* check if proper base type restrictions
-	     * are present. Range allowed for numbers
-	     * and strings only
-	     */
-	    if (!dlq_empty(&newdef->def.simple.rangeQ)) {
-		if (!(typ_is_number(btyp) || typ_is_string(btyp))) {
-		    log_error("\nError: Range or length not "
-			      "allowed for the %s builtin type",
-			      tk_get_btype_sym(btyp));
-		    retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
-		    tkc->cur = typdef->tk;
-		    ncx_print_errormsg(tkc, mod, retres);
-		}
-	    }
-
-	    /* Check that a pattern was actually entered
-	     * Check Pattern allowed for NCX_BT_STRING only
-	     */
-	    if (!dlq_empty(&newdef->def.simple.valQ)) {
-		if (newdef->def.simple.strrest == NCX_SR_ENUM) {
-		    log_error("\nError: keyword 'enumeration' "
-			      "within a restriction"
-			      "for a %s type",
-			      tk_get_btype_sym(btyp));
-		    retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
-		    tkc->cur = typdef->tk;
-		    ncx_print_errormsg(tkc, mod, retres);
-		} else if (newdef->def.simple.strrest == NCX_SR_BIT) {
-		    log_error("\nError: keyword 'bit' "
-			      "within a restriction"
-			      "for a %s type",
-			      tk_get_btype_sym(btyp));
-		    retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
-		    tkc->cur = typdef->tk;
-		    ncx_print_errormsg(tkc, mod, retres);
-		} else if (btyp != NCX_BT_STRING) {
-		    log_error("\nError: restrictions not "
-			      "allowed for a %s type",
-			      tk_get_btype_sym(btyp));
-		    retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
-		    tkc->cur = typdef->tk;
-		    ncx_print_errormsg(tkc, mod, retres);
-		}
-	    }
+	    res = one_restriction_test(tkc, mod, newdef);
+	    CHK_EXIT;
 	} else if (testbtyp != btyp) {
 	    log_error("\nError: Derived type '%s' does not match "
 		      "the eventual builtin type (%s)",
@@ -2705,35 +2760,39 @@ static status_t
     }
 
     /* If no loops then make sure base type is correct */
-    if (res == NO_ERR && fromdef) {
+    if (res == NO_ERR) {
 	res = restriction_test(tkc, mod, typdef);
+	if (res != NO_ERR) {
+	    errdone = TRUE;
+	}
     }
 
     /* print any errors so far, and exit if the typdef may
      * not be stable enough to test further
      */
     if (res != NO_ERR) {
-	tkc->cur = typdef->tk;
-	ncx_print_errormsg(tkc, mod, res);
+	if (!errdone) {
+	    tkc->cur = typdef->tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	}
 	return res;
     }
 
-    /* go through again and resolve the range definitions
+    /* OK so far: safe to process the typdef further
+     * go through again and resolve the range definitions
      * This is needed if min and max keywords used
      * Errors printed in the called fn
      */
-    if (fromdef || typ_get_new_named(typdef)) {
-	res = finish_yang_range(tkc, mod, typdef,
-				typ_get_range_type
-				(typ_get_basetype(typdef)));
-    }
+    res = finish_yang_range(tkc, mod, typdef,
+			    typ_get_range_type
+			    (typ_get_basetype(typdef)));
 
     /* validate that the ranges are valid now that min/max is set 
      * and all parent ranges are also set.  A range must be valid
      * wrt/ its parent range definition(s)
      * Errors printed in the called fn
      */
-    if (res == NO_ERR && (fromdef || typ_get_new_named(typdef))) {
+    if (res == NO_ERR) {
 	res = validate_range_chain(tkc, mod, typdef, name);
     }
 

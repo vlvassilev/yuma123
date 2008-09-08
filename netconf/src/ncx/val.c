@@ -831,6 +831,75 @@ static void
 }  /* init_from_template */
 
 
+/********************************************************************
+* FUNCTION check_rangeQ
+* 
+* Check all the typ_rangedef_t structs in the queue
+* For search qualifier NCX_SQUAL_RANGE
+*
+* INPUTS:
+*    btyp == number base type
+*    num == number to check
+*    checkQ == pointer to Q of typ_rangedef_t to check
+*
+* RETURNS:
+*    status, NO_ERR if string value is in the set
+*********************************************************************/
+static status_t
+    check_rangeQ (ncx_btype_t  btyp,
+		  const ncx_num_t *num,
+		  const dlq_hdr_t *checkQ)
+{
+    const typ_rangedef_t  *rv;
+    int32            cmp;
+    boolean          lbok, ubok;
+
+    for (rv = (const typ_rangedef_t *)dlq_firstEntry(checkQ);
+	 rv != NULL;
+	 rv = (const typ_rangedef_t *)dlq_nextEntry(rv)) {
+
+	lbok = FALSE;
+	ubok = FALSE;
+
+	/* make sure the range numbers are really this type */
+	if (rv->btyp != btyp) {
+	    return SET_ERROR(ERR_NCX_WRONG_NUMTYP);
+	}
+
+	/* check lower bound first, only if there is one */
+	if (!(rv->flags & TYP_FL_LBINF)) {
+	    cmp = ncx_compare_nums(num, &rv->lb, btyp);
+	    if (cmp >= 0) {
+		lbok = TRUE;
+	    }
+	} else {
+	    /* LB == -INF, always passes the test */
+	    lbok = TRUE;
+	} 
+
+	/* check upper bound last, only if there is one */
+	if (!(rv->flags & TYP_FL_UBINF)) {
+	    cmp = ncx_compare_nums(num, &rv->ub, btyp);
+	    if (cmp <= 0) {
+		ubok = TRUE;
+	    }
+	} else {
+	    /* UB == INF, always passes the test */
+	    ubok = TRUE;
+	}
+
+	if (lbok && ubok) {
+	    /* num is >= LB and <= UB */
+	    return NO_ERR;
+	}
+    }
+
+    /* ran out of rangedef segments to check */
+    return ERR_NCX_NOT_IN_RANGE;
+
+} /* check_rangeQ */
+
+
 /*************** E X T E R N A L    F U N C T I O N S  *************/
 
 
@@ -1150,8 +1219,6 @@ status_t
 			   const ncx_errinfo_t **errinfo)
 {
     const dlq_hdr_t *restQ;
-    const dlq_hdr_t *rangeQ;
-    const typ_def_t *rangdef;
     ncx_strrest_t   strrest;
     status_t        res;
     ncx_num_t       len;
@@ -1178,21 +1245,11 @@ status_t
 	return ERR_NCX_WRONG_DATATYP;
     }
 
-    /* get the typdef for the range def to check the length */
-    rangeQ = NULL;
-    rangdef = typ_get_cqual_typdef(typdef, NCX_SQUAL_RANGE);
-    if (rangdef) {
-	rangeQ = typ_get_crangeQ(rangdef);
-    }
-    if (rangeQ && !dlq_empty(rangeQ)) {
-	len.u = xml_strlen(strval);
-	res = val_check_rangeQ(NCX_BT_UINT32, &len, rangeQ);
-	if (res != NO_ERR) {
-	    if (errinfo) {
-		*errinfo = rangdef->range_errinfo;
-	    }
-	    return res;
-	}
+    /* check the range against the string length */
+    len.u = xml_strlen(strval);
+    res = val_range_ok_errinfo(typdef, NCX_BT_UINT32, &len, errinfo);
+    if (res != NO_ERR) {
+	return res;
     }
 
     /* the range-test, if any, has succeeded
@@ -1232,7 +1289,7 @@ status_t
 	} else {
 	    if (res == NO_ERR) {
 		return NO_ERR;
-	    } else if (last) {
+	    } else if (last) {   /***** WILL CHANGE WHEN N patterns per type ***/
 		return res;
 	    }
 	}
@@ -1363,7 +1420,7 @@ status_t
 
 	/* get the list member count and check it */
 	len.u = ncx_list_cnt(list);
-	res = val_check_rangeQ(NCX_BT_UINT32, &len, rangeQ);	
+	res = check_rangeQ(NCX_BT_UINT32, &len, rangeQ);	
 	if (res != NO_ERR) {
 	    /* wrong number of list elements */
 	    if (errinfo) {
@@ -1434,7 +1491,7 @@ status_t
 	/* check the string length range if any */
 	if (rangeQ) {
 	    len.u = xml_strlen(lmem->val.str);
-	    res = val_check_rangeQ(NCX_BT_UINT32, &len, rangeQ);
+	    res = check_rangeQ(NCX_BT_UINT32, &len, rangeQ);
 	    if (res != NO_ERR) {
 		if (errinfo) {
 		    *errinfo = randef->range_errinfo;
@@ -1683,15 +1740,10 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    /* make sure the data type is correct */
-    if (btyp != typ_get_basetype(typdef)) {
-	return ERR_NCX_WRONG_DATATYP;
-    }
-
     /* there can only be one active range, which is
      * the most derived typdef that declares a range
      */
-    res = val_check_rangeQ(btyp, num, checkQ);
+    res = check_rangeQ(btyp, num, checkQ);
     if (res != NO_ERR && errinfo) {
 	*errinfo = td->range_errinfo;
     }
@@ -3014,6 +3066,8 @@ status_t
 	}
 	break;
     case NCX_BT_STRING:
+    case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF:   /****/
 	VAL_STR(val) = xml_strdup(valstr);
 	if (!VAL_STR(val)) {
 	    res = ERR_INTERNAL_MEM;
@@ -3530,21 +3584,8 @@ status_t
 #endif
 
     val_clean_value(copy);
+    val_init_from_template(copy, val->obj);
 
-    /* copy all the fields */
-    copy->btyp = val->btyp;
-    copy->typdef = val->typdef;
-    copy->nsid = val->nsid;
-    if (val->dname) {
-	copy->dname = xml_strdup(val->dname);
-	if (!copy->dname) {
-	    return ERR_INTERNAL_MEM;
-	}
-	copy->name = copy->dname;
-    } else {
-	copy->dname = NULL;
-	copy->name = val->name;
-    }
     copy->editop = val->editop;
     copy->res = val->res;
     copy->flags = val->flags;
@@ -3598,7 +3639,6 @@ status_t
     case NCX_BT_LIST:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
-	val_init_complex(copy, val->btyp);
 	for (ch = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
 	     ch != NULL && res==NO_ERR;
 	     ch = (const val_value_t *)dlq_nextEntry(ch)) {
@@ -3606,8 +3646,7 @@ status_t
 	    if (!copych) {
 		res = ERR_INTERNAL_MEM;
 	    } else {
-		copych->parent = copy;
-		dlq_enque(copych, &copy->v.childQ);
+		val_add_child(copych, copy);
 	    }
 	}
 	break;
@@ -5523,75 +5562,6 @@ xmlns_id_t
     return v->nsid;
 
 }  /* val_get_parent_nsid */
-
-
-/********************************************************************
-* FUNCTION val_check_rangeQ
-* 
-* Check all the typ_rangedef_t structs in the queue
-* For search qualifier NCX_SQUAL_RANGE
-*
-* INPUTS:
-*    btyp == number base type
-*    num == number to check
-*    checkQ == pointer to Q of typ_rangedef_t to check
-*
-* RETURNS:
-*    status, NO_ERR if string value is in the set
-*********************************************************************/
-status_t
-    val_check_rangeQ (ncx_btype_t  btyp,
-		      const ncx_num_t *num,
-		      const dlq_hdr_t *checkQ)
-{
-    const typ_rangedef_t  *rv;
-    int32            cmp;
-    boolean          lbok, ubok;
-
-    for (rv = (const typ_rangedef_t *)dlq_firstEntry(checkQ);
-	 rv != NULL;
-	 rv = (const typ_rangedef_t *)dlq_nextEntry(rv)) {
-
-	lbok = FALSE;
-	ubok = FALSE;
-
-	/* make sure the range numbers are really this type */
-	if (rv->btyp != btyp) {
-	    return SET_ERROR(ERR_NCX_WRONG_NUMTYP);
-	}
-
-	/* check lower bound first, only if there is one */
-	if (!(rv->flags & TYP_FL_LBINF)) {
-	    cmp = ncx_compare_nums(num, &rv->lb, btyp);
-	    if (cmp >= 0) {
-		lbok = TRUE;
-	    }
-	} else {
-	    /* LB == -INF, always passes the test */
-	    lbok = TRUE;
-	} 
-
-	/* check upper bound last, only if there is one */
-	if (!(rv->flags & TYP_FL_UBINF)) {
-	    cmp = ncx_compare_nums(num, &rv->ub, btyp);
-	    if (cmp <= 0) {
-		ubok = TRUE;
-	    }
-	} else {
-	    /* UB == INF, always passes the test */
-	    ubok = TRUE;
-	}
-
-	if (lbok && ubok) {
-	    /* num is >= LB and <= UB */
-	    return NO_ERR;
-	}
-    }
-
-    /* ran out of rangedef segments to check */
-    return ERR_NCX_NOT_IN_RANGE;
-
-} /* val_check_rangeQ */
 
 
 /********************************************************************

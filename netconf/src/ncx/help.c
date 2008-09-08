@@ -437,4 +437,66 @@ void
 } /* help_write_lines */
 
 
+/********************************************************************
+ * FUNCTION help_write_lines_max
+ * 
+ * write some indented output to STDOUT
+ *
+ * INPUTS:
+ *    str == string to print; 'indent' number of spaces
+ *           will be added to each new line
+ *    indent == indent count
+ *    startnl == TRUE if start with a newline, FALSE otherwise
+ *    maxlen == 0..N max number of chars to output
+ *********************************************************************/
+void
+    help_write_lines_max (const xmlChar *str,
+			  uint32 indent,
+			  boolean startnl,
+			  uint32 maxlen)
+{
+    uint32  i, cnt;
+
+    cnt = 0;
+
+    if (maxlen==0) {
+	return;
+    }
+
+    if (startnl) {
+	log_stdout("\n");
+	if (++cnt > maxlen) {
+	    log_stdout("..."); 
+	    return;
+	}
+	for (i=0; i<indent; i++) {
+	    log_stdout(" ");
+	    if (++cnt > maxlen) {
+		log_stdout("..."); 
+		return;
+	    }
+	}
+    }
+
+    while (*str) {
+	log_stdout("%c", *str);
+	if (++cnt > maxlen) {
+	    log_stdout("..."); 
+	    return;
+	}
+
+	if (*str++ == '\n') {
+	    for (i=0; i<indent; i++) {
+		log_stdout(" ");
+		if (++cnt > maxlen) {
+		    log_stdout("..."); 
+		    return;
+		}
+	    }
+	}
+    }
+
+} /* help_write_lines_max */
+
+
 /* END file help.c */

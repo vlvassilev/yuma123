@@ -37,6 +37,11 @@ date	     init     comment
 #endif
 
 
+
+#define HELP_MODE_BRIEF_MAX            60
+#define HELP_MODE_NORMAL_MAX           100
+
+
 /********************************************************************
 *                                                                   *
 *                            T Y P E S                              *
@@ -79,5 +84,11 @@ extern void
     help_write_lines (const xmlChar *str,
 		      uint32 indent,
 		      boolean startnl);
+
+extern void
+    help_write_lines_max (const xmlChar *str,
+			  uint32 indent,
+			  boolean startnl,
+			  uint32 maxlen);
 
 #endif	    /* _H_help */

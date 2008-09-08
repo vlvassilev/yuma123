@@ -126,6 +126,10 @@ date         init     comment
 #include "xmlns.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
 #ifndef _H_xml_util
 #include "xml_util.h"
 #endif
@@ -180,20 +184,24 @@ date         init     comment
 #define YANGCLI_DIR         (const xmlChar *)"dir"
 #define YANGCLI_DEF_MODULE  (const xmlChar *)"default-module"
 #define YANGCLI_KEY         (const xmlChar *)"key"
-/* YANGCLI_HELP */
+
 #define YANGCLI_PASSWORD    (const xmlChar *)"password"
-/* NCX_EL_LOG */
-/* NCX_EL_LOGAPPEND */
-/* NCX_EL_LOGLEVEL */
-/* NCX_EL_MODULES */
+
 #define YANGCLI_NO_AUTOCOMP (const xmlChar *)"no-autocomp"
 #define YANGCLI_NO_AUTOLOAD (const xmlChar *)"no-autoload"
 #define YANGCLI_NO_FIXORDER (const xmlChar *)"no-fixorder"
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
 #define YANGCLI_USER        (const xmlChar *)"user"
 
+#define YANGCLI_COMMAND     (const xmlChar *)"command"
 #define YANGCLI_COMMANDS    (const xmlChar *)"commands"
-/* NCX_EL_VERSION */
+#define YANGCLI_GLOBAL      (const xmlChar *)"global"
+#define YANGCLI_GLOBALS     (const xmlChar *)"globals"
+#define YANGCLI_LOCAL       (const xmlChar *)"local"
+#define YANGCLI_LOCALS      (const xmlChar *)"locals"
+#define YANGCLI_OBJECTS     (const xmlChar *)"objects"
+#define YANGCLI_WITH_DEFAULTS (const xmlChar *)"with-defaults"
+#define YANGCLI_CURRENT_VALUE (const xmlChar *)"currecnt-value"
 
 #define YANGCLI_BRIEF  (const xmlChar *)"brief"
 #define YANGCLI_FULL   (const xmlChar *)"full"
@@ -204,6 +212,7 @@ date         init     comment
 /* YANGCLI top level commands */
 #define YANGCLI_CD      (const xmlChar *)"cd"
 #define YANGCLI_CONNECT (const xmlChar *)"connect"
+#define YANGCLI_FILL    (const xmlChar *)"fill"
 #define YANGCLI_HELP    (const xmlChar *)"help"
 #define YANGCLI_LOAD    (const xmlChar *)"load"
 #define YANGCLI_PWD     (const xmlChar *)"pwd"
@@ -489,7 +498,7 @@ static boolean
 *   $foo = $bar
 *   $foo = get-config filter=@filter.xml
 *   $foo = "quoted string literal"
-*   $foo = <inline><xml/></inline>
+*   $foo = [<inline><xml/></inline>]
 *   $foo = @datafile.xml
 *
 * INPUTS:
@@ -520,13 +529,13 @@ static status_t
 			    uint32 *len,
 			    boolean *getrpc)
 {
-    const xmlChar     *str, *name;
-    const val_value_t *curval;
-    const typ_def_t   *typdef;
-    val_value_t       *val;
-    uint32             nlen, tlen;
-    boolean            isglobal;
-    status_t           res;
+    const xmlChar         *str, *name;
+    const val_value_t     *curval;
+    const obj_template_t  *obj;
+    val_value_t           *val;
+    uint32                 nlen, tlen;
+    boolean                isglobal;
+    status_t               res;
 
     /* save start point in line */
     str = line;
@@ -592,15 +601,10 @@ static status_t
      *      $foo = blah
      *             ^
      */
-    if (curval) {
-	typdef = obj_get_ctypdef(curval->obj);
-    } else {
-	typdef = NULL;
-    }
+    obj = (curval) ? curval->obj : NULL;
 
-    /* get the script input as a new val_value_t struct */
-    val = var_get_script_val(typdef, NULL, 
-			     0, NULL, str, ISTOP, &res);
+    /* get the script or CLI input as a new val_value_t struct */
+    val = var_check_script_val(obj, str, ISTOP, &res);
     if (val) {
 	/* this is a plain assignment statement */
 	res = var_set_str(name, nlen, val, isglobal);
@@ -1086,10 +1090,8 @@ static status_t
 	res = ERR_INTERNAL_MEM;
     } else {
 	val_init_from_template(new_parm, parm);
-	(void)var_get_script_val(obj_get_ctypdef(parm),
+	(void)var_get_script_val(parm,
 				 new_parm,
-				 obj_get_nsid(parm),
-				 obj_get_name(parm), 
 				 line, ISPARM, &res);
 	if (res == NO_ERR) {
 	    /* add the parm to the parmset */
@@ -2075,9 +2077,17 @@ static void
  *
  * INPUTS:
  *  mode == help mode requested
+ *  shortmode == TRUE if printing just global or local variables
+ *               FALSE to print everything
+ *  isglobal == TRUE if print just globals
+ *              FALSE to print just locals
+ *              Ignored unless shortmode==TRUE
  *********************************************************************/
 static void
-    do_show_vars (help_mode_t mode)
+    do_show_vars (help_mode_t mode,
+		  boolean shortmode,
+		  boolean isglobal)
+
 {
     ncx_var_t  *var;
     dlq_hdr_t  *que;
@@ -2085,7 +2095,7 @@ static void
 
     imode = interactive_mode();
 
-    if (mode > HELP_MODE_BRIEF) {
+    if (mode > HELP_MODE_BRIEF && !shortmode) {
 	/* CLI Parameters */
 	if (mgr_cli_valset && val_child_cnt(mgr_cli_valset)) {
 	    if (imode) {
@@ -2122,99 +2132,112 @@ static void
     }
 
     /* Global Script Variables */
-    que = runstack_get_que(ISGLOBAL);
-    first = TRUE;
-    for (var = (ncx_var_t *)dlq_firstEntry(que);
-	 var != NULL;
-	 var = (ncx_var_t *)dlq_nextEntry(var)) {
+    if (!shortmode || isglobal) {
+	que = runstack_get_que(ISGLOBAL);
+	first = TRUE;
+	for (var = (ncx_var_t *)dlq_firstEntry(que);
+	     var != NULL;
+	     var = (ncx_var_t *)dlq_nextEntry(var)) {
+	    if (first) {
+		if (imode) {
+		    log_stdout("\nGlobal Variables");
+		} else {
+		    log_write("\nGlobal Variables");
+		}
+		first = FALSE;
+	    }
+	    if (typ_is_simple(var->val->btyp)) {
+		if (imode) {
+		    val_stdout_value(var->val, NCX_DEF_INDENT);
+		} else {
+		    val_dump_value(var->val, NCX_DEF_INDENT);
+		}
+	    } else {
+		if (imode) {
+		    log_stdout("\n  %s = (%s)", 
+			       var->name,
+			       tk_get_btype_sym(var->val->btyp));
+		} else {
+		    log_write("\n  %s = (%s)", 
+			      var->name,
+			      tk_get_btype_sym(var->val->btyp));
+		}
+		if (mode == HELP_MODE_FULL) {
+		    if (imode) {
+			val_stdout_value(var->val, NCX_DEF_INDENT);
+		    } else {
+			val_dump_value(var->val, NCX_DEF_INDENT);
+		    }
+		}
+	    }
+	}
 	if (first) {
 	    if (imode) {
-		log_stdout("\nGlobal Variables");
+		log_stdout("\nNo global variables");
 	    } else {
-		log_write("\nGlobal Variables");
-	    }
-	    first = FALSE;
-	}
-	if (typ_is_simple(var->val->btyp)) {
-	    if (imode) {
-		val_stdout_value(var->val, NCX_DEF_INDENT);
-	    } else {
-		val_dump_value(var->val, NCX_DEF_INDENT);
-	    }
-	} else {
-	    /* just print the data type name for complex types */
-	    if (imode) {
-		log_stdout("\n  %s = (%s)", 
-			   var->val->name,
-			   tk_get_btype_sym(var->val->btyp));
-	    } else {
-		log_write("\n  %s = (%s)", 
-			  var->val->name,
-			  tk_get_btype_sym(var->val->btyp));
+		log_write("\nNo global variables");
 	    }
 	}
-    }
-    if (first) {
 	if (imode) {
-	    log_stdout("\nNo global variables");
+	    log_stdout("\n");
 	} else {
-	    log_write("\nNo global variables");
+	    log_write("\n");
 	}
-    }
-    if (imode) {
-	log_stdout("\n");
-    } else {
-	log_write("\n");
-    }
-
-    if (mode == HELP_MODE_BRIEF) {
-	return;
     }
 
     /* Local Script Variables */
-    que = runstack_get_que(ISLOCAL);
-    first = TRUE;
-    for (var = (ncx_var_t *)dlq_firstEntry(que);
-	 var != NULL;
-	 var = (ncx_var_t *)dlq_nextEntry(var)) {
+    if (!shortmode || !isglobal) {
+	que = runstack_get_que(ISLOCAL);
+	first = TRUE;
+	for (var = (ncx_var_t *)dlq_firstEntry(que);
+	     var != NULL;
+	     var = (ncx_var_t *)dlq_nextEntry(var)) {
+	    if (first) {
+		if (imode) {
+		    log_stdout("\nLocal Variables");
+		} else {
+		    log_write("\nLocal Variables");
+		}
+		first = FALSE;
+	    }
+	    if (typ_is_simple(var->val->btyp)) {
+		if (imode) {
+		    val_stdout_value(var->val, NCX_DEF_INDENT);
+		} else {
+		    val_dump_value(var->val, NCX_DEF_INDENT);
+		}
+	    } else {
+		/* just print the data type name for complex types */
+		if (imode) {
+		    log_stdout("\n  %s = (%s)", 
+			       var->name,
+			       tk_get_btype_sym(var->val->btyp));
+		} else {
+		    log_write("\n  %s = (%s)", 
+			      var->name,
+			      tk_get_btype_sym(var->val->btyp));
+		}
+		if (mode == HELP_MODE_FULL) {
+		    if (imode) {
+			val_stdout_value(var->val, NCX_DEF_INDENT);
+		    } else {
+			val_dump_value(var->val, NCX_DEF_INDENT);
+		    }
+		}
+	    }
+	}
 	if (first) {
 	    if (imode) {
-		log_stdout("\nInteractive Shell Variables");
+		log_stdout("\nNo local variables");
 	    } else {
-		log_write("\nInteractive Shell Variables");
-	    }
-	    first = FALSE;
-	}
-	if (typ_is_simple(var->val->btyp)) {
-	    if (imode) {
-		val_stdout_value(var->val, NCX_DEF_INDENT);
-	    } else {
-		val_dump_value(var->val, NCX_DEF_INDENT);
-	    }
-	} else {
-	    /* just print the data type name for complex types */
-	    if (imode) {
-		log_stdout("\n  %s = (%s)", 
-			   var->val->name,
-			   tk_get_btype_sym(var->val->btyp));
-	    } else {
-		log_write("\n  %s = (%s)", 
-			  var->val->name,
-			  tk_get_btype_sym(var->val->btyp));
+		log_write("\nNo local variables");
 	    }
 	}
-    }
-    if (first) {
 	if (imode) {
-	    log_stdout("\nNo local variables");
+	    log_stdout("\n");
 	} else {
-	    log_write("\nNo local variables");
+	    log_write("\n");
 	}
-    }
-    if (imode) {
-	log_stdout("\n");
-    } else {
-	log_write("\n");
     }
 
 } /* do_show_vars */
@@ -2338,47 +2361,40 @@ static void
 
 
 /********************************************************************
- * FUNCTION do_show_commands (sub-mode of local RPC)
+ * FUNCTION do_show_objects (sub-mode of local RPC)
  * 
- * show commands
+ * show objects
  *
  * INPUTS:
- *    mod == first module to show
  *    mode == requested help mode
  *
  *********************************************************************/
 static void
-    do_show_commands (help_mode_t mode)
+    do_show_objects (help_mode_t mode)
 {
-    const ncx_module_t    *mod;
-    const obj_template_t  *obj;
-    boolean anyout, imode;
+    const ncx_module_t   *mod;
+    const obj_template_t *obj;
+    boolean               anyout, imode;
 
-
-    mod = ncx_find_module(YANGCLI_MOD);
-    if (!mod) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
-    }
+    mod = ncx_get_first_module();
 
     imode = interactive_mode();
     anyout = FALSE;
 
-    obj = ncx_get_first_object(mod);
-    while (obj) {
-	if (obj_is_rpc(obj)) {
-	    if (mode == HELP_MODE_BRIEF) {
-		if (imode) {
-		    log_stdout("\n  %s", obj_get_name(obj));
-		} else {
-		    log_write("\n  %s", obj_get_name(obj));
-		}
-	    } else {
-		obj_dump_template(obj, mode-1, 0, 0);
+    while (mod) {
+	for (obj = ncx_get_first_object(mod);
+	     obj != NULL;
+	     obj = ncx_get_next_object(mod, obj)) {
+
+	    if (obj_is_data_db(obj) && 
+		obj_has_name(obj) &&
+		!obj_is_hidden(obj) && !obj_is_abstract(obj)) {
+
+		obj_dump_template(obj, mode, 0, 0); 
+		anyout = TRUE;
 	    }
-	    anyout = TRUE;
 	}
-	obj = ncx_get_next_object(mod, obj);
+	mod = (const ncx_module_t *)ncx_get_next_module(mod);
     }
 
     if (anyout) {
@@ -2389,7 +2405,7 @@ static void
 	}
     }
 
-} /* do_show_commands */
+} /* do_show_objects */
 
 
 /********************************************************************
@@ -2439,12 +2455,18 @@ static void
 	/* there is 1 parm which is a choice of N */
 	parm = val_get_first_child(valset);
 	if (parm) {
-	    if (!xml_strcmp(parm->name, NCX_EL_LOCAL)) {
+	    if (!xml_strcmp(parm->name, YANGCLI_LOCAL)) {
 		do_show_var(VAL_STR(parm), ISLOCAL, mode);
-	    } else if (!xml_strcmp(parm->name, NCX_EL_GLOBAL)) {
+	    } else if (!xml_strcmp(parm->name, YANGCLI_LOCALS)) {
+		do_show_vars(mode, TRUE, FALSE);
+	    } else if (!xml_strcmp(parm->name, YANGCLI_OBJECTS)) {
+		do_show_objects(mode);
+	    } else if (!xml_strcmp(parm->name, YANGCLI_GLOBAL)) {
 		do_show_var(VAL_STR(parm), ISGLOBAL, mode);
+	    } else if (!xml_strcmp(parm->name, YANGCLI_GLOBALS)) {
+		do_show_vars(mode, TRUE, TRUE);
 	    } else if (!xml_strcmp(parm->name, NCX_EL_VARS)) {
-		do_show_vars(mode);
+		do_show_vars(mode, FALSE, FALSE);
 	    } else if (!xml_strcmp(parm->name, NCX_EL_MODULE)) {
 		mod = ncx_find_module(VAL_STR(parm));
 		if (mod) {
@@ -2480,8 +2502,6 @@ static void
 			log_error("\nyangcli: no modules loaded");
 		    }
 		}
-	    } else if (!xml_strcmp(parm->name, YANGCLI_COMMANDS)) {
-		do_show_commands(mode);
 	    } else if (!xml_strcmp(parm->name, NCX_EL_VERSION)) {
 		if (imode) {
 		    log_stdout("\nyangcli version %s\n", progver);
@@ -2502,6 +2522,53 @@ static void
     }
 
 }  /* do_show */
+
+
+/********************************************************************
+ * FUNCTION do_help_commands (sub-mode of local RPC)
+ * 
+ * help commands
+ *
+ * INPUTS:
+ *    mod == first module to show help
+ *    mode == requested help mode
+ *
+ *********************************************************************/
+static void
+    do_help_commands (help_mode_t mode)
+{
+    const ncx_module_t    *mod;
+    const obj_template_t  *obj;
+    boolean anyout, imode;
+
+
+    mod = ncx_find_module(YANGCLI_MOD);
+    if (!mod) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+
+    imode = interactive_mode();
+    anyout = FALSE;
+
+    obj = ncx_get_first_object(mod);
+    while (obj) {
+	if (obj_is_rpc(obj)) {
+	    obj_dump_template(obj, mode, 0, 0);
+	    anyout = TRUE;
+	}
+	obj = ncx_get_next_object(mod, obj);
+    }
+
+    if (anyout) {
+	if (imode) {
+	    log_stdout("\n");
+	} else {
+	    log_write("\n");
+	}
+    }
+
+} /* do_help_commands */
 
 
 /********************************************************************
@@ -2552,7 +2619,32 @@ static void
 	}
     }
 
+    parm = val_find_child(valset, YANGCLI_MOD, 
+			  YANGCLI_COMMAND);
+    if (parm && parm->res == NO_ERR) {
+	dtyp = NCX_NT_OBJ;
+	obj = parse_def(&dtyp, VAL_STR(parm), &dlen);
+	if (obj && obj->objtype == OBJ_TYP_RPC) {
+	    help_object(obj, mode);
+	} else {
+	    if (imode) {
+		log_stdout("\nyangcli: command (%s) not found",
+			   VAL_STR(parm));
+	    } else {
+		log_error("\nyangcli: command (%s) not found",
+			  VAL_STR(parm));
+	    }
+	}
+	return;
+    }
+
     /* look for the specific definition parameters */
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_COMMANDS);
+    if (parm && parm->res==NO_ERR) {
+	do_help_commands(mode);
+	return;
+    }
+
     parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_TYPE);
     if (parm && parm->res==NO_ERR) {
 	dtyp = NCX_NT_TYP;
@@ -2589,23 +2681,6 @@ static void
 	return;
     }
 
-    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_RPC);
-    if (parm && parm->res == NO_ERR) {
-	dtyp = NCX_NT_OBJ;
-	obj = parse_def(&dtyp, VAL_STR(parm), &dlen);
-	if (obj && obj->objtype == OBJ_TYP_RPC) {
-	    help_object(obj, mode);
-	} else {
-	    if (imode) {
-		log_stdout("\nyangcli: RPC definition (%s) not found",
-			   VAL_STR(parm));
-	    } else {
-		log_error("\nyangcli: RPC definition (%s) not found",
-			  VAL_STR(parm));
-	    }
-	}
-	return;
-    }
 
     parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_NOTIF);
     if (parm && parm->res == NO_ERR) {
@@ -2625,8 +2700,11 @@ static void
 	return;
     }
 
+
+    /* no parameters entered except maybe brief or full */
     if (mode == HELP_MODE_FULL) {
-	help_program_module(YANGCLI_MOD, YANGCLI_BOOT, mode);
+	help_program_module(YANGCLI_MOD, YANGCLI_BOOT, 
+			    HELP_MODE_NORMAL);
     } else {
 	dtyp = NCX_NT_OBJ;
 	obj = (const obj_template_t *)
@@ -2963,6 +3041,115 @@ static void
 
 
 /********************************************************************
+ * FUNCTION do_fill
+ * 
+ * Fill an object for use in a PDU
+ *
+ * INPUTS:
+ *    rpc == RPC method for the load command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * OUTPUTS:
+ *   the completed data node is output and
+ *   is usually part of an assignment statement
+ *
+ *********************************************************************/
+static void
+    do_fill (const obj_template_t *rpc,
+	     const xmlChar *line,
+	     uint32  len)
+{
+    val_value_t           *valset, *parm, *newparm, *curparm;
+    obj_template_t        *targobj;
+    const xmlChar         *target;
+    status_t               res;
+    boolean                imode, save_getopt;
+
+
+    valset = get_valset(rpc, &line[len], &res);
+    if (!valset || valset->res != NO_ERR) {
+	return;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, 
+			  NCX_EL_TARGET);
+    if (!parm || parm->res != NO_ERR) {
+	return;
+    } else {
+	target = VAL_STR(parm);
+    }
+
+    save_getopt = get_optional;
+    imode = interactive_mode();
+    newparm = NULL;
+    curparm = NULL;
+
+    res = xpath_find_schema_target_int(target, &targobj);
+    if (res != NO_ERR) {
+	log_error("\nError: Object '%s' not found", target);
+	return;
+    }	
+
+    parm = val_find_child(valset, YANGCLI_MOD, 
+			  YANGCLI_CURRENT_VALUE);
+    if (parm && parm->res == NO_ERR) {
+	curparm = var_get_script_val(targobj, NULL, 
+				     VAL_STR(parm),
+				     ISPARM, &res);
+	if (!curparm || res != NO_ERR) {
+	    log_error("\nError: Script value '%s' invalid (%s)", 
+		      VAL_STR(parm), get_error_string(res)); 
+	    return;
+	}
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, 
+			  YANGCLI_WITH_DEFAULTS);
+    if (parm && parm->res == NO_ERR) {
+	get_optional = TRUE;
+    }
+
+    newparm = val_new_value();
+    if (!newparm) {
+	log_error("\nError: malloc failure");
+    } else {
+	val_init_from_template(newparm, targobj);
+
+	res = fill_valset(rpc, newparm, curparm);
+	if (res == NO_ERR) {
+	    if (result_name) {
+		/* save the filled in value */
+		res = var_set_move(result_name, xml_strlen(result_name),
+				   result_isglobal, newparm);
+		if (res != NO_ERR) {
+		    val_free_value(newparm);
+
+		    log_error("\nError: set result for '%s' failed (%s)",
+			      result_name, get_error_string(res));
+		}
+		newparm = NULL;
+
+		/* clear the result flag */
+		m__free(result_name);
+		result_name = NULL;
+	    }
+	}
+    }
+
+    /* cleanup */
+    if (newparm) {
+	val_free_value(newparm);
+    }
+    if (curparm) {
+	val_free_value(curparm);
+    }
+    get_optional = save_getopt;
+
+}  /* do_fill */
+
+
+/********************************************************************
 * FUNCTION do_local_command
 * 
 * Handle local RPC operations from yangcli.ncx
@@ -2987,6 +3174,8 @@ static void
 
     if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
 	do_connect(rpc, line, len, FALSE);
+    } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
+	do_fill(rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
 	do_help(rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_LOAD)) {

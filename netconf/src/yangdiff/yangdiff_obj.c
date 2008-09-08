@@ -343,8 +343,9 @@ static uint32
     }
 
     if (bool_field_changed(YANG_K_CONFIG,
-			   old->config,
-			   new->config, FALSE, NULL)) {
+			   (oldobj->flags & OBJ_FL_CONFIG),
+			   (newobj->flags & OBJ_FL_CONFIG), 
+			   FALSE, NULL)) {
 	return 1;
     }
 
@@ -415,8 +416,10 @@ static void
 	output_cdb_line(cp, &cdb);
     }
 
-    if (bool_field_changed(YANG_K_CONFIG, old->config,
-			   new->config, isrev, &cdb)) {
+    if (bool_field_changed(YANG_K_CONFIG, 
+			   (oldobj->flags & OBJ_FL_CONFIG),
+			   (newobj->flags & OBJ_FL_CONFIG), 
+			   isrev, &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -488,14 +491,16 @@ static uint32
     }
 
     if (bool_field_changed(YANG_K_CONFIG,
-			   old->config,
-			   new->config, FALSE, NULL)) {
+			   (oldobj->flags & OBJ_FL_CONFIG),
+			   (newobj->flags & OBJ_FL_CONFIG), 
+			   FALSE, NULL)) {
 	return 1;
     }
 
     if (bool_field_changed(YANG_K_MANDATORY,
-			   old->mandatory,
-			   new->mandatory, FALSE, NULL)) {
+			   (oldobj->flags & OBJ_FL_MANDATORY),
+			   (newobj->flags & OBJ_FL_MANDATORY), 
+			   FALSE, NULL)) {
 	return 1;
     }
 
@@ -564,14 +569,16 @@ static void
     }
 
     if (bool_field_changed(YANG_K_CONFIG,
-			   old->config,
-			   new->config, isrev, &cdb)) {
+			   (oldobj->flags & OBJ_FL_CONFIG),
+			   (newobj->flags & OBJ_FL_CONFIG), 
+			   isrev, &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
     if (bool_field_changed(YANG_K_MANDATORY,
-			   old->mandatory,
-			   new->mandatory, isrev, &cdb)) {
+			   (oldobj->flags & OBJ_FL_MANDATORY),
+			   (newobj->flags & OBJ_FL_MANDATORY), 
+			   isrev, &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -631,8 +638,9 @@ static uint32
     }
 
     if (bool_field_changed(YANG_K_CONFIG,
-			   old->config,
-			   new->config, FALSE, NULL)) {
+			   (oldobj->flags & OBJ_FL_CONFIG),
+			   (newobj->flags & OBJ_FL_CONFIG), 
+			   FALSE, NULL)) {
 	return 1;
     }
 
@@ -719,8 +727,9 @@ static void
     output_mustQ_diff(cp, &old->mustQ, &new->mustQ);
 
     if (bool_field_changed(YANG_K_CONFIG,
-			   old->config,
-			   new->config, isrev, &cdb)) {
+			   (oldobj->flags & OBJ_FL_CONFIG),
+			   (newobj->flags & OBJ_FL_CONFIG), 
+			   isrev, &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -823,8 +832,10 @@ static uint32
 	return 1;
     }
 
-    if (bool_field_changed(YANG_K_CONFIG, old->config,
-			   new->config, FALSE, NULL)) {
+    if (bool_field_changed(YANG_K_CONFIG, 
+			   (oldobj->flags & OBJ_FL_CONFIG),
+			   (newobj->flags & OBJ_FL_CONFIG), 
+			   FALSE, NULL)) {
 	return 1;
     }
 
@@ -921,8 +932,9 @@ static void
     output_uniqueQ_diff(cp, old->uniqueQ, new->uniqueQ);
 
     if (bool_field_changed(YANG_K_CONFIG,
-			   old->config,
-			   new->config, isrev, &cdb)) {
+			   (oldobj->flags & OBJ_FL_CONFIG),
+			   (newobj->flags & OBJ_FL_CONFIG), 
+			   isrev, &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -1025,8 +1037,9 @@ static uint32
     }
 
     if (bool_field_changed(YANG_K_MANDATORY,
-			   old->mandatory,
-			   new->mandatory, FALSE, NULL)) {
+			   (oldobj->flags & OBJ_FL_MANDATORY),
+			   (newobj->flags & OBJ_FL_MANDATORY),
+			   FALSE, NULL)) {
 	return 1;
     }
 
@@ -1089,8 +1102,9 @@ static void
     }
 
     if (bool_field_changed(YANG_K_MANDATORY,
-			   old->mandatory,
-			   new->mandatory, isrev, &cdb)) {
+			   (oldobj->flags & OBJ_FL_MANDATORY),
+			   (newobj->flags & OBJ_FL_MANDATORY),
+			   isrev, &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 

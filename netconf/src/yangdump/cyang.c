@@ -1093,9 +1093,10 @@ static void
 	}
 
 	/* config field, only if actually set (no default) */
-	if (con->confset) {
+	if (obj->flags & OBJ_FL_CONFSET) {
 	    write_cyang_simple_str(scb, YANG_K_CONFIG, 
-				   (con->config) ? NCX_EL_TRUE : NCX_EL_FALSE,
+				   (obj->flags & OBJ_FL_CONFIG) 
+				   ? NCX_EL_TRUE : NCX_EL_FALSE,
 				   indent, 2, TRUE);
 	}
 	    
@@ -1170,17 +1171,17 @@ static void
 	}
 
 	/* config field, only if actually set (no default) */
-	if (leaf->confset) {
+	if (obj->flags & OBJ_FL_CONFSET) {
 	    write_cyang_simple_str(scb, YANG_K_CONFIG, 
-				   (leaf->config) ? 
+				   (obj->flags & OBJ_FL_CONFIG) ? 
 				   NCX_EL_TRUE : NCX_EL_FALSE,
 				   indent, 2, TRUE);
 	}
 
 	/* mandatory field, only if actually set (no default) */
-	if (leaf->mandset) {
+	if (obj->flags & OBJ_FL_MANDSET) {
 	    write_cyang_simple_str(scb, YANG_K_MANDATORY, 
-				   (leaf->mandatory) ? 
+				   (obj->flags & OBJ_FL_MANDATORY) ? 
 				   NCX_EL_TRUE : NCX_EL_FALSE,
 				   indent, 2, TRUE);
 	}
@@ -1230,9 +1231,9 @@ static void
 	write_cyang_musts(scb, &leaflist->mustQ, indent);
 
 	/* config field, only if actually set (no default) */
-	if (leaflist->confset) {
+	if (obj->flags & OBJ_FL_CONFSET) {
 	    write_cyang_simple_str(scb, YANG_K_CONFIG, 
-				   (leaflist->config) ? 
+				   (obj->flags & OBJ_FL_CONFIG) ? 
 				   NCX_EL_TRUE : NCX_EL_FALSE,
 				   indent, 2, TRUE);
 	}
@@ -1336,9 +1337,9 @@ static void
 	}
 
 	/* config field, only if actually set (no default) */
-	if (list->confset) {
+	if (obj->flags & OBJ_FL_CONFSET) {
 	    write_cyang_simple_str(scb, YANG_K_CONFIG, 
-				   (list->config) ? 
+				   (obj->flags & OBJ_FL_CONFIG) ? 
 				   NCX_EL_TRUE : NCX_EL_FALSE,
 				   indent, 2, TRUE);
 	}
@@ -1416,9 +1417,9 @@ static void
 	}
 
 	/* mandatory field, only if actually set (no default) */
-	if (choic->mandset) {
+	if (obj->flags & OBJ_FL_MANDSET) {
 	    write_cyang_simple_str(scb, YANG_K_MANDATORY, 
-				   (choic->mandatory) ? 
+				   (obj->flags & OBJ_FL_MANDATORY) ? 
 				   NCX_EL_TRUE : NCX_EL_FALSE,
 				   indent, 2, TRUE);
 	}

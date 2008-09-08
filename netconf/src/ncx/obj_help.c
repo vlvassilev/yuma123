@@ -35,6 +35,10 @@ date         init     comment
 #include "help.h"
 #endif
 
+#ifndef _H_log
+#include "log.h"
+#endif
+
 #ifndef _H_obj
 #include "obj.h"
 #endif
@@ -109,6 +113,7 @@ void
     }
 #endif
 
+
     if (!obj_has_name(obj)) {
 	return;
     }
@@ -121,7 +126,8 @@ void
 	return;
     }
 
-    if (obj->objtype == OBJ_TYP_RPCIO) {
+    if (obj->objtype == OBJ_TYP_RPCIO || 
+	obj->objtype == OBJ_TYP_RPC) {
 	help_write_lines(obj_get_name(obj), indent, TRUE);
 	count = 0;
     } else if (obj->objtype == OBJ_TYP_CASE) {
@@ -136,9 +142,12 @@ void
     }
 
     switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+    case OBJ_TYP_LIST:
+    case OBJ_TYP_CASE:
     case OBJ_TYP_RPC:
     case OBJ_TYP_RPCIO:
-    case OBJ_TYP_CASE:
+    case OBJ_TYP_NOTIF:
 	break;
     default:
 	if (obj->objtype != OBJ_TYP_CHOICE) {
@@ -149,24 +158,45 @@ void
 	    help_write_lines((const xmlChar *)"]", 0, FALSE); 
 	}
 
-	val = obj_get_default(obj);
-	if (val) {
-	    help_write_lines((const xmlChar *)" [", 0, FALSE); 
-	    help_write_lines(val, 0, FALSE);
-	    help_write_lines((const xmlChar *)"]", 0, FALSE); 
+	if (mode != HELP_MODE_BRIEF) {
+	    val = obj_get_default(obj);
+	    if (val) {
+		help_write_lines((const xmlChar *)" [d:", 0, FALSE); 
+		help_write_lines(val, 0, FALSE);
+		help_write_lines((const xmlChar *)"]", 0, FALSE); 
+	    }
 	}
     }
 
     val = obj_get_description(obj);
     if (val) {
-	help_write_lines(val, indent+NCX_DEF_INDENT, TRUE); 
+	switch (mode) {
+	case HELP_MODE_BRIEF:
+	    help_write_lines_max(val, indent+NCX_DEF_INDENT,
+				 TRUE, HELP_MODE_BRIEF_MAX); 
+	    break;
+	case HELP_MODE_NORMAL:
+	    if (obj->objtype == OBJ_TYP_RPC || 
+		obj->objtype == OBJ_TYP_NOTIF) {
+		help_write_lines_max(val, indent+NCX_DEF_INDENT,
+				     TRUE, HELP_MODE_NORMAL_MAX); 
+	    }
+	    break;
+	case HELP_MODE_FULL:
+	    help_write_lines(val, indent+NCX_DEF_INDENT, TRUE); 
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return;
+	}
     }
-
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
 	switch (mode) {
+	case HELP_MODE_BRIEF:
 	case HELP_MODE_NORMAL:
+	    break;
 	case HELP_MODE_FULL:
 	    if (obj->def.container->presence) {
 		help_write_lines((const xmlChar *)"presence: ", 
@@ -178,14 +208,17 @@ void
 	    }
 	    break;
 	default:
-	    ;
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return;
 	}
 	obj_dump_datadefQ(obj->def.container->datadefQ, mode, 
 			  nestlevel, indent+NCX_DEF_INDENT);
 	break;
     case OBJ_TYP_LEAF:
 	switch (mode) {
+	case HELP_MODE_BRIEF:
 	case HELP_MODE_NORMAL:
+	    break;
 	case HELP_MODE_FULL:
 	    val = obj_get_units(obj);
 	    if (val) {
@@ -201,6 +234,7 @@ void
     case OBJ_TYP_LEAF_LIST:
 	switch (mode) {
 	case HELP_MODE_NORMAL:
+	    break;
 	case HELP_MODE_FULL:
 	    val = obj_get_units(obj);
 	    if (val) {
@@ -230,6 +264,9 @@ void
 	}
 	break;
     case OBJ_TYP_CHOICE:
+	if (mode == HELP_MODE_BRIEF) {
+	    break;
+	}
 	count = dlq_count(obj->def.choic->caseQ);
 	if (count) {
 	    obj_dump_datadefQ(obj->def.choic->caseQ, mode, 
@@ -237,6 +274,9 @@ void
 	}
 	break;
     case OBJ_TYP_CASE:
+	if (mode == HELP_MODE_BRIEF) {
+	    break;
+	}
 	count = dlq_count(obj->def.cas->datadefQ);
 	if (count > 1) {
 	    obj_dump_datadefQ(obj->def.cas->datadefQ, mode, 
@@ -248,7 +288,9 @@ void
 	break;
     case OBJ_TYP_LIST:
 	switch (mode) {
+	case HELP_MODE_BRIEF:
 	case HELP_MODE_NORMAL:
+	    break;
 	case HELP_MODE_FULL:
 	    if (obj->def.list->keystr) {
 		help_write_lines((const xmlChar *)"key: ", 
@@ -275,25 +317,29 @@ void
 	default:
 	    ;
 	}
-	obj_dump_datadefQ(obj->def.list->datadefQ, mode, 
-			  nestlevel, indent+NCX_DEF_INDENT);
-	break;
-    case OBJ_TYP_RPC:
-	if (mode != HELP_MODE_BRIEF &&
-	    !dlq_empty(&obj->def.rpc->datadefQ)) {
-	    obj_dump_datadefQ(&obj->def.rpc->datadefQ, mode, 
+	if (mode != HELP_MODE_BRIEF) {
+	    obj_dump_datadefQ(obj->def.list->datadefQ, mode, 
 			      nestlevel, indent+NCX_DEF_INDENT);
-	} else {
-	    help_write_lines((const xmlChar *)"\n", 0, FALSE);
 	}
 	break;
+    case OBJ_TYP_RPC:
+	if (mode != HELP_MODE_BRIEF) {
+	    obj_dump_datadefQ(&obj->def.rpc->datadefQ, mode, 
+			      nestlevel, indent+NCX_DEF_INDENT);
+	}
+	log_stdout("\n");
+	break;
     case OBJ_TYP_RPCIO:
-	obj_dump_datadefQ(&obj->def.rpcio->datadefQ, mode, 
-			  nestlevel, indent+NCX_DEF_INDENT);
+	if (mode != HELP_MODE_BRIEF) {
+	    obj_dump_datadefQ(&obj->def.rpcio->datadefQ, mode, 
+			      nestlevel, indent+NCX_DEF_INDENT);
+	}
 	break;
     case OBJ_TYP_NOTIF:
-	obj_dump_datadefQ(&obj->def.notif->datadefQ, mode, 
-			  nestlevel, indent+NCX_DEF_INDENT);
+	if (mode != HELP_MODE_BRIEF) {
+	    obj_dump_datadefQ(&obj->def.notif->datadefQ, mode, 
+			      nestlevel, indent+NCX_DEF_INDENT);
+	}
     case OBJ_TYP_AUGMENT:
     case OBJ_TYP_USES:
     default:

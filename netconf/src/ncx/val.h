@@ -492,7 +492,7 @@ extern status_t
 
 extern status_t 
     val_set_simval (val_value_t  *val,
-		    const typ_def_t    *typdef,
+		    const typ_def_t *typdef,
 		    xmlns_id_t    nsid,
 		    const xmlChar *valname,
 		    const xmlChar *valstr);
@@ -681,11 +681,6 @@ extern boolean
 
 extern xmlns_id_t 
     val_get_parent_nsid (const val_value_t *val);
-
-extern status_t
-    val_check_rangeQ (ncx_btype_t  btyp,
-		      const ncx_num_t *num,
-		      const dlq_hdr_t *checkQ);
 
 /* count child instances of modname:objname within parent 'val' */
 extern uint32

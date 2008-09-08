@@ -136,6 +136,19 @@ date	     init     comment
 /* object is marked as abstract: not CLI or config data */
 #define OBJ_FL_ABSTRACT     bit15
 
+/* object is marked as config set */
+#define OBJ_FL_CONFSET      bit16
+
+/* object config value */
+#define OBJ_FL_CONFIG       bit17
+
+/* object is marked as mandatory set */
+#define OBJ_FL_MANDSET      bit18
+
+/* object mandatory value */
+#define OBJ_FL_MANDATORY    bit19
+
+
 
 /********************************************************************
 *								    *
@@ -211,8 +224,6 @@ typedef struct obj_container_t_ {
     dlq_hdr_t     *datadefQ;       /* Q of obj_template_t */
     boolean        datadefclone;
     ncx_status_t   status;
-    boolean        confset;
-    boolean        config;
     dlq_hdr_t      mustQ;           /* Q of ncx_errinfo_t */
     dlq_hdr_t      appinfoQ;        /* Q of ncx_appinfo_t */
 } obj_container_t;
@@ -226,10 +237,6 @@ typedef struct obj_leaf_t_ {
     xmlChar       *descr;
     xmlChar       *ref;
     typ_def_t     *typdef;
-    boolean        confset;
-    boolean        config;
-    boolean        mandset;
-    boolean        mandatory;
     ncx_status_t   status;
     dlq_hdr_t      mustQ;            /* Q of ncx_errinfo_t */
     dlq_hdr_t      appinfoQ;         /* Q of ncx_appinfo_t */
@@ -244,8 +251,6 @@ typedef struct obj_leaflist_t_ {
     xmlChar       *ref;
     typ_def_t     *typdef;
     boolean        ordersys; /* ordered-by system or user */
-    boolean        confset;
-    boolean        config;
     boolean        minset;
     uint32         minelems;
     boolean        maxset;
@@ -270,8 +275,6 @@ typedef struct obj_list_t_ {
     dlq_hdr_t     *datadefQ;        /* Q of obj_template_t */
     boolean        datadefclone;
     boolean        ordersys;   /* ordered-by system or user */
-    boolean        confset;
-    boolean        config;
     boolean        minset;
     uint32         minelems;
     boolean        maxset;
@@ -291,10 +294,6 @@ typedef struct obj_choice_t_ {
     xmlChar       *ref;
     dlq_hdr_t     *caseQ;             /* Q of obj_template_t */
     boolean        caseQclone;
-    boolean        confset;
-    boolean        config;
-    boolean        mandset;
-    boolean        mandatory;
     ncx_status_t   status;
     dlq_hdr_t      appinfoQ;           /* Q of ncx_appinfo_t */
 } obj_choice_t;

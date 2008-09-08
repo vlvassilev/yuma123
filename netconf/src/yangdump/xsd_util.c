@@ -608,11 +608,11 @@ static val_value_t *
 		val_add_child(newval, appval);
 	    }
 	}
-	if (obj->def.leaf->mandset) {
+	if (obj->flags & OBJ_FL_MANDSET) {
 	    needed = TRUE;
 	    newval = xml_val_new_cstring(YANG_K_MANDATORY,
 					 ncx_id,
-					 obj->def.leaf->mandatory 
+					 (obj->flags & OBJ_FL_MANDATORY)
 					 ? NCX_EL_TRUE : NCX_EL_FALSE);
 	    if (!newval) {
 		*res = ERR_INTERNAL_MEM;
@@ -662,11 +662,11 @@ static val_value_t *
 	}
 	break;
     case OBJ_TYP_CHOICE:
-	if (obj->def.choic->mandset) {
+	if (obj->flags & OBJ_FL_MANDSET) {
 	    needed = TRUE;
 	    newval = xml_val_new_cstring(YANG_K_MANDATORY,
 					 ncx_id,
-					 obj->def.choic->mandatory 
+					 (obj->flags & OBJ_FL_MANDATORY)
 					 ? NCX_EL_TRUE : NCX_EL_FALSE);
 	    if (!newval) {
 		val_free_value(appval);
@@ -2494,7 +2494,7 @@ val_value_t *
     if (isleaf) {
 	if (!iskey) {
 	    /* add the attributes for a leaf */
-	    if (!obj->def.leaf->mandatory) {
+	    if (!(obj->flags & OBJ_FL_MANDATORY)) {
 		res = xml_val_add_cattr(XSD_MIN_OCCURS, 0, XSD_ZERO, elem);
 	    }
 	}

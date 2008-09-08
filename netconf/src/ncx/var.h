@@ -32,6 +32,10 @@ date	     init     comment
 #include "ncxtypes.h"
 #endif
 
+#ifndef _H_obj
+#include "obj.h"
+#endif
+
 #ifndef _H_val
 #include "val.h"
 #endif
@@ -70,8 +74,10 @@ typedef enum var_side_t_ {
 typedef struct ncx_var_t_ {
     dlq_hdr_t     hdr;
     uint32        flags;
+    xmlChar      *name;
     val_value_t  *val;
 } ncx_var_t;
+
 
 /********************************************************************
 *								    *
@@ -126,13 +132,18 @@ extern status_t
 		   uint32 *namelen);
 
 extern val_value_t *
-    var_get_script_val (const typ_def_t *typdef,
+    var_get_script_val (const obj_template_t *obj,
 			val_value_t *val,
-			xmlns_id_t  nsid,
-			const xmlChar *varname,
 			const xmlChar *strval,
 			boolean istop,
 			status_t *res);
+
+
+extern val_value_t *
+    var_check_script_val (const obj_template_t *obj,
+			  const xmlChar *strval,
+			  boolean istop,
+			  status_t *res);
 
 
 extern status_t

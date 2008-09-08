@@ -3842,6 +3842,8 @@ status_t
     switch (btyp) {
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
+    case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF:  /*****/
 	if (*str1) {
 	    *str2 = xml_strdup(*str1);
 	    if (!*str2) {

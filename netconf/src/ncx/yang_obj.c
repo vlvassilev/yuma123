@@ -237,6 +237,34 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION finish_config_flag
+* 
+* Finish the internal settings for the config-stmt
+*
+* INPUTS:
+*   obj == object to process
+*
+*********************************************************************/
+static void
+    finish_config_flag (obj_template_t *obj)
+{
+    boolean flag;
+
+    if (!(obj->flags & OBJ_FL_CONFSET)) {
+	if (obj->parent) {
+	    flag = obj_get_config_flag(obj->parent);
+	    if (flag) {
+		obj->flags |= OBJ_FL_CONFIG;
+	    }
+	} else if (OBJ_DEF_CONFIG) {
+	    obj->flags |= OBJ_FL_CONFIG;
+	}
+    }
+
+} /* finish_config_flag */
+
+
+/********************************************************************
 * FUNCTION add_object
 * 
 * Check if an object already exists, and add it if not
@@ -342,7 +370,7 @@ static status_t
     const xmlChar   *val;
     const char      *expstr;
     tk_type_t        tktyp;
-    boolean          done, conf, mand, stat, desc, ref;
+    boolean          done, conf, flagset, mand, stat, desc, ref;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -384,10 +412,9 @@ static status_t
 
     leaf = obj->def.leaf;
     if (que == &mod->datadefQ) {
-	obj->flags |= OBJ_FL_TOP;
-	leaf->config = OBJ_DEF_CONFIG;
+	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
-    leaf->mandatory = OBJ_DEF_MANDATORY;
+
     leaf->typdef = typ_get_basetype_typdef(NCX_BT_ANY);
 
     /* Get the mandatory anyxml name */
@@ -429,6 +456,7 @@ static status_t
 
 	tktyp = TK_CUR_TYP(tkc);
 	val = TK_CUR_VAL(tkc);
+	flagset = FALSE;
 
 	/* check the current token type */
 	switch (tktyp) {
@@ -456,15 +484,21 @@ static status_t
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
-				       &leaf->config,
+				       &flagset,
 				       &conf, &leaf->appinfoQ);
-	    leaf->confset = TRUE;
+	    obj->flags |= OBJ_FL_CONFSET;
+	    if (flagset) {
+		obj->flags |= OBJ_FL_CONFIG;
+	    }
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    res = yang_consume_boolean(tkc, mod,
-				       &leaf->mandatory,
+				       &flagset,
 				       &mand, &leaf->appinfoQ);
-	    leaf->mandset = TRUE;
+	    obj->flags |= OBJ_FL_MANDSET;
+	    if (flagset) {
+		obj->flags |= OBJ_FL_MANDATORY;
+	    }
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    if (refi) {
@@ -541,7 +575,7 @@ static status_t
     dlq_hdr_t        errQ;
     ncx_status_t     errstatus;
     tk_type_t        tktyp;
-    boolean          done, pres, conf, stat, desc, ref;
+    boolean          done, pres, conf, flagset, stat, desc, ref;
     status_t         res, retres;
 
 #ifdef DEBUG
@@ -582,8 +616,7 @@ static status_t
     }
     con = obj->def.container;
     if (que == &mod->datadefQ) {
-	obj->flags |= OBJ_FL_TOP;
-	con->config = OBJ_DEF_CONFIG;
+	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
 	
@@ -626,6 +659,7 @@ static status_t
 
 	tktyp = TK_CUR_TYP(tkc);
 	val = TK_CUR_VAL(tkc);
+	flagset = FALSE;
 
 	/* check the current token type */
 	switch (tktyp) {
@@ -684,10 +718,13 @@ static status_t
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
-				       &con->config,
+				       &flagset,
 				       &conf, &con->appinfoQ);
+	    obj->flags |= OBJ_FL_CONFSET;
+	    if (flagset) {
+		obj->flags |= OBJ_FL_CONFIG;
+	    }
 	    CHK_OBJ_EXIT;
-	    con->confset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    if (refi) {
 		retres = ERR_NCX_REFINE_NOT_ALLOWED;
@@ -768,7 +805,7 @@ static status_t
     const char      *expstr;
     tk_type_t        tktyp;
     boolean          done, typ, units, def, conf;
-    boolean          mand, stat, desc, ref, typeok;
+    boolean          mand, stat, desc, ref, typeok, flagset;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -813,10 +850,8 @@ static status_t
     }
     leaf = obj->def.leaf;
     if (que == &mod->datadefQ) {
-	obj->flags |= OBJ_FL_TOP;
-	leaf->config = OBJ_DEF_CONFIG;
+	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
-    leaf->mandatory = OBJ_DEF_MANDATORY;
 
     /* Get the mandatory leaf name */
     res = yang_consume_id_string(tkc, mod, &leaf->name);
@@ -858,6 +893,7 @@ static status_t
 
 	tktyp = TK_CUR_TYP(tkc);
 	val = TK_CUR_VAL(tkc);
+	flagset = FALSE;
 
 	/* check the current token type */
 	switch (tktyp) {
@@ -930,16 +966,22 @@ static status_t
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
-				       &leaf->config,
+				       &flagset,
 				       &conf, &leaf->appinfoQ);
+	    obj->flags |= OBJ_FL_CONFSET;
+	    if (flagset) {
+		obj->flags |= OBJ_FL_CONFIG;
+	    }
 	    CHK_OBJ_EXIT;
-	    leaf->confset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    res = yang_consume_boolean(tkc, mod,
-				       &leaf->mandatory,
+				       &flagset,
 				       &mand, &leaf->appinfoQ);
+	    obj->flags |= OBJ_FL_MANDSET;
+	    if (flagset) {
+		obj->flags |= OBJ_FL_MANDATORY;
+	    }
 	    CHK_OBJ_EXIT;
-	    leaf->mandset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    if (refi) {
 		retres = ERR_NCX_REFINE_NOT_ALLOWED;
@@ -1022,7 +1064,7 @@ static status_t
     xmlChar         *str;
     tk_type_t        tktyp, nexttk;
     boolean          done, typ, units, conf;
-    boolean          minel, maxel, ord, stat, desc, ref, typeok;
+    boolean          minel, maxel, ord, stat, desc, ref, typeok, flagset;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -1069,8 +1111,7 @@ static status_t
     }
     llist = obj->def.leaflist;
     if (que == &mod->datadefQ) {
-	obj->flags |= OBJ_FL_TOP;
-	llist->config = OBJ_DEF_CONFIG;
+	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     /* Get the mandatory leaf-list name */
@@ -1112,6 +1153,7 @@ static status_t
 
 	tktyp = TK_CUR_TYP(tkc);
 	val = TK_CUR_VAL(tkc);
+	flagset = FALSE;
 
 	/* check the current token type */
 	switch (tktyp) {
@@ -1179,10 +1221,13 @@ static status_t
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
-				       &llist->config,
+				       &flagset,
 				       &conf, &llist->appinfoQ);
+	    obj->flags |= OBJ_FL_CONFSET;
+	    if (flagset) {
+		obj->flags |= OBJ_FL_CONFIG;
+	    }
 	    CHK_OBJ_EXIT;
-	    llist->confset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
 	    res = yang_consume_uint32(tkc, mod,
 				      &llist->minelems,
@@ -1335,7 +1380,7 @@ static status_t
     dlq_hdr_t        errQ;
     tk_type_t        tktyp, nexttk;
     boolean          done, key, conf;
-    boolean          minel, maxel, ord, stat, desc, ref;
+    boolean          minel, maxel, ord, stat, desc, ref, flagset;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -1382,8 +1427,7 @@ static status_t
 
     list = obj->def.list;
     if (que == &mod->datadefQ) {
-	obj->flags |= OBJ_FL_TOP;
-	list->config = OBJ_DEF_CONFIG;
+	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     /* Get the mandatory list name */
@@ -1426,6 +1470,7 @@ static status_t
 
 	tktyp = TK_CUR_TYP(tkc);
 	val = TK_CUR_VAL(tkc);
+	flagset = FALSE;
 
 	/* check the current token type */
 	switch (tktyp) {
@@ -1531,12 +1576,13 @@ static status_t
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
-				       &list->config,
+				       &flagset,
 				       &conf, &list->appinfoQ);
+	    obj->flags |= OBJ_FL_CONFSET;
+	    if (flagset) {
+		obj->flags |= OBJ_FL_CONFIG;
+	    }
 	    CHK_OBJ_EXIT;
-
-
-	    list->confset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
 	    res = yang_consume_uint32(tkc, mod,
 				      &list->minelems,
@@ -1629,7 +1675,7 @@ static status_t
 	}
     }
 
-    if (!list->keystr && list->config && !refi) {
+    if (!list->keystr && (obj->flags & OBJ_FL_CONFIG) && !refi) {
 	log_error("\nError: No key entered for list '%s' on line %u",
 		  list->name, obj->linenum);
 	retres = ERR_NCX_DATA_MISSING;
@@ -1963,7 +2009,7 @@ static status_t
     const char      *expstr;
     const xmlChar   *str;
     tk_type_t        tktyp;
-    boolean          done, def, mand, conf, stat, desc, ref;
+    boolean          done, def, mand, conf, stat, desc, ref, flagset;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -2006,11 +2052,8 @@ static status_t
 
     choic = obj->def.choic;
     if (que == &mod->datadefQ) {
-	obj->flags |= OBJ_FL_TOP;
-	choic->config = OBJ_DEF_CONFIG;
+	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
-
-    choic->mandatory = OBJ_DEF_MANDATORY;
 
     /* Get the mandatory choice name */
     res = yang_consume_id_string(tkc, mod, &choic->name);
@@ -2051,6 +2094,7 @@ static status_t
 
 	tktyp = TK_CUR_TYP(tkc);
 	val = TK_CUR_VAL(tkc);
+	flagset = FALSE;
 
 	/* check the current token type */
 	switch (tktyp) {
@@ -2082,9 +2126,12 @@ static status_t
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    res = yang_consume_boolean(tkc, mod,
-				       &choic->mandatory,
+				       &flagset,
 				       &mand, &choic->appinfoQ);
-	    choic->mandset = TRUE;
+	    obj->flags |= OBJ_FL_MANDSET;
+	    if (flagset) {
+		obj->flags |= OBJ_FL_MANDATORY;
+	    }
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    if (refi) {
@@ -2105,11 +2152,13 @@ static status_t
 				     &ref, &choic->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    /*** not in yang-00, expected in yang-01 ***/
 	    res = yang_consume_boolean(tkc, mod,
-				       &choic->config,
+				       &flagset,
 				       &conf, &choic->appinfoQ);
-	    choic->confset = TRUE;
+	    obj->flags |= OBJ_FL_CONFSET;
+	    if (flagset) {
+		obj->flags |= OBJ_FL_CONFIG;
+	    }
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
 	    res = consume_yang_case(tkc, mod,
@@ -2367,7 +2416,7 @@ static status_t
     obj->parent = parent;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
-	obj->flags |= OBJ_FL_TOP;
+	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     uses = obj->def.uses;
@@ -2810,7 +2859,7 @@ static status_t
     obj->parent = parent;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
-	obj->flags |= OBJ_FL_TOP;
+	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     aug = obj->def.augment;
@@ -3063,7 +3112,7 @@ static status_t
     obj->parent = parent;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
-	obj->flags |= OBJ_FL_TOP;
+	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     rpc = obj->def.rpc;
@@ -3236,7 +3285,7 @@ static status_t
     obj->parent = parent;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
-	obj->flags |= OBJ_FL_TOP;
+	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     notif = obj->def.notif;
@@ -3611,13 +3660,7 @@ static status_t
 	CHK_EXIT;
     }
 
-    if (!con->confset) {
-	if (obj->parent) {
-	    con->config = obj_get_config_flag(obj->parent);
-	} else {
-	    con->config = OBJ_DEF_CONFIG;
-	}
-    }
+    finish_config_flag(obj);
 
     res = yang_obj_resolve_datadefs(tkc, mod, con->datadefQ);
     CHK_EXIT;
@@ -3671,15 +3714,9 @@ static status_t
 	CHK_EXIT;
     }
 
-    if (!leaf->confset) {
-	if (obj->parent) {
-	    leaf->config = obj_get_config_flag(obj->parent);
-	} else {
-	    leaf->config = OBJ_DEF_CONFIG;
-	}
-    }
+    finish_config_flag(obj);
 
-    if (leaf->mandatory && leaf->defval) {
+    if ((obj->flags & OBJ_FL_MANDATORY) && leaf->defval) {
 	log_error("\nError: both mandatory and default statements present"
 		  "'%s'", obj_get_name(obj));
 	retres = ERR_NCX_INVALID_VALUE;
@@ -3742,13 +3779,7 @@ static status_t
      */
     llist->typdef->iqual = NCX_IQUAL_ZMORE;
 
-    if (!llist->confset) {
-	if (obj->parent) {
-	    llist->config = obj_get_config_flag(obj->parent);
-	} else {
-	    llist->config = OBJ_DEF_CONFIG;
-	}
-    }
+    finish_config_flag(obj);
 
     res = check_parent(tkc, mod, obj);
     CHK_EXIT;
@@ -3812,13 +3843,7 @@ static status_t
 	CHK_EXIT;
     }
 
-    if (!list->confset) {
-	if (obj->parent) {
-	    list->config = obj_get_config_flag(obj->parent);
-	} else {
-	    list->config = OBJ_DEF_CONFIG;
-	}
-    }
+    finish_config_flag(obj);
 
     res = yang_obj_resolve_datadefs(tkc, mod, list->datadefQ);
     CHK_EXIT;
@@ -3975,7 +4000,7 @@ static status_t
 	}
 
 	/* make sure madatory=false is not set for the key leaf */
-	if (key->def.leaf->mandset && !key->def.leaf->mandatory) {
+	if ((key->flags & OBJ_FL_MANDSET) && !(key->flags & OBJ_FL_MANDATORY)) {
 	    log_warn("\nWarning: 'mandatory false;' ignored in leaf '%s' "
 		      "on line %u for list '%s'",
 		      obj_get_name(key), key->linenum, list->name);
@@ -4282,15 +4307,9 @@ static status_t
     CHK_EXIT;
 
     /* not in draft yet !!! */
-    if (!choic->confset) {
-	if (obj->parent) {
-	    choic->config = obj_get_config_flag(obj->parent);
-	} else {
-	    choic->config = OBJ_DEF_CONFIG;
-	}
-    }
+    finish_config_flag(obj);
 
-    if (choic->mandatory && choic->defval) {
+    if ((obj->flags & OBJ_FL_MANDATORY) && choic->defval) {
 	log_error("\nError: both mandatory and default statements present"
 		  "'%s'", obj_get_name(obj));
 	retres = ERR_NCX_INVALID_VALUE;

@@ -208,6 +208,7 @@ static tk_btyp_t blist [] = {
     { NCX_BT_SLIST, 5, NCX_EL_SLIST, FL_NCX },
     { NCX_BT_CONTAINER, 9, NCX_EL_CONTAINER, FL_NCX },
     { NCX_BT_CHOICE, 6, NCX_EL_CHOICE, FL_NCX },
+    { NCX_BT_CASE, 4, NCX_EL_CASE, FL_NCX },
     { NCX_BT_LIST, 4, NCX_EL_LIST, FL_NCX },
     { NCX_BT_NONE, 4, (const xmlChar *)"NONE", 0 }
 };

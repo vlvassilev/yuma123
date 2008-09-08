@@ -88,6 +88,8 @@ date         init     comment
 * Malloc and fill in a new var struct
 *
 * INPUTS:
+*    name == name of var (not Z-terminated)
+*    namelen == length of name
 *    val == variable value
 *    isglobal == TRUE if global var
 *             == FALSE if runstack var
@@ -101,7 +103,9 @@ date         init     comment
 *    to be freed later
 *********************************************************************/
 static ncx_var_t *
-    new_var (val_value_t *val,
+    new_var (const xmlChar *name,
+	     uint32 namelen,
+	     val_value_t *val,
 	     boolean isglobal,
 	     boolean issystem,
 	     status_t *res)
@@ -115,6 +119,13 @@ static ncx_var_t *
     }
 
     memset(var, 0x0, sizeof(ncx_var_t));
+
+    var->name = xml_strndup(name, namelen);
+    if (!var->name) {
+	m__free(var);
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
 
     var->val = val;
     if (isglobal) {
@@ -141,6 +152,9 @@ static ncx_var_t *
 static void
     free_var (ncx_var_t *var)
 {
+    if (var->name) {
+	m__free(var->name);
+    }
     if (var->val) {
 	val_free_value(var->val);
     }
@@ -196,7 +210,7 @@ static status_t
     for (cur = (ncx_var_t *)dlq_firstEntry(que);
 	 cur != NULL;
 	 cur = (ncx_var_t *)dlq_nextEntry(cur)) {
-	ret = xml_strcmp(var->val->name, cur->val->name);
+	ret = xml_strcmp(var->name, cur->name);
 	if (ret < 0) {
 	    dlq_insertAhead(var, cur);
 	    return NO_ERR;
@@ -243,8 +257,8 @@ static ncx_var_t *
     for (cur = (ncx_var_t *)dlq_firstEntry(que);
 	 cur != NULL;
 	 cur = (ncx_var_t *)dlq_nextEntry(cur)) {
-	ret = xml_strncmp(name, cur->val->name, namelen);
-	if (ret == 0 && xml_strlen(cur->val->name)==namelen) {
+	ret = xml_strncmp(name, cur->name, namelen);
+	if (ret == 0 && xml_strlen(cur->name)==namelen) {
 	    dlq_remove(cur);
 	    return cur;
 	} /* else keep going */
@@ -286,8 +300,8 @@ static ncx_var_t *
     for (cur = (ncx_var_t *)dlq_firstEntry(que);
 	 cur != NULL;
 	 cur = (ncx_var_t *)dlq_nextEntry(cur)) {
-	ret = xml_strncmp(name, cur->val->name, namelen);
-	if (ret == 0 && xml_strlen(cur->val->name)==namelen) {
+	ret = xml_strncmp(name, cur->name, namelen);
+	if (ret == 0 && xml_strlen(cur->name)==namelen) {
 	    return cur;
 	} /* else keep going */
     }
@@ -333,7 +347,9 @@ static status_t
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    val_set_name(val, name, namelen);
+    if (!val->name) {
+	val_set_name(val, name, namelen);
+    }
 
     /* try to find this var */
     var = find_var(name, xml_strlen(name), isglobal);
@@ -349,7 +365,7 @@ static status_t
 	var->val = val;
     } else {
 	/* create a new value */
-	var = new_var(val, isglobal, issystem, &res);
+	var = new_var(name, namelen, val, isglobal, issystem, &res);
 	if (!var || res != NO_ERR) {
 	    return res;
 	}
@@ -362,7 +378,6 @@ static status_t
     return res;
 
 }  /* set_str */
-
 
 
 /*************   E X T E R N A L   F U N C T I O N S   ************/
@@ -773,17 +788,15 @@ status_t
 * See ncxcli.c for details on the script syntax
 *
 * INPUTS:
-*   typdef == expected type template 
+*   obj == expected type template 
 *          == NULL and will be set to NCX_BT_STRING for simple
 *             and NCX_BT_ANY for complex types
-*   val == value to fill in 
+*   val == value to fill in :: val->obj MUST be set
 *          == NULL to create a new one
-*   nsid == namespace ID of the 'val', can be zero
-*   varname == name of the 'val', can be NULL
 *   strval == string value to check
-*   istop == TRUE if calling from top level assignment
+*   istop == TRUE (ISTOP) if calling from top level assignment
 *            An unquoted string is the start of a command
-*         == FALSE if calling from a parameter parse
+*         == FALSE (ISPARM) if calling from a parameter parse
 *            An unquoted string is just a string
 *   res == address of status result
 *
@@ -795,37 +808,37 @@ status_t
 *   If no error, then returns pointer to new val or filled in 'val'
 *********************************************************************/
 val_value_t *
-    var_get_script_val (const typ_def_t *typdef,
+    var_get_script_val (const obj_template_t *obj,
 			val_value_t *val,
-			xmlns_id_t  nsid,
-			const xmlChar *varname,
 			const xmlChar *strval,
 			boolean istop,
 			status_t *res)
 {
-    const typ_def_t    *usetypdef;
-    const val_value_t  *varval;
-    const xmlChar      *str, *name;
-    val_value_t        *newval, *useval;
+    const val_value_t     *varval;
+    const xmlChar         *str, *name;
+    val_value_t           *newval, *useval;
 
-    xmlChar            *fname, *intbuff;
-    uint32              namelen, len;
-    boolean             isglobal;
+    xmlChar               *fname, *intbuff;
+    uint32                 namelen, len;
+    boolean                isglobal, isvarref;
 
 #ifdef DEBUG
-    if (!res) {
+    if (!obj || !res) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }
 #endif
 
     newval = NULL;
-    useval = NULL;
-    usetypdef = NULL;
+    isvarref = FALSE;
 
     *res = NO_ERR;
 
     /* get a new value struct if one is not provided */
+    if (strval && *strval == NCX_VAR_CH) {
+	isvarref = TRUE;
+    }
+
     if (val) {
 	useval = val;
     } else {
@@ -833,29 +846,19 @@ val_value_t *
 	if (!newval) {
 	    *res = ERR_INTERNAL_MEM;
 	    return NULL;
-	}
-	useval = newval;
-    }
-
-    /* set the typdef to 'string' if none is provided */
-    usetypdef = typdef;
-    if (!usetypdef) {
-	if (useval->typdef) {
-	    usetypdef = useval->typdef;
 	} else {
-	    usetypdef = typ_get_basetype_typdef(NCX_BT_STRING);
+	    useval = newval;
 	}
-    }
-
-    if (!usetypdef) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
     }
 
     /* check if strval is NULL */
     if (!strval) {
-	if (typ_get_basetype(usetypdef) == NCX_BT_EMPTY) {
-	    *res = val_set_simval(useval, usetypdef, 0, NULL, NULL);
+	if (obj_get_basetype(obj) == NCX_BT_EMPTY) {
+	    *res = val_set_simval(useval,
+				  obj_get_ctypdef(obj),
+				  obj_get_nsid(obj),
+				  obj_get_name(obj),
+				  NULL);
 	} else {
 	    *res = ERR_NCX_EMPTY_VAL;
 	}
@@ -893,7 +896,9 @@ val_value_t *
 	while (*str && *str != NCX_QUOTE_CH) {
 	    str++;
 	}
-	*res = val_set_string2(useval, NULL, usetypdef, 
+	*res = val_set_string2(useval, 
+			       obj_get_name(obj), 
+			       obj_get_ctypdef(obj), 
 			       strval, (uint32)(str-strval)); 
     } else if ((*strval == NCX_XML1a_CH) &&
 	       (strval[1] == NCX_XML1b_CH)) {
@@ -914,33 +919,200 @@ val_value_t *
 	}
     } else if (istop && ncx_valid_fname_ch(*strval)) {
 	/* this is a regular string, treated as a function
-	 * call at the top level
+	 * call at the top level.  If no RPC method is found,
+	 * then it will be treated as a string
 	 */
 	*res = NO_ERR;
-	return NULL;
-    } else {
-	/* this is a regular string, treated as a string
-	 * when used within an RPC function  parameter
-	 */
-	*res = val_set_simval(useval, usetypdef, 0, NULL, strval);
-    }
-
-    if (*res != NO_ERR) {
 	if (newval) {
 	    val_free_value(newval);
 	}
 	return NULL;
     } else {
-	if (varname) {
-	    val_set_qname(useval, nsid, varname, xml_strlen(varname));
-	} else {
-	    useval->nsid = nsid;
-	}
-	return useval;
+	/* this is a regular string, but not a valid NcxName,
+	 * so just treat as a string instead of potential RPC method
+	 */
+	*res = val_set_simval(useval, 
+			      obj_get_ctypdef(obj), 
+			      obj_get_nsid(obj), 
+			      obj_get_name(obj), 
+			      strval);
     }
-    /*NOTREACHED*/
+
+    /* clean up and exit */
+    if (*res != NO_ERR) {
+	if (newval) {
+	    val_free_value(newval);
+	}
+	useval = NULL;
+    }
+    return useval;
 
 }  /* var_get_script_val */
+
+
+/********************************************************************
+* FUNCTION var_check_script_val
+* 
+* Create a val_value_t struct for a parameter assignment
+* within the script processing mode, if a var ref is found
+*
+* See yangcli documentation for details on the script syntax
+*
+* INPUTS:
+*   obj == expected object template 
+*          == NULL and will be set to NCX_BT_STRING for simple
+*             and NCX_BT_ANY for complex types
+*   strval == string value to check
+*   istop == TRUE if calling from top level assignment
+*            An unquoted string is the start of a command
+*         == FALSE if calling from a parameter parse
+*            An unquoted string is just a string
+*   res == address of status result
+*
+* OUTPUTS:
+*   *res == status
+*
+* RETURNS:
+*   If error, then returns NULL;
+*   If no error, then returns pointer to new val or filled in 'val'
+*********************************************************************/
+val_value_t *
+    var_check_script_val (const obj_template_t *obj,
+			  const xmlChar *strval,
+			  boolean istop,
+			  status_t *res)
+{
+    const obj_template_t  *useobj;
+    const val_value_t     *varval;
+    const xmlChar         *str, *name;
+    val_value_t           *newval;
+    xmlChar               *fname, *intbuff;
+    uint32                 namelen, len;
+    boolean                isglobal;
+
+#ifdef DEBUG
+    if (!res || !strval) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    useobj = NULL;
+    newval = NULL;
+
+    *res = NO_ERR;
+
+    /* get a new value struct if one is not provided */
+    if (*strval == NCX_VAR_CH) {
+	/* this is a variable reference
+	 * get the value and clone it for the new value
+	 * flag an error if variable not found
+	 */
+	*res = var_check_ref(strval, ISRIGHT, &len, &isglobal, 
+			     &name, &namelen);
+	if (*res == NO_ERR) {
+	    varval = var_get_str(name, namelen, isglobal);
+	    if (!varval) {
+		*res = ERR_NCX_DEF_NOT_FOUND;
+	    } else {
+		newval = val_clone(varval);
+		if (!newval) {
+		    *res = ERR_INTERNAL_MEM;
+		}
+	    }
+	}
+	return newval;
+    }
+
+    /* not a variable reference so check further */
+    if (obj) {
+	useobj = obj;
+    } else {
+	useobj = ncx_get_gen_string();
+	if (!useobj) {
+	    *res = SET_ERROR(ERR_INTERNAL_VAL);
+	    return NULL;
+	}
+    }
+
+    /* malloc and init a new value struct for the result */
+    newval = val_new_value();
+    if (!newval) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+    val_init_from_template(newval, useobj);
+
+    /* check the string for the appopriate value assignment */
+    if (*strval==NCX_AT_CH) {
+	/* this is a NCX_BT_EXTERNAL value
+	 * find the file with the raw XML data
+	 */
+	fname = ncxmod_find_data_file(&strval[1], TRUE, res);
+	if (fname) {
+	    /* hand off the malloced 'fname' to be freed later */
+	    val_set_extern(newval, fname);
+	    
+	} /* else res already set */
+    } else if (strval && *strval == NCX_QUOTE_CH) {
+	/* this is a quoted string literal */
+	/* set the start after quote */
+	str = ++strval;
+
+	/* find the end of the quoted string */
+	while (*str && *str != NCX_QUOTE_CH) {
+	    str++;
+	}
+	*res = val_set_string2(newval, NULL, 
+			       obj_get_ctypdef(useobj), 
+			       strval, (uint32)(str-strval)); 
+    } else if (strval && (*strval == NCX_XML1a_CH) &&
+	       (strval[1] == NCX_XML1b_CH)) {
+
+	/* this is a bracketed inline XML sequence */
+	str = strval+2;
+			    
+	/* find the end of the inline XML */
+	while (*str && 
+	       !((*str==NCX_XML2a_CH) && (str[1]==NCX_XML2b_CH))) {
+	    str++;
+	}
+	intbuff = xml_strndup(strval+1, (uint32)(str-strval));
+	if (!intbuff) {
+	    *res = ERR_INTERNAL_MEM;
+	} else {
+	    val_set_intern(newval, intbuff);
+	}
+    } else if (strval && istop && ncx_valid_fname_ch(*strval)) {
+	/* this is a regular string, treated as a function
+	 * call at the top level; return NULL but with
+	 * the res status set to NO_ERR to signal that
+	 * an RPC method needs to be checked
+	 */
+	*res = NO_ERR;
+	val_free_value(newval);
+	return NULL;
+    } else {
+	/* this is a regular string, treated as a string
+	 * when used within an RPC function  parameter
+	 */
+	*res = val_set_simval(newval,
+			      obj_get_ctypdef(useobj), 
+			      obj_get_nsid(useobj),
+			      obj_get_name(useobj), 
+			      strval);
+    }
+
+    /* tried to get some value set, only return value if NO_ERR 
+     *  TBD: extended error reporting by returning the value anyways
+     */
+    if (*res != NO_ERR) {
+	val_free_value(newval);
+	newval = NULL;
+    }
+    return newval;
+
+}  /* var_check_script_val */
 
 
 /********************************************************************
@@ -962,8 +1134,9 @@ status_t
 			 const xmlChar *valstr,
 			 boolean isglobal)
 {
-    val_value_t  *val;
-    status_t      res;
+    const obj_template_t  *genstr;
+    val_value_t           *val;
+    status_t               res;
 
 #ifdef DEBUG
     if (!name || !valstr) {
@@ -971,12 +1144,19 @@ status_t
     }
 #endif
 
+    genstr = ncx_get_gen_string();
+    if (!genstr) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
     /* create a value struct to store */
     val = val_new_value();
     if (!val) {
 	return ERR_INTERNAL_MEM;
     }
-    
+
+    val_init_from_template(val, genstr);
+
     /* create a string value */
     res = val_set_string(val, name, valstr);
     if (res != NO_ERR) {

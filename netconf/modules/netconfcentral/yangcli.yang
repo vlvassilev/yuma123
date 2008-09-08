@@ -231,24 +231,29 @@ module yangcli {
     }
 
     rpc help {
-      description "Print the ncxcli help text";
+      description "Print the yangcli help text";
       ncx:rpc-type exec;
       input {
         choice helptype {
-          leaf type {
-            description "Show help for the specified type";
+          leaf command {
+            description "Show help for the specified command,
+                         also called an RPC method";
+            type nt:NcxIdentifier;
+          }
+          leaf commands {
+            description "Show info for all local commands";
+            type empty;
+          }
+          leaf notification {
+            description "Show help for the specified notification";
             type nt:NcxIdentifier;
           }
           leaf object {
             description "Show help for the specified object";
             type nt:NcxIdentifier;
           }
-          leaf rpc {
-            description "Show help for the specified RPC method";
-            type nt:NcxIdentifier;
-          }
-          leaf notif {
-            description "Show help for the specified notification";
+          leaf type {
+            description "Show help for the specified type";
             type nt:NcxIdentifier;
           }
         }
@@ -270,7 +275,7 @@ module yangcli {
     }
 
     rpc quit {
-      description "Quit the NCXCLI application";
+      description "Quit the yangcli application";
       ncx:rpc-type exec;
     }
 
@@ -333,7 +338,7 @@ module yangcli {
     }
 
     rpc show {
-      description "Local show command for ncxcli info.";
+      description "Local show command for yangcli info.";
       ncx:rpc-type exec;
       input {
         choice showtype {
@@ -352,28 +357,39 @@ module yangcli {
             type empty;
           }
 
-          leaf commands {
-            description "Show info for all local commands";
-            type empty;
+          leaf local {
+            description "Show info for one local user variable";
+            type nt:NcxName;
           }
 
-          leaf local {
-            description "Show full info for one local user variable";
-            type nt:NcxName;
+          leaf locals {
+            description "Show info for all local user variables";
+            type empty;
           }
 
           leaf global {
             description "Show full info for one global user variable";
             type nt:NcxName;
           }
+
+          leaf globals {
+            description "Show info for all global user variables";
+            type empty;
+          }
+
+          leaf objects {
+            description 
+              "Show config database objects available at this time";
+            type empty;
+          }
          
           leaf vars {
-            description "Show truncated info for all user variables";
+            description "Show truncated info for all program variables";
             type empty;
           }
 
           leaf version {
-            description "Show ncxcli version info";
+            description "Show yangcli version info";
             type empty;
           }
         }
@@ -397,6 +413,96 @@ module yangcli {
         }
       }
    }
+
+   rpc fill {
+     description 
+       "Fill a value for use in a NETCONF PDU or other operation.
+  
+        Used in an assignment statement to create a variable
+        for later use:
+
+            $foo = fill --target=/t:foo-con/bar-list[index='fred'] \
+                        --with-defaults \
+                        --current-value=$bar    ";
+     ncx:rpc-type exec;
+     input {
+       leaf target {
+         description 
+           "XPath target object to fill.  If prefixes are missing
+            then the first match in any namespace will be used.";
+
+         // type instance-identifier;  TBD
+
+         type string {
+           length "1..max";
+         }
+         mandatory true;
+       }
+
+       leaf with-defaults {
+         description 
+           "If present, then prompt for leafs with YANG default 
+            values.  If not, skip these objects.";
+         type empty;
+       }
+
+       leaf current-value {
+         description
+           "Contains a string representing the location
+            of the existing variable to use as a template
+            for the defaults in the filled variable.
+
+            If a node is present in the current-value,
+            then it will be presented as the default
+            value for the corresponding leaf.  Otherwise
+            the YANG default will be used instead, if any.
+
+            If the with-defaults parameter is not present,
+            then optional parameters with current values
+            will be skipped.  Mandatory parameters will
+            not be skipped in any case.
+
+            The current value can be specified in any of
+            the following 5 variants:
+
+            1) The global variable 'foo' would be specified as:
+ 
+                current-value=$$foo
+
+            2) The local variable 'bar' would be specified as:
+ 
+                current-value=$bar
+
+            An error will be reported if the global or local
+            variable does not reference the same object type
+            as the target parameter.
+
+            3) Inline XML could be specified as:
+
+                current-value=[<x:bar>\
+                                 <x:baz>17</x:baz>\
+                               </x:bar>]
+
+            4) An external file containing XML can be specified as:
+
+                current-value=@foo.xml
+
+            5) An external file in YANGCLI conf file format can
+               be specified as:
+
+                current-value=@foo.txt";
+          
+         type string {
+           length "1..max";
+         }
+       }
+     }
+     output {
+       anyxml data {
+         description "The result of the fill operation.";
+       }
+     }
+  }
 
 }
 

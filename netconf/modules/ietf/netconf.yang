@@ -896,6 +896,7 @@ module netconf {
      description 
        "Used as the container for NETCONF object definitions.";
      ncx:root;
+     ncx:abstract;
    }
         
 }

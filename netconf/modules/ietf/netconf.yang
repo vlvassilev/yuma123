@@ -198,7 +198,6 @@ module netconf {
    }
 
    container agent-hello {
-     ncx:hidden;
      description "Generic Agent Hello Message Parameters.";
 
      uses NcCapabilities;
@@ -207,13 +206,19 @@ module netconf {
         type SessionId;
         config false;
      }
+
+     ncx:hidden;
+     ncx:abstract;
    }
 
    container mgr-hello {
-     ncx:hidden;
+
      description "Generic Manager Hello Message Parameters.";
 
      uses NcCapabilities;
+
+     ncx:hidden;
+     ncx:abstract;
    }
 
    // NETCONF Operations PDU Data Types

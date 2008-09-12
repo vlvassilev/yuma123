@@ -1263,6 +1263,7 @@ static status_t
     uint32                 cnt, minelems, maxelems;
     boolean                minset, maxset, minerr, maxerr;
     status_t               res;
+    char                   buff[NCX_MAX_NUMLEN];
 
     res = NO_ERR;
     iqual = obj_get_iqualval(obj);
@@ -1278,8 +1279,44 @@ static status_t
 			     obj_get_name(obj));
 
     if (LOGDEBUG2) {
-	log_debug2("\ninstance_check '%s' against '%s' (cnt=%u, min=%u, max=%u)",
-		   obj_get_name(obj), val->name, cnt, minelems, maxelems);
+	if (!minset) {
+	    switch (iqual) {
+	    case NCX_IQUAL_ONE:
+	    case NCX_IQUAL_1MORE:
+		minelems = 1;
+		break;
+	    case NCX_IQUAL_ZMORE:
+	    case NCX_IQUAL_OPT:
+		minelems = 0;
+		break;
+	    default:
+		SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	}
+
+	if (!maxset) {
+	    switch (iqual) {
+	    case NCX_IQUAL_ONE:
+	    case NCX_IQUAL_OPT:
+		maxelems = 1;
+		break;
+	    case NCX_IQUAL_1MORE:
+	    case NCX_IQUAL_ZMORE:
+		maxelems = 0;
+		break;
+	    default:
+		SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	}
+
+	if (maxelems) {
+	    sprintf(buff, "%u", maxelems);
+	}
+
+	log_debug2("\ninstance_check '%s' against '%s' "
+		   "(cnt=%u, min=%u, max=%s)",
+		   obj_get_name(obj), val->name, cnt, 
+		   minelems, maxelems ? buff : "unbounded");
     }
 
     if (minset) {

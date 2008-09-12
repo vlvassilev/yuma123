@@ -557,10 +557,7 @@ static status_t
 	buff += cnt;
     }
 
-    /* skip this node if it is the virtual leaf-list header */
-    if (val->btyp == NCX_BT_LEAF_LIST) {
-	return NO_ERR;
-    } else if (val->obj->objtype == OBJ_TYP_RPCIO) {
+    if (val->obj->objtype == OBJ_TYP_RPCIO) {
 	/* get the prefix and name of the RPC method 
 	 * instead of this node named 'input'
 	 */
@@ -1442,6 +1439,8 @@ status_t
     *buff = (xmlChar *)m__getMem(len+1);
     if (!*buff) {
 	return ERR_INTERNAL_MEM;
+    } else {
+	memset(*buff, 0x0, len+1);
     }
 
     /* get the instance ID string for real this time */

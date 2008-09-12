@@ -74,10 +74,14 @@ date         init     comment
 /* #define TK_DEBUG 1 */
 /* #define TK_RDLN_DEBUG 1 */
 
-#define FL_NCX    bit0    /* source is TK_SOURCE_NCX */
-#define FL_YANG   bit1   /* source is TK_SOURCE_YANG */
-#define FL_CONF   bit2   /* source is TK_SOURCE_CONF */
+#define FL_YANG   bit0                /* source is TK_SOURCE_YANG */
+#define FL_CONF   bit1                /* source is TK_SOURCE_CONF */
+#define FL_XPATH  bit2               /* source is TK_SOURCE_XPATH */
+#define FL_REDO   bit3                /* source is TK_SOURCE_REDO */
 
+#define FL_NCX    bit4                /* place-holder; deprecated */
+
+#define FL_ALL    (FL_YANG|FL_CONF|FL_XPATH|FL_REDO)
 
 /********************************************************************
 *								    *
@@ -118,59 +122,57 @@ static tk_ent_t tlist [] = {
     { TK_TT_NONE, 0, NULL, "none", 0 }, 
     
     /* ONE CHAR TOKENS */
-    /* left brace '{' */
-    { TK_TT_LBRACE, 1, "{", "left brace", (FL_NCX|FL_YANG|FL_CONF) },
-    /* right brace '}' */
-    { TK_TT_RBRACE, 1, "}", "right brace", (FL_NCX|FL_YANG|FL_CONF) },
-    /* semi-colon ';' */
-    { TK_TT_SEMICOL, 1, ";", "semicolon", (FL_NCX|FL_YANG) },
-    /* left paren '(' */
-    { TK_TT_LPAREN, 1, "(", "left paren", FL_NCX },
-    /* right paren ')' */
-    { TK_TT_RPAREN, 1, ")", "right paren", FL_NCX },
-    /* left bracket '[' */
-    { TK_TT_LBRACK, 1, "[", "left bracket", FL_NCX },
-    /* right bracket ']' */
-    { TK_TT_RBRACK, 1, "]", "right bracket", FL_NCX },
-    /* comma ',' */
-    { TK_TT_COMMA, 1, ",", "comma", FL_NCX },
-    /* equal sign '=' */ 
-    { TK_TT_EQUAL, 1, "=", "equals sign", FL_NCX },
-    /* bar '|' */
-    { TK_TT_BAR, 1, "|", "vertical bar", (FL_NCX|FL_YANG) },
-    /* star '*' */
-    { TK_TT_STAR, 1, "*", "asterisk", FL_NCX },
-    /* question mark '?' */
-    { TK_TT_QMARK, 1, "?", "question mark", FL_NCX },
-    /* plus mark '+' */
-    { TK_TT_PLUS, 1, "+", "plus sign", (FL_NCX|FL_YANG) },
-    /* colon ':' */
-    { TK_TT_COLON, 1, ":", "colon", FL_NCX },
+    { TK_TT_LBRACE, 1, "{", "left brace", FL_ALL },
+    { TK_TT_RBRACE, 1, "}", "right brace", FL_ALL },
+    { TK_TT_SEMICOL, 1, ";", "semicolon", FL_YANG },
+    { TK_TT_LPAREN, 1, "(", "left paren", FL_XPATH },
+    { TK_TT_RPAREN, 1, ")", "right paren", FL_XPATH },
+    { TK_TT_LBRACK, 1, "[", "left bracket", FL_XPATH },
+    { TK_TT_RBRACK, 1, "]", "right bracket", FL_XPATH },
+    { TK_TT_COMMA, 1, ",", "comma", FL_XPATH },
+    { TK_TT_EQUAL, 1, "=", "equals sign", FL_XPATH },
+    { TK_TT_BAR, 1, "|", "vertical bar", 
+      (FL_YANG|FL_XPATH|FL_REDO) },
+    { TK_TT_STAR, 1, "*", "asterisk", FL_XPATH },
+    { TK_TT_ATSIGN, 1, "@", "at sign", FL_XPATH },
+    { TK_TT_PLUS, 1, "+", "plus sign", 
+      (FL_YANG|FL_XPATH|FL_REDO) },
+    { TK_TT_COLON, 1, ":", "colon", FL_XPATH },
+    { TK_TT_PERIOD, 1, ":", "period", FL_XPATH },
+    { TK_TT_FSLASH, 1, "/", "forward slash", FL_XPATH },
+    { TK_TT_MINUS, 1, "/", "minus", FL_XPATH },
+    { TK_TT_LT, 1, "<", "less than", FL_XPATH },
+    { TK_TT_GT, 1, ">", "greater than", FL_XPATH },
+    { TK_TT_DOLLAR, 1, "$", "dollar sign", FL_XPATH },
 
     /* TWO CHAR TOKENS */
-
-    /* range sep '..' */
-    { TK_TT_RANGESEP, 2, "..", "range seperator", (FL_NCX|FL_YANG) },
-    /* plus equals '+=' */
-    { TK_TT_PLUSEQ, 2, "+=", "plus equals", FL_NCX },
+    { TK_TT_RANGESEP, 2, "..", "range seperator", 
+      (FL_YANG|FL_REDO|FL_XPATH) },
+    { TK_TT_DBLCOLON, 2, "::", "double colon", FL_XPATH },
+    { TK_TT_DBLFSLASH, 2, "//", "double foward slash", FL_XPATH },
+    { TK_TT_NOTEQUAL, 2, "!=", "not equal sign", FL_XPATH },
+    { TK_TT_LEQUAL, 2, "<=", "less than or equal", FL_XPATH },
+    { TK_TT_GEQUAL, 2, ">=", "greater than or equal", FL_XPATH },
 
     /* string classification tokens, all here for name and placeholder */
-    { TK_TT_STRING, 0, "", "unquoted string", 0},
-    { TK_TT_SSTRING, 0, "", "scoped ID string", 0},
-    { TK_TT_TSTRING, 0, "", "token string", 0},
-    { TK_TT_MSTRING, 0, "", "prefix qualified ID string", 0},
-    { TK_TT_MSSTRING, 0, "", "prefix qualified scoped ID string", 0},
-    { TK_TT_QSTRING, 0, "", "double quoted string", 0},
-    { TK_TT_SQSTRING, 0, "", "single quoted string", 0},
+    { TK_TT_STRING, 0, "", "unquoted string", FL_ALL},
+    { TK_TT_SSTRING, 0, "", "scoped ID string", FL_ALL},
+    { TK_TT_TSTRING, 0, "", "token string", FL_ALL},
+    { TK_TT_MSTRING, 0, "", "prefix qualified ID string", FL_ALL},
+    { TK_TT_MSSTRING, 0, "", "prefix qualified scoped ID string", FL_ALL},
+    { TK_TT_QSTRING, 0, "", "double quoted string", FL_ALL},
+    { TK_TT_SQSTRING, 0, "", "single quoted string", FL_ALL},
 
     /* number classification tokens */
-    { TK_TT_DNUM, 0, "", "decimal number", 0},
-    { TK_TT_HNUM, 0, "", "hex number", 0},
-    { TK_TT_RNUM, 0, "", "real number", 0},
+    { TK_TT_DNUM, 0, "", "decimal number", FL_ALL},
+    { TK_TT_HNUM, 0, "", "hex number", FL_ALL},
+    { TK_TT_RNUM, 0, "", "real number", FL_ALL},
 
     /* newline for conf file parsing only */
-    { TK_TT_NEWLINE, 0, "", "newline", 0},    /* NEWLINE here for name */
-    { TK_TT_NONE, 0, NULL, "none", 0}               /* EO Array marker */
+    { TK_TT_NEWLINE, 0, "", "newline", FL_CONF}, 
+
+    /* EO Array marker */
+    { TK_TT_NONE, 0, NULL, "none", 0}
 };
 
 
@@ -180,36 +182,44 @@ static tk_ent_t tlist [] = {
  *  !!! NEED TO CHANGE IF NCX DATA TYPE NAMES ARE CHANGED !!!
  *  !!! NEED TO KEEP ARRAY POSITION AND NCX_BT_ VALUE THE SAME !!!
  *
+ * In YANG, the NCX_BT_ANY is not represented with a leaf
+ * but rather a separate 'anyxml' construct.  Even so, it is
+ * stored intervally as a leaf with type NCX_BT_ANY
+ *
+ * hack: string lengths are stored so only string compares
+ * with the correct number of chars are actually made
+ * when parsing the YANG type statements
+ *
  * TBD: change to runtime strlen evaluation 
  * instead of hardwire lengths.
  */
 static tk_btyp_t blist [] = {
     { NCX_BT_NONE, 4, (const xmlChar *)"NONE", 0 },
-    { NCX_BT_ANY, 6, NCX_EL_ANYXML, FL_NCX },  /* YANG, sep. keyword */
+    { NCX_BT_ANY, 6, NCX_EL_ANYXML, 0 },
     { NCX_BT_BITS, 4, NCX_EL_BITS, FL_YANG },
-    { NCX_BT_ENUM, 4, NCX_EL_ENUM, FL_NCX },
-    { NCX_BT_EMPTY, 5, NCX_EL_EMPTY, (FL_NCX|FL_YANG) },
-    { NCX_BT_BOOLEAN, 7, NCX_EL_BOOLEAN, (FL_NCX|FL_YANG) },
-    { NCX_BT_INT8, 4, NCX_EL_INT8, (FL_NCX|FL_YANG) },
-    { NCX_BT_INT16, 5, NCX_EL_INT16, (FL_NCX|FL_YANG) },
-    { NCX_BT_INT32, 5, NCX_EL_INT32, (FL_NCX|FL_YANG) },
-    { NCX_BT_INT64, 5, NCX_EL_INT64, (FL_NCX|FL_YANG) },
-    { NCX_BT_UINT8, 5, NCX_EL_UINT8, (FL_NCX|FL_YANG) },
-    { NCX_BT_UINT16, 6, NCX_EL_UINT16, (FL_NCX|FL_YANG) },
-    { NCX_BT_UINT32, 6, NCX_EL_UINT32, (FL_NCX|FL_YANG) },
-    { NCX_BT_UINT64, 6, NCX_EL_UINT64, (FL_NCX|FL_YANG) },
-    { NCX_BT_FLOAT32, 7, NCX_EL_FLOAT32, (FL_NCX|FL_YANG) },
-    { NCX_BT_FLOAT64, 7, NCX_EL_FLOAT64, (FL_NCX|FL_YANG) },
-    { NCX_BT_STRING, 6, NCX_EL_STRING, (FL_NCX|FL_YANG) },
-    { NCX_BT_BINARY, 6, NCX_EL_BINARY, (FL_NCX|FL_YANG) },
+    { NCX_BT_ENUM, 11, NCX_EL_ENUMERATION, FL_YANG },
+    { NCX_BT_EMPTY, 5, NCX_EL_EMPTY, FL_YANG },
+    { NCX_BT_BOOLEAN, 7, NCX_EL_BOOLEAN, FL_YANG },
+    { NCX_BT_INT8, 4, NCX_EL_INT8, FL_YANG },
+    { NCX_BT_INT16, 5, NCX_EL_INT16, FL_YANG },
+    { NCX_BT_INT32, 5, NCX_EL_INT32, FL_YANG },
+    { NCX_BT_INT64, 5, NCX_EL_INT64, FL_YANG },
+    { NCX_BT_UINT8, 5, NCX_EL_UINT8, FL_YANG },
+    { NCX_BT_UINT16, 6, NCX_EL_UINT16, FL_YANG },
+    { NCX_BT_UINT32, 6, NCX_EL_UINT32, FL_YANG },
+    { NCX_BT_UINT64, 6, NCX_EL_UINT64, FL_YANG },
+    { NCX_BT_FLOAT32, 7, NCX_EL_FLOAT32, FL_YANG },
+    { NCX_BT_FLOAT64, 7, NCX_EL_FLOAT64, FL_YANG },
+    { NCX_BT_STRING, 6, NCX_EL_STRING, FL_YANG },
+    { NCX_BT_BINARY, 6, NCX_EL_BINARY, FL_YANG },
     { NCX_BT_INSTANCE_ID, 19, NCX_EL_INSTANCE_IDENTIFIER, FL_YANG },
-    { NCX_BT_UNION, 5, NCX_EL_UNION, (FL_NCX|FL_YANG) },
+    { NCX_BT_UNION, 5, NCX_EL_UNION, FL_YANG },
     { NCX_BT_KEYREF, 6, NCX_EL_KEYREF, FL_YANG },
-    { NCX_BT_SLIST, 5, NCX_EL_SLIST, FL_NCX },
-    { NCX_BT_CONTAINER, 9, NCX_EL_CONTAINER, FL_NCX },
-    { NCX_BT_CHOICE, 6, NCX_EL_CHOICE, FL_NCX },
-    { NCX_BT_CASE, 4, NCX_EL_CASE, FL_NCX },
-    { NCX_BT_LIST, 4, NCX_EL_LIST, FL_NCX },
+    { NCX_BT_SLIST, 5, NCX_EL_SLIST, 0 },
+    { NCX_BT_CONTAINER, 9, NCX_EL_CONTAINER, 0 },
+    { NCX_BT_CHOICE, 6, NCX_EL_CHOICE, 0 },
+    { NCX_BT_CASE, 4, NCX_EL_CASE, 0 },
+    { NCX_BT_LIST, 4, NCX_EL_LIST, 0 },
     { NCX_BT_NONE, 4, (const xmlChar *)"NONE", 0 }
 };
 
@@ -543,8 +553,10 @@ static status_t
 		*outstr++ = *instr++;
 	    }
 
-	    /* check if last char written was a newline */
-	    if (*(outstr-1) == '\n') {
+	    /* check if last char written was a newline 
+	     * DO NOT ADJUST XPATH STRINGS
+	     */
+	    if (*(outstr-1) == '\n' && (tkc->source != TK_SOURCE_XPATH)) {
 		/* trim any trailing whitespace */
 		if (outstr-2 >= tkbuff) {
 		    teststr = outstr-2;
@@ -677,7 +689,7 @@ static boolean
 *   buff == token string to check -- NOT ZERO-TERMINATED
 *   len == length of string to check
 *   srctyp == parsing source
-*             (TK_SOURCE_NCX, TK_SOURCE_YANG, TK_SOURCE_CONF)
+*    (TK_SOURCE_CONF, TK_SOURCE_YANG, TK_SOURCE_CONF, TK_SOURCE_REDO)
 *
 * RETURNS:
 *   token type found or TK_TT_NONE if no match
@@ -692,14 +704,17 @@ static tk_type_t
 
     /* determine which subset of the token list will be checked */
     switch (srctyp) {
-    case TK_SOURCE_NCX:
-	flags = FL_NCX;
+    case TK_SOURCE_CONF:
+	flags = FL_CONF;
 	break;
     case TK_SOURCE_YANG:
 	flags = FL_YANG;
 	break;
-    case TK_SOURCE_CONF:
-	flags = FL_CONF;
+    case TK_SOURCE_XPATH:
+	flags = FL_XPATH;
+	break;
+    case TK_SOURCE_REDO:
+	flags = FL_REDO;
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -717,13 +732,13 @@ static tk_type_t
      * and the specified length will be returned
      */
     if (len==1) {
-        for (t=TK_TT_LBRACE; t<TK_TT_RANGESEP; t++) {
+        for (t=TK_TT_LBRACE; t <= TK_TT_DOLLAR; t++) {
             if (*buff == *tlist[t].tid && (tlist[t].flags & flags)) {
                 return tlist[t].ttyp;
             }
         }
     } else if (len==2) {
-        for (t=TK_TT_RANGESEP; t <= TK_TT_PLUSEQ; t++) {
+        for (t=TK_TT_RANGESEP; t <= TK_TT_GEQUAL; t++) {
             if (!xml_strncmp(buff, (const xmlChar *)tlist[t].tid, 2) &&
 		(tlist[t].flags & flags)) {
 		return tlist[t].ttyp;
@@ -1370,19 +1385,20 @@ static status_t
     module = NULL;
     item = NULL;
     scoped = FALSE;
+    tk = NULL;
 
     /* the bptr is pointing at the first string char which
      * is a valid identifier first char; start at the next char
       */
     str = tkc->bptr+1;
-    if (tkc->flags & TK_FL_REDO) {
-	/* redo so range clause components are not included */
+    if (tkc->source == TK_SOURCE_REDO) {
+	/* partial ID syntax; redo so range clause components are not included */
 	while ((*str != '.') && (*str != '-') && 
 	       ncx_valid_name_ch(*str)) {
 	    str++;
 	}
     } else {
-	/* allow ull NCX/YANG identifier syntax */
+	/* allow full YANG identifier syntax */
 	while (ncx_valid_name_ch(*str)) {
 	    str++;
 	}
@@ -1404,10 +1420,9 @@ static status_t
     }
 
     /* else got a string fragment that could be a valid ID format */
-    if (*str == NCX_MODSCOPE_CH) {
+    if (*str == NCX_MODSCOPE_CH && tkc->source != TK_SOURCE_XPATH) {
         /* stopped on the module-scope-identifier token
          * the first identifier component must be a module name 
-         * save the module name: bptr to str 
          */
         module = tkc->bptr;
         modlen = (uint32)(str - tkc->bptr);
@@ -1425,41 +1440,46 @@ static status_t
         /* drop through -- either we stopped on a scope char or
          * the end of the module-scoped identifier string
          */
-    }
+    } 
 
-    /* got some sort of identifier string 
-     * keep going until we don't stop on the scope char
-     */
-    while (*str == NCX_SCOPE_CH) {
-        res = get_name_comp(++str, &len);
-        if (res != NO_ERR) {
-            return finish_string(tkc, str);
-        }
-        scoped = TRUE;
-        str += len;
-    }
+    if (tkc->source != TK_SOURCE_XPATH) {
+	/* got some sort of identifier string 
+	 * keep going until we don't stop on the scope char
+	 */
+	while (*str == NCX_SCOPE_CH) {
+	    res = get_name_comp(++str, &len);
+	    if (res != NO_ERR) {
+		return finish_string(tkc, str);
+	    }
+	    scoped = TRUE;
+	    str += len;
+	}
 
-    /* for Xpath purposes in YANG, treat scoped ID as a string now */
-    if (scoped && tkc->source==TK_SOURCE_YANG) {
-	return finish_string(tkc, str);
-    }
+	/* for Xpath purposes in YANG, treat scoped ID as a string now */
+	if (scoped && tkc->source==TK_SOURCE_YANG) {
+	    return finish_string(tkc, str);
+	}
 
-    /* done with the string; create a token and save it */
-    if (module) {
-        if ((str - item) > NCX_MAX_Q_STRLEN) {
-            return ERR_NCX_LEN_EXCEEDED;
-        }
-        tk = new_token_wmod(scoped ? TK_TT_MSSTRING : TK_TT_MSTRING,
-                               module, modlen, item, (uint32)(str - item));
+	/* done with the string; create a token and save it */
+	if (module) {
+	    if ((str - item) > NCX_MAX_Q_STRLEN) {
+		return ERR_NCX_LEN_EXCEEDED;
+	    }
+	    tk = new_token_wmod(scoped ? TK_TT_MSSTRING : TK_TT_MSTRING,
+				module, modlen, item, (uint32)(str - item));
+	} else {
+	    if ((str - tkc->bptr) > NCX_MAX_Q_STRLEN) {
+		return ERR_NCX_LEN_EXCEEDED;
+	    }
+	    tk = new_token(scoped ? TK_TT_SSTRING : TK_TT_TSTRING,
+			   tkc->bptr, (uint32)(str - tkc->bptr));
+	}
     } else {
-        if ((str - tkc->bptr) > NCX_MAX_Q_STRLEN) {
-            return ERR_NCX_LEN_EXCEEDED;
-        }
-        tk = new_token(scoped ? TK_TT_SSTRING : TK_TT_TSTRING,
-                          tkc->bptr, (uint32)(str - tkc->bptr));
+	tk = new_token(TK_TT_TSTRING,  tkc->bptr, (uint32)(str - tkc->bptr));
     }
+
     if (!tk) {
-        return ERR_INTERNAL_MEM;
+	return ERR_INTERNAL_MEM;
     }
     tk->linenum = tkc->linenum;
     tk->linepos = tkc->linepos;
@@ -1665,35 +1685,6 @@ tk_chain_t *
 
 
 /********************************************************************
-* FUNCTION tk_setup_chain_ncx
-* 
-* Setup a previously allocated chain for an NCX file
-*
-* INPUTS
-*    tkc == token chain to setup
-*    fp == open file to use for text source
-*    filename == source filespec
-*********************************************************************/
-void
-    tk_setup_chain_ncx (tk_chain_t *tkc,
-			FILE *fp,
-			const xmlChar *filename)
-{
-#ifdef DEBUG
-    if (!tkc) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    tkc->fp = fp;
-    tkc->source = TK_SOURCE_NCX;
-    tkc->filename = filename;
-
-} /* tk_setup_chain_ncx */
-
-
-/********************************************************************
 * FUNCTION tk_setup_chain_conf
 * 
 * Setup a previously allocated chain for a text config file
@@ -1789,50 +1780,6 @@ void
 
 
 /********************************************************************
-* FUNCTION tk_get_btype_id
-* 
-* Check if the specified string is a NCX builtin type name
-*
-* INPUTS:
-*   buff == token string to check -- NOT ZERO-TERMINATED
-*   len == length of string to check
-* RETURNS:
-*   btype found or NCX_BT_NONE if no match
-*********************************************************************/
-ncx_btype_t 
-    tk_get_btype_id (const xmlChar *buff, 
-		     uint32 len)
-{
-    uint32 i;
-
-#ifdef DEBUG
-    if (!buff) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NCX_BT_NONE;
-    }
-    if (!len) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return NCX_BT_NONE;
-    }
-#endif
-
-    /* look in the blist for the specified type name */
-    for (i=1; blist[i].btyp != NCX_BT_NONE; i++) {
-        if ((blist[i].blen == len) &&
-            !xml_strncmp(blist[i].bid, buff, len)) {
-	    if (blist[i].flags & FL_NCX) {
-		return blist[i].btyp;
-	    } else {
-		return NCX_BT_NONE;
-	    }
-        }
-    }
-    return NCX_BT_NONE;
-
-} /* tk_get_btype_id */
-
-
-/********************************************************************
 * FUNCTION tk_get_yang_btype_id
 * 
 * Check if the specified string is a YANG builtin type name
@@ -1916,7 +1863,7 @@ const char *
 const char *
     tk_get_token_sym (tk_type_t ttyp) 
 {
-    if (ttyp <= TK_TT_PLUSEQ) {
+    if (ttyp <= TK_TT_GEQUAL) {
         return tlist[ttyp].tid;
     } else {
         return "--none--";
@@ -2215,13 +2162,15 @@ status_t
 		    dlq_enque(tk, &tkc->tkQ);
 		}
 		tkc->bptr++;
-            } else if ((tkc->source != TK_SOURCE_YANG &&
+            } else if ((tkc->source == TK_SOURCE_CONF &&
 			*tkc->bptr == NCX_COMMENT_CH) ||
 		       (tkc->source == TK_SOURCE_YANG &&
 			*tkc->bptr == '/' && tkc->bptr[1] == '/')) {
-		/* NCX and CONF files use the '# to eoln' comment format
+		/* CONF files use the '# to eoln' comment format
 		 * YANG files use the '// to eoln' comment format
-		 * skip past the comment, make next char EOLN 
+		 * skip past the comment, make next char EOLN
+		 *
+		 * TBD: SAVE COMMENTS IN XMLDOC SESSION MODE
 		 */
 		while (*tkc->bptr && *tkc->bptr != '\n') {
 		    tkc->bptr++;
@@ -2243,9 +2192,14 @@ status_t
 		       (isdigit(*tkc->bptr) || 
 			((*tkc->bptr=='+' || *tkc->bptr=='-') &&
 			 isdigit(*(tkc->bptr+1)))))  {
+
 		/* get some sort of number 
-		 * YANG does not have technically number tokens
+		 * YANG does not have number tokens
 		 * so they are parsed (first pass) as a string
+		 * There are corner cases such as range 1..max
+		 * that will be parsed wrong (2nd dot).  These
+		 * strings use the tk_retokenize_cur_string fn
+		 * to break up the string into more tokens
 		 */
                 res = tokenize_number(tkc);
             } else {
@@ -2281,7 +2235,7 @@ status_t
         }
     }
 
-    if (res == NO_ERR) {
+    if (res == NO_ERR && tkc->source != TK_SOURCE_XPATH) {
 	res = concat_qstrings(tkc);
     }
 
@@ -2335,8 +2289,7 @@ status_t
     if (!tkctest) {
 	return ERR_INTERNAL_MEM;
     }
-    tkctest->source = TK_SOURCE_NCX;
-    tkctest->flags |= TK_FL_REDO;
+    tkctest->source = TK_SOURCE_REDO;
     tkctest->bptr = tkctest->buff = TK_CUR_VAL(tkc);
     res = tk_tokenize_input(tkctest, mod);
 
@@ -2375,7 +2328,7 @@ status_t
 * The specified ncx:metadata string is parsed into tokens
 *
 * INPUTS:
-*   mod == module in progress for error purposes
+*   mod == module in progress for error purposes (may be NULL)
 *   str == string to tokenize
 *   res == address of return status
 *
@@ -2394,7 +2347,7 @@ tk_chain_t *
     tk_chain_t *tkc;
 
 #ifdef DEBUG
-    if (!mod || !str || !res) {
+    if (!str || !res) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }	
@@ -2407,12 +2360,56 @@ tk_chain_t *
 	return NULL;
     }
     tkc->source = TK_SOURCE_YANG;
-    tkc->flags |= TK_FL_REDO;
     tkc->bptr = tkc->buff = str;
     *res = tk_tokenize_input(tkc, mod);
     return tkc;
 
 } /* tk_tokenize_metadata_string */
+
+
+/********************************************************************
+* FUNCTION tk_tokenize_xpath_string
+* 
+* The specified XPath string is parsed into tokens
+*
+* INPUTS:
+*   mod == module in progress for error purposes (may be NULL)
+*   str == string to tokenize
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == error status, if return NULL or non-NULL
+*
+* RETURNS:
+*   pointer to malloced and filled in token chain
+*   ready to be traversed; always check *res for valid syntax
+*********************************************************************/
+tk_chain_t *
+    tk_tokenize_xpath_string (ncx_module_t *mod,
+			      xmlChar *str,
+			      status_t *res)
+{
+    tk_chain_t *tkc;
+
+#ifdef DEBUG
+    if (!str || !res) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }	
+#endif
+
+    /* create a new chain and parse the string */
+    tkc = tk_new_chain();
+    if (!tkc) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+    tkc->source = TK_SOURCE_XPATH;
+    tkc->bptr = tkc->buff = str;
+    *res = tk_tokenize_input(tkc, mod);
+    return tkc;
+
+} /* tk_tokenize_xpath_string */
 
 
 /********************************************************************

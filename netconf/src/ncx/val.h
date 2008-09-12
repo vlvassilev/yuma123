@@ -338,11 +338,6 @@ extern void
     val_init_from_template (val_value_t *val,
 			    const struct obj_template_t_ *obj);
 
-/* special version for leaf-list */
-extern void
-    val_init_from_template_primary (val_value_t *val,
-				    const struct obj_template_t_ *obj);
-
 extern void 
     val_free_value (val_value_t *val);
 

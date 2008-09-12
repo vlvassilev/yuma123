@@ -590,7 +590,6 @@ static void
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
-    case NCX_BT_LEAF_LIST:
 	while (!dlq_empty(&val->v.childQ)) {
 	    cur = (val_value_t *)dlq_deque(&val->v.childQ);
 	    val_free_value(cur);
@@ -1012,28 +1011,6 @@ void
     init_from_template(val, obj, obj_get_basetype(obj));
 
 }  /* val_init_from_template */
-
-
-/********************************************************************
-* FUNCTION val_init_from_template_primary
-* 
-* Special function to initialize a tconfig value node
-*
-* MUST CALL val_init_value FIRST
-*
-* INPUTS:
-*   val == pointer to the malloced struct to initialize
-*   obj == object template to use
-*********************************************************************/
-void
-    val_init_from_template_primary (val_value_t *val,
-				    const obj_template_t *obj)
-{
-
-    init_from_template(val, obj, 
-		       obj_get_primary_basetype(obj));
-
-}  /* val_init_from_template_primary */
 
 
 /********************************************************************

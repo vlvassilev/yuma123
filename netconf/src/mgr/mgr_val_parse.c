@@ -118,15 +118,6 @@ static status_t
 		 val_value_t  *retval);
 
 
-static status_t 
-    parse_one_btype (ses_cb_t  *scb,
-		     const obj_template_t *obj,
-		     ncx_btype_t  btyp,
-		     const xml_node_t *startnode,
-		     val_value_t  *retval);
-
-
-
 /********************************************************************
  * FUNCTION get_xml_node
  * 
@@ -1092,156 +1083,6 @@ static status_t
 
 
 /********************************************************************
- * FUNCTION parse_leaflist
- * 
- * Parse the XML input as a pseudo-complex type
- *
- * Handles the following base types:
- *   NCX_BT_LEAF_LIST
- *
- *
- * <foo>fred</foo>
- * <foo>barney</foo>
- * <foo>wilma</foo>
- *
- * INPUTS:
- *     scb == session control block
- *            Input is read from scb->reader.
- *     obj == object template for this string type
- *     startnode == top node of the parameter to be parsed
- *            Parser function will attempt to consume all the
- *            nodes until the matching endnode is reached
- *     retval ==  val_value_t that should get the results of the parsing
- *     
- * OUTPUTS:
- *    *retval will be filled in
- *    msg->errQ may be appended with new errors or warnings
- *
- * RETURNS:
- *   status
- *********************************************************************/
-static status_t 
-    parse_leaflist (ses_cb_t  *scb,
-		    const obj_template_t *obj,
-		    const xml_node_t *startnode,
-		    val_value_t  *retval)
-{
-    val_value_t          *chval;
-    xml_node_t            testnode;
-    status_t              res, retres;
-    boolean               done, empty;
-    ncx_btype_t           btyp;
-
-    /* setup local vars */
-    res = NO_ERR;
-    retres = NO_ERR;
-    done = FALSE;
-    empty = FALSE;
-
-    /* first set up a complex type (NCX_BT_LEAF_LIST
-     * that will hold all the simple leafs
-     */
-    val_init_from_template_primary(retval, obj);
-    retval->editop = get_editop(startnode);
-
-    switch (startnode->nodetyp) {
-    case XML_NT_START:
-	break;
-    case XML_NT_EMPTY:
-	empty = TRUE;
-	break;
-    case XML_NT_STRING:
-    case XML_NT_END:
-	res = ERR_NCX_WRONG_NODETYP_SIM;
-	break;
-    default:
-	res = ERR_NCX_WRONG_NODETYP;
-    }
-
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    xml_init_node(&testnode);
-
-    /* get the basetype of the individual leafs */
-    btyp = obj_get_basetype(obj);
-
-    /* go through sibling nodes until a different element shows up
-     * indicating the end of the leaf list
-     * gather all the leafs as children of the leaf-list
-     */
-    while (!done) {
-	/* init per-loop vars */
-	res = NO_ERR;
-
-	/* try to create a new child node for the leaf-list */
-	chval = val_new_child_val(obj_get_nsid(obj),
-				  obj_get_name(obj), 
-				  FALSE, retval, 
-				  get_editop(startnode));
-	if (!chval) {
-	    res = ERR_INTERNAL_MEM;
-	} else if (empty) {
-	    val_init_from_template(chval, obj);
-	    val_add_child(chval, retval);
-	    done = TRUE;
-	    continue;
-	} else {
-	    /* get one leaf parsed */
-	    res = parse_one_btype(scb, obj, btyp, startnode, chval);
-	    chval->res = res;
-	    val_add_child(chval, retval);
-	}
-
-	/* check any errors in setting up the child or index nodes */
-	if (res != NO_ERR) {
-	    retres = res;
-	    if (NEED_EXIT) {
-		done = TRUE;
-		continue;
-	    }
-	}
-
-	/* peek ahead at the next node to see if it matches this 
-	 * leaflist or not 
-	 */
-	res = get_xml_node(scb, &testnode);
-	if (res == NO_ERR) {
-	    if (testnode.nodetyp==XML_NT_START ||
-		testnode.nodetyp==XML_NT_EMPTY) {
-		res = xml_node_match(&testnode, 
-				     obj_get_nsid(obj), 
-				     obj_get_name(obj), 
-				     XML_NT_NONE);
-	    } else {
-		/* not really an error */
-		res = ERR_NCX_WRONG_ELEMENT;
-	    }
-
-	    if (res != NO_ERR) {
-		/* this is part of the next object, or maybe the
-		 * end of a parent object
-		 */
-		scb->xmladvance = FALSE;
-		done = TRUE;
-		continue;
-	    }
-	}
-	if (res != NO_ERR) {
-	    done = TRUE;
-	    continue;
-	}
-	xml_clean_node(&testnode);
-    }
-
-    xml_clean_node(&testnode);
-    return retres;
-
-} /* parse_leaflist */
-
-
-/********************************************************************
  * FUNCTION parse_complex
  * 
  * Parse the XML input as a complex type
@@ -1349,6 +1190,7 @@ static status_t
 	/* init per-loop vars */
 	res2 = NO_ERR;
 	empty = FALSE;
+	chval = NULL;
 
 	/* get the next node which should be a child or end node */
 	res = get_xml_node(scb, &chnode);
@@ -1419,6 +1261,10 @@ static status_t
 
 	    /* try to skip just the child node sub-tree */
 	    xml_clean_node(&chnode);
+	    if (chval) {
+		val_free_value(chval);
+		chval = NULL;
+	    }
 	    if (res2 != NO_ERR) {
 		/* skip child didn't work, now skip the entire value subtree */
 		(void)mgr_xml_skip_subtree(scb->reader, startnode);
@@ -1490,16 +1336,206 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION parse_one_btype
+* FUNCTION parse_metadata
+* 
+* Parse all the XML attributes in the specified xml_node_t struct
+*
+* Only XML_NT_START or XML_NT_EMPTY nodes will have attributes
+*
+* INPUTS:
+*     obj == object template containing meta-data definition
+*     nserr == TRUE if namespace errors should be checked
+*           == FALSE if not, and any attribute is accepted 
+*     node == node of the parameter maybe with attributes to be parsed
+*     retval ==  val_value_t that should get the results of the parsing
+*     
+* OUTPUTS:
+*    *retval will be filled in
+*    msg->errQ may be appended with new errors or warnings
+*    retval->editop contains the last value of the operation attribute
+*      seen, if any; will be OP_EDITOP_NONE if not set
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    parse_metadata (const obj_template_t *obj,
+		    const xml_node_t *node,
+		    boolean nserr,
+		    val_value_t  *retval)
+{
+    const obj_metadata_t    *meta;
+    const typ_def_t         *metadef;
+    xml_attr_t              *attr;
+    val_value_t             *metaval;
+    xmlns_id_t               ncid, yangid;
+    status_t                 res, retres;
+    boolean                  iskey, isvalue;
+
+    retres = NO_ERR;
+    ncid =  xmlns_nc_id();
+    yangid =  xmlns_yang_id();
+
+    /* go through all the attributes in the node and convert
+     * to val_value_t structs
+     * find the correct typedef to match each attribute
+     */
+    for (attr = xml_get_first_attr(node);
+	 attr != NULL;
+	 attr = xml_next_attr(attr)) {
+
+	if (attr->attr_dname && 
+	    !xml_strncmp(attr->attr_dname, 
+			 XMLNS, xml_strlen(XMLNS))) {
+	    /* skip this 'xmlns' attribute */
+	    continue;   
+	}
+
+	/* init per-loop locals */
+	res = NO_ERR;
+	meta = NULL;
+	metadef = NULL;
+	iskey = FALSE;
+	isvalue = FALSE;
+
+	/* check qualified and unqualified operation attribute,
+	 * then the 'xmlns' attribute, then a defined attribute
+	 */
+	if (val_match_metaval(attr, ncid, NC_OPERATION_ATTR_NAME)) {
+	    retval->editop = op_editop_id(attr->attr_val);
+	    if (retval->editop == OP_EDITOP_NONE) {
+		res = ERR_NCX_INVALID_VALUE;
+	    } else {
+		continue;
+	    }
+	} else if (val_match_metaval(attr, yangid, YANG_K_INSERT)) {
+	    retval->insertop = op_insertop_id(attr->attr_val);
+	    if (retval->insertop == OP_INSOP_NONE) {
+		res = ERR_NCX_INVALID_VALUE;
+	    } else {
+		continue;
+	    }
+	} else if (val_match_metaval(attr, yangid, YANG_K_KEY)) {
+	    iskey = TRUE;
+	} else if (val_match_metaval(attr, yangid, YANG_K_VALUE)) {
+	    isvalue = TRUE;
+	} else {
+	    /* find the attribute definition in this typdef */
+	    meta = obj_find_metadata(obj, attr->attr_name);
+	    if (meta) {
+		metadef = meta->typdef;
+	    } else if (!nserr) {
+		metadef = typ_get_basetype_typdef(NCX_BT_STRING);
+	    }
+	}
+
+	if (iskey || isvalue) {
+	    metadef = typ_get_basetype_typdef(NCX_BT_STRING);
+	}
+
+	if (metadef) {
+	    /* alloc a new value struct for rhe attribute */
+	    metaval = val_new_value();
+	    if (!metaval) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		/* parse the attribute string against the typdef */
+		res = val_parse_meta(metadef, attr->attr_ns,
+				     attr->attr_name, 
+				     attr->attr_val, metaval);
+		if (res == NO_ERR) {
+		    dlq_enque(metaval, &retval->metaQ);
+		} else {
+		    val_free_value(metaval);
+		}
+	    }
+	} else {
+	    res = ERR_NCX_UNKNOWN_ATTRIBUTE;
+	}
+	if (res != NO_ERR) {
+	    retres = res;
+	}
+    }
+    return retres;
+
+} /* parse_metadata */
+
+
+/********************************************************************
+* FUNCTION metadata_inst_check
+* 
+* Validate that all the XML attributes in the specified 
+* xml_node_t struct are pesent in appropriate numbers
+*
+* Since attributes are unordered, they all have to be parsed
+* before they can be checked for instance count
+*
+* INPUTS:
+*     scb == session control block
+*     msg == incoming RPC message
+*            Errors are appended to msg->errQ
+*     val == value to check for metadata errors
+*     
+* OUTPUTS:
+*    msg->errQ may be appended with new errors or warnings
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    metadata_inst_check (val_value_t  *val)
+{
+    const obj_metadata_t *meta;
+    uint32                cnt;
+    xmlns_id_t            yangid;
+
+    yangid = xmlns_yang_id();
+
+    /* first check the inst count of the YANG attributes
+     * may not need to do this at all if XmlTextReader
+     * rejects duplicate XML attributes
+     */
+    cnt = val_metadata_inst_count(val, yangid, YANG_K_KEY);
+    if (cnt > 1) {
+	return ERR_NCX_EXTRA_ATTR;
+    }
+
+    cnt = val_metadata_inst_count(val, yangid, YANG_K_VALUE);
+    if (cnt > 1) {
+	return ERR_NCX_EXTRA_ATTR;
+    }
+
+    if (!val->obj) {
+	return NO_ERR;
+    }
+
+    for (meta = obj_first_metadata(val->obj);
+	 meta != NO_ERR;
+	 meta = obj_next_metadata(meta)) {
+
+	cnt = val_metadata_inst_count(val, meta->nsid, meta->name);
+
+	/* check the instance qualifier from the metadata
+	 * continue the loop if there is no error
+	 */
+	if (cnt > 1) {
+	    return ERR_NCX_EXTRA_ATTR;
+	}
+    }
+    return NO_ERR;
+
+} /* metadata_inst_check */
+
+
+/********************************************************************
+* FUNCTION parse_btype
 * 
 * Switch to dispatch to specific base type handler
-* for one element; needed so leaf-list can be handled properly
 *
 * INPUTS:
 *     scb == session control block
 *            Input is read from scb->reader.
-*     obj == object template for expected node
-*     btyp == forced base type to use
+*     obj == object template to use for parsing
 *     startnode == top node of the parameter to be parsed
 *            Parser function will attempt to consume all the
 *            nodes until the matching endnode is reached
@@ -1513,15 +1549,17 @@ static status_t
 *   status
 *********************************************************************/
 static status_t 
-    parse_one_btype (ses_cb_t  *scb,
-		     const obj_template_t *obj,
-		     ncx_btype_t  btyp,
-		     const xml_node_t *startnode,
-		     val_value_t  *retval)
+    parse_btype (ses_cb_t  *scb,
+		 const obj_template_t *obj,
+		 const xml_node_t *startnode,
+		 val_value_t  *retval)
 {
+    ncx_btype_t  btyp;
     status_t     res, res2, res3;
     op_editop_t  editop;
     boolean      nserr;
+
+    btyp = obj_get_basetype(obj);
 
     /* get the attribute values from the start node */
     editop = OP_EDITOP_NONE;
@@ -1530,14 +1568,8 @@ static status_t
     /* check namespace errors except if the type is ANY */
     nserr = (btyp != NCX_BT_ANY);
 
-#if 0  /**** TEMP!!! GETTING STARTED !!! ****/
     /* parse the attributes, if any; do not quick exit on this error */
-    res2 = parse_metadata_nc(scb, msg, obj, startnode, 
-	   nserr, retval, &editop);
-#else
-    res2 = NO_ERR;
-#endif
-
+    res2 = parse_metadata(obj, startnode, nserr, retval);
 
     /* continue to parse the startnode depending on the base type 
      * to record as many errors as possible
@@ -1578,9 +1610,6 @@ static status_t
     case NCX_BT_UNION:
 	res = parse_union(scb, obj, startnode, retval);
 	break;
-    case NCX_BT_LEAF_LIST:
-	res = parse_leaflist(scb, obj, startnode, retval);
-	break;
     case NCX_BT_CONTAINER:
     case NCX_BT_LIST:
 	res = parse_complex(scb, obj, btyp, startnode, retval);
@@ -1597,13 +1626,10 @@ static status_t
     /* set the config flag for this value */
     res3 = NO_ERR;
 
-#if 0   /**** TEMP ****/
-    if (res == NO_ERR) {
+    if (res == NO_ERR && res2 == NO_ERR) {
 	/* this has to be after the retval typdef is set */
-	res3 = metadata_inst_check(scb, msg, retval);
-	clean_metaerrs(retval);
+	res3 = metadata_inst_check(retval);
     }
-#endif
 
     if (res != NO_ERR) {
 	retval->res = res;
@@ -1615,41 +1641,6 @@ static status_t
 
     retval->res = res3;
     return res3;
-
-} /* parse_one_btype */
-
-
-/********************************************************************
-* FUNCTION parse_btype
-* 
-* Switch to dispatch to specific base type handler
-*
-* INPUTS:
-*     scb == session control block
-*            Input is read from scb->reader.
-*     obj == object template to use for parsing
-*     startnode == top node of the parameter to be parsed
-*            Parser function will attempt to consume all the
-*            nodes until the matching endnode is reached
-*     retval ==  val_value_t that should get the results of the parsing
-*     
-* OUTPUTS:
-*    *retval will be filled in
-*    msg->errQ may be appended with new errors or warnings
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t 
-    parse_btype (ses_cb_t  *scb,
-		 const obj_template_t *obj,
-		 const xml_node_t *startnode,
-		 val_value_t  *retval)
-{
-    ncx_btype_t  btyp;
-
-    btyp = obj_get_primary_basetype(obj);
-    return parse_one_btype(scb, obj, btyp, startnode, retval);
 
 } /* parse_btype */
 
@@ -1714,252 +1705,6 @@ status_t
     return res;
 
 }  /* mgr_val_parse */
-
-
-#if 0
-/********************************************************************
-* FUNCTION find_metadef
-* 
-* Find the metadata descriptor, if any, in the typdef chain
-*
-* INPUTS:
-*     typdef == typdef to check
-*     name == attribute name to find
-*
-* RETURNS:
-*   pointer to metadata descriptor or NULL of not found
-*********************************************************************/
-static typ_child_t *
-    find_metadef (typ_def_t *typdef,
-		  const xmlChar *name)
-{
-    typ_child_t  *meta;
-
-    for (;;) {
-	meta = typ_find_meta(typdef, name);
-	if (meta) {
-	    return meta;
-	}
-	
-	typdef = typ_get_parent_typdef(typdef);
-	if (!typdef) {
-	    return NULL;
-	}
-    }
-    /*NOTREACHED*/
-
-} /* find_metadef */
-
-
-
-/********************************************************************
-* FUNCTION metadata_inst_check
-* 
-* Validate that all the XML attributes in the specified 
-* xml_node_t struct are pesent in appropriate numbers
-*
-* Since attributes are unordered, they all have to be parsed
-* before they can be checked for instance count
-*
-* INPUTS:
-*     val == value to check for metadata errors
-*     
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t 
-    metadata_inst_check (val_value_t  *val)
-{
-    const typ_def_t   *typdef;
-    typ_child_t       *metadef;
-    uint32             cnt;
-    status_t           res;
-    boolean            first;
-
-    /* first check the inst count of the operation attribute */
-    cnt = val_metadata_inst_count(val, xmlns_nc_id(), 
-				  NC_OPERATION_ATTR_NAME);
-    if (cnt > 1) {
-	return ERR_NCX_EXTRA_ATTR;
-    }
-
-    /* get the typdef for the first in the chain with 
-     * some meta data defined; may be NULL, in which
-     * case just the operation attribute will be checked
-     */
-    typdef = typ_get_cqual_typdef(val->typdef, NCX_SQUAL_META);
-
-    /* go through the entire typdef chain checking proper
-     * attribute instance count, and record errors
-     */
-    first = TRUE;
-    while (typdef) {
-	if (first) {
-	    metadef = typ_first_meta(typdef);
-	    first = FALSE;
-	} else {
-	    metadef = typ_next_meta(metadef);
-	}
-	if (!metadef) {
-	    typdef = typ_get_cparent_typdef(typdef);
-	    first = TRUE;
-	} else {
-	    /* got something to check 
-	     * 
-	     * limitation for now!!!
-	     * attribute namespace must be the same as the
-	     * value that holds it, except for the netconf
-	     * operation attribute
-	     */
-	    res = NO_ERR;
-	    cnt = val_metadata_inst_count(val, val->nsid, metadef->name);
-
-	    /* check the instance qualifier from the typdef 
-	     * continue the loop if there is no error
-	     */
-	    switch (metadef->typdef.iqual) {
-	    case NCX_IQUAL_ONE:
-		if (!cnt) {
-		    res = ERR_NCX_MISSING_ATTR;
-		} else if (cnt > 1) {
-		    res = ERR_NCX_EXTRA_ATTR;
-		}
-		break;
-	    case NCX_IQUAL_OPT:
-		if (cnt > 1) {
-		    res = ERR_NCX_EXTRA_ATTR;
-		}
-		break;
-	    case NCX_IQUAL_1MORE:
-		if (!cnt) {
-		    res = ERR_NCX_MISSING_ATTR;
-		}
-		break;
-	    case NCX_IQUAL_ZMORE:
-		break;
-	    default:
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-
-	    if (res != NO_ERR) {
-		return res;
-	    }
-	}
-    }
-    return NO_ERR;
-
-} /* metadata_inst_check */
-
-
-/********************************************************************
-* FUNCTION parse_metadata
-* 
-* Parse all the XML attributes in the specified xml_node_t struct
-*
-* Only XML_NT_START or XML_NT_EMPTY nodes will have attributes
-*
-* INPUTS:
-*     typdef == first non-ptr-only typdef for this type
-*     nserr == TRUE if namespace errors should be checked
-*           == FALSE if not, and any attribute is accepted 
-*     node == node of the parameter maybe with attributes to be parsed
-*     retval ==  val_value_t that should get the results of the parsing
-*     
-* OUTPUTS:
-*    *retval will be filled in
-*    *editop contains the last value of the operation attribute
-*      seen, if any; will be OP_EDITOP_NONE if not set
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t 
-    parse_metadata (typ_def_t *typdef,
-		    const xml_node_t *node,
-		    boolean nserr,
-		    val_value_t  *retval,
-		    op_editop_t  *editop)
-{
-    typ_child_t    *oper, *meta;
-    xml_attr_t     *attr;
-    typ_def_t      *metadef;
-    val_value_t    *metaval;
-    xmlns_id_t      ncid;
-    status_t        res;
-    boolean         isoper;
-
-    /* setup the NETCONF operation attribute */
-    oper = ncx_get_operation_attr();
-    ncid =  xmlns_nc_id();
-
-    res = NO_ERR;
-
-    /* go through all the attributes in the node and convert
-     * to val_value_t structs
-     * find the correct typedef to match each attribute
-     */
-    for (attr = xml_get_first_attr(node);
-	 attr != NULL;
-	 attr = xml_next_attr(attr)) {
-
-	meta = NULL;
-	metadef = NULL;
-	isoper = FALSE;
-
-	/* check qualified and unqualified operation attribute,
-	 * then the 'xmlns' attribute, then a defined attribute
-	 */
-	if (match_metaval(attr, ncid, NC_OPERATION_ATTR_NAME)) {
-	    metadef = &oper->typdef;
-	    isoper = TRUE;
-	} else if (attr->attr_dname &&
-		   !xml_strncmp(attr->attr_dname, 
-				XMLNS, xml_strlen(XMLNS))) {
-	    continue;   /* skip this 'xmlns' attribute */
-	} else {
-	    /* find the attribute definition in this typdef */
-	    meta = find_metadef(typdef, attr->attr_name);
-	    if (meta) {
-		metadef = &meta->typdef;
-	    } else if (!nserr) {
-		metadef = typ_get_basetype_typdef(NCX_BT_STRING);
-	    }
-	}
-
-	if (metadef) {
-	    /* alloc a new value struct for rhe attribute */
-	    metaval = val_new_value();
-	    if (!metaval) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		/* parse the attribute string against the typdef */
-		res = val_parse_meta(metadef, attr->attr_ns,
-				     attr->attr_name, 
-				     attr->attr_val, metaval);
-		if (res == NO_ERR) {
-		    if (isoper) {
-			*editop = op_editop_id(attr->attr_val);
-			/* don't save operation attr */
-			val_free_value(metaval);
-		    } else {
-			dlq_enque(metaval, &retval->metaQ);
-		    }
-		} else {
-		    val_free_value(metaval);
-		}
-	    }
-	} else {
-	    res = ERR_NCX_UNKNOWN_ATTRIBUTE;
-	}
-
-	if (res != NO_ERR) {
-	    return res;
-	}
-    }
-    return NO_ERR;
-
-} /* parse_metadata */
-#endif  /* 0 */
 
 
 /* END file mgr_val_parse.c */

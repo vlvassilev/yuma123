@@ -5379,52 +5379,6 @@ ncx_btype_t
 
 
 /********************************************************************
-* FUNCTION obj_get_primary_basetype
-* 
-* Get the NCX base type enum for the object type
-* Return the primary type NCX_BT_LEAF_LIST instead
-*  of the underlying list element type
-*
-* INPUTS:
-*    obj  == object to check
-*
-* RETURNS:
-*    base type enumeration
-*********************************************************************/
-ncx_btype_t
-    obj_get_primary_basetype (const obj_template_t  *obj)
-{
-    switch (obj->objtype) {
-    case OBJ_TYP_LEAF:
-	if (obj_is_xsdlist(obj)) {
-	    return NCX_BT_SLIST;
-	} else {
-	    return typ_get_basetype(obj->def.leaf->typdef);
-	}
-    case OBJ_TYP_LEAF_LIST:
-	return NCX_BT_LEAF_LIST;
-    case OBJ_TYP_CONTAINER:
-	return NCX_BT_CONTAINER;
-    case OBJ_TYP_LIST:
-	return NCX_BT_LIST;
-    case OBJ_TYP_CHOICE:
-	return NCX_BT_CHOICE;
-    case OBJ_TYP_CASE:
-	return NCX_BT_CASE;
-    case OBJ_TYP_RPCIO:
-	return NCX_BT_CONTAINER;
-    case OBJ_TYP_NOTIF:
-	return NCX_BT_CONTAINER;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NCX_BT_NONE;
-    }
-    /*NOTREACHED*/
-
-}  /* obj_get_primary_basetype */
-
-
-/********************************************************************
 * FUNCTION obj_get_mod_prefix
 * 
 * Get the module prefix for this object

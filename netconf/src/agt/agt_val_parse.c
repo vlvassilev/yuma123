@@ -139,17 +139,6 @@ static status_t
 		    val_value_t  *retval);
 
 
-static status_t 
-    parse_one_btype (ses_cb_t  *scb,
-		     xml_msg_hdr_t *msg,
-		     const obj_template_t *obj,
-		     ncx_btype_t  btyp,
-		     const xml_node_t *startnode,
-		     ncx_data_class_t parentdc,
-		     val_value_t  *retval);
-
-
-
 /********************************************************************
 * FUNCTION parse_error_subtree
 * 
@@ -1489,167 +1478,6 @@ static status_t
 
 
 /********************************************************************
- * FUNCTION parse_leaflist_nc
- * 
- * Parse the XML input as a pseudo-complex type
- *
- * Handles the following base types:
- *   NCX_BT_LEAF_LIST
- *
- *
- * <foo>fred</foo>
- * <foo>barney</foo>
- * <foo>wilma</foo>
- *
- * INPUTS:
- *   see parse_btype_nc parameter list
- * RETURNS:
- *   status
- *********************************************************************/
-static status_t 
-    parse_leaflist_nc (ses_cb_t  *scb,
-		       xml_msg_hdr_t *msg,
-		       const obj_template_t *obj,
-		       const xml_node_t *startnode,
-		       ncx_data_class_t parentdc,
-		       val_value_t  *retval)
-{
-    const xml_node_t     *errnode;
-    val_value_t          *chval;
-    xml_node_t            testnode;
-    status_t              res, retres;
-    boolean               done, errdone, empty;
-    ncx_btype_t           btyp;
-
-    /* setup local vars */
-    errnode = startnode;
-    res = NO_ERR;
-    retres = NO_ERR;
-    done = FALSE;
-    empty = FALSE;
-
-    /* first set up a complex type (NCX_BT_LEAF_LIST
-     * that will hold all the simple leafs
-     */
-    val_init_from_template_primary(retval, obj);
-    retval->dataclass = pick_dataclass(parentdc, obj);
-    retval->editop = get_editop(startnode);
-
-    switch (startnode->nodetyp) {
-    case XML_NT_START:
-	break;
-    case XML_NT_EMPTY:
-	empty = TRUE;
-	break;
-    case XML_NT_STRING:
-    case XML_NT_END:
-	res = ERR_NCX_WRONG_NODETYP_SIM;
-	break;
-    default:
-	res = ERR_NCX_WRONG_NODETYP;
-    }
-
-    if (res != NO_ERR) {
-	(void)parse_error_subtree(scb, msg, startnode,
-				  errnode, res, 
-				  NCX_NT_NONE, NULL, 
-				  NCX_NT_VAL, retval);
-	return res;
-    }
-
-    xml_init_node(&testnode);
-
-    /* get the basetype of the individual leafs */
-    btyp = obj_get_basetype(obj);
-
-    /* go through sibling nodes until a different element shows up
-     * indicating the end of the leaf list
-     * gather all the leafs as children of the leaf-list
-     */
-    while (!done) {
-	/* init per-loop vars */
-	errdone = FALSE;
-	res = NO_ERR;
-
-	/* try to create a new child node for the leaf-list */
-	chval = val_new_child_val(obj_get_nsid(obj),
-				  obj_get_name(obj), 
-				  FALSE, retval, 
-				  get_editop(startnode));
-	if (!chval) {
-	    res = ERR_INTERNAL_MEM;
-	} else if (empty) {
-	    val_init_from_template(chval, obj);
-	    val_add_child(chval, retval);
-	    done = TRUE;
-	    continue;
-	} else {
-	    /* get one leaf parsed */
-	    val_add_child(chval, retval);
-	    res = parse_one_btype(scb, msg, obj, btyp,
-				  startnode, parentdc, chval);
-	    chval->res = res;
-	    if (res != NO_ERR) {
-		/* did not parse the child node correctly */
-		errdone = TRUE;
-	    }
-	}
-
-	/* check any errors in setting up the child or index nodes */
-	if (res != NO_ERR) {
-	    retres = res;
-	    if (!errdone) {
-		/* add rpc-error to msg->errQ */
-		(void)parse_error_subtree(scb, msg, startnode,
-					  errnode, res, 
-					  NCX_NT_NONE, NULL, 
-					  NCX_NT_VAL, retval);
-	    }
-	    if (NEED_EXIT) {
-		done = TRUE;
-		continue;
-	    }
-	}
-
-	/* peek ahead at the next node to see if it matches this 
-	 * leaflist or not 
-	 */
-	res = get_xml_node(scb, msg, &testnode, TRUE);
-	if (res == NO_ERR) {
-	    if (testnode.nodetyp==XML_NT_START ||
-		testnode.nodetyp==XML_NT_EMPTY) {
-		res = xml_node_match(&testnode, 
-				     obj_get_nsid(obj), 
-				     obj_get_name(obj), 
-				     XML_NT_NONE);
-	    } else {
-		/* not really an error */
-		res = ERR_NCX_WRONG_ELEMENT;
-	    }
-
-	    if (res != NO_ERR) {
-		/* this is part of the next object, or maybe the
-		 * end of a parent object
-		 */
-		scb->xmladvance = FALSE;
-		done = TRUE;
-		continue;
-	    }
-	}
-	if (res != NO_ERR) {
-	    done = TRUE;
-	    continue;
-	}
-	xml_clean_node(&testnode);
-    }
-
-    xml_clean_node(&testnode);
-    return retres;
-
-} /* parse_leaflist_nc */
-
-
-/********************************************************************
  * FUNCTION parse_complex_nc
  * 
  * Parse the XML input as a complex type
@@ -1763,6 +1591,7 @@ static status_t
 	res2 = NO_ERR;
 	errdone = FALSE;
 	empty = FALSE;
+	chval = NULL;
 
 	/* get the next node which should be a child or end node */
 	res = get_xml_node(scb, msg, &chnode, TRUE);
@@ -1851,6 +1680,10 @@ static status_t
 					   NULL, NCX_NT_VAL, retval);
 	    }
 	    xml_clean_node(&chnode);
+	    if (chval) {
+		val_free_value(chval);
+		chval = NULL;
+	    }
 	    if (res2 != NO_ERR) {
 		/* skip child didn't work, now skip the entire value subtree */
 		(void)agt_xml_skip_subtree(scb, startnode);
@@ -1865,7 +1698,6 @@ static status_t
 	/* recurse through and get whatever nodes are present
 	 * in the child node
 	 */
-
 	val_add_child(chval, retval);
 	res = parse_btype_nc(scb, msg, curchild,
 			     &chnode, retval->dataclass, chval);
@@ -2136,18 +1968,16 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION parse_one_btype
+* FUNCTION parse_btype_nc
 * 
 * Switch to dispatch to specific base type handler
-* for one element; needed so leaf-list can be handled properly
 *
 * INPUTS:
 *     scb == session control block
 *            Input is read from scb->reader.
 *     msg == incoming RPC message
 *            Errors are appended to msg->errQ
-*     obj == object template for expected node
-*     btyp == forced base type to use
+*     obj == object template to use for parsing
 *     startnode == top node of the parameter to be parsed
 *            Parser function will attempt to consume all the
 *            nodes until the matching endnode is reached
@@ -2163,16 +1993,18 @@ static status_t
 *   status
 *********************************************************************/
 static status_t 
-    parse_one_btype (ses_cb_t  *scb,
-		     xml_msg_hdr_t *msg,
-		     const obj_template_t *obj,
-		     ncx_btype_t  btyp,
-		     const xml_node_t *startnode,
-		     ncx_data_class_t parentdc,
-		     val_value_t  *retval)
+    parse_btype_nc (ses_cb_t  *scb,
+		    xml_msg_hdr_t *msg,
+		    const obj_template_t *obj,
+		    const xml_node_t *startnode,
+		    ncx_data_class_t parentdc,
+		    val_value_t  *retval)
 {
+    ncx_btype_t  btyp;
     status_t     res, res2, res3;
     boolean      nserr;
+
+    btyp = obj_get_basetype(obj);
 
     /* get the attribute values from the start node */
     retval->editop = OP_EDITOP_NONE;
@@ -2226,10 +2058,6 @@ static status_t
     case NCX_BT_UNION:
 	res = parse_union_nc(scb, msg, obj, startnode, parentdc, retval);
 	break;
-    case NCX_BT_LEAF_LIST:
-	res = parse_leaflist_nc(scb, msg, obj, startnode, 
-				parentdc, retval);
-	break;
     case NCX_BT_CONTAINER:
     case NCX_BT_LIST:
 	res = parse_complex_nc(scb, msg, obj, startnode, 
@@ -2242,7 +2070,7 @@ static status_t
     /* set the config flag for this value */
     res3 = NO_ERR;
 
-    if (res == NO_ERR) {
+    if (res == NO_ERR  && res2 == NO_ERR) {
 	/* this has to be after the retval typdef is set */
 	res3 = metadata_inst_check(scb, msg, retval);
     }
@@ -2257,48 +2085,6 @@ static status_t
 
     retval->res = res3;
     return res3;
-
-} /* parse_one_btype */
-
-
-/********************************************************************
-* FUNCTION parse_btype_nc
-* 
-* Switch to dispatch to specific base type handler
-*
-* INPUTS:
-*     scb == session control block
-*            Input is read from scb->reader.
-*     msg == incoming RPC message
-*            Errors are appended to msg->errQ
-*     obj == object template to use for parsing
-*     startnode == top node of the parameter to be parsed
-*            Parser function will attempt to consume all the
-*            nodes until the matching endnode is reached
-*     parentdc == data class of the parent node, which will get
-*                 used if it is not explicitly set for the typdef
-*     retval ==  val_value_t that should get the results of the parsing
-*     
-* OUTPUTS:
-*    *retval will be filled in
-*    msg->errQ may be appended with new errors or warnings
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t 
-    parse_btype_nc (ses_cb_t  *scb,
-		    xml_msg_hdr_t *msg,
-		    const obj_template_t *obj,
-		    const xml_node_t *startnode,
-		    ncx_data_class_t parentdc,
-		    val_value_t  *retval)
-{
-    ncx_btype_t  btyp;
-
-    btyp = obj_get_primary_basetype(obj);
-    return parse_one_btype(scb, msg, obj, btyp,
-			   startnode, parentdc, retval);
 
 } /* parse_btype_nc */
 

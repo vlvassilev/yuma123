@@ -11,7 +11,7 @@ module SNMP-USM-DH-OBJECTS-MIB {
    /*** NAMESPACE / PREFIX DEFINITION ***/
 
    namespace "urn:ietf:params:xml:ns:yang:smiv2:SNMP-USM-DH-OBJECTS-MIB";
-   prefix "snmp-usm";
+   prefix "snmp-usm-dh";
 
    /*** LINKAGE (IMPORTS / INCLUDES) ***/
 
@@ -292,7 +292,7 @@ module SNMP-USM-DH-OBJECTS-MIB {
          functionality of the KeyChange objects in the base table row.";
 
       leaf usmDHUserAuthKeyChange {
-         type snmp-usm:DHKeyChange;
+         type snmp-usm-dh:DHKeyChange;
          config true;
          description 
            "The object used to change any given user's Authentication Key
@@ -306,7 +306,7 @@ module SNMP-USM-DH-OBJECTS-MIB {
       }
 
       leaf usmDHUserOwnAuthKeyChange {
-         type snmp-usm:DHKeyChange;
+         type snmp-usm-dh:DHKeyChange;
          config true;
          description 
            "The object used to change the agents own Authentication Key
@@ -320,7 +320,7 @@ module SNMP-USM-DH-OBJECTS-MIB {
       }
 
       leaf usmDHUserPrivKeyChange {
-         type snmp-usm:DHKeyChange;
+         type snmp-usm-dh:DHKeyChange;
          config true;
          description 
            "The object used to change any given user's Privacy Key using
@@ -334,7 +334,7 @@ module SNMP-USM-DH-OBJECTS-MIB {
       }
 
       leaf usmDHUserOwnPrivKeyChange {
-         type snmp-usm:DHKeyChange;
+         type snmp-usm-dh:DHKeyChange;
          config true;
          description 
            "The object used to change the agent's own Privacy Key using a

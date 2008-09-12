@@ -359,8 +359,7 @@ static status_t
     status_t         res, retres;
 
     /* right brace means appinfo is done */
-    if ((tkc->source == TK_SOURCE_NCX) ||
-	(tkc->source == TK_SOURCE_YANG && !nobrace)) {
+    if (tkc->source == TK_SOURCE_YANG && !nobrace) {
 	if (tk_next_typ(tkc)==TK_TT_RBRACE) {
 	    return ERR_NCX_SKIPPED;
 	}
@@ -470,20 +469,7 @@ static status_t
     status_t       res;
     boolean        done;
 
-    if (tkc->source == TK_SOURCE_NCX) {
-	/* check if optional appinfo keyword is present */
-	res = ncx_consume_tstring(tkc, mod, NCX_EL_APPINFO, TRUE);
-	if (res!=NO_ERR) {
-	    /* may be a real error or just skipped */
-	    return res;
-	}
-
-	/* got the token, so the left brace must be present */
-	res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-	if (res != NO_ERR) {
-	    return res;
-	}
-    } else if (tkc->source == TK_SOURCE_YANG && bkup) {
+    if (tkc->source == TK_SOURCE_YANG && bkup) {
 	/* hack: all the YANG fns that call this function
 	 * already parsed the MSTRING since extensions
 	 * can be spread out throughout the file
@@ -497,15 +483,6 @@ static status_t
 	if (res != NO_ERR || tkc->source == TK_SOURCE_YANG) {
 	    done = TRUE;
 	}
-    }
-
-    if (res == ERR_NCX_SKIPPED && tkc->source == TK_SOURCE_NCX) {
-	res = NO_ERR;
-    }
-
-    /* get the closing right brace */
-    if (res == NO_ERR && tkc->source == TK_SOURCE_NCX) {
-	res = ncx_consume_token(tkc, mod, TK_TT_RBRACE);
     }
 
     return res;
@@ -7008,9 +6985,6 @@ status_t
     if (res != NO_ERR) {
 	tkname = tk_get_token_name(ttyp);
 	switch (tkc->source) {
-	case TK_SOURCE_NCX:
-	    ncx_mod_exp_err(tkc, mod, res, tkname);
-	    break;
 	case TK_SOURCE_YANG:
 	    ncx_mod_exp_err(tkc, mod, res, tkname);
 

@@ -975,6 +975,10 @@ status_t
     res = add_top_node(DEF_NT_MODNODE, mod->name, mod);
     if (res == NO_ERR) {
 	res = add_top_node(DEF_NT_PRENODE, mod->prefix, mod);
+	if (res != NO_ERR) {
+	    log_error("\nError: Duplicate prefix (%s) in module %s",
+		      mod->prefix, mod->name);
+	}
     }
     return res;
 

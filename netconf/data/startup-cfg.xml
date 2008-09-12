@@ -3,11 +3,17 @@
   xmlns="urn:ietf:params:xml:ns:yang:test">
   <test1>
    <a> 1  </a>
-   <b>77</b>
+   <b>32</b>
    <c>aeddd34</c>
    <d>z</d>
+   <e>
+    <ee>a14</ee>
+    <ee>a8</ee>
+    <ee>ff</ee>
+    <ee>f777</ee>
+    <eee/>
+   </e>
   </test1>
-  <test1/>
   <test2>
    <a2>fred</a2>
    <b2>7</b2>

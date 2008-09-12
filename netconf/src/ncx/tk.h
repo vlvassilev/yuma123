@@ -155,13 +155,24 @@ typedef enum tk_type_t_ {
     TK_TT_EQUAL,                /* equal sign '=' */ 
     TK_TT_BAR,                  /* bar '|' */
     TK_TT_STAR,                 /* star '*' */
-    TK_TT_QMARK,                /* question mark '?' */
+    TK_TT_ATSIGN,               /* at sign '@' */
     TK_TT_PLUS,                 /* plus mark '+' */
     TK_TT_COLON,                /* colon char ':' */
+    TK_TT_PERIOD,               /* period char '.' */
+    TK_TT_FSLASH,               /* forward slash char '/' */
+    TK_TT_MINUS,                /* minus char '-' */
+    TK_TT_LT,                   /* less than char '<' */
+    TK_TT_GT,                   /* greater than char '>' */
+    TK_TT_DOLLAR,               /* dollar sign '$' */
 
     /* PUT ALL 2-CHAR TOKENS SECOND */
-    TK_TT_RANGESEP,             /* range separator '..' */
-    TK_TT_PLUSEQ,               /* plus equals '+=' */
+    TK_TT_RANGESEP,             /* range sep, parent node '..' */
+    TK_TT_DBLCOLON,             /* 2 colon chars '::' */
+    TK_TT_DBLFSLASH,            /* 2 fwd slashes '//' */
+    TK_TT_NOTEQUAL,             /* not equal '!=' */
+    TK_TT_LEQUAL,               /* less than or equal '<=' */
+    TK_TT_GEQUAL,               /* greater than or equal '>=' */
+
 
     /* PUT ALL STRING CLASSIFICATION TOKENS THIRD */
     TK_TT_STRING,               /* unquoted string */
@@ -182,10 +193,12 @@ typedef enum tk_type_t_ {
 } tk_type_t;
 
 typedef enum tk_source_t_ {
-    TK_SOURCE_NCX,
     TK_SOURCE_CONF,
-    TK_SOURCE_YANG
+    TK_SOURCE_YANG,
+    TK_SOURCE_XPATH,
+    TK_SOURCE_REDO
 } tk_source_t;
+
 
 /* single NCX language token type */
 typedef struct tk_token_t_ {
@@ -195,7 +208,6 @@ typedef struct tk_token_t_ {
     uint32     modlen;
     xmlChar    *val;       /* only used for variable length tokens */
     uint32     len;
-    uint32     flags;
     uint32     linenum;
     uint32     linepos;
 } tk_token_t;
@@ -226,11 +238,6 @@ extern tk_chain_t *
     tk_new_chain (void);
 
 extern void
-    tk_setup_chain_ncx (tk_chain_t *tkc,
-			FILE *fp,
-			const xmlChar *filename);
-
-extern void
     tk_setup_chain_conf (tk_chain_t *tkc,
 			 FILE *fp,
 			 const xmlChar *filename);
@@ -245,11 +252,6 @@ extern void
 
 extern tk_type_t 
     tk_get_token_id (const xmlChar *buff, 
-		     uint32 len);
-
-/* checks for valid NCX data type name */
-extern ncx_btype_t 
-    tk_get_btype_id (const xmlChar *buff, 
 		     uint32 len);
 
 /* checks for valid YANG data type name */
@@ -288,10 +290,21 @@ extern status_t
 extern status_t 
     tk_retokenize_cur_string (tk_chain_t *tkc,
 			      ncx_module_t *mod);
+
+/* convert the ncx:metadata content to 1 or 2 tokens */
 extern tk_chain_t *
     tk_tokenize_metadata_string (ncx_module_t *mod,
 				 xmlChar *str,
 				 status_t *res);
+
+/* convert an XPath string to tokens
+ * mod can be NULL -- used for error reporting
+ */
+extern tk_chain_t *
+    tk_tokenize_xpath_string (ncx_module_t *mod,
+			      xmlChar *str,
+			      status_t *res);
+
 
 
 extern uint32

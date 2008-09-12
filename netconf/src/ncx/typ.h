@@ -219,6 +219,7 @@ typedef struct typ_simple_t_ {
     ncx_strrest_t    strrest;   /* string/type restriction type in valQ */
     uint32           flags;
     struct typ_template_t_ *listtyp;       /* template for NCX_BT_SLIST */
+    tk_chain_t      *xchain;            /* saved for NCX_BT_KEYREF only */
 } typ_simple_t;
 
 
@@ -558,17 +559,6 @@ extern void
 /* get the proper range base type to use for a given base type */
 extern ncx_btype_t 
     typ_get_range_type (ncx_btype_t btyp);
-
-
-/* search this module and then the import path for
- * the specified type template
- */
-extern status_t
-    typ_locate_template (ncx_module_t  *mod,
-			 const xmlChar *modstr,
-			 const xmlChar *typname,
-			 typ_template_t  **tptr);
-
 
 /* Follow any typdef links and get the actual base type of 
  * the specified typedef 

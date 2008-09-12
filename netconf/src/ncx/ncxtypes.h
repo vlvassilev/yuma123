@@ -153,8 +153,7 @@ typedef enum ncx_btype_t_ {
     NCX_BT_CASE,                   /* not a real type */
     NCX_BT_LIST,
     NCX_BT_EXTERN,                 /* not a real type */
-    NCX_BT_INTERN,                 /* not a real type */
-    NCX_BT_LEAF_LIST          /* YANG multi-elem list */
+    NCX_BT_INTERN                  /* not a real type */
 
 } ncx_btype_t;
 

@@ -101,4 +101,14 @@ extern status_t
 			   const xmlChar *target,
 			   val_value_t **targval);
 
+
+
+extern status_t
+    xpath_get_keyref_path (tk_chain_t *tkc,
+			   ncx_module_t *mod,
+			   obj_template_t *obj,
+			   const xmlChar *target,
+			   tk_token_t *errtk,
+			   obj_template_t **targobj);
+
 #endif	    /* _H_xpath */

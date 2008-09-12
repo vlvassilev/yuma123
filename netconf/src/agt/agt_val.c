@@ -842,11 +842,11 @@ static status_t
     /* first traverse all the nodes until leaf nodes are reached */
     switch (newval->obj->objtype) {
     case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
 	res = invoke_simval_cb(cbtyp, editop, scb, msg,
 			       target, newval, 
 			       (v_val) ? v_val : curval, done);
 	break;
-    case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_CONTAINER:
     case OBJ_TYP_LIST:
     case OBJ_TYP_RPC:
@@ -1591,9 +1591,7 @@ status_t
 	return NO_ERR;
     }
 
-    if (obj->objtype == OBJ_TYP_LEAF_LIST) {
-	retres = instance_check(scb, msg, obj, valset, layer);
-    } else if (val_child_cnt(valset)) {
+    if (val_child_cnt(valset)) {
 	for (chval = val_get_first_child(valset);
 	     chval != NULL;
 	     chval = val_get_next_child(chval)) {

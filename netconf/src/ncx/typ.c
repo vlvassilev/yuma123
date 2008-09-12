@@ -131,6 +131,11 @@ static void
 	}
     }
 
+    if (sim->xchain) {
+	tk_free_chain(sim->xchain);
+	sim->xchain = NULL;
+    }
+
     sim->btyp = NCX_BT_NONE;
     sim->strrest = NCX_SR_NONE;
     sim->listtyp = NULL;
@@ -1796,76 +1801,6 @@ ncx_btype_t
 
 
 /********************************************************************
-* FUNCTION typ_locate_template
-* 
-* Search the current module, and then the module import path,
-* for the typ_template_t struct for the specified type name.
-*
-* INPUTS:
-*     mod == ncx_module_t for the construct using this type name
-*     modstr == name of only module to use; NULL if not used
-*     typname == name of type to find
-* OUTPUTS:
-*    *tptr == pointer to the located template, if NO_ERR
-* RETURNS:
-*    status
-*********************************************************************/
-status_t
-    typ_locate_template (ncx_module_t  *mod,
-			 const xmlChar *modstr,
-			 const xmlChar *typname,
-			 typ_template_t  **tptr)
-{
-    ncx_node_t       dtyp;
-    ncx_btype_t      btyp;
-
-#ifdef DEBUG
-    if (!mod || !typname || !tptr) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    dtyp = NCX_NT_TYP;
-    if (!modstr) {
-        /* First look in the mod->typeQ we have so far 
-         * It does not include the type we are building, so
-         * there is no need for a special check for that corner case
-         */
-	*tptr = ncx_find_type(mod, typname);
-	if (*tptr) {
-	    return NO_ERR;
-        }
-
-        /* Typename not found, now go through the imports list 
-         * for any match in an items list; ask for TYPES only
-         */
-
-        *tptr = (typ_template_t *)
-	    ncx_locate_import(mod, typname, &dtyp);
-
-	/* check if the typename is a base type
-	 * if we get here, there is no type override
-	 * in the current module or the import path
-	 */
-	if (!*tptr) {
-	    btyp = tk_get_btype_id(typname, xml_strlen(typname));
-	    if (btyp != NCX_BT_NONE) {
-		*tptr = (typ_template_t *)
-		    def_reg_find_moddef(NCX_MODULE, typname, &dtyp);
-	    }
-	}
-    } else {
-        dtyp = NCX_NT_TYP;
-        *tptr = (typ_template_t *)
-            ncx_locate_modqual_import(modstr, typname, 
-				      mod->diffmode, &dtyp);
-    }
-    return *tptr ? NO_ERR : ERR_NCX_DEF_NOT_FOUND;
-
-}  /* typ_locate_template */
-
-
-/********************************************************************
 * FUNCTION typ_get_basetype
 * 
 * Get the final base type of the specified typ_def_t
@@ -3502,7 +3437,6 @@ boolean
     case NCX_BT_CASE:
     case NCX_BT_LIST:
     case NCX_BT_ANY:
-    case NCX_BT_LEAF_LIST:
 	return TRUE;
     default:
 	return FALSE;
@@ -3575,7 +3509,6 @@ boolean
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
     case NCX_BT_LIST:
-    case NCX_BT_LEAF_LIST:
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
 	return FALSE;
@@ -3624,7 +3557,6 @@ boolean
     case NCX_BT_SLIST:
     case NCX_BT_KEYREF:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_LEAF_LIST:
 	return TRUE;
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
@@ -4562,7 +4494,6 @@ boolean
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
-    case NCX_BT_LEAF_LIST:
         return FALSE;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);

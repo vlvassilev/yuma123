@@ -938,28 +938,9 @@ status_t
 			      obj_template_t **targobj,
 			      dlq_hdr_t **targQ)
 {
-    status_t    res;
-
-#ifdef DEBUG
-    if (!tkc || !mod || !datadefQ || !target) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    if (*target == '/') {
-	/* check error: if nested object is using an abs. Xpath */
-	if (obj && obj->parent) {
-	    log_error("\nError: Absolute Xpath expression not "
-		      "allowed here (%s)", target);
-	    res = ERR_NCX_INVALID_VALUE;
-	    do_errmsg(tkc, mod, obj->tk, res);
-	    return res;
-	}
-    }
-
-    res = find_schema_node(tkc, mod, obj, datadefQ,
-			   target, targobj, targQ, obj->tk);
-    return res;
+    return xpath_find_schema_target_err(tkc, mod, obj, datadefQ, 
+					target, targobj, targQ, 
+					NULL);
 
 }  /* xpath_find_schema_target */
 
@@ -1004,7 +985,7 @@ status_t
     status_t    res;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !datadefQ || !target || !errtk) {
+    if (!mod || !datadefQ || !target) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -1015,13 +996,14 @@ status_t
 	    log_error("\nError: Absolute Xpath expression not "
 		      "allowed here (%s)", target);
 	    res = ERR_NCX_INVALID_VALUE;
-	    do_errmsg(tkc, mod, obj->tk, res);
+	    do_errmsg(tkc, mod, errtk ? errtk : obj->tk, res);
 	    return res;
 	}
     }
 
     res = find_schema_node(tkc, mod, obj, datadefQ,
-			   target, targobj, targQ, errtk);
+			   target, targobj, targQ, 
+			   errtk ? errtk : (obj ? obj->tk : NULL));
     return res;
 
 }  /* xpath_find_schema_target_err */
@@ -1110,6 +1092,74 @@ status_t
     return find_val_node(startval, mod, target, targval);
 
 }  /* xpath_find_val_target */
+
+
+/********************************************************************
+* FUNCTION xpath_get_keyref_path
+* 
+* Parse the keyref path as a keyref path
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* path-arg-str           = < a string which matches the rule
+*                            path-arg >
+*
+* path-arg               = absolute-path / relative-path
+*
+* absolute-path          = 1*("/" (node-identifier *path-predicate))
+*
+* relative-path          = descendant-path /
+*                          (".." "/"
+*                          *relative-path)
+* 
+* descendant-path        = node-identifier *path-predicate
+*                          absolute-path
+*
+* path-predicate         = "[" *WSP path-equality-expr *WSP "]"
+* 
+* path-equality-expr     = node-identifier *WSP "=" *WSP path-key-expr
+*
+* path-key-expr          = this-variable-keyword "/" rel-path-keyexpr
+*
+* rel-path-keyexpr       = 1*(".." "/") *(node-identifier "/")
+*                         node-identifier
+*
+* INPUTS:
+*    tkc == token chain in progress (may be NULL: errmsg only)
+*    mod == module in progress
+*    obj == object initiating search, which contains the keyref type
+*    target == Xpath expression string to evaluate
+*    errtk == error token to use if any messages generated (may be NULL)
+*    targobj == address of return target object (may be NULL)
+*
+* OUTPUTS:
+*   *targobj == pointer to return object target
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_get_keyref_path (tk_chain_t *tkc,
+			   ncx_module_t *mod,
+			   obj_template_t *obj,
+			   const xmlChar *target,
+			   tk_token_t *errtk,
+			   obj_template_t **targobj)
+{
+    status_t    res;
+
+#ifdef DEBUG
+    if (!mod || !obj || !target) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;  /******/
+
+    return res;
+
+}  /* xpath_get_keyref_path */
 			      
 
 /* END xpath.c */

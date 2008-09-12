@@ -711,9 +711,6 @@ extern const typ_def_t *
 extern ncx_btype_t
     obj_get_basetype (const obj_template_t  *obj);
 
-extern ncx_btype_t
-    obj_get_primary_basetype (const obj_template_t  *obj);
-
 extern const xmlChar *
     obj_get_mod_prefix (const obj_template_t *obj);
 

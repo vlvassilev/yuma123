@@ -4560,16 +4560,7 @@ status_t
 		*len = (uint32)icnt;
 	    }
 	} else {
-	    icnt = sprintf(numbuff, "%d", VAL_ENUM(val));
-	    if (icnt < 0) {
-		return SET_ERROR(ERR_INTERNAL_VAL);
-	    } else {
-		*len = (uint32)icnt;
-	    }
-	    /* number OK and added in -- canonical form is foo(n)
-	     * add name and 2 parens to the total 
-	     */
-	    *len += (xml_strlen(val->v.enu.name) + 2);
+	    *len = xml_strlen(val->v.enu.name);
 	}
 	break;
     case NCX_BT_INT8:

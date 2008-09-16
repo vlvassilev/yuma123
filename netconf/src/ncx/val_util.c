@@ -709,17 +709,49 @@ static status_t
 
 /*************** E X T E R N A L    F U N C T I O N S  *************/
 
-#if 0   /*   ***** TBD ******/
+
 /********************************************************************
  * FUNCTION val_set_canonical_order
  * 
  * Change the child XML nodes throughout an entire subtree
  * to the canonical order defined in the object template
  *
- * Note that there is no canonical order defined for 
- * the contents of an ncx:root container
+ * >>> IT IS ASSUMED THAT ONLY VALID NODES ARE PRESENT
+ * >>> AND ALL ERROR NODES HAVE BEEN PURGED ALREADY
  *
+ * There is no canonical order defined for 
+ * the contents of the following nodes:
+ *    - anyxml leaf
+ *    - ordered-by user leaf-list
+ *
+ * These nodes are not ordered, but their child nodes are ordered
+ *    - ncx:root container
+ *    - ordered-by user list
+ *      
  * Leaf objects will not be processed, if val is OBJ_TYP_LEAF
+ * Leaf-list objects will not be processed, if val is 
+ * OBJ_TYP_LEAF_LIST.  These object types must be processed
+ * within the context of the parent object.
+ *
+ * List child key nodes are ordered first among all
+ * of the list's child nodes.
+ *
+ * List nodes with system keys are not kept in sorted order
+ * This is not required by YANG.  Instead the user-given
+ * order servers as the canonical order.  It is up to
+ * the application setting the config to pick an
+ * order for the list nodes.
+ *
+ * Also, leaf-list order is not changed, regardless of
+ * the order of
+ *
+ * If a child node is found to be ncx:root, then it will
+ * NOT be reordered.  A separate call is needed with the
+ * root as the parameter to reorder the root contents.
+ *
+ * A root container as a child will be treated as an anyxml,
+ * and just the child node itself will be reordered.  All its
+ * children will be unchanged
  *
  * INPUTS:
  *   val == value node to change to canonical order
@@ -733,6 +765,7 @@ void
     val_set_canonical_order (val_value_t *val)
 {
     const obj_template_t  *chobj;
+    const obj_key_t       *key;
     dlq_hdr_t              tempQ;
     val_value_t           *chval;
 
@@ -756,17 +789,28 @@ void
     case OBJ_TYP_RPC:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	break;
-    case OBJ_TYP_CONTAINER:
     case OBJ_TYP_LIST:
+	/* for a list, put all the key leafs first */
+	for (key = obj_first_ckey(val->obj);
+	     key != NULL;
+	     key = obj_next_ckey(key)) {
+
+	    chval = val_find_child(val, 
+				   obj_get_mod_name(key->keyobj),
+				   obj_get_name(key->keyobj));
+	    if (chval) {
+		val_remove_child(chval);
+		dlq_enque(chval, &tempQ);
+	    }
+	}
+	dlq_block_enque(&tempQ, &val->v.childQ);
+	/* fall through to do the rest of the child nodes */
+    case OBJ_TYP_CONTAINER:
     case OBJ_TYP_RPCIO:
     case OBJ_TYP_NOTIF:
-	for (chobj = obj_get_first_child(obj);
+	for (chobj = obj_first_child_deep(val->obj);
 	     chobj != NULL;
-	     chobj = obj_get_next_child(chobj)) {
-
-	    if (!obj_has_name(chobj)) {
-		continue;
-	    }
+	     chobj = obj_next_child_deep(chobj)) {
 
 	    chval = val_find_child(val, 
 				   obj_get_mod_name(chobj),
@@ -779,12 +823,10 @@ void
 		case OBJ_TYP_LEAF:
 		case OBJ_TYP_LEAF_LIST:
 		    break;
-		case OBJ_TYP_CHOICE:
-		    chval = val_get_choice_first_set(val, chval->obj);
-
-
-		    break;
 		case OBJ_TYP_CONTAINER:
+		    if (obj_is_root(chval->obj)) {
+			break;
+		    } /* else fall through */
 		case OBJ_TYP_LIST:
 		    val_set_canonical_order(chval);
 		    break;
@@ -796,14 +838,14 @@ void
 				       obj_get_name(chobj));
 	    }
 	}
+
+	dlq_block_enque(&tempQ, &val->v.childQ);
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-
-    for (chval = (val_value_t *)dlq_firstEntry(&tempQ);
-	 chval
-
 }  /* val_set_canonical_order */
-#endif
 
 
 /********************************************************************

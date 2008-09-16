@@ -422,7 +422,7 @@ module yangcli {
         for later use:
 
             $foo = fill --target=/t:foo-con/bar-list[index='fred'] \
-                        --with-defaults \
+                        --optional \
                         --current-value=$bar    ";
      ncx:rpc-type exec;
      input {
@@ -439,10 +439,10 @@ module yangcli {
          mandatory true;
        }
 
-       leaf with-defaults {
+       leaf optional {
          description 
-           "If present, then prompt for leafs with YANG default 
-            values.  If not, skip these objects.";
+           "If present, then prompt for leafs that are optional.
+            If not, skip these objects.";
          type empty;
        }
 
@@ -457,10 +457,11 @@ module yangcli {
             value for the corresponding leaf.  Otherwise
             the YANG default will be used instead, if any.
 
-            If the with-defaults parameter is not present,
+            If the 'optional' parameter is not present,
             then optional parameters with current values
-            will be skipped.  Mandatory parameters will
-            not be skipped in any case.
+            will be skipped.  If the current-value contains
+            an associated value, it will be used in this case.
+            Mandatory parameters will never be skipped.
 
             The current value can be specified in any of
             the following 5 variants:

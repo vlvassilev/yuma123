@@ -498,6 +498,16 @@ extern const obj_template_t *
 extern const obj_template_t *
     obj_next_child (const obj_template_t *obj);
 
+
+/* skips augment and uses, dives into choice, case */
+extern const obj_template_t *
+    obj_first_child_deep (const obj_template_t *obj);
+
+/* skips augment and uses, dives into choice, case */
+extern const obj_template_t *
+    obj_next_child_deep (const obj_template_t *obj);
+
+
 extern obj_case_t *
     obj_find_case (obj_choice_t *choic,
 		   const xmlChar *modname,

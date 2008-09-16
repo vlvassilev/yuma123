@@ -1249,6 +1249,12 @@ status_t
 	    retres = res;
 	}
 	if (!NEED_EXIT) {
+	    /* keep going if there were errors in the input
+	     * in case more errors can be found or 
+	     * continue-on-error is in use
+	     * Each value node has a status field (val->res)
+	     * which will retain the error status 
+	     */
 	    res = post_psd_state(scb, msg, res);
 	    if (res != NO_ERR) {
 		retres = res;
@@ -1276,10 +1282,12 @@ status_t
     /* get rid of the error nodes after the validation and instance
      * checks are done; must checks and unique checks should also
      * be done by now,
+     * Also set the canonical order for the root node
      */
     testval = val_find_child(&msg->rpc_input, NULL, NCX_EL_CONFIG);
     if (testval) {
 	val_purge_errors_from_root(testval);
+	/* val_set_canonical_order(testval); */
     }
 
     /* call all the object invoke callbacks, only callbacks for valid

@@ -57,6 +57,9 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+extern void
+    val_set_canonical_order (val_value_t *val);
+
 extern status_t 
     val_gen_index_comp  (const obj_key_t *in,
 			 val_value_t *val);

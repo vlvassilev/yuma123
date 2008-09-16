@@ -134,7 +134,7 @@ static status_t
 			 val_value_t *hello)
 {
 
-    val_value_t  *caps, *sidval, *cap, *capchild;
+    val_value_t  *caps, *sidval, *cap;
     mgr_scb_t    *mscb;
     boolean       c1, c2;
     status_t      res;
@@ -159,23 +159,21 @@ static status_t
 	mscb->agtsid = VAL_UINT(sidval);
     }
 
-    cap = val_find_child(caps, NC_MODULE, NCX_EL_CAPABILITY);
-    if (!cap || cap->res != NO_ERR) {
-	return ERR_NCX_MISSING_VAL_INST;
-    }
-	
-    /* go through the caps child nodes and construct a caplist */
-    for (capchild = val_get_first_child(cap);
-	 capchild != NULL;
-	 capchild = val_get_next_child(capchild)) {
+    /* go through the capability nodes and construct a caplist */
+    for (cap = val_find_child(caps, NC_MODULE, NCX_EL_CAPABILITY);
+	 cap != NULL;
+	 cap = val_find_next_child(caps, NC_MODULE, 
+				   NCX_EL_CAPABILITY, cap)) {
 
-	res = cap_add_std_string(&mscb->caplist, 
-				 (const xmlChar *)VAL_STR(capchild));
+	if (cap->res != NO_ERR) {
+	    continue;
+	}
+	
+	res = cap_add_std_string(&mscb->caplist, VAL_STR(cap));
 	if (res == ERR_NCX_SKIPPED) {
-	    res = cap_add_module_string(&mscb->caplist,
-					(const xmlChar *)VAL_STR(capchild));
+	    res = cap_add_module_string(&mscb->caplist, VAL_STR(cap));
 	    if (res == ERR_NCX_SKIPPED) {
-		res = cap_add_ent(&mscb->caplist, VAL_STR(capchild));
+		res = cap_add_ent(&mscb->caplist, VAL_STR(cap));
 		if (res != NO_ERR) {
 		    return res;
 		}

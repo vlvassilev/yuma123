@@ -200,8 +200,8 @@ date         init     comment
 #define YANGCLI_LOCAL       (const xmlChar *)"local"
 #define YANGCLI_LOCALS      (const xmlChar *)"locals"
 #define YANGCLI_OBJECTS     (const xmlChar *)"objects"
-#define YANGCLI_WITH_DEFAULTS (const xmlChar *)"with-defaults"
-#define YANGCLI_CURRENT_VALUE (const xmlChar *)"currecnt-value"
+#define YANGCLI_OPTIONAL    (const xmlChar *)"optional"
+#define YANGCLI_CURRENT_VALUE (const xmlChar *)"current-value"
 
 #define YANGCLI_BRIEF  (const xmlChar *)"brief"
 #define YANGCLI_FULL   (const xmlChar *)"full"
@@ -222,10 +222,17 @@ date         init     comment
 #define YANGCLI_SET     (const xmlChar *)"set"
 #define YANGCLI_SHOW    (const xmlChar *)"show"
 
-
+#define YESNO_NODEF  0
+#define YESNO_CANCEL 0
+#define YESNO_YES    1
+#define YESNO_NO     2
 
 #define YANGCLI_NS_URI \
     ((const xmlChar *)"http://netconfcentral.com/ncx/ncxcli")
+
+
+#define YANGCLI_PR_LLIST (const xmlChar *)"Add another leaf-list?"
+#define YANGCLI_PR_LIST (const xmlChar *)"Add another list?"
 
 /* forward decl needed by do_save function */
 static void
@@ -1050,6 +1057,110 @@ static void *
 
 
 /********************************************************************
+* FUNCTION get_yesno
+* 
+* Get the user-selected choice, yes or no
+*
+* INPUTS:
+*   prompt == prompt message
+*   defcode == default answer code
+*      0 == no def answer
+*      1 == yes def answer
+*      2 == no def answer
+*   retcode == address of return code
+*
+* OUTPUTS:
+*    *retcode is set if return NO_ERR
+*       0 == cancel
+*       1 == yes
+*       2 == no
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    get_yesno (const xmlChar *prompt,
+	       uint32 defcode,
+	       uint32 *retcode)
+{
+    xmlChar                 *myline, *str;
+    status_t                 res;
+    boolean                  done;
+
+
+    res = NO_ERR;
+
+    if (prompt) {
+	log_stdout("\n%s", prompt);
+    }
+    log_stdout("\nEnter Y for yes, N for no, or C to cancel:");
+    switch (defcode) {
+    case YESNO_NODEF:
+	break;
+    case YESNO_YES:
+	log_stdout(" [default: Y]");
+	break;
+    case YESNO_NO:
+	log_stdout(" [default: N]");
+	break;
+    default:
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    done = FALSE;
+    while (!done) {
+
+	/* get input from the user STDIN */
+	myline = get_cmd_line(&res);
+	if (!myline) {
+	    return res;
+	}
+
+	/* strip leading whitespace */
+	str = myline;
+	while (*str && xml_isspace(*str)) {
+	    str++;
+	}
+
+	/* convert to a number, check [ENTER] for default */
+	if (*str) {
+	    if (*str == 'Y' || *str == 'y') {
+		*retcode = YESNO_YES;
+		done = TRUE;
+	    } else if (*str == 'N' || *str == 'n') {
+		*retcode = YESNO_NO;
+		done = TRUE;
+	    } else if (*str == 'C' || *str == 'c') {
+		*retcode = YESNO_CANCEL;
+		done = TRUE;
+	    }
+	} else {
+	    /* default accepted */
+	    switch (defcode) {
+	    case YESNO_NODEF:
+		break;
+	    case YESNO_YES:
+		*retcode = YESNO_YES;
+		done = TRUE;
+		break;
+	    case YESNO_NO:
+		*retcode = YESNO_NO;
+		done = TRUE;
+		break;
+	    default:
+		return SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	}
+	if (!done) {
+	    log_stdout("\nError: invalid value '%s'\n", str);
+	}
+    }
+    return res;
+
+}  /* get_yesno */
+
+
+/********************************************************************
 * FUNCTION get_complex_parm
 * 
 * Fill the specified parm, which is a complex type
@@ -1523,7 +1634,8 @@ static status_t
     const obj_template_t  *parm;
     val_value_t           *val, *oldval;
     status_t               res, retres;
-    boolean                done;
+    boolean                done, first;
+    uint32                 yesnocode;
 
     retres = NO_ERR;
     for (parm = obj_first_child(valset->obj);
@@ -1548,31 +1660,54 @@ static status_t
 	    }
             break;
         case OBJ_TYP_LEAF:
+	case OBJ_TYP_LEAF_LIST:
 	    /* if the parm is not already set and is not read-only
 	     * then try to get a value from the user at the CLI
 	     */
-	    val = val_find_child(valset, 
-				 obj_get_mod_name(parm),
-				 obj_get_name(parm));
+	    done = FALSE;
+	    while (!done) {
+		val = val_find_child(valset, 
+				     obj_get_mod_name(parm),
+				     obj_get_name(parm));
 
-	    if (!val) {
-		res = get_parm(rpc, parm, valset, oldvalset);
-		if (res != NO_ERR) {
-		    log_stdout("\nWarning: Parameter %s has errors (%s)",
-			       obj_get_name(parm), 
-			       get_error_string(res));
-		    retres = res;
+		if (!val || parm->objtype==OBJ_TYP_LEAF_LIST) {
+		    res = get_parm(rpc, parm, valset, oldvalset);
+		    if (res != NO_ERR) {
+			log_stdout("\nWarning: Parameter %s has errors (%s)",
+				   obj_get_name(parm), 
+				   get_error_string(res));
+			retres = res;
+		    }
+		}
+		if (parm->objtype == OBJ_TYP_LEAF) {
+		    done = TRUE;
+		} else {
+		    /* prompt for more leaf-list objects */
+		    res = get_yesno(YANGCLI_PR_LLIST,
+				    YESNO_NO, &yesnocode);
+		    if (res != NO_ERR) {
+			return res;
+		    }
+		    switch (yesnocode) {
+		    case YESNO_CANCEL:
+			return ERR_NCX_SKIPPED;
+		    case YESNO_YES:
+			break;
+		    case YESNO_NO:
+			done = TRUE;
+			break;
+		    default:
+			return SET_ERROR(ERR_INTERNAL_VAL);
+		    }
 		}
 	    }
-            break;
-	case OBJ_TYP_LEAF_LIST:
-	    retres = ERR_NCX_OPERATION_FAILED;   /****/
 	    break;
 	case OBJ_TYP_CONTAINER:
 	case OBJ_TYP_NOTIF:
 	case OBJ_TYP_RPCIO:
 	case OBJ_TYP_LIST:
 	    done = FALSE;
+	    first = TRUE;
 	    while (!done) {
 		/* if the parm is not already set and is not read-only
 		 * then try to get a value from the user at the CLI
@@ -1586,9 +1721,14 @@ static status_t
 			oldval = NULL;
 		    }
 
-		    val = val_find_child(valset, 
-					 obj_get_mod_name(parm),
-					 obj_get_name(parm));
+		    if (first) {
+			val = val_find_child(valset, 
+					     obj_get_mod_name(parm),
+					     obj_get_name(parm));
+		    } else {
+			val = NULL;
+			first = FALSE;
+		    }
 		    if (!val) {
 			val = val_new_value();
 			if (!val) {
@@ -1604,8 +1744,23 @@ static status_t
 		}
 
 		if (parm->objtype == OBJ_TYP_LIST) {
-		    /*** !!! need to prompt for more list entries ***/
-		    done = TRUE;  
+		    /* prompt for more leaf-list objects */
+		    res = get_yesno(YANGCLI_PR_LIST,
+				    YESNO_NO, &yesnocode);
+		    if (res != NO_ERR) {
+			return res;
+		    }
+		    switch (yesnocode) {
+		    case YESNO_CANCEL:
+			return ERR_NCX_SKIPPED;
+		    case YESNO_YES:
+			break;
+		    case YESNO_NO:
+			done = TRUE;
+			break;
+		    default:
+			return SET_ERROR(ERR_INTERNAL_VAL);
+		    }
 		} else {
 		    done = TRUE;
 		}
@@ -3105,7 +3260,7 @@ static void
     }
 
     parm = val_find_child(valset, YANGCLI_MOD, 
-			  YANGCLI_WITH_DEFAULTS);
+			  YANGCLI_OPTIONAL);
     if (parm && parm->res == NO_ERR) {
 	get_optional = TRUE;
     }
@@ -3131,6 +3286,11 @@ static void
 		newparm = NULL;
 
 		/* clear the result flag */
+		m__free(result_name);
+		result_name = NULL;
+	    }
+	} else {
+	    if (result_name) {
 		m__free(result_name);
 		result_name = NULL;
 	    }
@@ -3959,11 +4119,11 @@ static void
 static mgr_io_state_t
     yangcli_stdin_handler (void)
 {
-    xmlChar    *line;
-    ses_cb_t   *scb;
-    boolean     getrpc;
-    status_t    res;
-    uint32      len;
+     xmlChar       *line;
+    ses_cb_t       *scb;
+    boolean         getrpc;
+    status_t        res;
+    uint32          len;
 
     if (mgr_shutdown_requested()) {
 	state = MGR_IO_ST_SHUT;

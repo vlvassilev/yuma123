@@ -2940,7 +2940,7 @@ const obj_template_t *
 *    obj == obj_template_t to check
 
 * RETURNS:
-*    pointer to first child obj_template_t or 
+*    pointer to next child obj_template_t or 
 *    NULL if not found 
 *********************************************************************/
 const obj_template_t *
@@ -2969,6 +2969,129 @@ const obj_template_t *
     return NULL;
 
 }  /* obj_next_child */
+
+
+/********************************************************************
+* FUNCTION obj_first_child_deep
+* 
+* Get the first child object if the specified object
+* has any children.  Look past choices and cases to
+* the real nodes within them
+*
+*  !!!! SKIPS OVER AUGMENT AND USES !!!!
+*
+* INPUTS:
+*    obj == obj_template_t to check
+
+* RETURNS:
+*    pointer to first child obj_template_t or 
+*    NULL if not found 
+*********************************************************************/
+const obj_template_t *
+    obj_first_child_deep (const obj_template_t *obj)
+{
+    const dlq_hdr_t       *que;
+    const obj_template_t  *chobj;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    que = obj_get_cdatadefQ(obj);
+    if (que) {
+	for (chobj = (const obj_template_t *)dlq_firstEntry(que);
+	     chobj != NULL;
+	     chobj = (const obj_template_t *)dlq_nextEntry(chobj)) {
+	    if (obj_has_name(chobj)) {
+		if (chobj->objtype == OBJ_TYP_CHOICE ||
+		    chobj->objtype == OBJ_TYP_CASE) {
+		    return (obj_first_child_deep(chobj));
+		} else {
+		    return chobj;
+		}
+	    }
+	}
+    }
+
+    return NULL;
+
+}  /* obj_first_child_deep */
+
+
+/********************************************************************
+* FUNCTION obj_next_child_deep
+* 
+* Get the next child object if the specified object
+* has any children.  Look past choice and case nodes
+* to the real nodes within them
+*
+*  !!!! SKIPS OVER AUGMENT AND USES !!!!
+*
+* INPUTS:
+*    obj == obj_template_t to check
+*
+* RETURNS:
+*    pointer to next child obj_template_t or 
+*    NULL if not found 
+*********************************************************************/
+const obj_template_t *
+    obj_next_child_deep (const obj_template_t *obj)
+{
+    const obj_template_t  *cas, *next, *last;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    next = obj;
+    while (next) {
+	last = next;
+
+	/* try next sibling */
+	next = obj_next_child(next);
+	if (next) {
+	    return next;
+	}
+
+	/* was last sibling, try parent if this is a case */
+	if (last->parent && 
+	    (last->parent->objtype==OBJ_TYP_CASE)) {
+
+ 	    cas = (const obj_template_t *)
+		dlq_nextEntry(last->parent);
+	    if (!cas) {
+		/* no next case, try next object after choice */
+		return obj_next_child(last->parent->parent);
+	    } else {
+		/* keep trying the next case until one with
+		 * a child node is found
+		 */
+		while (1) {
+		    next = obj_first_child(cas);
+		    if (next) {
+			return next;
+		    } else {
+			cas = (const obj_template_t *)
+			    dlq_nextEntry(cas);
+			if (!cas) {
+			    /* no next case, ret. object after choice */
+			    return obj_next_child(last->parent->parent);
+			}
+		    }
+		}
+		/*NOTREACHED*/
+	    }
+	}
+    }
+    return NULL;
+
+}  /* obj_next_child_deep */
 
 
 /********************************************************************
@@ -3493,7 +3616,11 @@ obj_template_t *
     newobj->tk = srcobj->tk;
     newobj->linenum = srcobj->linenum;
     newobj->flags = (srcobj->flags | OBJ_FL_CLONE);
+    if (mobj) {
+	newobj->flags |= (mobj->flags & ~OBJ_FL_REFINE);
+    }
     newobj->mod = mod;
+    
     res = NO_ERR;
 
     /* set the specific object definition type */

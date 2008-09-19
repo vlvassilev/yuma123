@@ -415,6 +415,9 @@ static status_t
 	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
+    if (leaf->typdef) {
+	typ_free_typdef(leaf->typdef);
+    }
     leaf->typdef = typ_get_basetype_typdef(NCX_BT_ANY);
 
     /* Get the mandatory anyxml name */

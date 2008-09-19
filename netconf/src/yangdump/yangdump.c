@@ -21,6 +21,8 @@ date         init     comment
 #include  <string.h>
 #include  <unistd.h>
 
+#define _C_main 1
+
 #ifndef _H_procdefs
 #include  "procdefs.h"
 #endif
@@ -251,6 +253,9 @@ static status_t
 			   FULLTEST, PLAINMODE, TRUE, &res);
     }
     if (res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
 	return res;
     } else if (!valset) {
 	pr_usage();
@@ -401,7 +406,7 @@ static status_t
 	val = val_find_child(valset, YANGDUMP_MOD, 
 			     YANGDUMP_PARM_MODULE);
 	if (val) {
-	    cp->module = strdup((const char *)VAL_STR(val));
+	    cp->module = (char *)xml_strdup(VAL_STR(val));
 	    if (!cp->module) {
 		return ERR_INTERNAL_MEM;
 	    }
@@ -511,6 +516,9 @@ static status_t
     status_t       res;
 
     /* init module static variables */
+    malloc_cnt = 0;
+    free_cnt = 0;
+
     memset(&cvtparms, 0x0, sizeof(yangdump_cvtparms_t));
     cli_val = NULL;
 
@@ -527,9 +535,12 @@ static status_t
 		   LOG_DEBUG_WARN,
 #endif
 		   NULL);
+
     if (res == NO_ERR) {
+
 	/* load in the NCX converter parmset definition file */
 	res = ncxmod_load_module(YANGDUMP_MOD);
+
 	if (res == NO_ERR) {
 	    res = process_cli_input(argc, argv, &cvtparms);
 	}
@@ -1470,6 +1481,11 @@ static void
 
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
+
+    if (malloc_cnt != free_cnt) {
+	log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
+		  malloc_cnt, free_cnt);
+    }
 
     log_close();
 

@@ -22,6 +22,8 @@ date         init     comment
 #include  <string.h>
 #include  <unistd.h>
 
+#define _C_main 1
+
 #ifndef _H_procdefs
 #include  "procdefs.h"
 #endif
@@ -1469,6 +1471,8 @@ static status_t
     status_t       res;
 
     /* init module static variables */
+    malloc_cnt = 0;
+    free_cnt = 0;
     memset(&diffparms, 0x0, sizeof(yangdiff_diffparms_t));
     dlq_createSQue(&diffparms.oldmodQ);
     dlq_createSQue(&diffparms.newmodQ);
@@ -1557,6 +1561,11 @@ static void
 
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
+
+    if (malloc_cnt != free_cnt) {
+	log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
+		  malloc_cnt, free_cnt);
+    }
 
     log_close();
 

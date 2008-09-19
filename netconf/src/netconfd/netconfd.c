@@ -22,6 +22,8 @@ date         init     comment
 #include  <string.h>
 #include  <unistd.h>
 
+#define _C_main 1
+
 #ifndef _H_procdefs
 #include  "procdefs.h"
 #endif
@@ -330,6 +332,9 @@ int
     status_t   res;
     boolean    showver, showhelp;
 
+    malloc_cnt = 0;
+    free_cnt = 0;
+
     res = cmn_init(argc, argv, &showver, &showhelp);
 
 #ifdef NETCONFD_DEBUG
@@ -348,8 +353,15 @@ int
 	}
     }
 
-    print_errors();
     netconfd_cleanup();
+
+    if (malloc_cnt != free_cnt) {
+	printf("\n*** Error: memory leak (m:%u f:%u)\n", 
+	       malloc_cnt, free_cnt);
+    }
+
+    print_errors();
+
 
     return 0;
 

@@ -786,6 +786,8 @@ status_t
     /* initialize the namespace registry */
     xmlns_init();
 
+    ncx_init_done = TRUE;
+
     /* Initialize the INVALID namespace to help filter handling */
     res = xmlns_register_ns(INVALID_URN, INV_PREFIX, NCX_MODULE, &nsid);
     if (res != NO_ERR) {
@@ -845,8 +847,6 @@ status_t
 
     /* initialize the session message manager */
     ses_msg_init();
-
-    ncx_init_done = TRUE;
 
     return NO_ERR;
 
@@ -1978,34 +1978,10 @@ ncx_import_t *
 	return NULL;
     }
     (void)memset(import, 0x0, sizeof(ncx_import_t));
-    dlq_createSQue(&import->itemQ);
     dlq_createSQue(&import->appinfoQ);
     return import;
 
 }  /* ncx_new_import */
-
-
-/********************************************************************
-* FUNCTION ncx_new_import_item
-* 
-* Malloc and initialize the fields in a ncx_import_item_t
-*
-* RETURNS:
-*   pointer to the malloced and initialized struct or NULL if an error
-*********************************************************************/
-ncx_import_item_t * 
-    ncx_new_import_item (void)
-{
-    ncx_import_item_t  *item;
-
-    item = m__getObj(ncx_import_item_t);
-    if (!item) {
-	return NULL;
-    }
-    (void)memset(item, 0x0, sizeof(ncx_import_item_t));
-    return item;
-
-}  /* ncx_new_import_item */
 
 
 /********************************************************************
@@ -2022,8 +1998,6 @@ ncx_import_item_t *
 void 
     ncx_free_import (ncx_import_t *import)
 {
-    ncx_import_item_t  *item;
-
 #ifdef DEBUG
     if (!import) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -2035,15 +2009,8 @@ void
 	m__free(import->module);
     }
 
-    /* YANG imports only */
     if (import->prefix) {
 	m__free(import->prefix);
-    }
-
-    /* NCX imports only */
-    while (!dlq_empty(&import->itemQ)) {
-	item = (ncx_import_item_t *)dlq_deque(&import->itemQ);
-	ncx_free_import_item(item);
     }
 
     /* YANG only */
@@ -2052,35 +2019,6 @@ void
     m__free(import);
 
 }  /* ncx_free_import */
-
-
-/********************************************************************
-* FUNCTION ncx_free_import_item
-* 
-* Scrub the memory in a ncx_import_item_t by freeing all
-* the sub-fields and then freeing the entire struct itself 
-* The struct must be removed from any queue it is in before
-* this function is called.
-*
-* INPUTS:
-*    item == ncx_import_item_t data structure to free
-*********************************************************************/
-void 
-    ncx_free_import_item (ncx_import_item_t *item)
-{
-#ifdef DEBUG
-    if (!item) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    if (item->name) {
-	m__free(item->name);
-    }
-    m__free(item);
-
-}  /* ncx_free_import_item */
 
 
 /********************************************************************
@@ -2300,7 +2238,6 @@ void *
 		       ncx_node_t     *deftyp)
 {
     ncx_import_t      *imp;
-    ncx_import_item_t *item;
     void              *dptr;
     status_t           res;
 
@@ -2311,45 +2248,18 @@ void *
     }
 #endif
 
-    /* Go through the imports list for any match in an items list */
     for (imp = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
          imp != NULL;
          imp = (ncx_import_t *)dlq_nextEntry(imp)) {
-        /* check the item list for this import */
-        for (item = (ncx_import_item_t *)dlq_firstEntry(&imp->itemQ);
-             item != NULL;
-             item = (ncx_import_item_t *)dlq_nextEntry(item)) {
-            if (!xml_strcmp(item->name, defname)) {
-		dptr = NULL;
-                res = check_moddef(imp->module, defname, mod->diffmode,
-				   deftyp, &dptr);
-                if (res==NO_ERR) {
-                    return dptr;
-                } else if (res != ERR_NCX_DEF_NOT_FOUND) {
-		    return NULL;  /*  !! res is lost !! */
-		}
-            }
-        }
-    }
-        
-    /* Definition still not found. 
-     * Now try any module in the imports list that does not
-     * have an items list.  
-     * Fish in the registry for the definition 
-     */
-    for (imp = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
-         imp != NULL;
-         imp = (ncx_import_t *)dlq_nextEntry(imp)) {
+
         /* check only if there is no item list this time */
-        if (dlq_empty(&imp->itemQ)) {
-            res = check_moddef(imp->module, defname, mod->diffmode,
-			       deftyp, &dptr);
-            if (res == NO_ERR) {
-                return dptr;
-	    } else if (res != ERR_NCX_DEF_NOT_FOUND) {
-		return NULL;  /*  !! res is lost !! */
-	    }
-        }
+	res = check_moddef(imp->module, defname, mod->diffmode,
+			   deftyp, &dptr);
+	if (res == NO_ERR) {
+	    return dptr;
+	} else if (res != ERR_NCX_DEF_NOT_FOUND) {
+	    return NULL;  /*  !! res is lost !! */
+	}
     }
 
     /* Either not a definition, definition is a forward reference,

@@ -547,6 +547,7 @@ static status_t
 * 
 * Follow the absolute-path expression
 * and return the obj_template_t that it indicates
+* A missing prefix means check any namespace for the symbol
 *
 * !!! Internal version !!!
 * !!! Error messages are not printed by this function!!
@@ -569,18 +570,23 @@ static status_t
     obj_template_t *curobj, *nextobj;
     dlq_hdr_t      *curQ;
     ncx_module_t   *mod;
-    const xmlChar  *str;
+    const xmlChar  *str, *modname;
     uint32          len;
     status_t        res;
+    ncx_node_t      dtyp;
     xmlChar         prefix[NCX_MAX_NLEN+1];
     xmlChar         name[NCX_MAX_NLEN+1];
 
 
-    /* skip the first fwd slash, if any */
+    /* skip the first fwd slash, if any
+     * the target must be from the config root
+     * so if the first fwd-slash is missing then
+     * just keep going and assume the config root anyway
+     */
     if (*target == '/') {
 	str = ++target;
     } else {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+	str = target;
     }
 
     /* get the first QName (prefix, name) */
@@ -597,12 +603,16 @@ static status_t
 	if (!mod) {
 	    return ERR_NCX_INVALID_NAME;
 	}
+	/* get the first object template */
+	curobj = obj_find_template_top(mod, mod->name, name);
     } else {
-	return ERR_NCX_DATA_MISSING;
+	/* no prefix given, check all top-level objects */
+	dtyp = NCX_NT_OBJ;
+        curobj = (obj_template_t *)
+	    def_reg_find_any_moddef(&modname, name, &dtyp);
     }
 
-    /* get the first object template */
-    curobj = obj_find_template_top(mod, mod->name, name);
+    /* check if first level object found */
     if (!curobj) {
 	if (ncx_valid_name2(name)) {
 	    res = ERR_NCX_DEF_NOT_FOUND;
@@ -629,16 +639,6 @@ static status_t
 	    str += len;
 	}
 
-	/* make sure the prefix is valid, if present */
-	if (*prefix) {
-	    mod = def_reg_find_module_prefix(prefix);
-	    if (!mod) {
-		return ERR_NCX_INVALID_NAME;
-	    }
-	} else {
-	    return ERR_NCX_DATA_MISSING;
-	}
-
 	/* make sure the name is a valid name string */
 	if (!ncx_valid_name2(name)) {
 	    return ERR_NCX_INVALID_NAME;
@@ -646,13 +646,27 @@ static status_t
 
 	/* determine 'nextval' based on [curval, prefix, name] */
 	curQ = obj_get_datadefQ(curobj);
-
-	if (curQ) {
-	    nextobj = obj_find_template(curQ, mod->name, name);
-	} else {
+	if (!curQ) {
 	    return ERR_NCX_DEFSEG_NOT_FOUND;
 	}
 
+	/* make sure the prefix is valid, if present */
+	if (*prefix) {
+	    mod = def_reg_find_module_prefix(prefix);
+	    if (!mod) {
+		return ERR_NCX_INVALID_NAME;
+	    }
+	    nextobj = obj_find_template(curQ, mod->name, name);
+	} else {
+	    /* no prefix given; try current module first */
+	    nextobj = obj_find_template(curQ, obj_get_mod_name(curobj), 
+					name); 
+	    if (!nextobj) {
+		nextobj = obj_find_template(curQ, NULL, name); 
+	    }
+	}
+
+	/* setup next loop or error exit because last node not found */
 	if (nextobj) {
 	    curobj = nextobj;
 	} else {

@@ -5,6 +5,7 @@ module yangdump {
     prefix "yd";
 
     import ncxtypes { prefix "nt"; }
+
     import ncx { prefix "ncx"; }
 
     organization "Netconf Central";
@@ -228,7 +229,6 @@ module yangdump {
        description 
           "Converted from yangdump.ncx.";
     }
-
 
     typedef FormatType {
         description "Conversion Output Formats.";

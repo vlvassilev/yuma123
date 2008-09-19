@@ -97,6 +97,12 @@ static void
     }
 #endif
 
+    if (sim->range.rangestr) {
+	m__free(sim->range.rangestr);
+	sim->range.rangestr = NULL;
+    }
+    sim->range.tk = NULL;
+
     /* clean the rangeQ only if it is used */
     if (!dlq_empty(&sim->rangeQ)) {
 	rtyp = typ_get_range_type(sim->btyp);
@@ -907,7 +913,7 @@ void
     }
 
 #ifdef HAS_FLOAT
-    btyp++;
+    (void)btyp;
 #else
     if (btyp==NCX_BT_FLOAT32 && rv->lb.f) {
         m__free(rv->lb.f);

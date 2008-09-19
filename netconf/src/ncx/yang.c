@@ -1850,7 +1850,7 @@ void
     }
 #endif
 
-    if (node->submod && !node->submodcopy) {
+    if (node->submod) {
 	ncx_free_module(node->submod);
     }
     if (node->failed) {
@@ -2599,6 +2599,9 @@ void
 
     if (impptr->modname) {
 	m__free(impptr->modname);
+    }
+    if (impptr->modprefix) {
+	m__free(impptr->modprefix);
     }
 
     m__free(impptr);

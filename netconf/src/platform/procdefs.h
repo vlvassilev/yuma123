@@ -224,39 +224,20 @@ typedef		long double		LDBL;
 #define		TRUE	 ((boolean)1)
 #endif	    /* FALSE | TRUE */
 
-#if (!(defined(CPP_CHK_HEAP) || defined(CPP_MTRACE)))
+
+PUBLIC uint32  malloc_cnt;
+PUBLIC uint32  free_cnt;
+
 #ifndef m__getMem
-#define m__getMem   malloc
+#define m__getMem(X)   malloc(X);malloc_cnt++
 #endif		/* m__getMem */
 
-#ifndef m__malloc
-#define m__malloc    malloc
-#endif		/* m__malloc */
-
 #ifndef m__free
-#define m__free	    free
+#define m__free(X)    free(X);free_cnt++
 #endif		/* m__free */
 
-#ifndef m__strdup
-
-#ifdef __STDC__
-#define m__strdup	    _strdup
-#else
-
-#if CPV_UNIX
-#define m__strdup	    strdup
-#else
-#define m__strdup	    _strdup
-#endif
-
-#endif	/* __STDC__ */
-
-#endif		/* m__strdup */
-
-#endif   /*  (!(defined(CPP_CHK_HEAP) || defined(CPP_MTRACE))) */
-
 #ifndef m__getObj
-#define m__getObj(OBJ)	((OBJ *)m__malloc(sizeof(OBJ)))
+#define m__getObj(OBJ)	(OBJ *)malloc(sizeof(OBJ));malloc_cnt++
 #endif		/* m__getObj */
 
 #endif		/* _H_procdefs */

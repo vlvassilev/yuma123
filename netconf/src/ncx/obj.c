@@ -152,6 +152,7 @@ static obj_template_t *
 	return NULL;
     }
     (void)memset(obj, 0x0, sizeof(obj_template_t));
+    dlq_createSQue(&obj->metadataQ);
     return obj;
 
 }  /* new_blank_template */
@@ -250,6 +251,10 @@ static status_t
     for (srcobj = (obj_template_t *)dlq_firstEntry(srcQ);
 	 srcobj != NULL;
 	 srcobj = (obj_template_t *)dlq_nextEntry(srcobj)) {
+
+	if (!obj_has_name(srcobj)) {
+	    continue;
+	}
 
 	mobj = NULL;
 	if (merQ) {
@@ -633,7 +638,7 @@ static void
     if (con->ref) {
 	m__free(con->ref);
     }
-    if (con->presence && notclone) {
+    if (con->presence) {
 	m__free(con->presence);
     }
 
@@ -2492,11 +2497,6 @@ void
 	return;
     }
 #endif
-    /* check if the def pointer is not malloced, but cloned instead */
-    if (obj->flags & OBJ_FL_CLONE) {
-	m__free(obj);
-	return;
-    }
 
     clean_metadataQ(&obj->metadataQ);
 

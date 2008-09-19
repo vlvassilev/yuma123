@@ -3017,6 +3017,11 @@ status_t
 	val->name = val->dname;
     }
 
+    /* set the object to the generic string if not set */
+    if (!val->obj) {
+	val->obj = ncx_get_gen_string();
+    }
+
     val->nsid = nsid;
     val->typdef = typdef;
     val->btyp = typ_get_basetype(typdef);

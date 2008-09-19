@@ -209,14 +209,8 @@ extern const obj_template_t *
 extern ncx_import_t * 
     ncx_new_import (void);
 
-extern ncx_import_item_t * 
-    ncx_new_import_item (void);
-
 extern void 
     ncx_free_import (ncx_import_t *import);
-
-extern void 
-    ncx_free_import_item (ncx_import_item_t *item);
 
 extern ncx_import_t * 
     ncx_find_import (const ncx_module_t *mod,

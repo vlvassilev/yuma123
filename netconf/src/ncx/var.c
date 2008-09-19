@@ -481,6 +481,9 @@ void
     if (var->val) {
 	val_free_value(var->val);
     }
+    if (var->name) {
+	m__free(var->name);
+    }
     m__free(var);
 
 }  /* var_free */
@@ -973,8 +976,8 @@ val_value_t *
 *   *res == status
 *
 * RETURNS:
-*   If error, then returns NULL;
-*   If no error, then returns pointer to new val or filled in 'val'
+*   If no error, then returns pointer to new malloced val 
+*   If error, then returns NULL
 *********************************************************************/
 val_value_t *
     var_check_script_val (const obj_template_t *obj,

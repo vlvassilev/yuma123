@@ -34,6 +34,8 @@ date         init     comment
 
 #include "libtecla.h"
 
+#define _C_main 1
+
 #ifndef _H_procdefs
 #include "procdefs.h"
 #endif
@@ -207,6 +209,7 @@ date         init     comment
 #define YANGCLI_FULL   (const xmlChar *)"full"
 
 #define DEF_PROMPT     (const xmlChar *)"yangcli> "
+#define DEF_FN_PROMPT  (const xmlChar *)"yangcli:"
 #define MORE_PROMPT    (const xmlChar *)"   more> "
 
 /* YANGCLI top level commands */
@@ -262,46 +265,106 @@ static void
 *                                                                   *
 *********************************************************************/
 
-/* session control */
+/* NETCONF session control */
 static mgr_io_state_t  state;
 static ses_id_t        mysid;
 
 /* CLI and connect parameters */
 static val_value_t   *mgr_cli_valset;
 static val_value_t   *connect_valset;
+
+/* true if running a script from the invocation and exiting */
 static boolean         batchmode;
 
-/* really set to default-module [netconf] */
+/* the module to check first when no prefix is given and there
+ * is no parent node to check;
+ * usually set to module 'netconf'
+ */
 static xmlChar        *default_module;  
 
+/* true if printing program help and exiting */
 static boolean         helpmode;
+
+/* true if printing program version and exiting */
 static boolean         versionmode;
 
+/* contains list of modules entered from CLI --modules parm */
 static val_value_t    *modules;
 
+/* log level for all logging except for direct STDOUT output */
 static log_debug_t     log_level;
-static const xmlChar  *default_target;
-static boolean         get_optional;
-static boolean         autoload;
-static boolean         fixorder;
-static boolean         autocomp;
-static xmlChar        *confname;
+
+/* TRUE if append to existing log; FALSE to start a new log */
 static boolean         logappend;
+
+/* optional log filespec given at invocation to store output
+ * user IO from the KBD will still be done, but errors and
+ * warnings will be sent to the file, not STDOUT
+ */
 static xmlChar        *logfilename;
+
+/* agent target set when connected to an agent
+ * TBD: move all agent session vars to a struct for
+ * multiple concurrent sessions
+ */
+static const xmlChar  *default_target;
+
+/* true if optional nodes should be fiulled in by fill_valset */
+static boolean         get_optional;
+
+/* TRUE if OK to load modules automatically
+ * FALSE if --no-autoload set by user
+ * when agent connection is made, and module discovery is done
+ * then this var controls whether the matching modules
+ * will be loaded into this application automatically
+ */
+static boolean         autoload;
+
+/* TRUE if forcing PDUs sent in manager-specified order
+ * FALSE if OK to always send in correct order
+ */
+static boolean         fixorder;
+
+/* TRUE if OK to check for partial command names and parameter
+ * names by the user.  First match (TBD: longest match!!)
+ * will be used if no exact match found
+ * FALSE if only exact match should be used
+ */
+static boolean         autocomp;
+
+/* name of external CLI config file used on invocation */
+static xmlChar        *confname;
+
+/* name of script pased at invocation to auto-run */
 static xmlChar        *runscript;
+
+/* TRUE if runscript has been completed */
 static boolean         runscriptdone;
 
 /* assignment statement support */
 static xmlChar        *result_name;
+
+/* local result or global result 
+ * !!! TBD: integrate into runstack 
+ * !!! THIS WILL NOT WORK:
+ * !!!     $foo = run script2 ...
+ */
 static boolean         result_isglobal;
 
 /* CLI input buffer */
 static xmlChar         clibuff[YANGCLI_BUFFLEN];
+
+/* CLI generic 'more' mode */
 static boolean         climore;
+
+/* CLI prompt function-specific extension mode */
+static const xmlChar  *cli_fn;
+
+/* libtecla data structure for 1 CLI context */
 static GetLine        *cli_gl;
 
 /* program version string */
-static char progver[] = "0.7.1";
+static char progver[] = "0.7.5";
 
 
 /********************************************************************
@@ -613,8 +676,11 @@ static status_t
     /* get the script or CLI input as a new val_value_t struct */
     val = var_check_script_val(obj, str, ISTOP, &res);
     if (val) {
-	/* this is a plain assignment statement */
-	res = var_set_str(name, nlen, val, isglobal);
+	/* this is a plain assignment statement
+	 * val is a malloced struct, pass it over to the
+	 * var struct instead of cloning it
+	 */
+	res = var_set_move(name, nlen, isglobal, val);
 	if (res != NO_ERR) {
 	    val_free_value(val);
 	}
@@ -725,7 +791,19 @@ static void
     case MGR_IO_ST_CONNECT:
     case MGR_IO_ST_CONN_START:
     case MGR_IO_ST_SHUT:
-	xml_strncpy(buff, DEF_PROMPT, bufflen);	
+	if (cli_fn) {
+	    if ((xml_strlen(DEF_FN_PROMPT) 
+		 + xml_strlen(cli_fn) + 2) < bufflen) {
+		p = buff;
+		p += xml_strcpy(p, DEF_FN_PROMPT);
+		p += xml_strcpy(p, cli_fn);
+		xml_strcpy(p, (const xmlChar *)"> ");
+	    } else {
+		xml_strncpy(buff, DEF_PROMPT, bufflen);
+	    }
+	} else {
+	    xml_strncpy(buff, DEF_PROMPT, bufflen);
+	}
 	break;
     case MGR_IO_ST_CONN_IDLE:
     case MGR_IO_ST_CONN_RPYWAIT:
@@ -1637,7 +1715,9 @@ static status_t
     boolean                done, first;
     uint32                 yesnocode;
 
+    cli_fn = obj_get_name(rpc);
     retres = NO_ERR;
+
     for (parm = obj_first_child(valset->obj);
          parm != NULL;
          parm = obj_next_child(parm)) {
@@ -1686,10 +1766,12 @@ static status_t
 		    res = get_yesno(YANGCLI_PR_LLIST,
 				    YESNO_NO, &yesnocode);
 		    if (res != NO_ERR) {
+			cli_fn = NULL;
 			return res;
 		    }
 		    switch (yesnocode) {
 		    case YESNO_CANCEL:
+			cli_fn = NULL;
 			return ERR_NCX_SKIPPED;
 		    case YESNO_YES:
 			break;
@@ -1697,6 +1779,7 @@ static status_t
 			done = TRUE;
 			break;
 		    default:
+			cli_fn = NULL;
 			return SET_ERROR(ERR_INTERNAL_VAL);
 		    }
 		}
@@ -1748,10 +1831,12 @@ static status_t
 		    res = get_yesno(YANGCLI_PR_LIST,
 				    YESNO_NO, &yesnocode);
 		    if (res != NO_ERR) {
+			cli_fn = NULL;
 			return res;
 		    }
 		    switch (yesnocode) {
 		    case YESNO_CANCEL:
+			cli_fn = NULL;
 			return ERR_NCX_SKIPPED;
 		    case YESNO_YES:
 			break;
@@ -1759,6 +1844,7 @@ static status_t
 			done = TRUE;
 			break;
 		    default:
+			cli_fn = NULL;
 			return SET_ERROR(ERR_INTERNAL_VAL);
 		    }
 		} else {
@@ -1771,6 +1857,8 @@ static status_t
             retres = SET_ERROR(ERR_INTERNAL_VAL);
         }
     }
+
+    cli_fn = NULL;
     return retres;
 
 } /* fill_valset */
@@ -2029,6 +2117,8 @@ static void
 	if (connect_valset) {
 	    val_free_value(connect_valset);
 	}
+
+	/* save the newly malloced valset */
 	connect_valset = valset;
     } else if (!cli) {
 	if (interactive_mode()) {
@@ -2164,9 +2254,7 @@ static void
 
     /* get the module name */
     if (res == NO_ERR) {
-	if (valset) {
-	    val = val_find_child(valset, YANGCLI_MOD, NCX_EL_MODULE);
-	}
+	val = val_find_child(valset, YANGCLI_MOD, NCX_EL_MODULE);
 	if (!val) {
 	    res = ERR_NCX_DEF_NOT_FOUND;
 	} else if (val->res != NO_ERR) {
@@ -2750,16 +2838,20 @@ static void
     val_value_t          *valset, *parm;
     status_t              res;
     help_mode_t           mode;
-    boolean               imode;
+    boolean               imode, done;
     ncx_node_t            dtyp;
     uint32                dlen;
 
     imode = interactive_mode();
     valset = get_valset(rpc, &line[len], &res);
-    if (!valset || valset->res != NO_ERR) {
+    if (res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
 	return;
     }
 
+    done = FALSE;
     mode = HELP_MODE_NORMAL;
 
     /* look for the 'brief' parameter */
@@ -2790,6 +2882,7 @@ static void
 			  VAL_STR(parm));
 	    }
 	}
+	val_free_value(valset);
 	return;
     }
 
@@ -2797,6 +2890,7 @@ static void
     parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_COMMANDS);
     if (parm && parm->res==NO_ERR) {
 	do_help_commands(mode);
+	val_free_value(valset);
 	return;
     }
 
@@ -2815,6 +2909,7 @@ static void
 			  VAL_STR(parm));
 	    }
 	}
+	val_free_value(valset);
 	return;
     }
 
@@ -2833,6 +2928,7 @@ static void
 			  VAL_STR(parm));
 	    }
 	}
+	val_free_value(valset);
 	return;
     }
 
@@ -2852,15 +2948,33 @@ static void
 			  VAL_STR(parm));
 	    }
 	}
+	val_free_value(valset);
 	return;
     }
 
 
     /* no parameters entered except maybe brief or full */
-    if (mode == HELP_MODE_FULL) {
-	help_program_module(YANGCLI_MOD, YANGCLI_BOOT, 
-			    HELP_MODE_NORMAL);
-    } else {
+    switch (mode) {
+    case HELP_MODE_BRIEF:
+    case HELP_MODE_NORMAL:
+	log_stdout("\n\nyangcli summary:");
+	log_stdout("\n\n  Commands are defined with YANG rpc statements.");
+	log_stdout("\n  Use 'help commands' to see current list of commands.");
+	log_stdout("\n\n  Global variables are created with 2 dollar signs"
+		   "\n  in assignment statements ($$foo = 7).");
+	log_stdout("\n  Use 'show globals' to see current list "
+		   "of global variables.");
+	log_stdout("\n\n  Local variables (within a stack frame) are created"
+		   "\n  with 1 dollar sign in assignment"
+		   " statements ($foo = $bar).");
+	log_stdout("\n  Use 'show locals' to see current list "
+		   "of local variables.");
+	log_stdout("\n\n  Use 'show vars' to see all program variables.\n");
+
+	if (mode==HELP_MODE_BRIEF) {
+	    break;
+	}
+
 	dtyp = NCX_NT_OBJ;
 	obj = (const obj_template_t *)
 	    def_reg_find_moddef(YANGCLI_MOD, YANGCLI_HELP, &dtyp);
@@ -2869,7 +2983,16 @@ static void
 	} else {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
+	break;
+    case HELP_MODE_FULL:
+	help_program_module(YANGCLI_MOD, YANGCLI_BOOT, 
+			    HELP_MODE_FULL);
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
     }
+
+    val_free_value(valset);
 
 }  /* do_help */
 
@@ -3140,6 +3263,9 @@ static void
     if (res == NO_ERR || res == ERR_NCX_SKIPPED) {
 	pwd();
     }
+    if (valset) {
+	val_free_value(valset);
+    }
 
 }  /* do_pwd */
 
@@ -3170,12 +3296,16 @@ static void
 
     imode = interactive_mode();
     valset = get_valset(rpc, &line[len], &res);
-    if (!valset || valset->res != NO_ERR) {
+    if (res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
 	return;
     }
 
     parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_DIR);
     if (!parm || parm->res != NO_ERR) {
+	val_free_value(valset);
 	return;
     }
 
@@ -3191,7 +3321,9 @@ static void
     } else {
 	pwd();
     }
-    
+
+    val_free_value(valset);
+
 }  /* do_cd */
 
 
@@ -3223,13 +3355,17 @@ static void
 
 
     valset = get_valset(rpc, &line[len], &res);
-    if (!valset || valset->res != NO_ERR) {
+    if (res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
 	return;
     }
 
     parm = val_find_child(valset, YANGCLI_MOD, 
 			  NCX_EL_TARGET);
     if (!parm || parm->res != NO_ERR) {
+	val_free_value(valset);
 	return;
     } else {
 	target = VAL_STR(parm);
@@ -3243,6 +3379,7 @@ static void
     res = xpath_find_schema_target_int(target, &targobj);
     if (res != NO_ERR) {
 	log_error("\nError: Object '%s' not found", target);
+	val_free_value(valset);
 	return;
     }	
 
@@ -3255,6 +3392,7 @@ static void
 	if (!curparm || res != NO_ERR) {
 	    log_error("\nError: Script value '%s' invalid (%s)", 
 		      VAL_STR(parm), get_error_string(res)); 
+	    val_free_value(valset);
 	    return;
 	}
     }
@@ -3298,6 +3436,7 @@ static void
     }
 
     /* cleanup */
+    val_free_value(valset);
     if (newparm) {
 	val_free_value(newparm);
     }
@@ -4297,6 +4436,8 @@ static status_t
     result_isglobal = FALSE;
     memset(clibuff, 0x0, sizeof(clibuff));
     climore = FALSE;
+    malloc_cnt = 0;
+    free_cnt = 0;
 
     /* get a read line context with a history buffer 
     * change later to not get allocated if batch mode active
@@ -4482,11 +4623,9 @@ static void
 	default_module = NULL;
     }
 
-    default_target = NULL;
-
-    if (confname) {
-	m__free(confname);
-	confname = NULL;
+    if (modules) {
+	val_free_value(modules);
+	modules = NULL;
     }
 
     if (logfilename) {
@@ -4494,14 +4633,14 @@ static void
 	logfilename = NULL;
     }
 
+    if (confname) {
+	m__free(confname);
+	confname = NULL;
+    }
+
     if (runscript) {
 	m__free(runscript);
 	runscript = NULL;
-    }
-
-    if (modules) {
-	val_free_value(modules);
-	modules = NULL;
     }
 
     if (result_name) {
@@ -4509,7 +4648,15 @@ static void
 	result_name = NULL;
     }
 
+
+
+    if (malloc_cnt != free_cnt) {
+	log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
+		  malloc_cnt, free_cnt);
+    }
+
     log_close();
+
 
 }  /* yangcli_cleanup */
 

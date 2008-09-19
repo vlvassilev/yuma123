@@ -183,6 +183,7 @@ static void
     if (rec->ns_module) {
 	m__free(rec->ns_module);
     }
+    m__free(rec);
 
 }  /* free_xmlns */
 
@@ -745,6 +746,9 @@ void
     }
 #endif
 
+    if (pmap->nm_pfix) {
+	m__free(pmap->nm_pfix);
+    }
     m__free(pmap);
 
 }  /* xmlns_free_pmap */

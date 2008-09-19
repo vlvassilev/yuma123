@@ -42,6 +42,7 @@ module ncx {
        "Initial revision.";
   }
 
+
   leaf belongs-to {
     description 
        "Contains the module name value for a belongs-to-stmt.
@@ -299,7 +300,7 @@ module ncx {
   // Internal objects for anyxml parsing
   // every value node must be assigned an object template
   // even within the anyxml implementation
-  
+
   anyxml any {
     ncx:hidden;
     ncx:abstract;
@@ -321,7 +322,6 @@ module ncx {
      ncx:hidden;
      ncx:abstract;
   }
-
 
   // Netconf Central Extensions
 
@@ -442,9 +442,6 @@ module ncx {
       yin-element true;
     }
   }
-
-
-
 
 }
 

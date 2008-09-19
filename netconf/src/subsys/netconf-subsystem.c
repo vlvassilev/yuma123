@@ -33,6 +33,8 @@ date         init     comment
 #include <pwd.h>
 #include <stdarg.h>
 
+#define _C_main 1
+
 #include "procdefs.h"
 
 #ifndef _H_ncxconst

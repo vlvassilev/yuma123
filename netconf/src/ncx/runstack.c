@@ -106,8 +106,9 @@ typedef struct stack_entry_t_ {
 static boolean         runstack_init_done = FALSE;
 static uint32          script_level;
 static stack_entry_t   runstack[RUNSTACK_MAX_NEST];
-static dlq_hdr_t       globalQ;
-static dlq_hdr_t       zeroQ;
+static dlq_hdr_t       globalQ;    /* Q of ncx_var_t */
+static dlq_hdr_t       zeroQ;      /* Q of ncx_var_t */
+
 
 /********************************************************************
 * FUNCTION make_var

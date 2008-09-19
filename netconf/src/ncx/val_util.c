@@ -282,11 +282,6 @@ static status_t
 		if (!chval) {
 		    defval = obj_get_default(chobj);
 		    if (defval) {
-			chval = val_new_value();
-			if (!chval) {
-			    return ERR_INTERNAL_MEM;
-			}
-			val_init_from_template(chval, chobj);
 			res = cli_parse_parm(val, chobj,
 					    defval, scriptmode);
 			if (res==NO_ERR) {

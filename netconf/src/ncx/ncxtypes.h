@@ -505,15 +505,7 @@ typedef boolean (*ncx_nodetest_fn_t) (boolean withdef,
 				      const void *node);
 
 
-/* One import item from the <items> clause, NCX only */
-typedef struct ncx_import_item_t_ {
-    dlq_hdr_t  qhdr;
-    xmlChar   *name;
-    void *     def;        /* ??? real ptr type ??? */
-} ncx_import_item_t;
-
-
-/* One 'import' clause NCX and YANG */
+/* One 'import' clause in YANG */
 typedef struct ncx_import_t_ {
     dlq_hdr_t           qhdr;
     xmlChar            *module;
@@ -521,7 +513,6 @@ typedef struct ncx_import_t_ {
     struct tk_token_t_ *tk;            /* YANG only back-ptr */
     boolean             used;                   /* YANG-only */
     boolean             usexsd;        /* FALSE if duplicate */
-    dlq_hdr_t           itemQ;                   /* NCX only */
     dlq_hdr_t           appinfoQ;               /* YANG only */
 } ncx_import_t;
 

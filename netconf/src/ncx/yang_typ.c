@@ -442,7 +442,6 @@ static status_t
 	    rv->lbstr = xml_strdup(TK_CUR_VAL(tkc));
 	    if (!rv->lbstr) {
 		res = ERR_INTERNAL_MEM;
-
 	    }
 	}
     } else {

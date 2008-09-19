@@ -106,7 +106,6 @@ typedef struct yang_node_t_ {
     ncx_module_t  *submod;             /* submod for allincQ */
     xmlChar       *failed;  /* saved name for failed entries */
     tk_chain_t    *tkc;      /* saved token chain for errors */
-    boolean        submodcopy;    /* TRUE if submod back-ptr */
     status_t       res;         /* saved result for 'failed' */
 } yang_node_t;
 

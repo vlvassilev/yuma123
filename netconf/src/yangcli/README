@@ -99,25 +99,21 @@ Overview
     There cannot be any whitespace between the module-prefix,
     colon, and command name.  
 
-    If the module name is present, then only RPC methods
+    If the module prefix is present, then only RPC methods
     from the associated module will be checked.
 
         acme:reset-subsystem reset-target="/foo/bar[i=23]"
 
 
-    If the owner name is not present, then the default-owner 
+    If the module prefix is not present, then the default-module
     will be used instead first, and then (if connected) the 
     agent RPC methods will be checked.
 
        edit-config test-option=test-only config=$myconfig \
           error-option=stop-on-error default-operation=none
 
-
-    The command foo-reset has an implied default owner
-    which is 'ietf' or 'ncx', unless set by the user.
-
-    The owner string is used to look up definitions in
-    the registry.
+    If present, then only the module associated with that prefix 
+    string is used to look up definitions in the registry.
 
     A parm has several forms:
        - string literal (quoted or unquoted)

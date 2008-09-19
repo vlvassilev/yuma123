@@ -279,6 +279,9 @@ static status_t
 		    mod->langver = YANG_VERSION_NUM;
 		}
 	    }
+	    if (str) {
+		m__free(str);
+	    }
 
 	    res = yang_consume_semiapp(tkc, mod, &mod->appinfoQ);
 	    if (res != NO_ERR) {
@@ -701,7 +704,7 @@ static status_t
 		dlq_enque(node, &pcb->impchainQ);
 		dlq_enque(imp, &mod->importQ);
 		dlq_enque(impptr, &pcb->allimpQ);
-	    
+
 		/* load the module now instead of later for validation */
 		res = ncxmod_load_imodule(imp->module, pcb, YANG_PT_IMPORT);
 		if (res != NO_ERR) {

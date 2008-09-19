@@ -127,8 +127,10 @@ dlq_hdrT * dlq_createQue (void)
 {
     REG dlq_hdrT  *retP;
 
-    if ((retP = m__getObj(dlq_hdrT))==NULL)
+    retP = m__getObj(dlq_hdrT);
+    if (retP==NULL) {
 	return NULL;
+    }
 
     /* init empty list */
     retP->hdr_typ = DLQ_DHDR_NODE;

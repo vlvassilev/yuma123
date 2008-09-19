@@ -676,6 +676,11 @@ static status_t
     /* get the script or CLI input as a new val_value_t struct */
     val = var_check_script_val(obj, str, ISTOP, &res);
     if (val) {
+	if (!obj) {
+	    /* the generic name needs to be overwritten */
+	    val_set_name(val, name, nlen);
+	}
+
 	/* this is a plain assignment statement
 	 * val is a malloced struct, pass it over to the
 	 * var struct instead of cloning it
@@ -708,6 +713,10 @@ static status_t
     } else {
 	/* there was some error in the statement processing */
 	*len = 0;
+	if (result_name) {
+	    m__free(result_name);
+	    result_name = NULL;
+	}
     }
 
     return res;
@@ -2397,11 +2406,11 @@ static void
 		}
 	    } else {
 		if (imode) {
-		    log_stdout("\n  %s = (%s)", 
+		    log_stdout("\n   %s (%s)", 
 			       var->name,
 			       tk_get_btype_sym(var->val->btyp));
 		} else {
-		    log_write("\n  %s = (%s)", 
+		    log_write("\n   %s (%s)", 
 			      var->name,
 			      tk_get_btype_sym(var->val->btyp));
 		}
@@ -2452,11 +2461,11 @@ static void
 	    } else {
 		/* just print the data type name for complex types */
 		if (imode) {
-		    log_stdout("\n  %s = (%s)", 
+		    log_stdout("\n   %s (%s)", 
 			       var->name,
 			       tk_get_btype_sym(var->val->btyp));
 		} else {
-		    log_write("\n  %s = (%s)", 
+		    log_write("\n   %s (%s)", 
 			      var->name,
 			      tk_get_btype_sym(var->val->btyp));
 		}

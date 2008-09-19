@@ -1167,6 +1167,11 @@ status_t
 	return res;
     }
 
+    /* change the name of the value to the variable node
+     * instead of the generic 'string'
+     */
+    val_set_name(val, name, xml_strlen(name));
+
     /* save the variable */
     res = set_str(name, xml_strlen(name), val, isglobal, FALSE);
     if (res != NO_ERR) {

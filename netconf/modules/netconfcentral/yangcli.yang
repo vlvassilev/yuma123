@@ -230,6 +230,40 @@ module yangcli {
       }
     }
 
+    rpc create {
+      description
+       "Create some NETCONF config data with the edit-config operation";
+      ncx:rpc-type config;
+      input {
+        choice from {
+          default from-cli;
+
+          leaf from-local {
+            description "Use the local variable as the content";
+            type nt:NcxIdentifier;
+          }
+
+          leaf from-global {
+            description "Use the global variable as the content";
+            type nt:NcxIdentifier;
+          }
+
+          leaf from-cli {
+            description "Get the content from user keyboard input";
+            type empty;
+          }
+        }
+
+        leaf target {
+          description 
+           "Xpath expression indicating the node which is going
+            to be the parent of the content. The string '/'
+            indicates a child of the 'config' element.";
+          type string;
+        }
+      }
+    }
+
     rpc help {
       description "Print the yangcli help text";
       ncx:rpc-type exec;

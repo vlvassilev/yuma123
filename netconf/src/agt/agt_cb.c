@@ -164,7 +164,7 @@ void
     /* find the object template for this callback */
     res = xpath_find_schema_target_int(defpath, &obj);
     if (res != NO_ERR) {
-	SET_ERROR(ERR_INTERNAL_VAL);
+	/* probably had an error before the database was loaded */
 	return;
     }
 

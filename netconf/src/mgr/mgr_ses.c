@@ -310,7 +310,7 @@ static status_t
     /* Connect to the NETCONF subsystem */
     ret = libssh2_channel_subsystem(mscb->channel, "netconf");
     if (ret) {
-	log_info("\nmgr_ssh: Unable to request netconf subsystem");
+	log_info("\nmgr_ses: Unable to request netconf subsystem");
 	return ERR_NCX_SESSION_FAILED;
     }
 

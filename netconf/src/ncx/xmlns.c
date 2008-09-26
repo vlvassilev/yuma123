@@ -104,6 +104,9 @@ static xmlns_id_t xmlns_ncxid = 0;
 /* XSD Instance (XSI) namespace ID */
 static xmlns_id_t xmlns_xsiid = 0;
 
+/* 1998 XML Namespace ID */
+static xmlns_id_t xmlns_xmlid = 0;
+
 /* NETCONF Notifications namespace ID */
 static xmlns_id_t xmlns_ncnid = 0;
 
@@ -337,6 +340,8 @@ status_t
 	xmlns_invid = xmlns_next_id;
     } else if (!xml_strcmp(ns, XSI_URN)) {
 	xmlns_xsiid = xmlns_next_id;
+    } else if (!xml_strcmp(ns, XML_URN)) {
+	xmlns_xmlid = xmlns_next_id;
     } else if (!xml_strcmp(ns, NCN_URN)) {
 	xmlns_ncnid = xmlns_next_id;
     } else if (!xml_strcmp(ns, YANG_URN)) {
@@ -610,6 +615,23 @@ xmlns_id_t
 {
     return xmlns_xsiid;
 }  /* xmlns_xsi_id */
+
+
+/********************************************************************
+* FUNCTION xmlns_xml_id
+*
+* Get the ID for the 1998 XML namespace or 0 if it doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    XML ID or 0 if not found
+*********************************************************************/
+xmlns_id_t 
+    xmlns_xml_id (void)
+{
+    return xmlns_xmlid;
+}  /* xmlns_xml_id */
 
 
 /********************************************************************

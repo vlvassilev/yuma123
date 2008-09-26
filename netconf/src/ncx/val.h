@@ -529,6 +529,11 @@ extern void
 		   val_value_t *parent);
 
 extern void
+    val_insert_child (val_value_t *child,
+		      val_value_t *current,
+		      val_value_t *parent);
+
+extern void
     val_remove_child (val_value_t *child);
 
 extern void

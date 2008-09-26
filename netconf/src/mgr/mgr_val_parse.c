@@ -270,6 +270,7 @@ static status_t
 	/* treat this 'any' is an 'empty' data type  */
 	val_init_from_template(retval, ncx_get_gen_empty());
 	retval->v.bool = TRUE;
+	retval->nsid = startnode->nsid;
 	return NO_ERR;
     default:
 	res = ERR_NCX_WRONG_NODETYP;
@@ -299,12 +300,14 @@ static status_t
 	     * treated as a 'container' data type
 	     */
 	    val_init_from_template(retval, ncx_get_gen_container());
+	    retval->nsid = startnode->nsid;
 	    break;
 	case XML_NT_STRING:
 	    /* treat this string child node as the string
 	     * content for the parent node
 	     */
 	    val_init_from_template(retval, ncx_get_gen_string());
+	    retval->nsid = startnode->nsid;
 	    retval->v.str = xml_strdup(nextnode.simval);
 	    res = (retval->v.str) ? NO_ERR : ERR_INTERNAL_MEM;
 	    getstrend = TRUE;
@@ -315,6 +318,7 @@ static status_t
 		/* treat this start + end pair as an 'empty' data type */
 		val_init_from_template(retval, ncx_get_gen_empty());
 		retval->v.bool = TRUE;
+		retval->nsid = startnode->nsid;
 		return NO_ERR;
 	    }
 	    break;
@@ -1368,13 +1372,14 @@ static status_t
     const typ_def_t         *metadef;
     xml_attr_t              *attr;
     val_value_t             *metaval;
-    xmlns_id_t               ncid, yangid;
+    xmlns_id_t               ncid, yangid, xmlid;
     status_t                 res, retres;
-    boolean                  iskey, isvalue;
+    boolean                  iskey, isvalue, islang;
 
     retres = NO_ERR;
     ncid =  xmlns_nc_id();
     yangid =  xmlns_yang_id();
+    xmlid = xmlns_xml_id();
 
     /* go through all the attributes in the node and convert
      * to val_value_t structs
@@ -1397,6 +1402,7 @@ static status_t
 	metadef = NULL;
 	iskey = FALSE;
 	isvalue = FALSE;
+	islang = FALSE;
 
 	/* check qualified and unqualified operation attribute,
 	 * then the 'xmlns' attribute, then a defined attribute
@@ -1419,6 +1425,9 @@ static status_t
 	    iskey = TRUE;
 	} else if (val_match_metaval(attr, yangid, YANG_K_VALUE)) {
 	    isvalue = TRUE;
+	} else if (val_match_metaval(attr, xmlid, 
+				     (const xmlChar *)"lang")) {
+	    islang = TRUE;
 	} else {
 	    /* find the attribute definition in this typdef */
 	    meta = obj_find_metadata(obj, attr->attr_name);
@@ -1429,7 +1438,7 @@ static status_t
 	    }
 	}
 
-	if (iskey || isvalue) {
+	if (iskey || isvalue || islang) {
 	    metadef = typ_get_basetype_typdef(NCX_BT_STRING);
 	}
 
@@ -1451,6 +1460,8 @@ static status_t
 	    }
 	} else {
 	    res = ERR_NCX_UNKNOWN_ATTRIBUTE;
+	    log_error("\nError: unknown attribute '%s'", 
+		      attr->attr_qname);
 	}
 	if (res != NO_ERR) {
 	    retres = res;

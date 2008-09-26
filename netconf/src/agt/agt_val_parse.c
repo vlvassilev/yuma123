@@ -419,6 +419,7 @@ static status_t
 	/* treat this 'any' is an 'empty' data type  */
 	val_init_from_template(retval, ncx_get_gen_empty());
 	retval->v.bool = TRUE;
+	retval->nsid = startnode->nsid;
 	return NO_ERR;
     default:
 	res = ERR_NCX_WRONG_NODETYP;
@@ -451,12 +452,14 @@ static status_t
 	     * treated as a 'container' data type
 	     */
 	    val_init_from_template(retval, ncx_get_gen_container());
+	    retval->nsid = startnode->nsid;
 	    break;
 	case XML_NT_STRING:
 	    /* treat this string child node as the string
 	     * content for the parent node
 	     */
 	    val_init_from_template(retval, ncx_get_gen_string());
+	    retval->nsid = startnode->nsid;
 	    retval->v.str = xml_strdup(nextnode.simval);
 	    res = (retval->v.str) ? NO_ERR : ERR_INTERNAL_MEM;
 	    getstrend = TRUE;
@@ -467,6 +470,7 @@ static status_t
 		/* treat this start + end pair as an 'empty' data type */
 		val_init_from_template(retval, ncx_get_gen_empty());
 		retval->v.bool = TRUE;
+		retval->nsid = startnode->nsid;
 		return NO_ERR;
 	    } else {
 		errnode = &nextnode;

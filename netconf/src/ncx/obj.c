@@ -5833,6 +5833,59 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION obj_get_parent
+* 
+* Get the parent of the current object
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    pointer to the parent of this object or NULL if none
+*********************************************************************/
+obj_template_t *
+    obj_get_parent (obj_template_t  *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return obj->parent;
+
+}  /* obj_get_parent */
+
+
+/********************************************************************
+* FUNCTION obj_get_cparent
+* 
+* Get the parent of the current object
+* CONST POINTER VERSION
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    pointer to the parent of this object or NULL if none
+*********************************************************************/
+const obj_template_t *
+    obj_get_cparent (const obj_template_t  *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return obj->parent;
+
+}  /* obj_get_cparent */
+
+
+/********************************************************************
 * FUNCTION obj_is_mandatory
 *
 * Figure out if the obj is YANG mandatory or not
@@ -6618,7 +6671,7 @@ status_t
 	 */
 	if (curnode->nsid) {
 	    /* find the specified module first */
-	    foundmodname = xmlns_get_module(curnode->nsid);
+
 	    if (foundmodname) {
 		foundobj = obj_find_child(obj, 
 					  foundmodname,

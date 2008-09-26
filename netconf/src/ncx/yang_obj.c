@@ -4400,6 +4400,8 @@ static status_t
 	if (!uses->grp) {
 	    uses->grp = ncx_find_grouping(mod, uses->name);
 	    if (!uses->grp) {
+		log_error("\nError: grouping '%s' not found",
+			  uses->name);
 		retres = ERR_NCX_DEF_NOT_FOUND;
 		tkc->cur = obj->tk;
 		ncx_print_errormsg(tkc, mod, retres);
@@ -5213,6 +5215,7 @@ static status_t
     }
 
     if (res != NO_ERR && !errdone) {
+	log_error("\nError: '%s' token not allowed here", val);
 	ncx_mod_exp_err(tkc, mod, res, expstr);
 	yang_skip_statement(tkc, mod);
     }

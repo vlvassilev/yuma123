@@ -750,6 +750,12 @@ extern boolean
 extern const xmlChar *
     obj_get_units (const obj_template_t  *obj);
 
+extern obj_template_t *
+    obj_get_parent (obj_template_t  *obj);
+
+extern const obj_template_t *
+    obj_get_cparent (const obj_template_t  *obj);
+
 extern boolean
     obj_is_mandatory (const obj_template_t *obj);
 

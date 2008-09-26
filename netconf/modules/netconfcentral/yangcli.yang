@@ -39,6 +39,13 @@ module yangcli {
        description "Initial yang version started from ncxcli v 0.2";
     }
 
+
+    /*************************************************************
+     *
+     *     Groupings for parameters used in multiple commands
+     *
+     *************************************************************/
+
     grouping KorP {
       choice k-or-p {
         leaf key {
@@ -70,6 +77,110 @@ module yangcli {
         }
       }
     }
+
+    grouping FillParms {
+       leaf target {
+         description 
+           "XPath target object to fill.  If prefixes are missing
+            then the first match in any namespace will be used.";
+
+         // type instance-identifier;  TBD
+
+         type string {
+           length "1..max";
+         }
+         mandatory true;
+       }
+
+       leaf optional {
+         description 
+           "If present, then prompt for leafs that are optional.
+            If not, skip these objects.";
+         type empty;
+       }
+
+       leaf current-value {
+         description
+           "Contains a string representing the location
+            of the existing variable to use as a template
+            for the defaults in the filled variable.
+
+            If a node is present in the current-value,
+            then it will be presented as the default
+            value for the corresponding leaf.  Otherwise
+            the YANG default will be used instead, if any.
+
+            If the 'optional' parameter is not present,
+            then optional parameters with current values
+            will be skipped.  If the current-value contains
+            an associated value, it will be used in this case.
+            Mandatory parameters will never be skipped.
+
+            The current value can be specified in any of
+            the following 5 variants:
+
+            1) The global variable 'foo' would be specified as:
+ 
+                current-value=$$foo
+
+            2) The local variable 'bar' would be specified as:
+ 
+                current-value=$bar
+
+            An error will be reported if the global or local
+            variable does not reference the same object type
+            as the target parameter.
+
+            3) Inline XML could be specified as:
+
+                current-value=[<x:bar>\
+                                 <x:baz>17</x:baz>\
+                               </x:bar>]
+
+            4) An external file containing XML can be specified as:
+
+                current-value=@foo.xml
+
+            5) An external file in YANGCLI conf file format can
+               be specified as:
+
+                current-value=@foo.txt";
+          
+         type string {
+           length "1..max";
+         }
+       }
+    }
+
+    grouping EditOps {
+        description
+            "Common parms for create, merge, replace commands";
+
+        choice from {
+            mandatory true;
+
+            leaf from-local {
+                description "Use the local variable as the content";
+                type nt:NcxIdentifier;
+            }
+
+            leaf from-global {
+                description "Use the global variable as the content";
+                type nt:NcxIdentifier;
+            }
+
+            case from-cli {
+                uses FillParms;
+            }
+        }
+    }
+
+
+    /*************************************************************
+     *
+     *         CLI parameter set for yangcli program
+     *
+     *************************************************************/
 
     container yangcli {
       ncx:cli;
@@ -202,6 +313,25 @@ module yangcli {
       }
     }
 
+
+    /*************************************************************
+     *
+     *        RPC methods for local commands within yangcli
+     *
+     *************************************************************/
+
+    rpc cd {
+      description "Change the current working directory.";
+      ncx:rpc-type exec;
+      input {
+        leaf dir { 
+           description "Directory path to use.";
+           type string;
+           mandatory true;
+        }
+      }
+    }
+
     rpc connect {
       description "Connect to a NETCONF agent.";
       ncx:rpc-type exec;
@@ -235,33 +365,53 @@ module yangcli {
        "Create some NETCONF config data with the edit-config operation";
       ncx:rpc-type config;
       input {
-        choice from {
-          default from-cli;
+        uses EditOps;
+      }
+    }
 
-          leaf from-local {
-            description "Use the local variable as the content";
-            type nt:NcxIdentifier;
-          }
-
-          leaf from-global {
-            description "Use the global variable as the content";
-            type nt:NcxIdentifier;
-          }
-
-          leaf from-cli {
-            description "Get the content from user keyboard input";
-            type empty;
-          }
-        }
-
+    rpc delete {
+      description
+       "Delete some NETCONF config data with the edit-config operation";
+      ncx:rpc-type config;
+      input {
         leaf target {
           description 
            "Xpath expression indicating the node which is going
-            to be the parent of the content. The string '/'
-            indicates a child of the 'config' element.";
+            to be deleted.";
           type string;
         }
       }
+    }
+
+    rpc fill {
+      description 
+       "Fill a value for use in a NETCONF PDU or other operation.
+  
+        Used in an assignment statement to create a variable
+        for later use:
+
+            $foo = fill --target=/t:foo-con/bar-list[index='fred'] \
+                        --optional \
+                        --current-value=$bar    ";
+       ncx:rpc-type exec;
+       input {
+         uses FillParms;
+       }
+       output {
+         anyxml data {
+           description 
+             "The result of the fill operation.
+
+              The name of the value node is not really 'data'.
+              The value returned will be the name specified in
+              the 'target' pamrameter.
+
+              The data type will be inherited from the 'target'
+              parameter, and not really be an 'anyxml' structure.
+              YANG does have a data type that supports this
+              'clone of foo' feature.";
+         }
+       }
     }
 
     rpc help {
@@ -305,6 +455,29 @@ module yangcli {
           type nt:NcxName;
           mandatory true;
         }
+      }
+    }
+
+    rpc merge {
+      description
+       "Create some NETCONF config data with the edit-config operation";
+      ncx:rpc-type config;
+      input {
+        uses EditOps;
+      }
+    }
+
+    rpc pwd {
+      description "Print the current working directory.";
+      ncx:rpc-type exec;
+    }
+
+    rpc replace {
+      description
+       "Create some NETCONF config data with the edit-config operation";
+      ncx:rpc-type config;
+      input {
+        uses EditOps;
       }
     }
 
@@ -431,113 +604,7 @@ module yangcli {
       }
     }
 
-    rpc pwd {
-      description "Print the current working directory.";
-      ncx:rpc-type exec;
-    }
 
-    rpc cd {
-      description "Change the current working directory.";
-      ncx:rpc-type exec;
-      input {
-        leaf dir { 
-           description "Directory path to use.";
-           type string;
-           mandatory true;
-        }
-      }
-   }
-
-   rpc fill {
-     description 
-       "Fill a value for use in a NETCONF PDU or other operation.
-  
-        Used in an assignment statement to create a variable
-        for later use:
-
-            $foo = fill --target=/t:foo-con/bar-list[index='fred'] \
-                        --optional \
-                        --current-value=$bar    ";
-     ncx:rpc-type exec;
-     input {
-       leaf target {
-         description 
-           "XPath target object to fill.  If prefixes are missing
-            then the first match in any namespace will be used.";
-
-         // type instance-identifier;  TBD
-
-         type string {
-           length "1..max";
-         }
-         mandatory true;
-       }
-
-       leaf optional {
-         description 
-           "If present, then prompt for leafs that are optional.
-            If not, skip these objects.";
-         type empty;
-       }
-
-       leaf current-value {
-         description
-           "Contains a string representing the location
-            of the existing variable to use as a template
-            for the defaults in the filled variable.
-
-            If a node is present in the current-value,
-            then it will be presented as the default
-            value for the corresponding leaf.  Otherwise
-            the YANG default will be used instead, if any.
-
-            If the 'optional' parameter is not present,
-            then optional parameters with current values
-            will be skipped.  If the current-value contains
-            an associated value, it will be used in this case.
-            Mandatory parameters will never be skipped.
-
-            The current value can be specified in any of
-            the following 5 variants:
-
-            1) The global variable 'foo' would be specified as:
- 
-                current-value=$$foo
-
-            2) The local variable 'bar' would be specified as:
- 
-                current-value=$bar
-
-            An error will be reported if the global or local
-            variable does not reference the same object type
-            as the target parameter.
-
-            3) Inline XML could be specified as:
-
-                current-value=[<x:bar>\
-                                 <x:baz>17</x:baz>\
-                               </x:bar>]
-
-            4) An external file containing XML can be specified as:
-
-                current-value=@foo.xml
-
-            5) An external file in YANGCLI conf file format can
-               be specified as:
-
-                current-value=@foo.txt";
-          
-         type string {
-           length "1..max";
-         }
-       }
-     }
-     output {
-       anyxml data {
-         description "The result of the fill operation.";
-       }
-     }
-  }
 
 }
 

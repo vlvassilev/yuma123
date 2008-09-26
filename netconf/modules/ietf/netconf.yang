@@ -500,6 +500,15 @@ module netconf {
       }
    }
 
+   // NETCONF operation attribute
+   leaf operation {
+     description 
+       "Internal object for the nc:operation attribute.";
+     type EditOperationType;
+     ncx:abstract;
+     ncx:hidden;
+   }
+
    // NETCONF Generic RPC Messages
 
    container rpc {
@@ -604,16 +613,16 @@ module netconf {
         }
 
         choice edit-content {
-          anyxml config {
+          mandatory true;
+          container config {
             description 
               "Inline Config content: 'config' element.";
-            mandatory true;
+            ncx:root;
           }
           leaf url {
             description 
               "Pointer to Config content: 'url' element.";
             type ConfigURIType;
-            mandatory true;
           }
         }
       }

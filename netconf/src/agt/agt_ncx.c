@@ -316,20 +316,21 @@ static status_t
     /* get the config parameter */
     val = val_find_child(&msg->rpc_input, NC_MODULE,
 			 NCX_EL_CONFIG);
-    if (!val || val->res != NO_ERR) {
-	/* we shouldn't get here if the config param is missing */
-	return SET_ERROR(ERR_NCX_OPERATION_FAILED);
-    }
+    if (val && val->res == NO_ERR) {
+	/* validate the <config> element (wrt/ embedded operation
+	 * attributes) against the existing data model.
+	 * <rpc-error> records will be added as needed 
+	 */
+	res = agt_val_validate_write(scb, msg, target, val, defop);
 
-    /* validate the <config> element (wrt/ embedded operation
-     * attributes) against the existing data model.
-     * <rpc-error> records will be added as needed 
-     */
-    res = agt_val_validate_write(scb, msg, target, val, defop);
-
-    if (target->cfg_id == NCX_CFGID_RUNNING && res==NO_ERR) {
-	res = agt_val_split_root_check(scb, &msg->mhdr, 
-				       val, target->root);
+	if (target->cfg_id == NCX_CFGID_RUNNING && res==NO_ERR) {
+	    res = agt_val_split_root_check(scb, &msg->mhdr, 
+					   val, target->root);
+	}
+    } else if (!val) {
+	res = ERR_NCX_DATA_MISSING;
+    } else {
+	res = val->res;
     }
 
     /* save the default operation in 'user1' */

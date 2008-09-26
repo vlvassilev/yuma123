@@ -104,6 +104,12 @@ date	     init     comment
 #define XSI_PREFIX      (const xmlChar *)"xsi"
 
 
+/* URN for XML */
+#define XML_URN         (const xmlChar *)\
+			 "http://www.w3.org/XML/1998/namespace"
+#define XML_PREFIX      (const xmlChar *)"xml"
+
+
 /* URN for NETCONF Notifications */
 #define NCN_URN         (const xmlChar *)\
                          "urn:ietf:params:xml:ns:netconf:notification:1.0"

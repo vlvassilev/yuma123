@@ -430,7 +430,8 @@ static void
 	return;
     }
 
-    res = xml_msg_gen_xmlns_attrs(&msg->mhdr, msg->rpc_in_attrs);
+    res = xml_msg_gen_xmlns_attrs(&msg->mhdr, 
+				  msg->rpc_in_attrs);
     if (res != NO_ERR) {
 	ses_finish_msg(scb);
 	return;  /*** !!! ***/

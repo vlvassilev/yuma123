@@ -3696,6 +3696,40 @@ void
 
 
 /********************************************************************
+* FUNCTION val_insert_child
+* 
+*   Insert a child value node to a parent value node
+*
+* INPUTS:
+*    child == node to store in the parent
+*    current == current node to insert after; 
+*               NULL to make new first entry
+*    parent == complex value node with a childQ
+*
+*********************************************************************/
+void
+    val_insert_child (val_value_t *child,
+		      val_value_t *current,
+		      val_value_t *parent)
+{
+#ifdef DEBUG
+    if (!child || !parent) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    child->parent = parent;
+    if (current) {
+	dlq_insertAfter(child, current);
+    } else {
+	dlq_insertAfter(child, &parent->v.childQ);
+    }
+
+}   /* val_insert_child */
+
+
+/********************************************************************
 * FUNCTION val_remove_child
 * 
 *   Remove a child value node from its parent value node

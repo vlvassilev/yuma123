@@ -178,7 +178,7 @@ date         init     comment
 
 
 /* YANGCLI boot parameter names 
- * matches parm clauses in ncxcli-boot parmset in ncxcli.ncx
+ * matches parm clauses in ncxcli-boot parmset in ncxcli.yang
  */
 #define YANGCLI_AGENT       (const xmlChar *)"agent"
 #define YANGCLI_BATCHMODE   (const xmlChar *)"batch-mode"
@@ -197,6 +197,9 @@ date         init     comment
 
 #define YANGCLI_COMMAND     (const xmlChar *)"command"
 #define YANGCLI_COMMANDS    (const xmlChar *)"commands"
+#define YANGCLI_FROM_CLI    (const xmlChar *)"from-cli"
+#define YANGCLI_FROM_GLOBAL (const xmlChar *)"from-global"
+#define YANGCLI_FROM_LOCAL  (const xmlChar *)"from-local"
 #define YANGCLI_GLOBAL      (const xmlChar *)"global"
 #define YANGCLI_GLOBALS     (const xmlChar *)"globals"
 #define YANGCLI_LOCAL       (const xmlChar *)"local"
@@ -212,14 +215,18 @@ date         init     comment
 #define DEF_FN_PROMPT  (const xmlChar *)"yangcli:"
 #define MORE_PROMPT    (const xmlChar *)"   more> "
 
-/* YANGCLI top level commands */
+/* YANGCLI local RPC commands */
 #define YANGCLI_CD      (const xmlChar *)"cd"
 #define YANGCLI_CONNECT (const xmlChar *)"connect"
+#define YANGCLI_CREATE  (const xmlChar *)"create"
+#define YANGCLI_DELETE  (const xmlChar *)"delete"
 #define YANGCLI_FILL    (const xmlChar *)"fill"
 #define YANGCLI_HELP    (const xmlChar *)"help"
 #define YANGCLI_LOAD    (const xmlChar *)"load"
+#define YANGCLI_MERGE   (const xmlChar *)"merge"
 #define YANGCLI_PWD     (const xmlChar *)"pwd"
 #define YANGCLI_QUIT    (const xmlChar *)"quit"
+#define YANGCLI_REPLACE (const xmlChar *)"replace"
 #define YANGCLI_RUN     (const xmlChar *)"run"
 #define YANGCLI_SAVE    (const xmlChar *)"save"
 #define YANGCLI_SET     (const xmlChar *)"set"
@@ -245,11 +252,11 @@ static void
 static void
     top_command (xmlChar *line);
 
-/* forward decl needed by conn_command */
 static void
-    do_local_command (const obj_template_t *rpc,
-		      xmlChar *line,
-		      uint32  len);
+    yangcli_reply_handler (ses_cb_t *scb,
+			  mgr_rpc_req_t *req,
+			   mgr_rpc_rpy_t *rpy);
+
 
 
 /********************************************************************
@@ -727,7 +734,7 @@ static status_t
 /********************************************************************
 * FUNCTION parse_rpc_cli
 * 
-*  Call the ps_parse_cli for an RPC input parmset
+*  Call the cli_parse for an RPC input value set
 * 
 * INPUTS:
 *   rpc == RPC to parse CLI for
@@ -1874,6 +1881,78 @@ static status_t
 
 
 /********************************************************************
+ * FUNCTION get_valset
+ * 
+ * INPUTS:
+ *    rpc == RPC method for the command being processed
+ *    line == CLI input in progress
+ *    res == address of status result
+ *
+ * OUTPUTS:
+ *    *res is set to the status
+ *
+ * RETURNS:
+ *   malloced valset filled in with the parameters for 
+ *   the specified RPC
+ *
+ *********************************************************************/
+static val_value_t *
+    get_valset (const obj_template_t *rpc,
+		 const xmlChar *line,
+		 status_t  *res)
+{
+    const obj_template_t  *obj;
+    val_value_t           *valset;
+    uint32                 len;
+
+    *res = NO_ERR;
+    valset = NULL;
+    len = 0;
+
+    /* skip leading whitespace */
+    while (line[len] && xml_isspace(line[len])) {
+	len++;
+    }
+
+    /* check any non-whitespace entered after RPC method name */
+    if (line[len]) {
+	valset = parse_rpc_cli(rpc, &line[len], res);
+	if (*res == ERR_NCX_SKIPPED) {
+	    log_stdout("\nError: no parameters defined for RPC %s",
+		       obj_get_name(rpc));
+	} else if (*res != NO_ERR) {
+	    log_stdout("\nError in the parameters for RPC %s (%s)",
+		       obj_get_name(rpc), get_error_string(*res));
+	}
+    }
+
+    obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
+    if (!obj) {
+	*res = ERR_NCX_SKIPPED;
+	return NULL;
+    }
+
+    /* check no input from user, so start a parmset */
+    if (*res == NO_ERR && !valset) {
+	valset = val_new_value();
+	if (!valset) {
+	    *res = ERR_INTERNAL_MEM;
+	} else {
+	    val_init_from_template(valset, obj);
+	}
+    }
+
+    /* fill in any missing parameters from the CLI */
+    if (*res==NO_ERR && interactive_mode()) {
+	*res = fill_valset(rpc, valset, NULL);
+    }
+
+    return valset;
+
+}  /* get_valset */
+
+
+/********************************************************************
 * FUNCTION create_session
 * 
 * Start a NETCONF session and change the program state
@@ -1954,78 +2033,6 @@ static void
     }
     
 } /* create_session */
-
-
-/********************************************************************
- * FUNCTION get_valset
- * 
- * INPUTS:
- *    rpc == RPC method for the command being processed
- *    line == CLI input in progress
- *    res == address of status result
- *
- * OUTPUTS:
- *    *res is set to the status
- *
- * RETURNS:
- *   malloced valset filled in with the parameters for 
- *   the specified RPC
- *
- *********************************************************************/
-static val_value_t *
-    get_valset (const obj_template_t *rpc,
-		 const xmlChar *line,
-		 status_t  *res)
-{
-    const obj_template_t  *obj;
-    val_value_t           *valset;
-    uint32                 len;
-
-    *res = NO_ERR;
-    valset = NULL;
-    len = 0;
-
-    /* skip leading whitespace */
-    while (line[len] && xml_isspace(line[len])) {
-	len++;
-    }
-
-    /* check any non-whitespace entered after RPC method name */
-    if (line[len]) {
-	valset = parse_rpc_cli(rpc, &line[len], res);
-	if (*res == ERR_NCX_SKIPPED) {
-	    log_stdout("\nError: no parameters defined for RPC %s",
-		       obj_get_name(rpc));
-	} else if (*res != NO_ERR) {
-	    log_stdout("\nError in the parameters for RPC %s (%s)",
-		       obj_get_name(rpc), get_error_string(*res));
-	}
-    }
-
-    obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
-    if (!obj) {
-	*res = ERR_NCX_SKIPPED;
-	return NULL;
-    }
-
-    /* check no input from user, so start a parmset */
-    if (*res == NO_ERR && !valset) {
-	valset = val_new_value();
-	if (!valset) {
-	    *res = ERR_INTERNAL_MEM;
-	} else {
-	    val_init_from_template(valset, obj);
-	}
-    }
-
-    /* fill in any missing parameters from the CLI */
-    if (*res==NO_ERR && interactive_mode()) {
-	*res = fill_valset(rpc, valset, NULL);
-    }
-
-    return valset;
-
-}  /* get_valset */
 
 
 /********************************************************************
@@ -3457,10 +3464,849 @@ static void
 }  /* do_fill */
 
 
+
+/********************************************************************
+* FUNCTION add_config_from_content_node
+* 
+* Add the config node content for the edit-config operation
+*
+* INPUTS:
+*   rpc == RPC method in progress
+*   config_content == the node associated with the target
+*             to be used as content nested within the 
+*             <config> element
+*   curobj == the current object node for config_content, going
+*                 up the chain to the root object.
+*                 First call should pass config_content->obj
+*   config == the starting <config> node to add the data into
+*
+* OUTPUTS:
+*    config node is filled in with child nodes
+*
+* RETURNS:
+*    pointer to current node to add content into
+*********************************************************************/
+static status_t
+    add_config_from_content_node (const obj_template_t *rpc,
+				  val_value_t *config_content,
+				  const obj_template_t *curobj,
+				  val_value_t *config,
+				  val_value_t **curtop)
+{
+
+    const obj_template_t  *parent;
+    const obj_key_t       *curkey;
+    val_value_t           *newnode, *valtarget, *keyval, *lastkey;
+    status_t               res;
+
+    /* get to the root of the object chain */
+    parent = obj_get_cparent(curobj);
+    if (parent) {
+	res = add_config_from_content_node(rpc,
+					   config_content,
+					   parent,
+					   config,
+					   curtop);
+	if (res != NO_ERR) {
+	    return res;
+	}
+    }
+
+    /* set the current target, working down the stack
+     * on the way back from the initial dive
+     */
+    if (*curtop) {
+	valtarget = *curtop;
+    } else {
+	/* first time through to this point */
+	valtarget = config;
+	*curtop = config;
+    }
+
+    switch (curobj->objtype) {
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+	if (curobj != config_content->obj) {
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	val_add_child(config_content, valtarget);
+	*curtop = config_content;
+	break;
+    case OBJ_TYP_LIST:
+	/* get all the key nodes for the current object,
+	 * if they do not already exist
+	 */
+	if (curobj == config_content->obj) {
+	    val_add_child(config_content, valtarget);
+	    *curtop = config_content;
+	} else {
+	    newnode = val_new_value();
+	    if (!newnode) {
+		return ERR_INTERNAL_MEM;
+	    }
+	    val_init_from_template(newnode, curobj);
+	    val_add_child(newnode, valtarget);
+	    *curtop = newnode;
+	}
+
+	lastkey = NULL;
+	for (curkey = obj_first_ckey(curobj);
+	     curkey != NULL;
+	     curkey = obj_next_ckey(curkey)) {
+
+	    keyval = val_find_child(*curtop,
+				    obj_get_mod_name(curkey->keyobj),
+				    obj_get_name(curkey->keyobj));
+	    if (!keyval) {
+		res = get_parm(rpc, curkey->keyobj,
+			       *curtop, NULL);
+		if (res != NO_ERR) {
+		    return res;
+		}
+		keyval = val_find_child(*curtop,
+					obj_get_mod_name(curkey->keyobj),
+					obj_get_name(curkey->keyobj));
+		if (!keyval) {
+		    return SET_ERROR(ERR_INTERNAL_VAL);
+		}
+	    }
+
+	    val_remove_child(keyval);
+	    val_insert_child(keyval, lastkey, valtarget);
+	    lastkey = keyval;
+	}
+	break;
+    case OBJ_TYP_CONTAINER:
+	if (curobj == config_content->obj) {
+	    val_add_child(config_content, valtarget);
+	    *curtop = config_content;
+	} else {
+	    newnode = val_new_value();
+	    if (!newnode) {
+		return ERR_INTERNAL_MEM;
+	    }
+	    val_init_from_template(newnode, curobj);
+	    val_add_child(newnode, valtarget);
+	    *curtop = newnode;
+	}
+	break;
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+	/* skip over this meta nodes; they are not present
+	 * in instance documents
+	 */
+	break;
+    default:
+	/* any other object type is an error */
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    return NO_ERR;
+
+}  /* add_config_from_content_node */
+
+
+/********************************************************************
+* FUNCTION send_edit_config_to_agent
+* 
+* Send an <edit-config> operation to the agent
+*
+* INPUTS:
+*   config_content == the node associated with the target
+*             to be used as content nested within the 
+*             <config> element
+*
+* OUTPUTS:
+*    state may be changed or other action taken
+*    config_content is consumed -- freed or transfered
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    send_edit_config_to_agent (val_value_t *config_content)
+{
+    const obj_template_t  *rpc, *input, *child;
+    mgr_rpc_req_t         *req;
+    val_value_t           *reqdata, *parm, *target, *dummy_parm;
+    ses_cb_t              *scb;
+    status_t               res;
+    ncx_node_t             dtyp;
+
+    req = NULL;
+    reqdata = NULL;
+    res = NO_ERR;
+
+    if (!default_target) {
+	log_error("\nError: no <edit-config> target available on agent");
+	val_free_value(config_content);
+	return ERR_NCX_OPERATION_FAILED;
+    }
+
+    /* get the <edit-config> template */
+    dtyp = NCX_NT_OBJ;
+    rpc = (const obj_template_t *)
+	def_reg_find_moddef(NC_MODULE,
+			    NCX_EL_EDIT_CONFIG,
+			    &dtyp);
+    if (!rpc) {
+	val_free_value(config_content);
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    /* get the 'input' section container */
+    input = obj_find_child(rpc, NULL, YANG_K_INPUT);
+    if (!input) {
+	val_free_value(config_content);
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    /* construct a method + parameter tree */
+    reqdata = xml_val_new_struct(obj_get_name(rpc), 
+				 obj_get_nsid(rpc));
+    if (!reqdata) {
+	val_free_value(config_content);
+	log_error("\nError allocating a new RPC request");
+	return ERR_INTERNAL_MEM;
+    }
+
+    /* set the edit-config/input/target node to the default_target */
+    child = obj_find_child(input, NC_MODULE,
+			   NCX_EL_TARGET);
+    parm = val_new_value();
+    if (!parm) {
+	val_free_value(config_content);
+	val_free_value(reqdata);
+	return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(parm, child);
+    val_add_child(parm, reqdata);
+
+    target = xml_val_new_flag(default_target,
+			      obj_get_nsid(child));
+    if (!target) {
+	val_free_value(config_content);
+	val_free_value(reqdata);
+	return ERR_INTERNAL_MEM;
+    }
+
+    val_add_child(target, parm);
+
+    /* set the edit-config/input/default-operation node to 'none' */
+    child = obj_find_child(input, NC_MODULE,
+			   NCX_EL_DEFAULT_OPERATION);
+    parm = val_new_value();
+    if (!parm) {
+	val_free_value(config_content);
+	val_free_value(reqdata);
+	return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(parm, child);
+    val_add_child(parm, reqdata);
+    res = val_set_simval(parm,
+			 obj_get_ctypdef(child),
+			 obj_get_nsid(child),
+			 obj_get_name(child),
+			 NCX_EL_NONE);
+
+    if (res != NO_ERR) {
+	val_free_value(config_content);
+	val_free_value(reqdata);
+	return res;
+    }
+
+    /* set the edit-config/input/config node to the
+     * config_content, but after filling in any
+     * missing nodes from the root to the target
+     */
+    child = obj_find_child(input, NC_MODULE,
+			   NCX_EL_CONFIG);
+    parm = val_new_value();
+    if (!parm) {
+	val_free_value(config_content);
+	val_free_value(reqdata);
+	return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(parm, child);
+    val_add_child(parm, reqdata);
+
+    dummy_parm = NULL;
+    res = add_config_from_content_node(rpc, config_content,
+				       config_content->obj,
+				       parm, &dummy_parm);
+    if (res != NO_ERR) {
+	val_free_value(config_content);
+	val_free_value(reqdata);
+	return res;
+    }
+
+    /* !!! config_content consumed at this point !!!
+     * allocate an RPC request and send it 
+     */
+    scb = mgr_ses_get_scb(mysid);
+    if (!scb) {
+	res = SET_ERROR(ERR_INTERNAL_PTR);
+    } else {
+	req = mgr_rpc_new_request(scb);
+	if (!req) {
+	    res = ERR_INTERNAL_MEM;
+	    log_error("\nError allocating a new RPC request");
+	} else {
+	    req->data = reqdata;
+	}
+    }
+	
+    if (res == NO_ERR) {
+	if (LOGDEBUG2) {
+	    log_debug2("\nabout to send RPC request with reqdata:");
+	    val_dump_value(reqdata, NCX_DEF_INDENT);
+	}
+
+	/* the request will be stored if this returns NO_ERR */
+	res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
+    }
+
+    if (res != NO_ERR) {
+	if (req) {
+	    mgr_rpc_free_request(req);
+	} else if (reqdata) {
+	    val_free_value(reqdata);
+	}
+    } else {
+	state = MGR_IO_ST_CONN_RPYWAIT;
+    }
+
+    return res;
+
+} /* send_edit_config_to_agent */
+
+
+/********************************************************************
+ * FUNCTION get_edit_from_choice
+ * 
+ * Get the input for the EditOps from choice
+ *
+ * If the choice is 'from-cli' and this is interactive mode
+ * then the fill_valset will be called to get input
+ * based on the 'target' parameter also in the valset
+ *
+ * INPUTS:
+ *    rpc == RPC method for the load command
+ *    valset == parsed CLI valset
+ *    
+ * RETURNS:
+ *   malloced result of the choice; this is the content
+ *   that will be affected by the edit-config operation
+ *   via create, merge, or replace
+ *********************************************************************/
+static val_value_t *
+    get_edit_from_choice (const obj_template_t *rpc,
+			  val_value_t *valset)
+{
+    val_value_t           *parm, *curparm, *newparm;
+    const val_value_t     *userval;
+    obj_template_t        *targobj;
+    const xmlChar         *fromstr;
+    boolean                isglobal, iscli, saveopt;
+    status_t               res;
+
+    /* init locals */
+    iscli = FALSE;
+    res = NO_ERR;
+
+
+    /* look for the 'from' parameter variant */
+    parm = val_find_child(valset, YANGCLI_MOD, 
+			  YANGCLI_FROM_LOCAL);
+    if (parm) {
+	isglobal = FALSE;
+	fromstr = VAL_STR(parm);
+    } else {
+	parm = val_find_child(valset, YANGCLI_MOD, 
+			      YANGCLI_FROM_GLOBAL);
+	if (parm) {
+	    isglobal = TRUE;
+	    fromstr = VAL_STR(parm);
+	} else {
+	    fromstr = NULL;
+	    parm = val_find_child(valset, YANGCLI_MOD, 
+				  YANGCLI_FROM_CLI);
+	    if (parm) {
+		iscli = TRUE;
+	    } else {
+		log_error("\nError: No 'from' choice found");
+		res = ERR_NCX_DEF_NOT_FOUND;
+	    }
+	}
+    }
+
+    if (res != NO_ERR) {
+	return NULL;
+    }
+
+    if (iscli) {
+	saveopt = get_optional;
+	parm = val_find_child(valset, YANGCLI_MOD, 
+			      YANGCLI_OPTIONAL);
+	if (parm && parm->res == NO_ERR) {
+	    get_optional = TRUE;
+	}
+
+	/* from CLI -- look for the 'target' parameter */
+	parm = val_find_child(valset, YANGCLI_MOD, 
+			      NCX_EL_TARGET);
+	if (!parm) {
+	    log_error("\nError: target parameter is missing");
+	    get_optional = saveopt;
+	    return NULL;
+	}
+
+	res = xpath_find_schema_target_int(VAL_STR(parm), &targobj);
+	if (res != NO_ERR) {
+	    log_error("\nError: Object '%s' not found", VAL_STR(parm));
+	    get_optional = saveopt;
+	    return NULL;
+	}	
+
+	parm = val_find_child(valset, YANGCLI_MOD, 
+			      YANGCLI_CURRENT_VALUE);
+	if (parm && parm->res == NO_ERR) {
+	    curparm = var_get_script_val(targobj, NULL, 
+					 VAL_STR(parm),
+					 ISPARM, &res);
+	    if (!curparm || res != NO_ERR) {
+		log_error("\nError: Script value '%s' invalid (%s)", 
+			  VAL_STR(parm), get_error_string(res)); 
+		get_optional = saveopt;
+		return NULL;
+	    }
+	}
+
+	newparm = val_new_value();
+	if (!newparm) {
+	    log_error("\nError: malloc failure");
+	    get_optional = saveopt;
+	    return NULL;
+	}
+	val_init_from_template(newparm, targobj);
+
+	res = fill_valset(rpc, newparm, NULL);
+
+	get_optional = saveopt;
+
+	if (res != NO_ERR) {
+	    val_free_value(newparm);
+	    return NULL;
+	} else {
+	    return newparm;
+	}
+    } else {
+	/* from global or local variable */
+	userval = var_get(fromstr, isglobal);
+	if (!userval) {
+	    log_error("\nError: variable '%s' not found", fromstr);	    
+	    return NULL;
+	} else {
+	    newparm = val_clone(userval);
+	    return newparm;
+	}
+    }
+    /*NOTREACHED*/
+
+}  /* get_edit_from_choice */
+
+
+/********************************************************************
+ * FUNCTION add_operation_attr
+ * 
+ * Add the nc:operation attribute to a value node
+ *
+ * INPUTS:
+ *    val == value node to set
+ *    op == edit operation to use
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    add_operation_attr (val_value_t *val,
+			op_editop_t op)
+{
+    const obj_template_t *operobj;
+    const xmlChar        *editopstr;
+    val_value_t          *metaval;
+    ncx_node_t            dtyp;
+    status_t              res;
+
+    /* get the internal nc:operation object */
+    dtyp = NCX_NT_OBJ;
+    operobj = (const obj_template_t *)
+	def_reg_find_moddef(NC_MODULE, 
+			    NC_OPERATION_ATTR_NAME, 
+			    &dtyp);
+    if (!operobj) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    /* create a value node for the meta-value */
+    metaval = val_new_value();
+    if (!metaval) {
+	return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(metaval, operobj);
+
+    /* get the string value for the edit operation */
+    editopstr = op_editop_name(op);
+    if (!editopstr) {
+	val_free_value(metaval);
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* set the meta variable value and other fields */
+    res = val_set_simval(metaval,
+			 obj_get_ctypdef(operobj),
+			 obj_get_nsid(operobj),
+			 obj_get_name(operobj),
+			 editopstr);
+
+    if (res != NO_ERR) {
+	val_free_value(metaval);
+	return res;
+    }
+
+    dlq_enque(metaval, &val->metaQ);
+
+    return NO_ERR;
+
+} /* add_operation_attr */
+
+
+/********************************************************************
+ * FUNCTION do_create
+ * 
+ * Create some database object on the agent
+ *
+ * INPUTS:
+ *    rpc == RPC method for the create command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * OUTPUTS:
+ *   the completed data node is output and
+ *   is usually part of an assignment statement
+ *
+ *********************************************************************/
+static void
+    do_create (const obj_template_t *rpc,
+	       const xmlChar *line,
+	       uint32  len)
+{
+    val_value_t           *valset, *content;
+    status_t               res;
+
+    /* init locals */
+    res = NO_ERR;
+    content = NULL;
+
+    /* get the command line parameters for this command */
+    valset = get_valset(rpc, &line[len], &res);
+    if (!valset || res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
+	return;
+    }
+
+    /* get the contents specified in the 'from' choice */
+    content = get_edit_from_choice(rpc, valset);
+    if (!content) {
+	val_free_value(valset);
+	return;
+    }
+
+    /* add nc:operation attribute to the value node */
+    res = add_operation_attr(content, OP_EDITOP_CREATE);
+    if (res != NO_ERR) {
+	log_error("\nError: Creation of nc:operation"
+		  " attribute failed");
+	val_free_value(valset);
+	return;
+    }
+
+    /* construct an edit-config PDU with default parameters */
+    res = send_edit_config_to_agent(content);
+    if (res != NO_ERR) {
+	log_error("\nError: send create operation failed (%s)",
+		  get_error_string(res));
+    }
+
+    val_free_value(valset);
+
+}  /* do_create */
+
+
+/********************************************************************
+ * FUNCTION do_merge
+ * 
+ * Merge some database object on the agent
+ *
+ * INPUTS:
+ *    rpc == RPC method for the merge command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * OUTPUTS:
+ *   the completed data node is output and
+ *   is usually part of an assignment statement
+ *
+ *********************************************************************/
+static void
+    do_merge (const obj_template_t *rpc,
+	      const xmlChar *line,
+	      uint32  len)
+{
+    val_value_t           *valset, *content;
+    status_t               res;
+
+    /* init locals */
+    res = NO_ERR;
+    content = NULL;
+
+    /* get the command line parameters for this command */
+    valset = get_valset(rpc, &line[len], &res);
+    if (!valset || res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
+	return;
+    }
+
+    /* get the contents specified in the 'from' choice */
+    content = get_edit_from_choice(rpc, valset);
+    if (!content) {
+	val_free_value(valset);
+	return;
+    }
+
+    /* add nc:operation attribute to the value node */
+    res = add_operation_attr(content, OP_EDITOP_MERGE);
+    if (res != NO_ERR) {
+	log_error("\nError: Creation of nc:operation"
+		  " attribute failed");
+	val_free_value(valset);
+	return;
+    }
+
+    /* construct an edit-config PDU with default parameters */
+    res = send_edit_config_to_agent(content);
+    if (res != NO_ERR) {
+	log_error("\nError: send merge operation failed (%s)",
+		  get_error_string(res));
+    }
+
+    val_free_value(valset);
+
+}  /* do_merge */
+
+
+/********************************************************************
+ * FUNCTION do_replace
+ * 
+ * Replace some database object on the agent
+ *
+ * INPUTS:
+ *    rpc == RPC method for the replace command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * OUTPUTS:
+ *   the completed data node is output and
+ *   is usually part of an assignment statement
+ *
+ *********************************************************************/
+static void
+    do_replace (const obj_template_t *rpc,
+		const xmlChar *line,
+		uint32  len)
+{
+    val_value_t           *valset, *content;
+    status_t               res;
+
+    /* init locals */
+    res = NO_ERR;
+    content = NULL;
+
+    /* get the command line parameters for this command */
+    valset = get_valset(rpc, &line[len], &res);
+    if (!valset || res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
+	return;
+    }
+
+    /* get the contents specified in the 'from' choice */
+    content = get_edit_from_choice(rpc, valset);
+    if (!content) {
+	val_free_value(valset);
+	return;
+    }
+
+    /* add nc:operation attribute to the value node */
+    res = add_operation_attr(content, OP_EDITOP_REPLACE);
+    if (res != NO_ERR) {
+	log_error("\nError: Creation of nc:operation"
+		  " attribute failed");
+	val_free_value(valset);
+	return;
+    }
+
+    /* construct an edit-config PDU with default parameters */
+    res = send_edit_config_to_agent(content);
+    if (res != NO_ERR) {
+	log_error("\nError: send replace operation failed (%s)",
+		  get_error_string(res));
+    }
+
+    val_free_value(valset);
+
+}  /* do_replace */
+
+
+/********************************************************************
+ * FUNCTION do_delete
+ * 
+ * Delete some database object on the agent
+ *
+ * INPUTS:
+ *    rpc == RPC method for the delete command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * OUTPUTS:
+ *   the completed data node is output and
+ *   is usually part of an assignment statement
+ *
+ *********************************************************************/
+static void
+    do_delete (const obj_template_t *rpc,
+	       const xmlChar *line,
+	       uint32  len)
+{
+    obj_template_t        *targobj;
+    val_value_t           *valset, *content, *target;
+    status_t               res;
+
+    /* init locals */
+    res = NO_ERR;
+    content = NULL;
+
+    /* get the command line parameters for this command */
+    valset = get_valset(rpc, &line[len], &res);
+    if (!valset || res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
+	return;
+    }
+
+    target = val_find_child(valset, YANGCLI_MOD, 
+			    NCX_EL_TARGET);
+    if (!target) {
+	log_error("\nError: target parameter is missing");
+    }
+
+    res = xpath_find_schema_target_int(VAL_STR(target), 
+				       &targobj);
+    if (res != NO_ERR) {
+	log_error("\nError: Object '%s' not found", 
+		  VAL_STR(target));
+	val_free_value(valset);
+	return;
+    }	
+
+    /* create a content node to delete */
+    content = val_new_value();
+    if (!content) {
+	val_free_value(valset);
+	return;
+    }
+    val_init_from_template(content, targobj);
+
+    /* add nc:operation attribute to the value node */
+    res = add_operation_attr(content, OP_EDITOP_DELETE);
+    if (res != NO_ERR) {
+	log_error("\nError: Creation of nc:operation"
+		  " attribute failed");
+	val_free_value(valset);
+	val_free_value(content);
+	return;
+    }
+
+    /* construct an edit-config PDU with default parameters */
+    res = send_edit_config_to_agent(content);
+    if (res != NO_ERR) {
+	log_error("\nError: send delete operation failed (%s)",
+		  get_error_string(res));
+    }
+
+    val_free_value(valset);
+
+}  /* do_delete */
+
+
+/********************************************************************
+* FUNCTION do_local_conn_command
+* 
+* Handle local connection mode RPC operations from yangcli.yang
+*
+* INPUTS:
+*   rpc == template for the local RPC
+*   line == input command line from user
+*
+* OUTPUTS:
+*    state may be changed or other action taken
+*    the line buffer is NOT consumed or freed by this function
+*
+* RETURNS:
+*    NO_ERR if a RPC was executed
+*    ERR_NCX_SKIPPED if no command was invoked
+*********************************************************************/
+static status_t
+    do_local_conn_command (const obj_template_t *rpc,
+			   xmlChar *line,
+			   uint32  len)
+{
+    const xmlChar *rpcname;
+
+    rpcname = obj_get_name(rpc);
+
+    if (!xml_strcmp(rpcname, YANGCLI_CREATE)) {
+	do_create(rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_DELETE)) {
+	do_delete(rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_MERGE)) {
+	do_merge(rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_REPLACE)) {
+	do_replace(rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_SAVE)) {
+	if (len < xml_strlen(line)) {
+	    log_error("\nWarning: Extra characters ignored (%s)",
+		      &line[len]);
+	}
+	do_save();
+    } else {
+	return ERR_NCX_SKIPPED;
+    }
+    return NO_ERR;
+
+} /* do_local_conn_command */
+
+
 /********************************************************************
 * FUNCTION do_local_command
 * 
-* Handle local RPC operations from yangcli.ncx
+* Handle local RPC operations from yangcli.yang
 *
 * INPUTS:
 *   rpc == template for the local RPC
@@ -3480,14 +4326,20 @@ static void
 
     rpcname = obj_get_name(rpc);
 
-    if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
+    if (!xml_strcmp(rpcname, YANGCLI_CD)) {
+	do_cd(rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
 	do_connect(rpc, line, len, FALSE);
+    } else if (!xml_strcmp(rpcname, YANGCLI_DELETE)) {
+	do_delete(rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
 	do_fill(rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
 	do_help(rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_LOAD)) {
 	do_load(rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_PWD)) {
+	do_pwd(rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_QUIT)) {
 	state = MGR_IO_ST_SHUT;
 	mgr_request_shutdown();
@@ -3495,10 +4347,6 @@ static void
 	(void)do_run(rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {
 	do_show(rpc, line, len);
-    } else if (!xml_strcmp(rpcname, YANGCLI_PWD)) {
-	do_pwd(rpc, line, len);
-    } else if (!xml_strcmp(rpcname, YANGCLI_CD)) {
-	do_cd(rpc, line, len);
     } else {
 	log_error("\nError: The %s command is not allowed in this mode",
 		   rpcname);
@@ -3583,14 +4431,26 @@ static void
 {
     val_value_t  *val;
     status_t      res;
-    
+    boolean       anyout;
+
     if (rpy && rpy->reply) {
-	log_debug("\nRPC Reply %s for session %d:\n",
-		  rpy->msg_id, scb->sid);
-	if (LOGDEBUG) {
+
+	if (val_find_child(rpy->reply, NC_MODULE,
+			   NCX_EL_RPC_ERROR)) {
+	    log_error("\nRPC Error Reply %s for session %d:\n",
+		      rpy->msg_id, scb->sid);
 	    val_dump_value(rpy->reply, 0);
+	    log_error("\n");
+	    anyout = TRUE;
+	} else if (LOGDEBUG) {
+	    log_debug("\nRPC Reply %s for session %d:\n",
+		      rpy->msg_id, scb->sid);
+	    val_dump_value(rpy->reply, 0);
+	    log_debug("\n");
+	    anyout = TRUE;
+	} else {
+	    anyout = FALSE;
 	}
-	log_debug("\n");
 
 	if (result_name) {
 	    /* save the data element if it exists */
@@ -3612,7 +4472,11 @@ static void
 	    /* clear the result flag */
 	    m__free(result_name);
 	    result_name = NULL;
+	}  else if (!anyout) {
+	    log_info("\nOK\n");
 	}
+    } else {
+	log_error("\nError: yangcli: no reply parsed\n");
     }
 
     if (state == MGR_IO_ST_CONN_CLOSEWAIT) {
@@ -3696,14 +4560,12 @@ static void
     if (is_yangcli_ns(obj_get_nsid(rpc))) {
 	if (!xml_strcmp(obj_get_name(rpc), YANGCLI_CONNECT)) {
 	    log_stdout("\nError: Already connected");
-	} else if (!xml_strcmp(obj_get_name(rpc), YANGCLI_SAVE)) {
-	    if (len < linelen) {
-		log_error("\nWarning: Extra characters ignored (%s)",
-		       &line[len]);
-	    }
-	    do_save();
 	} else {
-	    do_local_command(rpc, line, len);
+	    res = do_local_conn_command(rpc, line, len);
+	    if (res == ERR_NCX_SKIPPED) {
+		res = NO_ERR;
+		do_local_command(rpc, line, len);
+	    }
 	}
 	return;
     }

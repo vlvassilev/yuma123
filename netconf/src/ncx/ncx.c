@@ -830,6 +830,12 @@ status_t
 	return res;
     }
 
+    /* Initialize the XML namespace for xml:lang attribute support */
+    res = xmlns_register_ns(XML_URN, XML_PREFIX, NCX_MODULE, &nsid);
+    if (res != NO_ERR) {
+	return res;
+    }
+
     /* Initialize the Notifications namespace for ncxdump program */
     res = xmlns_register_ns(NCN_URN, NCN_PREFIX, NCX_MODULE, &nsid);
     if (res != NO_ERR) {

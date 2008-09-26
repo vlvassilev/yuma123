@@ -150,6 +150,9 @@ extern xmlns_id_t
 extern xmlns_id_t 
     xmlns_xsi_id (void);
 
+extern xmlns_id_t 
+    xmlns_xml_id (void);
+
 /* get the NETCONF Notifications NS ID */
 extern xmlns_id_t 
     xmlns_ncn_id (void);

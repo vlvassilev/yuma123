@@ -486,6 +486,7 @@ status_t
     xmlChar             startch;
     int32               nlen, i;
     xmlChar             numbuff[NCX_MAX_NUMLEN], *buff;
+    xmlns_id_t          testid;
 
 #ifdef DEBUG
     if (!msg || !retbuff) {
@@ -510,7 +511,8 @@ status_t
      */
     defpfix = xmlns_get_ns_prefix(nsid);
     if (defpfix && *defpfix) {
-	if (!find_prefix_val(msg, defpfix)) {
+	testid = find_prefix_val(msg, defpfix);
+	if (testid == 0 || testid==nsid) {
 	    if (xml_strlen(defpfix) < buffsize) {
 		xml_strcpy(buff, defpfix);
 		return NO_ERR;
@@ -520,7 +522,7 @@ status_t
 	}
     }
 
-    /* default already in use so generate a prefix */
+    /* default already in use for something else so generate a prefix */
     nlen = sprintf((char *)numbuff, "%u", (uint32)nsid);
     if (nlen < 0) {
 	return SET_ERROR(ERR_NCX_INVALID_NUM);
@@ -850,6 +852,9 @@ status_t
 	res = xml_msg_gen_new_prefix(msg, pmap->nm_id, &buff, 0);
 	if (res == NO_ERR) {
 	    res = xml_add_xmlns_attr(attrs, pmap->nm_id, buff);
+	}
+	if (buff) {
+	    m__free(buff);
 	}
 
 	if (res != NO_ERR) {

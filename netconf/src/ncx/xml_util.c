@@ -869,6 +869,7 @@ status_t
     /* get the namespace URI value */
     nsval = xmlns_get_ns_name(ns_id);
     if (!nsval) {
+	xml_free_attr(attr);
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 

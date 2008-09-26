@@ -341,6 +341,7 @@ val_value_t *
     val->typdef = typ_get_basetype_typdef(NCX_BT_CONTAINER);
     val->name = name;
     val->nsid = nsid;
+    val->obj = ncx_get_gen_container();
 
     return val;
 
@@ -376,6 +377,7 @@ val_value_t *
     val->name = name;
     val->nsid = nsid;
     val->v.str = strval;  /*** this will be freed later !!! ***/
+    val->obj = ncx_get_gen_string();
     return val;
 
 }   /* xml_val_new_string */
@@ -416,6 +418,7 @@ val_value_t *
     val->name = name;
     val->nsid = nsid;
     val->v.str = str;  /*** this will be freed later !!! ***/
+    val->obj = ncx_get_gen_string();
     return val;
 
 }   /* xml_val_new_cstring */
@@ -449,6 +452,7 @@ val_value_t *
     val->typdef = typ_get_basetype_typdef(NCX_BT_EMPTY);
     val->name = name;
     val->nsid = nsid;
+    val->obj = ncx_get_gen_empty();
 
     return val;
 

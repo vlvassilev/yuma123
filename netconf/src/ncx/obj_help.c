@@ -80,6 +80,112 @@ date         init     comment
 *********************************************************************/
 
 
+
+/********************************************************************
+* FUNCTION dump_typdef_data
+*
+* Dump some contents from a  typ_def_t struct for help text
+*
+* INPUTS:
+*   obj == obj_template_t to dump help for
+*   mode == requested help mode
+*   indent == start indent count
+*********************************************************************/
+static void
+    dump_typdef_data (const obj_template_t *obj,
+		       help_mode_t mode,
+		       uint32 indent)
+{
+    const xmlChar    *datastr;
+    const typ_def_t  *typdef;
+    const typ_enum_t *tenum;
+    xmlChar           numbuff[NCX_MAX_NUMLEN];
+    ncx_btype_t       btyp;
+
+    if (mode == HELP_MODE_BRIEF) {
+	return;
+    }
+
+    typdef = obj_get_ctypdef(obj);
+    if (!typdef) {
+	return;
+    }
+
+    datastr = typ_get_rangestr(typdef);
+    if (datastr) {
+	help_write_lines((const xmlChar *)"range: ", indent, TRUE);
+	help_write_lines(datastr, 0, FALSE);
+    }
+
+    datastr = typ_get_pattern(typdef);
+    if (datastr) {
+	help_write_lines((const xmlChar *)"pattern: ", indent, TRUE);
+	help_write_lines(datastr, 0, FALSE);
+    }
+
+    /**** TBD: REST OF PATTERN STMTS ****/
+
+    btyp = typ_get_basetype(typdef);
+
+    switch (btyp) {
+    case NCX_BT_ENUM:
+    case NCX_BT_BITS:
+	if (btyp == NCX_BT_ENUM) {
+	    help_write_lines((const xmlChar *)"enum values:",
+			     indent, TRUE);
+	} else {
+	    help_write_lines((const xmlChar *)"bit values:",
+			     indent, TRUE);
+	}
+	
+	for (tenum = typ_first_enumdef(typdef);
+	     tenum != NULL;
+	     tenum = typ_next_enumdef(tenum)) {
+	    if (mode == HELP_MODE_NORMAL) {
+		help_write_lines((const xmlChar *)" ", 0, FALSE);
+		help_write_lines(tenum->name, 0, FALSE);
+	    } else {
+		help_write_lines(tenum->name,
+				 indent+NCX_DEF_INDENT, TRUE);
+		help_write_lines((const xmlChar *)"(", 0, FALSE);
+
+		if (btyp == NCX_BT_ENUM) {
+		    sprintf((char *)numbuff, "%d", tenum->val);
+		} else {
+		    sprintf((char *)numbuff, "%u", tenum->pos);
+		}
+
+		help_write_lines(numbuff, 0, FALSE);
+		help_write_lines((const xmlChar *)")", 0, FALSE);
+		if (tenum->descr) {
+		    help_write_lines(tenum->descr, 
+				     indent+(2*NCX_DEF_INDENT), 
+				     TRUE);
+		}
+		if (tenum->ref) {
+		    help_write_lines(tenum->ref, 
+				     indent+(2*NCX_DEF_INDENT), 
+				     TRUE);
+		}
+	    }
+	}
+	break;
+    case NCX_BT_KEYREF:
+	datastr = typ_get_keyref_path(typdef);
+	if (datastr) {
+	    help_write_lines((const xmlChar *)"keyref path:",
+			     indent, TRUE);
+	    help_write_lines(datastr, indent+NCX_DEF_INDENT, TRUE);
+	}
+	break;
+    default:
+	;
+    }
+
+    
+}  /* dump_typdef_data */
+
+
 /********************************************************************
 * FUNCTION obj_dump_template
 *
@@ -195,7 +301,15 @@ void
     case OBJ_TYP_CONTAINER:
 	switch (mode) {
 	case HELP_MODE_BRIEF:
+	    break;
 	case HELP_MODE_NORMAL:
+	    if (obj->def.container->presence) {
+		help_write_lines((const xmlChar *)"P container", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+	    } else {
+		help_write_lines((const xmlChar *)"NP container", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+	    }
 	    break;
 	case HELP_MODE_FULL:
 	    if (obj->def.container->presence) {
@@ -217,13 +331,16 @@ void
     case OBJ_TYP_LEAF:
 	switch (mode) {
 	case HELP_MODE_BRIEF:
+	    break;
 	case HELP_MODE_NORMAL:
+	    dump_typdef_data(obj, mode, indent);
 	    break;
 	case HELP_MODE_FULL:
+	    dump_typdef_data(obj, mode, indent);
 	    val = obj_get_units(obj);
 	    if (val) {
 		help_write_lines((const xmlChar *)"units: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
+				 indent, TRUE); 
 		help_write_lines(val, 0, FALSE);
 	    }
 	    break;
@@ -234,27 +351,32 @@ void
     case OBJ_TYP_LEAF_LIST:
 	switch (mode) {
 	case HELP_MODE_NORMAL:
+	    dump_typdef_data(obj, mode, indent);
 	    break;
 	case HELP_MODE_FULL:
+	    dump_typdef_data(obj, mode, indent);
 	    val = obj_get_units(obj);
 	    if (val) {
 		help_write_lines((const xmlChar *)"units: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
+				 indent, TRUE); 
 		help_write_lines(val, 0, FALSE);
 	    }
 	    if (!obj->def.leaflist->ordersys) {
 		help_write_lines((const xmlChar *)"ordered-by: user", 
-				 indent+NCX_DEF_INDENT, TRUE); 
+				 indent, TRUE); 
+	    } else {
+		help_write_lines((const xmlChar *)"ordered-by: system", 
+				 indent, TRUE); 
 	    }
 	    if (obj->def.leaflist->minset) {
 		help_write_lines((const xmlChar *)"min-elements: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
+				 indent, TRUE); 
 		sprintf(numbuff, "%u", obj->def.leaflist->minelems);
 		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
 	    }
 	    if (obj->def.leaflist->maxset) {
 		help_write_lines((const xmlChar *)"max-elements: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
+				 indent, TRUE); 
 		sprintf(numbuff, "%u", obj->def.leaflist->maxelems);
 		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
 	    }
@@ -289,27 +411,32 @@ void
     case OBJ_TYP_LIST:
 	switch (mode) {
 	case HELP_MODE_BRIEF:
-	case HELP_MODE_NORMAL:
 	    break;
+	case HELP_MODE_NORMAL:
 	case HELP_MODE_FULL:
 	    if (obj->def.list->keystr) {
 		help_write_lines((const xmlChar *)"key: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
+				 indent, TRUE); 
 		help_write_lines(obj->def.list->keystr, 0, FALSE);
 	    }
 	    if (!obj->def.list->ordersys) {
 		help_write_lines((const xmlChar *)"ordered-by: user", 
-				 indent+NCX_DEF_INDENT, TRUE); 
+				 indent, TRUE); 
 	    }
+
+	    if (mode == HELP_MODE_NORMAL) {
+		break;
+	    }
+
 	    if (obj->def.list->minset) {
 		help_write_lines((const xmlChar *)"min-elements: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
+				 indent, TRUE); 
 		sprintf(numbuff, "%u", obj->def.list->minelems);
 		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
 	    }
 	    if (obj->def.list->maxset) {
 		help_write_lines((const xmlChar *)"max-elements: ", 
-				 indent+NCX_DEF_INDENT, TRUE); 
+				 indent, TRUE); 
 		sprintf(numbuff, "%u", obj->def.list->maxelems);
 		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
 	    }

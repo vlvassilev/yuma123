@@ -149,47 +149,6 @@ static void
 }  /* clean_simple */
 
 
-#if 0
-/********************************************************************
-* FUNCTION clean_complex
-* 
-* Clean a complex type struct contents, but do not delete it
-*
-* INPUTS:
-*     cpx == pointer to the typ_complex_t  struct to clean
-*********************************************************************/
-static void
-    clean_complex (typ_complex_t  *cpx)
-{
-    typ_index_t  *in;
-    typ_child_t  *ch;
-
-#ifdef DEBUG
-    if (!cpx) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    /* empty and free the index queue */
-    while (!dlq_empty(&cpx->indexQ)) {
-        in = (typ_index_t *)dlq_deque(&cpx->indexQ);
-        typ_free_index(in);
-    }
-
-    /* empty and free the child queue */
-    while (!dlq_empty(&cpx->childQ)) {
-        ch = (typ_child_t *)dlq_deque(&cpx->childQ);
-        typ_free_child(ch);
-    }
-    
-    cpx->btyp = NCX_BT_NONE;
-    cpx->flags = 0;
-
-}  /* clean_complex */
-#endif
-
-
 /********************************************************************
 * FUNCTION clean_named
 * 
@@ -216,44 +175,6 @@ static void
     }
 
 }  /* clean_named */
-
-#if 0
-/********************************************************************
-* FUNCTION clean_child
-* 
-* Clean a typ_child_t struct
-*
-* INPUTS:
-*   ch == typ_listval_t struct to clean
-*   reuse == TRUE if the struct may be reused
-*         == FALSE if the memory is about to be freed
-*********************************************************************/
-static void
-    clean_child (typ_child_t *ch,
-		 boolean reuse)
-{
-    typ_child_t *ch1;
-
-    typ_clean_typdef(&ch->typdef);
-
-    /* if this child node is really a group header in a
-     * choice decl, then clean the Q of group members
-     */
-    while (!dlq_empty(&ch->groupQ)) {
-        ch1 = (typ_child_t *)dlq_deque(&ch->groupQ);
-        typ_free_child(ch1);
-    }
-
-    if (ch->name) {
-	m__free(ch->name);
-    }
-
-    if (reuse) {
-	typ_init_child(ch);
-    }
-
-}  /* clean_child */
-#endif
 
 
 /************* E X T E R N A L    F U N C T I O N S  *****************/
@@ -387,7 +308,6 @@ void
     typ_free_template (typ_template_t *typ)
 {
 
-
 #ifdef DEBUG
     if (!typ) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -448,7 +368,7 @@ typ_def_t *
 * FUNCTION typ_init_typdef
 * 
 * Initialize the fields in a typ_def_t
-* !! Still need to call typ_init_simple or typ_init_complex
+* !! Still need to call typ_init_simple
 * !! when the actual builting type is determined
 *
 * INPUTS:
@@ -457,6 +377,13 @@ typ_def_t *
 void
     typ_init_typdef (typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
 
     (void)memset(typdef, 0x0, sizeof(typ_def_t));
     typdef->iqual = NCX_IQUAL_ONE;
@@ -478,6 +405,13 @@ void
     typ_init_simple (typ_def_t  *tdef, 
 		     ncx_btype_t btyp)
 {
+#ifdef DEBUG
+    if (!tdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
     tdef->iqual = NCX_IQUAL_ONE;
     tdef->class = NCX_CL_SIMPLE;
     tdef->def.simple.btyp = btyp;
@@ -489,32 +423,6 @@ void
     tdef->def.simple.flags = 0;
 
 }  /* typ_init_simple */
-
-
-#if 0
-/********************************************************************
-* FUNCTION typ_init_complex
-* 
-* Init a typ_complex_t struct inside a typ_def_t
-*
-* INPUTS:
-*     typdef == pointer to the typ_def_t  struct to init
-*     as a NCX_CL_COMPLEX variant
-*********************************************************************/
-void
-    typ_init_complex (typ_def_t  *tdef, 
-		      ncx_btype_t btyp)
-{
-    tdef->iqual = NCX_IQUAL_ONE;
-    tdef->class = NCX_CL_COMPLEX;
-    tdef->def.complex.btyp = btyp;
-    dlq_createSQue(&tdef->def.complex.indexQ);
-    dlq_createSQue(&tdef->def.complex.childQ);
-    dlq_createSQue(&tdef->def.complex.metaQ);
-    tdef->def.complex.flags = 0;
-
-}  /* typ_init_complex */
-#endif
 
 
 /********************************************************************
@@ -529,6 +437,13 @@ void
 void
     typ_init_named (typ_def_t  *tdef)
 {
+
+#ifdef DEBUG
+    if (!tdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
 
     tdef->class = NCX_CL_NAMED;
     tdef->def.named.typ = NULL;
@@ -610,11 +525,6 @@ void
     case NCX_CL_SIMPLE:
         clean_simple(&typdef->def.simple);
         break;
-#if 0
-    case NCX_CL_COMPLEX:
-        clean_complex(&typdef->def.complex);
-        break;
-#endif
     case NCX_CL_NAMED:
         clean_named(&typdef->def.named);
         break;
@@ -671,6 +581,12 @@ status_t
 {
     typ_def_t *tdef;
 
+#ifdef DEBUG
+    if (!typdef) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     tdef = typdef->def.named.newtyp = typ_new_typdef();
     if (!tdef) {
 	return ERR_INTERNAL_MEM;
@@ -698,6 +614,13 @@ status_t
 typ_def_t *
     typ_get_new_named (typ_def_t  *typdef)
 {
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     if (typdef->class != NCX_CL_NAMED) {
 	return NULL;
     }
@@ -720,6 +643,13 @@ typ_def_t *
 const typ_def_t *
     typ_cget_new_named (const typ_def_t  *typdef)
 {
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     if (typdef->class != NCX_CL_NAMED) {
 	return NULL;
     }
@@ -1063,6 +993,14 @@ void
 dlq_hdr_t *
     typ_get_rangeQ (typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     switch (typdef->class) {
     case NCX_CL_BASE:
 	return NULL;
@@ -1101,6 +1039,14 @@ dlq_hdr_t *
 dlq_hdr_t *
     typ_get_rangeQ_con (typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     switch (typdef->class) {
     case NCX_CL_BASE:
 	return NULL;
@@ -1139,6 +1085,14 @@ dlq_hdr_t *
 const dlq_hdr_t *
     typ_get_crangeQ (const typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     switch (typdef->class) {
     case NCX_CL_BASE:
 	return NULL;
@@ -1178,6 +1132,14 @@ const dlq_hdr_t *
 const dlq_hdr_t *
     typ_get_crangeQ_con (const typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     switch (typdef->class) {
     case NCX_CL_BASE:
 	return NULL;
@@ -1216,6 +1178,14 @@ const dlq_hdr_t *
 typ_range_t *
     typ_get_range_con (typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     switch (typdef->class) {
     case NCX_CL_BASE:
 	return NULL;
@@ -1254,6 +1224,14 @@ typ_range_t *
 const typ_range_t *
     typ_get_crange_con (const typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     switch (typdef->class) {
     case NCX_CL_BASE:
 	return NULL;
@@ -1278,6 +1256,51 @@ const typ_range_t *
 
 
 /********************************************************************
+* FUNCTION typ_get_rangestr
+*
+* Return the range string for the given typdef chain
+*
+* INPUTS:
+*    typdef == typ def struct to check
+*
+* RETURNS:
+*   pointer to the range string for this typdef, NULL if none
+*********************************************************************/
+const xmlChar *
+    typ_get_rangestr (const typ_def_t *typdef)
+{
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    switch (typdef->class) {
+    case NCX_CL_BASE:
+	return NULL;
+    case NCX_CL_SIMPLE:
+	return typdef->def.simple.range.rangestr;
+    case NCX_CL_COMPLEX:
+	return NULL;
+    case NCX_CL_NAMED:
+	if (typdef->def.named.newtyp &&
+	    typdef->def.named.newtyp->def.simple.range.rangestr) {
+	    return typdef->def.named.newtyp->def.simple.range.rangestr;
+	} else {
+	    return typ_get_rangestr(&typdef->def.named.typ->typdef);
+	}
+    case NCX_CL_REF:
+	return typ_get_rangestr(typdef->def.ref.typdef);
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+}  /* typ_get_rangestr */
+
+
+/********************************************************************
 * FUNCTION typ_first_rangedef
 *
 * Return the lower bound range definition struct
@@ -1293,6 +1316,13 @@ const typ_rangedef_t *
     typ_first_rangedef (const typ_def_t *typdef)
 {
     const dlq_hdr_t *rangeQ;
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
 
     rangeQ = typ_get_crangeQ(typdef);
     if (rangeQ) {
@@ -1318,6 +1348,14 @@ const typ_rangedef_t *
 const typ_rangedef_t *
     typ_first_rangedef_con (const typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     switch (typdef->class) {
     case NCX_CL_BASE:
 	return NULL;
@@ -1370,6 +1408,12 @@ status_t
 {
     const typ_rangedef_t *rdef;
     status_t res;
+
+#ifdef DEBUG
+    if (!typdef || !btyp || !lb || !ub) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
     
     res = NO_ERR;
     switch (typdef->class) {
@@ -1573,193 +1617,6 @@ void
     m__free(lv);
 }  /* typ_free_listval */
 
-#if 0
-/********************************************************************
-* FUNCTION typ_new_index
-* 
-* Alloc and Init a typ_index_t struct
-*
-* RETURNS:
-*   pointer to malloced struct or NULL if memory error
-*********************************************************************/
-typ_index_t *
-    typ_new_index (void)
-{
-    typ_index_t  *in;
-
-    in = m__getObj(typ_index_t);
-    if (!in) {
-        return NULL;
-    }
-    typ_init_index(in);
-    return in;
-
-}  /* typ_new_index */
-
-
-/********************************************************************
-* FUNCTION typ_init_index
-* 
-* Init a typ_index_t struct
-*
-* INPUTS:
-*   in == typ_index_t struct to init
-*********************************************************************/
-void
-    typ_init_index (typ_index_t *in)
-{
-#ifdef DEBUG
-    if (!in) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-    memset(in, 0, sizeof(typ_index_t));
-    typ_init_child(&in->typch);
-
-}  /* typ_init_index */
-
-
-/********************************************************************
-* FUNCTION typ_free_index
-* 
-* Free a typ_index_t struct
-*
-* INPUTS:
-*   in == typ_index_t struct to free
-*********************************************************************/
-void
-    typ_free_index (typ_index_t *in)
-{
-#ifdef DEBUG
-    if (!in) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    typ_clean_index(in);
-    m__free(in);
-
-}  /* typ_free_index */
-
-
-/********************************************************************
-* FUNCTION typ_clean_index
-* 
-* Clean a typ_index_t struct
-*
-* INPUTS:
-*   in == typ_index_t struct to clean
-*********************************************************************/
-void
-    typ_clean_index (typ_index_t *in)
-{
-#ifdef DEBUG
-    if (!in) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    clean_child(&in->typch, TRUE);
-
-    if (in->sname) {
-	m__free(in->sname);
-	in->sname = NULL;
-    }
-
-}  /* typ_clean_index */
-
-
-/********************************************************************
-* FUNCTION typ_new_child
-* 
-* Alloc and Init a typ_child_t struct
-*
-* RETURNS:
-*   pointer to malloced struct or NULL if memory error
-*********************************************************************/
-typ_child_t *
-    typ_new_child (void)
-{
-    typ_child_t  *ch;
-
-    ch = m__getObj(typ_child_t);
-    if (!ch) {
-        return NULL;
-    }
-    typ_init_child(ch);
-    return ch;
-
-}  /* typ_new_child */
-
-
-/********************************************************************
-* FUNCTION typ_init_child
-* 
-* Init a typ_child_t struct
-*
-* RETURNS:
-*   pointer to malloced struct or NULL if memory error
-*********************************************************************/
-void
-    typ_init_child (typ_child_t *ch)
-{
-    memset(ch, 0, sizeof(typ_child_t));
-    dlq_createSQue(&ch->groupQ);
-    typ_init_typdef(&ch->typdef);
-
-}  /* typ_init_child */
-
-
-/********************************************************************
-* FUNCTION typ_free_child
-* 
-* Free a typ_child_t struct
-*
-* INPUTS:
-*   ch == typ_listval_t struct to free
-*********************************************************************/
-void
-    typ_free_child (typ_child_t *ch)
-{
-
-#ifdef DEBUG
-    if (!ch) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    clean_child(ch, FALSE);
-    m__free(ch);
-
-}  /* typ_free_child */
-
-
-/********************************************************************
-* FUNCTION typ_clean_child
-* 
-* Clean a typ_child_t struct
-*
-* INPUTS:
-*   ch == typ_listval_t struct to clean
-*********************************************************************/
-void
-    typ_clean_child (typ_child_t *ch)
-{
-#ifdef DEBUG
-    if (!ch) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-    clean_child(ch, TRUE);
-
-}  /* typ_clean_child */
-#endif   /* 0 */
-
 
 /********************************************************************
 * FUNCTION typ_get_range_type
@@ -1819,6 +1676,14 @@ ncx_btype_t
 ncx_btype_t
     typ_get_basetype (const typ_def_t  *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NCX_BT_NONE;
+    }
+#endif
+
     switch (typdef->class) {
     case NCX_CL_NONE:
         return NCX_BT_NONE;
@@ -1826,10 +1691,6 @@ ncx_btype_t
         return typdef->def.base;
     case NCX_CL_SIMPLE:
         return typdef->def.simple.btyp; 
-#if 0
-    case NCX_CL_COMPLEX:
-        return typdef->def.complex.btyp;
-#endif
     case NCX_CL_NAMED:
 	if (typdef->def.named.typ) {
 	    return typ_get_basetype(&typdef->def.named.typ->typdef);
@@ -1864,6 +1725,14 @@ ncx_btype_t
 const xmlChar *
     typ_get_name (const typ_def_t  *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     switch (typdef->class) {
     case NCX_CL_NONE:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -1873,11 +1742,6 @@ const xmlChar *
     case NCX_CL_SIMPLE:
 	return (const xmlChar *)
 	    tk_get_btype_sym(typdef->def.simple.btyp);
-#if 0
-    case NCX_CL_COMPLEX:
-	return (const xmlChar *)"";
-#endif
-
     case NCX_CL_NAMED:
 	return typdef->def.named.typ->name;
     case NCX_CL_REF:
@@ -1907,6 +1771,13 @@ const xmlChar *
 {
     ncx_btype_t  btyp;
 
+#ifdef DEBUG
+    if (!typ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     btyp = typ_get_basetype(&typ->typdef);
     if (btyp != NCX_BT_NONE) {
 	return (const xmlChar *)tk_get_btype_sym(btyp);
@@ -1931,6 +1802,14 @@ const xmlChar *
 const xmlChar *
     typ_get_parenttype_name (const typ_template_t  *typ)
 {
+
+#ifdef DEBUG
+    if (!typ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     if (typ->typdef.class == NCX_CL_NAMED) {
 	return typ->typdef.def.named.typ->name;
     } else {
@@ -1955,6 +1834,14 @@ const xmlChar *
 ncx_tclass_t
     typ_get_base_class (const typ_def_t  *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NCX_CL_NONE;
+    }
+#endif
+
     switch (typdef->class) {
     case NCX_CL_NONE:
         return NCX_CL_NONE;
@@ -2040,6 +1927,7 @@ typ_def_t *
 typ_def_t *
     typ_get_parent_typdef (typ_def_t  *typdef)
 {
+
 #ifdef DEBUG
     if (!typdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -2078,6 +1966,7 @@ typ_def_t *
 const typ_template_t *
     typ_get_parent_type (const typ_template_t  *typ)
 {
+
 #ifdef DEBUG
     if (!typ) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -2117,6 +2006,7 @@ const typ_template_t *
 const typ_def_t *
     typ_get_cparent_typdef (const typ_def_t  *typdef)
 {
+
 #ifdef DEBUG
     if (!typdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -2156,6 +2046,7 @@ const typ_def_t *
 typ_def_t *
     typ_get_next_typdef (typ_def_t  *typdef)
 {
+
 #ifdef DEBUG
     if (!typdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -2199,6 +2090,7 @@ typ_def_t *
 typ_def_t *
     typ_get_base_typdef (typ_def_t  *typdef)
 {
+
 #ifdef DEBUG
     if (!typdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -2238,6 +2130,7 @@ typ_def_t *
 const typ_def_t *
     typ_get_cbase_typdef (const typ_def_t  *typdef)
 {
+
 #ifdef DEBUG
     if (!typdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -2321,25 +2214,6 @@ typ_def_t *
 	    return NULL;
 	}
 	/*NOTREACHED*/
-#if 0
-    case NCX_CL_COMPLEX:
-	switch (squal) {
-	case NCX_SQUAL_NONE:
-	    return typdef;
-	case NCX_SQUAL_RANGE:
-	case NCX_SQUAL_VAL:
-	    return NULL;
-	case NCX_SQUAL_META:
-	    return (dlq_empty(&typdef->def.complex.metaQ)) ? 
-		NULL : typdef;
-	case NCX_SQUAL_APPINFO:
-	    return (dlq_empty(&typdef->appinfoQ)) ? NULL : typdef;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-	/*NOTREACHED*/
-#endif
     case NCX_CL_NAMED:
 	ntypdef = typdef->def.named.newtyp;
 	if (!ntypdef) {
@@ -2443,25 +2317,6 @@ const typ_def_t *
 	    return NULL;
 	}
 	/*NOTREACHED*/
-#if 0
-    case NCX_CL_COMPLEX:
-	switch (squal) {
-	case NCX_SQUAL_NONE:
-	    return typdef;
-	case NCX_SQUAL_RANGE:
-	case NCX_SQUAL_VAL:
-	    return NULL;
-	case NCX_SQUAL_META:
-	    return (dlq_empty(&typdef->def.complex.metaQ)) ? 
-		NULL : typdef;
-	case NCX_SQUAL_APPINFO:
-	    return (dlq_empty(&typdef->appinfoQ)) ? NULL : typdef;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-	/*NOTREACHED*/
-#endif
     case NCX_CL_NAMED:
 	ntypdef = typdef->def.named.newtyp;
 	if (!ntypdef) {
@@ -2505,612 +2360,6 @@ const typ_def_t *
     }
     /*NOTREACHED*/
 }  /* typ_get_cqual_typdef */
-
-
-#if 0
-/********************************************************************
-* FUNCTION typ_find_child
-*
-* Find the specified child name, even if is a group member in a choice
-*
-* INPUTS:
-*  name == name of child to find
-*  cpx == complex typedef to check
-* RETURNS:
-*  pointer to found child or NULL if not found
-*********************************************************************/
-typ_child_t *
-    typ_find_child (const xmlChar *name,
-		    const typ_complex_t *cpx)
-{
-    typ_child_t    *ch, *grch;
-
-#ifdef DEBUG
-    if (!name || !cpx) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    for (ch = (typ_child_t *)dlq_firstEntry(&cpx->childQ);
-         ch != NULL;
-         ch = (typ_child_t *)dlq_nextEntry(ch)) {
-        if (!dlq_empty(&ch->groupQ)) {
-            for (grch = (typ_child_t *)dlq_firstEntry(&ch->groupQ);
-                 grch != NULL;
-                 grch = (typ_child_t *)dlq_nextEntry(grch)) {
-                if (!xml_strcmp(name, grch->name)) { 
-                    return grch;
-                }
-            }
-        } else if (!xml_strcmp(name, ch->name)) {
-            return ch;
-        }
-    }
-    return NULL;
-
-}  /* typ_find_child */
-
-
-/********************************************************************
-* FUNCTION typ_find_child_typdef
-*
-* Find the typdef for the specified child name, even if is a 
-* group member in a choice
-*
-* INPUTS:
-*  name == name of child to find
-*  typdef== typedef to check
-*
-* RETURNS:
-*    pointer to typdef struct in the found child or NULL if not found
-*********************************************************************/
-typ_def_t *
-    typ_find_child_typdef (const xmlChar *name,
-			   typ_def_t *typdef)
-{
-    typ_def_t      *td;
-    typ_child_t    *ch, *grch;
-
-#ifdef DEBUG
-    if (!name || !typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    td = typ_get_base_typdef(typdef);
-    if (!td || td->class != NCX_CL_COMPLEX) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
-    }
-
-    for (ch = (typ_child_t *)dlq_firstEntry(&td->def.complex.childQ);
-         ch != NULL;
-         ch = (typ_child_t *)dlq_nextEntry(ch)) {
-        if (!dlq_empty(&ch->groupQ)) {
-            for (grch = (typ_child_t *)dlq_firstEntry(&ch->groupQ);
-                 grch != NULL;
-                 grch = (typ_child_t *)dlq_nextEntry(grch)) {
-                if (!xml_strcmp(name, grch->name)) { 
-                    return &grch->typdef;
-                }
-            }
-        } else if (!xml_strcmp(name, ch->name)) {
-            return &ch->typdef;
-        }
-    }
-    return NULL;
-
-}  /* typ_find_child_typdef */
-
-
-/********************************************************************
-* FUNCTION typ_first_child
-*
-* Find the first child in a complex type
-* Does not check index fields in tables
-*
-* INPUTS:
-*  cpx == complex typedef to check
-* RETURNS:
-*  pointer to found child or NULL if not found
-*********************************************************************/
-typ_child_t *
-    typ_first_child (const typ_complex_t *cpx)
-{
-    typ_child_t    *ch, *grch;
-
-#ifdef DEBUG
-    if (!cpx) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    ch = (typ_child_t *)dlq_firstEntry(&cpx->childQ);
-    if (ch != NULL) {
-        if (!dlq_empty(&ch->groupQ)) {
-            grch = (typ_child_t *)dlq_firstEntry(&ch->groupQ);
-            if (grch != NULL) {
-		return grch;
-            }
-        } else {
-            return ch;
-        }
-    }
-    return NULL;
-
-}  /* typ_first_child */
-
-
-/********************************************************************
-* FUNCTION typ_next_child
-*
-* Find the first child in a complex type
-* Does not check index fields in tables
-*
-* INPUTS:
-*  ch == typ_child_t node to check
-* RETURNS:
-*  pointer to next child or NULL if not found
-*********************************************************************/
-typ_child_t *
-    typ_next_child (typ_child_t *ch)
-{
-    typ_child_t  *nextch;
-
-#ifdef DEBUG
-    if (!ch) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    /* try the next typ_child_t in this chain */
-    nextch = (typ_child_t *)dlq_nextEntry(ch);
-    if (nextch) {
-	if (!dlq_empty(&nextch->groupQ)) {
-	    nextch = (typ_child_t *)dlq_firstEntry(&nextch->groupQ);
-	}
-    } else if (ch->grouptop) {
-	/* this is the end of a group chain
-	 * try the next node after the group 
-	 */
-	nextch = (typ_child_t *)dlq_nextEntry(ch->grouptop);
-	if (nextch && !dlq_empty(&nextch->groupQ)) {
-	    /* the next node is another group
-	     * get the first child in this group chain 
-	     */
-	    nextch = (typ_child_t *)dlq_firstEntry(&nextch->groupQ);
-	}
-    }
-
-    return nextch;
-
-}  /* typ_next_child */
-
-
-/********************************************************************
-* FUNCTION typ_next_con_child
-*
-* Find the first child in a complex type
-* Does not check index fields in tables
-*
-* INPUTS:
-*  ch == typ_child_t node to check
-* RETURNS:
-*  pointer to next child or NULL if not found
-*********************************************************************/
-const typ_child_t *
-    typ_next_con_child (const typ_child_t *ch)
-{
-    const typ_child_t  *nextch;
-
-#ifdef DEBUG
-    if (!ch) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    /* try the next typ_child_t in this chain */
-    nextch = (const typ_child_t *)dlq_nextEntry(ch);
-    if (nextch) {
-	if (!dlq_empty(&nextch->groupQ)) {
-	    nextch = (typ_child_t *)dlq_firstEntry(&nextch->groupQ);
-	}
-    } else if (ch->grouptop) {
-	/* this is the end of a group chain
-	 * try the next node after the group 
-	 */
-	nextch = (const typ_child_t *)dlq_nextEntry(ch->grouptop);
-	if (nextch && !dlq_empty(&nextch->groupQ)) {
-	    /* the next node is another group
-	     * get the first child in this group chain 
-	     */
-	    nextch = (const typ_child_t *)dlq_firstEntry(&nextch->groupQ);
-	}
-    }
-
-    return nextch;
-
-}  /* typ_next_con_child */
-
-
-/********************************************************************
-* FUNCTION typ_find_type_member
-* 
-* Find the first-level member of a complex type
-*
-* INPUTS:
-*     typdef == typdef to  check
-*     name == member name to find 
-* RETURNS:
-*     pointer to typdef of member or NULL if not found
-*********************************************************************/
-typ_def_t *
-    typ_find_type_member (typ_def_t  *typdef,
-			  const xmlChar *name)
-{
-    typ_child_t *ch;
-    typ_index_t *in;
-
-#ifdef DEBUG
-    if (!typdef || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    /* check if this is an alias typdef first */
-    typdef = typ_get_next_typdef(typdef);
-
-    /* only complex types have child nodes */
-    if (typdef->class != NCX_CL_COMPLEX) {
-        return NULL;
-    }
-
-    /* for tables, inline index definitions can be referenced */
-    if (typdef->def.complex.btyp == NCX_BT_LIST) {
-        for (in = (typ_index_t *)dlq_firstEntry(&typdef->def.complex.indexQ);
-             in != NULL;
-             in = (typ_index_t *)dlq_nextEntry(in)) {
-            if (in->ityp == NCX_IT_INLINE && 
-                !xml_strcmp(in->typch.name, name)) {
-		/* only return inline declared indices here
-		 * otherwise the real typdef is somewhere else
-		 */
-                return &in->typch.typdef;
-            }
-        }
-    }
-        
-    /* check all the complex members for the specified child name */
-    ch = typ_find_child(name, &typdef->def.complex);
-    if (ch) {
-        return &ch->typdef;
-    }
-    
-    /* nothing found */
-    return NULL;
-
-}  /* typ_find_type_member */
-
-
-/********************************************************************
-* FUNCTION typ_first_index
-*
-* Find the first index in a complex type
-*
-* INPUTS:
-*  cpx == complex typedef to check (MUST be NCX_BT_LIST)
-* RETURNS:
-*  pointer to found index or NULL if not found
-*********************************************************************/
-typ_index_t *
-    typ_first_index (const typ_complex_t *cpx)
-{
-    typ_index_t    *in;
-
-#ifdef DEBUG
-    if (!cpx) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    if (cpx) {
-	in = (typ_index_t *)dlq_firstEntry(&cpx->indexQ);
-	return in;
-    } else {
-	return NULL;
-    }
-}  /* typ_first_index */
-
-
-/********************************************************************
-* FUNCTION typ_next_index
-*
-* Find the next index in a complex type
-*
-* INPUTS:
-*    in == current index object
-*
-* RETURNS:
-*  pointer to next index, or NULL if no next
-*********************************************************************/
-typ_index_t *
-    typ_next_index (const typ_index_t *in)
-{
-#ifdef DEBUG
-    if (!in) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    return (typ_index_t *)dlq_nextEntry(in);
-
-}  /* typ_next_index */
-
-
-/********************************************************************
-* FUNCTION typ_find_index
-*
-* Find the specified index name
-*
-* INPUTS:
-*  name == name of child to find
-*  cpx == complex typedef to check
-* RETURNS:
-*  pointer to found child or NULL if not found
-*********************************************************************/
-typ_index_t *
-    typ_find_index (const xmlChar *name,
-		    const typ_complex_t *cpx)
-{
-    typ_index_t    *in;
-
-#ifdef DEBUG
-    if (!name || !cpx) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    for (in = (typ_index_t *)dlq_firstEntry(&cpx->indexQ);
-         in != NULL;
-         in = (typ_index_t *)dlq_nextEntry(in)) {
-	if (!xml_strcmp(name, in->typch.name)) {
-            return in;
-        } else if (!xml_strcmp(name, in->sname)) {
-	    return in;
-	}
-    }
-    return NULL;
-
-}  /* typ_find_index */
-
-
-/********************************************************************
-* FUNCTION typ_get_index_typdef
-*
-* Get the typ_def_t struct from the specified index
-*
-* INPUTS:
-*  indx == typ_index_t struct to check
-*
-* RETURNS:
-*   pointer to typdef or NULL if error
-*********************************************************************/
-typ_def_t *
-    typ_get_index_typdef (typ_index_t *indx)
-{
-#ifdef DEBUG
-    if (!indx) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    return &indx->typch.typdef;
-
-}  /* typ_get_index_typdef */
-
-
-/********************************************************************
-* FUNCTION typ_get_index_name
-*
-* Get the name string from the specified index
-*
-* INPUTS:
-*  indx == typ_index_t struct to check
-*
-* RETURNS:
-*   const pointer to name string
-*********************************************************************/
-const xmlChar *
-    typ_get_index_name (const typ_index_t *indx)
-{
-#ifdef DEBUG
-    if (!indx) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    return indx->typch.name;
-
-}  /* typ_get_index_name */
-#endif   /* 0 */
-
-
-#if 0
-/********************************************************************
-* FUNCTION typ_first_meta
-*
-* Find the first metadata definition in a typdef
-*
-* INPUTS:
-*  typdef == typedef to check
-* RETURNS:
-*  pointer to found meta data or NULL if not found
-*********************************************************************/
-typ_child_t *
-    typ_first_meta (const typ_def_t *typdef)
-{
-    const dlq_hdr_t       *metaQ;
-
-#ifdef DEBUG
-    if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    switch (typdef->class) {
-    case NCX_CL_BASE:
-	return NULL;
-    case NCX_CL_SIMPLE:
-	metaQ = &typdef->def.simple.metaQ;
-	break;
-    case NCX_CL_COMPLEX:
-	metaQ = &typdef->def.complex.metaQ;
-	break;
-    case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    metaQ = &typdef->def.named.newtyp->def.simple.metaQ;
-	    if (!dlq_empty(metaQ)) {
-		break;
-	    }
-	} 
-	return typ_first_meta(&typdef->def.named.typ->typdef);
-	break;
-    case NCX_CL_REF:
-	return typ_first_meta(typdef->def.ref.typdef);
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
-    }
-    return (typ_child_t *)dlq_firstEntry(metaQ);
-
-}  /* typ_first_meta */
-
-
-/********************************************************************
-* FUNCTION typ_first_meta_con
-*
-* Find the first metadata definition in a typdef
-* This function is constrained to the typdef passed
-* as a parameter, even if that typdef is chained.
-*
-* INPUTS:
-*  typdef == typedef to check
-* RETURNS:
-*  pointer to found meta data or NULL if not found
-*********************************************************************/
-typ_child_t *
-    typ_first_meta_con (const typ_def_t *typdef)
-{
-    const dlq_hdr_t       *metaQ;
-
-#ifdef DEBUG
-    if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    switch (typdef->class) {
-    case NCX_CL_BASE:
-	return NULL;
-    case NCX_CL_SIMPLE:
-	metaQ = &typdef->def.simple.metaQ;
-	break;
-    case NCX_CL_COMPLEX:
-	metaQ = &typdef->def.complex.metaQ;
-	break;
-    case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    metaQ = &typdef->def.named.newtyp->def.simple.metaQ;
-	} else {
-	    return NULL;
-	}
-	break;
-    case NCX_CL_REF:
-	return NULL;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
-    }
-    return (typ_child_t *)dlq_firstEntry(metaQ);
-
-}  /* typ_first_meta_con */
-
-
-/********************************************************************
-* FUNCTION typ_next_meta
-*
-* Find the next meta data in a typdef
-*
-* INPUTS:
-*    meta == current metadata object
-* RETURNS:
-*  pointer to next metadata, or NULL if no next
-*********************************************************************/
-typ_child_t *
-    typ_next_meta (typ_child_t *meta)
-{
-#ifdef DEBUG
-    if (!meta) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    return (typ_child_t *)dlq_nextEntry(meta);
-
-}  /* typ_next_meta */
-
-
-/********************************************************************
-* FUNCTION typ_find_meta
-*
-* Find the specified metadata name
-*
-* INPUTS:
-*  typdef ==  typedef to check
-*  name == name of metadata var to find
-*
-* RETURNS:
-*   pointer to found metadata or NULL if not found
-*********************************************************************/
-typ_child_t *
-    typ_find_meta (typ_def_t *typdef,
-		   const xmlChar *name)
-{
-    typ_child_t    *meta;
-
-#ifdef DEBUG
-    if (!name || !typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    for (meta = typ_first_meta(typdef);
-	 meta != NULL;
-	 meta = (typ_child_t *)dlq_nextEntry(meta)) {
-	if (!xml_strcmp(meta->name, name)) {
-	    return meta;
-	}
-    }
-    return NULL;
-
-}  /* typ_find_meta */
-#endif  /* 0 */
-
 
 
 /********************************************************************
@@ -3185,6 +2434,7 @@ const ncx_appinfo_t *
 			  const xmlChar *prefix,
 			  const xmlChar *name)		      
 {
+
 #ifdef DEBUG
     if (!typdef || !name) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -3211,6 +2461,7 @@ const ncx_appinfo_t *
 const xmlChar * 
     typ_get_defval (const typ_template_t *typ)
 {
+
 #ifdef DEBUG
     if (!typ) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -3281,6 +2532,7 @@ const xmlChar *
 ncx_iqual_t
     typ_get_iqualval (const typ_template_t *typ)
 {
+
 #ifdef DEBUG
     if (!typ) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -3359,6 +2611,7 @@ ncx_iqual_t
 const xmlChar * 
     typ_get_units (const typ_template_t *typ)
 {
+
 #ifdef DEBUG
     if (!typ) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -3593,6 +2846,13 @@ boolean
 const typ_enum_t *
     typ_first_enumdef (const typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
     if (typdef->class != NCX_CL_SIMPLE) {
 	return NULL;
     }
@@ -3601,6 +2861,34 @@ const typ_enum_t *
 	dlq_firstEntry(&typdef->def.simple.valQ);
 
 }  /* typ_first_enumdef */
+
+
+/********************************************************************
+* FUNCTION typ_next_enumdef
+*
+* Get the next enum def struct
+*
+* INPUTS:
+*    enumdef == typ enum struct to check
+*
+* RETURNS:
+*   pointer to the first enum def of NULL if none
+*********************************************************************/
+const typ_enum_t *
+    typ_next_enumdef (const typ_enum_t *enumdef)
+{
+
+#ifdef DEBUG
+    if (!enumdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (const typ_enum_t *)
+	dlq_nextEntry(enumdef);
+
+}  /* typ_next_enumdef */
 
 
 /********************************************************************
@@ -3617,6 +2905,14 @@ const typ_enum_t *
 typ_enum_t *
     typ_first_enumdef2 (typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     if (typdef->class != NCX_CL_SIMPLE) {
 	return NULL;
     }
@@ -3641,6 +2937,13 @@ typ_enum_t *
 const typ_enum_t *
     typ_first_con_enumdef (const typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
     
     switch (typdef->class) {
     case NCX_CL_SIMPLE:
@@ -3711,6 +3014,14 @@ typ_enum_t *
 uint32
     typ_enumdef_count (const typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
     if (typdef->class != NCX_CL_SIMPLE) {
 	return 0;
     }
@@ -3736,6 +3047,13 @@ const typ_sval_t *
 {
     ncx_btype_t btyp;
     const typ_sval_t  *retval;
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
 
     retval = NULL;
 
@@ -3789,15 +3107,19 @@ const typ_sval_t *
 uint32
     typ_get_maxrows (const typ_def_t  *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
     switch (typdef->class) {
     case NCX_CL_NONE:
     case NCX_CL_BASE:
     case NCX_CL_SIMPLE:
 	return 0;
-#if 0
-    case NCX_CL_COMPLEX:
-	return typdef->def.complex.maxrows;
-#endif
     case NCX_CL_NAMED:
         return typ_get_maxrows(&typdef->def.named.typ->typdef);
     case NCX_CL_REF:
@@ -3825,6 +3147,7 @@ uint32
 ncx_access_t
     typ_get_maxaccess (const typ_def_t *typdef)
 {
+
 #ifdef DEBUG
     if (!typdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -3869,6 +3192,7 @@ ncx_access_t
 ncx_data_class_t
     typ_get_dataclass (const typ_def_t *typdef)
 {
+
 #ifdef DEBUG
     if (!typdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -3966,6 +3290,7 @@ ncx_merge_t
 xmlns_id_t
     typ_get_nsid (const typ_template_t *typ)
 {
+
 #ifdef DEBUG
     if (!typ) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -3992,6 +3317,7 @@ xmlns_id_t
 uint32
     typ_get_choicenum (const typ_def_t *typdef)
 {
+
 #ifdef DEBUG
     if (!typdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -4104,6 +3430,8 @@ typ_unionnode_t *
 {
     typ_unionnode_t  *un;
 
+    /* typ is allowed to be NULL */
+
     un = m__getObj(typ_unionnode_t);
     if (!un) {
         return NULL;
@@ -4125,6 +3453,7 @@ typ_unionnode_t *
 void
     typ_free_unionnode (typ_unionnode_t *un)
 {
+
 #ifdef DEBUG
     if (!un) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -4153,6 +3482,7 @@ void
 typ_def_t *
     typ_get_unionnode_ptr (typ_unionnode_t *un)
 {
+
 #ifdef DEBUG
     if (!un) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -4184,6 +3514,7 @@ typ_def_t *
 const typ_unionnode_t *
     typ_first_unionnode (const typ_def_t *typdef)
 {
+
 #ifdef DEBUG
     if (!typdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -4296,6 +3627,13 @@ status_t
     typ_compile_pattern (ncx_btype_t btyp,
 			 typ_sval_t *sv)
 {
+
+#ifdef DEBUG
+    if (!sv) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     status_t    res;
     const xmlChar *str;
     xmlRegexpPtr pat;
@@ -4340,6 +3678,13 @@ const xmlChar *
 {
     const typ_sval_t  *sval;
 
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     sval = typ_first_strdef(typdef);
     if (!sval) {
 	return NULL;
@@ -4364,6 +3709,14 @@ const xmlChar *
 const ncx_errinfo_t *
     typ_get_pattern_errinfo (const typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     if (typdef->class==NCX_CL_NAMED) {
 	if (typdef->def.named.newtyp) {
 	    return typdef->def.named.newtyp->pat_errinfo;
@@ -4390,6 +3743,14 @@ const ncx_errinfo_t *
 const ncx_errinfo_t *
     typ_get_range_errinfo (const typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     if (typdef->class==NCX_CL_NAMED) {
 	if (typdef->def.named.newtyp) {
 	    return typdef->def.named.newtyp->range_errinfo;
@@ -4429,36 +3790,6 @@ void
     }
 
 }  /* typ_clean_typeQ */
-
-#if 0
-/********************************************************************
-* FUNCTION typ_clean_indexQ
-* 
-* Clean a queue of typ_index_t structs
-*
-* INPUTS:
-*     que == Q of typ_index_t to clean
-*
-*********************************************************************/
-void
-    typ_clean_indexQ (dlq_hdr_t *que)
-{
-    typ_index_t *tin;
-
-#ifdef DEBUG
-    if (!que) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    while (!dlq_empty(que)) {
-	tin = (typ_index_t *)dlq_deque(que);
-	typ_free_index(tin);
-    }
-
-}  /* typ_clean_indexQ */
-#endif
 
 
 /********************************************************************
@@ -4632,6 +3963,7 @@ boolean
 boolean
     typ_ok (const typ_def_t *typdef)
 {
+
 #ifdef DEBUG
     if (!typdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -4685,6 +4017,13 @@ const xmlChar *
     const typ_sval_t       *typ_sval;
     const typ_def_t        *tdef;
 
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     pathstr = NULL;
     typ_sval = NULL;
 
@@ -4719,6 +4058,7 @@ const xmlChar *
 boolean
     typ_has_subclauses (const typ_def_t *typdef)
 {
+
 #ifdef DEBUG
     if (!typdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);

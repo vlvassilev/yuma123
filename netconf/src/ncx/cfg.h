@@ -60,7 +60,7 @@
    2) call cfg_init_static_db for the various hard-wired databases
       that need to be created by the agent
 
-   3) call cfg_load_root() with the startup database contents
+   3) call cfg_apply_load_root() with the startup database contents
       to load into the running config
 
    4) call cfg_set_target() [NCX_CFGID_CANDIDATE or NCX_CFGID_RUNNING]

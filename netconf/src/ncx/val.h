@@ -310,6 +310,11 @@ typedef struct val_index_t_ {
 } val_index_t;
 
 
+/* test callback function to check if a value node should be cloned */
+typedef boolean
+    (*val_test_fn_t) (const val_value_t *val);
+
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
@@ -520,6 +525,19 @@ extern void
 extern val_value_t *
     val_clone (const val_value_t *val);
 
+extern val_value_t *
+    val_clone_test (const val_value_t *val,
+		    val_test_fn_t  testfn,
+		    status_t *res);
+
+/* pass in a config node, such as <config> root
+ * will call val_clone_test with the val_is_config_data
+ * callbacck function
+ */
+extern val_value_t *
+    val_clone_config_data (const val_value_t *val,
+			   status_t *res);
+
 extern status_t
     val_replace (const val_value_t *val,
 		 val_value_t *copy);
@@ -541,8 +559,8 @@ extern void
 		    val_value_t *curchild);
 
 extern val_value_t *
-    val_first_child (val_value_t *parent,
-		     val_value_t *child);
+    val_first_child_match (val_value_t *parent,
+			   val_value_t *child);
 
 extern val_value_t *
     val_get_first_child (const val_value_t *parent);
@@ -654,6 +672,9 @@ extern boolean
 
 extern boolean
     val_delete_allowed (const val_value_t *val);
+
+extern boolean
+    val_is_config_data (const val_value_t *val);
 
 extern boolean
     val_is_virtual (const val_value_t *val);

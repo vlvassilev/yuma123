@@ -143,7 +143,8 @@ typedef enum agt_cbtyp_t_ {
     AGT_CB_VALIDATE,               /* P1: write operation validate */
     AGT_CB_APPLY,                     /* P2: write operation apply */
     AGT_CB_COMMIT,               /* P3-pos: write operation commit */
-    AGT_CB_ROLLBACK            /* P3-neg: write operation rollback */
+    AGT_CB_ROLLBACK,           /* P3-neg: write operation rollback */
+    AGT_CB_TEST_APPLY          /* P1a-int: config data only, no CB */
 } agt_cbtyp_t;
 
 
@@ -159,6 +160,7 @@ typedef struct agt_profile_t_ {
     boolean          agt_usestartup;
     boolean          agt_logappend;
     boolean          agt_xmlorder;
+    boolean          agt_deleteall_ok;
     const xmlChar   *agt_logfile;
     const xmlChar   *agt_startup;
     const xmlChar   *agt_modpath;

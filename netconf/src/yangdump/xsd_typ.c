@@ -1785,13 +1785,6 @@ status_t
 	}
     }
 
-    /* Note: At this time, the simple type extensions via the 
-     * "+=" operator are not supported.  I can't figure out how
-     * to extend simple content, like adding enums and adding
-     * additional patterns to check in a logical OR expression
-     * and I don't want to cut-and-paste all the ancestor values
-     * instead of using a type extension
-     */
     if (hasnodes && typdef->def.named.newtyp) {
 	/* check if this is an range restriction */
 	if (!isext && rdef) {

@@ -65,6 +65,7 @@ extern status_t
     mgr_ses_new_session (const xmlChar *user,
 			 const xmlChar *password,
 			 const xmlChar *target,
+			 uint16 port,
 			 ses_id_t *retsid);
 
 extern void

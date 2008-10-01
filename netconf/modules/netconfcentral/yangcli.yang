@@ -53,6 +53,7 @@ module yangcli {
            "The full filespec for the key the program should use
             when connecting to the agent";
           type string;
+          mandatory true;
         }
 
         leaf password {
@@ -61,6 +62,7 @@ module yangcli {
              If none, then user will be prompted before connecting.";
           type string;
           ncx:password;
+          mandatory true;
         }
       }
     }
@@ -152,7 +154,7 @@ module yangcli {
        }
     }
 
-    grouping EditOps {
+    grouping EditParms {
         description
             "Common parms for create, merge, replace commands";
 
@@ -175,6 +177,34 @@ module yangcli {
         }
     }
 
+    grouping ConnectParms {
+        description
+          "Common parms for connecting to a NETCONF agent.
+           Used by the connect operation and if present at
+           the command line invocation, then the connect
+           operation will be invoked automatically.";
+
+        leaf user {
+          description
+             "User name to use for NETCONF sessions.";
+          type nt:NcxUserName;
+        }
+
+        leaf agent {
+           description
+             "IP address or DNS name of the NETCONF agent target.";
+          type string;
+        }
+
+        leaf port {
+          description 
+            "NETCONF port number to use.  If not present, then
+             port 830, followed by port 22, will be tried.";
+          type uint16 {
+            range "1..max";
+          }
+        }
+    }
 
     /*************************************************************
      *
@@ -188,13 +218,8 @@ module yangcli {
       description
         "CLI Parameter Set for the NETCONF Manager Application.";
 
-      leaf agent {
-        description
-          "IP address or DNS name of the NETCONF agent target.
-           If none, then the program will not try to auto-connect
-           upon startup";
-        type string;
-      }
+      uses ConnectParms;
+      uses KorP;
 
       leaf batch-mode {
         description
@@ -227,8 +252,6 @@ module yangcli {
            the help text is printed.";
         type empty;
       }
-
-      uses KorP;
 
       leaf log {
         description
@@ -297,13 +320,6 @@ module yangcli {
          type string;
       }
 
-      leaf user {
-        description
-           "User name to use for NETCONF sessions.
-            If none, then user will be prompted before connecting.";
-        type nt:NcxUserName;
-      }
-
       leaf version {
         description
           "Print version info for the program.
@@ -336,26 +352,19 @@ module yangcli {
       description "Connect to a NETCONF agent.";
       ncx:rpc-type exec;
       input {
-        leaf user {
-          description
-             "User name to use for NETCONF sessions.";
-          type nt:NcxUserName;
-	  mandatory true;
-        }
+        uses ConnectParms {
+          leaf user {
+    	    mandatory true;
+          }
 
+          leaf agent {
+  	    mandatory true;
+          }
+        }
         uses KorP {
           choice k-or-p {
             mandatory true;
-            leaf key { mandatory true; }
-            leaf password { mandatory true; }
           }
-        }
-
-        leaf agent {
-           description
-             "IP address or DNS name of the NETCONF agent target.";
-          type string;
-	  mandatory true;
         }
       }
     }
@@ -365,7 +374,7 @@ module yangcli {
        "Create some NETCONF config data with the edit-config operation";
       ncx:rpc-type config;
       input {
-        uses EditOps;
+        uses EditParms;
       }
     }
 
@@ -379,6 +388,7 @@ module yangcli {
            "Xpath expression indicating the node which is going
             to be deleted.";
           type string;
+          mandatory true;
         }
       }
     }
@@ -463,7 +473,7 @@ module yangcli {
        "Create some NETCONF config data with the edit-config operation";
       ncx:rpc-type config;
       input {
-        uses EditOps;
+        uses EditParms;
       }
     }
 
@@ -477,7 +487,7 @@ module yangcli {
        "Create some NETCONF config data with the edit-config operation";
       ncx:rpc-type config;
       input {
-        uses EditOps;
+        uses EditParms;
       }
     }
 

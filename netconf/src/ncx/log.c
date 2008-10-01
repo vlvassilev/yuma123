@@ -505,4 +505,19 @@ log_debug_t
 }  /* log_get_debug_level_enum */
 
 
+/********************************************************************
+* FUNCTION log_is_open
+* 
+* Check if the logfile is active
+* 
+* RETURNS:
+*   TRUE if logfile open, FALSE otherwise
+*********************************************************************/
+boolean
+    log_is_open (void)
+{
+    return (logfile) ? TRUE : FALSE;
+
+}  /* log_is_open */
+
 /* END file log.c */

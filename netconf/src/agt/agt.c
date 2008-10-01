@@ -134,7 +134,9 @@ static void
 {
     memset(&agt_profile, 0x0, sizeof(agt_profile_t));
 
-    /* First set the hard-wired values */
+    /* First set the hard-wired values
+     * TBD: get these from the command line
+     */
     agt_profile.agt_targ = NCX_AGT_TARG_RUNNING;
     agt_profile.agt_start = NCX_AGT_START_DISTINCT;
     agt_profile.agt_del_startup = TRUE;
@@ -144,11 +146,14 @@ static void
     agt_profile.agt_usestartup = TRUE;
     agt_profile.agt_logappend = FALSE;
     agt_profile.agt_xmlorder = FALSE;
+    agt_profile.agt_deleteall_ok = FALSE;
     agt_profile.agt_logfile = NULL;
     agt_profile.agt_startup = NULL;
     agt_profile.agt_modpath = NULL;
     agt_profile.agt_datapath = NULL;
     agt_profile.agt_runpath = NULL;
+
+    /* TBD: ports to listen to */
 
 } /* init_agent_profile */
 

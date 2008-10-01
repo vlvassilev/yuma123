@@ -145,18 +145,19 @@ static ses_cb_t  *mgrses[MGR_SES_MAX_SESSIONS];
 * INPUTS:
 *   scb == session control block
 *   hent == host entry struct
+*   port == port number to try, or 0 for defaults
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
     connect_to_agent (ses_cb_t *scb,
-		      struct hostent *hent)
+		      struct hostent *hent,
+		      uint16_t port)
 {
     struct sockaddr_in  targ;
     int                 ret;
-    uint16_t            port;
-
+    boolean             userport;
 
     /* get a file descriptor for the new socket */
     scb->fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -179,8 +180,13 @@ static status_t
 	   hent->h_addr_list[0],
 	   (size_t)hent->h_length);
 
-    /* try to connect to port 830 */
-    port = NCX_NCSSH_PORT;
+    /* try to connect to user-provided port or port 830 */
+    if (port) {
+	userport = TRUE;
+    } else {
+	port = NCX_NCSSH_PORT;
+	userport = FALSE;
+    }
     targ.sin_port = htons(port);
     ret = connect(scb->fd, 
 		  (struct sockaddr *)&targ,
@@ -190,13 +196,15 @@ static status_t
     }
 
     /* try SSH (port 22) next */
-    port = NCX_SSH_PORT;
-    targ.sin_port = htons(port);
-    ret = connect(scb->fd, 
-		  (struct sockaddr *)&targ,
-		  sizeof(struct sockaddr_in));
-    if (!ret) {
-	return NO_ERR;
+    if (!userport) {
+	port = NCX_SSH_PORT;
+	targ.sin_port = htons(port);
+	ret = connect(scb->fd, 
+		      (struct sockaddr *)&targ,
+		      sizeof(struct sockaddr_in));
+	if (!ret) {
+	    return NO_ERR;
+	}
     }
 
     /* de-activate the socket in the select loop */
@@ -397,6 +405,7 @@ void
 *   user == user name
 *   password == user password
 *   target == ASCII IP address or DNS hostname of target
+*   port == NETCONF port number to use, or 0 to use defaults
 *   retsid == address of session ID output
 *
 * OUTPUTS:
@@ -409,6 +418,7 @@ status_t
     mgr_ses_new_session (const xmlChar *user,
 			 const xmlChar *password,
 			 const xmlChar *target,
+			 uint16 port,
 			 ses_id_t *retsid)
 {
     ses_cb_t  *scb;
@@ -488,7 +498,7 @@ status_t
     hent = gethostbyname((const char *)target);
     if (hent) {
 	/* entry OK, try to get a TCP connection to agent */
-	res = connect_to_agent(scb, hent);
+	res = connect_to_agent(scb, hent, port);
     } else {
 	res = ERR_NCX_UNKNOWN_HOST;
     } 

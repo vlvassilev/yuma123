@@ -75,8 +75,6 @@ date	     init     comment
 /* typ_named_t flags field */
 #define TYP_FL_REPLACE   bit0         /* Replace if set; extend if not */
 
-/* access the typ_complex_t struct within the typdef */
-/* #define TYP_DEF_COMPLEX(T) (&((T)->def.complex)) */
 
 
 /********************************************************************
@@ -106,13 +104,13 @@ typedef struct typ_listval_t_ {
 
 /* one member of a range definition -- stored in simple.rangeQ 
  *
- * range components in NCX are allowed to appear out of order
- * but they are not allowed to overlap.
+ * range components in YANG are not allowed to appear out of order
+ * and they are not allowed to overlap.
  *
  * A single number component is represented
  * as a range where lower bound == upper bound
  *
- *  (1 | 5 | 10) saved as (1..1 | 2..2 | 10..10)
+ *  (1 | 5 | 10) saved as (1..1 | 5..5 | 10..10)
  *
  * symbolic range terms are stored in flags, and processed
  * in the 2nd pass of the compiler:
@@ -134,6 +132,7 @@ typedef struct typ_listval_t_ {
  * the number bounds of the range part are stored in lb and ub
  *
  * The entire range string is saved in rangestr for ncxdump
+ * and yangcli help text
  *
  * The token associated with the range part is saved for
  * error messages in YANG phase 2 compiling
@@ -189,8 +188,8 @@ typedef struct typ_range_t_ {
  *
  * The following enums defined in ncxconst.h are supported in this struct
  *  NCX_BT_BITS -- set of bit definitions (like list of enum)
- *  NCX_BT_ENUM -- C enum 
- *  NCX_BT_ENAME -- list of chile element nodes (deprecated)
+ *  NCX_BT_BOOLEAN -- true, 1, false, 0
+ *  NCX_BT_ENUM -- XSD like enumeration
  *  NCX_BT_EMPTY -- empty element type like <ok/>
  *  NCX_BT_INT8 -- 8 bit signed integer value
  *  NCX_BT_INT16 -- 16 bit signed integer value
@@ -203,11 +202,11 @@ typedef struct typ_range_t_ {
  *  NCX_BT_FLOAT32 -- 32 bit float number value
  *  NCX_BT_FLOAT64 -- 64 bit float number value
  *  NCX_BT_STRING -- char string
- *  NCX_BT_BINARY -- binary string
- *  NCX_BT_KEYREF -- YANG keyref
- *  NCX_BT_INSTANCE_ID -- YANG instance-identifier
- *  NCX_BT_SLIST -- simple list of string or number type
- *  NCX_BT_XLIST -- list of 1 or more patterns or valsets (deprecated)
+ *  NCX_BT_BINARY -- binary string (base64 from RFC 4648)
+ *  NCX_BT_KEYREF -- YANG keyref (XPath expression)
+ *  NCX_BT_INSTANCE_ID -- YANG instance-identifier (XPath expression)
+ *  NCX_BT_SLIST -- simple list of string or number type (xsd:list)
+ *  NCX_BT_UNION -- C-type union of any simtype except keyref and empty
  */
 typedef struct typ_simple_t_ {
     ncx_btype_t      btyp;                             /* NCX base type */
@@ -221,29 +220,6 @@ typedef struct typ_simple_t_ {
     struct typ_template_t_ *listtyp;       /* template for NCX_BT_SLIST */
     tk_chain_t      *xchain;            /* saved for NCX_BT_KEYREF only */
 } typ_simple_t;
-
-
-/* NCX_CL_COMPLEX
- *
- * typ_complex_t   !!! removed !!!
- *      - struct containing a pointer to complex type
- *
- *  NCX_BT_CONTAINER -- struct of arbitrary types
- *  NCX_BT_CHOICE -- choice of arbitrary types
- *  NCX_BT_LIST  -- table of arbitrary types
- *  NCX_BT_XCONTAINER -- containerized object of 1 arbitrary type
- *
- */
-#if 0
-typedef struct typ_complex_t_ {
-    ncx_btype_t        btyp;                   /* node type */
-    dlq_hdr_t          indexQ;          /* Q of typ_index_t */
-    dlq_hdr_t          childQ;          /* Q of typ_child_t */
-    dlq_hdr_t          metaQ;           /* Q of typ_child_t */
-    uint32             flags;
-    uint32             maxrows;      /* 0 == no max for con/tab */
-} typ_complex_t;
-#endif
 
 
 /* NCX_CL_NAMED
@@ -277,7 +253,6 @@ typedef struct typ_ref_t_ {
 typedef union typ_def_u_t_ {
     ncx_btype_t     base;
     typ_simple_t    simple;
-    /* typ_complex_t   complex; */
     typ_named_t     named;
     typ_ref_t       ref;
 } typ_def_u_t;
@@ -307,36 +282,7 @@ typedef struct typ_def_t_ {
 } typ_def_t;
 
 
-/* When I get to the bottom I go back to the top of the slide... 
- * Each member of a complex type is allocated as a typ_child_t
- * which of course can also contain a complex type
- *
- * !!! REMOVED: REPLACED WITH obj_template_t !!!
- */
-#if 0
-typedef struct typ_child_t_ {
-    dlq_hdr_t            qhdr;
-    xmlChar             *name;
-    typ_def_t           *parent;   
-    dlq_hdr_t            groupQ;       /* if node is a choice group hdr */
-    struct typ_child_t_ *grouptop;      /* if node is in a choice group */
-    typ_def_t            typdef;
-} typ_child_t;
-#endif
-
-
-/* One table or container index component */
-#if 0
-typedef struct typ_index_t_ {
-    dlq_hdr_t       qhdr;
-    xmlChar        *sname;       /* scoped name stored here */
-    ncx_indextyp_t  ityp;
-    typ_child_t     typch;       /* base name stored in typch.name */
-} typ_index_t;
-#endif
-
-
-/* One NCX 'type' definition -- top-level type template */
+/* One YANG 'type' definition -- top-level type template */
 typedef struct typ_template_t_ {
     dlq_hdr_t    qhdr;
     xmlChar     *name;
@@ -357,7 +303,7 @@ typedef struct typ_template_t_ {
 } typ_template_t;
 
 
-/* One NCX union node 
+/* One YANG union node 
  * One of the 2 pointers (typ or typdef will be NULL
  * If a named type is used, then 'typ' is active
  * If an inline type is used, then typdef is active
@@ -413,11 +359,6 @@ extern void
 extern void
     typ_init_simple (typ_def_t  *tdef, 
 		     ncx_btype_t btyp);
-
-/* init a complex data type after typ_init_typdef */
-extern void
-    typ_init_complex (typ_def_t  *tdef, 
-		      ncx_btype_t btyp);
 
 /* init a named data type after typ_init_typdef */
 extern void
@@ -494,12 +435,17 @@ extern typ_range_t *
 extern const typ_range_t *
     typ_get_crange_con (const typ_def_t *typdef);
 
+extern const xmlChar *
+    typ_get_rangestr (const typ_def_t *typdef);
+
 extern const typ_rangedef_t *
     typ_first_rangedef (const typ_def_t *typdef);
 
 extern const typ_rangedef_t *
     typ_first_rangedef_con (const typ_def_t *typdef);
 
+
+/* deprecated -- does not support multi-part ranges */
 extern status_t
     typ_get_rangebounds_con (const typ_def_t *typdef,
 			     ncx_btype_t *btyp,
@@ -522,37 +468,6 @@ extern typ_listval_t *
 /* free a list descriptor */
 extern void
     typ_free_listval (typ_listval_t *lv);
-
-/* malloc and init an index descriptor
- * extern typ_index_t *
- *    typ_new_index (void);
- *
- *
- * extern void
- *    typ_init_index (typ_index_t *in);
- *
- ** free an index descriptor **
- * extern void
- *    typ_free_index (typ_index_t *in);
- *
- * extern void
- *    typ_clean_index (typ_index_t *in);
- */
-
-/* malloc and init a child (within a complex type) descriptor */
-/* extern typ_child_t *
- *    typ_new_child (void);
- *
- * extern void
- *    typ_init_child (typ_child_t *ch);
- *
- ** free a child (within a complex type) descriptor 
- * extern void
- *    typ_free_child (typ_child_t *ch);
- *
- * extern void
- *    typ_clean_child (typ_child_t *ch);
- */
 
 /***************** ACCESS FUNCTIONS *****************/
 
@@ -623,7 +538,7 @@ extern typ_def_t *
 /* Get the next typdef in the chain for NCX_CL_NAMED or NCX_CL_REF
  * Skip any named types without the specific restriction defined
  *
- * Returns the input typdef for simple and complex typdef classes
+ * Returns the input typdef for simple typdef classes
  */
 extern typ_def_t *
     typ_get_qual_typdef (typ_def_t  *typdef,
@@ -632,90 +547,6 @@ extern typ_def_t *
 extern const typ_def_t *
     typ_get_cqual_typdef (const typ_def_t  *typdef,
 			  ncx_squal_t  squal);
-
-
-
-/* find the specified child node in a struct or choice
- * ignores any local members declared in the indexQ
- * use typ_find_type_member to find inline index typdefs
- *
- *
- * extern typ_child_t *
- *    typ_find_child (const xmlChar *name,
- *		    const typ_complex_t *cpx);
- *
- * extern typ_def_t *
- *    typ_find_child_typdef (const xmlChar *name,
- *			   typ_def_t *typdef);
- *
- *
- ** get the first child member
- * extern typ_child_t *
- *    typ_first_child (const typ_complex_t *cpx);
- *
- * ** get the next child member **
- * extern typ_child_t *
- *    typ_next_child (typ_child_t *ch);
- *
- * extern const typ_child_t *
- *    typ_next_con_child (const typ_child_t *ch);
- */
-
-
-
-
-/* find the specified child node in any complex type
- * This function checks the inline index fields for tables
- * plus all other complex types
- */
-extern typ_def_t *
-    typ_find_type_member (typ_def_t  *typdef,
-			  const xmlChar *name);
-
-/* get the first index descriptor 
- * extern typ_index_t *
- *    typ_first_index (const typ_complex_t *cpx);
- *
- * get the next index descriptor 
- * extern typ_index_t *
- *    typ_next_index (const typ_index_t *in);
- *
- *
- *
- *** find a specified index descriptor **
- * extern typ_index_t *
- *    typ_find_index (const xmlChar *name,
- *		    const typ_complex_t *cpx);
- *
- * extern typ_def_t *
- *    typ_get_index_typdef (typ_index_t *indx);
- *
- *
- * extern const xmlChar *
- *    typ_get_index_name (const typ_index_t *indx);
- */
-
-#if 0
-/* get the first metadata descriptor, will follow the typdef chain */
-extern void *   /* obj_template_t *   */
-    typ_first_meta (const typ_def_t *typdef);
-
-/* get the first metadata descriptor, will not follow the typdef chain */
-extern void *  /* obj_template *   */
-    typ_first_meta_con (const typ_def_t *typdef);
-
-/* get the next metadata descriptor *
- * extern typ_child_t * 
- *    typ_next_meta (typ_child_t *meta);
- *
- *
- ** find a specified metadata descriptor **
- * extern typ_child_t *
- *    typ_find_meta (typ_def_t *typdef,
- *		   const xmlChar *name);
- */
-#endif
-
 
 /* find a specified appinfo variable */
 extern const ncx_appinfo_t *
@@ -765,6 +596,8 @@ extern boolean
 extern const typ_enum_t *
     typ_first_enumdef (const typ_def_t *typdef);
 
+extern const typ_enum_t *
+    typ_next_enumdef (const typ_enum_t *enumdef);
 
 extern typ_enum_t *
     typ_first_enumdef2 (typ_def_t *typdef);

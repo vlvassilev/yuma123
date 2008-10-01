@@ -144,8 +144,8 @@ void
     }
 
 #ifdef MGR_TOP_DEBUG
-    log_debug2("\nmgr_top: got node");
-    if (LOGDEBUG2) {
+    if (LOGDEBUG3) {
+	log_debug3("\nmgr_top: got node");
 	xml_dump_node(&top);
     }
 #endif
@@ -167,7 +167,7 @@ void
     /* check any error trying to invoke the top handler */
     if (res != NO_ERR) {
 	scb->stats.in_err_msgs++;
-	log_error("\nagt_top: bad msg for session %d (%s)",
+	log_error("\nError: agt_top skipped msg for session %d (%s)",
 		  scb->sid, get_error_string(res));
     }
 

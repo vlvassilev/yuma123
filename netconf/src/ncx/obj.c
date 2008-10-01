@@ -2978,7 +2978,7 @@ const obj_template_t *
 * has any children.  Look past choices and cases to
 * the real nodes within them
 *
-*  !!!! SKIPS OVER AUGMENT AND USES !!!!
+*  !!!! SKIPS OVER AUGMENT AND USES AND CHOICES AND CASES !!!!
 *
 * INPUTS:
 *    obj == obj_template_t to check
@@ -3000,11 +3000,15 @@ const obj_template_t *
     }
 #endif
 
+    /* go through the child nodes of this object looking
+     * for the first data object; skip over all meta-objects
+     */
     que = obj_get_cdatadefQ(obj);
     if (que) {
 	for (chobj = (const obj_template_t *)dlq_firstEntry(que);
 	     chobj != NULL;
 	     chobj = (const obj_template_t *)dlq_nextEntry(chobj)) {
+
 	    if (obj_has_name(chobj)) {
 		if (chobj->objtype == OBJ_TYP_CHOICE ||
 		    chobj->objtype == OBJ_TYP_CASE) {
@@ -3040,7 +3044,7 @@ const obj_template_t *
 const obj_template_t *
     obj_next_child_deep (const obj_template_t *obj)
 {
-    const obj_template_t  *cas, *next, *last;
+    const obj_template_t  *cas, *next, *last, *child;
 
 #ifdef DEBUG
     if (!obj) {
@@ -3049,6 +3053,9 @@ const obj_template_t *
     }
 #endif
 
+    /* start the loop at the current object to set the
+     * 'last' object correctly
+     */
     next = obj;
     while (next) {
 	last = next;
@@ -3056,7 +3063,31 @@ const obj_template_t *
 	/* try next sibling */
 	next = obj_next_child(next);
 	if (next) {
-	    return next;
+	    switch (next->objtype) {
+	    case OBJ_TYP_CHOICE:
+		/* dive into each case to find a first object
+		 * this should return the first object in the 
+		 * first case, but it checks the entire choice
+		 * to support empty case arms
+		 */
+		for (cas = obj_first_child(next);
+		     cas != NULL;
+		     cas = obj_next_child(next)) {
+		    child = obj_first_child(cas);
+		    if (child) {
+			return child;
+		    }
+		}
+		continue;
+	    case OBJ_TYP_CASE:
+		child = obj_first_child(next);
+		if (child) {
+		    return child;
+		}
+		continue;
+	    default:
+		return next;
+	    }
 	}
 
 	/* was last sibling, try parent if this is a case */
@@ -4928,7 +4959,7 @@ ncx_access_t
     if (!get_config_flag(obj, &setflag)) {
 	return NCX_ACCESS_RO;
     } else {
-	return NCX_ACCESS_RW;
+	return NCX_ACCESS_RC;
     }
 
     /*** !!! no support for read-write at this time !!! ***/
@@ -5926,6 +5957,10 @@ boolean
 	}
 	return FALSE;
     case OBJ_TYP_LEAF:
+	if (obj_is_key(obj)) {
+	    return TRUE;
+	}
+	/* else fall through */
     case OBJ_TYP_CHOICE:
 	return (obj->flags & OBJ_FL_MANDATORY) ? TRUE : FALSE;
     case OBJ_TYP_LEAF_LIST:
@@ -6104,7 +6139,9 @@ boolean
     case OBJ_TYP_RPCIO:
 	return FALSE;
     default:
-	if (obj->parent) {
+	if (obj_is_root(obj)) {
+	    return TRUE;
+	} else if (obj->parent) {
 	    return obj_is_data_db(obj->parent);
 	} else {
 	    return TRUE;
@@ -6454,6 +6491,42 @@ boolean
 
 
 /********************************************************************
+* FUNCTION obj_is_system_ordered
+*
+* Check if the object is system or user-ordered
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is system ordered
+*   FALSE if object is user-ordered
+*********************************************************************/
+boolean
+    obj_is_system_ordered (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    switch (obj->objtype) {
+    case OBJ_TYP_LEAF_LIST:
+	return obj->def.leaflist->ordersys;
+    case OBJ_TYP_LIST:
+	return obj->def.list->ordersys;
+    default:
+	return TRUE;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_is_system_ordered */
+
+
+/********************************************************************
 * FUNCTION obj_ok_for_cli
 *
 * Figure out if the obj is OK for current CLI implementation
@@ -6598,6 +6671,13 @@ status_t
 		def_reg_find_any_moddef(&foundmodname,
 					curnode->elname,
 					&dtyp);
+	}
+	if (foundobj) {
+	    if (!obj_is_data_db(foundobj) ||
+		obj_is_abstract(foundobj) ||
+		obj_is_cli(foundobj)) {
+		foundobj = NULL;
+	    }
 	}
     } else if (xmlorder) {
 	/* the current node must match or one of the
@@ -6898,6 +6978,7 @@ obj_metadata_t *
     return (obj_metadata_t *)dlq_nextEntry(meta);
 
 }  /* obj_next_metadata */
+
 
 
 /* END obj.c */

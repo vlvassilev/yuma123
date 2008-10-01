@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<nd:config xmlns:nd="http://netconfcentral.com/ns/netconfd"
-  xmlns="urn:ietf:params:xml:ns:yang:test">
-  <test1>
-   <a> 1  </a>
-   <b>32</b>
-   <c>aeddd34</c>
-   <d>z</d>
-   <e>
-    <ee>a14</ee>
-    <ee>a8</ee>
-    <ee>e77</ee>
-    <ee>e777</ee>
-    <eee/>
-   </e>
-  </test1>
-  <test2>
-   <a2>fred</a2>
-   <b2>7</b2>
-   <foo/>
-  </test2>
-  <test2>
-   <a2>wilma</a2>
-   <b2>8</b2>
-   <foo>69 bugs to go!</foo>
-  </test2>
-  <test2>
-   <a2>bambi</a2>
-   <b2>2</b2>
-   <foo>/t:test2[t:a2=wilma]/t:b2</foo>
-  </test2>
+<nd:config xmlns:nd="http://netconfcentral.com/ns/netconfd">
+   <t:test1 xmlns:t="urn:ietf:params:xml:ns:yang:test">
+      <t:a>1</t:a>
+      <t:b>32</t:b>
+      <t:c>aeddd34</t:c>
+      <t:d>x</t:d>
+      <t:e>
+         <t:ee>a14</t:ee>
+         <t:ee>a8</t:ee>
+         <t:ee>e77</t:ee>
+         <t:ee>e777</t:ee>
+         <t:ee>a1</t:ee>
+         <t:eee>xxx</t:eee>
+      </t:e>
+      <t:f1>test one</t:f1>
+   </t:test1>
+   <t:test2 xmlns:t="urn:ietf:params:xml:ns:yang:test">
+      <t:a2>fred</t:a2>
+      <t:b2>7</t:b2>
+      <t:foo></t:foo>
+   </t:test2>
+   <t:test2 xmlns:t="urn:ietf:params:xml:ns:yang:test">
+      <t:a2>wilma</t:a2>
+      <t:b2>8</t:b2>
+      <t:foo>69 bugs to go!</t:foo>
+   </t:test2>
+   <t:test2 xmlns:t="urn:ietf:params:xml:ns:yang:test">
+      <t:a2>bambi</t:a2>
+      <t:b2>2</t:b2>
+      <t:foo>
+         /t:test2[t:a2=wilma]/t:b2
+      </t:foo>
+   </t:test2>
 </nd:config>
-
-
-

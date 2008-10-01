@@ -154,7 +154,7 @@ date         init     comment
 #define YANGCLI_DEBUG   1
 #endif
 
-#define MAX_PROMPT_LEN 32
+#define MAX_PROMPT_LEN 56
 
 #define YANGCLI_MAX_NEST  16
 
@@ -176,44 +176,49 @@ date         init     comment
 #define NCXDTMOD     (const xmlChar *)"ncxtypes"
 #define XSDMOD       (const xmlChar *)"xsd"
 
+#define DEF_PROMPT     (const xmlChar *)"yangcli> "
+#define DEF_FN_PROMPT  (const xmlChar *)"yangcli:"
+#define MORE_PROMPT    (const xmlChar *)"   more> "
 
-/* YANGCLI boot parameter names 
- * matches parm clauses in ncxcli-boot parmset in ncxcli.yang
+#define YESNO_NODEF  0
+#define YESNO_CANCEL 0
+#define YESNO_YES    1
+#define YESNO_NO     2
+
+#define DEF_OPTIONS (const xmlChar *)"?, \?\?, \?S, ?C"
+
+/* YANGCLI boot and operation parameter names 
+ * matches parm clauses in yangcli container in yangcli.yang
  */
+
 #define YANGCLI_AGENT       (const xmlChar *)"agent"
 #define YANGCLI_BATCHMODE   (const xmlChar *)"batch-mode"
-#define YANGCLI_CONF        (const xmlChar *)"conf"
-#define YANGCLI_DIR         (const xmlChar *)"dir"
-#define YANGCLI_DEF_MODULE  (const xmlChar *)"default-module"
-#define YANGCLI_KEY         (const xmlChar *)"key"
-
-#define YANGCLI_PASSWORD    (const xmlChar *)"password"
-
-#define YANGCLI_NO_AUTOCOMP (const xmlChar *)"no-autocomp"
-#define YANGCLI_NO_AUTOLOAD (const xmlChar *)"no-autoload"
-#define YANGCLI_NO_FIXORDER (const xmlChar *)"no-fixorder"
-#define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
-#define YANGCLI_USER        (const xmlChar *)"user"
-
+#define YANGCLI_BRIEF       (const xmlChar *)"brief"
 #define YANGCLI_COMMAND     (const xmlChar *)"command"
 #define YANGCLI_COMMANDS    (const xmlChar *)"commands"
+#define YANGCLI_CONF        (const xmlChar *)"conf"
+#define YANGCLI_CURRENT_VALUE (const xmlChar *)"current-value"
+#define YANGCLI_DEF_MODULE  (const xmlChar *)"default-module"
+#define YANGCLI_DIR         (const xmlChar *)"dir"
 #define YANGCLI_FROM_CLI    (const xmlChar *)"from-cli"
 #define YANGCLI_FROM_GLOBAL (const xmlChar *)"from-global"
 #define YANGCLI_FROM_LOCAL  (const xmlChar *)"from-local"
+#define YANGCLI_FULL        (const xmlChar *)"full"
 #define YANGCLI_GLOBAL      (const xmlChar *)"global"
 #define YANGCLI_GLOBALS     (const xmlChar *)"globals"
 #define YANGCLI_LOCAL       (const xmlChar *)"local"
 #define YANGCLI_LOCALS      (const xmlChar *)"locals"
+#define YANGCLI_KEY         (const xmlChar *)"key"
+#define YANGCLI_NO_AUTOCOMP (const xmlChar *)"no-autocomp"
+#define YANGCLI_NO_AUTOLOAD (const xmlChar *)"no-autoload"
+#define YANGCLI_NO_FIXORDER (const xmlChar *)"no-fixorder"
 #define YANGCLI_OBJECTS     (const xmlChar *)"objects"
 #define YANGCLI_OPTIONAL    (const xmlChar *)"optional"
-#define YANGCLI_CURRENT_VALUE (const xmlChar *)"current-value"
+#define YANGCLI_PASSWORD    (const xmlChar *)"password"
+#define YANGCLI_PORT        (const xmlChar *)"port"
+#define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
+#define YANGCLI_USER        (const xmlChar *)"user"
 
-#define YANGCLI_BRIEF  (const xmlChar *)"brief"
-#define YANGCLI_FULL   (const xmlChar *)"full"
-
-#define DEF_PROMPT     (const xmlChar *)"yangcli> "
-#define DEF_FN_PROMPT  (const xmlChar *)"yangcli:"
-#define MORE_PROMPT    (const xmlChar *)"   more> "
 
 /* YANGCLI local RPC commands */
 #define YANGCLI_CD      (const xmlChar *)"cd"
@@ -231,11 +236,6 @@ date         init     comment
 #define YANGCLI_SAVE    (const xmlChar *)"save"
 #define YANGCLI_SET     (const xmlChar *)"set"
 #define YANGCLI_SHOW    (const xmlChar *)"show"
-
-#define YESNO_NODEF  0
-#define YESNO_CANCEL 0
-#define YESNO_YES    1
-#define YESNO_NO     2
 
 #define YANGCLI_NS_URI \
     ((const xmlChar *)"http://netconfcentral.com/ncx/ncxcli")
@@ -256,7 +256,6 @@ static void
     yangcli_reply_handler (ses_cb_t *scb,
 			  mgr_rpc_req_t *req,
 			   mgr_rpc_rpy_t *rpy);
-
 
 
 /********************************************************************
@@ -827,9 +826,13 @@ static void
     case MGR_IO_ST_CONN_CLOSEWAIT:
     case MGR_IO_ST_CONN_SHUT:
 	p = buff;
-	len = xml_strcpy(p, (const xmlChar *)"yangcli ");
+	len = xml_strncpy(p, (const xmlChar *)"yangcli ", bufflen);
 	p += len;
 	bufflen -= len;
+
+	if (bufflen == 0) {
+	    return;
+	}
 
 	parm = NULL;
 	if (connect_valset) {
@@ -839,8 +842,14 @@ static void
 	    len = xml_strncpy(p, VAL_STR(parm), bufflen);
 	    p += len;
 	    bufflen -= len;
+	    if (bufflen == 0) {
+		return;
+	    }
 	    *p++ = NCX_AT_CH;
 	    --bufflen;
+	    if (bufflen == 0) {
+		return;
+	    }
 	}
 
 	parm = NULL;
@@ -848,14 +857,27 @@ static void
 	    parm= val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_AGENT);
 	}
 	if (parm) {
-	    len = xml_strncpy(p, VAL_STR(parm), bufflen-3);
+	    len = xml_strncpy(p, VAL_STR(parm), bufflen);
+	    p += len;
+	    bufflen -= len;
+	    if (bufflen == 0) {
+		return;
+	    }
+	}
+
+	if (cli_fn && bufflen > 3) {
+	    *p++ = ':';
+	    len = xml_strncpy(p, cli_fn, --bufflen);
 	    p += len;
 	    bufflen -= len;
 	}
 
-	*p++ = '>';
-	*p++ = ' ';
-	*p = 0;
+	if (bufflen > 2) {
+	    *p++ = '>';
+	    *p++ = ' ';
+	    *p = 0;
+	    bufflen -= 2;
+	}
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -1280,7 +1302,7 @@ static status_t
 
     res = NO_ERR;
 
-    log_stdout("\nEnter complex value %s (%s)", 
+    log_stdout("\nEnter parameter value %s (%s)", 
 	       obj_get_name(parm), 
 	       tk_get_btype_sym(obj_get_basetype(parm)));
 
@@ -1339,18 +1361,17 @@ static status_t
 	      val_value_t *valset,
 	      val_value_t *oldvalset)
 {
-    const xmlChar *def, *parmname;
-    val_value_t   *oldparm, *newparm;
-    xmlChar       *line, *start;
-    status_t       res;
-    ncx_btype_t    btyp;
+    const xmlChar    *def, *parmname;
+    const typ_def_t  *typdef;
+    val_value_t      *oldparm, *newparm;
+    xmlChar          *line, *start;
+    status_t          res;
+    ncx_btype_t       btyp;
+    boolean           done;
 
     if (!obj_is_mandatory(parm) && !get_optional) {
 	return NO_ERR;
     }
-
-    parmname = obj_get_name(parm);
-    btyp = obj_get_basetype(parm);
 
     switch (btyp) {
     case NCX_BT_ANY:
@@ -1360,59 +1381,94 @@ static status_t
 	;
     }
 
+    parmname = obj_get_name(parm);
+    typdef = obj_get_ctypdef(parm);
+    btyp = obj_get_basetype(parm);
     res = NO_ERR;
     oldparm = NULL;
     def = NULL;
   
-    if (btyp==NCX_BT_EMPTY) {
-	log_stdout("\nShould flag %s be set?", parmname);
-    } else {
-	log_stdout("\nEnter value for %s (%s)", parmname, 
-		   tk_get_btype_sym(btyp));
-    }
-    if (oldvalset) {
-	oldparm = val_find_child(oldvalset, 
-				 obj_get_mod_name(parm),
-				 parmname);
-    }
-
-    /* pick a default value, either old value or default clause */
-    if (!oldparm) {
-	/* try to get the defined default value */
-	if (btyp != NCX_BT_EMPTY) {
-	    def = obj_get_default(parm);
-	    if (!def && (obj_get_nsid(rpc) == xmlns_nc_id() &&
-			 (!xml_strcmp(parmname, NCX_EL_TARGET) ||
-			  !xml_strcmp(parmname, NCX_EL_SOURCE)))) {
-		def = default_target;
-	    }
-	}
-	if (def) {
-	    log_stdout(" [%s]\n", def);
-	} else if (btyp==NCX_BT_EMPTY) {
-	    log_stdout(" [N]\n");
-	}
-    } else {
-	/* use the old value for the default */
-	log_stdout(" [");
+    done = FALSE;
+    while (!done) {
 	if (btyp==NCX_BT_EMPTY) {
-	    log_stdout("Y");
+	    log_stdout("\nShould flag %s be set? (Y, N, %s)", 
+		       parmname, DEF_OPTIONS);
 	} else {
-	    val_dump_value(oldparm, -1);
+	    if (typdef && typdef->typename) {
+		def = typdef->typename;
+	    } else {
+		def = (const xmlChar *)tk_get_btype_sym(btyp);
+	    }
+	    log_stdout("\nEnter value for %s %s (%s, %s)", 
+		       obj_get_typestr(parm),
+		       parmname, def, DEF_OPTIONS);
 	}
-	log_stdout("]\n");
-    }
+	if (oldvalset) {
+	    oldparm = val_find_child(oldvalset, 
+				     obj_get_mod_name(parm),
+				     parmname);
+	}
 
-    /* get a line of input from the user */
-    line = get_cmd_line(&res);
-    if (!line) {
-	return res;
-    }
+	/* pick a default value, either old value or default clause */
+	if (!oldparm) {
+	    /* try to get the defined default value */
+	    if (btyp != NCX_BT_EMPTY) {
+		def = obj_get_default(parm);
+		if (!def && (obj_get_nsid(rpc) == xmlns_nc_id() &&
+			     (!xml_strcmp(parmname, NCX_EL_TARGET) ||
+			      !xml_strcmp(parmname, NCX_EL_SOURCE)))) {
+		    def = default_target;
+		}
+	    }
+	    if (def) {
+		log_stdout(" [%s]\n", def);
+	    } else if (btyp==NCX_BT_EMPTY) {
+		log_stdout(" [N]\n");
+	    }
+	} else {
+	    /* use the old value for the default */
+	    log_stdout(" [");
+	    if (btyp==NCX_BT_EMPTY) {
+		log_stdout("Y");
+	    } else {
+		val_dump_value(oldparm, -1);
+	    }
+	    log_stdout("]\n");
+	}
 
-    /* skip whitespace */
-    start = line;
-    while (*start && xml_isspace(*start)) {
-	start++;
+	/* get a line of input from the user */
+	line = get_cmd_line(&res);
+	if (!line) {
+	    return res;
+	}
+
+	/* skip whitespace */
+	start = line;
+	while (*start && xml_isspace(*start)) {
+	    start++;
+	}
+
+	if (*start == '?') {
+	    if (start[1] == '?') {
+		obj_dump_template(parm, HELP_MODE_FULL, 0,
+				  NCX_DEF_INDENT);
+	    } else if (start[1] == 'C' || start[1] == 'c') {
+		log_stdout("\n%s command canceled",
+			   obj_get_name(rpc));
+		return ERR_NCX_CANCELED;
+	    } else if (start[1] == 'S' || start[1] == 's') {
+		log_stdout("\n%s parameter skipped",
+			   obj_get_name(parm));
+		return ERR_NCX_SKIPPED;
+	    } else {
+		obj_dump_template(parm, HELP_MODE_NORMAL, 4,
+				  NCX_DEF_INDENT);
+	    }
+	    log_stdout("\n");
+	    continue;
+	} else {
+	    done = TRUE;
+	}
     }
 
     /* check if any non-whitespace chars entered */
@@ -1451,9 +1507,89 @@ static status_t
 	res = cli_parse_parm(valset, parm, start, SCRIPTMODE);
     }
 
+    if (res != NO_ERR) {
+	log_stdout("\nError: set parameter failed (%s)\n",
+		   get_error_string(res));
+    }
     return res;
     
 } /* get_parm */
+
+
+/********************************************************************
+* FUNCTION get_case
+* 
+* Get the user-selected case, which is not fully set
+* Use values from the last set (if any) for defaults.
+* This function will block on readline if mandatory parms
+* are needed from the CLI
+*
+* INPUTS:
+*   rpc == RPC template in progress
+*   cas == case object template header
+*   valset == value set to fill
+*   oldvalset == last set of values (or NULL if none)
+*
+* OUTPUTS:
+*    new val_value_t nodes may be added to valset
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    get_case (const obj_template_t *rpc,
+	      const obj_template_t *cas,
+	      val_value_t *valset,
+	      val_value_t *oldvalset)
+{
+    const obj_template_t    *parm;
+    val_value_t             *pval;
+    status_t                 res;
+
+    /* make sure a case was selected or found */
+    if (!obj_is_config(cas) || obj_is_abstract(cas)) {
+	log_stdout("\nError: No writable objects to fill for this case");
+	return ERR_NCX_SKIPPED;
+    }
+
+    /* finish the seclected case */
+    for (parm = obj_first_child(cas);
+	 parm != NULL;
+	 parm = obj_next_child(parm)) {
+
+	if (!obj_is_config(parm) || obj_is_abstract(parm)) {
+	    continue;
+	}
+
+	pval = val_find_child(valset, 
+			      obj_get_mod_name(parm),
+			      obj_get_name(parm));
+	if (pval) {
+	    continue;
+	}
+
+	/* node is config and not already set */
+	if (obj_get_basetype(parm) == NCX_BT_EMPTY) {
+	    res = cli_parse_parm(valset, parm, NULL, SCRIPTMODE);
+	} else {
+	    res = get_parm(rpc, parm, valset, oldvalset);
+	}
+
+	switch (res) {
+	case NO_ERR:
+	case ERR_NCX_SKIPPED:
+	    res = NO_ERR;
+	    break;
+	case ERR_NCX_CANCELED:
+	    return res;
+	default:
+	    return res;
+	}
+    }
+
+    return NO_ERR;
+
+} /* get_case */
 
 
 /********************************************************************
@@ -1487,15 +1623,19 @@ static status_t
     xmlChar                 *myline, *str;
     status_t                 res;
     int                      casenum, num;
-    boolean                  first, done, usedef;
+    boolean                  first, done, usedef, redo, saveopt;
 
-
-    res = NO_ERR;
-
-    if (!obj_is_config(choic)) {
+    if (!obj_is_config(choic) || obj_is_abstract(choic)) {
 	log_stdout("\nError: choice '%s' has no configurable parameters",
 		   obj_get_name(choic));
 	return ERR_NCX_ACCESS_DENIED;
+    }
+
+    res = NO_ERR;
+    saveopt = get_optional;
+    
+    if (obj_is_mandatory(choic)) {
+	get_optional = TRUE;
     }
 
     /* first check the partial block corner case */
@@ -1506,13 +1646,14 @@ static status_t
 
 	cas = pval->casobj;
 	if (!cas) {
+	    get_optional = saveopt;
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
 	for (parm = obj_first_child(cas); 
 	     parm != NULL;
 	     parm = obj_next_child(parm)) {
 
-	    if (!obj_is_config(parm)) {
+	    if (!obj_is_config(parm) || obj_is_abstract(parm)) {
 		continue;
 	    }
 
@@ -1524,13 +1665,21 @@ static status_t
 	    }
 
 	    res = get_parm(rpc, parm, valset, oldvalset);
-	    if (res != NO_ERR) {
-		log_stdout("\nError: get parm '%s' failed (%s)",
-			   obj_get_name(parm),
-			   get_error_string(res));
+	    switch (res) {
+	    case NO_ERR:
+		break;
+	    case ERR_NCX_SKIPPED:
+		res = NO_ERR;
+		break;
+	    case ERR_NCX_CANCELED:
+		get_optional = saveopt;
+		return res;
+	    default:
+		get_optional = saveopt;
 		return res;
 	    }
 	}
+	get_optional = saveopt;
 	return NO_ERR;
     }
 
@@ -1539,6 +1688,7 @@ static status_t
     if (!cas) {
 	log_stdout("\nNo case nodes defined for choice %s\n",
 		   obj_get_name(choic));
+	get_optional = saveopt;
 	return NO_ERR;
     }
 
@@ -1559,7 +1709,7 @@ static status_t
 	     parm != NULL;
 	     parm = obj_next_child(parm)) {
 
-	    if (!obj_is_config(parm)) {
+	    if (!obj_is_config(parm) || obj_is_abstract(parm)) {
 		continue;
 	    }
 
@@ -1578,20 +1728,24 @@ static status_t
     done = FALSE;
     log_stdout("\n");
     while (!done) {
+
+	redo = FALSE;
+
 	/* Pick a prompt, depending on the choice default case */
 	if (obj_get_default(choic)) {
-	    log_stdout("\nEnter choice number (%d - %d), "
-		       "[ENTER] for default (%s),"
-		       " or 0 to cancel", 1, num-1, 
+	    log_stdout("\nEnter choice number (%d - %d, %s), "
+		       "[ENTER] for default (%s): ",
+		       1, num-1, DEF_OPTIONS,
 		       obj_get_default(choic));
 	} else {
-	    log_stdout("\nEnter choice number (%d - %d),"
-		       "or 0 to cancel", 1, num-1);
+	    log_stdout("\nEnter choice number (%d - %d, %s): ",
+		       1, num-1, DEF_OPTIONS);
 	}
 
 	/* get input from the user STDIN */
 	myline = get_cmd_line(&res);
 	if (!myline) {
+	    get_optional = saveopt;
 	    return res;
 	}
 
@@ -1602,11 +1756,35 @@ static status_t
 	}
 
 	/* convert to a number, check [ENTER] for default */
-	if (*str) {
+	if (!*str) {
+	    usedef = TRUE;
+	} else if (*str == '?') {
+	    redo = TRUE;
+	    if (str[1] == '?') {
+		obj_dump_template(choic, HELP_MODE_FULL, 0,
+				  NCX_DEF_INDENT);
+	    } else if (str[1] == 'C' || str[1] == 'c') {
+		log_stdout("\n%s command canceled\n",
+			   obj_get_name(rpc));
+		get_optional = saveopt;
+		return ERR_NCX_CANCELED;
+	    } else if (str[1] == 'S' || str[1] == 's') {
+		log_stdout("\n%s choice skipped\n",
+			   obj_get_name(parm));
+		get_optional = saveopt;
+		return ERR_NCX_SKIPPED;
+	    } else {
+		obj_dump_template(choic, HELP_MODE_NORMAL, 4,
+				  NCX_DEF_INDENT);
+	    }
+	    log_stdout("\n");
+	} else {
 	    casenum = atoi((const char *)str);
 	    usedef = FALSE;
-	} else {
-	    usedef = TRUE;
+	}
+
+	if (redo) {
+	    continue;
 	}
 
 	/* check if default requested */
@@ -1617,9 +1795,6 @@ static status_t
 		log_stdout("\nError: Choice does not have a default case\n");
 		usedef = FALSE;
 	    }
-	} else if (casenum == 0) {
-	    log_stdout("\nChoice canceled\n");
-	    return ERR_NCX_SKIPPED;
 	} else if (casenum < 0 || casenum >= num) {
 	    log_stdout("\nError: invalid value '%s'\n", str);
 	} else {
@@ -1644,7 +1819,7 @@ static status_t
 	     cas != NULL && !done;
 	     cas = obj_next_child(cas)) {
 
-	    if (!obj_is_config(cas)) {
+	    if (!obj_is_config(cas) || obj_is_abstract(cas)) {
 		continue;
 	    }
 
@@ -1660,45 +1835,124 @@ static status_t
     }
 
     /* make sure a case was selected or found */
-    if (!cas || !obj_is_config(cas)) {
+    if (!cas) {
 	log_stdout("\nError: No case to fill for this choice");
+	get_optional = saveopt;
 	return ERR_NCX_SKIPPED;
     }
 
-    /* finish the seclected case */
-    for (parm = obj_first_child(cas);
-	 parm != NULL;
-	 parm = obj_next_child(parm)) {
-
-	if (!obj_is_config(parm)) {
-	    continue;
-	}
-
-	pval = val_find_child(valset, 
-			      obj_get_mod_name(parm),
-			      obj_get_name(parm));
-	if (pval) {
-	    continue;
-	}
-
-	/* node is config and not already set */
-	if (obj_get_basetype(parm) == NCX_BT_EMPTY) {
-	    res = cli_parse_parm(valset, parm, NULL, SCRIPTMODE);
-	} else {
-	    res = get_parm(rpc, parm, valset, oldvalset);
-	}
-
-	if (res != NO_ERR) {
-	    log_stdout("\nError: get parm '%s' failed (%s)",
-		       obj_get_name(parm),
-		       get_error_string(res));
-	    return res;
-	}
+    res = get_case(rpc, cas, valset, oldvalset);
+    switch (res) {
+    case NO_ERR:
+	break;
+    case ERR_NCX_SKIPPED:
+	res = NO_ERR;
+	break;
+    case ERR_NCX_CANCELED:
+	break;
+    default:
+	;
     }
 
-    return NO_ERR;
+    get_optional = saveopt;
+
+    return res;
 
 } /* get_choice */
+
+
+/********************************************************************
+* FUNCTION fill_value
+* 
+* Malloc and fill the specified value
+* Use the last value for the default (may be NULL)
+* This function will block on readline for user input
+*
+* INPUTS:
+*   rpc == RPC method that is being called
+*   parm == object for value to fill
+*   oldval == last value (or NULL if none)
+*   res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced value, filled in or NULL if some error
+*********************************************************************/
+static val_value_t *
+    fill_value (const obj_template_t *rpc,
+		const obj_template_t *parm,
+		val_value_t *oldval,
+		status_t  *res)
+{
+    val_value_t           *dummy, *newval;
+    boolean                saveopt;
+
+    switch (parm->objtype) {
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+	break;
+    default:
+	*res = SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+
+    if (!obj_is_config(parm) || obj_is_abstract(parm)) {
+	*res = ERR_NCX_NO_ACCESS_MAX;
+	return NULL;
+    }
+
+    /* since the CLI and original NCX language were never designed
+     * to support top-level leafs, a dummy container must be
+     * created for the new and old leaf or leaf-list entries
+     */
+    if (!parm->parent) {
+	*res = SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+
+    dummy = val_new_value();
+    if (!dummy) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+    val_init_from_template(dummy, parm->parent);
+
+    cli_fn = obj_get_name(rpc);
+
+    if (oldval) {
+	oldval = oldval->parent;
+    }
+
+    newval = NULL;
+    saveopt = get_optional;
+    get_optional = TRUE;
+    *res = get_parm(rpc, parm, dummy, oldval);
+    get_optional = saveopt;
+
+    switch (*res) {
+    case NO_ERR:
+	break;
+    case ERR_NCX_SKIPPED:
+	*res = NO_ERR;
+	break;
+    case ERR_NCX_CANCELED:
+    default:
+	break;
+    }
+
+    if (*res == NO_ERR) {
+	newval = val_get_first_child(dummy);
+	if (newval) {
+	    val_remove_child(newval);
+	}
+    }
+    cli_fn = NULL;
+    val_free_value(dummy);
+    return newval;
+
+} /* fill_value */
 
 
 /********************************************************************
@@ -1727,155 +1981,205 @@ static status_t
 {
     const obj_template_t  *parm;
     val_value_t           *val, *oldval;
-    status_t               res, retres;
-    boolean                done, first;
+    status_t               res;
+    boolean                done;
     uint32                 yesnocode;
 
     cli_fn = obj_get_name(rpc);
-    retres = NO_ERR;
+    res = NO_ERR;
 
     for (parm = obj_first_child(valset->obj);
-         parm != NULL;
+         parm != NULL && res==NO_ERR;
          parm = obj_next_child(parm)) {
 
-	if (!obj_is_config(parm)) {
+	if (!obj_is_config(parm) || obj_is_abstract(parm)) {
+	    continue;
+	}
+
+	if (!get_optional && !obj_is_mandatory(parm)) {
 	    continue;
 	}
 
         switch (parm->objtype) {
         case OBJ_TYP_CHOICE:
-	    if (val_choice_is_set(valset, parm)) {
-		continue;
-	    }
-
-	    if (get_optional || obj_is_mandatory(parm)) {
+	    if (!val_choice_is_set(valset, parm)) {
 		res = get_choice(rpc, parm, valset, oldvalset);
-		if (res != NO_ERR) {
-		    retres = res;
+		switch (res) {
+		case NO_ERR:
+		    break;
+		case ERR_NCX_SKIPPED:
+		    res = NO_ERR;
+		    break;
+		case ERR_NCX_CANCELED:
+		    break;
+		default:
+		    ;
 		}
 	    }
             break;
         case OBJ_TYP_LEAF:
-	case OBJ_TYP_LEAF_LIST:
-	    /* if the parm is not already set and is not read-only
-	     * then try to get a value from the user at the CLI
-	     */
-	    done = FALSE;
-	    while (!done) {
-		val = val_find_child(valset, 
-				     obj_get_mod_name(parm),
-				     obj_get_name(parm));
-
-		if (!val || parm->objtype==OBJ_TYP_LEAF_LIST) {
-		    res = get_parm(rpc, parm, valset, oldvalset);
-		    if (res != NO_ERR) {
-			log_stdout("\nWarning: Parameter %s has errors (%s)",
-				   obj_get_name(parm), 
-				   get_error_string(res));
-			retres = res;
-		    }
+	    val = val_find_child(valset, 
+				 obj_get_mod_name(parm),
+				 obj_get_name(parm));
+	    if (!val) {
+		res = get_parm(rpc, parm, valset, oldvalset);
+		switch (res) {
+		case NO_ERR:
+		    break;
+		case ERR_NCX_SKIPPED:
+		    res = NO_ERR;
+		    break;
+		case ERR_NCX_CANCELED:
+		    break;
+		default:
+		    ;
 		}
-		if (parm->objtype == OBJ_TYP_LEAF) {
-		    done = TRUE;
-		} else {
+	    }
+	    break;
+	case OBJ_TYP_LEAF_LIST:
+	    done = FALSE;
+	    while (!done && res == NO_ERR) {
+		res = get_parm(rpc, parm, valset, oldvalset);
+		switch (res) {
+		case NO_ERR:
 		    /* prompt for more leaf-list objects */
 		    res = get_yesno(YANGCLI_PR_LLIST,
 				    YESNO_NO, &yesnocode);
-		    if (res != NO_ERR) {
-			cli_fn = NULL;
-			return res;
+		    if (res == NO_ERR) {
+			switch (yesnocode) {
+			case YESNO_CANCEL:
+			    res = ERR_NCX_CANCELED;
+			    break;
+			case YESNO_YES:
+			    break;
+			case YESNO_NO:
+			    done = TRUE;
+			    break;
+			default:
+			    res = SET_ERROR(ERR_INTERNAL_VAL);
+			}
 		    }
-		    switch (yesnocode) {
-		    case YESNO_CANCEL:
-			cli_fn = NULL;
-			return ERR_NCX_SKIPPED;
-		    case YESNO_YES:
-			break;
-		    case YESNO_NO:
-			done = TRUE;
-			break;
-		    default:
-			cli_fn = NULL;
-			return SET_ERROR(ERR_INTERNAL_VAL);
-		    }
+		    break;
+		case ERR_NCX_SKIPPED:
+		    res = NO_ERR;
+		    break;
+		case ERR_NCX_CANCELED:
+		    break;
+		default:
+		    ;
 		}
 	    }
 	    break;
 	case OBJ_TYP_CONTAINER:
 	case OBJ_TYP_NOTIF:
 	case OBJ_TYP_RPCIO:
+	    /* if the parm is not already set and is not read-only
+	     * then try to get a value from the user at the CLI
+	     */
+	    val = val_find_child(valset, 
+				 obj_get_mod_name(parm),
+				 obj_get_name(parm));
+	    if (val) {
+		break;
+	    }
+			
+	    if (oldvalset) {
+		oldval = val_find_child(oldvalset, 
+					obj_get_mod_name(parm),
+					obj_get_name(parm));
+	    } else {
+		oldval = NULL;
+	    }
+
+	    val = val_new_value();
+	    if (!val) {
+		res = ERR_INTERNAL_MEM;
+		log_error("\nError: malloc of new value failed");
+		break;
+	    } else {
+		val_init_from_template(val, parm);
+		val_add_child(val, valset);
+	    }
+
+	    /* let the user know about the new nest level */
+	    log_stdout("\nFilling %s %s:\n",
+		       obj_get_typestr(parm),
+		       obj_get_name(parm));
+	    
+	    /* recurse with the child nodes */
+	    res = fill_valset(rpc, val, oldval);
+
+	    switch (res) {
+	    case NO_ERR:
+		break;
+	    case ERR_NCX_SKIPPED:
+		res = NO_ERR;
+		break;
+	    case ERR_NCX_CANCELED:
+		break;
+	    default:
+		;
+	    }
+	    break;
 	case OBJ_TYP_LIST:
 	    done = FALSE;
-	    first = TRUE;
-	    while (!done) {
-		/* if the parm is not already set and is not read-only
-		 * then try to get a value from the user at the CLI
-		 */
-		if (get_optional || obj_is_mandatory(parm)) {
-		    if (oldvalset) {
-			oldval = val_find_child(oldvalset, 
-						obj_get_mod_name(parm),
-						obj_get_name(parm));
-		    } else {
-			oldval = NULL;
-		    }
-
-		    if (first) {
-			val = val_find_child(valset, 
-					     obj_get_mod_name(parm),
-					     obj_get_name(parm));
-		    } else {
-			val = NULL;
-			first = FALSE;
-		    }
-		    if (!val) {
-			val = val_new_value();
-			if (!val) {
-			    retres = ERR_INTERNAL_MEM;
-			    break;
-			} else {
-			    val_init_from_template(val, parm);
-			    val_add_child(val, valset);
-			}
-		    }
-
-		    res = fill_valset(rpc, val, oldval);
+	    while (!done && res == NO_ERR) {
+		val = val_new_value();
+		if (!val) {
+		    res = ERR_INTERNAL_MEM;
+		    log_error("\nError: malloc of new value failed");
+		    continue;
+		} else {
+		    val_init_from_template(val, parm);
+		    val_add_child(val, valset);
 		}
 
-		if (parm->objtype == OBJ_TYP_LIST) {
-		    /* prompt for more leaf-list objects */
+		/* let the user know about the new nest level */
+		log_stdout("\nFilling list %s:\n",
+			   obj_get_name(parm));
+
+		/* recurse with the child node -- NO OLD VALUE
+		 * TBD: get keys, then look up old matching entry
+		 */
+		res = fill_valset(rpc, val, NULL);
+
+		switch (res) {
+		case NO_ERR:
+		    /* prompt for more list entries */
 		    res = get_yesno(YANGCLI_PR_LIST,
 				    YESNO_NO, &yesnocode);
-		    if (res != NO_ERR) {
-			cli_fn = NULL;
-			return res;
+		    if (res == NO_ERR) {
+			switch (yesnocode) {
+			case YESNO_CANCEL:
+			    res = ERR_NCX_CANCELED;
+			    break;
+			case YESNO_YES:
+			    break;
+			case YESNO_NO:
+			    done = TRUE;
+			    break;
+			default:
+			    res = SET_ERROR(ERR_INTERNAL_VAL);
+			}
 		    }
-		    switch (yesnocode) {
-		    case YESNO_CANCEL:
-			cli_fn = NULL;
-			return ERR_NCX_SKIPPED;
-		    case YESNO_YES:
-			break;
-		    case YESNO_NO:
-			done = TRUE;
-			break;
-		    default:
-			cli_fn = NULL;
-			return SET_ERROR(ERR_INTERNAL_VAL);
-		    }
-		} else {
-		    done = TRUE;
+		    break;
+		case ERR_NCX_SKIPPED:
+		    res = NO_ERR;
+		    break;
+		case ERR_NCX_CANCELED:
+		    break;
+		default:
+		    ;
 		}
 	    }
             break;
-	case OBJ_TYP_RPC:
         default: 
-            retres = SET_ERROR(ERR_INTERNAL_VAL);
+            res = SET_ERROR(ERR_INTERNAL_VAL);
         }
     }
 
     cli_fn = NULL;
-    return retres;
+    return res;
 
 } /* fill_valset */
 
@@ -1978,6 +2282,7 @@ static void
     const xmlChar *agent, *username, *password;
     val_value_t   *val;
     status_t       res;
+    uint16         port;
 
     if (mysid) {
 	if (mgr_ses_get_scb(mysid)) {
@@ -2014,15 +2319,21 @@ static void
 	return;
     }
 
+    port = 0;
+    val = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_PORT);
+    if (val && val->res == NO_ERR) {
+	port = VAL_UINT16(val);
+    }
+
     log_info("\nyangcli: Starting NETCONF session for %s on %s",
 	     username, agent);
 
     state = MGR_IO_ST_CONNECT;
 
-    /* this fnction call will cause us to block while the
+    /* this function call will cause us to block while the
      * protocol layer connect messages are processed
      */
-    res = mgr_ses_new_session(username, password, agent, &mysid);
+    res = mgr_ses_new_session(username, password, agent, port, &mysid);
     if (res == NO_ERR) {
 	state = MGR_IO_ST_CONN_START;
 	log_debug("\nyangcli: Start session %d OK", mysid);
@@ -2061,8 +2372,8 @@ static void
     const obj_template_t  *obj;
     val_value_t           *valset;
     status_t               res;
-    boolean       s1, s2, s3;
-    ncx_node_t    dtyp;
+    boolean                s1, s2, s3;
+    ncx_node_t             dtyp;
 
     /* retrieve the 'connect' RPC template, if not done already */
     if (!rpc) {
@@ -2126,9 +2437,13 @@ static void
     }
 
     /* if anything entered, try to get any missing params in ps */
+    res = NO_ERR;
     if (valset) {
 	if (interactive_mode()) {
-	    (void)fill_valset(rpc, valset, connect_valset);
+	    res = fill_valset(rpc, valset, connect_valset);
+	    if (res == ERR_NCX_SKIPPED) {
+		res = NO_ERR;
+	    }
 	}
 	if (connect_valset) {
 	    val_free_value(connect_valset);
@@ -2141,28 +2456,162 @@ static void
 	    (void)fill_valset(rpc, connect_valset, NULL);
 	}
     }
-	
-    /* hack: make sure the 3 required parms are set instead of
-     * full validation of the parmset
-     */
-    s1 = val_find_child(connect_valset, YANGCLI_MOD, 
-			YANGCLI_AGENT) ? TRUE : FALSE;
-    s2 = val_find_child(connect_valset, YANGCLI_MOD,
-			YANGCLI_USER) ? TRUE : FALSE;
-    s3 = (val_find_child(connect_valset, 
-			 YANGCLI_MOD, YANGCLI_PASSWORD) ||
-	  val_find_child(connect_valset, 
-			 YANGCLI_MOD, YANGCLI_KEY)) ? TRUE : FALSE;
 
-    /* check if all params present yet */
-    if (s1 && s2 && s3) {
-	create_session();
-    } else {
-	log_write("\nError: Connect failed due to missing parameters");
+    if (res != NO_ERR) {
+	log_write("\nError: Connect failed (%s)", get_error_string(res));
 	state = MGR_IO_ST_IDLE;
+    } else {
+	/* hack: make sure the 3 required parms are set instead of
+	 * full validation of the parmset
+	 */
+
+	s1 = val_find_child(connect_valset, YANGCLI_MOD, 
+			    YANGCLI_AGENT) ? TRUE : FALSE;
+	s2 = val_find_child(connect_valset, YANGCLI_MOD,
+			    YANGCLI_USER) ? TRUE : FALSE;
+	s3 = (val_find_child(connect_valset, 
+			     YANGCLI_MOD, YANGCLI_PASSWORD) ||
+	      val_find_child(connect_valset, 
+			     YANGCLI_MOD, YANGCLI_KEY)) ? TRUE : FALSE;
+
+	/* check if all params present yet */
+	if (s1 && s2 && s3) {
+	    create_session();
+	} else {
+	    log_write("\nError: Connect failed due to missing parameters");
+	    state = MGR_IO_ST_IDLE;
+	}
     }
 
 }  /* do_connect */
+
+
+/********************************************************************
+* FUNCTION send_copy_config_to_agent
+* 
+* Send a <copy-config> operation to the agent to support
+* the save operation
+*
+* INPUTS:
+*
+* OUTPUTS:
+*    state may be changed or other action taken
+*    config_content is consumed -- freed or transfered
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    send_copy_config_to_agent (void)
+{
+    const obj_template_t  *rpc, *input, *child;
+    mgr_rpc_req_t         *req;
+    val_value_t           *reqdata, *parm, *target, *source;
+    ses_cb_t              *scb;
+    status_t               res;
+    ncx_node_t             dtyp;
+
+    req = NULL;
+    reqdata = NULL;
+    res = NO_ERR;
+
+    /* get the <copy-config> template */
+    dtyp = NCX_NT_OBJ;
+    rpc = (const obj_template_t *)
+	def_reg_find_moddef(NC_MODULE,
+			    NCX_EL_COPY_CONFIG,
+			    &dtyp);
+    if (!rpc) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    /* get the 'input' section container */
+    input = obj_find_child(rpc, NULL, YANG_K_INPUT);
+    if (!input) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    /* construct a method + parameter tree */
+    reqdata = xml_val_new_struct(obj_get_name(rpc), 
+				 obj_get_nsid(rpc));
+    if (!reqdata) {
+	log_error("\nError allocating a new RPC request");
+	return ERR_INTERNAL_MEM;
+    }
+
+    /* set the edit-config/input/target node to the default_target */
+    child = obj_find_child(input, NC_MODULE, NCX_EL_TARGET);
+    parm = val_new_value();
+    if (!parm) {
+	val_free_value(reqdata);
+	return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(parm, child);
+    val_add_child(parm, reqdata);
+
+    target = xml_val_new_flag((const xmlChar *)"startup",
+			      obj_get_nsid(child));
+    if (!target) {
+	val_free_value(reqdata);
+	return ERR_INTERNAL_MEM;
+    }
+    val_add_child(target, parm);
+
+    /* set the edit-config/input/default-operation node to 'none' */
+    child = obj_find_child(input, NC_MODULE, NCX_EL_SOURCE);
+    parm = val_new_value();
+    if (!parm) {
+	val_free_value(reqdata);
+	return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(parm, child);
+    val_add_child(parm, reqdata);
+
+    source = xml_val_new_flag((const xmlChar *)"running",
+			      obj_get_nsid(child));
+    if (!source) {
+	val_free_value(reqdata);
+	return ERR_INTERNAL_MEM;
+    }
+    val_add_child(source, parm);
+
+    /* allocate an RPC request and send it */
+    scb = mgr_ses_get_scb(mysid);
+    if (!scb) {
+	res = SET_ERROR(ERR_INTERNAL_PTR);
+    } else {
+	req = mgr_rpc_new_request(scb);
+	if (!req) {
+	    res = ERR_INTERNAL_MEM;
+	    log_error("\nError allocating a new RPC request");
+	} else {
+	    req->data = reqdata;
+	}
+    }
+	
+    if (res == NO_ERR) {
+	if (LOGDEBUG2) {
+	    log_debug2("\nabout to send RPC request with reqdata:");
+	    val_dump_value(reqdata, NCX_DEF_INDENT);
+	}
+
+	/* the request will be stored if this returns NO_ERR */
+	res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
+    }
+
+    if (res != NO_ERR) {
+	if (req) {
+	    mgr_rpc_free_request(req);
+	} else if (reqdata) {
+	    val_free_value(reqdata);
+	}
+    } else {
+	state = MGR_IO_ST_CONN_RPYWAIT;
+    }
+
+    return res;
+
+} /* send_copy_config_to_agent */
 
 
 /********************************************************************
@@ -2181,6 +2630,7 @@ static void
     const ses_cb_t   *scb;
     const mgr_scb_t  *mscb;
     xmlChar          *line;
+    status_t          res;
 
     /* get the session info */
     scb = mgr_ses_get_scb(mysid);
@@ -2214,16 +2664,15 @@ static void
 	break;
     case NCX_AGT_TARG_RUNNING:
 	if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-	    line = xml_strdup((const xmlChar *)
-			      "copy-config target=startup source=running");
-	    if (line) {
-		conn_command(line);
-		m__free(line);
+	    res = send_copy_config_to_agent();
+	    if (res != NO_ERR) {
+		log_stdout("\nError: send copy-config failed (%s)",
+			   get_error_string(res));
 	    }
 	} else {
 	    log_stdout("\nWarning: No distinct save operation needed "
-		   "for this agent");
-	}	    
+		       "for this agent");
+	}
 	break;
     case NCX_AGT_TARG_LOCAL:
 	log_stdout("Error: Local URL target not supported");
@@ -2547,9 +2996,9 @@ static void
 	}
     } else {
 	if (imode) {
-	    log_stdout("\nVariable %s not found", name);
+	    log_stdout("\nVariable '%s' not found", name);
 	} else {
-	    log_write("\nVariable %s not found", name);
+	    log_write("\nVariable '%s' not found", name);
 	}
     }
 
@@ -3419,35 +3868,46 @@ static void
 	get_optional = TRUE;
     }
 
-    newparm = val_new_value();
-    if (!newparm) {
-	log_error("\nError: malloc failure");
-    } else {
-	val_init_from_template(newparm, targobj);
-
-	res = fill_valset(rpc, newparm, curparm);
-	if (res == NO_ERR) {
-	    if (result_name) {
-		/* save the filled in value */
-		res = var_set_move(result_name, xml_strlen(result_name),
-				   result_isglobal, newparm);
-		if (res != NO_ERR) {
-		    val_free_value(newparm);
-
-		    log_error("\nError: set result for '%s' failed (%s)",
-			      result_name, get_error_string(res));
-		}
-		newparm = NULL;
-
-		/* clear the result flag */
-		m__free(result_name);
-		result_name = NULL;
-	    }
+    switch (targobj->objtype) {
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+	newparm = fill_value(rpc, targobj, curparm, &res);
+	break;
+    default:
+	newparm = val_new_value();
+	if (!newparm) {
+	    log_error("\nError: malloc failure");
+	    res = ERR_INTERNAL_MEM;
 	} else {
-	    if (result_name) {
-		m__free(result_name);
-		result_name = NULL;
+	    val_init_from_template(newparm, targobj);
+	    res = fill_valset(rpc, newparm, curparm);
+	    if (res == ERR_NCX_SKIPPED) {
+		res = NO_ERR;
 	    }
+	}
+    }
+
+    if (res == NO_ERR) {
+	if (result_name) {
+	    /* save the filled in value */
+	    res = var_set_move(result_name, xml_strlen(result_name),
+			       result_isglobal, newparm);
+	    if (res != NO_ERR) {
+		val_free_value(newparm);
+
+		log_error("\nError: set result for '%s' failed (%s)",
+			  result_name, get_error_string(res));
+	    }
+	    newparm = NULL;
+
+	    /* clear the result flag */
+	    m__free(result_name);
+	    result_name = NULL;
+	}
+    } else {
+	if (result_name) {
+	    m__free(result_name);
+	    result_name = NULL;
 	}
     }
 
@@ -3464,11 +3924,12 @@ static void
 }  /* do_fill */
 
 
-
 /********************************************************************
 * FUNCTION add_config_from_content_node
 * 
 * Add the config node content for the edit-config operation
+* Build the <config> nodfe top-down, by recursing bottom-up
+* from the node to be edited.
 *
 * INPUTS:
 *   rpc == RPC method in progress
@@ -3496,7 +3957,7 @@ static status_t
 
     const obj_template_t  *parent;
     const obj_key_t       *curkey;
-    val_value_t           *newnode, *valtarget, *keyval, *lastkey;
+    val_value_t           *newnode, *keyval, *lastkey;
     status_t               res;
 
     /* get to the root of the object chain */
@@ -3515,29 +3976,34 @@ static status_t
     /* set the current target, working down the stack
      * on the way back from the initial dive
      */
-    if (*curtop) {
-	valtarget = *curtop;
-    } else {
+    if (!*curtop) {
 	/* first time through to this point */
-	valtarget = config;
 	*curtop = config;
     }
 
+    /* add content based on the current node type */
     switch (curobj->objtype) {
     case OBJ_TYP_LEAF:
+	if (curobj != config_content->obj) {
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	val_add_child(config_content, *curtop);
+	*curtop = config_content;
+	break;
     case OBJ_TYP_LEAF_LIST:
 	if (curobj != config_content->obj) {
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
-	val_add_child(config_content, valtarget);
+	val_add_child(config_content, *curtop);
 	*curtop = config_content;
+
 	break;
     case OBJ_TYP_LIST:
 	/* get all the key nodes for the current object,
 	 * if they do not already exist
 	 */
 	if (curobj == config_content->obj) {
-	    val_add_child(config_content, valtarget);
+	    val_add_child(config_content, *curtop);
 	    *curtop = config_content;
 	} else {
 	    newnode = val_new_value();
@@ -3545,7 +4011,7 @@ static status_t
 		return ERR_INTERNAL_MEM;
 	    }
 	    val_init_from_template(newnode, curobj);
-	    val_add_child(newnode, valtarget);
+	    val_add_child(newnode, *curtop);
 	    *curtop = newnode;
 	}
 
@@ -3572,13 +4038,13 @@ static status_t
 	    }
 
 	    val_remove_child(keyval);
-	    val_insert_child(keyval, lastkey, valtarget);
+	    val_insert_child(keyval, lastkey, *curtop);
 	    lastkey = keyval;
 	}
 	break;
     case OBJ_TYP_CONTAINER:
 	if (curobj == config_content->obj) {
-	    val_add_child(config_content, valtarget);
+	    val_add_child(config_content, *curtop);
 	    *curtop = config_content;
 	} else {
 	    newnode = val_new_value();
@@ -3586,7 +4052,7 @@ static status_t
 		return ERR_INTERNAL_MEM;
 	    }
 	    val_init_from_template(newnode, curobj);
-	    val_add_child(newnode, valtarget);
+	    val_add_child(newnode, *curtop);
 	    *curtop = newnode;
 	}
 	break;
@@ -3610,6 +4076,10 @@ static status_t
 * FUNCTION send_edit_config_to_agent
 * 
 * Send an <edit-config> operation to the agent
+*
+* Fills out the <config> node based on the config_target node
+* Any missing key nodes will be collected (via CLI prompt)
+* along the way.
 *
 * INPUTS:
 *   config_content == the node associated with the target
@@ -3829,19 +4299,8 @@ static val_value_t *
 	    fromstr = VAL_STR(parm);
 	} else {
 	    fromstr = NULL;
-	    parm = val_find_child(valset, YANGCLI_MOD, 
-				  YANGCLI_FROM_CLI);
-	    if (parm) {
-		iscli = TRUE;
-	    } else {
-		log_error("\nError: No 'from' choice found");
-		res = ERR_NCX_DEF_NOT_FOUND;
-	    }
+	    iscli = TRUE;
 	}
-    }
-
-    if (res != NO_ERR) {
-	return NULL;
     }
 
     if (iscli) {
@@ -3868,6 +4327,7 @@ static val_value_t *
 	    return NULL;
 	}	
 
+	curparm = NULL;
 	parm = val_find_child(valset, YANGCLI_MOD, 
 			      YANGCLI_CURRENT_VALUE);
 	if (parm && parm->res == NO_ERR) {
@@ -3882,23 +4342,46 @@ static val_value_t *
 	    }
 	}
 
-	newparm = val_new_value();
-	if (!newparm) {
-	    log_error("\nError: malloc failure");
+	switch (targobj->objtype) {
+	case OBJ_TYP_LEAF:
+	case OBJ_TYP_LEAF_LIST:
+	    newparm = fill_value(rpc, targobj, curparm, &res);
+
 	    get_optional = saveopt;
-	    return NULL;
-	}
-	val_init_from_template(newparm, targobj);
 
-	res = fill_valset(rpc, newparm, NULL);
+	    if (res != NO_ERR) {
+		if (newparm) {
+		    val_free_value(newparm);
+		}
+		return NULL;
+	    } else {
+		return newparm;
+	    }
+	    /*NOTREACHED*/
+	case OBJ_TYP_CHOICE:
+	    
+	default:
+	    newparm = val_new_value();
+	    if (!newparm) {
+		log_error("\nError: malloc failure");
+		get_optional = saveopt;
+		return NULL;
+	    }
+	    val_init_from_template(newparm, targobj);
 
-	get_optional = saveopt;
+	    res = fill_valset(rpc, newparm, curparm);
+	    if (res == ERR_NCX_SKIPPED) {
+		res = NO_ERR;
+	    }
 
-	if (res != NO_ERR) {
-	    val_free_value(newparm);
-	    return NULL;
-	} else {
-	    return newparm;
+	    get_optional = saveopt;
+
+	    if (res != NO_ERR) {
+		val_free_value(newparm);
+		return NULL;
+	    } else {
+		return newparm;
+	    }
 	}
     } else {
 	/* from global or local variable */
@@ -4214,6 +4697,8 @@ static void
 			    NCX_EL_TARGET);
     if (!target) {
 	log_error("\nError: target parameter is missing");
+	val_free_value(valset);
+	return;
     }
 
     res = xpath_find_schema_target_int(VAL_STR(target), 
@@ -4223,15 +4708,24 @@ static void
 		  VAL_STR(target));
 	val_free_value(valset);
 	return;
-    }	
+    }
 
-    /* create a content node to delete */
-    content = val_new_value();
+    /* add content only if this is a leaf-list */
+    if (targobj->objtype == OBJ_TYP_LEAF_LIST) {
+	log_stdout("\nSpecify the leaf-list value to delete:");
+	content = fill_value(rpc, targobj, NULL, &res);
+    } else {
+	/* create an empty content node to delete */
+	content = val_new_value();
+	if (content) {
+	    val_init_from_template(content, targobj);
+	}
+    }
+
     if (!content) {
 	val_free_value(valset);
 	return;
     }
-    val_init_from_template(content, targobj);
 
     /* add nc:operation attribute to the value node */
     res = add_operation_attr(content, OP_EDITOP_DELETE);
@@ -4430,23 +4924,37 @@ static void
 			  mgr_rpc_rpy_t *rpy)
 {
     val_value_t  *val;
+    mgr_scb_t    *mgrcb;
     status_t      res;
     boolean       anyout;
+    uint32        usesid;
+
+    mgrcb = scb->mgrcb;
+    if (mgrcb) {
+	usesid = mgrcb->agtsid;
+    } else {
+	usesid = 0;
+    }
 
     if (rpy && rpy->reply) {
-
 	if (val_find_child(rpy->reply, NC_MODULE,
 			   NCX_EL_RPC_ERROR)) {
-	    log_error("\nRPC Error Reply %s for session %d:\n",
-		      rpy->msg_id, scb->sid);
+	    log_error("\nRPC Error Reply %s for session %u:\n",
+		      rpy->msg_id, usesid);
 	    val_dump_value(rpy->reply, 0);
 	    log_error("\n");
 	    anyout = TRUE;
-	} else if (LOGDEBUG) {
-	    log_debug("\nRPC Reply %s for session %d:\n",
-		      rpy->msg_id, scb->sid);
-	    val_dump_value(rpy->reply, 0);
-	    log_debug("\n");
+	} else if (val_find_child(rpy->reply, NC_MODULE, NCX_EL_OK)) {
+	    log_info("\nRPC OK Reply %s for session %u:\n",
+		     rpy->msg_id, usesid);
+	    anyout = TRUE;
+	} else if (LOGINFO) {
+	    log_info("\nRPC Data Reply %s for session %u:\n",
+		     rpy->msg_id, usesid);
+	    if (LOGDEBUG) {
+		val_dump_value(rpy->reply, 0);
+		log_info("\n");
+	    }
 	    anyout = TRUE;
 	} else {
 	    anyout = FALSE;
@@ -4472,8 +4980,8 @@ static void
 	    /* clear the result flag */
 	    m__free(result_name);
 	    result_name = NULL;
-	}  else if (!anyout) {
-	    log_info("\nOK\n");
+	}  else if (!anyout && interactive_mode()) {
+	    log_stdout("\nOK\n");
 	}
     } else {
 	log_error("\nError: yangcli: no reply parsed\n");
@@ -4610,6 +5118,9 @@ static void
 	if (res == NO_ERR) {
 	    if (interactive_mode()) {
 		res = fill_valset(rpc, valset, NULL);
+		if (res == ERR_NCX_SKIPPED) {
+		    res = NO_ERR;
+		}
 	    }
 	}
 
@@ -5244,6 +5755,8 @@ static mgr_io_state_t
 	default:
 	    break;
 	}
+    } else {
+	log_info("\nOK\n");
     }
 
     return state;

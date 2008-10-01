@@ -260,7 +260,6 @@ static status_t
     op_testop_t     testop;
     status_t        res;
 
-
     /* check if the source config database exists */
     res = agt_get_cfg_from_parm(NCX_EL_TARGET, msg, methnode, &target);
     if (res != NO_ERR) {
@@ -323,11 +322,22 @@ static status_t
 	 */
 	res = agt_val_validate_write(scb, msg, target, val, defop);
 
+	/* for continue-on-error, ignore the validate return value
+	 * in case there are multiple parmsets and not all of them
+	 * had errors.  Force a NO_ERR return.
+	 */
+	if (!NEED_EXIT) {
+	    if (errop == OP_ERROP_CONTINUE) {
+		res = NO_ERR;
+	    }
+	}
+
 	if (target->cfg_id == NCX_CFGID_RUNNING && res==NO_ERR) {
-	    res = agt_val_split_root_check(scb, &msg->mhdr, 
-					   val, target->root);
+	    res = agt_val_split_root_check(scb, msg, val, 
+					   target->root, defop);
 	}
     } else if (!val) {
+	/* this is reported in agt_val_parse phase */
 	res = ERR_NCX_DATA_MISSING;
     } else {
 	res = val->res;
@@ -342,16 +352,6 @@ static status_t
     /* save the real result; this field is not used by the RPC layer */
     msg->rpc_status = res;
 
-    /* for continue-on-error, ignore the validate return value
-     * in case there are multiple parmsets and not all of them
-     * had errors.  Force a NO_ERR return.
-     */
-    if (!NEED_EXIT) {
-	if (errop == OP_ERROP_CONTINUE) {
-	    res = NO_ERR;
-	}
-    }
-    
     return res;
 
 } /* edit_config_validate */
@@ -375,7 +375,6 @@ static status_t
     cfg_template_t *target;
     val_value_t    *val;
     op_editop_t     defop;
-    op_errop_t      errop;
     op_testop_t     testop;
     status_t        res;
 
@@ -387,14 +386,12 @@ static status_t
 	return NO_ERR;
     }
     defop = (op_defop_t)msg->rpc_user1;
-    errop = (op_errop_t)msg->rpc_err_option;
 
     /* get the config to write */
     res = agt_get_cfg_from_parm(NCX_EL_TARGET, msg, methnode, &target);
     if (res != NO_ERR) {
 	return res;  /* error already recorded */
     } 
-
 
     /* get pointer to the config parameter */
     val = val_find_child(&msg->rpc_input, NC_MODULE,
@@ -405,7 +402,7 @@ static status_t
     }
 
     /* apply the <config> into the target config */
-    res = agt_val_apply_write(scb, msg, target, val, defop, errop);
+    res = agt_val_apply_write(scb, msg, target, val, defop);
     return res;
 
 } /* edit_config_invoke */
@@ -1062,7 +1059,7 @@ static status_t
     /* load the <config> into the target config */
     if (res == NO_ERR) {
 	res = agt_val_apply_write(scb, msg, target, val, 
-				  OP_EDITOP_LOAD, OP_ERROP_CONTINUE);
+				  OP_EDITOP_LOAD);
     }
 
     return res;

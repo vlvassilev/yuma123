@@ -738,15 +738,7 @@ static status_t
  * order for the list nodes.
  *
  * Also, leaf-list order is not changed, regardless of
- * the order of
- *
- * If a child node is found to be ncx:root, then it will
- * NOT be reordered.  A separate call is needed with the
- * root as the parameter to reorder the root contents.
- *
- * A root container as a child will be treated as an anyxml,
- * and just the child node itself will be reordered.  All its
- * children will be unchanged
+ * the order. The default insert order is 'last'.
  *
  * INPUTS:
  *   val == value node to change to canonical order
@@ -761,8 +753,10 @@ void
 {
     const obj_template_t  *chobj;
     const obj_key_t       *key;
+    val_value_t           *chval, *rootval, *nextrootval;
     dlq_hdr_t              tempQ;
-    val_value_t           *chval;
+    uint32                 count;
+
 
 #ifdef DEBUG
     if (!val || !val->obj) {
@@ -770,6 +764,11 @@ void
 	return;
     }
 #endif
+
+    if (LOGDEBUG3) {
+	log_debug3("\nval_canonical start '%s'", val->name);
+	val_dump_value(val, 0);
+    }
 
     dlq_createSQue(&tempQ);
 
@@ -801,6 +800,48 @@ void
 	dlq_block_enque(&tempQ, &val->v.childQ);
 	/* fall through to do the rest of the child nodes */
     case OBJ_TYP_CONTAINER:
+	if (obj_is_root(val->obj)) {
+	    for (rootval = val_get_first_child(val);
+		 rootval != NULL;
+		 rootval = nextrootval) {
+
+		count = 0;
+		chobj = rootval->obj;
+		chval = rootval;
+
+		while (chval) {
+		    if (chval != rootval) {
+			val_remove_child(chval);
+			dlq_enque(chval, &tempQ);
+			count++;
+		    }
+
+		    switch (chval->obj->objtype) {
+		    case OBJ_TYP_LEAF:
+		    case OBJ_TYP_LEAF_LIST:
+			break;
+		    case OBJ_TYP_CONTAINER:
+		    case OBJ_TYP_LIST:
+			val_set_canonical_order(chval);
+			break;
+		    default:
+			;
+		    }
+
+		    chval = val_find_next_child(val,
+						obj_get_mod_name(chval->obj),
+						chval->name,
+						rootval);
+		}
+
+		nextrootval = val_get_next_child(rootval);
+		if (count) {
+		    dlq_block_insertAfter(&tempQ, rootval);
+		}
+	    }
+	    break;
+	}
+	/* else fall through to normal container case */
     case OBJ_TYP_RPCIO:
     case OBJ_TYP_NOTIF:
 	for (chobj = obj_first_child_deep(val->obj);
@@ -838,6 +879,12 @@ void
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (LOGDEBUG3) {
+	log_debug3("\nval_canonical end '%s'", val->name);
+	log_debug3("\n   tempQ count is %u", dlq_count(&tempQ));
+	val_dump_value(val, 0);
     }
 
 }  /* val_set_canonical_order */

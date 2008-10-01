@@ -1076,9 +1076,8 @@ status_t
 	    /* check the delete against the parent edit-op */
 	    switch (pop) {
 	    case OP_EDITOP_NONE:
-		/* make sure the create edit-op is in a correct place */
-		res = (val_delete_allowed(curnode)) ?
-		    NO_ERR : ERR_NCX_OPERATION_FAILED;
+		res = (val_delete_allowed(curnode))
+		    ? NO_ERR : ERR_NCX_BAD_ATTRIBUTE;
 		break;
 	    case OP_EDITOP_MERGE:
 		/* delete within merge or ok */

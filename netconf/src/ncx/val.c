@@ -590,6 +590,7 @@ static void
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
 	while (!dlq_empty(&val->v.childQ)) {
 	    cur = (val_value_t *)dlq_deque(&val->v.childQ);
 	    val_free_value(cur);
@@ -733,7 +734,7 @@ static int32
 		 const val_value_t *val2)
 {
     const val_index_t *c1, *c2;
-    int32              cmp, ret;
+    int32              cmp;
 
     /* only lists have index chains */
     if (val1->obj->objtype != OBJ_TYP_LIST) {
@@ -763,11 +764,11 @@ static int32
 	    return 1;
 	}
 
-	/* check the node if the name then value matches */
-	ret = xml_strcmp(c1->val->name, c2->val->name);
-	if (ret) {
-	    return ret;
+	/* check the node if the object then value matches */
+	if (c1->val->obj != c2->val->obj) {
+	    return 1;  
 	} else {
+	    /* same name in the same namespace */
 	    cmp = val_compare(c1->val, c2->val);
 	    if (cmp) {
 		return cmp;
@@ -2372,11 +2373,6 @@ void
     }
 #endif
 
-    /* do not print index nodes */
-    if (val->index) {
-	return;
-    }
-
     /* indent and print the val name */
     ncx_printf_indent(startindent);
     if (val->btyp == NCX_BT_EXTERN) {
@@ -2602,11 +2598,6 @@ void
 	return;
     }
 #endif
-
-    /* do not print index nodes */
-    if (val->index) {
-	return;
-    }
 
     /* indent and print the val name */
     ncx_stdout_indent(startindent);
@@ -3200,7 +3191,14 @@ boolean
 
     btyp = dest->btyp;
     iqual = typ_get_iqualval_def(dest->typdef);
-    mergetyp = typ_get_mergetype(dest->typdef);
+
+    if (obj_is_system_ordered(dest->obj)) {
+	mergetyp = NCX_MERGE_LAST;
+    } else {
+	mergetyp = typ_get_mergetype(dest->typdef);
+	/***/
+    }
+
     dupsok = val_duplicates_allowed(dest);
 
     /* check if the type allows multiple instances,
@@ -3214,9 +3212,6 @@ boolean
 	/* check if parent param is valid */
 	parent = dest->parent;
 
-	/* check if entry already exists */
-
-
 
 	/* need to add the additional value to the parent;
 	 * do not free the source that is about to be inserted 
@@ -3224,9 +3219,12 @@ boolean
 
 	/* check if duplicate, and not allowed */
 	if (dupsok) {
+
+	    first = val_first_child_match(parent, dest);
+
 	    switch (mergetyp) {
 	    case NCX_MERGE_FIRST:
-		first = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
+
 		if (first) {
 		    src->parent = parent;
 		    dlq_insertAhead(src, first);
@@ -3243,7 +3241,8 @@ boolean
 	    }
 	    return FALSE;
 	} else {
-
+	    /* check if entry already exists */
+	    /***/
 	}
 	
 	return TRUE;
@@ -3294,6 +3293,8 @@ boolean
 			   typ_get_crangeQ(dest->typdef));
 	    break;
 	case NCX_BT_CHOICE:
+	    /***** WILL NOT HAPPEN *****/
+
 	    /* check if a different choice member is being set */
 	    first = (val_value_t *)dlq_firstEntry(&src->v.childQ);
 	    if (!first) {
@@ -3407,31 +3408,69 @@ void
 val_value_t *
     val_clone (const val_value_t *val)
 {
+    status_t res;
+
+    return val_clone_test(val, NULL, &res);
+
+}  /* val_clone */
+
+
+/********************************************************************
+* FUNCTION val_clone_test
+* 
+* Clone a specified val_value_t struct and sub-trees
+* Only clone the nodes that pass the test function callback
+*
+* INPUTS:
+*    val == value to clone
+*    testcb  == filter test callback function to use
+*               NULL means no filter
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == resturn status
+*
+* RETURNS:
+*   clone of val, or NULL if a malloc failure or entire node filtered
+*********************************************************************/
+val_value_t *
+    val_clone_test (const val_value_t *val,
+		    val_test_fn_t  testfn,
+		    status_t *res)
+{
     const val_value_t *ch;
     val_value_t       *copy, *copych;
-    status_t           res;
+    boolean            testres;
 
 #ifdef DEBUG
-    if (!val) {
+    if (!val || !res) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }
 #endif
 
+    if (testfn) {
+	testres = (*testfn)(val);
+	if (!testres) {
+	    *res = ERR_NCX_SKIPPED;
+	    return NULL;
+	}
+    }
+
     copy = val_new_value();
     if (!copy) {
+	*res = ERR_INTERNAL_MEM;
 	return NULL;
     }
 
     /* copy all the fields */
-    copy->btyp = val->btyp;
     copy->obj = val->obj;
     copy->typdef = val->typdef;
-    copy->nsid = val->nsid;
+
     if (val->dname) {
 	copy->dname = xml_strdup(val->dname);
 	if (!copy->dname) {
-	    SET_ERROR(ERR_INTERNAL_MEM);
+	    *res = ERR_INTERNAL_MEM;
 	    val_free_value(copy);
 	    return NULL;
 	}
@@ -3440,28 +3479,44 @@ val_value_t *
 	copy->dname = NULL;
 	copy->name = val->name;
     }
-    copy->editop = val->editop;
-    copy->res = val->res;
-    copy->flags = val->flags;
 
-    /**** THIS MAY NEED TO CHANGE !!! ****/
     copy->parent = val->parent;
-
+    copy->nsid = val->nsid;
+    copy->btyp = val->btyp;
+    copy->flags = val->flags;
+    copy->dataclass = val->dataclass;
     /* copy meta-data */
     for (ch = (const val_value_t *)dlq_firstEntry(&val->metaQ);
 	 ch != NULL;
 	 ch = (const val_value_t *)dlq_nextEntry(ch)) {
-	copych = val_clone(ch);
+	copych = val_clone_test(ch, testfn, res);
 	if (!copych) {
-	    SET_ERROR(ERR_INTERNAL_MEM);
-	    val_free_value(copy);
-	    return NULL;
+	    if (*res == ERR_NCX_SKIPPED) {
+		*res = NO_ERR;
+	    } else {
+		val_free_value(copy);
+		return NULL;
+	    }
+	} else {
+	    dlq_enque(copych, &copy->metaQ);
 	}
-	dlq_enque(copych, &copy->metaQ);
     }
 
-    /* copy the actual value or children for complex types */
-    res = NO_ERR;
+    copy->curparent = val->curparent;
+    copy->editop = val->editop;
+    copy->insertop = val->insertop;
+    copy->res = val->res;
+    copy->getcb = val->getcb;
+    /* DO NOT COPY copy->index = val->index; */
+    /* set copy->indexQ after cloning child nodes is done */
+    copy->untyp = val->untyp;
+    copy->unbtyp = val->unbtyp;
+    copy->casobj = val->casobj;
+
+    /* assume OK return for now */
+    *res = NO_ERR;
+
+    /* v_ union: copy the actual value or children for complex types */
     switch (val->btyp) {
     case NCX_BT_ENUM:
 	copy->v.enu.name = val->v.enu.name;
@@ -3481,15 +3536,15 @@ val_value_t *
     case NCX_BT_UINT64:
     case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
-	res = ncx_copy_num(&val->v.num, &copy->v.num, val->btyp);
+	*res = ncx_copy_num(&val->v.num, &copy->v.num, val->btyp);
 	break;
     case NCX_BT_STRING:	
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
-	res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
+	*res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
 	break;
     case NCX_BT_SLIST:
-	res = ncx_copy_list(&val->v.list, &copy->v.list);
+	*res = ncx_copy_list(&val->v.list, &copy->v.list);
 	break;
     case NCX_BT_ANY:
     case NCX_BT_LIST:
@@ -3497,11 +3552,13 @@ val_value_t *
     case NCX_BT_CHOICE:
 	val_init_complex(copy, val->btyp);
 	for (ch = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
-	     ch != NULL && res==NO_ERR;
+	     ch != NULL && *res==NO_ERR;
 	     ch = (const val_value_t *)dlq_nextEntry(ch)) {
-	    copych = val_clone(ch);
+	    copych = val_clone_test(ch, testfn, res);
 	    if (!copych) {
-		res = ERR_INTERNAL_MEM;
+		if (*res == ERR_NCX_SKIPPED) {
+		    *res = NO_ERR;
+		}
 	    } else {
 		copych->parent = copy;
 		dlq_enque(copych, &copy->v.childQ);
@@ -3512,7 +3569,7 @@ val_value_t *
 	if (val->v.fname) {
 	    copy->v.fname = xml_strdup(val->v.fname);
 	    if (!copy->v.fname) {
-		res = ERR_INTERNAL_MEM;
+		*res = ERR_INTERNAL_MEM;
 	    }
 	}
 	break;
@@ -3520,7 +3577,7 @@ val_value_t *
 	if (val->v.intbuff) {
 	    copy->v.intbuff = xml_strdup(val->v.intbuff);
 	    if (!copy->v.intbuff) {
-		res = ERR_INTERNAL_MEM;
+		*res = ERR_INTERNAL_MEM;
 	    }
 	}
 	break;
@@ -3530,19 +3587,43 @@ val_value_t *
     }
 
     /* reconstruct index records if needed */
-    if (res==NO_ERR && !dlq_empty(&val->indexQ)) {
-	res = val_gen_index_chain(val->obj, copy);
+    if (*res==NO_ERR && !dlq_empty(&val->indexQ)) {
+	*res = val_gen_index_chain(val->obj, copy);
     }
 
-    if (res != NO_ERR) {
-	SET_ERROR(res);
+    if (*res != NO_ERR) {
 	val_free_value(copy);
-	return NULL;
+	copy = NULL;
     }
 
     return copy;
 
-}  /* val_clone */
+}  /* val_clone_test */
+
+
+/********************************************************************
+* FUNCTION val_clone_config_data
+* 
+* Clone a specified val_value_t struct and sub-trees
+* Filter with the val_is_config_data callback function
+*
+* INPUTS:
+*    val == config data value to clone
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*   clone of val, or NULL if a malloc failure
+*********************************************************************/
+val_value_t *
+    val_clone_config_data (const val_value_t *val,
+			   status_t *res)
+{
+    return val_clone_test(val, val_is_config_data, res);
+
+}  /* val_clone_config_data */
 
 
 /********************************************************************
@@ -3787,23 +3868,20 @@ void
 
 
 /********************************************************************
-* FUNCTION val_first_child
+* FUNCTION val_first_child_match
 * 
 * Get the first instance of the corresponding child node 
-* The child nodes in data types are always ordered,
-* unlike parmsets, which can be loose ordering.
 * 
 * INPUTS:
-*    parent == parent complex type to check
-*    child == child value to find (from a different config) 
-
+*    parent == parent value to check
+*    child == child value to find (e.g., from a NETCONF PDU) 
 *
 * RETURNS:
 *   pointer to the child if found or NULL if not found
 *********************************************************************/
 val_value_t *
-    val_first_child (val_value_t  *parent,
-		     val_value_t *child)
+    val_first_child_match (val_value_t  *parent,
+			   val_value_t *child)
 {
     val_value_t *val;
 
@@ -3822,29 +3900,30 @@ val_value_t *
 	 val != NULL;
 	 val = (val_value_t *)dlq_nextEntry(val)) {
 
-	/* check the node if the name matches */
-	if (!xml_strcmp(val->name, child->name)) {
+	/* check the node if the QName matches */
+	if (val->nsid == child->nsid &&
+	    !xml_strcmp(val->name, child->name)) {
 
-	    /* check for table instance match */
 	    if (val->btyp == NCX_BT_LIST) {
-		/* match the instance identifier if any */
+		/* match the instance identifiers, if any */
 		if (val_index_match(child, val)) {
 		    return val;
 		}
-	    } else {
-		if (val->btyp != child->btyp) {
-		    SET_ERROR(ERR_INTERNAL_VAL);
-		    return NULL;
-		} else {
+	    } else if (val->obj->objtype == OBJ_TYP_LEAF_LIST) {
+		/* find the leaf-list with the same value */
+		if (!val_compare(val, child)) {
 		    return val;
 		}
+	    } else {
+		/* can only be this one instance */
+		return val;
 	    }
 	}
     }
 
     return NULL;
 
-}  /* val_first_child */
+}  /* val_first_child_match */
 
 
 /********************************************************************
@@ -4778,8 +4857,6 @@ ncx_iqual_t
 } /* val_get_iqualval */
 
 
-
-
 /********************************************************************
 * FUNCTION val_duplicates_allowed
 * 
@@ -4976,7 +5053,6 @@ status_t
 } /* val_parse_meta */
 
 
-
 /********************************************************************
 * FUNCTION val_set_extern
 * 
@@ -5068,6 +5144,11 @@ boolean
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_BINARY:
+	if (!VAL_STR(val)) {
+	    /* empty string */
+	    return TRUE;
+	}
+
 	/* hack: assume some length more than a URI,
 	 * and less than enough to cause line wrap
 	 */
@@ -5123,7 +5204,6 @@ boolean
 boolean
     val_create_allowed (const val_value_t *val)
 {
-    boolean ret;
 
 #ifdef DEBUG
     if (!val) {
@@ -5132,14 +5212,7 @@ boolean
     }
 #endif
 
-    if (val->btyp == NCX_BT_LIST) {
-	ret = TRUE;
-    } else if (val->index) {
-	ret = FALSE;
-    } else {
-	ret = TRUE;
-    }
-    return ret;
+    return (val->index) ? FALSE : TRUE;
 
 }  /* val_create_allowed */
 
@@ -5160,7 +5233,6 @@ boolean
 boolean
     val_delete_allowed (const val_value_t *val)
 {
-    boolean ret;
 
 #ifdef DEBUG
     if (!val) {
@@ -5169,21 +5241,41 @@ boolean
     }
 #endif
 
-    if (val->btyp == NCX_BT_LIST) {
-	ret = TRUE;
-    } else {
-	switch (typ_get_iqualval_def(val->typdef)) {
-	case NCX_IQUAL_OPT:
-	case NCX_IQUAL_ZMORE:
-	    ret = TRUE;
-	    break;
-	default:
-	    ret = FALSE;
-	}
-    }
-    return ret;
+    return (val->index) ? FALSE : TRUE;
 
 }  /* val_delete_allowed */
+
+
+/********************************************************************
+* FUNCTION val_is_config_data
+* 
+* Check if the specified value is a config DB object instance
+* 
+* INPUTS:
+*   val == value to check
+*   
+* RETURNS:
+*   TRUE if the val is a config DB object instance
+*   FALSE otherwise
+*********************************************************************/
+boolean
+    val_is_config_data (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    if (obj_is_data_db(val->obj) && 
+	obj_get_config_flag(val->obj)) {
+	return TRUE;
+    } else {
+	return FALSE;
+    }
+
+}  /* val_is_config_data */
 
 
 /********************************************************************

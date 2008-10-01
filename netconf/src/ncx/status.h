@@ -296,7 +296,8 @@ typedef enum status_t_
     /* system info return codes start at 500 */
     ERR_PARS_SECDONE=ERR_INFO_BASE,     /* 500 */
     ERR_NCX_SKIPPED,                    /* 501 */
-    ERR_LAST_INFO                       /* 502 -- not really used */
+    ERR_NCX_CANCELED,                   /* 502 */
+    ERR_LAST_INFO                       /* 503 -- not really used */
 
 } status_t;
 

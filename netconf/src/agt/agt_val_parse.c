@@ -1168,7 +1168,7 @@ static status_t
     const ncx_errinfo_t  *errinfo;
     xml_node_t            valnode, endnode;
     status_t              res, res2, res3;
-    boolean               errdone, empty;
+    boolean               errdone, empty, allow_delete_all;
     ncx_btype_t           listbtyp;
 
     /* init local vars */
@@ -1181,6 +1181,8 @@ static status_t
     errinfo = NULL;
     res2 = NO_ERR;
     res3 = NO_ERR;
+
+    allow_delete_all = FALSE;
 
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
@@ -1209,7 +1211,15 @@ static status_t
   
     /* check empty string corner case */
     if (empty) {
-	if (btyp==NCX_BT_SLIST || btyp==NCX_BT_BITS) {
+	if (retval->editop == OP_EDITOP_DELETE) {
+	    if (obj->objtype == OBJ_TYP_LEAF) {
+		res = NO_ERR;
+	    } else if (allow_delete_all) {
+		res = NO_ERR;
+	    } else {
+		res = ERR_NCX_MISSING_VAL_INST;
+	    }
+	} else if (btyp==NCX_BT_SLIST || btyp==NCX_BT_BITS) {
 	    /* check the empty list */
 	    res = val_list_ok_errinfo(obj_get_ctypdef(obj), 
 				      &retval->v.list,

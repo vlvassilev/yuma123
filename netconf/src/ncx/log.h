@@ -115,4 +115,7 @@ extern log_debug_t
 extern log_debug_t
     log_get_debug_level_enum (const char *str);
 
+extern boolean
+    log_is_open (void);
+
 #endif	    /* _H_log */

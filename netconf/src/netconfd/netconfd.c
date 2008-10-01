@@ -330,13 +330,16 @@ int
 	  const char *argv[])
 {
     status_t   res;
-    boolean    showver, showhelp;
+    boolean    showver, showhelp, stdlog;
 
     malloc_cnt = 0;
     free_cnt = 0;
 
+
     res = cmn_init(argc, argv, &showver, &showhelp);
 
+    stdlog = !log_is_open();
+    
 #ifdef NETCONFD_DEBUG
     log_debug2("\nnetconfd: init returned (%d)", res);
 #endif
@@ -356,12 +359,15 @@ int
     netconfd_cleanup();
 
     if (malloc_cnt != free_cnt) {
-	printf("\n*** Error: memory leak (m:%u f:%u)\n", 
+	printf("\n*** netconfd error: memory leak (m:%u f:%u)\n", 
 	       malloc_cnt, free_cnt);
     }
 
     print_errors();
 
+    if (stdlog) {
+	printf("\n");
+    }
 
     return 0;
 

@@ -627,7 +627,9 @@ const char *
     case ERR_PARS_SECDONE:
 	return "invalid command line value";
     case ERR_NCX_SKIPPED:
-	return "internal warning"; 
+	return "operation skipped"; 
+    case ERR_NCX_CANCELED:
+	return "operation canceled"; 
 
     default:
 	return "--";

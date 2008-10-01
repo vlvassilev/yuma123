@@ -19,7 +19,9 @@
 date	     init     comment
 ----------------------------------------------------------------------
 20-may-06    abb      Begun
-
+30-sep-08    abb      Implement AGT_CB_TEST_APPLY and 
+                      agt_val_split_root_test for YANG support of 
+                      dummy running config commit-time validation
 */
 
 #ifndef _H_agt
@@ -101,9 +103,10 @@ extern status_t
 
 extern status_t 
     agt_val_split_root_check (ses_cb_t *scb,
-			      xml_msg_hdr_t *msg,
+			      rpc_msg_t *msg,
 			      val_value_t *newroot,
-			      val_value_t *root);
+			      val_value_t *root,
+			      op_editop_t defop);
 
 extern status_t
     agt_val_validate_write (ses_cb_t  *scb,
@@ -118,8 +121,7 @@ extern status_t
 			 rpc_msg_t  *msg,
 			 cfg_template_t *target,
 			 val_value_t    *pducfg,
-			 op_editop_t  editop,
-			 op_errop_t  errop);
+			 op_editop_t  editop);
 
 
 #endif	    /* _H_agt_val */

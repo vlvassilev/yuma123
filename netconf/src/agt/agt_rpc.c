@@ -1013,11 +1013,12 @@ void
     /* check any errors in the RPC method node */
     if (res != NO_ERR && !errdone) {
 	/* construct an error-path string */
-	buff = m__getMem(xml_strlen(method.elname) + 6);
+	buff = m__getMem(xml_strlen(method.qname) 
+			 + xml_strlen(RPC_ROOT) + 2);
 	if (buff) {
 	    xml_strcpy(buff, RPC_ROOT);
 	    xml_strcat(buff, (const xmlChar *)"/");
-	    xml_strcat(buff, method.elname);
+	    xml_strcat(buff, method.qname);
 	}
 	/* passing a NULL buff is okay; it will get checked 
  	 * The NCX_NT_STRING node type enum is ignored if 

@@ -513,9 +513,6 @@ static status_t
     status_t         res;
     boolean          applyhere, mergehere, freenew;
     
-#ifdef AGT_VAL_DEBUG
-    log_debug2("\napply_write_val: %s start", newval->name);
-#endif
 
     res = NO_ERR;
     mergehere = FALSE;
@@ -531,6 +528,11 @@ static status_t
 
     /* apply the requested edit operation */
     if (applyhere) {
+
+#ifdef AGT_VAL_DEBUG
+	log_debug3("\napply_write_val: %s start", newval->name);
+#endif
+
 	if (msg->rpc_need_undo) {
 	    res = add_undo_node(msg, editop, newval,
 				curval, parent, NO_ERR);
@@ -549,35 +551,53 @@ static status_t
 
 	switch (newval->editop) {
 	case OP_EDITOP_MERGE:
-	    dlq_remove(newval);
+	    val_remove_child(newval);
 	    if (curval) {
 		freenew = merge_valnode(newval, curval);
 	    } else {
 		add_valnode(newval, parent);
 	    }
+
+	    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
+	    if (!freenew) {
+		val_set_canonical_order(parent);
+	    }
 	    break;
 	case OP_EDITOP_REPLACE:
-	    dlq_remove(newval);
+	    val_remove_child(newval);
 	    if (curval) {
+		val_set_canonical_order(newval);
 		swap_valnode(newval, curval);
 		if (!msg->rpc_need_undo) {
 		    val_free_value(curval);
 		} /* else curval not freed yet, hold in undo record */
 	    } else {
 		add_valnode(newval, parent);
+
+		/**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
+		val_set_canonical_order(parent);
 	    }
 	    break;
 	case OP_EDITOP_CREATE:
-	    dlq_remove(newval);
+	    val_remove_child(newval);
 	    add_valnode(newval, parent);
+
+	    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
+	    val_set_canonical_order(parent);
 	    break;
 	case OP_EDITOP_LOAD:
-	    dlq_remove(newval);
+	    val_remove_child(newval);
+	    val_set_canonical_order(newval);
+
+	    /*** DOES NOT ALLOW FOR NESTED LOAD OPERATIONS
+	     *** such as loading a module at runtime with an
+	     *** augment of a nested object
+	     ***/
 	    res = cfg_apply_load_root(target, newval);
 	    break;
 	case OP_EDITOP_DELETE:
 	    if (curval) {
-		dlq_remove(curval);
+		val_remove_child(curval);
 		if (!msg->rpc_need_undo) {
 		    val_free_value(curval);
 		} /* else curval not freed yet, hold in undo record */
@@ -597,6 +617,130 @@ static status_t
     return res;
 
 }  /* apply_write_val */
+
+
+/********************************************************************
+* FUNCTION test_apply_write_val
+* 
+* Execute the AGT_CB_TEST_APPLY phase
+*
+* INPUTS:
+*   parent == parent value of curval and newval
+*   newval == new value to apply
+*   curval == current instance of value (may be NULL if none)
+*   *done  == TRUE if the node manipulation is done
+*          == FALSE if none of the parent nodes have already
+*             edited the config nodes; just do user callbacks
+*
+* OUTPUTS:
+*   newval and curval may be moved around to
+*       different queues, or get modified
+*   *done may be changed from FALSE to TRUE if node is applied here
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    test_apply_write_val (val_value_t  *parent,
+			  val_value_t  *newval,
+			  val_value_t  *curval,
+			  boolean      *done)
+{
+    val_value_t     *testval;
+    status_t         res;
+    boolean          applyhere, mergehere, freenew;
+    
+    res = NO_ERR;
+    mergehere = FALSE;
+    freenew = FALSE;
+
+    /* check if this node needs the edit operation applied */
+    if (*done) {
+	applyhere = FALSE;
+    } else {
+	applyhere = apply_this_node(newval->editop, curval);
+	*done = applyhere;
+    }
+
+    /* apply the requested edit operation */
+    if (applyhere) {
+
+#ifdef AGT_VAL_DEBUG
+	log_debug3("\ntest_apply_write_val: %s start", newval->name);
+#endif
+
+	/* make sure the node is not a virtual value */
+	if (curval && val_is_virtual(curval)) {
+	    return NO_ERR;   /*** freenew?? ***/
+	}
+
+	switch (newval->editop) {
+	case OP_EDITOP_MERGE:
+	    testval = val_clone(newval);
+	    if (!testval) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		if (curval) {
+		    freenew = merge_valnode(testval, curval);
+		} else {
+		    add_valnode(testval, parent);
+		}
+	    }
+
+	    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
+	    if (!freenew) {
+		val_set_canonical_order(parent);
+	    }
+	    break;
+	case OP_EDITOP_REPLACE:
+	    testval = val_clone(newval);
+	    if (!testval) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		if (curval) {
+		    val_set_canonical_order(testval);
+		    swap_valnode(testval, curval);
+		    val_free_value(curval);
+		} else {
+		    add_valnode(testval, parent);
+		    
+		    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
+		    val_set_canonical_order(parent);
+		}
+	    }
+	    break;
+	case OP_EDITOP_CREATE:
+	    testval = val_clone(newval);
+	    if (!testval) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		add_valnode(testval, parent);
+
+		/**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
+		val_set_canonical_order(parent);
+	    }
+	    break;
+	case OP_EDITOP_LOAD:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	    break;
+	case OP_EDITOP_DELETE:
+	    if (curval) {
+		val_remove_child(curval);
+		val_free_value(curval);
+	    }
+	    break;
+	default:
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+    } /* else ignore metadata merge */
+
+    if (freenew) {
+	val_free_value(testval);
+    }
+
+    return res;
+
+}  /* test_apply_write_val */
 
 
 /********************************************************************
@@ -640,7 +784,7 @@ static status_t
     case AGT_CB_VALIDATE:
 
 #ifdef AGT_VAL_DEBUG
-    log_debug2("\ninvoke_simval:validate: %s start", newval->name);
+    log_debug3("\ninvoke_simval:validate: %s start", newval->name);
 #endif
 
 	/* check and adjust the operation attribute */
@@ -661,12 +805,16 @@ static status_t
 			     NCX_NT_VAL, newval);
 	}
 	break;
+    case AGT_CB_TEST_APPLY:
+	res = test_apply_write_val(newval->curparent, newval, curval, &done);
+	break;
     case AGT_CB_APPLY:
 	res = apply_write_val(newval->editop, scb, msg, target, 
 			      newval->curparent, newval, curval, &done);
 	break;
     default:
-	;  /***/
+	/* nothing to do for commit or rollback at this time */
+	;  
     }
 
     /* check if the typdef for this value has a callback */
@@ -722,7 +870,7 @@ static status_t
     case AGT_CB_VALIDATE:
 
 #ifdef AGT_VAL_DEBUG
-    log_debug2("\ninvoke_cpxval:validate: %s start", newval->name);
+    log_debug3("\ninvoke_cpxval:validate: %s start", newval->name);
 #endif
 
 	/* check and adjust the operation attribute */
@@ -748,6 +896,9 @@ static status_t
 	}
 	retres = res;
 	break;
+    case AGT_CB_TEST_APPLY:
+	retres = test_apply_write_val(newval->curparent, newval, curval, &done);
+	break;
     case AGT_CB_APPLY:
 	retres = apply_write_val(newval->editop, scb, msg, target,
 				 newval->curparent, newval, curval, &done);
@@ -766,7 +917,7 @@ static status_t
 
 	    chval->curparent = curval;
 	    if (curval) {
-		curch = val_first_child(curval, chval);
+		curch = val_first_child_match(curval, chval);
 	    } else {
 		curch = NULL;
 	    }
@@ -804,6 +955,7 @@ static status_t
 *   scb == session control block
 *   msg == incoming rpc_msg_t in progress
 *   target == cfg_template_t for the config database to write
+*          == NULL if cbtyp == AGT_CB_TEST_APPLY
 *   newval == val_value_t from the PDU
 *   curval == current value (if any) from the target config
 *   done   == TRUE if the node manipulation is done
@@ -912,8 +1064,9 @@ static void
 #endif
 
 	/* delete the node from the tree */
-	dlq_remove(undo->newnode);
+	val_remove_child(undo->newnode);
 	val_free_value(undo->newnode);
+	undo->newnode = NULL;
 	break;
     case OP_EDITOP_DELETE:
 	/* Since 'delete' cannot apply to an attribute,
@@ -957,7 +1110,7 @@ static void
 	 * of if the new node is just removed
 	 */
 	if (undo->newnode) {
-	    dlq_remove(undo->newnode);
+	    val_remove_child(undo->newnode);
 	    if (undo->curnode) {
 		swap_valnode(undo->curnode, undo->newnode);
 	    } 
@@ -1071,15 +1224,10 @@ static status_t
 {
     status_t  res;
 
-#ifdef DEBUG
-    if (!scb || !msg || !target || !newval) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
     case AGT_CB_APPLY:
+    case AGT_CB_TEST_APPLY:
 	/* keep checking until all the child nodes have been processed */
 	res = invoke_btype_cb(cbtyp, editop, scb, msg, 
 			      target, newval, curval, FALSE);
@@ -1188,10 +1336,10 @@ static status_t
 	res = NO_ERR;
 	cnt = 0;
 
-	if (LOGDEBUG2) {
-	    log_debug2("\nunique_check '%s' against '%s'",
-		       objname, valset->name);
-	}
+#ifdef AGT_VAL_DEBUG
+	log_debug3("\nunique_check '%s' against '%s'",
+		   objname, valset->name);
+#endif
 
 	/* save the values in a temp list entry of the same type as
 	 * the real list being checked.
@@ -1271,14 +1419,14 @@ static status_t
     maxerr = FALSE;
     minelems = 0;
     maxelems = 0;
-
     minset = obj_get_min_elements(obj, &minelems);
     maxset = obj_get_max_elements(obj, &maxelems);
 
     cnt = val_instance_count(val, obj_get_mod_name(obj),
 			     obj_get_name(obj));
 
-    if (LOGDEBUG2) {
+#ifdef AGT_VAL_DEBUG
+    if (LOGDEBUG3) {
 	if (!minset) {
 	    switch (iqual) {
 	    case NCX_IQUAL_ONE:
@@ -1313,23 +1461,21 @@ static status_t
 	    sprintf(buff, "%u", maxelems);
 	}
 
-	log_debug2("\ninstance_check '%s' against '%s' "
+	log_debug3("\ninstance_check '%s' against '%s' "
 		   "(cnt=%u, min=%u, max=%s)",
 		   obj_get_name(obj), val->name, cnt, 
 		   minelems, maxelems ? buff : "unbounded");
     }
+#endif
 
     if (minset) {
 	if (cnt < minelems) {
 	    /* not enough instances error */
 	    minerr = TRUE;
 	    res = ERR_NCX_MIN_ELEMS_VIOLATION;
-	    if (msg) {
-		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_OBJ, obj, 
-				 NCX_NT_VAL, val);
-	    }
-	    res = NO_ERR;
+	    agt_record_error(scb, msg, layer, res, 
+			     NULL, NCX_NT_OBJ, obj, 
+			     NCX_NT_VAL, val);
 	}
     }
 
@@ -1347,12 +1493,9 @@ static status_t
 
 	    maxerr = TRUE;
 	    res = ERR_NCX_MAX_ELEMS_VIOLATION;
-	    if (msg) {
-		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_OBJ, obj, 
-				 NCX_NT_VAL, val);
-	    }
-	    res = NO_ERR;
+	    agt_record_error(scb, msg, layer, res, 
+			     NULL, NCX_NT_OBJ, obj, 
+			     NCX_NT_VAL, val);
 	}
     }
 
@@ -1361,6 +1504,9 @@ static status_t
 	if (cnt < 1 && !minerr) {
 	    /* missing single parameter */
 	    res = ERR_NCX_MISSING_VAL_INST;
+	    agt_record_error(scb, msg, layer, res, 
+			     NULL, NCX_NT_OBJ, obj, 
+			     NCX_NT_VAL, val);
 	}
 	/* fall through */
     case NCX_IQUAL_OPT:
@@ -1370,25 +1516,28 @@ static status_t
 					  obj_get_mod_name(obj),
 					  obj_get_name(obj), 1);
 	    res = ERR_NCX_EXTRA_VAL_INST;
+	    agt_record_error(scb, msg, layer, res, 
+			     NULL, NCX_NT_OBJ, obj, 
+			     NCX_NT_VAL, val);
 	}
 	break;
     case NCX_IQUAL_1MORE:
 	if (cnt < 1 && !minerr) {
 	    /* missing parameter error */
 	    res = ERR_NCX_MISSING_VAL_INST;
-
+	    agt_record_error(scb, msg, layer, res, 
+			     NULL, NCX_NT_OBJ, obj, 
+			     NCX_NT_VAL, val);
 	}
 	break;
     case NCX_IQUAL_ZMORE:
 	break;
     default:
 	res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    if (res != NO_ERR && msg) {
 	agt_record_error(scb, msg, layer, res, 
 			 NULL, NCX_NT_OBJ, obj, 
 			 NCX_NT_VAL, val);
+
     }
 
     return res;
@@ -1439,10 +1588,10 @@ static status_t
 
     res = NO_ERR;
 
-    if (LOGDEBUG2) {
-	log_debug2("\nichoice_check_agt: check '%s' against '%s'",
-		   obj_get_name(choicobj), val->name);
-    }
+#ifdef AGT_VAL_DEBUG
+    log_debug3("\nichoice_check_agt: check '%s' against '%s'",
+	       obj_get_name(choicobj), val->name);
+#endif
 
     /* Go through all the child nodes for this object
      * and look for choices against the value set to see if each 
@@ -1536,9 +1685,6 @@ static status_t
     val_value_t           *chval;
     status_t               res, retres;
 
-#ifdef AGT_VAL_DEBUG
-    log_debug2("\nmst_stmt_check: %s start", curval->name);
-#endif
 
     retres = NO_ERR;
 
@@ -1553,13 +1699,17 @@ static status_t
     }
 
     mustQ = obj_get_mustQ(obj);
-    if (mustQ) {
+    if (mustQ && !dlq_empty(mustQ)) {
+
+#ifdef AGT_VAL_DEBUG
+	log_debug3("\nmst_stmt_check: %s start", curval->name);
+#endif
+
 	for (errinfo = (const ncx_errinfo_t *)dlq_firstEntry(mustQ);
 	     errinfo != NULL;
 	     errinfo = (const ncx_errinfo_t *)dlq_nextEntry(errinfo)) {
 	    /*** agt_xpath_eval(scb, msg, root, curval, errinfo, layer);  ***/
 	}
-
     }
 
     return retres;
@@ -1617,7 +1767,7 @@ status_t
 #endif
 
 #ifdef AGT_VAL_DEBUG
-    log_debug2("\nagt_val_instchk: %s start", valset->name);
+    log_debug3("\nagt_val_instchk: %s start", valset->name);
 #endif
 
     retres = NO_ERR;
@@ -1673,9 +1823,6 @@ status_t
 * Check for the proper number of object instances for
 * the specified configuration database
 * 
-* The top-level value set passed cannot represent a choice
-* or a case within a choice.
-*
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
 *   msg == xml_msg_hdr t from msg in progress 
@@ -1774,15 +1921,17 @@ status_t
 * the specified configuration database.  Conceptually
 * combine the newroot and root and check that.
 * 
-* The top-level value set passed cannot represent a choice
-* or a case within a choice.
+* This function is only used if the cfg target is RUNNING
+* The CANDIDATE cfg should use the agt_val_root_check
+* instead for a pre-commit test
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
-*   msg == xml_msg_hdr t from msg in progress 
+*   msg == RPC message in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   newroot == val_value_t for the edit-config config contents
 *   root == val_value_t for the target config being checked
+*   defop == the starting default-operation value
 *
 * OUTPUTS:
 *   if msg not NULL:
@@ -1795,17 +1944,13 @@ status_t
 *********************************************************************/
 status_t 
     agt_val_split_root_check (ses_cb_t *scb,
-			      xml_msg_hdr_t *msg,
+			      rpc_msg_t  *msg,
 			      val_value_t *newroot,
-			      val_value_t *root)
+			      val_value_t *root,
+			      op_editop_t  defop)
 {
-
-    return ERR_NCX_OPERATION_NOT_SUPPORTED;
-
-#if 0
-    const obj_template_t  *obj, *chobj;
-    val_value_t           *chval;
-    status_t               res, retres;
+    val_value_t     *copyroot;
+    status_t         res;
 
 #ifdef DEBUG
     if (!newroot || !root) {
@@ -1816,47 +1961,37 @@ status_t
     }
 #endif
 
-    retres = NO_ERR;
-
-    obj = root->obj;
-
-    /* check the instance counts for the subtrees that are present */
-    res = agt_val_instance_check(scb, msg, root, NCX_LAYER_CONTENT);
-    CHK_EXIT;
-
-    /* check the must-stmt expressions for the subtrees that are present */
-    for (chval = val_get_first_child(root);
-	 chval != NULL;
-	 chval = val_get_next_child(chval)) {
-
-	res = must_stmt_check(scb, msg, root, chval, NCX_LAYER_CONTENT);
-	CHK_EXIT;
-    }
-
-    /* check all the modules in the system for top-level objects and
-     * check the instance count and any missing mandatory top-level nodes
-     * this is CPU intensive if the agent has a lot of objects
+    /* create a temporary root config clone and do
+     * a test apply to that copy.  This will create
+     * the proper config for must, instance, choice,
+     * and unique tests.  
      *
+     * Resource errors due to user callback code
+     * can still happen during the real apply
      */
-    for (mod = ncx_get_first_module();
-	 mod != NULL;
-	 mod = ncx_get_next_module(mod)) {
-
-	for (chobj = ncx_get_first_object(mod);
-	     chobj != NULL;
-	     chobj = ncx_get_next_object(mod, chobj)) {
-
-	    if (chobj->objtype == OBJ_TYP_CHOICE) {
-		res = choice_check_agt(scb, msg, chobj, root, layer);
-	    } else {
-		res = instance_test(scb, msg, chobj, root, layer);
-	    }
-	    CHK_EXIT;
-	}
+    res = NO_ERR;
+    copyroot = val_clone_config_data(root, &res);
+    if (!copyroot) {
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT,
+			 ERR_NCX_OPERATION_FAILED, NULL,
+			 NCX_NT_STRING, get_error_string(res), 
+			 NCX_NT_VAL, root);
+	return res;
     }
 
-    return retres;
-#endif
+    /* do a dummy test apply to the partial config
+     * start with the config root, which is a val_value_t node 
+     */
+    res = handle_callback(AGT_CB_TEST_APPLY, defop, scb, 
+			  msg, NULL, newroot, copyroot);
+
+    if (res == NO_ERR) {
+	res = agt_val_root_check(scb, &msg->mhdr, copyroot);
+    }
+
+    val_free_value(copyroot);
+
+    return res;
     
 }  /* agt_val_split_root_check */
 
@@ -1958,7 +2093,7 @@ status_t
 *             tree of changes to apply to the target
 *   editop == requested start-state write operation
 *             (usually from the default-operation parameter)
-*   errop == requested error handling
+*
 * OUTPUTS:
 *   rpc_err_rec_t structs may be malloced and added to the msg->mhsr.errQ
 *
@@ -1970,15 +2105,9 @@ status_t
 			 rpc_msg_t  *msg,
 			 cfg_template_t *target,
 			 val_value_t    *pducfg,
-			 op_editop_t  editop,
-			 op_errop_t  errop)
+			 op_editop_t  editop)
 {
-#if 0
-    const obj_template_t *obj;
-    ncx_node_t            dtyp;
-#endif
     status_t              res;
-
 
 #ifdef DEBUG
     if (!scb || !msg || !target || !pducfg) {
@@ -1999,24 +2128,6 @@ status_t
 	return res;
     }
 
-#if 0
-    /* make sure the target root is not NULL */
-    if (!target->root) {
-	dtyp = NCX_NT_OBJ;
-	obj = (const obj_template_t *)
-	    def_reg_find_moddef(NC_MODULE, NCX_EL_CONFIG, &dtyp);
-	if (!obj) {
-	    return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-	}
-							  
-	target->root = val_new_value();
-	if (!target->root) {
-	    return ERR_INTERNAL_MEM;
-	}
-	val_init_from_template(target->root, obj);
-    }
-#endif
-
     /* start with the config root, which is a val_value_t node */
     res = handle_callback(AGT_CB_APPLY, editop, scb, 
 			  msg, target, pducfg, target->root);
@@ -2033,22 +2144,6 @@ status_t
 				  msg, target, pducfg, target->root);
 	}
     }  /* else there was no rollback, so APPLY is the final phase */
-
-
-    /* handle the LOAD operation here based on start state edit mode */
-    if (editop==OP_EDITOP_LOAD && (res==NO_ERR || errop==OP_ERROP_CONTINUE)) {
-#if 0
-	/* fast-track API for the internal load command 
-	 * The pducfg struct will be handed off to cfg->root
-	 */
-	res = cfg_load_root(target);
-	if (res != NO_ERR) {
-	    agt_record_error(scb, &msg->mhdr, 
-			     NCX_LAYER_OPERATION, res, NULL,
-			     NCX_NT_NONE, NULL, NCX_NT_VAL, pducfg);
-	}
-#endif
-    }
 
     return res;
 

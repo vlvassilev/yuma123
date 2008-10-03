@@ -313,7 +313,7 @@ status_t
 #ifdef NOT_YET 
 	    res = cap_add_std(newmycaps, CAP_STDID_CONF_COMMIT);
 	    if (res == NO_ERR) {
-		res = cap_add_stdval(newcaps, CAP_STDID_COMMIT);
+		res = cap_add_stdval(newcaps, CAP_STDID_CONF_COMMIT);
 	    }
 #endif
 	    break;
@@ -331,7 +331,6 @@ status_t
 	}
     }
 
-#ifdef NOT_YET
     if (res == NO_ERR) {
 	/* set the validate capability */
 	res = cap_add_std(newmycaps, CAP_STDID_VALIDATE);
@@ -339,7 +338,6 @@ status_t
 	    res = cap_add_stdval(newcaps, CAP_STDID_VALIDATE);
 	}
     }
-#endif
 
     /* check the startup type for distinct-startup capability */
     if (res == NO_ERR) {

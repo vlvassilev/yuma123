@@ -510,10 +510,6 @@ void
 	ncx_free_errinfo(typdef->pat_errinfo);
 	typdef->pat_errinfo = NULL;
     }
-    if (typdef->cbset) {
-	m__free(typdef->cbset);
-	typdef->cbset = NULL;
-    }
 
     ncx_clean_appinfoQ(&typdef->appinfoQ);
 
@@ -3301,33 +3297,6 @@ xmlns_id_t
     return typ->nsid;
     
 }  /* typ_get_nsid */
-
-
-/********************************************************************
-* FUNCTION typ_get_choicenum
-*
-* Get the choice ID for the specified typedef, if it is set
-*
-* INPUTS:
-*  typdef == typ_def_t struct to check
-*
-* RETURNS:
-*   choice ID number or zero if none
-*********************************************************************/
-uint32
-    typ_get_choicenum (const typ_def_t *typdef)
-{
-
-#ifdef DEBUG
-    if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
-    }
-#endif
-
-    return typdef->choicenum;
-
-}  /* typ_get_choicenum */
 
 
 /********************************************************************

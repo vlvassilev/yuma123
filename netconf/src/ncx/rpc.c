@@ -320,6 +320,7 @@ void
 #endif
 
     memset(undo, 0x0, sizeof(rpc_undo_rec_t));
+    dlq_createSQue(&undo->extra_deleteQ);
 
 } /* rpc_init_undorec */
 
@@ -367,6 +368,8 @@ void
 void 
     rpc_clean_undorec (rpc_undo_rec_t *undo)
 {
+    val_value_t *val;
+
 #ifdef DEBUG
     if (!undo) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -374,10 +377,19 @@ void
     }
 #endif
 
+    undo->newnode = NULL;  /*********************/
+
     if (undo->curnode) {
-	val_free_value((val_value_t *)undo->curnode);
+	val_free_value(undo->curnode);
     }
-    memset(undo, 0x0, sizeof(rpc_undo_rec_t));
+
+    while (!dlq_empty(&undo->extra_deleteQ)) {
+	val = (val_value_t *)
+	    dlq_deque(&undo->extra_deleteQ);
+	val_free_value(val);
+    }
+
+    rpc_init_undorec(undo);
 
 } /* rpc_clean_undorec */
 

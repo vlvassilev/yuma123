@@ -2514,6 +2514,7 @@ void
     case NCX_BT_LIST:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
 	log_write("{");
 	for (chval = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
 	     chval != NULL;
@@ -2733,6 +2734,7 @@ void
     case NCX_BT_LIST:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
 	log_stdout("{");
 	for (chval = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
 	     chval != NULL;
@@ -3175,12 +3177,10 @@ boolean
     val_merge (val_value_t *src,
 	       val_value_t *dest)
 {
-    val_value_t     *parent, *first;
     ncx_btype_t      btyp;
     ncx_iqual_t      iqual;
     ncx_merge_t      mergetyp;
     boolean          dupsok;
-    uint32           srcnum, destnum;
 
 #ifdef DEBUG
     if (!src || !dest) {
@@ -3193,59 +3193,37 @@ boolean
     iqual = typ_get_iqualval_def(dest->typdef);
 
     if (obj_is_system_ordered(dest->obj)) {
-	mergetyp = NCX_MERGE_LAST;
+	mergetyp = typ_get_mergetype(dest->typdef);
+	if (mergetyp == NCX_MERGE_NONE) {
+	    mergetyp = NCX_MERGE_LAST;
+	}
     } else {
 	mergetyp = typ_get_mergetype(dest->typdef);
-	/***/
+	if (mergetyp == NCX_MERGE_NONE) {
+	    mergetyp = NCX_MERGE_LAST;
+	}
+
+	/***************** !!!!!!!!!!! *******************/
     }
 
-    dupsok = val_duplicates_allowed(dest);
-
-    /* check if the type allows multiple instances,
-     * in which case a merge is really needed
-     * Otherwise the current value will be replaced
-     * unless it is a list or other multi-part data type
-     */
     switch (iqual) {
     case NCX_IQUAL_1MORE:
     case NCX_IQUAL_ZMORE:
-	/* check if parent param is valid */
-	parent = dest->parent;
+	switch (src->obj->objtype) {
+	case OBJ_TYP_LEAF_LIST:
+	case OBJ_TYP_LIST:
+	    /* duplicates not allowed in leaf lists 
+	     * leave the current value in place
+	     */
 
+	    /********** TBD: MOVE via insert attribute *****/
 
-	/* need to add the additional value to the parent;
-	 * do not free the source that is about to be inserted 
-	 */
-
-	/* check if duplicate, and not allowed */
-	if (dupsok) {
-
-	    first = val_first_child_match(parent, dest);
-
-	    switch (mergetyp) {
-	    case NCX_MERGE_FIRST:
-
-		if (first) {
-		    src->parent = parent;
-		    dlq_insertAhead(src, first);
-		} else {
-		    val_add_child(src, parent);
-		}
-		break;
-	    case NCX_MERGE_LAST:
-	    case NCX_MERGE_SORT:
-		val_add_child(src, parent);
-		break;
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	    return FALSE;
-	} else {
-	    /* check if entry already exists */
-	    /***/
+	    return TRUE;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return TRUE;
 	}
-	
-	return TRUE;
+	/*NOTREACHED*/
     case NCX_IQUAL_ONE:
     case NCX_IQUAL_OPT:
 	/* need to replace the current value or merge a list, etc. */
@@ -3288,46 +3266,16 @@ boolean
 	    merge_simple(src->unbtyp, src, dest);
 	    break;
 	case NCX_BT_SLIST:
+	    dupsok = val_duplicates_allowed(dest);
 	    ncx_merge_list(&src->v.list, &dest->v.list,
 			   mergetyp, dupsok, 
 			   typ_get_crangeQ(dest->typdef));
 	    break;
-	case NCX_BT_CHOICE:
-	    /***** WILL NOT HAPPEN *****/
-
-	    /* check if a different choice member is being set */
-	    first = (val_value_t *)dlq_firstEntry(&src->v.childQ);
-	    if (!first) {
-		return TRUE;  /* nothing to merge! */
-	    }
-	    srcnum = typ_get_choicenum(first->typdef);
-
-	    first = (val_value_t *)dlq_firstEntry(&dest->v.childQ);
-	    if (first) {
-		destnum = typ_get_choicenum(first->typdef);
-	    } else {
-		destnum = 0;
-	    }
-
-	    /* check if old choice needs to be deleted */
-	    if ((srcnum != destnum) && destnum) {
-		while (!dlq_empty(&dest->v.childQ)) {
-		    first = (val_value_t *)dlq_deque(&dest->v.childQ);
-		    val_free_value(first);
-		}
-	    }
-
-	    /* add the src node to the dest child Q */
-	    while (!dlq_empty(&src->v.childQ)) {
-		first = (val_value_t *)dlq_deque(&src->v.childQ);
-		val_add_child(first, dest);
-	    }
-
-	    break;
 	case NCX_BT_ANY:
 	case NCX_BT_CONTAINER:
 	case NCX_BT_LIST:
-	    /* TBD: should not happen */
+	case NCX_BT_CHOICE:
+	case NCX_BT_CASE:
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	    return TRUE;
 	default:
@@ -3550,6 +3498,7 @@ val_value_t *
     case NCX_BT_LIST:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
 	val_init_complex(copy, val->btyp);
 	for (ch = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
 	     ch != NULL && *res==NO_ERR;
@@ -3708,6 +3657,7 @@ status_t
     case NCX_BT_LIST:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
 	for (ch = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
 	     ch != NULL && res==NO_ERR;
 	     ch = (const val_value_t *)dlq_nextEntry(ch)) {
@@ -3774,6 +3724,62 @@ void
     dlq_enque(child, &parent->v.childQ);
 
 }   /* val_add_child */
+
+
+/********************************************************************
+* FUNCTION val_add_child_clean
+* 
+*   Add a child value node to a parent value node
+*
+* INPUTS:
+*    child == node to store in the parent
+*    parent == complex value node with a childQ
+*    cleanQ == address of Q to receive any deleted sibling nodes
+*
+* OUTPUTS:
+*    cleanQ may have nodes added if the child being added
+*    is part of a case.  All other cases will be deleted
+*    from the parent Q and moved to the cleanQ
+*
+*********************************************************************/
+void
+    val_add_child_clean (val_value_t *child,
+			 val_value_t *parent,
+			 dlq_hdr_t *cleanQ)
+{
+    val_value_t  *testval, *nextval;
+
+#ifdef DEBUG
+    if (!child || !parent || !cleanQ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (child->casobj) {
+	for (testval = val_get_first_child(parent);
+	     testval != NULL;
+	     testval = nextval) {
+
+	    nextval = val_get_next_child(testval);
+	    if (testval->casobj && 
+		(testval->casobj->parent == child->casobj->parent)) {
+
+		if (testval->casobj != child->casobj) {
+		    log_debug3("\nagt_val: clean old case member '%s'"
+			       " from parent '%s'",
+			       testval->name, parent->name);
+		    dlq_remove(testval);
+		    dlq_enque(testval, cleanQ);
+		}
+	    }
+	}
+    }
+
+    child->parent = parent;
+    dlq_enque(child, &parent->v.childQ);
+
+}   /* val_add_child_clean */
 
 
 /********************************************************************
@@ -4557,6 +4563,7 @@ int32
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
 	ch1 = (val_value_t *)dlq_firstEntry(&val1->v.childQ);
 	ch2 = (val_value_t *)dlq_firstEntry(&val2->v.childQ);
 	for (;;) {
@@ -4758,6 +4765,7 @@ status_t
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
 	return SET_ERROR(ERR_NCX_OPERATION_NOT_SUPPORTED);
     default:
 	return SET_ERROR(ERR_INTERNAL_VAL);
@@ -5173,8 +5181,9 @@ boolean
 	return TRUE;  /***/
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
-    case NCX_BT_CHOICE:
     case NCX_BT_LIST:
+    case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
 	return dlq_empty(&val->v.childQ);
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
@@ -5593,6 +5602,7 @@ boolean
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
 	/*** not supported for default value ***/

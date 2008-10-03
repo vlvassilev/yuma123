@@ -111,9 +111,15 @@ static void
 	return;
     }
 
+    btyp = typ_get_basetype(typdef);
+
     datastr = typ_get_rangestr(typdef);
     if (datastr) {
-	help_write_lines((const xmlChar *)"range: ", indent, TRUE);
+	if (typ_is_string(btyp)) {
+	    help_write_lines((const xmlChar *)"length: ", indent, TRUE);
+	} else {
+	    help_write_lines((const xmlChar *)"range: ", indent, TRUE);
+	}
 	help_write_lines(datastr, 0, FALSE);
     }
 
@@ -125,7 +131,7 @@ static void
 
     /**** TBD: REST OF PATTERN STMTS ****/
 
-    btyp = typ_get_basetype(typdef);
+
 
     switch (btyp) {
     case NCX_BT_ENUM:

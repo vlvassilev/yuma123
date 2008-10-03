@@ -1364,13 +1364,31 @@ static status_t
     const xmlChar    *def, *parmname;
     const typ_def_t  *typdef;
     val_value_t      *oldparm, *newparm;
-    xmlChar          *line, *start;
+    xmlChar          *line, *start, *objbuff;
     status_t          res;
     ncx_btype_t       btyp;
     boolean           done;
 
     if (!obj_is_mandatory(parm) && !get_optional) {
 	return NO_ERR;
+    }
+
+    res = NO_ERR;
+
+    if (obj_is_data_db(parm)) {
+	objbuff = NULL;
+	res = obj_gen_object_id(parm, &objbuff);
+	if (res != NO_ERR) {
+	    log_error("\nError: generate object ID failed (%s)",
+		      get_error_string(res));
+	    return res;
+	}
+
+	/* let the user know about the new nest level */
+	log_stdout("\nFilling %s %s:",
+		   obj_get_typestr(parm), objbuff);
+	    
+	m__free(objbuff);
     }
 
     switch (btyp) {
@@ -1545,6 +1563,7 @@ static status_t
     const obj_template_t    *parm;
     val_value_t             *pval;
     status_t                 res;
+    boolean                  saveopt;
 
     /* make sure a case was selected or found */
     if (!obj_is_config(cas) || obj_is_abstract(cas)) {
@@ -1552,9 +1571,13 @@ static status_t
 	return ERR_NCX_SKIPPED;
     }
 
+    saveopt = get_optional;
+    get_optional = TRUE;
+    res = NO_ERR;
+
     /* finish the seclected case */
     for (parm = obj_first_child(cas);
-	 parm != NULL;
+	 parm != NULL && res == NO_ERR;
 	 parm = obj_next_child(parm)) {
 
 	if (!obj_is_config(parm) || obj_is_abstract(parm)) {
@@ -1575,19 +1598,13 @@ static status_t
 	    res = get_parm(rpc, parm, valset, oldvalset);
 	}
 
-	switch (res) {
-	case NO_ERR:
-	case ERR_NCX_SKIPPED:
+	if (res == ERR_NCX_SKIPPED) {
 	    res = NO_ERR;
-	    break;
-	case ERR_NCX_CANCELED:
-	    return res;
-	default:
-	    return res;
 	}
     }
 
-    return NO_ERR;
+    get_optional = saveopt;
+    return res;
 
 } /* get_case */
 
@@ -1620,7 +1637,7 @@ static status_t
 {
     const obj_template_t    *parm, *cas, *usecase;
     val_value_t             *pval;
-    xmlChar                 *myline, *str;
+    xmlChar                 *myline, *str, *objbuff;
     status_t                 res;
     int                      casenum, num;
     boolean                  first, done, usedef, redo, saveopt;
@@ -1632,6 +1649,21 @@ static status_t
     }
 
     res = NO_ERR;
+
+    if (obj_is_data_db(choic)) {
+	objbuff = NULL;
+	res = obj_gen_object_id(choic, &objbuff);
+	if (res != NO_ERR) {
+	    log_error("\nError: generate object ID failed (%s)",
+		      get_error_string(res));
+	    return res;
+	}
+
+	/* let the user know about the new nest level */
+	log_stdout("\nFilling choice %s:", objbuff);
+	m__free(objbuff);
+    }
+
     saveopt = get_optional;
     
     if (obj_is_mandatory(choic)) {
@@ -1981,12 +2013,28 @@ static status_t
 {
     const obj_template_t  *parm;
     val_value_t           *val, *oldval;
+    xmlChar               *objbuff;
     status_t               res;
     boolean                done;
     uint32                 yesnocode;
 
-    cli_fn = obj_get_name(rpc);
     res = NO_ERR;
+    cli_fn = obj_get_name(rpc);
+
+    if (obj_is_data_db(valset->obj)) {
+	objbuff = NULL;
+	res = obj_gen_object_id(valset->obj, &objbuff);
+	if (res != NO_ERR) {
+	    log_error("\nError: generate object ID failed (%s)",
+		      get_error_string(res));
+	    return res;
+	}
+
+	/* let the user know about the new nest level */
+	log_stdout("\nFilling %s %s:",
+		   obj_get_typestr(valset->obj), objbuff);
+	m__free(objbuff);
+    }
 
     for (parm = obj_first_child(valset->obj);
          parm != NULL && res==NO_ERR;
@@ -2101,11 +2149,6 @@ static status_t
 		val_add_child(val, valset);
 	    }
 
-	    /* let the user know about the new nest level */
-	    log_stdout("\nFilling %s %s:\n",
-		       obj_get_typestr(parm),
-		       obj_get_name(parm));
-	    
 	    /* recurse with the child nodes */
 	    res = fill_valset(rpc, val, oldval);
 
@@ -2135,7 +2178,7 @@ static status_t
 		}
 
 		/* let the user know about the new nest level */
-		log_stdout("\nFilling list %s:\n",
+		log_stdout("\nFilling list %s:",
 			   obj_get_name(parm));
 
 		/* recurse with the child node -- NO OLD VALUE
@@ -3873,6 +3916,34 @@ static void
     case OBJ_TYP_LEAF_LIST:
 	newparm = fill_value(rpc, targobj, curparm, &res);
 	break;
+    case OBJ_TYP_CHOICE:
+	newparm = val_new_value();
+	if (!newparm) {
+	    log_error("\nError: malloc failure");
+	    res = ERR_INTERNAL_MEM;
+	} else {
+	    val_init_from_template(newparm, targobj);
+	    
+	    res = get_choice(rpc, targobj, newparm, curparm);
+	    if (res == ERR_NCX_SKIPPED) {
+		res = NO_ERR;
+	    }
+	}
+	break;
+    case OBJ_TYP_CASE:
+	newparm = val_new_value();
+	if (!newparm) {
+	    log_error("\nError: malloc failure");
+	    res = ERR_INTERNAL_MEM;
+	} else {
+	    val_init_from_template(newparm, targobj);
+
+	    res = get_case(rpc, targobj, newparm, curparm);
+	    if (res == ERR_NCX_SKIPPED) {
+		res = NO_ERR;
+	    }
+	}
+	break;
     default:
 	newparm = val_new_value();
 	if (!newparm) {
@@ -3925,11 +3996,9 @@ static void
 
 
 /********************************************************************
-* FUNCTION add_config_from_content_node
+* FUNCTION add_content
 * 
-* Add the config node content for the edit-config operation
-* Build the <config> nodfe top-down, by recursing bottom-up
-* from the node to be edited.
+* Add the config nodes to the parent
 *
 * INPUTS:
 *   rpc == RPC method in progress
@@ -3939,64 +4008,40 @@ static void
 *   curobj == the current object node for config_content, going
 *                 up the chain to the root object.
 *                 First call should pass config_content->obj
-*   config == the starting <config> node to add the data into
+*   curtop == address of steady-storage node to add the
+*             next new level
 *
 * OUTPUTS:
 *    config node is filled in with child nodes
+*    curtop is set to the latest top value
+*       It is not needed after the last call and should be ignored
 *
 * RETURNS:
-*    pointer to current node to add content into
+*    status; config_content is NOT freed if returning an error
 *********************************************************************/
 static status_t
-    add_config_from_content_node (const obj_template_t *rpc,
-				  val_value_t *config_content,
-				  const obj_template_t *curobj,
-				  val_value_t *config,
-				  val_value_t **curtop)
+    add_content (const obj_template_t *rpc,
+		 val_value_t *config_content,
+		 const obj_template_t *curobj,
+		 val_value_t **curtop)
 {
 
-    const obj_template_t  *parent;
     const obj_key_t       *curkey;
     val_value_t           *newnode, *keyval, *lastkey;
     status_t               res;
+    boolean                done;
 
-    /* get to the root of the object chain */
-    parent = obj_get_cparent(curobj);
-    if (parent) {
-	res = add_config_from_content_node(rpc,
-					   config_content,
-					   parent,
-					   config,
-					   curtop);
-	if (res != NO_ERR) {
-	    return res;
-	}
-    }
-
-    /* set the current target, working down the stack
-     * on the way back from the initial dive
-     */
-    if (!*curtop) {
-	/* first time through to this point */
-	*curtop = config;
-    }
+    res = NO_ERR;
 
     /* add content based on the current node type */
     switch (curobj->objtype) {
     case OBJ_TYP_LEAF:
-	if (curobj != config_content->obj) {
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	val_add_child(config_content, *curtop);
-	*curtop = config_content;
-	break;
     case OBJ_TYP_LEAF_LIST:
 	if (curobj != config_content->obj) {
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
 	val_add_child(config_content, *curtop);
 	*curtop = config_content;
-
 	break;
     case OBJ_TYP_LIST:
 	/* get all the key nodes for the current object,
@@ -4024,22 +4069,25 @@ static status_t
 				    obj_get_mod_name(curkey->keyobj),
 				    obj_get_name(curkey->keyobj));
 	    if (!keyval) {
-		res = get_parm(rpc, curkey->keyobj,
-			       *curtop, NULL);
-		if (res != NO_ERR) {
+		res = get_parm(rpc, curkey->keyobj, *curtop, NULL);
+		if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
 		    return res;
 		}
-		keyval = val_find_child(*curtop,
-					obj_get_mod_name(curkey->keyobj),
-					obj_get_name(curkey->keyobj));
-		if (!keyval) {
-		    return SET_ERROR(ERR_INTERNAL_VAL);
-		}
+		if (res == NO_ERR) {
+		    keyval = val_find_child(*curtop,
+					    obj_get_mod_name(curkey->keyobj),
+					    obj_get_name(curkey->keyobj));
+		    if (!keyval) {
+			return SET_ERROR(ERR_INTERNAL_VAL);
+		    }
+		} /* else skip this key (for debugging agent) */
 	    }
 
-	    val_remove_child(keyval);
-	    val_insert_child(keyval, lastkey, *curtop);
-	    lastkey = keyval;
+	    if (res == NO_ERR) {
+		val_remove_child(keyval);
+		val_insert_child(keyval, lastkey, *curtop);
+		lastkey = keyval;
+	    }
 	}
 	break;
     case OBJ_TYP_CONTAINER:
@@ -4058,16 +4106,98 @@ static status_t
 	break;
     case OBJ_TYP_CHOICE:
     case OBJ_TYP_CASE:
-	/* skip over this meta nodes; they are not present
-	 * in instance documents
-	 */
+	if (curobj != config_content->obj) {
+	    /* nothing to do for the choice level if the target is a case */
+	    res = NO_ERR;
+	    break;
+	}
+	done = FALSE;
+	while (!done) {
+	    newnode = val_get_first_child(config_content);
+	    if (newnode) {
+		val_remove_child(newnode);
+		res = add_content(rpc, newnode, newnode->obj, curtop);
+		if (res != NO_ERR) {
+		    val_free_value(newnode);
+		    done = TRUE;
+		}
+	    } else {
+		done = TRUE;
+	    }
+	}
+	if (res == NO_ERR) {
+	    val_free_value(config_content);
+	}
+	*curtop = newnode;
 	break;
     default:
 	/* any other object type is an error */
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    return NO_ERR;
+    return res;
+
+}  /* add_content */
+
+
+/********************************************************************
+* FUNCTION add_config_from_content_node
+* 
+* Add the config node content for the edit-config operation
+* Build the <config> nodfe top-down, by recursing bottom-up
+* from the node to be edited.
+*
+* INPUTS:
+*   rpc == RPC method in progress
+*   config_content == the node associated with the target
+*             to be used as content nested within the 
+*             <config> element
+*   curobj == the current object node for config_content, going
+*                 up the chain to the root object.
+*                 First call should pass config_content->obj
+*   config == the starting <config> node to add the data into
+*   curtop == address of stable storage for current add-to node
+*            This pointer MUST be set to NULL upon first fn call
+* OUTPUTS:
+*    config node is filled in with child nodes
+*
+* RETURNS:
+*    status; config_content is NOT freed if returning an error
+*********************************************************************/
+static status_t
+    add_config_from_content_node (const obj_template_t *rpc,
+				  val_value_t *config_content,
+				  const obj_template_t *curobj,
+				  val_value_t *config,
+				  val_value_t **curtop)
+{
+    const obj_template_t  *parent;
+    status_t               res;
+
+    /* get to the root of the object chain */
+    parent = obj_get_cparent(curobj);
+    if (parent) {
+	res = add_config_from_content_node(rpc,
+					   config_content,
+					   parent,
+					   config,
+					   curtop);
+	if (res != NO_ERR) {
+	    return res;
+	}
+    }
+
+    /* set the current target, working down the stack
+     * on the way back from the initial dive
+     */
+    if (!*curtop) {
+	/* first time through to this point */
+	*curtop = config;
+    }
+
+    res = add_content(rpc, config_content, curobj, curtop);
+
+    return res;
 
 }  /* add_config_from_content_node */
 
@@ -4088,7 +4218,9 @@ static status_t
 *
 * OUTPUTS:
 *    state may be changed or other action taken
-*    config_content is consumed -- freed or transfered
+*
+*    !!! config_content is consumed -- freed or transfered to a PDU
+*    !!! that will be freed later
 *
 * RETURNS:
 *    status
@@ -4252,9 +4384,9 @@ static status_t
 
 
 /********************************************************************
- * FUNCTION get_edit_from_choice
+ * FUNCTION get_content_from_choice
  * 
- * Get the input for the EditOps from choice
+ * Get the content input for the EditOps from choice
  *
  * If the choice is 'from-cli' and this is interactive mode
  * then the fill_valset will be called to get input
@@ -4263,14 +4395,22 @@ static status_t
  * INPUTS:
  *    rpc == RPC method for the load command
  *    valset == parsed CLI valset
- *    
+ *
+ * OUTPUTS:
+ *    *dummycon == TRUE if the returned container
+ *       is a dummy and not part of the config target
+ *       If so, then all the child nodes need to be moved to
+ *       the NETCONF PDU, not the dummy container
+ *       == FALSE if the returned value node is the one
+ *          and only element to add to the NETCONF PDU
+ *
  * RETURNS:
  *   malloced result of the choice; this is the content
  *   that will be affected by the edit-config operation
  *   via create, merge, or replace
  *********************************************************************/
 static val_value_t *
-    get_edit_from_choice (const obj_template_t *rpc,
+    get_content_from_choice (const obj_template_t *rpc,
 			  val_value_t *valset)
 {
     val_value_t           *parm, *curparm, *newparm;
@@ -4283,7 +4423,6 @@ static val_value_t *
     /* init locals */
     iscli = FALSE;
     res = NO_ERR;
-
 
     /* look for the 'from' parameter variant */
     parm = val_find_child(valset, YANGCLI_MOD, 
@@ -4340,48 +4479,70 @@ static val_value_t *
 		get_optional = saveopt;
 		return NULL;
 	    }
+	    if (curparm->obj != targobj) {
+		log_error("\nError: current value '%s' object type is incorrect.",
+			  VAL_STR(parm));
+		get_optional = saveopt;
+		return NULL;
+	    }
 	}
 
 	switch (targobj->objtype) {
 	case OBJ_TYP_LEAF:
 	case OBJ_TYP_LEAF_LIST:
 	    newparm = fill_value(rpc, targobj, curparm, &res);
-
-	    get_optional = saveopt;
-
-	    if (res != NO_ERR) {
-		if (newparm) {
-		    val_free_value(newparm);
-		}
-		return NULL;
-	    } else {
-		return newparm;
-	    }
-	    /*NOTREACHED*/
+	    break;
 	case OBJ_TYP_CHOICE:
+	    newparm = val_new_value();
+	    if (!newparm) {
+		log_error("\nError: malloc failure");
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		val_init_from_template(newparm, targobj);
 	    
+		res = get_choice(rpc, targobj, newparm, curparm);
+		if (res == ERR_NCX_SKIPPED) {
+		    res = NO_ERR;
+		}
+	    }
+	    break;
+	case OBJ_TYP_CASE:
+	    newparm = val_new_value();
+	    if (!newparm) {
+		log_error("\nError: malloc failure");
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		val_init_from_template(newparm, targobj);
+
+		res = get_case(rpc, targobj, newparm, curparm);
+		if (res == ERR_NCX_SKIPPED) {
+		    res = NO_ERR;
+		}
+	    }
+	    break;
 	default:
 	    newparm = val_new_value();
 	    if (!newparm) {
 		log_error("\nError: malloc failure");
-		get_optional = saveopt;
-		return NULL;
-	    }
-	    val_init_from_template(newparm, targobj);
-
-	    res = fill_valset(rpc, newparm, curparm);
-	    if (res == ERR_NCX_SKIPPED) {
-		res = NO_ERR;
-	    }
-
-	    get_optional = saveopt;
-
-	    if (res != NO_ERR) {
-		val_free_value(newparm);
-		return NULL;
+		res = ERR_INTERNAL_MEM;
 	    } else {
-		return newparm;
+		val_init_from_template(newparm, targobj);
+
+		res = fill_valset(rpc, newparm, curparm);
+		if (res == ERR_NCX_SKIPPED) {
+		    res = NO_ERR;
+		}
 	    }
+	}
+
+	get_optional = saveopt;
+	if (res != NO_ERR) {
+	    if (newparm) {
+		val_free_value(newparm);
+	    }
+	    return NULL;
+	} else {
+	    return newparm;
 	}
     } else {
 	/* from global or local variable */
@@ -4396,11 +4557,12 @@ static val_value_t *
     }
     /*NOTREACHED*/
 
-}  /* get_edit_from_choice */
+}  /* get_content_from_choice */
+
 
 
 /********************************************************************
- * FUNCTION add_operation_attr
+ * FUNCTION add_one_operation_attr
  * 
  * Add the nc:operation attribute to a value node
  *
@@ -4412,8 +4574,8 @@ static val_value_t *
  *   status
  *********************************************************************/
 static status_t
-    add_operation_attr (val_value_t *val,
-			op_editop_t op)
+    add_one_operation_attr (val_value_t *val,
+			    op_editop_t op)
 {
     const obj_template_t *operobj;
     const xmlChar        *editopstr;
@@ -4430,6 +4592,7 @@ static status_t
     if (!operobj) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
+
 
     /* create a value node for the meta-value */
     metaval = val_new_value();
@@ -4458,8 +4621,50 @@ static status_t
     }
 
     dlq_enque(metaval, &val->metaQ);
-
     return NO_ERR;
+
+} /* add_one_operation_attr */
+
+
+/********************************************************************
+ * FUNCTION add_operation_attr
+ * 
+ * Add the nc:operation attribute to a value node
+ *
+ * INPUTS:
+ *    val == value node to set
+ *    op == edit operation to use
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    add_operation_attr (val_value_t *val,
+			op_editop_t op)
+{
+    val_value_t          *childval;
+    status_t              res;
+
+    res = NO_ERR;
+
+    switch (val->obj->objtype) {
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+	for (childval = val_get_first_child(val);
+	     childval != NULL;
+	     childval = val_get_next_child(childval)) {
+
+	    res = add_one_operation_attr(childval, op);
+	    if (res != NO_ERR) {
+		return res;
+	    }
+	}
+	break;
+    default:
+	res = add_one_operation_attr(val, op);
+    }
+
+    return res;
 
 } /* add_operation_attr */
 
@@ -4501,7 +4706,7 @@ static void
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_edit_from_choice(rpc, valset);
+    content = get_content_from_choice(rpc, valset);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -4565,7 +4770,7 @@ static void
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_edit_from_choice(rpc, valset);
+    content = get_content_from_choice(rpc, valset);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -4629,7 +4834,7 @@ static void
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_edit_from_choice(rpc, valset);
+    content = get_content_from_choice(rpc, valset);
     if (!content) {
 	val_free_value(valset);
 	return;

@@ -11,7 +11,7 @@
          <t:ee>e77</t:ee>
          <t:ee>e777</t:ee>
          <t:ee>a1</t:ee>
-         <t:eee>xxx</t:eee>
+         <t:eee>test one</t:eee>
       </t:e>
       <t:f1>test one</t:f1>
    </t:test1>
@@ -22,7 +22,7 @@
    </t:test2>
    <t:test2 xmlns:t="urn:ietf:params:xml:ns:yang:test">
       <t:a2>wilma</t:a2>
-      <t:b2>8</t:b2>
+      <t:b2>55</t:b2>
       <t:foo>69 bugs to go!</t:foo>
    </t:test2>
    <t:test2 xmlns:t="urn:ietf:params:xml:ns:yang:test">

@@ -754,6 +754,7 @@ static boolean
 
 		/* add another layer to the filptr chain
 		 * for the child node header
+		 ********************************* !!!!!!!!!!! ***************************
 		 */
 		fp = save_filptr(filptr, chval, NCX_NT_CHILD, NULL);
 		if (!fp) {
@@ -889,12 +890,7 @@ static void
 	
 	switch (filptr->nodetyp) {
 	case NCX_NT_VAL:
-	    if (filptr->nodetyp == NCX_NT_VAL) {
-		val = (val_value_t *)filptr->node;
-	    } else {
-		SET_ERROR(ERR_INTERNAL_VAL);
-		return;
-	    }
+	    val = (val_value_t *)filptr->node;
 
 	    if (filptr->btyp != NCX_BT_CONTAINER) {
 		xml_wr_value_elem(scb, &msg->mhdr, val, parent->nsid,

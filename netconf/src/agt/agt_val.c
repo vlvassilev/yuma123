@@ -262,88 +262,42 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION add_valnode
-* 
-* Add a val node to the parent val node
-*
-* INPUTS:
-*    valnode == val_value_t struct to add to the parent val
-*    parent == val_value_t parent to add the valnode as a child
-*********************************************************************/
-static void
-    add_valnode (val_value_t *valnode,
-		 val_value_t *parent)
-{
-    val_add_child(valnode, parent);
-} /* add_valnode */
-
-
-/********************************************************************
-* FUNCTION swap_valnode
-* 
-* Swap a value node in the parent value node
-*
-* INPUTS:
-*    newval == val_valuet struct to add to the parent value node
-*    curval == current value node to replace
-*********************************************************************/
-static void
-    swap_valnode (val_value_t *newval,
-		  val_value_t *curval)
-{
-    val_swap_child(newval, curval);
-} /* swap_valnode */
-
-
-/********************************************************************
-* FUNCTION merge_valnode
-* 
-* Merge a value node to the parent value node
-*
-* INPUTS:
-*    newval == val_value_t struct to merge into the parent node
-*    curval == (first) current value found to merge with
-* RETURNS:
-*    TRUE if src should now be freed
-*    FALSE if source should not be freed
-*********************************************************************/
-static boolean
-    merge_valnode (val_value_t *newval,
-		   val_value_t *curval)
-{
-    return val_merge(newval, curval);
-
-} /* merge_valnode */
-
-
-/********************************************************************
 * FUNCTION add_undo_node
 * 
 * Add an undo node to the msg->undoQ
 *
 * INPUTS:
-*    appnode 
-*
+*    msg == RPC message in progress
+*    editop == edit-config operation attribute value
+*    newnode == node from PDU
+*    curnode == node from database (if any)
+*    parentnode == parent of curnode (or would be)
+*    res == result of edit operation
+*    result == address of return status
 * OUTPUTS:
 *    rpc_undo_rec_t struct added to msg->undoQ
+*   *result set to resturn status
 *
 * RETURNS:
-*   status
+*   pointer to new undo record, in case any extra_deleteQ
+*   items need to be added; NULL on error
 *********************************************************************/
-static status_t
+static rpc_undo_rec_t *
     add_undo_node (rpc_msg_t *msg,
 		   op_editop_t editop,
 		   val_value_t *newnode,
 		   val_value_t *curnode,
 		   val_value_t *parentnode,
-		   status_t  res)
+		   status_t  res,
+		   status_t  *result)
 {
     rpc_undo_rec_t *undo;
 
     /* create an undo record for this merge */
     undo = rpc_new_undorec();
     if (!undo) {
-	return ERR_INTERNAL_MEM;
+	*result = ERR_INTERNAL_MEM;
+	return NULL;
     }
     undo->ismeta = FALSE;
     undo->editop = editop;
@@ -356,14 +310,16 @@ static status_t
 	undo->curnode = val_clone(curnode);
 	if (!undo->curnode) {
 	    rpc_free_undorec(undo);
-	    return ERR_INTERNAL_MEM;
+	    *result = ERR_INTERNAL_MEM;
+	    return NULL;
 	}
     }
     undo->parentnode = parentnode;
     undo->res = res;
 
     dlq_enque(undo, &msg->rpc_undoQ);
-    return NO_ERR;
+    *result = NO_ERR;
+    return undo;
 
 } /* add_undo_node */
 
@@ -447,6 +403,7 @@ static status_t
 {
 #ifdef NOT_YET
     status_t  res;
+    rpc_undo_rec_t *undo;
 
     res = NO_ERR;
 
@@ -458,8 +415,8 @@ static status_t
 
     /* something requested, so check if an undo record is needed */
     if (msg->rpc_need_undo) {
-	res = add_undo_node(msg, editop,
-			    newval, curval, /*curparent*/  NO_ERR);
+	undo = add_undo_node(msg, editop,
+			    newval, curval, /*curparent*/  NO_ERR, &res);
 	if (res != NO_ERR) {
 	    return res;
 	}
@@ -473,6 +430,43 @@ static status_t
     return NO_ERR;
 #endif
 }   /* merge_metadata */
+
+
+/********************************************************************
+* FUNCTION add_child
+* 
+* Add a child node
+*
+* INPUTS:
+*   child == child value to add
+*   parent == parent value to add child to
+*   undo == undo record in progress (may be NULL)
+*
+* OUTPUTS:
+*    child added to parent->v.childQ
+*    any other cases removed and either added to undo node or deleted
+*
+*********************************************************************/
+static void
+    add_child_node (val_value_t  *child,
+		    val_value_t  *parent,
+		    rpc_undo_rec_t *undo)
+{
+    val_value_t  *val;
+    dlq_hdr_t     cleanQ;
+
+    dlq_createSQue(&cleanQ);
+
+    val_add_child_clean(child, parent, &cleanQ);
+    if (undo) {
+	dlq_block_enque(&cleanQ, &undo->extra_deleteQ);
+    } else {
+	while (!dlq_empty(&cleanQ)) {
+	    val = (val_value_t *)dlq_deque(&cleanQ);
+	    val_free_value(val);
+	}
+    }
+}  /* add_child_node */
 
 
 /********************************************************************
@@ -510,13 +504,15 @@ static status_t
 		     val_value_t  *curval,
 		     boolean      *done)
 {
-    status_t         res;
-    boolean          applyhere, mergehere, freenew;
+    rpc_undo_rec_t   *undo;
+    status_t          res;
+    boolean           applyhere, mergehere, freenew;
     
 
     res = NO_ERR;
     mergehere = FALSE;
     freenew = FALSE;
+    undo = NULL;
 
     /* check if this node needs the edit operation applied */
     if (*done) {
@@ -534,8 +530,8 @@ static status_t
 #endif
 
 	if (msg->rpc_need_undo) {
-	    res = add_undo_node(msg, editop, newval,
-				curval, parent, NO_ERR);
+	    undo = add_undo_node(msg, editop, newval,
+				 curval, parent, NO_ERR, &res);
 	    if (res != NO_ERR) {
 		return res;
 	    }
@@ -553,9 +549,9 @@ static status_t
 	case OP_EDITOP_MERGE:
 	    val_remove_child(newval);
 	    if (curval) {
-		freenew = merge_valnode(newval, curval);
+		freenew = val_merge(newval, curval);
 	    } else {
-		add_valnode(newval, parent);
+		add_child_node(newval, parent, undo);
 	    }
 
 	    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
@@ -567,12 +563,12 @@ static status_t
 	    val_remove_child(newval);
 	    if (curval) {
 		val_set_canonical_order(newval);
-		swap_valnode(newval, curval);
+		val_swap_child(newval, curval);
 		if (!msg->rpc_need_undo) {
 		    val_free_value(curval);
 		} /* else curval not freed yet, hold in undo record */
 	    } else {
-		add_valnode(newval, parent);
+		add_child_node(newval, parent, undo);
 
 		/**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
 		val_set_canonical_order(parent);
@@ -580,7 +576,7 @@ static status_t
 	    break;
 	case OP_EDITOP_CREATE:
 	    val_remove_child(newval);
-	    add_valnode(newval, parent);
+	    add_child_node(newval, parent, undo);
 
 	    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
 	    val_set_canonical_order(parent);
@@ -681,15 +677,15 @@ static status_t
 		res = ERR_INTERNAL_MEM;
 	    } else {
 		if (curval) {
-		    freenew = merge_valnode(testval, curval);
+		    freenew = val_merge(testval, curval);
 		} else {
-		    add_valnode(testval, parent);
+		    add_child_node(testval, parent, NULL);
 		}
 	    }
 
 	    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
 	    if (!freenew) {
-		val_set_canonical_order(parent);
+		; // val_set_canonical_order(parent);
 	    }
 	    break;
 	case OP_EDITOP_REPLACE:
@@ -698,14 +694,14 @@ static status_t
 		res = ERR_INTERNAL_MEM;
 	    } else {
 		if (curval) {
-		    val_set_canonical_order(testval);
-		    swap_valnode(testval, curval);
+		    // val_set_canonical_order(testval);
+		    val_swap_child(testval, curval);
 		    val_free_value(curval);
 		} else {
-		    add_valnode(testval, parent);
+		    add_child_node(testval, parent, NULL);
 		    
 		    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
-		    val_set_canonical_order(parent);
+		    // val_set_canonical_order(parent);
 		}
 	    }
 	    break;
@@ -714,10 +710,10 @@ static status_t
 	    if (!testval) {
 		res = ERR_INTERNAL_MEM;
 	    } else {
-		add_valnode(testval, parent);
+		add_child_node(testval, parent, NULL);
 
 		/**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
-		val_set_canonical_order(parent);
+		// val_set_canonical_order(parent);
 	    }
 	    break;
 	case OP_EDITOP_LOAD:
@@ -1086,7 +1082,7 @@ static void
 #endif
 
 	/* add the node back in the tree */
-	add_valnode(undo->curnode, undo->parentnode);
+	val_add_child(undo->curnode, undo->parentnode);
 	break;
     case OP_EDITOP_MERGE:
     case OP_EDITOP_REPLACE:
@@ -1112,7 +1108,7 @@ static void
 	if (undo->newnode) {
 	    val_remove_child(undo->newnode);
 	    if (undo->curnode) {
-		swap_valnode(undo->curnode, undo->newnode);
+		val_swap_child(undo->curnode, undo->newnode);
 	    } 
 	    /* remove new node */
 	    val_free_value(undo->newnode);
@@ -1174,7 +1170,7 @@ static void
 	    case OP_EDITOP_DELETE:
 		/* finish deleting 'curnode' */
 		if (undo->curnode) {
-		    ncx_free_node(undo->curnodetyp, undo->curnode);
+		    val_free_value(undo->curnode);
 		}
 		break;
 	    case OP_EDITOP_LOAD:
@@ -2021,7 +2017,8 @@ status_t
 * INPUTS:
 *   scb == session control block
 *   msg == incoming rpc_msg_t in progress
-*   target == cfg_template_t for the config database to write
+*   target == cfg_template_t for the config database to write 
+*          == NULL for no actual write acess (validate only)
 *   valroot == the val_value_t struct containing the root
 *              (NCX_BT_CONTAINER, ncx:root)
 *              datatype representing the config root with
@@ -2044,7 +2041,7 @@ status_t
     status_t        res;
 
 #ifdef DEBUG
-    if (!scb || !msg || !target || !valroot) {
+    if (!scb || !msg || !valroot) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!obj_is_root(valroot->obj)) {
@@ -2052,20 +2049,23 @@ status_t
     }	
 #endif
 
-    /* check the lock first */
-    res = cfg_ok_to_write(target, scb->sid);
-    if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, res, NULL,
-			 NCX_NT_NONE, NULL, 
-			 NCX_NT_VAL, valroot);
-	return res;
+    if (target) {
+	/* check the lock first */
+	res = cfg_ok_to_write(target, scb->sid);
+	if (res != NO_ERR) {
+	    agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, res, NULL,
+			     NCX_NT_NONE, NULL, 
+			     NCX_NT_VAL, valroot);
+	    return res;
+	}
     }
 
     /* the <config> root is just a value node of type 'root'
      * traverse all nodes and check the <edit-config> request
      */
     res = handle_callback(AGT_CB_VALIDATE, editop, scb, 
-			  msg, target, valroot, target->root);
+			  msg, target, valroot,
+			  (target) ? target->root : NULL);
 
     return res;
 

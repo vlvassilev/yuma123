@@ -269,8 +269,6 @@ typedef struct typ_def_t_ {
     ncx_access_t     maxaccess;
     ncx_data_class_t dataclass;
     ncx_merge_t      mergetype;
-    uint32           choicenum;       /* non-zero if choice member */
-    void            *cbset;            /* malloced agt_ps_tcbset_t */
     xmlChar         *prefix;            /* pfix used in type field */
     xmlChar         *typename;      /* typename used in type field */
     uint32           linenum;         /* linenum when NCX_CL_NAMED */
@@ -629,9 +627,6 @@ extern ncx_merge_t
 
 extern xmlns_id_t 
     typ_get_nsid (const typ_template_t *typ);
-
-extern uint32
-    typ_get_choicenum (const typ_def_t *typdef);
 
 extern const typ_template_t *
     typ_get_listtyp (const typ_def_t *typdef);

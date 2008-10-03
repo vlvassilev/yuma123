@@ -101,12 +101,10 @@ typedef struct rpc_undo_rec_t_ {
     dlq_hdr_t       qhdr;
     boolean         ismeta;
     op_editop_t     editop;
-    ncx_node_t      newnodetyp;
-    void           *newnode;      
-    ncx_node_t      curnodetyp;
-    void           *curnode;      
-    ncx_node_t      parentnodetyp;
-    void           *parentnode;    
+    val_value_t    *newnode;      
+    val_value_t    *curnode;      
+    val_value_t    *parentnode; 
+    dlq_hdr_t       extra_deleteQ;     
     status_t        res;
 } rpc_undo_rec_t;
 

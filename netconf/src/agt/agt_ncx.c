@@ -910,36 +910,86 @@ static status_t
 		       rpc_msg_t *msg,
 		       xml_node_t *methnode)
 {
-    cfg_template_t *target;
-    val_value_t    *val;
-    op_editop_t     defop;
-    status_t        res;
+    cfg_template_t       *target;
+    val_value_t          *val, *child, *rootval;
+    const xmlChar        *errstr;
+    const agt_profile_t  *profile;
+    status_t              res;
 
-
-    (void)methnode;
     target = NULL;
-    defop = OP_EDITOP_NONE;
     res = NO_ERR;
+    rootval = NULL;
+    errstr = NULL;
 
     /* get the source parameter */
     val = val_find_child(&msg->rpc_input, NC_MODULE,
 			 NCX_EL_SOURCE);
     if (!val || val->res != NO_ERR) {
 	if (val) {
-	    return val->res;
+	    res = val->res;
 	} else {
-	    return ERR_NCX_OPERATION_FAILED;
+	    res = ERR_NCX_OPERATION_FAILED;
 	}
+	errstr = NCX_EL_SOURCE;
     }
 
     /* determine which variant of the input parameter is present */
-    
-    /****/
-    return ERR_NCX_OPERATION_FAILED;
-    /****/
+    if (res == NO_ERR) {
+	child = val_get_first_child(val);
+	if (!child || child->res != NO_ERR) {
+	    if (child) {
+		res = child->res;
+		errstr = child->name;
+	    } else {
+		res = ERR_NCX_OPERATION_FAILED;
+		errstr = NCX_EL_SOURCE;
+	    }
+	}
+    }
 
-#if 0
-    /*** set the target config variable *****/
+    if (res == NO_ERR) {
+	if (!xml_strcmp(child->name, NCX_EL_RUNNING)) {
+	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+	    errstr = child->name;
+	} else if (!xml_strcmp(child->name, NCX_EL_CANDIDATE)) {
+	    profile = agt_get_profile();
+	    if (profile->agt_targ != NCX_AGT_TARG_CANDIDATE) {
+		res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+		errstr = child->name;
+	    } else {
+		target = cfg_get_config_id(NCX_CFGID_CANDIDATE);
+		if (target) {
+		    rootval = target->root;
+		    if (!rootval) {
+			res = ERR_NCX_OPERATION_FAILED;
+			errstr = child->name;
+		    }
+		} else {
+		    res = ERR_NCX_OPERATION_FAILED;
+		    errstr = child->name;
+		}
+	    }
+	} else if (!xml_strcmp(child->name, NCX_EL_STARTUP)) {
+	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+	    errstr = child->name;
+	} else if (!xml_strcmp(child->name, NCX_EL_URL)) {
+	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+	    errstr = child->name;
+	} else if (!xml_strcmp(child->name, NCX_EL_CONFIG)) {
+	    rootval = child;
+	}
+    }
+
+    if (res != NO_ERR) {
+	agt_record_error(scb, &msg->mhdr, 
+			 NCX_LAYER_OPERATION, res, methnode,
+			 (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
+			 (errstr) ? errstr : NULL,
+			 (rootval) ? NCX_NT_VAL : NCX_NT_NONE, 
+			 (rootval) ? rootval : NULL);
+	return res;
+    }
+
 
     /* set the error parameter to gather the most errors */
     msg->rpc_err_option = OP_ERROP_CONTINUE;
@@ -948,20 +998,16 @@ static status_t
      * attributes) against the existing data model.
      * <rpc-error> records will be added as needed 
      */
-    res = agt_val_validate_write(scb, msg, target, val, OP_EDITOP_NONE);
+    res = agt_val_validate_write(scb, msg, NULL, rootval, OP_EDITOP_MERGE);
 
     if (res == NO_ERR) {
-	res = agt_val_root_check(scb, msg, val);
+	res = agt_val_root_check(scb, &msg->mhdr, rootval);
     }
-
-    /* save the default operation in 'user1' */
-    msg->rpc_user1 = (void *)defop;
 
     /* save the real result; this field is not used by the RPC layer */
     msg->rpc_status = res;
 
     return res;
-#endif
 
 } /* validate_validate */
 

@@ -546,6 +546,12 @@ extern void
     val_add_child (val_value_t *child,
 		   val_value_t *parent);
 
+/* add an object and delete any extra cases */
+extern void
+    val_add_child_clean (val_value_t *child,
+			 val_value_t *parent,
+			 dlq_hdr_t *cleanQ);
+
 extern void
     val_insert_child (val_value_t *child,
 		      val_value_t *current,

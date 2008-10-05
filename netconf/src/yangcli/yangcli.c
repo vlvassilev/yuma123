@@ -1044,12 +1044,13 @@ static void *
 {
     void          *def;
     xmlChar       *start, *p, *q, oldp, oldq;
-    const xmlChar *module, *defname;
-    uint32         modlen;
+    const xmlChar *prefix, *defname, *modname;
+    uint32         prelen;
+    xmlns_id_t     nsid;
     
     def = NULL;
     q = NULL;
-    modlen = 0;
+    prelen = 0;
     *len = 0;
     start = line;
 
@@ -1070,11 +1071,11 @@ static void *
 	return NULL;
     }
 
-    /* search for an module prefix if found a separator */
+    /* search for a module prefix if a separator was found */
     if (*p == ':') {
 
-	/* use an explicit module name or prefix ion YANG */
-	modlen = p - start;
+	/* use an explicit module prefix in YANG */
+	prelen = p - start;
 	q = p+1;
 	while (*q && !xml_isspace(*q)) {
 	    q++;
@@ -1086,7 +1087,7 @@ static void *
 	oldp = *p;
 	*p = 0;
 
-	module = start;
+	prefix = start;
 	defname = p+1;
     } else {
 	/* no module prefix, use default module, if any */
@@ -1098,33 +1099,43 @@ static void *
 	/* try the default module, which will be NULL
 	 * unless set by the default-module CLI param
 	 */
-	module = NULL;
+	prefix = NULL;
 	defname = start;
     }
 
     /* look in the registry for the definition name 
      * first check if only the user supplied a module name
      */
-    if (module) {
-	def = def_reg_find_moddef(module, defname, dtyp);
+    if (prefix) {
 
-	/* if an explicit module is given, then no others
-	 * can be tried, but check partial command
-	 */
-	if (!def && autoload) {
-	    switch (*dtyp) {
-	    case NCX_NT_NONE:
-	    case NCX_NT_OBJ:
-		def = ncx_match_any_rpc(module, defname);
-		if (def) {
-		    *dtyp = NCX_NT_OBJ;
+	modname = NULL;
+	nsid = xmlns_find_ns_by_prefix(prefix);
+	if (nsid) {
+	    modname = xmlns_get_module(nsid);
+	}
+	if (modname) {
+	    def = def_reg_find_moddef(modname, defname, dtyp);
+
+	    /* if an explicit module is given, then no others
+	     * can be tried, but check partial command
+	     */
+	    if (!def && autoload) {
+		switch (*dtyp) {
+		case NCX_NT_NONE:
+		case NCX_NT_OBJ:
+		    def = ncx_match_any_rpc(modname, defname);
+		    if (def) {
+			*dtyp = NCX_NT_OBJ;
+		    }
+		default:
+		    ;
 		}
-	    default:
-		;
 	    }
+	} else {
+	    log_error("\nError: no module found for prefix '%s'", prefix);
 	}
     } else {
-	/* no module given, first try default module */
+	/* no module prefix given, first try default module */
 	if (default_module) {
 	    def = def_reg_find_moddef(default_module, defname, dtyp);
 	}
@@ -1143,7 +1154,7 @@ static void *
 
 	/* if not found, try any module */
 	if (!def) {
-	    def = def_reg_find_any_moddef(&module, defname, dtyp);
+	    def = def_reg_find_any_moddef(&modname, defname, dtyp);
 	}
 
 	/* if not found, try a partial RPC command name */
@@ -3089,7 +3100,7 @@ static void
     while (mod) {
 	if (mode == HELP_MODE_BRIEF) {
 	    if (imode) {
-		log_stdout("\n  %s/%s", mod->name, mod->version);
+		log_stdout("\n  %s:%s/%s", mod->prefix, mod->name, mod->version);
 	    } else {
 		log_write("\n  %s/%s", mod->name, mod->version);
 	    }

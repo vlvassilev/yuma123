@@ -446,6 +446,7 @@ date	     init     comment
 #define NCX_EL_MODULE          ((const xmlChar *)"module")
 #define NCX_EL_MODULELIST      ((const xmlChar *)"modulelist")
 #define NCX_EL_MODULES         ((const xmlChar *)"modules")
+#define NCX_EL_MOD_REVISION    ((const xmlChar *)"mod-revision")
 #define NCX_EL_MONITOR         ((const xmlChar *)"monitor")
 #define NCX_EL_NAME            ((const xmlChar *)"name")
 #define NCX_EL_NCX             ((const xmlChar *)"ncx")

@@ -1698,7 +1698,7 @@ static status_t
 		val_free_value(chval);
 		chval = NULL;
 	    }
-	    if (res2 != NO_ERR) {
+	    if (res == ERR_NCX_UNKNOWN_NS || res2 != NO_ERR) {
 		/* skip child didn't work, now skip the entire value subtree */
 		(void)agt_xml_skip_subtree(scb, startnode);
 		return res;

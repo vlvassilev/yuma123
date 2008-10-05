@@ -375,19 +375,8 @@ module netconf {
         config false;
         uses RpcErrorType;
       }
-      container data {
+      anyxml data {
         config false;
-        presence "Indicates some data returned in the reply.
-                  An empty container indicates the request produced
-                  no response data.";
-
-        /* this tag is only valid for NETCONF RPC methods
-         * that return a data element.  It will not support
-         * arbitrary data returned within the rpc-reply
-         * container.  It will only support top-level
-         * elements within the config database as child nodes
-         */
-        ncx:root;
       }
    }
 
@@ -403,9 +392,9 @@ module netconf {
           config false;
         }
 
-        container rpc-error {
-          uses RpcErrorType;
+        list rpc-error {
           config false;
+          uses RpcErrorType;
         }
       }
    }

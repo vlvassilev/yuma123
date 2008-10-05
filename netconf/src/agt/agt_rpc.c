@@ -498,9 +498,11 @@ static void
 			SET_ERROR(res);
 		    }
 		} else {
-		    /* just write the contents of the rpc <data> var */
-		    xml_wr_val(scb, &msg->mhdr, 
-			       msg->rpc_data, NCX_DEF_INDENT*2);
+		    /* just write the contents of the rpc <data> var
+		     * !!! TBD: change rpc_data to a Q instead of 1 element
+		     */
+		    xml_wr_full_val(scb, &msg->mhdr, 
+				    msg->rpc_data, NCX_DEF_INDENT*2);
 		}
 
 		/* only indent the </data> end tag if any data written */

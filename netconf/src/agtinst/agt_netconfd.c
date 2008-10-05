@@ -16,8 +16,9 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"
@@ -104,6 +105,7 @@ date         init     comment
 
 #define AGT_NETCONFD_DEBUG 1
 
+#define TEST_MOD  (const xmlChar *)"netconfd"
 #define TEST_PATH (const xmlChar *)"/nd:netconfd"
 
 /********************************************************************
@@ -196,11 +198,15 @@ static status_t
 #endif
 
     switch (cbtyp) {
+    case AGT_CB_LOAD_MOD:
+    case AGT_CB_UNLOAD_MOD:
     case AGT_CB_VALIDATE:
     case AGT_CB_APPLY:
 	/* this value set has static values and does not
 	 * need any setup or cleanup callbacks
 	 */
+	break;
+    case AGT_CB_COMMIT:
 	break;
     case AGT_CB_ROLLBACK:
 	/* the automatic rollback is sufficient for this parmset */
@@ -226,12 +232,21 @@ static status_t
     register_netconfd_callbacks (void)
 {
     status_t  res;
+    agt_cb_fnset_t  cbset;
 
     /****** TEST !!!! ************/
 
+    memset(&cbset, 0x0, sizeof(agt_cb_fnset_t));
+
+    cbset.cbfn[AGT_CB_LOAD_MOD] = ncboot_callback;
+    cbset.cbfn[AGT_CB_UNLOAD_MOD] = ncboot_callback;
+    cbset.cbfn[AGT_CB_VALIDATE] = ncboot_callback;
+    cbset.cbfn[AGT_CB_APPLY] = ncboot_callback;
+    cbset.cbfn[AGT_CB_COMMIT] = ncboot_callback;
+    cbset.cbfn[AGT_CB_ROLLBACK] = ncboot_callback;
+
     /* netconfd parmset : 1 callback for all cb types */
-    res = agt_cb_register_callback(TEST_PATH,
-				   FORALL, 0, ncboot_callback);
+    res = agt_cb_register_callbacks(TEST_MOD, TEST_PATH, NULL, &cbset);
     if (res != NO_ERR) {
 	return SET_ERROR(res);
     }
@@ -252,7 +267,7 @@ static void
 {
 
     /* netconfd parmset : 1 callback for all cb types */
-    agt_cb_unregister_callback(TEST_PATH);
+    agt_cb_unregister_callbacks(TEST_MOD, TEST_PATH);
 
 } /* unregister_netconfd_callbacks */
 

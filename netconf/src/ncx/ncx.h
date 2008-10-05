@@ -680,4 +680,7 @@ extern void
 extern void
     ncx_reset_modQ (void);
 
+extern void
+    ncx_set_load_callback (ncx_load_cbfn_t cbfn);
+
 #endif	    /* _H_ncx */

@@ -152,6 +152,8 @@ static obj_template_t   *gen_string;
 
 static obj_template_t   *gen_empty;
 
+/* TBD: support multiple callbacks */
+static ncx_load_cbfn_t  mod_load_callback;
 
 /* 1st stage init */
 static boolean       ncx_init_done = FALSE;
@@ -756,6 +758,7 @@ status_t
 
     save_descr = savestr;
     log_set_debug_level(dlevel);
+    mod_load_callback = NULL;
 
     if (startmsg) {
 	log_debug2(startmsg);
@@ -1473,7 +1476,9 @@ obj_template_t *
     rpc = NULL;
     if (module) {
 	mod = ncx_find_module(module);
-	rpc = ncx_match_rpc(mod, rpcname);
+	if (mod) {
+	    rpc = ncx_match_rpc(mod, rpcname);
+	}
     } else {
 	for (mod = ncx_get_first_module();
 	     mod != NULL;
@@ -1621,8 +1626,12 @@ status_t
 	/* save the module in the module Q */
 	mod->added = TRUE;
 	dlq_enque(mod, &ncx_modQ);
-    }
 
+	if (mod_load_callback) {
+	    (*mod_load_callback)(mod);
+	}
+    }
+    
     return NO_ERR;
 
 }  /* ncx_add_to_registry */
@@ -7284,6 +7293,24 @@ void
     ncx_curQ = &ncx_modQ;
 
 }  /* ncx_reset_modQ */
+
+
+/********************************************************************
+* FUNCTION ncx_set_load_callback
+* 
+* Set the callback function for a load-module event
+*
+* INPUT:
+*   cbfn == callback function to use
+*
+*********************************************************************/
+void
+    ncx_set_load_callback (ncx_load_cbfn_t cbfn)
+{
+
+    mod_load_callback = cbfn;
+
+}  /* ncx_set_load_callback */
 
 
 /* END file ncx.c */

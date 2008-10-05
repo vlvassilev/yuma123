@@ -565,4 +565,19 @@ typedef struct ncx_typname_t_ {
 } ncx_typname_t;
 
 
+/* user function callback template when a module is
+ * loaded into the system
+ *
+ * ncx_load_cbfn_t
+ * 
+ *  Run an instrumentation-defined function 
+ *  for a 'module-loaded' event
+ *
+ * INPUTS:
+ *   mod == module that was added to the registry
+ *
+ */
+typedef void (*ncx_load_cbfn_t) (ncx_module_t *mod);
+
+
 #endif	    /* _H_ncxtypes */

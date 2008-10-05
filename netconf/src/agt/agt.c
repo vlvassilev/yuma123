@@ -36,6 +36,10 @@ date         init     comment
 #include "agt_cap.h"
 #endif
 
+#ifndef _H_agt_cb
+#include "agt_cb.h"
+#endif
+
 #ifndef _H_agt_cli
 #include "agt_cli.h"
 #endif
@@ -324,6 +328,9 @@ status_t
 	ncxmod_set_runpath(agt_profile.agt_runpath);
     }
 
+    /* init user callback support */
+    agt_cb_init();
+
     /* initial signal handler first to allow clean exit */
     agt_signal_init();
 
@@ -495,6 +502,7 @@ void
 	agt_signal_cleanup();
 	agt_timer_cleanup();
 	agt_connect_cleanup();
+	agt_cb_cleanup();
 
 	print_errors();
 

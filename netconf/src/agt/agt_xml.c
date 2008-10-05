@@ -513,11 +513,11 @@ static status_t
     if ((res != NO_ERR) && msghdr) {
 	if (badns) {
 	    /* generate an operation-failed error */
-	    agt_record_error(NULL, msghdr, layer, res, 
+	    agt_record_error(scb, msghdr, layer, res, 
 			     node, NCX_NT_STRING, badns, 
 			     NCX_NT_NONE, NULL);
 	} else {
-	    agt_record_error(NULL, msghdr, layer, res, 
+	    agt_record_error(scb, msghdr, layer, res, 
 			     node, NCX_NT_NONE, NULL, 
 			     NCX_NT_NONE, NULL);
 	}

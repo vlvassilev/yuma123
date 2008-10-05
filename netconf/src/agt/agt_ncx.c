@@ -71,6 +71,10 @@ date         init     comment
 #include "cfg.h"
 #endif
 
+#ifndef _H_ncxmod
+#include "ncxmod.h"
+#endif
+
 #ifndef _H_obj
 #include "obj.h"
 #endif
@@ -1114,6 +1118,85 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION load_invoke
+*
+* load module : invoke callback
+* 
+* INPUTS:
+*    see rpc/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    load_invoke (ses_cb_t *scb,
+		 rpc_msg_t *msg,
+		 xml_node_t *methnode)
+{
+    val_value_t           *val, *newval;
+    const obj_template_t  *dataobj;
+    ncx_module_t          *mod;
+    status_t               res;
+
+    res = NO_ERR;
+
+    val = val_find_child(&msg->rpc_input, 
+			 NCXMOD_NETCONFD,
+			 NCX_EL_MODULE);
+    if (!val || val->res != NO_ERR) {
+	return ERR_NCX_OPERATION_FAILED;
+    }
+
+    mod = ncx_find_module(VAL_STR(val));
+    if (!mod) {
+	res = ncxmod_load_module(VAL_STR(val));
+	if (res != NO_ERR) {
+	    agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
+			     methnode, NCX_NT_NONE, NULL, 
+			     NCX_NT_VAL, val);
+	    return res;
+	} else {
+	    mod = ncx_find_module(VAL_STR(val));
+	    if (!mod) {
+		return SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	}
+    }
+
+    newval = val_new_value();
+    if (!newval) {
+	res = ERR_INTERNAL_MEM;
+    } else {
+	dataobj = ncx_get_gen_string();
+	val_init_from_template(newval, dataobj);
+	res = val_set_simval(newval,
+			     obj_get_ctypdef(dataobj),
+			     val->nsid,
+			     NULL,
+			     mod->version);
+	if (res == NO_ERR) {
+	    /* name is set to 'string' at this point, need to change it */
+	    val_set_name(newval, NCX_EL_MOD_REVISION,
+			 xml_strlen(NCX_EL_MOD_REVISION));
+	}
+    }
+	
+    if (res != NO_ERR) {
+	if (newval) {
+	    val_free_value(newval);
+	}
+	agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
+				 methnode, NCX_NT_NONE, NULL, 
+				 NCX_NT_VAL, val);
+    } else {
+	msg->rpc_data = newval;
+    }
+
+    return res;
+
+} /* load_invoke */
+
+
+/********************************************************************
 * FUNCTION register_nc_callbacks
 *
 * Register the agent callback functions for the NETCONF RPC methods 
@@ -1288,6 +1371,13 @@ static status_t
 	return SET_ERROR(res);
     }
 
+    /* load module extension */
+    res = agt_rpc_register_method(AGT_CLI_MODULE, NCX_EL_LOAD,
+	  AGT_RPC_PH_INVOKE,  load_invoke);
+    if (res != NO_ERR) {
+	return SET_ERROR(res);
+    }
+
     return NO_ERR;
 
 } /* register_nc_callbacks */
@@ -1334,6 +1424,9 @@ static void
 
     /* load-config extension */
     agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_LOAD_CONFIG);
+
+    /* load module extension */
+    agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_LOAD);
 
 } /* unregister_nc_callbacks */
 

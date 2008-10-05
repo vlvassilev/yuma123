@@ -76,7 +76,7 @@ date         init     comment
 *********************************************************************/
 #ifdef DEBUG
 #define NETCONFD_DEBUG   1
-#define NETCONFD_DEBUG_TEST 1
+/* #define NETCONFD_DEBUG_TEST 1 */
 #endif
 
 #define NETCONFD_MOD       (const xmlChar *)"netconfd"
@@ -136,12 +136,14 @@ static status_t
     log_debug2("\nnetconfd: Loading Debug Test Module");
 #endif
 
+#ifdef REMOVED_USE_LOAD_COMMAND
 #ifdef NETCONFD_DEBUG_TEST
     /* Load test module */
     res = ncxmod_load_module((const xmlChar *) "test");
     if (res != NO_ERR) {
 	return res;
     }
+#endif
 #endif
 
     return NO_ERR;
@@ -183,10 +185,14 @@ static status_t
 	      boolean *showhelp)
 {
     status_t   res;
+#ifdef NETCONFD_DEBUG_TEST
+    agt_cb_fnset_t cbset;
+#endif
 
 #ifdef NETCONFD_DEBUG
     int   i;
 #endif
+
     log_debug_t  dlevel;
 
     /* set the default debug output level */
@@ -249,9 +255,18 @@ static status_t
 
 
 #ifdef NETCONFD_DEBUG_TEST
-    res = agt_cb_register_callback((const xmlChar *)"/t:test1",
-				   TRUE, AGT_CB_APPLY,
-				   test_callback);
+
+    memset(&cbset, 0x0, sizeof(agt_cb_fnset_t));
+    cbset.cbfn[AGT_CB_LOAD_MOD] = test_callback;
+    cbset.cbfn[AGT_CB_UNLOAD_MOD] = test_callback;
+    cbset.cbfn[AGT_CB_VALIDATE] = test_callback;
+    cbset.cbfn[AGT_CB_APPLY] = test_callback;
+
+    res = agt_cb_register_callbacks((const xmlChar *)"test",
+				    (const xmlChar *)"/t:test1",
+				    (const xmlChar *)"2007-04-01",
+				    &cbset);
+
     if (res != NO_ERR) {
 	SET_ERROR(res);
 	return res;
@@ -308,7 +323,8 @@ static void
 #endif
 
 #ifdef NETCONFD_DEBUG_TEST
-    agt_cb_unregister_callback((const xmlChar *)"/t:test1");
+    agt_cb_unregister_callbacks((const xmlChar *)"test",
+				(const xmlChar *)"/t:test1");
 #endif
 
     /* Cleanup the Netconf Agent Library */

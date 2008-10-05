@@ -451,9 +451,9 @@ const char *
     case ERR_NCX_WRONG_NODETYP:
 	return "wrong node type";
     case ERR_NCX_WRONG_NODETYP_SIM:
-	return "expected simple node type";
+	return "expecting complex node type";
     case ERR_NCX_WRONG_NODETYP_CPX:
-	return "expected complex node type";
+	return "expecting string node type";
     case ERR_NCX_WRONG_DATATYP:
 	return "wrong data type"; 
     case ERR_NCX_WRONG_DATAVAL:

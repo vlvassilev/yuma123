@@ -104,16 +104,22 @@ typedef struct agt_cb_fnset_t_ {
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
+extern void
+    agt_cb_init (void);
+
+extern void
+    agt_cb_cleanup (void);
 
 extern status_t 
-    agt_cb_register_callback (const xmlChar *defpath,
-			      boolean forall,
-			      agt_cbtyp_t cbtyp,
-			      agt_cb_fn_t    cbfn);
+    agt_cb_register_callbacks (const xmlChar *modname,
+			       const xmlChar *defpath,
+			       const xmlChar *minversion,
+			       agt_cb_fnset_t *cbfnset);
 
 
 extern void
-    agt_cb_unregister_callback (const xmlChar *defpath);
+    agt_cb_unregister_callbacks (const xmlChar *modname,
+				 const xmlChar *defpath);
 
 
 #endif	    /* _H_agt_cb */

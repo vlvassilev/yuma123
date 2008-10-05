@@ -108,13 +108,48 @@ module netconfd {
 
     rpc load-config {
       description "NCX internal load-config operation.";
+
       ncx:rpc-type config;
+      ncx:hidden;
+
       input {
         container config {
           ncx:root;
           description "XML Config contents.";
         }
       }
+    }
+
+    rpc load {
+      description 
+        "Load a module into the agent, if it is not already loaded.
+         Returns the module revision date (or today's date if none),
+         of the module that was loaded, or an error if not found
+         or the module found had errors and was not loaded
+         successfully.  If the module is already loaded, then the
+         revision date will simply be returned.";
+
+      ncx:rpc-type config;
+
+      input {
+        leaf module {
+          description "Name of the module to load.";
+          mandatory true;
+          type nt:NcxName;
+        }
+      }
+
+      output {
+        leaf mod-revision {
+          description  
+            "Revision date of the module in use by the agent.";
+          mandatory true;
+          type string {
+            pattern '\d{4}-\d{2}-\d{2}';
+          }
+        }
+      }
+
     }
 
 }

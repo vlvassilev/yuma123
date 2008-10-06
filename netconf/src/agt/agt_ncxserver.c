@@ -157,7 +157,7 @@ status_t
     int i, new, ret;
     struct sockaddr_un clientname;
     struct timeval timeout;
-    size_t size;
+    socklen_t size;
     status_t res;
     boolean done, done2;
 
@@ -274,7 +274,7 @@ status_t
 	    if (FD_ISSET(i, &read_fd_set)) {
 		if (i == ncxsock) {
 		    /* Connection request on original socket. */
-		    size = sizeof(clientname);
+		    size = (socklen_t)sizeof(clientname);
 		    new = accept(ncxsock,
 				 (struct sockaddr *)&clientname,
 				 &size);

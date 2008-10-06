@@ -76,7 +76,8 @@ date         init     comment
 *********************************************************************/
 #ifdef DEBUG
 #define NETCONFD_DEBUG   1
-/* #define NETCONFD_DEBUG_TEST 1 */
+#define NETCONFD_DEBUG_TEST 1
+#define NETCONFD_DEBUG_LOAD_TEST 1
 #endif
 
 #define NETCONFD_MOD       (const xmlChar *)"netconfd"
@@ -136,14 +137,12 @@ static status_t
     log_debug2("\nnetconfd: Loading Debug Test Module");
 #endif
 
-#ifdef REMOVED_USE_LOAD_COMMAND
-#ifdef NETCONFD_DEBUG_TEST
+#ifdef NETCONFD_DEBUG_LOAD_TEST
     /* Load test module */
     res = ncxmod_load_module((const xmlChar *) "test");
     if (res != NO_ERR) {
 	return res;
     }
-#endif
 #endif
 
     return NO_ERR;

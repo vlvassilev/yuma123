@@ -450,17 +450,21 @@ void
 	ses_msg_free_msg(scb, msg);
     }
 
-    while (!dlq_empty(&scb->freeQ)) {
-	buff = (ses_msg_buff_t *)dlq_deque(&scb->freeQ);
-	ses_msg_free_buff(scb, buff);
-    }
-
     if (scb->outbuff) {
 	ses_msg_free_buff(scb, scb->outbuff);
     }
 
     while (!dlq_empty(&scb->outQ)) {
 	buff = (ses_msg_buff_t *)dlq_deque(&scb->outQ);
+	ses_msg_free_buff(scb, buff);
+    }
+
+    /* the freeQ must be cleared after the outQ because
+     * the normal free buffer action is to move it to
+     * the scb->freeQ
+     */
+    while (!dlq_empty(&scb->freeQ)) {
+	buff = (ses_msg_buff_t *)dlq_deque(&scb->freeQ);
 	ses_msg_free_buff(scb, buff);
     }
 

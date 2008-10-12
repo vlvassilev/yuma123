@@ -35,6 +35,10 @@ module yangcli {
       
          ";
 
+    revision 2008-10-11 {
+       description "cleaned up ConnectParms grouping";
+    }
+
     revision 2008-08-01 {
        description "Initial yang version started from ncxcli v 0.2";
     }
@@ -45,27 +49,6 @@ module yangcli {
      *     Groupings for parameters used in multiple commands
      *
      *************************************************************/
-
-    grouping KorP {
-      choice k-or-p {
-        leaf key {
-          description
-           "The full filespec for the key the program should use
-            when connecting to the agent";
-          type string;
-          mandatory true;
-        }
-
-        leaf password {
-          description
-            "User password to use for NETCONF sessions.
-             If none, then user will be prompted before connecting.";
-          type string;
-          ncx:password;
-          mandatory true;
-        }
-      }
-    }
 
     grouping HelpMode {
       choice brief-full {
@@ -196,6 +179,14 @@ module yangcli {
           type string;
         }
 
+        leaf password {
+          description
+            "User password to use for NETCONF sessions.
+             If none, then user will be prompted before connecting.";
+          type string;
+          ncx:password;
+        }
+
         leaf port {
           description 
             "NETCONF port number to use.  If not present, then
@@ -203,6 +194,14 @@ module yangcli {
           type uint16 {
             range "1..max";
           }
+          default 830;
+        }
+
+        leaf key {
+          description
+           "The full filespec for the key the program should use
+            when connecting to the agent";
+          type string;
         }
     }
 
@@ -219,7 +218,6 @@ module yangcli {
         "CLI Parameter Set for the NETCONF Manager Application.";
 
       uses ConnectParms;
-      uses KorP;
 
       leaf batch-mode {
         description
@@ -360,9 +358,8 @@ module yangcli {
           leaf agent {
   	    mandatory true;
           }
-        }
-        uses KorP {
-          choice k-or-p {
+
+          leaf password {
             mandatory true;
           }
         }

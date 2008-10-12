@@ -1773,7 +1773,8 @@ void
 * FUNCTION yang_check_imports_used
 * 
 * Check if the imports statements are actually used
-* Generate warnings if not used
+* Check if the  import is newer than the importing module
+* Generate warnings if so
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -1787,7 +1788,9 @@ void
     yang_check_imports_used (tk_chain_t *tkc,
 			     ncx_module_t *mod)
 {
-    ncx_import_t *testimp;
+    ncx_import_t  *testimp;
+    ncx_module_t  *impmod;
+    int            ret;
 
 #ifdef DEBUG
     if (!tkc || !mod) {
@@ -1803,6 +1806,19 @@ void
 	    log_warn("\nWarning: Module '%s' not used", testimp->module);
 	    tkc->cur = testimp->tk;
 	    ncx_print_errormsg(tkc, mod, ERR_NCX_IMPORT_NOT_USED);
+	}
+
+	/* check if the import is newer than this file */
+	impmod = ncx_find_module(testimp->module);
+	if (impmod) {
+	    ret = xml_strcmp(impmod->version,
+			     mod->version);
+	    if (ret > 0) {
+		log_warn("\nWarning: imported module '%s' (%s)"
+			 " is newer than '%s' (%s)",
+			 impmod->name, impmod->version,
+			 mod->name, mod->version);
+	    }
 	}
     }
 } /* yang_check_imports_used */

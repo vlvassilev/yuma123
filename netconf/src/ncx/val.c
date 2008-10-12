@@ -1225,6 +1225,8 @@ status_t
 	break;
     case NCX_BT_INSTANCE_ID:
 	return NO_ERR;  /*** BUG: MISSING INSTANCE ID VALIDATION ***/
+    case NCX_BT_KEYREF:
+	return NO_ERR;  /*** BUG: MISSING KEYREF VALIDATION ***/
     default:
 	return ERR_NCX_WRONG_DATATYP;
     }
@@ -2456,6 +2458,7 @@ void
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF:   /*******/
 	if (VAL_STR(val)) {
 	    quotes = val_need_quotes(VAL_STR(val));
 	    if (quotes) {
@@ -2676,6 +2679,7 @@ void
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF: /*******/
 	if (VAL_STR(val)) {
 	    quotes = val_need_quotes(VAL_STR(val));
 	    if (quotes) {

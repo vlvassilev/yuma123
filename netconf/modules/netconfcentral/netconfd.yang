@@ -14,6 +14,11 @@ module netconfd {
 
     description "NCX Agent Configuration Parameters and Statistics";
 
+    revision 2008-10-11 {
+       description 
+         "Added runtime load module support and candidate config";
+    }
+
     revision 2008-08-01 {
        description "Initial conversion from netconfd.ncx v 0.6";
     }
@@ -107,10 +112,17 @@ module netconfd {
     }
 
     rpc load-config {
-      description "NCX internal load-config operation.";
+      description 
+        "NCX internal load-config operation.
+         The config database can be loaded dynamically
+         only if the startup config phase was skipped
+         via the 'no-startup' option.
+
+         An operation-failed error will be returned and
+         any startup config file was loaded (even partially)
+         successfully.";
 
       ncx:rpc-type config;
-      ncx:hidden;
 
       input {
         container config {

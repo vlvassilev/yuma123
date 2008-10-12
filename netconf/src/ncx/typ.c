@@ -3654,12 +3654,12 @@ const xmlChar *
     }
 #endif
 
-    sval = typ_first_strdef(typdef);
-    if (!sval) {
-	return NULL;
+    sval = NULL;
+    if (typ_get_basetype(typdef) == NCX_BT_STRING) {
+	sval = typ_first_strdef(typdef);
     }
 
-    return sval->val;
+    return (sval) ? sval->val : NULL;
 
 }  /* typ_get_pattern */
 

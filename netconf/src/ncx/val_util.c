@@ -601,7 +601,7 @@ static status_t
     }
 
     /* check if the 'rpc' root element needs to be added here */
-    if (root) {
+    if (root && val->obj->objtype == OBJ_TYP_RPC) {
 	/* copy prefix */
 	if (mhdr) {
 	    ncprefix = xml_msg_get_prefix_xpath(mhdr, xmlns_nc_id());

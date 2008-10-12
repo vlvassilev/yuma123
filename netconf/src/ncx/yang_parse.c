@@ -701,11 +701,21 @@ static status_t
 		node->mod = mod;
 		node->tk = imp->tk;
 
+		/* save the import on the impchain stack */
 		dlq_enque(node, &pcb->impchainQ);
+
+		/* save the import for prefix translkation */
 		dlq_enque(imp, &mod->importQ);
+
+		/* save the import marker to keep a list
+		 * of all the imports with no duplicates
+		 * regardless of recursion or submodules
+		 */
 		dlq_enque(impptr, &pcb->allimpQ);
 
-		/* load the module now instead of later for validation */
+		/* load the module now instead of later for validation
+		 * it may not get used, but assume it will
+		 */
 		res = ncxmod_load_imodule(imp->module, pcb, YANG_PT_IMPORT);
 		if (res != NO_ERR) {
 		    if (!pcb || !pcb->top || pcb->top->errors) {
@@ -726,6 +736,7 @@ static status_t
 		} else {
 		    retres = SET_ERROR(ERR_INTERNAL_VAL);
 		}
+
 	    }
 	}
     } else {

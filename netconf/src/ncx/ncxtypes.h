@@ -436,13 +436,16 @@ typedef struct ncx_module_t_ {
     xmlChar          *descr;
     xmlChar          *ref;
     xmlChar          *ns;       /* malloc:main, copy:submod */
-    xmlChar          *prefix;   /* malloc:main, copy:submod */  
+    xmlChar          *prefix;   /* may be empty in a submod */
     xmlChar          *source;              /* full filespec */
-    const xmlChar    *sourcefn;      /* ptr to fn in source */
     xmlChar          *belongs;             /* set if submod */
+
+    const xmlChar    *sourcefn;      /* ptr to fn in source */
     const xmlChar    *belongsver;    /* back ptr to mod ver */
+
     dlq_hdr_t        *allimpQ;  /* back-ptr to pcb->allimpQ */
     dlq_hdr_t        *allincQ;  /* back-ptr to pcb->allincQ */
+
     xmlns_id_t        nsid;            /* assigned by xmlns */
     uint32            langver;
     boolean           ismod;     /* module/submodule keyword */
@@ -452,6 +455,7 @@ typedef struct ncx_module_t_ {
     status_t          status;         /* module parse result */
     uint32            errors;            /* yangdump results */
     uint32            warnings;          /* yangdump results */
+
     dlq_hdr_t         revhistQ;        /* Q of ncx_revhist_t */
     dlq_hdr_t         importQ;          /* Q of ncx_import_t */
     dlq_hdr_t         includeQ;        /* Q of ncx_include_t */

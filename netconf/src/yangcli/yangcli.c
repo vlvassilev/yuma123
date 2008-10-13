@@ -185,7 +185,7 @@ date         init     comment
 #define YESNO_YES    1
 #define YESNO_NO     2
 
-#define DEF_OPTIONS (const xmlChar *)"?, \?\?, \?S, ?C"
+#define DEF_OPTIONS (const xmlChar *)"?, \?\?, \?s, ?c"
 
 /* YANGCLI boot and operation parameter names 
  * matches parm clauses in yangcli container in yangcli.yang
@@ -1372,7 +1372,7 @@ static status_t
 	      val_value_t *valset,
 	      val_value_t *oldvalset)
 {
-    const xmlChar    *def, *parmname;
+    const xmlChar    *def, *parmname, *str;
     const typ_def_t  *typdef;
     val_value_t      *oldparm, *newparm;
     xmlChar          *line, *start, *objbuff;
@@ -1396,7 +1396,15 @@ static status_t
 	}
 
 	/* let the user know about the new nest level */
-	log_stdout("\nFilling %s %s:",
+	if (obj_is_key(parm)) {
+	    str = YANG_K_KEY;
+	} else if (obj_is_mandatory(parm)) {
+	    str = YANG_K_MANDATORY;
+	} else {
+	    str = (const xmlChar *)"optional";
+	}
+
+	log_stdout("\nFilling %s %s %s:", str,
 		   obj_get_typestr(parm), objbuff);
 	    
 	m__free(objbuff);
@@ -2187,10 +2195,6 @@ static status_t
 		    val_init_from_template(val, parm);
 		    val_add_child(val, valset);
 		}
-
-		/* let the user know about the new nest level */
-		log_stdout("\nFilling list %s:",
-			   obj_get_name(parm));
 
 		/* recurse with the child node -- NO OLD VALUE
 		 * TBD: get keys, then look up old matching entry

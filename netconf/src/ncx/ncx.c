@@ -610,6 +610,7 @@ static void
 {
     ncx_revhist_t  *revhist;
     ncx_import_t   *import;
+    ncx_include_t  *incl;
     typ_template_t *typ;
     grp_template_t *grp;
     obj_template_t *obj;
@@ -627,10 +628,22 @@ static void
 	def_reg_del_module(mod->name);
     }
 
+    /* clear the revision Q */
+    while (!dlq_empty(&mod->revhistQ)) {
+	revhist = (ncx_revhist_t *)dlq_deque(&mod->revhistQ);
+        ncx_free_revhist(revhist);
+    }
+
     /* clear the import Que */
     while (!dlq_empty(&mod->importQ)) {
 	import = (ncx_import_t *)dlq_deque(&mod->importQ);
         ncx_free_import(import);
+    }
+
+    /* clear the include Que */
+    while (!dlq_empty(&mod->includeQ)) {
+	incl = (ncx_include_t *)dlq_deque(&mod->includeQ);
+        ncx_free_include(incl);
     }
 
     /* clear the type Que */
@@ -663,18 +676,6 @@ static void
     /* clear the extension Que */
     ext_clean_extensionQ(&mod->extensionQ);
 
-    /* clear the header last */
-    while (!dlq_empty(&mod->revhistQ)) {
-	revhist = (ncx_revhist_t *)dlq_deque(&mod->revhistQ);
-        ncx_free_revhist(revhist);
-    }
-
-    /* clear the YANG stmtQ, used for docmode only */
-    while (!dlq_empty(&mod->stmtQ)) {
-	stmt = (yang_stmt_t *)dlq_deque(&mod->stmtQ);
-	yang_free_stmt(stmt);
-    }
-
     ncx_clean_appinfoQ(&mod->appinfoQ);
 
     ncx_clean_typnameQ(&mod->typnameQ);
@@ -683,6 +684,13 @@ static void
 
     yang_clean_nodeQ(&mod->saveincQ);
 
+    /* clear the YANG stmtQ, used for docmode only */
+    while (!dlq_empty(&mod->stmtQ)) {
+	stmt = (yang_stmt_t *)dlq_deque(&mod->stmtQ);
+	yang_free_stmt(stmt);
+    }
+
+    /* clear the name and other fields last for easier debugging */
     if (mod->name) {
 	m__free(mod->name);
     }
@@ -701,17 +709,18 @@ static void
     if (mod->ref) {
 	m__free(mod->ref);
     }
-    if (mod->ismod) {
-	if (mod->ns) {
-	    m__free(mod->ns);
-	}
-	if (mod->prefix) {
-	    m__free(mod->prefix);
-	}
-    } /* else these pointers are copied not malloced */
+    if (mod->ismod && mod->ns) {
+	m__free(mod->ns);
+    } 
+
+    if (mod->prefix) {
+	m__free(mod->prefix);
+    }
+
     if (mod->source) {
 	m__free(mod->source);
     }
+
     if (mod->belongs) {
 	m__free(mod->belongs);
     }

@@ -253,11 +253,7 @@ static void
 	} else {	    
 	    ses_putchar(scb, '_');
 	}
-	if (cp->unified && !mod->ismod) {
-	    ses_putstr(scb, mod->belongsver);
-	} else {
-	    ses_putstr(scb, mod->version);
-	}
+	ses_putstr(scb, mod->version);
     }
     if (!cp->simurls) {
 	ses_putstr(scb, (const xmlChar *)".html");
@@ -578,11 +574,7 @@ static void
     }
     if (!cp->noversionnames) {
 	ses_putchar(scb, '_');
-	if (cp->unified && !mod->ismod) {
-	    ses_putstr(scb, mod->belongsver);
-	} else {
-	    ses_putstr(scb, mod->version);
-	}
+	ses_putstr(scb, mod->version);
     }
     ses_putstr(scb, (const xmlChar *)".xsd',");
 
@@ -603,11 +595,7 @@ static void
     }
     if (!cp->noversionnames) {
 	ses_putchar(scb, '_');
-	if (cp->unified && !mod->ismod) {
-	    ses_putstr(scb, mod->belongsver);
-	} else {
-	    ses_putstr(scb, mod->version);
-	}
+	ses_putstr(scb, mod->version);
     }
     ses_putstr(scb, (const xmlChar *)".yang',");
 

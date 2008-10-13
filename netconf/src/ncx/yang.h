@@ -68,8 +68,7 @@ typedef enum yang_parsetype_t_ {
     YANG_PT_NONE,
     YANG_PT_TOP,          /* called from top level [sub]module */
     YANG_PT_INCLUDE,         /* called from module include-stmt */
-    YANG_PT_IMPORT,           /* called from module import-stmt */
-    YANG_PT_TOP_INCL     /* called from submodule to get prefix */
+    YANG_PT_IMPORT            /* called from module import-stmt */
 } yang_parsetype_t;
 
 
@@ -150,7 +149,6 @@ typedef struct yang_import_ptr_t_ {
  * than once, and speeds up validation processing
  */
 typedef struct yang_pcb_t_ {
-    struct ncx_module_t_ *mod;      /* top-level module */
     struct ncx_module_t_ *top;        /* top-level file */
     boolean       subtree_mode;
     boolean       with_submods;

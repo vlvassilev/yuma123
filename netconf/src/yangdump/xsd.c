@@ -311,10 +311,7 @@ status_t
     if (!mod) {
 	return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
     }
-    if (!mod->ismod) {
-	mod->nsid = pcb->mod->nsid;
-    }
-	
+
     /* create a struct named 'schema' to hold the entire result */
     val = xml_val_new_struct(XSD_SCHEMA, xsd_id);
     if (!val) {

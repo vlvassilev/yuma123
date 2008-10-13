@@ -445,19 +445,28 @@ val_value_t *
 		btyp = obj_get_basetype(chobj);
 		parmval = NULL;
 
+		/* skip past any whitespace after the parm name */
+		while (isspace(buff[buffpos]) && buffpos < bufflen) {
+		    buffpos++;
+		}
+
 		/* check if ended on space of EOLN */
 		if (btyp == NCX_BT_EMPTY) {
-		    buffpos++;   /* skip past WSP or equal or EOLN */
-		} else if (buffpos < bufflen) {
-		    buffpos++;   /* skip past WSP or equal */
-		    /* value expected, so zero-terminate the string
-		     * that represents the parameter value
-		     */
-
-		    /* skip any whitespace */
-		    while (buff[buffpos] && isspace(buff[buffpos])) {
-			buffpos++;
+		    if (buff[buffpos] == '=') {
+			log_error("\nError: cannot assign value "
+				  "to empty leaf '%s'", 
+				  obj_get_name(obj));
+			res = ERR_NCX_INVALID_VALUE;
 		    }
+		} else if (buffpos < bufflen) {
+		    if (buff[buffpos] == '=') {
+			buffpos++;
+
+			/* skip any whitespace */
+			while (buff[buffpos] && isspace(buff[buffpos])) {
+			    buffpos++;
+			}
+		    } /* else whitespace already skipped */
 
 		    /* if any chars left in buffer, get the parmval */
 		    if (buffpos < bufflen) {

@@ -580,6 +580,7 @@ static void
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF:
 	ncx_clean_str(&val->v.str);
 	break;
     case NCX_BT_SLIST:

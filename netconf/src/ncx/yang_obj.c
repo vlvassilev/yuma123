@@ -298,16 +298,19 @@ static status_t
     name = obj_get_name(obj);
 
     if (que == &mod->datadefQ) {
-	testobj = obj_find_template_top(mod, obj->mod->name, name);
+	testobj = obj_find_template_top(mod, 
+					obj_get_mod_name(obj), 
+					name);
     } else {
-	testobj = obj_find_template_test(que, obj->mod->name, name);
+	testobj = obj_find_template_test(que, 
+					 obj_get_mod_name(obj), 
+					 name);
     }
     if (testobj) {
 	if (testobj->mod != mod) {
 	    log_error("\nError: object '%s' already defined "
 		      "in submodule '%s' at line %u",
-		      name, testobj->mod->name,
-		      testobj->linenum);
+		      name, mod->name, testobj->linenum);
 	} else {
 	    log_error("\nError: object '%s' already defined at line %u",
 		      name, testobj->linenum);
@@ -1897,7 +1900,7 @@ static status_t
     }
 
     /* if shorthand version, copy leaf name to case name */
-    if (!withcase) {
+    if (!withcase && retres==NO_ERR) {
 	res = NO_ERR;
 	testobj = (obj_template_t *)dlq_firstEntry(cas->datadefQ);
 	if (testobj) {
@@ -1924,40 +1927,43 @@ static status_t
      * if not, check if any objects in the new case
      * are already defined in a different case
      */
-    res = NO_ERR;
-    for (casobj = (obj_template_t *)dlq_firstEntry(caseQ);
-	 casobj != NULL && res==NO_ERR;
-	 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
+    if (retres == NO_ERR) {
+	res = NO_ERR;
+	for (casobj = (obj_template_t *)dlq_firstEntry(caseQ);
+	     casobj != NULL && res==NO_ERR;
+	     casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
 
-	testcas = casobj->def.cas;
+	    testcas = casobj->def.cas;
 
-	if (!xml_strcmp(cas->name, testcas->name)) {
-	    /* case arm name already used  error */
-	    res = retres = ERR_NCX_DUP_ENTRY;
-	    log_error("\nError: case name '%s' already used"
-		      " on line %u", testcas->name,
-		      casobj->linenum);
-	    ncx_print_errormsg(tkc, mod, retres);
-	} else {
-	    /* check object named within case arm already used */
-	    for (testobj = (obj_template_t *)
-		     dlq_firstEntry(cas->datadefQ);
-		 testobj != NULL;
-		 testobj = (obj_template_t *)
-		     dlq_nextEntry(testobj)) {
+	    if (!xml_strcmp(cas->name, testcas->name)) {
+		/* case arm name already used  error */
+		res = retres = ERR_NCX_DUP_ENTRY;
+		log_error("\nError: case name '%s' already used"
+			  " on line %u", testcas->name,
+			  casobj->linenum);
+		ncx_print_errormsg(tkc, mod, retres);
+	    } else {
+		/* check object named within case arm already used */
+		for (testobj = (obj_template_t *)
+			 dlq_firstEntry(cas->datadefQ);
+		     testobj != NULL;
+		     testobj = (obj_template_t *)
+			 dlq_nextEntry(testobj)) {
 
-		str = obj_get_name(testobj);
-		test2obj = obj_find_template_test(testcas->datadefQ,
-						  testobj->mod->name,
-						  str);
-		if (test2obj) {
-		    /* duplicate in another case arm error */
-		    res = retres = ERR_NCX_DUP_ENTRY;
-		    log_error("\nError: object name '%s' already used"
-			      " in case '%s', on line %u", 
-			      str, testcas->name, test2obj->linenum);
-		    ncx_print_errormsg(tkc, mod, retres);
-		} 
+		    str = obj_get_name(testobj);
+		    test2obj = 
+			obj_find_template_test(testcas->datadefQ,
+					       obj_get_mod_name(testobj),
+					       str);
+		    if (test2obj) {
+			/* duplicate in another case arm error */
+			res = retres = ERR_NCX_DUP_ENTRY;
+			log_error("\nError: object name '%s' already used"
+				  " in case '%s', on line %u", 
+				  str, testcas->name, test2obj->linenum);
+			ncx_print_errormsg(tkc, mod, retres);
+		    } 
+		}
 	    }
 	}
     }
@@ -2192,9 +2198,12 @@ static status_t
 
 	/* make sure sibling choice is not already defined with same name */
 	if (que == &mod->datadefQ) {
-	    testobj = obj_find_template_top(mod, obj->mod->name, choic->name);
+	    testobj = obj_find_template_top(mod, 
+					    obj_get_mod_name(obj), 
+					    choic->name);
 	} else {
-	    testobj = obj_find_template_test(que, obj->mod->name,
+	    testobj = obj_find_template_test(que, 
+					     obj_get_mod_name(obj),
 					     choic->name);
 	}
 	if (testobj) {
@@ -2228,8 +2237,10 @@ static status_t
 		 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 		    
 		str = obj_get_name(testobj);
-		test2obj = obj_find_template_test(que, testobj->mod->name, 
-						  str);
+		test2obj = 
+		    obj_find_template_test(que, 
+					   obj_get_mod_name(testobj), 
+					   str);
 		if (test2obj) {
 		    /* duplicate in the same Q as the choice */
 		    res = retres = ERR_NCX_DUP_ENTRY;
@@ -2516,7 +2527,8 @@ static status_t
 
     /* save or delete the obj_template_t struct */
     if (uses->name && ncx_valid_name2(uses->name)) {
-	testobj = obj_find_template_test(que, obj->mod->name,
+	testobj = obj_find_template_test(que, 
+					 obj_get_mod_name(obj),
 					 uses->name);
 	if (testobj) {
 	    log_error("\nError: object '%s' already defined at line %u",
@@ -2675,7 +2687,8 @@ static status_t
     }
 
     /* save or delete the obj_template_t struct */
-    testobj = obj_find_template_test(que, obj->mod->name,
+    testobj = obj_find_template_test(que, 
+				     obj_get_mod_name(obj),
 				     rpcio->name);
     if (testobj) {
 	log_error("\nError: '%s' statement already defined at line %u",
@@ -3892,7 +3905,7 @@ static status_t
 static status_t 
     get_list_key (tk_chain_t *tkc,
 		  ncx_module_t  *mod,
-		  obj_list_t *list,
+		  obj_list_t    *list,
 		  obj_template_t *obj)
 {
     obj_template_t    *key;
@@ -3950,7 +3963,9 @@ static status_t
 	 */
 	savech = *p;
 	*p = 0;
-	key = obj_find_template(list->datadefQ, mod->name, str);
+	key = obj_find_template(list->datadefQ, 
+				obj_get_mod_name(obj), 
+				str);
 	if (!key) {
 	    log_error("\nError: node %s not found in key "
 		      "for list '%s'", str, list->name);
@@ -4331,7 +4346,8 @@ static status_t
 
     /* check defval is valid case name */
     if (choic->defval) {
-	cas = obj_find_case(choic, mod->name, choic->defval);
+	cas = obj_find_case(choic, obj_get_mod_name(obj), 
+			    choic->defval);
 	if (!cas) {
 	    /* default is not a valid case name */
 	    tkc->cur = obj->tk;
@@ -4437,7 +4453,7 @@ static status_t
 	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
 	testobj = obj_find_template(&uses->grp->datadefQ,
-				    obj->mod->name,
+				    obj_get_mod_name(chobj),
 				    obj_get_name(chobj));
 	if (!testobj) {
 	    /* error: refined obj not in the grouping */
@@ -4475,7 +4491,7 @@ static status_t
 	    } else if (chobj->objtype==OBJ_TYP_CHOICE) {
 		if (chobj->def.choic->defval) {
 		    cas = obj_find_case(chobj->def.choic,
-					chobj->mod->name,
+					obj_get_mod_name(chobj),
 					chobj->def.choic->defval);
 		    if (!cas) {
 			/* default is not a valid case name */

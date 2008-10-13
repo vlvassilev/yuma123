@@ -225,7 +225,7 @@ module yangdump {
              if any messages of this type appear in the error log.
         ";
 
-    revision 2008-07-20 {
+    revision 2008-10-12 {
        description 
           "Converted from yangdump.ncx.";
     }

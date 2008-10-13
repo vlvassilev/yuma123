@@ -332,6 +332,121 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION consume_belongs_to
+* 
+* Parse the next N tokens as a belongs-to clause
+* Set the submodule prefix and belongs string
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'belongs-to' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod   == module struct that will get updated
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    consume_belongs_to (tk_chain_t *tkc,
+			ncx_module_t  *mod)
+{
+    const xmlChar      *val;
+    const char         *expstr;
+    xmlChar            *str;
+    tk_type_t           tktyp;
+    boolean             done, pfixdone;
+    status_t            res, retres;
+
+    val = NULL;
+    str = NULL;
+    expstr = "module name";
+    done = FALSE;
+    pfixdone = FALSE;
+    retres = NO_ERR;
+
+    /* Get the mandatory module name */
+    res = yang_consume_id_string(tkc, mod, &mod->belongs);
+    if (res != NO_ERR) {
+	return res;
+    }
+	
+    /* Get the starting left brace for the sub-clauses
+     * or a semi-colon to end the belongs-to statement
+     */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+	done = TRUE;
+	break;
+    case TK_TT_LBRACE:
+	break;
+    default:
+	retres = ERR_NCX_WRONG_TKTYPE;
+	expstr = "semi-colon or left brace";
+	ncx_mod_exp_err(tkc, mod, retres, expstr);
+	done = TRUE;
+    }
+
+    /* get the prefix clause and any appinfo extensions */
+    while (!done) {
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
+	    CHK_EXIT;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    yang_skip_statement(tkc, mod);
+	    continue;
+	}
+
+	/* Got a token string so check the value, should be 'prefix' */
+	if (!xml_strcmp(val, YANG_K_PREFIX)) {
+	    res = yang_consume_strclause(tkc, mod, &mod->prefix,
+					 &pfixdone, &mod->appinfoQ);
+	    CHK_EXIT;
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    yang_skip_statement(tkc, mod);
+	}
+    }
+
+    return retres;
+
+}  /* consume_belongs_to */
+
+
+/********************************************************************
 * FUNCTION consume_submod_hdr
 * 
 * Parse the sub-module header statements
@@ -427,8 +542,7 @@ static status_t
 	    res = yang_consume_semiapp(tkc, mod, &mod->appinfoQ);
 	    CHK_EXIT;
         } else if (!xml_strcmp(val, YANG_K_BELONGS_TO)) {
-	    res = yang_consume_strclause(tkc, mod, &mod->belongs,
-					 &blong, &mod->appinfoQ);
+	    res = consume_belongs_to(tkc, mod);
 	    CHK_EXIT;
 	} else if (!yang_top_keyword(val)) {
 	    retres = ERR_NCX_WRONG_TKVAL;
@@ -454,6 +568,8 @@ static status_t
     return retres;
 
 }  /* consume_submod_hdr */
+
+
 
 
 /********************************************************************
@@ -1723,14 +1839,6 @@ static status_t
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
 	break;
-    case YANG_PT_TOP_INCL:
-	if (!ismain) {
-	    log_error("\nError: belongs-to (submodule) '%s': "
-		      "must identify a module", mod->name);
-	    retres = ERR_NCX_EXP_MODULE;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
-	break;
     default:
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -1747,36 +1855,6 @@ static status_t
 	CHK_EXIT;
     }
 
-    /* check if only parsing the module header */
-    if (ptyp == YANG_PT_TOP_INCL) {
-	if (pcb->subtree_mode) {
-	    /* don't waste the one def_reg add on this partial module
-	     * it is not really needed
-	     */
-	    return NO_ERR;
-	} else {
-	    /* clear these backpointers because the yang_pcb_t
-	     * will get destroyed soon
-	     */
-	    mod->allincQ = NULL;
-	    mod->allimpQ = NULL;
-
-	    /* add the module name and namespace to the registry */
-	    if (pcb->diffmode) {
-		res = ncx_add_to_modQ(mod);
-	    } else {
-		res = ncx_add_to_registry(mod);
-	    }
-	    if (res != NO_ERR) {
-		retres = res;
-	    } else {
-		pcb->mod = mod;
-		*wasadded = TRUE;
-	    }
-	    return retres;
-	}
-    }
-
     /* check if this module is already loaded, except in diff mode */
     if (mod->ismod && mod->name && !pcb->diffmode &&
 	def_reg_find_module(mod->name)) {
@@ -1789,31 +1867,6 @@ static status_t
 	default:
 	    ;
 	}
-    }
-
-    /* Check if this is a top-level submodule parse
-     * and get the module that it belongs-to
-     * so the prefix and namespace can be copied
-     *
-     * If the belongs clause is not set then the submodule
-     * prefix will remain NULL
-     */
-    if ((ptyp==YANG_PT_TOP) && !ismain && 
-	mod->belongs && ncx_valid_name2(mod->belongs)) {
-	res = ncxmod_load_imodule(mod->belongs, pcb,
-				  YANG_PT_TOP_INCL);
-	CHK_EXIT;
-
-	/* set the submodule prefix to the main module prefix */
-	if (pcb->mod && pcb->mod->prefix) {
-	    mod->prefix = pcb->mod->prefix;
-	    mod->belongsver = pcb->mod->version;
-	}
-    }
-
-    /* set the prefix if this is a submodule being included */
-    if (ptyp==YANG_PT_INCLUDE && pcb->top) {
-	mod->prefix = pcb->top->prefix;
     }
 
     /* Get the linkage statements (imports, include) */
@@ -1829,7 +1882,8 @@ static status_t
     CHK_EXIT;
 
     /* make sure there is at least name and prefix to continue */
-    if (!mod->name || !mod->prefix || !*mod->name || !*mod->prefix) {
+    if (!mod->name || (mod->ismod && !mod->prefix) || 
+	!*mod->name || (mod->ismod && !*mod->prefix)) {
 	return retres;
     }
 
@@ -1901,9 +1955,22 @@ static status_t
     mod->status = retres;
 
     /* make sure there is at least name and prefix to continue */
-    if (!((mod->name && ncx_valid_name2(mod->name)) &&
-	  (mod->prefix && ncx_valid_name2(mod->prefix)))) {
+    if (!mod->name || !ncx_valid_name2(mod->name)) {
 	return retres;
+    }
+    if (mod->ismod) {
+	if (!mod->prefix || !ncx_valid_name2(mod->prefix)) {
+	    return retres;
+	}
+    } else if (mod->prefix) {
+	if (!ncx_valid_name2(mod->prefix)) {
+	    return retres;
+	}
+    } else {
+	mod->prefix = xml_strdup((const xmlChar *)"");
+	if (!mod->prefix) {
+	    return ERR_INTERNAL_MEM;
+	}
     }
 
     /* add the definitions to the def_reg hash table;
@@ -1914,9 +1981,6 @@ static status_t
     case YANG_PT_IMPORT:
 	/* add this regular module to the registry */
 	if (mod->ismod || pcb->top == mod) {
-	    if (!mod->ismod) {
-		mod->nsid = pcb->mod->nsid;
-	    }
 
 	    if (pcb->top == mod) {
 		dlq_block_enque(mod->allimpQ, &mod->saveimpQ);
@@ -1943,9 +2007,6 @@ static status_t
 	} else {
 	    mod->nsid = xmlns_find_ns_by_name(mod->ns);
 	}
-	break;
-    case YANG_PT_TOP_INCL:
-	SET_ERROR(ERR_INTERNAL_VAL);
 	break;
     case YANG_PT_INCLUDE:
 	/* create an entry in the allinc Q to cache this entry

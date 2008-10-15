@@ -568,6 +568,35 @@ void
 
 
 /********************************************************************
+* FUNCTION typ_get_named_typename
+* 
+* Get the type name of the named typ
+*
+* INPUTS:
+*     typdef == pointer to the typ_def_t struct to check
+*
+* RETURNS:
+*    pointer to type name, NULL if some error
+*********************************************************************/
+const xmlChar *
+    typ_get_named_typename (const typ_def_t  *typdef)
+{
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (typdef->class != NCX_CL_NAMED) {
+	return NULL;
+    }
+    return typdef->def.named.typ->name;
+
+}  /* typ_get_named_typename */
+
+
+/********************************************************************
 * FUNCTION typ_set_new_named
 * 
 * Create a new typdef inside a typ_named_t struct inside a typ_def_t

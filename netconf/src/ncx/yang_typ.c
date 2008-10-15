@@ -886,12 +886,11 @@ static status_t
     const char    *expstr;
     tk_type_t      tktyp;
     status_t       res, retres;
-    boolean        done, lendone, patdone;
+    boolean        done, lendone;
 
     expstr = "length or pattern keyword";
     done = FALSE;    
     lendone = FALSE;
-    patdone = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
 
@@ -941,13 +940,6 @@ static status_t
 	    res = consume_yang_range(tkc, mod, typdef, FALSE);
 	    CHK_EXIT;
         } else if (!xml_strcmp(val, YANG_K_PATTERN)) {
-	    if (patdone) {
-		retres = ERR_NCX_ENTRY_EXISTS;
-		log_error("\nError: pattern clause already entered");
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	    patdone = TRUE;
-
 	    /* make sure this is not the 'binary' data type */
 	    if (btyp == NCX_BT_BINARY) {
 		log_error("\nPattern restriction not allowed"
@@ -1091,12 +1083,11 @@ static status_t
     const char    *expstr;
     tk_type_t      tktyp;
     status_t       res, retres;
-    boolean        done, rangedone, lendone, patdone;
+    boolean        done, rangedone, lendone;
 
     expstr = "range, length, or pattern keyword";
     rangedone = FALSE;
     lendone = FALSE;
-    patdone = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
     done = FALSE;
@@ -1168,12 +1159,6 @@ static status_t
 	    res = consume_yang_range(tkc, mod, typdef, FALSE);
 	    CHK_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_PATTERN)) {
-	    if (patdone) {
-		retres = ERR_NCX_ENTRY_EXISTS;
-		log_error("\nError: pattern clause already entered");
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	    patdone = TRUE;
 	    res = consume_yang_pattern(tkc, mod, typdef);
 	    CHK_EXIT;
 	} else {

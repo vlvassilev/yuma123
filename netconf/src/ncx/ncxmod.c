@@ -950,7 +950,9 @@ static status_t
 	testmod = ncx_find_module(modname);
 	if (testmod) {
 	    log_debug3("\nncxmod: module %s already loaded", modname);
-	    pcb->top = testmod;
+	    if (!pcb->top) {
+		pcb->top = testmod;
+	    }
 	    return testmod->status;
 	}
     }

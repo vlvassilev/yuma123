@@ -280,7 +280,7 @@ static status_t
 *               be in xml_attr_t format, not val_value_t metaval format
 *
 * OUTPUTS:
-*   *val = malloced return value
+*   *retval = malloced return value; MUST FREE THIS LATER
 *   *top_attrs = filled in attrs queue
 *
 * RETURNS:

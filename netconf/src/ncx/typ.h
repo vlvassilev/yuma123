@@ -386,16 +386,19 @@ extern void
     typ_set_named_typdef (typ_def_t *typdef,
 			  typ_template_t *imptyp);
 
+extern const xmlChar *
+    typ_get_named_typename (const typ_def_t  *typdef);
+
+extern status_t
+    typ_set_new_named (typ_def_t  *typdef, 
+		       ncx_btype_t btyp);
+
 /* access named.newtyp */
 extern typ_def_t *
     typ_get_new_named (typ_def_t  *typdef);
 
 extern const typ_def_t *
     typ_cget_new_named (const typ_def_t  *typdef);
-
-extern status_t
-    typ_set_new_named (typ_def_t  *typdef, 
-		       ncx_btype_t btyp);
 
 extern void
     typ_set_simple_typdef (typ_template_t *typ,

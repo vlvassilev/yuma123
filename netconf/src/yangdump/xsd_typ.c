@@ -174,80 +174,6 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION add_patterns
-* 
-*   Set up new patterns and add them as child nodes of 'val'
-*
-* INPUTS:
-*    typdef == typdef in progress
-*    val == value struct to hold the pattern element
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    add_patterns (const typ_def_t *typdef,
-		  val_value_t *val)
-{
-    val_value_t           *patval;
-    const typ_pattern_t   *pat;
-    status_t               res;
-    xmlns_id_t             xsd_id;
-    boolean                errinfo_set;
-
-    xsd_id = xmlns_xs_id();
-
-    /* This is not correct because multiple patterns within
-     * the same type step are ORed together in XSD.
-     * The NETMOD WG decided to treat multiple patterns
-     * as AND expressions in this case.
-     * NEED TO CHANGE TO A NESTED ANONYMOUS <simpleType> DESIGN -- TBD
-     */
-    for (pat = typ_get_first_cpattern(typdef);
-	 pat != NULL;
-	 pat = typ_get_next_cpattern(pat)) {
-
-	errinfo_set = ncx_errinfo_set(&pat->pat_errinfo);
-
-	/* create the pattern element */
-	if (errinfo_set || pat->pat_errinfo.descr || 
-	    pat->pat_errinfo.ref) {
-
-	    patval = xml_val_new_struct(NCX_EL_PATTERN, xsd_id);
-	    if (!patval) {
-		return ERR_INTERNAL_MEM;
-	    } else {
-		val_add_child(patval, val);
-		res = add_err_annotation(pat->pat_errinfo.error_message, 
-					 pat->pat_errinfo.error_app_tag, 
-					 pat->pat_errinfo.descr,
-					 pat->pat_errinfo.ref,
-					 patval);
-		if (res != NO_ERR) {
-		    return res;
-		}
-	    }
-	} else {
-	    patval = xml_val_new_flag(NCX_EL_PATTERN, xsd_id);
-	    if (!patval) {
-		return ERR_INTERNAL_MEM;
-	    } else {
-		val_add_child(patval, val);
-	    }
-	}
-
-	res = xml_val_add_cattr(NCX_EL_VALUE, 0, pat->pat_str, patval);
-	if (res != NO_ERR) {
-	    return res;
-	}
-    }
-
-    return NO_ERR;
-
-}   /* add_patterns */
-
-
-/********************************************************************
 * FUNCTION new_restriction
 * 
 *   Set up a new restriction struct
@@ -275,6 +201,7 @@ static val_value_t *
     status_t     res;
     xmlns_id_t   xsd_id;
 
+    res = NO_ERR;
     xsd_id = xmlns_xs_id();
 
     /* create a struct named 'restriction' to hold the entire result */
@@ -283,24 +210,27 @@ static val_value_t *
     } else {
 	val = xml_val_new_flag(XSD_RESTRICTION, xsd_id);
     }
+
     if (!val) {
 	return NULL;
     }
 
     /* add the base=QName attribute */
-    if (mod->nsid == base_nsid) {
-	/* do not use the prefix if this is the target namespace */
-	res = xml_val_add_cattr(XSD_BASE, 0, basename, val);
-    } else {
-	/* not the target namespace, so need a QName instead of Name */
-	str = xml_val_make_qname(base_nsid, basename);
-	if (str) {
-	    res = xml_val_add_attr(XSD_BASE, 0, str, val);
-	    if (res != NO_ERR) {
-		m__free(str);
-	    }
+    if (basename) {
+	if (mod->nsid == base_nsid) {
+	    /* do not use the prefix if this is the target namespace */
+	    res = xml_val_add_cattr(XSD_BASE, 0, basename, val);
 	} else {
-	    res = ERR_INTERNAL_MEM;
+	    /* not the target namespace, so need a QName instead of Name */
+	    str = xml_val_make_qname(base_nsid, basename);
+	    if (str) {
+		res = xml_val_add_attr(XSD_BASE, 0, str, val);
+		if (res != NO_ERR) {
+		    m__free(str);
+		}
+	    } else {
+		res = ERR_INTERNAL_MEM;
+	    }
 	}
     }
 
@@ -313,6 +243,164 @@ static val_value_t *
     /*NOTREACHED*/
 
 }   /* new_restriction */
+
+
+/********************************************************************
+* FUNCTION add_pattern
+* 
+*   Set up new patterns and add them as child nodes of 'val'
+*
+* INPUTS:
+*    pat == pattern in progress
+*    val == value struct to hold the pattern element
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    add_pattern (const typ_pattern_t *pat,
+		 val_value_t *val)
+{
+    val_value_t           *patval;
+    status_t               res;
+    xmlns_id_t             xsd_id;
+    boolean                errinfo_set;
+
+    xsd_id = xmlns_xs_id();
+    errinfo_set = ncx_errinfo_set(&pat->pat_errinfo);
+
+    /* create the pattern element */
+    if (errinfo_set || pat->pat_errinfo.descr || 
+	pat->pat_errinfo.ref) {
+
+	patval = xml_val_new_struct(NCX_EL_PATTERN, xsd_id);
+	if (!patval) {
+	    return ERR_INTERNAL_MEM;
+	} else {
+	    val_add_child(patval, val);
+	    res = add_err_annotation(pat->pat_errinfo.error_message, 
+				     pat->pat_errinfo.error_app_tag, 
+				     pat->pat_errinfo.descr,
+				     pat->pat_errinfo.ref,
+				     patval);
+	    if (res != NO_ERR) {
+		return res;
+	    }
+	}
+    } else {
+	patval = xml_val_new_flag(NCX_EL_PATTERN, xsd_id);
+	if (!patval) {
+	    return ERR_INTERNAL_MEM;
+	} else {
+	    val_add_child(patval, val);
+	}
+    }
+
+    res = xml_val_add_cattr(NCX_EL_VALUE, 0, pat->pat_str, patval);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    return NO_ERR;
+
+}   /* add_pattern */
+
+
+/********************************************************************
+* FUNCTION add_patterns
+* 
+*   Set up new patterns and add them as child nodes of 'val'
+*
+* INPUTS:
+*    typdef == typdef in progress
+*    basename == basetype name string; NULL == xs:string
+*    val == value struct to hold the pattern element
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    add_patterns (const ncx_module_t *mod,
+		  const typ_def_t *typdef,
+		  xmlns_id_t base_nsid,
+		  const xmlChar *basename,
+		  val_value_t *val)
+{
+    val_value_t           *simval, *restval, *curtop;
+    const typ_pattern_t   *pat;
+    status_t               res;
+    xmlns_id_t             xsd_id;
+    uint32                 patcnt, patnum;
+
+    curtop = NULL;
+
+    xsd_id = xmlns_xs_id();
+    patcnt = typ_get_pattern_count(typdef);
+
+    if (patcnt == 0) {
+	return NO_ERR;
+    } else if (patcnt == 1) {
+	return add_pattern(typ_get_first_cpattern(typdef), val);
+    }
+
+    /* else multiple patterns require N-1 nested anonymous types
+     * create simplType+restriction containers for the 1st through
+     * N-1th pattern
+     */
+    for (patnum = 1; patnum < patcnt; patnum++) {
+	if (patnum == 1) {
+	    pat = typ_get_first_cpattern(typdef);
+	} else {
+	    pat = typ_get_next_cpattern(pat);
+	}
+
+	simval = xml_val_new_struct(XSD_SIM_TYP, xsd_id);
+	if (!simval) {
+	    if (curtop) {
+		val_free_value(curtop);
+	    }
+	    return ERR_INTERNAL_MEM;
+	}
+
+	if (patnum == 1) {
+	    restval = new_restriction(mod, base_nsid, basename, TRUE);
+	} else {
+	    restval = new_restriction(mod, 0, NULL, TRUE);
+	}
+	if (!restval) {
+	    if (curtop) {
+		val_free_value(curtop);
+	    }
+	    val_free_value(simval);
+	    return ERR_INTERNAL_MEM;
+	} else {
+	    val_add_child(restval, simval);
+	}
+
+	if (!curtop) {
+	    curtop = simval;
+	} else {
+	    val_add_child(curtop, restval);
+	    curtop = simval;
+	}
+
+	res = add_pattern(pat, restval);
+	if (res != NO_ERR) {
+	    val_free_value(curtop);
+	    return res;
+	}
+    }
+
+    /* add the constructed tree the the restrcition node passed in */
+    val_add_child(curtop, val);
+
+    /* add the last pattern as a sibling of the new simpleType tree */
+    pat = typ_get_next_cpattern(pat);
+    res = add_pattern(pat, val);    
+    return res;
+
+}   /* add_patterns */
+
 
 
 /********************************************************************
@@ -707,9 +795,12 @@ static val_value_t *
     const typ_rangedef_t *rv;
     status_t              res;
     xmlns_id_t            xsd_id;
+    uint32                pattern_cnt;
 
     xsd_id = xmlns_xs_id();
     patstr = NULL;
+
+    pattern_cnt = typ_get_pattern_count(typdef);
 
     val = xml_val_new_struct(XSD_UNION, xsd_id);
     if (!val) {
@@ -731,7 +822,9 @@ static val_value_t *
 	    val_add_child(chval, val);  /* add early */
 	}
 
-	rval = new_restriction(mod, base_id, basename, TRUE);
+	rval = new_restriction(mod, base_id, 
+			       (pattern_cnt < 1) ? basename : NULL, 
+			       TRUE);
 	if (!rval) {
 	    val_free_value(val);
 	    return NULL;
@@ -739,13 +832,13 @@ static val_value_t *
 	    val_add_child(rval, chval);  /* add early */
 	}
 
-	res = finish_range(typdef, range, rv, rval);
+	res = add_patterns(mod, typdef, base_id, basename, rval);
 	if (res != NO_ERR) {
 	    val_free_value(val);
 	    return NULL;
 	}
 
-	res = add_patterns(typdef, rval);
+	res = finish_range(typdef, range, rv, rval);
 	if (res != NO_ERR) {
 	    val_free_value(val);
 	    return NULL;
@@ -1368,7 +1461,7 @@ status_t
     const xmlChar     *typename;
     const dlq_hdr_t   *rangeQ;
     const typ_range_t *range;
-    uint32             rangecnt;
+    uint32             rangecnt, patterncnt;
     xmlns_id_t         xsd_id;
     ncx_btype_t        btyp;
     status_t           res;
@@ -1469,14 +1562,16 @@ status_t
 	    }
 	    break;
 	case NCX_SR_PATTERN:
-	    /* get the pattern first */
-	    typ_sval = typ_first_strdef(typdef);
-	    if (!typ_sval) {
+	    /* get the pattern count */
+	    patterncnt = typ_get_pattern_count(typdef);
+	    if (patterncnt == 0) {
 		return SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 
 	    /* build a restriction element */
-	    chval = new_restriction(mod, xsd_id, NCX_EL_STRING, TRUE);
+	    chval = new_restriction(mod, xsd_id, 
+				    (patterncnt == 1) ? NCX_EL_STRING : NULL,
+				    TRUE);
 	    if (!chval) {
 		return ERR_INTERNAL_MEM;
 	    } else {
@@ -1484,7 +1579,7 @@ status_t
 	    }
 
 	    /* create the pattern element */
-	    res = add_patterns(typdef, chval);
+	    res = add_patterns(mod, typdef, xsd_id, NCX_EL_STRING, chval);
 	    if (res != NO_ERR) {
 		return res;
 	    }
@@ -1589,8 +1684,10 @@ status_t
     const dlq_hdr_t      *rangeQ;
     const typ_rangedef_t *rdef;
     const typ_sval_t     *sdef;
+    const xmlChar        *typename;
     const obj_template_t *mdef;   /**** not used yet ****/
     xmlChar              *str;
+    uint32                patcnt;
     ncx_btype_t           btyp;
     status_t              res;
     xmlns_id_t            xsd_id, test_id;
@@ -1602,9 +1699,11 @@ status_t
     btyp = typ_get_basetype(typdef);            /* NCX base type */
     rdef = typ_first_rangedef_con(typdef);        /* range def Q */
     range = typ_get_crange_con(typdef);
-    mdef = NULL;
-    sdef = typ_first_strdef(typdef);         /* string/pattern Q */
+    mdef = NULL;                /*** meta-data not checked yet ***/
+    sdef = typ_first_strdef(typdef);         /* string Q */
+    patcnt = typ_get_pattern_count(typdef);         /* pattern Q */
     issim = typ_is_xsd_simple(btyp);           /* container type */
+    typename = typ_get_named_typename(typdef);
     test_id = typdef->def.named.typ->nsid;     /* NS of the name */
     if (!test_id) {
 	test_id = mod->nsid;
@@ -1655,9 +1754,10 @@ status_t
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
 	isext = FALSE;
-	hasnodes = (rdef || sdef || mdef) ? TRUE : FALSE;
+	hasnodes = (rdef || patcnt || mdef) ? TRUE : FALSE;
 	break;
     case NCX_BT_ENUM:
+    case NCX_BT_BITS:
 	hasnodes = (sdef || mdef) ? TRUE : FALSE;
 	isext = hasnodes;
 	break;
@@ -1686,8 +1786,7 @@ status_t
 	if (dlq_count(rangeQ) > 1) {
 	    chval = new_range_union(mod, range,
 				    rangeQ, typdef,
-				    test_id,
-				    typdef->def.named.typ->name);
+				    test_id, typename);
 	    if (!chval) {
 		return ERR_INTERNAL_MEM;
 	    } else {
@@ -1721,38 +1820,45 @@ status_t
     }
 
     /* add the base=QName attribute */
-    if (test_id == mod->nsid) {
-	/* named type is a top-level definition */
-	res = xml_val_add_cattr(XSD_BASE, 0, 
-		       typdef->def.named.typ->name, chval);
-	if (res != NO_ERR) {
-	    return ERR_INTERNAL_MEM;
-	}
-    } else if (!test_id) {
-	/* named type is a local type */
-	res = xml_val_add_cattr
-	    (XSD_BASE, 0, 
-	     ncx_find_typname(typdef->def.named.typ, &mod->typnameQ),
-	     chval);
-	if (res != NO_ERR) {
-	    return ERR_INTERNAL_MEM;
-	}
-    } else {
-	/* add base=QName attribute */
-	str = xml_val_make_qname(test_id, typdef->def.named.typ->name);
-	if (!str) {
-	    return ERR_INTERNAL_MEM;
-	}
-	res = xml_val_add_attr(XSD_BASE, 0, str, chval);
-	if (res != NO_ERR) {
-	    m__free(str);
-	    return ERR_INTERNAL_MEM;
+    if (patcnt <= 1) {
+	if (test_id == mod->nsid) {
+	    /* named type is a top-level definition */
+	    res = xml_val_add_cattr(XSD_BASE, 0, typename, chval);
+	    if (res != NO_ERR) {
+		return ERR_INTERNAL_MEM;
+	    }
+	} else if (!test_id) {
+	    /* named type is a local type */
+	    res = xml_val_add_cattr
+		(XSD_BASE, 0, ncx_find_typname(typdef->def.named.typ, 
+					       &mod->typnameQ),
+		 chval);
+	    if (res != NO_ERR) {
+		return ERR_INTERNAL_MEM;
+	    }
+	} else {
+	    /* add base=QName attribute */
+	    str = xml_val_make_qname(test_id, typename);
+	    if (!str) {
+		return ERR_INTERNAL_MEM;
+	    }
+	    res = xml_val_add_attr(XSD_BASE, 0, str, chval);
+	    if (res != NO_ERR) {
+		m__free(str);
+		return ERR_INTERNAL_MEM;
+	    }
 	}
     }
 
     if (hasnodes && typdef->def.named.newtyp) {
+	res = NO_ERR;
+	if (!isext && patcnt) {
+	    res = add_patterns(mod, typdef,
+			       test_id, typename, chval);
+	}
+
 	/* check if this is an range restriction */
-	if (!isext && rdef) {
+	if (res == NO_ERR && !isext && rdef) {
 	    res = finish_range(typdef, range, rdef, chval);
 	}
 
@@ -1763,7 +1869,6 @@ status_t
 	    res = finish_attributes(mod, typdef->def.named.newtyp, chval);
 	} 
 #endif
-
     }
 
     return res;

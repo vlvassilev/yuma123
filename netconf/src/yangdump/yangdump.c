@@ -1301,6 +1301,9 @@ static status_t
 		pr_err(res);
 	    }
 	    xml_clean_attrs(&attrs);
+	    if (val) {
+		val_free_value(val);
+	    }
 	}
 	break;
     case NCX_CVTTYP_SQL:

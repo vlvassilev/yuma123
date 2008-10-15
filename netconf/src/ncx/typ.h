@@ -19,11 +19,11 @@
 date	     init     comment
 ----------------------------------------------------------------------
 22-oct-05    abb      Begun
-
+13-oct-08    abb      Moved pattern from typ_sval_t to ncx_pattern_t 
+                      to support N patterns per typdef
 */
 
 #include <xmlstring.h>
-#include <xmlregexp.h>
 
 #ifndef _H_ncxconst
 #include "ncxconst.h"
@@ -173,15 +173,28 @@ typedef struct typ_sval_t_ {
     dlq_hdr_t  qhdr;
     ncx_str_t val;
     uint32    flags;
-    xmlRegexpPtr pattern;
 } typ_sval_t;
 
 /* one range description */
 typedef struct typ_range_t_ {
-    xmlChar          *rangestr;        /* saved in YANG only */
-    tk_token_t       *tk;              /* saved in YANG only */
+    xmlChar         *rangestr;
+    tk_token_t      *tk;
+    dlq_hdr_t        rangeQ;            /* Q of typ_rangedef_t */
+    ncx_errinfo_t    range_errinfo;
+    ncx_status_t     res;
 } typ_range_t;
 
+/* YANG pattern struct : N per typedef and also
+ * across N typdefs in a chain: all are ANDed together like RelaxNG
+ * instead of ORed together within the same type step like XSD
+ */
+typedef struct typ_pattern_t_ {
+    dlq_hdr_t       qhdr;
+    xmlRegexpPtr    pattern;
+    xmlChar        *pat_str;
+    ncx_errinfo_t   pat_errinfo;
+    ncx_status_t    res;
+} typ_pattern_t;
 
 
 /* NCX_CL_SIMPLE
@@ -210,15 +223,15 @@ typedef struct typ_range_t_ {
  */
 typedef struct typ_simple_t_ {
     ncx_btype_t      btyp;                             /* NCX base type */
-    typ_range_t      range;            /* YANG saves errinfo for pass 2 */
-    dlq_hdr_t        rangeQ;                     /* Q of typ_rangedef_t */
+    struct typ_template_t_ *listtyp;       /* template for NCX_BT_SLIST */
+    tk_chain_t      *xchain;            /* saved for NCX_BT_KEYREF only */
+    typ_range_t      range;     /* for all num types and string length  */
     dlq_hdr_t        valQ;     /* bit, enum, string, list vals/patterns */
     dlq_hdr_t        metaQ;              /* Q of obj_template_t structs */
     dlq_hdr_t        unionQ;   /* Q of typ_unionnode_t for NCX_BT_UNION */
+    dlq_hdr_t        patternQ;  /* Q of ncx_pattern_t for NCX_BT_STRING */
     ncx_strrest_t    strrest;   /* string/type restriction type in valQ */
     uint32           flags;
-    struct typ_template_t_ *listtyp;       /* template for NCX_BT_SLIST */
-    tk_chain_t      *xchain;            /* saved for NCX_BT_KEYREF only */
 } typ_simple_t;
 
 
@@ -272,8 +285,6 @@ typedef struct typ_def_t_ {
     xmlChar         *prefix;            /* pfix used in type field */
     xmlChar         *typename;      /* typename used in type field */
     uint32           linenum;         /* linenum when NCX_CL_NAMED */
-    ncx_errinfo_t   *range_errinfo;
-    ncx_errinfo_t   *pat_errinfo;
     tk_token_t      *tk;            /* const back-ptr for errmsg */
     dlq_hdr_t        appinfoQ;             /* Q of ncx_appinfo_t */
     typ_def_u_t      def;
@@ -319,6 +330,7 @@ typedef struct typ_unionnode_t_ {
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
+
 
 /***************** INITIALIZATION FUNCTIONS *******************/
 
@@ -449,6 +461,16 @@ extern status_t
 			     ncx_btype_t *btyp,
 			     const ncx_num_t **lb,
 			     const ncx_num_t **ub);
+
+
+/* get typdef string restriction type */
+extern ncx_strrest_t 
+    typ_get_strrest (const typ_def_t *typdef);
+
+/* set typdef string restriction type */
+extern void
+    typ_set_strrest (typ_def_t *typdef,
+		     ncx_strrest_t strrest);
 
 /* malloc and init a string descriptor */
 extern typ_sval_t *
@@ -652,16 +674,29 @@ extern boolean
 extern boolean
     typ_is_string (ncx_btype_t btyp);
 
+extern typ_pattern_t *
+    typ_new_pattern (const xmlChar *pat_str);
+
+extern void
+    typ_free_pattern (typ_pattern_t *pat);
+
 extern status_t
-    typ_compile_pattern (ncx_btype_t btyp,
-			 typ_sval_t *sv);
+    typ_compile_pattern (typ_pattern_t *pat);
 
+extern typ_pattern_t *
+    typ_get_first_pattern (typ_def_t *typdef);
 
-extern const xmlChar *
-    typ_get_pattern (const typ_def_t *typdef);
+extern typ_pattern_t *
+    typ_get_next_pattern (typ_pattern_t *curpat);
 
-extern const ncx_errinfo_t *
-    typ_get_pattern_errinfo (const typ_def_t *typdef);
+extern const typ_pattern_t *
+    typ_get_first_cpattern (const typ_def_t *typdef);
+
+extern const typ_pattern_t *
+    typ_get_next_cpattern (const typ_pattern_t *curpat);
+
+extern uint32
+    typ_get_pattern_count (const typ_def_t *typdef);
 
 extern const ncx_errinfo_t *
     typ_get_range_errinfo (const typ_def_t *typdef);

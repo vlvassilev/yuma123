@@ -689,7 +689,11 @@ status_t
 *   tkc    == token chain
 *   mod    == module in progress
 *   errinfo == address of pointer to get the malloced 
-*              ncx_errinfo_t struct, filled in by this fn
+*              ncx_errinfo_t struct, if value is NULL
+*              the new initialized struct will be used if
+*              value is not NULL.  Either way, the
+*              struct will be filled in by this fn
+*              
 *   appinfoQ == Q to hold any extensions found
 *
 * OUTPUTS:
@@ -728,13 +732,17 @@ status_t
     res = NO_ERR;
     retres = NO_ERR;
 
-    err = ncx_new_errinfo();
-    if (!err) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+    if (*errinfo) {
+	err = *errinfo;
     } else {
-	*errinfo = err;
+	err = ncx_new_errinfo();
+	if (!err) {
+	    res = ERR_INTERNAL_MEM;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	} else {
+	    *errinfo = err;
+	}
     }
 
     while (!done) {

@@ -7095,6 +7095,40 @@ ncx_errinfo_t *
 
 
 /********************************************************************
+* FUNCTION ncx_errinfo_set
+* 
+* Check if the errinfo struct is set or empty
+* Checks only the error_app_tag and error_message fields
+*
+* INPUTS:
+*    errinfo == ncx_errinfo_t struct to check
+*
+* RETURNS:
+*   TRUE if at least one field set
+*   FALSE if the errinfo struct is empty
+
+*********************************************************************/
+boolean
+    ncx_errinfo_set (const ncx_errinfo_t *errinfo)
+{
+
+#ifdef DEBUG
+    if (!errinfo) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    if (errinfo->error_app_tag || errinfo->error_message) {
+	return TRUE;
+    } else {
+	return FALSE;
+    }
+
+}  /* ncx_errinfo_set */
+
+
+/********************************************************************
 * FUNCTION ncx_get_source
 * 
 * Get a malloced buffer containing the complete filespec

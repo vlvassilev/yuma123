@@ -399,10 +399,21 @@ extern status_t
 		  const ncx_num_t *num);
 
 extern status_t
+    val_pattern_ok (const typ_def_t *typdef,
+		    const xmlChar *strval);
+
+extern status_t
+    val_pattern_ok_errinfo (const typ_def_t *typdef,
+			    const xmlChar *strval,
+			    const ncx_errinfo_t **errinfo);
+
+extern status_t
     val_range_ok_errinfo (const typ_def_t *typdef,
 			  ncx_btype_t  btyp,
 			  const ncx_num_t *num,
 			  const ncx_errinfo_t **errinfo);
+
+
 
 /* check any simple type to see if it is valid,
  * but do not retrieve the value; used to check the

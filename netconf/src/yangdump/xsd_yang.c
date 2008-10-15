@@ -1058,9 +1058,10 @@ static status_t
 	break;
     case NCX_CL_SIMPLE:
 	simtyp = &typdef->def.simple;
-	empty = (dlq_empty(&simtyp->rangeQ) &&
+	empty = (dlq_empty(&simtyp->range.rangeQ) &&
 		 dlq_empty(&simtyp->unionQ) &&
 		 dlq_empty(&simtyp->valQ) &&
+		 dlq_empty(&simtyp->patternQ) &&
 		 dlq_empty(&simtyp->metaQ));
 	break;
     case NCX_CL_COMPLEX:
@@ -1076,8 +1077,9 @@ static status_t
     case NCX_CL_NAMED:
 	if (typdef->def.named.newtyp) {
 	    simtyp = &typdef->def.named.newtyp->def.simple;
-	    empty = (dlq_empty(&simtyp->rangeQ) &&
+	    empty = (dlq_empty(&simtyp->range.rangeQ) &&
 		     dlq_empty(&simtyp->valQ) &&
+		     dlq_empty(&simtyp->patternQ) &&
 		     dlq_empty(&simtyp->metaQ));
 	} else {
 	    empty = TRUE;

@@ -139,45 +139,56 @@ static void
  *
  * INPUTS:
  *    cp == parameter block to use
- *    oldtypdef == old internal typedef
- *    newtypdef == new internal typedef
+ *    oldpat == old internal pattern
+ *    newpat == new internal pattern
+ *    patnum == index number of pattern in the Q [1 .. N]
  *
  *********************************************************************/
 static void
     output_pattern_diff (yangdiff_diffparms_t *cp,
-			 const typ_def_t *oldtypdef,
-			 const typ_def_t *newtypdef)
+			 const typ_pattern_t *oldpat,
+			 const typ_pattern_t *newpat,
+			 uint32 patnum)
 {
-    const xmlChar       *oldpat, *newpat;
     const ncx_errinfo_t *olderr, *newerr;
+    const xmlChar       *oldstr, *newstr;
+    xmlChar              buff[NCX_MAX_NUMLEN+16], *p;
 
-    oldpat = typ_get_pattern(oldtypdef);
-    newpat = typ_get_pattern(newtypdef);
+    oldstr = (oldpat) ? oldpat->pat_str : NULL;
+    newstr = (newpat) ? newpat->pat_str : NULL;
 
-    olderr = typ_get_pattern_errinfo(oldtypdef);
-    newerr = typ_get_pattern_errinfo(newtypdef);
+    olderr = (oldpat) ? &oldpat->pat_errinfo : NULL;
+    newerr = (newpat) ? &newpat->pat_errinfo : NULL;
 
-    if (!oldpat && newpat) {
+    p = buff;
+    p += xml_strcpy(p, YANG_K_PATTERN);
+    *p++ = ' ';
+    *p++ = '[';
+    p += (uint32)sprintf((char *)p, "%u", patnum);
+    *p++ = ']';
+    *p = 0;
+    
+    if (!oldstr && newstr) {
 	/* pattern added in new revision */
-	output_diff(cp, YANG_K_PATTERN, NULL, newpat, FALSE);
+	output_diff(cp, buff, oldstr, newstr, FALSE);
 	indent_in(cp);
-	output_errinfo_diff(cp, NULL, newerr);
+	output_errinfo_diff(cp, olderr, newerr);
 	indent_out(cp);
-    } else if (oldpat && !newpat) {
+    } else if (oldstr && !newstr) {
 	/* pattern removed in new revision */
-	output_diff(cp, YANG_K_PATTERN, oldpat, NULL, FALSE);
+	output_diff(cp, buff, oldstr, newstr, FALSE);
 	indent_in(cp);
-	output_errinfo_diff(cp, olderr, NULL);
+	output_errinfo_diff(cp, olderr, newerr);
 	indent_out(cp);
-    } else if (oldpat && newpat) {
+    } else if (oldstr && newstr) {
 	/* check if pattern changed */
-	if (xml_strcmp(oldpat, newpat)) {
-	    output_diff(cp, YANG_K_PATTERN, oldpat, newpat, FALSE);
+	if (xml_strcmp(oldstr, newstr)) {
+	    output_diff(cp, buff, oldstr, newstr, FALSE);
 	    indent_in(cp);
 	    output_errinfo_diff(cp, olderr, newerr);
 	    indent_out(cp);
 	} else if (errinfo_changed(olderr, newerr)) {
-	    output_mstart_line(cp, YANG_K_PATTERN, oldpat, FALSE);
+	    output_mstart_line(cp, buff, oldstr, FALSE);
 	    indent_in(cp);
 	    output_errinfo_diff(cp, olderr, newerr);
 	    indent_out(cp);
@@ -185,6 +196,41 @@ static void
     }
 
 } /* output_pattern_diff */
+
+
+/********************************************************************
+ * FUNCTION output_patternQ_diff
+ * 
+ *  Output the differences report for the Q of pattern clauses
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldtypdef == old internal typedef
+ *    newtypdef == new internal typedef
+ *
+ *********************************************************************/
+static void
+    output_patternQ_diff (yangdiff_diffparms_t *cp,
+			 const typ_def_t *oldtypdef,
+			 const typ_def_t *newtypdef)
+{
+    const typ_pattern_t *oldpat, *newpat;
+    uint32               cnt;
+
+    oldpat = typ_get_first_cpattern(oldtypdef);
+    newpat = typ_get_first_cpattern(newtypdef);
+    cnt = 1;
+
+    while (oldpat || newpat) {
+
+	output_pattern_diff(cp, oldpat, newpat, cnt);
+
+	oldpat = (oldpat) ? typ_get_next_cpattern(oldpat) : NULL;
+	newpat = (newpat) ? typ_get_next_cpattern(newpat) : NULL;
+	cnt++;
+    }
+
+} /* output_patternQ_diff */
 
 
 /********************************************************************
@@ -714,7 +760,7 @@ void
 	output_range_diff(cp, YANG_K_RANGE, oldtypdef, newtypdef);
     } else if (typ_is_string(oldbtyp)) {
 	output_range_diff(cp, YANG_K_LENGTH, oldtypdef, newtypdef);
-	output_pattern_diff(cp, oldtypdef, newtypdef);
+	output_patternQ_diff(cp, oldtypdef, newtypdef);
     } else {
 	switch (oldbtyp) {
 	case NCX_BT_ENUM:
@@ -742,6 +788,46 @@ void
 * Check if the pattern-stmt changed at all
 *
 * INPUTS:
+*   oldpat == old pattern struct to check
+*   newpat == new pattern struct to check
+*
+* RETURNS:
+*   1 if struct changed
+*   0 if struct not changed
+*********************************************************************/
+static uint32
+    pattern_changed (const typ_pattern_t *oldpat,
+		     const typ_pattern_t *newpat)
+{
+    const ncx_errinfo_t *olderr, *newerr;
+    
+    /* check pattern string is the same */
+    if ((!oldpat && newpat) || (oldpat && !newpat)) {
+	return 1;
+    } else if (oldpat && newpat) {
+	if (xml_strcmp(oldpat->pat_str, 
+		       newpat->pat_str)) {
+	    return 1;
+	}
+    } else {
+	return 0;    	/* no pattern defined */
+    }
+
+    olderr = (oldpat) ? &oldpat->pat_errinfo : NULL;
+    newerr = (newpat) ? &newpat->pat_errinfo : NULL;
+
+    /* pattern string is the same, check error stuff */
+    return errinfo_changed(olderr, newerr);
+    
+}  /* pattern_changed */
+
+
+/********************************************************************
+* FUNCTION patternQ_changed
+*
+* Check if the Q of pattern-stmts changed at all
+*
+* INPUTS:
 *   oldtypdef == old type def struct to check
 *   newtypdef == new type def struct to check
 *
@@ -750,33 +836,39 @@ void
 *   0 if field not changed
 *********************************************************************/
 static uint32
-    pattern_changed (const typ_def_t *oldtypdef,
-		     const typ_def_t *newtypdef)
+    patternQ_changed (const typ_def_t *oldtypdef,
+		      const typ_def_t *newtypdef)
 {
-    const xmlChar       *oldpat, *newpat;
-    const ncx_errinfo_t *olderr, *newerr;
+    const typ_pattern_t  *oldpat, *newpat;
+    uint32                oldpatcnt, newpatcnt;
+    
+    oldpatcnt = typ_get_pattern_count(oldtypdef);
+    newpatcnt = typ_get_pattern_count(newtypdef);
 
-    oldpat = typ_get_pattern(oldtypdef);
-    newpat = typ_get_pattern(newtypdef);
-
-    /* check pattern string is the same */
-    if ((!oldpat && newpat) || (oldpat && !newpat)) {
+    if (oldpatcnt != newpatcnt) {
 	return 1;
-    } else if (oldpat && newpat) {
-	if (xml_strcmp(oldpat, newpat)) {
-	    return 1;
-	}
-    } else {
-	return 0;    	/* no pattern defined */
     }
 
-    olderr = typ_get_pattern_errinfo(oldtypdef);
-    newerr = typ_get_pattern_errinfo(newtypdef);
+    if (!oldpatcnt) {
+	return 0;
+    }
 
-    /* pattern string is the same, check error stuff */
-    return errinfo_changed(olderr, newerr);
-    
-}  /* pattern_changed */
+    oldpat = typ_get_first_cpattern(oldtypdef);
+    newpat = typ_get_first_cpattern(newtypdef);
+
+    while (oldpat && newpat) {
+
+	if (pattern_changed(oldpat, newpat)) {
+	    return 1;
+	}
+
+	oldpat = typ_get_next_cpattern(oldpat);
+	newpat = typ_get_next_cpattern(newpat);
+    }
+
+    return 0;
+
+}  /* patternQ_changed */
 
 
 /********************************************************************
@@ -962,7 +1054,7 @@ uint32
 	    return str_field_changed(YANG_K_PATH, oldpath, newpath, 
 				     FALSE, NULL);
 	} else if (typ_is_string(oldbtyp)) {
-	    if (pattern_changed(oldtypdef, newtypdef)) {
+	    if (patternQ_changed(oldtypdef, newtypdef)) {
 		return 1;
 	    }
 	    if (range_changed(oldtypdef, newtypdef)) {

@@ -959,8 +959,11 @@ static void
     const typ_unionnode_t *un;
     const typ_enum_t      *bit, *enu;
     const xmlChar         *str;
+    const typ_range_t     *range;
+    const typ_pattern_t   *pat;
     char                   buff[NCX_MAX_NUMLEN];
     int32                  indent;
+    boolean                errinfo_set;
 
     indent = startindent + ses_indent_count(scb);
 
@@ -1066,45 +1069,42 @@ static void
 	case NCX_BT_UINT64:
 	case NCX_BT_FLOAT32:
 	case NCX_BT_FLOAT64:
-	    if (typdef->def.simple.range.rangestr) {
-		if (typdef->range_errinfo) {
-		    write_simple_str(scb, YANG_K_RANGE,
-				     typdef->def.simple.range.rangestr,
-				     startindent, 2, FALSE);
-		    write_errinfo(scb, typdef->range_errinfo, indent);
+	    range = typ_get_crange_con(typdef);
+	    if (range && range->rangestr) {
+		errinfo_set = ncx_errinfo_set(&range->range_errinfo);
+		write_simple_str(scb, YANG_K_RANGE,
+				 range->rangestr,
+				 startindent, 2, !errinfo_set);
+		if (errinfo_set) {
+		    write_errinfo(scb, &range->range_errinfo, indent);
 		    ses_putstr_indent(scb, END_SEC, startindent);
-		} else {
-		    write_simple_str(scb, YANG_K_RANGE,
-				     typdef->def.simple.range.rangestr,
-				     startindent, 2, TRUE);
 		}
 	    }
 	    break;
 	case NCX_BT_STRING:
 	case NCX_BT_BINARY:
-	    if (typdef->def.simple.range.rangestr) {
-		if (typdef->range_errinfo) {
-		    write_simple_str(scb, YANG_K_LENGTH,
-				     typdef->def.simple.range.rangestr,
-				     startindent, 2, FALSE);
-		    write_errinfo(scb, typdef->range_errinfo, indent);
+	    range = typ_get_crange_con(typdef);
+	    if (range && range->rangestr) {
+		errinfo_set = ncx_errinfo_set(&range->range_errinfo);
+		write_simple_str(scb, YANG_K_LENGTH,
+				 range->rangestr,
+				 startindent, 2, !errinfo_set);
+		if (errinfo_set) {
+		    write_errinfo(scb, &range->range_errinfo, indent);
 		    ses_putstr_indent(scb, END_SEC, startindent);
-		} else {
-		    write_simple_str(scb, YANG_K_LENGTH,
-				     typdef->def.simple.range.rangestr,
-				     startindent, 2, TRUE);
 		}
 	    }
-	    str = typ_get_pattern(typdef);
-	    if (str) {
-		if (typdef->pat_errinfo) {		
-		    write_simple_str(scb, YANG_K_PATTERN, str,
-				     startindent, 1, FALSE);
-		    write_errinfo(scb, typdef->pat_errinfo, indent);
+
+	    for (pat = typ_get_first_cpattern(typdef);
+		 pat != NULL;
+		 pat = typ_get_next_cpattern(pat)) {
+
+		errinfo_set = ncx_errinfo_set(&pat->pat_errinfo);
+		write_simple_str(scb, YANG_K_PATTERN, str,
+				 startindent, 1, !errinfo_set);
+		if (errinfo_set) {
+		    write_errinfo(scb, &pat->pat_errinfo, indent);
 		    ses_putstr_indent(scb, END_SEC, startindent);
-		} else {
-		    write_simple_str(scb, YANG_K_PATTERN, str,
-				     startindent, 1, TRUE);
 		}
 	    }
 	    break;

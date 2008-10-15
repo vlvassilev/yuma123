@@ -671,6 +671,10 @@ extern ncx_errinfo_t *
     ncx_find_errinfo (dlq_hdr_t *que,
 		      const xmlChar *xpath);
 
+/* check if error-app-tag or error-message set */
+extern boolean
+    ncx_errinfo_set (const ncx_errinfo_t *errinfo);
+
 extern xmlChar *
     ncx_get_source (const xmlChar *fspec);
 

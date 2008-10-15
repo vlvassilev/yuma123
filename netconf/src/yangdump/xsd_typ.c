@@ -174,84 +174,77 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION add_pattern
+* FUNCTION add_patterns
 * 
-*   Set up a new pattern and add it as a child node of 'val'
+*   Set up new patterns and add them as child nodes of 'val'
 *
 * INPUTS:
 *    typdef == typdef in progress
-*    patstr == pattern string to add
 *    val == value struct to hold the pattern element
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
-    add_pattern (const typ_def_t *typdef,
-		 const xmlChar *patstr,
-		 val_value_t *val)
+    add_patterns (const typ_def_t *typdef,
+		  val_value_t *val)
 {
     val_value_t           *patval;
-    const ncx_errinfo_t   *errinfo;
-    const xmlChar         *errmsg, *errtag, *descr, *ref;
-    const typ_def_t       *tdef;
+    const typ_pattern_t   *pat;
     status_t               res;
     xmlns_id_t             xsd_id;
+    boolean                errinfo_set;
 
-    errinfo = NULL;
-    errmsg = NULL;
-    errtag = NULL;
-    descr = NULL;
-    ref = NULL;
-    res = NO_ERR;
-
-    /* check if appinfo provided for the range; if so,
-     * add it to the restriction of all the range-part simpleTypes
-     */
-    if (typdef->class == NCX_CL_NAMED) {
-	tdef = typ_cget_new_named(typdef);
-	errinfo = tdef->pat_errinfo;
-    } else {
-	errinfo = typdef->pat_errinfo;
-    }
-
-    if (errinfo) {
-	errmsg = errinfo->error_message;
-	errtag = errinfo->error_app_tag;
-	descr = errinfo->descr;
-	ref = errinfo->ref;
-    }
-	
     xsd_id = xmlns_xs_id();
 
-    /* create the pattern element */
-    if (errmsg || errtag || descr || ref) {
-	patval = xml_val_new_struct(NCX_EL_PATTERN, xsd_id);
-	if (!patval) {
-	    return ERR_INTERNAL_MEM;
-	} else {
-	    val_add_child(patval, val);
-	    res = add_err_annotation(errmsg, errtag, 
-				     descr, ref, patval);
-	    if (res != NO_ERR) {
-		return res;
+    /* This is not correct because multiple patterns within
+     * the same type step are ORed together in XSD.
+     * The NETMOD WG decided to treat multiple patterns
+     * as AND expressions in this case.
+     * NEED TO CHANGE TO A NESTED ANONYMOUS <simpleType> DESIGN -- TBD
+     */
+    for (pat = typ_get_first_cpattern(typdef);
+	 pat != NULL;
+	 pat = typ_get_next_cpattern(pat)) {
+
+	errinfo_set = ncx_errinfo_set(&pat->pat_errinfo);
+
+	/* create the pattern element */
+	if (errinfo_set || pat->pat_errinfo.descr || 
+	    pat->pat_errinfo.ref) {
+
+	    patval = xml_val_new_struct(NCX_EL_PATTERN, xsd_id);
+	    if (!patval) {
+		return ERR_INTERNAL_MEM;
+	    } else {
+		val_add_child(patval, val);
+		res = add_err_annotation(pat->pat_errinfo.error_message, 
+					 pat->pat_errinfo.error_app_tag, 
+					 pat->pat_errinfo.descr,
+					 pat->pat_errinfo.ref,
+					 patval);
+		if (res != NO_ERR) {
+		    return res;
+		}
 	    }
-		
-	}
-    } else {
-	patval = xml_val_new_flag(NCX_EL_PATTERN, xsd_id);
-	if (!patval) {
-	    return ERR_INTERNAL_MEM;
 	} else {
-	    val_add_child(patval, val);
+	    patval = xml_val_new_flag(NCX_EL_PATTERN, xsd_id);
+	    if (!patval) {
+		return ERR_INTERNAL_MEM;
+	    } else {
+		val_add_child(patval, val);
+	    }
+	}
+
+	res = xml_val_add_cattr(NCX_EL_VALUE, 0, pat->pat_str, patval);
+	if (res != NO_ERR) {
+	    return res;
 	}
     }
 
-    res = xml_val_add_cattr(NCX_EL_VALUE, 0, patstr, patval);
+    return NO_ERR;
 
-    return res;
-
-}   /* add_pattern */
+}   /* add_patterns */
 
 
 /********************************************************************
@@ -494,6 +487,7 @@ static val_value_t *
 *
 * INPUTS:
 *    typdef == typ def for the type definition in progress
+*    range = range in progress
 *    rdef == first rangedef record (1 of N)
 *    val == struct parent to contain child nodes for each range
 *
@@ -505,43 +499,22 @@ static val_value_t *
 *********************************************************************/
 static status_t
     finish_range (const typ_def_t *typdef,
+		  const typ_range_t *range,
 		  const typ_rangedef_t *rdef,
 		  val_value_t *val)
 {
     val_value_t          *chval;
-    const ncx_errinfo_t  *errinfo;
-    const xmlChar        *errmsg, *errtag, *descr, *ref;
-    const typ_def_t      *tdef;
     xmlChar               numbuff[NCX_MAX_NUMLEN];
     uint32                len;
     xmlns_id_t            xsd_id;
-    boolean               skipit, srange;
+    boolean               skipit, srange, errinfo_set;
     status_t              res;
 
     xsd_id = xmlns_xs_id();
-    errinfo = NULL;
-    errmsg = NULL;
-    errtag = NULL;
-    descr = NULL;
-    ref = NULL;
 
     /* check if appinfo provided for the range; if so,
      * add it to the restriction of all the range-part simpleTypes
      */
-    if (typdef->class == NCX_CL_NAMED) {
-	tdef = typ_cget_new_named(typdef);
-	errinfo = tdef->range_errinfo;
-    } else {
-	errinfo = typdef->range_errinfo;
-    }
-
-    if (errinfo) {
-	errmsg = errinfo->error_message;
-	errtag = errinfo->error_app_tag;
-	descr = errinfo->descr;
-	ref = errinfo->ref;
-    }
-
     skipit = FALSE;
     switch (typ_get_basetype(typdef)) {
     case NCX_BT_STRING:
@@ -586,8 +559,11 @@ static status_t
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+    errinfo_set = ncx_errinfo_set(&range->range_errinfo) || 
+	range->range_errinfo.descr || range->range_errinfo.ref;
+
     if (!skipit) {
-	if (errmsg || errtag || descr || ref) {
+	if (errinfo_set) {
 	    if (srange) {
 		chval = xml_val_new_struct(XSD_MIN_LEN, xsd_id);
 	    } else {
@@ -611,9 +587,11 @@ static status_t
 	    return res;
 	}
 
-	if (errmsg || errtag || descr || ref) {
-	    res = add_err_annotation(errmsg, errtag,
-				     descr, ref, chval);
+	if (errinfo_set) {
+	    res = add_err_annotation(range->range_errinfo.error_message, 
+				     range->range_errinfo.error_app_tag,
+				     range->range_errinfo.descr, 
+				     range->range_errinfo.ref, chval);
 	    if (res != NO_ERR) {
 		return res;
 	    }
@@ -656,7 +634,7 @@ static status_t
     }
 
     if (!skipit) {
-	if (errmsg || errtag || descr || ref) {
+	if (errinfo_set) {
 	    if (srange) {
 		chval = xml_val_new_struct(XSD_MAX_LEN, xsd_id);
 	    } else {
@@ -680,9 +658,11 @@ static status_t
 	    return res;
 	}
 
-	if (errmsg || errtag || descr || ref) {
-	    res = add_err_annotation(errmsg, errtag,
-				     descr, ref, chval);
+	if (errinfo_set) {
+	    res = add_err_annotation(range->range_errinfo.error_message, 
+				     range->range_errinfo.error_app_tag,
+				     range->range_errinfo.descr, 
+				     range->range_errinfo.ref, chval);
 	    if (res != NO_ERR) {
 		return res;
 	    }
@@ -704,10 +684,10 @@ static status_t
 *
 * INPUTS:
 *    mod == module in progress (need target namespace ID)
+*    range == range struct to use
 *    rangeQ == Q of typ_rangedef_t
 *    typdef == type definition for the simple or named type
 *              generating the range
-*    btyp == builtin type for typdef
 *    base_id == NS id of the base type name
 *    basename == name string for the base type name
 *
@@ -716,16 +696,14 @@ static status_t
 *********************************************************************/
 static val_value_t *
     new_range_union (const ncx_module_t  *mod,
+		     const typ_range_t *range,
 		     const dlq_hdr_t *rangeQ,
 		     const typ_def_t *typdef,
-		     ncx_btype_t btyp,
 		     xmlns_id_t base_id,
 		     const xmlChar *basename)
 {
-    const typ_def_t      *tdef;
     val_value_t          *val, *chval, *rval;
     const xmlChar        *patstr;
-    const typ_sval_t     *typ_sval;
     const typ_rangedef_t *rv;
     status_t              res;
     xmlns_id_t            xsd_id;
@@ -738,23 +716,6 @@ static val_value_t *
 	return NULL;
     }
 
-    if (btyp==NCX_BT_STRING) {
-	typ_sval = NULL;
-	if (typdef->class==NCX_CL_SIMPLE) {
-	    if (typdef->def.simple.strrest==NCX_SR_PATTERN) {
-		typ_sval = typ_first_strdef(typdef);
-	    }
-	} else if (typdef->class==NCX_CL_NAMED) {
-	    tdef = typ_cget_new_named(typdef);
-	    if (tdef && tdef->def.simple.strrest==NCX_SR_PATTERN) {
-		typ_sval = typ_first_strdef(tdef);
-	    }
-	}
-	if (typ_sval) {
-	    patstr = typ_sval->val;
-	}
-    }
-	    
     /* go through the Q of range parts and add a simpleType
      * for each one
      */
@@ -778,18 +739,16 @@ static val_value_t *
 	    val_add_child(rval, chval);  /* add early */
 	}
 
-	res = finish_range(typdef, rv, rval);
+	res = finish_range(typdef, range, rv, rval);
 	if (res != NO_ERR) {
 	    val_free_value(val);
 	    return NULL;
 	}
 
-	if (patstr) {
-	    res = add_pattern(typdef, patstr, rval);
-	    if (res != NO_ERR) {
-		val_free_value(val);
-		return NULL;
-	    }
+	res = add_patterns(typdef, rval);
+	if (res != NO_ERR) {
+	    val_free_value(val);
+	    return NULL;
 	}
     }
 
@@ -1408,6 +1367,7 @@ status_t
     const typ_rangedef_t *typ_rdef;
     const xmlChar     *typename;
     const dlq_hdr_t   *rangeQ;
+    const typ_range_t *range;
     uint32             rangecnt;
     xmlns_id_t         xsd_id;
     ncx_btype_t        btyp;
@@ -1416,13 +1376,15 @@ status_t
     xsd_id = xmlns_xs_id();
     btyp = typ_get_basetype(typdef);
     typename = xsd_typename(btyp);
+    range  = typ_get_crange_con(typdef);
     rangeQ = typ_get_crangeQ_con(typdef);
     rangecnt = (rangeQ) ? dlq_count(rangeQ) : 0;
     typ_rdef = typ_first_rangedef_con(typdef);
     res = NO_ERR;
 
     if (rangecnt > 1) {
-	chval = new_range_union(mod, rangeQ, typdef, btyp,
+	chval = new_range_union(mod, range,
+				rangeQ, typdef,
 				xsd_id, typename);
 	if (!chval) {
 	    return ERR_INTERNAL_MEM;
@@ -1463,7 +1425,7 @@ status_t
 	    val_add_child(chval, val);
 	}
 	if (rangecnt) {
-	    res = finish_range(typdef, typ_rdef, chval);
+	    res = finish_range(typdef, range, typ_rdef, chval);
 	    if (res != NO_ERR) {
 		return res;
 	    }
@@ -1481,7 +1443,7 @@ status_t
 		val_add_child(chval, val);
 	    }
 	    if (rangecnt) {
-		res = finish_range(typdef, typ_rdef, chval);
+		res = finish_range(typdef, range, typ_rdef, chval);
 		if (res != NO_ERR) {
 		    return res;
 		}
@@ -1522,13 +1484,13 @@ status_t
 	    }
 
 	    /* create the pattern element */
-	    res = add_pattern(typdef, typ_sval->val, chval);
+	    res = add_patterns(typdef, chval);
 	    if (res != NO_ERR) {
 		return res;
 	    }
 
 	    if (rangecnt) {
-		res = finish_range(typdef, typ_rdef, chval);
+		res = finish_range(typdef, range, typ_rdef, chval);
 	    }
 	    break;
 	default:
@@ -1623,6 +1585,7 @@ status_t
 			  val_value_t *val)
 {
     val_value_t          *topcon, *chval;
+    const typ_range_t    *range;
     const dlq_hdr_t      *rangeQ;
     const typ_rangedef_t *rdef;
     const typ_sval_t     *sdef;
@@ -1638,6 +1601,7 @@ status_t
     xsd_id = xmlns_xs_id();
     btyp = typ_get_basetype(typdef);            /* NCX base type */
     rdef = typ_first_rangedef_con(typdef);        /* range def Q */
+    range = typ_get_crange_con(typdef);
     mdef = NULL;
     sdef = typ_first_strdef(typdef);         /* string/pattern Q */
     issim = typ_is_xsd_simple(btyp);           /* container type */
@@ -1720,8 +1684,9 @@ status_t
     if (!isext && rdef) {
 	rangeQ = typ_get_crangeQ_con(typdef);
 	if (dlq_count(rangeQ) > 1) {
-	    chval = new_range_union(mod, rangeQ, typdef,
-				    btyp, test_id,
+	    chval = new_range_union(mod, range,
+				    rangeQ, typdef,
+				    test_id,
 				    typdef->def.named.typ->name);
 	    if (!chval) {
 		return ERR_INTERNAL_MEM;
@@ -1788,7 +1753,7 @@ status_t
     if (hasnodes && typdef->def.named.newtyp) {
 	/* check if this is an range restriction */
 	if (!isext && rdef) {
-	    res = finish_range(typdef, rdef, chval);
+	    res = finish_range(typdef, range, rdef, chval);
 	}
 
 #if 0

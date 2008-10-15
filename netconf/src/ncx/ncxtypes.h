@@ -24,6 +24,7 @@ date	     init     comment
 */
 
 #include <xmlstring.h>
+#include <xmlregexp.h>
 
 #ifndef _H_dlq
 #include "dlq.h"

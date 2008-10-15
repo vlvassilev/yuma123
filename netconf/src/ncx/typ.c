@@ -88,6 +88,7 @@ static void
     typ_unionnode_t *un;
     typ_rangedef_t  *rv;
     typ_sval_t      *sv;
+    typ_pattern_t   *pat;
     ncx_btype_t     rtyp;    /* range base type */
 
 #ifdef DEBUG
@@ -104,13 +105,21 @@ static void
     sim->range.tk = NULL;
 
     /* clean the rangeQ only if it is used */
-    if (!dlq_empty(&sim->rangeQ)) {
+    if (!dlq_empty(&sim->range.rangeQ)) {
 	rtyp = typ_get_range_type(sim->btyp);
-	while (!dlq_empty(&sim->rangeQ)) {
-	    rv = (typ_rangedef_t *)dlq_deque(&sim->rangeQ);
+	while (!dlq_empty(&sim->range.rangeQ)) {
+	    rv = (typ_rangedef_t *)dlq_deque(&sim->range.rangeQ);
 	    typ_free_rangedef(rv, rtyp);
 	}
     }
+    ncx_clean_errinfo(&sim->range.range_errinfo);
+
+    /* clean the patternQ */
+    while (!dlq_empty(&sim->patternQ)) {
+	pat = (typ_pattern_t *)dlq_deque(&sim->patternQ);
+	typ_free_pattern(pat);
+    }
+
     
     /* the Qs are used for differnt items, based on the type */
     switch (sim->btyp) {
@@ -405,6 +414,8 @@ void
     typ_init_simple (typ_def_t  *tdef, 
 		     ncx_btype_t btyp)
 {
+    typ_simple_t  *sim;
+
 #ifdef DEBUG
     if (!tdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -414,11 +425,16 @@ void
 
     tdef->iqual = NCX_IQUAL_ONE;
     tdef->class = NCX_CL_SIMPLE;
-    tdef->def.simple.btyp = btyp;
-    dlq_createSQue(&tdef->def.simple.rangeQ);
-    dlq_createSQue(&tdef->def.simple.valQ);
-    dlq_createSQue(&tdef->def.simple.metaQ);
-    dlq_createSQue(&tdef->def.simple.unionQ);
+
+    sim = &tdef->def.simple;
+
+    sim->btyp = btyp;
+    dlq_createSQue(&sim->range.rangeQ);
+    ncx_init_errinfo(&sim->range.range_errinfo);
+    dlq_createSQue(&sim->valQ);
+    dlq_createSQue(&sim->metaQ);
+    dlq_createSQue(&sim->unionQ);
+    dlq_createSQue(&sim->patternQ);
     tdef->def.simple.strrest = NCX_SR_NONE;
     tdef->def.simple.flags = 0;
 
@@ -501,14 +517,6 @@ void
     if (typdef->typename) {
         m__free(typdef->typename);
 	typdef->typename = NULL;
-    }
-    if (typdef->range_errinfo) {
-	ncx_free_errinfo(typdef->range_errinfo);
-	typdef->range_errinfo = NULL;
-    }
-    if (typdef->pat_errinfo) {
-	ncx_free_errinfo(typdef->pat_errinfo);
-	typdef->pat_errinfo = NULL;
     }
 
     ncx_clean_appinfoQ(&typdef->appinfoQ);
@@ -1001,13 +1009,13 @@ dlq_hdr_t *
     case NCX_CL_BASE:
 	return NULL;
     case NCX_CL_SIMPLE:
-	return &typdef->def.simple.rangeQ;
+	return &typdef->def.simple.range.rangeQ;
     case NCX_CL_COMPLEX:
 	return NULL;
     case NCX_CL_NAMED:
 	if (typdef->def.named.newtyp &&
-	    !dlq_empty(&typdef->def.named.newtyp->def.simple.rangeQ)) {
-	    return &typdef->def.named.newtyp->def.simple.rangeQ;
+	    !dlq_empty(&typdef->def.named.newtyp->def.simple.range.rangeQ)) {
+	    return &typdef->def.named.newtyp->def.simple.range.rangeQ;
 	} else {
 	    return typ_get_rangeQ(&typdef->def.named.typ->typdef);
 	}
@@ -1047,12 +1055,12 @@ dlq_hdr_t *
     case NCX_CL_BASE:
 	return NULL;
     case NCX_CL_SIMPLE:
-	return &typdef->def.simple.rangeQ;
+	return &typdef->def.simple.range.rangeQ;
     case NCX_CL_COMPLEX:
 	return NULL;
     case NCX_CL_NAMED:
 	if (typdef->def.named.newtyp) {
-	    return &typdef->def.named.newtyp->def.simple.rangeQ;
+	    return &typdef->def.named.newtyp->def.simple.range.rangeQ;
 	} else {
 	    return NULL;
 	}
@@ -1093,13 +1101,13 @@ const dlq_hdr_t *
     case NCX_CL_BASE:
 	return NULL;
     case NCX_CL_SIMPLE:
-	return &typdef->def.simple.rangeQ;
+	return &typdef->def.simple.range.rangeQ;
     case NCX_CL_COMPLEX:
 	return NULL;
     case NCX_CL_NAMED:
 	if (typdef->def.named.newtyp &&
-	    !dlq_empty(&typdef->def.named.newtyp->def.simple.rangeQ)) {
-	    return &typdef->def.named.newtyp->def.simple.rangeQ;
+	    !dlq_empty(&typdef->def.named.newtyp->def.simple.range.rangeQ)) {
+	    return &typdef->def.named.newtyp->def.simple.range.rangeQ;
 	} else {
 	    return typ_get_crangeQ(&typdef->def.named.typ->typdef);
 	}
@@ -1140,12 +1148,12 @@ const dlq_hdr_t *
     case NCX_CL_BASE:
 	return NULL;
     case NCX_CL_SIMPLE:
-	return &typdef->def.simple.rangeQ;
+	return &typdef->def.simple.range.rangeQ;
     case NCX_CL_COMPLEX:
 	return NULL;
     case NCX_CL_NAMED:
 	if (typdef->def.named.newtyp) {
-	    return &typdef->def.named.newtyp->def.simple.rangeQ;
+	    return &typdef->def.named.newtyp->def.simple.range.rangeQ;
 	} else {
 	    return NULL;
 	}
@@ -1357,13 +1365,13 @@ const typ_rangedef_t *
 	return NULL;
     case NCX_CL_SIMPLE:
 	return (const typ_rangedef_t *)
-	    dlq_firstEntry(&typdef->def.simple.rangeQ);
+	    dlq_firstEntry(&typdef->def.simple.range.rangeQ);
     case NCX_CL_COMPLEX:
 	return NULL;
     case NCX_CL_NAMED:
 	if (typdef->def.named.newtyp) {
 	    return (const typ_rangedef_t *)
-		dlq_firstEntry(&typdef->def.named.newtyp->def.simple.rangeQ);
+		dlq_firstEntry(&typdef->def.named.newtyp->def.simple.range.rangeQ);
 	} else {
 	    return NULL;
 	}
@@ -1419,14 +1427,14 @@ status_t
     case NCX_CL_SIMPLE:
 	/* get lower bound */
 	rdef = (const typ_rangedef_t *)
-	    dlq_firstEntry(&typdef->def.simple.rangeQ);
+	    dlq_firstEntry(&typdef->def.simple.range.rangeQ);
 	if (rdef ) {
 	    *btyp = rdef->btyp;
 	    *lb = &rdef->lb;
 
 	    /* get upper bound */
 	    rdef = (const typ_rangedef_t *)
-		dlq_lastEntry(&typdef->def.simple.rangeQ);
+		dlq_lastEntry(&typdef->def.simple.range.rangeQ);
 	    if (rdef) {
 		*ub = &rdef->ub;
 	    } else {
@@ -1443,13 +1451,13 @@ status_t
 	/* same check as simple type if newtyp exists */
 	if (typdef->def.named.newtyp) {
 	    rdef = (const typ_rangedef_t *)dlq_firstEntry
-		(&typdef->def.named.newtyp->def.simple.rangeQ);
+		(&typdef->def.named.newtyp->def.simple.range.rangeQ);
 	    if (rdef ) {
 		*btyp = rdef->btyp;
 		*lb = &rdef->lb;
 
 		rdef = (const typ_rangedef_t *)dlq_lastEntry
-		    (&typdef->def.named.newtyp->def.simple.rangeQ);
+		    (&typdef->def.named.newtyp->def.simple.range.rangeQ);
 		if (rdef ) {
 		    *ub = &rdef->ub;
 		} else {
@@ -1471,6 +1479,97 @@ status_t
     return res;
     
 }  /* typ_get_rangebounds_con */
+
+
+
+/********************************************************************
+* FUNCTION typ_get_strrest
+* 
+* Get the string restrinvtion type set for this typdef
+*
+* INPUTS:
+*   typdef == typdef to check
+*
+* RETURNS:
+*   string restrinction enumeration value
+*********************************************************************/
+ncx_strrest_t 
+    typ_get_strrest (const typ_def_t *typdef)
+{
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NCX_SR_NONE;
+    }
+#endif
+
+    switch (typdef->class) {
+    case NCX_CL_NONE:
+    case NCX_CL_BASE:
+        return NCX_SR_NONE;
+    case NCX_CL_SIMPLE:
+        return typdef->def.simple.strrest;
+    case NCX_CL_NAMED:
+	if (typdef->def.named.newtyp) {
+	    return typdef->def.named.newtyp->def.simple.strrest;
+	} else {
+	    return NCX_SR_NONE;
+	}
+    case NCX_CL_REF:
+	if (typdef->def.ref.typdef) {
+	    return typ_get_strrest(typdef->def.ref.typdef);
+	} else {
+	    return NCX_SR_NONE;
+	}
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NCX_SR_NONE;
+    }
+    /*NOTREACHED*/
+
+} /* typ_get_strrest */
+
+
+/********************************************************************
+* FUNCTION typ_set_strrest
+* 
+* Set the string restrinvtion type set for this typdef
+*
+* INPUTS:
+*   typdef == typdef to check
+*   strrest == string restriction enum value to set
+*
+*********************************************************************/
+void
+    typ_set_strrest (typ_def_t *typdef,
+		     ncx_strrest_t strrest)
+{
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    switch (typdef->class) {
+    case NCX_CL_NONE:
+    case NCX_CL_BASE:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	break;
+    case NCX_CL_SIMPLE:
+        typdef->def.simple.strrest = strrest;
+	break;
+    case NCX_CL_NAMED:
+	if (typdef->def.named.newtyp) {
+	    typdef->def.named.newtyp->def.simple.strrest = strrest;
+	}
+	break;
+    case NCX_CL_REF:
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+} /* typ_set_strrest */
 
 
 /********************************************************************
@@ -1551,15 +1650,13 @@ void
     }
 #endif
 
-    if (sv->pattern) {
-	xmlRegFreeRegexp(sv->pattern);
-    }
     if (sv->val) {
 	m__free(sv->val);
     }
     m__free(sv);
 
 }  /* typ_free_sval */
+
 
 
 /********************************************************************
@@ -2195,7 +2292,7 @@ typ_def_t *
 	case NCX_SQUAL_NONE:
 	    return typdef;
 	case NCX_SQUAL_RANGE:
-	    return (dlq_empty(&typdef->def.simple.rangeQ)) ? 
+	    return (dlq_empty(&typdef->def.simple.range.rangeQ)) ? 
 		NULL : typdef;
 	case NCX_SQUAL_VAL:
 	    return (dlq_empty(&typdef->def.simple.valQ)) ? 
@@ -2220,7 +2317,7 @@ typ_def_t *
 	case NCX_SQUAL_NONE:
 	    return typdef;
 	case NCX_SQUAL_RANGE:
-	    if (!dlq_empty(&ntypdef->def.simple.rangeQ)) {
+	    if (!dlq_empty(&ntypdef->def.simple.range.rangeQ)) {
 		return typdef;
 	    }
 	    break;
@@ -2298,7 +2395,7 @@ const typ_def_t *
 	case NCX_SQUAL_NONE:
 	    return typdef;
 	case NCX_SQUAL_RANGE:
-	    return (dlq_empty(&typdef->def.simple.rangeQ)) ? 
+	    return (dlq_empty(&typdef->def.simple.range.rangeQ)) ? 
 		NULL : typdef;
 	case NCX_SQUAL_VAL:
 	    return (dlq_empty(&typdef->def.simple.valQ)) ? 
@@ -2323,7 +2420,7 @@ const typ_def_t *
 	case NCX_SQUAL_NONE:
 	    return typdef;
 	case NCX_SQUAL_RANGE:
-	    if (!dlq_empty(&ntypdef->def.simple.rangeQ)) {
+	    if (!dlq_empty(&ntypdef->def.simple.range.rangeQ)) {
 		return typdef;
 	    }
 	    break;
@@ -3577,6 +3674,81 @@ boolean
 
 
 /********************************************************************
+* FUNCTION typ_new_pattern
+* 
+*   Malloc and init a pattern struct
+*
+* INPUTS:
+*  pat_str == pattern string to copy and save
+*
+* RETURNS:
+*   malloced struct or NULL if memory error
+*********************************************************************/
+typ_pattern_t *
+    typ_new_pattern (const xmlChar *pat_str)
+{
+    typ_pattern_t  *pat;
+
+#ifdef DEBUG
+    if (!pat_str) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    pat = m__getObj(typ_pattern_t);
+    if (!pat) {
+	return NULL;
+    }
+    memset(pat, 0x0, sizeof(typ_pattern_t));
+
+    pat->pat_str = xml_strdup(pat_str);
+    if (!pat->pat_str) {
+	m__free(pat);
+	return NULL;
+    }
+    
+    ncx_init_errinfo(&pat->pat_errinfo);
+
+    return pat;
+
+} /* typ_new_pattern */
+
+
+/********************************************************************
+* FUNCTION typ_free_pattern
+* 
+*   Free a pattern struct
+*   Must be freed from any Q before calling this function
+*
+* INPUTS:
+*    pat == typ_pattern_t struct to free
+*
+*********************************************************************/
+void
+    typ_free_pattern (typ_pattern_t *pat)
+{
+#ifdef DEBUG
+    if (!pat) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (pat->pattern) {
+	xmlRegFreeRegexp(pat->pattern);
+    }
+    if (pat->pat_str) {
+	m__free(pat->pat_str);
+    }
+    ncx_clean_errinfo(&pat->pat_errinfo);
+
+    m__free(pat);
+
+} /* typ_free_pattern */
+
+
+/********************************************************************
 * FUNCTION typ_compile_pattern
 * 
 * Compile a pattern as into a regex_t struct
@@ -3586,55 +3758,35 @@ boolean
 *     sv == ncx_sval_t holding the pattern to compile
 *
 * OUTPUTS:
-*     sv->pattern is set if NO_ERR
-*     sv->result is set with regex error flags on ERR
+*     pat->pattern is set if NO_ERR
 *
 * RETURNS:
 *     status
 *********************************************************************/
 status_t
-    typ_compile_pattern (ncx_btype_t btyp,
-			 typ_sval_t *sv)
+    typ_compile_pattern (typ_pattern_t *pat)
 {
 
 #ifdef DEBUG
-    if (!sv) {
+    if (!pat || !pat->pat_str) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    status_t    res;
-    const xmlChar *str;
-    xmlRegexpPtr pat;
-
-    res = NO_ERR;
-
-    switch (btyp) {
-    case NCX_BT_STRING:
-    case NCX_BT_SLIST:
-	str = sv->val;
-	break;
-    default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    pat = xmlRegexpCompile(str);
-    if (!pat) {
-	res = ERR_NCX_INVALID_PATTERN;
+    pat->pattern = xmlRegexpCompile(pat->pat_str);
+    if (!pat->pattern) {
+	return ERR_NCX_INVALID_PATTERN;
     } else {
-	res = NO_ERR;
-	sv->pattern = pat;
+	return NO_ERR;
     }
-	
-    return res;
 
 }  /* typ_compile_pattern */
 
 
 /********************************************************************
-* FUNCTION typ_get_pattern
+* FUNCTION typ_get_first_pattern
 * 
-* Get the pattern string for a typdef
+* Get the first pattern struct for a typdef
 *
 * INPUTS:
 *   typdef == typ_def_t to check
@@ -3642,10 +3794,9 @@ status_t
 * RETURNS:
 *   pointer to pattern string or NULL if none
 *********************************************************************/
-const xmlChar *
-    typ_get_pattern (const typ_def_t *typdef)
+typ_pattern_t *
+    typ_get_first_pattern (typ_def_t *typdef)
 {
-    const typ_sval_t  *sval;
 
 #ifdef DEBUG
     if (!typdef) {
@@ -3654,20 +3805,63 @@ const xmlChar *
     }
 #endif
 
-    sval = NULL;
-    if (typ_get_basetype(typdef) == NCX_BT_STRING) {
-	sval = typ_first_strdef(typdef);
+    switch (typdef->class) {
+    case NCX_CL_NONE:
+    case NCX_CL_BASE:
+    case NCX_CL_REF:
+	return NULL;
+    case NCX_CL_SIMPLE:
+	return (typ_pattern_t *)
+	    dlq_firstEntry(&typdef->def.simple.patternQ);
+        break;
+    case NCX_CL_NAMED:
+	if (typdef->def.named.newtyp) {
+	    return typ_get_first_pattern(typdef->def.named.newtyp);
+	} else {
+	    /* constrained -- do not go to next typdef */
+	    return NULL;
+	}
+	/*NOTREACHED*/
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
     }
+    /*NOTREACHED*/
 
-    return (sval) ? sval->val : NULL;
-
-}  /* typ_get_pattern */
+}  /* typ_get_first_pattern */
 
 
 /********************************************************************
-* FUNCTION typ_get_pattern_errinfo
+* FUNCTION typ_get_next_pattern
 * 
-* Get the pattern errinfo for a typdef
+* Get the next pattern struct for a typdef
+*
+* INPUTS:
+*   curpat  == current typ_pattern_t to check
+*
+* RETURNS:
+*   pointer to next pattern struct or NULL if none
+*********************************************************************/
+typ_pattern_t *
+    typ_get_next_pattern (typ_pattern_t *curpat)
+{
+#ifdef DEBUG
+    if (!curpat) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (typ_pattern_t *)dlq_nextEntry(curpat);
+
+}  /* typ_get_next_pattern */
+
+
+/********************************************************************
+* FUNCTION typ_get_first_cpattern
+* 
+* Get the first pattern struct for a typdef
+* Const version
 *
 * INPUTS:
 *   typdef == typ_def_t to check
@@ -3675,9 +3869,130 @@ const xmlChar *
 * RETURNS:
 *   pointer to pattern string or NULL if none
 *********************************************************************/
-const ncx_errinfo_t *
-    typ_get_pattern_errinfo (const typ_def_t *typdef)
+const typ_pattern_t *
+    typ_get_first_cpattern (const typ_def_t *typdef)
 {
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    switch (typdef->class) {
+    case NCX_CL_NONE:
+    case NCX_CL_BASE:
+    case NCX_CL_REF:
+	return NULL;
+    case NCX_CL_SIMPLE:
+	return (const typ_pattern_t *)
+	    dlq_firstEntry(&typdef->def.simple.patternQ);
+        break;
+    case NCX_CL_NAMED: 
+	if (typdef->def.named.newtyp) {
+	    return typ_get_first_cpattern(typdef->def.named.newtyp);
+	} else {
+	    /* constrained -- do not go to next typdef */
+	    return NULL;
+	}
+	/*NOTREACHED*/
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+    /*NOTREACHED*/
+
+}  /* typ_get_first_cpattern */
+
+
+/********************************************************************
+* FUNCTION typ_get_next_cpattern
+* 
+* Get the next pattern struct for a typdef
+* Const version
+*
+* INPUTS:
+*   curpat  == current typ_pattern_t to check
+*
+* RETURNS:
+*   pointer to next pattern struct or NULL if none
+*********************************************************************/
+const typ_pattern_t *
+    typ_get_next_cpattern (const typ_pattern_t *curpat)
+{
+
+#ifdef DEBUG
+    if (!curpat) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (typ_pattern_t *)dlq_nextEntry(curpat);
+
+}  /* typ_get_next_cpattern */
+
+
+/********************************************************************
+* FUNCTION typ_get_pattern_count
+* 
+* Get the number of pattern structs in a typdef
+*
+* INPUTS:
+*   typdef == typ_def_t to check
+*
+* RETURNS:
+*   count of the typ_pattern_t structs found
+*********************************************************************/
+uint32
+    typ_get_pattern_count (const typ_def_t *typdef)
+{
+    const typ_pattern_t *pat;
+    uint32               cnt;
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
+    pat = typ_get_first_cpattern(typdef);
+    if (!pat) {
+	return 0;
+    } else {
+	cnt = 1;
+    }
+    pat = typ_get_next_cpattern(pat);
+    while (pat) {
+	cnt++;
+	pat = typ_get_next_cpattern(pat);
+    }
+    return cnt;
+
+}  /* typ_get_pattern_count */
+
+
+#ifdef REMOVE_IN_PROGRESS
+/********************************************************************
+* FUNCTION typ_get_pattern_errinfo
+* 
+* Get the pattern errinfo for a typdef
+*
+* INPUTS:
+*   typdef == typ_def_t to check
+*   patstr == p[attern string to match 
+*
+* RETURNS:
+*   pointer to pattern string or NULL if none
+*********************************************************************/
+const ncx_errinfo_t *
+    typ_get_pattern_errinfo (const typ_def_t *typdef,
+			     const xmlChar *patstr)
+{
+    ncx_errinfo_t *errinfo;
+    const dlq_hdr_t     *que;
 
 #ifdef DEBUG
     if (!typdef) {
@@ -3688,14 +4003,26 @@ const ncx_errinfo_t *
 
     if (typdef->class==NCX_CL_NAMED) {
 	if (typdef->def.named.newtyp) {
-	    return typdef->def.named.newtyp->pat_errinfo;
+	    que = &typdef->def.named.newtyp->pat_errinfoQ;
+	} else {
+	    return NULL;
 	}
     } else {
-	return typdef->pat_errinfo;
+	que = &typdef->pat_errinfoQ;
     }
+
+    for (errinfo = (ncx_errinfo_t *)dlq_firstEntry(que);
+	 errinfo != NULL;
+	 errinfo = (ncx_errinfo_t *)dlq_nextEntry(errinfo)) {
+	if (errinfo->pattern &&
+	    !xml_strcmp(errinfo->pattern, patstr)) {
+	    return errinfo;
+	}
+    } 
     return NULL;
 
 }  /* typ_get_pattern_errinfo */
+#endif
 
 
 /********************************************************************
@@ -3720,12 +4047,17 @@ const ncx_errinfo_t *
     }
 #endif
 
-    if (typdef->class==NCX_CL_NAMED) {
+    switch (typdef->class) {
+    case NCX_CL_NAMED:
 	if (typdef->def.named.newtyp) {
-	    return typdef->def.named.newtyp->range_errinfo;
+	    return &typdef->def.named.newtyp->def.simple.range.range_errinfo;
 	}
-    } else {
-	return typdef->range_errinfo;
+	break;
+    case NCX_CL_SIMPLE:
+	return &typdef->def.simple.range.range_errinfo;
+    case NCX_CL_REF:
+    default:
+	;
     }
     return NULL;
 
@@ -3793,8 +4125,8 @@ boolean
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_KEYREF:
     case NCX_BT_UNION:
-	return TRUE;
     case NCX_BT_EMPTY:
+	return TRUE;
     case NCX_BT_ANY:
     case NCX_BT_SLIST:
     case NCX_BT_CONTAINER:
@@ -3905,9 +4237,9 @@ boolean
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_UNION:
-	return TRUE;
-    case NCX_BT_KEYREF:   /*** may change again back to true ***/
+    case NCX_BT_KEYREF:   /*** not official in the spec yet 10/13 ***/
     case NCX_BT_EMPTY:
+	return TRUE;
     case NCX_BT_ANY:
         return FALSE;
     default:
@@ -4062,10 +4394,10 @@ boolean
 	case NCX_BT_UINT64:
 	case NCX_BT_FLOAT32:
 	case NCX_BT_FLOAT64:
-	    return !dlq_empty(&typdef->def.simple.rangeQ);
+	    return !dlq_empty(&typdef->def.simple.range.rangeQ);
 	case NCX_BT_STRING:
 	case NCX_BT_BINARY:
-	    if (!dlq_empty(&typdef->def.simple.rangeQ)) {
+	    if (!dlq_empty(&typdef->def.simple.range.rangeQ)) {
 		return TRUE;
 	    }
 	    return !dlq_empty(&typdef->def.simple.valQ);

@@ -368,112 +368,6 @@ static boolean
 
 
 /********************************************************************
-* FUNCTION check_sval
-* 
-* Check one typ_sval_t entry against the correct restriction
-* Called for VALSET or PATTERN only not ENUM or BIT
-*
-* INPUTS:
-*    valstr == string to check
-*    strrest == string restriction type
-*    sval == pointer to typ_sval_t to check
-*
-* RETURNS:
-*    status, NO_ERR if string value is in the set
-*********************************************************************/
-static status_t
-    check_sval (const xmlChar *strval,
-		ncx_strrest_t  strrest,
-		const typ_sval_t    *sval)
-{
-    switch (strrest) {
-    case NCX_SR_NONE:
-	return NO_ERR;
-    case NCX_SR_VALSET:
-	/* check this typdef for restrictions */
-	if (!xml_strcmp(sval->val, strval)) {
-	    return NO_ERR;
-	} else {
-	    return ERR_NCX_VAL_NOTINSET;
-	}
-	/*NOTREACHED*/
-    case NCX_SR_PATTERN:
-	/* check this typdef against the specified pattern */
-	if (sval->pattern) {
-	    if (pattern_match(sval->pattern, strval)) {
-		return NO_ERR;
-	    } else {
-		return ERR_NCX_PATTERN_FAILED;
-	    }
-	} else {
-	    return SET_ERROR(ERR_INTERNAL_PTR);
-	}
-	/*NOTREACHED*/
-    case NCX_SR_PATH:
-	return NO_ERR;
-    default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-} /* check_sval */
-
-
-/********************************************************************
-* FUNCTION check_svalQ
-* 
-* Check all the strings in a queue of typ_sval_t 
-* String restriction type == NCX_SR_VALSET or NCX_SR_PATTERN
-* Called for VALSET or PATTERN only not ENUM or BIT
-*
-* INPUTS:
-*    valstr == string to check
-*    strrest == string restriction type
-*    checkQ == pointer to Q of typ_sval_t to check
-*
-* RETURNS:
-*    status, NO_ERR if string value is in the set
-*********************************************************************/
-static status_t
-    check_svalQ (const xmlChar *strval,
-		 ncx_strrest_t strrest,
-		 const dlq_hdr_t *checkQ)
-{
-    const typ_sval_t  *sval;
-    status_t     res;
-
-    switch (strrest) {
-    case NCX_SR_NONE:
-	return NO_ERR;
-    case NCX_SR_VALSET:
-	/* check this typdef for restrictions */
-	for (sval = (const typ_sval_t *)dlq_firstEntry(checkQ);
-	     sval != NULL;
-	     sval = (const typ_sval_t *)dlq_nextEntry(sval)) {
-	    res = check_sval(strval, strrest, sval);
-	    if (res == NO_ERR) {
-		return NO_ERR;
-	    }
-	}
-	return ERR_NCX_VAL_NOTINSET;
-    case NCX_SR_PATTERN:
-	/* check this typdef against the specified pattern */
-	sval = (const typ_sval_t *)dlq_firstEntry(checkQ);
-	if (sval != NULL) {
-	    return check_sval(strval, strrest, sval);
-	} else {
-	    return NO_ERR;
-	}
-    case NCX_SR_PATH:
-	return NO_ERR;
-    default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-    /*NOTREACHED*/
-
-} /* check_svalQ */
-
-
-/********************************************************************
 * FUNCTION check_svalQ_enum
 * 
 * Check all the ncx_enum_t structs in a queue of typ_sval_t 
@@ -1203,11 +1097,8 @@ status_t
 			   const xmlChar *strval,
 			   const ncx_errinfo_t **errinfo)
 {
-    const dlq_hdr_t *restQ;
-    ncx_strrest_t   strrest;
     status_t        res;
     ncx_num_t       len;
-    boolean         last;
 
 #ifdef DEBUG
     if (!typdef || !strval) {
@@ -1240,68 +1131,13 @@ status_t
     }
 
     /* the range-test, if any, has succeeded
-     * check if there are any more value restrictions to check 
+     * check if there is a pattern test for a string only
      */
-    typdef = typ_get_cqual_typdef(typdef, NCX_SQUAL_VAL);
-    if (!typdef) {
-	return NO_ERR;
+    if (btyp == NCX_BT_STRING) {
+	res = val_pattern_ok_errinfo(typdef, strval, errinfo);
     }
 
-    /* loop if this is a named derived type */
-    last = FALSE;
-    for (;;) {
-	switch (typdef->class) {
-	case NCX_CL_SIMPLE:
-	    restQ = &typdef->def.simple.valQ;
-	    strrest = typdef->def.simple.strrest;
-	    last = TRUE;
-	    break;
-	case NCX_CL_NAMED:
-	    restQ = &typdef->def.named.newtyp->def.simple.valQ;
-	    strrest = typdef->def.named.newtyp->def.simple.strrest;
-	    break;
-	default:
-	    return ERR_NCX_WRONG_DATATYP;  /* should not happen */
-	}
-
-	/* check if value explicitly set in this Q */
-	res = check_svalQ(strval, strrest, restQ);
-	if (strrest == NCX_SR_PATTERN) {
-	    if (res != NO_ERR) {
-		if (errinfo) {
-		    *errinfo = typdef->pat_errinfo;
-		}
-		return res;
-	    } /* else keep looking for more patterns in the type chain */
-	} else {
-	    if (res == NO_ERR) {
-		return NO_ERR;
-	    } else if (last) {   /***** WILL CHANGE WHEN N patterns per type ***/
-		return res;
-	    }
-	}
-
-	/* try again */
-	typdef = typ_get_cparent_typdef(typdef);
-	if (typdef) {
-	    typdef = typ_get_cqual_typdef(typdef, NCX_SQUAL_VAL);
-	}
-	    
-	if (!typdef) {
-	    if (strrest == NCX_SR_PATTERN) {
-		return NO_ERR;
-	    } else {
-		/* this is an NCX value set test
-		 * since there was at least one value restriction
-		 * that did not pass the test, the fact that there
-		 * are no more possible values to check means that
-		 * this string does not pass the value restriction test 
-		 */
-		return ERR_NCX_VAL_NOTINSET;
-	    }
-	}
-    }
-    /*NOTREACHED*/
+    return res;
 
 } /* val_string_ok_errinfo */
 
@@ -1362,14 +1198,9 @@ status_t
 			 const ncx_errinfo_t **errinfo)
 {
     const typ_template_t *listtyp;
-    const typ_def_t      *listdef, *randef, *valdef;
-    typ_enum_t           *enuval;
-    const dlq_hdr_t      *restQ, *rangeQ;
-    ncx_lmem_t           *lmem;
-    ncx_strrest_t         strrest;
-    ncx_num_t             len;
-    ncx_btype_t           btyp;
-    status_t              res, retres;
+    const typ_def_t      *listdef;
+    const ncx_lmem_t     *lmem;
+    status_t              res;
 
 
 #ifdef DEBUG
@@ -1385,139 +1216,22 @@ status_t
     /* listtyp is for the list members, not the list itself */
     listtyp = typ_get_clisttyp(typdef);
     listdef = &listtyp->typdef;
-    btyp = typ_get_basetype(listdef);
-    rangeQ = NULL;
-    restQ = NULL;
-    retres = NO_ERR;
-
-    /* check if there is a list member count restriction */
-    randef = typ_get_cqual_typdef(typdef, NCX_SQUAL_RANGE);
-    if (randef) {
-	/* there is a range definition, so get the typdef */
-	switch (randef->class) {
-	case NCX_CL_SIMPLE:
-	    rangeQ = &randef->def.simple.rangeQ;
-	    break;
-	case NCX_CL_NAMED:
-	    rangeQ = &randef->def.named.newtyp->def.simple.rangeQ;
-	    break;
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-
-	/* get the list member count and check it */
-	len.u = ncx_list_cnt(list);
-	res = check_rangeQ(NCX_BT_UINT32, &len, rangeQ);	
-	if (res != NO_ERR) {
-	    /* wrong number of list elements */
-	    if (errinfo) {
-		*errinfo = randef->range_errinfo;
-	    }
-	    return res;
-	}
-	rangeQ = NULL;
-    }
-
-    /* check if there is a rangedef on the list member values */
-    randef = typ_get_cqual_typdef(listdef, NCX_SQUAL_RANGE);
-    if (randef) {
-	/* there is a range definition, so get the typdef */
-	switch (randef->class) {
-	case NCX_CL_SIMPLE:
-	    rangeQ = &randef->def.simple.rangeQ;
-	    break;
-	case NCX_CL_NAMED:
-	    rangeQ = &randef->def.named.newtyp->def.simple.rangeQ;
-	    break;
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-
-    /* check if value restriction processing is needed 
-     * For lists, only 1 typdef is allowed to define patterns
-     *
-     * This does not have to be the same typdef that defines
-     * a range for all the string lengths in the list
-     *
-     * The syntax "+=" is not supported at this time
-     * for list extension, so the first Q encountered
-     * is going to override any ancestor node definitions
-     *
-     * If the list base type (btyp) is a number, then
-     * there won't be any valdef
-     */
-    if (btyp==NCX_BT_ENUM || typ_is_string(btyp)) {
-	valdef = typ_get_cqual_typdef(listdef, NCX_SQUAL_VAL);
-	if (valdef) {
-	    switch (valdef->class) {
-	    case NCX_CL_SIMPLE:
-		restQ = &valdef->def.simple.valQ;
-		strrest = valdef->def.simple.strrest;
-		break;
-	    case NCX_CL_NAMED:
-		restQ = &valdef->def.named.newtyp->def.simple.valQ;
-		strrest = valdef->def.named.newtyp->def.simple.strrest;
-		break;
-	    default:
-		return SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	}
-    }
-
-    /* check if there are no restrictions; if so, we are done */
-    if (!rangeQ && !restQ) {
-	return NO_ERR;
-    }
 
     /* go through all the list members and check them */
     for (lmem = (ncx_lmem_t *)dlq_firstEntry(&list->memQ);
 	 lmem != NULL;
 	 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
 
-	/* check the string length range if any */
-	if (rangeQ) {
-	    len.u = xml_strlen(lmem->val.str);
-	    res = check_rangeQ(NCX_BT_UINT32, &len, rangeQ);
-	    if (res != NO_ERR) {
-		if (errinfo) {
-		    *errinfo = randef->range_errinfo;
-		}
-		return res;
-	    }
+	/* stop on first error -- if 1 list member is invalid
+	 * then the entire list is invalid
+	 */
+	res = val_simval_ok_errinfo(listdef, lmem->val.str, errinfo);
+	if (res != NO_ERR) {
+	    return res;
 	}
+    }
 
-	/* check the value restrictions if any */
-        /***** THIS IS NOT CORRECT FOR MULTI-TYPDEF PATTERNS ****/
-	if (restQ) {
-	    switch (btyp) {
-	    case NCX_BT_ENUM:
-		res = check_svalQ_enum(lmem->val.enu.val, 
-				       (lmem->val.enu.name) ? FALSE : TRUE,
-				       lmem->val.enu.name,
-				       (lmem->val.enu.name) ? 
-				       xml_strlen(lmem->val.enu.name) : 0,
-				       restQ, &enuval);
-		break;
-	    case NCX_BT_STRING:
-	    case NCX_BT_BINARY:
-		res = check_svalQ((const xmlChar *)lmem->val.str, 
-				  strrest, restQ);
-		break;
-	    default:
-		return SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	    if (res != NO_ERR) {
-		/* the string did not match this pattern */
-		if (errinfo) {
-		    *errinfo = valdef->pat_errinfo;
-		}
-		return res;
-	    } 
-	}  /* if any value checks */
-    } /* for all the member values in the ncx_list_t */
-
-    return retres;
+    return NO_ERR;
 
 } /* val_list_ok */
 
@@ -1688,8 +1402,9 @@ status_t
 			  const ncx_num_t *num,
 			  const ncx_errinfo_t **errinfo)
 {
-    const typ_def_t  *td;
-    const dlq_hdr_t  *checkQ;
+    const typ_def_t       *testdef;
+    const dlq_hdr_t       *checkQ;
+    const ncx_errinfo_t   *range_errinfo;
     status_t          res;
 
 
@@ -1704,39 +1419,120 @@ status_t
     }
 
     /* find the real typdef to check */
-    td = typ_get_cqual_typdef(typdef, NCX_SQUAL_RANGE);
-    if (!td) {
+    testdef = typ_get_cqual_typdef(typdef, NCX_SQUAL_RANGE);
+    if (!testdef) {
 	/* assume this means no range specified and
 	 * not an internal PTR or VAL error
 	 */
 	return NO_ERR;   
     }
 
-    switch (td->class) {
-    case NCX_CL_BASE:
-    case NCX_CL_COMPLEX:
-	return NO_ERR;    /* no range at all can be specified */
-    case NCX_CL_SIMPLE:
-	checkQ = &td->def.simple.rangeQ;
-	break;
-    case NCX_CL_NAMED:
-	checkQ = &td->def.named.newtyp->def.simple.rangeQ;
-	break;
-    case NCX_CL_REF:
-    default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
     /* there can only be one active range, which is
      * the most derived typdef that declares a range
      */
+    range_errinfo = typ_get_range_errinfo(testdef);
+    checkQ = typ_get_crangeQ_con(testdef);
+
     res = check_rangeQ(btyp, num, checkQ);
-    if (res != NO_ERR && errinfo) {
-	*errinfo = td->range_errinfo;
+    if (res != NO_ERR && errinfo && range_errinfo &&
+	ncx_errinfo_set(range_errinfo)) {
+	*errinfo = range_errinfo;
     }
     return res;
 
 } /* val_range_ok_errinfo */
+
+
+/********************************************************************
+* FUNCTION val_pattern_ok
+* 
+* Check a string against all the patterns in a big AND expression
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated enum type
+*    strval == string value to check
+* 
+* RETURNS:
+*    NO_ERR if pattern OK or no patterns found to check; error otherwise
+*********************************************************************/
+status_t
+    val_pattern_ok (const typ_def_t *typdef,
+		    const xmlChar *strval)
+{
+
+    return val_pattern_ok_errinfo(typdef, strval, NULL);
+
+}  /* val_pattern_ok */
+
+
+/********************************************************************
+* FUNCTION val_pattern_ok_errinfo
+* 
+* Check a string against all the patterns in a big AND expression
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated enum type
+*    strval == string value to check
+*    errinfo == address of return errinfo struct for err-pattern
+*
+* OUTPUTS:
+*   *errinfo set to error info struct if any, and if error exit
+*
+* RETURNS:
+*    NO_ERR if pattern OK or no patterns found to check; 
+*    error otherwise, and *errinfo will be set if the pattern
+*    that failed has any errinfo defined in it
+*********************************************************************/
+status_t
+    val_pattern_ok_errinfo (const typ_def_t *typdef,
+			    const xmlChar *strval,
+			    const ncx_errinfo_t **errinfo)
+{
+    const typ_pattern_t   *pat;
+
+#ifdef DEBUG
+    if (!typdef) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (!strval) {
+	strval = (const xmlChar *)"";
+    }
+
+    if (typ_get_basetype(typdef) != NCX_BT_STRING) {
+	return ERR_NCX_WRONG_DATATYP;
+    }
+
+    if (errinfo) {
+	*errinfo = NULL;
+    }
+
+    while (typdef) {
+	for (pat = typ_get_first_cpattern(typdef);
+	     pat != NULL;
+	     pat = typ_get_next_cpattern(pat)) {
+
+	    if (pat->res == NO_ERR) {
+		if (!pattern_match(pat->pattern, strval)) {
+		    if (errinfo && 
+			ncx_errinfo_set(&pat->pat_errinfo)) {
+
+			*errinfo = &pat->pat_errinfo;
+			return ERR_NCX_PATTERN_FAILED;
+		    }
+		}
+	    } else {
+		/* return SET_ERROR(ERR_INTERNAL_VAL) */;
+	    }
+	}
+
+	typdef = typ_get_cparent_typdef(typdef);
+    }
+
+    return NO_ERR;
+
+} /* val_pattern_ok_errinfo */
 
 
 /********************************************************************

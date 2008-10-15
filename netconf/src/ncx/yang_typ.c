@@ -197,20 +197,26 @@ static status_t
 		      ncx_module_t *mod,
 		      typ_def_t *newdef)
 {
-    status_t      res, retres;
-    ncx_btype_t   btyp;
-    boolean       doerr;
+    dlq_hdr_t      *rangeQ;
+    typ_pattern_t  *pat;
+    status_t        res, retres;
+    ncx_btype_t     btyp;
+    boolean         doerr;
+    ncx_strrest_t   strrest;
 
     res = NO_ERR;
     retres = NO_ERR;
-    btyp = typ_get_basetype(newdef);
     doerr = FALSE;
 
+    btyp = typ_get_basetype(newdef);
+    rangeQ = typ_get_rangeQ_con(newdef);
+    strrest = typ_get_strrest(newdef);
+    
     /* check if proper base type restrictions
      * are present. Range allowed for numbers
      * and strings only
      */
-    if (!dlq_empty(&newdef->def.simple.rangeQ)) {
+    if (rangeQ && !dlq_empty(rangeQ)) {
 	if (!(typ_is_number(btyp) || typ_is_string(btyp))) {
 	    log_error("\nError: Range or length not "
 			  "allowed for the %s builtin type",
@@ -224,23 +230,16 @@ static status_t
     /* Check that a pattern was actually entered
      * Check Pattern allowed for NCX_BT_STRING only
      */
-    if (!dlq_empty(&newdef->def.simple.valQ)) {
-	switch (newdef->def.simple.strrest) {
-	case NCX_SR_NONE:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    break;
-	case NCX_SR_VALSET:
-	    /* deprecated NCX construct   foo = { red white blue }; */
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    break;
-	case NCX_SR_PATTERN:
-	    if (!(btyp == NCX_BT_STRING || btyp == NCX_BT_KEYREF)) {
-		log_error("\nError: keyword 'pattern' "
-			  "within a restriction for a %s type",
-			  tk_get_btype_sym(btyp));
-		doerr = TRUE;
-	    }
-	    break;
+    pat = typ_get_first_pattern(newdef);
+    if (pat) {
+	if (!(btyp == NCX_BT_STRING || btyp == NCX_BT_KEYREF)) {
+	    log_error("\nError: keyword 'pattern' "
+		      "within a restriction for a %s type",
+		      tk_get_btype_sym(btyp));
+	    doerr = TRUE;
+	}
+    } else {
+	switch (strrest) {
 	case NCX_SR_ENUM:
 	    if (btyp != NCX_BT_ENUM) {
 		log_error("\nError: keyword 'enumeration' "
@@ -266,7 +265,7 @@ static status_t
 	    }
 	    break;
 	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
+	    ;
 	}
     }
 
@@ -321,7 +320,7 @@ static status_t
      */
     testdef = typdef;
     while (testdef && testdef->class==NCX_CL_NAMED) {
-	newdef = testdef->def.named.newtyp;
+	newdef = typ_get_new_named(testdef);
 	if (!newdef) {
 	    testdef = typ_get_parent_typdef(testdef);
 	    continue;
@@ -643,16 +642,21 @@ static status_t
 			typ_def_t *typdef,
 			boolean isrange)
 {
-    const char   *expstr;
-    status_t      res, retres;
-    boolean       done;
-    ncx_btype_t   rbtyp, btyp;
+    const char      *expstr;
+    ncx_errinfo_t   *errinfo;
+    typ_range_t     *range;
+    status_t         res, retres;
+    boolean          done;
+    ncx_btype_t      rbtyp, btyp;
+
 
     res = NO_ERR;
     retres = NO_ERR;
+    errinfo = NULL;
+    range = typ_get_range_con(typdef);
 
     /* save the range token in case needed for error msg */
-    typdef->def.simple.range.tk = TK_CUR(tkc);
+    range->tk = TK_CUR(tkc);
 
     btyp = typ_get_basetype(typdef);
     if (btyp == NCX_BT_NONE) {
@@ -679,11 +683,11 @@ static status_t
     }
 
     if (TK_CUR_STR(tkc)) {
-	if (typdef->def.simple.range.rangestr) {
-	    m__free(typdef->def.simple.range.rangestr);
+	if (range->rangestr) {
+	    m__free(range->rangestr);
 	}
-	typdef->def.simple.range.rangestr = xml_strdup(TK_CUR_VAL(tkc));
-	if (!typdef->def.simple.range.rangestr) {
+	range->rangestr = xml_strdup(TK_CUR_VAL(tkc));
+	if (!range->rangestr) {
 	    res = ERR_INTERNAL_MEM;
 	    ncx_print_errormsg(tkc, mod, res);
 	    return res;
@@ -739,8 +743,9 @@ static status_t
 
     /* check sub-section for error-app-tag and error-message */
     if (TK_CUR_TYP(tkc)==TK_TT_LBRACE) {
-	res = yang_consume_error_stmts(tkc, mod,
-				       &typdef->range_errinfo,
+	errinfo = &range->range_errinfo;
+	res = yang_consume_error_stmts(tkc, mod, 
+				       &errinfo,
 				       &typdef->appinfoQ);
 	CHK_EXIT;
     }
@@ -773,13 +778,17 @@ static status_t
 			  ncx_module_t *mod,
 			  typ_def_t *typdef)
 {
-    typ_sval_t  *sv;
-    const char  *expstr;
-    status_t     res, retres;
+    typ_pattern_t   *pat;
+    ncx_errinfo_t   *errinfo;
+    const char      *expstr;
+    status_t         res, retres;
+    boolean          free_pat;
 
+    pat = NULL;
     retres = NO_ERR;
+    free_pat = FALSE;
     expstr = "pattern string";
-    typdef->def.simple.strrest = NCX_SR_PATTERN;
+    typ_set_strrest(typdef, NCX_SR_PATTERN);
 
     /* move past pattern keyword to pattern value, get 1 string */
     res = TK_ADV(tkc);
@@ -789,16 +798,17 @@ static status_t
     }
 
     if (TK_CUR_STR(tkc)) {
-	sv = typ_new_sval(TK_CUR_VAL(tkc), NCX_BT_STRING);
-	if (!sv) {
+	pat = typ_new_pattern(TK_CUR_VAL(tkc));
+	if (!pat) {
 	    res = ERR_INTERNAL_MEM;
 	    ncx_print_errormsg(tkc, mod, res);
 	    return res;
 	}
 
 	/* make sure the pattern is valid */
-	res = typ_compile_pattern(NCX_BT_STRING, sv);
+	res = typ_compile_pattern(pat);
 	if (res != NO_ERR) {
+	    pat->res = res;
 	    ncx_print_errormsg(tkc, mod, res);
 	    retres = res;
 	    if (NEED_EXIT) {
@@ -806,14 +816,11 @@ static status_t
 	    }
 	}
 
-	/* save the string in the valQ */
-	if (retres==NO_ERR) {
-	    dlq_enque(sv, &typdef->def.simple.valQ);
-	} else {
-	    typ_free_sval(sv);
-	}
+	/* save the struct in the patternQ early,
+	 * even if it didn't compile
+	 */
+	dlq_enque(pat, &typdef->def.simple.patternQ);
     }
-
 
     /* move to the next token, which must be ';' or '{' */
     expstr = "semicolon or left brace";
@@ -834,9 +841,9 @@ static status_t
 
     /* check sub-section for error-app-tag and error-message */
     if (TK_CUR_TYP(tkc)==TK_TT_LBRACE) {
-	expstr = NULL;
+	errinfo = &pat->pat_errinfo;
 	res = yang_consume_error_stmts(tkc, mod,
-				       &typdef->pat_errinfo,
+				       &errinfo,
 				       &typdef->appinfoQ);
 	if (res != NO_ERR) {
 	    retres = res;

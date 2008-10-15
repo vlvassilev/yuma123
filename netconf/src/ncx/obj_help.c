@@ -97,8 +97,9 @@ static void
 		       uint32 indent)
 {
     const xmlChar    *datastr;
-    const typ_def_t  *typdef;
+    const typ_def_t  *typdef, *testdef;
     const typ_enum_t *tenum;
+    const typ_pattern_t *pattern;
     xmlChar           numbuff[NCX_MAX_NUMLEN];
     ncx_btype_t       btyp;
 
@@ -123,15 +124,17 @@ static void
 	help_write_lines(datastr, 0, FALSE);
     }
 
-    datastr = typ_get_pattern(typdef);
-    if (datastr) {
-	help_write_lines((const xmlChar *)"pattern: ", indent, TRUE);
-	help_write_lines(datastr, 0, FALSE);
+    testdef = typdef;
+    while (testdef) {
+	for (pattern = typ_get_first_cpattern(testdef);
+	     pattern != NULL;
+	     pattern = typ_get_next_cpattern(pattern)) {
+
+	    help_write_lines((const xmlChar *)"pattern: ", indent, TRUE);
+	    help_write_lines(pattern->pat_str, 0, FALSE);
+	}
+	testdef = typ_get_cparent_typdef(testdef);
     }
-
-    /**** TBD: REST OF PATTERN STMTS ****/
-
-
 
     switch (btyp) {
     case NCX_BT_ENUM:

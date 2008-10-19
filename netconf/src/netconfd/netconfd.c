@@ -196,7 +196,11 @@ static status_t
 
     /* set the default debug output level */
 #ifdef DEBUG
-    dlevel = LOG_DEBUG_DEBUG;
+#ifdef NETCONFD_DEBUG_TEST
+    dlevel = LOG_DEBUG_DEBUG3;
+#else 
+    dlevel = LOG_DEBUG_INFO;
+#endif
 #else
     dlevel = LOG_DEBUG_WARN;
 #endif
@@ -227,7 +231,7 @@ static status_t
      * params can be initialized
      */
 
-    /* Load all the supported core modules */
+    /* Load the core modules (netconfd and netconf) */
     res = load_core_schema();
     if (res != NO_ERR) {
 	return res;

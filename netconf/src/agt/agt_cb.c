@@ -623,7 +623,7 @@ void
 
     modhdr = find_modhdr(modname);
     if (!modhdr) {
-	SET_ERROR(ERR_INTERNAL_VAL);
+	/* entry not found; assume it is an early exit cleanup */
 	return;
     }
 

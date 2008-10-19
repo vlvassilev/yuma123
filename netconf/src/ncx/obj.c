@@ -3098,7 +3098,7 @@ const obj_template_t *
 		dlq_nextEntry(last->parent);
 	    if (!cas) {
 		/* no next case, try next object after choice */
-		return obj_next_child(last->parent->parent);
+		return obj_next_child_deep(last->parent->parent);
 	    } else {
 		/* keep trying the next case until one with
 		 * a child node is found
@@ -3112,7 +3112,8 @@ const obj_template_t *
 			    dlq_nextEntry(cas);
 			if (!cas) {
 			    /* no next case, ret. object after choice */
-			    return obj_next_child(last->parent->parent);
+			    return 
+				obj_next_child_deep(last->parent->parent);
 			}
 		    }
 		}

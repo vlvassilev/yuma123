@@ -797,7 +797,6 @@ void
 		dlq_enque(chval, &tempQ);
 	    }
 	}
-	dlq_block_enque(&tempQ, &val->v.childQ);
 	/* fall through to do the rest of the child nodes */
     case OBJ_TYP_CONTAINER:
 	if (obj_is_root(val->obj)) {
@@ -848,6 +847,10 @@ void
 	     chobj != NULL;
 	     chobj = obj_next_child_deep(chobj)) {
 
+	    if (obj_is_key(chobj)) {
+		continue;
+	    }
+
 	    chval = val_find_child(val, 
 				   obj_get_mod_name(chobj),
 				   obj_get_name(chobj));
@@ -873,6 +876,10 @@ void
 				       obj_get_mod_name(chobj),
 				       obj_get_name(chobj));
 	    }
+	}
+
+	if (dlq_count(&val->v.childQ)) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
 
 	dlq_block_enque(&tempQ, &val->v.childQ);

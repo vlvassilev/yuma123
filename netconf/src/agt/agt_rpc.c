@@ -963,7 +963,6 @@ void
 
     /* check any errors in the <rpc> node */
     if (res != NO_ERR) {
-	msg->rpc_status = res;
 	send_rpc_reply(scb, msg);
 	rpc_free_msg(msg);
 	return;
@@ -1067,7 +1066,6 @@ void
 
     /* check that there is nothing after the <rpc> element */
     if (res == NO_ERR && !xml_docdone(scb->reader)) {
-	msg->rpc_status = ERR_NCX_UNKNOWN_ELEMENT;
 
 	/* get all the extra nodes and report the errors */
 	res = NO_ERR;
@@ -1117,12 +1115,6 @@ void
 	res = (*cbset->acb[AGT_RPC_PH_PRERPY])(scb, msg, &method);
     }
 
-    /* reply state 
-     * check if there is a manual override reply callback 
-     */
-    if (res != NO_ERR) {
-	msg->rpc_status = res;
-    }
     msg->rpc_agt_state = AGT_RPC_PH_REPLY;
     send_rpc_reply(scb, msg);
 

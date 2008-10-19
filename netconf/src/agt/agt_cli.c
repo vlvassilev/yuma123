@@ -32,12 +32,16 @@ date         init     comment
 #include "agt_cli.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_cli
 #include "cli.h"
+#endif
+
+#ifndef _H_conf
+#include "conf.h"
+#endif
+
+#ifndef _H_def_reg
+#include "def_reg.h"
 #endif
 
 #ifndef _H_ncx
@@ -105,6 +109,24 @@ static void
 	return;
     }
 
+    /* check all the netconfd CLI parameters;
+     * follow the order in netconfd.yang since
+     * no action will be taken until all params are collected
+     */
+
+    /* config param:
+     * do not look for config file param in this function
+     * so it can be called for the config file itself
+     */
+
+    /* get datapath param */
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DATAPATH);
+    if (val && val->res == NO_ERR) {
+	agt_profile->agt_datapath = VAL_STR(val);
+    }
+
+    /* help parameter checked externally */
+
     /* get log param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOG);
     if (val && val->res == NO_ERR) {
@@ -117,29 +139,11 @@ static void
 	agt_profile->agt_logappend = TRUE;
     }
 
-    /* get xmlorder param */
-    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_XMLORDER);
-    if (val && val->res == NO_ERR) {
-	agt_profile->agt_xmlorder = TRUE;
-    }
-
     /* get log-level param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOGLEVEL);
     if (val && val->res == NO_ERR) {
 	agt_profile->agt_loglevel = 
 	    log_get_debug_level_enum((const char *)VAL_STR(val));
-    }
-
-    /* get no-startup startup param choice */
-    val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_NOSTARTUP);
-    if (val && val->res == NO_ERR) {
-	agt_profile->agt_usestartup = FALSE;
-    }
-
-    /* OR get startup param */
-    val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_STARTUP);
-    if (val && val->res == NO_ERR) {
-	agt_profile->agt_startup = VAL_STR(val);
     }
 
     /* get modpath param */
@@ -148,18 +152,44 @@ static void
 	agt_profile->agt_modpath = VAL_STR(val);
     }
 
-    /* get datapath param */
-    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DATAPATH);
-    if (val && val->res == NO_ERR) {
-	agt_profile->agt_datapath = VAL_STR(val);
-    }
-
     /* get runpath param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_RUNPATH);
     if (val && val->res == NO_ERR) {
 	agt_profile->agt_runpath = VAL_STR(val);
     }
 
+    /* start choice: get no-startup startup param choice */
+    val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_NOSTARTUP);
+    if (val && val->res == NO_ERR) {
+	agt_profile->agt_usestartup = FALSE;
+    }
+
+    /* start choice: OR get startup param */
+    val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_STARTUP);
+    if (val && val->res == NO_ERR) {
+	agt_profile->agt_startup = VAL_STR(val);
+    }
+
+    /* get target param */
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_TARGET);
+    if (val && val->res == NO_ERR) {
+	if (!xml_strcmp(VAL_ENUM_NAME(val), NCX_EL_RUNNING)) {
+	    agt_profile->agt_targ = NCX_AGT_TARG_RUNNING;
+	    agt_profile->agt_start = NCX_AGT_START_DISTINCT;
+	} else if (!xml_strcmp(VAL_ENUM_NAME(val), 
+			       NCX_EL_CANDIDATE)) {
+	    agt_profile->agt_targ = NCX_AGT_TARG_CANDIDATE;
+	    agt_profile->agt_start = NCX_AGT_START_MIRROR;
+	}
+    }
+
+    /* version param handled externally */
+
+    /* get xmlorder param */
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_XMLORDER);
+    if (val && val->res == NO_ERR) {
+	agt_profile->agt_xmlorder = TRUE;
+    }
 
 } /* set_agent_profile */
 
@@ -206,10 +236,11 @@ status_t
 	def_reg_find_moddef(AGT_CLI_MODULE, 
 			    AGT_CLI_CONTAINER, &dtyp);
     if (!obj) {
-	return SET_ERROR(ERR_NCX_NOT_FOUND);
+	log_error("\nError: netconfd module with CLI definitions not loaded");
+	return ERR_NCX_NOT_FOUND;
     }
 
-    /* parse the command line against the PSD */
+    /* parse the command line against the object template */
     res = NO_ERR;
     valset = NULL;
     if (argc > 1) {
@@ -220,11 +251,29 @@ status_t
 	}
     }
 
-    /* transfer the parmset values */
-    set_agent_profile(valset, agt_profile);
-
-    /* check the quick exit parameters */
     if (valset) {
+	/* transfer the parmset values */
+	set_agent_profile(valset, agt_profile);
+
+	/* next get any params from the conf file */
+	val = val_find_child(valset, AGT_CLI_MODULE, 
+			     NCX_EL_CONFIG);
+	if (val) {
+	    if (val->res == NO_ERR) {
+		/* try the specified config location */
+		agt_profile->agt_conffile = VAL_STR(val);
+		res = conf_parse_val_from_filespec(VAL_STR(val), 
+						   valset, 
+						   TRUE, TRUE);
+		if (res != NO_ERR) {
+		    return res;
+		} else {
+		    /* transfer the parmset values again */
+		    set_agent_profile(valset, agt_profile);
+		}
+	    }
+	} /* else no default config location */
+
 	/* check if version mode requested */
 	val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_VERSION);
 	*showver = (val) ? TRUE : FALSE;

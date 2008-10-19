@@ -239,11 +239,12 @@ static status_t
     }
     cp->bufflen = YANGDUMP_BUFFSIZE;
 
-    /* find the parmset definition in the registry */
+    /* find the CLI container definition in the registry */
     dtyp = NCX_NT_OBJ;
     obj = (const obj_template_t *)
 	def_reg_find_moddef(YANGDUMP_MOD, YANGDUMP_CONTAINER, &dtyp);
     if (!obj) {
+	log_error("\nError: yangdump module with CLI definitions not loaded");
 	res = ERR_NCX_NOT_FOUND;
     }
 

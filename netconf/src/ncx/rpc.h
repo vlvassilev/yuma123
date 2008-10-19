@@ -129,7 +129,6 @@ typedef struct rpc_msg_t_ {
     int              rpc_agt_state;        /* rpc_agt_phase_t */
     op_errop_t       rpc_err_option;       
     val_value_t      rpc_input;
-    status_t         rpc_status;     /* final internal status */
 
     /* incoming:
      * hooks for method routines to save context or whatever 

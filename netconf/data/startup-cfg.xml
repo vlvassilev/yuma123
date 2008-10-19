@@ -14,6 +14,7 @@
          <t:eee>test one</t:eee>
       </t:e>
       <t:f1>test one</t:f1>
+      <t:g3a>ddddddd</t:g3a>
    </t:test1>
    <t:test2 xmlns:t="urn:ietf:params:xml:ns:yang:test">
       <t:a2>fred</t:a2>
@@ -21,12 +22,8 @@
       <t:foo></t:foo>
    </t:test2>
    <t:test2 xmlns:t="urn:ietf:params:xml:ns:yang:test">
-      <t:a2>wilma</t:a2>
-      <t:b2>55</t:b2>
-      <t:foo>69 bugs to go!</t:foo>
-   </t:test2>
-   <t:test2 xmlns:t="urn:ietf:params:xml:ns:yang:test">
       <t:a2>bambi</t:a2>
+      <t:a1>3</t:a1>
       <t:b2>2</t:b2>
       <t:foo>
          /t:test2[t:a2=wilma]/t:b2

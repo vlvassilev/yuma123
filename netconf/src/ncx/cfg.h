@@ -64,7 +64,10 @@
       to load into the running config
 
    4) call cfg_set_target() [NCX_CFGID_CANDIDATE or NCX_CFGID_RUNNING]
-   
+
+   4a) call cfg_fill_candidate_from_running if the target is candidate;
+       after agt.c/load_running_config is called
+
    5) call cfg_set_state() to setup config db access, when ready
       for NETCONF operations
 
@@ -122,7 +125,7 @@ date             init     comment
 
 /* bit definitions for the cfg_template->flags field */
 #define CFG_FL_TARGET       bit0
-
+#define CFG_FL_DIRTY        bit1
 
 /********************************************************************
 *                                                                   *
@@ -220,6 +223,15 @@ extern cfg_template_t *
 
 extern void
     cfg_set_target (ncx_cfg_t cfg_id);
+
+extern status_t
+    cfg_fill_candidate_from_running (void);
+
+extern void
+    cfg_set_dirty_flag (cfg_template_t *cfg);
+
+extern boolean
+    cfg_get_dirty_flag (const cfg_template_t *cfg);
 
 extern status_t
     cfg_ok_to_lock (const cfg_template_t *cfg);

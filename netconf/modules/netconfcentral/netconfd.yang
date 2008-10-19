@@ -31,6 +31,15 @@ module netconfd {
           Usage:
             netconfd [parameters]";
 
+      leaf config {
+        description
+          "The name of the configuration file to use.
+           Any parameter except this one can be set in the config file.
+           The default config file will be not be checked if this
+           parameter is present.";
+         type string;
+      }
+
       leaf datapath {
         description
            "Internal file search path for config files.";
@@ -77,6 +86,9 @@ module netconfd {
       }
 
       choice start {
+        description "select startup config for boot load";
+        // default is set in the agt_profile
+
         leaf no-startup {
           description
              "If present, do not load the startup config file.";
@@ -93,7 +105,31 @@ module netconfd {
               character is the forward slash '/', indicating
               an absolute file path.";
           type string;
+  
         }
+      }
+
+      leaf target {
+        description
+          "The database to use as the target of edit-config
+           operations.";
+        type enumeration {
+          enum running {
+            description 
+             "Write to the running config.
+              Also use distinct startup capability.
+              A copy-config operation must be used to 
+              save the running config to the startup config file.";
+          }
+          enum candidate {
+            description 
+              "Write to the candidate config.
+               Also automatically update the startup config
+               file after each 'commit' operation is
+               successfully completed.";
+          }
+        }
+        // default is set in the agt_profile
       }
 
       leaf version {

@@ -56,15 +56,6 @@ typedef enum op_method_t_ {
 } op_method_t;
 
 
-/* NETCONF protocol operation PDU config types */
-typedef enum op_config_t_ {
-    OP_CONFIG_NONE,
-    OP_CONFIG_CANDIDATE,  
-    OP_CONFIG_RUNNING,
-    OP_CONFIG_STARTUP
-} op_config_t;
-
-
 /* NETCONF protocol operation PDU source types */
 typedef enum op_srctyp_t_ {
     OP_SOURCE_NONE,
@@ -107,7 +98,8 @@ typedef enum op_editop_t_ {
     OP_EDITOP_REPLACE,
     OP_EDITOP_CREATE,
     OP_EDITOP_DELETE,
-    OP_EDITOP_LOAD         /* internal enumeration */
+    OP_EDITOP_LOAD,         /* internal enumeration */
+    OP_EDITOP_COMMIT
 } op_editop_t;
 
 
@@ -152,6 +144,7 @@ typedef enum op_errop_t_ {
 } op_errop_t;
 
 
+#if 0
 /* NETCONF protocol operation PDU sources union */
 typedef union op_source_u_t_ {
     op_config_t     op_config;
@@ -179,6 +172,7 @@ typedef struct op_target_t_ {
     op_targtyp_t    op_targtyp;
     op_target_u_t   op_targ;
 } op_target_t;
+#endif
 
 
 /* NETCONF protocol operation filter spec */
@@ -196,9 +190,6 @@ typedef struct op_filter_t_ {
 
 extern const xmlChar * 
     op_method_name (op_method_t op_id);
-
-extern const xmlChar * 
-    op_config_name (op_config_t cfg_id);
 
 extern const xmlChar * 
     op_editop_name (op_editop_t ed_id);

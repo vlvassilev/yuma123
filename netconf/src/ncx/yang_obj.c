@@ -1890,10 +1890,10 @@ static status_t
 	} else {
 	    if (refi) {
 		res = consume_yang_refine(tkc, mod,
-					  cas->datadefQ, parent);
+					  cas->datadefQ, obj);
 	    } else {
 		res = consume_case_datadef(tkc, mod,
-					   cas->datadefQ, parent, refi);
+					   cas->datadefQ, obj, refi);
 	    }
 	}
 	CHK_OBJ_EXIT;

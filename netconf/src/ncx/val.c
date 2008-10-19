@@ -5650,4 +5650,127 @@ boolean
 } /* val_match_metaval */
 
 
+/********************************************************************
+* FUNCTION val_get_dirty_flag
+* 
+* Get the dirty flag for this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if value is dirty, false otherwise
+*********************************************************************/
+boolean
+    val_get_dirty_flag (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+#endif
+
+    return (val->flags & VAL_FL_DIRTY) ? TRUE : FALSE;
+
+} /* val_get_dirty_flag */
+
+
+/********************************************************************
+* FUNCTION val_set_dirty_flag
+* 
+* Set the dirty flag for this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if value is dirty, false otherwise
+*********************************************************************/
+void
+    val_set_dirty_flag (val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+#endif
+
+    val->flags |= VAL_FL_DIRTY;
+
+} /* val_set_dirty_flag */
+
+
+/********************************************************************
+* FUNCTION val_clear_dirty_flag
+* 
+* Clear the dirty flag for this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if value is dirty, false otherwise
+*********************************************************************/
+void
+    val_clear_dirty_flag (val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+#endif
+
+    val->flags &= ~VAL_FL_DIRTY;
+
+} /* val_clear_dirty_flag */
+
+
+/********************************************************************
+ * FUNCTION val_clean_tree
+ * 
+ * Clear the dirty flag and the operation for all
+ * nodes within a value struct
+ *
+ * INPUTS:
+ *   val == value node to clean
+ *
+ * OUTPUTS:
+ *   val and all its child nodes (if any) are cleaned
+ *     val->flags: VAL_FL_DIRTY bit cleared to 0
+ *     val->editop: cleared to OP_EDITOP_NONE
+ *     val->curparent: cleared to NULL
+ *********************************************************************/
+void
+    val_clean_tree (val_value_t *val)
+{
+    val_value_t           *chval;
+
+
+#ifdef DEBUG
+    if (!val || !val->obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (obj_is_data_db(val->obj) &&
+	obj_is_config(val->obj)) {
+
+	for (chval = val_get_first_child(val);
+	     chval != NULL;
+	     chval = val_get_next_child(chval)) {
+	    val_clean_tree(chval);
+	}
+
+	val->flags &= ~VAL_FL_DIRTY;
+	val->editop = OP_EDITOP_NONE;
+	val->curparent = NULL;
+    }
+
+}  /* val_clean_tree */
+
+
 /* END file val.c */

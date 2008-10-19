@@ -353,9 +353,6 @@ static status_t
     /* save the test option in 'user2' */
     msg->rpc_user2 = (void *)testop;
 
-    /* save the real result; this field is not used by the RPC layer */
-    msg->rpc_status = res;
-
     return res;
 
 } /* edit_config_validate */
@@ -515,9 +512,11 @@ static status_t
 	res = agt_ncx_cfg_save(source, FALSE);
 	if (res != NO_ERR) {
 	    /* config save failed */
-	    agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
-			     methnode, NCX_NT_CFG, 
-			     (const void *)target, NCX_NT_NONE, NULL);
+	    agt_record_error(scb, &msg->mhdr, 
+			     NCX_LAYER_OPERATION,
+			     res, methnode,
+			     NCX_NT_CFG, target, 
+			     NCX_NT_NONE, NULL);
 	}
     }
 
@@ -1008,12 +1007,208 @@ static status_t
 	res = agt_val_root_check(scb, &msg->mhdr, rootval);
     }
 
-    /* save the real result; this field is not used by the RPC layer */
-    msg->rpc_status = res;
-
     return res;
 
 } /* validate_validate */
+
+
+/********************************************************************
+* FUNCTION commit_validate
+*
+* commit : validate params callback
+*
+* INPUTS:
+*    see rpc/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    commit_validate (ses_cb_t *scb,
+		     rpc_msg_t *msg,
+		     xml_node_t *methnode)
+{
+    cfg_template_t       *candidate, *running;
+    const agt_profile_t  *profile;
+    status_t              res;
+    boolean               errdone;
+
+
+    res = NO_ERR;
+    errdone = FALSE;
+
+    profile = agt_get_profile();
+
+    if (profile->agt_targ != NCX_AGT_TARG_CANDIDATE) {
+	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+    } else {
+	/* get the candidate config */
+	candidate = cfg_get_config_id(NCX_CFGID_CANDIDATE);
+	running = cfg_get_config_id(NCX_CFGID_RUNNING);
+	if (!candidate || !running) {
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	} else {
+	    /* check if this session is allowed to clear the
+	     * candidate config now
+	     */
+	    res = cfg_ok_to_write(candidate, SES_MY_SID(scb));
+
+	    if (res == NO_ERR) {
+		/* check if the running config can be written */
+		res = cfg_ok_to_write(running, SES_MY_SID(scb));
+	    }
+
+	    if (res == NO_ERR) {
+		res = agt_val_root_check(scb, &msg->mhdr, 
+					 candidate->root);
+		if (res != NO_ERR) {
+		    errdone = TRUE;
+		}
+	    }
+	}
+    }
+
+    if (res != NO_ERR && !errdone) {
+	agt_record_error(scb, &msg->mhdr, 
+			 NCX_LAYER_OPERATION, res, methnode,
+			 NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
+    }
+
+    return res;
+
+} /* commit_validate */
+
+
+/********************************************************************
+* FUNCTION commit_invoke
+*
+* commit : invoke callback
+* 
+* INPUTS:
+*    see rpc/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    commit_invoke (ses_cb_t *scb,
+		   rpc_msg_t *msg,
+		   xml_node_t *methnode)
+{
+    cfg_template_t *candidate, *running;
+    status_t        res;
+
+    res = NO_ERR;
+
+    candidate = cfg_get_config_id(NCX_CFGID_CANDIDATE);
+    running = cfg_get_config_id(NCX_CFGID_RUNNING);
+    if (!candidate || !running) {
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+	agt_record_error(scb, &msg->mhdr, 
+			 NCX_LAYER_OPERATION, res, methnode,
+			 NCX_NT_NONE, NULL, 
+			 NCX_NT_NONE, NULL);
+    } else {
+	res = agt_val_apply_commit(scb, msg, candidate, running);
+	if (res == NO_ERR) {
+	    res = cfg_fill_candidate_from_running();
+	    if (res != NO_ERR) {
+		agt_record_error(scb, &msg->mhdr, 
+				 NCX_LAYER_OPERATION, res, methnode,
+				 NCX_NT_NONE, NULL, 
+				 NCX_NT_VAL, candidate->root);
+	    }
+	}  /* else errors already recorded */
+    }
+
+    return res;
+
+} /* commit_invoke */
+
+
+/********************************************************************
+* FUNCTION discard_changes_validate
+*
+* discard-changes : validate params callback
+*
+* INPUTS:
+*    see rpc/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    discard_changes_validate (ses_cb_t *scb,
+			      rpc_msg_t *msg,
+			      xml_node_t *methnode)
+{
+    cfg_template_t       *candidate;
+    const agt_profile_t  *profile;
+    status_t              res;
+
+    res = NO_ERR;
+    profile = agt_get_profile();
+
+    if (profile->agt_targ != NCX_AGT_TARG_CANDIDATE) {
+	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+    } else {
+	/* get the candidate config */
+	candidate = cfg_get_config_id(NCX_CFGID_CANDIDATE);
+	if (!candidate) {
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	} else {
+	    /* check if this session is allowed to invoke now */
+	    res = cfg_ok_to_write(candidate, SES_MY_SID(scb));
+	}
+    }
+
+    if (res != NO_ERR) {
+	agt_record_error(scb, &msg->mhdr, 
+			 NCX_LAYER_OPERATION, res, methnode,
+			 NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
+	return res;
+    }
+
+    return res;
+
+} /* discard_changes_validate */
+
+
+/********************************************************************
+* FUNCTION discard_changes_invoke
+*
+* discard-changes : invoke callback
+* 
+* INPUTS:
+*    see rpc/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    discard_changes_invoke (ses_cb_t *scb,
+			   rpc_msg_t *msg,
+			   xml_node_t *methnode)
+{
+    cfg_template_t *candidate;
+    status_t        res;
+
+    res = NO_ERR;
+
+
+    /* get the candidate config */
+    candidate = cfg_get_config_id(NCX_CFGID_CANDIDATE);
+    if (!candidate) {
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+    } else if (cfg_get_dirty_flag(candidate)) {
+	res = cfg_fill_candidate_from_running();
+    }
+
+    if (res != NO_ERR) {
+	agt_record_error(scb, &msg->mhdr, 
+			 NCX_LAYER_OPERATION, res, methnode,
+			 NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
+    }
+
+    return res;
+
+} /* discard_changes_invoke */
 
 
 /********************************************************************
@@ -1111,6 +1306,8 @@ static status_t
 	res = agt_val_apply_write(scb, msg, target, val, 
 				  OP_EDITOP_LOAD);
     }
+
+    val_clean_tree(target->root);
 
     return res;
 
@@ -1353,10 +1550,38 @@ static status_t
     }
 
     /* commit :candidate capability */
-    agt_rpc_unsupport_method(NC_MODULE, op_method_name(OP_COMMIT));
+    res = agt_rpc_register_method(NC_MODULE,
+				  op_method_name(OP_COMMIT),
+				  AGT_RPC_PH_VALIDATE,
+				  commit_validate);
+    if (res != NO_ERR) {
+	return SET_ERROR(res);
+    }
+
+    res = agt_rpc_register_method(NC_MODULE,
+				  op_method_name(OP_COMMIT),
+				  AGT_RPC_PH_INVOKE,
+				  commit_invoke);
+    if (res != NO_ERR) {
+	return SET_ERROR(res);
+    }
 
     /* discard-changes :candidate capability */
-    agt_rpc_unsupport_method(NC_MODULE, op_method_name(OP_DISCARD_CHANGES));
+    res = agt_rpc_register_method(NC_MODULE,
+				  op_method_name(OP_DISCARD_CHANGES),
+				  AGT_RPC_PH_VALIDATE,
+				  discard_changes_validate);
+    if (res != NO_ERR) {
+	return SET_ERROR(res);
+    }
+
+    res = agt_rpc_register_method(NC_MODULE,
+				  op_method_name(OP_DISCARD_CHANGES),
+				  AGT_RPC_PH_INVOKE,
+				  discard_changes_invoke);
+    if (res != NO_ERR) {
+	return SET_ERROR(res);
+    }
 
     /* load-config extension */
     res = agt_rpc_register_method(AGT_CLI_MODULE, NCX_EL_LOAD_CONFIG,
@@ -1421,6 +1646,12 @@ static void
 
     /* validate */
     agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_VALIDATE));
+
+    /* commit */
+    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_COMMIT));
+
+    /* discard-changes */
+    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_DISCARD_CHANGES));
 
     /* load-config extension */
     agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_LOAD_CONFIG);

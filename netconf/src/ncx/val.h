@@ -147,7 +147,7 @@ date	     init     comment
 #define VAL_FL_DUPOK     bit1
 #define VAL_FL_DEFSET    bit2
 #define VAL_FL_META      bit3
-
+#define VAL_FL_DIRTY     bit4
 
 /* macros to access simple value types */
 #define VAL_BOOL(V)    ((V)->v.bool)
@@ -741,5 +741,18 @@ extern boolean
     val_match_metaval (const xml_attr_t *attr,
 		       xmlns_id_t  nsid,
 		       const xmlChar *name);
+
+
+extern boolean
+    val_get_dirty_flag (const val_value_t *val);
+
+extern void
+    val_set_dirty_flag (val_value_t *val);
+
+extern void
+    val_clear_dirty_flag (val_value_t *val);
+
+extern void
+    val_clean_tree (val_value_t *val);
 
 #endif	    /* _H_val */

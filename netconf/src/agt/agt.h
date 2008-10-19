@@ -157,12 +157,13 @@ typedef enum agt_cbtyp_t_ {
 typedef struct agt_profile_t_ {
     ncx_agttarg_t    agt_targ;
     ncx_agtstart_t   agt_start;
-    boolean          agt_del_startup;
     log_debug_t      agt_loglevel;
+    boolean          agt_del_startup;
     boolean          agt_usestartup;
     boolean          agt_logappend;
     boolean          agt_xmlorder;
-    boolean          agt_deleteall_ok;
+    boolean          agt_deleteall_ok;   /* TBD: not implemented */
+    const xmlChar   *agt_conffile;
     const xmlChar   *agt_logfile;
     const xmlChar   *agt_startup;
     const xmlChar   *agt_modpath;

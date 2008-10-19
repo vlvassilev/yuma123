@@ -244,7 +244,18 @@ static status_t
     val_value_t       *val;
     status_t           res;
 
-    val = newnode;
+    if (cbtyp > AGT_CB_ROLLBACK) {
+	return NO_ERR;
+    }
+
+    if (newnode) {
+	val = newnode;
+    } else if (curnode) {
+	val = curnode;
+    } else {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
     if (val->obj->cbset) {
 	cbset = val->obj->cbset;
 	if (cbset->cbfn[cbtyp]) {
@@ -343,7 +354,6 @@ static boolean
 		     const val_value_t *curnode)
 {
     boolean retval;
-    const val_value_t *val;
 
     retval = FALSE;
     switch (editop) {
@@ -358,16 +368,16 @@ static boolean
 	if (!curnode) {
 	    retval = TRUE;
 	} else {
-	    val = (const val_value_t *)curnode;
-
 	    /* if this is a leaf and not an index leaf, then
 	     * apply the merge here
 	     */
-	    if (val && !val->index) {
-		retval = typ_is_simple(obj_get_basetype(val->obj));
+	    if (curnode && !curnode->index) {
+		retval = typ_is_simple
+		    (obj_get_basetype(curnode->obj));
 	    }
 	}
 	break;
+    case OP_EDITOP_COMMIT:
     case OP_EDITOP_CREATE:
     case OP_EDITOP_REPLACE:
     case OP_EDITOP_LOAD:
@@ -504,8 +514,10 @@ static status_t
 		     val_value_t  *curval,
 		     boolean      *done)
 {
+    const xmlChar   *name;
     rpc_undo_rec_t   *undo;
     status_t          res;
+    op_editop_t       cur_editop;
     boolean           applyhere, mergehere, freenew;
     
 
@@ -514,11 +526,29 @@ static status_t
     freenew = FALSE;
     undo = NULL;
 
+    if (newval) {
+	cur_editop = newval->editop;
+	name = newval->name;
+    } else if (curval) {
+	cur_editop = editop;
+	name = curval->name;
+    } else {
+	*done = TRUE;
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+#ifdef AGT_VAL_DEBUG
+	log_debug3("\napply_write_val: %s start", name);
+#endif
+
     /* check if this node needs the edit operation applied */
     if (*done) {
 	applyhere = FALSE;
+    } else if (editop == OP_EDITOP_COMMIT) {
+	applyhere = val_get_dirty_flag(newval);
+	*done = applyhere;
     } else {
-	applyhere = apply_this_node(newval->editop, curval);
+	applyhere = apply_this_node(cur_editop, curval);
 	*done = applyhere;
     }
 
@@ -526,7 +556,7 @@ static status_t
     if (applyhere) {
 
 #ifdef AGT_VAL_DEBUG
-	log_debug3("\napply_write_val: %s start", newval->name);
+	log_debug2("\napply_write_val: %s applyhere", name);
 #endif
 
 	if (msg->rpc_need_undo) {
@@ -537,15 +567,29 @@ static status_t
 	    }
 	}
 
-	handle_audit_record(newval->editop, scb, target, 
+	handle_audit_record(cur_editop, scb, target, 
 			    (curval) ? curval : newval, res);
+
+	if (editop != OP_EDITOP_LOAD) {
+	    cfg_set_dirty_flag(target);
+
+	    if (editop == OP_EDITOP_DELETE) {
+		if (parent) {
+		    val_set_dirty_flag(parent);
+		}
+	    } else if (curval) {
+		val_set_dirty_flag(curval);
+	    } else if (parent) {
+		val_set_dirty_flag(parent);
+	    }
+	}
 
 	/* make sure the node is not a virtual value */
 	if (curval && val_is_virtual(curval)) {
 	    return NO_ERR;   /*** freenew?? ***/
 	}
 
-	switch (newval->editop) {
+	switch (cur_editop) {
 	case OP_EDITOP_MERGE:
 	    val_remove_child(newval);
 	    if (curval) {
@@ -560,6 +604,7 @@ static status_t
 	    }
 	    break;
 	case OP_EDITOP_REPLACE:
+	case OP_EDITOP_COMMIT:
 	    val_remove_child(newval);
 	    if (curval) {
 		val_set_canonical_order(newval);
@@ -587,7 +632,7 @@ static status_t
 
 	    /*** DOES NOT ALLOW FOR NESTED LOAD OPERATIONS
 	     *** such as loading a module at runtime with an
-	     *** augment of a nested object
+	     *** augment of a nested object as the root
 	     ***/
 	    res = cfg_apply_load_root(target, newval);
 	    break;
@@ -653,6 +698,9 @@ static status_t
     /* check if this node needs the edit operation applied */
     if (*done) {
 	applyhere = FALSE;
+    } else if (newval->editop == OP_EDITOP_COMMIT) {
+	applyhere = val_get_dirty_flag(newval);
+	*done = applyhere;
     } else {
 	applyhere = apply_this_node(newval->editop, curval);
 	*done = applyhere;
@@ -689,6 +737,7 @@ static status_t
 	    }
 	    break;
 	case OP_EDITOP_REPLACE:
+	case OP_EDITOP_COMMIT:
 	    testval = val_clone(newval);
 	    if (!testval) {
 		res = ERR_INTERNAL_MEM;
@@ -808,6 +857,9 @@ static status_t
 	res = apply_write_val(newval->editop, scb, msg, target, 
 			      newval->curparent, newval, curval, &done);
 	break;
+    case AGT_CB_COMMIT:
+    case AGT_CB_ROLLBACK:
+	break;
     default:
 	/* nothing to do for commit or rollback at this time */
 	;  
@@ -855,9 +907,10 @@ static status_t
 		      val_value_t  *curval,
 		      boolean done)
 {
-    val_value_t      *chval, *curch, *nextch;
+    val_value_t      *chval, *curch, *nextch, *cur_parent;
     status_t          res, retres;
     ncx_iqual_t       iqual;
+    op_editop_t       cur_editop;
     
     retres = NO_ERR;
 
@@ -893,20 +946,53 @@ static status_t
 	retres = res;
 	break;
     case AGT_CB_TEST_APPLY:
-	retres = test_apply_write_val(newval->curparent, newval, curval, &done);
+	retres = test_apply_write_val(newval->curparent, 
+				      newval, curval, &done);
 	break;
     case AGT_CB_APPLY:
-	retres = apply_write_val(newval->editop, scb, msg, target,
-				 newval->curparent, newval, curval, &done);
+	if (newval) {
+	    cur_editop = newval->editop;
+	    cur_parent = newval->curparent;
+	} else if (curval) {
+	    cur_editop = editop;
+	    cur_parent = curval->parent;
+	} else {
+	    retres = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+
+	if (retres == NO_ERR) {
+	    retres = apply_write_val(cur_editop, scb, msg, target,
+				     cur_parent, newval, 
+				     curval, &done);
+	}
+	break;
+    case AGT_CB_COMMIT:
+    case AGT_CB_ROLLBACK:
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+    if (newval) {
+	cur_editop = newval->editop;
+    } else if (curval) {
+	cur_editop = editop;
+    } else {
+	retres = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
     /* check all the child nodes next */
     if (retres == NO_ERR) {
-	for (chval = val_get_first_child(newval);
-	     chval != NULL;
+	if (newval) {
+	    cur_parent = newval;
+	} else if (curval) {
+	    cur_parent = curval;
+	} else {
+	    retres = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+
+	for (chval = val_get_first_child(cur_parent);
+	     chval != NULL && retres == NO_ERR;
 	     chval = nextch) {
 
 	    nextch = val_get_next_child(chval);
@@ -917,7 +1003,7 @@ static status_t
 	    } else {
 		curch = NULL;
 	    }
-	    res = invoke_btype_cb(cbtyp, newval->editop, scb, msg, 
+	    res = invoke_btype_cb(cbtyp, cur_editop, scb, msg, 
 				  target, chval, curch, done);
 	    if (chval->res == NO_ERR) {
 		chval->res = res;
@@ -971,9 +1057,10 @@ static status_t
 		     val_value_t  *curval,
 		     boolean done)
 {
-    status_t       res;
     val_value_t   *v_val;
-
+    status_t       res;
+    obj_type_t     objtype;
+    
     res = NO_ERR;
     v_val = NULL;
 
@@ -987,8 +1074,16 @@ static status_t
 	}
     }
 
+    if (newval && newval->obj) {
+	objtype = newval->obj->objtype;
+    } else if (curval && curval->obj) {
+	objtype = curval->obj->objtype;
+    } else {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
     /* first traverse all the nodes until leaf nodes are reached */
-    switch (newval->obj->objtype) {
+    switch (objtype) {
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
 	res = invoke_simval_cb(cbtyp, editop, scb, msg,
@@ -1579,10 +1674,12 @@ static status_t
 		      val_value_t *val,
 		      ncx_layer_t   layer)
 {
+    const obj_template_t  *testobj;
     val_value_t           *chval, *testval;
-    status_t               res;
+    status_t               res, retres;
 
     res = NO_ERR;
+    retres = NO_ERR;
 
 #ifdef AGT_VAL_DEBUG
     log_debug3("\nichoice_check_agt: check '%s' against '%s'",
@@ -1617,15 +1714,21 @@ static status_t
      * first make sure all the mandatory case 
      * objects are present
      */
-    res = instance_check(scb, msg, chval->casobj, val, layer);
-    /* errors already recorded if other than NO_ERR */
+    for (testobj = obj_first_child(chval->casobj);
+	 testobj != NULL;
+	 testobj = obj_next_child(testobj)) {
+
+	res = instance_check(scb, msg, testobj, val, layer);
+	CHK_EXIT;
+	/* errors already recorded if other than NO_ERR */
+    }
 
     /* check if any objects from other cases are present */
     testval = val_get_choice_next_set(val, choicobj, chval);
     while (testval) {
 	if (testval->casobj != chval->casobj) {
 	    /* error: extra case object in this choice */
-	    res = ERR_NCX_EXTRA_CHOICE;
+	    retres = res = ERR_NCX_EXTRA_CHOICE;
 	    if (msg) {
 		agt_record_error(scb, msg, layer, res, 
 				 NULL, NCX_NT_OBJ, choicobj, 
@@ -1636,10 +1739,10 @@ static status_t
     }
 
     if (val->res == NO_ERR) {
-	val->res = res;
+	val->res = retres;
     }
 
-    return res;
+    return retres;
 
 }  /* choice_check_agt */
 
@@ -2118,16 +2221,6 @@ status_t
     }	
 #endif
 
-    /* check the lock first */
-    res = cfg_ok_to_write(target, scb->sid);
-    if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, 
-			 res, NULL,
-			 NCX_NT_NONE, NULL, 
-			 NCX_NT_VAL, pducfg);
-	return res;
-    }
-
     /* start with the config root, which is a val_value_t node */
     res = handle_callback(AGT_CB_APPLY, editop, scb, 
 			  msg, target, pducfg, target->root);
@@ -2148,6 +2241,137 @@ status_t
     return res;
 
 }  /* agt_val_apply_write */
+
+
+/********************************************************************
+* FUNCTION agt_val_apply_commit
+* 
+* Apply the requested commit operation
+*
+* Invoke all the AGT_CB_COMMIT callbacks for a 
+* source and target and write operation
+*
+* INPUTS:
+*   scb == session control block
+*   msg == incoming commit rpc_msg_t in progress
+*   source == cfg_template_t for the source (candidate)
+*   target == cfg_template_t for the config database to 
+*             write (running)
+*
+* OUTPUTS:
+*   rpc_err_rec_t structs may be malloced and added 
+*   to the msg->mhsr.errQ
+*
+* RETURNS:
+*   none
+*********************************************************************/
+status_t
+    agt_val_apply_commit (ses_cb_t  *scb,
+			  rpc_msg_t  *msg,
+			  cfg_template_t *source,
+			  cfg_template_t *target)
+{
+    val_value_t      *curval, *nextval, *matchval;
+    status_t          res;
+
+#ifdef DEBUG
+    if (!scb || !msg || !source || !target) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    /* only save if the source config was touched */
+    if (!cfg_get_dirty_flag(source)) {
+	return NO_ERR;
+    }
+    /* check if any top-level config nodes have
+     * been deleted in the target
+     */
+    for (curval = val_get_first_child(target->root);
+	 curval != NULL && res == NO_ERR; 
+	 curval = nextval) {
+
+	nextval = val_get_next_child(curval);
+
+	if (obj_is_data_db(curval->obj) &&
+	    obj_is_config(curval->obj)) {
+
+	    /* check if node deleted in source */
+	    matchval = val_first_child_match(source->root,
+					     curval);
+	    if (!matchval) {
+		/* prevent the agt_val code from ignoring this node */
+		val_set_dirty_flag(curval);
+
+		/* deleted in the source, so delete in the target */
+		res = handle_callback(AGT_CB_APPLY,
+				      OP_EDITOP_DELETE, scb, 
+				      msg, target, 
+				      NULL, curval);
+	    }  /* else keep this node in target config */
+	}  /* else skip non-config database node */
+    }
+
+    /* check if any top-level config nodes have
+     * been changed in the target
+     */
+    for (curval = val_get_first_child(source->root);
+	 curval != NULL && res == NO_ERR; 
+	 curval = nextval) {
+
+	nextval = val_get_next_child(curval);
+
+	if (obj_is_data_db(curval->obj) &&
+	    obj_is_config(curval->obj)) {
+
+	    matchval = val_first_child_match(target->root,
+					     curval);
+
+	    res = handle_callback(AGT_CB_APPLY,
+				  OP_EDITOP_COMMIT, scb, 
+				  msg, target, 
+				  curval, matchval);
+	}
+    }
+
+    /* check if undo was in effect */
+    if (msg->rpc_need_undo) {
+	if (res==NO_ERR) {
+	    /* complete the operation */
+	    res = handle_callback(AGT_CB_COMMIT,
+				  OP_EDITOP_COMMIT, scb, 
+				  msg, target, 
+				  source->root,
+				  target->root);
+	} else {
+	    /* rollback the operation */
+	    res = handle_callback(AGT_CB_ROLLBACK,
+				  OP_EDITOP_COMMIT, scb, 
+				  msg, target, 
+				  source->root,
+				  target->root);
+	}
+    }  /* else there was no rollback, so APPLY is the final phase */
+
+    if (res == NO_ERR) {
+	res = agt_ncx_cfg_save(target, FALSE);
+	if (res != NO_ERR) {
+	    /* config save failed */
+	    agt_record_error(scb, &msg->mhdr, 
+			     NCX_LAYER_OPERATION, 
+			     res, NULL, 
+			     NCX_NT_CFG, target,
+			     NCX_NT_NONE, NULL);
+	} else {
+	    val_clean_tree(target->root);
+	}
+    }
+
+    return res;
+
+}  /* agt_val_apply_commit */
 
 
 /* END file agt_val.c */

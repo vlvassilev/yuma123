@@ -124,4 +124,10 @@ extern status_t
 			 op_editop_t  editop);
 
 
+extern status_t
+    agt_val_apply_commit (ses_cb_t  *scb,
+			  rpc_msg_t  *msg,
+			  cfg_template_t *source,
+			  cfg_template_t *target);
+
 #endif	    /* _H_agt_val */

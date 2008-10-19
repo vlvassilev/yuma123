@@ -297,14 +297,11 @@ typedef enum ncx_shutdowntyp_t_ {
 } ncx_shutdowntyp_t;
 
 
-/* hardwire the 3 standard configs, plus get ready for
- * rollback and vendor named config extensions
- */
+/* hardwire the 3 standard configs */
 typedef enum ncx_cfg_t_ {
     NCX_CFGID_RUNNING,
     NCX_CFGID_CANDIDATE,
-    NCX_CFGID_STARTUP,
-    NCX_CFGID_ROLLBACK
+    NCX_CFGID_STARTUP
 } ncx_cfg_t;
 
 

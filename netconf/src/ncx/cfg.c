@@ -87,9 +87,11 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-#define CFG_NUM_STATIC 6
+#define CFG_NUM_STATIC 3
 
 #define CFG_DATETIME_LEN 64
+
+#define MAX_CFGID   NCX_CFGID_STARTUP
 
 /********************************************************************
 *                                                                   *
@@ -152,7 +154,7 @@ static cfg_template_t *
 {
     ncx_cfg_t id;
 
-    for (id = NCX_CFGID_RUNNING; id <= NCX_CFGID_ROLLBACK; id++) {
+    for (id = NCX_CFGID_RUNNING; id <= MAX_CFGID; id++) {
 	if (!cfg_arr[id]) {
 	    continue;
 	}
@@ -261,15 +263,16 @@ static cfg_template_t *
     cfg->cfg_state = CFG_ST_INIT;
     dlq_createSQue(&cfg->load_errQ);
 
-    cfg->root = val_new_value();
-    if (!cfg->root) {
-	free_template(cfg);
-	return NULL;
-    }
+    if (cfg_id != NCX_CFGID_CANDIDATE) {
+	cfg->root = val_new_value();
+	if (!cfg->root) {
+	    free_template(cfg);
+	    return NULL;
+	}
 	
-    /* finish setting up the <config> root value */
-    val_init_from_template(cfg->root, cfgobj);
-
+	/* finish setting up the <config> root value */
+	val_init_from_template(cfg->root, cfgobj);
+    }  /* else root will be set next with val_clone_config */
 
     return cfg;
 
@@ -323,7 +326,7 @@ void
     ncx_cfg_t   id;
 
     if (cfg_init_done) {
-	for (id=NCX_CFGID_RUNNING; id<=NCX_CFGID_ROLLBACK; id++) {
+	for (id=NCX_CFGID_RUNNING; id <= MAX_CFGID; id++) {
 	    if (cfg_arr[id]) {
 		free_template(cfg_arr[id]);
 		cfg_arr[id] = NULL;
@@ -357,7 +360,7 @@ status_t
     }
 
 #ifdef DEBUG
-    if (cfg_id > NCX_CFGID_ROLLBACK) {
+    if (cfg_id > MAX_CFGID) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
     if (cfg_arr[cfg_id]) {
@@ -375,9 +378,6 @@ status_t
 	break;
     case NCX_CFGID_STARTUP:
 	name = NCX_CFG_STARTUP;
-	break;
-    case NCX_CFGID_ROLLBACK:
-	name = NCX_CFG_ROLLBACK;
 	break;
     default:
 	return SET_ERROR(ERR_INTERNAL_VAL);
@@ -501,7 +501,7 @@ void
 		   cfg_state_t  new_state)
 {
 #ifdef DEBUG
-    if (cfg_id > NCX_CFGID_ROLLBACK) {
+    if (cfg_id > MAX_CFGID) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return;
     }
@@ -530,7 +530,7 @@ cfg_state_t
     cfg_get_state (ncx_cfg_t cfg_id)
 {
 #ifdef DEBUG
-    if (cfg_id > NCX_CFGID_ROLLBACK) {
+    if (cfg_id > MAX_CFGID) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return CFG_ST_NONE;
     }
@@ -584,7 +584,7 @@ cfg_template_t *
     cfg_get_config_id (ncx_cfg_t cfgid)
 {
 
-    if (cfgid <= NCX_CFGID_ROLLBACK) {
+    if (cfgid <= MAX_CFGID) {
 	return cfg_arr[cfgid];
     }
     return NULL;
@@ -599,14 +599,13 @@ cfg_template_t *
 *
 * INPUTS:
 *    cfg_id = Config ID to set as a valid target
-* RETURNS:
-*    status
+*
 *********************************************************************/
 void
     cfg_set_target (ncx_cfg_t cfg_id)
 {
 #ifdef DEBUG
-    if (cfg_id > NCX_CFGID_ROLLBACK) {
+    if (cfg_id > MAX_CFGID) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return;
     }
@@ -619,6 +618,101 @@ void
     cfg_arr[cfg_id]->flags |= CFG_FL_TARGET;
 
 } /* cfg_set_target */
+
+
+/********************************************************************
+* FUNCTION cfg_fill_candidate_from_running
+*
+* Fill the <candidate> config with the config contents
+* of the <running> config
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    cfg_fill_candidate_from_running (void)
+{
+    cfg_template_t  *running, *candidate;
+    status_t         res;
+
+#ifdef DEBUG
+    if (!cfg_arr[NCX_CFGID_RUNNING] ||
+	!cfg_arr[NCX_CFGID_CANDIDATE]) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    running = cfg_arr[NCX_CFGID_RUNNING];
+    candidate = cfg_arr[NCX_CFGID_CANDIDATE];
+
+    if (!running->root) {
+	return ERR_NCX_DATA_MISSING;
+    }
+
+    if (candidate->root) {
+	val_free_value(candidate->root);
+	candidate->root = NULL;
+    }
+
+    res = NO_ERR;
+    candidate->root = 
+	val_clone_config_data(running->root, &res);
+
+    if (res == NO_ERR) {
+	/* clear the candidate dirty flag */
+	candidate->flags &= ~CFG_FL_DIRTY;
+    }
+    return res;
+
+} /* cfg_fill_candidate_from_running */
+
+
+/********************************************************************
+* FUNCTION cfg_set_dirty_flag
+*
+* Mark the config as 'changed'
+*
+* INPUTS:
+*    cfg == configuration template to set
+*
+*********************************************************************/
+void
+    cfg_set_dirty_flag (cfg_template_t *cfg)
+{
+#ifdef DEBUG
+    if (!cfg) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    cfg->flags |= CFG_FL_DIRTY;
+
+}  /* cfg_set_dirty_flag */
+
+
+/********************************************************************
+* FUNCTION cfg_get_dirty_flag
+*
+* Get the config dirty flag value
+*
+* INPUTS:
+*    cfg == configuration template to check
+*
+*********************************************************************/
+boolean
+    cfg_get_dirty_flag (const cfg_template_t *cfg)
+{
+#ifdef DEBUG
+    if (!cfg) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    return (cfg->flags & CFG_FL_DIRTY) ? TRUE : FALSE;
+
+}  /* cfg_get_dirty_flag */
 
 
 /********************************************************************
@@ -645,8 +739,16 @@ status_t
 
     switch (cfg->cfg_state) {
     case CFG_ST_READY:
-	/* lock can be granted */
-	res = NO_ERR;
+	if (cfg->cfg_id == NCX_CFGID_CANDIDATE) {
+	    /* lock cannot be granted if any changes
+	     * to the candidate are already made
+	     */
+	    res = (cfg_get_dirty_flag(cfg)) ? 
+		ERR_NCX_LOCK_DENIED : NO_ERR;
+	} else {
+	    /* lock can be granted if state is ready */
+	    res = NO_ERR;
+	}
 	break;
     case CFG_ST_PLOCK:
 	/* fall through -- TBD -- treat as full lock */
@@ -794,15 +896,27 @@ status_t
     }
 #endif
 
+    res = NO_ERR;
+
     /* check if this is a writable target,
      * except during agent boot
      * except for the <startup> config
      */
     if (cfg->cfg_state != CFG_ST_INIT) {
-	if (cfg->cfg_id != NCX_CFGID_STARTUP &&
-	    !(cfg->flags & CFG_FL_TARGET)) {
-	    return ERR_NCX_NOT_WRITABLE;
-	}
+	switch (cfg->cfg_id) {
+	case NCX_CFGID_RUNNING:
+	case NCX_CFGID_CANDIDATE:
+	case NCX_CFGID_STARTUP:
+	    break;
+	default:
+	    if (!(cfg->flags & CFG_FL_TARGET)) {
+		res = ERR_NCX_NOT_WRITABLE;
+	    }
+	}	
+    }
+
+    if (res != NO_ERR) {
+	return res;
     }
 
     /* check the current config state */

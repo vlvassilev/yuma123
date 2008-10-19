@@ -95,34 +95,6 @@ const xmlChar *
 
 
 /********************************************************************
-* FUNCTION op_config_name
-*
-* Get the keyword for the specified op_config_t enumeration
-*
-* INPUTS:  
-*    cfg_id == config ID
-* RETURNS:
-*    string for the config type, or "none" or "illegal"
-*********************************************************************/
-const xmlChar *
-    op_config_name (op_config_t cfg_id) 
-{
-    switch (cfg_id) {
-    case OP_CONFIG_NONE:
-	return NCX_EL_NONE;
-    case OP_CONFIG_CANDIDATE:
-	return NCX_EL_CANDIDATE;
-    case OP_CONFIG_RUNNING:
-	return NCX_EL_RUNNING;
-    case OP_CONFIG_STARTUP:
-	return NCX_EL_STARTUP;
-    default:
-	return NCX_EL_ILLEGAL;
-    }
-} /* op_config_name */
-
-
-/********************************************************************
 * FUNCTION op_editop_name
 *
 * Get the keyword for the specified op_editop_t enumeration
@@ -148,6 +120,8 @@ const xmlChar *
 	return NCX_EL_DELETE;
     case OP_EDITOP_LOAD:
 	return NCX_EL_LOAD;
+    case OP_EDITOP_COMMIT:
+	return NCX_EL_COMMIT;
     default:
 	return (const xmlChar *) "illegal";
     }
@@ -190,9 +164,12 @@ op_editop_t
 	return OP_EDITOP_NONE;
     }
 
-    /* internal extension, should not be used */
+    /* internal extensions, should not be used */
     if (!xml_strcmp(opstr, NCX_EL_LOAD)) {
 	return OP_EDITOP_LOAD;
+    }
+    if (!xml_strcmp(opstr, NCX_EL_COMMIT)) {
+	return OP_EDITOP_COMMIT;
     }
 
     return OP_EDITOP_NONE;

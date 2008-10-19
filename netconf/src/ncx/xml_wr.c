@@ -1011,6 +1011,7 @@ void
 
     switch (btyp) {
     case NCX_BT_ENUM:
+    case NCX_BT_BITS:
 	ses_putstr(scb, useval->v.enu.name); 
 	break;
     case NCX_BT_EMPTY:
@@ -1045,6 +1046,7 @@ void
 	break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF:   /******/
 	if (VAL_STR(useval)) {
 	    if (!fit_on_line(scb, useval) && (indent>0)) {
 		ses_indent(scb, indent);
@@ -1125,8 +1127,9 @@ void
 	break;
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
-    case NCX_BT_CHOICE:
     case NCX_BT_LIST:
+    case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
 	for (chval = val_get_first_child(useval);
 	     chval != NULL;
 	     chval = val_get_next_child(chval)) {

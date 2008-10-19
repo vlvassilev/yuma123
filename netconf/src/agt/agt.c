@@ -151,6 +151,7 @@ static void
     agt_profile.agt_logappend = FALSE;
     agt_profile.agt_xmlorder = FALSE;
     agt_profile.agt_deleteall_ok = FALSE;
+    agt_profile.agt_conffile = NULL;
     agt_profile.agt_logfile = NULL;
     agt_profile.agt_startup = NULL;
     agt_profile.agt_modpath = NULL;
@@ -202,7 +203,7 @@ static void
     /* check if error finding the filespec */
     if (startup && !fname) {
 	log_error("\nWarning: Startup config file (%s) not found."
-		 "\n   Booting with empty configuration!",
+		 "\n   Booting with empty configuration!\n",
 		  startup);
     }
 
@@ -216,21 +217,22 @@ static void
 	if (!dlq_empty(&cfg->load_errQ)) {
 	    log_error("\nError: configuration errors occurred loading the "
 		     "<running> database from NV-storage"
-		     "\n     (%s)", fname);
+		     "\n     (%s)\n", fname);
 	} else if (res == ERR_XML_READER_START_FAILED) {
 	    log_error("\nagt: Error: Could not open startup config file"
-		      "\n     (%s)", fname);
+		      "\n     (%s)\n", fname);
 	}
     }
 
     if (res == NO_ERR) {
-	log_info("\nagt: Startup config loaded OK\n     Source: %s",
+	log_info("\nagt: Startup config loaded OK\n     Source: %s\n",
 		 fname);
     }
 
     if (LOGDEBUG2) {
 	log_debug2("\nContents of %s configuration:", cfg->name);
 	val_dump_value(cfg->root, 0);
+	log_debug2("\n");
     }
 
     if (fname) {
@@ -284,9 +286,12 @@ status_t
     agt_shutdown_started = FALSE;
     agt_shutmode = NCX_SHUT_NONE;
 
+    /* allow cleanup to run even if this fn does not complete */
+    agt_init_done = TRUE;
+
     init_agent_profile();
 
-    /* get the command line params */
+    /* get the command line params and also any config file params */
     res = agt_cli_process_input(argc, argv, &agt_profile,
 				showver, showhelp);
     if (res != NO_ERR) {
@@ -297,9 +302,6 @@ status_t
     if (*showver || *showhelp) {
 	return NO_ERR;
     }
-
-    /*** TBD: process any config file specified in the CLI parms ***/
-    /***/
 
     /* set the debug logging level */
     log_set_debug_level(agt_profile.agt_loglevel);
@@ -421,7 +423,7 @@ status_t
 	return res;
     }
     
-    /*** ALL INITIAL NCX MODULES SHOULD BE LOADED AT THIS POINT ***/
+    /*** ALL INITIAL YANG MODULES SHOULD BE LOADED AT THIS POINT ***/
     if (ncx_any_mod_errors()) {
 	log_error("\nagt: fatal error - one or more YANG modules"
 		  " loaded with errors\n");
@@ -439,10 +441,10 @@ status_t
 	load_running_config(agt_profile.agt_startup);
     } else {
 	log_info("\nagt: Startup configuration skipped due "
-		 "to no-startup CLI option");
+		 "to no-startup CLI option\n");
     }
 
-    /* load the agtent sessions callback functions and vPS instance */
+    /* load the agtent sessions callback functions and DM module */
     agt_ses_init2();
 
     /*** TEMP: NEED TO CONVERT TO WG DM ***/
@@ -452,13 +454,19 @@ status_t
     /* allow users to access the configuration databases now */
     cfg_set_state(NCX_CFGID_RUNNING, CFG_ST_READY);
 
+    /* set the correct configuration target */
     if (agt_profile.agt_targ==NCX_AGT_TARG_CANDIDATE) {
-	 cfg_set_state(NCX_CFGID_CANDIDATE, CFG_ST_READY);
-	 cfg_set_target(NCX_CFGID_CANDIDATE);
+	res = cfg_fill_candidate_from_running();
+	if (res != NO_ERR) {
+	    return res;
+	}
+	cfg_set_state(NCX_CFGID_CANDIDATE, CFG_ST_READY);
+	cfg_set_target(NCX_CFGID_CANDIDATE);
     } else {
 	cfg_set_target(NCX_CFGID_RUNNING);
     }
 
+    /* setup the startup config only if used */
     if (agt_profile.agt_start==NCX_AGT_START_DISTINCT) {
 	cfg_set_state(NCX_CFGID_STARTUP, CFG_ST_READY);
     }
@@ -469,7 +477,7 @@ status_t
      * No sessions can actually be started until the 
      * agt_ncxserver_run function is called from netconfd_run
      */
-    agt_init_done = TRUE;
+
     return NO_ERR;
 
 }  /* agt_init */

@@ -217,7 +217,6 @@ void
 
     /* clean input parameter set */
     val_clean_value(&msg->rpc_input);
-    msg->rpc_status = NO_ERR;
     msg->rpc_user1 = NULL;
     msg->rpc_user2 = NULL;
 

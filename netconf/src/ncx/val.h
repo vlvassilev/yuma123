@@ -737,6 +737,11 @@ extern void
 extern boolean
     val_need_quotes (const xmlChar *str);
 
+
+extern boolean
+    val_all_whitespace (const xmlChar *str);
+
+
 extern boolean
     val_match_metaval (const xml_attr_t *attr,
 		       xmlns_id_t  nsid,

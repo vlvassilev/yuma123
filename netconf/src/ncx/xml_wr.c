@@ -1011,8 +1011,9 @@ void
 
     switch (btyp) {
     case NCX_BT_ENUM:
-    case NCX_BT_BITS:
-	ses_putstr(scb, useval->v.enu.name); 
+	if (useval->v.enu.name) {
+	    ses_putstr(scb, useval->v.enu.name);
+	}
 	break;
     case NCX_BT_EMPTY:
 	if (useval->v.bool) {
@@ -1059,6 +1060,7 @@ void
 	    ses_putcstr(scb, VAL_USTR(useval), indent);
 	}
 	break;
+    case NCX_BT_BITS:
     case NCX_BT_SLIST:
 	listbtyp = useval->v.list.btyp;
 	first = TRUE;

@@ -155,6 +155,7 @@ void
     memset(msg, 0x0, sizeof(rpc_msg_t));
     xml_msg_init_hdr(&msg->mhdr);
     val_init_value(&msg->rpc_input);
+    dlq_createSQue(&msg->rpc_dataQ);
     dlq_createSQue(&msg->rpc_undoQ);
 
 } /* rpc_init_msg */
@@ -201,6 +202,7 @@ void
     rpc_clean_msg (rpc_msg_t *msg)
 {
     rpc_undo_rec_t *undo;
+    val_value_t    *val;
 
 #ifdef DEBUG
     if (!msg) {
@@ -220,15 +222,15 @@ void
     msg->rpc_user1 = NULL;
     msg->rpc_user2 = NULL;
 
-    
-    if (msg->rpc_data) {
-	val_free_value(msg->rpc_data);
-	msg->rpc_data = NULL;
-    }
-    
     msg->rpc_filter.op_filtyp = OP_FILTER_NONE;
     msg->rpc_filter.op_filter = NULL;
     msg->rpc_datacb = NULL;
+
+    /* clean data queue */
+    while (!dlq_empty(&msg->rpc_dataQ)) {
+	val = (val_value_t *)dlq_deque(&msg->rpc_dataQ);
+	val_free_value(val);
+    }
 
     /* clean undo queue */
     while (!dlq_empty(&msg->rpc_undoQ)) {

@@ -117,6 +117,13 @@ static status_t
 		 const xml_node_t *startnode,
 		 val_value_t  *retval);
 
+static status_t 
+    parse_btype_split (ses_cb_t  *scb,
+		       const obj_template_t *obj,
+		       const obj_template_t *output,
+		       const xml_node_t *startnode,
+		       val_value_t  *retval);
+
 
 /********************************************************************
  * FUNCTION get_xml_node
@@ -1339,6 +1346,271 @@ static status_t
 } /* parse_complex */
 
 
+
+/********************************************************************
+ * FUNCTION parse_complex_split
+ * 
+ * Parse the XML input as a complex type
+ *
+ * Handles the following base types:
+ *   NCX_BT_CONTAINER
+ *   NCX_BT_LIST
+ *
+ * E.g., container:
+ *
+ * <foo>
+ *   <a>blah</a>
+ *   <b>7</b>
+ *   <c/>
+ * </foo>
+ *
+ * In an instance document, containers and lists look 
+ * the same.  The validation is different of course, but the
+ * parsing is basically the same.
+ *
+ * INPUTS:
+ *     scb == session control block
+ *            Input is read from scb->reader.
+ *     obj == object template for this complex type
+ *     output == foo-rpc/output object, if any
+ *     btyp == base type of the expected complex type
+ *     startnode == top node of the parameter to be parsed
+ *            Parser function will attempt to consume all the
+ *            nodes until the matching endnode is reached
+ *     retval ==  val_value_t that should get the results of the parsing
+ *     
+ * OUTPUTS:
+ *    *retval will be filled in
+ *    msg->errQ may be appended with new errors or warnings
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t 
+    parse_complex_split (ses_cb_t  *scb,
+			 const obj_template_t *obj,
+			 const obj_template_t *output,
+			 ncx_btype_t btyp,
+			 const xml_node_t *startnode,
+			 val_value_t  *retval)
+{
+    const obj_template_t *chobj, *curchild, 
+	*curtop, *nextchobj, *outchobj;
+    val_value_t          *chval;
+    xml_node_t            chnode;
+    status_t              res, res2, retres;
+    boolean               done, empty;
+    ncx_btype_t           chbtyp;
+
+    /* setup local vars */
+    chobj = NULL;
+    curtop = NULL;
+    curchild = NULL;
+    nextchobj = NULL;
+    res = NO_ERR;
+    res2 = NO_ERR;
+    retres = NO_ERR;
+    done = FALSE;
+    empty = FALSE;
+
+    val_init_from_template(retval, obj);
+
+    /* do not really need to validate the start node type
+     * since it is probably a virtual container at the
+     * very start, and after that, a node match must have
+     * occurred to call this function recursively
+     */
+    switch (startnode->nodetyp) {
+    case XML_NT_START:
+	break;
+    case XML_NT_EMPTY:
+	empty = TRUE;
+	break;
+    case XML_NT_STRING:
+    case XML_NT_END:
+	res = ERR_NCX_WRONG_NODETYP_SIM;
+	break;
+    default:
+	res = ERR_NCX_WRONG_NODETYP;
+    }
+
+    if (res == NO_ERR) {
+	/* start setting up the return value */
+	retval->editop = get_editop(startnode);
+
+	/* setup the first child in the complex object
+	 * Allowed be NULL in some cases so do not check
+	 * the result yet
+	 */
+	chobj = obj_first_child(obj);
+	outchobj = (output) ? obj_first_child(output) : NULL;
+    } else {
+	return res;
+    }
+
+    if (empty) {
+	return NO_ERR;
+    }
+
+    xml_init_node(&chnode);
+
+    /* go through each child node until the parent end node */
+    while (!done) {
+	/* init per-loop vars */
+	res2 = NO_ERR;
+	empty = FALSE;
+	chval = NULL;
+
+	/* get the next node which should be a child or end node */
+	res = get_xml_node(scb, &chnode);
+	if (res != NO_ERR) {
+	    done = TRUE;
+	} else {
+#ifdef MGR_VAL_PARSE_DEBUG
+	    log_debug3("\nparse_complex: expecting start-child or end node.");
+	    if (LOGDEBUG3) {
+		xml_dump_node(&chnode);
+	    }
+#endif
+	    /* validate the child member node type */
+	    switch (chnode.nodetyp) {
+	    case XML_NT_START:
+	    case XML_NT_EMPTY:
+		/* any namespace OK for now, check in obj_get_child_node */
+		break;
+	    case XML_NT_STRING:
+		res = ERR_NCX_WRONG_NODETYP_SIM;
+		break;
+	    case XML_NT_END:
+		res = xml_endnode_match(startnode, &chnode);
+		if (res == NO_ERR) {
+		    /* no error exit */
+		    done = TRUE;
+		    continue;
+		}
+		break;
+	    default:
+		res = ERR_NCX_WRONG_NODETYP;
+	    }
+	}
+
+	/* if we get here, there is a START or EMPTY node
+	 * that could be a valid child node
+	 *
+	 * if xmlorder enforced then check if the 
+	 * node is the correct child node
+	 *
+	 * if no xmlorder, then check for any valid child
+	 */
+	if (res==NO_ERR) {
+	    res = obj_get_child_node(obj, chobj, &chnode, FALSE,
+				     &curtop, &curchild);
+	    if (res != NO_ERR && output) {
+		res = obj_get_child_node(output, outchobj, &chnode, FALSE,
+					 &curtop, &curchild);
+	    }
+	}
+
+	/* try to setup a new child node */
+	if (res == NO_ERR) {
+	    /* save the child base type */
+	    chbtyp = obj_get_basetype(curchild);
+
+	    /* at this point, the 'curchild' template matches the
+	     * 'chnode' namespace and name;
+	     * Allocate a new val_value_t for the child value node
+	     */
+	    chval = val_new_child_val(obj_get_nsid(curchild),
+				      obj_get_name(curchild), 
+				      FALSE, retval, 
+				      get_editop(&chnode));
+	    if (!chval) {
+		res = ERR_INTERNAL_MEM;
+	    }
+	}
+
+	/* check any errors in setting up the child node */
+	if (res != NO_ERR) {
+
+	    /* try to skip just the child node sub-tree */
+	    xml_clean_node(&chnode);
+	    if (chval) {
+		val_free_value(chval);
+		chval = NULL;
+	    }
+	    if (res2 != NO_ERR) {
+		/* skip child didn't work, now skip the entire value subtree */
+		(void)mgr_xml_skip_subtree(scb->reader, startnode);
+		return res;
+	    } else {
+		/* skip child worked, go on to next child, parse for errors */
+		retres = res;
+		continue;
+	    }
+	}
+
+	/* recurse through and get whatever nodes are present
+	 * in the child node
+	 */
+	res = parse_btype(scb, curchild, &chnode, chval);
+	chval->res = res;
+	val_add_child(chval, retval);
+	if (res == NO_ERR) {
+	    /* setup the next child unless the current child
+	     * is a list
+	     */
+	    if (chbtyp != NCX_BT_LIST) {
+		/* setup next child if the cur child is 0 - 1 instance */
+		switch (obj_get_iqualval(curchild)) {
+		case NCX_IQUAL_ONE:
+		case NCX_IQUAL_OPT:
+		    if (chobj && curchild==chobj) {
+			chobj = obj_next_child(chobj);
+		    }
+		    if (outchobj && curchild==outchobj) {
+			outchobj = obj_next_child(outchobj);
+		    }
+		    break;
+		default:
+		    break;
+		}
+	    }
+	} else {
+	    /* did not parse the child node correctly */
+	    retres = res;
+	}
+	xml_clean_node(&chnode);
+
+	/* check if this is the special internal load-config RPC method,
+	 * in which case there will not be an end tag for the <load-config>
+	 * start tag passed to this function.  Need to quick exit
+	 * to prevent reading past the end of the XML config file,
+	 * which just contains the <config> element
+	 *
+	 * know there is just one parameter named <config> so just
+	 * go through the loop once because the </load-config> tag
+	 * will not be present
+	 */
+	if ((startnode->nsid == xmlns_ncx_id() || startnode->nsid == 0) && 
+	    !xml_strcmp(startnode->elname, NCX_EL_LOAD_CONFIG)) {
+	    done = TRUE;
+	}
+    }
+
+    /* check if the index ID needs to be set */
+    if (btyp==NCX_BT_LIST) {
+	res = gen_index_chain(obj_first_key(obj), retval);
+	if (res != NO_ERR) {
+	    retres = res;
+	}
+    }
+
+    xml_clean_node(&chnode);
+    return retres;
+
+} /* parse_complex_split */
+
+
 /********************************************************************
 * FUNCTION parse_metadata
 * 
@@ -1656,6 +1928,127 @@ static status_t
 } /* parse_btype */
 
 
+/********************************************************************
+* FUNCTION parse_btype_split
+* 
+* Switch to dispatch to specific base type handler
+*
+* INPUTS:
+*     scb == session control block
+*            Input is read from scb->reader.
+*     obj == object template to use for parsing
+      output == foo-rpc/output object (if any)
+*     startnode == top node of the parameter to be parsed
+*            Parser function will attempt to consume all the
+*            nodes until the matching endnode is reached
+*     retval ==  val_value_t that should get the results of the parsing
+*     
+* OUTPUTS:
+*    *retval will be filled in
+*    msg->errQ may be appended with new errors or warnings
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    parse_btype_split (ses_cb_t  *scb,
+		       const obj_template_t *obj,
+		       const obj_template_t *output,
+		       const xml_node_t *startnode,
+		       val_value_t  *retval)
+{
+    ncx_btype_t  btyp;
+    status_t     res, res2, res3;
+    op_editop_t  editop;
+    boolean      nserr;
+
+    btyp = obj_get_basetype(obj);
+
+    /* get the attribute values from the start node */
+    editop = OP_EDITOP_NONE;
+    retval->nsid = startnode->nsid;
+
+    /* check namespace errors except if the type is ANY */
+    nserr = (btyp != NCX_BT_ANY);
+
+    /* parse the attributes, if any; do not quick exit on this error */
+    res2 = parse_metadata(obj, startnode, nserr, retval);
+
+    /* continue to parse the startnode depending on the base type 
+     * to record as many errors as possible
+     */
+    switch (btyp) {
+    case NCX_BT_ANY:
+	res = parse_any(scb, startnode, retval);
+	break;
+    case NCX_BT_ENUM:
+	res = parse_enum(scb, obj, startnode, retval);
+	break;
+    case NCX_BT_EMPTY:
+	res = parse_empty(scb, obj, startnode, retval);
+	break;
+    case NCX_BT_BOOLEAN:
+	res = parse_boolean(scb, obj, startnode, retval);
+	break;
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+    case NCX_BT_INT64:
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+    case NCX_BT_UINT64:
+    case NCX_BT_FLOAT32:
+    case NCX_BT_FLOAT64:
+	res = parse_num(scb, obj, btyp, startnode, retval);
+	break;
+    case NCX_BT_KEYREF:
+    case NCX_BT_STRING:
+    case NCX_BT_BINARY:
+    case NCX_BT_SLIST:
+    case NCX_BT_BITS:
+    case NCX_BT_INSTANCE_ID:
+	res = parse_string(scb, obj, btyp, startnode, retval);
+	break;
+    case NCX_BT_UNION:
+	res = parse_union(scb, obj, startnode, retval);
+	break;
+    case NCX_BT_CONTAINER:
+    case NCX_BT_LIST:
+	res = parse_complex_split(scb, obj, output, 
+				  btyp, startnode, retval);
+	break;
+    default:
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* this will only be non-zero if the operation attribute
+     * was seen in XML subtree for the value
+     */
+    retval->editop = editop;
+
+    /* set the config flag for this value */
+    res3 = NO_ERR;
+
+    if (res == NO_ERR && res2 == NO_ERR) {
+	/* this has to be after the retval typdef is set */
+	res3 = metadata_inst_check(retval);
+    }
+
+    if (res != NO_ERR) {
+	retval->res = res;
+	return res;
+    } else if (res2 != NO_ERR) {
+	retval->res = res2;
+	return res2;
+    }
+
+    retval->res = res3;
+    return res3;
+
+} /* parse_btype_split */
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -1678,8 +2071,7 @@ static status_t
 *
 * INPUTS:
 *     scb == session control block
-*     msg == incoming message
-*     typ == typ_template_t for the parm or object type to parse
+*     obj == obj_template_t for the object type to parse
 *     startnode == top node of the parameter to be parsed
 *     retval ==  val_value_t that should get the results of the parsing
 *     
@@ -1713,6 +2105,70 @@ status_t
 
     /* get the element values */
     res = parse_btype(scb, obj, startnode, retval);
+    return res;
+
+}  /* mgr_val_parse */
+
+
+/********************************************************************
+* FUNCTION mgr_val_parse_reply
+* 
+* parse a value for a YANG type from a NETCONF PDU XML stream 
+* Use the rRPC object output type to parse any data
+*
+* Parse NETCONF PDU sub-contents into value fields
+* This module does not enforce complex type completeness.
+* Different subsets of configuration data are permitted
+* in several standard (and any proprietary) RPC methods
+*
+* A seperate parsing phase is used to validate the input
+* contained in the returned val_value_t struct.
+*
+* This parsing phase checks that simple types are complete
+* and child members of complex types are valid (but maybe 
+* missing or incomplete child nodes.
+*
+* INPUTS:
+*     scb == session control block
+*     obj == obj_template_t for the top-level reply to parse
+*     rpc == RPC template to use for any data in the output
+*     startnode == top node of the parameter to be parsed
+*     retval ==  val_value_t that should get the results of the parsing
+*     
+* OUTPUTS:
+*    *retval will be filled in
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    mgr_val_parse_reply (ses_cb_t  *scb,
+			 const obj_template_t *obj,
+			 const obj_template_t *rpc,
+			 const xml_node_t *startnode,
+			 val_value_t  *retval)
+{
+    const obj_template_t  *output;
+    status_t  res;
+
+#ifdef DEBUG
+    if (!scb || !obj || !startnode || !retval) {
+	/* non-recoverable error */
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+#ifdef MGR_VAL_PARSE_DEBUG
+    log_debug3("\nmgr_val_parse_reply: %s:%s btyp:%s", 
+	       obj_get_mod_prefix(obj),
+	       obj_get_name(obj), 
+	       tk_get_btype_sym(obj_get_basetype(obj)));
+#endif
+
+    output = (rpc) ? obj_find_child(rpc, NULL, NCX_EL_OUTPUT) : NULL;
+
+    /* get the element values */
+    res = parse_btype_split(scb, obj, output, startnode, retval);
     return res;
 
 }  /* mgr_val_parse */

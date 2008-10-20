@@ -172,6 +172,7 @@ static status_t
      * by the agt_rpc module
      */
     msg->rpc_user1 = source;
+    msg->rpc_data_type = RPC_DATA_STD;
     msg->rpc_datacb = agt_output_filter;
 
     return NO_ERR;
@@ -235,6 +236,7 @@ static status_t
      * by the agt_rpc module
      */
     msg->rpc_user1 = source;
+    msg->rpc_data_type = RPC_DATA_STD;
     msg->rpc_datacb = agt_output_filter;
 
     return NO_ERR;
@@ -1385,7 +1387,8 @@ static status_t
 				 methnode, NCX_NT_NONE, NULL, 
 				 NCX_NT_VAL, val);
     } else {
-	msg->rpc_data = newval;
+	msg->rpc_data_type = RPC_DATA_YANG;
+	dlq_enque(newval, &msg->rpc_dataQ);
     }
 
     return res;

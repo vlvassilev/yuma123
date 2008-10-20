@@ -420,6 +420,7 @@ static void
 {
     agt_rpc_data_cb_t    agtcb;
     const rpc_err_rec_t *err;
+    val_value_t         *val;
     status_t             res;
     xmlns_id_t           ncid;
     uint64               outbytes;
@@ -450,7 +451,8 @@ static void
      * changed later, but the standard requires a very
      * specific format to all <rpc-reply> elements
      */
-    datasend = (msg->rpc_data || msg->rpc_datacb) ? TRUE : FALSE;
+    datasend = (!dlq_empty(&msg->rpc_dataQ) 
+		|| msg->rpc_datacb) ? TRUE : FALSE;
 
     /* check which reply variant needs to be sent */
     if (dlq_empty(&msg->mhdr.errQ) && !datasend) {
@@ -460,7 +462,9 @@ static void
     } else {
 	/* send rpcResponse variant
 	 * 0 or <rpc-error> elements followed by
-	 * 0 or 1 <data> element
+	 * 0 to N  data elements, specified in the foo-rpc/output
+	 *
+	 * first send all the buffered errors
 	 */
 	for (err = (const rpc_err_rec_t *)dlq_firstEntry(&msg->mhdr.errQ);
 	     err != NULL;
@@ -471,8 +475,9 @@ static void
 	    }
 	}
 
-	/* check generation of <data> element
-	 * If the rpc_data filed is non-NULL, then there is
+	/* check generation of data contents
+	 * if the element
+	 * If the rpc_dataQ is non-empty, then there is
 	 * staticly filled data to send
 	 * If the rpc_datacb function pointer is non-NULL,
 	 * then this is dynamic reply content, even if the rpc_data
@@ -481,12 +486,14 @@ static void
 	if (datasend) {
 
 	    /* check corner case, just empty data and no data callback */
-	    if (!msg->rpc_datacb && !val_has_content(msg->rpc_data)) {
+	    if (!msg->rpc_datacb && dlq_empty(&msg->rpc_dataQ)) {
 		xml_wr_empty_elem(scb, &msg->mhdr, ncid,
 				  ncid, NCX_EL_DATA, NCX_DEF_INDENT);
 	    } else {
-		xml_wr_begin_elem(scb, &msg->mhdr, ncid, ncid,
-				  NCX_EL_DATA, NCX_DEF_INDENT);
+		if (msg->rpc_data_type == RPC_DATA_STD) {
+		    xml_wr_begin_elem(scb, &msg->mhdr, ncid, ncid,
+				      NCX_EL_DATA, NCX_DEF_INDENT);
+		}
 
 		outbytes = SES_OUT_BYTES(scb);
 
@@ -498,18 +505,24 @@ static void
 			SET_ERROR(res);
 		    }
 		} else {
-		    /* just write the contents of the rpc <data> var
-		     * !!! TBD: change rpc_data to a Q instead of 1 element
-		     */
-		    xml_wr_full_val(scb, &msg->mhdr, 
-				    msg->rpc_data, NCX_DEF_INDENT*2);
+		    /* just write the contents of the rpc <data> varQ */
+		    for (val = (val_value_t *)
+			     dlq_firstEntry(&msg->rpc_dataQ);
+			 val != NULL;
+			 val = (val_value_t *)dlq_nextEntry(val)) {
+
+			xml_wr_full_val(scb, &msg->mhdr, 
+					val, NCX_DEF_INDENT*2);
+		    }
 		}
 
 		/* only indent the </data> end tag if any data written */
 		datawritten = (outbytes != SES_OUT_BYTES(scb));
 
-		xml_wr_end_elem(scb, &msg->mhdr, ncid, NCX_EL_DATA, 
-				(datawritten) ? NCX_DEF_INDENT : -1);
+		if (msg->rpc_data_type == RPC_DATA_STD) {
+		    xml_wr_end_elem(scb, &msg->mhdr, ncid, NCX_EL_DATA, 
+				    (datawritten) ? NCX_DEF_INDENT : -1);
+		}
 	    }
 	} 
     }

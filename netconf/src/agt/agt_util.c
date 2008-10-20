@@ -424,10 +424,14 @@ void
     if (LOGDEBUG3) {
 	log_debug3("\nagt_record_error: ");
 	if (xmlnode) {
-	    log_debug3(" xml: %s:%s", 
-		       xmlns_get_ns_prefix(xmlnode->nsid),
-		       xmlnode->elname ? 
-		       xmlnode->elname : (const xmlChar *)"--");
+	    if (xmlnode->qname) {
+		log_debug3(" xml: %s", xmlnode->qname);
+	    } else {
+		log_debug3(" xml: %s:%s", 
+			   xmlns_get_ns_prefix(xmlnode->nsid),
+			   xmlnode->elname ? 
+			   xmlnode->elname : (const xmlChar *)"--");
+	    }
 	}
 	if (nodetyp == NCX_NT_VAL && errnode) {
 	    log_debug3(" errnode: \n");

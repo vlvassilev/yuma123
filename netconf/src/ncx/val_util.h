@@ -110,6 +110,15 @@ extern status_t
 			 ncx_instfmt_t format,
 			 xmlChar  **buff);
 
+
+extern status_t
+    val_gen_split_instance_id (xml_msg_hdr_t *mhdr,
+			       const val_value_t  *val, 
+			       ncx_instfmt_t format,
+			       xmlns_id_t leaf_nsid,
+			       const xmlChar *leaf_name,
+			       xmlChar  **buff);
+
 extern status_t
     val_get_index_string (xml_msg_hdr_t *mhdr,
 			  ncx_instfmt_t format,

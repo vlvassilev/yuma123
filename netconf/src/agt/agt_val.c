@@ -1498,13 +1498,16 @@ static status_t
 		    val_value_t *val,
 		    ncx_layer_t   layer)
 {
-    ncx_iqual_t            iqual;
-    uint32                 cnt, minelems, maxelems;
-    boolean                minset, maxset, minerr, maxerr;
-    status_t               res;
-    char                   buff[NCX_MAX_NUMLEN];
+    val_value_t    *errval;
+    xmlChar        *instbuff;
+    ncx_iqual_t     iqual;
+    uint32          cnt, i, minelems, maxelems;
+    boolean         minset, maxset, minerr, maxerr;
+    status_t        res, res2;
+    char            buff[NCX_MAX_NUMLEN];
 
     res = NO_ERR;
+    res2 = NO_ERR;
     iqual = obj_get_iqualval(obj);
     minerr = FALSE;
     maxerr = FALSE;
@@ -1564,14 +1567,46 @@ static status_t
 	    /* not enough instances error */
 	    minerr = TRUE;
 	    res = ERR_NCX_MIN_ELEMS_VIOLATION;
-	    agt_record_error(scb, msg, layer, res, 
-			     NULL, NCX_NT_OBJ, obj, 
-			     NCX_NT_VAL, val);
+
+	    if (cnt) {
+		/* use the first child instance as the
+		 * value node for the error-path
+		 */
+		errval = val_find_child(val,
+					obj_get_mod_name(obj),
+					obj_get_name(obj));
+		agt_record_error(scb, msg, layer, res, 
+				 NULL, NCX_NT_NONE, NULL, 
+				 NCX_NT_VAL, errval);
+	    } else {
+		/* need to construct a string error-path */
+		instbuff = NULL;
+		res2 = val_gen_split_instance_id(msg, val,
+						 NCX_IFMT_XPATH1,
+						 obj_get_nsid(obj),
+						 obj_get_name(obj),
+						 &instbuff);
+		if (res2 == NO_ERR) {
+		    agt_record_error(scb, msg, layer, res, 
+				     NULL, NCX_NT_NONE, NULL, 
+				     NCX_NT_STRING, instbuff);
+		} else {
+		    agt_record_error(scb, msg, layer, res, 
+				     NULL, NCX_NT_OBJ, obj, 
+				     NCX_NT_VAL, val);
+		}
+		if (instbuff) {
+		    m__free(instbuff);
+		}
+	    }
 	}
     }
 
     if (maxset) {
 	if (cnt > maxelems) {
+	    maxerr = TRUE;
+	    res = ERR_NCX_MAX_ELEMS_VIOLATION;
+
 	    /* too many instances error
 	     * need to find all the extra instances
 	     * and mark the extras as errors or they will
@@ -1581,25 +1616,60 @@ static status_t
 					  obj_get_mod_name(obj),
 					  obj_get_name(obj),
 					  maxelems);
-
-	    maxerr = TRUE;
-	    res = ERR_NCX_MAX_ELEMS_VIOLATION;
-	    agt_record_error(scb, msg, layer, res, 
-			     NULL, NCX_NT_OBJ, obj, 
-			     NCX_NT_VAL, val);
+	    /* use the first extra child instance as the
+	     * value node for the error-path
+	     */
+	    errval = val_find_child(val,
+				    obj_get_mod_name(obj),
+				    obj_get_name(obj));
+	    i = 1;
+	    while (errval && i < maxelems) {
+		errval = val_get_next_child(errval);
+		i++;
+	    }
+	    if (errval) {
+		agt_record_error(scb, msg, layer, res, 
+				 NULL, NCX_NT_OBJ, obj, 
+				 NCX_NT_VAL, errval);
+	    } else {
+		agt_record_error(scb, msg, layer, res, 
+				 NULL, NCX_NT_OBJ, obj, 
+				 NCX_NT_VAL, val);
+	    }
 	}
     }
 
     switch (iqual) {
     case NCX_IQUAL_ONE:
+    case NCX_IQUAL_1MORE:
 	if (cnt < 1 && !minerr) {
 	    /* missing single parameter */
 	    res = ERR_NCX_MISSING_VAL_INST;
-	    agt_record_error(scb, msg, layer, res, 
-			     NULL, NCX_NT_OBJ, obj, 
-			     NCX_NT_VAL, val);
+
+	    /* need to construct a string error-path */
+	    instbuff = NULL;
+	    res2 = val_gen_split_instance_id(msg, val,
+					     NCX_IFMT_XPATH1,
+					     obj_get_nsid(obj),
+					     obj_get_name(obj),
+					     &instbuff);
+	    if (res2 == NO_ERR) {
+		agt_record_error(scb, msg, layer, res, 
+				 NULL, NCX_NT_OBJ, obj, 
+				 NCX_NT_STRING, instbuff);
+	    } else {
+		agt_record_error(scb, msg, layer, res, 
+				 NULL, NCX_NT_OBJ, obj, 
+				 NCX_NT_VAL, val);
+	    }
+	    if (instbuff) {
+		m__free(instbuff);
+	    }
 	}
-	/* fall through */
+	if (iqual == NCX_IQUAL_1MORE) {
+	    break;
+	}
+	/* else fall through */
     case NCX_IQUAL_OPT:
 	if (cnt > 1 && !maxerr) {
 	    /* too many parameters */
@@ -1607,18 +1677,27 @@ static status_t
 					  obj_get_mod_name(obj),
 					  obj_get_name(obj), 1);
 	    res = ERR_NCX_EXTRA_VAL_INST;
-	    agt_record_error(scb, msg, layer, res, 
-			     NULL, NCX_NT_OBJ, obj, 
-			     NCX_NT_VAL, val);
-	}
-	break;
-    case NCX_IQUAL_1MORE:
-	if (cnt < 1 && !minerr) {
-	    /* missing parameter error */
-	    res = ERR_NCX_MISSING_VAL_INST;
-	    agt_record_error(scb, msg, layer, res, 
-			     NULL, NCX_NT_OBJ, obj, 
-			     NCX_NT_VAL, val);
+
+	    /* use the first extra child instance as the
+	     * value node for the error-path
+	     */
+	    errval = val_find_child(val,
+				    obj_get_mod_name(obj),
+				    obj_get_name(obj));
+	    i = 1;
+	    while (errval && i < maxelems) {
+		errval = val_get_next_child(errval);
+		i++;
+	    }
+	    if (errval) {
+		agt_record_error(scb, msg, layer, res, 
+				 NULL, NCX_NT_OBJ, obj, 
+				 NCX_NT_VAL, errval);
+	    } else {
+		agt_record_error(scb, msg, layer, res, 
+				 NULL, NCX_NT_OBJ, obj, 
+				 NCX_NT_VAL, val);
+	    }
 	}
 	break;
     case NCX_IQUAL_ZMORE:

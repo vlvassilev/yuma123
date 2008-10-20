@@ -988,11 +988,19 @@ rpc_err_rec_t *
 	    apptag = (const xmlChar *)"too-few-elements";
 	    break;
 	case ERR_NCX_NOT_IN_RANGE:
+	    apptag = (const xmlChar *)"not-in-range";
+	    break;
 	case ERR_NCX_VAL_NOTINSET:
+	    apptag = (const xmlChar *)"not-in-value-set";
+	    break;
 	case ERR_NCX_PATTERN_FAILED:
-	case ERR_NCX_MUST_TEST_FAILED:
+	    apptag = (const xmlChar *)"pattern-test-failed";
+	    break;
 	case ERR_NCX_DATA_REST_VIOLATION:
 	    apptag = (const xmlChar *)"data-restriction-violation";
+	    break;
+	case ERR_NCX_MUST_TEST_FAILED:
+	    apptag = (const xmlChar *)"must-violation";
 	    break;
 	case ERR_NCX_INSERT_MISSING_INSTANCE:
 	    apptag = (const xmlChar *)"missing-instance";

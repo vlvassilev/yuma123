@@ -94,6 +94,14 @@ typedef enum rpc_outtyp_t_ {
 } rpc_outtyp_t;
 
 
+/* Type of the <rpc-reply> data source */
+typedef enum rpc_data_t_ {
+    RPC_DATA_NONE,
+    RPC_DATA_STD,
+    RPC_DATA_YANG
+} rpc_data_t;
+
+
 /* struct of params to undo an edit-config opration
  * The actual nodes used depend on the edit operation value
  */
@@ -143,8 +151,9 @@ typedef struct rpc_msg_t_ {
      * The rpc_data and rpc_filter parameters are optionally used
      * by the rpc_datacb function to generate a reply.
      */
+    rpc_data_t      rpc_data_type;          /* type of data reply */
     void           *rpc_datacb;              /* rpc_agt_data_cb_t */
-    val_value_t    *rpc_data;                       /* data reply */
+    dlq_hdr_t       rpc_dataQ;                    /* data reply */
     op_filter_t     rpc_filter;        /* filter for get* methods */
 
     /* incoming: rollback or commit phase support builtin

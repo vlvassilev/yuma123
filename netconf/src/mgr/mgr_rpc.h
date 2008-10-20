@@ -60,6 +60,7 @@ typedef struct mgr_rpc_req_t_ {
     dlq_hdr_t      qhdr;
     xml_msg_hdr_t  mhdr;
     uint32         group_id;
+    const obj_template_t *rpc;
     xmlChar       *msg_id;       /* malloced message ID */
     xml_attrs_t    attrs;          /* Extra <rpc> attrs */
     val_value_t   *data;      /* starts with the method */

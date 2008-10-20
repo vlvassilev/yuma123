@@ -1619,10 +1619,6 @@ status_t
     case NCX_BT_ANY:
 	res = ERR_NCX_INVALID_VALUE;
 	break;
-    case NCX_BT_BITS:
-	/****/
-	res = NO_ERR;
-	break;
     case NCX_BT_ENUM:
 	res = val_enum_ok(typdef, simval, &retval, &retstr);
 	break;
@@ -1681,6 +1677,7 @@ status_t
 	/*****/
 	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
 	break;
+    case NCX_BT_BITS:
     case NCX_BT_SLIST:
 	listtyp = typ_get_clisttyp(typdef);
 	listbtyp = typ_get_basetype(&listtyp->typdef);
@@ -2226,7 +2223,9 @@ void
 	log_write("(any)");
 	break;
     case NCX_BT_ENUM:
-	log_write("%s", (const char *)val->v.enu.name);
+	if (val->v.enu.name) {
+	    log_write("%s", (const char *)val->v.enu.name);
+	}
 	break;
     case NCX_BT_EMPTY:
 	if (!val->v.bool) {
@@ -2300,7 +2299,9 @@ void
 		    }
 		    break;
 		case NCX_BT_ENUM:
-		    log_write("%s ", (const char *)listmem->val.enu.name);
+		    if (listmem->val.enu.name) {
+			log_write("%s ", (const char *)listmem->val.enu.name);
+		    }
 		    break;
 		default:
 		    dump_num(lbtyp, &listmem->val.num);
@@ -2454,7 +2455,9 @@ void
 	log_stdout("(any)");
 	break;
     case NCX_BT_ENUM:
-	log_stdout("%s", (const char *)val->v.enu.name);
+	if (val->v.enu.name) {
+	    log_stdout("%s", (const char *)val->v.enu.name);
+	}
 	break;
     case NCX_BT_EMPTY:
 	if (!val->v.bool) {
@@ -2521,7 +2524,9 @@ void
 		    }
 		    break;
 		case NCX_BT_ENUM:
-		    log_stdout("%s ", (const char *)listmem->val.enu.name);
+		    if (listmem->val.enu.name) {
+			log_stdout("%s ", (const char *)listmem->val.enu.name);
+		    }
 		    break;
 		default:
 		    stdout_num(lbtyp, &listmem->val.num);
@@ -3290,8 +3295,10 @@ val_value_t *
     case NCX_BT_STRING:	
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF:   /*****/
 	*res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
 	break;
+    case NCX_BT_BITS:
     case NCX_BT_SLIST:
 	*res = ncx_copy_list(&val->v.list, &copy->v.list);
 	break;
@@ -3332,8 +3339,7 @@ val_value_t *
 	}
 	break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+	*res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* reconstruct index records if needed */
@@ -4417,6 +4423,12 @@ int32
 * buff is allowed to be NULL; if so, then this fn will
 * just return the length of the string (w/o EOS ch) 
 *
+* USAGE:
+*  call 1st time with a NULL buffer to get the length
+*  call the 2nd time with a buffer of the returned length
+*
+* !!!! DOES NOT CHECK BUFF OVERRUN IF buff is non-NULL !!!!
+*
 * INPUTS:
 *    buff == buffer to write (NULL means get length only)
 *    val == value to check
@@ -4435,6 +4447,7 @@ status_t
     ncx_btype_t        btyp;
     status_t           res;
     int32              icnt;
+    uint32             bufflen;
     const ncx_lmem_t  *lmem;
     const xmlChar     *s;
     char               numbuff[VAL_MAX_NUMLEN];
@@ -4451,11 +4464,13 @@ status_t
 	/* flag is element name : <foo/>  */
 	if (val->v.bool) {
 	    if (buff) {
-		icnt = sprintf((char *)buff, "<%s/>", val->name);
-		if (icnt < 0) {
-		    return SET_ERROR(ERR_INTERNAL_VAL);
-		} else {
-		    *len = (uint32)icnt;
+		if ((xml_strlen(val->name)+3) < bufflen) {
+		    icnt = sprintf((char *)buff, "<%s/>", val->name);
+		    if (icnt < 0) {
+			return SET_ERROR(ERR_INTERNAL_VAL);
+		    } else {
+			*len = (uint32)icnt;
+		    }
 		}
 	    } else {
 		*len = xml_strlen(val->name) + 3;
@@ -4479,14 +4494,20 @@ status_t
 	break;
     case NCX_BT_ENUM:
 	if (buff) {
-	    icnt = sprintf((char *)buff, "%s", val->v.enu.name);
-	    if (icnt < 0 ) {
-		return SET_ERROR(ERR_INTERNAL_VAL);
+	    if (val->v.enu.name) {
+		icnt = sprintf((char *)buff, "%s", val->v.enu.name);
+		if (icnt < 0 ) {
+		    return SET_ERROR(ERR_INTERNAL_VAL);
+		} else {
+		    *len = (uint32)icnt;
+		}
 	    } else {
-		*len = (uint32)icnt;
+		*len = 0;
 	    }
-	} else {
+	} else if (val->v.enu.name) {
 	    *len = xml_strlen(val->v.enu.name);
+	} else {
+	    *len = 0;
 	}
 	break;
     case NCX_BT_INT8:
@@ -5618,6 +5639,33 @@ boolean
     return FALSE;
 
 }  /* val_need_quotes */
+
+
+/********************************************************************
+* FUNCTION val_all_whitespace
+* 
+* Check if a string is all whitespace
+*
+* INPUTS:
+*    str == string to check
+*
+* RETURNS:
+*    TRUE if string is all whitespace or empty length
+*    FALSE if non-whitespace char found
+*********************************************************************/
+boolean
+    val_all_whitespace (const xmlChar *str)
+{
+    /* any whitespace or newline needs quotes */
+    while (*str) {
+	if (!(isspace(*str) || *str == '\n')) {
+	    return FALSE;
+	}
+	str++;
+    }
+    return TRUE;
+
+}  /* val_all_whitespace */
 
 
 /********************************************************************

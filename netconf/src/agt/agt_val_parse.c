@@ -628,24 +628,41 @@ static status_t
     const xmlChar     *badval;
     xml_node_t         valnode, endnode;
     status_t           res, res2, res3;
-    boolean            errdone;
+    boolean            errdone, empty, enddone;
 
     /* init local vars */
     xml_init_node(&valnode);
     xml_init_node(&endnode);
     errnode = startnode;
     errdone = FALSE;
+    empty = FALSE;
+    enddone = FALSE;
     badval = NULL;
+    res = NO_ERR;
     res2 = NO_ERR;
     res3 = NO_ERR;
 
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
 
-    /* make sure the startnode is correct */
-    res = xml_node_match(startnode, obj_get_nsid(obj), 
-			 NULL, XML_NT_START); 
-    if (res == NO_ERR) {
+    if (retval->editop == OP_EDITOP_DELETE) {
+	switch (startnode->nodetyp) {
+	case XML_NT_EMPTY:
+	    empty = TRUE;
+	    break;
+	case XML_NT_START:
+	    break;
+	default:
+	    res = ERR_NCX_WRONG_NODETYP;
+	    errnode = startnode;
+	}
+    } else {
+	/* make sure the startnode is correct */
+	res = xml_node_match(startnode, obj_get_nsid(obj), 
+			     NULL, XML_NT_START); 
+    }
+
+    if (res == NO_ERR && !empty) {
 	/* get the next node which should be a string node */
 	res = get_xml_node(scb, msg, &valnode, TRUE);
 	if (res != NO_ERR) {
@@ -653,7 +670,7 @@ static status_t
 	}
     }
 
-    if (res == NO_ERR) {
+    if (res == NO_ERR && !empty) {
 #ifdef AGT_VAL_PARSE_DEBUG
 	log_debug3("\nparse_enum: expecting string node");
 	if (LOGDEBUG3) {
@@ -667,12 +684,22 @@ static status_t
 	    res = ERR_NCX_WRONG_NODETYP_CPX;
 	    errnode = &valnode;
 	    break;
+	case XML_NT_EMPTY:
+	    res = ERR_NCX_WRONG_NODETYP_CPX;
+	    errnode = &valnode;
+	    enddone = TRUE;
+	    break;
 	case XML_NT_STRING:
-	    /* get the non-whitespace string here */
-	    res = val_enum_ok(obj_get_ctypdef(obj), 
-			      valnode.simval, 
-			      &retval->v.enu.val, 
-			      &retval->v.enu.name);
+	    if (val_all_whitespace(valnode.simval) &&
+		retval->editop == OP_EDITOP_DELETE) {
+		res = NO_ERR;
+	    } else {
+		/* get the non-whitespace string here */
+		res = val_enum_ok(obj_get_ctypdef(obj), 
+				  valnode.simval, 
+				  &retval->v.enu.val, 
+				  &retval->v.enu.name);
+	    }
 	    if (res == NO_ERR) {
 		/* record the value even if there are errors after this */
 		retval->btyp = NCX_BT_ENUM;
@@ -680,27 +707,40 @@ static status_t
 		badval = valnode.simval;
 	    }
 	    break;
+	case XML_NT_END:
+	    enddone = TRUE;
+	    if (retval->editop == OP_EDITOP_DELETE) {
+		retval->btyp = NCX_BT_ENUM;
+		/* leave value empty, OK for leaf */
+	    } else {
+		res = ERR_NCX_INVALID_VALUE;
+		errnode = &valnode;
+	    }
+	    break;
 	default:
-	    res = ERR_NCX_WRONG_NODETYP;
+	    res = SET_ERROR(ERR_NCX_WRONG_NODETYP);
 	    errnode = &valnode;
+	    enddone = TRUE;
 	}
 
 	/* get the matching end node for startnode */
-	res2 = get_xml_node(scb, msg, &endnode, TRUE);
-	if (res2 == NO_ERR) {
+	if (!enddone) {
+	    res2 = get_xml_node(scb, msg, &endnode, TRUE);
+	    if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_enum: expecting end for %s", 
-		       startnode->qname);
-	    if (LOGDEBUG3) {
-		xml_dump_node(&endnode);
-	    }
+		log_debug3("\nparse_enum: expecting end for %s", 
+			   startnode->qname);
+		if (LOGDEBUG3) {
+		    xml_dump_node(&endnode);
+		}
 #endif
-	    res2 = xml_endnode_match(startnode, &endnode);
-	    if (res2 != NO_ERR) {
-		errnode = &endnode;
+		res2 = xml_endnode_match(startnode, &endnode);
+		if (res2 != NO_ERR) {
+		    errnode = &endnode;
+		}
+	    } else {
+		errdone = TRUE;
 	    }
-	} else {
-	    errdone = TRUE;
 	}
     }
 

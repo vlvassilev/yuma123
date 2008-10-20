@@ -1375,10 +1375,11 @@ static status_t
     const xmlChar    *def, *parmname, *str;
     const typ_def_t  *typdef;
     val_value_t      *oldparm, *newparm;
-    xmlChar          *line, *start, *objbuff;
+    xmlChar          *line, *start, *objbuff, *buff;
     status_t          res;
     ncx_btype_t       btyp;
     boolean           done;
+    uint32            len;
 
     if (!obj_is_mandatory(parm) && !get_optional) {
 	return NO_ERR;
@@ -1439,6 +1440,7 @@ static status_t
 	    log_stdout("\nEnter value for %s %s (%s, %s)", 
 		       obj_get_typestr(parm),
 		       parmname, def, DEF_OPTIONS);
+	    def = NULL;
 	}
 	if (oldvalset) {
 	    oldparm = val_find_child(oldvalset, 
@@ -1468,7 +1470,19 @@ static status_t
 	    if (btyp==NCX_BT_EMPTY) {
 		log_stdout("Y");
 	    } else {
-		val_dump_value(oldparm, -1);
+		res = val_sprintf_simval_nc(NULL, oldparm, &len);
+		if (res != NO_ERR) {
+		    return SET_ERROR(res);
+		}
+		buff = m__getMem(len+1);
+		if (!buff) {
+		    return ERR_INTERNAL_MEM;
+		}
+		res = val_sprintf_simval_nc(buff, oldparm, &len);
+		if (res == NO_ERR) {
+		    log_stdout("%s", buff);
+		}
+		m__free(buff);
 	    }
 	    log_stdout("]\n");
 	}
@@ -2644,6 +2658,7 @@ static status_t
 	    log_error("\nError allocating a new RPC request");
 	} else {
 	    req->data = reqdata;
+	    req->rpc = rpc;
 	}
     }
 	
@@ -4370,6 +4385,7 @@ static status_t
 	    log_error("\nError allocating a new RPC request");
 	} else {
 	    req->data = reqdata;
+	    req->rpc = rpc;
 	}
     }
 	
@@ -5375,6 +5391,7 @@ static void
 		log_error("\nError allocating a new RPC request");
 	    } else {
 		req->data = reqdata;
+		req->rpc = rpc;
 	    }
 	}
 	

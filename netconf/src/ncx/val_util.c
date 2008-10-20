@@ -84,7 +84,6 @@ date         init     comment
 #define VAL_UTIL_DEBUG  1
 
 
-
 /********************************************************************
 * FUNCTION new_index
 * 
@@ -106,8 +105,6 @@ static val_index_t *
     return in;
 
 }  /* new_index */
-
-
 
 
 /********************************************************************
@@ -364,6 +361,12 @@ static status_t
 * 
 * Get the index component string for the specified value
 * 
+* USAGE:
+*  call 1st time with a NULL buffer to get the length
+*  call the 2nd time with a buffer of the returned length
+*
+* !!!! DOES NOT CHECK BUFF OVERRUN IF buff is non-NULL !!!!
+*
 * INPUTS:
 *   mhdr == message hdr w/ prefix map or NULL to just use
 *           the internal prefix mappings
@@ -492,6 +495,12 @@ static status_t
 * 
 * Get the instance ID string for the specified value
 * 
+* USAGE:
+*  call 1st time with a NULL buffer to get the length
+*  call the 2nd time with a buffer of the returned length
+*
+* !!!! DOES NOT CHECK BUFF OVERRUN IF buff is non-NULL !!!!
+*
 * INPUTS:
 *   mhdr == message hdr w/ prefix map or NULL to just use
 *           the internal prefix mappings
@@ -1544,6 +1553,99 @@ status_t
     return res;
 
 }  /* val_gen_instance_id */
+
+
+/********************************************************************
+* FUNCTION val_gen_split_instance_id
+* 
+* Malloc and Generate the instance ID string for this value node, 
+* Add the last node from the parameters, not the value node
+*
+* INPUTS:
+*   mhdr == message hdr w/ prefix map or NULL to just use
+*           the internal prefix mappings
+*   val == node to generate the instance ID for
+*   format == desired output format (NCX or Xpath)
+*   leaf_pfix == namespace prefix string of the leaf to add
+*   leaf_name ==  name string of the leaf to add
+*   buff == pointer to address of buffer to use
+*
+* OUTPUTS
+*   mhdr.pmap may have entries added if prefixes used
+*      in the instance identifier which are not already in the pmap
+*   *buff == malloced buffer with the instance ID
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_gen_split_instance_id (xml_msg_hdr_t *mhdr,
+			       const val_value_t  *val, 
+			       ncx_instfmt_t format,
+			       xmlns_id_t leaf_nsid,
+			       const xmlChar *leaf_name,
+			       xmlChar  **buff)
+{
+    xmlChar  *p;
+    const xmlChar *leaf_pfix;
+    uint32    len, leaf_len;
+    status_t  res;
+
+#ifdef DEBUG 
+    if (!val || !leaf_name || !buff) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    leaf_pfix = NULL;
+    if (leaf_nsid) {
+	leaf_pfix = xmlns_get_ns_prefix(leaf_nsid);
+    }
+    if (!leaf_pfix) {
+	leaf_pfix = (const xmlChar *)"inv";
+    }
+
+    /* figure out the length of the parmset instance ID */
+    res = get_instance_string(mhdr, format, val, NULL, &len);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* check no instance ID */
+    if (len==0) {
+	*buff = NULL;
+	return ERR_NCX_NO_INSTANCE;
+    }
+
+    /* get the length of the extra leaf '/pfix:name' */
+    leaf_len = 1 + xml_strlen(leaf_pfix) + 1 + 
+	xml_strlen(leaf_name);
+
+    /* get a buffer to fit the instance ID string */
+    *buff = (xmlChar *)m__getMem(len+leaf_len+1);
+    if (!*buff) {
+	return ERR_INTERNAL_MEM;
+    } else {
+	memset(*buff, 0x0, len+1);
+    }
+
+    /* get the instance ID string for real this time */
+    res = get_instance_string(mhdr, format, val, *buff, &len);
+    if (res != NO_ERR) {
+	m__free(*buff);
+	*buff = NULL;
+    } else {
+	p = *buff;
+	p += len;
+	*p++ = '/';
+	p += xml_strcpy(p, leaf_pfix);
+	*p++ = ':';
+	p += xml_strcpy(p, leaf_name);
+    }
+
+    return res;
+
+}  /* val_gen_split_instance_id */
 
 
 /********************************************************************

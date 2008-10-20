@@ -562,6 +562,7 @@ void
     /* make sure any real session has been properly established */
     if (scb->type != SES_TYP_DUMMY && scb->state != SES_ST_IDLE) {
 	scb->stats.in_err_msgs++;
+	log_error("\nError: mgr_rpc: skipping incoming message");
 	mgr_xml_skip_subtree(scb->reader, top);
 	return;
     }
@@ -569,6 +570,7 @@ void
     /* make sure 'top' is the right kind of node */
     if (top->nodetyp != XML_NT_START) {
 	scb->stats.in_err_msgs++;
+	log_error("\nError: mgr_rpc: skipping incoming message");
 	mgr_xml_skip_subtree(scb->reader, top);
 	return;
     }
@@ -586,6 +588,7 @@ void
 	} else {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	    scb->stats.in_err_msgs++;
+	    log_error("\nError: mgr_rpc: skipping incoming message");
 	    mgr_xml_skip_subtree(scb->reader, top);
 	    return;
 	}
@@ -599,6 +602,7 @@ void
     if (!msg_id) {
 	scb->stats.in_err_msgs++;
 	mgr_xml_skip_subtree(scb->reader, top);
+	log_error("\nError: mgr_rpc: skipping incoming message");
 	return;
     }	    
 
@@ -609,6 +613,7 @@ void
     if (!rpy) {
 	m__free(msg_id);
 	scb->stats.in_err_msgs++;
+	log_error("\nError: mgr_rpc: skipping incoming message");
 	mgr_xml_skip_subtree(scb->reader, top);
 	return;
     } else {
@@ -641,7 +646,8 @@ void
     /* have a request/reply pair, so parse the reply 
      * as a val_value_t tree, stored in rpy->reply
      */
-    rpy->res = mgr_val_parse(scb, rpyobj, top, rpy->reply);
+    rpy->res = mgr_val_parse_reply(scb, rpyobj, req->rpc, 
+				   top, rpy->reply);
     if (rpy->res != NO_ERR) {
 	log_info("\nmgr_rpc: got invalid reply on session %d (%s)",
 		 scb->sid, get_error_string(rpy->res));

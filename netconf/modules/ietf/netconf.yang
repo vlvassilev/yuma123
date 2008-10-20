@@ -375,9 +375,10 @@ module netconf {
         config false;
         uses RpcErrorType;
       }
-      anyxml data {
-        config false;
-      }
+      // anyxml data {
+      //   config false;
+      // }
+      // any XML is allowed here, not just 1 el. named data
    }
 
    grouping RpcOkReplyType {
@@ -546,10 +547,11 @@ module netconf {
       }
 
       output {
-        anyxml data {
+        container data {
           description 
             "Copy of the source database subset which matched
              the filter criteria (if any).";
+         ncx:root;
        }
      }
    }
@@ -759,10 +761,11 @@ module netconf {
       }
 
       output {
-        anyxml data {
+        container data {
           description 
             "Copy of the 'running' database subset which matched
              the filter criteria (if any).";
+          ncx:root;
         }
       }
    }

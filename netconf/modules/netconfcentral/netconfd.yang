@@ -8,6 +8,8 @@ module netconfd {
 
     import ncxtypes { prefix nt; }
 
+    import inet-types { prefix inet; }
+
     organization  "Netconf Central";
 
     contact "Andy Bierman <support@netconfcentral.com>.";
@@ -77,6 +79,26 @@ module netconfd {
         description
            "Internal file search path for data model modules.";
         type nt:NcPathList;
+      }
+
+      leaf-list port {
+        max-elements 4;
+        description 
+          "Specify the TCP ports that the agent will accept
+           connections from.  These ports must also be configured
+           in the /etc/ssh/sshd_config file for the SSH master
+           agent to accept the connection and invoke the netconf
+           subsystem.
+
+           Up to 4 port numbers can be configured.
+
+           If any ports are configured, then only those values
+           will be accepted by the agent.
+
+           If no ports are configured, then the agent will accept
+           connections on the netconf-ssh and ssh ports (830 and 22).";
+
+         type inet:port-number;
       }
 
       leaf runpath {

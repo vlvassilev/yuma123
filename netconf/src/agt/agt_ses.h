@@ -99,7 +99,7 @@ extern boolean
     agt_ses_process_first_ready (void);
 
 extern boolean
-    agt_ses_ssh_port_allowed (uint32 port);
+    agt_ses_ssh_port_allowed (uint16 port);
 
 extern void
     agt_ses_fill_writeset (fd_set *fdset,

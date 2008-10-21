@@ -1012,7 +1012,7 @@ status_t
 
     while (!done) {
 	if (scb->state >= SES_ST_SHUTDOWN_REQ) {
-	    return ERR_NCX_OPERATION_FAILED;
+	    return ERR_NCX_SESSION_CLOSED;
 	}
 
 	/* get a new buffer */

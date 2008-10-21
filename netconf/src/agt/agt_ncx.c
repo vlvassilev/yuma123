@@ -889,7 +889,7 @@ static status_t
 
     sid = (ses_id_t)msg->rpc_user1;
     if (sid==scb->sid) {
-	/* zapping the surrent session */
+	/* zapping the current session */
 	agt_ses_request_close(sid);
     } else {
 	/* zapping another session */

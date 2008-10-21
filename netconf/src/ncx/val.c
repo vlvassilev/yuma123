@@ -593,6 +593,7 @@ static void
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF:   /****/
 	ncx_clean_str(&dest->v.str);
 	dest->v.str = src->v.str;
 	src->v.str = NULL;
@@ -723,7 +724,8 @@ static void
     }
     if (!typ_is_simple(val->btyp)) {
 	val_init_complex(val, btyp);
-    } else if (val->btyp == NCX_BT_SLIST) {
+    } else if (val->btyp == NCX_BT_SLIST ||
+	       val->btyp == NCX_BT_BITS) {
 	listtyp = typ_get_clisttyp(val->typdef);
 	listbtyp = typ_get_basetype(&listtyp->typdef);
 	ncx_init_list(&val->v.list, listbtyp);
@@ -2271,6 +2273,7 @@ void
 	}
 	break;
     case NCX_BT_SLIST:
+    case NCX_BT_BITS:
 	if (dlq_empty(&val->v.list.memQ)) {
 	    log_write("{ }");
 	} else {
@@ -2496,6 +2499,7 @@ void
 	}
 	break;
     case NCX_BT_SLIST:
+    case NCX_BT_BITS:
 	if (dlq_empty(&val->v.list.memQ)) {
 	    log_stdout("{ }");
 	} else {
@@ -2775,7 +2779,9 @@ status_t
 *  NCX_BT_EMPTY
 *  NCX_BT_BOOLEAN
 *  NCX_BT_SLIST
+*  NCX_BT_BITS
 *  NCX_BT_UNION
+*  NCX_BT_KEYREF
 *
 * INPUTS:
 *    val == value to set
@@ -2882,6 +2888,7 @@ status_t
 	}	    
 	break;
     case NCX_BT_SLIST:
+    case NCX_BT_BITS:
 	res = ncx_set_strlist(valstr, &val->v.list);
 	break;
     case NCX_BT_UNION:
@@ -3050,6 +3057,7 @@ boolean
 	case NCX_BT_STRING:
 	case NCX_BT_BINARY:
 	case NCX_BT_INSTANCE_ID:
+	case NCX_BT_KEYREF:   /*****/
 	    merge_simple(btyp, src, dest);
 	    break;
 	case NCX_BT_UNION:
@@ -3072,6 +3080,7 @@ boolean
 	    merge_simple(src->unbtyp, src, dest);
 	    break;
 	case NCX_BT_SLIST:
+	case NCX_BT_BITS:
 	    dupsok = val_duplicates_allowed(dest);
 	    ncx_merge_list(&src->v.list, &dest->v.list,
 			   mergetyp, dupsok, 
@@ -3455,9 +3464,11 @@ status_t
     case NCX_BT_STRING:	
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF:   /*****/
 	res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
 	break;
     case NCX_BT_SLIST:
+    case NCX_BT_BITS:
 	res = ncx_copy_list(&val->v.list, &copy->v.list);
 	break;
     case NCX_BT_ANY:
@@ -4235,6 +4246,7 @@ uint32
     cnt = 0;
     switch (val->btyp) {
     case NCX_BT_SLIST:
+    case NCX_BT_BITS:
 	cnt = ncx_list_cnt(&val->v.list);
 	break;
     default:
@@ -4359,8 +4371,10 @@ int32
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF:   /*****/
 	return ncx_compare_strs(&val1->v.str, &val2->v.str, btyp);
     case NCX_BT_SLIST:
+    case NCX_BT_BITS:
 	return ncx_compare_lists(&val1->v.list, &val2->v.list);
     case NCX_BT_LIST:
 	ret = index_match(val1, val2);
@@ -4527,6 +4541,7 @@ status_t
 	break;
     case NCX_BT_STRING:	
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF:  /****/
 	s = VAL_STR(val);
 	if (buff) {
 	    if (s) {
@@ -4551,6 +4566,7 @@ status_t
 	}
 	break;
     case NCX_BT_SLIST:
+    case NCX_BT_BITS:
 	*len = 0;
 	for (lmem = (const ncx_lmem_t *)dlq_firstEntry(&val->v.list.memQ);
 	     lmem != NULL;
@@ -4761,7 +4777,8 @@ boolean
 	return !dlq_empty(&val->v.childQ);
     } else if (btyp == NCX_BT_EMPTY && !val->v.bool) {
 	return FALSE;
-    } else if (btyp == NCX_BT_SLIST && ncx_list_empty(&val->v.list)) {
+    } else if ((btyp == NCX_BT_SLIST || btyp==NCX_BT_BITS)
+	       && ncx_list_empty(&val->v.list)) {
 	return FALSE;
     } else {
 	return TRUE;
@@ -4974,6 +4991,7 @@ boolean
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_BINARY:
+    case NCX_BT_KEYREF:   /*****/
 	if (!VAL_STR(val)) {
 	    /* empty string */
 	    return TRUE;
@@ -5000,6 +5018,7 @@ boolean
 	}
 	return (cnt < 2) ? TRUE : FALSE;
     case NCX_BT_SLIST:
+    case NCX_BT_BITS:
 	return TRUE;  /***/
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
@@ -5243,7 +5262,8 @@ void
 	realval->unbtyp = virval->unbtyp;
     } else if (!typ_is_simple(virval->btyp)) {
 	val_init_complex(realval, virval->btyp);
-    } else if (virval->btyp == NCX_BT_SLIST) {
+    } else if (virval->btyp == NCX_BT_SLIST ||
+	       virval->btyp == NCX_BT_BITS) {
 	listtyp = typ_get_listtyp(realval->typdef);
 	btyp = typ_get_basetype(&listtyp->typdef);
 	ncx_init_list(&realval->v.list, btyp);
@@ -5300,7 +5320,8 @@ val_value_t *
 
     if (!typ_is_simple(retval->btyp)) {
 	val_init_complex(retval, retval->btyp);
-    } else if (retval->btyp == NCX_BT_SLIST) {
+    } else if (retval->btyp == NCX_BT_SLIST ||
+	       retval->btyp == NCX_BT_BITS) {
 	listtyp = typ_get_listtyp(retval->typdef);
 	btyp = typ_get_basetype(&listtyp->typdef);
 	ncx_init_list(&retval->v.list, btyp);
@@ -5419,7 +5440,9 @@ boolean
 	    ret = TRUE;
 	}
 	break;
+    case NCX_BT_KEYREF:
     case NCX_BT_SLIST:
+    case NCX_BT_BITS:
     case NCX_BT_LIST:
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:

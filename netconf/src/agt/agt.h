@@ -128,6 +128,7 @@ date	     init     comment
 /* ncxserver magic cookie hack */
 #define NCX_SERVER_MAGIC "x56o8ab17eg92z343i55a0a964a864aOal1"
 
+#define AGT_MAX_PORTS  4
 
 /********************************************************************
 *								    *
@@ -169,6 +170,7 @@ typedef struct agt_profile_t_ {
     const xmlChar   *agt_modpath;
     const xmlChar   *agt_datapath;
     const xmlChar   *agt_runpath;
+    uint16           agt_ports[AGT_MAX_PORTS];
 } agt_profile_t;
 
 

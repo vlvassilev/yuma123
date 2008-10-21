@@ -16,6 +16,7 @@
    </t:test1>
    <t:test2 xmlns:t="urn:ietf:params:xml:ns:yang:test">
       <t:a2>fred</t:a2>
+      <t:a1>-33</t:a1>
       <t:b2>7</t:b2>
       <t:foo></t:foo>
    </t:test2>
@@ -27,4 +28,27 @@
          /t:test2[t:a2=wilma]/t:b2
       </t:foo>
    </t:test2>
+   <t:test3 xmlns:t="urn:ietf:params:xml:ns:yang:test">
+      <t:x>fred</t:x>
+      <t:test3deep>
+         <t:yy>1.100000</t:yy>
+         <t:y>sss</t:y>
+         <t:b>/a/b/c</t:b>
+         <t:deepy>
+            <t:yy3>ddd</t:yy3>
+            <t:yy1>/i</t:yy1>
+            <t:yy2>5.500000</t:yy2>
+         </t:deepy>
+         <t:deepy>
+            <t:yy3>aabb</t:yy3>
+            <t:yy1>/i/j</t:yy1>
+            <t:yy2>3.330000</t:yy2>
+         </t:deepy>
+      </t:test3deep>
+      <t:b2>4</t:b2>
+      <t:c2>3</t:c2>
+      <t:c2>-3</t:c2>
+      <t:c2>-6</t:c2>
+      <t:c2>-1</t:c2>
+   </t:test3>
 </nd:config>

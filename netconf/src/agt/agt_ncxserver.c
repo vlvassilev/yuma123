@@ -314,7 +314,7 @@ status_t
 				maxrdnum = i-1;
 			    }
 			    if (res != ERR_NCX_SESSION_CLOSED) {
-				log_info("\nagt_ses input failed"
+				log_info("\nagt_ncxssrv input failed"
 					 " for session %d (%s)",
 					 scb->sid, get_error_string(res));
 			    }

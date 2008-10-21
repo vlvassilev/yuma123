@@ -4070,8 +4070,10 @@ static status_t
 	if (curobj != config_content->obj) {
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
-	val_add_child(config_content, *curtop);
-	*curtop = config_content;
+	if (!obj_is_key(config_content->obj)) {
+	    val_add_child(config_content, *curtop);
+	    *curtop = config_content;
+	}
 	break;
     case OBJ_TYP_LIST:
 	/* get all the key nodes for the current object,
@@ -4099,24 +4101,35 @@ static status_t
 				    obj_get_mod_name(curkey->keyobj),
 				    obj_get_name(curkey->keyobj));
 	    if (!keyval) {
-		res = get_parm(rpc, curkey->keyobj, *curtop, NULL);
-		if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
-		    return res;
-		}
-		if (res == NO_ERR) {
-		    keyval = val_find_child(*curtop,
-					    obj_get_mod_name(curkey->keyobj),
-					    obj_get_name(curkey->keyobj));
-		    if (!keyval) {
-			return SET_ERROR(ERR_INTERNAL_VAL);
+		if (curkey->keyobj == config_content->obj) {
+		    /* for debugging the agent, allow a PDU
+		     * that should fail; there is an operation
+		     * attribute in a key leaf
+		     */
+		    keyval = config_content;
+		    val_insert_child(keyval, lastkey, *curtop);
+		    *curtop = config_content;
+		    lastkey = keyval;
+		    res = NO_ERR;
+		} else {
+		    res = get_parm(rpc, curkey->keyobj, *curtop, NULL);
+		    if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
+			return res;
 		    }
-		} /* else skip this key (for debugging agent) */
-	    }
-
-	    if (res == NO_ERR) {
-		val_remove_child(keyval);
-		val_insert_child(keyval, lastkey, *curtop);
-		lastkey = keyval;
+		    if (res == NO_ERR) {
+			keyval = val_find_child(*curtop,
+						obj_get_mod_name
+						(curkey->keyobj),
+						obj_get_name
+						(curkey->keyobj));
+			if (!keyval) {
+			    return SET_ERROR(ERR_INTERNAL_VAL);
+			}
+			val_remove_child(keyval);
+			val_insert_child(keyval, lastkey, *curtop);
+			lastkey = keyval;
+		    } /* else skip this key (for debugging agent) */
+		}
 	    }
 	}
 	break;
@@ -4370,6 +4383,11 @@ static status_t
 	val_free_value(config_content);
 	val_free_value(reqdata);
 	return res;
+    }
+
+    if (fixorder) {
+	/* must set the order of a root container seperately */
+	val_set_canonical_order(parm);
     }
 
     /* !!! config_content consumed at this point !!!

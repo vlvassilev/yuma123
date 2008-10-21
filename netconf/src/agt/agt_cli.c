@@ -102,6 +102,8 @@ static void
 		       agt_profile_t *agt_profile)
 {
     val_value_t  *val;
+    uint32        i;
+    boolean       done;
 
     /* check if there is any CLI data to read */
     if (!valset) {
@@ -150,6 +152,28 @@ static void
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_MODPATH);
     if (val && val->res == NO_ERR) {
 	agt_profile->agt_modpath = VAL_STR(val);
+    }
+
+    /* get leaf-list port parameter */
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_PORT);
+    if (val && val->res == NO_ERR) {
+	agt_profile->agt_ports[0] = VAL_UINT16(val);
+
+	val = val_find_next_child(valset, AGT_CLI_MODULE,
+				  NCX_EL_PORT, val);
+	while (val) {
+	    done = FALSE;
+	    for (i = 0;	 i < AGT_MAX_PORTS && !done; i++) {
+		if (agt_profile->agt_ports[i] == VAL_UINT16(val)) {
+		    done = TRUE;
+		} else if (agt_profile->agt_ports[i] == 0) {
+		    agt_profile->agt_ports[i] = VAL_UINT16(val);
+		    done = TRUE;
+		}
+	    }
+	    val = val_find_next_child(valset, AGT_CLI_MODULE,
+				      NCX_EL_PORT, val);
+	}
     }
 
     /* get runpath param */

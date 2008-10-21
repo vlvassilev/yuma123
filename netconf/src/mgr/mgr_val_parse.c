@@ -1247,6 +1247,12 @@ static status_t
 	if (res==NO_ERR) {
 	    res = obj_get_child_node(obj, chobj, &chnode, FALSE,
 				     &curtop, &curchild);
+	    if (res != NO_ERR) {
+		log_error("\nError: '%s' has no child node '%s'. Using anyxml",
+			  retval->name, chnode.qname);
+		curchild = ncx_get_gen_anyxml();
+		res = NO_ERR;
+	    }
 	}
 
 	/* try to setup a new child node */
@@ -1508,6 +1514,12 @@ static status_t
 	    if (res != NO_ERR && output) {
 		res = obj_get_child_node(output, outchobj, &chnode, FALSE,
 					 &curtop, &curchild);
+	    }
+	    if (res != NO_ERR) {
+		log_error("\nError: '%s' has no child node '%s'. Using anyxml",
+			  retval->name, chnode.qname);
+		curchild = ncx_get_gen_anyxml();
+		res = NO_ERR;
 	    }
 	}
 
@@ -2169,6 +2181,7 @@ status_t
 
     /* get the element values */
     res = parse_btype_split(scb, obj, output, startnode, retval);
+    
     return res;
 
 }  /* mgr_val_parse */

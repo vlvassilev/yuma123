@@ -190,7 +190,7 @@ void
 #endif
 
     res = NO_ERR;
-    
+
     /* make sure 'top' is the right kind of node */
     if (top->nodetyp != XML_NT_EMPTY) {
 	res = ERR_NCX_WRONG_NODETYP;
@@ -201,6 +201,8 @@ void
     if (res==NO_ERR && scb->state != SES_ST_INIT) {
 	/* TBD: stats update */
 	res = ERR_NCX_NO_ACCESS_STATE;
+    } else {
+	scb->state = SES_ST_IN_MSG;
     }
 
     /* check the ncxserver version */
@@ -222,9 +224,9 @@ void
     if (res == NO_ERR) {
 	attr = xml_find_attr(top, 0, NCX_EL_PORT);
 	if (attr && attr->attr_val) {
-	    res = ncx_decode_num(attr->attr_val, NCX_BT_UINT32, &num);
+	    res = ncx_decode_num(attr->attr_val, NCX_BT_UINT16, &num);
 	    if (res == NO_ERR) {
-		if (!agt_ses_ssh_port_allowed(num.u)) {
+		if (!agt_ses_ssh_port_allowed((uint16)num.u)) {
 		    res = ERR_NCX_ACCESS_DENIED;
 		}
 	    }
@@ -296,9 +298,9 @@ void
 	agt_ses_request_close(scb->sid);
 	log_info("\nagt_connect error (%s)\n  dropping session %d (%d)",
 		 get_error_string(res), scb->sid, res);
+    } else {
+	log_debug("\nagt_connect msg ok");
     }
-
-    log_debug("\nagt_connect msg ok");
 
     
 } /* agt_connect_dispatch */

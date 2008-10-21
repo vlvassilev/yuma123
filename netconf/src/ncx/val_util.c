@@ -81,7 +81,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-#define VAL_UTIL_DEBUG  1
+/* #define VAL_UTIL_DEBUG  1 */
 
 
 /********************************************************************
@@ -774,10 +774,12 @@ void
     }
 #endif
 
+#ifdef VAL_UTIL_DEBUG
     if (LOGDEBUG3) {
 	log_debug3("\nval_canonical start '%s'", val->name);
 	val_dump_value(val, 0);
     }
+#endif
 
     dlq_createSQue(&tempQ);
 
@@ -897,11 +899,13 @@ void
 	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+#ifdef VAL_UTIL_DEBUG
     if (LOGDEBUG3) {
 	log_debug3("\nval_canonical end '%s'", val->name);
 	log_debug3("\n   tempQ count is %u", dlq_count(&tempQ));
 	val_dump_value(val, 0);
     }
+#endif
 
 }  /* val_set_canonical_order */
 

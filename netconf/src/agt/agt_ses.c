@@ -1503,6 +1503,8 @@ boolean
     ses_ready_t  *rdy;
     ses_msg_t    *msg;
     status_t      res;
+    ses_id_t      mysid;
+
 #ifdef AGT_SES_DEBUG
     xmlChar       buff[32];
     uint32        cnt;
@@ -1515,6 +1517,7 @@ boolean
 
     /* get the session control block that rdy is embedded into */
     scb = agtses[rdy->sid];
+    mysid = scb->sid;
 
 #ifdef AGT_SES_DEBUG
     log_debug("\nagt_ses msg ready for session %d", scb->sid);
@@ -1549,7 +1552,7 @@ boolean
 
     /* setup the XML parser */
     if (scb->reader) {
-	/* reset the xmlreader */
+	    /* reset the xmlreader */
 	res = xml_reset_reader_for_session(ses_read_cb,
 					   NULL, scb, scb->reader);
     } else {
@@ -1567,15 +1570,23 @@ boolean
 	scb->state = SES_ST_SHUTDOWN_REQ;
     }
 
-    /* free the message that was just processed */
-    msg = (ses_msg_t *)dlq_deque(&scb->msgQ);
-    if (msg) {
-	ses_msg_free_msg(scb, msg);
-    }
+    /* get the session control block again to make sure it was not
+     * removed due to invalid <ncxconnect> that caused the session
+     * to be deleted
+     */
+    scb = agtses[mysid];
 
-    /* check if any messages left for this session */
-    if (!dlq_empty(&scb->msgQ)) {
-	ses_msg_make_inready(scb);
+    if (scb) {
+	/* free the message that was just processed */
+	msg = (ses_msg_t *)dlq_deque(&scb->msgQ);
+	if (msg) {
+	    ses_msg_free_msg(scb, msg);
+	}
+
+	/* check if any messages left for this session */
+	if (!dlq_empty(&scb->msgQ)) {
+	    ses_msg_make_inready(scb);
+	}
     }
 
     return TRUE;
@@ -1593,19 +1604,40 @@ boolean
 *     FALSE if port not allowed
 *********************************************************************/
 boolean
-    agt_ses_ssh_port_allowed (uint32 port)
+    agt_ses_ssh_port_allowed (uint16 port)
 {
+    const agt_profile_t *profile;
+    uint32         i;
 
-    /* !!! need to check configuration DB */
-
-    /* !!! hard-wired hack for now!!! */
-    if (port==NCX_SSH_PORT || port==NCX_NCSSH_PORT) {
-	return TRUE;
-    } else {
+    if (port == 0) {
 	return FALSE;
     }
 
-}  /* agt_ses_port_allowed */
+    profile = agt_get_profile();
+    if (!profile) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+
+    if (profile->agt_ports[0]) {
+	/* something configured, so use only that list */
+	for (i = 0; i < AGT_MAX_PORTS; i++) {
+	    if (port == profile->agt_ports[i]) {
+		return TRUE;
+	    }
+	}
+	return FALSE;
+    } else {
+	/* no ports configured so allow 830 and 22 */
+	if (port==NCX_SSH_PORT || port==NCX_NCSSH_PORT) {
+	    return TRUE;
+	} else {
+	    return FALSE;
+	}
+    }
+    /*NOTREACHED*/
+
+}  /* agt_ses_ssh_port_allowed */
 
 
 /********************************************************************

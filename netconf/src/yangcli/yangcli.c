@@ -192,6 +192,7 @@ date         init     comment
  */
 
 #define YANGCLI_AGENT       (const xmlChar *)"agent"
+#define YANGCLI_BAD_DATA    (const xmlChar *)"bad-data"
 #define YANGCLI_BATCHMODE   (const xmlChar *)"batch-mode"
 #define YANGCLI_BRIEF       (const xmlChar *)"brief"
 #define YANGCLI_COMMAND     (const xmlChar *)"command"
@@ -219,6 +220,13 @@ date         init     comment
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
 #define YANGCLI_USER        (const xmlChar *)"user"
 
+/* bad-data enumeration values */
+#define E_BAD_DATA_IGNORE (const xmlChar *)"ignore"
+#define E_BAD_DATA_WARN   (const xmlChar *)"warn"
+#define E_BAD_DATA_CHECK  (const xmlChar *)"check"
+#define E_BAD_DATA_ERROR  (const xmlChar *)"error"
+
+#define BAD_DATA_DEFAULT NCX_BAD_DATA_CHECK
 
 /* YANGCLI local RPC commands */
 #define YANGCLI_CD      (const xmlChar *)"cd"
@@ -236,6 +244,7 @@ date         init     comment
 #define YANGCLI_SAVE    (const xmlChar *)"save"
 #define YANGCLI_SET     (const xmlChar *)"set"
 #define YANGCLI_SHOW    (const xmlChar *)"show"
+
 
 #define YANGCLI_NS_URI \
     ((const xmlChar *)"http://netconfcentral.com/ncx/ncxcli")
@@ -338,6 +347,13 @@ static boolean         fixorder;
  */
 static boolean         autocomp;
 
+/* NCX_BAD_DATA_IGNORE to silently accept invalid input values
+ * NCX_BAD_DATA_WARN to warn and accept invalid input values
+ * NCX_BAD_DATA_CHECK to prompt user to keep or re-enter value
+ * NCX_BAD_DATA_ERROR to prompt user to re-enter value
+ */
+static ncx_bad_data_t  baddata;
+
 /* name of external CLI config file used on invocation */
 static xmlChar        *confname;
 
@@ -370,7 +386,7 @@ static const xmlChar  *cli_fn;
 static GetLine        *cli_gl;
 
 /* program version string */
-static char progver[] = "0.7.5";
+static char progver[] = "0.7.6";
 
 
 /********************************************************************
@@ -1376,6 +1392,7 @@ static status_t
     const typ_def_t  *typdef;
     val_value_t      *oldparm, *newparm;
     xmlChar          *line, *start, *objbuff, *buff;
+    xmlChar          *line2, *start2, *saveline;
     status_t          res;
     ncx_btype_t       btyp;
     boolean           done;
@@ -1456,6 +1473,9 @@ static status_t
 		if (!def && (obj_get_nsid(rpc) == xmlns_nc_id() &&
 			     (!xml_strcmp(parmname, NCX_EL_TARGET) ||
 			      !xml_strcmp(parmname, NCX_EL_SOURCE)))) {
+		    /* offer the default target for the NETCONF
+		     * <source> and <target> parameters
+		     */
 		    def = default_target;
 		}
 	    }
@@ -1499,25 +1519,31 @@ static status_t
 	    start++;
 	}
 
+	/* check for question-mark char sequences */
 	if (*start == '?') {
 	    if (start[1] == '?') {
+		/* ?? == full help */
 		obj_dump_template(parm, HELP_MODE_FULL, 0,
 				  NCX_DEF_INDENT);
 	    } else if (start[1] == 'C' || start[1] == 'c') {
+		/* ?c or ?C == cancel the operation */
 		log_stdout("\n%s command canceled",
 			   obj_get_name(rpc));
 		return ERR_NCX_CANCELED;
 	    } else if (start[1] == 'S' || start[1] == 's') {
+		/* ?s or ?S == skip this parameter */
 		log_stdout("\n%s parameter skipped",
 			   obj_get_name(parm));
 		return ERR_NCX_SKIPPED;
 	    } else {
+		/* ? == normal help mode */
 		obj_dump_template(parm, HELP_MODE_NORMAL, 4,
 				  NCX_DEF_INDENT);
 	    }
 	    log_stdout("\n");
 	    continue;
 	} else {
+	    /* top loop to get_parm is only executed once */
 	    done = TRUE;
 	}
     }
@@ -1527,10 +1553,13 @@ static status_t
 	/* no input, use default or old value */
 	if (def) {
 	    /* use default */
-	    res = cli_parse_parm(valset, parm, def, SCRIPTMODE);
+	    res = cli_parse_parm_ex(valset, parm, 
+				    def, SCRIPTMODE, baddata);
 	} else if (oldparm) {
+	    /* no default, try old value */
 	    if (btyp==NCX_BT_EMPTY) {
-		res = cli_parse_parm(valset, parm, NULL, SCRIPTMODE);
+		res = cli_parse_parm_ex(valset, parm, 
+					NULL, SCRIPTMODE, baddata);
 	    } else {
 		/* use a copy of the last value */
 		newparm = val_clone(oldparm);
@@ -1541,27 +1570,135 @@ static status_t
 		}
 	    }
 	} else if (btyp != NCX_BT_EMPTY) {
+	    /* data type requires some form of input */
 	    res = ERR_NCX_DATA_MISSING;
 	}  /* else flag should not be set */
     } else if (btyp==NCX_BT_EMPTY) {
+	/* empty data type handled special Y: set, N: leave out */
 	if (*start=='Y' || *start=='y') {
-	    res = cli_parse_parm(valset, parm, NULL, SCRIPTMODE);
+	    res = cli_parse_parm_ex(valset, parm, NULL, 
+				    SCRIPTMODE, baddata);
 	} else if (*start=='N' || *start=='n') {
-	    ; /* skip; so not add the flag */
-	} else if (!*start && oldparm) {
-	    /* default was set, so add this flag */
-	    res = cli_parse_parm(valset, parm, NULL, SCRIPTMODE);
+	    ; /* skip; do not add the flag */
+	} else if (oldparm) {
+	    /* previous value was set, so add this flag */
+	    res = cli_parse_parm_ex(valset, parm, 
+				    NULL, SCRIPTMODE, baddata);
 	} else {
+	    /* some value was entered, other than Y or N */
 	    res = ERR_NCX_WRONG_VAL;
 	}
     } else {
-	res = cli_parse_parm(valset, parm, start, SCRIPTMODE);
+	/* normal case: input for regular data type */
+	res = cli_parse_parm_ex(valset, parm, 
+				start, SCRIPTMODE, baddata);
     }
 
     if (res != NO_ERR) {
-	log_stdout("\nError: set parameter failed (%s)\n",
-		   get_error_string(res));
+	switch (baddata) {
+	case NCX_BAD_DATA_IGNORE:
+	case NCX_BAD_DATA_WARN:
+	    /* if these modes had error return status then the
+	     * problem was not invalid value; maybe malloc error
+	     */
+	    break;
+	case NCX_BAD_DATA_CHECK:
+	    if (NEED_EXIT) {
+		break;
+	    }
+
+	    saveline = (start) ? xml_strdup(start) :
+		xml_strdup((const xmlChar *)"");
+	    if (!saveline) {
+		res = ERR_INTERNAL_MEM;
+		break;
+	    }
+
+	    done = FALSE;
+	    while (!done) {
+		log_stdout("\nError: parameter '%s' value '%s' is invalid"
+			   "\nShould this value be used anyway? (Y, N, %s)"
+			   " [N]", 
+			   obj_get_name(parm),
+			   (start) ? start : (const xmlChar *)"",
+			   DEF_OPTIONS);
+
+		/* save the previous value because it is about
+		 * to get trashed by getting a new line
+		 */
+
+		/* get a line of input from the user */
+		line2 = get_cmd_line(&res);
+		if (!line2) {
+		    m__free(saveline);
+		    return res;
+		}
+
+		/* skip whitespace */
+		start2 = line2;
+		while (*start2 && xml_isspace(*start2)) {
+		    start2++;
+		}
+
+		/* check for question-mark char sequences */
+		if (!*start2) {
+		    /* default N: try again for a different input */
+		    m__free(saveline);
+		    res = get_parm(rpc, parm, valset, oldvalset);
+		    done = TRUE;
+		} else if (*start2 == '?') {
+		    if (start2[1] == '?') {
+			/* ?? == full help */
+			obj_dump_template(parm, HELP_MODE_FULL, 0,
+					  NCX_DEF_INDENT);
+		    } else if (start2[1] == 'C' || start2[1] == 'c') {
+			/* ?c or ?C == cancel the operation */
+			log_stdout("\n%s command canceled",
+				   obj_get_name(rpc));
+			m__free(saveline);
+			res = ERR_NCX_CANCELED;
+			done = TRUE;
+		    } else if (start2[1] == 'S' || start2[1] == 's') {
+			/* ?s or ?S == skip this parameter */
+			log_stdout("\n%s parameter skipped",
+				   obj_get_name(parm));
+			m__free(saveline);
+			res = ERR_NCX_SKIPPED;
+			done = TRUE;
+		    } else {
+			/* ? == normal help mode */
+			obj_dump_template(parm, HELP_MODE_NORMAL, 4,
+					  NCX_DEF_INDENT);
+		    }
+		    log_stdout("\n");
+		    continue;
+		} else if (*start2 == 'Y' || *start2 == 'y') {
+		    /* use the invalid value */
+		    res = cli_parse_parm_ex(valset, parm, 
+					    saveline, SCRIPTMODE, 
+					    NCX_BAD_DATA_IGNORE);
+		    m__free(saveline);
+		    done = TRUE;
+		} else if (*start2 == 'N' || *start2 == 'n') {
+		    /* recurse: try again for a different input */
+		    m__free(saveline);
+		    res = get_parm(rpc, parm, valset, oldvalset);
+		    done = TRUE;
+		} else {
+		    log_stdout("\nInvalid input.");
+		}
+	    }
+	    break;
+	case NCX_BAD_DATA_ERROR:
+	    log_stdout("\nError: set parameter '%s' failed (%s)\n",
+		       obj_get_name(parm),
+		       get_error_string(res));
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	}
     }
+
     return res;
     
 } /* get_parm */
@@ -1625,11 +1762,7 @@ static status_t
 	}
 
 	/* node is config and not already set */
-	if (obj_get_basetype(parm) == NCX_BT_EMPTY) {
-	    res = cli_parse_parm(valset, parm, NULL, SCRIPTMODE);
-	} else {
-	    res = get_parm(rpc, parm, valset, oldvalset);
-	}
+	res = get_parm(rpc, parm, valset, oldvalset);
 
 	if (res == ERR_NCX_SKIPPED) {
 	    res = NO_ERR;
@@ -1835,7 +1968,7 @@ static status_t
 		return ERR_NCX_CANCELED;
 	    } else if (str[1] == 'S' || str[1] == 's') {
 		log_stdout("\n%s choice skipped\n",
-			   obj_get_name(parm));
+			   obj_get_name(choic));
 		get_optional = saveopt;
 		return ERR_NCX_SKIPPED;
 	    } else {
@@ -4529,7 +4662,8 @@ static val_value_t *
 		return NULL;
 	    }
 	    if (curparm->obj != targobj) {
-		log_error("\nError: current value '%s' object type is incorrect.",
+		log_error("\nError: current value '%s' "
+			  "object type is incorrect.",
 			  VAL_STR(parm));
 		get_optional = saveopt;
 		return NULL;
@@ -5470,11 +5604,8 @@ static status_t
     status_t               res;
     ncx_node_t             dtyp;
 
-    /* check no command line parms */
-    if (argc <= 1) {
-	mgr_cli_valset = NULL;
-	return NO_ERR;
-    }
+    res = NO_ERR;
+    mgr_cli_valset = NULL;
 
     /* find the parmset definition in the registry */
     dtyp = NCX_NT_OBJ;
@@ -5484,10 +5615,24 @@ static status_t
 	res = ERR_NCX_NOT_FOUND;
     }
 
-    /* parse the command line against the PSD */    
-    mgr_cli_valset = cli_parse(argc, argv, obj,
-			       FULLTEST, PLAINMODE,
-			       autocomp, &res);
+    if (res == NO_ERR) {
+	/* check no command line parms */
+	if (argc <= 1) {
+	    mgr_cli_valset = val_new_value();
+	    if (!mgr_cli_valset) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		res = NO_ERR;
+		val_init_from_template(mgr_cli_valset, obj);
+	    }
+	} else {
+	    /* parse the command line against the PSD */    
+	    mgr_cli_valset = cli_parse(argc, argv, obj,
+				       FULLTEST, PLAINMODE,
+				       autocomp, &res);
+	}
+    }
+
     if (!mgr_cli_valset || res != NO_ERR) {
 	return res;
     }
@@ -5554,6 +5699,26 @@ static status_t
 	if (res != NO_ERR) {
 	    return res;
 	}
+    }
+
+    /* get the bad-data parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, 
+			  YANGCLI_BAD_DATA);
+    if (parm && parm->res == NO_ERR) {
+	if (!xml_strcmp(VAL_STR(parm), E_BAD_DATA_IGNORE)) {
+	    baddata = NCX_BAD_DATA_IGNORE;
+	} else if (!xml_strcmp(VAL_STR(parm), E_BAD_DATA_WARN)) {
+	    baddata = NCX_BAD_DATA_WARN;
+	} else if (!xml_strcmp(VAL_STR(parm), E_BAD_DATA_CHECK)) {
+	    baddata = NCX_BAD_DATA_CHECK;
+	} else if (!xml_strcmp(VAL_STR(parm), E_BAD_DATA_ERROR)) {
+	    baddata = NCX_BAD_DATA_ERROR;
+	} else {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    baddata = BAD_DATA_DEFAULT;
+	}
+    } else {
+	baddata = BAD_DATA_DEFAULT;
     }
 
     /* get the batch-mode parameter */

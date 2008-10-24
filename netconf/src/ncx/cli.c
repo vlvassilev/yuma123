@@ -80,6 +80,10 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_yangconst
+#include "yangconst.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -172,6 +176,92 @@ static status_t
     return res;
 
 }  /* parse_parm */
+
+
+/********************************************************************
+* FUNCTION parse_parm_ex
+* 
+* Create a ps_parm_t struct for the specified parm value,
+* and insert it into the parmset (extended)
+*
+* INPUTS:
+*   val == complex val_value_t to add the parsed parm into
+*   obj == obj_template_t descriptor for the missing parm
+*   nsid == namespace ID to really use
+*   name == object name to really use
+*   strval == string representation of the object value
+*             (may be NULL if obj btype is NCX_BT_EMPTY
+*   script == TRUE if parsing a script (in the manager)
+*          == FALSE if parsing XML or CLI
+*
+* OUTPUTS:
+*   If the specified parm is mandatory w/defval defined, then a 
+*   new ps_parm_t will be inserted in the ps->parmQ as required
+*   to fill in the parmset.
+*
+* RETURNS:
+*   status 
+*********************************************************************/
+static status_t
+    parse_parm_ex (val_value_t *val,
+		   const obj_template_t *obj,
+		   xmlns_id_t  nsid,
+		   const xmlChar *name,
+		   const xmlChar *strval,
+		   boolean script)
+{
+    val_value_t       *new_parm;
+    const typ_def_t   *typdef;
+    ncx_btype_t        btyp;
+    status_t           res;
+    
+#ifdef DEBUG
+    if (!val || !obj) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* create a new parm and fill it in */
+    new_parm = val_new_value();
+    if (!new_parm) {
+        return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(new_parm, obj);
+
+    /* adjust namespace ID and name */
+    val_set_name(new_parm, name, xml_strlen(name));
+    new_parm->nsid = nsid;
+
+    /* get the base type value */
+    typdef = obj_get_ctypdef(obj);
+    btyp = obj_get_basetype(obj);
+
+    if (typ_is_simple(btyp)) {
+	res = val_simval_ok(typdef, strval);
+	if (res == NO_ERR) {
+	    if (script) {
+		(void)var_get_script_val(obj, new_parm,
+					 strval, ISPARM, &res);
+	    } else {
+		res = val_set_simval(new_parm,
+				     typdef,  
+				     obj_get_nsid(obj),
+				     obj_get_name(obj),
+				     strval);
+	    }
+	}
+    } else {
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (res != NO_ERR) {
+	val_free_value(new_parm);
+    } else {
+	val_add_child(new_parm, val);
+    }
+    return res;
+
+}  /* parse_parm_ex */
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -537,7 +627,8 @@ val_value_t *
 	/* create a new val_value struct and set the value */
 	if (res == NO_ERR) {
 	    res = parse_parm(val, chobj, 
-			     (const xmlChar *)parmval, script);
+			     (const xmlChar *)parmval,
+			     script);
 	}
 
 	/* check any errors in the parm name or value */
@@ -625,6 +716,71 @@ status_t
     return parse_parm(val, obj, strval, script);
 
 }  /* cli_parse_parm */
+
+
+/********************************************************************
+* FUNCTION cli_parse_parm_ex
+* 
+* Create a val_value_t struct for the specified parm value,
+* and insert it into the parent container value
+* Allow different bad data error handling vioa parameter
+*
+* ONLY CALLED FROM CLI PARSING FUNCTIONS IN ncxcli.c
+* ALLOWS SCRIPT EXTENSIONS TO BE PRESENT
+*
+* INPUTS:
+*   val == parent value struct to adjust
+*   parm == obj_template_t descriptor for the missing parm
+*   strval == string representation of the parm value
+*             (may be NULL if parm btype is NCX_BT_EMPTY
+*   script == TRUE if CLI script mode
+*          == FALSE if CLI plain mode
+*   bad_data == enum defining how bad data should be handled
+*
+* OUTPUTS:
+*   A new val_value_t will be inserted in the val->v.childQ 
+*   as required to fill in the parm.
+*
+* RETURNS:
+*   status 
+*********************************************************************/
+status_t
+    cli_parse_parm_ex (val_value_t *val,
+		       const obj_template_t *obj,
+		       const xmlChar *strval,
+		       boolean script,
+		       ncx_bad_data_t  bad_data)
+{
+    const obj_template_t  *genstr;
+    status_t               res;
+
+    res = parse_parm(val, obj, strval, script);
+    if (res == NO_ERR || NEED_EXIT) {
+	return res;
+    }
+
+    switch (bad_data) {
+    case NCX_BAD_DATA_WARN:
+	log_warn("\nWarning: invalid value '%s' used for parm '%s'",
+		 (strval) ? strval : (const xmlChar *)"",
+		 obj_get_name(obj));
+	/* drop through */
+    case NCX_BAD_DATA_IGNORE:
+	genstr = ncx_get_gen_string();
+	res = parse_parm_ex(val, genstr, 
+			    obj_get_nsid(obj),
+			    obj_get_name(obj),
+			    strval, script);
+	return res;
+    case NCX_BAD_DATA_CHECK:
+    case NCX_BAD_DATA_ERROR:
+	return res;
+    default:
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    /*NOTREACHED*/
+
+}  /* cli_parse_parm_ex */
 
 
 /* END file cli.c */

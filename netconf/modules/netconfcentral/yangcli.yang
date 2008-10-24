@@ -219,6 +219,36 @@ module yangcli {
 
       uses ConnectParms;
 
+      leaf bad-data {
+        description
+          "Specifies how invalid user input from the CLI
+           will be handled when filling PDUs for remote
+           operations.";
+
+        type enumeration {
+          enum ignore {
+            description 
+              "Silently accept invalid PDU and data model 
+               parameters.";
+          }
+          enum warn {
+            description 
+              "Warn, but accept invalid PDU and data model 
+               parameters.";
+          }
+          enum check {
+            description 
+              "Prompt the user to keep the invalid value
+               or re-enter the value.";
+          }
+          enum error {
+            description 
+              "Prompt the user to re-neter the invalid value.";
+          }
+        }
+        default "check";
+      }
+
       leaf batch-mode {
         description
           "If present, the interactive CLI will not be used.

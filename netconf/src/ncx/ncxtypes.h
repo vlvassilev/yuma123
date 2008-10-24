@@ -333,6 +333,23 @@ typedef enum ncx_status_t_ {
 } ncx_status_t;
 
 
+/* enumeratoin for CLI handling of bad input data 
+ * used by yangcli, all others use NCX_BAD_DATA_ERROR
+ *
+ * NCX_BAD_DATA_IGNORE to silently accept invalid input values
+ * NCX_BAD_DATA_WARN to warn and accept invalid input values
+ * NCX_BAD_DATA_CHECK to prompt user to keep or re-enter value
+ * NCX_BAD_DATA_ERROR to prompt user to re-enter value
+ */
+typedef enum ncx_bad_data_t_ {
+    NCX_BAD_DATA_NONE,
+    NCX_BAD_DATA_IGNORE,
+    NCX_BAD_DATA_WARN,
+    NCX_BAD_DATA_CHECK,
+    NCX_BAD_DATA_ERROR
+} ncx_bad_data_t;
+
+
 /* union of all the basic number types
  * if float not supported, then it is stored as a string 
  */

@@ -28,6 +28,10 @@ date	     init     comment
 
 #include <xmlstring.h>
 
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
 #ifndef _H_obj
 #include "obj.h"
 #endif
@@ -79,5 +83,13 @@ extern status_t
 		    const obj_template_t *obj,
 		    const xmlChar *strval,
 		    boolean script);
+
+
+extern status_t
+    cli_parse_parm_ex (val_value_t *val,
+		       const obj_template_t *obj,
+		       const xmlChar *strval,
+		       boolean script,
+		       ncx_bad_data_t  bad_data);
 
 #endif	    /* _H_cli */

@@ -31,6 +31,10 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
+#ifndef _H_b64
+#include "b64.h"
+#endif
+
 #ifndef _H_cfg
 #include "cfg.h"
 #endif
@@ -949,13 +953,29 @@ static status_t
 
 	/* record the value even if there are errors */
 	switch (btyp) {
-	case NCX_BT_STRING:
 	case NCX_BT_BINARY:
+	    if (valnode.simval) {
+		/* result is going to be less than the encoded length */
+		retval->v.binary.ustr = m__getMem(valnode.simlen);
+		retval->v.binary.ubufflen = valnode.simlen;
+		if (!retval->v.binary.ustr) {
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    res = b64_decode(valnode.simval, valnode.simlen,
+				     retval->v.binary.ustr, 
+				     retval->v.binary.ubufflen,
+				     &retval->v.binary.ustrlen);
+		}
+	    }
+	    break;
+	case NCX_BT_STRING:
 	case NCX_BT_INSTANCE_ID:
 	case NCX_BT_KEYREF:
-	    retval->v.str = xml_strdup(valnode.simval);
-	    if (!retval->v.str) {
-		res = ERR_INTERNAL_MEM;
+	    if (valnode.simval) {
+		retval->v.str = xml_strdup(valnode.simval);
+		if (!retval->v.str) {
+		    res = ERR_INTERNAL_MEM;
+		}
 	    }
 	    break;
 	case NCX_BT_SLIST:

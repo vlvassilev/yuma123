@@ -100,6 +100,10 @@ date         init     comment
 #include "agt_val.h"
 #endif
 
+#ifndef _H_b64
+#include "b64.h"
+#endif
+
 #ifndef _H_cfg
 #include "cfg.h"
 #endif
@@ -332,10 +336,12 @@ static boolean
 {
     const val_value_t  *cmpval;
     val_value_t  *v_val;
+    xmlChar     *binbuff;
     ncx_num_t  num;
     ncx_enum_t  enu1;
     boolean   testres;
     status_t  res;
+    uint32    binlen, retlen;
 
     v_val = NULL;
 
@@ -354,6 +360,15 @@ static boolean
     cmpval = (v_val) ? v_val : curval;
 
     switch (curval->btyp) {
+    case NCX_BT_BOOLEAN:
+	if (!xml_strcmp(testval, NCX_EL_TRUE) ||
+	    !xml_strcmp(testval, (const xmlChar *)"1")) {
+	    testres = cmpval->v.bool;
+	} else if (!xml_strcmp(testval, NCX_EL_FALSE) ||
+		   !xml_strcmp(testval, (const xmlChar *)"0")) {
+	    testres = !cmpval->v.bool;
+	}
+	break;
     case NCX_BT_ENUM:
 	/* convert the test string to an enum */
 	res = ncx_set_enum(testval, &enu1);
@@ -383,7 +398,21 @@ static boolean
 	testres = !xml_strcmp((const xmlChar *)VAL_STR(cmpval), testval);
 	break;
     case NCX_BT_BINARY:
-	testres = !xml_strcmp(VAL_USTR(cmpval), testval);
+	binlen = xml_strlen(testval);
+	binbuff = m__getMem(binlen);
+	if (!binbuff) {
+	    SET_ERROR(ERR_INTERNAL_MEM);
+	    return 0;
+	}
+	res = b64_decode(testval, binlen,
+			 binbuff, binlen, &retlen);
+	if (res == NO_ERR) {
+	    testres = !memcmp(binbuff, cmpval->v.binary.ustr, retlen);
+	} else {
+	    SET_ERROR(res);
+	    testres = 0;
+	}
+	m__free(binbuff);
 	break;
     case NCX_BT_SLIST:
 	SET_ERROR(ERR_NCX_OPERATION_NOT_SUPPORTED);

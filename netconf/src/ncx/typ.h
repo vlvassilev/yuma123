@@ -725,6 +725,9 @@ extern boolean
 extern boolean
     typ_ok_for_union (ncx_btype_t btyp);
 
+extern boolean
+    typ_ok_for_xsdlist (ncx_btype_t btyp);
+
 /* check result in typdef chain */
 extern boolean
     typ_ok (const typ_def_t *typdef);

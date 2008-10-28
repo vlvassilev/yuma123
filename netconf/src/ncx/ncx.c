@@ -3693,7 +3693,7 @@ status_t
 *     str1 == first number
 *     str2 == second number
 *     btyp == expected data type 
-*             (NCX_BT_STRING, NCX_BT_BINARY)
+*             (NCX_BT_STRING, NCX_BT_INSTANCE_ID, NCX_BT_KEYREF)
 * RETURNS:
 *     -1 if str1 is < str2
 *      0 if str1 == str2   (also for error, after SET_ERROR called)
@@ -3709,16 +3709,14 @@ int32
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return 0;
     }
-#endif
-
-    switch (btyp) {
-    case NCX_BT_STRING:
-    case NCX_BT_BINARY:
-	return xml_strcmp(*str1, *str2);
-    default:
+    if (!typ_is_string(btyp)) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return 0;
-    }
+    }	
+#endif
+
+    return xml_strcmp(*str1, *str2);
+
     /*NOTREACHED*/
 }  /* ncx_compare_strs */
 
@@ -3729,7 +3727,8 @@ int32
 * Copy the contents of str1 to str2
 * Supports base types:
 *     NCX_BT_STRING
-*     NCX_BT_BINARY
+*     NCX_BT_INSTANCE_ID
+*     NCX_BT_KEYREF
 *
 * INPUTS:
 *     str1 == first string
@@ -3748,26 +3747,21 @@ status_t
     if (!str1 || !str2) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
+    if (!typ_is_string(btyp)) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }	
 #endif
 
-    switch (btyp) {
-    case NCX_BT_STRING:
-    case NCX_BT_BINARY:
-    case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:  /*****/
-	if (*str1) {
-	    *str2 = xml_strdup(*str1);
-	    if (!*str2) {
-		return ERR_INTERNAL_MEM;
-	    }
-	} else {
-	    *str2 = NULL;
+    if (*str1) {
+	*str2 = xml_strdup(*str1);
+	if (!*str2) {
+	    return ERR_INTERNAL_MEM;
 	}
-        break;
-    default:
-        return SET_ERROR(ERR_INTERNAL_VAL);
+    } else {
+	*str2 = NULL;
     }
     return NO_ERR;
+
 }  /* ncx_copy_str */
 
 
@@ -3875,17 +3869,12 @@ void
     /* clean the string Q */
     while (!dlq_empty(&list->memQ)) {
 	lmem = (ncx_lmem_t *)dlq_deque(&list->memQ);
-	switch (list->btyp) {
-	case NCX_BT_STRING:
-	case NCX_BT_BINARY:
+	if (typ_is_string(list->btyp)) {
 	    ncx_clean_str(&lmem->val.str);
-	    break;
-	case NCX_BT_ENUM:
-	    ncx_clean_enum(&lmem->val.enu);
-	    break;
-	default:
-	    /* must be a number */
+	} else if (typ_is_number(list->btyp)) {
 	    ncx_clean_num(list->btyp, &lmem->val.num);
+	} else if (list->btyp == NCX_BT_ENUM) {
+	    ncx_clean_enum(&lmem->val.enu);
 	}
 	m__free(lmem);
     }
@@ -4009,7 +3998,6 @@ boolean
     /* screen the list base type */
     switch (list->btyp) {
     case NCX_BT_STRING:
-    case NCX_BT_BINARY:
     case NCX_BT_ENUM:
 	break;
     default:
@@ -4085,7 +4073,6 @@ int32
 	}
 	switch (list1->btyp) {
 	case NCX_BT_STRING:
-	case NCX_BT_BINARY:
 	    switch (ncx_compare_strs(&s1->val.str, &s2->val.str, 
 				     list1->btyp)) {
 	    case -1:
@@ -4166,12 +4153,29 @@ status_t
 	/* copy the string or number from lmem to lcopy */
 	switch (list1->btyp) {
 	case NCX_BT_STRING:
-	case NCX_BT_BINARY:
 	    res = ncx_copy_str(&lmem->val.str, &lcopy->val.str, list1->btyp);
 	    break;
+	case NCX_BT_ENUM:
+	    lcopy->val.enu.val = lmem->val.enu.val;
+	    lcopy->val.enu.dname = xml_strdup(lmem->val.enu.name);
+	    if (!lcopy->val.enu.dname) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		lcopy->val.enu.name = lcopy->val.enu.dname;
+	    }
+	    break;
+	case NCX_BT_BOOLEAN:
+	    lcopy->val.bool = lmem->val.bool;
+	    break;
 	default:
-	    res = ncx_copy_num(&lmem->val.num, &lcopy->val.num, list1->btyp);
+	    if (typ_is_number(list1->btyp)) {
+		res = ncx_copy_num(&lmem->val.num, 
+				   &lcopy->val.num, list1->btyp);
+	    } else {
+		res = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
 	}
+
 	if (res != NO_ERR) {
 	    ncx_free_lmem(lcopy, list1->btyp);
 	    return res;
@@ -4488,7 +4492,7 @@ status_t
     /* check if any work to do */
     switch (btyp) {
     case NCX_BT_STRING:
-    case NCX_BT_BINARY:
+    case NCX_BT_BOOLEAN:
 	return NO_ERR;
     default:
 	;
@@ -4499,13 +4503,17 @@ status_t
 	 lmem != NULL;
 	 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
 
+
 	str = lmem->val.str;
 	if (btyp == NCX_BT_ENUM) {
 	    res = val_enum_ok(typdef, str,
 			      &lmem->val.enu.val,
 			      &lmem->val.enu.name);
-	} else {
+
+	} else if (typ_is_number(btyp)){
 	    res = ncx_decode_num(str, btyp, &lmem->val.num);
+	} else {
+	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
 	m__free(str);
 	lmem->val.str = NULL;
@@ -4572,15 +4580,19 @@ void
 
     switch (btyp) {
     case NCX_BT_STRING:
-    case NCX_BT_BINARY:
 	ncx_clean_str(&lmem->val.str);
 	break;
     case NCX_BT_ENUM:
 	ncx_clean_enum(&lmem->val.enu);
 	break;
+    case NCX_BT_BOOLEAN:
+	break;
     default:
-	/* must be a number */
-	ncx_clean_num(btyp, &lmem->val.num);
+	if (typ_is_number(btyp)) {
+	    ncx_clean_num(btyp, &lmem->val.num);
+	} else {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	}
     }
 
 } /* ncx_clean_lmem */
@@ -4633,6 +4645,7 @@ ncx_lmem_t *
     const ncx_str_t *str;
     const ncx_enum_t *enu;
     int32            cmpval;
+    boolean          bool;
 
 #ifdef DEBUG
     if (!list || !memval) {
@@ -4651,6 +4664,8 @@ ncx_lmem_t *
 	str = &memval->val.str;
     } else if (list->btyp == NCX_BT_ENUM) {
 	enu = &memval->val.enu;
+    } else if (list->btyp == NCX_BT_BOOLEAN) {
+	bool = memval->val.bool;
     } else {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
@@ -4663,9 +4678,12 @@ ncx_lmem_t *
 	    cmpval = ncx_compare_nums(&lmem->val.num, num, list->btyp);
 	} else if (str) {
 	    cmpval = ncx_compare_strs(&lmem->val.str, str, list->btyp);
-	} else {
+	} else if (enu) {
 	    cmpval = ncx_compare_enums(&lmem->val.enu, enu);
+	} else {
+	    cmpval = (lmem->val.bool && bool) ? 0 : 1;
 	}
+
 	if (!cmpval) {
 	    return lmem;
 	}
@@ -4784,6 +4802,107 @@ ncx_lmem_t *
     return (ncx_lmem_t *)dlq_firstEntry(&list->memQ);
 
 }  /* ncx_first_lmem */
+
+
+/********************************************************************
+* FUNCTION ncx_new_binary
+*
+* Malloc and fill in a new ncx_binary_t struct
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   pointer to malloced and initialized ncx_binary_t struct
+*   NULL if malloc error
+*********************************************************************/
+ncx_binary_t *
+    ncx_new_binary (void)
+{
+    ncx_binary_t  *binary;
+    
+    binary = m__getObj(ncx_binary_t);
+    if (!binary) {
+	return NULL;
+    }
+
+    ncx_init_binary(binary);
+    return binary;
+
+}  /* ncx_new_binary */
+
+
+/********************************************************************
+* FUNCTION ncx_init_binary
+* 
+* Init the memory of a ncx_binary_t struct
+*
+* INPUTS:
+*    binary == ncx_binary_t struct to init
+*********************************************************************/
+void
+    ncx_init_binary (ncx_binary_t *binary)
+{
+
+#ifdef DEBUG
+    if (!binary) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    memset(binary, 0x0, sizeof(ncx_binary_t));
+
+} /* ncx_init_binary */
+
+
+/********************************************************************
+* FUNCTION ncx_clean_binary
+* 
+* Scrub the memory of a ncx_binary_t but do not delete it
+*
+* INPUTS:
+*    binary == ncx_binary_t struct to clean
+*********************************************************************/
+void
+    ncx_clean_binary (ncx_binary_t *binary)
+{
+
+#ifdef DEBUG
+    if (!binary) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+    if (binary->ustr) {
+	m__free(binary->ustr);
+    }
+    memset(binary, 0x0, sizeof(ncx_binary_t));
+
+} /* ncx_clean_binary */
+
+
+/********************************************************************
+* FUNCTION ncx_free_binary
+*
+* Free all the memory in a  ncx_binary_t struct
+*
+* INPUTS:
+*   binary == struct to clean and free
+*
+*********************************************************************/
+void
+    ncx_free_binary (ncx_binary_t *binary)
+{
+#ifdef DEBUG
+    if (!binary) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+    ncx_clean_binary(binary);
+    m__free(binary);
+
+}  /* ncx_free_binary */
 
 
 /********************************************************************
@@ -6424,6 +6543,8 @@ ncx_tclass_t
     case NCX_BT_NONE:
         return NCX_CL_NONE;
     case NCX_BT_ANY:
+    case NCX_BT_BOOLEAN:
+    case NCX_BT_BITS:
     case NCX_BT_ENUM:
     case NCX_BT_EMPTY:
     case NCX_BT_INT8:
@@ -6438,11 +6559,14 @@ ncx_tclass_t
     case NCX_BT_FLOAT64:
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
+    case NCX_BT_KEYREF:
     case NCX_BT_SLIST:
+    case NCX_BT_UNION:
         return NCX_CL_SIMPLE;
     case NCX_BT_CONTAINER:
-    case NCX_BT_CHOICE:
     case NCX_BT_LIST:
+    case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
         return NCX_CL_COMPLEX;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);

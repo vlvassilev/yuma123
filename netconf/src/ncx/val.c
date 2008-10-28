@@ -29,6 +29,10 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
+#ifndef _H_b64
+#include "b64.h"
+#endif
+
 #ifndef _H_cfg
 #include "cfg.h"
 #endif
@@ -471,8 +475,10 @@ static void
     case NCX_BT_ENUM:
 	ncx_clean_enum(&val->v.enu);
 	break;
-    case NCX_BT_STRING:
     case NCX_BT_BINARY:
+	ncx_clean_binary(&val->v.binary);
+	break;
+    case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_KEYREF:
 	ncx_clean_str(&val->v.str);
@@ -590,8 +596,16 @@ static void
 	src->v.num.d = NULL;
 #endif
 	break;
-    case NCX_BT_STRING:
     case NCX_BT_BINARY:
+	ncx_clean_binary(&dest->v.binary);
+	dest->v.binary.ustr = src->v.binary.ustr;
+	dest->v.binary.ubufflen = src->v.binary.ubufflen;
+	dest->v.binary.ustrlen = src->v.binary.ustrlen;
+	src->v.binary.ustr = NULL;
+	src->v.binary.ustrlen = 0;
+	src->v.binary.ubufflen = 0;
+	break;
+    case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_KEYREF:   /****/
 	ncx_clean_str(&dest->v.str);
@@ -1115,7 +1129,27 @@ status_t
     /* make sure the data type is correct */
     switch (btyp) {
     case NCX_BT_STRING:
+	len.u = xml_strlen(strval);
+	res = val_range_ok_errinfo(typdef, NCX_BT_UINT32, &len, errinfo);
+	if (res != NO_ERR) {
+	    return res;
+	}
+
+	/* the range-test, if any, has succeeded
+	 * check if there is a pattern test for a string only
+	 */
+	if (btyp == NCX_BT_STRING) {
+	    res = val_pattern_ok_errinfo(typdef, strval, errinfo);
+	}
+	break;
     case NCX_BT_BINARY:
+	/* just get the length of the decoded binary string */
+	res = b64_decode(strval, xml_strlen(strval),
+			 NULL, NCX_MAX_UINT, &len.u);
+	if (res == NO_ERR) {
+	    res = val_range_ok_errinfo(typdef, NCX_BT_UINT32, 
+				       &len, errinfo);
+	}
 	break;
     case NCX_BT_INSTANCE_ID:
 	return NO_ERR;  /*** BUG: MISSING INSTANCE ID VALIDATION ***/
@@ -1126,18 +1160,6 @@ status_t
     }
 
     /* check the range against the string length */
-    len.u = xml_strlen(strval);
-    res = val_range_ok_errinfo(typdef, NCX_BT_UINT32, &len, errinfo);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* the range-test, if any, has succeeded
-     * check if there is a pattern test for a string only
-     */
-    if (btyp == NCX_BT_STRING) {
-	res = val_pattern_ok_errinfo(typdef, strval, errinfo);
-    }
 
     return res;
 
@@ -2253,8 +2275,11 @@ void
     case NCX_BT_FLOAT64:
 	dump_num(btyp, &val->v.num);
 	break;
-    case NCX_BT_STRING:
     case NCX_BT_BINARY:
+	log_write("binary string, length '%u'",
+		  val->v.binary.ustrlen);
+	break;
+    case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_KEYREF:   /*******/
 	if (VAL_STR(val)) {
@@ -2283,13 +2308,12 @@ void
 		     dlq_firstEntry(&val->v.list.memQ);
 		 listmem != NULL;
 		 listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) {
+
 		if (startindent >= 0) {
 		    ncx_printf_indent(startindent+NCX_DEF_INDENT);
 		}
-		switch (lbtyp) {
-		case NCX_BT_STRING:
-		case NCX_BT_BINARY:
-		case NCX_BT_INSTANCE_ID:
+
+		if (typ_is_string(lbtyp)) {
 		    if (listmem->val.str) {
 			quotes = val_need_quotes(listmem->val.str);
 			if (quotes) {
@@ -2300,15 +2324,25 @@ void
 			    log_write("%c", VAL_QUOTE_CH);
 			}
 		    }
-		    break;
-		case NCX_BT_ENUM:
-		    if (listmem->val.enu.name) {
-			log_write("%s ", (const char *)listmem->val.enu.name);
-		    }
-		    break;
-		default:
+		} else if (typ_is_number(lbtyp)) {
 		    dump_num(lbtyp, &listmem->val.num);
 		    log_write(" ");
+		} else {
+		    switch (lbtyp) {
+		    case NCX_BT_ENUM:
+			if (listmem->val.enu.name) {
+			    log_write("%s ",
+				      (const char *)listmem->val.enu.name);
+			}
+			break;
+		    case NCX_BT_BOOLEAN:
+			log_write("%s ",
+				  (listmem->val.bool) ? 
+				  NCX_EL_TRUE : NCX_EL_FALSE);
+			break;
+		    default:
+			SET_ERROR(ERR_INTERNAL_VAL);
+		    }
 		}
 	    }
 	    ncx_printf_indent(startindent);
@@ -2479,8 +2513,11 @@ void
     case NCX_BT_FLOAT64:
 	stdout_num(btyp, &val->v.num);
 	break;
-    case NCX_BT_STRING:
     case NCX_BT_BINARY:
+	log_stdout("binary string, length '%u'",
+		   val->v.binary.ustrlen);
+	break;
+    case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_KEYREF: /*******/
 	if (VAL_STR(val)) {
@@ -2509,13 +2546,12 @@ void
 		     dlq_firstEntry(&val->v.list.memQ);
 		 listmem != NULL;
 		 listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) {
+
 		if (startindent >= 0) {
 		    ncx_stdout_indent(startindent+NCX_DEF_INDENT);
 		}
-		switch (lbtyp) {
-		case NCX_BT_STRING:
-		case NCX_BT_BINARY:
-		case NCX_BT_INSTANCE_ID:
+
+		if (typ_is_string(lbtyp)) {
 		    if (listmem->val.str) {
 			quotes = val_need_quotes(listmem->val.str);
 			if (quotes) {
@@ -2526,17 +2562,28 @@ void
 			    log_stdout("%c", VAL_QUOTE_CH);
 			}
 		    }
-		    break;
-		case NCX_BT_ENUM:
-		    if (listmem->val.enu.name) {
-			log_stdout("%s ", (const char *)listmem->val.enu.name);
-		    }
-		    break;
-		default:
+		} else if (typ_is_number(lbtyp)) {
 		    stdout_num(lbtyp, &listmem->val.num);
 		    log_stdout(" ");
+		} else {
+		    switch (lbtyp) {
+		    case NCX_BT_ENUM:
+			if (listmem->val.enu.name) {
+			    log_stdout("%s ", 
+				       (const char *)listmem->val.enu.name);
+			}
+			break;
+		    case NCX_BT_BOOLEAN:
+			log_stdout("%s ",
+				   (listmem->val.bool) ? 
+				   NCX_EL_TRUE : NCX_EL_FALSE);
+			break;
+		    default:
+			SET_ERROR(ERR_INTERNAL_VAL);
+		    }
 		}
 	    }
+
 	    ncx_stdout_indent(startindent);
 	    log_stdout("}");
 	}
@@ -2677,9 +2724,9 @@ status_t
     val->nsid = 0;
 
     switch (val->btyp) {
-    case NCX_BT_BINARY:
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF:   /****/
 	if (valname && !val->name) {
 	    if (val->dname) {
 		SET_ERROR(ERR_INTERNAL_VAL);
@@ -2805,6 +2852,8 @@ status_t
 			const xmlChar *valstr)
 {
     status_t  res;
+    uint32    ulen;
+
 
 #ifdef DEBUG
     if (!val || !typdef) {
@@ -2814,6 +2863,7 @@ status_t
 
     res = NO_ERR;
 
+    /* only set name if it is not already set */
     if (!val->name && valname) {
 	val->dname = xml_strndup(valname, valnamelen);
 	if (!val->dname) {
@@ -2827,17 +2877,14 @@ status_t
 	val->obj = ncx_get_gen_string();
     }
 
+    /* set these fields even if already set by 
+     * val_init_from_template
+     */
     val->nsid = nsid;
     val->typdef = typdef;
     val->btyp = typ_get_basetype(typdef);
 
-    if (val->btyp != NCX_BT_EMPTY) {
-	if (!valstr || !*valstr) {
-	    return ERR_NCX_EMPTY_VAL;
-	}
-    }
-
-    /* convert the value */
+    /* convert the value string, if any */
     switch (val->btyp) {
     case NCX_BT_INT8:
     case NCX_BT_INT16:
@@ -2849,13 +2896,37 @@ status_t
     case NCX_BT_UINT64:
     case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
-	res = ncx_convert_num(valstr, NCX_NF_NONE, 
-			      val->btyp, &val->v.num);
+	if (valstr && *valstr) {
+	    res = ncx_convert_num(valstr, NCX_NF_NONE, 
+				  val->btyp, &val->v.num);
+	} else {
+	    res = ERR_NCX_EMPTY_VAL;
+	}
 	break;
     case NCX_BT_BINARY:
-	VAL_USTR(val) = xml_strdup(valstr);
-	if (!VAL_USTR(val)) {
+	ncx_init_binary(&val->v.binary);
+	ulen = 0;
+	if (valstr && *valstr) {
+	    ulen = xml_strlen(valstr);
+	}
+	if (!ulen) {
+	    break;
+	}
+
+	/* allocate a binary string as big as the input
+	 * text string, even though it will be about 25% too big
+	 */
+	val->v.binary.ustr = m__getMem(ulen+1);
+	if (!val->v.binary.ustr) {
 	    res = ERR_INTERNAL_MEM;
+	} else {
+	    /* really a test tool only for binary strings
+	     * entered at the CLI; use @foo.jpg for
+	     * raw input of binary files in var_get_script_val
+	     */
+	    memcpy(val->v.binary.ustr, valstr, ulen);
+	    val->v.binary.ubufflen = ulen+1;
+	    val->v.binary.ustrlen = ulen;
 	}
 	break;
     case NCX_BT_STRING:
@@ -2872,7 +2943,6 @@ status_t
     case NCX_BT_EMPTY:
     case NCX_BT_BOOLEAN:
 	/* if supplied, match the flag name against the supplied value */
-	res = NO_ERR;
 	if (valstr) {
 	    if (!xml_strcmp(NCX_EL_TRUE, valstr)) {
 		val->v.bool = TRUE;
@@ -2884,6 +2954,7 @@ status_t
 		res = ERR_NCX_INVALID_VALUE;
 	    }
 	} else {
+	    /* name indicates presence, so set val to TRUE */
 	    val->v.bool = TRUE;
 	}	    
 	break;
@@ -3062,16 +3133,25 @@ boolean
 	    break;
 	case NCX_BT_UNION:
 	    /* first clean the dest */
-	    switch (dest->unbtyp) {
-	    case NCX_BT_STRING:
-	    case NCX_BT_BINARY:
-		ncx_clean_str(&dest->v.str);
-		break;
-	    case NCX_BT_ENUM:
-		ncx_clean_enum(&dest->v.enu);
-		break;
-	    default:
+	    if (typ_is_number(dest->unbtyp)) {
 		ncx_clean_num(dest->unbtyp, &dest->v.num);
+	    } else if (typ_is_string(dest->unbtyp)) {		
+		ncx_clean_str(&dest->v.str);
+	    } else {
+		switch (dest->unbtyp) {
+		case NCX_BT_BINARY:
+		    ncx_clean_binary(&dest->v.binary);
+		    break;
+		case NCX_BT_ENUM:
+		    ncx_clean_enum(&dest->v.enu);
+		    break;
+		case NCX_BT_LIST:
+		case NCX_BT_BITS:
+		    ncx_clean_list(&dest->v.list);
+		    break;
+		default:
+		    ;
+		}
 	    }
 
 	    /* set the union member type */
@@ -3080,10 +3160,14 @@ boolean
 	    merge_simple(src->unbtyp, src, dest);
 	    break;
 	case NCX_BT_SLIST:
-	case NCX_BT_BITS:
 	    dupsok = val_duplicates_allowed(dest);
 	    ncx_merge_list(&src->v.list, &dest->v.list,
 			   mergetyp, dupsok, 
+			   typ_get_crangeQ(dest->typdef));
+	    break;
+	case NCX_BT_BITS:
+	    ncx_merge_list(&src->v.list, &dest->v.list,
+			   mergetyp, FALSE, 
 			   typ_get_crangeQ(dest->typdef));
 	    break;
 	case NCX_BT_ANY:
@@ -3301,8 +3385,22 @@ val_value_t *
     case NCX_BT_FLOAT64:
 	*res = ncx_copy_num(&val->v.num, &copy->v.num, val->btyp);
 	break;
-    case NCX_BT_STRING:	
     case NCX_BT_BINARY:
+	ncx_init_binary(&copy->v.binary);
+	if (val->v.binary.ustr) {
+	    copy->v.binary.ustr = m__getMem(val->v.binary.ustrlen);
+	    if (!copy->v.binary.ustr) {
+		*res = ERR_INTERNAL_MEM;
+	    } else {
+		memcpy(copy->v.binary.ustr, 
+		       val->v.binary.ustr, 
+		       val->v.binary.ustrlen);
+		copy->v.binary.ustrlen = val->v.binary.ustrlen;
+		copy->v.binary.ubufflen = val->v.binary.ustrlen;
+	    }
+	}
+	break;
+    case NCX_BT_STRING:	
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_KEYREF:   /*****/
 	*res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
@@ -3461,8 +3559,21 @@ status_t
     case NCX_BT_FLOAT64:
 	res = ncx_copy_num(&val->v.num, &copy->v.num, val->btyp);
 	break;
-    case NCX_BT_STRING:	
     case NCX_BT_BINARY:
+	ncx_clean_binary(&copy->v.binary);
+	if (val->v.binary.ustr) {
+	    copy->v.binary.ustr = m__getMem(val->v.binary.ustrlen);
+	    if (!copy->v.binary.ustr) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		memcpy(copy->v.binary.ustr, val->v.binary.ustr,
+		       val->v.binary.ustrlen);
+		copy->v.binary.ustrlen = val->v.binary.ustrlen;
+		copy->v.binary.ubufflen = val->v.binary.ustrlen;
+	    }
+	}
+	break;
+    case NCX_BT_STRING:	
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_KEYREF:   /*****/
 	res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
@@ -4019,7 +4130,8 @@ val_value_t *
 * and by string value.
 * Child node must be a base type of 
 *   NCX_BT_STRING
-*   NCX_BT_BINARY
+*   NCX_BT_INSTANCE_ID
+*   NCX_BT_KEYREF
 *
 * INPUTS:
 *    parent == parent complex type to check
@@ -4052,15 +4164,11 @@ val_value_t *
 
 	/* check the node if the name matches */
 	if (!xml_strcmp(val->name, name)) {
-	    switch (val->btyp) {
-	    case NCX_BT_STRING:
-	    case NCX_BT_BINARY:
-	    case NCX_BT_INSTANCE_ID:
+	    if (typ_is_string(val->btyp)) {
 		if (!xml_strcmp(val->v.str, strval)) {
 		    return val;
 		}
-		break;
-	    default:
+	    } else {
 		/* requested child node is wrong type */
 		return NULL;
 	    }
@@ -4347,7 +4455,7 @@ int32
 	} else {
 	    return -1;
 	}
-	break;
+	/*NOTREACHED*/
     case NCX_BT_ENUM:
 	if (VAL_ENUM(val1) == VAL_ENUM(val2)) {
 	    return 0;
@@ -4356,7 +4464,7 @@ int32
 	} else {
 	    return 1;
 	}
-	break;
+	/*NOTREACHED*/
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
@@ -4368,8 +4476,24 @@ int32
     case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
 	return ncx_compare_nums(&val1->v.num, &val2->v.num, btyp);
-    case NCX_BT_STRING:
     case NCX_BT_BINARY:
+	if (!val1->v.binary.ustr) {
+	    return -1;
+	} else if (!val2->v.binary.ustr) {
+	    return 1;
+	} else if (val1->v.binary.ustrlen <
+		   val2->v.binary.ustrlen) {
+	    return -1;
+	} else if (val1->v.binary.ustrlen >
+		   val2->v.binary.ustrlen) {
+	    return 1;
+	} else {
+	    return memcmp(val1->v.binary.ustr,
+			  val2->v.binary.ustr,
+			  val1->v.binary.ustrlen);
+	}
+	/*NOTREACHED*/
+    case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_KEYREF:   /*****/
 	return ncx_compare_strs(&val1->v.str, &val2->v.str, btyp);
@@ -4413,7 +4537,7 @@ int32
 	    ch1 = (val_value_t *)dlq_nextEntry(ch1);
 	    ch2 = (val_value_t *)dlq_nextEntry(ch2);
 	}
-	break;
+	/*NOTREACHED*/
     case NCX_BT_EXTERN:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return -1;
@@ -4458,12 +4582,12 @@ status_t
 			   const val_value_t *val,
 			   uint32 *len)
 {
+    const ncx_lmem_t  *lmem;
+    const xmlChar     *s;
     ncx_btype_t        btyp;
     status_t           res;
     int32              icnt;
     uint32             bufflen;
-    const ncx_lmem_t  *lmem;
-    const xmlChar     *s;
     char               numbuff[VAL_MAX_NUMLEN];
 
 #ifdef DEBUG
@@ -4472,7 +4596,9 @@ status_t
     }
 #endif
 
+    res = NO_ERR;
     btyp = val->btyp;
+
     switch (btyp) {
     case NCX_BT_EMPTY:
 	/* flag is element name : <foo/>  */
@@ -4554,15 +4680,25 @@ status_t
 	}
 	break;
     case NCX_BT_BINARY:
-	s = VAL_USTR(val);
+	s = val->v.binary.ustr;
 	if (buff) {
 	    if (s) {
-		*len = xml_strcpy(buff, s);
+		/* !!! do not know the real buffer length
+		 * !!! to send; assume call to this fn
+		 * !!! to retrieve the length was done OK
+		 */
+		res = b64_encode(s, val->v.binary.ustrlen,
+				 buff, NCX_MAX_UINT,
+				 NCX_DEF_LINELEN, len);
 	    } else {
 		*len = 0;
 	    }
+	} else if (s) {
+	    res = b64_encode(s, val->v.binary.ustrlen,
+			     NULL, NCX_MAX_UINT,
+			     NCX_DEF_LINELEN, len);
 	} else {
-	    *len = (s) ? xml_strlen(s) : 0;
+	    *len = 0;
 	}
 	break;
     case NCX_BT_SLIST:
@@ -4571,12 +4707,10 @@ status_t
 	for (lmem = (const ncx_lmem_t *)dlq_firstEntry(&val->v.list.memQ);
 	     lmem != NULL;
 	     lmem = (const ncx_lmem_t *)dlq_nextEntry(lmem)) {
-	    switch (val->v.list.btyp) {
-	    case NCX_BT_STRING:
-	    case NCX_BT_BINARY:
+
+	    if (typ_is_string(val->v.list.btyp)) {
 		s = lmem->val.str;
-		break;
-	    default:
+	    } else if (typ_is_number(val->v.list.btyp)) {
 		res = ncx_sprintf_num((xmlChar *)numbuff, 
 				      &lmem->val.num, 
 				      val->v.list.btyp, len);
@@ -4584,7 +4718,23 @@ status_t
 		    return SET_ERROR(res);
 		}
 		s = (const xmlChar *)numbuff;
+	    } else {
+		switch (val->v.list.btyp) {
+		case NCX_BT_ENUM:
+		    s = VAL_ENUM_NAME(val);
+		    break;
+		case NCX_BT_BOOLEAN:
+		    if (val->v.bool) {
+			s = NCX_EL_TRUE;
+		    } else {
+			s = NCX_EL_FALSE;
+		    }
+		    break;
+		default:
+		    s = NULL;
+		}
 	    }
+
 	    if (buff) {
 		/* hardwire double quotes to wrapper list strings */
 		icnt = sprintf((char *)buff, "\"%s\"", 
@@ -4858,6 +5008,23 @@ status_t
 
     /* handle the attr string according to its base type */
     switch (btyp) {
+    case NCX_BT_BOOLEAN:
+	if (attrval && !xml_strcmp(attrval, NCX_EL_TRUE)) {
+	    retval->v.bool = TRUE;
+	} else if (attrval && 
+		   !xml_strcmp(attrval,
+			       (const xmlChar *)"1")) {
+	    retval->v.bool = TRUE;
+	} else if (attrval && !xml_strcmp(attrval, NCX_EL_FALSE)) {
+	    retval->v.bool = FALSE;
+	} else if (attrval && 
+		   !xml_strcmp(attrval,
+			       (const xmlChar *)"0")) {
+	    retval->v.bool = FALSE;
+	} else {
+	    res = ERR_NCX_INVALID_VALUE;
+	}
+	break;
     case NCX_BT_ENUM:
 	res = val_enum_ok(typdef, attrval, &enuval, &enustr);
 	if (res == NO_ERR) {
@@ -4988,9 +5155,10 @@ boolean
     case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
 	return TRUE;
+    case NCX_BT_BINARY:
+	return (val->v.binary.ustrlen < 20) ? TRUE : FALSE;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_BINARY:
     case NCX_BT_KEYREF:   /*****/
 	if (!VAL_STR(val)) {
 	    /* empty string */
@@ -5349,11 +5517,13 @@ boolean
     val_is_default (const val_value_t *val)
 {
     const xmlChar *def;
+    xmlChar       *binbuff;
     ncx_enum_t     enu;
     ncx_num_t      num;
     boolean        ret;
     ncx_btype_t    btyp;
     status_t       res;
+    uint32         len, deflen;
 
 #ifdef DEBUG
     if (!val) {
@@ -5432,8 +5602,26 @@ boolean
 	}
 	ncx_clean_num(btyp, &num);
 	break;
-    case NCX_BT_STRING:
     case NCX_BT_BINARY:
+	deflen = xml_strlen(def);
+	res = b64_decode(def, deflen,
+			 NULL, NCX_MAX_UINT, &len);
+	if (res == NO_ERR) {
+	    binbuff = m__getMem(len);
+	    if (!binbuff) {
+		SET_ERROR(ERR_INTERNAL_MEM);
+		return FALSE;
+	    } 
+	    res = b64_decode(def, deflen,
+			       binbuff, len, &len);
+	    if (res == NO_ERR) {
+		ret = memcmp(binbuff, val->v.binary.ustr, len) 
+		    ? FALSE : TRUE;
+	    }
+	    m__free(binbuff);
+	}
+	break;
+    case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
 	if (!ncx_compare_strs((const ncx_str_t *)def, 
 			      &val->v.str, btyp)) {

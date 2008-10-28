@@ -390,6 +390,7 @@ typedef struct ncx_lmem_t_ {
 	ncx_num_t    num;
 	ncx_str_t    str;
 	ncx_enum_t   enu;
+	boolean      bool;
     } val;
     uint32   flags;
 } ncx_lmem_t;
@@ -400,6 +401,14 @@ typedef struct ncx_list_t_ {
     ncx_btype_t  btyp;
     dlq_hdr_t     memQ;                /* Q of ncx_lmem_t */
 } ncx_list_t;
+
+
+/* NCX base64 string node for YANG 'binary' built-in type */
+typedef struct ncx_binary_t_ {
+    unsigned char   *ustr;            /* binary string */
+    uint32           ubufflen;    /* binary buffer len */
+    uint32           ustrlen;    /* binary buffer used */
+} ncx_binary_t;
 
 
 /* struct for holding r/o pointer to generic internal node 

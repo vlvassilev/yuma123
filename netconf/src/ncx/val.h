@@ -172,8 +172,6 @@ date	     init     comment
 
 #define VAL_STR(V)     ((V)->v.str)
 
-#define VAL_USTR       VAL_STR
-
 #define VAL_INSTANCE_ID(V)    ((V)->v.str)
 
 #define VAL_UINT(V)    ((V)->v.num.u)
@@ -281,15 +279,15 @@ typedef struct val_value_t_ {
 	/* String data types:
 	 *   NCX_BT_STRING
 	 *   NCX_BT_INSTANCE_ID
-	 *   NCX_BT_BINARY 
 	 */
 	ncx_str_t  str; 
 
-	ncx_list_t list;              /* NCX_BT_BITS, NCX_BT_SLIST */
-	boolean    bool;           /* NCX_BT_EMPTY, NCX_BT_BOOLEAN */
-	ncx_enum_t enu;               /* NCX_BT_UNION, NCX_BT_ENUM */
-	xmlChar   *fname;                         /* NCX_BT_EXTERN */
-	xmlChar   *intbuff;                       /* NCX_BT_INTERN */
+	ncx_binary_t binary;              /* NCX_BT_BINARY */
+	ncx_list_t list;      /* NCX_BT_BITS, NCX_BT_SLIST */
+	boolean    bool;   /* NCX_BT_EMPTY, NCX_BT_BOOLEAN */
+	ncx_enum_t enu;       /* NCX_BT_UNION, NCX_BT_ENUM */
+	xmlChar   *fname;                 /* NCX_BT_EXTERN */
+	xmlChar   *intbuff;               /* NCX_BT_INTERN */
     } v;
 } val_value_t;
 

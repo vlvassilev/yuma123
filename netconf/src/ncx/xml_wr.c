@@ -959,6 +959,7 @@ void
 {
     const ncx_lmem_t   *listmem;
     val_value_t        *v_val, *v_chval, *chval, *useval, *usechval;
+    xmlChar            *binbuff;
     uint32              len;
     status_t            res;
     boolean             empty, first, wspace;
@@ -1056,8 +1057,21 @@ void
 	}
 	break;
     case NCX_BT_BINARY:
-	if (VAL_USTR(useval)) {
-	    ses_putcstr(scb, VAL_USTR(useval), indent);
+	if (useval->v.binary.ustr) {
+	    res = val_sprintf_simval_nc(NULL, useval, &len);
+	    if (res == NO_ERR) {
+		binbuff = m__getMem(len);
+		if (!binbuff) {
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    res = val_sprintf_simval_nc(binbuff, 
+						useval, &len); 
+		    if (res == NO_ERR) {
+			ses_putcstr(scb, binbuff, indent);
+		    }
+		    m__free(binbuff);
+		}
+	    }
 	}
 	break;
     case NCX_BT_BITS:
@@ -1072,7 +1086,7 @@ void
 	    wspace = FALSE;
 
 	    /* handle indent+double quote or space for non-strings */
-	    if (listbtyp==NCX_BT_STRING || listbtyp==NCX_BT_BINARY) {
+	    if (typ_is_string(listbtyp)) {
 
 		/* get len and whitespace flag */
 		len = xml_strlen_sp(listmem->val.str, &wspace);
@@ -1108,17 +1122,27 @@ void
 	    /* print the list member content as a string */
 	    switch (listbtyp) {
 	    case NCX_BT_STRING:
-	    case NCX_BT_BINARY:
+	    case NCX_BT_KEYREF:
 	    case NCX_BT_INSTANCE_ID:
 		ses_putcstr(scb, listmem->val.str, indent);
 		break;
 	    case NCX_BT_ENUM:
 		ses_putstr(scb, listmem->val.enu.name); 
 		break;
+	    case NCX_BT_BOOLEAN:
+		ses_putcstr(scb,
+			    (listmem->val.bool) ?
+			    NCX_EL_TRUE : NCX_EL_FALSE,
+			    indent);
+		break;
 	    default:
-		(void)ncx_sprintf_num(buff, &listmem->val.num, 
-				      listbtyp, &len);
-		ses_putcstr(scb, buff, indent);
+		if (typ_is_number(listbtyp)) {
+		    (void)ncx_sprintf_num(buff, &listmem->val.num, 
+					  listbtyp, &len);
+		    ses_putcstr(scb, buff, indent);
+		} else {
+		    SET_ERROR(ERR_INTERNAL_VAL);
+		}
 	    }
 
 	    /* check finish quoted string */

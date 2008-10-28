@@ -6782,6 +6782,40 @@ status_t
 
 
 /********************************************************************
+* FUNCTION obj_get_child_count
+*
+* Get the number of child nodes the object has
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   number of child nodes
+*********************************************************************/
+uint32
+    obj_get_child_count (const obj_template_t *obj)
+{
+
+    const dlq_hdr_t   *datadefQ;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    datadefQ = obj_get_cdatadefQ(obj);
+    if (datadefQ) {
+	return dlq_count(datadefQ);
+    } else {
+	return 0;
+    }
+
+}   /* obj_get_child_count */
+
+
+/********************************************************************
 * FUNCTION obj_new_metadata
 * 
 * Malloc and initialize the fields in a an obj_metadata_t

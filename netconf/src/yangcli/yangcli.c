@@ -1745,7 +1745,18 @@ static status_t
     get_optional = TRUE;
     res = NO_ERR;
 
-    /* finish the seclected case */
+    /* corner-case: user selected a case, and that case has
+     * one empty leaf in it; 
+     * e.g., <source> and <target> parms
+     */
+    if (obj_get_child_count(cas) == 1) {
+	parm = obj_first_child(cas);
+	if (parm && obj_get_basetype(parm)==NCX_BT_EMPTY) {
+	    return cli_parse_parm(valset, parm, NULL, FALSE);
+	}
+    }
+
+    /* finish the selected case */
     for (parm = obj_first_child(cas);
 	 parm != NULL && res == NO_ERR;
 	 parm = obj_next_child(parm)) {

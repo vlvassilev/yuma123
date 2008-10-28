@@ -397,31 +397,29 @@ static status_t
     total = 0;
 
     /* get the data type to determine if a quoted string is needed */
-    switch (val->btyp) {
-    case NCX_BT_ENUM:
-    case NCX_BT_STRING:
-    case NCX_BT_BINARY:
-    case NCX_BT_INSTANCE_ID:
-    case NCX_BT_BOOLEAN:
-    case NCX_BT_KEYREF:
-    case NCX_BT_UNION:
+    if (typ_is_string(val->btyp)) {
 	quotes = (format==NCX_IFMT_CLI) ?
 	    val_need_quotes(VAL_STR(val)) : TRUE;
-	break;
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
-    case NCX_BT_FLOAT64:
+    } else if (typ_is_number(val->btyp)) {
 	quotes = FALSE;
-	break;
-    default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+    } else {
+	switch (val->btyp) {
+	case NCX_BT_ENUM:
+	    quotes = val_need_quotes(VAL_ENUM_NAME(val));
+	    break;
+	case NCX_BT_BOOLEAN:
+	    quotes = FALSE;
+	    break;
+	case NCX_BT_BINARY:
+	case NCX_BT_BITS:
+	    quotes = TRUE;
+	    break;
+	case NCX_BT_UNION:
+	    quotes = TRUE;
+	    break;
+	default:
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
     }
 
     /* check if foo:parmname='parmval' format is needed */

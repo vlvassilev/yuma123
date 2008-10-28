@@ -3,7 +3,6 @@
    <t:test1 xmlns:t="urn:ietf:params:xml:ns:yang:test">
       <t:a>1</t:a>
       <t:b>32</t:b>
-      <t:c>aeddd34</t:c>
       <t:d>x</t:d>
       <t:e>
          <t:ee>a14</t:ee>

@@ -420,6 +420,20 @@ extern void
 extern ncx_lmem_t *
     ncx_first_lmem (ncx_list_t *list);
 
+/********************** ncx_binary_t *********************/
+extern ncx_binary_t *
+    ncx_new_binary (void);
+
+extern void
+    ncx_init_binary (ncx_binary_t *binary);
+
+extern void
+    ncx_clean_binary (ncx_binary_t *binary);
+
+extern void
+    ncx_free_binary (ncx_binary_t *binary);
+
+
 /********************** ncx_appinfo_t *********************/
 
 extern ncx_appinfo_t * 

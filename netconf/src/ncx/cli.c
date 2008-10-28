@@ -147,27 +147,25 @@ static status_t
     val_init_from_template(new_parm, obj);
 
     /* get the base type value */
-    typdef = obj_get_ctypdef(obj);
     btyp = obj_get_basetype(obj);
 
     if (typ_is_simple(btyp)) {
-	res = val_simval_ok(typdef, strval);
-	if (res == NO_ERR) {
-	    if (script) {
-		(void)var_get_script_val(obj, new_parm,
-					 strval, ISPARM, &res);
-	    } else {
-		res = val_set_simval(new_parm,
-				     typdef,  
-				     obj_get_nsid(obj),
-				     obj_get_name(obj),
-				     strval);
-	    }
+	if (script) {
+	    (void)var_get_script_val(obj, new_parm,
+				     strval, ISPARM, &res);
+	} else {
+	    typdef = obj_get_ctypdef(obj);
+	    res = val_set_simval(new_parm,
+				 typdef,  
+				 obj_get_nsid(obj),
+				 obj_get_name(obj),
+				 strval);
 	}
     } else {
 	res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+    /* save or free the new child node */
     if (res != NO_ERR) {
 	val_free_value(new_parm);
     } else {
@@ -233,22 +231,16 @@ static status_t
     new_parm->nsid = nsid;
 
     /* get the base type value */
-    typdef = obj_get_ctypdef(obj);
     btyp = obj_get_basetype(obj);
 
     if (typ_is_simple(btyp)) {
-	res = val_simval_ok(typdef, strval);
-	if (res == NO_ERR) {
-	    if (script) {
-		(void)var_get_script_val(obj, new_parm,
-					 strval, ISPARM, &res);
-	    } else {
-		res = val_set_simval(new_parm,
-				     typdef,  
-				     obj_get_nsid(obj),
-				     obj_get_name(obj),
-				     strval);
-	    }
+	if (script) {
+	    (void)var_get_script_val(obj, new_parm,
+				     strval, ISPARM, &res);
+	} else {
+	    typdef = obj_get_ctypdef(obj);
+	    res = val_set_simval(new_parm, typdef,  
+				 nsid, name, strval);
 	}
     } else {
 	res = SET_ERROR(ERR_INTERNAL_VAL);

@@ -217,7 +217,7 @@ static status_t
      * and strings only
      */
     if (rangeQ && !dlq_empty(rangeQ)) {
-	if (!(typ_is_number(btyp) || typ_is_string(btyp))) {
+	if (!(typ_is_number(btyp) || typ_is_string(btyp) || btyp==NCX_BT_BINARY)) {
 	    log_error("\nError: Range or length not "
 			  "allowed for the %s builtin type",
 		      tk_get_btype_sym(btyp));

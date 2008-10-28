@@ -1623,6 +1623,10 @@ typ_sval_t *
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }
+    if (!typ_is_string(btyp)) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
 #endif
 
     sv = m__getObj(typ_sval_t);
@@ -1630,31 +1634,10 @@ typ_sval_t *
         return NULL;
     }
     memset(sv, 0, sizeof(typ_sval_t));
-
-    switch (btyp) {
-    case NCX_BT_STRING:
-    case NCX_BT_INSTANCE_ID:
-        sv->val = xml_strdup(str);
-        if (!sv->val) {
-            m__free(sv);
-            return NULL;
-        }
-        break;
-    case NCX_BT_BINARY:
-        sv->val = xml_strdup(str);
-        if (!sv->val) {
-            m__free(sv);
-            return NULL;
-        }
-        sv->flags = TYP_FL_USTRING;
-        break;
-    case NCX_BT_SLIST:
-	/***********************/
-	break;
-    default:
-        SET_ERROR(ERR_INTERNAL_VAL);
-        m__free(sv);
-        return NULL;
+    sv->val = xml_strdup(str);
+    if (!sv->val) {
+	m__free(sv);
+	return NULL;
     }
     return sv;
 
@@ -3179,22 +3162,18 @@ const typ_sval_t *
 
     retval = NULL;
 
+    btyp = typ_get_basetype(typdef);
+    if (!typ_is_string(btyp)) {
+	return NULL;
+    }
+
     switch (typdef->class) {
     case NCX_CL_NONE:
     case NCX_CL_BASE:
 	break;
     case NCX_CL_SIMPLE:
-	btyp = typ_get_basetype(typdef);
-	switch (btyp) {
-	case NCX_BT_STRING:
-	case NCX_BT_BINARY:
-	case NCX_BT_KEYREF:
-	    retval = (const typ_sval_t *)
-		dlq_firstEntry(&typdef->def.simple.valQ);
-	    break;
-	default:
-	    ;
-	}
+	retval = (const typ_sval_t *)
+	    dlq_firstEntry(&typdef->def.simple.valQ);
 	break;
     case NCX_CL_COMPLEX:
 	break;
@@ -3690,7 +3669,6 @@ boolean
 {
     switch (btyp) {
     case NCX_BT_STRING:
-    case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
 	return TRUE;
     case NCX_BT_KEYREF:   /***/
@@ -4155,9 +4133,9 @@ boolean
     case NCX_BT_KEYREF:
     case NCX_BT_UNION:
     case NCX_BT_EMPTY:
+    case NCX_BT_SLIST:
 	return TRUE;
     case NCX_BT_ANY:
-    case NCX_BT_SLIST:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
@@ -4327,6 +4305,52 @@ boolean
         return FALSE;
     }
 }  /* typ_ok */
+
+
+/********************************************************************
+* FUNCTION typ_ok_for_xsdlist
+* 
+* Check if the base type is okay to use in an ncx:xsdlist typedef
+*
+* INPUTS:
+*     btyp == base type enum
+* RETURNS:
+*     TRUE if okay, FALSE if not
+*********************************************************************/
+boolean
+    typ_ok_for_xsdlist (ncx_btype_t btyp)
+{
+    switch (btyp) {
+    case NCX_BT_BITS:
+	return FALSE;
+    case NCX_BT_ENUM:
+    case NCX_BT_BOOLEAN:
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+    case NCX_BT_INT64:
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+    case NCX_BT_UINT64:
+    case NCX_BT_FLOAT32:
+    case NCX_BT_FLOAT64:
+    case NCX_BT_STRING:   /*** really NMTOKEN, not string ***/
+	return TRUE;
+    case NCX_BT_BINARY:
+    case NCX_BT_INSTANCE_ID:
+	return FALSE;
+    case NCX_BT_UNION:
+    case NCX_BT_KEYREF:
+    case NCX_BT_EMPTY:
+	return FALSE;
+    case NCX_BT_ANY:
+        return FALSE;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
+    }
+}  /* typ_ok_for_xsdlist */
 
 
 /********************************************************************

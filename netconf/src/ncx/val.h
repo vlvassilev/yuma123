@@ -378,10 +378,12 @@ extern status_t
  */
 extern status_t
     val_list_ok (const typ_def_t *typdef,
+		 ncx_btype_t btyp,
 		 ncx_list_t *list);
 
 extern status_t
     val_list_ok_errinfo (const typ_def_t *typdef,
+			 ncx_btype_t btyp,
 			 ncx_list_t *list,
 			 const ncx_errinfo_t **errinfo);
 
@@ -390,6 +392,12 @@ extern status_t
 		 const xmlChar *enumval,
 		 int32 *retval,
 		 const xmlChar **retstr);
+
+extern status_t
+    val_bit_ok (const typ_def_t *typdef,
+		const xmlChar *bitname,
+		uint32 *position,
+		uint32 *order);
 
 extern status_t
     val_range_ok (const typ_def_t *typdef,

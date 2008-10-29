@@ -1124,6 +1124,7 @@ void
 	    case NCX_BT_STRING:
 	    case NCX_BT_KEYREF:
 	    case NCX_BT_INSTANCE_ID:
+	    case NCX_BT_BITS:
 		ses_putcstr(scb, listmem->val.str, indent);
 		break;
 	    case NCX_BT_ENUM:

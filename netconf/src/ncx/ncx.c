@@ -3747,7 +3747,7 @@ status_t
     if (!str1 || !str2) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!typ_is_string(btyp)) {
+    if (!(typ_is_string(btyp) || btyp==NCX_BT_BITS)) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }	
 #endif
@@ -3869,13 +3869,7 @@ void
     /* clean the string Q */
     while (!dlq_empty(&list->memQ)) {
 	lmem = (ncx_lmem_t *)dlq_deque(&list->memQ);
-	if (typ_is_string(list->btyp)) {
-	    ncx_clean_str(&lmem->val.str);
-	} else if (typ_is_number(list->btyp)) {
-	    ncx_clean_num(list->btyp, &lmem->val.num);
-	} else if (list->btyp == NCX_BT_ENUM) {
-	    ncx_clean_enum(&lmem->val.enu);
-	}
+	ncx_clean_lmem(lmem, list->btyp);
 	m__free(lmem);
     }
 
@@ -4138,6 +4132,7 @@ status_t
     }
 #endif
 
+    res = NO_ERR;
     list2->btyp = list1->btyp;
     dlq_createSQue(&list2->memQ);
 
@@ -4154,6 +4149,16 @@ status_t
 	switch (list1->btyp) {
 	case NCX_BT_STRING:
 	    res = ncx_copy_str(&lmem->val.str, &lcopy->val.str, list1->btyp);
+	    break;
+	case NCX_BT_BITS:
+	    lcopy->val.bit.pos = lmem->val.bit.pos;
+	    lcopy->val.bit.order = lmem->val.bit.order;
+	    lcopy->val.bit.dname = xml_strdup(lmem->val.bit.name);
+	    if (!lcopy->val.bit.dname) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		lcopy->val.bit.name = lcopy->val.bit.dname;
+	    }
 	    break;
 	case NCX_BT_ENUM:
 	    lcopy->val.enu.val = lmem->val.enu.val;
@@ -4203,25 +4208,15 @@ status_t
 * If allow_dups == FALSE:
 *    check if entry exists; if so, exit;
 *
-* For each member in the src list {
-*
-*   If rangeQ not NULL:
-*      check if merging will violate the range restrictions
-*      as each entry is added. If so, then merge type will
-*      take note of this condition and overwrite dest list
-*      members as needed to keep the length within the maxLength
-*
 *   Merge src list member into dest, based on mergetyp enum
 * }
-*
-* OK exit
 *
 * INPUTS:
 *    src == ncx_list_t struct to merge from
 *    dest == ncx_list_t struct to merge into
 *    mergetyp == type of merge used for this list
 *    allow_dups == TRUE if this list allows duplicate values
-*
+*    
 * OUTPUTS:
 *    ncx_lmem_t structs will be moved from the src to dest as needed
 *
@@ -4232,14 +4227,10 @@ void
     ncx_merge_list (ncx_list_t *src,
 		    ncx_list_t *dest,
 		    ncx_merge_t mergetyp,
-		    boolean allow_dups,
-		    const dlq_hdr_t *rangeQ)
+		    boolean allow_dups)
 {
     ncx_lmem_t      *lmem, *dest_lmem;
-    const typ_rangedef_t *rdef;
-    const ncx_num_t *ub;
-    uint32           destcnt;
-    boolean          done;
+
 #ifdef DEBUG
     if (!src || !dest) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -4251,33 +4242,17 @@ void
     }
 #endif
 
-    ub = NULL;
-    destcnt = 0;
-
     /* get rid of dups in the src list if duplicates not allowed */
     if (!allow_dups) {
 	for (dest_lmem = (ncx_lmem_t *)dlq_firstEntry(&dest->memQ);
 	     dest_lmem != NULL;
 	     dest_lmem = (ncx_lmem_t *)dlq_nextEntry(dest_lmem)) {
-	    done = FALSE;
-	    while (!done) {
-		lmem = ncx_find_lmem(src, dest_lmem);
-		if (lmem) {
-		    dlq_remove(lmem);
-		    ncx_free_lmem(lmem, dest->btyp);
-		} else {
-		    done = TRUE;
-		}
-	    }
-	}
-    }
 
-    /* get range upper bound if rangeQ non-empty */
-    if (rangeQ) {
-	rdef = (const typ_rangedef_t *)dlq_lastEntry(rangeQ);
-	if (rdef) {
-	    ub = &rdef->ub;
-	    destcnt = ncx_list_cnt(dest);
+	    lmem = ncx_find_lmem(src, dest_lmem);
+	    if (lmem) {
+		dlq_remove(lmem);
+		ncx_free_lmem(lmem, dest->btyp);
+	    }
 	}
     }
 
@@ -4301,15 +4276,9 @@ void
 	}
 	dlq_remove(lmem);
 
-	/* check if upper bound controls size of list */
-	if (ub && destcnt+1 >= ub->u) {
-	    /* drop the src entry instead of adding it */
-	    ncx_free_lmem(lmem, src->btyp);
-	} else {
-	    /* merge lmem into the dest list */
-	    ncx_insert_lmem(dest, lmem, mergetyp);
-	    destcnt++;
-	}
+	/* merge lmem into the dest list */
+	ncx_insert_lmem(dest, lmem, mergetyp);
+
     }
 
 }  /* ncx_merge_list */
@@ -4485,6 +4454,7 @@ status_t
     xmlChar         *str;
     ncx_btype_t      btyp;
     status_t         res, retres;
+    dlq_hdr_t        tempQ;
 
     btyp = typ_get_basetype(typdef);
     retres = NO_ERR;
@@ -4503,28 +4473,48 @@ status_t
 	 lmem != NULL;
 	 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
 
-
 	str = lmem->val.str;
 	if (btyp == NCX_BT_ENUM) {
 	    res = val_enum_ok(typdef, str,
 			      &lmem->val.enu.val,
 			      &lmem->val.enu.name);
-
+	} else if (btyp == NCX_BT_BITS) {
+	    /* transfer the malloced string from 
+	     * val.str to val.bit.dname
+	     */
+	    lmem->val.bit.dname = str;
+	    lmem->val.bit.name = lmem->val.bit.dname;
+	    res = val_bit_ok(typdef, str, 
+			     &lmem->val.bit.pos,
+			     &lmem->val.bit.order);
 	} else if (typ_is_number(btyp)){
 	    res = ncx_decode_num(str, btyp, &lmem->val.num);
 	} else {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
-	m__free(str);
-	lmem->val.str = NULL;
+
+	if (btyp != NCX_BT_BITS) {
+	    m__free(str);
+	}
 
 	if (res != NO_ERR) {
 	    /* the string did not match this pattern */
-	    retres = res;
+	    CHK_EXIT;
 	    lmem->flags |= NCX_FL_VALUE_ERR;
 	} 
     }
 
+    if (retres == NO_ERR && btyp == NCX_BT_BITS) {
+	/* put bits in their canonical order */
+	dlq_createSQue(&tempQ);
+	dlq_block_enque(&list->memQ, &tempQ);
+
+	while (!dlq_empty(&tempQ)) {
+	    lmem = (ncx_lmem_t *)dlq_deque(&tempQ);
+	    ncx_insert_lmem(list, lmem, NCX_MERGE_SORT);
+	}
+    }
+	
     return retres;
 
 } /* ncx_finish_list */
@@ -4578,19 +4568,21 @@ void
     }
 #endif
 
-    switch (btyp) {
-    case NCX_BT_STRING:
+    if (typ_is_string(btyp)) {
 	ncx_clean_str(&lmem->val.str);
-	break;
-    case NCX_BT_ENUM:
-	ncx_clean_enum(&lmem->val.enu);
-	break;
-    case NCX_BT_BOOLEAN:
-	break;
-    default:
-	if (typ_is_number(btyp)) {
-	    ncx_clean_num(btyp, &lmem->val.num);
-	} else {
+    } else if (typ_is_number(btyp)) {
+	ncx_clean_num(btyp, &lmem->val.num);
+    } else {
+	switch (btyp) {
+	case NCX_BT_ENUM:
+	    ncx_clean_enum(&lmem->val.enu);
+	    break;
+	case NCX_BT_BITS:
+	    ncx_clean_bit(&lmem->val.bit);
+	    break;
+	case NCX_BT_BOOLEAN:
+	    break;
+	default:
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
     }
@@ -4711,11 +4703,13 @@ void
 		     ncx_lmem_t *memval,
 		     ncx_merge_t mergetyp)
 {
-    ncx_lmem_t      *lmem;
-    const ncx_num_t *num;
-    const ncx_str_t *str;
-    const ncx_enum_t *enu;
-    int32            cmpval;
+    ncx_lmem_t        *lmem;
+    const ncx_num_t   *num;
+    const ncx_str_t   *str;
+    const ncx_enum_t  *enu;
+    const ncx_bit_t   *bit;
+    int32              cmpval;
+    boolean            bool;
 
 #ifdef DEBUG
     if (!list || !memval) {
@@ -4723,21 +4717,6 @@ void
 	return;
     }
 #endif
-
-    num = NULL;
-    str = NULL;
-    enu = NULL;
-
-    if (typ_is_number(list->btyp)) {
-	num = &memval->val.num;
-    } else if (typ_is_string(list->btyp)) {
-	str = &memval->val.str;
-    } else if (list->btyp == NCX_BT_ENUM) {
-	enu = &memval->val.enu;
-    } else {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
-    }
 
     switch (mergetyp) {
     case NCX_MERGE_FIRST:
@@ -4752,6 +4731,27 @@ void
 	dlq_enque(memval, &list->memQ);
 	break;
     case NCX_MERGE_SORT:
+	num = NULL;
+	str = NULL;
+	enu = NULL;
+	bit = NULL;
+	bool = FALSE;
+
+	if (typ_is_number(list->btyp)) {
+	    num = &memval->val.num;
+	} else if (typ_is_string(list->btyp)) {
+	    str = &memval->val.str;
+	} else if (list->btyp == NCX_BT_ENUM) {
+	    enu = &memval->val.enu;
+	} else if (list->btyp == NCX_BT_BITS) {
+	    bit = &memval->val.bit;
+	} else if (list->btyp == NCX_BT_BOOLEAN) {
+	    bool = memval->val.bool;
+	} else {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return;
+	}
+
 	for (lmem = (ncx_lmem_t *)dlq_firstEntry(&list->memQ);
 	     lmem != NULL;
 	     lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
@@ -4759,9 +4759,18 @@ void
 		cmpval = ncx_compare_nums(&lmem->val.num, num, list->btyp);
 	    } else if (str) {
 		cmpval = ncx_compare_strs(&lmem->val.str, str, list->btyp);
-	    } else {
+	    } else if (enu) {
 		cmpval = ncx_compare_enums(&lmem->val.enu, enu);
+	    } else if (bit) {
+		cmpval = ncx_compare_bits(&lmem->val.bit, bit);
+	    } else {
+		if (lmem->val.bool) {
+		    cmpval = (bool) ? 0 : 1;
+		} else {
+		    cmpval = (bool) ? -1 : 0;
+		}
 	    }
+
 	    if (cmpval >= 0) {
 		dlq_insertAhead(memval, lmem);
 		return;
@@ -5558,6 +5567,100 @@ int32
     return xml_strcmp(enu1->name, enu2->name);
 
 } /* ncx_compare_enums */
+
+
+/********************** ncx_bit_t *********************/
+
+
+/********************************************************************
+* FUNCTION ncx_init_bit
+* 
+* Init the memory of a ncx_bit_t
+*
+* INPUTS:
+*    bit == ncx_bit_t struct to init
+*********************************************************************/
+void
+    ncx_init_bit (ncx_bit_t *bit)
+{
+#ifdef DEBUG
+    if (!bit) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    bit->name = NULL;
+    bit->dname = NULL;
+    bit->pos = 0;
+
+} /* ncx_init_bit */
+
+
+/********************************************************************
+* FUNCTION ncx_clean_bit
+* 
+* Scrub the memory of a ncx_bit_t but do not delete it
+*
+* INPUTS:
+*    bit == ncx_bit_t struct to clean
+*********************************************************************/
+void
+    ncx_clean_bit (ncx_bit_t *bit)
+{
+#ifdef DEBUG
+    if (!bit) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (bit->dname) {
+	m__free(bit->dname);
+	bit->dname = NULL;
+    }
+    bit->pos = 0;
+    bit->name = NULL;
+
+} /* ncx_clean_bit */
+
+
+/********************************************************************
+* FUNCTION ncx_compare_bits
+* 
+* Compare 2 bit values by their schema order position
+*
+* INPUTS:
+*    bitone == first ncx_bit_t check
+*    bitone == second ncx_bit_t check
+*   
+* RETURNS:
+*     -1 if bitone is < bittwo
+*      0 if bitone == bittwo
+*      1 if bitone is > bittwo
+*
+*********************************************************************/
+int32
+    ncx_compare_bits (const ncx_bit_t *bitone,
+		      const ncx_bit_t *bittwo)
+{
+#ifdef DEBUG
+    if (!bitone || !bittwo) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
+    if (bitone->order < bittwo->order) {
+	return -1;
+    } else if (bitone->order > bittwo->order) {
+	return 1;
+    } else {
+	return 0;
+    }
+    /*NOTREACHED*/
+
+} /* ncx_compare_bits */
 
 
 /********************************************************************

@@ -892,10 +892,7 @@ static status_t
     /* check empty string corner case */
     if (empty) {
 	if (btyp==NCX_BT_SLIST || btyp==NCX_BT_BITS) {
-	    /* check the empty list */
-	    res = val_list_ok_errinfo(obj_get_ctypdef(obj), 
-				      &retval->v.list,
-				      &errinfo);
+	    /* no need to check the empty list */ ;
 	} else {
 	    /* check the empty string */
 	    res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
@@ -931,19 +928,30 @@ static status_t
 	break;
     case XML_NT_STRING:
 	if (btyp==NCX_BT_SLIST || btyp==NCX_BT_BITS) {
-	    /* get the list of strings, then check them */
-	    listtyp = typ_get_listtyp(obj_get_ctypdef(obj));
-	    listbtyp = typ_get_basetype(&listtyp->typdef);
+	    if (btyp==NCX_BT_SLIST) {
+		/* get the list of strings, then check them */
+		listtyp = typ_get_listtyp(obj_get_ctypdef(obj));
+		listbtyp = typ_get_basetype(&listtyp->typdef);
+	    } else {
+		listbtyp = NCX_BT_BITS;
+	    }
 
 	    res = ncx_set_list(listbtyp, valnode.simval, 
 			       &retval->v.list);
 	    if (res == NO_ERR) {
-		res = ncx_finish_list(&listtyp->typdef, &retval->v.list);
+		if (btyp == NCX_BT_SLIST) {
+		    res = ncx_finish_list(&listtyp->typdef,
+					  &retval->v.list);
+		} else {
+		    res = ncx_finish_list(obj_get_ctypdef(obj),
+					  &retval->v.list);
+		}
 	    }
 
 	    if (res == NO_ERR) {
 		res = val_list_ok_errinfo(obj_get_ctypdef(obj), 
-					  &retval->v.list, &errinfo);
+					  btyp, &retval->v.list,
+					  &errinfo);
 	    }
 	} else {
 	    /* check the non-whitespace string */
@@ -979,6 +987,7 @@ static status_t
 	    }
 	    break;
 	case NCX_BT_SLIST:
+	case NCX_BT_BITS:
 	    break;   /* value already set */
 	default:
 	    res = SET_ERROR(ERR_INTERNAL_VAL);

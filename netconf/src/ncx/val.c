@@ -738,11 +738,17 @@ static void
     }
     if (!typ_is_simple(val->btyp)) {
 	val_init_complex(val, btyp);
-    } else if (val->btyp == NCX_BT_SLIST ||
-	       val->btyp == NCX_BT_BITS) {
+    } else if (val->btyp == NCX_BT_SLIST) {
 	listtyp = typ_get_clisttyp(val->typdef);
-	listbtyp = typ_get_basetype(&listtyp->typdef);
+	if (!listtyp) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    listbtyp = NCX_BT_STRING;
+	} else {
+	    listbtyp = typ_get_basetype(&listtyp->typdef);
+	}
 	ncx_init_list(&val->v.list, listbtyp);
+    } else if (val->btyp == NCX_BT_BITS) {
+	ncx_init_list(&val->v.list, NCX_BT_BITS);
     }
 
 }  /* init_from_template */
@@ -1174,6 +1180,7 @@ status_t
 *
 * INPUTS:
 *    typdef == typ_def_t for the designated list type
+*    btyp == base type (NCX_BT_SLIST or NCX_BT_BITS)
 *    list == list struct with ncx_lmem_t structs to check
 *
 * OUTPUTS:
@@ -1188,10 +1195,11 @@ status_t
 *********************************************************************/
 status_t
     val_list_ok (const typ_def_t *typdef,
+		 ncx_btype_t  btyp,
 		 ncx_list_t *list)
 {
 
-    return val_list_ok_errinfo(typdef, list, NULL);
+    return val_list_ok_errinfo(typdef, btyp, list, NULL);
 
 } /* val_list_ok */
 
@@ -1204,10 +1212,13 @@ status_t
 *
 * INPUTS:
 *    typdef == typ_def_t for the designated list type
+*    btyp == base type (NCX_BT_SLIST or NCX_BT_BITS)
 *    list == list struct with ncx_lmem_t structs to check
+*    errinfo == address of return rpc-error info struct
 *
 * OUTPUTS:
 *   If return other than NO_ERR:
+*     *errinfo contains the YANG specified error info, if any*   
 *     each list->lmem.flags field may contain bits set
 *     for errors:
 *        NCX_FL_RANGE_ERR: size out of range
@@ -1218,6 +1229,7 @@ status_t
 *********************************************************************/
 status_t
     val_list_ok_errinfo (const typ_def_t *typdef,
+			 ncx_btype_t  btyp,
 			 ncx_list_t *list,
 			 const ncx_errinfo_t **errinfo)
 {
@@ -1225,7 +1237,6 @@ status_t
     const typ_def_t      *listdef;
     const ncx_lmem_t     *lmem;
     status_t              res;
-
 
 #ifdef DEBUG
     if (!typdef || !list) {
@@ -1238,8 +1249,10 @@ status_t
     }
 
     /* listtyp is for the list members, not the list itself */
-    listtyp = typ_get_clisttyp(typdef);
-    listdef = &listtyp->typdef;
+    if (btyp == NCX_BT_SLIST) {
+	listtyp = typ_get_clisttyp(typdef);
+	listdef = &listtyp->typdef;
+    }
 
     /* go through all the list members and check them */
     for (lmem = (ncx_lmem_t *)dlq_firstEntry(&list->memQ);
@@ -1249,7 +1262,14 @@ status_t
 	/* stop on first error -- if 1 list member is invalid
 	 * then the entire list is invalid
 	 */
-	res = val_simval_ok_errinfo(listdef, lmem->val.str, errinfo);
+	if (btyp == NCX_BT_SLIST) {
+	    res = val_simval_ok_errinfo(listdef,
+					lmem->val.str,
+					errinfo);
+	} else {
+	    res = val_bit_ok(typdef, 
+			     lmem->val.str, NULL, NULL);
+	}
 	if (res != NO_ERR) {
 	    return res;
 	}
@@ -1257,9 +1277,9 @@ status_t
 
     return NO_ERR;
 
-} /* val_list_ok */
+} /* val_list_ok_errinfo */
 
-
+  
 /********************************************************************
 * FUNCTION val_enum_ok
 * 
@@ -1345,7 +1365,9 @@ status_t
 	    }
 	}
 
-	/* check if any more typdefs to search */
+	/* check if any more typdefs to search 
+         * NOT SUPPORTED IN YANG, WILL NOT FIND ANY MORE ENUMS
+	 */
 	if (last) {
 	    return ERR_NCX_VAL_NOTINSET;
 	}
@@ -1374,6 +1396,113 @@ status_t
     /*NOTREACHED*/
 
 } /* val_enum_ok */
+
+
+/********************************************************************
+* FUNCTION val_bit_ok
+* 
+* Check a bit name is valid for the typedef
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated bits type
+*    bitname == bit name value to check
+*    position == address of return bit struct position value
+*    order == address of return bit struct order
+*
+* OUTPUTS:
+*  if non-NULL:
+*     *position == bit position value
+*     *order == bit struct typedef order
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_bit_ok (const typ_def_t *typdef,
+		const xmlChar *bitname,
+		uint32 *position,
+		uint32 *order)
+{
+    const dlq_hdr_t  *checkQ;
+    status_t       res;
+    boolean        last;
+    typ_enum_t    *en;
+
+#ifdef DEBUG
+    if (!typdef || !bitname) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* check which string Q to use for further processing */
+    switch (typdef->class) {
+    case NCX_CL_SIMPLE:
+	checkQ = &typdef->def.simple.valQ;
+	last = TRUE;
+	break;
+    case NCX_CL_NAMED:
+	/* the restrictions in the newtyp override anything
+	 * in the parent typedef(s)
+	 */
+	last = FALSE;
+	if (typdef->def.named.newtyp) {
+	    checkQ = &typdef->def.named.newtyp->def.simple.valQ;
+	} else {
+	    checkQ = NULL;
+	}
+	break;
+    default:
+	return ERR_NCX_WRONG_DATATYP;  /* should not happen */
+    }
+
+    /* check typdefs until the final one in the chain is reached */
+    for (;;) {
+	if (checkQ) {
+	    res = check_svalQ_enum(0, FALSE, bitname,
+				   xml_strlen(bitname),
+				   checkQ, &en);
+	    if (res == NO_ERR) {
+		if (position) {
+		    *position = en->pos;
+		}
+		if (order) {
+		    *order = en->order;
+		}
+		return NO_ERR;
+	    }
+	}
+
+	/* check if any more typdefs to search 
+         * NOT SUPPORTED IN YANG, WILL NOT FIND ANY MORE BITS 
+	 */	
+	if (last) {
+	    return ERR_NCX_VAL_NOTINSET;
+	}
+
+	/* setup the typdef and checkQ for the next loop */
+	typdef = typ_get_next_typdef(&typdef->def.named.typ->typdef);
+	if (!typdef) {
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	switch (typdef->class) {
+	case NCX_CL_SIMPLE:
+	    checkQ = &typdef->def.simple.valQ;
+	    last = TRUE;
+	    break;
+	case NCX_CL_NAMED:
+	    if (typdef->def.named.newtyp) {
+		checkQ = &typdef->def.named.newtyp->def.simple.valQ;
+	    } else {
+		checkQ = NULL;
+	    }
+	    break;
+	default:
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+    }
+    /*NOTREACHED*/
+
+} /* val_bit_ok */
 
 
 /********************************************************************
@@ -1702,6 +1831,17 @@ status_t
 	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
 	break;
     case NCX_BT_BITS:
+	ncx_init_list(&list, NCX_BT_BITS);
+	res = ncx_set_list(NCX_BT_BITS, simval, &list);
+	if (res == NO_ERR) {
+	    res = ncx_finish_list(typdef, &list);
+	    if (res == NO_ERR) {
+		res = val_list_ok_errinfo(typdef, btyp, 
+					  &list, errinfo);
+	    }
+	}
+	ncx_clean_list(&list);
+	break;
     case NCX_BT_SLIST:
 	listtyp = typ_get_clisttyp(typdef);
 	listbtyp = typ_get_basetype(&listtyp->typdef);
@@ -1710,7 +1850,8 @@ status_t
 	if (res == NO_ERR) {
 	    res = ncx_finish_list(&listtyp->typdef, &list);
 	    if (res == NO_ERR) {
-		res = val_list_ok_errinfo(typdef, &list, errinfo);
+		res = val_list_ok_errinfo(typdef, btyp, 
+					  &list, errinfo);
 	    }
 	}
 	ncx_clean_list(&list);
@@ -2335,6 +2476,9 @@ void
 				      (const char *)listmem->val.enu.name);
 			}
 			break;
+		    case NCX_BT_BITS:
+			log_write("%s ", (const char *)listmem->val.str);
+			break;
 		    case NCX_BT_BOOLEAN:
 			log_write("%s ",
 				  (listmem->val.bool) ? 
@@ -2572,6 +2716,9 @@ void
 			    log_stdout("%s ", 
 				       (const char *)listmem->val.enu.name);
 			}
+			break;
+		    case NCX_BT_BITS:
+			log_write("%s ", (const char *)listmem->val.str);
 			break;
 		    case NCX_BT_BOOLEAN:
 			log_stdout("%s ",
@@ -3162,13 +3309,11 @@ boolean
 	case NCX_BT_SLIST:
 	    dupsok = val_duplicates_allowed(dest);
 	    ncx_merge_list(&src->v.list, &dest->v.list,
-			   mergetyp, dupsok, 
-			   typ_get_crangeQ(dest->typdef));
+			   mergetyp, dupsok);
 	    break;
 	case NCX_BT_BITS:
 	    ncx_merge_list(&src->v.list, &dest->v.list,
-			   mergetyp, FALSE, 
-			   typ_get_crangeQ(dest->typdef));
+			   mergetyp, FALSE);
 	    break;
 	case NCX_BT_ANY:
 	case NCX_BT_CONTAINER:
@@ -3540,8 +3685,8 @@ status_t
     res = NO_ERR;
     switch (val->btyp) {
     case NCX_BT_ENUM:
-	copy->v.enu.name = val->v.enu.name;
 	VAL_ENUM(copy) = VAL_ENUM(val);
+	VAL_ENUM_NAME(copy) = VAL_ENUM_NAME(val);
 	break;
     case NCX_BT_EMPTY:
     case NCX_BT_BOOLEAN:

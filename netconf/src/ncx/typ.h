@@ -161,6 +161,7 @@ typedef struct typ_enum_t_ {
     ncx_status_t  status;
     int32         val;
     uint32        pos;
+    uint32        order;
     uint32        flags;
     dlq_hdr_t     appinfoQ;
 } typ_enum_t;

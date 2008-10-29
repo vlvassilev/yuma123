@@ -383,6 +383,15 @@ typedef struct ncx_enum_t_ {
 } ncx_enum_t;
 
 
+/* one NCX_BT_BITS bit value */
+typedef struct ncx_bit_t_ {
+    const xmlChar *name;     /* bptr to typ_enum_t.name or this.dname */
+    xmlChar       *dname;    /* malloced bit name (value not checked) */
+    uint32         pos;      /* position value */
+    uint32         order;    /* typedef order */
+} ncx_bit_t;
+
+
 /* NCX list member: list of string or number */
 typedef struct ncx_lmem_t_ {
     dlq_hdr_t     qhdr;
@@ -390,6 +399,7 @@ typedef struct ncx_lmem_t_ {
 	ncx_num_t    num;
 	ncx_str_t    str;
 	ncx_enum_t   enu;
+	ncx_bit_t    bit;
 	boolean      bool;
     } val;
     uint32   flags;

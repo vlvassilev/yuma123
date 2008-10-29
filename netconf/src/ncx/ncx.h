@@ -76,6 +76,10 @@ date	     init     comment
 #include "ncxconst.h"
 #endif
 
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
 #ifndef _H_obj
 #include "obj.h"
 #endif
@@ -376,9 +380,7 @@ extern void
     ncx_merge_list (ncx_list_t *src,
 		    ncx_list_t *dest,
 		    ncx_merge_t mergetyp,
-		    boolean allow_dups,
-		    const dlq_hdr_t *rangeQ);
-
+		    boolean allow_dups);
 
 /* consume a generic string list with no type checking */
 extern status_t
@@ -515,6 +517,19 @@ extern status_t
 extern status_t
     ncx_set_enum (const xmlChar *enumval,
 		  ncx_enum_t *retenu);
+
+
+/********************** ncx_bit_t *********************/
+
+extern void
+    ncx_init_bit (ncx_bit_t *bit);
+
+extern void
+    ncx_clean_bit (ncx_bit_t *bit);
+
+extern int32
+    ncx_compare_bits (const ncx_bit_t *bitone,
+		      const ncx_bit_t *bittwo);
 
 /********************** ncx_typname_t *********************/
 

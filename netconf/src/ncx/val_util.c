@@ -784,6 +784,7 @@ void
     switch (val->obj->objtype) {
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
+	break;
     case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
 	break;
@@ -887,10 +888,15 @@ void
 	    }
 	}
 
+	/* check left over nodes */
 	if (dlq_count(&val->v.childQ)) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
+	    /* could be some error nodes left over not
+	     * part of the schema definition
+	     */
+	    dlq_block_enque(&val->v.childQ, &tempQ);
 	}
 
+	/* move the ordered tempQ back to the real Q */
 	dlq_block_enque(&tempQ, &val->v.childQ);
 	break;
     default:

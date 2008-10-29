@@ -123,8 +123,8 @@ static void
     
     /* the Qs are used for differnt items, based on the type */
     switch (sim->btyp) {
-    case NCX_BT_ENUM:
     case NCX_BT_BITS:
+    case NCX_BT_ENUM:
         while (!dlq_empty(&sim->valQ)) {
             en = (typ_enum_t *)dlq_deque(&sim->valQ);
             typ_free_enum(en);
@@ -426,8 +426,11 @@ void
     tdef->iqual = NCX_IQUAL_ONE;
     tdef->class = NCX_CL_SIMPLE;
 
-    sim = &tdef->def.simple;
+    if (btyp == NCX_BT_BITS) {
+	tdef->mergetype = NCX_MERGE_SORT;
+    }
 
+    sim = &tdef->def.simple;
     sim->btyp = btyp;
     dlq_createSQue(&sim->range.rangeQ);
     ncx_init_errinfo(&sim->range.range_errinfo);
@@ -3409,7 +3412,7 @@ xmlns_id_t
 *
 * Return the typ_template for the list type, if the supplied
 * typ_template contains a list typ_def, or named type chain
-*    leads to a NCX_BT_SLIST typdef
+*    leads to a NCX_BT_SLIST or NCX_BT_BITS typdef
 *
 * INPUTS:
 *  typ == typ_template_t struct to check
@@ -3420,6 +3423,7 @@ const typ_template_t *
     typ_get_listtyp (const typ_def_t *typdef)
 {
     const typ_def_t *ltypdef;
+    ncx_btype_t      btyp;
 
 #ifdef DEBUG
     if (!typdef) {
@@ -3437,11 +3441,18 @@ const typ_template_t *
     default:
 	ltypdef = typdef;
     }
-    if (typ_get_basetype(ltypdef) != NCX_BT_SLIST) {
+
+    btyp = typ_get_basetype(ltypdef);
+
+    switch (btyp) {
+    case NCX_BT_SLIST:
+    case NCX_BT_BITS:
+	return ltypdef->def.simple.listtyp;
+    default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }
-    return ltypdef->def.simple.listtyp;
+    /*NOTREACHED*/
     
 }  /* typ_get_listtyp */
 
@@ -3462,6 +3473,7 @@ const typ_template_t *
     typ_get_clisttyp (const typ_def_t *typdef)
 {
     const typ_def_t *ltypdef;
+    ncx_btype_t      btyp;
 
 #ifdef DEBUG
     if (!typdef) {
@@ -3479,11 +3491,16 @@ const typ_template_t *
     default:
 	ltypdef = typdef;
     }
-    if (typ_get_basetype(ltypdef) != NCX_BT_SLIST) {
+
+    btyp = typ_get_basetype(ltypdef);
+    switch (btyp) {
+    case NCX_BT_SLIST:
+    case NCX_BT_BITS:
+	return ltypdef->def.simple.listtyp;
+    default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }
-    return ltypdef->def.simple.listtyp;
     
 }  /* typ_get_clisttyp */
 

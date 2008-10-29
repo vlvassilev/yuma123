@@ -217,7 +217,8 @@ static status_t
      * and strings only
      */
     if (rangeQ && !dlq_empty(rangeQ)) {
-	if (!(typ_is_number(btyp) || typ_is_string(btyp) || btyp==NCX_BT_BINARY)) {
+	if (!(typ_is_number(btyp) || 
+	      typ_is_string(btyp) || btyp==NCX_BT_BINARY)) {
 	    log_error("\nError: Range or length not "
 			  "allowed for the %s builtin type",
 		      tk_get_btype_sym(btyp));
@@ -1272,6 +1273,7 @@ static status_t
     }
 
     /* always insert in the user-defined order == new last entry */
+    en->order = dlq_count(&sim->valQ) + 1;
     dlq_enque(en, &sim->valQ);
     return NO_ERR;
 

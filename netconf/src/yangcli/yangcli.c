@@ -2095,6 +2095,7 @@ static val_value_t *
 		val_value_t *oldval,
 		status_t  *res)
 {
+    const obj_template_t  *parentobj;
     val_value_t           *dummy, *newval;
     boolean                saveopt;
 
@@ -2116,9 +2117,10 @@ static val_value_t *
      * to support top-level leafs, a dummy container must be
      * created for the new and old leaf or leaf-list entries
      */
-    if (!parm->parent) {
-	*res = SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+    if (parm->parent) {
+	parentobj = parm->parent;
+    } else {
+	parentobj = ncx_get_gen_container();
     }
 
     dummy = val_new_value();
@@ -2126,7 +2128,7 @@ static val_value_t *
 	*res = ERR_INTERNAL_MEM;
 	return NULL;
     }
-    val_init_from_template(dummy, parm->parent);
+    val_init_from_template(dummy, parentobj);
 
     cli_fn = obj_get_name(rpc);
 

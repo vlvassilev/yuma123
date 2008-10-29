@@ -73,6 +73,10 @@ date         init     comment
 #include "typ.h"
 #endif
 
+#ifndef _H_yangconst
+#include "yangconst.h"
+#endif
+
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
@@ -213,9 +217,10 @@ void
 		       uint32 nestlevel,
 		       uint32 indent)
 {
-    const xmlChar    *val;
-    char              numbuff[NCX_MAX_NUMLEN];
-    uint32            count;
+    const xmlChar        *val;
+    const obj_template_t *testobj;
+    uint32                count;
+    char                  numbuff[NCX_MAX_NUMLEN];
 
 #ifdef DEBUG
     if (!obj) {
@@ -227,7 +232,6 @@ void
 	return;
     }
 #endif
-
 
     if (!obj_has_name(obj)) {
 	return;
@@ -460,8 +464,21 @@ void
 	break;
     case OBJ_TYP_RPC:
 	if (mode != HELP_MODE_BRIEF) {
-	    obj_dump_datadefQ(&obj->def.rpc->datadefQ, mode, 
-			      nestlevel, indent+NCX_DEF_INDENT);
+	    testobj = obj_find_child(obj, NULL, YANG_K_INPUT);
+	    if (testobj && obj_get_child_count(testobj)) {
+		obj_dump_template(testobj,
+				  mode,
+				  nestlevel,
+				  indent+NCX_DEF_INDENT);
+	    }
+
+	    testobj = obj_find_child(obj, NULL, YANG_K_OUTPUT);
+	    if (testobj && obj_get_child_count(testobj)) {
+		obj_dump_template(testobj,
+				  mode,
+				  nestlevel,
+				  indent+NCX_DEF_INDENT);
+	    }
 	}
 	log_stdout("\n");
 	break;

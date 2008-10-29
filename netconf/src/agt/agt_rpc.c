@@ -592,7 +592,7 @@ static status_t
 
     /* check if there is an input parmset specified */
     obj = obj_find_template(&rpc->datadefQ, NULL, YANG_K_INPUT);
-    if (obj) {
+    if (obj && obj_get_child_count(obj)) {
 	rpcio = obj->def.rpcio;
 	msg->rpc_agt_state = AGT_RPC_PH_PARSE;
 	res = agt_val_parse_nc(scb, &msg->mhdr, obj, method,
@@ -855,6 +855,7 @@ void
     rpc_msg_t       *msg;
     xml_attr_t      *attr;
     obj_template_t  *rpcobj;
+    const obj_template_t  *testobj;
     obj_rpc_t       *rpc;
     agt_rpc_cbset_t *cbset;
     xmlChar         *buff;
@@ -1099,8 +1100,11 @@ void
     xml_clean_node(&testnode);
 
     /* check the defaults and any choices if there is clean input */
-    if (res == NO_ERR && obj_find_child(rpcobj, NULL, YANG_K_INPUT)) {
-	res = post_psd_state(scb, msg, res);
+    if (res == NO_ERR) {
+	testobj = obj_find_child(rpcobj, NULL, YANG_K_INPUT);
+	if (testobj && obj_get_child_count(testobj)) {
+	    res = post_psd_state(scb, msg, res);
+	}
     }
 
     /* validate state */

@@ -377,12 +377,6 @@ static status_t
     status_t         res, retres;
     ncx_status_t     errstatus;
 
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
     obj = NULL;
     leaf = NULL;
     val = NULL;
@@ -583,12 +577,6 @@ static status_t
     tk_type_t        tktyp;
     boolean          done, pres, conf, flagset, stat, desc, ref;
     status_t         res, retres;
-
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
 
     obj = NULL;
     con = NULL;
@@ -814,12 +802,6 @@ static status_t
     boolean          mand, stat, desc, ref, typeok, flagset;
     status_t         res, retres;
     ncx_status_t     errstatus;
-
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
 
     obj = NULL;
     leaf = NULL;
@@ -1073,12 +1055,6 @@ static status_t
     boolean          minel, maxel, ord, stat, desc, ref, typeok, flagset;
     status_t         res, retres;
     ncx_status_t     errstatus;
-
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
 
     obj = NULL;
     llist = NULL;
@@ -1389,12 +1365,6 @@ static status_t
     boolean          minel, maxel, ord, stat, desc, ref, flagset;
     status_t         res, retres;
     ncx_status_t     errstatus;
-
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
 
     obj = NULL;
     list = NULL;
@@ -1757,12 +1727,6 @@ static status_t
     status_t         res, retres;
     ncx_status_t     errstatus;
 
-#ifdef DEBUG
-    if (!tkc || !mod || !caseQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
     obj = NULL;
     val = NULL;
     expstr = "keyword";
@@ -2021,12 +1985,6 @@ static status_t
     boolean          done, def, mand, conf, stat, desc, ref, flagset;
     status_t         res, retres;
     ncx_status_t     errstatus;
-
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
 
     obj = NULL;
     choic = NULL;
@@ -2307,12 +2265,6 @@ static status_t
     status_t         res;
     boolean          errdone;
 
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
     errdone = TRUE;
     res = NO_ERR;
     tktyp = TK_CUR_TYP(tkc);
@@ -2397,12 +2349,6 @@ static status_t
     tk_type_t        tktyp;
     boolean          done, stat, desc, ref;
     status_t         res, retres;
-
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
 
     obj = NULL;
     uses = NULL;
@@ -2594,12 +2540,6 @@ static status_t
     boolean          done, anydone;
     status_t         res, retres;
 
-#ifdef DEBUG
-    if (!tkc || !mod || !que || !parent) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
     obj = NULL;
     rpcio = NULL;
     val = NULL;
@@ -2746,12 +2686,6 @@ static status_t
     status_t         res;
     boolean          errdone;
 
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
     errdone = TRUE;
     res = NO_ERR;
     tktyp = TK_CUR_TYP(tkc);
@@ -2839,12 +2773,6 @@ static status_t
     boolean          done, when, stat, desc, ref;
     boolean          rpcin, rpcout;
     status_t         res, retres;
-
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
 
     obj = NULL;
     aug = NULL;
@@ -2937,9 +2865,6 @@ static status_t
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &aug->ref,
 				     &ref, &aug->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_INPUT) ||
-		   !xml_strcmp(val, YANG_K_OUTPUT)) {
-	    res = consume_yang_rpcio(tkc, mod, &aug->datadefQ, obj);
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
 	    res = consume_yang_case(tkc, mod, &aug->datadefQ,
 				    &aug->appinfoQ, obj, FALSE, TRUE);
@@ -3007,12 +2932,6 @@ static status_t
     tk_type_t        tktyp;
     boolean          errdone;
     status_t         res;
-
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
 
     expstr = "container, leaf, leaf-list, list, uses,"
 	"or augment keyword";
@@ -3089,19 +3008,14 @@ static status_t
 		      obj_template_t *parent,
 		      grp_template_t *grp)
 {
-    obj_template_t  *obj;
-    obj_rpc_t       *rpc;
-    const xmlChar   *val;
-    const char      *expstr;
-    tk_type_t        tktyp;
-    boolean          done, stat, desc, ref;
-    status_t         res, retres;
-
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    obj_template_t        *obj, *chobj;
+    const obj_template_t  *testobj;
+    obj_rpc_t             *rpc;
+    const xmlChar         *val;
+    const char            *expstr;
+    tk_type_t              tktyp;
+    boolean                done, stat, desc, ref;
+    status_t               res, retres;
 
     obj = NULL;
     rpc = NULL;
@@ -3223,6 +3137,64 @@ static status_t
 
     /* save or delete the obj_template_t struct */
     if (rpc->name && ncx_valid_name2(rpc->name)) {
+
+	/* make sure the rpc node has an input and output node
+	 * for augment purposes
+	 */
+	testobj = obj_find_child(obj, NULL, YANG_K_INPUT);
+	if (!testobj) {
+	    chobj = obj_new_template(OBJ_TYP_RPCIO);
+	    if (!chobj) {
+		res = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, res);
+		obj_free_template(obj);
+		return res;
+	    }
+
+	    chobj->mod = mod;
+	    chobj->tk = obj->tk;
+	    chobj->linenum = obj->linenum;
+	    chobj->parent = obj;
+
+	    chobj->def.rpcio->name = xml_strdup(YANG_K_INPUT);
+	    if (!chobj->def.rpcio->name) {
+		res = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, res);
+		obj_free_template(chobj);
+		obj_free_template(obj);
+		return res;
+	    }
+	    obj_set_ncx_flags(chobj);
+	    dlq_enque(chobj, &obj->def.rpc->datadefQ);
+	}
+
+	testobj = obj_find_child(obj, NULL, YANG_K_OUTPUT);
+	if (!testobj) {
+	    chobj = obj_new_template(OBJ_TYP_RPCIO);
+	    if (!chobj) {
+		res = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, res);
+		obj_free_template(obj);
+		return res;
+	    }
+
+	    chobj->mod = mod;
+	    chobj->tk = obj->tk;
+	    chobj->linenum = obj->linenum;
+	    chobj->parent = obj;
+
+	    chobj->def.rpcio->name = xml_strdup(YANG_K_OUTPUT);
+	    if (!chobj->def.rpcio->name) {
+		res = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, res);
+		obj_free_template(chobj);
+		obj_free_template(obj);
+		return res;
+	    }
+	    obj_set_ncx_flags(chobj);
+	    dlq_enque(chobj, &obj->def.rpc->datadefQ);
+	}
+	
 	res = add_object(tkc, mod, que, obj);
 	CHK_EXIT;
     } else {
@@ -3269,12 +3241,6 @@ static status_t
     tk_type_t        tktyp;
     boolean          done, stat, desc, ref;
     status_t         res, retres;
-
-#ifdef DEBUG
-    if (!tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
 
     obj = NULL;
     notif = NULL;

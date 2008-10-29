@@ -34,12 +34,14 @@
          <t:y>sss</t:y>
          <t:b>/a/b/c</t:b>
          <t:deepy>
-            <t:yy3>ddd</t:yy3>
+            <t:yy3>dQ==
+</t:yy3>
             <t:yy1>/i</t:yy1>
             <t:yy2>5.500000</t:yy2>
          </t:deepy>
          <t:deepy>
-            <t:yy3>aabb</t:yy3>
+            <t:yy3>aaY=
+</t:yy3>
             <t:yy1>/i/j</t:yy1>
             <t:yy2>3.330000</t:yy2>
          </t:deepy>
@@ -50,4 +52,5 @@
       <t:c2>-6</t:c2>
       <t:c2>-1</t:c2>
    </t:test3>
+   <t:bits1 xmlns:t="urn:ietf:params:xml:ns:yang:test">three one four</t:bits1>
 </nd:config>

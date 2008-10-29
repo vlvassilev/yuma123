@@ -775,15 +775,17 @@ static val_value_t *
      * convert the CLI into a parmset 
      */
     obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
-    if (!obj) {
+    if (obj && obj_get_child_count(obj)) {
+	myargv[0] = obj_get_name(rpc);
+	myargv[1] = args;
+	return cli_parse(2, (const char **)myargv, 
+			 obj, VALONLY, SCRIPTMODE,
+			 autocomp, res);
+    } else {
 	*res = ERR_NCX_SKIPPED;
 	return NULL;
     }
-
-    myargv[0] = obj_get_name(rpc);
-    myargv[1] = args;
-    return cli_parse(2, (const char **)myargv, 
-		     obj, VALONLY, SCRIPTMODE, autocomp, res);
+    /*NOTREACHED*/
 
 }  /* parse_rpc_cli */
 
@@ -2449,7 +2451,7 @@ static val_value_t *
     }
 
     obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
-    if (!obj) {
+    if (!obj || !obj_get_child_count(obj)) {
 	*res = ERR_NCX_SKIPPED;
 	return NULL;
     }
@@ -5489,10 +5491,11 @@ static void
 	res = ERR_INTERNAL_MEM;
     }
 
+    /* should find an input node */
     input = obj_find_child(rpc, NULL, YANG_K_INPUT);
 
     /* check if any params are expected */
-    if (res == NO_ERR && input) {
+    if (res == NO_ERR && input && obj_get_child_count(input)) {
 	while (line[len] && xml_isspace(line[len])) {
 	    len++;
 	}
@@ -5506,7 +5509,7 @@ static void
 	}
 
 	/* check no input from user, so start a parmset */
-	if (res == NO_ERR && !valset && input) {
+	if (res == NO_ERR && !valset) {
 	    valset = val_new_value();
 	    if (!valset) {
 		res = ERR_INTERNAL_MEM;

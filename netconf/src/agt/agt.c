@@ -138,14 +138,12 @@ static void
 {
     memset(&agt_profile, 0x0, sizeof(agt_profile_t));
 
-    /* First set the hard-wired values
-     * TBD: get these from the command line
+    /* Set the default values for the user parameters
+     * these may be overridden from the command line;
      */
-    agt_profile.agt_targ = NCX_AGT_TARG_RUNNING;
-    agt_profile.agt_start = NCX_AGT_START_DISTINCT;
-    agt_profile.agt_del_startup = TRUE;
-
-    /* Set the default values for the user parameters */
+    agt_profile.agt_targ = NCX_AGT_TARG_CANDIDATE;
+    agt_profile.agt_start = NCX_AGT_START_MIRROR;
+    agt_profile.agt_del_startup = FALSE;
     agt_profile.agt_loglevel = log_get_debug_level();
     agt_profile.agt_usestartup = TRUE;
     agt_profile.agt_logappend = FALSE;

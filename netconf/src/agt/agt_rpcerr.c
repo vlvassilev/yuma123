@@ -380,7 +380,7 @@ static rpc_err_t
     case ERR_NCX_CFG_NOT_FOUND:
 	return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_EXTRA_ATTR:
-	return RPC_ERR_BAD_ATTRIBUTE;
+	return RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_MISSING_ATTR:
 	return RPC_ERR_MISSING_ATTRIBUTE;
     case ERR_NCX_MISSING_VAL_INST:
@@ -430,17 +430,17 @@ static rpc_err_t
     case ERR_NCX_MANDATORY_NOT_ALLOWED:
 	return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_UNIQUE_TEST_FAILED:
-	return RPC_ERR_OPERATION_FAILED;   /* E.1 */
+	return RPC_ERR_OPERATION_FAILED;   /* 12.1 */
     case ERR_NCX_MAX_ELEMS_VIOLATION:
-	return RPC_ERR_OPERATION_FAILED;   /* E.2 */
+	return RPC_ERR_OPERATION_FAILED;   /* 12.2 */
     case ERR_NCX_MIN_ELEMS_VIOLATION:
-	return RPC_ERR_OPERATION_FAILED;   /* E.3 */
+	return RPC_ERR_OPERATION_FAILED;   /* 12.3 */
     case ERR_NCX_MUST_TEST_FAILED:
-	return RPC_ERR_OPERATION_FAILED;   /* E.4 */
+	return RPC_ERR_OPERATION_FAILED;   /* 12.4 */
     case ERR_NCX_DATA_REST_VIOLATION:
-	return RPC_ERR_INVALID_VALUE;      /* E.4 */
+	return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_INSERT_MISSING_INSTANCE:
-	return RPC_ERR_BAD_ATTRIBUTE;      /* E.5 */
+	return RPC_ERR_BAD_ATTRIBUTE;      /* 12.5 */
 
 	
     /* user warnings start at 400 */
@@ -979,19 +979,19 @@ rpc_err_rec_t *
     } else {
 	switch (interr) {
 	case ERR_NCX_UNIQUE_TEST_FAILED:
-	    apptag = (const xmlChar *)"data-not-unique";
+	    apptag = (const xmlChar *)"data-not-unique"; /* 12.1 */
 	    break;
 	case ERR_NCX_MAX_ELEMS_VIOLATION:
-	    apptag = (const xmlChar *)"too-many-elements";
+	    apptag = (const xmlChar *)"too-many-elements"; /* 12.2 */
 	    break;
 	case ERR_NCX_MIN_ELEMS_VIOLATION:
-	    apptag = (const xmlChar *)"too-few-elements";
+	    apptag = (const xmlChar *)"too-few-elements";  /* 12.3 */
 	    break;
 	case ERR_NCX_NOT_IN_RANGE:
 	    apptag = (const xmlChar *)"not-in-range";
 	    break;
 	case ERR_NCX_VAL_NOTINSET:
-	    apptag = (const xmlChar *)"not-in-value-set";
+	    apptag = (const xmlChar *)"not-in-value-set"; 
 	    break;
 	case ERR_NCX_PATTERN_FAILED:
 	    apptag = (const xmlChar *)"pattern-test-failed";
@@ -1000,10 +1000,10 @@ rpc_err_rec_t *
 	    apptag = (const xmlChar *)"data-restriction-violation";
 	    break;
 	case ERR_NCX_MUST_TEST_FAILED:
-	    apptag = (const xmlChar *)"must-violation";
+	    apptag = (const xmlChar *)"must-violation";  /* 12.4 */
 	    break;
 	case ERR_NCX_INSERT_MISSING_INSTANCE:
-	    apptag = (const xmlChar *)"missing-instance";
+	    apptag = (const xmlChar *)"missing-instance"; /* 12.5 */
 	    break;
 	default:
 	    apptag = NULL;

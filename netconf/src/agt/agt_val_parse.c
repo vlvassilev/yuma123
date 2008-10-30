@@ -1992,48 +1992,122 @@ static status_t
 			 val_value_t  *val)
 {
     const obj_metadata_t *meta;
-    uint32                cnt;
-    status_t              res, retres;
+    val_value_t          *metaval;
+    obj_type_t            objtype;
+    uint32                insertcnt, cnt, checkcnt;
+    status_t              res;
     xmlns_qname_t         qname;
     xmlns_id_t            yangid;
 
-    retres = NO_ERR;
+    res = NO_ERR;
     yangid = xmlns_yang_id();
 
-    /* first check the inst count of the YANG attributes
-     * may not need to do this at all if XmlTextReader
-     * rejects duplicate XML attributes
+    if (!val->obj) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    objtype = val->obj->objtype;
+
+    /* figure out how many key/value attributes are allowed */
+    switch (val->insertop) {
+    case OP_INSOP_NONE:
+	insertcnt = 0;
+	checkcnt = 1;
+	break;
+    case OP_INSOP_FIRST:
+    case OP_INSOP_LAST:
+	insertcnt = 1;
+	checkcnt = 0;
+	break;
+    case OP_INSOP_BEFORE:
+    case OP_INSOP_AFTER:
+	insertcnt = 1;
+	checkcnt = 1;
+	break;
+    default:
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* check if delete, these attrs not allowed at all then */
+    if (val->editop == OP_EDITOP_DELETE) {
+	checkcnt = 0;
+    }
+
+    /* check if 'insert' entered and not allowed */
+    if (insertcnt && 
+	(!(objtype==OBJ_TYP_LIST || objtype==OBJ_TYP_LEAF_LIST))) {
+	res = ERR_NCX_EXTRA_ATTR;
+	agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
+			 NULL, NCX_NT_STRING, YANG_K_INSERT, 
+			 NCX_NT_VAL, val);
+    }
+
+    /* check the inst count of the YANG attributes
+     * key attribute allowed for list only
      */
     cnt = val_metadata_inst_count(val, yangid, YANG_K_KEY);
-    if (cnt > 1) {
-	retres = ERR_NCX_EXTRA_ATTR;
-	agt_record_error(scb, msg, NCX_LAYER_CONTENT, retres, 
+    if (cnt > checkcnt || 
+	(cnt && val->obj->objtype != OBJ_TYP_LIST)) {
+
+	res = ERR_NCX_EXTRA_ATTR;
+	agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
+			 NULL, NCX_NT_STRING, YANG_K_KEY, 
+			 NCX_NT_VAL, val);
+    } else if (cnt) {
+	metaval = val_find_meta(val, yangid, YANG_K_KEY);
+	if (metaval) {
+	    val->insertstr = VAL_STR(metaval);
+	} else {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	}
+    } else if (val->obj->objtype==OBJ_TYP_LIST &&
+	       (val->insertop==OP_INSOP_BEFORE ||
+		val->insertop==OP_INSOP_AFTER)) {
+	/* the key attribute is missing */
+	res = ERR_NCX_MISSING_ATTR;
+	agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
 			 NULL, NCX_NT_STRING, YANG_K_KEY, 
 			 NCX_NT_VAL, val);
     }
 
+    /* value attribute allowed for leaf-list only */
     cnt = val_metadata_inst_count(val, yangid, YANG_K_VALUE);
-    if (cnt > 1) {
-	retres = ERR_NCX_EXTRA_ATTR;
-	agt_record_error(scb, msg, NCX_LAYER_CONTENT, retres, 
+    if (cnt > checkcnt ||
+	(cnt && val->obj->objtype != OBJ_TYP_LEAF_LIST)) {
+	res = ERR_NCX_EXTRA_ATTR;
+	agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
+			 NULL, NCX_NT_STRING, YANG_K_VALUE, 
+			 NCX_NT_VAL, val);
+    } else if (cnt) {
+	metaval = val_find_meta(val, yangid, YANG_K_VALUE);
+	if (metaval) {
+	    val->insertstr = VAL_STR(metaval);
+	} else {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	}
+    } else if (val->obj->objtype==OBJ_TYP_LEAF_LIST &&
+	       (val->insertop==OP_INSOP_BEFORE ||
+		val->insertop==OP_INSOP_AFTER)) {
+	/* the value attribute is missing */
+	res = ERR_NCX_MISSING_ATTR;
+	agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
 			 NULL, NCX_NT_STRING, YANG_K_VALUE, 
 			 NCX_NT_VAL, val);
     }
 
-    if (!val->obj) {
-	return retres;
-    }
-
+    /* check more than 1 of each specified metaval
+     * probably do not need to do this because the
+     * xmlTextReader parser might barf on the invalid XML
+     * way before this test gets to run
+     */
     for (meta = obj_first_metadata(val->obj);
 	 meta != NO_ERR;
 	 meta = obj_next_metadata(meta)) {
 
-	res = NO_ERR;
-	cnt = val_metadata_inst_count(val, meta->nsid, meta->name);
-
 	/* check the instance qualifier from the metadata
 	 * continue the loop if there is no error
 	 */
+	cnt = val_metadata_inst_count(val, meta->nsid, meta->name);
 	if (cnt > 1) {
 	    res = ERR_NCX_EXTRA_ATTR;
 	    qname.nsid = meta->nsid;
@@ -2042,10 +2116,9 @@ static status_t
 			     res, NULL,
 			     NCX_NT_QNAME, &qname, 
 			     NCX_NT_VAL, val);
-	    retres = res;
 	}
     }
-    return retres;
+    return res;
 
 } /* metadata_inst_check */
 

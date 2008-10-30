@@ -479,6 +479,119 @@ static void
 }  /* add_child_node */
 
 
+
+/********************************************************************
+* FUNCTION check_insert_attr
+* 
+* Check the YANG insert attribute
+*
+* INPUTS:
+*   scb == session control block
+*   msg == incoming rpc_msg_t in progress
+*   newval == val_value_t from the PDU
+*   
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    check_insert_attr (ses_cb_t  *scb,
+		       rpc_msg_t  *msg,
+		       val_value_t  *newval)
+{
+    val_value_t     *testval, *simval;
+    const xmlChar   *modname, *badval;
+    status_t         res;
+
+    res = NO_ERR;
+    badval = NULL;
+    modname = obj_get_mod_name(newval->obj);
+
+    if (newval->editop == OP_EDITOP_DELETE) {
+	/* this error already checked in agt_val_parse */
+	return NO_ERR;
+    }
+
+    if (newval->obj->objtype==OBJ_TYP_LEAF_LIST) {
+
+	/* OK to check insertstr, otherwise errors
+	 * should already be recorded by agt_val_parse
+	 */
+	if (!newval->insertstr) {
+	    /* insert op already checked in agt_val_parse */
+	    return NO_ERR;
+	}
+
+	/* make sure the insert attr is on a node with a parent */
+	if (!newval->curparent) {
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	} else {
+	    /* validate the insert string against siblings */
+	    testval = 
+		val_find_child(newval->curparent,
+			       modname, newval->name);
+	    if (!testval) {
+		res = ERR_NCX_INSERT_MISSING_INSTANCE;
+	    } else if (!ncx_valid_name(newval->insertstr,
+				       xml_strlen(newval->insertstr))) {
+		res = ERR_NCX_INVALID_VALUE;
+		badval = newval->insertstr;
+	    } else {
+		/* make a value node to compare in the
+		 * value space instead of the lexicographical space
+		 */
+		simval = val_make_simval(newval->typdef,
+					 newval->nsid,
+					 newval->name,
+					 newval->insertstr,
+					 &res);
+		if (res != NO_ERR) {
+		    badval = newval->insertstr;
+		} else {
+		    testval = 
+			val_first_child_match(newval->curparent,
+					      simval);
+		    if (!testval) {
+			/* sibling leaf-list with the specified
+			 * value was not found
+			 */
+			res = ERR_NCX_INSERT_MISSING_INSTANCE;
+		    }
+		}
+		    
+		if (simval) {
+		    val_free_value(simval);
+		}
+	    }
+	}
+    } else if (newval->obj->objtype == OBJ_TYP_LIST) {
+	/***/;
+    } else {
+	return NO_ERR;
+    }
+
+	     
+    /* record any errors so far */
+    if (res != NO_ERR) {
+	if (badval) {
+	    agt_record_error(scb, &msg->mhdr, 
+			     NCX_LAYER_CONTENT,
+			     res, NULL,
+			     NCX_NT_STRING, badval,
+			     NCX_NT_VAL, newval);
+	} else {
+	    agt_record_error(scb, &msg->mhdr, 
+			     NCX_LAYER_CONTENT,
+			     res, NULL, 
+			     NCX_NT_VAL, newval, 
+			     NCX_NT_VAL, newval);
+	}
+    }
+
+    return res;
+
+}  /* check_insert_attr */
+
+
 /********************************************************************
 * FUNCTION apply_write_val
 * 
@@ -829,7 +942,7 @@ static status_t
     case AGT_CB_VALIDATE:
 
 #ifdef AGT_VAL_DEBUG
-    log_debug3("\ninvoke_simval:validate: %s start", newval->name);
+	log_debug3("\ninvoke_simval:validate: %s start", newval->name);
 #endif
 
 	/* check and adjust the operation attribute */
@@ -837,13 +950,21 @@ static status_t
 	res = agt_check_editop(editop, &newval->editop, 
 			       newval, curval, iqual);
 
+	/* check the operation against the object definition
+	 * and whether or not the entry currently exists
+	 */
 	if (res == NO_ERR) {
 	    res = agt_check_max_access(newval->editop, 
 				       obj_get_max_access(newval->obj), 
 				       (curval != NULL));
 	}
 
-	if (res != NO_ERR) {
+	/* check the insert operation, if any */
+	if (res == NO_ERR) {
+	    res = check_insert_attr(scb, msg, newval);
+	    /* any errors already recorded */
+	} else {
+	    /* record error that happened above */
 	    agt_record_error(scb, &msg->mhdr, 
 			     NCX_LAYER_CONTENT, res, 
 			     NULL, NCX_NT_VAL, newval, 
@@ -851,7 +972,8 @@ static status_t
 	}
 	break;
     case AGT_CB_TEST_APPLY:
-	res = test_apply_write_val(newval->curparent, newval, curval, &done);
+	res = test_apply_write_val(newval->curparent, newval, 
+				   curval, &done);
 	break;
     case AGT_CB_APPLY:
 	res = apply_write_val(newval->editop, scb, msg, target, 
@@ -1177,7 +1299,7 @@ static void
 #endif
 
 	/* add the node back in the tree */
-	val_add_child(undo->curnode, undo->parentnode);
+	add_child_node(undo->curnode, undo->parentnode, NULL);
 	break;
     case OP_EDITOP_MERGE:
     case OP_EDITOP_REPLACE:

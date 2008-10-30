@@ -3150,7 +3150,7 @@ status_t
 *    NULL if some error
 *********************************************************************/
 val_value_t *
-    val_make_simval (typ_def_t    *typdef,
+    val_make_simval (const typ_def_t    *typdef,
 		     xmlns_id_t    nsid,
 		     const xmlChar *valname,
 		     const xmlChar *valstr,
@@ -3774,6 +3774,35 @@ status_t
 
 
 /********************************************************************
+* FUNCTION val_clear_editvars
+* 
+*   Clean the edit-config variables in the value node
+*   Do not clear the dirty flag though
+*
+* INPUTS:
+*    val == node to clear
+*
+*********************************************************************/
+void
+    val_clear_editvars (val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    val->curparent = NULL;
+    val->editop = OP_EDITOP_NONE;
+    val->insertop = OP_INSOP_NONE;
+    val->insertstr = NULL;
+    val->res = NO_ERR;
+
+}   /* val_clear_editvars */
+
+
+/********************************************************************
 * FUNCTION val_add_child
 * 
 *   Add a child value node to a parent value node
@@ -3803,7 +3832,18 @@ void
 /********************************************************************
 * FUNCTION val_add_child_clean
 * 
-*   Add a child value node to a parent value node
+*  Add a child value node to a parent value node
+*  This is only called by the agent when adding nodes
+*  to a target database.
+*
+*  If the child node being added is part of a choice/case,
+*  then all sibling nodes in other cases within the same
+*  choice will be deleted
+*
+*  The insert operation will also be check to see
+*  if the child is a list oo a leaf-list, which is ordered-by user
+*
+*  The default insert mode is always 'last'
 *
 * INPUTS:
 *    child == node to store in the parent
@@ -3821,7 +3861,9 @@ void
 			 val_value_t *parent,
 			 dlq_hdr_t *cleanQ)
 {
-    val_value_t  *testval, *nextval;
+    val_value_t  *testval, *nextval, *simval;
+    boolean       doins, islist;
+    status_t      res;
 
 #ifdef DEBUG
     if (!child || !parent || !cleanQ) {
@@ -3851,7 +3893,84 @@ void
     }
 
     child->parent = parent;
-    dlq_enque(child, &parent->v.childQ);
+
+    doins = FALSE;
+    if (child->obj->objtype == OBJ_TYP_LIST) {
+	doins = TRUE;
+	islist = TRUE;
+    } else if (child->obj->objtype == OBJ_TYP_LEAF_LIST) {
+	doins = TRUE;
+	islist = FALSE;
+    }
+    if (doins && child->insertop != OP_INSOP_NONE) {
+	switch (child->insertop) {
+	case OP_INSOP_FIRST:
+	    testval = val_find_child(parent, 
+				     obj_get_mod_name(child->obj),
+				     child->name);
+	    if (testval) {
+		dlq_insertAhead(child, testval);
+	    } else {
+		dlq_enque(child, &parent->v.childQ);
+	    }
+	    break;
+	case OP_INSOP_LAST:
+	case OP_INSOP_NONE:
+	    dlq_enque(child, &parent->v.childQ);
+	    break;
+	case OP_INSOP_BEFORE:
+	case OP_INSOP_AFTER:
+	    /* find the entry specified by the val->insertstr value
+	     * this is value='foo' for leaf-list and
+	     * key="[x:foo='bar'][x:foo2=7]" for list
+	     */
+	    if (child->obj->objtype == OBJ_TYP_LEAF_LIST) {
+		simval = val_make_simval(child->typdef,
+					 child->nsid,
+					 child->name,
+					 child->insertstr,
+					 &res);
+		if (res != NO_ERR) {
+		    SET_ERROR(res);
+		    dlq_enque(child, &parent->v.childQ);
+		} else {
+		    testval = 
+			val_first_child_match(child->curparent,
+					      simval);
+		    if (!testval) {
+			/* sibling leaf-list with the specified
+			 * value was not found
+			 */
+			SET_ERROR(ERR_NCX_INSERT_MISSING_INSTANCE);
+			dlq_enque(child, &parent->v.childQ);
+		    } else if (child->insertop == OP_INSOP_BEFORE) {
+			dlq_insertAhead(child, testval);
+		    } else {
+			dlq_insertAfter(child, testval);
+		    }
+		}
+		    
+		if (simval) {
+		    val_free_value(simval);
+		}
+	    } else if (child->obj->objtype == OBJ_TYP_LIST) {
+		/***** TBD ******/
+		dlq_enque(child, &parent->v.childQ);
+	    } else {
+		/* wrong object type */
+		SET_ERROR(ERR_INTERNAL_VAL);
+		dlq_enque(child, &parent->v.childQ);
+	    }
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    dlq_enque(child, &parent->v.childQ);
+	}
+    } else {
+	dlq_enque(child, &parent->v.childQ);
+    }
+
+    val_clear_editvars(child);
 
 }   /* val_add_child_clean */
 

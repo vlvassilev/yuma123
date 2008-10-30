@@ -228,6 +228,7 @@ typedef struct val_value_t_ {
     struct val_value_t_  *curparent;      
     op_editop_t    editop;            /* effective edit operation */
     op_insertop_t  insertop;             /* YANG insert operation */
+    const xmlChar *insertstr;        /* bptr to value or key attr */
     status_t       res;      /* edit result for continue-on-error */
 
     /* Used by Agent only:
@@ -523,7 +524,7 @@ extern status_t
 			const xmlChar *valstr);
 
 extern val_value_t *
-    val_make_simval (typ_def_t    *typdef,
+    val_make_simval (const typ_def_t    *typdef,
 		     xmlns_id_t    nsid,
 		     const xmlChar *valname,
 		     const xmlChar *valstr,
@@ -558,6 +559,9 @@ extern val_value_t *
 extern status_t
     val_replace (const val_value_t *val,
 		 val_value_t *copy);
+
+extern void
+    val_clear_editvars (val_value_t *val);
 
 extern void
     val_add_child (val_value_t *child,

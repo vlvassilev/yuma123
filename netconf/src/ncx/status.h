@@ -208,10 +208,10 @@ typedef enum status_t_
     ERR_NCX_WRONG_DATATYP,              /* 285 */
     ERR_NCX_WRONG_DATAVAL,              /* 286 */
     ERR_NCX_NUMLEN_TOOBIG,              /* 287 */
-    ERR_NCX_NOT_IN_RANGE,               /* 288 */   /* E.4 */
+    ERR_NCX_NOT_IN_RANGE,               /* 288 */
     ERR_NCX_WRONG_NUMTYP,               /* 289 */
     ERR_NCX_EXTRA_ENUMCH,               /* 290 */
-    ERR_NCX_VAL_NOTINSET,               /* 291 */   /* E.4 */
+    ERR_NCX_VAL_NOTINSET,               /* 291 */
     ERR_NCX_EXTRA_LISTSTR,              /* 292 */
     ERR_NCX_UNKNOWN_PSD,                /* 293 */
     ERR_NCX_EXTRA_PARMINST,             /* 294 */
@@ -253,15 +253,15 @@ typedef enum status_t_
     ERR_NCX_EXP_SUBMODULE,              /* 330 */
     ERR_NCX_PREFIX_NOT_FOUND,           /* 331 */
     ERR_NCX_IMPORT_ERRORS,              /* 332 */
-    ERR_NCX_PATTERN_FAILED,             /* 333 */  /* E.4 */
+    ERR_NCX_PATTERN_FAILED,             /* 333 */
     ERR_NCX_INVALID_TYPE_CHANGE,        /* 334 */
     ERR_NCX_MANDATORY_NOT_ALLOWED,      /* 335 */
-    ERR_NCX_UNIQUE_TEST_FAILED,         /* 336 */  /* E.1 */
-    ERR_NCX_MAX_ELEMS_VIOLATION,        /* 337 */  /* E.2 */
-    ERR_NCX_MIN_ELEMS_VIOLATION,        /* 338 */  /* E.3 */
-    ERR_NCX_MUST_TEST_FAILED,           /* 339 */  /* E.4 */
-    ERR_NCX_DATA_REST_VIOLATION,        /* 340 */  /* E.4 */
-    ERR_NCX_INSERT_MISSING_INSTANCE,    /* 341 */  /* E.5 */
+    ERR_NCX_UNIQUE_TEST_FAILED,         /* 336 */  /* 12.1 */
+    ERR_NCX_MAX_ELEMS_VIOLATION,        /* 337 */  /* 12.2 */
+    ERR_NCX_MIN_ELEMS_VIOLATION,        /* 338 */  /* 12.3 */
+    ERR_NCX_MUST_TEST_FAILED,           /* 339 */  /* 12.4 */
+    ERR_NCX_DATA_REST_VIOLATION,        /* 340 */  /* not used */
+    ERR_NCX_INSERT_MISSING_INSTANCE,    /* 341 */  /* 12.5 */
     ERR_LAST_USR_ERR,                   /* 340 -- not really used */
 
     /* user warnings start at 400 */

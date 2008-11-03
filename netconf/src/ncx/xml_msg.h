@@ -33,6 +33,10 @@ date             init     comment
 #include "status.h"
 #endif
 
+#ifndef _H_val
+#include "val.h"
+#endif
+
 #ifndef _H_xmlns
 #include "xmlns.h"
 #endif
@@ -91,6 +95,7 @@ extern const xmlChar *
     xml_msg_get_prefix (xml_msg_hdr_t *msg,
 			xmlns_id_t parent_nsid,
 			xmlns_id_t nsid,
+			const val_value_t *curelem,
 			boolean  *xneeded);
 
 extern const xmlChar *

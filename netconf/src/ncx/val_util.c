@@ -709,6 +709,38 @@ static status_t
 }  /* get_instance_string */
 
 
+
+/********************************************************************
+* FUNCTION purge_errors
+* 
+* Remove any error nodes recursively
+*
+* INPUTS:
+*   val == node to purge
+*
+*********************************************************************/
+static void
+    purge_errors (val_value_t *val)
+{
+    val_value_t           *chval, *nextval;
+
+    for (chval = val_get_first_child(val);
+	 chval != NULL; 
+	 chval = nextval) {
+
+	nextval = val_get_next_child(chval);
+
+	if (chval->res != NO_ERR) {
+	    val_remove_child(chval);
+	    val_free_value(chval);
+	} else {
+	    purge_errors(chval);
+	}
+    }
+
+}  /* purge_errors */
+
+
 /*************** E X T E R N A L    F U N C T I O N S  *************/
 
 
@@ -803,7 +835,7 @@ void
 				   obj_get_mod_name(key->keyobj),
 				   obj_get_name(key->keyobj));
 	    if (chval) {
-		val_remove_child(chval);
+		dlq_remove(chval);
 		dlq_enque(chval, &tempQ);
 	    }
 	}
@@ -820,7 +852,7 @@ void
 
 		while (chval) {
 		    if (chval != rootval) {
-			val_remove_child(chval);
+			dlq_remove(chval);
 			dlq_enque(chval, &tempQ);
 			count++;
 		    }
@@ -865,7 +897,7 @@ void
 				   obj_get_mod_name(chobj),
 				   obj_get_name(chobj));
 	    while (chval) {
-		val_remove_child(chval);
+		dlq_remove(chval);
 		dlq_enque(chval, &tempQ);
 
 		switch (chval->obj->objtype) {
@@ -1417,7 +1449,6 @@ boolean
 void
     val_purge_errors_from_root (val_value_t *val)
 {
-    val_value_t           *chval, *nextval;
 
 #ifdef DEBUG
     if (!val) {
@@ -1430,17 +1461,7 @@ void
     }
 #endif
 
-    for (chval = val_get_first_child(val);
-	 chval != NULL; 
-	 chval = nextval) {
-
-	nextval = val_get_next_child(chval);
-
-	if (chval->res != NO_ERR) {
-	    val_remove_child(chval);
-	    val_free_value(chval);
-	}
-    }
+    purge_errors(val);
     val->res = NO_ERR;
 
 }  /* val_purge_errors_from_root */

@@ -421,6 +421,7 @@ void
 
     errQ = (msghdr) ? &msghdr->errQ : NULL;
 
+    /* dump some error info to the log */
     if (LOGDEBUG3) {
 	log_debug3("\nagt_record_error: ");
 	if (xmlnode) {
@@ -440,7 +441,9 @@ void
 	}
     }
 
+    /* generate an error only if there is a Q to hold the result */
     if (errQ) {
+	/* get the error-path */
 	pathbuff = NULL;
 	if (errnode) {
 	    switch (nodetyp) {

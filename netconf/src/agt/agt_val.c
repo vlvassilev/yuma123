@@ -393,56 +393,6 @@ static boolean
 
 
 /********************************************************************
-* FUNCTION merge_metadata
-* 
-*   Add any metadata to the curnode from the newnode
-*   Generate undo and audit records records if needed
-*
-* INPUTS:
-*    msg == rpc message in progress
-*    newval == node to steal (move) attributes from
-*    curval == node to add or replace the value of attributes
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t
-    merge_metadata (rpc_msg_t *msg,
-		    val_value_t *newval,
-		    val_value_t *curval)
-{
-#ifdef NOT_YET
-    status_t  res;
-    rpc_undo_rec_t *undo;
-
-    res = NO_ERR;
-
-    /* first determine if any actual XML attribute merge is
-     * actually requested in the 'newval'
-     */
-
-
-
-    /* something requested, so check if an undo record is needed */
-    if (msg->rpc_need_undo) {
-	undo = add_undo_node(msg, editop,
-			    newval, curval, /*curparent*/  NO_ERR, &res);
-	if (res != NO_ERR) {
-	    return res;
-	}
-    }
-
-    val_merge_meta(newval, curval);
-    return res;
-#else
-    (void)msg;
-    val_merge_meta(newval, curval);
-    return NO_ERR;
-#endif
-}   /* merge_metadata */
-
-
-/********************************************************************
 * FUNCTION add_child
 * 
 * Add a child node
@@ -465,6 +415,9 @@ static void
     val_value_t  *val;
     dlq_hdr_t     cleanQ;
 
+    log_debug3("\nAdd child '%s' to parent '%s'",
+	       child->name, parent->name);
+
     dlq_createSQue(&cleanQ);
 
     val_add_child_clean(child, parent, &cleanQ);
@@ -476,8 +429,9 @@ static void
 	    val_free_value(val);
 	}
     }
-}  /* add_child_node */
 
+    
+}  /* add_child_node */
 
 
 /********************************************************************
@@ -660,6 +614,9 @@ static status_t
     } else if (editop == OP_EDITOP_COMMIT) {
 	applyhere = val_get_dirty_flag(newval);
 	*done = applyhere;
+    } else if (editop == OP_EDITOP_DELETE) {
+	applyhere = TRUE;
+	*done = TRUE;
     } else {
 	applyhere = apply_this_node(cur_editop, curval);
 	*done = applyhere;
@@ -680,8 +637,10 @@ static status_t
 	    }
 	}
 
-	handle_audit_record(cur_editop, scb, target, 
-			    (curval) ? curval : newval, res);
+	if (target->cfg_id == NCX_CFGID_RUNNING) {
+	    handle_audit_record(cur_editop, scb, target, 
+				(curval) ? curval : newval, res);
+	}
 
 	if (editop != OP_EDITOP_LOAD) {
 	    cfg_set_dirty_flag(target);
@@ -709,6 +668,9 @@ static status_t
 		freenew = val_merge(newval, curval);
 	    } else {
 		add_child_node(newval, parent, undo);
+		if (target->cfg_id == NCX_CFGID_RUNNING) { 
+		    val_clear_editvars(newval);
+		}
 	    }
 
 	    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
@@ -727,6 +689,9 @@ static status_t
 		} /* else curval not freed yet, hold in undo record */
 	    } else {
 		add_child_node(newval, parent, undo);
+		if (target->cfg_id == NCX_CFGID_RUNNING) { 
+		    val_clear_editvars(newval);
+		}
 
 		/**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
 		val_set_canonical_order(parent);
@@ -735,6 +700,9 @@ static status_t
 	case OP_EDITOP_CREATE:
 	    val_remove_child(newval);
 	    add_child_node(newval, parent, undo);
+	    if (target->cfg_id == NCX_CFGID_RUNNING) { 
+		val_clear_editvars(newval);
+	    }
 
 	    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
 	    val_set_canonical_order(parent);
@@ -760,8 +728,6 @@ static status_t
 	default:
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
-    } else if (newval->editop == OP_EDITOP_MERGE && curval) {
-	merge_metadata(msg, newval, curval);
     }
 
     if (freenew) {
@@ -932,8 +898,10 @@ static status_t
 		      val_value_t  *curval,
 		      boolean  done)
 {
+    val_value_t     *curparent;
     status_t         res;
     ncx_iqual_t      iqual;
+    op_editop_t      cureditop;
 
     res = NO_ERR;
 
@@ -972,12 +940,32 @@ static status_t
 	}
 	break;
     case AGT_CB_TEST_APPLY:
-	res = test_apply_write_val(newval->curparent, newval, 
+	if (newval) {
+	    curparent = newval->curparent;
+	} else if (curval) {
+	    curparent = curval->parent;
+	} else {
+	    curparent = NULL;
+	}
+	res = test_apply_write_val(curparent, newval, 
 				   curval, &done);
 	break;
     case AGT_CB_APPLY:
-	res = apply_write_val(newval->editop, scb, msg, target, 
-			      newval->curparent, newval, curval, &done);
+	if (newval) {
+	    curparent = newval->curparent;
+	    cureditop = newval->editop;
+	} else {
+	    curparent = NULL;
+	    cureditop = editop;
+	    if (curval) {
+		curparent = curval->parent;
+		if (cureditop == OP_EDITOP_NONE) {
+		    cureditop = curval->editop;
+		}
+	    }
+	}
+	res = apply_write_val(cureditop, scb, msg, target, 
+			      curparent, newval, curval, &done);
 	break;
     case AGT_CB_COMMIT:
     case AGT_CB_ROLLBACK:
@@ -1033,8 +1021,10 @@ static status_t
     status_t          res, retres;
     ncx_iqual_t       iqual;
     op_editop_t       cur_editop;
-    
+    boolean           initialdone;
+
     retres = NO_ERR;
+    initialdone = done;
 
     /* check the 'operation' attribute in VALIDATE phase */
     switch (cbtyp) {
@@ -1104,7 +1094,7 @@ static status_t
     }
 
     /* check all the child nodes next */
-    if (retres == NO_ERR) {
+    if (retres == NO_ERR && !done) {
 	if (newval) {
 	    cur_parent = newval;
 	} else if (curval) {
@@ -1126,7 +1116,7 @@ static status_t
 		curch = NULL;
 	    }
 	    res = invoke_btype_cb(cbtyp, cur_editop, scb, msg, 
-				  target, chval, curch, done);
+				  target, chval, curch, FALSE);
 	    if (chval->res == NO_ERR) {
 		chval->res = res;
 	    }
@@ -1136,8 +1126,10 @@ static status_t
 	}
     }
 
-    /* check if the typdef for this value has a callback */
-    if (retres == NO_ERR) {
+    /* check if the typdef for this value has a callback
+     * only call if the operation was applied here
+     */
+    if (retres == NO_ERR && !initialdone && done) {
 	retres = handle_user_callback(cbtyp, editop, scb, msg,
 				      newval, curval);
     }
@@ -1689,7 +1681,7 @@ static status_t
 	    /* not enough instances error */
 	    minerr = TRUE;
 	    res = ERR_NCX_MIN_ELEMS_VIOLATION;
-
+	    val->res = res;
 	    if (cnt) {
 		/* use the first child instance as the
 		 * value node for the error-path
@@ -1728,6 +1720,7 @@ static status_t
 	if (cnt > maxelems) {
 	    maxerr = TRUE;
 	    res = ERR_NCX_MAX_ELEMS_VIOLATION;
+	    val->res = res;
 
 	    /* too many instances error
 	     * need to find all the extra instances
@@ -1745,7 +1738,7 @@ static status_t
 				    obj_get_mod_name(obj),
 				    obj_get_name(obj));
 	    i = 1;
-	    while (errval && i < maxelems) {
+	    while (errval && i <= maxelems) {
 		errval = val_get_next_child(errval);
 		i++;
 	    }
@@ -1767,6 +1760,7 @@ static status_t
 	if (cnt < 1 && !minerr) {
 	    /* missing single parameter */
 	    res = ERR_NCX_MISSING_VAL_INST;
+	    val->res = res;
 
 	    /* need to construct a string error-path */
 	    instbuff = NULL;
@@ -1799,6 +1793,7 @@ static status_t
 					  obj_get_mod_name(obj),
 					  obj_get_name(obj), 1);
 	    res = ERR_NCX_EXTRA_VAL_INST;
+	    val->res = res;
 
 	    /* use the first extra child instance as the
 	     * value node for the error-path
@@ -1826,6 +1821,7 @@ static status_t
 	break;
     default:
 	res = SET_ERROR(ERR_INTERNAL_VAL);
+	val->res = res;
 	agt_record_error(scb, msg, layer, res, 
 			 NULL, NCX_NT_OBJ, obj, 
 			 NCX_NT_VAL, val);
@@ -2015,6 +2011,80 @@ static status_t
     return retres;
     
 }  /* must_stmt_check */
+
+
+/********************************************************************
+* FUNCTION apply_commit_deletes
+* 
+* Apply the requested commit delete operations
+*
+* Invoke all the AGT_CB_COMMIT callbacks for a 
+* source and target and write operation
+*
+* INPUTS:
+*   scb == session control block
+*   msg == incoming commit rpc_msg_t in progress
+*   target == target database (NCX_CFGID_RUNNING)
+*   candval == value struct from the candidate config
+*   runval == value struct from the running config
+*
+* OUTPUTS:
+*   rpc_err_rec_t structs may be malloced and added 
+*   to the msg->mhsr.errQ
+*
+* RETURNS:
+*   none
+*********************************************************************/
+static status_t
+    apply_commit_deletes (ses_cb_t  *scb,
+			  rpc_msg_t  *msg,
+			  cfg_template_t *target,
+			  val_value_t *candval,
+			  val_value_t *runval)
+{
+    val_value_t      *curval, *nextval, *matchval;
+    status_t          res;
+
+    res = NO_ERR;
+
+    /* go through running config
+     * if the matching node is not in the candidate,
+     * then delete that node in the running config as well
+     */
+    for (curval = val_get_first_child(runval);
+	 curval != NULL && res == NO_ERR; 
+	 curval = nextval) {
+
+	nextval = val_get_next_child(curval);
+
+	/* check only database config nodes */
+	if (obj_is_data_db(curval->obj) &&
+	    obj_is_config(curval->obj)) {
+
+	    /* check if node deleted in source */
+	    matchval = val_first_child_match(candval, curval);
+	    if (!matchval) {
+		/* prevent the agt_val code from ignoring this node */
+		val_set_dirty_flag(curval);
+
+		/* deleted in the source, so delete in the target */
+		res = handle_callback(AGT_CB_APPLY,
+				      OP_EDITOP_DELETE, scb, 
+				      msg, target, 
+				      NULL, curval);
+	    } else {
+		/* else keep this node in target config
+		 * but check any child nodes for deletion
+		 */
+		res = apply_commit_deletes(scb, msg, target,
+					   matchval, curval);
+	    }
+	}  /* else skip non-config database node */
+    }
+
+    return res;
+
+}   /* apply_commit_deletes */
 
 
 /******************* E X T E R N   F U N C T I O N S ***************/
@@ -2487,37 +2557,13 @@ status_t
     if (!cfg_get_dirty_flag(source)) {
 	return NO_ERR;
     }
-    /* check if any top-level config nodes have
-     * been deleted in the target
-     */
-    for (curval = val_get_first_child(target->root);
-	 curval != NULL && res == NO_ERR; 
-	 curval = nextval) {
 
-	nextval = val_get_next_child(curval);
+    /* check if any config nodes have been deleted in the target */
+    res = apply_commit_deletes(scb, msg, target,
+			       source->root,
+			       target->root);
 
-	if (obj_is_data_db(curval->obj) &&
-	    obj_is_config(curval->obj)) {
-
-	    /* check if node deleted in source */
-	    matchval = val_first_child_match(source->root,
-					     curval);
-	    if (!matchval) {
-		/* prevent the agt_val code from ignoring this node */
-		val_set_dirty_flag(curval);
-
-		/* deleted in the source, so delete in the target */
-		res = handle_callback(AGT_CB_APPLY,
-				      OP_EDITOP_DELETE, scb, 
-				      msg, target, 
-				      NULL, curval);
-	    }  /* else keep this node in target config */
-	}  /* else skip non-config database node */
-    }
-
-    /* check if any top-level config nodes have
-     * been changed in the target
-     */
+    /* check if any config nodes have been changed in the target */
     for (curval = val_get_first_child(source->root);
 	 curval != NULL && res == NO_ERR; 
 	 curval = nextval) {

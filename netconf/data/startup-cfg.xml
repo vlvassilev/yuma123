@@ -6,12 +6,11 @@
       <t:d>x</t:d>
       <t:e>
          <t:ee>a14</t:ee>
-         <t:ee>a8</t:ee>
-         <t:ee>e77</t:ee>
-         <t:ee>a1</t:ee>
+         <t:ee>a2000</t:ee>
+         <t:ee>c105</t:ee>
+         <t:ee>e3333</t:ee>
       </t:e>
       <t:f1>test one</t:f1>
-      <t:g3a>ddddddd</t:g3a>
    </t:test1>
    <t:test2 xmlns:t="urn:ietf:params:xml:ns:yang:test">
       <t:a2>fred</t:a2>
@@ -29,28 +28,9 @@
    </t:test2>
    <t:test3 xmlns:t="urn:ietf:params:xml:ns:yang:test">
       <t:x>fred</t:x>
-      <t:test3deep>
-         <t:yy>1.100000</t:yy>
-         <t:y>sss</t:y>
-         <t:b>/a/b/c</t:b>
-         <t:deepy>
-            <t:yy3>dQ==
-</t:yy3>
-            <t:yy1>/i</t:yy1>
-            <t:yy2>5.500000</t:yy2>
-         </t:deepy>
-         <t:deepy>
-            <t:yy3>aaY=
-</t:yy3>
-            <t:yy1>/i/j</t:yy1>
-            <t:yy2>3.330000</t:yy2>
-         </t:deepy>
-      </t:test3deep>
-      <t:b2>4</t:b2>
       <t:c2>3</t:c2>
       <t:c2>-3</t:c2>
       <t:c2>-6</t:c2>
       <t:c2>-1</t:c2>
    </t:test3>
-   <t:bits1 xmlns:t="urn:ietf:params:xml:ns:yang:test">three one four</t:bits1>
 </nd:config>

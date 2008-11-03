@@ -941,6 +941,9 @@ rpc_err_rec_t *
 		nsid = obj_get_nsid(obj);
 		err1 = (const void *)nsid;
 		err2 = (const void *)obj_get_name(obj);
+	    } else if (parmtyp == NCX_NT_STRING) {
+		err1 = (const void *)0;
+		err2 = (const void *)error_parm;
 	    } else {
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    }

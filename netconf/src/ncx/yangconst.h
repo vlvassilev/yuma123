@@ -43,9 +43,11 @@ date	     init     comment
 
 /* YANG keyword/YIN element names */
 
+#define YANG_K_AFTER             (const xmlChar *)"after"
 #define YANG_K_ARGUMENT          (const xmlChar *)"argument"
 #define YANG_K_AUGMENT           (const xmlChar *)"augment"
 #define YANG_K_ANYXML            (const xmlChar *)"anyxml"
+#define YANG_K_BEFORE            (const xmlChar *)"before"
 #define YANG_K_BELONGS_TO        (const xmlChar *)"belongs-to"
 #define YANG_K_BIT               (const xmlChar *)"bit"
 #define YANG_K_CASE              (const xmlChar *)"case"
@@ -59,13 +61,14 @@ date	     init     comment
 #define YANG_K_ERROR_APP_TAG     (const xmlChar *)"error-app-tag"
 #define YANG_K_ERROR_MESSAGE     (const xmlChar *)"error-message"
 #define YANG_K_EXTENSION         (const xmlChar *)"extension"
-#define YANG_K_EXTENSION         (const xmlChar *)"extension"
+#define YANG_K_FIRST             (const xmlChar *)"first"
 #define YANG_K_GROUPING          (const xmlChar *)"grouping"
 #define YANG_K_IMPORT            (const xmlChar *)"import"
 #define YANG_K_INCLUDE           (const xmlChar *)"include"
 #define YANG_K_INPUT             (const xmlChar *)"input"
 #define YANG_K_INSERT            (const xmlChar *)"insert"
 #define YANG_K_KEY               (const xmlChar *)"key"
+#define YANG_K_LAST              (const xmlChar *)"last"
 #define YANG_K_LEAF              (const xmlChar *)"leaf"
 #define YANG_K_LEAF_LIST         (const xmlChar *)"leaf-list"
 #define YANG_K_LENGTH            (const xmlChar *)"length"

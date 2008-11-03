@@ -482,6 +482,62 @@ module yangcli {
       }
     }
 
+    rpc insert {
+      description
+       "Insert some NETCONF config data with the edit-config operation";
+      ncx:rpc-type config;
+      input {
+        uses EditParms;
+
+        leaf order {
+          description 
+            "The insert order that should be used.
+             If the values 'before' or 'after' are selected,
+             then the edit-target parameter must also be present.";
+          type enumeration {
+            enum first;
+            enum last;
+            enum before;
+            enum after;
+          }
+          default last;
+        }
+
+	leaf operation {
+          description "The edit-config operation that should be used.";
+          type enumeration {
+            enum create;
+            enum merge;
+            enum replace;
+          }
+          default merge;
+        }
+
+	leaf edit-target {
+          description 
+            "The value or key clause that should be used.
+             This parameter shoul only be present if the
+             order selected is 'before' or 'after'.
+
+             For a leaf-list, the edit-target contains the
+             value of the target leaf-list node within the
+             configuration being edited.  The new config
+             will be inserted before or after this leaf-list
+             node, depending on the order selected.
+             E.g., edit-target='some leaf content'.
+
+             For a list, the edit-target contains the
+             key values of the target list node within the
+             configuration being edited.  The new config
+             will be inserted before or after this list
+             node, depending on the order selected.
+             E.g., edit-target=[name='fred'][zipcode=90210].";
+
+          type string;
+        }
+      }
+    }
+
     rpc load {
       description "Internal command to load a module or other file.";
       ncx:rpc-type exec;

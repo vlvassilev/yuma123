@@ -228,6 +228,55 @@ static xmlns_id_t
 }  /* find_prefix_val */
 
 
+/********************************************************************
+* FUNCTION xmlns_needed
+*
+* Check if an xmlns directive is needed for the specified
+* element node
+*
+* INPUTS:
+*    curelem  == value node for the current element
+*    nsid == namespace ID to check
+*
+* RETURNS:
+*   TRUE if an xmlns directive is needed
+*   FALSE if not (already generated in this XML path to toor)
+*********************************************************************/
+static boolean
+    xmlns_needed (const val_value_t *curelem,
+		  xmlns_id_t nsid)
+{
+
+    const val_value_t  *metaval;
+
+    /* check if the XMLNS directive already present
+     * in this node due to an attribute using the NS ID
+     */
+    for (metaval = val_get_first_meta_val(curelem);
+	 metaval != NULL;
+	 metaval = val_get_next_meta(metaval)) {
+	if (metaval->nsid == nsid) {
+	    return FALSE;
+	}
+    }
+
+    /* last chance, check the parent */
+    if (curelem->parent) {
+	if (curelem->parent->nsid == nsid) {
+	    return FALSE;
+	} else {
+	    return xmlns_needed(curelem->parent, nsid);
+	}
+    } else {
+	/* the NS ID was not found anywhere in the path to root
+	 * so an XMLNS directive is needed now
+	 */
+	return TRUE;
+    }
+
+}  /* xmlns_needed */
+
+
 /************** E X T E R N A L   F U N C T I O N S  ***************/
 
 
@@ -312,6 +361,7 @@ void
 *    msg  == message to search
 *    parent_nsid == parent namespace ID
 *    nsid == namespace ID to find
+*    curelem == value node for current element if available
 *    xneeded == pointer to xmlns needed flag output value
 *
 * OUTPUTS:
@@ -325,6 +375,7 @@ const xmlChar *
     xml_msg_get_prefix (xml_msg_hdr_t *msg,
 			xmlns_id_t parent_nsid,
 			xmlns_id_t nsid,
+			const val_value_t *curelem,
 			boolean  *xneeded)
 {
     xmlns_pmap_t   *pmap, *newpmap;
@@ -338,6 +389,7 @@ const xmlChar *
     }
 #endif
 
+    newpmap = NULL;
     *xneeded = FALSE;
 
     /* check if the default namespace is requested */
@@ -380,9 +432,23 @@ const xmlChar *
 	pfix = pmap->nm_pfix;
     }
 
-    /* xmlns directive will be needed for this new prefix */
-    if (!pmap || !pmap->nm_topattr) {
-	if (parent_nsid != nsid) {
+    /* xmlns directive will be needed if this is a new prefix */
+    if (!pmap) {
+	/* this is the first use */
+	*xneeded = TRUE;
+    } else if (!pmap->nm_topattr) {
+	/* this is not the first use, and the xmlns directive
+	 * is not in the top element; need to check if
+	 * the NSID has already been used in the current 
+	 * element or any of its ancestors
+	 */
+	if (curelem) {
+	    /* check the actual value tree */
+	    *xneeded = xmlns_needed(curelem, nsid);
+	} else if (parent_nsid != nsid) {
+	    /* use hack -- if child and parent not the same,
+	     * then generate the xmlns directive
+	     */
 	    *xneeded = TRUE;
 	}
     }

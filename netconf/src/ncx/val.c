@@ -85,6 +85,10 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_yangconst
+#include "yangconst.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -528,6 +532,10 @@ static void
     while (!dlq_empty(&val->indexQ)) {
 	in = (val_index_t *)dlq_deque(&val->indexQ);
 	m__free(in);
+    }
+
+    if (val->insertstr) {
+	m__free(val->insertstr);
     }
 
     if (redo) {
@@ -2091,6 +2099,33 @@ const val_value_t *
 
 
 /********************************************************************
+* FUNCTION val_get_first_meta_val
+* 
+* Get the first metaQ entry from the specified Queue
+* 
+* INPUTS:
+*    value node to get the metaQ from
+*
+* RETURNS:
+*   pointer to the first meta-var in the Queue if found, 
+*   or NULL if none
+*********************************************************************/
+const val_value_t *
+    val_get_first_meta_val (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (const val_value_t *)dlq_firstEntry(&val->metaQ);
+
+}  /* val_get_first_meta_val */
+
+
+/********************************************************************
 * FUNCTION val_get_next_meta
 * 
 * Get the next metaQ entry from the specified entry
@@ -3326,7 +3361,6 @@ boolean
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	    return TRUE;
 	}
-	val_merge_meta(src, dest);
 	return TRUE;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -3336,54 +3370,6 @@ boolean
 
 }  /* val_merge */
 
-
-/********************************************************************
-* FUNCTION val_merge_meta
-* 
-* Merge src val metaQ into dest val metaQ 
-*
-* INPUTS:
-*    src == val w/ metaQ to merge from
-*
-*       !!! destructive -- entries will be moved, not copied !!!
-*
-*    dest == val w/ metaQ to merge into
-*
-*********************************************************************/
-void
-    val_merge_meta (val_value_t *src,
-		    val_value_t *dest)
-{
-    val_value_t     *m1, *m2;
-
-#ifdef DEBUG
-    if (!src || !dest) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    /* !!! does not support virtual variables at this time !!! */
-    if (src->getcb || dest->getcb) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
-    }
-
-    /* if attr exists (m2) then replace it, 
-     * otherwise just add the new entry (m1) to the dest metaQ
-     */
-    while (!dlq_empty(&src->metaQ)) {
-	m1 = dlq_deque(&src->metaQ);
-	m2 = val_find_meta(dest, m1->nsid, m1->name);
-	if (m2) {
-	    dlq_swap(m1, m2);
-	    val_free_value(m2);
-	} else {
-	    dlq_enque(m1, &dest->metaQ);
-	}
-    }
-
-}  /* val_merge_meta */
 
 
 /********************************************************************
@@ -3477,6 +3463,7 @@ val_value_t *
     copy->btyp = val->btyp;
     copy->flags = val->flags;
     copy->dataclass = val->dataclass;
+
     /* copy meta-data */
     for (ch = (const val_value_t *)dlq_firstEntry(&val->metaQ);
 	 ch != NULL;
@@ -3491,6 +3478,16 @@ val_value_t *
 	    }
 	} else {
 	    dlq_enque(copych, &copy->metaQ);
+	}
+    }
+
+    /* set the copy->insertstr */
+    if (val->insertstr) {
+	copy->insertstr = xml_strdup(val->insertstr);
+	if (!copy->insertstr) {
+	    *res = ERR_INTERNAL_MEM;
+	    val_free_value(copy);
+	    return NULL;
 	}
     }
 
@@ -3796,8 +3793,10 @@ void
     val->curparent = NULL;
     val->editop = OP_EDITOP_NONE;
     val->insertop = OP_INSOP_NONE;
-    val->insertstr = NULL;
-    val->res = NO_ERR;
+    if (val->insertstr) {
+	m__free(val->insertstr);
+	val->insertstr = NULL;
+    }
 
 }   /* val_clear_editvars */
 
@@ -3886,6 +3885,7 @@ void
 			       " from parent '%s'",
 			       testval->name, parent->name);
 		    dlq_remove(testval);
+		    testval->parent = NULL;
 		    dlq_enque(testval, cleanQ);
 		}
 	    }
@@ -3969,8 +3969,6 @@ void
     } else {
 	dlq_enque(child, &parent->v.childQ);
     }
-
-    val_clear_editvars(child);
 
 }   /* val_add_child_clean */
 

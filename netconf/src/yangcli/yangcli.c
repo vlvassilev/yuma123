@@ -201,6 +201,7 @@ date         init     comment
 #define YANGCLI_CURRENT_VALUE (const xmlChar *)"current-value"
 #define YANGCLI_DEF_MODULE  (const xmlChar *)"default-module"
 #define YANGCLI_DIR         (const xmlChar *)"dir"
+#define YANGCLI_EDIT_TARGET (const xmlChar *)"edit-target"
 #define YANGCLI_FROM_CLI    (const xmlChar *)"from-cli"
 #define YANGCLI_FROM_GLOBAL (const xmlChar *)"from-global"
 #define YANGCLI_FROM_LOCAL  (const xmlChar *)"from-local"
@@ -214,7 +215,9 @@ date         init     comment
 #define YANGCLI_NO_AUTOLOAD (const xmlChar *)"no-autoload"
 #define YANGCLI_NO_FIXORDER (const xmlChar *)"no-fixorder"
 #define YANGCLI_OBJECTS     (const xmlChar *)"objects"
+#define YANGCLI_OPERATION   (const xmlChar *)"operation"
 #define YANGCLI_OPTIONAL    (const xmlChar *)"optional"
+#define YANGCLI_ORDER       (const xmlChar *)"order"
 #define YANGCLI_PASSWORD    (const xmlChar *)"password"
 #define YANGCLI_PORT        (const xmlChar *)"port"
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
@@ -235,6 +238,7 @@ date         init     comment
 #define YANGCLI_DELETE  (const xmlChar *)"delete"
 #define YANGCLI_FILL    (const xmlChar *)"fill"
 #define YANGCLI_HELP    (const xmlChar *)"help"
+#define YANGCLI_INSERT  (const xmlChar *)"insert"
 #define YANGCLI_LOAD    (const xmlChar *)"load"
 #define YANGCLI_MERGE   (const xmlChar *)"merge"
 #define YANGCLI_PWD     (const xmlChar *)"pwd"
@@ -246,12 +250,10 @@ date         init     comment
 #define YANGCLI_SHOW    (const xmlChar *)"show"
 
 
-#define YANGCLI_NS_URI \
-    ((const xmlChar *)"http://netconfcentral.com/ncx/ncxcli")
-
-
+/* specialized prompts for the fill command */
 #define YANGCLI_PR_LLIST (const xmlChar *)"Add another leaf-list?"
 #define YANGCLI_PR_LIST (const xmlChar *)"Add another list?"
+
 
 /* forward decl needed by do_save function */
 static void
@@ -261,17 +263,11 @@ static void
 static void
     top_command (xmlChar *line);
 
+/* forward decl needed by send_copy_config_to_agent function */
 static void
     yangcli_reply_handler (ses_cb_t *scb,
 			  mgr_rpc_req_t *req,
 			   mgr_rpc_rpy_t *rpy);
-
-
-/********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
-*********************************************************************/
 
 
 /********************************************************************
@@ -4868,6 +4864,147 @@ static status_t
 
 
 /********************************************************************
+ * FUNCTION add_one_insert_attrs
+ * 
+ * Add the yang:insert attribute(s) to a value node
+ *
+ * INPUTS:
+ *    val == value node to set
+ *    insop == insert operation to use
+ *    edit_target == edit target to use for key or value attr
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    add_one_insert_attrs (val_value_t *val,
+			  op_insertop_t insop,
+			  const xmlChar *edit_target)
+{
+    const obj_template_t *operobj;
+    const xmlChar        *insopstr;
+    val_value_t          *metaval;
+    ncx_node_t            dtyp;
+    status_t              res;
+    xmlns_id_t            yangid;
+
+    yangid = xmlns_yang_id();
+
+    /* get the internal nc:operation object */
+    dtyp = NCX_NT_OBJ;
+    operobj = ncx_get_gen_string();
+    if (!operobj) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    insopstr = op_insertop_name(insop);
+
+    /* create a value node for the meta-value */
+    metaval = val_new_value();
+    if (!metaval) {
+	return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(metaval, operobj);
+    val_set_qname(metaval, yangid,
+		  YANG_K_INSERT,
+		  xml_strlen(YANG_K_INSERT));
+
+    /* set the meta variable value and other fields */
+    res = val_set_simval(metaval,
+			 metaval->typdef,
+			 yangid,
+			 YANG_K_INSERT,
+			 insopstr);
+    if (res != NO_ERR) {
+	val_free_value(metaval);
+	return res;
+    } else {
+	dlq_enque(metaval, &val->metaQ);
+    }
+
+    if (insop == OP_INSOP_BEFORE || insop == OP_INSOP_AFTER) {
+	/* create a value node for the meta-value */
+	metaval = val_new_value();
+	if (!metaval) {
+	    return ERR_INTERNAL_MEM;
+	}
+	val_init_from_template(metaval, operobj);
+
+	/* set the attribute name */
+	if (val->obj->objtype==OBJ_TYP_LEAF_LIST) {
+	    val_set_qname(metaval, yangid,
+			  YANG_K_VALUE,
+			  xml_strlen(YANG_K_VALUE));
+	} else {
+	    val_set_qname(metaval, yangid,
+			  YANG_K_KEY,
+			  xml_strlen(YANG_K_KEY));
+	}
+
+	/* set the meta variable value and other fields */
+	res = val_set_simval(metaval,
+			     metaval->typdef,
+			     yangid, NULL,
+			     edit_target);
+	if (res != NO_ERR) {
+	    val_free_value(metaval);
+	    return res;
+	} else {
+	    dlq_enque(metaval, &val->metaQ);
+	}
+    }	  
+
+    return NO_ERR;
+
+} /* add_one_insert_attrs */
+
+
+/********************************************************************
+ * FUNCTION add_insert_attrs
+ * 
+ * Add the yang:insert attribute(s) to a value node
+ *
+ * INPUTS:
+ *    val == value node to set
+ *    insop == insert operation to use
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    add_insert_attrs (val_value_t *val,
+		      op_insertop_t insop,
+		      const xmlChar *edit_target)
+{
+    val_value_t          *childval;
+    status_t              res;
+
+    res = NO_ERR;
+
+    switch (val->obj->objtype) {
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+	for (childval = val_get_first_child(val);
+	     childval != NULL;
+	     childval = val_get_next_child(childval)) {
+
+	    res = add_one_insert_attrs(childval, insop,
+				       edit_target);
+	    if (res != NO_ERR) {
+		return res;
+	    }
+	}
+	break;
+    default:
+	res = add_one_insert_attrs(val, insop, edit_target);
+    }
+
+    return res;
+
+} /* add_insert_attrs */
+
+
+/********************************************************************
  * FUNCTION do_create
  * 
  * Create some database object on the agent
@@ -4879,7 +5016,7 @@ static status_t
  *
  * OUTPUTS:
  *   the completed data node is output and
- *   is usually part of an assignment statement
+ *   an edit-config operation is sent to the agent
  *
  *********************************************************************/
 static void
@@ -4916,6 +5053,7 @@ static void
 	log_error("\nError: Creation of nc:operation"
 		  " attribute failed");
 	val_free_value(valset);
+	val_free_value(content);
 	return;
     }
 
@@ -4943,7 +5081,7 @@ static void
  *
  * OUTPUTS:
  *   the completed data node is output and
- *   is usually part of an assignment statement
+ *   an edit-config operation is sent to the agent
  *
  *********************************************************************/
 static void
@@ -4980,6 +5118,7 @@ static void
 	log_error("\nError: Creation of nc:operation"
 		  " attribute failed");
 	val_free_value(valset);
+	val_free_value(content);
 	return;
     }
 
@@ -5007,7 +5146,7 @@ static void
  *
  * OUTPUTS:
  *   the completed data node is output and
- *   is usually part of an assignment statement
+ *   an edit-config operation is sent to the agent
  *
  *********************************************************************/
 static void
@@ -5044,6 +5183,7 @@ static void
 	log_error("\nError: Creation of nc:operation"
 		  " attribute failed");
 	val_free_value(valset);
+	val_free_value(content);
 	return;
     }
 
@@ -5071,7 +5211,7 @@ static void
  *
  * OUTPUTS:
  *   the completed data node is output and
- *   is usually part of an assignment statement
+ *   an edit-config operation is sent to the agent
  *
  *********************************************************************/
 static void
@@ -5153,6 +5293,136 @@ static void
 
 
 /********************************************************************
+ * FUNCTION do_insert
+ * 
+ * Insert a database object on the agent
+ *
+ * INPUTS:
+ *    rpc == RPC method for the create command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * OUTPUTS:
+ *   the completed data node is output and
+ *   an edit-config operation is sent to the agent
+ *
+ *********************************************************************/
+static void
+    do_insert (const obj_template_t *rpc,
+	       const xmlChar *line,
+	       uint32  len)
+{
+    val_value_t      *valset, *content, *tempval;
+    const xmlChar    *edit_target;
+    op_editop_t       editop;
+    op_insertop_t     insertop;
+    status_t          res;
+
+    /* init locals */
+    res = NO_ERR;
+    content = NULL;
+
+    /* get the command line parameters for this command */
+    valset = get_valset(rpc, &line[len], &res);
+    if (!valset || res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
+	return;
+    }
+
+    /* get the contents specified in the 'from' choice */
+    content = get_content_from_choice(rpc, valset);
+    if (!content) {
+	val_free_value(valset);
+	return;
+    }
+
+    /* get the insert order */
+    tempval = val_find_child(valset, YANGCLI_MOD,
+			     YANGCLI_ORDER);
+    if (tempval && tempval->res == NO_ERR) {
+	insertop = op_insertop_id(VAL_ENUM_NAME(tempval));
+    } else {
+	insertop = OP_INSOP_LAST;
+    }
+
+    /* get the edit-config operation */
+    tempval = val_find_child(valset, YANGCLI_MOD,
+			     YANGCLI_OPERATION);
+    if (tempval && tempval->res == NO_ERR) {
+	editop = op_editop_id(VAL_ENUM_NAME(tempval));
+    } else {
+	editop = OP_EDITOP_MERGE;
+    }
+
+    /* get the edit-target parameter only if the
+     * order is 'before' or 'after'; ignore otherwise
+     */
+    tempval = val_find_child(valset, YANGCLI_MOD,
+			     YANGCLI_EDIT_TARGET);
+    if (tempval && tempval->res == NO_ERR) {
+	edit_target = VAL_STR(tempval);
+    } else {
+	edit_target = NULL;
+    }
+
+    /* check if the edit-target is needed */
+    switch (insertop) {
+    case OP_INSOP_BEFORE:
+    case OP_INSOP_AFTER:
+	if (!edit_target) {
+	    log_error("\nError: edit-target parameter missing");
+	    val_free_value(content);
+	    val_free_value(valset);
+	    return;
+	}
+	break;
+    default:
+	;
+    }
+
+    /* add nc:operation attribute to the value node */
+    res = add_operation_attr(content, editop);
+    if (res != NO_ERR) {
+	log_error("\nError: Creation of nc:operation"
+		  " attribute failed");
+    }
+
+    /* add yang:insert attribute and possibly a key or value
+     * attribute as well
+     */
+    if (res == NO_ERR) {
+	res = add_insert_attrs(content, insertop,
+			       edit_target);
+	if (res != NO_ERR) {
+	    log_error("\nError: Creation of yang:insert"
+		  " attribute(s) failed");
+	}
+    }
+
+    /* send the PDU, hand off the content node */
+    if (res == NO_ERR) {
+	/* construct an edit-config PDU with default parameters */
+	res = send_edit_config_to_agent(content);
+	if (res != NO_ERR) {
+	    log_error("\nError: send create operation failed (%s)",
+		      get_error_string(res));
+	}
+	content = NULL;
+    }
+
+    /* cleanup and exit */
+    if (content) {
+	val_free_value(content);
+    }
+
+    val_free_value(valset);
+
+}  /* do_insert */
+
+
+/********************************************************************
 * FUNCTION do_local_conn_command
 * 
 * Handle local connection mode RPC operations from yangcli.yang
@@ -5182,6 +5452,8 @@ static status_t
 	do_create(rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_DELETE)) {
 	do_delete(rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_INSERT)) {
+	do_insert(rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_MERGE)) {
 	do_merge(rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_REPLACE)) {

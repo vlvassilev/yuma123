@@ -48,6 +48,10 @@ date         init     comment
 #include  "xml_util.h"
 #endif
 
+#ifndef _H_yangconst
+#include  "yangconst.h"
+#endif
+
 /********************************************************************
 * FUNCTION op_method_name
 *
@@ -195,13 +199,13 @@ const xmlChar *
     case OP_INSOP_NONE:
 	return NCX_EL_NONE;
     case OP_INSOP_FIRST:
-	return (const xmlChar *)"first";
+	return YANG_K_FIRST;
     case OP_INSOP_LAST:
-	return (const xmlChar *)"last";
+	return YANG_K_LAST;
     case OP_INSOP_BEFORE:
-	return (const xmlChar *)"before";
+	return YANG_K_BEFORE;
     case OP_INSOP_AFTER:
-	return (const xmlChar *)"after";
+	return YANG_K_AFTER;
     default:
 	return (const xmlChar *) "illegal";
     }
@@ -228,16 +232,16 @@ op_insertop_t
     }
 #endif
 
-    if (!xml_strcmp(opstr, (const xmlChar *)"first")) {
+    if (!xml_strcmp(opstr, YANG_K_FIRST)) {
 	return OP_INSOP_FIRST;
     }
-    if (!xml_strcmp(opstr, (const xmlChar *)"last")) {
+    if (!xml_strcmp(opstr, YANG_K_LAST)) {
 	return OP_INSOP_LAST;
     }
-    if (!xml_strcmp(opstr, (const xmlChar *)"before")) {
+    if (!xml_strcmp(opstr, YANG_K_BEFORE)) {
 	return OP_INSOP_BEFORE;
     }
-    if (!xml_strcmp(opstr, (const xmlChar *)"after")) {
+    if (!xml_strcmp(opstr, YANG_K_AFTER)) {
 	return OP_INSOP_AFTER;
     }
     return OP_INSOP_NONE;

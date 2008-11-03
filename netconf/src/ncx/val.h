@@ -228,7 +228,8 @@ typedef struct val_value_t_ {
     struct val_value_t_  *curparent;      
     op_editop_t    editop;            /* effective edit operation */
     op_insertop_t  insertop;             /* YANG insert operation */
-    const xmlChar *insertstr;        /* bptr to value or key attr */
+    xmlChar       *insertstr;          /* saved value or key attr */
+    boolean        iskey;                     /* T: key, F: value */
     status_t       res;      /* edit result for continue-on-error */
 
     /* Used by Agent only:
@@ -454,6 +455,9 @@ extern const val_value_t *
     val_get_first_meta (const dlq_hdr_t *queue);
 
 extern const val_value_t *
+    val_get_first_meta_val (const val_value_t *val);
+
+extern const val_value_t *
     val_get_next_meta (const val_value_t *curmeta);
 
 extern boolean
@@ -533,12 +537,6 @@ extern val_value_t *
 extern boolean
     val_merge (val_value_t *src,
 	       val_value_t *dest);
-
-
-/* just merge src->metaQ into dest->metaQ */
-extern void
-    val_merge_meta (val_value_t *src,
-		    val_value_t *dest);
 
 extern val_value_t *
     val_clone (const val_value_t *val);

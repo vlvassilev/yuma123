@@ -256,6 +256,7 @@ static void
 *   attrQ == Q of xml_attr_t or val_value_t to write
 *   isattrq == TRUE for Q of xml_attr_t
 *           == FALSE for Q of val_value_t
+*    curelem == value node for current element, if available
 *   indent == actual indent amount; xml_wr_indent will not be checked
 *   elem_nsid == namespace ID of the parent element
 *
@@ -265,6 +266,7 @@ static void
 		 xml_msg_hdr_t *msg,
 		 const dlq_hdr_t *attrQ,
 		 boolean isattrq,
+		 const val_value_t  *curelem,
 		 int32 indent,
 		 xmlns_id_t elem_nsid)
 {
@@ -324,7 +326,9 @@ static void
 	} else if (attr_nsid) {
 	    /* prefix:attribute-name format */
 	    pfix = xml_msg_get_prefix(msg, elem_nsid, 
-				      attr_nsid, &xneeded);
+				      attr_nsid, 
+				      curelem,
+				      &xneeded);
 	    if (xneeded) {
 		write_xmlns_decl(scb, pfix, attr_nsid, indent);
 	    }
@@ -446,7 +450,8 @@ void
 
     /* start the element and write the prefix, if any */
     ses_putchar(scb, '<');
-    pfix = xml_msg_get_prefix(msg, parent_nsid, nsid, &xneeded);
+    pfix = xml_msg_get_prefix(msg, parent_nsid,
+			      nsid, NULL, &xneeded);
     if (pfix) {
 	ses_putstr(scb, pfix);
 	ses_putchar(scb, ':');
@@ -460,7 +465,8 @@ void
 	    indent += ses_indent_count(scb);
 	}
 	if (attrQ) {
-	    write_attrs(scb, msg, attrQ, isattrq, indent, nsid);
+	    write_attrs(scb, msg, attrQ, isattrq, 
+			NULL, indent, nsid);
 	}
 	if (xneeded) {
 	    if (!attrQ || dlq_empty(attrQ)) {
@@ -483,6 +489,95 @@ void
     }
 
 }  /* xml_wr_begin_elem_ex */
+
+
+/********************************************************************
+* FUNCTION xml_wr_begin_elem_val
+*
+* Write a start or empty XML tag to the specified session
+*
+* INPUTS:
+*   scb == session control block
+*   msg == top header from message in progress
+*   val  == value node to use
+*   indent == number of chars to indent after a newline
+*           == -1 means no newline or indent
+*           == 0 means just newline
+*   empty == TRUE for empty node
+*         == FALSE for start node
+*
+* RETURNS:
+*   none
+*********************************************************************/
+void
+    xml_wr_begin_elem_val (ses_cb_t *scb,
+			   xml_msg_hdr_t *msg,
+			   const val_value_t *val,
+			   int32 indent,
+			   boolean empty)
+{
+    const xmlChar       *pfix, *elname;
+    const dlq_hdr_t     *attrQ;
+    boolean              xneeded;
+    xmlns_id_t           nsid, parent_nsid;
+
+#ifdef DEBUG
+    if (!scb || !msg || !val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    elname = val->name;
+    nsid = val->nsid;
+    attrQ = &val->metaQ;
+    if (val->parent) {
+	parent_nsid = val->parent->nsid;
+    } else {
+	parent_nsid = 0;
+    }
+
+    ses_indent(scb, indent);
+
+    /* start the element and write the prefix, if any */
+    ses_putchar(scb, '<');
+    pfix = xml_msg_get_prefix(msg, parent_nsid, nsid, val, &xneeded);
+    if (pfix) {
+	ses_putstr(scb, pfix);
+	ses_putchar(scb, ':');
+    }
+
+    /* write the element name */
+    ses_putstr(scb, elname);
+
+    if (xneeded || (attrQ && !dlq_empty(attrQ))) {
+	if (indent >= 0) {
+	    indent += ses_indent_count(scb);
+	}
+	if (attrQ) {
+	    write_attrs(scb, msg, attrQ, FALSE, val, indent, nsid);
+	}
+	if (xneeded) {
+	    if (!attrQ || dlq_empty(attrQ)) {
+		indent = -1;
+	    }
+	    write_xmlns_decl(scb, pfix, nsid, indent);
+	}
+    }
+
+    /* finish up the element */
+    if (empty) {
+	ses_putchar(scb, '/');
+    }
+    ses_putchar(scb, '>');
+
+    /* hack in XMLDOC mode to get more readable XSD output */
+    if (empty && scb->mode==SES_MODE_XMLDOC && indent < 
+	(3*ses_indent_count(scb))) {
+	ses_putchar(scb, '\n');
+    }
+
+}  /* xml_wr_begin_elem_val */
 
 
 /********************************************************************
@@ -590,7 +685,7 @@ void
     /* start the element and write the prefix, if any */
     ses_putchar(scb, '<');
     ses_putchar(scb, '/');
-    pfix = xml_msg_get_prefix(msg, 0, nsid, &xneeded);
+    pfix = xml_msg_get_prefix(msg, 0, nsid, NULL, &xneeded);
     if (pfix) {
 	ses_putstr(scb, pfix);
 	ses_putchar(scb, ':');
@@ -609,137 +704,6 @@ void
     }
 
 }  /* xml_wr_end_elem */
-
-
-#if 0
-/********************************************************************
-* FUNCTION xml_wr_begin_app_elem
-*
-* Write a start or empty XML tag to the specified session
-*
-* INPUTS:
-*   scb == session control block
-*   msg == message in progress
-*   app == cfg_app_t to print
-*   indent == number of chars to indent after a newline
-*           == -1 means no newline or indent
-*           == 0 means just newline
-*   empty == TRUE for empty node
-*         == FALSE for start node
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    xml_wr_begin_app_elem (ses_cb_t *scb,
-			   xml_msg_hdr_t *msg,
-			   const cfg_app_t *app,
-			   int32 indent,
-			   boolean empty)
-{
-    xmlns_id_t        nsid, lastdef;
-    status_t          res;
-
-
-#ifdef DEBUG
-    if (!scb || !msg || !app) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    nsid = app->appdef->nsid;
-
-    lastdef = msg->last_defns;
-
-    msg->last_defns = msg->defns;
-    msg->defns = nsid;
-
-    res = xml_msg_gen_new_prefix(msg, msg->last_defns, 
-				 &msg->last_defpfix,
-				 XML_MSG_PREFIX_SIZE+1);
-    if (res != NO_ERR) {
-	msg->defns = msg->last_defns;
-	msg->last_defns = lastdef;
-	SET_ERROR(res);
-	return;
-    }
-
-    ses_indent(scb, indent);
-
-    /* start the element and write the prefix, if any */
-    ses_putchar(scb, '<');
-
-    /* write the application name */
-    ses_putstr(scb, app->appdef->appname);
-
-    write_xmlns_decl(scb, NULL, nsid, -1);
-
-    if (indent >=0) {
-	indent += ses_indent_count(scb);
-    }
-
-    if (msg->last_defns) {
-	write_xmlns_decl(scb, msg->last_defpfix, 
-			 msg->last_defns, indent);    
-    }
-
-    /* finish up the element */
-    if (empty) {
-	ses_putchar(scb, '/');
-    }
-    ses_putchar(scb, '>');
-
-}  /* xml_wr_begin_app_elem */
-
-
-/********************************************************************
-* FUNCTION xml_wr_end_app_elem
-*
-* Write an end tag to the specified session
-*
-* INPUTS:
-*   scb == session control block to start msg 
-*   msg == header from message in progress
-*   app == cfg_app_t to end
-*   indent == number of chars to indent after a newline
-*           == -1 means no newline or indent
-*           == 0 means just newline
-*
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    xml_wr_end_app_elem (ses_cb_t *scb,
-		      xml_msg_hdr_t *msg,
-		      const cfg_app_t  *app,
-		      int32 indent)
-{
-
-#ifdef DEBUG
-    if (!scb || !msg || !app) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    ses_indent(scb, indent);
-
-    /* start the element and write the prefix, if any */
-    ses_putchar(scb, '<');
-    ses_putchar(scb, '/');
-
-    /* write the element name */
-    ses_putstr(scb, app->appdef->appname);
-	
-    /* finish up the element */
-    ses_putchar(scb, '>');
-
-    msg->defns = msg->last_defns;
-    msg->last_defns = 0;
-    msg->last_defpfix[0] = 0;
-
-}  /* xml_wr_end_app_elem */
-#endif  /*** 0 ***/
 
 
 /********************************************************************
@@ -912,7 +876,8 @@ void
 			 indent, FALSE);
 
     /* counting on xmlns decl to be in <rpc-error> parent node */
-    pfix = xml_msg_get_prefix(msg, parent_nsid, val_nsid, &xneeded);
+    pfix = xml_msg_get_prefix(msg, parent_nsid, val_nsid, 
+			      NULL, &xneeded);
     if (pfix) {
 	ses_putstr(scb, pfix);
 	ses_putchar(scb, XMLNS_SEPCH);
@@ -1120,28 +1085,27 @@ void
 	    }
 
 	    /* print the list member content as a string */
-	    switch (listbtyp) {
-	    case NCX_BT_STRING:
-	    case NCX_BT_KEYREF:
-	    case NCX_BT_INSTANCE_ID:
-	    case NCX_BT_BITS:
+	    if (typ_is_string(listbtyp)) {
 		ses_putcstr(scb, listmem->val.str, indent);
-		break;
-	    case NCX_BT_ENUM:
-		ses_putstr(scb, listmem->val.enu.name); 
-		break;
-	    case NCX_BT_BOOLEAN:
-		ses_putcstr(scb,
-			    (listmem->val.bool) ?
-			    NCX_EL_TRUE : NCX_EL_FALSE,
-			    indent);
-		break;
-	    default:
-		if (typ_is_number(listbtyp)) {
-		    (void)ncx_sprintf_num(buff, &listmem->val.num, 
-					  listbtyp, &len);
-		    ses_putcstr(scb, buff, indent);
-		} else {
+	    } else if (typ_is_number(listbtyp)) {
+		(void)ncx_sprintf_num(buff, &listmem->val.num, 
+				      listbtyp, &len);
+		ses_putcstr(scb, buff, indent);
+	    } else {
+		switch (listbtyp) {
+		case NCX_BT_BITS:
+		    ses_putstr(scb, listmem->val.bit.name);
+		    break;
+		case NCX_BT_ENUM:
+		    ses_putstr(scb, listmem->val.enu.name); 
+		    break;
+		case NCX_BT_BOOLEAN:
+		    ses_putcstr(scb,
+				(listmem->val.bool) ?
+				NCX_EL_TRUE : NCX_EL_FALSE,
+				indent);
+		    break;
+		default:
 		    SET_ERROR(ERR_INTERNAL_VAL);
 		}
 	    }
@@ -1202,11 +1166,8 @@ void
 		    empty = TRUE;
 		}
 	    }
-	    xml_wr_begin_elem_ex(scb, msg, 
-				 useval->nsid,
-				 usechval->nsid, 
-				 usechval->name, &usechval->metaQ, 
-				 FALSE, indent, empty);
+	    xml_wr_begin_elem_val(scb, msg, usechval,
+				  indent, empty);
 
 	    /* check corner-case; empty application placeholder */
 	    if (!empty) {
@@ -1325,11 +1286,7 @@ void
     if (val_has_content(out)) {
 
 	/* write the top-level start node */
-	xml_wr_begin_elem_ex(scb, msg,
-			     val_get_parent_nsid(out),
-			     out->nsid, out->name, 
-			     &out->metaQ, METAQ, 
-			     indent, START);
+	xml_wr_begin_elem_val(scb, msg, out, indent, START);
 
 	/* write the value node contents */
 	xml_wr_check_val(scb, msg, out, 
@@ -1340,11 +1297,7 @@ void
 			fit_on_line(scb, out) ? -1 : indent);
     } else {
 	/* write the top-level empty node */
-	xml_wr_begin_elem_ex(scb, msg,
-			     val_get_parent_nsid(out),
-			     out->nsid, out->name, 
-			     &out->metaQ, METAQ, 
-			     indent, EMPTY);
+	xml_wr_begin_elem_val(scb, msg, out, indent, EMPTY);
     }
 
     if (vir) {

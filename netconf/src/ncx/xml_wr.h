@@ -88,6 +88,14 @@ extern void
 			  int32 indent,
 			  boolean empty);
 
+
+extern void
+    xml_wr_begin_elem_val (ses_cb_t *scb,
+			   xml_msg_hdr_t *msg,
+			   const val_value_t *val,
+			   int32 indent,
+			   boolean empty);
+
 extern void
     xml_wr_begin_elem (ses_cb_t *scb,
 		       xml_msg_hdr_t *msg,

@@ -1774,6 +1774,9 @@ static status_t
 	    } else {
 		/* skip child worked, go on to next child, parse for errors */
 		retres = res;
+		if (NEED_EXIT || res==ERR_XML_READER_EOF) {
+		    done = TRUE;
+		}
 		continue;
 	    }
 	}
@@ -1787,6 +1790,10 @@ static status_t
 	chval->res = res;
 	if (res != NO_ERR) {
 	    retres = res;
+	    if (NEED_EXIT || res==ERR_XML_READER_EOF) {
+		done = TRUE;
+		continue;
+	    }
 	}
 
 	/* setup the next child unless the current child
@@ -1869,7 +1876,7 @@ static status_t
     val_value_t             *metaval;
     xmlns_id_t               ncid, yangid;
     status_t                 res, retres;
-    boolean                  iskey, isvalue;
+
 
     retres = NO_ERR;
     ncid =  xmlns_nc_id();
@@ -1892,10 +1899,7 @@ static status_t
 
 	/* init per-loop locals */
 	res = NO_ERR;
-	meta = NULL;
 	metadef = NULL;
-	iskey = FALSE;
-	isvalue = FALSE;
 
 	/* check qualified and unqualified operation attribute,
 	 * then the 'xmlns' attribute, then a defined attribute
@@ -1915,9 +1919,31 @@ static status_t
 		continue;
 	    }
 	} else if (val_match_metaval(attr, yangid, YANG_K_KEY)) {
-	    iskey = TRUE;
+	    if (!retval->insertstr) {
+		retval->iskey = TRUE;
+		retval->insertstr = xml_strdup(attr->attr_val);
+		if (!retval->insertstr) {
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    continue;
+		}
+	    } else {
+		/* insert and key both entered */
+		res = ERR_NCX_EXTRA_ATTR;
+	    }
 	} else if (val_match_metaval(attr, yangid, YANG_K_VALUE)) {
-	    isvalue = TRUE;
+	    if (!retval->insertstr) {
+		retval->iskey = FALSE;
+		retval->insertstr = xml_strdup(attr->attr_val);
+		if (!retval->insertstr) {
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    continue;
+		}
+	    } else {
+		/* insert and key both entered */
+		res = ERR_NCX_EXTRA_ATTR;
+	    }
 	} else {
 	    /* find the attribute definition in this typdef */
 	    meta = obj_find_metadata(obj, attr->attr_name);
@@ -1928,12 +1954,12 @@ static status_t
 	    }
 	}
 
-	if (iskey || isvalue) {
-	    metadef = typ_get_basetype_typdef(NCX_BT_STRING);
-	}
-
 	if (metadef) {
-	    /* alloc a new value struct for rhe attribute */
+	    /* alloc a new value struct for the attribute
+	     * do not save the operation, insert, key, or
+	     * value attributes from NETCONF and YANG
+	     * these must not persist in the database contents
+	     */
 	    metaval = val_new_value();
 	    if (!metaval) {
 		res = ERR_INTERNAL_MEM;
@@ -1948,7 +1974,7 @@ static status_t
 		    val_free_value(metaval);
 		}
 	    }
-	} else {
+	} else if (res == NO_ERR) {
 	    res = ERR_NCX_UNKNOWN_ATTRIBUTE;
 	}
 
@@ -1992,7 +2018,6 @@ static status_t
 			 val_value_t  *val)
 {
     const obj_metadata_t *meta;
-    val_value_t          *metaval;
     obj_type_t            objtype;
     uint32                insertcnt, cnt, checkcnt;
     status_t              res;
@@ -2037,62 +2062,60 @@ static status_t
     if (insertcnt && 
 	(!(objtype==OBJ_TYP_LIST || objtype==OBJ_TYP_LEAF_LIST))) {
 	res = ERR_NCX_EXTRA_ATTR;
+	qname.nsid = yangid;
+	qname.name = YANG_K_INSERT;
 	agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
-			 NULL, NCX_NT_STRING, YANG_K_INSERT, 
+			 NULL, NCX_NT_QNAME, &qname, 
 			 NCX_NT_VAL, val);
     }
 
     /* check the inst count of the YANG attributes
      * key attribute allowed for list only
      */
-    cnt = val_metadata_inst_count(val, yangid, YANG_K_KEY);
-    if (cnt > checkcnt || 
-	(cnt && val->obj->objtype != OBJ_TYP_LIST)) {
-
-	res = ERR_NCX_EXTRA_ATTR;
-	agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
-			 NULL, NCX_NT_STRING, YANG_K_KEY, 
-			 NCX_NT_VAL, val);
-    } else if (cnt) {
-	metaval = val_find_meta(val, yangid, YANG_K_KEY);
-	if (metaval) {
-	    val->insertstr = VAL_STR(metaval);
+    if (res == NO_ERR && val->insertstr) {
+	if (val->iskey) {
+	    if (!checkcnt || val->obj->objtype != OBJ_TYP_LIST) {
+		res = ERR_NCX_EXTRA_ATTR;
+		qname.nsid = yangid;
+		qname.name = YANG_K_KEY;
+		agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
+				 NULL, NCX_NT_QNAME, &qname, 
+				 NCX_NT_VAL, val);
+	    }
 	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
+	    if (!checkcnt || val->obj->objtype != OBJ_TYP_LEAF_LIST) {
+		res = ERR_NCX_EXTRA_ATTR;
+		qname.nsid = yangid;
+		qname.name = YANG_K_VALUE;
+		agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
+				 NULL, NCX_NT_QNAME, &qname, 
+				 NCX_NT_VAL, val);
+	    }
 	}
-    } else if (val->obj->objtype==OBJ_TYP_LIST &&
-	       (val->insertop==OP_INSOP_BEFORE ||
-		val->insertop==OP_INSOP_AFTER)) {
-	/* the key attribute is missing */
-	res = ERR_NCX_MISSING_ATTR;
-	agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
-			 NULL, NCX_NT_STRING, YANG_K_KEY, 
-			 NCX_NT_VAL, val);
     }
 
-    /* value attribute allowed for leaf-list only */
-    cnt = val_metadata_inst_count(val, yangid, YANG_K_VALUE);
-    if (cnt > checkcnt ||
-	(cnt && val->obj->objtype != OBJ_TYP_LEAF_LIST)) {
-	res = ERR_NCX_EXTRA_ATTR;
-	agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
-			 NULL, NCX_NT_STRING, YANG_K_VALUE, 
-			 NCX_NT_VAL, val);
-    } else if (cnt) {
-	metaval = val_find_meta(val, yangid, YANG_K_VALUE);
-	if (metaval) {
-	    val->insertstr = VAL_STR(metaval);
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
+    /* check missing value or key attributes */
+    if (res == NO_ERR && !val->insertstr &&
+	(val->insertop==OP_INSOP_BEFORE ||
+	 val->insertop==OP_INSOP_AFTER)) {
+
+	if (val->obj->objtype == OBJ_TYP_LEAF_LIST) {
+	    /* the value attribute is missing */
+	    res = ERR_NCX_MISSING_ATTR;
+	    qname.nsid = yangid;
+	    qname.name = YANG_K_VALUE;
+	    agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
+			     NULL, NCX_NT_QNAME, &qname, 
+			     NCX_NT_VAL, val);
+	} else if (val->obj->objtype == OBJ_TYP_LIST) {
+	    /* the key attribute is missing */
+	    res = ERR_NCX_MISSING_ATTR;
+	    qname.nsid = yangid;
+	    qname.name = YANG_K_KEY;
+	    agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
+			     NULL, NCX_NT_QNAME, &qname, 
+			     NCX_NT_VAL, val);
 	}
-    } else if (val->obj->objtype==OBJ_TYP_LEAF_LIST &&
-	       (val->insertop==OP_INSOP_BEFORE ||
-		val->insertop==OP_INSOP_AFTER)) {
-	/* the value attribute is missing */
-	res = ERR_NCX_MISSING_ATTR;
-	agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
-			 NULL, NCX_NT_STRING, YANG_K_VALUE, 
-			 NCX_NT_VAL, val);
     }
 
     /* check more than 1 of each specified metaval
@@ -2101,7 +2124,7 @@ static status_t
      * way before this test gets to run
      */
     for (meta = obj_first_metadata(val->obj);
-	 meta != NO_ERR;
+	 meta != NULL;
 	 meta = obj_next_metadata(meta)) {
 
 	/* check the instance qualifier from the metadata
@@ -2118,6 +2141,7 @@ static status_t
 			     NCX_NT_VAL, val);
 	}
     }
+
     return res;
 
 } /* metadata_inst_check */

@@ -1304,6 +1304,8 @@ static status_t
 
 	/* check any errors in setting up the child node */
 	if (res != NO_ERR) {
+	    retres = res;
+
 
 	    /* try to skip just the child node sub-tree */
 	    xml_clean_node(&chnode);
@@ -1311,15 +1313,13 @@ static status_t
 		val_free_value(chval);
 		chval = NULL;
 	    }
-	    if (res2 != NO_ERR) {
-		/* skip child didn't work, now skip the entire value subtree */
-		(void)mgr_xml_skip_subtree(scb->reader, startnode);
-		return res;
+	    if (NEED_EXIT || res == ERR_XML_READER_EOF) {
+		done = TRUE;
 	    } else {
-		/* skip child worked, go on to next child, parse for errors */
-		retres = res;
-		continue;
+		/* skip the entire value subtree */
+		(void)mgr_xml_skip_subtree(scb->reader, startnode);
 	    }
+	    continue;
 	}
 
 	/* recurse through and get whatever nodes are present
@@ -1348,6 +1348,10 @@ static status_t
 	} else {
 	    /* did not parse the child node correctly */
 	    retres = res;
+	    if (NEED_EXIT || res==ERR_XML_READER_EOF) {
+		done = TRUE;
+		continue;
+	    }
 	}
 	xml_clean_node(&chnode);
 
@@ -1368,7 +1372,7 @@ static status_t
     }
 
     /* check if the index ID needs to be set */
-    if (btyp==NCX_BT_LIST) {
+    if (retres==NO_ERR && btyp==NCX_BT_LIST) {
 	res = gen_index_chain(obj_first_key(obj), retval);
 	if (res != NO_ERR) {
 	    retres = res;
@@ -1572,6 +1576,7 @@ static status_t
 
 	/* check any errors in setting up the child node */
 	if (res != NO_ERR) {
+	    retres = res;
 
 	    /* try to skip just the child node sub-tree */
 	    xml_clean_node(&chnode);
@@ -1579,15 +1584,13 @@ static status_t
 		val_free_value(chval);
 		chval = NULL;
 	    }
-	    if (res2 != NO_ERR) {
-		/* skip child didn't work, now skip the entire value subtree */
-		(void)mgr_xml_skip_subtree(scb->reader, startnode);
-		return res;
+	    if (NEED_EXIT || res==ERR_XML_READER_EOF) {
+		done = TRUE;
 	    } else {
-		/* skip child worked, go on to next child, parse for errors */
-		retres = res;
-		continue;
+		/* skip the entire value subtree */
+		(void)mgr_xml_skip_subtree(scb->reader, startnode);
 	    }
+	    continue;
 	}
 
 	/* recurse through and get whatever nodes are present
@@ -1619,6 +1622,9 @@ static status_t
 	} else {
 	    /* did not parse the child node correctly */
 	    retres = res;
+	    if (NEED_EXIT || res==ERR_XML_READER_EOF) {
+		done = TRUE;
+	    }
 	}
 	xml_clean_node(&chnode);
 
@@ -1639,7 +1645,7 @@ static status_t
     }
 
     /* check if the index ID needs to be set */
-    if (btyp==NCX_BT_LIST) {
+    if (retres==NO_ERR && btyp==NCX_BT_LIST) {
 	res = gen_index_chain(obj_first_key(obj), retval);
 	if (res != NO_ERR) {
 	    retres = res;

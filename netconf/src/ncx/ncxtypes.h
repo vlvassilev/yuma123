@@ -242,11 +242,9 @@ typedef enum ncx_squal_t_ {
 /* Enumeration of string restriction types */
 typedef enum ncx_strrest_t_ {
     NCX_SR_NONE,
-    NCX_SR_VALSET,  
     NCX_SR_PATTERN,
     NCX_SR_ENUM,
-    NCX_SR_BIT,
-    NCX_SR_PATH
+    NCX_SR_BIT
 }  ncx_strrest_t;
 
 

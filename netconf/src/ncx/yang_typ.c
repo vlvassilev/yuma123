@@ -105,6 +105,10 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
 #ifndef _H_yangconst
 #include "yangconst.h"
 #endif
@@ -233,7 +237,7 @@ static status_t
      */
     pat = typ_get_first_pattern(newdef);
     if (pat) {
-	if (!(btyp == NCX_BT_STRING || btyp == NCX_BT_KEYREF)) {
+	if (btyp != NCX_BT_STRING) {
 	    log_error("\nError: keyword 'pattern' "
 		      "within a restriction for a %s type",
 		      tk_get_btype_sym(btyp));
@@ -252,14 +256,6 @@ static status_t
 	case NCX_SR_BIT:
 	    if (btyp != NCX_BT_BITS) {
 		log_error("\nError: keyword 'bit' "
-			  "within a restriction for a %s type",
-			  tk_get_btype_sym(btyp));
-		doerr = TRUE;
-	    }
-	    break;
-	case NCX_SR_PATH:
-	    if (btyp != NCX_BT_KEYREF) {
-		log_error("\nError: keyword 'path' "
 			  "within a restriction for a %s type",
 			  tk_get_btype_sym(btyp));
 		doerr = TRUE;
@@ -1988,7 +1984,7 @@ static status_t
 			ncx_module_t *mod,
 			typ_def_t *typdef)
 {
-    typ_sval_t    *sv;
+    typ_simple_t  *sim;
     const xmlChar *val;
     const char    *expstr;
     tk_type_t      tktyp;
@@ -2000,6 +1996,8 @@ static status_t
     res = NO_ERR;
     retres = NO_ERR;
     done = FALSE;
+
+    sim = &typdef->def.simple;
 
     while (!done) {
 
@@ -2042,7 +2040,6 @@ static status_t
 		log_error("\nError: path statement already entered");
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
-	    pathdone = TRUE;
 
 	    /* get the path string value and save it */
 	    res = TK_ADV(tkc);
@@ -2051,22 +2048,37 @@ static status_t
 		return res;
 	    }
 
+	    /* store, parse, and validate that the keyref
+	     * is well-formed. Do not check the objects
+	     * in the path string until later
+	     */
 	    if (TK_CUR_STR(tkc)) {
-		/* save the path string in the typdef valQ */
-		sv = typ_new_sval(TK_CUR_VAL(tkc), NCX_BT_STRING);
-		if (!sv) {
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		    return res;
-		} else {
-		    dlq_enque(sv, &typdef->def.simple.valQ);
-		    typdef->def.simple.strrest = NCX_SR_PATH;
+		/* create an XPath parser control block and
+		 *  store the path string there
+		 */
+		if (!pathdone) {
+		    sim->xkeyref = xpath_new_pcb(TK_CUR_VAL(tkc));
+		    if (!sim->xkeyref) {
+			res = ERR_INTERNAL_MEM;
+			ncx_print_errormsg(tkc, mod, res);
+			return res;
+		    } else {
+			res = xpath_parse_keyref_path(tkc, 
+						      mod, 
+						      sim->xkeyref);
+			if (res != NO_ERR) {
+			    /* errors already reported */
+			    retres = res;
+			}
+		    }
 		}
 	    } else {
 		retres = ERR_NCX_WRONG_TKTYPE;
 		expstr = "path string";
 		ncx_mod_exp_err(tkc, mod, retres, expstr);
 	    }
+
+	    pathdone = TRUE;
 
 	    res = yang_consume_semiapp(tkc, mod, &typdef->appinfoQ);
 	    CHK_EXIT;

@@ -913,6 +913,573 @@ static status_t
 }  /* find_val_node */
 
 
+/********************************************************************
+* FUNCTION parse_token
+* 
+* Parse the keyref token sequence for a specific token type
+* It has already been tokenized
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*    tktyp == expected token type
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    parse_token (xpath_pcb_t *pcb,
+		 tk_type_t  tktype)
+{
+    status_t     res;
+
+    /* get the next token */
+    res = TK_ADV(pcb->tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	return res;
+    }
+
+    if (TK_CUR_TYP(pcb->tkc) != tktype) {
+	res = ERR_NCX_WRONG_TKTYPE;
+	ncx_mod_exp_err(pcb->tkc, pcb->mod, res,
+			tk_get_token_name(tktype));
+	return res;
+    }
+
+    return NO_ERR;
+
+}  /* parse_token */
+
+
+/********************************************************************
+* FUNCTION parse_node_identifier
+* 
+* Parse the keyref node-identifier string
+* It has already been tokenized
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* node-identifier        = [prefix ":"] identifier
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    parse_node_identifier (xpath_pcb_t *pcb)
+{
+    status_t     res;
+
+    res = NO_ERR;
+
+    /* get the next token in the step, node-identifier */
+    res = TK_ADV(pcb->tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	return res;
+    }
+
+    switch (TK_CUR_TYP(pcb->tkc)) {
+    case TK_TT_MSTRING:
+	/* pfix:identifier */
+	if (!pcb->mod->prefix ||
+	    xml_strcmp(pcb->mod->prefix, TK_CUR_MOD(pcb->tkc))) {
+
+	    if (!ncx_find_pre_import(pcb->mod,
+				     TK_CUR_MOD(pcb->tkc))) {
+		res = ERR_NCX_PREFIX_NOT_FOUND;
+		log_error("\nError: import for prefix '%s' not found",
+			  TK_CUR_MOD(pcb->tkc));
+		ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	    }
+	}
+	if (pcb->obj) {
+	    ;  /***/
+	} /* else prefix:identifier not checked here */
+	break;
+    case TK_TT_TSTRING:
+	if (pcb->obj) {
+	    ;  /***/
+	} /* else identifier not checked here */
+	break;
+    default:
+	res = ERR_NCX_WRONG_TKTYPE;
+	ncx_mod_exp_err(pcb->tkc, pcb->mod, res,
+			tk_get_token_name(TK_CUR_TYP(pcb->tkc)));
+    }
+
+    return res;
+
+}  /* parse_node_identifier */
+
+
+/********************************************************************
+* FUNCTION parse_current_fn
+* 
+* Parse the keyref current-function token sequence
+* It has already been tokenized
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* current-function-invocation = 'current()'
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    parse_current_fn (xpath_pcb_t *pcb)
+{
+    status_t     res;
+
+    /* get the function name 'current' */
+    res = parse_token(pcb, TK_TT_TSTRING);
+    if (res != NO_ERR) {
+	return res;
+    }
+    if (xml_strcmp(TK_CUR_VAL(pcb->tkc),
+		   (const xmlChar *)"current")) {
+	res = ERR_NCX_WRONG_VAL;
+	ncx_mod_exp_err(pcb->tkc, pcb->mod, res,
+			"current() function");
+	return res;
+    }
+
+    /* get the left paren '(' */
+    res = parse_token(pcb, TK_TT_LPAREN);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* get the right paren ')' */
+    res = parse_token(pcb, TK_TT_RPAREN);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    return NO_ERR;
+
+}  /* parse_current_fn */
+
+
+/********************************************************************
+* FUNCTION parse_path_key_expr
+* 
+* Parse the keyref *path-key-expr token sequence
+* It has already been tokenized
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* path-key-expr          = current-function-invocation "/"
+*                          rel-path-keyexpr
+*
+* rel-path-keyexpr       = 1*(".." "/") *(node-identifier "/")
+*                          node-identifier
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    parse_path_key_expr (xpath_pcb_t *pcb)
+{
+    tk_type_t    nexttyp;
+    status_t     res;
+    boolean      done;
+
+    res = NO_ERR;
+    done = FALSE;
+
+    /* get the current function call 'current()' */
+    res = parse_current_fn(pcb);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* get the path separator '/' */
+    res = parse_token(pcb, TK_TT_FSLASH);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* make one loop for each step of the first part of
+     * the rel-path-keyexpr; the '../' token pairs
+     */
+    while (!done) {
+	/* get the parent marker '..' */
+	res = parse_token(pcb, TK_TT_RANGESEP);
+	if (res != NO_ERR) {
+	    done = TRUE;
+	    continue;
+	}
+
+	/* get the path separator '/' */
+	res = parse_token(pcb, TK_TT_FSLASH);
+	if (res != NO_ERR) {
+	    done = TRUE;
+	    continue;
+	}
+
+	/* check the next token;
+	 * it may be the start of another '../' pair
+	 */
+	nexttyp = tk_next_typ(pcb->tkc);
+	if (nexttyp != TK_TT_RANGESEP) {
+	    done = TRUE;
+	} /* else keep going to the next '../' pair */
+    }
+
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* get the node-identifier sequence */
+    done = FALSE;
+    while (!done) {
+	res = parse_node_identifier(pcb);
+	if (res != NO_ERR) {
+	    done = TRUE;
+	    continue;
+	}
+
+	/* check the next token;
+	 * it may be the fwd slash to start another step
+	 */
+	nexttyp = tk_next_typ(pcb->tkc);
+	if (nexttyp != TK_TT_FSLASH) {
+	    done = TRUE;
+	} else {
+	    res = parse_token(pcb, TK_TT_FSLASH);
+	    if (res != NO_ERR) {
+		done = TRUE;
+	    }
+	}
+    }
+
+    return res;
+
+}  /* parse_path_key_expr */
+
+
+/********************************************************************
+* FUNCTION parse_path_predicate
+* 
+* Parse the keyref *path-predicate token sequence
+* It has already been tokenized
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* path-predicate         = "[" *WSP path-equality-expr *WSP "]"
+*
+* path-equality-expr     = node-identifier *WSP "=" *WSP path-key-expr
+*
+* path-key-expr          = current-function-invocation "/"
+*                          rel-path-keyexpr
+*
+* node-identifier        = [prefix ":"] identifier
+*
+* current-function-invocation = 'current()'
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    parse_path_predicate (xpath_pcb_t *pcb)
+{
+    tk_type_t    nexttyp;
+    status_t     res;
+    boolean      done;
+
+    res = NO_ERR;
+    done = FALSE;
+
+    /* make one loop for each step */
+    while (!done) {
+	/* get the left bracket '[' */
+	res = parse_token(pcb, TK_TT_LBRACK);
+	if (res != NO_ERR) {
+	    done = TRUE;
+	    continue;
+	}
+
+	/* get the node-identifier next */
+	res = parse_node_identifier(pcb);
+	if (res != NO_ERR) {
+	    done = TRUE;
+	    continue;
+	}
+
+	/* get the equals sign '=' */
+	res = parse_token(pcb, TK_TT_EQUAL);
+	if (res != NO_ERR) {
+	    done = TRUE;
+	    continue;
+	}
+
+	/* get the path-key-expr next */
+	res = parse_path_key_expr(pcb);
+	if (res != NO_ERR) {
+	    done = TRUE;
+	    continue;
+	}
+
+	/* get the right bracket ']' */
+	res = parse_token(pcb, TK_TT_RBRACK);
+	if (res != NO_ERR) {
+	    done = TRUE;
+	    continue;
+	}
+
+	/* check the next token;
+	 * it may be the start of another path-predicate '['
+	 */
+	nexttyp = tk_next_typ(pcb->tkc);
+	if (nexttyp != TK_TT_LBRACK) {
+	    done = TRUE;
+	} /* else keep going to the next path-predicate */
+    }
+
+    return res;
+
+}  /* parse_path_predicate */
+
+
+/********************************************************************
+* FUNCTION parse_absolute_path
+* 
+* Parse the keyref path-arg string
+* It has already been tokenized
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* absolute-path          = 1*("/" (node-identifier *path-predicate))
+*
+* path-predicate         = "[" *WSP path-equality-expr *WSP "]"
+*
+* path-equality-expr     = node-identifier *WSP "=" *WSP path-key-expr
+*
+* path-key-expr          = current-function-invocation "/"
+*                          rel-path-keyexpr
+*
+* node-identifier        = [prefix ":"] identifier
+*
+* current-function-invocation = 'current()'
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    parse_absolute_path (xpath_pcb_t *pcb)
+{
+    tk_type_t    nexttyp;
+    status_t     res;
+    boolean      done;
+
+    res = NO_ERR;
+    done = FALSE;
+
+    /* make one loop for each step */
+    while (!done) {
+	/* get  the first token in the step, '/' */
+	res = TK_ADV(pcb->tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	    done = TRUE;
+	    continue;
+	}
+	if (TK_CUR_TYP(pcb->tkc) != TK_TT_FSLASH) {
+	    res = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(pcb->tkc, pcb->mod, res,
+			    "forward slash");
+	    done = TRUE;
+	    continue;
+	}
+
+	/* get the node-identifier next */
+	res = parse_node_identifier(pcb);
+	if (res != NO_ERR) {
+	    done = TRUE;
+	    continue;
+	}
+
+	/* check the next token;
+	 * it may be the start of a path-predicate '['
+	 * or the start of another step '/'
+	 */
+	nexttyp = tk_next_typ(pcb->tkc);
+	if (nexttyp == TK_TT_LBRACK) {
+	    res = parse_path_predicate(pcb);
+	    if (res != NO_ERR) {
+		done = TRUE;
+		continue;
+	    }
+
+	    nexttyp = tk_next_typ(pcb->tkc);
+	    if (nexttyp != TK_TT_FSLASH) {
+		done = TRUE;
+	    }
+	} else if (nexttyp != TK_TT_FSLASH) {
+	    done = TRUE;
+	} /* else keep going to the next step */
+    }
+
+    /* check that the string ended properly */
+    if (res == NO_ERR) {
+	nexttyp = tk_next_typ(pcb->tkc);
+	if (nexttyp != TK_TT_NONE) {
+	    res = ERR_NCX_INVALID_TOKEN;
+	    log_error("\nError: wrong token at end of absolute-path '%s'",
+		      tk_get_token_name(nexttyp));
+	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	}
+    }
+
+    return res;
+
+}  /* parse_absolute_path */
+
+
+/********************************************************************
+* FUNCTION parse_relative_path
+* 
+* Parse the keyref relative-path string
+* It has already been tokenized
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* relative-path          = descendant-path /
+*                          (".." "/"
+*                          *relative-path)
+*
+* descendant-path        = node-identifier *path-predicate
+*                          absolute-path
+*
+* Real implementation:
+*
+* relative-path          = *(".." "/") descendant-path
+*
+* descendant-path        = node-identifier *path-predicate
+*                          [absolute-path]
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    parse_relative_path (xpath_pcb_t *pcb)
+{
+    tk_type_t    nexttyp;
+    status_t     res;
+
+    res = NO_ERR;
+
+    /* check the next token;
+     * it may be the start of a '../' pair or a
+     * descendant-path (node-identifier)
+     */
+    nexttyp = tk_next_typ(pcb->tkc);
+    while (nexttyp == TK_TT_RANGESEP && res == NO_ERR) {
+	res = parse_token(pcb, TK_TT_RANGESEP);
+	if (res == NO_ERR) {
+	    res = parse_token(pcb, TK_TT_FSLASH);
+	    if (res == NO_ERR) {
+		/* check the next token;
+		 * it may be the start of another ../ pair
+		 * or a node identifier
+		 */
+		nexttyp = tk_next_typ(pcb->tkc);
+	    }
+	}
+    }
+
+    if (res == NO_ERR) {
+	/* expect a node identifier first */
+	res = parse_node_identifier(pcb);
+	if (res == NO_ERR) {
+	    /* check the next token;
+	     * it may be the start of a path-predicate '['
+	     * or the start of another step '/'
+	     */
+	    nexttyp = tk_next_typ(pcb->tkc);
+	    if (nexttyp == TK_TT_LBRACK) {
+		res = parse_path_predicate(pcb);
+	    }
+
+	    if (res == NO_ERR) {
+		/* check the next token;
+		 * it may be the start of another step '/'
+		 */
+		nexttyp = tk_next_typ(pcb->tkc);
+		if (nexttyp == TK_TT_FSLASH) {
+		    res = parse_absolute_path(pcb);
+		}
+	    }
+	}
+    }
+	    
+    return res;
+
+}  /* parse_relative_path */
+
+
+/********************************************************************
+* FUNCTION parse_path_arg
+* 
+* Parse the keyref path-arg string
+* It has already been tokenized
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* path-arg-str           = < a string which matches the rule
+*                            path-arg >
+*
+* path-arg               = absolute-path / relative-path
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    parse_path_arg (xpath_pcb_t *pcb)
+{
+    tk_type_t  nexttyp;
+
+    nexttyp = tk_next_typ(pcb->tkc);
+    if (nexttyp == TK_TT_FSLASH) {
+	return parse_absolute_path(pcb);
+    } else {
+	return parse_relative_path(pcb);
+    }
+
+}  /* parse_path_arg */
+
+
 /************    E X T E R N A L   F U N C T I O N S    ************/
 
 
@@ -1116,31 +1683,7 @@ status_t
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
 *
-* path-arg-str           = < a string which matches the rule
-*                            path-arg >
-*
-* path-arg               = absolute-path / relative-path
-*
-* absolute-path          = 1*("/" (node-identifier *path-predicate))
-*
-* relative-path          = descendant-path /
-*                          (".." "/"
-*                          *relative-path)
-* 
-* descendant-path        = node-identifier *path-predicate
-*                          absolute-path
-*
-* path-predicate         = "[" *WSP path-equality-expr *WSP "]"
-* 
-* path-equality-expr     = node-identifier *WSP "=" *WSP path-key-expr
-*
-* path-key-expr          = this-variable-keyword "/" rel-path-keyexpr
-*
-* rel-path-keyexpr       = 1*(".." "/") *(node-identifier "/")
-*                         node-identifier
-*
 * INPUTS:
-*    tkc == token chain in progress (may be NULL: errmsg only)
 *    mod == module in progress
 *    obj == object initiating search, which contains the keyref type
 *    target == Xpath expression string to evaluate
@@ -1154,14 +1697,12 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    xpath_get_keyref_path (tk_chain_t *tkc,
-			   ncx_module_t *mod,
-			   obj_template_t *obj,
+    xpath_get_keyref_path (const ncx_module_t *mod,
+			   const obj_template_t *obj,
 			   const xmlChar *target,
-			   tk_token_t *errtk,
-			   obj_template_t **targobj)
+			   const tk_token_t *errtk,
+			   const obj_template_t **targobj)
 {
-    status_t    res;
 
 #ifdef DEBUG
     if (!mod || !obj || !target) {
@@ -1169,11 +1710,147 @@ status_t
     }
 #endif
 
-    res = NO_ERR;  /******/
+    /*****/
 
-    return res;
+    return NO_ERR;
 
 }  /* xpath_get_keyref_path */
-			      
+
+
+/********************************************************************
+* FUNCTION xpath_parse_keyref_path
+* 
+* Parse the keyref path as a keyref path
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+*
+* INPUTS:
+*    tkc == parent token chain
+*    mod == module in progress
+*    pcb == initialized xpath parser control block
+*           for the keyref path; use xpath_new_pcb
+*           to initialize before calling this fn
+*
+* OUTPUTS:
+*   pcb->tkc is filled and then validated
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_parse_keyref_path (tk_chain_t *tkc,
+			     ncx_module_t *mod,
+			     xpath_pcb_t *pcb)
+{
+    status_t       res;
+
+#ifdef DEBUG
+    if (!tkc || !mod || !pcb) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    pcb->tkc = tk_tokenize_xpath_string(mod, pcb->exprstr, 
+					TK_CUR_LNUM(tkc),
+					TK_CUR_LPOS(tkc),
+					&res);
+    if (!pcb->tkc || res != NO_ERR) {
+	log_error("\nError: Invalid path string '%s'",
+		  pcb->exprstr);
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    pcb->mod = mod;
+    pcb->parenttkc= tkc;
+
+    pcb->parseres = parse_path_arg(pcb);
+
+    return pcb->parseres;
+
+}  /* xpath_parse_keyref_path */
+
+
+/********************************************************************
+* FUNCTION xpath_new_pcb
+* 
+* Create and initialize an XPath parser control block
+*
+* INPUTS:
+*   XPath expression string to save (a copy will be made)
+*
+* RETURNS:
+*   pointer to malloced struct, NULL if malloc error
+*********************************************************************/
+xpath_pcb_t *
+    xpath_new_pcb (const xmlChar *xpathstr)
+{
+    xpath_pcb_t *pcb;
+
+#ifdef DEBUG
+    if (!xpathstr) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    pcb = m__getObj(xpath_pcb_t);
+    if (!pcb) {
+	return NULL;
+    }
+
+    memset(pcb, 0x0, sizeof(xpath_pcb_t));
+
+    pcb->exprstr = xml_strdup(xpathstr);
+    if (!pcb->exprstr) {
+	m__free(pcb);
+	return NULL;
+    }
+
+    dlq_createSQue(&pcb->varbindQ);
+    dlq_createSQue(&pcb->result.nodeQ);
+
+    return pcb;
+
+}  /* xpath_new_pcb */
+
+
+/********************************************************************
+* FUNCTION xpath_free_pcb
+* 
+* Free a malloced XPath parser control block
+*
+* INPUTS:
+*   pcb == pointer to parser control block to free
+*********************************************************************/
+void
+    xpath_free_pcb (xpath_pcb_t *pcb)
+{
+    val_value_t  *val;
+
+    while (!dlq_empty(&pcb->varbindQ)) {
+	val = (val_value_t *)dlq_deque(&pcb->varbindQ);
+	val_free_value(val);
+    }
+
+    if (pcb->tkc) {
+	tk_free_chain(pcb->tkc);
+    }
+
+    if (pcb->exprstr) {
+	m__free(pcb->exprstr);
+    }
+
+    while (!dlq_empty(&pcb->result.nodeQ)) {
+	val = (val_value_t *)dlq_deque(&pcb->result.nodeQ);
+	val_free_value(val);
+    }
+
+    m__free(pcb);
+
+}  /* xpath_free_pcb */
+
 
 /* END xpath.c */

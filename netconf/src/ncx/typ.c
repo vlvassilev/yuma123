@@ -54,6 +54,10 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
@@ -146,9 +150,9 @@ static void
 	}
     }
 
-    if (sim->xchain) {
-	tk_free_chain(sim->xchain);
-	sim->xchain = NULL;
+    if (sim->xkeyref) {
+	xpath_free_pcb(sim->xkeyref);
+	sim->xkeyref = NULL;
     }
 
     sim->btyp = NCX_BT_NONE;
@@ -4385,7 +4389,6 @@ const xmlChar *
     typ_get_keyref_path (const typ_def_t *typdef)
 {
     const xmlChar          *pathstr;
-    const typ_sval_t       *typ_sval;
     const typ_def_t        *tdef;
 
 #ifdef DEBUG
@@ -4396,18 +4399,17 @@ const xmlChar *
 #endif
 
     pathstr = NULL;
-    typ_sval = NULL;
 
     if (typ_get_basetype(typdef) != NCX_BT_KEYREF) {
 	return NULL;
     }
 
     tdef = typ_get_cbase_typdef(typdef);
-    typ_sval = typ_first_strdef(tdef);
-    if (typ_sval) {
-	pathstr = typ_sval->val;
+    if (tdef && tdef->def.simple.xkeyref) {
+	pathstr = tdef->def.simple.xkeyref->exprstr;
+    } else {
+	SET_ERROR(ERR_INTERNAL_VAL);
     }
-
     return pathstr;
 
 }   /* typ_get_keyref_path */

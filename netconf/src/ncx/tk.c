@@ -1420,7 +1420,7 @@ static status_t
     }
 
     /* else got a string fragment that could be a valid ID format */
-    if (*str == NCX_MODSCOPE_CH && tkc->source != TK_SOURCE_XPATH) {
+    if (*str == NCX_MODSCOPE_CH && str[1] != NCX_MODSCOPE_CH) {
         /* stopped on the module-scope-identifier token
          * the first identifier component must be a module name 
          */
@@ -1474,8 +1474,15 @@ static status_t
 	    tk = new_token(scoped ? TK_TT_SSTRING : TK_TT_TSTRING,
 			   tkc->bptr, (uint32)(str - tkc->bptr));
 	}
+    } else if (module) {
+	/* XPath prefix:identifier */
+	tk = new_token_wmod(TK_TT_MSTRING,
+			    module, modlen, 
+			    item, (uint32)(str - item));
     } else {
-	tk = new_token(TK_TT_TSTRING,  tkc->bptr, (uint32)(str - tkc->bptr));
+	/* XPath identifier */
+	tk = new_token(TK_TT_TSTRING,  tkc->bptr, 
+		       (uint32)(str - tkc->bptr));
     }
 
     if (!tk) {
@@ -2375,6 +2382,8 @@ tk_chain_t *
 * INPUTS:
 *   mod == module in progress for error purposes (may be NULL)
 *   str == string to tokenize
+*   curlinenum == current line number
+*   curlinepos == current line position
 *   res == address of return status
 *
 * OUTPUTS:
@@ -2387,6 +2396,8 @@ tk_chain_t *
 tk_chain_t *
     tk_tokenize_xpath_string (ncx_module_t *mod,
 			      xmlChar *str,
+			      uint32 curlinenum,
+			      uint32 curlinepos,
 			      status_t *res)
 {
     tk_chain_t *tkc;
@@ -2406,6 +2417,8 @@ tk_chain_t *
     }
     tkc->source = TK_SOURCE_XPATH;
     tkc->bptr = tkc->buff = str;
+    tkc->linenum = curlinenum;
+    tkc->linepos = curlinepos;
     *res = tk_tokenize_input(tkc, mod);
     return tkc;
 

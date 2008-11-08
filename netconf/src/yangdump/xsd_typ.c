@@ -486,45 +486,6 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION add_sval_restriction
-* 
-*   Add an enumeration element to the parent restriction element
-*
-* INPUTS:
-*    enu == enum struct (contains name, description, etc.)
-*    val == struct parent to contain child nodes for each type
-*
-* OUTPUTS:
-*    val->v.childQ has entries added for the types in this module
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    add_sval_restriction (const xmlChar *strval,
-			  val_value_t *val)
-{
-    val_value_t      *enuval;
-    status_t          res;
-    xmlns_id_t        xsd_id;
-
-    xsd_id = xmlns_xs_id();
-
-    enuval = xml_val_new_struct(XSD_ENUMERATION, xsd_id);
-    if (!enuval) {
-	return ERR_INTERNAL_MEM;
-    } else {
-	val_add_child(enuval, val);  /* add early */
-    }
-
-    /* add value attribute */
-    res = xml_val_add_cattr(NCX_EL_VALUE, 0, strval, enuval);
-    return res;
-
-}   /* add_sval_restriction */
-
-
-/********************************************************************
 * FUNCTION make_enum
 * 
 *   Create a value struct representing an enumerated type
@@ -1456,7 +1417,6 @@ status_t
 			   val_value_t *val)
 {
     val_value_t      *topcon, *simtyp, *chval;
-    const typ_sval_t *typ_sval;
     const typ_rangedef_t *typ_rdef;
     const xmlChar     *typename;
     const dlq_hdr_t   *rangeQ;
@@ -1537,25 +1497,6 @@ status_t
 	    }
 	    if (rangecnt) {
 		res = finish_range(typdef, range, typ_rdef, chval);
-		if (res != NO_ERR) {
-		    return res;
-		}
-	    }
-	    break;
-	case NCX_SR_VALSET:
-	    /* build a restriction element */
-	    chval = new_restriction(mod, xsd_id, NCX_EL_STRING, TRUE);
-	    if (!chval) {
-		return ERR_INTERNAL_MEM;
-	    } else {
-		val_add_child(chval, val);
-	    }
-
-	    /* add all the value strings */
-	    for (typ_sval = typ_first_strdef(typdef);
-		 typ_sval != NULL;
-		 typ_sval = (typ_sval_t *)dlq_nextEntry(typ_sval)) {
-		res = add_sval_restriction(typ_sval->val, chval);
 		if (res != NO_ERR) {
 		    return res;
 		}

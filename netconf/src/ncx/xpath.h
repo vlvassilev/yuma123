@@ -57,11 +57,90 @@ date	     init     comment
 *********************************************************************/
 
 
+/* XPath 1.0 sec 2.2 AxisName */
+#define XP_AXIS_ANCESTOR           (const xmlChar *)"ancestor"
+#define XP_AXIS_ANCESTOR_OR_SELF   (const xmlChar *)"ancestor-or-self"
+#define XP_AXIS_ATTRIBUTE          (const xmlChar *)"attribute"
+#define XP_AXIS_CHILD              (const xmlChar *)"child"
+#define XP_AXIS_DESCENDANT         (const xmlChar *)"descendant"
+#define XP_AXIS_DESCENDANT_OR_SELF (const xmlChar *)"descendant-or-self"
+#define XP_AXIS_FOLLOWING          (const xmlChar *)"following"
+#define XP_AXIS_FOLLOWING_SIBLING  (const xmlChar *)"following-sibling"
+#define XP_AXIS_NAMESPACE          (const xmlChar *)"namespace"
+#define XP_AXIS_PARENT             (const xmlChar *)"parent"
+#define XP_AXIS_PRECEDING          (const xmlChar *)"preceding"
+#define XP_AXIS_PRECEDING_SIBLING  (const xmlChar *)"preceding-sibling"
+#define XP_AXIS_SELF               (const xmlChar *)"self"
+
+/* Xpath 1.0 Function library + current() from XPath 2.0 */
+#define XP_FN_LAST                 (const xmlChar *)"last"
+#define XP_FN_POSITION             (const xmlChar *)"position"
+#define XP_FN_COUNT                (const xmlChar *)"count"
+#define XP_FN_ID                   (const xmlChar *)"id"
+#define XP_FN_LOCAL_NAME           (const xmlChar *)"local-name"
+#define XP_FN_NAMESPACE_URI        (const xmlChar *)"namespace-uri"
+#define XP_FN_NAME                 (const xmlChar *)"name"
+#define XP_FN_STRING               (const xmlChar *)"string"
+#define XP_FN_CONCAT               (const xmlChar *)"concat"
+#define XP_FN_STARTS_WITH          (const xmlChar *)"starts-with"
+#define XP_FN_CONTAINS             (const xmlChar *)"contains"
+#define XP_FN_SUBSTRING_BEFORE     (const xmlChar *)"substring-before"
+#define XP_FN_SUBSTRING_AFTER      (const xmlChar *)"substring-after"
+#define XP_FN_SUBSTRING            (const xmlChar *)"substring"
+#define XP_FN_STRING_LENGTH        (const xmlChar *)"string-length"
+#define XP_FN_NORMALIZE_SPACE      (const xmlChar *)"normalize-space"
+#define XP_FN_TRANSLATE            (const xmlChar *)"translate"
+#define XP_FN_BOOLEAN              (const xmlChar *)"boolean"
+#define XP_FN_NOT                  (const xmlChar *)"not"
+#define XP_FN_TRUE                 (const xmlChar *)"true"
+#define XP_FN_FALSE                (const xmlChar *)"false"
+#define XP_FN_LANG                 (const xmlChar *)"lang"
+#define XP_FN_NUMBER               (const xmlChar *)"number"
+#define XP_FN_SUM                  (const xmlChar *)"sum"
+#define XP_FN_FLOOR                (const xmlChar *)"floor"
+#define XP_FN_CEILING              (const xmlChar *)"ceiling"
+#define XP_FN_ROUND                (const xmlChar *)"round"
+#define XP_FN_CURRENT              (const xmlChar *)"current"
+
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
 *								    *
 *********************************************************************/
+
+/* XPath nodeset result */
+typedef struct xpath_nodeset_t_ {
+    dlq_hdr_t            nodeQ;        /* Q of val_value_t */
+    const tk_token_t    *errtoken;
+    uint32               errpos;
+    status_t             res;
+} xpath_nodeset_t;
+
+
+/* XPath parser control block */
+typedef struct xpath_pcb_t_ {
+    tk_chain_t          *tkc;
+    xmlChar             *exprstr;
+    ncx_module_t        *mod;         /* bptr to module context */
+    tk_chain_t          *parenttkc;          /* for error token */
+
+    /* these 2 parms are used to parse keyref path-arg 
+     * limited object tree syntax allowed only
+     */
+    const obj_template_t  *obj;           /* bptr to start object */
+    const obj_template_t  *targobj;       /* bptr to result object */
+
+    /* these parms are used for must and when processing
+     * against a target database ; full XPath 1.0 allowed
+     */
+    val_value_t         *cxtnode;
+    xpath_nodeset_t      result;
+    uint32               cxtpos;
+    uint32               cxtsize;
+    dlq_hdr_t            varbindQ;        /* Q of val_value_t */
+    status_t             parseres;
+} xpath_pcb_t;
 
 
 /********************************************************************
@@ -104,11 +183,23 @@ extern status_t
 
 
 extern status_t
-    xpath_get_keyref_path (tk_chain_t *tkc,
-			   ncx_module_t *mod,
-			   obj_template_t *obj,
+    xpath_get_keyref_path (const ncx_module_t *mod,
+			   const obj_template_t *obj,
 			   const xmlChar *target,
-			   tk_token_t *errtk,
-			   obj_template_t **targobj);
+			   const tk_token_t *errtk,
+			   const obj_template_t **targobj);
+
+
+extern status_t
+    xpath_parse_keyref_path (tk_chain_t *tkc,
+			     ncx_module_t *mod,
+			     xpath_pcb_t *pcb);
+
+extern xpath_pcb_t *
+    xpath_new_pcb (const xmlChar *xpathstr);
+
+
+extern void
+    xpath_free_pcb (xpath_pcb_t *pcb);
 
 #endif	    /* _H_xpath */

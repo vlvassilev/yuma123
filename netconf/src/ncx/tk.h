@@ -303,6 +303,8 @@ extern tk_chain_t *
 extern tk_chain_t *
     tk_tokenize_xpath_string (ncx_module_t *mod,
 			      xmlChar *str,
+			      uint32 curlinenum,
+			      uint32 curlinepos,
 			      status_t *res);
 
 

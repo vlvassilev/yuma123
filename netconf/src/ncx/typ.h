@@ -225,7 +225,7 @@ typedef struct typ_pattern_t_ {
 typedef struct typ_simple_t_ {
     ncx_btype_t      btyp;                             /* NCX base type */
     struct typ_template_t_ *listtyp;       /* template for NCX_BT_SLIST */
-    tk_chain_t      *xchain;            /* saved for NCX_BT_KEYREF only */
+    struct xpath_pcb_t_   *xkeyref;     /* saved for NCX_BT_KEYREF only */
     typ_range_t      range;     /* for all num types and string length  */
     dlq_hdr_t        valQ;     /* bit, enum, string, list vals/patterns */
     dlq_hdr_t        metaQ;              /* Q of obj_template_t structs */

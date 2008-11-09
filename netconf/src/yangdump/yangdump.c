@@ -539,7 +539,7 @@ static status_t
 
     if (res == NO_ERR) {
 
-	/* load in the NCX converter parmset definition file */
+	/* load in the YANGDUMP converter parmset definition file */
 	res = ncxmod_load_module(YANGDUMP_MOD);
 
 	if (res == NO_ERR) {

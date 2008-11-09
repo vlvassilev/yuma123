@@ -617,6 +617,9 @@ extern obj_key_t *
 extern const obj_key_t *
     obj_next_ckey (const obj_key_t *objkey);
 
+extern uint32
+    obj_key_count (const obj_template_t *obj);
+
 extern boolean
     obj_any_rpcs (const dlq_hdr_t *datadefQ);
 

@@ -117,19 +117,39 @@ typedef struct xpath_nodeset_t_ {
     status_t             res;
 } xpath_nodeset_t;
 
+typedef enum xpath_curmode_t_ {
+    XP_CM_NONE,
+    XP_CM_TARGET,
+    XP_CM_ALT,
+    XP_CM_KEYVAR
+} xpath_curmode_t;
+
+typedef enum xpath_source_t_ {
+    XP_SRC_NONE,
+    XP_SRC_KEYREF,
+    XP_SRC_LEAFREF,
+    XP_SRC_MUST,
+    XP_SRC_WHEN
+} xpath_source_t;
 
 /* XPath parser control block */
 typedef struct xpath_pcb_t_ {
     tk_chain_t          *tkc;
     xmlChar             *exprstr;
-    ncx_module_t        *mod;         /* bptr to module context */
-    tk_chain_t          *parenttkc;          /* for error token */
+    ncx_module_t        *mod;         /* bptr to exprstr context */
+    boolean              abspath;
+    xpath_source_t       source;
 
     /* these 2 parms are used to parse keyref path-arg 
      * limited object tree syntax allowed only
      */
-    const obj_template_t  *obj;           /* bptr to start object */
+    ncx_module_t          *objmod;        /* module containing obj */
+    const obj_template_t  *docroot;        /* bptr to <config> obj */
+    const obj_template_t  *obj;            /* bptr to start object */
     const obj_template_t  *targobj;       /* bptr to result object */
+    const obj_template_t  *altobj;       /* bptr to result object */
+    const obj_template_t  *varobj;       /* bptr to key-expr object */
+    xpath_curmode_t        curmode;   
 
     /* these parms are used for must and when processing
      * against a target database ; full XPath 1.0 allowed
@@ -140,6 +160,8 @@ typedef struct xpath_pcb_t_ {
     uint32               cxtsize;
     dlq_hdr_t            varbindQ;        /* Q of val_value_t */
     status_t             parseres;
+    status_t             validateres;
+    
 } xpath_pcb_t;
 
 
@@ -148,6 +170,8 @@ typedef struct xpath_pcb_t_ {
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
+
+/*********    S C H E M A  N O D E  I D    S U P P O R T  ***********/
 
 /* malloc and init an NCX database object template */
 extern status_t
@@ -181,19 +205,7 @@ extern status_t
 			   val_value_t **targval);
 
 
-
-extern status_t
-    xpath_get_keyref_path (const ncx_module_t *mod,
-			   const obj_template_t *obj,
-			   const xmlChar *target,
-			   const tk_token_t *errtk,
-			   const obj_template_t **targobj);
-
-
-extern status_t
-    xpath_parse_keyref_path (tk_chain_t *tkc,
-			     ncx_module_t *mod,
-			     xpath_pcb_t *pcb);
+/*******    X P A T H   and   K E Y R E F    S U P P O R T   *******/
 
 extern xpath_pcb_t *
     xpath_new_pcb (const xmlChar *xpathstr);
@@ -201,5 +213,24 @@ extern xpath_pcb_t *
 
 extern void
     xpath_free_pcb (xpath_pcb_t *pcb);
+
+extern status_t
+    xpath_parse_keyref_path (tk_chain_t *tkc,
+			     ncx_module_t *mod,
+			     xpath_pcb_t *pcb);
+
+extern status_t
+    xpath_validate_keyref_path (ncx_module_t *mod,
+				const obj_template_t *obj,
+				xpath_pcb_t *pcb);
+
+extern status_t
+    xpath_get_keyref_value (ncx_module_t *mod,
+			    obj_template_t *obj,
+			    xpath_pcb_t *pcb,
+			    val_value_t **targval);
+
+
+
 
 #endif	    /* _H_xpath */

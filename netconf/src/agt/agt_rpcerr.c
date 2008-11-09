@@ -441,7 +441,8 @@ static rpc_err_t
 	return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_INSERT_MISSING_INSTANCE:
 	return RPC_ERR_BAD_ATTRIBUTE;      /* 12.5 */
-
+    case ERR_NCX_NOT_CONFIG:
+	return RPC_ERR_OPERATION_FAILED;
 	
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

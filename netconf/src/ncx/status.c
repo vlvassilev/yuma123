@@ -568,6 +568,8 @@ const char *
 	return "data restriction violation";
     case ERR_NCX_INSERT_MISSING_INSTANCE:
 	return "missing instance for insert operation";
+    case ERR_NCX_NOT_CONFIG:
+	return "object not config";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

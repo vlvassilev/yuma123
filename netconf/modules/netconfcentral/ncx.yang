@@ -323,6 +323,12 @@ module ncx {
      ncx:abstract;
   }
 
+  container root {
+     ncx:hidden;
+     ncx:abstract;
+     ncx:root;
+  }
+
   // Netconf Central Extensions
 
   extension abstract {

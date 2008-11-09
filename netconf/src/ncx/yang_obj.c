@@ -5791,7 +5791,6 @@ status_t
 	    CHK_EXIT;
 	    res = yang_obj_resolve_final(tkc, mod, 
 					 testobj->def.list->datadefQ);
-	    CHK_EXIT;
 	    yang_check_obj_used(tkc, mod,
 				testobj->def.list->typedefQ,
 				testobj->def.list->groupingQ);
@@ -5845,7 +5844,7 @@ status_t
 	    break;
 	case OBJ_TYP_NONE:
 	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	}
 	CHK_EXIT;
     }
@@ -5853,6 +5852,121 @@ status_t
     return retres;
 
 }  /* yang_obj_resolve_final */
+
+
+/********************************************************************
+* FUNCTION yang_obj_resolve_xpath
+* 
+* Check all keyref, must, and when XPath expressions
+* to make sure they are well-formed
+*
+* Checks the cooked objects, and skips all groupings
+* uses, and augment nodes
+*
+* MUST BE CALLED AFTER yang_obj_resolve_final
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   datadefQ == Q of obj_template_t structs to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_obj_resolve_xpath (tk_chain_t *tkc,
+			    ncx_module_t  *mod,
+			    dlq_hdr_t *datadefQ)
+{
+    obj_template_t  *testobj;
+    typ_def_t       *typdef;
+    xpath_pcb_t     *pcb;
+    status_t         res, retres;
+
+#ifdef DEBUG
+    if (!tkc || !mod || !datadefQ) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    /* first resolve all the local object names */
+    for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
+	 testobj != NULL;
+	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+
+	if (!obj_has_name(testobj)) {
+	    /* skip augment and uses */
+	    continue;
+	}
+	
+	switch (testobj->objtype) {
+	case OBJ_TYP_CONTAINER:
+	    /* check container node */
+
+
+	    /* check container children */
+	    res = 
+		yang_obj_resolve_xpath(tkc, mod, 
+				       testobj->def.container->datadefQ);
+	    break;
+	case OBJ_TYP_LEAF:
+	case OBJ_TYP_LEAF_LIST:
+	    if (obj_get_basetype(testobj) == NCX_BT_KEYREF) {
+#ifdef YANG_OBJ_DEBUG
+	log_debug3("\nresolve_xpath: mod %s, object %s, on line %u",
+		   mod->name, obj_get_name(testobj), testobj->linenum);
+#endif
+
+		typdef = obj_get_typdef(testobj);
+		pcb = typ_get_keyref_pcb(typdef);
+		res = xpath_validate_keyref_path(mod, testobj, pcb);
+	    }
+	    break;
+	case OBJ_TYP_LIST:
+	    /* check list node */
+
+
+	    /* check list children */
+	    res = yang_obj_resolve_xpath(tkc, mod, 
+					 testobj->def.list->datadefQ);
+	    CHK_EXIT;
+	    break;
+	case OBJ_TYP_CHOICE:
+	    res = yang_obj_resolve_xpath(tkc, mod, 
+					 testobj->def.choic->caseQ);
+	    break;
+	case OBJ_TYP_CASE:
+	    res = yang_obj_resolve_xpath(tkc, mod, 
+					 testobj->def.cas->datadefQ);
+	    break;
+	case OBJ_TYP_RPC:
+	    res = yang_obj_resolve_xpath(tkc, mod, 
+					 &testobj->def.rpc->datadefQ);
+	    break;
+	case OBJ_TYP_RPCIO:
+	    res = yang_obj_resolve_xpath(tkc, mod, 
+					 &testobj->def.rpcio->datadefQ);
+	    break;
+	case OBJ_TYP_NOTIF:
+	    res = yang_obj_resolve_xpath(tkc, mod, 
+					 &testobj->def.notif->datadefQ);
+	    break;
+	case OBJ_TYP_NONE:
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	CHK_EXIT;
+    }
+
+    return retres;
+
+}  /* yang_obj_resolve_xpath */
 
 
 /* END file yang_obj.c */

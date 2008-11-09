@@ -114,4 +114,10 @@ extern status_t
 			    ncx_module_t  *mod,
 			    dlq_hdr_t *datadefQ);
 
+extern status_t 
+    yang_obj_resolve_xpath (tk_chain_t *tkc,
+			    ncx_module_t  *mod,
+			    dlq_hdr_t *datadefQ);
+
+
 #endif	    /* _H_yang_obj */

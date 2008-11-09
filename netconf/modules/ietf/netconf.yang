@@ -539,10 +539,11 @@ module netconf {
           uses GetConfigSourceType;
         }
 
-        anyxml filter {
+        container filter {
           description "Subtree or Xpath filter to use.";
           ncx:metadata "FilterType type";
           ncx:metadata "string select";
+          ncx:root;
         }
       }
 
@@ -737,7 +738,7 @@ module netconf {
       ncx:rpc-type "monitor";
 
       input {
-        anyxml filter {
+        container filter {
           description
             "This parameter specifies the portion of the system
              configuration and state data to retrieve.  If this parameter is
@@ -757,6 +758,7 @@ module netconf {
              expression.";
           ncx:metadata "FilterType type";
           ncx:metadata "string select";
+          ncx:root;
         }
       }
 

@@ -4232,6 +4232,7 @@ obj_key_t *
 
 }  /* obj_first_key */
 
+
 /********************************************************************
 * FUNCTION obj_first_ckey
 * 
@@ -4315,6 +4316,40 @@ const obj_key_t *
     return (const obj_key_t *)dlq_nextEntry(objkey);
 
 }  /* obj_next_ckey */
+
+
+/********************************************************************
+* FUNCTION obj_key_count
+* 
+* Get the number of keys for this object
+*
+* INPUTS:
+*   obj == object to check
+*
+* RETURNS:
+*   number of keys in the obj_key_t Q
+*********************************************************************/
+uint32
+    obj_key_count (const obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
+    if (obj->objtype != OBJ_TYP_LIST) {
+	return 0;
+    }
+
+    if (obj->def.list->keyQ) {
+	return dlq_count(obj->def.list->keyQ);
+    } else {
+	return 0;
+    }
+
+}  /* obj_key_count */
 
 
 /********************************************************************

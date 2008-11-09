@@ -2460,6 +2460,27 @@ uint32
 } /* tk_token_count */
 
 
+/********************************************************************
+* FUNCTION tk_reset_chain
+* 
+* Reset the token chain current pointer to the start
+*
+* INPUTS:
+*   tkc == token chain to reset
+*
+*********************************************************************/
+void
+    tk_reset_chain (tk_chain_t *tkc) 
+{
+#ifdef DEBUG
+    if (!tkc) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }	
+#endif
+    tkc->cur = (tk_token_t *)&tkc->tkQ;
+
+}  /* tk_reset_chain */
 
 
 /* END file tk.c */

@@ -1940,9 +1940,6 @@ static status_t
     res = yang_obj_resolve_augments(tkc, mod, &mod->datadefQ);
     CHK_EXIT;
 
-    /* Check for imports not used warnings */
-    yang_check_imports_used(tkc, mod);
-
     /* One final check for grouping integrity */
     res = yang_grp_resolve_final(tkc, mod, &mod->groupingQ);
     CHK_EXIT;
@@ -1950,6 +1947,12 @@ static status_t
     /* One final check for object integrity */
     res = yang_obj_resolve_final(tkc, mod, &mod->datadefQ);
     CHK_EXIT;
+
+    /* Validate all the XPath expressions within all cooked objects */
+    res = yang_obj_resolve_xpath(tkc, mod, &mod->datadefQ);
+
+    /* Check for imports not used warnings */
+    yang_check_imports_used(tkc, mod);
 
     /* save the module parse status */
     mod->status = retres;

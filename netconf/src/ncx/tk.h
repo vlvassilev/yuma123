@@ -312,4 +312,7 @@ extern tk_chain_t *
 extern uint32
     tk_token_count (const tk_chain_t *tkc);
 
+extern void
+    tk_reset_chain (tk_chain_t *tkc);
+
 #endif	    /* _H_tk */

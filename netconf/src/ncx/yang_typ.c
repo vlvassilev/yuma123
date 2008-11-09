@@ -2057,6 +2057,11 @@ static status_t
 		 *  store the path string there
 		 */
 		if (!pathdone) {
+		    /* very little validation is done now
+		     * because the object using this keyref
+		     * data type is needed to set the starting
+		     * context node
+		     */
 		    sim->xkeyref = xpath_new_pcb(TK_CUR_VAL(tkc));
 		    if (!sim->xkeyref) {
 			res = ERR_INTERNAL_MEM;

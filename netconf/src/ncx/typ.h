@@ -736,6 +736,10 @@ extern boolean
 extern const xmlChar *
     typ_get_keyref_path (const typ_def_t *typdef);
 
+/* returns xpath_pcb_t but cannot import due to H file loop */
+extern void *
+    typ_get_keyref_pcb (typ_def_t *typdef);
+
 extern boolean
     typ_has_subclauses (const typ_def_t *typdef);
 

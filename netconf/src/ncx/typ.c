@@ -4416,6 +4416,45 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION typ_get_keyref_pcb
+* 
+*   Get the XPath parser control blockt for the keyref data type
+*
+* INPUTS:
+*    typdef == typdef for the the keyref
+*
+* RETURNS:
+*    pointer to the PCB struct or NULL if some error
+*********************************************************************/
+void *
+    typ_get_keyref_pcb (typ_def_t *typdef)
+{
+    const typ_def_t        *tdef;
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (typ_get_basetype(typdef) != NCX_BT_KEYREF) {
+	return NULL;
+    }
+
+    tdef = typ_get_base_typdef(typdef);
+    if (tdef && tdef->def.simple.xkeyref) {
+	return (void *)tdef->def.simple.xkeyref;
+    } else {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+    /*NOTREACHED*/
+
+}   /* typ_get_keyref_pcb */
+
+
+/********************************************************************
 * FUNCTION typ_has_subclauses
 * 
 *   Check if the specified typdef has any sub-clauses

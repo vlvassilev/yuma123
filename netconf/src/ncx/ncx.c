@@ -152,6 +152,8 @@ static obj_template_t   *gen_string;
 
 static obj_template_t   *gen_empty;
 
+static obj_template_t   *gen_root;
+
 /* TBD: support multiple callbacks */
 static ncx_load_cbfn_t  mod_load_callback;
 
@@ -914,6 +916,12 @@ status_t
     gen_empty = (obj_template_t *)
 	def_reg_find_moddef(NCX_MODULE, NCX_EL_EMPTY, &deftyp);
     if (!gen_empty) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    gen_root = (obj_template_t *)
+	def_reg_find_moddef(NCX_MODULE, NCX_EL_ROOT, &deftyp);
+    if (!gen_root) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
@@ -1739,6 +1747,28 @@ ncx_module_t *
 	(ncx_module_t *)dlq_nextEntry(mod) : NULL;
 
 }  /* ncx_get_next_module */
+
+
+/********************************************************************
+* FUNCTION ncx_get_modname
+* 
+* Get the main module name
+* 
+* RETURNS:
+*   main module name or NULL if error
+*********************************************************************/
+const xmlChar *
+    ncx_get_modname (const ncx_module_t *mod)
+{
+#ifdef DEBUG
+    if (!mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+    return (mod->ismod) ? mod->name : mod->belongs;
+
+}  /* ncx_get_modname */
 
 
 /********************************************************************
@@ -6091,6 +6121,28 @@ obj_template_t *
     return gen_empty;
 
 } /* ncx_get_gen_empty */
+
+
+/********************************************************************
+* FUNCTION ncx_get_gen_root
+* 
+* Get the object template for the NCX generic root container
+*
+*********************************************************************/
+obj_template_t *
+    ncx_get_gen_root (void)
+{
+    status_t  res;
+
+    if (!stage2_init_done) {
+	res = ncx_stage2_init();
+	if (res != NO_ERR) {
+	    return NULL;
+	}
+    }
+    return gen_root;
+
+} /* ncx_get_gen_root */
 
 
 /********************************************************************

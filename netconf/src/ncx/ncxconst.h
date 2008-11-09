@@ -50,9 +50,6 @@ date	     init     comment
 /* NETCONF Module Owner */
 #define NC_OWNER        (const xmlChar *)"ietf"
 
-/* NETCONF Application Container Name */
-#define NC_APP          "netconf"
-
 /* NETCONF edit-config operation attribute name */
 #define NC_OPERATION_ATTR_NAME (const xmlChar *)"operation"
 

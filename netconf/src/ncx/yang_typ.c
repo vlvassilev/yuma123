@@ -109,6 +109,10 @@ date         init     comment
 #include "xpath.h"
 #endif
 
+#ifndef _H_xpath_keyref
+#include "xpath_keyref.h"
+#endif
+
 #ifndef _H_yangconst
 #include "yangconst.h"
 #endif
@@ -2068,7 +2072,7 @@ static status_t
 			ncx_print_errormsg(tkc, mod, res);
 			return res;
 		    } else {
-			res = xpath_parse_keyref_path(tkc, 
+			res = xpath_keyref_parse_path(tkc, 
 						      mod, 
 						      sim->xkeyref);
 			if (res != NO_ERR) {

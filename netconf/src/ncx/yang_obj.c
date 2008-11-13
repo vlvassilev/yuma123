@@ -153,6 +153,10 @@ date         init     comment
 #include "xpath.h"
 #endif
 
+#ifndef _H_xpath_keyref
+#include "xpath_keyref.h"
+#endif
+
 #ifndef _H_yangconst
 #include "yangconst.h"
 #endif
@@ -5925,7 +5929,7 @@ status_t
 
 		typdef = obj_get_typdef(testobj);
 		pcb = typ_get_keyref_pcb(typdef);
-		res = xpath_validate_keyref_path(mod, testobj, pcb);
+		res = xpath_keyref_validate_path(mod, testobj, pcb);
 	    }
 	    break;
 	case OBJ_TYP_LIST:

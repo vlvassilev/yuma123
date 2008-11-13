@@ -171,8 +171,6 @@ typedef struct xpath_pcb_t_ {
 *								    *
 *********************************************************************/
 
-/*********    S C H E M A  N O D E  I D    S U P P O R T  ***********/
-
 /* malloc and init an NCX database object template */
 extern status_t
     xpath_find_schema_target (tk_chain_t *tkc,
@@ -205,8 +203,6 @@ extern status_t
 			   val_value_t **targval);
 
 
-/*******    X P A T H   and   K E Y R E F    S U P P O R T   *******/
-
 extern xpath_pcb_t *
     xpath_new_pcb (const xmlChar *xpathstr);
 
@@ -215,22 +211,8 @@ extern void
     xpath_free_pcb (xpath_pcb_t *pcb);
 
 extern status_t
-    xpath_parse_keyref_path (tk_chain_t *tkc,
-			     ncx_module_t *mod,
-			     xpath_pcb_t *pcb);
-
-extern status_t
-    xpath_validate_keyref_path (ncx_module_t *mod,
-				const obj_template_t *obj,
-				xpath_pcb_t *pcb);
-
-extern status_t
-    xpath_get_keyref_value (ncx_module_t *mod,
-			    obj_template_t *obj,
-			    xpath_pcb_t *pcb,
-			    val_value_t **targval);
-
-
-
+    xpath_get_curmod_from_prefix (const xmlChar *prefix,
+				  ncx_module_t *mod,
+				  ncx_module_t **targmod);
 
 #endif	    /* _H_xpath */

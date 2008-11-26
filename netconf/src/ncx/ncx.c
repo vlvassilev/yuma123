@@ -110,6 +110,10 @@ extern float strtof (const char *str, char **err);
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xpath1
+#include "xpath1.h"
+#endif
+
 #ifndef _H_yang
 #include "yang.h"
 #endif
@@ -151,6 +155,8 @@ static obj_template_t   *gen_container;
 static obj_template_t   *gen_string;
 
 static obj_template_t   *gen_empty;
+
+static obj_template_t   *gen_float;
 
 static obj_template_t   *gen_root;
 
@@ -802,6 +808,12 @@ status_t
 
     ncx_init_done = TRUE;
 
+    /* init XPath functions */
+    res = xpath1_init();
+    if (res != NO_ERR) {
+	return res;
+    }
+
     /* Initialize the INVALID namespace to help filter handling */
     res = xmlns_register_ns(INVALID_URN, INV_PREFIX, NCX_MODULE, &nsid);
     if (res != NO_ERR) {
@@ -919,11 +931,18 @@ status_t
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
+    gen_float = (obj_template_t *)
+	def_reg_find_moddef(NCX_MODULE, NCX_EL_FLOAT, &deftyp);
+    if (!gen_float) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
     gen_root = (obj_template_t *)
 	def_reg_find_moddef(NCX_MODULE, NCX_EL_ROOT, &deftyp);
     if (!gen_root) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
+
 
     stage2_init_done = TRUE;
     return NO_ERR;
@@ -961,9 +980,12 @@ void
 	gen_container = NULL;
 	gen_string = NULL;
 	gen_empty = NULL;
+	gen_float = NULL;
+	gen_root = NULL;
     }
 
     typ_unload_basetypes();
+    xpath1_cleanup();
     xmlns_cleanup();
     def_reg_cleanup();
     cfg_cleanup();
@@ -6122,6 +6144,27 @@ obj_template_t *
 
 } /* ncx_get_gen_empty */
 
+/********************************************************************
+* FUNCTION ncx_get_gen_float
+* 
+* Get the object template for the NCX generic float32 leaf
+*
+*********************************************************************/
+obj_template_t *
+    ncx_get_gen_float (void)
+{
+    status_t  res;
+
+    if (!stage2_init_done) {
+	res = ncx_stage2_init();
+	if (res != NO_ERR) {
+	    return NULL;
+	}
+    }
+    return gen_float;
+
+} /* ncx_get_gen_float */
+
 
 /********************************************************************
 * FUNCTION ncx_get_gen_root
@@ -7297,10 +7340,6 @@ void
     ncx_clean_errinfo (ncx_errinfo_t *err)
 {
 
-    if (err->xpath) {
-	m__free(err->xpath);
-	err->xpath = NULL;
-    }
     if (err->descr) {
 	m__free(err->descr);
 	err->descr = NULL;
@@ -7340,40 +7379,6 @@ void
 
 
 /********************************************************************
-* FUNCTION ncx_find_errinfo
-* 
-* Find the specified errinfo
-*
-* INPUTS:
-*    que == Q of ncx_errinfo_t to search
-*    xpath == XPath string to match 
-*********************************************************************/
-ncx_errinfo_t *
-    ncx_find_errinfo (dlq_hdr_t *que,
-		      const xmlChar *xpath)
-{
-    ncx_errinfo_t  *errinfo;
-
-#ifdef DEBUG
-    if (!que || !xpath) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    for (errinfo = (ncx_errinfo_t *)dlq_firstEntry(que);
-	 errinfo != NULL;
-	 errinfo = (ncx_errinfo_t *)dlq_nextEntry(errinfo)) {
-	if (!xml_strcmp(errinfo->xpath, xpath)) {
-	    return errinfo;
-	}
-    }
-    return NULL;
-
-}  /* ncx_find_errinfo */
-
-
-/********************************************************************
 * FUNCTION ncx_errinfo_set
 * 
 * Check if the errinfo struct is set or empty
@@ -7405,6 +7410,76 @@ boolean
     }
 
 }  /* ncx_errinfo_set */
+
+
+/********************************************************************
+* FUNCTION ncx_copy_errinfo
+* 
+* Copy the fields from one errinfo to a blank errinfo
+*
+* INPUTS:
+*    src == struct with starting contents
+*    dest == struct to get copy of src contents
+*
+* OUTPUTS:
+*    *dest fields set which are set in src
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    ncx_copy_errinfo (const ncx_errinfo_t *src,
+		      ncx_errinfo_t *dest)
+{
+#ifdef DEBUG
+    if (!src || !dest) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (src->descr) {
+	if (dest->descr) {
+	    m__free(dest->descr);
+	}
+	dest->descr = xml_strdup(src->descr);
+	if (!dest->descr) {
+	    return ERR_INTERNAL_MEM;
+	}
+    }
+
+    if (src->ref) {
+	if (dest->ref) {
+	    m__free(dest->ref);
+	}
+	dest->ref = xml_strdup(src->ref);
+	if (!dest->ref) {
+	    return ERR_INTERNAL_MEM;
+	}
+    }
+
+    if (src->error_app_tag) {
+	if (dest->error_app_tag) {
+	    m__free(dest->error_app_tag);
+	}
+	dest->error_app_tag = xml_strdup(src->error_app_tag);
+	if (!dest->error_app_tag) {
+	    return ERR_INTERNAL_MEM;
+	}
+    }
+
+    if (src->error_message) {
+	if (dest->error_message) {
+	    m__free(dest->error_message);
+	}
+	dest->error_message = xml_strdup(src->error_message);
+	if (!dest->error_message) {
+	    return ERR_INTERNAL_MEM;
+	}
+    }
+
+    return NO_ERR;
+
+}  /* ncx_copy_errinfo */
 
 
 /********************************************************************

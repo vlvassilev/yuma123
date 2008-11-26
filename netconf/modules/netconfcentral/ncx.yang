@@ -323,6 +323,12 @@ module ncx {
      ncx:abstract;
   }
 
+  leaf float {
+     type float32;
+     ncx:hidden;
+     ncx:abstract;
+  }
+
   container root {
      ncx:hidden;
      ncx:abstract;

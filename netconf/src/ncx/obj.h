@@ -96,9 +96,7 @@ date	     init     comment
 /* object is a refinement within a uses, not a real object */
 #define OBJ_FL_REFINE       bit3
 
-/* object is conditional, expanded via an augment clause
- * the obj_when_t clause is non-empty 
- */
+/* object is conditional, via a when-stmt expression */
 #define OBJ_FL_CONDITIONAL  bit4
 
 /* object is a top-level definition within a module or submodule */
@@ -224,8 +222,7 @@ typedef struct obj_container_t_ {
     dlq_hdr_t     *datadefQ;       /* Q of obj_template_t */
     boolean        datadefclone;
     ncx_status_t   status;
-    dlq_hdr_t      mustQ;           /* Q of ncx_errinfo_t */
-    dlq_hdr_t      appinfoQ;        /* Q of ncx_appinfo_t */
+    dlq_hdr_t      mustQ;             /* Q of xpath_pcb_t */
 } obj_container_t;
 
 
@@ -238,8 +235,7 @@ typedef struct obj_leaf_t_ {
     xmlChar       *ref;
     typ_def_t     *typdef;
     ncx_status_t   status;
-    dlq_hdr_t      mustQ;            /* Q of ncx_errinfo_t */
-    dlq_hdr_t      appinfoQ;         /* Q of ncx_appinfo_t */
+    dlq_hdr_t      mustQ;              /* Q of xpath_pcb_t */
 } obj_leaf_t;
 
 
@@ -256,8 +252,7 @@ typedef struct obj_leaflist_t_ {
     boolean        maxset;
     uint32         maxelems;
     ncx_status_t   status;
-    dlq_hdr_t      mustQ;            /* Q of ncx_errinfo_t */
-    dlq_hdr_t      appinfoQ;         /* Q of ncx_appinfo_t */
+    dlq_hdr_t      mustQ;              /* Q of xpath_pcb_t */
 } obj_leaflist_t;
 
 
@@ -281,8 +276,7 @@ typedef struct obj_list_t_ {
     uint32         maxelems;
     uint32         keylinenum;
     ncx_status_t   status;
-    dlq_hdr_t      mustQ;            /* Q of ncx_errinfo_t */
-    dlq_hdr_t      appinfoQ;         /* Q of ncx_appinfo_t */
+    dlq_hdr_t      mustQ;              /* Q of xpath_pcb_t */
 } obj_list_t;
 
 
@@ -295,7 +289,6 @@ typedef struct obj_choice_t_ {
     dlq_hdr_t     *caseQ;             /* Q of obj_template_t */
     boolean        caseQclone;
     ncx_status_t   status;
-    dlq_hdr_t      appinfoQ;           /* Q of ncx_appinfo_t */
 } obj_choice_t;
 
 
@@ -308,7 +301,6 @@ typedef struct obj_case_t_ {
     boolean         nameclone;
     boolean         datadefclone;
     ncx_status_t    status;
-    dlq_hdr_t       appinfoQ;          /* Q of ncx_appinfo_t */
 } obj_case_t;
 
 
@@ -321,7 +313,6 @@ typedef struct obj_uses_t_ {
     grp_template_t   *grp;      /* const back-ptr to grouping */
     dlq_hdr_t        *datadefQ;         /* Q of obj_template_t */
     ncx_status_t      status;
-    dlq_hdr_t         appinfoQ;          /* Q of ncx_appinfo_t */
 } obj_uses_t;
 
 
@@ -331,7 +322,6 @@ typedef struct obj_rpcio_t_ {
     dlq_hdr_t          typedefQ;         /* Q of typ_template_t */
     dlq_hdr_t          groupingQ;        /* Q of gtp_template_t */
     dlq_hdr_t          datadefQ;         /* Q of obj_template_t */
-    dlq_hdr_t          appinfoQ;          /* Q of ncx_appinfo_t */
 } obj_rpcio_t;
 
 
@@ -344,7 +334,6 @@ typedef struct obj_rpc_t_ {
     dlq_hdr_t          typedefQ;         /* Q of typ_template_t */
     dlq_hdr_t          groupingQ;        /* Q of gtp_template_t */
     dlq_hdr_t          datadefQ;         /* Q of obj_template_t */
-    dlq_hdr_t          appinfoQ;          /* Q of ncx_appinfo_t */
 
     /* internal fields for manager and agent */
     rpc_type_t      rpc_typ;
@@ -354,23 +343,15 @@ typedef struct obj_rpc_t_ {
 } obj_rpc_t;
 
 
-/* One concatenated YANG 'when' clause' definition */
-typedef struct obj_when_t_ {
-    xmlChar       *xpath;
-} obj_when_t;
-
-
 /* YANG augment statement struct */
 typedef struct obj_augment_t_ {
     xmlChar          *target;
     xmlChar          *descr;
     xmlChar          *ref;
     struct obj_template_t_ *targobj;
-    obj_when_t        when;
     obj_augtype_t     augtype;
     ncx_status_t      status;
     dlq_hdr_t         datadefQ;         /* Q of obj_template_t */
-    dlq_hdr_t         appinfoQ;          /* Q of ncx_appinfo_t */
 } obj_augment_t;
 
 
@@ -383,7 +364,6 @@ typedef struct obj_notif_t_ {
     dlq_hdr_t         typedefQ;         /* Q of typ_template_t */
     dlq_hdr_t         groupingQ;        /* Q of gtp_template_t */
     dlq_hdr_t         datadefQ;          /* Q of obj_template_t */
-    dlq_hdr_t         appinfoQ;          /* Q of ncx_appinfo_t */
 } obj_notif_t;
 
 
@@ -398,9 +378,13 @@ typedef struct obj_template_t_ {
     grp_template_t *grp;          /* non-NULL == in a grp.datadefQ */
     struct obj_template_t_ *parent;
     struct obj_template_t_ *usesobj;
-    const obj_when_t  *augwhen;     /* augment when clause backptr */
-    dlq_hdr_t    metadataQ;                 /* Q of obj_metadata_t */
-    void   *cbset;   /* agt_rpc_cbset_t for RPC or agt_cb_fnset_t for OBJ */
+    struct xpath_pcb_t_    *when;           /* optional when clause */
+    struct xpath_pcb_t_    *augwhen;    /* back-ptr to augment when */
+    struct xpath_pcb_t_    *usewhen;       /* back-ptr to uses when */
+    dlq_hdr_t               metadataQ;       /* Q of obj_metadata_t */
+      /* cbset is agt_rpc_cbset_t for RPC or agt_cb_fnset_t for OBJ */
+    void                   *cbset;   
+    dlq_hdr_t               appinfoQ;         /* Q of ncx_appinfo_t */
     union def_ {
 	obj_container_t   *container;
 	obj_leaf_t        *leaf;
@@ -685,7 +669,7 @@ extern void
 extern ncx_access_t
     obj_get_max_access (const obj_template_t *obj);
 
-extern dlq_hdr_t *
+extern const dlq_hdr_t *
     obj_get_appinfoQ (const obj_template_t *obj);
 
 extern dlq_hdr_t *

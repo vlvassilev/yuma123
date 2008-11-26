@@ -67,6 +67,10 @@ date         init     comment
 #include "xmlns.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
 #ifndef _H_yang
 #include "yang.h"
 #endif
@@ -153,33 +157,16 @@ static obj_template_t *
     }
     (void)memset(obj, 0x0, sizeof(obj_template_t));
     dlq_createSQue(&obj->metadataQ);
+    dlq_createSQue(&obj->appinfoQ);
     return obj;
 
 }  /* new_blank_template */
 
 
 /********************************************************************
-* FUNCTION free_blank_template
-* 
-* Free a blank obj_template_t
-*
-* INPUTS:
-*   obj == blank template to free
-*
-*********************************************************************/
-static void
-    free_blank_template (obj_template_t *obj)
-{
-
-    m__free(obj);
-
-}  /* free_blank_template */
-
-
-/********************************************************************
 * FUNCTION clean_mustQ
 * 
-* Clean a Q of ncx_errinfo_t
+* Clean a Q of xpath_pcb_t entries
 *
 * INPUTS:
 *   mustQ == Q of ncx_errinfo_t to delete
@@ -188,11 +175,11 @@ static void
 static void
     clean_mustQ (dlq_hdr_t *mustQ)
 {
-    ncx_errinfo_t *must;
+    xpath_pcb_t *must;
 
     while (!dlq_empty(mustQ)) {
-	must = (ncx_errinfo_t *)dlq_deque(mustQ);
-	ncx_free_errinfo(must);
+	must = (xpath_pcb_t *)dlq_deque(mustQ);
+	xpath_free_pcb(must);
     }
 
 }  /* clean_mustQ */
@@ -291,6 +278,8 @@ static status_t
 }  /* clone_datadefQ */
 
 
+
+
 /********************************************************************
 * FUNCTION clone_appinfoQ
 * 
@@ -344,9 +333,6 @@ static status_t
     return NO_ERR;
 
 }  /* clone_appinfoQ */
-
-
-
 
 
 /********************************************************************
@@ -422,83 +408,9 @@ static obj_case_t *
 	return NULL;
     }
 
-    res = clone_appinfoQ(&newcas->appinfoQ,
-			 &cas->appinfoQ,
-			 (mcas) ? &mcas->appinfoQ : NULL);
-    if (res != NO_ERR) {
-	free_case(newcas);
-	return NULL;
-    }
-
     return newcas;
 
 }  /* clone_case */
-
-
-/********************************************************************
-* FUNCTION clone_must
-* 
-* Clone a must clause (ncx_errinfo_t struct)
-*
-* INPUTS:
-*    srcmust == struct with starting contents
-*
-* RETURNS:
-*   new ncx_errinfo_t clone of the srcmust, NULL if malloc error
-*********************************************************************/
-static ncx_errinfo_t *
-    clone_must (ncx_errinfo_t *srcmust)
-{
-    ncx_errinfo_t *newmust;
-
-    newmust = ncx_new_errinfo();
-    if (!newmust) {
-	return NULL;
-    }
-
-    if (srcmust->xpath) {
-	newmust->xpath = xml_strdup(srcmust->xpath);
-	if (!newmust->xpath) {
-	    ncx_free_errinfo(newmust);
-	    return NULL;
-	}
-    }
-
-    if (srcmust->descr) {
-	newmust->descr = xml_strdup(srcmust->descr);
-	if (!newmust->descr) {
-	    ncx_free_errinfo(newmust);
-	    return NULL;
-	}
-    }
-
-    if (srcmust->ref) {
-	newmust->ref = xml_strdup(srcmust->ref);
-	if (!newmust->ref) {
-	    ncx_free_errinfo(newmust);
-	    return NULL;
-	}
-    }
-
-    if (srcmust->error_app_tag) {
-	newmust->error_app_tag = xml_strdup(srcmust->error_app_tag);
-	if (!newmust->error_app_tag) {
-	    ncx_free_errinfo(newmust);
-	    return NULL;
-	}
-    }
-
-    if (srcmust->error_message) {
-	newmust->error_message = xml_strdup(srcmust->error_message);
-	if (!newmust->error_message) {
-	    ncx_free_errinfo(newmust);
-	    return NULL;
-	}
-    }
-
-    return newmust;
-
-}  /* clone_must */
 
 
 /********************************************************************
@@ -520,13 +432,13 @@ static status_t
 		 dlq_hdr_t *mergeQ)
 {
 
-    ncx_errinfo_t *srcmust, *newmust;
+    xpath_pcb_t *srcmust, *newmust;
 
-    for (srcmust = (ncx_errinfo_t *)dlq_firstEntry(srcQ);
+    for (srcmust = (xpath_pcb_t *)dlq_firstEntry(srcQ);
 	 srcmust != NULL;
-	 srcmust = (ncx_errinfo_t *)dlq_nextEntry(srcmust)) {
+	 srcmust = (xpath_pcb_t *)dlq_nextEntry(srcmust)) {
 
-	newmust = clone_must(srcmust);
+	newmust = xpath_clone_pcb(srcmust);
 	if (!newmust) {
 	    return ERR_INTERNAL_MEM;
 	} else {
@@ -535,11 +447,11 @@ static status_t
     }
 
     if (mergeQ) {
-	for (srcmust = (ncx_errinfo_t *)dlq_firstEntry(mergeQ);
+	for (srcmust = (xpath_pcb_t *)dlq_firstEntry(mergeQ);
 	     srcmust != NULL;
-	     srcmust = (ncx_errinfo_t *)dlq_nextEntry(srcmust)) {
+	     srcmust = (xpath_pcb_t *)dlq_nextEntry(srcmust)) {
 
-	    newmust = clone_must(srcmust);
+	    newmust = xpath_clone_pcb(srcmust);
 	    if (!newmust) {
 		return ERR_INTERNAL_MEM;
 	    } else {
@@ -602,7 +514,6 @@ static obj_container_t *
     }
 
     dlq_createSQue(&con->mustQ);
-    dlq_createSQue(&con->appinfoQ);
 
     return con;
 
@@ -655,7 +566,6 @@ static void
     }
 
     clean_mustQ(&con->mustQ);
-    ncx_clean_appinfoQ(&con->appinfoQ);
 
     m__free(con);
 
@@ -758,14 +668,6 @@ static obj_container_t *
 	return NULL;
     }
 
-    res = clone_appinfoQ(&newcon->appinfoQ,
-			 &con->appinfoQ,
-			 (mcon) ? &mcon->appinfoQ : NULL);
-    if (res != NO_ERR) {
-	free_container(newcon, OBJ_FL_CLONE);
-	return NULL;
-    }
-
     return newcon;
 
 }  /* clone_container */
@@ -804,7 +706,6 @@ static obj_leaf_t *
 	leaf->status = NCX_STATUS_CURRENT;
     }
 
-    dlq_createSQue(&leaf->appinfoQ);
     dlq_createSQue(&leaf->mustQ);
 
     return leaf;
@@ -854,7 +755,6 @@ static void
     }
 
     clean_mustQ(&leaf->mustQ);
-    ncx_clean_appinfoQ(&leaf->appinfoQ);
 
     m__free(leaf);
 
@@ -944,14 +844,6 @@ static obj_leaf_t *
 	return NULL;
     }
 
-    res = clone_appinfoQ(&newleaf->appinfoQ,
-			 &leaf->appinfoQ,
-			 (mleaf) ? &mleaf->appinfoQ : NULL);
-    if (res != NO_ERR) {
-	free_leaf(newleaf, OBJ_FL_CLONE);
-	return NULL;
-    }
-
     return newleaf;
 
 }  /* clone_leaf */
@@ -992,7 +884,6 @@ static obj_leaflist_t *
     }
 
     dlq_createSQue(&leaflist->mustQ);
-    dlq_createSQue(&leaflist->appinfoQ);
 
     return leaflist;
 
@@ -1037,7 +928,6 @@ static void
     }
 
     clean_mustQ(&leaflist->mustQ);
-    ncx_clean_appinfoQ(&leaflist->appinfoQ);
 
     m__free(leaflist);
 
@@ -1130,14 +1020,6 @@ static obj_leaflist_t *
 	newleaflist->maxset = leaflist->maxset;
     }
 
-    res = clone_appinfoQ(&newleaflist->appinfoQ,
-			 &leaflist->appinfoQ,
-			 (mleaflist) ? &mleaflist->appinfoQ : NULL);
-    if (res != NO_ERR) {
-	free_leaflist(newleaflist, OBJ_FL_CLONE);
-	return NULL;
-    }
-
     return newleaflist;
 
 }  /* clone_leaflist */
@@ -1204,7 +1086,6 @@ static void
     }
 
     clean_mustQ(&list->mustQ);
-    ncx_clean_appinfoQ(&list->appinfoQ);
 
     m__free(list);
 
@@ -1268,7 +1149,6 @@ static obj_list_t *
     }
 
     dlq_createSQue(&list->mustQ);
-    dlq_createSQue(&list->appinfoQ);
 
     list->datadefQ = dlq_createQue();
     if (!list->datadefQ) {
@@ -1381,14 +1261,6 @@ static obj_list_t *
 	return NULL;
     }
 
-    res = clone_appinfoQ(&newlist->appinfoQ,
-			 &list->appinfoQ,
-			 (mlist) ? &mlist->appinfoQ : NULL);
-    if (res != NO_ERR) {
-	free_list(newlist, OBJ_FL_CLONE);
-	return NULL;
-    }
-
     return newlist;
 
 }  /* clone_list */
@@ -1417,7 +1289,6 @@ static obj_case_t *
     }
     (void)memset(cas, 0x0, sizeof(obj_case_t));
 
-    dlq_createSQue(&cas->appinfoQ);
     cas->status = NCX_STATUS_CURRENT;
 
     if (isreal) {
@@ -1458,7 +1329,6 @@ static void
 	obj_clean_datadefQ(cas->datadefQ);
 	dlq_destroyQue(cas->datadefQ);
     }
-    ncx_clean_appinfoQ(&cas->appinfoQ);
 
     m__free(cas);
 
@@ -1494,7 +1364,6 @@ static obj_choice_t *
 	return NULL;
     }
 
-    dlq_createSQue(&ch->appinfoQ);
     if (isreal) {
 	ch->status = NCX_STATUS_CURRENT;
     }
@@ -1541,8 +1410,6 @@ static void
 	obj_clean_datadefQ(choic->caseQ);
 	dlq_destroyQue(choic->caseQ);
     }
-
-    ncx_clean_appinfoQ(&choic->appinfoQ);
 
     m__free(choic);
 
@@ -1635,14 +1502,6 @@ static obj_choice_t *
 	return NULL;
     }
 
-    res = clone_appinfoQ(&newchoic->appinfoQ,
-			 &choic->appinfoQ,
-			 (mchoic) ? &mchoic->appinfoQ : NULL);
-    if (res != NO_ERR) {
-	free_choice(newchoic, OBJ_FL_CLONE);
-	return NULL;
-    }
-
     return newchoic;
 
 }  /* clone_choice */
@@ -1671,7 +1530,6 @@ static obj_uses_t *
     }
     (void)memset(us, 0x0, sizeof(obj_uses_t));
 
-    dlq_createSQue(&us->appinfoQ);
     if (isreal) {
 	us->status = NCX_STATUS_CURRENT;   /* default */
     }
@@ -1716,31 +1574,10 @@ static void
 
     obj_clean_datadefQ(us->datadefQ);
     dlq_destroyQue(us->datadefQ);
-    ncx_clean_appinfoQ(&us->appinfoQ);
 
     m__free(us);
 
 }  /* free_uses */
-
-
-/********************************************************************
-* FUNCTION clean_when
-* 
-* Scrub the memory in a obj_when_t by freeing all
-* the sub-fields
-*
-* INPUTS:
-*    wh == obj_when_t data structure to free
-*********************************************************************/
-static void 
-    clean_when (obj_when_t *wh)
-{
-    if (wh->xpath) {
-	m__free(wh->xpath);
-	wh->xpath = NULL;
-    }
-
-}  /* clean_when */
 
 
 /********************************************************************
@@ -1767,7 +1604,6 @@ static obj_augment_t *
     (void)memset(aug, 0x0, sizeof(obj_augment_t));
 
     dlq_createSQue(&aug->datadefQ);
-    dlq_createSQue(&aug->appinfoQ);
 
     if (isreal) {
 	aug->status = NCX_STATUS_CURRENT;
@@ -1795,7 +1631,6 @@ static void
     if (aug->target) {
 	m__free(aug->target);
     }
-    clean_when(&aug->when);
 
     if (aug->descr) {
 	m__free(aug->descr);
@@ -1805,7 +1640,6 @@ static void
     }
 
     obj_clean_datadefQ(&aug->datadefQ);
-    ncx_clean_appinfoQ(&aug->appinfoQ);
 
     m__free(aug);
 
@@ -1834,7 +1668,6 @@ static obj_rpc_t *
     dlq_createSQue(&rpc->typedefQ);
     dlq_createSQue(&rpc->groupingQ);
     dlq_createSQue(&rpc->datadefQ);
-    dlq_createSQue(&rpc->appinfoQ);
     rpc->status = NCX_STATUS_CURRENT;
     return rpc;
 
@@ -1865,7 +1698,6 @@ static void
     typ_clean_typeQ(&rpc->typedefQ);
     grp_clean_groupingQ(&rpc->groupingQ);
     obj_clean_datadefQ(&rpc->datadefQ);
-    ncx_clean_appinfoQ(&rpc->appinfoQ);
 
     m__free(rpc);
 
@@ -1896,7 +1728,6 @@ static obj_rpcio_t *
     dlq_createSQue(&rpcio->typedefQ);
     dlq_createSQue(&rpcio->groupingQ);
     dlq_createSQue(&rpcio->datadefQ);
-    dlq_createSQue(&rpcio->appinfoQ);
     return rpcio;
 
 }  /* new_rpcio */
@@ -1920,7 +1751,6 @@ static void
     typ_clean_typeQ(&rpcio->typedefQ);
     grp_clean_groupingQ(&rpcio->groupingQ);
     obj_clean_datadefQ(&rpcio->datadefQ);
-    ncx_clean_appinfoQ(&rpcio->appinfoQ);
     m__free(rpcio);
 
 }  /* free_rpcio */
@@ -1948,7 +1778,6 @@ static obj_notif_t *
     dlq_createSQue(&notif->typedefQ);
     dlq_createSQue(&notif->groupingQ);
     dlq_createSQue(&notif->datadefQ);
-    dlq_createSQue(&notif->appinfoQ);
     notif->status = NCX_STATUS_CURRENT;
     return notif;
 
@@ -1979,7 +1808,6 @@ static void
     typ_clean_typeQ(&notif->typedefQ);
     grp_clean_groupingQ(&notif->groupingQ);
     obj_clean_datadefQ(&notif->datadefQ);
-    ncx_clean_appinfoQ(&notif->appinfoQ);
 
     m__free(notif);
 
@@ -2352,6 +2180,25 @@ static const obj_template_t *
 
 } /* find_next_child */
 
+/********************************************************************
+* FUNCTION free_blank_template
+* 
+* Free a blank obj_template_t
+*
+* INPUTS:
+*   obj == blank template to free
+*
+*********************************************************************/
+static void
+    free_blank_template (obj_template_t *obj)
+{
+
+    clean_metadataQ(&obj->metadataQ);
+    ncx_clean_appinfoQ(&obj->appinfoQ);
+    m__free(obj);
+
+}  /* free_blank_template */
+
 
 /**************** E X T E R N A L    F U N C T I O N S    **********/
 
@@ -2386,8 +2233,9 @@ obj_template_t *
 
     (void)memset(obj, 0x0, sizeof(obj_template_t));
     obj->objtype = objtype;
+    dlq_createSQue(&obj->appinfoQ);
     dlq_createSQue(&obj->metadataQ);
-
+    
     switch (objtype) {
     case OBJ_TYP_CONTAINER:
 	obj->def.container = new_container(TRUE);
@@ -2498,7 +2346,12 @@ void
     }
 #endif
 
+    ncx_clean_appinfoQ(&obj->appinfoQ);
     clean_metadataQ(&obj->metadataQ);
+
+    if (obj->when) {
+	xpath_free_pcb(obj->when);
+    }
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
@@ -3652,9 +3505,15 @@ obj_template_t *
 	newobj->flags |= (mobj->flags & ~OBJ_FL_REFINE);
     }
     newobj->mod = mod;
-    
-    res = NO_ERR;
 
+    res = clone_appinfoQ(&newobj->appinfoQ,
+			 &srcobj->appinfoQ,
+			 (mobj) ? &mobj->appinfoQ : NULL);
+    if (res != NO_ERR) {
+	free_blank_template(newobj);
+	return NULL;
+    }
+    
     /* set the specific object definition type */
     switch (srcobj->objtype) {
     case OBJ_TYP_CONTAINER:
@@ -5014,7 +4873,7 @@ ncx_access_t
 * RETURNS:
 *   YANG status clause for this object
 *********************************************************************/
-dlq_hdr_t *
+const dlq_hdr_t *
     obj_get_appinfoQ (const obj_template_t *obj)
 {
 #ifdef DEBUG
@@ -5024,35 +4883,7 @@ dlq_hdr_t *
     }
 #endif
 
-    switch (obj->objtype) {
-    case OBJ_TYP_CONTAINER:
-	return &obj->def.container->appinfoQ;
-    case OBJ_TYP_LEAF:
-	return &obj->def.leaf->appinfoQ;
-    case OBJ_TYP_LEAF_LIST:
-	return &obj->def.leaflist->appinfoQ;
-    case OBJ_TYP_LIST:
-	return &obj->def.list->appinfoQ;
-    case OBJ_TYP_CHOICE:
-	return &obj->def.choic->appinfoQ;
-    case OBJ_TYP_CASE:
-	return &obj->def.cas->appinfoQ;
-    case OBJ_TYP_USES:
-	return &obj->def.uses->appinfoQ;
-    case OBJ_TYP_AUGMENT:
-	return &obj->def.augment->appinfoQ;
-    case OBJ_TYP_RPC:
-	return &obj->def.rpc->appinfoQ;
-    case OBJ_TYP_RPCIO:
-	return &obj->def.rpcio->appinfoQ;
-    case OBJ_TYP_NOTIF:
-	return &obj->def.notif->appinfoQ;
-    case OBJ_TYP_NONE:
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
-    }
-    /*NOTREACHED*/
+    return &obj->appinfoQ;
 
 }  /* obj_get_appinfoQ */
 
@@ -7048,7 +6879,6 @@ obj_metadata_t *
     return (obj_metadata_t *)dlq_nextEntry(meta);
 
 }  /* obj_next_metadata */
-
 
 
 /* END obj.c */

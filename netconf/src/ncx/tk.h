@@ -163,7 +163,6 @@ typedef enum tk_type_t_ {
     TK_TT_MINUS,                /* minus char '-' */
     TK_TT_LT,                   /* less than char '<' */
     TK_TT_GT,                   /* greater than char '>' */
-    TK_TT_DOLLAR,               /* dollar sign '$' */
 
     /* PUT ALL 2-CHAR TOKENS SECOND */
     TK_TT_RANGESEP,             /* range sep, parent node '..' */
@@ -182,6 +181,11 @@ typedef enum tk_type_t_ {
     TK_TT_MSSTRING,             /* module-qualified scoped string */
     TK_TT_QSTRING,              /* double quoted string */
     TK_TT_SQSTRING,             /* single quoted string */
+
+    TK_TT_VARBIND,              /* XPath varbind '$NCName' */
+    TK_TT_QVARBIND,             /* XPath varbind '$prefix:NCName' */
+
+    TK_TT_NCNAME_STAR,         /* XPath NCName:* sequence */
 
     /* PUT ALL NUMBER CLASSIFICATION TOKENS FOURTH */
     TK_TT_DNUM,                 /* decimal number */
@@ -270,6 +274,9 @@ extern const char *
 
 extern tk_type_t
     tk_next_typ (tk_chain_t *tkc);
+
+extern tk_type_t
+    tk_next_typ2 (tk_chain_t *tkc);
 
 extern const xmlChar *
     tk_next_val (tk_chain_t *tkc);

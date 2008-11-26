@@ -125,6 +125,10 @@ date         init     comment
 #include  "xmlns.h"
 #endif
 
+#ifndef _H_xpath
+#include  "xpath.h"
+#endif
+
 #ifndef _H_yangconst
 #include  "yangconst.h"
 #endif
@@ -1977,7 +1981,7 @@ static status_t
 {
     const obj_template_t  *obj;
     const dlq_hdr_t       *mustQ;
-    const ncx_errinfo_t   *errinfo;
+    xpath_pcb_t           *must;
     val_value_t           *chval;
     status_t               res, retres;
 
@@ -2001,10 +2005,13 @@ static status_t
 	log_debug3("\nmst_stmt_check: %s start", curval->name);
 #endif
 
-	for (errinfo = (const ncx_errinfo_t *)dlq_firstEntry(mustQ);
-	     errinfo != NULL;
-	     errinfo = (const ncx_errinfo_t *)dlq_nextEntry(errinfo)) {
+	for (must = (xpath_pcb_t *)dlq_firstEntry(mustQ);
+	     must != NULL;
+	     must = (xpath_pcb_t *)dlq_nextEntry(must)) {
+
+	    /****/
 	    /*** agt_xpath_eval(scb, msg, root, curval, errinfo, layer);  ***/
+
 	}
     }
 

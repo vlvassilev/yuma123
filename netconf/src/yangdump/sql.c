@@ -89,6 +89,10 @@ date         init     comment
 #include "xml_val.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
 #ifndef _H_xsd_util
 #include "xsd_util.h"
 #endif
@@ -821,9 +825,9 @@ static void
     ses_putstr(scb, (const xmlChar *)buff);
 
     /* column: augwhen */
-    if (obj->augwhen && obj->augwhen->xpath) {
+    if (obj->augwhen && obj->augwhen->exprstr) {
 	ses_putstr(scb, (const xmlChar *)"\n    '");
-	write_cstring(scb, obj->augwhen->xpath);
+	write_cstring(scb, obj->augwhen->exprstr);
 	ses_putstr(scb, (const xmlChar *)"',");
     } else {
 	write_empty_col(scb);

@@ -1060,7 +1060,8 @@ status_t
 * Create and initialize an XPath parser control block
 *
 * INPUTS:
-*   XPath expression string to save (a copy will be made)
+*   xpathstr == XPath expression string to save (a copy will be made)
+*            == NULL if this step should be skipped
 *
 * RETURNS:
 *   pointer to malloced struct, NULL if malloc error
@@ -1070,13 +1071,6 @@ xpath_pcb_t *
 {
     xpath_pcb_t *pcb;
 
-#ifdef DEBUG
-    if (!xpathstr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
     pcb = m__getObj(xpath_pcb_t);
     if (!pcb) {
 	return NULL;
@@ -1084,18 +1078,91 @@ xpath_pcb_t *
 
     memset(pcb, 0x0, sizeof(xpath_pcb_t));
 
-    pcb->exprstr = xml_strdup(xpathstr);
-    if (!pcb->exprstr) {
-	m__free(pcb);
-	return NULL;
+    if (xpathstr) {
+	pcb->exprstr = xml_strdup(xpathstr);
+	if (!pcb->exprstr) {
+	    m__free(pcb);
+	    return NULL;
+	}
     }
 
     dlq_createSQue(&pcb->varbindQ);
-    dlq_createSQue(&pcb->result.nodeQ);
+
+    ncx_init_errinfo(&pcb->errinfo);
 
     return pcb;
 
 }  /* xpath_new_pcb */
+
+
+/********************************************************************
+* FUNCTION xpath_clone_pcb
+* 
+* Clone an XPath PCB for a  must clause copy
+*
+* INPUTS:
+*    srcpcb == struct with starting contents
+*
+* RETURNS:
+*   new xpatyh_pcb_t clone of the srcmust, NULL if malloc error
+*   It will not be processed or parsed.  Only the starter
+*   data will be set
+*********************************************************************/
+xpath_pcb_t *
+    xpath_clone_pcb (xpath_pcb_t *srcpcb)
+{
+    xpath_pcb_t *newpcb;
+    status_t     res;
+
+    newpcb = xpath_new_pcb(srcpcb->exprstr);
+    if (!newpcb) {
+	return NULL;
+    }
+
+    res = ncx_copy_errinfo(&srcpcb->errinfo, &newpcb->errinfo);
+    if (res != NO_ERR) {
+	xpath_free_pcb(newpcb);
+	return NULL;
+    }
+
+    newpcb->mod = srcpcb->mod;
+    newpcb->source = srcpcb->source;
+
+    return newpcb;
+
+}  /* xpath_clone_pcb */
+
+
+/********************************************************************
+* FUNCTION xpath_find_pcb
+* 
+* Find an XPath PCB
+*
+* INPUTS:
+*    pcbQ == Q of xpath_pcb_t structs to check
+*    exprstr == XPath expression string to find
+*
+* RETURNS:
+*   pointer to found xpath_pcb_t or NULL if not found
+*********************************************************************/
+xpath_pcb_t *
+    xpath_find_pcb (dlq_hdr_t *pcbQ,
+		    const xmlChar *exprstr)
+{
+    xpath_pcb_t *pcb;
+
+    for (pcb = (xpath_pcb_t *)dlq_firstEntry(pcbQ);
+	 pcb != NULL;
+	 pcb = (xpath_pcb_t *)dlq_nextEntry(pcb)) {
+
+	if (pcb->exprstr && 
+	    !xml_strcmp(exprstr, pcb->exprstr)) {
+	    return pcb;
+	}
+    }
+    return NULL;
+
+}  /* xpath_find_pcb */
 
 
 /********************************************************************
@@ -1124,14 +1191,257 @@ void
 	m__free(pcb->exprstr);
     }
 
-    while (!dlq_empty(&pcb->result.nodeQ)) {
-	val = (val_value_t *)dlq_deque(&pcb->result.nodeQ);
-	val_free_value(val);
+    if (pcb->result) {
+	xpath_free_result(pcb->result);
     }
+
+    ncx_clean_errinfo(&pcb->errinfo);
 
     m__free(pcb);
 
 }  /* xpath_free_pcb */
+
+
+/********************************************************************
+* FUNCTION xpath_new_result
+* 
+* Create and initialize an XPath result struct
+*
+* INPUTS:
+*   restype == the desired result type
+*
+* RETURNS:
+*   pointer to malloced struct, NULL if malloc error
+*********************************************************************/
+xpath_result_t *
+    xpath_new_result (xpath_restype_t  restype)
+{
+    xpath_result_t *result;
+
+    result = m__getObj(xpath_result_t);
+    if (!result) {
+	return NULL;
+    }
+    
+    xpath_init_result(result, restype);
+    return result;
+
+}  /* xpath_new_result */
+
+
+/********************************************************************
+* FUNCTION xpath_init_result
+* 
+* Initialize an XPath result struct
+*
+* INPUTS:
+*   result == pointer to result struct to initialize
+*   restype == the desired result type
+*********************************************************************/
+void 
+    xpath_init_result (xpath_result_t *result,
+		       xpath_restype_t  restype)
+{
+#ifdef DEBUG
+    if (!result) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    memset(result, 0x0, sizeof(xpath_result_t));
+    result->restype = restype;
+
+    switch (restype) {
+    case XP_RT_NODESET:
+	dlq_createSQue(&result->r.nodeQ);
+	break;
+    case XP_RT_NUMBER:
+	ncx_init_num(&result->r.num);
+	ncx_set_num_zero(&result->r.num, NCX_BT_FLOAT32);
+	break;
+    case XP_RT_STRING:
+    case XP_RT_BOOLEAN:
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+}  /* xpath_init_result */
+
+
+/********************************************************************
+* FUNCTION xpath_free_result
+* 
+* Free a malloced XPath result struct
+*
+* INPUTS:
+*   result == pointer to result struct to free
+*********************************************************************/
+void
+    xpath_free_result (xpath_result_t *result)
+{
+#ifdef DEBUG
+    if (!result) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    xpath_clean_result(result);
+    m__free(result);
+
+}  /* xpath_free_result */
+
+
+/********************************************************************
+* FUNCTION xpath_clean_result
+* 
+* Clean an XPath result struct
+*
+* INPUTS:
+*   result == pointer to result struct to clean
+*********************************************************************/
+void
+    xpath_clean_result (xpath_result_t *result)
+{
+    xpath_resnode_t *resnode;
+
+#ifdef DEBUG
+    if (!result) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    switch (result->restype) {
+    case XP_RT_NODESET:
+	while (!dlq_empty(&result->r.nodeQ)) {
+	    resnode = (xpath_resnode_t *)dlq_deque(&result->r.nodeQ);
+	    xpath_free_resnode(resnode);
+	}
+	break;
+    case XP_RT_NUMBER:
+	ncx_clean_num(NCX_BT_FLOAT32, &result->r.num);
+	break;
+    case XP_RT_STRING:
+	if (result->r.str) {
+	    m__free(result->r.str);
+	    result->r.str = NULL;
+	}
+	break;
+    case XP_RT_BOOLEAN:
+	result->r.bool = FALSE;
+	break;
+    case XP_RT_NONE:
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    result->restype = XP_RT_NONE;
+    result->errtoken = NULL;
+    result->res = NO_ERR;
+
+}  /* xpath_clean_result */
+
+
+/********************************************************************
+* FUNCTION xpath_new_resnode
+* 
+* Create and initialize an XPath result node struct
+*
+* INPUTS:
+*   restype == the desired result type
+*
+* RETURNS:
+*   pointer to malloced struct, NULL if malloc error
+*********************************************************************/
+xpath_resnode_t *
+    xpath_new_resnode (void)
+{
+    xpath_resnode_t *resnode;
+
+    resnode = m__getObj(xpath_resnode_t);
+    if (!resnode) {
+	return NULL;
+    }
+    
+    xpath_init_resnode(resnode);
+    return resnode;
+
+}  /* xpath_new_resnode */
+
+
+/********************************************************************
+* FUNCTION xpath_init_resnode
+* 
+* Initialize an XPath result node struct
+*
+* INPUTS:
+*   resnode == pointer to result node struct to initialize
+*********************************************************************/
+void 
+    xpath_init_resnode (xpath_resnode_t *resnode)
+{
+#ifdef DEBUG
+    if (!resnode) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    memset(resnode, 0x0, sizeof(xpath_resnode_t));
+
+}  /* xpath_init_resnode */
+
+
+/********************************************************************
+* FUNCTION xpath_free_resnode
+* 
+* Free a malloced XPath result node struct
+*
+* INPUTS:
+*   resnode == pointer to result node struct to free
+*********************************************************************/
+void
+    xpath_free_resnode (xpath_resnode_t *resnode)
+{
+#ifdef DEBUG
+    if (!resnode) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    xpath_clean_resnode(resnode);
+    m__free(resnode);
+
+}  /* xpath_free_resnode */
+
+
+/********************************************************************
+* FUNCTION xpath_clean_resnode
+* 
+* Clean an XPath result node struct
+*
+* INPUTS:
+*   resnode == pointer to result node struct to clean
+*********************************************************************/
+void
+    xpath_clean_resnode (xpath_resnode_t *resnode)
+{
+
+#ifdef DEBUG
+    if (!resnode) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    memset(resnode, 0x0, sizeof(xpath_resnode_t));
+
+}  /* xpath_clean_resnode */
 
 
 /********************************************************************
@@ -1193,6 +1503,46 @@ status_t
 
 }   /* xpath_get_curmod_from_prefix */
 
+
+/********************************************************************
+* FUNCTION xpath_parse_token
+* 
+* Parse the XPath token sequence for a specific token type
+* It has already been tokenized
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*    tktyp == expected token type
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_parse_token (xpath_pcb_t *pcb,
+		       tk_type_t  tktype)
+{
+    status_t     res;
+
+    /* get the next token */
+    res = TK_ADV(pcb->tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	return res;
+    }
+
+    if (TK_CUR_TYP(pcb->tkc) != tktype) {
+	res = ERR_NCX_WRONG_TKTYPE;
+	ncx_mod_exp_err(pcb->tkc, pcb->mod, res,
+			tk_get_token_name(tktype));
+	return res;
+    }
+
+    return NO_ERR;
+
+}  /* xpath_parse_token */
 
 
 /* END xpath.c */

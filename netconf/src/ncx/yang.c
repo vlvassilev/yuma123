@@ -86,6 +86,14 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
+#ifndef _H_xpath1
+#include "xpath1.h"
+#endif
+
 #ifndef _H_yang
 #include "yang.h"
 #endif
@@ -1053,8 +1061,8 @@ status_t
 * INPUTS:
 *   tkc    == token chain
 *   mod    == module in progress
-*   mustQ  == address of Q of ncx_errinfo_t struct to store
-*             a new malloced ncx_errinfo_t 
+*   mustQ  == address of Q of xpath_pcb_t structs to store
+*             a new malloced xpath_pcb_t 
 *   appinfoQ == Q to hold any extensions found (may be NULL)
 *
 * OUTPUTS:
@@ -1071,7 +1079,7 @@ status_t
 {
     const xmlChar *val;
     const char    *expstr;
-    ncx_errinfo_t *must;
+    xpath_pcb_t   *must;
     tk_type_t      tktyp;
     status_t       res, retres;
     boolean        done, etag, emsg, desc, ref;
@@ -1082,7 +1090,7 @@ status_t
     }
 #endif
 
-    must = ncx_new_errinfo();
+    must = xpath_new_pcb(NULL);
     if (!must) {
 	res = ERR_INTERNAL_MEM;
 	ncx_print_errormsg(tkc, mod, res);
@@ -1098,22 +1106,34 @@ status_t
     ref = FALSE;
 
     /* get the Xpath string for the must expression */
-    res = yang_consume_string(tkc, mod, &must->xpath);
+    res = yang_consume_string(tkc, mod, &must->exprstr);
     if (res != NO_ERR) {
 	retres = res;
 	if (NEED_EXIT) {
-	    ncx_free_errinfo(must);
+	    xpath_free_pcb(must);
 	    return retres;
 	}
     }
 
+    /* parse the must expression for well-formed XPath */
+    res = xpath1_parse_expr(tkc, mod, must, XP_SRC_MUST);
+    if (res != NO_ERR) {
+	/* errors already reported */
+	retres = res;
+	if (NEED_EXIT) {
+	    xpath_free_pcb(must);
+	    return retres;
+	}
+    }
+
+    /* move on to the must sub-clauses, if any */
     expstr = "error-message, error-app-tag, "
 	"description, or reference keywords";
 
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
 	ncx_print_errormsg(tkc, mod, res);
-	ncx_free_errinfo(must);
+	xpath_free_pcb(must);
 	return res;
     }
 
@@ -1126,17 +1146,16 @@ status_t
     default:
 	res = ERR_NCX_WRONG_TKTYPE;
 	ncx_mod_exp_err(tkc, mod, res, expstr);
-	ncx_free_errinfo(must);
+	xpath_free_pcb(must);
 	return res;
     }
 
     while (!done) {
-
 	/* get the next token */
 	res = TK_ADV(tkc);
 	if (res != NO_ERR) {
 	    ncx_print_errormsg(tkc, mod, res);
-	    ncx_free_errinfo(must);
+	    xpath_free_pcb(must);
 	    return res;
 	}
 
@@ -1148,7 +1167,7 @@ status_t
 	case TK_TT_NONE:
 	    res = ERR_NCX_EOF;
 	    ncx_print_errormsg(tkc, mod, res);
-	    ncx_free_errinfo(must);
+	    xpath_free_pcb(must);
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
@@ -1156,7 +1175,7 @@ status_t
 	    if (res != NO_ERR) {
 		retres = res;
 		if (NEED_EXIT) {
-		    ncx_free_errinfo(must);
+		    xpath_free_pcb(must);
 		    return retres;
 		}
 	    }
@@ -1169,7 +1188,7 @@ status_t
 	default:
 	    retres = ERR_NCX_WRONG_TKTYPE;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    ncx_free_errinfo(must);
+	    xpath_free_pcb(must);
 	    continue;
 	}
 
@@ -1177,20 +1196,20 @@ status_t
         if (!xml_strcmp(val, YANG_K_ERROR_APP_TAG)) {
 	    /* Optional 'error-app-tag' field is present */
 	    res = yang_consume_strclause(tkc, mod,
-					 &must->error_app_tag,
+					 &must->errinfo.error_app_tag,
 					 &etag, appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_ERROR_MESSAGE)) {
 	    /* Optional 'error-message' field is present */
 	    res = yang_consume_strclause(tkc, mod,
-					 &must->error_message,
+					 &must->errinfo.error_message,
 					 &emsg, appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    /* Optional 'description' field is present */
-	    res = yang_consume_descr(tkc, mod, &must->descr,
+	    res = yang_consume_descr(tkc, mod, &must->errinfo.descr,
 				     &desc, appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    /* Optional 'reference' field is present */
-	    res = yang_consume_descr(tkc, mod, &must->ref,
+	    res = yang_consume_descr(tkc, mod, &must->errinfo.ref,
 				     &ref, appinfoQ);
 	} else {
 	    expstr = "must sub-statement";
@@ -1200,7 +1219,7 @@ status_t
 	if (res != NO_ERR) {
 	    retres = res;
 	    if (NEED_EXIT) {
-		ncx_free_errinfo(must);
+		xpath_free_pcb(must);
 		return retres;
 	    }
 	}

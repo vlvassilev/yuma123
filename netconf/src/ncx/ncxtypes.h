@@ -581,7 +581,6 @@ typedef enum ncx_strtyp_t_ {
 /* YANG must statement struct */
 typedef struct ncx_errinfo_t_ {
     dlq_hdr_t         qhdr;
-    xmlChar          *xpath;                      /* must target */
     xmlChar          *descr;
     xmlChar          *ref;
     xmlChar          *error_app_tag;

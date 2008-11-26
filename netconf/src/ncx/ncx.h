@@ -577,6 +577,9 @@ extern obj_template_t *
     ncx_get_gen_empty (void);
 
 extern obj_template_t *
+    ncx_get_gen_float (void);
+
+extern obj_template_t *
     ncx_get_gen_root (void);
 
 /* translate ncx_layer_t enum to a string */
@@ -702,14 +705,13 @@ extern void
 extern void 
     ncx_free_errinfo (ncx_errinfo_t *err);
 
-/* used to diff 2 must-stmts */
-extern ncx_errinfo_t *
-    ncx_find_errinfo (dlq_hdr_t *que,
-		      const xmlChar *xpath);
-
 /* check if error-app-tag or error-message set */
 extern boolean
     ncx_errinfo_set (const ncx_errinfo_t *errinfo);
+
+extern status_t
+    ncx_copy_errinfo (const ncx_errinfo_t *src,
+		      ncx_errinfo_t *dest);
 
 extern xmlChar *
     ncx_get_source (const xmlChar *fspec);

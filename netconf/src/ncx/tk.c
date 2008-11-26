@@ -143,7 +143,6 @@ static tk_ent_t tlist [] = {
     { TK_TT_MINUS, 1, "/", "minus", FL_XPATH },
     { TK_TT_LT, 1, "<", "less than", FL_XPATH },
     { TK_TT_GT, 1, ">", "greater than", FL_XPATH },
-    { TK_TT_DOLLAR, 1, "$", "dollar sign", FL_XPATH },
 
     /* TWO CHAR TOKENS */
     { TK_TT_RANGESEP, 2, "..", "range seperator", 
@@ -162,6 +161,13 @@ static tk_ent_t tlist [] = {
     { TK_TT_MSSTRING, 0, "", "prefix qualified scoped ID string", FL_ALL},
     { TK_TT_QSTRING, 0, "", "double quoted string", FL_ALL},
     { TK_TT_SQSTRING, 0, "", "single quoted string", FL_ALL},
+
+    /* variable binding '$NCName' or '$QName' */
+    { TK_TT_VARBIND, 0, "", "varbind", FL_XPATH },
+    { TK_TT_QVARBIND, 0, "", "qvarbind", FL_XPATH },
+
+    /* XPath NameTest, form 2: 'NCName:*' */
+    { TK_TT_NCNAME_STAR, 0, "", "NCName:*", FL_XPATH },
 
     /* number classification tokens */
     { TK_TT_DNUM, 0, "", "decimal number", FL_ALL},
@@ -732,7 +738,7 @@ static tk_type_t
      * and the specified length will be returned
      */
     if (len==1) {
-        for (t=TK_TT_LBRACE; t <= TK_TT_DOLLAR; t++) {
+        for (t=TK_TT_LBRACE; t <= TK_TT_GT; t++) {
             if (*buff == *tlist[t].tid && (tlist[t].flags & flags)) {
                 return tlist[t].ttyp;
             }
@@ -1363,6 +1369,90 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION tokenize_varbind_string
+* 
+* Handle some sort of $string, which could be a varbind string
+* in the form $QName 
+*
+* INPUTS:
+*   tkc == token chain 
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    tokenize_varbind_string (tk_chain_t *tkc)
+{
+    xmlChar        *str;
+    const xmlChar  *prefix, *item;
+    tk_token_t     *tk;
+    uint32          len, prelen;
+    status_t        res;
+
+    prefix = NULL;
+    item = NULL;
+
+    /* the bptr is pointing at the dollar sign char */
+    str = tkc->bptr+1;
+    while (ncx_valid_name_ch(*str)) {
+	str++;
+    }
+
+    /* check reasonable length for a QName */
+    len = (uint32)(str - tkc->bptr+1);
+    if (!len || len > NCX_MAX_NLEN) {
+        return finish_string(tkc, str);
+    }
+
+    /* else got a string fragment that could be a valid ID format */
+    if (*str == NCX_MODSCOPE_CH && str[1] != NCX_MODSCOPE_CH) {
+        /* stopped on the module-scope-identifier token
+         * the first identifier component must be a prefix
+	 * or possibly a module name 
+         */
+        prefix = tkc->bptr+1;
+        prelen = len;
+        item = ++str;
+
+        /* str now points at the start of the imported item 
+         * There needs to be at least one valid name component
+         * after the module qualifier
+         */
+        res = get_name_comp(str, &len);
+        if (res != NO_ERR) {
+            return finish_string(tkc, str);
+        }
+        str += len;
+        /* drop through -- either we stopped on a scope char or
+         * the end of the module-scoped identifier string
+         */
+    } 
+
+    if (prefix) {
+	/* XPath $prefix:identifier */
+	tk = new_token_wmod(TK_TT_QVARBIND,
+			    prefix, prelen, 
+			    item, (uint32)(str - item));
+    } else {
+	/* XPath $identifier */
+	tk = new_token(TK_TT_VARBIND,  tkc->bptr+1, len);
+    }
+
+    if (!tk) {
+	return ERR_INTERNAL_MEM;
+    }
+    tk->linenum = tkc->linenum;
+    tk->linepos = tkc->linepos;
+    dlq_enque(tk, &tkc->tkQ);
+
+    len = (uint32)(str - tkc->bptr);
+    tkc->bptr = str;    /* advance the buffer pointer */
+    tkc->linepos += len;
+    return NO_ERR;
+
+}  /* tokenize_varbind_string */
+
+
+/********************************************************************
 * FUNCTION tokenize_id_string
 * 
 * Handle some sort of non-quoted string, which could be an ID string
@@ -1376,15 +1466,16 @@ static status_t
     tokenize_id_string (tk_chain_t *tkc)
 {
     xmlChar        *str;
-    const xmlChar  *module, *item;
-    boolean         scoped;
+    const xmlChar  *prefix, *item;
+    boolean         scoped, namestar;
     tk_token_t     *tk;
-    uint32          len, modlen;
+    uint32          len, prelen;
     status_t        res;
 
-    module = NULL;
+    prefix = NULL;
     item = NULL;
     scoped = FALSE;
+    namestar = FALSE;
     tk = NULL;
 
     /* the bptr is pointing at the first string char which
@@ -1392,7 +1483,9 @@ static status_t
       */
     str = tkc->bptr+1;
     if (tkc->source == TK_SOURCE_REDO) {
-	/* partial ID syntax; redo so range clause components are not included */
+	/* partial ID syntax; redo so range clause 
+	 * components are not included 
+	 */
 	while ((*str != '.') && (*str != '-') && 
 	       ncx_valid_name_ch(*str)) {
 	    str++;
@@ -1421,25 +1514,29 @@ static status_t
 
     /* else got a string fragment that could be a valid ID format */
     if (*str == NCX_MODSCOPE_CH && str[1] != NCX_MODSCOPE_CH) {
-        /* stopped on the module-scope-identifier token
-         * the first identifier component must be a module name 
+        /* stopped on the prefix-scope-identifier token
+         * the first identifier component must be a prefix name 
          */
-        module = tkc->bptr;
-        modlen = (uint32)(str - tkc->bptr);
+        prefix = tkc->bptr;
+        prelen = (uint32)(str - tkc->bptr);
         item = ++str;
 
-        /* str now points at the start of the imported item 
-         * There needs to be at least one valid name component
-         * after the module qualifier
-         */
-        res = get_name_comp(str, &len);
-        if (res != NO_ERR) {
-            return finish_string(tkc, str);
-        }
-        str += len;
-        /* drop through -- either we stopped on a scope char or
-         * the end of the module-scoped identifier string
-         */
+	if (tkc->source == TK_SOURCE_XPATH && *item == '*') {
+	    namestar = TRUE;
+	} else {
+	    /* str now points at the start of the imported item 
+	     * There needs to be at least one valid name component
+	     * after the prefix qualifier
+	     */
+	    res = get_name_comp(str, &len);
+	    if (res != NO_ERR) {
+		return finish_string(tkc, str);
+	    }
+	    str += len;
+	    /* drop through -- either we stopped on a scope char or
+	     * the end of the prefix-scoped identifier string
+	     */
+	}
     } 
 
     if (tkc->source != TK_SOURCE_XPATH) {
@@ -1461,12 +1558,12 @@ static status_t
 	}
 
 	/* done with the string; create a token and save it */
-	if (module) {
+	if (prefix) {
 	    if ((str - item) > NCX_MAX_Q_STRLEN) {
 		return ERR_NCX_LEN_EXCEEDED;
 	    }
 	    tk = new_token_wmod(scoped ? TK_TT_MSSTRING : TK_TT_MSTRING,
-				module, modlen, item, (uint32)(str - item));
+				prefix, prelen, item, (uint32)(str - item));
 	} else {
 	    if ((str - tkc->bptr) > NCX_MAX_Q_STRLEN) {
 		return ERR_NCX_LEN_EXCEEDED;
@@ -1474,11 +1571,16 @@ static status_t
 	    tk = new_token(scoped ? TK_TT_SSTRING : TK_TT_TSTRING,
 			   tkc->bptr, (uint32)(str - tkc->bptr));
 	}
-    } else if (module) {
-	/* XPath prefix:identifier */
-	tk = new_token_wmod(TK_TT_MSTRING,
-			    module, modlen, 
-			    item, (uint32)(str - item));
+    } else if (prefix) {
+	if (namestar) {
+	    /* XPath 'prefix:*'  */
+	    tk = new_token(TK_TT_NCNAME_STAR,  prefix, prelen);
+	} else {
+	    /* XPath prefix:identifier */
+	    tk = new_token_wmod(TK_TT_MSTRING,
+				prefix, prelen, 
+				item, (uint32)(str - item));
+	}
     } else {
 	/* XPath identifier */
 	tk = new_token(TK_TT_TSTRING,  tkc->bptr, 
@@ -1920,7 +2022,7 @@ tk_type_t
     tk_token_t *tk;
 
 #ifdef DEBUG
-    if (!tkc) {
+    if (!tkc || !tkc->cur) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return TK_TT_NONE;
     }
@@ -1930,6 +2032,39 @@ tk_type_t
     return  (tk) ? tk->typ : TK_TT_NONE;
 
 } /* tk_next_typ */
+
+
+/********************************************************************
+* FUNCTION tk_next_typ2
+* 
+* Get the token type of the token after the next token
+*
+* INPUTS:
+*   tkc == token chain 
+* RETURNS:
+*   token type
+*********************************************************************/
+tk_type_t
+    tk_next_typ2 (tk_chain_t *tkc)
+{
+    tk_token_t *tk;
+
+#ifdef DEBUG
+    if (!tkc || !tkc->cur) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return TK_TT_NONE;
+    }
+#endif
+
+    tk = (tk_token_t *)dlq_nextEntry(tkc->cur);
+    if (tk) {
+	tk = (tk_token_t *)dlq_nextEntry(tk);
+	return  (tk) ? tk->typ : TK_TT_NONE;
+    } else {
+	return TK_TT_NONE;
+    }
+
+} /* tk_next_typ2 */
 
 
 /********************************************************************
@@ -2192,8 +2327,11 @@ status_t
             } else if (*tkc->bptr == NCX_SQSTRING_CH) {
                 /* get a single-quoted string which may span multiple lines */
                 res = tokenize_sqstring(tkc);
+	    } else if (tkc->source == TK_SOURCE_XPATH &&
+		       *tkc->bptr == NCX_VARBIND_CH) {
+		res = tokenize_varbind_string(tkc);
             } else if (ncx_valid_fname_ch(*tkc->bptr)) {
-                /* get some some of unquoted ID string */
+                /* get some some of unquoted ID string or regular string */
                 res = tokenize_id_string(tkc);
             } else if ((tkc->source != TK_SOURCE_YANG) &&
 		       (isdigit(*tkc->bptr) || 

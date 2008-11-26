@@ -89,6 +89,10 @@ date         init     comment
 #include "xml_val.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
 #ifndef _H_xsd_util
 #include "xsd_util.h"
 #endif
@@ -366,6 +370,7 @@ static val_value_t *
 {
     val_value_t          *newval, *appval, *mustval;
     const dlq_hdr_t      *mustQ, *appinfoQ;
+    const xpath_pcb_t    *must;
     const ncx_errinfo_t  *errinfo;
     const obj_template_t *outputobj;
     xmlChar              *buff;
@@ -494,10 +499,10 @@ static val_value_t *
     }
 
     /* add when clause if needed */
-    if (obj->augwhen && obj->augwhen->xpath) {
+    if (obj->when && obj->when->exprstr) {
 	needed = TRUE;
 	newval = xml_val_new_cstring(YANG_K_WHEN, ncx_id,
-				     obj->augwhen->xpath);
+				     obj->when->exprstr);
 	if (!newval) {
 	    val_free_value(appval);
 	    return NULL;
@@ -508,11 +513,13 @@ static val_value_t *
 
     /* add must entries if needed */
     if (mustQ) {
-	for (errinfo = (const ncx_errinfo_t *)dlq_firstEntry(mustQ);
-	     errinfo != NULL;
-	     errinfo = (const ncx_errinfo_t *)dlq_nextEntry(errinfo)) {
+	for (must = (const xpath_pcb_t *)dlq_firstEntry(mustQ);
+	     must != NULL;
+	     must = (const xpath_pcb_t *)dlq_nextEntry(must)) {
 
+	    errinfo = &must->errinfo;
 	    needed = TRUE;
+
 	    mustval = xml_val_new_struct(YANG_K_MUST, ncx_id);
 	    if (!mustval) {
 		val_free_value(appval);
@@ -521,9 +528,9 @@ static val_value_t *
 		val_add_child(mustval, appval);
 	    }
 
-	    if (errinfo->xpath) {
+	    if (must->exprstr) {
 		newval = xml_val_new_cstring(NCX_EL_XPATH, ncx_id,
-					     errinfo->xpath);
+					     must->exprstr);
 		if (!newval) {
 		    val_free_value(appval);
 		    return NULL;

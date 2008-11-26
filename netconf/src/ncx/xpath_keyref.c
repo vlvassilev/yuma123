@@ -87,47 +87,6 @@ date         init     comment
 
 
 /********************************************************************
-* FUNCTION parse_token
-* 
-* Parse the keyref token sequence for a specific token type
-* It has already been tokenized
-*
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
-*
-* INPUTS:
-*    pcb == parser control block in progress
-*    tktyp == expected token type
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    parse_token (xpath_pcb_t *pcb,
-		 tk_type_t  tktype)
-{
-    status_t     res;
-
-    /* get the next token */
-    res = TK_ADV(pcb->tkc);
-    if (res != NO_ERR) {
-	ncx_print_errormsg(pcb->tkc, pcb->mod, res);
-	return res;
-    }
-
-    if (TK_CUR_TYP(pcb->tkc) != tktype) {
-	res = ERR_NCX_WRONG_TKTYPE;
-	ncx_mod_exp_err(pcb->tkc, pcb->mod, res,
-			tk_get_token_name(tktype));
-	return res;
-    }
-
-    return NO_ERR;
-
-}  /* parse_token */
-
-
-/********************************************************************
 * FUNCTION set_next_objnode
 * 
 * Get the object identifier associated with
@@ -402,7 +361,7 @@ static status_t
     status_t     res;
 
     /* get the function name 'current' */
-    res = parse_token(pcb, TK_TT_TSTRING);
+    res = xpath_parse_token(pcb, TK_TT_TSTRING);
     if (res != NO_ERR) {
 	return res;
     }
@@ -415,13 +374,13 @@ static status_t
     }
 
     /* get the left paren '(' */
-    res = parse_token(pcb, TK_TT_LPAREN);
+    res = xpath_parse_token(pcb, TK_TT_LPAREN);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* get the right paren ')' */
-    res = parse_token(pcb, TK_TT_RPAREN);
+    res = xpath_parse_token(pcb, TK_TT_RPAREN);
     if (res != NO_ERR) {
 	return res;
     }
@@ -486,7 +445,7 @@ static status_t
     }
 
     /* get the path separator '/' */
-    res = parse_token(pcb, TK_TT_FSLASH);
+    res = xpath_parse_token(pcb, TK_TT_FSLASH);
     if (res != NO_ERR) {
 	return res;
     }
@@ -496,14 +455,14 @@ static status_t
      */
     while (!done) {
 	/* get the parent marker '..' */
-	res = parse_token(pcb, TK_TT_RANGESEP);
+	res = xpath_parse_token(pcb, TK_TT_RANGESEP);
 	if (res != NO_ERR) {
 	    done = TRUE;
 	    continue;
 	}
 
 	/* get the path separator '/' */
-	res = parse_token(pcb, TK_TT_FSLASH);
+	res = xpath_parse_token(pcb, TK_TT_FSLASH);
 	if (res != NO_ERR) {
 	    done = TRUE;
 	    continue;
@@ -547,7 +506,7 @@ static status_t
 	if (nexttyp != TK_TT_FSLASH) {
 	    done = TRUE;
 	} else {
-	    res = parse_token(pcb, TK_TT_FSLASH);
+	    res = xpath_parse_token(pcb, TK_TT_FSLASH);
 	    if (res != NO_ERR) {
 		done = TRUE;
 	    }
@@ -655,7 +614,7 @@ static status_t
 	loopcount++;
 
 	/* get the left bracket '[' */
-	res = parse_token(pcb, TK_TT_LBRACK);
+	res = xpath_parse_token(pcb, TK_TT_LBRACK);
 	if (res != NO_ERR) {
 	    done = TRUE;
 	    continue;
@@ -731,7 +690,7 @@ static status_t
 	} 
 
 	/* get the equals sign '=' */
-	res = parse_token(pcb, TK_TT_EQUAL);
+	res = xpath_parse_token(pcb, TK_TT_EQUAL);
 	if (res != NO_ERR) {
 	    done = TRUE;
 	    continue;
@@ -779,7 +738,7 @@ static status_t
 	}
 
 	/* get the right bracket ']' */
-	res = parse_token(pcb, TK_TT_RBRACK);
+	res = xpath_parse_token(pcb, TK_TT_RBRACK);
 	if (res != NO_ERR) {
 	    done = TRUE;
 	    continue;
@@ -859,7 +818,7 @@ static status_t
     /* make one loop for each step */
     while (!done) {
 	/* get  the first token in the step, '/' */
-	res = parse_token(pcb, TK_TT_FSLASH);
+	res = xpath_parse_token(pcb, TK_TT_FSLASH);
 	if (res != NO_ERR) {
 	    done = TRUE;
 	    continue;
@@ -952,9 +911,9 @@ static status_t
      */
     nexttyp = tk_next_typ(pcb->tkc);
     while (nexttyp == TK_TT_RANGESEP && res == NO_ERR) {
-	res = parse_token(pcb, TK_TT_RANGESEP);
+	res = xpath_parse_token(pcb, TK_TT_RANGESEP);
 	if (res == NO_ERR) {
-	    res = parse_token(pcb, TK_TT_FSLASH);
+	    res = xpath_parse_token(pcb, TK_TT_FSLASH);
 	    if (res == NO_ERR) {
 		if (pcb->obj) {
 		    res = move_up_obj(pcb);

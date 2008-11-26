@@ -62,6 +62,15 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/* struct of NCX user variable mapping for yangcli */
+typedef struct ncx_var_t_ {
+    dlq_hdr_t     hdr;
+    uint32        flags;
+    xmlChar      *name;
+    val_value_t  *val;
+} ncx_var_t;
+
+
 /* values for isleft parameter in var_check_ref */
 
 typedef enum var_side_t_ {
@@ -69,14 +78,6 @@ typedef enum var_side_t_ {
     ISLEFT
 } var_side_t;
 
-
-/* struct of NCX user variable mapping for ncxcli */
-typedef struct ncx_var_t_ {
-    dlq_hdr_t     hdr;
-    uint32        flags;
-    xmlChar      *name;
-    val_value_t  *val;
-} ncx_var_t;
 
 
 /********************************************************************

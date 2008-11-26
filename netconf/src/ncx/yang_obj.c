@@ -153,6 +153,10 @@ date         init     comment
 #include "xpath.h"
 #endif
 
+#ifndef _H_xpath1
+#include "xpath1.h"
+#endif
+
 #ifndef _H_xpath_keyref
 #include "xpath_keyref.h"
 #endif
@@ -196,6 +200,12 @@ date         init     comment
 
 /* used in parser routines to decide if processing can continue
  * will exit the function if critical error or continue if not
+ * In all uses, there is a new object being constructed,
+ * called 'obj', which must be freed before exit
+ *
+ * Unless the error is considered fatal, processing
+ * continues in order to validate as much of the input
+ * module as possible
  */
 #define CHK_OBJ_EXIT					  \
     if (res != NO_ERR) {				  \
@@ -374,10 +384,11 @@ static status_t
 {
     obj_template_t  *obj;
     obj_leaf_t      *leaf;
+    xmlChar         *str;
     const xmlChar   *val;
     const char      *expstr;
     tk_type_t        tktyp;
-    boolean          done, conf, flagset, mand, stat, desc, ref;
+    boolean          done, when, conf, flagset, mand, stat, desc, ref;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -386,6 +397,7 @@ static status_t
     val = NULL;
     expstr = "keyword";
     done = FALSE;
+    when = FALSE;
     conf = FALSE;
     mand = FALSE;
     stat = FALSE;
@@ -471,7 +483,7 @@ static status_t
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &leaf->appinfoQ);
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    continue;
 	case TK_TT_RBRACE:
@@ -486,10 +498,30 @@ static status_t
 	}
 
 	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_CONFIG)) {
+	if (!xml_strcmp(val, YANG_K_WHEN)) {
+	    res = yang_consume_strclause(tkc, mod, &str,
+					 &when, &obj->appinfoQ);
+	    if (res == NO_ERR) {
+		obj->when = xpath_new_pcb(NULL);
+		if (!obj->when) {
+		    m__free(str);
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		} else {
+		    obj->when->exprstr = str;
+		}
+		str = NULL;
+
+		if (res == NO_ERR) {
+		    res = xpath1_parse_expr(tkc, mod, obj->when,
+					    XP_SRC_WHEN);
+		}
+	    }
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
-				       &conf, &leaf->appinfoQ);
+				       &conf, &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -498,7 +530,7 @@ static status_t
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
-				       &mand, &leaf->appinfoQ);
+				       &mand, &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_MANDSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_MANDATORY;
@@ -512,16 +544,16 @@ static status_t
 					  NULL, NULL);
 	    } else {
 		res = yang_consume_status(tkc, mod, &leaf->status,
-					  &stat, &leaf->appinfoQ);
+					  &stat, &obj->appinfoQ);
 	    }
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &leaf->descr,
-				     &desc, &leaf->appinfoQ);
+				     &desc, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &leaf->ref,
-				     &ref, &leaf->appinfoQ);
+				     &ref, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
@@ -574,12 +606,13 @@ static status_t
 {
     obj_template_t  *obj;
     obj_container_t *con;
+    xmlChar         *str;
     const xmlChar   *val;
     const char      *expstr;
     dlq_hdr_t        errQ;
     ncx_status_t     errstatus;
     tk_type_t        tktyp;
-    boolean          done, pres, conf, flagset, stat, desc, ref;
+    boolean          done, when, pres, conf, flagset, stat, desc, ref;
     status_t         res, retres;
 
     obj = NULL;
@@ -587,6 +620,7 @@ static status_t
     val = NULL;
     expstr = "keyword";
     done = FALSE;
+    when = FALSE;
     pres = FALSE;
     conf = FALSE;
     stat = FALSE;
@@ -668,7 +702,7 @@ static status_t
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &con->appinfoQ);
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    continue;
 	case TK_TT_RBRACE:
@@ -683,7 +717,27 @@ static status_t
 	}
 
 	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
+	if (!xml_strcmp(val, YANG_K_WHEN)) {
+	    res = yang_consume_strclause(tkc, mod, &str,
+					 &when, &obj->appinfoQ);
+	    if (res == NO_ERR) {
+		obj->when = xpath_new_pcb(NULL);
+		if (!obj->when) {
+		    m__free(str);
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		} else {
+		    obj->when->exprstr = str;
+		}
+		str = NULL;
+
+		if (res == NO_ERR) {
+		    res = xpath1_parse_expr(tkc, mod, obj->when,
+					    XP_SRC_WHEN);
+		}
+	    }
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
 	    if (refi) {
 		res = ERR_NCX_REFINE_NOT_ALLOWED;
 		ncx_print_errormsg(tkc, mod, res);
@@ -707,17 +761,17 @@ static status_t
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
 	    res = yang_consume_must(tkc, mod, &con->mustQ,
-				    &con->appinfoQ);
+				    &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_PRESENCE)) {
 	    res = yang_consume_strclause(tkc, mod, 
 					 &con->presence,
-					 &pres, &con->appinfoQ);
+					 &pres, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
-				       &conf, &con->appinfoQ);
+				       &conf, &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -731,16 +785,16 @@ static status_t
 					  NULL, NULL);
 	    } else {
 		res = yang_consume_status(tkc, mod, &con->status,
-					  &stat, &con->appinfoQ);
+					  &stat, &obj->appinfoQ);
 	    }
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &con->descr,
-				     &desc, &con->appinfoQ);
+				     &desc, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &con->ref,
-				     &ref, &con->appinfoQ);
+				     &ref, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else {
 	    if (refi) {
@@ -799,10 +853,11 @@ static status_t
 {
     obj_template_t  *obj;
     obj_leaf_t      *leaf;
+    xmlChar         *str;
     const xmlChar   *val;
     const char      *expstr;
     tk_type_t        tktyp;
-    boolean          done, typ, units, def, conf;
+    boolean          done, when, typ, units, def, conf;
     boolean          mand, stat, desc, ref, typeok, flagset;
     status_t         res, retres;
     ncx_status_t     errstatus;
@@ -812,6 +867,7 @@ static status_t
     val = NULL;
     expstr = "keyword";
     done = FALSE;
+    when = FALSE;
     typ = FALSE;
     units = FALSE;
     def = FALSE;
@@ -848,7 +904,6 @@ static status_t
     /* Get the mandatory leaf name */
     res = yang_consume_id_string(tkc, mod, &leaf->name);
     CHK_OBJ_EXIT;
-
 
     /* Get the starting left brace for the sub-clauses
      * or a semi-colon to end the leaf-stmt
@@ -896,7 +951,7 @@ static status_t
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &leaf->appinfoQ);
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    continue;
 	case TK_TT_RBRACE:
@@ -911,7 +966,27 @@ static status_t
 	}
 
 	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_TYPE)) {
+	if (!xml_strcmp(val, YANG_K_WHEN)) {
+	    res = yang_consume_strclause(tkc, mod, &str,
+					 &when, &obj->appinfoQ);
+	    if (res == NO_ERR) {
+		obj->when = xpath_new_pcb(NULL);
+		if (!obj->when) {
+		    m__free(str);
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		} else {
+		    obj->when->exprstr = str;
+		}
+		str = NULL;
+
+		if (res == NO_ERR) {
+		    res = xpath1_parse_expr(tkc, mod, obj->when,
+					    XP_SRC_WHEN);
+		}
+	    }
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_TYPE)) {
 	    if (refi || typ) {
 		if (refi) {
 		    retres = ERR_NCX_REFINE_NOT_ALLOWED;
@@ -944,22 +1019,22 @@ static status_t
 		}
 	    } else {
 		res = yang_consume_strclause(tkc, mod, &leaf->units,
-					     &units, &leaf->appinfoQ);
+					     &units, &obj->appinfoQ);
 		CHK_OBJ_EXIT;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
 	    res = yang_consume_must(tkc, mod, &leaf->mustQ,
-				    &leaf->appinfoQ);
+				    &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
 	    res = yang_consume_strclause(tkc, mod, 
 					 &leaf->defval,
-					 &def, &leaf->appinfoQ);
+					 &def, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
-				       &conf, &leaf->appinfoQ);
+				       &conf, &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -968,7 +1043,7 @@ static status_t
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
-				       &mand, &leaf->appinfoQ);
+				       &mand, &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_MANDSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_MANDATORY;
@@ -982,16 +1057,16 @@ static status_t
 					  NULL, NULL);
 	    } else {
 		res = yang_consume_status(tkc, mod, &leaf->status,
-					  &stat, &leaf->appinfoQ);
+					  &stat, &obj->appinfoQ);
 	    }
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &leaf->descr,
-				     &desc, &leaf->appinfoQ);
+				     &desc, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &leaf->ref,
-				     &ref, &leaf->appinfoQ);
+				     &ref, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
@@ -1055,7 +1130,7 @@ static status_t
     const char      *expstr;
     xmlChar         *str;
     tk_type_t        tktyp, nexttk;
-    boolean          done, typ, units, conf;
+    boolean          done, when, typ, units, conf;
     boolean          minel, maxel, ord, stat, desc, ref, typeok, flagset;
     status_t         res, retres;
     ncx_status_t     errstatus;
@@ -1066,6 +1141,7 @@ static status_t
     expstr = "keyword";
     str = NULL;
     done = FALSE;
+    when = FALSE;
     typ = FALSE;
     units = FALSE;
     conf = FALSE;
@@ -1150,7 +1226,7 @@ static status_t
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &llist->appinfoQ);
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    continue;
 	case TK_TT_RBRACE:
@@ -1165,7 +1241,27 @@ static status_t
 	}
 
 	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_TYPE)) {
+	if (!xml_strcmp(val, YANG_K_WHEN)) {
+	    res = yang_consume_strclause(tkc, mod, &str,
+					 &when, &obj->appinfoQ);
+	    if (res == NO_ERR) {
+		obj->when = xpath_new_pcb(NULL);
+		if (!obj->when) {
+		    m__free(str);
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		} else {
+		    obj->when->exprstr = str;
+		}
+		str = NULL;
+
+		if (res == NO_ERR) {
+		    res = xpath1_parse_expr(tkc, mod, obj->when,
+					    XP_SRC_WHEN);
+		}
+	    }
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_TYPE)) {
 	    if (refi || typ) {
 		if (refi) {
 		    retres = ERR_NCX_REFINE_NOT_ALLOWED;
@@ -1198,17 +1294,17 @@ static status_t
 		CHK_OBJ_EXIT;
 	    } else {
 		res = yang_consume_strclause(tkc, mod, &llist->units,
-					     &units, &llist->appinfoQ);
+					     &units, &obj->appinfoQ);
 		CHK_OBJ_EXIT;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
 	    res = yang_consume_must(tkc, mod, &llist->mustQ,
-				    &llist->appinfoQ);
+				    &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
-				       &conf, &llist->appinfoQ);
+				       &conf, &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -1217,7 +1313,7 @@ static status_t
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
 	    res = yang_consume_uint32(tkc, mod,
 				      &llist->minelems,
-				      &minel, &llist->appinfoQ);
+				      &minel, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    llist->minset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
@@ -1227,12 +1323,12 @@ static status_t
 	    if (nexttk==TK_TT_DNUM) {
 		res = yang_consume_uint32(tkc, mod,
 					  &llist->maxelems,
-					  &maxel, &llist->appinfoQ);
+					  &maxel, &obj->appinfoQ);
 	    } else if (TK_TYP_STR(nexttk)) {
 		if (!xml_strcmp(nextval, YANG_K_UNBOUNDED)) {
 		    str = NULL;
 		    res = yang_consume_strclause(tkc, mod, &str,
-					     &maxel, &llist->appinfoQ);
+					     &maxel, &obj->appinfoQ);
 		    if (str) {
 			m__free(str);
 			str = NULL;
@@ -1242,7 +1338,7 @@ static status_t
 		    /* may be a quoted number or an error */
 		    res = yang_consume_uint32(tkc, mod,
 					      &llist->maxelems,
-					      &maxel, &llist->appinfoQ);
+					      &maxel, &obj->appinfoQ);
 		}
 	    }		    
 	    CHK_OBJ_EXIT;
@@ -1265,7 +1361,7 @@ static status_t
 		CHK_OBJ_EXIT;
 	    } else {
 		res = yang_consume_strclause(tkc, mod, &str,
-					     &ord, &llist->appinfoQ);
+					     &ord, &obj->appinfoQ);
 		if (str) {
 		    if (!xml_strcmp(str, YANG_K_USER)) {
 			llist->ordersys = FALSE;
@@ -1288,17 +1384,17 @@ static status_t
 					  NULL, NULL);
 	    } else {
 		res = yang_consume_status(tkc, mod, &llist->status,
-					  &stat, &llist->appinfoQ);
+					  &stat, &obj->appinfoQ);
 		
 	    }
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &llist->descr,
-				     &desc, &llist->appinfoQ);
+				     &desc, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &llist->ref,
-				     &ref, &llist->appinfoQ);
+				     &ref, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
@@ -1365,7 +1461,7 @@ static status_t
     tk_token_t      *savetk;
     dlq_hdr_t        errQ;
     tk_type_t        tktyp, nexttk;
-    boolean          done, key, conf;
+    boolean          done, when, key, conf;
     boolean          minel, maxel, ord, stat, desc, ref, flagset;
     status_t         res, retres;
     ncx_status_t     errstatus;
@@ -1376,6 +1472,7 @@ static status_t
     expstr = "keyword";
     str = NULL;
     done = FALSE;
+    when = FALSE;
     key = FALSE;
     conf = FALSE;
     minel = FALSE;
@@ -1461,7 +1558,7 @@ static status_t
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &list->appinfoQ);
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    continue;
 	case TK_TT_RBRACE:
@@ -1476,7 +1573,27 @@ static status_t
 	}
 
 	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
+	if (!xml_strcmp(val, YANG_K_WHEN)) {
+	    res = yang_consume_strclause(tkc, mod, &str,
+					 &when, &obj->appinfoQ);
+	    if (res == NO_ERR) {
+		obj->when = xpath_new_pcb(NULL);
+		if (!obj->when) {
+		    m__free(str);
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		} else {
+		    obj->when->exprstr = str;
+		}
+		str = NULL;
+
+		if (res == NO_ERR) {
+		    res = xpath1_parse_expr(tkc, mod, obj->when,
+					    XP_SRC_WHEN);
+		}
+	    }
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
 	    if (refi) {
 		retres = ERR_NCX_REFINE_NOT_ALLOWED;
 		ncx_print_errormsg(tkc, mod, retres);
@@ -1500,7 +1617,7 @@ static status_t
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
 	    res = yang_consume_must(tkc, mod, &list->mustQ,
-				    &list->appinfoQ);
+				    &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_KEY)) {
 	    if (refi) {
@@ -1515,7 +1632,7 @@ static status_t
 	    } else {
 		savetk = TK_CUR(tkc);
 		res = yang_consume_strclause(tkc, mod, &list->keystr,
-					     &key, &list->appinfoQ);
+					     &key, &obj->appinfoQ);
 		if (res == NO_ERR) {
 		    list->keytk = savetk;
 		    list->keylinenum = savetk->linenum;
@@ -1546,7 +1663,7 @@ static status_t
 
 		res = yang_consume_strclause(tkc, mod,
 					     &objuniq->xpath,
-					     NULL, &list->appinfoQ);
+					     NULL, &obj->appinfoQ);
 		if (res == NO_ERR) {
 		    dlq_enque(objuniq, list->uniqueQ);
 		} else {
@@ -1557,7 +1674,7 @@ static status_t
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
-				       &conf, &list->appinfoQ);
+				       &conf, &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -1566,7 +1683,7 @@ static status_t
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
 	    res = yang_consume_uint32(tkc, mod,
 				      &list->minelems,
-				      &minel, &list->appinfoQ);
+				      &minel, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    list->minset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
@@ -1576,12 +1693,12 @@ static status_t
 	    if (nexttk==TK_TT_DNUM) {
 		res = yang_consume_uint32(tkc, mod,
 					  &list->maxelems,
-					  &maxel, &list->appinfoQ);
+					  &maxel, &obj->appinfoQ);
 	    } else if (TK_TYP_STR(nexttk)) {
 		if (!xml_strcmp(nextval, YANG_K_UNBOUNDED)) {
 		    str = NULL;
 		    res = yang_consume_strclause(tkc, mod, &str,
-					     &maxel, &list->appinfoQ);
+					     &maxel, &obj->appinfoQ);
 		    if (str) {
 			m__free(str);
 			str = NULL;
@@ -1591,7 +1708,7 @@ static status_t
 		    /* may be a quoted number or an error */
 		    res = yang_consume_uint32(tkc, mod,
 					      &list->maxelems,
-					      &maxel, &list->appinfoQ);
+					      &maxel, &obj->appinfoQ);
 		}
 	    }		    
 	    CHK_OBJ_EXIT;
@@ -1609,7 +1726,7 @@ static status_t
 		}
 	    } else {
 		res = yang_consume_strclause(tkc, mod, &str,
-					     &ord, &list->appinfoQ);
+					     &ord, &obj->appinfoQ);
 		if (str) {
 		    if (!xml_strcmp(str, YANG_K_USER)) {
 			list->ordersys = FALSE;
@@ -1632,16 +1749,16 @@ static status_t
 					  NULL, NULL);
 	    } else {
 		res = yang_consume_status(tkc, mod, &list->status,
-					  &stat, &list->appinfoQ);
+					  &stat, &obj->appinfoQ);
 	    }
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &list->descr,
-				     &desc, &list->appinfoQ);
+				     &desc, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &list->ref,
-				     &ref, &list->appinfoQ);
+				     &ref, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else {
 	    if (refi) {
@@ -1699,7 +1816,6 @@ static status_t
 *   mod == module in progress
 *   choic == obj_choice_t in progress, add case arm to this caseQ
 *   caseQ == Que to store the obj_template_t generated
-*   appinfoQ == Que to store any vendor extension clauses
 *   parent == the obj_template_t containing the 'choic' param
 *             In YANG, a top-level object cannot be a 'choice',
 *             so this param should not be NULL
@@ -1717,17 +1833,17 @@ static status_t
     consume_yang_case (tk_chain_t *tkc,
 		       ncx_module_t  *mod,
 		       dlq_hdr_t *caseQ,
-		       dlq_hdr_t *appinfoQ,
 		       obj_template_t *parent,
 		       boolean refi,
 		       boolean withcase)
 {
     obj_case_t      *cas, *testcas;
     obj_template_t  *obj, *testobj, *test2obj, *casobj;
-    const xmlChar   *val, *str;
+    xmlChar         *str;
+    const xmlChar   *val, *namestr;
     const char      *expstr;
     tk_type_t        tktyp;
-    boolean          done, stat, desc, ref, anydone;
+    boolean          done, when, stat, desc, ref, anydone;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -1735,6 +1851,7 @@ static status_t
     val = NULL;
     expstr = "keyword";
     done = FALSE;
+    when = FALSE;
     stat = FALSE;
     desc = FALSE;
     ref = FALSE;
@@ -1824,7 +1941,7 @@ static status_t
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, appinfoQ);
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    continue;
 	case TK_TT_RBRACE:
@@ -1839,7 +1956,27 @@ static status_t
 	}
 
 	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_STATUS)) {
+	if (!xml_strcmp(val, YANG_K_WHEN)) {
+	    res = yang_consume_strclause(tkc, mod, &str,
+					 &when, &obj->appinfoQ);
+	    if (res == NO_ERR) {
+		obj->when = xpath_new_pcb(NULL);
+		if (!obj->when) {
+		    m__free(str);
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		} else {
+		    obj->when->exprstr = str;
+		}
+		str = NULL;
+
+		if (res == NO_ERR) {
+		    res = xpath1_parse_expr(tkc, mod, obj->when,
+					    XP_SRC_WHEN);
+		}
+	    }
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    if (refi) {
 		retres = ERR_NCX_REFINE_NOT_ALLOWED;
 		ncx_print_errormsg(tkc, mod, retres);
@@ -1847,14 +1984,14 @@ static status_t
 					  NULL, NULL);
 	    } else {
 		res = yang_consume_status(tkc, mod, &cas->status,
-					  &stat, &cas->appinfoQ);
+					  &stat, &obj->appinfoQ);
 	    }
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &cas->descr,
-				     &desc, &cas->appinfoQ);
+				     &desc, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &cas->ref,
-				     &ref, &cas->appinfoQ);
+				     &ref, &obj->appinfoQ);
 	} else {
 	    if (refi) {
 		res = consume_yang_refine(tkc, mod,
@@ -1918,17 +2055,17 @@ static status_t
 		     testobj = (obj_template_t *)
 			 dlq_nextEntry(testobj)) {
 
-		    str = obj_get_name(testobj);
+		    namestr = obj_get_name(testobj);
 		    test2obj = 
 			obj_find_template_test(testcas->datadefQ,
 					       obj_get_mod_name(testobj),
-					       str);
+					       namestr);
 		    if (test2obj) {
 			/* duplicate in another case arm error */
 			res = retres = ERR_NCX_DUP_ENTRY;
 			log_error("\nError: object name '%s' already used"
 				  " in case '%s', on line %u", 
-				  str, testcas->name, test2obj->linenum);
+				  namestr, testcas->name, test2obj->linenum);
 			ncx_print_errormsg(tkc, mod, retres);
 		    } 
 		}
@@ -1982,11 +2119,11 @@ static status_t
     obj_template_t  *obj, *testobj, *test2obj, *casobj;
     obj_choice_t    *choic;
     obj_case_t      *testcas;
-    const xmlChar   *val;
+    const xmlChar   *val, *namestr;
     const char      *expstr;
-    const xmlChar   *str;
+    xmlChar         *str;
     tk_type_t        tktyp;
-    boolean          done, def, mand, conf, stat, desc, ref, flagset;
+    boolean          done, when, def, mand, conf, stat, desc, ref, flagset;
     status_t         res, retres;
     ncx_status_t     errstatus;
 
@@ -1995,6 +2132,7 @@ static status_t
     val = NULL;
     expstr = "keyword";
     done = FALSE;
+    when = FALSE;
     def = FALSE;
     mand = FALSE;
     conf = FALSE;
@@ -2076,7 +2214,7 @@ static status_t
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &choic->appinfoQ);
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    continue;
 	case TK_TT_RBRACE:
@@ -2091,14 +2229,33 @@ static status_t
 	}
 
 	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_DEFAULT)) {
+	if (!xml_strcmp(val, YANG_K_WHEN)) {
+	    res = yang_consume_strclause(tkc, mod, &str,
+					 &when, &obj->appinfoQ);
+	    if (res == NO_ERR) {
+		obj->when = xpath_new_pcb(NULL);
+		if (!obj->when) {
+		    m__free(str);
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		} else {
+		    obj->when->exprstr = str;
+		}
+		str = NULL;
+
+		if (res == NO_ERR) {
+		    res = xpath1_parse_expr(tkc, mod, obj->when,
+					    XP_SRC_WHEN);
+		}
+	    }
+	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
 	    res = yang_consume_strclause(tkc, mod, &choic->defval,
-					 &def, &choic->appinfoQ);
+					 &def, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
-				       &mand, &choic->appinfoQ);
+				       &mand, &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_MANDSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_MANDATORY;
@@ -2111,21 +2268,21 @@ static status_t
 		res = yang_consume_status(tkc, mod, &errstatus, NULL, NULL);
 	    } else {
 		res = yang_consume_status(tkc, mod, &choic->status,
-					  &stat, &choic->appinfoQ);
+					  &stat, &obj->appinfoQ);
 	    }
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &choic->descr,
-				     &desc, &choic->appinfoQ);
+				     &desc, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &choic->ref,
-				     &ref, &choic->appinfoQ);
+				     &ref, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
-				       &conf, &choic->appinfoQ);
+				       &conf, &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -2134,7 +2291,6 @@ static status_t
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
 	    res = consume_yang_case(tkc, mod,
 				    choic->caseQ,
-				    &choic->appinfoQ,
 				    obj, refi, TRUE);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_ANYXML) ||
@@ -2145,7 +2301,6 @@ static status_t
 	    /* create an inline 1-obj case statement */
 	    res = consume_yang_case(tkc, mod,
 				    choic->caseQ,
-				    &choic->appinfoQ,
 				    obj, refi, FALSE);
 	    CHK_OBJ_EXIT;
 	} else {
@@ -2198,17 +2353,17 @@ static status_t
 		 testobj != NULL;
 		 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 		    
-		str = obj_get_name(testobj);
+		namestr = obj_get_name(testobj);
 		test2obj = 
 		    obj_find_template_test(que, 
 					   obj_get_mod_name(testobj), 
-					   str);
+					   namestr);
 		if (test2obj) {
 		    /* duplicate in the same Q as the choice */
 		    res = retres = ERR_NCX_DUP_ENTRY;
 		    log_error("\nError: object name '%s' in case '%s'"
 			      " already used in sibling node, on line %u", 
-			      str, test2obj->linenum);
+			      namestr, test2obj->linenum);
 		    ncx_print_errormsg(tkc, mod, retres);
 		} 
 	    }
@@ -2351,7 +2506,7 @@ static status_t
     xmlChar         *str;
     yang_stmt_t     *stmt;
     tk_type_t        tktyp;
-    boolean          done, stat, desc, ref;
+    boolean          done, when, stat, desc, ref;
     status_t         res, retres;
 
     obj = NULL;
@@ -2360,6 +2515,7 @@ static status_t
     expstr = "keyword";
     str = NULL;
     done = FALSE;
+    when = FALSE;
     stat = FALSE;
     desc = FALSE;
     ref = FALSE;
@@ -2445,7 +2601,7 @@ static status_t
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &uses->appinfoQ);
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    continue;
 	case TK_TT_RBRACE:
@@ -2460,15 +2616,35 @@ static status_t
 	}
 
 	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_STATUS)) {
+	if (!xml_strcmp(val, YANG_K_WHEN)) {
+	    res = yang_consume_strclause(tkc, mod, &str,
+					 &when, &obj->appinfoQ);
+	    if (res == NO_ERR) {
+		obj->when = xpath_new_pcb(NULL);
+		if (!obj->when) {
+		    m__free(str);
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		} else {
+		    obj->when->exprstr = str;
+		}
+		str = NULL;
+
+		if (res == NO_ERR) {
+		    res = xpath1_parse_expr(tkc, mod, obj->when,
+					    XP_SRC_WHEN);
+		}
+	    }
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    res = yang_consume_status(tkc, mod, &uses->status,
-				      &stat, &uses->appinfoQ);
+				      &stat, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &uses->descr,
-				     &desc, &uses->appinfoQ);
+				     &desc, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &uses->ref,
-				     &ref, &uses->appinfoQ);
+				     &ref, &obj->appinfoQ);
 	} else {
 	    res = consume_yang_refine(tkc, mod, uses->datadefQ, obj);
 	}
@@ -2603,7 +2779,7 @@ static status_t
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &rpcio->appinfoQ);
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    continue;
 	case TK_TT_RBRACE:
@@ -2842,7 +3018,7 @@ static status_t
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &aug->appinfoQ);
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    continue;
 	case TK_TT_RBRACE:
@@ -2858,20 +3034,36 @@ static status_t
 
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_strclause(tkc, mod, &aug->when.xpath,
-					 &when, &aug->appinfoQ);
+	    res = yang_consume_strclause(tkc, mod, &str,
+					 &when, &obj->appinfoQ);
+	    if (res == NO_ERR) {
+		obj->when = xpath_new_pcb(NULL);
+		if (!obj->when) {
+		    m__free(str);
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		} else {
+		    obj->when->exprstr = str;
+		}
+		str = NULL;
+
+		if (res == NO_ERR) {
+		    res = xpath1_parse_expr(tkc, mod, obj->when,
+					    XP_SRC_WHEN);
+		}
+	    }
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    res = yang_consume_status(tkc, mod, &aug->status,
-				      &stat, &aug->appinfoQ);
+				      &stat, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &aug->descr,
-				     &desc, &aug->appinfoQ);
+				     &desc, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &aug->ref,
-				     &ref, &aug->appinfoQ);
+				     &ref, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
 	    res = consume_yang_case(tkc, mod, &aug->datadefQ,
-				    &aug->appinfoQ, obj, FALSE, TRUE);
+				    obj, FALSE, TRUE);
 	} else {
 	    res = consume_yang_augdata(tkc, mod, &aug->datadefQ, obj);
 	}
@@ -3100,7 +3292,7 @@ static status_t
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &rpc->appinfoQ);
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    continue;
 	case TK_TT_RBRACE:
@@ -3122,13 +3314,13 @@ static status_t
 					    &rpc->groupingQ, obj);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    res = yang_consume_status(tkc, mod, &rpc->status,
-				      &stat, &rpc->appinfoQ);
+				      &stat, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &rpc->descr,
-				     &desc, &rpc->appinfoQ);
+				     &desc, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &rpc->ref,
-				     &ref, &rpc->appinfoQ);
+				     &ref, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_INPUT) ||
 		   !xml_strcmp(val, YANG_K_OUTPUT)) {
 	    res = consume_yang_rpcio(tkc, mod, &rpc->datadefQ, obj);
@@ -3325,7 +3517,7 @@ static status_t
 	    return res;
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &notif->appinfoQ);
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	    continue;
 	case TK_TT_RBRACE:
@@ -3347,13 +3539,13 @@ static status_t
 					    &notif->groupingQ, obj);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    res = yang_consume_status(tkc, mod, &notif->status,
-				      &stat, &notif->appinfoQ);
+				      &stat, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &notif->descr,
-				     &desc, &notif->appinfoQ);
+				     &desc, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &notif->ref,
-				     &ref, &notif->appinfoQ);
+				     &ref, &obj->appinfoQ);
 	} else {
 	    res = consume_datadef(tkc, mod, &notif->datadefQ,
 				  obj, FALSE, NULL);
@@ -3635,9 +3827,6 @@ static status_t
     res = resolve_metadata(tkc, mod, obj);
     CHK_EXIT;
 
-    res = ncx_resolve_appinfoQ(tkc, mod, &con->appinfoQ);
-    CHK_EXIT;
-
     if (!obj_is_refine(obj)) {
 	res = yang_typ_resolve_typedefs(tkc, mod, con->typedefQ, obj);
 	CHK_EXIT;
@@ -3687,9 +3876,6 @@ static status_t
     status_t res, retres;
 
     retres = NO_ERR;
-
-    res = ncx_resolve_appinfoQ(tkc, mod, &leaf->appinfoQ);
-    CHK_EXIT;
 
     res = resolve_metadata(tkc, mod, obj);
     CHK_EXIT;
@@ -3748,9 +3934,6 @@ static status_t
     retres = NO_ERR;
 
     res = resolve_metadata(tkc, mod, obj);
-    CHK_EXIT;
-
-    res = ncx_resolve_appinfoQ(tkc, mod, &llist->appinfoQ);
     CHK_EXIT;
 
     if (!obj_is_refine(obj)) {
@@ -3816,9 +3999,6 @@ static status_t
     retres = NO_ERR;
 
     res = resolve_metadata(tkc, mod, obj);
-    CHK_EXIT;
-
-    res = ncx_resolve_appinfoQ(tkc, mod, &list->appinfoQ);
     CHK_EXIT;
 
     if (!obj_is_refine(obj)) {
@@ -4248,9 +4428,6 @@ static status_t
 
     retres = NO_ERR;
 
-    res = ncx_resolve_appinfoQ(tkc, mod, &cas->appinfoQ);
-    CHK_EXIT;
-
     res = yang_obj_resolve_datadefs(tkc, mod, cas->datadefQ);
     CHK_EXIT;
 
@@ -4290,9 +4467,6 @@ static status_t
     status_t res, retres;
 
     retres = NO_ERR;
-
-    res = ncx_resolve_appinfoQ(tkc, mod, &choic->appinfoQ);
-    CHK_EXIT;
 
     /* not in draft yet !!! */
     finish_config_flag(obj);
@@ -4374,9 +4548,6 @@ static status_t
     status_t        res, retres;
 
     retres = NO_ERR;
-
-    res = ncx_resolve_appinfoQ(tkc, mod, &uses->appinfoQ);
-    CHK_EXIT;
 
     /* find the grouping that this uses references if this is
      * a local grouping, and grp has not been set yet
@@ -4580,6 +4751,9 @@ static status_t
 		    newobj->mod = obj->mod;
 		    newobj->parent = obj->parent;
 		    newobj->usesobj = obj;
+		    if (obj->when) {
+			newobj->usewhen = obj->when;
+		    }
 		    dlq_insertAhead(newobj, obj);
 
 #ifdef YANG_OBJ_DEBUG
@@ -4630,9 +4804,6 @@ static status_t
     
     retres = NO_ERR;
 
-    res = ncx_resolve_appinfoQ(tkc, mod, &aug->appinfoQ);
-    CHK_EXIT;
-
     res = check_parent(tkc, mod, obj);
     CHK_EXIT;
 
@@ -4666,7 +4837,8 @@ static status_t
 	    continue;
 	}
 	
-	if (aug->when.xpath && obj_is_mandatory(testobj)) {
+	if (obj->when && obj->when->exprstr
+	    && obj_is_mandatory(testobj)) {
 	    log_error("\nError: Mandatory object '%s' not allowed "
 		      "in conditional augment statement",
 		      obj_get_name(testobj));
@@ -4929,9 +5101,8 @@ static status_t
 		} else {
 		    newobj->parent = targobj;
 		    newobj->flags |= OBJ_FL_AUGCLONE;
-		    if (aug->when.xpath) {
-			newobj->augwhen = &aug->when;
-			
+		    if (obj->when) {
+			newobj->augwhen = obj->when;
 		    }
 		    obj_set_ncx_flags(newobj);
 		    dlq_enque(newobj, targQ);
@@ -4990,9 +5161,6 @@ static status_t
 
     retres = NO_ERR;
 
-    res = ncx_resolve_appinfoQ(tkc, mod, &rpc->appinfoQ);
-    CHK_EXIT;
-
     res = yang_typ_resolve_typedefs(tkc, mod, &rpc->typedefQ, obj);
     CHK_EXIT;
 
@@ -5034,9 +5202,6 @@ static status_t
 
     retres = NO_ERR;
 
-    res = ncx_resolve_appinfoQ(tkc, mod, &rpcio->appinfoQ);
-    CHK_EXIT;
-
     res = yang_typ_resolve_typedefs(tkc, mod, &rpcio->typedefQ, obj);
     CHK_EXIT;
 
@@ -5077,9 +5242,6 @@ static status_t
     status_t          res, retres;
 
     retres = NO_ERR;
-
-    res = ncx_resolve_appinfoQ(tkc, mod, &notif->appinfoQ);
-    CHK_EXIT;
 
     res = yang_typ_resolve_typedefs(tkc, mod, &notif->typedefQ, obj);
     CHK_EXIT;
@@ -5421,10 +5583,14 @@ status_t
     res = NO_ERR;
     retres = NO_ERR;
 
+
     /* first resolve all the local type names */
     for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
 	 testobj != NULL;
 	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+
+	res = ncx_resolve_appinfoQ(tkc, mod, &testobj->appinfoQ);
+	CHK_EXIT;
 
 	switch (testobj->objtype) {
 	case OBJ_TYP_CONTAINER:

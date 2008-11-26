@@ -41,6 +41,10 @@ date         init     comment
 #include  "xml_util.h"
 #endif
 
+#ifndef _H_xpath
+#include  "xpath.h"
+#endif
+
 #ifndef _H_yangconst
 #include  "yangconst.h"
 #endif
@@ -87,8 +91,8 @@ date         init     comment
  *  Check if a Q of must-stmt definitions changed
  *
  * INPUTS:
- *    oldQ == Q of old ncx_errinfo_t to use
- *    newQ == Q of new ncx_errinfo_t to use
+ *    oldQ == Q of old xpath_pcb_t to use
+ *    newQ == Q of new xpath_pcb_t to use
  *
  * RETURNS:
  *    1 if field changed
@@ -99,26 +103,27 @@ static uint32
 		   dlq_hdr_t *newQ)
 {
 
-    ncx_errinfo_t *oldm, *newm;
+    xpath_pcb_t *oldm, *newm;
 
     if (dlq_count(oldQ) != dlq_count(newQ)) {
 	return 1;
     }
 
-    for (newm = (ncx_errinfo_t *)dlq_firstEntry(newQ);
+    for (newm = (xpath_pcb_t *)dlq_firstEntry(newQ);
 	 newm != NULL;
-	 newm = (ncx_errinfo_t *)dlq_nextEntry(newm)) {
+	 newm = (xpath_pcb_t *)dlq_nextEntry(newm)) {
 	newm->seen = FALSE;
     }
 
     /* look through the old Q for matching entries in the new Q */
-    for (oldm = (ncx_errinfo_t *)dlq_firstEntry(oldQ);
+    for (oldm = (xpath_pcb_t *)dlq_firstEntry(oldQ);
 	 oldm != NULL;
-	 oldm = (ncx_errinfo_t *)dlq_nextEntry(oldm)) {
+	 oldm = (xpath_pcb_t *)dlq_nextEntry(oldm)) {
 
-	newm = ncx_find_errinfo(newQ, oldm->xpath);
+	newm = xpath_find_pcb(newQ, oldm->exprstr);
 	if (newm) {
-	    if (errinfo_changed(oldm, newm)) {
+	    if (errinfo_changed(&oldm->errinfo, 
+				&newm->errinfo)) {
 		return 1;
 	    } else {
 		newm->seen = TRUE;
@@ -129,9 +134,9 @@ static uint32
     }
 
     /* look for must-stmts that were added in the new module */
-    for (newm = (ncx_errinfo_t *)dlq_firstEntry(newQ);
+    for (newm = (xpath_pcb_t *)dlq_firstEntry(newQ);
 	 newm != NULL;
-	 newm = (ncx_errinfo_t *)dlq_nextEntry(newm)) {
+	 newm = (xpath_pcb_t *)dlq_nextEntry(newm)) {
 	if (!newm->seen) {
 	    return 1;
 	}
@@ -149,8 +154,8 @@ static uint32
  *
  * INPUTS:
  *    cp == comparison paraeters to use
- *    oldQ == Q of old ncx_errinfo_t to use
- *    newQ == Q of new ncx_errinfo_t to use
+ *    oldQ == Q of old xpath_pcb_t to use
+ *    newQ == Q of new xpath_pcb_t to use
  *
  *********************************************************************/
 static void
@@ -158,41 +163,44 @@ static void
 		       dlq_hdr_t *oldQ,
 		       dlq_hdr_t *newQ)
 {
-    ncx_errinfo_t *oldm, *newm;
+    xpath_pcb_t *oldm, *newm;
 
-    for (newm = (ncx_errinfo_t *)dlq_firstEntry(newQ);
+    for (newm = (xpath_pcb_t *)dlq_firstEntry(newQ);
 	 newm != NULL;
-	 newm = (ncx_errinfo_t *)dlq_nextEntry(newm)) {
+	 newm = (xpath_pcb_t *)dlq_nextEntry(newm)) {
 	newm->seen = FALSE;
     }
 
     /* look through the old Q for matching entries in the new Q */
-    for (oldm = (ncx_errinfo_t *)dlq_firstEntry(oldQ);
+    for (oldm = (xpath_pcb_t *)dlq_firstEntry(oldQ);
 	 oldm != NULL;
-	 oldm = (ncx_errinfo_t *)dlq_nextEntry(oldm)) {
+	 oldm = (xpath_pcb_t *)dlq_nextEntry(oldm)) {
 
-	newm = ncx_find_errinfo(newQ, oldm->xpath);
+	newm = xpath_find_pcb(newQ, oldm->exprstr);
 	if (newm) {
 	    newm->seen = TRUE;
-	    if (errinfo_changed(oldm, newm)) {
-		output_mstart_line(cp, YANG_K_MUST, oldm->xpath, FALSE);
+	    if (errinfo_changed(&oldm->errinfo, 
+				&newm->errinfo)) {
+		output_mstart_line(cp, YANG_K_MUST, 
+				   oldm->exprstr, FALSE);
 		indent_in(cp);
-		output_errinfo_diff(cp, oldm, newm);
+		output_errinfo_diff(cp, &oldm->errinfo, 
+				    &newm->errinfo);
 		indent_out(cp);
 	    }
 	} else {
 	    /* must-stmt was removed from the new module */
-	    output_diff(cp, YANG_K_MUST,  oldm->xpath, NULL, FALSE);
+	    output_diff(cp, YANG_K_MUST,  oldm->exprstr, NULL, FALSE);
 	}
     }
 
     /* look for must-stmts that were added in the new module */
-    for (newm = (ncx_errinfo_t *)dlq_firstEntry(newQ);
+    for (newm = (xpath_pcb_t *)dlq_firstEntry(newQ);
 	 newm != NULL;
-	 newm = (ncx_errinfo_t *)dlq_nextEntry(newm)) {
+	 newm = (xpath_pcb_t *)dlq_nextEntry(newm)) {
 	if (!newm->seen) {
 	    /* must-stmt was added in the new module */
-	    output_diff(cp, YANG_K_MUST,  NULL, newm->xpath, FALSE);
+	    output_diff(cp, YANG_K_MUST,  NULL, newm->exprstr, FALSE);
 	}
     }
 

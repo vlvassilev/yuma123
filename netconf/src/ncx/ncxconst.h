@@ -191,7 +191,7 @@ date	     init     comment
 /* filespec identifier field separator token */
 #define NCX_PATHSEP_CH     '/'
 
-/* module scoped identifier field separator token */
+/* prefix scoped identifier field separator token */
 #define NCX_MODSCOPE_CH     ':'
 
 /* start of a double quoted string in NCX text */
@@ -199,6 +199,10 @@ date	     init     comment
 
 /* start of a single quoted string in NCX text */
 #define NCX_SQSTRING_CH   '\''
+
+/* start of an NCX or XPath varbind */
+#define NCX_VARBIND_CH    '$'
+
 
 /* Standard 0x0 syntax to indicate a HEX number is specified */
 #define NCX_IS_HEX_CH(c) ((c)=='x' || (c)=='X')

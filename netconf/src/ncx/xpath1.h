@@ -84,11 +84,7 @@ extern status_t
 		      xpath_pcb_t *pcb);
 
 
-extern status_t
-    xpath1_init (void);
-
-extern void
-    xpath1_cleanup (void);
-
+extern const xpath_fncb_t *
+    xpath1_get_functions_ptr (void);
 
 #endif	    /* _H_xpath1 */

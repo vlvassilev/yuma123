@@ -110,10 +110,6 @@ extern float strtof (const char *str, char **err);
 #include "xml_util.h"
 #endif
 
-#ifndef _H_xpath1
-#include "xpath1.h"
-#endif
-
 #ifndef _H_yang
 #include "yang.h"
 #endif
@@ -808,12 +804,6 @@ status_t
 
     ncx_init_done = TRUE;
 
-    /* init XPath functions */
-    res = xpath1_init();
-    if (res != NO_ERR) {
-	return res;
-    }
-
     /* Initialize the INVALID namespace to help filter handling */
     res = xmlns_register_ns(INVALID_URN, INV_PREFIX, NCX_MODULE, &nsid);
     if (res != NO_ERR) {
@@ -985,7 +975,6 @@ void
     }
 
     typ_unload_basetypes();
-    xpath1_cleanup();
     xmlns_cleanup();
     def_reg_cleanup();
     cfg_cleanup();

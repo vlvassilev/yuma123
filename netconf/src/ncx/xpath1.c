@@ -81,15 +81,192 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                         V A R I A B L E S                         *
+*           F O R W A R D   D E C L A R A T I O N S                 *
 *                                                                   *
 *********************************************************************/
-static dlq_hdr_t  functionQ;
-
-
 static xpath_result_t *
     parse_expr (xpath_pcb_t *pcb,
                 status_t  *res);
+
+
+static xpath_result_t *
+    boolean_fn (xpath_pcb_t *pcb,
+		dlq_hdr_t *parmQ,
+		status_t  *res);
+
+static xpath_result_t *
+    ceiling_fn (xpath_pcb_t *pcb,
+		dlq_hdr_t *parmQ,
+		status_t  *res);
+
+static xpath_result_t *
+    concat_fn (xpath_pcb_t *pcb,
+	       dlq_hdr_t *parmQ,
+	       status_t  *res);
+
+static xpath_result_t *
+    contains_fn (xpath_pcb_t *pcb,
+		 dlq_hdr_t *parmQ,
+		 status_t  *res);
+
+static xpath_result_t *
+    count_fn (xpath_pcb_t *pcb,
+	      dlq_hdr_t *parmQ,
+	      status_t  *res);
+
+static xpath_result_t *
+    current_fn (xpath_pcb_t *pcb,
+		dlq_hdr_t *parmQ,
+		status_t  *res);
+
+static xpath_result_t *
+    false_fn (xpath_pcb_t *pcb,
+	      dlq_hdr_t *parmQ,
+	      status_t  *res);
+
+static xpath_result_t *
+    floor_fn (xpath_pcb_t *pcb,
+	      dlq_hdr_t *parmQ,
+	      status_t  *res);
+
+static xpath_result_t *
+    id_fn (xpath_pcb_t *pcb,
+	   dlq_hdr_t *parmQ,
+	   status_t  *res);
+
+static xpath_result_t *
+    lang_fn (xpath_pcb_t *pcb,
+	     dlq_hdr_t *parmQ,
+	     status_t  *res);
+
+static xpath_result_t *
+    last_fn (xpath_pcb_t *pcb,
+	     dlq_hdr_t *parmQ,
+	     status_t  *res);
+
+static xpath_result_t *
+    local_name_fn (xpath_pcb_t *pcb,
+		   dlq_hdr_t *parmQ,
+		   status_t  *res);
+
+static xpath_result_t *
+    namespace_uri_fn (xpath_pcb_t *pcb,
+		      dlq_hdr_t *parmQ,
+		      status_t  *res);
+
+static xpath_result_t *
+    name_fn (xpath_pcb_t *pcb,
+	     dlq_hdr_t *parmQ,
+	     status_t  *res);
+
+static xpath_result_t *
+    normalize_space_fn (xpath_pcb_t *pcb,
+			dlq_hdr_t *parmQ,
+			status_t  *res);
+
+static xpath_result_t *
+    not_fn (xpath_pcb_t *pcb,
+	    dlq_hdr_t *parmQ,
+	    status_t  *res);
+
+static xpath_result_t *
+    number_fn (xpath_pcb_t *pcb,
+	       dlq_hdr_t *parmQ,
+	       status_t  *res);
+
+static xpath_result_t *
+    position_fn (xpath_pcb_t *pcb,
+		 dlq_hdr_t *parmQ,
+		 status_t  *res);
+
+static xpath_result_t *
+    round_fn (xpath_pcb_t *pcb,
+	      dlq_hdr_t *parmQ,
+	      status_t  *res);
+
+static xpath_result_t *
+    starts_with_fn (xpath_pcb_t *pcb,
+		 dlq_hdr_t *parmQ,
+		    status_t  *res);
+
+static xpath_result_t *
+    string_fn (xpath_pcb_t *pcb,
+	       dlq_hdr_t *parmQ,
+	       status_t  *res);
+
+static xpath_result_t *
+    string_length_fn (xpath_pcb_t *pcb,
+		      dlq_hdr_t *parmQ,
+		      status_t  *res);
+
+static xpath_result_t *
+    substring_fn (xpath_pcb_t *pcb,
+		  dlq_hdr_t *parmQ,
+		  status_t  *res);
+
+static xpath_result_t *
+    substring_after_fn (xpath_pcb_t *pcb,
+			dlq_hdr_t *parmQ,
+			status_t  *res);
+
+static xpath_result_t *
+    substring_before_fn (xpath_pcb_t *pcb,
+			 dlq_hdr_t *parmQ,
+			 status_t  *res);
+
+static xpath_result_t *
+    sum_fn (xpath_pcb_t *pcb,
+	    dlq_hdr_t *parmQ,
+	    status_t  *res);
+
+static xpath_result_t *
+    translate_fn (xpath_pcb_t *pcb,
+		  dlq_hdr_t *parmQ,
+		  status_t  *res);
+
+static xpath_result_t *
+    true_fn (xpath_pcb_t *pcb,
+	     dlq_hdr_t *parmQ,
+	     status_t  *res);
+
+
+/********************************************************************
+*                                                                   *
+*                         V A R I A B L E S                         *
+*                                                                   *
+*********************************************************************/
+
+static xpath_fncb_t functions [] = {
+    { XP_FN_BOOLEAN, XP_RT_BOOLEAN, 1, boolean_fn },
+    { XP_FN_CEILING, XP_RT_NUMBER, 1, ceiling_fn },
+    { XP_FN_CONCAT, XP_RT_STRING, -1, concat_fn },
+    { XP_FN_CONTAINS, XP_RT_BOOLEAN, 2, contains_fn },
+    { XP_FN_COUNT, XP_RT_NUMBER, 1, count_fn },
+    { XP_FN_CURRENT, XP_RT_NODESET, 0, current_fn },
+    { XP_FN_FALSE, XP_RT_BOOLEAN, 0, false_fn },
+    { XP_FN_FLOOR, XP_RT_NUMBER, 1, floor_fn },
+    { XP_FN_ID, XP_RT_NODESET, 1, id_fn },
+    { XP_FN_LANG, XP_RT_BOOLEAN, 1, lang_fn },
+    { XP_FN_LAST, XP_RT_NUMBER, 0, last_fn },
+    { XP_FN_LOCAL_NAME, XP_RT_STRING, -1, local_name_fn },
+    { XP_FN_NAME, XP_RT_STRING, -1, name_fn },
+    { XP_FN_NAMESPACE_URI, XP_RT_STRING, -1, namespace_uri_fn },
+    { XP_FN_NORMALIZE_SPACE, XP_RT_STRING, -1, normalize_space_fn },
+    { XP_FN_NOT, XP_RT_BOOLEAN, 1, not_fn },
+    { XP_FN_NUMBER, XP_RT_NUMBER, -1, number_fn },
+    { XP_FN_POSITION, XP_RT_NUMBER, 0, position_fn },
+    { XP_FN_ROUND, XP_RT_NUMBER, 1, round_fn },
+    { XP_FN_STARTS_WITH, XP_RT_BOOLEAN, 2, starts_with_fn },
+    { XP_FN_STRING, XP_RT_STRING, -1, string_fn },
+    { XP_FN_STRING_LENGTH, XP_RT_NUMBER, -1, string_length_fn },
+    { XP_FN_SUBSTRING, XP_RT_STRING, -1, substring_fn },
+    { XP_FN_SUBSTRING_AFTER, XP_RT_STRING, 2, substring_after_fn },
+    { XP_FN_SUBSTRING_BEFORE, XP_RT_STRING, 2, substring_before_fn },
+    { XP_FN_SUM, XP_RT_NUMBER, 1, sum_fn },
+    { XP_FN_TRANSLATE, XP_RT_STRING, 3, translate_fn },
+    { XP_FN_TRUE, XP_RT_BOOLEAN, 0, true_fn },
+    { NULL, XP_RT_NONE, 0, NULL }   /* last entry marker */
+};
 
 
 
@@ -190,60 +367,779 @@ static xpath_nodetype_t
 } /* get_nodetype_id */
 
 
+
+
+/**********   X P A T H    F U N C T I O N S   ************/
+
+/* XPath callback functions -- in progress */
+
+
 /********************************************************************
-* FUNCTION new_fncb
+* FUNCTION boolean_fn
 * 
-* Malloc and init a new XPath function control block
+* boolean boolean(object) function [4.3]
 *
 * INPUTS:
-*    name == pointer to const name string
-*    restype == function result type
-*    parmcnt == number of parms expected, 
-*               -1 == N parms allowed 
-*    fn == function callback
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 object to convert to boolean
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
 *
 * RETURNS:
-*   malloced xpath_fncb_t if no error
-*   NULL if malloc fails
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
 *********************************************************************/
-static xpath_fncb_t *
-    new_fncb (const xmlChar *name,
-	      xpath_restype_t restype,
-	      int32  parmcnt,
-	      xpath_fn_t  fn)
+static xpath_result_t *
+    boolean_fn (xpath_pcb_t *pcb,
+		dlq_hdr_t *parmQ,
+		status_t  *res)
 {
-    xpath_fncb_t  *fncb;
+    return NULL;
 
-    fncb = m__getObj(xpath_fncb_t);
-    if (!fncb) {
-	return NULL;
-    }
-    memset(fncb, 0x0, sizeof(xpath_fncb_t));
-    fncb->name = name;
-    fncb->restype = restype;
-    fncb->parmcnt = parmcnt;
-    fncb->fn = fn;
-
-    return fncb;
-
-} /* new_fncb */
+}  /* boolean_fn */
 
 
 /********************************************************************
-* FUNCTION free_fncb
+* FUNCTION ceiling_fn
 * 
-* Clean and free an XPath function control block
+* number ceiling(number) function [4.4]
 *
 * INPUTS:
-*    fncb == pointer to control block to free
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 number to convert to ceiling(number)
+*    res == address of return status
 *
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
 *********************************************************************/
-static void
-    free_fncb (xpath_fncb_t *fncb)
+static xpath_result_t *
+    ceiling_fn (xpath_pcb_t *pcb,
+		dlq_hdr_t *parmQ,
+		status_t  *res)
 {
-    m__free(fncb);
+    return NULL;
 
-} /* free_fncb */
+}  /* ceiling_fn */
+
+
+/********************************************************************
+* FUNCTION concat_fn
+* 
+* string concat(string, string, string*) function [4.2]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 2 or more strings to concatenate
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    concat_fn (xpath_pcb_t *pcb,
+	       dlq_hdr_t *parmQ,
+	       status_t  *res)
+{
+    return NULL;
+
+}  /* concat_fn */
+
+
+/********************************************************************
+* FUNCTION contains_fn
+* 
+* boolean contains(string, string) function [4.2]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 2 strings
+*             returns true if the 1st string contains the 2nd string
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    contains_fn (xpath_pcb_t *pcb,
+		 dlq_hdr_t *parmQ,
+		 status_t  *res)
+{
+    return NULL;
+
+}  /* contains_fn */
+
+
+/********************************************************************
+* FUNCTION count_fn
+* 
+* number count(nodeset) function [4.1]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 parm (nodeset to get node count for)
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    count_fn (xpath_pcb_t *pcb,
+	      dlq_hdr_t *parmQ,
+	      status_t  *res)
+{
+    return NULL;
+
+}  /* count_fn */
+
+
+/********************************************************************
+* FUNCTION current_fn
+* 
+* number current() function [XPATH 2.0 used in YANG]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == empty parmQ
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    current_fn (xpath_pcb_t *pcb,
+		dlq_hdr_t *parmQ,
+		status_t  *res)
+{
+    return NULL;
+
+}  /* current_fn */
+
+
+/********************************************************************
+* FUNCTION false_fn
+* 
+* boolean false() function [4.3]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == empty parmQ
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    false_fn (xpath_pcb_t *pcb,
+	      dlq_hdr_t *parmQ,
+	      status_t  *res)
+{
+    return NULL;
+
+}  /* false_fn */
+
+
+/********************************************************************
+* FUNCTION floor_fn
+* 
+* number floor(number) function [4.4]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 number to convert to floor(number)
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    floor_fn (xpath_pcb_t *pcb,
+	      dlq_hdr_t *parmQ,
+	      status_t  *res)
+{
+    return NULL;
+
+}  /* floor_fn */
+
+
+/********************************************************************
+* FUNCTION id_fn
+* 
+* nodeset id(object) function [4.1]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 parm, which is the object to match
+*             against the current result in progress
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    id_fn (xpath_pcb_t *pcb,
+	   dlq_hdr_t *parmQ,
+	   status_t  *res)
+{
+    return NULL;
+
+}  /* id_fn */
+
+
+/********************************************************************
+* FUNCTION lang_fn
+* 
+* boolean lang(string) function [4.3]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 parm; lang string to match
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    lang_fn (xpath_pcb_t *pcb,
+	     dlq_hdr_t *parmQ,
+	     status_t  *res)
+{
+    return NULL;
+
+}  /* lang_fn */
+
+
+/********************************************************************
+* FUNCTION last_fn
+* 
+* number last() function [4.1]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == empty parmQ
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    last_fn (xpath_pcb_t *pcb,
+	     dlq_hdr_t *parmQ,
+	     status_t  *res)
+{
+    return NULL;
+
+}  /* last_fn */
+
+
+/********************************************************************
+* FUNCTION local_name_fn
+* 
+* string local-name(nodeset?) function [4.1]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with optional node-set parm 
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    local_name_fn (xpath_pcb_t *pcb,
+		   dlq_hdr_t *parmQ,
+		   status_t  *res)
+{
+    return NULL;
+
+}  /* local_name_fn */
+
+
+/********************************************************************
+* FUNCTION namespace_uri_fn
+* 
+* string namespace-uri(nodeset?) function [4.1]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with optional node-set parm 
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    namespace_uri_fn (xpath_pcb_t *pcb,
+		      dlq_hdr_t *parmQ,
+		      status_t  *res)
+{
+    return NULL;
+
+}  /* namespace_uri_fn */
+
+
+/********************************************************************
+* FUNCTION name_fn
+* 
+* string name(nodeset?) function [4.1]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with optional node-set parm 
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    name_fn (xpath_pcb_t *pcb,
+	     dlq_hdr_t *parmQ,
+	     status_t  *res)
+{
+    return NULL;
+
+}  /* name_fn */
+
+
+/********************************************************************
+* FUNCTION normalize_space_fn
+* 
+* string normalize-space(string?) function [4.2]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with optional string to convert to normalized
+*             string
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    normalize_space_fn (xpath_pcb_t *pcb,
+			dlq_hdr_t *parmQ,
+			status_t  *res)
+{
+    return NULL;
+
+}  /* normalize_space_fn */
+
+
+/********************************************************************
+* FUNCTION not_fn
+* 
+* boolean not(object) function [4.3]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 object to perform NOT boolean conversion
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    not_fn (xpath_pcb_t *pcb,
+	    dlq_hdr_t *parmQ,
+	    status_t  *res)
+{
+    return NULL;
+
+}  /* not_fn */
+
+
+/********************************************************************
+* FUNCTION number_fn
+* 
+* number number(object?) function [4.4]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 optional object to convert to a number
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    number_fn (xpath_pcb_t *pcb,
+	       dlq_hdr_t *parmQ,
+	       status_t  *res)
+{
+    return NULL;
+
+}  /* number_fn */
+
+
+/********************************************************************
+* FUNCTION position_fn
+* 
+* number position() function [4.1]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == empty parmQ
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    position_fn (xpath_pcb_t *pcb,
+		 dlq_hdr_t *parmQ,
+		 status_t  *res)
+{
+    return NULL;
+
+}  /* position_fn */
+
+
+/********************************************************************
+* FUNCTION round_fn
+* 
+* number round(number) function [4.4]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 number to convert to round(number)
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    round_fn (xpath_pcb_t *pcb,
+	      dlq_hdr_t *parmQ,
+	      status_t  *res)
+{
+    return NULL;
+
+}  /* round_fn */
+
+
+/********************************************************************
+* FUNCTION starts_with_fn
+* 
+* boolean starts-with(string, string) function [4.2]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 2 strings
+*             returns true if the 1st string starts with the 2nd string
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    starts_with_fn (xpath_pcb_t *pcb,
+		    dlq_hdr_t *parmQ,
+		    status_t  *res)
+{
+    return NULL;
+
+}  /* starts_with_fn */
+
+
+/********************************************************************
+* FUNCTION string_fn
+* 
+* string string(object?) function [4.2]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with optional object to convert to string
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    string_fn (xpath_pcb_t *pcb,
+	       dlq_hdr_t *parmQ,
+	       status_t  *res)
+{
+    return NULL;
+
+}  /* string_fn */
+
+
+/********************************************************************
+* FUNCTION string_length_fn
+* 
+* number string-length(string?) function [4.2]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with optional string to check length
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    string_length_fn (xpath_pcb_t *pcb,
+		      dlq_hdr_t *parmQ,
+		      status_t  *res)
+{
+    return NULL;
+
+}  /* string_length_fn */
+
+
+/********************************************************************
+* FUNCTION substring_fn
+* 
+* string substring-after(string, number, number?) function [4.2]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 2 or 3 parms
+*             returns substring of 1st string starting at the
+*             position indicated by the first number; copies
+*             only N chars if the 2nd number is present
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    substring_fn (xpath_pcb_t *pcb,
+		  dlq_hdr_t *parmQ,
+		  status_t  *res)
+{
+    return NULL;
+
+}  /* substring_fn */
+
+
+/********************************************************************
+* FUNCTION substring_after_fn
+* 
+* string substring-after(string, string) function [4.2]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 2 strings
+*             returns substring of 1st string after
+*             the occurance of the 2nd string
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    substring_after_fn (xpath_pcb_t *pcb,
+			dlq_hdr_t *parmQ,
+			status_t  *res)
+{
+    return NULL;
+
+}  /* substring_after_fn */
+
+
+/********************************************************************
+* FUNCTION substring_before_fn
+* 
+* string substring-before(string, string) function [4.2]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 2 strings
+*             returns substring of 1st string that precedes
+*             the occurance of the 2nd string
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    substring_before_fn (xpath_pcb_t *pcb,
+			 dlq_hdr_t *parmQ,
+			 status_t  *res)
+{
+    return NULL;
+
+}  /* substring_before_fn */
+
+
+/********************************************************************
+* FUNCTION sum_fn
+* 
+* number sum(nodeset) function [4.4]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 nodeset to convert to numbers
+*             and add together to resurn the total
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    sum_fn (xpath_pcb_t *pcb,
+	    dlq_hdr_t *parmQ,
+	    status_t  *res)
+{
+    return NULL;
+
+}  /* sum_fn */
+
+
+/********************************************************************
+* FUNCTION translate_fn
+* 
+* string translate(string, string, string) function [4.2]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 3 strings to translate
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    translate_fn (xpath_pcb_t *pcb,
+		  dlq_hdr_t *parmQ,
+		  status_t  *res)
+{
+    return NULL;
+
+}  /* translate_fn */
+
+
+/********************************************************************
+* FUNCTION true_fn
+* 
+* boolean true() function [4.3]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == empty parmQ
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    true_fn (xpath_pcb_t *pcb,
+	     dlq_hdr_t *parmQ,
+	     status_t  *res)
+{
+    return NULL;
+
+}  /* true_fn */
 
 
 /********************************************************************
@@ -259,42 +1155,25 @@ static void
 *   pointer to found control block
 *   NULL if not found
 *********************************************************************/
-static xpath_fncb_t *
+static const xpath_fncb_t *
     find_fncb (xpath_pcb_t *pcb,
 	       const xmlChar *name)
 {
-    xpath_fncb_t  *fncb;
+    const xpath_fncb_t  *fncb;
+    uint32               i;
 
-    for (fncb = (xpath_fncb_t *)dlq_firstEntry(pcb->functionQ);
-	 fncb != NULL;
-	 fncb = (xpath_fncb_t *)dlq_nextEntry(fncb)) {
-
+    i = 0;
+    fncb = &pcb->functions[i];
+    while (fncb && fncb->name) {
 	if (!xml_strcmp(name, fncb->name)) {
 	    return fncb;
+	} else {
+	    fncb = &pcb->functions[++i];
 	}
     }
     return NULL;
 
 } /* find_fncb */
-
-
-
-
-/* XPath callback functions -- in progress */
-static xpath_result_t *
-    last_fn (xpath_pcb_t *pcb,
-	     dlq_hdr_t *parmQ,
-	     status_t  *res)
-{
-    return NULL;
-}
-
-
-
-
-
-
-
 
 
 /********************************************************************
@@ -925,7 +1804,7 @@ static xpath_result_t *
 			 status_t *res)
 {
     xpath_result_t         *val1, *val2;
-    xpath_fncb_t           *fncb;
+    const xpath_fncb_t     *fncb;
     dlq_hdr_t               parmQ;
     tk_type_t               nexttyp;
     int32                   parmcnt;
@@ -2199,48 +3078,20 @@ status_t
 
 
 /********************************************************************
-* FUNCTION xpath1_init
+* FUNCTION xpath1_get_functions_ptr
 * 
-* Initialize the master XPath functionQ
+* Get the start of the function array for XPath 1.0 plus
+* the current() function
 *
+* RETURNS:
+*   pointer to functions array
 *********************************************************************/
-status_t
-    xpath1_init (void)
+const xpath_fncb_t *
+    xpath1_get_functions_ptr (void)
 {
-    xpath_fncb_t *fncb;
+    return &functions[0];
 
-    dlq_createSQue(&functionQ);
-
-    fncb = new_fncb(XP_FN_LAST, XP_RT_NUMBER, 0, last_fn);
-    if (!fncb) {
-	return ERR_INTERNAL_MEM;
-    } else {
-	dlq_enque(fncb, &functionQ);
-    }
-
-
-    return NO_ERR;
-
-}  /* xpath1_init */
-
-
-/********************************************************************
-* FUNCTION xpath_cleanup_functionQ
-* 
-* Cleanup the master XPath functionQ
-*
-*********************************************************************/
-void
-    xpath1_cleanup (void)
-{
-    xpath_fncb_t *fncb;
-
-    while (!dlq_empty(&functionQ)) {
-	fncb = (xpath_fncb_t *)dlq_deque(&functionQ);
-	free_fncb(fncb);
-    }
-
-}  /* xpath1_cleanup */
+}  /* xpath1_get_functions_ptr */
 
 
 /* END xpath1.c */

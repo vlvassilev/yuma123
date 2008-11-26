@@ -73,34 +73,36 @@ date	     init     comment
 #define XP_AXIS_SELF               (const xmlChar *)"self"
 
 /* Xpath 1.0 Function library + current() from XPath 2.0 */
-#define XP_FN_LAST                 (const xmlChar *)"last"
-#define XP_FN_POSITION             (const xmlChar *)"position"
-#define XP_FN_COUNT                (const xmlChar *)"count"
-#define XP_FN_ID                   (const xmlChar *)"id"
-#define XP_FN_LOCAL_NAME           (const xmlChar *)"local-name"
-#define XP_FN_NAMESPACE_URI        (const xmlChar *)"namespace-uri"
-#define XP_FN_NAME                 (const xmlChar *)"name"
-#define XP_FN_STRING               (const xmlChar *)"string"
-#define XP_FN_CONCAT               (const xmlChar *)"concat"
-#define XP_FN_STARTS_WITH          (const xmlChar *)"starts-with"
-#define XP_FN_CONTAINS             (const xmlChar *)"contains"
-#define XP_FN_SUBSTRING_BEFORE     (const xmlChar *)"substring-before"
-#define XP_FN_SUBSTRING_AFTER      (const xmlChar *)"substring-after"
-#define XP_FN_SUBSTRING            (const xmlChar *)"substring"
-#define XP_FN_STRING_LENGTH        (const xmlChar *)"string-length"
-#define XP_FN_NORMALIZE_SPACE      (const xmlChar *)"normalize-space"
-#define XP_FN_TRANSLATE            (const xmlChar *)"translate"
 #define XP_FN_BOOLEAN              (const xmlChar *)"boolean"
-#define XP_FN_NOT                  (const xmlChar *)"not"
-#define XP_FN_TRUE                 (const xmlChar *)"true"
-#define XP_FN_FALSE                (const xmlChar *)"false"
-#define XP_FN_LANG                 (const xmlChar *)"lang"
-#define XP_FN_NUMBER               (const xmlChar *)"number"
-#define XP_FN_SUM                  (const xmlChar *)"sum"
-#define XP_FN_FLOOR                (const xmlChar *)"floor"
 #define XP_FN_CEILING              (const xmlChar *)"ceiling"
-#define XP_FN_ROUND                (const xmlChar *)"round"
+#define XP_FN_CONCAT               (const xmlChar *)"concat"
+#define XP_FN_CONTAINS             (const xmlChar *)"contains"
+#define XP_FN_COUNT                (const xmlChar *)"count"
 #define XP_FN_CURRENT              (const xmlChar *)"current"
+#define XP_FN_FALSE                (const xmlChar *)"false"
+#define XP_FN_FLOOR                (const xmlChar *)"floor"
+#define XP_FN_ID                   (const xmlChar *)"id"
+#define XP_FN_LANG                 (const xmlChar *)"lang"
+#define XP_FN_LAST                 (const xmlChar *)"last"
+#define XP_FN_LOCAL_NAME           (const xmlChar *)"local-name"
+#define XP_FN_NAME                 (const xmlChar *)"name"
+#define XP_FN_NAMESPACE_URI        (const xmlChar *)"namespace-uri"
+#define XP_FN_NORMALIZE_SPACE      (const xmlChar *)"normalize-space"
+#define XP_FN_NOT                  (const xmlChar *)"not"
+#define XP_FN_NUMBER               (const xmlChar *)"number"
+#define XP_FN_POSITION             (const xmlChar *)"position"
+#define XP_FN_ROUND                (const xmlChar *)"round"
+#define XP_FN_STARTS_WITH          (const xmlChar *)"starts-with"
+#define XP_FN_STRING               (const xmlChar *)"string"
+#define XP_FN_STRING_LENGTH        (const xmlChar *)"string-length"
+#define XP_FN_SUBSTRING            (const xmlChar *)"substring"
+#define XP_FN_SUBSTRING_AFTER      (const xmlChar *)"substring-after"
+#define XP_FN_SUBSTRING_BEFORE     (const xmlChar *)"substring-before"
+#define XP_FN_SUM                  (const xmlChar *)"sum"
+#define XP_FN_TRANSLATE            (const xmlChar *)"translate"
+#define XP_FN_TRUE                 (const xmlChar *)"true"
+
+
 
 /* XPath NodeType values */
 #define XP_NT_COMMENT              (const xmlChar *)"comment"
@@ -272,8 +274,8 @@ typedef struct xpath_pcb_t_ {
     xpath_result_t      *curfilter;
     uint32               cxtpos;
     uint32               cxtsize;
-    dlq_hdr_t            varbindQ;        /* Q of val_value_t */
-    dlq_hdr_t           *functionQ;       /* Q of xpath_fncb_t */
+    dlq_hdr_t            varbindQ;          /* Q of val_value_t */
+    const struct xpath_fncb_t_ *functions;   /* array of xpath_fncb_t */
     status_t             parseres;
     status_t             validateres;
 
@@ -291,7 +293,6 @@ typedef xpath_result_t *
 
 /* XPath function control block */
 typedef struct xpath_fncb_t_ {
-    dlq_hdr_t          qhdr;
     const xmlChar     *name;
     xpath_restype_t    restype;
     int32              parmcnt;   /* -1 == N, 0..N == actual cnt */

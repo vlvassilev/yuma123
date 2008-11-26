@@ -63,6 +63,10 @@ date         init     comment
 #include "xpath.h"
 #endif
 
+#ifndef _H_xpath1
+#include "xpath1.h"
+#endif
+
 #ifndef _H_yangconst
 #include "yangconst.h"
 #endif
@@ -1090,6 +1094,8 @@ xpath_pcb_t *
 
     ncx_init_errinfo(&pcb->errinfo);
 
+    pcb->functions = xpath1_get_functions_ptr();
+
     return pcb;
 
 }  /* xpath_new_pcb */
@@ -1127,6 +1133,7 @@ xpath_pcb_t *
 
     newpcb->mod = srcpcb->mod;
     newpcb->source = srcpcb->source;
+    newpcb->functions = srcpcb->functions;
 
     return newpcb;
 

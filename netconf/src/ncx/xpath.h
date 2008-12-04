@@ -245,6 +245,7 @@ typedef struct xpath_result_t_ {
 typedef struct xpath_pcb_t_ {
     dlq_hdr_t            qhdr;           /* in case saved in a Q */
     tk_chain_t          *tkc;               /* chain for exprstr */
+    tk_token_t          *tk;              /* back-ptr for errors */
     xmlChar             *exprstr;           /* YANG XPath string */
     ncx_module_t        *mod;         /* bptr to exprstr context */
     boolean              abspath;

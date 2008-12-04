@@ -331,7 +331,7 @@ typedef enum ncx_status_t_ {
 } ncx_status_t;
 
 
-/* enumeratoin for CLI handling of bad input data 
+/* enumeration for CLI handling of bad input data 
  * used by yangcli, all others use NCX_BAD_DATA_ERROR
  *
  * NCX_BAD_DATA_IGNORE to silently accept invalid input values
@@ -432,7 +432,7 @@ typedef struct ncx_filptr_t_ {
 } ncx_filptr_t;
 
 
-/* NCX appinfo entry */
+/* YANG extension usage entry */
 typedef struct ncx_appinfo_t_ {
     dlq_hdr_t               qhdr;
     xmlChar                *prefix;
@@ -445,20 +445,41 @@ typedef struct ncx_appinfo_t_ {
 } ncx_appinfo_t;
 
 
-/* NCX revision-history entry */
+/* YANG revision entry */
 typedef struct ncx_revhist_t_ {
-    dlq_hdr_t         qhdr;
-    xmlChar          *version;
-    xmlChar          *descr;
+    dlq_hdr_t           qhdr;
+    xmlChar            *version;
+    xmlChar            *descr;
     struct tk_token_t_ *tk;
-    status_t          res;
+    status_t            res;
 } ncx_revhist_t;
 
+/* YANG if-feature entry */
+typedef struct ncx_iffeature_t_ {
+    dlq_hdr_t              qhdr;
+    xmlChar               *prefix;
+    xmlChar               *name;
+    struct ncx_feature_t_ *feature;
+    struct tk_token_t_    *tk;
+} ncx_iffeature_t;
 
-/* representation of one module during parsing.
- * these are registered in the def_reg module to resolve
- * imports from other modules
- */
+
+/* YANG feature entry */
+typedef struct ncx_feature_t_ {
+    dlq_hdr_t           qhdr;
+    struct ncx_module_t_ *mod;         /* back-ptr to module */
+    xmlChar            *name;
+    xmlChar            *descr;
+    xmlChar            *ref;
+    struct tk_token_t_ *tk;
+    ncx_status_t        status;
+    dlq_hdr_t           iffeatureQ;   /* Q of ncx_iffeature_t */
+    dlq_hdr_t           appinfoQ;       /* Q of ncx_appinfo_t */
+    status_t            res;    /* may be stored with errors */
+} ncx_feature_t;
+
+
+/* representation of one module or submodule during and after parsing */
 typedef struct ncx_module_t_ {
     dlq_hdr_t         qhdr;
     xmlChar          *name; 
@@ -495,6 +516,7 @@ typedef struct ncx_module_t_ {
     dlq_hdr_t         groupingQ;      /* Q of grp_template_t */
     dlq_hdr_t         datadefQ;       /* Q of obj_template_t */
     dlq_hdr_t         extensionQ;     /* Q of ext_template_t */
+    dlq_hdr_t         featureQ;        /* Q of ncx_feature_t */
     dlq_hdr_t         appinfoQ;        /* Q of ncx_appinfo_t */
     dlq_hdr_t         typnameQ;        /* Q of ncx_typname_t */
     dlq_hdr_t         saveimpQ;    /* Q of yang_import_ptr_t */   

@@ -479,6 +479,59 @@ extern status_t
 			  ncx_module_t  *mod,
 			  dlq_hdr_t *appinfoQ);
 
+
+/********************** ncx_iffeature_t *********************/
+
+extern ncx_iffeature_t * 
+    ncx_new_iffeature (void);
+
+extern void 
+    ncx_free_iffeature (ncx_iffeature_t *iffeature);
+
+extern void 
+    ncx_clean_iffeatureQ (dlq_hdr_t *iffeatureQ);
+
+extern ncx_iffeature_t *
+    ncx_find_iffeature (dlq_hdr_t *iffeatureQ,
+			const xmlChar *prefix,
+			const xmlChar *name,
+			const xmlChar *modprefix);
+
+
+/********************** ncx_feature_t *********************/
+
+extern ncx_feature_t * 
+    ncx_new_feature (void);
+
+extern void 
+    ncx_free_feature (ncx_feature_t *feature);
+
+extern ncx_feature_t *
+    ncx_find_feature (ncx_module_t *mod,
+		      const xmlChar *name);
+
+extern ncx_feature_t *
+    ncx_find_feature_que (dlq_hdr_t *featureQ,
+			  const xmlChar *name);
+
+extern const ncx_feature_t *
+    ncx_first_feature (const ncx_module_t *mod);
+
+extern const ncx_feature_t *
+    ncx_next_feature (const ncx_module_t *mod,
+		      const ncx_feature_t *curfeature);
+
+extern status_t 
+    ncx_resolve_feature (tk_chain_t *tkc,
+			 ncx_module_t  *mod,
+			 ncx_feature_t *feature);
+
+extern status_t 
+    ncx_resolve_feature_final (tk_chain_t *tkc,
+			       ncx_module_t  *mod,
+			       ncx_feature_t *feature);
+
+
 /********************** ncx_filptr_t *********************/
 
 extern ncx_filptr_t *
@@ -724,5 +777,10 @@ extern void
 
 extern void
     ncx_set_load_callback (ncx_load_cbfn_t cbfn);
+
+extern boolean
+    ncx_prefix_different (const xmlChar *prefix1,
+			  const xmlChar *prefix2,
+			  const xmlChar *modprefix);
 
 #endif	    /* _H_ncx */

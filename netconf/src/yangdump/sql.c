@@ -825,9 +825,10 @@ static void
     ses_putstr(scb, (const xmlChar *)buff);
 
     /* column: augwhen */
-    if (obj->augwhen && obj->augwhen->exprstr) {
+    if (obj->augobj && obj->augobj->when &&
+	obj->augobj->when->exprstr) {
 	ses_putstr(scb, (const xmlChar *)"\n    '");
-	write_cstring(scb, obj->augwhen->exprstr);
+	write_cstring(scb, obj->augobj->when->exprstr);
 	ses_putstr(scb, (const xmlChar *)"',");
     } else {
 	write_empty_col(scb);

@@ -35,10 +35,11 @@
       OBJ_TYP_RPCIO
       OBJ_TYP_NOTIF
 
-      * concrete objects (container - list)
+   These objects are grouped as follows:
+      * concrete data node objects (container - list)
       * meta grouping constructs (choice, case) and (uses, augment)
       * RPC method objects (rpc, input, output)
-      * notification data object (notification)
+      * notification objects (notification)
 
     5 Pass Validation Process
 
@@ -67,14 +68,15 @@
 
     The uses and augment objects are kept for
     XSD and other translation, and needed for internal data sharing.
-    In a cloned object, a minimal amount of data id copied,
+    In a cloned object, a minimal amount of data is copied,
     and the rest is shadowed with back-pointers.
 
     For the 'uses' statement, refined objects are merged into
-    the cloned tree as specified.
+    the cloned tree as specified by the grouping and any
+    refine statements within the uses statement.
 
     For the 'augment' statement, one exact clone of each augmenting
-    node is placed in the target, based on the Xpath expression
+    node is placed in the target, based on the schema node target
     for the augment clause.
 
 
@@ -87,7 +89,7 @@
 date         init     comment
 ----------------------------------------------------------------------
 09dec07      abb      begun; start from yang_typ.c
-
+29nov08      abb      added when-stmt support as per yang-02
 
 *********************************************************************
 *                                                                   *
@@ -384,7 +386,6 @@ static status_t
 {
     obj_template_t  *obj;
     obj_leaf_t      *leaf;
-    xmlChar         *str;
     const xmlChar   *val;
     const char      *expstr;
     tk_type_t        tktyp;
@@ -499,24 +500,12 @@ static status_t
 
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_strclause(tkc, mod, &str,
-					 &when, &obj->appinfoQ);
-	    if (res == NO_ERR) {
-		obj->when = xpath_new_pcb(NULL);
-		if (!obj->when) {
-		    m__free(str);
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		} else {
-		    obj->when->exprstr = str;
-		}
-		str = NULL;
-
-		if (res == NO_ERR) {
-		    res = xpath1_parse_expr(tkc, mod, obj->when,
-					    XP_SRC_WHEN);
-		}
-	    }
+	    res = yang_consume_when(tkc, mod, obj, &when);
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+	    res = yang_consume_iffeature(tkc, mod, 
+					 &obj->iffeatureQ,
+					 &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
@@ -606,7 +595,6 @@ static status_t
 {
     obj_template_t  *obj;
     obj_container_t *con;
-    xmlChar         *str;
     const xmlChar   *val;
     const char      *expstr;
     dlq_hdr_t        errQ;
@@ -718,24 +706,12 @@ static status_t
 
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_strclause(tkc, mod, &str,
-					 &when, &obj->appinfoQ);
-	    if (res == NO_ERR) {
-		obj->when = xpath_new_pcb(NULL);
-		if (!obj->when) {
-		    m__free(str);
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		} else {
-		    obj->when->exprstr = str;
-		}
-		str = NULL;
-
-		if (res == NO_ERR) {
-		    res = xpath1_parse_expr(tkc, mod, obj->when,
-					    XP_SRC_WHEN);
-		}
-	    }
+	    res = yang_consume_when(tkc, mod, obj, &when);
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+	    res = yang_consume_iffeature(tkc, mod, 
+					 &obj->iffeatureQ,
+					 &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
 	    if (refi) {
@@ -853,7 +829,6 @@ static status_t
 {
     obj_template_t  *obj;
     obj_leaf_t      *leaf;
-    xmlChar         *str;
     const xmlChar   *val;
     const char      *expstr;
     tk_type_t        tktyp;
@@ -967,24 +942,12 @@ static status_t
 
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_strclause(tkc, mod, &str,
-					 &when, &obj->appinfoQ);
-	    if (res == NO_ERR) {
-		obj->when = xpath_new_pcb(NULL);
-		if (!obj->when) {
-		    m__free(str);
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		} else {
-		    obj->when->exprstr = str;
-		}
-		str = NULL;
-
-		if (res == NO_ERR) {
-		    res = xpath1_parse_expr(tkc, mod, obj->when,
-					    XP_SRC_WHEN);
-		}
-	    }
+	    res = yang_consume_when(tkc, mod, obj, &when);
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+	    res = yang_consume_iffeature(tkc, mod, 
+					 &obj->iffeatureQ,
+					 &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_TYPE)) {
 	    if (refi || typ) {
@@ -1242,24 +1205,12 @@ static status_t
 
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_strclause(tkc, mod, &str,
-					 &when, &obj->appinfoQ);
-	    if (res == NO_ERR) {
-		obj->when = xpath_new_pcb(NULL);
-		if (!obj->when) {
-		    m__free(str);
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		} else {
-		    obj->when->exprstr = str;
-		}
-		str = NULL;
-
-		if (res == NO_ERR) {
-		    res = xpath1_parse_expr(tkc, mod, obj->when,
-					    XP_SRC_WHEN);
-		}
-	    }
+	    res = yang_consume_when(tkc, mod, obj, &when);
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+	    res = yang_consume_iffeature(tkc, mod, 
+					 &obj->iffeatureQ,
+					 &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_TYPE)) {
 	    if (refi || typ) {
@@ -1574,24 +1525,12 @@ static status_t
 
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_strclause(tkc, mod, &str,
-					 &when, &obj->appinfoQ);
-	    if (res == NO_ERR) {
-		obj->when = xpath_new_pcb(NULL);
-		if (!obj->when) {
-		    m__free(str);
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		} else {
-		    obj->when->exprstr = str;
-		}
-		str = NULL;
-
-		if (res == NO_ERR) {
-		    res = xpath1_parse_expr(tkc, mod, obj->when,
-					    XP_SRC_WHEN);
-		}
-	    }
+	    res = yang_consume_when(tkc, mod, obj, &when);
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+	    res = yang_consume_iffeature(tkc, mod, 
+					 &obj->iffeatureQ,
+					 &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
 	    if (refi) {
@@ -1839,7 +1778,6 @@ static status_t
 {
     obj_case_t      *cas, *testcas;
     obj_template_t  *obj, *testobj, *test2obj, *casobj;
-    xmlChar         *str;
     const xmlChar   *val, *namestr;
     const char      *expstr;
     tk_type_t        tktyp;
@@ -1957,24 +1895,12 @@ static status_t
 
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_strclause(tkc, mod, &str,
-					 &when, &obj->appinfoQ);
-	    if (res == NO_ERR) {
-		obj->when = xpath_new_pcb(NULL);
-		if (!obj->when) {
-		    m__free(str);
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		} else {
-		    obj->when->exprstr = str;
-		}
-		str = NULL;
-
-		if (res == NO_ERR) {
-		    res = xpath1_parse_expr(tkc, mod, obj->when,
-					    XP_SRC_WHEN);
-		}
-	    }
+	    res = yang_consume_when(tkc, mod, obj, &when);
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+	    res = yang_consume_iffeature(tkc, mod, 
+					 &obj->iffeatureQ,
+					 &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    if (refi) {
@@ -2121,7 +2047,6 @@ static status_t
     obj_case_t      *testcas;
     const xmlChar   *val, *namestr;
     const char      *expstr;
-    xmlChar         *str;
     tk_type_t        tktyp;
     boolean          done, when, def, mand, conf, stat, desc, ref, flagset;
     status_t         res, retres;
@@ -2230,24 +2155,13 @@ static status_t
 
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_strclause(tkc, mod, &str,
-					 &when, &obj->appinfoQ);
-	    if (res == NO_ERR) {
-		obj->when = xpath_new_pcb(NULL);
-		if (!obj->when) {
-		    m__free(str);
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		} else {
-		    obj->when->exprstr = str;
-		}
-		str = NULL;
-
-		if (res == NO_ERR) {
-		    res = xpath1_parse_expr(tkc, mod, obj->when,
-					    XP_SRC_WHEN);
-		}
-	    }
+	    res = yang_consume_when(tkc, mod, obj, &when);
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+	    res = yang_consume_iffeature(tkc, mod, 
+					 &obj->iffeatureQ,
+					 &obj->appinfoQ);
+	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
 	    res = yang_consume_strclause(tkc, mod, &choic->defval,
 					 &def, &obj->appinfoQ);
@@ -2617,24 +2531,12 @@ static status_t
 
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_strclause(tkc, mod, &str,
-					 &when, &obj->appinfoQ);
-	    if (res == NO_ERR) {
-		obj->when = xpath_new_pcb(NULL);
-		if (!obj->when) {
-		    m__free(str);
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		} else {
-		    obj->when->exprstr = str;
-		}
-		str = NULL;
-
-		if (res == NO_ERR) {
-		    res = xpath1_parse_expr(tkc, mod, obj->when,
-					    XP_SRC_WHEN);
-		}
-	    }
+	    res = yang_consume_when(tkc, mod, obj, &when);
+	    CHK_OBJ_EXIT;
+	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+	    res = yang_consume_iffeature(tkc, mod, 
+					 &obj->iffeatureQ,
+					 &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    res = yang_consume_status(tkc, mod, &uses->status,
@@ -3034,24 +2936,11 @@ static status_t
 
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_strclause(tkc, mod, &str,
-					 &when, &obj->appinfoQ);
-	    if (res == NO_ERR) {
-		obj->when = xpath_new_pcb(NULL);
-		if (!obj->when) {
-		    m__free(str);
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		} else {
-		    obj->when->exprstr = str;
-		}
-		str = NULL;
-
-		if (res == NO_ERR) {
-		    res = xpath1_parse_expr(tkc, mod, obj->when,
-					    XP_SRC_WHEN);
-		}
-	    }
+	    res = yang_consume_when(tkc, mod, obj, &when);
+	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+	    res = yang_consume_iffeature(tkc, mod, 
+					 &obj->iffeatureQ,
+					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    res = yang_consume_status(tkc, mod, &aug->status,
 				      &stat, &obj->appinfoQ);
@@ -3307,7 +3196,11 @@ static status_t
 	}
 
 	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
+	if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+	    res = yang_consume_iffeature(tkc, mod, 
+					 &obj->iffeatureQ,
+					 &obj->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
 	    res = yang_typ_consume_typedef(tkc, mod, &rpc->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
 	    res = yang_grp_consume_grouping(tkc, mod, 
@@ -3537,6 +3430,10 @@ static status_t
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
 	    res = yang_grp_consume_grouping(tkc, mod, 
 					    &notif->groupingQ, obj);
+	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+	    res = yang_consume_iffeature(tkc, mod, 
+					 &obj->iffeatureQ,
+					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    res = yang_consume_status(tkc, mod, &notif->status,
 				      &stat, &obj->appinfoQ);
@@ -4315,6 +4212,8 @@ static status_t
 	    continue;
 	} 
 
+	uniobj->flags |= OBJ_FL_UNIQUE;
+
 	/* make sure this leaf component not already used */
 	res = NO_ERR;
 	for (testcomp = (obj_unique_comp_t *)dlq_firstEntry(&uni->compQ);
@@ -4751,9 +4650,6 @@ static status_t
 		    newobj->mod = obj->mod;
 		    newobj->parent = obj->parent;
 		    newobj->usesobj = obj;
-		    if (obj->when) {
-			newobj->usewhen = obj->when;
-		    }
 		    dlq_insertAhead(newobj, obj);
 
 #ifdef YANG_OBJ_DEBUG
@@ -5101,9 +4997,7 @@ static status_t
 		} else {
 		    newobj->parent = targobj;
 		    newobj->flags |= OBJ_FL_AUGCLONE;
-		    if (obj->when) {
-			newobj->augwhen = obj->when;
-		    }
+		    newobj->augobj = obj;
 		    obj_set_ncx_flags(newobj);
 		    dlq_enque(newobj, targQ);
 
@@ -5373,6 +5267,340 @@ static status_t
 }  /* consume_datadef */
 
 
+/********************************************************************
+* FUNCTION resolve_iffeatureQ
+* 
+* Check the Q of if-feature statements for the specified object
+
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   obj == object to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_iffeatureQ (tk_chain_t *tkc,
+			ncx_module_t  *mod,
+			obj_template_t *obj)
+{
+    ncx_feature_t    *testfeature;
+    ncx_iffeature_t  *iff;
+    status_t          res, retres;
+    boolean           errdone;
+
+    retres = NO_ERR;
+
+    /* check if there are any if-feature statements inside
+     * this object that need to be resolved
+     */
+    for (iff = (ncx_iffeature_t *)
+	     dlq_firstEntry(&obj->iffeatureQ);
+	 iff != NULL;
+	 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+
+	testfeature = NULL;
+	errdone = FALSE;
+	res = NO_ERR;
+
+	if (iff->prefix &&
+	    xml_strcmp(iff->prefix, mod->prefix)) {
+	    /* find the feature in another module */
+	    res = yang_find_imp_feature(tkc, mod, iff->prefix,
+					iff->name, iff->tk,
+					&testfeature);
+	    if (res != NO_ERR) {
+		retres = res;
+		errdone = TRUE;
+	    }
+	} else {
+	    testfeature = ncx_find_feature(mod, iff->name);
+	}
+
+	if (!testfeature && !errdone) {
+	    log_error("\nError: Feature '%s' not found "
+		      "for if-feature statement in object '%s'",
+		      iff->name, obj_get_name(obj));
+	    res = retres = ERR_NCX_DEF_NOT_FOUND;
+	    tkc->cur = iff->tk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+
+	if (testfeature) {
+	    iff->feature = testfeature;
+	}
+    }
+
+    /* check the feature mismatch corner cases later,
+     * after the OBJ_FL_KEY flags have been set
+     */
+    return retres;
+				    
+}  /* resolve_iffeatureQ */
+
+
+
+/********************************************************************
+* FUNCTION check_iffeature_mismatch
+* 
+* Check the child object against the ancestor node for 1 if-feature
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   ancestor == ancestor node of child to compare against
+*               and stop the check
+*   testobj == current object being checked
+*   iff == current if-feature record within the testobj to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    check_iffeature_mismatch (tk_chain_t *tkc,
+			      ncx_module_t  *mod,
+			      obj_template_t *ancestor,
+			      obj_template_t *testobj,
+			      ncx_iffeature_t *iff)
+
+{
+    status_t  res;
+
+    res = NO_ERR;
+
+    if (!ncx_find_iffeature(&ancestor->iffeatureQ,
+			    iff->prefix,
+			    iff->name,
+			    mod->prefix)) {
+	res = ERR_NCX_INVALID_CONDITIONAL;
+	log_error("\nError: 'if-feature %s' present for "
+		  "%s %s, but not in list %s",
+		  iff->name, 
+		  obj_get_typestr(testobj),
+		  obj_get_name(testobj),
+		  obj_get_name(ancestor));
+	tkc->cur = iff->tk;
+	ncx_print_errormsg(tkc, mod, res);
+    }
+    return res;
+}  /* check_iffeature_mismatch */
+
+
+/********************************************************************
+* FUNCTION check_one_when_mismatch
+* 
+* Check one object when clause(s) against another
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   test1 == node to check
+*   test2 == node to check
+* 
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    check_one_when_mismatch (tk_chain_t *tkc,
+			     ncx_module_t  *mod,
+			     obj_template_t *test1,
+			     obj_template_t *test2)
+{
+    if (!test1->when) {
+	return NO_ERR;
+    }
+
+    if (test2->when) {
+	if (!xml_strcmp(test1->when->exprstr,
+			test2->when->exprstr)) {
+	    return NO_ERR;
+	}
+    }
+	
+    if (test2->usesobj && test2->usesobj->when) {
+	if (!xml_strcmp(test1->when->exprstr,
+			test2->usesobj->when->exprstr)) {
+	    return NO_ERR;
+	}
+    }
+	
+    if (test2->augobj && test2->augobj->when) {
+	if (!xml_strcmp(test1->when->exprstr,
+			test2->augobj->when->exprstr)) {
+	    return NO_ERR;
+	}
+    }
+
+    log_error("\nError: when-stmt '%s' not in affect "
+	      "for list %s",
+	      test1->when, obj_get_name(test2));
+    tkc->cur = test1->when->tk;
+    ncx_print_errormsg(tkc, mod, ERR_NCX_INVALID_CONDITIONAL);
+
+    return ERR_NCX_INVALID_CONDITIONAL;
+				    
+}  /* check_one_conditional_mismatch */
+
+
+/********************************************************************
+* FUNCTION check_conditional_mismatch
+* 
+* Check the child object against the ancestor node to see
+* if any child conditionals are present that are not
+* present in the path to the ancestor.  Treat this
+* as an error
+*
+* Do not call for every node!
+*    - (parent-list, key-leaf)
+*    - (unique-list, unique-node)
+*    - (parent-choice, default-case)
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   ancestor == ancestor node of child to compare against
+*               and stop the check
+*   child == child object to check
+* 
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    check_conditional_mismatch (tk_chain_t *tkc,
+				ncx_module_t  *mod,
+				obj_template_t *ancestor,
+				obj_template_t *child)
+{
+    obj_template_t   *testobj;
+    ncx_iffeature_t  *iff;
+    status_t          res, retres;
+    boolean           done;
+
+    retres = NO_ERR;
+
+    testobj = child->parent;
+    if (!testobj) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (ancestor->objtype==OBJ_TYP_CHOICE && 
+	child->objtype==OBJ_TYP_CASE) {
+
+
+    } else {
+	/* make sure that the child node does not introduce
+	 * any if-features that are not in the ancestor node
+	 */
+	testobj = child;
+	done = FALSE;
+
+	/* go up the tree from the child to the level before
+	 * the ancestor
+	 */
+	while (!done) {
+	    /* check all possible when clauses in the testobj
+	     * against the ancestor node
+	     */
+	    res = check_one_when_mismatch(tkc, mod, 
+					  testobj,
+					  ancestor);
+	    CHK_EXIT;
+
+	    if (testobj->usesobj) {
+		res = check_one_when_mismatch(tkc, mod, 
+					      testobj->usesobj,
+					      ancestor);
+		CHK_EXIT;
+	    }
+
+	    if (testobj->augobj) {
+		res = check_one_when_mismatch(tkc, mod, 
+					      testobj->augobj,
+					      ancestor);
+		CHK_EXIT;
+	    }
+
+	    /* check all the if-features in the testnode
+	     * against the ones in the ancestor;
+	     * a missing if-feature in the ancestor is an error
+	     */
+	    for (iff = (ncx_iffeature_t *)
+		     dlq_firstEntry(&testobj->iffeatureQ);
+		 iff != NULL;
+		 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+
+		res = check_iffeature_mismatch(tkc, mod, ancestor,
+					       testobj, iff);
+		CHK_EXIT;
+	    }
+
+
+	    /* check any extra if-features from the uses object */
+	    if (testobj->usesobj) {
+		for (iff = (ncx_iffeature_t *)
+			 dlq_firstEntry(&testobj->usesobj->iffeatureQ);
+		     iff != NULL;
+		     iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+
+		    if (!ncx_find_iffeature(&testobj->iffeatureQ,
+					    iff->prefix,
+					    iff->name,
+					    mod->prefix)) {
+
+			res = check_iffeature_mismatch(tkc, mod, ancestor,
+						       testobj, iff);
+			CHK_EXIT;
+		    }
+		}
+	    }
+
+	    /* check any extra if-features from the augment object */
+	    if (testobj->augobj) {
+		for (iff = (ncx_iffeature_t *)
+			 dlq_firstEntry(&testobj->augobj->iffeatureQ);
+		     iff != NULL;
+		     iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+
+		    if (!ncx_find_iffeature(&testobj->iffeatureQ,
+					    iff->prefix,
+					    iff->name,
+					    mod->prefix)) {
+
+			res = check_iffeature_mismatch(tkc, mod, ancestor,
+						       testobj, iff);
+			CHK_EXIT;
+		    }
+		}
+	    }
+
+	    testobj = testobj->parent;
+	    if (!testobj) {
+		return SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	    if (testobj == ancestor) {
+		done = TRUE;
+	    }
+	}
+    }
+
+    return retres;
+				    
+}  /* check_conditional_mismatch */
+
+
 /************   E X T E R N A L   F U N C T I O N S   ***************/
 
 
@@ -5590,6 +5818,9 @@ status_t
 	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
 	res = ncx_resolve_appinfoQ(tkc, mod, &testobj->appinfoQ);
+	CHK_EXIT;
+
+	res = resolve_iffeatureQ(tkc, mod, testobj);
 	CHK_EXIT;
 
 	switch (testobj->objtype) {
@@ -6051,10 +6282,13 @@ status_t
 			    ncx_module_t  *mod,
 			    dlq_hdr_t *datadefQ)
 {
-    obj_template_t  *testobj;
-    typ_def_t       *typdef;
-    xpath_pcb_t     *pcb;
-    status_t         res, retres;
+    obj_template_t     *testobj;
+    obj_key_t          *key;
+    const obj_unique_t *uniq;
+    obj_unique_comp_t  *uncomp;
+    typ_def_t          *typdef;
+    xpath_pcb_t        *pcb;
+    status_t            res, retres;
 
 #ifdef DEBUG
     if (!tkc || !mod || !datadefQ) {
@@ -6075,10 +6309,22 @@ status_t
 	    continue;
 	}
 	
+	if (testobj->when) {
+	    /****/;
+	}
+
+	if (testobj->usesobj && testobj->usesobj->when) {
+	    /****/;
+	}
+
+	if (testobj->augobj && testobj->augobj->when) {
+	    /****/;
+	}
+
+	
 	switch (testobj->objtype) {
 	case OBJ_TYP_CONTAINER:
-	    /* check container node */
-
+	    /* check container must-stmts */
 
 	    /* check container children */
 	    res = 
@@ -6089,18 +6335,56 @@ status_t
 	case OBJ_TYP_LEAF_LIST:
 	    if (obj_get_basetype(testobj) == NCX_BT_KEYREF) {
 #ifdef YANG_OBJ_DEBUG
-	log_debug3("\nresolve_xpath: mod %s, object %s, on line %u",
-		   mod->name, obj_get_name(testobj), testobj->linenum);
+		log_debug3("\nresolve_xpath: mod %s, object %s, on line %u",
+			   mod->name, obj_get_name(testobj), 
+			   testobj->linenum);
 #endif
 
 		typdef = obj_get_typdef(testobj);
 		pcb = typ_get_keyref_pcb(typdef);
 		res = xpath_keyref_validate_path(mod, testobj, pcb);
 	    }
+
+	    /* check leaf or leaf-list must-stmts */
+
 	    break;
 	case OBJ_TYP_LIST:
-	    /* check list node */
+	    /* check the list must-stmts */
 
+	    /* check that none of the key leafs have more
+	     * conditionals than their list parent
+	     */
+	    for (key = obj_first_key(testobj);
+		 key != NULL;
+		 key = obj_next_key(key)) {
+
+		if (key->keyobj) {
+		    res = check_conditional_mismatch(tkc, mod,
+						     testobj,
+						     key->keyobj);
+		    CHK_EXIT;
+		}
+	    }
+
+	    /* check that none of the unique set leafs have more
+	     * conditionals than their list parent
+	     */
+	    for (uniq = obj_first_unique(testobj);
+		 uniq != NULL;
+		 uniq = obj_next_unique(uniq)) {
+
+		for (uncomp = obj_first_unique_comp(uniq);
+		     uncomp != NULL;
+		     uncomp = obj_next_unique_comp(uncomp)) {
+
+		    if (uncomp->unobj) {
+			res = check_conditional_mismatch(tkc, mod,
+							 testobj,
+							 uncomp->unobj);
+			CHK_EXIT;
+		    }
+		}
+	    }
 
 	    /* check list children */
 	    res = yang_obj_resolve_xpath(tkc, mod, 
@@ -6134,7 +6418,7 @@ status_t
 	CHK_EXIT;
     }
 
-    return retres;
+	return retres;
 
 }  /* yang_obj_resolve_xpath */
 

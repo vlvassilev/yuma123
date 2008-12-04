@@ -146,6 +146,8 @@ date	     init     comment
 /* object mandatory value */
 #define OBJ_FL_MANDATORY    bit19
 
+/* object used in a unique-stmt within a list */
+#define OBJ_FL_UNIQUE       bit20
 
 
 /********************************************************************
@@ -376,15 +378,18 @@ typedef struct obj_template_t_ {
     ncx_module_t  *mod;            /* mod or submod containing obj */
     tk_token_t    *tk;             /* tk valid only during parsing */
     grp_template_t *grp;          /* non-NULL == in a grp.datadefQ */
+
+    /* 4 back pointers */
     struct obj_template_t_ *parent;
     struct obj_template_t_ *usesobj;
+    struct obj_template_t_ *augobj;
     struct xpath_pcb_t_    *when;           /* optional when clause */
-    struct xpath_pcb_t_    *augwhen;    /* back-ptr to augment when */
-    struct xpath_pcb_t_    *usewhen;       /* back-ptr to uses when */
     dlq_hdr_t               metadataQ;       /* Q of obj_metadata_t */
+    dlq_hdr_t               appinfoQ;         /* Q of ncx_appinfo_t */
+    dlq_hdr_t               iffeatureQ;     /* Q of ncx_iffeature_t */
       /* cbset is agt_rpc_cbset_t for RPC or agt_cb_fnset_t for OBJ */
     void                   *cbset;   
-    dlq_hdr_t               appinfoQ;         /* Q of ncx_appinfo_t */
+
     union def_ {
 	obj_container_t   *container;
 	obj_leaf_t        *leaf;
@@ -573,6 +578,12 @@ extern const obj_unique_t *
 
 extern const obj_unique_t *
     obj_next_unique (const obj_unique_t *un);
+
+extern obj_unique_comp_t *
+    obj_first_unique_comp (const obj_unique_t *un);
+
+extern obj_unique_comp_t *
+    obj_next_unique_comp (obj_unique_comp_t *uncomp);
 
 /********************    obj_key_t   ********************/
 extern obj_key_t *

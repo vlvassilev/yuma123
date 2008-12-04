@@ -1134,6 +1134,7 @@ xpath_pcb_t *
     newpcb->mod = srcpcb->mod;
     newpcb->source = srcpcb->source;
     newpcb->functions = srcpcb->functions;
+    newpcb->tk = srcpcb->tk;
 
     return newpcb;
 

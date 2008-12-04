@@ -248,6 +248,20 @@ extern status_t
 		       dlq_hdr_t *mustQ,
 		       dlq_hdr_t *appinfoQ);
 
+/* consume one when-stmt into obj->when */
+extern status_t
+    yang_consume_when (tk_chain_t  *tkc,
+		       ncx_module_t *mod,
+		       obj_template_t *obj,
+		       boolean        *whenflag);
+
+/* consume one if-feature-stmt into iffeatureQ */
+extern status_t
+    yang_consume_iffeature (tk_chain_t *tkc,
+			    ncx_module_t *mod,
+			    dlq_hdr_t *iffeatureQ,
+			    dlq_hdr_t *appinfoQ);
+
 /* consume one boolean clause */
 extern status_t 
     yang_consume_boolean (tk_chain_t  *tkc,
@@ -299,6 +313,14 @@ extern status_t
 			     tk_token_t *errtk,
 			     ext_template_t **ext);
 
+
+extern status_t 
+    yang_find_imp_feature (tk_chain_t  *tkc,
+			   ncx_module_t *mod,
+			   const xmlChar *prefix,
+			   const xmlChar *name,
+			   tk_token_t *errtk,
+			   ncx_feature_t **feature);
 
 /* generate warnings if local typedefs/groupings not used */
 extern void

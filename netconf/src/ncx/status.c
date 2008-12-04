@@ -570,6 +570,8 @@ const char *
 	return "missing instance for insert operation";
     case ERR_NCX_NOT_CONFIG:
 	return "object not config";
+    case ERR_NCX_INVALID_CONDITIONAL:
+	return "invalid conditional object";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:
@@ -624,6 +626,8 @@ const char *
 	return "invalid status for child node";
     case ERR_NCX_DUP_AUGNODE:
 	return "duplicate sibling node name from external augment";
+    case ERR_NCX_DUP_IF_FEATURE:
+	return "duplicate if-feature statement";
 
     /* system info codes start at 500 */
     case ERR_PARS_SECDONE:

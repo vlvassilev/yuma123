@@ -158,6 +158,7 @@ static obj_template_t *
     (void)memset(obj, 0x0, sizeof(obj_template_t));
     dlq_createSQue(&obj->metadataQ);
     dlq_createSQue(&obj->appinfoQ);
+    dlq_createSQue(&obj->iffeatureQ);
     return obj;
 
 }  /* new_blank_template */
@@ -2233,8 +2234,9 @@ obj_template_t *
 
     (void)memset(obj, 0x0, sizeof(obj_template_t));
     obj->objtype = objtype;
-    dlq_createSQue(&obj->appinfoQ);
     dlq_createSQue(&obj->metadataQ);
+    dlq_createSQue(&obj->appinfoQ);
+    dlq_createSQue(&obj->iffeatureQ);
     
     switch (objtype) {
     case OBJ_TYP_CONTAINER:
@@ -2346,8 +2348,9 @@ void
     }
 #endif
 
-    ncx_clean_appinfoQ(&obj->appinfoQ);
     clean_metadataQ(&obj->metadataQ);
+    ncx_clean_appinfoQ(&obj->appinfoQ);
+    ncx_clean_iffeatureQ(&obj->iffeatureQ);
 
     if (obj->when) {
 	xpath_free_pcb(obj->when);
@@ -3887,6 +3890,9 @@ obj_unique_t *
 * 
 * Get the first unique-stmt for a list
 *
+* INPUTS:
+*   listobj == list object to check for unique structs
+*
 * RETURNS:
 *   pointer to found entry or NULL if not found
 *********************************************************************/
@@ -3935,6 +3941,59 @@ const obj_unique_t *
     return (const obj_unique_t *)dlq_nextEntry(un);
 
 }  /* obj_next_unique */
+
+
+/********************************************************************
+* FUNCTION obj_first_unique_comp
+* 
+* Get the first identifier in a unique-stmt for a list
+*
+* INPUTS:
+*   un == unique struct to check
+*
+* RETURNS:
+*   pointer to found entry or NULL if not found
+*********************************************************************/
+obj_unique_comp_t *
+    obj_first_unique_comp (const obj_unique_t *un)
+{
+
+#ifdef DEBUG
+    if (!un) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (obj_unique_comp_t *)dlq_firstEntry(&un->compQ);
+
+}  /* obj_first_unique_comp */
+
+
+/********************************************************************
+* FUNCTION obj_next_unique_comp
+* 
+* Get the next unique-stmt component for a list
+*
+* INPUTS:
+*  uncomp == current unique component node
+*
+* RETURNS:
+*   pointer to next entry or NULL if none
+*********************************************************************/
+obj_unique_comp_t *
+    obj_next_unique_comp (obj_unique_comp_t *uncomp)
+{
+#ifdef DEBUG
+    if (!uncomp) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (obj_unique_comp_t *)dlq_nextEntry(uncomp);
+
+}  /* obj_next_unique_comp */
 
 
 /********************************************************************

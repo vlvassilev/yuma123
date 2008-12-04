@@ -2072,6 +2072,7 @@ static status_t
 			ncx_print_errormsg(tkc, mod, res);
 			return res;
 		    } else {
+			sim->xkeyref->tk = TK_CUR(tkc);
 			res = xpath_keyref_parse_path(tkc, mod, 
 						      sim->xkeyref);
 			if (res != NO_ERR) {

@@ -1097,6 +1097,7 @@ status_t
 	return res;
     }
 
+    must->tk = TK_CUR(tkc);
     retres = NO_ERR;
     expstr = "Xpath expression string";
     done = FALSE;
@@ -1228,6 +1229,166 @@ status_t
     return retres;
 
 }  /* yang_consume_must */
+
+
+
+/********************************************************************
+* FUNCTION yang_consume_when
+* 
+* Parse the when statement
+*
+* Current token is the 'when' keyword
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   obj    == obj_template_t of the parent object of this 'when'
+*   whenflag == address of boolean set-once flag for the when-stmt
+*               an error will be generated if the value passed
+*               in is TRUE.  Set the initial value to FALSE
+*               before first call, and do not change it after that
+* OUTPUTS:
+*   obj->when malloced and dilled in
+*   *whenflag set if not set already
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t
+    yang_consume_when (tk_chain_t  *tkc,
+		       ncx_module_t *mod,
+		       obj_template_t *obj,
+		       boolean        *whenflag)
+{
+    tk_token_t    *savetk;
+    xmlChar       *str;
+    status_t       res;
+
+#ifdef DEBUG
+    if (!tkc || !mod || !obj || !whenflag) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    savetk = TK_CUR(tkc);
+
+    res = yang_consume_strclause(tkc, mod, &str,
+				 whenflag, &obj->appinfoQ);
+    if (res == NO_ERR) {
+	obj->when = xpath_new_pcb(NULL);
+	if (!obj->when) {
+	    m__free(str);
+	    res = ERR_INTERNAL_MEM;
+	    ncx_print_errormsg(tkc, mod, res);
+	} else {
+	    obj->when->exprstr = str;
+	    obj->when->tk = savetk;
+	}
+	str = NULL;
+
+	if (res == NO_ERR) {
+	    res = xpath1_parse_expr(tkc, mod, obj->when,
+				    XP_SRC_WHEN);
+	}
+    }
+
+    return res;
+
+} /* yang_consume_when */
+
+
+/********************************************************************
+* FUNCTION yang_consume_iffeature
+* 
+* Parse the if-feature statement
+*
+* Current token is the 'if-feature' keyword
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   iffeatureQ  == Q of ncx_iffeature_t to hold the new if-feature
+*   appinfoQ  == queue to store appinfo (extension usage)
+*
+* OUTPUTS:
+*   ncx_iffeature_t malloced and added to iffeatureQ
+*   maybe ncx_appinfo_t structs added to appinfoQ
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t
+    yang_consume_iffeature (tk_chain_t *tkc,
+			    ncx_module_t *mod,
+			    dlq_hdr_t *iffeatureQ,
+			    dlq_hdr_t *appinfoQ)
+{
+    ncx_iffeature_t  *iff;
+    xmlChar          *prefix, *name;
+    status_t          res, res2;
+    
+#ifdef DEBUG
+    if (!tkc || !mod || !iffeatureQ || !appinfoQ) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    prefix = NULL;
+    name = NULL;
+
+    res = yang_consume_pid_string(tkc, mod, &prefix, &name);
+    if (res == NO_ERR) {
+	/* check if this if if-feature already entered warning */
+	iff = ncx_find_iffeature(iffeatureQ,
+				 prefix, name,
+				 mod->prefix);
+	if (iff) {
+	    log_warn("\nWarning: if-feature '%s%s%s' "
+		     "already specified on line %u",
+		     (prefix) ? prefix : (const xmlChar *)"",
+		     (prefix) ? ":" :  "", name,
+		     iff->tk->linenum);
+	    ncx_print_errormsg(tkc, mod, ERR_NCX_DUP_IF_FEATURE);
+
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    m__free(name);
+	} else {
+	    /* not found so add it to the if-feature Q */
+	    iff = ncx_new_iffeature();
+	    if (!iff) {
+		res = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, res);
+		if (prefix) {
+		    m__free(prefix);
+		}
+		m__free(name);
+	    } else {
+		/* transfer malloced fields */
+		iff->prefix = prefix;
+		iff->name = name;
+		iff->tk = TK_CUR(tkc);
+		dlq_enque(iff, iffeatureQ);
+	    }
+	}
+    }
+
+    /* get the closing semi-colon even if previous error */
+    res2 = yang_consume_semiapp(tkc, mod, appinfoQ);
+    if (res == NO_ERR) {
+	res = res2;
+    }
+
+    return res;
+
+} /* yang_consume_iffeature */
 
 
 /********************************************************************
@@ -1739,6 +1900,107 @@ status_t
     return res;
 
 }  /* yang_find_imp_extension */
+
+
+/********************************************************************
+* FUNCTION yang_find_imp_feature
+* 
+* Find the specified imported feature
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   prefix  == prefix value to use
+*   name == feature name to use
+*   errtk == token to use in error messages (may be NULL)
+*   feature  == address of return ncx_feature_t pointer
+*
+* OUTPUTS:
+*   *feature set to the found ncx_feature_t, if NO_ERR
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_find_imp_feature (tk_chain_t  *tkc,
+			   ncx_module_t *mod,
+			   const xmlChar *prefix,
+			   const xmlChar *name,
+			   tk_token_t *errtk,
+			   ncx_feature_t **feature)
+{
+    ncx_import_t   *imp;
+    ncx_module_t   *imod;
+    tk_token_t     *savetk;
+    status_t        res, retres;
+
+#ifdef DEBUG
+    if (!tkc || !mod || !prefix || !name || !feature) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    imod = NULL;
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    imp = ncx_find_pre_import(mod, prefix);
+    if (!imp) {
+	res = ERR_NCX_PREFIX_NOT_FOUND;
+	log_error("\nError: import for prefix '%s' not found", prefix);
+    } else {
+	/* First find or load the module */
+	if (mod->diffmode) {
+	    imod = ncx_find_module(imp->module);
+	} else {
+	    imod = def_reg_find_module(imp->module);
+	}
+	if (!imod) {
+	    res = ncxmod_load_module(imp->module);
+	    CHK_EXIT;
+
+	    /* try again to find the module; should not fail */
+	    if (mod->diffmode) {
+		imod = ncx_find_module(imp->module);
+	    } else {
+		imod = def_reg_find_module(imp->module);
+	    }
+	    if (!imod) {
+		log_error("\nError: failure importing module '%s'",
+			  imp->module);
+		res = ERR_NCX_DEF_NOT_FOUND;
+	    }
+	}
+
+	/* found import OK, look up imported extension definition */
+	if (imod) {
+	    *feature = ncx_find_feature(imod, name);
+	    if (!*feature) {
+		res = ERR_NCX_DEF_NOT_FOUND;
+		log_error("\nError: feature definition for '%s:%s' not found"
+			  " in module %s", 
+			  prefix, name, imp->module);
+	    } else {
+		return NO_ERR;
+	    }
+	}
+    }
+
+    if (errtk) {
+	savetk = tkc->cur;
+	tkc->cur = errtk;
+	ncx_print_errormsg(tkc, mod, res);
+	tkc->cur = savetk;
+    } else {
+	ncx_print_errormsg(tkc, mod, res);
+    }
+
+    return res;
+
+}  /* yang_find_imp_feature */
 
 
 /********************************************************************
@@ -2577,6 +2839,10 @@ boolean
     if (!xml_strcmp(keyword, YANG_K_EXTENSION)) {
 	return TRUE;
     }
+    if (!xml_strcmp(keyword, YANG_K_FEATURE)) {
+	return TRUE;
+    }
+
     return FALSE;
 
 }  /* yang_top_keyword */

@@ -615,6 +615,7 @@ static void
     ncx_revhist_t  *revhist;
     ncx_import_t   *import;
     ncx_include_t  *incl;
+    ncx_feature_t  *feature;
     typ_template_t *typ;
     grp_template_t *grp;
     obj_template_t *obj;
@@ -694,6 +695,12 @@ static void
 	yang_free_stmt(stmt);
     }
 
+    /* clear the YANG featureQ */
+    while (!dlq_empty(&mod->featureQ)) {
+	feature = (ncx_feature_t *)dlq_deque(&mod->featureQ);
+	ncx_free_feature(feature);
+    }
+
     /* clear the name and other fields last for easier debugging */
     if (mod->name) {
 	m__free(mod->name);
@@ -732,6 +739,72 @@ static void
     m__free(mod);
 
 }  /* free_module */
+
+
+/********************************************************************
+* FUNCTION check_feature_loop
+* 
+* Validate all the if-feature clauses present in 
+* the specified feature, after all if-features have
+* been resolved (or at least attempted)
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == ncx_module_t in progress
+*   feature == ncx_feature_t to check now
+*   startfeature == feature that started this off, so if this
+*                   is reached again, it will trigger an error
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    check_feature_loop (tk_chain_t *tkc,
+			ncx_module_t  *mod,
+			ncx_feature_t *feature,
+			ncx_feature_t *startfeature)
+{
+    ncx_iffeature_t  *iff;
+    status_t          res, retres;
+
+    retres = NO_ERR;
+
+    /* check if there are any if-feature statements inside
+     * this feature that need to be resolved
+     */
+    for (iff = (ncx_iffeature_t *)
+	     dlq_firstEntry(&feature->iffeatureQ);
+	 iff != NULL;
+	 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+
+	if (!iff->feature) {
+	    continue;
+	}
+
+	if (iff->feature == startfeature) {
+	    retres = res = ERR_NCX_DEF_LOOP;
+	    startfeature->res = res;
+	    log_error("\nError: if-feature loop detected for '%s' "
+		      "in feature '%s'",
+		      startfeature->name,
+		      feature->name);
+	    tkc->cur = startfeature->tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	} else if (iff->feature->res != ERR_NCX_DEF_LOOP) {
+	    res = check_feature_loop(tkc, mod, iff->feature,
+				     startfeature);
+	    if (res != NO_ERR) {
+		retres = res;
+	    }
+	}
+    }
+
+    return retres;
+
+}  /* check_feature_loop */
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -1021,6 +1094,7 @@ ncx_module_t *
     dlq_createSQue(&mod->saveimpQ);
     dlq_createSQue(&mod->saveincQ);
     dlq_createSQue(&mod->stmtQ);
+    dlq_createSQue(&mod->featureQ);
     return mod;
 
 }  /* ncx_new_module */
@@ -5358,6 +5432,442 @@ status_t
 
 
 /********************************************************************
+* FUNCTION ncx_new_iffeature
+* 
+* Get a new ncx_iffeature_t struct
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    pointer to a malloced ncx_iffeature_t struct,
+*    or NULL if malloc error
+*********************************************************************/
+ncx_iffeature_t *
+    ncx_new_iffeature (void)
+{
+    ncx_iffeature_t *iff;
+
+    iff = m__getObj(ncx_iffeature_t);
+    if (!iff) {
+	return NULL;
+    }
+    memset (iff, 0x0, sizeof(ncx_iffeature_t));
+
+    return iff;
+
+} /* ncx_new_iffeature */
+
+
+/********************************************************************
+* FUNCTION ncx_free_iffeature
+* 
+* Free a malloced ncx_iffeature_t struct
+*
+* INPUTS:
+*    iff == struct to free
+*
+*********************************************************************/
+void 
+    ncx_free_iffeature (ncx_iffeature_t *iff)
+{
+
+#ifdef DEBUG
+    if (!iff) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (iff->prefix) {
+	m__free(iff->prefix);
+    }
+    if (iff->name) {
+	m__free(iff->name);
+    }
+
+    m__free(iff);
+    
+} /* ncx_free_iffeature */
+
+
+/********************************************************************
+* FUNCTION ncx_clean_iffeatureQ
+* 
+* Clean a Q of malloced ncx_iffeature_t struct
+*
+* INPUTS:
+*    iffeatureQ == address of Q to clean
+*
+*********************************************************************/
+void 
+    ncx_clean_iffeatureQ (dlq_hdr_t *iffeatureQ)
+{
+
+    ncx_iffeature_t  *iff;
+
+#ifdef DEBUG
+    if (!iffeatureQ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    while (!dlq_empty(iffeatureQ)) {
+	iff = (ncx_iffeature_t *)dlq_deque(iffeatureQ);
+	ncx_free_iffeature(iff);
+    }
+    
+} /* ncx_clean_iffeatureQ */
+
+
+/********************************************************************
+* FUNCTION ncx_find_iffeature
+* 
+* Search a Q of ncx_iffeature_t structs for a match
+*
+* INPUTS:
+*    iffeatureQ == address of Q to search
+*    prefix == prefix to check for
+*              a NULL value indicates the current module
+*    name == feature name string to find
+*********************************************************************/
+ncx_iffeature_t *
+    ncx_find_iffeature (dlq_hdr_t *iffeatureQ,
+			const xmlChar *prefix,
+			const xmlChar *name,
+			const xmlChar *modprefix)
+{
+    ncx_iffeature_t  *iff;
+
+#ifdef DEBUG
+    if (!iffeatureQ || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (iff = (ncx_iffeature_t *)
+	     dlq_firstEntry(iffeatureQ);
+	 iff != NULL;
+	 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+
+	/* check if name fields the same */
+	if (iff->name && !xml_strcmp(iff->name, name)) {
+
+	    /* check if prefix fields reference
+	     * different modules, if set or implied
+	     */
+	    if (!ncx_prefix_different(prefix,
+				      iff->prefix,
+				      modprefix)) {
+		return iff;
+	    }
+	}
+    }
+    return NULL;
+    
+} /* ncx_find_iffeature */
+
+
+/********************************************************************
+* FUNCTION ncx_new_feature
+* 
+* Get a new ncx_feature_t struct
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    pointer to a malloced ncx_feature_t struct,
+*    or NULL if malloc error
+*********************************************************************/
+ncx_feature_t *
+    ncx_new_feature (void)
+{
+    ncx_feature_t *feature;
+
+    feature = m__getObj(ncx_feature_t);
+    if (!feature) {
+	return NULL;
+    }
+    memset (feature, 0x0, sizeof(ncx_feature_t));
+
+    dlq_createSQue(&feature->iffeatureQ);
+    dlq_createSQue(&feature->appinfoQ);
+
+    return feature;
+
+} /* ncx_new_feature */
+
+
+/********************************************************************
+* FUNCTION ncx_free_feature
+* 
+* Free a malloced ncx_feature_t struct
+*
+* INPUTS:
+*    feature == struct to free
+*
+*********************************************************************/
+void 
+    ncx_free_feature (ncx_feature_t *feature)
+{
+
+#ifdef DEBUG
+    if (!feature) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (feature->name) {
+	m__free(feature->name);
+    }
+
+    if (feature->descr) {
+	m__free(feature->descr);
+    }
+
+    if (feature->ref) {
+	m__free(feature->ref);
+    }
+
+    ncx_clean_iffeatureQ(&feature->iffeatureQ);
+
+    ncx_clean_appinfoQ(&feature->appinfoQ);
+
+    m__free(feature);
+    
+} /* ncx_free_feature */
+
+
+/********************************************************************
+* FUNCTION ncx_find_feature
+* 
+* Find a ncx_feature_t struct in the module and perhaps
+* any of its submodules
+*
+* INPUTS:
+*    mod == module to search
+*    name == feature name to find
+*
+* RETURNS:
+*    pointer to found feature or NULL if not found
+*********************************************************************/
+ncx_feature_t *
+    ncx_find_feature (ncx_module_t *mod,
+		      const xmlChar *name)
+{
+    ncx_feature_t  *feature;
+    dlq_hdr_t      *que;
+    yang_node_t    *node;
+    ncx_include_t  *inc;
+
+#ifdef DEBUG
+    if (!mod || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    feature = ncx_find_feature_que(&mod->featureQ, name);
+    if (feature) {
+	return feature;
+    }
+
+    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+
+    /* check all the submodules, but only the ones visible
+     * to this module or submodule, YANG only
+     */
+    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+	 inc != NULL;
+	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+
+	/* get the real submodule struct */
+	if (!inc->submod) {
+	    node = yang_find_node(que, inc->submodule);
+	    if (node) {
+		inc->submod = node->submod;
+	    }
+	    if (!inc->submod) {
+		/* include not found, should not be in Q !!! */
+		SET_ERROR(ERR_INTERNAL_VAL);
+		continue;
+	    }
+	}
+
+	/* check the type Q in this submodule */
+	feature = ncx_find_feature_que(&inc->submod->featureQ, name);
+	if (feature) {
+	    return feature;
+	}
+    }
+
+    return NULL;
+
+} /* ncx_find_feature */
+
+
+/********************************************************************
+* FUNCTION ncx_find_feature_que
+* 
+* Find a ncx_feature_t struct in the specified Q
+*
+* INPUTS:
+*    featureQ == Q of ncx_feature_t to search
+*    name == feature name to find
+*
+* RETURNS:
+*    pointer to found feature or NULL if not found
+*********************************************************************/
+ncx_feature_t *
+    ncx_find_feature_que (dlq_hdr_t *featureQ,
+			  const xmlChar *name)
+{
+    ncx_feature_t *feature;
+
+#ifdef DEBUG
+    if (!featureQ || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (feature = (ncx_feature_t *)dlq_firstEntry(featureQ);
+	 feature != NULL;
+	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
+
+	if (!xml_strcmp(feature->name, name)) {
+	    return feature;
+	}
+    }
+    return NULL;
+	 
+} /* ncx_find_feature_que */
+
+
+/********************************************************************
+* FUNCTION ncx_resolve_feature
+* 
+* Validate all the if-feature clauses present in 
+* the specified feature
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == ncx_module_t in progress
+*   feature == ncx_feature_t to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    ncx_resolve_feature (tk_chain_t *tkc,
+			 ncx_module_t  *mod,
+			 ncx_feature_t *feature)
+{
+    ncx_feature_t    *testfeature;
+    ncx_iffeature_t  *iff;
+    status_t          res, retres;
+    boolean           errdone;
+
+#ifdef DEBUG
+    if (!tkc || !mod || !feature) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    retres = NO_ERR;
+
+    /* check if there are any if-feature statements inside
+     * this feature that need to be resolved
+     */
+    for (iff = (ncx_iffeature_t *)
+	     dlq_firstEntry(&feature->iffeatureQ);
+	 iff != NULL;
+	 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+
+	testfeature = NULL;
+	errdone = FALSE;
+	res = NO_ERR;
+
+	if (iff->prefix &&
+	    xml_strcmp(iff->prefix, mod->prefix)) {
+	    /* find the feature in another module */
+	    res = yang_find_imp_feature(tkc, mod, iff->prefix,
+					iff->name, iff->tk,
+					&testfeature);
+	    if (res != NO_ERR) {
+		retres = res;
+		errdone = TRUE;
+	    }
+	} else if (!xml_strcmp(iff->name, feature->name)) {
+	    /* error: if-feature foo inside feature foo */
+	    res = retres = ERR_NCX_DEF_LOOP;
+	    log_error("\nError: 'if-feature %s' inside feature '%s'",
+		      iff->name, iff->name);
+	    tkc->cur = iff->tk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	    errdone = TRUE;
+	} else {
+	    testfeature = ncx_find_feature(mod, iff->name);
+	}
+
+	if (!testfeature && !errdone) {
+	    log_error("\nError: Feature '%s' not found "
+		      "for if-feature statement",
+		      iff->name);
+	    res = retres = ERR_NCX_DEF_NOT_FOUND;
+	    tkc->cur = iff->tk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+
+	if (testfeature) {
+	    iff->feature = testfeature;
+	}
+    }
+
+    return retres;
+
+}  /* ncx_resolve_feature */
+
+
+/********************************************************************
+* FUNCTION ncx_resolve_feature_final
+* 
+* Validate all the if-feature clauses present in 
+* the specified feature, after all if-features have
+* been resolved (or at least attempted)
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == ncx_module_t in progress
+*   feature == ncx_feature_t to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    ncx_resolve_feature_final (tk_chain_t *tkc,
+			       ncx_module_t  *mod,
+			       ncx_feature_t *feature)
+{
+#ifdef DEBUG
+    if (!tkc || !mod || !feature) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+    return check_feature_loop(tkc, mod, feature, feature);
+
+}  /* ncx_resolve_feature_final */
+
+
+/********************************************************************
 * FUNCTION ncx_new_filptr
 * 
 * Get a new ncx_filptr_t struct
@@ -6529,10 +7039,61 @@ void
 		     status_t result,
 		     const char *expstr)
 {
+    const char *gotval;
+    tk_type_t   tktyp;
+    boolean     skip, done;
+    uint32      skipcount;
+    status_t    res;
+
     ncx_print_errormsg_ex(tkc, mod, result, NULL, 0,
 			  (expstr) ? FALSE : TRUE);
-    if (expstr) {
-	log_write("  Expected: %s\n", expstr);
+
+    skip = FALSE;
+    tktyp = TK_CUR_TYP(tkc);
+
+    if (tktyp == TK_TT_NONE) {
+	gotval = NULL;
+    } else if (TK_CUR_TYP(tkc)==TK_TT_TSTRING || TK_CUR_NUM(tkc)) {
+	gotval = (const char *)TK_CUR_VAL(tkc);
+    } else if (TK_CUR_TYP(tkc) == TK_TT_LBRACE) {
+	gotval = "left brace, skipping to closing right brace";
+	skip = TRUE;
+    } else {
+	gotval = tk_get_token_name(tktyp);
+    }
+
+    if (LOGERROR) {
+	if (gotval && expstr) {
+	    log_write("  Got '%s', Expected: %s\n", gotval, expstr);
+	} else if (expstr) {
+	    log_write("  Expected: %s\n", expstr);
+	}
+    }
+
+    if (skip) {
+	/* got an unexpected left brace, so skip to the
+	 * end of this unknown section to resynch;
+	 * otherwise the first unknown closing right brace
+	 * will end the parent section, which causes
+	 * a false 'unexpected EOF' error
+	 */
+	skipcount = 1;
+	done = FALSE;
+	res = NO_ERR;
+	while (!done && res == NO_ERR) {
+	    res = TK_ADV(tkc);
+	    if (res == NO_ERR) {
+		tktyp = TK_CUR_TYP(tkc);
+		if (tktyp == TK_TT_LBRACE) {
+		    skipcount++;
+		} else if (tktyp == TK_TT_RBRACE) {
+		    skipcount--;
+		}
+		if (!skipcount) {
+		    done = TRUE;
+		}
+	    }
+	}
     }
 
 }  /* ncx_mod_exp_err */
@@ -7697,6 +8258,43 @@ void
     mod_load_callback = cbfn;
 
 }  /* ncx_set_load_callback */
+
+
+
+/********************************************************************
+* FUNCTION ncx_prefix_different
+* 
+* Check if the specified prefix pair reference different modules
+* 
+* INPUT:
+*   prefix1 == 1st prefix to check (may be NULL)
+*   prefix2 == 2nd prefix to check (may be NULL)
+*   modprefix == module prefix to check (may be NULL)
+*
+* RETURNS:
+*   TRUE if prefix1 and prefix2 reference different modules
+*   FALSE if prefix1 and prefix2 reference the same modules
+*********************************************************************/
+boolean
+    ncx_prefix_different (const xmlChar *prefix1,
+			  const xmlChar *prefix2,
+			  const xmlChar *modprefix)
+{
+    if (!prefix1) {
+	prefix1 = modprefix;
+    }
+    if (!prefix2) {
+	prefix2 = modprefix;
+    }
+    if (prefix1 == prefix2) {
+	return FALSE;
+    }
+    if (!prefix1 || !prefix2) {
+	return TRUE;
+    }
+    return (xml_strcmp(prefix1, prefix2)) ? TRUE : FALSE;
+
+}  /* ncx_prefix_different */
 
 
 /* END file ncx.c */

@@ -138,10 +138,10 @@ date         init     comment
 
 
 /********************************************************************
-* FUNCTION resolve_iappinfo
+* FUNCTION resolve_mod_appinfo
 * 
 * Validate the ncx_appinfo_t (extension usage) within
-* the includes and imports clauses for this module
+* the include, import, and feature clauses for this module
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -154,11 +154,12 @@ date         init     comment
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_iappinfo (tk_chain_t  *tkc,
-		      ncx_module_t *mod)
+    resolve_mod_appinfo (tk_chain_t  *tkc,
+			 ncx_module_t *mod)
 {
     ncx_import_t    *imp;
     ncx_include_t   *inc;
+    ncx_feature_t   *feature;
     status_t         res, retres;
 
     retres = NO_ERR;
@@ -179,9 +180,17 @@ static status_t
 	CHK_EXIT;
     }
 
+    for (feature = (ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
+	 feature != NULL;
+	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
+
+	res = ncx_resolve_appinfoQ(tkc, mod, &feature->appinfoQ);
+	CHK_EXIT;
+    }
+
     return retres;
 
-}  /* resolve_iappinfo */
+}  /* resolve_mod_appinfo */
 
 
 /********************************************************************
@@ -447,6 +456,176 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION consume_feature
+* 
+* Parse the next N tokens as a feature statement
+* Create an ncx_feature_t struct and add it to the
+* module or submodule featureQ
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'belongs-to' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod   == module struct that will get updated
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    consume_feature (tk_chain_t *tkc,
+		     ncx_module_t  *mod)
+{
+    const xmlChar      *val;
+    const char         *expstr;
+    ncx_feature_t      *feature, *testfeature;
+    tk_type_t           tktyp;
+    boolean             done, stat, desc, ref, keep;
+    status_t            res, retres;
+
+    val = NULL;
+    expstr = "feature name";
+    done = FALSE;
+    stat = FALSE;
+    desc = FALSE;
+    ref = FALSE;
+    keep = TRUE;
+    retres = NO_ERR;
+
+    feature = ncx_new_feature();
+    if (!feature) {
+	res = ERR_INTERNAL_MEM;
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+    feature->tk = TK_CUR(tkc);
+
+    /* Get the mandatory feature name */
+    res = yang_consume_id_string(tkc, mod, &feature->name);
+    if (res != NO_ERR) {
+	/* do not keep -- must have a name field */
+	retres = res;
+	keep = FALSE;
+    }
+	
+    /* Get the starting left brace for the sub-clauses
+     * or a semi-colon to end the feature statement
+     */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	ncx_free_feature(feature);
+	return res;
+    }
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+	done = TRUE;
+	break;
+    case TK_TT_LBRACE:
+	break;
+    default:
+	retres = ERR_NCX_WRONG_TKTYPE;
+	expstr = "semi-colon or left brace";
+	ncx_mod_exp_err(tkc, mod, retres, expstr);
+	done = TRUE;
+    }
+
+    expstr = "feature sub-statement";
+
+    /* get the prefix clause and any appinfo extensions */
+    while (!done) {
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	    retres = res;
+	    done = TRUE;
+	    continue;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    retres = ERR_NCX_EOF;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    done = TRUE;
+	    continue;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT) {
+		    done = TRUE;
+		}
+	    }
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    yang_skip_statement(tkc, mod);
+	    continue;
+	}
+
+	/* Got a token string so check the value, should be 'prefix' */
+	if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+	    res = yang_consume_iffeature(tkc, mod, 
+					 &feature->iffeatureQ,
+					 &feature->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
+	    res = yang_consume_status(tkc, mod, &feature->status,
+				      &stat, &feature->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+	    res = yang_consume_descr(tkc, mod, &feature->descr,
+				     &desc, &feature->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+	    res = yang_consume_descr(tkc, mod, &feature->ref,
+				     &ref, &feature->appinfoQ);
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    yang_skip_statement(tkc, mod);
+	    continue;
+	}
+	if (res != NO_ERR) {
+	    retres = res;
+	    if (NEED_EXIT) {
+		done = TRUE;
+	    }
+	}
+    }
+
+    /* check if feature already exists in this module */
+    if (keep) {
+	testfeature = ncx_find_feature(mod, feature->name);
+	if (testfeature) {
+	    retres = ERR_NCX_DUP_ENTRY;
+	    log_error("\nError: feature '%s' already defined "
+		      "in this module", feature->name);
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+	feature->res = retres;
+	dlq_enque(feature, &mod->featureQ);
+    } else {
+	ncx_free_feature(feature);
+    }
+
+    return retres;
+
+}  /* consume_feature */
+
+
+/********************************************************************
 * FUNCTION consume_submod_hdr
 * 
 * Parse the sub-module header statements
@@ -568,8 +747,6 @@ static status_t
     return retres;
 
 }  /* consume_submod_hdr */
-
-
 
 
 /********************************************************************
@@ -1703,6 +1880,8 @@ static status_t
 	 */
         if (!xml_strcmp(val, YANG_K_EXTENSION)) {
 	    res = yang_ext_consume_extension(tkc, mod);
+	} else if (!xml_strcmp(val, YANG_K_FEATURE)) {
+	    res = consume_feature(tkc, mod);
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
 	    res = yang_typ_consume_typedef(tkc, mod, &mod->typeQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
@@ -1763,6 +1942,7 @@ static status_t
 		       boolean *wasadded)
 {
     yang_node_t   *node;
+    ncx_feature_t *feature;
     boolean        ismain, loaded;
     status_t       res, retres;
 
@@ -1906,15 +2086,33 @@ static status_t
 
     /**************** Module Validation *************************/
 
-    /* check all the module level extension statements */
+    /* check all the module level extension usage */
     res = ncx_resolve_appinfoQ(tkc, mod, &mod->appinfoQ);
     CHK_EXIT;
 
-    /* check all the module level extension statements
-     * within the include and import statements
+    /* check all the module level extension usage
+     * within the include, import, and feature statements
      */
-    res = resolve_iappinfo(tkc, mod);
+    res = resolve_mod_appinfo(tkc, mod);
     CHK_EXIT;
+
+    /* resolve any if-feature statements within the featureQ */
+    for (feature = (ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
+	 feature != NULL;
+	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
+
+	res = ncx_resolve_feature(tkc, mod, feature);
+	CHK_EXIT;
+    }
+
+    /* check for any if-feature loops caused by this module */
+    for (feature = (ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
+	 feature != NULL;
+	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
+
+	res = ncx_resolve_feature_final(tkc, mod, feature);
+	CHK_EXIT;
+    }
 
     /* Validate any module-level typedefs */
     res = yang_typ_resolve_typedefs(tkc, mod, &mod->typeQ, NULL);

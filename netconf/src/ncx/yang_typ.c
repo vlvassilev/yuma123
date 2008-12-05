@@ -2103,6 +2103,99 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION finish_idref_type
+* 
+* Parse the next N tokens as the subsection of a
+* NCX_BT_IDREF type that is being defined
+*
+* Current token is the left brace starting the string
+* sub-section. Continue until right brace or error.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   typdef == typ_def_t in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    finish_idref_type (tk_chain_t  *tkc,
+		       ncx_module_t *mod,
+		       typ_def_t *typdef)
+{
+    typ_simple_t  *sim;
+    const xmlChar *val;
+    const char    *expstr;
+    tk_type_t      tktyp;
+    status_t       res, retres;
+    boolean        done, basedone;
+
+    expstr = "base keyword";
+    basedone = FALSE;
+    res = NO_ERR;
+    retres = NO_ERR;
+    done = FALSE;
+
+    sim = &typdef->def.simple;
+
+    while (!done) {
+
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+	    CHK_EXIT;
+	    continue;
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_BASE)) {
+	    res = yang_consume_pid(tkc, mod,
+				   &sim->idref.baseprefix,
+				   &sim->idref.basename,
+				   &basedone,
+				   &typdef->appinfoQ);
+	    CHK_EXIT;
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+    }
+
+    return retres;
+
+}  /* finish_idref_type */
+
+
+/********************************************************************
 * FUNCTION resolve_minmax
 * 
 * Resolve the min and max keywords in the rangeQ if present
@@ -3188,6 +3281,14 @@ static status_t
 		extonly = TRUE;
 	    } else {
 		res = finish_keyref_type(tkc, mod, typdef);
+		CHK_EXIT;
+	    }
+	    break;
+	case NCX_BT_IDREF:
+	    if (derived) {
+		extonly = TRUE;
+	    } else {
+		res = finish_idref_type(tkc, mod, typdef);
 		CHK_EXIT;
 	    }
 	    break;

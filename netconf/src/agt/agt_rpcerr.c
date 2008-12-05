@@ -445,6 +445,8 @@ static rpc_err_t
 	return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_CONDITIONAL:
 	return RPC_ERR_OPERATION_FAILED;
+    case ERR_NCX_USING_OBSOLETE:
+	return RPC_ERR_OPERATION_FAILED;
 	
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:
@@ -474,6 +476,7 @@ static rpc_err_t
     case ERR_NCX_INVALID_STATUS:
     case ERR_NCX_DUP_AUGNODE:
     case ERR_NCX_DUP_IF_FEATURE:
+    case ERR_NCX_USING_DEPRECATED:
     case ERR_PARS_SECDONE:
     case ERR_NCX_SKIPPED:
     case ERR_NCX_CANCELED:

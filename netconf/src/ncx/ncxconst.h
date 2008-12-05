@@ -413,6 +413,7 @@ date	     init     comment
 #define NCX_EL_HELP            ((const xmlChar *)"help")
 #define NCX_EL_HIDDEN          ((const xmlChar *)"hidden")
 #define NCX_EL_HTML            ((const xmlChar *)"html")
+#define NCX_EL_IDENTITYREF     ((const xmlChar *)"identityref")
 #define NCX_EL_ILLEGAL         ((const xmlChar *)"illegal")
 #define NCX_EL_IMPORT          ((const xmlChar *)"import")
 #define NCX_EL_IMPORTS         ((const xmlChar *)"imports")

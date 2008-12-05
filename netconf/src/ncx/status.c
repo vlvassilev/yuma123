@@ -572,6 +572,8 @@ const char *
 	return "object not config";
     case ERR_NCX_INVALID_CONDITIONAL:
 	return "invalid conditional object";
+    case ERR_NCX_USING_OBSOLETE:
+	return "using obsolete definition";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:
@@ -628,6 +630,8 @@ const char *
 	return "duplicate sibling node name from external augment";
     case ERR_NCX_DUP_IF_FEATURE:
 	return "duplicate if-feature statement";
+    case ERR_NCX_USING_DEPRECATED:
+	return "using deprecated definition";
 
     /* system info codes start at 500 */
     case ERR_PARS_SECDONE:

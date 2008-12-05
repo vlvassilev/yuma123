@@ -114,10 +114,41 @@ date         init     comment
 
 /********************************************************************
 *								    *
-*			     T Y P E S				    *
+*			S T A T I C   D A T A                       *
 *								    *
 *********************************************************************/
 
+static const xmlChar *top_keywords[] = 
+{
+    YANG_K_ANYXML,
+    YANG_K_AUGMENT,
+    YANG_K_BELONGS_TO,
+    YANG_K_CHOICE,
+    YANG_K_CONTACT,
+    YANG_K_CONTAINER,
+    YANG_K_DESCRIPTION,
+    YANG_K_DEVIATION,
+    YANG_K_EXTENSION,
+    YANG_K_FEATURE,
+    YANG_K_GROUPING,
+    YANG_K_IDENTITY,
+    YANG_K_IMPORT,
+    YANG_K_INCLUDE,
+    YANG_K_LEAF,
+    YANG_K_LEAF_LIST,
+    YANG_K_LIST,
+    YANG_K_NAMESPACE,
+    YANG_K_NOTIFICATION,
+    YANG_K_ORGANIZATION,
+    YANG_K_PREFIX,
+    YANG_K_REFERENCE,
+    YANG_K_REVISION,
+    YANG_K_RPC,
+    YANG_K_TYPEDEF,
+    YANG_K_USES,
+    YANG_K_YANG_VERSION,
+    NULL
+};
 
 
 /********************************************************************
@@ -854,6 +885,12 @@ status_t
     status_t    res, retres;
     boolean     save;
 
+#ifdef DEBUG
+    if (!tkc) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     save = TRUE;
     res = NO_ERR;
     retres = NO_ERR;
@@ -887,6 +924,82 @@ status_t
     return retres;
 
 } /* yang_consume_descr */
+
+
+/********************************************************************
+* FUNCTION yang_consume_pid
+* 
+* Parse the rest of the statement (2 forms):
+*
+*        keyword [prefix:]name;
+*
+*        keyword [prefix:]name { appinfo }
+*
+* Current token is the starting keyword
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   prefixstr == prefix string to set  (may be NULL)
+*   str == string to set  (may be NULL)
+*   dupflag == flag to check if entry already found (may be NULL)
+*   appinfoQ == Q to hold any extensions found
+*
+* OUTPUTS:
+*   *str set to the value if str not NULL
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_consume_pid (tk_chain_t  *tkc,
+		      ncx_module_t *mod,
+		      xmlChar **prefixstr,
+		      xmlChar **str,
+		      boolean *dupflag,
+		      dlq_hdr_t *appinfoQ)
+{
+    status_t    res, retres;
+    boolean     save;
+
+#ifdef DEBUG
+    if (!tkc) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    save = TRUE;
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    if (dupflag) {
+	if (*dupflag) {
+	    retres = ERR_NCX_ENTRY_EXISTS;
+	    ncx_print_errormsg(tkc, mod, retres);
+	    save = FALSE;
+	} else {
+	    *dupflag = TRUE;
+	}
+    }
+
+    /* get the PID string value */
+    res = yang_consume_pid_string(tkc, mod, prefixstr, str);
+    CHK_EXIT;
+
+    /* finish the clause */
+    if (save) {
+	res = yang_consume_semiapp(tkc, mod, appinfoQ);
+    } else {
+	res = yang_consume_semiapp(tkc, mod, NULL);
+    }
+    CHK_EXIT;
+
+    return retres;
+
+} /* yang_consume_pid */
 
 
 /********************************************************************
@@ -2004,6 +2117,107 @@ status_t
 
 
 /********************************************************************
+* FUNCTION yang_find_imp_identity
+* 
+* Find the specified imported identity
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   prefix  == prefix value to use
+*   name == feature name to use
+*   errtk == token to use in error messages (may be NULL)
+*   identity  == address of return ncx_identity_t pointer
+*
+* OUTPUTS:
+*   *identity set to the found ncx_identity_t, if NO_ERR
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_find_imp_identity (tk_chain_t  *tkc,
+			    ncx_module_t *mod,
+			    const xmlChar *prefix,
+			    const xmlChar *name,
+			    tk_token_t *errtk,
+			    ncx_identity_t **identity)
+{
+    ncx_import_t   *imp;
+    ncx_module_t   *imod;
+    tk_token_t     *savetk;
+    status_t        res, retres;
+
+#ifdef DEBUG
+    if (!tkc || !mod || !prefix || !name || !identity) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    imod = NULL;
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    imp = ncx_find_pre_import(mod, prefix);
+    if (!imp) {
+	res = ERR_NCX_PREFIX_NOT_FOUND;
+	log_error("\nError: import for prefix '%s' not found", prefix);
+    } else {
+	/* First find or load the module */
+	if (mod->diffmode) {
+	    imod = ncx_find_module(imp->module);
+	} else {
+	    imod = def_reg_find_module(imp->module);
+	}
+	if (!imod) {
+	    res = ncxmod_load_module(imp->module);
+	    CHK_EXIT;
+
+	    /* try again to find the module; should not fail */
+	    if (mod->diffmode) {
+		imod = ncx_find_module(imp->module);
+	    } else {
+		imod = def_reg_find_module(imp->module);
+	    }
+	    if (!imod) {
+		log_error("\nError: failure importing module '%s'",
+			  imp->module);
+		res = ERR_NCX_DEF_NOT_FOUND;
+	    }
+	}
+
+	/* found import OK, look up imported extension definition */
+	if (imod) {
+	    *identity = ncx_find_identity(imod, name);
+	    if (!*identity) {
+		res = ERR_NCX_DEF_NOT_FOUND;
+		log_error("\nError: identity definition for '%s:%s' not found"
+			  " in module %s", 
+			  prefix, name, imp->module);
+	    } else {
+		return NO_ERR;
+	    }
+	}
+    }
+
+    if (errtk) {
+	savetk = tkc->cur;
+	tkc->cur = errtk;
+	ncx_print_errormsg(tkc, mod, res);
+	tkc->cur = savetk;
+    } else {
+	ncx_print_errormsg(tkc, mod, res);
+    }
+
+    return res;
+
+}  /* yang_find_imp_identity */
+
+
+/********************************************************************
 * FUNCTION yang_check_obj_used
 * 
 * Check if the local typedefs and groupings are actually used
@@ -2760,6 +2974,10 @@ void
 boolean
     yang_top_keyword (const xmlChar *keyword)
 {
+    const xmlChar *topkw;
+    uint32         i;
+    int            ret;
+
 #ifdef DEBUG
     if (!keyword) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -2767,83 +2985,19 @@ boolean
     }
 #endif
 
-    if (!xml_strcmp(keyword, YANG_K_YANG_VERSION)) {
-	return TRUE;
+    for (i=0;;i++) {
+	topkw = top_keywords[i];
+	if (!topkw) {
+	    return FALSE;
+	}
+	ret = xml_strcmp(topkw, keyword);
+	if (ret == 0) {
+	    return TRUE;
+	} else if (ret > 0) {
+	    return FALSE;
+	}
     }
-    if (!xml_strcmp(keyword, YANG_K_NAMESPACE)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_PREFIX)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_BELONGS_TO)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_ORGANIZATION)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_CONTACT)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_DESCRIPTION)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_REFERENCE)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_IMPORT)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_INCLUDE)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_REVISION)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_TYPEDEF)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_GROUPING)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_ANYXML)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_CONTAINER)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_LEAF)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_LEAF_LIST)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_LIST)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_CHOICE)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_USES)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_AUGMENT)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_RPC)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_NOTIFICATION)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_EXTENSION)) {
-	return TRUE;
-    }
-    if (!xml_strcmp(keyword, YANG_K_FEATURE)) {
-	return TRUE;
-    }
-
-    return FALSE;
+    /*NOTREACHED*/
 
 }  /* yang_top_keyword */
 

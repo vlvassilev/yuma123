@@ -264,7 +264,8 @@ typedef enum status_t_
     ERR_NCX_INSERT_MISSING_INSTANCE,    /* 341 */  /* 12.5 */
     ERR_NCX_NOT_CONFIG,                 /* 342 */
     ERR_NCX_INVALID_CONDITIONAL,        /* 343 */
-    ERR_LAST_USR_ERR,                   /* 344 -- not really used */
+    ERR_NCX_USING_OBSOLETE,             /* 344 */
+    ERR_LAST_USR_ERR,                   /* 345 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */
@@ -294,7 +295,8 @@ typedef enum status_t_
     ERR_NCX_INVALID_STATUS,             /* 424 */
     ERR_NCX_DUP_AUGNODE,                /* 425 */
     ERR_NCX_DUP_IF_FEATURE,             /* 426 */
-    ERR_LAST_WARN,                      /* 427 -- not really used */
+    ERR_NCX_USING_DEPRECATED,           /* 427 */
+    ERR_LAST_WARN,                      /* 428 -- not really used */
 
     /* system info return codes start at 500 */
     ERR_PARS_SECDONE=ERR_INFO_BASE,     /* 500 */

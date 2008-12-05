@@ -616,6 +616,7 @@ static void
     ncx_import_t   *import;
     ncx_include_t  *incl;
     ncx_feature_t  *feature;
+    ncx_identity_t *identity;
     typ_template_t *typ;
     grp_template_t *grp;
     obj_template_t *obj;
@@ -701,6 +702,12 @@ static void
 	ncx_free_feature(feature);
     }
 
+    /* clear the YANG identityQ */
+    while (!dlq_empty(&mod->identityQ)) {
+	identity = (ncx_identity_t *)dlq_deque(&mod->identityQ);
+	ncx_free_identity(identity);
+    }
+
     /* clear the name and other fields last for easier debugging */
     if (mod->name) {
 	m__free(mod->name);
@@ -739,72 +746,6 @@ static void
     m__free(mod);
 
 }  /* free_module */
-
-
-/********************************************************************
-* FUNCTION check_feature_loop
-* 
-* Validate all the if-feature clauses present in 
-* the specified feature, after all if-features have
-* been resolved (or at least attempted)
-*
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
-*
-* INPUTS:
-*   tkc == token chain
-*   mod == ncx_module_t in progress
-*   feature == ncx_feature_t to check now
-*   startfeature == feature that started this off, so if this
-*                   is reached again, it will trigger an error
-*
-* RETURNS:
-*   status of the operation
-*********************************************************************/
-static status_t 
-    check_feature_loop (tk_chain_t *tkc,
-			ncx_module_t  *mod,
-			ncx_feature_t *feature,
-			ncx_feature_t *startfeature)
-{
-    ncx_iffeature_t  *iff;
-    status_t          res, retres;
-
-    retres = NO_ERR;
-
-    /* check if there are any if-feature statements inside
-     * this feature that need to be resolved
-     */
-    for (iff = (ncx_iffeature_t *)
-	     dlq_firstEntry(&feature->iffeatureQ);
-	 iff != NULL;
-	 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
-
-	if (!iff->feature) {
-	    continue;
-	}
-
-	if (iff->feature == startfeature) {
-	    retres = res = ERR_NCX_DEF_LOOP;
-	    startfeature->res = res;
-	    log_error("\nError: if-feature loop detected for '%s' "
-		      "in feature '%s'",
-		      startfeature->name,
-		      feature->name);
-	    tkc->cur = startfeature->tk;
-	    ncx_print_errormsg(tkc, mod, res);
-	} else if (iff->feature->res != ERR_NCX_DEF_LOOP) {
-	    res = check_feature_loop(tkc, mod, iff->feature,
-				     startfeature);
-	    if (res != NO_ERR) {
-		retres = res;
-	    }
-	}
-    }
-
-    return retres;
-
-}  /* check_feature_loop */
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -1095,6 +1036,7 @@ ncx_module_t *
     dlq_createSQue(&mod->saveincQ);
     dlq_createSQue(&mod->stmtQ);
     dlq_createSQue(&mod->featureQ);
+    dlq_createSQue(&mod->identityQ);
     return mod;
 
 }  /* ncx_new_module */
@@ -5451,7 +5393,7 @@ ncx_iffeature_t *
     if (!iff) {
 	return NULL;
     }
-    memset (iff, 0x0, sizeof(ncx_iffeature_t));
+    memset(iff, 0x0, sizeof(ncx_iffeature_t));
 
     return iff;
 
@@ -5589,7 +5531,7 @@ ncx_feature_t *
     if (!feature) {
 	return NULL;
     }
-    memset (feature, 0x0, sizeof(ncx_feature_t));
+    memset(feature, 0x0, sizeof(ncx_feature_t));
 
     dlq_createSQue(&feature->iffeatureQ);
     dlq_createSQue(&feature->appinfoQ);
@@ -5747,124 +5689,198 @@ ncx_feature_t *
 
 
 /********************************************************************
-* FUNCTION ncx_resolve_feature
+* FUNCTION ncx_new_identity
 * 
-* Validate all the if-feature clauses present in 
-* the specified feature
-*
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
+* Get a new ncx_identity_t struct
 *
 * INPUTS:
-*   tkc == token chain
-*   mod == ncx_module_t in progress
-*   feature == ncx_feature_t to check
-*
+*    none
 * RETURNS:
-*   status of the operation
+*    pointer to a malloced ncx_identity_t struct,
+*    or NULL if malloc error
 *********************************************************************/
-status_t 
-    ncx_resolve_feature (tk_chain_t *tkc,
-			 ncx_module_t  *mod,
-			 ncx_feature_t *feature)
+ncx_identity_t *
+    ncx_new_identity (void)
 {
-    ncx_feature_t    *testfeature;
-    ncx_iffeature_t  *iff;
-    status_t          res, retres;
-    boolean           errdone;
+    ncx_identity_t *identity;
 
-#ifdef DEBUG
-    if (!tkc || !mod || !feature) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+    identity = m__getObj(ncx_identity_t);
+    if (!identity) {
+	return NULL;
     }
-#endif
+    memset(identity, 0x0, sizeof(ncx_identity_t));
 
-    retres = NO_ERR;
+    dlq_createSQue(&identity->childQ);
+    dlq_createSQue(&identity->appinfoQ);
+    identity->idlink.identity = identity;
+    return identity;
 
-    /* check if there are any if-feature statements inside
-     * this feature that need to be resolved
-     */
-    for (iff = (ncx_iffeature_t *)
-	     dlq_firstEntry(&feature->iffeatureQ);
-	 iff != NULL;
-	 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
-
-	testfeature = NULL;
-	errdone = FALSE;
-	res = NO_ERR;
-
-	if (iff->prefix &&
-	    xml_strcmp(iff->prefix, mod->prefix)) {
-	    /* find the feature in another module */
-	    res = yang_find_imp_feature(tkc, mod, iff->prefix,
-					iff->name, iff->tk,
-					&testfeature);
-	    if (res != NO_ERR) {
-		retres = res;
-		errdone = TRUE;
-	    }
-	} else if (!xml_strcmp(iff->name, feature->name)) {
-	    /* error: if-feature foo inside feature foo */
-	    res = retres = ERR_NCX_DEF_LOOP;
-	    log_error("\nError: 'if-feature %s' inside feature '%s'",
-		      iff->name, iff->name);
-	    tkc->cur = iff->tk;
-	    ncx_print_errormsg(tkc, mod, retres);
-	    errdone = TRUE;
-	} else {
-	    testfeature = ncx_find_feature(mod, iff->name);
-	}
-
-	if (!testfeature && !errdone) {
-	    log_error("\nError: Feature '%s' not found "
-		      "for if-feature statement",
-		      iff->name);
-	    res = retres = ERR_NCX_DEF_NOT_FOUND;
-	    tkc->cur = iff->tk;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
-
-	if (testfeature) {
-	    iff->feature = testfeature;
-	}
-    }
-
-    return retres;
-
-}  /* ncx_resolve_feature */
+} /* ncx_new_identity */
 
 
 /********************************************************************
-* FUNCTION ncx_resolve_feature_final
+* FUNCTION ncx_free_identity
 * 
-* Validate all the if-feature clauses present in 
-* the specified feature, after all if-features have
-* been resolved (or at least attempted)
-*
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
+* Free a malloced ncx_identity_t struct
 *
 * INPUTS:
-*   tkc == token chain
-*   mod == ncx_module_t in progress
-*   feature == ncx_feature_t to check
+*    identity == struct to free
 *
-* RETURNS:
-*   status of the operation
 *********************************************************************/
-status_t 
-    ncx_resolve_feature_final (tk_chain_t *tkc,
-			       ncx_module_t  *mod,
-			       ncx_feature_t *feature)
+void 
+    ncx_free_identity (ncx_identity_t *identity)
 {
+
 #ifdef DEBUG
-    if (!tkc || !mod || !feature) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+    if (!identity) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
     }
 #endif
-    return check_feature_loop(tkc, mod, feature, feature);
 
-}  /* ncx_resolve_feature_final */
+    /*** !!! ignoring the back-ptr Q threading the
+     *** !!! idlink headers; do not delete from system
+     *** !!! until some way to clear all or issue an error
+     *** !!! is done.  Assume this free is part of the 
+     *** !!! system cleanup for now
+     ***
+     *** !!! Clearing out the back-ptrs in case the heap 'free'
+     *** !!! function does not set these fields to garbage
+     ***/
+    identity->idlink.inq = FALSE;
+    identity->idlink.identity = NULL;
+
+    if (identity->name) {
+	m__free(identity->name);
+    }
+
+    if (identity->baseprefix) {
+	m__free(identity->baseprefix);
+    }
+
+    if (identity->basename) {
+	m__free(identity->basename);
+    }
+
+    if (identity->descr) {
+	m__free(identity->descr);
+    }
+
+    if (identity->ref) {
+	m__free(identity->ref);
+    }
+
+    ncx_clean_appinfoQ(&identity->appinfoQ);
+
+    m__free(identity);
+    
+} /* ncx_free_identity */
+
+
+/********************************************************************
+* FUNCTION ncx_find_identity
+* 
+* Find a ncx_identity_t struct in the module and perhaps
+* any of its submodules
+*
+* INPUTS:
+*    mod == module to search
+*    name == identity name to find
+*
+* RETURNS:
+*    pointer to found feature or NULL if not found
+*********************************************************************/
+ncx_identity_t *
+    ncx_find_identity (ncx_module_t *mod,
+		       const xmlChar *name)
+{
+    ncx_identity_t  *identity;
+    dlq_hdr_t       *que;
+    yang_node_t     *node;
+    ncx_include_t   *inc;
+
+#ifdef DEBUG
+    if (!mod || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    identity = ncx_find_identity_que(&mod->identityQ, name);
+    if (identity) {
+	return identity;
+    }
+
+    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+
+    /* check all the submodules, but only the ones visible
+     * to this module or submodule, YANG only
+     */
+    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+	 inc != NULL;
+	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+
+	/* get the real submodule struct */
+	if (!inc->submod) {
+	    node = yang_find_node(que, inc->submodule);
+	    if (node) {
+		inc->submod = node->submod;
+	    }
+	    if (!inc->submod) {
+		/* include not found, should not be in Q !!! */
+		SET_ERROR(ERR_INTERNAL_VAL);
+		continue;
+	    }
+	}
+
+	/* check the type Q in this submodule */
+	identity = ncx_find_identity_que(&inc->submod->identityQ, name);
+	if (identity) {
+	    return identity;
+	}
+    }
+
+    return NULL;
+
+} /* ncx_find_identity */
+
+
+/********************************************************************
+* FUNCTION ncx_find_identity_que
+* 
+* Find a ncx_identity_t struct in the specified Q
+*
+* INPUTS:
+*    identityQ == Q of ncx_identity_t to search
+*    name == identity name to find
+*
+* RETURNS:
+*    pointer to found identity or NULL if not found
+*********************************************************************/
+ncx_identity_t *
+    ncx_find_identity_que (dlq_hdr_t *identityQ,
+			   const xmlChar *name)
+{
+    ncx_identity_t *identity;
+
+#ifdef DEBUG
+    if (!identityQ || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (identity = (ncx_identity_t *)dlq_firstEntry(identityQ);
+	 identity != NULL;
+	 identity = (ncx_identity_t *)dlq_nextEntry(identity)) {
+
+	if (!xml_strcmp(identity->name, name)) {
+	    return identity;
+	}
+    }
+    return NULL;
+	 
+} /* ncx_find_identity_que */
 
 
 /********************************************************************
@@ -6858,6 +6874,64 @@ const xmlChar *
     /*NOTREACHED*/
 
 }  /* ncx_get_status_string */
+
+
+/********************************************************************
+* FUNCTION ncx_check_yang_status
+* 
+* Check the backward compatibility of the 2 YANG status fields
+* 
+* INPUTS:
+*   mystatus == enum value for the node to be tested
+*   depstatus == status value of the dependency
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t
+    ncx_check_yang_status (ncx_status_t mystatus,
+			   ncx_status_t depstatus)
+{
+    switch (mystatus) {
+    case NCX_STATUS_CURRENT:
+	/* current definition can use another
+	 * current definition 
+	 */
+	switch (depstatus) {
+	case NCX_STATUS_CURRENT:
+	    return NO_ERR;
+	case NCX_STATUS_DEPRECATED:
+	    return ERR_NCX_USING_DEPRECATED;
+	case NCX_STATUS_OBSOLETE:
+	    return ERR_NCX_USING_OBSOLETE;
+	default:
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	/*NOTRECHED*/
+    case NCX_STATUS_DEPRECATED:
+	/* deprecated definition can use anything but an 
+	 * an obsolete definition
+	 */
+	switch (depstatus) {
+	case NCX_STATUS_CURRENT:
+	case NCX_STATUS_DEPRECATED:
+	    return NO_ERR;
+	case NCX_STATUS_OBSOLETE:
+	    return ERR_NCX_USING_OBSOLETE;
+	default:
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	/*NOTREACHED*/
+    case NCX_STATUS_OBSOLETE:
+	/* obsolete definition can use any definition */
+	return NO_ERR;
+    case NCX_STATUS_NONE:
+    default:
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    /*NOTREACHED*/
+
+}  /* ncx_check_yang_status */
 
 
 /********************************************************************

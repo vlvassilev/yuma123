@@ -129,14 +129,6 @@ date         init     comment
 /* #define YANG_PARSE_DEBUG_TRACE 1 */
 #endif
 
-
-/********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
-*********************************************************************/
-
-
 /********************************************************************
 * FUNCTION resolve_mod_appinfo
 * 
@@ -465,7 +457,7 @@ static status_t
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
 *
-* Current token is the 'belongs-to' keyword
+* Current token is the 'feature' keyword
 *
 * INPUTS:
 *   tkc == token chain
@@ -623,6 +615,465 @@ static status_t
     return retres;
 
 }  /* consume_feature */
+
+
+/********************************************************************
+* FUNCTION resolve_feature
+* 
+* Validate all the if-feature clauses present in 
+* the specified feature
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == ncx_module_t in progress
+*   feature == ncx_feature_t to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_feature (tk_chain_t *tkc,
+		     ncx_module_t  *mod,
+		     ncx_feature_t *feature)
+{
+    ncx_feature_t    *testfeature;
+    ncx_iffeature_t  *iff;
+    status_t          res, retres;
+    boolean           errdone;
+
+    retres = NO_ERR;
+
+    /* check if there are any if-feature statements inside
+     * this feature that need to be resolved
+     */
+    for (iff = (ncx_iffeature_t *)
+	     dlq_firstEntry(&feature->iffeatureQ);
+	 iff != NULL;
+	 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+
+	testfeature = NULL;
+	errdone = FALSE;
+	res = NO_ERR;
+
+	if (iff->prefix &&
+	    xml_strcmp(iff->prefix, mod->prefix)) {
+	    /* find the feature in another module */
+	    res = yang_find_imp_feature(tkc, mod, iff->prefix,
+					iff->name, iff->tk,
+					&testfeature);
+	    if (res != NO_ERR) {
+		retres = res;
+		errdone = TRUE;
+	    }
+	} else if (!xml_strcmp(iff->name, feature->name)) {
+	    /* error: if-feature foo inside feature foo */
+	    res = retres = ERR_NCX_DEF_LOOP;
+	    log_error("\nError: 'if-feature %s' inside feature '%s'",
+		      iff->name, iff->name);
+	    tkc->cur = iff->tk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	    errdone = TRUE;
+	} else {
+	    testfeature = ncx_find_feature(mod, iff->name);
+	}
+
+	if (!testfeature && !errdone) {
+	    log_error("\nError: Feature '%s' not found "
+		      "for if-feature statement",
+		      iff->name);
+	    res = retres = ERR_NCX_DEF_NOT_FOUND;
+	    tkc->cur = iff->tk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+
+	if (testfeature) {
+	    iff->feature = testfeature;
+	}
+    }
+
+    return retres;
+
+}  /* resolve_feature */
+
+
+/********************************************************************
+* FUNCTION check_feature_loop
+* 
+* Validate all the if-feature clauses present in 
+* the specified feature, after all if-features have
+* been resolved (or at least attempted)
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == ncx_module_t in progress
+*   feature == ncx_feature_t to check now
+*   startfeature == feature that started this off, so if this
+*                   is reached again, it will trigger an error
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    check_feature_loop (tk_chain_t *tkc,
+			ncx_module_t  *mod,
+			ncx_feature_t *feature,
+			ncx_feature_t *startfeature)
+{
+    ncx_iffeature_t  *iff;
+    status_t          res, retres;
+
+    retres = NO_ERR;
+
+    /* check if there are any if-feature statements inside
+     * this feature that need to be resolved
+     */
+    for (iff = (ncx_iffeature_t *)
+	     dlq_firstEntry(&feature->iffeatureQ);
+	 iff != NULL;
+	 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+
+	if (!iff->feature) {
+	    continue;
+	}
+
+	if (iff->feature == startfeature) {
+	    retres = res = ERR_NCX_DEF_LOOP;
+	    startfeature->res = res;
+	    log_error("\nError: if-feature loop detected for '%s' "
+		      "in feature '%s'",
+		      startfeature->name,
+		      feature->name);
+	    tkc->cur = startfeature->tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	} else if (iff->feature->res != ERR_NCX_DEF_LOOP) {
+	    res = check_feature_loop(tkc, mod, iff->feature,
+				     startfeature);
+	    if (res != NO_ERR) {
+		retres = res;
+	    }
+	}
+    }
+
+    return retres;
+
+}  /* check_feature_loop */
+
+
+/********************************************************************
+* FUNCTION consume_identity
+* 
+* Parse the next N tokens as an identity statement
+* Create an ncx_identity_t struct and add it to the
+* module or submodule identityQ
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'identity' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod   == module struct that will get updated
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    consume_identity (tk_chain_t *tkc,
+		      ncx_module_t  *mod)
+{
+    const xmlChar      *val;
+    const char         *expstr;
+    ncx_identity_t     *identity, *testidentity;
+    tk_type_t           tktyp;
+    boolean             done, base, stat, desc, ref, keep;
+    status_t            res, retres;
+
+    val = NULL;
+    expstr = "identity name";
+    done = FALSE;
+    base = FALSE;
+    stat = FALSE;
+    desc = FALSE;
+    ref = FALSE;
+    keep = TRUE;
+    retres = NO_ERR;
+
+    identity = ncx_new_identity();
+    if (!identity) {
+	res = ERR_INTERNAL_MEM;
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+    identity->tk = TK_CUR(tkc);
+    identity->isroot = TRUE;
+
+    /* Get the mandatory identity name */
+    res = yang_consume_id_string(tkc, mod, &identity->name);
+    if (res != NO_ERR) {
+	/* do not keep -- must have a name field */
+	retres = res;
+	keep = FALSE;
+    }
+	
+    /* Get the starting left brace for the sub-clauses
+     * or a semi-colon to end the identity statement
+     */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	ncx_free_identity(identity);
+	return res;
+    }
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+	done = TRUE;
+	break;
+    case TK_TT_LBRACE:
+	break;
+    default:
+	retres = ERR_NCX_WRONG_TKTYPE;
+	expstr = "semi-colon or left brace";
+	ncx_mod_exp_err(tkc, mod, retres, expstr);
+	done = TRUE;
+    }
+
+    expstr = "identity sub-statement";
+
+    /* get the prefix clause and any appinfo extensions */
+    while (!done) {
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	    retres = res;
+	    done = TRUE;
+	    continue;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    retres = ERR_NCX_EOF;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    done = TRUE;
+	    continue;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT) {
+		    done = TRUE;
+		}
+	    }
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    yang_skip_statement(tkc, mod);
+	    continue;
+	}
+
+	/* Got a token string so check the value, should be 'prefix' */
+	if (!xml_strcmp(val, YANG_K_BASE)) {
+	    identity->isroot = FALSE;
+	    res = yang_consume_pid(tkc, mod, 
+				   &identity->baseprefix,
+				   &identity->basename,
+				   &base, &identity->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
+	    res = yang_consume_status(tkc, mod, &identity->status,
+				      &stat, &identity->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+	    res = yang_consume_descr(tkc, mod, &identity->descr,
+				     &desc, &identity->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+	    res = yang_consume_descr(tkc, mod, &identity->ref,
+				     &ref, &identity->appinfoQ);
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    yang_skip_statement(tkc, mod);
+	    continue;
+	}
+	if (res != NO_ERR) {
+	    retres = res;
+	    if (NEED_EXIT) {
+		done = TRUE;
+	    }
+	}
+    }
+
+    /* check if feature already exists in this module */
+    if (keep) {
+	testidentity = ncx_find_identity(mod, identity->name);
+	if (testidentity) {
+	    retres = ERR_NCX_DUP_ENTRY;
+	    log_error("\nError: identity '%s' already defined "
+		      "in this module", identity->name);
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+	identity->res = retres;
+	dlq_enque(identity, &mod->identityQ);
+    } else {
+	ncx_free_identity(identity);
+    }
+
+    return retres;
+
+}  /* consume_identity */
+
+
+/********************************************************************
+* FUNCTION resolve_identity
+* 
+* Validate the identity statement base clause, if any
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == ncx_module_t in progress
+*   identity == ncx_identity_t to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_identity (tk_chain_t *tkc,
+		      ncx_module_t  *mod,
+		      ncx_identity_t *identity)
+{
+    ncx_identity_t   *testidentity;
+    status_t          res;
+    boolean           errdone;
+
+    if (identity->isroot) {
+	return NO_ERR;
+    }
+
+    res = NO_ERR;
+    testidentity = NULL;
+    errdone = FALSE;
+
+    if (identity->baseprefix &&
+	xml_strcmp(identity->baseprefix, mod->prefix)) {
+
+	/* find the identity in another module */
+	res = yang_find_imp_identity(tkc, mod, 
+				     identity->baseprefix,
+				     identity->basename, 
+				     identity->tk,
+				     &testidentity);
+	if (res != NO_ERR) {
+	    errdone = TRUE;
+	}
+    } else if (!xml_strcmp(identity->name, identity->basename)) {
+	/* error: 'base foo' inside 'identity foo' */
+	res = ERR_NCX_DEF_LOOP;
+	log_error("\nError: 'base %s' inside identity '%s'",
+		  identity->basename, identity->name);
+	tkc->cur = identity->tk;
+	ncx_print_errormsg(tkc, mod, res);
+	errdone = TRUE;
+    } else {
+	testidentity = 
+	    ncx_find_identity(mod, 
+			      identity->basename);
+    }
+
+    if (!testidentity && !errdone) {
+	log_error("\nError: Base '%s%s%s' not found "
+		  "for identity statement '%s'",
+		  (identity->baseprefix) ? 
+		  identity->baseprefix : (const xmlChar *)"",
+		  (identity->baseprefix) ? "?" : "",
+		  identity->basename,
+		  identity->name);
+	res = ERR_NCX_DEF_NOT_FOUND;
+	tkc->cur = identity->tk;
+	ncx_print_errormsg(tkc, mod, res);
+    }
+
+    if (testidentity) {
+	identity->base = testidentity;
+    }
+
+    return res;
+
+}  /* resolve_identity */
+
+
+/********************************************************************
+* FUNCTION check_identity_loop
+* 
+* Validate the base identity chain for loops
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == ncx_module_t in progress
+*   identity == ncx_identity_t to check now
+*   startidentity == identity that started this off, so if this
+*                    is reached again, it will trigger an error
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    check_identity_loop (tk_chain_t *tkc,
+			 ncx_module_t  *mod,
+			 ncx_identity_t *identity,
+			 ncx_identity_t *startidentity)
+{
+    status_t          res;
+
+    /* check if there is a base statement, and if it leads
+     * back to startidentity or not
+     */
+    if (!identity->base) {
+	res = NO_ERR;
+    } else if (identity->base == startidentity) {
+	res = ERR_NCX_DEF_LOOP;
+	startidentity->res = res;
+	log_error("\nError: identity base loop detected for '%s' "
+		  "in identity '%s'",
+		  startidentity->name,
+		  identity->name);
+	tkc->cur = startidentity->tk;
+	ncx_print_errormsg(tkc, mod, res);
+    } else if (identity->base->res != ERR_NCX_DEF_LOOP) {
+	res = check_identity_loop(tkc, mod, 
+				  identity->base,
+				  startidentity);
+	if (res == NO_ERR) {
+	    /* thread the idlink into the base identifier */
+	    dlq_enque(&identity->idlink, &identity->base->childQ);
+	    identity->idlink.inq = TRUE;
+	}
+    }
+
+    return res;
+
+}  /* check_identity_loop */
 
 
 /********************************************************************
@@ -1882,6 +2333,8 @@ static status_t
 	    res = yang_ext_consume_extension(tkc, mod);
 	} else if (!xml_strcmp(val, YANG_K_FEATURE)) {
 	    res = consume_feature(tkc, mod);
+	} else if (!xml_strcmp(val, YANG_K_IDENTITY)) {
+	    res = consume_identity(tkc, mod);
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
 	    res = yang_typ_consume_typedef(tkc, mod, &mod->typeQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
@@ -1941,10 +2394,11 @@ static status_t
 		       yang_parsetype_t ptyp,
 		       boolean *wasadded)
 {
-    yang_node_t   *node;
-    ncx_feature_t *feature;
-    boolean        ismain, loaded;
-    status_t       res, retres;
+    yang_node_t    *node;
+    ncx_feature_t  *feature;
+    ncx_identity_t *identity;
+    boolean         ismain, loaded;
+    status_t        res, retres;
 
 #ifdef YANG_PARSE_DEBUG_TRACE
     log_debug3("\nEnter parse_yang_module");
@@ -2101,7 +2555,7 @@ static status_t
 	 feature != NULL;
 	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	res = ncx_resolve_feature(tkc, mod, feature);
+	res = resolve_feature(tkc, mod, feature);
 	CHK_EXIT;
     }
 
@@ -2110,7 +2564,27 @@ static status_t
 	 feature != NULL;
 	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	res = ncx_resolve_feature_final(tkc, mod, feature);
+	res = check_feature_loop(tkc, mod, feature, feature);
+	CHK_EXIT;
+    }
+
+    /* resolve the base-stmt within any identity statements 
+     * within the identityQ 
+     */
+    for (identity = (ncx_identity_t *)dlq_firstEntry(&mod->identityQ);
+	 identity != NULL;
+	 identity = (ncx_identity_t *)dlq_nextEntry(identity)) {
+
+	res = resolve_identity(tkc, mod, identity);
+	CHK_EXIT;
+    }
+
+    /* resolve any identity base loops within the identityQ */
+    for (identity = (ncx_identity_t *)dlq_firstEntry(&mod->identityQ);
+	 identity != NULL;
+	 identity = (ncx_identity_t *)dlq_nextEntry(identity)) {
+
+	res = check_identity_loop(tkc, mod, identity, identity);
 	CHK_EXIT;
     }
 

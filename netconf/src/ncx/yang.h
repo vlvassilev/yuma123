@@ -224,6 +224,15 @@ extern status_t
 			boolean *dupflag,
 			dlq_hdr_t *appinfoQ);
 
+/* consume one [prefix:]name clause */
+extern status_t 
+    yang_consume_pid (tk_chain_t  *tkc,
+		      ncx_module_t *mod,
+		      xmlChar **prefixstr,
+		      xmlChar **str,
+		      boolean *dupflag,
+		      dlq_hdr_t *appinfoQ);
+
 /* consume one normative string clause */
 extern status_t 
     yang_consume_strclause (tk_chain_t  *tkc,
@@ -321,6 +330,14 @@ extern status_t
 			   const xmlChar *name,
 			   tk_token_t *errtk,
 			   ncx_feature_t **feature);
+
+extern status_t 
+    yang_find_imp_identity (tk_chain_t  *tkc,
+			    ncx_module_t *mod,
+			    const xmlChar *prefix,
+			    const xmlChar *name,
+			    tk_token_t *errtk,
+			    ncx_identity_t **identity);
 
 /* generate warnings if local typedefs/groupings not used */
 extern void

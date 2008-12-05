@@ -198,6 +198,16 @@ typedef struct typ_pattern_t_ {
 } typ_pattern_t;
 
 
+/* YANG identityref struct
+ * the value is an identity-stmt QName
+ * that has a base-stmt that resolves to the same value
+ */
+typedef struct typ_idref_t {
+    xmlChar        *baseprefix;
+    xmlChar        *basename;
+    ncx_identity_t *base;     /* back-ptr to base (if found ) */
+} typ_idref_t;
+
 /* NCX_CL_SIMPLE
  *
  * The following enums defined in ncxconst.h are supported in this struct
@@ -218,6 +228,7 @@ typedef struct typ_pattern_t_ {
  *  NCX_BT_STRING -- char string
  *  NCX_BT_BINARY -- binary string (base64 from RFC 4648)
  *  NCX_BT_KEYREF -- YANG keyref (XPath expression)
+ *  NCX_BT_IDREF -- YANG identityref (QName)
  *  NCX_BT_INSTANCE_ID -- YANG instance-identifier (XPath expression)
  *  NCX_BT_SLIST -- simple list of string or number type (xsd:list)
  *  NCX_BT_UNION -- C-type union of any simtype except keyref and empty
@@ -227,6 +238,7 @@ typedef struct typ_simple_t_ {
     struct typ_template_t_ *listtyp;       /* template for NCX_BT_SLIST */
     struct xpath_pcb_t_   *xkeyref;     /* saved for NCX_BT_KEYREF only */
     typ_range_t      range;     /* for all num types and string length  */
+    typ_idref_t      idref;                    /* for NCX_BT_IDREF only */
     dlq_hdr_t        valQ;     /* bit, enum, string, list vals/patterns */
     dlq_hdr_t        metaQ;              /* Q of obj_template_t structs */
     dlq_hdr_t        unionQ;   /* Q of typ_unionnode_t for NCX_BT_UNION */
@@ -365,6 +377,7 @@ extern typ_def_t *
 /* init a pre-allocated typdef (done first) */
 extern void 
     typ_init_typdef (typ_def_t *typdef);
+
 
 /* init a simple data type after typ_init_typdef */
 extern void

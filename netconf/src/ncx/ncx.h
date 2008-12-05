@@ -514,23 +514,21 @@ extern ncx_feature_t *
     ncx_find_feature_que (dlq_hdr_t *featureQ,
 			  const xmlChar *name);
 
-extern const ncx_feature_t *
-    ncx_first_feature (const ncx_module_t *mod);
+/********************** ncx_identity_t *********************/
 
-extern const ncx_feature_t *
-    ncx_next_feature (const ncx_module_t *mod,
-		      const ncx_feature_t *curfeature);
+extern ncx_identity_t * 
+    ncx_new_identity (void);
 
-extern status_t 
-    ncx_resolve_feature (tk_chain_t *tkc,
-			 ncx_module_t  *mod,
-			 ncx_feature_t *feature);
+extern void 
+    ncx_free_identity (ncx_identity_t *identity);
 
-extern status_t 
-    ncx_resolve_feature_final (tk_chain_t *tkc,
-			       ncx_module_t  *mod,
-			       ncx_feature_t *feature);
+extern ncx_identity_t *
+    ncx_find_identity (ncx_module_t *mod,
+		       const xmlChar *name);
 
+extern ncx_identity_t *
+    ncx_find_identity_que (dlq_hdr_t *identityQ,
+			   const xmlChar *name);
 
 /********************** ncx_filptr_t *********************/
 
@@ -696,6 +694,10 @@ extern ncx_status_t
 
 extern const xmlChar *
     ncx_get_status_string (ncx_status_t status);
+
+extern status_t
+    ncx_check_yang_status (ncx_status_t mystatus,
+			   ncx_status_t depstatus);
 
 extern ncx_tclass_t
     ncx_get_tclass (ncx_btype_t btyp);

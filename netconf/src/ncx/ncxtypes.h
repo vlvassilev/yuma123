@@ -128,7 +128,7 @@ typedef enum ncx_data_class_t_ {
 typedef enum ncx_btype_t_ {
     NCX_BT_NONE,
     NCX_BT_ANY,
-    NCX_BT_BITS,        /* mapped to NCX_BT_SLIST */
+    NCX_BT_BITS,
     NCX_BT_ENUM,
     NCX_BT_EMPTY,
     NCX_BT_BOOLEAN,
@@ -147,7 +147,8 @@ typedef enum ncx_btype_t_ {
     NCX_BT_INSTANCE_ID,
     NCX_BT_UNION,
     NCX_BT_KEYREF,
-    NCX_BT_SLIST,                 /* simple XSD list */
+    NCX_BT_IDREF,
+    NCX_BT_SLIST,                 /* ncx:xsdlist extension */
 
     NCX_BT_CONTAINER,
     NCX_BT_CHOICE,
@@ -373,6 +374,8 @@ typedef union ncx_num_t_ {
  */
 typedef xmlChar * ncx_str_t;
 
+typedef const xmlChar * ncx_const_str_t;
+
 /* one NCX_BT_ENUM enumeration value (user may enter 1 of 3 forms) */
 typedef struct ncx_enum_t_ {
     const xmlChar *name;     /* bptr to typ_enum_t or dname */
@@ -467,7 +470,6 @@ typedef struct ncx_iffeature_t_ {
 /* YANG feature entry */
 typedef struct ncx_feature_t_ {
     dlq_hdr_t           qhdr;
-    struct ncx_module_t_ *mod;         /* back-ptr to module */
     xmlChar            *name;
     xmlChar            *descr;
     xmlChar            *ref;
@@ -477,6 +479,44 @@ typedef struct ncx_feature_t_ {
     dlq_hdr_t           appinfoQ;       /* Q of ncx_appinfo_t */
     status_t            res;    /* may be stored with errors */
 } ncx_feature_t;
+
+
+/* back pointer to a YANG identity
+ * used to create an inline tree of valid values
+ * for an identity used as a base
+ *
+ * This inline Q record will be linked in to the
+ * childQ of the base identity when the identity
+ * containing this struct is using it as a base
+ *
+ * This thread is only used for client help,
+ * to easily list all the QName values that are permitted
+ * for a identityref leaf
+ */
+typedef struct ncx_idlink_t_ {
+    dlq_hdr_t  qhdr;
+    struct ncx_identity_t_ *identity;
+    boolean    inq;
+} ncx_idlink_t;
+
+
+/* YANG identity entry */
+typedef struct ncx_identity_t_ {
+    dlq_hdr_t             qhdr;
+    struct ncx_identity_t_ *base;      /* back-ptr to base id */
+    xmlChar              *name;
+    xmlChar              *baseprefix;
+    xmlChar              *basename;
+    xmlChar              *descr;
+    xmlChar              *ref;
+    struct tk_token_t_   *tk;
+    ncx_status_t          status;
+    dlq_hdr_t             childQ;          /* Q of ncx_idlink_t */
+    dlq_hdr_t             appinfoQ;       /* Q of ncx_appinfo_t */
+    status_t              res;    /* may be stored with errors */
+    boolean               isroot;    /* base==NULL not an error */
+    ncx_idlink_t          idlink;
+} ncx_identity_t;
 
 
 /* representation of one module or submodule during and after parsing */
@@ -517,6 +557,7 @@ typedef struct ncx_module_t_ {
     dlq_hdr_t         datadefQ;       /* Q of obj_template_t */
     dlq_hdr_t         extensionQ;     /* Q of ext_template_t */
     dlq_hdr_t         featureQ;        /* Q of ncx_feature_t */
+    dlq_hdr_t         identityQ;      /* Q of ncx_identity_t */
     dlq_hdr_t         appinfoQ;        /* Q of ncx_appinfo_t */
     dlq_hdr_t         typnameQ;        /* Q of ncx_typname_t */
     dlq_hdr_t         saveimpQ;    /* Q of yang_import_ptr_t */   

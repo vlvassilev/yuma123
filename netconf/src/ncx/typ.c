@@ -108,6 +108,19 @@ static void
     }
     sim->range.tk = NULL;
 
+    if (sim->idref.baseprefix) {
+	m__free(sim->idref.baseprefix);
+	sim->idref.baseprefix = NULL;
+    }
+
+    if (sim->idref.basename) {
+	m__free(sim->idref.basename);
+	sim->idref.basename = NULL;
+    }
+	
+    sim->idref.base = NULL;
+    sim->idref.isq = FALSE;
+
     /* clean the rangeQ only if it is used */
     if (!dlq_empty(&sim->range.rangeQ)) {
 	rtyp = typ_get_range_type(sim->btyp);
@@ -403,6 +416,8 @@ void
     dlq_createSQue(&typdef->appinfoQ);
 
 }  /* typ_init_typdef */
+
+
 
 
 /********************************************************************

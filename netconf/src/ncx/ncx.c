@@ -561,8 +561,7 @@ static status_t
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
-	if (obj->objtype == OBJ_TYP_USES ||
-	    obj->objtype == OBJ_TYP_AUGMENT) {
+	if (!obj_has_name(obj)) {
 	    /* these are not real objects, and do not have names */
 	    continue;
 	}
@@ -6522,54 +6521,6 @@ void
     }
 
 }  /* ncx_clean_typnameQ */
-
-
-/********************************************************************
-* FUNCTION ncx_printf_indent
-* 
-* Printf a newline, then the specified number of chars
-*
-* INPUTS:
-*    indentcnt == number of indent chars, -1 == skip everything
-*
-*********************************************************************/
-void
-    ncx_printf_indent (int32 indentcnt)
-{
-    int32  i;
-
-    if (indentcnt >= 0) {
-	log_write("\n");
-	for (i=0; i<indentcnt; i++) {
-	    log_write(" ");
-	}
-    }
-
-} /* ncx_printf_indent */
-
-
-/********************************************************************
-* FUNCTION ncx_stdout_indent
-* 
-* Printf a newline to stdout, then the specified number of chars
-*
-* INPUTS:
-*    indentcnt == number of indent chars, -1 == skip everything
-*
-*********************************************************************/
-void
-    ncx_stdout_indent (int32 indentcnt)
-{
-    int32  i;
-
-    if (indentcnt >= 0) {
-	log_stdout("\n");
-	for (i=0; i<indentcnt; i++) {
-	    log_stdout(" ");
-	}
-    }
-
-} /* ncx_stdout_indent */
 
 
 /********************************************************************

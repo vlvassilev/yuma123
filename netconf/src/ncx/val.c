@@ -98,6 +98,12 @@ date         init     comment
 
 /* #define VAL_DEBUG  1 */
 
+/* pick a log output function for dump_value */
+typedef void (*dumpfn_t) (const char *fstr, ...);
+
+/* pick a log indent function for dump_value */
+typedef void (*indentfn_t) (int32 indentcnt);
+
 
 /********************************************************************
 * FUNCTION dump_num
@@ -487,6 +493,11 @@ static void
     case NCX_BT_KEYREF:
 	ncx_clean_str(&val->v.str);
 	break;
+    case NCX_BT_IDREF:
+	if (val->v.idref.name) {
+	    m__free(val->v.idref.name);
+	}
+	break;
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
 	ncx_clean_list(&val->v.list);
@@ -619,6 +630,14 @@ static void
 	ncx_clean_str(&dest->v.str);
 	dest->v.str = src->v.str;
 	src->v.str = NULL;
+	break;
+    case NCX_BT_IDREF:
+	dest->v.idref.nsid = src->v.idref.nsid;	
+	if (dest->v.idref.name) {
+	    m__free(dest->v.idref.name);
+	}
+	dest->v.idref.name = src->v.idref.name;
+	src->v.idref.name = NULL;
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -829,6 +848,292 @@ static status_t
     return ERR_NCX_NOT_IN_RANGE;
 
 } /* check_rangeQ */
+
+
+/********************************************************************
+* FUNCTION dump_value
+* 
+* Printf the specified val_value_t struct to 
+* the logfile, or stdout if none set
+* Uses conf file format (see ncx/conf.h)
+*
+* INPUTS:
+*    val == value to dump
+*    startindent == start indent char count
+*    tolog == TRUE if use log for output
+*             FALSE if use STDOUT for output
+*********************************************************************/
+static void
+    dump_value (const val_value_t *val,
+		int32 startindent,
+		boolean tolog)
+{
+    dumpfn_t            dumpfn, errorfn;
+    indentfn_t          indentfn;
+    const val_value_t  *chval;
+    const ncx_lmem_t   *listmem;
+    const val_idref_t  *idref;
+    xmlChar            *buff;
+    ncx_btype_t         btyp, lbtyp;
+    uint32              len;
+    status_t            res;
+    boolean             quotes;
+
+#ifdef VAL_INCLUDE_META
+    const dlq_hdr_t    *metaQ;
+    const val_value_t  *metaval;
+#endif
+
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (tolog) {
+	dumpfn = log_write;
+	errorfn = log_error;
+	indentfn = log_indent;
+    } else {
+	dumpfn = log_stdout;
+	errorfn = log_stdout;
+	indentfn = log_stdout_indent;
+    }
+
+    /* indent and print the val name */
+    (*indentfn)(startindent);
+    if (val->btyp == NCX_BT_EXTERN) {
+	(*dumpfn)("%s (extern=%s) ", 
+		  (val->name) ? (const char *)val->name : "--",
+		  (val->v.fname) ? (const char *)val->v.fname : "--");
+    } else if (val->btyp == NCX_BT_INTERN) {
+	(*dumpfn)("%s (intern) ",
+		  (val->name) ? (const char *)val->name : "--");
+    } else {
+	(*dumpfn)("%s ", (val->name) ? (const char *)val->name : "--");
+    }
+
+    /* get the real base type */
+    if (val->btyp == NCX_BT_UNION) {
+	btyp = val->unbtyp;
+    } else {
+	btyp = val->btyp;
+    }
+
+    /* check if an index clause needs to be printed next */
+    if (!dlq_empty(&val->indexQ)) {
+	res = val_get_index_string(NULL, NCX_IFMT_CLI, val, NULL, &len);
+	if (res == NO_ERR) {
+	    buff = m__getMem(len+1);
+	    if (buff) {
+		res = val_get_index_string(NULL, NCX_IFMT_CLI, 
+					   val, buff, &len);
+		if (res == NO_ERR) {
+		    (dumpfn)("%s ", buff);
+		} else {
+		    SET_ERROR(res);
+		}
+		m__free(buff);
+	    } else {
+		(*errorfn)("\nval: malloc failed for %u bytes", len+1);
+	    }
+	}
+
+	/* check if there is no more to print for this node */
+	if (typ_is_simple(btyp)) {
+	    return;
+	}
+    }
+
+    /* dump the value, depending on the base type */
+    switch (btyp) {
+    case NCX_BT_NONE:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	break;
+    case NCX_BT_ANY:
+	(*dumpfn)("(any)");
+	break;
+    case NCX_BT_ENUM:
+	if (val->v.enu.name) {
+	    (*dumpfn)("%s", (const char *)val->v.enu.name);
+	}
+	break;
+    case NCX_BT_EMPTY:
+	if (!val->v.bool) {
+	    (*dumpfn)("(not set)");   /* should not happen */
+	}
+	break;
+    case NCX_BT_BOOLEAN:
+	if (val->v.bool) {
+	    (*dumpfn)("true");
+	} else {
+	    (*dumpfn)("false");
+	}
+	break;
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+    case NCX_BT_INT64:
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+    case NCX_BT_UINT64:
+    case NCX_BT_FLOAT32:
+    case NCX_BT_FLOAT64:
+	if (tolog) {
+	    dump_num(btyp, &val->v.num);
+	} else {
+	    stdout_num(btyp, &val->v.num);
+	}
+	break;
+    case NCX_BT_BINARY:
+	(*dumpfn)("binary string, length '%u'",
+		  val->v.binary.ustrlen);
+	break;
+    case NCX_BT_STRING:
+    case NCX_BT_INSTANCE_ID:
+    case NCX_BT_KEYREF:   /*******/
+	if (VAL_STR(val)) {
+	    quotes = val_need_quotes(VAL_STR(val));
+	    if (quotes) {
+		(*dumpfn)("%c", VAL_QUOTE_CH);
+	    }
+	    if (obj_is_password(val->obj)) {
+		(*dumpfn)("%s", (const char *)"****");
+	    } else {
+		(*dumpfn)("%s", (const char *)VAL_STR(val));
+	    }
+	    if (quotes) {
+		(*dumpfn)("%c", VAL_QUOTE_CH);
+	    }
+	}
+	break;
+    case NCX_BT_IDREF:
+	idref = VAL_IDREF(val);
+	(*dumpfn)("%s:%s",
+		  xmlns_get_ns_prefix(idref->nsid),
+		  idref->name);
+	break;
+    case NCX_BT_SLIST:
+    case NCX_BT_BITS:
+	if (dlq_empty(&val->v.list.memQ)) {
+	    (*dumpfn)("{ }");
+	} else {
+	    lbtyp = val->v.list.btyp;
+	    (*dumpfn)("{");
+	    for (listmem = (const ncx_lmem_t *)
+		     dlq_firstEntry(&val->v.list.memQ);
+		 listmem != NULL;
+		 listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) {
+
+		if (startindent >= 0) {
+		    (*indentfn)(startindent+NCX_DEF_INDENT);
+		}
+
+		if (typ_is_string(lbtyp)) {
+		    if (listmem->val.str) {
+			quotes = val_need_quotes(listmem->val.str);
+			if (quotes) {
+			    (*dumpfn)("%c", VAL_QUOTE_CH);
+			}
+			(*dumpfn)("%s ", (const char *)listmem->val.str);
+			if (quotes) {
+			    (*dumpfn)("%c", VAL_QUOTE_CH);
+			}
+		    }
+		} else if (typ_is_number(lbtyp)) {
+		    if (tolog) {
+			dump_num(lbtyp, &listmem->val.num);
+		    } else {
+			stdout_num(lbtyp, &listmem->val.num);
+		    }
+		    (*dumpfn)(" ");
+		} else {
+		    switch (lbtyp) {
+		    case NCX_BT_ENUM:
+			if (listmem->val.enu.name) {
+			    (*dumpfn)("%s ",
+				      (const char *)listmem->val.enu.name);
+			}
+			break;
+		    case NCX_BT_BITS:
+			(*dumpfn)("%s ", (const char *)listmem->val.str);
+			break;
+		    case NCX_BT_BOOLEAN:
+			(*dumpfn)("%s ",
+				  (listmem->val.bool) ? 
+				  NCX_EL_TRUE : NCX_EL_FALSE);
+			break;
+		    default:
+			SET_ERROR(ERR_INTERNAL_VAL);
+		    }
+		}
+	    }
+	    (*indentfn)(startindent);
+	    (*dumpfn)("}");
+	}
+	break;
+    case NCX_BT_LIST:
+    case NCX_BT_CONTAINER:
+    case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
+	(*dumpfn)("{");
+	for (chval = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
+	     chval != NULL;
+	     chval = (const val_value_t *)dlq_nextEntry(chval)) {
+	    dump_value(chval, (startindent >= 0) ?
+		       startindent+NCX_DEF_INDENT : startindent,
+		       tolog);
+	}
+	(*indentfn)(startindent);
+	(*dumpfn)("}");
+	break;
+    case NCX_BT_EXTERN:
+	(*dumpfn)("{");
+	(*indentfn)(startindent);
+	if (tolog) {
+	    dump_extern(val->v.fname);
+	} else {
+	    stdout_extern(val->v.fname);
+	}
+	(*indentfn)(startindent);
+	(*dumpfn)("}");
+	break;
+    case NCX_BT_INTERN:
+	(*dumpfn)("{");
+	(*indentfn)(startindent);
+	if (tolog) {
+	    dump_intern(val->v.intbuff);
+	} else {
+	    stdout_intern(val->v.intbuff);
+	}
+	(*indentfn)(startindent);
+	(*dumpfn)("}");
+	break;
+    default:
+	(*errorfn)("\nval: illegal btype (%d)", btyp);
+    }    
+
+#ifdef VAL_INCLUDE_META
+    /* dump the metadata queue if non-empty */
+    metaQ = val_get_metaQ(val);
+    if (metaQ && !dlq_empty(metaQ)) {
+	if (startindent >= 0) {
+	    (*indentfn)(startindent+NCX_DEF_INDENT);
+	}
+	(*dumpfn)("%s.metaQ ", val->name);
+	for (metaval = val_get_first_meta(metaQ);
+	     metaval != NULL;
+	     metaval = val_get_next_meta(metaval)) {
+	    dump_value(metaval, (startindent >= 0) ?
+		       startindent+(2*NCX_DEF_INDENT) : startindent,
+		       tolog);
+	}
+    }
+#endif
+
+}   /* dump_value */
 
 
 /*************** E X T E R N A L    F U N C T I O N S  *************/
@@ -1514,6 +1819,250 @@ status_t
 
 
 /********************************************************************
+* FUNCTION val_idref_ok
+* 
+* Check if an identityref QName is valid for the typedef
+* The QName must match an identity that has the same base
+* as specified in the typdef
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated identityref type
+*    qname == QName or local-name string to check
+*    nsid == namespace ID from XML node for NS of QName
+*            this NSID will be used and not the prefix in qname
+*            it was parsed in the XML node and is not a module prefix
+*    name == address of return local name part of QName
+*    id == address of return identity, if found
+*
+* OUTPUTS:
+*  if non-NULL:
+*     *name == pointer into the qname string at the start of
+*              the local name part
+*     *id == pointer to ncx_identity_t found
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_idref_ok (const typ_def_t *typdef,
+		  const xmlChar *qname,
+		  xmlns_id_t nsid,
+		  const xmlChar **name,
+		  const ncx_identity_t **id)
+{
+    const typ_idref_t     *idref;
+    const xmlChar         *str, *modname;
+    ncx_module_t          *mod;
+    const ncx_identity_t  *identity;
+
+#ifdef DEBUG
+    if (!typdef || !qname) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (typ_get_basetype(typdef) != NCX_BT_IDREF) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    if (nsid == XMLNS_NULL_NS_ID) {
+	return ERR_NCX_DEF_NOT_FOUND;
+    }
+
+    idref = typ_get_idref(typdef);
+    if (!idref || !idref->base) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    
+    /* find the local-name in the prefix:local-name combo */
+    str = qname;
+    while (*str && *str != ':') {
+	str++;
+    }
+    if (*str == ':') {
+	str++;
+    }
+    if (name) {
+	*name = str;
+    }
+
+    /* str should point to the local name now */
+    modname = xmlns_get_module(nsid);
+    if (!modname) {
+	return ERR_NCX_DEF_NOT_FOUND;
+    }
+    mod = ncx_find_module(modname);
+    if (!mod) {
+	return ERR_NCX_DEF_NOT_FOUND;
+    }
+
+    /* the namespace produced a module which should have
+     * the identity-stmt with this name
+     */
+    identity = ncx_find_identity(mod, str);
+    if (!identity) {
+	return ERR_NCX_DEF_NOT_FOUND;
+    }
+    if (id) {
+	*id = identity;
+    }
+
+    /* got some identity match; make sure this identity
+     * has an ancestor-or-self node that is the same base
+     * as the base specified in the typdef
+     */
+    while (identity) {
+	if (identity == idref->base) {
+	    return NO_ERR;
+	} else {
+	    identity = identity->base;
+	}
+    }
+    return ERR_NCX_INVALID_VALUE;
+
+} /* val_idref_ok */
+
+
+/********************************************************************
+* FUNCTION val_parse_idref
+* 
+* Parse a CLI BASED identityref QName into its various parts
+*
+* INPUTS:
+*    mod == module containing the default-stmt (or NULL if N/A)
+*    qname == QName or local-name string to parse
+*    nsid == address of return namespace ID of the module
+*            indicated by the prefix. If mod==NULL then
+*            a prefix MUST be present
+*    name == address of return local name part of QName
+*    id == address of return identity, if found
+*
+* OUTPUTS:
+*  if non-NULL:
+*     *nsid == namespace ID for the prefix part of the QName
+*     *name == pointer into the qname string at the start of
+*              the local name part
+*     *id == pointer to ncx_identity_t found (if any, not an error)
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_parse_idref (ncx_module_t *mod,
+		     const xmlChar *qname,
+		     xmlns_id_t  *nsid,
+		     const xmlChar **name,
+		     const ncx_identity_t **id)
+{
+    const xmlChar         *str, *modname;
+    ncx_module_t          *impmod;
+    const ncx_identity_t  *identity;
+    const ncx_import_t    *import;
+    xmlChar               *prefixbuff;
+    status_t               res;
+    uint32                 prefixlen;
+    xmlns_id_t             prefixnsid;
+
+#ifdef DEBUG
+    if (!qname) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+    
+    res = NO_ERR;
+    impmod = NULL;
+    
+    if (nsid) {
+	*nsid = 0;
+    }
+    if (name) {
+	*name = NULL;
+    }
+
+    /* find the local-name in the prefix:local-name combo */
+    str = qname;
+    while (*str && *str != ':') {
+	str++;
+    }
+
+    /* figure out the prefix namespace ID */
+    if (*str == ':') {
+	/* prefix found */
+	prefixnsid = 0;
+	prefixlen = (uint32)(str++ - qname);
+	prefixbuff = m__getMem(prefixlen+1);
+	if (!prefixbuff) {
+	    return ERR_INTERNAL_MEM;
+	} else {
+	    xml_strncpy(prefixbuff, qname, prefixlen);
+	}
+
+	if (mod) {
+	    if (xml_strcmp(mod->prefix, prefixbuff)) {
+		import = ncx_find_pre_import(mod, prefixbuff);
+		if (import) {
+		    impmod = ncx_find_module(import->module);
+		    if (impmod) {
+			prefixnsid = impmod->nsid;
+			identity = ncx_find_identity(impmod, str);
+		    } else {
+			res = ERR_NCX_MOD_NOT_FOUND;
+		    }
+		} else {
+		    res = ERR_NCX_IMP_NOT_FOUND;
+		}
+	    } else {
+		prefixnsid = mod->nsid;
+		identity = ncx_find_identity(mod, str);
+	    }
+	} else {
+	    /* look up the default prefix for a module */
+	    prefixnsid = xmlns_find_ns_by_prefix(prefixbuff);
+	    if (prefixnsid) {
+		modname = xmlns_get_module(prefixnsid);
+		if (modname) {
+		    impmod = ncx_find_module(modname);
+		    if (impmod) {
+			prefixnsid = impmod->nsid;
+			identity = ncx_find_identity(mod, str);
+		    } else {
+			res = ERR_NCX_MOD_NOT_FOUND;
+		    }
+		} else {
+		    res = ERR_NCX_MOD_NOT_FOUND;
+		}
+	    } else {
+		res = ERR_NCX_PREFIX_NOT_FOUND;
+	    }
+	}
+	m__free(prefixbuff);
+	if (name) {
+	    *name = str;
+	}
+    } else {
+	/* no prefix entered */
+	if (name) {
+	    *name = qname;
+	}
+	if (mod) {
+	    prefixnsid = mod->nsid;
+	    identity = ncx_find_identity(mod, qname);
+	} else {
+	    res = ERR_NCX_INVALID_VALUE;
+	}
+    }
+
+    if (id) {
+	*id = identity;
+    }
+    if (nsid) {
+	*nsid = prefixnsid;
+    }
+    return res;
+
+}  /* val_parse_idref */
+
+
+/********************************************************************
 * FUNCTION val_range_ok
 * 
 * Check a number to see if it is in range or not
@@ -1744,15 +2293,17 @@ status_t
 			   const xmlChar *simval,
 			   const ncx_errinfo_t **errinfo)
 {
-    const xmlChar          *retstr;
+    const xmlChar          *retstr, *name;
     val_value_t            *unval;
     const typ_template_t   *listtyp;
+    const ncx_identity_t   *identity;
     ncx_num_t               num;
     ncx_list_t              list;
     status_t                res;
     ncx_btype_t             btyp, listbtyp;
     int32                   retval;
     boolean                 forced;
+    xmlns_id_t              nsid;
 
 #ifdef DEBUG
     if (!typdef) {
@@ -1820,7 +2371,10 @@ status_t
 	break;
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
+	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
+	break;
     case NCX_BT_INSTANCE_ID:
+	/*****/
 	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
 	break;
     case NCX_BT_UNION:
@@ -1837,6 +2391,12 @@ status_t
     case NCX_BT_KEYREF:
 	/*****/
 	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
+	break;
+    case NCX_BT_IDREF:
+	res = val_parse_idref(NULL, simval, &nsid, &name, &identity);
+	if (res == NO_ERR) {
+	    res = val_idref_ok(typdef, simval, nsid, &name, &identity);
+	}
 	break;
     case NCX_BT_BITS:
 	ncx_init_list(&list, NCX_BT_BITS);
@@ -1939,9 +2499,8 @@ status_t
 {
     const typ_def_t        *undef;
     const typ_unionnode_t  *un;
-    ncx_btype_t      btyp;
-    status_t         res;
-    boolean          done, retdone;
+    status_t                res;
+    boolean                 done, retdone;
 
 #ifdef DEBUG
     if (!typdef || !strval || !retval) {
@@ -1981,48 +2540,20 @@ status_t
 	    continue;
 	}
 
-	btyp = typ_get_basetype(undef);
-
-	/* figure out the type and validate+convert the string */
-	if (typ_is_number(btyp)) {
-	    res = ncx_decode_num(strval, btyp, &retval->v.num);
-	    if (res == NO_ERR) {
-		res = val_range_ok_errinfo(undef, btyp, 
-					   &retval->v.num,
-					   errinfo);
-	    }
-	} else if (typ_is_string(btyp)) {
-	    res = val_string_ok_errinfo(undef, btyp, strval, errinfo);
-	    if (res == NO_ERR) {
-		retval->v.str = xml_strdup(strval);
-		if (!retval->v.str) {
-		    res = ERR_INTERNAL_VAL;
-		}
-	    }
-	} else if (btyp==NCX_BT_ENUM) {
-	    res = val_enum_ok(undef, strval,
-			      &retval->v.enu.val, 
-			      &retval->v.enu.name);
-	} else if (btyp==NCX_BT_UNION) {
-	    res = val_union_ok_errinfo(undef, strval, retval, errinfo);
-	    if (res==NO_ERR) {
-		retdone = TRUE;
-	    }
-	} else {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-
+	res = val_simval_ok_errinfo(undef, strval, errinfo);
 	if (res == NO_ERR) {
 	    /* the un->typ field may be NULL for YANG unions in progress
 	     * When the default is checked this ptr may be NULL, but the
 	     * retval is not used by that fn.  After the module is
 	     * registered, the un->typ field should be set
-	     *
-	     * (!!! make sure unnamed types from YANG work OK !!!)
 	     */
 	    if (!retdone) {
-		retval->untyp = un->typ;   /***/
-		retval->unbtyp = btyp;
+		retval->untyp = un->typ;   /****/
+
+		/* what if this is set to NCX_BT_UNION still?
+		 * not sure it matters.  Check!!!
+		 */
+		retval->unbtyp = typ_get_basetype(undef);
 	    }
 	    done = TRUE;
 	} else if (res != ERR_INTERNAL_MEM) {
@@ -2349,19 +2880,6 @@ void
     val_dump_value (const val_value_t *val,
 		    int32 startindent)
 {
-    const val_value_t  *chval;
-    const ncx_lmem_t   *listmem;
-    xmlChar            *buff;
-    ncx_btype_t         btyp, lbtyp;
-    uint32              len;
-    status_t            res;
-    boolean             quotes;
-
-#ifdef VAL_INCLUDE_META
-    const dlq_hdr_t    *metaQ;
-    const val_value_t  *metaval;
-#endif
-
 #ifdef DEBUG
     if (!val) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -2369,213 +2887,7 @@ void
     }
 #endif
 
-    /* indent and print the val name */
-    ncx_printf_indent(startindent);
-    if (val->btyp == NCX_BT_EXTERN) {
-	log_write("%s (extern=%s) ", 
-		   (val->name) ? (const char *)val->name : "--",
-		   (val->v.fname) ? (const char *)val->v.fname : "--");
-    } else if (val->btyp == NCX_BT_INTERN) {
-	log_write("%s (intern) ",
-		   (val->name) ? (const char *)val->name : "--");
-    } else {
-	log_write("%s ", (val->name) ? (const char *)val->name : "--");
-    }
-
-    /* get the real base type */
-    if (val->btyp == NCX_BT_UNION) {
-	btyp = val->unbtyp;
-    } else {
-	btyp = val->btyp;
-    }
-
-    /* check if an index clause needs to be printed next */
-    if (!dlq_empty(&val->indexQ)) {
-	res = val_get_index_string(NULL, NCX_IFMT_CLI, val, NULL, &len);
-	if (res == NO_ERR) {
-	    buff = m__getMem(len+1);
-	    if (buff) {
-		res = val_get_index_string(NULL, NCX_IFMT_CLI, 
-					   val, buff, &len);
-		if (res == NO_ERR) {
-		    log_write("%s ", buff);
-		} else {
-		    SET_ERROR(res);
-		}
-		m__free(buff);
-	    } else {
-		log_error("\nval: malloc failed for %u bytes", len+1);
-	    }
-	}
-
-	/* check if there is no more to print for this node */
-	if (typ_is_simple(btyp)) {
-	    return;
-	}
-    }
-
-    /* dump the value, depending on the base type */
-    switch (btyp) {
-    case NCX_BT_NONE:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	break;
-    case NCX_BT_ANY:
-	log_write("(any)");
-	break;
-    case NCX_BT_ENUM:
-	if (val->v.enu.name) {
-	    log_write("%s", (const char *)val->v.enu.name);
-	}
-	break;
-    case NCX_BT_EMPTY:
-	if (!val->v.bool) {
-	    log_write("(not set)");   /* should not happen */
-	}
-	break;
-    case NCX_BT_BOOLEAN:
-	if (val->v.bool) {
-	    log_write("true");
-	} else {
-	    log_write("false");
-	}
-	break;
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
-    case NCX_BT_FLOAT64:
-	dump_num(btyp, &val->v.num);
-	break;
-    case NCX_BT_BINARY:
-	log_write("binary string, length '%u'",
-		  val->v.binary.ustrlen);
-	break;
-    case NCX_BT_STRING:
-    case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:   /*******/
-	if (VAL_STR(val)) {
-	    quotes = val_need_quotes(VAL_STR(val));
-	    if (quotes) {
-		log_write("%c", VAL_QUOTE_CH);
-	    }
-	    if (obj_is_password(val->obj)) {
-		log_write("%s", (const char *)"****");
-	    } else {
-		log_write("%s", (const char *)VAL_STR(val));
-	    }
-	    if (quotes) {
-		log_write("%c", VAL_QUOTE_CH);
-	    }
-	}
-	break;
-    case NCX_BT_SLIST:
-    case NCX_BT_BITS:
-	if (dlq_empty(&val->v.list.memQ)) {
-	    log_write("{ }");
-	} else {
-	    lbtyp = val->v.list.btyp;
-	    log_write("{");
-	    for (listmem = (const ncx_lmem_t *)
-		     dlq_firstEntry(&val->v.list.memQ);
-		 listmem != NULL;
-		 listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) {
-
-		if (startindent >= 0) {
-		    ncx_printf_indent(startindent+NCX_DEF_INDENT);
-		}
-
-		if (typ_is_string(lbtyp)) {
-		    if (listmem->val.str) {
-			quotes = val_need_quotes(listmem->val.str);
-			if (quotes) {
-			    log_write("%c", VAL_QUOTE_CH);
-			}
-			log_write("%s ", (const char *)listmem->val.str);
-			if (quotes) {
-			    log_write("%c", VAL_QUOTE_CH);
-			}
-		    }
-		} else if (typ_is_number(lbtyp)) {
-		    dump_num(lbtyp, &listmem->val.num);
-		    log_write(" ");
-		} else {
-		    switch (lbtyp) {
-		    case NCX_BT_ENUM:
-			if (listmem->val.enu.name) {
-			    log_write("%s ",
-				      (const char *)listmem->val.enu.name);
-			}
-			break;
-		    case NCX_BT_BITS:
-			log_write("%s ", (const char *)listmem->val.str);
-			break;
-		    case NCX_BT_BOOLEAN:
-			log_write("%s ",
-				  (listmem->val.bool) ? 
-				  NCX_EL_TRUE : NCX_EL_FALSE);
-			break;
-		    default:
-			SET_ERROR(ERR_INTERNAL_VAL);
-		    }
-		}
-	    }
-	    ncx_printf_indent(startindent);
-	    log_write("}");
-	}
-	break;
-    case NCX_BT_LIST:
-    case NCX_BT_CONTAINER:
-    case NCX_BT_CHOICE:
-    case NCX_BT_CASE:
-	log_write("{");
-	for (chval = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
-	     chval != NULL;
-	     chval = (const val_value_t *)dlq_nextEntry(chval)) {
-	    val_dump_value(chval, (startindent >= 0) ?
-			   startindent+NCX_DEF_INDENT : startindent);
-	}
-	ncx_printf_indent(startindent);
-	log_write("}");
-	break;
-    case NCX_BT_EXTERN:
-	log_write("{");
-	ncx_printf_indent(startindent);
-	dump_extern(val->v.fname);
-	ncx_printf_indent(startindent);
-	log_write("}");
-	break;
-    case NCX_BT_INTERN:
-	log_write("{");
-	ncx_printf_indent(startindent);
-	dump_intern(val->v.intbuff);
-	ncx_printf_indent(startindent);
-	log_write("}");
-	break;
-    default:
-	log_error("\nval: illegal btype (%d)", btyp);
-    }    
-
-#ifdef VAL_INCLUDE_META
-    /* dump the metadata queue if non-empty */
-    metaQ = val_get_metaQ(val);
-    if (metaQ && !dlq_empty(metaQ)) {
-	if (startindent >= 0) {
-	    ncx_printf_indent(startindent+NCX_DEF_INDENT);
-	}
-	log_write("%s.metaQ ", val->name);
-	for (metaval = val_get_first_meta(metaQ);
-	     metaval != NULL;
-	     metaval = val_get_next_meta(metaval)) {
-	    val_dump_value(metaval, (startindent >= 0) ?
-			   startindent+(2*NCX_DEF_INDENT) : startindent);
-	}
-    }
-#endif
+    dump_value(val, startindent, TRUE);
 
 } /* val_dump_value */
 
@@ -2597,19 +2909,6 @@ void
     val_stdout_value (const val_value_t *val,
 		      int32 startindent)
 {
-    const val_value_t  *chval;
-    const ncx_lmem_t   *listmem;
-    xmlChar            *buff;
-    ncx_btype_t         btyp, lbtyp;
-    uint32              len;
-    status_t            res;
-    boolean             quotes;
-
-#ifdef VAL_INCLUDE_META
-    const dlq_hdr_t    *metaQ;
-    const val_value_t  *metaval;
-#endif
-
 #ifdef DEBUG
     if (!val) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -2617,208 +2916,7 @@ void
     }
 #endif
 
-    /* indent and print the val name */
-    ncx_stdout_indent(startindent);
-    if (val->btyp == NCX_BT_EXTERN) {
-	log_stdout("%s (extern=%s) ", 
-		   (val->name) ? (const char *)val->name : "--",
-		   (val->v.fname) ? (const char *)val->v.fname : "--");
-    } else if (val->btyp == NCX_BT_INTERN) {
-	log_stdout("%s (intern) ",
-		   (val->name) ? (const char *)val->name : "--");
-    } else {
-	log_stdout("%s ", (val->name) ? (const char *)val->name : "--");
-    }
-
-    /* get the real base type */
-    if (val->btyp == NCX_BT_UNION) {
-	btyp = val->unbtyp;
-    } else {
-	btyp = val->btyp;
-    }
-
-    /* check if an index clause needs to be printed next */
-    if (!dlq_empty(&val->indexQ)) {
-	res = val_get_index_string(NULL, NCX_IFMT_CLI, val, NULL, &len);
-	if (res == NO_ERR) {
-	    buff = m__getMem(len+1);
-	    if (buff) {
-		res = val_get_index_string(NULL, NCX_IFMT_CLI, 
-					   val, buff, &len);
-		if (res == NO_ERR) {
-		    log_stdout("%s ", buff);
-		} else {
-		    SET_ERROR(res);
-		}
-		m__free(buff);
-	    } else {
-		log_stdout("\nval: malloc failed for %u bytes", len+1);
-	    }
-	}
-
-	/* check if there is no more to print for this node */
-	if (typ_is_simple(btyp)) {
-	    return;
-	}
-    }
-
-    /* dump the value, depending on the base type */
-    switch (btyp) {
-    case NCX_BT_NONE:
-	log_stdout("(--)");
-	break;
-    case NCX_BT_ANY:
-	log_stdout("(any)");
-	break;
-    case NCX_BT_ENUM:
-	if (val->v.enu.name) {
-	    log_stdout("%s", (const char *)val->v.enu.name);
-	}
-	break;
-    case NCX_BT_EMPTY:
-	if (!val->v.bool) {
-	    log_stdout("(not set)");   /* should not happen */
-	}
-	break;
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
-    case NCX_BT_FLOAT64:
-	stdout_num(btyp, &val->v.num);
-	break;
-    case NCX_BT_BINARY:
-	log_stdout("binary string, length '%u'",
-		   val->v.binary.ustrlen);
-	break;
-    case NCX_BT_STRING:
-    case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF: /*******/
-	if (VAL_STR(val)) {
-	    quotes = val_need_quotes(VAL_STR(val));
-	    if (quotes) {
-		log_stdout("%c", VAL_QUOTE_CH);
-	    }
-	    if (obj_is_password(val->obj)) {
-		log_stdout("%s", (const char *)"****");
-	    } else {
-		log_stdout("%s", (const char *)VAL_STR(val));
-	    }
-	    if (quotes) {
-		log_stdout("%c", VAL_QUOTE_CH);
-	    }
-	}
-	break;
-    case NCX_BT_SLIST:
-    case NCX_BT_BITS:
-	if (dlq_empty(&val->v.list.memQ)) {
-	    log_stdout("{ }");
-	} else {
-	    lbtyp = val->v.list.btyp;
-	    log_stdout("{");
-	    for (listmem = (const ncx_lmem_t *)
-		     dlq_firstEntry(&val->v.list.memQ);
-		 listmem != NULL;
-		 listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) {
-
-		if (startindent >= 0) {
-		    ncx_stdout_indent(startindent+NCX_DEF_INDENT);
-		}
-
-		if (typ_is_string(lbtyp)) {
-		    if (listmem->val.str) {
-			quotes = val_need_quotes(listmem->val.str);
-			if (quotes) {
-			    log_stdout("%c", VAL_QUOTE_CH);
-			}
-			log_stdout("%s ", (const char *)listmem->val.str);
-			if (quotes) {
-			    log_stdout("%c", VAL_QUOTE_CH);
-			}
-		    }
-		} else if (typ_is_number(lbtyp)) {
-		    stdout_num(lbtyp, &listmem->val.num);
-		    log_stdout(" ");
-		} else {
-		    switch (lbtyp) {
-		    case NCX_BT_ENUM:
-			if (listmem->val.enu.name) {
-			    log_stdout("%s ", 
-				       (const char *)listmem->val.enu.name);
-			}
-			break;
-		    case NCX_BT_BITS:
-			log_write("%s ", (const char *)listmem->val.str);
-			break;
-		    case NCX_BT_BOOLEAN:
-			log_stdout("%s ",
-				   (listmem->val.bool) ? 
-				   NCX_EL_TRUE : NCX_EL_FALSE);
-			break;
-		    default:
-			SET_ERROR(ERR_INTERNAL_VAL);
-		    }
-		}
-	    }
-
-	    ncx_stdout_indent(startindent);
-	    log_stdout("}");
-	}
-	break;
-    case NCX_BT_LIST:
-    case NCX_BT_CONTAINER:
-    case NCX_BT_CHOICE:
-    case NCX_BT_CASE:
-	log_stdout("{");
-	for (chval = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
-	     chval != NULL;
-	     chval = (const val_value_t *)dlq_nextEntry(chval)) {
-	    val_stdout_value(chval, (startindent >= 0) ?
-			     startindent+NCX_DEF_INDENT : startindent);
-	}
-	ncx_stdout_indent(startindent);
-	log_stdout("}");
-	break;
-    case NCX_BT_EXTERN:
-	log_stdout("{");
-	ncx_stdout_indent(startindent);
-	stdout_extern(val->v.fname);
-	ncx_stdout_indent(startindent);
-	log_stdout("}");
-	break;
-    case NCX_BT_INTERN:
-	log_stdout("{");
-	ncx_stdout_indent(startindent);
-	stdout_intern(val->v.intbuff);
-	ncx_stdout_indent(startindent);
-	log_stdout("}");
-	break;
-    default:
-	log_stdout("\nval: illegal btype (%d)", btyp);
-    }    
-
-#ifdef VAL_INCLUDE_META
-    /* dump the metadata queue if non-empty */
-    metaQ = val_get_metaQ(val);
-    if (metaQ && !dlq_empty(metaQ)) {
-	if (startindent >= 0) {
-	    ncx_stdout_indent(startindent+NCX_DEF_INDENT);
-	}
-	log_stdout("%s.metaQ ", val->name);
-	for (metaval = val_get_first_meta(metaQ);
-	     metaval != NULL;
-	     metaval = val_get_next_meta(metaval)) {
-	    val_stdout_value(metaval, (startindent >= 0) ?
-			     startindent+(2*NCX_DEF_INDENT) 
-			     : startindent);
-	}
-    }
-#endif
+    dump_value(val, startindent, FALSE);
 
 } /* val_stdout_value */
 
@@ -3011,6 +3109,7 @@ status_t
 *  NCX_BT_BITS
 *  NCX_BT_UNION
 *  NCX_BT_KEYREF
+*  NCX_BT_IDREF
 *
 * INPUTS:
 *    val == value to set

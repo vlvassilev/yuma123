@@ -495,6 +495,7 @@ void
 	}
     case OBJ_TYP_AUGMENT:
     case OBJ_TYP_USES:
+    case OBJ_TYP_REFINE:
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
     }

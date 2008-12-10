@@ -21,7 +21,7 @@
     engine callbacks to process arbitrarily complex
     data structues with the same code.
 
-    There are 11 types of objects:
+    There are 12 types of objects:
 
       OBJ_TYP_CONTAINER
       OBJ_TYP_LEAF
@@ -30,6 +30,7 @@
       OBJ_TYP_CHOICE
       OBJ_TYP_CASE
       OBJ_TYP_USES
+      OBJ_TYP_REFINE
       OBJ_TYP_AUGMENT
       OBJ_TYP_RPC
       OBJ_TYP_RPCIO
@@ -37,7 +38,8 @@
 
    These objects are grouped as follows:
       * concrete data node objects (container - list)
-      * meta grouping constructs (choice, case) and (uses, augment)
+      * meta grouping constructs (choice, case) 
+        and (uses, refine, augment)
       * RPC method objects (rpc, input, output)
       * notification objects (notification)
 
@@ -232,22 +234,26 @@ static status_t
 		     ncx_module_t  *mod,
 		     dlq_hdr_t *que,
 		     obj_template_t *parent,
-		     boolean refi,
 		     grp_template_t *grp);
 
 static status_t 
     consume_case_datadef (tk_chain_t *tkc,
 			  ncx_module_t  *mod,
 			  dlq_hdr_t *que,
-			  obj_template_t *parent,
-			  boolean refi);
+			  obj_template_t *parent);
 
 static status_t 
-    consume_yang_refine (tk_chain_t *tkc,
-			 ncx_module_t  *mod,
-			 dlq_hdr_t *que,
-			 obj_template_t *parent);
+    consume_refine (tk_chain_t *tkc,
+		    ncx_module_t  *mod,
+		    dlq_hdr_t *que,
+		    obj_template_t *parent);
 
+static status_t 
+    consume_augment (tk_chain_t *tkc,
+		     ncx_module_t  *mod,
+		     dlq_hdr_t *que,
+		     obj_template_t *parent,
+		     grp_template_t *grp);
 
 /*************    P A R S E   F U N C T I O N S    *************/
 
@@ -355,7 +361,68 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION consume_yang_anyxml
+* FUNCTION consume_semi_lbrace
+* 
+* Parse the next token as a semi-colon or a left brace
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'anyxml' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   obj == object in progress
+*   done == address of boolean done flag
+*
+*
+OUTPUTS:
+*  *done will be set on exit to TRUE or FALSE
+*
+* RETURNS:
+*   status of the operation;
+*********************************************************************/
+static status_t 
+    consume_semi_lbrace (tk_chain_t *tkc,
+			 ncx_module_t  *mod,
+			 obj_template_t *obj,
+			 boolean *done)
+{
+    const char *expstr;
+    status_t res;
+
+    /* Get the starting left brace for the sub-clauses
+     * or a semi-colon to end the case-stmt
+     */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	*done = TRUE;
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+	obj->flags |= OBJ_FL_EMPTY;
+	*done = TRUE;
+	break;
+    case TK_TT_LBRACE:
+	*done = FALSE;
+	break;
+    default:
+	res = ERR_NCX_WRONG_TKTYPE;
+	expstr = "semi-colon or left brace";
+	ncx_mod_exp_err(tkc, mod, res, expstr);
+	*done = TRUE;
+    }
+    return res;
+
+}  /* consume_semi_lbrace */
+
+
+/********************************************************************
+* FUNCTION consume_anyxml
 * 
 * Parse the next N tokens as an anyxml-stmt
 * Create and fill in an obj_template_t struct
@@ -370,19 +437,17 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level anyxml-stmt
-*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == parent grp_template_t or NULL if not child of grp
 *   
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_anyxml (tk_chain_t *tkc,
-			 ncx_module_t  *mod,
-			 dlq_hdr_t  *que,
-			 obj_template_t *parent,
-			 boolean refi,
-			 grp_template_t *grp)
+    consume_anyxml (tk_chain_t *tkc,
+		    ncx_module_t  *mod,
+		    dlq_hdr_t  *que,
+		    obj_template_t *parent,
+		    grp_template_t *grp)
 {
     obj_template_t  *obj;
     obj_leaf_t      *leaf;
@@ -391,7 +456,6 @@ static status_t
     tk_type_t        tktyp;
     boolean          done, when, conf, flagset, mand, stat, desc, ref;
     status_t         res, retres;
-    ncx_status_t     errstatus;
 
     obj = NULL;
     leaf = NULL;
@@ -420,9 +484,6 @@ static status_t
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
     obj->grp = grp;
-    if (refi) {
-	obj->flags |= OBJ_FL_REFINE;
-    }
 
     leaf = obj->def.leaf;
     if (que == &mod->datadefQ) {
@@ -438,30 +499,10 @@ static status_t
     res = yang_consume_id_string(tkc, mod, &leaf->name);
     CHK_OBJ_EXIT;
 
-    /* Get the starting left brace for the sub-clauses
-     * or a semi-colon to end the anyxml-stmt
-     */
-    res = TK_ADV(tkc);
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_template(obj);
-	return res;
-    }
-    switch (TK_CUR_TYP(tkc)) {
-    case TK_TT_SEMICOL:
-	obj->flags |= OBJ_FL_EMPTY;
-	done = TRUE;
-	break;
-    case TK_TT_LBRACE:
-	break;
-    default:
-	retres = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	done = TRUE;
-    }
+    res = consume_semi_lbrace(tkc, mod, obj, &done);
+    CHK_OBJ_EXIT;
 
-    /* get the leaf statements and any appinfo extensions */
+    /* get the anyxml statements and any appinfo extensions */
     while (!done) {
 	/* get the next token */
 	res = TK_ADV(tkc);
@@ -526,15 +567,8 @@ static status_t
 	    }
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_status(tkc, mod, &errstatus,
-					  NULL, NULL);
-	    } else {
-		res = yang_consume_status(tkc, mod, &leaf->status,
-					  &stat, &obj->appinfoQ);
-	    }
+	    res = yang_consume_status(tkc, mod, &leaf->status,
+				      &stat, &obj->appinfoQ);
 	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &leaf->descr,
@@ -560,11 +594,11 @@ static status_t
 
     return retres;
 
-}  /* consume_yang_anyxml */
+}  /* consume_anyxml */
 
 
 /********************************************************************
-* FUNCTION consume_yang_container
+* FUNCTION consume_container
 * 
 * Parse the next N tokens as a container-stmt
 * Create and fill in an obj_template_t struct
@@ -579,26 +613,22 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level
-*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_container (tk_chain_t *tkc,
-			    ncx_module_t  *mod,
-			    dlq_hdr_t  *que,
-			    obj_template_t *parent,
-			    boolean refi,
-			    grp_template_t *grp)
+    consume_container (tk_chain_t *tkc,
+		       ncx_module_t  *mod,
+		       dlq_hdr_t  *que,
+		       obj_template_t *parent,
+		       grp_template_t *grp)
 {
     obj_template_t  *obj;
     obj_container_t *con;
     const xmlChar   *val;
     const char      *expstr;
-    dlq_hdr_t        errQ;
-    ncx_status_t     errstatus;
     tk_type_t        tktyp;
     boolean          done, when, pres, conf, flagset, stat, desc, ref;
     status_t         res, retres;
@@ -616,7 +646,6 @@ static status_t
     ref = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
-    dlq_createSQue(&errQ);
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_CONTAINER);
@@ -631,41 +660,18 @@ static status_t
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
     obj->grp = grp;
-    if (refi) {
-	obj->flags |= OBJ_FL_REFINE;
-    }
+
     con = obj->def.container;
     if (que == &mod->datadefQ) {
 	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
-
 	
     /* Get the mandatory container name */
     res = yang_consume_id_string(tkc, mod, &con->name);
     CHK_OBJ_EXIT;
 
-    /* Get the starting left brace for the sub-clauses
-     * or a semi-colon to end the container-stmt
-     */
-    res = TK_ADV(tkc);
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_template(obj);
-	return res;
-    }
-    switch (TK_CUR_TYP(tkc)) {
-    case TK_TT_SEMICOL:
-	obj->flags |= OBJ_FL_EMPTY;
-	done = TRUE;
-	break;
-    case TK_TT_LBRACE:
-	break;
-    default:
-	retres = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	done = TRUE;
-    }
+    res = consume_semi_lbrace(tkc, mod, obj, &done);
+    CHK_OBJ_EXIT;
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -707,43 +713,23 @@ static status_t
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
 	    res = yang_consume_iffeature(tkc, mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    if (refi) {
-		res = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, res);
-		(void)yang_typ_consume_typedef(tkc, mod, &errQ);
-		typ_clean_typeQ(&errQ);
-	    } else {
-		res = yang_typ_consume_typedef(tkc, mod,
-					       con->typedefQ);
-		CHK_OBJ_EXIT;
-	    }
+	    res = yang_typ_consume_typedef(tkc, mod,
+					   con->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    if (refi) {
-		res = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, res);
-		(void)yang_grp_consume_grouping(tkc, mod, &errQ, obj);
-		grp_clean_groupingQ(&errQ);
-	    } else {
-		res = yang_grp_consume_grouping(tkc, mod, 
-						con->groupingQ, obj);
-		CHK_OBJ_EXIT;
-	    }
+	    res = yang_grp_consume_grouping(tkc, mod, 
+					    con->groupingQ, obj);
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
 	    res = yang_consume_must(tkc, mod, &con->mustQ,
 				    &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_PRESENCE)) {
 	    res = yang_consume_strclause(tkc, mod, 
 					 &con->presence,
 					 &pres, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
@@ -752,36 +738,20 @@ static status_t
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
 	    }
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_status(tkc, mod, &errstatus,
-					  NULL, NULL);
-	    } else {
-		res = yang_consume_status(tkc, mod, &con->status,
-					  &stat, &obj->appinfoQ);
-	    }
-	    CHK_OBJ_EXIT;
+	    res = yang_consume_status(tkc, mod, &con->status,
+				      &stat, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &con->descr,
 				     &desc, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &con->ref,
 				     &ref, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else {
-	    if (refi) {
-		res = consume_yang_refine(tkc, mod,
-					  con->datadefQ, obj);
-	    } else {
-		res = yang_obj_consume_datadef(tkc, mod,
-					       con->datadefQ, obj);
-	    }
-	    CHK_OBJ_EXIT;
+	    res = yang_obj_consume_datadef(tkc, mod,
+					   con->datadefQ, obj);
 	}
+	CHK_OBJ_EXIT;
     }
 
     /* save or delete the obj_template_t struct */
@@ -794,11 +764,11 @@ static status_t
 
     return retres;
 
-}  /* consume_yang_container */
+}  /* consume_container */
 
 
 /********************************************************************
-* FUNCTION consume_yang_leaf
+* FUNCTION consume_leaf
 * 
 * Parse the next N tokens as a leaf-stmt
 * Create and fill in an obj_template_t struct
@@ -813,19 +783,17 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level data-def-stmt
-*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == parent grp_template_t or NULL if not child of grp
 *   
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_leaf (tk_chain_t *tkc,
-		       ncx_module_t  *mod,
-		       dlq_hdr_t  *que,
-		       obj_template_t *parent,
-		       boolean refi,
-		       grp_template_t *grp)
+    consume_leaf (tk_chain_t *tkc,
+		  ncx_module_t  *mod,
+		  dlq_hdr_t  *que,
+		  obj_template_t *parent,
+		  grp_template_t *grp)
 {
     obj_template_t  *obj;
     obj_leaf_t      *leaf;
@@ -835,7 +803,6 @@ static status_t
     boolean          done, when, typ, units, def, conf;
     boolean          mand, stat, desc, ref, typeok, flagset;
     status_t         res, retres;
-    ncx_status_t     errstatus;
 
     obj = NULL;
     leaf = NULL;
@@ -868,9 +835,7 @@ static status_t
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
     obj->grp = grp;
-    if (refi) {
-	obj->flags |= OBJ_FL_REFINE;
-    }
+
     leaf = obj->def.leaf;
     if (que == &mod->datadefQ) {
 	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
@@ -880,28 +845,9 @@ static status_t
     res = yang_consume_id_string(tkc, mod, &leaf->name);
     CHK_OBJ_EXIT;
 
-    /* Get the starting left brace for the sub-clauses
-     * or a semi-colon to end the leaf-stmt
-     */
-    res = TK_ADV(tkc);
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_template(obj);
-	return res;
-    }
-    switch (TK_CUR_TYP(tkc)) {
-    case TK_TT_SEMICOL:
-	obj->flags |= OBJ_FL_EMPTY;
-	done = TRUE;
-	break;
-    case TK_TT_LBRACE:
-	break;
-    default:
-	retres = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	done = TRUE;
-    }
+    /* Get the mandatory left brace */
+    res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
+    CHK_OBJ_EXIT;
 
     /* get the leaf statements and any appinfo extensions */
     while (!done) {
@@ -943,57 +889,39 @@ static status_t
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
 	    res = yang_consume_iffeature(tkc, mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_TYPE)) {
-	    if (refi || typ) {
-		if (refi) {
-		    retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		} else {
-		    retres = ERR_NCX_DUP_ENTRY;
-		}
+	    if (typ) {
+		retres = ERR_NCX_DUP_ENTRY;
 		typeok = FALSE;
 		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_typ_consume_type(tkc, mod, leaf->typdef);
-		CHK_OBJ_EXIT;
+
+		/* toss the old typdef because this is a fatal
+		 * error anyway, and need to skip past the new
+		 * typedef; replace the old typedef!
+		 */
 		typ_clean_typdef(leaf->typdef);
+		res = yang_typ_consume_type(tkc, mod, leaf->typdef);
 	    } else {
 		typ = TRUE;
 		res = yang_typ_consume_type(tkc, mod, leaf->typdef);
-		CHK_OBJ_EXIT;
 		if (res == NO_ERR) {
 		    typeok = TRUE;
 		}
 	    }
 	} else if (!xml_strcmp(val, YANG_K_UNITS)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_strclause(tkc, mod, &leaf->units,
-					     NULL, NULL);
-		CHK_OBJ_EXIT;
-		if (leaf->units) {
-		    m__free(leaf->units);
-		    leaf->units = NULL;
-		}
-	    } else {
-		res = yang_consume_strclause(tkc, mod, &leaf->units,
-					     &units, &obj->appinfoQ);
-		CHK_OBJ_EXIT;
-	    }
+	    res = yang_consume_strclause(tkc, mod, &leaf->units,
+					 &units, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
 	    res = yang_consume_must(tkc, mod, &leaf->mustQ,
 				    &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
 	    res = yang_consume_strclause(tkc, mod, 
 					 &leaf->defval,
 					 &def, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
@@ -1002,7 +930,6 @@ static status_t
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
 	    }
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
@@ -1011,41 +938,31 @@ static status_t
 	    if (flagset) {
 		obj->flags |= OBJ_FL_MANDATORY;
 	    }
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_status(tkc, mod, &errstatus,
-					  NULL, NULL);
-	    } else {
-		res = yang_consume_status(tkc, mod, &leaf->status,
-					  &stat, &obj->appinfoQ);
-	    }
-	    CHK_OBJ_EXIT;
+	    res = yang_consume_status(tkc, mod, &leaf->status,
+				      &stat, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &leaf->descr,
 				     &desc, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &leaf->ref,
 				     &ref, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    res = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
+	CHK_OBJ_EXIT;
     }
 
     /* check mandatory params */
-    if (!typ && !refi) {
+    if (!typ) {
 	expstr = "mandatory type statement";
 	retres = ERR_NCX_DATA_MISSING;
 	ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
     /* save or delete the obj_template_t struct */
-    if (leaf->name && ncx_valid_name2(leaf->name) && (typeok || refi)) {
+    if (leaf->name && ncx_valid_name2(leaf->name) && typeok) {
 	res = add_object(tkc, mod, que, obj);
 	CHK_EXIT;
     } else {
@@ -1054,11 +971,11 @@ static status_t
 
     return retres;
 
-}  /* consume_yang_leaf */
+}  /* consume_leaf */
 
 
 /********************************************************************
-* FUNCTION consume_yang_leaflist
+* FUNCTION consume_leaflist
 * 
 * Parse the next N tokens as a leaf-list-stmt
 * Create and fill in an obj_template_t struct
@@ -1073,30 +990,27 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level data-def-stmt
-*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_leaflist (tk_chain_t *tkc,
-			   ncx_module_t  *mod,
-			   dlq_hdr_t  *que,
-			   obj_template_t *parent,
-			   boolean refi,
-			   grp_template_t *grp)
+    consume_leaflist (tk_chain_t *tkc,
+		      ncx_module_t  *mod,
+		      dlq_hdr_t  *que,
+		      obj_template_t *parent,
+		      grp_template_t *grp)
 {
     obj_template_t  *obj;
     obj_leaflist_t  *llist;
-    const xmlChar   *val, *nextval;
+    const xmlChar   *val;
     const char      *expstr;
     xmlChar         *str;
-    tk_type_t        tktyp, nexttk;
+    tk_type_t        tktyp;
     boolean          done, when, typ, units, conf;
     boolean          minel, maxel, ord, stat, desc, ref, typeok, flagset;
     status_t         res, retres;
-    ncx_status_t     errstatus;
 
     obj = NULL;
     llist = NULL;
@@ -1131,9 +1045,7 @@ static status_t
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
     obj->grp = grp;
-    if (refi) {
-	obj->flags |= OBJ_FL_REFINE;
-    }
+
     llist = obj->def.leaflist;
     if (que == &mod->datadefQ) {
 	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
@@ -1143,28 +1055,9 @@ static status_t
     res = yang_consume_id_string(tkc, mod, &llist->name);
     CHK_OBJ_EXIT;
 
-    /* Get the starting left brace for the sub-clauses
-     * or a semi-colon to end the leaf-list-stmt
-     */
-    res = TK_ADV(tkc);
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_template(obj);
-	return res;
-    }
-    switch (TK_CUR_TYP(tkc)) {
-    case TK_TT_SEMICOL:
-	obj->flags |= OBJ_FL_EMPTY;
-	done = TRUE;
-	break;
-    case TK_TT_LBRACE:
-	break;
-    default:
-	retres = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	done = TRUE;
-    }
+    /* Get the mandatory left brace */
+    res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
+    CHK_OBJ_EXIT;
 
     /* get the leaf-list statements and any appinfo extensions */
     while (!done) {
@@ -1178,7 +1071,6 @@ static status_t
 
 	tktyp = TK_CUR_TYP(tkc);
 	val = TK_CUR_VAL(tkc);
-	flagset = FALSE;
 
 	/* check the current token type */
 	switch (tktyp) {
@@ -1206,53 +1098,32 @@ static status_t
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
 	    res = yang_consume_iffeature(tkc, mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_TYPE)) {
-	    if (refi || typ) {
-		if (refi) {
-		    retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		} else {
-		    retres = ERR_NCX_DUP_ENTRY;
-		}
+	    if (typ) {
+		retres = ERR_NCX_DUP_ENTRY;
 		typeok = FALSE;
 		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_typ_consume_type(tkc, mod, llist->typdef);
-		CHK_OBJ_EXIT;
 		typ_clean_typdef(llist->typdef);
+		res = yang_typ_consume_type(tkc, mod, llist->typdef);
 	    } else {
 		typ = TRUE;
 		res = yang_typ_consume_type(tkc, mod, llist->typdef);
-		CHK_OBJ_EXIT;
 		if (res == NO_ERR) {
 		    typeok = TRUE;
 		}
 	    }
 	} else if (!xml_strcmp(val, YANG_K_UNITS)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_strclause(tkc, mod, &llist->units,
-					     NULL, NULL);
-		if (llist->units) {
-		    m__free(llist->units);
-		    llist->units = NULL;
-		}
-		CHK_OBJ_EXIT;
-	    } else {
-		res = yang_consume_strclause(tkc, mod, &llist->units,
-					     &units, &obj->appinfoQ);
-		CHK_OBJ_EXIT;
-	    }
+	    res = yang_consume_strclause(tkc, mod, &llist->units,
+					 &units, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
 	    res = yang_consume_must(tkc, mod, &llist->mustQ,
 				    &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+	    flagset = FALSE;
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
 				       &conf, &obj->appinfoQ);
@@ -1260,108 +1131,45 @@ static status_t
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
 	    }
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
 	    res = yang_consume_uint32(tkc, mod,
 				      &llist->minelems,
 				      &minel, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	    llist->minset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
-	    nexttk = tk_next_typ(tkc);
-	    nextval = tk_next_val(tkc);
-
-	    if (nexttk==TK_TT_DNUM) {
-		res = yang_consume_uint32(tkc, mod,
-					  &llist->maxelems,
-					  &maxel, &obj->appinfoQ);
-	    } else if (TK_TYP_STR(nexttk)) {
-		if (!xml_strcmp(nextval, YANG_K_UNBOUNDED)) {
-		    str = NULL;
-		    res = yang_consume_strclause(tkc, mod, &str,
-					     &maxel, &obj->appinfoQ);
-		    if (str) {
-			m__free(str);
-			str = NULL;
-		    }
-		    /* default is unbounded, so don't set anything */
-		} else {
-		    /* may be a quoted number or an error */
-		    res = yang_consume_uint32(tkc, mod,
-					      &llist->maxelems,
-					      &maxel, &obj->appinfoQ);
-		}
-	    }		    
-	    CHK_OBJ_EXIT;
+	    res = yang_consume_max_elements(tkc, mod,
+					    &llist->maxelems,
+					    &maxel, &obj->appinfoQ);
 	    llist->maxset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_ORDERED_BY)) {
-	    str = NULL;
-	    if (refi || ord) {
-		if (refi) {
-		    retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		} else {
-		    retres = ERR_NCX_DUP_ENTRY;
-		}		    
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_strclause(tkc, mod, &str,
-					     NULL, NULL);
-		if (str) {
-		    m__free(str);
-		    str = NULL;
-		}
-		CHK_OBJ_EXIT;
-	    } else {
-		res = yang_consume_strclause(tkc, mod, &str,
-					     &ord, &obj->appinfoQ);
-		if (str) {
-		    if (!xml_strcmp(str, YANG_K_USER)) {
-			llist->ordersys = FALSE;
-		    } else if (!xml_strcmp(str, YANG_K_SYSTEM)) {
-			llist->ordersys = TRUE;
-		    } else {
-			retres = ERR_NCX_WRONG_TKVAL;
-			expstr = "system or user keyword";
-			ncx_mod_exp_err(tkc, mod, retres, expstr);
-		    }
-		    m__free(str);
-		}
-		CHK_OBJ_EXIT;
-	    }
+	    res = yang_consume_ordered_by(tkc, mod, 
+					  &llist->ordersys,
+					  &ord, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_status(tkc, mod, &errstatus,
-					  NULL, NULL);
-	    } else {
-		res = yang_consume_status(tkc, mod, &llist->status,
-					  &stat, &obj->appinfoQ);
-		
-	    }
-	    CHK_OBJ_EXIT;
+	    res = yang_consume_status(tkc, mod, &llist->status,
+				      &stat, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &llist->descr,
 				     &desc, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &llist->ref,
 				     &ref, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    res = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
+	CHK_OBJ_EXIT;
     }
 
     /* check mandatory params */
-    if (!typ && !refi) {
+    if (!typ) {
 	expstr = "mandatory type-stmt";
 	retres = ERR_NCX_DATA_MISSING;
 	ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
     /* save or delete the obj_template_t struct */
-    if (llist->name && ncx_valid_name2(llist->name) && (typeok || refi)) {
+    if (llist->name && ncx_valid_name2(llist->name) && typeok) {
 	res = add_object(tkc, mod, que, obj);
 	CHK_EXIT;
     } else {
@@ -1370,11 +1178,11 @@ static status_t
 
     return retres;
 
-}  /* consume_yang_leaflist */
+}  /* consume_leaflist */
 
 
 /********************************************************************
-* FUNCTION consume_yang_list
+* FUNCTION consume_list
 * 
 * Parse the next N tokens as a list-stmt
 * Create and fill in an obj_template_t struct
@@ -1389,33 +1197,29 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level data-def-stmt
-*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_list (tk_chain_t *tkc,
-		       ncx_module_t  *mod,
-		       dlq_hdr_t  *que,
-		       obj_template_t *parent,
-		       boolean refi,
-		       grp_template_t *grp)
+    consume_list (tk_chain_t *tkc,
+		  ncx_module_t  *mod,
+		  dlq_hdr_t  *que,
+		  obj_template_t *parent,
+		  grp_template_t *grp)
 {
     obj_template_t  *obj;
     obj_list_t      *list;
     obj_unique_t    *objuniq;
-    const xmlChar   *val, *nextval;
+    const xmlChar   *val;
     const char      *expstr;
     xmlChar         *str;
     tk_token_t      *savetk;
-    dlq_hdr_t        errQ;
-    tk_type_t        tktyp, nexttk;
+    tk_type_t        tktyp;
     boolean          done, when, key, conf;
     boolean          minel, maxel, ord, stat, desc, ref, flagset;
     status_t         res, retres;
-    ncx_status_t     errstatus;
 
     obj = NULL;
     list = NULL;
@@ -1434,7 +1238,6 @@ static status_t
     ref = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
-    dlq_createSQue(&errQ);
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_LIST);
@@ -1449,9 +1252,6 @@ static status_t
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
     obj->grp = grp;
-    if (refi) {
-	obj->flags |= OBJ_FL_REFINE;
-    }
 
     list = obj->def.list;
     if (que == &mod->datadefQ) {
@@ -1462,28 +1262,9 @@ static status_t
     res = yang_consume_id_string(tkc, mod, &list->name);
     CHK_OBJ_EXIT;
 
-    /* Get the starting left brace for the sub-clauses
-     * or a semi-colon to end the list-stmt
-     */
-    res = TK_ADV(tkc);
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_template(obj);
-	return res;
-    }
-    switch (TK_CUR_TYP(tkc)) {
-    case TK_TT_SEMICOL:
-	obj->flags |= OBJ_FL_EMPTY;
-	done = TRUE;
-	break;
-    case TK_TT_LBRACE:
-	break;
-    default:
-	retres = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	done = TRUE;
-    }
+    /* Get the mandatory left brace */
+    res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
+    CHK_OBJ_EXIT;
 
     /* get the list statements and any appinfo extensions */
     while (!done) {
@@ -1498,7 +1279,6 @@ static status_t
 
 	tktyp = TK_CUR_TYP(tkc);
 	val = TK_CUR_VAL(tkc);
-	flagset = FALSE;
 
 	/* check the current token type */
 	switch (tktyp) {
@@ -1526,91 +1306,48 @@ static status_t
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
 	    res = yang_consume_iffeature(tkc, mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_typ_consume_typedef(tkc, mod, &errQ);
-		typ_clean_typeQ(&errQ);
-	    } else {
-		res = yang_typ_consume_typedef(tkc, mod,
-					       list->typedefQ);
-	    }
-	    CHK_OBJ_EXIT;
+	    res = yang_typ_consume_typedef(tkc, mod,
+					   list->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_grp_consume_grouping(tkc, mod, &errQ, obj);
-		grp_clean_groupingQ(&errQ);
-	    } else {
-		res = yang_grp_consume_grouping(tkc, mod,
-						list->groupingQ, obj);
-	    }
-	    CHK_OBJ_EXIT;
+	    res = yang_grp_consume_grouping(tkc, mod,
+					    list->groupingQ, obj);
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
 	    res = yang_consume_must(tkc, mod, &list->mustQ,
 				    &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_KEY)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_strclause(tkc, mod, &list->keystr,
-					     NULL, NULL);
-		if (list->keystr) {
-		    m__free(list->keystr);
-		    list->keystr = NULL;
-		}
-	    } else {
-		savetk = TK_CUR(tkc);
-		res = yang_consume_strclause(tkc, mod, &list->keystr,
-					     &key, &obj->appinfoQ);
-		if (res == NO_ERR) {
-		    list->keytk = savetk;
-		    list->keylinenum = savetk->linenum;
-		}
+	    savetk = TK_CUR(tkc);
+	    res = yang_consume_strclause(tkc, mod, &list->keystr,
+					 &key, &obj->appinfoQ);
+	    if (res == NO_ERR) {
+		list->keytk = savetk;
+		list->keylinenum = savetk->linenum;
 	    }
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_UNIQUE)) {
-	    if (refi) {
-		str = NULL;
-		res = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_strclause(tkc, mod, &str,
-					     NULL, NULL);
-		if (str) {
-		    m__free(str);
-		    str = NULL;
-		}
-	    } else {
-		objuniq = obj_new_unique();
-		if (!objuniq) {
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		    obj_free_template(obj);
-		    return res;
-		}
-
-		objuniq->tk = TK_CUR(tkc);
-
-		res = yang_consume_strclause(tkc, mod,
-					     &objuniq->xpath,
-					     NULL, &obj->appinfoQ);
-		if (res == NO_ERR) {
-		    dlq_enque(objuniq, list->uniqueQ);
-		} else {
-		    obj_free_unique(objuniq);
-		}
+	    objuniq = obj_new_unique();
+	    if (!objuniq) {
+		res = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, res);
+		obj_free_template(obj);
+		return res;
 	    }
-	    CHK_OBJ_EXIT;
+
+	    objuniq->tk = TK_CUR(tkc);
+
+	    res = yang_consume_strclause(tkc, mod,
+					 &objuniq->xpath,
+					 NULL, &obj->appinfoQ);
+	    if (res == NO_ERR) {
+		dlq_enque(objuniq, list->uniqueQ);
+	    } else {
+		obj_free_unique(objuniq);
+	    }
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+	    flagset = FALSE;
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
 				       &conf, &obj->appinfoQ);
@@ -1618,100 +1355,37 @@ static status_t
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
 	    }
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
 	    res = yang_consume_uint32(tkc, mod,
 				      &list->minelems,
 				      &minel, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	    list->minset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
-	    nexttk = tk_next_typ(tkc);
-	    nextval = tk_next_val(tkc);
-
-	    if (nexttk==TK_TT_DNUM) {
-		res = yang_consume_uint32(tkc, mod,
-					  &list->maxelems,
-					  &maxel, &obj->appinfoQ);
-	    } else if (TK_TYP_STR(nexttk)) {
-		if (!xml_strcmp(nextval, YANG_K_UNBOUNDED)) {
-		    str = NULL;
-		    res = yang_consume_strclause(tkc, mod, &str,
-					     &maxel, &obj->appinfoQ);
-		    if (str) {
-			m__free(str);
-			str = NULL;
-		    }
-		    /* default is unbounded, so don't set anything */
-		} else {
-		    /* may be a quoted number or an error */
-		    res = yang_consume_uint32(tkc, mod,
-					      &list->maxelems,
-					      &maxel, &obj->appinfoQ);
-		}
-	    }		    
-	    CHK_OBJ_EXIT;
+	    res = yang_consume_max_elements(tkc, mod,
+					    &list->maxelems,
+					    &maxel, &obj->appinfoQ);
 	    list->maxset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_ORDERED_BY)) {
-	    str = NULL;
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_strclause(tkc, mod, &str,
-					     NULL, NULL);
-		if (str) {
-		    m__free(str);
-		    str = NULL;
-		}
-	    } else {
-		res = yang_consume_strclause(tkc, mod, &str,
-					     &ord, &obj->appinfoQ);
-		if (str) {
-		    if (!xml_strcmp(str, YANG_K_USER)) {
-			list->ordersys = FALSE;
-		    } else if (!xml_strcmp(str, YANG_K_SYSTEM)) {
-			list->ordersys = TRUE;
-		    } else {
-			retres = ERR_NCX_WRONG_TKVAL;
-			expstr = "system or user keyword";
-			ncx_mod_exp_err(tkc, mod, retres, expstr);
-		    }
-		    m__free(str);
-		}
-	    }
-	    CHK_OBJ_EXIT;
+	    res = yang_consume_ordered_by(tkc, mod,
+					  &list->ordersys,
+					  &ord, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_status(tkc, mod, &errstatus,
-					  NULL, NULL);
-	    } else {
-		res = yang_consume_status(tkc, mod, &list->status,
-					  &stat, &obj->appinfoQ);
-	    }
-	    CHK_OBJ_EXIT;
+	    res = yang_consume_status(tkc, mod, &list->status,
+				      &stat, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &list->descr,
 				     &desc, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &list->ref,
 				     &ref, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else {
-	    if (refi) {
-		res = consume_yang_refine(tkc, mod,
-					  list->datadefQ, obj);
-	    } else {
-		res = yang_obj_consume_datadef(tkc, mod,
-					       list->datadefQ, obj);
-	    }
-	    CHK_OBJ_EXIT;
+	    res = yang_obj_consume_datadef(tkc, mod,
+					   list->datadefQ, obj);
 	}
+	CHK_OBJ_EXIT;
     }
 
-    if (!list->keystr && (obj->flags & OBJ_FL_CONFIG) && !refi) {
+    if (!list->keystr && (obj->flags & OBJ_FL_CONFIG)) {
 	log_error("\nError: No key entered for list '%s' on line %u",
 		  list->name, obj->linenum);
 	retres = ERR_NCX_DATA_MISSING;
@@ -1734,11 +1408,11 @@ static status_t
 
     return retres;
 
-}  /* consume_yang_list */
+}  /* consume_list */
 
 
 /********************************************************************
-* FUNCTION consume_yang_case
+* FUNCTION consume_case
 * 
 * Parse the next N tokens as a case-stmt
 * Create and fill in an obj_template_t struct
@@ -1758,7 +1432,6 @@ static status_t
 *   parent == the obj_template_t containing the 'choic' param
 *             In YANG, a top-level object cannot be a 'choice',
 *             so this param should not be NULL
-*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   withcase == TRUE if a case arm was entered and the normal
 *               (full) syntax for a case arm is used
 *            == FALSE if the case arm is the shorthand implied
@@ -1769,12 +1442,11 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_case (tk_chain_t *tkc,
-		       ncx_module_t  *mod,
-		       dlq_hdr_t *caseQ,
-		       obj_template_t *parent,
-		       boolean refi,
-		       boolean withcase)
+    consume_case (tk_chain_t *tkc,
+		  ncx_module_t  *mod,
+		  dlq_hdr_t *caseQ,
+		  obj_template_t *parent,
+		  boolean withcase)
 {
     obj_case_t      *cas, *testcas;
     obj_template_t  *obj, *testobj, *test2obj, *casobj;
@@ -1783,7 +1455,6 @@ static status_t
     tk_type_t        tktyp;
     boolean          done, when, stat, desc, ref, anydone;
     status_t         res, retres;
-    ncx_status_t     errstatus;
 
     obj = NULL;
     val = NULL;
@@ -1809,9 +1480,6 @@ static status_t
     obj->tk = TK_CUR(tkc);
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
-    if (refi) {
-	obj->flags |= OBJ_FL_REFINE;
-    }
 
     cas = obj->def.cas;
 
@@ -1820,39 +1488,13 @@ static status_t
 	res = yang_consume_id_string(tkc, mod, &cas->name);
 	CHK_OBJ_EXIT;
 
-
-	/* Get the starting left brace for the sub-clauses
-	 * or a semi-colon to end the case-stmt
-	 */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
-	switch (TK_CUR_TYP(tkc)) {
-	case TK_TT_SEMICOL:
-	    obj->flags |= OBJ_FL_EMPTY;
-	    done = TRUE;
-	    break;
-	case TK_TT_LBRACE:
-	    break;
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    expstr = "semi-colon or left brace";
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    done = TRUE;
-	}
+	res = consume_semi_lbrace(tkc, mod, obj, &done);
+	CHK_OBJ_EXIT;
     } else {
 	/* shoarthand version, just 1 data-def-stmt per case */
 	anydone = TRUE;
-	if (refi) {
-	    res = consume_yang_refine(tkc, mod,
-				      cas->datadefQ, obj);
-	} else {
-	    res = consume_case_datadef(tkc, mod,
-				       cas->datadefQ, obj, refi);
-	}
+	res = consume_case_datadef(tkc, mod,
+				   cas->datadefQ, obj);
 	CHK_OBJ_EXIT;
 	done = TRUE;
     }
@@ -1896,22 +1538,13 @@ static status_t
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
 	    res = yang_consume_iffeature(tkc, mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_status(tkc, mod, &errstatus,
-					  NULL, NULL);
-	    } else {
-		res = yang_consume_status(tkc, mod, &cas->status,
-					  &stat, &obj->appinfoQ);
-	    }
+	    res = yang_consume_status(tkc, mod, &cas->status,
+				      &stat, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &cas->descr,
 				     &desc, &obj->appinfoQ);
@@ -1919,13 +1552,8 @@ static status_t
 	    res = yang_consume_descr(tkc, mod, &cas->ref,
 				     &ref, &obj->appinfoQ);
 	} else {
-	    if (refi) {
-		res = consume_yang_refine(tkc, mod,
-					  cas->datadefQ, obj);
-	    } else {
-		res = consume_case_datadef(tkc, mod,
-					   cas->datadefQ, obj, refi);
-	    }
+	    res = consume_case_datadef(tkc, mod,
+				       cas->datadefQ, obj);
 	}
 	CHK_OBJ_EXIT;
     }
@@ -2009,11 +1637,11 @@ static status_t
 
     return retres;
 
-}  /* consume_yang_case */
+}  /* consume_case */
 
 
 /********************************************************************
-* FUNCTION consume_yang_choice
+* FUNCTION consume_choice
 * 
 * Parse the next N tokens as a choice-stmt
 * Create and fill in an obj_template_t struct
@@ -2028,19 +1656,17 @@ static status_t
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object
-*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_choice (tk_chain_t *tkc,
-			 ncx_module_t  *mod,
-			 dlq_hdr_t  *que,
-			 obj_template_t *parent,
-			 boolean refi,
-			 grp_template_t *grp)
+    consume_choice (tk_chain_t *tkc,
+		    ncx_module_t  *mod,
+		    dlq_hdr_t  *que,
+		    obj_template_t *parent,
+		    grp_template_t *grp)
 {
     obj_template_t  *obj, *testobj, *test2obj, *casobj;
     obj_choice_t    *choic;
@@ -2050,7 +1676,6 @@ static status_t
     tk_type_t        tktyp;
     boolean          done, when, def, mand, conf, stat, desc, ref, flagset;
     status_t         res, retres;
-    ncx_status_t     errstatus;
 
     obj = NULL;
     choic = NULL;
@@ -2080,9 +1705,6 @@ static status_t
     obj->linenum = obj->tk->linenum;
     obj->parent = parent;
     obj->grp = grp;
-    if (refi) {
-	obj->flags |= OBJ_FL_REFINE;
-    }
 
     choic = obj->def.choic;
     if (que == &mod->datadefQ) {
@@ -2093,28 +1715,8 @@ static status_t
     res = yang_consume_id_string(tkc, mod, &choic->name);
     CHK_OBJ_EXIT;
 
-    /* Get the starting left brace for the sub-clauses
-     * or a semi-colon to end the choice-stmt
-     */
-    res = TK_ADV(tkc);
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_template(obj);
-	return res;
-    }
-    switch (TK_CUR_TYP(tkc)) {
-    case TK_TT_SEMICOL:
-	obj->flags |= OBJ_FL_EMPTY;
-	done = TRUE;
-	break;
-    case TK_TT_LBRACE:
-	break;
-    default:
-	retres = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	done = TRUE;
-    }
+    res = consume_semi_lbrace(tkc, mod, obj, &done);
+    CHK_OBJ_EXIT;
 
     /* get the sub-section statements and any appinfo extensions */
     while (!done) {
@@ -2156,16 +1758,13 @@ static status_t
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
 	    res = yang_consume_iffeature(tkc, mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
 	    res = yang_consume_strclause(tkc, mod, &choic->defval,
 					 &def, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
@@ -2174,25 +1773,15 @@ static status_t
 	    if (flagset) {
 		obj->flags |= OBJ_FL_MANDATORY;
 	    }
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    if (refi) {
-		retres = ERR_NCX_REFINE_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-		res = yang_consume_status(tkc, mod, &errstatus, NULL, NULL);
-	    } else {
-		res = yang_consume_status(tkc, mod, &choic->status,
-					  &stat, &obj->appinfoQ);
-	    }
-	    CHK_OBJ_EXIT;
+	    res = yang_consume_status(tkc, mod, &choic->status,
+				      &stat, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &choic->descr,
 				     &desc, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &choic->ref,
 				     &ref, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
@@ -2201,26 +1790,24 @@ static status_t
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
 	    }
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
-	    res = consume_yang_case(tkc, mod,
+	    res = consume_case(tkc, mod,
 				    choic->caseQ,
-				    obj, refi, TRUE);
-	    CHK_OBJ_EXIT;
+				    obj, TRUE);
 	} else if (!xml_strcmp(val, YANG_K_ANYXML) ||
 		   !xml_strcmp(val, YANG_K_CONTAINER) ||
 		   !xml_strcmp(val, YANG_K_LEAF) ||
 		   !xml_strcmp(val, YANG_K_LEAF_LIST) ||
 		   !xml_strcmp(val, YANG_K_LIST)) {
 	    /* create an inline 1-obj case statement */
-	    res = consume_yang_case(tkc, mod,
+	    res = consume_case(tkc, mod,
 				    choic->caseQ,
-				    obj, refi, FALSE);
-	    CHK_OBJ_EXIT;
+				    obj, FALSE);
 	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    res = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
+	CHK_OBJ_EXIT;
     }
 
     /* save or delete the obj_template_t struct */
@@ -2296,27 +1883,20 @@ static status_t
 
     return retres;
 
-}  /* consume_yang_choice */
+}  /* consume_choice */
 
 
 /********************************************************************
-* FUNCTION consume_yang_refine
+* FUNCTION consume_refine
 * 
-* Parse the next N tokens as a case-stmt
+* Parse the next N tokens as a refinement-stmt
 * Create and fill in an obj_template_t struct
 * and add it to the datadefQ for a uses in progress
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
 *
-* Current token is the starting keyword of an object
-* that can be refined in a uses statement:
-*
-*   container
-*   leaf
-*   leaf-list
-*   list
-*   choice
+* Current token is the 'refine' keyword
 *
 * INPUTS:
 *   tkc == token chain
@@ -2328,64 +1908,167 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_refine (tk_chain_t *tkc,
-			 ncx_module_t  *mod,
-			 dlq_hdr_t *que,
-			 obj_template_t *parent)
+    consume_refine (tk_chain_t *tkc,
+		    ncx_module_t  *mod,
+		    dlq_hdr_t *que,
+		    obj_template_t *parent)
 {
+    obj_template_t  *obj;
+    obj_refine_t    *refine;
     const xmlChar   *val;
+    const char      *expstr;
     tk_type_t        tktyp;
-    status_t         res;
-    boolean          errdone;
+    boolean          done, targ, desc, ref, pres, def;
+    boolean          conf, mand, minel, maxel, flagset;
+    status_t         res, retres;
 
-    errdone = TRUE;
+    obj = NULL;
+    refine = NULL;
+    val = NULL;
+    expstr = "refine target";
+    done = FALSE;
+    targ = FALSE;
+    desc = FALSE;
+    ref = FALSE;
+    pres = FALSE;
+    def = FALSE;
+    conf = FALSE;
+    mand = FALSE;
+    minel = FALSE;
+    maxel = FALSE;
     res = NO_ERR;
-    tktyp = TK_CUR_TYP(tkc);
-    val = TK_CUR_VAL(tkc);
+    retres = NO_ERR;
 
-    /* check the current token type */
-    if (tktyp != TK_TT_TSTRING) {
-	errdone = FALSE;
-	res = ERR_NCX_WRONG_TKTYPE;
-    } else {
-	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_ANYXML)) {
-	    res = consume_yang_anyxml(tkc, mod, que, parent,
-				      TRUE, NULL);
-	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
-	    res = consume_yang_container(tkc, mod, que, parent,
-					 TRUE, NULL);
-	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
-	    res = consume_yang_leaf(tkc, mod, que, parent,
-				    TRUE, NULL);
-	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
-	    res = consume_yang_leaflist(tkc, mod, que, parent,
-					TRUE, NULL);
-	} else if (!xml_strcmp(val, YANG_K_LIST)) {
-	    res = consume_yang_list(tkc, mod, que, parent,
-				    TRUE, NULL);
-	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
-	    res = consume_yang_choice(tkc, mod, que, parent,
-				      TRUE, NULL);
-	} else {
-	    errdone = FALSE;
-	    res = ERR_NCX_WRONG_TKVAL;
+    /* Get a new obj_template_t to fill in */
+    obj = obj_new_template(OBJ_TYP_REFINE);
+    if (!obj) {
+	res = ERR_INTERNAL_MEM;
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+    refine = obj->def.refine;
+
+    obj->mod = mod;
+    obj->tk = TK_CUR(tkc);
+    obj->linenum = obj->tk->linenum;
+    obj->parent = parent;
+
+    /* Get the mandatory refine target */
+    res = yang_consume_string(tkc, mod, &refine->target);
+    CHK_OBJ_EXIT;
+
+    res = consume_semi_lbrace(tkc, mod, obj, &done);
+    CHK_OBJ_EXIT;
+
+    /* get the container statements and any appinfo extensions */
+    while (!done) {
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    obj_free_template(obj);
+	    return res;
 	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+	flagset = FALSE;
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    obj_free_template(obj);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+	    CHK_OBJ_EXIT;
+	    continue;
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+	if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+	    refine->descr_tk = TK_CUR(tkc);
+	    res = yang_consume_descr(tkc, mod, &refine->descr,
+				     &desc, &obj->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+	    refine->ref_tk = TK_CUR(tkc);
+	    res = yang_consume_descr(tkc, mod, &refine->ref,
+				     &ref, &obj->appinfoQ);
+
+	} else if (!xml_strcmp(val, YANG_K_PRESENCE)) {
+	    refine->presence_tk = TK_CUR(tkc);
+	    res = yang_consume_strclause(tkc, mod, 
+					 &refine->presence,
+					 &pres, &obj->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
+	    refine->def_tk = TK_CUR(tkc);
+	    res = yang_consume_strclause(tkc, mod, 
+					 &refine->def,
+					 &def, &obj->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+	    refine->config_tk = TK_CUR(tkc);
+	    res = yang_consume_boolean(tkc, mod, &flagset,
+				       &conf, &obj->appinfoQ);
+	    obj->flags |= OBJ_FL_CONFSET;
+	    if (flagset) {
+		obj->flags |= OBJ_FL_CONFIG;
+	    }
+	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
+	    refine->mandatory_tk = TK_CUR(tkc);
+	    res = yang_consume_boolean(tkc, mod,
+				       &flagset,
+				       &mand, &obj->appinfoQ);
+	    obj->flags |= OBJ_FL_MANDSET;
+	    if (flagset) {
+		obj->flags |= OBJ_FL_MANDATORY;
+	    }
+	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
+	    refine->minelems_tk = TK_CUR(tkc);
+	    res = yang_consume_uint32(tkc, mod,
+				      &refine->minelems,
+				      &minel, &obj->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
+	    refine->maxelems_tk = TK_CUR(tkc);
+	    res = yang_consume_max_elements(tkc, mod,
+					    &refine->maxelems,
+					    &maxel, &obj->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_MUST)) {
+	    res = yang_consume_must(tkc, mod, &refine->mustQ,
+				    &obj->appinfoQ);
+	} else {
+	    res = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	}
+	CHK_OBJ_EXIT;
     }
 
-    if (res != NO_ERR && !errdone) {
-	ncx_mod_exp_err(tkc, mod, res,
-			"container, leaf, leaf-list, list, "
-			"or choice keyword");
+    /* save or delete the obj_template_t struct */
+    if (refine->target) {
+	res = add_object(tkc, mod, que, obj);
+	CHK_EXIT;
+    } else {
+	obj_free_template(obj);
     }
 
     return res;
 
-}  /* consume_yang_refine */
+}  /* consume_refine */
 
 
 /********************************************************************
-* FUNCTION consume_yang_uses
+* FUNCTION consume_uses
 * 
 * Parse the next N tokens as a uses-stmt
 * Create and fill in an obj_template_t struct
@@ -2406,11 +2089,11 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_uses (tk_chain_t *tkc,
-		       ncx_module_t  *mod,
-		       dlq_hdr_t  *que,
-		       obj_template_t *parent,
-		       grp_template_t *grp)
+    consume_uses (tk_chain_t *tkc,
+		  ncx_module_t  *mod,
+		  dlq_hdr_t  *que,
+		  obj_template_t *parent,
+		  grp_template_t *grp)
 {
     obj_template_t  *obj, *testobj;
     obj_uses_t      *uses;
@@ -2469,29 +2152,10 @@ static status_t
 	uses->grp = impgrp;
     }
 
-    /* Get the starting left brace for the sub-clauses
-     * or a semi-colon to end the uses-stmt
-     */
-    res = TK_ADV(tkc);
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_template(obj);
-	return res;
-    }
-    switch (TK_CUR_TYP(tkc)) {
-    case TK_TT_SEMICOL:
-	obj->flags |= OBJ_FL_EMPTY;
-	done = TRUE;
-	break;
-    case TK_TT_LBRACE:
-	break;
-    default:
-	retres = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	done = TRUE;
-    }
+    res = consume_semi_lbrace(tkc, mod, obj, &done);
+    CHK_OBJ_EXIT;
 
+    expstr = "uses sub-statement";
 
     /* get the sub-section statements and any appinfo extensions */
     while (!done) {
@@ -2532,12 +2196,10 @@ static status_t
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
 	    res = yang_consume_iffeature(tkc, mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    res = yang_consume_status(tkc, mod, &uses->status,
 				      &stat, &obj->appinfoQ);
@@ -2547,8 +2209,14 @@ static status_t
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &uses->ref,
 				     &ref, &obj->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
+	    res = consume_augment(tkc, mod, uses->datadefQ,
+				       obj, NULL);
+	} else if (!xml_strcmp(val, YANG_K_REFINE)) {
+	    res = consume_refine(tkc, mod, uses->datadefQ, obj);
 	} else {
-	    res = consume_yang_refine(tkc, mod, uses->datadefQ, obj);
+	   res = ERR_NCX_WRONG_TKVAL;
+	   ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
 	CHK_OBJ_EXIT;
     }
@@ -2585,11 +2253,11 @@ static status_t
 
     return retres;
 
-}  /* consume_yang_uses */
+}  /* consume_uses */
 
 
 /********************************************************************
-* FUNCTION consume_yang_rpcio
+* FUNCTION consume_rpcio
 * 
 * Parse the next N tokens as an input-stmt or output-stmt
 * Create and fill in an obj_template_t struct
@@ -2609,10 +2277,10 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_rpcio (tk_chain_t *tkc,
-			ncx_module_t  *mod,
-			dlq_hdr_t  *que,
-			obj_template_t *parent)
+    consume_rpcio (tk_chain_t *tkc,
+		   ncx_module_t  *mod,
+		   dlq_hdr_t  *que,
+		   obj_template_t *parent)
 {
     obj_template_t  *obj, *testobj;
     obj_rpcio_t     *rpcio;
@@ -2725,11 +2393,11 @@ static status_t
 
     return retres;
 
-}  /* consume_yang_rpcio */
+}  /* consume_rpcio */
 
 
 /********************************************************************
-* FUNCTION consume_yang_augdata
+* FUNCTION consume_augdata
 * 
 * Parse the next N tokens as a case-stmt
 * Create and fill in an obj_template_t struct
@@ -2758,10 +2426,10 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_augdata (tk_chain_t *tkc,
-			  ncx_module_t  *mod,
-			  dlq_hdr_t *que,
-			  obj_template_t *parent)
+    consume_augdata (tk_chain_t *tkc,
+		     ncx_module_t  *mod,
+		     dlq_hdr_t *que,
+		     obj_template_t *parent)
 {
     const xmlChar   *val;
     tk_type_t        tktyp;
@@ -2780,25 +2448,19 @@ static status_t
     } else {
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_ANYXML)) {
-	    res = consume_yang_anyxml(tkc, mod, que, parent,
-				      FALSE, NULL);
+	    res = consume_anyxml(tkc, mod, que, parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
-	    res = consume_yang_container(tkc, mod, que, parent,
-					 FALSE, NULL);
+	    res = consume_container(tkc, mod, que, parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
-	    res = consume_yang_leaf(tkc, mod, que, parent,
-				    FALSE, NULL);
+	    res = consume_leaf(tkc, mod, que, parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
-	    res = consume_yang_leaflist(tkc, mod, que, parent,
-					FALSE, NULL);
+	    res = consume_leaflist(tkc, mod, que, parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
-	    res = consume_yang_list(tkc, mod, que, parent,
-				    FALSE, NULL);
+	    res = consume_list(tkc, mod, que, parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
-	    res = consume_yang_choice(tkc, mod, que, parent,
-				      FALSE, NULL);
+	    res = consume_choice(tkc, mod, que, parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_USES)) {
-	    res = consume_yang_uses(tkc, mod, que, parent, NULL);
+	    res = consume_uses(tkc, mod, que, parent, NULL);
 	} else {
 	    errdone = FALSE;
 	    res = ERR_NCX_WRONG_TKVAL;
@@ -2813,11 +2475,11 @@ static status_t
 
     return res;
 
-}  /* consume_yang_augdata */
+}  /* consume_augdata */
 
 
 /********************************************************************
-* FUNCTION consume_yang_augment
+* FUNCTION consume_augment
 * 
 * Parse the next N tokens as an augment-stmt
 * Create a obj_template_t struct and add it to the specified module
@@ -2838,11 +2500,11 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_augment (tk_chain_t *tkc,
-			  ncx_module_t  *mod,
-			  dlq_hdr_t *que,
-			  obj_template_t *parent,
-			  grp_template_t *grp)
+    consume_augment (tk_chain_t *tkc,
+		     ncx_module_t  *mod,
+		     dlq_hdr_t *que,
+		     obj_template_t *parent,
+		     grp_template_t *grp)
 {
 
     obj_template_t  *obj;
@@ -2951,10 +2613,10 @@ static status_t
 	    res = yang_consume_descr(tkc, mod, &aug->ref,
 				     &ref, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
-	    res = consume_yang_case(tkc, mod, &aug->datadefQ,
-				    obj, FALSE, TRUE);
+	    res = consume_case(tkc, mod, &aug->datadefQ,
+				    obj, TRUE);
 	} else {
-	    res = consume_yang_augdata(tkc, mod, &aug->datadefQ, obj);
+	    res = consume_augdata(tkc, mod, &aug->datadefQ, obj);
 	}
 	CHK_OBJ_EXIT;
     }
@@ -2980,7 +2642,7 @@ static status_t
 
     return retres;
 
-} /* consume_yang_augment */
+} /* consume_augment */
 
 
 /********************************************************************
@@ -3000,7 +2662,6 @@ static status_t
 *   mod == module in progress
 *   que == queue will get the obj_template_t 
 *   parent == parent object or NULL if top-level data-def-stmt
-*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *
 * RETURNS:
 *   status of the operation
@@ -3009,8 +2670,7 @@ static status_t
     consume_case_datadef (tk_chain_t *tkc,
 			  ncx_module_t  *mod,
 			  dlq_hdr_t *que,
-			  obj_template_t *parent,
-			  boolean refi)
+			  obj_template_t *parent)
 {
     const xmlChar   *val;
     const char      *expstr;
@@ -3032,24 +2692,22 @@ static status_t
     } else {
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_ANYXML)) {
-	    res = consume_yang_anyxml(tkc, mod, que,
-				      parent, refi, NULL);
+	    res = consume_anyxml(tkc, mod, que,
+				      parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
-	    res = consume_yang_container(tkc, mod, que,
-					 parent, refi, NULL);
+	    res = consume_container(tkc, mod, que,
+					 parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
-	    res = consume_yang_leaf(tkc, mod, que,
-				    parent, refi, NULL);
+	    res = consume_leaf(tkc, mod, que,
+				    parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
-	    res = consume_yang_leaflist(tkc, mod, que,
-					parent, refi, NULL);
+	    res = consume_leaflist(tkc, mod, que,
+					parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
-	    res = consume_yang_list(tkc, mod, que,
-				    parent, refi, NULL);
+	    res = consume_list(tkc, mod, que,
+				    parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_USES)) {
-	    res = consume_yang_uses(tkc, mod, que, parent, NULL);
-	} else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
-	    res = consume_yang_augment(tkc, mod, que, parent, NULL);
+	    res = consume_uses(tkc, mod, que, parent, NULL);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    errdone = FALSE;
@@ -3066,7 +2724,7 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION consume_yang_rpc
+* FUNCTION consume_rpc
 * 
 * Parse the next N tokens as an rpc-stmt
 * Create and fill in an obj_template_t struct
@@ -3087,11 +2745,11 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_rpc (tk_chain_t *tkc,
-		      ncx_module_t  *mod,
-		      dlq_hdr_t  *que,
-		      obj_template_t *parent,
-		      grp_template_t *grp)
+    consume_rpc (tk_chain_t *tkc,
+		 ncx_module_t  *mod,
+		 dlq_hdr_t  *que,
+		 obj_template_t *parent,
+		 grp_template_t *grp)
 {
     obj_template_t        *obj, *chobj;
     const obj_template_t  *testobj;
@@ -3136,28 +2794,8 @@ static status_t
     res = yang_consume_id_string(tkc, mod, &rpc->name);
     CHK_OBJ_EXIT;
 
-    /* Get the starting left brace for the sub-clauses
-     * or a semi-colon to end the rpc-stmt
-     */
-    res = TK_ADV(tkc);
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_template(obj);
-	return res;
-    }
-    switch (TK_CUR_TYP(tkc)) {
-    case TK_TT_SEMICOL:
-	obj->flags |= OBJ_FL_EMPTY;
-	done = TRUE;
-	break;
-    case TK_TT_LBRACE:
-	break;
-    default:
-	retres = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	done = TRUE;
-    }
+    res = consume_semi_lbrace(tkc, mod, obj, &done);
+    CHK_OBJ_EXIT;
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -3216,7 +2854,7 @@ static status_t
 				     &ref, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_INPUT) ||
 		   !xml_strcmp(val, YANG_K_OUTPUT)) {
-	    res = consume_yang_rpcio(tkc, mod, &rpc->datadefQ, obj);
+	    res = consume_rpcio(tkc, mod, &rpc->datadefQ, obj);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
@@ -3292,11 +2930,11 @@ static status_t
 
     return retres;
 
-}  /* consume_yang_rpc */
+}  /* consume_rpc */
 
 
 /********************************************************************
-* FUNCTION consume_yang_notif
+* FUNCTION consume_notif
 * 
 * Parse the next N tokens as a notification-stmt
 * Create and fill in an obj_template_t struct
@@ -3317,11 +2955,11 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_yang_notif (tk_chain_t *tkc,
-			ncx_module_t  *mod,
-			dlq_hdr_t  *que,
-			obj_template_t *parent,
-			grp_template_t *grp)
+    consume_notif (tk_chain_t *tkc,
+		   ncx_module_t  *mod,
+		   dlq_hdr_t  *que,
+		   obj_template_t *parent,
+		   grp_template_t *grp)
 {
     obj_template_t  *obj;
     obj_notif_t     *notif;
@@ -3365,28 +3003,8 @@ static status_t
     res = yang_consume_id_string(tkc, mod, &notif->name);
     CHK_OBJ_EXIT;
 
-    /* Get the starting left brace for the sub-clauses
-     * or a semi-colon to end the notification-stmt
-     */
-    res = TK_ADV(tkc);
-    if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_template(obj);
-	return res;
-    }
-    switch (TK_CUR_TYP(tkc)) {
-    case TK_TT_SEMICOL:
-	obj->flags |= OBJ_FL_EMPTY;
-	done = TRUE;
-	break;
-    case TK_TT_LBRACE:
-	break;
-    default:
-	retres = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	done = TRUE;
-    }
+    res = consume_semi_lbrace(tkc, mod, obj, &done);
+    CHK_OBJ_EXIT;
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -3445,7 +3063,7 @@ static status_t
 				     &ref, &obj->appinfoQ);
 	} else {
 	    res = consume_datadef(tkc, mod, &notif->datadefQ,
-				  obj, FALSE, NULL);
+				  obj, NULL);
 	}
 	CHK_OBJ_EXIT;
     }
@@ -3460,7 +3078,7 @@ static status_t
 
     return retres;
 
-}  /* consume_yang_notif */
+}  /* consume_notif */
 
 
 /************   R E S O L V E    F U N C T I O N S   ***************/
@@ -4420,6 +4038,378 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION check_refine_allowed
+* 
+* Check the uses object type against the target node found
+*
+* Only checks if extra refine clauses are present
+* which are not allowed for that 
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   refineobj == refine object to check
+*   targobj == target object to check against
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    check_refine_allowed (tk_chain_t *tkc,
+			  ncx_module_t  *mod,
+			  obj_template_t *refineobj,
+			  obj_template_t *targobj)
+{
+    obj_refine_t   *refine;
+    xpath_pcb_t    *must;
+    boolean         pres, def, conf, mand, minel, maxel, bmust;
+    status_t        res;
+
+    refine = refineobj->def.refine;
+
+    pres = FALSE;
+    def = FALSE;
+    conf = FALSE;
+    mand = FALSE;
+    minel = FALSE;
+    maxel = FALSE;
+    bmust = FALSE;
+
+    res = NO_ERR;
+
+    switch (targobj->objtype) {
+    case OBJ_TYP_LEAF:
+	conf = TRUE;
+	mand = TRUE;
+	if (obj_get_basetype(targobj) != NCX_BT_ANY) {
+	    bmust = TRUE;
+	    def = TRUE;
+	}
+	break;
+    case OBJ_TYP_LEAF_LIST:
+	conf = TRUE;
+	if (obj_get_basetype(targobj) == NCX_BT_ANY) {
+	    mand = TRUE;
+	} else {
+	    bmust = TRUE;
+	    minel = TRUE;
+	    maxel = TRUE;
+	}
+	break;
+    case OBJ_TYP_CONTAINER:
+	bmust = TRUE;
+	pres = TRUE;
+	conf = TRUE;
+	break;
+    case OBJ_TYP_LIST:
+	bmust = TRUE;
+	conf = TRUE;
+	minel = TRUE;
+	maxel = TRUE;
+	break;
+    case OBJ_TYP_CHOICE:
+	def = TRUE;
+	mand = TRUE;
+	break;
+    case OBJ_TYP_CASE:
+	break;
+    default:
+	return NO_ERR;  /* error: should already be reported */
+    }
+
+    /* check all the fields except description and reference
+     * since they are allowed to appear in every variant
+     */
+    if (refine->presence && !pres) {
+	res = ERR_NCX_REFINE_NOT_ALLOWED;
+	log_error("\nError: 'presence' refinement on %s '%s'",
+		  obj_get_typestr(targobj),
+		  obj_get_name(targobj));
+	tkc->cur = refine->presence_tk;
+	ncx_print_errormsg(tkc, mod, res);
+    }
+
+    if (refine->def && !def) {
+	res = ERR_NCX_REFINE_NOT_ALLOWED;
+	log_error("\nError: 'default' refinement on %s '%s'",
+		  obj_get_typestr(targobj),
+		  obj_get_name(targobj));
+	tkc->cur = refine->def_tk;
+	ncx_print_errormsg(tkc, mod, res);
+    }
+
+    if (refine->config_tk && !conf) {
+	res = ERR_NCX_REFINE_NOT_ALLOWED;
+	log_error("\nError: 'config' refinement on %s '%s'",
+		  obj_get_typestr(targobj),
+		  obj_get_name(targobj));
+	tkc->cur = refine->config_tk;
+	ncx_print_errormsg(tkc, mod, res);
+    }
+
+    if (refine->mandatory_tk && !mand) {
+	res = ERR_NCX_REFINE_NOT_ALLOWED;
+	log_error("\nError: 'mandatory' refinement on %s '%s'",
+		  obj_get_typestr(targobj),
+		  obj_get_name(targobj));
+	tkc->cur = refine->config_tk;
+	ncx_print_errormsg(tkc, mod, res);
+    }
+
+    if (refine->minelems_tk && !minel) {
+	res = ERR_NCX_REFINE_NOT_ALLOWED;
+	log_error("\nError: 'min-elements' refinement on %s '%s'",
+		  obj_get_typestr(targobj),
+		  obj_get_name(targobj));
+	tkc->cur = refine->minelems_tk;
+	ncx_print_errormsg(tkc, mod, res);
+    }
+
+    if (refine->maxelems_tk && !maxel) {
+	res = ERR_NCX_REFINE_NOT_ALLOWED;
+	log_error("\nError: 'max-elements' refinement on %s '%s'",
+		  obj_get_typestr(targobj),
+		  obj_get_name(targobj));
+	tkc->cur = refine->maxelems_tk;
+	ncx_print_errormsg(tkc, mod, res);
+    }
+
+    if (!dlq_empty(&refine->mustQ) && !bmust) {
+	res = ERR_NCX_REFINE_NOT_ALLOWED;
+	for (must = (xpath_pcb_t *)dlq_firstEntry(&refine->mustQ);
+	     must != NULL;
+	     must = (xpath_pcb_t *)dlq_nextEntry(must)) {
+	    log_error("\nError: 'must' refinement on %s '%s'",
+		      obj_get_typestr(targobj),
+		      obj_get_name(targobj));
+	    tkc->cur = must->tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	}
+    }
+
+    return res;
+
+}  /* check_refine_allowed */
+
+
+/********************************************************************
+* FUNCTION combine_refine_objects
+* 
+* Combine two refine objects with the same target
+* Add fields from the mergeobj into the keepobj.
+*
+* The mergeobj should be freed after this call
+*
+* Only checks if extra refine clauses are present
+* which are not allowed for that 
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   keepobj == refine object to keep
+*   mergeobj == refine object to merge into 'keepobj'
+*   targobj == refine object target to check type
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    combine_refine_objects (tk_chain_t *tkc,
+			    ncx_module_t  *mod,
+			    obj_template_t *keepobj,
+			    obj_template_t *mergeobj,
+			    obj_template_t *targobj)
+{
+    obj_refine_t   *krefine, *mrefine;
+    boolean         pres, def, conf, mand, minel, maxel, bmust;
+    status_t        res;
+
+    krefine = keepobj->def.refine;
+    mrefine = mergeobj->def.refine;
+
+    pres = FALSE;
+    def = FALSE;
+    conf = FALSE;
+    mand = FALSE;
+    minel = FALSE;
+    maxel = FALSE;
+    bmust = FALSE;
+
+    res = NO_ERR;
+
+    switch (targobj->objtype) {
+    case OBJ_TYP_LEAF:
+	conf = TRUE;
+	mand = TRUE;
+	if (obj_get_basetype(targobj) != NCX_BT_ANY) {
+	    bmust = TRUE;
+	    def = TRUE;
+	}
+	break;
+    case OBJ_TYP_LEAF_LIST:
+	conf = TRUE;
+	if (obj_get_basetype(targobj) == NCX_BT_ANY) {
+	    mand = TRUE;
+	} else {
+	    bmust = TRUE;
+	    minel = TRUE;
+	    maxel = TRUE;
+	}
+	break;
+    case OBJ_TYP_CONTAINER:
+	bmust = TRUE;
+	pres = TRUE;
+	conf = TRUE;
+	break;
+    case OBJ_TYP_LIST:
+	bmust = TRUE;
+	conf = TRUE;
+	minel = TRUE;
+	maxel = TRUE;
+	break;
+    case OBJ_TYP_CHOICE:
+	def = TRUE;
+	mand = TRUE;
+	break;
+    case OBJ_TYP_CASE:
+	break;
+    default:
+	return NO_ERR;  /* error: should already be reported */
+    }
+
+
+    if (mrefine->descr) {
+	if (krefine->descr) {
+	    res = ERR_NCX_DUP_REFINE_STMT;
+	    log_error("\nError: description-stmt set in refine on line %u",
+		      krefine->descr_tk->linenum);
+	    tkc->cur = mrefine->descr_tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	} else {
+	    krefine->descr = mrefine->descr;
+	    krefine->descr_tk = mrefine->descr_tk;
+	    mrefine->descr = NULL;
+	}
+    }
+
+    if (mrefine->ref) {
+	if (krefine->ref) {
+	    res = ERR_NCX_DUP_REFINE_STMT;
+	    log_error("\nError: reference-stmt set in refine on line %u",
+		      krefine->ref_tk->linenum);
+	    tkc->cur = mrefine->ref_tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	} else {
+	    krefine->ref = mrefine->ref;
+	    krefine->ref_tk = mrefine->ref_tk;
+	    mrefine->ref = NULL;
+	}
+    }
+
+    if (mrefine->presence && pres) {
+	if (krefine->presence) {
+	    res = ERR_NCX_DUP_REFINE_STMT;
+	    log_error("\nError: presence-stmt set in refine on line %u",
+		      krefine->presence_tk->linenum);
+	    tkc->cur = mrefine->presence_tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	} else {
+	    krefine->presence = mrefine->presence;
+	    krefine->presence_tk = mrefine->presence_tk;
+	    mrefine->presence = NULL;
+	}
+    }
+
+    if (mrefine->def && def) {
+	if (krefine->def) {
+	    res = ERR_NCX_DUP_REFINE_STMT;
+	    log_error("\nError: default-stmt set in refine on line %u",
+		      krefine->def_tk->linenum);
+	    tkc->cur = mrefine->def_tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	} else {
+	    krefine->def = mrefine->def;
+	    krefine->def_tk = mrefine->def_tk;
+	    mrefine->def = NULL;
+	}
+    }
+
+    if (mrefine->config_tk && conf) {
+	if (krefine->config_tk) {
+	    res = ERR_NCX_DUP_REFINE_STMT;
+	    log_error("\nError: config-stmt set in refine on line %u",
+		      krefine->config_tk->linenum);
+	    tkc->cur = mrefine->config_tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	} else {
+	    krefine->config_tk = mrefine->config_tk;
+	    keepobj->flags |= OBJ_FL_CONFSET;
+	    if (mergeobj->flags & OBJ_FL_CONFIG) {
+		keepobj->flags |= OBJ_FL_CONFIG;
+	    }
+	}
+    }
+
+    if (mrefine->mandatory_tk && mand) {
+	if (krefine->mandatory_tk) {
+	    res = ERR_NCX_DUP_REFINE_STMT;
+	    log_error("\nError: mandatory-stmt set in refine on line %u",
+		      krefine->mandatory_tk->linenum);
+	    tkc->cur = mrefine->mandatory_tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	} else {
+	    krefine->mandatory_tk = mrefine->mandatory_tk;
+	    keepobj->flags |= OBJ_FL_MANDSET;
+	    if (mergeobj->flags & OBJ_FL_MANDATORY) {
+		keepobj->flags |= OBJ_FL_MANDATORY;
+	    }
+	}
+    }
+
+    if (mrefine->minelems_tk && minel) {
+	if (krefine->minelems_tk) {
+	    res = ERR_NCX_DUP_REFINE_STMT;
+	    log_error("\nError: min-elements-stmt set in refine on line %u",
+		      krefine->minelems_tk->linenum);
+	    tkc->cur = mrefine->minelems_tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	} else {
+	    krefine->minelems = mrefine->minelems;
+	    krefine->minelems_tk = mrefine->minelems_tk;
+	}
+    }
+
+    if (mrefine->maxelems_tk && maxel) {
+	if (krefine->maxelems_tk) {
+	    res = ERR_NCX_DUP_REFINE_STMT;
+	    log_error("\nError: max-elements-stmt set in refine on line %u",
+		      krefine->maxelems_tk->linenum);
+	    tkc->cur = mrefine->maxelems_tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	} else {
+	    krefine->maxelems = mrefine->maxelems;
+	    krefine->minelems_tk = mrefine->minelems_tk;
+	}
+    }
+
+    if (!dlq_empty(&mrefine->mustQ) && bmust) {
+	dlq_block_enque(&mrefine->mustQ, &krefine->mustQ);
+    }
+
+    if (!dlq_empty(&mergeobj->appinfoQ)) {
+	dlq_block_enque(&mergeobj->appinfoQ, &keepobj->appinfoQ);
+    }
+
+    return res;
+
+}  /* combine_refine_objects */
+
+
+/********************************************************************
 * FUNCTION resolve_uses
 * 
 * Check the uses object type
@@ -4442,8 +4432,9 @@ static status_t
 		  obj_uses_t *uses,
 		  obj_template_t *obj)
 {
-    obj_template_t *chobj, *testobj, *cobj;
+    obj_template_t *chobj, *testobj, *cobj, *targobj, *nextobj;
     obj_case_t     *cas;
+    obj_refine_t   *refine;
     status_t        res, retres;
 
     retres = NO_ERR;
@@ -4476,12 +4467,11 @@ static status_t
     }
 
 
-    /* resolve all the grouping refinements */
+    /* resolve all the grouping augments, skip the refines */
     res = yang_obj_resolve_datadefs(tkc, mod, uses->datadefQ);
     if (res != NO_ERR) {
 	retres = res;
     }
-
     res = check_parent(tkc, mod, obj);
     CHK_EXIT;
 
@@ -4492,54 +4482,67 @@ static status_t
 	 chobj != NULL;
 	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
-	testobj = obj_find_template(&uses->grp->datadefQ,
-				    obj_get_mod_name(chobj),
-				    obj_get_name(chobj));
-	if (!testobj) {
-	    /* error: refined obj not in the grouping */
-	    log_error("\nError: refinement node '%s' not found"
+	if (chobj->objtype != OBJ_TYP_REFINE) {
+	    continue;
+	}
+
+	refine = chobj->def.refine;
+
+	/* find schema-nodeid target
+	 * the node being refined MUST exist in the grouping
+	 */
+	res = xpath_find_schema_target(tkc, mod, obj,
+				       &uses->grp->datadefQ,
+				       refine->target, 
+				       &targobj, NULL);
+	if (res != NO_ERR || !targobj) {
+	    /* warning: refined obj not in the grouping */
+	    log_warn("\nWarning: refinement node '%s' not found"
 		      " in grouping '%s'", obj_get_name(chobj),
 		      uses->grp->name);
-	    retres = ERR_NCX_DEF_NOT_FOUND;
+	    retres = ERR_NCX_MISSING_REFTARGET;
 	    tkc->cur = chobj->tk;
 	    ncx_print_errormsg(tkc, mod, retres);
 	} else {
-	    /* check if the object types match */
-	    if (testobj->objtype != chobj->objtype) {
-		retres = ERR_NCX_WRONG_TYPE;
-		log_error("\nError: refinement node '%s' is a"
-			  "%s node, but should be a %s type of node",
-			  obj_get_name(chobj),
-			  obj_get_typestr(chobj),
-			  obj_get_typestr(testobj));
-		tkc->cur = chobj->tk;
-		ncx_print_errormsg(tkc, mod, retres);
-	    } else if (chobj->objtype==OBJ_TYP_LEAF) {
-		if (chobj->def.leaf->defval) {
-		    res = val_simval_ok(testobj->def.leaf->typdef,
-					chobj->def.leaf->defval);
+	    /* refine target is valid, so save it */
+	    refine->targobj = targobj;
+
+	    /* check any extra refinements not allowed for
+	     * the target object type
+	     */
+	    res = check_refine_allowed(tkc, mod,
+				       chobj, targobj);
+	    CHK_EXIT;
+
+	    /* check if any default statements are present,
+	     * and if they are OK for the target data type
+	     */
+	    if (targobj->objtype == OBJ_TYP_LEAF) {
+		if (refine->def) {
+		    res = val_simval_ok(targobj->def.leaf->typdef,
+					refine->def);
 		    if (res != NO_ERR) {
 			retres = res;
 			log_error("\nError: Leaf refinement '%s' has "
 				  "invalid default value (%s)",
-				  obj_get_name(testobj),
-				  chobj->def.leaf->defval);
-			tkc->cur = chobj->tk;
+				  obj_get_name(targobj),
+				  refine->def);
+			tkc->cur = refine->def_tk;
 			ncx_print_errormsg(tkc, mod, retres);
 		    }
 		}
-	    } else if (chobj->objtype==OBJ_TYP_CHOICE) {
-		if (chobj->def.choic->defval) {
-		    cas = obj_find_case(chobj->def.choic,
-					obj_get_mod_name(chobj),
-					chobj->def.choic->defval);
+	    } else if (targobj->objtype == OBJ_TYP_CHOICE) {
+		if (refine->def) {
+		    cas = obj_find_case(targobj->def.choic,
+					obj_get_mod_name(targobj),
+					refine->def);
 		    if (!cas) {
 			/* default is not a valid case name */
-			tkc->cur = chobj->tk;
+			tkc->cur = refine->def_tk;
 			retres = ERR_NCX_INVALID_VALUE;
 			log_error("\nError: Refined choice default '%s' "
-				  "not a valid case name",
-				  chobj->def.choic->defval);
+				  "is not a valid case name",
+				  refine->def);
 			ncx_print_errormsg(tkc, mod, retres);
 		    } else {
 			/* valid case name, 
@@ -4549,7 +4552,8 @@ static status_t
 				 dlq_firstEntry(cas->datadefQ);
 			     cobj != NULL;
 			     cobj = (obj_template_t *)dlq_nextEntry(cobj)) {
-			    if (obj_is_mandatory(cobj)) {
+			    if (obj_has_name(cobj) &&
+				obj_is_mandatory(cobj)) {
 				tkc->cur = cobj->tk;		    
 				retres = ERR_NCX_DEFCHOICE_NOT_OPTIONAL;
 				ncx_print_errormsg(tkc, mod, retres);
@@ -4561,6 +4565,49 @@ static status_t
 	}
     }
 
+    /* go through the refinement objects one more time
+     * and combine the ones with the same target (if any)
+     * Generate an error for duplicate sub-clauses entered
+     */
+    for (chobj = (obj_template_t *)dlq_firstEntry(uses->datadefQ);
+	 chobj != NULL;
+	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
+
+	if (chobj->objtype != OBJ_TYP_REFINE) {
+	    continue;
+	}
+
+	cobj = chobj->def.refine->targobj;
+	if (!cobj) {
+	    continue;
+	}
+
+	/* look through rest of Q for any refine w/ same target */
+	for (testobj = (obj_template_t *)dlq_nextEntry(chobj);
+	     testobj != NULL; 
+	     testobj = nextobj) {
+
+	    nextobj = (obj_template_t *)dlq_nextEntry(testobj);
+
+	    if (testobj->objtype != OBJ_TYP_REFINE) {
+		continue;
+	    }
+
+	    if (testobj->def.refine->targobj == cobj) {
+		/* duplicate refine found, remove and combine */
+		dlq_remove(testobj);
+		res = combine_refine_objects(tkc, mod,
+					     chobj, testobj, cobj);
+		obj_free_template(testobj);
+		CHK_EXIT;
+	    }
+	}
+    }
+
+    /* at this point there should be one refine object for
+     * each target specified, and no duplicates, unless fatal
+     * error so will not continue anyways
+     */
     return retres;
 				    
 }  /* resolve_uses */
@@ -4591,7 +4638,7 @@ static status_t
 		 dlq_hdr_t *datadefQ)
 {
     obj_uses_t     *uses;
-    obj_template_t *chobj, *mobj, *newobj, *testobj;
+    obj_template_t *chobj, *newobj, *testobj;
     const xmlChar  *name;
     status_t        res, retres;
 
@@ -4625,6 +4672,7 @@ static status_t
 	switch (chobj->objtype) {
 	case OBJ_TYP_USES:    /* expand should already be done */
 	case OBJ_TYP_AUGMENT:
+	case OBJ_TYP_REFINE:
 	    break;
 	default:
 	    name = obj_get_name(chobj);
@@ -4636,8 +4684,8 @@ static status_t
 		tkc->cur = chobj->tk;
 		ncx_print_errormsg(tkc, mod, retres);
 	    } else {
-		mobj = obj_find_template(uses->datadefQ, NULL, name);
-		newobj = obj_clone_template(mod, chobj, mobj);
+		newobj = obj_clone_template(mod, chobj,
+					    uses->datadefQ);
 		if (!newobj) {
 		    retres = ERR_INTERNAL_MEM;
 		    tkc->cur = chobj->tk;
@@ -4694,8 +4742,7 @@ static status_t
 		     obj_augment_t *aug,
 		     obj_template_t *obj)
 {
-    obj_template_t   *testobj;
-    status_t          res, retres;
+    status_t       res, retres;
 
     
     retres = NO_ERR;
@@ -4715,35 +4762,20 @@ static status_t
 	ncx_print_errormsg(tkc, mod, retres);
     }
 
+    /* check if correct target Xpath string form is present */
+    if (!obj->parent && aug->target && *aug->target != '/') {
+	/* absolute-schema-nodeid target must be used */
+	log_error("\nError: descendant schema-nodeid form"
+		  " not allowed in top-level augment statement");
+	retres = ERR_NCX_INVALID_AUGTARGET;
+	tkc->cur = obj->tk;
+	ncx_print_errormsg(tkc, mod, retres);
+    }
+
     /* resolve augment contents */
     res = yang_obj_resolve_datadefs(tkc, mod, &aug->datadefQ);
     CHK_EXIT;
 
-    /*** validate well-formed Xpath in when clause ***/
-    /*** XPATH TBD ***/
-
-    /* check that all the augment nodes are optional */
-    for (testobj = (obj_template_t *)
-	     dlq_firstEntry(&aug->datadefQ);
-	 testobj != NO_ERR;
-	 testobj = (obj_template_t *)
-	     dlq_nextEntry(testobj)) {
-
-	if (!obj_has_name(testobj)) {
-	    continue;
-	}
-	
-	if (obj->when && obj->when->exprstr
-	    && obj_is_mandatory(testobj)) {
-	    log_error("\nError: Mandatory object '%s' not allowed "
-		      "in conditional augment statement",
-		      obj_get_name(testobj));
-	    retres = ERR_NCX_MANDATORY_NOT_ALLOWED;
-	    tkc->cur = testobj->tk;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
-    }
-    
     return retres;
 				    
 }  /* resolve_augment */
@@ -4781,7 +4813,7 @@ static status_t
     obj_augment_t     *aug;
     obj_template_t    *targobj, *chobj, *newobj, *testobj;
     const xmlChar     *name;
-    dlq_hdr_t         *targQ;
+    dlq_hdr_t         *targQ, *augQ;
     status_t           res, retres;
     boolean            augextern, augdefcase, config, confset;
     
@@ -4793,6 +4825,7 @@ static status_t
 	return NO_ERR;
     }
 
+    augQ = &aug->datadefQ;
     retres = NO_ERR;
     targobj = NULL;
     targQ = NULL;
@@ -4805,12 +4838,11 @@ static status_t
     if (res != NO_ERR) {
 	return res;
     }
-
-
 	
     aug->targobj = targobj;
 
-    augextern = (mod->nsid != obj_get_nsid(targobj)) ? TRUE : FALSE;
+    augextern = xml_strcmp(obj_get_mod_name(obj),
+			   obj_get_mod_name(targobj));
 
     augdefcase = (targobj->objtype == OBJ_TYP_CASE && targobj->parent
 		  && targobj->parent->def.choic->defval &&
@@ -4818,16 +4850,13 @@ static status_t
 			      targobj->parent->def.choic->defval)) 
 	? TRUE : FALSE;
     
-
     /* check external augment for mandatory nodes */
     if (augextern || augdefcase) {
 
 	/* check that all the augment nodes are optional */
-	for (testobj = (obj_template_t *)
-		 dlq_firstEntry(&aug->datadefQ);
+	for (testobj = (obj_template_t *)dlq_firstEntry(augQ);
 	     testobj != NO_ERR;
-	     testobj = (obj_template_t *)
-		 dlq_nextEntry(testobj)) {
+	     testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
 	    if (!obj_has_name(testobj)) {
 		continue;
@@ -4841,7 +4870,8 @@ static status_t
 		} else {
 		    log_error("\nError: Mandatory object '%s' not allowed "
 			      "in default case '%s'",
-			      obj_get_name(testobj), obj_get_name(targobj));
+			      obj_get_name(testobj), 
+			      obj_get_name(targobj));
 		}
 		
 		retres = ERR_NCX_MANDATORY_NOT_ALLOWED;
@@ -4851,63 +4881,81 @@ static status_t
 	}
     }
 
+    /* make sure the objects augmented the target node
+     * are OK for that object type
+     */
     switch (targobj->objtype) {
     case OBJ_TYP_RPC:
-	if (dlq_count(&aug->datadefQ) > 2) {
-	    retres = ERR_NCX_EXTRA_PARM;
-	    log_error("\nError: too many augment entries for an RPC method");
-	    tkc->cur = obj->tk;
-	    ncx_print_errormsg(tkc, mod, retres);
-	    break;
-	}
-
-	for (testobj = (obj_template_t *)dlq_firstEntry(&aug->datadefQ);
-	     testobj != NULL;
-	     testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
-	    if (obj->objtype != OBJ_TYP_RPCIO) {
-		retres = ERR_NCX_INVALID_VALUE;
-		log_error("\nError: invalid object '%s' augmenting RPC method",
-			  obj_get_name(testobj));
-		tkc->cur = obj->tk;
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
+	retres = ERR_NCX_INVALID_AUGTARGET;
+	log_error("\nError: cannot augment rpc node '%s'; use 'input' "
+		  "or 'output' instead", 
+		  obj_get_name(targobj));
+	tkc->cur = obj->tk;
+	ncx_print_errormsg(tkc, mod, retres);
 	break;
     case OBJ_TYP_CHOICE:
-	for (testobj = (obj_template_t *)dlq_firstEntry(&aug->datadefQ);
+	for (testobj = (obj_template_t *)dlq_firstEntry(augQ);
 	     testobj != NULL;
 	     testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
-	    switch (obj->objtype) {
+	    switch (testobj->objtype) {
 	    case OBJ_TYP_RPC:
 	    case OBJ_TYP_RPCIO:
 	    case OBJ_TYP_NOTIF:
 	    case OBJ_TYP_CHOICE:
-	    case OBJ_TYP_USES:
-		retres = ERR_NCX_INVALID_VALUE;
-		log_error("\nError: invalid object '%s' augmenting choice node",
+		retres = ERR_NCX_INVALID_AUGTARGET;
+		log_error("\nError: invalid %s '%s' augmenting choice node",
+			  obj_get_typestr(testobj),
 			  obj_get_name(testobj));
 		tkc->cur = obj->tk;
 		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    case OBJ_TYP_NONE:
+	    case OBJ_TYP_USES:
+	    case OBJ_TYP_AUGMENT:
+	    case OBJ_TYP_REFINE:
+		retres = SET_ERROR(ERR_INTERNAL_VAL);
 		break;
 	    default:
 		;
 	    }
 	}
 	break;
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+	/* in this implementation, anyxml is tagged as a base type
+	 * for a leaf, since it originally was a builtin type
+	 * TBD: make anyxml a separate object type
+	 * until then, make sure the basetype is not anyxml
+	 */
+	if (obj_get_basetype(targobj) == NCX_BT_ANY) {
+	    retres = ERR_NCX_INVALID_AUGTARGET;
+	    log_error("\nError: cannot augment anyxml node '%s'",
+		      obj_get_name(testobj));
+	    tkc->cur = obj->tk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+	break;
     default:
-	for (testobj = (obj_template_t *)dlq_firstEntry(&aug->datadefQ);
+	for (testobj = (obj_template_t *)dlq_firstEntry(augQ);
 	     testobj != NULL;
 	     testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
-	    switch (obj->objtype) {
+	    switch (testobj->objtype) {
 	    case OBJ_TYP_RPC:
 	    case OBJ_TYP_RPCIO:
 	    case OBJ_TYP_NOTIF:
 	    case OBJ_TYP_CASE:
-		retres = ERR_NCX_INVALID_VALUE;
-		log_error("\nError: invalid object '%s' augmenting data node",
+		retres = ERR_NCX_INVALID_AUGTARGET;
+		log_error("\nError: invalid %s '%s' augmenting data node",
+			  obj_get_typestr(testobj),
 			  obj_get_name(testobj));
 		tkc->cur = obj->tk;
 		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    case OBJ_TYP_NONE:
+	    case OBJ_TYP_USES:
+	    case OBJ_TYP_AUGMENT:
+	    case OBJ_TYP_REFINE:
+		retres = SET_ERROR(ERR_INTERNAL_VAL);
 		break;
 	    default:
 		;
@@ -4917,12 +4965,11 @@ static status_t
 
     /* get the augment target datadefQ */
     targQ = obj_get_datadefQ(targobj);
-    if (!targQ || targobj->objtype==OBJ_TYP_LEAF
-	|| targobj->objtype==OBJ_TYP_LEAF_LIST) {
-	log_error("\nError: &s '%s' cannot be augmented",
+    if (!targQ) {
+	log_error("\nError: %s '%s' cannot be augmented",
 		  obj_get_typestr(targobj),
 		  obj_get_name(targobj));
-	retres = ERR_NCX_WRONG_NODETYP;
+	retres = ERR_NCX_INVALID_AUGTARGET;
 	tkc->cur = targobj->tk;
 	ncx_print_errormsg(tkc, mod, retres);
 	return retres;
@@ -4933,7 +4980,7 @@ static status_t
      * if not, then clone the grouping object and add it
      * to the augment target
      */
-    for (chobj = (obj_template_t *)dlq_firstEntry(&aug->datadefQ);
+    for (chobj = (obj_template_t *)dlq_firstEntry(augQ);
 	 chobj != NULL;
 	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
@@ -4977,6 +5024,10 @@ static status_t
 		tkc->cur = chobj->tk;
 		ncx_print_errormsg(tkc, mod, retres);
 	    } else {
+		/* OK to create the new name
+		 * make a clone of the augment object in
+		 * case this augment is inside a grouping
+		 */
 		if (targobj->objtype == OBJ_TYP_CHOICE) {
 		    /* make sure all the child nodes are wrapped
 		     * in a OBJ_TYP_CASE node -- this has not
@@ -5017,7 +5068,6 @@ static status_t
 			       targobj->linenum,
 			       obj->linenum);
 #endif
-
 		}
 	    }
 	}
@@ -5173,7 +5223,6 @@ static status_t
 *   mod == module in progress
 *   que == queue will get the obj_template_t 
 *   parent == parent object or NULL if top-level data-def-stmt
-*   refi == TRUE if uses refinement, FALSE if normal anyxml
 *   grp == grp_template_t parent or NULL if parent is not a grouping
 *
 * RETURNS:
@@ -5184,7 +5233,6 @@ static status_t
 		     ncx_module_t  *mod,
 		     dlq_hdr_t *que,
 		     obj_template_t *parent,
-		     boolean refi,
 		     grp_template_t *grp)
 {
     const xmlChar   *val;
@@ -5195,7 +5243,7 @@ static status_t
 
     expstr = "anyxml, container, leaf, leaf-list, list, choice, uses,"
 	"or augment keyword";
-    errdone = FALSE;
+    errdone = TRUE;
     res = NO_ERR;
     tktyp = TK_CUR_TYP(tkc);
     val = TK_CUR_VAL(tkc);
@@ -5203,56 +5251,31 @@ static status_t
     /* check the current token type */
     if (tktyp != TK_TT_TSTRING) {
 	res = ERR_NCX_WRONG_TKTYPE;
+	errdone = FALSE;
     } else {
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_ANYXML)) {
-	    res = consume_yang_anyxml(tkc, mod, que,
-				      parent, refi, grp);
-	    if (res != NO_ERR) {
-		errdone = TRUE;
-	    }
+	    res = consume_anyxml(tkc, mod, que, parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
-	    res = consume_yang_container(tkc, mod, que,
-					 parent, refi, grp);
-	    if (res != NO_ERR) {
-		errdone = TRUE;
-	    }
+	    res = consume_container(tkc, mod, que,
+					 parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
-	    res = consume_yang_leaf(tkc, mod, que,
-				    parent, refi, grp);
-	    if (res != NO_ERR) {
-		errdone = TRUE;
-	    }
+	    res = consume_leaf(tkc, mod, que,
+				    parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
-	    res = consume_yang_leaflist(tkc, mod, que,
-					parent, refi, grp);
-	    if (res != NO_ERR) {
-		errdone = TRUE;
-	    }
+	    res = consume_leaflist(tkc, mod, que,
+					parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
-	    res = consume_yang_list(tkc, mod, que,
-				    parent, refi, grp);
-	    if (res != NO_ERR) {
-		errdone = TRUE;
-	    }
+	    res = consume_list(tkc, mod, que,
+				    parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
-	    res = consume_yang_choice(tkc, mod, que,
-				      parent, refi, grp);
-	    if (res != NO_ERR) {
-		errdone = TRUE;
-	    }
+	    res = consume_choice(tkc, mod, que,
+				      parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_USES)) {
-	    res = consume_yang_uses(tkc, mod, que, parent, grp);
-	    if (res != NO_ERR) {
-		errdone = TRUE;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
-	    res = consume_yang_augment(tkc, mod, que, parent, grp);
-	    if (res != NO_ERR) {
-		errdone = TRUE;
-	    }
+	    res = consume_uses(tkc, mod, que, parent, grp);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
+	    errdone = FALSE;
 	}
     }
 
@@ -5341,7 +5364,6 @@ static status_t
     return retres;
 				    
 }  /* resolve_iffeatureQ */
-
 
 
 /********************************************************************
@@ -5643,7 +5665,7 @@ status_t
     }
 #endif
 
-    res = consume_datadef(tkc, mod, que, parent, FALSE, NULL);
+    res = consume_datadef(tkc, mod, que, parent, NULL);
     return res;
 
 }  /* yang_obj_consume_datadef */
@@ -5688,7 +5710,7 @@ status_t
     }
 #endif
 
-    res = consume_datadef(tkc, mod, que, parent, FALSE, grp);
+    res = consume_datadef(tkc, mod, que, parent, grp);
     return res;
 
 }  /* yang_obj_consume_datadef_grp */
@@ -5729,7 +5751,7 @@ status_t
     }
 #endif
 
-    res = consume_yang_rpc(tkc, mod, &mod->datadefQ, NULL, NULL);
+    res = consume_rpc(tkc, mod, &mod->datadefQ, NULL, NULL);
     return res;
 
 }  /* yang_obj_consume_rpc */
@@ -5740,8 +5762,6 @@ status_t
 * 
 * Parse the next N tokens as a notification-stmt
 * Create a obj_template_t struct and add it to the specified module
-*
-* First pass of a 3 pass compiler
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -5770,15 +5790,56 @@ status_t
     }
 #endif
 
-    res = consume_yang_notif(tkc, mod, &mod->datadefQ, NULL, NULL);
+    res = consume_notif(tkc, mod, &mod->datadefQ, NULL, NULL);
     return res;
 
 }  /* yang_obj_consume_notification */
 
 
 /********************************************************************
+* FUNCTION yang_obj_consume_augment
+* 
+* Parse the next N tokens as a top-level augment-stmt
+* Create a obj_template_t struct and add it to the specified module
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'augment' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*
+* OUTPUTS:
+*   new augment object added to module 
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_obj_consume_augment (tk_chain_t *tkc,
+			      ncx_module_t  *mod)
+{
+    status_t         res;
+
+#ifdef DEBUG
+    if (!tkc || !mod) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = consume_augment(tkc, mod, &mod->datadefQ, NULL, NULL);
+    return res;
+
+}  /* yang_obj_consume_augment */
+
+
+/********************************************************************
 * FUNCTION yang_obj_resolve_datadefs
 * 
+* First pass object validation
+*
 * Analyze the entire datadefQ within the module struct
 * Finish all the clauses within this struct that
 * may have been defered because of possible forward references
@@ -5868,6 +5929,9 @@ status_t
 	    res = resolve_notif(tkc, mod,
 				testobj->def.notif, testobj);
 	    break;
+	case OBJ_TYP_REFINE:
+	    res = NO_ERR;
+	    break;
 	case OBJ_TYP_NONE:
 	default:
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -5883,8 +5947,13 @@ status_t
 /********************************************************************
 * FUNCTION yang_obj_resolve_uses
 * 
+* Second pass object validation
+*
 * Expand and validate any uses clauses within any objects
 * within the datadefQ
+*
+* Search through the entire datadefQ tree(s) and call
+* the expand_uses() function
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -6020,6 +6089,9 @@ status_t
 /********************************************************************
 * FUNCTION yang_obj_resolve_augments
 * 
+*
+* Third pass object validation
+*
 * Expand and validate any augment clauses within any objects
 * within the datadefQ
 *
@@ -6091,6 +6163,7 @@ status_t
 	    }
 	    break;
 	case OBJ_TYP_USES:
+	case OBJ_TYP_REFINE:
 	    break;
 	case OBJ_TYP_AUGMENT:
 	    res = expand_augment(tkc, mod, testobj, datadefQ);
@@ -6126,6 +6199,8 @@ status_t
 /********************************************************************
 * FUNCTION yang_obj_resolve_final
 * 
+* Fourth pass object validation
+*
 * Check various final stage errors and warnings
 * within a single file
 *
@@ -6243,6 +6318,8 @@ status_t
 				&testobj->def.notif->typedefQ,
 				&testobj->def.notif->groupingQ);
 	    break;
+	case OBJ_TYP_REFINE:
+	    break;
 	case OBJ_TYP_NONE:
 	default:
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -6258,6 +6335,8 @@ status_t
 /********************************************************************
 * FUNCTION yang_obj_resolve_xpath
 * 
+* Fifth (and final) pass object validation
+*
 * Check all keyref, must, and when XPath expressions
 * to make sure they are well-formed
 *
@@ -6303,6 +6382,12 @@ status_t
     for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
 	 testobj != NULL;
 	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+
+	/*** validate correct Xpath in when clause ***/
+	/*** XPATH TBD ***/
+
+	/*** validate correct Xpath in must clauses ***/
+	/*** XPATH TBD ***/
 
 	if (!obj_has_name(testobj)) {
 	    /* skip augment and uses */

@@ -217,7 +217,8 @@ static void
 *    mod == module owner of the cloned data
 *    newQ == Q of obj_template_t getting new contents
 *    srcQ == Q of obj_template_t with starting contents
-*    merQ == Q of obj_template_t to merge into the clone, as refinements
+*    mobjQ == Q of OBJ_TYP_REFINE obj_template_t to 
+*            merge into the clone, as refinements
 *            (May be NULL)
 *   parent == parent object containing the srcQ (may be NULL)
 *
@@ -228,10 +229,10 @@ static status_t
     clone_datadefQ (ncx_module_t *mod,
 		    dlq_hdr_t *newQ,
 		    dlq_hdr_t *srcQ,
-		    dlq_hdr_t *merQ,
+		    dlq_hdr_t *mobjQ,
 		    obj_template_t *parent)
 {
-    obj_template_t  *newobj, *srcobj, *mobj, *testobj;
+    obj_template_t  *newobj, *srcobj, *testobj;
     status_t         res;
 
     res = NO_ERR;
@@ -244,14 +245,7 @@ static status_t
 	    continue;
 	}
 
-	mobj = NULL;
-	if (merQ) {
-	    mobj = obj_find_template(merQ, 
-				     obj_get_mod_name(srcobj),
-				     obj_get_name(srcobj));
-	}
-
-	newobj = obj_clone_template(mod, srcobj, mobj);
+	newobj = obj_clone_template(mod, srcobj, mobjQ);
 	if (!newobj) {
 	    log_error("\nError: clone of object %s failed",
 		      obj_get_name(srcobj));
@@ -277,8 +271,6 @@ static status_t
     return res;
 
 }  /* clone_datadefQ */
-
-
 
 
 /********************************************************************
@@ -344,11 +336,13 @@ static status_t
 * INPUTS:
 *    mod == module owner of the cloned data
 *    cas == obj_case_t data structure to clone
-*    mcas == obj_case_t data structure to merge
+*    mcas == obj_refine_t data structure to merge
 *            into the clone, as refinements.  Only
 *            legal case refinements will be checked
 *            (May be NULL)
 *    obj == new object template getting this cloned case
+*    mobjQ == Q containing OBJ_TYP_REFINE objects to check
+*
 * RETURNS:
 *   pointer to malloced case clone
 *   NULL if  malloc error or internal error
@@ -356,8 +350,9 @@ static status_t
 static obj_case_t *
     clone_case (ncx_module_t *mod,
 		obj_case_t *cas,
-		obj_case_t *mcas,
-		obj_template_t *obj)
+		obj_refine_t *mcas,
+		obj_template_t *obj,
+		dlq_hdr_t  *mobjQ)
 {
     obj_case_t     *newcas;
     status_t        res;
@@ -403,7 +398,7 @@ static obj_case_t *
     }
 
     res = clone_datadefQ(mod, newcas->datadefQ, cas->datadefQ,
-			 (mcas) ? mcas->datadefQ : NULL, obj);
+			 mobjQ, obj);
     if (res != NO_ERR) {
 	free_case(newcas);
 	return NULL;
@@ -582,10 +577,11 @@ static void
 *    mod == module owner of the cloned data
 *    parent == new object containing 'con'
 *    con == obj_container_t data structure to clone
-*    mcon == obj_container_t data structure to merge
+*    mcon == obj_refine_t data structure to merge
 *            into the clone, as refinements.  Only
 *            legal container refinements will be checked
 *            (May be NULL)
+*    mobjQ == starting merge object Q, passed through
 *
 * RETURNS:
 *   pointer to malloced object clone
@@ -595,7 +591,8 @@ static obj_container_t *
     clone_container (ncx_module_t *mod,
 		     obj_template_t  *parent,
 		     obj_container_t *con,
-		     obj_container_t *mcon)
+		     obj_refine_t *mcon,
+		     dlq_hdr_t  *mobjQ)
 {
     obj_container_t *newcon;
     status_t         res;
@@ -662,8 +659,8 @@ static obj_container_t *
 	return NULL;
     }
 
-    res = clone_datadefQ(mod, newcon->datadefQ, con->datadefQ,
-			 (mcon) ? mcon->datadefQ : NULL, parent);
+    res = clone_datadefQ(mod, newcon->datadefQ, 
+			 con->datadefQ, mobjQ, parent);
     if (res != NO_ERR) {
 	free_container(newcon, OBJ_FL_CLONE);
 	return NULL;
@@ -769,7 +766,7 @@ static void
 *
 * INPUTS:
 *    leaf == obj_leaf_t data structure to clone
-*    mleaf == obj_leaf_t data structure to merge
+*    mleaf == obj_refine_t data structure to merge
 *            into the clone, as refinements.  Only
 *            legal leaf refinements will be checked
 *            (May be NULL)
@@ -780,7 +777,7 @@ static void
 *********************************************************************/
 static obj_leaf_t *
     clone_leaf (obj_leaf_t *leaf,
-		obj_leaf_t *mleaf)
+		obj_refine_t *mleaf)
 {
     obj_leaf_t      *newleaf;
     status_t         res;
@@ -796,8 +793,8 @@ static obj_leaf_t *
     newleaf->typdef = leaf->typdef;
     newleaf->status = leaf->status;
 
-    if (mleaf && mleaf->defval) {
-	newleaf->defval = xml_strdup(mleaf->defval);
+    if (mleaf && mleaf->def) {
+	newleaf->defval = xml_strdup(mleaf->def);
 	if (!newleaf->defval) {
 	    free_leaf(newleaf, OBJ_FL_CLONE);
 	    return NULL;
@@ -942,7 +939,7 @@ static void
 *
 * INPUTS:
 *    leaflist == obj_leaflist_t data structure to clone
-*    mleaflist == obj_leaflist_t data structure to merge
+*    mleaflist == obj_refine_t data structure to merge
 *            into the clone, as refinements.  Only
 *            legal leaf-list refinements will be checked
 *            (May be NULL)
@@ -953,10 +950,10 @@ static void
 *********************************************************************/
 static obj_leaflist_t *
     clone_leaflist (obj_leaflist_t *leaflist,
-		obj_leaflist_t *mleaflist)
+		    obj_refine_t *mleaflist)
 {
     obj_leaflist_t      *newleaflist;
-    status_t         res;
+    status_t             res;
 
     newleaflist = new_leaflist(FALSE);
     if (!newleaflist) {
@@ -1005,7 +1002,7 @@ static obj_leaflist_t *
 	return NULL;
     }
 
-    if (mleaflist && mleaflist->minset) {
+    if (mleaflist && mleaflist->minelems_tk) {
 	newleaflist->minelems = mleaflist->minelems;
 	newleaflist->minset = TRUE;
     } else {
@@ -1013,7 +1010,7 @@ static obj_leaflist_t *
 	newleaflist->minset = leaflist->minset;
     }
 
-    if (mleaflist && mleaflist->maxset) {
+    if (mleaflist && mleaflist->maxelems_tk) {
 	newleaflist->maxelems = mleaflist->maxelems;
 	newleaflist->maxset = TRUE;
     } else {
@@ -1171,10 +1168,11 @@ static obj_list_t *
 *    mod == module owner of the cloned data
 *    parent == new obj containing 'list'
 *    list == obj_list_t data structure to clone
-*    mlist == obj_list_t data structure to merge
+*    mlist == obj_refine_t data structure to merge
 *            into the clone, as refinements.  Only
 *            legal list refinements will be checked
 *            (May be NULL)
+*    mobjQ == Q of objects with OBJ_TYP_REFINE to apply
 *
 * RETURNS:
 *   pointer to malloced object clone
@@ -1184,7 +1182,8 @@ static obj_list_t *
     clone_list (ncx_module_t *mod,
 		obj_template_t *parent,
 		obj_list_t *list,
-		obj_list_t *mlist)
+		obj_refine_t *mlist,
+		dlq_hdr_t *mobjQ)
 {
     obj_list_t      *newlist;
     status_t         res;
@@ -1239,7 +1238,7 @@ static obj_list_t *
 	return NULL;
     }
 
-    if (mlist && mlist->minset) {
+    if (mlist && mlist->minelems_tk) {
 	newlist->minelems = mlist->minelems;
 	newlist->minset = TRUE;
     } else {
@@ -1247,7 +1246,7 @@ static obj_list_t *
 	newlist->minset = list->minset;
     }
 
-    if (mlist && mlist->maxset) {
+    if (mlist && mlist->maxelems_tk) {
 	newlist->maxelems = mlist->maxelems;
 	newlist->maxset = TRUE;
     } else {
@@ -1256,7 +1255,7 @@ static obj_list_t *
     }
 
     res = clone_datadefQ(mod, newlist->datadefQ, list->datadefQ, 
-			 (mlist) ? mlist->datadefQ : NULL, parent);
+			 mobjQ, parent);
     if (res != NO_ERR) {
 	free_list(newlist, OBJ_FL_CLONE);
 	return NULL;
@@ -1430,6 +1429,7 @@ static void
 *            legal choice refinements will be checked
 *            (May be NULL)
 *    obj == parent object containing 'choic'
+*    mobjQ == Q with OBJ_TYP_REFINE nodes to check
 *
 * RETURNS:
 *   pointer to malloced object clone
@@ -1438,8 +1438,9 @@ static void
 static obj_choice_t *
     clone_choice (ncx_module_t *mod,
 		  obj_choice_t *choic,
-		  obj_choice_t *mchoic,
-		  obj_template_t *obj)
+		  obj_refine_t *mchoic,
+		  obj_template_t *obj,
+		  dlq_hdr_t  *mobjQ)
 {
     obj_choice_t    *newchoic;
     status_t         res;
@@ -1453,8 +1454,8 @@ static obj_choice_t *
     newchoic->name = choic->name;
     newchoic->status = choic->status;
 
-    if (mchoic && mchoic->defval) {
-	newchoic->defval = xml_strdup(mchoic->defval);
+    if (mchoic && mchoic->def) {
+	newchoic->defval = xml_strdup(mchoic->def);
 	if (!newchoic->defval) {
 	    free_choice(newchoic, OBJ_FL_CLONE);
 	    return NULL;
@@ -1496,8 +1497,7 @@ static obj_choice_t *
     }
 
     res = clone_datadefQ(mod, newchoic->caseQ,
-			 choic->caseQ,
-			 (mchoic) ? mchoic->caseQ : NULL, obj);
+			 choic->caseQ, mobjQ, obj);
     if (res != NO_ERR) {
 	free_choice(newchoic, OBJ_FL_CLONE);
 	return NULL;
@@ -1579,6 +1579,69 @@ static void
     m__free(us);
 
 }  /* free_uses */
+
+
+/********************************************************************
+* FUNCTION new_refine
+* 
+* Malloc and initialize the fields in a obj_refine_t
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
+static obj_refine_t * 
+    new_refine (void)
+{
+    obj_refine_t  *refi;
+
+    refi = m__getObj(obj_refine_t);
+    if (!refi) {
+	return NULL;
+    }
+    (void)memset(refi, 0x0, sizeof(obj_refine_t));
+
+    dlq_createSQue(&refi->mustQ);
+
+    return refi;
+
+}  /* new_refine */
+
+
+/********************************************************************
+* FUNCTION free_refine
+* 
+* Scrub the memory in a obj_refine_t by freeing all
+* the sub-fields and then freeing the entire struct itself 
+* The struct must be removed from any queue it is in before
+* this function is called.
+*
+* INPUTS:
+*    refi == obj_refine_t data structure to free
+*********************************************************************/
+static void 
+    free_refine (obj_refine_t *refi)
+{
+    if (refi->target) {
+	m__free(refi->target);
+    }
+    if (refi->descr) {
+	m__free(refi->descr);
+    }
+    if (refi->ref) {
+	m__free(refi->ref);
+    }
+    if (refi->presence) {
+	m__free(refi->presence);
+    }
+    if (refi->def) {
+	m__free(refi->def);
+    }
+
+    clean_mustQ(&refi->mustQ);
+
+    m__free(refi);
+
+}  /* free_refine */
 
 
 /********************************************************************
@@ -1993,6 +2056,7 @@ static boolean
 	/*NOTREACHED*/
     case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
 	/* no real setting -- not applicable */
 	*setflag = FALSE;
 	return FALSE;
@@ -2288,6 +2352,13 @@ obj_template_t *
 	    return NULL;
 	}
 	break;
+    case OBJ_TYP_REFINE:
+	obj->def.refine = new_refine();
+	if (!obj->def.refine) {
+	    m__free(obj);
+	    return NULL;
+	}
+	break;
     case OBJ_TYP_AUGMENT:
 	obj->def.augment = new_augment(TRUE);
 	if (!obj->def.augment) {
@@ -2390,6 +2461,11 @@ void
     case OBJ_TYP_USES:
 	if (obj->def.uses) {
 	    free_uses(obj->def.uses);
+	}
+	break;
+    case OBJ_TYP_REFINE:
+	if (obj->def.refine) {
+	    free_refine(obj->def.refine);
 	}
 	break;
     case OBJ_TYP_AUGMENT:
@@ -3028,68 +3104,6 @@ obj_case_t *
 }  /* obj_find_case */
 
 
-#ifdef NOT_NEEDEED
-/********************************************************************
-* FUNCTION obj_find_uses
-* 
-* Find a specified uses-stmt within a Q of obj_template_t
-*
-* INPUTS:
-*    que == Q of obj_template_t to check
-*    uobj == uses object to find a match for
-*
-* RETURNS:
-*    pointer to obj_template_t for matching object
-*    NULL if not found
-*********************************************************************/
-obj_template_t *
-    obj_find_uses (const dlq_hdr_t *que,
-		   const obj_template_t *uobj)
-{
-    const obj_template_t *obj;
-    const grp_template_t  *grp1, *grp2;
-
-#ifdef DEBUG
-    if (!que || !uobj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-    if (uobj->objtype != OBJ_TYP_USES) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
-    }
-#endif
-
-    grp1 = uobj->def.uses->grp;
-
-    for (obj = (obj_template_t *)dlq_firstEntry(que);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
-
-	if (obj->objtype != OBJ_TYP_USES) {
-	    continue;
-	}
-
-	grp2 = obj->def.uses->grp;
-
-	if (xml_strcmp(grp1->name, grp2->name)) {
-	    continue;
-	}
-
-	if (xml_strcmp(grp_get_mod_name(grp1),
-		       grp_get_mod_name(grp2)) {
-	    continue;
-	}
-
-	return obj;
-    }
-
-    return NULL;
-
-}  /* obj_find_uses */
-#endif
-
-
 /********************************************************************
 * FUNCTION obj_new_rpcio
 * 
@@ -3229,7 +3243,7 @@ typ_template_t *
     case OBJ_TYP_CHOICE:
     case OBJ_TYP_CASE:
     case OBJ_TYP_USES:
-	break;
+    case OBJ_TYP_REFINE:
     case OBJ_TYP_AUGMENT:
 	break;
     case OBJ_TYP_RPC:
@@ -3326,7 +3340,7 @@ grp_template_t *
     case OBJ_TYP_CHOICE:
     case OBJ_TYP_CASE:
     case OBJ_TYP_USES:
-	break;
+    case OBJ_TYP_REFINE:
     case OBJ_TYP_AUGMENT:
 	break;
     case OBJ_TYP_RPC:
@@ -3452,9 +3466,12 @@ status_t
 *   srcobj == obj_template to clone
 *             !!! This struct MUST NOT be deleted!!!
 *             !!! Unless all of its clones are also deleted !!!
-*   mobj == merge object (may be NULL)
-*           only fields allowed to be revised will be checked
-*           even if other fields are set in this struct
+*   mobjQ == merge object Q (may be NULL)
+*           datadefQ to check for OBJ_TYP_REFINE nodes
+*           If the target of the refine node matches the
+*           srcobj (e.g., from same grouping), then the
+*           sub-clauses in that refinement-stmt that
+*           are allowed to be revised will be checked
 *
 * RETURNS:
 *   pointer to malloced clone obj_template_t
@@ -3463,9 +3480,9 @@ status_t
 obj_template_t *
     obj_clone_template (ncx_module_t *mod,
 			obj_template_t *srcobj,
-			obj_template_t *mobj)
+			dlq_hdr_t *mobjQ)
 {
-    obj_template_t     *newobj;
+    obj_template_t     *newobj, *mobj, *testobj;
     status_t            res;
 
 #ifdef DEBUG
@@ -3477,17 +3494,6 @@ obj_template_t *
 	srcobj->objtype > OBJ_TYP_AUGMENT) {
         SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
-    }
-    if (mobj) {
-	if (mobj->objtype != srcobj->objtype) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-	if (xml_strcmp(obj_get_name(srcobj),
-			obj_get_name(mobj))) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
     }
 #endif
 
@@ -3504,10 +3510,27 @@ obj_template_t *
     newobj->tk = srcobj->tk;
     newobj->linenum = srcobj->linenum;
     newobj->flags = (srcobj->flags | OBJ_FL_CLONE);
+    newobj->mod = mod;
+
+    mobj = NULL;
+    if (mobjQ) {
+	for (testobj = (obj_template_t *)dlq_firstEntry(mobjQ);
+	     testobj != NULL && mobj == NULL;
+	     testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+
+	    if (testobj->objtype != OBJ_TYP_REFINE) {
+		continue;
+	    }
+
+	    if (testobj->def.refine->targobj == srcobj) {
+		mobj = testobj;
+	    }
+	}
+    }
+
     if (mobj) {
 	newobj->flags |= (mobj->flags & ~OBJ_FL_REFINE);
     }
-    newobj->mod = mod;
 
     res = clone_appinfoQ(&newobj->appinfoQ,
 			 &srcobj->appinfoQ,
@@ -3521,8 +3544,10 @@ obj_template_t *
     switch (srcobj->objtype) {
     case OBJ_TYP_CONTAINER:
 	newobj->def.container = 
-	    clone_container(mod, newobj, srcobj->def.container,
-			    (mobj) ? mobj->def.container : NULL);
+	    clone_container(mod, newobj, 
+			    srcobj->def.container,
+			    (mobj) ? mobj->def.refine : NULL,
+			    mobjQ);
 	if (!newobj->def.container) {
 	    res = ERR_INTERNAL_MEM;
 	}
@@ -3530,7 +3555,7 @@ obj_template_t *
     case OBJ_TYP_LEAF:
 	newobj->def.leaf = 
 	    clone_leaf(srcobj->def.leaf,
-		       (mobj) ? mobj->def.leaf : NULL);
+		       (mobj) ? mobj->def.refine : NULL);
 	if (!newobj->def.leaf) {
 	    res = ERR_INTERNAL_MEM;
 	}
@@ -3538,7 +3563,7 @@ obj_template_t *
     case OBJ_TYP_LEAF_LIST:
 	newobj->def.leaflist = 
 	    clone_leaflist(srcobj->def.leaflist,
-			   (mobj) ? mobj->def.leaflist : NULL);
+			   (mobj) ? mobj->def.refine : NULL);
 	if (!newobj->def.leaflist) {
 	    res = ERR_INTERNAL_MEM;
 	}
@@ -3546,7 +3571,7 @@ obj_template_t *
     case OBJ_TYP_LIST:
 	newobj->def.list = 
 	    clone_list(mod, newobj, srcobj->def.list,
-		       (mobj) ? mobj->def.list : NULL);
+		       (mobj) ? mobj->def.refine : NULL, mobjQ);
 	if (!newobj->def.list) {
 	    res = ERR_INTERNAL_MEM;
 	}
@@ -3554,7 +3579,8 @@ obj_template_t *
     case OBJ_TYP_CHOICE:
 	newobj->def.choic = 
 	    clone_choice(mod, srcobj->def.choic,
-			 (mobj) ? mobj->def.choic : NULL, newobj);
+			 (mobj) ? mobj->def.refine : NULL, 
+			 newobj, mobjQ);
 	if (!newobj->def.choic) {
 	    res = ERR_INTERNAL_MEM;
 	}
@@ -3562,8 +3588,8 @@ obj_template_t *
     case OBJ_TYP_CASE:
 	newobj->def.cas = 
 	    clone_case(mod, srcobj->def.cas,
-		       (mobj) ? mobj->def.cas : NULL,
-		       newobj);
+		       (mobj) ? mobj->def.refine : NULL,
+		       newobj, mobjQ);
 	if (!newobj->def.cas) {
 	    res = ERR_INTERNAL_MEM;
 	}
@@ -3617,7 +3643,7 @@ obj_template_t *
 *   srcobj == obj_template to clone
 *             !!! This struct MUST NOT be deleted!!!
 *             !!! Unless all of its clones are also deleted !!!
-*   mobj == merge object (may be NULL)
+*   mobjQ == Q of obj_refine_t objects to merge (may be NULL)
 *           only fields allowed to be revised will be checked
 *           even if other fields are set in this struct
 *
@@ -3628,7 +3654,7 @@ obj_template_t *
 obj_template_t *
     obj_clone_template_case (ncx_module_t *mod,
 			     obj_template_t *srcobj,
-			     obj_template_t *mobj)
+			     dlq_hdr_t *mobjQ)
 {
     obj_template_t     *casobj, *newobj;
 
@@ -3642,21 +3668,10 @@ obj_template_t *
         SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
     }
-    if (mobj) {
-	if (mobj->objtype != srcobj->objtype) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-	if (xml_strcmp(obj_get_name(srcobj),
-			obj_get_name(mobj))) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-    }
 #endif
 
     if (srcobj->objtype == OBJ_TYP_CASE) {
-	return obj_clone_template(mod, srcobj, mobj);
+	return obj_clone_template(mod, srcobj, mobjQ);
     }
 
     casobj = new_blank_template();
@@ -3685,7 +3700,7 @@ obj_template_t *
     }
     casobj->def.cas->status = obj_get_status(srcobj);
 
-    newobj = obj_clone_template(mod, srcobj, mobj);
+    newobj = obj_clone_template(mod, srcobj, mobjQ);
     if (!newobj) {
 	obj_free_template(casobj);
 	return NULL;
@@ -4543,6 +4558,8 @@ const xmlChar *
 	return YANG_K_USES;
     case OBJ_TYP_AUGMENT:
 	return YANG_K_AUGMENT;
+    case OBJ_TYP_REFINE:
+	return YANG_K_REFINE;
     case OBJ_TYP_RPC:
 	return obj->def.rpc->name;
     case OBJ_TYP_RPCIO:
@@ -4592,6 +4609,7 @@ boolean
 	return TRUE;
     case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
 	return FALSE;
     case OBJ_TYP_RPC:
     case OBJ_TYP_RPCIO:
@@ -4640,6 +4658,7 @@ ncx_status_t
     case OBJ_TYP_CHOICE:
 	return obj->def.choic->status;
     case OBJ_TYP_CASE:
+    case OBJ_TYP_REFINE:
 	return (obj->parent) ?
 	    obj_get_status(obj->parent) : NCX_STATUS_CURRENT;
     case OBJ_TYP_USES:
@@ -4699,6 +4718,8 @@ const xmlChar *
 	return obj->def.cas->descr;
     case OBJ_TYP_USES:
 	return obj->def.uses->descr;
+    case OBJ_TYP_REFINE:
+	return obj->def.refine->descr;
     case OBJ_TYP_AUGMENT:
 	return obj->def.augment->descr;
     case OBJ_TYP_RPC:
@@ -4753,6 +4774,8 @@ const xmlChar *
 	return obj->def.cas->ref;
     case OBJ_TYP_USES:
 	return obj->def.uses->ref;
+    case OBJ_TYP_REFINE:
+	return obj->def.refine->ref;
     case OBJ_TYP_AUGMENT:
 	return obj->def.augment->ref;
     case OBJ_TYP_RPC:
@@ -4868,6 +4891,7 @@ void
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_LIST:
     case OBJ_TYP_CHOICE:
+    case OBJ_TYP_REFINE:
 	obj->flags |= OBJ_FL_CONFIG;
 	break;
     case OBJ_TYP_CASE:
@@ -4977,6 +5001,8 @@ dlq_hdr_t *
 	return &obj->def.leaflist->mustQ;
     case OBJ_TYP_LIST:
 	return &obj->def.list->mustQ;
+    case OBJ_TYP_REFINE:
+	return &obj->def.refine->mustQ;
     default:
 	return NULL;
     }
@@ -5021,6 +5047,8 @@ const xmlChar *
 	return YANG_K_CASE;
     case OBJ_TYP_USES:
 	return YANG_K_USES;
+    case OBJ_TYP_REFINE:
+	return YANG_K_REFINE;
     case OBJ_TYP_AUGMENT:
 	return YANG_K_AUGMENT;
     case OBJ_TYP_RPC:
@@ -5066,6 +5094,7 @@ dlq_hdr_t *
 	return obj->def.container->datadefQ;
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
+    case OBJ_TYP_REFINE:
 	return NULL;
     case OBJ_TYP_LIST:
 	return obj->def.list->datadefQ;
@@ -5118,6 +5147,7 @@ const dlq_hdr_t *
 	return obj->def.container->datadefQ;
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
+    case OBJ_TYP_REFINE:
 	return NULL;
     case OBJ_TYP_LIST:
 	return obj->def.list->datadefQ;
@@ -5206,6 +5236,10 @@ const xmlChar *
     if (obj->objtype != OBJ_TYP_LEAF) {
 	return NULL;
     }
+    if (obj_get_basetype(obj) == NCX_BT_ANY) {
+	return NULL;
+    }
+
     if (obj->def.leaf->defval) {
 	return obj->def.leaf->defval;
     }
@@ -5645,6 +5679,9 @@ ncx_iqual_t
 	    }
 	}
 	break;
+    case OBJ_TYP_REFINE:
+	ret = NCX_IQUAL_ZMORE;
+	break;
     case OBJ_TYP_RPC:
     case OBJ_TYP_NOTIF:
 	ret = NCX_IQUAL_ONE;
@@ -5691,6 +5728,9 @@ boolean
     case OBJ_TYP_LIST:
 	*minelems = obj->def.list->minelems;
 	return obj->def.list->minset;
+    case OBJ_TYP_REFINE:
+	*minelems = obj->def.refine->minelems;
+	return (obj->def.refine->minelems_tk) ? TRUE : FALSE;
     default:
 	return FALSE;
     }
@@ -5733,6 +5773,9 @@ boolean
     case OBJ_TYP_LIST:
 	*maxelems = obj->def.list->maxelems;
 	return obj->def.list->maxset;
+    case OBJ_TYP_REFINE:
+	*maxelems = obj->def.refine->maxelems;
+	return (obj->def.refine->maxelems_tk) ? TRUE : FALSE;
     default:
 	return FALSE;
     }
@@ -5895,6 +5938,7 @@ boolean
 	return (obj->def.list->minelems) ? TRUE : FALSE;
     case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
     case OBJ_TYP_RPC:
     case OBJ_TYP_NOTIF:
 	return FALSE;
@@ -6022,6 +6066,8 @@ boolean
 	return FALSE;
     case OBJ_TYP_RPCIO:
 	return TRUE;  /* hack for yangdump HTML output */
+    case OBJ_TYP_REFINE:
+	return FALSE;
     default:
 	if (obj->parent) {
 	    return obj_is_data(obj->parent);
@@ -6063,6 +6109,8 @@ boolean
     case OBJ_TYP_NOTIF:
 	return FALSE;
     case OBJ_TYP_RPCIO:
+	return FALSE;
+    case OBJ_TYP_REFINE:
 	return FALSE;
     default:
 	if (obj_is_root(obj)) {

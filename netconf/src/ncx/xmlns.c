@@ -68,6 +68,11 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
+/* max registered namespaces/modules in the database
+ * increase to allow more modules loaded at once
+ * (this is an arbitrary limit)
+ */
+#define XMLNS_MAX_NS   4096
 
 #ifdef DEBUG
 #define XMLNS_DEBUG 1

@@ -2841,6 +2841,7 @@ static status_t
     typ_enum_t       *enu;
     status_t         res, retres;
     boolean          errdone;
+    ncx_btype_t      btyp;
 
     res = NO_ERR;
     retres = NO_ERR;
@@ -2914,10 +2915,13 @@ static status_t
 
     /* check default value if any defined */
     if (res == NO_ERR) {
-	if (defval && (typ_get_basetype(typdef) != NCX_BT_NONE) &&
-	    typ_ok(typdef)) {
-
-	    res = val_simval_ok(typdef, defval);
+	btyp = typ_get_basetype(typdef);
+	if (defval && (btyp != NCX_BT_NONE) && typ_ok(typdef)) {
+	    if (btyp == NCX_BT_IDREF) {
+		res = val_parse_idref(mod, defval, NULL, NULL, NULL);
+	    } else {
+		res = val_simval_ok(typdef, defval);
+	    }
 	    if (res != NO_ERR) {
 		if (obj) {
 		    log_error("\nError: %s '%s' has invalid "

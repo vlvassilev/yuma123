@@ -2018,7 +2018,7 @@ status_t
     }
 
     /* check the namespace associated with this node */
-    str = xmlTextReaderNamespaceUri(reader);
+    str = xmlTextReaderConstNamespaceUri(reader);
     if (str && *str) {
         ns = def_reg_find_ns(str);
         if (ns) {
@@ -2033,6 +2033,56 @@ status_t
     return NO_ERR;
 
 } /* xml_check_ns */
+
+
+/********************************************************************
+* FUNCTION xml_check_qname_content
+* 
+* Check if the string node content is a likely QName
+* If so, then get the namespace URI for the prefix,
+* look it up in def_reg, and store the NSID in the node
+*
+* INPUTS:
+*    reader == reader to use
+*    node == current string node in progress
+*
+* OUTPUTS:
+*    
+*********************************************************************/
+void
+    xml_check_qname_content (xmlTextReaderPtr reader,
+			     xml_node_t      *node)
+{
+    xmlChar *str, *ns;
+
+    str = node->simfree;
+    if (!str && node->simval) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+
+    /* find the first colon char */
+    while (*str && *str != ':') {
+	str++;
+    }
+
+    if (*str == ':') {
+	*str = 0;
+	ns = xmlTextReaderLookupNamespace(reader, node->simfree);
+	if (ns) {
+	    node->contentnsid = xmlns_find_ns_by_name(ns);
+	    xmlFree(ns);
+	}
+	*str = ':';
+    } else {
+	ns = xmlTextReaderLookupNamespace(reader, NULL);
+	if (ns) {
+	    node->contentnsid = xmlns_find_ns_by_name(ns);
+	    xmlFree(ns);
+	}
+    }
+
+}  /* xml_check_qname_content */
 
 
 /* END xml_util.c */

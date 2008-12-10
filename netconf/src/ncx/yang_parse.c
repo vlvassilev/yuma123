@@ -813,6 +813,7 @@ static status_t
     }
     identity->tk = TK_CUR(tkc);
     identity->isroot = TRUE;
+    identity->mod = mod;
 
     /* Get the mandatory identity name */
     res = yang_consume_id_string(tkc, mod, &identity->name);
@@ -976,7 +977,7 @@ static status_t
 	xml_strcmp(identity->baseprefix, mod->prefix)) {
 
 	/* find the identity in another module */
-	res = yang_find_imp_identity(tkc, mod, 
+       	res = yang_find_imp_identity(tkc, mod, 
 				     identity->baseprefix,
 				     identity->basename, 
 				     identity->tk,
@@ -2344,6 +2345,8 @@ static status_t
 	    res = yang_obj_consume_rpc(tkc, mod);
 	} else if (!xml_strcmp(val, YANG_K_NOTIFICATION)) {
 	    res = yang_obj_consume_notification(tkc, mod);
+	} else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
+	    res = yang_obj_consume_augment(tkc, mod);
 	} else {
 	    res = yang_obj_consume_datadef(tkc, mod,
 					   &mod->datadefQ, NULL);

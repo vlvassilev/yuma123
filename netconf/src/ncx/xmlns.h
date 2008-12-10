@@ -40,12 +40,6 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-/* max registered namespaces/modules in the database
- * increase to allow more modules loaded at once
- * 
- */
-#define XMLNS_MAX_NS   16384
-
 #define XMLNS_NULL_NS_ID          0
 
 #define XMLNS                     ((const xmlChar *)"xmlns")

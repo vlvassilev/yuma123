@@ -756,4 +756,7 @@ extern void *
 extern boolean
     typ_has_subclauses (const typ_def_t *typdef);
 
+extern const typ_idref_t *
+    typ_get_idref (const typ_def_t  *typdef);
+
 #endif	    /* _H_typ */

@@ -153,7 +153,7 @@ static void
     case XML_NT_END:
     case XML_NT_EMPTY:
 	/* get the element QName */
-	str = xmlTextReaderName(reader);
+	str = xmlTextReaderConstName(reader);
 	if (!str) {
 	    str = (const xmlChar *)"--";
 	}
@@ -196,6 +196,8 @@ static void
 }  /* get_errnode */
 
 
+
+
 /********************************************************************
 * FUNCTION get_all_attrs
 * 
@@ -228,8 +230,8 @@ static status_t
 		   boolean nserr)
 {
     int            i, cnt, ret;
-    xmlChar       *name, *value;
-    const xmlChar *badns;
+    xmlChar       *value;
+    const xmlChar *badns, *name;
     xmlns_id_t     nsid;
     status_t       res;
     boolean        done;
@@ -263,7 +265,7 @@ static status_t
 	    done = TRUE;
 	} else {
 	    /* get the attribute name */
-	    name = xmlTextReaderName(scb->reader);
+	    name = xmlTextReaderConstName(scb->reader);
 	    if (!name) {
 		res = ERR_XML_READER_NULLNAME;
 	    } else {
@@ -445,7 +447,7 @@ static status_t
     case XML_NT_END:
     case XML_NT_EMPTY:
 	/* get the element QName */
-	str = xmlTextReaderName(scb->reader);
+	str = xmlTextReaderConstName(scb->reader);
 	if (!str) {
 	    /* this never really happens */
 	    SET_ERROR(ERR_XML_READER_NULLNAME);
@@ -497,6 +499,10 @@ static status_t
 		node->simlen = xml_strlen(node->simfree);
 		node->simval = (const xmlChar *)node->simfree;
 	    }
+
+	    /* see if this is a QName string; if so save the NSID */
+	    xml_check_qname_content(scb->reader, node);
+
 	    xmlFree(valstr);
 	}
 	if (!node->simval) {
@@ -755,7 +761,7 @@ status_t
 	nodetyp = xmlTextReaderNodeType(scb->reader);
 
 	/* get the element QName */
-	qname = xmlTextReaderName(scb->reader);
+	qname = xmlTextReaderConstName(scb->reader);
 	if (qname) {
 	    /* check for namespace prefix in the name 
 	     * only error is 'unregistered namespace ID'

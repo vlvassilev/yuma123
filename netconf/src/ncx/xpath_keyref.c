@@ -997,9 +997,6 @@ static status_t
 /************    E X T E R N A L   F U N C T I O N S    ************/
 
 
-/*******    X P A T H   and   K E Y R E F    S U P P O R T   *******/
-
-
 /********************************************************************
 * FUNCTION xpath_keyref_parse_path
 * 
@@ -1137,6 +1134,8 @@ status_t
 
     /* check keyref is config but target is not */
     if (pcb->validateres == NO_ERR && pcb->targobj) {
+
+	/* make sure the config vs. non-config rules are followed */
 	if (obj_get_config_flag(obj) &&
 	    !obj_get_config_flag(pcb->targobj)) {
 	    res = ERR_NCX_NOT_CONFIG;
@@ -1148,31 +1147,37 @@ status_t
 	    pcb->validateres = res;
 	}
 
-	switch (pcb->source) {
-	case XP_SRC_KEYREF:
+	/* check for a leaf or leaf-list, then if that is OK,
+	 * check for a key leaf (!!! this may change!!!)
+	 */
+	if (!obj_get_ctypdef(pcb->targobj) ||
+	    obj_get_basetype(pcb->targobj) == NCX_BT_ANY) {
+	    res = ERR_NCX_INVALID_VALUE;
+	    log_error("\nError: invalid path target anyxml '%s'",
+		      obj_get_name(pcb->targobj));
+	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	    pcb->validateres = res;
+	} else if (pcb->source == XP_SRC_KEYREF) {
 	    if (!obj_is_key(pcb->targobj)) {
-		res = ERR_NCX_TYPE_NOT_INDEX;
+		res = ERR_NCX_INVALID_VALUE;
 		log_error("\nError: path target '%s' is "
 			  "not a key leaf",
 			  obj_get_name(pcb->targobj));
-		ncx_mod_exp_err(pcb->tkc, 
-				pcb->objmod, 
-				res, "key leaf");
+		ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
 		pcb->validateres = res;
 	    }
-	    break;
-	case XP_SRC_LEAFREF:
-	    break;
-	default:
-	    ;
 	}
 
+	/* this test is probably not worth doing,
+	 * but check for the loop anyway
+	 */
 	if (pcb->targobj == pcb->obj) {
 	    res = ERR_NCX_DEF_LOOP;
 	    log_error("\nError: path target '%s' is set to "
 		      "the target object",
 		      obj_get_name(pcb->targobj));
 	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	    pcb->validateres = res;
 	}
     }
 

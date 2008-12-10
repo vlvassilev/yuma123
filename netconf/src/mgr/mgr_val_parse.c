@@ -496,10 +496,6 @@ static status_t
 			      valnode.simval, 
 			      &retval->v.enu.val, 
 			      &retval->v.enu.name);
-	    if (res == NO_ERR) {
-		/* record the value even if there are errors after this */
-		retval->btyp = NCX_BT_ENUM;
-	    }
 	    break;
 	default:
 	    res = ERR_NCX_WRONG_NODETYP;
@@ -1023,6 +1019,132 @@ static status_t
 
 
 /********************************************************************
+ * FUNCTION parse_idref
+ * 
+ * Parse the XML input as an 'identityref' type 
+ * e.g..
+ *
+ * <foo>acme:card-type3</foo>
+ * 
+ * INPUTS:
+ *     scb == session control block
+ *            Input is read from scb->reader.
+ *     obj == object template for this identityref type
+ *     startnode == top node of the parameter to be parsed
+ *            Parser function will attempt to consume all the
+ *            nodes until the matching endnode is reached
+ *     retval ==  val_value_t that should get the results of the parsing
+ *     
+ * OUTPUTS:
+ *    *retval will be filled in
+ *    msg->errQ may be appended with new errors or warnings
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t 
+    parse_idref (ses_cb_t  *scb,
+		 const obj_template_t *obj,
+		 const xml_node_t *startnode,
+		 val_value_t  *retval)
+{
+    const xmlChar         *str;
+    xml_node_t             valnode, endnode;
+    status_t               res, res2;
+    boolean                enddone;
+
+    /* init local vars */
+    xml_init_node(&valnode);
+    xml_init_node(&endnode);
+    enddone = FALSE;
+    res = NO_ERR;
+    res2 = NO_ERR;
+
+    val_init_from_template(retval, obj);
+
+    /* make sure the startnode is correct */
+    res = xml_node_match(startnode, obj_get_nsid(obj), 
+			 NULL, XML_NT_START); 
+    if (res == NO_ERR) {
+	/* get the next node which should be a string node */
+	res = get_xml_node(scb, &valnode);
+    }
+
+    if (res == NO_ERR) {
+#ifdef MGR_VAL_PARSE_DEBUG
+	log_debug3("\nparse_idref: expecting string node");
+	if (LOGDEBUG3) {
+	    xml_dump_node(&valnode);
+	}
+#endif
+
+	/* validate the node type and enum string or number content */
+	switch (valnode.nodetyp) {
+	case XML_NT_START:
+	case XML_NT_EMPTY:
+	    res = ERR_NCX_WRONG_NODETYP_CPX;
+	    break;
+	case XML_NT_STRING:
+	    if (val_all_whitespace(valnode.simval)) {
+		res = ERR_NCX_INVALID_VALUE;
+	    } else {
+		retval->v.idref.nsid = valnode.contentnsid;
+
+		/* get the name field and verify identity is valid
+		 * for the identity base in the typdef
+		 */
+		str = NULL;
+		res = val_idref_ok(obj_get_ctypdef(obj), 
+				   valnode.simval,
+				   retval->v.idref.nsid,
+				   &str, 
+				   &retval->v.idref.identity);
+		if (str) {
+		    retval->v.idref.name = xml_strdup(str);
+		    if (!retval->v.idref.name) {
+			res = ERR_INTERNAL_MEM;
+		    }
+		}
+	    }
+	    break;
+	case XML_NT_END:
+	    enddone = TRUE;
+	    res = ERR_NCX_INVALID_VALUE;
+	    break;
+	default:
+	    res = SET_ERROR(ERR_NCX_WRONG_NODETYP);
+	    enddone = TRUE;
+	}
+
+	/* get the matching end node for startnode */
+	if (!enddone) {
+	    res2 = get_xml_node(scb, &endnode);
+	    if (res2 == NO_ERR) {
+#ifdef MGR_VAL_PARSE_DEBUG
+		log_debug3("\nparse_idref: expecting end for %s", 
+			   startnode->qname);
+		if (LOGDEBUG3) {
+		    xml_dump_node(&endnode);
+		}
+#endif
+		res2 = xml_endnode_match(startnode, &endnode);
+	    }
+	}
+    }
+
+    if (res == NO_ERR) {
+	res = res2;
+    }
+
+    xml_clean_node(&valnode);
+    xml_clean_node(&endnode);
+    return res;
+
+} /* parse_idref */
+
+
+
+/********************************************************************
  * FUNCTION parse_union
  * 
  * Parse the XML input as a 'union' type 
@@ -1383,7 +1505,6 @@ static status_t
     return retres;
 
 } /* parse_complex */
-
 
 
 /********************************************************************
@@ -1936,6 +2057,9 @@ static status_t
     case NCX_BT_BITS:
     case NCX_BT_INSTANCE_ID:
 	res = parse_string(scb, obj, btyp, startnode, retval);
+	break;
+    case NCX_BT_IDREF:
+	res = parse_idref(scb, obj, startnode, retval);
 	break;
     case NCX_BT_UNION:
 	res = parse_union(scb, obj, startnode, retval);

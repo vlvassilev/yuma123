@@ -574,6 +574,10 @@ const char *
 	return "invalid conditional object";
     case ERR_NCX_USING_OBSOLETE:
 	return "using obsolete definition";
+    case ERR_NCX_INVALID_AUGTARGET:
+	return "invalid augment target";
+    case ERR_NCX_DUP_REFINE_STMT:
+	return "duplicate refine sub-clause";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:
@@ -632,6 +636,8 @@ const char *
 	return "duplicate if-feature statement";
     case ERR_NCX_USING_DEPRECATED:
 	return "using deprecated definition";
+    case ERR_NCX_MISSING_REFTARGET:
+	return "missing refine target";
 
     /* system info codes start at 500 */
     case ERR_PARS_SECDONE:

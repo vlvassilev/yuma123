@@ -504,6 +504,7 @@ typedef struct ncx_idlink_t_ {
 typedef struct ncx_identity_t_ {
     dlq_hdr_t             qhdr;
     struct ncx_identity_t_ *base;      /* back-ptr to base id */
+    struct ncx_module_t_   *mod;      /* back-pre to module */
     xmlChar              *name;
     xmlChar              *baseprefix;
     xmlChar              *basename;

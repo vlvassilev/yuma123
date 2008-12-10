@@ -446,6 +446,8 @@ static rpc_err_t
     case ERR_NCX_INVALID_CONDITIONAL:
 	return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_USING_OBSOLETE:
+    case ERR_NCX_INVALID_AUGTARGET:
+    case ERR_NCX_DUP_REFINE_STMT:
 	return RPC_ERR_OPERATION_FAILED;
 	
     /* user warnings start at 400 */
@@ -477,6 +479,7 @@ static rpc_err_t
     case ERR_NCX_DUP_AUGNODE:
     case ERR_NCX_DUP_IF_FEATURE:
     case ERR_NCX_USING_DEPRECATED:
+    case ERR_NCX_MISSING_REFTARGET:
     case ERR_PARS_SECDONE:
     case ERR_NCX_SKIPPED:
     case ERR_NCX_CANCELED:

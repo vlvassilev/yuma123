@@ -119,7 +119,6 @@ static void
     }
 	
     sim->idref.base = NULL;
-    sim->idref.isq = FALSE;
 
     /* clean the rangeQ only if it is used */
     if (!dlq_empty(&sim->range.rangeQ)) {
@@ -4546,5 +4545,37 @@ boolean
 
 }   /* typ_has_subclauses */
 
+
+/********************************************************************
+* FUNCTION typ_get_idref
+* 
+* Get the idref field if this is an NCX_BT_IDREF typdef
+*
+* INPUTS:
+*     typdef == typdef to  check
+*
+* RETURNS:
+*     pointer to idref field or NULL if wrong type
+*********************************************************************/
+const typ_idref_t *
+    typ_get_idref (const typ_def_t  *typdef)
+{
+    const typ_def_t  *basetypdef;
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (typ_get_basetype(typdef) != NCX_BT_IDREF) {
+	return NULL;
+    }
+
+    basetypdef = typ_get_cbase_typdef(typdef);
+    return &basetypdef->def.simple.idref;
+
+}  /* typ_get_idref */
 
 /* END typ.c */

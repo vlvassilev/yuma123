@@ -133,6 +133,7 @@ typedef enum xml_nodetyp_t_ {
 typedef struct xml_node_t_ {
     xml_nodetyp_t  nodetyp;
     xmlns_id_t     nsid;
+    xmlns_id_t     contentnsid;
     const xmlChar *module;
     const xmlChar *qname;
     const xmlChar *elname;
@@ -346,6 +347,7 @@ extern xmlChar
     xml_convert_char_entity (const xmlChar *str, 
 			     uint32 *used);
 
+/******************* SPECIAL NAMESPACE APIs ************************/
 
 extern status_t
     xml_check_ns (xmlTextReaderPtr reader,
@@ -353,6 +355,10 @@ extern status_t
 		  xmlns_id_t       *id,
 		  uint32           *pfix_len,
 		  const xmlChar   **badns);
+
+extern void
+    xml_check_qname_content (xmlTextReaderPtr reader,
+			     xml_node_t      *node);
 
 
 #endif	    /* _H_xml_util */

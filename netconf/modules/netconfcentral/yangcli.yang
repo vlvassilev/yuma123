@@ -381,15 +381,15 @@ module yangcli {
       ncx:rpc-type exec;
       input {
         uses ConnectParms {
-          leaf user {
+          refine user {
     	    mandatory true;
           }
 
-          leaf agent {
+          refine agent {
   	    mandatory true;
           }
 
-          leaf password {
+          refine password {
             mandatory true;
           }
         }

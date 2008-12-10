@@ -819,6 +819,7 @@ void
 	break;
     case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
 	break;
     case OBJ_TYP_CHOICE:
     case OBJ_TYP_CASE:

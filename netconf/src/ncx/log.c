@@ -520,4 +520,53 @@ boolean
 
 }  /* log_is_open */
 
+
+/********************************************************************
+* FUNCTION log_indent
+* 
+* Printf a newline, then the specified number of chars
+*
+* INPUTS:
+*    indentcnt == number of indent chars, -1 == skip everything
+*
+*********************************************************************/
+void
+    log_indent (int32 indentcnt)
+{
+    int32  i;
+
+    if (indentcnt >= 0) {
+	log_write("\n");
+	for (i=0; i<indentcnt; i++) {
+	    log_write(" ");
+	}
+    }
+
+} /* log_indent */
+
+
+/********************************************************************
+* FUNCTION log_stdout_indent
+* 
+* Printf a newline to stdout, then the specified number of chars
+*
+* INPUTS:
+*    indentcnt == number of indent chars, -1 == skip everything
+*
+*********************************************************************/
+void
+    log_stdout_indent (int32 indentcnt)
+{
+    int32  i;
+
+    if (indentcnt >= 0) {
+	log_stdout("\n");
+	for (i=0; i<indentcnt; i++) {
+	    log_stdout(" ");
+	}
+    }
+
+} /* log_stdout_indent */
+
+
 /* END file log.c */

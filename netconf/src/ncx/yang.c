@@ -823,28 +823,25 @@ status_t
 	    /* Optional 'description' field is present */
 	    res = yang_consume_descr(tkc, mod, &err->descr,
 				     &desc, appinfoQ);
-	    CHK_EXIT;
         } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    /* Optional 'description' field is present */
 	    res = yang_consume_descr(tkc, mod, &err->ref,
 				     &ref, appinfoQ);
-	    CHK_EXIT;
         } else if (!xml_strcmp(val, YANG_K_ERROR_APP_TAG)) {
 	    /* Optional 'error-app-tag' field is present */
 	    res = yang_consume_strclause(tkc, mod,
 					 &err->error_app_tag,
 					 &etag, appinfoQ);
-	    CHK_EXIT;
         } else if (!xml_strcmp(val, YANG_K_ERROR_MESSAGE)) {
 	    /* Optional 'error-app-tag' field is present */
 	    res = yang_consume_strclause(tkc, mod,
 					 &err->error_message,
 					 &emsg, appinfoQ);
-	    CHK_EXIT;
 	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);	    
+	    res = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, res, expstr);	    
 	}
+	CHK_EXIT;
     }
 
     return retres;
@@ -1144,9 +1141,8 @@ status_t
 	    retres = ERR_NCX_INVALID_VALUE;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
 	}
+	m__free(str);
     }
-
-    m__free(str);
 
     /* finish the clause */
     if (save) {
@@ -1159,6 +1155,165 @@ status_t
     return retres;
 
 }  /* yang_consume_status */
+
+
+/********************************************************************
+* FUNCTION yang_consume_ordered_by
+* 
+* Parse the ordered-by statement
+*
+* Current token is the 'ordered-by' keyword
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   ordsys == ordered-by object to set  (may be NULL)
+*   dupflag == flag to check if entry already found (may be NULL)
+*   appinfoQ == Q to hold any extensions found (may be NULL)
+*
+* OUTPUTS:
+*   *ordsys set to the value if not NULL
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_consume_ordered_by (tk_chain_t  *tkc,
+			     ncx_module_t *mod,
+			     boolean *ordsys,
+			     boolean *dupflag,
+			     dlq_hdr_t *appinfoQ)
+{
+    xmlChar       *str;
+    const char    *expstr;
+    boolean        ordsys2;
+    status_t       res, retres;
+    boolean        save;
+
+    expstr = "system or user keyword";
+    retres = NO_ERR;
+    save = TRUE;
+    str = NULL;
+    ordsys2 = FALSE;
+
+    if (dupflag) {
+	if (*dupflag) {
+	    res = ERR_NCX_ENTRY_EXISTS;
+	    ncx_print_errormsg(tkc, mod, res);
+	    save = FALSE;
+	} else {
+	    *dupflag = TRUE;
+	}
+    }
+
+    /* get the string value */
+    res = yang_consume_string(tkc, mod, &str);
+    if (res != NO_ERR) {
+	retres = res;
+	if (NEED_EXIT) {
+	    if (str) {
+		m__free(str);
+	    }
+	    return res;
+	}
+    }
+
+    if (str) {
+	if (!xml_strcmp(str, YANG_K_USER)) {
+	    ordsys2 = FALSE;
+	} else if (!xml_strcmp(str, YANG_K_SYSTEM)) {
+	    ordsys2 = TRUE;
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+
+	if (ordsys && save) {
+	    *ordsys = ordsys2;
+	}
+
+	m__free(str);
+    }
+
+    /* finish the clause */
+    if (save) {
+	res = yang_consume_semiapp(tkc, mod, appinfoQ);
+    } else {
+	res = yang_consume_semiapp(tkc, mod, NULL);
+    }
+    CHK_EXIT;
+
+    return retres;
+
+}  /* yang_consume_ordered_by */
+
+
+/********************************************************************
+* FUNCTION yang_consume_max_elements
+* 
+* Parse the max-elements statement
+*
+* Current token is the 'max-elements' keyword
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   maxelems == max-elements object to set  (may be NULL)
+*   dupflag == flag to check if entry already found (may be NULL)
+*   appinfoQ == Q to hold any extensions found (may be NULL)
+*
+* OUTPUTS:
+*   *maxelems set to the value if not NULL
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_consume_max_elements (tk_chain_t  *tkc,
+			       ncx_module_t *mod,
+			       uint32 *maxelems,
+			       boolean *dupflag,
+			       dlq_hdr_t *appinfoQ)
+{
+    xmlChar       *str;
+    const xmlChar *nextval;
+    tk_type_t      nexttk;
+    status_t       res;
+
+    nexttk = tk_next_typ(tkc);
+    nextval = tk_next_val(tkc);
+
+    if (nexttk==TK_TT_DNUM) {
+	res = yang_consume_uint32(tkc, mod, maxelems,
+				  dupflag, appinfoQ);
+    } else if (TK_TYP_STR(nexttk)) {
+	str = NULL;
+	if (!xml_strcmp(nextval, YANG_K_UNBOUNDED)) {
+	    res = yang_consume_strclause(tkc, mod, &str,
+					 dupflag, appinfoQ);
+	    if (str) {
+		m__free(str);
+		str = NULL;
+	    }
+	    if (maxelems) {
+		*maxelems = 0;
+	    }
+	} else {
+	    /* may be a quoted number or an error */
+	    res = yang_consume_uint32(tkc, mod, maxelems,
+				      dupflag, appinfoQ);
+	}
+    }		    
+
+    return res;
+
+}  /* yang_consume_max_elements */
 
 
 /********************************************************************
@@ -2305,6 +2460,7 @@ void
     for (testimp = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
 	 testimp != NULL;
 	 testimp = (ncx_import_t *)dlq_nextEntry(testimp)) {
+
 	if (!testimp->used) {
 	    log_warn("\nWarning: Module '%s' not used", testimp->module);
 	    tkc->cur = testimp->tk;
@@ -2317,7 +2473,7 @@ void
 	    ret = xml_strcmp(impmod->version,
 			     mod->version);
 	    if (ret > 0) {
-		log_warn("\nWarning: imported module '%s' (%s)"
+		log_info("\nInfo: imported module '%s' (%s)"
 			 " is newer than '%s' (%s)",
 			 impmod->name, impmod->version,
 			 mod->name, mod->version);

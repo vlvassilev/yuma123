@@ -174,6 +174,8 @@ date	     init     comment
 
 #define VAL_INSTANCE_ID(V)    ((V)->v.str)
 
+#define VAL_IDREF(V)    (&(V)->v.idref)
+
 #define VAL_UINT(V)    ((V)->v.num.u)
 
 #define VAL_UINT8(V)    ((uint8)((V)->v.num.u))
@@ -193,7 +195,14 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-
+/* one QName for the NCX_BT_IDREF value */
+typedef struct val_idref_t_ {
+    xmlns_id_t  nsid;
+    /* if nsid == INV_ID then this is entire QName */
+    xmlChar    *name;
+    const ncx_identity_t  *identity;  /* ID back-ptr if found */
+} val_idref_t;
+    
 /* one value to match one type */
 typedef struct val_value_t_ {
     dlq_hdr_t      qhdr;
@@ -221,8 +230,8 @@ typedef struct val_value_t_ {
      */
     dlq_hdr_t      metaQ;                       /* Q of val_value_t */
 
-    /* these fields are only used in new values before they are 
-     * actually added to the config database (TBD: remove)
+    /* these fields are only used in modified values before they are 
+     * actually added to the config database (TBD: move into struct)
      * curparent == parent of curnode for merge
      */
     struct val_value_t_  *curparent;      
@@ -251,8 +260,16 @@ typedef struct val_value_t_ {
     /* this field is used for NCX_BT_CHOICE 
      * If set, the object path for this node is really:
      *    $this --> casobj --> casobj.parent --> $this.parent
+     * the OBJ_TYP_CASE and OBJ_TYP_CHOICE nodes are skipped
+     * inside an XML instance document
      */
     const struct obj_template_t_   *casobj;
+
+    /* these fields are for NCX_BT_KEYREF
+     * value stored in v union as a string
+     */
+    struct xpath_pcb_t_            *krpcb;
+    ncx_btype_t                     krbtyp;
 
     /* union of all the NCX-specific sub-types
      * note that the following invisible constructs should
@@ -283,6 +300,8 @@ typedef struct val_value_t_ {
 	 *   NCX_BT_INSTANCE_ID
 	 */
 	ncx_str_t  str; 
+
+	val_idref_t idref;
 
 	ncx_binary_t binary;              /* NCX_BT_BINARY */
 	ncx_list_t list;      /* NCX_BT_BITS, NCX_BT_SLIST */
@@ -400,6 +419,20 @@ extern status_t
 		const xmlChar *bitname,
 		uint32 *position,
 		uint32 *order);
+
+extern status_t
+    val_idref_ok (const typ_def_t *typdef,
+		  const xmlChar *qname,
+		  xmlns_id_t nsid,
+		  const xmlChar **name,
+		  const ncx_identity_t **id);
+
+extern status_t
+    val_parse_idref (ncx_module_t *mod,
+		     const xmlChar *qname,
+		     xmlns_id_t  *nsid,
+		     const xmlChar **name,
+		     const ncx_identity_t **id);
 
 extern status_t
     val_range_ok (const typ_def_t *typdef,

@@ -250,6 +250,22 @@ extern status_t
 			 boolean *dupflag,
 			 dlq_hdr_t *appinfoQ);
 
+/* consume one ordered-by clause */
+extern status_t 
+    yang_consume_ordered_by (tk_chain_t  *tkc,
+			     ncx_module_t *mod,
+			     boolean *ordsys,
+			     boolean *dupflag,
+			     dlq_hdr_t *appinfoQ);
+
+/* consume one max-elements clause */
+extern status_t 
+    yang_consume_max_elements (tk_chain_t  *tkc,
+			       ncx_module_t *mod,
+			       uint32 *maxelems,
+			       boolean *dupflag,
+			       dlq_hdr_t *appinfoQ);
+
 /* consume one must-stmt into mustQ */
 extern status_t
     yang_consume_must (tk_chain_t  *tkc,

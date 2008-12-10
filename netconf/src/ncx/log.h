@@ -118,4 +118,10 @@ extern log_debug_t
 extern boolean
     log_is_open (void);
 
+extern void
+    log_indent (int32 indentcnt);
+
+extern void
+    log_stdout_indent (int32 indentcnt);
+
 #endif	    /* _H_log */

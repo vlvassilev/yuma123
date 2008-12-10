@@ -169,6 +169,7 @@ typedef enum obj_type_t_ {
     OBJ_TYP_CHOICE,
     OBJ_TYP_CASE,       /* last named database object */
     OBJ_TYP_USES,
+    OBJ_TYP_REFINE,            /* child of uses only */
     OBJ_TYP_AUGMENT,
     OBJ_TYP_RPC,
     OBJ_TYP_RPCIO,
@@ -318,6 +319,37 @@ typedef struct obj_uses_t_ {
 } obj_uses_t;
 
 
+/* YANG refine statement struct */
+typedef struct obj_refine_t_ {
+    xmlChar          *target;
+    struct obj_template_t_ *targobj;
+
+    /* the token for each sub-clause is saved because
+     * when the refine-stmt is parsed, the target is not
+     * known yet so picking the correct variant
+     * such as refine-leaf-stmts or refine-list-stmts
+     * needs to wait until the resolve phase
+     */
+    xmlChar          *descr;
+    tk_token_t       *descr_tk;
+    xmlChar          *ref;
+    tk_token_t       *ref_tk;
+    xmlChar          *presence;
+    tk_token_t       *presence_tk;
+    xmlChar          *def;
+    tk_token_t       *def_tk;
+    /* config and confset are in the object flags */
+    tk_token_t       *config_tk;
+    /* mandatory and mandset are in the object flags */
+    tk_token_t       *mandatory_tk;
+    uint32            minelems;
+    tk_token_t       *minelems_tk;   /* also minset */
+    uint32            maxelems;
+    tk_token_t       *maxelems_tk;   /* also maxset */
+    dlq_hdr_t         mustQ;
+} obj_refine_t;
+
+
 /* YANG input-stmt or output-stmt struct */
 typedef struct obj_rpcio_t_ {
     xmlChar           *name;                 /* input or output */
@@ -398,6 +430,7 @@ typedef struct obj_template_t_ {
 	obj_choice_t      *choic;
 	obj_case_t        *cas;
 	obj_uses_t        *uses;
+	obj_refine_t      *refine;
 	obj_augment_t     *augment;
 	obj_rpc_t         *rpc;
 	obj_rpcio_t       *rpcio;
@@ -536,7 +569,7 @@ extern status_t
 extern obj_template_t *
     obj_clone_template (ncx_module_t *mod,
 			obj_template_t *srcobj,
-			obj_template_t *mobj);
+			dlq_hdr_t *mobjQ);
 
 /* create an OBJ_TYP_CASE wrapper if needed,
  * for a short-case-stmt data def 
@@ -544,7 +577,7 @@ extern obj_template_t *
 extern obj_template_t *
     obj_clone_template_case (ncx_module_t *mod,
 			     obj_template_t *srcobj,
-			     obj_template_t *mobj);
+			     dlq_hdr_t *mobjQ);
 
 
 /********************    obj_unique_t   ********************/

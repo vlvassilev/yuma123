@@ -445,48 +445,50 @@ module netconf {
    grouping GetConfigSourceType {
       description "NETCONF config 'source' Parameter contents.";
 
-      uses CommonConfigSourceType;
-
-      augment config-source {
-        leaf url {
-          description 
-            "URL pointing to config data. Only available
-             if 'url' capability supported.";
-          type ConfigURIType;
-        }
+      uses CommonConfigSourceType {
+          augment config-source {
+              leaf url {
+                description 
+                  "URL pointing to config data. Only available
+                   if 'url' capability supported.";
+               type ConfigURIType;
+              }
+          }
       }
    }
 
    grouping RpcOperationSourceType {
       description "NETCONF 'source' Parameter contents.";
 
-      uses CommonConfigSourceType;
-      augment config-source {
-        leaf url {
-          description 
-            "URL pointing to config data. Only available
-             if 'url' capability supported.";
-          type ConfigURIType;
-        }
+      uses CommonConfigSourceType {
+          augment config-source {
+              leaf url {
+                description 
+                  "URL pointing to config data. Only available
+                   if 'url' capability supported.";
+                type ConfigURIType;
+              }
 
-        container config {
-          description "Inline configuration data";
-	  ncx:root;
-        }
+              container config {
+                description "Inline configuration data";
+                ncx:root;
+              }
+          }
       }
    }
 
    grouping RpcOperationTargetType {
       description "NETCONF 'target' Parameter contents.";
 
-      uses CommonConfigSourceType;
-      augment config-source {
-        leaf url {
-          description 
-            "URL pointing to desired config data output. Only 
-             available if 'url' capability supported.";
-          type ConfigURIType;
-        }
+      uses CommonConfigSourceType {
+          augment config-source {
+              leaf url {
+                description 
+                  "URL pointing to desired config data output. Only 
+                   available if 'url' capability supported.";
+                type ConfigURIType;
+              }
+          }
       }
    }
 

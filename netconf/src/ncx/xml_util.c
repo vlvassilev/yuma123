@@ -103,6 +103,7 @@ static xml_chcvt_t chcvt [] = {
     {NULL, ' '}
 };
 
+
 /************** E X T E R N A L   F U N C T I O N S   **************/
 
 
@@ -194,7 +195,6 @@ void
 
     node->nodetyp = XML_NT_NONE;
     node->nsid = 0;
-    node->module = NULL;
     node->qname = NULL;
     node->elname = NULL;
     if (node->simfree) {
@@ -1707,68 +1707,6 @@ boolean
 } /* xml_isspace_str */
 
 
-/********************************************************************
-* FUNCTION xml_trim_string
-* 
-* Get string pointer + length of real string
-* Get rid of the leading and trailing whitespace
-*
-* INPUTS:
-*   str == xmlChar string to check
-* OUTPUTS:
-*   *len == length of the trimmed string
-* RETURNS:
-*   pointer to new start of string
-*********************************************************************/
-const xmlChar *
-    xml_trim_string (const xmlChar *str, 
-		     uint32 *len)
-{
-    const xmlChar *s2;
-
-#ifdef DEBUG
-    if (!str || !len) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    if (!*str) {
-	*len = 0;
-        return str;
-    }
-
-    /* str is at least char long, save ptr to start */
-    s2 = str;   
-
-    /* skip over the begin whitespace */
-    while (xml_isspace(*str)) {
-        str++;
-    }
-    if (!*str) {
-        /* found only whitespace */
-        *len = 0;  
-        return str;
-    }
-
-    /* found at least one non-whitespace char;
-     * str now points to start of real string;
-     * get s2 to point to the EO string char in str 
-     * then backup to the first non-whitespace
-     */
-    while (*s2) {
-        s2++;
-    }
-    s2--;
-    while (xml_isspace(*s2)) {
-        s2--;
-    }
-
-    /* s2 now points to the last real char in the string */
-    *len = (uint32)(s2-str+1);
-    return str;
-
-} /* xml_trim_string */
 
 
 /********************************************************************
@@ -1864,9 +1802,10 @@ int
 xmlChar *
     xml_copy_clean_string (const xmlChar *str)
 {
-    const xmlChar *newstart;
-    xmlChar *newstr, *cur;
-    uint32   len, i;
+    const xmlChar *newstart, *endstr;
+    xmlChar       *newstr;
+    uint32         len, newlen;
+    boolean        allwhitespace;
 
 #ifdef DEBUG
     if (!str) {
@@ -1875,37 +1814,42 @@ xmlChar *
     }
 #endif
 
-    newstart = xml_trim_string(str, &len);
+    allwhitespace = FALSE;
+    len = xml_strlen(str);
+    newlen = len;
 
-    /* malloc this full amount, which will be too big if
-     * there are character entities in the string
-     */
-    newstr = (xmlChar *)m__getMem(len+1);
+    if (len) {
+	newstart = str;
+	endstr = str + len - 1;
+	while (endstr >= str && xml_isspace(*endstr)) {
+	    endstr--;
+	}
+	if (endstr < str) {
+	    allwhitespace = TRUE;
+	} else {
+	    newstart = str;
+	    while (xml_isspace(*newstart)) {
+		newstart++;
+	    }
+	}
+
+	if (!allwhitespace) {
+	    newlen = (uint32)(endstr - newstart + 1);
+	}
+    }
+
+    newstr = (xmlChar *)m__getMem(newlen+1);
     if (!newstr) {
 	SET_ERROR(ERR_INTERNAL_MEM);
 	return NULL;
     }
 
-    if (!newstart || !len) {
-	*newstr = 0;
-	return newstr;
+    if (len == newlen) {
+	xml_strcpy(newstr, str);
+    } else {
+	xml_strncpy(newstr, newstart, newlen);
     }
 
-    /* newstart is the copy-from string
-     * cur is the copy-to string
-     */
-    cur = newstr;
-    for (i=0; i<len; ) {
-	if (*newstart == '&') {
-	    *cur++ = xml_convert_char_entity(newstart, &len);
-	    newstart += len;
-	    i += len;
-	} else {
-	    *cur++ = *newstart++;
-	    i++;
-	}
-    }
-    *cur = 0;
     return newstr;
 
 } /* xml_copy_clean_string */

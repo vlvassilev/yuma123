@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nd:config xmlns:nd="http://netconfcentral.com/ns/netconfd">
-   <t:test1 xmlns:t="urn:ietf:params:xml:ns:yang:test">
+   <t:test1 xmlns:t="http://netconfcentral.com/ns/test">
       <t:a>1</t:a>
       <t:b>32</t:b>
       <t:d>x</t:d>
@@ -12,13 +12,13 @@
       </t:e>
       <t:f1>test one</t:f1>
    </t:test1>
-   <t:test2 xmlns:t="urn:ietf:params:xml:ns:yang:test">
+   <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
       <t:a2>fred</t:a2>
       <t:a1>-33</t:a1>
       <t:b2>7</t:b2>
       <t:foo></t:foo>
    </t:test2>
-   <t:test2 xmlns:t="urn:ietf:params:xml:ns:yang:test">
+   <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
       <t:a2>bambi</t:a2>
       <t:a1>3</t:a1>
       <t:b2>2</t:b2>
@@ -26,11 +26,12 @@
          /t:test2[t:a2=wilma]/t:b2
       </t:foo>
    </t:test2>
-   <t:test3 xmlns:t="urn:ietf:params:xml:ns:yang:test">
+   <t:test3 xmlns:t="http://netconfcentral.com/ns/test">
       <t:x>fred</t:x>
       <t:c2>3</t:c2>
       <t:c2>-3</t:c2>
       <t:c2>-6</t:c2>
       <t:c2>-1</t:c2>
    </t:test3>
+   <t:idtest xmlns:t="http://netconfcentral.com/ns/test">t:id-C</t:idtest>
 </nd:config>

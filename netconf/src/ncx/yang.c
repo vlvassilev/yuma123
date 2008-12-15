@@ -229,12 +229,12 @@ status_t
 	    res = NO_ERR;
 	    done = TRUE;
 	}  else {
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	}
     }
 
     res = ncx_consume_token(tkc, mod, TK_TT_RBRACE);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 
@@ -805,7 +805,7 @@ status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -841,7 +841,7 @@ status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);	    
 	}
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -908,7 +908,7 @@ status_t
     } else {
 	res = yang_consume_string(tkc, mod, NULL);
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* finish the clause */
     if (save) {
@@ -916,7 +916,7 @@ status_t
     } else {
 	res = yang_consume_semiapp(tkc, mod, NULL);
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 
@@ -984,7 +984,7 @@ status_t
 
     /* get the PID string value */
     res = yang_consume_pid_string(tkc, mod, prefixstr, str);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* finish the clause */
     if (save) {
@@ -992,7 +992,7 @@ status_t
     } else {
 	res = yang_consume_semiapp(tkc, mod, NULL);
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 
@@ -1052,7 +1052,7 @@ status_t
     } else {
 	res = yang_consume_string(tkc, mod, NULL);
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* finish the clause */
     if (save) {
@@ -1060,7 +1060,7 @@ status_t
     } else {
 	res = yang_consume_semiapp(tkc, mod, NULL);
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 
@@ -1121,7 +1121,7 @@ status_t
     res = yang_consume_string(tkc, mod, &str);
     if (res != NO_ERR) {
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    if (str) {
 		m__free(str);
 	    }
@@ -1150,7 +1150,7 @@ status_t
     } else {
 	res = yang_consume_semiapp(tkc, mod, NULL);
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 
@@ -1213,7 +1213,7 @@ status_t
     res = yang_consume_string(tkc, mod, &str);
     if (res != NO_ERR) {
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    if (str) {
 		m__free(str);
 	    }
@@ -1244,7 +1244,7 @@ status_t
     } else {
 	res = yang_consume_semiapp(tkc, mod, NULL);
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 
@@ -1378,7 +1378,7 @@ status_t
     res = yang_consume_string(tkc, mod, &must->exprstr);
     if (res != NO_ERR) {
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    xpath_free_pcb(must);
 	    return retres;
 	}
@@ -1389,7 +1389,7 @@ status_t
     if (res != NO_ERR) {
 	/* errors already reported */
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    xpath_free_pcb(must);
 	    return retres;
 	}
@@ -1443,7 +1443,7 @@ status_t
 	    res = ncx_consume_appinfo(tkc, mod, appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    xpath_free_pcb(must);
 		    return retres;
 		}
@@ -1487,7 +1487,7 @@ status_t
 	}
 	if (res != NO_ERR) {
 	    retres = res;
-	    if (NEED_EXIT) {
+	    if (NEED_EXIT(res)) {
 		xpath_free_pcb(must);
 		return retres;
 	    }
@@ -1713,7 +1713,7 @@ status_t
     res = yang_consume_string(tkc, mod, &str);
     if (res != NO_ERR) {
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    if (str) {
 		m__free(str);
 	    }
@@ -1743,7 +1743,7 @@ status_t
     } else {
 	res = yang_consume_semiapp(tkc, mod, NULL);
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 
@@ -1825,7 +1825,7 @@ status_t
     } else {
 	res = yang_consume_semiapp(tkc, mod, NULL);
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 
@@ -1907,7 +1907,7 @@ status_t
     } else {
 	res = yang_consume_semiapp(tkc, mod, NULL);
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 
@@ -2127,7 +2127,7 @@ status_t
 	}
 	if (!imod) {
 	    res = ncxmod_load_module(imp->module);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 
 	    /* try again to find the module; should not fail */
 	    if (mod->diffmode) {
@@ -2228,7 +2228,7 @@ status_t
 	}
 	if (!imod) {
 	    res = ncxmod_load_module(imp->module);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 
 	    /* try again to find the module; should not fail */
 	    if (mod->diffmode) {
@@ -2329,7 +2329,7 @@ status_t
 	}
 	if (!imod) {
 	    res = ncxmod_load_module(imp->module);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 
 	    /* try again to find the module; should not fail */
 	    if (mod->diffmode) {
@@ -2581,7 +2581,7 @@ void
 *    pointer to found node, NULL if not found
 *********************************************************************/
 yang_node_t *
-    yang_find_node (dlq_hdr_t *que,
+    yang_find_node (const dlq_hdr_t *que,
 		    const xmlChar *name)
 {
     yang_node_t *node;

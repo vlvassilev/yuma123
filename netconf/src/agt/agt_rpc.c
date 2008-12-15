@@ -1261,7 +1261,7 @@ status_t
 	if (res != NO_ERR) {
 	    retres = res;
 	}
-	if (!NEED_EXIT) {
+	if (!NEED_EXIT(res)) {
 	    /* keep going if there were errors in the input
 	     * in case more errors can be found or 
 	     * continue-on-error is in use

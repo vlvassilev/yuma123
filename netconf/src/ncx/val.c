@@ -1854,6 +1854,7 @@ status_t
     const xmlChar         *str, *modname;
     ncx_module_t          *mod;
     const ncx_identity_t  *identity;
+    boolean                found;
 
 #ifdef DEBUG
     if (!typdef || !qname) {
@@ -1864,12 +1865,14 @@ status_t
     }
 #endif
 
+    found = FALSE;
+
     if (nsid == XMLNS_NULL_NS_ID) {
 	return ERR_NCX_DEF_NOT_FOUND;
     }
 
     idref = typ_get_idref(typdef);
-    if (!idref || !idref->base) {
+    if (!idref) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
     
@@ -1880,9 +1883,6 @@ status_t
     }
     if (*str == ':') {
 	str++;
-    }
-    if (name) {
-	*name = str;
     }
 
     /* str should point to the local name now */
@@ -1902,21 +1902,32 @@ status_t
     if (!identity) {
 	return ERR_NCX_DEF_NOT_FOUND;
     }
-    if (id) {
-	*id = identity;
-    }
 
     /* got some identity match; make sure this identity
      * has an ancestor-or-self node that is the same base
      * as the base specified in the typdef
      */
-    while (identity) {
-	if (identity == idref->base) {
-	    return NO_ERR;
+
+    while (identity && !found) {
+	if (!xml_strcmp(ncx_get_modname(identity->mod), 
+			idref->modname) &&
+	    !xml_strcmp(identity->name, idref->basename)) {
+	    found = TRUE;
 	} else {
 	    identity = identity->base;
 	}
     }
+
+    if (found) {
+	if (name) {
+	    *name = str;
+	}
+	if (id) {
+	    *id = identity;
+	}
+	return NO_ERR;
+    }
+
     return ERR_NCX_INVALID_VALUE;
 
 } /* val_idref_ok */
@@ -2023,7 +2034,7 @@ status_t
 		    impmod = ncx_find_module(modname);
 		    if (impmod) {
 			prefixnsid = impmod->nsid;
-			identity = ncx_find_identity(mod, str);
+			identity = ncx_find_identity(impmod, str);
 		    } else {
 			res = ERR_NCX_MOD_NOT_FOUND;
 		    }
@@ -3132,9 +3143,11 @@ status_t
 			uint32 valnamelen,
 			const xmlChar *valstr)
 {
-    status_t  res;
-    uint32    ulen;
-
+    const xmlChar        *localname;
+    const ncx_identity_t *identity;
+    status_t              res;
+    uint32                ulen;
+    xmlns_id_t            qname_nsid;
 
 #ifdef DEBUG
     if (!val || !typdef) {
@@ -3216,6 +3229,22 @@ status_t
 	VAL_STR(val) = xml_strdup(valstr);
 	if (!VAL_STR(val)) {
 	    res = ERR_INTERNAL_MEM;
+	}
+	break;
+    case NCX_BT_IDREF:
+	res = val_parse_idref(NULL, valstr, &qname_nsid, 
+			      &localname, &identity);
+	if (res == NO_ERR) {
+	    res = val_idref_ok(typdef, valstr, qname_nsid, 
+			       &localname, &identity);
+	    if (res == NO_ERR) {
+		val->v.idref.nsid = qname_nsid;
+		val->v.idref.identity = identity;
+		val->v.idref.name = xml_strdup(localname);
+		if (!val->v.idref.name) {
+		    res = ERR_INTERNAL_MEM;
+		}
+	    }
 	}
 	break;
     case NCX_BT_ENUM:
@@ -3645,6 +3674,16 @@ val_value_t *
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_KEYREF:   /*****/
 	*res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
+	break;
+    case NCX_BT_IDREF:
+	copy->v.idref.name = xml_strdup(val->v.idref.name);
+	if (!copy->v.idref.name) {
+	    *res = ERR_INTERNAL_MEM;
+	} else {
+	    *res = NO_ERR;
+	}
+	copy->v.idref.nsid = val->v.idref.nsid;
+	copy->v.idref.identity = val->v.idref.identity;
 	break;
     case NCX_BT_BITS:
     case NCX_BT_SLIST:

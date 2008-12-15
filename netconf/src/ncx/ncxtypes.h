@@ -478,6 +478,7 @@ typedef struct ncx_feature_t_ {
     dlq_hdr_t           iffeatureQ;   /* Q of ncx_iffeature_t */
     dlq_hdr_t           appinfoQ;       /* Q of ncx_appinfo_t */
     status_t            res;    /* may be stored with errors */
+    boolean             enabled;
 } ncx_feature_t;
 
 
@@ -677,6 +678,29 @@ typedef struct ncx_typname_t_ {
  *
  */
 typedef void (*ncx_load_cbfn_t) (ncx_module_t *mod);
+
+
+/* user function callback template to traverse all module
+ * features for a specified module
+ *
+ * ncx_feature_cbfn_t
+ * 
+ *  Run an instrumentation-defined function 
+ *  for each feature found in the module (enabled or not)
+ *
+ * INPUTS:
+ *    mod == module originally passed to the main 
+ *           function, which contains the 'feature'
+ *    feature == feature being processed in the traversal
+ *    cookie == cookie originally passed to the main function
+ *
+ * RETURNS:
+ *    TRUE if processing should continue
+ *    FALSE if feature traversal should terminate
+ */
+typedef boolean (*ncx_feature_cbfn_t) (const ncx_module_t *mod,
+				       const ncx_feature_t *feature,
+				       void *cookie);
 
 
 #endif	    /* _H_ncxtypes */

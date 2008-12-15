@@ -111,7 +111,7 @@ date         init     comment
 /* used in parser routines to decide if processing can continue
  * will exit the function if critical error or continue if not
  */
-#define CHK_GRP_EXIT					  \
+#define CHK_GRP_EXIT(res, retres)			  \
     if (res != NO_ERR) {				  \
 	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) { \
 	    grp_free_template(grp);			  \
@@ -170,7 +170,7 @@ static status_t
 	} else if (testobj->def.uses->grp) {
 	    res = follow_loop(tkc, mod,
 			      testobj->def.uses->grp, testgrp);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	}
     }
 
@@ -302,7 +302,7 @@ status_t
 
     /* Get the mandatory grouping name */
     res = yang_consume_id_string(tkc, mod, &grp->name);
-    CHK_GRP_EXIT;
+    CHK_GRP_EXIT(res, retres);
 
     /* Get the starting left brace for the sub-clauses
      * or a semi-colon to end the grouping clause
@@ -349,7 +349,7 @@ status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &grp->appinfoQ);
-	    CHK_GRP_EXIT;
+	    CHK_GRP_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -383,7 +383,7 @@ status_t
 					       &grp->datadefQ,
 					       parent, grp);
 	}
-	CHK_GRP_EXIT;
+	CHK_GRP_EXIT(res, retres);
     }
 
     /* save or delete the grp_template_t struct */
@@ -486,22 +486,22 @@ status_t
 
 	/* check the appinfoQ */
 	res = ncx_resolve_appinfoQ(tkc, mod, &grp->appinfoQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	/* check any local typedefs */
 	res = yang_typ_resolve_typedefs_grp(tkc, mod,
 					    &grp->typedefQ,
 					    parent, grp);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	/* check any local groupings */
 	res = yang_grp_resolve_groupings(tkc, mod,
 					 &grp->groupingQ, parent);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	/* check any local objects */
 	res = yang_obj_resolve_datadefs(tkc, mod, &grp->datadefQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     /* go through and check grouping shadow error
@@ -563,7 +563,7 @@ status_t
 		tkc->cur = grp->tk;
 		ncx_print_errormsg(tkc, mod, res);
 	    }
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	}
     }
 
@@ -576,7 +576,7 @@ status_t
 
 	/* check any group/uses loops */
 	res = check_chain_loop(tkc, mod, grp);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 	if (res != NO_ERR) {
 	    dlq_remove(grp);
 	    grp_free_template(grp);
@@ -638,15 +638,15 @@ status_t
 
 	/* check any local groupings */
 	res = yang_grp_resolve_complete(tkc, mod, &grp->groupingQ, parent);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	/* check any local objects for uses clauses */
 	res = yang_obj_resolve_uses(tkc, mod, &grp->datadefQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	/* check any local objects for augment clauses */
 	res = yang_obj_resolve_augments(tkc, mod, &grp->datadefQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
     }
 
@@ -700,11 +700,11 @@ status_t
 
 	/* check any local groupings */
 	res = yang_grp_resolve_final(tkc, mod, &grp->groupingQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	/* final check on all objects within groupings */
 	res = yang_obj_resolve_final(tkc, mod, &grp->datadefQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	yang_check_obj_used(tkc, mod, &grp->typedefQ,
 			    &grp->groupingQ);

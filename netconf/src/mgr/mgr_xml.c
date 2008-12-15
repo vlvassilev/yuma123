@@ -81,47 +81,6 @@ date         init     comment
 
 
 /********************************************************************
-* FUNCTION dump_skipnode
-* 
-*  Dump some debug info during XML node skipping
-*
-* INPUTS:
-*    node == xml node to print debug info for
-*
-*********************************************************************/
-static void
-    dump_skipnode (const xml_node_t *node)
-{
-    if (LOGDEBUG2) {
-	switch (node->nodetyp) {
-	case XML_NT_NONE:
-	    log_debug2("\nmgr_xml: skip NULL node");
-	    break;
-	case XML_NT_EMPTY:
-	    log_debug2("\nmgr_xml: skip empty node %s",
-		       node->elname);
-	    break;
-	case XML_NT_START:
-	    log_debug2("\nmgr_xml: skip start node %s",
-		       node->elname);
-	    break;
-	case XML_NT_END:
-	    log_debug2("\nmgr_xml: skip end node %s",
-		       node->elname);
-	    break;
-	case XML_NT_STRING:
-	    log_debug2("\nmgr_xml: skip string node %20s",
-		       (node->simval) ? 
-		       (const char *)node->simval : "--");
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-} /* dump_skipnode */
-
-
-/********************************************************************
 * FUNCTION get_attrs
 * 
 *  Copy all the attributes from the current node to
@@ -333,7 +292,6 @@ static status_t
 	res = xml_check_ns(reader, str, &node->nsid, &len, &badns);
 	if (!nserr && res != NO_ERR) {
 	    node->nsid = xmlns_inv_id();
-	    len = 0;
 	    res = NO_ERR;
 	}
 	    
@@ -534,14 +492,14 @@ status_t
     xml_init_node(&node);
     res = mgr_xml_consume_node_noadv(reader, &node);
     if (res == NO_ERR) {
-	dump_skipnode(&node);
 	res = xml_endnode_match(startnode, &node);
-	xml_clean_node(&node);
 	if (res == NO_ERR) {
+	    xml_clean_node(&node);
 	    return NO_ERR;
 	}
     }
 
+    xml_clean_node(&node);
     if (justone) {
 	return NO_ERR;
     }
@@ -555,8 +513,6 @@ status_t
 	    /* fatal error */
 	    return ERR_XML_READER_EOF;
 	}
-
-	dump_skipnode(&node);
 
 	/* get the node depth to match the end node correctly */
 	depth = xmlTextReaderDepth(reader);

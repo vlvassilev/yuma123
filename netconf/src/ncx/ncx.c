@@ -272,7 +272,7 @@ static status_t
 
     if (!imod) {
 	res = ncxmod_load_module(modname);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	/* try again to find the module; should not fail */
 	if (diffmode) {
@@ -393,7 +393,7 @@ static status_t
 				  &appinfo->name);
     if (res != NO_ERR) {
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    ncx_free_appinfo(appinfo);
 	    return retres;
 	}
@@ -418,7 +418,7 @@ static status_t
 	res = yang_consume_string(tkc, mod, &appinfo->value);
 	if (res != NO_ERR) {
 	    retres = res;
-	    if (NEED_EXIT) {
+	    if (NEED_EXIT(res)) {
 		ncx_free_appinfo(appinfo);
 		return retres;
 	    }
@@ -429,7 +429,7 @@ static status_t
     res = yang_consume_semiapp(tkc, mod, appinfo->appinfoQ);
     if (res != NO_ERR) {
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    ncx_free_appinfo(appinfo);
 	    return retres;
 	}
@@ -1574,7 +1574,7 @@ status_t
     /* check module parse code */
     if (mod->status != NO_ERR) {
 	res = mod->status;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    /* should not happen */
 	    log_error("\nError: cannot add module '%s' to registry"
 		      " with fatal errors", mod->name);
@@ -4555,7 +4555,7 @@ status_t
 
 	if (res != NO_ERR) {
 	    /* the string did not match this pattern */
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    lmem->flags |= NCX_FL_VALUE_ERR;
 	} 
     }
@@ -5329,7 +5329,7 @@ status_t
 	    res = yang_find_imp_extension(tkc, mod, appinfo->prefix,
 					  appinfo->name, appinfo->tk,
 					  &ext);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else {
 
 	    ext = ext_find_extension(&mod->extensionQ, appinfo->name);
@@ -5364,7 +5364,7 @@ status_t
 
 	/* recurse through any nested appinfo statements */
 	res = ncx_resolve_appinfoQ(tkc, mod, appinfo->appinfoQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -5685,6 +5685,170 @@ ncx_feature_t *
     return NULL;
 	 
 } /* ncx_find_feature_que */
+
+
+/********************************************************************
+* FUNCTION ncx_for_all_features
+* 
+* Execute a callback function for all features in this module
+* and any submodules
+*
+* INPUTS:
+*    mod == module to search for features
+*    cbfn == feature callback function
+*    cookie == cookie value to pass to each iteration of the callback
+*    enabledonly == TRUE if only callbacks for enabled features
+*                   FALSE if all features should invoke callbacks
+*********************************************************************/
+void
+    ncx_for_all_features (const ncx_module_t *mod,
+			  ncx_feature_cbfn_t  cbfn,
+			  void *cookie,
+			  boolean enabledonly)
+{
+    const ncx_feature_t  *feature;
+    const dlq_hdr_t      *que;
+    yang_node_t          *node;
+    ncx_include_t        *inc;
+    boolean               keepgoing;
+
+#ifdef DEBUG
+    if (!mod || !cbfn) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    keepgoing = TRUE;
+
+    for (feature = (const ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
+	 feature != NULL && keepgoing;
+	 feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
+
+	if (enabledonly && !feature->enabled) {
+	    continue;
+	}
+
+	keepgoing = (*cbfn)(mod, feature, cookie);
+    }	
+	
+    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+
+    /* check all the submodules, but only the ones visible
+     * to this module or submodule, YANG only
+     */
+    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+	 inc != NULL && keepgoing;
+	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+
+	/* get the real submodule struct */
+	if (!inc->submod) {
+	    node = yang_find_node(que, inc->submodule);
+	    if (node) {
+		inc->submod = node->submod;
+	    }
+	    if (!inc->submod) {
+		/* include not found, should not be in Q !!! */
+		SET_ERROR(ERR_INTERNAL_VAL);
+		continue;
+	    }
+	}
+
+	for (feature = (const ncx_feature_t *)
+		 dlq_firstEntry(&inc->submod->featureQ);
+	     feature != NULL && keepgoing;
+	     feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
+
+	    if (enabledonly && !feature->enabled) {
+		continue;
+	    }
+
+	    keepgoing = (*cbfn)(mod, feature, cookie);
+	}
+    }
+
+} /* ncx_for_all_features */
+
+
+/********************************************************************
+* FUNCTION ncx_feature_count
+* 
+* Get the total feature count for this module
+* and any submodules
+*
+* INPUTS:
+*    mod == module to search for features
+*    enabledonly == TRUE to only count enabled features
+*                   FALSE to count all features
+*********************************************************************/
+uint32
+    ncx_feature_count (const ncx_module_t *mod,
+		       boolean enabledonly)
+{
+    const ncx_feature_t  *feature;
+    const yang_node_t    *node;
+    const dlq_hdr_t      *que;
+    ncx_include_t        *inc;
+    uint32                count;
+
+#ifdef DEBUG
+    if (!mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
+    count = 0;
+
+    for (feature = (const ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
+	 feature != NULL;
+	 feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
+
+	if (enabledonly && !feature->enabled) {
+	    continue;
+	}
+
+	count++;
+    }	
+	
+    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+
+    /* check all the submodules, but only the ones visible
+     * to this module or submodule, YANG only
+     */
+    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+	 inc != NULL;
+	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+
+	/* get the real submodule struct */
+	if (!inc->submod) {
+	    node = yang_find_node(que, inc->submodule);
+	    if (node) {
+		inc->submod = node->submod;
+	    }
+	    if (!inc->submod) {
+		/* include not found, should not be in Q !!! */
+		SET_ERROR(ERR_INTERNAL_VAL);
+		continue;
+	    }
+	}
+
+	for (feature = (const ncx_feature_t *)
+		 dlq_firstEntry(&inc->submod->featureQ);
+	     feature != NULL;
+	     feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
+
+	    if (enabledonly && !feature->enabled) {
+		continue;
+	    }
+
+	    count++;
+	}
+    }
+
+    return count;
+
+} /* ncx_feature_count */
 
 
 /********************************************************************

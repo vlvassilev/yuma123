@@ -332,7 +332,7 @@ static status_t
 	 * in case there are multiple parmsets and not all of them
 	 * had errors.  Force a NO_ERR return.
 	 */
-	if (!NEED_EXIT) {
+	if (!NEED_EXIT(res)) {
 	    if (errop == OP_ERROP_CONTINUE) {
 		res = NO_ERR;
 	    }

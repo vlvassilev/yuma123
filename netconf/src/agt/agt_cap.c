@@ -199,6 +199,7 @@ static status_t
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
+#ifdef WILL_CHANGE_TO_STD_SDISC_MODULE
 /********************************************************************
 * FUNCTION agt_cap_init
 *
@@ -217,6 +218,7 @@ status_t
     return NO_ERR;
 	
 } /* agt_cap_init */
+#endif
 
 
 /********************************************************************
@@ -407,7 +409,6 @@ status_t
 {
     ncx_module_t  *mod;
     status_t       res;
-    xmlns_id_t     nc_id, ncx_id;
 
     if (!agt_caps || !my_agt_caps) {
 	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
@@ -419,27 +420,49 @@ status_t
     }
 
     res = NO_ERR;
-    nc_id = xmlns_nc_id();
-    ncx_id = xmlns_ncx_id();
 
     /* add capability for each module loaded in ncxmod */
     while (mod && res == NO_ERR) {
-	res = cap_add_mod(my_agt_caps,
-			  mod->name,
-			  mod->version);
-	if (res == NO_ERR) {
-	    res = cap_add_modval(agt_caps,
-				 mod->name,
-				 mod->version);
+	/* keep internal modules out of the capabilities */
+	if (xml_strcmp(mod->name, NCX_EL_NETCONF) &&
+	    xml_strcmp(mod->name, NCX_EL_XSD)) {
+
+	    res = cap_add_modval(agt_caps, mod);
 	}
-	if (res == NO_ERR) {
-	    mod = (ncx_module_t *)dlq_nextEntry(mod);
-	}
+	mod = (ncx_module_t *)dlq_nextEntry(mod);
     }
 
     return res;
 
 } /* agt_cap_set_modules */
+
+
+/********************************************************************
+* FUNCTION agt_cap_add_module
+*
+* Add a module at runtime, after the initial set has been set
+* MUST call after agt_cap_set_caps
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_cap_add_module (const ncx_module_t *mod)
+{
+#ifdef DEBUG
+    if (!mod) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (!agt_caps || !my_agt_caps) {
+	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+    }
+
+    return cap_add_modval(agt_caps, mod);
+
+} /* agt_cap_add_module */
+
 
 #if 0
 /********************************************************************
@@ -543,6 +566,7 @@ val_value_t *
 {
     return agt_caps;
 } /* agt_cap_get_capsval */
+
 
 /********************************************************************
 * FUNCTION agt_cap_std_set

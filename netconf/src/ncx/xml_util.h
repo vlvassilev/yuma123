@@ -51,7 +51,6 @@
       - xml_strncmp
       - xml_isspace
       - xml_isspace_str
-      - xml_trim_string
       - xml_copy_clean_string
       - xml_convert_char_entity
 
@@ -331,10 +330,6 @@ extern boolean
 
 
 /************************* NCX STRING APIs **************************/
-
-extern const xmlChar *
-    xml_trim_string (const xmlChar *str, 
-		     uint32 *len);
 
 extern int 
     xml_strcmp_nosp (const xmlChar *s1, 

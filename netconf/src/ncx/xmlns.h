@@ -119,6 +119,10 @@ extern xmlns_id_t
 extern xmlns_id_t  
     xmlns_find_ns_by_name (const xmlChar *name);
 
+extern xmlns_id_t  
+    xmlns_find_ns_by_name_str (const xmlChar *name,
+			       uint32 namelen);
+
 
 /* get the NETCONF NS ID */
 extern xmlns_id_t  

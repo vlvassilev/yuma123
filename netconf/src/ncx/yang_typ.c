@@ -332,7 +332,7 @@ static status_t
 	if (testbtyp==NCX_BT_NONE) {
 	    newdef->def.simple.btyp = btyp;
 	    res = one_restriction_test(tkc, mod, newdef);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else if (testbtyp != btyp) {
 	    log_error("\nError: Derived type '%s' does not match "
 		      "the eventual builtin type (%s)",
@@ -452,7 +452,7 @@ static status_t
     if (res != NO_ERR) {
 	retres = res;
 	ncx_mod_exp_err(tkc, mod, res, expstr);
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    typ_free_rangedef(rv, btyp);
 	    return retres;
 	}
@@ -506,7 +506,7 @@ static status_t
     if (res != NO_ERR) {
 	ncx_mod_exp_err(tkc, mod, res, expstr);
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    typ_free_rangedef(rv, btyp);
 	    return res;
 	}
@@ -551,7 +551,7 @@ static status_t
 	if (res != NO_ERR) {
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	    retres = res;
-	    if (NEED_EXIT) {
+	    if (NEED_EXIT(res)) {
 		typ_free_rangedef(rv, btyp);
 		return res;
 	    }
@@ -716,7 +716,7 @@ static status_t
     while (!done) {
         /* get one range spec */
         res = consume_yang_rangedef(tkc, mod, typdef, rbtyp);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
         /* Current token is either a BAR or SEMICOL/LBRACE
          * Move past it if BAR and keep going
@@ -748,7 +748,7 @@ static status_t
 	res = yang_consume_error_stmts(tkc, mod, 
 				       &errinfo,
 				       &typdef->appinfoQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -812,7 +812,7 @@ static status_t
 	    pat->res = res;
 	    ncx_print_errormsg(tkc, mod, res);
 	    retres = res;
-	    if (NEED_EXIT) {
+	    if (NEED_EXIT(res)) {
 		return res;
 	    }
 	}
@@ -916,7 +916,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_TSTRING:
 	    break;  /* YANG clause assumed */
@@ -939,7 +939,7 @@ static status_t
 
 	    lendone = TRUE;
 	    res = consume_yang_range(tkc, mod, typdef, FALSE);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
         } else if (!xml_strcmp(val, YANG_K_PATTERN)) {
 	    /* make sure this is not the 'binary' data type */
 	    if (btyp == NCX_BT_BINARY) {
@@ -950,7 +950,7 @@ static status_t
 	    } 
 
 	    res = consume_yang_pattern(tkc, mod, typdef);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -1020,7 +1020,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1043,7 +1043,7 @@ static status_t
 
 	    rangedone = TRUE;
 	    res = consume_yang_range(tkc, mod, typdef, TRUE);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -1114,7 +1114,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1143,7 +1143,7 @@ static status_t
 
 	    rangedone = TRUE;
 	    res = consume_yang_range(tkc, mod, typdef, TRUE);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
         } else if (!xml_strcmp(val, YANG_K_LENGTH)) {
 	    if (rangedone) {
 		retres = ERR_NCX_ENTRY_EXISTS;
@@ -1158,10 +1158,10 @@ static status_t
 	    }
 	    lendone = TRUE;
 	    res = consume_yang_range(tkc, mod, typdef, FALSE);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else if (!xml_strcmp(val, YANG_K_PATTERN)) {
 	    res = consume_yang_pattern(tkc, mod, typdef);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -1323,7 +1323,7 @@ static status_t
      * check token type, which should be an identifier string
      */
     res = yang_consume_id_string(tkc, mod, &str);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     if (str) {
 	enu = typ_new_enum2(str);
@@ -1389,7 +1389,7 @@ static status_t
 	    res = ncx_consume_appinfo(tkc, mod, &enu->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    typ_free_enum(enu);
 		    return res;
 		}
@@ -1427,7 +1427,7 @@ static status_t
 	}
 	if (res != NO_ERR) {
 	    retres = res;
-	    if (NEED_EXIT) {
+	    if (NEED_EXIT(res)) {
 		typ_free_enum(enu);
 		return res;
 	    }
@@ -1509,7 +1509,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1526,7 +1526,7 @@ static status_t
         if (!xml_strcmp(val, YANG_K_BIT)) {
 	    bitdone = TRUE;
 	    res = consume_yang_bit(tkc, mod, typdef);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -1589,7 +1589,7 @@ static status_t
      * check token type, which should be a trimmed string
      */
     res = yang_consume_string(tkc, mod, &str);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* validate the enum string format */
     if (str) {
@@ -1684,7 +1684,7 @@ static status_t
 	    res = ncx_consume_appinfo(tkc, mod, &enu->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    typ_free_enum(enu);
 		    return res;
 		}
@@ -1722,7 +1722,7 @@ static status_t
 	}
 	if (res != NO_ERR) {
 	    retres = res;
-	    if (NEED_EXIT) {
+	    if (NEED_EXIT(res)) {
 		typ_free_enum(enu);
 		return res;
 	    }
@@ -1805,7 +1805,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1822,7 +1822,7 @@ static status_t
         if (!xml_strcmp(val, YANG_K_ENUM)) {
 	    enumdone = TRUE;
 	    res = consume_yang_enum(tkc, mod, typdef);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -1900,7 +1900,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1934,7 +1934,7 @@ static status_t
 	    res = yang_typ_consume_type(tkc, mod, un->typdef);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    typ_free_unionnode(un);
 		    return res;
 		}
@@ -2024,7 +2024,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -2090,7 +2090,7 @@ static status_t
 	    pathdone = TRUE;
 
 	    res = yang_consume_semiapp(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -2163,7 +2163,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -2178,12 +2178,13 @@ static status_t
 
 	/* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_BASE)) {
+	    sim->idref.modname = ncx_get_modname(mod);
 	    res = yang_consume_pid(tkc, mod,
 				   &sim->idref.baseprefix,
 				   &sim->idref.basename,
 				   &basedone,
 				   &typdef->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -2770,7 +2771,7 @@ static status_t
 
 	res = resolve_type(tkc, mod, un->typdef,
 			   NULL, NULL, parent, grp, fromdef);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	btyp = typ_get_basetype(un->typdef);
 	if (btyp != NCX_BT_NONE && !typ_ok_for_union(btyp)) {
@@ -2860,7 +2861,7 @@ static status_t
 
     /* check the appinfoQ */
     res = ncx_resolve_appinfoQ(tkc, mod, &typdef->appinfoQ);
-    if (NEED_EXIT) {
+    if (NEED_EXIT(res)) {
 	return res;
     } else {
 	res = NO_ERR;
@@ -2953,7 +2954,7 @@ static status_t
 		     enu = (typ_enum_t *)dlq_nextEntry(enu)) {
 
 		    res = ncx_resolve_appinfoQ(tkc, mod, &enu->appinfoQ);
-		    CHK_EXIT;
+		    CHK_EXIT(res, retres);
 		}
 		res = NO_ERR;
 	    }
@@ -3052,14 +3053,14 @@ static status_t
 
     /* check the appinfoQ */
     typ->res = res = ncx_resolve_appinfoQ(tkc, mod, &typ->appinfoQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     res = resolve_type(tkc, mod, &typ->typdef, typ->name,
 		       typ->defval, obj, grp, TRUE);
     if (typ->res == NO_ERR) {
 	typ->res = res;
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
     return retres;
 
 }  /* resolve_typedef */
@@ -3113,7 +3114,7 @@ static status_t
     res = yang_consume_pid_string(tkc, mod, 
 				  &intypdef->prefix,
 				  &intypdef->typename);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* got ID and prefix if there is one */
     if (intypdef->prefix && intypdef->typename &&
@@ -3125,7 +3126,7 @@ static status_t
 				    TK_CUR(tkc),
 				    &imptyp);
 	if (res != NO_ERR) {
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    /* type not found but continue processing errors for now */
 	    typ_init_named(intypdef);
 	} else {
@@ -3231,7 +3232,7 @@ static status_t
     case NCX_BT_NONE:
 	/* extending a local type that has not been resolved yet */
 	res = finish_unknown_type(tkc, mod, typdef);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 	break;
     case NCX_BT_ANY:
 	extonly = TRUE;
@@ -3241,7 +3242,7 @@ static status_t
 	    extonly = TRUE;
 	} else {
 	    res = finish_bits_type(tkc, mod, typdef);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	}
 	break;
     case NCX_BT_ENUM:
@@ -3249,7 +3250,7 @@ static status_t
 	    extonly = TRUE;
 	} else {
 	    res = finish_enum_type(tkc, mod, typdef);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case NCX_BT_EMPTY:
 	    extonly = TRUE;
@@ -3265,19 +3266,19 @@ static status_t
 	case NCX_BT_FLOAT32:
 	case NCX_BT_FLOAT64:
 	    res = finish_number_type(tkc, mod, typdef);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case NCX_BT_STRING:
 	case NCX_BT_BINARY:
 	    res = finish_string_type(tkc, mod, typdef, btyp);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case NCX_BT_UNION:
 	    if (derived) {
 		extonly = TRUE;
 	    } else {
 		res = finish_union_type(tkc, mod, typdef);
-		CHK_EXIT;
+		CHK_EXIT(res, retres);
 	    }
 	    break;
 	case NCX_BT_KEYREF:
@@ -3285,7 +3286,7 @@ static status_t
 		extonly = TRUE;
 	    } else {
 		res = finish_keyref_type(tkc, mod, typdef);
-		CHK_EXIT;
+		CHK_EXIT(res, retres);
 	    }
 	    break;
 	case NCX_BT_IDREF:
@@ -3293,7 +3294,7 @@ static status_t
 		extonly = TRUE;
 	    } else {
 		res = finish_idref_type(tkc, mod, typdef);
-		CHK_EXIT;
+		CHK_EXIT(res, retres);
 	    }
 	    break;
 	default:
@@ -3310,7 +3311,7 @@ static status_t
 	TK_BKUP(tkc);  
 	res = yang_consume_semiapp(tkc, mod,
 				   &typdef->appinfoQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -3454,11 +3455,11 @@ status_t
 
     /* Get the mandatory type name */
     res = yang_consume_id_string(tkc, mod, &typ->name);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* Get the starting left brace for the sub-clauses */
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* get the prefix clause and any appinfo extensions */
     while (!done) {
@@ -3485,7 +3486,7 @@ status_t
 	    res = ncx_consume_appinfo(tkc, mod, &typ->typdef.appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    typ_free_template(typ);
 		}
 		return res;
@@ -3516,7 +3517,7 @@ status_t
 	    res = yang_typ_consume_type(tkc, mod, &typ->typdef);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    typ_free_template(typ);
 		    return res;
 		}
@@ -3528,7 +3529,7 @@ status_t
 					 &unit, &typ->typdef.appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    typ_free_template(typ);
 		    return res;
 		}
@@ -3538,7 +3539,7 @@ status_t
 					 &def, &typ->typdef.appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    typ_free_template(typ);
 		    return res;
 		}
@@ -3548,7 +3549,7 @@ status_t
 				      &stat, &typ->typdef.appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    typ_free_template(typ);
 		    return res;
 		}
@@ -3558,7 +3559,7 @@ status_t
 				     &desc, &typ->typdef.appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    typ_free_template(typ);
 		    return res;
 		}
@@ -3568,7 +3569,7 @@ status_t
 				     &ref, &typ->typdef.appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    typ_free_template(typ);
 		    return res;
 		}
@@ -3687,7 +3688,7 @@ status_t
 	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
 	res = resolve_typedef(tkc, mod, typ, parent, NULL);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -3754,7 +3755,7 @@ status_t
 	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
 	res = resolve_typedef(tkc, mod, typ, parent, grp);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;

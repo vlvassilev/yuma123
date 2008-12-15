@@ -1440,7 +1440,7 @@ static status_t
     log_debug2("\nStart subtree file:\n%s\n", fullspec);
     res = convert_one(cp);
     if (res != NO_ERR) {
-	if (!NEED_EXIT) {
+	if (!NEED_EXIT(res)) {
 	    res = NO_ERR;
 	}
     }
@@ -1536,7 +1536,7 @@ int
 		while (val) {
 		    cvtparms.curmodule = (const char *)VAL_STR(val);
 		    res = convert_one(&cvtparms);
-		    if (NEED_EXIT) {
+		    if (NEED_EXIT(res)) {
 			val = NULL;
 		    } else {
 			val = val_find_next_child(cli_val,

@@ -1531,7 +1531,6 @@ status_t
 }  /* typ_get_rangebounds_con */
 
 
-
 /********************************************************************
 * FUNCTION typ_get_strrest
 * 
@@ -2888,6 +2887,7 @@ boolean
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_UNION:
     case NCX_BT_KEYREF:
+    case NCX_BT_IDREF:
     case NCX_BT_SLIST:
 	return TRUE;
     case NCX_BT_CONTAINER:
@@ -2941,6 +2941,7 @@ boolean
     case NCX_BT_UNION:
     case NCX_BT_SLIST:
     case NCX_BT_KEYREF:
+    case NCX_BT_IDREF:
     case NCX_BT_INSTANCE_ID:
 	return TRUE;
     case NCX_BT_CONTAINER:
@@ -4166,6 +4167,7 @@ boolean
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_KEYREF:
+    case NCX_BT_IDREF:
     case NCX_BT_UNION:
     case NCX_BT_EMPTY:
     case NCX_BT_SLIST:
@@ -4280,6 +4282,7 @@ boolean
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_UNION:
     case NCX_BT_KEYREF:   /*** not official in the spec yet 10/13 ***/
+    case NCX_BT_IDREF:
     case NCX_BT_EMPTY:
 	return TRUE;
     case NCX_BT_ANY:
@@ -4528,6 +4531,7 @@ boolean
 	    return !dlq_empty(&typdef->def.simple.valQ);
 	case NCX_BT_SLIST:
 	case NCX_BT_KEYREF:
+	case NCX_BT_IDREF:
 	    return TRUE;
 	default:
 	    return FALSE;

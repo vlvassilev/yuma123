@@ -747,7 +747,7 @@ status_t
     status_t               res;
 
     res = parse_parm(val, obj, strval, script);
-    if (res == NO_ERR || NEED_EXIT) {
+    if (res == NO_ERR || NEED_EXIT(res)) {
 	return res;
     }
 

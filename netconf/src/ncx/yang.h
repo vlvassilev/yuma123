@@ -377,7 +377,7 @@ extern void
     yang_clean_nodeQ (dlq_hdr_t *que);
 
 extern yang_node_t *
-    yang_find_node (dlq_hdr_t *que,
+    yang_find_node (const dlq_hdr_t *que,
 		    const xmlChar *name);
 
 extern yang_pcb_t *

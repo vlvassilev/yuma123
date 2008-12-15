@@ -996,7 +996,7 @@ static status_t
     log_debug2("\nStart subtree file:\n%s\n", fullspec);
     res = compare_one(cp);
     if (res != NO_ERR) {
-	if (!NEED_EXIT) {
+	if (!NEED_EXIT(res)) {
 	    res = NO_ERR;
 	}
     }

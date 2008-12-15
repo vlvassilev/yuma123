@@ -211,7 +211,7 @@ date         init     comment
  * continues in order to validate as much of the input
  * module as possible
  */
-#define CHK_OBJ_EXIT					  \
+#define CHK_OBJ_EXIT(res, retres)			  \
     if (res != NO_ERR) {				  \
 	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) { \
 	    obj_free_template(obj);			  \
@@ -497,10 +497,10 @@ static status_t
 
     /* Get the mandatory anyxml name */
     res = yang_consume_id_string(tkc, mod, &leaf->name);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* get the anyxml statements and any appinfo extensions */
     while (!done) {
@@ -526,7 +526,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -542,12 +542,10 @@ static status_t
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
 	    res = yang_consume_iffeature(tkc, mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
@@ -556,7 +554,6 @@ static status_t
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
 	    }
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    res = yang_consume_boolean(tkc, mod,
 				       &flagset,
@@ -565,29 +562,27 @@ static status_t
 	    if (flagset) {
 		obj->flags |= OBJ_FL_MANDATORY;
 	    }
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    res = yang_consume_status(tkc, mod, &leaf->status,
 				      &stat, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &leaf->descr,
 				     &desc, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &leaf->ref,
 				     &ref, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+
 	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    res = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
+	CHK_OBJ_EXIT(res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     if (leaf->name && ncx_valid_name2(leaf->name)) {
 	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     } else {
 	obj_free_template(obj);
     }
@@ -668,10 +663,10 @@ static status_t
 	
     /* Get the mandatory container name */
     res = yang_consume_id_string(tkc, mod, &con->name);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -697,7 +692,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -751,13 +746,13 @@ static status_t
 	    res = yang_obj_consume_datadef(tkc, mod,
 					   con->datadefQ, obj);
 	}
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     if (con->name && ncx_valid_name2(con->name)) {
 	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     } else {
 	obj_free_template(obj);
     }
@@ -843,11 +838,11 @@ static status_t
 
     /* Get the mandatory leaf name */
     res = yang_consume_id_string(tkc, mod, &leaf->name);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* Get the mandatory left brace */
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* get the leaf statements and any appinfo extensions */
     while (!done) {
@@ -873,7 +868,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -951,7 +946,7 @@ static status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     }
 
     /* check mandatory params */
@@ -964,7 +959,7 @@ static status_t
     /* save or delete the obj_template_t struct */
     if (leaf->name && ncx_valid_name2(leaf->name) && typeok) {
 	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     } else {
 	obj_free_template(obj);
     }
@@ -1053,11 +1048,11 @@ static status_t
 
     /* Get the mandatory leaf-list name */
     res = yang_consume_id_string(tkc, mod, &llist->name);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* Get the mandatory left brace */
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* get the leaf-list statements and any appinfo extensions */
     while (!done) {
@@ -1082,7 +1077,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1158,7 +1153,7 @@ static status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     }
 
     /* check mandatory params */
@@ -1171,7 +1166,7 @@ static status_t
     /* save or delete the obj_template_t struct */
     if (llist->name && ncx_valid_name2(llist->name) && typeok) {
 	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     } else {
 	obj_free_template(obj);
     }
@@ -1260,11 +1255,11 @@ static status_t
 
     /* Get the mandatory list name */
     res = yang_consume_id_string(tkc, mod, &list->name);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* Get the mandatory left brace */
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* get the list statements and any appinfo extensions */
     while (!done) {
@@ -1290,7 +1285,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1382,7 +1377,7 @@ static status_t
 	    res = yang_obj_consume_datadef(tkc, mod,
 					   list->datadefQ, obj);
 	}
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     }
 
     if (!list->keystr && (obj->flags & OBJ_FL_CONFIG)) {
@@ -1401,7 +1396,7 @@ static status_t
     /* save or delete the obj_template_t struct */
     if (list->name && ncx_valid_name2(list->name)) {
 	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     } else {
 	obj_free_template(obj);
     }
@@ -1486,16 +1481,16 @@ static status_t
     /* Get the mandatory case name */
     if (withcase) {
 	res = yang_consume_id_string(tkc, mod, &cas->name);
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
 
 	res = consume_semi_lbrace(tkc, mod, obj, &done);
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     } else {
 	/* shoarthand version, just 1 data-def-stmt per case */
 	anydone = TRUE;
 	res = consume_case_datadef(tkc, mod,
 				   cas->datadefQ, obj);
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
 	done = TRUE;
     }
 
@@ -1522,7 +1517,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1555,7 +1550,7 @@ static status_t
 	    res = consume_case_datadef(tkc, mod,
 				       cas->datadefQ, obj);
 	}
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     }
 
     /* if shorthand version, copy leaf name to case name */
@@ -1713,10 +1708,10 @@ static status_t
 
     /* Get the mandatory choice name */
     res = yang_consume_id_string(tkc, mod, &choic->name);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* get the sub-section statements and any appinfo extensions */
     while (!done) {
@@ -1742,7 +1737,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1807,7 +1802,7 @@ static status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -1955,10 +1950,10 @@ static status_t
 
     /* Get the mandatory refine target */
     res = yang_consume_string(tkc, mod, &refine->target);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -1984,7 +1979,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -2051,13 +2046,13 @@ static status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     if (refine->target) {
 	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     } else {
 	obj_free_template(obj);
     }
@@ -2142,18 +2137,18 @@ static status_t
     res = yang_consume_pid_string(tkc, mod,
 				  &uses->prefix,
 				  &uses->name);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* attempt to find grouping only if it is from another module */
     if (uses->prefix && xml_strcmp(uses->prefix, mod->prefix)) {
 	res = yang_find_imp_grouping(tkc, mod, uses->prefix,
 				     uses->name, obj->tk, &impgrp);
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
 	uses->grp = impgrp;
     }
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     expstr = "uses sub-statement";
 
@@ -2180,7 +2175,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -2218,7 +2213,7 @@ static status_t
 	   res = ERR_NCX_WRONG_TKVAL;
 	   ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -2325,7 +2320,7 @@ static status_t
 
     /* Get the starting left brace for the sub-clauses */
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -2350,7 +2345,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -2373,7 +2368,7 @@ static status_t
 	    res = yang_obj_consume_datadef(tkc, mod,
 					   &rpcio->datadefQ, obj);
 	}
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -2554,11 +2549,11 @@ static status_t
 
     /* Get the mandatory augment target */
     res = yang_consume_string(tkc, mod, &aug->target);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* Get the starting left brace for the sub-clauses */
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* get the sub-section statements and any appinfo extensions */
     while (!done) {
@@ -2583,7 +2578,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -2618,7 +2613,7 @@ static status_t
 	} else {
 	    res = consume_augdata(tkc, mod, &aug->datadefQ, obj);
 	}
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -2792,10 +2787,10 @@ static status_t
 	
     /* Get the mandatory RPC method name */
     res = yang_consume_id_string(tkc, mod, &rpc->name);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -2820,7 +2815,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -2859,7 +2854,7 @@ static status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -2923,7 +2918,7 @@ static status_t
 	}
 	
 	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     } else {
 	obj_free_template(obj);
     }
@@ -3001,10 +2996,10 @@ static status_t
 	
     /* Get the mandatory RPC method name */
     res = yang_consume_id_string(tkc, mod, &notif->name);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT;
+    CHK_OBJ_EXIT(res, retres);
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -3029,7 +3024,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT;
+	    CHK_OBJ_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -3065,13 +3060,13 @@ static status_t
 	    res = consume_datadef(tkc, mod, &notif->datadefQ,
 				  obj, NULL);
 	}
-	CHK_OBJ_EXIT;
+	CHK_OBJ_EXIT(res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     if (notif->name && ncx_valid_name2(notif->name)) {
 	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     } else {
 	obj_free_template(obj);
     }
@@ -3340,23 +3335,23 @@ static status_t
     retres = NO_ERR;
 
     res = resolve_metadata(tkc, mod, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     if (!obj_is_refine(obj)) {
 	res = yang_typ_resolve_typedefs(tkc, mod, con->typedefQ, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	res = yang_grp_resolve_groupings(tkc, mod, con->groupingQ, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     finish_config_flag(obj);
 
     res = yang_obj_resolve_datadefs(tkc, mod, con->datadefQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     res = check_parent(tkc, mod, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /*** validate must Xpath well-formed ***/
 		     
@@ -3393,12 +3388,12 @@ static status_t
     retres = NO_ERR;
 
     res = resolve_metadata(tkc, mod, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     if (!obj_is_refine(obj)) {
 	res = yang_typ_resolve_type(tkc, mod, leaf->typdef,
 				    leaf->defval, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     finish_config_flag(obj);
@@ -3412,7 +3407,7 @@ static status_t
     }
 
     res = check_parent(tkc, mod, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /*** validate must Xpath well-formed ***/
 
@@ -3449,12 +3444,12 @@ static status_t
     retres = NO_ERR;
 
     res = resolve_metadata(tkc, mod, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     if (!obj_is_refine(obj)) {
 	res = yang_typ_resolve_type(tkc, mod,
 				    llist->typdef, NULL, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     /* mark default as zero or more entries
@@ -3466,7 +3461,7 @@ static status_t
     finish_config_flag(obj);
 
     res = check_parent(tkc, mod, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* check if minelems and maxelems are valid */
     if (llist->minelems && llist->maxelems) {
@@ -3514,23 +3509,23 @@ static status_t
     retres = NO_ERR;
 
     res = resolve_metadata(tkc, mod, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     if (!obj_is_refine(obj)) {
 	res = yang_typ_resolve_typedefs(tkc, mod, list->typedefQ, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	res = yang_grp_resolve_groupings(tkc, mod, list->groupingQ, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     finish_config_flag(obj);
 
     res = yang_obj_resolve_datadefs(tkc, mod, list->datadefQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     res = check_parent(tkc, mod, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /*** validate must Xpath well-formed ***/
 
@@ -3794,7 +3789,7 @@ static status_t
 	res = xpath_find_schema_target_err(tkc, mod, obj,
 					   list->datadefQ,
 					   str, &uniobj, NULL, errtk);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 	if (res == NO_ERR) {
 	    savestr = xml_strdup(str);
 	    if (!savestr) {
@@ -3902,7 +3897,7 @@ static status_t
     /* validate key clause */
     if (list->keystr) {
 	res = get_list_key(tkc, mod, list, obj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     /* validate Q of unique clauses */
@@ -3910,7 +3905,7 @@ static status_t
 	 uni != NULL;
 	 uni = (obj_unique_t *)dlq_nextEntry(uni)) {
 	res = get_unique_comps(tkc, mod, list, obj, uni);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -3946,10 +3941,10 @@ static status_t
     retres = NO_ERR;
 
     res = yang_obj_resolve_datadefs(tkc, mod, cas->datadefQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     res = check_parent(tkc, mod, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 				    
@@ -3998,12 +3993,12 @@ static status_t
 
     res = check_parent(tkc, mod, obj);
 
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
 
     /* finish up the data-def-stmts in each case arm */
     res = yang_obj_resolve_datadefs(tkc, mod, choic->caseQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* check defval is valid case name */
     if (choic->defval) {
@@ -4460,7 +4455,7 @@ static status_t
     if (uses->grp) {
 	uses->grp->used = TRUE;
 	res = yang_grp_check_nest_loop(tkc, mod, obj, uses->grp);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 	if (res != NO_ERR) {
 	    uses->grp = NULL;   /* prevent recursive crash later */
 	}
@@ -4473,7 +4468,7 @@ static status_t
 	retres = res;
     }
     res = check_parent(tkc, mod, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* make sure all the refinements really match a child
      * in the grouping
@@ -4512,7 +4507,7 @@ static status_t
 	     */
 	    res = check_refine_allowed(tkc, mod,
 				       chobj, targobj);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 
 	    /* check if any default statements are present,
 	     * and if they are OK for the target data type
@@ -4599,7 +4594,7 @@ static status_t
 		res = combine_refine_objects(tkc, mod,
 					     chobj, testobj, cobj);
 		obj_free_template(testobj);
-		CHK_EXIT;
+		CHK_EXIT(res, retres);
 	    }
 	}
     }
@@ -4748,7 +4743,7 @@ static status_t
     retres = NO_ERR;
 
     res = check_parent(tkc, mod, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* figure out augment target later */
 
@@ -4774,7 +4769,7 @@ static status_t
 
     /* resolve augment contents */
     res = yang_obj_resolve_datadefs(tkc, mod, &aug->datadefQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 				    
@@ -4995,7 +4990,7 @@ static status_t
 	    break;
 	case OBJ_TYP_AUGMENT:
 	    res = expand_augment(tkc, mod, chobj, &aug->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	default:
 	    name = obj_get_name(chobj);
@@ -5106,13 +5101,13 @@ static status_t
     retres = NO_ERR;
 
     res = yang_typ_resolve_typedefs(tkc, mod, &rpc->typedefQ, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     res = yang_grp_resolve_groupings(tkc, mod, &rpc->groupingQ, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     res = yang_obj_resolve_datadefs(tkc, mod, &rpc->datadefQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 				    
@@ -5147,13 +5142,13 @@ static status_t
     retres = NO_ERR;
 
     res = yang_typ_resolve_typedefs(tkc, mod, &rpcio->typedefQ, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     res = yang_grp_resolve_groupings(tkc, mod, &rpcio->groupingQ, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     res = yang_obj_resolve_datadefs(tkc, mod, &rpcio->datadefQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 				    
@@ -5188,14 +5183,14 @@ static status_t
     retres = NO_ERR;
 
     res = yang_typ_resolve_typedefs(tkc, mod, &notif->typedefQ, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     res = yang_grp_resolve_groupings(tkc, mod, &notif->groupingQ, obj);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* resolve notification contents */
     res = yang_obj_resolve_datadefs(tkc, mod, &notif->datadefQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     return retres;
 				    
@@ -5539,20 +5534,20 @@ static status_t
 	    res = check_one_when_mismatch(tkc, mod, 
 					  testobj,
 					  ancestor);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 
 	    if (testobj->usesobj) {
 		res = check_one_when_mismatch(tkc, mod, 
 					      testobj->usesobj,
 					      ancestor);
-		CHK_EXIT;
+		CHK_EXIT(res, retres);
 	    }
 
 	    if (testobj->augobj) {
 		res = check_one_when_mismatch(tkc, mod, 
 					      testobj->augobj,
 					      ancestor);
-		CHK_EXIT;
+		CHK_EXIT(res, retres);
 	    }
 
 	    /* check all the if-features in the testnode
@@ -5566,7 +5561,7 @@ static status_t
 
 		res = check_iffeature_mismatch(tkc, mod, ancestor,
 					       testobj, iff);
-		CHK_EXIT;
+		CHK_EXIT(res, retres);
 	    }
 
 
@@ -5584,7 +5579,7 @@ static status_t
 
 			res = check_iffeature_mismatch(tkc, mod, ancestor,
 						       testobj, iff);
-			CHK_EXIT;
+			CHK_EXIT(res, retres);
 		    }
 		}
 	    }
@@ -5603,7 +5598,7 @@ static status_t
 
 			res = check_iffeature_mismatch(tkc, mod, ancestor,
 						       testobj, iff);
-			CHK_EXIT;
+			CHK_EXIT(res, retres);
 		    }
 		}
 	    }
@@ -5879,10 +5874,10 @@ status_t
 	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
 	res = ncx_resolve_appinfoQ(tkc, mod, &testobj->appinfoQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	res = resolve_iffeatureQ(tkc, mod, testobj);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 
 	switch (testobj->objtype) {
 	case OBJ_TYP_CONTAINER:
@@ -5936,7 +5931,7 @@ status_t
 	default:
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	}
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -6001,11 +5996,11 @@ status_t
 	    res = yang_grp_resolve_complete(tkc, mod,
 					    testobj->def.container->groupingQ,
 					    testobj);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 
 	    res = yang_obj_resolve_uses(tkc, mod,
 					testobj->def.container->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_LEAF:
 	case OBJ_TYP_LEAF_LIST:
@@ -6014,11 +6009,11 @@ status_t
 	    res = yang_grp_resolve_complete(tkc, mod,
 					    testobj->def.list->groupingQ,
 					    testobj);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 
 	    res = yang_obj_resolve_uses(tkc, mod,
 					testobj->def.list->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_CHOICE:
 	    for (casobj = (obj_template_t *)
@@ -6027,58 +6022,58 @@ status_t
 		 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
 		cas = casobj->def.cas;
 		res = yang_obj_resolve_uses(tkc, mod, cas->datadefQ);
-		CHK_EXIT;
+		CHK_EXIT(res, retres);
 	    }
 	    break;
 	case OBJ_TYP_CASE:
 	    cas = testobj->def.cas;
 	    res = yang_obj_resolve_uses(tkc, mod, cas->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_USES:
 	    res = expand_uses(tkc, mod, testobj, datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_AUGMENT:
 	    aug = testobj->def.augment;
 	    res = yang_obj_resolve_uses(tkc, mod, &aug->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_RPC:
 	    res = yang_grp_resolve_complete(tkc, mod,
 					    &testobj->def.rpc->groupingQ,
 					    testobj);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 
 	    res = yang_obj_resolve_uses(tkc, mod,
 					&testobj->def.rpc->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_RPCIO:
 	    res = yang_grp_resolve_complete(tkc, mod,
 					    &testobj->def.rpcio->groupingQ,
 					    testobj);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 
 	    res = yang_obj_resolve_uses(tkc, mod,
 					&testobj->def.rpcio->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_NOTIF:
 	    res = yang_grp_resolve_complete(tkc, mod,
 					    &testobj->def.notif->groupingQ,
 					    testobj);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 
 	    res = yang_obj_resolve_uses(tkc, mod,
 					&testobj->def.notif->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_NONE:
 	default:
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -6142,7 +6137,7 @@ status_t
 	case OBJ_TYP_CONTAINER:
 	    res = yang_obj_resolve_augments(tkc, mod,
 					    testobj->def.container->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_LEAF:
 	case OBJ_TYP_LEAF_LIST:
@@ -6150,7 +6145,7 @@ status_t
 	case OBJ_TYP_LIST:
 	    res = yang_obj_resolve_augments(tkc, mod,
 					    testobj->def.list->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_CHOICE:
 	    for (casobj = (obj_template_t *)
@@ -6159,7 +6154,7 @@ status_t
 		 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
 		cas = casobj->def.cas;
 		res = yang_obj_resolve_augments(tkc, mod, cas->datadefQ);
-		CHK_EXIT;
+		CHK_EXIT(res, retres);
 	    }
 	    break;
 	case OBJ_TYP_USES:
@@ -6167,28 +6162,28 @@ status_t
 	    break;
 	case OBJ_TYP_AUGMENT:
 	    res = expand_augment(tkc, mod, testobj, datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_RPC:
 	    res = yang_obj_resolve_augments(tkc, mod,
 					    &testobj->def.rpc->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_RPCIO:
 	    res = yang_obj_resolve_augments(tkc, mod,
 					    &testobj->def.rpcio->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_NOTIF:
 	    res = yang_obj_resolve_augments(tkc, mod,
 					    &testobj->def.notif->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_NONE:
 	default:
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -6251,7 +6246,7 @@ status_t
 	case OBJ_TYP_CONTAINER:
 	    res = yang_grp_resolve_final(tkc, mod,
 					 testobj->def.container->groupingQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    res = yang_obj_resolve_final(tkc, mod, 
 					 testobj->def.container->datadefQ);
 	    yang_check_obj_used(tkc, mod,
@@ -6264,7 +6259,7 @@ status_t
 	case OBJ_TYP_LIST:
 	    res = yang_grp_resolve_final(tkc, mod,
 					 testobj->def.list->groupingQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    res = yang_obj_resolve_final(tkc, mod, 
 					 testobj->def.list->datadefQ);
 	    yang_check_obj_used(tkc, mod,
@@ -6291,7 +6286,7 @@ status_t
 	case OBJ_TYP_RPC:
 	    res = yang_grp_resolve_final(tkc, mod,
 					 &testobj->def.rpc->groupingQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    res = yang_obj_resolve_final(tkc, mod, 
 					 &testobj->def.rpc->datadefQ);
 	    yang_check_obj_used(tkc, mod,
@@ -6301,7 +6296,7 @@ status_t
 	case OBJ_TYP_RPCIO:
 	    res = yang_grp_resolve_final(tkc, mod,
 					 &testobj->def.rpcio->groupingQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    res = yang_obj_resolve_final(tkc, mod, 
 					 &testobj->def.rpcio->datadefQ);
 	    yang_check_obj_used(tkc, mod,
@@ -6311,7 +6306,7 @@ status_t
 	case OBJ_TYP_NOTIF:
 	    res = yang_grp_resolve_final(tkc, mod,
 					 &testobj->def.notif->groupingQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    res = yang_obj_resolve_final(tkc, mod, 
 					 &testobj->def.notif->datadefQ);
 	    yang_check_obj_used(tkc, mod,
@@ -6324,7 +6319,7 @@ status_t
 	default:
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	}
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -6447,7 +6442,7 @@ status_t
 		    res = check_conditional_mismatch(tkc, mod,
 						     testobj,
 						     key->keyobj);
-		    CHK_EXIT;
+		    CHK_EXIT(res, retres);
 		}
 	    }
 
@@ -6466,7 +6461,7 @@ status_t
 			res = check_conditional_mismatch(tkc, mod,
 							 testobj,
 							 uncomp->unobj);
-			CHK_EXIT;
+			CHK_EXIT(res, retres);
 		    }
 		}
 	    }
@@ -6474,7 +6469,7 @@ status_t
 	    /* check list children */
 	    res = yang_obj_resolve_xpath(tkc, mod, 
 					 testobj->def.list->datadefQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_CHOICE:
 	    res = yang_obj_resolve_xpath(tkc, mod, 
@@ -6500,7 +6495,7 @@ status_t
 	default:
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	}
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
 	return retres;

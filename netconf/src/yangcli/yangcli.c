@@ -1601,7 +1601,7 @@ static status_t
 	     */
 	    break;
 	case NCX_BAD_DATA_CHECK:
-	    if (NEED_EXIT) {
+	    if (NEED_EXIT(res)) {
 		break;
 	    }
 
@@ -6195,7 +6195,7 @@ static void
     cap_dump_stdcaps(&mscb->caplist);
 
     log_stdout("\n\nAgent Module Capabilities");
-    cap_dump_modcaps(&mscb->caplist, TRUE);
+    cap_dump_modcaps(&mscb->caplist);
 
     log_stdout("\n\nAgent Enterprise Capabilities");
     cap_dump_entcaps(&mscb->caplist);
@@ -6305,6 +6305,13 @@ static void
 			 &module,
 			 &modlen,
 			 &version);
+
+	if (!module || !modlen || !version) {
+	    log_warning("\nWarning: skipping invalid module capability "
+			"for URI '%s'", cap->cap_uri);
+	    cap = cap_next_modcap(cap);
+	    continue;
+	}
 
 	xml_strncpy(namebuff, module, modlen);
 	mod = ncx_find_module(namebuff);

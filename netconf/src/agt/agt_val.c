@@ -1920,7 +1920,7 @@ static status_t
 	 testobj = obj_next_child(testobj)) {
 
 	res = instance_check(scb, msg, testobj, val, layer);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 	/* errors already recorded if other than NO_ERR */
     }
 
@@ -1995,7 +1995,7 @@ static status_t
 	 chval = val_get_next_child(chval)) {
 
 	res = must_stmt_check(scb, msg, root, chval, layer);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     mustQ = obj_get_mustQ(obj);
@@ -2164,7 +2164,7 @@ status_t
 		continue;
 	    } else if (chval->obj->objtype != OBJ_TYP_LEAF) {
 		res = agt_val_instance_check(scb, msg, chval, layer);
-		CHK_EXIT;
+		CHK_EXIT(res, retres);
 	    }
 	}
     }
@@ -2186,7 +2186,7 @@ status_t
 	if (res != NO_ERR && valset->res == NO_ERR) {	    
 	    valset->res = res;
 	}
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -2240,7 +2240,7 @@ status_t
 
     /* check the instance counts for the subtrees that are present */
     res = agt_val_instance_check(scb, msg, root, NCX_LAYER_CONTENT);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* check the must-stmt expressions for the subtrees that are present */
     for (chval = val_get_first_child(root);
@@ -2248,7 +2248,7 @@ status_t
 	 chval = val_get_next_child(chval)) {
 
 	res = must_stmt_check(scb, msg, root, chval, NCX_LAYER_CONTENT);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     /* check all the modules in the system for top-level objects and
@@ -2282,7 +2282,7 @@ status_t
 		res = instance_check(scb, msg, chobj, 
 				     root, NCX_LAYER_CONTENT);
 	    }
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	}
     }
 

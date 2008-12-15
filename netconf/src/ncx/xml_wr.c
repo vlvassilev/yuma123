@@ -826,8 +826,7 @@ void
 * FUNCTION xml_wr_qname_elem
 *
 * Write a start tag, QName string content, and an end tag
-* to the specified session.  A flag element and
-* ename will vary from this format.
+* to the specified session.
 *
 * The ses_start_msg must be called before this
 * function, in order for it to allow any writes
@@ -836,7 +835,7 @@ void
 *   scb == session control block
 *   msg == header from message in progres
 *   val_nsid == namespace ID of the QName prefix
-*   str == simple string to write as element content
+*   str == local-name part of the QName
 *   parent_nsid == namespace ID of the parent element
 *   nsid == namespace ID of the element to write
 *   elname == unqualified name of element to write
@@ -875,7 +874,9 @@ void
 			 nsid, elname, attrQ, isattrq, 
 			 indent, FALSE);
 
-    /* counting on xmlns decl to be in <rpc-error> parent node */
+    /* counting on xmlns decl to be in ancestor node
+     * because the xneeded node is being ignored here
+     */
     pfix = xml_msg_get_prefix(msg, parent_nsid, val_nsid, 
 			      NULL, &xneeded);
     if (pfix) {
@@ -923,11 +924,12 @@ void
 		      ncx_nodetest_fn_t testfn)
 {
     const ncx_lmem_t   *listmem;
+    const xmlChar      *pfix;
     val_value_t        *v_val, *v_chval, *chval, *useval, *usechval;
     xmlChar            *binbuff;
     uint32              len;
     status_t            res;
-    boolean             empty, first, wspace;
+    boolean             empty, first, wspace, xneeded;
     ncx_btype_t         btyp, listbtyp;
     xmlChar             buff[NCX_MAX_NUMLEN];
 
@@ -1012,14 +1014,29 @@ void
 	}
 	break;
     case NCX_BT_STRING:
-    case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:   /******/
+    case NCX_BT_INSTANCE_ID:   /****/
+    case NCX_BT_KEYREF:        /****/
 	if (VAL_STR(useval)) {
 	    if (!fit_on_line(scb, useval) && (indent>0)) {
 		ses_indent(scb, indent);
 	    }
 	    ses_putcstr(scb, VAL_STR(useval), indent);
 	}
+	break;
+    case NCX_BT_IDREF:
+	/* counting on xmlns decl to be in ancestor node
+	 * because the xneeded node is being ignored here
+	 */
+	pfix = xml_msg_get_prefix(msg,
+				  (useval->parent) 
+				  ? useval->parent->nsid : 0,
+				  useval->v.idref.nsid, 
+				  useval, &xneeded);
+	if (pfix) {
+	    ses_putstr(scb, pfix);
+	    ses_putchar(scb, XMLNS_SEPCH);
+	}
+	ses_putstr(scb, useval->v.idref.name);
 	break;
     case NCX_BT_BINARY:
 	if (useval->v.binary.ustr) {
@@ -1166,25 +1183,38 @@ void
 		    empty = TRUE;
 		}
 	    }
-	    xml_wr_begin_elem_val(scb, msg, usechval,
-				  indent, empty);
 
-	    /* check corner-case; empty application placeholder */
-	    if (!empty) {
-		/* indent all the child nodes if any */
-		if (indent >= 0) {
-		    indent += ses_indent_count(scb);
+	    if (usechval->btyp == NCX_BT_IDREF) {
+		/* write a complete QName element */
+		xml_wr_qname_elem(scb, msg, 
+				  usechval->v.idref.nsid,
+				  usechval->v.idref.name,
+				  useval->nsid,
+				  usechval->nsid,
+				  usechval->name,
+				  &usechval->metaQ, FALSE, indent);
+	    } else {
+		/* write the child start tag, recurse, then end tag */
+		xml_wr_begin_elem_val(scb, msg, usechval,
+				      indent, empty);
+
+		/* check corner-case; empty application placeholder */
+		if (!empty) {
+		    /* indent all the child nodes if any */
+		    if (indent >= 0) {
+			indent += ses_indent_count(scb);
+		    }
+
+		    /* write the child node value */
+		    xml_wr_check_val(scb, msg, usechval, indent, testfn);
+
+		    /* reset the indent and write the value end node */
+		    if (indent >= 0) {
+			indent -= ses_indent_count(scb);
+		    }
+		    xml_wr_end_elem(scb, msg, usechval->nsid, usechval->name, 
+				    fit_on_line(scb, usechval) ? -1 : indent);
 		}
-
-		/* write the child node value */
-		xml_wr_check_val(scb, msg, usechval, indent, testfn);
-
-		/* reset the indent and write the value end node */
-		if (indent >= 0) {
-		    indent -= ses_indent_count(scb);
-		}
-		xml_wr_end_elem(scb, msg, usechval->nsid, usechval->name, 
-				fit_on_line(scb, usechval) ? -1 : indent);
 	    }
 
 	    if (v_chval) {
@@ -1283,7 +1313,15 @@ void
     }
 
     /* write the value node contents or an empty node if none */
-    if (val_has_content(out)) {
+    if (out->btyp == NCX_BT_IDREF) {
+	/* write a complete QName element */
+	xml_wr_qname_elem(scb, msg, 
+			  out->v.idref.nsid,
+			  out->v.idref.name,
+			  (out->parent) ? out->parent->nsid : 0,
+			  out->nsid, out->name,
+			  &out->metaQ, FALSE, indent);
+    } else if (val_has_content(out)) {
 
 	/* write the top-level start node */
 	xml_wr_begin_elem_val(scb, msg, out, indent, START);
@@ -1424,20 +1462,28 @@ status_t
 
     /* generate the <foo> start tag */
     if (res == NO_ERR) {
-	xml_wr_begin_elem_ex(scb, &msg->mhdr,
-			     0, val->nsid, val->name, 
-			     attrs, TRUE, 0, FALSE);
+	if (val->btyp == NCX_BT_IDREF) {
+	    xml_wr_qname_elem(scb, &msg->mhdr, 
+			      val->v.idref.nsid,
+			      val->v.idref.name, 0,
+			      val->nsid, val->name,
+			      attrs, TRUE, 0);
+	} else {
+	    xml_wr_begin_elem_ex(scb, &msg->mhdr,
+				 0, val->nsid, val->name, 
+				 attrs, TRUE, 0, FALSE);
+	}
 	anyout = TRUE;
-    }
 
-    /* output the value */
-    if (res == NO_ERR) {
-	xml_wr_check_val(scb, &msg->mhdr, val, indent, testfn);
-    }
+	/* output the value */
+	if (res == NO_ERR) {
+	    xml_wr_check_val(scb, &msg->mhdr, val, indent, testfn);
+	}
 
-    /* generate the <foo> end tag */
-    if (res == NO_ERR) {
-	xml_wr_end_elem(scb, &msg->mhdr, val->nsid, val->name, 0);
+	/* generate the <foo> end tag */
+	if (res == NO_ERR) {
+	    xml_wr_end_elem(scb, &msg->mhdr, val->nsid, val->name, 0);
+	}
     }
 
     /* finish the message, should be NO-OP  */

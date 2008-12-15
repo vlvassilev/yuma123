@@ -1956,7 +1956,7 @@ static status_t
 	    } else {
 		/* skip child worked, go on to next child, parse for errors */
 		retres = res;
-		if (NEED_EXIT || res==ERR_XML_READER_EOF) {
+		if (NEED_EXIT(res) || res==ERR_XML_READER_EOF) {
 		    done = TRUE;
 		}
 		continue;
@@ -1972,7 +1972,7 @@ static status_t
 	chval->res = res;
 	if (res != NO_ERR) {
 	    retres = res;
-	    if (NEED_EXIT || res==ERR_XML_READER_EOF) {
+	    if (NEED_EXIT(res) || res==ERR_XML_READER_EOF) {
 		done = TRUE;
 		continue;
 	    }
@@ -2165,7 +2165,7 @@ static status_t
 				  NCX_LAYER_OPERATION, res,  
 				  attr, node, NULL, 
 				  NCX_NT_VAL, retval);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	}
     }
     return retres;

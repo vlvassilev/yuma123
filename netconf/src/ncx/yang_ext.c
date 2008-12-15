@@ -185,7 +185,7 @@ static status_t
 	    m__free(errstr);
 	}
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* Get the starting left brace for the sub-clauses
      * or a semi-colon to end the extension-stmt
@@ -234,7 +234,7 @@ static status_t
 		res = ncx_consume_appinfo(tkc, mod, &errQ);
 		ncx_clean_appinfoQ(&errQ);
 	    }
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -260,7 +260,7 @@ static status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;

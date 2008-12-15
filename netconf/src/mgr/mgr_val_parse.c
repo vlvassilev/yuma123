@@ -1293,7 +1293,7 @@ static status_t
     val_value_t          *chval;
     xml_node_t            chnode;
     status_t              res, res2, retres;
-    boolean               done, empty;
+    boolean               done, empty, errmode;
     ncx_btype_t           chbtyp;
 
     /* setup local vars */
@@ -1306,6 +1306,7 @@ static status_t
     retres = NO_ERR;
     done = FALSE;
     empty = FALSE;
+    errmode = FALSE;
 
     val_init_from_template(retval, obj);
 
@@ -1357,34 +1358,41 @@ static status_t
 	/* get the next node which should be a child or end node */
 	res = get_xml_node(scb, &chnode);
 	if (res != NO_ERR) {
-	    done = TRUE;
-	} else {
+	    if (res == ERR_NCX_UNKNOWN_NS && chnode.elname) {
+		retval->res = res;
+		errmode = TRUE;
+		res = NO_ERR;
+	    }  else {
+		done = TRUE;
+		continue;
+	    }
+	}
+
 #ifdef MGR_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_complex: expecting start-child or end node.");
-	    if (LOGDEBUG3) {
-		xml_dump_node(&chnode);
-	    }
+	log_debug3("\nparse_complex: expecting start-child or end node.");
+	if (LOGDEBUG3) {
+	    xml_dump_node(&chnode);
+	}
 #endif
-	    /* validate the child member node type */
-	    switch (chnode.nodetyp) {
-	    case XML_NT_START:
-	    case XML_NT_EMPTY:
-		/* any namespace OK for now, check in obj_get_child_node */
-		break;
-	    case XML_NT_STRING:
-		res = ERR_NCX_WRONG_NODETYP_SIM;
-		break;
-	    case XML_NT_END:
-		res = xml_endnode_match(startnode, &chnode);
-		if (res == NO_ERR) {
-		    /* no error exit */
-		    done = TRUE;
-		    continue;
-		}
-		break;
-	    default:
-		res = ERR_NCX_WRONG_NODETYP;
+	/* validate the child member node type */
+	switch (chnode.nodetyp) {
+	case XML_NT_START:
+	case XML_NT_EMPTY:
+	    /* any namespace OK for now, check in obj_get_child_node */
+	    break;
+	case XML_NT_STRING:
+	    res = ERR_NCX_WRONG_NODETYP_SIM;
+	    break;
+	case XML_NT_END:
+	    res = xml_endnode_match(startnode, &chnode);
+	    if (res == NO_ERR) {
+		/* no error exit */
+		done = TRUE;
+		continue;
 	    }
+	    break;
+	default:
+	    res = ERR_NCX_WRONG_NODETYP;
 	}
 
 	/* if we get here, there is a START or EMPTY node
@@ -1396,9 +1404,12 @@ static status_t
 	 * if no xmlorder, then check for any valid child
 	 */
 	if (res==NO_ERR) {
-	    res = obj_get_child_node(obj, chobj, &chnode, FALSE,
-				     &curtop, &curchild);
-	    if (res != NO_ERR) {
+	    curchild = NULL;
+	    if (!errmode) {
+		res = obj_get_child_node(obj, chobj, &chnode, FALSE,
+					 &curtop, &curchild);
+	    }
+	    if (!curchild || res != NO_ERR) {
 		log_error("\nError: '%s' has no child node '%s'. Using anyxml",
 			  retval->name, chnode.qname);
 		curchild = ncx_get_gen_anyxml();
@@ -1416,7 +1427,7 @@ static status_t
 	     * Allocate a new val_value_t for the child value node
 	     */
 	    chval = val_new_child_val(obj_get_nsid(curchild),
-				      obj_get_name(curchild), 
+				      (errmode) ? chnode.elname : obj_get_name(curchild), 
 				      FALSE, retval, 
 				      get_editop(&chnode));
 	    if (!chval) {
@@ -1435,7 +1446,7 @@ static status_t
 		val_free_value(chval);
 		chval = NULL;
 	    }
-	    if (NEED_EXIT || res == ERR_XML_READER_EOF) {
+	    if (NEED_EXIT(res) || res == ERR_XML_READER_EOF) {
 		done = TRUE;
 	    } else {
 		/* skip the entire value subtree */
@@ -1470,7 +1481,7 @@ static status_t
 	} else {
 	    /* did not parse the child node correctly */
 	    retres = res;
-	    if (NEED_EXIT || res==ERR_XML_READER_EOF) {
+	    if (NEED_EXIT(res) || res==ERR_XML_READER_EOF) {
 		done = TRUE;
 		continue;
 	    }
@@ -1705,7 +1716,7 @@ static status_t
 		val_free_value(chval);
 		chval = NULL;
 	    }
-	    if (NEED_EXIT || res==ERR_XML_READER_EOF) {
+	    if (NEED_EXIT(res) || res==ERR_XML_READER_EOF) {
 		done = TRUE;
 	    } else {
 		/* skip the entire value subtree */
@@ -1743,7 +1754,7 @@ static status_t
 	} else {
 	    /* did not parse the child node correctly */
 	    retres = res;
-	    if (NEED_EXIT || res==ERR_XML_READER_EOF) {
+	    if (NEED_EXIT(res) || res==ERR_XML_READER_EOF) {
 		done = TRUE;
 	    }
 	}
@@ -2343,7 +2354,7 @@ status_t
     
     return res;
 
-}  /* mgr_val_parse */
+}  /* mgr_val_parse_reply */
 
 
 /* END file mgr_val_parse.c */

@@ -58,12 +58,14 @@ extern uint32
 			   xmlns_id_t  nsid,
 			   const xmlChar *name);
 
+/* hand off a malloced attribute string */
 extern status_t
     xml_val_add_attr (const xmlChar *name,
 		      xmlns_id_t nsid,
 		      xmlChar *attrval,
 		      val_value_t *val);
 
+/* copy a const attribute string */
 extern status_t
     xml_val_add_cattr (const xmlChar *name,
 		       xmlns_id_t nsid,
@@ -74,11 +76,13 @@ extern val_value_t *
     xml_val_new_struct (const xmlChar *name,
 			xmlns_id_t     nsid);
 
+/* hand off a malloced string */
 extern val_value_t *
     xml_val_new_string (const xmlChar *name,
 			xmlns_id_t     nsid,
 			xmlChar *strval);
 
+/* copy a const string */
 extern val_value_t *
     xml_val_new_cstring (const xmlChar *name,
 			 xmlns_id_t     nsid,

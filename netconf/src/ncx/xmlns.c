@@ -512,6 +512,50 @@ xmlns_id_t
 
 
 /********************************************************************
+* FUNCTION xmlns_find_ns_by_name_str
+*
+* Find the NS ID from its name (counted string version)
+*
+* INPUTS:
+*    name == pointer to name string
+*    namelen == length of name string
+*
+* RETURNS:
+*    namespace ID or XMLNS_NULL_NS_ID if error
+*********************************************************************/
+xmlns_id_t 
+    xmlns_find_ns_by_name_str (const xmlChar *name,
+			       uint32 namelen)
+{
+    xmlns_t  *ns;
+    uint32    i;
+
+#ifdef DEBUG
+    if (!name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return XMLNS_NULL_NS_ID;
+    } 
+    if (!namelen) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return XMLNS_NULL_NS_ID;
+    } 
+#endif
+
+    for (i=0; i<xmlns_next_id-1; i++) {
+	ns = xmlns[i];
+	if (ns->ns_name) {
+            if (!xml_strncmp(ns->ns_name, name, namelen)) {
+                return ns->ns_id;
+            }
+	}
+    }
+
+    return XMLNS_NULL_NS_ID;
+
+} /* xmlns_find_ns_by_name_str */
+
+
+/********************************************************************
 * FUNCTION xmlns_cleanup
 *
 * Cleanup module static data

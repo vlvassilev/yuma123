@@ -206,6 +206,7 @@ typedef struct typ_idref_t {
     xmlChar        *baseprefix;
     xmlChar        *basename;
     ncx_identity_t *base;     /* back-ptr to base (if found ) */
+    const xmlChar  *modname;   /* back-ptr to the main mod name */
 } typ_idref_t;
 
 /* NCX_CL_SIMPLE

@@ -161,7 +161,7 @@ static status_t
 	 imp = (ncx_import_t *)dlq_nextEntry(imp)) {
 
 	res = ncx_resolve_appinfoQ(tkc, mod, &imp->appinfoQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
@@ -169,7 +169,7 @@ static status_t
 	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
 	res = ncx_resolve_appinfoQ(tkc, mod, &inc->appinfoQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     for (feature = (ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
@@ -177,7 +177,7 @@ static status_t
 	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
 	res = ncx_resolve_appinfoQ(tkc, mod, &feature->appinfoQ);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -416,7 +416,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_TSTRING:
 	    break;  /* YANG clause assumed */
@@ -434,7 +434,7 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_PREFIX)) {
 	    res = yang_consume_strclause(tkc, mod, &mod->prefix,
 					 &pfixdone, &mod->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -552,7 +552,7 @@ static status_t
 	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    done = TRUE;
 		}
 	    }
@@ -591,7 +591,7 @@ static status_t
 	}
 	if (res != NO_ERR) {
 	    retres = res;
-	    if (NEED_EXIT) {
+	    if (NEED_EXIT(res)) {
 		done = TRUE;
 	    }
 	}
@@ -873,7 +873,7 @@ static status_t
 	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    done = TRUE;
 		}
 	    }
@@ -914,7 +914,7 @@ static status_t
 	}
 	if (res != NO_ERR) {
 	    retres = res;
-	    if (NEED_EXIT) {
+	    if (NEED_EXIT(res)) {
 		done = TRUE;
 	    }
 	}
@@ -1130,7 +1130,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_TSTRING:
 	    break;  /* YANG clause assumed */
@@ -1158,7 +1158,7 @@ static status_t
 	    res = ncx_consume_token(tkc, mod, TK_TT_DNUM);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    return res;
 		}
 	    } else {
@@ -1171,10 +1171,10 @@ static status_t
 	    }
 
 	    res = yang_consume_semiapp(tkc, mod, &mod->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
         } else if (!xml_strcmp(val, YANG_K_BELONGS_TO)) {
 	    res = consume_belongs_to(tkc, mod);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else if (!yang_top_keyword(val)) {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -1258,7 +1258,7 @@ static status_t
     res = yang_consume_id_string(tkc, mod, &imp->module);
     if (res != NO_ERR) {
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    ncx_free_import(imp);
 	    return res;
 	}
@@ -1268,7 +1268,7 @@ static status_t
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
     if (res != NO_ERR) {
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    ncx_free_import(imp);
 	    return res;
 	}
@@ -1299,7 +1299,7 @@ static status_t
 	    res = ncx_consume_appinfo(tkc, mod, &imp->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    ncx_free_import(imp);
 		    return res;
 		}
@@ -1323,7 +1323,7 @@ static status_t
 					 &pfixdone, &imp->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    ncx_free_import(imp);
 		    return res;
 		}
@@ -1543,7 +1543,7 @@ static status_t
     res = yang_consume_id_string(tkc, mod, &inc->submodule);
     if (res != NO_ERR) {
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    ncx_free_include(inc);
 	    return res;
 	}
@@ -1553,7 +1553,7 @@ static status_t
     res = yang_consume_semiapp(tkc, mod, &inc->appinfoQ);
     if (res != NO_ERR) {
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    ncx_free_include(inc);
 	    return res;
 	}
@@ -1727,7 +1727,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_TSTRING:
 	    break;  /* YANG clause assumed */
@@ -1745,10 +1745,10 @@ static status_t
 	/* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_IMPORT)) {
 	    res = consume_import(tkc, mod, pcb);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
         } else if (!xml_strcmp(val, YANG_K_INCLUDE)) {
 	    res = consume_include(tkc, mod, pcb);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else if (!yang_top_keyword(val)) {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -1826,7 +1826,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_TSTRING:
 	    break;  /* YANG clause assumed */
@@ -1846,19 +1846,19 @@ static status_t
 	    /* 'organization' field is present */
 	    res = yang_consume_strclause(tkc, mod, &mod->organization,
 					 &org, &mod->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
         } else if (!xml_strcmp(val, YANG_K_CONTACT)) {
 	    res = yang_consume_descr(tkc, mod, &mod->contact_info,
 				     &contact, &mod->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
         } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    res = yang_consume_descr(tkc, mod, &mod->descr,
 				     &descr, &mod->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
         } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    res = yang_consume_descr(tkc, mod, &mod->ref,
 				     &ref, &mod->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else if (!yang_top_keyword(val)) {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -1980,7 +1980,7 @@ static status_t
 	    res = ncx_consume_token(tkc, mod, TK_TT_DNUM);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    ncx_free_revhist(rev);
 		    m__free(str);
 		    return res;
@@ -1990,7 +1990,7 @@ static status_t
 		res = ncx_consume_token(tkc, mod, TK_TT_DNUM);
 		if (res != NO_ERR) {
 		    retres = res;
-		    if (NEED_EXIT) {
+		    if (NEED_EXIT(res)) {
 			ncx_free_revhist(rev);
 			m__free(str);
 			return res;
@@ -2010,7 +2010,7 @@ static status_t
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
     if (res != NO_ERR) {
 	retres = res;
-	if (NEED_EXIT) {
+	if (NEED_EXIT(res)) {
 	    ncx_free_revhist(rev);
 	    return res;
 	}
@@ -2041,7 +2041,7 @@ static status_t
 	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    ncx_free_revhist(rev);
 		    return res;
 		}
@@ -2066,7 +2066,7 @@ static status_t
 				     &descrdone, &mod->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-		if (NEED_EXIT) {
+		if (NEED_EXIT(res)) {
 		    ncx_free_revhist(rev);
 		    return res;
 		}
@@ -2089,7 +2089,7 @@ static status_t
     if (rev->version) {
 	/* check if the version string is valid */
 	res = yang_validate_date_string(tkc, mod, rev->tk, rev->version);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
 	    
 	/* check if the revision is already present */
 	testrev = ncx_find_revhist(mod, rev->version);
@@ -2168,7 +2168,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_TSTRING:
 	    break;  /* YANG clause assumed */
@@ -2186,7 +2186,7 @@ static status_t
 	/* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_REVISION)) {
 	    res = consume_revision(tkc, mod);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	} else if (!yang_top_keyword(val)) {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -2314,7 +2314,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
-	    CHK_EXIT;
+	    CHK_EXIT(res, retres);
 	    continue;
 	case TK_TT_TSTRING:
 	    break;  /* YANG clause assumed */
@@ -2351,7 +2351,7 @@ static status_t
 	    res = yang_obj_consume_datadef(tkc, mod,
 					   &mod->datadefQ, NULL);
 	}
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -2444,7 +2444,7 @@ static status_t
 	res = ERR_NCX_WRONG_TKTYPE;
 	ncx_print_errormsg(tkc, mod, res);
     }
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* exit on all errors, since this is probably not a YANG file */
     if (retres != NO_ERR) {
@@ -2485,11 +2485,11 @@ static status_t
     if (ismain) {
 	/* consume module-header-stmts */
 	res = consume_mod_hdr(tkc, mod);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     } else {
 	/* consume submodule-header-stmts */
 	res = consume_submod_hdr(tkc, mod);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     /* check if this module is already loaded, except in diff mode */
@@ -2508,15 +2508,15 @@ static status_t
 
     /* Get the linkage statements (imports, include) */
     res = consume_linkage_stmts(tkc, mod, pcb);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* Get the meta statements (organization, etc.) */
     res = consume_meta_stmts(tkc, mod, ismain);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* Get the revision statements */
     res = consume_revision_stmts(tkc, mod);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* make sure there is at least name and prefix to continue */
     if (!mod->name || (mod->ismod && !mod->prefix) || 
@@ -2526,11 +2526,11 @@ static status_t
 
     /* Get the definition statements */
     res = consume_body_stmts(tkc, mod);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* the next node should be the '(sub)module' end node */
     res = ncx_consume_token(tkc, mod, TK_TT_RBRACE);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* check extra tokens left over */
     res = TK_ADV(tkc);
@@ -2545,13 +2545,13 @@ static status_t
 
     /* check all the module level extension usage */
     res = ncx_resolve_appinfoQ(tkc, mod, &mod->appinfoQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* check all the module level extension usage
      * within the include, import, and feature statements
      */
     res = resolve_mod_appinfo(tkc, mod);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* resolve any if-feature statements within the featureQ */
     for (feature = (ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
@@ -2559,7 +2559,7 @@ static status_t
 	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
 	res = resolve_feature(tkc, mod, feature);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     /* check for any if-feature loops caused by this module */
@@ -2568,7 +2568,7 @@ static status_t
 	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
 	res = check_feature_loop(tkc, mod, feature, feature);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     /* resolve the base-stmt within any identity statements 
@@ -2579,7 +2579,7 @@ static status_t
 	 identity = (ncx_identity_t *)dlq_nextEntry(identity)) {
 
 	res = resolve_identity(tkc, mod, identity);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     /* resolve any identity base loops within the identityQ */
@@ -2588,40 +2588,40 @@ static status_t
 	 identity = (ncx_identity_t *)dlq_nextEntry(identity)) {
 
 	res = check_identity_loop(tkc, mod, identity, identity);
-	CHK_EXIT;
+	CHK_EXIT(res, retres);
     }
 
     /* Validate any module-level typedefs */
     res = yang_typ_resolve_typedefs(tkc, mod, &mod->typeQ, NULL);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* Validate any module-level groupings */
     res = yang_grp_resolve_groupings(tkc, mod, &mod->groupingQ, NULL);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* Validate any module-level data-def-stmts */
     res = yang_obj_resolve_datadefs(tkc, mod, &mod->datadefQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* Expand and validate any uses-stmts within module-level groupings */
     res = yang_grp_resolve_complete(tkc, mod, &mod->groupingQ, NULL);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* Expand and validate any uses-stmts within module-level datadefs */
     res = yang_obj_resolve_uses(tkc, mod, &mod->datadefQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* Expand and validate any augment-stmts within module-level datadefs */
     res = yang_obj_resolve_augments(tkc, mod, &mod->datadefQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* One final check for grouping integrity */
     res = yang_grp_resolve_final(tkc, mod, &mod->groupingQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* One final check for object integrity */
     res = yang_obj_resolve_final(tkc, mod, &mod->datadefQ);
-    CHK_EXIT;
+    CHK_EXIT(res, retres);
 
     /* Validate all the XPath expressions within all cooked objects */
     res = yang_obj_resolve_xpath(tkc, mod, &mod->datadefQ);

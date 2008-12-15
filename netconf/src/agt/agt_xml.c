@@ -723,12 +723,13 @@ status_t
 				     NCX_LAYER_NONE, NULL);
     if (res == NO_ERR) {
 	res = xml_endnode_match(startnode, &node);
-	xml_clean_node(&node);
 	if (res == NO_ERR) {
+	    xml_clean_node(&node);
 	    return NO_ERR;
 	}
     }
 
+    xml_clean_node(&node);
     if (justone) {
 	return NO_ERR;
     }

@@ -50,8 +50,16 @@ date         init     comment
 #include  "log.h"
 #endif
 
+#ifndef _H_ncx
+#include  "ncx.h"
+#endif
+
 #ifndef _H_ncxconst
 #include  "ncxconst.h"
+#endif
+
+#ifndef _H_ncxtypes
+#include  "ncxtypes.h"
 #endif
 
 #ifndef _H_status
@@ -68,6 +76,10 @@ date         init     comment
 
 #ifndef _H_xml_val
 #include  "xml_val.h"
+#endif
+
+#ifndef _H_yangconst
+#include  "yangconst.h"
 #endif
 
 /********************************************************************
@@ -113,6 +125,34 @@ static cap_stdrec_t stdcaps[] =
 
 
 /********************************************************************
+* FUNCTION new_cap
+*
+* Malloc and init a new cap_rec_t struct
+*
+* RETURNS:
+*    malloced cap rec or NULL if error
+*********************************************************************/
+static cap_rec_t *
+    new_cap (void)
+{
+
+    cap_rec_t  *cap;
+
+    cap = m__getObj(cap_rec_t);
+    if (!cap) {
+        return NULL;
+    }
+    memset(cap, 0x0, sizeof(cap_rec_t));
+
+    ncx_init_list(&cap->cap_feature_list, NCX_BT_STRING);
+    ncx_init_list(&cap->cap_deviation_list, NCX_BT_STRING);
+
+    return cap;
+
+}  /* new_cap */
+
+
+/********************************************************************
 * FUNCTION free_cap
 *
 * Clean and free the fields in a pre-allocated cap_rec_t struct
@@ -128,12 +168,247 @@ static void
     if (cap->cap_uri) {
 	m__free(cap->cap_uri);
     }
-    if (cap->cap_mod_malloc) {
-	m__free(cap->cap_mod_malloc);
+    if (cap->cap_module) {
+	m__free(cap->cap_module);
     }
+    if (cap->cap_revision) {
+	m__free(cap->cap_revision);
+    }
+
+    ncx_clean_list(&cap->cap_feature_list);
+    ncx_clean_list(&cap->cap_deviation_list);
+
     m__free(cap);
 
 }  /* free_cap */
+
+
+/********************************************************************
+* FUNCTION get_features_len
+*
+* Get the name length of each enabled feature
+*
+* INPUTS:
+*    mod == original module
+*    feature == feature found
+*    cookie == original cookie
+*
+* RETURNS:
+*    TRUE if processing should continue, FALSE if done
+*********************************************************************/
+static boolean
+    get_features_len (const ncx_module_t *mod,
+		     const ncx_feature_t *feature,
+		     void *cookie)
+{
+    uint32  *count;
+
+    (void)mod;
+    count = (uint32 *)cookie;
+    *count += xml_strlen(feature->name);
+    return TRUE;
+
+}  /* get_features_len */
+
+
+/********************************************************************
+* FUNCTION add_features
+*
+* Add a name, string for each enabled feature
+*
+* INPUTS:
+*    mod == original module
+*    feature == feature found
+*    cookie == original cookie
+*
+* RETURNS:
+*    TRUE if processing should continue, FALSE if done
+*********************************************************************/
+static boolean
+    add_features (const ncx_module_t *mod,
+		  const ncx_feature_t *feature,
+		  void *cookie)
+{
+    xmlChar  **str;
+
+    (void)mod;
+    str = (xmlChar **)cookie;
+    *str += xml_strcpy(*str, feature->name);
+    **str++ = ',';
+    return TRUE;
+
+}  /* add_features */
+
+
+/********************************************************************
+* FUNCTION make_mod_urn
+*
+* Construct and malloc a module capability URN string
+*
+* From yang-02: section 5.4:
+
+   The namespace URI is advertised as a capability in the NETCONF
+   <hello> message to indicate support for the YANG module by a NETCONF
+   server.  The capability URI advertised MUST be on the form:
+
+     capability-string   = namespace-uri [ parameter-list ]
+     parameter-list      = "?" parameter *( "&" parameter )
+     parameter           = revision-parameter /
+                           module-parameter /
+                           feature-parameter /
+                           deviation-parameter
+     revision-parameter  = "revision=" revision-number
+     module-parameter    = "module=" module-name
+     feature-parameter   = "features=" feature *( "," feature )
+     deviation-parameter = "deviations=" deviation *( "," deviation )
+
+   Where "revision-number" is the revision of the module (see
+   Section 7.1.9) that the server implements, "module-name" is the name
+   of module as it appears in the "module" statement (see Section 7.1),
+   "namespace-uri" is the namespace for the module as it appears in the
+   "namespace" statement, "feature" is the name of an optional feature
+   implemented by the device (see Section 7.18.1), and "deviation" is
+   the name of a module defining device deviations (see Section 7.18.3).
+
+* INPUTS:
+*    mod == module to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static xmlChar *
+    make_mod_urn (const ncx_module_t *mod)
+{
+    xmlChar              *str, *p;
+    uint32                len, feature_count;
+
+    /* get the length of the string needed by doing a dry run */
+    len = xml_strlen(mod->ns);
+    len++;   /* '?' char */
+
+    len += xml_strlen(CAP_MODULE_EQ);
+    len += xml_strlen(mod->name);
+    len++;   /* & char */
+
+    len += xml_strlen(CAP_REVISION_EQ);
+    len += xml_strlen(mod->version);
+
+    feature_count = ncx_feature_count(mod, TRUE);
+
+    if (feature_count) {
+	len++;   /* & char */
+	len += xml_strlen(CAP_FEATURES_EQ);
+	len += (feature_count-1);   /* all the commas */
+
+	/* add in all the enabled features length */
+	ncx_for_all_features(mod, get_features_len, &len, TRUE);
+    }
+
+    /*** TBD: Add deviations ***/
+
+
+    /* get a string to hold the result */
+    str = m__getMem(len+1);
+    if (!str) {
+	return NULL;
+    }
+
+    /* repeat the previous steps for real */
+    p = str;
+    p += xml_strcpy(p, mod->ns);
+    *p++ = '?';
+
+    p += xml_strcpy(p, CAP_MODULE_EQ);
+    p += xml_strcpy(p, mod->name);
+    *p++ = '&';
+
+    p += xml_strcpy(p, CAP_REVISION_EQ);
+    p += xml_strcpy(p, mod->version);
+
+    feature_count = ncx_feature_count(mod, TRUE);
+
+    if (feature_count) {
+	*p++ = '&';
+	p += xml_strcpy(p, CAP_FEATURES_EQ);
+
+	/* add in all the enabled 'feature-name,' strings */
+	ncx_for_all_features(mod, add_features, &p, TRUE);
+
+	/* the last entry will have a comma that has to be removed */
+	*--p = 0;
+    }
+
+    /*** TBD: Add deviations ***/
+
+    return str;
+
+}  /* make_mod_urn */ 
+
+
+/********************************************************************
+* FUNCTION parse_uri_parm
+*
+* Parse a read-only substring as a foo=bar parameter
+* Setup the next string after that is done
+*
+* INPUTS:
+*    parmname = start of the sub-string, stopped on 
+*               what should be the start of a parameter
+*    parmnamelen == address of parm name return length
+*    parmval == address of return parmval pointer
+*    parmvallen == address of return parmval length
+*    nextparmname == address of return pointer to next parmname
+*
+* RETURNS:
+*    status, NO_ERR if valid parm-pair parsed
+*********************************************************************/
+static status_t 
+    parse_uri_parm (const xmlChar *parmname,
+		    uint32 *parmnamelen,
+		    const xmlChar **parmval,
+		    uint32 *parmvallen,
+		    const xmlChar **nextparmname)
+{
+    const xmlChar  *str, *equal;
+
+    *parmnamelen = 0;
+    *parmval = NULL;
+    *parmvallen = 0;
+    *nextparmname = NULL;
+
+    /* find the equals sign after the parameter name */
+    equal = parmname;
+    while (*equal && *equal != '=') {
+	equal++;
+    }
+    if (!*equal || equal == parmname) {
+	/* error: skip to next parm or EOS */
+	while (*equal && *equal != '&') {
+	    equal++;
+	}
+	if (*equal) {
+	    /* stopped on ampersand */
+	    *nextparmname = ++equal;
+	}
+	return ERR_NCX_INVALID_VALUE;
+    }
+
+    /* OK: got an equals sign after some non-zero string */
+    *parmnamelen = (uint32)(equal - parmname);
+    *parmval = str = equal+1;
+
+    while (*str && *str != '&') {
+	str++;
+    }
+
+    *parmvallen = (uint32)(str - *parmval);
+    if (*str) {
+	/* stopped on ampersand so another param is expected */
+	*nextparmname = str+1;
+    }
+    return NO_ERR;
+
+}  /* parse_uri_parm */
 
 
 /************** E X T E R N A L   F U N C T I O N S ************/
@@ -422,8 +697,14 @@ status_t
 			   const xmlChar *uri)
 {
     cap_rec_t     *cap;
-    const xmlChar *p;
-    uint32         len;
+    const xmlChar *qmark, *parmname, *parmval, *nextparmname;
+    const xmlChar *module, *revision, *features, *deviations;
+    xmlChar       *liststr, *commastr;
+    uint32         parmnamelen, parmvallen, baselen, i;
+    uint32         modulelen, revisionlen, featureslen, deviationslen;
+    boolean        curmod, currev, curfeat, curdev, done;
+    status_t       res;
+    xmlns_id_t     foundnsid;
 
 #ifdef DEBUG
     if (!caplist || !uri) {
@@ -431,50 +712,206 @@ status_t
     }
 #endif
 
-    /* get capability prefix string length */
-    len = xml_strlen(CAP_MODURN);
-
-    /* the base capability is a different form than the rest */
-    if (xml_strncmp(uri, CAP_MODURN, len)) {
+    /* look for the end of the URI, for any parameters */
+    qmark = uri;
+    while (*qmark && *qmark != '?') {
+	qmark++;
+    }
+    if (!*qmark) {
 	return ERR_NCX_SKIPPED;
     }
 
-    cap = m__getObj(cap_rec_t);
-    if (cap == NULL) {
+    baselen = (uint32)(qmark-uri);
+
+    module = NULL;
+    revision = NULL;
+    features = NULL;
+    deviations = NULL;
+    modulelen = 0;
+    revisionlen = 0;
+    deviationslen = 0;
+    featureslen = 0;
+    curmod = FALSE;
+    currev = FALSE;
+    curfeat = FALSE;
+    curdev = FALSE;
+
+    /* lookup this namespace to see if it is already loaded */
+    foundnsid = xmlns_find_ns_by_name_str(uri, baselen);
+
+    /* setup the start of the parameter name for each loop iteration */
+    parmname = qmark + 1;
+    parmval = NULL;
+    nextparmname = parmname;
+
+    done = FALSE;
+    while (!done) {
+	if (nextparmname) {
+	    parmname = nextparmname;
+	} else {
+	    done = TRUE;
+	    continue;
+	}
+
+	res = parse_uri_parm(parmname, &parmnamelen, &parmval, &parmvallen, &nextparmname);
+	if (res != NO_ERR) {
+	    log_warn("\nWarning: skipping invalid parameter syntax (%s) "
+		     "in capability URI '%s'", get_error_string(res), uri);
+	    if (NEED_EXIT(res)) {
+		done = TRUE;
+	    }
+	    continue;
+	}
+
+	/* check that the parameter name matches one of the expected names */
+	if (!xml_strncmp(parmname, YANG_K_MODULE, xml_strlen(YANG_K_MODULE))) {
+	    if (curmod) {
+		log_warn("\nWarning: skipping duplicate 'module' parameter "
+			 "in capability URI '%s'", uri);
+	    } else {
+		curmod = TRUE;
+		module = parmval;
+		modulelen = parmvallen;
+	    }
+	} else if (!xml_strncmp(parmname, YANG_K_REVISION, xml_strlen(YANG_K_REVISION))) {
+	    if (currev) {
+		log_warn("\nWarning: skipping duplicate 'revision' parameter "
+			 "in capability URI '%s'", uri);
+	    } else {
+		currev = TRUE;
+		revision = parmval;
+		revisionlen = parmvallen;
+	    }
+	} else if (!xml_strncmp(parmname, YANG_K_FEATURES, xml_strlen(YANG_K_FEATURES))) {
+	    if (curfeat) {
+		log_warn("\nWarning: skipping duplicate 'features' parameter "
+			 "in capability URI '%s'", uri);
+	    } else {
+		curfeat = TRUE;
+		features = parmval;
+		featureslen = parmvallen;
+	    }
+	} else if (!xml_strncmp(parmname, YANG_K_DEVIATIONS, xml_strlen(YANG_K_DEVIATIONS))) {
+	    if (curdev) {
+		log_warn("\nWarning: skipping duplicate 'deviations' parameter "
+			 "in capability URI '%s'", uri);
+	    } else {
+		curdev = TRUE;
+		deviations = parmval;
+		deviationslen = parmvallen;
+	    }
+	} else if (LOGWARN) {
+	    /* skip over this unknown parameter */
+	    log_warn("\nWarning: skipping unknown parameter '");
+	    for (i=0; i<parmnamelen; i++) {
+		log_warn("%c", parmname[i]);
+	    }
+	    log_warn("=");
+	    for (i=0; i<parmvallen; i++) {
+		log_warn("%c", parmval[i]);
+	    }
+	    log_warn("' in capability URI '%s'", uri);
+	}
+    }
+
+    if (NEED_EXIT(res)) {
+	return res;
+    }
+
+    if (!module) {
+	if (revision || features || deviations) {
+	    log_warn("\nWarning: 'module' parameter missing from possible "
+		     "capability URI '%s'", uri);
+	}
+	return ERR_NCX_SKIPPED;
+    }
+
+    /* assume this is a module capability URI
+     * sp malloc a new capability record and save it
+     */
+    cap = new_cap();
+    if (!cap) {
         return ERR_INTERNAL_MEM;
     }
-    memset(cap, 0x0, sizeof(cap_rec_t));
-
-    cap->cap_subj = CAP_SUBJTYP_DM;
     cap->cap_uri = xml_strdup(uri);
     if (!cap->cap_uri) {
 	free_cap(cap);
         return ERR_INTERNAL_MEM;
     }
 
-    /* parse out the module name
-     * get the 'p' var to point at the start of the owner
-     */
-    p = cap->cap_uri;
-    p += len;
-    cap->cap_mod = p;
-
-    /* find the end of the module name */
-    while (*p && *p != CAP_SEP_CH) {
-	p++;
+    cap->cap_module = xml_strndup(module, modulelen);
+    if (!cap->cap_module) {
+	free_cap(cap);
+        return ERR_INTERNAL_MEM;
     }
 
-    /* set the length and malloc flag */
-    cap->cap_mod_len = (uint32)(p - cap->cap_mod);
-    cap->cap_mod_malloc = NULL;
-
-    /* check if stopped on a separator char,
-     * if so, the version is expected as the last component
-     */
-    if (*p) {
-	xml_strncpy(cap->cap_ver, ++p, CAP_VERSION_LEN);
+    /* check wrong module namespace base URI */
+    if (foundnsid) {
+	parmname = xmlns_get_module(foundnsid);
+	if (xml_strcmp(parmname, cap->cap_module)) {
+	    log_warn("\nWarning: capability base URI mismatch, "
+		     "got '%s' not '%s''", 
+		     cap->cap_module,  parmname);
+	}
     }
 
+    if (revision) {
+	cap->cap_revision = xml_strndup(revision, revisionlen);
+	if (!cap->cap_revision) {
+	    free_cap(cap);
+	    return ERR_INTERNAL_MEM;
+	}
+    } else {
+	log_warn("\nWarning: 'revision' parameter missing from "
+		 "capability URI '%s'", uri);
+    }
+
+    if (features) {
+	liststr = xml_strndup(features, featureslen);
+	if (!liststr) {
+	    free_cap(cap);
+	    return ERR_INTERNAL_MEM;
+	}
+
+	commastr = liststr;
+	while (*commastr) {
+	    if (*commastr == ',') {
+		*commastr = ' ';
+	    }
+	}
+
+	res = ncx_set_list(NCX_BT_STRING, liststr, &cap->cap_feature_list);
+	m__free(liststr);
+	if (res != NO_ERR) {
+	    free_cap(cap);
+	    return res;
+	}
+    }
+
+    if (deviations) {
+	liststr = xml_strndup(deviations, deviationslen);
+	if (!liststr) {
+	    free_cap(cap);
+	    return ERR_INTERNAL_MEM;
+	}
+
+	commastr = liststr;
+	while (*commastr) {
+	    if (*commastr == ',') {
+		*commastr = ' ';
+	    }
+	}
+
+	res = ncx_set_list(NCX_BT_STRING, liststr, &cap->cap_deviation_list);
+	m__free(liststr);
+	if (res != NO_ERR) {
+	    free_cap(cap);
+	    return res;
+	}
+    }
+
+    cap->cap_subject = CAP_SUBJTYP_DM;
+    cap->cap_baselen = baselen;
     dlq_enque(cap, &caplist->capQ);
     return NO_ERR;
 
@@ -504,76 +941,12 @@ status_t
 
     m__setbit(caplist->cap_std, stdcaps[CAP_STDID_URL].cap_bitnum);
     caplist->cap_protos = xml_strdup(proto_list);
-    if (caplist->cap_protos==NULL) {
+    if (!caplist->cap_protos) {
         return ERR_INTERNAL_MEM;
     }
     return NO_ERR;
 
 } /* cap_add_url */
-
-
-/********************************************************************
-* FUNCTION cap_add_mod
-*
-* Add a module capability to the list
-*
-* INPUTS:
-*    caplist == capability list that will contain the module caps
-*    modname == module name
-*    modversion == module version string (MAY BE NULL)
-*
-* RETURNS:
-*    status
-*********************************************************************/
-status_t 
-    cap_add_mod (cap_list_t *caplist, 
-		 const xmlChar *modname,
-		 const xmlChar *modversion)
-{
-    xmlChar      *str;
-    cap_rec_t    *cap;
-
-#ifdef DEBUG
-    if (!caplist || !modname) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    /* construct the module URN string */
-    str = cap_make_mod_urn(modname, modversion);
-    if (!str) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* malloc a new capability record */
-    cap = m__getObj(cap_rec_t);
-    if (cap == NULL) {
-	m__free(str);
-        return ERR_INTERNAL_MEM;
-    }
-    memset(cap, 0x0, sizeof(cap_rec_t));
-
-    /* fill in the cap_rec_t struct */
-    cap->cap_subj = CAP_SUBJTYP_DM;
-    cap->cap_uri = str;
-
-    cap->cap_mod_malloc = xml_strdup(modname);
-    if (!cap->cap_mod_malloc) {
-	free_cap(cap);
-	return ERR_INTERNAL_MEM;
-    } else {
-	cap->cap_mod = cap->cap_mod_malloc;
-	cap->cap_mod_len = xml_strlen(cap->cap_mod);
-    }
-
-    if (modversion) {
-	xml_strncpy(cap->cap_ver, modversion, CAP_VERSION_LEN);
-    }
-
-    dlq_enque(cap, &caplist->capQ);
-    return NO_ERR;
-
-}  /* cap_add_mod */ 
 
 
 /********************************************************************
@@ -600,15 +973,13 @@ status_t
     }
 #endif
 
-    /* malloc a new capability record */
-    cap = m__getObj(cap_rec_t);
-    if (cap == NULL) {
-        return ERR_INTERNAL_MEM;
+    cap = new_cap();
+    if (!cap) {
+	return ERR_INTERNAL_MEM;
     }
-    memset(cap, 0x0, sizeof(cap_rec_t));
 
     /* fill in the cap_rec_t struct */
-    cap->cap_subj = CAP_SUBJTYP_OTHER;
+    cap->cap_subject = CAP_SUBJTYP_OTHER;
     cap->cap_uri = xml_strdup(uristr);
     if (!cap->cap_uri) {
 	free_cap(cap);
@@ -618,7 +989,7 @@ status_t
     dlq_enque(cap, &caplist->capQ);
     return NO_ERR;
 
-}  /* cap_add_mod */ 
+}  /* cap_add_ent */ 
 
 
 /********************************************************************
@@ -628,34 +999,35 @@ status_t
 *
 * INPUTS:
 *    caplist == capability list that will contain the enterprise cap 
-*    modname == module name
-*    modversion == module version string
+*    mod == module to add
 *
 * RETURNS:
 *    status
 *********************************************************************/
 status_t 
     cap_add_modval (val_value_t *caplist, 
-		    const xmlChar *modname,
-		    const xmlChar *modversion)
+		    const ncx_module_t *mod)
 {
     xmlChar      *str;
     val_value_t  *capval;
 
 #ifdef DEBUG
-    if (!caplist || !modname) {
+    if (!caplist || !mod) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
+    if (!mod->name || !mod->ns || !mod->version || !mod->ismod) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }	
 #endif
 
     /* construct the module URN string */
-    str = cap_make_mod_urn(modname, modversion);
+    str = make_mod_urn(mod);
     if (!str) {
 	return ERR_INTERNAL_MEM;
     }
 
     /* make the capability element */
-    capval = xml_val_new_cstring(NCX_EL_CAPABILITY,
+    capval = xml_val_new_string(NCX_EL_CAPABILITY,
 				 xmlns_nc_id(), str);
     if (!capval) {
 	m__free(str);
@@ -664,64 +1036,12 @@ status_t
 
     val_add_child(capval, caplist);
 
-    m__free(str);
-
     return NO_ERR;
 
 }  /* cap_add_modval */ 
 
 
-/********************************************************************
-* FUNCTION cap_make_mod_urn
-*
-* Construct and malloc a module capability URN string
-*
-* INPUTS:
-*    caplist == capability list that will contain the module caps
-*    modname == module name
-*    modversion == module version string (MAY BE NULL)
-*
-* RETURNS:
-*    status
-*********************************************************************/
-xmlChar *
-    cap_make_mod_urn (const xmlChar *modname,
-		      const xmlChar *modversion)
-{
-    uint32        len;
-    xmlChar      *str, *p;
-
-#ifdef DEBUG
-    if (!modname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    /* construct the module URN string */
-    if (modversion) {
-	len = xml_strlen(CAP_MODURN) + 
-	    xml_strlen(modname) + 1 + xml_strlen(modversion);
-    } else {
-	len = xml_strlen(CAP_MODURN) + xml_strlen(modname);
-    }
-    str = m__getMem(len+1);
-    if (!str) {
-	return NULL;
-    }
-    p = str;
-    p += xml_strcpy(p, CAP_MODURN);
-    p += xml_strcpy(p, modname);
-    if (modversion) {
-	*p++ = CAP_SEP_CH;
-	xml_strcpy(p, modversion);
-    }
-
-    return str;
-
-}  /* cap_make_mod_urn */ 
-
-
+#ifdef ONLY_USED_BY_AGT_CAP_DELETED
 /********************************************************************
 * FUNCTION cap_make_mod_url
 *
@@ -764,6 +1084,7 @@ xmlChar *
     return str;
 
 }  /* cap_make_mod_url */ 
+#endif
 
 
 /********************************************************************
@@ -924,15 +1245,12 @@ void
 *
 * INPUTS:
 *    caplist == capability list to print
-*    checkdb == TRUE if the local DB should be checked
-*               and any missing modules or difference in 
-*               versions is reported
 *********************************************************************/
 void
-    cap_dump_modcaps (const cap_list_t *caplist,
-		      boolean checkdb)
+    cap_dump_modcaps (const cap_list_t *caplist)
 {
     const cap_rec_t *cap;
+    const ncx_lmem_t *lmem;
     boolean anycaps;
 
 #ifdef DEBUG
@@ -948,21 +1266,35 @@ void
 	 cap != NULL;
 	 cap = (cap_rec_t *)dlq_nextEntry(cap)) {
 
-	if (cap->cap_subj != CAP_SUBJTYP_DM) {
+	if (cap->cap_subject != CAP_SUBJTYP_DM) {
 	    continue;
 	}
 
 	anycaps = TRUE;
-	
-	log_write("\n   ");
-	if (cap->cap_mod) {
-	    log_write("%s", cap->cap_mod);
+	if (cap->cap_revision) {
+	    log_write("\n   %s/%s", cap->cap_module, cap->cap_revision);
 	} else {
-	    log_write("%s", cap->cap_uri);
+	    log_write("\n   %s", cap->cap_module);
+	}
+	
+	if (!dlq_empty(&cap->cap_feature_list.memQ)) {
+	    log_write("\n   Features: ");
+	    for (lmem = (ncx_lmem_t *)dlq_firstEntry(&cap->cap_feature_list.memQ);
+		 lmem != NULL;
+		 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
+
+		log_write("\n       %s ", lmem->val.str);
+	    }
 	}
 
-	if (checkdb) {
-	    ;
+	if (!dlq_empty(&cap->cap_deviation_list.memQ)) {
+	    log_write("\n   Deviations: ");
+	    for (lmem = (ncx_lmem_t *)dlq_firstEntry(&cap->cap_deviation_list.memQ);
+		 lmem != NULL;
+		 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
+
+		log_write("\n       %s ", lmem->val.str);
+	    }
 	}
     }
 
@@ -971,6 +1303,47 @@ void
     }
 
 } /* cap_dump_modcaps */
+
+
+/********************************************************************
+* FUNCTION cap_dump_entcaps
+*
+* Printf the enterprise capabilities list
+*
+* INPUTS:
+*    caplist == capability list to print
+*
+*********************************************************************/
+void
+    cap_dump_entcaps (const cap_list_t *caplist)
+{
+    const cap_rec_t *cap;
+    boolean  anycaps;
+
+#ifdef DEBUG
+    if (!caplist) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    anycaps = FALSE;
+
+    for (cap = (cap_rec_t *)dlq_firstEntry(&caplist->capQ);
+	 cap != NULL;
+	 cap = (cap_rec_t *)dlq_nextEntry(cap)) {
+
+	if (cap->cap_subject != CAP_SUBJTYP_DM) {
+	    anycaps = TRUE;
+	    log_write("\n   %s", cap->cap_uri);
+	}
+    }
+
+    if (!anycaps) {
+	log_write("\n   None");
+    }
+
+} /* cap_dump_entcaps */
 
 
 /********************************************************************
@@ -1001,7 +1374,7 @@ const cap_rec_t *
 	 cap != NULL;
 	 cap = (cap_rec_t *)dlq_nextEntry(cap)) {
 
-	if (cap->cap_subj != CAP_SUBJTYP_DM) {
+	if (cap->cap_subject != CAP_SUBJTYP_DM) {
 	    continue;
 	}
 	return cap;
@@ -1039,7 +1412,7 @@ const cap_rec_t *
 	 cap != NULL;
 	 cap = (cap_rec_t *)dlq_nextEntry(cap)) {
 
-	if (cap->cap_subj != CAP_SUBJTYP_DM) {
+	if (cap->cap_subject != CAP_SUBJTYP_DM) {
 	    continue;
 	}
 	return cap;
@@ -1086,52 +1459,13 @@ void
     }
 #endif
 
-    *module = cap->cap_mod;
-    *modlen = cap->cap_mod_len;
-    *version = cap->cap_ver;
+    *module = cap->cap_module;
+    *modlen = xml_strlen(cap->cap_module);
+    *version = cap->cap_revision;
 
 } /* cap_split_modcap */
 
 
-/********************************************************************
-* FUNCTION cap_dump_entcaps
-*
-* Printf the enterprise capabilities list
-*
-* INPUTS:
-*    caplist == capability list to print
-*
-*********************************************************************/
-void
-    cap_dump_entcaps (const cap_list_t *caplist)
-{
-    const cap_rec_t *cap;
-    boolean  anycaps;
-
-#ifdef DEBUG
-    if (!caplist) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    anycaps = FALSE;
-
-    for (cap = (cap_rec_t *)dlq_firstEntry(&caplist->capQ);
-	 cap != NULL;
-	 cap = (cap_rec_t *)dlq_nextEntry(cap)) {
-
-	if (cap->cap_subj != CAP_SUBJTYP_DM) {
-	    anycaps = TRUE;
-	    log_write("\n   %s", cap->cap_uri);
-	}
-    }
-
-    if (!anycaps) {
-	log_write("\n   None");
-    }
-
-} /* cap_dump_entcaps */
 
 
 /* END file cap.c */

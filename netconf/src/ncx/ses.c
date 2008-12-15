@@ -882,7 +882,7 @@ int
     ses_msg_t   *msg;
     ses_msg_buff_t  *buff, *buff2;
     int          retlen;
-    boolean      done, first;
+    boolean      done;
 
     scb = (ses_cb_t *)context;
     if (scb->state >= SES_ST_SHUTDOWN_REQ) {
@@ -903,9 +903,6 @@ int
 	    buff->buffpos = 0;
 	    msg->curbuff = buff;
 	}
-	first = TRUE;
-    } else {
-	first = FALSE;
     }
 
     /* check current buffer end has been reached */
@@ -917,14 +914,6 @@ int
 	    buff->buffpos = 0;
 	    msg->curbuff = buff;
 	}
-    }
-
-    /* hack -- the xmlReader barfs unless the XML directive
-     * is present and also starts with a newline
-     */
-    if (first) {
-
-
     }
 
     /* start transferring bytes to the return buffer */

@@ -59,11 +59,13 @@ date	     init     comment
 #define YANG_K_DEFAULT           (const xmlChar *)"default"
 #define YANG_K_DESCRIPTION       (const xmlChar *)"description"
 #define YANG_K_DEVIATION         (const xmlChar *)"deviation"
+#define YANG_K_DEVIATIONS        (const xmlChar *)"deviations"
 #define YANG_K_ENUM              (const xmlChar *)"enum"
 #define YANG_K_ERROR_APP_TAG     (const xmlChar *)"error-app-tag"
 #define YANG_K_ERROR_MESSAGE     (const xmlChar *)"error-message"
 #define YANG_K_EXTENSION         (const xmlChar *)"extension"
 #define YANG_K_FEATURE           (const xmlChar *)"feature"
+#define YANG_K_FEATURES          (const xmlChar *)"features"
 #define YANG_K_FIRST             (const xmlChar *)"first"
 #define YANG_K_GROUPING          (const xmlChar *)"grouping"
 #define YANG_K_IDENTITY          (const xmlChar *)"identity"
@@ -124,7 +126,7 @@ date	     init     comment
 /* used in parser routines to decide if processing can continue
  * will exit the function if critical error or continue if not
  */
-#define CHK_EXIT \
+#define CHK_EXIT(res, retres)			\
     if (res != NO_ERR) { \
 	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) { \
 	    return res; \
@@ -137,7 +139,7 @@ date	     init     comment
  * does not return, just evaluates to TRUE if there is
  * a critical error and false if processing can continue
  */
-#define NEED_EXIT					\
+#define NEED_EXIT(res)					\
     ((res == NO_ERR) ? FALSE :				\
      (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) ?	\
      TRUE : FALSE)

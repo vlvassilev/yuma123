@@ -514,6 +514,17 @@ extern ncx_feature_t *
     ncx_find_feature_que (dlq_hdr_t *featureQ,
 			  const xmlChar *name);
 
+extern void
+    ncx_for_all_features (const ncx_module_t *mod,
+			  ncx_feature_cbfn_t  cbfn,
+			  void *cookie,
+			  boolean enabledonly);
+
+extern uint32
+    ncx_feature_count (const ncx_module_t *mod,
+		       boolean enabledonly);
+
+
 /********************** ncx_identity_t *********************/
 
 extern ncx_identity_t * 

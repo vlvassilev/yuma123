@@ -173,6 +173,8 @@ static status_t
 	if (res == ERR_NCX_SKIPPED) {
 	    res = cap_add_module_string(&mscb->caplist, VAL_STR(cap));
 	    if (res == ERR_NCX_SKIPPED) {
+		log_warn("\nWarning: received unknown capability '%s'",
+			 VAL_STR(cap));
 		res = cap_add_ent(&mscb->caplist, VAL_STR(cap));
 		if (res != NO_ERR) {
 		    return res;

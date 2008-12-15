@@ -415,11 +415,13 @@ status_t
 	return res;
     }
 
+#ifdef WILL_CHANGE_TO_STD_SDISC_MODULE
     /* load the agent schema discovery data model module */
     res = agt_cap_init();
     if (res != NO_ERR) {
 	return res;
     }
+#endif
     
     /*** ALL INITIAL YANG MODULES SHOULD BE LOADED AT THIS POINT ***/
     if (ncx_any_mod_errors()) {

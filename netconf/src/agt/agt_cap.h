@@ -43,9 +43,10 @@ date	     init     comment
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
-
+#ifdef WILL_CHANGE_TO_STD_SDISC_MODULE
 extern status_t
     agt_cap_init (void);
+#endif
 
 extern void 
     agt_cap_cleanup (void);
@@ -56,6 +57,9 @@ extern status_t
 
 extern status_t 
     agt_cap_set_modules (void);
+
+extern status_t 
+    agt_cap_add_module (const ncx_module_t *mod);
 
 extern void
     agt_cap_set_modcaps_parmset (void);

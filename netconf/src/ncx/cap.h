@@ -47,7 +47,7 @@ date             init     comment
 /* NETCONF Capability Identifier Base String */
 #define CAP_URN ((const xmlChar *)"urn:ietf:params:netconf:capability:")
 
-/* NCX Module Capability Identifier Base String */
+/* NCX Module Capability Identifier Base String !!! OBSOLETE !!! */
 #define CAP_MODURN ((const xmlChar *) \
 		    "http://netconfcentral.com/modules/")
 
@@ -83,6 +83,11 @@ date             init     comment
 #define CAP_NAME_URL           "url:1.0"
 #define CAP_NAME_XPATH         "xpath:1.0"
 
+/* some YANG capability details */
+#define CAP_REVISION_EQ        (const xmlChar *)"revision="
+#define CAP_MODULE_EQ          (const xmlChar *)"module="
+#define CAP_FEATURES_EQ        (const xmlChar *)"features="
+#define CAP_DEVIATIONS_EQ      (const xmlChar *)"deviations="
 
 /********************************************************************
 *                                                                   *
@@ -133,12 +138,13 @@ typedef struct cap_stdrec_t_ {
 /* queue of this structure for list of enterprise capabilities */
 typedef struct cap_rec_t_ {
     dlq_hdr_t      cap_qhdr;
-    cap_subjtyp_t  cap_subj;
+    cap_subjtyp_t  cap_subject;
     xmlChar       *cap_uri;
-    const xmlChar *cap_mod;      /* points inside cap_uri if used */
-    uint32         cap_mod_len;
-    xmlChar       *cap_mod_malloc;      /* malloced, <<-- cap_mod */
-    xmlChar        cap_ver[CAP_VERSION_LEN+1];
+    uint32         cap_baselen;
+    xmlChar       *cap_module;
+    xmlChar       *cap_revision;
+    ncx_list_t     cap_feature_list;
+    ncx_list_t     cap_deviation_list;
 } cap_rec_t;
 
 
@@ -188,11 +194,12 @@ extern status_t
     cap_add_url (cap_list_t *caplist, 
 		 const xmlChar *proto_list);
 
-
+#ifdef DO_NOT_NEED
 extern status_t 
     cap_add_mod (cap_list_t *caplist, 
 		 const xmlChar *modname,
 		 const xmlChar *modversion);
+#endif
 
 extern status_t 
     cap_add_ent (cap_list_t *caplist, 
@@ -201,16 +208,13 @@ extern status_t
 /* add a capability string for a data model module */
 extern status_t 
     cap_add_modval (val_value_t *caplist, 
-		    const xmlChar *modname,
-		    const xmlChar *modversion);
+		    const ncx_module_t *mod);
 
-extern xmlChar *
-    cap_make_mod_urn (const xmlChar *modname,
-		      const xmlChar *modversion);
 
+#ifdef ONLY_USED_BY_AGT_CAP_DELETED
 extern xmlChar *
     cap_make_mod_url (const cap_rec_t *caprec);
-
+#endif
 
 /* fast search of standard protocol capability set */
 extern boolean 
@@ -235,8 +239,11 @@ extern void
     cap_dump_stdcaps (const cap_list_t *caplist);
 
 extern void
-    cap_dump_modcaps (const cap_list_t *caplist,
-		      boolean checkdb);
+    cap_dump_modcaps (const cap_list_t *caplist);
+
+extern void
+    cap_dump_entcaps (const cap_list_t *caplist);
+
 extern const cap_rec_t *
     cap_first_modcap (const cap_list_t *caplist);
 
@@ -249,7 +256,5 @@ extern void
 		      uint32 *modlen,
 		      const xmlChar **version);
 
-extern void
-    cap_dump_entcaps (const cap_list_t *caplist);
 
 #endif            /* _H_cap */

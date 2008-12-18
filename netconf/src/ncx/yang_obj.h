@@ -97,6 +97,10 @@ extern status_t
 			      ncx_module_t  *mod);
 
 extern status_t 
+    yang_obj_consume_deviation (tk_chain_t *tkc,
+				ncx_module_t  *mod);
+
+extern status_t 
     yang_obj_resolve_datadefs (tk_chain_t *tkc,
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *datadefQ);

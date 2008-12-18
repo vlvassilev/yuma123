@@ -578,6 +578,8 @@ const char *
 	return "invalid augment target";
     case ERR_NCX_DUP_REFINE_STMT:
 	return "duplicate refine sub-clause";
+    case ERR_NCX_INVALID_DEV_STMT:
+	return "invalid deviate sub-clause";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

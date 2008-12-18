@@ -6307,8 +6307,8 @@ static void
 			 &version);
 
 	if (!module || !modlen || !version) {
-	    log_warning("\nWarning: skipping invalid module capability "
-			"for URI '%s'", cap->cap_uri);
+	    log_warn("\nWarning: skipping invalid module capability "
+		     "for URI '%s'", cap->cap_uri);
 	    cap = cap_next_modcap(cap);
 	    continue;
 	}

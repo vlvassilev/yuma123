@@ -437,9 +437,13 @@ static status_t
 	curobj = ncx_locate_modqual_import(imp->module, name,
 					   mod->diffmode, &dtyp);
     } else if (*target == '/') {
-	curobj = obj_find_template_top(mod, mod->name, name);
+	curobj = obj_find_template_top(mod,
+				       ncx_get_modname(mod),
+				       name);
     } else {
-	curobj = obj_find_template(datadefQ, mod->name, name);
+	curobj = obj_find_template(datadefQ, 
+				   ncx_get_modname(mod), 
+				   name);
     }
 
     if (!curobj) {

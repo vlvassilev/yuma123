@@ -558,6 +558,7 @@ typedef struct ncx_module_t_ {
     dlq_hdr_t         groupingQ;      /* Q of grp_template_t */
     dlq_hdr_t         datadefQ;       /* Q of obj_template_t */
     dlq_hdr_t         extensionQ;     /* Q of ext_template_t */
+    dlq_hdr_t         deviationQ;    /* Q of obj_deviation_t */
     dlq_hdr_t         featureQ;        /* Q of ncx_feature_t */
     dlq_hdr_t         identityQ;      /* Q of ncx_identity_t */
     dlq_hdr_t         appinfoQ;        /* Q of ncx_appinfo_t */

@@ -448,6 +448,7 @@ static rpc_err_t
     case ERR_NCX_USING_OBSOLETE:
     case ERR_NCX_INVALID_AUGTARGET:
     case ERR_NCX_DUP_REFINE_STMT:
+    case ERR_NCX_INVALID_DEV_STMT:
 	return RPC_ERR_OPERATION_FAILED;
 	
     /* user warnings start at 400 */

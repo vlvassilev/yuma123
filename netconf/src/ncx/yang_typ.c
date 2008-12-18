@@ -3509,7 +3509,7 @@ status_t
 	    if (typdone) {
 		retres = ERR_NCX_ENTRY_EXISTS;
 		typeok = FALSE;
-		log_error("\nError: type clause already entered");
+		log_error("\nError: type-stmt already entered");
 		ncx_print_errormsg(tkc, mod, res);
 		typ_clean_typdef(&typ->typdef);
 	    }

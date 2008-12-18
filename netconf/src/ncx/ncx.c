@@ -681,6 +681,8 @@ static void
     /* clear the extension Que */
     ext_clean_extensionQ(&mod->extensionQ);
 
+    obj_clean_deviationQ(&mod->deviationQ);
+
     ncx_clean_appinfoQ(&mod->appinfoQ);
 
     ncx_clean_typnameQ(&mod->typnameQ);
@@ -1029,6 +1031,7 @@ ncx_module_t *
     dlq_createSQue(&mod->groupingQ);
     dlq_createSQue(&mod->datadefQ);
     dlq_createSQue(&mod->extensionQ);
+    dlq_createSQue(&mod->deviationQ);
     dlq_createSQue(&mod->appinfoQ);
     dlq_createSQue(&mod->typnameQ);
     dlq_createSQue(&mod->saveimpQ);

@@ -192,7 +192,7 @@ date         init     comment
 *********************************************************************/
 
 #ifdef DEBUG
-/* #define YANG_OBJ_DEBUG 1 */
+#define YANG_OBJ_DEBUG 1
 #endif
 
 
@@ -211,10 +211,32 @@ date         init     comment
  * continues in order to validate as much of the input
  * module as possible
  */
-#define CHK_OBJ_EXIT(res, retres)			  \
+#define CHK_OBJ_EXIT(obj, res, retres)			  \
     if (res != NO_ERR) {				  \
 	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) { \
 	    obj_free_template(obj);			  \
+	    return res;					  \
+	} else {					  \
+	    retres = res;				  \
+	}						  \
+    }
+
+
+#define CHK_DEV_EXIT(dev, res, retres)			  \
+    if (res != NO_ERR) {				  \
+	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) { \
+	    obj_free_deviation(dev);			  \
+	    return res;					  \
+	} else {					  \
+	    retres = res;				  \
+	}						  \
+    }
+
+
+#define CHK_DEVI_EXIT(devi, res, retres)		  \
+    if (res != NO_ERR) {				  \
+	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) { \
+	    obj_free_deviate(devi);			  \
 	    return res;					  \
 	} else {					  \
 	    retres = res;				  \
@@ -254,6 +276,12 @@ static status_t
 		     dlq_hdr_t *que,
 		     obj_template_t *parent,
 		     grp_template_t *grp);
+
+static status_t 
+    expand_augment (tk_chain_t *tkc,
+		    ncx_module_t  *mod,
+		    obj_template_t *obj,
+		    dlq_hdr_t *datadefQ);
 
 /*************    P A R S E   F U N C T I O N S    *************/
 
@@ -497,10 +525,10 @@ static status_t
 
     /* Get the mandatory anyxml name */
     res = yang_consume_id_string(tkc, mod, &leaf->name);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* get the anyxml statements and any appinfo extensions */
     while (!done) {
@@ -526,7 +554,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -576,7 +604,7 @@ static status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -663,10 +691,10 @@ static status_t
 	
     /* Get the mandatory container name */
     res = yang_consume_id_string(tkc, mod, &con->name);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -692,7 +720,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -746,7 +774,7 @@ static status_t
 	    res = yang_obj_consume_datadef(tkc, mod,
 					   con->datadefQ, obj);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -838,11 +866,11 @@ static status_t
 
     /* Get the mandatory leaf name */
     res = yang_consume_id_string(tkc, mod, &leaf->name);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* Get the mandatory left brace */
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* get the leaf statements and any appinfo extensions */
     while (!done) {
@@ -868,7 +896,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -946,7 +974,7 @@ static status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* check mandatory params */
@@ -1048,11 +1076,11 @@ static status_t
 
     /* Get the mandatory leaf-list name */
     res = yang_consume_id_string(tkc, mod, &llist->name);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* Get the mandatory left brace */
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* get the leaf-list statements and any appinfo extensions */
     while (!done) {
@@ -1077,7 +1105,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1153,7 +1181,7 @@ static status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* check mandatory params */
@@ -1255,11 +1283,11 @@ static status_t
 
     /* Get the mandatory list name */
     res = yang_consume_id_string(tkc, mod, &list->name);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* Get the mandatory left brace */
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* get the list statements and any appinfo extensions */
     while (!done) {
@@ -1285,7 +1313,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1377,7 +1405,7 @@ static status_t
 	    res = yang_obj_consume_datadef(tkc, mod,
 					   list->datadefQ, obj);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     if (!list->keystr && (obj->flags & OBJ_FL_CONFIG)) {
@@ -1481,16 +1509,16 @@ static status_t
     /* Get the mandatory case name */
     if (withcase) {
 	res = yang_consume_id_string(tkc, mod, &cas->name);
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
 
 	res = consume_semi_lbrace(tkc, mod, obj, &done);
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     } else {
 	/* shoarthand version, just 1 data-def-stmt per case */
 	anydone = TRUE;
 	res = consume_case_datadef(tkc, mod,
 				   cas->datadefQ, obj);
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
 	done = TRUE;
     }
 
@@ -1517,7 +1545,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1550,7 +1578,7 @@ static status_t
 	    res = consume_case_datadef(tkc, mod,
 				       cas->datadefQ, obj);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* if shorthand version, copy leaf name to case name */
@@ -1708,10 +1736,10 @@ static status_t
 
     /* Get the mandatory choice name */
     res = yang_consume_id_string(tkc, mod, &choic->name);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* get the sub-section statements and any appinfo extensions */
     while (!done) {
@@ -1737,7 +1765,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -1802,7 +1830,7 @@ static status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -1950,10 +1978,10 @@ static status_t
 
     /* Get the mandatory refine target */
     res = yang_consume_string(tkc, mod, &refine->target);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -1979,7 +2007,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -2046,7 +2074,7 @@ static status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -2137,18 +2165,18 @@ static status_t
     res = yang_consume_pid_string(tkc, mod,
 				  &uses->prefix,
 				  &uses->name);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* attempt to find grouping only if it is from another module */
     if (uses->prefix && xml_strcmp(uses->prefix, mod->prefix)) {
 	res = yang_find_imp_grouping(tkc, mod, uses->prefix,
 				     uses->name, obj->tk, &impgrp);
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
 	uses->grp = impgrp;
     }
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     expstr = "uses sub-statement";
 
@@ -2175,7 +2203,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -2213,7 +2241,7 @@ static status_t
 	   res = ERR_NCX_WRONG_TKVAL;
 	   ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -2320,7 +2348,7 @@ static status_t
 
     /* Get the starting left brace for the sub-clauses */
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -2345,7 +2373,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -2368,7 +2396,7 @@ static status_t
 	    res = yang_obj_consume_datadef(tkc, mod,
 					   &rpcio->datadefQ, obj);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -2549,11 +2577,11 @@ static status_t
 
     /* Get the mandatory augment target */
     res = yang_consume_string(tkc, mod, &aug->target);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
-    /* Get the starting left brace for the sub-clauses */
-    res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-    CHK_OBJ_EXIT(res, retres);
+    /* Get the semi-colon or starting left brace for the sub-clauses */
+    res = consume_semi_lbrace(tkc, mod, obj, &done);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* get the sub-section statements and any appinfo extensions */
     while (!done) {
@@ -2578,7 +2606,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -2613,11 +2641,11 @@ static status_t
 	} else {
 	    res = consume_augdata(tkc, mod, &aug->datadefQ, obj);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
-    if (retres == NO_ERR) {
+    if (aug->target) {
 	obj_set_ncx_flags(obj);
 	dlq_enque(obj, que);
 	if (mod->stmtmode && que==&mod->datadefQ) {
@@ -2787,10 +2815,10 @@ static status_t
 	
     /* Get the mandatory RPC method name */
     res = yang_consume_id_string(tkc, mod, &rpc->name);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -2815,7 +2843,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -2854,7 +2882,7 @@ static status_t
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -2996,10 +3024,10 @@ static status_t
 	
     /* Get the mandatory RPC method name */
     res = yang_consume_id_string(tkc, mod, &notif->name);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT(res, retres);
+    CHK_OBJ_EXIT(obj, res, retres);
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
@@ -3024,7 +3052,7 @@ static status_t
 	case TK_TT_MSTRING:
 	    /* vendor-specific clause found instead */
 	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(res, retres);
+	    CHK_OBJ_EXIT(obj, res, retres);
 	    continue;
 	case TK_TT_RBRACE:
 	    done = TRUE;
@@ -3060,7 +3088,7 @@ static status_t
 	    res = consume_datadef(tkc, mod, &notif->datadefQ,
 				  obj, NULL);
 	}
-	CHK_OBJ_EXIT(res, retres);
+	CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
@@ -3074,6 +3102,483 @@ static status_t
     return retres;
 
 }  /* consume_notif */
+
+
+/********************************************************************
+* FUNCTION consume_deviate
+* 
+* Parse the next N tokens as a deviate-stmt
+* Create a obj_deviate_t struct and add it to the 
+* specified deviation->deviateQ
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'deviate' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   deviation == parent obj_deviation_t to hold the new obj_deviate_t
+*                created by this function
+*
+* OUTPUTS:
+*   new deviate struct added to deviation deviateQ
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    consume_deviate (tk_chain_t *tkc,
+		     ncx_module_t  *mod,
+		     obj_deviation_t *deviation)
+{
+    obj_deviate_t    *devi;
+    obj_unique_t     *uniq;
+    typ_def_t        *dummy;
+    const xmlChar    *val;
+    const char       *expstr;
+    xmlChar          *str;
+    tk_type_t         tktyp;
+    boolean           done, type, units, def, conf;
+    boolean           mand, minel, maxel;
+    status_t          res, retres;
+
+    /* Get a new obj_deviation_t to fill in */
+    devi = obj_new_deviate();
+    if (!devi) {
+	res = ERR_INTERNAL_MEM;
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    val = NULL;
+    expstr = "add, replace, delete, or not-supported";
+    str = NULL;
+    done = FALSE;
+    type = FALSE;
+    units = FALSE;
+    def = FALSE;
+    conf = FALSE;
+    mand = FALSE;
+    minel = FALSE;
+    maxel = FALSE;
+    retres = NO_ERR;
+
+    devi->tk = TK_CUR(tkc);
+    devi->linenum = devi->tk->linenum;
+
+    /* Get the mandatory deviation argument */
+    res = yang_consume_string(tkc, mod, &str);
+    CHK_DEVI_EXIT(devi, res, retres);
+
+    if (res == NO_ERR) {
+	/* check the value */
+	if (!xml_strcmp(str, YANG_K_ADD)) {
+	    devi->arg = OBJ_DARG_ADD;
+	} else if (!xml_strcmp(str, YANG_K_DELETE)) {
+	    devi->arg = OBJ_DARG_DELETE;
+	} else if (!xml_strcmp(str, YANG_K_REPLACE)) {
+	    devi->arg = OBJ_DARG_REPLACE;
+	} else if (!xml_strcmp(str, YANG_K_NOT_SUPPORTED)) {
+	    devi->arg = OBJ_DARG_NOT_SUPPORTED;
+	} else {
+	    log_error("\nError: invalid deviate-stmt "
+		      "argument '%s'", str);
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+    }
+
+    if (str) {
+	m__free(str);
+	str = NULL;
+    }
+
+    /* Get the starting left brace or semi-colon */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	obj_free_deviate(devi);
+	return res;
+    }
+
+    /* check for semi-colon or left brace */
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+	/* only 1 arg type allowed to be empty */
+	if (devi->arg == OBJ_DARG_NOT_SUPPORTED) {
+	    devi->empty = TRUE;
+	} else {
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    expstr = "left brace";
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+	done = TRUE;
+	break;
+    case TK_TT_LBRACE:
+	done = FALSE;
+	break;
+    default:
+	retres = ERR_NCX_WRONG_TKTYPE;
+	expstr = "semi-colon or left brace";
+	ncx_mod_exp_err(tkc, mod, retres, expstr);
+	done = TRUE;
+    }
+
+    expstr = "deviate-stmt sub-clause";
+
+    /* get the sub-section statements and any appinfo extensions */
+    while (!done) {
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    obj_free_deviate(devi);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    obj_free_deviate(devi);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &devi->appinfoQ);
+	    CHK_DEVI_EXIT(devi, res, retres);
+	    continue;
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a keyword token string so check the value */
+	if (!xml_strcmp(val, YANG_K_TYPE)) {
+	    devi->type_tk = TK_CUR(tkc);
+
+	    switch (devi->arg) {
+	    case OBJ_DARG_NONE:
+		/* argument was invalid so cannot check it further */
+		break;
+	    case OBJ_DARG_ADD:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: type-stmt cannot be added");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    case OBJ_DARG_DELETE:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: type-stmt cannot be deleted");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    case OBJ_DARG_REPLACE:
+		break;
+	    case OBJ_DARG_NOT_SUPPORTED:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: sub-clauses not allowed "
+			  "for 'not-supported'");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    default:
+		retres = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    if (type) {
+		log_error("\nError: type-stmt already entered");
+		retres = ERR_NCX_ENTRY_EXISTS;		
+		dummy = typ_new_typdef();
+		if (!dummy) {
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		    obj_free_deviate(devi);
+		    return res;
+		} else {
+		    res = yang_typ_consume_type(tkc, 
+						mod, 
+						dummy);
+		    typ_free_typdef(dummy);
+		}
+	    } else {
+
+		type = TRUE;
+		devi->typdef = typ_new_typdef();
+		if (!devi->typdef) {
+		    res = ERR_INTERNAL_MEM;
+		    ncx_print_errormsg(tkc, mod, res);
+		    obj_free_deviate(devi);
+		    return res;
+		} else {
+		    res = yang_typ_consume_type(tkc, 
+						mod, 
+						devi->typdef);
+		}
+	    }
+	} else if (!xml_strcmp(val, YANG_K_UNITS)) {
+	    devi->units_tk = TK_CUR(tkc);
+
+	    switch (devi->arg) {
+	    case OBJ_DARG_NONE:
+		/* argument was invalid so cannot check it further */
+		break;
+	    case OBJ_DARG_ADD:
+		break;
+	    case OBJ_DARG_DELETE:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: units-stmt cannot be deleted");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    case OBJ_DARG_REPLACE:
+		break;
+	    case OBJ_DARG_NOT_SUPPORTED:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: sub-clauses not allowed "
+			  "for 'not-supported'");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    default:
+		retres = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    res = yang_consume_strclause(tkc, mod, &devi->units,
+					 &units, &devi->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
+	    devi->default_tk = TK_CUR(tkc);
+
+	    switch (devi->arg) {
+	    case OBJ_DARG_NONE:
+		/* argument was invalid so cannot check it further */
+		break;
+	    case OBJ_DARG_ADD:
+		break;
+	    case OBJ_DARG_DELETE:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: default-stmt cannot be deleted");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    case OBJ_DARG_REPLACE:
+		break;
+	    case OBJ_DARG_NOT_SUPPORTED:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: sub-clauses not allowed "
+			  "for 'not-supported'");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    default:
+		retres = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    res = yang_consume_strclause(tkc, mod, 
+					 &devi->defval,
+					 &def, &devi->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+	    devi->config_tk = TK_CUR(tkc);
+
+	    switch (devi->arg) {
+	    case OBJ_DARG_NONE:
+		/* argument was invalid so cannot check it further */
+		break;
+	    case OBJ_DARG_ADD:
+		break;
+	    case OBJ_DARG_DELETE:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: config-stmt cannot be deleted");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    case OBJ_DARG_REPLACE:
+		break;
+	    case OBJ_DARG_NOT_SUPPORTED:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: sub-clauses not allowed "
+			  "for 'not-supported'");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    default:
+		retres = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    res = yang_consume_boolean(tkc, mod,
+				       &devi->config,
+				       &conf, &devi->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
+	    devi->mandatory_tk = TK_CUR(tkc);
+
+	    switch (devi->arg) {
+	    case OBJ_DARG_NONE:
+		/* argument was invalid so cannot check it further */
+		break;
+	    case OBJ_DARG_ADD:
+		break;
+	    case OBJ_DARG_DELETE:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: mandatory-stmt cannot be deleted");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    case OBJ_DARG_REPLACE:
+		break;
+	    case OBJ_DARG_NOT_SUPPORTED:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: sub-clauses not allowed "
+			  "for 'not-supported'");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    default:
+		retres = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    res = yang_consume_boolean(tkc, mod,
+				       &devi->mandatory,
+				       &mand, &devi->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
+	    devi->minelems_tk = TK_CUR(tkc);
+
+	    switch (devi->arg) {
+	    case OBJ_DARG_NONE:
+		/* argument was invalid so cannot check it further */
+		break;
+	    case OBJ_DARG_ADD:
+		break;
+	    case OBJ_DARG_DELETE:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: min-elements-stmt cannot be deleted");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    case OBJ_DARG_REPLACE:
+		break;
+	    case OBJ_DARG_NOT_SUPPORTED:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: sub-clauses not allowed "
+			  "for 'not-supported'");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    default:
+		retres = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    res = yang_consume_uint32(tkc, mod,
+				      &devi->minelems,
+				      &minel, &devi->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
+	    devi->maxelems_tk = TK_CUR(tkc);
+
+	    switch (devi->arg) {
+	    case OBJ_DARG_NONE:
+		/* argument was invalid so cannot check it further */
+		break;
+	    case OBJ_DARG_ADD:
+		break;
+	    case OBJ_DARG_DELETE:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: max-elements-stmt cannot be deleted");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    case OBJ_DARG_REPLACE:
+		break;
+	    case OBJ_DARG_NOT_SUPPORTED:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: sub-clauses not allowed "
+			  "for 'not-supported'");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    default:
+		retres = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    res = yang_consume_max_elements(tkc, mod,
+					    &devi->maxelems,
+					    &maxel, &devi->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_MUST)) {
+	    switch (devi->arg) {
+	    case OBJ_DARG_NONE:
+		/* argument was invalid so cannot check it further */
+		break;
+	    case OBJ_DARG_ADD:
+		break;
+	    case OBJ_DARG_DELETE:
+		break;
+	    case OBJ_DARG_REPLACE:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: must-stmt cannot be replaced");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    case OBJ_DARG_NOT_SUPPORTED:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: sub-clauses not allowed "
+			  "for 'not-supported'");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    default:
+		retres = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    res = yang_consume_must(tkc, mod, &devi->mustQ,
+				    &devi->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_UNIQUE)) {
+	    uniq = obj_new_unique();
+	    if (!uniq) {
+		res = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, res);
+		obj_free_deviate(devi);
+		return res;
+	    }
+
+	    uniq->tk = TK_CUR(tkc);
+
+	    switch (devi->arg) {
+	    case OBJ_DARG_NONE:
+		/* argument was invalid so cannot check it further */
+		break;
+	    case OBJ_DARG_ADD:
+		break;
+	    case OBJ_DARG_DELETE:
+		break;
+	    case OBJ_DARG_REPLACE:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: unique-stmt cannot be replaced");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    case OBJ_DARG_NOT_SUPPORTED:
+		retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: sub-clauses not allowed "
+			  "for 'not-supported'");
+		ncx_print_errormsg(tkc, mod, retres);
+		break;
+	    default:
+		retres = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    res = yang_consume_strclause(tkc, mod,
+					 &uniq->xpath,
+					 NULL, &devi->appinfoQ);
+	    CHK_DEVI_EXIT(devi, res, retres);
+	    if (res == NO_ERR) {
+		dlq_enque(uniq, &devi->uniqueQ);
+	    } else {
+		obj_free_unique(uniq);
+	    }
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+	CHK_DEVI_EXIT(devi, res, retres);
+    }
+
+    devi->res = retres;
+    dlq_enque(devi, &deviation->deviateQ);
+
+    return retres;
+
+}  /* consume_deviate */
 
 
 /************   R E S O L V E    F U N C T I O N S   ***************/
@@ -4709,6 +5214,29 @@ static status_t
 	}
     }
 
+    /* go through each node in the uses datadefQ
+     * looking for augments within the uses
+     * expand the augment within the same Q
+     * as the uses
+     */
+    for (chobj = (obj_template_t *)
+	     dlq_firstEntry(uses->datadefQ);
+	 chobj != NULL;
+	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
+
+	if (chobj->objtype != OBJ_TYP_AUGMENT) {
+	    continue;
+	}
+
+#ifdef YANG_OBJ_DEBUG
+	log_debug3("\nexpand_uses_augment: mod %s, augment on line %u",
+		   mod->name, chobj->linenum);
+#endif
+
+	res = expand_augment(tkc, mod, chobj, datadefQ);
+	CHK_EXIT(res, retres);
+    }
+
     return retres;
 				    
 }  /* expand_uses */
@@ -5618,6 +6146,10 @@ static status_t
 }  /* check_conditional_mismatch */
 
 
+
+
+
+
 /************   E X T E R N A L   F U N C T I O N S   ***************/
 
 
@@ -5828,6 +6360,158 @@ status_t
     return res;
 
 }  /* yang_obj_consume_augment */
+
+
+/********************************************************************
+* FUNCTION yang_obj_consume_deviation
+* 
+* Parse the next N tokens as a top-level deviation-stmt
+* Create a obj_deviation_t struct and add it to the 
+* specified module
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'deviation' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*
+* OUTPUTS:
+*   new deviation struct added to module deviationQ
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_obj_consume_deviation (tk_chain_t *tkc,
+				ncx_module_t  *mod)
+{
+    obj_deviation_t  *dev;
+    const xmlChar    *val;
+    const char       *expstr;
+    xmlChar          *str;
+    tk_type_t         tktyp;
+    boolean           done, desc, ref;
+    status_t          res, retres;
+
+#ifdef DEBUG
+    if (!tkc || !mod) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* Get a new obj_deviation_t to fill in */
+    dev = obj_new_deviation();
+    if (!dev) {
+	res = ERR_INTERNAL_MEM;
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    val = NULL;
+    expstr = "absolute schema node";
+    str = NULL;
+    done = FALSE;
+    desc = FALSE;
+    ref = FALSE;
+    retres = NO_ERR;
+
+    dev->tk = TK_CUR(tkc);
+    dev->linenum = dev->tk->linenum;
+
+    /* Get the mandatory deviation target */
+    res = yang_consume_string(tkc, mod, &dev->target);
+    CHK_DEV_EXIT(dev, res, retres);
+
+    /* Get the starting left brace or semi-colon */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	obj_free_deviation(dev);
+	return res;
+    }
+
+    /* check for semi-colon or left brace */
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+	dev->empty = TRUE;
+	done = TRUE;
+	break;
+    case TK_TT_LBRACE:
+	done = FALSE;
+	break;
+    default:
+	res = ERR_NCX_WRONG_TKTYPE;
+	expstr = "semi-colon or left brace";
+	ncx_mod_exp_err(tkc, mod, res, expstr);
+	done = TRUE;
+    }
+
+    /* get the sub-section statements and any appinfo extensions */
+    while (!done) {
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    obj_free_deviation(dev);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    obj_free_deviation(dev);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &dev->appinfoQ);
+	    CHK_DEV_EXIT(dev, res, retres);
+	    continue;
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a keyword token string so check the value */
+	if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+	    res = yang_consume_descr(tkc, mod, &dev->descr,
+				     &desc, &dev->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+	    res = yang_consume_descr(tkc, mod, &dev->ref,
+				     &ref, &dev->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_DEVIATE)) {
+	    res = consume_deviate(tkc, mod, dev);
+	} else {
+	    res = ERR_NCX_WRONG_TKVAL;
+	    expstr = "description, reference, or deviate";
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	}
+	CHK_DEV_EXIT(dev, res, retres);
+    }
+
+    /* save or delete the obj_deviation_t struct */
+    if (dev->target) {
+	dlq_enque(dev, &mod->deviationQ);
+    } else {
+	obj_free_deviation(dev);
+    }
+
+    return retres;
+
+}  /* yang_obj_consume_deviation */
 
 
 /********************************************************************
@@ -6106,8 +6790,7 @@ status_t
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *datadefQ)
 {
-    obj_template_t  *testobj, *casobj;
-    obj_case_t      *cas;
+    obj_template_t  *testobj;
     status_t         res, retres;
 
 #ifdef DEBUG
@@ -6124,66 +6807,10 @@ status_t
 	 testobj != NULL;
 	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-	if (obj_is_cloned(testobj)) {
-	    continue;
-	}
-
-#ifdef YANG_OBJ_DEBUG
-	log_debug3("\nresolve_aug: mod %s, object %s, on line %u",
-		   mod->name, obj_get_name(testobj), testobj->linenum);
-#endif
-	
-	switch (testobj->objtype) {
-	case OBJ_TYP_CONTAINER:
-	    res = yang_obj_resolve_augments(tkc, mod,
-					    testobj->def.container->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_LEAF:
-	case OBJ_TYP_LEAF_LIST:
-	    break;
-	case OBJ_TYP_LIST:
-	    res = yang_obj_resolve_augments(tkc, mod,
-					    testobj->def.list->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_CHOICE:
-	    for (casobj = (obj_template_t *)
-		     dlq_firstEntry(testobj->def.choic->caseQ);
-		 casobj != NULL;
-		 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
-		cas = casobj->def.cas;
-		res = yang_obj_resolve_augments(tkc, mod, cas->datadefQ);
-		CHK_EXIT(res, retres);
-	    }
-	    break;
-	case OBJ_TYP_USES:
-	case OBJ_TYP_REFINE:
-	    break;
-	case OBJ_TYP_AUGMENT:
+	if (testobj->objtype == OBJ_TYP_AUGMENT) {
 	    res = expand_augment(tkc, mod, testobj, datadefQ);
 	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_RPC:
-	    res = yang_obj_resolve_augments(tkc, mod,
-					    &testobj->def.rpc->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_RPCIO:
-	    res = yang_obj_resolve_augments(tkc, mod,
-					    &testobj->def.rpcio->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_NOTIF:
-	    res = yang_obj_resolve_augments(tkc, mod,
-					    &testobj->def.notif->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_NONE:
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
-	CHK_EXIT(res, retres);
     }
 
     return retres;

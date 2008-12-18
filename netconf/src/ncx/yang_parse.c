@@ -2347,6 +2347,8 @@ static status_t
 	    res = yang_obj_consume_notification(tkc, mod);
 	} else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
 	    res = yang_obj_consume_augment(tkc, mod);
+	} else if (!xml_strcmp(val, YANG_K_DEVIATION)) {
+	    res = yang_obj_consume_deviation(tkc, mod);
 	} else {
 	    res = yang_obj_consume_datadef(tkc, mod,
 					   &mod->datadefQ, NULL);

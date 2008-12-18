@@ -452,6 +452,72 @@ typedef struct obj_metadata_t_ {
 } obj_metadata_t;
 
 
+/* type of deviation for each deviate entry */
+typedef enum obj_deviate_arg_t_ {
+    OBJ_DARG_NONE,
+    OBJ_DARG_ADD,
+    OBJ_DARG_DELETE,
+    OBJ_DARG_REPLACE,
+    OBJ_DARG_NOT_SUPPORTED
+}  obj_deviate_arg_t;
+
+
+/* YANG deviate statement struct */
+typedef struct obj_deviate_t_ {
+    dlq_hdr_t          qhdr;
+
+
+
+    /* the token for each sub-clause is saved because
+     * when the deviation-stmt is parsed, the target is not
+     * known yet so picking the correct variant
+     * such as type-stmt or refine-list-stmts
+     * needs to wait until the resolve phase
+     *
+     * all tk_token_t are back-pointers, not malloced
+     */
+    tk_token_t       *tk;
+    uint32            linenum;
+    boolean           empty;
+    status_t          res;
+    obj_deviate_arg_t arg;
+    tk_token_t       *arg_tk;
+    typ_def_t        *typdef;
+    tk_token_t       *type_tk;
+    xmlChar          *units;
+    tk_token_t       *units_tk;
+    xmlChar          *defval;
+    tk_token_t       *default_tk;
+    boolean           config;
+    tk_token_t       *config_tk;
+    boolean           mandatory;
+    tk_token_t       *mandatory_tk;
+    uint32            minelems;
+    tk_token_t       *minelems_tk;   /* also minset */
+    uint32            maxelems;
+    tk_token_t       *maxelems_tk;   /* also maxset */
+    dlq_hdr_t         mustQ;     /* Q of xpath_pcb_t */
+    dlq_hdr_t         uniqueQ;  /* Q of obj_unique_t */
+    dlq_hdr_t         appinfoQ;  /* Q of ncx_appinfo_t */
+} obj_deviate_t;
+
+
+/* YANG deviate statement struct */
+typedef struct obj_deviation_t_ {
+    dlq_hdr_t             qhdr;
+    xmlChar              *target;
+    obj_template_t       *targobj;
+    xmlChar              *descr;
+    xmlChar              *ref;
+    tk_token_t           *tk;   /* back-ptr */
+    uint32                linenum;
+    boolean               empty;
+    status_t              res;
+    dlq_hdr_t             deviateQ;   /* Q of obj_deviate_t */
+    dlq_hdr_t             appinfoQ;  /* Q of ncx_appinfo_t */
+} obj_deviation_t;
+
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
@@ -653,6 +719,29 @@ extern boolean
 
 extern boolean
     obj_any_notifs (const dlq_hdr_t *datadefQ);
+
+
+/********************    obj_deviate_t   *******************/
+
+extern obj_deviate_t *
+    obj_new_deviate (void);
+
+extern void
+    obj_free_deviate (obj_deviate_t *deviate);
+
+
+
+/********************    obj_deviation_t   *****************/
+
+extern obj_deviation_t *
+    obj_new_deviation (void);
+
+extern void
+    obj_free_deviation (obj_deviation_t *deviation);
+
+extern void
+    obj_clean_deviationQ (dlq_hdr_t *deviationQ);
+
 
 /******************** OBJECT ID ************************/
 /* malloc an object ID */

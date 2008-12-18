@@ -880,7 +880,8 @@ status_t
 	    }
 	}
 
-	res = ncx_set_list(NCX_BT_STRING, liststr, &cap->cap_feature_list);
+	res = ncx_set_list(NCX_BT_STRING, liststr, 
+			   &cap->cap_feature_list);
 	m__free(liststr);
 	if (res != NO_ERR) {
 	    free_cap(cap);
@@ -902,7 +903,8 @@ status_t
 	    }
 	}
 
-	res = ncx_set_list(NCX_BT_STRING, liststr, &cap->cap_deviation_list);
+	res = ncx_set_list(NCX_BT_STRING, liststr, 
+			   &cap->cap_deviation_list);
 	m__free(liststr);
 	if (res != NO_ERR) {
 	    free_cap(cap);

@@ -267,7 +267,8 @@ typedef enum status_t_
     ERR_NCX_USING_OBSOLETE,             /* 344 */
     ERR_NCX_INVALID_AUGTARGET,          /* 345 */
     ERR_NCX_DUP_REFINE_STMT,            /* 346 */
-    ERR_LAST_USR_ERR,                   /* 347 -- not really used */
+    ERR_NCX_INVALID_DEV_STMT,           /* 347 */
+    ERR_LAST_USR_ERR,                   /* 348 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */

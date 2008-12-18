@@ -1546,6 +1546,8 @@ static status_t
     case OBJ_TYP_NOTIF:
 	res = do_typedefs_notif(mod, obj, typnameQ);
 	break;
+    case OBJ_TYP_REFINE:
+	break;
     default:
 	res = SET_ERROR(ERR_INTERNAL_VAL);
     }

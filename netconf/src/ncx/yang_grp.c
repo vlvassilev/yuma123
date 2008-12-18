@@ -633,21 +633,22 @@ status_t
      * and data-def statements
      */
     for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
-	 grp != NULL && res==NO_ERR;
+	 grp != NULL;
 	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
 	/* check any local groupings */
 	res = yang_grp_resolve_complete(tkc, mod, &grp->groupingQ, parent);
 	CHK_EXIT(res, retres);
+    }
+
+
+    for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
+	 grp != NULL;
+	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
 	/* check any local objects for uses clauses */
 	res = yang_obj_resolve_uses(tkc, mod, &grp->datadefQ);
 	CHK_EXIT(res, retres);
-
-	/* check any local objects for augment clauses */
-	res = yang_obj_resolve_augments(tkc, mod, &grp->datadefQ);
-	CHK_EXIT(res, retres);
-
     }
 
     return retres;

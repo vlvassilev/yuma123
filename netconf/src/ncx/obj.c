@@ -2271,10 +2271,10 @@ static void
 /********************************************************************
 * FUNCTION obj_new_template
 * 
-* Malloc and initialize the fields in a an obk_template_t
+* Malloc and initialize the fields in a an object template
 *
 * INPUTS:
-*   objtype == the specifi object type to create
+*   objtype == the specific object type to create
 *
 * RETURNS:
 *   pointer to the malloced and initialized struct or NULL if an error
@@ -4353,6 +4353,179 @@ boolean
     return FALSE;
 
 }  /* obj_any_notifs */
+
+
+/********************************************************************
+* FUNCTION obj_new_deviate
+* 
+* Malloc and initialize the fields in a an object deviate statement
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
+obj_deviate_t * 
+    obj_new_deviate (void)
+{
+    obj_deviate_t  *deviate;
+
+    deviate = m__getObj(obj_deviate_t);
+    if (!deviate) {
+	return NULL;
+    }
+
+    memset(deviate, 0x0, sizeof(obj_deviate_t));
+
+    dlq_createSQue(&deviate->mustQ);
+    dlq_createSQue(&deviate->uniqueQ);
+    dlq_createSQue(&deviate->appinfoQ);
+
+    return deviate;
+
+} /* obj_new_deviate */
+
+
+/********************************************************************
+* FUNCTION obj_free_deviate
+* 
+* Clean and free an object deviate statement
+*
+* INPUTS:
+*   deviate == pointer to the struct to clean and free
+*********************************************************************/
+void
+    obj_free_deviate (obj_deviate_t *deviate)
+{
+    obj_unique_t   *uni;
+
+#ifdef DEBUG
+    if (!deviate) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (deviate->typdef) {
+	typ_free_typdef(deviate->typdef);
+    }
+    if (deviate->units) {
+	m__free(deviate->units);
+    }
+    if (deviate->defval) {
+	m__free(deviate->defval);
+    }
+
+    clean_mustQ(&deviate->mustQ);
+
+    while (!dlq_empty(&deviate->uniqueQ)) {
+	uni = (obj_unique_t *)dlq_deque(&deviate->uniqueQ);
+	obj_free_unique(uni);
+    }
+
+    ncx_clean_appinfoQ(&deviate->appinfoQ);
+
+    m__free(deviate);
+
+} /* obj_free_deviate */
+
+
+/********************************************************************
+* FUNCTION obj_new_deviation
+* 
+* Malloc and initialize the fields in a an object deviation statement
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
+obj_deviation_t * 
+    obj_new_deviation (void)
+{
+    obj_deviation_t  *deviation;
+
+    deviation = m__getObj(obj_deviation_t);
+    if (!deviation) {
+	return NULL;
+    }
+
+    memset(deviation, 0x0, sizeof(obj_deviation_t));
+
+    dlq_createSQue(&deviation->deviateQ);
+    dlq_createSQue(&deviation->appinfoQ);
+
+    return deviation;
+
+} /* obj_new_deviation */
+
+
+/********************************************************************
+* FUNCTION obj_free_deviation
+* 
+* Clean and free an object deviation statement
+*
+* INPUTS:
+*   deviation == pointer to the struct to clean and free
+*********************************************************************/
+void
+    obj_free_deviation (obj_deviation_t *deviation)
+{
+    obj_deviate_t   *deviate;
+
+#ifdef DEBUG
+    if (!deviation) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (deviation->target) {
+	m__free(deviation->target);
+    }
+
+    if (deviation->descr) {
+	m__free(deviation->descr);
+    }
+    if (deviation->ref) {
+	m__free(deviation->ref);
+    }
+
+    while (!dlq_empty(&deviation->deviateQ)) {
+	deviate = (obj_deviate_t *)
+	    dlq_deque(&deviation->deviateQ);
+	obj_free_deviate(deviate);
+    }
+
+    ncx_clean_appinfoQ(&deviation->appinfoQ);
+
+    m__free(deviation);
+
+} /* obj_free_deviation */
+
+
+/********************************************************************
+* FUNCTION obj_clean_deviationQ
+* 
+* Clean and free an Q of object deviation statements
+*
+* INPUTS:
+*   deviationQ == pointer to Q of the structs to clean and free
+*********************************************************************/
+void
+    obj_clean_deviationQ (dlq_hdr_t *deviationQ)
+{
+    obj_deviation_t   *deviation;
+
+#ifdef DEBUG
+    if (!deviationQ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    while (!dlq_empty(deviationQ)) {
+	deviation = (obj_deviation_t *)dlq_deque(deviationQ);
+	obj_free_deviation(deviation);
+    }
+
+} /* obj_clean_deviationQ */
 
 
 /********************************************************************

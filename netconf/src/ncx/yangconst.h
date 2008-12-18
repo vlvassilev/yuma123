@@ -43,6 +43,7 @@ date	     init     comment
 
 /* YANG keyword/YIN element names */
 
+#define YANG_K_ADD               (const xmlChar *)"add"
 #define YANG_K_AFTER             (const xmlChar *)"after"
 #define YANG_K_ARGUMENT          (const xmlChar *)"argument"
 #define YANG_K_AUGMENT           (const xmlChar *)"augment"
@@ -57,7 +58,9 @@ date	     init     comment
 #define YANG_K_CONTACT           (const xmlChar *)"contact"
 #define YANG_K_CONTAINER         (const xmlChar *)"container"
 #define YANG_K_DEFAULT           (const xmlChar *)"default"
+#define YANG_K_DELETE            (const xmlChar *)"delete"
 #define YANG_K_DESCRIPTION       (const xmlChar *)"description"
+#define YANG_K_DEVIATE           (const xmlChar *)"deviate"
 #define YANG_K_DEVIATION         (const xmlChar *)"deviation"
 #define YANG_K_DEVIATIONS        (const xmlChar *)"deviations"
 #define YANG_K_ENUM              (const xmlChar *)"enum"
@@ -92,6 +95,7 @@ date	     init     comment
 #define YANG_K_NAN               (const xmlChar *)"NaN"
 #define YANG_K_NEGINF            (const xmlChar *)"-INF"
 #define YANG_K_NOTIFICATION      (const xmlChar *)"notification"
+#define YANG_K_NOT_SUPPORTED     (const xmlChar *)"not-supported"
 #define YANG_K_ORDERED_BY        (const xmlChar *)"ordered-by"
 #define YANG_K_ORGANIZATION      (const xmlChar *)"organization"
 #define YANG_K_OUTPUT            (const xmlChar *)"output"
@@ -104,6 +108,7 @@ date	     init     comment
 #define YANG_K_RANGE             (const xmlChar *)"range"
 #define YANG_K_REFERENCE         (const xmlChar *)"reference"
 #define YANG_K_REFINE            (const xmlChar *)"refine"
+#define YANG_K_REPLACE           (const xmlChar *)"replace"
 #define YANG_K_REVISION          (const xmlChar *)"revision"
 #define YANG_K_RPC               (const xmlChar *)"rpc"
 #define YANG_K_STATUS            (const xmlChar *)"status"

@@ -126,6 +126,7 @@ date	     init     comment
 #define XSD_OUTPUT_TYPEEXT (const xmlChar *)"_output_type__"
 #define XSD_PROC_CONTENTS  (const xmlChar *)"processContents"
 #define XSD_PS_SUFFIX      (const xmlChar *)"PSType"
+#define XSD_QNAME          (const xmlChar *)"QName"
 #define XSD_QUAL           (const xmlChar *)"qualified"
 #define XSD_REQUIRED       (const xmlChar *)"required"
 #define XSD_REF            (const xmlChar *)"ref"

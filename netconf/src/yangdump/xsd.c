@@ -267,8 +267,7 @@ static status_t
 *   Convert a [sub]module to XSD 1.0 format
 *
 * INPUTS:
-*   pcb == parser control block of module to convert
-*          This is returned from ncxmod_load_module_xsd
+*   mod == module to convert
 *   cp == conversion parms struct to use
 *   retval == address of val_value_t to receive a malloced value struct
 *             representing the XSD.  Extra mallocs will be avoided by
@@ -287,12 +286,11 @@ static status_t
 *   status
 *********************************************************************/
 status_t
-    xsd_convert_module (yang_pcb_t *pcb,
+    xsd_convert_module (ncx_module_t *mod,
 			yangdump_cvtparms_t *cp,
 			val_value_t **retval,
 			xml_attrs_t *top_attrs)
 {
-    ncx_module_t      *mod;
     val_value_t       *val, *annot;
     const xmlChar     *cstr;
     xmlChar           *str;
@@ -306,12 +304,6 @@ status_t
     xsd_id = xmlns_xs_id();
     *retval = NULL;
     
-    /* the module should already be parsed and loaded */
-    mod = pcb->top;
-    if (!mod) {
-	return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
-    }
-
     /* create a struct named 'schema' to hold the entire result */
     val = xml_val_new_struct(XSD_SCHEMA, xsd_id);
     if (!val) {

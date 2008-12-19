@@ -1270,7 +1270,7 @@ void
 	break;
     case XP_RT_NUMBER:
 	ncx_init_num(&result->r.num);
-	ncx_set_num_zero(&result->r.num, NCX_BT_FLOAT32);
+	ncx_set_num_zero(&result->r.num, NCX_BT_FLOAT64);
 	break;
     case XP_RT_STRING:
     case XP_RT_BOOLEAN:
@@ -1334,7 +1334,7 @@ void
 	}
 	break;
     case XP_RT_NUMBER:
-	ncx_clean_num(NCX_BT_FLOAT32, &result->r.num);
+	ncx_clean_num(NCX_BT_FLOAT64, &result->r.num);
 	break;
     case XP_RT_STRING:
 	if (result->r.str) {

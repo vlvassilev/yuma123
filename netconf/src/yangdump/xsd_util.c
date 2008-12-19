@@ -1504,6 +1504,8 @@ const xmlChar *
     case NCX_BT_KEYREF:  /***/
     case NCX_BT_INSTANCE_ID:
 	return NCX_EL_STRING;
+    case NCX_BT_IDREF:
+	return XSD_QNAME;
     case NCX_BT_BINARY:
 	return XSD_BASE64;
     case NCX_BT_SLIST:

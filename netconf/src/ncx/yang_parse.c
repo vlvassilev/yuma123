@@ -2627,6 +2627,7 @@ static status_t
 
     /* Validate all the XPath expressions within all cooked objects */
     res = yang_obj_resolve_xpath(tkc, mod, &mod->datadefQ);
+    CHK_EXIT(res, retres);
 
     /* Check for imports not used warnings */
     yang_check_imports_used(tkc, mod);

@@ -1083,6 +1083,53 @@ ncx_module_t *
 
 
 /********************************************************************
+* FUNCTION ncx_find_submodule
+*
+* Find a submodule of an ncx_module_t in the ncx_modQ
+* These are the modules that are already loaded
+* This search is done instead of the def_reg directly
+* to force the selection specified by the <import>
+* instead of what might be loaded into the registry
+*
+* INPUTS:
+*   modname == module name
+*   submodname == submodule name
+*
+* RETURNS:
+*  module pointer if found or NULL if not
+*********************************************************************/
+ncx_module_t *
+    ncx_find_submodule (const xmlChar *modname,
+			const xmlChar *submodname)
+{
+    ncx_module_t  *mod;
+    yang_node_t   *node;
+    dlq_hdr_t     *que;
+
+#ifdef DEBUG
+    if (!modname || !submodname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;    /* error */
+    }
+#endif
+
+    mod = ncx_find_module(modname);
+    if (!mod) {
+	return NULL;
+    }
+
+    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+    node = yang_find_node(que, submodname);
+    if (node) {
+	return node->submod;
+    }
+
+    return NULL;
+
+}   /* ncx_find_submodule */
+
+
+/********************************************************************
 * FUNCTION ncx_free_module
 * 
 * Scrub the memory in a ncx_module_t by freeing all

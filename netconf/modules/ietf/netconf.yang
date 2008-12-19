@@ -36,6 +36,50 @@ module netconf {
        "Initial conversion from netconf.ncx version 0.6.";
    }
 
+
+   // NETCONF capabilities defined as features
+   feature writable-running {
+       description "NETCONF :writable-running capability";
+       reference "RFC 4741, section 8.2";
+   }
+
+   feature candidate {
+       description "NETCONF :candidate capability";
+       reference "RFC 4741, section 8.3";
+   }
+
+   feature confirmed-commit {
+       description "NETCONF :confirmed-commit capability";
+       reference "RFC 4741, section 8.4";
+       if-feature candidate;
+   }
+
+   feature rollback-on-error {
+       description "NETCONF :rollback-on-error capability";
+       reference "RFC 4741, section 8.5";
+   }
+
+   feature validate {
+       description "NETCONF :validate capability";
+       reference "RFC 4741, section 8.6";
+   }
+
+   feature startup {
+       description "NETCONF :startup capability";
+       reference "RFC 4741, section 8.7";
+   }
+
+   feature url {
+       description "NETCONF :url capability";
+       reference "RFC 4741, section 8.8";
+   }
+
+   feature xpath {
+       description "NETCONF :xpath capability";
+       reference "RFC 4741, section 8.9";
+   }
+
+
    // NETCONF Simple Types
 
    typedef Language {
@@ -427,6 +471,7 @@ module netconf {
         mandatory true;
 
         leaf candidate {
+          if-feature candidate;
           description 
             "Only available if 'candidate' capability supported.";
           type empty;
@@ -435,6 +480,7 @@ module netconf {
           type empty;
         }
         leaf startup {
+          if-feature startup;
           description 
             "Only available if 'startup' capability supported.";
           type empty;
@@ -448,6 +494,7 @@ module netconf {
       uses CommonConfigSourceType {
           augment config-source {
               leaf url {
+                if-feature url;
                 description 
                   "URL pointing to config data. Only available
                    if 'url' capability supported.";
@@ -463,6 +510,7 @@ module netconf {
       uses CommonConfigSourceType {
           augment config-source {
               leaf url {
+                if-feature url;
                 description 
                   "URL pointing to config data. Only available
                    if 'url' capability supported.";
@@ -483,6 +531,7 @@ module netconf {
       uses CommonConfigSourceType {
           augment config-source {
               leaf url {
+                if-feature url;
                 description 
                   "URL pointing to desired config data output. Only 
                    available if 'url' capability supported.";
@@ -594,6 +643,7 @@ module netconf {
         }
 
         leaf test-option {
+          if-feature validate;
           description 
             "Test option if validate capability supported.
              The 'validate' capability must be present to set
@@ -614,6 +664,7 @@ module netconf {
             ncx:root;
           }
           leaf url {
+            if-feature url;
             description 
               "Pointer to Config content: 'url' element.";
             type ConfigURIType;
@@ -820,6 +871,7 @@ module netconf {
    }
 
    rpc commit {
+      if-feature candidate;
       description
         "Only available if 'candidate' capability is supported.
 
@@ -866,6 +918,7 @@ module netconf {
    }
 
    rpc discard-changes {
+      if-feature candidate;
       description
         "Only available if 'candidate' capability is supported.
 
@@ -884,6 +937,7 @@ module netconf {
    }
 
    rpc validate {
+      if-feature validate;
       description
          "Only available if 'validate' capability is supported.
 

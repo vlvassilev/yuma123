@@ -1163,6 +1163,7 @@ static status_t
     convert_one (yangdump_cvtparms_t *cp)
 {
     ses_cb_t          *scb;
+    ncx_module_t      *targmod;
     val_value_t       *val;
     yang_pcb_t        *pcb;
     xmlChar           *namebuff;
@@ -1277,9 +1278,32 @@ static status_t
 	    res = ERR_NCX_IMPORT_ERRORS;
 	    ncx_print_errormsg(NULL, pcb->top, res);
 	} else {
+	    if (!pcb->top->ismod) {
+		/* need to load the entire module now,
+		 * in order to get a namespace ID for
+		 * the main module, which is also used in the submodule
+		 */
+		res = ncxmod_load_module(ncx_get_modname(pcb->top));
+		if (res != NO_ERR) {
+		    log_error("\nError: main module '%s' had errors."
+			      "\n       XSD conversion of '%s' terminated.",
+			      ncx_get_modname(pcb->top),
+			      pcb->top->sourcefn);
+		    ncx_print_errormsg(NULL, pcb->top, res);
+		    break;
+		} else {
+		    targmod = 
+			ncx_find_submodule
+			(ncx_get_modname(pcb->top), 
+			 pcb->top->name);
+		}
+	    } else {
+		targmod = pcb->top;
+	    }
+
 	    val = NULL;
 	    xml_init_attrs(&attrs);
-	    res = xsd_convert_module(pcb, cp, &val, &attrs);
+	    res = xsd_convert_module(targmod, cp, &val, &attrs);
 	    if (res == NO_ERR) {
 		if (cp->defnames || (cp->output && cp->output_isdir)) {
 		    namebuff = xsd_make_output_filename(pcb->top, cp);
@@ -1314,7 +1338,8 @@ static status_t
     case NCX_CVTTYP_SQLDB:
 	if (ncx_any_dependency_errors(pcb->top)) {
 	    log_error("\nError: one or more imported modules had errors."
-		      "\n       SQL object database conversion of '%s' terminated.",
+		      "\n       SQL object database conversion of "
+		      "'%s' terminated.",
 		      pcb->top->sourcefn);
 	    res = ERR_NCX_IMPORT_ERRORS;
 	    ncx_print_errormsg(NULL, pcb->top, res);

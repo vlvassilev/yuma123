@@ -1629,22 +1629,26 @@ static xpath_result_t *
     parse_relative_location_path (xpath_pcb_t *pcb,
 				  status_t *res)
 {
-    xpath_result_t  *val1;
+    xpath_result_t  *val1, *val2;
     tk_type_t        nexttyp;
     boolean          abbrev, done;
 
     val1 = NULL;
+    val2 = NULL;
     abbrev = FALSE;
     done = FALSE;
     
     while (!done && *res == NO_ERR) {
         val1 = parse_step(pcb, res);
 
+	/***** add in step to result *****/
+	if (val2) {
+	    xpath_free_result(val2);
+	}
+	val2 = val1;
+	/*********************************/
+
         if (*res == NO_ERR) {
-
-	    /***** add in step to result *****/
-	    /***/
-
             nexttyp = tk_next_typ(pcb->tkc);
             if (nexttyp == TK_TT_FSLASH) {
                 *res = xpath_parse_token(pcb, TK_TT_FSLASH);
@@ -1657,7 +1661,7 @@ static xpath_result_t *
         }
     }
             
-    return val1;
+    return val2;
 
 }  /* parse_relative_location_path */
 
@@ -2727,8 +2731,8 @@ static xpath_result_t *
 		continue;
 	    }
 
-            if (match_next_token(pcb, TK_TT_STRING, XP_OP_AND)) {
-                *res = xpath_parse_token(pcb, TK_TT_STRING);
+            if (match_next_token(pcb, TK_TT_TSTRING, XP_OP_AND)) {
+                *res = xpath_parse_token(pcb, TK_TT_TSTRING);
             } else {
                 done = TRUE;
             }
@@ -2796,8 +2800,8 @@ static xpath_result_t *
 		continue;
 	    }
 
-            if (match_next_token(pcb, TK_TT_STRING, XP_OP_OR)) {
-                *res = xpath_parse_token(pcb, TK_TT_STRING);
+            if (match_next_token(pcb, TK_TT_TSTRING, XP_OP_OR)) {
+                *res = xpath_parse_token(pcb, TK_TT_TSTRING);
             } else {
                 done = TRUE;
             }
@@ -2918,6 +2922,13 @@ status_t
     result = parse_expr(pcb, &pcb->parseres);
     if (result) {
 	xpath_free_result(result);
+    }
+
+    if (LOGDEBUG3 && pcb->tkc) {
+	log_debug3("\n\nParse chain for XPath '%s':\n",
+		   pcb->exprstr);
+	tk_dump_chain(pcb->tkc);
+	log_debug3("\n");
     }
 
     /* the expression will not be processed further if the

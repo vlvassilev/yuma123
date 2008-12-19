@@ -129,6 +129,10 @@ extern ncx_module_t *
 extern ncx_module_t *
     ncx_find_module (const xmlChar *modname);
 
+extern ncx_module_t *
+    ncx_find_submodule (const xmlChar *modname,
+			const xmlChar *submodname);
+
 /* use if module was not added to registry */
 extern void 
     ncx_free_module (ncx_module_t *mod);

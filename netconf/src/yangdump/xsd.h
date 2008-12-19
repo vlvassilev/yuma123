@@ -66,7 +66,7 @@ date	     init     comment
  * representing an XML element which represents an XSD
  */
 extern status_t 
-    xsd_convert_module (yang_pcb_t *pcb,
+    xsd_convert_module (ncx_module_t *mod,
 			yangdump_cvtparms_t *cp,
 			val_value_t **retval,
 			xml_attrs_t  *top_attrs);

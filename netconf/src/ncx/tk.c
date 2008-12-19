@@ -131,22 +131,20 @@ static tk_ent_t tlist [] = {
     { TK_TT_RBRACK, 1, "]", "right bracket", FL_XPATH },
     { TK_TT_COMMA, 1, ",", "comma", FL_XPATH },
     { TK_TT_EQUAL, 1, "=", "equals sign", FL_XPATH },
-    { TK_TT_BAR, 1, "|", "vertical bar", 
-      (FL_YANG|FL_XPATH|FL_REDO) },
+    { TK_TT_BAR, 1, "|", "vertical bar", (FL_YANG|FL_XPATH|FL_REDO) },
     { TK_TT_STAR, 1, "*", "asterisk", FL_XPATH },
     { TK_TT_ATSIGN, 1, "@", "at sign", FL_XPATH },
-    { TK_TT_PLUS, 1, "+", "plus sign", 
-      (FL_YANG|FL_XPATH|FL_REDO) },
+    { TK_TT_PLUS, 1, "+", "plus sign", (FL_YANG|FL_XPATH|FL_REDO) },
     { TK_TT_COLON, 1, ":", "colon", FL_XPATH },
-    { TK_TT_PERIOD, 1, ":", "period", FL_XPATH },
+    { TK_TT_PERIOD, 1, ".", "period", FL_XPATH },
     { TK_TT_FSLASH, 1, "/", "forward slash", FL_XPATH },
-    { TK_TT_MINUS, 1, "/", "minus", FL_XPATH },
+    { TK_TT_MINUS, 1, "-", "minus", FL_XPATH },
     { TK_TT_LT, 1, "<", "less than", FL_XPATH },
     { TK_TT_GT, 1, ">", "greater than", FL_XPATH },
 
     /* TWO CHAR TOKENS */
     { TK_TT_RANGESEP, 2, "..", "range seperator", 
-      (FL_YANG|FL_REDO|FL_XPATH) },
+      (FL_REDO|FL_XPATH) },
     { TK_TT_DBLCOLON, 2, "::", "double colon", FL_XPATH },
     { TK_TT_DBLFSLASH, 2, "//", "double foward slash", FL_XPATH },
     { TK_TT_NOTEQUAL, 2, "!=", "not equal sign", FL_XPATH },
@@ -2334,19 +2332,21 @@ status_t
             } else if (ncx_valid_fname_ch(*tkc->bptr)) {
                 /* get some some of unquoted ID string or regular string */
                 res = tokenize_id_string(tkc);
-            } else if ((tkc->source != TK_SOURCE_YANG) &&
-		       (isdigit(*tkc->bptr) || 
-			((*tkc->bptr=='+' || *tkc->bptr=='-') &&
-			 isdigit(*(tkc->bptr+1)))))  {
-
+            } else if ((*tkc->bptr=='+' || *tkc->bptr=='-') &&
+		       isdigit(*(tkc->bptr+1)) &&
+		       (tkc->source != TK_SOURCE_YANG) &&
+		       (tkc->source != TK_SOURCE_XPATH)) {
 		/* get some sort of number 
-		 * YANG does not have number tokens
+		 * YANG does not have +/- number sequences
 		 * so they are parsed (first pass) as a string
 		 * There are corner cases such as range 1..max
 		 * that will be parsed wrong (2nd dot).  These
 		 * strings use the tk_retokenize_cur_string fn
 		 * to break up the string into more tokens
 		 */
+                res = tokenize_number(tkc);
+	    } else if (isdigit(*tkc->bptr) &&
+		       (tkc->source != TK_SOURCE_YANG)) {
                 res = tokenize_number(tkc);
             } else {
 		/* check for a 2 char token before 1 char token */

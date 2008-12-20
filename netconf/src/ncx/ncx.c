@@ -7288,7 +7288,11 @@ void
 			  (expstr) ? FALSE : TRUE);
 
     skip = FALSE;
-    tktyp = TK_CUR_TYP(tkc);
+    if (TK_CUR(tkc)) {
+	tktyp = TK_CUR_TYP(tkc);
+    } else {
+	tktyp = TK_TT_NONE;
+    }
 
     if (tktyp == TK_TT_NONE) {
 	gotval = NULL;

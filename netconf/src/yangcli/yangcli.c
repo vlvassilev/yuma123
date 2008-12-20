@@ -255,19 +255,74 @@ date         init     comment
 #define YANGCLI_PR_LIST (const xmlChar *)"Add another list?"
 
 
+#define YANGCLI_DEF_AGENT (const xmlChar *)"default"
+
+
+/********************************************************************
+*                                                                   *
+*                          T Y P E S                                *
+*                                                                   *
+*********************************************************************/
+
+/* cache the module pointers known by a particular agent,
+ * as reported in the session <hello> message
+ */
+typedef struct modptr_t_ {
+    dlq_hdr_t            qhdr;
+    const ncx_module_t  *mod;
+} modptr_t;
+
+
+/* NETCONF agent control block */
+typedef struct agent_cb_t_ {
+    dlq_hdr_t            qhdr;
+    xmlChar             *name;
+    xmlChar             *address;
+    xmlChar             *password;
+    const xmlChar       *default_target;
+    val_value_t         *connect_valset; 
+    /* assignment statement support */
+    xmlChar             *result_name;
+
+    /* local result or global result 
+     * !!! TBD: integrate into runstack 
+     * !!! THIS WILL NOT WORK:
+     * !!!     $foo = run script2 ...
+     */
+    boolean              result_isglobal;
+
+    /* true if optional nodes should be filled in by fill_valset */
+    boolean              get_optional;
+
+    mgr_io_state_t       state;
+    ses_id_t             mysid;
+    ncx_bad_data_t       baddata;
+    log_debug_t          log_level;
+    boolean              autoload;
+    boolean              fixorder;
+    dlq_hdr_t            varbindQ;   /* Q of ncx_var_t */
+    dlq_hdr_t            modptrQ;     /* Q of modptr_t */
+} agent_cb_t;
+
+
+
+
 /* forward decl needed by do_save function */
 static void
-    conn_command (xmlChar *line);
+    conn_command (agent_cb_t *agent_cb,
+		  xmlChar *line);
 
 /* forward decl needed by do_run function */
 static void
-    top_command (xmlChar *line);
+    top_command (agent_cb_t *agent_cb,
+		 xmlChar *line);
 
 /* forward decl needed by send_copy_config_to_agent function */
 static void
     yangcli_reply_handler (ses_cb_t *scb,
-			  mgr_rpc_req_t *req,
+			   mgr_rpc_req_t *req,
 			   mgr_rpc_rpy_t *rpy);
+
 
 
 /********************************************************************
@@ -276,12 +331,18 @@ static void
 *                                                                   *
 *********************************************************************/
 
-/* NETCONF session control */
-static mgr_io_state_t  state;
-static ses_id_t        mysid;
+/* TBD: use multiple agent control blocks, stored in this Q */
+static dlq_hdr_t      agent_cbQ;
 
-/* CLI and connect parameters */
+/* hack for now instead of lookup functions to get correct
+ * agent processing context; later search by session ID
+ */
+static agent_cb_t    *cur_agent_cb = NULL;
+
+/* CLI parameters */
 static val_value_t   *mgr_cli_valset;
+
+/* global connect param set, copied to agent connect parmsets */
 static val_value_t   *connect_valset;
 
 /* true if running a script from the invocation and exiting */
@@ -302,7 +363,7 @@ static boolean         versionmode;
 /* contains list of modules entered from CLI --modules parm */
 static val_value_t    *modules;
 
-/* log level for all logging except for direct STDOUT output */
+/* global log level for all logging except for direct STDOUT output */
 static log_debug_t     log_level;
 
 /* TRUE if append to existing log; FALSE to start a new log */
@@ -314,14 +375,6 @@ static boolean         logappend;
  */
 static xmlChar        *logfilename;
 
-/* agent target set when connected to an agent
- * TBD: move all agent session vars to a struct for
- * multiple concurrent sessions
- */
-static const xmlChar  *default_target;
-
-/* true if optional nodes should be fiulled in by fill_valset */
-static boolean         get_optional;
 
 /* TRUE if OK to load modules automatically
  * FALSE if --no-autoload set by user
@@ -359,15 +412,6 @@ static xmlChar        *runscript;
 /* TRUE if runscript has been completed */
 static boolean         runscriptdone;
 
-/* assignment statement support */
-static xmlChar        *result_name;
-
-/* local result or global result 
- * !!! TBD: integrate into runstack 
- * !!! THIS WILL NOT WORK:
- * !!!     $foo = run script2 ...
- */
-static boolean         result_isglobal;
 
 /* CLI input buffer */
 static xmlChar         clibuff[YANGCLI_BUFFLEN];
@@ -382,7 +426,141 @@ static const xmlChar  *cli_fn;
 static GetLine        *cli_gl;
 
 /* program version string */
-static char progver[] = "0.7.6";
+static char progver[] = "0.7.7";
+
+
+
+/********************************************************************
+* FUNCTION new_modptr
+* 
+*  Malloc and init a new module pointer block
+* 
+* INPUTS:
+*    mod == module to cache in this struct
+*
+* RETURNS:
+*   malloced modptr_t struct or NULL of malloc failed
+*********************************************************************/
+static modptr_t *
+    new_modptr (const ncx_module_t *mod)
+{
+    modptr_t  *modptr;
+
+    modptr = m__getObj(modptr_t);
+    if (!modptr) {
+	return NULL;
+    }
+    memset(modptr, 0x0, sizeof(modptr_t));
+    modptr->mod = mod;
+    return modptr;
+
+}  /* new_modptr */
+
+
+/********************************************************************
+* FUNCTION free_modptr
+* 
+*  Clean and free a module pointer block
+* 
+* INPUTS:
+*    modptr == mod pointer block to free
+*              MUST BE REMOVED FROM ANY Q FIRST
+*
+*********************************************************************/
+static void
+    free_modptr (modptr_t *modptr)
+{
+    m__free(modptr);
+
+}  /* free_modptr */
+
+
+/********************************************************************
+* FUNCTION new_agent_cb
+* 
+*  Malloc and init a new agent control block
+* 
+* INPUTS:
+*    name == name of agent record
+*
+* RETURNS:
+*   malloced agent_cb struct or NULL of malloc failed
+*********************************************************************/
+static agent_cb_t *
+    new_agent_cb (const xmlChar *name)
+{
+    agent_cb_t  *agent_cb;
+
+    agent_cb = m__getObj(agent_cb_t);
+    if (!agent_cb) {
+	return NULL;
+    }
+    memset(agent_cb, 0x0, sizeof(agent_cb_t));
+    dlq_createSQue(&agent_cb->varbindQ);
+    dlq_createSQue(&agent_cb->modptrQ);
+
+    agent_cb->name = xml_strdup(name);
+    if (!agent_cb->name) {
+	m__free(agent_cb);
+	return NULL;
+    }
+
+    /* set default agent flags to current settings */
+    agent_cb->state = MGR_IO_ST_INIT;
+    agent_cb->baddata = baddata;
+    agent_cb->log_level = log_level;
+    agent_cb->autoload = autoload;
+    agent_cb->fixorder = fixorder;
+    agent_cb->get_optional = FALSE;
+
+    return agent_cb;
+
+}  /* new_agent_cb */
+
+
+/********************************************************************
+* FUNCTION free_agent_cb
+* 
+*  Clean and free an agent control block
+* 
+* INPUTS:
+*    agent_cb == control block to free
+*                MUST BE REMOVED FROM ANY Q FIRST
+*
+*********************************************************************/
+static void
+    free_agent_cb (agent_cb_t *agent_cb)
+{
+
+    modptr_t  *modptr;
+
+    if (agent_cb->name) {
+	m__free(agent_cb->name);
+    }
+    if (agent_cb->address) {
+	m__free(agent_cb->address);
+    }
+    if (agent_cb->password) {
+	m__free(agent_cb->password);
+    }
+    if (agent_cb->result_name) {
+	m__free(agent_cb->result_name);
+    }
+
+    if (agent_cb->connect_valset) {
+	val_free_value(agent_cb->connect_valset);
+    }
+
+    var_clean_varQ(&agent_cb->varbindQ);
+
+    while (!dlq_empty(&agent_cb->modptrQ)) {
+	modptr = (modptr_t *)dlq_deque(&agent_cb->modptrQ);
+	free_modptr(modptr);
+    }
+
+    m__free(agent_cb);
+
+}  /* free_agent_cb */
 
 
 /********************************************************************
@@ -545,15 +723,18 @@ static boolean
 /********************************************************************
 * FUNCTION is_top
 * 
-*  Check the state and determine if the top or conn
+* Check the state and determine if the top or conn
 * mode is active
 * 
+* INPUTS:
+*   agent state to use
+*
 * RETURNS:
 *  TRUE if this is TOP mode
 *  FALSE if this is CONN mode (or associated states)
 *********************************************************************/
 static boolean
-    is_top (void)
+    is_top (mgr_io_state_t state)
 {
     switch (state) {
     case MGR_IO_ST_INIT:
@@ -590,6 +771,7 @@ static boolean
 *   $foo = @datafile.xml
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   line == command line string to expand
 *   len  == address of number chars parsed so far in line
 *   getrpc == address of return flag to parse and execute an
@@ -613,7 +795,8 @@ static boolean
 *    status
 *********************************************************************/
 static status_t
-    check_assign_statement (const xmlChar *line,
+    check_assign_statement (agent_cb_t *agent_cb,
+			    const xmlChar *line,
 			    uint32 *len,
 			    boolean *getrpc)
 {
@@ -711,29 +894,29 @@ static status_t
 	/* this is as assignment to the results
 	 * of an RPC function call 
 	 */
-	if (result_name) {
+	if (agent_cb->result_name) {
 	    log_error("\nyangcli: result already pending for %s",
-		      result_name);
-	    m__free(result_name);
-	    result_name = NULL;
+		      agent_cb->result_name);
+	    m__free(agent_cb->result_name);
+	    agent_cb->result_name = NULL;
 	}
 
 	/* save the variable result name */
-	result_name = xml_strndup(name, nlen);
-	if (!result_name) {
+	agent_cb->result_name = xml_strndup(name, nlen);
+	if (!agent_cb->result_name) {
 	    *len = 0;
 	    res = ERR_INTERNAL_MEM;
 	} else {
-	    result_isglobal = isglobal;
+	    agent_cb->result_isglobal = isglobal;
 	    *len = str - line;
 	    *getrpc = TRUE;
 	}
     } else {
 	/* there was some error in the statement processing */
 	*len = 0;
-	if (result_name) {
-	    m__free(result_name);
-	    result_name = NULL;
+	if (agent_cb->result_name) {
+	    m__free(agent_cb->result_name);
+	    agent_cb->result_name = NULL;
 	}
     }
 
@@ -797,24 +980,20 @@ static val_value_t *
 *
 *********************************************************************/
 static void
-    get_prompt (xmlChar *buff,
+    get_prompt (agent_cb_t *agent_cb,
+		xmlChar *buff,
 		uint32 bufflen)
 {
     xmlChar        *p;
     val_value_t    *parm;
     uint32          len;
 
-    if (!buff || !bufflen) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
-    }
-
     if (climore) {
 	xml_strncpy(buff, MORE_PROMPT, bufflen);
 	return;
     }
 
-    switch (state) {
+    switch (agent_cb->state) {
     case MGR_IO_ST_INIT:
     case MGR_IO_ST_IDLE:
     case MGR_IO_ST_CONNECT:
@@ -849,8 +1028,13 @@ static void
 	}
 
 	parm = NULL;
-	if (connect_valset) {
-	    parm = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_USER);
+	if (agent_cb->connect_valset) {
+	    parm = val_find_child(agent_cb->connect_valset, 
+				  YANGCLI_MOD, YANGCLI_USER);
+	}
+	if (!parm && connect_valset) {
+	    parm = val_find_child(connect_valset, 
+				  YANGCLI_MOD, YANGCLI_USER);
 	}
 	if (parm) {
 	    len = xml_strncpy(p, VAL_STR(parm), bufflen);
@@ -867,8 +1051,13 @@ static void
 	}
 
 	parm = NULL;
-	if (connect_valset) {
-	    parm= val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_AGENT);
+	if (agent_cb->connect_valset) {
+	    parm = val_find_child(agent_cb->connect_valset, 
+				  YANGCLI_MOD, YANGCLI_AGENT);
+	}
+	if (!parm && connect_valset) {
+	    parm= val_find_child(connect_valset, 
+				 YANGCLI_MOD, YANGCLI_AGENT);
 	}
 	if (parm) {
 	    len = xml_strncpy(p, VAL_STR(parm), bufflen);
@@ -913,17 +1102,20 @@ static void
 * Do not free this line after use, just discard it
 * It will be freed by the tecla lib
 *
+* INPUTS:
+*   agent_cb == agent control block to use
+*
 * RETURNS:
 *   static line from tecla read line, else NULL if some error
 *********************************************************************/
 static xmlChar *
-    get_line (void)
+    get_line (agent_cb_t *agent_cb)
 {
     xmlChar *line;
     xmlChar prompt[MAX_PROMPT_LEN];
 
     line = NULL;
-    get_prompt(prompt, MAX_PROMPT_LEN-1);
+    get_prompt(agent_cb, prompt, MAX_PROMPT_LEN-1);
 
     if (!climore) {
 	log_stdout("\n");
@@ -950,6 +1142,7 @@ static xmlChar *
 *      concatenation, an error will be returned
 * 
 * INPUTS:
+*   agent_cb == agent control block to use
 *   res == address of status result
 *
 * OUTPUTS:
@@ -960,12 +1153,12 @@ static xmlChar *
 *   NULL if some error
 *********************************************************************/
 static xmlChar *
-    get_cmd_line (status_t *res)
+    get_cmd_line (agent_cb_t *agent_cb,
+		  status_t *res)
 {
     xmlChar        *start, *str;
     boolean         done;
     int             len, total, maxlen;
-
 
     /* init locals */
     total = 0;
@@ -978,7 +1171,7 @@ static xmlChar *
     while (!done) {
 
 	/* read the next line from the user */
-	str = get_line();
+	str = get_line(agent_cb);
 	if (!str) {
 	    *res = ERR_NCX_READ_FAILED;
 	    done = TRUE;
@@ -1203,6 +1396,7 @@ static void *
 * Get the user-selected choice, yes or no
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   prompt == prompt message
 *   defcode == default answer code
 *      0 == no def answer
@@ -1220,7 +1414,8 @@ static void *
 *   status
 *********************************************************************/
 static status_t
-    get_yesno (const xmlChar *prompt,
+    get_yesno (agent_cb_t *agent_cb,
+	       const xmlChar *prompt,
 	       uint32 defcode,
 	       uint32 *retcode)
 {
@@ -1252,7 +1447,7 @@ static status_t
     while (!done) {
 
 	/* get input from the user STDIN */
-	myline = get_cmd_line(&res);
+	myline = get_cmd_line(agent_cb, &res);
 	if (!myline) {
 	    return res;
 	}
@@ -1308,6 +1503,7 @@ static status_t
 * This function will block on readline to get input from the user
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   parm == parm to get from the CLI
 *   valset == value set being filled
 *
@@ -1318,7 +1514,8 @@ static status_t
 *    status
 *********************************************************************/
 static status_t
-    get_complex_parm (const obj_template_t *parm,
+    get_complex_parm (agent_cb_t *agent_cb,
+		      const obj_template_t *parm,
 		      val_value_t *valset)
 {
     xmlChar          *line;
@@ -1332,7 +1529,7 @@ static status_t
 	       tk_get_btype_sym(obj_get_basetype(parm)));
 
     /* get a line of input from the user */
-    line = get_cmd_line(&res);
+    line = get_cmd_line(agent_cb, &res);
     if (!line) {
 	return res;
     }
@@ -1369,6 +1566,7 @@ static status_t
 * This function will block on readline to get input from the user
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   rpc == RPC method that is being called
 *   parm == parm to get from the CLI
 *   valset == value set being filled
@@ -1381,7 +1579,8 @@ static status_t
 *    status
 *********************************************************************/
 static status_t
-    get_parm (const obj_template_t *rpc,
+    get_parm (agent_cb_t *agent_cb,
+	      const obj_template_t *rpc,
 	      const obj_template_t *parm,
 	      val_value_t *valset,
 	      val_value_t *oldvalset)
@@ -1396,7 +1595,7 @@ static status_t
     boolean           done;
     uint32            len;
 
-    if (!obj_is_mandatory(parm) && !get_optional) {
+    if (!obj_is_mandatory(parm) && !agent_cb->get_optional) {
 	return NO_ERR;
     }
 
@@ -1429,7 +1628,7 @@ static status_t
     switch (btyp) {
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
-	return get_complex_parm(parm, valset);
+	return get_complex_parm(agent_cb, parm, valset);
     default:
 	;
     }
@@ -1474,7 +1673,7 @@ static status_t
 		    /* offer the default target for the NETCONF
 		     * <source> and <target> parameters
 		     */
-		    def = default_target;
+		    def = agent_cb->default_target;
 		}
 	    }
 	    if (def) {
@@ -1506,7 +1705,7 @@ static status_t
 	}
 
 	/* get a line of input from the user */
-	line = get_cmd_line(&res);
+	line = get_cmd_line(agent_cb, &res);
 	if (!line) {
 	    return res;
 	}
@@ -1626,7 +1825,7 @@ static status_t
 		 */
 
 		/* get a line of input from the user */
-		line2 = get_cmd_line(&res);
+		line2 = get_cmd_line(agent_cb, &res);
 		if (!line2) {
 		    m__free(saveline);
 		    return res;
@@ -1642,7 +1841,7 @@ static status_t
 		if (!*start2) {
 		    /* default N: try again for a different input */
 		    m__free(saveline);
-		    res = get_parm(rpc, parm, valset, oldvalset);
+		    res = get_parm(agent_cb, rpc, parm, valset, oldvalset);
 		    done = TRUE;
 		} else if (*start2 == '?') {
 		    if (start2[1] == '?') {
@@ -1680,7 +1879,7 @@ static status_t
 		} else if (*start2 == 'N' || *start2 == 'n') {
 		    /* recurse: try again for a different input */
 		    m__free(saveline);
-		    res = get_parm(rpc, parm, valset, oldvalset);
+		    res = get_parm(agent_cb, rpc, parm, valset, oldvalset);
 		    done = TRUE;
 		} else {
 		    log_stdout("\nInvalid input.");
@@ -1711,6 +1910,7 @@ static status_t
 * are needed from the CLI
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   rpc == RPC template in progress
 *   cas == case object template header
 *   valset == value set to fill
@@ -1723,7 +1923,8 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    get_case (const obj_template_t *rpc,
+    get_case (agent_cb_t *agent_cb,
+	      const obj_template_t *rpc,
 	      const obj_template_t *cas,
 	      val_value_t *valset,
 	      val_value_t *oldvalset)
@@ -1739,8 +1940,8 @@ static status_t
 	return ERR_NCX_SKIPPED;
     }
 
-    saveopt = get_optional;
-    get_optional = TRUE;
+    saveopt = agent_cb->get_optional;
+    agent_cb->get_optional = TRUE;
     res = NO_ERR;
 
     /* corner-case: user selected a case, and that case has
@@ -1771,14 +1972,14 @@ static status_t
 	}
 
 	/* node is config and not already set */
-	res = get_parm(rpc, parm, valset, oldvalset);
+	res = get_parm(agent_cb, rpc, parm, valset, oldvalset);
 
 	if (res == ERR_NCX_SKIPPED) {
 	    res = NO_ERR;
 	}
     }
 
-    get_optional = saveopt;
+    agent_cb->get_optional = saveopt;
     return res;
 
 } /* get_case */
@@ -1793,6 +1994,7 @@ static status_t
 * are needed from the CLI
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   rpc == RPC template in progress
 *   choic == choice object template header
 *   valset == value set to fill
@@ -1805,7 +2007,8 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    get_choice (const obj_template_t *rpc,
+    get_choice (agent_cb_t *agent_cb,
+		const obj_template_t *rpc,
 		const obj_template_t *choic,
 		val_value_t *valset,
 		val_value_t *oldvalset)
@@ -1839,10 +2042,10 @@ static status_t
 	m__free(objbuff);
     }
 
-    saveopt = get_optional;
+    saveopt = agent_cb->get_optional;
     
     if (obj_is_mandatory(choic)) {
-	get_optional = TRUE;
+	agent_cb->get_optional = TRUE;
     }
 
     /* first check the partial block corner case */
@@ -1853,7 +2056,7 @@ static status_t
 
 	cas = pval->casobj;
 	if (!cas) {
-	    get_optional = saveopt;
+	    agent_cb->get_optional = saveopt;
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
 	for (parm = obj_first_child(cas); 
@@ -1871,7 +2074,7 @@ static status_t
 		continue;   /* node within case already set */
 	    }
 
-	    res = get_parm(rpc, parm, valset, oldvalset);
+	    res = get_parm(agent_cb, rpc, parm, valset, oldvalset);
 	    switch (res) {
 	    case NO_ERR:
 		break;
@@ -1879,14 +2082,14 @@ static status_t
 		res = NO_ERR;
 		break;
 	    case ERR_NCX_CANCELED:
-		get_optional = saveopt;
+		agent_cb->get_optional = saveopt;
 		return res;
 	    default:
-		get_optional = saveopt;
+		agent_cb->get_optional = saveopt;
 		return res;
 	    }
 	}
-	get_optional = saveopt;
+	agent_cb->get_optional = saveopt;
 	return NO_ERR;
     }
 
@@ -1895,7 +2098,7 @@ static status_t
     if (!cas) {
 	log_stdout("\nNo case nodes defined for choice %s\n",
 		   obj_get_name(choic));
-	get_optional = saveopt;
+	agent_cb->get_optional = saveopt;
 	return NO_ERR;
     }
 
@@ -1950,9 +2153,9 @@ static status_t
 	}
 
 	/* get input from the user STDIN */
-	myline = get_cmd_line(&res);
+	myline = get_cmd_line(agent_cb, &res);
 	if (!myline) {
-	    get_optional = saveopt;
+	    agent_cb->get_optional = saveopt;
 	    return res;
 	}
 
@@ -1973,12 +2176,12 @@ static status_t
 	    } else if (str[1] == 'C' || str[1] == 'c') {
 		log_stdout("\n%s command canceled\n",
 			   obj_get_name(rpc));
-		get_optional = saveopt;
+		agent_cb->get_optional = saveopt;
 		return ERR_NCX_CANCELED;
 	    } else if (str[1] == 'S' || str[1] == 's') {
 		log_stdout("\n%s choice skipped\n",
 			   obj_get_name(choic));
-		get_optional = saveopt;
+		agent_cb->get_optional = saveopt;
 		return ERR_NCX_SKIPPED;
 	    } else {
 		obj_dump_template(choic, HELP_MODE_NORMAL, 4,
@@ -2044,11 +2247,11 @@ static status_t
     /* make sure a case was selected or found */
     if (!cas) {
 	log_stdout("\nError: No case to fill for this choice");
-	get_optional = saveopt;
+	agent_cb->get_optional = saveopt;
 	return ERR_NCX_SKIPPED;
     }
 
-    res = get_case(rpc, cas, valset, oldvalset);
+    res = get_case(agent_cb, rpc, cas, valset, oldvalset);
     switch (res) {
     case NO_ERR:
 	break;
@@ -2061,7 +2264,7 @@ static status_t
 	;
     }
 
-    get_optional = saveopt;
+    agent_cb->get_optional = saveopt;
 
     return res;
 
@@ -2076,6 +2279,7 @@ static status_t
 * This function will block on readline for user input
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   rpc == RPC method that is being called
 *   parm == object for value to fill
 *   oldval == last value (or NULL if none)
@@ -2088,7 +2292,8 @@ static status_t
 *    malloced value, filled in or NULL if some error
 *********************************************************************/
 static val_value_t *
-    fill_value (const obj_template_t *rpc,
+    fill_value (agent_cb_t *agent_cb,
+		const obj_template_t *rpc,
 		const obj_template_t *parm,
 		val_value_t *oldval,
 		status_t  *res)
@@ -2135,10 +2340,10 @@ static val_value_t *
     }
 
     newval = NULL;
-    saveopt = get_optional;
-    get_optional = TRUE;
-    *res = get_parm(rpc, parm, dummy, oldval);
-    get_optional = saveopt;
+    saveopt = agent_cb->get_optional;
+    agent_cb->get_optional = TRUE;
+    *res = get_parm(agent_cb, rpc, parm, dummy, oldval);
+    agent_cb->get_optional = saveopt;
 
     switch (*res) {
     case NO_ERR:
@@ -2173,6 +2378,7 @@ static val_value_t *
 * are needed from the CLI
 *
 * INPUTS:
+*   agent_cb == current agent control block (NULL if none)
 *   rpc == RPC method that is being called
 *   valset == value set to fill
 *   oldvalset == last set of values (or NULL if none)
@@ -2184,7 +2390,8 @@ static val_value_t *
 *    status,, valset may be partially filled if not NO_ERR
 *********************************************************************/
 static status_t
-    fill_valset (const obj_template_t *rpc,
+    fill_valset (agent_cb_t *agent_cb,
+		 const obj_template_t *rpc,
 		 val_value_t *valset,
 		 val_value_t *oldvalset)
 {
@@ -2221,14 +2428,15 @@ static status_t
 	    continue;
 	}
 
-	if (!get_optional && !obj_is_mandatory(parm)) {
+	if (!agent_cb->get_optional && !obj_is_mandatory(parm)) {
 	    continue;
 	}
 
         switch (parm->objtype) {
         case OBJ_TYP_CHOICE:
 	    if (!val_choice_is_set(valset, parm)) {
-		res = get_choice(rpc, parm, valset, oldvalset);
+		res = get_choice(agent_cb, rpc, parm, 
+				 valset, oldvalset);
 		switch (res) {
 		case NO_ERR:
 		    break;
@@ -2247,7 +2455,7 @@ static status_t
 				 obj_get_mod_name(parm),
 				 obj_get_name(parm));
 	    if (!val) {
-		res = get_parm(rpc, parm, valset, oldvalset);
+		res = get_parm(agent_cb, rpc, parm, valset, oldvalset);
 		switch (res) {
 		case NO_ERR:
 		    break;
@@ -2264,11 +2472,11 @@ static status_t
 	case OBJ_TYP_LEAF_LIST:
 	    done = FALSE;
 	    while (!done && res == NO_ERR) {
-		res = get_parm(rpc, parm, valset, oldvalset);
+		res = get_parm(agent_cb, rpc, parm, valset, oldvalset);
 		switch (res) {
 		case NO_ERR:
 		    /* prompt for more leaf-list objects */
-		    res = get_yesno(YANGCLI_PR_LLIST,
+		    res = get_yesno(agent_cb, YANGCLI_PR_LLIST,
 				    YESNO_NO, &yesnocode);
 		    if (res == NO_ERR) {
 			switch (yesnocode) {
@@ -2327,7 +2535,7 @@ static status_t
 	    }
 
 	    /* recurse with the child nodes */
-	    res = fill_valset(rpc, val, oldval);
+	    res = fill_valset(agent_cb, rpc, val, oldval);
 
 	    switch (res) {
 	    case NO_ERR:
@@ -2357,12 +2565,12 @@ static status_t
 		/* recurse with the child node -- NO OLD VALUE
 		 * TBD: get keys, then look up old matching entry
 		 */
-		res = fill_valset(rpc, val, NULL);
+		res = fill_valset(agent_cb, rpc, val, NULL);
 
 		switch (res) {
 		case NO_ERR:
 		    /* prompt for more list entries */
-		    res = get_yesno(YANGCLI_PR_LIST,
+		    res = get_yesno(agent_cb, YANGCLI_PR_LIST,
 				    YESNO_NO, &yesnocode);
 		    if (res == NO_ERR) {
 			switch (yesnocode) {
@@ -2404,6 +2612,7 @@ static status_t
  * FUNCTION get_valset
  * 
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    rpc == RPC method for the command being processed
  *    line == CLI input in progress
  *    res == address of status result
@@ -2417,9 +2626,10 @@ static status_t
  *
  *********************************************************************/
 static val_value_t *
-    get_valset (const obj_template_t *rpc,
-		 const xmlChar *line,
-		 status_t  *res)
+    get_valset (agent_cb_t *agent_cb,
+		const obj_template_t *rpc,
+		const xmlChar *line,
+		status_t  *res)
 {
     const obj_template_t  *obj;
     val_value_t           *valset;
@@ -2464,7 +2674,7 @@ static val_value_t *
 
     /* fill in any missing parameters from the CLI */
     if (*res==NO_ERR && interactive_mode()) {
-	*res = fill_valset(rpc, valset, NULL);
+	*res = fill_valset(agent_cb, rpc, valset, NULL);
     }
 
     return valset;
@@ -2482,36 +2692,35 @@ static val_value_t *
 * The STDIN handler will not do anything with incoming chars
 * while state == MGR_IO_ST_CONNECT
 * 
-* Inputs are derived from the module variables in connect_valset:
-*    agent == NETCONF agent address string
-*    username == SSH2 user name string
-*    password == SSH2 password
+* INPUTS:
+*   agent_cb == agent control block to use
 *
 * OUTPUTS:
-*   'mysid' is set to the output session ID, if NO_ERR
-*   'state' is changed based on the success of the session setup
+*   'agent_cb->mysid' is set to the output session ID, if NO_ERR
+*   'agent_cb->state' is changed based on the success of the session setup
 *
 *********************************************************************/
 static void
-    create_session (void)
+    create_session (agent_cb_t *agent_cb)
 {
     const xmlChar *agent, *username, *password;
     val_value_t   *val;
     status_t       res;
     uint16         port;
 
-    if (mysid) {
-	if (mgr_ses_get_scb(mysid)) {
+    if (agent_cb->mysid) {
+	if (mgr_ses_get_scb(agent_cb->mysid)) {
 	    SET_ERROR(ERR_INTERNAL_INIT_SEQ);
 	    return;
 	} else {
 	    /* session was reset */
-	    mysid = 0;
+	    agent_cb->mysid = 0;
 	}
     }
 
     /* retrieving the parameters should not fail */
-    val =  val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_USER);
+    val =  val_find_child(agent_cb->connect_valset, 
+			  YANGCLI_MOD, YANGCLI_USER);
     if (val && val->res == NO_ERR) {
 	username = VAL_STR(val);
     } else {
@@ -2519,7 +2728,8 @@ static void
 	return;
     }
 
-    val = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_AGENT);
+    val = val_find_child(agent_cb->connect_valset,
+			 YANGCLI_MOD, YANGCLI_AGENT);
     if (val && val->res == NO_ERR) {
 	agent = VAL_STR(val);
     } else {
@@ -2527,7 +2737,8 @@ static void
 	return;
     }
 
-    val = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_PASSWORD);
+    val = val_find_child(agent_cb->connect_valset,
+			 YANGCLI_MOD, YANGCLI_PASSWORD);
     if (val && val->res == NO_ERR) {
 	password = VAL_STR(val);
     } else {
@@ -2536,7 +2747,8 @@ static void
     }
 
     port = 0;
-    val = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_PORT);
+    val = val_find_child(agent_cb->connect_valset,
+			 YANGCLI_MOD, YANGCLI_PORT);
     if (val && val->res == NO_ERR) {
 	port = VAL_UINT16(val);
     }
@@ -2544,19 +2756,22 @@ static void
     log_info("\nyangcli: Starting NETCONF session for %s on %s",
 	     username, agent);
 
-    state = MGR_IO_ST_CONNECT;
+    agent_cb->state = MGR_IO_ST_CONNECT;
 
     /* this function call will cause us to block while the
      * protocol layer connect messages are processed
      */
-    res = mgr_ses_new_session(username, password, agent, port, &mysid);
+    res = mgr_ses_new_session(username, password, 
+			      agent, port, 
+			      &agent_cb->mysid);
     if (res == NO_ERR) {
-	state = MGR_IO_ST_CONN_START;
-	log_debug("\nyangcli: Start session %d OK", mysid);
+	agent_cb->state = MGR_IO_ST_CONN_START;
+	log_debug("\nyangcli: Start session %d OK for agent '%s'", 
+		  agent_cb->mysid, agent_cb->name);
     } else {
 	log_info("\nyangcli: Start session failed for user %s on "
 		 "%s (%s)\n", username, agent, get_error_string(res));
-	state = MGR_IO_ST_IDLE;
+	agent_cb->state = MGR_IO_ST_IDLE;
     }
     
 } /* create_session */
@@ -2566,6 +2781,7 @@ static void
  * FUNCTION do_connect
  * 
  * INPUTS:
+ *   agent_cb == agent control block to use
  *   rpc == rpc header for 'connect' command
  *   line == input text from readline call, not modified or freed here
  *   start == byte offset from 'line' where the parse RPC method
@@ -2575,18 +2791,19 @@ static void
  *       == FALSE if this is from top-level command input
  *
  * OUTPUTS:
- *   connect_valsetparms may be set 
+ *   connect_valset parms may be set 
  *   create_session may be called
  *
  *********************************************************************/
 static void
-    do_connect (const obj_template_t *rpc,
+    do_connect (agent_cb_t *agent_cb,
+		const obj_template_t *rpc,
 		const xmlChar *line,
 		uint32 start,
 		boolean  cli)
 {
     const obj_template_t  *obj;
-    val_value_t           *valset;
+    val_value_t           *valset, *use_valset;;
     status_t               res;
     boolean                s1, s2, s3;
     ncx_node_t             dtyp;
@@ -2625,6 +2842,10 @@ static void
 	}
     }
 
+    /* pick the local over the global connect valset */
+    use_valset = (agent_cb->connect_valset) ? 
+	agent_cb->connect_valset : connect_valset;
+
     /* get an empty parmset and use the old set for defaults 
      * unless this is a cll from the program startup and all
      * of the parameters are entered
@@ -2632,14 +2853,12 @@ static void
     if (!valset) {
 	s1 = s2 = s3 = FALSE;
 	if (cli) {
-	    s1 = val_find_child(connect_valset, YANGCLI_MOD, 
+	    s1 = val_find_child(use_valset, YANGCLI_MOD, 
 				YANGCLI_AGENT) ? TRUE : FALSE;
-	    s2 = val_find_child(connect_valset, YANGCLI_MOD,
+	    s2 = val_find_child(use_valset, YANGCLI_MOD,
 				YANGCLI_USER) ? TRUE : FALSE;
-	    s3 = (val_find_child(connect_valset, 
-				 YANGCLI_MOD, YANGCLI_PASSWORD) ||
-		  val_find_child(connect_valset, 
-				 YANGCLI_MOD, YANGCLI_KEY)) ? TRUE : FALSE;
+	    s3 = val_find_child(use_valset, YANGCLI_MOD,
+				YANGCLI_PASSWORD) ? TRUE : FALSE;
 	}
 	if (!(s1 && s2 && s3)) {
 	    valset = val_new_value();
@@ -2656,46 +2875,59 @@ static void
     res = NO_ERR;
     if (valset) {
 	if (interactive_mode()) {
-	    res = fill_valset(rpc, valset, connect_valset);
+	    res = fill_valset(agent_cb, rpc, valset, use_valset);
 	    if (res == ERR_NCX_SKIPPED) {
 		res = NO_ERR;
 	    }
 	}
-	if (connect_valset) {
-	    val_free_value(connect_valset);
-	}
 
-	/* save the newly malloced valset */
-	connect_valset = valset;
+	/* save the malloced valset */
+	if (res == NO_ERR) {
+	    if (agent_cb->connect_valset) {
+		val_free_value(agent_cb->connect_valset);
+	    }
+	    agent_cb->connect_valset = valset;
+	}
     } else if (!cli) {
 	if (interactive_mode()) {
-	    (void)fill_valset(rpc, connect_valset, NULL);
+	    if (!agent_cb->connect_valset) {
+		agent_cb->connect_valset = val_new_value();
+		if (!agent_cb->connect_valset) {
+		    log_write("\nError: malloc failure");
+		    return;
+		} else {
+		    val_init_from_template(agent_cb->connect_valset,
+					   obj);
+		}
+	    }
+	    (void)fill_valset(agent_cb, rpc,
+			      agent_cb->connect_valset, 
+			      connect_valset);
 	}
     }
 
     if (res != NO_ERR) {
-	log_write("\nError: Connect failed (%s)", get_error_string(res));
-	state = MGR_IO_ST_IDLE;
+	log_write("\nError: Connect failed (%s)", 
+		  get_error_string(res));
+	agent_cb->state = MGR_IO_ST_IDLE;
     } else {
 	/* hack: make sure the 3 required parms are set instead of
 	 * full validation of the parmset
 	 */
 
-	s1 = val_find_child(connect_valset, YANGCLI_MOD, 
+	s1 = val_find_child(agent_cb->connect_valset, YANGCLI_MOD, 
 			    YANGCLI_AGENT) ? TRUE : FALSE;
-	s2 = val_find_child(connect_valset, YANGCLI_MOD,
+	s2 = val_find_child(agent_cb->connect_valset, YANGCLI_MOD,
 			    YANGCLI_USER) ? TRUE : FALSE;
-	s3 = (val_find_child(connect_valset, 
-			     YANGCLI_MOD, YANGCLI_PASSWORD) ||
-	      val_find_child(connect_valset, 
-			     YANGCLI_MOD, YANGCLI_KEY)) ? TRUE : FALSE;
+	s3 = val_find_child(agent_cb->connect_valset, YANGCLI_MOD,
+			    YANGCLI_PASSWORD) ? TRUE : FALSE;
 
 	/* check if all params present yet */
 	if (s1 && s2 && s3) {
-	    create_session();
+	    create_session(agent_cb);
 	} else {
 	    log_write("\nError: Connect failed due to missing parameters");
-	    state = MGR_IO_ST_IDLE;
+	    agent_cb->state = MGR_IO_ST_IDLE;
 	}
     }
 
@@ -2709,6 +2941,7 @@ static void
 * the save operation
 *
 * INPUTS:
+*    agent_cb == agent control block to use
 *
 * OUTPUTS:
 *    state may be changed or other action taken
@@ -2718,7 +2951,7 @@ static void
 *    status
 *********************************************************************/
 static status_t
-    send_copy_config_to_agent (void)
+    send_copy_config_to_agent (agent_cb_t *agent_cb)
 {
     const obj_template_t  *rpc, *input, *child;
     mgr_rpc_req_t         *req;
@@ -2792,7 +3025,7 @@ static status_t
     val_add_child(source, parm);
 
     /* allocate an RPC request and send it */
-    scb = mgr_ses_get_scb(mysid);
+    scb = mgr_ses_get_scb(agent_cb->mysid);
     if (!scb) {
 	res = SET_ERROR(ERR_INTERNAL_PTR);
     } else {
@@ -2823,7 +3056,7 @@ static status_t
 	    val_free_value(reqdata);
 	}
     } else {
-	state = MGR_IO_ST_CONN_RPYWAIT;
+	agent_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
 
     return res;
@@ -2835,14 +3068,14 @@ static status_t
  * FUNCTION do_save
  * 
  * INPUTS:
- *    none (connect_valset needs to be valid)
+ *    agent_cb == agent control block to use
  *
  * OUTPUTS:
  *   copy-config and/or commit operation will be sent to agent
  *
  *********************************************************************/
 static void
-    do_save (void)
+    do_save (agent_cb_t *agent_cb)
 {
     const ses_cb_t   *scb;
     const mgr_scb_t  *mscb;
@@ -2850,7 +3083,7 @@ static void
     status_t          res;
 
     /* get the session info */
-    scb = mgr_ses_get_scb(mysid);
+    scb = mgr_ses_get_scb(agent_cb->mysid);
     if (!scb) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return;
@@ -2868,7 +3101,7 @@ static void
     case NCX_AGT_TARG_CAND_RUNNING:
 	line = xml_strdup(NCX_EL_COMMIT);
 	if (line) {
-	    conn_command(line);
+	    conn_command(agent_cb, line);
 #ifdef NOT_YET
 	    if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
 		log_stdout(" + copy-config <running> <startup>");
@@ -2881,7 +3114,7 @@ static void
 	break;
     case NCX_AGT_TARG_RUNNING:
 	if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-	    res = send_copy_config_to_agent();
+	    res = send_copy_config_to_agent(agent_cb);
 	    if (res != NO_ERR) {
 		log_stdout("\nError: send copy-config failed (%s)",
 			   get_error_string(res));
@@ -2913,6 +3146,7 @@ static void
  * Get the module parameter and load the specified NCX module
  *
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    rpc == RPC method for the load command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -2922,7 +3156,8 @@ static void
  *
  *********************************************************************/
 static void
-    do_load (const obj_template_t *rpc,
+    do_load (agent_cb_t *agent_cb,
+	     const obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
@@ -2932,7 +3167,7 @@ static void
     val = NULL;
     res = NO_ERR;
 
-    valset = get_valset(rpc, &line[len], &res);
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
 
     /* get the module name */
     if (res == NO_ERR) {
@@ -2954,7 +3189,7 @@ static void
 	log_stdout("\nLoad module %s OK", VAL_STR(val));
     } else {
 	log_stdout("\nError: Load module failed (%s)",
-	       get_error_string(res));
+		   get_error_string(res));
     }
 
     if (valset) {
@@ -3263,7 +3498,8 @@ static void
     while (mod) {
 	if (mode == HELP_MODE_BRIEF) {
 	    if (imode) {
-		log_stdout("\n  %s:%s/%s", mod->prefix, mod->name, mod->version);
+		log_stdout("\n  %s:%s/%s", mod->prefix, 
+			   mod->name, mod->version);
 	    } else {
 		log_write("\n  %s/%s", mod->name, mod->version);
 	    }
@@ -3344,13 +3580,15 @@ static void
  * based on the parameter
  *
  * INPUTS:
+ * agent_cb == agent control block to use
  *    rpc == RPC method for the show command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
  *
  *********************************************************************/
 static void
-    do_show (const obj_template_t *rpc,
+    do_show (agent_cb_t *agent_cb,
+	     const obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
@@ -3361,7 +3599,7 @@ static void
     help_mode_t         mode;
 
     imode = interactive_mode();
-    valset = get_valset(rpc, &line[len], &res);
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
 
     if (valset && res == NO_ERR) {
 	mode = HELP_MODE_NORMAL;
@@ -3393,6 +3631,7 @@ static void
 	    } else if (!xml_strcmp(parm->name, NCX_EL_VARS)) {
 		do_show_vars(mode, FALSE, FALSE);
 	    } else if (!xml_strcmp(parm->name, NCX_EL_MODULE)) {
+		/***/
 		mod = ncx_find_module(VAL_STR(parm));
 		if (mod) {
 		    do_show_module(mod, mode);
@@ -3455,18 +3694,19 @@ static void
  * help commands
  *
  * INPUTS:
- *    mod == first module to show help
+ *    agent_cb == agent control block to use
  *    mode == requested help mode
  *
  *********************************************************************/
 static void
-    do_help_commands (help_mode_t mode)
+    do_help_commands (agent_cb_t *agent_cb,
+		      help_mode_t mode)
 {
     const ncx_module_t    *mod;
     const obj_template_t  *obj;
     boolean anyout, imode;
 
-
+    /***/
     mod = ncx_find_module(YANGCLI_MOD);
     if (!mod) {
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -3502,6 +3742,7 @@ static void
  * Print the general yangcli help text to STDOUT
  *
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    rpc == RPC method for the load command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -3511,7 +3752,8 @@ static void
  *
  *********************************************************************/
 static void
-    do_help (const obj_template_t *rpc,
+    do_help (agent_cb_t *agent_cb,
+	     const obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
@@ -3525,7 +3767,7 @@ static void
     uint32                dlen;
 
     imode = interactive_mode();
-    valset = get_valset(rpc, &line[len], &res);
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (res != NO_ERR) {
 	if (valset) {
 	    val_free_value(valset);
@@ -3571,7 +3813,7 @@ static void
     /* look for the specific definition parameters */
     parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_COMMANDS);
     if (parm && parm->res==NO_ERR) {
-	do_help_commands(mode);
+	do_help_commands(agent_cb, mode);
 	val_free_value(valset);
 	return;
     }
@@ -3687,6 +3929,7 @@ static void
  * run the specified script
  *
  * INPUTS:
+ *   agent_cb == agent control block to use
  *   source == file source
  *   valset == value set for the run script parameters
  *
@@ -3694,7 +3937,8 @@ static void
  *   status
  *********************************************************************/
 static status_t
-    do_start_script (const xmlChar *source,
+    do_start_script (agent_cb_t *agent_cb,
+		     const xmlChar *source,
 		     val_value_t *valset)
 {
     xmlChar       *str, *fspec;
@@ -3746,10 +3990,10 @@ static status_t
     str = runstack_get_cmd(&res);
     if (str && res == NO_ERR) {
 	/* execute the line as an RPC command */
-	if (is_top()) {
-	    top_command(str);
+	if (is_top(agent_cb->state)) {
+	    top_command(agent_cb, str);
 	} else {
-	    conn_command(str);
+	    conn_command(agent_cb, str);
 	}
     }
 
@@ -3767,6 +4011,7 @@ static status_t
  * Get the specified parameter and run the specified script
  *
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    rpc == RPC method for the show command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -3775,7 +4020,8 @@ static status_t
  *    status
  *********************************************************************/
 static status_t
-    do_run (const obj_template_t *rpc,
+    do_run (agent_cb_t *agent_cb,
+	    const obj_template_t *rpc,
 	    const xmlChar *line,
 	    uint32  len)
 {
@@ -3785,7 +4031,7 @@ static status_t
     res = NO_ERR;
 
     /* get the 'script' parameter */
-    valset = get_valset(rpc, &line[len], &res);
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
 
     if (valset && res == NO_ERR) {
 	/* there is 1 parm */
@@ -3796,7 +4042,7 @@ static status_t
 	    res = parm->res;
 	} else {
 	    /* the parm val is the script filespec */
-	    res = do_start_script(VAL_STR(parm), valset);
+	    res = do_start_script(agent_cb, VAL_STR(parm), valset);
 	    if (res != NO_ERR) {
 		log_write("\nError: start script %s failed (%s)",
 			  obj_get_name(rpc),
@@ -3819,13 +4065,16 @@ static status_t
  * 
  * Process run-script CLI parameter
  *
+ * INPUTS:
+ *   agent_cb == agent control block to use
+ *
  * SIDE EFFECTS:
  *   runstack start with the runscript script if no errors
  * RETURNS:
  *   status
  *********************************************************************/
 static status_t
-    do_startup_script (void)
+    do_startup_script (agent_cb_t *agent_cb)
 {
     const obj_template_t *rpc;
     xmlChar              *line, *p;
@@ -3858,7 +4107,7 @@ static status_t
     xml_strcpy(p, runscript);
     
     /* fill in the value set for the input parameters */
-    res = do_run(rpc, line, 0);
+    res = do_run(agent_cb, rpc, line, 0);
     return res;
 
 }  /* do_startup_script */
@@ -3923,6 +4172,7 @@ static void
  * Print the current working directory
  *
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    rpc == RPC method for the load command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -3932,7 +4182,8 @@ static void
  *
  *********************************************************************/
 static void
-    do_pwd (const obj_template_t *rpc,
+    do_pwd (agent_cb_t *agent_cb,
+	    const obj_template_t *rpc,
 	    const xmlChar *line,
 	    uint32  len)
 {
@@ -3941,7 +4192,7 @@ static void
     boolean           imode;
 
     imode = interactive_mode();
-    valset = get_valset(rpc, &line[len], &res);
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (res == NO_ERR || res == ERR_NCX_SKIPPED) {
 	pwd();
     }
@@ -3958,6 +4209,7 @@ static void
  * Change the current working directory
  *
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    rpc == RPC method for the load command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -3967,7 +4219,8 @@ static void
  *
  *********************************************************************/
 static void
-    do_cd (const obj_template_t *rpc,
+    do_cd (agent_cb_t *agent_cb,
+	   const obj_template_t *rpc,
 	   const xmlChar *line,
 	   uint32  len)
 {
@@ -3977,7 +4230,7 @@ static void
     boolean           imode;
 
     imode = interactive_mode();
-    valset = get_valset(rpc, &line[len], &res);
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (res != NO_ERR) {
 	if (valset) {
 	    val_free_value(valset);
@@ -4015,6 +4268,7 @@ static void
  * Fill an object for use in a PDU
  *
  * INPUTS:
+ *    agent_cb == agent control block to use (NULL if none)
  *    rpc == RPC method for the load command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -4025,7 +4279,8 @@ static void
  *
  *********************************************************************/
 static void
-    do_fill (const obj_template_t *rpc,
+    do_fill (agent_cb_t *agent_cb,
+	     const obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
@@ -4035,8 +4290,7 @@ static void
     status_t               res;
     boolean                imode, save_getopt;
 
-
-    valset = get_valset(rpc, &line[len], &res);
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (res != NO_ERR) {
 	if (valset) {
 	    val_free_value(valset);
@@ -4053,7 +4307,7 @@ static void
 	target = VAL_STR(parm);
     }
 
-    save_getopt = get_optional;
+    save_getopt = agent_cb->get_optional;
     imode = interactive_mode();
     newparm = NULL;
     curparm = NULL;
@@ -4082,13 +4336,13 @@ static void
     parm = val_find_child(valset, YANGCLI_MOD, 
 			  YANGCLI_OPTIONAL);
     if (parm && parm->res == NO_ERR) {
-	get_optional = TRUE;
+	agent_cb->get_optional = TRUE;
     }
 
     switch (targobj->objtype) {
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
-	newparm = fill_value(rpc, targobj, curparm, &res);
+	newparm = fill_value(agent_cb, rpc, targobj, curparm, &res);
 	break;
     case OBJ_TYP_CHOICE:
 	newparm = val_new_value();
@@ -4098,7 +4352,7 @@ static void
 	} else {
 	    val_init_from_template(newparm, targobj);
 	    
-	    res = get_choice(rpc, targobj, newparm, curparm);
+	    res = get_choice(agent_cb, rpc, targobj, newparm, curparm);
 	    if (res == ERR_NCX_SKIPPED) {
 		res = NO_ERR;
 	    }
@@ -4112,7 +4366,7 @@ static void
 	} else {
 	    val_init_from_template(newparm, targobj);
 
-	    res = get_case(rpc, targobj, newparm, curparm);
+	    res = get_case(agent_cb, rpc, targobj, newparm, curparm);
 	    if (res == ERR_NCX_SKIPPED) {
 		res = NO_ERR;
 	    }
@@ -4125,7 +4379,7 @@ static void
 	    res = ERR_INTERNAL_MEM;
 	} else {
 	    val_init_from_template(newparm, targobj);
-	    res = fill_valset(rpc, newparm, curparm);
+	    res = fill_valset(agent_cb, rpc, newparm, curparm);
 	    if (res == ERR_NCX_SKIPPED) {
 		res = NO_ERR;
 	    }
@@ -4133,26 +4387,28 @@ static void
     }
 
     if (res == NO_ERR) {
-	if (result_name) {
+	if (agent_cb->result_name) {
 	    /* save the filled in value */
-	    res = var_set_move(result_name, xml_strlen(result_name),
-			       result_isglobal, newparm);
+	    res = var_set_move(agent_cb->result_name, 
+			       xml_strlen(agent_cb->result_name),
+			       agent_cb->result_isglobal, newparm);
 	    if (res != NO_ERR) {
 		val_free_value(newparm);
 
 		log_error("\nError: set result for '%s' failed (%s)",
-			  result_name, get_error_string(res));
+			  agent_cb->result_name, 
+			  get_error_string(res));
 	    }
 	    newparm = NULL;
 
 	    /* clear the result flag */
-	    m__free(result_name);
-	    result_name = NULL;
+	    m__free(agent_cb->result_name);
+	    agent_cb->result_name = NULL;
 	}
     } else {
-	if (result_name) {
-	    m__free(result_name);
-	    result_name = NULL;
+	if (agent_cb->result_name) {
+	    m__free(agent_cb->result_name);
+	    agent_cb->result_name = NULL;
 	}
     }
 
@@ -4164,7 +4420,7 @@ static void
     if (curparm) {
 	val_free_value(curparm);
     }
-    get_optional = save_getopt;
+    agent_cb->get_optional = save_getopt;
 
 }  /* do_fill */
 
@@ -4175,6 +4431,7 @@ static void
 * Add the config nodes to the parent
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   rpc == RPC method in progress
 *   config_content == the node associated with the target
 *             to be used as content nested within the 
@@ -4194,7 +4451,8 @@ static void
 *    status; config_content is NOT freed if returning an error
 *********************************************************************/
 static status_t
-    add_content (const obj_template_t *rpc,
+    add_content (agent_cb_t *agent_cb,
+		 const obj_template_t *rpc,
 		 val_value_t *config_content,
 		 const obj_template_t *curobj,
 		 val_value_t **curtop)
@@ -4256,7 +4514,8 @@ static status_t
 		    lastkey = keyval;
 		    res = NO_ERR;
 		} else {
-		    res = get_parm(rpc, curkey->keyobj, *curtop, NULL);
+		    res = get_parm(agent_cb, rpc, 
+				   curkey->keyobj, *curtop, NULL);
 		    if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
 			return res;
 		    }
@@ -4303,7 +4562,8 @@ static status_t
 	    newnode = val_get_first_child(config_content);
 	    if (newnode) {
 		val_remove_child(newnode);
-		res = add_content(rpc, newnode, newnode->obj, curtop);
+		res = add_content(agent_cb, rpc, newnode, 
+				  newnode->obj, curtop);
 		if (res != NO_ERR) {
 		    val_free_value(newnode);
 		    done = TRUE;
@@ -4335,6 +4595,7 @@ static status_t
 * from the node to be edited.
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   rpc == RPC method in progress
 *   config_content == the node associated with the target
 *             to be used as content nested within the 
@@ -4352,7 +4613,8 @@ static status_t
 *    status; config_content is NOT freed if returning an error
 *********************************************************************/
 static status_t
-    add_config_from_content_node (const obj_template_t *rpc,
+    add_config_from_content_node (agent_cb_t *agent_cb,
+				  const obj_template_t *rpc,
 				  val_value_t *config_content,
 				  const obj_template_t *curobj,
 				  val_value_t *config,
@@ -4364,7 +4626,8 @@ static status_t
     /* get to the root of the object chain */
     parent = obj_get_cparent(curobj);
     if (parent) {
-	res = add_config_from_content_node(rpc,
+	res = add_config_from_content_node(agent_cb,
+					   rpc,
 					   config_content,
 					   parent,
 					   config,
@@ -4382,7 +4645,8 @@ static status_t
 	*curtop = config;
     }
 
-    res = add_content(rpc, config_content, curobj, curtop);
+    res = add_content(agent_cb, rpc, config_content, 
+		      curobj, curtop);
 
     return res;
 
@@ -4399,12 +4663,13 @@ static status_t
 * along the way.
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   config_content == the node associated with the target
 *             to be used as content nested within the 
 *             <config> element
 *
 * OUTPUTS:
-*    state may be changed or other action taken
+*    agent_cb->state may be changed or other action taken
 *
 *    !!! config_content is consumed -- freed or transfered to a PDU
 *    !!! that will be freed later
@@ -4413,7 +4678,8 @@ static status_t
 *    status
 *********************************************************************/
 static status_t
-    send_edit_config_to_agent (val_value_t *config_content)
+    send_edit_config_to_agent (agent_cb_t *agent_cb,
+			       val_value_t *config_content)
 {
     const obj_template_t  *rpc, *input, *child;
     mgr_rpc_req_t         *req;
@@ -4426,7 +4692,7 @@ static status_t
     reqdata = NULL;
     res = NO_ERR;
 
-    if (!default_target) {
+    if (!agent_cb->default_target) {
 	log_error("\nError: no <edit-config> target available on agent");
 	val_free_value(config_content);
 	return ERR_NCX_OPERATION_FAILED;
@@ -4471,7 +4737,7 @@ static status_t
     val_init_from_template(parm, child);
     val_add_child(parm, reqdata);
 
-    target = xml_val_new_flag(default_target,
+    target = xml_val_new_flag(agent_cb->default_target,
 			      obj_get_nsid(child));
     if (!target) {
 	val_free_value(config_content);
@@ -4520,7 +4786,8 @@ static status_t
     val_add_child(parm, reqdata);
 
     dummy_parm = NULL;
-    res = add_config_from_content_node(rpc, config_content,
+    res = add_config_from_content_node(agent_cb,
+				       rpc, config_content,
 				       config_content->obj,
 				       parm, &dummy_parm);
     if (res != NO_ERR) {
@@ -4529,7 +4796,7 @@ static status_t
 	return res;
     }
 
-    if (fixorder) {
+    if (agent_cb->fixorder) {
 	/* must set the order of a root container seperately */
 	val_set_canonical_order(parm);
     }
@@ -4537,7 +4804,7 @@ static status_t
     /* !!! config_content consumed at this point !!!
      * allocate an RPC request and send it 
      */
-    scb = mgr_ses_get_scb(mysid);
+    scb = mgr_ses_get_scb(agent_cb->mysid);
     if (!scb) {
 	res = SET_ERROR(ERR_INTERNAL_PTR);
     } else {
@@ -4568,7 +4835,7 @@ static status_t
 	    val_free_value(reqdata);
 	}
     } else {
-	state = MGR_IO_ST_CONN_RPYWAIT;
+	agent_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
 
     return res;
@@ -4586,6 +4853,7 @@ static status_t
  * based on the 'target' parameter also in the valset
  *
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    rpc == RPC method for the load command
  *    valset == parsed CLI valset
  *
@@ -4603,8 +4871,9 @@ static status_t
  *   via create, merge, or replace
  *********************************************************************/
 static val_value_t *
-    get_content_from_choice (const obj_template_t *rpc,
-			  val_value_t *valset)
+    get_content_from_choice (agent_cb_t *agent_cb,
+			     const obj_template_t *rpc,
+			     val_value_t *valset)
 {
     val_value_t           *parm, *curparm, *newparm;
     const val_value_t     *userval;
@@ -4636,11 +4905,11 @@ static val_value_t *
     }
 
     if (iscli) {
-	saveopt = get_optional;
+	saveopt = agent_cb->get_optional;
 	parm = val_find_child(valset, YANGCLI_MOD, 
 			      YANGCLI_OPTIONAL);
 	if (parm && parm->res == NO_ERR) {
-	    get_optional = TRUE;
+	    agent_cb->get_optional = TRUE;
 	}
 
 	/* from CLI -- look for the 'target' parameter */
@@ -4648,14 +4917,14 @@ static val_value_t *
 			      NCX_EL_TARGET);
 	if (!parm) {
 	    log_error("\nError: target parameter is missing");
-	    get_optional = saveopt;
+	    agent_cb->get_optional = saveopt;
 	    return NULL;
 	}
 
 	res = xpath_find_schema_target_int(VAL_STR(parm), &targobj);
 	if (res != NO_ERR) {
 	    log_error("\nError: Object '%s' not found", VAL_STR(parm));
-	    get_optional = saveopt;
+	    agent_cb->get_optional = saveopt;
 	    return NULL;
 	}	
 
@@ -4669,14 +4938,14 @@ static val_value_t *
 	    if (!curparm || res != NO_ERR) {
 		log_error("\nError: Script value '%s' invalid (%s)", 
 			  VAL_STR(parm), get_error_string(res)); 
-		get_optional = saveopt;
+		agent_cb->get_optional = saveopt;
 		return NULL;
 	    }
 	    if (curparm->obj != targobj) {
 		log_error("\nError: current value '%s' "
 			  "object type is incorrect.",
 			  VAL_STR(parm));
-		get_optional = saveopt;
+		agent_cb->get_optional = saveopt;
 		return NULL;
 	    }
 	}
@@ -4684,7 +4953,7 @@ static val_value_t *
 	switch (targobj->objtype) {
 	case OBJ_TYP_LEAF:
 	case OBJ_TYP_LEAF_LIST:
-	    newparm = fill_value(rpc, targobj, curparm, &res);
+	    newparm = fill_value(agent_cb, rpc, targobj, curparm, &res);
 	    break;
 	case OBJ_TYP_CHOICE:
 	    newparm = val_new_value();
@@ -4694,7 +4963,7 @@ static val_value_t *
 	    } else {
 		val_init_from_template(newparm, targobj);
 	    
-		res = get_choice(rpc, targobj, newparm, curparm);
+		res = get_choice(agent_cb, rpc, targobj, newparm, curparm);
 		if (res == ERR_NCX_SKIPPED) {
 		    res = NO_ERR;
 		}
@@ -4708,7 +4977,7 @@ static val_value_t *
 	    } else {
 		val_init_from_template(newparm, targobj);
 
-		res = get_case(rpc, targobj, newparm, curparm);
+		res = get_case(agent_cb, rpc, targobj, newparm, curparm);
 		if (res == ERR_NCX_SKIPPED) {
 		    res = NO_ERR;
 		}
@@ -4722,14 +4991,14 @@ static val_value_t *
 	    } else {
 		val_init_from_template(newparm, targobj);
 
-		res = fill_valset(rpc, newparm, curparm);
+		res = fill_valset(agent_cb, rpc, newparm, curparm);
 		if (res == ERR_NCX_SKIPPED) {
 		    res = NO_ERR;
 		}
 	    }
 	}
 
-	get_optional = saveopt;
+	agent_cb->get_optional = saveopt;
 	if (res != NO_ERR) {
 	    if (newparm) {
 		val_free_value(newparm);
@@ -5010,6 +5279,7 @@ static status_t
  * Create some database object on the agent
  *
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    rpc == RPC method for the create command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -5020,7 +5290,8 @@ static status_t
  *
  *********************************************************************/
 static void
-    do_create (const obj_template_t *rpc,
+    do_create (agent_cb_t *agent_cb,
+	       const obj_template_t *rpc,
 	       const xmlChar *line,
 	       uint32  len)
 {
@@ -5032,7 +5303,7 @@ static void
     content = NULL;
 
     /* get the command line parameters for this command */
-    valset = get_valset(rpc, &line[len], &res);
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (!valset || res != NO_ERR) {
 	if (valset) {
 	    val_free_value(valset);
@@ -5041,7 +5312,7 @@ static void
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(rpc, valset);
+    content = get_content_from_choice(agent_cb, rpc, valset);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -5058,7 +5329,7 @@ static void
     }
 
     /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(content);
+    res = send_edit_config_to_agent(agent_cb, content);
     if (res != NO_ERR) {
 	log_error("\nError: send create operation failed (%s)",
 		  get_error_string(res));
@@ -5075,6 +5346,7 @@ static void
  * Merge some database object on the agent
  *
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    rpc == RPC method for the merge command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -5085,7 +5357,8 @@ static void
  *
  *********************************************************************/
 static void
-    do_merge (const obj_template_t *rpc,
+    do_merge (agent_cb_t *agent_cb,
+	      const obj_template_t *rpc,
 	      const xmlChar *line,
 	      uint32  len)
 {
@@ -5097,7 +5370,7 @@ static void
     content = NULL;
 
     /* get the command line parameters for this command */
-    valset = get_valset(rpc, &line[len], &res);
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (!valset || res != NO_ERR) {
 	if (valset) {
 	    val_free_value(valset);
@@ -5106,7 +5379,7 @@ static void
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(rpc, valset);
+    content = get_content_from_choice(agent_cb, rpc, valset);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -5123,7 +5396,7 @@ static void
     }
 
     /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(content);
+    res = send_edit_config_to_agent(agent_cb, content);
     if (res != NO_ERR) {
 	log_error("\nError: send merge operation failed (%s)",
 		  get_error_string(res));
@@ -5140,6 +5413,7 @@ static void
  * Replace some database object on the agent
  *
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    rpc == RPC method for the replace command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -5150,7 +5424,8 @@ static void
  *
  *********************************************************************/
 static void
-    do_replace (const obj_template_t *rpc,
+    do_replace (agent_cb_t *agent_cb,
+		const obj_template_t *rpc,
 		const xmlChar *line,
 		uint32  len)
 {
@@ -5162,7 +5437,7 @@ static void
     content = NULL;
 
     /* get the command line parameters for this command */
-    valset = get_valset(rpc, &line[len], &res);
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (!valset || res != NO_ERR) {
 	if (valset) {
 	    val_free_value(valset);
@@ -5171,7 +5446,7 @@ static void
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(rpc, valset);
+    content = get_content_from_choice(agent_cb, rpc, valset);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -5188,7 +5463,7 @@ static void
     }
 
     /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(content);
+    res = send_edit_config_to_agent(agent_cb, content);
     if (res != NO_ERR) {
 	log_error("\nError: send replace operation failed (%s)",
 		  get_error_string(res));
@@ -5205,6 +5480,7 @@ static void
  * Delete some database object on the agent
  *
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    rpc == RPC method for the delete command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -5215,7 +5491,8 @@ static void
  *
  *********************************************************************/
 static void
-    do_delete (const obj_template_t *rpc,
+    do_delete (agent_cb_t *agent_cb,
+	       const obj_template_t *rpc,
 	       const xmlChar *line,
 	       uint32  len)
 {
@@ -5228,7 +5505,7 @@ static void
     content = NULL;
 
     /* get the command line parameters for this command */
-    valset = get_valset(rpc, &line[len], &res);
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (!valset || res != NO_ERR) {
 	if (valset) {
 	    val_free_value(valset);
@@ -5256,7 +5533,7 @@ static void
     /* add content only if this is a leaf-list */
     if (targobj->objtype == OBJ_TYP_LEAF_LIST) {
 	log_stdout("\nSpecify the leaf-list value to delete:");
-	content = fill_value(rpc, targobj, NULL, &res);
+	content = fill_value(agent_cb, rpc, targobj, NULL, &res);
     } else {
 	/* create an empty content node to delete */
 	content = val_new_value();
@@ -5281,7 +5558,7 @@ static void
     }
 
     /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(content);
+    res = send_edit_config_to_agent(agent_cb, content);
     if (res != NO_ERR) {
 	log_error("\nError: send delete operation failed (%s)",
 		  get_error_string(res));
@@ -5298,6 +5575,7 @@ static void
  * Insert a database object on the agent
  *
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    rpc == RPC method for the create command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -5308,7 +5586,8 @@ static void
  *
  *********************************************************************/
 static void
-    do_insert (const obj_template_t *rpc,
+    do_insert (agent_cb_t *agent_cb,
+	       const obj_template_t *rpc,
 	       const xmlChar *line,
 	       uint32  len)
 {
@@ -5323,7 +5602,7 @@ static void
     content = NULL;
 
     /* get the command line parameters for this command */
-    valset = get_valset(rpc, &line[len], &res);
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (!valset || res != NO_ERR) {
 	if (valset) {
 	    val_free_value(valset);
@@ -5332,7 +5611,7 @@ static void
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(rpc, valset);
+    content = get_content_from_choice(agent_cb, rpc, valset);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -5404,7 +5683,7 @@ static void
     /* send the PDU, hand off the content node */
     if (res == NO_ERR) {
 	/* construct an edit-config PDU with default parameters */
-	res = send_edit_config_to_agent(content);
+	res = send_edit_config_to_agent(agent_cb, content);
 	if (res != NO_ERR) {
 	    log_error("\nError: send create operation failed (%s)",
 		      get_error_string(res));
@@ -5428,11 +5707,13 @@ static void
 * Handle local connection mode RPC operations from yangcli.yang
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   rpc == template for the local RPC
 *   line == input command line from user
+*   len == line length
 *
 * OUTPUTS:
-*    state may be changed or other action taken
+*    agent_cb->state may be changed or other action taken
 *    the line buffer is NOT consumed or freed by this function
 *
 * RETURNS:
@@ -5440,7 +5721,8 @@ static void
 *    ERR_NCX_SKIPPED if no command was invoked
 *********************************************************************/
 static status_t
-    do_local_conn_command (const obj_template_t *rpc,
+    do_local_conn_command (agent_cb_t *agent_cb,
+			   const obj_template_t *rpc,
 			   xmlChar *line,
 			   uint32  len)
 {
@@ -5449,21 +5731,21 @@ static status_t
     rpcname = obj_get_name(rpc);
 
     if (!xml_strcmp(rpcname, YANGCLI_CREATE)) {
-	do_create(rpc, line, len);
+	do_create(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_DELETE)) {
-	do_delete(rpc, line, len);
+	do_delete(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_INSERT)) {
-	do_insert(rpc, line, len);
+	do_insert(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_MERGE)) {
-	do_merge(rpc, line, len);
+	do_merge(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_REPLACE)) {
-	do_replace(rpc, line, len);
+	do_replace(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_SAVE)) {
 	if (len < xml_strlen(line)) {
 	    log_error("\nWarning: Extra characters ignored (%s)",
 		      &line[len]);
 	}
-	do_save();
+	do_save(agent_cb);
     } else {
 	return ERR_NCX_SKIPPED;
     }
@@ -5478,8 +5760,10 @@ static status_t
 * Handle local RPC operations from yangcli.yang
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   rpc == template for the local RPC
 *   line == input command line from user
+*   len == length of line in bytes
 *
 * OUTPUTS:
 *    state may be changed or other action taken
@@ -5487,7 +5771,8 @@ static status_t
 *
 *********************************************************************/
 static void
-    do_local_command (const obj_template_t *rpc,
+    do_local_command (agent_cb_t *agent_cb,
+		      const obj_template_t *rpc,
 		      xmlChar *line,
 		      uint32  len)
 {
@@ -5496,26 +5781,26 @@ static void
     rpcname = obj_get_name(rpc);
 
     if (!xml_strcmp(rpcname, YANGCLI_CD)) {
-	do_cd(rpc, line, len);
+	do_cd(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
-	do_connect(rpc, line, len, FALSE);
+	do_connect(agent_cb, rpc, line, len, FALSE);
     } else if (!xml_strcmp(rpcname, YANGCLI_DELETE)) {
-	do_delete(rpc, line, len);
+	do_delete(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
-	do_fill(rpc, line, len);
+	do_fill(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
-	do_help(rpc, line, len);
+	do_help(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_LOAD)) {
-	do_load(rpc, line, len);
+	do_load(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_PWD)) {
-	do_pwd(rpc, line, len);
+	do_pwd(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_QUIT)) {
-	state = MGR_IO_ST_SHUT;
+	agent_cb->state = MGR_IO_ST_SHUT;
 	mgr_request_shutdown();
     } else if (!xml_strcmp(rpcname, YANGCLI_RUN)) {
-	(void)do_run(rpc, line, len);
+	(void)do_run(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {
-	do_show(rpc, line, len);
+	do_show(agent_cb, rpc, line, len);
     } else {
 	log_error("\nError: The %s command is not allowed in this mode",
 		   rpcname);
@@ -5529,6 +5814,7 @@ static void
 * Top-level command handler
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   line == input command line from user
 *
 * OUTPUTS:
@@ -5537,7 +5823,8 @@ static void
 *
 *********************************************************************/
 static void
-    top_command (xmlChar *line)
+    top_command (agent_cb_t *agent_cb,
+		 xmlChar *line)
 {
     const obj_template_t  *rpc;
     uint32                 len;
@@ -5551,18 +5838,19 @@ static void
     dtyp = NCX_NT_OBJ;
     rpc = (const obj_template_t *)parse_def(&dtyp, line, &len);
     if (!rpc) {
-	if (result_name) {
+	if (agent_cb->result_name) {
 	    /* this is just a string assignment */
-	    res = var_set_from_string(result_name,
-				      line, result_isglobal);
+	    res = var_set_from_string(agent_cb->result_name, line, 
+				      agent_cb->result_isglobal);
 	    if (res != NO_ERR) {
 		log_error("\nyangcli: Error setting variable %s (%s)",
-			  result_name, get_error_string(res));
+			  agent_cb->result_name, 
+			  get_error_string(res));
 	    }
 
 	    /* clear the result flag either way */
-	    m__free(result_name);
-	    result_name = NULL;
+	    m__free(agent_cb->result_name);
+	    agent_cb->result_name = NULL;
 	} else {
 	    /* this is an unknown command */
 	    log_error("\nError: Unrecognized command");
@@ -5572,7 +5860,7 @@ static void
 
     /* check  handful of yangcli commands */
     if (is_yangcli_ns(obj_get_nsid(rpc))) {
-	do_local_command(rpc, line, len);
+	do_local_command(agent_cb, rpc, line, len);
     } else {
 	log_error("\nError: Not connected to agent."
 		  "\nLocal commands only in this mode.");
@@ -5595,9 +5883,10 @@ static void
  *********************************************************************/
 static void
     yangcli_reply_handler (ses_cb_t *scb,
-			  mgr_rpc_req_t *req,
-			  mgr_rpc_rpy_t *rpy)
+			   mgr_rpc_req_t *req,
+			   mgr_rpc_rpy_t *rpy)
 {
+    agent_cb_t   *agent_cb;
     val_value_t  *val;
     mgr_scb_t    *mgrcb;
     status_t      res;
@@ -5610,6 +5899,9 @@ static void
     } else {
 	usesid = 0;
     }
+
+    /*****/
+    agent_cb = cur_agent_cb;
 
     if (rpy && rpy->reply) {
 	if (val_find_child(rpy->reply, NC_MODULE,
@@ -5635,7 +5927,7 @@ static void
 	    anyout = FALSE;
 	}
 
-	if (result_name) {
+	if (agent_cb->result_name) {
 	    /* save the data element if it exists */
 	    val = val_first_child_name(rpy->reply, NCX_EL_DATA);
 	    if (!val) {
@@ -5645,16 +5937,17 @@ static void
 	    } else {
 		dlq_remove(val);
 	    }
-	    res = var_set_move(result_name, xml_strlen(result_name),
-			       result_isglobal, val);
+	    res = var_set_move(agent_cb->result_name, 
+			       xml_strlen(agent_cb->result_name),
+			       agent_cb->result_isglobal, val);
 	    if (res != NO_ERR) {
 		log_error("\nyangcli reply: set result failed (%s)",
 			  get_error_string(res));
 	    }
 
 	    /* clear the result flag */
-	    m__free(result_name);
-	    result_name = NULL;
+	    m__free(agent_cb->result_name);
+	    agent_cb->result_name = NULL;
 	}  else if (!anyout && interactive_mode()) {
 	    log_stdout("\nOK\n");
 	}
@@ -5662,11 +5955,11 @@ static void
 	log_error("\nError: yangcli: no reply parsed\n");
     }
 
-    if (state == MGR_IO_ST_CONN_CLOSEWAIT) {
-	mysid = 0;
-	state = MGR_IO_ST_IDLE;
-    } else if (state == MGR_IO_ST_CONN_RPYWAIT) {
-	state = MGR_IO_ST_CONN_IDLE;
+    if (agent_cb->state == MGR_IO_ST_CONN_CLOSEWAIT) {
+	agent_cb->mysid = 0;
+	agent_cb->state = MGR_IO_ST_IDLE;
+    } else if (agent_cb->state == MGR_IO_ST_CONN_RPYWAIT) {
+	agent_cb->state = MGR_IO_ST_CONN_IDLE;
     } /* else leave state at its current value */
 
     /* free the request and reply */
@@ -5684,6 +5977,7 @@ static void
 * Connection level command handler
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   line == input command line from user
 *
 * OUTPUTS:
@@ -5692,7 +5986,8 @@ static void
 *
 *********************************************************************/
 static void
-    conn_command (xmlChar *line)
+    conn_command (agent_cb_t *agent_cb,
+		  xmlChar *line)
 {
     const obj_template_t  *rpc, *input;
     mgr_rpc_req_t         *req;
@@ -5720,18 +6015,19 @@ static void
     dtyp = NCX_NT_OBJ;
     rpc = (const obj_template_t *)parse_def(&dtyp, line, &len);
     if (!rpc) {
-	if (result_name) {
+	if (agent_cb->result_name) {
 	    /* this is just a string assignment */
-	    res = var_set_from_string(result_name,
-				      line, result_isglobal);
+	    res = var_set_from_string(agent_cb->result_name,
+				      line, 
+				      agent_cb->result_isglobal);
 	    if (res != NO_ERR) {
 		log_error("\nyangcli: Error setting variable %s (%s)",
-			  result_name, get_error_string(res));
+			  agent_cb->result_name, get_error_string(res));
 	    }
 
 	    /* clear the result flag either way */
-	    m__free(result_name);
-	    result_name = NULL;
+	    m__free(agent_cb->result_name);
+	    agent_cb->result_name = NULL;
 	} else {
 	    /* this is an unknown command */
 	    log_stdout("\nUnrecognized command");
@@ -5744,10 +6040,10 @@ static void
 	if (!xml_strcmp(obj_get_name(rpc), YANGCLI_CONNECT)) {
 	    log_stdout("\nError: Already connected");
 	} else {
-	    res = do_local_conn_command(rpc, line, len);
+	    res = do_local_conn_command(agent_cb, rpc, line, len);
 	    if (res == ERR_NCX_SKIPPED) {
 		res = NO_ERR;
-		do_local_command(rpc, line, len);
+		do_local_command(agent_cb, rpc, line, len);
 	    }
 	}
 	return;
@@ -5793,7 +6089,7 @@ static void
 	/* fill in any missing parameters from the CLI */
 	if (res == NO_ERR) {
 	    if (interactive_mode()) {
-		res = fill_valset(rpc, valset, NULL);
+		res = fill_valset(agent_cb, rpc, valset, NULL);
 		if (res == ERR_NCX_SKIPPED) {
 		    res = NO_ERR;
 		}
@@ -5821,7 +6117,7 @@ static void
 	    
     /* allocate an RPC request and send it */
     if (res == NO_ERR) {
-	scb = mgr_ses_get_scb(mysid);
+	scb = mgr_ses_get_scb(agent_cb->mysid);
 	if (!scb) {
 	    res = SET_ERROR(ERR_INTERNAL_PTR);
 	} else {
@@ -5858,9 +6154,9 @@ static void
 	    val_free_value(reqdata);
 	}
     } else if (shut) {
-	state = MGR_IO_ST_CONN_CLOSEWAIT;
+	agent_cb->state = MGR_IO_ST_CONN_CLOSEWAIT;
     } else {
-	state = MGR_IO_ST_CONN_RPYWAIT;
+	agent_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
 
 } /* conn_command */
@@ -6026,6 +6322,7 @@ static status_t
 	helpmode = TRUE;
     }
 
+#ifdef NOT_IMPLEMENTED
     /* get the key parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_KEY);
     if (parm && parm->res == NO_ERR) {
@@ -6035,6 +6332,7 @@ static status_t
 	    return res;
 	}
     }
+#endif
 
     /* get the password parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_PASSWORD);
@@ -6169,11 +6467,13 @@ static status_t
 * of the NETCONF agent
 * 
 * INPUTS:
+*  agent_cb == agent control block to use
 *  scb == session control block
 *
 *********************************************************************/
 static void
-    report_capabilities (const ses_cb_t *scb)
+    report_capabilities (agent_cb_t *agent_cb,
+			 const ses_cb_t *scb)
 {
     const mgr_scb_t    *mscb;
     const xmlChar      *agent;
@@ -6181,7 +6481,8 @@ static void
 
     mscb = (const mgr_scb_t *)scb->mgrcb;
 
-    parm = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_AGENT);
+    parm = val_find_child(agent_cb->connect_valset, 
+			  YANGCLI_MOD, YANGCLI_AGENT);
     if (parm && parm->res == NO_ERR) {
 	agent = VAL_STR(parm);
     } else {
@@ -6204,30 +6505,30 @@ static void
     log_stdout("\nDefault target set to: ");
     switch (mscb->targtyp) {
     case NCX_AGT_TARG_NONE:
-	default_target = NULL;
+	agent_cb->default_target = NULL;
 	log_stdout("none");
 	break;
     case NCX_AGT_TARG_CANDIDATE:
-	default_target = NCX_EL_CANDIDATE;
+	agent_cb->default_target = NCX_EL_CANDIDATE;
 	log_stdout("<candidate>");
 	break;
     case NCX_AGT_TARG_RUNNING:
-	default_target = NCX_EL_RUNNING;	
+	agent_cb->default_target = NCX_EL_RUNNING;	
 	log_stdout("<running>");
 	break;
     case NCX_AGT_TARG_CAND_RUNNING:
 	log_stdout("<candidate> (<running> also supported)");
 	break;
     case NCX_AGT_TARG_LOCAL:
-	default_target = NULL;
+	agent_cb->default_target = NULL;
 	log_stdout("none -- local file");	
 	break;
     case NCX_AGT_TARG_REMOTE:
-	default_target = NULL;
+	agent_cb->default_target = NULL;
 	log_stdout("none -- remote file");	
 	break;
     default:
-	default_target = NULL;
+	agent_cb->default_target = NULL;
 	SET_ERROR(ERR_INTERNAL_VAL);
 	log_stdout("none -- unknown (%d)", mscb->targtyp);
 	break;
@@ -6280,16 +6581,19 @@ static void
 * Also check for wrong module module and version errors
 *
 * INPUTS:
+*  agent_cb == agent control block to use
 *  scb == session control block
 *
 *********************************************************************/
 static void
-    check_module_capabilities (const ses_cb_t *scb)
+    check_module_capabilities (agent_cb_t *agent_cb,
+			       const ses_cb_t *scb)
 {
     const mgr_scb_t    *mscb;
     const ncx_module_t *mod;
     const cap_rec_t    *cap;
     const xmlChar      *module, *version;
+    modptr_t           *modptr;
     uint32              modlen;
     status_t            res;
     xmlChar             namebuff[NCX_MAX_NLEN+1];
@@ -6328,6 +6632,21 @@ static void
 	    }
 	}
 
+	if (!mod) {
+	    mod = ncx_find_module(namebuff);
+	}
+
+	/* keep track of the exact modules the agent knows about */
+	if (mod) {
+	    modptr = new_modptr(mod);
+	    if (!modptr) {
+		log_error("\nMalloc failure");
+		return;
+	    } else {
+		dlq_enque(modptr, &agent_cb->modptrQ);
+	    }
+	}
+
 	if (mod) {
 	    if (xml_strcmp(mod->version, version)) {
 		log_warn("\nyangcli warning: Module %s "
@@ -6355,50 +6674,55 @@ static void
 static mgr_io_state_t
     yangcli_stdin_handler (void)
 {
-     xmlChar       *line;
+    agent_cb_t    *agent_cb;
+    xmlChar       *line;
     ses_cb_t       *scb;
     boolean         getrpc;
     status_t        res;
     uint32          len;
 
+    /****/
+    agent_cb = cur_agent_cb;
+
     if (mgr_shutdown_requested()) {
-	state = MGR_IO_ST_SHUT;
+	agent_cb->state = MGR_IO_ST_SHUT;
     }
 
-    switch (state) {
+    switch (agent_cb->state) {
     case MGR_IO_ST_INIT:
-	return state;
+	return agent_cb->state;
     case MGR_IO_ST_IDLE:
     case MGR_IO_ST_CONN_IDLE:
 	break;
     case MGR_IO_ST_CONN_START:
 	/* waiting until <hello> processing complete */
-	scb = mgr_ses_get_scb(mysid);
+	scb = mgr_ses_get_scb(agent_cb->mysid);
 	if (!scb) {
 	    /* session startup failed */
-	    state = MGR_IO_ST_IDLE;
-	} else if (scb->state == SES_ST_IDLE && dlq_empty(&scb->outQ)) {
+	    agent_cb->state = MGR_IO_ST_IDLE;
+	} else if (scb->state == SES_ST_IDLE 
+		   && dlq_empty(&scb->outQ)) {
 	    /* incoming hello OK and outgoing hello is sent */
-	    state = MGR_IO_ST_CONN_IDLE;
-	    report_capabilities(scb);
-	    check_module_capabilities(scb);
+	    agent_cb->state = MGR_IO_ST_CONN_IDLE;
+	    report_capabilities(agent_cb, scb);
+	    check_module_capabilities(agent_cb, scb);
 	} else {
 	    /* still setting up session */
-	    return state;
+	    return agent_cb->state;
 	}
 	break;
     case MGR_IO_ST_CONN_RPYWAIT:
 	/* check if session was dropped by remote peer */
-	scb = mgr_ses_get_scb(mysid);
+	scb = mgr_ses_get_scb(agent_cb->mysid);
 	if (!scb || scb->state == SES_ST_SHUTDOWN_REQ) {
 	    if (scb) {
-		(void)mgr_ses_free_session(mysid);
+		(void)mgr_ses_free_session(agent_cb->mysid);
 	    }
-	    mysid = 0;
-	    state = MGR_IO_ST_IDLE;
+	    agent_cb->mysid = 0;
+	    agent_cb->state = MGR_IO_ST_IDLE;
 	} else  {
 	    /* keep waiting for reply */
-	    return state;
+	    return agent_cb->state;
 	}
 	break;
     case MGR_IO_ST_CONNECT:
@@ -6407,25 +6731,25 @@ static mgr_io_state_t
     case MGR_IO_ST_CONN_SHUT:
     case MGR_IO_ST_CONN_CLOSEWAIT:
 	/* do not accept chars in these states */
-	return state;
+	return agent_cb->state;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
-	return state;
+	return agent_cb->state;
     }
 
     /* check a batch-mode corner-case, nothing else to do */
     if (batchmode && !runscript) {
 	mgr_request_shutdown();
-	return state;
+	return agent_cb->state;
     }
 
     /* check the run-script parameters */
     if (runscript && !runscriptdone) {
 	runscriptdone = TRUE;
-	res = do_startup_script();
+	res = do_startup_script(agent_cb);
 	if (res != NO_ERR) {
 	    mgr_request_shutdown();
-	    return state;
+	    return agent_cb->state;
 	}
     }
 
@@ -6437,30 +6761,30 @@ static mgr_io_state_t
 	    if (batchmode) {
 		mgr_request_shutdown();
 	    }
-	    return state;
+	    return agent_cb->state;
 	}
     } else {
 	/* block until user enters some input */
-	line = get_cmd_line(&res);
+	line = get_cmd_line(agent_cb, &res);
 	if (!line) {
-	    return state;
+	    return agent_cb->state;
 	}
     }
 
     /* check if this is an assignment statement */
-    res = check_assign_statement(line, &len, &getrpc);
+    res = check_assign_statement(agent_cb, line, &len, &getrpc);
     if (res != NO_ERR) {
 	log_error("\nyangcli: Variable assignment failed (%s) (%s)",
 		  line, get_error_string(res));
     } else if (getrpc) {
-	switch (state) {
+	switch (agent_cb->state) {
 	case MGR_IO_ST_IDLE:
 	    /* waiting for top-level commands */
-	    top_command(&line[len]);
+	    top_command(agent_cb, &line[len]);
 	    break;
 	case MGR_IO_ST_CONN_IDLE:
 	    /* waiting for session commands */
-	    conn_command(&line[len]);
+	    conn_command(agent_cb, &line[len]);
 	    break;
 	case MGR_IO_ST_CONN_RPYWAIT:
 	    /* waiting for RPC reply while more input typed */
@@ -6474,7 +6798,7 @@ static mgr_io_state_t
 	log_info("\nOK\n");
     }
 
-    return state;
+    return agent_cb->state;
 
 } /* yangcli_stdin_handler */
 
@@ -6496,6 +6820,7 @@ static status_t
 	      const char *argv[])
 {
     const obj_template_t *obj;
+    agent_cb_t           *agent_cb;
     ncx_lmem_t           *lmem;
     val_value_t          *parm;
     ncx_node_t            dtyp;
@@ -6513,8 +6838,8 @@ static status_t
 #endif
 
     /* init the module static vars */
-    state = MGR_IO_ST_INIT;
-    mysid = 0;
+    dlq_createSQue(&agent_cbQ);
+    /* state = MGR_IO_ST_INIT; */
     mgr_cli_valset = NULL;
     connect_valset = NULL;
     batchmode = FALSE;
@@ -6522,8 +6847,6 @@ static status_t
     helpmode = FALSE;
     versionmode = FALSE;
     modules = NULL;
-    default_target = NULL;
-    get_optional = FALSE;
     autoload = TRUE;
     fixorder = TRUE;
     autocomp = TRUE;
@@ -6531,8 +6854,6 @@ static status_t
     logfilename = NULL;
     runscript = NULL;
     runscriptdone = FALSE;
-    result_name = NULL;
-    result_isglobal = FALSE;
     memset(clibuff, 0x0, sizeof(clibuff));
     climore = FALSE;
     malloc_cnt = 0;
@@ -6580,7 +6901,9 @@ static status_t
 	return res;
     }
 
-    /* init the connect parmset */
+    /* init the connect parmset object template;
+     * find the connect RPC method
+     */
     dtyp = NCX_NT_OBJ;
     obj = (const obj_template_t *)
 	def_reg_find_moddef(YANGCLI_MOD, YANGCLI_CONNECT, &dtyp);
@@ -6588,6 +6911,7 @@ static status_t
 	return ERR_NCX_DEF_NOT_FOUND;
     }
 
+    /* set the parmset object to the input node of the RPC */
     obj = obj_find_child(obj, NULL, YANG_K_INPUT);
     if (!obj) {
 	return ERR_NCX_DEF_NOT_FOUND;
@@ -6604,17 +6928,11 @@ static status_t
 	val_init_from_template(connect_valset, obj);
     }
 
-    /* CMD-P1) Get any command line parameters */
+    /* Get any command line and conf file parameters */
     res = process_cli_input(argc, argv);
     if (res != NO_ERR) {
 	return res;
     }
-
-    /* CMD-P2) Get any environment string parameters */
-    /***/
-
-    /* CMD-P3) Get any PS file parameters */
-    /***/
 
     /* check print version */
     if (versionmode && !helpmode) {
@@ -6631,6 +6949,16 @@ static status_t
     if (helpmode || versionmode) {
 	return NO_ERR;
     }
+
+
+    /* create a default agent control block */
+    agent_cb = new_agent_cb(YANGCLI_DEF_AGENT);
+    if (!agent_cb) {
+	return ERR_INTERNAL_MEM;
+    }
+    dlq_enque(agent_cb, &agent_cbQ);
+
+    cur_agent_cb = agent_cb;
 
     /* set the CLI handler */
     mgr_io_set_stdin_handler(yangcli_stdin_handler);
@@ -6662,16 +6990,18 @@ static status_t
 	}
     }
 
-
-    /* check to see if a session should be auto-started 
+    /* check to see if a session should be auto-started
+     * --> if the agent parameter is set a connect will
+     * --> be attempted
+     *
      * The yangcli_stdin_handler will call the finish_start_session
      * function when the user enters a line of keyboard text
      */
-    state = MGR_IO_ST_IDLE;
+    agent_cb->state = MGR_IO_ST_IDLE;
     if (connect_valset) {
 	parm = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_AGENT);
 	if (parm && parm->res == NO_ERR) {
-	    do_connect(NULL, NULL, 0, TRUE);
+	    do_connect(agent_cb, NULL, NULL, 0, TRUE);
 	}
     }
 
@@ -6689,6 +7019,8 @@ static status_t
 static void
     yangcli_cleanup (void)
 {
+    agent_cb_t  *agent_cb;
+
     log_debug2("\nShutting down yangcli\n");
 
     /* cleanup the user edit buffer */
@@ -6704,8 +7036,15 @@ static void
     ncx_cleanup();
 
     /* clean and reset all module static vars */
-    state = MGR_IO_ST_NONE;
-    mysid = 0;
+    if (cur_agent_cb) {
+	cur_agent_cb->state = MGR_IO_ST_NONE;
+	cur_agent_cb->mysid = 0;
+    }
+
+    while (!dlq_empty(&agent_cbQ)) {
+	agent_cb = (agent_cb_t *)dlq_deque(&agent_cbQ);
+	free_agent_cb(agent_cb);
+    }
 
     if (mgr_cli_valset) {
 	val_free_value(mgr_cli_valset);
@@ -6742,20 +7081,12 @@ static void
 	runscript = NULL;
     }
 
-    if (result_name) {
-	m__free(result_name);
-	result_name = NULL;
-    }
-
-
-
     if (malloc_cnt != free_cnt) {
 	log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
 		  malloc_cnt, free_cnt);
     }
 
     log_close();
-
 
 }  /* yangcli_cleanup */
 

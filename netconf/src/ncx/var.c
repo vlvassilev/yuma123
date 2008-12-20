@@ -232,6 +232,7 @@ static status_t
 * Remove a user var 
 * 
 * INPUTS:
+*   varQ == que to use (NULL if not known yet)
 *   name == var name to remove
 *   namelen == length of name
 *   isglobal == TRUE if global var, FALSE if local var
@@ -240,21 +241,23 @@ static status_t
 *   found var struct or NULL if not found
 *********************************************************************/
 static ncx_var_t *
-    remove_var (const xmlChar *name,
+    remove_var (dlq_hdr_t *varQ,
+		const xmlChar *name,
 		uint32 namelen,
 		boolean isglobal)
 {
-    dlq_hdr_t  *que;
     ncx_var_t  *cur;
     int         ret;
 
-    que = get_que(isglobal, name);
-    if (!que) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+    if (!varQ) {
+	varQ = get_que(isglobal, name);
+	if (!varQ) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return NULL;
+	}
     }
 
-    for (cur = (ncx_var_t *)dlq_firstEntry(que);
+    for (cur = (ncx_var_t *)dlq_firstEntry(varQ);
 	 cur != NULL;
 	 cur = (ncx_var_t *)dlq_nextEntry(cur)) {
 	ret = xml_strncmp(name, cur->name, namelen);
@@ -275,6 +278,7 @@ static ncx_var_t *
 * Find a user var 
 * 
 * INPUTS:
+*   varQ == que to use or NULL if not known
 *   name == var name to find
 *   namelen == name length
 *   isglobal = TRUE if global var, FALSE if local
@@ -283,21 +287,23 @@ static ncx_var_t *
 *   found var struct or NULL if not found
 *********************************************************************/
 static ncx_var_t *
-    find_var (const xmlChar *name,
+    find_var (dlq_hdr_t *varQ,
+	      const xmlChar *name,
 	      uint32  namelen,
 	      boolean isglobal)
 {
-    dlq_hdr_t  *que;
     ncx_var_t  *cur;
     int         ret;
 
-    que = get_que(isglobal, name);
-    if (!que) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+    if (!varQ) {
+	varQ = get_que(isglobal, name);
+	if (!varQ) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return NULL;
+	}
     }
 
-    for (cur = (ncx_var_t *)dlq_firstEntry(que);
+    for (cur = (ncx_var_t *)dlq_firstEntry(varQ);
 	 cur != NULL;
 	 cur = (ncx_var_t *)dlq_nextEntry(cur)) {
 	ret = xml_strncmp(name, cur->name, namelen);
@@ -320,40 +326,35 @@ static ncx_var_t *
 * Force caller to deallocate var if there is an error
 *
 * INPUTS:
+*   varQ == queue to use or NULL if not known yet
 *   name == var name to set
 *   namelen == length of name
 *   val == var value to set
-*   isglobal == TRUE for global var, 
+*   isglobal == TRUE for global var, (ignored if varQ is non-NULL)
 *   issystem == TRUE for global system var, 
 * 
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
-    set_str (const xmlChar *name,
+    set_str (dlq_hdr_t *varQ,
+	     const xmlChar *name,
 	     uint32 namelen,
 	     val_value_t *val,
 	     boolean isglobal,
 	     boolean issystem)
 {
     ncx_var_t    *var;
-    dlq_hdr_t    *que;
     status_t      res;
 
     res = NO_ERR;
-
-    que = get_que(isglobal, name);
-    if (!que) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
 
     if (!val->name) {
 	val_set_name(val, name, namelen);
     }
 
     /* try to find this var */
-    var = find_var(name, xml_strlen(name), isglobal);
-
+    var = find_var(varQ, name, xml_strlen(name), isglobal);
     if (var) {
 	if (var->flags & VAR_FL_SYSTEM) {
 	    /* found system var, replace only if same type */
@@ -364,12 +365,19 @@ static status_t
 	val_free_value(var->val);
 	var->val = val;
     } else {
+	if (!varQ) {
+	    varQ = get_que(isglobal, name);
+	    if (!varQ) {
+		return SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	}
+
 	/* create a new value */
 	var = new_var(name, namelen, val, isglobal, issystem, &res);
 	if (!var || res != NO_ERR) {
 	    return res;
 	}
-	res = insert_var(var, que);
+	res = insert_var(var, varQ);
 	if (res != NO_ERR) {
 	    var->val = NULL;
 	    free_var(var);
@@ -420,7 +428,7 @@ status_t
 	return ERR_INTERNAL_MEM;
     }
 
-    res = set_str(name, namelen, val, isglobal, FALSE);
+    res = set_str(NULL, name, namelen, val, isglobal, FALSE);
     if (res != NO_ERR) {
 	val_free_value(val);
     }
@@ -460,6 +468,81 @@ status_t
 
 
 /********************************************************************
+* FUNCTION var_set_str_que
+* 
+* Find and set (or create a new) global user variable
+* 
+* INPUTS:
+*   varQ == variable binding Q to use instead of runstack
+*   name == var name to set
+*   namelen == length of name
+*   value == var value to set
+* 
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    var_set_str_que (dlq_hdr_t *varQ,
+		     const xmlChar *name,
+		     uint32 namelen,
+		     const val_value_t *value)
+{
+    val_value_t  *val;
+    status_t      res;
+
+#ifdef DEBUG
+    if (!varQ || !name || !value) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (!namelen) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    val = val_clone(value);
+    if (!val) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    res = set_str(varQ, name, namelen, val, FALSE, FALSE);
+    if (res != NO_ERR) {
+	val_free_value(val);
+    }
+    return res;
+
+}  /* var_set_str_que */
+
+
+/********************************************************************
+* FUNCTION var_set_que
+* 
+* Find and set (or create a new) Q-based user variable
+* 
+* INPUTS:
+*   varQ == varbind Q to use
+*   name == var name to set
+*   value == var value to set
+* 
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    var_set_que (dlq_hdr_t *varQ,
+		 const xmlChar *name,
+		 const val_value_t *value)
+{
+#ifdef DEBUG
+    if (!varQ || !name) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    return var_set_str_que(varQ, name, xml_strlen(name), value);
+
+}  /* var_set_que */
+
+
+/********************************************************************
 * FUNCTION var_free
 * 
 * Free a ncx_var_t struct
@@ -487,6 +570,36 @@ void
     m__free(var);
 
 }  /* var_free */
+
+
+
+/********************************************************************
+* FUNCTION var_clean_varQ
+* 
+* Clean a Q of ncx_var_t
+* 
+* INPUTS:
+*   varQ == Q of var structs to free
+* 
+*********************************************************************/
+void
+    var_clean_varQ (dlq_hdr_t *varQ)
+{
+    ncx_var_t *var;
+
+#ifdef DEBUG
+    if (!varQ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    while (!dlq_empty(varQ)) {
+	var = (ncx_var_t *)dlq_deque(varQ);
+	var_free(var);
+    }
+
+}  /* var_clean_varQ */
 
 
 /********************************************************************
@@ -520,7 +633,7 @@ status_t
     }
 #endif
 
-    return set_str(name, namelen, value, isglobal, FALSE);
+    return set_str(NULL, name, namelen, value, isglobal, FALSE);
 
 }  /* var_set_move */
 
@@ -555,7 +668,7 @@ status_t
 	return ERR_INTERNAL_MEM;
     }
 
-    res = set_str(name, xml_strlen(name), val, TRUE, TRUE);
+    res = set_str(NULL, name, xml_strlen(name), val, TRUE, TRUE);
     if (res != NO_ERR) {
 	val_free_value(val);
     }
@@ -596,7 +709,7 @@ const val_value_t *
     }
 #endif
 
-    var = find_var(name, namelen, isglobal);
+    var = find_var(NULL, name, namelen, isglobal);
     if (var) {
 	return var->val;
     } else {
@@ -631,7 +744,7 @@ const val_value_t *
     }
 #endif
 
-    var = find_var(name, xml_strlen(name), isglobal);
+    var = find_var(NULL, name, xml_strlen(name), isglobal);
     if (var) {
 	return var->val;
     } else {
@@ -639,6 +752,82 @@ const val_value_t *
     }
 
 }  /* var_get */
+
+
+/********************************************************************
+* FUNCTION var_get_str_que
+* 
+* Find a global user variable
+* 
+* INPUTS:
+*   varQ == queue of ncx_var_t to use
+*   name == var name to get
+*   namelen == length of name
+*
+* RETURNS:
+*   pointer to value, or NULL if not found
+*********************************************************************/
+const val_value_t *
+    var_get_str_que (dlq_hdr_t *varQ,
+		     const xmlChar *name,
+		     uint32 namelen)
+{
+    ncx_var_t    *var;
+
+#ifdef DEBUG
+    if (!varQ || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+    if (!namelen) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+#endif
+
+    var = find_var(varQ, name, namelen, FALSE);
+    if (var) {
+	return var->val;
+    } else {
+	return NULL;
+    }
+
+}  /* var_get_str_que */
+
+
+/********************************************************************
+* FUNCTION var_get_que
+* 
+* Find a Q-based user variable
+* 
+* INPUTS:
+*   varQ == Q of ncx_var_t to use
+*   name == var name to get
+* 
+* RETURNS:
+*   pointer to value, or NULL if not found
+*********************************************************************/
+const val_value_t *
+    var_get_que (dlq_hdr_t *varQ,
+		 const xmlChar *name)
+{
+    const ncx_var_t  *var;
+
+#ifdef DEBUG
+    if (!name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    var = find_var(varQ, name, xml_strlen(name), FALSE);
+    if (var) {
+	return var->val;
+    } else {
+	return NULL;
+    }
+
+}  /* var_get_que */
 
 
 /********************************************************************
@@ -671,7 +860,7 @@ void
     }
 #endif
 
-    var = remove_var(name, namelen, isglobal);
+    var = remove_var(NULL, name, namelen, isglobal);
     if (var) {
 	free_var(var);
     } else {
@@ -679,6 +868,46 @@ void
     }
 
 }  /* var_unset */
+
+
+/********************************************************************
+* FUNCTION var_unset_que
+* 
+* Find and remove a Q-based user variable
+* 
+* INPUTS:
+*   varQ == Q of ncx_var_t to use
+*   name == var name to unset
+*   namelen == length of name string
+* 
+*********************************************************************/
+void
+    var_unset_que (dlq_hdr_t *varQ,
+		   const xmlChar *name,
+		   uint32 namelen)
+{
+
+    ncx_var_t *var;
+
+#ifdef DEBUG
+    if (!varQ || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+    if (!namelen) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+#endif
+
+    var = remove_var(varQ, name, namelen, FALSE);
+    if (var) {
+	free_var(var);
+    } else {
+	log_error("\nunset: Variable %s not found", name);
+    }
+
+}  /* var_unset_que */
 
 
 /********************************************************************
@@ -1173,7 +1402,7 @@ status_t
     val_set_name(val, name, xml_strlen(name));
 
     /* save the variable */
-    res = set_str(name, xml_strlen(name), val, isglobal, FALSE);
+    res = set_str(NULL, name, xml_strlen(name), val, isglobal, FALSE);
     if (res != NO_ERR) {
 	val_free_value(val);
     }

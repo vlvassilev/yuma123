@@ -97,8 +97,23 @@ extern status_t
 	     const val_value_t *value,
 	     boolean isglobal);
 
+
+extern status_t
+    var_set_str_que (dlq_hdr_t  *varQ,
+		     const xmlChar *name,
+		     uint32 namelen,
+		     const val_value_t *value);
+
+extern status_t
+    var_set_que (dlq_hdr_t *varQ,
+		 const xmlChar *name,
+		 const val_value_t *value);
+
 extern void
     var_free (ncx_var_t *var);
+
+extern void
+    var_clean_varQ (dlq_hdr_t *varQ);
 
 extern status_t
     var_set_move (const xmlChar *name,
@@ -119,10 +134,24 @@ extern const val_value_t *
     var_get (const xmlChar *name,
 	     boolean isglobal);
 
+extern const val_value_t *
+    var_get_str_que (dlq_hdr_t *varQ,
+		     const xmlChar *name,
+		     uint32 namelen);
+
+extern const val_value_t *
+    var_get_que (dlq_hdr_t *varQ,
+		 const xmlChar *name);
+
 extern void
     var_unset (const xmlChar *name,
 	       uint32 namelen,
 	       boolean isglobal);
+
+extern void
+    var_unset_que (dlq_hdr_t *varQ,
+		   const xmlChar *name,
+		   uint32 namelen);
 
 extern status_t
     var_check_ref (const xmlChar *line,

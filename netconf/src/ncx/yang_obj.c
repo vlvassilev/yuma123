@@ -3664,6 +3664,94 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION resolve_mustQ
+* 
+* Check any must-stmts for this node
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   mod == module in progress containing obj
+*   obj == object to check (from the cooked module,
+*                           not from any grouping or augment)
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_mustQ (ncx_module_t  *mod,
+		   obj_template_t *obj)
+{
+    xpath_pcb_t    *must;
+    dlq_hdr_t      *mustQ;
+    status_t        res, retres;
+
+    mustQ = obj_get_mustQ(obj);
+    if (!mustQ) {
+	return NO_ERR;
+    }
+
+    retres = NO_ERR;
+    for (must = (xpath_pcb_t *)dlq_firstEntry(mustQ);
+	 must != NULL;
+	 must = (xpath_pcb_t *)dlq_nextEntry(must)) {
+
+	if (must->parseres != NO_ERR) {
+	    /* some errors already reported so do not
+	     * duplicate messages; just skip 2nd pass
+	     */
+	    continue;
+	}
+
+	res = xpath1_validate_expr(mod, obj, must);
+	CHK_EXIT(res, retres);
+    }
+    return retres;
+
+}  /* resolve_mustQ */
+
+
+/********************************************************************
+* FUNCTION resolve_when
+* 
+* Check any when-stmt for this node
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   mod == module in progress containing obj
+*   obj == object to check (from the cooked module,
+*                           not from any grouping or augment)
+*
+* OUTPUTS:
+*   pcb->validateres is set
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_when (ncx_module_t  *mod,
+		  obj_template_t *obj)
+{
+    if (!obj->when) {
+	return NO_ERR;
+    }
+
+    if (obj->when->parseres != NO_ERR) {
+	/* some errors already reported so do not
+	 * duplicate messages; just skip 2nd pass
+	 */
+	return NO_ERR;
+    }
+
+    return xpath1_validate_expr(mod, obj, obj->when);
+
+}  /* resolve_when */
+
+
+/********************************************************************
 * FUNCTION resolve_metadata
 * 
 * Check the object for ncx:metadata definitions
@@ -3858,8 +3946,12 @@ static status_t
     res = check_parent(tkc, mod, obj);
     CHK_EXIT(res, retres);
 
-    /*** validate must Xpath well-formed ***/
-		     
+    res = resolve_mustQ(mod, obj);
+    CHK_EXIT(res, retres);
+
+    res = resolve_when(mod, obj);
+    CHK_EXIT(res, retres);
+
     return retres;
 				    
 }  /* resolve_container */
@@ -3914,7 +4006,11 @@ static status_t
     res = check_parent(tkc, mod, obj);
     CHK_EXIT(res, retres);
 
-    /*** validate must Xpath well-formed ***/
+    res = resolve_mustQ(mod, obj);
+    CHK_EXIT(res, retres);
+
+    res = resolve_when(mod, obj);
+    CHK_EXIT(res, retres);
 
     return retres;
 				    
@@ -3979,7 +4075,11 @@ static status_t
 	}
     }
 
-    /*** validate must Xpath well-formed ***/
+    res = resolve_mustQ(mod, obj);
+    CHK_EXIT(res, retres);
+
+    res = resolve_when(mod, obj);
+    CHK_EXIT(res, retres);
 
     return retres;
 				    
@@ -4032,7 +4132,11 @@ static status_t
     res = check_parent(tkc, mod, obj);
     CHK_EXIT(res, retres);
 
-    /*** validate must Xpath well-formed ***/
+    res = resolve_mustQ(mod, obj);
+    CHK_EXIT(res, retres);
+
+    res = resolve_when(mod, obj);
+    CHK_EXIT(res, retres);
 
     /* check if minelems and maxelems are valid */
     if (list->minelems && list->maxelems) {
@@ -4451,6 +4555,9 @@ static status_t
     res = check_parent(tkc, mod, obj);
     CHK_EXIT(res, retres);
 
+    res = resolve_when(mod, obj);
+    CHK_EXIT(res, retres);
+
     return retres;
 				    
 }  /* resolve_case */
@@ -4497,9 +4604,10 @@ static status_t
     }
 
     res = check_parent(tkc, mod, obj);
-
     CHK_EXIT(res, retres);
 
+    res = resolve_when(mod, obj);
+    CHK_EXIT(res, retres);
 
     /* finish up the data-def-stmts in each case arm */
     res = yang_obj_resolve_datadefs(tkc, mod, choic->caseQ);

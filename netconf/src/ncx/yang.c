@@ -1385,7 +1385,7 @@ status_t
     }
 
     /* parse the must expression for well-formed XPath */
-    res = xpath1_parse_expr(tkc, mod, must, XP_SRC_MUST);
+    res = xpath1_parse_expr(tkc, mod, must, XP_SRC_YANG);
     if (res != NO_ERR) {
 	/* errors already reported */
 	retres = res;
@@ -1499,7 +1499,6 @@ status_t
 }  /* yang_consume_must */
 
 
-
 /********************************************************************
 * FUNCTION yang_consume_when
 * 
@@ -1559,7 +1558,7 @@ status_t
 
 	if (res == NO_ERR) {
 	    res = xpath1_parse_expr(tkc, mod, obj->when,
-				    XP_SRC_WHEN);
+				    XP_SRC_YANG);
 	}
     }
 

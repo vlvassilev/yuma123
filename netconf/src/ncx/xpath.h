@@ -144,33 +144,31 @@ typedef enum xpath_curmode_t_ {
 typedef enum xpath_source_t_ {
     XP_SRC_NONE,
     XP_SRC_KEYREF,
-    XP_SRC_LEAFREF,
-    XP_SRC_MUST,
-    XP_SRC_WHEN,
-    XP_SRC_GETOP
+    XP_SRC_YANG,
+    XP_SRC_XML
 } xpath_source_t;
 
 
 /* XPath expression operation type */
 typedef enum xpath_exop_t_ {
     XP_EXOP_NONE,
-    XP_EXOP_AND,
-    XP_EXOP_OR,
-    XP_EXOP_EQUAL,
-    XP_EXOP_NOTEQUAL,
-    XP_EXOP_LT,
-    XP_EXOP_GT,
-    XP_EXOP_LEQUAL,
-    XP_EXOP_GEQUAL,
-    XP_EXOP_ADD,
-    XP_EXOP_SUBTRACT,
-    XP_EXOP_MULTIPLY,
-    XP_EXOP_DIV,
-    XP_EXOP_MOD,
-    XP_EXOP_NEGATE,
-    XP_EXOP_UNION,
-    XP_EXOP_FILTER1,
-    XP_EXOP_FILTER2
+    XP_EXOP_AND,         /* keyword 'and' */
+    XP_EXOP_OR,          /* keyword 'or' */
+    XP_EXOP_EQUAL,       /* equals '=' */
+    XP_EXOP_NOTEQUAL,    /* bang equals '!=' */
+    XP_EXOP_LT,          /* left angle bracket '<' */
+    XP_EXOP_GT,          /* right angle bracket '>' */
+    XP_EXOP_LEQUAL,      /* l. angle-equals '<= */
+    XP_EXOP_GEQUAL,      /* r. angle-equals '>=' */
+    XP_EXOP_ADD,         /* plus sign '+' */
+    XP_EXOP_SUBTRACT,    /* minus '-' */
+    XP_EXOP_MULTIPLY,    /* asterisk '*' */
+    XP_EXOP_DIV,         /* keyword 'div' */
+    XP_EXOP_MOD,         /* keyword 'mod' */
+    XP_EXOP_NEGATE,      /* unary '-' */
+    XP_EXOP_UNION,       /* vert. bar '|' */
+    XP_EXOP_FILTER1,     /* fwd slash '/' */
+    XP_EXOP_FILTER2      /* double fwd slash (C++ comment) */
 } xpath_exop_t;
 
 /* XPath expression node types */
@@ -247,25 +245,34 @@ typedef struct xpath_pcb_t_ {
     tk_chain_t          *tkc;               /* chain for exprstr */
     tk_token_t          *tk;              /* back-ptr for errors */
     xmlChar             *exprstr;           /* YANG XPath string */
+
+    /* the prefixes in the QNames in the exprstr MUST be resolved
+     * in different contexts.  
+     *
+     * For must/when/keyref XPath, the prefix is a module prefix
+     * which must match an import statement in the 'mod' import Q
+     *
+     * For XML context (NETCONF PDU 'select' attribute)
+     * the prefix is part of an extended name, representing
+     * XML namespace for the module that defines that node
+     */
     ncx_module_t        *mod;         /* bptr to exprstr context */
     boolean              abspath;
     xpath_source_t       source;
 
     ncx_errinfo_t        errinfo;           /* must error extras */
 
-    /* these 2 parms are used to parse keyref path-arg 
+    /* these parms are used to parse keyref path-arg 
      * limited object tree syntax allowed only
      */
     ncx_module_t          *objmod;        /* module containing obj */
     const obj_template_t  *docroot;        /* bptr to <config> obj */
     const obj_template_t  *obj;            /* bptr to start object */
     const obj_template_t  *targobj;       /* bptr to result object */
-    const obj_template_t  *altobj;       /* bptr to result object */
-    const obj_template_t  *varobj;       /* bptr to key-expr object */
+    const obj_template_t  *altobj;        /* bptr to result object */
+    const obj_template_t  *varobj;      /* bptr to key-expr object */
     xpath_curmode_t        curmode;     /* select targ/alt/var obj */
-
-    xpath_axis_t           curaxis;    
-
+    boolean                rpcroot;      /* docroot is really /rpc */
 
     /* these parms are used for must and when processing
      * against a target database ; full XPath 1.0 allowed
@@ -275,7 +282,17 @@ typedef struct xpath_pcb_t_ {
     xpath_result_t      *curfilter;
     uint32               cxtpos;
     uint32               cxtsize;
-    dlq_hdr_t            varbindQ;          /* Q of val_value_t */
+    xpath_axis_t         curaxis;    
+
+    /* The varbindQ is passed in as a parameter by the app
+     * It contains zero or more ncx_var_t structs
+     */
+    dlq_hdr_t           *varbindQ;         /* Q of ncx_var_t */
+
+    /* The function Q is a copy of the global Q
+     * It is not hardwired in case app-specific extensions
+     * are added later
+     */
     const struct xpath_fncb_t_ *functions;   /* array of xpath_fncb_t */
     status_t             parseres;
     status_t             validateres;
@@ -385,6 +402,11 @@ extern status_t
 				  ncx_module_t *mod,
 				  ncx_module_t **targmod);
 
+extern status_t
+    xpath_get_curmod_from_prefix_str (const xmlChar *prefix,
+				      uint32 prefixlen,
+				      ncx_module_t *mod,
+				      ncx_module_t **targmod);
 
 extern status_t
     xpath_parse_token (xpath_pcb_t *pcb,

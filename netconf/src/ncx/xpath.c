@@ -1094,8 +1094,6 @@ xpath_pcb_t *
 	}
     }
 
-    dlq_createSQue(&pcb->varbindQ);
-
     ncx_init_errinfo(&pcb->errinfo);
 
     pcb->functions = xpath1_get_functions_ptr();
@@ -1188,13 +1186,6 @@ xpath_pcb_t *
 void
     xpath_free_pcb (xpath_pcb_t *pcb)
 {
-    val_value_t  *val;
-
-    while (!dlq_empty(&pcb->varbindQ)) {
-	val = (val_value_t *)dlq_deque(&pcb->varbindQ);
-	val_free_value(val);
-    }
-
     if (pcb->tkc) {
 	tk_free_chain(pcb->tkc);
     }
@@ -1514,6 +1505,58 @@ status_t
     return res;
 
 }   /* xpath_get_curmod_from_prefix */
+
+
+
+/********************************************************************
+* FUNCTION xpath_get_curmod_from_prefix_str
+* 
+* Get the correct module to use for a given prefix
+* Unended string version
+*
+* INPUTS:
+*    prefix == string to check
+*    prefixlen == length of prefix
+*    mod == module to use for the default context
+*           and prefixes will be relative to this module's
+*           import statements.
+*        == NULL and the default registered prefixes
+*           will be used
+*    targmod == address of return module
+*
+* OUTPUTS:
+*    *targmod == target moduke to use
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_get_curmod_from_prefix_str (const xmlChar *prefix,
+				      uint32 prefixlen,
+				      ncx_module_t *mod,
+				      ncx_module_t **targmod)
+{
+    xmlChar        *buff;
+    status_t        res;
+
+    if (prefix && prefixlen) {
+	buff = m__getMem(prefixlen+1);
+	if (!buff) {
+	    return ERR_INTERNAL_MEM;
+	}
+	xml_strncpy(buff, prefix, prefixlen);
+
+	res = xpath_get_curmod_from_prefix(buff, mod, targmod);
+	
+	m__free(buff);
+
+	return res;
+    } else {
+	return xpath_get_curmod_from_prefix(NULL, mod, targmod);
+    }
+    /*NOTREACHED*/
+
+}   /* xpath_get_curmod_from_prefix_str */
 
 
 /********************************************************************

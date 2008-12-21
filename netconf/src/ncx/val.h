@@ -227,6 +227,10 @@ typedef struct val_value_t_ {
      * to be added to object nodes for anyxml, leaf, leaf-list,
      * list, and container nodes.  The config property will
      * be inherited from the object that contains the metadata
+     *
+     * This is used mostly for RPC input parameters
+     * and is strongly discouraged.  Full edit-config
+     * support is not provided for metdata
      */
     dlq_hdr_t      metaQ;                       /* Q of val_value_t */
 

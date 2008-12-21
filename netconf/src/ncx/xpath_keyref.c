@@ -131,7 +131,7 @@ static status_t
 
     if (res == NO_ERR) {
 	res = xpath_get_curmod_from_prefix(prefix,
-					   pcb->objmod,
+					   pcb->mod,
 					   &targmod);
 	if (res != NO_ERR) {
 	    log_error("\nError: Module for prefix '%s' not found",
@@ -140,7 +140,7 @@ static status_t
     }
 
     if (res != NO_ERR) {
-	ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	ncx_print_errormsg(pcb->tkc, pcb->mod, res);
 	return res;
     }
 
@@ -658,8 +658,6 @@ static status_t
 		    continue;
 		}
 		break;
-	    case XP_SRC_LEAFREF:
-		break;
 	    default:
 		res = SET_ERROR(ERR_INTERNAL_VAL);
 		ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
@@ -1157,7 +1155,7 @@ status_t
 		      obj_get_name(pcb->targobj));
 	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
 	    pcb->validateres = res;
-	} else if (pcb->source == XP_SRC_KEYREF) {
+	} else {
 	    if (!obj_is_key(pcb->targobj)) {
 		res = ERR_NCX_INVALID_VALUE;
 		log_error("\nError: path target '%s' is "

@@ -1266,6 +1266,48 @@ static boolean
 
 
 /********************************************************************
+* FUNCTION check_qname_prefix
+* 
+* Check the prefix for the current node against the proper context
+* and report any unresolved prefix errors
+*
+* Do not check the local-name part of the QName because
+* the module is still being parsed and out of order
+* nodes will not be found yet
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    check_qname_prefix (xpath_pcb_t *pcb)
+{
+    const xmlChar  *prefix;
+    ncx_module_t   *targmod;
+    uint32          prefixlen;
+    status_t        res;
+
+    prefix = TK_CUR_MOD(pcb->tkc);
+    prefixlen = TK_CUR_MODLEN(pcb->tkc);
+
+    res = xpath_get_curmod_from_prefix_str(prefix, prefixlen,
+					   pcb->mod, &targmod);
+
+    if (res != NO_ERR) {
+	log_error("\nError: Module for prefix '%s' not found",
+		  (prefix) ? prefix : (const xmlChar *)"");
+	ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+    }
+
+    return res;
+    
+}  /* check_qname_prefix */
+
+
+
+/********************************************************************
 * FUNCTION eval_xpath_op
 * 
 * Evaluate the XPath operation on the 1 or 2 operands
@@ -1356,6 +1398,10 @@ static xpath_result_t *
 	break;
     case TK_TT_MSTRING:
 	/* match all element children with same QName */
+	*res = check_qname_prefix(pcb);
+	if (*res != NO_ERR) {
+	    return NULL;
+	}
 	break;
     case TK_TT_TSTRING:
 	/* check the ID token for a NodeType name */
@@ -2135,7 +2181,7 @@ static xpath_result_t *
     val1 = NULL;
     val2 = NULL;
 
-    /* peek ahead to check the possible next chars */
+    /* peek ahead to check the possible next sequence */
     nexttyp = tk_next_typ(pcb->tkc);
     switch (nexttyp) {
     case TK_TT_FSLASH:                /* abs location path */
@@ -2960,6 +3006,10 @@ status_t
 *    obj == object using the keyref data type
 *    pcb == the keyref parser control block from the typdef
 *
+* OUTPUTS:
+*   pcb->obj and pcb->objmod are set
+*   pcb->validateres is set
+*
 * RETURNS:
 *   status
 *********************************************************************/
@@ -2968,8 +3018,7 @@ status_t
                           const obj_template_t *obj,
                           xpath_pcb_t *pcb)
 {
-#if 0
-    status_t  res;
+    xpath_result_t  *result;
 
 #ifdef DEBUG
     if (!mod || !obj || !pcb) {
@@ -2991,64 +3040,29 @@ status_t
     }
 
     tk_reset_chain(pcb->tkc);
+
     pcb->objmod = mod;
     pcb->obj = obj;
-    pcb->source = XP_SRC_KEYREF;
     pcb->targobj = NULL;
     pcb->altobj = NULL;
     pcb->varobj = NULL;
     pcb->curmode = XP_CM_TARGET;
 
+    if (!obj_is_data_db(obj)) {
+	pcb->rpcroot = TRUE;
+    }
+
     /* validate the XPath expression against the 
      * full cooked object tree
      */
-    pcb->validateres = parse_path_arg(pcb);
+    result = parse_expr(pcb, &pcb->validateres);
 
-    /* check keyref is config but target is not */
-    if (pcb->validateres == NO_ERR && pcb->targobj) {
-        if (obj_get_config_flag(obj) &&
-            !obj_get_config_flag(pcb->targobj)) {
-            res = ERR_NCX_NOT_CONFIG;
-            log_error("\nError: XPath target '%s' for keyref '%s' must be "
-                      "a config object",
-                      obj_get_name(pcb->targobj),
-                      obj_get_name(obj));
-            ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
-            pcb->validateres = res;
-        }
-
-        switch (pcb->source) {
-        case XP_SRC_KEYREF:
-            if (!obj_is_key(pcb->targobj)) {
-                res = ERR_NCX_TYPE_NOT_INDEX;
-                log_error("\nError: path target '%s' is "
-                          "not a key leaf",
-                          obj_get_name(pcb->targobj));
-                ncx_mod_exp_err(pcb->tkc, 
-                                pcb->objmod, 
-                                res, "key leaf");
-                pcb->validateres = res;
-            }
-            break;
-        case XP_SRC_LEAFREF:
-            break;
-        default:
-            ;
-        }
-
-        if (pcb->targobj == pcb->obj) {
-            res = ERR_NCX_DEF_LOOP;
-            log_error("\nError: path target '%s' is set to "
-                      "the target object",
-                      obj_get_name(pcb->targobj));
-            ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
-        }
+    if (result) {
+	xpath_free_result(result);
     }
 
     return pcb->validateres;
-#else
-    return NO_ERR;
-#endif
+
 }  /* xpath1_validate_expr */
 
 

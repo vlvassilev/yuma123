@@ -3722,6 +3722,7 @@ static status_t
 *
 * INPUTS:
 *   mod == module in progress containing obj
+*   when == XPath control block to use
 *   obj == object to check (from the cooked module,
 *                           not from any grouping or augment)
 *
@@ -3733,20 +3734,17 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_when (ncx_module_t  *mod,
+		  xpath_pcb_t *when,
 		  obj_template_t *obj)
 {
-    if (!obj->when) {
-	return NO_ERR;
-    }
-
-    if (obj->when->parseres != NO_ERR) {
+    if (when->parseres != NO_ERR) {
 	/* some errors already reported so do not
 	 * duplicate messages; just skip 2nd pass
 	 */
 	return NO_ERR;
     }
 
-    return xpath1_validate_expr(mod, obj, obj->when);
+    return xpath1_validate_expr(mod, obj, when);
 
 }  /* resolve_when */
 
@@ -3946,12 +3944,6 @@ static status_t
     res = check_parent(tkc, mod, obj);
     CHK_EXIT(res, retres);
 
-    res = resolve_mustQ(mod, obj);
-    CHK_EXIT(res, retres);
-
-    res = resolve_when(mod, obj);
-    CHK_EXIT(res, retres);
-
     return retres;
 				    
 }  /* resolve_container */
@@ -4004,12 +3996,6 @@ static status_t
     }
 
     res = check_parent(tkc, mod, obj);
-    CHK_EXIT(res, retres);
-
-    res = resolve_mustQ(mod, obj);
-    CHK_EXIT(res, retres);
-
-    res = resolve_when(mod, obj);
     CHK_EXIT(res, retres);
 
     return retres;
@@ -4075,12 +4061,6 @@ static status_t
 	}
     }
 
-    res = resolve_mustQ(mod, obj);
-    CHK_EXIT(res, retres);
-
-    res = resolve_when(mod, obj);
-    CHK_EXIT(res, retres);
-
     return retres;
 				    
 }  /* resolve_leaflist */
@@ -4130,12 +4110,6 @@ static status_t
     CHK_EXIT(res, retres);
 
     res = check_parent(tkc, mod, obj);
-    CHK_EXIT(res, retres);
-
-    res = resolve_mustQ(mod, obj);
-    CHK_EXIT(res, retres);
-
-    res = resolve_when(mod, obj);
     CHK_EXIT(res, retres);
 
     /* check if minelems and maxelems are valid */
@@ -4555,9 +4529,6 @@ static status_t
     res = check_parent(tkc, mod, obj);
     CHK_EXIT(res, retres);
 
-    res = resolve_when(mod, obj);
-    CHK_EXIT(res, retres);
-
     return retres;
 				    
 }  /* resolve_case */
@@ -4604,9 +4575,6 @@ static status_t
     }
 
     res = check_parent(tkc, mod, obj);
-    CHK_EXIT(res, retres);
-
-    res = resolve_when(mod, obj);
     CHK_EXIT(res, retres);
 
     /* finish up the data-def-stmts in each case arm */
@@ -7113,34 +7081,39 @@ status_t
 	 testobj != NULL;
 	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-	/*** validate correct Xpath in when clause ***/
-	/*** XPATH TBD ***/
-
-	/*** validate correct Xpath in must clauses ***/
-	/*** XPATH TBD ***/
-
 	if (!obj_has_name(testobj)) {
 	    /* skip augment and uses */
 	    continue;
 	}
-	
+
+	/* check the when-stmt in the object itself */
 	if (testobj->when) {
-	    /****/;
+	    res = resolve_when(mod, testobj->when, testobj);
+	    CHK_EXIT(res, retres);
 	}
 
+	/* check the when-stmt in the uses object carried fwd */
 	if (testobj->usesobj && testobj->usesobj->when) {
-	    /****/;
+	    res = resolve_when(mod,
+			       testobj->usesobj->when,
+			       testobj);
+	    CHK_EXIT(res, retres);
 	}
 
+	/* check the when-stmt in the augment object carried fwd */
 	if (testobj->augobj && testobj->augobj->when) {
-	    /****/;
+	    res = resolve_when(mod,
+			       testobj->augobj->when,
+			       testobj);
+	    CHK_EXIT(res, retres);
 	}
 
+	/* validate correct Xpath in must clauses */
+	res = resolve_mustQ(mod, testobj);
+	CHK_EXIT(res, retres);
 	
 	switch (testobj->objtype) {
 	case OBJ_TYP_CONTAINER:
-	    /* check container must-stmts */
-
 	    /* check container children */
 	    res = 
 		yang_obj_resolve_xpath(tkc, mod, 
@@ -7159,13 +7132,8 @@ status_t
 		pcb = typ_get_keyref_pcb(typdef);
 		res = xpath_keyref_validate_path(mod, testobj, pcb);
 	    }
-
-	    /* check leaf or leaf-list must-stmts */
-
 	    break;
 	case OBJ_TYP_LIST:
-	    /* check the list must-stmts */
-
 	    /* check that none of the key leafs have more
 	     * conditionals than their list parent
 	     */

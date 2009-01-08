@@ -71,18 +71,19 @@ extern status_t
 		       xpath_pcb_t *pcb,
 		       xpath_source_t source);
 
-
 extern status_t
     xpath1_validate_expr (ncx_module_t *mod,
 			  const obj_template_t *obj,
 			  xpath_pcb_t *pcb);
 
 
-extern status_t
-    xpath1_get_value (ncx_module_t *mod,
+extern xpath_result_t *
+    xpath1_eval_expr (xpath_pcb_t *pcb,
 		      val_value_t *val,
-		      xpath_pcb_t *pcb);
-
+		      val_value_t *docroot,
+		      boolean logerrors,
+		      boolean configonly,
+		      status_t *res);
 
 extern const xpath_fncb_t *
     xpath1_get_functions_ptr (void);

@@ -450,7 +450,10 @@ static rpc_err_t
     case ERR_NCX_DUP_REFINE_STMT:
     case ERR_NCX_INVALID_DEV_STMT:
 	return RPC_ERR_OPERATION_FAILED;
-	
+    case ERR_NCX_INVALID_XPATH_EXPR:
+    case ERR_NCX_NO_XPATH_PARENT:
+	return RPC_ERR_INVALID_VALUE;
+
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:
     case ERR_INC_NOT_FOUND:
@@ -484,8 +487,15 @@ static rpc_err_t
     case ERR_PARS_SECDONE:
     case ERR_NCX_SKIPPED:
     case ERR_NCX_CANCELED:
+	return RPC_ERR_OPERATION_FAILED;
+    case ERR_NCX_EMPTY_XPATH_RESULT:
+    case ERR_NCX_NO_XPATH_CHILD:
+    case ERR_NCX_NO_XPATH_NODES:
+	return RPC_ERR_INVALID_VALUE;
+
     default:
 	return RPC_ERR_OPERATION_FAILED;	
+
     }
     /*NOTREACHED*/
 

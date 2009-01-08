@@ -129,6 +129,10 @@ date         init     comment
 #include  "xpath.h"
 #endif
 
+#ifndef _H_xpath1
+#include  "xpath1.h"
+#endif
+
 #ifndef _H_yangconst
 #include  "yangconst.h"
 #endif
@@ -1961,7 +1965,6 @@ static status_t
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   root == val_value_t or the target database root to validate
 *   curval == val_value_t for the current context node in the tree
-*   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
 *   if msg not NULL:
@@ -1976,12 +1979,12 @@ static status_t
     must_stmt_check (ses_cb_t *scb,
 		     xml_msg_hdr_t *msg,
 		     val_value_t *root,
-		     val_value_t *curval,
-		     ncx_layer_t   layer)
+		     val_value_t *curval)
 {
     const obj_template_t  *obj;
     const dlq_hdr_t       *mustQ;
     xpath_pcb_t           *must;
+    xpath_result_t        *result;
     val_value_t           *chval;
     status_t               res, retres;
 
@@ -1990,29 +1993,50 @@ static status_t
 
     obj = curval->obj;
 
-    for (chval = val_get_first_child(curval);
-	 chval != NULL;
-	 chval = val_get_next_child(chval)) {
-
-	res = must_stmt_check(scb, msg, root, chval, layer);
-	CHK_EXIT(res, retres);
+    if (!obj_has_name(obj)) {
+	return NO_ERR;
     }
 
+    /* execute all the must tests top down, so
+     * foo/bar errors are reported before /foo/bar/child
+     */
     mustQ = obj_get_mustQ(obj);
     if (mustQ && !dlq_empty(mustQ)) {
 
-#ifdef AGT_VAL_DEBUG
 	log_debug3("\nmst_stmt_check: %s start", curval->name);
-#endif
 
 	for (must = (xpath_pcb_t *)dlq_firstEntry(mustQ);
 	     must != NULL;
 	     must = (xpath_pcb_t *)dlq_nextEntry(must)) {
 
-	    /****/
-	    /*** agt_xpath_eval(scb, msg, root, curval, errinfo, layer);  ***/
+	    result = xpath1_eval_expr(must, curval, root, 
+				      FALSE, TRUE, &res);
+	    if (!result || res != NO_ERR) {
+		log_debug2("\nagt_val: must XPath failed for "
+			   "%s %s (%s)",
+			   obj_get_typestr(obj),
+			   obj_get_name(obj),
+			   get_error_string(res));
 
+		/**** agt_record_error(); invalid XPath ****/
+	    } else if (!xpath_cvt_boolean(result)) {
+		/**** agt_record_error(); must failed ****/
+
+	    }
+
+	    if (result) {
+		xpath_free_result(result);
+	    }
 	}
+    }
+
+    /* recurse for every child node until leafs are hit */
+    for (chval = val_get_first_child(curval);
+	 chval != NULL;
+	 chval = val_get_next_child(chval)) {
+
+	res = must_stmt_check(scb, msg, root, chval);
+	CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -2247,7 +2271,7 @@ status_t
 	 chval != NULL;
 	 chval = val_get_next_child(chval)) {
 
-	res = must_stmt_check(scb, msg, root, chval, NCX_LAYER_CONTENT);
+	res = must_stmt_check(scb, msg, root, chval);
 	CHK_EXIT(res, retres);
     }
 

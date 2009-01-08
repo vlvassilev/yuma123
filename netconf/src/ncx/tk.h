@@ -32,6 +32,10 @@ date	     init     comment
 #include "ncxtypes.h"
 #endif
 
+#ifndef _H_xmlns
+#include "xmlns.h"
+#endif
+
 /********************************************************************
 *								    *
 *			 C O N S T A N T S			    *
@@ -206,14 +210,15 @@ typedef enum tk_source_t_ {
 
 /* single NCX language token type */
 typedef struct tk_token_t_ {
-    dlq_hdr_t  qhdr;
-    tk_type_t  typ;
-    xmlChar    *mod;       /* only used if module qualifier found */
-    uint32     modlen;
+    dlq_hdr_t   qhdr;
+    tk_type_t   typ;
+    xmlChar    *mod;                  /* only used if prefix found */
+    uint32      modlen;          /* length of 'mod'; not Z-string! */
     xmlChar    *val;       /* only used for variable length tokens */
-    uint32     len;
-    uint32     linenum;
-    uint32     linepos;
+    uint32      len;
+    uint32      linenum;
+    uint32      linepos;
+    xmlns_id_t  nsid;        /* only used for TK_TT_MSTRING tokens */
 } tk_token_t;
 
 

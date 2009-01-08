@@ -4370,6 +4370,7 @@ val_value_t *
 }  /* val_find_child */
 
 
+
 /********************************************************************
 * FUNCTION val_match_child
 * 
@@ -4671,6 +4672,695 @@ uint32
     return cnt;
 
 }  /* val_child_inst_cnt */
+
+
+/********************************************************************
+* FUNCTION val_find_all_children
+* 
+* Find all occurances of the specified node(s)
+* within the children of the current node. 
+* The walker fn will be called for each match.  
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* INPUTS:
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    parent == parent complex type to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    childname == name of child node to find
+*              == NULL to match any child name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if childname == NULL
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
+boolean
+    val_find_all_children (val_walker_fn_t walkerfn,
+			   void *cookie1,
+			   void *cookie2,
+			   val_value_t  *parent,
+			   const xmlChar *modname,
+			   const xmlChar *childname,
+			   boolean configonly)
+{
+    val_value_t *val;
+    boolean      fnresult;
+
+#ifdef DEBUG
+    if (!parent) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    if (!typ_has_children(parent->btyp)) {
+	return FALSE;
+    }
+
+    for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
+	 val != NULL;
+	 val = (val_value_t *)dlq_nextEntry(val)) {
+
+	if (configonly && !childname && 
+	    !obj_is_config(val->obj)) {
+	    continue;
+	}
+
+	fnresult = TRUE;
+	if (modname && childname) {
+	    if (!xml_strcmp(modname, 
+			    obj_get_mod_name(val->obj)) &&
+		!xml_strcmp(childname, val->name)) {
+
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+	    }
+	} else if (modname) {
+	    if (!xml_strcmp(modname, obj_get_mod_name(val->obj))) {
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+	    }
+	} else if (childname) {
+	    if (!xml_strcmp(val->name, childname)) {
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+	    }
+	} else {
+	    fnresult = (*walkerfn)(val, cookie1, cookie2);
+	}
+	if (!fnresult) {
+	    return FALSE;
+	}
+
+    }
+    return TRUE;
+
+}  /* val_find_all_children */
+
+
+/********************************************************************
+* FUNCTION val_find_all_ancestors
+* 
+* Find all the ancestor instances of the specified node
+* within the path to root from the current node;
+* use the filter criteria provided
+*
+* INPUTS:
+*
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    startnode == node to start search at
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    name == name of ancestor node to find
+*              == NULL to match any node name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if descname == NULL
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
+boolean
+    val_find_all_ancestors (val_walker_fn_t  walkerfn,
+			    void *cookie1,
+			    void *cookie2,
+			    const val_value_t *startnode,
+			    const xmlChar *modname,
+			    const xmlChar *name,
+			    boolean configonly)
+{
+    val_value_t *val;
+    boolean      fnresult;
+
+#ifdef DEBUG
+    if (!startnode) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    val = startnode->parent;
+
+    while (val) {
+
+	if (configonly && !name && !obj_is_config(val->obj)) {
+	    val = val->parent;
+	    continue;
+	}
+
+	fnresult = TRUE;
+	if (modname && name) {
+	    if (!xml_strcmp(modname, 
+			    obj_get_mod_name(val->obj)) &&
+		!xml_strcmp(name, val->name)) {
+
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+	    }
+	} else if (modname) {
+	    if (!xml_strcmp(modname, obj_get_mod_name(val->obj))) {
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+	    }
+	} else if (name) {
+	    if (!xml_strcmp(val->name, name)) {
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+	    }
+	} else if (!val->parent) {
+	    fnresult = (*walkerfn)(val, cookie1, cookie2);
+	}
+	if (!fnresult) {
+	    return FALSE;
+	}
+	val = val->parent;
+    }
+    return TRUE;
+
+}  /* val_find_all_ancestors */
+
+
+/********************************************************************
+* FUNCTION val_find_descendant
+* 
+* Find the first instance of the specified node
+* within the current subtree
+*
+* INPUTS:
+*    startnode == start node to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    descname == name of descendent node to find
+*              == NULL to match any node name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if descname == NULL
+*
+* RETURNS:
+*   pointer to the node if found or NULL if not found
+*********************************************************************/
+val_value_t *
+    val_find_descendant (const val_value_t *startnode,
+			 const xmlChar *modname,
+			 const xmlChar *descname,
+			 boolean configonly)
+{
+    val_value_t *val, *findval;
+
+#ifdef DEBUG
+    if (!startnode) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (!typ_has_children(startnode->btyp)) {
+	return NULL;
+    }
+
+    for (val = (val_value_t *)dlq_firstEntry(&startnode->v.childQ);
+	 val != NULL;
+	 val = (val_value_t *)dlq_nextEntry(val)) {
+
+	if (configonly && !descname && !obj_is_config(val->obj)) {
+	    continue;
+	}
+
+	if (modname && descname) {
+	    if (!xml_strcmp(modname, 
+			    obj_get_mod_name(val->obj)) &&
+		!xml_strcmp(descname, val->name)) {
+		return val;
+	    }
+	} else if (modname) {
+	    if (!xml_strcmp(modname, obj_get_mod_name(val->obj))) {
+		return val;
+	    }
+	} else if (descname) {
+	    if (!xml_strcmp(val->name, descname)) {
+		return val;
+	    }
+	} else {
+	    return val;
+	}
+
+	findval = val_find_descendant(val, modname, 
+				      descname, configonly);
+	if (findval) {
+	    return findval;
+	}
+    }
+    return NULL;
+
+}  /* val_find_descendant */
+
+
+/********************************************************************
+* FUNCTION val_find_all_descendants
+* 
+* Find all occurances of the specified node
+* within the current subtree. The walker fn will
+* be called for each match.  
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* INPUTS:
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    startnode == startnode complex type to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    descname == name of descendent node to find
+*              == NULL to match any node name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if decname == NULL
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
+boolean
+    val_find_all_descendants (val_walker_fn_t walkerfn,
+			      void *cookie1,
+			      void *cookie2,
+			      val_value_t  *startnode,
+			      const xmlChar *modname,
+			      const xmlChar *descname,
+			      boolean configonly)
+{
+    val_value_t *val;
+    boolean      fncalled, fnresult;
+
+#ifdef DEBUG
+    if (!startnode) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    if (!typ_has_children(startnode->btyp)) {
+	return FALSE;
+    }
+
+    for (val = (val_value_t *)dlq_firstEntry(&startnode->v.childQ);
+	 val != NULL;
+	 val = (val_value_t *)dlq_nextEntry(val)) {
+
+	if (configonly && !descname && !obj_is_config(val->obj)) {
+	    continue;
+	}
+
+	fncalled = FALSE;
+	fnresult = TRUE;
+	if (modname && descname) {
+	    if (!xml_strcmp(modname, 
+			    obj_get_mod_name(val->obj)) &&
+		!xml_strcmp(descname, val->name)) {
+
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+		fncalled = TRUE;
+	    }
+	} else if (modname) {
+	    if (!xml_strcmp(modname, obj_get_mod_name(val->obj))) {
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+		fncalled = TRUE;
+	    }
+	} else if (descname) {
+	    if (!xml_strcmp(val->name, descname)) {
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+		fncalled = TRUE;
+	    }
+	} else {
+	    fnresult = (*walkerfn)(val, cookie1, cookie2);
+	    fncalled = TRUE;
+	}
+	if (!fnresult) {
+	    return FALSE;
+	}
+
+	if (!fncalled) {
+	    fnresult = val_find_all_descendants(walkerfn, cookie1, cookie2,
+						val, modname, descname, 
+						configonly);
+	    if (!fnresult) {
+		return FALSE;
+	    }
+	}
+    }
+    return TRUE;
+
+}  /* val_find_all_descendants */
+
+
+/********************************************************************
+* FUNCTION val_find_all_pfaxis
+* 
+* Find all occurances of the specified node
+* for the specified preceding or following axis
+*
+*   preceding::*
+*   preceding-sibling::*
+*   following::*
+*   following-sibling::*
+*
+* within the current subtree. The walker fn will
+* be called for each match.  Because the callbacks
+* will be done in sequential order, starting from
+* the 
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* INPUTS:
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    startnode == starting sibling node to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    name == name of preceding or following node to find
+*              == NULL to match any node name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if decname == NULL
+*    dblslash == TRUE if all decendents of the preceding
+*                 or following nodes should be checked
+*                FALSE only 
+*    axis == axis enum to use
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
+boolean
+    val_find_all_pfaxis (val_walker_fn_t  walkerfn,
+			 void *cookie1,
+			 void *cookie2,
+			 val_value_t  *startnode,
+			 const xmlChar *modname,
+			 const xmlChar *name,
+			 boolean configonly,
+			 boolean dblslash,
+			 ncx_xpath_axis_t axis)
+{
+    val_value_t *val, *child;
+    boolean      fncalled, fnresult, forward;
+
+#ifdef DEBUG
+    if (!startnode) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    /* check the Q containing the startnode
+     * for preceding or following nodes;
+     * could be sibling node check or any node check
+     */
+    switch (axis) {
+    case XP_AX_PRECEDING:   /*****/
+	return FALSE;
+    case XP_AX_PRECEDING_SIBLING:
+	/* execute the callback for all preceding nodes
+	 * that match the filter criteria 
+	 */
+	val = (val_value_t *)dlq_prevEntry(startnode);
+	forward = FALSE;
+	break;
+    case XP_AX_FOLLOWING:  /****/
+	return FALSE;
+    case XP_AX_FOLLOWING_SIBLING:
+	val = (val_value_t *)dlq_nextEntry(startnode);
+	forward = TRUE;
+	break;
+    case XP_AX_NONE:
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+
+    while (val) {
+	if (configonly && !name && !obj_is_config(val->obj)) {
+	    if (forward) {
+		val = (val_value_t *)dlq_nextEntry(val);
+	    } else {
+		val = (val_value_t *)dlq_prevEntry(val);
+	    }
+	    continue;
+	}
+
+	fncalled = FALSE;
+	fnresult = TRUE;
+	if (modname && name) {
+	    if (!xml_strcmp(modname, 
+			    obj_get_mod_name(val->obj)) &&
+		!xml_strcmp(name, val->name)) {
+
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+		fncalled = TRUE;
+	    }
+	} else if (modname) {
+	    if (!xml_strcmp(modname, obj_get_mod_name(val->obj))) {
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+		fncalled = TRUE;
+	    }
+	} else if (name) {
+	    if (!xml_strcmp(val->name, name)) {
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+		fncalled = TRUE;
+	    }
+	} else {
+	    fnresult = (*walkerfn)(val, cookie1, cookie2);
+	    fncalled = TRUE;
+	}
+	if (!fnresult) {
+	    return FALSE;
+	}
+
+	if (!fncalled && dblslash) {
+	    /* if /foo did not get added, than 
+	     * try /foo/bar, /foo/baz, etc.
+	     * check all the child nodes even if
+	     * one of them matches, because all
+	     * matches are needed with the '//' operator
+	     */
+	    for (child = val_get_first_child(val);
+		 child != NULL;
+		 child = val_get_next_child(child)) {
+
+		fnresult = 
+		    val_find_all_pfaxis(walkerfn, 
+					cookie1, 
+					cookie2,
+					child, 
+					modname, 
+					name, 
+					configonly,
+					dblslash,
+					axis);
+		if (!fnresult) {
+		    return FALSE;
+		}
+	    }
+	}
+
+	if (forward) {
+	    val = (val_value_t *)dlq_nextEntry(val);
+	} else {
+	    val = (val_value_t *)dlq_prevEntry(val);
+	}
+    }
+    return TRUE;
+
+}  /* val_find_all_pfaxis */
+
+
+/********************************************************************
+* FUNCTION val_get_axisnode
+* 
+* Find the specified node based on the context node,
+* a context position and an axis
+*
+*   ancestor::*
+*   ancestor-or-self::*
+*   child::*
+*   descendant::*
+*   descendant-or-self::*
+*   following::*
+*   following-sibling::*
+*   preceding::*
+*   preceding-sibling::*
+*   self::*
+*
+* INPUTS:
+*    startnode == starting sibling node to check
+*    topval == docroot for context size, position calculation
+*    axis == axis enum to use
+*    position == position to find in the specified axis
+*
+* RETURNS:
+*   pointer to found value or NULL if none
+*********************************************************************/
+val_value_t *
+    val_get_axisnode (val_value_t *startnode,
+		      val_value_t *topval,
+		      ncx_xpath_axis_t axis,
+		      int64 position)
+{
+    val_value_t  *val;
+    dlq_hdr_t   *parentQ;
+    int64        curpos;
+
+#ifdef DEBUG
+    if (!startnode) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+    if (position <= 0) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+#endif
+
+    curpos = 0;
+
+    /* check the Q containing the startnode
+     * for preceding or following nodes;
+     * could be sibling node check or any node check
+     */
+    switch (axis) {
+    case XP_AX_ANCESTOR:
+	/* starting at the parent of the contextnode,
+	 * count upwards back to the docroot,
+	 * and get the Nth position
+	 */
+	val = startnode;
+	while (val->parent) {
+	    if (++curpos == position) {
+		return val->parent;
+	    }
+	    val = val->parent;
+	}
+	return NULL;
+    case XP_AX_ANCESTOR_OR_SELF:
+	/* starting at the contextnode,
+	 * count upwards back to the docroot,
+	 * and get the Nth position
+	 */
+	if (position==1) {
+	    return startnode;
+	}
+
+	curpos++;
+
+	/* parent is position 2, not 1 */
+	val = startnode;
+	while (val->parent) {
+	    if (++curpos == position) {
+		return val->parent;
+	    }
+	    val = val->parent;
+	}
+	return NULL;
+    case XP_AX_ATTRIBUTE:
+	/* TBD: attributes not supported */
+	return NULL;
+    case XP_AX_CHILD:
+	if (startnode->parent) {
+	    /* get the Nth sibling for the startnode set */
+	    parentQ = &startnode->parent->v.childQ;
+	    val = (val_value_t *)dlq_firstEntry(parentQ);
+	    while (val) {
+		if (++curpos == position) {
+		    return val;
+		}
+		val = (val_value_t *)dlq_nextEntry(val);
+	    }
+	    return NULL;
+	} else {
+	    /* this is the docroot, so there is no
+	     * need to check anything.
+	     * Unless the position is 1, it is not a match
+	     */
+	    return (position == 1) ? startnode : NULL;
+	}
+	/*NOTREACHED*/
+    case XP_AX_DESCENDANT:
+
+	return NULL;
+    case XP_AX_DESCENDANT_OR_SELF:
+
+	return NULL;
+    case XP_AX_FOLLOWING:
+	/* get the Nth document node following startnode */
+	/****/
+	return NULL;
+    case XP_AX_FOLLOWING_SIBLING:
+	/* get the Nth sibling node following startnode */
+	val = (val_value_t *)dlq_nextEntry(startnode);
+	while (val) {
+	    if (++curpos == position) {
+		return val;
+	    }
+	    val = (val_value_t *)dlq_nextEntry(val); 
+	}
+	return NULL;
+    case XP_AX_NAMESPACE:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    case XP_AX_PARENT:
+	/* there can only be one node in this axis,
+	 * so if the startnode isn't it, then return NULL
+	 */
+	return (position == 1) ? startnode : NULL;
+    case XP_AX_PRECEDING:
+	/****/
+	return NULL;
+    case XP_AX_PRECEDING_SIBLING:
+	/* get the Nth sibling node preceding startnode */
+	val = (val_value_t *)dlq_prevEntry(startnode);
+	while (val) {
+	    if (++curpos == position) {
+		return val;
+	    }
+	    val = (val_value_t *)dlq_prevEntry(val); 
+	}
+	return NULL;
+    case XP_AX_NONE:
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+    /*NOTREACHED*/
+
+}  /* val_get_axisnode */
 
 
 /********************************************************************

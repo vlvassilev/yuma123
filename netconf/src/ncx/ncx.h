@@ -309,6 +309,14 @@ extern status_t
 		  ncx_num_t *num2,
 		  ncx_btype_t  btyp);
 
+extern boolean
+    ncx_num_is_integral (const ncx_num_t *num,
+			 ncx_btype_t  btyp);
+
+extern int64
+    ncx_cvt_to_int64 (const ncx_num_t *num,
+		      ncx_btype_t  btyp);
+
 extern ncx_numfmt_t
     ncx_get_numfmt (const xmlChar *numstr);
 
@@ -670,7 +678,7 @@ extern void
 			   ncx_module_t  *mod,
 			   status_t     res,
 			   const char *filename,
-			   uint linenum,
+			   uint32 linenum,
 			   boolean fineoln);
 
 

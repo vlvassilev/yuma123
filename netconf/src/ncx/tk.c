@@ -1511,6 +1511,13 @@ static status_t
         return finish_string(tkc, str);
     }
 
+    /* check YANG parser stopped on proper end of ID */
+    if (tkc->source == TK_SOURCE_YANG && 
+	!(*str=='{' || *str==';' || *str == '/' || *str==':'
+	  || xml_isspace(*str))) {
+	return finish_string(tkc, str);
+    }
+
     /* else got a string fragment that could be a valid ID format */
     if (*str == NCX_MODSCOPE_CH && str[1] != NCX_MODSCOPE_CH) {
         /* stopped on the prefix-scope-identifier token
@@ -1522,6 +1529,7 @@ static status_t
 
 	if (tkc->source == TK_SOURCE_XPATH && *item == '*') {
 	    namestar = TRUE;
+	    str++;                   /* consume the '*' char */
 	} else {
 	    /* str now points at the start of the imported item 
 	     * There needs to be at least one valid name component

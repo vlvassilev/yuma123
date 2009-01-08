@@ -195,6 +195,7 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
 /* one QName for the NCX_BT_IDREF value */
 typedef struct val_idref_t_ {
     xmlns_id_t  nsid;
@@ -333,10 +334,35 @@ typedef struct val_index_t_ {
 } val_index_t;
 
 
-/* test callback function to check if a value node should be cloned */
+/* test callback function to check if a value node 
+ * should be cloned 
+ *
+ * INPUTS:
+ *   val == value node to check
+ *
+ * RETURNS:
+ *   TRUE if OK to be cloned
+ *   FALSE if not OK to be cloned (skipped instead)
+ */
 typedef boolean
     (*val_test_fn_t) (const val_value_t *val);
 
+
+/* child or descendent node search walker function
+ *
+ * INPUTS:
+ *   val == value node found in descendent search
+ *   cookie1 == cookie1 value passed to start of walk
+ *   cookie2 == cookie2 value passed to start of walk
+ *
+ * RETURNS:
+ *   TRUE if walk should continue
+ *   FALSE if walk should terminate 
+ */
+typedef boolean
+    (*val_walker_fn_t) (val_value_t *val,
+			void *cookie1,
+			void *cookie2);
 
 /********************************************************************
 *								    *
@@ -675,6 +701,60 @@ extern uint32
 			   const val_value_t *child);
 
 
+extern boolean
+    val_find_all_children (val_walker_fn_t walkerfn,
+			   void *cookie1,
+			   void *cookie2,
+			   val_value_t  *parent,
+			   const xmlChar *modname,
+			   const xmlChar *childname,
+			   boolean configonly);
+
+extern boolean
+    val_find_all_ancestors (val_walker_fn_t  walkerfn,
+			    void *cookie1,
+			    void *cookie2,
+			    const val_value_t *startnode,
+			    const xmlChar *modname,
+			    const xmlChar *name,
+			    boolean configonly);
+
+extern val_value_t *
+    val_find_descendant (const val_value_t *startnode,
+			 const xmlChar *modname,
+			 const xmlChar *descname,
+			 boolean configonly);
+
+
+extern boolean
+    val_find_all_descendants (val_walker_fn_t  walkerfn,
+			      void *cookie1,
+			      void *cookie2,
+			      val_value_t *startnode,
+			      const xmlChar *modname,
+			      const xmlChar *descname,
+			      boolean configonly);
+
+			      
+extern boolean
+    val_find_all_pfaxis (val_walker_fn_t  walkerfn,
+			 void *cookie1,
+			 void *cookie2,
+			 val_value_t  *startnode,
+			 const xmlChar *modname,
+			 const xmlChar *name,
+			 boolean configonly,
+			 boolean dblslash,
+			 ncx_xpath_axis_t axis);
+			      
+
+extern val_value_t *
+    val_get_axisnode (val_value_t *startnode,
+		      val_value_t *topval,
+		      ncx_xpath_axis_t axis,
+		      int64 position);
+
+		    
 extern uint32
     val_liststr_count (const val_value_t *val);
 

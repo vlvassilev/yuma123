@@ -49,12 +49,22 @@ date	     init     comment
 #include "val.h"
 #endif
 
+#ifndef _H_var
+#include "var.h"
+#endif
+
 
 /********************************************************************
 *								    *
 *			 C O N S T A N T S			    *
 *								    *
 *********************************************************************/
+
+/* max size of the pcb->result_cacheQ */
+#define XPATH_RESULT_CACHE_MAX     16
+
+/* max size of the pcb->resnode_cacheQ */
+#define XPATH_RESNODE_CACHE_MAX     64
 
 
 /* XPath 1.0 sec 2.2 AxisName */
@@ -117,6 +127,39 @@ date	     init     comment
 #define XP_OP_DIV                  (const xmlChar *)"div"
 #define XP_OP_MOD                  (const xmlChar *)"mod"
 
+/* XPath control block flag definitions */
+
+/* If dynnode is present, then at least one component
+ * within the entire XPath expression is variable.
+ * (e.g  ../parent == 'fred'  or $foo + 1
+ *
+ * If not set, then the entire expression is constant
+ * (e.g.,  34 mod 2 or 48 and 'fred')
+ */
+#define XP_FL_DYNNODE            bit0
+
+
+/* during XPath evaluation, skipping the rest of a
+ * FALSE AND expression
+ */
+#define XP_FL_SKIP_FAND          bit1
+
+
+/* during XPath evaluation, skipping the rest of a
+ * TRUE OR expression
+ */
+#define XP_FL_SKIP_TOR           bit2
+
+
+/* used by xpath_keyref.c to keep track of path type */
+#define XP_FL_ABSPATH            bit3
+
+
+/* used for YANG/NETCONF to auto-filter any non-config nodes
+ * that are matched by an XPath wildcard mechanism
+ */
+#define XP_FL_CONFIGONLY         bit4
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
@@ -129,7 +172,8 @@ typedef enum xpath_restype_t_ {
     XP_RT_NODESET,
     XP_RT_NUMBER,
     XP_RT_STRING,
-    XP_RT_BOOLEAN
+    XP_RT_BOOLEAN,
+    XP_RT_VARPTR
 } xpath_restype_t;
 
 /* XPath dynamic parsing mode for keyref */
@@ -139,6 +183,17 @@ typedef enum xpath_curmode_t_ {
     XP_CM_ALT,
     XP_CM_KEYVAR
 } xpath_curmode_t;
+
+
+/* document root type */
+typedef enum xpath_document_t_ {
+    XP_DOC_NONE,
+    XP_DOC_DATABASE,
+    XP_DOC_RPC,
+    XP_DOC_RPC_REPLY,
+    XP_DOC_NOTIFICATION
+} xpath_document_t;
+
 
 /* XPath expression source type */
 typedef enum xpath_source_t_ {
@@ -171,6 +226,7 @@ typedef enum xpath_exop_t_ {
     XP_EXOP_FILTER2      /* double fwd slash (C++ comment) */
 } xpath_exop_t;
 
+
 /* XPath expression node types */
 typedef enum xpath_nodetype_t_ {
     XP_EXNT_NONE,
@@ -181,42 +237,15 @@ typedef enum xpath_nodetype_t_ {
 } xpath_nodetype_t;
 
 
-/* XPath expression axis types */
-typedef enum xpath_axis_t_ {
-    XP_AX_NONE,
-    XP_AX_ANCESTOR,
-    XP_AX_ANCESTOR_OR_SELF,
-    XP_AX_ATTRIBUTE,
-    XP_AX_CHILD,
-    XP_AX_DESCENDANT,
-    XP_AX_DESCENDANT_OR_SELF,
-    XP_AX_FOLLOWING,
-    XP_AX_FOLLOWING_SIBLING,
-    XP_AX_NAMESPACE,
-    XP_AX_PARENT,
-    XP_AX_PRECEDING,
-    XP_AX_PRECEDING_SIBLING,
-    XP_AX_SELF
-} xpath_axis_t;
-
-
-/* XPath result  node types */
-typedef enum xpath_resnodetype_t_ {
-    XP_RNT_NONE,
-    XP_RNT_OBJPTR,
-    XP_RNT_VALPTR,
-    XP_RNT_VARPTR
-} xpath_resnodetype_t;
-
-
 /* XPath result node struct */
 typedef struct xpath_resnode_t_ {
-    dlq_hdr_t             qhdr;        /* in case saved in a Q */
-    xpath_resnodetype_t   nodetype;
+    dlq_hdr_t             qhdr;
+    ncx_xpath_axis_t      axis;
+    boolean               dblslash;
+    val_value_t          *topvalptr;
     union node_ {
 	const obj_template_t *objptr;
 	val_value_t          *valptr;
-	xmlChar              *varname;
     } node;
 } xpath_resnode_t;
 
@@ -225,12 +254,14 @@ typedef struct xpath_resnode_t_ {
 typedef struct xpath_result_t_ {
     dlq_hdr_t            qhdr;        /* in case saved in a Q */
     xpath_restype_t      restype;
+    boolean              isval;   /* matters if XP_RT_NODESET */
 
     union r_ {
 	dlq_hdr_t            nodeQ;       /* Q of xpath_resnode_t */
-	boolean              bool;
+	boolean              bool; 
 	ncx_num_t            num;
 	xmlChar             *str;
+	ncx_var_t           *varptr;
     } r;
 
     const tk_token_t    *errtoken;
@@ -257,32 +288,36 @@ typedef struct xpath_pcb_t_ {
      * XML namespace for the module that defines that node
      */
     ncx_module_t        *mod;         /* bptr to exprstr context */
-    boolean              abspath;
     xpath_source_t       source;
-
-    ncx_errinfo_t        errinfo;           /* must error extras */
+    ncx_errinfo_t        errinfo;            /* must error extras */
+    boolean              logerrors;     /* T: use log_error F: agt */
 
     /* these parms are used to parse keyref path-arg 
      * limited object tree syntax allowed only
      */
+    const obj_template_t  *targobj;       /* bptr to result object */
+    const obj_template_t  *altobj;     /* bptr to pred. RHS object */
+    const obj_template_t  *varobj;  /* bptr to key-expr LHS object */
+    xpath_curmode_t        curmode;     /* select targ/alt/var obj */
+
+    /* these parms are used by keyref and XPath1 parsing */
+    const obj_template_t  *obj;            /* bptr to start object */
     ncx_module_t          *objmod;        /* module containing obj */
     const obj_template_t  *docroot;        /* bptr to <config> obj */
-    const obj_template_t  *obj;            /* bptr to start object */
-    const obj_template_t  *targobj;       /* bptr to result object */
-    const obj_template_t  *altobj;        /* bptr to result object */
-    const obj_template_t  *varobj;      /* bptr to key-expr object */
-    xpath_curmode_t        curmode;     /* select targ/alt/var obj */
-    boolean                rpcroot;      /* docroot is really /rpc */
-
-    /* these parms are used for must and when processing
-     * against a target database ; full XPath 1.0 allowed
+    xpath_document_t       doctype;
+    val_value_t           *val;                  /* current() node */
+    val_value_t           *val_docroot;        /* cfg->root for db */
+    /* these parms are used for XPath1 processing
+     * against a target database 
      */
-    val_value_t         *cxtnode;
+    uint32               flags;
     xpath_result_t      *result;
-    xpath_result_t      *curfilter;
-    uint32               cxtpos;
-    uint32               cxtsize;
-    xpath_axis_t         curaxis;    
+
+    /* additive XPath1 context back- pointer to current 
+     * step results; initially NULL and modified until
+     * the expression is done
+     */
+    xpath_resnode_t      context;
 
     /* The varbindQ is passed in as a parameter by the app
      * It contains zero or more ncx_var_t structs
@@ -291,14 +326,35 @@ typedef struct xpath_pcb_t_ {
 
     /* The function Q is a copy of the global Q
      * It is not hardwired in case app-specific extensions
-     * are added later
+     * are added later -- array of xpath_fncb_t
      */
-    const struct xpath_fncb_t_ *functions;   /* array of xpath_fncb_t */
+    const struct xpath_fncb_t_ *functions; 
+
+    /* Performance Caches
+     * The xpath_result_t and xpath_resnode_t structs
+     * are used in many intermediate operations
+     *
+     * These Qs are used to cache these structs
+     * instead of calling malloc and free constantly
+     *
+     * The XPATH_RESULT_CACHE_MAX and XPATH_RESNODE_CACHE_MAX
+     * constants are used to control the max cache sizes
+     * This is not user-configurable (TBD).
+     */
+    dlq_hdr_t           result_cacheQ;  /* Q of xpath_result_t */
+    dlq_hdr_t           resnode_cacheQ;  /* Q of xpath_resnode_t */
+    uint32              result_count;
+    uint32              resnode_count;
+
+    /* first and second pass parsing results
+     * the next phase will not execute until
+     * all previous phases have a NO_ERR status
+     */
     status_t             parseres;
     status_t             validateres;
+    status_t             valueres;
 
-    /* yangdiff support */
-    boolean              seen;
+    boolean              seen;      /* yangdiff support */
 } xpath_pcb_t;
 
 
@@ -317,7 +373,15 @@ typedef struct xpath_fncb_t_ {
     xpath_fn_t         fn;
 } xpath_fncb_t;
 
-
+/* Value or object node walker fn callback parameters */
+typedef struct xpath_walkerparms_t_ {
+    dlq_hdr_t         *resnodeQ;
+    val_value_t       *topvalptr;
+    ncx_xpath_axis_t   axis;
+    boolean            dblslash;
+    uint32             callcount;
+    status_t           res;
+} xpath_walkerparms_t;
 
 /********************************************************************
 *								    *
@@ -325,7 +389,7 @@ typedef struct xpath_fncb_t_ {
 *								    *
 *********************************************************************/
 
-/* malloc and init an NCX database object template */
+/* find target, save in *targobj */
 extern status_t
     xpath_find_schema_target (tk_chain_t *tkc,
 			      ncx_module_t *mod,
@@ -335,6 +399,7 @@ extern status_t
 			      obj_template_t **targobj,
 			      dlq_hdr_t **targQ);
 
+/* find target, save in *targobj, use the errtk if error */
 extern status_t
     xpath_find_schema_target_err (tk_chain_t *tkc,
 				  ncx_module_t *mod,
@@ -346,38 +411,49 @@ extern status_t
 				  tk_token_t *errtk);
 
 
+/* internal find target, without any error reporting */
 extern status_t
     xpath_find_schema_target_int (const xmlChar *target,
 				  obj_template_t **targobj);
 
+/* used by cfg.c to find parms in the value struct for
+ * a config file (ncx:cli)
+ */
 extern status_t
     xpath_find_val_target (val_value_t *startval,
 			   ncx_module_t *mod,
 			   const xmlChar *target,
 			   val_value_t **targval);
 
-
+/* malloc a new XPath parser control block */
 extern xpath_pcb_t *
     xpath_new_pcb (const xmlChar *xpathstr);
 
-
+/* copy from typdef to object for keyref
+ * of object to value for NETCONF PDU processing
+ */
 extern xpath_pcb_t *
     xpath_clone_pcb (xpath_pcb_t *srcpcb);
 
+/* find by exact match of the expressions string */
 extern xpath_pcb_t *
     xpath_find_pcb (dlq_hdr_t *pcbQ, 
 		    const xmlChar *exprstr);
 
+/* free an XPath parser control block */
 extern void
     xpath_free_pcb (xpath_pcb_t *pcb);
 
+/* malloc an XPath result */
 extern xpath_result_t *
     xpath_new_result (xpath_restype_t restype);
 
+/* malloc an XPath result node */
 extern void 
     xpath_init_result (xpath_result_t *result,
 		       xpath_restype_t restype);
 
+/* free an XPath result */
 extern void
     xpath_free_result (xpath_result_t *result);
 
@@ -411,5 +487,8 @@ extern status_t
 extern status_t
     xpath_parse_token (xpath_pcb_t *pcb,
 		       tk_type_t  tktype);
+
+extern boolean
+    xpath_cvt_boolean (const xpath_result_t *result);
 
 #endif	    /* _H_xpath */

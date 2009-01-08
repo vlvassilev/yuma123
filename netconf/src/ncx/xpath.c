@@ -1098,6 +1098,9 @@ xpath_pcb_t *
 
     pcb->functions = xpath1_get_functions_ptr();
 
+    dlq_createSQue(&pcb->result_cacheQ);
+    dlq_createSQue(&pcb->resnode_cacheQ);
+
     return pcb;
 
 }  /* xpath_new_pcb */
@@ -1186,6 +1189,9 @@ xpath_pcb_t *
 void
     xpath_free_pcb (xpath_pcb_t *pcb)
 {
+    xpath_result_t   *result;
+    xpath_resnode_t  *resnode;
+
     if (pcb->tkc) {
 	tk_free_chain(pcb->tkc);
     }
@@ -1199,6 +1205,19 @@ void
     }
 
     ncx_clean_errinfo(&pcb->errinfo);
+
+    while (!dlq_empty(&pcb->result_cacheQ)) {
+	result = (xpath_result_t *)
+	    dlq_deque(&pcb->result_cacheQ);
+	xpath_free_result(result);
+    }
+
+    while (!dlq_empty(&pcb->resnode_cacheQ)) {
+	resnode = (xpath_resnode_t *)
+	    dlq_deque(&pcb->resnode_cacheQ);
+	xpath_free_resnode(resnode);
+    }
+
 
     m__free(pcb);
 
@@ -1265,6 +1284,7 @@ void
 	break;
     case XP_RT_STRING:
     case XP_RT_BOOLEAN:
+    case XP_RT_VARPTR:
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -1335,6 +1355,9 @@ void
 	break;
     case XP_RT_BOOLEAN:
 	result->r.bool = FALSE;
+	break;
+    case XP_RT_VARPTR:
+	result->r.varptr = NULL;
 	break;
     case XP_RT_NONE:
 	break;
@@ -1486,10 +1509,11 @@ status_t
 	    imp = ncx_find_pre_import(mod, prefix);
 	    if (!imp) {
 		res = ERR_NCX_INVALID_NAME;
-	    }
-	    *targmod = ncx_find_module(imp->module);
-	    if (!*targmod) {
-		res = ERR_NCX_MOD_NOT_FOUND;
+	    } else {
+		*targmod = ncx_find_module(imp->module);
+		if (!*targmod) {
+		    res = ERR_NCX_MOD_NOT_FOUND;
+		}
 	    }
 	} else {
 	    *targmod = mod;
@@ -1598,6 +1622,72 @@ status_t
     return NO_ERR;
 
 }  /* xpath_parse_token */
+
+
+/********************************************************************
+* FUNCTION xpath_cvt_boolean
+* 
+* Convert an XPath result to a boolean answer
+*
+* INPUTS:
+*    result == result struct to convert to boolean
+*
+* RETURNS:
+*   TRUE or FALSE depending on conversion
+*********************************************************************/
+boolean
+    xpath_cvt_boolean (const xpath_result_t *result)
+{
+    val_value_t *testval;
+
+    switch (result->restype) {
+    case XP_RT_NONE:
+	return FALSE;
+    case XP_RT_NODESET:
+	return (dlq_empty(&result->r.nodeQ)) ? FALSE : TRUE;
+    case XP_RT_NUMBER:
+	return (ncx_num_zero(&result->r.num, NCX_BT_FLOAT64)) ?
+	    FALSE : TRUE;
+    case XP_RT_STRING:
+	return (result->r.str && xml_strlen(result->r.str)) ?
+	    TRUE : FALSE;
+    case XP_RT_BOOLEAN:
+	return result->r.bool;
+    case XP_RT_VARPTR:
+	if (result->r.varptr && result->r.varptr->val) {
+	    testval = result->r.varptr->val;
+	    if (typ_is_string(testval->btyp)) {
+		return (VAL_STR(testval) && 
+			xml_strlen(VAL_STR(testval))) ?
+		    TRUE : FALSE;
+	    } else if (typ_is_number(testval->btyp)) {
+		return (ncx_num_zero(&testval->v.num, 
+				     NCX_BT_FLOAT64)) ?
+		    FALSE : TRUE;
+	    } else if (!typ_is_simple(testval->btyp)) {
+		return (val_has_content(testval)) ? TRUE : FALSE;
+	    } else {
+		switch (testval->btyp) {
+		case NCX_BT_BOOLEAN:
+		    return VAL_BOOL(testval);
+		case NCX_BT_BITS:
+		case NCX_BT_SLIST:
+		    return !ncx_list_empty(&testval->v.list);
+		default:
+		    return TRUE;
+		}
+	    }
+	    /*NOTREACHED*/
+	} else {
+	    return FALSE;
+	}
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+    /*NOTREACHED*/
+
+}  /* xpath_cvt_boolean */
 
 
 /* END xpath.c */

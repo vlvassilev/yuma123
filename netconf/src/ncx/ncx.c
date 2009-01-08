@@ -22,14 +22,14 @@ date         init     comment
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>
+
+#ifdef HAS_FLOAT
 #include <math.h>
+#include <tgmath.h>
+#endif
+
 #include <ctype.h>
 #include <unistd.h>
-
-/* this is not getting included due to -Wextra in make rules */
-#ifndef MACOSX
-extern float strtof (const char *str, char **err);
-#endif
 
 #include <xmlstring.h>
 #include <xmlreader.h>
@@ -3464,6 +3464,150 @@ status_t
     }
     return NO_ERR;
 }  /* ncx_copy_num */
+
+
+/********************************************************************
+* FUNCTION ncx_num_is_integral
+* 
+* Check if the number is integral or if it has a fractional part
+* Supports all NCX numeric types:
+*    NCX_BT_INT*
+*    NCX_BT_UINT*
+*    NCX_BT_FLOAT*
+*
+* INPUTS:
+*     num == number to check
+*     btyp == expected data type
+*
+* RETURNS:
+*     TRUE if integral, FALSE if not
+*********************************************************************/
+boolean
+    ncx_num_is_integral (const ncx_num_t *num,
+			 ncx_btype_t  btyp)
+{
+#ifdef HAS_FLOAT
+    float f;
+    double d;
+#else
+    const char *str;
+#endif
+
+#ifdef DEBUG
+    if (!num) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    switch (btyp) {
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+    case NCX_BT_INT64:
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+    case NCX_BT_UINT64:
+	return TRUE;
+    case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT        
+	f = roundf(num->f);
+	return (f == num->f) ? TRUE : FALSE;
+#else
+	str = strstr(num->f, ".");
+	if (!str) {
+	    return TRUE;
+	} else {
+	    str++;
+	    while (*str && *str != '0') {
+		str++;
+	    }
+	    return (*str) ? FALSE : TRUE;
+        }            
+#endif
+    case NCX_BT_FLOAT64:
+#ifdef HAS_FLOAT        
+	d = round(num->d);
+	return (d == num->d) ? TRUE : FALSE;
+#else
+	str = strstr(num->d, ".");
+	if (!str) {
+	    return TRUE;
+	} else {
+	    str++;
+	    while (*str && *str != '0') {
+		str++;
+	    }
+	    return (*str) ? FALSE : TRUE;
+        }            
+#endif
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+    /*NOTREACHED*/
+
+}  /* ncx_num_is_integral */
+
+
+
+/********************************************************************
+* FUNCTION ncx_cvt_to_int64
+* 
+* Convert a number to an integer64;
+* Use rounding for float32 and float64
+*
+* INPUTS:
+*     num == number to convert
+*     btyp == data type of num
+*
+* RETURNS:
+*     int64 representation
+*********************************************************************/
+int64
+    ncx_cvt_to_int64 (const ncx_num_t *num,
+		      ncx_btype_t  btyp)
+{
+#ifdef DEBUG
+    if (!num) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    switch (btyp) {
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+	return (int64)num->i;
+    case NCX_BT_INT64:
+	return num->l;
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+	return (int64)num->u;
+    case NCX_BT_UINT64:
+	return (int64)num->ul;
+    case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT        
+	return lrintf(num->f);
+#else
+	return (int64)atoll(num->f);
+#endif
+    case NCX_BT_FLOAT64:
+#ifdef HAS_FLOAT        
+	return lrint(num->d);
+#else
+	return (int64)atoll(num->d);
+#endif
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+    /*NOTREACHED*/
+
+}  /* ncx_cvt_to_int64 */
 
 
 /********************************************************************
@@ -7159,7 +7303,7 @@ void
 			   ncx_module_t  *mod,
 			   status_t     res,
 			   const char *filename,
-			   uint linenum,
+			   uint32 linenum,
 			   boolean fineoln)
 {
     boolean      iserr;

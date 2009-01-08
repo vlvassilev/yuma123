@@ -518,6 +518,23 @@ typedef struct obj_deviation_t_ {
 } obj_deviation_t;
 
 
+/* child or descendant node search walker function
+ *
+ * INPUTS:
+ *   obj == object node found in descendant search
+ *   cookie1 == cookie1 value passed to start of walk
+ *   cookie2 == cookie2 value passed to start of walk
+ *
+ * RETURNS:
+ *   TRUE if walk should continue
+ *   FALSE if walk should terminate 
+ */
+typedef boolean
+    (*obj_walker_fn_t) (const obj_template_t *obj,
+			void *cookie1,
+			void *cookie2);
+
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
@@ -594,6 +611,49 @@ extern const obj_template_t *
 /* skips augment and uses, dives into choice, case */
 extern const obj_template_t *
     obj_next_child_deep (const obj_template_t *obj);
+
+extern boolean
+    obj_find_all_children (obj_walker_fn_t walkerfn,
+			   void *cookie1,
+			   void *cookie2,
+			   const obj_template_t *startnode,
+			   const xmlChar *modname,
+			   const xmlChar *childname,
+			   boolean configonly);
+
+
+extern boolean
+    obj_find_all_ancestors (obj_walker_fn_t walkerfn,
+			    void *cookie1,
+			    void *cookie2,
+			    const obj_template_t *startnode,
+			    const xmlChar *modname,
+			    const xmlChar *name,
+			    boolean configonly,
+			    boolean *fncalled);
+
+extern boolean
+    obj_find_all_descendants (obj_walker_fn_t walkerfn,
+			      void *cookie1,
+			      void *cookie2,
+			      const obj_template_t *startnode,
+			      const xmlChar *modname,
+			      const xmlChar *name,
+			      boolean configonly,
+			      boolean *fncalled);
+
+
+extern boolean
+    obj_find_all_pfaxis (obj_walker_fn_t walkerfn,
+			 void *cookie1,
+			 void *cookie2,
+			 const obj_template_t *startnode,
+			 const xmlChar *modname,
+			 const xmlChar *name,
+			 boolean configonly,
+			 boolean dblslash,
+			 ncx_xpath_axis_t axis,
+			 boolean *fncalled);
 
 
 extern obj_case_t *
@@ -893,6 +953,15 @@ extern boolean
 
 extern boolean
     obj_is_data_db (const obj_template_t *obj);
+
+extern boolean
+    obj_in_rpc (const obj_template_t *obj);
+
+extern boolean
+    obj_in_rpc_reply (const obj_template_t *obj);
+
+extern boolean
+    obj_in_notif (const obj_template_t *obj);
 
 extern boolean
     obj_is_rpc (const obj_template_t *obj);

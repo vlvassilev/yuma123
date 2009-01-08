@@ -349,6 +349,25 @@ typedef enum ncx_bad_data_t_ {
 } ncx_bad_data_t;
 
 
+/* XPath expression axis types */
+typedef enum ncx_xpath_axis_t_ {
+    XP_AX_NONE,
+    XP_AX_ANCESTOR,
+    XP_AX_ANCESTOR_OR_SELF,
+    XP_AX_ATTRIBUTE,
+    XP_AX_CHILD,
+    XP_AX_DESCENDANT,
+    XP_AX_DESCENDANT_OR_SELF,
+    XP_AX_FOLLOWING,
+    XP_AX_FOLLOWING_SIBLING,
+    XP_AX_NAMESPACE,
+    XP_AX_PARENT,
+    XP_AX_PRECEDING,
+    XP_AX_PRECEDING_SIBLING,
+    XP_AX_SELF
+} ncx_xpath_axis_t;
+
+
 /* union of all the basic number types
  * if float not supported, then it is stored as a string 
  */

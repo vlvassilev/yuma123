@@ -235,6 +235,7 @@ static status_t
 *   varQ == que to use (NULL if not known yet)
 *   name == var name to remove
 *   namelen == length of name
+*   nsid == namespace ID to check if non-zero
 *   isglobal == TRUE if global var, FALSE if local var
 *
 * RETURNS:
@@ -244,6 +245,7 @@ static ncx_var_t *
     remove_var (dlq_hdr_t *varQ,
 		const xmlChar *name,
 		uint32 namelen,
+		xmlns_id_t nsid,
 		boolean isglobal)
 {
     ncx_var_t  *cur;
@@ -260,6 +262,11 @@ static ncx_var_t *
     for (cur = (ncx_var_t *)dlq_firstEntry(varQ);
 	 cur != NULL;
 	 cur = (ncx_var_t *)dlq_nextEntry(cur)) {
+
+	if (nsid && cur->nsid && nsid != cur->nsid) {
+	    continue;
+	}
+
 	ret = xml_strncmp(name, cur->name, namelen);
 	if (ret == 0 && xml_strlen(cur->name)==namelen) {
 	    dlq_remove(cur);
@@ -281,6 +288,7 @@ static ncx_var_t *
 *   varQ == que to use or NULL if not known
 *   name == var name to find
 *   namelen == name length
+*   nsid == namespace ID to check if non-zero
 *   isglobal = TRUE if global var, FALSE if local
 *
 * RETURNS:
@@ -290,6 +298,7 @@ static ncx_var_t *
     find_var (dlq_hdr_t *varQ,
 	      const xmlChar *name,
 	      uint32  namelen,
+	      xmlns_id_t  nsid,
 	      boolean isglobal)
 {
     ncx_var_t  *cur;
@@ -306,6 +315,11 @@ static ncx_var_t *
     for (cur = (ncx_var_t *)dlq_firstEntry(varQ);
 	 cur != NULL;
 	 cur = (ncx_var_t *)dlq_nextEntry(cur)) {
+
+	if (nsid && cur->nsid && nsid != cur->nsid) {
+	    continue;
+	}
+
 	ret = xml_strncmp(name, cur->name, namelen);
 	if (ret == 0 && xml_strlen(cur->name)==namelen) {
 	    return cur;
@@ -354,7 +368,7 @@ static status_t
     }
 
     /* try to find this var */
-    var = find_var(varQ, name, xml_strlen(name), isglobal);
+    var = find_var(varQ, name, xml_strlen(name), 0, isglobal);
     if (var) {
 	if (var->flags & VAR_FL_SYSTEM) {
 	    /* found system var, replace only if same type */
@@ -709,7 +723,7 @@ const val_value_t *
     }
 #endif
 
-    var = find_var(NULL, name, namelen, isglobal);
+    var = find_var(NULL, name, namelen, 0, isglobal);
     if (var) {
 	return var->val;
     } else {
@@ -744,7 +758,7 @@ const val_value_t *
     }
 #endif
 
-    var = find_var(NULL, name, xml_strlen(name), isglobal);
+    var = find_var(NULL, name, xml_strlen(name), 0, isglobal);
     if (var) {
 	return var->val;
     } else {
@@ -763,6 +777,7 @@ const val_value_t *
 *   varQ == queue of ncx_var_t to use
 *   name == var name to get
 *   namelen == length of name
+*   nsid == namespace ID  for name (0 if not used)
 *
 * RETURNS:
 *   pointer to value, or NULL if not found
@@ -770,7 +785,8 @@ const val_value_t *
 const val_value_t *
     var_get_str_que (dlq_hdr_t *varQ,
 		     const xmlChar *name,
-		     uint32 namelen)
+		     uint32 namelen,
+		     xmlns_id_t  nsid)
 {
     ncx_var_t    *var;
 
@@ -785,7 +801,7 @@ const val_value_t *
     }
 #endif
 
-    var = find_var(varQ, name, namelen, FALSE);
+    var = find_var(varQ, name, namelen, nsid, FALSE);
     if (var) {
 	return var->val;
     } else {
@@ -803,13 +819,15 @@ const val_value_t *
 * INPUTS:
 *   varQ == Q of ncx_var_t to use
 *   name == var name to get
+*   nsid == namespace ID  for name (0 if not used)
 * 
 * RETURNS:
 *   pointer to value, or NULL if not found
 *********************************************************************/
 const val_value_t *
     var_get_que (dlq_hdr_t *varQ,
-		 const xmlChar *name)
+		 const xmlChar *name,
+		 xmlns_id_t nsid)
 {
     const ncx_var_t  *var;
 
@@ -820,7 +838,7 @@ const val_value_t *
     }
 #endif
 
-    var = find_var(varQ, name, xml_strlen(name), FALSE);
+    var = find_var(varQ, name, xml_strlen(name), nsid, FALSE);
     if (var) {
 	return var->val;
     } else {
@@ -828,6 +846,37 @@ const val_value_t *
     }
 
 }  /* var_get_que */
+
+
+/********************************************************************
+* FUNCTION var_get_que_raw
+* 
+* Find a Q-based user variable; return the var struct instead
+* of just the value
+* 
+* INPUTS:
+*   varQ == Q of ncx_var_t to use
+*   nsid == namespace ID to match (0 if not used)
+*   name == var name to get
+* 
+* RETURNS:
+*   pointer to value, or NULL if not found
+*********************************************************************/
+ncx_var_t *
+    var_get_que_raw (dlq_hdr_t *varQ,
+		     xmlns_id_t  nsid,
+		     const xmlChar *name)
+{
+#ifdef DEBUG
+    if (!name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return find_var(varQ, name, xml_strlen(name), nsid, FALSE);
+
+}  /* var_get_que_raw */
 
 
 /********************************************************************
@@ -860,7 +909,7 @@ void
     }
 #endif
 
-    var = remove_var(NULL, name, namelen, isglobal);
+    var = remove_var(NULL, name, namelen, 0, isglobal);
     if (var) {
 	free_var(var);
     } else {
@@ -879,12 +928,14 @@ void
 *   varQ == Q of ncx_var_t to use
 *   name == var name to unset
 *   namelen == length of name string
+*   nsid == namespace ID to check if non-zero
 * 
 *********************************************************************/
 void
     var_unset_que (dlq_hdr_t *varQ,
 		   const xmlChar *name,
-		   uint32 namelen)
+		   uint32 namelen,
+		   xmlns_id_t  nsid)
 {
 
     ncx_var_t *var;
@@ -900,7 +951,7 @@ void
     }
 #endif
 
-    var = remove_var(varQ, name, namelen, FALSE);
+    var = remove_var(varQ, name, namelen, nsid, FALSE);
     if (var) {
 	free_var(var);
     } else {

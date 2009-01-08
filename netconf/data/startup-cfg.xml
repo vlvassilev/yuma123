@@ -28,6 +28,15 @@
    </t:test2>
    <t:test3 xmlns:t="http://netconfcentral.com/ns/test">
       <t:x>fred</t:x>
+      <t:test3deep>
+	<t:yy>1.3</t:yy>
+	<t:y>this is a string</t:y>
+	<t:bb>1.3</t:bb>
+	<t:deepy>
+	  <t:yy3>fred</t:yy3>
+	  <t:yy2>1.123400005</t:yy2>
+	</t:deepy>
+      </t:test3deep>
       <t:c2>3</t:c2>
       <t:c2>-3</t:c2>
       <t:c2>-6</t:c2>

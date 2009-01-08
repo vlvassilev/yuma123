@@ -580,6 +580,10 @@ const char *
 	return "duplicate refine sub-clause";
     case ERR_NCX_INVALID_DEV_STMT:
 	return "invalid deviate sub-clause";
+    case ERR_NCX_INVALID_XPATH_EXPR:
+	return "invalid XPath expression syntax";
+    case ERR_NCX_NO_XPATH_PARENT:
+	return "no parent node available";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:
@@ -640,6 +644,12 @@ const char *
 	return "using deprecated definition";
     case ERR_NCX_MISSING_REFTARGET:
 	return "missing refine target";
+    case ERR_NCX_EMPTY_XPATH_RESULT:
+	return "empty XPath result in must or when expr";
+    case ERR_NCX_NO_XPATH_CHILD:
+	return "no child or descendent node available";
+    case ERR_NCX_NO_XPATH_NODES:
+	return "no nodes available";
 
     /* system info codes start at 500 */
     case ERR_PARS_SECDONE:

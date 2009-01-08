@@ -169,7 +169,7 @@ static status_t
 			       ncx_get_modname(targmod),
 			       nodename);
 	}
-    } else if (pcb->abspath) {
+    } else if (pcb->flags & XP_FL_ABSPATH) {
 	/* setting object for the first time
 	 * get top-level object from object module 
 	 */
@@ -983,7 +983,7 @@ static status_t
 
     nexttyp = tk_next_typ(pcb->tkc);
     if (nexttyp == TK_TT_FSLASH) {
-	pcb->abspath = TRUE;
+	pcb->flags |= XP_FL_ABSPATH;
 	return parse_absolute_path(pcb);
     } else {
 	return parse_relative_path(pcb);
@@ -1117,6 +1117,7 @@ status_t
     }
 
     tk_reset_chain(pcb->tkc);
+    pcb->flags = 0;
     pcb->objmod = mod;
     pcb->obj = obj;
     pcb->source = XP_SRC_KEYREF;

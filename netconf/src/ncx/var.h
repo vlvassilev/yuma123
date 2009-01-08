@@ -66,6 +66,7 @@ date	     init     comment
 typedef struct ncx_var_t_ {
     dlq_hdr_t     hdr;
     uint32        flags;
+    xmlns_id_t    nsid;     /* set to zero if not used */
     xmlChar      *name;
     val_value_t  *val;
 } ncx_var_t;
@@ -137,11 +138,18 @@ extern const val_value_t *
 extern const val_value_t *
     var_get_str_que (dlq_hdr_t *varQ,
 		     const xmlChar *name,
-		     uint32 namelen);
+		     uint32 namelen,
+		     xmlns_id_t nsid);
 
 extern const val_value_t *
     var_get_que (dlq_hdr_t *varQ,
-		 const xmlChar *name);
+		 const xmlChar *name,
+		 xmlns_id_t nsid);
+
+extern ncx_var_t *
+    var_get_que_raw (dlq_hdr_t *varQ,
+		     xmlns_id_t  nsid,
+		     const xmlChar *name);
 
 extern void
     var_unset (const xmlChar *name,
@@ -151,7 +159,8 @@ extern void
 extern void
     var_unset_que (dlq_hdr_t *varQ,
 		   const xmlChar *name,
-		   uint32 namelen);
+		   uint32 namelen,
+		   xmlns_id_t  nsid);
 
 extern status_t
     var_check_ref (const xmlChar *line,

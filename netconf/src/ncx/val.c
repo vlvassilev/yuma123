@@ -98,6 +98,19 @@ date         init     comment
 
 /* #define VAL_DEBUG  1 */
 
+/********************************************************************
+*                                                                   *
+*                          T Y P E S                                *
+*                                                                   *
+*********************************************************************/
+
+typedef struct finderparms_t_ {
+    val_value_t  *findval;
+    val_value_t  *foundval;
+    int64         findpos;
+    int64         foundpos;
+} finderparms_t;
+
 /* pick a log output function for dump_value */
 typedef void (*dumpfn_t) (const char *fstr, ...);
 
@@ -1134,6 +1147,142 @@ static void
 #endif
 
 }   /* dump_value */
+
+
+/********************************************************************
+* FUNCTION position_walker
+* 
+* Position finder val_walker_fn for XPath support
+* Follows val_walker_fn_t template
+*
+* INPUTS:
+*   val == value node being processed in the tree walk
+*   cookie1 == cookie1 value passed to start fn
+*   cookie2 == cookie2 value passed to start fn
+*
+* RETURNS:
+*   TRUE if walk should continue, FALSE if not
+*********************************************************************/
+static boolean
+    position_walker (val_value_t *val,
+		     void *cookie1,
+		     void *cookie2)
+{
+    finderparms_t *finderparms;
+
+    finderparms = (finderparms_t *)cookie1;
+    (void)cookie2;
+
+    finderparms->foundval = val;
+    finderparms->foundpos++;
+
+    if (finderparms->findval && 
+	(finderparms->findval == val)) {
+	return FALSE;
+    }
+
+    if (finderparms->findpos && 
+	(finderparms->findpos == finderparms->foundpos)) {
+	return FALSE;
+    }
+
+    return TRUE;
+
+}  /* position_walker */
+
+
+/********************************************************************
+* FUNCTION process_one_valwalker
+* 
+* Process one child object node for
+* the obj_find_all_* functions
+*
+* INPUTS:
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    obj == object to process
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    name == name of node to filter
+*              == NULL to match any node name
+*    configonly = TRUE for config=true only
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*    fncalled == address of return function called flag
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
+static boolean
+    process_one_valwalker (val_walker_fn_t walkerfn,
+			   void *cookie1,
+			   void *cookie2,
+			   val_value_t *val,
+			   const xmlChar *modname,
+			   const xmlChar *name,
+			   boolean configonly,
+			   boolean textmode,
+			   boolean *fncalled)
+{
+    boolean         fnresult;
+
+    *fncalled = FALSE;
+    if (configonly && !name && !obj_is_config(val->obj)) {
+	return TRUE;
+    }
+
+    fnresult = TRUE;
+    if (textmode) {
+	if ((val->obj->objtype == OBJ_TYP_LEAF ||
+	     val->obj->objtype == OBJ_TYP_LEAF_LIST) &&
+	    val->btyp != NCX_BT_ANY) {
+
+	    if (walkerfn) {
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+	    }
+	    *fncalled = TRUE;
+	}
+    } else if (modname && name) {
+	if (!xml_strcmp(modname, 
+			obj_get_mod_name(val->obj)) &&
+	    !xml_strcmp(name, val->name)) {
+
+	    if (walkerfn) {
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+	    }
+	    *fncalled = TRUE;
+	}
+    } else if (modname) {
+	if (!xml_strcmp(modname, obj_get_mod_name(val->obj))) {
+	    if (walkerfn) {
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+	    }
+	    *fncalled = TRUE;
+	}
+    } else if (name) {
+	if (!xml_strcmp(name, val->name)) {
+	    if (walkerfn) {
+		fnresult = (*walkerfn)(val, cookie1, cookie2);
+	    }
+	    *fncalled = TRUE;
+	}
+    } else {
+	if (walkerfn) {
+	    fnresult = (*walkerfn)(val, cookie1, cookie2);
+	}
+	*fncalled = TRUE;
+    }
+
+    return fnresult;
+
+}  /* process_one_valwalker */
 
 
 /*************** E X T E R N A L    F U N C T I O N S  *************/
@@ -4688,18 +4837,21 @@ uint32
 *    walkerfn == callback function to use
 *    cookie1 == cookie1 value to pass to walker fn
 *    cookie2 == cookie2 value to pass to walker fn
-*    parent == parent complex type to check
+*    startnode == node to check
 *    modname == module name; 
 *                the first match in this module namespace
 *                will be returned
 *            == NULL:
 *                 the first match in any namespace will
 *                 be  returned;
-*    childname == name of child node to find
+*    name == name of child node to find
 *              == NULL to match any child name
 *    configonly == TRUE to skip over non-config nodes
 *                  FALSE to check all nodes
 *                  Only used if childname == NULL
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
 *
 * RETURNS:
 *   TRUE if normal termination occurred
@@ -4709,57 +4861,42 @@ boolean
     val_find_all_children (val_walker_fn_t walkerfn,
 			   void *cookie1,
 			   void *cookie2,
-			   val_value_t  *parent,
+			   val_value_t *startnode,
 			   const xmlChar *modname,
-			   const xmlChar *childname,
-			   boolean configonly)
+			   const xmlChar *name,
+			   boolean configonly,
+			   boolean textmode)
 {
     val_value_t *val;
-    boolean      fnresult;
+    boolean      fnresult, fncalled;
 
 #ifdef DEBUG
-    if (!parent) {
+    if (!startnode) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return FALSE;
     }
 #endif
 
-    if (!typ_has_children(parent->btyp)) {
+    if (!typ_has_children(startnode->btyp)) {
 	return FALSE;
     }
 
-    for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
+    for (val = (val_value_t *)dlq_firstEntry(&startnode->v.childQ);
 	 val != NULL;
 	 val = (val_value_t *)dlq_nextEntry(val)) {
 
-	if (configonly && !childname && 
-	    !obj_is_config(val->obj)) {
-	    continue;
-	}
-
-	fnresult = TRUE;
-	if (modname && childname) {
-	    if (!xml_strcmp(modname, 
-			    obj_get_mod_name(val->obj)) &&
-		!xml_strcmp(childname, val->name)) {
-
-		fnresult = (*walkerfn)(val, cookie1, cookie2);
-	    }
-	} else if (modname) {
-	    if (!xml_strcmp(modname, obj_get_mod_name(val->obj))) {
-		fnresult = (*walkerfn)(val, cookie1, cookie2);
-	    }
-	} else if (childname) {
-	    if (!xml_strcmp(val->name, childname)) {
-		fnresult = (*walkerfn)(val, cookie1, cookie2);
-	    }
-	} else {
-	    fnresult = (*walkerfn)(val, cookie1, cookie2);
-	}
+	fnresult = process_one_valwalker(walkerfn,
+					 cookie1,
+					 cookie2,
+					 val, 
+					 modname,
+					 name,
+					 configonly,
+					 textmode,
+					 &fncalled);
 	if (!fnresult) {
 	    return FALSE;
 	}
-
     }
     return TRUE;
 
@@ -4789,7 +4926,10 @@ boolean
 *              == NULL to match any node name
 *    configonly == TRUE to skip over non-config nodes
 *                  FALSE to check all nodes
-*                  Only used if descname == NULL
+*                  Only used if name == NULL
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
 *
 * RETURNS:
 *   TRUE if normal termination occurred
@@ -4802,10 +4942,11 @@ boolean
 			    const val_value_t *startnode,
 			    const xmlChar *modname,
 			    const xmlChar *name,
-			    boolean configonly)
+			    boolean configonly,
+			    boolean textmode)
 {
     val_value_t *val;
-    boolean      fnresult;
+    boolean      fnresult, fncalled;
 
 #ifdef DEBUG
     if (!startnode) {
@@ -4817,31 +4958,15 @@ boolean
     val = startnode->parent;
 
     while (val) {
-
-	if (configonly && !name && !obj_is_config(val->obj)) {
-	    val = val->parent;
-	    continue;
-	}
-
-	fnresult = TRUE;
-	if (modname && name) {
-	    if (!xml_strcmp(modname, 
-			    obj_get_mod_name(val->obj)) &&
-		!xml_strcmp(name, val->name)) {
-
-		fnresult = (*walkerfn)(val, cookie1, cookie2);
-	    }
-	} else if (modname) {
-	    if (!xml_strcmp(modname, obj_get_mod_name(val->obj))) {
-		fnresult = (*walkerfn)(val, cookie1, cookie2);
-	    }
-	} else if (name) {
-	    if (!xml_strcmp(val->name, name)) {
-		fnresult = (*walkerfn)(val, cookie1, cookie2);
-	    }
-	} else if (!val->parent) {
-	    fnresult = (*walkerfn)(val, cookie1, cookie2);
-	}
+	fnresult = process_one_valwalker(walkerfn,
+					 cookie1,
+					 cookie2,
+					 val, 
+					 modname,
+					 name,
+					 configonly,
+					 textmode,
+					 &fncalled);
 	if (!fnresult) {
 	    return FALSE;
 	}
@@ -4850,85 +4975,6 @@ boolean
     return TRUE;
 
 }  /* val_find_all_ancestors */
-
-
-/********************************************************************
-* FUNCTION val_find_descendant
-* 
-* Find the first instance of the specified node
-* within the current subtree
-*
-* INPUTS:
-*    startnode == start node to check
-*    modname == module name; 
-*                the first match in this module namespace
-*                will be returned
-*            == NULL:
-*                 the first match in any namespace will
-*                 be  returned;
-*    descname == name of descendent node to find
-*              == NULL to match any node name
-*    configonly == TRUE to skip over non-config nodes
-*                  FALSE to check all nodes
-*                  Only used if descname == NULL
-*
-* RETURNS:
-*   pointer to the node if found or NULL if not found
-*********************************************************************/
-val_value_t *
-    val_find_descendant (const val_value_t *startnode,
-			 const xmlChar *modname,
-			 const xmlChar *descname,
-			 boolean configonly)
-{
-    val_value_t *val, *findval;
-
-#ifdef DEBUG
-    if (!startnode) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    if (!typ_has_children(startnode->btyp)) {
-	return NULL;
-    }
-
-    for (val = (val_value_t *)dlq_firstEntry(&startnode->v.childQ);
-	 val != NULL;
-	 val = (val_value_t *)dlq_nextEntry(val)) {
-
-	if (configonly && !descname && !obj_is_config(val->obj)) {
-	    continue;
-	}
-
-	if (modname && descname) {
-	    if (!xml_strcmp(modname, 
-			    obj_get_mod_name(val->obj)) &&
-		!xml_strcmp(descname, val->name)) {
-		return val;
-	    }
-	} else if (modname) {
-	    if (!xml_strcmp(modname, obj_get_mod_name(val->obj))) {
-		return val;
-	    }
-	} else if (descname) {
-	    if (!xml_strcmp(val->name, descname)) {
-		return val;
-	    }
-	} else {
-	    return val;
-	}
-
-	findval = val_find_descendant(val, modname, 
-				      descname, configonly);
-	if (findval) {
-	    return findval;
-	}
-    }
-    return NULL;
-
-}  /* val_find_descendant */
 
 
 /********************************************************************
@@ -4952,11 +4998,14 @@ val_value_t *
 *            == NULL:
 *                 the first match in any namespace will
 *                 be  returned;
-*    descname == name of descendent node to find
+*    name == name of descendent node to find
 *              == NULL to match any node name
 *    configonly == TRUE to skip over non-config nodes
 *                  FALSE to check all nodes
 *                  Only used if decname == NULL
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
 *
 * RETURNS:
 *   TRUE if normal termination occurred
@@ -4966,10 +5015,11 @@ boolean
     val_find_all_descendants (val_walker_fn_t walkerfn,
 			      void *cookie1,
 			      void *cookie2,
-			      val_value_t  *startnode,
+			      val_value_t *startnode,
 			      const xmlChar *modname,
-			      const xmlChar *descname,
-			      boolean configonly)
+			      const xmlChar *name,
+			      boolean configonly,
+			      boolean textmode)
 {
     val_value_t *val;
     boolean      fncalled, fnresult;
@@ -4989,42 +5039,28 @@ boolean
 	 val != NULL;
 	 val = (val_value_t *)dlq_nextEntry(val)) {
 
-	if (configonly && !descname && !obj_is_config(val->obj)) {
-	    continue;
-	}
-
 	fncalled = FALSE;
-	fnresult = TRUE;
-	if (modname && descname) {
-	    if (!xml_strcmp(modname, 
-			    obj_get_mod_name(val->obj)) &&
-		!xml_strcmp(descname, val->name)) {
-
-		fnresult = (*walkerfn)(val, cookie1, cookie2);
-		fncalled = TRUE;
-	    }
-	} else if (modname) {
-	    if (!xml_strcmp(modname, obj_get_mod_name(val->obj))) {
-		fnresult = (*walkerfn)(val, cookie1, cookie2);
-		fncalled = TRUE;
-	    }
-	} else if (descname) {
-	    if (!xml_strcmp(val->name, descname)) {
-		fnresult = (*walkerfn)(val, cookie1, cookie2);
-		fncalled = TRUE;
-	    }
-	} else {
-	    fnresult = (*walkerfn)(val, cookie1, cookie2);
-	    fncalled = TRUE;
-	}
+	fnresult = process_one_valwalker(walkerfn,
+					 cookie1,
+					 cookie2,
+					 val, 
+					 modname,
+					 name,
+					 configonly,
+					 textmode,
+					 &fncalled);
 	if (!fnresult) {
 	    return FALSE;
 	}
-
 	if (!fncalled) {
-	    fnresult = val_find_all_descendants(walkerfn, cookie1, cookie2,
-						val, modname, descname, 
-						configonly);
+	    fnresult = val_find_all_descendants(walkerfn,
+						cookie1,
+						cookie2,
+						val,
+						modname,
+						name, 
+						configonly,
+						textmode);
 	    if (!fnresult) {
 		return FALSE;
 	    }
@@ -5042,8 +5078,155 @@ boolean
 * for the specified preceding or following axis
 *
 *   preceding::*
-*   preceding-sibling::*
 *   following::*
+*
+* within the current subtree. The walker fn will
+* be called for each match.  Because the callbacks
+* will be done in sequential order, starting from
+* the 
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* INPUTS:
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    topnode == topnode used as the relative root for
+*               calculating node position
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    name == name of preceding or following node to find
+*              == NULL to match any node name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if decname == NULL
+*    dblslash == TRUE if all decendents of the preceding
+*                 or following nodes should be checked
+*                FALSE only 1 level is checked, not their descendants
+*    textmode == TRUE if just testing for text() nodes
+*                name modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*    axis == axis enum to use
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
+boolean
+    val_find_all_pfaxis (val_walker_fn_t  walkerfn,
+			 void *cookie1,
+			 void *cookie2,
+			 val_value_t  *startnode,
+			 const xmlChar *modname,
+			 const xmlChar *name,
+			 boolean configonly,
+			 boolean dblslash,
+			 boolean textmode,
+			 ncx_xpath_axis_t axis)
+{
+    val_value_t      *val, *child;
+    boolean           fncalled, fnresult, forward;
+
+#ifdef DEBUG
+    if (!startnode) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    /* check the Q containing the startnode
+     * for preceding or following nodes;
+     * could be sibling node check or any node check
+     */
+    switch (axis) {
+    case XP_AX_PRECEDING:
+	forward = FALSE;
+	val = (val_value_t *)dlq_prevEntry(startnode);
+	break;
+    case XP_AX_FOLLOWING:
+	forward = TRUE;
+	val = (val_value_t *)dlq_nextEntry(startnode);
+	break;
+    case XP_AX_NONE:
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+
+    while (val) {
+	if (configonly && !name && !obj_is_config(val->obj)) {
+	    if (forward) {
+		val = (val_value_t *)dlq_nextEntry(val);
+	    } else {
+		val = (val_value_t *)dlq_prevEntry(val);
+	    }
+	    continue;
+	}
+
+	fnresult = process_one_valwalker(walkerfn,
+					 cookie1,
+					 cookie2,
+					 val, 
+					 modname,
+					 name,
+					 configonly,
+					 textmode,
+					 &fncalled);
+	if (!fnresult) {
+	    return FALSE;
+	}
+
+	if (!fncalled && dblslash) {
+	    /* if /foo did not get added, than 
+	     * try /foo/bar, /foo/baz, etc.
+	     * check all the child nodes even if
+	     * one of them matches, because all
+	     * matches are needed with the '//' operator
+	     */
+	    for (child = val_get_first_child(val);
+		 child != NULL;
+		 child = val_get_next_child(child)) {
+
+		fnresult = 
+		    val_find_all_pfaxis(walkerfn, 
+					cookie1, 
+					cookie2,
+					child, 
+					modname, 
+					name, 
+					configonly,
+					dblslash,
+					textmode,
+					axis);
+		if (!fnresult) {
+		    return FALSE;
+		}
+	    }
+	}
+
+	if (forward) {
+	    val = (val_value_t *)dlq_nextEntry(val);
+	} else {
+	    val = (val_value_t *)dlq_prevEntry(val);
+	}
+    }
+    return TRUE;
+
+}  /* val_find_all_pfaxis */
+
+
+/********************************************************************
+* FUNCTION val_find_all_pfsibling_axis
+* 
+* Find all occurances of the specified node
+* for the specified axis
+*
+*   preceding-sibling::*
 *   following-sibling::*
 *
 * within the current subtree. The walker fn will
@@ -5073,6 +5256,9 @@ boolean
 *    dblslash == TRUE if all decendents of the preceding
 *                 or following nodes should be checked
 *                FALSE only 
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
 *    axis == axis enum to use
 *
 * RETURNS:
@@ -5080,15 +5266,16 @@ boolean
 *   FALSE if walker fn requested early termination
 *********************************************************************/
 boolean
-    val_find_all_pfaxis (val_walker_fn_t  walkerfn,
-			 void *cookie1,
-			 void *cookie2,
-			 val_value_t  *startnode,
-			 const xmlChar *modname,
-			 const xmlChar *name,
-			 boolean configonly,
-			 boolean dblslash,
-			 ncx_xpath_axis_t axis)
+    val_find_all_pfsibling_axis (val_walker_fn_t  walkerfn,
+				 void *cookie1,
+				 void *cookie2,
+				 val_value_t  *startnode,
+				 const xmlChar *modname,
+				 const xmlChar *name,
+				 boolean configonly,
+				 boolean dblslash,
+				 boolean textmode,
+				 ncx_xpath_axis_t axis)
 {
     val_value_t *val, *child;
     boolean      fncalled, fnresult, forward;
@@ -5102,11 +5289,8 @@ boolean
 
     /* check the Q containing the startnode
      * for preceding or following nodes;
-     * could be sibling node check or any node check
      */
     switch (axis) {
-    case XP_AX_PRECEDING:   /*****/
-	return FALSE;
     case XP_AX_PRECEDING_SIBLING:
 	/* execute the callback for all preceding nodes
 	 * that match the filter criteria 
@@ -5114,8 +5298,6 @@ boolean
 	val = (val_value_t *)dlq_prevEntry(startnode);
 	forward = FALSE;
 	break;
-    case XP_AX_FOLLOWING:  /****/
-	return FALSE;
     case XP_AX_FOLLOWING_SIBLING:
 	val = (val_value_t *)dlq_nextEntry(startnode);
 	forward = TRUE;
@@ -5136,30 +5318,15 @@ boolean
 	    continue;
 	}
 
-	fncalled = FALSE;
-	fnresult = TRUE;
-	if (modname && name) {
-	    if (!xml_strcmp(modname, 
-			    obj_get_mod_name(val->obj)) &&
-		!xml_strcmp(name, val->name)) {
-
-		fnresult = (*walkerfn)(val, cookie1, cookie2);
-		fncalled = TRUE;
-	    }
-	} else if (modname) {
-	    if (!xml_strcmp(modname, obj_get_mod_name(val->obj))) {
-		fnresult = (*walkerfn)(val, cookie1, cookie2);
-		fncalled = TRUE;
-	    }
-	} else if (name) {
-	    if (!xml_strcmp(val->name, name)) {
-		fnresult = (*walkerfn)(val, cookie1, cookie2);
-		fncalled = TRUE;
-	    }
-	} else {
-	    fnresult = (*walkerfn)(val, cookie1, cookie2);
-	    fncalled = TRUE;
-	}
+	fnresult = process_one_valwalker(walkerfn,
+					 cookie1,
+					 cookie2,
+					 val, 
+					 modname,
+					 name,
+					 configonly,
+					 textmode,
+					 &fncalled);
 	if (!fnresult) {
 	    return FALSE;
 	}
@@ -5176,15 +5343,16 @@ boolean
 		 child = val_get_next_child(child)) {
 
 		fnresult = 
-		    val_find_all_pfaxis(walkerfn, 
-					cookie1, 
-					cookie2,
-					child, 
-					modname, 
-					name, 
-					configonly,
-					dblslash,
-					axis);
+		    val_find_all_pfsibling_axis(walkerfn, 
+						cookie1, 
+						cookie2,
+						child, 
+						modname, 
+						name, 
+						configonly,
+						dblslash,
+						textmode,
+						axis);
 		if (!fnresult) {
 		    return FALSE;
 		}
@@ -5199,7 +5367,7 @@ boolean
     }
     return TRUE;
 
-}  /* val_find_all_pfaxis */
+}  /* val_find_all_pfsibling_axis */
 
 
 /********************************************************************
@@ -5220,8 +5388,24 @@ boolean
 *   self::*
 *
 * INPUTS:
-*    startnode == starting sibling node to check
-*    topval == docroot for context size, position calculation
+*    startnode == context node to run tests from
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    name == name of preceding or following node to find
+*              == NULL to match any node name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if decname == NULL
+*    dblslash == TRUE if all decendents of the preceding
+*                 or following nodes should be checked
+*                FALSE only 
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
 *    axis == axis enum to use
 *    position == position to find in the specified axis
 *
@@ -5230,13 +5414,16 @@ boolean
 *********************************************************************/
 val_value_t *
     val_get_axisnode (val_value_t *startnode,
-		      val_value_t *topval,
+		      const xmlChar *modname,
+		      const xmlChar *name,
+		      boolean configonly,
+		      boolean dblslash,
+		      boolean textmode,
 		      ncx_xpath_axis_t axis,
 		      int64 position)
 {
-    val_value_t  *val;
-    dlq_hdr_t   *parentQ;
-    int64        curpos;
+    finderparms_t    finderparms;
+    boolean          fnresult, fncalled;
 
 #ifdef DEBUG
     if (!startnode) {
@@ -5249,110 +5436,146 @@ val_value_t *
     }
 #endif
 
-    curpos = 0;
+    memset(&finderparms, 0x0, sizeof(finderparms_t));
+    finderparms.findpos = position;
 
     /* check the Q containing the startnode
      * for preceding or following nodes;
      * could be sibling node check or any node check
      */
     switch (axis) {
-    case XP_AX_ANCESTOR:
-	/* starting at the parent of the contextnode,
-	 * count upwards back to the docroot,
-	 * and get the Nth position
-	 */
-	val = startnode;
-	while (val->parent) {
-	    if (++curpos == position) {
-		return val->parent;
-	    }
-	    val = val->parent;
-	}
-	return NULL;
     case XP_AX_ANCESTOR_OR_SELF:
-	/* starting at the contextnode,
-	 * count upwards back to the docroot,
-	 * and get the Nth position
-	 */
-	if (position==1) {
-	    return startnode;
+	fnresult = process_one_valwalker(position_walker,
+					 &finderparms,
+					 NULL,
+					 startnode,
+					 modname,
+					 name,
+					 configonly,
+					 textmode,
+					 &fncalled);
+	if (!fnresult) {
+	    return finderparms.foundval;
 	}
-
-	curpos++;
-
-	/* parent is position 2, not 1 */
-	val = startnode;
-	while (val->parent) {
-	    if (++curpos == position) {
-		return val->parent;
-	    }
-	    val = val->parent;
+	finderparms.foundpos = 1;
+	/* fall through */
+    case XP_AX_ANCESTOR:
+	fnresult = val_find_all_ancestors(position_walker,
+					  &finderparms,
+					  NULL,
+					  startnode,
+					  modname,
+					  name,
+					  configonly,
+					  textmode);
+	if (fnresult) {
+	    return NULL;
+	} else {
+	    return finderparms.foundval;
 	}
-	return NULL;
     case XP_AX_ATTRIBUTE:
 	/* TBD: attributes not supported */
 	return NULL;
     case XP_AX_CHILD:
-	if (startnode->parent) {
-	    /* get the Nth sibling for the startnode set */
-	    parentQ = &startnode->parent->v.childQ;
-	    val = (val_value_t *)dlq_firstEntry(parentQ);
-	    while (val) {
-		if (++curpos == position) {
-		    return val;
-		}
-		val = (val_value_t *)dlq_nextEntry(val);
-	    }
+	fnresult = val_find_all_children(position_walker,
+					 &finderparms,
+					 NULL,
+					 startnode,
+					 modname,
+					 name,
+					 configonly,
+					 textmode);
+	if (fnresult) {
 	    return NULL;
 	} else {
-	    /* this is the docroot, so there is no
-	     * need to check anything.
-	     * Unless the position is 1, it is not a match
-	     */
-	    return (position == 1) ? startnode : NULL;
+	    return finderparms.foundval;
 	}
-	/*NOTREACHED*/
-    case XP_AX_DESCENDANT:
-
-	return NULL;
     case XP_AX_DESCENDANT_OR_SELF:
-
-	return NULL;
-    case XP_AX_FOLLOWING:
-	/* get the Nth document node following startnode */
-	/****/
-	return NULL;
-    case XP_AX_FOLLOWING_SIBLING:
-	/* get the Nth sibling node following startnode */
-	val = (val_value_t *)dlq_nextEntry(startnode);
-	while (val) {
-	    if (++curpos == position) {
-		return val;
-	    }
-	    val = (val_value_t *)dlq_nextEntry(val); 
+	fnresult = process_one_valwalker(position_walker,
+					 &finderparms,
+					 NULL,
+					 startnode,
+					 modname,
+					 name,
+					 configonly,
+					 textmode,
+					 &fncalled);
+	if (!fnresult) {
+	    return finderparms.foundval;
 	}
-	return NULL;
+	finderparms.foundpos = 1;
+	/* fall through */
+    case XP_AX_DESCENDANT:
+	fnresult = val_find_all_descendants(position_walker,
+					    &finderparms,
+					    NULL,
+					    startnode,
+					    modname,
+					    name,
+					    configonly,
+					    textmode);
+	if (fnresult) {
+	    return NULL;
+	} else {
+	    return finderparms.foundval;
+	}
+    case XP_AX_PRECEDING:
+    case XP_AX_FOLLOWING:
+	fnresult = val_find_all_pfaxis(position_walker,
+				       &finderparms,
+				       NULL,
+				       startnode,
+				       modname,
+				       name,
+				       configonly,
+				       dblslash,
+				       textmode,
+				       axis);
+	if (fnresult) {
+	    return NULL;
+	} else {
+	    return finderparms.foundval;
+	}
+    case XP_AX_PRECEDING_SIBLING:
+    case XP_AX_FOLLOWING_SIBLING:
+	fnresult = val_find_all_pfsibling_axis(position_walker,
+					       &finderparms,
+					       NULL,
+					       startnode,
+					       modname,
+					       name,
+					       configonly,
+					       dblslash,
+					       textmode,
+					       axis);
+	if (fnresult) {
+	    return NULL;
+	} else {
+	    return finderparms.foundval;
+	}
     case XP_AX_NAMESPACE:
-	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     case XP_AX_PARENT:
+	if (!startnode->parent) {
+	    return NULL;
+	}
 	/* there can only be one node in this axis,
 	 * so if the startnode isn't it, then return NULL
 	 */
-	return (position == 1) ? startnode : NULL;
-    case XP_AX_PRECEDING:
-	/****/
-	return NULL;
-    case XP_AX_PRECEDING_SIBLING:
-	/* get the Nth sibling node preceding startnode */
-	val = (val_value_t *)dlq_prevEntry(startnode);
-	while (val) {
-	    if (++curpos == position) {
-		return val;
-	    }
-	    val = (val_value_t *)dlq_prevEntry(val); 
+	fnresult = process_one_valwalker(position_walker,
+					 &finderparms,
+					 NULL,
+					 startnode->parent,
+					 modname,
+					 name,
+					 configonly,
+					 textmode,
+					 &fncalled);
+	if (fnresult) {
+	    return NULL;
+	} else {
+	    return finderparms.foundval;
 	}
-	return NULL;
     case XP_AX_NONE:
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);

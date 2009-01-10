@@ -2285,6 +2285,9 @@ static void
 *    childname == name of child node to find
 *              == NULL to match any child name
 *    configonly = TRUE for config=true only
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
 *    fncalled == address of return function called flag
 *
 * RETURNS:
@@ -2299,11 +2302,13 @@ static boolean
 			      const xmlChar *modname,
 			      const xmlChar *childname,
 			      boolean configonly,
+			      boolean textmode,
 			      boolean *fncalled)
 			      
 {
     boolean         fnresult;
 
+    *fncalled = FALSE;
     if (!obj_has_name(obj)) {
 	return TRUE;
     }
@@ -2314,7 +2319,15 @@ static boolean
     }
 
     fnresult = TRUE;
-    if (modname && childname) {
+    if (textmode) {
+	if ((obj->objtype == OBJ_TYP_LEAF ||
+	     obj->objtype == OBJ_TYP_LEAF_LIST) &&
+	    obj_get_basetype(obj) != NCX_BT_ANY) {
+
+	    fnresult = (*walkerfn)(obj, cookie1, cookie2);
+	    *fncalled = TRUE;
+	}
+    } else if (modname && childname) {
 	if (!xml_strcmp(modname, 
 			obj_get_mod_name(obj)) &&
 	    !xml_strcmp(childname, obj_get_name(obj))) {
@@ -2938,6 +2951,50 @@ const obj_template_t *
 
 
 /********************************************************************
+* FUNCTION obj_last_child
+* 
+* Get the last child object if the specified object
+* has any children
+*
+*  !!!! SKIPS OVER AUGMENT AND USES !!!!
+*
+* INPUTS:
+*    obj == obj_template_t to check
+
+* RETURNS:
+*    pointer to first child obj_template_t or 
+*    NULL if not found 
+*********************************************************************/
+const obj_template_t *
+    obj_last_child (const obj_template_t *obj)
+{
+    const dlq_hdr_t       *que;
+    const obj_template_t  *chobj;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    que = obj_get_cdatadefQ(obj);
+    if (que) {
+	for (chobj = (const obj_template_t *)dlq_lastEntry(que);
+	     chobj != NULL;
+	     chobj = (const obj_template_t *)dlq_prevEntry(chobj)) {
+	    if (obj_has_name(chobj)) {
+		return chobj;
+	    }
+	}
+    }
+
+    return NULL;
+
+}  /* obj_last_child */
+
+
+/********************************************************************
 * FUNCTION obj_next_child
 * 
 * Get the next child object if the specified object
@@ -2978,6 +3035,49 @@ const obj_template_t *
     return NULL;
 
 }  /* obj_next_child */
+
+
+/********************************************************************
+* FUNCTION obj_previous_child
+* 
+* Get the previous child object if the specified object
+* has any children
+*
+*  !!!! SKIPS OVER AUGMENT AND USES !!!!
+*
+* INPUTS:
+*    obj == obj_template_t to check
+
+* RETURNS:
+*    pointer to next child obj_template_t or 
+*    NULL if not found 
+*********************************************************************/
+const obj_template_t *
+    obj_previous_child (const obj_template_t *obj)
+{
+    const obj_template_t  *prev;
+    boolean                done;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    prev = obj;
+    done = FALSE;
+    while (!done) {
+	prev = (const obj_template_t *)dlq_prevEntry(prev);
+	if (!prev) {
+	    done = TRUE;
+	} else if (obj_has_name(prev)) {
+	    return prev;
+	}
+    }
+    return NULL;
+
+}  /* obj_previous_child */
 
 
 /********************************************************************
@@ -3163,6 +3263,9 @@ const obj_template_t *
 *    configonly == TRUE to skip over non-config nodes
 *                  FALSE to check all nodes
 *                  Only used if childname == NULL
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
 *
 * RETURNS:
 *   TRUE if normal termination occurred
@@ -3175,7 +3278,8 @@ boolean
 			   const obj_template_t *startnode,
 			   const xmlChar *modname,
 			   const xmlChar *childname,
-			   boolean configonly)
+			   boolean configonly,
+			   boolean textmode)
 {
     const obj_template_t *obj;
     const dlq_hdr_t      *datadefQ;
@@ -3204,7 +3308,8 @@ boolean
 					obj,
 					modname,
 					childname,
-					configonly);
+					configonly,
+					textmode);
 	} else if (obj->objtype == OBJ_TYP_CASE) {
 	    ret = obj_find_all_children(walkerfn,
 					cookie1,
@@ -3212,7 +3317,8 @@ boolean
 					obj,
 					modname,
 					childname,
-					configonly);
+					configonly,
+					textmode);
 	} else {
 	    ret = process_one_walker_child(walkerfn,
 					   cookie1,
@@ -3220,7 +3326,8 @@ boolean
 					   obj,
 					   modname, 
 					   childname,
-					   configonly, 
+					   configonly,
+					   textmode,
 					   &fncalled);
 	}
 	if (!ret) {
@@ -3230,6 +3337,93 @@ boolean
     return TRUE;
 
 }  /* obj_find_all_children */
+
+
+/********************************************************************
+* FUNCTION obj_find_all_ancestors
+* 
+* Find all occurances of the specified node(s)
+* within the ancestors of the current node. 
+* The walker fn will be called for each match.  
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* This function skips choice and case nodes and
+* only processes real data nodes
+*
+* INPUTS:
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    startnode == start node to check
+*    modname == module name; 
+*                only matches in this module namespace
+*                will be returned
+*            == NULL:
+*                 namespace matching will be skipped
+*    name == name of ancestor node to find
+*              == NULL to match any ancestor name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if name == NULL
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*    fncalled == address of return function called flag
+*
+* OUTPUTS:
+*   *fncalled set to TRUE if a callback function was called
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
+boolean
+    obj_find_all_ancestors (obj_walker_fn_t walkerfn,
+			    void *cookie1,
+			    void *cookie2,
+			    const obj_template_t *startnode,
+			    const xmlChar *modname,
+			    const xmlChar *name,
+			    boolean configonly,
+			    boolean textmode,
+			    boolean *fncalled)
+{
+    const obj_template_t *obj;
+    boolean               fnresult;
+
+#ifdef DEBUG
+    if (!startnode) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    obj = startnode->parent;
+    while (obj) {
+	if (obj->objtype == OBJ_TYP_CHOICE ||
+	    obj->objtype == OBJ_TYP_CASE) {
+	    fnresult = TRUE;
+	} else {
+	    fnresult = process_one_walker_child(walkerfn,
+					   cookie1,
+					   cookie2,
+					   obj,
+					   modname, 
+					   name,
+					   configonly,
+					   textmode,
+					   fncalled);
+	}
+	if (!fnresult) {
+	    return FALSE;
+	}
+	obj = obj->parent;
+    }
+    return TRUE;
+
+}  /* obj_find_all_ancestors */
 
 
 /********************************************************************
@@ -3260,6 +3454,9 @@ boolean
 *    configonly == TRUE to skip over non-config nodes
 *                  FALSE to check all nodes
 *                  Only used if name == NULL
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
 *    fncalled == address of return function called flag
 *
 * OUTPUTS:
@@ -3277,6 +3474,7 @@ boolean
 			      const xmlChar *modname,
 			      const xmlChar *name,
 			      boolean configonly,
+			      boolean textmode,
 			      boolean *fncalled)
 {
     const obj_template_t *obj;
@@ -3307,6 +3505,7 @@ boolean
 					   modname,
 					   name,
 					   configonly,
+					   textmode,
 					   fncalled);
 	} else if (obj->objtype == OBJ_TYP_CASE) {
 	    ret = obj_find_all_descendants(walkerfn,
@@ -3316,6 +3515,7 @@ boolean
 					   modname,
 					   name,
 					   configonly,
+					   textmode,
 					   fncalled);
 	} else {
 	    ret = process_one_walker_child(walkerfn,
@@ -3325,6 +3525,7 @@ boolean
 					   modname, 
 					   name,
 					   configonly,
+					   textmode,
 					   fncalled);
 	    if (ret && !*fncalled) {
 		ret = obj_find_all_descendants(walkerfn,
@@ -3334,6 +3535,7 @@ boolean
 					       modname,
 					       name,
 					       configonly,
+					       textmode,
 					       fncalled);
 	    }
 	}
@@ -3379,8 +3581,11 @@ boolean
 *                  Only used if name == NULL
 *    dblslash == TRUE if all decendents of the preceding
 *                 or following nodes should be checked
-*                FALSE only 
-*    pfaxis == axis enum to use
+*                FALSE only 1 level is checked
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*    axis == axis enum to use
 *    fncalled == address of return function called flag
 *
 * OUTPUTS:
@@ -3399,11 +3604,12 @@ boolean
 			 const xmlChar *name,
 			 boolean configonly,
 			 boolean dblslash,
+			 boolean textmode,
 			 ncx_xpath_axis_t axis,
 			 boolean *fncalled)
 {
     const obj_template_t *obj, *child;
-    boolean               myfncalled, fnresult, needcont;
+    boolean               fnresult, needcont, forward;
 
 #ifdef DEBUG
     if (!startnode || !fncalled) {
@@ -3418,22 +3624,37 @@ boolean
      */
     switch (axis) {
     case XP_AX_PRECEDING:
+	dblslash = TRUE;
+	/* fall through */
     case XP_AX_PRECEDING_SIBLING:
 	/* execute the callback for all preceding nodes
 	 * that match the filter criteria 
 	 */
-	obj = (const obj_template_t *)
-	    dlq_prevEntry(startnode);
+	forward = FALSE;
 	break;
     case XP_AX_FOLLOWING:
+	dblslash = TRUE;
+	/* fall through */
     case XP_AX_FOLLOWING_SIBLING:
-	obj = (const obj_template_t *)
-	    dlq_nextEntry(startnode);
+	forward = TRUE;
 	break;
     case XP_AX_NONE:
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
+    }
+
+    /* for objects, need to let same node match, because
+     * if there are multiple instances of the object,
+     * it would match
+     */
+    if (startnode->objtype == OBJ_TYP_LIST ||
+	startnode->objtype == OBJ_TYP_LEAF_LIST) {
+	obj = startnode;
+    } else if (forward) {
+	obj = (const obj_template_t *)dlq_nextEntry(startnode);
+    } else {
+	obj = (const obj_template_t *)dlq_prevEntry(startnode);
     }
 
     while (obj) {
@@ -3449,89 +3670,65 @@ boolean
 
 	if (needcont) {
 	    /* get the next node to process */
-	    switch (axis) {
-	    case XP_AX_PRECEDING:
-	    case XP_AX_PRECEDING_SIBLING:
-		/* execute the callback for all preceding nodes
-		 * that match the filter criteria 
-		 */
-		obj = (const obj_template_t *)dlq_prevEntry(obj);
-		break;
-	    case XP_AX_FOLLOWING:
-	    case XP_AX_FOLLOWING_SIBLING:
+	    if (forward) {
 		obj = (const obj_template_t *)dlq_nextEntry(obj);
-		break;
-	    case XP_AX_NONE:
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-		return FALSE;
+	    } else {
+		obj = (const obj_template_t *)dlq_prevEntry(obj);
 	    }
 	    continue;
 	}
 
 	if (obj->objtype == OBJ_TYP_CHOICE ||
 	    obj->objtype == OBJ_TYP_CASE) {
-	    for (child = obj_first_child(obj);
-		 obj != NULL;
-		 obj = obj_next_child(obj)) {
+	    for (child = (forward) ? obj_first_child(obj) :
+		     obj_last_child(obj);
+		 child != NULL;
+		 child = (forward) ? obj_next_child(child) :
+		     obj_previous_child(child)) {
 
 		fnresult = obj_find_all_pfaxis(walkerfn,
-					  cookie1,
-					  cookie2,
-					  obj,
-					  modname,
-					  name,
-					  configonly,
-					  dblslash,
-					  axis,
-					  fncalled);
+					       cookie1,
+					       cookie2,
+					       child,
+					       modname,
+					       name,
+					       configonly,
+					       dblslash,
+					       textmode,
+					       axis,
+					       fncalled);
 		if (!fnresult) {
 		    return FALSE;
 		}
 	    }
 	} else {
-	    myfncalled = FALSE;
-	    fnresult = TRUE;
-	    if (modname && name) {
-		if (!xml_strcmp(modname, 
-				obj_get_mod_name(obj)) &&
-		    !xml_strcmp(name, obj_get_name(obj))) {
-
-		    fnresult = (*walkerfn)(obj, cookie1, cookie2);
-		    myfncalled = TRUE;
-		}
-	    } else if (modname) {
-		if (!xml_strcmp(modname, obj_get_mod_name(obj))) {
-		    fnresult = (*walkerfn)(obj, cookie1, cookie2);
-		    myfncalled = TRUE;
-		}
-	    } else if (name) {
-		if (!xml_strcmp(obj_get_name(obj), name)) {
-		    fnresult = (*walkerfn)(obj, cookie1, cookie2);
-		    myfncalled = TRUE;
-		}
-	    } else {
-		fnresult = (*walkerfn)(obj, cookie1, cookie2);
-		myfncalled = TRUE;
-	    }
+	    fnresult = process_one_walker_child(walkerfn,
+						cookie1,
+						cookie2,
+						obj,
+						modname,
+						name,
+						configonly,
+						textmode,
+						fncalled);
 	    if (!fnresult) {
 		return FALSE;
 	    }
 
-	    if (myfncalled) {
-		*fncalled = TRUE;
-	    }
-
-	    if (!myfncalled && dblslash) {
+	    if (!*fncalled && dblslash) {
 		/* if /foo did not get added, than 
 		 * try /foo/bar, /foo/baz, etc.
 		 * check all the child nodes even if
 		 * one of them matches, because all
 		 * matches are needed with the '//' operator
 		 */
-		for (child = obj_first_child(obj);
+		for (child = (forward) ?
+			 obj_first_child(obj) :
+			 obj_last_child(obj);
 		     child != NULL;
-		     child = obj_next_child(child)) {
+		     child = (forward) ?
+			 obj_next_child(child) :
+			 obj_previous_child(child)) {
 
 		    fnresult = 
 			obj_find_all_pfaxis(walkerfn, 
@@ -3542,6 +3739,7 @@ boolean
 					    name, 
 					    configonly,
 					    dblslash,
+					    textmode,
 					    axis,
 					    fncalled);
 		    if (!fnresult) {
@@ -3552,22 +3750,10 @@ boolean
 	}
 
 	/* get the next node to process */
-	switch (axis) {
-	case XP_AX_PRECEDING:
-	case XP_AX_PRECEDING_SIBLING:
-	    /* execute the callback for all preceding nodes
-	     * that match the filter criteria 
-	     */
-	    obj = (const obj_template_t *)dlq_prevEntry(obj);
-	    break;
-	case XP_AX_FOLLOWING:
-	case XP_AX_FOLLOWING_SIBLING:
+	if (forward) {
 	    obj = (const obj_template_t *)dlq_nextEntry(obj);
-	    break;
-	case XP_AX_NONE:
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return FALSE;
+	} else {
+	    obj = (const obj_template_t *)dlq_prevEntry(obj);
 	}
     }
     return TRUE;
@@ -3692,7 +3878,6 @@ void
     }
 
 }  /* obj_clean_datadefQ */
-
 
 
 /********************************************************************

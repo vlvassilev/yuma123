@@ -705,52 +705,65 @@ extern boolean
     val_find_all_children (val_walker_fn_t walkerfn,
 			   void *cookie1,
 			   void *cookie2,
-			   val_value_t  *parent,
+			   val_value_t *startnode,
 			   const xmlChar *modname,
-			   const xmlChar *childname,
-			   boolean configonly);
+			   const xmlChar *name,
+			   boolean configonly,
+			   boolean textmode);
 
 extern boolean
-    val_find_all_ancestors (val_walker_fn_t  walkerfn,
+    val_find_all_ancestors (val_walker_fn_t walkerfn,
 			    void *cookie1,
 			    void *cookie2,
 			    const val_value_t *startnode,
 			    const xmlChar *modname,
 			    const xmlChar *name,
-			    boolean configonly);
-
-extern val_value_t *
-    val_find_descendant (const val_value_t *startnode,
-			 const xmlChar *modname,
-			 const xmlChar *descname,
-			 boolean configonly);
-
+			    boolean configonly,
+			    boolean textmode);
 
 extern boolean
-    val_find_all_descendants (val_walker_fn_t  walkerfn,
+    val_find_all_descendants (val_walker_fn_t walkerfn,
 			      void *cookie1,
 			      void *cookie2,
 			      val_value_t *startnode,
 			      const xmlChar *modname,
-			      const xmlChar *descname,
-			      boolean configonly);
+			      const xmlChar *name,
+			      boolean configonly,
+			      boolean textmode);
 
 			      
 extern boolean
-    val_find_all_pfaxis (val_walker_fn_t  walkerfn,
+    val_find_all_pfaxis (val_walker_fn_t walkerfn,
 			 void *cookie1,
 			 void *cookie2,
-			 val_value_t  *startnode,
+			 val_value_t *startnode,
 			 const xmlChar *modname,
 			 const xmlChar *name,
 			 boolean configonly,
 			 boolean dblslash,
+			 boolean textmode,
 			 ncx_xpath_axis_t axis);
 			      
 
+extern boolean
+    val_find_all_pfsibling_axis (val_walker_fn_t  walkerfn,
+				 void *cookie1,
+				 void *cookie2,
+				 val_value_t *startnode,
+				 const xmlChar *modname,
+				 const xmlChar *name,
+				 boolean configonly,
+				 boolean dblslash,
+				 boolean textmode,
+				 ncx_xpath_axis_t axis);
+			      
 extern val_value_t *
     val_get_axisnode (val_value_t *startnode,
-		      val_value_t *topval,
+		      const xmlChar *modname,
+		      const xmlChar *name,
+		      boolean configonly,
+		      boolean dblslash,
+		      boolean textmode,
 		      ncx_xpath_axis_t axis,
 		      int64 position);
 

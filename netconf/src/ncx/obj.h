@@ -601,7 +601,15 @@ extern const obj_template_t *
 
 /* skips augment and uses */
 extern const obj_template_t *
+    obj_last_child (const obj_template_t *obj);
+
+/* skips augment and uses */
+extern const obj_template_t *
     obj_next_child (const obj_template_t *obj);
+
+/* skips augment and uses */
+extern const obj_template_t *
+    obj_previous_child (const obj_template_t *obj);
 
 
 /* skips augment and uses, dives into choice, case */
@@ -619,7 +627,8 @@ extern boolean
 			   const obj_template_t *startnode,
 			   const xmlChar *modname,
 			   const xmlChar *childname,
-			   boolean configonly);
+			   boolean configonly, 
+			   boolean textmode);
 
 
 extern boolean
@@ -630,6 +639,7 @@ extern boolean
 			    const xmlChar *modname,
 			    const xmlChar *name,
 			    boolean configonly,
+			    boolean textmode,
 			    boolean *fncalled);
 
 extern boolean
@@ -640,6 +650,7 @@ extern boolean
 			      const xmlChar *modname,
 			      const xmlChar *name,
 			      boolean configonly,
+			      boolean textmode,
 			      boolean *fncalled);
 
 
@@ -652,6 +663,7 @@ extern boolean
 			 const xmlChar *name,
 			 boolean configonly,
 			 boolean dblslash,
+			 boolean textmode,
 			 ncx_xpath_axis_t axis,
 			 boolean *fncalled);
 

@@ -118,7 +118,6 @@ extern status_t
 extern status_t
     ncx_stage2_init (void);
 
-
 extern void 
     ncx_cleanup (void);
 
@@ -200,6 +199,10 @@ extern ncx_module_t *
 /* returns mod->name for main mod, mod->belongs for submod */
 extern const xmlChar *
     ncx_get_modname (const ncx_module_t *mod);
+
+extern ncx_module_t *
+    ncx_get_mainmod (ncx_module_t *mod);
+
 
 /************* top obj_template_t in module **************/
 extern const obj_template_t *
@@ -807,5 +810,6 @@ extern boolean
     ncx_prefix_different (const xmlChar *prefix1,
 			  const xmlChar *prefix2,
 			  const xmlChar *modprefix);
+
 
 #endif	    /* _H_ncx */

@@ -6412,8 +6412,31 @@ static status_t
 
     /* load in the agent boot parameter definition file */
     res = ncxmod_load_module(YANGCLI_MOD);
+    if (res != NO_ERR) {
+	return res;
+    }
 
-    return res;
+    /* load in the NETCONF data types and RPC methods */
+    res = ncxmod_load_module(NCMOD);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* load in the NCX extensions */
+    res = ncxmod_load_module(NCXMOD_NCX);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* initialize the NETCONF operation attribute 
+     * MUST be after the netconf.yang module is loaded
+     */
+    res = ncx_stage2_init();
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    return NO_ERR;
 
 }  /* load_base_schema */
 
@@ -6445,12 +6468,6 @@ static status_t
 
     /* load in the NCX data types */
     res = ncxmod_load_module(NCXDTMOD);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module(NCMOD);
     if (res != NO_ERR) {
 	return res;
     }

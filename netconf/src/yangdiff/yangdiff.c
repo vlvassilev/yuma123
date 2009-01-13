@@ -1495,6 +1495,14 @@ static status_t
     if (res == NO_ERR) {
 	/* load in the YANG converter CLI definition file */
 	res = ncxmod_load_module(YANGDIFF_MOD);
+
+	if (res == NO_ERR) {
+	    res = ncxmod_load_module(NCXMOD_NCX);
+	    if (res == NO_ERR) {
+		res = ncx_stage2_init();
+	    }
+	}
+
 	if (res == NO_ERR) {
 	    res = process_cli_input(argc, argv, &diffparms);
 	}

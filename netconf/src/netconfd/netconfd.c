@@ -106,7 +106,7 @@ static status_t
     status_t   res;
 
 #ifdef NETCONFD_DEBUG
-    log_debug2("\nnetconfd: Loading netconfd core module parmset");
+    log_debug2("\nnetconfd: Loading netconfd core module");
 #endif
 
     /* load in the agent boot parameter definition file */
@@ -120,13 +120,23 @@ static status_t
 #endif
 
     /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module((const xmlChar *) NCXMOD_NETCONF);
+    res = ncxmod_load_module(NCXMOD_NETCONF);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+#ifdef NETCONFD_DEBUG
+    log_debug2("\nnetconfd: Loading NCX Module");
+#endif
+
+    /* load in the NCX extensions module */
+    res = ncxmod_load_module(NCXMOD_NCX);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* initialize the NETCONF operation attribute 
-     * MUST be after the netconf.ncx module is loaded
+     * MUST be after the netconf.yang module is loaded
      */
     res = ncx_stage2_init();
     if (res != NO_ERR) {

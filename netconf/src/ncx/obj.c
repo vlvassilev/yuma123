@@ -2037,7 +2037,11 @@ static boolean
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_LIST:
     case OBJ_TYP_CHOICE:
-	if (obj->parent || obj->grp) {
+	if (obj_is_toproot(obj)) {
+	    *setflag = TRUE;
+	    return TRUE;
+	} else if ((obj->parent && 
+		    !obj_is_toproot(obj->parent)) || obj->grp) {
 	    *setflag = (obj->flags & OBJ_FL_CONFSET) 
 		? TRUE : FALSE;
 	} else {
@@ -2123,8 +2127,9 @@ static status_t
 
     *retlen = 0;
 
-    if (obj->parent) {
-	res = get_object_string(obj->parent, buff, bufflen, normalmode, retlen);
+    if (obj->parent && !obj_is_toproot(obj->parent)) {
+	res = get_object_string(obj->parent, buff, 
+				bufflen, normalmode, retlen);
 	if (res != NO_ERR) {
 	    return res;
 	}
@@ -2268,8 +2273,7 @@ static void
 /********************************************************************
 * FUNCTION process_one_walker_child
 * 
-* Process one child object node for
-* the obj_find_all_children function
+* Process one child object node 
 *
 * INPUTS:
 *    walkerfn == callback function to use
@@ -2353,6 +2357,496 @@ static boolean
     return fnresult;
 
 }  /* process_one_walker_child */
+
+
+/********************************************************************
+* FUNCTION test_one_child
+* 
+* The the specified node
+* The walker fn will be called for each match.  
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* This function skips choice and case nodes and
+* only processes real data nodes
+*
+* INPUTS:
+*    exprmod == module containing the XPath object
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    obj == node to check
+*    modname == module name; 
+*                only matches in this module namespace
+*                will be returned
+*            == NULL:
+*                 namespace matching will be skipped
+*    name == name of node to find
+*              == NULL to match any name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if childname == NULL
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
+static boolean
+    test_one_child (ncx_module_t *exprmod,
+		    obj_walker_fn_t walkerfn,
+		    void *cookie1,
+		    void *cookie2,
+		    const obj_template_t *obj,
+		    const xmlChar *modname,
+		    const xmlChar *name,
+		    boolean configonly,
+		    boolean textmode)
+{
+    boolean               fnresult, fncalled;
+
+    if (obj->objtype == OBJ_TYP_CHOICE ||
+	obj->objtype == OBJ_TYP_CASE) {
+	fnresult = obj_find_all_children(exprmod,
+					 walkerfn,
+					 cookie1,
+					 cookie2,
+					 obj,
+					 modname,
+					 name,
+					 configonly,
+					 textmode,
+					 FALSE);
+    } else {
+	fnresult = process_one_walker_child(walkerfn,
+					    cookie1,
+					    cookie2,
+					    obj,
+					    modname, 
+					    name,
+					    configonly,
+					    textmode,
+					    &fncalled);
+    }
+
+    if (!fnresult) {
+	return FALSE;
+    }
+
+    return TRUE;
+
+}  /* test_one_child */
+
+
+/********************************************************************
+* FUNCTION test_one_ancestor
+* 
+* The the specified node
+* The walker fn will be called for each match.  
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* This function skips choice and case nodes and
+* only processes real data nodes
+*
+* INPUTS:
+*    exprmod == module containing object
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    obj == node to check
+*    modname == module name; 
+*                only matches in this module namespace
+*                will be returned
+*            == NULL:
+*                 namespace matching will be skipped
+*    name == name of node to find
+*              == NULL to match any name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if childname == NULL
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*    orself == TRUE if axis ancestor-or-self
+*    fncalled == address of return function called flag
+*
+* OUTPUTS:
+*   *fncalled set to TRUE if a callback function was called
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
+static boolean
+    test_one_ancestor (ncx_module_t *exprmod,
+		       obj_walker_fn_t walkerfn,
+		       void *cookie1,
+		       void *cookie2,
+		       const obj_template_t *obj,
+		       const xmlChar *modname,
+		       const xmlChar *name,
+		       boolean configonly,
+		       boolean textmode,
+		       boolean orself,
+		       boolean *fncalled)
+{
+    boolean               fnresult;
+
+    if (obj->objtype == OBJ_TYP_CHOICE ||
+	obj->objtype == OBJ_TYP_CASE) {
+	fnresult = obj_find_all_ancestors(exprmod,
+					  walkerfn,
+					  cookie1,
+					  cookie2,
+					  obj,
+					  modname,
+					  name,
+					  configonly,
+					  textmode,
+					  FALSE,
+					  orself,
+					  fncalled);
+    } else {
+	fnresult = process_one_walker_child(walkerfn,
+					    cookie1,
+					    cookie2,
+					    obj,
+					    modname, 
+					    name,
+					    configonly,
+					    textmode,
+					    fncalled);
+    }
+
+    if (!fnresult) {
+	return FALSE;
+    }
+
+    return TRUE;
+
+}  /* test_one_ancestor */
+
+
+/********************************************************************
+* FUNCTION test_one_descendant
+* 
+* The the specified node
+* The walker fn will be called for each match.  
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* This function skips choice and case nodes and
+* only processes real data nodes
+*
+* INPUTS:
+*    exprmod == module containing object
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    startobj == node to check
+*    modname == module name; 
+*                only matches in this module namespace
+*                will be returned
+*            == NULL:
+*                 namespace matching will be skipped
+*    name == name of node to find
+*              == NULL to match any name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if childname == NULL
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*    orself == TRUE if descendant-or-self test
+*    fncalled == address of return function called flag
+*
+* OUTPUTS:
+*   *fncalled set to TRUE if a callback function was called
+
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
+static boolean
+    test_one_descendant (ncx_module_t *exprmod,
+			 obj_walker_fn_t walkerfn,
+			 void *cookie1,
+			 void *cookie2,
+			 const obj_template_t *startobj,
+			 const xmlChar *modname,
+			 const xmlChar *name,
+			 boolean configonly,
+			 boolean textmode,
+			 boolean orself,
+			 boolean *fncalled)
+{
+    const obj_template_t *obj;
+    const dlq_hdr_t      *datadefQ;
+    boolean               fnresult;
+
+    if (orself) {
+	fnresult = process_one_walker_child(walkerfn,
+					    cookie1,
+					    cookie2,
+					    startobj,
+					    modname, 
+					    name,
+					    configonly,
+					    textmode,
+					    fncalled);
+	if (!fnresult) {
+	    return FALSE;
+	}
+    }
+
+    datadefQ = obj_get_cdatadefQ(startobj);
+    if (!datadefQ) {
+	return TRUE;
+    }
+
+    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
+	 obj != NULL;
+	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	if (obj->objtype == OBJ_TYP_CHOICE ||
+	    obj->objtype == OBJ_TYP_CASE) {
+	    fnresult = obj_find_all_descendants(exprmod,
+						walkerfn,
+						cookie1,
+						cookie2,
+						obj,
+						modname,
+						name,
+						configonly,
+						textmode,
+						FALSE,
+						orself,
+						fncalled);
+	} else {
+	    fnresult = process_one_walker_child(walkerfn,
+						cookie1,
+						cookie2,
+						obj,
+						modname, 
+						name,
+						configonly,
+						textmode,
+						fncalled);
+	    if (fnresult && !*fncalled) {
+		fnresult = obj_find_all_descendants(exprmod,
+						    walkerfn,
+						    cookie1,
+						    cookie2,
+						    obj,
+						    modname,
+						    name,
+						    configonly,
+						    textmode,
+						    FALSE,
+						    orself,
+						    fncalled);
+	    }
+	}
+	if (!fnresult) {
+	    return FALSE;
+	}
+    }
+
+    return TRUE;
+
+}  /* test_one_descendant */
+
+
+/********************************************************************
+* FUNCTION test_one_pfnode
+* 
+* The the specified node
+* The walker fn will be called for each match.  
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* This function skips choice and case nodes and
+* only processes real data nodes
+*
+* INPUTS:
+*    exprmod == module containing object
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    obj == node to check
+*    modname == module name; 
+*                only matches in this module namespace
+*                will be returned
+*            == NULL:
+*                 namespace matching will be skipped
+*    childname == name of child node to find
+*              == NULL to match any child name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if childname == NULL
+*    dblslash == TRUE if all decendents of the preceding
+*                 or following nodes should be checked
+*                FALSE only 1 level is checked
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*    forward == TRUE: forward axis test
+*               FALSE: reverse axis test
+*    axis == axis enum to use
+*    fncalled == address of return function called flag
+*
+* OUTPUTS:
+*   *fncalled set to TRUE if a callback function was called
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
+static boolean
+    test_one_pfnode (ncx_module_t *exprmod,
+		     obj_walker_fn_t walkerfn,
+		     void *cookie1,
+		     void *cookie2,
+		     const obj_template_t *obj,
+		     const xmlChar *modname,
+		     const xmlChar *name,
+		     boolean configonly,
+		     boolean dblslash,
+		     boolean textmode,
+		     boolean forward,
+		     ncx_xpath_axis_t axis,
+		     boolean *fncalled)
+{
+    const obj_template_t *child;
+    boolean               fnresult, needcont;
+
+    /* for objects, need to let same node match, because
+     * if there are multiple instances of the object,
+     * it would match
+     */
+    if (obj->objtype == OBJ_TYP_LIST ||
+	obj->objtype == OBJ_TYP_LEAF_LIST) {
+	;
+    } else if (forward) {
+	obj = (const obj_template_t *)dlq_nextEntry(obj);
+    } else {
+	obj = (const obj_template_t *)dlq_prevEntry(obj);
+    }
+
+    while (obj) {
+	needcont = FALSE;
+
+	if (!obj_has_name(obj)) {
+	    needcont = TRUE;
+	}
+
+	if (configonly && !name && !obj_is_config(obj)) {
+	    needcont = TRUE;
+	}
+
+	if (needcont) {
+	    /* get the next node to process */
+	    if (forward) {
+		obj = (const obj_template_t *)dlq_nextEntry(obj);
+	    } else {
+		obj = (const obj_template_t *)dlq_prevEntry(obj);
+	    }
+	    continue;
+	}
+
+	if (obj->objtype == OBJ_TYP_CHOICE ||
+	    obj->objtype == OBJ_TYP_CASE) {
+	    for (child = (forward) ? obj_first_child(obj) :
+		     obj_last_child(obj);
+		 child != NULL;
+		 child = (forward) ? obj_next_child(child) :
+		     obj_previous_child(child)) {
+
+		fnresult = obj_find_all_pfaxis(exprmod,
+					       walkerfn,
+					       cookie1,
+					       cookie2,
+					       child,
+					       modname,
+					       name,
+					       configonly,
+					       dblslash,
+					       textmode,
+					       FALSE,
+					       axis,
+					       fncalled);
+		if (!fnresult) {
+		    return FALSE;
+		}
+	    }
+	} else {
+	    fnresult = process_one_walker_child(walkerfn,
+						cookie1,
+						cookie2,
+						obj,
+						modname,
+						name,
+						configonly,
+						textmode,
+						fncalled);
+	    if (!fnresult) {
+		return FALSE;
+	    }
+
+	    if (!*fncalled && dblslash) {
+		/* if /foo did not get added, than 
+		 * try /foo/bar, /foo/baz, etc.
+		 * check all the child nodes even if
+		 * one of them matches, because all
+		 * matches are needed with the '//' operator
+		 */
+		for (child = (forward) ?
+			 obj_first_child(obj) :
+			 obj_last_child(obj);
+		     child != NULL;
+		     child = (forward) ?
+			 obj_next_child(child) :
+			 obj_previous_child(child)) {
+
+		    fnresult = 
+			obj_find_all_pfaxis(exprmod,
+					    walkerfn, 
+					    cookie1, 
+					    cookie2,
+					    child, 
+					    modname, 
+					    name, 
+					    configonly,
+					    dblslash,
+					    textmode,
+					    FALSE,
+					    axis,
+					    fncalled);
+		    if (!fnresult) {
+			return FALSE;
+		    }
+		}
+	    }
+	}
+
+	/* get the next node to process */
+	if (forward) {
+	    obj = (const obj_template_t *)dlq_nextEntry(obj);
+	} else {
+	    obj = (const obj_template_t *)dlq_prevEntry(obj);
+	}
+
+    }
+    return TRUE;
+
+}  /* test_one_pfnode */
 
 
 /**************** E X T E R N A L    F U N C T I O N S    **********/
@@ -3249,6 +3743,7 @@ const obj_template_t *
 * only processes real data nodes
 *
 * INPUTS:
+*    exprmod == module containing XPath expression
 *    walkerfn == callback function to use
 *    cookie1 == cookie1 value to pass to walker fn
 *    cookie2 == cookie2 value to pass to walker fn
@@ -3266,74 +3761,105 @@ const obj_template_t *
 *    textmode == TRUE if just testing for text() nodes
 *                name and modname will be ignored in this mode
 *                FALSE if using name and modname to filter
+*    useroot == TRUE is it is safe to use the toproot
+*               FALSE if not, use all moduleQ search instead
 *
 * RETURNS:
 *   TRUE if normal termination occurred
 *   FALSE if walker fn requested early termination
 *********************************************************************/
 boolean
-    obj_find_all_children (obj_walker_fn_t walkerfn,
+    obj_find_all_children (ncx_module_t *exprmod,
+			   obj_walker_fn_t walkerfn,
 			   void *cookie1,
 			   void *cookie2,
 			   const obj_template_t *startnode,
 			   const xmlChar *modname,
 			   const xmlChar *childname,
 			   boolean configonly,
-			   boolean textmode)
+			   boolean textmode,
+			   boolean useroot)
 {
-    const obj_template_t *obj;
     const dlq_hdr_t      *datadefQ;
-    boolean               ret, fncalled;
+    const obj_template_t *obj;
+    ncx_module_t         *mod;
+    boolean               fnresult;
 
 #ifdef DEBUG
-    if (!startnode) {
+    if (!exprmod || !walkerfn || !startnode) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return FALSE;
     }
 #endif
 
-    datadefQ = obj_get_cdatadefQ(startnode);
-    if (!datadefQ) {
-	return TRUE;
+    if (obj_is_toproot(startnode) && !useroot) {
+
+	for (obj = ncx_get_first_data_object(exprmod);
+	     obj != NULL;
+	     obj = ncx_get_next_data_object(exprmod, obj)) {
+
+	    fnresult = test_one_child(exprmod,
+				      walkerfn,
+				      cookie1,
+				      cookie2,
+				      obj,
+				      modname,
+				      childname,
+				      configonly,
+				      textmode);
+	    if (!fnresult) {
+		return FALSE;
+	    }
+	}
+
+	for (mod = ncx_get_first_module();
+	     mod != NULL;
+	     mod = ncx_get_next_module(mod)) {
+
+	    for (obj = ncx_get_first_data_object(mod);
+		 obj != NULL;
+		 obj = ncx_get_next_data_object(mod, obj)) {
+
+		fnresult = test_one_child(exprmod,
+					  walkerfn,
+					  cookie1,
+					  cookie2,
+					  obj,
+					  modname,
+					  childname,
+					  configonly,
+					  textmode);
+		if (!fnresult) {
+		    return FALSE;
+		}
+	    }
+	}
+    } else {
+
+	datadefQ = obj_get_cdatadefQ(startnode);
+	if (!datadefQ) {
+	    return TRUE;
+	}
+
+	for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
+	     obj != NULL;
+	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+
+	    fnresult = test_one_child(exprmod,
+				      walkerfn,
+				      cookie1,
+				      cookie2,
+				      obj,
+				      modname,
+				      childname,
+				      configonly,
+				      textmode);
+	    if (!fnresult) {
+		return FALSE;
+	    }
+	}
     }
 
-    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
-
-	if (obj->objtype == OBJ_TYP_CHOICE) {
-	    ret = obj_find_all_children(walkerfn,
-					cookie1,
-					cookie2,
-					obj,
-					modname,
-					childname,
-					configonly,
-					textmode);
-	} else if (obj->objtype == OBJ_TYP_CASE) {
-	    ret = obj_find_all_children(walkerfn,
-					cookie1,
-					cookie2,
-					obj,
-					modname,
-					childname,
-					configonly,
-					textmode);
-	} else {
-	    ret = process_one_walker_child(walkerfn,
-					   cookie1,
-					   cookie2,
-					   obj,
-					   modname, 
-					   childname,
-					   configonly,
-					   textmode,
-					   &fncalled);
-	}
-	if (!ret) {
-	    return FALSE;
-	}
-    }
     return TRUE;
 
 }  /* obj_find_all_children */
@@ -3353,6 +3879,7 @@ boolean
 * only processes real data nodes
 *
 * INPUTS:
+*    exprmod == module containing XPath object
 *    walkerfn == callback function to use
 *    cookie1 == cookie1 value to pass to walker fn
 *    cookie2 == cookie2 value to pass to walker fn
@@ -3370,6 +3897,10 @@ boolean
 *    textmode == TRUE if just testing for text() nodes
 *                name and modname will be ignored in this mode
 *                FALSE if using name and modname to filter
+*    useroot == TRUE is it is safe to use the toproot
+*               FALSE if not, use all moduleQ search instead
+*    orself == TRUE if axis is really ancestor-or-self
+*              FALSE if axis is ancestor
 *    fncalled == address of return function called flag
 *
 * OUTPUTS:
@@ -3380,7 +3911,8 @@ boolean
 *   FALSE if walker fn requested early termination
 *********************************************************************/
 boolean
-    obj_find_all_ancestors (obj_walker_fn_t walkerfn,
+    obj_find_all_ancestors (ncx_module_t *exprmod,
+			    obj_walker_fn_t walkerfn,
 			    void *cookie1,
 			    void *cookie2,
 			    const obj_template_t *startnode,
@@ -3388,39 +3920,98 @@ boolean
 			    const xmlChar *name,
 			    boolean configonly,
 			    boolean textmode,
+			    boolean useroot,
+			    boolean orself,
 			    boolean *fncalled)
 {
     const obj_template_t *obj;
+    ncx_module_t         *mod;
     boolean               fnresult;
 
 #ifdef DEBUG
-    if (!startnode) {
+    if (!exprmod || !walkerfn || !startnode || !fncalled) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return FALSE;
     }
 #endif
 
-    obj = startnode->parent;
-    while (obj) {
-	if (obj->objtype == OBJ_TYP_CHOICE ||
-	    obj->objtype == OBJ_TYP_CASE) {
-	    fnresult = TRUE;
-	} else {
-	    fnresult = process_one_walker_child(walkerfn,
-					   cookie1,
-					   cookie2,
-					   obj,
-					   modname, 
-					   name,
-					   configonly,
-					   textmode,
-					   fncalled);
-	}
-	if (!fnresult) {
-	    return FALSE;
-	}
-	obj = obj->parent;
+    *fncalled = FALSE;
+
+    if (orself) {
+	obj = startnode;
+    } else {
+	obj = startnode->parent;
     }
+
+    if (obj && obj_is_toproot(obj) && !useroot) {
+
+	for (obj = ncx_get_first_data_object(exprmod);
+	     obj != NULL;
+	     obj = ncx_get_next_data_object(exprmod, obj)) {
+
+	    fnresult = test_one_ancestor(exprmod,
+					 walkerfn,
+					 cookie1,
+					 cookie2,
+					 obj,
+					 modname,
+					 name,
+					 configonly,
+					 textmode,
+					 orself,
+					 fncalled);
+	    if (!fnresult) {
+		return FALSE;
+	    }
+	}
+
+	for (mod = ncx_get_first_module();
+	     mod != NULL;
+	     mod = ncx_get_next_module(mod)) {
+
+	    for (obj = ncx_get_first_data_object(mod);
+		 obj != NULL;
+		 obj = ncx_get_next_data_object(mod, obj)) {
+
+		fnresult = test_one_ancestor(exprmod,
+					     walkerfn,
+					     cookie1,
+					     cookie2,
+					     obj,
+					     modname,
+					     name,
+					     configonly,
+					     textmode,
+					     orself,
+					     fncalled);
+		if (!fnresult) {
+		    return FALSE;
+		}
+	    }
+	}
+    } else {
+	while (obj) {
+	    if (obj->objtype == OBJ_TYP_CHOICE ||
+		obj->objtype == OBJ_TYP_CASE) {
+		fnresult = TRUE;
+	    } else {
+		fnresult = process_one_walker_child(walkerfn,
+						    cookie1,
+						    cookie2,
+						    obj,
+						    modname, 
+						    name,
+						    configonly,
+						    textmode,
+						    fncalled);
+	    }
+	    if (!fnresult) {
+		return FALSE;
+	    }
+	    obj = obj->parent;
+	}
+    }
+
     return TRUE;
 
 }  /* obj_find_all_ancestors */
@@ -3440,6 +4031,7 @@ boolean
 * only processes real data nodes
 *
 * INPUTS:
+*    exprmod == module containing XPath expression
 *    walkerfn == callback function to use
 *    cookie1 == cookie1 value to pass to walker fn
 *    cookie2 == cookie2 value to pass to walker fn
@@ -3457,6 +4049,10 @@ boolean
 *    textmode == TRUE if just testing for text() nodes
 *                name and modname will be ignored in this mode
 *                FALSE if using name and modname to filter
+*    useroot == TRUE is it is safe to use the toproot
+*               FALSE if not, use all moduleQ search instead
+*    orself == TRUE if axis is really ancestor-or-self
+*              FALSE if axis is ancestor
 *    fncalled == address of return function called flag
 *
 * OUTPUTS:
@@ -3467,7 +4063,8 @@ boolean
 *   FALSE if walker fn requested early termination
 *********************************************************************/
 boolean
-    obj_find_all_descendants (obj_walker_fn_t walkerfn,
+    obj_find_all_descendants (ncx_module_t *exprmod,
+			      obj_walker_fn_t walkerfn,
 			      void *cookie1,
 			      void *cookie2,
 			      const obj_template_t *startnode,
@@ -3475,30 +4072,31 @@ boolean
 			      const xmlChar *name,
 			      boolean configonly,
 			      boolean textmode,
+			      boolean useroot,
+			      boolean orself,
 			      boolean *fncalled)
 {
     const obj_template_t *obj;
-    const dlq_hdr_t      *datadefQ;
-    boolean               ret;
+    ncx_module_t         *mod;
+    boolean               fnresult;
 
 #ifdef DEBUG
-    if (!startnode) {
+    if (!exprmod || !walkerfn || !startnode || !fncalled) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return FALSE;
     }
 #endif
 
-    datadefQ = obj_get_cdatadefQ(startnode);
-    if (!datadefQ) {
-	return TRUE;
-    }
+    *fncalled = FALSE;
 
-    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+    if (obj_is_toproot(startnode) && !useroot) {
 
-	if (obj->objtype == OBJ_TYP_CHOICE) {
-	    ret = obj_find_all_descendants(walkerfn,
+	for (obj = ncx_get_first_data_object(exprmod);
+	     obj != NULL;
+	     obj = ncx_get_next_data_object(exprmod, obj)) {
+
+	    fnresult = test_one_descendant(exprmod,
+					   walkerfn,
 					   cookie1,
 					   cookie2,
 					   obj,
@@ -3506,29 +4104,23 @@ boolean
 					   name,
 					   configonly,
 					   textmode,
+					   orself,
 					   fncalled);
-	} else if (obj->objtype == OBJ_TYP_CASE) {
-	    ret = obj_find_all_descendants(walkerfn,
-					   cookie1,
-					   cookie2,
-					   obj,
-					   modname,
-					   name,
-					   configonly,
-					   textmode,
-					   fncalled);
-	} else {
-	    ret = process_one_walker_child(walkerfn,
-					   cookie1,
-					   cookie2,
-					   obj,
-					   modname, 
-					   name,
-					   configonly,
-					   textmode,
-					   fncalled);
-	    if (ret && !*fncalled) {
-		ret = obj_find_all_descendants(walkerfn,
+	    if (!fnresult) {
+		return FALSE;
+	    }
+	}
+
+	for (mod = ncx_get_first_module();
+	     mod != NULL;
+	     mod = ncx_get_next_module(mod)) {
+
+	    for (obj = ncx_get_first_data_object(mod);
+		 obj != NULL;
+		 obj = ncx_get_next_data_object(mod, obj)) {
+
+		fnresult = test_one_descendant(exprmod,
+					       walkerfn,
 					       cookie1,
 					       cookie2,
 					       obj,
@@ -3536,13 +4128,28 @@ boolean
 					       name,
 					       configonly,
 					       textmode,
+					       orself,
 					       fncalled);
+		if (!fnresult) {
+		    return FALSE;
+		}
 	    }
 	}
-	if (!ret) {
+    } else {
+	fnresult = test_one_descendant(exprmod,
+				       walkerfn,
+				       cookie1,
+				       cookie2,
+				       startnode,
+				       modname,
+				       name,
+				       configonly,
+				       textmode,
+				       orself,
+				       fncalled);
+	if (!fnresult) {
 	    return FALSE;
 	}
-
     }
     return TRUE;
 
@@ -3564,6 +4171,7 @@ boolean
 * only processes real data nodes
 *
 * INPUTS:
+*    exprmod == module containing object
 *    walkerfn == callback function to use
 *    cookie1 == cookie1 value to pass to walker fn
 *    cookie2 == cookie2 value to pass to walker fn
@@ -3596,7 +4204,8 @@ boolean
 *   FALSE if walker fn requested early termination
 *********************************************************************/
 boolean
-    obj_find_all_pfaxis (obj_walker_fn_t walkerfn,
+    obj_find_all_pfaxis (ncx_module_t *exprmod,
+			 obj_walker_fn_t walkerfn,
 			 void *cookie1,
 			 void *cookie2,
 			 const obj_template_t *startnode,
@@ -3605,18 +4214,22 @@ boolean
 			 boolean configonly,
 			 boolean dblslash,
 			 boolean textmode,
+			 boolean useroot,
 			 ncx_xpath_axis_t axis,
 			 boolean *fncalled)
 {
-    const obj_template_t *obj, *child;
-    boolean               fnresult, needcont, forward;
+    const obj_template_t *obj;
+    ncx_module_t         *mod;
+    boolean               fnresult, forward;
 
 #ifdef DEBUG
-    if (!startnode || !fncalled) {
+    if (!exprmod || !walkerfn || !startnode || !fncalled) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return FALSE;
     }
 #endif
+
+    *fncalled = FALSE;
 
     /* check the Q containing the startnode
      * for preceding or following nodes;
@@ -3644,118 +4257,79 @@ boolean
 	return FALSE;
     }
 
-    /* for objects, need to let same node match, because
-     * if there are multiple instances of the object,
-     * it would match
-     */
-    if (startnode->objtype == OBJ_TYP_LIST ||
-	startnode->objtype == OBJ_TYP_LEAF_LIST) {
-	obj = startnode;
-    } else if (forward) {
-	obj = (const obj_template_t *)dlq_nextEntry(startnode);
-    } else {
-	obj = (const obj_template_t *)dlq_prevEntry(startnode);
+    if (obj_is_toproot(startnode) && !dblslash) {
+	return TRUE;
     }
 
-    while (obj) {
-	needcont = FALSE;
+    if (obj_is_toproot(startnode) && !useroot) {
 
-	if (!obj_has_name(obj)) {
-	    needcont = TRUE;
-	}
+	for (obj = ncx_get_first_data_object(exprmod);
+	     obj != NULL;
+	     obj = ncx_get_next_data_object(exprmod, obj)) {
 
-	if (configonly && !name && !obj_is_config(obj)) {
-	    needcont = TRUE;
-	}
-
-	if (needcont) {
-	    /* get the next node to process */
-	    if (forward) {
-		obj = (const obj_template_t *)dlq_nextEntry(obj);
-	    } else {
-		obj = (const obj_template_t *)dlq_prevEntry(obj);
+	    fnresult = test_one_pfnode(exprmod,
+				       walkerfn,
+				       cookie1,
+				       cookie2,
+				       obj,
+				       modname,
+				       name,
+				       configonly,
+				       dblslash,
+				       textmode,
+				       forward,
+				       axis,
+				       fncalled);
+	    if (!fnresult) {
+		return FALSE;
 	    }
-	    continue;
 	}
 
-	if (obj->objtype == OBJ_TYP_CHOICE ||
-	    obj->objtype == OBJ_TYP_CASE) {
-	    for (child = (forward) ? obj_first_child(obj) :
-		     obj_last_child(obj);
-		 child != NULL;
-		 child = (forward) ? obj_next_child(child) :
-		     obj_previous_child(child)) {
+	for (mod = ncx_get_first_module();
+	     mod != NULL;
+	     mod = ncx_get_next_module(mod)) {
 
-		fnresult = obj_find_all_pfaxis(walkerfn,
-					       cookie1,
-					       cookie2,
-					       child,
-					       modname,
-					       name,
-					       configonly,
-					       dblslash,
-					       textmode,
-					       axis,
-					       fncalled);
+	    for (obj = ncx_get_first_data_object(mod);
+		 obj != NULL;
+		 obj = ncx_get_next_data_object(mod, obj)) {
+
+		fnresult = test_one_pfnode(exprmod,
+					   walkerfn,
+					   cookie1,
+					   cookie2,
+					   obj,
+					   modname,
+					   name,
+					   configonly,
+					   dblslash,
+					   textmode,
+					   forward,
+					   axis,
+					   fncalled);
 		if (!fnresult) {
 		    return FALSE;
 		}
 	    }
-	} else {
-	    fnresult = process_one_walker_child(walkerfn,
-						cookie1,
-						cookie2,
-						obj,
-						modname,
-						name,
-						configonly,
-						textmode,
-						fncalled);
-	    if (!fnresult) {
-		return FALSE;
-	    }
-
-	    if (!*fncalled && dblslash) {
-		/* if /foo did not get added, than 
-		 * try /foo/bar, /foo/baz, etc.
-		 * check all the child nodes even if
-		 * one of them matches, because all
-		 * matches are needed with the '//' operator
-		 */
-		for (child = (forward) ?
-			 obj_first_child(obj) :
-			 obj_last_child(obj);
-		     child != NULL;
-		     child = (forward) ?
-			 obj_next_child(child) :
-			 obj_previous_child(child)) {
-
-		    fnresult = 
-			obj_find_all_pfaxis(walkerfn, 
-					    cookie1, 
-					    cookie2,
-					    child, 
-					    modname, 
-					    name, 
-					    configonly,
-					    dblslash,
-					    textmode,
-					    axis,
-					    fncalled);
-		    if (!fnresult) {
-			return FALSE;
-		    }
-		}
-	    }
 	}
-
-	/* get the next node to process */
-	if (forward) {
-	    obj = (const obj_template_t *)dlq_nextEntry(obj);
-	} else {
-	    obj = (const obj_template_t *)dlq_prevEntry(obj);
+    } else {
+	fnresult = test_one_pfnode(exprmod,
+				   walkerfn,
+				   cookie1,
+				   cookie2,
+				   startnode,
+				   modname,
+				   name,
+				   configonly,
+				   dblslash,
+				   textmode,
+				   forward,
+				   axis,
+				   fncalled);
+	if (!fnresult) {
+	    return FALSE;
 	}
     }
+
     return TRUE;
 
 }  /* obj_find_all_pfaxis */
@@ -3970,7 +4544,7 @@ typ_template_t *
 	}
     }
 
-    if (obj->parent) {
+    if (obj->parent && !obj_is_toproot(obj->parent)) {
 	return obj_find_type(obj->parent, typname);
     } else {
 	return NULL;
@@ -4067,7 +4641,7 @@ grp_template_t *
 	}
     }
 
-    if (obj->parent) {
+    if (obj->parent && !obj_is_toproot(obj->parent)) {
 	return obj_find_grouping(obj->parent, grpname);
     } else {
 	return NULL;
@@ -5501,6 +6075,41 @@ boolean
 
 
 /********************************************************************
+* FUNCTION obj_has_text_content
+* 
+* Check if the specified object type has a text content
+* for XPath purposes
+*
+* INPUTS:
+*   obj == the specific object to check
+*
+* RETURNS:
+*   TRUE if obj has text content
+*   FALSE otherwise
+*********************************************************************/
+boolean
+    obj_has_text_content (const obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    switch (obj->objtype) {
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+	return (obj_get_basetype(obj) == NCX_BT_ANY) ? FALSE : TRUE;
+    default:
+	return FALSE;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_has_text_content */
+
+
+/********************************************************************
 * FUNCTION obj_get_status
 * 
 * Get the status field for this obj
@@ -6185,7 +6794,7 @@ uint32
 
     level = 1;
     parent = obj->parent;
-    while (parent) {
+    while (parent && !obj_is_toproot(parent)) {
 	level++;
 	parent = parent->parent;
     }
@@ -6944,7 +7553,7 @@ boolean
     case OBJ_TYP_REFINE:
 	return FALSE;
     default:
-	if (obj->parent) {
+	if (obj->parent && !obj_is_toproot(obj->parent)) {
 	    return obj_is_data(obj->parent);
 	} else {
 	    return TRUE;
@@ -6988,9 +7597,9 @@ boolean
     case OBJ_TYP_REFINE:
 	return FALSE;
     default:
-	if (obj_is_root(obj)) {
+	if (obj_is_toproot(obj)) {
 	    return TRUE;
-	} else if (obj->parent) {
+	} else if (obj->parent && !obj_is_toproot(obj->parent)) {
 	    return obj_is_data_db(obj->parent);
 	} else {
 	    return TRUE;
@@ -7033,7 +7642,7 @@ boolean
     case OBJ_TYP_REFINE:
 	return FALSE;
     default:
-	if (obj->parent) {
+	if (obj->parent && !obj_is_toproot(obj->parent)) {
 	    return obj_in_rpc(obj->parent);
 	} else {
 	    return FALSE;
@@ -7076,7 +7685,7 @@ boolean
     case OBJ_TYP_REFINE:
 	return FALSE;
     default:
-	if (obj->parent) {
+	if (obj->parent && !obj_is_toproot(obj->parent)) {
 	    return obj_in_rpc_reply(obj->parent);
 	} else {
 	    return FALSE;
@@ -7119,7 +7728,7 @@ boolean
     case OBJ_TYP_REFINE:
 	return FALSE;
     default:
-	if (obj->parent) {
+	if (obj->parent && !obj_is_toproot(obj->parent)) {
 	    return obj_in_notif(obj->parent);
 	} else {
 	    return FALSE;
@@ -7326,6 +7935,37 @@ boolean
     return (obj->flags & OBJ_FL_ROOT) ? TRUE : FALSE;
 
 }   /* obj_is_root */
+
+
+/********************************************************************
+* FUNCTION obj_is_toproot
+*
+* Check if object is the tconfig top root
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is the top root
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_toproot (const obj_template_t *obj)
+{
+
+    const obj_template_t *top;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    top = ncx_get_gen_root();
+    return (top && top == obj) ? TRUE : FALSE;
+
+}   /* obj_is_toproot */
 
 
 /********************************************************************

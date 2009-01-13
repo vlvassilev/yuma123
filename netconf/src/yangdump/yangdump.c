@@ -543,6 +543,13 @@ static status_t
 	res = ncxmod_load_module(YANGDUMP_MOD);
 
 	if (res == NO_ERR) {
+	    res = ncxmod_load_module(NCXMOD_NCX);
+	    if (res == NO_ERR) {
+		res = ncx_stage2_init();
+	    }
+	}
+
+	if (res == NO_ERR) {
 	    res = process_cli_input(argc, argv, &cvtparms);
 	}
     }

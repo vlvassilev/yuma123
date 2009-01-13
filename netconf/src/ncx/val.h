@@ -715,11 +715,12 @@ extern boolean
     val_find_all_ancestors (val_walker_fn_t walkerfn,
 			    void *cookie1,
 			    void *cookie2,
-			    const val_value_t *startnode,
+			    val_value_t *startnode,
 			    const xmlChar *modname,
 			    const xmlChar *name,
-			    boolean configonly,
-			    boolean textmode);
+			    boolean configonly,			    
+			    boolean textmode,
+			    boolean orself);
 
 extern boolean
     val_find_all_descendants (val_walker_fn_t walkerfn,
@@ -729,7 +730,8 @@ extern boolean
 			      const xmlChar *modname,
 			      const xmlChar *name,
 			      boolean configonly,
-			      boolean textmode);
+			      boolean textmode,
+			      boolean orself);
 
 			      
 extern boolean
@@ -897,5 +899,8 @@ extern void
 
 extern void
     val_clean_tree (val_value_t *val);
+
+extern uint32
+    val_get_nest_level (val_value_t *val);
 
 #endif	    /* _H_val */

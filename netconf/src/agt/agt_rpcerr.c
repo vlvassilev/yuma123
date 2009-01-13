@@ -115,8 +115,14 @@ static rpc_err_t
 		rpc_err_sev_t *errsev)
 {
 
+    if (intres >= ERR_WARN_BASE) {
+	*errsev = RPC_ERR_SEV_WARNING;
+	return RPC_ERR_NONE;
+    }
+
     *errsev = RPC_ERR_SEV_ERROR;
 
+    
     /* translate the internal NCX error code to a netconf code */
     switch (intres) {
     case NO_ERR:
@@ -451,48 +457,9 @@ static rpc_err_t
     case ERR_NCX_INVALID_DEV_STMT:
 	return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_XPATH_EXPR:
-    case ERR_NCX_NO_XPATH_PARENT:
 	return RPC_ERR_INVALID_VALUE;
 
-    /* user warnings start at 400 */
-    case ERR_MAKFILE_DUP_SRC:
-    case ERR_INC_NOT_FOUND:
-    case ERR_CMDLINE_VAL:
-    case ERR_CMDLINE_OPT:
-    case ERR_CMDLINE_OPT_UNKNOWN:
-    case ERR_CMDLINE_SYNTAX:
-    case ERR_CMDLINE_VAL_REQUIRED:
-    case ERR_FORM_INPUT:
-    case ERR_FORM_UNKNOWN:
-    case ERR_NCX_NO_INSTANCE:
-    case ERR_NCX_SESSION_CLOSED:
-    case ERR_NCX_DUP_IMPORT:
-    case ERR_NCX_INVALID_DUP_IMPORT:
-    case ERR_NCX_TYPDEF_NOT_USED:
-    case ERR_NCX_GRPDEF_NOT_USED:
-    case ERR_NCX_IMPORT_NOT_USED:
-    case ERR_NCX_DUP_UNIQUE_COMP:
-    case ERR_NCX_STMT_IGNORED:
-    case ERR_NCX_DUP_INCLUDE:
-    case ERR_NCX_INCLUDE_NOT_USED:
-    case ERR_NCX_DATE_PAST:
-    case ERR_NCX_DATE_FUTURE:
-    case ERR_NCX_ENUM_VAL_ORDER:
-    case ERR_NCX_BIT_POS_ORDER:
-    case ERR_NCX_INVALID_STATUS:
-    case ERR_NCX_DUP_AUGNODE:
-    case ERR_NCX_DUP_IF_FEATURE:
-    case ERR_NCX_USING_DEPRECATED:
-    case ERR_NCX_MISSING_REFTARGET:
-    case ERR_PARS_SECDONE:
-    case ERR_NCX_SKIPPED:
-    case ERR_NCX_CANCELED:
-	return RPC_ERR_OPERATION_FAILED;
-    case ERR_NCX_EMPTY_XPATH_RESULT:
-    case ERR_NCX_NO_XPATH_CHILD:
-    case ERR_NCX_NO_XPATH_NODES:
-	return RPC_ERR_INVALID_VALUE;
-
+    /* user warnings start at 400 and do not need to be listed here */
     default:
 	return RPC_ERR_OPERATION_FAILED;	
 

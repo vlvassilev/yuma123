@@ -301,7 +301,7 @@ static void
     boolean flag;
 
     if (!(obj->flags & OBJ_FL_CONFSET)) {
-	if (obj->parent) {
+	if (obj->parent && !obj_is_toproot(obj->parent)) {
 	    flag = obj_get_config_flag(obj->parent);
 	    if (flag) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -3613,7 +3613,7 @@ static status_t
     res = NO_ERR;
 
     /* check status stmt against the parent, if any */
-    if (obj && obj->parent) {
+    if (obj && obj->parent && !obj_is_toproot(obj->parent)) {
 	if (!obj_is_refine(obj)) {
 	    stat = obj_get_status(obj);
 	    parentstat = obj_get_status(obj->parent);
@@ -5352,7 +5352,8 @@ static status_t
     /* figure out augment target later */
 
     /* check if correct target Xpath string form is present */
-    if (obj->parent && aug->target && *aug->target == '/') {
+    if (obj->parent && !obj_is_toproot(obj->parent) && 
+	aug->target && *aug->target == '/') {
 	/* absolute-schema-nodeid target not allowed */
 	log_error("\nError: absolute schema-nodeid form"
 		  " not allowed in nested augment statement");
@@ -5362,7 +5363,8 @@ static status_t
     }
 
     /* check if correct target Xpath string form is present */
-    if (!obj->parent && aug->target && *aug->target != '/') {
+    if ((!obj->parent || obj_is_toproot(obj->parent)) && 
+	(aug->target && *aug->target != '/')) {
 	/* absolute-schema-nodeid target must be used */
 	log_error("\nError: descendant schema-nodeid form"
 		  " not allowed in top-level augment statement");
@@ -6220,10 +6222,6 @@ static status_t
     return retres;
 				    
 }  /* check_conditional_mismatch */
-
-
-
-
 
 
 /************   E X T E R N A L   F U N C T I O N S   ***************/

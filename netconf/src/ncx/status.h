@@ -269,8 +269,7 @@ typedef enum status_t_
     ERR_NCX_DUP_REFINE_STMT,            /* 346 */
     ERR_NCX_INVALID_DEV_STMT,           /* 347 */
     ERR_NCX_INVALID_XPATH_EXPR,         /* 348 */
-    ERR_NCX_NO_XPATH_PARENT,            /* 349 */
-    ERR_LAST_USR_ERR,                   /* 352 -- not really used */
+    ERR_LAST_USR_ERR,                   /* 349 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */
@@ -303,9 +302,13 @@ typedef enum status_t_
     ERR_NCX_USING_DEPRECATED,           /* 427 */
     ERR_NCX_MISSING_REFTARGET,          /* 428 */
     ERR_NCX_EMPTY_XPATH_RESULT,         /* 429 */
-    ERR_NCX_NO_XPATH_CHILD,             /* 430 */
-    ERR_NCX_NO_XPATH_NODES,             /* 431 */
-    ERR_LAST_WARN,                      /* 432 -- not really used */
+    ERR_NCX_NO_XPATH_ANCESTOR,          /* 430 */
+    ERR_NCX_NO_XPATH_PARENT,            /* 431 */
+    ERR_NCX_NO_XPATH_CHILD,             /* 432 */
+    ERR_NCX_NO_XPATH_DESCENDANT,        /* 433 */
+    ERR_NCX_NO_XPATH_NODES,             /* 434 */
+
+    ERR_LAST_WARN,                      /* 435 -- not really used */
 
     /* system info return codes start at 500 */
     ERR_PARS_SECDONE=ERR_INFO_BASE,     /* 500 */

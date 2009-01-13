@@ -160,6 +160,12 @@ date	     init     comment
  */
 #define XP_FL_CONFIGONLY         bit4
 
+/* used to indicate the top object node is set
+ * FALSE to indicate that all the ncx_module_t datadefQs
+ * need to be searched instead
+ */
+#define XP_FL_USEROOT             bit5
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
@@ -390,7 +396,6 @@ typedef struct xpath_walkerparms_t_ {
     dlq_hdr_t         *resnodeQ;
     val_value_t       *topvalptr;
     ncx_xpath_axis_t   axis;
-    boolean            dblslash;
     uint32             callcount;
     xpath_testmode_t   testmode;
     status_t           res;

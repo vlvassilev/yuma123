@@ -2996,14 +2996,17 @@ static status_t
 	}
 
 	/* check local typedef shadowed further up the chain */
-	if (!errtyp && obj && obj->parent) {
+	if (!errtyp && obj && obj->parent && 
+	    !obj_is_root(obj->parent)) {
 	    errtyp = obj_find_type(obj->parent, name);
 	}
 
 	/* check module-global (exportable) typedef shadowed
 	 * only check for nested typedefs
 	 */
-	if (!errtyp && obj && (name || obj->grp || obj->parent)) {
+	if (!errtyp && obj && 
+	    (name || obj->grp || 
+	     (obj->parent && !obj_is_root(obj->parent)))) {
 	    errtyp = ncx_find_type(mod, name);
 	}
 

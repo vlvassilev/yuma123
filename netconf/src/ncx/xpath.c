@@ -957,7 +957,7 @@ status_t
 
     if (*target == '/') {
 	/* check error: if nested object is using an abs. Xpath */
-	if (obj && obj->parent) {
+	if (obj && obj->parent && !obj_is_root(obj->parent)) {
 	    log_error("\nError: Absolute Xpath expression not "
 		      "allowed here (%s)", target);
 	    res = ERR_NCX_INVALID_VALUE;

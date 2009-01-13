@@ -621,18 +621,21 @@ extern const obj_template_t *
     obj_next_child_deep (const obj_template_t *obj);
 
 extern boolean
-    obj_find_all_children (obj_walker_fn_t walkerfn,
+    obj_find_all_children (ncx_module_t *exprmod,
+			   obj_walker_fn_t walkerfn,
 			   void *cookie1,
 			   void *cookie2,
 			   const obj_template_t *startnode,
 			   const xmlChar *modname,
 			   const xmlChar *childname,
 			   boolean configonly, 
-			   boolean textmode);
+			   boolean textmode,
+			   boolean useroot);
 
 
 extern boolean
-    obj_find_all_ancestors (obj_walker_fn_t walkerfn,
+    obj_find_all_ancestors (ncx_module_t *exprmod,
+			    obj_walker_fn_t walkerfn,
 			    void *cookie1,
 			    void *cookie2,
 			    const obj_template_t *startnode,
@@ -640,10 +643,13 @@ extern boolean
 			    const xmlChar *name,
 			    boolean configonly,
 			    boolean textmode,
+			    boolean useroot,
+			    boolean orself,
 			    boolean *fncalled);
 
 extern boolean
-    obj_find_all_descendants (obj_walker_fn_t walkerfn,
+    obj_find_all_descendants (ncx_module_t *exprmod,
+			      obj_walker_fn_t walkerfn,
 			      void *cookie1,
 			      void *cookie2,
 			      const obj_template_t *startnode,
@@ -651,11 +657,14 @@ extern boolean
 			      const xmlChar *name,
 			      boolean configonly,
 			      boolean textmode,
+			      boolean useroot,
+			      boolean orself,
 			      boolean *fncalled);
 
 
 extern boolean
-    obj_find_all_pfaxis (obj_walker_fn_t walkerfn,
+    obj_find_all_pfaxis (ncx_module_t *exprmod,
+			 obj_walker_fn_t walkerfn,
 			 void *cookie1,
 			 void *cookie2,
 			 const obj_template_t *startnode,
@@ -664,6 +673,7 @@ extern boolean
 			 boolean configonly,
 			 boolean dblslash,
 			 boolean textmode,
+			 boolean useroot,
 			 ncx_xpath_axis_t axis,
 			 boolean *fncalled);
 
@@ -850,6 +860,9 @@ extern const xmlChar *
 extern boolean
     obj_has_name (const obj_template_t *obj);
 
+extern boolean
+    obj_has_text_content (const obj_template_t *obj);
+
 extern ncx_status_t
     obj_get_status (const obj_template_t *obj);
 
@@ -990,6 +1003,9 @@ extern boolean
 
 extern boolean
     obj_is_root (const obj_template_t *obj);
+
+extern boolean
+    obj_is_toproot (const obj_template_t *obj);
 
 extern boolean
     obj_is_password (const obj_template_t *obj);

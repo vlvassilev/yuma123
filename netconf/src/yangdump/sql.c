@@ -792,7 +792,7 @@ static void
     ses_putstr(scb, (const xmlChar *)buff);
 
     /* column: parentid */
-    if (obj->parent) {
+    if (obj->parent && !obj_is_toproot(obj->parent)) {
 	write_object_id(scb, obj->parent, buff);
     } else {
 	write_empty_col(scb);

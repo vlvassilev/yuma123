@@ -444,7 +444,7 @@ status_t
 		 "to no-startup CLI option\n");
     }
 
-    /* load the agtent sessions callback functions and DM module */
+    /* load the agent sessions callback functions and DM module */
     agt_ses_init2();
 
     /*** TEMP: NEED TO CONVERT TO WG DM ***/

@@ -130,6 +130,18 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
+*                            T Y P E S                              *
+*                                                                   *
+*********************************************************************/
+
+typedef struct objptr_t_ {
+    dlq_hdr_t       qhdr;
+    obj_template_t *obj;
+}  objptr_t;
+
+
+/********************************************************************
+*                                                                   *
 *                       V A R I A B L E S			    *
 *                                                                   *
 *********************************************************************/
@@ -155,6 +167,8 @@ static obj_template_t   *gen_empty;
 static obj_template_t   *gen_float;
 
 static obj_template_t   *gen_root;
+
+static dlq_hdr_t         objstoreQ;
 
 /* TBD: support multiple callbacks */
 static ncx_load_cbfn_t  mod_load_callback;
@@ -520,6 +534,8 @@ static status_t
     grp_template_t *grp;
     obj_template_t *obj;
     ext_template_t *ext;
+    dlq_hdr_t      *topQ;
+    objptr_t       *objptr;
     status_t        res;
 
     /* add the type definitions to the def_reg hash table */
@@ -557,25 +573,46 @@ static status_t
         }
     }
 
-    /* add the top-level object definitions to the def_reg hash table */
-    for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-         obj != NULL;
-         obj = (obj_template_t *)dlq_nextEntry(obj)) {
-	if (!obj_has_name(obj)) {
-	    /* these are not real objects, and do not have names */
-	    continue;
+    if (!dlq_empty(&mod->datadefQ)) {
+	if (gen_root) {
+	    topQ = obj_get_datadefQ(gen_root);
+	} else {
+	    topQ = &objstoreQ;
 	}
 
-	res = def_reg_add_moddef(modname,
-				 obj_get_name(obj), NCX_NT_OBJ, obj);
-        if (res != NO_ERR) {
-	    /* this object registration failed */
-	    log_error("\nncx reg: Module '%s' registering "
-		      "object '%s' failed (%s)",
-		      modname, obj_get_name(obj),
-		      get_error_string(res));
-            return res;
-        }
+	/* add the top-level object definitions to the def_reg hash table */
+	for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+	     obj != NULL;
+	     obj = (obj_template_t *)dlq_nextEntry(obj)) {
+	    if (!obj_has_name(obj)) {
+		/* these are not real objects, and do not have names */
+		continue;
+	    }
+
+	    res = def_reg_add_moddef(modname,
+				     obj_get_name(obj), 
+				     NCX_NT_OBJ, obj);
+	    if (res != NO_ERR) {
+		/* this object registration failed */
+		log_error("\nncx reg: Module '%s' registering "
+			  "object '%s' failed (%s)",
+			  modname, obj_get_name(obj),
+			  get_error_string(res));
+		return res;
+	    }
+
+	    if (gen_root) {
+		obj->parent = gen_root;
+	    } else {
+		objptr = m__getObj(objptr_t);
+		if (!objptr) {
+		    return ERR_INTERNAL_MEM;
+		}
+		memset(objptr, 0x0, sizeof(objptr_t));
+		objptr->obj = obj;
+		dlq_enque(objptr, topQ);
+	    }
+	}
     }
 
     /* jsut set the extension namespace ID */
@@ -798,6 +835,7 @@ status_t
     dlq_createSQue(&ncx_filptrQ);
     ncx_max_filptrs = NCX_DEF_FILPTR_CACHESIZE;
     ncx_cur_filptrs = 0;
+    dlq_createSQue(&objstoreQ);
 
     /* check that the correct version of libxml2 is installed */
     LIBXML_TEST_VERSION;
@@ -903,6 +941,8 @@ status_t
 status_t 
     ncx_stage2_init (void)
 {
+    obj_template_t   *obj;
+    objptr_t         *objptr;
     ncx_node_t        deftyp;
 
     if (stage2_init_done) {
@@ -948,6 +988,13 @@ status_t
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
+    /* add the top-level object definitions to the def_reg hash table */
+    while (!dlq_empty(&objstoreQ)) {
+	objptr = (objptr_t *)dlq_deque(&objstoreQ);
+
+	obj->parent = gen_root;
+	m__free(objptr);
+    }
 
     stage2_init_done = TRUE;
     return NO_ERR;
@@ -965,9 +1012,15 @@ void
 {
     ncx_module_t   *mod;
     ncx_filptr_t   *filptr;
+    objptr_t       *objptr;
 
     if (!ncx_init_done) {
 	return;
+    }
+
+    while (!dlq_empty(&objstoreQ)) {
+	objptr = (objptr_t *)dlq_deque(&objstoreQ);
+	m__free(objptr);
     }
 
     while (!dlq_empty(&ncx_modQ)) {
@@ -1848,6 +1901,32 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION ncx_get_mainmod
+* 
+* Get the main module
+* 
+* RETURNS:
+*   main module NULL if error
+*********************************************************************/
+ncx_module_t *
+    ncx_get_mainmod (ncx_module_t *mod)
+{
+
+#ifdef DEBUG
+    if (!mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+    if (mod->ismod) {
+	return mod;
+    }
+    return ncx_find_module(mod->belongs);
+
+}  /* ncx_get_mainmod */
+
+
+/********************************************************************
 * FUNCTION ncx_get_first_object
 * 
 * Get the first object in the datadefQs for the specified module
@@ -1868,7 +1947,8 @@ const obj_template_t *
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
-	if (!obj_has_name(obj) || obj_is_cli(obj)) {
+	if (!obj_has_name(obj) || obj_is_cli(obj) || 
+	    obj_is_abstract(obj)) {
 	    continue;
 	}
 	return obj;
@@ -1888,7 +1968,8 @@ const obj_template_t *
 	     obj != NULL;
 	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	    if (!obj_has_name(obj)  || obj_is_cli(obj)) {
+	    if (!obj_has_name(obj)  || obj_is_cli(obj) ||
+		obj_is_abstract(obj)) {
 		continue;
 	    }
 
@@ -1922,7 +2003,8 @@ const obj_template_t *
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) || obj_is_cli(obj)) {
+	if (!obj_has_name(obj) || obj_is_cli(obj) ||
+	    obj_is_abstract(obj)) {
 	    continue;
 	}
 
@@ -1952,7 +2034,8 @@ const obj_template_t *
 	     obj != NULL;
 	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	    if (!obj_has_name(obj)  || obj_is_cli(obj)) {
+	    if (!obj_has_name(obj)  || obj_is_cli(obj) ||
+		obj_is_abstract(obj)) {
 		continue;
 	    }
 
@@ -1986,7 +2069,8 @@ const obj_template_t *
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
-	if (!obj_has_name(obj) || obj_is_cli(obj)) {
+	if (!obj_has_name(obj) || obj_is_cli(obj) ||
+	    obj_is_abstract(obj)) {
 	    continue;
 	}
 	if (obj_is_data_db(obj)) {
@@ -2008,7 +2092,8 @@ const obj_template_t *
 	     obj != NULL;
 	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	    if (!obj_has_name(obj)  || obj_is_cli(obj)) {
+	    if (!obj_has_name(obj) || obj_is_cli(obj) ||
+		obj_is_abstract(obj)) {
 		continue;
 	    }
 
@@ -2043,7 +2128,8 @@ const obj_template_t *
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) || obj_is_cli(obj)) {
+	if (!obj_has_name(obj) || obj_is_cli(obj) ||
+	    obj_is_abstract(obj)) {
 	    continue;
 	}
 
@@ -2075,7 +2161,8 @@ const obj_template_t *
 	     obj != NULL;
 	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	    if (!obj_has_name(obj)  || obj_is_cli(obj)) {
+	    if (!obj_has_name(obj)  || obj_is_cli(obj) ||
+		obj_is_abstract(obj)) {
 		continue;
 	    }
 
@@ -6890,13 +6977,8 @@ void
 obj_template_t *
     ncx_get_gen_anyxml (void)
 {
-    status_t  res;
-
     if (!stage2_init_done) {
-	res = ncx_stage2_init();
-	if (res != NO_ERR) {
-	    return NULL;
-	}
+	return NULL;
     }
     return gen_anyxml;
 
@@ -6912,13 +6994,8 @@ obj_template_t *
 obj_template_t *
     ncx_get_gen_container (void)
 {
-    status_t  res;
-
     if (!stage2_init_done) {
-	res = ncx_stage2_init();
-	if (res != NO_ERR) {
-	    return NULL;
-	}
+	return NULL;
     }
     return gen_container;
 
@@ -6934,13 +7011,8 @@ obj_template_t *
 obj_template_t *
     ncx_get_gen_string (void)
 {
-    status_t  res;
-
     if (!stage2_init_done) {
-	res = ncx_stage2_init();
-	if (res != NO_ERR) {
-	    return NULL;
-	}
+	return NULL;
     }
     return gen_string;
 
@@ -6956,13 +7028,8 @@ obj_template_t *
 obj_template_t *
     ncx_get_gen_empty (void)
 {
-    status_t  res;
-
     if (!stage2_init_done) {
-	res = ncx_stage2_init();
-	if (res != NO_ERR) {
-	    return NULL;
-	}
+	return NULL;
     }
     return gen_empty;
 
@@ -6977,13 +7044,8 @@ obj_template_t *
 obj_template_t *
     ncx_get_gen_float (void)
 {
-    status_t  res;
-
     if (!stage2_init_done) {
-	res = ncx_stage2_init();
-	if (res != NO_ERR) {
-	    return NULL;
-	}
+	return NULL;
     }
     return gen_float;
 
@@ -6999,13 +7061,8 @@ obj_template_t *
 obj_template_t *
     ncx_get_gen_root (void)
 {
-    status_t  res;
-
     if (!stage2_init_done) {
-	res = ncx_stage2_init();
-	if (res != NO_ERR) {
-	    return NULL;
-	}
+	return NULL;
     }
     return gen_root;
 

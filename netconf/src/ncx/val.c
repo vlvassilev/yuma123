@@ -4930,6 +4930,8 @@ boolean
 *    textmode == TRUE if just testing for text() nodes
 *                name and modname will be ignored in this mode
 *                FALSE if using name and modname to filter
+*    orself == TRUE if axis is really ancestor-or-self
+*              FALSE if axis is ancestor
 *
 * RETURNS:
 *   TRUE if normal termination occurred
@@ -4939,11 +4941,12 @@ boolean
     val_find_all_ancestors (val_walker_fn_t  walkerfn,
 			    void *cookie1,
 			    void *cookie2,
-			    const val_value_t *startnode,
+			    val_value_t *startnode,
 			    const xmlChar *modname,
 			    const xmlChar *name,
 			    boolean configonly,
-			    boolean textmode)
+			    boolean textmode,
+			    boolean orself)
 {
     val_value_t *val;
     boolean      fnresult, fncalled;
@@ -4955,7 +4958,11 @@ boolean
     }
 #endif
 
-    val = startnode->parent;
+    if (orself) {
+	val = startnode;
+    } else {
+	val = startnode->parent;
+    }
 
     while (val) {
 	fnresult = process_one_valwalker(walkerfn,
@@ -5006,6 +5013,8 @@ boolean
 *    textmode == TRUE if just testing for text() nodes
 *                name and modname will be ignored in this mode
 *                FALSE if using name and modname to filter
+*    orself == TRUE if axis is really ancestor-or-self
+*              FALSE if axis is ancestor
 *
 * RETURNS:
 *   TRUE if normal termination occurred
@@ -5019,7 +5028,8 @@ boolean
 			      const xmlChar *modname,
 			      const xmlChar *name,
 			      boolean configonly,
-			      boolean textmode)
+			      boolean textmode,
+			      boolean orself)
 {
     val_value_t *val;
     boolean      fncalled, fnresult;
@@ -5031,8 +5041,23 @@ boolean
     }
 #endif
 
+    if (orself) {
+	fnresult = process_one_valwalker(walkerfn,
+					 cookie1,
+					 cookie2,
+					 startnode,
+					 modname, 
+					 name,
+					 configonly,
+					 textmode,
+					 &fncalled);
+	if (!fnresult) {
+	    return FALSE;
+	}
+    }
+
     if (!typ_has_children(startnode->btyp)) {
-	return FALSE;
+	return TRUE;
     }
 
     for (val = (val_value_t *)dlq_firstEntry(&startnode->v.childQ);
@@ -5060,7 +5085,8 @@ boolean
 						modname,
 						name, 
 						configonly,
-						textmode);
+						textmode,
+						FALSE);
 	    if (!fnresult) {
 		return FALSE;
 	    }
@@ -5423,7 +5449,7 @@ val_value_t *
 		      int64 position)
 {
     finderparms_t    finderparms;
-    boolean          fnresult, fncalled;
+    boolean          fnresult, fncalled, orself;
 
 #ifdef DEBUG
     if (!startnode) {
@@ -5436,6 +5462,7 @@ val_value_t *
     }
 #endif
 
+    orself = FALSE;
     memset(&finderparms, 0x0, sizeof(finderparms_t));
     finderparms.findpos = position;
 
@@ -5445,19 +5472,7 @@ val_value_t *
      */
     switch (axis) {
     case XP_AX_ANCESTOR_OR_SELF:
-	fnresult = process_one_valwalker(position_walker,
-					 &finderparms,
-					 NULL,
-					 startnode,
-					 modname,
-					 name,
-					 configonly,
-					 textmode,
-					 &fncalled);
-	if (!fnresult) {
-	    return finderparms.foundval;
-	}
-	finderparms.foundpos = 1;
+	orself = TRUE;
 	/* fall through */
     case XP_AX_ANCESTOR:
 	fnresult = val_find_all_ancestors(position_walker,
@@ -5467,7 +5482,8 @@ val_value_t *
 					  modname,
 					  name,
 					  configonly,
-					  textmode);
+					  textmode,
+					  orself);
 	if (fnresult) {
 	    return NULL;
 	} else {
@@ -5491,19 +5507,7 @@ val_value_t *
 	    return finderparms.foundval;
 	}
     case XP_AX_DESCENDANT_OR_SELF:
-	fnresult = process_one_valwalker(position_walker,
-					 &finderparms,
-					 NULL,
-					 startnode,
-					 modname,
-					 name,
-					 configonly,
-					 textmode,
-					 &fncalled);
-	if (!fnresult) {
-	    return finderparms.foundval;
-	}
-	finderparms.foundpos = 1;
+	orself = TRUE;
 	/* fall through */
     case XP_AX_DESCENDANT:
 	fnresult = val_find_all_descendants(position_walker,
@@ -5513,7 +5517,8 @@ val_value_t *
 					    modname,
 					    name,
 					    configonly,
-					    textmode);
+					    textmode,
+					    orself);
 	if (fnresult) {
 	    return NULL;
 	} else {
@@ -7343,6 +7348,40 @@ void
     }
 
 }  /* val_clean_tree */
+
+
+/********************************************************************
+* FUNCTION val_get_nest_level
+* 
+* Get the next level of the value
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     nest level from the root
+*********************************************************************/
+uint32
+    val_get_nest_level (val_value_t *val)
+{
+    uint32 level;
+
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return 0;
+    }
+#endif
+
+    level = 1;
+    while (val->parent) {
+	level++;
+	val = val->parent;
+    }
+    return level;
+
+} /* val_get_nest_level */
+
 
 
 /* END file val.c */

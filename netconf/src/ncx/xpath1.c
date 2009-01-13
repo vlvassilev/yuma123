@@ -298,7 +298,7 @@ static void
 
 
 /********************************************************************
-* FUNCTION no_parent_error
+* FUNCTION no_parent_warning
 * 
 * Generate a no parent available error if OK
 *
@@ -306,17 +306,17 @@ static void
 *    pcb == parser control block to use
 *********************************************************************/
 static void
-    no_parent_error (xpath_pcb_t *pcb)
+    no_parent_warning (xpath_pcb_t *pcb)
 {
     if (pcb->logerrors) {
-	log_error("\nError: no parent node available "
+	log_warn("\nWarning: no parent found "
 		  "in XPath expr '%s'", pcb->exprstr);
 	ncx_print_errormsg(pcb->tkc, 
 			   pcb->objmod, 
 			   ERR_NCX_NO_XPATH_PARENT);
     }
 
-}  /* no_parent_error */
+}  /* no_parent_warning */
 
 
 /********************************************************************
@@ -749,6 +749,94 @@ static boolean
 
 } /* result_is_docroot */
 #endif
+
+
+/********************************************************************
+* FUNCTION dump_result
+* 
+* Generate log output displaying the contents of a result
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    result == result to dump
+*    banner == optional first banner string to use
+*********************************************************************/
+static void
+    dump_result (xpath_pcb_t *pcb,
+		 xpath_result_t *result,
+		 const char *banner)
+{
+    xpath_resnode_t       *resnode;
+    val_value_t           *val;
+    const obj_template_t  *obj;
+    ncx_var_t             *var;
+
+    if (banner) {
+	log_write("\n%s", banner);
+    }
+    log_write(" mod:%s, line:%u", 
+	      ncx_get_modname(pcb->mod),
+	      pcb->tk->linenum);
+    log_write("\nxpath result for '%s'", pcb->exprstr);
+
+    switch (result->restype) {
+    case XP_RT_NONE:
+	log_write("\n  typ: none");
+	break;
+    case XP_RT_NODESET:
+	log_write("\n  typ: nodeset = ");
+	for (resnode = (xpath_resnode_t *)
+		 dlq_firstEntry(&result->r.nodeQ);
+	     resnode != NULL;
+	     resnode = (xpath_resnode_t *)dlq_nextEntry(resnode)) {
+
+	    log_write("\n   node ");
+	    if (result->isval) {
+		val = resnode->node.valptr;
+		if (val) {
+		    log_write("%s:%s [L:%u]", 
+			      xmlns_get_ns_prefix(val->nsid),
+			      val->name,
+			      val_get_nest_level(val));
+		} else {
+		    log_write("NULL");
+		}
+	    } else {
+		obj = resnode->node.objptr;
+		if (obj) {
+		    log_write("%s:%s [L:%u]", 
+			      obj_get_mod_prefix(obj),
+			      obj_get_name(obj),
+			      obj_get_level(obj));
+		} else {
+		    log_write("NULL");
+		}
+	    }
+	}
+	break;
+    case XP_RT_NUMBER:
+	log_write("\n  typ: number = ");
+	ncx_printf_num(&result->r.num, NCX_BT_FLOAT64);
+	break;
+    case XP_RT_STRING:
+	log_write("\n  typ: string = %s", result->r.str);
+	break;
+    case XP_RT_BOOLEAN:
+	log_write("\n  typ: boolean = %s",
+		  (result->r.bool) ? "true" : "false");
+	break;
+    case XP_RT_VARPTR:
+	var = result->r.varptr;
+	log_write("\n  typ: varptr %s =", var->name);
+	val_dump_value(var->val, 5);
+	break;
+    default:
+	log_write("\n  typ: INVALID (%d)", result->restype);
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    log_write("\n");
+
+}  /* dump_result */
 
 
 /********************************************************************
@@ -2007,8 +2095,7 @@ static boolean
 		}
 	    }
 
-	    if (obj->parent && 
-		obj->parent != pcb->docroot) {
+	    if (obj->parent && obj->parent != pcb->docroot) {
 		obj = obj->parent;
 	    } else {
 		return FALSE;
@@ -2095,10 +2182,10 @@ static boolean
 	return TRUE;
     }
 
-    /* need to add this child node */
+    /* need to add this node */
     newresnode = new_val_resnode(pcb, 
 				 parms->axis, 
-				 parms->dblslash,
+				 FALSE,
 				 val);
     if (!newresnode) {
 	parms->res = ERR_INTERNAL_MEM;
@@ -2158,7 +2245,7 @@ static boolean
     /* need to add this child node */
     newresnode = new_obj_resnode(pcb, 
 				 parms->axis, 
-				 parms->dblslash,
+				 FALSE,
 				 obj);
     if (!newresnode) {
 	parms->res = ERR_INTERNAL_MEM;
@@ -2174,10 +2261,10 @@ static boolean
 
 
 /********************************************************************
-* FUNCTION set_nodeset_parent
+* FUNCTION set_nodeset_self
 * 
-* Check the current result nodeset and move each
-* node to its parent, or remove it if no parent
+* Check the current result nodeset and keep each
+* node, or remove it if filter tests fail
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -2189,79 +2276,125 @@ static boolean
 *              else only this namespace will be checked
 *    name == name of parent to find
 *         == NULL to find any parent name
-*    dblslash == TRUE if all descendants should be checked
-*             == FALSE if just parent node should be checked
+*    textmode == TRUE if just selecting text() nodes
+*                FALSE if ignored
 *
 * OUTPUTS:
 *    result->nodeQ contents adjusted or removed
+*
 * RETURNS:
 *    status
 *********************************************************************/
 static status_t
-    set_nodeset_parent (xpath_pcb_t *pcb,
-			xpath_result_t *result,
-			xmlns_id_t nsid,
-			const xmlChar *name,
-			boolean dblslash)
+    set_nodeset_self (xpath_pcb_t *pcb,
+		      xpath_result_t *result,
+		      xmlns_id_t nsid,
+		      const xmlChar *name,
+		      boolean textmode)
 {
     xpath_resnode_t        *resnode, *findnode;
-    const obj_template_t   *testobj, *useobj;
+    const obj_template_t   *testobj;
     const xmlChar           *modname;
     val_value_t            *testval;
-    status_t                res, retres;
-    boolean                 keep;
+    boolean                 keep, cfgonly, fnresult, fncalled, useroot;
     dlq_hdr_t               resnodeQ;
+    status_t                res;
+    xpath_walkerparms_t     walkerparms;
 
     if (!pcb->val && !pcb->obj) {
 	return NO_ERR;
     }
 
+    if (dlq_empty(&result->r.nodeQ)) {
+	return NO_ERR;
+    }
+
     dlq_createSQue(&resnodeQ);
 
-    retres = NO_ERR;
+    walkerparms.resnodeQ = &resnodeQ;
+    walkerparms.axis = XP_AX_SELF;
+    walkerparms.res = NO_ERR;
+    walkerparms.topvalptr = NULL;
+    walkerparms.callcount = 0;
 
-    if (nsid) {
-	modname = xmlns_get_module(nsid);
+    if (textmode) {
+	walkerparms.testmode = XP_TM_TEXT;
+    } else if (nsid && name) {
+	walkerparms.testmode = XP_TM_QNAME;
+    } else if (name) {
+	walkerparms.testmode = XP_TM_NCNAME;	
     } else {
-	modname = NULL;
+	walkerparms.testmode = XP_TM_ALL;	
     }
+
+    modname = (nsid) ? xmlns_get_module(nsid) : NULL;
+    useroot = (pcb->flags & XP_FL_USEROOT) ? TRUE : FALSE;
+
+    res = NO_ERR;
 
     /* the resnodes need to be deleted or moved to a tempQ
      * to correctly track duplicates and remove them
      */
-    while (!dlq_empty(&result->r.nodeQ)) {
+    while (!dlq_empty(&result->r.nodeQ) && res == NO_ERR) {
 
 	resnode = (xpath_resnode_t *)dlq_deque(&result->r.nodeQ);
-	keep = FALSE;
 
-	if (pcb->val) {
-	    testval = resnode->node.valptr;
-	    
-	    if (testval == pcb->val_docroot || 
-		!testval->parent) {
-		if (dblslash) {
-		    /* just move this node to the result */
-		    resnode->dblslash = TRUE;
-		    resnode->topvalptr = testval;
-		    dlq_enque(resnode, &resnodeQ);
-		} else {
-		    /* no parent available error
-		     * remove node from result 
-		     */
-		    res = ERR_NCX_NO_XPATH_PARENT;
-		    no_parent_error(pcb);
-		    free_resnode(pcb, resnode);
-		    CHK_EXIT(res, retres);
-		}
+	if (resnode->dblslash) {
+	    if (pcb->val) {
+		testval = resnode->node.valptr;
+		walkerparms.topvalptr = testval;
+		cfgonly = obj_is_config(testval->obj);
+
+		fnresult = 
+		    val_find_all_descendants(value_walker_fn,
+					     pcb, 
+					     &walkerparms,
+					     testval, 
+					     modname,
+					     name,
+					     cfgonly,
+					     textmode,
+					     TRUE);
 	    } else {
-		testval = testval->parent;
+		testobj = resnode->node.objptr;
+		cfgonly = obj_is_config(testobj);
 
-		if (modname && name) {
+		fnresult = 
+		    obj_find_all_descendants(pcb->objmod,
+					     object_walker_fn,
+					     pcb, 
+					     &walkerparms,
+					     testobj,
+					     modname,
+					     name,
+					     cfgonly,
+					     textmode,
+					     useroot,
+					     TRUE,
+					     &fncalled);
+	    }
+
+	    if (!fnresult || walkerparms.res != NO_ERR) {
+		res = walkerparms.res;
+	    }
+	    free_resnode(pcb, resnode);
+	} else {
+	    keep = FALSE;
+
+	    if (pcb->val) {
+		testval = resnode->node.valptr;
+	    
+		if (textmode) {
+		    if (obj_has_text_content(testval->obj)) {
+			keep = TRUE;
+		    }
+		} else if (modname && name) {
 		    if (!xml_strcmp(modname,
 				    obj_get_mod_name(testval->obj)) &&
 			!xml_strcmp(name, testval->name)) {
 			keep = TRUE;
 		    }
+
 		} else if (modname) {
 		    if (!xml_strcmp(modname,
 				    obj_get_mod_name(testval->obj))) {
@@ -2280,98 +2413,39 @@ static status_t
 					    &resnodeQ, 
 					    testval);
 		    if (findnode) {
-			/* parent already in the Q
-			 * remove node from result 
-			 */
-			if (dblslash) {
+			if (resnode->dblslash) {
 			    findnode->dblslash = TRUE;
 			}
 			free_resnode(pcb, resnode);
 		    } else {
 			/* set the resnode to its parent */
-			resnode->dblslash = dblslash;
-			resnode->topvalptr = testval->parent;
-			resnode->node.valptr = testval->parent;
+			resnode->topvalptr = testval;
+			resnode->node.valptr = testval;
 			dlq_enque(resnode, &resnodeQ);
 		    }
 		} else {
-		    /* no parent available error
-		     * remove node from result 
-		     */
-		    res = ERR_NCX_NO_XPATH_PARENT;
-		    no_parent_error(pcb);
 		    free_resnode(pcb, resnode);
-		    CHK_EXIT(res, retres);
-		}
-	    }
-	} else {
-	    testobj = resnode->node.objptr;
-	    if (testobj == pcb->docroot) {
-		if (dblslash) {
-		    resnode->dblslash = TRUE;
-		    dlq_enque(resnode, &resnodeQ);
-		} else {
-		    /* this is an RPC or notification */
-		    res = ERR_NCX_NO_XPATH_PARENT;
-		    no_parent_error(pcb);
-		    free_resnode(pcb, resnode);
-		    CHK_EXIT(res, retres);
-		}
-	    } else if (!testobj->parent) {
-		if (!dblslash && (modname || name)) {
-		    res = ERR_NCX_NO_XPATH_PARENT;
-		    no_parent_error(pcb);
-		    free_resnode(pcb, resnode);
-		    CHK_EXIT(res, retres);
-		} else {
-		    /* this is a databd node */
-		    findnode = find_resnode(pcb, 
-					    &resnodeQ, 
-					    pcb->docroot);
-		    if (findnode) {
-			if (dblslash) {
-			    findnode->dblslash = TRUE;
-			}
-			free_resnode(pcb, resnode);
-		    } else {
-			resnode->node.objptr = pcb->docroot;
-			resnode->dblslash = dblslash;
-			dlq_enque(resnode, &resnodeQ);
-		    }
 		}
 	    } else {
-		/* find a parent but not a case or choice */
-		testobj = testobj->parent;
-		while (testobj && testobj->parent && 
-		       (testobj->objtype==OBJ_TYP_CHOICE ||
-			testobj->objtype==OBJ_TYP_CASE)) {
-		    testobj = testobj->parent;
-		}
+		testobj = resnode->node.objptr;
 
-		/* check if stopped on top-level choice
-		 * a top-level case should not happen
-		 * but check it anyway
-		 */
-		if (testobj->objtype==OBJ_TYP_CHOICE ||
-		    testobj->objtype==OBJ_TYP_CASE) {
-		    useobj = pcb->docroot;
-		} else {
-		    useobj = testobj;
-		}
-
-		if (modname && name) {
+		if (textmode) {
+		    if (obj_has_text_content(testobj)) {
+			keep = TRUE;
+		    }
+		} else if (modname && name) {
 		    if (!xml_strcmp(modname,
-				    obj_get_mod_name(useobj)) &&
-			!xml_strcmp(name, obj_get_name(useobj))) {
+				    obj_get_mod_name(testobj)) &&
+			!xml_strcmp(name, obj_get_name(testobj))) {
 			keep = TRUE;
 		    }
 		} else if (modname) {
 		    if (!xml_strcmp(modname,
-				    obj_get_mod_name(useobj))) {
+				    obj_get_mod_name(testobj))) {
 			keep = TRUE;
 		    }
 		} else if (name) {
-		    if (!xml_strcmp(name, obj_get_name(useobj))) {
+		    if (!xml_strcmp(name, obj_get_name(testobj))) {
 			keep = TRUE;
 		    }
 		} else {
@@ -2379,23 +2453,28 @@ static status_t
 		}
 
 		if (keep) {
-		    /* replace this node with the useobj */
-		    findnode = find_resnode(pcb, &resnodeQ, useobj);
+		    findnode = find_resnode(pcb, 
+					    &resnodeQ, 
+					    testobj);
 		    if (findnode) {
-			if (dblslash) {
+			if (resnode->dblslash) {
 			    findnode->dblslash = TRUE;
 			}
 			free_resnode(pcb, resnode);
 		    } else {
-			resnode->dblslash = dblslash;
-			resnode->node.objptr = useobj;
+			/* set the resnode to its parent */
+			resnode->node.objptr = testobj;
 			dlq_enque(resnode, &resnodeQ);
 		    }
 		} else {
-		    res = ERR_NCX_NO_XPATH_PARENT;
-		    no_parent_error(pcb);
+		    if (pcb->logerrors) {
+			log_warn("\nWarning: no self node found "
+				 "in XPath expr '%s'", pcb->exprstr);
+			ncx_print_errormsg(pcb->tkc, 
+					   pcb->objmod, 
+					   ERR_NCX_NO_XPATH_NODES);
+		    }
 		    free_resnode(pcb, resnode);
-		    CHK_EXIT(res, retres);
 		}
 	    }
 	}
@@ -2406,7 +2485,287 @@ static status_t
 	dlq_block_enque(&resnodeQ, &result->r.nodeQ);
     }
 
-    return retres;
+    return res;
+
+}  /* set_nodeset_self */
+
+
+/********************************************************************
+* FUNCTION set_nodeset_parent
+* 
+* Check the current result nodeset and move each
+* node to its parent, or remove it if no parent
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*    result == address of return XPath result nodeset
+*    nsid == 0 if any namespace is OK
+*              else only this namespace will be checked
+*    name == name of parent to find
+*         == NULL to find any parent name
+*
+* OUTPUTS:
+*    result->nodeQ contents adjusted or removed
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    set_nodeset_parent (xpath_pcb_t *pcb,
+			xpath_result_t *result,
+			xmlns_id_t nsid,
+			const xmlChar *name)
+{
+    xpath_resnode_t        *resnode, *findnode;
+    const obj_template_t   *testobj, *useobj;
+    const xmlChar           *modname;
+    val_value_t            *testval;
+    boolean                 keep, cfgonly, fnresult, fncalled, useroot;
+    dlq_hdr_t               resnodeQ;
+    status_t                res;
+    xpath_walkerparms_t     walkerparms;
+
+    if (!pcb->val && !pcb->obj) {
+	return NO_ERR;
+    }
+
+    if (dlq_empty(&result->r.nodeQ)) {
+	return NO_ERR;
+    }
+
+    dlq_createSQue(&resnodeQ);
+
+    walkerparms.resnodeQ = &resnodeQ;
+    walkerparms.axis = XP_AX_PARENT;
+    walkerparms.res = NO_ERR;
+    walkerparms.topvalptr = NULL;
+    walkerparms.callcount = 0;
+
+    if (nsid && name) {
+	walkerparms.testmode = XP_TM_QNAME;
+    } else if (name) {
+	walkerparms.testmode = XP_TM_NCNAME;	
+    } else {
+	walkerparms.testmode = XP_TM_ALL;	
+    }
+
+
+    modname = (nsid) ? xmlns_get_module(nsid) : NULL;
+    useroot = (pcb->flags & XP_FL_USEROOT) ? TRUE : FALSE;
+
+    res = NO_ERR;
+
+    /* the resnodes need to be deleted or moved to a tempQ
+     * to correctly track duplicates and remove them
+     */
+    while (!dlq_empty(&result->r.nodeQ) && res == NO_ERR) {
+
+	resnode = (xpath_resnode_t *)dlq_deque(&result->r.nodeQ);
+
+	if (resnode->dblslash) {
+	    if (pcb->val) {
+		testval = resnode->node.valptr;
+		walkerparms.topvalptr = testval;
+		cfgonly = obj_is_config(testval->obj);
+
+		fnresult = 
+		    val_find_all_descendants(value_walker_fn,
+					     pcb, 
+					     &walkerparms,
+					     testval, 
+					     modname,
+					     name,
+					     cfgonly,
+					     FALSE,
+					     TRUE);
+	    } else {
+		testobj = resnode->node.objptr;
+		cfgonly = obj_is_config(testobj);
+
+		fnresult = 
+		    obj_find_all_descendants(pcb->objmod,
+					     object_walker_fn,
+					     pcb, 
+					     &walkerparms,
+					     testobj,
+					     modname,
+					     name,
+					     cfgonly,
+					     FALSE,
+					     useroot,
+					     TRUE,
+					     &fncalled);
+	    }
+
+	    if (!fnresult || walkerparms.res != NO_ERR) {
+		res = walkerparms.res;
+	    }
+	    free_resnode(pcb, resnode);
+	} else {
+	    keep = FALSE;
+
+	    if (pcb->val) {
+		testval = resnode->node.valptr;
+	    
+		if (testval == pcb->val_docroot) {
+		    if (resnode->dblslash) {
+			/* just move this node to the result */
+			resnode->topvalptr = testval;
+			dlq_enque(resnode, &resnodeQ);
+		    } else {
+			/* no parent available error
+			 * remove node from result 
+			 */
+			no_parent_warning(pcb);
+			free_resnode(pcb, resnode);
+		    }
+		} else {
+		    testval = testval->parent;
+		    
+		    if (modname && name) {
+			if (!xml_strcmp(modname,
+					obj_get_mod_name(testval->obj)) &&
+			    !xml_strcmp(name, testval->name)) {
+			    keep = TRUE;
+			}
+		    } else if (modname) {
+			if (!xml_strcmp(modname,
+					obj_get_mod_name(testval->obj))) {
+			    keep = TRUE;
+			}
+		    } else if (name) {
+			if (!xml_strcmp(name, testval->name)) {
+			    keep = TRUE;
+			}
+		    } else {
+			keep = TRUE;
+		    }
+
+		    if (keep) {
+			findnode = find_resnode(pcb, 
+						&resnodeQ, 
+						testval);
+			if (findnode) {
+			    /* parent already in the Q
+			     * remove node from result 
+			     */
+			    if (resnode->dblslash) {
+				findnode->dblslash = TRUE;
+			    }
+			    free_resnode(pcb, resnode);
+			} else {
+			    /* set the resnode to its parent */
+			    resnode->topvalptr = testval->parent;
+			    resnode->node.valptr = testval->parent;
+			    dlq_enque(resnode, &resnodeQ);
+			}
+		    } else {
+			/* no parent available error
+			 * remove node from result 
+			 */
+			no_parent_warning(pcb);
+			free_resnode(pcb, resnode);
+		    }
+		}
+	    } else {
+		testobj = resnode->node.objptr;
+		if (testobj == pcb->docroot) {
+		    if (resnode->dblslash) {
+			dlq_enque(resnode, &resnodeQ);
+		    } else {
+			/* this is an RPC or notification */
+			no_parent_warning(pcb);
+			free_resnode(pcb, resnode);
+		    }
+		} else if (!testobj->parent) {
+		    if (!resnode->dblslash && (modname || name)) {
+			no_parent_warning(pcb);
+			free_resnode(pcb, resnode);
+		    } else {
+			/* this is a databd node */
+			findnode = find_resnode(pcb, 
+						&resnodeQ, 
+						pcb->docroot);
+			if (findnode) {
+			    if (resnode->dblslash) {
+				findnode->dblslash = TRUE;
+			    }
+			    free_resnode(pcb, resnode);
+			} else {
+			    resnode->node.objptr = pcb->docroot;
+			    dlq_enque(resnode, &resnodeQ);
+			}
+		    }
+		} else {
+		    /* find a parent but not a case or choice */
+		    testobj = testobj->parent;
+		    while (testobj && testobj->parent && 
+			   !obj_is_toproot(testobj->parent) &&
+			   (testobj->objtype==OBJ_TYP_CHOICE ||
+			    testobj->objtype==OBJ_TYP_CASE)) {
+			testobj = testobj->parent;
+		    }
+
+		    /* check if stopped on top-level choice
+		     * a top-level case should not happen
+		     * but check it anyway
+		     */
+		    if (testobj->objtype==OBJ_TYP_CHOICE ||
+			testobj->objtype==OBJ_TYP_CASE) {
+			useobj = pcb->docroot;
+		    } else {
+			useobj = testobj;
+		    }
+
+		    if (modname && name) {
+			if (!xml_strcmp(modname,
+					obj_get_mod_name(useobj)) &&
+			    !xml_strcmp(name, obj_get_name(useobj))) {
+			    keep = TRUE;
+			}
+		    } else if (modname) {
+			if (!xml_strcmp(modname,
+					obj_get_mod_name(useobj))) {
+			    keep = TRUE;
+			}
+		    } else if (name) {
+			if (!xml_strcmp(name, obj_get_name(useobj))) {
+			    keep = TRUE;
+			}
+		    } else {
+			keep = TRUE;
+		    }
+
+		    if (keep) {
+			/* replace this node with the useobj */
+			findnode = find_resnode(pcb, &resnodeQ, useobj);
+			if (findnode) {
+			    if (resnode->dblslash) {
+				findnode->dblslash = TRUE;
+			    }
+			    free_resnode(pcb, resnode);
+			} else {
+			    resnode->node.objptr = useobj;
+			    dlq_enque(resnode, &resnodeQ);
+			}
+		    } else {
+			no_parent_warning(pcb);
+			free_resnode(pcb, resnode);
+		    }
+		}
+	    }
+	}
+    }
+
+    /* put the resnode entries back where they belong */
+    if (!dlq_empty(&resnodeQ)) {
+	dlq_block_enque(&resnodeQ, &result->r.nodeQ);
+    }
+
+    return res;
 
 }  /* set_nodeset_parent */
 
@@ -2435,10 +2794,9 @@ static status_t
 *                 In this mode, if the context object
 *                 is config=true, then config=false
 *                 children will be skipped
-*    dblslash == TRUE if all descendants should be checked
-*             == FALSE if just child nodes should be checked
 *    textmode == TRUE if just selecting text() nodes
 *                FALSE if ignored
+*     axis == actual axis used
 *
 * OUTPUTS:
 *    result->nodeQ contents adjusted or replaced
@@ -2451,15 +2809,16 @@ static status_t
 		       xpath_result_t *result,
 		       xmlns_id_t  childnsid,
 		       const xmlChar *childname,
-		       boolean dblslash,
-		       boolean textmode)
+		       boolean textmode,
+		       ncx_xpath_axis_t axis)
 {
     xpath_resnode_t      *resnode;
     const obj_template_t *testobj;
     val_value_t          *testval;
     const xmlChar        *modname;
     status_t              res;
-    boolean               childfound, ret, fncalled, cfgonly;
+    boolean               fnresult, fncalled, cfgonly;
+    boolean               orself, myorself, useroot;
     dlq_hdr_t             resnodeQ;
     xpath_walkerparms_t   walkerparms;
 
@@ -2467,10 +2826,15 @@ static status_t
 	return NO_ERR;
     }
 
+    if (dlq_empty(&result->r.nodeQ)) {
+	return NO_ERR;
+    }
+
     dlq_createSQue(&resnodeQ);
-    childfound = FALSE;
     res = NO_ERR;
     cfgonly = (pcb->flags & XP_FL_CONFIGONLY) ?	TRUE : FALSE;
+    orself = (axis == XP_AX_DESCENDANT_OR_SELF) ? TRUE : FALSE;
+    useroot = (pcb->flags & XP_FL_USEROOT) ? TRUE : FALSE;
 
     if (childnsid) {
 	modname = xmlns_get_module(childnsid);
@@ -2482,7 +2846,6 @@ static status_t
     walkerparms.axis = XP_AX_CHILD;
     walkerparms.res = NO_ERR;
     walkerparms.topvalptr = NULL;
-    walkerparms.dblslash = dblslash;
     walkerparms.callcount = 0;
 
     if (textmode) {
@@ -2501,7 +2864,7 @@ static status_t
     while (!dlq_empty(&result->r.nodeQ) && res == NO_ERR) {
 
 	resnode = (xpath_resnode_t *)dlq_deque(&result->r.nodeQ);
-
+	myorself = (orself || resnode->dblslash) ? TRUE : FALSE;
 
 	/* select 1 or all children of the resnode 
 	 * special YANG support; skip over nodes that
@@ -2513,8 +2876,8 @@ static status_t
 	    testval = resnode->node.valptr;
 	    walkerparms.topvalptr = testval;
 
-	    if (dblslash || resnode->dblslash) {
-		ret = 
+	    if (axis != XP_AX_CHILD || resnode->dblslash) {
+		fnresult = 
 		    val_find_all_descendants(value_walker_fn,
 					     pcb, 
 					     &walkerparms,
@@ -2522,51 +2885,58 @@ static status_t
 					     modname,
 					     childname,
 					     cfgonly,
-					     textmode);
-		if (!ret || walkerparms.res != NO_ERR) {
+					     textmode,
+					     myorself);
+		if (!fnresult || walkerparms.res != NO_ERR) {
 		    res = walkerparms.res;
 		}
 	    } else {
-		ret = val_find_all_children(value_walker_fn,
-					    pcb, 
-					    &walkerparms,
-					    testval, 
-					    modname,
-					    childname,
-					    cfgonly,
-					    textmode);
-		if (!ret || walkerparms.res != NO_ERR) {
+		fnresult = 
+		    val_find_all_children(value_walker_fn,
+					  pcb, 
+					  &walkerparms,
+					  testval, 
+					  modname,
+					  childname,
+					  cfgonly,
+					  textmode);
+		if (!fnresult || walkerparms.res != NO_ERR) {
 		    res = walkerparms.res;
 		}
 	    }
 	} else {
 	    testobj = resnode->node.objptr;
 
-	    if (dblslash || resnode->dblslash) {
-		fncalled = FALSE;
-		ret = obj_find_all_descendants(object_walker_fn,
-					       pcb, 
-					       &walkerparms,
-					       testobj,
-					       modname,
-					       childname,
-					       cfgonly,
-					       textmode,
-					       &fncalled);
-		if (!ret || walkerparms.res != NO_ERR) {
+	    if (axis != XP_AX_CHILD || resnode->dblslash) {
+		fnresult = 
+		    obj_find_all_descendants(pcb->objmod,
+					     object_walker_fn,
+					     pcb, 
+					     &walkerparms,
+					     testobj,
+					     modname,
+					     childname,
+					     cfgonly,
+					     textmode,
+					     useroot,
+					     myorself,
+					     &fncalled);
+		if (!fnresult || walkerparms.res != NO_ERR) {
 		    res = walkerparms.res;
 		}
-
 	    } else {
-		ret = obj_find_all_children(object_walker_fn,
-					    pcb,
-					    &walkerparms,
-					    testobj,
-					    modname,
-					    childname,
-					    cfgonly,
-					    textmode);
-		if (!ret || walkerparms.res != NO_ERR) {
+		fnresult = 
+		    obj_find_all_children(pcb->objmod,
+					  object_walker_fn,
+					  pcb,
+					  &walkerparms,
+					  testobj,
+					  modname,
+					  childname,
+					  cfgonly,
+					  textmode,
+					  useroot);
+		if (!fnresult || walkerparms.res != NO_ERR) {
 		    res = walkerparms.res;
 		}
 	    }
@@ -2579,16 +2949,18 @@ static status_t
     if (!dlq_empty(&resnodeQ)) {
 	dlq_block_enque(&resnodeQ, &result->r.nodeQ);
     } else if (!pcb->val && pcb->obj) {
-	res = ERR_NCX_NO_XPATH_CHILD;
 	if (pcb->logerrors) {
-	    if (dblslash) {
-		log_warn("\nWarning: no descendant nodes available "
+	    if (axis != XP_AX_CHILD) {
+		res = ERR_NCX_NO_XPATH_DESCENDANT;
+		log_warn("\nWarning: no descendant nodes found "
 			 "in XPath expr '%s'", pcb->exprstr);
 	    } else {
-		log_warn("\nWarning: no child nodes available "
+		res = ERR_NCX_NO_XPATH_CHILD;
+		log_warn("\nWarning: no child nodes found "
 			 "in XPath expr '%s'", pcb->exprstr);
 	    }
 	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	    res = NO_ERR;
 	}
     }
 
@@ -2638,8 +3010,6 @@ static status_t
 *               In this mode, if the context object
 *               is config=true, then config=false
 *               preceding nodes will be skipped
-*    dblslash == TRUE if all descendants should be checked
-*             == FALSE if just child nodes should be checked
 *    textmode == TRUE if just selecting text() nodes
 *                FALSE if ignored
 *    axis == axis in use for this current step
@@ -2655,7 +3025,6 @@ static status_t
 			xpath_result_t *result,
 			xmlns_id_t  nsid,
 			const xmlChar *name,
-			boolean dblslash,
 			boolean textmode,
 			ncx_xpath_axis_t axis)
 {
@@ -2664,11 +3033,15 @@ static status_t
     val_value_t          *testval,*topval;
     const xmlChar        *modname;
     status_t              res;
-    boolean               fnresult, fncalled, cfgonly;
+    boolean               fnresult, fncalled, cfgonly, useroot;
     dlq_hdr_t             resnodeQ;
     xpath_walkerparms_t   walkerparms;
     
     if (!pcb->val && !pcb->obj) {
+	return NO_ERR;
+    }
+
+    if (dlq_empty(&result->r.nodeQ)) {
 	return NO_ERR;
     }
 
@@ -2677,11 +3050,11 @@ static status_t
     cfgonly = (pcb->flags & XP_FL_CONFIGONLY) ?	TRUE : FALSE;
 
     modname = (nsid) ? xmlns_get_module(nsid) : NULL;
+    useroot = (pcb->flags & XP_FL_USEROOT) ? TRUE : FALSE;
 
     walkerparms.resnodeQ = &resnodeQ;
     walkerparms.axis = axis;
     walkerparms.res = NO_ERR;
-    walkerparms.dblslash = dblslash;
     walkerparms.callcount = 0;
 
     if (textmode) {
@@ -2720,7 +3093,7 @@ static status_t
 					modname,
 					name, 
 					cfgonly, 
-					dblslash || resnode->dblslash, 
+					resnode->dblslash, 
 					textmode,
 					axis);
 	    } else {
@@ -2732,7 +3105,7 @@ static status_t
 						modname,
 						name, 
 						cfgonly, 
-						dblslash || resnode->dblslash, 
+						resnode->dblslash, 
 						textmode,
 						axis);
 
@@ -2742,17 +3115,17 @@ static status_t
 	    }
 	} else {
 	    testobj = resnode->node.objptr;
-
-	    fncalled = FALSE;
-	    fnresult = obj_find_all_pfaxis(object_walker_fn,
+	    fnresult = obj_find_all_pfaxis(pcb->objmod,
+					   object_walker_fn,
 					   pcb, 
 					   &walkerparms,
 					   testobj, 
 					   modname,
 					   name, 
 					   cfgonly,
-					   dblslash || resnode->dblslash,
+					   resnode->dblslash,
 					   textmode,
+					   useroot,
 					   axis, 
 					   &fncalled);
 	    if (!fnresult || walkerparms.res != NO_ERR) {
@@ -2768,11 +3141,12 @@ static status_t
     } else if (!pcb->val && pcb->obj) {
 	res = ERR_NCX_NO_XPATH_NODES;
 	if (pcb->logerrors) {
-	    log_warn("\nWarning: no nodes from selected axis "
-		     "available in XPath expr '%s'", 
+	    log_warn("\nWarning: no axis nodes found "
+		     "in XPath expr '%s'", 
 		     pcb->exprstr);
 	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
 	}
+	res = NO_ERR;
     }
 
     return res;
@@ -2800,9 +3174,6 @@ static status_t
 *                 In this mode, if the context object
 *                 is config=true, then config=false
 *                 children will be skipped
-*    dblslash == TRUE if all descendants should be checked
-*                if no ancestor found that matches
-*             == FALSE if just ancestor nodes should be checked
 *    textmode == TRUE if just selecting text() nodes
 *                FALSE if ignored
 *     axis == axis in use for this current step
@@ -2819,7 +3190,6 @@ static status_t
 			  xpath_result_t *result,
 			  xmlns_id_t  nsid,
 			  const xmlChar *name,
-			  boolean dblslash,
 			  boolean textmode,
 			  ncx_xpath_axis_t axis)
 {
@@ -2829,11 +3199,15 @@ static status_t
     const xmlChar          *modname;
     xpath_result_t         *dummy;
     status_t                res;
-    boolean                 cfgonly, fnresult, fncalled;
+    boolean                 cfgonly, fnresult, fncalled, orself, useroot;
     dlq_hdr_t               resnodeQ;
     xpath_walkerparms_t     walkerparms;
 
     if (!pcb->val && !pcb->obj) {
+	return NO_ERR;
+    }
+
+    if (dlq_empty(&result->r.nodeQ)) {
 	return NO_ERR;
     }
 
@@ -2844,11 +3218,12 @@ static status_t
     modname = (nsid) ? xmlns_get_module(nsid) : NULL;
 
     cfgonly = (pcb->flags & XP_FL_CONFIGONLY) ?	TRUE : FALSE;
+    useroot = (pcb->flags & XP_FL_USEROOT) ? TRUE : FALSE;
+    orself = (axis == XP_AX_ANCESTOR_OR_SELF) ? TRUE : FALSE;
 
     walkerparms.resnodeQ = &resnodeQ;
     walkerparms.axis = axis;
     walkerparms.res = NO_ERR;
-    walkerparms.dblslash = dblslash;
 
     if (textmode) {
 	walkerparms.testmode = XP_TM_TEXT;
@@ -2878,11 +3253,12 @@ static status_t
 					      modname, 
 					      name, 
 					      cfgonly,
+					      orself,
 					      textmode);
 	} else {
 	    testobj = resnode->node.objptr;
-	    fncalled = FALSE;
-	    fnresult = obj_find_all_ancestors(object_walker_fn,
+	    fnresult = obj_find_all_ancestors(pcb->objmod,
+					      object_walker_fn,
 					      pcb,
 					      &walkerparms,
 					      testobj,
@@ -2890,6 +3266,8 @@ static status_t
 					      name, 
 					      cfgonly,
 					      textmode,
+					      useroot,
+					      orself,
 					      &fncalled);
 
 	}
@@ -2897,9 +3275,7 @@ static status_t
 	    res = walkerparms.res;
 	} else if (!fnresult) {
 	    res = ERR_NCX_OPERATION_FAILED;
-	} else if (!walkerparms.callcount && 
-		   (dblslash || resnode->dblslash)) {
-
+	} else if (!walkerparms.callcount && resnode->dblslash) {
 	    dummy = new_result(pcb, XP_RT_NODESET);
 	    if (!dummy) {
 		res = ERR_INTERNAL_MEM;
@@ -2915,9 +3291,11 @@ static status_t
 						    modname, 
 						    name, 
 						    cfgonly,
+						    TRUE,
 						    textmode);
 	    } else {
-		fnresult = obj_find_all_descendants(object_walker_fn,
+		fnresult = obj_find_all_descendants(pcb->objmod,
+						    object_walker_fn,
 						    pcb,
 						    &walkerparms,
 						    testobj,
@@ -2925,6 +3303,8 @@ static status_t
 						    name, 
 						    cfgonly,
 						    textmode,
+						    useroot,
+						    TRUE,
 						    &fncalled);
 	    }
 	    walkerparms.resnodeQ = &resnodeQ;
@@ -2938,7 +3318,6 @@ static status_t
 					   dummy,
 					   nsid, 
 					   name, 
-					   dblslash, 
 					   textmode,
 					   axis);
 		while (!dlq_empty(&dummy->r.nodeQ)) {
@@ -2964,6 +3343,19 @@ static status_t
     /* put the resnode entries back where they belong */
     if (!dlq_empty(&resnodeQ)) {
 	dlq_block_enque(&resnodeQ, &result->r.nodeQ);
+    } else {
+	res = ERR_NCX_NO_XPATH_ANCESTOR;
+	if (pcb->logerrors) {
+	    if (orself) {
+		log_warn("\nWarning: no ancestor-or-self nodes found "
+			 "in XPath expr '%s'", pcb->exprstr);
+	    } else {
+		log_warn("\nWarning: no ancestor nodes found "
+			 "in XPath expr '%s'", pcb->exprstr);
+	    }
+	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	}
+	res = NO_ERR;
     }
 
     return res;
@@ -2999,9 +3391,6 @@ static status_t
 * INPUTS:
 *    pcb == parser control block in progress
 *    axis  == current axis from first part of Step
-*    dblslash == TRUE if the // meta-step is in effect
-*                 for this step
-*                FALSE if '/ seen instead
 *    result == address of pointer to result struct in progress
 *
 * OUTPUTS:
@@ -3013,7 +3402,6 @@ static status_t
 static status_t
     parse_node_test (xpath_pcb_t *pcb,
 		     ncx_xpath_axis_t axis,
-		     boolean dblslash,
 		     xpath_result_t **result)
 {
     xpath_result_t    *val1;
@@ -3028,11 +3416,14 @@ static status_t
     literal = NULL;
     nsid = 0;
     name = NULL;
+    textmode = FALSE;
 
     res = TK_ADV(pcb->tkc);
     if (res != NO_ERR) {
+	res = ERR_NCX_INVALID_XPATH_EXPR;
 	if (pcb->logerrors) {
-	    log_error("\nError: Invalid XPath expression");
+	    log_error("\nError: token expected in XPath "
+		      "expression '%s'", pcb->exprstr);
 	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
 	} else {
 	    /*** handle agent error ***/
@@ -3100,7 +3491,7 @@ static status_t
 	case XP_EXNT_COMMENT:
 	    /* no comments to match */
 	    emptyresult = TRUE;
-	    if (!pcb->obj && pcb->logerrors) {
+	    if (pcb->obj && pcb->logerrors) {
 		log_warn("\nWarning: no comment nodes available in "
 			 "XPath expr '%s'", pcb->exprstr);
 		ncx_print_errormsg(pcb->tkc, pcb->mod,
@@ -3115,7 +3506,7 @@ static status_t
 	case XP_EXNT_PROC_INST:
 	    /* no processing instructions to match */
 	    emptyresult = TRUE;
-	    if (!pcb->obj && pcb->logerrors) {
+	    if (pcb->obj && pcb->logerrors) {
 		log_warn("\nWarning: no processing instruction "
 			 "nodes available in "
 			 "XPath expr '%s'", pcb->exprstr);
@@ -3177,21 +3568,18 @@ static status_t
 	    *result = new_nodeset(pcb,
 				  pcb->context.node.objptr,
 				  pcb->context.node.valptr,
-				  axis, dblslash);
+				  axis, FALSE);
 	    if (!*result) {
 		res = ERR_INTERNAL_MEM;
 	    }
 	}
 	if (res == NO_ERR) {
-	    if (!(dblslash && !nsid && !name)) {
-		res = set_nodeset_ancestor(pcb, 
-					   *result,
-					   nsid, 
-					   name,
-					   dblslash, 
-					   textmode,
-					   axis);
-	    }  /* else keep the context node */
+	    res = set_nodeset_ancestor(pcb, 
+				       *result,
+				       nsid, 
+				       name,
+				       textmode,
+				       axis);
 	} 
 	break;
     case XP_AX_ATTRIBUTE:
@@ -3202,7 +3590,7 @@ static status_t
 	 *
 	 * just set the result to the empty nodeset
 	 */
-	if (!pcb->obj && pcb->logerrors) {
+	if (pcb->obj && pcb->logerrors) {
 	    log_warn("\nWarning: attribute axis is empty in "
 		     "XPath expr '%s'", pcb->exprstr);
 	    ncx_print_errormsg(pcb->tkc, pcb->mod,
@@ -3217,8 +3605,7 @@ static status_t
 	}
 	break;
     case XP_AX_DESCENDANT:
-	dblslash = TRUE;
-	/* fall through */
+    case XP_AX_DESCENDANT_OR_SELF:
     case XP_AX_CHILD:
 	/* select all the child nodes of each node in 
 	 * the result node set.
@@ -3230,7 +3617,7 @@ static status_t
 	    *result = new_nodeset(pcb, 
 				  pcb->context.node.objptr,
 				  pcb->context.node.valptr,
-				  axis, dblslash);
+				  axis, FALSE);
 	    if (!*result) {
 		res = ERR_INTERNAL_MEM;
 	    }
@@ -3240,28 +3627,8 @@ static status_t
 				    *result, 
 				    nsid, 
 				    name, 
-				    dblslash, 
-				    textmode);
-	}
-	break;
-    case XP_AX_DESCENDANT_OR_SELF:
-	dblslash = TRUE;
-
-	/* keep the nodeset the same, since this axis
-	 * selects the current node, which already
-	 * selects all the child nodes as well
-	 */
-	if (!*result) {
-	    /* first step is descendant-or-self::* */
-	    *result = new_nodeset(pcb, 
-				  pcb->context.node.objptr,
-				  pcb->context.node.valptr,
-				  axis, dblslash);
-	    if (!*result) {
-		res = ERR_INTERNAL_MEM;
-	    }
-	} else {
-	    set_nodeset_dblslash(pcb, *result);
+				    textmode,
+				    axis);
 	}
 	break;
     case XP_AX_FOLLOWING:
@@ -3277,7 +3644,7 @@ static status_t
 	    *result = new_nodeset(pcb, 
 				  pcb->context.node.objptr,
 				  pcb->context.node.valptr,
-				  axis, dblslash);
+				  axis, FALSE);
 	    if (!*result) {
 		res = ERR_INTERNAL_MEM;
 	    }
@@ -3288,7 +3655,6 @@ static status_t
 				     *result,
 				     nsid, 
 				     name,
-				     dblslash,
 				     textmode,
 				     axis);
 	}	 
@@ -3302,7 +3668,7 @@ static status_t
 	 *
 	 * For now, just turn the result into the empty set
 	 */
-	if (!pcb->obj && pcb->logerrors) {
+	if (pcb->obj && pcb->logerrors) {
 	    log_warn("Warning: namespace axis is empty in "
 		     "XPath expr '%s'", pcb->exprstr);
 	    ncx_print_errormsg(pcb->tkc, pcb->mod,
@@ -3318,8 +3684,8 @@ static status_t
 	break;
     case XP_AX_PARENT:
 	/* step is parent::*  -- same as .. for nodes  */
-	if (textmode && !dblslash) {
-	    if (!pcb->obj && pcb->logerrors) {
+	if (textmode) {
+	    if (pcb->obj && pcb->logerrors) {
 		log_warn("Warning: parent axis contains no text nodes in "
 		     "XPath expr '%s'", pcb->exprstr);
 		ncx_print_errormsg(pcb->tkc, pcb->mod,
@@ -3340,7 +3706,7 @@ static status_t
 				  pcb->context.node.objptr, 
 				  pcb->context.node.valptr,
 				  axis, 
-				  dblslash);
+				  FALSE);
 	    if (!*result) {
 		res = ERR_INTERNAL_MEM;
 	    }
@@ -3350,16 +3716,7 @@ static status_t
 	    res = set_nodeset_parent(pcb, 
 				     *result, 
 				     nsid,
-				     name,
-				     dblslash);
-	}
-	if (dblslash && res == NO_ERR) {
-	    res = set_nodeset_child(pcb, 
-				    *result, 
-				    nsid,
-				    name,
-				    TRUE,
-				    textmode);
+				     name);
 	}
 	break;
     case XP_AX_SELF:
@@ -3369,11 +3726,18 @@ static status_t
 	    *result = new_nodeset(pcb, 
 				  pcb->context.node.objptr,
 				  pcb->context.node.valptr,
-				  axis, dblslash);
+				  axis, FALSE);
 	    if (!*result) {
 		res = ERR_INTERNAL_MEM;
 	    }
 	}
+	if (res == NO_ERR) {
+	    res = set_nodeset_self(pcb,
+				   *result,
+				   nsid,
+				   name,
+				   textmode);
+	}				   
 	break;
     case XP_AX_NONE:
     default:
@@ -3634,20 +3998,27 @@ static status_t
     const xmlChar    *nextval;
     tk_type_t         nexttyp, nexttyp2;
     ncx_xpath_axis_t  axis;
-    boolean           dblslash;
     status_t          res;
 
-    dblslash = FALSE;
     nexttyp = tk_next_typ(pcb->tkc);
     axis = XP_AX_CHILD;
 
     /* check start token '/' or '//' */
     if (nexttyp == TK_TT_DBLFSLASH) {
-	dblslash = TRUE;
 	res = xpath_parse_token(pcb, TK_TT_DBLFSLASH);
 	if (res != NO_ERR) {
 	    return res;
 	}
+	if (!*result) {
+	    *result = new_nodeset(pcb,
+				  pcb->context.node.objptr,
+				  pcb->context.node.valptr,
+				  axis, TRUE);
+	    if (!*result) {
+		return ERR_INTERNAL_MEM;
+	    }
+	}
+	set_nodeset_dblslash(pcb, *result);
     } else if (nexttyp == TK_TT_FSLASH) {
 	res = xpath_parse_token(pcb, TK_TT_FSLASH);
 	if (res != NO_ERR) {
@@ -3660,7 +4031,7 @@ static status_t
 				  pcb->docroot, 
 				  pcb->val_docroot,
 				  axis,
-				  dblslash);
+				  FALSE);
 	    if (!*result) {
 		return ERR_INTERNAL_MEM;
 	    }
@@ -3673,7 +4044,8 @@ static status_t
 	}
     } else if (*result) {
 	/* should not happen */
-	return SET_ERROR(ERR_INTERNAL_VAL);
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return ERR_NCX_INVALID_XPATH_EXPR;
     }
 
     /* handle an abbreviated step (. or ..) or
@@ -3694,37 +4066,16 @@ static status_t
 	    return res;
 	}
 
-	if (dblslash) {
-	    /* step is //.  
-	     * matches all descendants af the current context node
-	     */
+	/* first step is simply . */
+	if (!*result) {
+	    *result = new_nodeset(pcb,
+				  pcb->context.node.objptr,
+				  pcb->context.node.valptr,
+				  axis, FALSE);
 	    if (!*result) {
-		/* first step -- matches entire document */
-		*result = new_nodeset(pcb, 
-				      pcb->docroot,
-				      pcb->val_docroot,
-				      axis, dblslash);
-		if (!*result) {
-		    return ERR_INTERNAL_MEM;
-		}
-	    } else {
-		/* else not first step; 
-		 * set the dblslash flag in every node in the result
-		 */
-		set_nodeset_dblslash(pcb, *result);
+		return ERR_INTERNAL_MEM;
 	    }
-	} else {
-	    /* first step is simply . */
-	    if (!*result) {
-		*result = new_nodeset(pcb,
-				      pcb->context.node.objptr,
-				      pcb->context.node.valptr,
-				      axis, dblslash);
-		if (!*result) {
-		    return ERR_INTERNAL_MEM;
-		}
-	    } /* else leave current result alone */
-	}
+	} /* else leave current result alone */
 	return NO_ERR;
     case TK_TT_RANGESEP:
 	/* abbrev step '..': 
@@ -3740,7 +4091,7 @@ static status_t
 	    *result = new_nodeset(pcb, 
 				  pcb->context.node.objptr, 
 				  pcb->context.node.valptr,
-				  axis, dblslash);
+				  axis, FALSE);
 	    if (!*result) {
 		res = ERR_INTERNAL_MEM;
 	    }
@@ -3749,8 +4100,7 @@ static status_t
 	    res = set_nodeset_parent(pcb, 
 				     *result,
 				     0,
-				     NULL,
-				     dblslash);
+				     NULL);
 	}
 	return res;
     case TK_TT_ATSIGN:
@@ -3809,7 +4159,7 @@ static status_t
     }
 
     /* axis or default child parsed OK, get node test */
-    res = parse_node_test(pcb, axis, dblslash, result);
+    res = parse_node_test(pcb, axis, result);
     if (res == NO_ERR) {
 	nexttyp = tk_next_typ(pcb->tkc);
 	while (nexttyp == TK_TT_LBRACK && res==NO_ERR) {
@@ -5199,7 +5549,7 @@ status_t
     if (!rootdone) {
 	/* get the rpc/input, rpc/output, or /notif node */
 	rootobj = obj;
-	while (rootobj->parent && 
+	while (rootobj->parent && !obj_is_toproot(rootobj->parent) &&
 	       rootobj->objtype != OBJ_TYP_RPCIO) {
 	    rootobj = rootobj->parent;
 	}
@@ -5212,11 +5562,17 @@ status_t
      */
     result = parse_expr(pcb, &pcb->validateres);
 
+
     if (result) {
+	if (LOGDEBUG2) {
+	    dump_result(pcb, result, "validate_expr");
+	}
+
 	free_result(pcb, result);
     }
 
     return pcb->validateres;
+
 
 }  /* xpath1_validate_expr */
 
@@ -5260,6 +5616,8 @@ xpath_result_t *
 		      boolean configonly,
 		      status_t *res)
 {
+    xpath_result_t *result;
+
 #ifdef DEBUG
     if (!pcb || !val || !docroot || !res) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -5313,7 +5671,15 @@ xpath_result_t *
 	pcb->flags |= XP_FL_CONFIGONLY;
     }
 
-    return parse_expr(pcb, &pcb->valueres);
+    pcb->flags |= XP_FL_USEROOT;
+
+    result = parse_expr(pcb, &pcb->valueres);
+
+    if (LOGDEBUG2) {
+	dump_result(pcb, result, "eval_expr");
+    }
+
+    return result;
 
 }  /* xpath1_eval_expr */
 

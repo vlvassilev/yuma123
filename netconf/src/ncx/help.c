@@ -140,7 +140,7 @@ static void
 	    first = FALSE;
 	}
 
-	help_write_lines((const xmlChar *)"", indent+2, TRUE);
+	help_write_lines(EMPTY_STRING, indent+2, TRUE);
 	if (appinfo->value) {
 	    log_stdout("%s = %s", appinfo->name, appinfo->value);
 	} else {

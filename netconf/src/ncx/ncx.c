@@ -2979,6 +2979,75 @@ void
 
 
 /********************************************************************
+* FUNCTION ncx_set_num_one
+* 
+* Set a number to one
+*
+* INPUTS:
+*     num == number to set
+*     btyp == expected data type
+*
+*********************************************************************/
+void
+    ncx_set_num_one (ncx_num_t *num,
+		     ncx_btype_t  btyp)
+{
+#ifdef DEBUG
+    if (!num) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    switch (btyp) {
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+	num->i = 1;
+	break;
+    case NCX_BT_INT64:
+	num->l = 1;
+	break;
+    case NCX_BT_UINT8:
+	num->u = 1;
+	break;
+    case NCX_BT_UINT64:
+	num->ul = 1;
+	break;
+    case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT
+	num->f = 1;
+#else
+	if (num->f) {
+	    m__free(num->f);
+	}
+	num->f = xml_strdup((const xmlChar *)"1");
+	if (!num->f) {
+	    SET_ERROR(ERR_INTERNAL_MEM);
+	}
+#endif
+	break;
+    case NCX_BT_FLOAT64:
+#ifdef HAS_FLOAT
+	num->d = 1;
+#else
+	if (num->d) {
+	    m__free(num->d);
+	}
+	num->d = xml_strdup((const xmlChar *)"1");
+	if (!num->d) {
+	    SET_ERROR(ERR_INTERNAL_MEM);
+	}
+#endif
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+} /* ncx_set_num_one */
+
+
+/********************************************************************
 * FUNCTION ncx_set_num_zero
 * 
 * Set a number to zero
@@ -3554,6 +3623,710 @@ status_t
 
 
 /********************************************************************
+* FUNCTION ncx_cast_num
+* 
+* Cast a number as another number type
+*
+* Supports all NCX numeric types:
+*    NCX_BT_INT*
+*    NCX_BT_UINT*
+*    NCX_BT_FLOAT*
+*
+* INPUTS:
+*     num1 == source number
+*     btyp1 == expected data type of num1
+*     num2 == target number
+*     btyp2 == desired data type of num2
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    ncx_cast_num (const ncx_num_t *num1,
+		  ncx_btype_t  btyp1,
+		  ncx_num_t *num2,
+		  ncx_btype_t  btyp2)
+{
+    status_t   res;
+
+#ifdef DEBUG
+    if (!num1 || !num2) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    switch (btyp1) {
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+	switch (btyp2) {
+	case NCX_BT_INT8:
+	case NCX_BT_INT16:
+	case NCX_BT_INT32:
+	    num2->i = num1->i;
+	    break;
+	case NCX_BT_INT64:
+	    num2->l = (int64)num1->i;
+	    break;
+	case NCX_BT_UINT8:
+	case NCX_BT_UINT16:
+	case NCX_BT_UINT32:
+	    num2->u = (uint32)num1->i;
+	    break;
+	case NCX_BT_UINT64:
+	    num2->ul = (uint64)num1->i;
+	    break;
+	case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT
+	    num2->f = (float)num1->i;
+#else
+	    if (num2->f) {
+		m__free(num2->f);
+		num2->f = NULL;
+	    }
+
+            num2->f = m__getMem(NCX_MAX_NUMLEN+1);
+            if (!num2->f) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+		res = ncx_sprintf_num(num2->f,
+				      num1->i,
+				      btyp1,
+				      &len);
+	    }
+#endif
+	    break;
+	case NCX_BT_FLOAT64:
+#ifdef HAS_FLOAT
+	    num2->d = (double)num1->i;
+#else
+	    if (num2->d) {
+		m__free(num2->d);
+		num2->d = NULL;
+	    }
+
+            num2->d = m__getMem(NCX_MAX_NUMLEN+1);
+            if (!num2->d) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+		res = ncx_sprintf_num(num2->d,
+				      num1->i,
+				      btyp1,
+				      &len);
+	    }
+#endif
+	    break;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+        break;
+    case NCX_BT_INT64:
+	switch (btyp2) {
+	case NCX_BT_INT8:
+	case NCX_BT_INT16:
+	case NCX_BT_INT32:
+	case NCX_BT_UINT8:
+	case NCX_BT_UINT16:
+	case NCX_BT_UINT32:
+	    res = ERR_NCX_INVALID_VALUE;
+	    break;
+	case NCX_BT_INT64:
+	    num2->l = num1->l;
+	    break;
+	case NCX_BT_UINT64:
+	    num2->ul = (uint64)num1->l;
+	    break;
+	case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT
+	    num2->f = (float)num1->l;
+#else
+	    if (num2->f) {
+		m__free(num2->f);
+		num2->f = NULL;
+	    }
+
+            num2->f = m__getMem(NCX_MAX_NUMLEN+1);
+            if (!num2->f) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+		res = ncx_sprintf_num(num2->f,
+				      num1->l,
+				      btyp1,
+				      &len);
+	    }
+#endif
+	    break;
+	case NCX_BT_FLOAT64:
+#ifdef HAS_FLOAT
+	    num2->d = (double)num1->l;
+#else
+	    if (num2->d) {
+		m__free(num2->d);
+		num2->d = NULL;
+	    }
+
+            num2->d = m__getMem(NCX_MAX_NUMLEN+1);
+            if (!num2->d) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+		res = ncx_sprintf_num(num2->d,
+				      num1->l,
+				      btyp1,
+				      &len);
+	    }
+#endif
+	    break;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+        break;
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+	switch (btyp2) {
+	case NCX_BT_INT8:
+	case NCX_BT_INT16:
+	case NCX_BT_INT32:
+	    num2->i = (int32)num1->u;
+	    break;
+	case NCX_BT_INT64:
+	    num2->l = (int64)num1->u;
+	    break;
+	case NCX_BT_UINT8:
+	case NCX_BT_UINT16:
+	case NCX_BT_UINT32:
+	    num2->u = num1->u;
+	    break;
+	case NCX_BT_UINT64:
+	    num2->ul = (uint64)num1->u;
+	    break;
+	case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT
+	    num2->f = (float)num1->u;
+#else
+	    if (num2->f) {
+		m__free(num2->f);
+		num2->f = NULL;
+	    }
+
+            num2->f = m__getMem(NCX_MAX_NUMLEN+1);
+            if (!num2->f) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+		res = ncx_sprintf_num(num2->f,
+				      num1->u,
+				      btyp1,
+				      &len);
+	    }
+#endif
+	    break;
+	case NCX_BT_FLOAT64:
+#ifdef HAS_FLOAT
+	    num2->d = (double)num1->u;
+#else
+	    if (num2->d) {
+		m__free(num2->d);
+		num2->d = NULL;
+	    }
+
+            num2->d = m__getMem(NCX_MAX_NUMLEN+1);
+            if (!num2->d) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+		res = ncx_sprintf_num(num2->d,
+				      num1->u,
+				      btyp1,
+				      &len);
+	    }
+
+#endif
+	    break;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+        break;
+    case NCX_BT_UINT64:
+	switch (btyp2) {
+	case NCX_BT_INT8:
+	case NCX_BT_INT16:
+	case NCX_BT_INT32:
+	case NCX_BT_UINT8:
+	case NCX_BT_UINT16:
+	case NCX_BT_UINT32:
+	    res = ERR_NCX_INVALID_VALUE;
+	    break;
+	case NCX_BT_INT64:
+	    num2->l = (int64)num1->ul;
+	    break;
+	case NCX_BT_UINT64:
+	    num2->ul = num1->ul;
+	    break;
+	case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT
+	    num2->f = (float)num1->ul;
+#else
+	    if (num2->f) {
+		m__free(num2->f);
+		num2->f = NULL;
+	    }
+
+            num2->f = m__getMem(NCX_MAX_NUMLEN+1);
+            if (!num2->f) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+		res = ncx_sprintf_num(num2->f,
+				      num1->ul,
+				      btyp1,
+				      &len);
+	    }
+#endif
+	    break;
+	case NCX_BT_FLOAT64:
+#ifdef HAS_FLOAT
+	    num2->d = (double)num1->ul;
+#else
+	    if (num2->d) {
+		m__free(num2->d);
+		num2->d = NULL;
+	    }
+
+            num2->d = m__getMem(NCX_MAX_NUMLEN+1);
+            if (!num2->d) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+		res = ncx_sprintf_num(num2->d,
+				      num1->ul,
+				      btyp1,
+				      &len);
+	    }
+#endif
+	    break;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+        break;
+    case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT
+	switch (btyp2) {
+	case NCX_BT_INT8:
+	case NCX_BT_INT16:
+	case NCX_BT_INT32:
+	case NCX_BT_UINT8:
+	case NCX_BT_UINT16:
+	case NCX_BT_UINT32:
+	    res = ERR_NCX_INVALID_VALUE;
+	    break;
+	case NCX_BT_INT64:
+	    num2->l = (int64)lrintf(num1->f);
+	    break;
+	case NCX_BT_UINT64:
+	    num2->ul = (uint64)lrintf(num1->f);
+	    break;
+	case NCX_BT_FLOAT32:
+	    num2->f = num1->f;
+	    break;
+	case NCX_BT_FLOAT64:
+	    num2->d = (double)num1->f;
+	    break;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+#else
+	res = ncx_convert_num(num1->f, NCX_NF_DEC, 
+			      btyp2, num2);
+#endif
+        break;
+    case NCX_BT_FLOAT64:
+#ifdef HAS_FLOAT
+	switch (btyp2) {
+	case NCX_BT_INT8:
+	case NCX_BT_INT16:
+	case NCX_BT_INT32:
+	case NCX_BT_UINT8:
+	case NCX_BT_UINT16:
+	case NCX_BT_UINT32:
+	case NCX_BT_FLOAT32:
+	    return ERR_NCX_INVALID_VALUE;
+	case NCX_BT_INT64:
+	    num2->l = (int64)lrint(num1->d);
+	    break;
+	case NCX_BT_UINT64:
+	    num2->ul = (uint64)lrint(num1->d);
+	    break;
+	case NCX_BT_FLOAT64:
+	    num2->d = num1->d;
+	    break;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+#else
+	res = ncx_convert_num(val1->d, NCX_NF_DEC, 
+			      btyp2, num2);
+#endif
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    return res;
+
+}  /* ncx_cast_num */
+
+
+/********************************************************************
+* FUNCTION ncx_num_floor
+* 
+* Get the floor value of a number
+*
+* Supports all NCX numeric types:
+*    NCX_BT_INT*
+*    NCX_BT_UINT*
+*    NCX_BT_FLOAT*
+*
+* INPUTS:
+*     num1 == source number
+*     num2 == target number
+*     btyp == expected data type of numbers
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    ncx_num_floor (const ncx_num_t *num1,
+		   ncx_num_t *num2,
+		   ncx_btype_t  btyp)
+{
+    status_t   res;
+
+#ifndef HAS_FLOAT
+    char      *str, *p;
+#endif
+
+#ifdef DEBUG
+    if (!num1 || !num2) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    switch (btyp) {
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+	num2->i = num1->i;
+	break;
+    case NCX_BT_INT64:
+	num2->l = num1->l;
+	break;
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+	num2->u = num1->u;
+	break;
+    case NCX_BT_UINT64:
+	num2->ul = num1->ul;
+	break;
+    case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT
+	num2->f = floorf(num1->f);
+#else
+	if (num1->f) {
+	    str = p = num1->f;
+	    while (*p && *p != '.') {
+		p++;
+	    }
+
+	    if (num2->f) {
+		m__free(num2->f);
+		num2->f = NULL;
+	    }
+	    num2->f = m__getMem((uint32)(p-str+1));
+	    if (!num2->f) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		xml_strncpy(num2->f, str, (uint32)(p-str));
+	    }
+	} else {
+	    ncx_set_num_zero(num, NCX_BT_FLOAT32);
+	}
+#endif
+	break;
+    case NCX_BT_FLOAT64:
+#ifdef HAS_FLOAT
+	num2->d = floor(num1->d);
+#else
+	if (num1->d) {
+	    str = p = num1->d;
+	    while (*p && *p != '.') {
+		p++;
+	    }
+
+	    if (num2->d) {
+		m__free(num2->d);
+		num2->d = NULL;
+	    }
+	    num2->d = m__getMem((uint32)(p-str+1));
+	    if (!num2->f) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		xml_strncpy(num2->d, str, (uint32)(p-str));
+	    }
+	} else {
+	    ncx_set_num_zero(num, NCX_BT_FLOAT64);
+	}
+#endif
+	break;
+    default:
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    return res;
+    
+}  /* ncx_num_floor */
+
+
+/********************************************************************
+* FUNCTION ncx_num_ceiling
+* 
+* Get the ceiling value of a number
+*
+* Supports all NCX numeric types:
+*    NCX_BT_INT*
+*    NCX_BT_UINT*
+*    NCX_BT_FLOAT*
+*
+* INPUTS:
+*     num1 == source number
+*     num2 == target number
+*     btyp == expected data type of numbers
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    ncx_num_ceiling (const ncx_num_t *num1,
+		     ncx_num_t *num2,
+		     ncx_btype_t  btyp)
+{
+    status_t   res;
+
+#ifndef HAS_FLOAT
+    char      *str, *p;
+#endif
+
+#ifdef DEBUG
+    if (!num1 || !num2) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    switch (btyp) {
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+	num2->i = num1->i;
+	break;
+    case NCX_BT_INT64:
+	num2->l = num1->l;
+	break;
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+	num2->u = num1->u;
+	break;
+    case NCX_BT_UINT64:
+	num2->ul = num1->ul;
+	break;
+    case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT
+	num2->f = ceilf(num1->f);
+#else
+	if (num1->f) {
+	    str = p = num1->f;
+	    while (*p && *p != '.') {
+		p++;
+	    }
+
+	    if (num2->f) {
+		m__free(num2->f);
+		num2->f = NULL;
+	    }
+	    num2->f = m__getMem((uint32)(p-str+1));
+	    if (!num2->f) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		xml_strncpy(num2->f, str, (uint32)(p-str));
+		if (*p) {
+		    /**** Add 1 to the string number result ****/
+		}
+	    }
+	} else {
+	    ncx_set_num_zero(num, NCX_BT_FLOAT32);
+	}
+#endif
+	break;
+    case NCX_BT_FLOAT64:
+#ifdef HAS_FLOAT
+	num2->d = ceil(num1->d);
+#else
+	if (num1->d) {
+	    str = p = num1->d;
+	    while (*p && *p != '.') {
+		p++;
+	    }
+
+	    if (num2->d) {
+		m__free(num2->d);
+		num2->d = NULL;
+	    }
+	    num2->d = m__getMem((uint32)(p-str+1));
+	    if (!num2->f) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		xml_strncpy(num2->d, str, (uint32)(p-str));
+		if (*p) {
+		    /**** Add 1 to the string number result ****/
+		}
+	    }
+	} else {
+	    ncx_set_num_zero(num, NCX_BT_FLOAT64);
+	}
+#endif
+	break;
+    default:
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    return res;
+    
+}  /* ncx_num_ceiling */
+
+
+/********************************************************************
+* FUNCTION ncx_num_round
+* 
+* Get the rounded value of a number
+*
+* Supports all NCX numeric types:
+*    NCX_BT_INT*
+*    NCX_BT_UINT*
+*    NCX_BT_FLOAT*
+*
+* INPUTS:
+*     num1 == source number
+*     num2 == target number
+*     btyp == expected data type of numbers
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    ncx_num_round (const ncx_num_t *num1,
+		   ncx_num_t *num2,
+		   ncx_btype_t  btyp)
+{
+    status_t   res;
+
+#ifndef HAS_FLOAT
+    char      *str, *p;
+#endif
+
+#ifdef DEBUG
+    if (!num1 || !num2) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    switch (btyp) {
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+	num2->i = num1->i;
+	break;
+    case NCX_BT_INT64:
+	num2->l = num1->l;
+	break;
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+	num2->u = num1->u;
+	break;
+    case NCX_BT_UINT64:
+	num2->ul = num1->ul;
+	break;
+    case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT
+	num2->f = roundf(num1->f);
+#else
+	if (num1->f) {
+	    str = p = num1->f;
+	    while (*p && *p != '.') {
+		p++;
+	    }
+
+	    if (num2->f) {
+		m__free(num2->f);
+		num2->f = NULL;
+	    }
+	    num2->f = m__getMem((uint32)(p-str+1));
+	    if (!num2->f) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		xml_strncpy(num2->f, str, (uint32)(p-str));
+		if (*p) {
+		    /**** Round the string number result ****/
+		}
+	    }
+	} else {
+	    ncx_set_num_zero(num, NCX_BT_FLOAT32);
+	}
+#endif
+	break;
+    case NCX_BT_FLOAT64:
+#ifdef HAS_FLOAT
+	num2->d = round(num1->d);
+#else
+	if (num1->d) {
+	    str = p = num1->d;
+	    while (*p && *p != '.') {
+		p++;
+	    }
+
+	    if (num2->d) {
+		m__free(num2->d);
+		num2->d = NULL;
+	    }
+	    num2->d = m__getMem((uint32)(p-str+1));
+	    if (!num2->f) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		xml_strncpy(num2->d, str, (uint32)(p-str));
+		if (*p) {
+		    /**** Round the string number result ****/
+		}
+	    }
+	} else {
+	    ncx_set_num_zero(num, NCX_BT_FLOAT64);
+	}
+#endif
+	break;
+    default:
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    return res;
+    
+}  /* ncx_num_round */
+
+
+/********************************************************************
 * FUNCTION ncx_num_is_integral
 * 
 * Check if the number is integral or if it has a fractional part
@@ -3804,7 +4577,8 @@ void
 *    buff == buffer to write; NULL means just get length
 *    num == number to printf
 *    btyp == number base type
-* 
+*    len == address of return length
+*
 * OUTPUTS::
 *    *len == number of bytes written (or would have been) to buff
 *
@@ -3850,14 +4624,14 @@ status_t
 	break;
     case NCX_BT_FLOAT32:
 #ifdef HAS_FLOAT
-	ilen = sprintf((char *)buff, "%f", num->f);
+	ilen = sprintf((char *)buff, "%1.15f", num->f);
 #else
 	ilen = sprintf((char *)buff, "%s", (num->f) ? num->f : "");
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	ilen = sprintf((char *)buff, "%lf", num->d);
+	ilen = sprintf((char *)buff, "%1.15lf", num->d);
 #else
 	ilen = sprintf((char *)buff, "%s", (num->d) ? num->d : "");
 #endif

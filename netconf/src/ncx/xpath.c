@@ -1125,6 +1125,13 @@ xpath_pcb_t *
     xpath_pcb_t *newpcb;
     status_t     res;
 
+#ifdef DEBUG
+    if (!srcpcb) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     newpcb = xpath_new_pcb(srcpcb->exprstr);
     if (!newpcb) {
 	return NULL;
@@ -1164,6 +1171,13 @@ xpath_pcb_t *
 {
     xpath_pcb_t *pcb;
 
+#ifdef DEBUG
+    if (!pcb || !exprstr) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     for (pcb = (xpath_pcb_t *)dlq_firstEntry(pcbQ);
 	 pcb != NULL;
 	 pcb = (xpath_pcb_t *)dlq_nextEntry(pcb)) {
@@ -1191,6 +1205,13 @@ void
 {
     xpath_result_t   *result;
     xpath_resnode_t  *resnode;
+
+#ifdef DEBUG
+    if (!pcb) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
 
     if (pcb->tkc) {
 	tk_free_chain(pcb->tkc);
@@ -1284,7 +1305,6 @@ void
 	break;
     case XP_RT_STRING:
     case XP_RT_BOOLEAN:
-    case XP_RT_VARPTR:
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -1356,9 +1376,6 @@ void
     case XP_RT_BOOLEAN:
 	result->r.bool = FALSE;
 	break;
-    case XP_RT_VARPTR:
-	result->r.varptr = NULL;
-	break;
     case XP_RT_NONE:
 	break;
     default:
@@ -1366,7 +1383,6 @@ void
     }
 
     result->restype = XP_RT_NONE;
-    result->errtoken = NULL;
     result->res = NO_ERR;
 
 }  /* xpath_clean_result */
@@ -1498,6 +1514,12 @@ status_t
     ncx_import_t   *imp;
     status_t        res;
 
+#ifdef DEBUG
+    if (!mod || !targmod) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     /* get the import if there is a real prefix entered */
     if (prefix && *prefix) {
 	if (!mod) {
@@ -1563,6 +1585,12 @@ status_t
     xmlChar        *buff;
     status_t        res;
 
+#ifdef DEBUG
+    if (!mod || !targmod) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     if (prefix && prefixlen) {
 	buff = m__getMem(prefixlen+1);
 	if (!buff) {
@@ -1605,6 +1633,12 @@ status_t
 {
     status_t     res;
 
+#ifdef DEBUG
+    if (!pcb) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     /* get the next token */
     res = TK_ADV(pcb->tkc);
     if (res != NO_ERR) {
@@ -1638,7 +1672,12 @@ status_t
 boolean
     xpath_cvt_boolean (const xpath_result_t *result)
 {
-    val_value_t *testval;
+#ifdef DEBUG
+    if (!result) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
 
     switch (result->restype) {
     case XP_RT_NONE:
@@ -1653,34 +1692,6 @@ boolean
 	    TRUE : FALSE;
     case XP_RT_BOOLEAN:
 	return result->r.bool;
-    case XP_RT_VARPTR:
-	if (result->r.varptr && result->r.varptr->val) {
-	    testval = result->r.varptr->val;
-	    if (typ_is_string(testval->btyp)) {
-		return (VAL_STR(testval) && 
-			xml_strlen(VAL_STR(testval))) ?
-		    TRUE : FALSE;
-	    } else if (typ_is_number(testval->btyp)) {
-		return (ncx_num_zero(&testval->v.num, 
-				     NCX_BT_FLOAT64)) ?
-		    FALSE : TRUE;
-	    } else if (!typ_is_simple(testval->btyp)) {
-		return (val_has_content(testval)) ? TRUE : FALSE;
-	    } else {
-		switch (testval->btyp) {
-		case NCX_BT_BOOLEAN:
-		    return VAL_BOOL(testval);
-		case NCX_BT_BITS:
-		case NCX_BT_SLIST:
-		    return !ncx_list_empty(&testval->v.list);
-		default:
-		    return TRUE;
-		}
-	    }
-	    /*NOTREACHED*/
-	} else {
-	    return FALSE;
-	}
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
@@ -1688,6 +1699,214 @@ boolean
     /*NOTREACHED*/
 
 }  /* xpath_cvt_boolean */
+
+
+/********************************************************************
+* FUNCTION xpath_cvt_number
+* 
+* Convert an XPath result to a number answer
+*
+* INPUTS:
+*    result == result struct to convert to a number
+*    num == pointer to ncx_num_t to hold the conversion result
+*
+* OUTPUTS:
+*   *num == numeric result from conversion
+*
+*********************************************************************/
+void
+    xpath_cvt_number (const xpath_result_t *result,
+		      ncx_num_t *num)
+{
+    const xpath_resnode_t   *resnode;
+    val_value_t             *val;
+    status_t                 res;
+    ncx_num_t                testnum;
+
+#ifdef DEBUG
+    if (!result || !num) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    res = NO_ERR;
+
+    switch (result->restype) {
+    case XP_RT_NONE:
+	/****/
+	ncx_set_num_zero(num, NCX_BT_FLOAT64);
+	break;
+    case XP_RT_NODESET:
+	if (dlq_empty(&result->r.nodeQ)) {
+	    /****/
+	    ncx_set_num_zero(num, NCX_BT_FLOAT64);
+	} else {
+	    if (result->isval) {
+		resnode = (const xpath_resnode_t *)
+		    dlq_firstEntry(&result->r.nodeQ);
+		val = val_get_first_leaf(resnode->node.valptr);
+		if (val && typ_is_number(val->btyp)) {
+		    res = ncx_cast_num(&val->v.num,
+				       val->btyp,
+				       num,
+				       NCX_BT_FLOAT64);
+		    if (res != NO_ERR) {
+			/****/
+			ncx_set_num_zero(num, NCX_BT_FLOAT64);
+		    }			
+		} else {
+		    /****/
+		    ncx_set_num_zero(num, NCX_BT_FLOAT64);
+		}
+	    } else {
+		ncx_set_num_zero(num, NCX_BT_FLOAT64);
+	    }
+	}
+	break;
+    case XP_RT_NUMBER:
+	ncx_copy_num(&result->r.num, num, NCX_BT_FLOAT64);
+	break;
+    case XP_RT_STRING:
+	if (result->r.str) {
+	    ncx_init_num(&testnum);
+	    res = ncx_convert_num(result->r.str,
+				  NCX_NF_DEC,
+				  NCX_BT_FLOAT64,
+				  &testnum);
+	    if (res == NO_ERR) {
+		(void)ncx_copy_num(&testnum, num, NCX_BT_FLOAT64);
+	    } else {
+		ncx_set_num_one(num, NCX_BT_FLOAT64);
+	    }
+	    ncx_clean_num(NCX_BT_FLOAT64, &testnum);
+	} else {
+	    /****/
+	    ncx_set_num_zero(num, NCX_BT_FLOAT64);
+	}
+	break;
+    case XP_RT_BOOLEAN:
+	if (result->r.bool) {
+	    ncx_set_num_one(num, NCX_BT_FLOAT64);
+	} else {
+	    ncx_set_num_zero(num, NCX_BT_FLOAT64);
+	}
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+}  /* xpath_cvt_number */
+
+
+/********************************************************************
+* FUNCTION xpath_cvt_string
+* 
+* Convert an XPath result to a string answer
+*
+* INPUTS:
+*    result == result struct to convert to a number
+*    str == pointer to xmlChar * to hold the conversion result
+*
+* OUTPUTS:
+*   *str == pointer to malloced string from conversion
+*
+* RETURNS:
+*   status; could get an ERR_INTERNAL_MEM error or NO_RER
+*********************************************************************/
+status_t
+    xpath_cvt_string (const xpath_result_t *result,
+		      xmlChar **str)
+{
+    const xpath_resnode_t   *resnode;
+    val_value_t             *val;
+    status_t                 res;
+    uint32                   len;
+
+#ifdef DEBUG
+    if (!result || !str) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    *str = NULL;
+
+    switch (result->restype) {
+    case XP_RT_NONE:
+	*str = xml_strdup(EMPTY_STRING);
+	break;
+    case XP_RT_NODESET:
+	if (dlq_empty(&result->r.nodeQ)) {
+	    *str = xml_strdup(EMPTY_STRING);
+	} else {
+	    if (result->isval) {
+		resnode = (const xpath_resnode_t *)
+		    dlq_firstEntry(&result->r.nodeQ);
+		val = val_get_first_leaf(resnode->node.valptr);
+		if (val) {
+		    res = val_sprintf_simval_nc(NULL, val, &len);
+		    if (res == NO_ERR) {
+			*str = m__getMem(len+1);
+			if (*str) {
+			    (void)val_sprintf_simval_nc(*str, val, &len);
+			}
+		    }
+		} else {
+		    *str = xml_strdup(EMPTY_STRING);
+		}
+	    } else {
+		*str = xml_strdup(EMPTY_STRING);
+	    }
+	}
+	break;
+    case XP_RT_NUMBER:
+	res = ncx_sprintf_num(NULL, 
+			      &result->r.num,
+			      NCX_BT_FLOAT64,
+			      &len);
+	if (res != NO_ERR) {
+	    return res;
+	}
+
+	*str = m__getMem(len+1);
+	if (*str) {
+	    res = ncx_sprintf_num(*str,
+				  &result->r.num,
+				  NCX_BT_FLOAT64,
+				  &len);
+	    if (res != NO_ERR) {
+		m__free(*str);
+		*str = NULL;
+		return res;
+	    }
+	}
+	break;
+    case XP_RT_STRING:
+	if (result->r.str) {
+	    *str = xml_strdup(result->r.str);
+	} else {
+	    *str = xml_strdup(EMPTY_STRING);
+	}
+	break;
+    case XP_RT_BOOLEAN:
+	if (result->r.bool) {
+	    *str = xml_strdup(NCX_EL_TRUE);
+	} else {
+	    *str = xml_strdup(NCX_EL_FALSE);
+	}
+	break;
+    default:
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (!*str) {
+	res = ERR_INTERNAL_MEM;
+    }
+    return res;
+
+}  /* xpath_cvt_string */
 
 
 /* END xpath.c */

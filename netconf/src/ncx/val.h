@@ -87,6 +87,10 @@ date	     init     comment
 #include "dlq.h"
 #endif
 
+#ifndef _H_ncxconst
+#include "ncxconst.h"
+#endif
+
 #ifndef _H_ncxtypes
 #include "ncxtypes.h"
 #endif
@@ -118,7 +122,7 @@ date	     init     comment
 *********************************************************************/
 
 
-#define VAL_MAX_NUMLEN  48
+#define VAL_MAX_NUMLEN  NCX_MAX_NUMLEN
 
 /* constants used in generating C and Xpath instance ID strings */
 #define VAL_BINDEX_CH     '['
@@ -902,5 +906,8 @@ extern void
 
 extern uint32
     val_get_nest_level (val_value_t *val);
+
+extern val_value_t *
+    val_get_first_leaf (val_value_t *val);
 
 #endif	    /* _H_val */

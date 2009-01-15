@@ -484,7 +484,7 @@ const xmlChar *
 	return NCX_EL_ERROR;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
-	return (const xmlChar *)"";
+	return EMPTY_STRING;
     }
 }  /* rpc_err_get_severity */
 

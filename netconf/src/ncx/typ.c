@@ -1861,7 +1861,7 @@ const xmlChar *
     switch (typdef->class) {
     case NCX_CL_NONE:
 	SET_ERROR(ERR_INTERNAL_VAL);
-	return (const xmlChar *)"";
+	return EMPTY_STRING;
     case NCX_CL_BASE:
 	return (const xmlChar *)tk_get_btype_sym(typdef->def.base);
     case NCX_CL_SIMPLE:
@@ -1873,7 +1873,7 @@ const xmlChar *
 	return typ_get_name(typdef->def.ref.typdef);
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
-	return (const xmlChar *)"";
+	return EMPTY_STRING;
     }
     /*NOTREACHED*/
 
@@ -1907,7 +1907,7 @@ const xmlChar *
     if (btyp != NCX_BT_NONE) {
 	return (const xmlChar *)tk_get_btype_sym(btyp);
     } else {
-	return (const xmlChar *)"";
+	return EMPTY_STRING;
     }
     /*NOTREACHED*/
 
@@ -1938,7 +1938,7 @@ const xmlChar *
     if (typ->typdef.class == NCX_CL_NAMED) {
 	return typ->typdef.def.named.typ->name;
     } else {
-	return (const xmlChar *)"";
+	return EMPTY_STRING;
     }
     /*NOTREACHED*/
 

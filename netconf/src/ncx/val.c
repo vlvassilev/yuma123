@@ -152,14 +152,14 @@ static void
 	break;
     case NCX_BT_FLOAT32:
 #ifdef HAS_FLOAT
-	log_write("%f", num->f);
+	log_write("%1.15f", num->f);
 #else
 	log_write("%s", (num->f) ? num->f : "--");
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	log_write("%lf", num->d);
+	log_write("%1.15lf", num->d);
 #else
 	log_write("%s", (num->d) ? num->d : "--");
 #endif
@@ -2367,7 +2367,7 @@ status_t
 #endif
 
     if (!strval) {
-	strval = (const xmlChar *)"";
+	strval = EMPTY_STRING;
     }
 
     if (typ_get_basetype(typdef) != NCX_BT_STRING) {
@@ -2477,7 +2477,7 @@ status_t
 
     if (!simval) {
 	forced = TRUE;
-	simval = (const xmlChar *)"";
+	simval = EMPTY_STRING;
     } else {
 	forced = FALSE;
     }
@@ -7382,6 +7382,53 @@ uint32
 
 } /* val_get_nest_level */
 
+
+/********************************************************************
+* FUNCTION val_get_first_leaf
+* 
+* Get the first leaf or leaflist node in the 
+* specified value tree
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     pointer to first leaf found within this val struct
+*    pointer to val if val is a leaf
+*********************************************************************/
+val_value_t *
+    val_get_first_leaf (val_value_t *val)
+{
+    val_value_t  *child, *found;
+
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+#endif
+
+    if ((val->obj->objtype == OBJ_TYP_LEAF ||
+	 val->obj->objtype == OBJ_TYP_LEAF_LIST) &&
+	val->btyp != NCX_BT_ANY) {
+
+	return val;
+    } else if (typ_has_children(val->btyp)) {
+	for (child = (val_value_t *)
+		 dlq_firstEntry(&val->v.childQ);
+	     child != NULL;
+	     child = (val_value_t *)dlq_nextEntry(val)) {
+
+	    found = val_get_first_leaf(child);
+	    if (found) {
+		return found;
+	    }
+	}
+    }
+
+    return NULL;
+
+}  /* val_get_first_leaf */
 
 
 /* END file val.c */

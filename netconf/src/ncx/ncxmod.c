@@ -276,7 +276,7 @@ static status_t
 	suffix = NCXMOD_YANG_SUFFIX;
 	break;
     case NCXMOD_MODE_FILEYANG:
-	suffix = (const xmlChar *)"";
+	suffix = EMPTY_STRING;
 	break;
     default:
 	*done = TRUE;

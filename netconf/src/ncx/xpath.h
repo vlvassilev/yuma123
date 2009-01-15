@@ -178,8 +178,7 @@ typedef enum xpath_restype_t_ {
     XP_RT_NODESET,
     XP_RT_NUMBER,
     XP_RT_STRING,
-    XP_RT_BOOLEAN,
-    XP_RT_VARPTR
+    XP_RT_BOOLEAN
 } xpath_restype_t;
 
 /* XPath dynamic parsing mode for keyref */
@@ -258,8 +257,8 @@ typedef struct xpath_resnode_t_ {
     dlq_hdr_t             qhdr;
     ncx_xpath_axis_t      axis;
     boolean               dblslash;
-    val_value_t          *topvalptr;
     xpath_testmode_t      testmode;
+    val_value_t          *topvalptr;
     union node_ {
 	const obj_template_t *objptr;
 	val_value_t          *valptr;
@@ -281,8 +280,6 @@ typedef struct xpath_result_t_ {
 	ncx_var_t           *varptr;
     } r;
 
-    const tk_token_t    *errtoken;
-    uint32               errpos;
     status_t             res;
 } xpath_result_t;
 
@@ -363,6 +360,7 @@ typedef struct xpath_pcb_t_ {
     uint32              result_count;
     uint32              resnode_count;
 
+
     /* first and second pass parsing results
      * the next phase will not execute until
      * all previous phases have a NO_ERR status
@@ -370,6 +368,10 @@ typedef struct xpath_pcb_t_ {
     status_t             parseres;
     status_t             validateres;
     status_t             valueres;
+
+    /* saved error info for the agent to process */
+    const tk_token_t    *errtoken;
+    uint32               errpos;
 
     boolean              seen;      /* yangdiff support */
 } xpath_pcb_t;
@@ -509,5 +511,14 @@ extern status_t
 
 extern boolean
     xpath_cvt_boolean (const xpath_result_t *result);
+
+extern void
+    xpath_cvt_number (const xpath_result_t *result,
+		      ncx_num_t *num);
+
+extern status_t
+    xpath_cvt_string (const xpath_result_t *result,
+		      xmlChar **str);
+
 
 #endif	    /* _H_xpath */

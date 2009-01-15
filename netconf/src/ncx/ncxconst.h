@@ -66,7 +66,7 @@ date	     init     comment
 #define INVALID_URN    (const xmlChar *)"INVALID"
 
 /* max number len to use for static buffer allocation only */
-#define NCX_MAX_NUMLEN   32
+#define NCX_MAX_NUMLEN   47
 
  /* all name fields in YANG or NCX can be 1 to 63 bytes
   * YANG conformance requires this number to be >= 63
@@ -141,6 +141,8 @@ date	     init     comment
 #define NCX_XML_SLOC (const xmlChar *)\
 		      "http://www.w3.org/XML/1998/namespace"\
 		      "\n    http://www.w3.org/2001/xml.xsd"
+
+#define EMPTY_STRING  (const xmlChar *)""
 
 /* NCX owner for built-in definitions */
 #define NCX_OWNER       (const xmlChar *)"ncx"

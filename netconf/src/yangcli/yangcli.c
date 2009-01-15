@@ -1805,7 +1805,7 @@ static status_t
 	    }
 
 	    saveline = (start) ? xml_strdup(start) :
-		xml_strdup((const xmlChar *)"");
+		xml_strdup(EMPTY_STRING);
 	    if (!saveline) {
 		res = ERR_INTERNAL_MEM;
 		break;
@@ -1817,7 +1817,7 @@ static status_t
 			   "\nShould this value be used anyway? (Y, N, %s)"
 			   " [N]", 
 			   obj_get_name(parm),
-			   (start) ? start : (const xmlChar *)"",
+			   (start) ? start : EMPTY_STRING,
 			   DEF_OPTIONS);
 
 		/* save the previous value because it is about

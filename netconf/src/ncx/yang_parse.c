@@ -1003,7 +1003,7 @@ static status_t
 	log_error("\nError: Base '%s%s%s' not found "
 		  "for identity statement '%s'",
 		  (identity->baseprefix) ? 
-		  identity->baseprefix : (const xmlChar *)"",
+		  identity->baseprefix : EMPTY_STRING,
 		  (identity->baseprefix) ? "?" : "",
 		  identity->basename,
 		  identity->name);
@@ -2648,7 +2648,7 @@ static status_t
 	    return retres;
 	}
     } else {
-	mod->prefix = xml_strdup((const xmlChar *)"");
+	mod->prefix = xml_strdup(EMPTY_STRING);
 	if (!mod->prefix) {
 	    return ERR_INTERNAL_MEM;
 	}

@@ -1268,9 +1268,9 @@ static status_t
 	} else {
 	    /* check the empty string */
 	    res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
-					btyp, (const xmlChar *)"",
+					btyp, EMPTY_STRING,
 					&errinfo);
-	    retval->v.str = xml_strdup((const xmlChar *)"");
+	    retval->v.str = xml_strdup(EMPTY_STRING);
 	    if (!retval->v.str) {
 		res = ERR_INTERNAL_MEM;
 	    }

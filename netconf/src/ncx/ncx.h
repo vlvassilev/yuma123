@@ -289,6 +289,10 @@ extern void
 		     ncx_btype_t  btyp);
 
 extern void
+    ncx_set_num_one (ncx_num_t *num,
+		     ncx_btype_t  btyp);
+
+extern void
     ncx_set_num_zero (ncx_num_t *num,
 		      ncx_btype_t  btyp);
 
@@ -311,6 +315,27 @@ extern status_t
     ncx_copy_num (const ncx_num_t *num1,
 		  ncx_num_t *num2,
 		  ncx_btype_t  btyp);
+
+extern status_t
+    ncx_cast_num (const ncx_num_t *num1,
+		  ncx_btype_t  btyp1,
+		  ncx_num_t *num2,
+		  ncx_btype_t  btyp2);
+
+extern status_t
+    ncx_num_floor (const ncx_num_t *num1,
+		   ncx_num_t *num2,
+		   ncx_btype_t  btyp);
+
+extern status_t
+    ncx_num_ceiling (const ncx_num_t *num1,
+		     ncx_num_t *num2,
+		     ncx_btype_t  btyp);
+
+extern status_t
+    ncx_num_round (const ncx_num_t *num1,
+		   ncx_num_t *num2,
+		   ncx_btype_t  btyp);
 
 extern boolean
     ncx_num_is_integral (const ncx_num_t *num,

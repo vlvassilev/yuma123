@@ -184,7 +184,7 @@ static void
 	}
 	if (!node->simval) {
 	    /* prevent a NULL ptr reference */
-	    node->simval = (const xmlChar *)"";
+	    node->simval = EMPTY_STRING;
 	    node->simlen = 0;     
 	    node->simfree = NULL;
 	}
@@ -507,7 +507,7 @@ static status_t
 	}
 	if (!node->simval) {
 	    /* prevent a NULL ptr reference */
-	    node->simval = (const xmlChar *)"";
+	    node->simval = EMPTY_STRING;
 	    node->simlen = 0;
 	    node->simfree = NULL;
 	}
@@ -775,7 +775,7 @@ status_t
 	    /* set the element name to the char after the prefix */
 	    elname = qname+len;
 	} else {
-	    qname = (const xmlChar *)"";
+	    qname = EMPTY_STRING;
 	}
 
 	/* check the normal case to see if the search is done */

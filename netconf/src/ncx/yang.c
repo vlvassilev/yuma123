@@ -297,7 +297,7 @@ status_t
 		if (TK_CUR_VAL(tkc)) {
 		    *field = xml_strdup(TK_CUR_VAL(tkc));
 		} else {
-		    *field = xml_strdup((const xmlChar *)"");
+		    *field = xml_strdup(EMPTY_STRING);
 		}
 	    }
 	    if (!*field) {
@@ -1618,7 +1618,7 @@ status_t
 	if (iff) {
 	    log_warn("\nWarning: if-feature '%s%s%s' "
 		     "already specified on line %u",
-		     (prefix) ? prefix : (const xmlChar *)"",
+		     (prefix) ? prefix : EMPTY_STRING,
 		     (prefix) ? ":" :  "", name,
 		     iff->tk->linenum);
 	    ncx_print_errormsg(tkc, mod, ERR_NCX_DUP_IF_FEATURE);

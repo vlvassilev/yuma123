@@ -787,7 +787,7 @@ static status_t
     } else if (cp->modpath) {
 	ncxmod_set_modpath(cp->modpath);
     } else {
-	ncxmod_set_modpath((const xmlChar *)"");
+	ncxmod_set_modpath(EMPTY_STRING);
     }
 
     newpcb = ncxmod_load_module_diff((cp->curnew) ? cp->curnew : cp->new,
@@ -853,7 +853,7 @@ static status_t
     } else if (cp->modpath) {
 	ncxmod_set_modpath(cp->modpath);
     } else {
-	ncxmod_set_modpath((const xmlChar *)"");
+	ncxmod_set_modpath(EMPTY_STRING);
     }
 
     /* load in the requested 'old' module to compare

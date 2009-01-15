@@ -135,7 +135,7 @@ static status_t
 					   &targmod);
 	if (res != NO_ERR) {
 	    log_error("\nError: Module for prefix '%s' not found",
-		      (prefix) ? prefix : (const xmlChar *)"");
+		      (prefix) ? prefix : EMPTY_STRING);
 	}
     }
 

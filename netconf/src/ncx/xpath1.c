@@ -269,6 +269,96 @@ static xpath_fncb_t functions [] = {
 };
 
 
+/********************************************************************
+* FUNCTION set_uint32_num
+* 
+* Set an ncx_num_t with a uint32 number
+*
+* INPUTS:
+*    innum == number value to use
+*    outnum == address ofoutput number
+*
+* OUTPUTS:
+*   *outnum is set with the converted value
+*    
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    set_uint32_num (uint32 innum,
+		    ncx_num_t  *outnum)
+{
+#ifndef HAS_FLOAT
+    char        *str;
+    uint32       len;
+    ncx_num_t    dummy;
+#endif
+
+    status_t   res;
+
+#ifdef HAS_FLOAT
+    outnum->d = (double)innum;
+    res = NO_ERR;
+#else
+    if (outnum->d) {
+	m__free(outnum->d);
+	outnum->d = NULL;
+    }
+    ncx_init_num(&dummy);
+    dummy.u = innum;
+    res = ncx_sprintf_num(NULL, &dummy, NCX_BT_UINT32, &len);
+    if (res == NO_ERR) {
+	outnum->d = m__getMem(len+1);
+	if (!outnum->d) {
+	    res = ERR_INTERNAL_MEM;
+	} else {
+	    res = ncx_sprintf_num(outnum->d, 
+				  &dummy
+				  NCX_BT_UINT32, 
+				  &len);
+	}
+    }
+    ncx_clean_num(NCX_BT_UINT32, &dummy);
+#endif
+
+    return res;
+
+}  /* set_uint32_num */
+
+
+/********************************************************************
+* FUNCTION restype_string
+* 
+* Get the result type enumeration name
+*
+* INPUTS:
+*    restyoe == the result type 
+*
+* RETURNS:
+*    name of the enum
+*********************************************************************/
+static const xmlChar *
+    restype_string (xpath_restype_t restype)
+{
+    switch (restype) {
+    case XP_RT_NONE:
+	return (const xmlChar *)"none";
+    case XP_RT_NODESET:
+	return (const xmlChar *)"nodeset";
+    case XP_RT_NUMBER:
+	return (const xmlChar *)"number";
+    case XP_RT_STRING:
+	return (const xmlChar *)"string";
+    case XP_RT_BOOLEAN:
+	return (const xmlChar *)"boolean";
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return (const xmlChar *)"INVALID";
+    }
+    /*NOTREACHED*/
+
+}  /* restype_string */
+
 
 /********************************************************************
 * FUNCTION malloc_failed_error
@@ -345,6 +435,60 @@ static void
     }
 
 }  /* unexpected_error */
+
+
+/********************************************************************
+* FUNCTION wrong_type_error
+* 
+* Generate a wrong function parameter type error if OK
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    gottyoe == the result type encountered
+*    exptyoe == the result type expected
+*********************************************************************/
+static void
+    wrong_type_error (xpath_pcb_t *pcb,
+		      xpath_restype_t gottype,
+		      xpath_restype_t exptype)
+{
+    if (pcb->logerrors) {
+	log_error("\nError: Got arg type '%s', expected '%s' in "
+		  "Xpath expression '%s'",
+		  restype_string(gottype),
+		  restype_string(exptype),
+		  pcb->exprstr);
+	ncx_print_errormsg(pcb->tkc, pcb->mod, 
+			   ERR_NCX_WRONG_DATATYP);
+    }
+
+}  /* wrong_type_error */
+
+
+/********************************************************************
+* FUNCTION wrong_parmcnt_error
+* 
+* Generate a wrong function parameter count error if OK
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmcnt == the number of parameters received
+*    res == error result to use
+*********************************************************************/
+static void
+    wrong_parmcnt_error (xpath_pcb_t *pcb,
+			 uint32 parmcnt,
+			 status_t res)
+{
+    if (pcb->logerrors) {
+	log_error("\nError: wrong function arg count '%u' in "
+		  "Xpath expression '%s'",
+		  parmcnt,
+		  pcb->exprstr);
+	ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+    }
+
+}  /* wrong_parmcnt_error */
 
 
 /********************************************************************
@@ -638,9 +782,6 @@ static xpath_result_t *
     case XP_RT_BOOLEAN:
 	newresult->r.bool = result->r.bool;
 	break;
-    case XP_RT_VARPTR:
-	newresult->r.varptr = result->r.varptr;
-	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	xpath_free_result(newresult);
@@ -769,7 +910,6 @@ static void
     xpath_resnode_t       *resnode;
     val_value_t           *val;
     const obj_template_t  *obj;
-    ncx_var_t             *var;
 
     if (banner) {
 	log_write("\n%s", banner);
@@ -824,11 +964,6 @@ static void
     case XP_RT_BOOLEAN:
 	log_write("\n  typ: boolean = %s",
 		  (result->r.bool) ? "true" : "false");
-	break;
-    case XP_RT_VARPTR:
-	var = result->r.varptr;
-	log_write("\n  typ: varptr %s =", var->name);
-	val_dump_value(var->val, 5);
 	break;
     default:
 	log_write("\n  typ: INVALID (%d)", result->restype);
@@ -979,8 +1114,6 @@ static boolean
 
 /**********   X P A T H    F U N C T I O N S   ************/
 
-/* XPath callback functions -- in progress */
-
 
 /********************************************************************
 * FUNCTION boolean_fn
@@ -1004,7 +1137,28 @@ static xpath_result_t *
 		dlq_hdr_t *parmQ,
 		status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (!parm) {
+	/* should already be reported in obj mode */
+	*res = ERR_NCX_MISSING_PARM;
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_BOOLEAN);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+
+    result->r.bool = xpath_cvt_boolean(parm);
+    *res = NO_ERR;
+    return result;
 
 }  /* boolean_fn */
 
@@ -1031,7 +1185,40 @@ static xpath_result_t *
 		dlq_hdr_t *parmQ,
 		status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (!parm) {
+	*res = ERR_NCX_MISSING_PARM;
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_NUMBER);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+
+    if (parm->restype == XP_RT_NUMBER) {
+	*res = ncx_num_ceiling(&parm->r.num,
+			       &result->r.num,
+			       NCX_BT_FLOAT64);
+			   
+    } else {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm->restype, XP_RT_NUMBER);
+    }
+
+    if (*res != NO_ERR) {
+	free_result(pcb, result);
+	result = NULL;
+    }
+
+    return result;
 
 }  /* ceiling_fn */
 
@@ -1058,7 +1245,66 @@ static xpath_result_t *
 	       dlq_hdr_t *parmQ,
 	       status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result;
+    xmlChar         *str;
+    uint32           parmcnt, len;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    *res = NO_ERR;
+    len = 0;
+
+    /* check at least 2 strings to concat */
+    parmcnt = dlq_count(parmQ);
+    if (parmcnt < 2) {
+	*res = ERR_NCX_MISSING_PARM;
+	wrong_parmcnt_error(pcb, parmcnt, *res);
+	return NULL;
+    }
+
+    /* check all parms are strings and get total len */
+    for (parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+	 parm != NULL;
+	 parm = (xpath_result_t *)dlq_nextEntry(parm)) {
+	if (parm->restype != XP_RT_STRING) {
+	    *res = ERR_NCX_WRONG_DATATYP;
+	    wrong_type_error(pcb, parm->restype, XP_RT_STRING);
+	} else if (parm->r.str) {
+	    len += xml_strlen(parm->r.str);
+	}
+    }
+
+    if (*res != NO_ERR) {
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_STRING);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+
+    result->r.str = m__getMem(len+1);
+    if (!result->r.str) {
+	free_result(pcb, result);
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+
+    str = result->r.str;
+
+    for (parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+	 parm != NULL;
+	 parm = (xpath_result_t *)dlq_nextEntry(parm)) {
+	if (parm->r.str) {
+	    str += xml_strcpy(str, parm->r.str);
+	}
+    }
+
+    return result;
+
 
 }  /* concat_fn */
 
@@ -1086,6 +1332,36 @@ static xpath_result_t *
 		 dlq_hdr_t *parmQ,
 		 status_t  *res)
 {
+    xpath_result_t  *parm1, *parm2, *result;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
+    parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
+
+    if (parm1->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm1->restype, XP_RT_STRING);
+    } else if (parm2->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm2->restype, XP_RT_STRING);
+    } else {
+	result = new_result(pcb, XP_RT_BOOLEAN);
+	if (!result) {
+	    *res = ERR_INTERNAL_MEM;
+	} else {
+	    if (strstr((const char *)parm1->r.str, 
+		       (const char *)parm2->r.str)) {
+		result->r.bool = TRUE;
+	    } else {
+		result->r.bool = FALSE;
+	    }
+	    *res = NO_ERR;
+	    return result;
+	}
+    }
     return NULL;
 
 }  /* contains_fn */
@@ -1113,6 +1389,31 @@ static xpath_result_t *
 	      dlq_hdr_t *parmQ,
 	      status_t  *res)
 {
+    xpath_result_t *parm, *result;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+
+    if (parm->restype != XP_RT_NODESET) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm->restype, XP_RT_NODESET);
+    } else {
+	result = new_result(pcb, XP_RT_NUMBER);
+	if (!result) {
+	    *res = ERR_INTERNAL_MEM;
+	} else {
+	    if (pcb->val) {
+		/****/
+
+	    } else {
+		ncx_set_num_zero(&result->r.num, NCX_BT_FLOAT64);
+	    }
+	    *res = NO_ERR;
+	    return result;
+	}
+    }
     return NULL;
 
 }  /* count_fn */
@@ -1140,7 +1441,25 @@ static xpath_result_t *
 		dlq_hdr_t *parmQ,
 		status_t  *res)
 {
-    return NULL;
+    xpath_result_t *result;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    (void)parmQ;
+
+    result = new_nodeset(pcb, 
+			 pcb->context.node.objptr,
+			 pcb->context.node.valptr,
+			 XP_AX_CHILD, FALSE);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+    } else {
+	*res = NO_ERR;
+    }
+
+    return result;
 
 }  /* current_fn */
 
@@ -1167,7 +1486,23 @@ static xpath_result_t *
 	      dlq_hdr_t *parmQ,
 	      status_t  *res)
 {
-    return NULL;
+    xpath_result_t *result;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    (void)parmQ;
+
+    result = new_result(pcb, XP_RT_BOOLEAN);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+    } else {
+	result->r.bool = FALSE;
+	*res = NO_ERR;
+    }
+
+    return result;
 
 }  /* false_fn */
 
@@ -1194,7 +1529,39 @@ static xpath_result_t *
 	      dlq_hdr_t *parmQ,
 	      status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (!parm) {
+	*res = ERR_NCX_MISSING_PARM;
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_NUMBER);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+
+    if (parm->restype == XP_RT_NUMBER) {
+	*res = ncx_num_floor(&parm->r.num,
+			     &result->r.num,
+			     NCX_BT_FLOAT64);
+    } else {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm->restype, XP_RT_NUMBER);
+    }	
+			   
+    if (*res != NO_ERR) {
+	free_result(pcb, result);
+	result = NULL;
+    }
+
+    return result;
 
 }  /* floor_fn */
 
@@ -1222,7 +1589,26 @@ static xpath_result_t *
 	   dlq_hdr_t *parmQ,
 	   status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *result;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    (void)parmQ;  /*****/
+
+    result = new_result(pcb, XP_RT_NODESET);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+    } else {
+	*res = NO_ERR;
+    }
+
+    /**** get all nodes with the specified ID ****/
+    /**** No IDs in YANG so return empty nodeset ****/
+    /**** Change this later if there are standard IDs ****/
+
+    return result;
 
 }  /* id_fn */
 
@@ -1249,7 +1635,27 @@ static xpath_result_t *
 	     dlq_hdr_t *parmQ,
 	     status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm->restype, XP_RT_STRING);
+	return NULL;
+    }
+
+    /* no attributes in YANG, so no lang attr either */
+    result = new_result(pcb, XP_RT_NODESET);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+    } else {
+	*res = NO_ERR;
+    }
+    return result;
 
 }  /* lang_fn */
 
@@ -1276,6 +1682,11 @@ static xpath_result_t *
 	     dlq_hdr_t *parmQ,
 	     status_t  *res)
 {
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    /*********/
     return NULL;
 
 }  /* last_fn */
@@ -1303,7 +1714,67 @@ static xpath_result_t *
 		   dlq_hdr_t *parmQ,
 		   status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result;
+    xpath_resnode_t *resnode;
+    const xmlChar   *str;
+    uint32           parmcnt;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parmcnt = dlq_count(parmQ);
+    if (parmcnt > 1) {
+	*res = ERR_NCX_EXTRA_PARM;
+	wrong_parmcnt_error(pcb, parmcnt, *res);
+	return NULL;
+    }
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm && parm->restype != XP_RT_NODESET) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm->restype, XP_RT_NODESET);
+	return NULL;
+    }
+
+    str = NULL;
+    if (parm) {
+	resnode = (xpath_resnode_t *)
+	    dlq_firstEntry(&parm->r.nodeQ);
+	if (resnode) {
+	    if (pcb->val) {
+		str = resnode->node.valptr->name;
+	    } else {
+		str = obj_get_name(resnode->node.objptr);
+	    }
+	}
+    } else {
+	if (pcb->val) {
+	    str = pcb->context.node.valptr->name;
+	} else {
+	    str = obj_get_name(pcb->context.node.objptr);
+	}
+    }
+	    
+    result = new_result(pcb, XP_RT_STRING);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+    
+    if (str) {
+	result->r.str = xml_strdup(str);
+    } else {
+	result->r.str = xml_strdup(EMPTY_STRING);
+    }
+
+    if (!result->r.str) {
+	*res = ERR_INTERNAL_MEM;
+	free_result(pcb, result);
+	return NULL;
+    }
+
+    return result;
 
 }  /* local_name_fn */
 
@@ -1330,7 +1801,70 @@ static xpath_result_t *
 		      dlq_hdr_t *parmQ,
 		      status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result;
+    xpath_resnode_t *resnode;
+    const xmlChar   *str;
+    uint32           parmcnt;
+    xmlns_id_t       nsid;
+
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parmcnt = dlq_count(parmQ);
+    if (parmcnt > 1) {
+	*res = ERR_NCX_EXTRA_PARM;
+	wrong_parmcnt_error(pcb, parmcnt, *res);
+	return NULL;
+    }
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm && parm->restype != XP_RT_NODESET) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm->restype, XP_RT_NODESET);
+	return NULL;
+    }
+
+    nsid = 0;
+    if (parm) {
+	resnode = (xpath_resnode_t *)
+	    dlq_firstEntry(&parm->r.nodeQ);
+	if (resnode) {
+	    if (pcb->val) {
+		nsid = obj_get_nsid(resnode->node.valptr->obj);
+	    } else {
+		nsid = obj_get_nsid(resnode->node.objptr);
+	    }
+	}
+    } else {
+	if (pcb->val) {
+	    nsid = obj_get_nsid(pcb->context.node.valptr->obj);
+	} else {
+	    nsid = obj_get_nsid(pcb->context.node.objptr);
+	}
+    }
+		
+    result = new_result(pcb, XP_RT_STRING);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+    
+    if (nsid) {
+	str = xmlns_get_ns_name(nsid);
+	result->r.str = xml_strdup(str);
+    } else {
+	result->r.str = xml_strdup(EMPTY_STRING);
+    }
+
+    if (!result->r.str) {
+	*res = ERR_INTERNAL_MEM;
+	free_result(pcb, result);
+	return NULL;
+    }
+
+    return result;
 
 }  /* namespace_uri_fn */
 
@@ -1357,7 +1891,93 @@ static xpath_result_t *
 	     dlq_hdr_t *parmQ,
 	     status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result;
+    xpath_resnode_t *resnode;
+    const xmlChar   *prefix, *name;
+    xmlChar         *str;
+    uint32           len, parmcnt;
+    xmlns_id_t       nsid;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parmcnt = dlq_count(parmQ);
+    if (parmcnt > 1) {
+	*res = ERR_NCX_EXTRA_PARM;
+	wrong_parmcnt_error(pcb, parmcnt, *res);
+	return NULL;
+    }
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm && parm->restype != XP_RT_NODESET) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm->restype, XP_RT_NODESET);
+	return NULL;
+    }
+
+    nsid = 0;
+    name = NULL;
+
+    if (parm) {
+	resnode = (xpath_resnode_t *)
+	    dlq_firstEntry(&parm->r.nodeQ);
+	if (resnode) {
+	    if (pcb->val) {
+		nsid = obj_get_nsid(resnode->node.valptr->obj);
+		name = resnode->node.valptr->name;
+	    } else {
+		nsid = obj_get_nsid(resnode->node.objptr);
+		name = obj_get_name(resnode->node.objptr);
+	    }
+	}
+    } else {
+	if (pcb->val) {
+	    nsid = obj_get_nsid(pcb->context.node.valptr->obj);
+	    name = pcb->context.node.valptr->name;
+	} else {
+	    nsid = obj_get_nsid(pcb->context.node.objptr);
+	    name = obj_get_name(pcb->context.node.objptr);
+	}
+    }
+		
+    result = new_result(pcb, XP_RT_STRING);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+    
+    if (nsid) {
+	prefix = xmlns_get_ns_prefix(nsid);
+    }
+
+    len = 0;
+    if (prefix) {
+	len += xml_strlen(prefix);
+	len++;
+    }
+    if (name) {
+	len += xml_strlen(name);
+    } else {
+	name = (const xmlChar *)"none";
+	len += 4;
+    }
+
+    result->r.str = m__getMem(len+1);
+    if (!result->r.str) {
+	*res = ERR_INTERNAL_MEM;
+	free_result(pcb, result);
+	return NULL;
+    }
+
+    str = result->r.str;
+    if (prefix) {
+	str += xml_strcpy(str, prefix);
+	*str++ = ':';
+    }
+    xml_strcpy(str, name);
+
+    return result;
 
 }  /* name_fn */
 
@@ -1385,7 +2005,110 @@ static xpath_result_t *
 			dlq_hdr_t *parmQ,
 			status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result, *tempresult;
+    const xmlChar   *teststr;
+    xmlChar         *mallocstr, *str;
+    uint32           parmcnt;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parmcnt = dlq_count(parmQ);
+    if (parmcnt > 1) {
+	*res = ERR_NCX_EXTRA_PARM;
+	wrong_parmcnt_error(pcb, parmcnt, *res);
+	return NULL;
+    }
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm && parm->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm->restype, XP_RT_STRING);
+	return NULL;
+    }
+
+    teststr = NULL;
+    str = NULL;
+    mallocstr = NULL;
+
+    if (parm) {
+	teststr = parm->r.str;
+    } else {
+	tempresult= new_nodeset(pcb,
+				pcb->context.node.objptr,
+				pcb->context.node.valptr,
+				XP_AX_CHILD, FALSE);
+
+	if (!tempresult) {
+	    *res = ERR_INTERNAL_MEM;
+	    return NULL;
+	} else {
+	    *res = xpath_cvt_string(tempresult, &mallocstr);
+	    if (*res == NO_ERR) {
+		teststr = mallocstr;
+	    }
+	    free_result(pcb, tempresult);
+	}
+    }
+    
+    if (*res != NO_ERR) {
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_STRING);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	if (mallocstr) {
+	    m__free(mallocstr);
+	}
+	return NULL;
+    }
+    
+    if (!teststr) {
+	teststr = EMPTY_STRING;
+    }
+
+    result->r.str = m__getMem(xml_strlen(teststr)+1);
+    if (!result->r.str) {
+	*res = ERR_INTERNAL_MEM;
+	free_result(pcb, result);
+	if (mallocstr) {
+	    m__free(mallocstr);
+	}
+	return NULL;
+    }
+
+    str = result->r.str;
+
+    while (*teststr && xml_isspace(*teststr)) {
+	teststr++;
+    }
+
+    while (*teststr) {
+	if (xml_isspace(*teststr)) {
+	    *str++ = ' ';
+	    teststr++;
+	    while (*teststr && xml_isspace(*teststr)) {
+		teststr++;
+	    }
+
+	} else {
+	    *str++ = *teststr++;
+	}
+    }
+
+    if (str > result->r.str && *(str-1) == ' ') {
+	str--;
+    }
+
+    *str = 0;
+
+    if (mallocstr) {
+	m__free(mallocstr);
+    }
+
+    return result;
 
 }  /* normalize_space_fn */
 
@@ -1412,7 +2135,29 @@ static xpath_result_t *
 	    dlq_hdr_t *parmQ,
 	    status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm->restype != XP_RT_BOOLEAN) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm->restype, XP_RT_BOOLEAN);
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_BOOLEAN);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+    } else {
+	*res = NO_ERR;
+    }
+
+    result->r.bool = !parm->r.bool;
+
+    return result;
 
 }  /* not_fn */
 
@@ -1439,7 +2184,62 @@ static xpath_result_t *
 	       dlq_hdr_t *parmQ,
 	       status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result, *tempresult;
+    uint32           parmcnt;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parmcnt = dlq_count(parmQ);
+    if (parmcnt > 1) {
+	*res = ERR_NCX_EXTRA_PARM;
+	wrong_parmcnt_error(pcb, parmcnt, *res);
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_NUMBER);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+
+    *res = NO_ERR;
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm) {
+	xpath_cvt_number(parm, &result->r.num);
+    } else {
+	/* convert the context node value */
+	if (pcb->val) {
+	    /* get the value of the context node
+	     * and convert it to a string first
+	     */
+	    tempresult= new_nodeset(pcb,
+				    pcb->context.node.objptr,
+				    pcb->context.node.valptr,
+				    XP_AX_CHILD, FALSE);
+
+	    if (!tempresult) {
+		*res = ERR_INTERNAL_MEM;
+	    } else {
+		xpath_cvt_number(tempresult, &result->r.num);
+		free_result(pcb, tempresult);
+	    }
+	} else {
+	    /* nothing to check; conversion to NaN is
+	     * not an XPath error
+	     */
+	    ncx_set_num_zero(&result->r.num, NCX_BT_FLOAT64);
+	}
+    }
+
+    if (*res != NO_ERR) {
+	free_result(pcb, result);
+	result = NULL;
+    }
+
+    return result;
 
 }  /* number_fn */
 
@@ -1466,6 +2266,12 @@ static xpath_result_t *
 		 dlq_hdr_t *parmQ,
 		 status_t  *res)
 {
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    /******/
+
     return NULL;
 
 }  /* position_fn */
@@ -1493,7 +2299,39 @@ static xpath_result_t *
 	      dlq_hdr_t *parmQ,
 	      status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (!parm) {
+	*res = ERR_NCX_MISSING_PARM;
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_NUMBER);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+
+    if (parm->restype == XP_RT_NUMBER) {
+	*res = ncx_num_round(&parm->r.num,
+			     &result->r.num,
+			     NCX_BT_FLOAT64);
+    } else {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm->restype, XP_RT_NUMBER);
+    }
+
+    if (*res != NO_ERR) {
+	free_result(pcb, result);
+	result = NULL;
+    }
+
+    return result;
 
 }  /* round_fn */
 
@@ -1521,6 +2359,43 @@ static xpath_result_t *
 		    dlq_hdr_t *parmQ,
 		    status_t  *res)
 {
+    xpath_result_t  *parm1, *parm2, *result;
+    uint32           len1, len2;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
+    parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
+
+    if (parm1->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm1->restype, XP_RT_STRING);
+    } else if (parm2->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm2->restype, XP_RT_STRING);
+    } else {
+	result = new_result(pcb, XP_RT_BOOLEAN);
+	if (!result) {
+	    *res = ERR_INTERNAL_MEM;
+	} else {
+	    len1 = xml_strlen(parm1->r.str);
+	    len2 = xml_strlen(parm2->r.str);
+
+	    if (len2 > len1) {
+		result->r.bool = FALSE;
+	    } else if (!xml_strncmp(parm1->r.str, 
+				    parm2->r.str,
+				    len2)) {
+		result->r.bool = TRUE;
+	    } else {
+		result->r.bool = FALSE;
+	    }
+	    *res = NO_ERR;
+	    return result;
+	}
+    }
     return NULL;
 
 }  /* starts_with_fn */
@@ -1548,7 +2423,62 @@ static xpath_result_t *
 	       dlq_hdr_t *parmQ,
 	       status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result, *tempresult;
+    uint32           parmcnt;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parmcnt = dlq_count(parmQ);
+    if (parmcnt > 1) {
+	*res = ERR_NCX_EXTRA_PARM;
+	wrong_parmcnt_error(pcb, parmcnt, *res);
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_STRING);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+
+    *res = NO_ERR;
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm) {
+	xpath_cvt_string(parm, &result->r.str);
+    } else {
+	/* convert the context node value */
+	if (pcb->val) {
+	    /* get the value of the context node
+	     * and convert it to a string first
+	     */
+	    tempresult= new_nodeset(pcb,
+				    pcb->context.node.objptr,
+				    pcb->context.node.valptr,
+				    XP_AX_CHILD, FALSE);
+
+	    if (!tempresult) {
+		*res = ERR_INTERNAL_MEM;
+	    } else {
+		*res = xpath_cvt_string(tempresult, &result->r.str);
+		free_result(pcb, tempresult);
+	    }
+	} else {
+	    result->r.str = xml_strdup(EMPTY_STRING);
+	    if (!result->r.str) {
+		*res = ERR_INTERNAL_MEM;
+	    }
+	}
+    }
+
+    if (*res != NO_ERR) {
+	free_result(pcb, result);
+	result = NULL;
+    }
+
+    return result;
 
 }  /* string_fn */
 
@@ -1575,7 +2505,70 @@ static xpath_result_t *
 		      dlq_hdr_t *parmQ,
 		      status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm, *result, *tempresult;
+    xmlChar         *tempstr;
+    uint32           parmcnt, len;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    parmcnt = dlq_count(parmQ);
+    if (parmcnt > 1) {
+	*res = ERR_NCX_EXTRA_PARM;
+	wrong_parmcnt_error(pcb, parmcnt, *res);
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_NUMBER);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+
+    *res = NO_ERR;
+    len = 0;
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm) {
+	len = xml_strlen(result->r.str);
+    } else {
+	/* convert the context node value */
+	if (pcb->val) {
+	    /* get the value of the context node
+	     * and convert it to a string first
+	     */
+	    tempresult= new_nodeset(pcb,
+				    pcb->context.node.objptr,
+				    pcb->context.node.valptr,
+				    XP_AX_CHILD, FALSE);
+
+	    if (!tempresult) {
+		*res = ERR_INTERNAL_MEM;
+	    } else {
+		tempstr = NULL;
+		*res = xpath_cvt_string(tempresult, &tempstr);
+		free_result(pcb, tempresult);
+		if (*res == NO_ERR && tempstr) {
+		    len = xml_strlen(tempstr);
+		    m__free(tempstr);
+		}
+	    }
+	} else {
+	    len = 0;
+	}
+    }
+
+    if (*res == NO_ERR) {
+	*res = set_uint32_num(len, &result->r.num);
+    }
+
+    if (*res != NO_ERR) {
+	free_result(pcb, result);
+	result = NULL;
+    }
+
+    return result;
 
 }  /* string_length_fn */
 
@@ -1605,7 +2598,121 @@ static xpath_result_t *
 		  dlq_hdr_t *parmQ,
 		  status_t  *res)
 {
-    return NULL;
+    xpath_result_t  *parm1, *parm2, *parm3, *result;
+    ncx_num_t        tempnum;
+    uint32           parmcnt, maxlen;
+    int64            startpos, copylen, slen;
+    status_t         myres;
+    boolean          copylenset;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    *res = NO_ERR;
+
+    /* check at least 2 strings to concat */
+    parmcnt = dlq_count(parmQ);
+    if (parmcnt < 2) {
+	*res = ERR_NCX_MISSING_PARM;
+	wrong_parmcnt_error(pcb, parmcnt, *res);
+	return NULL;
+    } else if (parmcnt > 3) {
+	*res = ERR_NCX_EXTRA_PARM;
+	wrong_parmcnt_error(pcb, parmcnt, *res);
+	return NULL;
+    }
+
+    parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
+    parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
+    parm3 = (xpath_result_t *)dlq_nextEntry(parm2);
+
+    if (parm1->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm1->restype, XP_RT_STRING);
+    }
+
+    if (parm2->restype != XP_RT_NUMBER) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm2->restype, XP_RT_NUMBER);
+    }
+
+    if (parm3 && parm3->restype != XP_RT_NUMBER) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm3->restype, XP_RT_NUMBER);
+    }
+
+    if (*res != NO_ERR) {
+	return NULL;
+    }
+
+    startpos = 0;
+    ncx_init_num(&tempnum);
+    myres = ncx_num_round(&parm2->r.num, &tempnum, NCX_BT_FLOAT64);
+    if (myres == NO_ERR) {
+	startpos = ncx_cvt_to_int64(&tempnum, NCX_BT_FLOAT64);
+    }
+    ncx_clean_num(NCX_BT_FLOAT64, &tempnum);
+
+    copylenset = FALSE;
+    copylen = 0;
+    if (parm3) {
+	copylenset = TRUE;
+	myres = ncx_num_round(&parm3->r.num, &tempnum, NCX_BT_FLOAT64);
+	if (myres == NO_ERR) {
+	    copylen = ncx_cvt_to_int64(&tempnum, NCX_BT_FLOAT64);
+
+	}
+	ncx_clean_num(NCX_BT_FLOAT64, &tempnum);
+    }
+
+    slen = (int64)xml_strlen(parm1->r.str);
+
+    result = new_result(pcb, XP_RT_STRING);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+
+    if (startpos > (slen+1) || (copylenset && copylen <= 0)) {
+	/* starting after EOS */
+	result->r.str = xml_strdup(EMPTY_STRING);
+    } else if (copylenset) {
+	if (startpos < 1) {
+	    /* adjust startpos, then copy N chars */
+	    copylen += (startpos-1);
+	    startpos = 1;
+	}
+	if (copylen >= 1) {
+	    if (copylen >= NCX_MAX_UINT) {
+		/* internal max of strings way less than 4G
+		 * so copy the whole string
+		 */
+		result->r.str = xml_strdup(&parm1->r.str[startpos-1]);
+	    } else {
+		/* copy at most N chars of whole string */
+		maxlen = (uint32)copylen;
+		result->r.str = xml_strndup(&parm1->r.str[startpos-1],
+					    maxlen);
+	    }
+	} else {
+	    result->r.str = xml_strdup(EMPTY_STRING);
+	}
+    } else if (startpos <= 1) {
+	/* copying whole string */
+	result->r.str = xml_strdup(parm1->r.str);
+    } else {
+	/* copying rest of string */
+	result->r.str = xml_strdup(&parm1->r.str[startpos-1]);
+    }
+
+    if (!result->r.str) {
+	*res = ERR_INTERNAL_MEM;
+	free_result(pcb, result);
+	result = NULL;
+    }
+	
+    return result;
 
 }  /* substring_fn */
 
@@ -1634,6 +2741,10 @@ static xpath_result_t *
 			dlq_hdr_t *parmQ,
 			status_t  *res)
 {
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
     return NULL;
 
 }  /* substring_after_fn */
@@ -1663,6 +2774,10 @@ static xpath_result_t *
 			 dlq_hdr_t *parmQ,
 			 status_t  *res)
 {
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
     return NULL;
 
 }  /* substring_before_fn */
@@ -1691,6 +2806,10 @@ static xpath_result_t *
 	    dlq_hdr_t *parmQ,
 	    status_t  *res)
 {
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
     return NULL;
 
 }  /* sum_fn */
@@ -1718,6 +2837,10 @@ static xpath_result_t *
 		  dlq_hdr_t *parmQ,
 		  status_t  *res)
 {
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
     return NULL;
 
 }  /* translate_fn */
@@ -1745,7 +2868,21 @@ static xpath_result_t *
 	     dlq_hdr_t *parmQ,
 	     status_t  *res)
 {
-    return NULL;
+    xpath_result_t *result;
+
+    if (!pcb->val && !pcb->obj) {
+	return NULL;
+    }
+
+    (void)parmQ;
+    result = new_result(pcb, XP_RT_BOOLEAN);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+    } else {
+	result->r.bool = TRUE;
+	*res = NO_ERR;
+    }
+    return result;
 
 }  /* true_fn */
 
@@ -1935,7 +3072,7 @@ static status_t
 	if (res != NO_ERR) {
 	    if (pcb->logerrors) {
 		log_error("\nError: Module for prefix '%s' not found",
-			  (prefix) ? prefix : (const xmlChar *)"");
+			  (prefix) ? prefix : EMPTY_STRING);
 		ncx_print_errormsg(pcb->tkc, pcb->mod, res);
 	    }
 	} else if (nsid) {
@@ -1949,6 +3086,78 @@ static status_t
     
 }  /* check_qname_prefix */
 
+
+/********************************************************************
+* FUNCTION cvt_from_value
+* 
+* Convert a val_value_t into an XPath result
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    val == value struct to convert
+*
+* RETURNS:
+*   malloced and filled in xpath_result_t or NULL if malloc error
+*********************************************************************/
+static xpath_result_t *
+    cvt_from_value (xpath_pcb_t *pcb,
+		    const val_value_t *val)
+{
+    xpath_result_t   *result;
+    status_t          res;
+    uint32            len;
+
+    result = NULL;
+    if (typ_is_string(val->btyp)) {
+	result = new_result(pcb, XP_RT_STRING);
+	if (result) {
+	    if (VAL_STR(val)) {
+		result->r.str = xml_strdup(VAL_STR(val));
+	    } else {
+		result->r.str = xml_strdup(EMPTY_STRING);
+	    }
+	    if (!result->r.str) {
+		free_result(pcb, result);
+		result = NULL;
+	    }
+	}
+    } else if (typ_is_number(val->btyp)) {
+	result = new_result(pcb, XP_RT_NUMBER);
+	if (result) {
+	    res = ncx_cast_num(&val->v.num, 
+			       val->btyp,
+			       &result->r.num,
+			       NCX_BT_FLOAT64);
+	    if (res != NO_ERR) {
+		free_result(pcb, result);
+		result = NULL;
+	    }
+	}
+    } else if (typ_is_simple(val->btyp)) {
+	len = 0;
+	res = val_sprintf_simval_nc(NULL, val, &len);
+	if (res == NO_ERR) {
+	    result = new_result(pcb, NCX_BT_STRING);
+	    if (result) {
+		result->r.str = m__getMem(len+1);
+		if (!result->r.str) {
+		    free_result(pcb, result);
+		    result = NULL;
+		} else {
+		    res = val_sprintf_simval_nc
+			(result->r.str, val, &len);
+		    if (res != NO_ERR) {
+			free_result(pcb, result);
+			result = NULL;
+		    }
+		}
+	    }
+	}
+    }
+
+    return result;
+
+}  /* cvt_from_value */
 
 
 /********************************************************************
@@ -4414,7 +5623,7 @@ static xpath_result_t *
 				      TK_CUR_VAL(pcb->tkc), res);
 		errstr = TK_CUR_MOD(pcb->tkc);
 	    }
-	    if (*res != NO_ERR) {
+	    if (!varbind || *res != NO_ERR) {
 		if (pcb->logerrors) {
 		    if (*res == ERR_NCX_DEF_NOT_FOUND) {
 			log_error("\nError: unknown variable binding '%s'",
@@ -4430,11 +5639,9 @@ static xpath_result_t *
 		}
 	    } else {
 		/* OK: found the variable binding */
-		val1 = new_result(pcb, XP_RT_VARPTR);
+		val1 = cvt_from_value(pcb, varbind->val);
 		if (!val1) {
 		    *res = ERR_INTERNAL_MEM;
-		} else {
-		    val1->r.varptr = varbind;
 		}
 	    }
 	}

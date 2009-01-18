@@ -281,47 +281,16 @@ static xpath_fncb_t functions [] = {
 * OUTPUTS:
 *   *outnum is set with the converted value
 *    
-* RETURNS:
-*    status
 *********************************************************************/
-static status_t
+static void
     set_uint32_num (uint32 innum,
 		    ncx_num_t  *outnum)
 {
-#ifndef HAS_FLOAT
-    char        *str;
-    uint32       len;
-    ncx_num_t    dummy;
-#endif
-
-    status_t   res;
-
 #ifdef HAS_FLOAT
     outnum->d = (double)innum;
-    res = NO_ERR;
 #else
-    if (outnum->d) {
-	m__free(outnum->d);
-	outnum->d = NULL;
-    }
-    ncx_init_num(&dummy);
-    dummy.u = innum;
-    res = ncx_sprintf_num(NULL, &dummy, NCX_BT_UINT32, &len);
-    if (res == NO_ERR) {
-	outnum->d = m__getMem(len+1);
-	if (!outnum->d) {
-	    res = ERR_INTERNAL_MEM;
-	} else {
-	    res = ncx_sprintf_num(outnum->d, 
-				  &dummy
-				  NCX_BT_UINT32, 
-				  &len);
-	}
-    }
-    ncx_clean_num(NCX_BT_UINT32, &dummy);
+    outnum->d = (int64)innum;
 #endif
-
-    return res;
 
 }  /* set_uint32_num */
 
@@ -573,8 +542,7 @@ static void
 *    pcb == parser control block to use
 *           if pcb->val set then node.valptr will be used
 *           else node.objptr will be used instead
-*    axis == axis that selected this node
-*           (expected to be used later for attribute support)
+*    position == position within the current search
 *    dblslash == TRUE if // present on this result node
 *                and has not been converted to separate
 *                nodes for all descendants instead
@@ -587,7 +555,7 @@ static void
 *********************************************************************/
 static xpath_resnode_t *
     new_obj_resnode (xpath_pcb_t *pcb,
-		     ncx_xpath_axis_t  axis,
+		     int64 position,
 		     boolean dblslash,
 		     const obj_template_t *objptr)
 {
@@ -603,9 +571,9 @@ static xpath_resnode_t *
     if (!resnode) {
 	malloc_failed_error(pcb);
     } else  {
-	resnode->node.objptr = objptr;
-	resnode->axis = axis;
+	resnode->position = position;
 	resnode->dblslash = dblslash;
+	resnode->node.objptr = objptr;
     }
 
     return resnode;
@@ -622,8 +590,7 @@ static xpath_resnode_t *
 *    pcb == parser control block to use
 *           if pcb->val set then node.valptr will be used
 *           else node.objptr will be used instead
-*    axis == axis that selected this node
-*           (expected to be used later for attribute support)
+*    position == position within the search context
 *    dblslash == TRUE if // present on this result node
 *                and has not been converted to separate
 *                nodes for all descendants instead
@@ -636,7 +603,7 @@ static xpath_resnode_t *
 *********************************************************************/
 static xpath_resnode_t *
     new_val_resnode (xpath_pcb_t *pcb,
-		     ncx_xpath_axis_t  axis,
+		     int64 position,
 		     boolean dblslash,
 		     val_value_t *valptr)
 {
@@ -652,9 +619,9 @@ static xpath_resnode_t *
     if (!resnode) {
 	malloc_failed_error(pcb);
     } else {
-	resnode->node.valptr = valptr;
-	resnode->axis = axis;
+	resnode->position = position;
 	resnode->dblslash = dblslash;
+	resnode->node.valptr = valptr;
     }
 
     return resnode;
@@ -707,12 +674,12 @@ static xpath_resnode_t *
 {
     if (pcb->val) {
 	return new_val_resnode(pcb, 
-			       resnode->axis,
+			       resnode->position,
 			       resnode->dblslash,
 			       resnode->node.valptr);
     } else if (pcb->obj) {
 	return new_obj_resnode(pcb, 
-			       resnode->axis,
+			       resnode->position,
 			       resnode->dblslash,
 			       resnode->node.objptr);
     } else {
@@ -795,6 +762,189 @@ static xpath_result_t *
 
 
 /********************************************************************
+* FUNCTION compare_results
+* 
+* Compare 2 results
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    val1 == first result struct to compare
+*    val2 == second result struct to compare
+*    res == address of resturn status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*    -1 if val1 < val2
+*     0 if val1 == val2
+*     1 if val1 > val2
+*********************************************************************/
+static int32
+    compare_results (xpath_pcb_t *pcb,
+		     xpath_result_t *val1,
+		     xpath_result_t *val2,
+		     status_t *res)
+{
+    xmlChar         *str1, *str2;
+    ncx_num_t        num1, num2;
+    boolean          bool1, bool2;
+    int32            retval;
+
+    *res = NO_ERR;
+
+    if (!pcb->val) {
+	return 0;
+    }
+
+    str1 = NULL;
+    str2 = NULL;
+    retval = 0;
+
+    if (val1->restype == XP_RT_NODESET) {
+	*res = xpath_cvt_string(val1, &str1);
+	if (*res != NO_ERR) {
+	    return retval;
+	}
+    }
+
+    if (val2->restype == XP_RT_NODESET) {
+	*res = xpath_cvt_string(val2, &str2);
+	if (*res != NO_ERR) {
+	    if (str1) {
+		m__free(str1);
+	    }
+	    return retval;
+	}
+    }
+
+    /* handle converted nodesets */
+    if (str1 && str2) {
+	retval = xml_strcmp(str1, str2);
+	m__free(str1);
+	m__free(str2);
+	return retval;
+    } else if (str1) {
+	if (val2->restype == XP_RT_STRING) {
+	    retval = xml_strcmp(str1, val2->r.str);
+	} else {
+	    *res = xpath_cvt_string(val2, &str2);
+	    if (*res == NO_ERR) {
+		retval = xml_strcmp(str1, str2);
+	    }
+	    if (str2) {
+		m__free(str2);
+	    }
+	}
+	m__free(str1);
+	return retval;
+    } else if (str2) {
+	if (val1->restype == XP_RT_STRING) {
+	    retval = xml_strcmp(val1->r.str, str2);
+	} else {
+	    *res = xpath_cvt_string(val1, &str1);
+	    if (*res == NO_ERR) {
+		retval = xml_strcmp(str1, str2);
+	    }
+	    if (str1) {
+		m__free(str1);
+	    }
+	}
+	m__free(str2);
+	return retval;
+    }
+
+    /* no nodesets involved, so compare if same result type */
+    if (val1->restype == val2->restype) {
+	switch (val1->restype) {
+	case XP_RT_NUMBER:
+	    retval = ncx_compare_nums(&val1->r.num,
+				      &val2->r.num,
+				      NCX_BT_FLOAT64);
+	    break;
+	case XP_RT_STRING:
+	    retval = xml_strcmp(val1->r.str, val2->r.str);
+	    break;
+	case XP_RT_BOOLEAN:
+	    if (val1->r.bool && val2->r.bool) {
+		retval = 0;
+	    } else if (val1->r.bool) {
+		retval = 1;
+	    } else {
+		retval = -1;
+	    }
+	    break;
+	default:
+	    *res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	return retval;
+    }
+
+    /* not the same result types, so figure out the
+     * best comparision to make.  Priority is:
+     *
+     *  1) string
+     *  2) number
+     *  3) boolean
+     */
+    if (val1->restype == XP_RT_STRING) {
+	str2 = NULL;
+	*res = xpath_cvt_string(val2, &str2);
+	if (*res == NO_ERR) {
+	    retval = xml_strcmp(val1->r.str, str2);
+	}
+	if (str2) {
+	    m__free(str2);
+	}
+    } else if (val2->restype == XP_RT_STRING) {
+	str1 = NULL;
+	*res = xpath_cvt_string(val1, &str1);
+	if (*res == NO_ERR) {
+	    retval = xml_strcmp(str1, val2->r.str);
+	}
+	if (str1) {
+	    m__free(str1);
+	}
+    } else if (val1->restype == XP_RT_NUMBER) {
+	ncx_init_num(&num2);
+	xpath_cvt_number(val2, &num2);
+	retval = ncx_compare_nums(&val1->r.num, &num2,
+				  NCX_BT_FLOAT64);
+	ncx_clean_num(NCX_BT_FLOAT64, &num2);
+    } else if (val2->restype == XP_RT_NUMBER) {
+	ncx_init_num(&num1);
+	xpath_cvt_number(val1, &num1);
+	retval = ncx_compare_nums(&num1, &val2->r.num,
+				  NCX_BT_FLOAT64);
+	ncx_clean_num(NCX_BT_FLOAT64, &num1);
+    } else if (val1->restype == XP_RT_BOOLEAN) {
+	bool2 = xpath_cvt_boolean(val2);
+	if (val1->r.bool && bool2) {
+	    retval = 0;
+	} else if (val1->r.bool) {
+	    retval = 1;
+	} else {
+	    retval = -1;
+	}
+    }  else if (val2->restype == XP_RT_BOOLEAN) {
+	bool1 = xpath_cvt_boolean(val1);
+	if (bool1 && val2->r.bool) {
+	    retval = 0;
+	} else if (bool1) {
+	    retval = 1;
+	} else {
+	    retval = -1;
+	}
+    } else {
+	*res = ERR_NCX_INVALID_VALUE;
+    }
+
+    return retval;
+
+} /* compare_results */
+
+
+/********************************************************************
 * FUNCTION new_nodeset
 * 
 * Start a nodeset result with a specified object or value ptr
@@ -805,7 +955,6 @@ static xpath_result_t *
 *    pcb == parser control block to use
 *    obj == object ptr to store as the first resnode
 *    val == value ptr to store as the first resnode
-*    axis == selected axis for this node
 *    dblslash == TRUE if unprocessed dblslash in effect
 *                FALSE if not
 *
@@ -816,7 +965,7 @@ static xpath_result_t *
     new_nodeset (xpath_pcb_t *pcb,
 		 const obj_template_t *obj,
 		 val_value_t *val,
-		 ncx_xpath_axis_t axis,
+		 int64 position,
 		 boolean dblslash)
 {
     xpath_result_t  *result;
@@ -829,10 +978,10 @@ static xpath_result_t *
 
     if (obj || val) {
 	if (pcb->val) {
-	    resnode = new_val_resnode(pcb, axis, dblslash, val);
+	    resnode = new_val_resnode(pcb, position, dblslash, val);
 	    result->isval = TRUE;
 	} else {
-	    resnode = new_obj_resnode(pcb, axis, dblslash, obj);
+	    resnode = new_obj_resnode(pcb, position, dblslash, obj);
 	    result->isval = FALSE;
 	}
 	if (!resnode) {
@@ -842,54 +991,11 @@ static xpath_result_t *
 	dlq_enque(resnode, &result->r.nodeQ);
     }
 
+    result->last = 1;
+
     return result;
 
 } /* new_nodeset */
-
-
-#if 0
-/********************************************************************
-* FUNCTION result_is_docroot
-* 
-* Check if the specified result is the document root
-*
-* INPUTS:
-*    pcb == parser control block to use
-*    result == result to check
-*
-* RETURNS:
-*    TRUE if result is a nodest containing the docroot
-*    FALSE otherwise
-*********************************************************************/
-static boolean
-    result_is_docroot (xpath_pcb_t *pcb,
-		       xpath_result_t *result)
-{
-    xpath_resnode_t  *resnode;
-
-    if (!result || result->restype != XP_RT_NODESET) {
-	return FALSE;
-    }
-
-    if (dlq_count(&result->r.nodeQ) != 1) {
-	return FALSE;
-    }
-
-    resnode = (xpath_resnode_t *)
-	dlq_firstEntry(&result->r.nodeQ);
-
-    if (pcb->val) {
-	return (resnode->node.valptr == pcb->val_docroot) ?
-	    TRUE : FALSE;
-    } else if (pcb->obj) {
-	return (resnode->node.objptr == pcb->docroot) ?
-	    TRUE : FALSE;
-    } else {
-	return FALSE;
-    }
-
-} /* result_is_docroot */
-#endif
 
 
 /********************************************************************
@@ -1305,7 +1411,6 @@ static xpath_result_t *
 
     return result;
 
-
 }  /* concat_fn */
 
 
@@ -1390,6 +1495,7 @@ static xpath_result_t *
 	      status_t  *res)
 {
     xpath_result_t *parm, *result;
+    ncx_num_t       tempnum;
 
     if (!pcb->val && !pcb->obj) {
 	return NULL;
@@ -1405,12 +1511,23 @@ static xpath_result_t *
 	    *res = ERR_INTERNAL_MEM;
 	} else {
 	    if (pcb->val) {
-		/****/
-
+		ncx_init_num(&tempnum);
+		tempnum.u = dlq_count(&parm->r.nodeQ);
+		*res = ncx_cast_num(&tempnum, 
+				    NCX_BT_UINT32,
+				    &result->r.num,
+				    NCX_BT_FLOAT64);
+		ncx_clean_num(NCX_BT_UINT32, &tempnum);
 	    } else {
 		ncx_set_num_zero(&result->r.num, NCX_BT_FLOAT64);
+		*res = NO_ERR;
 	    }
-	    *res = NO_ERR;
+
+	    if (*res != NO_ERR) {
+		free_result(pcb, result);
+		result = NULL;
+	    }
+
 	    return result;
 	}
     }
@@ -1452,7 +1569,7 @@ static xpath_result_t *
     result = new_nodeset(pcb, 
 			 pcb->context.node.objptr,
 			 pcb->context.node.valptr,
-			 XP_AX_CHILD, FALSE);
+			 1, FALSE);
     if (!result) {
 	*res = ERR_INTERNAL_MEM;
     } else {
@@ -1682,12 +1799,35 @@ static xpath_result_t *
 	     dlq_hdr_t *parmQ,
 	     status_t  *res)
 {
+    xpath_result_t *result;
+    ncx_num_t       tempnum;
+
     if (!pcb->val && !pcb->obj) {
 	return NULL;
     }
 
-    /*********/
-    return NULL;
+    (void)parmQ;
+    *res = NO_ERR;
+    result = new_result(pcb, XP_RT_NUMBER);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+    } else {
+	ncx_init_num(&tempnum);
+	tempnum.l = pcb->context.last;
+	*res = ncx_cast_num(&tempnum, 
+			    NCX_BT_INT64,
+			    &result->r.num,
+			    NCX_BT_FLOAT64);
+
+	ncx_clean_num(NCX_BT_INT64, &tempnum);
+
+	if (*res != NO_ERR) {
+	    free_result(pcb, result);
+	    result = NULL;
+	}
+    }
+
+    return result;
 
 }  /* last_fn */
 
@@ -2038,7 +2178,7 @@ static xpath_result_t *
 	tempresult= new_nodeset(pcb,
 				pcb->context.node.objptr,
 				pcb->context.node.valptr,
-				XP_AX_CHILD, FALSE);
+				1, FALSE);
 
 	if (!tempresult) {
 	    *res = ERR_INTERNAL_MEM;
@@ -2218,7 +2358,7 @@ static xpath_result_t *
 	    tempresult= new_nodeset(pcb,
 				    pcb->context.node.objptr,
 				    pcb->context.node.valptr,
-				    XP_AX_CHILD, FALSE);
+				    1, FALSE);
 
 	    if (!tempresult) {
 		*res = ERR_INTERNAL_MEM;
@@ -2266,13 +2406,35 @@ static xpath_result_t *
 		 dlq_hdr_t *parmQ,
 		 status_t  *res)
 {
+    xpath_result_t *result;
+    ncx_num_t       tempnum;
+
     if (!pcb->val && !pcb->obj) {
 	return NULL;
     }
 
-    /******/
+    (void)parmQ;
+    *res = NO_ERR;
+    result = new_result(pcb, XP_RT_NUMBER);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+    } else {
+	ncx_init_num(&tempnum);
+	tempnum.l = pcb->context.position;
+	*res = ncx_cast_num(&tempnum, 
+			    NCX_BT_INT64,
+			    &result->r.num,
+			    NCX_BT_FLOAT64);
 
-    return NULL;
+	ncx_clean_num(NCX_BT_INT64, &tempnum);
+
+	if (*res != NO_ERR) {
+	    free_result(pcb, result);
+	    result = NULL;
+	}
+    }
+
+    return result;
 
 }  /* position_fn */
 
@@ -2318,7 +2480,7 @@ static xpath_result_t *
     }
 
     if (parm->restype == XP_RT_NUMBER) {
-	*res = ncx_num_round(&parm->r.num,
+	*res = ncx_round_num(&parm->r.num,
 			     &result->r.num,
 			     NCX_BT_FLOAT64);
     } else {
@@ -2457,7 +2619,7 @@ static xpath_result_t *
 	    tempresult= new_nodeset(pcb,
 				    pcb->context.node.objptr,
 				    pcb->context.node.valptr,
-				    XP_AX_CHILD, FALSE);
+				    1, FALSE);
 
 	    if (!tempresult) {
 		*res = ERR_INTERNAL_MEM;
@@ -2541,7 +2703,7 @@ static xpath_result_t *
 	    tempresult= new_nodeset(pcb,
 				    pcb->context.node.objptr,
 				    pcb->context.node.valptr,
-				    XP_AX_CHILD, FALSE);
+				    1, FALSE);
 
 	    if (!tempresult) {
 		*res = ERR_INTERNAL_MEM;
@@ -2560,7 +2722,7 @@ static xpath_result_t *
     }
 
     if (*res == NO_ERR) {
-	*res = set_uint32_num(len, &result->r.num);
+	set_uint32_num(len, &result->r.num);
     }
 
     if (*res != NO_ERR) {
@@ -2648,7 +2810,7 @@ static xpath_result_t *
 
     startpos = 0;
     ncx_init_num(&tempnum);
-    myres = ncx_num_round(&parm2->r.num, &tempnum, NCX_BT_FLOAT64);
+    myres = ncx_round_num(&parm2->r.num, &tempnum, NCX_BT_FLOAT64);
     if (myres == NO_ERR) {
 	startpos = ncx_cvt_to_int64(&tempnum, NCX_BT_FLOAT64);
     }
@@ -2658,7 +2820,7 @@ static xpath_result_t *
     copylen = 0;
     if (parm3) {
 	copylenset = TRUE;
-	myres = ncx_num_round(&parm3->r.num, &tempnum, NCX_BT_FLOAT64);
+	myres = ncx_round_num(&parm3->r.num, &tempnum, NCX_BT_FLOAT64);
 	if (myres == NO_ERR) {
 	    copylen = ncx_cvt_to_int64(&tempnum, NCX_BT_FLOAT64);
 
@@ -2741,10 +2903,52 @@ static xpath_result_t *
 			dlq_hdr_t *parmQ,
 			status_t  *res)
 {
+    xpath_result_t  *parm1, *parm2, *result;
+    const xmlChar   *str, *retstr;
+
     if (!pcb->val && !pcb->obj) {
 	return NULL;
     }
 
+    parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
+    parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
+
+    if (parm1->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm1->restype, XP_RT_STRING);
+    } else if (parm2->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm2->restype, XP_RT_STRING);
+    } else {
+	result = new_result(pcb, XP_RT_STRING);
+	if (result) {
+	    str = (const xmlChar *)
+		strstr((const char *)parm1->r.str, 
+		       (const char *)parm2->r.str);
+	    if (str) {
+		retstr = str + xml_strlen(parm2->r.str);
+		result->r.str = m__getMem(xml_strlen(retstr)+1);
+		if (result->r.str) {
+		    xml_strcpy(result->r.str, retstr);
+		}
+	    } else {
+		result->r.str = xml_strdup(EMPTY_STRING);
+	    }
+
+	    if (!result->r.str) {
+		*res = ERR_INTERNAL_MEM;
+	    }
+
+	    if (*res != NO_ERR) {
+		free_result(pcb, result);
+		result = NULL;
+	    }
+
+	    return result;
+	} else {
+	    *res = ERR_INTERNAL_MEM;
+	}
+    }
     return NULL;
 
 }  /* substring_after_fn */
@@ -2774,10 +2978,55 @@ static xpath_result_t *
 			 dlq_hdr_t *parmQ,
 			 status_t  *res)
 {
+    xpath_result_t  *parm1, *parm2, *result;
+    const xmlChar   *str;
+    uint32           retlen;
+
     if (!pcb->val && !pcb->obj) {
 	return NULL;
     }
 
+    parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
+    parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
+
+    if (parm1->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm1->restype, XP_RT_STRING);
+    } else if (parm2->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm2->restype, XP_RT_STRING);
+    } else {
+	result = new_result(pcb, XP_RT_STRING);
+	if (result) {
+	    str = (const xmlChar *)
+		strstr((const char *)parm1->r.str, 
+		       (const char *)parm2->r.str);
+	    if (str) {
+		retlen = (uint32)(str - parm1->r.str);
+		result->r.str = m__getMem(retlen+1);
+		if (result->r.str) {
+		    xml_strncpy(result->r.str,
+				parm1->r.str,
+				retlen);
+		}
+	    } else {
+		result->r.str = xml_strdup(EMPTY_STRING);
+	    }
+
+	    if (!result->r.str) {
+		*res = ERR_INTERNAL_MEM;
+	    }
+
+	    if (*res != NO_ERR) {
+		free_result(pcb, result);
+		result = NULL;
+	    }
+
+	    return result;
+	} else {
+	    *res = ERR_INTERNAL_MEM;
+	}
+    }
     return NULL;
 
 }  /* substring_before_fn */
@@ -2806,11 +3055,67 @@ static xpath_result_t *
 	    dlq_hdr_t *parmQ,
 	    status_t  *res)
 {
+    xpath_result_t   *parm, *result;
+    xpath_resnode_t  *resnode;
+    val_value_t      *val;
+    ncx_num_t         tempnum, mysum;
+    status_t          myres;
+
     if (!pcb->val && !pcb->obj) {
 	return NULL;
     }
 
-    return NULL;
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm->restype != XP_RT_NODESET) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm->restype, XP_RT_NODESET);
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_NUMBER);
+    if (result) {
+	if (pcb->val) {
+
+	    ncx_init_num(&tempnum);
+	    ncx_set_num_zero(&tempnum, NCX_BT_FLOAT64);
+	    ncx_init_num(&mysum);
+	    ncx_set_num_zero(&mysum, NCX_BT_FLOAT64);
+	    myres = NO_ERR;
+
+	    for (resnode = (xpath_resnode_t *)
+		     dlq_firstEntry(&parm->r.nodeQ);
+		 resnode != NULL && myres == NO_ERR;
+		 resnode = (xpath_resnode_t *)
+		     dlq_nextEntry(resnode)) {
+
+		val = val_get_first_leaf(resnode->node.valptr);
+		if (val && typ_is_number(val->btyp)) {
+		    myres = ncx_cast_num(&val->v.num,
+				       val->btyp,
+				       &tempnum,
+				       NCX_BT_FLOAT64);
+		    if (myres == NO_ERR) {
+			mysum.d += tempnum.d;
+		    }
+		} else {
+		    myres = ERR_NCX_INVALID_VALUE;
+		}
+	    }
+
+	    if (myres == NO_ERR) {
+		result->r.num.d = mysum.d;
+	    } else {
+		ncx_set_num_nan(&result->r.num, NCX_BT_FLOAT64);
+	    }
+	} else {
+	    ncx_set_num_zero(&result->r.num, NCX_BT_FLOAT64);
+	}
+
+	return result;
+    } else {
+	*res = ERR_INTERNAL_MEM;
+    }
+    return result;
 
 }  /* sum_fn */
 
@@ -2837,11 +3142,96 @@ static xpath_result_t *
 		  dlq_hdr_t *parmQ,
 		  status_t  *res)
 {
+    xpath_result_t  *parm1, *parm2, *parm3, *result;
+    xmlChar         *p1str, *p2str, *p3str, *writestr;
+    uint32           parmcnt, p1len, p2len, p3len, curpos;
+    boolean          done;
+
     if (!pcb->val && !pcb->obj) {
 	return NULL;
     }
 
-    return NULL;
+    *res = NO_ERR;
+
+    /* check at least 2 strings to concat */
+    parmcnt = dlq_count(parmQ);
+
+    parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
+    parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
+    parm3 = (xpath_result_t *)dlq_nextEntry(parm2);
+
+    if (parm1->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm1->restype, XP_RT_STRING);
+    } else {
+	p1str = parm1->r.str;
+	p1len = xml_strlen(p1str);
+    }
+	
+    if (parm2->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm2->restype, XP_RT_STRING);
+    } else {
+	p2str = parm2->r.str;
+	p2len = xml_strlen(p2str);
+    }
+
+    if (parm3->restype != XP_RT_STRING) {
+	*res = ERR_NCX_WRONG_DATATYP;
+	wrong_type_error(pcb, parm3->restype, XP_RT_NUMBER);
+    } else {
+	p3str = parm3->r.str;
+	p3len = xml_strlen(p3str);
+    }
+
+    if (*res != NO_ERR) {
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_STRING);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+    result->r.str = m__getMem(p1len+1);
+    if (!result->r.str) {
+	*res = ERR_INTERNAL_MEM;
+	free_result(pcb, result);
+	result = NULL;
+    }
+
+    writestr = result->r.str;
+
+    /* translate p1str into the result string */
+    while (*p1str) {
+	curpos = 0;
+	done = FALSE;
+
+	/* look for a match char in p2str */
+	while (!done && curpos < p2len) {
+	    if (p2str[curpos] == *p1str) {
+		done = TRUE;
+	    } else {
+		curpos++;
+	    }
+	}
+
+	if (done) {
+	    if (curpos < p3len) {
+		/* replace p1char with p3str translation char */
+		*writestr++ = p3str[curpos];
+	    } /* else drop p1char from result */
+	} else {
+	    /* copy p1char to result */
+	    *writestr++ = *p1str;
+	}
+
+	p1str++;
+    }
+
+    *writestr = 0;
+
+    return result;
 
 }  /* translate_fn */
 
@@ -3161,35 +3551,6 @@ static xpath_result_t *
 
 
 /********************************************************************
-* FUNCTION eval_xpath_op
-* 
-* Evaluate the XPath operation on the 1 or 2 operands
-* Store the result in the first operand
-*
-* INPUTS:
-*    op1 == operand 1
-*    op2 == operand 2
-*    exop == expression operation enum
-*
-* OUTPUTS:
-*   op1 is updated to contain the result of the operation
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    eval_xpath_op (xpath_result_t *op1,
-                   xpath_result_t *op2,
-                   xpath_exop_t    exop)
-{
-
-    /*****/
-    return NO_ERR;
-
-}  /* eval_xpath_op */
-
-
-/********************************************************************
 * FUNCTION find_resnode
 * 
 * Check if the specified resnode ptr is already in the Q
@@ -3318,6 +3679,61 @@ static boolean
 
 
 /********************************************************************
+* FUNCTION merge_nodeset
+* 
+* Add the nodes from val1 into val2
+* that are not already there
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    result == address of return XPath result nodeset
+*
+* OUTPUTS:
+*    result->nodeQ contents adjusted
+*
+*********************************************************************/
+static void
+    merge_nodeset (xpath_pcb_t *pcb,
+		   xpath_result_t *val1,
+		   xpath_result_t *val2)
+{
+    xpath_resnode_t        *resnode, *findnode;
+
+    if (!pcb->val && !pcb->obj) {
+	return;
+    }
+
+    if (val1->restype != XP_RT_NODESET ||
+	val2->restype != XP_RT_NODESET) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+
+    while (!dlq_empty(&val1->r.nodeQ)) {
+	resnode = (xpath_resnode_t *)dlq_deque(&val1->r.nodeQ);
+
+	if (pcb->val) {
+	    findnode = find_resnode(pcb, &val2->r.nodeQ,
+				    resnode->node.valptr);
+	} else {
+	    findnode = find_resnode(pcb, &val2->r.nodeQ,
+				    resnode->node.objptr);
+	}
+	if (findnode) {
+	    if (resnode->dblslash) {
+		findnode->dblslash = TRUE;
+	    }
+	    findnode->position = resnode->position;
+	    free_resnode(pcb, resnode);
+	} else {
+	    dlq_enque(resnode, &val2->r.nodeQ);
+	}
+    }
+
+}  /* merge_nodeset */
+
+
+/********************************************************************
 * FUNCTION set_nodeset_dblslash
 * 
 * Set the current nodes dblslash flag
@@ -3393,20 +3809,13 @@ static boolean
 
     /* need to add this node */
     newresnode = new_val_resnode(pcb, 
-				 parms->axis, 
+				 ++parms->callcount, 
 				 FALSE,
 				 val);
     if (!newresnode) {
 	parms->res = ERR_INTERNAL_MEM;
 	return FALSE;
     }
-
-    if (parms->topvalptr) {
-	newresnode->topvalptr = parms->topvalptr;
-    } else {
-	newresnode->topvalptr = pcb->val_docroot;
-    }
-    newresnode->testmode = parms->testmode;
 
     dlq_enque(newresnode, parms->resnodeQ);
     return TRUE;
@@ -3453,15 +3862,13 @@ static boolean
 
     /* need to add this child node */
     newresnode = new_obj_resnode(pcb, 
-				 parms->axis, 
+				 ++parms->callcount, 
 				 FALSE,
 				 obj);
     if (!newresnode) {
 	parms->res = ERR_INTERNAL_MEM;
 	return FALSE;
     }
-
-    newresnode->testmode = parms->testmode;
 
     dlq_enque(newresnode, parms->resnodeQ);
     return TRUE;
@@ -3521,20 +3928,8 @@ static status_t
     dlq_createSQue(&resnodeQ);
 
     walkerparms.resnodeQ = &resnodeQ;
-    walkerparms.axis = XP_AX_SELF;
     walkerparms.res = NO_ERR;
-    walkerparms.topvalptr = NULL;
     walkerparms.callcount = 0;
-
-    if (textmode) {
-	walkerparms.testmode = XP_TM_TEXT;
-    } else if (nsid && name) {
-	walkerparms.testmode = XP_TM_QNAME;
-    } else if (name) {
-	walkerparms.testmode = XP_TM_NCNAME;	
-    } else {
-	walkerparms.testmode = XP_TM_ALL;	
-    }
 
     modname = (nsid) ? xmlns_get_module(nsid) : NULL;
     useroot = (pcb->flags & XP_FL_USEROOT) ? TRUE : FALSE;
@@ -3551,7 +3946,6 @@ static status_t
 	if (resnode->dblslash) {
 	    if (pcb->val) {
 		testval = resnode->node.valptr;
-		walkerparms.topvalptr = testval;
 		cfgonly = obj_is_config(testval->obj);
 
 		fnresult = 
@@ -3624,12 +4018,15 @@ static status_t
 		    if (findnode) {
 			if (resnode->dblslash) {
 			    findnode->dblslash = TRUE;
+			    findnode->position = 
+				++walkerparms.callcount;
 			}
 			free_resnode(pcb, resnode);
 		    } else {
 			/* set the resnode to its parent */
-			resnode->topvalptr = testval;
 			resnode->node.valptr = testval;
+			resnode->position = 
+			    ++walkerparms.callcount;
 			dlq_enque(resnode, &resnodeQ);
 		    }
 		} else {
@@ -3668,11 +4065,15 @@ static status_t
 		    if (findnode) {
 			if (resnode->dblslash) {
 			    findnode->dblslash = TRUE;
+			    findnode->position = 
+				++walkerparms.callcount;
 			}
 			free_resnode(pcb, resnode);
 		    } else {
 			/* set the resnode to its parent */
 			resnode->node.objptr = testobj;
+			resnode->position =
+			    ++walkerparms.callcount;
 			dlq_enque(resnode, &resnodeQ);
 		    }
 		} else {
@@ -3693,6 +4094,8 @@ static status_t
     if (!dlq_empty(&resnodeQ)) {
 	dlq_block_enque(&resnodeQ, &result->r.nodeQ);
     }
+
+    result->last = walkerparms.callcount;
 
     return res;
 
@@ -3748,19 +4151,8 @@ static status_t
     dlq_createSQue(&resnodeQ);
 
     walkerparms.resnodeQ = &resnodeQ;
-    walkerparms.axis = XP_AX_PARENT;
     walkerparms.res = NO_ERR;
-    walkerparms.topvalptr = NULL;
     walkerparms.callcount = 0;
-
-    if (nsid && name) {
-	walkerparms.testmode = XP_TM_QNAME;
-    } else if (name) {
-	walkerparms.testmode = XP_TM_NCNAME;	
-    } else {
-	walkerparms.testmode = XP_TM_ALL;	
-    }
-
 
     modname = (nsid) ? xmlns_get_module(nsid) : NULL;
     useroot = (pcb->flags & XP_FL_USEROOT) ? TRUE : FALSE;
@@ -3777,7 +4169,6 @@ static status_t
 	if (resnode->dblslash) {
 	    if (pcb->val) {
 		testval = resnode->node.valptr;
-		walkerparms.topvalptr = testval;
 		cfgonly = obj_is_config(testval->obj);
 
 		fnresult = 
@@ -3822,7 +4213,8 @@ static status_t
 		if (testval == pcb->val_docroot) {
 		    if (resnode->dblslash) {
 			/* just move this node to the result */
-			resnode->topvalptr = testval;
+			resnode->position = 
+			    ++walkerparms.callcount;
 			dlq_enque(resnode, &resnodeQ);
 		    } else {
 			/* no parent available error
@@ -3862,12 +4254,15 @@ static status_t
 			     * remove node from result 
 			     */
 			    if (resnode->dblslash) {
+				findnode->position = 
+				    ++walkerparms.callcount;
 				findnode->dblslash = TRUE;
 			    }
 			    free_resnode(pcb, resnode);
 			} else {
 			    /* set the resnode to its parent */
-			    resnode->topvalptr = testval->parent;
+			    resnode->position = 
+				++walkerparms.callcount;
 			    resnode->node.valptr = testval->parent;
 			    dlq_enque(resnode, &resnodeQ);
 			}
@@ -3883,6 +4278,8 @@ static status_t
 		testobj = resnode->node.objptr;
 		if (testobj == pcb->docroot) {
 		    if (resnode->dblslash) {
+			resnode->position = 
+			    ++walkerparms.callcount;
 			dlq_enque(resnode, &resnodeQ);
 		    } else {
 			/* this is an RPC or notification */
@@ -3900,10 +4297,14 @@ static status_t
 						pcb->docroot);
 			if (findnode) {
 			    if (resnode->dblslash) {
+				findnode->position = 
+				    ++walkerparms.callcount;
 				findnode->dblslash = TRUE;
 			    }
 			    free_resnode(pcb, resnode);
 			} else {
+			    resnode->position = 
+				++walkerparms.callcount;
 			    resnode->node.objptr = pcb->docroot;
 			    dlq_enque(resnode, &resnodeQ);
 			}
@@ -3953,11 +4354,15 @@ static status_t
 			findnode = find_resnode(pcb, &resnodeQ, useobj);
 			if (findnode) {
 			    if (resnode->dblslash) {
+				findnode->position =
+				    ++walkerparms.callcount;
 				findnode->dblslash = TRUE;
 			    }
 			    free_resnode(pcb, resnode);
 			} else {
 			    resnode->node.objptr = useobj;
+			    resnode->position = 
+				++walkerparms.callcount;
 			    dlq_enque(resnode, &resnodeQ);
 			}
 		    } else {
@@ -3973,6 +4378,8 @@ static status_t
     if (!dlq_empty(&resnodeQ)) {
 	dlq_block_enque(&resnodeQ, &result->r.nodeQ);
     }
+
+    result->last = walkerparms.callcount;
 
     return res;
 
@@ -4052,20 +4459,8 @@ static status_t
     }
 
     walkerparms.resnodeQ = &resnodeQ;
-    walkerparms.axis = XP_AX_CHILD;
     walkerparms.res = NO_ERR;
-    walkerparms.topvalptr = NULL;
     walkerparms.callcount = 0;
-
-    if (textmode) {
-	walkerparms.testmode = XP_TM_TEXT;
-    } else if (childnsid && childname) {
-	walkerparms.testmode = XP_TM_QNAME;
-    } else if (childname) {
-	walkerparms.testmode = XP_TM_NCNAME;	
-    } else {
-	walkerparms.testmode = XP_TM_ALL;	
-    }
 
     /* the resnodes need to be deleted or moved to a tempQ
      * to correctly track duplicates and remove them
@@ -4083,7 +4478,6 @@ static status_t
 	if (pcb->val) {
 
 	    testval = resnode->node.valptr;
-	    walkerparms.topvalptr = testval;
 
 	    if (axis != XP_AX_CHILD || resnode->dblslash) {
 		fnresult = 
@@ -4173,6 +4567,8 @@ static status_t
 	}
     }
 
+    result->last = walkerparms.callcount;
+
     return res;
 
 }  /* set_nodeset_child */
@@ -4239,7 +4635,7 @@ static status_t
 {
     xpath_resnode_t      *resnode;
     const obj_template_t *testobj;
-    val_value_t          *testval,*topval;
+    val_value_t          *testval;
     const xmlChar        *modname;
     status_t              res;
     boolean               fnresult, fncalled, cfgonly, useroot;
@@ -4262,19 +4658,8 @@ static status_t
     useroot = (pcb->flags & XP_FL_USEROOT) ? TRUE : FALSE;
 
     walkerparms.resnodeQ = &resnodeQ;
-    walkerparms.axis = axis;
     walkerparms.res = NO_ERR;
     walkerparms.callcount = 0;
-
-    if (textmode) {
-	walkerparms.testmode = XP_TM_TEXT;
-    } else if (nsid && name) {
-	walkerparms.testmode = XP_TM_QNAME;
-    } else if (name) {
-	walkerparms.testmode = XP_TM_NCNAME;	
-    } else {
-	walkerparms.testmode = XP_TM_ALL;	
-    }
 
     /* the resnodes need to be deleted or moved to a tempQ
      * to correctly track duplicates and remove them
@@ -4290,15 +4675,13 @@ static status_t
 	 */
 	if (pcb->val) {
 	    testval = resnode->node.valptr;
-	    topval = (resnode->topvalptr) ?
-		resnode->topvalptr : resnode->node.valptr;
 
 	    if (axis==XP_AX_PRECEDING || axis==XP_AX_FOLLOWING) {
 		fnresult = 
 		    val_find_all_pfaxis(value_walker_fn,
 					pcb, 
 					&walkerparms,
-					topval, 
+					testval, 
 					modname,
 					name, 
 					cfgonly, 
@@ -4357,6 +4740,8 @@ static status_t
 	}
 	res = NO_ERR;
     }
+
+    result->last = walkerparms.callcount;
 
     return res;
 
@@ -4431,18 +4816,7 @@ static status_t
     orself = (axis == XP_AX_ANCESTOR_OR_SELF) ? TRUE : FALSE;
 
     walkerparms.resnodeQ = &resnodeQ;
-    walkerparms.axis = axis;
     walkerparms.res = NO_ERR;
-
-    if (textmode) {
-	walkerparms.testmode = XP_TM_TEXT;
-    } else if (nsid && name) {
-	walkerparms.testmode = XP_TM_QNAME;
-    } else if (name) {
-	walkerparms.testmode = XP_TM_NCNAME;	
-    } else {
-	walkerparms.testmode = XP_TM_ALL;	
-    }
 
     /* the resnodes need to be deleted or moved to a tempQ
      * to correctly track duplicates and remove them
@@ -4566,6 +4940,8 @@ static status_t
 	}
 	res = NO_ERR;
     }
+
+    result->last = walkerparms.callcount;
 
     return res;
 
@@ -4777,7 +5153,7 @@ static status_t
 	    *result = new_nodeset(pcb,
 				  pcb->context.node.objptr,
 				  pcb->context.node.valptr,
-				  axis, FALSE);
+				  1, FALSE);
 	    if (!*result) {
 		res = ERR_INTERNAL_MEM;
 	    }
@@ -4826,7 +5202,7 @@ static status_t
 	    *result = new_nodeset(pcb, 
 				  pcb->context.node.objptr,
 				  pcb->context.node.valptr,
-				  axis, FALSE);
+				  1, FALSE);
 	    if (!*result) {
 		res = ERR_INTERNAL_MEM;
 	    }
@@ -4853,7 +5229,7 @@ static status_t
 	    *result = new_nodeset(pcb, 
 				  pcb->context.node.objptr,
 				  pcb->context.node.valptr,
-				  axis, FALSE);
+				  1, FALSE);
 	    if (!*result) {
 		res = ERR_INTERNAL_MEM;
 	    }
@@ -4914,7 +5290,7 @@ static status_t
 	    *result = new_nodeset(pcb, 
 				  pcb->context.node.objptr, 
 				  pcb->context.node.valptr,
-				  axis, 
+				  1, 
 				  FALSE);
 	    if (!*result) {
 		res = ERR_INTERNAL_MEM;
@@ -4935,7 +5311,7 @@ static status_t
 	    *result = new_nodeset(pcb, 
 				  pcb->context.node.objptr,
 				  pcb->context.node.valptr,
-				  axis, FALSE);
+				  1, FALSE);
 	    if (!*result) {
 		res = ERR_INTERNAL_MEM;
 	    }
@@ -4988,10 +5364,8 @@ static status_t
 {
     xpath_result_t  *val1, *contextset;
     xpath_resnode_t  lastcontext, *resnode, *nextnode;
-    val_value_t     *testval;
     tk_token_t      *leftbrack;
-    const xmlChar   *modname, *name;
-    boolean          bool, textmode;
+    boolean          bool;
     status_t         res;
     int64            position;
 
@@ -5010,7 +5384,9 @@ static status_t
 
 	    lastcontext.node.valptr = 
 		pcb->context.node.valptr;
-	    lastcontext.axis = pcb->context.axis;
+	    lastcontext.position = pcb->context.position;
+	    lastcontext.last = pcb->context.last;
+	    lastcontext.dblslash = pcb->context.dblslash;
 
 	    for (resnode = (xpath_resnode_t *)
 		     dlq_firstEntry(&(*result)->r.nodeQ);
@@ -5027,6 +5403,9 @@ static status_t
 		    dlq_nextEntry(resnode);
 
 		pcb->context.node.valptr = resnode->node.valptr;
+		pcb->context.position = resnode->position;
+		pcb->context.last = contextset->last;
+		pcb->context.dblslash = resnode->dblslash;
 
 		val1 = parse_expr(pcb, &res);
 		if (res != NO_ERR) {
@@ -5055,49 +5434,12 @@ static status_t
 			position = 
 			    ncx_cvt_to_int64(&val1->r.num,
 					     NCX_BT_FLOAT64);
-			if (position <= 0) {
-			    bool = FALSE;
-			} else {
-			    /* check if the proximity position
-			     * of this node matches the position
-			     * value from this expression
-			     */
-			    modname = NULL;
-			    name = NULL;
-			    textmode = FALSE;
-
-			    switch (resnode->testmode) {
-			    case XP_TM_ALL:
-				break;
-			    case XP_TM_TEXT:
-				textmode = TRUE;
-				break;
-			    case XP_TM_QNAME:
-				modname = 
-				    obj_get_mod_name
-				    (resnode->node.valptr->obj);
-				name = resnode->node.valptr->name;
-				break;
-			    case XP_TM_NCNAME:
-				name = resnode->node.valptr->name;
-				break;
-			    default:
-				res = SET_ERROR(ERR_INTERNAL_VAL);
-			    }
-
-			    testval = 
-				val_get_axisnode(resnode->topvalptr,
-						 modname,
-						 name,
-						 obj_is_config
-						 (resnode->node.valptr->obj),
-						 resnode->dblslash,
-						 textmode,
-						 resnode->axis,
-						 position);
-			    bool = (testval && 
-				    testval == resnode->node.valptr);
-			}
+			/* check if the proximity position
+			 * of this node matches the position
+			 * value from this expression
+			 */
+			bool = (position == resnode->position) ?
+			    TRUE : FALSE;
 		    } else {
 			bool = FALSE;
 		    }
@@ -5117,7 +5459,9 @@ static status_t
 
 	    pcb->context.node.valptr = 
 		lastcontext.node.valptr;
-	    pcb->context.axis =	lastcontext.axis;
+	    pcb->context.position = lastcontext.position;
+	    pcb->context.last = lastcontext.last;
+	    pcb->context.dblslash = lastcontext.dblslash;
 
 	} else {
 	    /* result is from a primary expression and
@@ -5222,7 +5566,7 @@ static status_t
 	    *result = new_nodeset(pcb,
 				  pcb->context.node.objptr,
 				  pcb->context.node.valptr,
-				  axis, TRUE);
+				  1, TRUE);
 	    if (!*result) {
 		return ERR_INTERNAL_MEM;
 	    }
@@ -5239,7 +5583,7 @@ static status_t
 	    *result = new_nodeset(pcb, 
 				  pcb->docroot, 
 				  pcb->val_docroot,
-				  axis,
+				  1,
 				  FALSE);
 	    if (!*result) {
 		return ERR_INTERNAL_MEM;
@@ -5280,7 +5624,7 @@ static status_t
 	    *result = new_nodeset(pcb,
 				  pcb->context.node.objptr,
 				  pcb->context.node.valptr,
-				  axis, FALSE);
+				  1, FALSE);
 	    if (!*result) {
 		return ERR_INTERNAL_MEM;
 	    }
@@ -5300,7 +5644,7 @@ static status_t
 	    *result = new_nodeset(pcb, 
 				  pcb->context.node.objptr, 
 				  pcb->context.node.valptr,
-				  axis, FALSE);
+				  1, FALSE);
 	    if (!*result) {
 		res = ERR_INTERNAL_MEM;
 	    }
@@ -5891,7 +6235,7 @@ static xpath_result_t *
 	if (curop != XP_EXOP_NONE) {
 	    val2 = parse_location_path(pcb, res);
 	    if (*res == NO_ERR) {
-                *res = eval_xpath_op(val1, val2, curop);
+		/*   *res = eval_xpath_op(val1, val2, curop);  */
             }
         }
     }
@@ -5945,14 +6289,21 @@ static xpath_result_t *
 
         if (*res == NO_ERR) {
             if (val2) {
-                *res = eval_xpath_op(val2, val1, XP_EXOP_UNION);
-                if (val1) {
-                    free_result(pcb, val1);
-                }
-            } else {
-                val2 = val1;
-            }
-            val1 = NULL;
+		if (pcb->val || pcb->obj) {
+		    /* add all the nodes from val1 into val2
+		     * that are not already present
+		     */
+		    merge_nodeset(pcb, val1, val2);
+		    
+		    if (val1) {
+			free_result(pcb, val1);
+			val1 = NULL;
+		    }
+		}
+	    } else {
+		val2 = val1;
+		val1 = NULL;
+	    }
 
 	    if (*res != NO_ERR) {
 		continue;
@@ -6003,7 +6354,7 @@ static xpath_result_t *
     parse_unary_expr (xpath_pcb_t *pcb,
 		      status_t *res)
 {
-    xpath_result_t  *val1;
+    xpath_result_t  *val1, *result;
     tk_type_t        nexttyp;
     uint32           minuscnt;
 
@@ -6023,8 +6374,23 @@ static xpath_result_t *
     val1 = parse_union_expr(pcb, res);
 
     if (*res == NO_ERR && minuscnt/2) {
-	/* odd number of negate ops requested */
-	*res = eval_xpath_op(val1, NULL, XP_EXOP_NEGATE);
+	if (pcb->val || pcb->obj) {
+	    /* odd number of negate ops requested */
+
+	    if (val1->restype == XP_RT_BOOLEAN) {
+		val1->r.bool = !val1->r.bool;
+		return val1;
+	    } else {
+		result = new_result(pcb, XP_RT_BOOLEAN);
+		if (!result) {
+		    *res = ERR_INTERNAL_MEM;
+		    return NULL;
+		}
+		result->r.bool = xpath_cvt_boolean(val1);
+		free_result(pcb, val1);
+		return result;
+	    }
+	}
     }
 
     return val1;
@@ -6061,29 +6427,94 @@ static xpath_result_t *
     parse_multiplicative_expr (xpath_pcb_t *pcb,
 			       status_t *res)
 {
-    xpath_result_t  *val1, *val2;
+    xpath_result_t  *val1, *val2, *result;
+    ncx_num_t        num1, num2;
     xpath_exop_t     curop;
     boolean          done;
     tk_type_t        nexttyp;
 
     val1 = NULL;
     val2 = NULL;
+    result = NULL;
     curop = XP_EXOP_NONE;
     done = FALSE;
+
+    ncx_init_num(&num1);
+    ncx_init_num(&num2);
 
     while (!done && *res == NO_ERR) {
         val1 = parse_unary_expr(pcb, res);
 
         if (*res == NO_ERR) {
             if (val2) {
-                *res = eval_xpath_op(val2, val1, curop);
-                if (val1) {
-                    free_result(pcb, val1);
-                }
+		if (pcb->val || pcb->obj) {
+		    /* val2 holds the 1st operand
+		     * val1 holds the 2nd operand
+		     */
+		    if (val1->restype != XP_RT_NUMBER) {
+			xpath_cvt_number(val1, &num1);
+		    } else {
+			*res = ncx_copy_num(&val1->r.num,
+					    &num1, 
+					    NCX_BT_FLOAT64);
+		    }
+
+		    if (val2->restype != XP_RT_NUMBER) {
+			xpath_cvt_number(val2, &num2);
+		    } else {
+			*res = ncx_copy_num(&val2->r.num,
+					    &num2, 
+					    NCX_BT_FLOAT64);
+		    }
+
+		    if (*res == NO_ERR) {
+			result = new_result(pcb, XP_RT_NUMBER);
+			if (!result) {
+			    *res = ERR_INTERNAL_MEM;
+			} else {
+			    switch (curop) {
+			    case XP_EXOP_MULTIPLY:
+				result->r.num.d = num2.d * num1.d;
+				break;
+			    case XP_EXOP_DIV:
+				if (ncx_num_zero(&num2, 
+						 NCX_BT_FLOAT64)) {
+				    ncx_set_num_max(&result->r.num,
+						    NCX_BT_FLOAT64);
+				} else {
+				    result->r.num.d = num2.d / num1.d;
+				}
+				break;
+			    case XP_EXOP_MOD:
+				result->r.num.d = num2.d / num1.d;
+#ifdef HAS_FLOAT
+				result->r.num.d = trunc(result->r.num.d);
+#endif
+				break;
+			    default:
+				*res = SET_ERROR(ERR_INTERNAL_VAL);
+			    }
+			}
+		    }
+		}
+
+		if (val1) {
+		    free_result(pcb, val1);
+		    val1 = NULL;
+		}
+		if (val2) {
+		    free_result(pcb, val2);
+		    val2 = NULL;
+		}
+
+		if (result) {
+		    val2 = result;
+		    result = NULL;
+		}
             } else {
                 val2 = val1;
+		val1 = NULL;
             }
-            val1 = NULL;
 
 	    if (*res != NO_ERR) {
 		continue;
@@ -6119,6 +6550,9 @@ static xpath_result_t *
         free_result(pcb, val1);
     }
 
+    ncx_clean_num(NCX_BT_FLOAT64, &num1);
+    ncx_clean_num(NCX_BT_FLOAT64, &num2);
+
     return val2;
 
 } /* parse_multiplicative_expr */
@@ -6152,13 +6586,15 @@ static xpath_result_t *
     parse_additive_expr (xpath_pcb_t *pcb,
 			   status_t *res)
 {
-    xpath_result_t  *val1, *val2;
+    xpath_result_t  *val1, *val2, *result;
+    ncx_num_t        num1, num2;
     xpath_exop_t     curop;
     boolean          done;
     tk_type_t        nexttyp;
 
     val1 = NULL;
     val2 = NULL;
+    result = NULL;
     curop = XP_EXOP_NONE;
     done = FALSE;
 
@@ -6167,14 +6603,63 @@ static xpath_result_t *
 
         if (*res == NO_ERR) {
             if (val2) {
-                *res = eval_xpath_op(val2, val1, curop);
-                if (val1) {
-                    free_result(pcb, val1);
-                }
+		/* val2 holds the 1st operand
+		 * val1 holds the 2nd operand
+		 */
+
+		if (pcb->val || pcb->val) {
+		    if (val1->restype != XP_RT_NUMBER) {
+			xpath_cvt_number(val1, &num1);
+		    } else {
+			*res = ncx_copy_num(&val1->r.num,
+					    &num1, 
+					    NCX_BT_FLOAT64);
+		    }
+
+		    if (val2->restype != XP_RT_NUMBER) {
+			xpath_cvt_number(val2, &num2);
+		    } else {
+			*res = ncx_copy_num(&val2->r.num,
+					    &num2, 
+					    NCX_BT_FLOAT64);
+		    }
+
+		    if (*res == NO_ERR) {
+			result = new_result(pcb, XP_RT_NUMBER);
+			if (!result) {
+			    *res = ERR_INTERNAL_MEM;
+			} else {
+			    switch (curop) {
+			    case XP_EXOP_ADD:
+				result->r.num.d = num2.d + num1.d;
+				break;
+			    case XP_EXOP_SUBTRACT:
+				result->r.num.d = num2.d - num1.d;
+				break;
+			    default:
+				*res = SET_ERROR(ERR_INTERNAL_VAL);
+			    }
+			}
+		    }
+		}
+
+		if (val1) {
+		    free_result(pcb, val1);
+		    val1 = NULL;
+		}
+		if (val2) {
+		    free_result(pcb, val2);
+		    val2 = NULL;
+		}
+
+		if (result) {
+		    val2 = result;
+		    result = NULL;
+		}
             } else {
                 val2 = val1;
+		val1 = NULL;
             }
-            val1 = NULL;
 
 	    if (*res != NO_ERR) {
 		continue;
@@ -6200,6 +6685,9 @@ static xpath_result_t *
     if (val1) {
         free_result(pcb, val1);
     }
+
+    ncx_clean_num(NCX_BT_FLOAT64, &num1);
+    ncx_clean_num(NCX_BT_FLOAT64, &num2);
 
     return val2;
 
@@ -6236,13 +6724,15 @@ static xpath_result_t *
     parse_relational_expr (xpath_pcb_t *pcb,
 			   status_t *res)
 {
-    xpath_result_t  *val1, *val2;
+    xpath_result_t  *val1, *val2, *result;
     xpath_exop_t     curop;
     boolean          done;
     tk_type_t        nexttyp;
+    int32            cmpresult;
 
     val1 = NULL;
     val2 = NULL;
+    result = NULL;
     curop = XP_EXOP_NONE;
     done = FALSE;
 
@@ -6251,14 +6741,59 @@ static xpath_result_t *
 
         if (*res == NO_ERR) {
             if (val2) {
-                *res = eval_xpath_op(val2, val1, curop);
-                if (val1) {
-                    free_result(pcb, val1);
-                }
+		if (pcb->val || pcb->obj) {
+		    /* val2 holds the 1st operand
+		     * val1 holds the 2nd operand
+		     */
+		    cmpresult = compare_results(pcb, val2, val1, res);
+
+		    if (*res == NO_ERR) {
+			result = new_result(pcb, XP_RT_BOOLEAN);
+			if (!result) {
+			    *res = ERR_INTERNAL_MEM;
+			} else {
+			    switch (curop) {
+			    case XP_EXOP_LT:
+				result->r.bool = (cmpresult < 0)
+				    ? TRUE : FALSE;
+				break;
+			    case XP_EXOP_GT:
+				result->r.bool = (cmpresult > 0)
+				    ? TRUE : FALSE;
+				break;
+			    case XP_EXOP_LEQUAL:
+				result->r.bool = (cmpresult <= 0)
+				    ? TRUE : FALSE;
+				break;
+			    case XP_EXOP_GEQUAL:
+				result->r.bool = (cmpresult >= 0)
+				    ? TRUE : FALSE;
+				break;
+			    default:
+				*res = SET_ERROR(ERR_INTERNAL_VAL);
+			    }
+			}
+		    }
+		}
+
+		if (val1) {
+		    free_result(pcb, val1);
+		    val1 = NULL;
+		}
+
+		if (val2) {
+		    free_result(pcb, val2);
+		    val2 = NULL;
+		}
+
+		if (result) {
+		    val2 = result;
+		    result = NULL;
+		}
             } else {
                 val2 = val1;
+		val1 = NULL;
             }
-            val1 = NULL;
 
 	    if (*res != NO_ERR) {
 		continue;
@@ -6324,12 +6859,14 @@ static xpath_result_t *
     parse_equality_expr (xpath_pcb_t *pcb,
 			 status_t *res)
 {
-    xpath_result_t  *val1, *val2;
+    xpath_result_t  *val1, *val2, *result;
     xpath_exop_t     curop;
     boolean          done;
+    int32            cmpresult;
 
     val1 = NULL;
     val2 = NULL;
+    result = NULL;
     curop = XP_EXOP_NONE;
     done = FALSE;
 
@@ -6338,14 +6875,51 @@ static xpath_result_t *
 
         if (*res == NO_ERR) {
             if (val2) {
-                *res = eval_xpath_op(val2, val1, curop);
-                if (val1) {
-                    free_result(pcb, val1);
-                }
+		if (pcb->val || pcb->obj) {
+		    /* val2 holds the 1st operand
+		     * val1 holds the 2nd operand
+		     */
+		    cmpresult = compare_results(pcb, val2, val1, res);
+
+		    if (*res == NO_ERR) {
+			result = new_result(pcb, XP_RT_BOOLEAN);
+			if (!result) {
+			    *res = ERR_INTERNAL_MEM;
+			} else {
+			    switch (curop) {
+			    case XP_EXOP_EQUAL:
+				result->r.bool = (cmpresult == 0) 
+				    ? TRUE : FALSE;
+				break;
+			    case XP_EXOP_NOTEQUAL:
+				result->r.bool = (cmpresult != 0)
+				    ? TRUE : FALSE;
+				break;
+			    default:
+				*res = SET_ERROR(ERR_INTERNAL_VAL);
+			    }
+			}
+		    }
+		}
+
+		if (val1) {
+		    free_result(pcb, val1);
+		    val1 = NULL;
+		}
+
+		if (val2) {
+		    free_result(pcb, val2);
+		    val2 = NULL;
+		}
+
+		if (result) {
+		    val2 = result;
+		    result = NULL;
+		}
             } else {
                 val2 = val1;
+		val1 = NULL;
             }
-            val1 = NULL;
 
 	    if (*res != NO_ERR) {
 		continue;
@@ -6399,11 +6973,12 @@ static xpath_result_t *
     parse_and_expr (xpath_pcb_t *pcb,
                     status_t *res)
 {
-    xpath_result_t  *val1, *val2;
-    boolean          done;
+    xpath_result_t  *val1, *val2, *result;
+    boolean          done, bool1, bool2;
 
     val1 = NULL;
     val2 = NULL;
+    result = NULL;
     done = FALSE;
 
     while (!done && *res == NO_ERR) {
@@ -6411,14 +6986,40 @@ static xpath_result_t *
 
         if (*res == NO_ERR) {
             if (val2) {
-                *res = eval_xpath_op(val2, val1, XP_EXOP_AND);
-                if (val1) {
-                    free_result(pcb, val1);
-                }
+		if (pcb->val || pcb->obj) {
+		    /* val2 holds the 1st operand
+		     * val1 holds the 2nd operand
+		     */
+		    bool1 = xpath_cvt_boolean(val1);
+		    bool2 = xpath_cvt_boolean(val2);
+
+		    result = new_result(pcb, XP_RT_BOOLEAN);
+		    if (!result) {
+			*res = ERR_INTERNAL_MEM;
+		    } else {
+			result->r.bool = (bool1 && bool2) 
+			    ? TRUE : FALSE;
+		    }
+		}
+
+		if (val1) {
+		    free_result(pcb, val1);
+		    val1 = NULL;
+		}
+
+		if (val2) {
+		    free_result(pcb, val2);
+		    val2 = NULL;
+		}
+
+		if (result) {
+		    val2 = result;
+		    result = NULL;
+		}
             } else {
                 val2 = val1;
+		val1 = NULL;
             }
-            val1 = NULL;
 
 	    if (*res != NO_ERR) {
 		continue;
@@ -6468,11 +7069,12 @@ static xpath_result_t *
     parse_or_expr (xpath_pcb_t *pcb,
                    status_t *res)
 {
-    xpath_result_t  *val1, *val2;
-    boolean          done;
+    xpath_result_t  *val1, *val2, *result;
+    boolean          done, bool1, bool2;
 
     val1 = NULL;
     val2 = NULL;
+    result = NULL;
     done = FALSE;
 
     while (!done && *res == NO_ERR) {
@@ -6480,14 +7082,40 @@ static xpath_result_t *
 
         if (*res == NO_ERR) {
             if (val2) {
-                *res = eval_xpath_op(val2, val1, XP_EXOP_OR);
-                if (val1) {
-                    free_result(pcb, val1);
-                }
+		if (pcb->val || pcb->obj) {
+		    /* val2 holds the 1st operand
+		     * val1 holds the 2nd operand
+		     */
+		    bool1 = xpath_cvt_boolean(val1);
+		    bool2 = xpath_cvt_boolean(val2);
+
+		    result = new_result(pcb, XP_RT_BOOLEAN);
+		    if (!result) {
+			*res = ERR_INTERNAL_MEM;
+		    } else {
+			result->r.bool = (bool1 || bool2) 
+			    ? TRUE : FALSE;
+		    }
+		}
+		    
+		if (val1) {
+		    free_result(pcb, val1);
+		    val1 = NULL;
+		}
+
+		if (val2) {
+		    free_result(pcb, val2);
+		    val2 = NULL;
+		}
+
+		if (result) {
+		    val2 = result;
+		    result = NULL;
+		}
             } else {
                 val2 = val1;
+		val1 = NULL;
             }
-            val1 = NULL;
 
 	    if (*res != NO_ERR) {
 		continue;

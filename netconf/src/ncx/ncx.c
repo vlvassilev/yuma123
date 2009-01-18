@@ -2689,24 +2689,10 @@ void
 	memset(num, 0x0, sizeof(ncx_num_t));
 	break;
     case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	num->f = 0.0;
-#else
-	if (num->f) {
-	    m__free(num->f);
-	    num->f = NULL;
-	}
-#endif   /* HAS_FLOAT */
+	num->f = 0;
 	break;
     case NCX_BT_FLOAT64:
-#ifdef HAS_FLOAT
-	num->d = 0.0;
-#else
-	if (num->d) {
-	    m__free(num->d);
-	    num->d = NULL;
-	}
-#endif   /* HAS_FLOAT */
+	num->d = 0;
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -2779,7 +2765,6 @@ int32
             return 1;
         }
     case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
         if (num1->f < num2->f) {
             return -1;
         } else if (num1->f == num2->f) {
@@ -2787,18 +2772,7 @@ int32
         } else {
             return 1;
         }
-#else
-        /**** TBD: REAL NUMBER IS NOT NORMALIZED YET *****/
-        if (num1->f && num2->f) {
-            return xml_strcmp(num1->f, num2->f);
-        } else if (num1->f) {
-            return -1;
-        } else {
-            return 1;
-        }
-#endif
     case NCX_BT_FLOAT64:
-#ifdef HAS_FLOAT
         if (num1->d < num2->d) {
             return -1;
         } else if (num1->d == num2->d) {
@@ -2806,16 +2780,6 @@ int32
         } else {
             return 1;
         }
-#else
-        /**** TBD: REAL NUMBER IS NOT NORMALIZED YET *****/
-        if (num1->d && num2->d) {
-            return xml_strcmp(num1->d, num2->d);
-        } else if (num1->d) {
-            return -1;
-        } else {
-            return 1;
-        }
-#endif
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return 0;
@@ -2868,28 +2832,16 @@ void
 	break;
     case NCX_BT_FLOAT32:
 #ifdef HAS_FLOAT
-	num->f = -1;  /* INFINITY */
+	num->f = -INFINITY;
 #else
-	if (num->f) {
-	    m__free(num->f);
-	}
-	num->f = xml_strdup((const xmlChar *) NCX_MIN_FLOAT);
-	if (!num->f) {
-	    SET_ERROR(ERR_INTERNAL_MEM);
-	}
+	num->f = NCX_MIN_LONG;
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	num->d = -1;  /* INFINITY */
+	num->d = -INFINITY;
 #else
-	if (num->d) {
-	    m__free(num->d);
-	}
-	num->d = xml_strdup((const xmlChar *) NCX_MIN_DOUBLE);
-	if (!num->d) {
-	    SET_ERROR(ERR_INTERNAL_MEM);
-	}
+	num->d = NCX_MIN_LONG;
 #endif
 	break;
     default:
@@ -2947,28 +2899,16 @@ void
 	break;
     case NCX_BT_FLOAT32:
 #ifdef HAS_FLOAT
-	num->f = 1; /* INFINITY */
+	num->f = INFINITY;
 #else
-	if (num->f) {
-	    m__free(num->f);
-	}
-	num->f = xml_strdup((const xmlChar *) NCX_MAX_FLOAT);
-	if (!num->f) {
-	    SET_ERROR(ERR_INTERNAL_MEM);
-	}
+	num->f = NCX_MAX_LONG-1;
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	num->d = 1;   /* INFINITY */
+	num->d = INFINITY;
 #else
-	if (num->d) {
-	    m__free(num->d);
-	}
-	num->d = xml_strdup((const xmlChar *) NCX_MAX_DOUBLE);
-	if (!num->d) {
-	    SET_ERROR(ERR_INTERNAL_MEM);
-	}
+	num->d = NCX_MAX_LONG-1;
 #endif
 	break;
     default:
@@ -3015,30 +2955,10 @@ void
 	num->ul = 1;
 	break;
     case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
 	num->f = 1;
-#else
-	if (num->f) {
-	    m__free(num->f);
-	}
-	num->f = xml_strdup((const xmlChar *)"1");
-	if (!num->f) {
-	    SET_ERROR(ERR_INTERNAL_MEM);
-	}
-#endif
 	break;
     case NCX_BT_FLOAT64:
-#ifdef HAS_FLOAT
 	num->d = 1;
-#else
-	if (num->d) {
-	    m__free(num->d);
-	}
-	num->d = xml_strdup((const xmlChar *)"1");
-	if (!num->d) {
-	    SET_ERROR(ERR_INTERNAL_MEM);
-	}
-#endif
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -3084,36 +3004,68 @@ void
 	num->ul = 0;
 	break;
     case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
 	num->f = 0;
-#else
-	if (num->f) {
-	    m__free(num->f);
-	}
-	num->f = xml_strdup((const xmlChar *)"0");
-	if (!num->f) {
-	    SET_ERROR(ERR_INTERNAL_MEM);
-	}
-#endif
 	break;
     case NCX_BT_FLOAT64:
-#ifdef HAS_FLOAT
 	num->d = 0;
-#else
-	if (num->d) {
-	    m__free(num->d);
-	}
-	num->d = xml_strdup((const xmlChar *)"0");
-	if (!num->d) {
-	    SET_ERROR(ERR_INTERNAL_MEM);
-	}
-#endif
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
 } /* ncx_set_num_zero */
+
+
+/********************************************************************
+* FUNCTION ncx_set_num_nan
+* 
+* Set a FP number to the Not a Number value
+*
+* INPUTS:
+*     num == number to set
+*     btyp == expected data type
+*
+*********************************************************************/
+void
+    ncx_set_num_nan (ncx_num_t *num,
+		     ncx_btype_t  btyp)
+{
+#ifdef DEBUG
+    if (!num) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    switch (btyp) {
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+    case NCX_BT_INT64:
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+    case NCX_BT_UINT64:
+	break;
+    case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT
+	num->f = NAN;
+#else
+	num->f = NCX_MAX_LONG;
+#endif
+	break;
+    case NCX_BT_FLOAT64:
+#ifdef HAS_FLOAT
+	num->d = NAN;
+#else
+	num->d = NCX_MAX_LONG;
+#endif
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+} /* ncx_set_num_nan */
 
 
 /********************************************************************
@@ -3154,27 +3106,9 @@ boolean
     case NCX_BT_UINT64:
         return (num->ul) ? FALSE : TRUE;
     case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-        return (num->f) ? FALSE : TRUE;
-#else
-        /**** TBD: REAL NUMBER IS NOT NORMALIZED YET *****/
-        if (num->f) {
-            return (xml_strcmp(num->f, NCX_EL_ZERO)) ? FALSE : TRUE;
-	} else {
-	    return FALSE;
-	}
-#endif
+        return (num->f == 0) ? TRUE : FALSE;
     case NCX_BT_FLOAT64:
-#ifdef HAS_FLOAT
-        return (num->d) ? FALSE : TRUE;
-#else
-        /**** TBD: REAL NUMBER IS NOT NORMALIZED YET *****/
-        if (num->d) {
-            return (xml_strcmp(num->d, NCX_EL_ZERO)) ? FALSE : TRUE;
-        } else {
-            return FALSE;
-        }
-#endif
+        return (num->d == 0) ? TRUE : FALSE;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return FALSE;
@@ -3217,7 +3151,8 @@ status_t
     float f;
     double d;
 #else
-    xmlChar *str;
+    int64 f;
+    int64 d;
 #endif
 
 #ifdef DEBUG
@@ -3428,16 +3363,20 @@ status_t
 #else
         switch (numfmt) {
         case NCX_NF_DEC:
-        case NCX_NF_REAL:
-	    if (val->f) {
-		m__free(val->f);
-	    }
-            val->f = xml_strdup(numstr);
-            if (!val->f) {
-                return ERR_INTERNAL_MEM;
+            ll = strtoll((const char *)numstr, &err, 10);
+            if (err && *err) {
+                return ERR_NCX_INVALID_NUM;
             }
+            val->f = (int64)ll;
             break;
         case NCX_NF_HEX:
+            ll = strtoll((const char *)numstr, &err, 16);
+            if (err && *err) {
+                return ERR_NCX_INVALID_HEXNUM;
+            }
+            val->f = (int64)ll;
+            break;
+        case NCX_NF_REAL:
             return ERR_NCX_WRONG_NUMTYP;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
@@ -3463,16 +3402,20 @@ status_t
 #else
         switch (numfmt) {
         case NCX_NF_DEC:
-        case NCX_NF_REAL:
-	    if (val->d) {
-		m__free(val->d);
-	    }
-            val->d = xml_strdup(numstr);
-            if (!val->d) {
-                return ERR_INTERNAL_MEM;
+            ll = strtoll((const char *)numstr, &err, 10);
+            if (err && *err) {
+                return ERR_NCX_INVALID_NUM;
             }
+            val->d = (int64)ll;
             break;
         case NCX_NF_HEX:
+            ll = strtoll((const char *)numstr, &err, 16);
+            if (err && *err) {
+                return ERR_NCX_INVALID_HEXNUM;
+            }
+            val->d = (int64)ll;
+            break;
+        case NCX_NF_REAL:
             return ERR_NCX_WRONG_NUMTYP;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
@@ -3582,38 +3525,10 @@ status_t
         num2->ul = num1->ul;
         break;
     case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT        
         num2->f = num1->f;
-#else
-        if (str1->f) {
-	    if (num2->f) {
-		m__free(num2->f);
-	    }
-            num2->f = xml_strdup(str1->f);
-            if (!num2->f) {
-                return ERR_INTERNAL_MEM;
-            }
-        } else {
-            return SET_ERROR(ERR_INTERNAL_PTR);
-        }            
-#endif
         break;
     case NCX_BT_FLOAT64:
-#ifdef HAS_FLOAT        
         num2->d = num1->d;
-#else
-        if (str1->d) {
-	    if (num2->d) {
-		m__free(num2->d);
-	    }
-            num2->d = xml_strdup(str1->d);
-            if (!num2->d) {
-                return ERR_INTERNAL_MEM;
-            }
-        } else {
-            return SET_ERROR(ERR_INTERNAL_PTR);
-        }
-#endif
         break;
     default:
         return SET_ERROR(ERR_INTERNAL_VAL);
@@ -3682,40 +3597,14 @@ status_t
 #ifdef HAS_FLOAT
 	    num2->f = (float)num1->i;
 #else
-	    if (num2->f) {
-		m__free(num2->f);
-		num2->f = NULL;
-	    }
-
-            num2->f = m__getMem(NCX_MAX_NUMLEN+1);
-            if (!num2->f) {
-                res = ERR_INTERNAL_MEM;
-            } else {
-		res = ncx_sprintf_num(num2->f,
-				      num1->i,
-				      btyp1,
-				      &len);
-	    }
+	    num2->f = (int64)num1->i;
 #endif
 	    break;
 	case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	    num2->d = (double)num1->i;
 #else
-	    if (num2->d) {
-		m__free(num2->d);
-		num2->d = NULL;
-	    }
-
-            num2->d = m__getMem(NCX_MAX_NUMLEN+1);
-            if (!num2->d) {
-                res = ERR_INTERNAL_MEM;
-            } else {
-		res = ncx_sprintf_num(num2->d,
-				      num1->i,
-				      btyp1,
-				      &len);
-	    }
+	    num2->d = (int64)num1->i;
 #endif
 	    break;
 	default:
@@ -3742,40 +3631,14 @@ status_t
 #ifdef HAS_FLOAT
 	    num2->f = (float)num1->l;
 #else
-	    if (num2->f) {
-		m__free(num2->f);
-		num2->f = NULL;
-	    }
-
-            num2->f = m__getMem(NCX_MAX_NUMLEN+1);
-            if (!num2->f) {
-                res = ERR_INTERNAL_MEM;
-            } else {
-		res = ncx_sprintf_num(num2->f,
-				      num1->l,
-				      btyp1,
-				      &len);
-	    }
+	    num2->f = (int64)num1->l;
 #endif
 	    break;
 	case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	    num2->d = (double)num1->l;
 #else
-	    if (num2->d) {
-		m__free(num2->d);
-		num2->d = NULL;
-	    }
-
-            num2->d = m__getMem(NCX_MAX_NUMLEN+1);
-            if (!num2->d) {
-                res = ERR_INTERNAL_MEM;
-            } else {
-		res = ncx_sprintf_num(num2->d,
-				      num1->l,
-				      btyp1,
-				      &len);
-	    }
+	    num2->d = (int64)num1->l;
 #endif
 	    break;
 	default:
@@ -3806,41 +3669,14 @@ status_t
 #ifdef HAS_FLOAT
 	    num2->f = (float)num1->u;
 #else
-	    if (num2->f) {
-		m__free(num2->f);
-		num2->f = NULL;
-	    }
-
-            num2->f = m__getMem(NCX_MAX_NUMLEN+1);
-            if (!num2->f) {
-                res = ERR_INTERNAL_MEM;
-            } else {
-		res = ncx_sprintf_num(num2->f,
-				      num1->u,
-				      btyp1,
-				      &len);
-	    }
+	    num2->f = (int64)num1->u;
 #endif
 	    break;
 	case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	    num2->d = (double)num1->u;
 #else
-	    if (num2->d) {
-		m__free(num2->d);
-		num2->d = NULL;
-	    }
-
-            num2->d = m__getMem(NCX_MAX_NUMLEN+1);
-            if (!num2->d) {
-                res = ERR_INTERNAL_MEM;
-            } else {
-		res = ncx_sprintf_num(num2->d,
-				      num1->u,
-				      btyp1,
-				      &len);
-	    }
-
+	    num2->d = (int64)num1->u;
 #endif
 	    break;
 	default:
@@ -3867,40 +3703,14 @@ status_t
 #ifdef HAS_FLOAT
 	    num2->f = (float)num1->ul;
 #else
-	    if (num2->f) {
-		m__free(num2->f);
-		num2->f = NULL;
-	    }
-
-            num2->f = m__getMem(NCX_MAX_NUMLEN+1);
-            if (!num2->f) {
-                res = ERR_INTERNAL_MEM;
-            } else {
-		res = ncx_sprintf_num(num2->f,
-				      num1->ul,
-				      btyp1,
-				      &len);
-	    }
+	    num2->f = (int64)num1->ul;
 #endif
 	    break;
 	case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	    num2->d = (double)num1->ul;
 #else
-	    if (num2->d) {
-		m__free(num2->d);
-		num2->d = NULL;
-	    }
-
-            num2->d = m__getMem(NCX_MAX_NUMLEN+1);
-            if (!num2->d) {
-                res = ERR_INTERNAL_MEM;
-            } else {
-		res = ncx_sprintf_num(num2->d,
-				      num1->ul,
-				      btyp1,
-				      &len);
-	    }
+	    num2->d = (int64)num1->ul;
 #endif
 	    break;
 	default:
@@ -3934,8 +3744,30 @@ status_t
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	}
 #else
-	res = ncx_convert_num(num1->f, NCX_NF_DEC, 
-			      btyp2, num2);
+	switch (btyp2) {
+	case NCX_BT_INT8:
+	case NCX_BT_INT16:
+	case NCX_BT_INT32:
+	case NCX_BT_UINT8:
+	case NCX_BT_UINT16:
+	case NCX_BT_UINT32:
+	    res = ERR_NCX_INVALID_VALUE;
+	    break;
+	case NCX_BT_INT64:
+	    num2->l = num1->f;
+	    break;
+	case NCX_BT_UINT64:
+	    num2->ul = (uint64)num1->f;
+	    break;
+	case NCX_BT_FLOAT32:
+	    num2->f = num1->f;
+	    break;
+	case NCX_BT_FLOAT64:
+	    num2->d = num1->f;
+	    break;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
 #endif
         break;
     case NCX_BT_FLOAT64:
@@ -3962,8 +3794,27 @@ status_t
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	}
 #else
-	res = ncx_convert_num(val1->d, NCX_NF_DEC, 
-			      btyp2, num2);
+	switch (btyp2) {
+	case NCX_BT_INT8:
+	case NCX_BT_INT16:
+	case NCX_BT_INT32:
+	case NCX_BT_UINT8:
+	case NCX_BT_UINT16:
+	case NCX_BT_UINT32:
+	case NCX_BT_FLOAT32:
+	    return ERR_NCX_INVALID_VALUE;
+	case NCX_BT_INT64:
+	    num2->l = num1->d;
+	    break;
+	case NCX_BT_UINT64:
+	    num2->ul = (uint64)num1->d;
+	    break;
+	case NCX_BT_FLOAT64:
+	    num2->d = num1->d;
+	    break;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
 #endif
         break;
     default:
@@ -4000,10 +3851,6 @@ status_t
 {
     status_t   res;
 
-#ifndef HAS_FLOAT
-    char      *str, *p;
-#endif
-
 #ifdef DEBUG
     if (!num1 || !num2) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
@@ -4033,50 +3880,14 @@ status_t
 #ifdef HAS_FLOAT
 	num2->f = floorf(num1->f);
 #else
-	if (num1->f) {
-	    str = p = num1->f;
-	    while (*p && *p != '.') {
-		p++;
-	    }
-
-	    if (num2->f) {
-		m__free(num2->f);
-		num2->f = NULL;
-	    }
-	    num2->f = m__getMem((uint32)(p-str+1));
-	    if (!num2->f) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		xml_strncpy(num2->f, str, (uint32)(p-str));
-	    }
-	} else {
-	    ncx_set_num_zero(num, NCX_BT_FLOAT32);
-	}
+	num2->f = num1->f;
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	num2->d = floor(num1->d);
 #else
-	if (num1->d) {
-	    str = p = num1->d;
-	    while (*p && *p != '.') {
-		p++;
-	    }
-
-	    if (num2->d) {
-		m__free(num2->d);
-		num2->d = NULL;
-	    }
-	    num2->d = m__getMem((uint32)(p-str+1));
-	    if (!num2->f) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		xml_strncpy(num2->d, str, (uint32)(p-str));
-	    }
-	} else {
-	    ncx_set_num_zero(num, NCX_BT_FLOAT64);
-	}
+	num2->d = num1->d;
 #endif
 	break;
     default:
@@ -4113,10 +3924,6 @@ status_t
 {
     status_t   res;
 
-#ifndef HAS_FLOAT
-    char      *str, *p;
-#endif
-
 #ifdef DEBUG
     if (!num1 || !num2) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
@@ -4146,56 +3953,14 @@ status_t
 #ifdef HAS_FLOAT
 	num2->f = ceilf(num1->f);
 #else
-	if (num1->f) {
-	    str = p = num1->f;
-	    while (*p && *p != '.') {
-		p++;
-	    }
-
-	    if (num2->f) {
-		m__free(num2->f);
-		num2->f = NULL;
-	    }
-	    num2->f = m__getMem((uint32)(p-str+1));
-	    if (!num2->f) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		xml_strncpy(num2->f, str, (uint32)(p-str));
-		if (*p) {
-		    /**** Add 1 to the string number result ****/
-		}
-	    }
-	} else {
-	    ncx_set_num_zero(num, NCX_BT_FLOAT32);
-	}
+	num2->f = num1->f;
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	num2->d = ceil(num1->d);
 #else
-	if (num1->d) {
-	    str = p = num1->d;
-	    while (*p && *p != '.') {
-		p++;
-	    }
-
-	    if (num2->d) {
-		m__free(num2->d);
-		num2->d = NULL;
-	    }
-	    num2->d = m__getMem((uint32)(p-str+1));
-	    if (!num2->f) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		xml_strncpy(num2->d, str, (uint32)(p-str));
-		if (*p) {
-		    /**** Add 1 to the string number result ****/
-		}
-	    }
-	} else {
-	    ncx_set_num_zero(num, NCX_BT_FLOAT64);
-	}
+	num2->d = num1->d;
 #endif
 	break;
     default:
@@ -4208,7 +3973,7 @@ status_t
 
 
 /********************************************************************
-* FUNCTION ncx_num_round
+* FUNCTION ncx_round_num
 * 
 * Get the rounded value of a number
 *
@@ -4226,15 +3991,11 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    ncx_num_round (const ncx_num_t *num1,
+    ncx_round_num (const ncx_num_t *num1,
 		   ncx_num_t *num2,
 		   ncx_btype_t  btyp)
 {
     status_t   res;
-
-#ifndef HAS_FLOAT
-    char      *str, *p;
-#endif
 
 #ifdef DEBUG
     if (!num1 || !num2) {
@@ -4265,56 +4026,14 @@ status_t
 #ifdef HAS_FLOAT
 	num2->f = roundf(num1->f);
 #else
-	if (num1->f) {
-	    str = p = num1->f;
-	    while (*p && *p != '.') {
-		p++;
-	    }
-
-	    if (num2->f) {
-		m__free(num2->f);
-		num2->f = NULL;
-	    }
-	    num2->f = m__getMem((uint32)(p-str+1));
-	    if (!num2->f) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		xml_strncpy(num2->f, str, (uint32)(p-str));
-		if (*p) {
-		    /**** Round the string number result ****/
-		}
-	    }
-	} else {
-	    ncx_set_num_zero(num, NCX_BT_FLOAT32);
-	}
+	num2->f = num1->f;
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	num2->d = round(num1->d);
 #else
-	if (num1->d) {
-	    str = p = num1->d;
-	    while (*p && *p != '.') {
-		p++;
-	    }
-
-	    if (num2->d) {
-		m__free(num2->d);
-		num2->d = NULL;
-	    }
-	    num2->d = m__getMem((uint32)(p-str+1));
-	    if (!num2->f) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		xml_strncpy(num2->d, str, (uint32)(p-str));
-		if (*p) {
-		    /**** Round the string number result ****/
-		}
-	    }
-	} else {
-	    ncx_set_num_zero(num, NCX_BT_FLOAT64);
-	}
+	num2->d = num1->d;
 #endif
 	break;
     default:
@@ -4323,7 +4042,7 @@ status_t
 
     return res;
     
-}  /* ncx_num_round */
+}  /* ncx_round_num */
 
 
 /********************************************************************
@@ -4349,8 +4068,6 @@ boolean
 #ifdef HAS_FLOAT
     float f;
     double d;
-#else
-    const char *str;
 #endif
 
 #ifdef DEBUG
@@ -4375,32 +4092,14 @@ boolean
 	f = roundf(num->f);
 	return (f == num->f) ? TRUE : FALSE;
 #else
-	str = strstr(num->f, ".");
-	if (!str) {
-	    return TRUE;
-	} else {
-	    str++;
-	    while (*str && *str != '0') {
-		str++;
-	    }
-	    return (*str) ? FALSE : TRUE;
-        }            
+	return TRUE;
 #endif
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT        
 	d = round(num->d);
 	return (d == num->d) ? TRUE : FALSE;
 #else
-	str = strstr(num->d, ".");
-	if (!str) {
-	    return TRUE;
-	} else {
-	    str++;
-	    while (*str && *str != '0') {
-		str++;
-	    }
-	    return (*str) ? FALSE : TRUE;
-        }            
+	return TRUE;
 #endif
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -4453,13 +4152,13 @@ int64
 #ifdef HAS_FLOAT        
 	return lrintf(num->f);
 #else
-	return (int64)atoll(num->f);
+	return num->f;
 #endif
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT        
 	return lrint(num->d);
 #else
-	return (int64)atoll(num->d);
+	return num->d;
 #endif
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -4551,14 +4250,14 @@ void
 #ifdef HAS_FLOAT
 	log_write("%f", num->f);
 #else
-	log_write("%s", (num->f) ? num->f : "--");
+	log_write("%lld", num->f);
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	log_write("%lf", num->d);
 #else
-	log_write("%s", (num->d) ? num->d : "--");
+	log_write("%lld", num->d);
 #endif
 	break;
     default:
@@ -4626,14 +4325,14 @@ status_t
 #ifdef HAS_FLOAT
 	ilen = sprintf((char *)buff, "%1.15f", num->f);
 #else
-	ilen = sprintf((char *)buff, "%s", (num->f) ? num->f : "");
+	ilen = sprintf((char *)buff, "%lld", num->f);
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	ilen = sprintf((char *)buff, "%1.15lf", num->d);
 #else
-	ilen = sprintf((char *)buff, "%s", (num->d) ? num->d : "");
+	ilen = sprintf((char *)buff, "%lld", num->d);
 #endif
 	break;
     default:
@@ -4691,9 +4390,17 @@ boolean
     case NCX_BT_UINT64:
         return (num->ul == NCX_MIN_ULONG) ? TRUE : FALSE;
     case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT
+	return (num->f == -INFINITY) ? TRUE : FALSE;
+#else
+	return (num->f == NCX_MIN_LONG) ? TRUE : FALSE;
+#endif
     case NCX_BT_FLOAT64:
-	/* there is no actual min value, just MIN and -INF */
-	return FALSE;
+#ifdef HAS_FLOAT
+	return (num->d == -INFINITY) ? TRUE : FALSE;
+#else
+	return (num->d == NCX_MIN_LONG) ? TRUE : FALSE;
+#endif
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return FALSE;
@@ -4745,9 +4452,17 @@ boolean
     case NCX_BT_UINT64:
         return (num->ul == NCX_MAX_ULONG) ? TRUE : FALSE;
     case NCX_BT_FLOAT32:
+#ifdef HAS_FLOAT
+	return (num->f == INFINITY) ? TRUE : FALSE;
+#else
+	return (num->f == NCX_MAX_LONG-1) ? TRUE : FALSE;
+#endif
     case NCX_BT_FLOAT64:
-	/* float does not have a max, MAX or INF is used instead */
-	return FALSE;
+#ifdef HAS_FLOAT
+	return (num->d == INFINITY) ? TRUE : FALSE;
+#else
+	return (num->d == NCX_MAX_LONG-1) ? TRUE : FALSE;
+#endif
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return FALSE;

@@ -896,21 +896,8 @@ void
 	m__free(rv->rangestr);
     }
 
-#ifdef HAS_FLOAT
-    (void)btyp;
-#else
-    if (btyp==NCX_BT_FLOAT32 && rv->lb.f) {
-        m__free(rv->lb.f);
-    } else if (btyp==NCX_BT_FLOAT64 && rv->lb.d) {
-        m__free(rv->lb.d);
-    }
-
-    if (btyp==NCX_BT_FLOAT32 && rv->ub.f) {
-        m__free(rv->ub.f);
-    } else if (btyp==NCX_BT_FLOAT64 && rv->ub.d) {
-        m__free(rv->ub.d);
-    }
-#endif
+    ncx_clean_num(btyp, &rv->lb);
+    ncx_clean_num(btyp, &rv->ub);
 
     if (rv->lbstr) {
 	m__free(rv->lbstr);
@@ -920,6 +907,7 @@ void
     }
 
     m__free(rv);
+
  }  /* typ_free_rangedef */
 
 

@@ -154,14 +154,14 @@ static void
 #ifdef HAS_FLOAT
 	log_write("%1.15f", num->f);
 #else
-	log_write("%s", (num->f) ? num->f : "--");
+	log_write("lld", num->f);
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	log_write("%1.15lf", num->d);
 #else
-	log_write("%s", (num->d) ? num->d : "--");
+	log_write("%lld", num->d);
 #endif
 	break;
     default:
@@ -206,14 +206,14 @@ static void
 #ifdef HAS_FLOAT
 	log_stdout("%f", num->f);
 #else
-	log_stdout("%s", (num->f) ? num->f : "--");
+	log_stdout("%lld", num->f);
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	log_stdout("%lf", num->d);
 #else
-	log_stdout("%s", (num->d) ? num->d : "--");
+	log_stdout("%lld", num->d);
 #endif
 	break;
     default:
@@ -617,16 +617,10 @@ static void
     case NCX_BT_FLOAT32:
 	ncx_clean_num(btyp, &dest->v.num);
 	dest->v.num.f = src->v.num.f;
-#ifndef HAS_FLOAT
-	src->v.num.f = NULL;
-#endif
 	break;
     case NCX_BT_FLOAT64:
 	ncx_clean_num(btyp, &dest->v.num);
 	dest->v.num.d = src->v.num.d;
-#ifndef HAS_FLOAT
-	src->v.num.d = NULL;
-#endif
 	break;
     case NCX_BT_BINARY:
 	ncx_clean_binary(&dest->v.binary);

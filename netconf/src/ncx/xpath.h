@@ -255,10 +255,9 @@ typedef enum xpath_testmode_t_ {
 /* XPath result node struct */
 typedef struct xpath_resnode_t_ {
     dlq_hdr_t             qhdr;
-    ncx_xpath_axis_t      axis;
     boolean               dblslash;
-    xpath_testmode_t      testmode;
-    val_value_t          *topvalptr;
+    int64                 position;
+    int64                 last;   /* only set in context node */
     union node_ {
 	const obj_template_t *objptr;
 	val_value_t          *valptr;
@@ -271,13 +270,12 @@ typedef struct xpath_result_t_ {
     dlq_hdr_t            qhdr;        /* in case saved in a Q */
     xpath_restype_t      restype;
     boolean              isval;   /* matters if XP_RT_NODESET */
-
+    int64                last;    /* used with XP_RT_NODESET */
     union r_ {
-	dlq_hdr_t            nodeQ;       /* Q of xpath_resnode_t */
-	boolean              bool; 
-	ncx_num_t            num;
-	xmlChar             *str;
-	ncx_var_t           *varptr;
+	dlq_hdr_t         nodeQ;       /* Q of xpath_resnode_t */
+	boolean           bool; 
+	ncx_num_t         num;
+	xmlChar          *str;
     } r;
 
     status_t             res;
@@ -398,7 +396,7 @@ typedef struct xpath_walkerparms_t_ {
     dlq_hdr_t         *resnodeQ;
     val_value_t       *topvalptr;
     ncx_xpath_axis_t   axis;
-    uint32             callcount;
+    int64              callcount;
     xpath_testmode_t   testmode;
     status_t           res;
 } xpath_walkerparms_t;

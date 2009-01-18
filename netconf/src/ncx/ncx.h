@@ -296,6 +296,10 @@ extern void
     ncx_set_num_zero (ncx_num_t *num,
 		      ncx_btype_t  btyp);
 
+extern void
+    ncx_set_num_nan (ncx_num_t *num,
+		     ncx_btype_t  btyp);
+
 extern boolean
     ncx_num_zero (const ncx_num_t *num,
 		  ncx_btype_t  btyp);
@@ -333,7 +337,7 @@ extern status_t
 		     ncx_btype_t  btyp);
 
 extern status_t
-    ncx_num_round (const ncx_num_t *num1,
+    ncx_round_num (const ncx_num_t *num1,
 		   ncx_num_t *num2,
 		   ncx_btype_t  btyp);
 

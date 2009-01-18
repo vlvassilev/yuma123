@@ -1734,13 +1734,11 @@ void
 
     switch (result->restype) {
     case XP_RT_NONE:
-	/****/
-	ncx_set_num_zero(num, NCX_BT_FLOAT64);
+	ncx_set_num_nan(num, NCX_BT_FLOAT64);
 	break;
     case XP_RT_NODESET:
 	if (dlq_empty(&result->r.nodeQ)) {
-	    /****/
-	    ncx_set_num_zero(num, NCX_BT_FLOAT64);
+	    ncx_set_num_nan(num, NCX_BT_FLOAT64);
 	} else {
 	    if (result->isval) {
 		resnode = (const xpath_resnode_t *)
@@ -1752,14 +1750,13 @@ void
 				       num,
 				       NCX_BT_FLOAT64);
 		    if (res != NO_ERR) {
-			/****/
-			ncx_set_num_zero(num, NCX_BT_FLOAT64);
+			ncx_set_num_nan(num, NCX_BT_FLOAT64);
 		    }			
 		} else {
-		    /****/
-		    ncx_set_num_zero(num, NCX_BT_FLOAT64);
+		    ncx_set_num_nan(num, NCX_BT_FLOAT64);
 		}
 	    } else {
+		/* does not matter */
 		ncx_set_num_zero(num, NCX_BT_FLOAT64);
 	    }
 	}
@@ -1777,12 +1774,11 @@ void
 	    if (res == NO_ERR) {
 		(void)ncx_copy_num(&testnum, num, NCX_BT_FLOAT64);
 	    } else {
-		ncx_set_num_one(num, NCX_BT_FLOAT64);
+		ncx_set_num_nan(num, NCX_BT_FLOAT64);
 	    }
 	    ncx_clean_num(NCX_BT_FLOAT64, &testnum);
 	} else {
-	    /****/
-	    ncx_set_num_zero(num, NCX_BT_FLOAT64);
+	    ncx_set_num_nan(num, NCX_BT_FLOAT64);
 	}
 	break;
     case XP_RT_BOOLEAN:

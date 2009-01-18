@@ -380,8 +380,8 @@ typedef union ncx_num_t_ {
     float f;                           /* NCX_BT_FLOAT */
     double d;                         /* NCX_BT_DOUBLE */
 #else
-    xmlChar  *f;                       /* NCX_BT_FLOAT */
-    xmlChar  *d;                      /* NCX_BT_DOUBLE */
+    int64  *f;                       /* NCX_BT_FLOAT */
+    int64  *d;                      /* NCX_BT_DOUBLE */
 #endif
 } ncx_num_t;
 

@@ -1900,9 +1900,7 @@ static status_t
 		res = ERR_INTERNAL_MEM;
 	    } else {
 		/* parse the attribute string against the typdef */
-		res = val_parse_meta(metadef, attr->attr_ns,
-				     attr->attr_name, 
-				     attr->attr_val, metaval);
+		res = val_parse_meta(metadef, attr, metaval);
 		if (res == NO_ERR) {
 		    dlq_enque(metaval, &retval->metaQ);
 		} else {

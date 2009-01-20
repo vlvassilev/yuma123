@@ -2009,6 +2009,7 @@ static status_t
 	     must != NULL;
 	     must = (xpath_pcb_t *)dlq_nextEntry(must)) {
 
+	    res = NO_ERR;
 	    result = xpath1_eval_expr(must, curval, root, 
 				      FALSE, TRUE, &res);
 	    if (!result || res != NO_ERR) {
@@ -2018,21 +2019,51 @@ static status_t
 			   obj_get_name(obj),
 			   get_error_string(res));
 
-		/**** agt_record_error(); invalid XPath ****/
+		if (res == NO_ERR) {
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		}
+		agt_record_error_errinfo(scb, msg,
+					 NCX_LAYER_CONTENT,
+					 res, NULL,
+					 NCX_NT_STRING,
+					 must->exprstr,
+					 NCX_NT_VAL,
+					 curval,
+					 (ncx_errinfo_set
+					  (&must->errinfo)) ?
+					 &must->errinfo : NULL);
+		CHK_EXIT(res, retres);
 	    } else if (!xpath_cvt_boolean(result)) {
-		/**** agt_record_error(); must failed ****/
-
+		res = ERR_NCX_MUST_TEST_FAILED;
+		agt_record_error_errinfo(scb, msg,
+					 NCX_LAYER_CONTENT,
+					 res,
+					 NULL,
+					 NCX_NT_STRING,
+					 must->exprstr,
+					 NCX_NT_VAL,
+					 curval,
+					 (ncx_errinfo_set
+					  (&must->errinfo)) ?
+					 &must->errinfo : NULL);
+		CHK_EXIT(res, retres);
+	    } else {
+		log_debug2("\nmust OK '%s'", must->exprstr);
 	    }
 
 	    if (result) {
 		xpath_free_result(result);
+	    }
+
+	    if (res != NO_ERR) {
+		curval->res = res;
 	    }
 	}
     }
 
     /* recurse for every child node until leafs are hit */
     for (chval = val_get_first_child(curval);
-	 chval != NULL;
+	 chval != NULL && retres == NO_ERR;
 	 chval = val_get_next_child(chval)) {
 
 	res = must_stmt_check(scb, msg, root, chval);

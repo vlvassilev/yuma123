@@ -23,6 +23,7 @@ date	     init     comment
 */
 
 #include <xmlstring.h>
+#include <xmlreader.h>
 #include <xmlregexp.h>
 
 #ifndef _H_dlq
@@ -288,6 +289,7 @@ typedef struct xpath_pcb_t_ {
     tk_chain_t          *tkc;               /* chain for exprstr */
     tk_token_t          *tk;              /* back-ptr for errors */
     xmlChar             *exprstr;           /* YANG XPath string */
+    xmlTextReaderPtr     reader;            /* get NS inside XML */
 
     /* the prefixes in the QNames in the exprstr MUST be resolved
      * in different contexts.  
@@ -444,7 +446,10 @@ extern status_t
 			   const xmlChar *target,
 			   val_value_t **targval);
 
-/* malloc a new XPath parser control block */
+/* malloc a new XPath parser control block
+ * xpathstr is allowed to be NULL, otherwise
+ * a strdup will be made and exprstr will be set
+ */
 extern xpath_pcb_t *
     xpath_new_pcb (const xmlChar *xpathstr);
 

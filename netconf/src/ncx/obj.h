@@ -149,6 +149,9 @@ date	     init     comment
 /* object used in a unique-stmt within a list */
 #define OBJ_FL_UNIQUE       bit20
 
+/* object data type is an XPath string */
+#define OBJ_FL_XPATH        bit21
+
 
 /********************************************************************
 *								    *
@@ -846,6 +849,10 @@ extern status_t
 extern void
     obj_set_ncx_flags (obj_template_t *obj);
 
+/* set the ncx:xpath flags */
+extern void
+    obj_set_xpath_flags (obj_template_t *obj);
+
 
 /***************** ACCESS OBJECT PROPERTIES  *******************/
 
@@ -1004,8 +1011,10 @@ extern boolean
 extern boolean
     obj_is_root (const obj_template_t *obj);
 
+#if 0
 extern boolean
     obj_is_toproot (const obj_template_t *obj);
+#endif
 
 extern boolean
     obj_is_password (const obj_template_t *obj);
@@ -1021,6 +1030,9 @@ extern boolean
 
 extern boolean
     obj_is_abstract (const obj_template_t *obj);
+
+extern boolean
+    obj_is_xpath_string (const obj_template_t *obj);
 
 extern boolean
     obj_is_system_ordered (const obj_template_t *obj);

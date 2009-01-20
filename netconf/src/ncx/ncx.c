@@ -4248,14 +4248,14 @@ void
 	break;
     case NCX_BT_FLOAT32:
 #ifdef HAS_FLOAT
-	log_write("%f", num->f);
+	log_write("%1.15f", num->f);
 #else
 	log_write("%lld", num->f);
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	log_write("%lf", num->d);
+	log_write("%1.15lf", num->d);
 #else
 	log_write("%lld", num->d);
 #endif

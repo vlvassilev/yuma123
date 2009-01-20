@@ -85,6 +85,15 @@ extern xpath_result_t *
 		      boolean configonly,
 		      status_t *res);
 
+extern xpath_result_t *
+    xpath1_eval_xmlexpr (xmlTextReaderPtr reader,
+			 xpath_pcb_t *pcb,
+			 val_value_t *val,
+			 val_value_t *docroot,
+			 boolean logerrors,
+			 boolean configonly,
+			 status_t *res);
+
 extern const xpath_fncb_t *
     xpath1_get_functions_ptr (void);
 

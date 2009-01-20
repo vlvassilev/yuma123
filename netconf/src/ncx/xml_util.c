@@ -58,6 +58,10 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -721,6 +725,10 @@ void
     if (attr->attr_val) {
 	m__free(attr->attr_val);
     }
+    if (attr->attr_xpcb) {
+	xpath_free_pcb(attr->attr_xpcb);
+    }
+
     m__free(attr);
 
 }  /* xml_free_attr */
@@ -788,32 +796,40 @@ status_t
 *    attr_qname == qualified attribute name string
 *    plen == attribute prefix length
 *    attr_val == attribute value string
+*    res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
 * RETURNS:
-*    NO_ERR if all okay
+*    pointer to attr that was added, NULL if none added
 *********************************************************************/
-status_t
+xml_attr_t *
     xml_add_qattr (xml_attrs_t *attrs, 
 		   xmlns_id_t  ns_id,
 		   const xmlChar *attr_qname,
 		   uint32  plen,
-		   const xmlChar *attr_val)
+		   const xmlChar *attr_val,
+		   status_t  *res)
 {
     xml_attr_t  *attr;
 
 #ifdef DEBUG
-    if (!attrs || !attr_qname || !attr_val) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
+    if (!attrs || !attr_qname || !attr_val || !res) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
     }
 #endif
 
     attr = xml_new_attr();
     if (!attr) {
-        return ERR_INTERNAL_MEM;
+        *res = ERR_INTERNAL_MEM;
+	return NULL;
     }
     attr->attr_dname = xml_strdup(attr_qname);
     if (!attr->attr_dname) {
 	xml_free_attr(attr);
-        return ERR_INTERNAL_MEM;
+        *res = ERR_INTERNAL_MEM;
+	return NULL;
     }
     attr->attr_qname = attr->attr_dname;
     attr->attr_name = attr->attr_dname+plen;
@@ -821,11 +837,14 @@ status_t
     attr->attr_val = xml_strdup(attr_val);
     if (!attr->attr_val) {
 	xml_free_attr(attr);
-        return SET_ERROR(ERR_INTERNAL_MEM);
+        *res = ERR_INTERNAL_MEM;
+	return NULL;
     }
+
     attr->attr_ns = ns_id;
     dlq_enque(attr, attrs);
-    return NO_ERR;
+    *res = NO_ERR;
+    return attr;
 
 }  /* xml_add_qattr */
 
@@ -2027,6 +2046,68 @@ void
     }
 
 }  /* xml_check_qname_content */
+
+
+/********************************************************************
+* FUNCTION xml_get_namespace_id
+* 
+* Get the namespace for the specified prefix (may be NULL)
+* Use the current XML reader context to resolve the prefix
+*
+* INPUTS:
+*    reader == XML reader to use
+*    prefix == prefix string to use (NULL == default namespace)
+*    prefixlen == N if not a Z-terminated string
+*              == 0 if it is a Z-terminated string
+*    retnsid == address of return namespace ID
+*
+* OUTPUTS:
+*    *retnsid == XMLNS ID for the namespace, 0 if none found
+*               INVALID ID if unknown
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xml_get_namespace_id (xmlTextReaderPtr reader,
+			  const xmlChar *prefix,
+			  uint32 prefixlen,
+			  xmlns_id_t  *retnsid)
+{
+    xmlChar *str, *ns;
+
+#ifdef DEBUG
+    if (!reader || !retnsid) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (prefix && prefixlen) {
+	str = xml_strndup(prefix, prefixlen);
+	if (!str) {
+	    return ERR_INTERNAL_MEM;
+	}
+	ns = xmlTextReaderLookupNamespace(reader, str);
+	if (ns) {
+	    *retnsid = xmlns_find_ns_by_name(ns);
+	    xmlFree(ns);
+	}
+	m__free(str);
+    } else if (prefix) {
+	ns = xmlTextReaderLookupNamespace(reader, prefix);
+	if (ns) {
+	    *retnsid = xmlns_find_ns_by_name(ns);
+	    xmlFree(ns);
+	}
+    } else {
+	ns = xmlTextReaderLookupNamespace(reader, NULL);
+	if (ns) {
+	    *retnsid = xmlns_find_ns_by_name(ns);
+	    xmlFree(ns);
+	}
+    }
+    return NO_ERR;
+
+}  /* xml_get_namespace_id */
 
 
 /* END xml_util.c */

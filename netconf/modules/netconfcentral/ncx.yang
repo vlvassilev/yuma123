@@ -455,5 +455,21 @@ module ncx {
     }
   }
 
+  extension xpath {
+    description
+      "Used to indicate that the content of a data type
+       is an XPath expression.  This is needed to properly
+       evaluate the namespace prefixes within the expression.
+
+       The xpath extension may appear within the type-stmt,
+       within a typedef, leaf, or leaf-list.  The builtin
+       data type must be 'string', or the 'xpath' extension
+       will be ignored.
+
+       All data using the 'instance-identifier' built-in type
+       will automatically be processed as an XPath string,
+       so the xpath extension is not needed in that case.";
+  }
+ 
 }
 

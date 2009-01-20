@@ -2562,6 +2562,56 @@ const ncx_appinfo_t *
 
 
 /********************************************************************
+* FUNCTION typ_is_xpath_string
+*
+* Find the ncx:xpath extension within the specified typdef chain
+*
+* INPUTS:
+*  typdef == start of typ_def_t chain to check
+*
+* RETURNS:
+*   TRUE if ncx:xpath extension found
+*   FALSE otherwise
+*********************************************************************/
+boolean
+    typ_is_xpath_string (const typ_def_t *typdef)
+{
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    if (typ_get_basetype(typdef) == NCX_BT_INSTANCE_ID) {
+	return TRUE;
+    }
+
+    if (ncx_find_appinfo(&typdef->appinfoQ,
+			 NCX_PREFIX, NCX_EL_XPATH)) {
+	return TRUE;
+    }
+
+    if (typdef->class == NCX_CL_NAMED) {
+	if (typdef->def.named.newtyp &&
+	    ncx_find_appinfo(&typdef->def.named.newtyp->appinfoQ,
+			     NCX_PREFIX, NCX_EL_XPATH)) {
+	    return TRUE;
+	}
+	if (typdef->def.named.typ) {
+	    return typ_is_xpath_string(&typdef->def.named.typ->typdef);
+	} else {
+	    return FALSE;
+	}
+    } else {
+	return FALSE;
+    }
+
+}  /* typ_is_xpath_string */
+
+
+/********************************************************************
 * FUNCTION typ_get_defval
 *
 * Find the default value string for the specified type template

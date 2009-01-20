@@ -85,6 +85,10 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
 #ifndef _H_yangconst
 #include "yangconst.h"
 #endif
@@ -545,7 +549,6 @@ static void
 
     if (val->dname) {
 	m__free(val->dname);
-	val->dname = NULL;
     }
 
     while (!dlq_empty(&val->metaQ)) {
@@ -560,6 +563,10 @@ static void
 
     if (val->insertstr) {
 	m__free(val->insertstr);
+    }
+
+    if (val->xpathpcb) {
+	xpath_free_pcb(val->xpathpcb);
     }
 
     if (redo) {
@@ -6277,9 +6284,7 @@ boolean
 *
 * INPUTS:
 *     typdef == typdef to check
-*     nsid   == attribute namespace ID
-*     attrname == attribute name string
-*     attrval == attribute value string
+*     attr == XML attribute to check
 *     retval == initialized val_value_t to fill in
 *
 * OUTPUTS:
@@ -6289,34 +6294,35 @@ boolean
 *********************************************************************/
 status_t
     val_parse_meta (const typ_def_t *typdef,
-		xmlns_id_t    nsid,
-		const xmlChar *attrname,
-		const xmlChar *attrval,
-		val_value_t *retval)
+		    xml_attr_t *attr,
+		    val_value_t *retval)
 {
-    ncx_btype_t  btyp;
-    int32        enuval;
-    const xmlChar *enustr;
-    status_t     res;
+    const xmlChar   *enustr, *attrval;
+    ncx_btype_t      btyp;
+    int32            enuval;
+    status_t         res;
 
 #ifdef DEBUG
-    if (!typdef || !attrname || !attrval) {
+    if (!typdef || !attr || !retval) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     btyp = typ_get_basetype(typdef);
+    attrval = attr->attr_val;
 
     /* setup the return value */
     retval->flags |= VAL_FL_META;  /* obj field is NULL in meta */
     retval->btyp = btyp;
     retval->typdef = typdef;
-    retval->dname = xml_strdup(attrname);
+    retval->dname = xml_strdup(attr->attr_name);
     if (!retval->dname) {
 	return ERR_INTERNAL_MEM;
     }
     retval->name = retval->dname;
-    retval->nsid = nsid;
+    retval->nsid = attr->attr_ns;
+    retval->xpathpcb = attr->attr_xpcb;
+    attr->attr_xpcb = NULL;
 
     /* handle the attr string according to its base type */
     switch (btyp) {

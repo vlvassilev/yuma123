@@ -256,12 +256,12 @@ typedef enum status_t_
     ERR_NCX_PATTERN_FAILED,             /* 333 */
     ERR_NCX_INVALID_TYPE_CHANGE,        /* 334 */
     ERR_NCX_MANDATORY_NOT_ALLOWED,      /* 335 */
-    ERR_NCX_UNIQUE_TEST_FAILED,         /* 336 */  /* 12.1 */
-    ERR_NCX_MAX_ELEMS_VIOLATION,        /* 337 */  /* 12.2 */
-    ERR_NCX_MIN_ELEMS_VIOLATION,        /* 338 */  /* 12.3 */
-    ERR_NCX_MUST_TEST_FAILED,           /* 339 */  /* 12.4 */
+    ERR_NCX_UNIQUE_TEST_FAILED,         /* 336 */  /* 13.1 */
+    ERR_NCX_MAX_ELEMS_VIOLATION,        /* 337 */  /* 13.2 */
+    ERR_NCX_MIN_ELEMS_VIOLATION,        /* 338 */  /* 13.3 */
+    ERR_NCX_MUST_TEST_FAILED,           /* 339 */  /* 13.4 */
     ERR_NCX_DATA_REST_VIOLATION,        /* 340 */  /* not used */
-    ERR_NCX_INSERT_MISSING_INSTANCE,    /* 341 */  /* 12.5 */
+    ERR_NCX_INSERT_MISSING_INSTANCE,    /* 341 */  /* 13.5 */
     ERR_NCX_NOT_CONFIG,                 /* 342 */
     ERR_NCX_INVALID_CONDITIONAL,        /* 343 */
     ERR_NCX_USING_OBSOLETE,             /* 344 */

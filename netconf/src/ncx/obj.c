@@ -2037,11 +2037,11 @@ static boolean
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_LIST:
     case OBJ_TYP_CHOICE:
-	if (obj_is_toproot(obj)) {
+	if (obj_is_root(obj)) {
 	    *setflag = TRUE;
 	    return TRUE;
 	} else if ((obj->parent && 
-		    !obj_is_toproot(obj->parent)) || obj->grp) {
+		    !obj_is_root(obj->parent)) || obj->grp) {
 	    *setflag = (obj->flags & OBJ_FL_CONFSET) 
 		? TRUE : FALSE;
 	} else {
@@ -2127,7 +2127,7 @@ static status_t
 
     *retlen = 0;
 
-    if (obj->parent && !obj_is_toproot(obj->parent)) {
+    if (obj->parent && !obj_is_root(obj->parent)) {
 	res = get_object_string(obj->parent, buff, 
 				bufflen, normalmode, retlen);
 	if (res != NO_ERR) {
@@ -3792,7 +3792,7 @@ boolean
     }
 #endif
 
-    if (obj_is_toproot(startnode) && !useroot) {
+    if (obj_is_root(startnode) && !useroot) {
 
 	for (obj = ncx_get_first_data_object(exprmod);
 	     obj != NULL;
@@ -3943,7 +3943,7 @@ boolean
 	obj = startnode->parent;
     }
 
-    if (obj && obj_is_toproot(obj) && !useroot) {
+    if (obj && obj_is_root(obj) && !useroot) {
 
 	for (obj = ncx_get_first_data_object(exprmod);
 	     obj != NULL;
@@ -4089,7 +4089,7 @@ boolean
 
     *fncalled = FALSE;
 
-    if (obj_is_toproot(startnode) && !useroot) {
+    if (obj_is_root(startnode) && !useroot) {
 
 	for (obj = ncx_get_first_data_object(exprmod);
 	     obj != NULL;
@@ -4257,11 +4257,11 @@ boolean
 	return FALSE;
     }
 
-    if (obj_is_toproot(startnode) && !dblslash) {
+    if (obj_is_root(startnode) && !dblslash) {
 	return TRUE;
     }
 
-    if (obj_is_toproot(startnode) && !useroot) {
+    if (obj_is_root(startnode) && !useroot) {
 
 	for (obj = ncx_get_first_data_object(exprmod);
 	     obj != NULL;
@@ -4544,7 +4544,7 @@ typ_template_t *
 	}
     }
 
-    if (obj->parent && !obj_is_toproot(obj->parent)) {
+    if (obj->parent && !obj_is_root(obj->parent)) {
 	return obj_find_type(obj->parent, typname);
     } else {
 	return NULL;
@@ -4641,7 +4641,7 @@ grp_template_t *
 	}
     }
 
-    if (obj->parent && !obj_is_toproot(obj->parent)) {
+    if (obj->parent && !obj_is_root(obj->parent)) {
 	return obj_find_grouping(obj->parent, grpname);
     } else {
 	return NULL;
@@ -6794,7 +6794,7 @@ uint32
 
     level = 1;
     parent = obj->parent;
-    while (parent && !obj_is_toproot(parent)) {
+    while (parent && !obj_is_root(parent)) {
 	level++;
 	parent = parent->parent;
     }
@@ -7553,7 +7553,7 @@ boolean
     case OBJ_TYP_REFINE:
 	return FALSE;
     default:
-	if (obj->parent && !obj_is_toproot(obj->parent)) {
+	if (obj->parent && !obj_is_root(obj->parent)) {
 	    return obj_is_data(obj->parent);
 	} else {
 	    return TRUE;
@@ -7597,9 +7597,9 @@ boolean
     case OBJ_TYP_REFINE:
 	return FALSE;
     default:
-	if (obj_is_toproot(obj)) {
+	if (obj_is_root(obj)) {
 	    return TRUE;
-	} else if (obj->parent && !obj_is_toproot(obj->parent)) {
+	} else if (obj->parent && !obj_is_root(obj->parent)) {
 	    return obj_is_data_db(obj->parent);
 	} else {
 	    return TRUE;
@@ -7642,7 +7642,7 @@ boolean
     case OBJ_TYP_REFINE:
 	return FALSE;
     default:
-	if (obj->parent && !obj_is_toproot(obj->parent)) {
+	if (obj->parent && !obj_is_root(obj->parent)) {
 	    return obj_in_rpc(obj->parent);
 	} else {
 	    return FALSE;
@@ -7685,7 +7685,7 @@ boolean
     case OBJ_TYP_REFINE:
 	return FALSE;
     default:
-	if (obj->parent && !obj_is_toproot(obj->parent)) {
+	if (obj->parent && !obj_is_root(obj->parent)) {
 	    return obj_in_rpc_reply(obj->parent);
 	} else {
 	    return FALSE;
@@ -7728,7 +7728,7 @@ boolean
     case OBJ_TYP_REFINE:
 	return FALSE;
     default:
-	if (obj->parent && !obj_is_toproot(obj->parent)) {
+	if (obj->parent && !obj_is_root(obj->parent)) {
 	    return obj_in_notif(obj->parent);
 	} else {
 	    return FALSE;
@@ -7878,7 +7878,56 @@ void
 	obj->flags |= OBJ_FL_ABSTRACT;
     }
 
+    if (obj->objtype == OBJ_TYP_LEAF && 
+	obj_get_basetype(obj) != NCX_BT_ANY) {
+	if (typ_is_xpath_string(obj->def.leaf->typdef)) {
+	    obj->flags |= OBJ_FL_XPATH;
+	}
+    } else if (obj->objtype == OBJ_TYP_LEAF_LIST &&
+	       obj_get_basetype(obj) != NCX_BT_ANY) {
+	if (typ_is_xpath_string(obj->def.leaflist->typdef)) {
+	    obj->flags |= OBJ_FL_XPATH;
+	}
+    }
+
 }   /* obj_set_ncx_flags */
+
+
+/********************************************************************
+* FUNCTION obj_set_xpath_flags
+*
+* Check the NCX xpath appinfo extensions and set flags as needed
+*
+** INPUTS:
+*   obj == obj_template to check
+*
+* OUTPUTS:
+*   may set additional bits in the obj->flags field
+*
+*********************************************************************/
+void
+    obj_set_xpath_flags (obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (obj->objtype == OBJ_TYP_LEAF && 
+	obj_get_basetype(obj) != NCX_BT_ANY) {
+	if (typ_is_xpath_string(obj->def.leaf->typdef)) {
+	    obj->flags |= OBJ_FL_XPATH;
+	}
+    } else if (obj->objtype == OBJ_TYP_LEAF_LIST &&
+	       obj_get_basetype(obj) != NCX_BT_ANY) {
+	if (typ_is_xpath_string(obj->def.leaflist->typdef)) {
+	    obj->flags |= OBJ_FL_XPATH;
+	}
+    }
+
+}   /* obj_set_xpath_flags */
 
 
 /********************************************************************
@@ -7937,6 +7986,7 @@ boolean
 }   /* obj_is_root */
 
 
+#if 0
 /********************************************************************
 * FUNCTION obj_is_toproot
 *
@@ -7966,6 +8016,7 @@ boolean
     return (top && top == obj) ? TRUE : FALSE;
 
 }   /* obj_is_toproot */
+#endif
 
 
 /********************************************************************
@@ -8106,6 +8157,35 @@ boolean
     return (obj->flags & OBJ_FL_ABSTRACT) ? TRUE : FALSE;
 
 }   /* obj_is_abstract */
+
+
+/********************************************************************
+* FUNCTION obj_is_xpath_string
+*
+* Check if object is an XPath string
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:xpath
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_xpath_string (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return ((obj->flags & OBJ_FL_XPATH) ||
+	    obj_get_basetype(obj)==NCX_BT_INSTANCE_ID) ? TRUE : FALSE;
+
+}   /* obj_is_xpath_string */
 
 
 /********************************************************************

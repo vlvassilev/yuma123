@@ -43,4 +43,32 @@
       <t:c2>-1</t:c2>
    </t:test3>
    <t:idtest xmlns:t="http://netconfcentral.com/ns/test">t:id-C</t:idtest>
+   <tm:test1 xmlns:tm="http://netconfcentral.com/ns/testmust">
+     <tm:doc>
+       <tm:chapter>
+	 <tm:id>2</tm:id>
+	 <tm:title>test one</tm:title>
+	 <tm:section>
+	   <tm:id>4</tm:id>	   
+	   <tm:para>this is another test</tm:para>
+	 </tm:section>
+	 <tm:section>
+	   <tm:id>5</tm:id>	   
+	   <tm:para>this is another test</tm:para>
+	 </tm:section>
+	 <tm:section>
+	   <tm:id>2</tm:id>	   
+	   <tm:para>this is another test 2</tm:para>
+	 </tm:section>
+	 <tm:section>
+	   <tm:id>1</tm:id>	   
+	   <tm:para>this is another test 3</tm:para>
+	 </tm:section>
+	 <tm:section>
+	   <tm:id>11</tm:id>	   
+	   <tm:para>this is another test 4</tm:para>
+	 </tm:section>
+       </tm:chapter>
+     </tm:doc>
+   </tm:test1>
 </nd:config>

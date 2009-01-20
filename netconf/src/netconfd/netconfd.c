@@ -153,6 +153,12 @@ static status_t
     if (res != NO_ERR) {
 	return res;
     }
+
+    /* Load testmust module */
+    res = ncxmod_load_module((const xmlChar *) "testmust");
+    if (res != NO_ERR) {
+	return res;
+    }
 #endif
 
     return NO_ERR;

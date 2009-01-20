@@ -598,6 +598,10 @@ extern const ncx_appinfo_t *
 			  const xmlChar *prefix,
 			  const xmlChar *name);
 
+extern boolean
+    typ_is_xpath_string (const typ_def_t *typdef);
+
+
 /* get default from template */
 extern const xmlChar * 
     typ_get_defval (const typ_template_t *typ);

@@ -3357,24 +3357,29 @@ static ncx_var_t *
 						    prefixlen,
 						    pcb->mod,
 						    &targmod);
-	    if (*res != NO_ERR) {
-		return NULL;
+	    if (*res == NO_ERR) {
+		nsid = targmod->nsid;
 	    }
-	    nsid = targmod->nsid;
 	}
-
-	/* try to find the variable */
-	var = var_get_que_raw(pcb->varbindQ, nsid, name);
-	if (!var) {
-	    *res = ERR_NCX_DEF_NOT_FOUND;
-	}
-	return var;
+    } else if (pcb->reader) {
+	*res = xml_get_namespace_id(pcb->reader,
+				    prefix,
+				    prefixlen,
+				    &nsid);
     } else {
-	/*** agent TBD ***/
 	*res = ERR_NCX_DEF_NOT_FOUND;
+    }
+
+    if (*res != NO_ERR) {
 	return NULL;
     }
-    /*NOTREACHED*/
+
+    /* try to find the variable */
+    var = var_get_que_raw(pcb->varbindQ, nsid, name);
+    if (!var) {
+	*res = ERR_NCX_DEF_NOT_FOUND;
+    }
+    return var;
 
 }  /* get_varbind */
 
@@ -3452,24 +3457,31 @@ static status_t
     status_t        res;
 
     res = NO_ERR;
-    if (pcb->source != XP_SRC_XML) {
-	prefix = TK_CUR_MOD(pcb->tkc);
-	prefixlen = TK_CUR_MODLEN(pcb->tkc);
 
-	res = xpath_get_curmod_from_prefix_str(prefix, prefixlen,
-					       pcb->mod, &targmod);
+    prefix = TK_CUR_MOD(pcb->tkc);
+    prefixlen = TK_CUR_MODLEN(pcb->tkc);
 
-	if (res != NO_ERR) {
-	    if (pcb->logerrors) {
-		log_error("\nError: Module for prefix '%s' not found",
-			  (prefix) ? prefix : EMPTY_STRING);
-		ncx_print_errormsg(pcb->tkc, pcb->mod, res);
-	    }
-	} else if (nsid) {
+    if (pcb->reader) {
+	res = xml_get_namespace_id(pcb->reader,
+				   prefix,
+				   prefixlen,
+				   nsid);
+    } else {
+	res = xpath_get_curmod_from_prefix_str(prefix, 
+					       prefixlen,
+					       pcb->mod, 
+					       &targmod);
+	if (res == NO_ERR) {
 	    *nsid = targmod->nsid;
 	}
-    } else {
-	/*** check agent prefix ***/;
+    }
+
+    if (res != NO_ERR) {
+	if (pcb->logerrors) {
+	    log_error("\nError: Module for prefix '%s' not found",
+		      (prefix) ? prefix : EMPTY_STRING);
+	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	}
     }
 
     return res;
@@ -3527,7 +3539,7 @@ static xpath_result_t *
 	len = 0;
 	res = val_sprintf_simval_nc(NULL, val, &len);
 	if (res == NO_ERR) {
-	    result = new_result(pcb, NCX_BT_STRING);
+	    result = new_result(pcb, XP_RT_STRING);
 	    if (result) {
 		result->r.str = m__getMem(len+1);
 		if (!result->r.str) {
@@ -4313,7 +4325,7 @@ static status_t
 		    /* find a parent but not a case or choice */
 		    testobj = testobj->parent;
 		    while (testobj && testobj->parent && 
-			   !obj_is_toproot(testobj->parent) &&
+			   !obj_is_root(testobj->parent) &&
 			   (testobj->objtype==OBJ_TYP_CHOICE ||
 			    testobj->objtype==OBJ_TYP_CASE)) {
 			testobj = testobj->parent;
@@ -5022,14 +5034,18 @@ static status_t
 	break;
     case TK_TT_NCNAME_STAR:
 	/* match all nodes in the namespace w/ specified prefix */
-	res = check_qname_prefix(pcb, &pcb->tkc->cur->nsid);
+	if (!pcb->tkc->cur->nsid) {
+	    res = check_qname_prefix(pcb, &pcb->tkc->cur->nsid);
+	}
 	if (res == NO_ERR) {
 	    nsid = pcb->tkc->cur->nsid;
 	}
 	break;
     case TK_TT_MSTRING:
 	/* match all nodes in the namespace w/ specified prefix */
-	res = check_qname_prefix(pcb, &pcb->tkc->cur->nsid);
+	if (!pcb->tkc->cur->nsid) {
+	    res = check_qname_prefix(pcb, &pcb->tkc->cur->nsid);
+	}
 	if (res == NO_ERR) {
 	    nsid = pcb->tkc->cur->nsid;
 	    name = TK_CUR_VAL(pcb->tkc);
@@ -5379,8 +5395,18 @@ static status_t
 	contextset = *result;
 	if (!contextset) {
 	    return SET_ERROR(ERR_INTERNAL_VAL);
-	} else if (contextset->restype == XP_RT_NODESET &&
-		   !dlq_empty(&contextset->r.nodeQ)) {
+	} else if (contextset->restype == XP_RT_NODESET) {
+	    if (dlq_empty(&contextset->r.nodeQ)) {
+		/* always one pass; do not care about result */
+		val1 = parse_expr(pcb, &res);
+		if (res == NO_ERR) {
+		    res = xpath_parse_token(pcb, TK_TT_RBRACK);
+		}
+		if (val1) {
+		    free_result(pcb, val1);
+		}
+		return res;
+	    }
 
 	    lastcontext.node.valptr = 
 		pcb->context.node.valptr;
@@ -5389,7 +5415,7 @@ static status_t
 	    lastcontext.dblslash = pcb->context.dblslash;
 
 	    for (resnode = (xpath_resnode_t *)
-		     dlq_firstEntry(&(*result)->r.nodeQ);
+		     dlq_firstEntry(&contextset->r.nodeQ);
 		 resnode != NULL;
 		 resnode = nextnode) {
 
@@ -6013,7 +6039,7 @@ static xpath_result_t *
 	    }
 
 	    *res = ncx_decode_num(TK_CUR_VAL(pcb->tkc),
-				  NCX_BT_FLOAT32,
+				  NCX_BT_FLOAT64,
 				  &val1->r.num);
 	}
 	break;
@@ -6237,7 +6263,10 @@ static xpath_result_t *
 	    if (*res == NO_ERR) {
 		/*   *res = eval_xpath_op(val1, val2, curop);  */
             }
-        }
+        } else {
+	    val2 = val1;
+	    val1 = NULL;
+	}
     }
 
     if (val1) {
@@ -7384,7 +7413,7 @@ status_t
     if (!rootdone) {
 	/* get the rpc/input, rpc/output, or /notif node */
 	rootobj = obj;
-	while (rootobj->parent && !obj_is_toproot(rootobj->parent) &&
+	while (rootobj->parent && !obj_is_root(rootobj->parent) &&
 	       rootobj->objtype != OBJ_TYP_RPCIO) {
 	    rootobj = rootobj->parent;
 	}
@@ -7510,13 +7539,115 @@ xpath_result_t *
 
     result = parse_expr(pcb, &pcb->valueres);
 
-    if (LOGDEBUG2) {
+    if (LOGDEBUG2 && result) {
 	dump_result(pcb, result, "eval_expr");
     }
 
     return result;
 
 }  /* xpath1_eval_expr */
+
+
+/********************************************************************
+* FUNCTION xpath1_eval_xmlexpr
+* 
+* Evaluate the expression and get the expression nodeset result
+* Called from inside the XML parser, so the XML reader
+* must be used to get the XML namespace to prefix mappings
+*
+* INPUTS:
+*    reader == XML reader to use
+*    pcb == initialized XPath parser control block
+*           the xpath_new_pcb(exprstr) function is
+*           all that is needed.  This function will
+*           vall xpath1_parse_expr if it has not
+*           already been called.
+*    val == start context node for value of current()
+*    docroot == ptr to cfg->root or top of rpc/rpc-replay/notif tree
+*    logerrors == TRUE if log_error and ncx_print_errormsg
+*                  should be used to log XPath errors and warnings
+*                 FALSE if internal error info should be recorded
+*                 in the xpath_result_t struct instead
+*                !!! use FALSE unless DEBUG mode !!!
+*    configonly == 
+*           XP_SRC_XML:
+*                 TRUE if this is a <get-config> call
+*                 and all config=false nodes should be skipped
+*                 FALSE if <get> call and non-config nodes
+*                 will not be skipped
+*           XP_SRC_YANG and XP_SRC_KEYREF:
+*                 should be set to false
+*     res == address of return status
+*
+* OUTPUTS:
+*   *res is set to the return status
+*
+* RETURNS:
+*   malloced result struct with expr result
+*   NULL if no result produced (see *res for reason)
+*********************************************************************/
+xpath_result_t *
+    xpath1_eval_xmlexpr (xmlTextReaderPtr reader,
+			 xpath_pcb_t *pcb,
+			 val_value_t *val,
+			 val_value_t *docroot,
+			 boolean logerrors,
+			 boolean configonly,
+			 status_t *res)
+{
+    xpath_result_t *result;
+
+#ifdef DEBUG
+    if (!pcb || !res) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    if (pcb->tkc) {
+	tk_reset_chain(pcb->tkc);
+    } else {
+	pcb->tkc = tk_tokenize_xpath_string(NULL, pcb->exprstr, 
+					    0, 0, res);
+	if (!pcb->tkc || *res != NO_ERR) {
+	    if (logerrors) {
+		log_error("\nError: Invalid XPath string '%s'",
+			  pcb->exprstr);
+		ncx_print_errormsg(NULL, NULL, *res);
+	    }
+	    return NULL;
+	}
+    }
+
+    pcb->obj = NULL;
+    pcb->mod = NULL;
+    pcb->val = val;
+    pcb->val_docroot = docroot;
+    pcb->logerrors = logerrors;
+    pcb->reader = reader;
+
+    if (val) {
+	pcb->context.node.valptr = val;
+    } else {
+	pcb->context.node.valptr = docroot;
+    }
+
+    if (configonly ||
+	(pcb->source == XP_SRC_YANG && obj_is_config(val->obj))) {
+	pcb->flags |= XP_FL_CONFIGONLY;
+    }
+
+    pcb->flags |= XP_FL_USEROOT;
+
+    result = parse_expr(pcb, &pcb->valueres);
+
+    if (LOGDEBUG2 && result) {
+	dump_result(pcb, result, "eval_xmlexpr");
+    }
+
+    return result;
+
+}  /* xpath1_eval_xmlexpr */
 
 
 /********************************************************************

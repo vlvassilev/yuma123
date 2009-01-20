@@ -66,6 +66,18 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
+#ifndef _H_xpath1
+#include "xpath1.h"
+#endif
+
+#ifndef _H_yangconst
+#include "yangconst.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -196,8 +208,6 @@ static void
 }  /* get_errnode */
 
 
-
-
 /********************************************************************
 * FUNCTION get_all_attrs
 * 
@@ -229,15 +239,17 @@ static status_t
 		   xml_msg_hdr_t *msghdr,
 		   boolean nserr)
 {
-    int            i, cnt, ret;
-    xmlChar       *value;
-    const xmlChar *badns, *name;
-    xmlns_id_t     nsid;
-    status_t       res;
-    boolean        done;
-    xml_attr_t     errattr;
-    xml_node_t     errnode;
-    uint32         plen;
+    xmlChar        *value;
+    const xmlChar  *badns, *name;
+    xpath_result_t *result;
+    xml_attr_t     *attr;
+    int             i, cnt, ret;
+    xmlns_id_t      nsid;
+    status_t        res;
+    boolean         done;
+    xml_attr_t      errattr;
+    xml_node_t      errnode;
+    uint32          plen;
 
     /* check the attribute count first */
     cnt = xmlTextReaderAttributeCount(scb->reader);
@@ -284,7 +296,39 @@ static status_t
 		    /* save the values as received, may be QName 
 		     * only error that can occur is a malloc fail
 		     */
-		    res = xml_add_qattr(attrs, nsid, name, plen, value);
+		    attr = xml_add_qattr(attrs, nsid, name, 
+					 plen, value, &res);
+		    if (attr && !xml_strcmp(name, NCX_EL_SELECT)) {
+			/* special hack: do not know which
+			 * attributes within an XML node
+			 * are tagged as XPath strings at this point
+			 * To save resources, only the 'select'
+			 * attribute is supported at this time.
+			 * Only check the name, not the namespace
+			 * since it is often left out for attributes
+			 */
+			attr->attr_xpcb = xpath_new_pcb(value);
+			if (!attr->attr_xpcb) {
+			    res = ERR_INTERNAL_MEM;
+			} else {
+			    /* do a first pass parsing to resolve all
+			     * the prefixes and check well-formed XPath
+			     */
+			    result = xpath1_eval_xmlexpr(scb->reader,
+							 attr->attr_xpcb,
+							 NULL,
+							 NULL,
+							 FALSE,
+							 FALSE,
+							 &res);
+			    if (result) {
+				xpath_free_result(result);
+			    }
+			    if (!NEED_EXIT(res)) {
+				res = NO_ERR;
+			    }
+			}
+		    }
 		    xmlFree(value);
 		} else {
 		    res = ERR_XML_READER_NULLVAL;
@@ -469,8 +513,8 @@ static status_t
 	/* set the element name to the char after the prefix, if any */
 	node->elname = (const xmlChar *)(str+len);
 	
-	/* get all the attributes -- should be none for XML_NT_END */
-	if (res == NO_ERR) {
+	/* get all the attributes, except for XML_NT_END */
+	if (res == NO_ERR && node->nodetyp != XML_NT_END) {
 	    res2 = get_all_attrs(scb, &node->attrs, 
 				 layer, msghdr, nserr);
 	}

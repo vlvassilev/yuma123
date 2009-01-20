@@ -275,10 +275,10 @@ typedef struct val_value_t_ {
     const struct obj_template_t_   *casobj;
 
     /* these fields are for NCX_BT_KEYREF
+     * NCX_BT_INSTANCE_ID, or tagged ncx:xpath 
      * value stored in v union as a string
      */
-    struct xpath_pcb_t_            *krpcb;
-    ncx_btype_t                     krbtyp;
+    struct xpath_pcb_t_            *xpathpcb;
 
     /* union of all the NCX-specific sub-types
      * note that the following invisible constructs should
@@ -811,9 +811,7 @@ extern boolean
 
 extern status_t
     val_parse_meta (const typ_def_t *typdef,
-		    xmlns_id_t    nsid,
-		    const xmlChar *attrname,
-		    const xmlChar *attrval,
+		    xml_attr_t *attr,
 		    val_value_t *retval);
 
 extern void

@@ -4,8 +4,8 @@ module netconf {
 
    prefix "nc";
 
-   // for XSD types like anyURI
-   import xsd { prefix "xs"; }
+   // for the uri data type
+   import yang-types { prefix "yang"; }
 
    // for NCX 'metadata' language extension
    import ncx { prefix "ncx"; }
@@ -192,6 +192,13 @@ module netconf {
      default "subtree";
    }
 
+   typedef SelectString {
+     description "XPath string used in the select attribute.";
+     type string {
+       ncx:xpath;
+     }
+   }
+
    typedef EditOperationType {
      description "NETCONF 'operation' Attribute Content";
      type enumeration { 
@@ -224,7 +231,7 @@ module netconf {
    }
 
    typedef ConfigURIType {
-     type xs:anyURI;
+     type yang:uri;
    }
 
    // NETCONF Hello PDU Data Types
@@ -236,7 +243,7 @@ module netconf {
        config false;
        leaf-list capability {
           description "One Generic Capability URI.";
-          type xs:anyURI;
+          type yang:uri;
        }
      }
    }
@@ -276,7 +283,7 @@ module netconf {
          "Name of the missing or invalid XSD attribute.
           Used with missing-attribute, bad-attribute, and
           unknown-attribute error-tag values.";
-       type   xs:QName;
+       type   string;           // xs:QName
        config false;
      }
 
@@ -288,7 +295,7 @@ module netconf {
           Name of an invalid or missing element when used with
           then missing-element, bad-element, unknown-element,
           and unknown-namespace error-tag values.";
-       type   xs:QName;
+       type   string;             // xs:QName
        config false;
      }
 
@@ -300,7 +307,7 @@ module netconf {
           can appear zero or more times in the 'error-info'
           container.  Used with the partial-operation error-tag
           value.";
-       type   xs:QName;
+       type   string;                    // xs:QName
        config false;
      }
 
@@ -312,7 +319,7 @@ module netconf {
           can appear zero or more times in the 'error-info'
           container.   Used with the partial-operation error-tag
           value.";
-        type   xs:QName;
+        type   string;                   // xs:QName
         config false;
       }
 
@@ -324,7 +331,7 @@ module netconf {
            can appear zero or more times in the <error-info>
            container.   Used with the partial-operation error-tag
            value.";
-        type   xs:QName;
+        type   string;                  // xs:QName
         config false;
       }
 
@@ -385,7 +392,7 @@ module netconf {
          the XPath expression is interpreted, the set of namespace
          declarations are those in scope on the rpc-error element,
          including the default namespace.";
-       type string;
+       type instance-identifier;
      }
 
      leaf error-message {
@@ -423,6 +430,7 @@ module netconf {
       //   config false;
       // }
       // any XML is allowed here, not just 1 el. named data
+      // The contents of the 'rpc output' section appears here
    }
 
    grouping RpcOkReplyType {
@@ -593,7 +601,7 @@ module netconf {
         container filter {
           description "Subtree or Xpath filter to use.";
           ncx:metadata "FilterType type";
-          ncx:metadata "string select";
+          ncx:metadata "SelectString select";
           ncx:root;
         }
       }

@@ -111,6 +111,7 @@ typedef struct xml_attr_t_ {
     const xmlChar *attr_name;
     xmlChar       *attr_dname;   /* full qualified name if any */
     xmlChar       *attr_val;
+    struct xpath_pcb_t_ *attr_xpcb;
 } xml_attr_t;
 
 
@@ -228,12 +229,13 @@ extern status_t
 		  const xmlChar *attr_name,
 		  const xmlChar *attr_val);
 
-extern status_t
+extern xml_attr_t *
     xml_add_qattr (xml_attrs_t *attrs, 
 		   xmlns_id_t  ns_id,
 		   const xmlChar *attr_qname,
 		   uint32  plen,
-		   const xmlChar *attr_val);
+		   const xmlChar *attr_val,
+		   status_t *res);
 
 extern status_t
     xml_add_xmlns_attr (xml_attrs_t *attrs, 
@@ -355,5 +357,11 @@ extern void
     xml_check_qname_content (xmlTextReaderPtr reader,
 			     xml_node_t      *node);
 
+
+extern status_t
+    xml_get_namespace_id (xmlTextReaderPtr reader,
+			  const xmlChar *prefix,
+			  uint32 prefixlen,
+			  xmlns_id_t  *retnsid);
 
 #endif	    /* _H_xml_util */

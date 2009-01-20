@@ -301,7 +301,7 @@ static void
     boolean flag;
 
     if (!(obj->flags & OBJ_FL_CONFSET)) {
-	if (obj->parent && !obj_is_toproot(obj->parent)) {
+	if (obj->parent && !obj_is_root(obj->parent)) {
 	    flag = obj_get_config_flag(obj->parent);
 	    if (flag) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -3613,7 +3613,7 @@ static status_t
     res = NO_ERR;
 
     /* check status stmt against the parent, if any */
-    if (obj && obj->parent && !obj_is_toproot(obj->parent)) {
+    if (obj && obj->parent && !obj_is_root(obj->parent)) {
 	if (!obj_is_refine(obj)) {
 	    stat = obj_get_status(obj);
 	    parentstat = obj_get_status(obj->parent);
@@ -3982,10 +3982,18 @@ static status_t
     if (!obj_is_refine(obj)) {
 	res = yang_typ_resolve_type(tkc, mod, leaf->typdef,
 				    leaf->defval, obj);
+	if (res == NO_ERR) {
+	    obj_set_xpath_flags(obj);
+	}
 	CHK_EXIT(res, retres);
-    }
+    } 
+
+
 
     finish_config_flag(obj);
+
+
+
 
     if ((obj->flags & OBJ_FL_MANDATORY) && leaf->defval) {
 	log_error("\nError: both mandatory and default statements present"
@@ -4036,6 +4044,9 @@ static status_t
     if (!obj_is_refine(obj)) {
 	res = yang_typ_resolve_type(tkc, mod,
 				    llist->typdef, NULL, obj);
+	if (res == NO_ERR) {
+	    obj_set_xpath_flags(obj);
+	}
 	CHK_EXIT(res, retres);
     }
 
@@ -5352,7 +5363,7 @@ static status_t
     /* figure out augment target later */
 
     /* check if correct target Xpath string form is present */
-    if (obj->parent && !obj_is_toproot(obj->parent) && 
+    if (obj->parent && !obj_is_root(obj->parent) && 
 	aug->target && *aug->target == '/') {
 	/* absolute-schema-nodeid target not allowed */
 	log_error("\nError: absolute schema-nodeid form"
@@ -5363,7 +5374,7 @@ static status_t
     }
 
     /* check if correct target Xpath string form is present */
-    if ((!obj->parent || obj_is_toproot(obj->parent)) && 
+    if ((!obj->parent || obj_is_root(obj->parent)) && 
 	(aug->target && *aug->target != '/')) {
 	/* absolute-schema-nodeid target must be used */
 	log_error("\nError: descendant schema-nodeid form"

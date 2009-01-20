@@ -161,7 +161,9 @@ static status_t
 		    /* save the values as received, may be QName 
 		     * only error that can occur is a malloc fail
 		     */
-		    res = xml_add_qattr(attrs, nsid, name, plen, value);
+		    (void)xml_add_qattr(attrs, nsid, 
+					name, plen, 
+					value, &res);
 		    xmlFree(value);
 		} else {
 		    res = ERR_XML_READER_NULLVAL;
@@ -298,8 +300,10 @@ static status_t
 	/* set the element name to the char after the prefix, if any */
 	node->elname = (const xmlChar *)(str+len);
 	
-	/* get all the attributes -- should be none for XML_NT_END */
-	res2 = get_attrs(reader, &node->attrs, nserr);
+	/* get all the attributes, except for XML_NT_END */
+	if (node->nodetyp != XML_NT_END) {
+	    res2 = get_attrs(reader, &node->attrs, nserr);
+	}
 
 	/* Set the node owner */
 	if (node->nsid) {

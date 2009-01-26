@@ -275,11 +275,7 @@ op_filtertyp_t
     if (!xml_strcmp(filstr, NCX_EL_XPATH)) {
 	return OP_FILTER_XPATH;
     }
-    if (!xml_strcmp(filstr, NCX_EL_C)) {
-	return OP_FILTER_C;
-    }
 
-    SET_ERROR(ERR_INTERNAL_VAL);
     return OP_FILTER_NONE;
 
 } /* op_filtertyp_id */

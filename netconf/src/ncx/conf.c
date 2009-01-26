@@ -626,7 +626,7 @@ static status_t
 				     TK_CUR_VAL(tkc));
 	}
     }  else {
-	curparm = val_find_child(val, obj_get_mod_name(val->obj),
+	curparm = val_find_child(val, val_get_mod_name(val),
 				 TK_CUR_VAL(tkc));
     }
 	

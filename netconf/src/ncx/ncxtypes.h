@@ -206,9 +206,7 @@ typedef enum ncx_node_t_ {
     NCX_NT_STRING,                      /* xmlChar *, error only */
     NCX_NT_CFG,                  /* cfg_template_t *, error only */
     NCX_NT_INDEX,                     /* obj_key_t *, error only */
-    NCX_NT_QNAME,                 /* xmlns_qname_t *, error only */
-    NCX_NT_TOP,                 /* ncx_filptr_t used for cfg top */
-    NCX_NT_CHILD             /* ncx_filptr_t used for child root */
+    NCX_NT_QNAME                  /* xmlns_qname_t *, error only */
 } ncx_node_t;
 
 
@@ -441,19 +439,6 @@ typedef struct ncx_binary_t_ {
 } ncx_binary_t;
 
 
-/* struct for holding r/o pointer to generic internal node 
- * for filtering purposes
- */
-typedef struct ncx_filptr_t_ {
-    dlq_hdr_t       qhdr;
-    ncx_btype_t     btyp;
-    xmlns_id_t      nsid;
-    ncx_node_t      nodetyp;
-    void           *node;          /* based on nodetyp */
-    dlq_hdr_t       childQ;
-} ncx_filptr_t;
-
-
 /* YANG extension usage entry */
 typedef struct ncx_appinfo_t_ {
     dlq_hdr_t               qhdr;
@@ -499,6 +484,15 @@ typedef struct ncx_feature_t_ {
     status_t            res;    /* may be stored with errors */
     boolean             enabled;
 } ncx_feature_t;
+
+/* struct for holding r/o pointer to generic internal node 
+ * for filtering purposes
+ */
+typedef struct ncx_filptr_t_ {
+    dlq_hdr_t             qhdr;
+    struct val_value_t_  *node;
+    dlq_hdr_t             childQ;  /* Q of ncx_filptr_t */
+} ncx_filptr_t;
 
 
 /* back pointer to a YANG identity

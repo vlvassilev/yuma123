@@ -707,67 +707,6 @@ void
 
 
 /********************************************************************
-* FUNCTION xml_wr_value_elem
-*
-* Write a start tag, simple value content, and an end tag
-* to the specified session.  A flag element and
-* ename will vary from this format.
-*
-* INPUTS:
-*   scb == session control block
-*   msg == header from message in progress
-*   val == simple value to write as element content
-*   nsid == namespace ID of the parent element
-*   nsid == namespace ID of the element to write
-*   elname == unqualified name of element to write
-*   attrQ == Q of xml_attr_t or val_value_t records to write in
-*            the element; NULL == none
-*   isattrq == TRUE for Q of xml_attr_t, FALSE for val_value_t
-*   indent == number of chars to indent after a newline
-*           == -1 means no newline or indent
-*           == 0 means just newline
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    xml_wr_value_elem (ses_cb_t *scb,
-		       xml_msg_hdr_t *msg,
-		       val_value_t *val,
-		       xmlns_id_t  parent_nsid,
-		       xmlns_id_t  nsid,
-		       const xmlChar *elname,
-		       const dlq_hdr_t *attrQ,
-		       boolean isattrq,
-		       int32 indent)
-{
-    boolean   newln;
-    int32     valdent;
-
-#ifdef DEBUG
-    if (!scb || !msg || !val || !elname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    if (val->parent)
-	xml_wr_begin_elem_ex(scb, msg, parent_nsid, 
-			     nsid, elname, attrQ, isattrq, 
-			     indent, FALSE);
-
-    newln = !fit_on_line(scb, val);
-    if (newln) {
-	valdent =  (indent < 0) ? indent : indent + ses_indent_count(scb);
-    } else {
-	valdent = -1;
-    }
-    xml_wr_val(scb, msg, val, valdent);
-    xml_wr_end_elem(scb, msg, nsid, elname, (newln) ? indent : -1);
-
-}  /* xml_wr_value_elem */
-
-
-/********************************************************************
 * FUNCTION xml_wr_string_elem
 *
 * Write a start tag, simple string content, and an end tag

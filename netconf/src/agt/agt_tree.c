@@ -152,6 +152,10 @@ date         init     comment
 #include  "status.h"
 #endif
 
+#ifndef _H_tk
+#include  "tk.h"
+#endif
+
 #ifndef _H_val
 #include  "val.h"
 #endif
@@ -173,19 +177,13 @@ date         init     comment
 #endif
 
 
-static boolean
-    prune_subtree (const ses_cb_t *scb,
-		   val_value_t *filval,
-		   boolean getop,
-		   ncx_filptr_t *parent);
-
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
 
-/* #define AGT_TREE_DEBUG 1 */
+#define AGT_TREE_DEBUG 1
 
 
 /********************************************************************
@@ -194,75 +192,35 @@ static boolean
 *                                                                   *
 *********************************************************************/
 
-#ifdef AGT_TREE_DEBUG
-static uint32 debugcnt = 0;
-#endif
-
 
 /********************************************************************
 * FUNCTION save_filptr
 *
-* create ncx_filptr_t struct and save it in the filptr->childQ
+* create ncx_filptr_t struct and save it in the parent->childQ
 * 
 * INPUTS:
 *    parent == filptr struct to save the nodeptr in
-*    filval == the filter node that matched
-*    nodetyp == enumerated type of 'node'
-*    node == node to save
+*    valnode == value node to save
 *
 * RETURNS:
 *    pointer to new ncx_filptr_t struct that was savedstatus
 *********************************************************************/
 static ncx_filptr_t *
     save_filptr (ncx_filptr_t *parent,
-		 val_value_t  *filval,
-		 ncx_node_t  nodetyp,
-		 void *node)
+		 val_value_t *valnode)
 {
     ncx_filptr_t  *filptr;
 
     filptr = ncx_new_filptr();
-    if (!filptr) {
-	return NULL;
+
+    if (filptr) {
+	filptr->node = valnode;
+	dlq_enque(filptr, &parent->childQ);
     }
-    filptr->btyp = filval->btyp;
-    filptr->nsid = filval->nsid;
-    filptr->nodetyp = nodetyp;
-    filptr->node = node;
-    dlq_enque(filptr, &parent->childQ);
+
     return filptr;
 
 } /* save_filptr */
-
-
-/********************************************************************
-* FUNCTION next_filptr
-*
-* go to the next ncx_filptr_t struct in the Q
-* remove the current node and free it if requested
-* 
-* INPUTS:
-*    filptr == current filptr node
-*    discard == TRUE if the current should be removed from the
-*               the Q and discarded
-*               FALSE if it should be left in the Q
-* RETURNS:
-*    pointer to the next filptr or NULL if no next
-*********************************************************************/
-static ncx_filptr_t *
-    next_filptr (ncx_filptr_t *filptr,
-		 boolean discard)
-{
-    ncx_filptr_t  *fp;
-
-    fp = (ncx_filptr_t *)dlq_nextEntry(filptr);
-    if (discard) {
-	dlq_remove(filptr);
-	ncx_free_filptr(filptr);
-    }
-    return fp;
-
-} /* next_filptr */
 
 
 /********************************************************************
@@ -335,13 +293,12 @@ static boolean
 			val_value_t *curval)
 {
     const val_value_t  *cmpval;
-    val_value_t  *v_val;
-    xmlChar     *binbuff;
-    ncx_num_t  num;
-    ncx_enum_t  enu1;
-    boolean   testres;
-    status_t  res;
-    uint32    binlen, retlen;
+    val_value_t        *v_val;
+    xmlChar            *binbuff;
+    boolean             testres;
+    status_t            res;
+    uint32              binlen, retlen, testlen;
+    ncx_num_t           num;
 
     v_val = NULL;
 
@@ -359,7 +316,7 @@ static boolean
     testres = FALSE;
     cmpval = (v_val) ? v_val : curval;
 
-    switch (curval->btyp) {
+    switch (cmpval->btyp) {
     case NCX_BT_BOOLEAN:
 	if (!xml_strcmp(testval, NCX_EL_TRUE) ||
 	    !xml_strcmp(testval, (const xmlChar *)"1")) {
@@ -368,34 +325,6 @@ static boolean
 		   !xml_strcmp(testval, (const xmlChar *)"0")) {
 	    testres = !cmpval->v.bool;
 	}
-	break;
-    case NCX_BT_ENUM:
-	/* convert the test string to an enum */
-	res = ncx_set_enum(testval, &enu1);
-	if (res != NO_ERR) {
-	    break;
-	}
-	testres = (!ncx_compare_enums(&enu1, &cmpval->v.enu))
-			? TRUE : FALSE;
-	break;
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
-    case NCX_BT_FLOAT64:
-	res = ncx_decode_num(testval, curval->btyp, &num);
-	if (res == NO_ERR) {
-	    testres = !ncx_compare_nums(&num, &cmpval->v.num, 
-					curval->btyp) ? TRUE : FALSE;
-	}
-	break;
-    case NCX_BT_STRING:
-	testres = !xml_strcmp((const xmlChar *)VAL_STR(cmpval), testval);
 	break;
     case NCX_BT_BINARY:
 	binlen = xml_strlen(testval);
@@ -414,12 +343,48 @@ static boolean
 	}
 	m__free(binbuff);
 	break;
-    case NCX_BT_SLIST:
-	SET_ERROR(ERR_NCX_OPERATION_NOT_SUPPORTED);
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+    case NCX_BT_INT64:
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+    case NCX_BT_UINT64:
+    case NCX_BT_FLOAT32:
+    case NCX_BT_FLOAT64:
+	ncx_init_num(&num);
+	res = ncx_decode_num(testval, cmpval->btyp, &num);
+	if (res == NO_ERR) {
+	    testres = !ncx_compare_nums(&num, &cmpval->v.num, 
+					curval->btyp) ? TRUE : FALSE;
+	}
+	ncx_clean_num(cmpval->btyp, &num);
 	break;
+    case NCX_BT_ENUM:
+    case NCX_BT_STRING:
+    case NCX_BT_INSTANCE_ID:
+    case NCX_BT_IDREF:
+    case NCX_BT_KEYREF: /****/
+	testlen = xml_strlen(testval);
+	retlen = 0;
+	res = val_sprintf_simval_nc(NULL, cmpval, &retlen);
+	if (res == NO_ERR && retlen == testlen) {
+	    binbuff = m__getMem(retlen+1);
+	    if (binbuff) {
+		res = val_sprintf_simval_nc(binbuff, cmpval, &retlen);
+		if (res == NO_ERR) {
+		    testres = (xml_strcmp(binbuff, testval)) 
+			? FALSE : TRUE;
+		}
+		m__free(binbuff);
+	    }
+	}
+	break;
+    case NCX_BT_BITS:
+    case NCX_BT_SLIST:
     case NCX_BT_EMPTY:
     case NCX_BT_CONTAINER:
-    case NCX_BT_CHOICE:
     case NCX_BT_LIST:
     default:
 	;   /* test is automatically FALSE for these data types */
@@ -435,228 +400,7 @@ static boolean
 
 
 /********************************************************************
-* FUNCTION check_sibling_set
-*
-* First stage evaluation of the sibling nodes within a subtree filter
-* to see what mix is present.
-*
-* INPUTS:
-*    filval == filter node value
-*
-* OUTPUTS:
-*    *anycon == TRUE if any container nodes found
-*    *anycm  == TRUE if any content match nodes found
-*    *anysel == TRUE if any select nodes found
-*
-* RETURNS:
-*    none
-*********************************************************************/
-static void
-    check_sibling_set (const val_value_t *filval,
-		       boolean *anycon,
-		       boolean *anycm,
-		       boolean *anysel)
-{
-    const val_value_t  *chval;
-
-    *anycon = FALSE;
-    *anycm = FALSE;
-    *anysel = FALSE;
-
-    for (chval = val_get_first_child(filval);
-	 chval != NULL;
-	 chval = val_get_next_child(chval)) {
-	switch (chval->btyp) {
-	case NCX_BT_EMPTY:
-	    *anysel = TRUE;
-	    break;
-	case NCX_BT_STRING:
-	    *anycm = TRUE;
-	    break;
-	case NCX_BT_CONTAINER:
-	    *anycon = TRUE;
-	    break;
-	case NCX_BT_NONE:
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-}  /* check_sibling_set */
-
-
-/********************************************************************
-* FUNCTION check_fp_sibling_set
-*
-* First stage evaluation of the sibling nodes within a subtree filter
-* to see what mix is present. Run test on ncx_filptr_t tree
-* instead of a val_avlue_t tree
-*
-* INPUTS:
-*    filptr == filter node value
-*
-* OUTPUTS:
-*    *anycon == TRUE if any container nodes found
-*    *anycm  == TRUE if any content match nodes found
-*    *anysel == TRUE if any select nodes found
-*
-* RETURNS:
-*    none
-*********************************************************************/
-static void
-    check_fp_sibling_set (const ncx_filptr_t *filptr,
-			  boolean *anycon,
-			  boolean *anycm,
-			  boolean *anysel)
-{
-    const ncx_filptr_t  *fp;
-
-    *anycon = FALSE;
-    *anycm = FALSE;
-    *anysel = FALSE;
-
-    for (fp = (const ncx_filptr_t *)dlq_firstEntry(&filptr->childQ);
-	 fp != NULL;
-	 fp = (const ncx_filptr_t *)dlq_nextEntry(fp)) {
-	switch (fp->btyp) {
-	case NCX_BT_EMPTY:
-	    *anysel = TRUE;
-	    break;
-	case NCX_BT_STRING:
-	    *anycm = TRUE;
-	    break;
-	case NCX_BT_CONTAINER:
-	    *anycon = TRUE;
-	    break;
-	case NCX_BT_NONE:
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-}  /* check_fp_sibling_set */
-
-
-/********************************************************************
-* FUNCTION match_val
-*
-* Match the request filter node to a nested child node in the 
-* specified target parm
-*
-* INPUTS:
-*    filval == current filter value node, which should
-*            represent a parm node
-*    curval == current value node from the target
-*    parent == filptr parent to save this child filptr in
-* 
-* OUTPUTS:
-*    a ncx_filptr_t struct is malloced and added to the 
-*    parent->childQ for each instance of the found val
-*
-* RETURNS:
-*    number of matches found
-*********************************************************************/
-static uint32
-    match_val (val_value_t *filval, 
-	       const val_value_t *curval,
-	       ncx_filptr_t  *parent)
-{
-    val_value_t  *chcurval;
-    ncx_filptr_t       *fp;
-    status_t            res;
-    uint32              found;
-
-    found = 0;
-    /* make sure the current target node is a complex type */
-    if (!typ_has_children(curval->btyp)) {
-	return 0;
-    }
-
-    /* check all child nodes and save all the ones that match */
-    for (chcurval = val_get_first_child(curval);
-	 chcurval != NULL;
-	 chcurval = val_get_next_child(chcurval)) {
-	
-	if (!xml_strcmp(chcurval->name, filval->name)) {
-	    if (attr_test(filval, chcurval)) {
-		fp = save_filptr(parent, filval, NCX_NT_VAL, chcurval);
-		if (!fp) {
-		    SET_ERROR(res);
-		    return found;
-		} else {
-		    found++;
-		}
-	    } 
-	} 
-    }
-    return found;
-
-} /* match_val */
-
-
-/********************************************************************
-* FUNCTION content_match_val
-*
-* Match the request content match node to a nested child node in the 
-* specified target parm.  If the nested target node is a simple
-* type and it passes the content match test
-*
-* INPUTS:
-*    scb == session control block
-*    filval == current filter value node, which should
-*            represent a parm node
-*    curval == current value node from the target
-*    parent == filptr parent to save this child filptr in
-* 
-* OUTPUTS:
-*    a ncx_filptr_t struct is malloced and added to the 
-*    parent->childQ for each instance of the found matching val
-*
-* RETURNS:
-*    number of matches found
-*********************************************************************/
-static uint32
-    content_match_val (const ses_cb_t *scb,
-		       val_value_t *filval, 
-		       val_value_t *curval,
-		       ncx_filptr_t *parent)
-{
-    val_value_t  *chcurval;
-    ncx_filptr_t       *fp;
-    uint32              found;
-
-    found = 0;
-
-    /* make sure the current target node is a simple type */
-    if (!typ_has_children(curval->btyp)) {
-	return 0;
-    }
-
-    for (chcurval = val_get_first_child(curval);
-	 chcurval != NULL;
-	 chcurval = val_get_next_child(chcurval)) {
-
-	if (!xml_strcmp(chcurval->name, filval->name)) {
-	    if (attr_test(filval, chcurval)) {
-		if (content_match_test(scb, VAL_STR(filval), chcurval)) {
-		    fp = save_filptr(parent, filval, NCX_NT_VAL, chcurval);
-		    if (!fp) {
-			SET_ERROR(ERR_INTERNAL_MEM);
-			return found;
-		    } else {
-			found++;
-		    }
-		} 
-	    } 
-	}
-    }
-    return found;
-
-} /* content_match_val */
-
-
-/********************************************************************
-* FUNCTION prune_val
+* FUNCTION process_val
 *
 * Evaluate the subtree and remove nodes
 * which are not in the result set
@@ -668,225 +412,271 @@ static uint32
 * INPUTS:
 *    scb == session control block
 *        == NULL if no read access control is desired
-*    filval == filter value (w/ indexQ of ncx_filptr_t nodes)
-*    getop  == TRUE to include all data
-*           == FALSE to include just writable data
+*    getop  == TRUE if this is a <get> and not a <get-config>
+*              The target is expected to be the <running> 
+*              config, and all state data will be available for the
+*              filter output.
+*              FALSE if this is a <get-config> and only the 
+*              specified target in available for filter output
+*    filval == filter node
+*    curval == current database node
+*    result == filptr tree result to fill in
+*    keepempty == address of return keepempty flag
 *
 * OUTPUTS:
-*    fil is pruned as needed
-*    only 'true' result filter nodes should be remaining 
-*
+*    *result is filled in as needed
+*     only 'true' result filter nodes should be remaining 
+*    *keepempty is set to TRUE if 
 * RETURNS:
-*      TRUE if the filval node itself is a TRUE filter, because
-*           at least one of its child node paths is TRUE
-*      FALSE if the filval node and all its childen are a FALSE
-*        filter and should be removed from the output
+*     status, NO_ERR or malloc error
 *********************************************************************/
-static boolean
-    prune_val (const ses_cb_t *scb,
-	       val_value_t *filval,
-	       boolean getop,
-	       ncx_filptr_t  *parent)
+static status_t
+    process_val (const ses_cb_t *scb,
+		 boolean getop,
+		 val_value_t *filval,
+		 val_value_t *curval,
+		 ncx_filptr_t *result,
+		 boolean *keepempty)
 {
-    val_value_t  *val;
-    val_value_t        *chval;
-    ncx_filptr_t       *filptr, *fp, *chfp;
-    boolean             test, done;
+    val_value_t      *filchild, *curchild;
+    ncx_filptr_t     *filptr;
+    boolean           test, anycon, anycm, anysel, mykeepempty;
+    xmlns_id_t        ncid;
+    status_t          res;
 
-    /* The childQ contains all possible filptr instance matches 
-     * from the target data model for the 'filval'.
-     *
-     * Go through and try to eliminate all the instances
-     * that do not match nested nodes in the filter.
-     *
-     * Mark the node as filtered if there are no instances
-     * remaining at the end of the process
+    *keepempty = FALSE;
+
+    /* little hack: treat a filter node with the 
+     * NETCONF namespace as if it were set to 0
+     * this will happen if the manager is lazy
+     * and just set the NETCONF namespace at
+     * the top level, and uses it for everything
      */
-    filptr = (ncx_filptr_t *)dlq_firstEntry(&parent->childQ);
-    while (filptr) {
-	/* The filter node can be any type of node
-	 * It matches the 'val' node.  Any child
-	 * nodes in the filter must match child
-	 * nodes in the target node
-	 */
-	if (filptr->nodetyp != NCX_NT_VAL) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return FALSE;
-	} else {
-	    val = (val_value_t *)filptr->node;
+    ncid = xmlns_nc_id();
+
+    /* The filval is the same level as the curval
+     *
+     * Go through and check all the child nodes of the
+     * filval (sibling set) against all the children
+     * of the curval.  Determine which nodes to keep
+     * and save ncx_filptr_t structs for those nodes
+     */
+    anycon = FALSE;
+    anycm = FALSE;
+    anysel = FALSE;
+
+    /* check any content match nodes first
+     * they must all be true or this entire sibling
+     * set is rejected
+     */
+    for (filchild = val_get_first_child(filval);
+	 filchild != NULL;
+	 filchild = val_get_next_child(filchild)) {
+
+	if (filchild->nsid == ncid) {
+	    /* no content in NETCONF namespace, so assume
+	     * that no namespace was used and the filter NSID
+	     * has been passed down to this point
+	     */
+	    filchild->nsid = 0;
 	}
 
-#ifdef AGT_TREE_DEBUG
-	log_debug("\nagt_tree_prune_val: %s %u", filval->name, debugcnt++);
-	/* val_dump_value(val, NCX_DEF_INDENT); */
+	/* skip all but content match nodes */
+	switch (filchild->btyp) {
+	case NCX_BT_STRING:
+	    anycm = TRUE;
+	    break;
+	case NCX_BT_EMPTY:
+	    anysel = TRUE;
+	    continue;
+	case NCX_BT_CONTAINER:
+	    anycon = TRUE;
+	    continue;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	}
+
+	/* check corner case not caught by XML pares */
+	if (val_all_whitespace(VAL_STR(filchild))) {
+	    /* should not happen! */
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    continue;
+	}
+
+	/* This is a valid content select node 
+	 * Need to compare it to the current node
+	 * based on the target data type.
+	 * The filter data type is always going to
+	 * be string and this needs to be 
+	 * compared to a sprintf of the target value
+	 * Compare the string value to all instances
+	 * of the 'filchild' node; need just 1 match
+	 */
+	test = FALSE;
+	for (curchild = 
+		 val_first_child_qname(curval, 
+				       filchild->nsid,
+				       filchild->name);
+	     curchild != NULL && !test;
+	     curchild = val_next_child_qname(curval,
+					     filchild->nsid,
+					     filchild->name,
+					     curchild)) {
+
+#ifdef NOT_YET	
+	    /* check access control if scb is non-NULL */
+	    if (scb && !agt_acm_val_read_allowed(scb->username, 
+						 curchild)) {
+		/* treat an access-failed on a content match
+		 * test as a termination trigger
+		 */
+		return NO_ERR;
+	    }
 #endif
+	    test = content_match_test(scb, 
+				      VAL_STR(filchild), 
+				      curchild);
+	}
+
+	if (!test) {
+#ifdef AGT_TREE_DEBUG
+	    log_debug2("\nagt_tree_process_val: %s "
+		       "sibling set pruned; CM not found for '%s'", 
+		       filval->name, filchild->name);
+#endif
+	    return NO_ERR;
+	}
+    }
+
+    /* at this point any content match node tests have passed
+     * except any attribute match tests in the content nodes
+     * have not been tested yet.  They are AND tests.
+     * RFC 4741 is not that clear, but this means the content
+     * match is not ever skipped because of failed match tests
+     *
+     * Check if there are no more tests; If not, all the
+     * child nodes of curval are selected
+     */
+    if (!anycon && !anysel) {
+	*keepempty = TRUE;
+	return NO_ERR;
+    }
+
+    /* Go through the filval child nodes again and this
+     * time select nodes for real
+     */
+    for (filchild = val_get_first_child(filval);
+	 filchild != NULL;
+	 filchild = val_get_next_child(filchild)) {
 
 	/* first check if this is a get-config operation 
-	 * and if so, if it fails the config test 
+	 * and if so, if the test node fails the config test 
 	 */
 	if (!getop && !agt_check_config(ses_withdef(scb), 
-					NCX_NT_VAL, val)) {
-	    /* not a config node so skip it */
-	    filptr = next_filptr(filptr, TRUE);
-	    continue;
-	}
-	
-	/* next check any attr-match tests */
-	if (!attr_test(filval, val)) {
-	    /* failed an attr-match test so skip it */
-	    filptr = next_filptr(filptr, TRUE);
+					NCX_NT_VAL, 
+					filchild)) {
 	    continue;
 	}
 
-	switch (filval->btyp) {
-	case NCX_BT_EMPTY:
-	    /* this is a select node which has already been 
-	     * matched to the current node; nothing else to do
-	     */
-	    filptr = next_filptr(filptr, FALSE);
-	    break;
-	case NCX_BT_STRING:
-	    /* This is a content select node 
-	     * Need to compare it to the current node
-	     * based on the target data type.
-	     * The filter data type is always going to
-	     * be string and this needs to be 
-	     * compared to a sprintf of the target value
-	     */
-	    test = content_match_test(scb, VAL_STR(filval), val);
-	    filptr = next_filptr(filptr, !test);
-	    break;
-	case NCX_BT_CONTAINER:
-	    /* this is a container node, so the current node
-	     * in the target must be a complex type; not a leaf node
-	     */
-	    if (!obj_is_root(val->obj)) {
-		if (!typ_has_children(val->btyp)) {
-		    filptr = next_filptr(filptr, TRUE);
-		    break;
-		}
+	/* go through all the actual instances of 'filchild'
+	 * within the child nodes of 'curval'
+	 */
+	for (curchild = val_first_child_qname(curval, 
+					      filchild->nsid,
+					      filchild->name);
+	     curchild != NULL;
+	     curchild = val_next_child_qname(curval,
+					     filchild->nsid,
+					     filchild->name,
+					     curchild)) {
+	    
+	    filptr = NULL;
+
+#ifdef NOT_YET	
+	    /* check access control if scb is non-NULL */
+	    if (scb && !agt_acm_val_read_allowed(scb->username, 
+						 testval)) {
+		continue;
+	    }
+#endif
+
+	    /* check any attr-match tests */
+	    if (!attr_test(filchild, curchild)) {
+		/* failed an attr-match test so skip it */
+		continue;
 	    }
 
-	    /* go through the child nodes of the filter
-	     * and compare to the complex target 
-	     */
-	    done = FALSE;
-	    for (chval = val_get_first_child(filval);
-		 chval != NULL && !done;
-		 chval = val_get_next_child(chval)) {
-
-		/* check namespace */
-		if (!obj_is_root(val->obj) &&
-		    chval->nsid != filval->nsid) {
-		    continue;
-		}
-
-		/* add another layer to the filptr chain
-		 * for the child node header
-		 ********************************* !!!!!!!!!!! ***************************
+	    /* process the filter child node based on its type */
+	    switch (filchild->btyp) {
+	    case NCX_BT_STRING:
+		/* This is a content select node */
+		test = content_match_test(scb, 
+					  VAL_STR(filchild), 
+					  curchild);
+		if (!test) {
+		    break;
+		} /* else fall through and add node */
+	    case NCX_BT_EMPTY:
+		/* this is a select node  matched to the 
+		 * current node, so save it
 		 */
-		fp = save_filptr(filptr, chval, NCX_NT_CHILD, NULL);
-		if (!fp) {
-		    SET_ERROR(ERR_INTERNAL_MEM);
-		    return !dlq_empty(&parent->childQ);
+		filptr = save_filptr(result, curchild);
+		if (!filptr) {
+		    return ERR_INTERNAL_MEM;
+		}
+		break;
+	    case NCX_BT_CONTAINER:
+		/* this is a container node, so the current node
+		 * in the target must be a complex type; not a leaf node
+		 */
+		if (!typ_has_children(curchild->btyp)) {
+		    break;
 		}
 
-		switch (chval->btyp) {
-		case NCX_BT_EMPTY:
-		    if (!match_val(chval, val, fp)) {
-			dlq_remove(fp);
-			ncx_free_filptr(fp);
-		    }
-		    break;
-		case NCX_BT_STRING:
-		    if (!content_match_val(scb, chval, val, fp)) {
-			/* this whole filptr is removed
-			 * if a child select node fails
-			 */
-			filptr = next_filptr(filptr, TRUE);
-			done = TRUE;
-		    }
-		    break;
-		case NCX_BT_CONTAINER:
-		    if (match_val(chval, val, fp)) {
-			chfp = (ncx_filptr_t *)dlq_firstEntry(&fp->childQ);
-			while (chfp) {
-			    test = prune_subtree(scb, chval, getop, chfp);
-			    chfp = next_filptr(chfp, !test);
-			}
-		    }
-		    if (dlq_empty(&fp->childQ)) {
-			dlq_remove(fp);
-			ncx_free_filptr(fp);
-		    }
-		    break;
-		default:
-		    SET_ERROR(ERR_INTERNAL_VAL);
-		    return !dlq_empty(&parent->childQ);
+		/* save this node for now */
+		filptr = save_filptr(result, curchild);
+		if (!filptr) {
+		    return ERR_INTERNAL_MEM;
 		}
+
+		/* go through the child nodes of the filter
+		 * and compare to the complex target 
+		 */
+		res = process_val(scb, getop, filchild,
+				  curchild, filptr, 
+				  &mykeepempty);
+		if (res != NO_ERR) {
+		    return res;
+		}
+
+		if (!mykeepempty && dlq_empty(&filptr->childQ)) {
+		    dlq_remove(filptr);
+		    ncx_free_filptr(filptr);
+		    filptr = NULL;
+		}
+		break;
+	    default:
+		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
-	    if (!done) {
-		filptr = next_filptr(filptr, dlq_empty(&filptr->childQ));
+
+	    if (filptr && 
+		filptr->node->btyp == NCX_BT_LIST &&
+		!dlq_empty(&filptr->childQ)) {
+
+		/* make sure all the list keys (if any)
+		 * are present, since specific nodes
+		 * are requested, and the keys could
+		 * get filtered out
+		 */
+
+
 	    }
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
     }
 
-    return !dlq_empty(&parent->childQ);
+    return NO_ERR;
 
-} /* prune_val */
-
-
-
-/********************************************************************
-* FUNCTION prune_subtree
-*
-* Evaluate the subtree and remove nodes
-* which are not in the result set
-*
-* The filval is a NCX_BT_CONTAINER, and already matched 
-* to the 'curnode'.  This function evaluates the child nodes
-* recursively as more container nodes are matched to the target
-*
-* INPUTS:
-*    scb == session control block
-*        == NULL if no read access control is desired
-*    filval == filter value (w/ indexQ of ncx_filptr_t nodes)
-*    getop  == TRUE to include monitor sets and parmsets
-*           == FALSE to include just parmsets
-*    parent == ncx_filptr_t that will contain any found nodes
-*
-* OUTPUTS:
-*    fil is pruned as needed
-*    only 'true' result filter nodes should be remaining 
-*
-* RETURNS:
-*      TRUE if the filval node itself is a TRUE filter, because
-*           at least one of its child node paths is TRUE
-*      FALSE if the filval node and all its childen are a FALSE
-*        filter and should be removed from the output
-*********************************************************************/
-static boolean
-    prune_subtree (const ses_cb_t *scb,
-		   val_value_t *filval,
-		   boolean getop,
-		   ncx_filptr_t *parent)
-{
-    boolean       retval;
-
-    switch (parent->nodetyp) {
-    case NCX_NT_VAL:
-	retval = prune_val(scb, filval, getop, parent);
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	retval = FALSE;
-    }    
-    return retval;
-
-} /* prune_subtree */
+} /* process_val */
 
 
 /********************************************************************
@@ -906,72 +696,64 @@ static boolean
 static void
     output_node (ses_cb_t *scb, 
 		 rpc_msg_t *msg, 
-		 ncx_filptr_t  *parent,
+		 ncx_filptr_t *parent,
 		 int32 indent)
 {
     ncx_filptr_t  *filptr;
     val_value_t   *val;
-    boolean        empty, anycon, anycm, anysel;
+    xmlns_id_t     parentnsid, valnsid;
 
     for (filptr = (ncx_filptr_t *)dlq_firstEntry(&parent->childQ);
 	 filptr != NULL;
 	 filptr = (ncx_filptr_t *)dlq_nextEntry(filptr)) {
 	
-	switch (filptr->nodetyp) {
-	case NCX_NT_VAL:
-	    val = (val_value_t *)filptr->node;
+	val = filptr->node;
+	valnsid = obj_get_nsid(val->obj);
+	if (val->parent) {
+	    parentnsid = obj_get_nsid(val->parent->obj);
+	} else {
+	    parentnsid = 0;
+	}
 
-	    if (filptr->btyp != NCX_BT_CONTAINER) {
-		xml_wr_value_elem(scb, &msg->mhdr, val, parent->nsid,
-				  filptr->nsid,  val->name, 
-				  &val->metaQ, FALSE, indent);
-		break;
-	    } else {
-		/* check the child nodes in the filter
-		 * If there are container nodes or select nodes
-		 * then only those specific nodes will be output
-		 *
-		 * If there are only content match nodes then
-		 * the entire filval node is supposed to be output
-		 */
-		check_fp_sibling_set(filptr, &anycon, &anycm, &anysel);
-		if (!anycon && !anysel) {
-		    xml_wr_value_elem(scb, &msg->mhdr, val, 
-				      parent->nsid, filptr->nsid,
-				      val->name, &val->metaQ, FALSE, indent);
-		    break;
-		}
+	if (dlq_empty(&filptr->childQ)) {
+	    xml_wr_full_val(scb, &msg->mhdr, val, indent);
+	} else {
+	    /* check the child nodes in the filter
+	     * If there are container nodes or select nodes
+	     * then only those specific nodes will be output
+	     *
+	     * If there are only content match nodes then
+	     * the entire filval node is supposed to be output
+	     */
 
-		/* else 1 or more containers and/or select nodes */
-		empty = dlq_empty(&filptr->childQ);
-		xml_wr_begin_elem_ex(scb, &msg->mhdr, 
-				     parent->nsid, filptr->nsid,
-				     val->name, &val->metaQ, FALSE, 
-				     indent, empty);
- 		if (empty) {
-		    break;
-		}
-	    }
+	    /* else 1 or more containers and/or select nodes */
+	    xml_wr_begin_elem_ex(scb, 
+				 &msg->mhdr,
+				 parentnsid,
+				 valnsid,
+				 val->name, 
+				 &val->metaQ, 
+				 FALSE, 
+				 indent, 
+				 FALSE);
 
-	    /* non-empty filter struct */
 	    if (indent >= 0) {
 		indent += NCX_DEF_INDENT;
 	    }
+
 	    output_node(scb, msg, filptr, indent);	    
+
 	    if (indent >= 0) {
 		indent -= NCX_DEF_INDENT;
 	    }
-	    xml_wr_end_elem(scb, &msg->mhdr, filptr->nsid, val->name, indent);
-	    break;
-	case NCX_NT_CHILD:
-	    output_node(scb, msg, filptr, indent);
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return;
+
+	    xml_wr_end_elem(scb, 
+			    &msg->mhdr, 
+			    valnsid,
+			    val->name, 
+			    indent);
 	}
     }
-    
 }  /* output_node */
 
 
@@ -994,13 +776,16 @@ static void
     ncx_filptr_t        *fp;
     int32                i;
 
-    log_debug('\n');
+    log_debug2("\n");
     for (i=0; i<indent; i++) {
-	log_debug(' ');
+	log_debug2(" ");
     }
 
-    log_debug("filptr: %u %u %u",
-	   filptr->btyp, filptr->nsid, filptr->nodetyp);
+    log_debug2("filptr: %u:%s %s",  
+	       filptr->node->nsid,
+	       filptr->node->name,
+	       tk_get_btype_sym(filptr->node->btyp));
+
 
     for (fp = (ncx_filptr_t *)dlq_firstEntry(&filptr->childQ);
 	 fp != NULL;
@@ -1063,9 +848,10 @@ ncx_filptr_t *
 			   const cfg_template_t *cfg,
 			   boolean getop)
 {
-    val_value_t       *fil;
+    val_value_t       *filter;
     ncx_filptr_t      *top;
-    boolean            anycon, anycm, anysel;
+    status_t           res;
+    boolean            keepempty;
 
 #ifdef DEBUG
     if (!msg || !cfg || !msg->rpc_filter.op_filter) {
@@ -1074,76 +860,57 @@ ncx_filptr_t *
     }
 #endif
 
-    /* the msg filter should be non-NULL */
-    fil = msg->rpc_filter.op_filter;
-    
     /* make sure the config has some data in it */
     if (!cfg->root) {
 	return NULL;
     }
 
+    /* the msg filter should be non-NULL */
+    filter = msg->rpc_filter.op_filter;
+    
     /* start at the top with <filter> itself */
-    switch (fil->btyp) {
+    switch (filter->btyp) {
     case NCX_BT_EMPTY:
 	/* This is an empty filter element; 
 	 * This is allowed, but the result is the empty set
 	 */
-	return NULL;
+	break;
     case NCX_BT_STRING:
 	/* This is a mixed mode request, which is supposed to
 	 * be invalid; In this case it is simply interpreted
 	 * as 'not a match', because all NCX data is in XML.
 	 * This is not really allowed, and the result is the empty set
 	 */
-	return NULL;
+	break;
     case NCX_BT_CONTAINER:
-
 	/* This is the normal case - a container node
 	 * Go through the child nodes.
-	 * There should be only container nodes at this level
-	 *
-	 * This must match an application node in the 
-	 * target configuration.  
 	 */
-	check_sibling_set(fil, &anycon, &anycm, &anysel);
-
-#if 0
-	if (anycm) {
-	    /* A content match node at this level cancels out
-	     * the entire sibling set, since there are no simple
-	     * types to compare against yet
-	     */
-	    return NULL;
-	}
-#endif
-
 	top = ncx_new_filptr();
 	if (!top) {
 	    return NULL;
 	}
-	top->nodetyp = NCX_NT_TOP;
+	top->node = cfg->root;
 	
-	/* Go through all the child nodes of <filter>
-	 * There are only independent container nodes at this level
-	 * for each one, match to a val_value_t node and prune the
-	 * subtree from there
-	 */
-
-	if (!prune_val(scb, cfg->root, getop, top)) {
+	res = process_val(scb, getop, filter, 
+			  cfg->root, top, &keepempty);
+	if (res != NO_ERR || dlq_empty(&top->childQ)) {
+	    /* ignore keepempty because the result will
+	     * be the same w/NULL return, just faster
+	     */
 	    ncx_free_filptr(top);
-	    return NULL;
 	} else {
-
 #ifdef AGT_TREE_DEBUG
 	    dump_filptr_node(top, 0);
 #endif
-
 	    return top;
 	}
+	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
     }
+
+    return NULL;
 
 } /* agt_tree_prune_filter */
 
@@ -1170,7 +937,7 @@ void
 			    int32 indent)
 {
 #ifdef DEBUG
-    if (!scb || !msg) {
+    if (!scb || !msg || !top) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return;
     }

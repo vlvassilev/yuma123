@@ -1,0 +1,115 @@
+  module yang-registry {
+
+      namespace "yang-registry-TBD";
+
+      prefix "iyr";
+
+      // for the uri data type
+      import yang-types { prefix "yang"; }
+
+      description 
+         "YANG Module Registry Data Structures";
+
+      contact
+        "Send comments to <andy@netconfcentral.com>.";
+
+      revision "2009-01-22" {
+          description 
+            "Initial version.";
+      }
+
+      container registry {
+
+          leaf registry-id {
+              description
+                 "Contains the identity of this registry.";
+              type yang:uri;
+              mandatory true;
+          }
+
+          list module {
+              key "name";
+
+              unique "namespace";
+
+              leaf name {
+                 description "YANG module name.";
+                 // TBD: imported name string type
+    		 type string { length "1..63"; }
+              }
+
+              leaf namespace {
+                  description "YANG module namespace.";
+		  type yang:uri;
+		  mandatory true;
+	      }
+
+	      leaf url {
+		  description 
+		     "URL for this YANG module, if one
+		      is available.";
+		  type yang:uri;
+	      }
+
+	      leaf virtual {
+		  description 
+                    "If present, then this registry entry
+                     represents a virtual YANG module,
+                     which is a YANG module which does not
+                     contain any body statements.  Instead,
+                     submodules are used to contain all 
+                     body statements.
+
+                     Each release entry within this entry
+		     is expected to contain all
+		     the submodule content information for
+		     this virtual module.";
+	          type empty;
+	      }
+
+              list release {
+                  description
+                    "Describes the contents of a specific 
+		     release of a YANG module.  At least 
+		     one entry MUST exist for the most 
+		     current version of the module.";
+
+                  min-elements 1;
+
+                  key version;
+
+                  leaf version {
+                     description "YANG module release date.";
+                     // TBD: imported date string type
+	   	     // YYYY-MM-DD
+		     type string { length "10"; }
+                  }
+
+                  list submodule {
+		      key "name";
+
+		      leaf name {
+		          description "YANG submodule name.";
+		          // TBD: imported name string type
+		          type string { length "1..63"; }
+		      }
+		
+		      leaf version {
+                          description "YANG module revision date.";
+                          // TBD: imported date string type
+		          // YYYY-MM-DD
+		         type string { length "10"; }
+		         mandatory true;
+                      }
+
+                      leaf url {
+		          description 
+			    "URL for this YANG submodule, if one
+			     is available.";
+		          type yang:uri;
+		      }
+		  }  // list submodule
+              }  // list release  
+	  } // list module
+      }  // container registry
+  } // module yang-registry

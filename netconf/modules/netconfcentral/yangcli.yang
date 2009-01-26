@@ -8,6 +8,8 @@ module yangcli {
 
     import ncxtypes { prefix nt; }
 
+    import netconf { prefix nc; }
+
     organization  "Netconf Central";
 
     contact "Andy Bierman <support@netconfcentral.com>.";
@@ -34,6 +36,10 @@ module yangcli {
             specified script will be run automatically upon startup
       
          ";
+
+    revision 2009-01-21 {
+       description "added sget and xget support";
+    }
 
     revision 2008-10-11 {
        description "cleaned up ConnectParms grouping";
@@ -67,7 +73,10 @@ module yangcli {
        leaf target {
          description 
            "XPath target object to fill.  If prefixes are missing
-            then the first match in any namespace will be used.";
+            then the first match in any namespace will be used.
+            Any prefix used must be the default prefix
+            assigned to the desired YANG module. Prefix usage is
+            optional.";
 
          // type instance-identifier;  TBD
 
@@ -137,9 +146,10 @@ module yangcli {
        }
     }
 
-    grouping EditParms {
+    grouping CommonPduParms {
         description
-            "Common parms for create, merge, replace commands";
+            "Common parms for some local commands that
+             generate NETCONF PDUs";
 
         choice from {
             mandatory true;
@@ -157,6 +167,35 @@ module yangcli {
             case from-cli {
                 uses FillParms;
             }
+        }
+    }
+
+    grouping EditParms {
+        description
+            "Common parms for create, merge, replace commands";
+
+        uses CommonPduParms;
+    }
+
+    grouping XGetParms {
+        description
+            "Common parms for xget and xget-config operations.";
+
+        uses CommonPduParms {
+          augment from {
+            leaf select {
+              description
+                "The XPath expression to use in the retrieval
+                 operation.  The string may only contain
+                 single quotes, which are required for
+                 string literals.  The entire string
+                 will be inserted into a double-quoted
+                 string, within the get-config PDU.
+                 Character entities will be inserted as
+                 needed to maintain well-formed XML.";
+              type string { length "1..max"; }
+            }
+          }
         }
     }
 
@@ -197,12 +236,14 @@ module yangcli {
           default 830;
         }
 
+/*
         leaf key {
           description
            "The full filespec for the key the program should use
             when connecting to the agent";
           type string;
         }
+*/
     }
 
     /*************************************************************
@@ -422,7 +463,7 @@ module yangcli {
 
     rpc fill {
       description 
-       "Fill a value for use in a NETCONF PDU or other operation.
+       "Fill a value for reuse in a NETCONF PDU or other operation.
   
         Used in an assignment statement to create a variable
         for later use:
@@ -439,14 +480,15 @@ module yangcli {
            description 
              "The result of the fill operation.
 
-              The name of the value node is not really 'data'.
-              The value returned will be the name specified in
-              the 'target' pamrameter.
+              The name of the value node may not really 
+              be 'data'. If the 'target' or 'current-value'
+              input parameters are used, then the name
+              of the result node will be copied instead.
 
               The data type will be inherited from the 'target'
-              parameter, and not really be an 'anyxml' structure.
-              YANG does have a data type that supports this
-              'clone of foo' feature.";
+              or 'current_value' parameters, and not really be 
+              an 'anyxml' structure.  YANG does have a data 
+              type that supports this feature.";
          }
        }
     }
@@ -553,7 +595,7 @@ module yangcli {
 
     rpc merge {
       description
-       "Create some NETCONF config data with the edit-config operation";
+       "Merge some NETCONF config data with the edit-config operation";
       ncx:rpc-type config;
       input {
         uses EditParms;
@@ -637,6 +679,42 @@ module yangcli {
       ncx:rpc-type exec;
     }
 
+    rpc sget {
+      description
+       "Get some NETCONF running config or state data with the get
+        operation, using an optional subtree filter.";
+      ncx:rpc-type monitor;
+      input {
+        uses CommonPduParms;
+      }
+      output {
+        anyxml data {
+          description 
+            "The data resulting from the retrieval operation.";
+        }
+      }
+    }
+
+    rpc sget-config {
+      description
+       "Get some NETCONF config data with the get-config
+        operation, using an optional subtree filter.";
+      ncx:rpc-type monitor;
+      input {
+        uses CommonPduParms;
+        container source {
+          description "Particular configuration to retrieve.";
+          uses nc:GetConfigSourceType;
+        }
+      }
+      output {
+        anyxml data {
+          description 
+            "The data resulting from the retrieval operation.";
+        }
+      }
+    }
+
     rpc show {
       description "Local show command for yangcli info.";
       ncx:rpc-type exec;
@@ -697,6 +775,42 @@ module yangcli {
       }
     }
 
+    rpc xget {
+      description
+       "Get some NETCONF running config or state data with the get
+        operation, using an optional XPath filter.";
+      ncx:rpc-type monitor;
+      input {
+        uses XGetParms;
+      }
+      output {
+        anyxml data {
+          description 
+            "The data resulting from the retrieval operation.";
+        }
+      }
+    }
+
+    rpc xget-config {
+      description
+       "Get some NETCONF config data with the get-config
+        operation, using an optional XPath filter.";
+      ncx:rpc-type monitor;
+      input {
+        uses XGetParms;
+
+        container source {
+          description "Particular configuration to retrieve.";
+          uses nc:GetConfigSourceType;
+        }
+      }
+      output {
+        anyxml data {
+          description 
+            "The data resulting from the retrieval operation.";
+        }
+      }
+    }
 
 
 }

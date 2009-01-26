@@ -220,11 +220,14 @@ static void
 	    if (errinfo->v.strval) {
 		if (errinfo->isqname) {
 		    xml_wr_qname_elem(scb, &msg->mhdr, 
-				      errinfo->val_nsid, errinfo->v.strval, 
-				      ncid, errinfo->name_nsid, errinfo->name, 
+				      errinfo->val_nsid, 
+				      errinfo->v.strval, 
+				      ncid, errinfo->name_nsid, 
+				      errinfo->name, 
 				      NULL, FALSE, indent);
 		} else {
-		    xml_wr_string_elem(scb, &msg->mhdr, errinfo->v.strval, 
+		    xml_wr_string_elem(scb, &msg->mhdr, 
+				       errinfo->v.strval, 
 				       ncid, errinfo->name_nsid, 
 				       errinfo->name, 
 				       NULL, FALSE, indent);
@@ -256,9 +259,9 @@ static void
 	    break;
 	default:
 	    if (errinfo->v.cpxval) {
-		xml_wr_value_elem(scb, &msg->mhdr, errinfo->v.cpxval,
-				  ncid, errinfo->name_nsid, errinfo->name, 
-				  NULL, FALSE, indent);
+		xml_wr_full_val(scb, &msg->mhdr, 
+				errinfo->v.cpxval,
+				indent);
 	    } else {
 		SET_ERROR(ERR_INTERNAL_PTR);
 	    }

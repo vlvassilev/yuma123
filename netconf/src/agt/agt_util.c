@@ -233,7 +233,7 @@ status_t
     status_t           res;
 
     val = val_find_child(&msg->rpc_input, 
-			 obj_get_mod_name(msg->rpc_input.obj), 
+			 val_get_mod_name(&msg->rpc_input), 
 			 parmname);
     if (!val || val->res != NO_ERR) {
 	if (!val) {
@@ -321,7 +321,7 @@ const val_value_t *
     val_value_t *val;
 
     val =  val_find_child(&msg->rpc_input,
-			  obj_get_mod_name(msg->rpc_input.obj),
+			  val_get_mod_name(&msg->rpc_input),
 			  parmname);
     return val;
 
@@ -644,10 +644,6 @@ status_t
 		}
 	    }
 	    break;
-	case OP_FILTER_C:
-	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    errstr = (const xmlChar *)"C";
-	    break;
 	default:
 	    res = ERR_NCX_INVALID_VALUE;
 	}
@@ -811,8 +807,6 @@ status_t
 	    }
 	}
 	break;
-    case OP_FILTER_C:
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
     case OP_FILTER_SUBTREE:
 	if (source->root) {
 	    top = agt_tree_prune_filter(scb, msg, source, getop);

@@ -671,7 +671,7 @@ static status_t
 	}
     } else if (val->parent) {
 	childcnt = val_child_inst_cnt(val->parent,
-				      obj_get_mod_name(val->obj),
+				      val_get_mod_name(val),
 				      val->name);
 	if (childcnt > 1) {	
 	    /* there are multiple unnamed instances, so force
@@ -871,7 +871,7 @@ void
 		    }
 
 		    chval = val_find_next_child(val,
-						obj_get_mod_name(chval->obj),
+						val_get_mod_name(chval),
 						chval->name,
 						rootval);
 		}

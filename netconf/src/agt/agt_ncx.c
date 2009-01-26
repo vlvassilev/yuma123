@@ -142,11 +142,8 @@ static status_t
 		  rpc_msg_t *msg,
 		  xml_node_t *methnode)
 {
-    val_value_t    *filter;
     cfg_template_t *source;
     status_t        res;
-
-    filter = NULL;
 
     /* check if the <running> config is ready to read */
     source = cfg_get_config_id(NCX_CFGID_RUNNING);
@@ -195,11 +192,8 @@ static status_t
 			 rpc_msg_t *msg,
 			 xml_node_t *methnode)
 {
-    val_value_t    *filter;
     cfg_template_t *source;
     status_t        res;
-
-    filter = NULL;
 
     /* check if the source config database exists */
     res = agt_get_cfg_from_parm(NCX_EL_SOURCE, msg, methnode, &source);

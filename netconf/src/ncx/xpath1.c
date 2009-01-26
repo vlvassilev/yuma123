@@ -4005,14 +4005,14 @@ static status_t
 		    }
 		} else if (modname && name) {
 		    if (!xml_strcmp(modname,
-				    obj_get_mod_name(testval->obj)) &&
+				    val_get_mod_name(testval)) &&
 			!xml_strcmp(name, testval->name)) {
 			keep = TRUE;
 		    }
 
 		} else if (modname) {
 		    if (!xml_strcmp(modname,
-				    obj_get_mod_name(testval->obj))) {
+				    val_get_mod_name(testval))) {
 			keep = TRUE;
 		    }
 		} else if (name) {
@@ -4240,13 +4240,13 @@ static status_t
 		    
 		    if (modname && name) {
 			if (!xml_strcmp(modname,
-					obj_get_mod_name(testval->obj)) &&
+					val_get_mod_name(testval)) &&
 			    !xml_strcmp(name, testval->name)) {
 			    keep = TRUE;
 			}
 		    } else if (modname) {
 			if (!xml_strcmp(modname,
-					obj_get_mod_name(testval->obj))) {
+					val_get_mod_name(testval))) {
 			    keep = TRUE;
 			}
 		    } else if (name) {

@@ -1252,7 +1252,7 @@ static boolean
 	}
     } else if (modname && name) {
 	if (!xml_strcmp(modname, 
-			obj_get_mod_name(val->obj)) &&
+			val_get_mod_name(val)) &&
 	    !xml_strcmp(name, val->name)) {
 
 	    if (walkerfn) {
@@ -1261,7 +1261,7 @@ static boolean
 	    *fncalled = TRUE;
 	}
     } else if (modname) {
-	if (!xml_strcmp(modname, obj_get_mod_name(val->obj))) {
+	if (!xml_strcmp(modname, val_get_mod_name(val))) {
 	    if (walkerfn) {
 		fnresult = (*walkerfn)(val, cookie1, cookie2);
 	    }
@@ -3495,6 +3495,43 @@ val_value_t *
 }  /* val_make_simval */
 
 
+/********************************************************************
+* FUNCTION val_make_string
+* 
+* Malloc and set a val_value_t as a generic NCX_BT_STRING
+* namespace set to 0 !!!
+*
+* INPUTS:
+*    nsid == namespace ID to use
+*    valname == name of simple value
+*    valstr == simple value encoded as a string
+*
+* RETURNS:
+*   malloced val struct filled in; NULL if malloc or strdup failed
+*********************************************************************/
+val_value_t *
+    val_make_string (xmlns_id_t nsid,
+		     const xmlChar *valname,
+		     const xmlChar *valstr)
+{
+    val_value_t *val;
+    status_t     res;
+
+    val = val_new_value();
+    if (!val) {
+	return NULL;
+    }
+    res = val_set_string(val, valname, valstr);
+    if (res != NO_ERR) {
+	val_free_value(val);
+	val = NULL;
+    } else {
+	val->nsid = nsid;
+    }
+    return val;
+
+}  /* val_make_string */
+
 
 /********************************************************************
 * FUNCTION val_merge
@@ -4194,7 +4231,7 @@ void
 	switch (child->insertop) {
 	case OP_INSOP_FIRST:
 	    testval = val_find_child(parent, 
-				     obj_get_mod_name(child->obj),
+				     val_get_mod_name(child),
 				     child->name);
 	    if (testval) {
 		dlq_insertAhead(child, testval);
@@ -4395,8 +4432,16 @@ val_value_t *
 		    return val;
 		}
 	    } else if (val->obj->objtype == OBJ_TYP_LEAF_LIST) {
-		/* find the leaf-list with the same value */
-		if (!val_compare(val, child)) {
+		if (val->btyp == child->btyp) {
+		    /* find the leaf-list with the same value */
+		    if (!val_compare(val, child)) {
+			return val;
+		    }
+		} else {
+		    /* match any value; if this is a subtree
+		     * filter test, it is not for a content match
+		     * node
+		     */
 		    return val;
 		}
 	    } else {
@@ -4409,6 +4454,75 @@ val_value_t *
     return NULL;
 
 }  /* val_first_child_match */
+
+
+/********************************************************************
+* FUNCTION val_next_child_match
+* 
+* Get the next instance of the corresponding child node 
+* 
+* INPUTS:
+*    parent == parent value to check
+*    child == child value to find (e.g., from a NETCONF PDU) 
+*    curmatch == current child of parent that matched
+*                
+* RETURNS:
+*   pointer to the next child match if found or NULL if not found
+*********************************************************************/
+val_value_t *
+    val_next_child_match (val_value_t *parent,
+			  val_value_t *child,
+			  val_value_t *curmatch)
+{
+    val_value_t *val;
+
+#ifdef DEBUG
+    if (!parent || !child || !curmatch) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (!typ_has_children(parent->btyp)) {
+	return NULL;
+    }
+
+    for (val = (val_value_t *)dlq_nextEntry(curmatch);
+	 val != NULL;
+	 val = (val_value_t *)dlq_nextEntry(val)) {
+
+	/* check the node if the QName matches */
+	if (val->nsid == child->nsid &&
+	    !xml_strcmp(val->name, child->name)) {
+
+	    if (val->btyp == NCX_BT_LIST) {
+		/* match the instance identifiers, if any */
+		if (val_index_match(child, val)) {
+		    return val;
+		}
+	    } else if (val->obj->objtype == OBJ_TYP_LEAF_LIST) {
+		if (val->btyp == child->btyp) {
+		    /* find the leaf-list with the same value */
+		    if (!val_compare(val, child)) {
+			return val;
+		    }
+		} else {
+		    /* match any value; if this is a subtree
+		     * filter test, it is not for a content match
+		     * node
+		     */
+		    return val;
+		}
+	    } else {
+		/* can only be this one instance */
+		return val;
+	    }
+	}
+    }
+
+    return NULL;
+
+}  /* val_next_child_match */
 
 
 /********************************************************************
@@ -4508,7 +4622,7 @@ val_value_t *
 	 val = (val_value_t *)dlq_nextEntry(val)) {
 	if (modname && 
 	    xml_strcmp(modname, 
-		       obj_get_mod_name(val->obj))) {
+		       val_get_mod_name(val))) {
 	    continue;
 	}
 	if (!xml_strcmp(val->name, childname)) {
@@ -4561,7 +4675,7 @@ val_value_t *
 	 val != NULL;
 	 val = (val_value_t *)dlq_nextEntry(val)) {
 	if (modname && 
-	    xml_strcmp(modname, obj_get_mod_name(val->obj))) {
+	    xml_strcmp(modname, val_get_mod_name(val))) {
 	    continue;
 	}
 	if (!xml_strncmp(val->name, childname,
@@ -4617,7 +4731,7 @@ val_value_t *
 	 val = (val_value_t *)dlq_nextEntry(val)) {
 	if (modname && 
 	    xml_strcmp(modname, 
-		       obj_get_mod_name(val->obj))) {
+		       val_get_mod_name(val))) {
 	    continue;
 	}
 	if (!xml_strcmp(val->name, childname)) {
@@ -4672,6 +4786,108 @@ val_value_t *
     return NULL;
 
 }  /* val_first_child_name */
+
+
+/********************************************************************
+* FUNCTION val_first_child_qname
+* 
+* Get the first corresponding child node instance, by QName
+* 
+* INPUTS:
+*    parent == parent complex type to check
+*    nsid == namespace ID to use, 0 for any
+*    name == child name to find
+*
+* RETURNS:
+*   pointer to the first match if found, or NULL if not found
+*********************************************************************/
+val_value_t *
+    val_first_child_qname (val_value_t *parent,
+			   xmlns_id_t   nsid,
+			   const xmlChar *name)
+{
+    val_value_t *val;
+
+#ifdef DEBUG
+    if (!parent || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (!typ_has_children(parent->btyp)) {
+	return NULL;
+    }
+	
+    for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
+	 val != NULL;
+	 val = (val_value_t *)dlq_nextEntry(val)) {
+
+	if (!xmlns_ids_equal(nsid, val->nsid)) {
+	    continue;
+	}
+
+	/* check the node if the name matches */
+	if (!xml_strcmp(val->name, name)) {
+	    return val;
+	}
+    }
+
+    return NULL;
+
+}  /* val_first_child_qname */
+
+
+/********************************************************************
+* FUNCTION val_next_child_qname
+* 
+* Get the next corresponding child node instance, by QName
+* 
+* INPUTS:
+*    parent == parent complex type to check
+*    nsid == namespace ID to use, 0 for any
+*    name == child name to find
+*    curchild == current child match to start from
+*
+* RETURNS:
+*   pointer to the next match if found, or NULL if not found
+*********************************************************************/
+val_value_t *
+    val_next_child_qname (val_value_t *parent,
+			  xmlns_id_t   nsid,
+			  const xmlChar *name,
+			  val_value_t *curchild)
+{
+    val_value_t *val;
+
+#ifdef DEBUG
+    if (!parent || !name || !curchild) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (!typ_has_children(parent->btyp)) {
+	return NULL;
+    }
+	
+    for (val = (val_value_t *)dlq_nextEntry(curchild);
+	 val != NULL;
+	 val = (val_value_t *)dlq_nextEntry(val)) {
+
+	if (!xmlns_ids_equal(nsid, val->nsid)) {
+	    continue;
+	}
+
+	/* check the node if the name matches */
+	if (!xml_strcmp(val->name, name)) {
+	    return val;
+	}
+    }
+
+    return NULL;
+
+}  /* val_next_child_qname */
 
 
 /********************************************************************
@@ -4808,8 +5024,7 @@ uint32
 	 val = (const val_value_t *)dlq_nextEntry(val)) {
 
 	if (modname &&
-	    xml_strcmp(modname,
-		       obj_get_mod_name(val->obj))) {
+	    xml_strcmp(modname, val_get_mod_name(val))) {
 	    continue;
 	}
 
@@ -5627,8 +5842,8 @@ uint32
 	 val != NULL;
 	 val = (const val_value_t *)dlq_nextEntry(val)) {
 
-	if (xml_strcmp(obj_get_mod_name(child->obj),
-		       obj_get_mod_name(val->obj))) {
+	if (xml_strcmp(val_get_mod_name(child),
+		       val_get_mod_name(val))) {
 	    continue;
 	}
 
@@ -7070,7 +7285,7 @@ uint32
 
 	if (modname && 
 	    xml_strcmp(modname,
-		       obj_get_mod_name(chval->obj))) {
+		       val_get_mod_name(chval))) {
 	    continue;
 	}
 
@@ -7128,7 +7343,7 @@ void
 
 	if (modname && 
 	    xml_strcmp(modname,
-		       obj_get_mod_name(chval->obj))) {
+		       val_get_mod_name(chval))) {
 	    continue;
 	}
 
@@ -7429,6 +7644,71 @@ val_value_t *
     return NULL;
 
 }  /* val_get_first_leaf */
+
+
+/********************************************************************
+* FUNCTION val_get_mod_name
+* 
+* Get the module name associated with this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     const pointer to module name string
+*     NULL if not found
+*********************************************************************/
+const xmlChar *
+    val_get_mod_name (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+#endif
+
+    if (val->nsid) {
+	return xmlns_get_module(val->nsid);
+    } else {
+	return obj_get_mod_name(val->obj);
+    }
+
+}  /* val_get_mod_name */
+
+
+/********************************************************************
+* FUNCTION val_change_nsid
+* 
+* Change the namespace ID fora value node and all its descendants
+*
+* INPUTS:
+*     val == value node to change
+*    nsid == new namespace ID to use
+*
+*********************************************************************/
+void
+    val_change_nsid (val_value_t *val,
+		     xmlns_id_t nsid)
+{
+    val_value_t  *child;
+
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+#endif
+
+    val->nsid = nsid;
+
+    for (child = val_get_first_child(val);
+	 child != NULL;
+	 child = val_get_next_child(child)) {
+	val_change_nsid(child, nsid);
+    }
+
+}  /* val_change_nsid */
 
 
 /* END file val.c */

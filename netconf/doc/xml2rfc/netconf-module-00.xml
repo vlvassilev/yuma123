@@ -1,3 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+    <!ENTITY rfc4741 PUBLIC '' 
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4741.xml'>
+    <!ENTITY yangspec PUBLIC '' 
+      'http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-netmod-yang.xml'>
+    <!ENTITY yangtypes PUBLIC '' 
+      'http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-netmod-yang-types.xml'>
+]>
+
+<rfc category="std" docName="draft-bierman-netmod-netconf-module-00" 
+     ipr="trust200811">
+
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+
+<?rfc strict="yes"?>
+<?rfc comments="no" ?>
+<?rfc inline="no" ?>
+<?rfc editing="no" ?>
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="4"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="no" ?>
+<?rfc compact="no"?>
+<?rfc iprnotified="no"?>
+
+ <front>
+  <title abbrev="netconf.yang">
+     A YANG Module for the NETCONF Protocol
+  </title>
+  <author fullname="Andy Bierman" initials="A.B."
+            surname="Bierman">
+    <organization>Netconf Central</organization>
+    <address>
+      <postal>
+	<street></street>
+	<city>Simi Valley</city>
+	<region>CA</region>
+	<code></code>
+	<country>USA</country>
+      </postal>
+      <email>andy@netconfcentral.com</email>
+    </address>
+  </author>
+
+  <date month="January" year="2009" />
+  <area>Management</area>
+  <workgroup>Internet Engineering Task Force</workgroup>
+  <keyword>NETMOD</keyword>
+  <keyword>NETCONF</keyword>
+  <keyword>XML</keyword>
+  <keyword>YANG</keyword>
+  <abstract>
+   <t>
+    The NETCONF protocol contains several data types and protocol
+    operations which could be utilized in NETMOD data models,
+    written with the YANG data modeling language.
+    This document contains a YANG module defining the NETCONF
+    data types and protocol operations, in order for other 
+    YANG modules to properly import and augment the definitions
+    in a common way.
+   </t>
+  </abstract>
+ </front>
+
+ <middle>
+   <section title="Introduction">
+     <t>
+       The standardization of network configuration interfaces for use 
+       with the <xref target="RFC4741">NETCONF</xref> protocol 
+       requires a modular set of data models, which can be reused
+       and extended over time.
+
+       This document defines a YANG module which represents the
+       NETCONF protocol definitions and operations.
+       It is intended to provide a common module which can be imported
+       by other YANG data model modules.  It is not an authoritative
+       representation of the NETCONF protocol XML syntax.  That
+       is defined in the XSD within RFC 4741.
+    
+       However, in order to utilize the protocol data types and 
+       augment the protocol operations, a YANG representation
+       of these constructs is needed.
+     </t>
+
+     <t>
+       <figure anchor="NETCONF_stack">
+	 <artwork>
+<![CDATA[
+
+ The NETCONF stack can be conceptually partitioned into four layers.
+
+       Layer                Example
+      +-------------+   +--------------------+ +-------------------+
+  (4) |   Content   |   | Configuration data | | Notification data |
+      +-------------+   +--------------------+ +-------------------+
+             |                    |                   |
+      +-------------+   +-----------------+     +---------------+
+  (3) | Operations  |   |  <edit-config>  |     |  <eventType>  |
+      +-------------+   +-----------------+     +---------------+
+             |                    |                   |
+      +-------------+   +--------------------+  +----------------+
+  (2) |     RPC     |   | <rpc>, <rpc-reply> |  | <notification> |
+      +-------------+   +--------------------+  +----------------+
+             |                    |                   |
+      +-------------+       +-----------------------------+
+  (1) |  Transport  |       |   BEEP, SSH, SSL, console   |
+      |   Protocol  |       |                             |
+      +-------------+       +-----------------------------+
+
+]]>
+	 </artwork>
+       </figure>
+     </t>
+
+     <t>
+       This document defines a YANG module which describes
+       the NETCONF operations layer (3).
+     </t>
+   </section>
+
+   <section title="Terminology">
+     <section title="NETCONF Terms">
+       <t>
+	 The following terms are defined in RFC 4741 and are not redefined here:
+	 <list style="symbols">
+	   <t>agent</t>
+	   <t>application</t>
+	   <t>manager</t>
+	   <t>operation</t>
+	   <t>RPC</t>
+	 </list>
+       </t>
+     </section>
+   </section>
+
+   <section title="NETCONF YANG Module" anchor="YANG">
+   <t>
+    This section contains a YANG 
+    <xref target="I-D.ietf-netmod-yang"/>
+    module definition which
+    defines the YANG syntax associated with the 
+    conceptual data structures found
+    in <xref target="RFC4741"/>.  The yang-types
+    <xref target="I-D.ietf-netmod-yang-types"/> module
+    is imported in order to utilize the 'uri'
+    data type.
+   </t>
+
+   <t>
+     <figure anchor="NETCONF_module">
+       <artwork>
+
+<![CDATA[
+BEGIN
+
 module netconf {
 
    namespace "urn:ietf:params:xml:ns:netconf:base:1.0";
@@ -7,8 +165,9 @@ module netconf {
    // for the uri data type
    import yang-types { prefix "yang"; }
 
-   // for NCX 'metadata' language extension
-   import ncx { prefix "ncx"; }
+   // for NCX language extensions
+   // these will probablt be removed in a future version
+   // import ncx { prefix "ncx"; }
 
    description 
       "NETCONF Protocol 
@@ -21,21 +180,10 @@ module netconf {
      "Translated by Andy Bierman.
       Send comments to <andy@netconfcentral.com>.";
 
-   revision "2008-08-30" {
+   revision "2009-01-19" {
      description 
-       "Add some NCX extensions to automate some agent processing.";
+       "Initial I-D version.";
    }
-
-   revision "2008-04-26" {
-     description 
-       "Change get-config and get output from 'config' to 'data'.";
-   }
-
-   revision "2008-04-16" {
-     description 
-       "Initial conversion from netconf.ncx version 0.6.";
-   }
-
 
    // NETCONF capabilities defined as features
    feature writable-running {
@@ -105,7 +253,7 @@ module netconf {
    typedef LangString {
      description "XML string with a language attribute.";
      type string;
-     ncx:metadata "Language lang";
+     // ncx:metadata "Language lang";
    }
 
    typedef MessageId {
@@ -195,7 +343,7 @@ module netconf {
    typedef SelectString {
      description "XPath string used in the select attribute.";
      type string {
-       ncx:xpath;
+       // ncx:xpath;
      }
    }
 
@@ -258,8 +406,8 @@ module netconf {
         config false;
      }
 
-     ncx:hidden;
-     ncx:abstract;
+     // ncx:hidden;
+     // ncx:abstract;
    }
 
    container mgr-hello {
@@ -268,8 +416,8 @@ module netconf {
 
      uses NcCapabilities;
 
-     ncx:hidden;
-     ncx:abstract;
+     // ncx:hidden;
+     // ncx:abstract;
    }
 
    // NETCONF Operations PDU Data Types
@@ -384,23 +532,24 @@ module netconf {
        description
          "Contains the absolute XPath [2] expression identifying
           the element path to the node that is associated with the error
-          being reported in a particular rpc-error element.  This element
-         will not be present if no appropriate payload element can be
-         associated with a particular error condition, or if the
-         'bad-element' QString returned in the 'error-info' container is
-         sufficient to identify the node associated with the error.  When
-         the XPath expression is interpreted, the set of namespace
-         declarations are those in scope on the rpc-error element,
-         including the default namespace.";
+          being reported in a particular rpc-error element.  This 
+          element will not be present if no appropriate payload element 
+          can be associated with a particular error condition, or if the
+          'bad-element' QString returned in the 'error-info' container
+          is sufficient to identify the node associated with the error.
+          When the XPath expression is interpreted, the set of 
+          namespace declarations are those in scope on the rpc-error
+          element, including the default namespace.";
        type instance-identifier;
      }
 
      leaf error-message {
        description
          "Contains a string suitable for human display that
-          describes the error condition.  This element will not be present
-          if no appropriate message is provided for a particular error
-          condition.  This element SHOULD include an xml:lang attribute.";
+          describes the error condition.  This element will not be
+          present if no appropriate message is provided for a particular
+          error condition.  This element SHOULD include an 
+          xml:lang attribute.";
         type LangString;
       }
 
@@ -409,13 +558,13 @@ module netconf {
           "Contains protocol- or data-model-specific error content.
            This element will not be present if no such error content is
            provided for a particular error condition.  The list in 
-           RFC 4741, Appendix A, defines any mandatory error-info content 
-           for each error.  After any protocol-mandated content, a 
-           data model definition may mandate that certain application-layer
-           error information be included in the error-info container. 
-           An implementation may include additional elements to 
-           provide extended and/or implementation-specific debugging 
-           information.";
+           RFC 4741, Appendix A, defines any mandatory error-info 
+           content for each error.  After any protocol-mandated 
+           content, a data model definition may mandate that certain
+           application-layer error information be included in the
+           error-info container.  An implementation may include 
+           additional elements to provide extended and/or 
+           implementation-specific debugging information.";
       }
    }
 
@@ -440,7 +589,8 @@ module netconf {
         leaf ok {
           description
             "Sent in 'rpc-reply' messages if no errors or
-             warnings occurred during the processing of an 'rpc' request.";
+             warnings occurred during the processing of 
+             an 'rpc' request.";
           type empty;
           config false;
         }
@@ -462,7 +612,8 @@ module netconf {
         leaf ok {
           description
             "Sent in 'rpc-reply' messages if no errors or
-             warnings occurred during the processing of an 'rpc' request.";
+             warnings occurred during the processing of 
+             an 'rpc' request.";
           type empty;
         }
 
@@ -527,7 +678,7 @@ module netconf {
 
               container config {
                 description "Inline configuration data";
-                ncx:root;
+                // ncx:root;
               }
           }
       }
@@ -554,8 +705,8 @@ module netconf {
      description 
        "Internal object for the nc:operation attribute.";
      type EditOperationType;
-     ncx:abstract;
-     ncx:hidden;
+     // ncx:abstract;
+     // ncx:hidden;
    }
 
    // NETCONF Generic RPC Messages
@@ -566,8 +717,8 @@ module netconf {
      reference "RFC 4741, section 4.1";
 
      // do not treat missing message-id as an error
-     ncx:metadata  "MessageId message-id";
-     ncx:abstract;
+     // ncx:metadata  "MessageId message-id";
+     // ncx:abstract;
    }
 
    container rpc-reply {
@@ -578,8 +729,8 @@ module netconf {
      uses RpcReplyType;
 
      // do not treat missing message-id as an error
-     ncx:metadata  "MessageId message-id";
-     ncx:abstract;
+     // ncx:metadata  "MessageId message-id";
+     // ncx:abstract;
    }
 
    // NETCONF Standard RPC Methods
@@ -590,7 +741,7 @@ module netconf {
 
       reference "RFC 4741, section 7.2";
 
-      ncx:rpc-type "monitor";
+      // ncx:rpc-type "monitor";
 
       input {
         container source {
@@ -598,10 +749,11 @@ module netconf {
           uses GetConfigSourceType;
         }
 
-        anyxml filter {
+        container filter {
           description "Subtree or Xpath filter to use.";
-          ncx:metadata "FilterType type";
-          ncx:metadata "SelectString select";
+          // ncx:metadata "FilterType type";
+          // ncx:metadata "SelectString select";
+          // ncx:root;
         }
       }
 
@@ -610,7 +762,7 @@ module netconf {
           description 
             "Copy of the source database subset which matched
              the filter criteria (if any).";
-         ncx:root;
+         // ncx:root;
        }
      }
    }
@@ -619,22 +771,23 @@ module netconf {
       description
         "The 'edit-config' operation loads all or part of a specified
          configuration to the specified target configuration.  This
-         operation allows the new configuration to be expressed in several
-         ways, such as using a local file, a remote file, or inline.  If
-         the target configuration does not exist, it will be created.  If a
-         NETCONF peer supports the :url capability (Section 8.8), the <url>
-         element can appear instead of the <config> parameter and should
-         identify a local configuration file.
+         operation allows the new configuration to be expressed in 
+         several ways, such as using a local file, a remote file, 
+         or inline.  If the target configuration does not exist, it 
+         will be created.  If a NETCONF peer supports the :url 
+         capability (Section 8.8), the <url> element can appear 
+         instead of the <config> parameter and should identify
+         a local configuration file.
 
          The device analyzes the source and target configurations and
-         performs the requested changes.  The target configuration is not
-         necessarily replaced, as with the <copy-config> message.  Instead,
-         the target configuration is changed in accordance with the
-         source's data and requested operations.";
+         performs the requested changes.  The target configuration
+         is not necessarily replaced, as with the <copy-config> message.
+         Instead, the target configuration is changed in accordance with
+         the source's data and requested operations.";
 
       reference "RFC 4741, section 7.2";
 
-      ncx:rpc-type "config";
+      // ncx:rpc-type "config";
 
       input {
         container target {
@@ -668,7 +821,7 @@ module netconf {
           container config {
             description 
               "Inline Config content: 'config' element.";
-            ncx:root;
+            // ncx:root;
           }
           leaf url {
             if-feature url;
@@ -684,25 +837,27 @@ module netconf {
       description
         "Create or replace an entire configuration datastore with the
          contents of another complete configuration datastore.  If the
-         target datastore exists, it is overwritten.  Otherwise, a new one
-         is created, if allowed.
+         target datastore exists, it is overwritten.  Otherwise, a new
+         one is created, if allowed.
 
-         If a NETCONF peer supports the :url capability (Section 8.8), the
-         'url' element can appear as the <source> or <target> parameter.
+         If a NETCONF peer supports the :url capability (Section 8.8),
+         the 'url' element can appear as the <source> or <target> 
+         parameter.
 
-         Even if it advertises the :writable-running capability, a device
-         may choose not to support the <running/> configuration datastore
-         as the <target> parameter of a <copy-config> operation.  A device
-         may choose not to support remote-to-remote copy operations, where
-         both the <source> and <target> parameters use the <url> element.
+         Even if it advertises the :writable-running capability, a 
+         device may choose not to support the <running/> 
+         configuration datastore as the <target> parameter of a
+         <copy-config> operation.  A device may choose not to 
+         support remote-to-remote copy operations, where both the
+         <source> and <target> parameters use the <url> element.
 
-        If the source and target parameters identify the same URL or
-        configuration datastore, an error MUST be returned with an error-
-        tag containing invalid-value.";
+         If the source and target parameters identify the same URL or
+         configuration datastore, an error MUST be returned with an 
+         error-tag containing invalid-value.";
 
       reference "RFC 4741, section 7.3";
 
-      ncx:rpc-type "config";
+      // ncx:rpc-type "config";
 
       input {
         container target {
@@ -724,12 +879,12 @@ module netconf {
         "Delete a configuration datastore.  The 'running' configuration
          datastore cannot be deleted.
 
-         If a NETCONF peer supports the :url capability (Section 8.8), the
-         'url' element can appear as the <target> parameter.";
+         If a NETCONF peer supports the :url capability (Section 8.8),
+         the 'url' element can appear as the <target> parameter.";
 
       reference "RFC 4741, section 7.4";
 
-      ncx:rpc-type "config";
+      // ncx:rpc-type "config";
 
       input {
         container target {
@@ -741,15 +896,16 @@ module netconf {
 
    rpc lock {
       description
-        "The lock operation allows the client to lock the configuration
-         system of a device.  Such locks are intended to be short-lived and
-         allow a client to make a change without fear of interaction with
-         other NETCONF clients, non-NETCONF clients (e.g., SNMP and command
-         line interface (CLI) scripts), and human users. ...";
+        "The lock operation allows the client to lock the 
+         configuration system of a device.  Such locks are intended
+         to be short-lived and allow a client to make a change without
+         fear of interaction with other NETCONF clients, non-NETCONF
+         clients (e.g., SNMP and command line interface (CLI) scripts),
+         and human users. ...";
 
       reference "RFC 4741, section 7.5";
 
-      ncx:rpc-type "config";
+      // ncx:rpc-type "config";
 
       input {
         container target {
@@ -778,7 +934,7 @@ module netconf {
 
       reference "RFC 4741, section 7.6";
 
-      ncx:rpc-type "config";
+      // ncx:rpc-type "config";
 
       input {
         container target {
@@ -795,29 +951,30 @@ module netconf {
 
       reference "RFC 4741, section 7.7";
 
-      ncx:rpc-type "monitor";
+      // ncx:rpc-type "monitor";
 
       input {
-        anyxml filter {
+        container filter {
           description
             "This parameter specifies the portion of the system
-             configuration and state data to retrieve.  If this parameter is
-             empty, all the device configuration and state information is
-             returned.
+             configuration and state data to retrieve.  If this 
+             parameter is empty, all the device configuration and state
+             information is returned.
 
-             The filter element may optionally contain a 'type' attribute.
-             This attribute indicates the type of filtering syntax used
-             within the filter element.  The default filtering mechanism in
-             NETCONF is referred to as subtree filtering and is described in
-             Section 6.  The value 'subtree' explicitly identifies this type
-             of filtering.
+             The filter element may optionally contain a 'type' 
+             attribute.  This attribute indicates the type of filtering
+             syntax used within the filter element.  The default
+             filtering mechanism in NETCONF is referred to as subtree
+             filtering and is described in Section 6.  The value
+             'subtree' explicitly identifies this type of filtering.
 
              If the NETCONF peer supports the :xpath capability
-             (Section 8.9), the value 'xpath' may be used to indicate that
-             the select attribute of the filter element contains an XPath
-             expression.";
-          ncx:metadata "FilterType type";
-          ncx:metadata "string select";
+             (Section 8.9), the value 'xpath' may be used to indicate
+             that the select attribute of the filter element contains
+             an XPath expression.";
+          // ncx:metadata "FilterType type";
+          // ncx:metadata "string select";
+          // ncx:root;
         }
       }
 
@@ -826,7 +983,7 @@ module netconf {
           description 
             "Copy of the 'running' database subset which matched
              the filter criteria (if any).";
-          ncx:root;
+          // ncx:root;
         }
       }
    }
@@ -835,15 +992,16 @@ module netconf {
       description
         "Request graceful termination of a NETCONF session.
 
-         When a NETCONF server receives a <close-session> request, it will
-         gracefully close the session.  The server will release any locks
-         and resources associated with the session and gracefully close any
-         associated connections.  Any NETCONF requests received after a
-         'close-session' request will be ignored.";
+         When a NETCONF server receives a <close-session> request, it
+         will gracefully close the session.  The server will release
+         any locks and resources associated with the session and
+         gracefully close any associated connections.  Any NETCONF
+         requests received after a 'close-session' request will 
+         be ignored.";
 
       reference "RFC 4741, section 7.8";
 
-      ncx:rpc-type "other";
+      // ncx:rpc-type "other";
    }
 
    rpc kill-session {
@@ -851,13 +1009,14 @@ module netconf {
         "Force the termination of a NETCONF session.
 
          When a NETCONF entity receives a <kill-session> request for an
-         open session, it will abort any operations currently in process,
-         release any locks and resources associated with the session, and
-         close any associated connections.
+         open session, it will abort any operations currently in
+         process, release any locks and resources associated with the
+         session, and close any associated connections.
 
          If a NETCONF server receives a <kill-session> request while
-         processing a confirmed commit (Section 8.4), it must restore the
-         configuration to its state before the confirmed commit was issued.
+         processing a confirmed commit (Section 8.4), it must restore
+         the configuration to its state before the confirmed commit
+         was issued.
 
          Otherwise, the <kill-session> operation does not roll back
          configuration or other device state modifications made by the
@@ -865,7 +1024,7 @@ module netconf {
 
       reference "RFC 4741, section 7.9";
 
-      ncx:rpc-type "exec";
+      // ncx:rpc-type "exec";
 
       input {
         leaf session-id {
@@ -902,7 +1061,7 @@ module netconf {
 
       reference "RFC 4741, section 8.3.4.1";
 
-      ncx:rpc-type "config";
+      // ncx:rpc-type "config";
 
       input {
         leaf confirmed {
@@ -928,17 +1087,18 @@ module netconf {
       description
         "Only available if 'candidate' capability is supported.
 
-         If the client decides that the candidate configuration should not be
-         committed, the 'discard-changes' operation can be used to revert the
-         candidate configuration to the current running configuration.
+         If the client decides that the candidate configuration should
+         not be committed, the 'discard-changes' operation can be 
+         used to revert the candidate configuration to the current
+         running configuration.
 
-         This operation discards any uncommitted changes by resetting the
-         candidate configuration with the content of the running
+         This operation discards any uncommitted changes by resetting
+         the candidate configuration with the content of the running
          configuration.";
 
       reference "RFC 4741, section 8.3.4.2";
 
-      ncx:rpc-type "config";
+      // ncx:rpc-type "config";
 
    }
 
@@ -951,7 +1111,7 @@ module netconf {
 
       reference "RFC 4741, section 8.6.4.1";
 
-      ncx:rpc-type "config";
+      // ncx:rpc-type "config";
 
       input {
         container source {
@@ -965,10 +1125,47 @@ module netconf {
    container config {
      description 
        "Used as the container for NETCONF object definitions.";
-     ncx:root;
-     ncx:abstract;
+     // ncx:root;
+     // ncx:abstract;
    }
         
 }
 
+END
+]]>
+       </artwork>
+     </figure>
+   </t>
+  </section>
+
+  <!-- Possibly a 'Contributors' section ... -->
+
+  <section anchor="IANA" title="IANA Considerations">
+    <t>
+      There are no actions requested of IANA.
+    </t>
+  </section>
+
+  <section anchor="Security" title="Security Considerations">
+    <t>
+      This document defines a YANG representation of the
+      NETCONF protocol operations.  It does not introduce
+      any new or increased security risks into the management system,
+      since the authoritative representation is defined
+      in RFC 4741.
+    </t>
+  </section>
+
+ </middle>
+
+  <!--  ***** BACK MATTER ***** -->
+ <back>
+   <references title="Normative References">
+     &rfc4741;
+     &yangspec;
+     &yangtypes;
+   </references>
+ </back>
+
+</rfc>
 

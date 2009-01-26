@@ -123,17 +123,6 @@ extern void
 
 
 extern void
-    xml_wr_value_elem (ses_cb_t *scb,
-		       xml_msg_hdr_t *msg,
-		       val_value_t *val,
-		       xmlns_id_t  parent_nsid,
-		       xmlns_id_t  nsid,
-		       const xmlChar *elname,
-		       const dlq_hdr_t *attrQ,
-		       boolean isattrq,
-		       int32 indent);
-
-extern void
     xml_wr_string_elem (ses_cb_t *scb,
 			xml_msg_hdr_t *msg,
 			const xmlChar *str,

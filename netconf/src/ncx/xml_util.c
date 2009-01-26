@@ -1812,7 +1812,9 @@ int
 * Get a malloced string contained the converted string
 * from the input
 * Get rid of the leading and trailing whilespace
-* Get rid of character entities
+*
+* Character entities have already been removed by the xmlTextReader
+*
 * INPUTS:
 *   str == xmlChar string to check
 * RETURNS:

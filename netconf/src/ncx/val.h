@@ -566,12 +566,17 @@ extern void
 
 
 
+/* use next 4 functions after calling
+ * val_new_value().
+ */
 
+/* set a generic string using the builtin string typdef */
 extern status_t 
     val_set_string (val_value_t  *val,
 		    const xmlChar *valname,
 		    const xmlChar *valstr);
 
+/* set a string with any typdef */
 extern status_t 
     val_set_string2 (val_value_t  *val,
 		     const xmlChar *valname,
@@ -579,6 +584,7 @@ extern status_t
 		     const xmlChar *valstr,
 		     uint32 valstrlen);
 
+/* set any simple value with any typdef */
 extern status_t 
     val_set_simval (val_value_t  *val,
 		    const typ_def_t *typdef,
@@ -586,6 +592,7 @@ extern status_t
 		    const xmlChar *valname,
 		    const xmlChar *valstr);
 
+/* set any simple value with any typdef, and a counted string */
 extern status_t 
     val_set_simval_str (val_value_t  *val,
 			const typ_def_t    *typdef,
@@ -594,12 +601,18 @@ extern status_t
 			uint32 valnamelen,
 			const xmlChar *valstr);
 
+/* same as val_set_simval, but malloc the value first */
 extern val_value_t *
     val_make_simval (const typ_def_t    *typdef,
 		     xmlns_id_t    nsid,
 		     const xmlChar *valname,
 		     const xmlChar *valstr,
 		     status_t  *res);
+
+extern val_value_t *
+    val_make_string (xmlns_id_t nsid,
+		     const xmlChar *valname,
+		     const xmlChar *valstr);
 
 extern boolean
     val_merge (val_value_t *src,
@@ -655,6 +668,11 @@ extern val_value_t *
 			   val_value_t *child);
 
 extern val_value_t *
+    val_next_child_match (val_value_t *parent,
+			  val_value_t *child,
+			  val_value_t *curmatch);
+
+extern val_value_t *
     val_get_first_child (const val_value_t *parent);
 
 extern val_value_t *
@@ -681,6 +699,18 @@ extern val_value_t *
 extern val_value_t *
     val_first_child_name (val_value_t *parent,
 			  const xmlChar *name);
+
+extern val_value_t *
+    val_first_child_qname (val_value_t *parent,
+			   xmlns_id_t   nsid,
+			   const xmlChar *name);
+
+extern val_value_t *
+    val_next_child_qname (val_value_t *parent,
+			  xmlns_id_t   nsid,
+			  const xmlChar *name,
+			  val_value_t *curchild);
+
 
 /* find first name value pair */
 extern val_value_t *
@@ -907,5 +937,12 @@ extern uint32
 
 extern val_value_t *
     val_get_first_leaf (val_value_t *val);
+
+extern const xmlChar *
+    val_get_mod_name (const val_value_t *val);
+
+extern void
+    val_change_nsid (val_value_t *val,
+		     xmlns_id_t nsid);
 
 #endif	    /* _H_val */

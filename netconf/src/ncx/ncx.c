@@ -8071,12 +8071,6 @@ void
     case NCX_NT_QNAME:                         /* xmlns_qname_t */
 	xmlns_free_qname(node);
 	break;
-    case NCX_NT_TOP:                            /* ncx_filptr_t */
-	m__free(node);    /***/
-	break;
-    case NCX_NT_CHILD:                          /* ncx_filptr_t */
-	m__free(node);    /***/
-	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	m__free(node);

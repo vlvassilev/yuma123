@@ -86,8 +86,7 @@ typedef enum op_defop_t_ {
 typedef enum op_filtertyp_t_ {
     OP_FILTER_NONE,
     OP_FILTER_SUBTREE,
-    OP_FILTER_XPATH,
-    OP_FILTER_C
+    OP_FILTER_XPATH
 } op_filtertyp_t;
 
 

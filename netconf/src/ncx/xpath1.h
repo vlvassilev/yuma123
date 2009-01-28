@@ -22,6 +22,10 @@ date	     init     comment
 
 */
 
+#ifndef _H_dlq
+#include "dlq.h"
+#endif
+
 #ifndef _H_ncxtypes
 #include "ncxtypes.h"
 #endif
@@ -96,5 +100,14 @@ extern xpath_result_t *
 
 extern const xpath_fncb_t *
     xpath1_get_functions_ptr (void);
+
+extern void
+    xpath1_prune_nodeset (xpath_pcb_t *pcb,
+			  xpath_result_t *result);
+
+extern boolean
+    xpath1_check_node_exists (xpath_pcb_t *pcb,
+			      dlq_hdr_t *resultQ,
+			      val_value_t *val);
 
 #endif	    /* _H_xpath1 */

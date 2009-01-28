@@ -1,15 +1,15 @@
-#ifndef _H_agt_tree
-#define _H_agt_tree
+#ifndef _H_agt_xpath
+#define _H_agt_xpath
 
-/*  FILE: agt_tree.h
+/*  FILE: agt_xpath.h
 *********************************************************************
 *								    *
 *			 P U R P O S E				    *
 *								    *
 *********************************************************************
 
-    Agent subtree filter processing for <filter> element in
-    <get> and <get-config> operations
+    Agent XPath filter processing for select attribute in
+    <filter> element in <get> and <get-config> operations
 
 *********************************************************************
 *								    *
@@ -19,7 +19,7 @@
 
 date	     init     comment
 ----------------------------------------------------------------------
-16-jun-06    abb      Begun
+27-jan-09    abb      Begun
 
 */
 
@@ -35,24 +35,21 @@ date	     init     comment
 #include "ses.h"
 #endif
 
+#ifndef _H_status
+#include "status.h"
+#endif
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
 
-extern ncx_filptr_t *
-    agt_tree_prune_filter (ses_cb_t *scb,
-			   rpc_msg_t *msg,
-			   const cfg_template_t *cfg,
-			   boolean getop);
+extern status_t
+    agt_xpath_output_filter (ses_cb_t *scb,
+			     rpc_msg_t *msg,
+			     const cfg_template_t *cfg,
+			     boolean getop,
+			     int32 indent);
 
-extern void
-    agt_tree_output_filter (ses_cb_t *scb,
-			    rpc_msg_t *msg,
-			    ncx_filptr_t *top,
-			    int32 indent,
-			    boolean getop);
-
-
-#endif	    /* _H_agt_tree */
+#endif	    /* _H_agt_xpath */

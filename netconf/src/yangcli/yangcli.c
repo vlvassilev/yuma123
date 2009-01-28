@@ -4935,7 +4935,7 @@ static status_t
  *********************************************************************/
 static status_t
     add_filter_attrs (val_value_t *val,
-			  const xmlChar *selectstr)
+		      const xmlChar *selectstr)
 {
     val_value_t          *metaval;
     xmlns_id_t            ncid;
@@ -4983,7 +4983,11 @@ static status_t
 *   get_content == the node associated with the target
 *             to be used as content nested within the 
 *             <filter> element
-*   source == optional source (NULL == <get>)
+*             == NULL to use selectstr instead
+*   selectstr == XPath select string
+*             == NULL to use get_content instead
+*   source == optional database source 
+*             <candidate>, <running>
 *
 * OUTPUTS:
 *    agent_cb->state may be changed or other action taken
@@ -5000,9 +5004,10 @@ static status_t
 static status_t
     send_get_to_agent (agent_cb_t *agent_cb,
 		       val_value_t *get_content,
+		       const xmlChar *selectstr,
 		       val_value_t *source)
 {
-    const obj_template_t  *rpc, *input, *child;
+    const obj_template_t  *rpc, *input;
     mgr_rpc_req_t         *req;
     val_value_t           *reqdata, *filter, *dummy_parm;
     ses_cb_t              *scb;
@@ -5012,28 +5017,26 @@ static status_t
     req = NULL;
     reqdata = NULL;
     res = NO_ERR;
+    input = NULL;
 
-    /* get the <get> template */
+    /* get the <get> or <get-config> input template */
     dtyp = NCX_NT_OBJ;
     rpc = (const obj_template_t *)
 	def_reg_find_moddef(NC_MODULE,
-			    (source) ? NCX_EL_GET_CONFIG : NCX_EL_GET,
+			    (source) ? 
+			    NCX_EL_GET_CONFIG : NCX_EL_GET,
 			    &dtyp);
-    if (!rpc) {
-	if (source) {
-	    val_free_value(source);
-	}
-	val_free_value(get_content);
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    if (rpc) {
+	input = obj_find_child(rpc, NULL, YANG_K_INPUT);
     }
 
-    /* get the 'input' section container */
-    input = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (!input) {
 	if (source) {
 	    val_free_value(source);
 	}
-	val_free_value(get_content);
+	if (get_content) {
+	    val_free_value(get_content);
+	}
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
@@ -5044,7 +5047,9 @@ static status_t
 	if (source) {
 	    val_free_value(source);
 	}
-	val_free_value(get_content);
+	if (get_content) {
+	    val_free_value(get_content);
+	}
 	log_error("\nError allocating a new RPC request");
 	return ERR_INTERNAL_MEM;
     }
@@ -5053,49 +5058,46 @@ static status_t
 	val_add_child(source, reqdata);
     }
 
-    /* set the get/input/filter node to the
-     * get_content, but after filling in any
-     * missing nodes from the root to the target
-     */
-    child = obj_find_child(input, NC_MODULE,
-			   NCX_EL_FILTER);
-    filter = val_new_value();
+    if (get_content) {
+	/* set the get/input/filter node to the
+	 * get_content, but after filling in any
+	 * missing nodes from the root to the target
+	 */
+	filter = xml_val_new_struct(NCX_EL_FILTER, xmlns_nc_id());
+    } else {
+	filter = xml_val_new_flag(NCX_EL_FILTER, xmlns_nc_id());
+    }
     if (!filter) {
-	val_free_value(get_content);
+	if (get_content) {
+	    val_free_value(get_content);
+	}
 	val_free_value(reqdata);
 	return ERR_INTERNAL_MEM;
     }
-    val_init_from_template(filter, child);
     val_add_child(filter, reqdata);
 
-    res = add_filter_attrs(filter, NULL);
+    res = add_filter_attrs(filter, selectstr);
     if (res != NO_ERR) {
-	val_free_value(get_content);
+	if (get_content) {
+	    val_free_value(get_content);
+	}
 	val_free_value(reqdata);
 	return ERR_INTERNAL_MEM;
     }
 
-    dummy_parm = NULL;
-    res = add_filter_from_content_node(agent_cb,
-				       rpc, get_content,
-				       get_content->obj,
-				       filter, &dummy_parm);
-    if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
-	/*  val_free_value(get_content); already freed! */
-	val_free_value(reqdata);
-	return res;
+    if (get_content) {
+	dummy_parm = NULL;
+	res = add_filter_from_content_node(agent_cb,
+					   rpc, get_content,
+					   get_content->obj,
+					   filter, &dummy_parm);
+	if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
+	    /*  val_free_value(get_content); already freed! */
+	    val_free_value(reqdata);
+	    return res;
+	}
+	res = NO_ERR;
     }
-    res = NO_ERR;
-
-#if 0
-    /* should not need to set any particular order
-     * in a subtree filter
-     */
-    if (agent_cb->fixorder) {
-	/* must set the order of a root container seperately */
-	val_set_canonical_order(filter);
-    }
-#endif
 
     /* !!! get_content consumed at this point !!!
      * allocate an RPC request and send it 
@@ -6059,7 +6061,7 @@ static void
     }
 
     /* construct a get PDU with the content as the filter */
-    res = send_get_to_agent(agent_cb, content, NULL);
+    res = send_get_to_agent(agent_cb, content, NULL, NULL);
     if (res != NO_ERR) {
 	log_error("\nError: send get operation failed (%s)",
 		  get_error_string(res));
@@ -6125,15 +6127,148 @@ static void
     val_change_nsid(source, xmlns_nc_id());
 
     /* construct a get PDU with the content as the filter */
-    res = send_get_to_agent(agent_cb, content, source);
+    res = send_get_to_agent(agent_cb, content, NULL, source);
     if (res != NO_ERR) {
-	log_error("\nError: send get operation failed (%s)",
+	log_error("\nError: send get-config operation failed (%s)",
 		  get_error_string(res));
     }
 
     val_free_value(valset);
 
 }  /* do_sget_config */
+
+
+/********************************************************************
+ * FUNCTION do_xget
+ * 
+ * Get some running config and/or state data with the <get> operation,
+ * using an optional XPath filter
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    rpc == RPC method for the create command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * OUTPUTS:
+ *   the completed data node is output and
+ *   a <get> operation is sent to the agent
+ *
+ *********************************************************************/
+static void
+    do_xget (agent_cb_t *agent_cb,
+	     const obj_template_t *rpc,
+	     const xmlChar *line,
+	     uint32  len)
+{
+    val_value_t           *valset, *content;
+    status_t               res;
+
+    /* init locals */
+    res = NO_ERR;
+    content = NULL;
+
+    /* get the command line parameters for this command */
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    if (!valset || res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
+	return;
+    }
+
+    /* get the contents specified in the 'from' choice */
+    content = get_content_from_choice(agent_cb, rpc, valset);
+    if (content) {
+	if (content->btyp == NCX_BT_STRING) {
+
+	    /* construct a get PDU with the content as the filter */
+	    res = send_get_to_agent(agent_cb, NULL, 
+				    VAL_STR(content), NULL);
+	    if (res != NO_ERR) {
+		log_error("\nError: send get operation failed (%s)",
+			  get_error_string(res));
+	    }
+	} else {
+	    log_error("\nError: xget content wrong type");
+	}
+	val_free_value(content);
+    }
+
+    val_free_value(valset);
+
+}  /* do_xget */
+
+
+/********************************************************************
+ * FUNCTION do_xget_config
+ * 
+ * Get some config data with the <get-config> operation,
+ * using an optional XPath filter
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    rpc == RPC method for the create command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * OUTPUTS:
+ *   the completed data node is output and
+ *   a <get-config> operation is sent to the agent
+ *
+ *********************************************************************/
+static void
+    do_xget_config (agent_cb_t *agent_cb,
+		    const obj_template_t *rpc,
+		    const xmlChar *line,
+		    uint32  len)
+{
+    val_value_t     *valset, *content, *source;
+    status_t         res;
+      
+    /* get the command line parameters for this command */
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    if (!valset || res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
+	return;
+    }
+
+    /* get the source parameter */
+    source = val_find_child(valset, NULL, NCX_EL_SOURCE);
+    if (!source) {
+	log_error("\nError: mandatory source parameter missing");
+	val_free_value(valset);
+	return;
+    }
+
+    /* get the contents specified in the 'from' choice */
+    content = get_content_from_choice(agent_cb, rpc, valset);
+    if (content) {
+	if (content->btyp == NCX_BT_STRING) {
+	    /* hand off this malloced node to send_get_to_agent */
+	    val_remove_child(source);
+	    val_change_nsid(source, xmlns_nc_id());
+
+	    /* construct a get PDU with the content as the filter */
+	    res = send_get_to_agent(agent_cb, 
+				    NULL, 
+				    VAL_STR(content), 
+				    source);
+	    if (res != NO_ERR) {
+		log_error("\nError: send get-config operation failed (%s)",
+			  get_error_string(res));
+	    }
+	} else {
+	    log_error("\nError: xget content wrong type");
+	}
+	val_free_value(content);
+    }
+
+    val_free_value(valset);
+
+}  /* do_xget_config */
 
 
 /********************************************************************
@@ -6186,9 +6321,9 @@ static status_t
     } else if (!xml_strcmp(rpcname, YANGCLI_SGET_CONFIG)) {
 	do_sget_config(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_XGET)) {
-	/* do_sget(agent_cb, rpc, line, len); */
+	do_xget(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_XGET_CONFIG)) {
-	/* do_sget(agent_cb, rpc, line, len); */
+	do_xget_config(agent_cb, rpc, line, len);
     } else {
 	return ERR_NCX_SKIPPED;
     }

@@ -351,15 +351,13 @@ status_t
 	}
     }
 
-#ifdef NOT_YET
     /* set the xpath capability */
     if (res == NO_ERR) {
-	res = cap_add_std(&my_agt_caps, CAP_STDID_XPATH);
+	res = cap_add_std(newmycaps, CAP_STDID_XPATH);
 	if (res == NO_ERR) {
 	    res = cap_add_stdval(newcaps, CAP_STDID_XPATH);
 	}
     }
-#endif
 
 #ifdef NOT_YET
     /* set the url capability */
@@ -462,75 +460,6 @@ status_t
     return cap_add_modval(agt_caps, mod);
 
 } /* agt_cap_add_module */
-
-
-#if 0
-/********************************************************************
-* FUNCTION agt_cap_set_modcaps_parmset
-*
-* Setup the schema-discovery 'modules' parmset
-* MUST call after agt_cap_set_modules and after the
-* <running> configuration is loaded
-*
-*********************************************************************/
-void
-    agt_cap_set_modcaps_parmset (void)
-{
-    const cap_rec_t  *modcap;
-    val_value_t      *val;
-    status_t          res;
-
-    if (!agt_caps || !my_agt_caps) {
-	SET_ERROR(ERR_INTERNAL_INIT_SEQ);
-	return;
-    }
-
-    /* make sure there is at least one module to report */
-    modcap = cap_first_modcap(my_agt_caps);
-    if (!modcap) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
-    }
-
-    /* create a new parmset struct for schemaList */
-    val = val_new_value();
-    if (!val) {
-	SET_ERROR(ERR_INTERNAL_MEM);
-	return;
-    }
-
-    /* add schema parm for each module loaded in ncxmod */
-    while (modcap) {
-
-	/* add a schema child node for this module */
-	res = add_schema_parm(ps, modcap);
-	if (res != NO_ERR) {
-	    ps_free_parmset(ps);
-	    return;
-	}
-
-	/* setup next pass through the while loop */
-	modcap = cap_next_modcap(modcap);
-    }
-
-    /* generate an instance ID for this parmset */
-    res = ps_gen_parmset_instance_id(ps);
-    if (res != NO_ERR) {
-	ps_free_parmset(ps);
-	SET_ERROR(res);
-	return;
-    }
-
-    /* add the parmset to the netconf application node */
-    res = cfg_add_parmset(cfg_get_config_id(NCX_CFGID_RUNNING),
-			  ps, SES_NULL_SID);
-    if (res != NO_ERR) {
-	ps_free_parmset(ps);
-	SET_ERROR(res);
-    }
-
-} /* agt_cap_set_modcaps_parmset */
-#endif
 
 
 /********************************************************************

@@ -49,6 +49,10 @@ date         init     comment
 #include "agt_util.h"
 #endif
 
+#ifndef _H_agt_xpath
+#include "agt_xpath.h"
+#endif
+
 #ifndef _H_agt_val
 #include "agt_val.h"
 #endif
@@ -121,6 +125,9 @@ date         init     comment
 #include  "xml_wr.h"
 #endif
 
+#ifndef _H_xpath
+#include  "xpath.h"
+#endif
 
 /********************************************************************
 *                                                                   *
@@ -505,13 +512,17 @@ void
 *          == NULL, no errors will be recorded!
 *    layer == netconf layer error occured
 *    res == internal error code
-*    xmlnode == XML node causing error (NULL if not available)
-*    error_parm == error data, specific to 'res'
+*    xmlattr == XML attribute node causing error
+*               (NULL if not available)
+*    xmlnode == XML node containing the attr
+*    badns == bad namespace string value
 *    nodetyp == type of node in 'errnode'
 *    errnode == internal data node with the error
 *            == NULL if not used
+*
 * OUTPUTS:
 *   errQ has error message added if no malloc errors
+*
 * RETURNS:
 *    none
 *********************************************************************/
@@ -626,22 +637,26 @@ status_t
 	case OP_FILTER_SUBTREE:
 	    break;
 	case OP_FILTER_XPATH:
-	    if (!agt_cap_std_set(CAP_STDID_XPATH)) {
-		res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-		errstr = (const xmlChar *)"xpath";
-	    } else {
-		sel = val_find_meta(filter, nsid, NCX_EL_SELECT);
-		if (!sel) {
-		    memset(&selattr, 0x0, sizeof(xml_attr_t));
-		    selattr.attr_ns = xmlns_nc_id();
-		    selattr.attr_name = NCX_EL_SELECT;
-		    res = ERR_NCX_MISSING_ATTRIBUTE;
-		    agt_record_attr_error(scb, &msg->mhdr, 
-					  NCX_LAYER_OPERATION, res,
-					  &selattr, NULL, NULL,
-					  NCX_NT_VAL, filter);
-		    return res;
-		}
+	    sel = val_find_meta(filter, nsid, NCX_EL_SELECT);
+	    if (!sel || !sel->xpathpcb) {
+		res = ERR_NCX_MISSING_ATTRIBUTE;
+	    } else if (sel->xpathpcb->parseres != NO_ERR) {
+		res = sel->xpathpcb->parseres;
+	    }
+	    if (res != NO_ERR) {
+		memset(&selattr, 0x0, sizeof(xml_attr_t));
+		selattr.attr_ns = xmlns_nc_id();
+		selattr.attr_name = NCX_EL_SELECT;
+		agt_record_attr_error(scb, 
+				      &msg->mhdr, 
+				      NCX_LAYER_OPERATION, 
+				      res,
+				      &selattr, 
+				      NULL, 
+				      NULL,
+				      NCX_NT_VAL, 
+				      filter);
+		return res;
 	    }
 	    break;
 	default:
@@ -781,9 +796,10 @@ status_t
 		       rpc_msg_t *msg,
 		       int32 indent)
 {
-    cfg_template_t *source;
-    ncx_filptr_t   *top;
-    boolean         getop;
+    cfg_template_t  *source;
+    ncx_filptr_t    *top;
+    boolean          getop;
+    status_t         res;
 
     getop = !xml_strcmp(msg->rpc_method->name, NCX_EL_GET);
 
@@ -795,6 +811,8 @@ status_t
     if (!source) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
+
+    res = NO_ERR;
 
     switch (msg->rpc_filter.op_filtyp) {
     case OP_FILTER_NONE:
@@ -811,17 +829,23 @@ status_t
 	if (source->root) {
 	    top = agt_tree_prune_filter(scb, msg, source, getop);
 	    if (top) {
-		agt_tree_output_filter(scb, msg, top, indent);
+		agt_tree_output_filter(scb, msg, top, 
+				       indent, getop);
 		ncx_free_filptr(top);
+		break;
 	    }
 	}
 	break;
     case OP_FILTER_XPATH:
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+	if (source->root) {
+	    res = agt_xpath_output_filter(scb, msg, source,
+					  getop, indent);
+	}
+	break;
     default:
-	return SET_ERROR(ERR_INTERNAL_PTR);
+	res = SET_ERROR(ERR_INTERNAL_PTR);
     }
-    return NO_ERR;
+    return res;
 		
 } /* agt_output_filter */
 

@@ -654,113 +654,6 @@ static void
 } /* free_resnode */
 
 
-#if 0
-/********************************************************************
-* FUNCTION clone_resnode
-* 
-* Clone a result node struct
-*
-* INPUTS:
-*    pcb == parser control block to use
-*    resnode == result node struct to clone
-*
-* RETURNS:
-*    malloced data structure to mirror the 'resnode' or NULL
-*    if out-of-memory error
-*********************************************************************/
-static xpath_resnode_t *
-    clone_resnode (xpath_pcb_t *pcb,
-		   xpath_resnode_t *resnode)
-{
-    if (pcb->val) {
-	return new_val_resnode(pcb, 
-			       resnode->position,
-			       resnode->dblslash,
-			       resnode->node.valptr);
-    } else if (pcb->obj) {
-	return new_obj_resnode(pcb, 
-			       resnode->position,
-			       resnode->dblslash,
-			       resnode->node.objptr);
-    } else {
-	return NULL;
-    }
-
-}  /* clone_resnode */
-#endif
-
-
-#if 0
-/********************************************************************
-* FUNCTION clone_result
-* 
-* Clone a result struct
-*
-* INPUTS:
-*    pcb == parser control block to use
-*    result == result struct to clone
-*
-* RETURNS:
-*    malloced data structure to mirror the 'result' or NULL
-*    if out-of-memory error
-*********************************************************************/
-static xpath_result_t *
-    clone_result (xpath_pcb_t *pcb,
-		  const xpath_result_t *result)
-{
-    xpath_result_t  *newresult;
-    xpath_resnode_t *resnode, *newresnode;
-    status_t         res;
-    
-    newresult = new_result(pcb, result->restype);
-    if (!newresult) {
-	return NULL;
-    }
-
-    switch (result->restype) {
-    case XP_RT_NONE:
-	break;
-    case XP_RT_NODESET:
-	for (resnode = (xpath_resnode_t *)
-		 dlq_firstEntry(&result->r.nodeQ);
-	     resnode != NULL;
-	     resnode = (xpath_resnode_t *)dlq_nextEntry(resnode)) {
-
-	    newresnode = clone_resnode(pcb, resnode);
-	    if (!newresnode) {
-		xpath_free_result(newresult);
-		return NULL;
-	    } else {
-		dlq_enque(newresnode, &newresult->r.nodeQ);
-	    }
-	}
-	break;
-    case XP_RT_NUMBER:
-	res = ncx_copy_num(&result->r.num, &newresult->r.num,
-			   NCX_BT_FLOAT64);
-	break;
-    case XP_RT_STRING:
-	newresult->r.str = xml_strdup(result->r.str);
-	if (!newresult->r.str) {
-	    xpath_free_result(newresult);
-	    return NULL;
-	}
-	break;
-    case XP_RT_BOOLEAN:
-	newresult->r.bool = result->r.bool;
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	xpath_free_result(newresult);
-	return NULL;
-    }
-
-    return newresult;
-
-} /* clone_result */
-#endif
-
-
 /********************************************************************
 * FUNCTION compare_results
 * 
@@ -881,43 +774,14 @@ static int32
     }
 
     /* not the same result types, so figure out the
-     * best comparision to make.  Priority is:
+     * correct comparision to make.  Priority defined
+     * by XPath is
      *
-     *  1) string
+     *  1) boolean
      *  2) number
-     *  3) boolean
+     *  3) string
      */
-    if (val1->restype == XP_RT_STRING) {
-	str2 = NULL;
-	*res = xpath_cvt_string(val2, &str2);
-	if (*res == NO_ERR) {
-	    retval = xml_strcmp(val1->r.str, str2);
-	}
-	if (str2) {
-	    m__free(str2);
-	}
-    } else if (val2->restype == XP_RT_STRING) {
-	str1 = NULL;
-	*res = xpath_cvt_string(val1, &str1);
-	if (*res == NO_ERR) {
-	    retval = xml_strcmp(str1, val2->r.str);
-	}
-	if (str1) {
-	    m__free(str1);
-	}
-    } else if (val1->restype == XP_RT_NUMBER) {
-	ncx_init_num(&num2);
-	xpath_cvt_number(val2, &num2);
-	retval = ncx_compare_nums(&val1->r.num, &num2,
-				  NCX_BT_FLOAT64);
-	ncx_clean_num(NCX_BT_FLOAT64, &num2);
-    } else if (val2->restype == XP_RT_NUMBER) {
-	ncx_init_num(&num1);
-	xpath_cvt_number(val1, &num1);
-	retval = ncx_compare_nums(&num1, &val2->r.num,
-				  NCX_BT_FLOAT64);
-	ncx_clean_num(NCX_BT_FLOAT64, &num1);
-    } else if (val1->restype == XP_RT_BOOLEAN) {
+    if (val1->restype == XP_RT_BOOLEAN) {
 	bool2 = xpath_cvt_boolean(val2);
 	if (val1->r.bool && bool2) {
 	    retval = 0;
@@ -934,6 +798,36 @@ static int32
 	    retval = 1;
 	} else {
 	    retval = -1;
+	}
+    } else if (val1->restype == XP_RT_NUMBER) {
+	ncx_init_num(&num2);
+	xpath_cvt_number(val2, &num2);
+	retval = ncx_compare_nums(&val1->r.num, &num2,
+				  NCX_BT_FLOAT64);
+	ncx_clean_num(NCX_BT_FLOAT64, &num2);
+    } else if (val2->restype == XP_RT_NUMBER) {
+	ncx_init_num(&num1);
+	xpath_cvt_number(val1, &num1);
+	retval = ncx_compare_nums(&num1, &val2->r.num,
+				  NCX_BT_FLOAT64);
+	ncx_clean_num(NCX_BT_FLOAT64, &num1);
+    } else if (val1->restype == XP_RT_STRING) {
+	str2 = NULL;
+	*res = xpath_cvt_string(val2, &str2);
+	if (*res == NO_ERR) {
+	    retval = xml_strcmp(val1->r.str, str2);
+	}
+	if (str2) {
+	    m__free(str2);
+	}
+    } else if (val2->restype == XP_RT_STRING) {
+	str1 = NULL;
+	*res = xpath_cvt_string(val1, &str1);
+	if (*res == NO_ERR) {
+	    retval = xml_strcmp(str1, val2->r.str);
+	}
+	if (str1) {
+	    m__free(str1);
 	}
     } else {
 	*res = ERR_NCX_INVALID_VALUE;
@@ -1020,9 +914,11 @@ static void
     if (banner) {
 	log_write("\n%s", banner);
     }
-    log_write(" mod:%s, line:%u", 
-	      ncx_get_modname(pcb->mod),
-	      pcb->tk->linenum);
+    if (pcb->mod) {
+	log_write(" mod:%s, line:%u", 
+		  ncx_get_modname(pcb->mod),
+		  pcb->tk->linenum);
+    }
     log_write("\nxpath result for '%s'", pcb->exprstr);
 
     switch (result->restype) {
@@ -3600,94 +3496,6 @@ static xpath_resnode_t *
     return NULL;
 
 }  /* find_resnode */
-
-#if 0
-/********************************************************************
-* FUNCTION check_node_exists
-* 
-* Check if any ancestor-ot-self node is already in the specified Q
-*
-* This is only done after all the nodes have been processed
-* and the nodeset is complete.  For NETCONF purposes,
-* the entire path to root is added for the context node,
-* and the entire context node contexts are always returned
-*
-* INPUTS:
-*    pcb == parser control block to use
-*    resultQ == Q of xpath_resnode_t structs to check
-*               DOES NOT HAVE TO BE WITHIN A RESULT NODE Q
-*    ptr   == node pointer value to find
-*
-* RETURNS:
-*    TRUE if found, FALSE otherwise
-*********************************************************************/
-static boolean
-    check_node_exists (xpath_pcb_t *pcb,
-		       dlq_hdr_t *resultQ,
-		       void *ptr)
-{
-    obj_template_t   *obj;
-    val_value_t      *val;
-
-    /* quick test -- see if docroot is already in the Q
-     * which means nothing else is needed
-     */
-    if (pcb->val) {
-	if (find_resnode(pcb, resultQ, pcb->val_docroot)) {
-	    return TRUE;
-	}
-    } else if (pcb->obj) {
-	if (find_resnode(pcb, resultQ, pcb->docroot)) {
-	    return TRUE;
-	}
-    } else {
-	return FALSE;
-    }
-
-    /* no docroot in the Q so check the node itself */
-    if (pcb->val) {
-	val = (val_value_t *)ptr;
-	if (val == pcb->val_docroot) {
-	    return FALSE;
-	}
-	
-	while (val) {
-	    if (find_resnode(pcb, resultQ, val)) {
-		return TRUE;
-	    }
-
-	    if (val->parent && 
-		val->parent != pcb->val_docroot) {
-		val = val->parent;
-	    } else {
-		return FALSE;
-	    }
-	}
-    } else {
-	obj = (obj_template_t *)ptr;
-	if (obj == pcb->docroot) {
-	    return FALSE;
-	}
-
-	while (obj) {
-	    if (!(obj->objtype == OBJ_TYP_CHOICE ||
-		  obj->objtype == OBJ_TYP_CASE)) {
-		if (find_resnode(pcb, resultQ, obj)) {
-		    return TRUE;
-		}
-	    }
-
-	    if (obj->parent && obj->parent != pcb->docroot) {
-		obj = obj->parent;
-	    } else {
-		return FALSE;
-	    }
-	}
-    }
-    return FALSE;
-
-}  /* check_node_exists */
-#endif
 
 
 /********************************************************************
@@ -7504,21 +7312,6 @@ xpath_result_t *
     } else {
 	*res = SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
-
-#if 0
-	/* agent XML mode */
-	pcb->tkc = tk_tokenize_xpath_string(NULL, pcb->exprstr, 
-					    0, 0, res);
-	if (!pcb->tkc || *res != NO_ERR) {
-	    if (logerrors) {
-		log_error("\nError: Invalid XPath string '%s'",
-			  pcb->exprstr);
-		ncx_print_errormsg(tkc, mod, *res);
-	    }
-	    return NULL;
-	}
-#endif
-
     }
 
     pcb->val = val;
@@ -7665,6 +7458,134 @@ const xpath_fncb_t *
     return &functions[0];
 
 }  /* xpath1_get_functions_ptr */
+
+
+/********************************************************************
+* FUNCTION xpath1_prune_nodeset
+* 
+* Check the current result nodeset and remove
+* any redundant nodes from a NETCONF POV
+* Any node that has an ancestor already in
+* the result will be deleted
+*
+* INPUTS:
+*    pcb == XPath parser control block to use
+*    result == XPath result nodeset to prune
+*
+* OUTPUTS:
+*    some result->nodeQ contents adjusted or removed
+*
+*********************************************************************/
+void
+    xpath1_prune_nodeset (xpath_pcb_t *pcb,
+			  xpath_result_t *result)
+{
+    xpath_resnode_t        *resnode, *nextnode;
+
+#ifdef DEBUG
+    if (!result) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (result->restype != XP_RT_NODESET) {
+	return;
+    }
+
+    if (!result->isval || !pcb->val_docroot) {
+	return;
+    }
+
+    if (dlq_empty(&result->r.nodeQ)) {
+	return;
+    }
+
+    /* the resnodes need to be deleted or moved to a tempQ
+     * to correctly track duplicates and remove them
+     */
+    for (resnode = (xpath_resnode_t *)
+	     dlq_firstEntry(&result->r.nodeQ);
+	 resnode != NULL;
+	 resnode = nextnode) {
+
+	nextnode = (xpath_resnode_t *)dlq_nextEntry(resnode);
+
+	dlq_remove(resnode);
+
+	if (xpath1_check_node_exists(pcb, 
+				     &result->r.nodeQ,
+				     resnode->node.valptr)) {
+	    log_debug2("\nxpath1: prune node '%s:%s'",
+		       val_get_mod_name(resnode->node.valptr),
+		       resnode->node.valptr->name);
+	    free_resnode(pcb, resnode);
+	} else {
+	    if (nextnode) {
+		dlq_insertAhead(resnode, nextnode);
+	    } else {
+		dlq_enque(resnode, &result->r.nodeQ);
+	    }
+	}
+    }
+
+}  /* xpath1_prune_nodeset */
+
+
+/********************************************************************
+* FUNCTION xpath1_check_node_exists
+* 
+* Check if any ancestor-ot-self node is already in the specified Q
+* ONLY FOR VALUE NODES IN THE RESULT
+*
+* This is only done after all the nodes have been processed
+* and the nodeset is complete.  For NETCONF purposes,
+* the entire path to root is added for the context node,
+* and the entire context node contexts are always returned
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    resultQ == Q of xpath_resnode_t structs to check
+*               DOES NOT HAVE TO BE WITHIN A RESULT NODE Q
+*    val   == value node pointer value to find
+*
+* RETURNS:
+*    TRUE if found, FALSE otherwise
+*********************************************************************/
+boolean
+    xpath1_check_node_exists (xpath_pcb_t *pcb,
+			      dlq_hdr_t *resultQ,
+			      val_value_t *val)
+{
+
+
+    /* quick test -- see if docroot is already in the Q
+     * which means nothing else is needed
+     */
+    if (find_resnode(pcb, resultQ, pcb->val_docroot)) {
+	return TRUE;
+    }
+
+    /* no docroot in the Q so check the node itself */
+    if (val == pcb->val_docroot) {
+	return FALSE;
+    }
+	
+    while (val) {
+	if (find_resnode(pcb, resultQ, val)) {
+	    return TRUE;
+	}
+
+	if (val->parent && 
+	    val->parent != pcb->val_docroot) {
+	    val = val->parent;
+	} else {
+	    return FALSE;
+	}
+    }
+    return FALSE;
+
+}  /* xpath1_check_node_exists */
 
 
 /* END xpath1.c */

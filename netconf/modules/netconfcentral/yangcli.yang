@@ -181,8 +181,19 @@ module yangcli {
         description
             "Common parms for xget and xget-config operations.";
 
-        uses CommonPduParms {
-          augment from {
+	choice from {
+            mandatory true;
+
+            leaf from-local {
+                description "Use the local variable as the content";
+                type nt:NcxIdentifier;
+            }
+
+            leaf from-global {
+                description "Use the global variable as the content";
+                type nt:NcxIdentifier;
+            }
+
             leaf select {
               description
                 "The XPath expression to use in the retrieval
@@ -195,7 +206,6 @@ module yangcli {
                  needed to maintain well-formed XML.";
               type string { length "1..max"; }
             }
-          }
         }
     }
 

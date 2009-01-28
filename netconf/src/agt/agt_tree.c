@@ -203,7 +203,8 @@ date         init     comment
 *    valnode == value node to save
 *
 * RETURNS:
-*    pointer to new ncx_filptr_t struct that was savedstatus
+*    pointer to new ncx_filptr_t struct that was saved
+*    NULL if malloc error
 *********************************************************************/
 static ncx_filptr_t *
     save_filptr (ncx_filptr_t *parent,
@@ -221,6 +222,39 @@ static ncx_filptr_t *
     return filptr;
 
 } /* save_filptr */
+
+
+/********************************************************************
+* FUNCTION find_filptr
+*
+* find an ncx_filptr_t struct
+* 
+* INPUTS:
+*    parent == parent with the Q of ncx_filptr_t to search
+*    valnode == value node to find
+*
+* RETURNS:
+*    pointer to found ncx_filptr_t struct
+*    NULL if not found
+*********************************************************************/
+static ncx_filptr_t *
+    find_filptr (ncx_filptr_t *parent,
+		 val_value_t *valnode)
+{
+    ncx_filptr_t  *filptr;
+
+    for (filptr = (ncx_filptr_t *)dlq_firstEntry(&parent->childQ);
+	 filptr != NULL;
+	 filptr = (ncx_filptr_t *)dlq_nextEntry(filptr)) {
+
+	if (filptr->node == valnode) {
+	    return filptr;
+	}
+    }
+
+    return NULL;
+
+} /* find_filptr */
 
 
 /********************************************************************
@@ -439,11 +473,13 @@ static status_t
 		 boolean *keepempty)
 {
     val_value_t      *filchild, *curchild;
+    val_index_t      *valindex;
     ncx_filptr_t     *filptr;
     boolean           test, anycon, anycm, anysel, mykeepempty;
     xmlns_id_t        ncid;
     status_t          res;
 
+    res = NO_ERR;
     *keepempty = FALSE;
 
     /* little hack: treat a filter node with the 
@@ -668,8 +704,16 @@ static status_t
 		 * are requested, and the keys could
 		 * get filtered out
 		 */
-
-
+		for (valindex = val_get_first_index(filptr->node);
+		     valindex != NULL;
+		     valindex = val_get_next_index(valindex)) {
+		    
+		    if (!find_filptr(filptr, valindex->val)) {
+			if (!save_filptr(filptr, valindex->val)) {
+			    return ERR_INTERNAL_MEM;
+			}
+		    }
+		}
 	    }
 	}
     }
@@ -689,6 +733,7 @@ static status_t
 *    msg == rpc_msg_t in progress
 *    parent == parent filter chain node
 *    indent == start indent amount
+*    getop == TRUE if <get>, FALSE if <get-config>
 *
 * RETURNS:
 *    none
@@ -697,11 +742,15 @@ static void
     output_node (ses_cb_t *scb, 
 		 rpc_msg_t *msg, 
 		 ncx_filptr_t *parent,
-		 int32 indent)
+		 int32 indent,
+		 boolean getop)
 {
     ncx_filptr_t  *filptr;
     val_value_t   *val;
     xmlns_id_t     parentnsid, valnsid;
+    int32          indentamount;
+
+    indentamount = ses_indent_count(scb);
 
     for (filptr = (ncx_filptr_t *)dlq_firstEntry(&parent->childQ);
 	 filptr != NULL;
@@ -716,7 +765,13 @@ static void
 	}
 
 	if (dlq_empty(&filptr->childQ)) {
-	    xml_wr_full_val(scb, &msg->mhdr, val, indent);
+	    if (getop) {
+		xml_wr_full_val(scb, &msg->mhdr, val, indent);
+	    } else {
+		xml_wr_full_check_val(scb, &msg->mhdr, 
+				      val, indent,
+				      agt_check_config);
+	    }
 	} else {
 	    /* check the child nodes in the filter
 	     * If there are container nodes or select nodes
@@ -738,13 +793,13 @@ static void
 				 FALSE);
 
 	    if (indent >= 0) {
-		indent += NCX_DEF_INDENT;
+		indent += indentamount;
 	    }
 
-	    output_node(scb, msg, filptr, indent);	    
+	    output_node(scb, msg, filptr, indent, getop);	    
 
 	    if (indent >= 0) {
-		indent -= NCX_DEF_INDENT;
+		indent -= indentamount;
 	    }
 
 	    xml_wr_end_elem(scb, 
@@ -926,6 +981,7 @@ ncx_filptr_t *
 *    msg == rpc_msg_t in progress
 *    top == ncx_filptr tree to output
 *    indent == start indent amount
+*    getop == TRUE if <get>, FALSE if <get-config>
 *
 * RETURNS:
 *    none
@@ -934,7 +990,8 @@ void
     agt_tree_output_filter (ses_cb_t *scb,
 			    rpc_msg_t *msg,
 			    ncx_filptr_t *top,
-			    int32 indent)
+			    int32 indent,
+			    boolean getop)
 {
 #ifdef DEBUG
     if (!scb || !msg || !top) {
@@ -943,7 +1000,7 @@ void
     }
 #endif
 
-    output_node(scb, msg, top, indent);
+    output_node(scb, msg, top, indent, getop);
     
 } /* agt_tree_output_filter */
 

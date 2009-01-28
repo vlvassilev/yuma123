@@ -334,7 +334,7 @@ typedef struct val_value_t_ {
  */
 typedef struct val_index_t_ {
     dlq_hdr_t     qhdr;
-    val_value_t  *val;      /* points to somewhere in the subtree */
+    val_value_t  *val;      /* points to a child node */
 } val_index_t;
 
 
@@ -838,6 +838,12 @@ extern boolean
 
 extern boolean
     val_has_index (const val_value_t *val);
+
+extern val_index_t *
+    val_get_first_index (const val_value_t *val);
+
+extern val_index_t *
+    val_get_next_index (const val_index_t *valindex);
 
 extern status_t
     val_parse_meta (const typ_def_t *typdef,

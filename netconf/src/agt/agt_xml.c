@@ -298,7 +298,7 @@ static status_t
 		     */
 		    attr = xml_add_qattr(attrs, nsid, name, 
 					 plen, value, &res);
-		    if (attr && !xml_strcmp(name, NCX_EL_SELECT)) {
+		    if (attr && !xml_strcmp(&name[plen], NCX_EL_SELECT)) {
 			/* special hack: do not know which
 			 * attributes within an XML node
 			 * are tagged as XPath strings at this point

@@ -6305,11 +6305,14 @@ status_t
 * E.g.: foo.bar.baz
 *
 * INPUTS:
-*    cpx == complex type to check
+*    val == complex type to check
 *    name == scoped name string of a nested node to find
+*    chval == address of return child val
+*
 * OUTPUTS:
 *    *chval is set to the value of the found local scoped 
 *      child member, if NO_ERR
+*
 * RETURNS:
 *   status
 *********************************************************************/
@@ -6321,6 +6324,12 @@ status_t
     xmlChar        *buff;
     const xmlChar  *next;
     val_value_t    *ch, *nextch;
+
+#ifdef DEBUG
+    if (!val || !name || !chval) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     buff = m__getMem(NCX_MAX_NLEN+1);
     if (!buff) {
@@ -6382,6 +6391,13 @@ status_t
 ncx_iqual_t 
     val_get_iqualval (const val_value_t *val)
 {
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NCX_IQUAL_NONE;
+    }
+#endif
+
     return obj_get_iqualval(val->obj);
 
 } /* val_get_iqualval */
@@ -6411,6 +6427,13 @@ ncx_iqual_t
 boolean
     val_duplicates_allowed (val_value_t *val)
 {
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
     /* see if info already cached */
     if (val->flags & VAL_FL_DUPDONE) {
 	return (val->flags & VAL_FL_DUPOK) ? TRUE : FALSE;
@@ -6446,6 +6469,13 @@ boolean
     val_has_content (const val_value_t *val)
 {
     ncx_btype_t  btyp;
+
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
 
     if (!val_is_real(val)) {
 	return TRUE;
@@ -6486,9 +6516,68 @@ boolean
 boolean
     val_has_index (const val_value_t *val)
 {
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
     return (dlq_empty(&val->indexQ)) ? FALSE : TRUE;
 
 }  /* val_has_index */
+
+
+/********************************************************************
+* FUNCTION val_get_first_index
+* 
+* Get the first index entry, if any for this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*    pointer to first val_index_t node,  NULL if none
+*********************************************************************/
+val_index_t *
+    val_get_first_index (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (val_index_t *)dlq_firstEntry(&val->indexQ);
+
+}  /* val_get_first_index */
+
+
+/********************************************************************
+* FUNCTION val_get_next_index
+* 
+* Get the next index entry, if any for this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*    pointer to next val_index_t node,  NULL if none
+*********************************************************************/
+val_index_t *
+    val_get_next_index (const val_index_t *valindex)
+{
+#ifdef DEBUG
+    if (!valindex) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (val_index_t *)dlq_nextEntry(valindex);
+
+}  /* val_get_next_index */
 
 
 /********************************************************************

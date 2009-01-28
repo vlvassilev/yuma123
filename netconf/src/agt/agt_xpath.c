@@ -326,7 +326,6 @@ static void
 	     * descendant of the topval, so output it now
 	     */
 	    dlq_remove(testnode);
-
 	    if (getop) {
 		xml_wr_full_val(scb, &msg->mhdr, 
 				testnode->node.valptr, 
@@ -336,6 +335,7 @@ static void
 				      testnode->node.valptr, 
 				      indent, agt_check_config);
 	    }
+	    xpath_free_resnode(testnode);
 	}
     }
 
@@ -354,6 +354,7 @@ static void
 	output_resnode(scb, msg, pcb, &descendantQ, 
 		       testnode->node.valptr, 
 		       topval, getop, indent);
+	xpath_free_resnode(testnode);
 	testnode = (xpath_resnode_t *)dlq_deque(&descendantQ);
     }
 

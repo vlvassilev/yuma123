@@ -20,7 +20,7 @@
    </t:test2>
    <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
       <t:a2>bambi</t:a2>
-      <t:a1>3</t:a1>
+      <t:a1>32</t:a1>
       <t:b2>2</t:b2>
       <t:foo>
          /t:test2[t:a2=wilma]/t:b2
@@ -29,13 +29,13 @@
    <t:test3 xmlns:t="http://netconfcentral.com/ns/test">
       <t:x>fred</t:x>
       <t:test3deep>
-	<t:yy>1.3</t:yy>
-	<t:y>this is a string</t:y>
-	<t:bb>1.3</t:bb>
-	<t:deepy>
-	  <t:yy3>fred</t:yy3>
-	  <t:yy2>1.123400005</t:yy2>
-	</t:deepy>
+         <t:yy>1.299999952316284</t:yy>
+         <t:y>this is a string</t:y>
+         <t:bb>1.3</t:bb>
+         <t:deepy>
+            <t:yy3>fred</t:yy3>
+            <t:yy2>1.123400005000000</t:yy2>
+         </t:deepy>
       </t:test3deep>
       <t:c2>3</t:c2>
       <t:c2>-3</t:c2>
@@ -43,32 +43,4 @@
       <t:c2>-1</t:c2>
    </t:test3>
    <t:idtest xmlns:t="http://netconfcentral.com/ns/test">t:id-C</t:idtest>
-   <tm:test1 xmlns:tm="http://netconfcentral.com/ns/testmust">
-     <tm:doc>
-       <tm:chapter>
-	 <tm:id>2</tm:id>
-	 <tm:title>test one</tm:title>
-	 <tm:section>
-	   <tm:id>4</tm:id>	   
-	   <tm:para>this is another test</tm:para>
-	 </tm:section>
-	 <tm:section>
-	   <tm:id>5</tm:id>	   
-	   <tm:para>this is another test</tm:para>
-	 </tm:section>
-	 <tm:section>
-	   <tm:id>2</tm:id>	   
-	   <tm:para>this is another test 2</tm:para>
-	 </tm:section>
-	 <tm:section>
-	   <tm:id>1</tm:id>	   
-	   <tm:para>this is another test 3</tm:para>
-	 </tm:section>
-	 <tm:section>
-	   <tm:id>11</tm:id>	   
-	   <tm:para>this is another test 4</tm:para>
-	 </tm:section>
-       </tm:chapter>
-     </tm:doc>
-   </tm:test1>
 </nd:config>

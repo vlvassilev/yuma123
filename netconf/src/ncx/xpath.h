@@ -243,16 +243,6 @@ typedef enum xpath_nodetype_t_ {
 } xpath_nodetype_t;
 
 
-/* Xpath node test mode */
-typedef enum xpath_testmode_t_ {
-    XP_TM_NONE,
-    XP_TM_TEXT,
-    XP_TM_ALL,
-    XP_TM_QNAME,
-    XP_TM_NCNAME
-} xpath_testmode_t;
-
-    
 /* XPath result node struct */
 typedef struct xpath_resnode_t_ {
     dlq_hdr_t             qhdr;
@@ -396,12 +386,23 @@ typedef struct xpath_fncb_t_ {
 /* Value or object node walker fn callback parameters */
 typedef struct xpath_walkerparms_t_ {
     dlq_hdr_t         *resnodeQ;
-    val_value_t       *topvalptr;
-    ncx_xpath_axis_t   axis;
+    /*    ncx_xpath_axis_t   axis; */
     int64              callcount;
-    xpath_testmode_t   testmode;
     status_t           res;
 } xpath_walkerparms_t;
+
+
+/* Value node compare walker fn callback parameters */
+typedef struct xpath_compwalkerparms_t_ {
+    xpath_result_t    *result2;
+    xmlChar           *cmpstring;
+    ncx_num_t         *cmpnum;
+    xmlChar           *buffer;
+    uint32             buffsize;
+    xpath_exop_t       exop;
+    boolean            cmpresult;
+    status_t           res;
+} xpath_compwalkerparms_t;
 
 
 /********************************************************************

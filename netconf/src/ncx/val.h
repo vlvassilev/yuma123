@@ -765,7 +765,8 @@ extern boolean
 			      const xmlChar *name,
 			      boolean configonly,
 			      boolean textmode,
-			      boolean orself);
+			      boolean orself,
+			      boolean forceall);
 
 			      
 extern boolean

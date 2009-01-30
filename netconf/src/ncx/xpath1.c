@@ -77,7 +77,7 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-
+#define TEMP_BUFFSIZE  1024
 
 /********************************************************************
 *                                                                   *
@@ -296,40 +296,6 @@ static void
 
 
 /********************************************************************
-* FUNCTION restype_string
-* 
-* Get the result type enumeration name
-*
-* INPUTS:
-*    restyoe == the result type 
-*
-* RETURNS:
-*    name of the enum
-*********************************************************************/
-static const xmlChar *
-    restype_string (xpath_restype_t restype)
-{
-    switch (restype) {
-    case XP_RT_NONE:
-	return (const xmlChar *)"none";
-    case XP_RT_NODESET:
-	return (const xmlChar *)"nodeset";
-    case XP_RT_NUMBER:
-	return (const xmlChar *)"number";
-    case XP_RT_STRING:
-	return (const xmlChar *)"string";
-    case XP_RT_BOOLEAN:
-	return (const xmlChar *)"boolean";
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return (const xmlChar *)"INVALID";
-    }
-    /*NOTREACHED*/
-
-}  /* restype_string */
-
-
-/********************************************************************
 * FUNCTION malloc_failed_error
 * 
 * Generate a malloc failed error if OK
@@ -404,34 +370,6 @@ static void
     }
 
 }  /* unexpected_error */
-
-
-/********************************************************************
-* FUNCTION wrong_type_error
-* 
-* Generate a wrong function parameter type error if OK
-*
-* INPUTS:
-*    pcb == parser control block to use
-*    gottyoe == the result type encountered
-*    exptyoe == the result type expected
-*********************************************************************/
-static void
-    wrong_type_error (xpath_pcb_t *pcb,
-		      xpath_restype_t gottype,
-		      xpath_restype_t exptype)
-{
-    if (pcb->logerrors) {
-	log_error("\nError: Got arg type '%s', expected '%s' in "
-		  "Xpath expression '%s'",
-		  restype_string(gottype),
-		  restype_string(exptype),
-		  pcb->exprstr);
-	ncx_print_errormsg(pcb->tkc, pcb->mod, 
-			   ERR_NCX_WRONG_DATATYP);
-    }
-
-}  /* wrong_type_error */
 
 
 /********************************************************************
@@ -655,190 +593,6 @@ static void
 
 
 /********************************************************************
-* FUNCTION compare_results
-* 
-* Compare 2 results
-*
-* INPUTS:
-*    pcb == parser control block to use
-*    val1 == first result struct to compare
-*    val2 == second result struct to compare
-*    res == address of resturn status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*    -1 if val1 < val2
-*     0 if val1 == val2
-*     1 if val1 > val2
-*********************************************************************/
-static int32
-    compare_results (xpath_pcb_t *pcb,
-		     xpath_result_t *val1,
-		     xpath_result_t *val2,
-		     status_t *res)
-{
-    xmlChar         *str1, *str2;
-    ncx_num_t        num1, num2;
-    boolean          bool1, bool2;
-    int32            retval;
-
-    *res = NO_ERR;
-
-    if (!pcb->val) {
-	return 0;
-    }
-
-    str1 = NULL;
-    str2 = NULL;
-    retval = 0;
-
-    if (val1->restype == XP_RT_NODESET) {
-	*res = xpath_cvt_string(val1, &str1);
-	if (*res != NO_ERR) {
-	    return retval;
-	}
-    }
-
-    if (val2->restype == XP_RT_NODESET) {
-	*res = xpath_cvt_string(val2, &str2);
-	if (*res != NO_ERR) {
-	    if (str1) {
-		m__free(str1);
-	    }
-	    return retval;
-	}
-    }
-
-    /* handle converted nodesets */
-    if (str1 && str2) {
-	retval = xml_strcmp(str1, str2);
-	m__free(str1);
-	m__free(str2);
-	return retval;
-    } else if (str1) {
-	if (val2->restype == XP_RT_STRING) {
-	    retval = xml_strcmp(str1, val2->r.str);
-	} else {
-	    *res = xpath_cvt_string(val2, &str2);
-	    if (*res == NO_ERR) {
-		retval = xml_strcmp(str1, str2);
-	    }
-	    if (str2) {
-		m__free(str2);
-	    }
-	}
-	m__free(str1);
-	return retval;
-    } else if (str2) {
-	if (val1->restype == XP_RT_STRING) {
-	    retval = xml_strcmp(val1->r.str, str2);
-	} else {
-	    *res = xpath_cvt_string(val1, &str1);
-	    if (*res == NO_ERR) {
-		retval = xml_strcmp(str1, str2);
-	    }
-	    if (str1) {
-		m__free(str1);
-	    }
-	}
-	m__free(str2);
-	return retval;
-    }
-
-    /* no nodesets involved, so compare if same result type */
-    if (val1->restype == val2->restype) {
-	switch (val1->restype) {
-	case XP_RT_NUMBER:
-	    retval = ncx_compare_nums(&val1->r.num,
-				      &val2->r.num,
-				      NCX_BT_FLOAT64);
-	    break;
-	case XP_RT_STRING:
-	    retval = xml_strcmp(val1->r.str, val2->r.str);
-	    break;
-	case XP_RT_BOOLEAN:
-	    if (val1->r.bool && val2->r.bool) {
-		retval = 0;
-	    } else if (val1->r.bool) {
-		retval = 1;
-	    } else {
-		retval = -1;
-	    }
-	    break;
-	default:
-	    *res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	return retval;
-    }
-
-    /* not the same result types, so figure out the
-     * correct comparision to make.  Priority defined
-     * by XPath is
-     *
-     *  1) boolean
-     *  2) number
-     *  3) string
-     */
-    if (val1->restype == XP_RT_BOOLEAN) {
-	bool2 = xpath_cvt_boolean(val2);
-	if (val1->r.bool && bool2) {
-	    retval = 0;
-	} else if (val1->r.bool) {
-	    retval = 1;
-	} else {
-	    retval = -1;
-	}
-    }  else if (val2->restype == XP_RT_BOOLEAN) {
-	bool1 = xpath_cvt_boolean(val1);
-	if (bool1 && val2->r.bool) {
-	    retval = 0;
-	} else if (bool1) {
-	    retval = 1;
-	} else {
-	    retval = -1;
-	}
-    } else if (val1->restype == XP_RT_NUMBER) {
-	ncx_init_num(&num2);
-	xpath_cvt_number(val2, &num2);
-	retval = ncx_compare_nums(&val1->r.num, &num2,
-				  NCX_BT_FLOAT64);
-	ncx_clean_num(NCX_BT_FLOAT64, &num2);
-    } else if (val2->restype == XP_RT_NUMBER) {
-	ncx_init_num(&num1);
-	xpath_cvt_number(val1, &num1);
-	retval = ncx_compare_nums(&num1, &val2->r.num,
-				  NCX_BT_FLOAT64);
-	ncx_clean_num(NCX_BT_FLOAT64, &num1);
-    } else if (val1->restype == XP_RT_STRING) {
-	str2 = NULL;
-	*res = xpath_cvt_string(val2, &str2);
-	if (*res == NO_ERR) {
-	    retval = xml_strcmp(val1->r.str, str2);
-	}
-	if (str2) {
-	    m__free(str2);
-	}
-    } else if (val2->restype == XP_RT_STRING) {
-	str1 = NULL;
-	*res = xpath_cvt_string(val1, &str1);
-	if (*res == NO_ERR) {
-	    retval = xml_strcmp(str1, val2->r.str);
-	}
-	if (str1) {
-	    m__free(str1);
-	}
-    } else {
-	*res = ERR_NCX_INVALID_VALUE;
-    }
-
-    return retval;
-
-} /* compare_results */
-
-
-/********************************************************************
 * FUNCTION new_nodeset
 * 
 * Start a nodeset result with a specified object or value ptr
@@ -890,6 +644,846 @@ static xpath_result_t *
     return result;
 
 } /* new_nodeset */
+
+
+/********************************************************************
+* FUNCTION convert_compare_result
+* 
+* Convert an int32 compare result to a boolean
+* based on the XPath relation op
+*
+* INPUTS:
+*    cmpresult == compare result
+*    exop == XPath relational or equality expression OP
+*
+* RETURNS:
+*    TRUE if relation is TRUE
+*    FALSE if relation is FALSE
+*********************************************************************/
+static boolean
+    convert_compare_result (int32 cmpresult,
+			    xpath_exop_t exop)
+{
+    switch (exop) {
+    case XP_EXOP_EQUAL:
+	return (cmpresult) ? FALSE : TRUE;
+    case XP_EXOP_NOTEQUAL:
+	return (cmpresult) ? TRUE : FALSE;
+    case XP_EXOP_LT:
+	return (cmpresult < 0) ? TRUE : FALSE;
+    case XP_EXOP_GT:
+	return (cmpresult > 0) ? TRUE : FALSE;
+    case XP_EXOP_LEQUAL:
+	return (cmpresult <= 0) ? TRUE : FALSE;
+    case XP_EXOP_GEQUAL:
+	return (cmpresult >= 0) ? TRUE : FALSE;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return TRUE;
+    }
+    /*NOTREACHED*/
+
+} /* convert_compare_result */
+
+
+/********************************************************************
+* FUNCTION compare_strings
+* 
+* Compare str1 to str2
+* Use the specified operation
+*
+*    str1  <op>  str2
+*
+* INPUTS:
+*    str1 == left hand side string
+*    str1 == left hand side string
+*    exop == XPath expression op to use
+*
+* RETURNS:
+*    TRUE if relation is TRUE
+*    FALSE if relation is FALSE
+*********************************************************************/
+static boolean
+    compare_strings (const xmlChar *str1,
+		     const xmlChar *str2,
+		     xpath_exop_t  exop)
+{
+    int32  cmpresult;
+
+    cmpresult = xml_strcmp(str1, str2);
+    return convert_compare_result(cmpresult, exop);
+
+} /* compare_strings */
+
+
+/********************************************************************
+* FUNCTION compare_numbers
+* 
+* Compare str1 to str2
+* Use the specified operation
+*
+*    num1  <op>  num2
+*
+* INPUTS:
+*    num1 == left hand side number
+*    numstr2 == right hand side string to convert to num2
+*               and then compare to num1
+*    exop == XPath expression op to use
+*
+* RETURNS:
+*    TRUE if relation is TRUE
+*    FALSE if relation is FALSE
+*********************************************************************/
+static boolean
+    compare_numbers (const ncx_num_t *num1,
+		     const xmlChar *numstr2,
+		     xpath_exop_t  exop)
+{
+    int32       cmpresult;
+    ncx_num_t   num2;
+    status_t    res;
+
+    ncx_init_num(&num2);
+
+    res = ncx_decode_num(numstr2, NCX_BT_FLOAT64, &num2);
+    if (res == NO_ERR) {
+	cmpresult = ncx_compare_nums(num1, &num2, NCX_BT_FLOAT64);
+    }
+    ncx_clean_num(NCX_BT_FLOAT64, &num2);
+    if (res != NO_ERR) {
+	return FALSE;
+    }
+    return convert_compare_result(cmpresult, exop);
+
+} /* compare_numbers */
+
+
+/********************************************************************
+* FUNCTION compare_booleans
+* 
+* Compare bool1 to bool2
+* Use the specified operation
+*
+*    bool1  <op>  bool2
+*
+* INPUTS:
+*    num1 == left hand side number
+*    str2 == right hand side string to convert to a number
+*            and then compare to num1
+*    exop == XPath expression op to use
+*
+* RETURNS:
+*    TRUE if relation is TRUE
+*    FALSE if relation is FALSE
+*********************************************************************/
+static boolean
+    compare_booleans (boolean bool1,
+		      boolean bool2,
+		      xpath_exop_t  exop)
+{
+
+    int32  cmpresult;
+
+    if ((bool1 && bool2) || (!bool1 && !bool2)) {
+	cmpresult = 0;
+    } else if (bool1) {
+	cmpresult = 1;
+    } else {
+	cmpresult = -1;
+    }
+
+    return convert_compare_result(cmpresult, exop);
+
+}  /* compare_booleans */
+
+
+/********************************************************************
+* FUNCTION compare_walker_fn
+* 
+* Compare the parm string to the current value
+* Stop the walk on the first TRUE comparison
+*
+*    val1 <op>  val2
+*
+*  val1 == parms.cmpstring or parms.cmpnum
+*  val2 == string value of node passed by val walker
+*    op == parms.exop
+*
+* Matches val_walker_fn_t template in val.h
+*
+* INPUTS:
+*    val == value node found in the search, used as 'val2'
+*    cookie1 == xpath_pcb_t * : parser control block to use
+*               currently not used!!!
+*    cookie2 == xpath_compwalkerparms_t *: walker parms to use
+*                cmpstring or cmpnum is used, not result2
+* OUTPUTS:
+*    *cookie2 contents adjusted  (parms.cmpresult and parms.res)
+*
+* RETURNS:
+*    TRUE to keep walk going
+*    FALSE to terminate walk
+*********************************************************************/
+static boolean
+    compare_walker_fn (val_value_t *val,
+		       void *cookie1,
+		       void *cookie2)
+{
+    xpath_compwalkerparms_t  *parms;
+    xmlChar                  *buffer;
+    status_t                  res;
+    uint32                    cnt;
+
+    (void)cookie1;
+    parms = (xpath_compwalkerparms_t *)cookie2;
+
+    /* skip all complex nodes */
+    if (!typ_is_simple(val->btyp)) {
+	return TRUE;
+    }
+
+    if (typ_is_string(val->btyp)) {
+	if (parms->cmpstring) {
+	    parms->cmpresult = 
+		compare_strings(parms->cmpstring, 
+				VAL_STR(val),
+				parms->exop);
+	} else {
+	    parms->cmpresult = 
+		compare_numbers(parms->cmpnum, 
+				VAL_STR(val),
+				parms->exop);
+	}
+    } else {
+	/* get value sprintf size */
+	res = val_sprintf_simval_nc(NULL, val, &cnt);
+	if (res != NO_ERR) {
+	    parms->res = res;
+	    return FALSE;
+	}
+
+	if (cnt < parms->buffsize) {
+	    /* use pre-allocated buffer */
+	    res = val_sprintf_simval_nc(parms->buffer, val, &cnt);
+	    if (res == NO_ERR) {
+		if (parms->cmpstring) {
+		    parms->cmpresult = 
+			compare_strings(parms->cmpstring, 
+					parms->buffer,
+					parms->exop);
+		} else {
+		    parms->cmpresult = 
+			compare_numbers(parms->cmpnum, 
+					parms->buffer,
+					parms->exop);
+		}
+	    } else {
+		parms->res = res;
+		return FALSE;
+	    }
+	} else {
+	    /* use a temp buffer */
+	    buffer = m__getMem(cnt+1);
+	    if (!buffer) {
+		parms->res = ERR_INTERNAL_MEM;
+		return FALSE;
+	    }
+
+	    res = val_sprintf_simval_nc(buffer, val, &cnt);
+	    if (res != NO_ERR) {
+		m__free(buffer);
+		parms->res = res;
+		return FALSE;
+	    }
+
+	    if (parms->cmpstring) {
+		parms->cmpresult = 
+		    compare_strings(parms->cmpstring, 
+				    buffer,
+				    parms->exop);
+	    } else {
+		parms->cmpresult = 
+		    compare_numbers(parms->cmpnum, 
+				    buffer,
+				    parms->exop);
+	    }
+
+	    m__free(buffer);
+	}
+    }
+
+    return !parms->cmpresult;
+
+}  /* compare_walker_fn */
+
+
+/********************************************************************
+* FUNCTION top_compare_walker_fn
+* 
+* Compare the current string in the 1st nodeset
+* to the entire 2nd node-set
+*
+* This callback should get called once for every
+* node in the first parmset.  Each time a simple
+* type is passed into the callback, the entire
+* result2 is processed with new callbacks to
+* compare the 'cmpstring' against each simple
+* type in the 2nd node-set.
+*
+* Stop the walk on the first TRUE comparison
+*
+* Matches val_walker_fn_t template in val.h
+*
+* INPUTS:
+*    val == value node found in the search
+*    cookie1 == xpath_pcb_t * : parser control block to use
+*               currently not used!!!
+*    cookie2 == xpath_compwalkerparms_t *: walker parms to use
+*               result2 is used, not cmpstring
+* OUTPUTS:
+*    *cookie2 contents adjusted  (parms.cmpresult and parms.res)
+*
+* RETURNS:
+*    TRUE to keep walk going
+*    FALSE to terminate walk
+*********************************************************************/
+static boolean
+    top_compare_walker_fn (val_value_t *val,
+			   void *cookie1,
+			   void *cookie2)
+{
+    xpath_compwalkerparms_t  *parms, newparms;
+    xmlChar                  *buffer, *comparestr;
+    xpath_pcb_t              *pcb;
+    xpath_resnode_t          *resnode;
+    val_value_t              *testval;
+    status_t                  res;
+    uint32                    cnt;
+    boolean                   fnresult, cfgonly;
+
+    pcb = (xpath_pcb_t *)cookie1;
+    parms = (xpath_compwalkerparms_t *)cookie2;
+
+    /* skip all complex nodes */
+    if (!typ_is_simple(val->btyp)) {
+	return TRUE;
+    }
+
+    res = NO_ERR;
+    buffer = NULL;
+    cfgonly = (pcb->flags & XP_FL_CONFIGONLY) ?	TRUE : FALSE;
+
+    if (typ_is_string(val->btyp)) {
+	comparestr = VAL_STR(val);
+    } else {
+	/* get value sprintf size */
+	res = val_sprintf_simval_nc(NULL, val, &cnt);
+	if (res != NO_ERR) {
+	    parms->res = res;
+	    return FALSE;
+	}
+
+	if (cnt < parms->buffsize) {
+	    /* use pre-allocated buffer */
+	    res = val_sprintf_simval_nc(parms->buffer, val, &cnt);
+	    if (res != NO_ERR) {
+		parms->res = res;
+		return FALSE;
+	    }
+	    comparestr = parms->buffer;
+	} else {
+	    /* use a temp buffer */
+	    buffer = m__getMem(cnt+1);
+	    if (!buffer) {
+		parms->res = ERR_INTERNAL_MEM;
+		return FALSE;
+	    }
+
+	    res = val_sprintf_simval_nc(buffer, val, &cnt);
+	    if (res != NO_ERR) {
+		m__free(buffer);
+		parms->res = res;
+		return FALSE;
+	    }
+	    comparestr = buffer;
+	}
+    }
+
+    /* setup 2nd walker parms */
+    newparms.result2 = NULL;
+    newparms.cmpstring = comparestr;
+    ncx_init_num(newparms.cmpnum);
+    newparms.buffer = m__getMem(TEMP_BUFFSIZE);
+    if (!newparms.buffer) {
+	if (buffer) {
+	    m__free(buffer);
+	}
+	parms->res = ERR_INTERNAL_MEM;
+	return FALSE;
+    }
+    newparms.buffsize = TEMP_BUFFSIZE;
+    newparms.exop = parms->exop;
+    newparms.cmpresult = FALSE;
+    newparms.res = NO_ERR;
+
+    /* go through all the nodes in the first node-set
+     * and compare each leaf against all the leafs
+     * in the other node-set; stop when condition
+     * is met or both node-sets completely searched
+     */
+    for (resnode = (xpath_resnode_t *)
+	     dlq_firstEntry(&parms->result2->r.nodeQ);
+	 resnode != NULL && res == NO_ERR;
+	 resnode = (xpath_resnode_t *)dlq_nextEntry(resnode)) {
+
+	testval = resnode->node.valptr;
+	
+	fnresult = 
+	    val_find_all_descendants(compare_walker_fn,
+				     pcb, 
+				     &newparms,
+				     testval, 
+				     NULL,
+				     NULL,
+				     cfgonly,
+				     FALSE,
+				     TRUE,
+				     TRUE);
+	if (newparms.res != NO_ERR) {
+	    res = newparms.res;
+	    parms->res = res;
+	} else if (!fnresult) {
+	    /* condition was met if return FALSE and
+	     * walkerparms.res == NO_ERR
+	     */
+	    if (buffer) {
+		m__free(buffer);
+	    }
+	    m__free(newparms.buffer);
+	    parms->res = NO_ERR;
+	    return FALSE;
+	}
+    }
+
+    if (buffer) {
+	m__free(buffer);
+    }
+    m__free(newparms.buffer);
+
+    return TRUE;
+
+}  /* top_compare_walker_fn */
+
+
+/********************************************************************
+* FUNCTION compare_nodeset_to_other
+* 
+* Compare 2 results, 1 of them is a node-set
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    val1 == first result struct to compare
+*    val2 == second result struct to compare
+*    exop == XPath expression operator to use
+*    res == address of resturn status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*    TRUE if relation is TRUE
+*    FALSE if relation is FALSE or some error
+*********************************************************************/
+static boolean
+    compare_nodeset_to_other (xpath_pcb_t *pcb,
+			      xpath_result_t *val1,
+			      xpath_result_t *val2,
+			      xpath_exop_t exop,
+			      status_t *res)
+{
+    xpath_resnode_t         *resnode;
+    xpath_result_t          *tempval;
+    val_value_t             *testval;
+    boolean                  bool1, bool2, fnresult, cfgonly;
+    xpath_compwalkerparms_t  walkerparms;
+
+    *res = NO_ERR;
+
+    /* only compare real results, not objects */
+    if (!pcb->val) {
+	return TRUE;
+    }
+
+    cfgonly = (pcb->flags & XP_FL_CONFIGONLY) ?	TRUE : FALSE;
+
+    if (val2->restype == XP_RT_NODESET) {
+	/* invert the exop; use val2 as val1 */
+	switch (exop) {
+	case XP_EXOP_EQUAL:
+	case XP_EXOP_NOTEQUAL:
+	    break;
+	case XP_EXOP_LT:
+	    exop = XP_EXOP_GT;
+	    break;
+	case XP_EXOP_GT:
+	    exop = XP_EXOP_LT;
+	    break;
+	case XP_EXOP_LEQUAL:
+	    exop = XP_EXOP_GT;
+	    break;
+	case XP_EXOP_GEQUAL:
+	    exop = XP_EXOP_LT;
+	    break;
+	default:
+	    *res = SET_ERROR(ERR_INTERNAL_VAL);
+	    return TRUE;
+	}
+
+	/* swap the parameters so the parmset is on the LHS */
+	tempval = val1;
+	val1 = val2;
+	val2 = tempval;
+    }
+
+    if (dlq_empty(&val1->r.nodeQ)) {
+	return FALSE;
+    }
+
+    /* go through the nodes in val1 and compare them to val2
+     * for string and number; for boolean, convert val1
+     * toa boolean and compare right now
+     */
+    switch (val2->restype) {
+    case XP_RT_STRING:
+	walkerparms.cmpstring = val2->r.str;
+	walkerparms.cmpnum = NULL;
+	break;
+    case XP_RT_NUMBER:
+	walkerparms.cmpstring = NULL;
+	walkerparms.cmpnum = &val2->r.num;
+	break;
+    case XP_RT_BOOLEAN:
+	bool1 = xpath_cvt_boolean(val1);
+	bool2 = val2->r.bool;
+	return compare_booleans(bool1, bool2, exop);
+    default:
+	*res = SET_ERROR(ERR_INTERNAL_VAL);
+	return TRUE;
+    }
+
+    walkerparms.result2 = NULL;
+    walkerparms.buffer = m__getMem(TEMP_BUFFSIZE);
+    if (!walkerparms.buffer) {
+	*res = ERR_INTERNAL_MEM;
+	return FALSE;
+    }
+    walkerparms.buffsize = TEMP_BUFFSIZE;
+    walkerparms.exop = exop;
+    walkerparms.cmpresult = FALSE;
+    walkerparms.res = NO_ERR;
+
+    /* compare the LHS node-set to the cmpstring or cmpnum
+     * first match will end the walk
+     */
+    for (resnode = (xpath_resnode_t *)dlq_firstEntry(&val1->r.nodeQ);
+	 resnode != NULL && *res == NO_ERR;
+	 resnode = (xpath_resnode_t *)dlq_nextEntry(resnode)) {
+
+	testval = resnode->node.valptr;
+	
+	fnresult = 
+	    val_find_all_descendants(compare_walker_fn,
+				     pcb, 
+				     &walkerparms,
+				     testval, 
+				     NULL,
+				     NULL,
+				     cfgonly,
+				     FALSE,
+				     TRUE,
+				     TRUE);
+	if (walkerparms.res != NO_ERR) {
+	    *res = walkerparms.res;
+	} else if (!fnresult) {
+	    /* condition was met if return FALSE and
+	     * walkerparms.res == NO_ERR
+	     */
+	    m__free(walkerparms.buffer);
+	    return TRUE;
+	}
+    }
+
+    m__free(walkerparms.buffer);
+
+    return FALSE;
+
+} /* compare_nodeset_to_other */
+
+
+/********************************************************************
+* FUNCTION compare_nodesets
+* 
+* Compare 2 nodeset results
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    val1 == first result struct to compare
+*    val2 == second result struct to compare
+*    exop == XPath expression op to use
+*    res == address of resturn status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*    TRUE if relation is TRUE
+     FALSE if relation is FALSE or some error (check *res)
+*********************************************************************/
+static boolean
+    compare_nodesets (xpath_pcb_t *pcb,
+		      xpath_result_t *val1,
+		      xpath_result_t *val2,
+		      xpath_exop_t exop,
+		      status_t *res)
+{
+    xpath_resnode_t         *resnode;
+    val_value_t             *testval;
+    boolean                  fnresult, cfgonly;
+    xpath_compwalkerparms_t  walkerparms;
+
+    *res = NO_ERR;
+    if (!pcb->val) {
+	return FALSE;
+    }
+
+    if ((val1->restype != val2->restype) ||
+	(val1->restype != XP_RT_NODESET)) {
+	*res = SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+
+    /* make sure both node sets are non-empty */
+    if (dlq_empty(&val1->r.nodeQ) || dlq_empty(&val2->r.nodeQ)) {
+	/* cannot be a matching node in both node-sets
+	 * if 1 or both node-sets are empty
+	 */
+	return FALSE;
+    }
+
+    /* both node-sets have at least 1 node */
+    cfgonly = (pcb->flags & XP_FL_CONFIGONLY) ?	TRUE : FALSE;
+
+    walkerparms.result2 = val2;
+    walkerparms.cmpstring = NULL;
+    walkerparms.cmpnum = NULL;
+    walkerparms.buffer = m__getMem(TEMP_BUFFSIZE);
+    if (!walkerparms.buffer) {
+	*res = ERR_INTERNAL_MEM;
+	return FALSE;
+    }
+    walkerparms.buffsize = TEMP_BUFFSIZE;
+    walkerparms.exop = exop;
+    walkerparms.cmpresult = FALSE;
+    walkerparms.res = NO_ERR;
+
+    /* go through all the nodes in the first node-set
+     * and compare each leaf against all the leafs
+     * in the other node-set; stop when condition
+     * is met or both node-sets completely searched
+     */
+    for (resnode = (xpath_resnode_t *)dlq_firstEntry(&val1->r.nodeQ);
+	 resnode != NULL && *res == NO_ERR;
+	 resnode = (xpath_resnode_t *)dlq_nextEntry(resnode)) {
+
+	testval = resnode->node.valptr;
+	
+	fnresult = 
+	    val_find_all_descendants(top_compare_walker_fn,
+				     pcb, 
+				     &walkerparms,
+				     testval, 
+				     NULL,
+				     NULL,
+				     cfgonly,
+				     FALSE,
+				     TRUE,
+				     TRUE);
+	if (walkerparms.res != NO_ERR) {
+	    *res = walkerparms.res;
+	} else if (!fnresult) {
+	    /* condition was met if return FALSE and
+	     * walkerparms.res == NO_ERR
+	     */
+	    m__free(walkerparms.buffer);
+	    return TRUE;
+	}
+    }
+
+    m__free(walkerparms.buffer);
+
+    return FALSE;
+
+} /* compare_nodesets */
+
+
+/********************************************************************
+* FUNCTION compare_results
+* 
+* Compare 2 results, using the specified logic operator
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    val1 == first result struct to compare
+*    val2 == second result struct to compare
+*    exop == XPath exression operator to use
+*    res == address of resturn status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*     relation result (TRUE or FALSE)
+*********************************************************************/
+static boolean
+    compare_results (xpath_pcb_t *pcb,
+		     xpath_result_t *val1,
+		     xpath_result_t *val2,
+		     xpath_exop_t    exop,
+		     status_t *res)
+{
+    xmlChar         *str1, *str2;
+    ncx_num_t        num1, num2;
+    boolean          retval, bool1, bool2;
+    int32            cmpval;
+
+    *res = NO_ERR;
+
+    /* only compare real results, not objects */
+    if (!pcb->val) {
+	return TRUE;
+    }
+
+    /* compare directly if the vals are the same result type */
+    if (val1->restype == val2->restype) {
+	switch (val1->restype) {
+	case XP_RT_NODESET:
+	    return compare_nodesets(pcb, val1, val2, 
+				    exop, res);
+	case XP_RT_NUMBER:
+	    cmpval = ncx_compare_nums(&val1->r.num,
+				      &val2->r.num,
+				      NCX_BT_FLOAT64);
+	    return convert_compare_result(cmpval, exop);
+	case XP_RT_STRING:
+	    return compare_strings(val1->r.str, 
+				   val2->r.str,
+				   exop);
+	case XP_RT_BOOLEAN:
+	    return compare_booleans(val1->r.bool,
+				    val2->r.bool,
+				    exop);
+	    break;
+	default:
+	    *res = SET_ERROR(ERR_INTERNAL_VAL);
+	    return TRUE;
+	}
+	/*NOTREACHED*/
+    }
+
+    /* if 1 nodeset is involved, then compare each node
+     * to the other value until the relation is TRUE
+     */
+    if (val1->restype == XP_RT_NODESET ||
+	val2->restype == XP_RT_NODESET) {
+	return compare_nodeset_to_other(pcb, val1, val2, 
+					exop, res);
+    }
+
+    /* no nodesets involved, so the specific exop matters */
+    if (exop == XP_EXOP_EQUAL || exop == XP_EXOP_NOTEQUAL) {
+	/* no nodesets involved
+	 * not the same result types, so figure out the
+	 * correct comparision to make.  Priority defined
+	 * by XPath is
+	 *
+	 *  1) boolean
+	 *  2) number
+	 *  3) string
+	 */
+	if (val1->restype == XP_RT_BOOLEAN) {
+	    bool2 = xpath_cvt_boolean(val2);
+	    return compare_booleans(val1->r.bool, bool2, exop);
+	}  else if (val2->restype == XP_RT_BOOLEAN) {
+	    bool1 = xpath_cvt_boolean(val1);
+	    return compare_booleans(bool1, val2->r.bool, exop);
+	} else if (val1->restype == XP_RT_NUMBER) {
+	    ncx_init_num(&num2);
+	    xpath_cvt_number(val2, &num2);
+	    cmpval = ncx_compare_nums(&val1->r.num, &num2,
+				      NCX_BT_FLOAT64);
+	    ncx_clean_num(NCX_BT_FLOAT64, &num2);
+	    return convert_compare_result(cmpval, exop);
+	} else if (val2->restype == XP_RT_NUMBER) {
+	    ncx_init_num(&num1);
+	    xpath_cvt_number(val1, &num1);
+	    cmpval = ncx_compare_nums(&num1, &val2->r.num,
+				      NCX_BT_FLOAT64);
+	    ncx_clean_num(NCX_BT_FLOAT64, &num1);
+	    return convert_compare_result(cmpval, exop);
+	} else if (val1->restype == XP_RT_STRING) {
+	    str2 = NULL;
+	    *res = xpath_cvt_string(val2, &str2);
+	    if (*res == NO_ERR) {
+		cmpval = xml_strcmp(val1->r.str, str2);
+	    }
+	    if (str2) {
+		m__free(str2);
+	    }
+	    if (*res == NO_ERR) {
+		return convert_compare_result(cmpval, exop);
+	    } else {
+		return TRUE;
+	    }
+	} else if (val2->restype == XP_RT_STRING) {
+	    str1 = NULL;
+	    *res = xpath_cvt_string(val1, &str1);
+	    if (*res == NO_ERR) {
+		cmpval = xml_strcmp(str1, val2->r.str);
+	    }
+	    if (str1) {
+		m__free(str1);
+	    }
+	    if (*res == NO_ERR) {
+		return convert_compare_result(cmpval, exop);
+	    } else {
+		return TRUE;
+	    }
+	} else {
+	    *res = ERR_NCX_INVALID_VALUE;
+	    return TRUE;
+	}
+    }
+
+    /* no nodesets involved
+     * expression op is a relational operator
+     * not the same result types, so convert to numbers and compare
+     */
+    ncx_init_num(&num1);
+    ncx_init_num(&num2);
+
+    xpath_cvt_number(val1, &num1);
+    xpath_cvt_number(val2, &num2);
+
+    cmpval = ncx_compare_nums(&num1,&num2, NCX_BT_FLOAT64);
+    retval = convert_compare_result(cmpval, exop);
+
+    ncx_clean_num(NCX_BT_FLOAT64, &num1);
+    ncx_clean_num(NCX_BT_FLOAT64, &num2);
+
+    return retval;
+
+} /* compare_results */
+
 
 
 /********************************************************************
@@ -1188,6 +1782,7 @@ static xpath_result_t *
 		status_t  *res)
 {
     xpath_result_t  *parm, *result;
+    ncx_num_t        num;
 
     if (!pcb->val && !pcb->obj) {
 	return NULL;
@@ -1211,8 +1806,12 @@ static xpath_result_t *
 			       NCX_BT_FLOAT64);
 			   
     } else {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm->restype, XP_RT_NUMBER);
+	ncx_init_num(&num);
+	xpath_cvt_number(parm, &num);
+	*res = ncx_num_ceiling(&num,
+			       &result->r.num,
+			       NCX_BT_FLOAT64);
+	ncx_clean_num(NCX_BT_FLOAT64, &num);
     }
 
     if (*res != NO_ERR) {
@@ -1248,7 +1847,7 @@ static xpath_result_t *
 	       status_t  *res)
 {
     xpath_result_t  *parm, *result;
-    xmlChar         *str;
+    xmlChar         *str, *returnstr;
     uint32           parmcnt, len;
 
     if (!pcb->val && !pcb->obj) {
@@ -1268,11 +1867,14 @@ static xpath_result_t *
 
     /* check all parms are strings and get total len */
     for (parm = (xpath_result_t *)dlq_firstEntry(parmQ);
-	 parm != NULL;
+	 parm != NULL && *res == NO_ERR;
 	 parm = (xpath_result_t *)dlq_nextEntry(parm)) {
 	if (parm->restype != XP_RT_STRING) {
-	    *res = ERR_NCX_WRONG_DATATYP;
-	    wrong_type_error(pcb, parm->restype, XP_RT_STRING);
+	    *res = xpath_cvt_string(parm, &str);
+	    if (*res == NO_ERR) {
+		len += xml_strlen(str);
+		m__free(str);
+	    }
 	} else if (parm->r.str) {
 	    len += xml_strlen(parm->r.str);
 	}
@@ -1295,14 +1897,26 @@ static xpath_result_t *
 	return NULL;
     }
 
-    str = result->r.str;
+    returnstr = result->r.str;
 
     for (parm = (xpath_result_t *)dlq_firstEntry(parmQ);
-	 parm != NULL;
+	 parm != NULL && *res == NO_ERR;
 	 parm = (xpath_result_t *)dlq_nextEntry(parm)) {
-	if (parm->r.str) {
-	    str += xml_strcpy(str, parm->r.str);
+
+	if (parm->restype != XP_RT_STRING) {
+	    *res = xpath_cvt_string(parm, &str);
+	    if (*res == NO_ERR) {
+		returnstr += xml_strcpy(returnstr, str);
+		m__free(str);
+	    }
+	} else if (parm->r.str) {
+	    returnstr += xml_strcpy(returnstr, parm->r.str);
 	}
+    }
+
+    if (*res != NO_ERR) {
+	xpath_free_result(result);
+	result = NULL;
     }
 
     return result;
@@ -1334,36 +1948,67 @@ static xpath_result_t *
 		 status_t  *res)
 {
     xpath_result_t  *parm1, *parm2, *result;
+    xmlChar         *str1, *str2;
+    boolean          malloc1, malloc2;
 
     if (!pcb->val && !pcb->obj) {
 	return NULL;
     }
 
+    *res = NO_ERR;
+    str1 = NULL;
+    str2 = NULL;
+    malloc1 = FALSE;
+    malloc2 = FALSE;
+
     parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
     parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
 
     if (parm1->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm1->restype, XP_RT_STRING);
-    } else if (parm2->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm2->restype, XP_RT_STRING);
+	*res = xpath_cvt_string(parm1, &str1);
+	malloc1 = TRUE;
     } else {
-	result = new_result(pcb, XP_RT_BOOLEAN);
-	if (!result) {
-	    *res = ERR_INTERNAL_MEM;
-	} else {
-	    if (strstr((const char *)parm1->r.str, 
-		       (const char *)parm2->r.str)) {
-		result->r.bool = TRUE;
-	    } else {
-		result->r.bool = FALSE;
-	    }
-	    *res = NO_ERR;
-	    return result;
-	}
+	str1 = parm1->r.str;
     }
-    return NULL;
+    if (*res != NO_ERR) {
+	return NULL;
+    }
+
+    if (parm2->restype != XP_RT_STRING) {
+	*res = xpath_cvt_string(parm2, &str2);
+	malloc2 = TRUE;
+    } else {
+	str2 = parm2->r.str;
+    }
+    if (*res != NO_ERR) {
+	if (malloc1) {
+	    m__free(str1);
+	}
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_BOOLEAN);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+    } else {
+	if (strstr((const char *)str1, 
+		   (const char *)str2)) {
+	    result->r.bool = TRUE;
+	} else {
+	    result->r.bool = FALSE;
+	}
+	*res = NO_ERR;
+    }
+
+    if (malloc1) {
+	m__free(str1);
+    }
+
+    if (malloc2) {
+	m__free(str2);
+    }
+
+    return result;
 
 }  /* contains_fn */
 
@@ -1398,13 +2043,13 @@ static xpath_result_t *
     }
     parm = (xpath_result_t *)dlq_firstEntry(parmQ);
 
-    if (parm->restype != XP_RT_NODESET) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm->restype, XP_RT_NODESET);
+    *res = NO_ERR;
+    result = new_result(pcb, XP_RT_NUMBER);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
     } else {
-	result = new_result(pcb, XP_RT_NUMBER);
-	if (!result) {
-	    *res = ERR_INTERNAL_MEM;
+	if (parm->restype != XP_RT_NODESET) {
+	    ncx_set_num_zero(&result->r.num, NCX_BT_FLOAT64);
 	} else {
 	    if (pcb->val) {
 		ncx_init_num(&tempnum);
@@ -1416,18 +2061,15 @@ static xpath_result_t *
 		ncx_clean_num(NCX_BT_UINT32, &tempnum);
 	    } else {
 		ncx_set_num_zero(&result->r.num, NCX_BT_FLOAT64);
-		*res = NO_ERR;
 	    }
 
 	    if (*res != NO_ERR) {
 		free_result(pcb, result);
 		result = NULL;
 	    }
-
-	    return result;
 	}
     }
-    return NULL;
+    return result;
 
 }  /* count_fn */
 
@@ -1543,6 +2185,7 @@ static xpath_result_t *
 	      status_t  *res)
 {
     xpath_result_t  *parm, *result;
+    ncx_num_t        num;
 
     if (!pcb->val && !pcb->obj) {
 	return NULL;
@@ -1565,8 +2208,12 @@ static xpath_result_t *
 			     &result->r.num,
 			     NCX_BT_FLOAT64);
     } else {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm->restype, XP_RT_NUMBER);
+	ncx_init_num(&num);
+	xpath_cvt_number(parm, &num);
+	*res = ncx_num_floor(&num,
+			     &result->r.num,
+			     NCX_BT_FLOAT64);
+	ncx_clean_num(NCX_BT_FLOAT64, &num);
     }	
 			   
     if (*res != NO_ERR) {
@@ -1648,18 +2295,9 @@ static xpath_result_t *
 	     dlq_hdr_t *parmQ,
 	     status_t  *res)
 {
-    xpath_result_t  *parm, *result;
+    xpath_result_t  *result;
 
-    if (!pcb->val && !pcb->obj) {
-	return NULL;
-    }
-
-    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
-    if (parm->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm->restype, XP_RT_STRING);
-	return NULL;
-    }
+    (void)parmQ;
 
     /* no attributes in YANG, so no lang attr either */
     result = new_result(pcb, XP_RT_NODESET);
@@ -1767,14 +2405,11 @@ static xpath_result_t *
     }
 
     parm = (xpath_result_t *)dlq_firstEntry(parmQ);
-    if (parm && parm->restype != XP_RT_NODESET) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm->restype, XP_RT_NODESET);
-	return NULL;
-    }
-
     str = NULL;
-    if (parm) {
+
+    if (parm && parm->restype != XP_RT_NODESET) {
+	;
+    } else if (parm) {
 	resnode = (xpath_resnode_t *)
 	    dlq_firstEntry(&parm->r.nodeQ);
 	if (resnode) {
@@ -1855,15 +2490,11 @@ static xpath_result_t *
 	return NULL;
     }
 
+    nsid = 0;
     parm = (xpath_result_t *)dlq_firstEntry(parmQ);
     if (parm && parm->restype != XP_RT_NODESET) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm->restype, XP_RT_NODESET);
-	return NULL;
-    }
-
-    nsid = 0;
-    if (parm) {
+	;
+    } else if (parm) {
 	resnode = (xpath_resnode_t *)
 	    dlq_firstEntry(&parm->r.nodeQ);
 	if (resnode) {
@@ -1945,17 +2576,13 @@ static xpath_result_t *
 	return NULL;
     }
 
-    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
-    if (parm && parm->restype != XP_RT_NODESET) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm->restype, XP_RT_NODESET);
-	return NULL;
-    }
-
     nsid = 0;
     name = NULL;
 
-    if (parm) {
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm && parm->restype != XP_RT_NODESET) {
+	;
+    } else if (parm) {
 	resnode = (xpath_resnode_t *)
 	    dlq_firstEntry(&parm->r.nodeQ);
 	if (resnode) {
@@ -1995,8 +2622,7 @@ static xpath_result_t *
     if (name) {
 	len += xml_strlen(name);
     } else {
-	name = (const xmlChar *)"none";
-	len += 4;
+	name = EMPTY_STRING;
     }
 
     result->r.str = m__getMem(len+1);
@@ -2057,18 +2683,14 @@ static xpath_result_t *
 	return NULL;
     }
 
-    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
-    if (parm && parm->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm->restype, XP_RT_STRING);
-	return NULL;
-    }
-
     teststr = NULL;
     str = NULL;
     mallocstr = NULL;
 
-    if (parm) {
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm && parm->restype != XP_RT_STRING) {
+	;
+    } else if (parm) {
 	teststr = parm->r.str;
     } else {
 	tempresult= new_nodeset(pcb,
@@ -2172,6 +2794,7 @@ static xpath_result_t *
 	    status_t  *res)
 {
     xpath_result_t  *parm, *result;
+    boolean          boolresult;
 
     if (!pcb->val && !pcb->obj) {
 	return NULL;
@@ -2179,19 +2802,18 @@ static xpath_result_t *
 
     parm = (xpath_result_t *)dlq_firstEntry(parmQ);
     if (parm->restype != XP_RT_BOOLEAN) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm->restype, XP_RT_BOOLEAN);
-	return NULL;
+	boolresult = xpath_cvt_boolean(parm);
+    } else {
+	boolresult = parm->r.bool;
     }
 
     result = new_result(pcb, XP_RT_BOOLEAN);
     if (!result) {
 	*res = ERR_INTERNAL_MEM;
     } else {
+	result->r.bool = !boolresult;
 	*res = NO_ERR;
     }
-
-    result->r.bool = !parm->r.bool;
 
     return result;
 
@@ -2358,6 +2980,7 @@ static xpath_result_t *
 	      status_t  *res)
 {
     xpath_result_t  *parm, *result;
+    ncx_num_t        num;
 
     if (!pcb->val && !pcb->obj) {
 	return NULL;
@@ -2380,8 +3003,12 @@ static xpath_result_t *
 			     &result->r.num,
 			     NCX_BT_FLOAT64);
     } else {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm->restype, XP_RT_NUMBER);
+	ncx_init_num(&num);
+	xpath_cvt_number(parm, &num);
+	*res = ncx_round_num(&num,
+			     &result->r.num,
+			     NCX_BT_FLOAT64);
+	ncx_clean_num(NCX_BT_FLOAT64, &num);
     }
 
     if (*res != NO_ERR) {
@@ -2418,43 +3045,73 @@ static xpath_result_t *
 		    status_t  *res)
 {
     xpath_result_t  *parm1, *parm2, *result;
+    xmlChar         *str1, *str2;
     uint32           len1, len2;
+    boolean          malloc1, malloc2;
 
     if (!pcb->val && !pcb->obj) {
 	return NULL;
     }
 
+    *res = NO_ERR;
+    str1 = NULL;
+    str2 = NULL;
+    malloc1 = FALSE;
+    malloc2 = FALSE;
+    len1 = 0;
+    len2= 0;
+
     parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
     parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
 
     if (parm1->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm1->restype, XP_RT_STRING);
-    } else if (parm2->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm2->restype, XP_RT_STRING);
+	*res = xpath_cvt_string(parm1, &str1);
+	malloc1 = TRUE;
     } else {
-	result = new_result(pcb, XP_RT_BOOLEAN);
-	if (!result) {
-	    *res = ERR_INTERNAL_MEM;
-	} else {
-	    len1 = xml_strlen(parm1->r.str);
-	    len2 = xml_strlen(parm2->r.str);
-
-	    if (len2 > len1) {
-		result->r.bool = FALSE;
-	    } else if (!xml_strncmp(parm1->r.str, 
-				    parm2->r.str,
-				    len2)) {
-		result->r.bool = TRUE;
-	    } else {
-		result->r.bool = FALSE;
-	    }
-	    *res = NO_ERR;
-	    return result;
-	}
+	str1 = parm1->r.str;
     }
-    return NULL;
+    if (*res != NO_ERR) {
+	return NULL;
+    }
+
+    if (parm2->restype != XP_RT_STRING) {
+	*res = xpath_cvt_string(parm2, &str2);
+	malloc2 = TRUE;
+    } else {
+	str2 = parm2->r.str;
+    }
+    if (*res != NO_ERR) {
+	if (malloc1) {
+	    m__free(str1);
+	}
+	return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_BOOLEAN);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
+    } else {
+	len1 = xml_strlen(str1);
+	len2 = xml_strlen(str2);
+
+	if (len2 > len1) {
+	    result->r.bool = FALSE;
+	} else if (!xml_strncmp(str1, str2, len2)) {
+	    result->r.bool = TRUE;
+	} else {
+	    result->r.bool = FALSE;
+	}
+	*res = NO_ERR;
+    }
+
+    if (malloc1) {
+	m__free(str1);
+    }
+    if (malloc2) {
+	m__free(str2);
+    }
+
+    return result;
 
 }  /* starts_with_fn */
 
@@ -2586,10 +3243,17 @@ static xpath_result_t *
 
     *res = NO_ERR;
     len = 0;
+    tempstr = NULL;
 
     parm = (xpath_result_t *)dlq_firstEntry(parmQ);
-    if (parm) {
-	len = xml_strlen(result->r.str);
+    if (parm && parm->restype != XP_RT_STRING) {
+	*res = xpath_cvt_string(parm, &tempstr);
+	if (*res == NO_ERR) {
+	    len = xml_strlen(tempstr);
+	    m__free(tempstr);
+	}
+    } else if (parm) {
+	len = xml_strlen(parm->r.str);
     } else {
 	/* convert the context node value */
 	if (pcb->val) {
@@ -2607,21 +3271,17 @@ static xpath_result_t *
 		tempstr = NULL;
 		*res = xpath_cvt_string(tempresult, &tempstr);
 		free_result(pcb, tempresult);
-		if (*res == NO_ERR && tempstr) {
+		if (*res == NO_ERR) {
 		    len = xml_strlen(tempstr);
 		    m__free(tempstr);
 		}
 	    }
-	} else {
-	    len = 0;
 	}
     }
 
     if (*res == NO_ERR) {
 	set_uint32_num(len, &result->r.num);
-    }
-
-    if (*res != NO_ERR) {
+    } else {
 	free_result(pcb, result);
 	result = NULL;
     }
@@ -2657,17 +3317,23 @@ static xpath_result_t *
 		  status_t  *res)
 {
     xpath_result_t  *parm1, *parm2, *parm3, *result;
-    ncx_num_t        tempnum;
+    xmlChar         *str1;
+    ncx_num_t        tempnum, num2, num3;
     uint32           parmcnt, maxlen;
     int64            startpos, copylen, slen;
     status_t         myres;
-    boolean          copylenset;
+    boolean          copylenset, malloc1;
 
     if (!pcb->val && !pcb->obj) {
 	return NULL;
     }
 
     *res = NO_ERR;
+
+    str1 = NULL;
+    malloc1 = FALSE;
+    ncx_init_num(&num2);
+    ncx_init_num(&num3);
 
     /* check at least 2 strings to concat */
     parmcnt = dlq_count(parmQ);
@@ -2686,27 +3352,24 @@ static xpath_result_t *
     parm3 = (xpath_result_t *)dlq_nextEntry(parm2);
 
     if (parm1->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm1->restype, XP_RT_STRING);
+	*res = xpath_cvt_string(parm1, &str1);
+	if (*res != NO_ERR) {
+	    return NULL;
+	} else {
+	    malloc1 = TRUE;
+	}
+    } else {
+	str1 = parm1->r.str;
     }
 
-    if (parm2->restype != XP_RT_NUMBER) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm2->restype, XP_RT_NUMBER);
-    }
-
-    if (parm3 && parm3->restype != XP_RT_NUMBER) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm3->restype, XP_RT_NUMBER);
-    }
-
-    if (*res != NO_ERR) {
-	return NULL;
+    xpath_cvt_number(parm2, &num2);
+    if (parm3) {
+	xpath_cvt_number(parm3, &num3);
     }
 
     startpos = 0;
     ncx_init_num(&tempnum);
-    myres = ncx_round_num(&parm2->r.num, &tempnum, NCX_BT_FLOAT64);
+    myres = ncx_round_num(&num2, &tempnum, NCX_BT_FLOAT64);
     if (myres == NO_ERR) {
 	startpos = ncx_cvt_to_int64(&tempnum, NCX_BT_FLOAT64);
     }
@@ -2716,7 +3379,7 @@ static xpath_result_t *
     copylen = 0;
     if (parm3) {
 	copylenset = TRUE;
-	myres = ncx_round_num(&parm3->r.num, &tempnum, NCX_BT_FLOAT64);
+	myres = ncx_round_num(&num3, &tempnum, NCX_BT_FLOAT64);
 	if (myres == NO_ERR) {
 	    copylen = ncx_cvt_to_int64(&tempnum, NCX_BT_FLOAT64);
 
@@ -2724,7 +3387,7 @@ static xpath_result_t *
 	ncx_clean_num(NCX_BT_FLOAT64, &tempnum);
     }
 
-    slen = (int64)xml_strlen(parm1->r.str);
+    slen = (int64)xml_strlen(str1);
 
     result = new_result(pcb, XP_RT_STRING);
     if (!result) {
@@ -2746,11 +3409,11 @@ static xpath_result_t *
 		/* internal max of strings way less than 4G
 		 * so copy the whole string
 		 */
-		result->r.str = xml_strdup(&parm1->r.str[startpos-1]);
+		result->r.str = xml_strdup(&str1[startpos-1]);
 	    } else {
 		/* copy at most N chars of whole string */
 		maxlen = (uint32)copylen;
-		result->r.str = xml_strndup(&parm1->r.str[startpos-1],
+		result->r.str = xml_strndup(&str1[startpos-1],
 					    maxlen);
 	    }
 	} else {
@@ -2758,10 +3421,10 @@ static xpath_result_t *
 	}
     } else if (startpos <= 1) {
 	/* copying whole string */
-	result->r.str = xml_strdup(parm1->r.str);
+	result->r.str = xml_strdup(str1);
     } else {
 	/* copying rest of string */
-	result->r.str = xml_strdup(&parm1->r.str[startpos-1]);
+	result->r.str = xml_strdup(&str1[startpos-1]);
     }
 
     if (!result->r.str) {
@@ -2769,7 +3432,13 @@ static xpath_result_t *
 	free_result(pcb, result);
 	result = NULL;
     }
-	
+
+    if (malloc1) {
+	m__free(str1);
+    }
+    ncx_clean_num(NCX_BT_FLOAT64, &num2);
+    ncx_clean_num(NCX_BT_FLOAT64, &num3);
+
     return result;
 
 }  /* substring_fn */
@@ -2801,51 +3470,79 @@ static xpath_result_t *
 {
     xpath_result_t  *parm1, *parm2, *result;
     const xmlChar   *str, *retstr;
+    xmlChar         *str1, *str2;
+    boolean          malloc1, malloc2;
 
     if (!pcb->val && !pcb->obj) {
 	return NULL;
     }
 
+    str1 = NULL;
+    str2 = NULL;
+    malloc1 = FALSE;
+    malloc2 = FALSE;
+
     parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
     parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
 
     if (parm1->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm1->restype, XP_RT_STRING);
-    } else if (parm2->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm2->restype, XP_RT_STRING);
+	*res = xpath_cvt_string(parm1, &str1);
+	if (*res != NO_ERR) {
+	    return NULL;
+	}
+	malloc1 = TRUE;
     } else {
-	result = new_result(pcb, XP_RT_STRING);
-	if (result) {
-	    str = (const xmlChar *)
-		strstr((const char *)parm1->r.str, 
-		       (const char *)parm2->r.str);
-	    if (str) {
-		retstr = str + xml_strlen(parm2->r.str);
-		result->r.str = m__getMem(xml_strlen(retstr)+1);
-		if (result->r.str) {
-		    xml_strcpy(result->r.str, retstr);
-		}
-	    } else {
-		result->r.str = xml_strdup(EMPTY_STRING);
-	    }
+	str1 = parm1->r.str;
+    }
 
-	    if (!result->r.str) {
-		*res = ERR_INTERNAL_MEM;
+    if (parm2->restype != XP_RT_STRING) {
+	*res = xpath_cvt_string(parm2, &str2);
+	if (*res != NO_ERR) {
+	    if (malloc1) {
+		m__free(str1);
 	    }
+	    return NULL;
+	}
+	malloc2 = TRUE;
+    } else {
+	str2 = parm2->r.str;
+    }
 
-	    if (*res != NO_ERR) {
-		free_result(pcb, result);
-		result = NULL;
+    result = new_result(pcb, XP_RT_STRING);
+    if (result) {
+	str = (const xmlChar *)
+	    strstr((const char *)str1, 
+		   (const char *)str2);
+	if (str) {
+	    retstr = str + xml_strlen(str2);
+	    result->r.str = m__getMem(xml_strlen(retstr)+1);
+	    if (result->r.str) {
+		xml_strcpy(result->r.str, retstr);
 	    }
-
-	    return result;
 	} else {
+	    result->r.str = xml_strdup(EMPTY_STRING);
+	}
+
+	if (!result->r.str) {
 	    *res = ERR_INTERNAL_MEM;
 	}
+
+	if (*res != NO_ERR) {
+	    free_result(pcb, result);
+	    result = NULL;
+	}
+    } else {
+	*res = ERR_INTERNAL_MEM;
     }
-    return NULL;
+
+    if (malloc1) {
+	m__free(str1);
+    }
+    if (malloc2) {
+	m__free(str2);
+    }
+
+    return result;
 
 }  /* substring_after_fn */
 
@@ -2876,7 +3573,9 @@ static xpath_result_t *
 {
     xpath_result_t  *parm1, *parm2, *result;
     const xmlChar   *str;
+    xmlChar         *str1, *str2;
     uint32           retlen;
+    boolean          malloc1, malloc2;
 
     if (!pcb->val && !pcb->obj) {
 	return NULL;
@@ -2886,44 +3585,65 @@ static xpath_result_t *
     parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
 
     if (parm1->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm1->restype, XP_RT_STRING);
-    } else if (parm2->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm2->restype, XP_RT_STRING);
+	*res = xpath_cvt_string(parm1, &str1);
+	if (*res != NO_ERR) {
+	    return NULL;
+	}
+	malloc1 = TRUE;
     } else {
-	result = new_result(pcb, XP_RT_STRING);
-	if (result) {
-	    str = (const xmlChar *)
-		strstr((const char *)parm1->r.str, 
-		       (const char *)parm2->r.str);
-	    if (str) {
-		retlen = (uint32)(str - parm1->r.str);
-		result->r.str = m__getMem(retlen+1);
-		if (result->r.str) {
-		    xml_strncpy(result->r.str,
-				parm1->r.str,
-				retlen);
-		}
-	    } else {
-		result->r.str = xml_strdup(EMPTY_STRING);
-	    }
+	str1 = parm1->r.str;
+    }
 
-	    if (!result->r.str) {
-		*res = ERR_INTERNAL_MEM;
+    if (parm2->restype != XP_RT_STRING) {
+	*res = xpath_cvt_string(parm2, &str2);
+	if (*res != NO_ERR) {
+	    if (malloc1) {
+		m__free(str1);
 	    }
+	    return NULL;
+	}
+	malloc2 = TRUE;
+    } else {
+	str2 = parm2->r.str;
+    }
 
-	    if (*res != NO_ERR) {
-		free_result(pcb, result);
-		result = NULL;
+    result = new_result(pcb, XP_RT_STRING);
+    if (result) {
+	str = (const xmlChar *)
+	    strstr((const char *)str1, 
+		   (const char *)str2);
+	if (str) {
+	    retlen = (uint32)(str - str1);
+	    result->r.str = m__getMem(retlen+1);
+	    if (result->r.str) {
+		xml_strncpy(result->r.str,
+			    str1,
+			    retlen);
 	    }
-
-	    return result;
 	} else {
+	    result->r.str = xml_strdup(EMPTY_STRING);
+	}
+
+	if (!result->r.str) {
 	    *res = ERR_INTERNAL_MEM;
 	}
+
+	if (*res != NO_ERR) {
+	    free_result(pcb, result);
+	    result = NULL;
+	}
+    } else {
+	*res = ERR_INTERNAL_MEM;
     }
-    return NULL;
+
+    if (malloc1) {
+	m__free(str1);
+    }
+    if (malloc2) {
+	m__free(str2);
+    }
+
+    return result;
 
 }  /* substring_before_fn */
 
@@ -2961,56 +3681,49 @@ static xpath_result_t *
 	return NULL;
     }
 
-    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
-    if (parm->restype != XP_RT_NODESET) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm->restype, XP_RT_NODESET);
+    result = new_result(pcb, XP_RT_NUMBER);
+    if (!result) {
+	*res = ERR_INTERNAL_MEM;
 	return NULL;
     }
 
-    result = new_result(pcb, XP_RT_NUMBER);
-    if (result) {
-	if (pcb->val) {
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm->restype != XP_RT_NODESET || !pcb->val) {
+	ncx_set_num_zero(&result->r.num, NCX_BT_FLOAT64);
+    } else {
+	ncx_init_num(&tempnum);
+	ncx_set_num_zero(&tempnum, NCX_BT_FLOAT64);
+	ncx_init_num(&mysum);
+	ncx_set_num_zero(&mysum, NCX_BT_FLOAT64);
+	myres = NO_ERR;
 
-	    ncx_init_num(&tempnum);
-	    ncx_set_num_zero(&tempnum, NCX_BT_FLOAT64);
-	    ncx_init_num(&mysum);
-	    ncx_set_num_zero(&mysum, NCX_BT_FLOAT64);
-	    myres = NO_ERR;
+	for (resnode = (xpath_resnode_t *)
+		 dlq_firstEntry(&parm->r.nodeQ);
+	     resnode != NULL && myres == NO_ERR;
+	     resnode = (xpath_resnode_t *)
+		 dlq_nextEntry(resnode)) {
 
-	    for (resnode = (xpath_resnode_t *)
-		     dlq_firstEntry(&parm->r.nodeQ);
-		 resnode != NULL && myres == NO_ERR;
-		 resnode = (xpath_resnode_t *)
-		     dlq_nextEntry(resnode)) {
-
-		val = val_get_first_leaf(resnode->node.valptr);
-		if (val && typ_is_number(val->btyp)) {
-		    myres = ncx_cast_num(&val->v.num,
-				       val->btyp,
-				       &tempnum,
-				       NCX_BT_FLOAT64);
-		    if (myres == NO_ERR) {
-			mysum.d += tempnum.d;
-		    }
-		} else {
-		    myres = ERR_NCX_INVALID_VALUE;
+	    val = val_get_first_leaf(resnode->node.valptr);
+	    if (val && typ_is_number(val->btyp)) {
+		myres = ncx_cast_num(&val->v.num,
+				     val->btyp,
+				     &tempnum,
+				     NCX_BT_FLOAT64);
+		if (myres == NO_ERR) {
+		    mysum.d += tempnum.d;
 		}
-	    }
-
-	    if (myres == NO_ERR) {
-		result->r.num.d = mysum.d;
 	    } else {
-		ncx_set_num_nan(&result->r.num, NCX_BT_FLOAT64);
+		myres = ERR_NCX_INVALID_VALUE;
 	    }
-	} else {
-	    ncx_set_num_zero(&result->r.num, NCX_BT_FLOAT64);
 	}
 
-	return result;
-    } else {
-	*res = ERR_INTERNAL_MEM;
+	if (myres == NO_ERR) {
+	    result->r.num.d = mysum.d;
+	} else {
+	    ncx_set_num_nan(&result->r.num, NCX_BT_FLOAT64);
+	}
     }
+
     return result;
 
 }  /* sum_fn */
@@ -3041,11 +3754,15 @@ static xpath_result_t *
     xpath_result_t  *parm1, *parm2, *parm3, *result;
     xmlChar         *p1str, *p2str, *p3str, *writestr;
     uint32           parmcnt, p1len, p2len, p3len, curpos;
-    boolean          done;
+    boolean          done, malloc1, malloc2, malloc3;
 
     if (!pcb->val && !pcb->obj) {
 	return NULL;
     }
+
+    malloc1 = FALSE;
+    malloc2 = FALSE;
+    malloc3 = FALSE;
 
     *res = NO_ERR;
 
@@ -3057,75 +3774,99 @@ static xpath_result_t *
     parm3 = (xpath_result_t *)dlq_nextEntry(parm2);
 
     if (parm1->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm1->restype, XP_RT_STRING);
+	*res = xpath_cvt_string(parm1, &p1str);
+	if (*res != NO_ERR) {
+	    return NULL;
+	}
+	malloc1 = TRUE;
     } else {
 	p1str = parm1->r.str;
-	p1len = xml_strlen(p1str);
     }
+    p1len = xml_strlen(p1str);
 	
     if (parm2->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm2->restype, XP_RT_STRING);
+	*res = xpath_cvt_string(parm2, &p2str);
+	if (*res != NO_ERR) {
+	    if (malloc1) {
+		m__free(p1str);
+	    }
+	    return NULL;
+	}
+	malloc2 = TRUE;
     } else {
 	p2str = parm2->r.str;
-	p2len = xml_strlen(p2str);
     }
+    p2len = xml_strlen(p2str);
 
     if (parm3->restype != XP_RT_STRING) {
-	*res = ERR_NCX_WRONG_DATATYP;
-	wrong_type_error(pcb, parm3->restype, XP_RT_NUMBER);
+	*res = xpath_cvt_string(parm3, &p3str);
+	if (*res != NO_ERR) {
+	    if (malloc1) {
+		m__free(p1str);
+	    }
+	    if (malloc2) {
+		m__free(p2str);
+	    }
+	    return NULL;
+	}
+	malloc3 = TRUE;
     } else {
 	p3str = parm3->r.str;
-	p3len = xml_strlen(p3str);
     }
-
-    if (*res != NO_ERR) {
-	return NULL;
-    }
+    p3len = xml_strlen(p3str);
 
     result = new_result(pcb, XP_RT_STRING);
     if (!result) {
 	*res = ERR_INTERNAL_MEM;
-	return NULL;
-    }
-    result->r.str = m__getMem(p1len+1);
-    if (!result->r.str) {
-	*res = ERR_INTERNAL_MEM;
-	free_result(pcb, result);
-	result = NULL;
-    }
-
-    writestr = result->r.str;
-
-    /* translate p1str into the result string */
-    while (*p1str) {
-	curpos = 0;
-	done = FALSE;
-
-	/* look for a match char in p2str */
-	while (!done && curpos < p2len) {
-	    if (p2str[curpos] == *p1str) {
-		done = TRUE;
-	    } else {
-		curpos++;
-	    }
-	}
-
-	if (done) {
-	    if (curpos < p3len) {
-		/* replace p1char with p3str translation char */
-		*writestr++ = p3str[curpos];
-	    } /* else drop p1char from result */
+    } else {
+	result->r.str = m__getMem(p1len+1);
+	if (!result->r.str) {
+	    *res = ERR_INTERNAL_MEM;
+	    free_result(pcb, result);
+	    result = NULL;
 	} else {
-	    /* copy p1char to result */
-	    *writestr++ = *p1str;
-	}
+	    writestr = result->r.str;
 
-	p1str++;
+	    /* translate p1str into the result string */
+	    while (*p1str) {
+		curpos = 0;
+		done = FALSE;
+
+		/* look for a match char in p2str */
+		while (!done && curpos < p2len) {
+		    if (p2str[curpos] == *p1str) {
+			done = TRUE;
+		    } else {
+			curpos++;
+		    }
+		}
+
+		if (done) {
+		    if (curpos < p3len) {
+			/* replace p1char with p3str translation char */
+			*writestr++ = p3str[curpos];
+		    } /* else drop p1char from result */
+		} else {
+		    /* copy p1char to result */
+		    *writestr++ = *p1str;
+		}
+
+		p1str++;
+	    }
+
+	    *writestr = 0;
+	}
     }
 
-    *writestr = 0;
+    if (malloc1) {
+	m__free(p1str);
+    }
+    if (malloc2) {
+	m__free(p2str);
+    }
+    if (malloc3) {
+	m__free(p3str);
+    }
 
     return result;
 
@@ -3777,7 +4518,8 @@ static status_t
 					     name,
 					     cfgonly,
 					     textmode,
-					     TRUE);
+					     TRUE,
+					     FALSE);
 	    } else {
 		testobj = resnode->node.objptr;
 		cfgonly = obj_is_config(testobj);
@@ -4000,7 +4742,8 @@ static status_t
 					     name,
 					     cfgonly,
 					     FALSE,
-					     TRUE);
+					     TRUE,
+					     FALSE);
 	    } else {
 		testobj = resnode->node.objptr;
 		cfgonly = obj_is_config(testobj);
@@ -4309,7 +5052,8 @@ static status_t
 					     childname,
 					     cfgonly,
 					     textmode,
-					     myorself);
+					     myorself,
+					     FALSE);
 		if (!fnresult || walkerparms.res != NO_ERR) {
 		    res = walkerparms.res;
 		}
@@ -4694,8 +5438,10 @@ static status_t
 						    modname, 
 						    name, 
 						    cfgonly,
+						    textmode,
 						    TRUE,
-						    textmode);
+						    FALSE);
+
 	    } else {
 		fnresult = obj_find_all_descendants(pcb->objmod,
 						    object_walker_fn,
@@ -5721,6 +6467,14 @@ static xpath_result_t *
 	} else {
 	    /* make the function call */
 	    val1 = (*fncb->fn)(pcb, &parmQ, res);
+
+	    if (LOGDEBUG3) {
+		if (val1) {
+		    log_debug3("\nXPath fn %s result:",
+			       fncb->name);
+		    dump_result(pcb, val1, NULL);
+		}
+	    }
 	}
     } else {
 	*res = ERR_NCX_UNKNOWN_PARM;
@@ -6563,9 +7317,8 @@ static xpath_result_t *
 {
     xpath_result_t  *val1, *val2, *result;
     xpath_exop_t     curop;
-    boolean          done;
+    boolean          done, cmpresult;
     tk_type_t        nexttyp;
-    int32            cmpresult;
 
     val1 = NULL;
     val2 = NULL;
@@ -6582,33 +7335,18 @@ static xpath_result_t *
 		    /* val2 holds the 1st operand
 		     * val1 holds the 2nd operand
 		     */
-		    cmpresult = compare_results(pcb, val2, val1, res);
+		    cmpresult = compare_results(pcb, 
+						val2, 
+						val1, 
+						curop,
+						res);
 
 		    if (*res == NO_ERR) {
 			result = new_result(pcb, XP_RT_BOOLEAN);
 			if (!result) {
 			    *res = ERR_INTERNAL_MEM;
 			} else {
-			    switch (curop) {
-			    case XP_EXOP_LT:
-				result->r.bool = (cmpresult < 0)
-				    ? TRUE : FALSE;
-				break;
-			    case XP_EXOP_GT:
-				result->r.bool = (cmpresult > 0)
-				    ? TRUE : FALSE;
-				break;
-			    case XP_EXOP_LEQUAL:
-				result->r.bool = (cmpresult <= 0)
-				    ? TRUE : FALSE;
-				break;
-			    case XP_EXOP_GEQUAL:
-				result->r.bool = (cmpresult >= 0)
-				    ? TRUE : FALSE;
-				break;
-			    default:
-				*res = SET_ERROR(ERR_INTERNAL_VAL);
-			    }
+			    result->r.bool = cmpresult;
 			}
 		    }
 		}
@@ -6698,8 +7436,7 @@ static xpath_result_t *
 {
     xpath_result_t  *val1, *val2, *result;
     xpath_exop_t     curop;
-    boolean          done;
-    int32            cmpresult;
+    boolean          done, cmpresult;
 
     val1 = NULL;
     val2 = NULL;
@@ -6716,25 +7453,18 @@ static xpath_result_t *
 		    /* val2 holds the 1st operand
 		     * val1 holds the 2nd operand
 		     */
-		    cmpresult = compare_results(pcb, val2, val1, res);
+		    cmpresult = compare_results(pcb, 
+						val2, 
+						val1, 
+						curop,
+						res);
 
 		    if (*res == NO_ERR) {
 			result = new_result(pcb, XP_RT_BOOLEAN);
 			if (!result) {
 			    *res = ERR_INTERNAL_MEM;
 			} else {
-			    switch (curop) {
-			    case XP_EXOP_EQUAL:
-				result->r.bool = (cmpresult == 0) 
-				    ? TRUE : FALSE;
-				break;
-			    case XP_EXOP_NOTEQUAL:
-				result->r.bool = (cmpresult != 0)
-				    ? TRUE : FALSE;
-				break;
-			    default:
-				*res = SET_ERROR(ERR_INTERNAL_VAL);
-			    }
+			    result->r.bool = cmpresult;
 			}
 		    }
 		}

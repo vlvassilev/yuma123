@@ -1912,7 +1912,7 @@ static status_t
 		 * if xmlorder == TRUE, then this could indicate an extra
 		 * instance of the last child node
 		 */
-		res = ERR_NCX_EXTRA_NODE;
+		res = ERR_NCX_UNKNOWN_OBJECT;
 		errnode = &chnode;
 	    }
 	}

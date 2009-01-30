@@ -470,8 +470,8 @@ const char *
 	return "value not in set"; 
     case ERR_NCX_EXTRA_LISTSTR:
 	return "extra list string found"; 
-    case ERR_NCX_UNKNOWN_PSD:
-	return "unknown parameter set"; 
+    case ERR_NCX_UNKNOWN_OBJECT:
+	return "unknown object"; 
     case ERR_NCX_EXTRA_PARMINST:
 	return "extra parameter instance"; 
     case ERR_NCX_EXTRA_CHOICE:

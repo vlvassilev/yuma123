@@ -213,7 +213,7 @@ typedef enum status_t_
     ERR_NCX_EXTRA_ENUMCH,               /* 290 */
     ERR_NCX_VAL_NOTINSET,               /* 291 */
     ERR_NCX_EXTRA_LISTSTR,              /* 292 */
-    ERR_NCX_UNKNOWN_PSD,                /* 293 */
+    ERR_NCX_UNKNOWN_OBJECT,             /* 293 */
     ERR_NCX_EXTRA_PARMINST,             /* 294 */
     ERR_NCX_EXTRA_CHOICE,               /* 295 */
     ERR_NCX_MISSING_CHOICE,             /* 296 */

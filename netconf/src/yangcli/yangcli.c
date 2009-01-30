@@ -2324,7 +2324,7 @@ static val_value_t *
      * to support top-level leafs, a dummy container must be
      * created for the new and old leaf or leaf-list entries
      */
-    if (parm->parent) {
+    if (parm->parent && !obj_is_root(parm->parent)) {
 	parentobj = parm->parent;
     } else {
 	parentobj = ncx_get_gen_container();
@@ -4635,7 +4635,7 @@ static status_t
 
     /* get to the root of the object chain */
     parent = obj_get_cparent(curobj);
-    if (parent) {
+    if (parent && !obj_is_root(parent)) {
 	res = add_config_from_content_node(agent_cb,
 					   rpc,
 					   config_content,
@@ -6162,6 +6162,7 @@ static void
 	     uint32  len)
 {
     val_value_t           *valset, *content;
+    const xmlChar         *str;
     status_t               res;
 
     /* init locals */
@@ -6180,14 +6181,25 @@ static void
     /* get the contents specified in the 'from' choice */
     content = get_content_from_choice(agent_cb, rpc, valset);
     if (content) {
-	if (content->btyp == NCX_BT_STRING) {
-
-	    /* construct a get PDU with the content as the filter */
-	    res = send_get_to_agent(agent_cb, NULL, 
-				    VAL_STR(content), NULL);
-	    if (res != NO_ERR) {
-		log_error("\nError: send get operation failed (%s)",
-			  get_error_string(res));
+	if (content->btyp == NCX_BT_STRING && content->v.str) {
+	    str = content->v.str;
+	    while (*str && *str != '"') {
+		str++;
+	    }
+	    if (*str) {
+		log_error("\nError: select string cannot "
+			  "contain a double quote");
+	    } else {
+		/* construct a get PDU with the content
+		 * as the filter 
+		 */
+		res = send_get_to_agent(agent_cb, NULL, 
+					VAL_STR(content), NULL);
+		if (res != NO_ERR) {
+		    log_error("\nError: send get operation"
+			      " failed (%s)",
+			      get_error_string(res));
+		}
 	    }
 	} else {
 	    log_error("\nError: xget content wrong type");
@@ -6224,6 +6236,7 @@ static void
 		    uint32  len)
 {
     val_value_t     *valset, *content, *source;
+    const xmlChar   *str;
     status_t         res;
       
     /* get the command line parameters for this command */
@@ -6246,19 +6259,29 @@ static void
     /* get the contents specified in the 'from' choice */
     content = get_content_from_choice(agent_cb, rpc, valset);
     if (content) {
-	if (content->btyp == NCX_BT_STRING) {
-	    /* hand off this malloced node to send_get_to_agent */
-	    val_remove_child(source);
-	    val_change_nsid(source, xmlns_nc_id());
+	if (content->btyp == NCX_BT_STRING && content->v.str) {
+	    str = content->v.str;
+	    while (*str && *str != '"') {
+		str++;
+	    }
+	    if (*str) {
+		log_error("\nError: select string cannot "
+			  "contain a double quote");
+	    } else {
+		/* hand off this malloced node to send_get_to_agent */
+		val_remove_child(source);
+		val_change_nsid(source, xmlns_nc_id());
 
-	    /* construct a get PDU with the content as the filter */
-	    res = send_get_to_agent(agent_cb, 
-				    NULL, 
-				    VAL_STR(content), 
-				    source);
-	    if (res != NO_ERR) {
-		log_error("\nError: send get-config operation failed (%s)",
-			  get_error_string(res));
+		/* construct a get PDU with the content as the filter */
+		res = send_get_to_agent(agent_cb, 
+					NULL, 
+					VAL_STR(content), 
+					source);
+		if (res != NO_ERR) {
+		    log_error("\nError: send get-config "
+			      "operation failed (%s)",
+			      get_error_string(res));
+		}
 	    }
 	} else {
 	    log_error("\nError: xget content wrong type");

@@ -5231,7 +5231,10 @@ boolean
 *                FALSE if using name and modname to filter
 *    orself == TRUE if axis is really ancestor-or-self
 *              FALSE if axis is ancestor
-*
+*    forceall == TRUE to invoke the descendant callbacks
+*                even if fncalled was true from the current
+*               (parent) node;  FALSE to skip descendants
+*               if fncalled was TRUE
 * RETURNS:
 *   TRUE if normal termination occurred
 *   FALSE if walker fn requested early termination
@@ -5245,7 +5248,8 @@ boolean
 			      const xmlChar *name,
 			      boolean configonly,
 			      boolean textmode,
-			      boolean orself)
+			      boolean orself,
+			      boolean forceall)
 {
     val_value_t *val;
     boolean      fncalled, fnresult;
@@ -5293,7 +5297,7 @@ boolean
 	if (!fnresult) {
 	    return FALSE;
 	}
-	if (!fncalled) {
+	if (!fncalled || forceall) {
 	    fnresult = val_find_all_descendants(walkerfn,
 						cookie1,
 						cookie2,
@@ -5302,7 +5306,8 @@ boolean
 						name, 
 						configonly,
 						textmode,
-						FALSE);
+						FALSE,
+						forceall);
 	    if (!fnresult) {
 		return FALSE;
 	    }
@@ -5734,7 +5739,8 @@ val_value_t *
 					    name,
 					    configonly,
 					    textmode,
-					    orself);
+					    orself,
+					    FALSE);
 	if (fnresult) {
 	    return NULL;
 	} else {

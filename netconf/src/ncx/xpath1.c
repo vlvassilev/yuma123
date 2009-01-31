@@ -1129,10 +1129,10 @@ static boolean
 	    exop = XP_EXOP_LT;
 	    break;
 	case XP_EXOP_LEQUAL:
-	    exop = XP_EXOP_GT;
+	    exop = XP_EXOP_GEQUAL;
 	    break;
 	case XP_EXOP_GEQUAL:
-	    exop = XP_EXOP_LT;
+	    exop = XP_EXOP_LEQUAL;
 	    break;
 	default:
 	    *res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -1432,7 +1432,7 @@ static boolean
 	    return convert_compare_result(cmpval, exop);
 	} else if (val1->restype == XP_RT_STRING) {
 	    str2 = NULL;
-	    *res = xpath_cvt_string(val2, &str2);
+	    *res = xpath_cvt_string(pcb, val2, &str2);
 	    if (*res == NO_ERR) {
 		cmpval = xml_strcmp(val1->r.str, str2);
 	    }
@@ -1446,7 +1446,7 @@ static boolean
 	    }
 	} else if (val2->restype == XP_RT_STRING) {
 	    str1 = NULL;
-	    *res = xpath_cvt_string(val1, &str1);
+	    *res = xpath_cvt_string(pcb, val1, &str1);
 	    if (*res == NO_ERR) {
 		cmpval = xml_strcmp(str1, val2->r.str);
 	    }
@@ -1483,7 +1483,6 @@ static boolean
     return retval;
 
 } /* compare_results */
-
 
 
 /********************************************************************
@@ -1708,6 +1707,102 @@ static boolean
 } /* location_path_end */
 
 
+/********************************************************************
+* FUNCTION stringify_walker_fn
+* 
+* Stringify the current node in a nodeset
+*
+* Matches val_walker_fn_t template in val.h
+*
+* INPUTS:
+*    val == value node found to get the string value for
+*    cookie1 == xpath_pcb_t * : parser control block to use
+*               currently not used!!!
+*    cookie2 == xpath_stringwalkerparms_t *: walker parms to use
+*                buffer is filled unless NULL, then len is
+*                calculated
+* OUTPUTS:
+*    *cookie2 contents adjusted 
+*
+* RETURNS:
+*    TRUE to keep walk going
+*    FALSE to terminate walk
+*********************************************************************/
+static boolean
+    stringify_walker_fn (val_value_t *val,
+			 void *cookie1,
+			 void *cookie2)
+{
+    xpath_stringwalkerparms_t  *parms;
+    status_t                    res;
+    uint32                      cnt;
+
+    (void)cookie1;
+    parms = (xpath_stringwalkerparms_t *)cookie2;
+
+    /* skip all complex nodes */
+    if (!typ_is_simple(val->btyp)) {
+	if (parms->buffer) {
+	    if (parms->buffpos+1 < parms->buffsize) {
+		parms->buffer[parms->buffpos++] = '\n';
+		parms->buffer[parms->buffpos] = '\0';		
+	    } else {
+		parms->res = ERR_BUFF_OVFL;
+		return FALSE;
+	    }
+	} else {
+	    parms->buffpos++;
+	}
+	return TRUE;
+    }
+
+    if (typ_is_string(val->btyp)) {
+	cnt = xml_strlen(VAL_STR(val));
+	if (parms->buffer) {
+	    if (parms->buffpos+cnt+2 < parms->buffsize) {
+		parms->buffer[parms->buffpos++] = '\n';
+		xml_strcpy(&parms->buffer[parms->buffpos],
+			   VAL_STR(val));
+	    } else {
+		parms->res = ERR_BUFF_OVFL;
+		return FALSE;
+	    }
+	    parms->buffpos += cnt;
+	} else {
+	    parms->buffpos += (cnt+1); 
+	}
+
+    } else {
+	/* get value sprintf size */
+	res = val_sprintf_simval_nc(NULL, val, &cnt);
+	if (res != NO_ERR) {
+	    parms->res = res;
+	    return FALSE;
+	}
+	if (parms->buffer) {
+	    if (parms->buffpos+cnt+2 < parms->buffsize) {
+		parms->buffer[parms->buffpos++] = '\n';
+		res = val_sprintf_simval_nc
+		    (&parms->buffer[parms->buffpos], val, &cnt);
+		if (res != NO_ERR) {
+		    parms->res = res;
+		    return FALSE;
+		}
+	    } else {
+		parms->res = ERR_BUFF_OVFL;
+		return FALSE;
+	    }
+	    parms->buffpos += cnt;
+	} else {
+	    parms->buffpos += (cnt+1);
+	}
+    }
+
+    return TRUE;
+
+}  /* stringify_walker_fn */
+
+
 /**********   X P A T H    F U N C T I O N S   ************/
 
 
@@ -1870,7 +1965,7 @@ static xpath_result_t *
 	 parm != NULL && *res == NO_ERR;
 	 parm = (xpath_result_t *)dlq_nextEntry(parm)) {
 	if (parm->restype != XP_RT_STRING) {
-	    *res = xpath_cvt_string(parm, &str);
+	    *res = xpath_cvt_string(pcb, parm, &str);
 	    if (*res == NO_ERR) {
 		len += xml_strlen(str);
 		m__free(str);
@@ -1904,7 +1999,7 @@ static xpath_result_t *
 	 parm = (xpath_result_t *)dlq_nextEntry(parm)) {
 
 	if (parm->restype != XP_RT_STRING) {
-	    *res = xpath_cvt_string(parm, &str);
+	    *res = xpath_cvt_string(pcb, parm, &str);
 	    if (*res == NO_ERR) {
 		returnstr += xml_strcpy(returnstr, str);
 		m__free(str);
@@ -1965,7 +2060,7 @@ static xpath_result_t *
     parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
 
     if (parm1->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm1, &str1);
+	*res = xpath_cvt_string(pcb, parm1, &str1);
 	malloc1 = TRUE;
     } else {
 	str1 = parm1->r.str;
@@ -1975,7 +2070,7 @@ static xpath_result_t *
     }
 
     if (parm2->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm2, &str2);
+	*res = xpath_cvt_string(pcb, parm2, &str2);
 	malloc2 = TRUE;
     } else {
 	str2 = parm2->r.str;
@@ -2702,7 +2797,9 @@ static xpath_result_t *
 	    *res = ERR_INTERNAL_MEM;
 	    return NULL;
 	} else {
-	    *res = xpath_cvt_string(tempresult, &mallocstr);
+	    *res = xpath_cvt_string(pcb, 
+				    tempresult, 
+				    &mallocstr);
 	    if (*res == NO_ERR) {
 		teststr = mallocstr;
 	    }
@@ -3065,7 +3162,7 @@ static xpath_result_t *
     parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
 
     if (parm1->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm1, &str1);
+	*res = xpath_cvt_string(pcb, parm1, &str1);
 	malloc1 = TRUE;
     } else {
 	str1 = parm1->r.str;
@@ -3075,7 +3172,7 @@ static xpath_result_t *
     }
 
     if (parm2->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm2, &str2);
+	*res = xpath_cvt_string(pcb, parm2, &str2);
 	malloc2 = TRUE;
     } else {
 	str2 = parm2->r.str;
@@ -3162,7 +3259,7 @@ static xpath_result_t *
 
     parm = (xpath_result_t *)dlq_firstEntry(parmQ);
     if (parm) {
-	xpath_cvt_string(parm, &result->r.str);
+	xpath_cvt_string(pcb, parm, &result->r.str);
     } else {
 	/* convert the context node value */
 	if (pcb->val) {
@@ -3177,7 +3274,9 @@ static xpath_result_t *
 	    if (!tempresult) {
 		*res = ERR_INTERNAL_MEM;
 	    } else {
-		*res = xpath_cvt_string(tempresult, &result->r.str);
+		*res = xpath_cvt_string(pcb, 
+					tempresult, 
+					&result->r.str);
 		free_result(pcb, tempresult);
 	    }
 	} else {
@@ -3247,7 +3346,7 @@ static xpath_result_t *
 
     parm = (xpath_result_t *)dlq_firstEntry(parmQ);
     if (parm && parm->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm, &tempstr);
+	*res = xpath_cvt_string(pcb, parm, &tempstr);
 	if (*res == NO_ERR) {
 	    len = xml_strlen(tempstr);
 	    m__free(tempstr);
@@ -3269,7 +3368,9 @@ static xpath_result_t *
 		*res = ERR_INTERNAL_MEM;
 	    } else {
 		tempstr = NULL;
-		*res = xpath_cvt_string(tempresult, &tempstr);
+		*res = xpath_cvt_string(pcb, 
+					tempresult, 
+					&tempstr);
 		free_result(pcb, tempresult);
 		if (*res == NO_ERR) {
 		    len = xml_strlen(tempstr);
@@ -3352,7 +3453,7 @@ static xpath_result_t *
     parm3 = (xpath_result_t *)dlq_nextEntry(parm2);
 
     if (parm1->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm1, &str1);
+	*res = xpath_cvt_string(pcb, parm1, &str1);
 	if (*res != NO_ERR) {
 	    return NULL;
 	} else {
@@ -3486,7 +3587,7 @@ static xpath_result_t *
     parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
 
     if (parm1->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm1, &str1);
+	*res = xpath_cvt_string(pcb, parm1, &str1);
 	if (*res != NO_ERR) {
 	    return NULL;
 	}
@@ -3496,7 +3597,7 @@ static xpath_result_t *
     }
 
     if (parm2->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm2, &str2);
+	*res = xpath_cvt_string(pcb, parm2, &str2);
 	if (*res != NO_ERR) {
 	    if (malloc1) {
 		m__free(str1);
@@ -3585,7 +3686,7 @@ static xpath_result_t *
     parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
 
     if (parm1->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm1, &str1);
+	*res = xpath_cvt_string(pcb, parm1, &str1);
 	if (*res != NO_ERR) {
 	    return NULL;
 	}
@@ -3595,7 +3696,7 @@ static xpath_result_t *
     }
 
     if (parm2->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm2, &str2);
+	*res = xpath_cvt_string(pcb, parm2, &str2);
 	if (*res != NO_ERR) {
 	    if (malloc1) {
 		m__free(str1);
@@ -3774,7 +3875,7 @@ static xpath_result_t *
     parm3 = (xpath_result_t *)dlq_nextEntry(parm2);
 
     if (parm1->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm1, &p1str);
+	*res = xpath_cvt_string(pcb, parm1, &p1str);
 	if (*res != NO_ERR) {
 	    return NULL;
 	}
@@ -3785,7 +3886,7 @@ static xpath_result_t *
     p1len = xml_strlen(p1str);
 	
     if (parm2->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm2, &p2str);
+	*res = xpath_cvt_string(pcb, parm2, &p2str);
 	if (*res != NO_ERR) {
 	    if (malloc1) {
 		m__free(p1str);
@@ -3799,7 +3900,7 @@ static xpath_result_t *
     p2len = xml_strlen(p2str);
 
     if (parm3->restype != XP_RT_STRING) {
-	*res = xpath_cvt_string(parm3, &p3str);
+	*res = xpath_cvt_string(pcb, parm3, &p3str);
 	if (*res != NO_ERR) {
 	    if (malloc1) {
 		m__free(p1str);
@@ -7998,7 +8099,7 @@ status_t
 *                 and all config=false nodes should be skipped
 *                 FALSE if <get> call and non-config nodes
 *                 will not be skipped
-*           XP_SRC_YANG and XP_SRC_KEYREF:
+*           XP_SRC_YANG and XP_SRC_LEAFREF:
 *                 should be set to false
 *     res == address of return status
 *
@@ -8098,7 +8199,7 @@ xpath_result_t *
 *                 and all config=false nodes should be skipped
 *                 FALSE if <get> call and non-config nodes
 *                 will not be skipped
-*           XP_SRC_YANG and XP_SRC_KEYREF:
+*           XP_SRC_YANG and XP_SRC_LEAFREF:
 *                 should be set to false
 *     res == address of return status
 *
@@ -8287,7 +8388,12 @@ boolean
 			      dlq_hdr_t *resultQ,
 			      val_value_t *val)
 {
-
+#ifdef DEBUG
+    if (!pcb || !resultQ || !val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
 
     /* quick test -- see if docroot is already in the Q
      * which means nothing else is needed
@@ -8316,6 +8422,171 @@ boolean
     return FALSE;
 
 }  /* xpath1_check_node_exists */
+
+
+/********************************************************************
+* FUNCTION xpath1_stringify_nodeset
+* 
+* Convert a value node pointer to a string node
+* ONLY FOR VALUE NODES IN THE RESULT
+*
+*   string(nodeset)
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    result == result to stringify
+*    str == address of return string
+*
+* OUTPUTS:
+*    *str == malloced and filled in string (if NO_ERR)
+*
+* RETURNS:
+*    status, NO_ER or ERR_INTERNAL_MEM, etc.
+*********************************************************************/
+status_t
+    xpath1_stringify_nodeset (xpath_pcb_t *pcb,
+			      const xpath_result_t *result,
+			      xmlChar **str)
+{
+    xpath_resnode_t *resnode, *bestnode;
+    val_value_t     *bestval;
+    uint32           reslevel, bestlevel, cnt;
+    status_t         res;
+    boolean          cfgonly, fnresult;
+    xpath_stringwalkerparms_t walkerparms;
+
+#ifdef DEBUG
+    if (!pcb || !result || !str) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (result->restype != XP_RT_NODESET) {
+	return SET_ERROR(ERR_INTERNAL_VAL); 
+    }
+
+    if (!pcb->val_docroot || !result->isval) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+	
+    /* find the best node to use in the result
+     * which is the first node at the lowest value nest level
+     */
+    reslevel = 0;
+    bestlevel = NCX_MAX_UINT;
+    bestnode = NULL;
+
+    for (resnode = (xpath_resnode_t *)dlq_firstEntry(&result->r.nodeQ);
+	 resnode != NULL;
+	 resnode = (xpath_resnode_t *)dlq_nextEntry(resnode)) {
+
+	if (resnode->node.valptr == pcb->val_docroot) {
+	    bestlevel = 0;
+	    bestnode = resnode;
+	} else {
+	    reslevel = val_get_nest_level(resnode->node.valptr);
+	    if (reslevel < bestlevel) {
+		bestlevel = reslevel;
+		bestnode = resnode;
+	    }
+	}
+    }
+
+    if (!bestnode) {
+	*str = xml_strdup(EMPTY_STRING);
+	if (!*str) {
+	    return ERR_INTERNAL_MEM;
+	} else {
+	    return NO_ERR;
+	}
+    }
+
+    /* If the node == val_docroot
+     * DO NOT use the entire contents of the 
+     * database in the string!!!
+     * Since multiple documents are supported
+     * under one root in NETCONF, just grab the
+     * first child no matter what node it is
+     */
+    bestval = bestnode->node.valptr;
+    if (bestval == pcb->val_docroot) {
+	bestval = val_get_first_child(bestval);
+    }
+
+    if (!bestval) {
+	*str = xml_strdup(EMPTY_STRING);
+	if (!*str) {
+	    return ERR_INTERNAL_MEM;
+	} else {
+	    return NO_ERR;
+	}
+    }
+
+    if (typ_is_simple(bestval->btyp)) {
+	res = val_sprintf_simval_nc(NULL, bestval, &cnt);
+	if (res != NO_ERR) {
+	    return res;
+	}
+	*str = m__getMem(cnt+1);
+	if (!*str) {
+	    return ERR_INTERNAL_MEM;
+	}
+	res = val_sprintf_simval_nc(*str, bestval, &cnt);
+	if (res != NO_ERR) {
+	    m__free(*str);
+	    *str = NULL;
+	    return res;
+	}
+	return NO_ERR;
+    } else {
+	cfgonly = (pcb->flags & XP_FL_CONFIGONLY) ? TRUE : FALSE;
+	walkerparms.buffer = NULL;
+	walkerparms.buffsize = 0;
+	walkerparms.buffpos = 0;
+	walkerparms.res = NO_ERR;
+
+	fnresult = val_find_all_descendants(stringify_walker_fn,
+					    pcb,
+					    &walkerparms,
+					    bestval,
+					    NULL,
+					    NULL,
+					    cfgonly,
+					    FALSE,
+					    TRUE,
+					    TRUE);
+	if (walkerparms.res != NO_ERR) {
+	    return walkerparms.res;
+	}
+
+	walkerparms.buffer = m__getMem(walkerparms.buffpos+2);
+	if (!walkerparms.buffer) {
+	    return ERR_INTERNAL_MEM;
+	}
+	walkerparms.buffsize = walkerparms.buffpos+2;
+	walkerparms.buffpos = 0;
+
+	fnresult = val_find_all_descendants(stringify_walker_fn,
+					    pcb,
+					    &walkerparms,
+					    bestval,
+					    NULL,
+					    NULL,
+					    cfgonly,
+					    FALSE,
+					    TRUE,
+					    TRUE);
+	if (walkerparms.res != NO_ERR) {
+	    m__free(walkerparms.buffer);
+	    return walkerparms.res;
+	}
+
+	*str = walkerparms.buffer;
+	return NO_ERR;
+    }
+    /*NOTREACHED*/
+
+}  /* xpath1_stringify_nodeset */
 
 
 /* END xpath1.c */

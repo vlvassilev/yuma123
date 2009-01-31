@@ -1,14 +1,14 @@
-#ifndef _H_xpath_keyref
-#define _H_xpath_keyref
+#ifndef _H_xpath_leafref
+#define _H_xpath_leafref
 
-/*  FILE: xpath_keyref.h
+/*  FILE: xpath_leafref.h
 *********************************************************************
 *								    *
 *			 P U R P O S E				    *
 *								    *
 *********************************************************************
 
-    Keyref data type Xpath support
+    Leafref data type Xpath support
 
 *********************************************************************
 *								    *
@@ -69,17 +69,17 @@ date	     init     comment
 *********************************************************************/
 
 extern status_t
-    xpath_keyref_parse_path (tk_chain_t *tkc,
+    xpath_leafref_parse_path (tk_chain_t *tkc,
 			     ncx_module_t *mod,
 			     xpath_pcb_t *pcb);
 
 extern status_t
-    xpath_keyref_validate_path (ncx_module_t *mod,
+    xpath_leafref_validate_path (ncx_module_t *mod,
 				const obj_template_t *obj,
 				xpath_pcb_t *pcb);
 
 extern status_t
-    xpath_keyref_get_value (ncx_module_t *mod,
+    xpath_leafref_get_value (ncx_module_t *mod,
 			    obj_template_t *obj,
 			    xpath_pcb_t *pcb,
 			    val_value_t **targval);
@@ -87,4 +87,4 @@ extern status_t
 
 
 
-#endif	    /* _H_xpath_keyref */
+#endif	    /* _H_xpath_leafref */

@@ -1539,7 +1539,7 @@ status_t
     case NCX_BT_UNION:
 	res = xsd_finish_union(mod, typdef, val);
 	break;
-    case NCX_BT_KEYREF:
+    case NCX_BT_LEAFREF:
 	break;
     case NCX_BT_BITS:
 	/* a bits type is list of identifier strings */
@@ -1712,7 +1712,7 @@ status_t
 	hasnodes = (mdef) ? TRUE : FALSE;
 	isext = hasnodes;
 	break;
-    case NCX_BT_KEYREF:
+    case NCX_BT_LEAFREF:
 	isext = FALSE;
 	hasnodes = TRUE;
 	break;

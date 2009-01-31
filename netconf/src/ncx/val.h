@@ -274,7 +274,7 @@ typedef struct val_value_t_ {
      */
     const struct obj_template_t_   *casobj;
 
-    /* these fields are for NCX_BT_KEYREF
+    /* these fields are for NCX_BT_LEAFREF
      * NCX_BT_INSTANCE_ID, or tagged ncx:xpath 
      * value stored in v union as a string
      */

@@ -228,16 +228,17 @@ typedef struct typ_idref_t {
  *  NCX_BT_FLOAT64 -- 64 bit float number value
  *  NCX_BT_STRING -- char string
  *  NCX_BT_BINARY -- binary string (base64 from RFC 4648)
- *  NCX_BT_KEYREF -- YANG keyref (XPath expression)
+ *  NCX_BT_LEAFREF -- YANG leafref (XPath path expression)
  *  NCX_BT_IDREF -- YANG identityref (QName)
  *  NCX_BT_INSTANCE_ID -- YANG instance-identifier (XPath expression)
  *  NCX_BT_SLIST -- simple list of string or number type (xsd:list)
- *  NCX_BT_UNION -- C-type union of any simtype except keyref and empty
+ *  NCX_BT_UNION -- C-type union of any simtype except leafref and empty
  */
 typedef struct typ_simple_t_ {
     ncx_btype_t      btyp;                             /* NCX base type */
     struct typ_template_t_ *listtyp;       /* template for NCX_BT_SLIST */
-    struct xpath_pcb_t_   *xkeyref;     /* saved for NCX_BT_KEYREF only */
+    struct xpath_pcb_t_   *xleafref;   /* saved for NCX_BT_LEAFREF only */
+    boolean          leafref_constrained;
     typ_range_t      range;     /* for all num types and string length  */
     typ_idref_t      idref;                    /* for NCX_BT_IDREF only */
     dlq_hdr_t        valQ;     /* bit, enum, string, list vals/patterns */
@@ -752,11 +753,14 @@ extern boolean
     typ_ok (const typ_def_t *typdef);
 
 extern const xmlChar *
-    typ_get_keyref_path (const typ_def_t *typdef);
+    typ_get_leafref_path (const typ_def_t *typdef);
 
 /* returns xpath_pcb_t but cannot import due to H file loop */
 extern void *
-    typ_get_keyref_pcb (typ_def_t *typdef);
+    typ_get_leafref_pcb (typ_def_t *typdef);
+
+extern boolean
+    typ_get_leafref_constrained (const typ_def_t *typdef);
 
 extern boolean
     typ_has_subclauses (const typ_def_t *typdef);

@@ -969,7 +969,7 @@ static void
     const typ_pattern_t   *pat;
     char                   buff[NCX_MAX_NUMLEN];
     int32                  indent;
-    boolean                errinfo_set;
+    boolean                errinfo_set, constrained_set;
 
     indent = startindent + ses_indent_count(scb);
 
@@ -1116,12 +1116,17 @@ static void
 	    break;
 	case NCX_BT_SLIST:
 	    break;
-	case NCX_BT_KEYREF:
-	    str = typ_get_keyref_path(typdef);
+	case NCX_BT_LEAFREF:
+	    str = typ_get_leafref_path(typdef);
 	    if (str) {
 		write_simple_str(scb, YANG_K_PATH, str,
 				 startindent, 2, TRUE);
 	    }
+	    constrained_set = typ_get_leafref_constrained(typdef);
+	    write_simple_str(scb, YANG_K_REQUIRE_INSTANCE,
+			     (constrained_set) 
+			     ? NCX_EL_TRUE : NCX_EL_FALSE,
+			     startindent, 2, TRUE);
 	    break;
 	default:
 	    break;

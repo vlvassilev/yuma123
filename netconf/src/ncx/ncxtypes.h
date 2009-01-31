@@ -146,7 +146,7 @@ typedef enum ncx_btype_t_ {
     NCX_BT_BINARY,
     NCX_BT_INSTANCE_ID,
     NCX_BT_UNION,
-    NCX_BT_KEYREF,
+    NCX_BT_LEAFREF,
     NCX_BT_IDREF,
     NCX_BT_SLIST,                 /* ncx:xsdlist extension */
 

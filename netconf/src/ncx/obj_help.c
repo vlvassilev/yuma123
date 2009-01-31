@@ -183,10 +183,10 @@ static void
 	    }
 	}
 	break;
-    case NCX_BT_KEYREF:
-	datastr = typ_get_keyref_path(typdef);
+    case NCX_BT_LEAFREF:
+	datastr = typ_get_leafref_path(typdef);
 	if (datastr) {
-	    help_write_lines((const xmlChar *)"keyref path:",
+	    help_write_lines((const xmlChar *)"leafref path:",
 			     indent, TRUE);
 	    help_write_lines(datastr, indent+NCX_DEF_INDENT, TRUE);
 	}

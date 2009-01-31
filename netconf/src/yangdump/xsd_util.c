@@ -1297,7 +1297,7 @@ static val_value_t *
 *
 * INPUTS:
 *    typ == typ_template_t to check
-*    path == path strnig for keyref or NULL if N/A
+*    path == path strnig for leafref or NULL if N/A
 *
 * RETURNS:
 *   malloced value containing all the appinfo or NULL if malloc error
@@ -1362,7 +1362,7 @@ static val_value_t *
 	}
     }
 
-    /* add path for keyref if needed */
+    /* add path for leafref if needed */
     if (path) {
 	newval = xml_val_new_cstring(YANG_K_PATH, ncx_id, path);
 	if (!newval) {
@@ -1501,7 +1501,7 @@ const xmlChar *
     case NCX_BT_FLOAT64:
 	return NCX_EL_DOUBLE;
     case NCX_BT_STRING:
-    case NCX_BT_KEYREF:  /***/
+    case NCX_BT_LEAFREF:  /***/
     case NCX_BT_INSTANCE_ID:
 	return NCX_EL_STRING;
     case NCX_BT_IDREF:
@@ -3059,8 +3059,8 @@ status_t
     res = NO_ERR;
 
     if (typ->typdef.class == NCX_CL_SIMPLE &&
-	typ_get_basetype(&typ->typdef)==NCX_BT_KEYREF) {
-	path = typ_get_keyref_path(&typ->typdef);
+	typ_get_basetype(&typ->typdef)==NCX_BT_LEAFREF) {
+	path = typ_get_leafref_path(&typ->typdef);
     }
 
     if (typ->descr || typ->ref || 

@@ -162,9 +162,9 @@ static void
 	}
     }
 
-    if (sim->xkeyref) {
-	xpath_free_pcb(sim->xkeyref);
-	sim->xkeyref = NULL;
+    if (sim->xleafref) {
+	xpath_free_pcb(sim->xleafref);
+	sim->xleafref = NULL;
     }
 
     sim->btyp = NCX_BT_NONE;
@@ -2924,7 +2924,7 @@ boolean
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_UNION:
-    case NCX_BT_KEYREF:
+    case NCX_BT_LEAFREF:
     case NCX_BT_IDREF:
     case NCX_BT_SLIST:
 	return TRUE;
@@ -2978,7 +2978,7 @@ boolean
     case NCX_BT_BINARY:
     case NCX_BT_UNION:
     case NCX_BT_SLIST:
-    case NCX_BT_KEYREF:
+    case NCX_BT_LEAFREF:
     case NCX_BT_IDREF:
     case NCX_BT_INSTANCE_ID:
 	return TRUE;
@@ -3745,7 +3745,7 @@ boolean
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
 	return TRUE;
-    case NCX_BT_KEYREF:   /***/
+    case NCX_BT_LEAFREF:   /***/
 	return TRUE;
     default:
 	return FALSE;
@@ -4204,7 +4204,7 @@ boolean
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:
+    case NCX_BT_LEAFREF:
     case NCX_BT_IDREF:
     case NCX_BT_UNION:
     case NCX_BT_EMPTY:
@@ -4319,7 +4319,7 @@ boolean
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_UNION:
-    case NCX_BT_KEYREF:   /*** not official in the spec yet 10/13 ***/
+    case NCX_BT_LEAFREF:   /*** not official in the spec yet 10/13 ***/
     case NCX_BT_IDREF:
     case NCX_BT_EMPTY:
 	return TRUE;
@@ -4417,7 +4417,7 @@ boolean
     case NCX_BT_INSTANCE_ID:
 	return FALSE;
     case NCX_BT_UNION:
-    case NCX_BT_KEYREF:
+    case NCX_BT_LEAFREF:
     case NCX_BT_EMPTY:
 	return FALSE;
     case NCX_BT_ANY:
@@ -4430,18 +4430,18 @@ boolean
 
 
 /********************************************************************
-* FUNCTION typ_get_keyref_path
+* FUNCTION typ_get_leafref_path
 * 
-*   Get the path argument for the keyref data type
+*   Get the path argument for the leafref data type
 *
 * INPUTS:
-*    typdef == typdef for the the keyref
+*    typdef == typdef for the the leafref
 *
 * RETURNS:
 *    pointer to the path argument or NULL if some error
 *********************************************************************/
 const xmlChar *
-    typ_get_keyref_path (const typ_def_t *typdef)
+    typ_get_leafref_path (const typ_def_t *typdef)
 {
     const xmlChar          *pathstr;
     const typ_def_t        *tdef;
@@ -4455,34 +4455,32 @@ const xmlChar *
 
     pathstr = NULL;
 
-    if (typ_get_basetype(typdef) != NCX_BT_KEYREF) {
+    if (typ_get_basetype(typdef) != NCX_BT_LEAFREF) {
 	return NULL;
     }
 
     tdef = typ_get_cbase_typdef(typdef);
-    if (tdef && tdef->def.simple.xkeyref) {
-	pathstr = tdef->def.simple.xkeyref->exprstr;
-    } else {
-	SET_ERROR(ERR_INTERNAL_VAL);
+    if (tdef && tdef->def.simple.xleafref) {
+	pathstr = tdef->def.simple.xleafref->exprstr;
     }
     return pathstr;
 
-}   /* typ_get_keyref_path */
+}   /* typ_get_leafref_path */
 
 
 /********************************************************************
-* FUNCTION typ_get_keyref_pcb
+* FUNCTION typ_get_leafref_pcb
 * 
-*   Get the XPath parser control blockt for the keyref data type
+*   Get the XPath parser control block for the leafref data type
 *
 * INPUTS:
-*    typdef == typdef for the the keyref
+*    typdef == typdef for the the leafref
 *
 * RETURNS:
 *    pointer to the PCB struct or NULL if some error
 *********************************************************************/
 void *
-    typ_get_keyref_pcb (typ_def_t *typdef)
+    typ_get_leafref_pcb (typ_def_t *typdef)
 {
     const typ_def_t        *tdef;
 
@@ -4493,20 +4491,57 @@ void *
     }
 #endif
 
-    if (typ_get_basetype(typdef) != NCX_BT_KEYREF) {
+    if (typ_get_basetype(typdef) != NCX_BT_LEAFREF) {
 	return NULL;
     }
 
     tdef = typ_get_base_typdef(typdef);
-    if (tdef && tdef->def.simple.xkeyref) {
-	return (void *)tdef->def.simple.xkeyref;
+    if (tdef && tdef->def.simple.xleafref) {
+	return (void *)tdef->def.simple.xleafref;
     } else {
-	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }
     /*NOTREACHED*/
 
-}   /* typ_get_keyref_pcb */
+}   /* typ_get_leafref_pcb */
+
+
+/********************************************************************
+* FUNCTION typ_get_leafref_constrained
+* 
+*   Get the constrained true/false fiield for the leafref data type
+*
+* INPUTS:
+*    typdef == typdef for the the leafref
+*
+* RETURNS:
+*    TRUE if constrained; FALSE if not
+*********************************************************************/
+boolean
+    typ_get_leafref_constrained (const typ_def_t *typdef)
+{
+    const typ_def_t        *tdef;
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    if (typ_get_basetype(typdef) != NCX_BT_LEAFREF) {
+	return FALSE;
+    }
+
+    tdef = typ_get_cbase_typdef(typdef);
+    if (tdef && tdef->def.simple.xleafref) {
+	return tdef->def.simple.leafref_constrained;
+    } else {
+	return FALSE;
+    }
+    /*NOTREACHED*/
+
+}   /* typ_get_leafref_constrained */
 
 
 /********************************************************************
@@ -4568,7 +4603,7 @@ boolean
 	    }
 	    return !dlq_empty(&typdef->def.simple.valQ);
 	case NCX_BT_SLIST:
-	case NCX_BT_KEYREF:
+	case NCX_BT_LEAFREF:
 	case NCX_BT_IDREF:
 	    return TRUE;
 	default:

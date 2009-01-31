@@ -665,13 +665,13 @@ void
     oldbtyp = typ_get_basetype(oldtypdef);
     newbtyp = typ_get_basetype(newtypdef);
 
-    if (oldbtyp == NCX_BT_KEYREF) {
-	oldpath = typ_get_keyref_path(oldtypdef);
+    if (oldbtyp == NCX_BT_LEAFREF) {
+	oldpath = typ_get_leafref_path(oldtypdef);
     } else {
 	oldpath = NULL;
     }
-    if (newbtyp==NCX_BT_KEYREF) {
-	newpath = typ_get_keyref_path(newtypdef);
+    if (newbtyp==NCX_BT_LEAFREF) {
+	newpath = typ_get_leafref_path(newtypdef);
     } else {
 	newpath = NULL;
     }
@@ -751,7 +751,7 @@ void
      */
     indent_in(cp);
 
-    /* special case -- check keyref here */
+    /* special case -- check leafref here */
     if (oldpath || newpath) {
 	output_diff(cp, YANG_K_PATH, oldpath, newpath, FALSE);
     }
@@ -1048,9 +1048,9 @@ uint32
 	if (oldbtyp != newbtyp) {
 	    return 1;
 	}
-	if (oldbtyp == NCX_BT_KEYREF) {
-	    oldpath = typ_get_keyref_path(oldtypdef);
-	    newpath = typ_get_keyref_path(newtypdef);
+	if (oldbtyp == NCX_BT_LEAFREF) {
+	    oldpath = typ_get_leafref_path(oldtypdef);
+	    newpath = typ_get_leafref_path(newtypdef);
 	    return str_field_changed(YANG_K_PATH, oldpath, newpath, 
 				     FALSE, NULL);
 	} else if (typ_is_string(oldbtyp)) {

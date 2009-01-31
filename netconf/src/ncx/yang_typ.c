@@ -28,7 +28,7 @@
     NCX_BT_CONTAINER        container ** Not a type **
     NCX_BT_CHOICE           choice ** Not a type **
     NCX_BT_LIST             list ** Not a type **
-    NCX_BT_KEYREF           keyref
+    NCX_BT_LEAFREF          leafref
     NCX_BT_INSTANCE_ID      instance-identifier
 
     NCX_BT_CHOICE           meta-type for YANG choice
@@ -109,8 +109,8 @@ date         init     comment
 #include "xpath.h"
 #endif
 
-#ifndef _H_xpath_keyref
-#include "xpath_keyref.h"
+#ifndef _H_xpath_leafref
+#include "xpath_leafref.h"
 #endif
 
 #ifndef _H_yangconst
@@ -1964,10 +1964,10 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION finish_keyref_type
+* FUNCTION finish_leafref_type
 * 
 * Parse the next N tokens as the subsection of a
-* NCX_BT_KEYREF type that is being defined
+* NCX_BT_LEAFREF type that is being defined
 *
 * Current token is the left brace starting the string
 * sub-section. Continue until right brace or error.
@@ -1984,7 +1984,7 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    finish_keyref_type (tk_chain_t  *tkc,
+    finish_leafref_type (tk_chain_t  *tkc,
 			ncx_module_t *mod,
 			typ_def_t *typdef)
 {
@@ -1993,10 +1993,11 @@ static status_t
     const char    *expstr;
     tk_type_t      tktyp;
     status_t       res, retres;
-    boolean        done, pathdone;
+    boolean        done, pathdone, constrained;
 
-    expstr = "path keyword";
+    expstr = "path or require-instance keyword";
     pathdone = FALSE;
+    constrained = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
     done = FALSE;
@@ -2004,7 +2005,6 @@ static status_t
     sim = &typdef->def.simple;
 
     while (!done) {
-
 	/* get the next token */
 	res = TK_ADV(tkc);
 	if (res != NO_ERR) {
@@ -2052,7 +2052,7 @@ static status_t
 		return res;
 	    }
 
-	    /* store, parse, and validate that the keyref
+	    /* store, parse, and validate that the leafref
 	     * is well-formed. Do not check the objects
 	     * in the path string until later
 	     */
@@ -2062,44 +2062,58 @@ static status_t
 		 */
 		if (!pathdone) {
 		    /* very little validation is done now
-		     * because the object using this keyref
+		     * because the object using this leafref
 		     * data type is needed to set the starting
 		     * context node
 		     */
-		    sim->xkeyref = xpath_new_pcb(TK_CUR_VAL(tkc));
-		    if (!sim->xkeyref) {
+		    sim->xleafref = xpath_new_pcb(TK_CUR_VAL(tkc));
+		    if (!sim->xleafref) {
 			res = ERR_INTERNAL_MEM;
 			ncx_print_errormsg(tkc, mod, res);
 			return res;
 		    } else {
-			sim->xkeyref->tk = TK_CUR(tkc);
-			res = xpath_keyref_parse_path(tkc, mod, 
-						      sim->xkeyref);
+			sim->xleafref->tk = TK_CUR(tkc);
+			res = xpath_leafref_parse_path(tkc, mod, 
+						       sim->xleafref);
 			if (res != NO_ERR) {
 			    /* errors already reported */
 			    retres = res;
 			}
 		    }
 		}
-	    } else {
-		retres = ERR_NCX_WRONG_TKTYPE;
-		expstr = "path string";
-		ncx_mod_exp_err(tkc, mod, retres, expstr);
+
+		pathdone = TRUE;
+		
+		res = yang_consume_semiapp(tkc, mod, &typdef->appinfoQ);
+		CHK_EXIT(res, retres);
 	    }
-
-	    pathdone = TRUE;
-
-	    res = yang_consume_semiapp(tkc, mod, &typdef->appinfoQ);
+	} else if (!xml_strcmp(val, YANG_K_REQUIRE_INSTANCE)) {
+	    res = yang_consume_boolean(tkc, mod, 
+				       &sim->leafref_constrained,
+				       &constrained,
+				       &typdef->appinfoQ);
 	    CHK_EXIT(res, retres);
 	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    expstr = "path or require-instance statement";
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
 	}
     }
 
+    if (retres == NO_ERR && !pathdone) {
+	retres = ERR_NCX_MISSING_REFTARGET;
+	log_error("\nError: path missing in leafref type");
+	ncx_print_errormsg(tkc, mod, retres);
+    }
+
+    if (retres == NO_ERR && !constrained) {
+	/* set to default */
+	sim->leafref_constrained = TRUE;
+    }
+
     return retres;
 
-}  /* finish_keyref_type */
+}  /* finish_leafref_type */
 
 
 /********************************************************************
@@ -3190,7 +3204,7 @@ static status_t
 	    retres = ERR_NCX_MISSING_TYPE;
 	    expstr = "union member definitions";
 	    break;
-	case NCX_BT_KEYREF:
+	case NCX_BT_LEAFREF:
 	    retres = ERR_NCX_MISSING_TYPE;
 	    expstr = "path specifier";
 	    break;
@@ -3284,11 +3298,11 @@ static status_t
 		CHK_EXIT(res, retres);
 	    }
 	    break;
-	case NCX_BT_KEYREF:
+	case NCX_BT_LEAFREF:
 	    if (derived) {
 		extonly = TRUE;
 	    } else {
-		res = finish_keyref_type(tkc, mod, typdef);
+		res = finish_leafref_type(tkc, mod, typdef);
 		CHK_EXIT(res, retres);
 	    }
 	    break;

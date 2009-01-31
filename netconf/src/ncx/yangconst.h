@@ -109,6 +109,7 @@ date	     init     comment
 #define YANG_K_REFERENCE         (const xmlChar *)"reference"
 #define YANG_K_REFINE            (const xmlChar *)"refine"
 #define YANG_K_REPLACE           (const xmlChar *)"replace"
+#define YANG_K_REQUIRE_INSTANCE  (const xmlChar *)"require-instance"
 #define YANG_K_REVISION          (const xmlChar *)"revision"
 #define YANG_K_RPC               (const xmlChar *)"rpc"
 #define YANG_K_STATUS            (const xmlChar *)"status"

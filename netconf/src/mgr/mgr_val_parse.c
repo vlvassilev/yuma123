@@ -974,7 +974,7 @@ static status_t
 	    break;
 	case NCX_BT_STRING:
 	case NCX_BT_INSTANCE_ID:
-	case NCX_BT_KEYREF:
+	case NCX_BT_LEAFREF:
 	    if (valnode.simval) {
 		retval->v.str = xml_strdup(valnode.simval);
 		if (!retval->v.str) {
@@ -2059,7 +2059,7 @@ static status_t
     case NCX_BT_FLOAT64:
 	res = parse_num(scb, obj, btyp, startnode, retval);
 	break;
-    case NCX_BT_KEYREF:
+    case NCX_BT_LEAFREF:
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
     case NCX_BT_SLIST:
@@ -2182,7 +2182,7 @@ static status_t
     case NCX_BT_FLOAT64:
 	res = parse_num(scb, obj, btyp, startnode, retval);
 	break;
-    case NCX_BT_KEYREF:
+    case NCX_BT_LEAFREF:
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
     case NCX_BT_SLIST:

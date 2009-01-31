@@ -191,9 +191,9 @@ module ncx {
 
   leaf path {
     description 
-       "Contains the path-stmt Xpath expression value for a keyref.
-        Will be present in appinfo for all keyref typedefs, and
-        inline type-stmts for leafs and leaf-lists.";
+       "Contains the path-stmt Xpath expression value for a leafref.
+        Will be present in appinfo for all leafref typedefs, and
+        inline type-stmts for leafref leafs and leaf-lists.";
     type string;
     ncx:abstract;
   }

@@ -4519,7 +4519,7 @@ status_t
 *     str1 == first number
 *     str2 == second number
 *     btyp == expected data type 
-*             (NCX_BT_STRING, NCX_BT_INSTANCE_ID, NCX_BT_KEYREF)
+*             (NCX_BT_STRING, NCX_BT_INSTANCE_ID, NCX_BT_LEAFREF)
 * RETURNS:
 *     -1 if str1 is < str2
 *      0 if str1 == str2   (also for error, after SET_ERROR called)
@@ -4554,7 +4554,7 @@ int32
 * Supports base types:
 *     NCX_BT_STRING
 *     NCX_BT_INSTANCE_ID
-*     NCX_BT_KEYREF
+*     NCX_BT_LEAFREF
 *
 * INPUTS:
 *     str1 == first string
@@ -8234,7 +8234,7 @@ ncx_tclass_t
     case NCX_BT_FLOAT64:
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
-    case NCX_BT_KEYREF:
+    case NCX_BT_LEAFREF:
     case NCX_BT_SLIST:
     case NCX_BT_UNION:
         return NCX_CL_SIMPLE;

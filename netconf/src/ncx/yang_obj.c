@@ -161,8 +161,8 @@ date         init     comment
 #include "xpath1.h"
 #endif
 
-#ifndef _H_xpath_keyref
-#include "xpath_keyref.h"
+#ifndef _H_xpath_leafref
+#include "xpath_leafref.h"
 #endif
 
 #ifndef _H_yangconst
@@ -7044,7 +7044,7 @@ status_t
 * 
 * Fifth (and final) pass object validation
 *
-* Check all keyref, must, and when XPath expressions
+* Check all leafref, must, and when XPath expressions
 * to make sure they are well-formed
 *
 * Checks the cooked objects, and skips all groupings
@@ -7130,7 +7130,7 @@ status_t
 	    break;
 	case OBJ_TYP_LEAF:
 	case OBJ_TYP_LEAF_LIST:
-	    if (obj_get_basetype(testobj) == NCX_BT_KEYREF) {
+	    if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
 #ifdef YANG_OBJ_DEBUG
 		log_debug3("\nresolve_xpath: mod %s, object %s, on line %u",
 			   mod->name, obj_get_name(testobj), 
@@ -7138,8 +7138,8 @@ status_t
 #endif
 
 		typdef = obj_get_typdef(testobj);
-		pcb = typ_get_keyref_pcb(typdef);
-		res = xpath_keyref_validate_path(mod, testobj, pcb);
+		pcb = typ_get_leafref_pcb(typdef);
+		res = xpath_leafref_validate_path(mod, testobj, pcb);
 	    }
 	    break;
 	case OBJ_TYP_LIST:

@@ -399,7 +399,7 @@ static boolean
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_IDREF:
-    case NCX_BT_KEYREF: /****/
+    case NCX_BT_LEAFREF: /****/
 	testlen = xml_strlen(testval);
 	retlen = 0;
 	res = val_sprintf_simval_nc(NULL, cmpval, &retlen);

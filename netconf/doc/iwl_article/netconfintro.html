@@ -1,0 +1,92 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Introduction to NETCONF</title>
+  </head>
+  <body>
+    <h2>Introduction to NETCONF</h2>
+    <h4>by Andy Bierman &lt;andy@netconfcentral.org&gt;</h4>
+    <p>
+      <a href="http://www.rfc-editor.org/rfc/rfc4741.txt">
+      NETCONF</a> is an XML-based network
+      configuration protocol standardized in the IETF.
+      <a href="http://www.w3.org/TR/REC-xml/">XML</a>
+      is a good encoding for CLI-based configuration
+      data because it easily models the natural data
+      structures, and allows NETCONF to utilize a large set of
+      XML standard tools and technologies.
+    </p>
+    <p>
+      NETCONF has an extensible set of operations, such as
+      'edit-config', 'validate', and 'commit', which
+      provide some transaction-like database manipulation
+      capabilities, not found in SNMP.  It is session-based,
+      usually implemented as an SSH subsystem.  An agent
+      implementation will specify exactly which feature
+      subsets (called 'capabilities') it supports at
+      the start of each session.  A manager does not have
+      to guess or use off-line tools to find out what
+      variations and data model versions are supported
+      by each agent.
+    </p>
+    <p>
+      If the 'candidate' database is supported, then database edits
+      can be gathered in this scratchpad database
+      and committed all at once the
+      the active configuration database (called 'running').
+    </p>
+    <p>
+      If the 'startup' capability is supported, then the
+      non-volatile version of the configuration database
+      is managed independently of the 'running' configuration.
+      Otherwise, all changes to the 'running' configuration
+      are written to NV-storage right away.
+    </p>
+    <p>
+      Databases can also be globally locked, so no matter
+      how many sessions were active at the same time,
+      unintended edits could be prevented.
+      Work is currently  underway to standardize a 'partial-lock' operation, 
+      to allow multiple concurrent (non-overlapping) explicit locks 
+      on the same database. Large ISPs have requested this feature,
+      to avoid locking an entire (huge) backbone router database,
+      in order to edit a single interface.
+    </p>
+    <p>
+      NETCONF also provides powerful built-in retrieval filtering,
+      with the 'get' and 'get-config' operations.
+      Subtree filtering uses an XML-encoded filter to
+      retrieve a subset of a configuration or state data.
+      If the 'xpath' capability is supported, then the
+      <a href="http://www.w3.org/TR/xpath">XPath</a>
+      filtering language can be used to select data
+      for retrieval.
+    </p>
+    <p>
+      If the 'notification' capability is supported,
+      then a manager can use NETCONF to receive filtered
+      notification streams.
+      <a href="ftp://ftp.rfc-editor.org/in-notes/rfc5277.txt">
+	NETCONF Notifications
+      </a>
+      is a Proposed Standard RFC, like NETCONF.  Buffering
+      and replay are also supported.
+    </p>
+    <p>
+      NETCONF does not directly address the standardization
+      of arbitrary configuration database content, although
+      current work is being done to provide
+      monitoring of the NETCONF protocol itself.
+    </p>
+    <p>
+      The 'content layer' work is being done by the NETCONF
+      Data Modeling WG, 
+      <a href="http://tools.ietf.org/wg/netmod/">NETMOD</a>.
+      A data modeling language, called
+      Yet Another Next Generation (YANG) is being developed
+      to fully describe the NETCONF protocol content layer.
+      (Next time...how YANG opens the door to fully automated
+      NETCONF protocol implementation.)
+    </p>
+  </body>
+</html>
+

@@ -152,7 +152,7 @@ date	     init     comment
 #define XP_FL_SKIP_TOR           bit2
 
 
-/* used by xpath_keyref.c to keep track of path type */
+/* used by xpath_leafref.c to keep track of path type */
 #define XP_FL_ABSPATH            bit3
 
 
@@ -182,7 +182,7 @@ typedef enum xpath_restype_t_ {
     XP_RT_BOOLEAN
 } xpath_restype_t;
 
-/* XPath dynamic parsing mode for keyref */
+/* XPath dynamic parsing mode for leafref */
 typedef enum xpath_curmode_t_ {
     XP_CM_NONE,
     XP_CM_TARGET,
@@ -204,7 +204,7 @@ typedef enum xpath_document_t_ {
 /* XPath expression source type */
 typedef enum xpath_source_t_ {
     XP_SRC_NONE,
-    XP_SRC_KEYREF,
+    XP_SRC_LEAFREF,
     XP_SRC_YANG,
     XP_SRC_XML
 } xpath_source_t;
@@ -284,7 +284,7 @@ typedef struct xpath_pcb_t_ {
     /* the prefixes in the QNames in the exprstr MUST be resolved
      * in different contexts.  
      *
-     * For must/when/keyref XPath, the prefix is a module prefix
+     * For must/when/leafref XPath, the prefix is a module prefix
      * which must match an import statement in the 'mod' import Q
      *
      * For XML context (NETCONF PDU 'select' attribute)
@@ -296,7 +296,7 @@ typedef struct xpath_pcb_t_ {
     ncx_errinfo_t        errinfo;            /* must error extras */
     boolean              logerrors;     /* T: use log_error F: agt */
 
-    /* these parms are used to parse keyref path-arg 
+    /* these parms are used to parse leafref path-arg 
      * limited object tree syntax allowed only
      */
     const obj_template_t  *targobj;       /* bptr to result object */
@@ -304,7 +304,7 @@ typedef struct xpath_pcb_t_ {
     const obj_template_t  *varobj;  /* bptr to key-expr LHS object */
     xpath_curmode_t        curmode;     /* select targ/alt/var obj */
 
-    /* these parms are used by keyref and XPath1 parsing */
+    /* these parms are used by leafref and XPath1 parsing */
     const obj_template_t  *obj;            /* bptr to start object */
     ncx_module_t          *objmod;        /* module containing obj */
     const obj_template_t  *docroot;        /* bptr to <config> obj */
@@ -386,7 +386,6 @@ typedef struct xpath_fncb_t_ {
 /* Value or object node walker fn callback parameters */
 typedef struct xpath_walkerparms_t_ {
     dlq_hdr_t         *resnodeQ;
-    /*    ncx_xpath_axis_t   axis; */
     int64              callcount;
     status_t           res;
 } xpath_walkerparms_t;
@@ -403,6 +402,15 @@ typedef struct xpath_compwalkerparms_t_ {
     boolean            cmpresult;
     status_t           res;
 } xpath_compwalkerparms_t;
+
+
+/* Value node stringify walker fn callback parameters */
+typedef struct xpath_stringwalkerparms_t_ {
+    xmlChar           *buffer;
+    uint32             buffsize;
+    uint32             buffpos;
+    status_t           res;
+} xpath_stringwalkerparms_t;
 
 
 /********************************************************************
@@ -454,7 +462,7 @@ extern status_t
 extern xpath_pcb_t *
     xpath_new_pcb (const xmlChar *xpathstr);
 
-/* copy from typdef to object for keyref
+/* copy from typdef to object for leafref
  * of object to value for NETCONF PDU processing
  */
 extern xpath_pcb_t *
@@ -521,7 +529,8 @@ extern void
 		      ncx_num_t *num);
 
 extern status_t
-    xpath_cvt_string (const xpath_result_t *result,
+    xpath_cvt_string (xpath_pcb_t *pcb,
+		      const xpath_result_t *result,
 		      xmlChar **str);
 
 

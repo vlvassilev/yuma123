@@ -861,6 +861,9 @@ static status_t
 }  /* find_val_node */
 
 
+
+
+
 /************    E X T E R N A L   F U N C T I O N S    ************/
 
 
@@ -1801,6 +1804,7 @@ void
 * Convert an XPath result to a string answer
 *
 * INPUTS:
+*    pcb == parser control block to use
 *    result == result struct to convert to a number
 *    str == pointer to xmlChar * to hold the conversion result
 *
@@ -1811,11 +1815,10 @@ void
 *   status; could get an ERR_INTERNAL_MEM error or NO_RER
 *********************************************************************/
 status_t
-    xpath_cvt_string (const xpath_result_t *result,
+    xpath_cvt_string (xpath_pcb_t *pcb,
+		      const xpath_result_t *result,
 		      xmlChar **str)
 {
-    const xpath_resnode_t   *resnode;
-    val_value_t             *val;
     status_t                 res;
     uint32                   len;
 
@@ -1838,20 +1841,7 @@ status_t
 	    *str = xml_strdup(EMPTY_STRING);
 	} else {
 	    if (result->isval) {
-		resnode = (const xpath_resnode_t *)
-		    dlq_firstEntry(&result->r.nodeQ);
-		val = val_get_first_leaf(resnode->node.valptr);
-		if (val) {
-		    res = val_sprintf_simval_nc(NULL, val, &len);
-		    if (res == NO_ERR) {
-			*str = m__getMem(len+1);
-			if (*str) {
-			    (void)val_sprintf_simval_nc(*str, val, &len);
-			}
-		    }
-		} else {
-		    *str = xml_strdup(EMPTY_STRING);
-		}
+		res = xpath1_stringify_nodeset(pcb, result, str);
 	    } else {
 		*str = xml_strdup(EMPTY_STRING);
 	    }

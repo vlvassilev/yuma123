@@ -212,9 +212,6 @@ module yangdump {
             defined in draft-ietf-netmod-yang-00.txt.
 
         BUGS
-           - keyref Xpath expressions are not validated
-           - must-stmt Xpath expressions are not validated
-          
              Internal diagnostics may generate the following
              type of message if any bugs are detected at runtime:
 

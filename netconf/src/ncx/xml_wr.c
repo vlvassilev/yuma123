@@ -954,7 +954,7 @@ void
 	break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:   /****/
-    case NCX_BT_KEYREF:        /****/
+    case NCX_BT_LEAFREF:        /****/
 	if (VAL_STR(useval)) {
 	    if (!fit_on_line(scb, useval) && (indent>0)) {
 		ses_indent(scb, indent);

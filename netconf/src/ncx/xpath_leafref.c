@@ -1,4 +1,4 @@
-/*  FILE: xpath_keyref.c
+/*  FILE: xpath_leafref.c
 
     Schema and data model Xpath search support
 		
@@ -63,8 +63,8 @@ date         init     comment
 #include "xpath.h"
 #endif
 
-#ifndef _H_xpath_keyref
-#include "xpath_keyref.h"
+#ifndef _H_xpath_leafref
+#include "xpath_leafref.h"
 #endif
 
 #ifndef _H_yangconst
@@ -90,7 +90,7 @@ date         init     comment
 * FUNCTION set_next_objnode
 * 
 * Get the object identifier associated with
-* QName in an keyref XPath expression
+* QName in an leafref XPath expression
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -274,7 +274,7 @@ static status_t
 /********************************************************************
 * FUNCTION parse_node_identifier
 * 
-* Parse the keyref node-identifier string
+* Parse the leafref node-identifier string
 * It has already been tokenized
 *
 * Error messages are printed by this function!!
@@ -341,7 +341,7 @@ static status_t
 /********************************************************************
 * FUNCTION parse_current_fn
 * 
-* Parse the keyref current-function token sequence
+* Parse the leafref current-function token sequence
 * It has already been tokenized
 *
 * Error messages are printed by this function!!
@@ -407,7 +407,7 @@ static status_t
 /********************************************************************
 * FUNCTION parse_path_key_expr
 * 
-* Parse the keyref *path-key-expr token sequence
+* Parse the leafref *path-key-expr token sequence
 * It has already been tokenized
 *
 * Error messages are printed by this function!!
@@ -558,7 +558,7 @@ static int32
 /********************************************************************
 * FUNCTION parse_path_predicate
 * 
-* Parse the keyref *path-predicate token sequence
+* Parse the leafref *path-predicate token sequence
 * It has already been tokenized
 *
 * Error messages are printed by this function!!
@@ -645,7 +645,7 @@ static status_t
 	    }
 
 	    switch (pcb->source) {
-	    case XP_SRC_KEYREF:
+	    case XP_SRC_LEAFREF:
 		if (!obj_is_key(pcb->varobj)) {
 		    res = ERR_NCX_TYPE_NOT_INDEX;
 		    log_error("\nError: path predicate '%s' is "
@@ -778,7 +778,7 @@ static status_t
 /********************************************************************
 * FUNCTION parse_absolute_path
 * 
-* Parse the keyref path-arg string
+* Parse the leafref path-arg string
 * It has already been tokenized
 *
 * Error messages are printed by this function!!
@@ -869,7 +869,7 @@ static status_t
 /********************************************************************
 * FUNCTION parse_relative_path
 * 
-* Parse the keyref relative-path string
+* Parse the leafref relative-path string
 * It has already been tokenized
 *
 * Error messages are printed by this function!!
@@ -959,7 +959,7 @@ static status_t
 /********************************************************************
 * FUNCTION parse_path_arg
 * 
-* Parse the keyref path-arg string
+* Parse the leafref path-arg string
 * It has already been tokenized
 *
 * Error messages are printed by this function!!
@@ -996,9 +996,9 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION xpath_keyref_parse_path
+* FUNCTION xpath_leafref_parse_path
 * 
-* Parse the keyref path as a keyref path
+* Parse the leafref path as a leafref path
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -1008,7 +1008,7 @@ static status_t
 *    tkc == parent token chain
 *    mod == module in progress
 *    pcb == initialized xpath parser control block
-*           for the keyref path; use xpath_new_pcb
+*           for the leafref path; use xpath_new_pcb
 *           to initialize before calling this fn
 *
 * OUTPUTS:
@@ -1018,7 +1018,7 @@ static status_t
 *   status
 *********************************************************************/
 status_t
-    xpath_keyref_parse_path (tk_chain_t *tkc,
+    xpath_leafref_parse_path (tk_chain_t *tkc,
 			     ncx_module_t *mod,
 			     xpath_pcb_t *pcb)
 {
@@ -1045,12 +1045,12 @@ status_t
 	return res;
     }
 
-    /* the module that contains the keyref is the one
+    /* the module that contains the leafref is the one
      * that will always be used to resolve prefixes
      * within the XPath expression
      */
     pcb->mod = mod;
-    pcb->source = XP_SRC_KEYREF;
+    pcb->source = XP_SRC_LEAFREF;
 
     /* since the pcb->obj is not set, this validation
      * phase will skip identifier tests, predicate tests
@@ -1063,18 +1063,18 @@ status_t
      */
     return pcb->parseres;
 
-}  /* xpath_keyref_parse_path */
+}  /* xpath_leafref_parse_path */
 
 
 /********************************************************************
-* FUNCTION xpath_keyref_validate_path
+* FUNCTION xpath_leafref_validate_path
 * 
-* Validate the previously parsed keyref path
+* Validate the previously parsed leafref path
 *   - QNames are valid
 *   - object structure referenced is valid
 *   - objects are all 'config true'
 *   - target object is a leaf
-*   - keyref represents a single instance
+*   - leafref represents a single instance
 *
 * Called after all 'uses' and 'augment' expansion
 * so validation against cooked object tree can be done
@@ -1084,14 +1084,14 @@ status_t
 *
 * INPUTS:
 *    mod == module containing the 'obj' (in progress)
-*    obj == object using the keyref data type
-*    pcb == the keyref parser control block from the typdef
+*    obj == object using the leafref data type
+*    pcb == the leafref parser control block from the typdef
 *
 * RETURNS:
 *   status
 *********************************************************************/
 status_t
-    xpath_keyref_validate_path (ncx_module_t *mod,
+    xpath_leafref_validate_path (ncx_module_t *mod,
 				const obj_template_t *obj,
 				xpath_pcb_t *pcb)
 {
@@ -1120,7 +1120,7 @@ status_t
     pcb->flags = 0;
     pcb->objmod = mod;
     pcb->obj = obj;
-    pcb->source = XP_SRC_KEYREF;
+    pcb->source = XP_SRC_LEAFREF;
     pcb->targobj = NULL;
     pcb->altobj = NULL;
     pcb->varobj = NULL;
@@ -1131,14 +1131,16 @@ status_t
      */
     pcb->validateres = parse_path_arg(pcb);
 
-    /* check keyref is config but target is not */
+    /* check leafref is config but target is not */
     if (pcb->validateres == NO_ERR && pcb->targobj) {
 
 	/* make sure the config vs. non-config rules are followed */
 	if (obj_get_config_flag(obj) &&
-	    !obj_get_config_flag(pcb->targobj)) {
+	    !obj_get_config_flag(pcb->targobj) &&
+	    typ_get_leafref_constrained(obj_get_ctypdef(obj))) {
+
 	    res = ERR_NCX_NOT_CONFIG;
-	    log_error("\nError: XPath target '%s' for keyref '%s' must be "
+	    log_error("\nError: XPath target '%s' for leafref '%s' must be "
 		      "a config object",
 		      obj_get_name(pcb->targobj),
 		      obj_get_name(obj));
@@ -1182,17 +1184,17 @@ status_t
 
     return pcb->validateres;
 
-}  /* xpath_keyref_validate_path */
+}  /* xpath_leafref_validate_path */
 
 
 /********************************************************************
-* FUNCTION xpath_keyref_get_value
+* FUNCTION xpath_leafref_get_value
 * 
-* Get a pointer to the keyref target value node
+* Get a pointer to the leafref target value node
 *
 * INPUTS:
 *    mod == module in progress
-*    obj == object initiating search, which contains the keyref type
+*    obj == object initiating search, which contains the leafref type
 *    pcb == XPath parser control block to use
 *    targval == address of return target value (may be NULL)
 *
@@ -1204,7 +1206,7 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    xpath_keyref_get_value (ncx_module_t *mod,
+    xpath_leafref_get_value (ncx_module_t *mod,
 			    obj_template_t *obj,
 			    xpath_pcb_t *pcb,
 			    val_value_t **targval)
@@ -1220,7 +1222,7 @@ status_t
 
     return NO_ERR;
 
-}  /* xpath_keyref_get_value */
+}  /* xpath_leafref_get_value */
 
 
 /* END xpath.c */

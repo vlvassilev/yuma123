@@ -110,4 +110,11 @@ extern boolean
 			      dlq_hdr_t *resultQ,
 			      val_value_t *val);
 
+extern status_t
+    xpath1_stringify_nodeset (xpath_pcb_t *pcb,
+			      const xpath_result_t *result,
+			      xmlChar **str);
+
+
+
 #endif	    /* _H_xpath1 */

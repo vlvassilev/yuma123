@@ -182,8 +182,6 @@ module yangdiff {
                    /usr/share/yang/modules/netconfcentral/ncxtypes.ncx
 
         BUGS
-           - keyref Xpath expressions are not validated
-           - must-stmt Xpath expressions are not validated
            - sub-modules ignored in directory processing mode,
              and module comparisons do not include sub-modules;
              the 'unified' parameter will be added later to

@@ -507,7 +507,7 @@ static void
 	break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:
+    case NCX_BT_LEAFREF:
 	ncx_clean_str(&val->v.str);
 	break;
     case NCX_BT_IDREF:
@@ -640,7 +640,7 @@ static void
 	break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:   /****/
+    case NCX_BT_LEAFREF:   /****/
 	ncx_clean_str(&dest->v.str);
 	dest->v.str = src->v.str;
 	src->v.str = NULL;
@@ -1007,7 +1007,7 @@ static void
 	break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:   /*******/
+    case NCX_BT_LEAFREF:   /*******/
 	if (VAL_STR(val)) {
 	    quotes = val_need_quotes(VAL_STR(val));
 	    if (quotes) {
@@ -1622,8 +1622,8 @@ status_t
 	break;
     case NCX_BT_INSTANCE_ID:
 	return NO_ERR;  /*** BUG: MISSING INSTANCE ID VALIDATION ***/
-    case NCX_BT_KEYREF:
-	return NO_ERR;  /*** BUG: MISSING KEYREF VALIDATION ***/
+    case NCX_BT_LEAFREF:
+	return NO_ERR;  /*** BUG: MISSING LEAFREF VALIDATION ***/
     default:
 	return ERR_NCX_WRONG_DATATYP;
     }
@@ -2549,7 +2549,7 @@ status_t
 	    val_free_value(unval);
 	}
 	break;
-    case NCX_BT_KEYREF:
+    case NCX_BT_LEAFREF:
 	/*****/
 	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
 	break;
@@ -3167,7 +3167,7 @@ status_t
     switch (val->btyp) {
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:   /****/
+    case NCX_BT_LEAFREF:   /****/
 	if (valname && !val->name) {
 	    if (val->dname) {
 		SET_ERROR(ERR_INTERNAL_VAL);
@@ -3269,7 +3269,7 @@ status_t
 *  NCX_BT_SLIST
 *  NCX_BT_BITS
 *  NCX_BT_UNION
-*  NCX_BT_KEYREF
+*  NCX_BT_LEAFREF
 *  NCX_BT_IDREF
 *
 * INPUTS:
@@ -3375,7 +3375,7 @@ status_t
 	break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:   /****/
+    case NCX_BT_LEAFREF:   /****/
 	VAL_STR(val) = xml_strdup(valstr);
 	if (!VAL_STR(val)) {
 	    res = ERR_INTERNAL_MEM;
@@ -3625,7 +3625,7 @@ boolean
 	case NCX_BT_STRING:
 	case NCX_BT_BINARY:
 	case NCX_BT_INSTANCE_ID:
-	case NCX_BT_KEYREF:   /*****/
+	case NCX_BT_LEAFREF:   /*****/
 	    merge_simple(btyp, src, dest);
 	    break;
 	case NCX_BT_UNION:
@@ -3859,7 +3859,7 @@ val_value_t *
 	break;
     case NCX_BT_STRING:	
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:   /*****/
+    case NCX_BT_LEAFREF:   /*****/
 	*res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
 	break;
     case NCX_BT_IDREF:
@@ -4042,7 +4042,7 @@ status_t
 	break;
     case NCX_BT_STRING:	
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:   /*****/
+    case NCX_BT_LEAFREF:   /*****/
 	res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
 	break;
     case NCX_BT_SLIST:
@@ -4898,7 +4898,7 @@ val_value_t *
 * Child node must be a base type of 
 *   NCX_BT_STRING
 *   NCX_BT_INSTANCE_ID
-*   NCX_BT_KEYREF
+*   NCX_BT_LEAFREF
 *
 * INPUTS:
 *    parent == parent complex type to check
@@ -6035,7 +6035,7 @@ int32
 	/*NOTREACHED*/
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:   /*****/
+    case NCX_BT_LEAFREF:   /*****/
 	return ncx_compare_strs(&val1->v.str, &val2->v.str, btyp);
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
@@ -6207,7 +6207,7 @@ status_t
 	break;
     case NCX_BT_STRING:	
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:  /****/
+    case NCX_BT_LEAFREF:  /****/
 	s = VAL_STR(val);
 	if (buff) {
 	    if (s) {
@@ -6787,7 +6787,7 @@ boolean
 	return (val->v.binary.ustrlen < 20) ? TRUE : FALSE;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_KEYREF:   /*****/
+    case NCX_BT_LEAFREF:   /*****/
 	if (!VAL_STR(val)) {
 	    /* empty string */
 	    return TRUE;
@@ -7256,7 +7256,7 @@ boolean
 	    ret = TRUE;
 	}
 	break;
-    case NCX_BT_KEYREF:
+    case NCX_BT_LEAFREF:
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
     case NCX_BT_LIST:

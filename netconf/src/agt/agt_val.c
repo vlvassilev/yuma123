@@ -1025,7 +1025,7 @@ static status_t
 		      val_value_t  *curval,
 		      boolean done)
 {
-    val_value_t      *chval, *curch, *nextch, *cur_parent;
+    val_value_t      *chval, *curch, *nextch, *curparent;
     status_t          res, retres;
     ncx_iqual_t       iqual;
     op_editop_t       cur_editop;
@@ -1072,17 +1072,17 @@ static status_t
     case AGT_CB_APPLY:
 	if (newval) {
 	    cur_editop = newval->editop;
-	    cur_parent = newval->curparent;
+	    curparent = newval->curparent;
 	} else if (curval) {
 	    cur_editop = editop;
-	    cur_parent = curval->parent;
+	    curparent = curval->parent;
 	} else {
 	    retres = SET_ERROR(ERR_INTERNAL_VAL);
 	}
 
 	if (retres == NO_ERR) {
 	    retres = apply_write_val(cur_editop, scb, msg, target,
-				     cur_parent, newval, 
+				     curparent, newval, 
 				     curval, &done);
 	}
 	break;
@@ -1095,23 +1095,17 @@ static status_t
 
     if (newval) {
 	cur_editop = newval->editop;
+	curparent = newval;
     } else if (curval) {
 	cur_editop = editop;
+	curparent = curval;
     } else {
 	retres = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* check all the child nodes next */
-    if (retres == NO_ERR && !done) {
-	if (newval) {
-	    cur_parent = newval;
-	} else if (curval) {
-	    cur_parent = curval;
-	} else {
-	    retres = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-
-	for (chval = val_get_first_child(cur_parent);
+    if (retres == NO_ERR && !done && curparent) {
+	for (chval = val_get_first_child(curparent);
 	     chval != NULL && retres == NO_ERR;
 	     chval = nextch) {
 
@@ -2604,7 +2598,7 @@ status_t
 			  cfg_template_t *source,
 			  cfg_template_t *target)
 {
-    val_value_t      *curval, *nextval, *matchval;
+    val_value_t      *newval, *nextval, *matchval;
     status_t          res;
 
 #ifdef DEBUG
@@ -2626,22 +2620,23 @@ status_t
 			       target->root);
 
     /* check if any config nodes have been changed in the target */
-    for (curval = val_get_first_child(source->root);
-	 curval != NULL && res == NO_ERR; 
-	 curval = nextval) {
+    for (newval = val_get_first_child(source->root);
+	 newval != NULL && res == NO_ERR; 
+	 newval = nextval) {
 
-	nextval = val_get_next_child(curval);
+	nextval = val_get_next_child(newval);
 
-	if (obj_is_data_db(curval->obj) &&
-	    obj_is_config(curval->obj)) {
+	if (obj_is_data_db(newval->obj) &&
+	    obj_is_config(newval->obj)) {
 
-	    matchval = val_first_child_match(target->root,
-					     curval);
+	    matchval = val_first_child_match(target->root, newval);
 
+	    newval->curparent = target->root;
+	    
 	    res = handle_callback(AGT_CB_APPLY,
 				  OP_EDITOP_COMMIT, scb, 
 				  msg, target, 
-				  curval, matchval);
+				  newval, matchval);
 	}
     }
 

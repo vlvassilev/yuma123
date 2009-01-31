@@ -2017,10 +2017,6 @@ status_t
 
     found = FALSE;
 
-    if (nsid == XMLNS_NULL_NS_ID) {
-	return ERR_NCX_DEF_NOT_FOUND;
-    }
-
     idref = typ_get_idref(typdef);
     if (!idref) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
@@ -2033,31 +2029,45 @@ status_t
     }
     if (*str == ':') {
 	str++;
+    } else {
+	str = qname;
     }
 
-    /* str should point to the local name now */
-    modname = xmlns_get_module(nsid);
-    if (!modname) {
-	return ERR_NCX_DEF_NOT_FOUND;
-    }
-    mod = ncx_find_module(modname);
-    if (!mod) {
-	return ERR_NCX_DEF_NOT_FOUND;
+    if (nsid) {
+	/* str should point to the local name now */
+	modname = xmlns_get_module(nsid);
+	if (!modname) {
+	    return ERR_NCX_INVALID_VALUE;
+	}
+	mod = ncx_find_module(modname);
+	if (!mod) {
+	    return ERR_NCX_INVALID_VALUE;
+	}
+
+	/* the namespace produced a module which should have
+	 * the identity-stmt with this name
+	 */
+	identity = ncx_find_identity(mod, str);
+    } else {
+	/* no default namespace, so be liberal and
+	 * try to find any matching value
+	 */
+	identity = NULL;
+	for (mod = ncx_get_first_module();
+	     mod != NULL && identity == NULL;
+	     mod = ncx_get_next_module(mod)) {
+	    identity = ncx_find_identity(mod, str); 
+	}
     }
 
-    /* the namespace produced a module which should have
-     * the identity-stmt with this name
-     */
-    identity = ncx_find_identity(mod, str);
     if (!identity) {
-	return ERR_NCX_DEF_NOT_FOUND;
+	return ERR_NCX_INVALID_VALUE;
     }
 
     /* got some identity match; make sure this identity
      * has an ancestor-or-self node that is the same base
      * as the base specified in the typdef
      */
-
     while (identity && !found) {
 	if (!xml_strcmp(ncx_get_modname(identity->mod), 
 			idref->modname) &&
@@ -2208,7 +2218,20 @@ status_t
 	    prefixnsid = mod->nsid;
 	    identity = ncx_find_identity(mod, qname);
 	} else {
-	    res = ERR_NCX_INVALID_VALUE;
+	    /*** TBD: agent module check only ***/
+	    /* check all modules */
+	    identity = NULL;
+	    for (mod = ncx_get_first_module();
+		 mod != NULL && identity == NULL;
+		 mod = ncx_get_next_module(mod)) {
+		identity = ncx_find_identity(mod, qname);
+		if (identity) {
+		    prefixnsid = mod->nsid;		    
+		}
+	    }
+	    if (!identity) {
+		res = ERR_NCX_INVALID_VALUE;
+	    }
 	}
     }
 
@@ -2218,6 +2241,7 @@ status_t
     if (nsid) {
 	*nsid = prefixnsid;
     }
+
     return res;
 
 }  /* val_parse_idref */
@@ -7770,6 +7794,37 @@ const xmlChar *
     }
 
 }  /* val_get_mod_name */
+
+
+/********************************************************************
+* FUNCTION val_get_nsid
+* 
+* Get the namespace ID for the specified value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     const pointer to module name string
+*     NULL if not found
+*********************************************************************/
+xmlns_id_t
+    val_get_nsid (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return 0;
+    }
+#endif
+
+    if (val->nsid) {
+	return val->nsid;
+    } else {
+	return obj_get_nsid(val->obj);
+    }
+
+}  /* val_get_nsid */
 
 
 /********************************************************************

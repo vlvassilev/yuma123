@@ -1216,8 +1216,8 @@ val_value_t *
 	 */
 	*res = val_set_simval(useval, 
 			      obj_get_ctypdef(obj), 
-			      obj_get_nsid(obj), 
-			      obj_get_name(obj), 
+			      val_get_nsid(useval), 
+			      useval->name, 
 			      strval);
     }
 

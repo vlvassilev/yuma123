@@ -1124,14 +1124,23 @@ void
 	    }
 
 	    if (usechval->btyp == NCX_BT_IDREF) {
-		/* write a complete QName element */
-		xml_wr_qname_elem(scb, msg, 
-				  usechval->v.idref.nsid,
-				  usechval->v.idref.name,
-				  useval->nsid,
-				  usechval->nsid,
-				  usechval->name,
-				  &usechval->metaQ, FALSE, indent);
+		if (usechval->v.idref.name) {
+		    /* write a complete QName element */
+		    xml_wr_qname_elem(scb, msg, 
+				      usechval->v.idref.nsid,
+				      usechval->v.idref.name,
+				      useval->nsid,
+				      usechval->nsid,
+				      usechval->name,
+				      &usechval->metaQ, 
+				      FALSE, indent);
+		} else {
+		    /* empty contents, eg, create PDU */
+		    xml_wr_begin_elem_val(scb, msg,
+					  usechval, 
+					  indent, 
+					  TRUE);
+		}
 	    } else {
 		/* write the child start tag, recurse, then end tag */
 		xml_wr_begin_elem_val(scb, msg, usechval,

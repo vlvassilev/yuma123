@@ -4507,18 +4507,18 @@ void *
 
 
 /********************************************************************
-* FUNCTION typ_get_leafref_constrained
+* FUNCTION typ_get_constrained
 * 
-*   Get the constrained true/false fiield for the leafref data type
+*   Get the constrained true/false field for the data type
 *
 * INPUTS:
-*    typdef == typdef for the the leafref
+*    typdef == typdef for the the leafref or instance-identifier
 *
 * RETURNS:
 *    TRUE if constrained; FALSE if not
 *********************************************************************/
 boolean
-    typ_get_leafref_constrained (const typ_def_t *typdef)
+    typ_get_constrained (const typ_def_t *typdef)
 {
     const typ_def_t        *tdef;
 
@@ -4529,19 +4529,15 @@ boolean
     }
 #endif
 
-    if (typ_get_basetype(typdef) != NCX_BT_LEAFREF) {
-	return FALSE;
-    }
-
     tdef = typ_get_cbase_typdef(typdef);
-    if (tdef && tdef->def.simple.xleafref) {
-	return tdef->def.simple.leafref_constrained;
+    if (tdef) {
+	return tdef->def.simple.constrained;
     } else {
 	return FALSE;
     }
     /*NOTREACHED*/
 
-}   /* typ_get_leafref_constrained */
+}   /* typ_get_constrained */
 
 
 /********************************************************************

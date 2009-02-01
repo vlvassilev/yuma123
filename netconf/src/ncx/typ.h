@@ -238,7 +238,7 @@ typedef struct typ_simple_t_ {
     ncx_btype_t      btyp;                             /* NCX base type */
     struct typ_template_t_ *listtyp;       /* template for NCX_BT_SLIST */
     struct xpath_pcb_t_   *xleafref;   /* saved for NCX_BT_LEAFREF only */
-    boolean          leafref_constrained;
+    boolean          constrained;
     typ_range_t      range;     /* for all num types and string length  */
     typ_idref_t      idref;                    /* for NCX_BT_IDREF only */
     dlq_hdr_t        valQ;     /* bit, enum, string, list vals/patterns */
@@ -759,8 +759,9 @@ extern const xmlChar *
 extern void *
     typ_get_leafref_pcb (typ_def_t *typdef);
 
+/* leafref or instance-identifier constrained flag */
 extern boolean
-    typ_get_leafref_constrained (const typ_def_t *typdef);
+    typ_get_constrained (const typ_def_t *typdef);
 
 extern boolean
     typ_has_subclauses (const typ_def_t *typdef);

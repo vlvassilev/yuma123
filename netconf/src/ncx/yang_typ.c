@@ -2089,7 +2089,7 @@ static status_t
 	    }
 	} else if (!xml_strcmp(val, YANG_K_REQUIRE_INSTANCE)) {
 	    res = yang_consume_boolean(tkc, mod, 
-				       &sim->leafref_constrained,
+				       &sim->constrained,
 				       &constrained,
 				       &typdef->appinfoQ);
 	    CHK_EXIT(res, retres);
@@ -2108,12 +2108,110 @@ static status_t
 
     if (retres == NO_ERR && !constrained) {
 	/* set to default */
-	sim->leafref_constrained = TRUE;
+	sim->constrained = TRUE;
     }
 
     return retres;
 
 }  /* finish_leafref_type */
+
+
+/********************************************************************
+* FUNCTION finish_instanceid_type
+* 
+* Parse the next N tokens as the subsection of a
+* NCX_BT_INSTANCE_ID type that is being defined
+*
+* Current token is the left brace starting the string
+* sub-section. Continue until right brace or error.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc    == token chain
+*   mod    == module in progress
+*   typdef == typ_def_t in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    finish_instanceid_type (tk_chain_t  *tkc,
+			    ncx_module_t *mod,
+			    typ_def_t *typdef)
+{
+    typ_simple_t  *sim;
+    const xmlChar *val;
+    const char    *expstr;
+    tk_type_t      tktyp;
+    status_t       res, retres;
+    boolean        done, pathdone, constrained;
+
+    expstr = "require-instance keyword";
+    pathdone = FALSE;
+    constrained = FALSE;
+    res = NO_ERR;
+    retres = NO_ERR;
+    done = FALSE;
+
+    sim = &typdef->def.simple;
+
+    while (!done) {
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+	    CHK_EXIT(res, retres);
+	    continue;
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    continue;
+	}
+
+	/* Got a token string so check the value */
+	if (!xml_strcmp(val, YANG_K_REQUIRE_INSTANCE)) {
+	    res = yang_consume_boolean(tkc, mod, 
+				       &sim->constrained,
+				       &constrained,
+				       &typdef->appinfoQ);
+	    CHK_EXIT(res, retres);
+	} else {
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    expstr = "require-instance statement";
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	}
+    }
+
+    if (retres == NO_ERR && !constrained) {
+	/* set to default */
+	sim->constrained = TRUE;
+    }
+
+    return retres;
+
+}  /* finish_instanceid_type */
 
 
 /********************************************************************
@@ -3215,6 +3313,9 @@ static status_t
 	    }
 	    return retres;
 	default:
+	    if (btyp == NCX_BT_INSTANCE_ID) {
+		intypdef->def.simple.constrained = TRUE;
+	    }
 	    return NO_ERR;
 	}
 	ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -3268,56 +3369,64 @@ static status_t
 	} else {
 	    res = finish_enum_type(tkc, mod, typdef);
 	    CHK_EXIT(res, retres);
-	    break;
-	case NCX_BT_EMPTY:
-	    extonly = TRUE;
-	    break;
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	case NCX_BT_INT64:
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
-	case NCX_BT_UINT64:
-	case NCX_BT_FLOAT32:
-	case NCX_BT_FLOAT64:
-	    res = finish_number_type(tkc, mod, typdef);
-	    CHK_EXIT(res, retres);
-	    break;
-	case NCX_BT_STRING:
-	case NCX_BT_BINARY:
-	    res = finish_string_type(tkc, mod, typdef, btyp);
-	    CHK_EXIT(res, retres);
-	    break;
-	case NCX_BT_UNION:
-	    if (derived) {
-		extonly = TRUE;
-	    } else {
-		res = finish_union_type(tkc, mod, typdef);
-		CHK_EXIT(res, retres);
-	    }
-	    break;
-	case NCX_BT_LEAFREF:
-	    if (derived) {
-		extonly = TRUE;
-	    } else {
-		res = finish_leafref_type(tkc, mod, typdef);
-		CHK_EXIT(res, retres);
-	    }
-	    break;
-	case NCX_BT_IDREF:
-	    if (derived) {
-		extonly = TRUE;
-	    } else {
-		res = finish_idref_type(tkc, mod, typdef);
-		CHK_EXIT(res, retres);
-	    }
-	    break;
-	default:
-	    retres = SET_ERROR(ERR_INTERNAL_VAL);
-	    ncx_print_errormsg(tkc, mod, retres);
 	}
+	break;
+    case NCX_BT_EMPTY:
+	extonly = TRUE;
+	break;
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+    case NCX_BT_INT64:
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+    case NCX_BT_UINT64:
+    case NCX_BT_FLOAT32:
+    case NCX_BT_FLOAT64:
+	res = finish_number_type(tkc, mod, typdef);
+	CHK_EXIT(res, retres);
+	break;
+    case NCX_BT_STRING:
+    case NCX_BT_BINARY:
+	res = finish_string_type(tkc, mod, typdef, btyp);
+	CHK_EXIT(res, retres);
+	break;
+    case NCX_BT_UNION:
+	if (derived) {
+	    extonly = TRUE;
+	} else {
+	    res = finish_union_type(tkc, mod, typdef);
+	    CHK_EXIT(res, retres);
+	}
+	break;
+    case NCX_BT_LEAFREF:
+	if (derived) {
+	    extonly = TRUE;
+	} else {
+	    res = finish_leafref_type(tkc, mod, typdef);
+	    CHK_EXIT(res, retres);
+	}
+	break;
+    case NCX_BT_IDREF:
+	if (derived) {
+	    extonly = TRUE;
+	} else {
+	    res = finish_idref_type(tkc, mod, typdef);
+	    CHK_EXIT(res, retres);
+	}
+	break;
+    case NCX_BT_INSTANCE_ID:
+	if (derived) {
+	    extonly = TRUE;
+	} else {
+	    res = finish_instanceid_type(tkc, mod, typdef);
+	    CHK_EXIT(res, retres);
+	}
+	break;
+    default:
+	retres = SET_ERROR(ERR_INTERNAL_VAL);
+	ncx_print_errormsg(tkc, mod, retres);
     }
 
     /* check if this sub-section is only allowed

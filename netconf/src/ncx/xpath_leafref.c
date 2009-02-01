@@ -1137,7 +1137,7 @@ status_t
 	/* make sure the config vs. non-config rules are followed */
 	if (obj_get_config_flag(obj) &&
 	    !obj_get_config_flag(pcb->targobj) &&
-	    typ_get_leafref_constrained(obj_get_ctypdef(obj))) {
+	    typ_get_constrained(obj_get_ctypdef(obj))) {
 
 	    res = ERR_NCX_NOT_CONFIG;
 	    log_error("\nError: XPath target '%s' for leafref '%s' must be "

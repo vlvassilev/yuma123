@@ -26,6 +26,10 @@
          /t:test2[t:a2=wilma]/t:b2
       </t:foo>
    </t:test2>
+   <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
+      <t:a2>xxx</t:a2>
+      <t:foo>yyyy</t:foo>
+   </t:test2>
    <t:test3 xmlns:t="http://netconfcentral.com/ns/test">
       <t:x>fred</t:x>
       <t:test3deep>
@@ -42,5 +46,7 @@
       <t:c2>-6</t:c2>
       <t:c2>-1</t:c2>
    </t:test3>
-   <t:idtest xmlns:t="http://netconfcentral.com/ns/test">t:id-C</t:idtest>
+   <t:instance1 xmlns:t="http://netconfcentral.com/ns/test">
+      /t:test2[a2='bambi']/t:a1
+   </t:instance1>
 </nd:config>

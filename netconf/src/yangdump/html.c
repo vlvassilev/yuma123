@@ -1062,7 +1062,6 @@ static void
 	    break;
 	case NCX_BT_EMPTY:
 	case NCX_BT_BOOLEAN:
-	case NCX_BT_INSTANCE_ID:
 	    /* appinfo only */
 	    break;
 	case NCX_BT_INT8:
@@ -1122,7 +1121,9 @@ static void
 		write_simple_str(scb, YANG_K_PATH, str,
 				 startindent, 2, TRUE);
 	    }
-	    constrained_set = typ_get_leafref_constrained(typdef);
+	    /* fall through */
+	case NCX_BT_INSTANCE_ID:
+	    constrained_set = typ_get_constrained(typdef);
 	    write_simple_str(scb, YANG_K_REQUIRE_INSTANCE,
 			     (constrained_set) 
 			     ? NCX_EL_TRUE : NCX_EL_FALSE,

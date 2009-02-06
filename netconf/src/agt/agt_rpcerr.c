@@ -457,6 +457,8 @@ static rpc_err_t
     case ERR_NCX_INVALID_DEV_STMT:
 	return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_XPATH_EXPR:
+    case ERR_NCX_INVALID_INSTANCEID:
+    case ERR_NCX_MISSING_INSTANCE:
 	return RPC_ERR_INVALID_VALUE;
 
     /* user warnings start at 400 and do not need to be listed here */

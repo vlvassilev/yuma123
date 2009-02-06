@@ -269,7 +269,9 @@ typedef enum status_t_
     ERR_NCX_DUP_REFINE_STMT,            /* 346 */
     ERR_NCX_INVALID_DEV_STMT,           /* 347 */
     ERR_NCX_INVALID_XPATH_EXPR,         /* 348 */
-    ERR_LAST_USR_ERR,                   /* 349 -- not really used */
+    ERR_NCX_INVALID_INSTANCEID,         /* 349 */
+    ERR_NCX_MISSING_INSTANCE,           /* 350 */
+    ERR_LAST_USR_ERR,                   /* 351 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */

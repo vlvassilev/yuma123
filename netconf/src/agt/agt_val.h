@@ -93,6 +93,7 @@ extern status_t
     agt_val_instance_check (ses_cb_t *scb,
 			    xml_msg_hdr_t *msg,
 			    val_value_t *valset,
+			    val_value_t *root,
 			    ncx_layer_t   layer);
 
 

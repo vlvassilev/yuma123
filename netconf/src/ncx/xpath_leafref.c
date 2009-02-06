@@ -632,7 +632,8 @@ static status_t
 
 	/* validate the variable object foo in [foo = expr] */
 	if (pcb->obj && pcb->varobj) {
-	    if (pcb->varobj->objtype != OBJ_TYP_LEAF) {
+	    if (!(pcb->varobj->objtype == OBJ_TYP_LEAF ||
+		  pcb->varobj->objtype == OBJ_TYP_LEAF_LIST)) {
 		res = ERR_NCX_WRONG_TYPE;
 		log_error("\nError: path predicate found is %s '%s'",
 			  obj_get_typestr(pcb->varobj),
@@ -644,6 +645,7 @@ static status_t
 		continue;
 	    }
 
+#ifdef NEED_TO_CHECK_KEY_LEAF
 	    switch (pcb->source) {
 	    case XP_SRC_LEAFREF:
 		if (!obj_is_key(pcb->varobj)) {
@@ -664,6 +666,7 @@ static status_t
 		done = TRUE;
 		continue;
 	    }
+#endif
 
 	    keynum = get_key_number(pcb->targobj, pcb->varobj);
 	    if (keynum == -1) {
@@ -1019,8 +1022,8 @@ static status_t
 *********************************************************************/
 status_t
     xpath_leafref_parse_path (tk_chain_t *tkc,
-			     ncx_module_t *mod,
-			     xpath_pcb_t *pcb)
+			      ncx_module_t *mod,
+			      xpath_pcb_t *pcb)
 {
     status_t       res;
 
@@ -1086,25 +1089,32 @@ status_t
 *    mod == module containing the 'obj' (in progress)
 *    obj == object using the leafref data type
 *    pcb == the leafref parser control block from the typdef
+*    leafobj == address of the return target object
+*
+* OUTPUTS:
+*   *leafobj == the target leaf found by parsing the path (NO_ERR)
 *
 * RETURNS:
 *   status
 *********************************************************************/
 status_t
     xpath_leafref_validate_path (ncx_module_t *mod,
-				const obj_template_t *obj,
-				xpath_pcb_t *pcb)
+				 const obj_template_t *obj,
+				 xpath_pcb_t *pcb,
+				 const obj_template_t **leafobj)
 {
     status_t  res;
 
 #ifdef DEBUG
-    if (!mod || !obj || !pcb) {
+    if (!mod || !obj || !pcb || !leafobj) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!pcb->tkc) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
+
+    *leafobj = NULL;
 
     if (pcb->parseres != NO_ERR) {
 	/* errors already reported, skip this one */
@@ -1133,6 +1143,10 @@ status_t
 
     /* check leafref is config but target is not */
     if (pcb->validateres == NO_ERR && pcb->targobj) {
+	/* return this object even if errors
+	 * it will get ignored unless return NO_ERR
+	 */
+	*leafobj = pcb->targobj;
 
 	/* make sure the config vs. non-config rules are followed */
 	if (obj_get_config_flag(obj) &&
@@ -1140,8 +1154,8 @@ status_t
 	    typ_get_constrained(obj_get_ctypdef(obj))) {
 
 	    res = ERR_NCX_NOT_CONFIG;
-	    log_error("\nError: XPath target '%s' for leafref '%s' must be "
-		      "a config object",
+	    log_error("\nError: XPath target '%s' for leafref '%s'"
+		      " must be a config object",
 		      obj_get_name(pcb->targobj),
 		      obj_get_name(obj));
 	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
@@ -1185,44 +1199,6 @@ status_t
     return pcb->validateres;
 
 }  /* xpath_leafref_validate_path */
-
-
-/********************************************************************
-* FUNCTION xpath_leafref_get_value
-* 
-* Get a pointer to the leafref target value node
-*
-* INPUTS:
-*    mod == module in progress
-*    obj == object initiating search, which contains the leafref type
-*    pcb == XPath parser control block to use
-*    targval == address of return target value (may be NULL)
-*
-* OUTPUTS:
-*   if non-NULL:
-*      *targval == pointer to return value node target
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    xpath_leafref_get_value (ncx_module_t *mod,
-			    obj_template_t *obj,
-			    xpath_pcb_t *pcb,
-			    val_value_t **targval)
-{
-
-#ifdef DEBUG
-    if (!mod || !obj || !pcb) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    /*****/
-
-    return NO_ERR;
-
-}  /* xpath_leafref_get_value */
 
 
 /* END xpath.c */

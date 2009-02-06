@@ -582,6 +582,10 @@ const char *
 	return "invalid deviate sub-clause";
     case ERR_NCX_INVALID_XPATH_EXPR:
 	return "invalid XPath expression syntax";
+    case ERR_NCX_INVALID_INSTANCEID:
+	return "invalid instance-identifier syntax";
+    case ERR_NCX_MISSING_INSTANCE:
+	return "require-instance test failed";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

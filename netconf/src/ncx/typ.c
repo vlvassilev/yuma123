@@ -4479,8 +4479,8 @@ const xmlChar *
 * RETURNS:
 *    pointer to the PCB struct or NULL if some error
 *********************************************************************/
-void *
-    typ_get_leafref_pcb (typ_def_t *typdef)
+const struct xpath_pcb_t_ *
+    typ_get_leafref_pcb (const typ_def_t *typdef)
 {
     const typ_def_t        *tdef;
 
@@ -4495,9 +4495,9 @@ void *
 	return NULL;
     }
 
-    tdef = typ_get_base_typdef(typdef);
+    tdef = typ_get_cbase_typdef(typdef);
     if (tdef && tdef->def.simple.xleafref) {
-	return (void *)tdef->def.simple.xleafref;
+	return tdef->def.simple.xleafref;
     } else {
 	return NULL;
     }
@@ -4538,6 +4538,91 @@ boolean
     /*NOTREACHED*/
 
 }   /* typ_get_constrained */
+
+
+/********************************************************************
+* FUNCTION typ_set_xref_typdef
+* 
+*   Set the target typdef for a leafref or instance-identifier
+*   NCX_BT_LEAFREF or NCX_BT_INSTANCE_ID
+*
+* INPUTS:
+*    typdef == typdef for the the leafref or instance-identifier
+*
+*********************************************************************/
+void
+    typ_set_xref_typdef (typ_def_t *typdef,
+			 const typ_def_t *target)
+{
+    typ_def_t        *tdef;
+    ncx_btype_t       btyp;
+
+#ifdef DEBUG
+    if (!typdef || !target) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    btyp = typ_get_basetype(typdef);
+    
+    if (!(btyp == NCX_BT_LEAFREF || btyp == NCX_BT_INSTANCE_ID)) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+
+    tdef = typ_get_base_typdef(typdef);
+    if (tdef && tdef->class == NCX_CL_SIMPLE) {
+	tdef->def.simple.xrefdef = target;
+    } else {
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+}   /* typ_set_xref_typdef */
+
+
+/********************************************************************
+* FUNCTION typ_get_xref_typdef
+* 
+*   Get the xrefdef target typdef from a leafref 
+*   or instance-identifier
+*   NCX_BT_LEAFREF or NCX_BT_INSTANCE_ID
+*
+* INPUTS:
+*    typdef == typdef for the the leafref or instance-identifier
+*
+* RETURNS:
+*    pointer to the PCB struct or NULL if some error
+*********************************************************************/
+const typ_def_t *
+    typ_get_xref_typdef (const typ_def_t *typdef)
+{
+    const typ_def_t        *tdef;
+    ncx_btype_t             btyp;
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    btyp = typ_get_basetype(typdef);
+    
+    if (!(btyp == NCX_BT_LEAFREF || btyp == NCX_BT_INSTANCE_ID)) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+
+    tdef = typ_get_cbase_typdef(typdef);
+    if (tdef && tdef->class == NCX_CL_SIMPLE) {
+	return tdef->def.simple.xrefdef;
+    } else {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+
+}   /* typ_get_xref_typdef */
 
 
 /********************************************************************

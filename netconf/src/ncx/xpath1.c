@@ -399,6 +399,218 @@ static void
 
 
 /********************************************************************
+* FUNCTION invalid_instanceid_error
+* 
+* Generate a invalid instance identifier error
+*
+* INPUTS:
+*    pcb == parser control block to use
+*********************************************************************/
+static void
+    invalid_instanceid_error (xpath_pcb_t *pcb)
+{
+    if (pcb->logerrors) {
+	log_error("\nError: XPath found in instance-identifier '%s'",
+		  pcb->exprstr);
+	ncx_print_errormsg(pcb->tkc, pcb->mod, 
+			   ERR_NCX_INVALID_INSTANCEID);
+    }
+
+}  /* invalid_instanceid_error */
+
+
+/********************************************************************
+* FUNCTION check_instanceid_expr
+* 
+* Check the form of an instance-identifier expression
+* The operation has been checked already and the
+* expression is:
+*
+*       leftval = rightval
+*
+* Make sure the CLRs in the YANG spec are followed
+* DOES NOT check the actual result value, just
+* tries to keep track of the expression syntax
+*
+* Use check_instanceid_result to finish the 
+* instance-identifier tests
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    leftval == LHS result
+*    rightval == RHS result
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    check_instanceid_expr (xpath_pcb_t *pcb,
+			   xpath_result_t *leftval,
+			   xpath_result_t *rightval)
+{
+    val_value_t           *contextval;
+    const char            *msg;
+    status_t               res;
+    boolean                haserror;
+
+    /* skip unless this is a real value tree eval */
+    if (!pcb->val || !pcb->val_docroot) {
+	return NO_ERR;
+    }
+
+    haserror = FALSE;
+    res = ERR_NCX_INVALID_INSTANCEID;
+    msg = NULL;
+
+    /* check LHS which is supposed to be a nodeset.
+     * it can only be an empty nodeset if the
+     * instance-identifier is constrained to
+     * existing values by 'require-instance true'
+     */
+    if (leftval) {
+	if (leftval->restype != XP_RT_NODESET) {
+	    msg = "LHS has wrong data type";
+	    haserror = TRUE;
+	} else {
+	    /* check out the nodeset contents */
+	    contextval = pcb->context.node.valptr;
+	    if (!contextval) {
+		return SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    if (contextval->obj->objtype == OBJ_TYP_LIST ||
+		contextval->obj->objtype == OBJ_TYP_LEAF_LIST) {
+		/* the '.=result' must be the format, and be
+		 * the same as the context for a leaf-list
+		 * For a list, the name='fred' expr is used,
+		 *   'name' must be a key leaf
+		 *    of the context node
+		 * check the actual result later
+		 */
+		;
+	    } else {
+		msg = "wrong context node type";
+		haserror = TRUE;
+	    }
+	}
+    } else {
+	haserror = TRUE;
+	msg = "missing LHS value in predicate";
+    }
+
+    if (!haserror) {
+	if (rightval) {
+	    if (!(rightval->restype == XP_RT_STRING ||
+		  rightval->restype == XP_RT_NUMBER)) {
+		msg = "RHS has wrong data type";
+		haserror = TRUE;
+	    }
+	} else {
+	    haserror = TRUE;
+	    msg = "missing RHS value in predicate";
+	}
+    }
+
+    if (haserror) {
+	if (pcb->logerrors) {
+	    log_error("\nError: %s in instance-identifier '%s'",
+		      msg, pcb->exprstr);
+	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	}
+	return res;
+    } else {
+	return NO_ERR;
+    }
+    
+}  /* check_instanceid_expr */
+
+
+/********************************************************************
+* FUNCTION check_instance_result
+* 
+* Check the results of a leafref or instance-identifier expression
+*
+* Make sure the require-instance condition is met
+* if it is set to 'true'
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    resultl == complete instance-identifier result to check
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    check_instance_result (xpath_pcb_t *pcb,
+			   xpath_result_t *result)
+{
+    val_value_t           *contextval;
+    const char            *msg;
+    status_t               res;
+    boolean                haserror, constrained;
+    uint32                 nodecount;
+
+    /* skip unless this is a real value tree eval */
+    if (!pcb->val || !pcb->val_docroot) {
+	return NO_ERR;
+    }
+
+    haserror = FALSE;
+    res = ERR_NCX_INVALID_INSTANCEID;
+    msg = NULL;
+
+    if (result->restype != XP_RT_NODESET) {
+	msg = "wrong result type";
+	haserror = TRUE;
+    } else {
+	/* check the node count */
+	nodecount = dlq_count(&result->r.nodeQ);
+
+	if (nodecount > 1) {
+	    if (pcb->val->btyp == NCX_BT_INSTANCE_ID) {
+		msg = "too many instances";
+		haserror = TRUE;
+	    }
+	} else {
+	    /* check out the nodeset contents */
+	    contextval = pcb->val;
+	    if (!contextval) {
+		return SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    constrained = 
+		typ_get_constrained
+		(obj_get_ctypdef(contextval->obj));
+
+	    if (constrained && !nodecount) {
+		/* should have matched exactly one instance */
+		msg = "missing instance";
+		haserror = TRUE;
+		res = ERR_NCX_MISSING_INSTANCE;
+	    }
+	}
+    }
+
+    if (haserror) {
+	if (pcb->logerrors) {
+	    if (pcb->val->btyp == NCX_BT_LEAFREF) {
+		log_error("\nError: %s in leafref path '%s'",
+			  msg, pcb->exprstr);
+	    } else {
+		log_error("\nError: %s in instance-identifier '%s'",
+			  msg, pcb->exprstr);
+	    }
+	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	}
+	return res;
+    } else {
+	return NO_ERR;
+    }
+    
+}  /* check_instance_result */
+
+
+/********************************************************************
 * FUNCTION new_result
 * 
 * Get a new result from the cache or malloc if none available
@@ -5686,8 +5898,16 @@ static status_t
     /* process the tokens but not the result yet */
     switch (TK_CUR_TYP(pcb->tkc)) {
     case TK_TT_STAR:
+	if (pcb->flags & XP_FL_INSTANCEID) {
+	    invalid_instanceid_error(pcb);
+	    return ERR_NCX_INVALID_INSTANCEID;
+	}
 	break;
     case TK_TT_NCNAME_STAR:
+	if (pcb->flags & XP_FL_INSTANCEID) {
+	    invalid_instanceid_error(pcb);
+	    return ERR_NCX_INVALID_INSTANCEID;
+	}
 	/* match all nodes in the namespace w/ specified prefix */
 	if (!pcb->tkc->cur->nsid) {
 	    res = check_qname_prefix(pcb, &pcb->tkc->cur->nsid);
@@ -5740,6 +5960,11 @@ static status_t
 	res = xpath_parse_token(pcb, TK_TT_RPAREN);
 	if (res != NO_ERR) {
 	    return res;
+	}
+
+	if (pcb->flags & XP_FL_INSTANCEID) {
+	    invalid_instanceid_error(pcb);
+	    return ERR_NCX_INVALID_INSTANCEID;
 	}
 
 	/* process the result based on the node type test */
@@ -6243,6 +6468,12 @@ static status_t
 	if (res != NO_ERR) {
 	    return res;
 	}
+
+	if (pcb->flags & XP_FL_INSTANCEID) {
+	    invalid_instanceid_error(pcb);
+	    return ERR_NCX_INVALID_INSTANCEID;
+	}
+
 	if (!*result) {
 	    *result = new_nodeset(pcb,
 				  pcb->context.node.objptr,
@@ -6319,6 +6550,11 @@ static status_t
 	    return res;
 	}
 
+	if (pcb->flags & XP_FL_INSTANCEID) {
+	    invalid_instanceid_error(pcb);
+	    return ERR_NCX_INVALID_INSTANCEID;
+	}
+
 	/* step is .. or  //.. */
 	if (!*result) {
 	    /* first step is .. or //..     */
@@ -6343,6 +6579,11 @@ static status_t
 	if (res != NO_ERR) {
 	    return res;
 	}
+
+	if (pcb->flags & XP_FL_INSTANCEID) {
+	    invalid_instanceid_error(pcb);
+	    return ERR_NCX_INVALID_INSTANCEID;
+	}
 	break;
     case TK_TT_STAR:
     case TK_TT_NCNAME_STAR:
@@ -6364,6 +6605,11 @@ static status_t
 	    res = xpath_parse_token(pcb, TK_TT_DBLCOLON);
 	    if (res != NO_ERR) {
 		return res;
+	    }
+
+	    if (pcb->flags & XP_FL_INSTANCEID) {
+		invalid_instanceid_error(pcb);
+		return ERR_NCX_INVALID_INSTANCEID;
 	    }
 	} else if (axis == XP_AX_NONE && nexttyp2==TK_TT_DBLCOLON) {
 	    /* incorrect axis-name :: sequence */
@@ -6514,6 +6760,12 @@ static xpath_result_t *
 	return NULL;
     }
 
+    if (pcb->flags & XP_FL_INSTANCEID) {
+	invalid_instanceid_error(pcb);
+	*res = ERR_NCX_INVALID_INSTANCEID;
+	return NULL;
+    }
+
     /* find the function in the library */
     fncb = find_fncb(pcb, TK_CUR_VAL(pcb->tkc));
     if (fncb) {
@@ -6643,6 +6895,12 @@ static xpath_result_t *
     case TK_TT_QVARBIND:
 	*res = xpath_parse_token(pcb, nexttyp);
 
+	if (pcb->flags & XP_FL_INSTANCEID) {
+	    invalid_instanceid_error(pcb);
+	    *res = ERR_NCX_INVALID_INSTANCEID;
+	    return NULL;
+	}
+
 	/* get QName or NCName variable reference */
 	if (*res == NO_ERR) {
 	    if (TK_CUR_TYP(pcb->tkc) == TK_TT_VARBIND) {
@@ -6667,8 +6925,6 @@ static xpath_result_t *
 				  errstr);
 			ncx_print_errormsg(pcb->tkc, pcb->mod, *res);
 		    }
-		} else {
-		    ;  /**** log agent error ****/
 		}
 	    } else {
 		/* OK: found the variable binding */
@@ -6683,6 +6939,13 @@ static xpath_result_t *
 	/* get ( expr ) */
 	*res = xpath_parse_token(pcb, TK_TT_LPAREN);
 	if (*res == NO_ERR) {
+
+	    if (pcb->flags & XP_FL_INSTANCEID) {
+		invalid_instanceid_error(pcb);
+		*res = ERR_NCX_INVALID_INSTANCEID;
+		return NULL;
+	    }
+
 	    val1 = parse_expr(pcb, res);
 	    if (*res == NO_ERR) {
 		*res = xpath_parse_token(pcb, TK_TT_RPAREN);
@@ -6692,6 +6955,12 @@ static xpath_result_t *
     case TK_TT_DNUM:
     case TK_TT_RNUM:
 	*res = xpath_parse_token(pcb, nexttyp);
+
+	if (pcb->flags & XP_FL_INSTANCEID) {
+	    invalid_instanceid_error(pcb);
+	    *res = ERR_NCX_INVALID_INSTANCEID;
+	    return NULL;
+	}
 
 	/* get the Number token */
 	if (*res == NO_ERR) {
@@ -7006,6 +7275,12 @@ static xpath_result_t *
 		done = TRUE;
 	    } else {
                 *res = xpath_parse_token(pcb, TK_TT_BAR);
+		if (*res == NO_ERR) {
+		    if (pcb->flags & XP_FL_INSTANCEID) {
+			invalid_instanceid_error(pcb);
+			*res = ERR_NCX_INVALID_INSTANCEID;
+		    }
+		}
             }
         }
     }
@@ -7234,6 +7509,12 @@ static xpath_result_t *
 	    }
 	    if (!done) {
                 *res = xpath_parse_token(pcb, nexttyp);
+		if (*res == NO_ERR) {
+		    if (pcb->flags & XP_FL_INSTANCEID) {
+			invalid_instanceid_error(pcb);
+			*res = ERR_NCX_INVALID_INSTANCEID;
+		    }
+		}
             }
         }
     }
@@ -7370,6 +7651,12 @@ static xpath_result_t *
 	    }
 	    if (!done) {
                 *res = xpath_parse_token(pcb, nexttyp);
+		if (*res == NO_ERR) {
+		    if (pcb->flags & XP_FL_INSTANCEID) {
+			invalid_instanceid_error(pcb);
+			*res = ERR_NCX_INVALID_INSTANCEID;
+		    }
+		}
             }
         }
     }
@@ -7494,6 +7781,12 @@ static xpath_result_t *
 	    }
 	    if (!done) {
                 *res = xpath_parse_token(pcb, nexttyp);
+		if (*res == NO_ERR) {
+		    if (pcb->flags & XP_FL_INSTANCEID) {
+			invalid_instanceid_error(pcb);
+			*res = ERR_NCX_INVALID_INSTANCEID;
+		    }
+		}
             }
         }
     }
@@ -7537,12 +7830,13 @@ static xpath_result_t *
 {
     xpath_result_t  *val1, *val2, *result;
     xpath_exop_t     curop;
-    boolean          done, cmpresult;
+    boolean          done, cmpresult, equalsdone;
 
     val1 = NULL;
     val2 = NULL;
     result = NULL;
     curop = XP_EXOP_NONE;
+    equalsdone = FALSE;
     done = FALSE;
 
     while (!done && *res == NO_ERR) {
@@ -7554,18 +7848,26 @@ static xpath_result_t *
 		    /* val2 holds the 1st operand
 		     * val1 holds the 2nd operand
 		     */
-		    cmpresult = compare_results(pcb, 
-						val2, 
-						val1, 
-						curop,
-						res);
+		    if (pcb->flags & XP_FL_INSTANCEID) {
+			*res = check_instanceid_expr(pcb, 
+						     val2, 
+						     val1);
+		    }
 
 		    if (*res == NO_ERR) {
-			result = new_result(pcb, XP_RT_BOOLEAN);
-			if (!result) {
-			    *res = ERR_INTERNAL_MEM;
-			} else {
-			    result->r.bool = cmpresult;
+			cmpresult = compare_results(pcb, 
+						    val2, 
+						    val1, 
+						    curop,
+						    res);
+
+			if (*res == NO_ERR) {
+			    result = new_result(pcb, XP_RT_BOOLEAN);
+			    if (!result) {
+				*res = ERR_INTERNAL_MEM;
+			    } else {
+				result->r.bool = cmpresult;
+			    }
 			}
 		    }
 		}
@@ -7595,9 +7897,25 @@ static xpath_result_t *
 
             if (match_next_token(pcb, TK_TT_EQUAL, NULL)) {
                 *res = xpath_parse_token(pcb, TK_TT_EQUAL);
+		if (*res == NO_ERR) {
+		    if (equalsdone) {
+			if (pcb->flags & XP_FL_INSTANCEID) {
+			    invalid_instanceid_error(pcb);
+			    *res = ERR_NCX_INVALID_INSTANCEID;
+			}
+		    } else {
+			equalsdone = TRUE;
+		    }
+		}
 		curop = XP_EXOP_EQUAL;
 	    } else if (match_next_token(pcb, TK_TT_NOTEQUAL, NULL)) {
                 *res = xpath_parse_token(pcb, TK_TT_NOTEQUAL);
+		if (*res == NO_ERR) {
+		    if (pcb->flags & XP_FL_INSTANCEID) {
+			invalid_instanceid_error(pcb);
+			*res = ERR_NCX_INVALID_INSTANCEID;
+		    }
+		}
 		curop = XP_EXOP_NOTEQUAL;
             } else {
                 done = TRUE;
@@ -7849,11 +8167,16 @@ static xpath_result_t *
 * This is just a first pass done when the
 * XPath string is consumed.  If this is a
 * YANG file source then the prefixes will be
-* checked against the 'mos' import Q
+* checked against the 'mod' import Q
 *
 * The expression is parsed into XPath tokens
 * and checked for well-formed syntax and function
 * invocations. Any variable 
+*
+* If the source is XP_SRC_INSTANCEID, then YANG
+* instance-identifier syntax is followed, not XPath 1.0
+* This is only used by instance-identifiers in
+* default-stmt, conf file, CLI, etc.
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -7925,11 +8248,17 @@ status_t
     pcb->context.node.objptr = NULL;
     pcb->parseres = NO_ERR;
 
+    if (pcb->source == XP_SRC_INSTANCEID) {
+	pcb->flags |= XP_FL_INSTANCEID;
+	result = parse_location_path(pcb, &pcb->parseres);
+    } else {
+	result = parse_expr(pcb, &pcb->parseres);
+    }
+
     /* since the pcb->obj is not set, this validation
      * phase will skip identifier tests, predicate tests
      * and completeness tests
      */
-    result = parse_expr(pcb, &pcb->parseres);
     if (result) {
 	free_result(pcb, result);
     }
@@ -7937,13 +8266,29 @@ status_t
     if (pcb->parseres == NO_ERR && pcb->tkc->cur) {
 	res = TK_ADV(pcb->tkc);
 	if (res == NO_ERR) {
-	    if (pcb->logerrors) {
-		pcb->parseres = ERR_NCX_INVALID_XPATH_EXPR;
-		log_error("\nError: extra tokens in XPath expression '%s'",
-			  pcb->exprstr);
-		ncx_print_errormsg(pcb->tkc, pcb->mod, pcb->parseres);
+	    /* should not get more tokens at this point
+	     * have something like '7 + 4 4 + 7'
+	     * and the parser stopped after the first complete
+	     * expression
+	     */
+	    if (pcb->source == XP_SRC_INSTANCEID) {	    
+		pcb->parseres = ERR_NCX_INVALID_INSTANCEID;
+		if (pcb->logerrors) {
+		    log_error("\nError: extra tokens in "
+			      "instance-identifier '%s'",
+			      pcb->exprstr);
+		    ncx_print_errormsg(pcb->tkc, pcb->mod, 
+				       pcb->parseres);
+		}
 	    } else {
-		/*** log agent error ***/
+		pcb->parseres = ERR_NCX_INVALID_XPATH_EXPR;
+		if (pcb->logerrors) {
+		    log_error("\nError: extra tokens in "
+			      "XPath expression '%s'",
+			      pcb->exprstr);
+		    ncx_print_errormsg(pcb->tkc, pcb->mod, 
+				       pcb->parseres);
+		}
 	    }
 	}
     }
@@ -8063,8 +8408,11 @@ status_t
      * full cooked object tree
      * !!! not much checking done right now !!!
      */
-    result = parse_expr(pcb, &pcb->validateres);
-
+    if (pcb->source == XP_SRC_INSTANCEID) {
+	result = parse_location_path(pcb, &pcb->validateres);
+    } else {
+	result = parse_expr(pcb, &pcb->validateres);
+    }
 
     if (result) {
 	if (LOGDEBUG2) {
@@ -8075,7 +8423,6 @@ status_t
     }
 
     return pcb->validateres;
-
 
 }  /* xpath1_validate_expr */
 
@@ -8161,7 +8508,11 @@ xpath_result_t *
 
     pcb->flags |= XP_FL_USEROOT;
 
-    result = parse_expr(pcb, &pcb->valueres);
+    if (pcb->source == XP_SRC_INSTANCEID) {
+	result = parse_location_path(pcb, &pcb->valueres);
+    } else {
+	result = parse_expr(pcb, &pcb->valueres);
+    }
 
     if (LOGDEBUG2 && result) {
 	dump_result(pcb, result, "eval_expr");
@@ -8220,6 +8571,7 @@ xpath_result_t *
 			 status_t *res)
 {
     xpath_result_t *result;
+    status_t        myres;
 
 #ifdef DEBUG
     if (!pcb || !res) {
@@ -8228,6 +8580,7 @@ xpath_result_t *
     }
 #endif
 
+    *res = NO_ERR;
     if (pcb->tkc) {
 	tk_reset_chain(pcb->tkc);
     } else {
@@ -8265,13 +8618,143 @@ xpath_result_t *
 
     result = parse_expr(pcb, &pcb->valueres);
 
-    if (LOGDEBUG2 && result) {
+    if (pcb->valueres == NO_ERR && pcb->tkc->cur) {
+	myres = TK_ADV(pcb->tkc);
+	if (myres == NO_ERR) {
+	    pcb->valueres = ERR_NCX_INVALID_XPATH_EXPR;	    
+	    if (pcb->logerrors) {
+		log_error("\nError: extra tokens in XPath expression '%s'",
+			  pcb->exprstr);
+		ncx_print_errormsg(pcb->tkc, pcb->mod, pcb->valueres);
+	    }
+	}
+    }
+
+    if (pcb->valueres == NO_ERR && result &&
+	val->btyp == NCX_BT_LEAFREF) {
+	pcb->valueres = check_instance_result(pcb, result);
+    }
+
+    *res = pcb->valueres;
+
+    if (LOGDEBUG3 && result) {
 	dump_result(pcb, result, "eval_xmlexpr");
     }
 
     return result;
 
 }  /* xpath1_eval_xmlexpr */
+
+
+/********************************************************************
+* FUNCTION xpath1_eval_xml_instanceid
+* 
+* Evaluate the expression and get the expression nodeset result
+* Called from inside the XML parser, so the XML reader
+* must be used to get the XML namespace to prefix mappings
+*
+* 
+* INPUTS:
+*    reader == XML reader to use
+*    pcb == initialized XPath parser control block
+*           the xpath_new_pcb(exprstr) function is
+*           all that is needed.  This function will
+*           vall xpath1_parse_expr if it has not
+*           already been called.
+*    val == start context node for value of current()
+*    docroot == ptr to cfg->root or top of rpc/rpc-replay/notif tree
+*    logerrors == TRUE if log_error and ncx_print_errormsg
+*                  should be used to log XPath errors and warnings
+*                 FALSE if internal error info should be recorded
+*                 in the xpath_result_t struct instead
+*                !!! use FALSE unless DEBUG mode !!!
+*     res == address of return status
+*
+* OUTPUTS:
+*   *res is set to the return status
+*
+* RETURNS:
+*   malloced result struct with expr result
+*   NULL if no result produced (see *res for reason)
+*********************************************************************/
+xpath_result_t *
+    xpath1_eval_xml_instanceid (xmlTextReaderPtr reader,
+				xpath_pcb_t *pcb,
+				val_value_t *val,
+				val_value_t *docroot,
+				boolean logerrors,
+				status_t *res)
+{
+    xpath_result_t *result;
+    status_t        myres;
+
+#ifdef DEBUG
+    if (!pcb || !res) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    *res = NO_ERR;
+    if (pcb->tkc) {
+	tk_reset_chain(pcb->tkc);
+    } else {
+	pcb->tkc = tk_tokenize_xpath_string(NULL, pcb->exprstr, 
+					    0, 0, res);
+	if (!pcb->tkc || *res != NO_ERR) {
+	    if (logerrors) {
+		log_error("\nError: Invalid XPath string '%s'",
+			  pcb->exprstr);
+		ncx_print_errormsg(NULL, NULL, *res);
+	    }
+	    return NULL;
+	}
+    }
+
+    pcb->obj = NULL;
+    pcb->mod = NULL;
+    pcb->val = val;
+    pcb->val_docroot = docroot;
+    pcb->logerrors = logerrors;
+    pcb->reader = reader;
+
+    if (val) {
+	pcb->context.node.valptr = val;
+    } else {
+	pcb->context.node.valptr = docroot;
+    }
+
+    pcb->flags |= (XP_FL_USEROOT | XP_FL_INSTANCEID);
+
+    result = parse_location_path(pcb, &pcb->valueres);
+
+    if (pcb->valueres == NO_ERR && pcb->tkc->cur) {
+	myres = TK_ADV(pcb->tkc);
+	if (myres == NO_ERR) {
+	    pcb->valueres = ERR_NCX_INVALID_INSTANCEID;	    
+	    if (pcb->logerrors) {
+		log_error("\nError: extra tokens in "
+			  "instance-identifier '%s'",
+			  pcb->exprstr);
+		ncx_print_errormsg(pcb->tkc, pcb->mod, 
+				   pcb->valueres);
+	    }
+	}
+    }
+
+    if (pcb->valueres == NO_ERR && result) {
+	pcb->valueres = check_instance_result(pcb, result);
+    }
+
+    *res = pcb->valueres;
+
+    if (LOGDEBUG2 && result) {
+	dump_result(pcb, result, "eval_xml_instanceid");
+    }
+
+    return result;
+
+}  /* xpath1_eval_xml_instanceid */
 
 
 /********************************************************************
@@ -8587,6 +9070,54 @@ status_t
     /*NOTREACHED*/
 
 }  /* xpath1_stringify_nodeset */
+
+
+/********************************************************************
+* FUNCTION xpath1_compare_result_to_string
+* 
+* Compare an XPath result to the specified string
+*
+*    result = 'string'
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    result == result struct to compare
+*    strval == string value to compare to result
+*    res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*     equality relation result (TRUE or FALSE)
+*********************************************************************/
+boolean
+    xpath1_compare_result_to_string (xpath_pcb_t *pcb,
+				     xpath_result_t *result,
+				     xmlChar *strval,
+				     status_t *res)
+{
+    xpath_result_t   sresult;
+    boolean          retval;
+
+    /* only compare real results, not objects */
+    if (!pcb->val) {
+	return TRUE;
+    }
+
+    *res = NO_ERR;
+    xpath_init_result(&sresult, XP_RT_STRING);
+    sresult.r.str = strval;
+
+    retval = compare_results(pcb, result, &sresult,
+			     XP_EXOP_EQUAL, res);
+    
+    sresult.r.str = NULL;
+    xpath_clean_result(&sresult);
+
+    return retval;
+
+}  /* xpath1_compare_result_to_string */
 
 
 /* END xpath1.c */

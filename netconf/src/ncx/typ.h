@@ -238,7 +238,11 @@ typedef struct typ_simple_t_ {
     ncx_btype_t      btyp;                             /* NCX base type */
     struct typ_template_t_ *listtyp;       /* template for NCX_BT_SLIST */
     struct xpath_pcb_t_   *xleafref;   /* saved for NCX_BT_LEAFREF only */
-    boolean          constrained;
+
+    /* pointer to resolved typedef for NCX_BT_LEAFREF/NCX_BT_INSTANCE_ID */
+    const struct typ_def_t_ *xrefdef;    
+
+    boolean          constrained;     /* set when require-instance=TRUE */
     typ_range_t      range;     /* for all num types and string length  */
     typ_idref_t      idref;                    /* for NCX_BT_IDREF only */
     dlq_hdr_t        valQ;     /* bit, enum, string, list vals/patterns */
@@ -756,12 +760,19 @@ extern const xmlChar *
     typ_get_leafref_path (const typ_def_t *typdef);
 
 /* returns xpath_pcb_t but cannot import due to H file loop */
-extern void *
-    typ_get_leafref_pcb (typ_def_t *typdef);
+extern const struct xpath_pcb_t_ *
+    typ_get_leafref_pcb (const typ_def_t *typdef);
 
 /* leafref or instance-identifier constrained flag */
 extern boolean
     typ_get_constrained (const typ_def_t *typdef);
+
+extern void
+    typ_set_xref_typdef (typ_def_t *typdef,
+			 const typ_def_t *target);
+
+extern const typ_def_t *
+    typ_get_xref_typdef (const typ_def_t *typdef);
 
 extern boolean
     typ_has_subclauses (const typ_def_t *typdef);

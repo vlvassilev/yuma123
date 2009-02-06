@@ -1586,8 +1586,11 @@ static status_t
 * the specified value struct. Checks the direct accessible
 * children of 'val' only!!!
 * 
+* Also check 'require-instance' for the NCX_BT_LEAFREF
+* and NCX_BT_INSTANCEID data types
+*
 * The top-level value set passed cannot represent a choice
-* or a case within a choice.
+* or a case within a choice. 
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
@@ -1595,6 +1598,7 @@ static status_t
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   obj == object template for child node in valset to check
 *   val == val_value_t list, leaf-list, or container to check
+*   root == config root for 'val'
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -1612,18 +1616,26 @@ static status_t
 		    xml_msg_hdr_t *msg,
 		    const obj_template_t *obj,
 		    val_value_t *val,
-		    ncx_layer_t   layer)
+		    val_value_t *root,
+		    ncx_layer_t layer)
 {
-    val_value_t    *errval;
-    xmlChar        *instbuff;
-    ncx_iqual_t     iqual;
-    uint32          cnt, i, minelems, maxelems;
-    boolean         minset, maxset, minerr, maxerr;
-    status_t        res, res2;
-    char            buff[NCX_MAX_NUMLEN];
+    val_value_t         *errval;
+    xmlChar             *instbuff;
+    xpath_result_t      *result;
+    const xpath_pcb_t   *xpcb;
+    xpath_pcb_t         *xpcbclone;
+    const ncx_errinfo_t *errinfo;
+    const typ_def_t     *typdef;
+    ncx_iqual_t          iqual;
+    uint32               cnt, i, minelems, maxelems;
+    boolean              minset, maxset, minerr, maxerr;
+    boolean              constrained, fnresult;
+    status_t             res, res2;
+    char                 buff[NCX_MAX_NUMLEN];
 
     res = NO_ERR;
     res2 = NO_ERR;
+    errinfo = NULL;
     iqual = obj_get_iqualval(obj);
     minerr = FALSE;
     maxerr = FALSE;
@@ -1830,6 +1842,99 @@ static status_t
 
     }
 
+    switch (val->btyp) {
+    case NCX_BT_LEAFREF:
+	/* do a complete parsing to retrieve the
+	 * instance that matched, just checking the
+	 * require-instance flag
+	 */
+	typdef = obj_get_ctypdef(val->obj);
+	constrained = typ_get_constrained(typdef);
+	xpcb = typ_get_leafref_pcb(typdef);
+
+	if (constrained) {
+	    xpcbclone = xpath_clone_pcb(xpcb);
+	    if (!xpcbclone) {
+		res2 = ERR_INTERNAL_MEM;
+	    } 
+
+	    if (res2 == NO_ERR) {
+		result = xpath1_eval_xmlexpr
+		    (scb->reader, xpcbclone, val, root,
+		     FALSE, TRUE, &res2);
+
+		if (res2 == NO_ERR) {
+		    /* check result: the string value in 'val'
+		     * must match one of the values in the
+		     * result set
+		     */
+		    fnresult = xpath1_compare_result_to_string
+			(xpcbclone, result, VAL_STR(val), &res2);
+
+		    if (res2 == NO_ERR && !fnresult) {
+			/* did not match any of the current instances */
+			res2 = ERR_NCX_MISSING_INSTANCE;
+		    }
+		}
+
+		if (result) {
+		    xpath_free_result(result);
+		}
+	    } else {
+		/* just use the leafref xrefdef */
+		errinfo = NULL;
+		res2 = val_simval_ok_errinfo
+		    (typ_get_xref_typdef(typdef),
+		     VAL_STR(val),
+		     &errinfo);
+	    }
+
+	    if (xpcbclone) {
+		xpath_free_pcb(xpcbclone);
+	    }
+	}
+
+	if (res2 != NO_ERR) {
+	    val->res = res2;
+	    agt_record_error_errinfo(scb, msg, layer, res2, 
+				     NULL, NCX_NT_OBJ, obj, 
+				     NCX_NT_VAL, val, errinfo);
+	}
+
+	if (res == NO_ERR) {
+	    res = res2;
+	}
+	break;
+    case NCX_BT_INSTANCE_ID:
+	/* do a complete parsing to retrieve the
+	 * instance that matched, just checking the
+	 * require-instance flag
+	 */
+	result = 
+	    xpath1_eval_xml_instanceid(scb->reader,
+				       val->xpathpcb,
+				       val,
+				       root,
+				       FALSE,
+				       &res2);
+	if (result) {
+	    xpath_free_result(result);
+	}
+
+	if (res2 != NO_ERR) {
+	    val->res = res2;
+	    agt_record_error(scb, msg, layer, res2, 
+			     NULL, NCX_NT_OBJ, obj, 
+			     NCX_NT_VAL, val);
+	}
+	if (res == NO_ERR) {
+	    res = res2;
+	}
+	break;
+    default:
+	;
+    }
+
     return res;
     
 }  /* instance_check */
@@ -1855,6 +1960,7 @@ static status_t
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   choicobj == object template for the choice to check
 *   val == parent val_value_t list or container to check
+*   root == database root of 'val'
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -1871,6 +1977,7 @@ static status_t
 		      xml_msg_hdr_t *msg,
 		      const obj_template_t *choicobj,
 		      val_value_t *val,
+		      val_value_t *root,
 		      ncx_layer_t   layer)
 {
     const obj_template_t  *testobj;
@@ -1917,7 +2024,8 @@ static status_t
 	 testobj != NULL;
 	 testobj = obj_next_child(testobj)) {
 
-	res = instance_check(scb, msg, testobj, val, layer);
+	res = instance_check(scb, msg, testobj, 
+			     val, root, layer);
 	CHK_EXIT(res, retres);
 	/* errors already recorded if other than NO_ERR */
     }
@@ -2165,6 +2273,7 @@ static status_t
 *   msg == xml_msg_hdr t from msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   valset == val_value_t list, leaf-list, or container to check
+*   root == database root of 'valset'
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -2180,7 +2289,8 @@ status_t
     agt_val_instance_check (ses_cb_t *scb,
 			    xml_msg_hdr_t *msg,
 			    val_value_t *valset,
-			    ncx_layer_t   layer)
+			    val_value_t *root,
+			    ncx_layer_t layer)
 {
     const obj_template_t  *obj, *chobj;
     val_value_t           *chval;
@@ -2212,7 +2322,8 @@ status_t
 	    if (obj_is_root(chval->obj)) {
 		continue;
 	    } else if (chval->obj->objtype != OBJ_TYP_LEAF) {
-		res = agt_val_instance_check(scb, msg, chval, layer);
+		res = agt_val_instance_check(scb, msg, 
+					     chval, root, layer);
 		CHK_EXIT(res, retres);
 	    }
 	}
@@ -2228,9 +2339,11 @@ status_t
 	}
 
 	if (chobj->objtype == OBJ_TYP_CHOICE) {
-	    res = choice_check_agt(scb, msg, chobj, valset, layer);
+	    res = choice_check_agt(scb, msg, chobj, 
+				   valset, root, layer);
 	} else {
-	    res = instance_check(scb, msg, chobj, valset, layer);
+	    res = instance_check(scb, msg, chobj, 
+				 valset, root, layer);
 	}
 	if (res != NO_ERR && valset->res == NO_ERR) {	    
 	    valset->res = res;
@@ -2273,6 +2386,7 @@ status_t
     const obj_template_t  *obj, *chobj;
     val_value_t           *chval;
     status_t               res, retres;
+    xmlns_id_t             ncxid;
 
 #ifdef DEBUG
     if (!root) {
@@ -2284,11 +2398,12 @@ status_t
 #endif
 
     retres = NO_ERR;
-
+    ncxid = xmlns_ncx_id();
     obj = root->obj;
 
     /* check the instance counts for the subtrees that are present */
-    res = agt_val_instance_check(scb, msg, root, NCX_LAYER_CONTENT);
+    res = agt_val_instance_check(scb, msg, root, 
+				 root, NCX_LAYER_CONTENT);
     CHK_EXIT(res, retres);
 
     /* check the must-stmt expressions for the subtrees that are present */
@@ -2312,7 +2427,7 @@ status_t
 	/* hack: skip the NCX extensions module that defines objects
 	 * just for the XSD generation usage
 	 */
-	if (mod->nsid == xmlns_ncx_id()) {
+	if (mod->nsid == ncxid) {
 	    continue;
 	}
 
@@ -2326,10 +2441,10 @@ status_t
 
 	    if (chobj->objtype == OBJ_TYP_CHOICE) {
 		res = choice_check_agt(scb, msg, chobj, 
-				       root, NCX_LAYER_CONTENT);
+				       root, root, NCX_LAYER_CONTENT);
 	    } else {
 		res = instance_check(scb, msg, chobj, 
-				     root, NCX_LAYER_CONTENT);
+				     root, root, NCX_LAYER_CONTENT);
 	    }
 	    CHK_EXIT(res, retres);
 	}

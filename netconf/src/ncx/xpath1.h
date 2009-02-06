@@ -98,6 +98,14 @@ extern xpath_result_t *
 			 boolean configonly,
 			 status_t *res);
 
+extern xpath_result_t *
+    xpath1_eval_xml_instanceid (xmlTextReaderPtr reader,
+				xpath_pcb_t *pcb,
+				val_value_t *val,
+				val_value_t *docroot,
+				boolean logerrors,
+				status_t *res);
+
 extern const xpath_fncb_t *
     xpath1_get_functions_ptr (void);
 
@@ -115,6 +123,11 @@ extern status_t
 			      const xpath_result_t *result,
 			      xmlChar **str);
 
+extern boolean
+    xpath1_compare_result_to_string (xpath_pcb_t *pcb,
+				     xpath_result_t *result,
+				     xmlChar *strval,
+				     status_t *res);
 
 
 #endif	    /* _H_xpath1 */

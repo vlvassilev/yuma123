@@ -70,20 +70,14 @@ date	     init     comment
 
 extern status_t
     xpath_leafref_parse_path (tk_chain_t *tkc,
-			     ncx_module_t *mod,
-			     xpath_pcb_t *pcb);
+			      ncx_module_t *mod,
+			      xpath_pcb_t *pcb);
 
 extern status_t
     xpath_leafref_validate_path (ncx_module_t *mod,
-				const obj_template_t *obj,
-				xpath_pcb_t *pcb);
-
-extern status_t
-    xpath_leafref_get_value (ncx_module_t *mod,
-			    obj_template_t *obj,
-			    xpath_pcb_t *pcb,
-			    val_value_t **targval);
-
+				 const obj_template_t *obj,
+				 xpath_pcb_t *pcb,
+				 const obj_template_t **leafobj);
 
 
 

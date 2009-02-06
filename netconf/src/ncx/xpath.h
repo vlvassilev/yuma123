@@ -167,6 +167,12 @@ date	     init     comment
  */
 #define XP_FL_USEROOT             bit5
 
+/* used to restrict the XPath expression to the YANG
+ * instance-identifier syntax
+ */
+#define XP_FL_INSTANCEID          bit6
+
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
@@ -206,6 +212,7 @@ typedef enum xpath_source_t_ {
     XP_SRC_NONE,
     XP_SRC_LEAFREF,
     XP_SRC_YANG,
+    XP_SRC_INSTANCEID,
     XP_SRC_XML
 } xpath_source_t;
 
@@ -466,7 +473,7 @@ extern xpath_pcb_t *
  * of object to value for NETCONF PDU processing
  */
 extern xpath_pcb_t *
-    xpath_clone_pcb (xpath_pcb_t *srcpcb);
+    xpath_clone_pcb (const xpath_pcb_t *srcpcb);
 
 /* find by exact match of the expressions string */
 extern xpath_pcb_t *

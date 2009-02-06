@@ -3988,12 +3988,7 @@ static status_t
 	CHK_EXIT(res, retres);
     } 
 
-
-
     finish_config_flag(obj);
-
-
-
 
     if ((obj->flags & OBJ_FL_MANDATORY) && leaf->defval) {
 	log_error("\nError: both mandatory and default statements present"
@@ -7068,13 +7063,15 @@ status_t
 			    ncx_module_t  *mod,
 			    dlq_hdr_t *datadefQ)
 {
-    obj_template_t     *testobj;
-    obj_key_t          *key;
-    const obj_unique_t *uniq;
-    obj_unique_comp_t  *uncomp;
-    typ_def_t          *typdef;
-    xpath_pcb_t        *pcb;
-    status_t            res, retres;
+    obj_template_t        *testobj;
+    const obj_template_t  *leafobj;
+    obj_key_t             *key;
+    const obj_unique_t    *uniq;
+    obj_unique_comp_t     *uncomp;
+    typ_def_t             *typdef;
+    const xpath_pcb_t     *pcb;
+    xpath_pcb_t           *pcbclone;
+    status_t               res, retres;
 
 #ifdef DEBUG
     if (!tkc || !mod || !datadefQ) {
@@ -7137,9 +7134,31 @@ status_t
 			   testobj->linenum);
 #endif
 
+		/* need to make a copy of the XPath PCB because
+		 * typedefs are treated as read-only when referenced
+		 * from a val_value_t node
+		 */
 		typdef = obj_get_typdef(testobj);
 		pcb = typ_get_leafref_pcb(typdef);
-		res = xpath_leafref_validate_path(mod, testobj, pcb);
+		pcbclone = xpath_clone_pcb(pcb);
+		if (!pcbclone) {
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    tkc->cur = pcb->tk;
+		    res = xpath_leafref_parse_path(tkc, mod, pcbclone);
+		    if (res == NO_ERR) {
+			leafobj = NULL;
+			res = xpath_leafref_validate_path(mod, 
+							  testobj, 
+							  pcbclone, 
+							  &leafobj);
+			if (res == NO_ERR && leafobj) {
+			    typ_set_xref_typdef(typdef, 
+						obj_get_ctypdef(leafobj));
+			}
+		    }
+		    xpath_free_pcb(pcbclone);
+		}
 	    }
 	    break;
 	case OBJ_TYP_LIST:

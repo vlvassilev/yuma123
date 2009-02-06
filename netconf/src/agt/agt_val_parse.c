@@ -1363,13 +1363,13 @@ static status_t
 		/* do a first pass parsing to resolve all
 		 * the prefixes and check well-formed XPath
 		 */
-		result = xpath1_eval_xmlexpr(scb->reader,
-					     retval->xpathpcb,
-					     NULL,
-					     NULL,
-					     FALSE,
-					     FALSE,
-					     &res);
+		result = 
+		    xpath1_eval_xml_instanceid(scb->reader,
+					       retval->xpathpcb,
+					       NULL,
+					       NULL,
+					       FALSE,
+					       &res);
 		if (result) {
 		    xpath_free_result(result);
 		}
@@ -2449,6 +2449,9 @@ static status_t
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
     case NCX_BT_INSTANCE_ID:
+	/* leafref and instance-identifier do not get
+	 * fully validated until commit time
+	 */
 	res = parse_string_nc(scb, msg, obj, btyp, startnode, 
 			      parentdc, retval);
 	break;

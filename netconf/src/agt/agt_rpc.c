@@ -662,6 +662,7 @@ static status_t
 	 */
 	res = agt_val_instance_check(scb, &msg->mhdr, 
 				     &msg->rpc_input, 
+				     &msg->rpc_input,
 				     NCX_LAYER_OPERATION);
     }
 

@@ -1123,7 +1123,7 @@ xpath_pcb_t *
 *   data will be set
 *********************************************************************/
 xpath_pcb_t *
-    xpath_clone_pcb (xpath_pcb_t *srcpcb)
+    xpath_clone_pcb (const xpath_pcb_t *srcpcb)
 {
     xpath_pcb_t *newpcb;
     status_t     res;

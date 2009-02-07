@@ -321,7 +321,7 @@ static status_t
 * has been called, and returns NO_ERR.
 * 
 * !!! TO-DO !!!
-*  - There are no 1-char aliases for NCX parameters.
+*  - There are no 1-char aliases for CLI parameters.
 *  - Position-dependent, unnamed parameters are not supported
 *    at this time.
 *
@@ -653,10 +653,12 @@ val_value_t *
     buff = NULL;
     res = NO_ERR;
 
+#ifdef PUT_BACK_ADDING_DEFAULTS_TO_CLI
     /* 2) add any defaults for mandatory parms that are not set */
     if (!valonly) {
 	res = val_add_defaults(val, script);
     }
+#endif
 
     /* 3) CLI Instance Check
      * Go through all the parameters in the object and check

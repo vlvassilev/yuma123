@@ -5139,7 +5139,7 @@ static status_t
 			    /* set the resnode to its parent */
 			    resnode->position = 
 				++walkerparms.callcount;
-			    resnode->node.valptr = testval->parent;
+			    resnode->node.valptr = testval;
 			    dlq_enque(resnode, &resnodeQ);
 			}
 		    } else {
@@ -9118,6 +9118,54 @@ boolean
     return retval;
 
 }  /* xpath1_compare_result_to_string */
+
+
+/********************************************************************
+* FUNCTION xpath1_compare_result_to_number
+* 
+* Compare an XPath result to the specified number
+*
+*    result = number
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    result == result struct to compare
+*    numval == number struct to compare to result
+*              MUST BE TYPE NCX_BT_FLOAT64
+*    res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*     equality relation result (TRUE or FALSE)
+*********************************************************************/
+boolean
+    xpath1_compare_result_to_number (xpath_pcb_t *pcb,
+				     xpath_result_t *result,
+				     ncx_num_t *numval,
+				     status_t *res)
+{
+    xpath_result_t   sresult;
+    boolean          retval;
+
+    /* only compare real results, not objects */
+    if (!pcb->val) {
+	return TRUE;
+    }
+
+    *res = NO_ERR;
+    xpath_init_result(&sresult, XP_RT_NUMBER);
+    ncx_copy_num(numval, &sresult.r.num, NCX_BT_FLOAT64);
+
+    retval = compare_results(pcb, result, &sresult,
+			     XP_EXOP_EQUAL, res);
+    
+    xpath_clean_result(&sresult);
+
+    return retval;
+
+}  /* xpath1_compare_result_to_number */
 
 
 /* END xpath1.c */

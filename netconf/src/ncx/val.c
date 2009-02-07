@@ -123,58 +123,6 @@ typedef void (*indentfn_t) (int32 indentcnt);
 
 
 /********************************************************************
-* FUNCTION dump_num
-* 
-* Printf the specified ncx_num_t 
-*
-* INPUTS:
-*    btyp == base type of the number
-*    num == number to printf
-*
-*********************************************************************/
-static void
-    dump_num (ncx_btype_t btyp,
-	      const ncx_num_t *num)
-{
-    /* dump the value, depending on the base type */
-    switch (btyp) {
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-	log_write("%d", num->i);
-	break;
-    case NCX_BT_INT64:
-	log_write("%lld", num->l);
-	break;
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-	log_write("%u", num->u);
-	break;
-    case NCX_BT_UINT64:
-	log_write("%llu", num->ul);
-	break;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	log_write("%1.15f", num->f);
-#else
-	log_write("lld", num->f);
-#endif
-	break;
-    case NCX_BT_FLOAT64:
-#ifdef HAS_FLOAT
-	log_write("%1.15lf", num->d);
-#else
-	log_write("%lld", num->d);
-#endif
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-    }
-} /* dump_num */
-
-
-/********************************************************************
 * FUNCTION stdout_num
 * 
 * Printf the specified ncx_num_t to stdout
@@ -188,41 +136,17 @@ static void
     stdout_num (ncx_btype_t btyp,
 		const ncx_num_t *num)
 {
-    /* dump the value, depending on the base type */
-    switch (btyp) {
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-	log_stdout("%d", num->i);
-	break;
-    case NCX_BT_INT64:
-	log_stdout("%lld", num->l);
-	break;
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-	log_stdout("%u", num->u);
-	break;
-    case NCX_BT_UINT64:
-	log_stdout("%llu", num->ul);
-	break;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	log_stdout("%f", num->f);
-#else
-	log_stdout("%lld", num->f);
-#endif
-	break;
-    case NCX_BT_FLOAT64:
-#ifdef HAS_FLOAT
-	log_stdout("%lf", num->d);
-#else
-	log_stdout("%lld", num->d);
-#endif
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+    xmlChar    numbuff[VAL_MAX_NUMLEN];
+    uint32     len;
+    status_t   res;
+
+    res = ncx_sprintf_num(numbuff, num, btyp, &len);
+    if (res != NO_ERR) {
+	log_stdout("invalid num '%s'", get_error_string(res));
+    } else {
+	log_stdout("%s", numbuff);
     }
+
 } /* stdout_num */
 
 
@@ -996,7 +920,7 @@ static void
     case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
 	if (tolog) {
-	    dump_num(btyp, &val->v.num);
+	    ncx_printf_num(&val->v.num, btyp);
 	} else {
 	    stdout_num(btyp, &val->v.num);
 	}
@@ -1058,7 +982,7 @@ static void
 		    }
 		} else if (typ_is_number(lbtyp)) {
 		    if (tolog) {
-			dump_num(lbtyp, &listmem->val.num);
+			ncx_printf_num(&listmem->val.num, lbtyp);
 		    } else {
 			stdout_num(lbtyp, &listmem->val.num);
 		    }

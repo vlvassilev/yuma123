@@ -130,4 +130,10 @@ extern boolean
 				     status_t *res);
 
 
+extern boolean
+    xpath1_compare_result_to_number (xpath_pcb_t *pcb,
+				     xpath_result_t *result,
+				     ncx_num_t *numval,
+				     status_t *res);
+
 #endif	    /* _H_xpath1 */

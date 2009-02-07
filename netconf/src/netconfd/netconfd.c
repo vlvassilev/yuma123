@@ -91,7 +91,35 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 /* program version string */
-static char progver[] = "0.8.1";
+static char progver[] = "0.8.2";
+
+
+/********************************************************************
+ * FUNCTION load_base_schema 
+ * 
+ * RETURNS:
+ *     status
+ *********************************************************************/
+static status_t
+    load_base_schema (void)
+{
+    status_t res;
+
+    /* load in the agent boot parameter definition file */
+    res = ncxmod_load_module(NCXMOD_NETCONFD);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* load in the NETCONF data types and RPC methods */
+    res = ncxmod_load_module(NCXMOD_NETCONF);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    return res;
+
+}   /* load_base_schema */
 
 
 /********************************************************************
@@ -104,26 +132,6 @@ static status_t
     load_core_schema (void)
 {
     status_t   res;
-
-#ifdef NETCONFD_DEBUG
-    log_debug2("\nnetconfd: Loading netconfd core module");
-#endif
-
-    /* load in the agent boot parameter definition file */
-    res = ncxmod_load_module(NCXMOD_NETCONFD);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-#ifdef NETCONFD_DEBUG
-    log_debug2("\nnetconfd: Loading NETCONF Module");
-#endif
-
-    /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module(NCXMOD_NETCONF);
-    if (res != NO_ERR) {
-	return res;
-    }
 
 #ifdef NETCONFD_DEBUG
     log_debug2("\nnetconfd: Loading NCX Module");
@@ -248,15 +256,15 @@ static status_t
      */
 
     /* Load the core modules (netconfd and netconf) */
-    res = load_core_schema();
+    res = load_base_schema();
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the Netconf Agent Library
-     * CMD-P1) Get any command line parameters 
+     * with command line and conf file parameters 
      */
-    res = agt_init(argc, argv, showver, showhelp);
+    res = agt_init1(argc, argv, showver, showhelp);
     if (res != NO_ERR) {
 	return res;
     }
@@ -266,12 +274,17 @@ static status_t
 	return NO_ERR;
     }
 
-    /* CMD-P2) Get any environment string parameters */
-    /***/
+    /* Load the core modules (netconfd and netconf) */
+    res = load_core_schema();
+    if (res != NO_ERR) {
+	return res;
+    }
 
-    /* CMD-P3) Get any PS file parameters */
-    /***/
-
+    /* finidh initializing agent data structures */
+    res = agt_init2();
+    if (res != NO_ERR) {
+	return res;
+    }
 
 #ifdef NETCONFD_DEBUG_TEST
 

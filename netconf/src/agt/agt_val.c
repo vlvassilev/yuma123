@@ -1580,15 +1580,147 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION instance_xpath_check
+* 
+* Check the leafref or instance-identifier leaf or leaf-list node
+* Test 'require-instance' for the NCX_BT_LEAFREF
+* and NCX_BT_INSTANCEID data types
+*
+* INPUTS:
+*   scb == session control block (may be NULL; no session stats)
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   val == value node to check
+*   root == config root for 'val'
+*   layer == NCX layer calling this function (for error purposes only)
+*
+* OUTPUTS:
+*   if msg not NULL:
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+
+*      which must be freed by the called with the 
+*      rpc_err_free_record function
+*
+* RETURNS:
+*   status of the operation, NO_ERR if no validation errors found
+*********************************************************************/
+static status_t 
+    instance_xpath_check (ses_cb_t *scb,
+			  xml_msg_hdr_t *msg,
+			  val_value_t *val,
+			  val_value_t *root,
+			  ncx_layer_t layer)
+{
+    xpath_result_t      *result;
+    const xpath_pcb_t   *xpcb;
+    xpath_pcb_t         *xpcbclone;
+    const ncx_errinfo_t *errinfo;
+    const typ_def_t     *typdef;
+    boolean              constrained, fnresult;
+    status_t             res;
+
+    res = NO_ERR;
+    errinfo = NULL;
+
+    switch (val->btyp) {
+    case NCX_BT_LEAFREF:
+	/* do a complete parsing to retrieve the
+	 * instance that matched, just checking the
+	 * require-instance flag
+	 */
+	typdef = obj_get_ctypdef(val->obj);
+	constrained = typ_get_constrained(typdef);
+	xpcb = typ_get_leafref_pcb(typdef);
+
+	if (constrained) {
+	    xpcbclone = xpath_clone_pcb(xpcb);
+	    if (!xpcbclone) {
+		res = ERR_INTERNAL_MEM;
+	    } 
+
+	    if (res == NO_ERR) {
+		result = xpath1_eval_xmlexpr
+		    (scb->reader, xpcbclone, val, root,
+		     FALSE, TRUE, &res);
+
+		if (res == NO_ERR) {
+		    /* check result: the string value in 'val'
+		     * must match one of the values in the
+		     * result set
+		     */
+
+		    fnresult = xpath1_compare_result_to_string
+			(xpcbclone, result, VAL_STR(val), &res);
+
+		    if (res == NO_ERR && !fnresult) {
+			/* did not match any of the current instances */
+			res = ERR_NCX_MISSING_INSTANCE;
+		    }
+		}
+
+		if (result) {
+		    xpath_free_result(result);
+		}
+	    } else {
+		/* just use the leafref xrefdef */
+		errinfo = NULL;
+		res = val_simval_ok_errinfo
+		    (typ_get_xref_typdef(typdef),
+		     VAL_STR(val),
+		     &errinfo);
+	    }
+
+	    if (xpcbclone) {
+		xpath_free_pcb(xpcbclone);
+	    }
+	}
+
+	if (res != NO_ERR) {
+	    val->res = res;
+	    agt_record_error_errinfo(scb, msg, layer, res, 
+				     NULL, NCX_NT_OBJ, val->obj, 
+				     NCX_NT_VAL, val, errinfo);
+	}
+	break;
+    case NCX_BT_INSTANCE_ID:
+	/* do a complete parsing to retrieve the
+	 * instance that matched, just checking the
+	 * require-instance flag
+	 */
+	result = 
+	    xpath1_eval_xml_instanceid(scb->reader,
+				       val->xpathpcb,
+				       val,
+				       root,
+				       FALSE,
+				       &res);
+	if (result) {
+	    xpath_free_result(result);
+	}
+
+	if (res != NO_ERR) {
+	    val->res = res;
+	    agt_record_error(scb, msg, layer, res, 
+			     NULL, NCX_NT_OBJ, val->obj, 
+			     NCX_NT_VAL, val);
+	}
+	break;
+    default:
+	;
+    }
+
+    return res;
+    
+}  /* instance_xpath_check */
+
+
+/********************************************************************
 * FUNCTION instance_check
 * 
 * Check for the proper number of object instances for
 * the specified value struct. Checks the direct accessible
 * children of 'val' only!!!
 * 
-* Also check 'require-instance' for the NCX_BT_LEAFREF
-* and NCX_BT_INSTANCEID data types
-*
 * The top-level value set passed cannot represent a choice
 * or a case within a choice. 
 *
@@ -1598,7 +1730,6 @@ static status_t
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   obj == object template for child node in valset to check
 *   val == val_value_t list, leaf-list, or container to check
-*   root == config root for 'val'
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -1616,20 +1747,14 @@ static status_t
 		    xml_msg_hdr_t *msg,
 		    const obj_template_t *obj,
 		    val_value_t *val,
-		    val_value_t *root,
 		    ncx_layer_t layer)
 {
     val_value_t         *errval;
     xmlChar             *instbuff;
-    xpath_result_t      *result;
-    const xpath_pcb_t   *xpcb;
-    xpath_pcb_t         *xpcbclone;
     const ncx_errinfo_t *errinfo;
-    const typ_def_t     *typdef;
     ncx_iqual_t          iqual;
     uint32               cnt, i, minelems, maxelems;
     boolean              minset, maxset, minerr, maxerr;
-    boolean              constrained, fnresult;
     status_t             res, res2;
     char                 buff[NCX_MAX_NUMLEN];
 
@@ -1842,99 +1967,6 @@ static status_t
 
     }
 
-    switch (val->btyp) {
-    case NCX_BT_LEAFREF:
-	/* do a complete parsing to retrieve the
-	 * instance that matched, just checking the
-	 * require-instance flag
-	 */
-	typdef = obj_get_ctypdef(val->obj);
-	constrained = typ_get_constrained(typdef);
-	xpcb = typ_get_leafref_pcb(typdef);
-
-	if (constrained) {
-	    xpcbclone = xpath_clone_pcb(xpcb);
-	    if (!xpcbclone) {
-		res2 = ERR_INTERNAL_MEM;
-	    } 
-
-	    if (res2 == NO_ERR) {
-		result = xpath1_eval_xmlexpr
-		    (scb->reader, xpcbclone, val, root,
-		     FALSE, TRUE, &res2);
-
-		if (res2 == NO_ERR) {
-		    /* check result: the string value in 'val'
-		     * must match one of the values in the
-		     * result set
-		     */
-		    fnresult = xpath1_compare_result_to_string
-			(xpcbclone, result, VAL_STR(val), &res2);
-
-		    if (res2 == NO_ERR && !fnresult) {
-			/* did not match any of the current instances */
-			res2 = ERR_NCX_MISSING_INSTANCE;
-		    }
-		}
-
-		if (result) {
-		    xpath_free_result(result);
-		}
-	    } else {
-		/* just use the leafref xrefdef */
-		errinfo = NULL;
-		res2 = val_simval_ok_errinfo
-		    (typ_get_xref_typdef(typdef),
-		     VAL_STR(val),
-		     &errinfo);
-	    }
-
-	    if (xpcbclone) {
-		xpath_free_pcb(xpcbclone);
-	    }
-	}
-
-	if (res2 != NO_ERR) {
-	    val->res = res2;
-	    agt_record_error_errinfo(scb, msg, layer, res2, 
-				     NULL, NCX_NT_OBJ, obj, 
-				     NCX_NT_VAL, val, errinfo);
-	}
-
-	if (res == NO_ERR) {
-	    res = res2;
-	}
-	break;
-    case NCX_BT_INSTANCE_ID:
-	/* do a complete parsing to retrieve the
-	 * instance that matched, just checking the
-	 * require-instance flag
-	 */
-	result = 
-	    xpath1_eval_xml_instanceid(scb->reader,
-				       val->xpathpcb,
-				       val,
-				       root,
-				       FALSE,
-				       &res2);
-	if (result) {
-	    xpath_free_result(result);
-	}
-
-	if (res2 != NO_ERR) {
-	    val->res = res2;
-	    agt_record_error(scb, msg, layer, res2, 
-			     NULL, NCX_NT_OBJ, obj, 
-			     NCX_NT_VAL, val);
-	}
-	if (res == NO_ERR) {
-	    res = res2;
-	}
-	break;
-    default:
-	;
-    }
-
     return res;
     
 }  /* instance_check */
@@ -1960,7 +1992,6 @@ static status_t
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   choicobj == object template for the choice to check
 *   val == parent val_value_t list or container to check
-*   root == database root of 'val'
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -1977,7 +2008,6 @@ static status_t
 		      xml_msg_hdr_t *msg,
 		      const obj_template_t *choicobj,
 		      val_value_t *val,
-		      val_value_t *root,
 		      ncx_layer_t   layer)
 {
     const obj_template_t  *testobj;
@@ -2024,8 +2054,7 @@ static status_t
 	 testobj != NULL;
 	 testobj = obj_next_child(testobj)) {
 
-	res = instance_check(scb, msg, testobj, 
-			     val, root, layer);
+	res = instance_check(scb, msg, testobj, val, layer);
 	CHK_EXIT(res, retres);
 	/* errors already recorded if other than NO_ERR */
     }
@@ -2325,6 +2354,11 @@ status_t
 		res = agt_val_instance_check(scb, msg, 
 					     chval, root, layer);
 		CHK_EXIT(res, retres);
+	    } else if (chval->btyp == NCX_BT_LEAFREF ||
+		       chval->btyp == NCX_BT_INSTANCE_ID) {
+		res = instance_xpath_check(scb, msg, chval, 
+					   root, layer);
+		CHK_EXIT(res, retres);
 	    }
 	}
     }
@@ -2340,10 +2374,10 @@ status_t
 
 	if (chobj->objtype == OBJ_TYP_CHOICE) {
 	    res = choice_check_agt(scb, msg, chobj, 
-				   valset, root, layer);
+				   valset, layer);
 	} else {
 	    res = instance_check(scb, msg, chobj, 
-				 valset, root, layer);
+				 valset, layer);
 	}
 	if (res != NO_ERR && valset->res == NO_ERR) {	    
 	    valset->res = res;
@@ -2397,6 +2431,8 @@ status_t
     }
 #endif
 
+    log_debug3("\nagt_val_root_check: start");
+
     retres = NO_ERR;
     ncxid = xmlns_ncx_id();
     obj = root->obj;
@@ -2441,14 +2477,16 @@ status_t
 
 	    if (chobj->objtype == OBJ_TYP_CHOICE) {
 		res = choice_check_agt(scb, msg, chobj, 
-				       root, root, NCX_LAYER_CONTENT);
+				       root, NCX_LAYER_CONTENT);
 	    } else {
 		res = instance_check(scb, msg, chobj, 
-				     root, root, NCX_LAYER_CONTENT);
+				     root, NCX_LAYER_CONTENT);
 	    }
 	    CHK_EXIT(res, retres);
 	}
     }
+
+    log_debug3("\nagt_val_root_check: end");
 
     return retres;
     

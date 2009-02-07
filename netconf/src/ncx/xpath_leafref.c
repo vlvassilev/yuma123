@@ -632,8 +632,7 @@ static status_t
 
 	/* validate the variable object foo in [foo = expr] */
 	if (pcb->obj && pcb->varobj) {
-	    if (!(pcb->varobj->objtype == OBJ_TYP_LEAF ||
-		  pcb->varobj->objtype == OBJ_TYP_LEAF_LIST)) {
+	    if (pcb->varobj->objtype != OBJ_TYP_LEAF) {
 		res = ERR_NCX_WRONG_TYPE;
 		log_error("\nError: path predicate found is %s '%s'",
 			  obj_get_typestr(pcb->varobj),
@@ -1162,25 +1161,15 @@ status_t
 	    pcb->validateres = res;
 	}
 
-	/* check for a leaf or leaf-list, then if that is OK,
-	 * check for a key leaf (!!! this may change!!!)
-	 */
+	/* check for a leaf, then if that is OK */
 	if (!obj_get_ctypdef(pcb->targobj) ||
+	    pcb->targobj->objtype != OBJ_TYP_LEAF ||
 	    obj_get_basetype(pcb->targobj) == NCX_BT_ANY) {
 	    res = ERR_NCX_INVALID_VALUE;
 	    log_error("\nError: invalid path target anyxml '%s'",
 		      obj_get_name(pcb->targobj));
 	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
 	    pcb->validateres = res;
-	} else {
-	    if (!obj_is_key(pcb->targobj)) {
-		res = ERR_NCX_INVALID_VALUE;
-		log_error("\nError: path target '%s' is "
-			  "not a key leaf",
-			  obj_get_name(pcb->targobj));
-		ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
-		pcb->validateres = res;
-	    }
 	}
 
 	/* this test is probably not worth doing,
@@ -1194,6 +1183,11 @@ status_t
 	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
 	    pcb->validateres = res;
 	}
+
+	/**** NEED TO CHECK THE CORNER CASE WHERE A LEAFREF
+	 **** AND/OR INSTANCE-IDENTIFIER COMBOS CAUSE A LOOP
+	 **** THAT WILL PREVENT AGENT VALIDATION FROM COMPLETING
+	 ****/
     }
 
     return pcb->validateres;

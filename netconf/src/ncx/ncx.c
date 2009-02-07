@@ -30,6 +30,7 @@ date         init     comment
 
 #include <ctype.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include <xmlstring.h>
 #include <xmlreader.h>
@@ -784,6 +785,46 @@ static void
     m__free(mod);
 
 }  /* free_module */
+
+
+/********************************************************************
+* FUNCTION remove_trailing_zero_count
+* 
+* Get the number of trailing zeros and maybe the decimal point too
+*
+* INPUTS:
+*   buff == number buffer to check
+*
+* RETURNS:
+*   number of chars to remove from the end of string
+*********************************************************************/
+static int32
+    remove_trailing_zero_count (const xmlChar *buff)
+{
+    int32  len, newlen;
+    const xmlChar  *str;
+
+    len = strlen((const char *)buff);
+    if (!len) {
+	return 0;
+    }
+
+    str = &buff[len-1];
+
+    while (str >= buff && *str == '0') {
+	str--;
+    }
+
+    if (*str == '.') {
+	str--;
+    }
+
+    newlen = (int32)(str - buff) + 1;
+
+    return len - newlen;
+
+}  /* remove_trailing_zero_count */
+
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -3148,7 +3189,11 @@ status_t
     unsigned long long ull;
 
 #ifdef HAS_FLOAT
+# ifdef STRTOF_FIXED
     float f;
+# else
+    double f;
+# endif
     double d;
 #else
     int64 f;
@@ -3163,6 +3208,8 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
+
+    err = NULL;
 
     /* check the number format set to don't know */
     if (numfmt==NCX_NF_NONE) {
@@ -3349,8 +3396,13 @@ status_t
         switch (numfmt) {
         case NCX_NF_DEC:
         case NCX_NF_REAL:
+	    errno = 0;
+#ifdef STRTOF_FIXED
             f = strtof((const char *)numstr, &err);
-            if (err && *err) {
+#else 
+            f = strtod((const char *)numstr, &err);
+#endif
+            if (errno) {
                 return ERR_NCX_INVALID_NUM;
             }
             val->f = f;
@@ -3388,8 +3440,9 @@ status_t
         switch (numfmt) {
         case NCX_NF_DEC:
         case NCX_NF_REAL:
+	    errno = 0;
             d = strtod((const char *)numstr, &err);
-            if (err && *err) {
+            if (errno) {
                 return ERR_NCX_INVALID_NUM;
             }
             val->d = d;
@@ -3595,7 +3648,11 @@ status_t
 	    break;
 	case NCX_BT_FLOAT32:
 #ifdef HAS_FLOAT
+# ifdef STRTOF_FIXED
 	    num2->f = (float)num1->i;
+# else
+	    num2->f = (double)num1->i;
+# endif
 #else
 	    num2->f = (int64)num1->i;
 #endif
@@ -3629,7 +3686,11 @@ status_t
 	    break;
 	case NCX_BT_FLOAT32:
 #ifdef HAS_FLOAT
+# ifdef STRTOF_FIXED
 	    num2->f = (float)num1->l;
+# else
+	    num2->f = (double)num1->l;
+# endif
 #else
 	    num2->f = (int64)num1->l;
 #endif
@@ -3667,7 +3728,11 @@ status_t
 	    break;
 	case NCX_BT_FLOAT32:
 #ifdef HAS_FLOAT
+# ifdef STRTOF_FIXED
 	    num2->f = (float)num1->u;
+# else
+	    num2->f = (double)num1->u;
+# endif
 #else
 	    num2->f = (int64)num1->u;
 #endif
@@ -3701,7 +3766,11 @@ status_t
 	    break;
 	case NCX_BT_FLOAT32:
 #ifdef HAS_FLOAT
+# ifdef STRTOF_FIXED
 	    num2->f = (float)num1->ul;
+# else
+	    num2->f = (double)num1->ul;
+# endif
 #else
 	    num2->f = (int64)num1->ul;
 #endif
@@ -3729,10 +3798,18 @@ status_t
 	    res = ERR_NCX_INVALID_VALUE;
 	    break;
 	case NCX_BT_INT64:
+#ifdef STRTOF_FIXED
 	    num2->l = (int64)lrintf(num1->f);
+#else
+	    num2->l = (int64)lrint(num1->f);
+#endif
 	    break;
 	case NCX_BT_UINT64:
+#ifdef STRTOF_FIXED
 	    num2->ul = (uint64)lrintf(num1->f);
+#else
+	    num2->ul = (uint64)lrint(num1->f);
+#endif
 	    break;
 	case NCX_BT_FLOAT32:
 	    num2->f = num1->f;
@@ -4219,6 +4296,10 @@ void
     ncx_printf_num (const ncx_num_t *num,
 		    ncx_btype_t  btyp)
 {
+    xmlChar   numbuff[VAL_MAX_NUMLEN];
+    uint32    len;
+    status_t  res;
+
 #ifdef DEBUG
     if (!num) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -4226,42 +4307,11 @@ void
     }
 #endif
 
-    switch (btyp) {
-    case NCX_BT_NONE:
-	log_write("--");
-	break;
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-	log_write("%d", num->i);
-	break;
-    case NCX_BT_INT64:
-	log_write("%lld", num->l);
-	break;
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-	log_write("%u", num->u);
-	break;
-    case NCX_BT_UINT64:
-	log_write("%llu", num->ul);
-	break;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	log_write("%1.15f", num->f);
-#else
-	log_write("%lld", num->f);
-#endif
-	break;
-    case NCX_BT_FLOAT64:
-#ifdef HAS_FLOAT
-	log_write("%1.15lf", num->d);
-#else
-	log_write("%lld", num->d);
-#endif
-	break;
-    default:
-	log_write("--");
+    res = ncx_sprintf_num(numbuff, num, btyp, &len);
+    if (res != NO_ERR) {
+	log_write("invalid num '%s'", get_error_string(res));
+    } else {
+	log_write("%s", numbuff);
     }
 
 } /* ncx_printf_num */
@@ -4290,8 +4340,9 @@ status_t
 		     ncx_btype_t  btyp,
 		     uint32   *len)
 {
-    int32  ilen;
-    xmlChar dumbuff[VAL_MAX_NUMLEN];
+
+    int32    ilen, tzcount;
+    xmlChar  dumbuff[VAL_MAX_NUMLEN];
 
 #ifdef DEBUG
     if (!num || !len) {
@@ -4323,14 +4374,28 @@ status_t
 	break;
     case NCX_BT_FLOAT32:
 #ifdef HAS_FLOAT
-	ilen = sprintf((char *)buff, "%1.15f", num->f);
+	ilen = sprintf((char *)buff, "%.14f", num->f);
+	tzcount = remove_trailing_zero_count(buff);
+	if (tzcount) {
+	    ilen -= tzcount;
+	    if (buff != dumbuff) {
+		buff[ilen] =  0;
+	    }
+	}
 #else
 	ilen = sprintf((char *)buff, "%lld", num->f);
 #endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	ilen = sprintf((char *)buff, "%1.15lf", num->d);
+	ilen = sprintf((char *)buff, "%.14f", num->d);
+	tzcount = remove_trailing_zero_count(buff);
+	if (tzcount) {
+	    ilen -= tzcount;
+	    if (buff != dumbuff) {
+		buff[ilen] =  0;
+	    }
+	}
 #else
 	ilen = sprintf((char *)buff, "%lld", num->d);
 #endif

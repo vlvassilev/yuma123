@@ -244,9 +244,9 @@ static void
 
 
 /********************************************************************
-* FUNCTION agt_init
+* FUNCTION agt_init1
 * 
-* Initialize the Agent Library
+* Initialize the Agent Library: stage 1: CLI and profile
 * 
 * TBD -- put platform-specific agent init here
 *
@@ -264,10 +264,10 @@ static void
 *   status of the initialization procedure
 *********************************************************************/
 status_t 
-    agt_init (int argc,
-	      const char *argv[],
-	      boolean *showver,
-	      boolean *showhelp)
+    agt_init1 (int argc,
+	       const char *argv[],
+	       boolean *showver,
+	       boolean *showhelp)
 {
     status_t  res;
 
@@ -278,6 +278,8 @@ status_t
 #ifdef AGT_DEBUG
     log_debug3("\nAgent Init Starting...");
 #endif
+
+    res = NO_ERR;
 
     /* initialize shutdown variables */
     agt_shutdown = FALSE;
@@ -327,6 +329,30 @@ status_t
     if (agt_profile.agt_runpath) {
 	ncxmod_set_runpath(agt_profile.agt_runpath);
     }
+
+    return res;
+
+} /* agt_init1 */
+
+
+/********************************************************************
+* FUNCTION agt_init2
+* 
+* Initialize the Agent Library
+* 
+* TBD -- put platform-specific agent init here
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t 
+    agt_init2 (void)
+{
+    status_t  res;
+
+#ifdef AGT_DEBUG
+    log_debug3("\nAgent Init-2 Starting...");
+#endif
 
     /* init user callback support */
     agt_cb_init();
@@ -480,7 +506,7 @@ status_t
 
     return NO_ERR;
 
-}  /* agt_init */
+}  /* agt_init2 */
 
 
 /********************************************************************

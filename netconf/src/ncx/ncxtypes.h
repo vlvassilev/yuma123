@@ -375,11 +375,15 @@ typedef union ncx_num_t_ {
     uint32 u;                           /* NCX_BT_UINT */
     uint64 ul;                         /* NCX_BT_ULONG */
 #ifdef HAS_FLOAT
+# ifdef STRTOF_FIXED
     float f;                           /* NCX_BT_FLOAT */
+# else
+    double f;                          /* NCX_BT_FLOAT */
+# endif
     double d;                         /* NCX_BT_DOUBLE */
 #else
-    int64  *f;                       /* NCX_BT_FLOAT */
-    int64  *d;                      /* NCX_BT_DOUBLE */
+    int64  f;                       /* NCX_BT_FLOAT */
+    int64  d;                      /* NCX_BT_DOUBLE */
 #endif
 } ncx_num_t;
 

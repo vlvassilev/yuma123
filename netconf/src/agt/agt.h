@@ -181,10 +181,13 @@ typedef struct agt_profile_t_ {
 *********************************************************************/
 
 extern status_t 
-    agt_init (int argc,
-	      const char *argv[],
-	      boolean *showver,
-	      boolean *showhelp);
+    agt_init1 (int argc,
+	       const char *argv[],
+	       boolean *showver,
+	       boolean *showhelp);
+
+extern status_t
+    agt_init2 (void);
 
 extern void 
     agt_cleanup (void);

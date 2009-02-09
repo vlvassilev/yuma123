@@ -752,6 +752,7 @@ static status_t
     const ncx_errinfo_t *errinfo;
     xml_node_t           valnode, endnode;
     status_t             res, res2;
+    ncx_numfmt_t         numfmt;
 
     /* init local vars */
     xml_init_node(&valnode);
@@ -787,8 +788,17 @@ static status_t
 	res = ERR_NCX_WRONG_NODETYP_CPX;
 	break;
     case XML_NT_STRING:
-	/* get the non-whitespace string here */
-	res = ncx_decode_num(valnode.simval, btyp, &retval->v.num);
+	/* convert the non-whitespace string to a number */
+	numfmt = ncx_get_numfmt(valnode.simval);
+	if (numfmt == NCX_NF_OCTAL) {
+	    numfmt = NCX_NF_DEC;
+	}
+	if (numfmt == NCX_NF_DEC || numfmt == NCX_NF_REAL) {
+	    res = ncx_convert_num(valnode.simval, numfmt,
+				  btyp, &retval->v.num);
+	}  else {
+	    res = ERR_NCX_WRONG_NUMTYP;
+	}
 	if (res == NO_ERR) {
 	    res = val_range_ok_errinfo(obj_get_ctypdef(obj), btyp, 
 				       &retval->v.num, &errinfo);

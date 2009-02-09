@@ -233,7 +233,12 @@ static status_t
      * to be processed.  No module can get its internal config
      * until the NCX module parser and definition registry is up
      */
-    res = ncx_init(FALSE, dlevel, "\nStarting netconfd...");
+    res = ncx_init(FALSE, 
+		   dlevel, 
+		   TRUE,
+		   "\nStarting netconfd",
+		   argc, argv);
+		   
     if (res != NO_ERR) {
 	return res;
     }
@@ -388,11 +393,10 @@ int
 
     stdlog = !log_is_open();
     
-#ifdef NETCONFD_DEBUG
-    log_debug2("\nnetconfd: init returned (%d)", res);
-#endif
-
-    if (res==NO_ERR) {
+    if (res != NO_ERR) {
+	log_error("\nnetconfd: init returned (%s)", 
+		  get_error_string(res));
+    } else {
 	if (showver) {
 	    log_write("\nnetconfd version %s\n", progver);
 	} else if (showhelp) {

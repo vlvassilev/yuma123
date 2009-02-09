@@ -1268,6 +1268,9 @@ static status_t
 			   FULLTEST, PLAINMODE, TRUE, &res);
     }
     if (res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
 	return res;
     } else if (!valset) {
 	pr_usage();
@@ -1305,8 +1308,6 @@ static status_t
 	    log_error("\nError: invalid log-level value (%s)",
 		      (const char *)VAL_STR(val));
 	    return ERR_NCX_INVALID_VALUE;
-	} else {
-	    log_set_debug_level(cp->log_level);
 	}
     }
 
@@ -1322,15 +1323,6 @@ static status_t
     val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_LOGAPPEND);
     if (val) {
 	cp->logappend = TRUE;
-    }
-
-    /* try to open the log file if requested */
-    if (cp->full_logfilename) {
-	res = log_open((const char *)cp->full_logfilename,
-		       cp->logappend, FALSE);
-	if (res != NO_ERR) {
-	    return res;
-	}
     }
 
     /*** ORDER DOES NOT MATTER FOR REST OF PARAMETERS ***/
@@ -1491,7 +1483,10 @@ static status_t
 #else
 		   LOG_DEBUG_WARN,
 #endif
-		   NULL);
+		   FALSE,
+		   "\nStarting yangdiff",
+		   argc, argv);
+
     if (res == NO_ERR) {
 	/* load in the YANG converter CLI definition file */
 	res = ncxmod_load_module(YANGDIFF_MOD);

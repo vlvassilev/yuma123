@@ -209,7 +209,8 @@ void
     if (res == NO_ERR) {
 	attr = xml_find_attr(top, 0, NCX_EL_VERSION);
 	if (attr && attr->attr_val) {
-	    res = ncx_decode_num(attr->attr_val, NCX_BT_UINT32, &num);
+	    res = ncx_convert_num(attr->attr_val, NCX_NF_DEC,
+				  NCX_BT_UINT32, &num);
 	    if (res == NO_ERR) {
 		if (num.u != NCX_SERVER_VERSION) {
 		    res = ERR_NCX_WRONG_VERSION;
@@ -224,7 +225,8 @@ void
     if (res == NO_ERR) {
 	attr = xml_find_attr(top, 0, NCX_EL_PORT);
 	if (attr && attr->attr_val) {
-	    res = ncx_decode_num(attr->attr_val, NCX_BT_UINT16, &num);
+	    res = ncx_convert_num(attr->attr_val, NCX_NF_DEC,
+				  NCX_BT_UINT16, &num);
 	    if (res == NO_ERR) {
 		if (!agt_ses_ssh_port_allowed((uint16)num.u)) {
 		    res = ERR_NCX_ACCESS_DENIED;

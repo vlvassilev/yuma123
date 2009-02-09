@@ -106,9 +106,11 @@ date         init     comment
 static status_t
     set_next_objnode (xpath_pcb_t *pcb,
 		      const xmlChar *prefix,
+		      xmlns_id_t  nsid,
 		      const xmlChar *nodename)
 {
     const obj_template_t  **useobj, *foundobj;
+    const xmlChar          *modname;
     ncx_module_t           *targmod;
     status_t                res;
 
@@ -130,12 +132,23 @@ static status_t
     }
 
     if (res == NO_ERR) {
-	res = xpath_get_curmod_from_prefix(prefix,
-					   pcb->mod,
-					   &targmod);
-	if (res != NO_ERR) {
-	    log_error("\nError: Module for prefix '%s' not found",
-		      (prefix) ? prefix : EMPTY_STRING);
+	if (pcb->source == XP_SRC_XML) {
+	    targmod = NULL;
+	    modname = xmlns_get_module(nsid);
+	    if (modname) {
+		targmod = ncx_find_module(modname);
+	    }
+	    if (!targmod) {
+		res = ERR_NCX_DEF_NOT_FOUND;
+	    }
+	} else {
+	    res = xpath_get_curmod_from_prefix(prefix,
+					       pcb->mod,
+					       &targmod);
+	    if (res != NO_ERR) {
+		log_error("\nError: Module for prefix '%s' not found",
+			  (prefix) ? prefix : EMPTY_STRING);
+	    }
 	}
     }
 
@@ -187,14 +200,16 @@ static status_t
 
     if (!foundobj) {
 	res = ERR_NCX_DEF_NOT_FOUND;
-	if (prefix) {
-	    log_error("\nError: object not found '%s:%s'",
-		      prefix, nodename);
-	} else {
-	    log_error("\nError: object not found '%s'",
-		      nodename);
+	if (pcb->logerrors) {
+	    if (prefix) {
+		log_error("\nError: object not found '%s:%s'",
+			  prefix, nodename);
+	    } else {
+		log_error("\nError: object not found '%s'",
+			  nodename);
+	    }
+	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
 	}
-	ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
     } else {
 	*useobj = foundobj;
     }
@@ -291,11 +306,13 @@ static status_t
 static status_t
     parse_node_identifier (xpath_pcb_t *pcb)
 {
-    const xmlChar  *prefix;
+    const xmlChar  *prefix, *nodename;
     ncx_import_t   *import;
     status_t        res;
+    xmlns_id_t      nsid;
 
     prefix = NULL;
+    nsid = 0;
     import = NULL;
     res = NO_ERR;
 
@@ -307,24 +324,57 @@ static status_t
     }
 
     switch (TK_CUR_TYP(pcb->tkc)) {
+    case TK_TT_PERIOD:
+	if (pcb->flags & XP_FL_INSTANCEID) {
+	    if (!(pcb->targobj && 
+		  pcb->targobj->objtype == OBJ_TYP_LEAF_LIST)) {
+		res = ERR_NCX_INVALID_VALUE;
+	    } else {
+		nodename = obj_get_name(pcb->targobj);
+	    }
+	} else {
+	    res = ERR_NCX_WRONG_TKTYPE;
+	    log_error("\nError: '.' not allowed here");
+	    ncx_print_errormsg(pcb->tkc, NULL, res);
+	}
+	break;
     case TK_TT_MSTRING:
 	/* pfix:identifier */
 	prefix = TK_CUR_MOD(pcb->tkc);
-	if (xml_strcmp(pcb->mod->prefix, prefix)) {
-	    import = ncx_find_pre_import(pcb->mod, prefix);
-	    if (!import) {
-		res = ERR_NCX_PREFIX_NOT_FOUND;
-		log_error("\nError: import for prefix '%s' not found",
-			  prefix);
-		ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+
+	if (pcb->source != XP_SRC_XML) {
+	    if (xml_strcmp(pcb->mod->prefix, prefix)) {
+		import = ncx_find_pre_import(pcb->mod, prefix);
+		if (!import) {
+		    res = ERR_NCX_PREFIX_NOT_FOUND;
+		    log_error("\nError: import for prefix '%s' not found",
+			      prefix);
+		    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+		    break;
+		}
+	    }
+	} else {
+	    res = xml_get_namespace_id(pcb->reader,
+				       prefix,
+				       TK_CUR_MODLEN(pcb->tkc),
+				       &nsid);
+	    if (res != NO_ERR) {
+		if (pcb->logerrors) {
+		    log_error("\nError: unknown XML prefix '%s'",  prefix);
+		    ncx_print_errormsg(pcb->tkc, NULL, res);
+		}
 		break;
 	    }
 	}
 	/* fall through to check QName */
     case TK_TT_TSTRING:
 	if (pcb->obj) {
-	    res = set_next_objnode(pcb, prefix,
-				   TK_CUR_VAL(pcb->tkc));
+	    if (pcb->source == XP_SRC_XML) {
+		res = set_next_objnode(pcb, prefix, nsid, nodename);
+	    } else {
+		res = set_next_objnode(pcb, prefix, nsid,
+				       TK_CUR_VAL(pcb->tkc));
+	    }
 	} /* else identifier not checked here */
 	break;
     default:
@@ -586,7 +636,7 @@ static status_t
 {
     tk_type_t              nexttyp;
     status_t               res;
-    boolean                done;
+    boolean                done, leaflist;
     uint64                 keyflags, keybit;
     uint32                 keytotal, keycount, loopcount;
     int32                  keynum;
@@ -597,18 +647,26 @@ static status_t
     keytotal = 0;
     keycount = 0;
     loopcount = 0;
+    leaflist = FALSE;
 
     if (pcb->targobj && pcb->targobj->objtype == OBJ_TYP_LIST) {
 	keytotal = obj_key_count(pcb->targobj);
 	if (keytotal > 64) {
-	    log_warn("\nWarning: Only first 64 keys in list '%s'"
-		     " can be checked in XPath expression", 
-		     obj_get_name(pcb->obj));
+	    if (pcb->logerrors) {
+		log_warn("\nWarning: Only first 64 keys in list '%s'"
+			 " can be checked in XPath expression", 
+			 obj_get_name(pcb->obj));
+	    }
 	}
+    } else if ((pcb->flags & XP_FL_INSTANCEID) && pcb->targobj && 
+	       pcb->targobj->objtype == OBJ_TYP_LEAF_LIST) {
+	keytotal = 1;
     }
     
     /* make one loop for each step */
     while (!done) {
+
+	leaflist = FALSE;
 
 	/* only used if pcb->obj set and validating expr */
 	loopcount++;
@@ -632,60 +690,61 @@ static status_t
 
 	/* validate the variable object foo in [foo = expr] */
 	if (pcb->obj && pcb->varobj) {
-	    if (pcb->varobj->objtype != OBJ_TYP_LEAF) {
+	    if ((pcb->flags & XP_FL_INSTANCEID) &&
+		pcb->varobj->objtype == OBJ_TYP_LEAF_LIST) {
+		if (!(pcb->targobj && pcb->targobj == pcb->varobj)) {
+		    res = ERR_NCX_WRONG_INDEX_TYPE;
+		    if (pcb->logerrors) {
+			log_error("\nError: wrong index type '%s' for "
+				  "leaf-list '%s'",
+				  obj_get_typestr(pcb->varobj),
+				  obj_get_name(pcb->targobj));
+			ncx_print_errormsg(pcb->tkc, NULL, res);
+		    }
+		} else {
+		    leaflist = TRUE;
+		}
+	    } else if (pcb->varobj->objtype != OBJ_TYP_LEAF) {
 		res = ERR_NCX_WRONG_TYPE;
-		log_error("\nError: path predicate found is %s '%s'",
-			  obj_get_typestr(pcb->varobj),
-			  obj_get_name(pcb->varobj));
-		ncx_mod_exp_err(pcb->tkc, 
-				pcb->objmod, 
-				res, "leaf");
-		done = TRUE;
-		continue;
-	    }
-
-#ifdef NEED_TO_CHECK_KEY_LEAF
-	    switch (pcb->source) {
-	    case XP_SRC_LEAFREF:
-		if (!obj_is_key(pcb->varobj)) {
-		    res = ERR_NCX_TYPE_NOT_INDEX;
-		    log_error("\nError: path predicate '%s' is "
-			      "not a key leaf",
+		if (pcb->logerrors) {
+		    log_error("\nError: path predicate found is %s '%s'",
+			      obj_get_typestr(pcb->varobj),
 			      obj_get_name(pcb->varobj));
 		    ncx_mod_exp_err(pcb->tkc, 
 				    pcb->objmod, 
-				    res, "key leaf");
-		    done = TRUE;
-		    continue;
+				    res, "leaf");
 		}
-		break;
-	    default:
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-		ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
 		done = TRUE;
 		continue;
 	    }
-#endif
 
-	    keynum = get_key_number(pcb->targobj, pcb->varobj);
+	    if (leaflist) {
+		keynum = 0;
+	    } else {
+		keynum = get_key_number(pcb->targobj, pcb->varobj);
+	    }
 	    if (keynum == -1) {
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    } else if (keynum < 64) {
 		keybit = (uint64)(1 << keynum);
 		if (keyflags & keybit) {
 		    res = ERR_NCX_EXTRA_PARM;
-		    log_error("\nError: key '%s' already specified "
-			      "in XPath expression for object '%s'",
-			      obj_get_name(pcb->varobj),
-			      obj_get_name(pcb->targobj));
-		    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+		    if (pcb->logerrors) {
+			log_error("\nError: key '%s' already specified "
+				  "in XPath expression for object '%s'",
+				  obj_get_name(pcb->varobj),
+				  obj_get_name(pcb->targobj));
+			ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+		    }
 		} else {
 		    keycount++;
 		    keyflags |= keybit;
 		}
 	    } else {
-		log_warn("\nWarning: Key '%s' skipped in validation test",
-			 obj_get_name(pcb->varobj));
+		if (pcb->logerrors) {
+		    log_warn("\nWarning: Key '%s' skipped in validation test",
+			     obj_get_name(pcb->varobj));
+		}
 	    }
 	} 
 
@@ -696,41 +755,70 @@ static status_t
 	    continue;
 	}
 
-	/* get the path-key-expr next */
-	res = parse_path_key_expr(pcb);
-	if (res != NO_ERR) {
-	    done = TRUE;
-	    continue;
+	if (pcb->flags & XP_FL_INSTANCEID) {
+	    pcb->altobj = NULL;
+
+	    /* parse literal */
+	    res = TK_ADV(pcb->tkc);
+	    if (res == NO_ERR) {
+		if (!(TK_CUR_TYP(pcb->tkc) == TK_TT_QSTRING ||
+		      TK_CUR_TYP(pcb->tkc) == TK_TT_SQSTRING)) {
+		    res = ERR_NCX_WRONG_TKTYPE;
+		}
+	    }
+
+	    if (res != NO_ERR) {
+		if (pcb->logerrors) {
+		    log_error("\nError: invalid predicate in "
+			      "expression '%s'", pcb->exprstr);
+		    ncx_print_errormsg(pcb->tkc, NULL, res);
+		}
+		done = TRUE;
+		continue;
+	    }
+	} else {
+	    /* get the path-key-expr next */
+	    res = parse_path_key_expr(pcb);
+	    if (res != NO_ERR) {
+		done = TRUE;
+		continue;
+	    }
 	}
 
 	/* check the object specified in the key expression */
 	if (pcb->obj && pcb->altobj) {
 	    if (pcb->altobj->objtype != OBJ_TYP_LEAF) {
 		res = ERR_NCX_WRONG_TYPE;
-		log_error("\nError: path target found is %s '%s'",
-			  obj_get_typestr(pcb->altobj),
-			  obj_get_name(pcb->altobj));
-		ncx_mod_exp_err(pcb->tkc, 
-				pcb->objmod, 
-				res, "leaf");
+		if (pcb->logerrors) {
+		    log_error("\nError: path target found is %s '%s'",
+			      obj_get_typestr(pcb->altobj),
+			      obj_get_name(pcb->altobj));
+		    ncx_mod_exp_err(pcb->tkc, 
+				    pcb->objmod, 
+				    res, "leaf");
+		}
 		done = TRUE;
 		continue;
 	    } else {
 		/* check the predicate for errors */
 		if (pcb->altobj == pcb->obj) {
 		    res = ERR_NCX_DEF_LOOP;
-		    log_error("\nError: path target '%s' is set to "
-			      "the target object",
-			      obj_get_name(pcb->altobj));
-		    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+		    if (pcb->logerrors) {
+			log_error("\nError: path target '%s' is set to "
+				  "the target object",
+				  obj_get_name(pcb->altobj));
+			ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+		    }
 		    done = TRUE;
 		    continue;
 		} else if (pcb->altobj == pcb->varobj) {
 		    res = ERR_NCX_DEF_LOOP;
-		    log_error("\nError: path target '%s' is set to "
-			      "the key leaf object",
-			      obj_get_name(pcb->altobj));
-		    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+		    if (pcb->logerrors) {
+			log_error("\nError: path target '%s' is set to "
+				  "the key leaf object",
+				  obj_get_name(pcb->altobj));
+			ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+		    }
 		    done = TRUE;
 		    continue;
 		}
@@ -759,16 +847,21 @@ static status_t
 	if (loopcount != keytotal) {
 	    if (keycount < keytotal) {
 		res = ERR_NCX_MISSING_INDEX;
-		log_error("\nError: missing key components in"
-			  " XPath expression for list '%s'",
-			  obj_get_name(pcb->targobj));
+		if (pcb->logerrors) {
+		    log_error("\nError: missing key components in"
+			      " XPath expression for list '%s'",
+			      obj_get_name(pcb->targobj));
+		    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+		}
 	    } else {
 		res = ERR_NCX_EXTRA_VAL_INST;
-		log_error("\nError: extra key components in"
-			  " XPath expression for list '%s'",
-			  obj_get_name(pcb->targobj));
+		if (pcb->logerrors) {
+		    log_error("\nError: extra key components in"
+			      " XPath expression for list '%s'",
+			      obj_get_name(pcb->targobj));
+		    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+		}
 	    }
-	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
 	}
     }
 
@@ -857,9 +950,11 @@ static status_t
 	nexttyp = tk_next_typ(pcb->tkc);
 	if (nexttyp != TK_TT_NONE) {
 	    res = ERR_NCX_INVALID_TOKEN;
-	    log_error("\nError: wrong token at end of absolute-path '%s'",
-		      tk_get_token_name(nexttyp));
-	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	    if (pcb->logerrors) {
+		log_error("\nError: wrong token at end of absolute-path '%s'",
+			  tk_get_token_name(nexttyp));
+		ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	    }
 	}
     }
 
@@ -1032,6 +1127,8 @@ status_t
     }
 #endif
 
+    pcb->logerrors = TRUE;
+
     /* before all objects are known, only simple validation
      * is done, and the token chain is saved for reuse
      * each time the expression is evaluated
@@ -1113,6 +1210,7 @@ status_t
     }
 #endif
 
+    pcb->logerrors = TRUE;
     *leafobj = NULL;
 
     if (pcb->parseres != NO_ERR) {
@@ -1193,6 +1291,96 @@ status_t
     return pcb->validateres;
 
 }  /* xpath_leafref_validate_path */
+
+
+/********************************************************************
+* FUNCTION xpath_leafref_validate_xmlpath
+* 
+* Validate an instance-identifier expression
+* within an XML PDU context
+*
+* INPUTS:
+*    reader == XML reader to use
+*    pcb == initialized XPath parser control block
+*           the xpath_new_pcb(exprstr) function is
+*           all that is needed.  This function will
+*           call tk_tokenize_xpath_string if it has not
+*           already been called.
+*    logerrors == TRUE if log_error and ncx_print_errormsg
+*                  should be used to log XPath errors and warnings
+*                 FALSE if internal error info should be recorded
+*                 in the xpath_result_t struct instead
+*                !!! use FALSE unless DEBUG mode !!!
+*    targobj == address of return target object
+*     
+* OUTPUTS:
+*   *targobj is set to the object that this instance-identifier
+*    references, if NO_ERR
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_leafref_validate_xmlpath (xmlTextReaderPtr reader,
+				    xpath_pcb_t *pcb,
+				    boolean logerrors,
+				    const obj_template_t **targobj)
+{
+    status_t  res;
+
+#ifdef DEBUG
+    if (!reader || !pcb || !targobj) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    *targobj = NULL;
+
+    if (pcb->tkc) {
+	tk_reset_chain(pcb->tkc);
+    } else {
+	pcb->tkc = tk_tokenize_xpath_string(NULL, pcb->exprstr, 
+					    0, 0, &res);
+    }
+
+    if (!pcb->tkc || res != NO_ERR) {
+	if (logerrors) {
+	    log_error("\nError: Invalid path string '%s'",
+		      pcb->exprstr);
+	}
+	pcb->parseres = res;
+	return res;
+    }
+
+    pcb->docroot = ncx_get_gen_root();
+    if (!pcb->docroot) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    pcb->obj = pcb->docroot;
+    pcb->reader = reader;
+    pcb->flags = XP_FL_INSTANCEID;
+    pcb->source = XP_SRC_XML;
+    pcb->logerrors = logerrors;
+    pcb->objmod = NULL;
+    pcb->val = NULL;
+    pcb->val_docroot = NULL;
+    pcb->targobj = NULL;
+    pcb->altobj = NULL;
+    pcb->varobj = NULL;
+    pcb->curmode = XP_CM_TARGET;
+
+    /* validate the XPath expression against the 
+     * full cooked object tree
+     */
+    pcb->validateres = parse_absolute_path(pcb);
+
+    /* check leafref is config but target is not */
+    if (pcb->validateres == NO_ERR && pcb->targobj) {
+	*targobj = pcb->targobj;
+    }
+
+    return pcb->validateres;
+
+}  /* xpath_leafref_validate_xmlpath */
 
 
 /* END xpath.c */

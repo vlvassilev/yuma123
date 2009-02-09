@@ -24,9 +24,16 @@ date	     init     comment
 10-feb-07    abb      Split out common functions from agt_ps_parse.h
 29-jul-08    abb      change to cli.h; remove all by CLI parsing;
                       conversion from NCX parmset to YANG object
+07-feb-09    abb      Add cli_rawparm_t and cli_parse_raw
+                      for bootstrap CLI support
+
 */
 
 #include <xmlstring.h>
+
+#ifndef _H_dlq
+#include "dlq.h"
+#endif
 
 #ifndef _H_ncxtypes
 #include "ncxtypes.h"
@@ -61,6 +68,14 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/* used for bootstrap CLI parms only, no validation */
+typedef struct cli_rawparm_t_ {
+    dlq_hdr_t   qhdr;
+    const char *name;
+    char       *value;
+    int32       count;
+} cli_rawparm_t;
+
 
 /********************************************************************
 *								    *
@@ -68,6 +83,27 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/*** bootstrap CLI support ***/
+extern cli_rawparm_t *
+    cli_new_rawparm (const xmlChar *name);
+
+extern void
+    cli_free_rawparm (cli_rawparm_t *parm);
+
+extern void
+    cli_clean_rawparmQ (dlq_hdr_t *parmQ);
+
+extern cli_rawparm_t *
+    cli_find_rawparm (const xmlChar *name,
+		      dlq_hdr_t *parmQ);
+
+extern status_t
+    cli_parse_raw (int argc, 
+		   const char *argv[],
+		   dlq_hdr_t *rawparmQ);
+
+
+/*** schema based CLI support ***/
 extern val_value_t *
     cli_parse (int argc, 
 	       const char *argv[],

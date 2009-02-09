@@ -303,17 +303,7 @@ status_t
 	return NO_ERR;
     }
 
-    /* set the debug logging level */
-    log_set_debug_level(agt_profile.agt_loglevel);
-
-    /* set the log file */
-    if (agt_profile.agt_logfile) {
-	res = log_open((const char *)agt_profile.agt_logfile,
-		       agt_profile.agt_logappend, TRUE);
-	if (res != NO_ERR) {
-	    return res;
-	}
-    }
+    /* loglevel and log file already set */
 
     /* set the module search path */
     if (agt_profile.agt_modpath) {

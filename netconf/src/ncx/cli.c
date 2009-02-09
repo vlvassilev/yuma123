@@ -133,12 +133,6 @@ static status_t
     ncx_btype_t        btyp;
     status_t           res;
     
-#ifdef DEBUG
-    if (!val || !obj) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
     /* create a new parm and fill it in */
     new_parm = val_new_value();
     if (!new_parm) {
@@ -213,12 +207,6 @@ static status_t
     ncx_btype_t        btyp;
     status_t           res;
     
-#ifdef DEBUG
-    if (!val || !obj) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
     /* create a new parm and fill it in */
     new_parm = val_new_value();
     if (!new_parm) {
@@ -256,7 +244,401 @@ static status_t
 }  /* parse_parm_ex */
 
 
+/********************************************************************
+* FUNCTION find_rawparm
+* 
+* Find the specified raw parm entry
+*
+* INPUTS:
+*   parmQ == Q of cli_rawparm_t 
+*   name == object name to really use
+*   namelen == length of 'name'
+*
+* RETURNS:
+*   raw parm entry if found, NULL if not
+*********************************************************************/
+static cli_rawparm_t *
+    find_rawparm (dlq_hdr_t *parmQ,
+		  const char *name,
+		  int32 namelen)
+{
+    cli_rawparm_t  *parm;
+
+    if (!namelen) {
+	return NULL;
+    }
+
+    /* check exact match */
+    for (parm = (cli_rawparm_t *)dlq_firstEntry(parmQ);
+	 parm != NULL;
+	 parm = (cli_rawparm_t *)dlq_nextEntry(parm)) {
+
+	if (strlen(parm->name) == (size_t)namelen &&
+	    !strncmp(parm->name, name, namelen)) {
+	    return parm;
+	}
+    }
+
+    /* check first partial match */
+    for (parm = (cli_rawparm_t *)dlq_firstEntry(parmQ);
+	 parm != NULL;
+	 parm = (cli_rawparm_t *)dlq_nextEntry(parm)) {
+
+	if (!strncmp(parm->name, name, namelen)) {
+	    return parm;
+	}
+    }
+
+    return NULL;
+
+} /* find_rawparm */
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
+
+
+/********************************************************************
+* FUNCTION cli_new_rawparm
+* 
+* Malloc and init a raw parm entry
+*
+* INPUTS:
+*   name == name of parm (static const string)
+*
+* RETURNS:
+*   new parm entry, NULL if malloc failed
+*********************************************************************/
+cli_rawparm_t *
+    cli_new_rawparm (const xmlChar *name)
+{
+    cli_rawparm_t  *parm;
+
+#ifdef DEBUG
+    if (!name) {
+	return NULL;
+    }
+#endif
+
+    parm = m__getObj(cli_rawparm_t);
+    if (parm) {
+	memset(parm, 0x0, sizeof(cli_rawparm_t));
+	parm->name = (const char *)name;
+    }
+    return parm;
+
+} /* cli_new_rawparm */
+
+
+/********************************************************************
+* FUNCTION cli_free_rawparm
+* 
+* Clean and free a raw parm entry
+*
+* INPUTS:
+*   parm == raw parm entry to free
+*********************************************************************/
+void
+    cli_free_rawparm (cli_rawparm_t *parm)
+{
+#ifdef DEBUG
+    if (!parm) {
+	return;
+    }
+#endif
+
+    if (parm->value) {
+	m__free(parm->value);
+    }
+    m__free(parm);
+
+} /* cli_free_rawparm */
+
+
+/********************************************************************
+* FUNCTION cli_clean_rawparmQ
+* 
+* Clean and free a Q of raw parm entries
+*
+* INPUTS:
+*   parmQ == Q of raw parm entry to free
+*********************************************************************/
+void
+    cli_clean_rawparmQ (dlq_hdr_t *parmQ)
+{
+    cli_rawparm_t  *parm;
+
+#ifdef DEBUG
+    if (!parmQ) {
+	return;
+    }
+#endif
+
+    while (!dlq_empty(parmQ)) {
+	parm = (cli_rawparm_t *)dlq_deque(parmQ);
+	cli_free_rawparm(parm);
+    }
+
+} /* cli_clean_rawparmQ */
+
+
+/********************************************************************
+* FUNCTION cli_find_rawparm
+* 
+* Find the specified raw parm entry
+*
+* INPUTS:
+*   name == object name to really use
+*   parmQ == Q of cli_rawparm_t 
+*
+* RETURNS:
+*   raw parm entry if found, NULL if not
+*********************************************************************/
+cli_rawparm_t *
+    cli_find_rawparm (const xmlChar *name,
+		      dlq_hdr_t *parmQ)
+{
+#ifdef DEBUG
+    if (!name || !parmQ) {
+	return NULL;
+    }
+#endif
+
+    return find_rawparm(parmQ, (const char *)name, 
+			strlen((const char *)name));
+
+} /* cli_find_rawparm */
+
+
+/********************************************************************
+* FUNCTION cli_parse_raw
+* 
+* Generate N sets of variable/value pairs for the
+* specified boot-strap CLI parameters
+* 
+* There are no modules loaded yet, and nothing
+* has been initialized, not even logging
+* This function is almost the first thing done
+* by the application
+*
+* CLI Syntax Supported
+*
+* [prefix] parmname
+*
+* [prefix] parmname=value
+*
+*    prefix ==  0 to 2 dashes    foo  -foo --foo
+*    parmname == any valid NCX identifier string
+*    value == string
+*
+* No spaces are allowed after 'parmname' if 'value' is entered
+* Each parameter is allowed to occur zero or one times.
+* If multiple instances of a parameter are entered, then
+* the last one entered will win.
+* The 'autocomp' parameter is set to TRUE
+*
+* The 'value' string cannot be split across multiple argv segments.
+* Use quotation chars within the CLI shell to pass a string
+* containing whitespace to the CLI parser:
+*
+*   --foo="quoted string if whitespace needed"
+*   --foo="quoted string if setting a variable \
+*         as a top-level assignment"
+*   --foo=unquoted-string-without-whitespace
+*
+*  - There are no 1-char aliases for CLI parameters.
+*  - Position-dependent, unnamed parameters are not supported
+*
+* INPUTS:
+*   argc == number of strings passed in 'argv'
+*   argv == array of command line argument strings
+*   parmQ == Q of cli_rawparm_t entries
+*            that should be used to validate the CLI input
+*            and store the results
+*
+* OUTPUTS:
+*    *rawparm (within parmQ):
+*       - 'value' will be recorded if it is present
+*       - count will be set to the number of times this 
+*         parameter was entered (set even if no value)
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    cli_parse_raw (int argc, 
+		   const char *argv[],
+		   dlq_hdr_t *rawparmQ)
+{
+    cli_rawparm_t  *rawparm;
+    char           *parmname, *parmval, *str, *buff;
+    int32           parmnamelen, buffpos, bufflen;
+    int             parmnum;
+    status_t        res;
+
+#ifdef DEBUG
+    if (!argv || !rawparmQ) {
+	return ERR_INTERNAL_PTR;
+    }
+    if (dlq_empty(rawparmQ)) {
+	return ERR_INTERNAL_VAL;
+    }
+#endif
+
+    /* check if there are any parameters at all to parse */
+    if (argc < 2) {
+	return NO_ERR;
+    }
+
+    /* gather all the argv strings into one buffer for easier parsing
+     * need to copy because the buffer is written during parsing
+     * and the argv parameter is always a 'const char **' data type
+     *
+     * first determine the buffer length
+     */
+    bufflen = 0;
+    for (parmnum=1; parmnum < argc; parmnum++) {
+	bufflen += (uint32)(strlen(argv[parmnum]) + 1);
+    }
+
+    /* adjust extra space */
+    if (bufflen) {
+	bufflen--;
+    }
+
+    buff = m__getMem(bufflen+1);
+    if (!buff) {
+	/* non-recoverable error */
+	return ERR_INTERNAL_MEM;
+    }
+
+    /* copy the argv strings into the buffer */
+    buffpos = 0;
+    for (parmnum=1; parmnum < argc; parmnum++) {
+	buffpos += xml_strcpy((xmlChar *)&buff[buffpos], 
+			      (const xmlChar *)argv[parmnum]);
+	if (parmnum+1 < argc) {
+	    buff[buffpos++] = ' ';
+	}
+    }
+    buff[buffpos] = 0;
+
+    /* setup parm loop */
+    buffpos = 0;
+
+    res = NO_ERR;
+
+    /* go through all the command line strings
+     * setup parmname and parmval based on strings found
+     * and the rawparmQ for these parameters
+     * save each parm value in the parmQ entry
+     */
+    while (buffpos < bufflen && res == NO_ERR) {
+
+	/* first skip starting whitespace */
+	while (buff[buffpos] && isspace(buff[buffpos])) {
+	    buffpos++;
+	}
+
+	/* check start of parameter name conventions 
+	 * allow zero, one, or two dashes before parmname
+         *          foo   -foo   --foo
+	 */
+	if (!buff[buffpos]) {
+	    res = ERR_NCX_WRONG_LEN;
+	} else if (buff[buffpos] == NCX_CLI_START_CH) {
+	    if (!buff[buffpos+1]) {
+		res = ERR_NCX_WRONG_LEN;
+	    } else if (buff[buffpos+1] == NCX_CLI_START_CH) {
+		if (!buff[buffpos+2]) {
+		    res = ERR_NCX_WRONG_LEN;
+		} else {
+		    buffpos += 2;  /* skip past 2 dashes */
+		}
+	    } else {
+		buffpos++;    /* skip past 1 dash */
+	    }
+	} /* else no dashes, leave parmname pointer alone */
+
+	/* check for the end of the parm name, wsp or equal sign
+	 * get the parm template, and get ready to parse it
+	 */
+	if (res != NO_ERR) {
+	    continue;
+	}
+
+	/* check the parmname string for a terminating char */
+	parmname = &buff[buffpos];
+	str = &parmname[1];
+	while (*str && !isspace(*str) && *str != NCX_ASSIGN_CH) {
+	    str++;
+	}
+
+	parmnamelen = str - parmname;
+	buffpos += parmnamelen;
+
+	parmval = NULL;
+
+	/* check if this parameter name is in the parmset def */
+	rawparm = find_rawparm(rawparmQ, parmname, parmnamelen);
+
+	if (rawparm) {
+	    rawparm->count++;
+	}
+
+	if (buffpos < bufflen && buff[buffpos] == '=') {
+	    buffpos++;
+
+	    /* if any chars left in buffer, get the parmval */
+	    if (buffpos < bufflen) {
+		if (buff[buffpos] == NCX_QUOTE_CH) {
+		    /* set the start after quote */
+		    parmval = &buff[++buffpos];
+			
+		    /* find the end of the quoted string */
+		    str = &parmval[1];
+		    while (*str && *str != NCX_QUOTE_CH) {
+			str++;
+		    }
+		} else {
+		    /* set the start of the parmval */
+		    parmval = &buff[buffpos];
+		    
+		    /* find the end of the unquoted string */
+		    str = &parmval[1];
+		    while (*str && !isspace(*str)) {
+			str++;
+		    }
+		}
+
+		/* terminate string */
+		*str = 0;
+
+		/* skip buffpos past eo-string */
+		buffpos += (int32)((str - parmval) + 1);  
+	    }
+        }
+
+	if (rawparm && parmval) {
+	    if (rawparm->value) {
+		m__free(rawparm->value);
+	    }
+	    rawparm->value = strdup(parmval);
+	    if (!rawparm->value) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		/* manually bump the malloc count since 
+		 * strdup did not do that
+		 */
+		malloc_cnt++;
+	    }
+	}
+    }
+
+    m__free(buff);
+
+    return res;
+
+}  /* cli_parse_raw */
 
 
 /********************************************************************
@@ -322,8 +704,8 @@ static status_t
 * 
 * !!! TO-DO !!!
 *  - There are no 1-char aliases for CLI parameters.
-*  - Position-dependent, unnamed parameters are not supported
-*    at this time.
+*  - unnamed parameters are not supported at this time.
+*    (ncx:cli-default extension)
 *
 * INPUTS:
 *   argc == number of strings passed in 'argv'
@@ -342,7 +724,7 @@ static status_t
 *
 * OUTPUTS:
 *   *status == the final function return status
-
+*
 * Just as the NETCONF parser does, the CLI parser will not add a parameter
 * to the val_value_t if any errors occur related to the initial parsing.
 *
@@ -366,7 +748,8 @@ val_value_t *
     uint32          parmnamelen, buffpos, bufflen;
     ncx_btype_t     btyp;
     status_t        res;
-    xmlChar         errbuff[NCX_MAX_NLEN];
+    xmlChar         errbuff[NCX_MAX_NLEN], savechar;
+    boolean         gotdashes;
 
 #ifdef DEBUG
     if (!status) {
@@ -467,6 +850,7 @@ val_value_t *
     while (buffpos < bufflen) {
 
 	res = NO_ERR;
+	gotdashes = FALSE;
 
 	/* first skip starting whitespace */
 	while (buff[buffpos] && isspace(buff[buffpos])) {
@@ -487,9 +871,11 @@ val_value_t *
 		    res = ERR_NCX_WRONG_LEN;
 		} else {
 		    buffpos += 2;  /* skip past 2 dashes */
+		    gotdashes = TRUE;
 		}
 	    } else {
 		buffpos++;    /* skip past 1 dash */
+		gotdashes = TRUE;
 	    }
 	} /* else no dashes, leave parmname pointer alone */
 
@@ -519,7 +905,23 @@ val_value_t *
 					(const xmlChar *)parmname,
 					parmnamelen);
 	    }
-	    
+
+	    if (!chobj && !gotdashes) {
+		/* try the default parameter
+		 * if any defined, then use the unknown parm
+		 * name as a parameter value for the default parm
+		 */
+		chobj = obj_get_default_parm(obj);
+		if (chobj) {
+		    savechar = parmname[parmnamelen];
+		    parmname[parmnamelen] = 0;
+		    res = parse_parm(val, chobj, 
+				     (const xmlChar *)parmname, script);
+		    parmname[parmnamelen] = savechar;
+		    continue;
+		}
+	    }
+
 	    if (!chobj) {
 		res = ERR_NCX_UNKNOWN_PARM;
 	    } else {

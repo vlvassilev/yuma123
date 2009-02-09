@@ -113,7 +113,11 @@ date	     init     comment
 extern status_t 
     ncx_init (boolean savestr,
 	      log_debug_t dlevel,
-	      const char *startmsg);
+	      boolean logtstamps,
+	      const char *startmsg,
+	      int argc,
+	      const char *argv[]);
+
 
 extern status_t
     ncx_stage2_init (void);

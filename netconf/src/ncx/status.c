@@ -26,12 +26,6 @@ date         init     comment
 #include "procdefs.h"
 #endif
 
-#ifdef NOT_YET
-#ifndef _H_db
-#include "db.h"
-#endif
-#endif
-
 #ifndef _H_log
 #include  "log.h"
 #endif
@@ -72,6 +66,7 @@ typedef struct error_snapshot_t_ {
 *                                                                   *
 *********************************************************************/
 
+/* used for error_stack, when debug_level == NONE */
 static int error_level = 0;
 static error_snapshot_t error_stack[MAX_ERR_LEVEL];
 
@@ -85,22 +80,22 @@ status_t set_error (const char *filename, int linenum,
 		status_t status, int sqlError)
 {
     
-    if (error_level < MAX_ERR_LEVEL) {
+    if (log_get_debug_level() > LOG_DEBUG_NONE) {
+        log_error("\nE0:\n   %s:%d\n   Error %d: %s\n",
+		  filename,
+		  linenum,
+		  status,
+		  get_error_string(status));
+    } else if (error_level < MAX_ERR_LEVEL) {
         error_stack[error_level].linenum = linenum;
         error_stack[error_level].sqlError = sqlError;
         error_stack[error_level].status = status;
         strncpy(error_stack[error_level].filename, 
 		filename, MAX_ERR_FILENAME-1);
 	error_stack[error_level].msg = get_error_string(status);
-
-#ifdef NOT_YET
-        if (sqlError) {
-	    db_capture_error();
-	}
-#endif
-
 	error_level++;
     }
+
     return status;
 
 }   /* set_error */
@@ -121,12 +116,6 @@ void print_errors (void)
 		  error_stack[i].linenum,
 		  error_stack[i].status,
 		  (error_stack[i].msg) ? error_stack[i].msg : "");
-
-#ifdef NOT_YET
-	if (error_stack[i].sqlError) {
-	    db_print_error();
-	}
-#endif
 	if (i==error_level-1) {
 	    log_error("\n");
 	}

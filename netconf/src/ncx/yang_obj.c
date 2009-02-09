@@ -3921,7 +3921,9 @@ static status_t
 		       obj_container_t *con,
 		       obj_template_t *obj)
 {
-    status_t      res, retres;
+    const obj_template_t *targobj;
+    const ncx_appinfo_t  *appinfo;
+    status_t              res, retres;
 
     retres = NO_ERR;
 
@@ -3943,6 +3945,30 @@ static status_t
 
     res = check_parent(tkc, mod, obj);
     CHK_EXIT(res, retres);
+
+    res = NO_ERR;
+    appinfo = ncx_find_appinfo(&obj->appinfoQ,
+			       NCX_PREFIX,
+			       NCX_EL_DEFAULT_PARM);
+    if (appinfo) {
+	if (appinfo->value) {
+	    targobj = obj_find_child(obj,
+				     obj_get_mod_name(obj),
+				     appinfo->value);
+	    if (targobj) {
+		con->defaultparm = targobj;
+	    } else {
+		res = ERR_NCX_UNKNOWN_OBJECT;
+	    }
+	} else {
+	    res = ERR_NCX_MISSING_PARM;
+	}
+	if (res != NO_ERR) {
+	    log_error("\nError: invalid 'default-parm' extension");
+	    ncx_print_errormsg(tkc, mod, res);
+	    CHK_EXIT(res, retres);
+	}
+    }
 
     return retres;
 				    
@@ -5749,7 +5775,9 @@ static status_t
 		   obj_rpcio_t *rpcio,
 		   obj_template_t *obj)
 {
-    status_t          res, retres;
+    const obj_template_t *targobj;
+    const ncx_appinfo_t  *appinfo;
+    status_t              res, retres;
 
     retres = NO_ERR;
 
@@ -5761,6 +5789,33 @@ static status_t
 
     res = yang_obj_resolve_datadefs(tkc, mod, &rpcio->datadefQ);
     CHK_EXIT(res, retres);
+
+    if (!xml_strcmp(obj_get_name(obj), YANG_K_INPUT)) {
+	res = NO_ERR;
+	appinfo = ncx_find_appinfo(&obj->appinfoQ,
+				   NCX_PREFIX,
+				   NCX_EL_DEFAULT_PARM);
+	if (appinfo) {
+	    if (appinfo->value) {
+		targobj = obj_find_child(obj,
+					 obj_get_mod_name(obj),
+					 appinfo->value);
+		if (targobj) {
+		    rpcio->defaultparm = targobj;
+		} else {
+		    res = ERR_NCX_UNKNOWN_OBJECT;
+		}
+	    } else {
+		res = ERR_NCX_MISSING_PARM;
+	    }
+
+	    if (res != NO_ERR) {
+		log_error("\nError: invalid 'default-parm' extension");
+		ncx_print_errormsg(tkc, mod, res);
+		CHK_EXIT(res, retres);
+	    }
+	}
+    }
 
     return retres;
 				    

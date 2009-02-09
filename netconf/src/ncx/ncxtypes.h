@@ -250,6 +250,7 @@ typedef enum ncx_strrest_t_ {
 /* Enumeration of number format types */
 typedef enum ncx_numfmt_t_ {
     NCX_NF_NONE,
+    NCX_NF_OCTAL,
     NCX_NF_DEC,  
     NCX_NF_HEX, 
     NCX_NF_REAL

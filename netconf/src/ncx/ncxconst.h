@@ -373,6 +373,7 @@ date	     init     comment
 #define NCX_EL_DEF             ((const xmlChar *)"def")
 #define NCX_EL_DEFAULT         ((const xmlChar *)"default")
 #define NCX_EL_DEFAULT_OPERATION ((const xmlChar *)"default-operation")
+#define NCX_EL_DEFAULT_PARM    ((const xmlChar *)"default-parm")
 #define NCX_EL_DEFINITIONS     ((const xmlChar *)"definitions")
 #define NCX_EL_DEFOP           ((const xmlChar *)"default-operation")
 #define NCX_EL_DELETE          ((const xmlChar *)"delete")

@@ -98,6 +98,7 @@ extern xpath_result_t *
 			 boolean configonly,
 			 status_t *res);
 
+#ifdef KEEP_AROUND_UNTIL_LEAFREF_TESTED
 extern xpath_result_t *
     xpath1_eval_xml_instanceid (xmlTextReaderPtr reader,
 				xpath_pcb_t *pcb,
@@ -105,6 +106,7 @@ extern xpath_result_t *
 				val_value_t *docroot,
 				boolean logerrors,
 				status_t *res);
+#endif
 
 extern const xpath_fncb_t *
     xpath1_get_functions_ptr (void);

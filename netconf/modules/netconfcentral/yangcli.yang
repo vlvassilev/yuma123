@@ -419,6 +419,8 @@ module yangcli {
       description "Change the current working directory.";
       ncx:rpc-type exec;
       input {
+        ncx:default-parm dir;
+
         leaf dir { 
            description "Directory path to use.";
            type string;
@@ -431,6 +433,8 @@ module yangcli {
       description "Connect to a NETCONF agent.";
       ncx:rpc-type exec;
       input {
+        ncx:default-parm agent;
+
         uses ConnectParms {
           refine user {
     	    mandatory true;
@@ -452,6 +456,7 @@ module yangcli {
        "Create some NETCONF config data with the edit-config operation";
       ncx:rpc-type config;
       input {
+        ncx:default-parm  target;
         uses EditParms;
       }
     }
@@ -461,6 +466,7 @@ module yangcli {
        "Delete some NETCONF config data with the edit-config operation";
       ncx:rpc-type config;
       input {
+        ncx:default-parm  target;
         leaf target {
           description 
            "Xpath expression indicating the node which is going
@@ -483,6 +489,7 @@ module yangcli {
                         --current-value=$bar    ";
        ncx:rpc-type exec;
        input {
+         ncx:default-parm  target;
          uses FillParms;
        }
        output {
@@ -507,6 +514,8 @@ module yangcli {
       description "Print the yangcli help text";
       ncx:rpc-type exec;
       input {
+        ncx:default-parm command;
+
         choice helptype {
           leaf command {
             description "Show help for the specified command,
@@ -539,6 +548,8 @@ module yangcli {
        "Insert some NETCONF config data with the edit-config operation";
       ncx:rpc-type config;
       input {
+        ncx:default-parm  target;
+
         uses EditParms;
 
         leaf order {
@@ -594,6 +605,7 @@ module yangcli {
       description "Internal command to load a module or other file.";
       ncx:rpc-type exec;
       input {
+        ncx:default-parm module;
         leaf module {
           description
              "Module name to load";
@@ -608,6 +620,7 @@ module yangcli {
        "Merge some NETCONF config data with the edit-config operation";
       ncx:rpc-type config;
       input {
+        ncx:default-parm target;
         uses EditParms;
       }
     }
@@ -622,6 +635,7 @@ module yangcli {
        "Create some NETCONF config data with the edit-config operation";
       ncx:rpc-type config;
       input {
+        ncx:default-parm target;
         uses EditParms;
       }
     }
@@ -635,6 +649,8 @@ module yangcli {
       description "Internal command to run a script.";
       ncx:rpc-type exec;
       input {
+        ncx:default-parm script;
+
         leaf script {
            description "script filespec to run";
            type string;
@@ -695,6 +711,7 @@ module yangcli {
         operation, using an optional subtree filter.";
       ncx:rpc-type monitor;
       input {
+        ncx:default-parm target;
         uses CommonPduParms;
       }
       output {
@@ -711,6 +728,7 @@ module yangcli {
         operation, using an optional subtree filter.";
       ncx:rpc-type monitor;
       input {
+        ncx:default-parm target;
         uses CommonPduParms;
         container source {
           description "Particular configuration to retrieve.";
@@ -729,6 +747,8 @@ module yangcli {
       description "Local show command for yangcli info.";
       ncx:rpc-type exec;
       input {
+        ncx:default-parm local;
+
         choice showtype {
           leaf module {
             description "Show full info for one module";
@@ -791,6 +811,7 @@ module yangcli {
         operation, using an optional XPath filter.";
       ncx:rpc-type monitor;
       input {
+        ncx:default-parm select;
         uses XGetParms;
       }
       output {
@@ -807,6 +828,7 @@ module yangcli {
         operation, using an optional XPath filter.";
       ncx:rpc-type monitor;
       input {
+        ncx:default-parm select;
         uses XGetParms;
 
         container source {

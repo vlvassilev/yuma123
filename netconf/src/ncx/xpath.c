@@ -1556,7 +1556,6 @@ status_t
 }   /* xpath_get_curmod_from_prefix */
 
 
-
 /********************************************************************
 * FUNCTION xpath_get_curmod_from_prefix_str
 * 
@@ -1645,14 +1644,18 @@ status_t
     /* get the next token */
     res = TK_ADV(pcb->tkc);
     if (res != NO_ERR) {
-	ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	if (pcb->logerrors) {
+	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	}
 	return res;
     }
 
     if (TK_CUR_TYP(pcb->tkc) != tktype) {
 	res = ERR_NCX_WRONG_TKTYPE;
-	ncx_mod_exp_err(pcb->tkc, pcb->mod, res,
-			tk_get_token_name(tktype));
+	if (pcb->logerrors) {
+	    ncx_mod_exp_err(pcb->tkc, pcb->mod, res,
+			    tk_get_token_name(tktype));
+	}
 	return res;
     }
 
@@ -1725,6 +1728,7 @@ void
     val_value_t             *val;
     status_t                 res;
     ncx_num_t                testnum;
+    ncx_numfmt_t             numformat;
 
 #ifdef DEBUG
     if (!result || !num) {
@@ -1769,17 +1773,35 @@ void
 	break;
     case XP_RT_STRING:
 	if (result->r.str) {
-	    ncx_init_num(&testnum);
-	    res = ncx_convert_num(result->r.str,
-				  NCX_NF_DEC,
-				  NCX_BT_FLOAT64,
-				  &testnum);
+	    numformat = ncx_get_numfmt(result->r.str);
+	    switch (numformat) {
+	    case NCX_NF_DEC:
+	    case NCX_NF_REAL:
+		break;
+	    case NCX_NF_NONE:
+	    case NCX_NF_OCTAL:
+	    case NCX_NF_HEX:
+		res = ERR_NCX_WRONG_NUMTYP;
+		break;
+	    default:
+		res = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
 	    if (res == NO_ERR) {
-		(void)ncx_copy_num(&testnum, num, NCX_BT_FLOAT64);
+		ncx_init_num(&testnum);
+		res = ncx_convert_num(result->r.str,
+				      numformat,
+				      NCX_BT_FLOAT64,
+				      &testnum);
+		if (res == NO_ERR) {
+		    (void)ncx_copy_num(&testnum, num, NCX_BT_FLOAT64);
+		} else {
+		    ncx_set_num_nan(num, NCX_BT_FLOAT64);
+		}
+		ncx_clean_num(NCX_BT_FLOAT64, &testnum);
 	    } else {
 		ncx_set_num_nan(num, NCX_BT_FLOAT64);
 	    }
-	    ncx_clean_num(NCX_BT_FLOAT64, &testnum);
 	} else {
 	    ncx_set_num_nan(num, NCX_BT_FLOAT64);
 	}

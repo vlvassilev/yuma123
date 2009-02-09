@@ -43,6 +43,10 @@ date         init     comment
 #include "cfg.h"
 #endif
 
+#ifndef _H_cli
+#include "cli.h"
+#endif
+
 #ifndef _H_def_reg
 #include "def_reg.h"
 #endif
@@ -826,6 +830,145 @@ static int32
 }  /* remove_trailing_zero_count */
 
 
+/********************************************************************
+* FUNCTION bootstrap_cli
+* 
+* Handle the CLI parms that need to be set even before
+* any other initialization has been done, or any YANG modules
+* have been loaded.
+*
+* Hardwired list of bootstrap parameters
+* DO NOT RESET THEM FROM THE OUTPUT OF THE cli_parse function
+* THESE CLI PARAMS WILL STILL BE IN THE argv array
+*
+* Common CLI parameters handled as bootstrap parameters
+*
+*   log-level
+*   log-append
+*   log
+*   modpath
+*
+* INPUTS:
+*    argc == CLI argument count
+*    argv == array of CLI parms
+*    dlevel == default debug level
+*    logtstamps == flag for log_open, if 'log' parameter is present
+*
+* RETURNS:
+*   status of the bootstrap CLI procedure
+*********************************************************************/
+static status_t 
+    bootstrap_cli (int argc,
+		   const char *argv[],
+		   log_debug_t dlevel,
+		   boolean logtstamps)
+{
+    dlq_hdr_t        parmQ;
+    cli_rawparm_t   *parm;
+    char            *logfilename;
+    log_debug_t      loglevel;
+    boolean          logappend;
+    status_t         res;
+
+    dlq_createSQue(&parmQ);
+
+    res = NO_ERR;
+    logfilename = NULL;
+    logappend = FALSE;
+    loglevel = LOG_DEBUG_NONE;
+
+    parm = cli_new_rawparm(NCX_EL_LOGLEVEL);
+    if (parm) {
+	dlq_enque(parm, &parmQ);
+    } else {
+	res = ERR_INTERNAL_MEM;
+    }
+
+    if (res == NO_ERR) {
+	parm = cli_new_rawparm(NCX_EL_LOG);
+	if (parm) {
+	    dlq_enque(parm, &parmQ);
+	} else {
+	    res = ERR_INTERNAL_MEM;
+	}
+    }
+
+    if (res == NO_ERR) {
+	parm = cli_new_rawparm(NCX_EL_LOGAPPEND);
+	if (parm) {
+	    dlq_enque(parm, &parmQ);
+	} else {
+	    res = ERR_INTERNAL_MEM;
+	}
+    }
+
+    if (res == NO_ERR) {
+	parm = cli_new_rawparm(NCX_EL_MODPATH);
+	if (parm) {
+	    dlq_enque(parm, &parmQ);
+	} else {
+	    res = ERR_INTERNAL_MEM;
+	}
+    }
+
+    if (res == NO_ERR) {
+	res = cli_parse_raw(argc, argv, &parmQ);
+    }
+
+    if (res != NO_ERR) {
+	cli_clean_rawparmQ(&parmQ);
+	return res;
+    }
+
+    parm = cli_find_rawparm(NCX_EL_LOGLEVEL, &parmQ);
+    if (parm && parm->value) {
+	loglevel = log_get_debug_level_enum(parm->value);
+	if (loglevel == LOG_DEBUG_NONE) {
+	    res = ERR_NCX_INVALID_VALUE;
+	} else {
+	    log_set_debug_level(loglevel);
+	}
+    } else {
+	log_set_debug_level(dlevel);
+    }
+
+    if (res == NO_ERR) {
+	parm = cli_find_rawparm(NCX_EL_LOGAPPEND, &parmQ);
+	logappend = (parm && parm->count) ? TRUE : FALSE;
+	if (parm && parm->value) {
+	    res = ERR_NCX_INVALID_VALUE;
+	}
+    }
+
+    if (res == NO_ERR) {
+	parm = cli_find_rawparm(NCX_EL_LOG, &parmQ);
+	if (parm && parm->value) {
+	    logfilename = (char *)
+		ncx_get_source((const xmlChar *)parm->value);
+	    if (!logfilename) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		res = log_open(logfilename, logappend, logtstamps);
+	    }
+	}
+    }
+
+    if (res == NO_ERR) {
+	parm = cli_find_rawparm(NCX_EL_MODPATH, &parmQ);
+	if (parm && parm->value) {
+	    ncxmod_set_modpath((const xmlChar *)parm->value);
+	}
+    }
+
+    if (logfilename) {
+	m__free(logfilename);
+    }
+
+    cli_clean_rawparmQ(&parmQ);
+    return res;
+
+} /* bootstrap_cli */
+
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
@@ -836,35 +979,48 @@ static int32
 * Initialize the NCX module
 *
 * INPUTS:
-*   savestr == TRUE if parsed description strings that are
-*              not needed by the agent at runtime should
-*              be saved anyway.  Converters should use this value.
+*    savestr == TRUE if parsed description strings that are
+*               not needed by the agent at runtime should
+*               be saved anyway.  Converters should use this value.
 *                 
-*           == FALSE if uneeded strings should not be saved.
-*              Embedded agents should use this value
+*            == FALSE if uneeded strings should not be saved.
+*               Embedded agents should use this value
 *
 *    dlevel == desired debug output level
+*    logtstamps == TRUE if log should use timestamps
+*                  FALSE if not; not used unless 'log' is present
+*    startmsg == log_debug2 message to print before starting;
+*                NULL if not used;
+*    argc == CLI argument count for bootstrap CLI
+*    argv == array of CLI parms for bootstrap CLI
 *
-*  startmsg == log_debug2 message to print before starting;
-*              NULL if not used;
 * RETURNS:
 *   status of the initialization procedure
 *********************************************************************/
 status_t 
     ncx_init (boolean savestr,
 	      log_debug_t dlevel,
-	      const char *startmsg)
+	      boolean logtstamps,
+	      const char *startmsg,
+	      int argc,
+	      const char *argv[])
 {
     status_t     res;
     xmlns_id_t   nsid;
-
+    
     if (ncx_init_done) {
         return NO_ERR;
     }
 
     save_descr = savestr;
-    log_set_debug_level(dlevel);
     mod_load_callback = NULL;
+    log_set_debug_level(dlevel);
+
+    /* deal with bootstrap CLI parms */
+    res = bootstrap_cli(argc, argv, dlevel, logtstamps);
+    if (res != NO_ERR) {
+	return res;
+    }
 
     if (startmsg) {
 	log_debug2(startmsg);
@@ -3165,7 +3321,7 @@ boolean
 *
 * INPUTS:
 *     numstr == number string
-*     numfmt == NCX_NF_DEC, NCX_NF_HEX, or NCX_NF_REAL
+*     numfmt == NCX_NF_OCTAL, NCX_NF_DEC, NCX_NF_HEX, or NCX_NF_REAL
 *     btyp == desired number type 
 *             (e.g., NCX_BT_INT, NCX_BT_UINT, NCX_BT_FLOAT)
 *     val == pointer to ncx_num_t to hold result
@@ -3221,179 +3377,138 @@ status_t
     case NCX_BT_INT16:
     case NCX_BT_INT32:
         switch (numfmt) {
+        case NCX_NF_OCTAL:
+            l = strtol((const char *)numstr, &err, 8);
+	    break;
         case NCX_NF_DEC:
             l = strtol((const char *)numstr, &err, 10);
-            if (err && *err) {
-                return ERR_NCX_INVALID_NUM;
-            }
-
-	    switch (btyp) {
-	    case NCX_BT_INT8:
-		if (l < NCX_MIN_INT8 || l > NCX_MAX_INT8) {
-		    return ERR_NCX_NOT_IN_RANGE;
-		}
-		break;
-	    case NCX_BT_INT16:
-		if (l < NCX_MIN_INT16 || l > NCX_MAX_INT16) {
-		    return ERR_NCX_NOT_IN_RANGE;
-		}
-		break;
-	    default:
-		;
-	    }
-
-            val->i = (int32)l;
-            break;
+	    break;
         case NCX_NF_HEX:
             l = strtol((const char *)numstr, &err, 16);
-            if (err && *err) {
-                return ERR_NCX_INVALID_HEXNUM;
-            }
-
-	    switch (btyp) {
-	    case NCX_BT_INT8:
-		if (l < NCX_MIN_INT8 || l > NCX_MAX_INT8) {
-		    return ERR_NCX_NOT_IN_RANGE;
-		}
-		break;
-	    case NCX_BT_INT16:
-		if (l < NCX_MIN_INT16 || l > NCX_MAX_INT16) {
-		    return ERR_NCX_NOT_IN_RANGE;
-		}
-		break;
-	    default:
-		;
-	    }
-
-            val->i = (int32)l;
-            break;
+	    break;
         case NCX_NF_REAL:
             return ERR_NCX_WRONG_NUMTYP;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
-        }
+	}
+
+	if (err && *err) {
+	    return ERR_NCX_INVALID_NUM;
+	}
+
+	switch (btyp) {
+	case NCX_BT_INT8:
+	    if (l < NCX_MIN_INT8 || l > NCX_MAX_INT8) {
+		return ERR_NCX_NOT_IN_RANGE;
+	    }
+	    break;
+	case NCX_BT_INT16:
+	    if (l < NCX_MIN_INT16 || l > NCX_MAX_INT16) {
+		return ERR_NCX_NOT_IN_RANGE;
+	    }
+	    break;
+	default:
+	    ;
+	}
+	val->i = (int32)l;
         break;
     case NCX_BT_INT64:
         switch (numfmt) {
+        case NCX_NF_OCTAL:
+            ll = strtoll((const char *)numstr, &err, 8);
+	    break;
         case NCX_NF_DEC:
             ll = strtoll((const char *)numstr, &err, 10);
-            if (err && *err) {
-                return ERR_NCX_INVALID_NUM;
-            }
-            val->l = (int64)ll;
-            break;
+	    break;
         case NCX_NF_HEX:
             ll = strtoll((const char *)numstr, &err, 16);
-            if (err && *err) {
-                return ERR_NCX_INVALID_HEXNUM;
-            }
-            val->l = (int64)ll;
-            break;
+	    break;
         case NCX_NF_REAL:
             return ERR_NCX_WRONG_NUMTYP;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
+
+	if (err && *err) {
+	    return ERR_NCX_INVALID_NUM;
+	}
+	val->l = (int64)ll;
         break;
     case NCX_BT_UINT8:
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
         switch (numfmt) {
+        case NCX_NF_OCTAL:
+            ul = strtoul((const char *)numstr, &err, 8);
+	    break;
         case NCX_NF_DEC:
             ul = strtoul((const char *)numstr, &err, 10);
-            if (err && *err) {
-                return ERR_NCX_INVALID_NUM;
-            }
-
-	    switch (btyp) {
-	    case NCX_BT_UINT8:
-		if (ul > NCX_MAX_UINT8) {
-		    return ERR_NCX_NOT_IN_RANGE;
-		}
-		break;
-	    case NCX_BT_UINT16:
-		if (ul > NCX_MAX_UINT16) {
-		    return ERR_NCX_NOT_IN_RANGE;
-		}
-		break;
-	    default:
-		;
-	    }
-
-	    if (*numstr == '-') {
-		return ERR_NCX_NOT_IN_RANGE;
-	    }
-
-            val->u = (uint32)ul;
-            break;
+	    break;
         case NCX_NF_HEX:
             ul = strtoul((const char *)numstr, &err, 16);
-            if (err && *err) {
-                return ERR_NCX_INVALID_HEXNUM;
-            }
-
-	    switch (btyp) {
-	    case NCX_BT_UINT8:
-		if (ul > NCX_MAX_UINT8) {
-		    return ERR_NCX_NOT_IN_RANGE;
-		}
-		break;
-	    case NCX_BT_UINT16:
-		if (ul > NCX_MAX_UINT16) {
-		    return ERR_NCX_NOT_IN_RANGE;
-		}
-		break;
-	    default:
-		;
-	    }
-
-	    if (*numstr == '-') {
-		return ERR_NCX_NOT_IN_RANGE;
-	    }
-
-            val->u = (uint32)ul;
-            break;
+	    break;
         case TK_TT_RNUM:
             return ERR_NCX_WRONG_NUMTYP;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
-        break;
+
+	if (err && *err) {
+	    return ERR_NCX_INVALID_NUM;
+	}
+
+	switch (btyp) {
+	case NCX_BT_UINT8:
+	    if (ul > NCX_MAX_UINT8) {
+		return ERR_NCX_NOT_IN_RANGE;
+	    }
+	    break;
+	case NCX_BT_UINT16:
+	    if (ul > NCX_MAX_UINT16) {
+		return ERR_NCX_NOT_IN_RANGE;
+	    }
+	    break;
+	default:
+	    ;
+	}
+
+	if (*numstr == '-') {
+	    return ERR_NCX_NOT_IN_RANGE;
+	}
+
+	val->u = (uint32)ul;
+	break;
     case NCX_BT_UINT64:
         switch (numfmt) {
+        case NCX_NF_OCTAL:
+            ull = strtoull((const char *)numstr, &err, 8);
+	    break;
         case NCX_NF_DEC:
             ull = strtoull((const char *)numstr, &err, 10);
-            if (err && *err) {
-                return ERR_NCX_INVALID_NUM;
-            }
-
-	    if (*numstr == '-') {
-		return ERR_NCX_NOT_IN_RANGE;
-	    }
-
-            val->ul = (uint64)ull;
-            break;
+	    break;
         case NCX_NF_HEX:
             ull = strtoull((const char *)numstr, &err, 16);
-            if (err && *err) {
-                return ERR_NCX_INVALID_HEXNUM;
-            }
-
-	    if (*numstr == '-') {
-		return ERR_NCX_NOT_IN_RANGE;
-	    }
-
-            val->ul = (uint64)ull;
-            break;
+	    break;
         case NCX_NF_REAL:
             return ERR_NCX_WRONG_TKTYPE;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
-        break;
+
+	if (err && *err) {
+	    return ERR_NCX_INVALID_NUM;
+	}
+
+	if (*numstr == '-') {
+	    return ERR_NCX_NOT_IN_RANGE;
+	}
+
+	val->ul = (uint64)ull;
+	break;
     case NCX_BT_FLOAT32:
 #ifdef HAS_FLOAT
         switch (numfmt) {
+	case NCX_NF_OCTAL:
         case NCX_NF_DEC:
         case NCX_NF_REAL:
 	    errno = 0;
@@ -3414,6 +3529,13 @@ status_t
         }
 #else
         switch (numfmt) {
+        case NCX_NF_OCTAL:
+            ll = strtoll((const char *)numstr, &err, 8);
+            if (err && *err) {
+                return ERR_NCX_INVALID_NUM;
+            }
+            val->f = (int64)ll;
+            break;
         case NCX_NF_DEC:
             ll = strtoll((const char *)numstr, &err, 10);
             if (err && *err) {
@@ -3438,6 +3560,7 @@ status_t
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
         switch (numfmt) {
+	case NCX_NF_OCTAL:
         case NCX_NF_DEC:
         case NCX_NF_REAL:
 	    errno = 0;
@@ -3454,6 +3577,13 @@ status_t
         }
 #else
         switch (numfmt) {
+        case NCX_NF_OCTAL:
+            ll = strtoll((const char *)numstr, &err, 8);
+            if (err && *err) {
+                return ERR_NCX_INVALID_NUM;
+            }
+            val->d = (int64)ll;
+            break;
         case NCX_NF_DEC:
             ll = strtoll((const char *)numstr, &err, 10);
             if (err && *err) {
@@ -3524,6 +3654,11 @@ status_t
     }
     if (*str) {
 	return ncx_convert_num(numstr, NCX_NF_REAL, btyp, retnum);
+    }
+
+    /* check octal number */
+    if (*numstr == '0') {
+	return ncx_convert_num(numstr, NCX_NF_OCTAL, btyp, retnum);
     }
 
     /* else assume this is a decimal number */
@@ -4274,10 +4409,16 @@ ncx_numfmt_t
 	return NCX_NF_HEX;
     }
 
+    /* check real number next */
     while (*numstr && (*numstr != '.')) {
 	numstr++;
     }
-    return (*numstr) ? NCX_NF_REAL : NCX_NF_DEC;
+    if (*numstr) {
+	return NCX_NF_REAL;
+    }
+
+    /* leading zero means octal, otherwise decimal */
+    return (*numstr == '0') ? NCX_NF_OCTAL : NCX_NF_DEC;
 
 }  /* ncx_get_numfmt */
 
@@ -4558,10 +4699,18 @@ status_t
 			ncx_btype_t  btyp,
 			ncx_num_t    *val)
 {
+    const xmlChar *numstr;
+
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_DNUM:
-	return ncx_convert_num(TK_CUR_VAL(tkc), 
-			       NCX_NF_DEC, btyp, val);
+	numstr = TK_CUR_VAL(tkc);
+	if (numstr && *numstr=='0') {
+	    return ncx_convert_num(TK_CUR_VAL(tkc), 
+				   NCX_NF_OCTAL, btyp, val);
+	} else {
+	    return ncx_convert_num(TK_CUR_VAL(tkc), 
+				   NCX_NF_DEC, btyp, val);
+	}
     case TK_TT_HNUM:
 	return ncx_convert_num(TK_CUR_VAL(tkc), 
 			       NCX_NF_HEX, btyp, val);

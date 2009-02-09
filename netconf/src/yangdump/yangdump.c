@@ -286,7 +286,9 @@ static status_t
 	}
     }
 
-    /* get the log-level parameter */
+    /* get the log-level parameter, but already set in
+     * cli bootstrap, so do not activate
+     */
     val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_LOGLEVEL);
     if (val) {
 	cp->log_level = 
@@ -295,8 +297,6 @@ static status_t
 	    log_error("\nError: invalid log-level value (%s)",
 		      (const char *)VAL_STR(val));
 	    return ERR_NCX_INVALID_VALUE;
-	} else {
-	    log_set_debug_level(cp->log_level);
 	}
     }
 
@@ -312,15 +312,6 @@ static status_t
     val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_LOGAPPEND);
     if (val) {
 	cp->logappend = TRUE;
-    }
-
-    /* try to open the log file if requested */
-    if (cp->full_logfilename) {
-	res = log_open((const char *)cp->full_logfilename,
-		       cp->logappend, FALSE);
-	if (res != NO_ERR) {
-	    return res;
-	}
     }
 
     /*** ORDER DOES NOT MATTER FOR REST OF PARAMETERS ***/
@@ -535,7 +526,9 @@ static status_t
 #else
 		   LOG_DEBUG_WARN,
 #endif
-		   NULL);
+		   FALSE,
+		   "yangdump started",
+		   argc, argv);
 
     if (res == NO_ERR) {
 

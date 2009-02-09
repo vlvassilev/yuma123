@@ -4206,10 +4206,10 @@ boolean
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_LEAFREF:
     case NCX_BT_IDREF:
-    case NCX_BT_UNION:
-    case NCX_BT_EMPTY:
     case NCX_BT_SLIST:
+    case NCX_BT_UNION:
 	return TRUE;
+    case NCX_BT_EMPTY:
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
@@ -4319,11 +4319,14 @@ boolean
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_UNION:
-    case NCX_BT_LEAFREF:   /*** not official in the spec yet 10/13 ***/
     case NCX_BT_IDREF:
-    case NCX_BT_EMPTY:
 	return TRUE;
+    case NCX_BT_EMPTY:
+    case NCX_BT_LEAFREF:
     case NCX_BT_ANY:
+    case NCX_BT_CONTAINER:
+    case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
         return FALSE;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);

@@ -101,7 +101,7 @@ static const xmlChar *ncxmod_env_install;
 
 static const xmlChar *ncxmod_env_userhome;
 
-static const xmlChar *ncxmod_mod_path;
+static const xmlChar *ncxmod_mod_path = NULL;
 
 static const xmlChar *ncxmod_alt_path;
 
@@ -1689,13 +1689,14 @@ xmlChar *
 * 
 *   Override the NCX_MODPATH env var with the modpath CLI var
 *
+* THIS MAY GET SET DURING BOOTSTRAP SO SET_ERROR NOT CALLED !!!
+*
 *********************************************************************/
 void
     ncxmod_set_modpath (const xmlChar *modpath)
 {
 #ifdef DEBUG
     if (!modpath) {
-        SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
 #endif

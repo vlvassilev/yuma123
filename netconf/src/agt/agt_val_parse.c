@@ -122,6 +122,10 @@ date         init     comment
 #include "xpath.h"
 #endif
 
+#ifndef _H_xpath_leafref
+#include "xpath_leafref.h"
+#endif
+
 #ifndef _H_xpath1
 #include "xpath1.h"
 #endif
@@ -1069,6 +1073,7 @@ static status_t
     xml_node_t           valnode, endnode;
     status_t             res, res2, res3;
     boolean              errdone;
+    ncx_numfmt_t         numfmt;
 
     /* init local vars */
     xml_init_node(&valnode);
@@ -1119,8 +1124,17 @@ static status_t
 	errnode = &valnode;
 	break;
     case XML_NT_STRING:
-	/* get the non-whitespace string here */
-	res = ncx_decode_num(valnode.simval, btyp, &retval->v.num);
+	/* convert the non-whitespace string to a number */
+	numfmt = ncx_get_numfmt(valnode.simval);
+	if (numfmt == NCX_NF_OCTAL) {
+	    numfmt = NCX_NF_DEC;
+	}
+	if (numfmt == NCX_NF_DEC || numfmt == NCX_NF_REAL) {
+	    res = ncx_convert_num(valnode.simval, numfmt,
+				 btyp, &retval->v.num);
+	}  else {
+	    res = ERR_NCX_WRONG_NUMTYP;
+	}
 	if (res == NO_ERR) {
 	    res = val_range_ok_errinfo(obj_get_ctypdef(obj), btyp, 
 				       &retval->v.num, &errinfo);
@@ -1218,7 +1232,8 @@ static status_t
     const xmlChar        *badval;
     const typ_template_t *listtyp;
     const ncx_errinfo_t  *errinfo;
-    xpath_result_t       *result;
+    const obj_template_t *targobj;
+    xpath_result_t       *result; 
     xml_node_t            valnode, endnode;
     status_t              res, res2, res3;
     boolean               errdone, empty, allow_delete_all;
@@ -1359,17 +1374,23 @@ static status_t
 	    retval->xpathpcb = xpath_new_pcb(valnode.simval);
 	    if (!retval->xpathpcb) {
 		res = ERR_INTERNAL_MEM;
-	    } else {
+	    } else if (btyp == NCX_BT_INSTANCE_ID) {
 		/* do a first pass parsing to resolve all
 		 * the prefixes and check well-formed XPath
 		 */
+		res = xpath_leafref_validate_xmlpath(scb->reader,
+						     retval->xpathpcb,
+						     FALSE,
+						     &targobj);
+	    } else {
 		result = 
-		    xpath1_eval_xml_instanceid(scb->reader,
-					       retval->xpathpcb,
-					       NULL,
-					       NULL,
-					       FALSE,
-					       &res);
+		    xpath1_eval_xmlexpr(scb->reader,
+					retval->xpathpcb,
+					NULL,
+					NULL,
+					FALSE,
+					FALSE,
+					&res);
 		if (result) {
 		    xpath_free_result(result);
 		}

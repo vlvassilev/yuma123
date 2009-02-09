@@ -1584,7 +1584,7 @@ static status_t
 * 
 * Check the leafref or instance-identifier leaf or leaf-list node
 * Test 'require-instance' for the NCX_BT_LEAFREF
-* and NCX_BT_INSTANCEID data types
+* and NCX_BT_INSTANCE_ID data types
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
@@ -1613,11 +1613,10 @@ static status_t
 {
     xpath_result_t      *result;
     const xpath_pcb_t   *xpcb;
-    xpath_pcb_t         *xpcbclone;
     const ncx_errinfo_t *errinfo;
     const typ_def_t     *typdef;
     boolean              constrained, fnresult;
-    status_t             res;
+    status_t             res, validateres;
 
     res = NO_ERR;
     errinfo = NULL;
@@ -1632,46 +1631,43 @@ static status_t
 	constrained = typ_get_constrained(typdef);
 	xpcb = typ_get_leafref_pcb(typdef);
 
-	if (constrained) {
-	    xpcbclone = xpath_clone_pcb(xpcb);
-	    if (!xpcbclone) {
+	if (!val->xpathpcb) {
+	    val->xpathpcb = xpath_clone_pcb(xpcb);
+	    if (!val->xpathpcb) {
 		res = ERR_INTERNAL_MEM;
-	    } 
+	    }
+	}
+
+	if (res == NO_ERR) {
+	    result = xpath1_eval_xmlexpr
+		(scb->reader, val->xpathpcb, val, root,
+		 FALSE, TRUE, &res);
 
 	    if (res == NO_ERR) {
-		result = xpath1_eval_xmlexpr
-		    (scb->reader, xpcbclone, val, root,
-		     FALSE, TRUE, &res);
-
-		if (res == NO_ERR) {
+		if (constrained) {
 		    /* check result: the string value in 'val'
 		     * must match one of the values in the
 		     * result set
 		     */
-
 		    fnresult = xpath1_compare_result_to_string
-			(xpcbclone, result, VAL_STR(val), &res);
+			(val->xpathpcb, result, VAL_STR(val), &res);
 
 		    if (res == NO_ERR && !fnresult) {
 			/* did not match any of the current instances */
 			res = ERR_NCX_MISSING_INSTANCE;
 		    }
-		}
 
-		if (result) {
-		    xpath_free_result(result);
+		    if (result) {
+			xpath_free_result(result);
+		    }
+		} else {
+		    /* just use the leafref xrefdef */
+		    errinfo = NULL;
+		    res = val_simval_ok_errinfo
+			(typ_get_xref_typdef(typdef),
+			 VAL_STR(val),
+			 &errinfo);
 		}
-	    } else {
-		/* just use the leafref xrefdef */
-		errinfo = NULL;
-		res = val_simval_ok_errinfo
-		    (typ_get_xref_typdef(typdef),
-		     VAL_STR(val),
-		     &errinfo);
-	    }
-
-	    if (xpcbclone) {
-		xpath_free_pcb(xpcbclone);
 	    }
 	}
 
@@ -1687,15 +1683,28 @@ static status_t
 	 * instance that matched, just checking the
 	 * require-instance flag
 	 */
-	result = 
-	    xpath1_eval_xml_instanceid(scb->reader,
-				       val->xpathpcb,
-				       val,
-				       root,
-				       FALSE,
-				       &res);
-	if (result) {
-	    xpath_free_result(result);
+	validateres = val->xpathpcb->validateres;
+
+	if (validateres == NO_ERR) {
+	    result = 
+		xpath1_eval_xmlexpr(scb->reader,
+				    val->xpathpcb,
+				    val,
+				    root,
+				    FALSE,
+				    FALSE,
+				    &res);
+	    if (result) {
+		xpath_free_result(result);
+	    }
+
+	    if (!constrained) {
+		if (!NEED_EXIT(res)) {
+		    res = NO_ERR;
+		}
+	    }
+	} else {
+	    res = validateres;
 	}
 
 	if (res != NO_ERR) {

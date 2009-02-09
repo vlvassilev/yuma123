@@ -8306,7 +8306,7 @@ boolean
  * INPUTS:
  *    obj == parent object template
  *    chobj == current child node (may be NULL if the
- *             xmlorder param is true
+ *             xmlorder param is FALSE
  *     xmlorder == TRUE if should follow strict XML element order
  *              == FALSE if sibling node order errors should be 
  *                 ignored; find child nodes out of order
@@ -8710,6 +8710,55 @@ obj_metadata_t *
     return (obj_metadata_t *)dlq_nextEntry(meta);
 
 }  /* obj_next_metadata */
+
+
+/********************************************************************
+* FUNCTION obj_get_default_parm
+* 
+* Get the ncx:default-parm object for this object
+* Only supported for OBJ_TYP_CONTAINER and OBJ_TYP_RPCIO (input)
+*
+* INPUTS:
+*   obj == the specific object to check
+*
+* RETURNS:
+*   pointer to the name field, NULL if some error or unnamed
+*********************************************************************/
+const obj_template_t * 
+    obj_get_default_parm (const obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+	return obj->def.container->defaultparm;
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+    case OBJ_TYP_LIST:
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_USES:
+    case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
+    case OBJ_TYP_RPC:
+	return NULL;
+    case OBJ_TYP_RPCIO:
+	return obj->def.rpcio->defaultparm;
+    case OBJ_TYP_NOTIF:
+	return NULL;
+    case OBJ_TYP_NONE:
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_get_default_parm */
 
 
 /* END obj.c */

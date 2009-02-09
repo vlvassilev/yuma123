@@ -951,17 +951,31 @@ static boolean
 		     const xmlChar *numstr2,
 		     xpath_exop_t  exop)
 {
-    int32       cmpresult;
-    ncx_num_t   num2;
-    status_t    res;
+    int32        cmpresult;
+    ncx_num_t    num2;
+    status_t     res;
+    ncx_numfmt_t numfmt;
 
-    ncx_init_num(&num2);
-
-    res = ncx_decode_num(numstr2, NCX_BT_FLOAT64, &num2);
-    if (res == NO_ERR) {
-	cmpresult = ncx_compare_nums(num1, &num2, NCX_BT_FLOAT64);
+    numfmt = ncx_get_numfmt(numstr2);
+    if (numfmt == NCX_NF_OCTAL) {
+	numfmt = NCX_NF_DEC;
     }
-    ncx_clean_num(NCX_BT_FLOAT64, &num2);
+
+    if (numfmt == NCX_NF_DEC || numfmt == NCX_NF_REAL) {
+	ncx_init_num(&num2);
+	
+	res = ncx_convert_num(numstr2, numfmt, 
+			      NCX_BT_FLOAT64, &num2);
+	if (res == NO_ERR) {
+	    cmpresult = ncx_compare_nums(num1, &num2, NCX_BT_FLOAT64);
+	}
+	ncx_clean_num(NCX_BT_FLOAT64, &num2);
+    } else if (numfmt == NCX_NF_NONE) {
+	res = ERR_NCX_INVALID_VALUE;
+    } else {
+	res = ERR_NCX_WRONG_NUMTYP;
+    }
+
     if (res != NO_ERR) {
 	return FALSE;
     }
@@ -6886,6 +6900,7 @@ static xpath_result_t *
     ncx_var_t              *varbind;
     const xmlChar          *errstr;
     tk_type_t               nexttyp;
+    ncx_numfmt_t            numfmt;
 
     val1 = NULL;
     nexttyp = tk_next_typ(pcb->tkc);
@@ -6970,9 +6985,20 @@ static xpath_result_t *
 		return NULL;
 	    }
 
-	    *res = ncx_decode_num(TK_CUR_VAL(pcb->tkc),
-				  NCX_BT_FLOAT64,
-				  &val1->r.num);
+	    numfmt = ncx_get_numfmt(TK_CUR_VAL(pcb->tkc));
+	    if (numfmt == NCX_NF_OCTAL) {
+		numfmt = NCX_NF_DEC;
+	    }
+	    if (numfmt == NCX_NF_DEC || numfmt == NCX_NF_REAL) {
+		*res = ncx_convert_num(TK_CUR_VAL(pcb->tkc),
+				       numfmt,
+				       NCX_BT_FLOAT64,
+				       &val1->r.num);
+	    } else if (numfmt == NCX_NF_NONE) {
+		*res = ERR_NCX_INVALID_VALUE;
+	    } else {
+		*res = ERR_NCX_WRONG_NUMTYP;
+	    }
 	}
 	break;
     case TK_TT_QSTRING:             /* double quoted string */
@@ -8535,7 +8561,7 @@ xpath_result_t *
 *    pcb == initialized XPath parser control block
 *           the xpath_new_pcb(exprstr) function is
 *           all that is needed.  This function will
-*           vall xpath1_parse_expr if it has not
+*           call xpath1_parse_expr if it has not
 *           already been called.
 *    val == start context node for value of current()
 *    docroot == ptr to cfg->root or top of rpc/rpc-replay/notif tree
@@ -8646,6 +8672,7 @@ xpath_result_t *
 }  /* xpath1_eval_xmlexpr */
 
 
+#ifdef KEEP_AROUND_UNTIL_LEAFREF_TESTED
 /********************************************************************
 * FUNCTION xpath1_eval_xml_instanceid
 * 
@@ -8755,6 +8782,7 @@ xpath_result_t *
     return result;
 
 }  /* xpath1_eval_xml_instanceid */
+#endif
 
 
 /********************************************************************

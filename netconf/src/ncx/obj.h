@@ -229,6 +229,7 @@ typedef struct obj_container_t_ {
     boolean        datadefclone;
     ncx_status_t   status;
     dlq_hdr_t      mustQ;             /* Q of xpath_pcb_t */
+    const struct obj_template_t_ *defaultparm;
 } obj_container_t;
 
 
@@ -359,6 +360,7 @@ typedef struct obj_rpcio_t_ {
     dlq_hdr_t          typedefQ;         /* Q of typ_template_t */
     dlq_hdr_t          groupingQ;        /* Q of gtp_template_t */
     dlq_hdr_t          datadefQ;         /* Q of obj_template_t */
+    const struct obj_template_t_ *defaultparm;
 } obj_rpcio_t;
 
 
@@ -1072,6 +1074,10 @@ extern obj_metadata_t *
 
 extern obj_metadata_t *
     obj_next_metadata (const obj_metadata_t *meta);
+
+/* yangcli and ncx:cli support */
+extern const obj_template_t * 
+    obj_get_default_parm (const obj_template_t *obj);
 
 
 #endif	    /* _H_obj */

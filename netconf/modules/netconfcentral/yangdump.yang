@@ -272,6 +272,7 @@ module yangdump {
 
     container yangdump {
       ncx:cli;
+      ncx:default-parm module;
 
       description 
          "CLI Parameter Set for the YANG Converter Application.";

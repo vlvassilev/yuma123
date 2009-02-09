@@ -2664,6 +2664,9 @@ static val_value_t *
     obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (!obj || !obj_get_child_count(obj)) {
 	*res = ERR_NCX_SKIPPED;
+	if (valset) {
+	    val_free_value(valset);
+	}
 	return NULL;
     }
 
@@ -6818,7 +6821,11 @@ static status_t
 	}
     }
 
-    if (!mgr_cli_valset || res != NO_ERR) {
+    if (res != NO_ERR) {
+	if (mgr_cli_valset) {
+	    val_free_value(mgr_cli_valset);
+	    mgr_cli_valset = NULL;
+	}
 	return res;
     }
 
@@ -6837,44 +6844,6 @@ static status_t
      * go through the yangcli params in order,
      * after setting up the logging parameters
      ****************************************************/
-
-    /* get the log-level parameter */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_LOGLEVEL);
-    if (parm && parm->res == NO_ERR) {
-	log_level = 
-	    log_get_debug_level_enum((const char *)VAL_STR(parm));
-	if (log_level == LOG_DEBUG_NONE) {
-	    return ERR_NCX_INVALID_VALUE;
-	} else {
-	    log_set_debug_level(log_level);
-	}
-    }
-
-    /* get the log-append parameter */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_LOGAPPEND);
-    if (parm && parm->res == NO_ERR) {
-	logappend = TRUE;
-    }
-
-    /* get the log parameter if present */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_LOG);
-    if (parm && parm->res == NO_ERR) {
-	res = NO_ERR;
-	logfilename = xml_strdup(VAL_STR(parm));
-	if (!logfilename) {
-	    res = ERR_INTERNAL_MEM;
-	    log_error("\nyangcli: Out of Memory error");
-	} else {
-	    res = log_open((const char *)logfilename, logappend, FALSE);
-	    if (res != NO_ERR) {
-		log_error("\nyangcli: Could not open logfile %s",
-			  logfilename);
-	    }
-	}
-	if (res != NO_ERR) {
-	    return res;
-	}
-    }
 
     /* get the agent parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AGENT);
@@ -7489,7 +7458,12 @@ static status_t
      * to be processed.  No module can get its internal config
      * until the NCX module parser and definition registry is up
      */
-    res = ncx_init(NCX_SAVESTR, log_level, "\nStarting yangcli...");
+    res = ncx_init(NCX_SAVESTR, 
+		   log_level, 
+		   TRUE,
+		   "\nStarting yangcli",
+		   argc, argv);
+
     if (res != NO_ERR) {
 	return res;
     }

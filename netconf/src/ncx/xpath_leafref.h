@@ -23,6 +23,7 @@ date	     init     comment
 */
 
 #include <xmlstring.h>
+#include <xmlreader.h>
 #include <xmlregexp.h>
 
 #ifndef _H_dlq
@@ -78,6 +79,12 @@ extern status_t
 				 const obj_template_t *obj,
 				 xpath_pcb_t *pcb,
 				 const obj_template_t **leafobj);
+
+extern status_t
+    xpath_leafref_validate_xmlpath (xmlTextReaderPtr reader,
+				    xpath_pcb_t *pcb,
+				    boolean logerrors,
+				    const obj_template_t **targobj);
 
 
 

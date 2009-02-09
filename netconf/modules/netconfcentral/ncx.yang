@@ -354,22 +354,23 @@ module ncx {
       be included in any NETCONF configuration databases.";
   }
 
-  extension cli-default {
+  extension default-parm {
     description
-     "Used within a CLI container definition to specify a
-      leaf parameter within the CLI container that is used
-      as the default if no parameter name is entered.
+     "Used within a CLI container or rpc definition to specify a
+      leaf parameter within the CLI container or rpc input
+      section, that is used as the default if no parameter name 
+      is entered.
 
       These values must not begin with a dash (-) or 
       double dash (--) sequence or they will be mistaken
       for CLI parameter names.
 
       This option is somewhat risky because any unrecognized
-      parameter without any prefix (- or --) will try
-      to be assigned to the default parameter.
-      It can also be useful though, for assigning file name
-      parameters through shell expansion.";
-
+      parameter without any prefix (- or --) will be tried
+      as the default parameter type, instead of catching
+      the unknown parameter error.  It can also be useful though, 
+      for assigning file name parameters through shell expansion,
+      or if there is only one parameter.";
     argument parm {
      yin-element true;
     }

@@ -273,6 +273,9 @@ status_t
 	valset = cli_parse(argc, argv, obj,
 			   FULLTEST, PLAINMODE, TRUE, &res);
 	if (res != NO_ERR) {
+	    if (valset) {
+		val_free_value(valset);
+	    }
 	    return res;
 	}
     }

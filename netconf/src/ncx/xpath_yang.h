@@ -1,14 +1,14 @@
-#ifndef _H_xpath_leafref
-#define _H_xpath_leafref
+#ifndef _H_xpath_yang
+#define _H_xpath_yang
 
-/*  FILE: xpath_leafref.h
+/*  FILE: xpath_yang.h
 *********************************************************************
 *								    *
 *			 P U R P O S E				    *
 *								    *
 *********************************************************************
 
-    Leafref data type Xpath support
+    YANG-specific Xpath support
 
 *********************************************************************
 *								    *
@@ -53,39 +53,27 @@ date	     init     comment
 
 /********************************************************************
 *								    *
-*			 C O N S T A N T S			    *
-*								    *
-*********************************************************************/
-
-/********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
-*********************************************************************/
-
-/********************************************************************
-*								    *
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
 
 extern status_t
-    xpath_leafref_parse_path (tk_chain_t *tkc,
+    xpath_yang_parse_path (tk_chain_t *tkc,
 			      ncx_module_t *mod,
 			      xpath_pcb_t *pcb);
 
 extern status_t
-    xpath_leafref_validate_path (ncx_module_t *mod,
+    xpath_yang_validate_path (ncx_module_t *mod,
 				 const obj_template_t *obj,
 				 xpath_pcb_t *pcb,
 				 const obj_template_t **leafobj);
 
 extern status_t
-    xpath_leafref_validate_xmlpath (xmlTextReaderPtr reader,
+    xpath_yang_validate_xmlpath (xmlTextReaderPtr reader,
 				    xpath_pcb_t *pcb,
 				    boolean logerrors,
 				    const obj_template_t **targobj);
 
 
 
-#endif	    /* _H_xpath_leafref */
+#endif	    /* _H_xpath_yang */

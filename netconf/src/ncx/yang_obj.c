@@ -161,8 +161,8 @@ date         init     comment
 #include "xpath1.h"
 #endif
 
-#ifndef _H_xpath_leafref
-#include "xpath_leafref.h"
+#ifndef _H_xpath_yang
+#include "xpath_yang.h"
 #endif
 
 #ifndef _H_yangconst
@@ -3664,6 +3664,72 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION resolve_default_parm
+* 
+* Check the rpc input or container object type
+* to see if a CLI default-parm was defined.  If so,
+* find the target object.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   obj == parent object for 'rpcio' or 'list'
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_default_parm (tk_chain_t *tkc,
+		   ncx_module_t  *mod,
+		   obj_template_t *obj)
+{
+    const obj_template_t *targobj;
+    const ncx_appinfo_t  *appinfo;
+    status_t              res;
+
+    res = NO_ERR;
+
+    if (obj->objtype == OBJ_TYP_CONTAINER ||
+	(obj->objtype == OBJ_TYP_RPCIO &&
+	 !xml_strcmp(obj_get_name(obj), YANG_K_INPUT))) {
+
+	appinfo = ncx_find_appinfo(&obj->appinfoQ,
+				   NCX_PREFIX,
+				   NCX_EL_DEFAULT_PARM);
+	if (appinfo) {
+	    if (appinfo->value) {
+		targobj = obj_find_child(obj,
+					 obj_get_mod_name(obj),
+					 appinfo->value);
+		if (targobj) {
+		    if (obj->objtype == OBJ_TYP_CONTAINER) {
+			obj->def.container->defaultparm = targobj;
+		    } else {
+			obj->def.rpcio->defaultparm = targobj;
+		    }
+		} else {
+		    res = ERR_NCX_UNKNOWN_OBJECT;
+		}
+	    } else {
+		res = ERR_NCX_MISSING_PARM;
+	    }
+
+	    if (res != NO_ERR) {
+		log_error("\nError: invalid 'default-parm' extension");
+		ncx_print_errormsg(tkc, mod, res);
+	    }
+	}
+    }
+
+    return res;
+				    
+}  /* resolve_default_parm */
+
+
+/********************************************************************
 * FUNCTION resolve_mustQ
 * 
 * Check any must-stmts for this node
@@ -3921,8 +3987,6 @@ static status_t
 		       obj_container_t *con,
 		       obj_template_t *obj)
 {
-    const obj_template_t *targobj;
-    const ncx_appinfo_t  *appinfo;
     status_t              res, retres;
 
     retres = NO_ERR;
@@ -3945,30 +4009,6 @@ static status_t
 
     res = check_parent(tkc, mod, obj);
     CHK_EXIT(res, retres);
-
-    res = NO_ERR;
-    appinfo = ncx_find_appinfo(&obj->appinfoQ,
-			       NCX_PREFIX,
-			       NCX_EL_DEFAULT_PARM);
-    if (appinfo) {
-	if (appinfo->value) {
-	    targobj = obj_find_child(obj,
-				     obj_get_mod_name(obj),
-				     appinfo->value);
-	    if (targobj) {
-		con->defaultparm = targobj;
-	    } else {
-		res = ERR_NCX_UNKNOWN_OBJECT;
-	    }
-	} else {
-	    res = ERR_NCX_MISSING_PARM;
-	}
-	if (res != NO_ERR) {
-	    log_error("\nError: invalid 'default-parm' extension");
-	    ncx_print_errormsg(tkc, mod, res);
-	    CHK_EXIT(res, retres);
-	}
-    }
 
     return retres;
 				    
@@ -5775,8 +5815,6 @@ static status_t
 		   obj_rpcio_t *rpcio,
 		   obj_template_t *obj)
 {
-    const obj_template_t *targobj;
-    const ncx_appinfo_t  *appinfo;
     status_t              res, retres;
 
     retres = NO_ERR;
@@ -5789,33 +5827,6 @@ static status_t
 
     res = yang_obj_resolve_datadefs(tkc, mod, &rpcio->datadefQ);
     CHK_EXIT(res, retres);
-
-    if (!xml_strcmp(obj_get_name(obj), YANG_K_INPUT)) {
-	res = NO_ERR;
-	appinfo = ncx_find_appinfo(&obj->appinfoQ,
-				   NCX_PREFIX,
-				   NCX_EL_DEFAULT_PARM);
-	if (appinfo) {
-	    if (appinfo->value) {
-		targobj = obj_find_child(obj,
-					 obj_get_mod_name(obj),
-					 appinfo->value);
-		if (targobj) {
-		    rpcio->defaultparm = targobj;
-		} else {
-		    res = ERR_NCX_UNKNOWN_OBJECT;
-		}
-	    } else {
-		res = ERR_NCX_MISSING_PARM;
-	    }
-
-	    if (res != NO_ERR) {
-		log_error("\nError: invalid 'default-parm' extension");
-		ncx_print_errormsg(tkc, mod, res);
-		CHK_EXIT(res, retres);
-	    }
-	}
-    }
 
     return retres;
 				    
@@ -7011,6 +7022,8 @@ status_t
 	    CHK_EXIT(res, retres);
 	    res = yang_obj_resolve_final(tkc, mod, 
 					 testobj->def.container->datadefQ);
+	    CHK_EXIT(res, retres);
+	    res = resolve_default_parm(tkc, mod, testobj);
 	    yang_check_obj_used(tkc, mod,
 				testobj->def.container->typedefQ,
 				testobj->def.container->groupingQ);
@@ -7024,6 +7037,7 @@ status_t
 	    CHK_EXIT(res, retres);
 	    res = yang_obj_resolve_final(tkc, mod, 
 					 testobj->def.list->datadefQ);
+	    CHK_EXIT(res, retres);
 	    yang_check_obj_used(tkc, mod,
 				testobj->def.list->typedefQ,
 				testobj->def.list->groupingQ);
@@ -7061,6 +7075,8 @@ status_t
 	    CHK_EXIT(res, retres);
 	    res = yang_obj_resolve_final(tkc, mod, 
 					 &testobj->def.rpcio->datadefQ);
+	    CHK_EXIT(res, retres);
+	    res = resolve_default_parm(tkc, mod, testobj);
 	    yang_check_obj_used(tkc, mod,
 				&testobj->def.rpcio->typedefQ,
 				&testobj->def.rpcio->groupingQ);
@@ -7200,13 +7216,13 @@ status_t
 		    res = ERR_INTERNAL_MEM;
 		} else {
 		    tkc->cur = pcb->tk;
-		    res = xpath_leafref_parse_path(tkc, mod, pcbclone);
+		    res = xpath_yang_parse_path(tkc, mod, pcbclone);
 		    if (res == NO_ERR) {
 			leafobj = NULL;
-			res = xpath_leafref_validate_path(mod, 
-							  testobj, 
-							  pcbclone, 
-							  &leafobj);
+			res = xpath_yang_validate_path(mod, 
+						       testobj, 
+						       pcbclone, 
+						       &leafobj);
 			if (res == NO_ERR && leafobj) {
 			    typ_set_xref_typdef(typdef, 
 						obj_get_ctypdef(leafobj));

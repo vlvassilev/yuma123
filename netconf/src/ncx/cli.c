@@ -101,10 +101,105 @@ date         init     comment
 
 
 /********************************************************************
+* FUNCTION parse_parm_cmn
+* 
+* Create a val_value_t struct for the specified parm value,
+* and insert it into the value set
+*
+* INPUTS:
+*   new_parm == complex val_value_t to add the parsed parm into
+*   obj == obj_template_t descriptor for the missing parm
+*   strval == string representation of the object value
+*             (may be NULL if obj btype is NCX_BT_EMPTY
+*   script == TRUE if parsing a script (in the manager)
+*          == FALSE if parsing XML or CLI
+*
+* OUTPUTS:
+*   If the specified parm is mandatory w/defval defined, then a 
+*   new val_value_t will be inserted in the vnew_parm->v.childQ 
+*   as required to fill in the value set.
+*
+* RETURNS:
+*   status 
+*********************************************************************/
+static status_t
+    parse_parm_cmn (val_value_t *new_parm,
+		    const obj_template_t *obj,
+		    const xmlChar *strval,
+		    boolean script)
+{
+    val_value_t          *newchild;
+    const typ_def_t      *typdef;
+    const obj_template_t *choiceobj, *targobj;
+    ncx_btype_t           btyp;
+    status_t              res;
+
+    res = NO_ERR;
+
+    /* check special case where the parm is a container
+     * with 1 child -- a choice of empty; for this
+     * common NETCONF mechanism, try to match the
+     * strval to a child name
+     */
+    if (obj->objtype == OBJ_TYP_CONTAINER) {
+
+	/* check if the only child is an OBJ_TYP_CHOICE */
+	choiceobj = obj_first_child(obj);
+	if (choiceobj->objtype != OBJ_TYP_CHOICE) {
+	    res = ERR_NCX_INVALID_VALUE;
+	} else {
+	    /* check if a child of any case is named 'strval' */
+	    targobj = obj_find_child(choiceobj,
+				     obj_get_mod_name(obj),
+				     strval);
+	    if (targobj && 
+		obj_get_basetype(targobj) == NCX_BT_EMPTY) {
+		/* found a match so create a value node */
+		newchild = val_new_value();
+		if (!newchild) {
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    val_init_from_template(newchild, targobj);
+		    val_add_child(newchild, new_parm);
+		}
+	    } else {
+		res = ERR_NCX_INVALID_VALUE;
+	    }
+	}
+    } else {
+	/* get the base type value */
+	btyp = obj_get_basetype(obj);
+
+	if (typ_is_simple(btyp)) {
+	    if (script) {
+		(void)var_get_script_val(obj, 
+					 new_parm,
+					 strval, 
+					 ISPARM, 
+					 &res);
+	    } else {
+		typdef = obj_get_ctypdef(obj);
+		res = val_set_simval(new_parm,
+				     typdef,  
+				     obj_get_nsid(obj),
+				     obj_get_name(obj),
+				     strval);
+	    }
+	} else {
+	    res = ERR_NCX_INVALID_VALUE;
+	}
+    }
+
+    return res;
+
+}  /* parse_parm_cmn */
+
+
+/********************************************************************
 * FUNCTION parse_parm
 * 
-* Create a ps_parm_t struct for the specified parm value,
-* and insert it into the parmset (extended)
+* Create a val_value_t struct for the specified parm value,
+* and insert it into the value set
 *
 * INPUTS:
 *   val == complex val_value_t to add the parsed parm into
@@ -116,8 +211,8 @@ date         init     comment
 *
 * OUTPUTS:
 *   If the specified parm is mandatory w/defval defined, then a 
-*   new ps_parm_t will be inserted in the ps->parmQ as required
-*   to fill in the parmset.
+*   new val_value_t will be inserted in the val->v.childQ as required
+*   to fill in the value set.
 *
 * RETURNS:
 *   status 
@@ -128,11 +223,9 @@ static status_t
 		const xmlChar *strval,
 		boolean script)
 {
-    val_value_t       *new_parm;
-    const typ_def_t   *typdef;
-    ncx_btype_t        btyp;
-    status_t           res;
-    
+    val_value_t          *new_parm;
+    status_t              res;
+
     /* create a new parm and fill it in */
     new_parm = val_new_value();
     if (!new_parm) {
@@ -140,24 +233,7 @@ static status_t
     }
     val_init_from_template(new_parm, obj);
 
-    /* get the base type value */
-    btyp = obj_get_basetype(obj);
-
-    if (typ_is_simple(btyp)) {
-	if (script) {
-	    (void)var_get_script_val(obj, new_parm,
-				     strval, ISPARM, &res);
-	} else {
-	    typdef = obj_get_ctypdef(obj);
-	    res = val_set_simval(new_parm,
-				 typdef,  
-				 obj_get_nsid(obj),
-				 obj_get_name(obj),
-				 strval);
-	}
-    } else {
-	res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
+    res = parse_parm_cmn(new_parm, obj, strval, script);
 
     /* save or free the new child node */
     if (res != NO_ERR) {
@@ -165,6 +241,7 @@ static status_t
     } else {
 	val_add_child(new_parm, val);
     }
+
     return res;
 
 }  /* parse_parm */
@@ -173,8 +250,8 @@ static status_t
 /********************************************************************
 * FUNCTION parse_parm_ex
 * 
-* Create a ps_parm_t struct for the specified parm value,
-* and insert it into the parmset (extended)
+* Create a val_value_t struct for the specified parm value,
+* and insert it into the value set (extended)
 *
 * INPUTS:
 *   val == complex val_value_t to add the parsed parm into
@@ -188,8 +265,8 @@ static status_t
 *
 * OUTPUTS:
 *   If the specified parm is mandatory w/defval defined, then a 
-*   new ps_parm_t will be inserted in the ps->parmQ as required
-*   to fill in the parmset.
+*   new val_value_t will be inserted in the val->v.childQ as required
+*   to fill in the value set.
 *
 * RETURNS:
 *   status 
@@ -203,8 +280,6 @@ static status_t
 		   boolean script)
 {
     val_value_t       *new_parm;
-    const typ_def_t   *typdef;
-    ncx_btype_t        btyp;
     status_t           res;
     
     /* create a new parm and fill it in */
@@ -218,21 +293,7 @@ static status_t
     val_set_name(new_parm, name, xml_strlen(name));
     new_parm->nsid = nsid;
 
-    /* get the base type value */
-    btyp = obj_get_basetype(obj);
-
-    if (typ_is_simple(btyp)) {
-	if (script) {
-	    (void)var_get_script_val(obj, new_parm,
-				     strval, ISPARM, &res);
-	} else {
-	    typdef = obj_get_ctypdef(obj);
-	    res = val_set_simval(new_parm, typdef,  
-				 nsid, name, strval);
-	}
-    } else {
-	res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
+    res = parse_parm_cmn(new_parm, obj, strval, script);
 
     if (res != NO_ERR) {
 	val_free_value(new_parm);

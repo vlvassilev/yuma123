@@ -109,8 +109,8 @@ date         init     comment
 #include "xpath.h"
 #endif
 
-#ifndef _H_xpath_leafref
-#include "xpath_leafref.h"
+#ifndef _H_xpath_yang
+#include "xpath_yang.h"
 #endif
 
 #ifndef _H_yangconst
@@ -2073,8 +2073,8 @@ static status_t
 			return res;
 		    } else {
 			sim->xleafref->tk = TK_CUR(tkc);
-			res = xpath_leafref_parse_path(tkc, mod, 
-						       sim->xleafref);
+			res = xpath_yang_parse_path(tkc, mod, 
+						    sim->xleafref);
 			if (res != NO_ERR) {
 			    /* errors already reported */
 			    retres = res;

@@ -714,6 +714,8 @@ static void
 	ncx_init_list(&val->v.list, listbtyp);
     } else if (val->btyp == NCX_BT_BITS) {
 	ncx_init_list(&val->v.list, NCX_BT_BITS);
+    } else if (val->btyp == NCX_BT_EMPTY) {
+	val->v.bool = TRUE;
     }
 
 }  /* init_from_template */

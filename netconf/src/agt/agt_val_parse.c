@@ -122,8 +122,8 @@ date         init     comment
 #include "xpath.h"
 #endif
 
-#ifndef _H_xpath_leafref
-#include "xpath_leafref.h"
+#ifndef _H_xpath_yang
+#include "xpath_yang.h"
 #endif
 
 #ifndef _H_xpath1
@@ -1378,10 +1378,10 @@ static status_t
 		/* do a first pass parsing to resolve all
 		 * the prefixes and check well-formed XPath
 		 */
-		res = xpath_leafref_validate_xmlpath(scb->reader,
-						     retval->xpathpcb,
-						     FALSE,
-						     &targobj);
+		res = xpath_yang_validate_xmlpath(scb->reader,
+						  retval->xpathpcb,
+						  FALSE,
+						  &targobj);
 	    } else {
 		result = 
 		    xpath1_eval_xmlexpr(scb->reader,

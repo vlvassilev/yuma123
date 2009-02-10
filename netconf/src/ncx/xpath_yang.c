@@ -1,6 +1,22 @@
-/*  FILE: xpath_leafref.c
+/*  FILE: xpath_yang.c
 
-    Schema and data model Xpath search support
+    Schema and data model Xpath search support for
+    YANG specific 'XPath-like' expressions.
+    This module provides validation only.
+
+    Once this module validates that the YANG-specific
+    syntax is followed, then xpath1.c can be
+    used to evaluate the expression and generate
+    a node-set result.
+
+   The following YANG features are supported:
+
+    - augment target
+    - refine target
+    - leafref path target
+    - instance-identifier
+    - key attribute for insert operation
+
 		
 *********************************************************************
 *                                                                   *
@@ -63,8 +79,8 @@ date         init     comment
 #include "xpath.h"
 #endif
 
-#ifndef _H_xpath_leafref
-#include "xpath_leafref.h"
+#ifndef _H_xpath_yang
+#include "xpath_yang.h"
 #endif
 
 #ifndef _H_yangconst
@@ -1093,7 +1109,7 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION xpath_leafref_parse_path
+* FUNCTION xpath_yang_parse_path
 * 
 * Parse the leafref path as a leafref path
 *
@@ -1115,7 +1131,7 @@ static status_t
 *   status
 *********************************************************************/
 status_t
-    xpath_leafref_parse_path (tk_chain_t *tkc,
+    xpath_yang_parse_path (tk_chain_t *tkc,
 			      ncx_module_t *mod,
 			      xpath_pcb_t *pcb)
 {
@@ -1162,11 +1178,11 @@ status_t
      */
     return pcb->parseres;
 
-}  /* xpath_leafref_parse_path */
+}  /* xpath_yang_parse_path */
 
 
 /********************************************************************
-* FUNCTION xpath_leafref_validate_path
+* FUNCTION xpath_yang_validate_path
 * 
 * Validate the previously parsed leafref path
 *   - QNames are valid
@@ -1194,7 +1210,7 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    xpath_leafref_validate_path (ncx_module_t *mod,
+    xpath_yang_validate_path (ncx_module_t *mod,
 				 const obj_template_t *obj,
 				 xpath_pcb_t *pcb,
 				 const obj_template_t **leafobj)
@@ -1290,11 +1306,11 @@ status_t
 
     return pcb->validateres;
 
-}  /* xpath_leafref_validate_path */
+}  /* xpath_yang_validate_path */
 
 
 /********************************************************************
-* FUNCTION xpath_leafref_validate_xmlpath
+* FUNCTION xpath_yang_validate_xmlpath
 * 
 * Validate an instance-identifier expression
 * within an XML PDU context
@@ -1320,7 +1336,7 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    xpath_leafref_validate_xmlpath (xmlTextReaderPtr reader,
+    xpath_yang_validate_xmlpath (xmlTextReaderPtr reader,
 				    xpath_pcb_t *pcb,
 				    boolean logerrors,
 				    const obj_template_t **targobj)
@@ -1380,7 +1396,7 @@ status_t
 
     return pcb->validateres;
 
-}  /* xpath_leafref_validate_xmlpath */
+}  /* xpath_yang_validate_xmlpath */
 
 
-/* END xpath.c */
+/* END xpath_yang.c */

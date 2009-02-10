@@ -473,17 +473,19 @@ static status_t
 	return NO_ERR;
     }
 
+    /* OK to check insertstr, otherwise errors
+     * should already be recorded by agt_val_parse
+     */
+    if (!newval->insertstr) {
+	/* insert op already checked in agt_val_parse */
+	return NO_ERR;
+    }
+
     if (newval->obj->objtype==OBJ_TYP_LEAF_LIST) {
-
-	/* OK to check insertstr, otherwise errors
-	 * should already be recorded by agt_val_parse
+	/* make sure the insert attr is on a node with a parent
+	 * this should always be true since the docroot would
+	 * be the parent of every accessible object instance
 	 */
-	if (!newval->insertstr) {
-	    /* insert op already checked in agt_val_parse */
-	    return NO_ERR;
-	}
-
-	/* make sure the insert attr is on a node with a parent */
 	if (!newval->curparent) {
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	} else {
@@ -1498,9 +1500,11 @@ static status_t
 	return NO_ERR;
     }
 
-    listcnt = val_child_inst_cnt(valset,
-				 obj_get_mod_name(obj),
-				 obj_get_name(obj));
+    modname = obj_get_mod_name(obj);
+    objname = obj_get_name(obj);
+
+    listcnt = val_child_inst_cnt(valset, modname, objname);
+
     if (listcnt < 2) {
 	return NO_ERR;
     }
@@ -1510,8 +1514,6 @@ static status_t
     res = NO_ERR;
     retres = NO_ERR;
     uninum = 1;
-    modname = obj_get_mod_name(obj);
-    objname = obj_get_name(obj);
 
     compset1 = val_new_value();
     if (!compset) {

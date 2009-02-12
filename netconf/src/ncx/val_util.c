@@ -987,7 +987,7 @@ status_t
 
 	if (chval->index) {
 	    continue;
-	} else if (chval->obj->mod != in->keyobj->mod) {
+	} else if (val_get_nsid(chval) != obj_get_nsid(in->keyobj)) {
 	    continue;
 	} else if (!xml_strcmp(obj_get_name(in->keyobj), 
 			       chval->name)) {

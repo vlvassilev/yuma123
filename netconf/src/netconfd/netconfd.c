@@ -21,12 +21,7 @@ date         init     comment
 #include  <stdlib.h>
 #include  <string.h>
 #include  <unistd.h>
-
-#define MEMORY_DEBUG 1
-
-#ifdef MEMORY_DEBUG
 #include <mcheck.h>
-#endif
 
 #define _C_main 1
 
@@ -84,6 +79,7 @@ date         init     comment
 #define NETCONFD_DEBUG   1
 #define NETCONFD_DEBUG_TEST 1
 #define NETCONFD_DEBUG_LOAD_TEST 1
+/* #define MEMORY_DEBUG 1 */
 #endif
 
 #define NETCONFD_MOD       (const xmlChar *)"netconfd"
@@ -97,7 +93,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 /* program version string */
-static char progver[] = "0.8.2";
+static char progver[] = "0.8.3";
 
 
 /********************************************************************

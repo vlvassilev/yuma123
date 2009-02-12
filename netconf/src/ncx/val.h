@@ -661,6 +661,13 @@ extern void
 			 val_value_t *parent,
 			 dlq_hdr_t *cleanQ);
 
+
+extern void
+    val_add_child_clean_editvars (val_editvars_t *editvars,
+				  val_value_t *child,
+				  val_value_t *parent,
+				  dlq_hdr_t *cleanQ);
+
 extern void
     val_insert_child (val_value_t *child,
 		      val_value_t *current,
@@ -826,6 +833,11 @@ extern boolean
 extern int32
     val_compare (const val_value_t *val1,
 		 const val_value_t *val2);
+
+extern int32
+    val_compare_to_string (const val_value_t *val1,
+			   const xmlChar *strval2,
+			   status_t *res);
 
 extern status_t
     val_sprintf_simval_nc (xmlChar *buff,

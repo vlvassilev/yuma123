@@ -606,6 +606,7 @@ static int32
 {
     const val_index_t *c1, *c2;
     int32              cmp;
+    status_t           res;
 
     /* only lists have index chains */
     if (val1->obj->objtype != OBJ_TYP_LIST) {
@@ -635,15 +636,31 @@ static int32
 	    return 1;
 	}
 
-	/* check the node if the object then value matches */
-	if (c1->val->obj != c2->val->obj) {
-	    return 1;  
-	} else {
-	    /* same name in the same namespace */
+	res = NO_ERR;
+
+	/* same name in the same namespace */
+	if (c1->val->btyp == c2->val->btyp) {
 	    cmp = val_compare(c1->val, c2->val);
-	    if (cmp) {
-		return cmp;
-	    }
+	} else if (typ_is_string(c1->val->btyp)) {
+	    cmp = val_compare_to_string(val2,
+					VAL_STR(c1->val), 
+					&res);
+	} else if (typ_is_string(c2->val->btyp)) {
+	    cmp = val_compare_to_string(val1,
+					VAL_STR(c2->val), 
+					&res);
+	} else {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return -2;
+	}
+
+	if (res != NO_ERR) {
+	    SET_ERROR(res);	
+	    return -2;
+	}
+
+	if (cmp) {
+	    return cmp;
 	}
 
 	/* node matched, get next node */
@@ -3579,6 +3596,11 @@ boolean
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return TRUE;
     }
+    if (!typ_is_simple(src->btyp) || 
+	!typ_is_simple(dest->btyp)) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return TRUE;
+    }	
 #endif
 
     btyp = dest->btyp;
@@ -4215,11 +4237,60 @@ void
 			 val_value_t *parent,
 			 dlq_hdr_t *cleanQ)
 {
+#ifdef DEBUG
+    if (!child || !parent || !cleanQ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    val_add_child_clean_editvars(child->editvars, child, 
+				 parent, cleanQ);
+
+}   /* val_add_child_clean */
+
+
+/********************************************************************
+* FUNCTION val_add_child_clean_editvars
+* 
+*  Add a child value node to a parent value node
+*  This is only called by the agent when adding nodes
+*  to a target database.
+*
+*   Pass in the editvar to use
+*
+*  If the child node being added is part of a choice/case,
+*  then all sibling nodes in other cases within the same
+*  choice will be deleted
+*
+*  The insert operation will also be check to see
+*  if the child is a list oo a leaf-list, which is ordered-by user
+*
+*  The default insert mode is always 'last'
+*
+* INPUTS:
+*    editvars == val_editvars_t struct to use
+*    child == node to store in the parent
+*    parent == complex value node with a childQ
+*    cleanQ == address of Q to receive any deleted sibling nodes
+*
+* OUTPUTS:
+*    cleanQ may have nodes added if the child being added
+*    is part of a case.  All other cases will be deleted
+*    from the parent Q and moved to the cleanQ
+*
+*********************************************************************/
+void
+    val_add_child_clean_editvars (val_editvars_t *editvars,
+				  val_value_t *child,
+				  val_value_t *parent,
+				  dlq_hdr_t *cleanQ)
+{
     val_value_t  *testval, *nextval;
     boolean       doins, islist;
 
 #ifdef DEBUG
-    if (!child || !parent || !cleanQ) {
+    if (!editvars || !child || !parent || !cleanQ) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return;
     }
@@ -4258,7 +4329,7 @@ void
     }
 
     if (doins) {
-	switch (child->editvars->insertop) {
+	switch (editvars->insertop) {
 	case OP_INSOP_FIRST:
 	    testval = val_find_child(parent, 
 				     val_get_mod_name(child),
@@ -4282,9 +4353,9 @@ void
 	    if (child->obj->objtype == OBJ_TYP_LEAF_LIST ||
 		child->obj->objtype == OBJ_TYP_LIST) {
 
-		if (child->editvars->insertval) {
-		    testval = child->editvars->insertval;
-		    if (child->editvars->insertop == OP_INSOP_BEFORE) {
+		if (editvars->insertval) {
+		    testval = editvars->insertval;
+		    if (editvars->insertop == OP_INSOP_BEFORE) {
 			dlq_insertAhead(child, testval);
 		    } else {
 			dlq_insertAfter(child, testval);
@@ -4307,7 +4378,7 @@ void
 	dlq_enque(child, &parent->v.childQ);
     }
 
-}   /* val_add_child_clean */
+}   /* val_add_child_clean_editvars */
 
 
 /********************************************************************
@@ -5918,8 +5989,6 @@ uint32
 }  /* val_liststr_count */
 
 
-
-
 /********************************************************************
 * FUNCTION val_index_match
 * 
@@ -6108,6 +6177,95 @@ int32
     return ret;
 
 }  /* val_compare */
+
+
+/********************************************************************
+* FUNCTION val_compare_to_string
+* 
+* Compare a val_value_t struct value contents to a string
+* 
+* Handles NCX_CL_BASE and NCX_CL_SIMPLE data classes
+* by comparing the simple value.
+*
+* !!!! Meta-value contents are ignored for this test !!!!
+* 
+* INPUTS:
+*    val1 == first value to check
+*    strval2 == second value to check 
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*   compare result
+*     -1: val1 is less than val2 (if complex just different or error)
+*      0: val1 is the same as val2 
+*      1: val1 is greater than val2
+*********************************************************************/
+int32
+    val_compare_to_string (const val_value_t *val1,
+			   const xmlChar *strval2,
+			   status_t *res)
+{
+#define MYBUFFSIZE  64
+
+    xmlChar      buff[MYBUFFSIZE], *mbuff;
+    status_t     myres;
+    uint32       len;
+    int32        retval;
+
+#ifdef DEBUG
+    if (!val1 || !strval2) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return -1;
+    }
+#endif
+
+    len = 0;
+    mbuff = NULL;
+
+    myres = val_sprintf_simval_nc(NULL, val1, &len);
+    if (myres != NO_ERR) {
+	if (res) {
+	    *res = myres;
+	}
+	return -2;
+    }
+    if (len < MYBUFFSIZE) {
+	myres = val_sprintf_simval_nc(buff, val1, &len);
+    } else {
+	mbuff =m__getMem(len+1);
+	if (!mbuff) {
+	    if (res) {
+		*res = ERR_INTERNAL_MEM;
+	    }
+	    return -2;
+	}
+	myres = val_sprintf_simval_nc(mbuff, val1, &len);
+    }
+
+    if (myres != NO_ERR) {
+	if (res) {
+	    *res = myres;
+	}
+	return -2;
+    }
+
+    if (mbuff) {
+	retval = xml_strcmp(mbuff, strval2);
+	m__free(mbuff);
+    } else {
+	retval = xml_strcmp(buff, strval2);
+    }
+
+    if (res) {
+	*res = NO_ERR;
+    }
+
+    return retval;
+
+}  /* val_compare_to_string */
 
 
 /********************************************************************
@@ -6463,8 +6621,13 @@ boolean
     }
 
     /* check for no-duplicates in the type appinfo */
-    if (typ_find_appinfo(val->typdef, NCX_PREFIX, 
-			 NCX_EL_NODUPLICATES)) {
+    if (val->typdef) {
+	if (typ_find_appinfo(val->typdef, NCX_PREFIX, 
+			     NCX_EL_NODUPLICATES)) {
+	    val->flags |= VAL_FL_DUPDONE;
+	    return FALSE;
+	}
+    } else {
 	val->flags |= VAL_FL_DUPDONE;
 	return FALSE;
     }
@@ -7182,6 +7345,10 @@ boolean
      * for the index node has a default
      */
     if (val->index) {
+	return FALSE;
+    }
+
+    if (!val->typdef) {
 	return FALSE;
     }
 
@@ -7963,10 +8130,14 @@ val_value_t *
 	}
     }
 
+    if (myres == NO_ERR) {
+	myres = val_gen_index_chain(listval->obj, listval);
+    }
+
     if (res) {
 	*res = myres;
     }
-
+				    
     if (myres != NO_ERR) {
 	val_free_value(listval);
 	listval = NULL;

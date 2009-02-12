@@ -447,15 +447,13 @@ static void
 /********************************************************************
 * FUNCTION move_child_node
 * 
-* Move a child node
+* Move a child list or leaf-list node
 *
 * INPUTS:
 *   newchild == new child value to add
 *   curchild == existing child value to move
 *   parent == parent value to move child within
 *   undo == undo record in progress (may be NULL)
-*   ismerge == TRUE if this is a merge operation
-*              FALSE if this is a replace operation
 *
 * OUTPUTS:
 *    child added to parent->v.childQ
@@ -466,44 +464,26 @@ static void
     move_child_node (val_value_t  *newchild,
 		     val_value_t  *curchild,
 		     val_value_t  *parent,
-		     rpc_undo_rec_t *undo,
-		     boolean ismerge)
+		     rpc_undo_rec_t *undo)
 {
     val_value_t  *val;
     dlq_hdr_t     cleanQ;
-    boolean       freenew;
 
     if (LOGDEBUG3) {
-	log_debug3("\nMove child '%s', %s in parent '%s'",
-		   newchild->name, 
-		   (ismerge) ? "merge" : "replace",
-		   parent->name);
+	log_debug3("\nMove child '%s' in parent '%s'",
+		   newchild->name, parent->name);
     }
 
     dlq_createSQue(&cleanQ);
 
     val_remove_child(curchild);
 
-    freenew = FALSE;
-    if (ismerge) {
-	freenew = val_merge(newchild, curchild);
-	if (curchild->editvars) {
-	    val_free_editvars(curchild);
-	}
-	curchild->editvars = newchild->editvars;
-	newchild->editvars = NULL;
-	val_add_child_clean(curchild, parent, &cleanQ);
-	if (freenew) {
-	    val_free_value(newchild);
-	}
+    val_add_child_clean(newchild, parent, &cleanQ);	
+    if (undo) {
+	/*** order is not remembered ! ***/
+	dlq_enque(curchild, &undo->extra_deleteQ);
     } else {
-	val_add_child_clean(newchild, parent, &cleanQ);	
-	if (undo) {
-	    /*** order is not kept ! ***/
-	    dlq_enque(curchild, &undo->extra_deleteQ);
-	} else {
-	    val_free_value(curchild);
-	}
+	val_free_value(curchild);
     }
 
     /* should not happen, but checking anyway */
@@ -517,6 +497,64 @@ static void
     }
 
 }  /* move_child_node */
+
+
+/********************************************************************
+* FUNCTION move_mergedlist_node
+* 
+* Move a list node that was just merged with
+* the contents of the newval; now the curval needs
+* to be moved
+*
+* INPUTS:
+*   newchild == new child value to add
+*   curchild == existing child value to move
+*   parent == parent value to move child within
+*   undo == undo record in progress (may be NULL)
+*
+* OUTPUTS:
+*    child added to parent->v.childQ
+*    any other cases removed and either added to undo node or deleted
+*
+*********************************************************************/
+static void
+    move_mergedlist_node (val_value_t  *newchild,
+			  val_value_t  *curchild,
+			  val_value_t  *parent,
+			  rpc_undo_rec_t *undo)
+{
+    val_value_t  *val;
+    dlq_hdr_t     cleanQ;
+
+    if (LOGDEBUG3) {
+	log_debug3("\nMove list '%s' in parent '%s'",
+		   newchild->name, parent->name);
+    }
+
+    dlq_createSQue(&cleanQ);
+
+    val_remove_child(curchild);
+    
+    val_add_child_clean_editvars(newchild->editvars, 
+				 curchild,
+				 parent, 
+				 &cleanQ);	
+
+    if (undo) {
+	/*** TBD: remember order! ***/
+    }
+
+    /* should not happen, but checking anyway */
+    if (undo) {
+	dlq_block_enque(&cleanQ, &undo->extra_deleteQ);
+    } else {
+	while (!dlq_empty(&cleanQ)) {
+	    val = (val_value_t *)dlq_deque(&cleanQ);
+	    val_free_value(val);
+	}
+    }
+
+}  /* move_mergedlist_node */
 
 
 /********************************************************************
@@ -818,7 +856,7 @@ static status_t
 
 	/* make sure the node is not a virtual value */
 	if (curval && val_is_virtual(curval)) {
-	    return NO_ERR;   /*** freenew?? ***/
+	    return NO_ERR;
 	}
 
 	switch (cur_editop) {
@@ -829,8 +867,7 @@ static status_t
 		    move_child_node(newval, 
 				    curval, 
 				    parent, 
-				    undo,
-				    TRUE);
+				    undo);
 		} else {
 		    freenew = val_merge(newval, curval);
 		}
@@ -850,8 +887,7 @@ static status_t
 		    move_child_node(newval, 
 				    curval, 
 				    parent, 
-				    undo,
-				    FALSE);
+				    undo);
 		} else {
 		    val_set_canonical_order(newval);
 		    val_swap_child(newval, curval);
@@ -895,6 +931,15 @@ static status_t
 	    !freenew && cur_editop != OP_EDITOP_LOAD) { 
 	    val_clear_editvars(newval);
 	}
+    }
+
+    if (res == NO_ERR 
+	&& newval->btyp == NCX_BT_LIST
+	&& newval->editvars->insertstr 
+	&& cur_editop == OP_EDITOP_MERGE) {
+
+	/* move the list entry after the merge is done */
+	move_mergedlist_node(newval, curval, parent, undo);
     }
 
     if (freenew) {
@@ -979,8 +1024,7 @@ static status_t
 			move_child_node(testval, 
 					curval, 
 					parent, 
-					NULL,
-					TRUE);
+					NULL);
 		    } else {
 			freenew = val_merge(newval, curval);
 		    }
@@ -1005,8 +1049,7 @@ static status_t
 			move_child_node(testval, 
 					curval, 
 					parent, 
-					NULL,
-					FALSE);
+					NULL);
 		    } else {
 			/* val_set_canonical_order(testval); */
 			val_swap_child(testval, curval);
@@ -1040,6 +1083,15 @@ static status_t
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
     } /* else ignore metadata merge */
+
+    if (res == NO_ERR 
+	&& newval->btyp == NCX_BT_LIST
+	&& newval->editvars->insertstr 
+	&& newval->editvars->editop == OP_EDITOP_MERGE) {
+
+	/* move the list entry after the merge is done */
+	move_mergedlist_node(newval, curval, parent, NULL);
+    }
 
     if (freenew) {
 	val_free_value(testval);
@@ -1233,6 +1285,8 @@ static status_t
 
 	if (res == NO_ERR) {
 	    res = check_insert_attr(scb, msg, newval);
+	    CHK_EXIT(res, retres);
+	    res = NO_ERR;   /* any error already recorded */
 	}
 
 	if (res != NO_ERR) {
@@ -1240,9 +1294,8 @@ static status_t
 			     NCX_LAYER_CONTENT, res, 
 			     NULL, NCX_NT_VAL, newval, 
 			     NCX_NT_VAL, newval);
-	    return res;
+	    CHK_EXIT(res, retres);
 	}
-	retres = res;
 	break;
     case AGT_CB_TEST_APPLY:
 	retres = test_apply_write_val(newval->editvars->curparent, 
@@ -1269,17 +1322,19 @@ static status_t
     case AGT_CB_ROLLBACK:
 	break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+	retres = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    if (newval) {
-	cur_editop = newval->editvars->editop;
-	curparent = newval;
-    } else if (curval) {
-	cur_editop = editop;
-	curparent = curval;
-    } else {
-	retres = SET_ERROR(ERR_INTERNAL_VAL);
+    if (retres == NO_ERR) {
+	if (newval) {
+	    cur_editop = newval->editvars->editop;
+	    curparent = newval;
+	} else if (curval) {
+	    cur_editop = editop;
+	    curparent = curval;
+	} else {
+	    retres = SET_ERROR(ERR_INTERNAL_VAL);
+	}
     }
 
     /* check all the child nodes next */
@@ -1301,9 +1356,7 @@ static status_t
 	    if (chval->res == NO_ERR) {
 		chval->res = res;
 	    }
-	    if (res != NO_ERR) {
-		retres = res;
-	    }
+	    CHK_EXIT(res, retres);
 	}
     }
 

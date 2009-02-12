@@ -129,10 +129,15 @@ static status_t
     const xmlChar          *modname;
     ncx_module_t           *targmod;
     status_t                res;
+    boolean                 laxnamespaces;
 
+    /* TBD: change this to an agt_profile 'namespaces' */
+    laxnamespaces = TRUE;
+    targmod = NULL;
     foundobj = NULL;
     res = NO_ERR;
 
+    /* set the pcb target to get the result */
     switch (pcb->curmode) {
     case XP_CM_TARGET:
 	useobj = &pcb->targobj;
@@ -147,33 +152,78 @@ static status_t
 	res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+    /* get the module from the NSID or the prefix */
     if (res == NO_ERR) {
 	if (pcb->source == XP_SRC_XML) {
-	    targmod = NULL;
-	    modname = xmlns_get_module(nsid);
-	    if (modname) {
-		targmod = ncx_find_module(modname);
-	    }
-	    if (!targmod) {
-		res = ERR_NCX_DEF_NOT_FOUND;
+	    if (nsid) {
+		modname = xmlns_get_module(nsid);
+		if (modname) {
+		    targmod = ncx_find_module(modname);
+		}
+		if (!targmod) {
+		    res = ERR_NCX_DEF_NOT_FOUND;
+		    if (pcb->logerrors) {
+			log_error("\nError: module not found in expr '%s'",
+				  pcb->exprstr);
+		    }
+		}
+	    } else if (!laxnamespaces) {
+		res = ERR_NCX_UNKNOWN_NAMESPACE;
+		if (pcb->logerrors) {
+		    log_error("\nError: no namespace in expr '%s'",
+			      pcb->exprstr);
+		}
 	    }
 	} else {
 	    res = xpath_get_curmod_from_prefix(prefix,
 					       pcb->mod,
 					       &targmod);
 	    if (res != NO_ERR) {
-		log_error("\nError: Module for prefix '%s' not found",
-			  (prefix) ? prefix : EMPTY_STRING);
+		if (!prefix && laxnamespaces) {
+		    res = NO_ERR;
+		} else if (pcb->logerrors) {
+		    log_error("\nError: Module for prefix '%s' not found",
+			      (prefix) ? prefix : EMPTY_STRING);
+		}
 	    }
 	}
     }
 
+    /* check if no NSID or prefix used: instead of rejecting
+     * the request, check any top-level object, if allowed
+     * by the laxnamespaces parameter
+     */
+    if (!targmod && laxnamespaces && 
+	res == NO_ERR && (!nsid || !prefix)) {
+
+	if (pcb->targobj) {
+	    foundobj = obj_find_child(pcb->targobj,
+				      obj_get_mod_name(pcb->targobj),
+				      nodename);
+	}
+
+	if (!foundobj) {
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	    if (pcb->logerrors) {
+		log_error("\nError: No object match for node '%s' "
+			  "in expr '%s'",
+			  nodename, pcb->exprstr);
+	    }
+	}
+    }
+
+    /* finish off any error and exit */
     if (res != NO_ERR) {
-	ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	if (pcb->logerrors) {
+	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	}
 	return res;
     }
 
-    if (*useobj) {
+    /* get the object from the module (if not already done) */
+    if (foundobj) {
+	/* already set in the wildcard search above */	;
+    } else if (*useobj) {
 	if (obj_is_root(*useobj)) {
 	    foundobj = 
 		obj_find_template_top(targmod,
@@ -290,9 +340,11 @@ static status_t
 
     if (!foundobj) {
 	res = ERR_NCX_DEF_NOT_FOUND;
-	log_error("\nError: parent not found for object '%s'",
-		  obj_get_name(*useobj));
-	ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	if (pcb->logerrors) {
+	    log_error("\nError: parent not found for object '%s'",
+		      obj_get_name(*useobj));
+	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	}
     } else {
 	*useobj = foundobj;
     }
@@ -328,9 +380,10 @@ static status_t
     xmlns_id_t      nsid;
 
     prefix = NULL;
-    nsid = 0;
+    nodename = NULL;
     import = NULL;
     res = NO_ERR;
+    nsid = 0;
 
     /* get the next token in the step, node-identifier */
     res = TK_ADV(pcb->tkc);
@@ -350,8 +403,10 @@ static status_t
 	    }
 	} else {
 	    res = ERR_NCX_WRONG_TKTYPE;
-	    log_error("\nError: '.' not allowed here");
-	    ncx_print_errormsg(pcb->tkc, NULL, res);
+	    if (pcb->logerrors) {
+		log_error("\nError: '.' not allowed here");
+		ncx_print_errormsg(pcb->tkc, NULL, res);
+	    }
 	}
 	break;
     case TK_TT_MSTRING:
@@ -363,9 +418,12 @@ static status_t
 		import = ncx_find_pre_import(pcb->mod, prefix);
 		if (!import) {
 		    res = ERR_NCX_PREFIX_NOT_FOUND;
-		    log_error("\nError: import for prefix '%s' not found",
-			      prefix);
-		    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+		    if (pcb->logerrors) {
+			log_error("\nError: import for "
+				  "prefix '%s' not found",
+				  prefix);
+			ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+		    }
 		    break;
 		}
 	    }
@@ -384,13 +442,9 @@ static status_t
 	}
 	/* fall through to check QName */
     case TK_TT_TSTRING:
+	nodename = TK_CUR_VAL(pcb->tkc);
 	if (pcb->obj) {
-	    if (pcb->source == XP_SRC_XML) {
-		res = set_next_objnode(pcb, prefix, nsid, nodename);
-	    } else {
-		res = set_next_objnode(pcb, prefix, nsid,
-				       TK_CUR_VAL(pcb->tkc));
-	    }
+	    res = set_next_objnode(pcb, prefix, nsid, nodename);
 	} /* else identifier not checked here */
 	break;
     default:
@@ -1154,24 +1208,14 @@ static status_t
 	    if (res != NO_ERR) {
 		done = TRUE;
 	    }
+	} else if (nexttyp == TK_TT_NONE) {
+	    done = TRUE;
+	    continue;
 	} else {
 	    res = ERR_NCX_INVALID_VALUE;
 	    done = TRUE;
 	    if (pcb->logerrors) {
 		log_error("\nError: wrong token in key-expr '%s'",
-			  pcb->exprstr);
-		ncx_print_errormsg(pcb->tkc, pcb->mod, res);
-	    }
-	}
-    }
-
-    /* check that the string ended properly */
-    if (res == NO_ERR) {
-	nexttyp = tk_next_typ(pcb->tkc);
-	if (nexttyp != TK_TT_NONE) {
-	    res = ERR_NCX_INVALID_VALUE;
-	    if (pcb->logerrors) {
-		log_error("\nError: wrong token at end of key-expr '%s'",
 			  pcb->exprstr);
 		ncx_print_errormsg(pcb->tkc, pcb->mod, res);
 	    }
@@ -1233,9 +1277,11 @@ status_t
 					TK_CUR_LPOS(tkc),
 					&res);
     if (!pcb->tkc || res != NO_ERR) {
-	log_error("\nError: Invalid path string '%s'",
-		  pcb->exprstr);
-	ncx_print_errormsg(tkc, mod, res);
+	if (pcb->logerrors) {
+	    log_error("\nError: Invalid path string '%s'",
+		      pcb->exprstr);
+	    ncx_print_errormsg(tkc, mod, res);
+	}
 	return res;
     }
 
@@ -1347,11 +1393,13 @@ status_t
 	    typ_get_constrained(obj_get_ctypdef(obj))) {
 
 	    res = ERR_NCX_NOT_CONFIG;
-	    log_error("\nError: XPath target '%s' for leafref '%s'"
-		      " must be a config object",
-		      obj_get_name(pcb->targobj),
-		      obj_get_name(obj));
-	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	    if (pcb->logerrors) {
+		log_error("\nError: XPath target '%s' for leafref '%s'"
+			  " must be a config object",
+			  obj_get_name(pcb->targobj),
+			  obj_get_name(obj));
+		ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	    }
 	    pcb->validateres = res;
 	}
 
@@ -1360,9 +1408,11 @@ status_t
 	    pcb->targobj->objtype != OBJ_TYP_LEAF ||
 	    obj_get_basetype(pcb->targobj) == NCX_BT_ANY) {
 	    res = ERR_NCX_INVALID_VALUE;
-	    log_error("\nError: invalid path target anyxml '%s'",
-		      obj_get_name(pcb->targobj));
-	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	    if (pcb->logerrors) {
+		log_error("\nError: invalid path target anyxml '%s'",
+			  obj_get_name(pcb->targobj));
+		ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	    }
 	    pcb->validateres = res;
 	}
 
@@ -1371,10 +1421,12 @@ status_t
 	 */
 	if (pcb->targobj == pcb->obj) {
 	    res = ERR_NCX_DEF_LOOP;
-	    log_error("\nError: path target '%s' is set to "
-		      "the target object",
-		      obj_get_name(pcb->targobj));
-	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	    if (pcb->logerrors) {
+		log_error("\nError: path target '%s' is set to "
+			  "the target object",
+			  obj_get_name(pcb->targobj));
+		ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	    }
 	    pcb->validateres = res;
 	}
 
@@ -1429,6 +1481,7 @@ status_t
 #endif
 
     *targobj = NULL;
+    pcb->logerrors = logerrors;
 
     if (pcb->tkc) {
 	tk_reset_chain(pcb->tkc);
@@ -1438,7 +1491,7 @@ status_t
     }
 
     if (!pcb->tkc || res != NO_ERR) {
-	if (logerrors) {
+	if (pcb->logerrors) {
 	    log_error("\nError: Invalid path string '%s'",
 		      pcb->exprstr);
 	}
@@ -1454,7 +1507,6 @@ status_t
     pcb->reader = reader;
     pcb->flags = XP_FL_INSTANCEID;
     pcb->source = XP_SRC_XML;
-    pcb->logerrors = logerrors;
     pcb->objmod = NULL;
     pcb->val = NULL;
     pcb->val_docroot = NULL;
@@ -1519,6 +1571,9 @@ status_t
     }
 #endif
 
+    res = NO_ERR;
+    pcb->logerrors = logerrors;
+
     if (pcb->tkc) {
 	tk_reset_chain(pcb->tkc);
     } else {
@@ -1527,7 +1582,7 @@ status_t
     }
 
     if (!pcb->tkc || res != NO_ERR) {
-	if (logerrors) {
+	if (pcb->logerrors) {
 	    log_error("\nError: Invalid path string '%s'",
 		      pcb->exprstr);
 	}
@@ -1543,7 +1598,6 @@ status_t
     pcb->reader = reader;
     pcb->flags = XP_FL_INSTANCEID;
     pcb->source = XP_SRC_XML;
-    pcb->logerrors = logerrors;
     pcb->objmod = NULL;
     pcb->val = NULL;
     pcb->val_docroot = NULL;

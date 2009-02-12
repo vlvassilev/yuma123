@@ -81,6 +81,35 @@ module netconfd {
         type nt:NcPathList;
       }
 
+/*
+      leaf namespaces {
+        description
+          "XML namespace enforcement policy.";
+
+        type enumeration {
+          enum strict {
+            description
+              "XML namespaces will be strictly enforced, 
+               and the correct namespace must be used for
+               every XML attribute and element.";
+          }
+          enum lax {
+             description
+              "XML namespaces will be loosely enforced, 
+               and a missing namespace (i.e., set to NULL
+               or the NETCONF namespace) will cause the agent
+               to attempt ro match the element or attribute name to
+               one within a valid data model namespace.
+               If multiple matches would occur, the agent
+               will pick one, based on the order modules
+               were initially loaded into agent.";
+          }
+        }
+        default lax;
+      }
+
+*/
+
       leaf-list port {
         max-elements 4;
         description 

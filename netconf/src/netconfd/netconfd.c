@@ -22,6 +22,12 @@ date         init     comment
 #include  <string.h>
 #include  <unistd.h>
 
+#define MEMORY_DEBUG 1
+
+#ifdef MEMORY_DEBUG
+#include <mcheck.h>
+#endif
+
 #define _C_main 1
 
 #ifndef _H_procdefs
@@ -384,6 +390,10 @@ int
 {
     status_t   res;
     boolean    showver, showhelp, stdlog;
+
+#ifdef MEMORY_DEBUG
+    mtrace();
+#endif
 
     malloc_cnt = 0;
     free_cnt = 0;

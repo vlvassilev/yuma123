@@ -101,6 +101,7 @@ date         init     comment
 *********************************************************************/
 
 /* #define VAL_DEBUG  1 */
+/* #define VAL_EDITVARS_DEBUG */
 
 /********************************************************************
 *                                                                   *
@@ -121,6 +122,10 @@ typedef void (*dumpfn_t) (const char *fstr, ...);
 /* pick a log indent function for dump_value */
 typedef void (*indentfn_t) (int32 indentcnt);
 
+#ifdef VAL_EDITVARS_DEBUG
+static uint32 editvars_malloc = 0;
+static uint32 editvars_free = 0;
+#endif
 
 /********************************************************************
 * FUNCTION stdout_num
@@ -390,14 +395,9 @@ static status_t
 *
 * INPUTS:
 *    val == val_value_t data structure to clean
-*   redo == TRUE if this value might be used over again
-*           so val will be reset to all cleared values
-*        == FALSE if this value is about to be freed
-*           !!! many fields will be left with invalid values !!!
 *********************************************************************/
 static void 
-    clean_value (val_value_t *val,
-		 boolean redo)
+    clean_value (val_value_t *val)
 {
     val_value_t   *cur;
     val_index_t   *in;
@@ -407,6 +407,10 @@ static void
 	btyp = val->unbtyp;
     } else {
 	btyp = val->btyp;
+    }
+
+    if (val->editvars) {
+	val_free_editvars(val);
     }
 
     /* clean the val->v union, depending on base type */
@@ -485,16 +489,8 @@ static void
 	m__free(in);
     }
 
-    if (val->insertstr) {
-	m__free(val->insertstr);
-    }
-
     if (val->xpathpcb) {
 	xpath_free_pcb(val->xpathpcb);
-    }
-
-    if (redo) {
-	val_init_value(val);
     }
 
 }  /* clean_value */
@@ -664,7 +660,7 @@ static int32
 * 
 * Initialize a value node from its object template
 *
-* MUST CALL val_new_value OR val_init_value FIRST
+* MUST CALL val_new_value FIRST
 *
 * INPUTS:
 *   val == pointer to the malloced struct to initialize
@@ -1227,33 +1223,26 @@ val_value_t *
     val_new_value (void)
 {
     val_value_t  *val;
+    status_t      res;
 
     val = m__getObj(val_value_t);
     if (!val) {
 	return NULL;
     }
-    val_init_value(val);
-    return val;
 
-}  /* val_new_value */
-
-
-/********************************************************************
-* FUNCTION val_init_value
-* 
-* Initialize the fields in a val_value_t
-*
-* INPUTS:
-*   val == pointer to the malloced struct to initialize
-*********************************************************************/
-void
-    val_init_value (val_value_t *val)
-{
     (void)memset(val, 0x0, sizeof(val_value_t));
     dlq_createSQue(&val->metaQ);
     dlq_createSQue(&val->indexQ);
 
-}  /* val_init_value */
+    res = val_new_editvars(val);
+    if (res != NO_ERR) {
+	val_free_value(val);
+	val = NULL;
+    }
+
+    return val;
+
+}  /* val_new_value */
 
 
 /********************************************************************
@@ -1261,7 +1250,7 @@ void
 * 
 * Initialize the fields in a complex val_value_t
 *
-* MUST CALL val_init_value FIRST
+* MUST CALL val_new_value FIRST
 *
 * INPUTS:
 *   val == pointer to the malloced struct to initialize
@@ -1281,7 +1270,7 @@ void
 * 
 * Special function to initialize a virtual value node
 *
-* MUST CALL val_init_value FIRST
+* MUST CALL val_new_value FIRST
 *
 * INPUTS:
 *   val == pointer to the malloced struct to initialize
@@ -1304,7 +1293,7 @@ void
 * 
 * Initialize a value node from its object template
 *
-* MUST CALL val_new_value OR val_init_value FIRST
+* MUST CALL val_new_value FIRST
 *
 * INPUTS:
 *   val == pointer to the initialized value struct to bind
@@ -1340,35 +1329,107 @@ void
 	return;
     }
 #endif
-    clean_value(val, FALSE);
+    clean_value(val);
     m__free(val);
 
 }  /* val_free_value */
 
 
 /********************************************************************
-* FUNCTION val_clean_value
+* FUNCTION val_new_editvars
 * 
-* Scrub the memory in a ncx_value_t by freeing all
-* the sub-fields. DOES NOT free the entire struct itself 
-* The struct must be removed from any queue it is in before
-* this function is called.
+* Malloc and initialize the val->editvars field
 *
 * INPUTS:
-*    val == val_value_t data structure to clean
+*    val == val_value_t data structure to use
+*
+* OUTPUTS:
+*    val->editvars is malloced and initialized
+* 
+* RETURNS:
+*   status
 *********************************************************************/
-void 
-    val_clean_value (val_value_t *val)
+status_t
+    val_new_editvars (val_value_t *val)
+{
+    val_editvars_t  *editvars;
+
+#ifdef DEBUG
+    if (!val) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (val->editvars) {
+	return SET_ERROR(ERR_NCX_DATA_EXISTS);
+    }
+
+    editvars = m__getObj(val_editvars_t);
+    if (!editvars) {
+	return ERR_INTERNAL_MEM;
+    }
+    memset(editvars, 0x0, sizeof(val_editvars_t));
+
+    val->editvars = editvars;
+
+#ifdef VAL_EDITVARS_DEBUG
+    log_debug3("\n\nnew_editvars: %u = %p\n",
+	       ++editvars_malloc,
+	       editvars);
+#endif
+
+    return NO_ERR;
+
+}  /* val_new_editvars */
+
+
+/********************************************************************
+* FUNCTION val_free_editvars
+* 
+* Clean and free the val->editvars field
+*
+* INPUTS:
+*    val == val_value_t data structure to use
+*
+* OUTPUTS:
+*    val->editvars is cleaned, freed, and set to NULL
+*********************************************************************/
+void
+    val_free_editvars (val_value_t *val)
 {
 #ifdef DEBUG
     if (!val) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;  
+	return;
     }
 #endif
-    clean_value(val, TRUE);
 
-}  /* val_clean_value */
+    if (val->editvars) {
+#ifdef VAL_EDITVARS_DEBUG
+	log_debug3("\n\nfree_editvars: %s: %d = %p\n",
+		   (val->name) ? val->name : NCX_EL_NONE,
+		   ++editvars_free,
+		   val->editvars);
+#endif
+
+	if (val->editvars->insertstr) {
+	    m__free(val->editvars->insertstr);
+	}
+
+	if (val->editvars->insertxpcb) {
+	    xpath_free_pcb(val->editvars->insertxpcb);
+	}
+
+	m__free(val->editvars);
+	val->editvars = NULL;
+    } else {
+#ifdef VAL_EDITVARS_DEBUG
+	log_debug3("\nval_free_editvars skipped (%u, %s)",
+		   editvars_free, val->name);
+#endif
+    }
+
+}  /* val_free_editvars */
 
 
 /********************************************************************
@@ -3747,22 +3808,40 @@ val_value_t *
     }
 
     /* set the copy->insertstr */
-    if (val->insertstr) {
-	copy->insertstr = xml_strdup(val->insertstr);
-	if (!copy->insertstr) {
-	    *res = ERR_INTERNAL_MEM;
-	    val_free_value(copy);
-	    return NULL;
+    if (val->editvars) {
+	copy->editvars->curparent = val->editvars->curparent;
+	copy->editvars->editop = val->editvars->editop;
+	copy->editvars->insertop = val->editvars->insertop;
+
+	if (val->editvars->insertstr) {
+	    copy->editvars->insertstr = 
+		xml_strdup(val->editvars->insertstr);
+	    if (!copy->editvars->insertstr) {
+		*res = ERR_INTERNAL_MEM;
+		val_free_value(copy);
+		return NULL;
+	    }
 	}
+
+	if (val->editvars->insertxpcb) {
+	    copy->editvars->insertxpcb = 
+		xpath_clone_pcb(val->editvars->insertxpcb);
+	    if (!copy->editvars->insertxpcb) {
+		*res = ERR_INTERNAL_MEM;
+		val_free_value(copy);
+		return NULL;
+	    }
+	}
+
+	copy->editvars->insertval = val->editvars->insertval;
     }
 
-    copy->curparent = val->curparent;
-    copy->editop = val->editop;
-    copy->insertop = val->insertop;
     copy->res = val->res;
     copy->getcb = val->getcb;
+
     /* DO NOT COPY copy->index = val->index; */
     /* set copy->indexQ after cloning child nodes is done */
+
     copy->untyp = val->untyp;
     copy->unbtyp = val->unbtyp;
     copy->casobj = val->casobj;
@@ -3932,10 +4011,17 @@ status_t
     }
 #endif
 
-    val_clean_value(copy);
+    val_free_value(copy);
+    copy = val_new_value();
+    if (!copy) {
+	return ERR_INTERNAL_MEM;
+    }
     val_init_from_template(copy, val->obj);
 
-    copy->editop = val->editop;
+    if (val->editvars && copy->editvars) {
+	copy->editvars->editop = val->editvars->editop;
+    }
+
     copy->res = val->res;
     copy->flags = val->flags;
 
@@ -4065,13 +4151,7 @@ void
     }
 #endif
 
-    val->curparent = NULL;
-    val->editop = OP_EDITOP_NONE;
-    val->insertop = OP_INSOP_NONE;
-    if (val->insertstr) {
-	m__free(val->insertstr);
-	val->insertstr = NULL;
-    }
+    val_free_editvars(val);
 
 }   /* val_clear_editvars */
 
@@ -4135,9 +4215,8 @@ void
 			 val_value_t *parent,
 			 dlq_hdr_t *cleanQ)
 {
-    val_value_t  *testval, *nextval, *simval;
+    val_value_t  *testval, *nextval;
     boolean       doins, islist;
-    status_t      res;
 
 #ifdef DEBUG
     if (!child || !parent || !cleanQ) {
@@ -4177,8 +4256,9 @@ void
 	doins = TRUE;
 	islist = FALSE;
     }
-    if (doins && child->insertop != OP_INSOP_NONE) {
-	switch (child->insertop) {
+
+    if (doins) {
+	switch (child->editvars->insertop) {
 	case OP_INSOP_FIRST:
 	    testval = val_find_child(parent, 
 				     val_get_mod_name(child),
@@ -4199,38 +4279,20 @@ void
 	     * this is value='foo' for leaf-list and
 	     * key="[x:foo='bar'][x:foo2=7]" for list
 	     */
-	    if (child->obj->objtype == OBJ_TYP_LEAF_LIST) {
-		simval = val_make_simval(child->typdef,
-					 child->nsid,
-					 child->name,
-					 child->insertstr,
-					 &res);
-		if (res != NO_ERR) {
-		    SET_ERROR(res);
-		    dlq_enque(child, &parent->v.childQ);
-		} else {
-		    testval = 
-			val_first_child_match(child->curparent,
-					      simval);
-		    if (!testval) {
-			/* sibling leaf-list with the specified
-			 * value was not found
-			 */
-			SET_ERROR(ERR_NCX_INSERT_MISSING_INSTANCE);
-			dlq_enque(child, &parent->v.childQ);
-		    } else if (child->insertop == OP_INSOP_BEFORE) {
+	    if (child->obj->objtype == OBJ_TYP_LEAF_LIST ||
+		child->obj->objtype == OBJ_TYP_LIST) {
+
+		if (child->editvars->insertval) {
+		    testval = child->editvars->insertval;
+		    if (child->editvars->insertop == OP_INSOP_BEFORE) {
 			dlq_insertAhead(child, testval);
 		    } else {
 			dlq_insertAfter(child, testval);
 		    }
+		} else {
+		    SET_ERROR(ERR_NCX_INSERT_MISSING_INSTANCE);
+		    dlq_enque(child, &parent->v.childQ);
 		}
-		    
-		if (simval) {
-		    val_free_value(simval);
-		}
-	    } else if (child->obj->objtype == OBJ_TYP_LIST) {
-		/***** TBD ******/
-		dlq_enque(child, &parent->v.childQ);
 	    } else {
 		/* wrong object type */
 		SET_ERROR(ERR_INTERNAL_VAL);
@@ -5916,7 +5978,7 @@ int32
 {
     ncx_btype_t  btyp;
     val_value_t *ch1, *ch2;
-    int32 ret;
+    int32        ret;
 
 #ifdef DEBUG
     if (!val1 || !val2) {
@@ -5939,22 +6001,22 @@ int32
     case NCX_BT_EMPTY:
     case NCX_BT_BOOLEAN:
 	if (val1->v.bool == val2->v.bool) {
-	    return 0;
+	    ret = 0;
 	} else if (val1->v.bool) {
-	    return 1;
+	    ret = 1;
 	} else {
-	    return -1;
+	    ret = -1;
 	}
-	/*NOTREACHED*/
+	break;
     case NCX_BT_ENUM:
 	if (VAL_ENUM(val1) == VAL_ENUM(val2)) {
-	    return 0;
+	    ret = 0;
 	} else if (VAL_ENUM(val1) < VAL_ENUM(val2)) {
-	    return -1;
+	    ret = -1;
 	} else {
-	    return 1;
+	    ret = 1;
 	}
-	/*NOTREACHED*/
+	break;
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
@@ -5965,35 +6027,38 @@ int32
     case NCX_BT_UINT64:
     case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
-	return ncx_compare_nums(&val1->v.num, &val2->v.num, btyp);
+	ret = ncx_compare_nums(&val1->v.num, &val2->v.num, btyp);
+	break;
     case NCX_BT_BINARY:
 	if (!val1->v.binary.ustr) {
-	    return -1;
+	    ret = -1;
 	} else if (!val2->v.binary.ustr) {
-	    return 1;
+	    ret = 1;
 	} else if (val1->v.binary.ustrlen <
 		   val2->v.binary.ustrlen) {
-	    return -1;
+	    ret = -1;
 	} else if (val1->v.binary.ustrlen >
 		   val2->v.binary.ustrlen) {
-	    return 1;
+	    ret = 1;
 	} else {
-	    return memcmp(val1->v.binary.ustr,
-			  val2->v.binary.ustr,
-			  val1->v.binary.ustrlen);
+	    ret = memcmp(val1->v.binary.ustr,
+			 val2->v.binary.ustr,
+			 val1->v.binary.ustrlen);
 	}
-	/*NOTREACHED*/
+	break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_LEAFREF:   /*****/
-	return ncx_compare_strs(&val1->v.str, &val2->v.str, btyp);
+	ret = ncx_compare_strs(&val1->v.str, &val2->v.str, btyp);
+	break;
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
-	return ncx_compare_lists(&val1->v.list, &val2->v.list);
+	ret = ncx_compare_lists(&val1->v.list, &val2->v.list);
+	break;
     case NCX_BT_LIST:
 	ret = index_match(val1, val2);
 	if (ret) {
-	    return ret;
+	    break;
 	} /* else drop though and check values */
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
@@ -6030,15 +6095,17 @@ int32
 	/*NOTREACHED*/
     case NCX_BT_EXTERN:
 	SET_ERROR(ERR_INTERNAL_VAL);
-	return -1;
+	ret = -1;
+	break;
     case NCX_BT_INTERN:
 	SET_ERROR(ERR_INTERNAL_VAL);
-	return -1;
+	ret = -1;
+	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
-	return -1;
+	ret = -1;
     }
-    /*NOTREACHED*/
+    return ret;
 
 }  /* val_compare */
 
@@ -7593,18 +7660,14 @@ void
     }
 #endif
 
-    if (obj_is_data_db(val->obj) &&
-	obj_is_config(val->obj)) {
-
+    if (obj_is_data_db(val->obj)) {
 	for (chval = val_get_first_child(val);
 	     chval != NULL;
 	     chval = val_get_next_child(chval)) {
 	    val_clean_tree(chval);
 	}
-
 	val->flags &= ~VAL_FL_DIRTY;
-	val->editop = OP_EDITOP_NONE;
-	val->curparent = NULL;
+	val_free_editvars(val);
     }
 
 }  /* val_clean_tree */
@@ -7785,6 +7848,134 @@ void
     }
 
 }  /* val_change_nsid */
+
+
+/********************************************************************
+* FUNCTION val_make_from_insertxpcb
+* 
+* Make a val_value_t for a list, with the
+* child nodes for key leafs, specified in the
+* key attribute string given to the insert operation
+*
+* INPUTS:
+*   sourceval == list val_value_t from the PDU with the insertxpcb
+*               to process 
+*   status == address of return status (may be NULL, ignored)
+*
+* OUTPUTS:
+*   if non-NULL:
+*      *status == return status
+*
+* RETURNS:
+*   malloced list val_value_t struct with converted value
+*********************************************************************/
+val_value_t *
+    val_make_from_insertxpcb (val_value_t *sourceval,
+			      status_t *res)
+{
+    val_value_t     *listval, *keyval;
+    xpath_pcb_t     *xpcb;
+    const xmlChar   *keyname, *keystring;
+    boolean          done;
+    status_t         myres;
+
+#ifdef DEBUG
+    if (!sourceval) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    myres = NO_ERR;
+    if (res) {
+	*res = NO_ERR;
+    }
+
+    listval = val_new_value();
+    if (!listval) {
+	if (res) {
+	    *res = ERR_INTERNAL_MEM;
+	}
+	return NULL;
+    }
+    val_init_from_template(listval, sourceval->obj);
+
+    xpcb = sourceval->editvars->insertxpcb;
+    if (!xpcb || !xpcb->tkc || xpcb->validateres != NO_ERR) {
+	if (res) {
+	    *res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	val_free_value(listval);
+	return NULL;
+    }
+
+    tk_reset_chain(xpcb->tkc);
+
+    done = FALSE;
+    while (!done && myres == NO_ERR) {
+	keyname = NULL;
+	keystring = NULL;
+	keyval = NULL;
+
+	myres = xpath_parse_token(xpcb, TK_TT_LBRACK);
+	if (myres != NO_ERR) {
+	    continue;
+	}
+
+	myres = TK_ADV(xpcb->tkc);
+	if (myres != NO_ERR) {
+	    continue;
+	}
+	keyname = TK_CUR_VAL(xpcb->tkc);
+
+	myres = xpath_parse_token(xpcb, TK_TT_EQUAL);
+	if (myres != NO_ERR) {
+	    continue;
+	}
+	
+	myres = TK_ADV(xpcb->tkc);
+	if (myres != NO_ERR) {
+	    continue;
+	}
+	keystring = TK_CUR_VAL(xpcb->tkc);
+
+	myres = xpath_parse_token(xpcb, TK_TT_RBRACK);
+	if (myres != NO_ERR) {
+	    continue;
+	}
+	
+	if (!keyname || !keystring) {
+	    myres = SET_ERROR(ERR_INTERNAL_VAL);
+	    continue;
+	}
+
+	keyval = val_make_string(val_get_nsid(sourceval),
+				 keyname, keystring);
+	if (!keyval) {
+	    myres = ERR_INTERNAL_MEM;
+	    continue;
+	} else {
+	    val_add_child(keyval, listval);
+	}
+
+	if (tk_next_typ(xpcb->tkc) != TK_TT_LBRACK) {
+	    done = TRUE;
+	}
+    }
+
+    if (res) {
+	*res = myres;
+    }
+
+    if (myres != NO_ERR) {
+	val_free_value(listval);
+	listval = NULL;
+    }
+	
+    return listval;
+	
+}  /* val_make_from_insertxpcb */
+
 
 
 /* END file val.c */

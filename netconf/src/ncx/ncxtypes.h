@@ -162,7 +162,7 @@ typedef enum ncx_btype_t_ {
 
 #define NCX_FIRST_DATATYPE NCX_BT_ANY
 #define NCX_LAST_DATATYPE  NCX_BT_LIST
-#define NCX_NUM_BASETYPES  (NCX_LAST_DATATYPE-NCX_FIRST_DATATYPE)
+#define NCX_NUM_BASETYPES  (NCX_LAST_DATATYPE-NCX_FIRST_DATATYPE+1)
 
 
 /* Enumeration of the basic value type classifications */

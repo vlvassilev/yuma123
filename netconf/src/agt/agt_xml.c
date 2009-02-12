@@ -70,6 +70,10 @@ date         init     comment
 #include "xpath.h"
 #endif
 
+#ifndef _H_xpath_yang
+#include "xpath_yang.h"
+#endif
+
 #ifndef _H_xpath1
 #include "xpath1.h"
 #endif
@@ -292,46 +296,67 @@ static status_t
 
 		/* get the attribute value even if a NS error */
 		value = xmlTextReaderValue(scb->reader);
-		if (value) {
+		if (!value) {
+		    res = ERR_XML_READER_NULLVAL;
+		} else {
 		    /* save the values as received, may be QName 
 		     * only error that can occur is a malloc fail
 		     */
 		    attr = xml_add_qattr(attrs, nsid, name, 
 					 plen, value, &res);
-		    if (attr && !xml_strcmp(&name[plen], NCX_EL_SELECT)) {
+		    if (!attr) {
+			res = ERR_INTERNAL_MEM;
+		    } else {
 			/* special hack: do not know which
 			 * attributes within an XML node
 			 * are tagged as XPath strings at this point
-			 * To save resources, only the 'select'
-			 * attribute is supported at this time.
+			 * To save resources, only the 'select' and
+			 * 'key' attributes are supported at this time.
 			 * Only check the name, not the namespace
 			 * since it is often left out for attributes
+			 *
+			 * In case this hack guesses wrong, only 
+			 * return fatal errors from the xpath check
+			 * the pcb->validateres will record the error
 			 */
-			attr->attr_xpcb = xpath_new_pcb(value);
-			if (!attr->attr_xpcb) {
-			    res = ERR_INTERNAL_MEM;
-			} else {
-			    /* do a first pass parsing to resolve all
-			     * the prefixes and check well-formed XPath
-			     */
-			    result = xpath1_eval_xmlexpr(scb->reader,
-							 attr->attr_xpcb,
-							 NULL,
-							 NULL,
-							 FALSE,
-							 FALSE,
-							 &res);
-			    if (result) {
-				xpath_free_result(result);
+			if (!xml_strcmp(&name[plen], NCX_EL_SELECT)) {
+			    attr->attr_xpcb = xpath_new_pcb(value);
+			    if (!attr->attr_xpcb) {
+				res = ERR_INTERNAL_MEM;
+			    } else {
+				/* do a first pass parsing to resolve all
+				 * the prefixes and check well-formed XPath
+				 */
+				result = xpath1_eval_xmlexpr
+				    (scb->reader,
+				     attr->attr_xpcb,
+				     NULL,
+				     NULL,
+				     FALSE,
+				     FALSE,
+				     &res);
+				if (result) {
+				    xpath_free_result(result);
+				}
 			    }
-			    if (!NEED_EXIT(res)) {
-				res = NO_ERR;
+			} else if (!xml_strcmp(&name[plen], NCX_EL_KEY)) {
+			    attr->attr_xpcb = xpath_new_pcb(value);
+			    if (!attr->attr_xpcb) {
+				res = ERR_INTERNAL_MEM;
+			    } else {
+				res = xpath_yang_validate_xmlkey
+				    (scb->reader,
+				     attr->attr_xpcb,
+				     NULL,
+				     FALSE);
 			    }
+			}
+
+			if (res != NO_ERR && !NEED_EXIT(res)) {
+			    res = NO_ERR;
 			}
 		    }
 		    xmlFree(value);
-		} else {
-		    res = ERR_XML_READER_NULLVAL;
 		}
 	    }
 	}

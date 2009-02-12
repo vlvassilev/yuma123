@@ -239,8 +239,8 @@ status_t
     const xmlChar     *cfgname;
     status_t           res;
 
-    val = val_find_child(&msg->rpc_input, 
-			 val_get_mod_name(&msg->rpc_input), 
+    val = val_find_child(msg->rpc_input, 
+			 val_get_mod_name(msg->rpc_input), 
 			 parmname);
     if (!val || val->res != NO_ERR) {
 	if (!val) {
@@ -250,7 +250,7 @@ status_t
 	}
 	agt_record_error(NULL, &msg->mhdr, NCX_LAYER_OPERATION,
 			 res, methnode, NCX_NT_NONE, NULL, NCX_NT_VAL, 
-			 &msg->rpc_input);
+			 msg->rpc_input);
 	return res;
     }
 
@@ -327,8 +327,8 @@ const val_value_t *
 {
     val_value_t *val;
 
-    val =  val_find_child(&msg->rpc_input,
-			  val_get_mod_name(&msg->rpc_input),
+    val =  val_find_child(msg->rpc_input,
+			  val_get_mod_name(msg->rpc_input),
 			  parmname);
     return val;
 
@@ -578,6 +578,88 @@ void
 
 
 /********************************************************************
+* FUNCTION agt_record_insert_error
+*
+* Generate an rpc_err_rec_t and save it in the msg
+* Use the provided error info record for <rpc-error> fields
+*
+* INPUTS:
+*    scb == session control block 
+*        == NULL and no stats will be recorded
+*    msghdr == XML msg header with error Q
+*          == NULL, no errors will be recorded!
+*    layer == netconf layer error occured               <error-type>
+*    res == internal error code                      <error-app-tag>
+*    errval == value node generating the insert error
+*
+* OUTPUTS:
+*   errQ has error message added if no malloc errors
+*   scb->stats may be updated if scb non-NULL
+
+* RETURNS:
+*    none
+*********************************************************************/
+void
+    agt_record_insert_error (ses_cb_t *scb,
+			     xml_msg_hdr_t *msghdr,
+			     ncx_layer_t layer,
+			     status_t  res,
+			     const val_value_t *errval)
+{
+    rpc_err_rec_t   *err;
+    dlq_hdr_t       *errQ;
+    xmlChar         *pathbuff;
+
+#ifdef DEBUG
+    if (!errval) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    errQ = (msghdr) ? &msghdr->errQ : NULL;
+
+    /* dump some error info to the log */
+    if (LOGDEBUG3) {
+	log_debug3("\nagt_record_insert_error: ");
+	val_dump_value(errval, NCX_DEF_INDENT);
+	log_debug3("\n");
+    }
+
+    /* generate an error only if there is a Q to hold the result */
+    if (errQ) {
+	/* get the error-path */
+	pathbuff = NULL;
+	(void)val_gen_instance_id(msghdr, errval, 
+				  NCX_IFMT_XPATH1, 
+				  &pathbuff);
+
+	err = agt_rpcerr_gen_insert_error(layer, 
+					  res,
+					  errval, 
+					  pathbuff);
+	if (err) {
+	    dlq_enque(err, errQ);
+	} else {
+	    if (pathbuff) {
+		m__free(pathbuff);
+	    }
+	    /*** inc error-dropped counter for the session stats ***/
+	    if (scb) {
+		;
+	    }
+	}
+    }
+
+    /* TBD: inc the specific error type for the session stats */
+    if (scb) {
+	scb->stats.in_err_msgs++;
+    }
+
+} /* agt_record_insert_error */
+
+
+/********************************************************************
 * FUNCTION agt_validate_filter
 *
 * Validate the <filter> parameter if present
@@ -616,7 +698,7 @@ status_t
     res = NO_ERR;
 
     /* filter parm is optional */
-    filter = val_find_child(&msg->rpc_input, 
+    filter = val_find_child(msg->rpc_input, 
 			    NC_MODULE, NCX_EL_FILTER);
     if (!filter) {
 	msg->rpc_filter.op_filtyp = OP_FILTER_NONE;
@@ -676,7 +758,7 @@ status_t
 #ifdef AGT_UTIL_DEBUG
 	if (LOGDEBUG3) {
 	    log_debug3("\nagt_util_validate_filter:");
-	    val_dump_value(&msg->rpc_input, 0);
+	    val_dump_value(msg->rpc_input, 0);
 	}
 #endif
 
@@ -1140,6 +1222,10 @@ status_t
     return res;
 
 } /* agt_check_editop */
+
+
+
+
 
 
 /* END file agt_util.c */

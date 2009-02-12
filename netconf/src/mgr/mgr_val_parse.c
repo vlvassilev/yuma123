@@ -1341,7 +1341,7 @@ static status_t
 
     if (res == NO_ERR) {
 	/* start setting up the return value */
-	retval->editop = get_editop(startnode);
+	retval->editvars->editop = get_editop(startnode);
 
 	/* setup the first child in the complex object
 	 * Allowed be NULL in some cases so do not check
@@ -1617,7 +1617,7 @@ static status_t
 
     if (res == NO_ERR) {
 	/* start setting up the return value */
-	retval->editop = get_editop(startnode);
+	retval->editvars->editop = get_editop(startnode);
 
 	/* setup the first child in the complex object
 	 * Allowed be NULL in some cases so do not check
@@ -1869,15 +1869,15 @@ static status_t
 	 * then the 'xmlns' attribute, then a defined attribute
 	 */
 	if (val_match_metaval(attr, ncid, NC_OPERATION_ATTR_NAME)) {
-	    retval->editop = op_editop_id(attr->attr_val);
-	    if (retval->editop == OP_EDITOP_NONE) {
+	    retval->editvars->editop = op_editop_id(attr->attr_val);
+	    if (retval->editvars->editop == OP_EDITOP_NONE) {
 		res = ERR_NCX_INVALID_VALUE;
 	    } else {
 		continue;
 	    }
 	} else if (val_match_metaval(attr, yangid, YANG_K_INSERT)) {
-	    retval->insertop = op_insertop_id(attr->attr_val);
-	    if (retval->insertop == OP_INSOP_NONE) {
+	    retval->editvars->insertop = op_insertop_id(attr->attr_val);
+	    if (retval->editvars->insertop == OP_INSOP_NONE) {
 		res = ERR_NCX_INVALID_VALUE;
 	    } else {
 		continue;
@@ -2094,7 +2094,7 @@ static status_t
     /* this will only be non-zero if the operation attribute
      * was seen in XML subtree for the value
      */
-    retval->editop = editop;
+    retval->editvars->editop = editop;
 
     /* set the config flag for this value */
     res3 = NO_ERR;
@@ -2215,7 +2215,7 @@ static status_t
     /* this will only be non-zero if the operation attribute
      * was seen in XML subtree for the value
      */
-    retval->editop = editop;
+    retval->editvars->editop = editop;
 
     /* set the config flag for this value */
     res3 = NO_ERR;

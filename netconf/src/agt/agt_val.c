@@ -129,6 +129,10 @@ date         init     comment
 #include  "xpath.h"
 #endif
 
+#ifndef _H_xpath_yang
+#include  "xpath_yang.h"
+#endif
+
 #ifndef _H_xpath1
 #include  "xpath1.h"
 #endif
@@ -401,7 +405,7 @@ static boolean
 
 
 /********************************************************************
-* FUNCTION add_child
+* FUNCTION add_child_node
 * 
 * Add a child node
 *
@@ -437,9 +441,82 @@ static void
 	    val_free_value(val);
 	}
     }
-
-    
 }  /* add_child_node */
+
+
+/********************************************************************
+* FUNCTION move_child_node
+* 
+* Move a child node
+*
+* INPUTS:
+*   newchild == new child value to add
+*   curchild == existing child value to move
+*   parent == parent value to move child within
+*   undo == undo record in progress (may be NULL)
+*   ismerge == TRUE if this is a merge operation
+*              FALSE if this is a replace operation
+*
+* OUTPUTS:
+*    child added to parent->v.childQ
+*    any other cases removed and either added to undo node or deleted
+*
+*********************************************************************/
+static void
+    move_child_node (val_value_t  *newchild,
+		     val_value_t  *curchild,
+		     val_value_t  *parent,
+		     rpc_undo_rec_t *undo,
+		     boolean ismerge)
+{
+    val_value_t  *val;
+    dlq_hdr_t     cleanQ;
+    boolean       freenew;
+
+    if (LOGDEBUG3) {
+	log_debug3("\nMove child '%s', %s in parent '%s'",
+		   newchild->name, 
+		   (ismerge) ? "merge" : "replace",
+		   parent->name);
+    }
+
+    dlq_createSQue(&cleanQ);
+
+    val_remove_child(curchild);
+
+    freenew = FALSE;
+    if (ismerge) {
+	freenew = val_merge(newchild, curchild);
+	if (curchild->editvars) {
+	    val_free_editvars(curchild);
+	}
+	curchild->editvars = newchild->editvars;
+	newchild->editvars = NULL;
+	val_add_child_clean(curchild, parent, &cleanQ);
+	if (freenew) {
+	    val_free_value(newchild);
+	}
+    } else {
+	val_add_child_clean(newchild, parent, &cleanQ);	
+	if (undo) {
+	    /*** order is not kept ! ***/
+	    dlq_enque(curchild, &undo->extra_deleteQ);
+	} else {
+	    val_free_value(curchild);
+	}
+    }
+
+    /* should not happen, but checking anyway */
+    if (undo) {
+	dlq_block_enque(&cleanQ, &undo->extra_deleteQ);
+    } else {
+	while (!dlq_empty(&cleanQ)) {
+	    val = (val_value_t *)dlq_deque(&cleanQ);
+	    val_free_value(val);
+	}
+    }
+
+}  /* move_child_node */
 
 
 /********************************************************************
@@ -460,95 +537,168 @@ static status_t
 		       rpc_msg_t  *msg,
 		       val_value_t  *newval)
 {
-    val_value_t     *testval, *simval;
-    const xmlChar   *modname, *badval;
+    val_value_t     *testval, *simval, *insertval;
     status_t         res;
 
     res = NO_ERR;
-    badval = NULL;
-    modname = obj_get_mod_name(newval->obj);
 
-    if (newval->editop == OP_EDITOP_DELETE) {
+    if (newval->editvars->editop == OP_EDITOP_DELETE) {
 	/* this error already checked in agt_val_parse */
 	return NO_ERR;
     }
 
-    /* OK to check insertstr, otherwise errors
-     * should already be recorded by agt_val_parse
-     */
-    if (!newval->insertstr) {
-	/* insert op already checked in agt_val_parse */
-	return NO_ERR;
-    }
-
-    if (newval->obj->objtype==OBJ_TYP_LEAF_LIST) {
+    switch (newval->obj->objtype) {
+    case OBJ_TYP_LEAF_LIST:
 	/* make sure the insert attr is on a node with a parent
 	 * this should always be true since the docroot would
 	 * be the parent of every accessible object instance
+	 *
+	 * OK to check insertstr, otherwise errors
+	 * should already be recorded by agt_val_parse
 	 */
-	if (!newval->curparent) {
+	if (newval->editvars->insertop == OP_INSOP_NONE) {
+	    return NO_ERR;
+	}
+
+	if (!newval->editvars->insertstr) {
+	    /* insert op already checked in agt_val_parse */
+	    return NO_ERR;
+	}
+
+	if (obj_is_system_ordered(newval->obj)) {
+	    res = ERR_NCX_UNEXPECTED_INSERT_ATTRS;
+	    agt_record_error(scb,
+			     &msg->mhdr,
+			     NCX_LAYER_CONTENT,
+			     res,
+			     NULL,
+			     NCX_NT_STRING,
+			     newval->editvars->insertstr,
+			     NCX_NT_VAL,
+			     newval);
+	    return res;
+	}
+
+	if (!newval->editvars->curparent) {
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	} else {
-	    /* validate the insert string against siblings */
-	    testval = 
-		val_find_child(newval->curparent,
-			       modname, newval->name);
-	    if (!testval) {
-		res = ERR_NCX_INSERT_MISSING_INSTANCE;
-	    } else if (!ncx_valid_name(newval->insertstr,
-				       xml_strlen(newval->insertstr))) {
-		res = ERR_NCX_INVALID_VALUE;
-		badval = newval->insertstr;
-	    } else {
-		/* make a value node to compare in the
-		 * value space instead of the lexicographical space
-		 */
-		simval = val_make_simval(newval->typdef,
-					 newval->nsid,
-					 newval->name,
-					 newval->insertstr,
-					 &res);
-		if (res != NO_ERR) {
-		    badval = newval->insertstr;
+	    /* validate the insert string against siblings
+	     * make a value node to compare in the
+	     * value space instead of the lexicographical space
+	     */
+	    simval = val_make_simval(newval->typdef,
+				     newval->nsid,
+				     newval->name,
+				     newval->editvars->insertstr,
+				     &res);
+	    if (res == NO_ERR && simval) {
+		testval = 
+		    val_first_child_match(newval->editvars->curparent,
+					  simval);
+		if (!testval) {
+		    /* sibling leaf-list with the specified
+		     * value was not found
+		     */
+		    res = ERR_NCX_INSERT_MISSING_INSTANCE;
 		} else {
-		    testval = 
-			val_first_child_match(newval->curparent,
-					      simval);
-		    if (!testval) {
-			/* sibling leaf-list with the specified
-			 * value was not found
-			 */
-			res = ERR_NCX_INSERT_MISSING_INSTANCE;
-		    }
-		}
-		    
-		if (simval) {
-		    val_free_value(simval);
+		    newval->editvars->insertval = testval;
 		}
 	    }
+		    
+	    if (simval) {
+		val_free_value(simval);
+	    }
 	}
-    } else if (newval->obj->objtype == OBJ_TYP_LIST) {
-	/***/;
-    } else {
-	return NO_ERR;
-    }
+	break;
+    case OBJ_TYP_LIST:
+	/* there should be a 'key' attribute
+	 * OK to check insertxpcb, otherwise errors
+	 * should already be recorded by agt_val_parse
+	 */
+	if (newval->editvars->insertop == OP_INSOP_NONE) {
+	    return NO_ERR;
+	}
 
-	     
-    /* record any errors so far */
-    if (res != NO_ERR) {
-	if (badval) {
-	    agt_record_error(scb, &msg->mhdr, 
-			     NCX_LAYER_CONTENT,
-			     res, NULL,
-			     NCX_NT_STRING, badval,
-			     NCX_NT_VAL, newval);
-	} else {
-	    agt_record_error(scb, &msg->mhdr, 
-			     NCX_LAYER_CONTENT,
-			     res, NULL, 
-			     NCX_NT_VAL, newval, 
-			     NCX_NT_VAL, newval);
+	if (!newval->editvars->insertstr) {
+	    /* insert op already checked in agt_val_parse */
+	    return NO_ERR;
 	}
+
+	if (!newval->editvars->insertxpcb) {
+	    /* insert op already checked in agt_val_parse */
+	    return NO_ERR;
+	}
+
+	if (obj_is_system_ordered(newval->obj)) {
+	    res = ERR_NCX_UNEXPECTED_INSERT_ATTRS;
+	    agt_record_error(scb,
+			     &msg->mhdr,
+			     NCX_LAYER_CONTENT,
+			     res,
+			     NULL,
+			     NCX_NT_STRING,
+			     newval->editvars->insertstr,
+			     NCX_NT_VAL,
+			     newval);
+	    return res;
+	}
+
+	if (newval->editvars->insertxpcb->validateres != NO_ERR) {
+	    res = newval->editvars->insertxpcb->validateres;
+	} else {
+	    res = xpath_yang_validate_xmlkey
+		(scb->reader,
+		 newval->editvars->insertxpcb,
+		 newval->obj,
+		 FALSE);		
+	}
+	if (res == NO_ERR) {
+	    /* get the list entry that the 'key' attribute
+	     * referenced. It should be valid objects
+	     * and well-formed from passing the previous test
+	     */
+	    testval = val_make_from_insertxpcb(newval, &res);
+	    if (res == NO_ERR && testval) {
+		val_set_canonical_order(testval);
+		insertval = val_first_child_match
+		    (newval->editvars->curparent,  testval);
+		if (!insertval) {
+		    /* sibling list with the specified
+		     * key value was not found
+		     */
+		    res = ERR_NCX_INSERT_MISSING_INSTANCE;
+		} else {
+		    newval->editvars->insertval = insertval;
+		}
+	    }
+	    if (testval) {
+		val_free_value(testval);
+		testval = NULL;
+	    }
+	}
+	break;
+    default:
+	if (newval->editvars->insertop != OP_INSOP_NONE) {
+	    res = ERR_NCX_UNEXPECTED_INSERT_ATTRS;
+	    agt_record_error(scb,
+			     &msg->mhdr,
+			     NCX_LAYER_CONTENT,
+			     res,
+			     NULL,
+			     NCX_NT_STRING,
+			     newval->editvars->insertstr,
+			     NCX_NT_VAL,
+			     newval);
+	    return res;
+	}
+    }
+	     
+    if (res != NO_ERR) {
+	agt_record_insert_error(scb, 
+				&msg->mhdr, 
+				NCX_LAYER_CONTENT,
+				res, 
+				newval);
     }
 
     return res;
@@ -604,7 +754,7 @@ static status_t
     undo = NULL;
 
     if (newval) {
-	cur_editop = newval->editop;
+	cur_editop = newval->editvars->editop;
 	name = newval->name;
     } else if (curval) {
 	cur_editop = editop;
@@ -675,15 +825,19 @@ static status_t
 	case OP_EDITOP_MERGE:
 	    val_remove_child(newval);
 	    if (curval) {
-		freenew = val_merge(newval, curval);
+		if (newval->editvars->insertstr) {
+		    move_child_node(newval, 
+				    curval, 
+				    parent, 
+				    undo,
+				    TRUE);
+		} else {
+		    freenew = val_merge(newval, curval);
+		}
 	    } else {
 		add_child_node(newval, parent, undo);
-		if (target->cfg_id == NCX_CFGID_RUNNING) { 
-		    val_clear_editvars(newval);
-		}
 	    }
 
-	    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
 	    if (!freenew) {
 		val_set_canonical_order(parent);
 	    }
@@ -692,29 +846,27 @@ static status_t
 	case OP_EDITOP_COMMIT:
 	    val_remove_child(newval);
 	    if (curval) {
-		val_set_canonical_order(newval);
-		val_swap_child(newval, curval);
-		if (!msg->rpc_need_undo) {
-		    val_free_value(curval);
-		} /* else curval not freed yet, hold in undo record */
+		if (newval->editvars->insertstr) {
+		    move_child_node(newval, 
+				    curval, 
+				    parent, 
+				    undo,
+				    FALSE);
+		} else {
+		    val_set_canonical_order(newval);
+		    val_swap_child(newval, curval);
+		    if (!msg->rpc_need_undo) {
+			val_free_value(curval);
+		    } /* else curval not freed yet, hold in undo record */
+		}
 	    } else {
 		add_child_node(newval, parent, undo);
-		if (target->cfg_id == NCX_CFGID_RUNNING) { 
-		    val_clear_editvars(newval);
-		}
-
-		/**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
 		val_set_canonical_order(parent);
 	    }
 	    break;
 	case OP_EDITOP_CREATE:
 	    val_remove_child(newval);
 	    add_child_node(newval, parent, undo);
-	    if (target->cfg_id == NCX_CFGID_RUNNING) { 
-		val_clear_editvars(newval);
-	    }
-
-	    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
 	    val_set_canonical_order(parent);
 	    break;
 	case OP_EDITOP_LOAD:
@@ -737,6 +889,11 @@ static status_t
 	    break;
 	default:
 	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+
+	if (target->cfg_id == NCX_CFGID_RUNNING && 
+	    !freenew && cur_editop != OP_EDITOP_LOAD) { 
+	    val_clear_editvars(newval);
 	}
     }
 
@@ -787,11 +944,14 @@ static status_t
     /* check if this node needs the edit operation applied */
     if (*done) {
 	applyhere = FALSE;
-    } else if (newval->editop == OP_EDITOP_COMMIT) {
+    } else if (newval->editvars->editop == OP_EDITOP_COMMIT) {
 	applyhere = val_get_dirty_flag(newval);
 	*done = applyhere;
+    } else if (newval->editvars->editop == OP_EDITOP_DELETE) {
+	applyhere = TRUE;
+	*done = TRUE;
     } else {
-	applyhere = apply_this_node(newval->editop, curval);
+	applyhere = apply_this_node(newval->editvars->editop, curval);
 	*done = applyhere;
     }
 
@@ -807,22 +967,30 @@ static status_t
 	    return NO_ERR;   /*** freenew?? ***/
 	}
 
-	switch (newval->editop) {
+	switch (newval->editvars->editop) {
 	case OP_EDITOP_MERGE:
 	    testval = val_clone(newval);
 	    if (!testval) {
 		res = ERR_INTERNAL_MEM;
 	    } else {
 		if (curval) {
-		    freenew = val_merge(testval, curval);
+		    if (newval->editvars->insertstr) {
+			freenew = FALSE;
+			move_child_node(testval, 
+					curval, 
+					parent, 
+					NULL,
+					TRUE);
+		    } else {
+			freenew = val_merge(newval, curval);
+		    }
 		} else {
 		    add_child_node(testval, parent, NULL);
 		}
 	    }
 
-	    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
 	    if (!freenew) {
-		; // val_set_canonical_order(parent);
+		; /* val_set_canonical_order(parent); */
 	    }
 	    break;
 	case OP_EDITOP_REPLACE:
@@ -832,14 +1000,21 @@ static status_t
 		res = ERR_INTERNAL_MEM;
 	    } else {
 		if (curval) {
-		    // val_set_canonical_order(testval);
-		    val_swap_child(testval, curval);
-		    val_free_value(curval);
+		    if (newval->editvars->insertstr) {
+			freenew = FALSE;
+			move_child_node(testval, 
+					curval, 
+					parent, 
+					NULL,
+					FALSE);
+		    } else {
+			/* val_set_canonical_order(testval); */
+			val_swap_child(testval, curval);
+			val_free_value(curval);
+		    }
 		} else {
 		    add_child_node(testval, parent, NULL);
-		    
-		    /**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
-		    // val_set_canonical_order(parent);
+		    /* val_set_canonical_order(parent); */
 		}
 	    }
 	    break;
@@ -849,9 +1024,7 @@ static status_t
 		res = ERR_INTERNAL_MEM;
 	    } else {
 		add_child_node(testval, parent, NULL);
-
-		/**** NEEDS OPTIMIZED INSERT : TEMP REORDER ****/
-		// val_set_canonical_order(parent);
+		/* val_set_canonical_order(parent); */
 	    }
 	    break;
 	case OP_EDITOP_LOAD:
@@ -925,14 +1098,14 @@ static status_t
 
 	/* check and adjust the operation attribute */
 	iqual = val_get_iqualval(newval);
-	res = agt_check_editop(editop, &newval->editop, 
+	res = agt_check_editop(editop, &newval->editvars->editop, 
 			       newval, curval, iqual);
 
 	/* check the operation against the object definition
 	 * and whether or not the entry currently exists
 	 */
 	if (res == NO_ERR) {
-	    res = agt_check_max_access(newval->editop, 
+	    res = agt_check_max_access(newval->editvars->editop, 
 				       obj_get_max_access(newval->obj), 
 				       (curval != NULL));
 	}
@@ -951,7 +1124,7 @@ static status_t
 	break;
     case AGT_CB_TEST_APPLY:
 	if (newval) {
-	    curparent = newval->curparent;
+	    curparent = newval->editvars->curparent;
 	} else if (curval) {
 	    curparent = curval->parent;
 	} else {
@@ -962,15 +1135,15 @@ static status_t
 	break;
     case AGT_CB_APPLY:
 	if (newval) {
-	    curparent = newval->curparent;
-	    cureditop = newval->editop;
+	    curparent = newval->editvars->curparent;
+	    cureditop = newval->editvars->editop;
 	} else {
 	    curparent = NULL;
 	    cureditop = editop;
 	    if (curval) {
 		curparent = curval->parent;
 		if (cureditop == OP_EDITOP_NONE) {
-		    cureditop = curval->editop;
+		    cureditop = curval->editvars->editop;
 		}
 	    }
 	}
@@ -1046,16 +1219,20 @@ static status_t
 
 	/* check and adjust the operation attribute */
 	iqual = val_get_iqualval(newval);
-	res = agt_check_editop(editop, &newval->editop, 
+	res = agt_check_editop(editop, &newval->editvars->editop, 
 			       newval, curval, iqual);
 	if (res == NO_ERR) {
-	    res = agt_check_max_access(newval->editop, 
+	    res = agt_check_max_access(newval->editvars->editop, 
 				       obj_get_max_access(newval->obj), 
 				       (curval != NULL));
 	}
 
-	if (res==NO_ERR && newval->obj->objtype==OBJ_TYP_LIST) {
+	if (res == NO_ERR && newval->obj->objtype == OBJ_TYP_LIST) {
 	    /**** unique test ****/
+	}
+
+	if (res == NO_ERR) {
+	    res = check_insert_attr(scb, msg, newval);
 	}
 
 	if (res != NO_ERR) {
@@ -1068,13 +1245,13 @@ static status_t
 	retres = res;
 	break;
     case AGT_CB_TEST_APPLY:
-	retres = test_apply_write_val(newval->curparent, 
+	retres = test_apply_write_val(newval->editvars->curparent, 
 				      newval, curval, &done);
 	break;
     case AGT_CB_APPLY:
 	if (newval) {
-	    cur_editop = newval->editop;
-	    curparent = newval->curparent;
+	    cur_editop = newval->editvars->editop;
+	    curparent = newval->editvars->curparent;
 	} else if (curval) {
 	    cur_editop = editop;
 	    curparent = curval->parent;
@@ -1096,7 +1273,7 @@ static status_t
     }
 
     if (newval) {
-	cur_editop = newval->editop;
+	cur_editop = newval->editvars->editop;
 	curparent = newval;
     } else if (curval) {
 	cur_editop = editop;
@@ -1113,7 +1290,7 @@ static status_t
 
 	    nextch = val_get_next_child(chval);
 
-	    chval->curparent = curval;
+	    chval->editvars->curparent = curval;
 	    if (curval) {
 		curch = val_first_child_match(curval, chval);
 	    } else {
@@ -1685,6 +1862,7 @@ static status_t
 	 * instance that matched, just checking the
 	 * require-instance flag
 	 */
+	result = NULL;
 	validateres = val->xpathpcb->validateres;
 
 	if (validateres == NO_ERR) {
@@ -1705,15 +1883,13 @@ static status_t
 		    res = NO_ERR;
 		}
 	    }
-	} else {
-	    res = validateres;
-	}
 
-	if (res != NO_ERR) {
-	    val->res = res;
-	    agt_record_error(scb, msg, layer, res, 
-			     NULL, NCX_NT_OBJ, val->obj, 
-			     NCX_NT_VAL, val);
+	    if (res != NO_ERR) {
+		val->res = res;
+		agt_record_error(scb, msg, layer, res, 
+				 NULL, NCX_NT_OBJ, val->obj, 
+				 NCX_NT_VAL, val);
+	    }
 	}
 	break;
     default:
@@ -2795,7 +2971,7 @@ status_t
 
 	    matchval = val_first_child_match(target->root, newval);
 
-	    newval->curparent = target->root;
+	    newval->editvars->curparent = target->root;
 	    
 	    res = handle_callback(AGT_CB_APPLY,
 				  OP_EDITOP_COMMIT, scb, 

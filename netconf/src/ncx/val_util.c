@@ -1509,7 +1509,7 @@ val_value_t *
     }
 
     chval->parent = parent;
-    chval->editop = editop;
+    chval->editvars->editop = editop;
     chval->nsid = nsid;
 
     return chval;

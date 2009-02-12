@@ -228,6 +228,11 @@ status_t
 
     xsd_id = xmlns_xs_id();
     basetypes[NCX_BT_NONE] = NULL;
+
+    for (btyp=NCX_FIRST_DATATYPE; btyp<=NCX_LAST_DATATYPE; btyp++) {
+	basetypes[btyp] = NULL;
+    }
+
     for (btyp=NCX_FIRST_DATATYPE; btyp<=NCX_LAST_DATATYPE; btyp++) {
 	/* create a typ_template_t struct */
 	typ = typ_new_template();

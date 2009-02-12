@@ -77,6 +77,9 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
+
+/* #define XPATH1_PARSE_DEBUG 1 */
+
 #define TEMP_BUFFSIZE  1024
 
 /********************************************************************
@@ -8319,12 +8322,14 @@ status_t
 	}
     }
 
+#ifdef XPATH1_PARSE_DEBUG
     if (LOGDEBUG3 && pcb->tkc) {
 	log_debug3("\n\nParse chain for XPath '%s':\n",
 		   pcb->exprstr);
 	tk_dump_chain(pcb->tkc);
 	log_debug3("\n");
     }
+#endif
 
     /* the expression will not be processed further if the
      * parseres is other than NO_ERR

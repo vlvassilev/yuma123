@@ -661,7 +661,7 @@ static status_t
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
 
-    if (retval->editop == OP_EDITOP_DELETE) {
+    if (retval->editvars->editop == OP_EDITOP_DELETE) {
 	switch (startnode->nodetyp) {
 	case XML_NT_EMPTY:
 	    empty = TRUE;
@@ -707,7 +707,7 @@ static status_t
 	    break;
 	case XML_NT_STRING:
 	    if (val_all_whitespace(valnode.simval) &&
-		retval->editop == OP_EDITOP_DELETE) {
+		retval->editvars->editop == OP_EDITOP_DELETE) {
 		res = NO_ERR;
 	    } else {
 		/* get the non-whitespace string here */
@@ -725,7 +725,7 @@ static status_t
 	    break;
 	case XML_NT_END:
 	    enddone = TRUE;
-	    if (retval->editop == OP_EDITOP_DELETE) {
+	    if (retval->editvars->editop == OP_EDITOP_DELETE) {
 		retval->btyp = NCX_BT_ENUM;
 		/* leave value empty, OK for leaf */
 	    } else {
@@ -1279,7 +1279,7 @@ static status_t
   
     /* check empty string corner case */
     if (empty) {
-	if (retval->editop == OP_EDITOP_DELETE) {
+	if (retval->editvars->editop == OP_EDITOP_DELETE) {
 	    if (obj->objtype == OBJ_TYP_LEAF) {
 		res = NO_ERR;
 	    } else if (allow_delete_all) {
@@ -1528,7 +1528,7 @@ static status_t
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
 
-    if (retval->editop == OP_EDITOP_DELETE) {
+    if (retval->editvars->editop == OP_EDITOP_DELETE) {
 	switch (startnode->nodetyp) {
 	case XML_NT_EMPTY:
 	    empty = TRUE;
@@ -1574,7 +1574,7 @@ static status_t
 	    break;
 	case XML_NT_STRING:
 	    if (val_all_whitespace(valnode.simval) &&
-		retval->editop == OP_EDITOP_DELETE) {
+		retval->editvars->editop == OP_EDITOP_DELETE) {
 		res = NO_ERR;
 	    } else {
 		retval->v.idref.nsid = valnode.contentnsid;
@@ -1604,7 +1604,7 @@ static status_t
 	    break;
 	case XML_NT_END:
 	    enddone = TRUE;
-	    if (retval->editop == OP_EDITOP_DELETE) {
+	    if (retval->editvars->editop == OP_EDITOP_DELETE) {
 		retval->btyp = NCX_BT_IDREF;
 	    } else {
 		res = ERR_NCX_INVALID_VALUE;
@@ -1886,7 +1886,7 @@ static status_t
 
     if (res == NO_ERR) {
 	/* start setting up the return value */
-	retval->editop = get_editop(startnode);
+	retval->editvars->editop = get_editop(startnode);
 
 	/* setup the first child in the complex object
 	 * Allowed be NULL in some cases so do not check
@@ -2145,26 +2145,32 @@ static status_t
 	 * then the 'xmlns' attribute, then a defined attribute
 	 */
 	if (val_match_metaval(attr, ncid, NC_OPERATION_ATTR_NAME)) {
-	    retval->editop = op_editop_id(attr->attr_val);
-	    if (retval->editop == OP_EDITOP_NONE) {
+	    retval->editvars->editop = op_editop_id(attr->attr_val);
+	    if (retval->editvars->editop == OP_EDITOP_NONE) {
 		res = ERR_NCX_INVALID_VALUE;
 	    } else {
 		continue;
 	    }
 	} else if (val_match_metaval(attr, yangid, YANG_K_INSERT)) {
-	    retval->insertop = op_insertop_id(attr->attr_val);
-	    if (retval->insertop == OP_INSOP_NONE) {
+	    retval->editvars->insertop = op_insertop_id(attr->attr_val);
+	    if (retval->editvars->insertop == OP_INSOP_NONE) {
 		res = ERR_NCX_INVALID_VALUE;
 	    } else {
 		continue;
 	    }
 	} else if (val_match_metaval(attr, yangid, YANG_K_KEY)) {
-	    if (!retval->insertstr) {
-		retval->iskey = TRUE;
-		retval->insertstr = xml_strdup(attr->attr_val);
-		if (!retval->insertstr) {
+	    if (!retval->editvars->insertstr) {
+		retval->editvars->iskey = TRUE;
+		retval->editvars->insertstr = xml_strdup(attr->attr_val);
+		if (!retval->editvars->insertstr) {
 		    res = ERR_INTERNAL_MEM;
 		} else {
+		    /* hand off the XPath parser control block
+		     * which has already resolved the XML
+		     * namespace prefixes to NSID numbers
+		     */
+		    retval->editvars->insertxpcb = attr->attr_xpcb;
+		    attr->attr_xpcb = NULL;
 		    continue;
 		}
 	    } else {
@@ -2172,10 +2178,10 @@ static status_t
 		res = ERR_NCX_EXTRA_ATTR;
 	    }
 	} else if (val_match_metaval(attr, yangid, YANG_K_VALUE)) {
-	    if (!retval->insertstr) {
-		retval->iskey = FALSE;
-		retval->insertstr = xml_strdup(attr->attr_val);
-		if (!retval->insertstr) {
+	    if (!retval->editvars->insertstr) {
+		retval->editvars->iskey = FALSE;
+		retval->editvars->insertstr = xml_strdup(attr->attr_val);
+		if (!retval->editvars->insertstr) {
 		    res = ERR_INTERNAL_MEM;
 		} else {
 		    continue;
@@ -2272,7 +2278,7 @@ static status_t
     objtype = val->obj->objtype;
 
     /* figure out how many key/value attributes are allowed */
-    switch (val->insertop) {
+    switch (val->editvars->insertop) {
     case OP_INSOP_NONE:
 	insertcnt = 0;
 	checkcnt = 1;
@@ -2292,7 +2298,7 @@ static status_t
     }
 
     /* check if delete, these attrs not allowed at all then */
-    if (val->editop == OP_EDITOP_DELETE) {
+    if (val->editvars->editop == OP_EDITOP_DELETE) {
 	checkcnt = 0;
     }
 
@@ -2310,8 +2316,8 @@ static status_t
     /* check the inst count of the YANG attributes
      * key attribute allowed for list only
      */
-    if (res == NO_ERR && val->insertstr) {
-	if (val->iskey) {
+    if (res == NO_ERR && val->editvars->insertstr) {
+	if (val->editvars->iskey) {
 	    if (!checkcnt || val->obj->objtype != OBJ_TYP_LIST) {
 		res = ERR_NCX_EXTRA_ATTR;
 		qname.nsid = yangid;
@@ -2333,9 +2339,9 @@ static status_t
     }
 
     /* check missing value or key attributes */
-    if (res == NO_ERR && !val->insertstr &&
-	(val->insertop==OP_INSOP_BEFORE ||
-	 val->insertop==OP_INSOP_AFTER)) {
+    if (res == NO_ERR && !val->editvars->insertstr &&
+	(val->editvars->insertop==OP_INSOP_BEFORE ||
+	 val->editvars->insertop==OP_INSOP_AFTER)) {
 
 	if (val->obj->objtype == OBJ_TYP_LEAF_LIST) {
 	    /* the value attribute is missing */
@@ -2425,7 +2431,7 @@ static status_t
     btyp = obj_get_basetype(obj);
 
     /* get the attribute values from the start node */
-    retval->editop = OP_EDITOP_NONE;
+    retval->editvars->editop = OP_EDITOP_NONE;
     retval->nsid = startnode->nsid;
 
     /* check namespace errors except if the type is ANY */

@@ -575,6 +575,8 @@ const char *
 	return "invalid instance-identifier syntax";
     case ERR_NCX_MISSING_INSTANCE:
 	return "require-instance test failed";
+    case ERR_NCX_UNEXPECTED_INSERT_ATTRS:
+	return "key or select attribute not allowed";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

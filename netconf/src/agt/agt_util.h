@@ -113,6 +113,13 @@ extern void
 			   const void *errnode);
 
 
+extern void
+    agt_record_insert_error (ses_cb_t *scb,
+			     xml_msg_hdr_t *msghdr,
+			     ncx_layer_t layer,
+			     status_t  res,
+			     const val_value_t *errval);
+
 extern status_t 
     agt_validate_filter (ses_cb_t *scb,
 			 rpc_msg_t *msg);

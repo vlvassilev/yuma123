@@ -6,7 +6,8 @@
 
 ### GCC + [LINUX or MACOSX]
 
-# leave -Werror out for now
+# leave -Werror out of DEBUG BLDs
+# only add when BLD=BLD is in the MAKE flags
 CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Wmissing-include-dirs -Wswitch-default -Wunused-parameter \
 	-Wextra -Wundef -Wshadow -Wpointer-arith \
@@ -20,7 +21,7 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 
 # debug
 ifdef BLD
-  CFLAGS=-DDEBUG -DLINUX -DGCC -DHAS_FLOAT $(CWARN)
+  CFLAGS=-DDEBUG -DLINUX -DGCC -DHAS_FLOAT $(CWARN) -Werror
 else
   CFLAGS=-ggdb3 -DDEBUG -DLINUX -DGCC -DHAS_FLOAT $(CWARN)
 endif

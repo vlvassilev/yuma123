@@ -190,6 +190,10 @@ static void
     }
 #endif
 
+    if (cfg->root) {
+	val_free_value(cfg->root);
+    }
+
     if (cfg->name) {
 	m__free(cfg->name);
     }
@@ -206,10 +210,6 @@ static void
     while (!dlq_empty(&cfg->load_errQ)) {
 	err = (rpc_err_rec_t *)dlq_deque(&cfg->load_errQ);
 	rpc_err_free_record(err);
-    }
-
-    if (cfg->root) {
-	val_free_value(cfg->root);
     }
 
     m__free(cfg);

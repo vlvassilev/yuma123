@@ -923,7 +923,8 @@ val_value_t *
          *          foo   -foo   --foo
 	 */
 	if (!buff[buffpos]) {
-	    res = ERR_NCX_WRONG_LEN;
+	    /* got some extra whitespace at the EOLN */
+	    continue;
 	} else if (buff[buffpos] == NCX_CLI_START_CH) {
 	    if (!buff[buffpos+1]) {
 		res = ERR_NCX_WRONG_LEN;

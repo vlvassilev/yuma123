@@ -271,7 +271,8 @@ typedef enum status_t_
     ERR_NCX_INVALID_XPATH_EXPR,         /* 348 */
     ERR_NCX_INVALID_INSTANCEID,         /* 349 */
     ERR_NCX_MISSING_INSTANCE,           /* 350 */
-    ERR_LAST_USR_ERR,                   /* 351 -- not really used */
+    ERR_NCX_UNEXPECTED_INSERT_ATTRS,    /* 351 */
+    ERR_LAST_USR_ERR,                   /* 352 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */

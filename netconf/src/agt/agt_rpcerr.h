@@ -83,18 +83,12 @@ extern rpc_err_rec_t *
 			       const xmlChar *badns,
 			       xmlChar *error_path);
 
-
-#ifdef NOT_YET
-/* generate an NCX_LAYER_CONTENT error */
+/* generate a YANG missing-instance error */
 extern rpc_err_rec_t *
-    agt_rpcerr_gen_app_error (
-			  status_t   interr,
-			  const xml_node_t *errnode,
-			  const xmlChar *apptag,
-			  xmlChar *error_msg,
-			  const xmlChar *error_lang,
-			  void *error_parm);
-#endif
+    agt_rpcerr_gen_insert_error (ncx_layer_t layer,
+				 status_t   interr,
+				 const val_value_t *errval,
+				 xmlChar *error_path);
 
 
 #endif            /* _H_agt_rpcerr */

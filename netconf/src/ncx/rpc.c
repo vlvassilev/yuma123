@@ -98,7 +98,18 @@ rpc_msg_t *
     if (!msg) {
         return NULL;
     }
-    rpc_init_msg(msg);
+
+    memset(msg, 0x0, sizeof(rpc_msg_t));
+    xml_msg_init_hdr(&msg->mhdr);
+    dlq_createSQue(&msg->rpc_dataQ);
+    dlq_createSQue(&msg->rpc_undoQ);
+
+    msg->rpc_input = val_new_value();
+    if (!msg->rpc_input) {
+	rpc_free_msg(msg);
+	return NULL;
+    }
+
     return msg;
 
 } /* rpc_new_msg */
@@ -133,35 +144,6 @@ rpc_msg_t *
 
 
 /********************************************************************
-* FUNCTION rpc_init_msg
-*
-* Initialize a new rpc_msg_t struct
-*
-* INPUTS:
-*   msg == rpc_msg_t memory to initialize
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    rpc_init_msg (rpc_msg_t *msg)
-{
-#ifdef DEBUG
-    if (!msg) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    memset(msg, 0x0, sizeof(rpc_msg_t));
-    xml_msg_init_hdr(&msg->mhdr);
-    val_init_value(&msg->rpc_input);
-    dlq_createSQue(&msg->rpc_dataQ);
-    dlq_createSQue(&msg->rpc_undoQ);
-
-} /* rpc_init_msg */
-
-
-/********************************************************************
 * FUNCTION rpc_free_msg
 *
 * Free all the memory used by the specified rpc_msg_t
@@ -173,33 +155,6 @@ void
 *********************************************************************/
 void 
     rpc_free_msg (rpc_msg_t *msg)
-{
-#ifdef DEBUG
-    if (!msg) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    rpc_clean_msg(msg);
-    m__free(msg);
-
-} /* rpc_free_msg */
-
-
-/********************************************************************
-* FUNCTION rpc_clean_msg
-*
-* Clean all the memory used by the specified rpc_msg_t
-* but do not free the struct itself
-*
-* INPUTS:
-*   msg == rpc_msg_t to clean
-* RETURNS:
-*   none
-*********************************************************************/
-void 
-    rpc_clean_msg (rpc_msg_t *msg)
 {
     rpc_undo_rec_t *undo;
     val_value_t    *val;
@@ -218,7 +173,9 @@ void
     msg->rpc_agt_state = 0;
 
     /* clean input parameter set */
-    val_clean_value(&msg->rpc_input);
+    if (msg->rpc_input) {
+	val_free_value(msg->rpc_input);
+    }
     msg->rpc_user1 = NULL;
     msg->rpc_user2 = NULL;
 
@@ -238,7 +195,9 @@ void
 	rpc_free_undorec(undo);
     }
 
-} /* rpc_clean_msg */
+    m__free(msg);
+
+} /* rpc_free_msg */
 
 
 /********************************************************************

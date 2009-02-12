@@ -429,11 +429,9 @@ date	     init     comment
 #define NCX_EL_INT16           ((const xmlChar *)"int16")
 #define NCX_EL_INT32           ((const xmlChar *)"int32")
 #define NCX_EL_INT64           ((const xmlChar *)"int64")
-#define NCX_EL_ITEMS           ((const xmlChar *)"items")
+#define NCX_EL_KEY             ((const xmlChar *)"key")
 #define NCX_EL_KILL_SESSION    ((const xmlChar *)"kill-session")
 #define NCX_EL_LANG            ((const xmlChar *)"xml:lang")
-#define NCX_EL_LAST_MODIFIED   ((const xmlChar *)"last-modified")
-#define NCX_EL_LAST_UPDATE     ((const xmlChar *)"last-update")
 #define NCX_EL_LEAFREF         ((const xmlChar *)"leafref")
 #define NCX_EL_LIST            ((const xmlChar *)"list")
 #define NCX_EL_LOAD            ((const xmlChar *)"load")
@@ -561,7 +559,6 @@ date	     init     comment
 #define NCX_EL_XSD             ((const xmlChar *)"xsd")
 #define NCX_EL_XSDLIST         ((const xmlChar *)"xsdlist")
 #define NCX_EL_YANG            ((const xmlChar *)"yang")
-#define NCX_EL_ZERO            ((const xmlChar *)"0.0")
 
 
 /* bit definitions for ncx_lstr_t flags field */

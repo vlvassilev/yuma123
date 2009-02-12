@@ -641,6 +641,13 @@ static int32
 *
 * current-function-invocation = 'current()'
 *
+* For instance-identifiers (XP_FL_INSTANCEID) the 
+* following syntax is used:
+*
+* path-predicate        = "[" *WSP instpath-equality-expr *WSP "]"
+*
+* instpath-equality-expr = node-identifier *WSP "=" *WSP quoted-string
+*
 * INPUTS:
 *    pcb == parser control block in progress
 *
@@ -1104,6 +1111,77 @@ static status_t
 
 }  /* parse_path_arg */
 
+/********************************************************************
+* FUNCTION parse_keyexpr
+* 
+* Parse the key attribute expression
+* It has already been tokenized
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* keyexprr          = 1*path-predicate
+*
+* path-predicate         = "[" *WSP path-equality-expr *WSP "]"
+*
+* path-equality-expr     = node-identifier *WSP "=" *WSP quoted-string
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    parse_keyexpr (xpath_pcb_t *pcb)
+{
+    tk_type_t    nexttyp;
+    status_t     res;
+    boolean      done;
+
+    res = NO_ERR;
+    done = FALSE;
+
+    /* make one loop for each step */
+    while (!done) {
+	/* check the next token;
+	 * it may be the start of a path-predicate '['
+	 * or the start of another step '/'
+	 */
+	nexttyp = tk_next_typ(pcb->tkc);
+	if (nexttyp == TK_TT_LBRACK) {
+	    res = parse_path_predicate(pcb);
+	    if (res != NO_ERR) {
+		done = TRUE;
+	    }
+	} else {
+	    res = ERR_NCX_INVALID_VALUE;
+	    done = TRUE;
+	    if (pcb->logerrors) {
+		log_error("\nError: wrong token in key-expr '%s'",
+			  pcb->exprstr);
+		ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	    }
+	}
+    }
+
+    /* check that the string ended properly */
+    if (res == NO_ERR) {
+	nexttyp = tk_next_typ(pcb->tkc);
+	if (nexttyp != TK_TT_NONE) {
+	    res = ERR_NCX_INVALID_VALUE;
+	    if (pcb->logerrors) {
+		log_error("\nError: wrong token at end of key-expr '%s'",
+			  pcb->exprstr);
+		ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	    }
+	}
+    }
+
+    return res;
+
+}  /* parse_keyexpr */
+
 
 /************    E X T E R N A L   F U N C T I O N S    ************/
 
@@ -1122,7 +1200,8 @@ static status_t
 *    mod == module in progress
 *    pcb == initialized xpath parser control block
 *           for the leafref path; use xpath_new_pcb
-*           to initialize before calling this fn
+*           to initialize before calling this fn.
+*           The pcb->exprstr field must be set
 *
 * OUTPUTS:
 *   pcb->tkc is filled and then validated
@@ -1132,13 +1211,13 @@ static status_t
 *********************************************************************/
 status_t
     xpath_yang_parse_path (tk_chain_t *tkc,
-			      ncx_module_t *mod,
-			      xpath_pcb_t *pcb)
+			   ncx_module_t *mod,
+			   xpath_pcb_t *pcb)
 {
     status_t       res;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !pcb) {
+    if (!tkc || !mod || !pcb || !pcb->exprstr) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -1200,7 +1279,8 @@ status_t
 * INPUTS:
 *    mod == module containing the 'obj' (in progress)
 *    obj == object using the leafref data type
-*    pcb == the leafref parser control block from the typdef
+*    pcb == the leafref parser control block, possibly
+*           cloned from from the typdef
 *    leafobj == address of the return target object
 *
 * OUTPUTS:
@@ -1211,14 +1291,14 @@ status_t
 *********************************************************************/
 status_t
     xpath_yang_validate_path (ncx_module_t *mod,
-				 const obj_template_t *obj,
-				 xpath_pcb_t *pcb,
-				 const obj_template_t **leafobj)
+			      const obj_template_t *obj,
+			      xpath_pcb_t *pcb,
+			      const obj_template_t **leafobj)
 {
     status_t  res;
 
 #ifdef DEBUG
-    if (!mod || !obj || !pcb || !leafobj) {
+    if (!mod || !obj || !pcb || !leafobj || !pcb->exprstr) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!pcb->tkc) {
@@ -1318,10 +1398,9 @@ status_t
 * INPUTS:
 *    reader == XML reader to use
 *    pcb == initialized XPath parser control block
-*           the xpath_new_pcb(exprstr) function is
-*           all that is needed.  This function will
-*           call tk_tokenize_xpath_string if it has not
-*           already been called.
+*           with a possibly unchecked pcb->exprstr.
+*           This function will  call tk_tokenize_xpath_string
+*           if it has not already been called.
 *    logerrors == TRUE if log_error and ncx_print_errormsg
 *                  should be used to log XPath errors and warnings
 *                 FALSE if internal error info should be recorded
@@ -1337,14 +1416,14 @@ status_t
 *********************************************************************/
 status_t
     xpath_yang_validate_xmlpath (xmlTextReaderPtr reader,
-				    xpath_pcb_t *pcb,
-				    boolean logerrors,
-				    const obj_template_t **targobj)
+				 xpath_pcb_t *pcb,
+				 boolean logerrors,
+				 const obj_template_t **targobj)
 {
     status_t  res;
 
 #ifdef DEBUG
-    if (!reader || !pcb || !targobj) {
+    if (!reader || !pcb || !targobj || !pcb->exprstr) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -1397,6 +1476,90 @@ status_t
     return pcb->validateres;
 
 }  /* xpath_yang_validate_xmlpath */
+
+
+/********************************************************************
+* FUNCTION xpath_yang_validate_xmlkey
+* 
+* Validate a key XML attribute value given in
+* an <edit-config> operation with an 'insert' attribute
+* Check that a complete set of predicates is present
+* for the specified list of leaf-list
+*
+* INPUTS:
+*    reader == XML reader to use
+*    pcb == initialized XPath parser control block
+*           with a possibly unchecked pcb->exprstr.
+*           This function will  call tk_tokenize_xpath_string
+*           if it has not already been called.
+*    obj == list or leaf-list object associated with
+*           the pcb->exprstr predicate expression
+*           (MAY be NULL if first-pass parsing and
+*           object is not known yet -- parsed in XML attribute)
+*    logerrors == TRUE if log_error and ncx_print_errormsg
+*                  should be used to log XPath errors and warnings
+*                 FALSE if internal error info should be recorded
+*                 in the xpath_result_t struct instead
+*                !!! use FALSE unless DEBUG mode !!!
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_yang_validate_xmlkey (xmlTextReaderPtr reader,
+				xpath_pcb_t *pcb,
+				const obj_template_t *obj,
+				boolean logerrors)
+{
+    status_t  res;
+
+#ifdef DEBUG
+    if (!reader || !pcb || !pcb->exprstr) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (pcb->tkc) {
+	tk_reset_chain(pcb->tkc);
+    } else {
+	pcb->tkc = tk_tokenize_xpath_string(NULL, pcb->exprstr, 
+					    0, 0, &res);
+    }
+
+    if (!pcb->tkc || res != NO_ERR) {
+	if (logerrors) {
+	    log_error("\nError: Invalid path string '%s'",
+		      pcb->exprstr);
+	}
+	pcb->parseres = res;
+	return res;
+    }
+
+    pcb->docroot = ncx_get_gen_root();
+    if (!pcb->docroot) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    pcb->obj = obj;
+    pcb->reader = reader;
+    pcb->flags = XP_FL_INSTANCEID;
+    pcb->source = XP_SRC_XML;
+    pcb->logerrors = logerrors;
+    pcb->objmod = NULL;
+    pcb->val = NULL;
+    pcb->val_docroot = NULL;
+    pcb->targobj = obj;
+    pcb->altobj = NULL;
+    pcb->varobj = NULL;
+    pcb->curmode = XP_CM_TARGET;
+
+    /* validate the XPath expression against the 
+     * full cooked object tree
+     */
+    pcb->validateres = parse_keyexpr(pcb);
+
+    return pcb->validateres;
+
+}  /* xpath_yang_validate_xmlkey */
 
 
 /* END xpath_yang.c */

@@ -599,13 +599,13 @@ static status_t
 	rpcio = obj->def.rpcio;
 	msg->rpc_agt_state = AGT_RPC_PH_PARSE;
 	res = agt_val_parse_nc(scb, &msg->mhdr, obj, method,
-			       NCX_DC_CONFIG, &msg->rpc_input);
+			       NCX_DC_CONFIG, msg->rpc_input);
 
 #ifdef AGT_RPC_DEBUG
 	if (LOGDEBUG3) {
 	    log_debug3("\nagt_rpc: parse RPC input state");
 	    rpc_err_dump_errors(msg);
-	    val_dump_value(&msg->rpc_input, 0);
+	    val_dump_value(msg->rpc_input, 0);
 	}
 #endif
     }
@@ -648,7 +648,7 @@ static status_t
 	 *** added to the value tree, so val_add_defaults
 	 *** will add a default where there was an error before
 	 ***/
-	res = val_add_defaults(&msg->rpc_input, FALSE);
+	res = val_add_defaults(msg->rpc_input, FALSE);
     }
 
     if (res == NO_ERR) {
@@ -661,8 +661,8 @@ static status_t
 	 * as multiple missing parameter errors
 	 */
 	res = agt_val_instance_check(scb, &msg->mhdr, 
-				     &msg->rpc_input, 
-				     &msg->rpc_input,
+				     msg->rpc_input, 
+				     msg->rpc_input,
 				     NCX_LAYER_OPERATION);
     }
 
@@ -1301,7 +1301,7 @@ status_t
      * be done by now,
      * Also set the canonical order for the root node
      */
-    testval = val_find_child(&msg->rpc_input, NULL, NCX_EL_CONFIG);
+    testval = val_find_child(msg->rpc_input, NULL, NCX_EL_CONFIG);
     if (testval) {
 	val_purge_errors_from_root(testval);
 	/* val_set_canonical_order(testval); */

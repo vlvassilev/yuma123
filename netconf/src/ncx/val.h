@@ -207,7 +207,24 @@ typedef struct val_idref_t_ {
     xmlChar    *name;
     const ncx_identity_t  *identity;  /* ID back-ptr if found */
 } val_idref_t;
-    
+
+
+/* one set of edit-in-progress variables for one value node */
+typedef struct val_editvars_t_ {
+    /* these fields are only used in modified values before they are 
+     * actually added to the config database (TBD: move into struct)
+     * curparent == parent of curnode for merge
+     */
+    struct val_value_t_  *curparent;      
+    op_editop_t    editop;            /* effective edit operation */
+    op_insertop_t  insertop;             /* YANG insert operation */
+    xmlChar       *insertstr;          /* saved value or key attr */
+    struct xpath_pcb_t_ *insertxpcb;       /* key attr for insert */
+    struct val_value_t_ *insertval;                   /* back-ptr */
+    boolean        iskey;                     /* T: key, F: value */
+} val_editvars_t;
+
+
 /* one value to match one type */
 typedef struct val_value_t_ {
     dlq_hdr_t      qhdr;
@@ -237,18 +254,11 @@ typedef struct val_value_t_ {
      * and is strongly discouraged.  Full edit-config
      * support is not provided for metdata
      */
-    dlq_hdr_t      metaQ;                       /* Q of val_value_t */
+    dlq_hdr_t        metaQ;                      /* Q of val_value_t */
 
-    /* these fields are only used in modified values before they are 
-     * actually added to the config database (TBD: move into struct)
-     * curparent == parent of curnode for merge
-     */
-    struct val_value_t_  *curparent;      
-    op_editop_t    editop;            /* effective edit operation */
-    op_insertop_t  insertop;             /* YANG insert operation */
-    xmlChar       *insertstr;          /* saved value or key attr */
-    boolean        iskey;                     /* T: key, F: value */
-    status_t       res;      /* edit result for continue-on-error */
+    /* value editing variables */
+    val_editvars_t  *editvars;              /* edit-in-progress vars */
+    status_t         res;                      /* validationt result */
 
     /* Used by Agent only:
      * if this field is non-NULL, then the entire value node
@@ -377,9 +387,6 @@ typedef boolean
 extern val_value_t *
     val_new_value (void);
 
-extern void 
-    val_init_value (val_value_t *val);
-
 /* this is deprecated and should only be called 
  * by val_init_from_template
  */
@@ -399,8 +406,11 @@ extern void
 extern void 
     val_free_value (val_value_t *val);
 
-extern void 
-    val_clean_value (val_value_t *val);
+extern status_t
+    val_new_editvars (val_value_t *val);
+
+extern void
+    val_free_editvars (val_value_t *val);
 
 extern void 
     val_set_name (val_value_t *val,
@@ -954,5 +964,9 @@ extern xmlns_id_t
 extern void
     val_change_nsid (val_value_t *val,
 		     xmlns_id_t nsid);
+
+extern val_value_t *
+    val_make_from_insertxpcb (val_value_t  *sourceval,
+			      status_t *res);
 
 #endif	    /* _H_val */

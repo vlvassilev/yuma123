@@ -136,7 +136,7 @@ typedef struct rpc_msg_t_ {
     /* incoming: AGENT RPC processing state */
     int              rpc_agt_state;        /* rpc_agt_phase_t */
     op_errop_t       rpc_err_option;       
-    val_value_t      rpc_input;
+    val_value_t     *rpc_input;
 
     /* incoming:
      * hooks for method routines to save context or whatever 
@@ -186,13 +186,7 @@ extern rpc_msg_t *
     rpc_new_out_msg (void);
 
 extern void 
-    rpc_init_msg (rpc_msg_t *msg);
-
-extern void 
     rpc_free_msg (rpc_msg_t *msg);
-
-extern void 
-    rpc_clean_msg (rpc_msg_t *msg);
 
 extern const xmlChar *
     rpc_get_rpctype_str (rpc_type_t rpctyp);

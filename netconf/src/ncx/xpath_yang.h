@@ -59,21 +59,27 @@ date	     init     comment
 
 extern status_t
     xpath_yang_parse_path (tk_chain_t *tkc,
-			      ncx_module_t *mod,
-			      xpath_pcb_t *pcb);
+			   ncx_module_t *mod,
+			   xpath_pcb_t *pcb);
 
 extern status_t
     xpath_yang_validate_path (ncx_module_t *mod,
-				 const obj_template_t *obj,
-				 xpath_pcb_t *pcb,
-				 const obj_template_t **leafobj);
+			      const obj_template_t *obj,
+			      xpath_pcb_t *pcb,
+			      const obj_template_t **leafobj);
 
 extern status_t
     xpath_yang_validate_xmlpath (xmlTextReaderPtr reader,
-				    xpath_pcb_t *pcb,
-				    boolean logerrors,
-				    const obj_template_t **targobj);
+				 xpath_pcb_t *pcb,
+				 boolean logerrors,
+				 const obj_template_t **targobj);
 
+
+extern status_t
+    xpath_yang_validate_xmlkey (xmlTextReaderPtr reader,
+				xpath_pcb_t *pcb,
+				const obj_template_t *obj,
+				boolean logerrors);
 
 
 #endif	    /* _H_xpath_yang */

@@ -460,6 +460,8 @@ static rpc_err_t
     case ERR_NCX_INVALID_INSTANCEID:
     case ERR_NCX_MISSING_INSTANCE:
 	return RPC_ERR_INVALID_VALUE;
+    case ERR_NCX_UNEXPECTED_INSERT_ATTRS:
+	return RPC_ERR_OPERATION_FAILED;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:
@@ -911,6 +913,10 @@ rpc_err_rec_t *
 		err2 = (const void *)obj_get_name(in);
 	    }
 	}
+    case ERR_NCX_DEF_NOT_FOUND:
+	if (parmtyp == NCX_NT_STRING && error_parm) {
+	    err1 = error_parm;
+	}
 	break;
     case ERR_NCX_MISSING_ATTR:
     case ERR_NCX_EXTRA_ATTR:
@@ -1057,6 +1063,91 @@ rpc_err_rec_t *
 
 
 /********************************************************************
+* FUNCTION agt_rpc_gen_insert_error
+*
+* Generate an internal <rpc-error> record for an element
+* for an insert operation failed error
+*
+* INPUTS:
+*   layer == protocol layer where the error occurred
+*   interr == internal error code
+*             if NO_ERR than use the rpcerr only
+*   errval == pointer to the node with the insert error
+*  error_path == malloced string of the value (or type, etc.) instance
+*                ID string in NCX_IFMT_XPATH format; this will be added
+*                to the rpc_err_rec_t and freed later
+*             == NULL if not available
+*
+* RETURNS:
+*   pointer to allocated and filled in rpc_err_rec_t struct
+*     ready to add to the msg->rpc_errQ
+*   NULL if a record could not be allocated or not enough
+*     val;id info in the parameters 
+*********************************************************************/
+rpc_err_rec_t *
+    agt_rpcerr_gen_insert_error (ncx_layer_t layer,
+				 status_t   interr,
+				 const val_value_t *errval,
+				 xmlChar *error_path)
+{
+    rpc_err_rec_t            *err;
+    xmlChar                  *error_msg;
+    const xmlChar            *badval, *badns, *msg, *apptag;
+    const void               *err1, *err2, *err3, *err4;
+    rpc_err_t                 rpcerr;
+    status_t                  res;
+    rpc_err_sev_t             errsev;
+    xmlns_id_t                nsid;
+
+    badval = NULL;
+    badns = NULL;
+    err1 = NULL;
+    err2 = NULL;
+    err3 = NULL;
+    err4 = NULL;
+
+    rpcerr = RPC_ERR_BAD_ATTRIBUTE;
+    errsev = RPC_ERR_SEV_ERROR;
+
+    msg = (const xmlChar *)get_error_string(interr);
+    error_msg = (msg) ? xml_strdup(msg) : NULL;
+
+    apptag = (const xmlChar *)"missing-instance"; /* 12.5 */
+
+    /* get a new error record */
+    err = start_err(layer, interr, rpcerr, errsev, apptag, error_path, 
+		    error_msg, NULL);
+    if (!err) {
+	return NULL;
+    }
+
+    badval = errval->editvars->insertstr;
+
+    nsid = xmlns_yang_id();
+    err1 = (const void *)nsid;
+    if (errval->obj->objtype == OBJ_TYP_LIST) {
+	err2 = (const void *)NCX_EL_KEY;
+    } else {
+	err2 = (const void *)NCX_EL_VALUE;
+    }
+    nsid = val_get_nsid(errval);
+    err3 = (const void *)nsid;
+    err4 = (const void *)errval->name;
+
+    /* add the required error-info, call even if err2 is NULL */
+    res = add_base_vars(err, rpcerr, NULL, badval, badns, 
+			err1, err2, err3, err4);
+    if (res != NO_ERR) {
+	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
+	;    /* add error statistics (TBD) */
+    }
+
+    return err;
+
+} /* agt_rpcerr_gen_insert_error */
+
+
+/********************************************************************
 * FUNCTION agt_rpc_gen_attr_error
 *
 * Generate an internal <rpc-error> record for an attribute
@@ -1143,57 +1234,5 @@ rpc_err_rec_t *
 
 } /* agt_rpcerr_gen_attr_error */
 
-
-
-#ifdef NOT_YET
-/********************************************************************
-* FUNCTION agt_rpc_gen_app_error
-*
-* Generate an internal <rpc-error> record for an element
-*
-* INPUTS:
-*   interr == internal error code
-*             if NO_ERR than use the rpcerr only
-*   errnode == XML node where error occurred
-*           == NULL then there is no valid XML node (maybe the error!)
-*
-*   app-tag == the error-app-tag that should be generated.
-*              This will override the default (if any) if non-NULL
-*           == NULL if the default error-app-tag should be used
-*   error_msg == error-msg to use instead of default message
-*                that might be be generated.  This string is assumed
-*                to be a malloced string that will be saved in the
-*                rpc_err_rec_t struct and freed when the
-*                rpc_err_clean_record function is called for
-*                this record.  
-*             == NULL if the default msg text should be used instead
-*   error_lang == a 'lang' value string such as EN, JP, or FR 
-*              == NULL if the default (EN) should be used
-*              This parameter is ignored if error_msg == NULL
-*   error_parm == pointer to the extra parameter expected for
-*                this type of error.  
-*                == (void *)pointer to session_id for lock-denied errors
-*                == (void *) pointer to the bad-value string to use
-*                   for all other errors
-*
-* RETURNS:
-*   pointer to allocated and filled in rpc_err_rec_t struct
-*     ready to add to the msg->rpc_errQ
-*   NULL if a record could not be allocated or not enough
-*     val;id info in the parameters 
-*********************************************************************/
-rpc_err_rec_t *
-    agt_rpcerr_gen_app_error (status_t   interr,
-			      const xml_node_t *errnode,
-			      const xmlChar *apptag,
-			      xmlChar *error_msg,
-			      const xmlChar *error_lang,
-			      void *error_parm)
-{
-
-    return NULL;      /*** TBD ***/
-
-}  /* agt_rpcerr_gen_app_error */
-#endif
 
 /* END file agt_rpcerr.c */

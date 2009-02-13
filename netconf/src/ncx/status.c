@@ -577,6 +577,8 @@ const char *
 	return "require-instance test failed";
     case ERR_NCX_UNEXPECTED_INSERT_ATTRS:
 	return "key or select attribute not allowed";
+    case ERR_NCX_INVALID_UNIQUE_NODE:
+	return "invalid unique-stmt node";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

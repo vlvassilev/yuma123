@@ -1689,8 +1689,8 @@ static status_t
 /********************************************************************
 * FUNCTION unique_check
 * 
-* Check for the proper number of unique tuples within
-* the list instances for the specified list entry
+* Check for the proper uniqueness of the tuples within
+* the set of list instances for the specified node
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)

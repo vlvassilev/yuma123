@@ -1404,8 +1404,8 @@ static void *
 *   prompt == prompt message
 *   defcode == default answer code
 *      0 == no def answer
-*      1 == yes def answer
-*      2 == no def answer
+*      1 == def answer is yes
+*      2 == def answer is no
 *   retcode == address of return code
 *
 * OUTPUTS:
@@ -6164,9 +6164,20 @@ static void
 	     const xmlChar *line,
 	     uint32  len)
 {
-    val_value_t           *valset, *content;
-    const xmlChar         *str;
-    status_t               res;
+    const ses_cb_t      *scb;
+    const mgr_scb_t     *mscb;
+    val_value_t         *valset, *content;
+    const xmlChar       *str;
+    status_t             res;
+    uint32               retcode;
+
+    /* get the session info */
+    scb = mgr_ses_get_scb(agent_cb->mysid);
+    if (!scb) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+    mscb = (const mgr_scb_t *)scb->mgrcb;
 
     /* init locals */
     res = NO_ERR;
@@ -6175,6 +6186,51 @@ static void
     /* get the command line parameters for this command */
     valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (!valset || res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
+	return;
+    }
+
+    /* check if the agent supports :xpath */
+    if (!cap_std_set(&mscb->caplist, CAP_STDID_XPATH)) {
+	switch (agent_cb->baddata) {
+	case NCX_BAD_DATA_IGNORE:
+	    break;
+	case NCX_BAD_DATA_WARN:
+	    log_warn("\nWarning: agent does not have :xpath support");
+	    break;
+	case NCX_BAD_DATA_CHECK:
+	    retcode = 0;
+	    log_warn("\nWarning: agent does not have :xpath support");
+	    res = get_yesno(agent_cb,
+			    (const xmlChar *)"Send request anyway?",
+			    YESNO_NO, &retcode);
+	    if (res == NO_ERR) {
+		switch (retcode) {
+		case YESNO_CANCEL:
+		case YESNO_NO:
+		    res = ERR_NCX_CANCELED;
+		    break;
+		case YESNO_YES:
+		    break;
+		default:
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		}
+	    }
+	    break;
+	case NCX_BAD_DATA_ERROR:
+	    log_error("\nError: agent does not have :xpath support");
+	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+	    break;
+	case NCX_BAD_DATA_NONE:
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+    }
+
+    /* check any error so far */
+    if (res != NO_ERR) {
 	if (valset) {
 	    val_free_value(valset);
 	}
@@ -6238,13 +6294,73 @@ static void
 		    const xmlChar *line,
 		    uint32  len)
 {
-    val_value_t     *valset, *content, *source;
-    const xmlChar   *str;
-    status_t         res;
+    const ses_cb_t      *scb;
+    const mgr_scb_t     *mscb;
+    val_value_t         *valset, *content, *source;
+    const xmlChar       *str;
+    status_t             res;
+    uint32               retcode;
+
+    /* get the session info */
+    scb = mgr_ses_get_scb(agent_cb->mysid);
+    if (!scb) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+    mscb = (const mgr_scb_t *)scb->mgrcb;
+
+    /* init locals */
+    res = NO_ERR;
+    content = NULL;
       
     /* get the command line parameters for this command */
     valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (!valset || res != NO_ERR) {
+	if (valset) {
+	    val_free_value(valset);
+	}
+	return;
+    }
+
+    /* check if the agent supports :xpath */
+    if (!cap_std_set(&mscb->caplist, CAP_STDID_XPATH)) {
+	switch (agent_cb->baddata) {
+	case NCX_BAD_DATA_IGNORE:
+	    break;
+	case NCX_BAD_DATA_WARN:
+	    log_warn("\nWarning: agent does not have :xpath support");
+	    break;
+	case NCX_BAD_DATA_CHECK:
+	    retcode = 0;
+	    log_warn("\nWarning: agent does not have :xpath support");
+	    res = get_yesno(agent_cb,
+			    (const xmlChar *)"Send request anyway?",
+			    YESNO_NO, &retcode);
+	    if (res == NO_ERR) {
+		switch (retcode) {
+		case YESNO_CANCEL:
+		case YESNO_NO:
+		    res = ERR_NCX_CANCELED;
+		    break;
+		case YESNO_YES:
+		    break;
+		default:
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		}
+	    }
+	    break;
+	case NCX_BAD_DATA_ERROR:
+	    log_error("\nError: agent does not have :xpath support");
+	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+	    break;
+	case NCX_BAD_DATA_NONE:
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+    }
+
+    /* check any error so far */
+    if (res != NO_ERR) {
 	if (valset) {
 	    val_free_value(valset);
 	}

@@ -4406,7 +4406,7 @@ static status_t
 		      obj_template_t *obj,
 		      obj_unique_t *uni)
 {
-    obj_template_t    *uniobj;
+    obj_template_t    *uniobj, *testobj;
     xmlChar           *str, *p, *savestr, savech;
     tk_token_t        *errtk;
     obj_unique_comp_t *unicomp, *testcomp;
@@ -4467,23 +4467,55 @@ static status_t
 	 * child node in the obj_list_t datadefQ
 	 * make sure the unique target is a leaf
 	 */
-	if (uniobj->objtype != OBJ_TYP_LEAF) {
+	if (uniobj->objtype != OBJ_TYP_LEAF ||
+	    obj_get_basetype(uniobj) == NCX_BT_ANY) {
 	    log_error("\nError: node '%s' on line %u not a leaf in unique"
 		      " statement for list '%s' (%s)",
-		      obj_get_name(uniobj), 
+		      obj_get_basetype(uniobj)==NCX_BT_ANY 
+		      ? obj_get_name(uniobj) : NCX_EL_ANYXML,
 		      uniobj->linenum,
 		      list->name, obj_get_typestr(uniobj));
-	    retres = ERR_NCX_INVALID_VALUE;
+	    retres = ERR_NCX_INVALID_UNIQUE_NODE;
 	    tkc->cur = errtk;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    m__free(savestr);
 	    continue;
 	} 
 
+	/* the final target seems to be a valid leaf
+	 * so check that its path back to the original
+	 * object is all static object types
+	 *   container, leaf, choice, case
+	 */
+	testobj = uniobj->parent;
+	res = NO_ERR;
+	while (testobj && (testobj != obj) && (res == NO_ERR)) {
+	    switch (testobj->objtype) {
+	    case OBJ_TYP_CONTAINER:
+	    case OBJ_TYP_CHOICE:
+	    case OBJ_TYP_CASE:
+		break;
+	    default:
+		res = ERR_NCX_INVALID_UNIQUE_NODE;
+		log_error("\nError: multi-instance node (%s) "
+			  "within unique stmt '%s'",
+			  obj_get_typestr(testobj),
+			  uni->xpath);
+		tkc->cur = errtk;
+		ncx_print_errormsg(tkc, mod, res);
+	    }
+
+	    testobj = testobj->parent;
+	}
+	if (res != NO_ERR) {
+	    m__free(savestr);
+	    CHK_EXIT(res, retres);
+	    continue;
+	}
+
 	uniobj->flags |= OBJ_FL_UNIQUE;
 
 	/* make sure this leaf component not already used */
-	res = NO_ERR;
 	for (testcomp = (obj_unique_comp_t *)dlq_firstEntry(&uni->compQ);
 	     testcomp != NULL && res==NO_ERR;
 	     testcomp = (obj_unique_comp_t *)dlq_nextEntry(testcomp)) {
@@ -4492,13 +4524,14 @@ static status_t
 			  "for list '%s'",
 			  obj_get_name(uniobj),
 			  uniobj->linenum, list->name);
-		res = ERR_NCX_DUP_UNIQUE_COMP;
 		tkc->cur = errtk;
-		ncx_print_errormsg(tkc, mod, res);
+		ncx_print_errormsg(tkc, mod,
+				   ERR_NCX_DUP_UNIQUE_COMP);
 	    }
 	}
 
-	if (res==NO_ERR && retres == NO_ERR) {
+	/* try to save the info in a new unicomp struct */
+	if (retres == NO_ERR) {
 	    /* get a new unique component struct */
 	    unicomp = obj_new_unique_comp();
 	    if (!unicomp) {
@@ -4508,11 +4541,16 @@ static status_t
 		m__free(savestr);
 		return retres;
 	    } else {
-		/* everything OK so save the unique component */
+		/* everything OK so save the unique component
+		 * pass off the malloced savestr to the
+		 * unicomp record
+		 */
 		unicomp->unobj = uniobj;
 		unicomp->xpath = savestr;
 		dlq_enque(unicomp, &uni->compQ);
 	    }
+	} else {
+	    m__free(savestr);
 	}
     }
 

@@ -462,7 +462,8 @@ static rpc_err_t
 	return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_UNEXPECTED_INSERT_ATTRS:
 	return RPC_ERR_OPERATION_FAILED;
-
+    case ERR_NCX_INVALID_UNIQUE_NODE:
+	return RPC_ERR_INVALID_VALUE;
     /* user warnings start at 400 and do not need to be listed here */
     default:
 	return RPC_ERR_OPERATION_FAILED;	

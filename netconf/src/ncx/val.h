@@ -147,11 +147,24 @@ date	     init     comment
 #endif
 
 /* val_value_t flags field */
+
+/* if set the duplicates-ok test has been done */
 #define VAL_FL_DUPDONE   bit0
+
+/* if set the duplicates-ok test was OK */
 #define VAL_FL_DUPOK     bit1
+
+/* if set, this value was added by val_add_defaults */
 #define VAL_FL_DEFSET    bit2
+
+/* if set, value is actually for an XML attribute */
 #define VAL_FL_META      bit3
+
+/* if set, value has been edited or added */
 #define VAL_FL_DIRTY     bit4
+
+/* if set, value is a list which has unique-stmt already failed */
+#define VAL_FL_UNIDONE   bit5
 
 /* macros to access simple value types */
 #define VAL_BOOL(V)    ((V)->v.bool)
@@ -198,7 +211,6 @@ date	     init     comment
 *			     T Y P E S				    *
 *								    *
 *********************************************************************/
-
 
 /* one QName for the NCX_BT_IDREF value */
 typedef struct val_idref_t_ {
@@ -346,6 +358,13 @@ typedef struct val_index_t_ {
     dlq_hdr_t     qhdr;
     val_value_t  *val;      /* points to a child node */
 } val_index_t;
+
+
+/* one unique-stmt component test value node */
+typedef struct val_unique_t_ {
+    dlq_hdr_t     qhdr;
+    val_value_t  *valptr;
+} val_unique_t;
 
 
 /* test callback function to check if a value node 
@@ -647,9 +666,6 @@ extern val_value_t *
 extern status_t
     val_replace (const val_value_t *val,
 		 val_value_t *copy);
-
-extern void
-    val_clear_editvars (val_value_t *val);
 
 extern void
     val_add_child (val_value_t *child,
@@ -980,5 +996,12 @@ extern void
 extern val_value_t *
     val_make_from_insertxpcb (val_value_t  *sourceval,
 			      status_t *res);
+
+extern val_unique_t * 
+    val_new_unique (void);
+
+extern void
+    val_free_unique (val_unique_t *valuni);
+
 
 #endif	    /* _H_val */

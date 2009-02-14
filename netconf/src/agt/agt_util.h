@@ -116,9 +116,15 @@ extern void
 extern void
     agt_record_insert_error (ses_cb_t *scb,
 			     xml_msg_hdr_t *msghdr,
-			     ncx_layer_t layer,
 			     status_t  res,
 			     const val_value_t *errval);
+
+extern void
+    agt_record_unique_error (ses_cb_t *scb,
+			     xml_msg_hdr_t *msghdr,
+			     val_value_t *errval,
+			     dlq_hdr_t  *valuniqueQ);
+
 
 extern status_t 
     agt_validate_filter (ses_cb_t *scb,

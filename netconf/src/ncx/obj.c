@@ -5182,7 +5182,7 @@ obj_unique_t *
 * Get the first unique-stmt for a list
 *
 * INPUTS:
-*   listobj == list object to check for unique structs
+*   listobj == (list) object to check for unique structs
 *
 * RETURNS:
 *   pointer to found entry or NULL if not found
@@ -5196,11 +5196,11 @@ const obj_unique_t *
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }
+#endif
+
     if (listobj->objtype != OBJ_TYP_LIST) {
-	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }
-#endif
 
     return (const obj_unique_t *)
 	dlq_firstEntry(listobj->def.list->uniqueQ);

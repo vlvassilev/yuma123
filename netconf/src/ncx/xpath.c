@@ -280,6 +280,7 @@ static status_t
 *
 * INPUTS:
 *    target == Xpath expression string to evaluate
+*    logerrors = TRUE to use log_error, FALSE to skip it
 *    prefix == buffer to store prefix portion of QName (if any)
 *    name == buffer to store name portion of segment
 *    len == address of return byte count
@@ -294,6 +295,7 @@ static status_t
 *********************************************************************/
 static status_t
     next_val_nodeid (const xmlChar *target,
+		     boolean logerrors,
 		     xmlChar *prefix,
 		     xmlChar *name,
 		     uint32 *len)
@@ -310,7 +312,9 @@ static status_t
 
     if (!ncx_valid_name(target, cnt)) {
 	xml_strncpy(prefix, target, min(cnt, NCX_MAX_NLEN));
-	log_error("\nError: invalid name string (%s)", prefix);
+	if (logerrors) {
+	    log_error("\nError: invalid name string (%s)", prefix);
+	}
 	return ERR_NCX_INVALID_NAME;
     }
 
@@ -326,7 +330,9 @@ static status_t
 
 	if (!ncx_valid_name(p, cnt)) {
 	    xml_strncpy(name, p, min(cnt, NCX_MAX_NLEN));
-	    log_error("\nError: invalid name string (%s)", name);
+	    if (logerrors) {
+		log_error("\nError: invalid name string (%s)", name);
+	    }
 	    return ERR_NCX_INVALID_NAME;
 	}
 
@@ -754,7 +760,7 @@ static status_t
     }
 
     /* get the first QName (prefix, name) */
-    res = next_val_nodeid(str, prefix, name, &len);
+    res = next_val_nodeid(str, TRUE, prefix, name, &len);
     if (res != NO_ERR) {
 	return res;
     } else {
@@ -795,7 +801,7 @@ static status_t
     while (*str == '/') {
 	str++;
 	/* get the next QName (prefix, name) */
-	res = next_val_nodeid(str, prefix, name, &len);
+	res = next_val_nodeid(str, TRUE, prefix, name, &len);
 	if (res != NO_ERR) {
 	    return res;
 	} else {
@@ -861,7 +867,187 @@ static status_t
 }  /* find_val_node */
 
 
+/********************************************************************
+* FUNCTION find_val_node_unique
+* 
+* Follow the relative-path schema-nodeid expression
+* and return the val_value_t that it indicates, if any
+* Used in the YANG unique-stmt component
+*
+*  [/] foo/bar/baz
+*
+* No predicates are expected, but choice and case nodes
+* are expected and will be accounted for if present
+*
+* XML mode - unique-smmt processing
+* check first before logging errors;
+*
+* If logerrors:
+*   Error messages are printed by this function!!
+*   Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    startval == val_value_t node to start search
+*    mod == module to use for the default context
+*           and prefixes will be relative to this module's
+*           import statements.
+*        == NULL and the default registered prefixes
+*           will be used
+*    target == relative path expr to evaluate
+*    logerrors == TRUE to log_error, FALSE to skip
+*    targval == address of return value  (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL inputs:
+*      *targval == target value node
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    find_val_node_unique (val_value_t *startval,
+			  ncx_module_t *mod,
+			  const xmlChar *target,
+			  boolean logerrors,
+			  val_value_t **targval)
+{
+    val_value_t    *curval;
+    ncx_module_t   *usemod;
+    const xmlChar  *str;
+    uint32          len;
+    status_t        res;
+    xmlChar         prefix[NCX_MAX_NLEN+1];
+    xmlChar         name[NCX_MAX_NLEN+1];
 
+    /* skip the first fwd slash, if any */
+    if (*target == '/') {
+	str = ++target;
+    } else {
+	str = target;
+    }
+
+    /* get the first QName (prefix, name) */
+    res = next_val_nodeid(str, logerrors, prefix, name, &len);
+    if (res != NO_ERR) {
+	return res;
+    } else {
+	str += len;
+    }
+
+    res = xpath_get_curmod_from_prefix(prefix, mod, &usemod);
+    if (res != NO_ERR) {
+	if (*prefix) {
+	    if (logerrors) {
+		log_error("\nError: module not found for prefix %s"
+			  " in Xpath target %s",
+			  prefix, target);
+	    }
+	    return ERR_NCX_MOD_NOT_FOUND;
+	} else {
+	    if (logerrors) {
+		log_error("\nError: no module prefix specified"
+			  " in Xpath target %s", target);
+		return ERR_NCX_MOD_NOT_FOUND;
+	    }
+	}
+    }
+
+    /* get the first value node */
+    curval = val_find_child(startval, usemod->name, name);
+    if (!curval) {
+	if (ncx_valid_name2(name)) {
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	} else {
+	    res = ERR_NCX_INVALID_NAME;
+	}
+	if (logerrors) {
+	    log_error("\nError: value node '%s' not found for module %s"
+		      " in Xpath target %s",
+		      name, usemod->name, target);
+	}
+	return res;
+    }
+
+    /* got the first object; keep parsing node IDs
+     * until the Xpath expression is done or an error occurs
+     */
+    while (*str == '/') {
+	str++;
+	/* get the next QName (prefix, name) */
+	res = next_val_nodeid(str, logerrors, prefix, name, &len);
+	if (res != NO_ERR) {
+	    return res;
+	} else {
+	    str += len;
+	}
+
+	res = xpath_get_curmod_from_prefix(prefix, mod, &usemod);
+	if (res != NO_ERR) {
+	    if (*prefix) {
+		if (logerrors) {
+		    log_error("\nError: module not found for prefix %s"
+			      " in Xpath target %s",
+			      prefix, target);
+		}
+		return ERR_NCX_MOD_NOT_FOUND;
+	    } else {
+		if (logerrors) {
+		    log_error("\nError: no module prefix specified"
+			      " in Xpath target %s", target);
+		}
+		return ERR_NCX_MOD_NOT_FOUND;
+	    }
+	}
+
+	/* determine 'nextval' based on [curval, prefix, name] */
+	switch (curval->obj->objtype) {
+	case OBJ_TYP_CONTAINER:
+	case OBJ_TYP_LIST:
+	case OBJ_TYP_CHOICE:
+	case OBJ_TYP_CASE:
+	case OBJ_TYP_RPC:
+	case OBJ_TYP_RPCIO:
+	case OBJ_TYP_NOTIF:
+	    curval = val_find_child(curval, usemod->name, name);
+	    if (!curval) {
+		if (ncx_valid_name2(name)) {
+		    res = ERR_NCX_DEF_NOT_FOUND;
+		} else {
+		    res = ERR_NCX_INVALID_NAME;
+		}
+		if (logerrors) {
+		    log_error("\nError: value node '%s' not found for module %s"
+			      " in Xpath target %s",
+			      name, usemod->name, target);
+		}
+		return res;
+	    }
+	    break;
+	case OBJ_TYP_LEAF:
+	case OBJ_TYP_LEAF_LIST:
+	    res = ERR_NCX_DEFSEG_NOT_FOUND;
+	    if (logerrors) {
+		log_error("\nError: '%s' in Xpath target '%s' invalid: "
+			  "%s is a %s",
+			  name, target, curval->name,
+			  obj_get_typestr(curval->obj));
+	    }
+	    return res;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	    if (logerrors) {
+		do_errmsg(NULL, mod, NULL, res);
+	    }
+	    return res;
+	}
+    }
+
+    if (targval) {
+	*targval = curval;
+    }
+    return NO_ERR;
+
+}  /* find_val_node_unique */
 
 
 /************    E X T E R N A L   F U N C T I O N S    ************/
@@ -978,7 +1164,7 @@ status_t
 
 
 /********************************************************************
-* FUNCTION xpath_find_schema_int
+* FUNCTION xpath_find_schema_target_int
 * 
 * Follow the absolute-path expression
 * and return the obj_template_t that it indicates
@@ -1018,7 +1204,7 @@ status_t
 * 
 * Follow the absolute-path Xpath expression as used
 * internally to identify a config DB node
-* and return the obj_template_t that it indicates
+* and return the val_value_t that it indicates
 *
 * Expression must be the node-path from root for
 * the desired node.
@@ -1060,6 +1246,59 @@ status_t
     return find_val_node(startval, mod, target, targval);
 
 }  /* xpath_find_val_target */
+
+
+/********************************************************************
+* FUNCTION xpath_find_val_unique
+* 
+* Follow the relative-path Xpath expression as used
+* internally to identify a config DB node
+* and return the val_value_t that it indicates
+*
+* Expression must be the node-path from root for
+* the desired node.
+*
+* Error messages are logged by this function
+* only if logerrors is TRUE
+*
+* INPUTS:
+*    cfg == configuration to search
+*    mod == module to use for the default context
+*           and prefixes will be relative to this module's
+*           import statements.
+*        == NULL and the default registered prefixes
+*           will be used
+*    target == Xpath expression string to evaluate
+*    logerrors == TRUE to use log_error, FALSE to skip it
+*    targval == address of return value  (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL inputs and value node found:
+*      *targval == target value node
+*   If non-NULL targval and error exit:
+*      *targval == last good node visited in expression (if any)
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_find_val_unique (val_value_t *startval,
+			   ncx_module_t *mod,
+			   const xmlChar *target,
+			   boolean logerrors,
+			   val_value_t **targval)
+{
+
+#ifdef DEBUG
+    if (!startval || !target) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    return find_val_node_unique(startval, mod, 
+				target, logerrors, targval);
+
+}  /* xpath_find_val_unique */
 
 
 /*******    X P A T H   and   K E Y R E F    S U P P O R T   *******/

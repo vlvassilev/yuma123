@@ -462,6 +462,16 @@ extern status_t
 			   const xmlChar *target,
 			   val_value_t **targval);
 
+/* called by agent to find a descendant value node
+ * based  on a relative-path sub-clause of a unique-stmt
+ */
+extern status_t
+    xpath_find_val_unique (val_value_t *startval,
+			   ncx_module_t *mod,
+			   const xmlChar *target,
+			   boolean logerrors,
+			   val_value_t **targval);
+
 /* malloc a new XPath parser control block
  * xpathstr is allowed to be NULL, otherwise
  * a strdup will be made and exprstr will be set

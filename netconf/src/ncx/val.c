@@ -4154,31 +4154,6 @@ status_t
 
 
 /********************************************************************
-* FUNCTION val_clear_editvars
-* 
-*   Clean the edit-config variables in the value node
-*   Do not clear the dirty flag though
-*
-* INPUTS:
-*    val == node to clear
-*
-*********************************************************************/
-void
-    val_clear_editvars (val_value_t *val)
-{
-#ifdef DEBUG
-    if (!val) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    val_free_editvars(val);
-
-}   /* val_clear_editvars */
-
-
-/********************************************************************
 * FUNCTION val_add_child
 * 
 *   Add a child value node to a parent value node
@@ -6965,8 +6940,9 @@ boolean
 	return TRUE;
     case NCX_BT_BINARY:
 	return (val->v.binary.ustrlen < 20) ? TRUE : FALSE;
-    case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
+	return FALSE;
+    case NCX_BT_STRING:
     case NCX_BT_LEAFREF:   /*****/
 	if (!VAL_STR(val)) {
 	    /* empty string */
@@ -8147,6 +8123,52 @@ val_value_t *
 	
 }  /* val_make_from_insertxpcb */
 
+
+/********************************************************************
+* FUNCTION val_new_unique
+* 
+* Malloc and initialize the fields in a val_unique_t
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
+val_unique_t * 
+    val_new_unique (void)
+{
+    val_unique_t  *valuni;
+
+    valuni = m__getObj(val_unique_t);
+    if (!valuni) {
+	return NULL;
+    }
+
+    (void)memset(valuni, 0x0, sizeof(val_unique_t));
+    return valuni;
+
+}  /* val_new_unique */
+
+
+/********************************************************************
+* FUNCTION val_free_unique
+* 
+* CLean and free a val_unique_t struct
+*
+* INPUTS:
+*    valuni == val_unique struct to free
+*********************************************************************/
+void
+    val_free_unique (val_unique_t *valuni)
+{
+#ifdef DEBUG
+    if (!valuni) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    m__free(valuni);
+
+}  /* val_free_unique */
 
 
 /* END file val.c */

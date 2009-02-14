@@ -583,12 +583,13 @@ void
 * Generate an rpc_err_rec_t and save it in the msg
 * Use the provided error info record for <rpc-error> fields
 *
+* For YANG 'missing-instance' error-app-tag
+*
 * INPUTS:
 *    scb == session control block 
 *        == NULL and no stats will be recorded
 *    msghdr == XML msg header with error Q
 *          == NULL, no errors will be recorded!
-*    layer == netconf layer error occured               <error-type>
 *    res == internal error code                      <error-app-tag>
 *    errval == value node generating the insert error
 *
@@ -602,7 +603,6 @@ void
 void
     agt_record_insert_error (ses_cb_t *scb,
 			     xml_msg_hdr_t *msghdr,
-			     ncx_layer_t layer,
 			     status_t  res,
 			     const val_value_t *errval)
 {
@@ -634,7 +634,7 @@ void
 				  NCX_IFMT_XPATH1, 
 				  &pathbuff);
 
-	err = agt_rpcerr_gen_insert_error(layer, 
+	err = agt_rpcerr_gen_insert_error(NCX_LAYER_CONTENT, 
 					  res,
 					  errval, 
 					  pathbuff);
@@ -657,6 +657,92 @@ void
     }
 
 } /* agt_record_insert_error */
+
+
+/********************************************************************
+* FUNCTION agt_record_unique_error
+*
+* Generate an rpc_err_rec_t and save it in the msg
+* Use the provided error info record for <rpc-error> fields
+*
+* For YANG 'data-not-unique' error-app-tag
+*
+* INPUTS:
+*    scb == session control block 
+*        == NULL and no stats will be recorded
+*    msghdr == XML msg header with error Q
+*          == NULL, no errors will be recorded!
+*    errval == list value node that contains the unique-stmt
+*    valuniqueQ == Q of val_unique_t structs for error-info
+*
+* OUTPUTS:
+*   errQ has error message added if no malloc errors
+*   scb->stats may be updated if scb non-NULL
+
+* RETURNS:
+*    none
+*********************************************************************/
+void
+    agt_record_unique_error (ses_cb_t *scb,
+			     xml_msg_hdr_t *msghdr,
+			     val_value_t *errval,
+			     dlq_hdr_t  *valuniqueQ)
+{
+    rpc_err_rec_t   *err;
+    dlq_hdr_t       *errQ;
+    xmlChar         *pathbuff;
+    status_t         interr;
+
+#ifdef DEBUG
+    if (!errval) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    interr = ERR_NCX_UNIQUE_TEST_FAILED;
+
+    errQ = (msghdr) ? &msghdr->errQ : NULL;
+
+    /* dump some error info to the log */
+    if (LOGDEBUG3) {
+	log_debug3("\nagt_record_unique_error: ");
+	val_dump_value(errval, NCX_DEF_INDENT);
+	log_debug3("\n");
+    }
+
+    /* generate an error only if there is a Q to hold the result */
+    if (errQ) {
+	/* get the error-path */
+	pathbuff = NULL;
+	(void)val_gen_instance_id(msghdr, errval, 
+				  NCX_IFMT_XPATH1, 
+				  &pathbuff);
+
+	err = agt_rpcerr_gen_unique_error(msghdr,
+					  NCX_LAYER_CONTENT, 
+					  interr,
+					  valuniqueQ, 
+					  pathbuff);
+	if (err) {
+	    dlq_enque(err, errQ);
+	} else {
+	    if (pathbuff) {
+		m__free(pathbuff);
+	    }
+	    /*** inc error-dropped counter for the session stats ***/
+	    if (scb) {
+		;
+	    }
+	}
+    }
+
+    /* TBD: inc the specific error type for the session stats */
+    if (scb) {
+	scb->stats.in_err_msgs++;
+    }
+
+} /* agt_record_unique_error */
 
 
 /********************************************************************

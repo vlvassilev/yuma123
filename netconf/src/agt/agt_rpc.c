@@ -215,8 +215,9 @@ static void
 	 errinfo = (rpc_err_info_t *)dlq_nextEntry(errinfo)) {
 
 	switch (errinfo->val_btype) {
-	case NCX_BT_BINARY:
 	case NCX_BT_STRING:
+	case NCX_BT_INSTANCE_ID:
+	case NCX_BT_LEAFREF:
 	    if (errinfo->v.strval) {
 		if (errinfo->isqname) {
 		    xml_wr_qname_elem(scb, &msg->mhdr, 
@@ -257,8 +258,23 @@ static void
 		SET_ERROR(res);
 	    }
 	    break;
+	case NCX_BT_ANY:
+	case NCX_BT_BITS:
+	case NCX_BT_ENUM:
+	case NCX_BT_EMPTY:
+	case NCX_BT_BOOLEAN:
+	case NCX_BT_BINARY:
+	case NCX_BT_UNION:
+	case NCX_BT_INTERN:
+	case NCX_BT_EXTERN:
+	case NCX_BT_IDREF:
+	case NCX_BT_SLIST:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    break;
 	default:
-	    if (errinfo->v.cpxval) {
+	    if (typ_is_simple(errinfo->val_btype)) {
+		SET_ERROR(ERR_INTERNAL_VAL);
+	    } else if (errinfo->v.cpxval) {
 		xml_wr_full_val(scb, &msg->mhdr, 
 				errinfo->v.cpxval,
 				indent);

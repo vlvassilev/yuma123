@@ -27,8 +27,18 @@
       </t:foo>
    </t:test2>
    <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
-      <t:a2>xxx</t:a2>
-      <t:foo>yyyy</t:foo>
+      <t:a2>tina</t:a2>
+      <t:a1>4</t:a1>
+      <t:b2>5</t:b2>
+      <t:xxx/>
+      <t:foo>ddd</t:foo>
+   </t:test2>
+   <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
+      <t:a2>gina</t:a2>
+      <t:a1>33</t:a1>
+      <t:b2>6</t:b2>
+      <t:xxx/>
+      <t:foo>fff</t:foo>
    </t:test2>
    <t:test3 xmlns:t="http://netconfcentral.com/ns/test">
       <t:x>fred</t:x>
@@ -38,14 +48,13 @@
          <t:bb>13.9</t:bb>
          <t:deepy>
             <t:yy3>fred</t:yy3>
-            <t:yy2>1.123400005000000</t:yy2>
+            <t:yy2>1.123400005</t:yy2>
          </t:deepy>
-	 <t:yy64>13.9</t:yy64>
+         <t:yy64>13.9</t:yy64>
       </t:test3deep>
       <t:c2>3</t:c2>
       <t:c2>-3</t:c2>
       <t:c2>-6</t:c2>
       <t:c2>-1</t:c2>
    </t:test3>
-   <t:instance1 xmlns:t="http://netconfcentral.com/ns/test">/test1/garbage</t:instance1>
 </nd:config>

@@ -24,20 +24,24 @@ date             init     comment
 
 #include <xmlstring.h>
 
-#ifndef _H_rpc
-#include "rpc.h"
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
 #endif
 
 #ifndef _H_rpc_err
 #include "rpc_err.h"
 #endif
 
-#ifndef _H_ses
-#include "ses.h"
-#endif
-
 #ifndef _H_status
 #include "status.h"
+#endif
+
+#ifndef _H_val
+#include "val.h"
+#endif
+
+#ifndef _H_xml_msg
+#include "xml_msg.h"
 #endif
 
 #ifndef _H_xml_util
@@ -88,6 +92,14 @@ extern rpc_err_rec_t *
     agt_rpcerr_gen_insert_error (ncx_layer_t layer,
 				 status_t   interr,
 				 const val_value_t *errval,
+				 xmlChar *error_path);
+
+
+extern rpc_err_rec_t *
+    agt_rpcerr_gen_unique_error (xml_msg_hdr_t *msghdr,
+				 ncx_layer_t layer,
+				 status_t   interr,
+				 const dlq_hdr_t *valuniqueQ,
 				 xmlChar *error_path);
 
 

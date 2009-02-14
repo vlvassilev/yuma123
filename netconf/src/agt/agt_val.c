@@ -732,11 +732,7 @@ static status_t
     }
 	     
     if (res != NO_ERR) {
-	agt_record_insert_error(scb, 
-				&msg->mhdr, 
-				NCX_LAYER_CONTENT,
-				res, 
-				newval);
+	agt_record_insert_error(scb, &msg->mhdr, res, newval);
     }
 
     return res;
@@ -926,20 +922,20 @@ static status_t
 	default:
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}
-
-	if (target->cfg_id == NCX_CFGID_RUNNING && 
-	    !freenew && cur_editop != OP_EDITOP_LOAD) { 
-	    val_clear_editvars(newval);
-	}
     }
 
     if (res == NO_ERR 
 	&& newval->btyp == NCX_BT_LIST
-	&& newval->editvars->insertstr 
 	&& cur_editop == OP_EDITOP_MERGE) {
+	if (newval->editvars
+	    && newval->editvars->insertstr ) {
 
-	/* move the list entry after the merge is done */
-	move_mergedlist_node(newval, curval, parent, undo);
+	    /* move the list entry after the merge is done */
+	    move_mergedlist_node(newval, curval, parent, undo);
+	} else {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    freenew = TRUE;
+	}
     }
 
     if (freenew) {
@@ -1685,22 +1681,141 @@ static status_t
 }  /* handle_callback */
 
 
-#ifdef NOT_YET
 /********************************************************************
-* FUNCTION unique_check
+* FUNCTION compare_unique_testsets
 * 
-* Check for the proper uniqueness of the tuples within
-* the set of list instances for the specified node
+* Compare 2 Qs of val_unique_t structs
+*
+* INPUTS:
+*   uni1Q == Q of val_unique_t structs for value1
+*   uni2Q == Q of val_unique_t structs for value2
+*
+* RETURNS:
+*   TRUE if compare test is equal
+*   FALSE if compare test not equal
+*********************************************************************/
+static boolean
+    compare_unique_testsets (dlq_hdr_t *uni1Q,
+			     dlq_hdr_t *uni2Q)
+{
+    val_unique_t  *uni1, *uni2;
+    int32          cmpval;
+
+    /* compare the 2 Qs of values */
+    uni1 = (val_unique_t *)dlq_firstEntry(uni1Q);
+    uni2 = (val_unique_t *)dlq_firstEntry(uni2Q);
+
+    while (uni1 && uni2) {
+	cmpval = val_compare(uni1->valptr, uni2->valptr);
+	if (cmpval) {
+	    return FALSE;
+	}
+	uni1 = (val_unique_t *)dlq_nextEntry(uni1);
+	uni2 = (val_unique_t *)dlq_nextEntry(uni2);
+    }
+    return TRUE;
+
+} /* compare_unique_testsets */
+
+
+/********************************************************************
+* FUNCTION make_unique_testset
+* 
+* Construct a Q of val_unique_t records, each with the
+* current value of the corresponding obj_unique_comp_t
+* If a node is not present the test will be stopped,
+* ERR_NCX_CANCELED will be returned in the status parm,
+* Any nodes in the resultQ will be left there
+* and need to be deleted
+*
+* INPUTS:
+*   curval == value to run test for
+*          If test needed, all following-sibling nodes will be 
+*          checked to see if they are the same list object instance
+*          and if they have a complete tuple to compare, 
+*   unidef == obj_unique_t to process
+*   resultQ == Queue header to store the val_unique_t records
+*   freeQ == Queue of free val_unique_t records to check first
+*
+* OUTPUTS:
+*   resultQ has zero or more val_unique_t structs added
+*   which need to be freed with the val_free_unique fn
+*
+* RETURNS:
+*   status of the operation, NO_ERR if all nodes found and stored OK
+*********************************************************************/
+static status_t 
+    make_unique_testset (val_value_t *curval,
+			 const obj_unique_t *unidef,
+			 dlq_hdr_t *resultQ,
+			 dlq_hdr_t *freeQ)
+{
+    obj_unique_comp_t  *unicomp;
+    val_unique_t       *unival;
+    val_value_t        *targval;
+    ncx_module_t       *mod;
+    status_t            res, retres;
+
+    retres = NO_ERR;
+
+    unicomp = obj_first_unique_comp(unidef);
+    if (!unicomp) {
+	/* really should not happen */
+	return ERR_NCX_CANCELED;
+    }
+
+    /* need to get a non-const pointer to the module */
+    mod = def_reg_find_module(obj_get_mod_name(curval->obj));
+
+    /* for each unique component, get the descendant
+     * node that is specifies and save it in a val_unique_t
+     */
+    while (unicomp && retres == NO_ERR) {
+	res = xpath_find_val_unique(curval, mod,
+				    unicomp->xpath,
+				    FALSE,
+				    &targval);
+
+	if (res != NO_ERR) {
+	    retres = ERR_NCX_CANCELED;
+	    continue;
+	}
+
+	unival = (val_unique_t *)dlq_deque(freeQ);
+	if (!unival) {
+	    unival = val_new_unique();
+	    if (!unival) {
+		retres = ERR_INTERNAL_MEM;
+		continue;
+	    }
+	}
+
+	unival->valptr = targval;
+	dlq_enque(unival, resultQ);
+
+	unicomp = obj_next_unique_comp(unicomp);
+    }
+
+    return retres;
+
+} /* make_unique_testset */
+
+
+/********************************************************************
+* FUNCTION one_unique_stmt_check
+* 
+* Run the unique-stmt test for the specified list object type
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
 *   msg == xml_msg_hdr t from msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
-*   obj == object template for child node in valset to check
-*          This must represent an OBJ_TYP_LIST object
-*          If the unique Q is empty, return NO_ERR
-*   valset == val_value_t of the parent of the 'obj' child type
-*   layer == NCX layer calling this function (for error purposes only)
+*   curval == value to run test for
+*          If test needed, all following-sibling nodes will be 
+*          checked to see if they are the same list object instance
+*          and if they have a complete tuple to compare, 
+*   unidef == obj_unique_t to process
+*   uninum == ordinal ID for this unique-stmt
 *
 * OUTPUTS:
 *   if msg not NULL:
@@ -1712,103 +1827,180 @@ static status_t
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
 static status_t 
-    unique_check (ses_cb_t *scb,
-		  xml_msg_hdr_t *msg,
-		  const obj_template_t *obj,
-		  val_value_t *valset,
-		  ncx_layer_t   layer)
+    one_unique_stmt_check (ses_cb_t *scb,
+			   xml_msg_hdr_t *msg,
+			   val_value_t *curval,
+			   const obj_unique_t *unidef,
+			   uint32 uninum)
 {
-    const obj_template_t  *chobj;
-    const obj_unique_t    *uni;
-    const xmlChar         *modname, objname;
-    val_value_t           *compset1, *compset2, *startchild, *curchild;
-    uint32                 uninum, listcnt;
+    dlq_hdr_t        uni1Q, uni2Q, freeQ;
+    val_unique_t    *unival;
+    val_value_t     *testval;
+    status_t         res, retres;
+    boolean          done, done2, errordone;
+
+    retres = NO_ERR;
+    dlq_createSQue(&uni1Q);
+    dlq_createSQue(&uni2Q);
+    dlq_createSQue(&freeQ);
+    done = FALSE;
+    errordone = FALSE;
+
+    if (LOGDEBUG3) {
+	log_debug3("\nunique_chk: %s start %u", 
+		   curval->name, uninum);
+    }
+
+    /* try to get the start set for this list */
+    res = make_unique_testset(curval, unidef, &uni1Q, &freeQ);
+    if (res == NO_ERR) {
+	;
+    } else if (res == ERR_NCX_CANCELED) {
+	done = TRUE;
+    } else {
+	retres = res;
+    }
+
+    if (retres == NO_ERR && !done) {
+	/* go through all the following-siblings of this list
+	 * and find all the list entries with the same object;
+	 * get the unique tuple set and if complete,
+	 * compare it to the uni1Q of node values
+	 */
+
+	done2 = FALSE;
+	for (testval = (val_value_t *)dlq_nextEntry(curval);
+	     testval != NULL && !done2;
+	     testval = (val_value_t *)dlq_nextEntry(testval)) {
+
+	    if (testval->obj == curval->obj) {
+		res = make_unique_testset(testval, unidef, 
+					  &uni2Q, &freeQ);
+		if (res == NO_ERR) {
+		    if (compare_unique_testsets(&uni1Q, &uni2Q)) {
+			/* 2 lists have the same values
+			 * so generate an error; only
+			 * do this once for the startval
+			 * but find all the duplicates
+			 * and mark the flags so the
+			 * same error message will not
+			 * be duplicated in the <rpc-reply>
+			 */
+			if (!errordone) {
+			    agt_record_unique_error
+				(scb, msg, curval, &uni1Q);
+			    errordone = TRUE;
+			}
+			/* curval->res = ERR_NCX_UNIQUE_TEST_FAILED; */
+			testval->res = ERR_NCX_UNIQUE_TEST_FAILED;
+			retres = ERR_NCX_UNIQUE_TEST_FAILED;
+			testval->flags |= VAL_FL_UNIDONE;
+		    }
+		    dlq_block_enque(&uni2Q, &freeQ);
+		} else if (res == ERR_NCX_CANCELED) {
+		    dlq_block_enque(&uni2Q, &freeQ);
+		} else {
+		    agt_record_error(scb, msg, NCX_LAYER_CONTENT,
+				     res, NULL, NCX_NT_NONE, NULL,
+				     NCX_NT_VAL, curval);
+		    done2 = TRUE;
+		    retres = res;
+		}
+	    }
+	}
+    }
+
+    /* cleanup and exit */
+    while (!dlq_empty(&uni1Q)) {
+	unival = (val_unique_t *)dlq_deque(&uni1Q);
+	val_free_unique(unival);
+    }
+
+    while (!dlq_empty(&uni2Q)) {
+	unival = (val_unique_t *)dlq_deque(&uni2Q);
+	val_free_unique(unival);
+    }
+
+    while (!dlq_empty(&freeQ)) {
+	unival = (val_unique_t *)dlq_deque(&freeQ);
+	val_free_unique(unival);
+    }
+
+    return retres;
+
+} /* one_unique_stmt_check */
+
+
+/********************************************************************
+* FUNCTION unique_stmt_check
+* 
+* Check for the proper uniqueness of the tuples within
+* the set of list instances for the specified node
+*
+* INPUTS:
+*   scb == session control block (may be NULL; no session stats)
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   curval == value to run test for
+*          If test needed, all following-sibling nodes will be 
+*          checked to see if they are the same list object instance
+*          and if they have a complete tuple to compare, 
+*
+* OUTPUTS:
+*   if msg not NULL:
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+*      which must be freed by the called with the 
+*      rpc_err_free_record function
+*
+* RETURNS:
+*   status of the operation, NO_ERR if no validation errors found
+*********************************************************************/
+static status_t 
+    unique_stmt_check (ses_cb_t *scb,
+		       xml_msg_hdr_t *msg,
+		       val_value_t *curval)
+{
+    const obj_unique_t    *unidef;
+    val_value_t           *clearval, *chval;
+    uint32                 uninum;
     status_t               res, retres;
 
-    uni = obj_get_first_unique(obj);
-    if (!uni) {
-	return NO_ERR;
-    }
-
-    modname = obj_get_mod_name(obj);
-    objname = obj_get_name(obj);
-
-    listcnt = val_child_inst_cnt(valset, modname, objname);
-
-    if (listcnt < 2) {
-	return NO_ERR;
-    }
-
-    compset1 = NULL;
-    compset2 = NULL;
-    res = NO_ERR;
+    uninum = 0;
     retres = NO_ERR;
-    uninum = 1;
+    unidef = obj_first_unique(curval->obj);
 
-    compset1 = val_new_value();
-    if (!compset) {
-	res = ERR_INTERNAL_MEM;
-    } else {
-	val_init_from_template(compset1, obj);
-    }
+    if (unidef && !(curval->flags & VAL_FL_UNIDONE)) {
+	while (unidef && retres == NO_ERR) {
+	    ++uninum;
 
-    compset2 = val_new_value();
-    if (!compset) {
-	res = ERR_INTERNAL_MEM;
-    } else {
-	val_init_from_template(compset2, obj);
-    }
+	    res = one_unique_stmt_check(scb, msg, curval,
+					unidef, uninum);
+	    CHK_EXIT(res, retres);
 
-    if (res != NO_ERR) {
-	agt_record_error(scb, msg, layer, res, 
-			 NULL, NCX_NT_OBJ, obj, 
-			 NCX_NT_VAL, valset);
-	retres = res;
-	uni = NULL;
-    }
-
-    /* go through each unique test for the list
-     * they do not have names, so just give them numbers
-     * in the unique test 'bad-value' clause
-     */
-    while (uni) {
-	res = NO_ERR;
-	cnt = 0;
-
-#ifdef AGT_VAL_DEBUG
-	log_debug3("\nunique_check '%s' against '%s'",
-		   objname, valset->name);
-#endif
-
-	/* save the values in a temp list entry of the same type as
-	 * the real list being checked.
-	 */
-	firstchild = val_find_child(valset, modname, objname);
-
-
-
-	if (res != NO_ERR) {
-	    agt_record_error(scb, msg, layer, res, 
-			     NULL, NCX_NT_OBJ, obj, 
-			     NCX_NT_VAL, val);
+	    unidef = obj_next_unique(unidef);
 	}
-
-	uni = obj_next_unique(uni);
-	uninum++;
     }
 
+    /* recurse for every child node until leafs are hit */
+    for (chval = val_get_first_child(curval);
+	 chval != NULL && retres == NO_ERR;
+	 chval = val_get_next_child(chval)) {
 
-    if (compset1) {
-	val_free_value(compset1);
-    }
-    if (compset2) {
-	val_free_value(compset1);
+	res = unique_stmt_check(scb, msg, chval);
+	CHK_EXIT(res, retres);
     }
 
-    return res;
-    
-}  /* unique_check */
-#endif
+    if (uninum && retres != NO_ERR) {
+	for (clearval = (val_value_t *)dlq_nextEntry(curval);
+	     clearval != NULL;
+	     clearval = (val_value_t *)dlq_nextEntry(clearval)) {
+	    clearval->flags &= ~VAL_FL_UNIDONE;
+	}
+    }
+
+    return retres;
+
+}  /* unique_stmt_check */
 
 
 /********************************************************************
@@ -2364,17 +2556,15 @@ static status_t
 
     obj = curval->obj;
 
-    if (!obj_has_name(obj)) {
-	return NO_ERR;
-    }
-
     /* execute all the must tests top down, so
      * foo/bar errors are reported before /foo/bar/child
      */
     mustQ = obj_get_mustQ(obj);
     if (mustQ && !dlq_empty(mustQ)) {
 
-	log_debug3("\nmst_stmt_check: %s start", curval->name);
+	if (LOGDEBUG3) {
+	    log_debug3("\nmust_chk: %s start", curval->name);
+	}
 
 	for (must = (xpath_pcb_t *)dlq_firstEntry(mustQ);
 	     must != NULL;
@@ -2384,11 +2574,13 @@ static status_t
 	    result = xpath1_eval_expr(must, curval, root, 
 				      FALSE, TRUE, &res);
 	    if (!result || res != NO_ERR) {
-		log_debug2("\nagt_val: must XPath failed for "
-			   "%s %s (%s)",
-			   obj_get_typestr(obj),
-			   obj_get_name(obj),
-			   get_error_string(res));
+		if (LOGDEBUG2) {
+		    log_debug2("\nmust_chk: failed for "
+			       "%s %s (%s)",
+			       obj_get_typestr(obj),
+			       obj_get_name(obj),
+			       get_error_string(res));
+		}
 
 		if (res == NO_ERR) {
 		    res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -2419,7 +2611,10 @@ static status_t
 					 &must->errinfo : NULL);
 		CHK_EXIT(res, retres);
 	    } else {
-		log_debug2("\nmust OK '%s'", must->exprstr);
+		if (LOGDEBUG3) {
+		    log_debug3("\nmust_chk: OK '%s'", 
+			       must->exprstr);
+		}
 	    }
 
 	    if (result) {
@@ -2688,6 +2883,9 @@ status_t
 	 chval = val_get_next_child(chval)) {
 
 	res = must_stmt_check(scb, msg, root, chval);
+	CHK_EXIT(res, retres);
+
+	res = unique_stmt_check(scb, msg, chval);
 	CHK_EXIT(res, retres);
     }
 

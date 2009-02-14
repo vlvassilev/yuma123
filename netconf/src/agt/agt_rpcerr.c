@@ -63,6 +63,14 @@ date         init     comment
 #include  "status.h"
 #endif
 
+#ifndef _H_val
+#include  "val.h"
+#endif
+
+#ifndef _H_val_util
+#include  "val_util.h"
+#endif
+
 #ifndef _H_xmlns
 #include  "xmlns.h"
 #endif
@@ -436,17 +444,17 @@ static rpc_err_t
     case ERR_NCX_MANDATORY_NOT_ALLOWED:
 	return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_UNIQUE_TEST_FAILED:
-	return RPC_ERR_OPERATION_FAILED;   /* 12.1 */
+	return RPC_ERR_OPERATION_FAILED;   /* 13.1 */
     case ERR_NCX_MAX_ELEMS_VIOLATION:
-	return RPC_ERR_OPERATION_FAILED;   /* 12.2 */
+	return RPC_ERR_OPERATION_FAILED;   /* 13.2 */
     case ERR_NCX_MIN_ELEMS_VIOLATION:
-	return RPC_ERR_OPERATION_FAILED;   /* 12.3 */
+	return RPC_ERR_OPERATION_FAILED;   /* 13.3 */
     case ERR_NCX_MUST_TEST_FAILED:
-	return RPC_ERR_OPERATION_FAILED;   /* 12.4 */
+	return RPC_ERR_OPERATION_FAILED;   /* 13.4 */
     case ERR_NCX_DATA_REST_VIOLATION:
 	return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_INSERT_MISSING_INSTANCE:
-	return RPC_ERR_BAD_ATTRIBUTE;      /* 12.5 */
+	return RPC_ERR_BAD_ATTRIBUTE;      /* 13.5 */
     case ERR_NCX_NOT_CONFIG:
 	return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_CONDITIONAL:
@@ -979,13 +987,13 @@ rpc_err_rec_t *
     } else {
 	switch (interr) {
 	case ERR_NCX_UNIQUE_TEST_FAILED:
-	    apptag = (const xmlChar *)"data-not-unique"; /* 12.1 */
+	    apptag = (const xmlChar *)"data-not-unique"; /* 13.1 */
 	    break;
 	case ERR_NCX_MAX_ELEMS_VIOLATION:
-	    apptag = (const xmlChar *)"too-many-elements"; /* 12.2 */
+	    apptag = (const xmlChar *)"too-many-elements"; /* 13.2 */
 	    break;
 	case ERR_NCX_MIN_ELEMS_VIOLATION:
-	    apptag = (const xmlChar *)"too-few-elements";  /* 12.3 */
+	    apptag = (const xmlChar *)"too-few-elements";  /* 13.3 */
 	    break;
 	case ERR_NCX_NOT_IN_RANGE:
 	    apptag = (const xmlChar *)"not-in-range";
@@ -1000,10 +1008,10 @@ rpc_err_rec_t *
 	    apptag = (const xmlChar *)"data-restriction-violation";
 	    break;
 	case ERR_NCX_MUST_TEST_FAILED:
-	    apptag = (const xmlChar *)"must-violation";  /* 12.4 */
+	    apptag = (const xmlChar *)"must-violation";  /* 14.4 */
 	    break;
 	case ERR_NCX_INSERT_MISSING_INSTANCE:
-	    apptag = (const xmlChar *)"missing-instance"; /* 12.5 */
+	    apptag = (const xmlChar *)"missing-instance"; /* 14.5 */
 	    break;
 	default:
 	    apptag = NULL;
@@ -1014,6 +1022,9 @@ rpc_err_rec_t *
     err = start_err(layer, interr, rpcerr, errsev, apptag, error_path, 
 		    error_msg, NULL);
     if (!err) {
+	if (error_msg) {
+	    m__free(error_msg);
+	}
 	return NULL;
     }
 
@@ -1100,6 +1111,13 @@ rpc_err_rec_t *
     rpc_err_sev_t             errsev;
     xmlns_id_t                nsid;
 
+#ifdef DEBUG
+    if (!errval) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     badval = NULL;
     badns = NULL;
     err1 = NULL;
@@ -1113,16 +1131,21 @@ rpc_err_rec_t *
     msg = (const xmlChar *)get_error_string(interr);
     error_msg = (msg) ? xml_strdup(msg) : NULL;
 
-    apptag = (const xmlChar *)"missing-instance"; /* 12.5 */
+    apptag = (const xmlChar *)"missing-instance"; /* 13.5 */
 
     /* get a new error record */
     err = start_err(layer, interr, rpcerr, errsev, apptag, error_path, 
 		    error_msg, NULL);
     if (!err) {
+	if (error_msg) {
+	    m__free(error_msg);
+	}
 	return NULL;
     }
 
-    badval = errval->editvars->insertstr;
+    if (errval->editvars) {
+	badval = errval->editvars->insertstr;
+    }
 
     nsid = xmlns_yang_id();
     err1 = (const void *)nsid;
@@ -1146,6 +1169,107 @@ rpc_err_rec_t *
     return err;
 
 } /* agt_rpcerr_gen_insert_error */
+
+
+/********************************************************************
+* FUNCTION agt_rpc_gen_unique_error
+*
+* Generate an internal <rpc-error> record for an element
+* for a unique-stmt failed error (data-not-unique)
+*
+* INPUTS:
+*   msghdr == message header to use for prefix storage
+*   layer == protocol layer where the error occurred
+*   interr == internal error code
+*             if NO_ERR than use the rpcerr only
+*   errval == pointer to the node with the insert error
+*   valuniqueQ == Q of val_unique_t structs to
+*                   use for <non-unique> elements
+*  error_path == malloced string of the value (or type, etc.) instance
+*                ID string in NCX_IFMT_XPATH format; this will be added
+*                to the rpc_err_rec_t and freed later
+*             == NULL if not available
+*
+* RETURNS:
+*   pointer to allocated and filled in rpc_err_rec_t struct
+*     ready to add to the msg->rpc_errQ
+*   NULL if a record could not be allocated or not enough
+*     val;id info in the parameters 
+*********************************************************************/
+rpc_err_rec_t *
+    agt_rpcerr_gen_unique_error (xml_msg_hdr_t *msghdr,
+				 ncx_layer_t layer,
+				 status_t   interr,
+				 const dlq_hdr_t *valuniqueQ,
+				 xmlChar *error_path)
+{
+    rpc_err_rec_t            *err;
+    rpc_err_info_t           *errinfo;
+    xmlChar                  *error_msg, *pathbuff;
+    const xmlChar            *msg, *apptag;
+    val_unique_t             *unival;
+    rpc_err_t                 rpcerr;
+    status_t                  res;
+    rpc_err_sev_t             errsev;
+    xmlns_id_t                yangid;
+
+
+    rpcerr = RPC_ERR_OPERATION_FAILED;
+    errsev = RPC_ERR_SEV_ERROR;
+    msg = (const xmlChar *)get_error_string(interr);
+    error_msg = (msg) ? xml_strdup(msg) : NULL;
+    apptag = (const xmlChar *)"data-not-unique"; /* 13.1 */
+
+    /* get a new error record */
+    err = start_err(layer, interr, rpcerr, 
+		    errsev, apptag, error_path, 
+		    error_msg, NULL);
+    if (!err) {
+	if (error_msg) {
+	    m__free(error_msg);
+	}
+	return NULL;
+    }
+
+    if (!valuniqueQ) {
+	return err;
+    }
+
+    yangid = xmlns_yang_id();
+
+    for (unival = (val_unique_t *)dlq_firstEntry(valuniqueQ);
+	 unival != NULL;
+	 unival = (val_unique_t *)dlq_nextEntry(unival)) {
+
+	pathbuff = NULL;
+	res = val_gen_instance_id(msghdr, 
+				  unival->valptr, 
+				  NCX_IFMT_XPATH1, 
+				  &pathbuff);
+	if (res != NO_ERR) {
+	    return err;
+	}
+
+	errinfo = rpc_err_new_info();
+	if (!errinfo) {
+	    /* try to send the error as-is */
+	    m__free(pathbuff);
+	    return err;
+	}
+	
+	/* generate non-unique value */
+	errinfo->name_nsid = yangid;
+	errinfo->name = NCX_EL_NON_UNIQUE;
+	errinfo->val_btype = NCX_BT_INSTANCE_ID;
+	errinfo->val_nsid = 0;
+	errinfo->dval = pathbuff;
+	errinfo->v.strval = errinfo->dval;
+	dlq_enque(errinfo, &err->error_info);
+    }
+
+    return err;
+
+} /* agt_rpcerr_gen_unique_error */
 
 
 /********************************************************************
@@ -1220,6 +1344,9 @@ rpc_err_rec_t *
     err = start_err(layer, interr, rpcerr, errsev, NULL, error_path, 
 		    error_msg, NULL);
     if (!err) {
+	if (error_msg) {
+	    m__free(error_msg);
+	}
 	return NULL;
     }
 

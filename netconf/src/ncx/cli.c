@@ -810,7 +810,7 @@ val_value_t *
     ncx_btype_t     btyp;
     status_t        res;
     xmlChar         errbuff[NCX_MAX_NLEN], savechar;
-    boolean         gotdashes;
+    boolean         gotdashes, gotmatch;
 
 #ifdef DEBUG
     if (!status) {
@@ -912,6 +912,7 @@ val_value_t *
     while (buffpos < bufflen && res == NO_ERR) {
 
 	gotdashes = FALSE;
+	gotmatch = FALSE;
 
 	/* first skip starting whitespace */
 	while (buff[buffpos] && isspace(buff[buffpos])) {
@@ -966,6 +967,9 @@ val_value_t *
 		    obj_match_child_str(obj, obj_get_mod_name(obj),
 					(const xmlChar *)parmname,
 					parmnamelen);
+		if (chobj) {
+		    gotmatch = TRUE;
+		}
 	    }
 
 	    if (!chobj && !gotdashes) {
@@ -1096,6 +1100,20 @@ val_value_t *
 	    res = parse_parm(val, chobj, 
 			     (const xmlChar *)parmval,
 			     script);
+	} else if (res == ERR_NCX_EMPTY_VAL &&
+		   gotmatch && !gotdashes) {
+	    /* matched parm did not work out so
+	     * check if this is intended to be a
+	     * parameter value for the default-parm
+	     */
+	    chobj = obj_get_default_parm(obj);
+	    if (chobj) {
+		savechar = parmname[parmnamelen];
+		parmname[parmnamelen] = 0;
+		res = parse_parm(val, chobj, 
+				 (const xmlChar *)parmname, script);
+		parmname[parmnamelen] = savechar;
+	    }
 	}
 
 	/* check any errors in the parm name or value */

@@ -908,9 +908,9 @@ val_value_t *
      * and the PSD for these parameters
      * save each parm value in a ps_parm_t struct
      */
-    while (buffpos < bufflen) {
+    res = NO_ERR;
+    while (buffpos < bufflen && res == NO_ERR) {
 
-	res = NO_ERR;
 	gotdashes = FALSE;
 
 	/* first skip starting whitespace */
@@ -1016,7 +1016,11 @@ val_value_t *
 
 		    /* if any chars left in buffer, get the parmval */
 		    if (buffpos < bufflen) {
-			if (buff[buffpos] == NCX_QUOTE_CH) {
+			if (buff[buffpos] == NCX_QUOTE_CH ||
+			    buff[buffpos] == NCX_SQUOTE_CH) {
+
+			    savechar = buff[buffpos];
+
 			    if (script) {
 				/* set the start at quote */
 				parmval = &buff[buffpos];
@@ -1027,12 +1031,19 @@ val_value_t *
 
 			    /* find the end of the quoted string */
 			    str = &parmval[1];
-			    while (*str && *str != NCX_QUOTE_CH) {
+			    while (*str && *str != savechar) {
 				str++;
 			    }
-			    /* if script mode keep ending quote */
-			    if (script && *str == NCX_QUOTE_CH) {
-				str++;
+
+			    if (*str == savechar) {
+				/* if script mode keep ending quote */
+				if (script) {
+				    str++;
+				}
+			    } else {
+				log_error("\nError: unfinished string "
+					  "found '%s'", parmval);
+				res = ERR_NCX_UNENDED_QSTRING;
 			    }
 			} else if (script && (buffpos+1 < bufflen) &&
 				   (buff[buffpos] == NCX_XML1a_CH) &&

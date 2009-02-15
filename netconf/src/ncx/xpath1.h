@@ -69,18 +69,25 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/* parse initial expr with YANG prefixes: must/when
+ * the object is left out in case it is in a grouping
+ */
 extern status_t
     xpath1_parse_expr (tk_chain_t *tkc,
 		       ncx_module_t *mod,
 		       xpath_pcb_t *pcb,
 		       xpath_source_t source);
 
+/* parse expr with YANG prefixes: must/when
+ * called from final OBJ xpath check after all
+ * cooked objects are in place
+ */
 extern status_t
     xpath1_validate_expr (ncx_module_t *mod,
 			  const obj_template_t *obj,
 			  xpath_pcb_t *pcb);
 
-
+/* use if the prefixes are YANG: must/when */
 extern xpath_result_t *
     xpath1_eval_expr (xpath_pcb_t *pcb,
 		      val_value_t *val,
@@ -89,6 +96,7 @@ extern xpath_result_t *
 		      boolean configonly,
 		      status_t *res);
 
+/* use if the prefixes are XML: select */
 extern xpath_result_t *
     xpath1_eval_xmlexpr (xmlTextReaderPtr reader,
 			 xpath_pcb_t *pcb,

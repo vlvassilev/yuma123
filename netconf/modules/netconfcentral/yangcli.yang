@@ -56,6 +56,17 @@ module yangcli {
      *
      *************************************************************/
 
+
+    typedef Timeout {
+	description
+	  "Number of seconds to wait for a response
+	   from the agent before declaring a timeout.
+           Zero means no timeout at all.";
+        type uint32;
+        units seconds;
+        default 30;
+    }
+
     grouping HelpMode {
       choice brief-full {
         leaf brief {
@@ -175,6 +186,11 @@ module yangcli {
             "Common parms for create, merge, replace commands";
 
         uses CommonPduParms;
+
+	leaf timeout {
+	  description "Timeout to use";
+	  type Timeout;
+        }
     }
 
     grouping XGetParms {
@@ -207,6 +223,12 @@ module yangcli {
               type string { length "1..max"; }
             }
         }
+
+	leaf timeout {
+	  description "Timeout to use";
+	  type Timeout;
+        }
+
     }
 
     grouping ConnectParms {
@@ -246,14 +268,14 @@ module yangcli {
           default 830;
         }
 
-/*
-        leaf key {
-          description
-           "The full filespec for the key the program should use
-            when connecting to the agent";
-          type string;
+	leaf timeout {
+	  description
+	    "Number of seconds to wait for a response
+	     from the agent before declaring a timeout.
+             Zero means no timeout at all.";
+          type Timeout;
         }
-*/
+ 
     }
 
     /*************************************************************
@@ -269,6 +291,28 @@ module yangcli {
         "CLI Parameter Set for the NETCONF Manager Application.";
 
       uses ConnectParms;
+
+      leaf autocomp {
+        description
+          "Controls whether partial keywords will be 
+           checked for interactive or script commands.
+           By default, the first match for a partial keyword
+           will be used if no definition is found for
+           a command name or parameter name.";
+        type boolean;
+        default true;
+      }
+ 
+      leaf autoload {
+        description
+          "Controls whether any modules (except this one)
+           will be automatically loaded upon startup or
+           upon session startup with an agent. If false,
+           the 'load-module' command must be used to
+           explicitly load all the desired definition modules.";
+        type boolean;
+        default true;
+      }
 
       leaf bad-data {
         description
@@ -324,6 +368,17 @@ module yangcli {
          type nt:NcxName;
       }
 
+      leaf fixorder {
+        description
+          "Controls whether PDU parameters will be
+           automatically sent to the agent in the
+           correct order.  If false, the specified order
+           will be used. If true, then canonical order will
+	   be used";
+        type boolean;
+	default true;
+      }
+ 
       leaf help {
         description
           "Print help text for the program.
@@ -360,35 +415,6 @@ module yangcli {
         type nt:NcModuleSpec;
       }
 
-      leaf no-autocomp {
-        description
-          "If present, then no partial keywords will be 
-           checked for interactive or script commands.
-           By default, the first match for a partial keyword
-           will be used if no definition is found for
-           a command name or parameter name.";
-        type empty;
-      }
- 
-      leaf no-autoload {
-        description
-          "If present, then no modules (except this one)
-           will be automatically loaded upon startup or
-           upon session startup with an agent. Instead,
-           the 'load-module' command must be used to
-           explicitly load all the desired definition modules.";
-        type empty;
-      }
-
-      leaf no-fixorder {
-        description
-          "If present, then parameters will not be
-           automatically sent to the agent in the
-           correct order.  Instead, the specified order
-           will be used.";
-        type empty;
-      }
- 
       leaf run-script {
         description
           "The specified script will be invoked upon startup.
@@ -407,7 +433,6 @@ module yangcli {
         type empty;
       }
     }
-
 
     /*************************************************************
      *

@@ -608,7 +608,7 @@ static status_t
     }
 
     /* check if the 'rpc' root element needs to be added here */
-    if (root && val->obj->objtype == OBJ_TYP_RPC) {
+    if (root && val->obj->objtype == OBJ_TYP_RPCIO) {
 	/* copy prefix */
 	if (mhdr) {
 	    ncprefix = xml_msg_get_prefix_xpath(mhdr, xmlns_nc_id());
@@ -707,7 +707,6 @@ static status_t
     return res;
 
 }  /* get_instance_string */
-
 
 
 /********************************************************************
@@ -1517,7 +1516,6 @@ val_value_t *
 } /* val_new_child_val */
 
 
-
 /********************************************************************
 * FUNCTION val_gen_instance_id
 * 
@@ -1544,7 +1542,7 @@ status_t
 			 ncx_instfmt_t format,
 			 xmlChar  **buff)
 {
-    uint32    len;
+    uint32    len, len2;
     status_t  res;
 
 #ifdef DEBUG 
@@ -1574,10 +1572,14 @@ status_t
     }
 
     /* get the instance ID string for real this time */
-    res = get_instance_string(mhdr, format, val, *buff, &len);
+    res = get_instance_string(mhdr, format, val, *buff, &len2);
     if (res != NO_ERR) {
 	m__free(*buff);
 	*buff = NULL;
+    }
+
+    if (res == NO_ERR && len != len2) {
+	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     return res;

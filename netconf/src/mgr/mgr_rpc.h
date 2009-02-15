@@ -19,6 +19,7 @@ date             init     comment
 ----------------------------------------------------------------------
 13-feb-07    abb      Begun; started from agt_rpc.h
 */
+#include <time.h>
 
 #ifndef _H_cfg
 #include "cfg.h"
@@ -64,6 +65,8 @@ typedef struct mgr_rpc_req_t_ {
     xmlChar       *msg_id;       /* malloced message ID */
     xml_attrs_t    attrs;          /* Extra <rpc> attrs */
     val_value_t   *data;      /* starts with the method */
+    time_t         starttime;     /* tstamp for timeout */
+    uint32         timeout;       /* timeout in seconds */
     void          *replycb;           /* mgr_rpc_cbfn_t */
 } mgr_rpc_req_t;
 
@@ -118,6 +121,12 @@ extern void
 extern void
     mgr_rpc_clean_requestQ (dlq_hdr_t *reqQ);
 
+/*** returning number of msgs timed out
+ *** need a callback-based cleanup later on
+ *** to support N concurrent requests per agent
+ ***/
+extern uint32
+    mgr_rpc_timeout_requestQ (dlq_hdr_t *reqQ);
 
 /* non-blocking send, reply function will be called when
  * one is received or a timeout occurs

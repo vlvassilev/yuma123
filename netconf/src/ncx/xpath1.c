@@ -1071,7 +1071,9 @@ static boolean
 	return TRUE;
     }
 
-    if (typ_is_string(val->btyp)) {
+    if (obj_is_password(val->obj)) {
+	parms->cmpresult = FALSE;
+    } else if (typ_is_string(val->btyp)) {
 	if (parms->cmpstring) {
 	    parms->cmpresult = 
 		compare_strings(parms->cmpstring, 

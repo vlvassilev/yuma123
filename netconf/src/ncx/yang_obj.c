@@ -4469,18 +4469,31 @@ static status_t
 	 */
 	if (uniobj->objtype != OBJ_TYP_LEAF ||
 	    obj_get_basetype(uniobj) == NCX_BT_ANY) {
-	    log_error("\nError: node '%s' on line %u not a leaf in unique"
-		      " statement for list '%s' (%s)",
-		      obj_get_basetype(uniobj)==NCX_BT_ANY 
-		      ? obj_get_name(uniobj) : NCX_EL_ANYXML,
+	    log_error("\nError: node '%s' on line %u not leaf in "
+		      "list '%s' unique-stmt",
+		      obj_get_name(uniobj),
 		      uniobj->linenum,
-		      list->name, obj_get_typestr(uniobj));
+		      list->name);
 	    retres = ERR_NCX_INVALID_UNIQUE_NODE;
 	    tkc->cur = errtk;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    m__free(savestr);
 	    continue;
 	} 
+
+	/* make sure there is a no config mismatch */
+	if (obj_is_config(obj) && !obj_is_config(uniobj)) {
+	    log_error("\nError: leaf '%s' on line %u not config in "
+		      "list '%s' unique-stmt",
+		      obj_get_name(uniobj),
+		      uniobj->linenum,
+		      list->name);
+	    retres = ERR_NCX_INVALID_UNIQUE_NODE;
+	    tkc->cur = errtk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	    m__free(savestr);
+	    continue;
+	}
 
 	/* the final target seems to be a valid leaf
 	 * so check that its path back to the original

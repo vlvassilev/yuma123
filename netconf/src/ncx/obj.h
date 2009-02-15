@@ -1040,6 +1040,9 @@ extern boolean
     obj_is_system_ordered (const obj_template_t *obj);
 
 extern boolean
+    obj_is_np_container (const obj_template_t *obj);
+
+extern boolean
     obj_ok_for_cli (const obj_template_t *obj);
 
 extern status_t 

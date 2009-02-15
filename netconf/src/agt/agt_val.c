@@ -200,30 +200,32 @@ static void
 	return;
     }
 
-    ibuff = NULL;
-    tstamp_datetime(tbuff);
+    if (LOGINFO) {
+	ibuff = NULL;
+	tstamp_datetime(tbuff);
 
-    if (node) {
-	(void)val_gen_instance_id(NULL, node, NCX_IFMT_XPATH1, 
-				  &ibuff);
+	if (node) {
+	    (void)val_gen_instance_id(NULL, node, NCX_IFMT_XPATH1, 
+				      &ibuff);
+	}
+
+	log_info("\nedit-config: operation %s on session %d by %s@%s"
+		 "\n  at %s on target %s with result (%s)"
+		 "\n  data: %s",
+		 op_editop_name(editop),
+		 scb->sid, 
+		 scb->username,
+		 scb->peeraddr,
+		 tbuff,
+		 target->name,
+		 get_error_string(res),
+		 (ibuff) ? (const char *)ibuff : "--");
+
+	if (ibuff) {
+	    m__free(ibuff);
+	}
     }
 
-    log_info("\nedit-config: operation %s on session %d by %s@%s"
-	     "\n  at %s on target %s with result (%s)"
-	     "\n  data: %s",
-	     op_editop_name(editop),
-	     scb->sid, 
-	     scb->username,
-	     scb->peeraddr,
-	     tbuff,
-	     target->name,
-	     get_error_string(res),
-	     (ibuff) ? (const char *)ibuff : "--");
-
-    if (ibuff) {
-	m__free(ibuff);
-    }
-	     
 } /* handle_audit_record */
 
 
@@ -427,8 +429,10 @@ static void
     val_value_t  *val;
     dlq_hdr_t     cleanQ;
 
-    log_debug3("\nAdd child '%s' to parent '%s'",
-	       child->name, parent->name);
+    if (LOGDEBUG3) {
+	log_debug3("\nAdd child '%s' to parent '%s'",
+		   child->name, parent->name);
+    }
 
     dlq_createSQue(&cleanQ);
 
@@ -799,7 +803,9 @@ static status_t
     }
 
 #ifdef AGT_VAL_DEBUG
+    if (LOGDEBUG3) {
 	log_debug3("\napply_write_val: %s start", name);
+    }
 #endif
 
     /* check if this node needs the edit operation applied */
@@ -820,7 +826,9 @@ static status_t
     if (applyhere) {
 
 #ifdef AGT_VAL_DEBUG
-	log_debug2("\napply_write_val: %s applyhere", name);
+	if (LOGDEBUG2) {
+	    log_debug2("\napply_write_val: %s applyhere", name);
+	}
 #endif
 
 	if (msg->rpc_need_undo) {
@@ -1000,7 +1008,9 @@ static status_t
     if (applyhere) {
 
 #ifdef AGT_VAL_DEBUG
-	log_debug3("\ntest_apply_write_val: %s start", newval->name);
+	if (LOGDEBUG3) {
+	    log_debug3("\ntest_apply_write_val: %s start", newval->name);
+	}
 #endif
 
 	/* make sure the node is not a virtual value */
@@ -1141,7 +1151,11 @@ static status_t
     case AGT_CB_VALIDATE:
 
 #ifdef AGT_VAL_DEBUG
-	log_debug3("\ninvoke_simval:validate: %s start", newval->name);
+	if (LOGDEBUG3) {
+	    log_debug3("\ninvoke_simval:validate: %s:%s start", 
+		       obj_get_mod_name(newval->obj),
+		       newval->name);
+	}
 #endif
 
 	/* check and adjust the operation attribute */
@@ -1262,7 +1276,11 @@ static status_t
     case AGT_CB_VALIDATE:
 
 #ifdef AGT_VAL_DEBUG
-    log_debug3("\ninvoke_cpxval:validate: %s start", newval->name);
+	if (LOGDEBUG3) {
+	    log_debug3("\ninvoke_cpxval:validate: %s:%s start", 
+		       obj_get_mod_name(newval->obj),
+		       newval->name);
+	}
 #endif
 
 	/* check and adjust the operation attribute */
@@ -1275,7 +1293,7 @@ static status_t
 				       (curval != NULL));
 	}
 
-	if (res == NO_ERR && newval->obj->objtype == OBJ_TYP_LIST) {
+	if (res == NO_ERR && newval->btyp == NCX_BT_LIST) {
 	    /**** unique test ****/
 	}
 
@@ -1847,7 +1865,8 @@ static status_t
     errordone = FALSE;
 
     if (LOGDEBUG3) {
-	log_debug3("\nunique_chk: %s start %u", 
+	log_debug3("\nunique_chk: %s:%s start %u", 
+		   obj_get_mod_name(curval->obj),
 		   curval->name, uninum);
     }
 
@@ -2240,10 +2259,15 @@ static status_t
 	    sprintf(buff, "%u", maxelems);
 	}
 
-	log_debug3("\ninstance_check '%s' against '%s' "
+	log_debug3("\ninstance_check '%s:%s' against '%s:%s' "
 		   "(cnt=%u, min=%u, max=%s)",
-		   obj_get_name(obj), val->name, cnt, 
-		   minelems, maxelems ? buff : "unbounded");
+		   obj_get_mod_name(obj),
+		   obj_get_name(obj),
+		   obj_get_mod_name(val->obj),
+		   val->name, 
+		   cnt, 
+		   minelems, 
+		   maxelems ? buff : "unbounded");
     }
 #endif
 
@@ -2450,8 +2474,14 @@ static status_t
     retres = NO_ERR;
 
 #ifdef AGT_VAL_DEBUG
-    log_debug3("\nichoice_check_agt: check '%s' against '%s'",
-	       obj_get_name(choicobj), val->name);
+    if (LOGDEBUG3) {
+	log_debug3("\nichoice_check_agt: check "
+		   "'%s:%s' against '%s:%s'",
+		   obj_get_mod_name(choicobj),
+		   obj_get_name(choicobj), 
+		   obj_get_mod_name(val->obj),
+		   val->name);
+    }
 #endif
 
     /* Go through all the child nodes for this object
@@ -2551,21 +2581,19 @@ static status_t
     val_value_t           *chval;
     status_t               res, retres;
 
+    obj = curval->obj;
+
+    if (!obj_is_config(obj)) {
+	return NO_ERR;
+    }
 
     retres = NO_ERR;
-
-    obj = curval->obj;
 
     /* execute all the must tests top down, so
      * foo/bar errors are reported before /foo/bar/child
      */
     mustQ = obj_get_mustQ(obj);
     if (mustQ && !dlq_empty(mustQ)) {
-
-	if (LOGDEBUG3) {
-	    log_debug3("\nmust_chk: %s start", curval->name);
-	}
-
 	for (must = (xpath_pcb_t *)dlq_firstEntry(mustQ);
 	     must != NULL;
 	     must = (xpath_pcb_t *)dlq_nextEntry(must)) {
@@ -2574,14 +2602,12 @@ static status_t
 	    result = xpath1_eval_expr(must, curval, root, 
 				      FALSE, TRUE, &res);
 	    if (!result || res != NO_ERR) {
-		if (LOGDEBUG2) {
-		    log_debug2("\nmust_chk: failed for "
-			       "%s %s (%s)",
-			       obj_get_typestr(obj),
-			       obj_get_name(obj),
-			       get_error_string(res));
-		}
-
+		log_error("\nmust_chk: failed for "
+			  "%s:%s (%s) expr '%s'",
+			  obj_get_mod_name(obj),
+			  curval->name,
+			  get_error_string(res),
+			  must->exprstr);
 		if (res == NO_ERR) {
 		    res = SET_ERROR(ERR_INTERNAL_VAL);
 		}
@@ -2597,6 +2623,13 @@ static status_t
 					 &must->errinfo : NULL);
 		CHK_EXIT(res, retres);
 	    } else if (!xpath_cvt_boolean(result)) {
+		if (LOGDEBUG2) {
+		    log_debug2("\nmust_chk: false for %s:%s expr '%s'", 
+			       obj_get_mod_name(obj),
+			       curval->name,
+			       must->exprstr);
+		}
+
 		res = ERR_NCX_MUST_TEST_FAILED;
 		agt_record_error_errinfo(scb, msg,
 					 NCX_LAYER_CONTENT,
@@ -2612,7 +2645,9 @@ static status_t
 		CHK_EXIT(res, retres);
 	    } else {
 		if (LOGDEBUG3) {
-		    log_debug3("\nmust_chk: OK '%s'", 
+		    log_debug3("\nmust_chk: OK for %s:%s expr '%s'", 
+			       obj_get_mod_name(obj),
+			       curval->name,
 			       must->exprstr);
 		}
 	    }
@@ -2639,6 +2674,351 @@ static status_t
     return retres;
     
 }  /* must_stmt_check */
+
+
+/********************************************************************
+* FUNCTION when_stmt_check
+* 
+* Check for any when-stmts in the object tree and validate the Xpath
+* expression against the complete database 'root' and current
+* context node 'curval'.
+*
+* There are 3 possible when-stmts to evaluate for every cooked node
+*
+*     object when
+*     augment when
+*     uses when
+*
+* Since deleting any node may cause other when-stmts to become 
+* false, tis function needs to be called N times until the
+* deleteQ is returned empty.
+*
+* INPUTS:
+*   scb == session control block (may be NULL; no session stats)
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   root == val_value_t or the target database root to validate
+*   curval == val_value_t for the current context node in the tree
+*   configmode == TRUE to test config-TRUE
+*                 FALSE to test config=FALSE
+*   deleteQ  == address of Q for deleted descendants
+*   deleteme == address of return delete flag
+*
+* OUTPUTS:
+*   if msg not NULL:
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+*      which must be freed by the called with the 
+*      rpc_err_free_record function
+*    deleteQ will have any deleted descendant entries
+*         due to false when-stmt expressions
+*   *deleteme == TRUE if this node failed its when test
+*                and needs to be deleted;
+*
+* RETURNS:
+*   status of the operation, NO_ERR or ERR_INTERNAL_MEM most likely
+*********************************************************************/
+static status_t 
+    when_stmt_check (ses_cb_t *scb,
+		     xml_msg_hdr_t *msg,
+		     val_value_t *root,
+		     val_value_t *curval,
+		     boolean configmode,
+		     dlq_hdr_t *deleteQ,
+		     boolean *deleteme)
+{
+    const obj_template_t  *obj;
+    const xpath_pcb_t     *objwhen, *augwhen, *useswhen, *whendef;
+    xpath_pcb_t           *whenclone;
+    xpath_result_t        *result;
+    val_value_t           *chval, *nextchild;
+    uint32                 loopcount;
+    status_t               res, retres;
+    boolean                deletechild;
+
+    *deleteme = FALSE;
+    obj = curval->obj;
+
+    if (configmode != obj_is_config(obj)) {
+	return NO_ERR;
+    }
+
+    retres = NO_ERR;
+    objwhen = obj->when;
+    augwhen = (obj->augobj) ? obj->augobj->when : NULL;
+    useswhen = (obj->usesobj) ? obj->usesobj->when : NULL;
+
+    /* execute all the when tests top down
+     * continue to descendants except if this
+     * node gets deleted (obviously)
+     */
+    if (objwhen || augwhen || useswhen) {
+
+	/* check each of the 3 when statmements */
+	for (loopcount = 0; loopcount < 3; loopcount++) {
+	    switch (loopcount) {
+	    case 0:
+		if (objwhen) {
+		    whendef = objwhen;
+		} else {
+		    continue;
+		}
+		break;
+	    case 1:
+		if (augwhen) {
+		    whendef = augwhen;
+		} else {
+		    continue;
+		}
+		break;
+	    case 2:
+		if (useswhen) {
+		    whendef = useswhen;
+		} else {
+		    continue;
+		}
+		break;
+	    default:
+		return SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+
+	    /* get a writable XPath parser control block */
+	    whenclone = xpath_clone_pcb(whendef);
+	    if (!whenclone) {
+		return ERR_INTERNAL_MEM;
+	    }
+
+	    res = NO_ERR;
+	    result = xpath1_eval_expr(whenclone, curval, root, 
+				      FALSE, TRUE, &res);
+	    if (!result || res != NO_ERR) {
+		log_error("\nError: when_chk: failed for "
+			   "%s:%s (%s) '%s'",
+			  obj_get_mod_name(obj),
+			  obj_get_name(obj),
+			  get_error_string(res),
+			  whenclone->exprstr);
+	    } else if (!xpath_cvt_boolean(result)) {
+		if (LOGDEBUG2) {
+		    log_debug2("\nwhen_chk: test false for "
+			       "node '%s:%s' expr '%s'", 
+			       obj_get_mod_name(obj),
+			       curval->name,
+			       whenclone->exprstr);
+		}
+		*deleteme = TRUE;
+	    } else {
+		if (LOGDEBUG3) {
+		    log_debug3("\nwhen_chk: test passed for "
+			       "node '%s:%s' expr '%s'", 
+			       obj_get_mod_name(obj),
+			       curval->name,
+			       whenclone->exprstr);
+		}
+	    }
+
+	    if (result) {
+		xpath_free_result(result);
+	    }
+
+	    xpath_free_pcb(whenclone);
+	    whenclone = NULL;
+
+	    if (*deleteme) {
+		return NO_ERR;
+	    }
+	}
+    }
+
+    /* recurse for every child node until leafs are hit */
+    for (chval = val_get_first_child(curval);
+	 chval != NULL && retres == NO_ERR;
+	 chval = nextchild) {
+
+	nextchild = val_get_next_child(chval);
+
+	res = when_stmt_check(scb, msg, 
+			      root, chval, 
+			      configmode,
+			      deleteQ, 
+			      &deletechild);
+	CHK_EXIT(res, retres);
+	if (res == NO_ERR && deletechild) {
+	    val_remove_child(chval);
+	    dlq_enque(chval, deleteQ);
+	}
+    }
+
+    return retres;
+    
+}  /* when_stmt_check */
+
+
+/********************************************************************
+* FUNCTION delete_empty_npcontainers
+* 
+* Check for any empty non-presense containers
+* and delete them
+*
+* INPUTS:
+*   scb == session control block (may be NULL; no session stats)
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   root == val_value_t or the target database root to validate
+*   curval == val_value_t for the current context node in the tree
+*   configmode == TRUE to test config-TRUE
+*                 FALSE to test config=FALSE
+*   deleteQ  == address of Q for deleted descendants
+*   deleteme == address of return delete flag
+*
+* OUTPUTS:
+*   if msg not NULL:
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+*      which must be freed by the called with the 
+*      rpc_err_free_record function
+*    deleteQ will have any deleted descendant entries
+*         due to false when-stmt expressions
+*   *deleteme == TRUE if this node failed its when test
+*                and needs to be deleted;
+*
+*********************************************************************/
+static void
+    delete_empty_npcontainers (ses_cb_t *scb,
+			       xml_msg_hdr_t *msg,
+			       val_value_t *root,
+			       val_value_t *curval,
+			       boolean configmode,
+			       dlq_hdr_t *deleteQ,
+			       boolean *deleteme)
+{
+    const obj_template_t  *obj;
+    val_value_t           *chval, *nextchild;
+    boolean                deletechild;
+
+    *deleteme = FALSE;
+    obj = curval->obj;
+
+    if (configmode != obj_is_config(obj)) {
+	return;
+    }
+
+    if (obj_is_np_container(curval->obj) &&
+	!val_get_first_child(curval)) {
+	*deleteme = TRUE;
+	return;
+    }
+
+    /* recurse for every child node until leafs are hit */
+    for (chval = val_get_first_child(curval);
+	 chval != NULL;
+	 chval = nextchild) {
+
+	nextchild = val_get_next_child(chval);
+
+	delete_empty_npcontainers(scb, msg, 
+				  root, chval, 
+				  configmode,
+				  deleteQ, 
+				  &deletechild);
+	if (deletechild) {
+	    val_remove_child(chval);
+	    dlq_enque(chval, deleteQ);
+	}
+    }
+
+}  /* delete_empty_npcontainers */
+
+
+/********************************************************************
+* FUNCTION delete_dead_nodes
+* 
+* Delete all the nodes that have false when-stmt exprs
+* Also delete empty NP-containers
+*
+* INPUTS:
+*   scb == session control block
+*   msg == incoming commit rpc_msg_t in progress
+*   root == target database root value node
+*   configmode == TRUE for testing config=TRUE nodes only
+*              == FALSE for testing config=FALSE nodes only
+*
+* OUTPUTS:
+*   false when-stmt nodes will be deleted from the database
+*   
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    delete_dead_nodes (ses_cb_t  *scb,
+		       xml_msg_hdr_t *msg,
+		       val_value_t *root,
+		       boolean configmode)
+{
+    val_value_t  *deleteval;
+    dlq_hdr_t     deleteQ;
+    boolean       deleteme, done;
+    status_t      res;
+
+    dlq_createSQue(&deleteQ);
+    res = NO_ERR;
+    done = FALSE;
+
+    delete_empty_npcontainers(scb, msg, 
+			      root, root, 
+			      configmode,
+			      &deleteQ, 
+			      &deleteme);
+
+    while (!dlq_empty(&deleteQ)) {
+	/**** NEED TO DEAL WITH ROLLBACK
+	 **** INSTEAD OF REALLY DELETING THESE NODES
+	 ****/
+	deleteval = (val_value_t *)dlq_deque(&deleteQ);
+
+	/*** TBD: CHECK AUDIT IF TARGET IS RUNNING ***/
+
+	if (LOGDEBUG) {
+	    log_debug("\nagt_val: deleting empty NP "
+		      "container node '%s:%s'",
+		      obj_get_mod_name(deleteval->obj),
+		      deleteval->name);
+	}
+	val_free_value(deleteval);
+    }
+
+    while (!done && res == NO_ERR) {
+
+	/* keep checking the root until no more deletes */
+	res = when_stmt_check(scb, msg, 
+			      root, root, 
+			      configmode,
+			      &deleteQ, 
+			      &deleteme);
+
+	if (!dlq_empty(&deleteQ)) {
+	    while (!dlq_empty(&deleteQ)) {
+		/**** NEED TO DEAL WITH ROLLBACK
+		 **** INSTEAD OF REALLY DELETING THESE NODES
+		 ****/
+		deleteval = (val_value_t *)dlq_deque(&deleteQ);
+
+		/*** TBD: CHECK AUDIT IF TARGET IS RUNNING ***/
+
+		if (LOGDEBUG) {
+		    log_debug("\nagt_val: deleting false "
+			      "when node '%s:%s'",
+			      obj_get_mod_name(deleteval->obj),
+			      deleteval->name);
+		}
+		val_free_value(deleteval);
+	    }
+	} else {
+	    done = TRUE;
+	}
+    }
+
+    return res;
+
+}  /* delete_dead_nodes */
 
 
 /********************************************************************
@@ -2767,7 +3147,11 @@ status_t
 #endif
 
 #ifdef AGT_VAL_DEBUG
-    log_debug3("\nagt_val_instchk: %s start", valset->name);
+    if (LOGDEBUG3) {
+	log_debug3("\nagt_val_instchk: %s:%s start", 
+		   obj_get_mod_name(valset->obj),
+		   valset->name);
+    }
 #endif
 
     retres = NO_ERR;
@@ -2856,7 +3240,7 @@ status_t
     val_value_t           *chval;
     status_t               res, retres;
     xmlns_id_t             ncxid;
-
+    
 #ifdef DEBUG
     if (!root) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
@@ -2866,11 +3250,20 @@ status_t
     }
 #endif
 
-    log_debug3("\nagt_val_root_check: start");
+    if (LOGDEBUG3) {
+	log_debug3("\nagt_val_root_check: start");
+    }
 
     retres = NO_ERR;
     ncxid = xmlns_ncx_id();
     obj = root->obj;
+
+    /* first need to delete all the false when-stmt
+     * config objects and empty NP containers
+     * and then see if the config is valid
+     */
+    res = delete_dead_nodes(scb, msg, root, TRUE);
+    CHK_EXIT(res, retres);
 
     /* check the instance counts for the subtrees that are present */
     res = agt_val_instance_check(scb, msg, root, 
@@ -2924,7 +3317,9 @@ status_t
 	}
     }
 
-    log_debug3("\nagt_val_root_check: end");
+    if (LOGDEBUG3) {
+	log_debug3("\nagt_val_root_check: end");
+    }
 
     return retres;
     

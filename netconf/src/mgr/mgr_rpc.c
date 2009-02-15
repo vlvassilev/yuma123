@@ -17,10 +17,11 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <string.h>
-#include  <memory.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <memory.h>
+#include <time.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"
@@ -197,6 +198,9 @@ static void
     mgr_scb_t *mscb;
 
     mscb = (mgr_scb_t *)scb->mgrcb;
+
+    (void)time(&req->starttime);
+
     dlq_enque(req, &mscb->reqQ);
 
 }  /* add_request */
@@ -429,6 +433,61 @@ void
     }
 
 } /* mgr_rpc_clean_requestQ */
+
+
+/********************************************************************
+* FUNCTION mgr_rpc_timeout_requestQ
+*
+* Clean the request Q of mgr_rpc_req_t entries
+* Only remove the entries that have timed out
+*
+* INPUTS:
+*   reqQ == Q of entries to check
+*
+* RETURNS:
+*   number of request timed out
+*********************************************************************/
+uint32
+    mgr_rpc_timeout_requestQ (dlq_hdr_t *reqQ)
+{
+    mgr_rpc_req_t *req, *nextreq;
+    time_t         timenow;
+    double         timediff;
+    uint32         deletecount;
+
+#ifdef DEBUG
+    if (!reqQ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
+    deletecount = 0;
+    (void)time(&timenow);
+
+    for (req = (mgr_rpc_req_t *)dlq_firstEntry(reqQ);
+	 req != NULL;
+	 req = nextreq) {
+
+	nextreq = (mgr_rpc_req_t *)dlq_nextEntry(req);
+
+	if (!req->timeout) {
+	    continue;
+	}
+
+	timediff = difftime(timenow, req->starttime);
+	if (timediff >= (double)req->timeout) {
+	    log_debug("\nmgr_rpc: deleting timed out request '%s'",
+		      req->msg_id);
+	    deletecount++;
+	    dlq_remove(req);
+	    mgr_rpc_free_request(req);
+	}
+    }
+
+    return deletecount;
+
+} /* mgr_rpc_timeout_requestQ */
 
 
 /********************************************************************

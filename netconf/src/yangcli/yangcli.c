@@ -166,6 +166,8 @@ date         init     comment
 
 #define YANGCLI_HISTLEN  64000
 
+#define YANGCLI_DEF_TIMEOUT   30
+
 #define YANGCLI_MOD  (const xmlChar *)"yangcli"
 
 /* CLI parmset for the ncxcli application */
@@ -192,6 +194,8 @@ date         init     comment
  */
 
 #define YANGCLI_AGENT       (const xmlChar *)"agent"
+#define YANGCLI_AUTOCOMP    (const xmlChar *)"autocomp"
+#define YANGCLI_AUTOLOAD    (const xmlChar *)"autoload"
 #define YANGCLI_BAD_DATA    (const xmlChar *)"bad-data"
 #define YANGCLI_BATCHMODE   (const xmlChar *)"batch-mode"
 #define YANGCLI_BRIEF       (const xmlChar *)"brief"
@@ -202,6 +206,7 @@ date         init     comment
 #define YANGCLI_DEF_MODULE  (const xmlChar *)"default-module"
 #define YANGCLI_DIR         (const xmlChar *)"dir"
 #define YANGCLI_EDIT_TARGET (const xmlChar *)"edit-target"
+#define YANGCLI_FIXORDER    (const xmlChar *)"fixorder"
 #define YANGCLI_FROM_CLI    (const xmlChar *)"from-cli"
 #define YANGCLI_FROM_GLOBAL (const xmlChar *)"from-global"
 #define YANGCLI_FROM_LOCAL  (const xmlChar *)"from-local"
@@ -211,9 +216,6 @@ date         init     comment
 #define YANGCLI_LOCAL       (const xmlChar *)"local"
 #define YANGCLI_LOCALS      (const xmlChar *)"locals"
 #define YANGCLI_KEY         (const xmlChar *)"key"
-#define YANGCLI_NO_AUTOCOMP (const xmlChar *)"no-autocomp"
-#define YANGCLI_NO_AUTOLOAD (const xmlChar *)"no-autoload"
-#define YANGCLI_NO_FIXORDER (const xmlChar *)"no-fixorder"
 #define YANGCLI_OBJECTS     (const xmlChar *)"objects"
 #define YANGCLI_OPERATION   (const xmlChar *)"operation"
 #define YANGCLI_OPTIONAL    (const xmlChar *)"optional"
@@ -221,6 +223,7 @@ date         init     comment
 #define YANGCLI_PASSWORD    (const xmlChar *)"password"
 #define YANGCLI_PORT        (const xmlChar *)"port"
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
+#define YANGCLI_TIMEOUT     (const xmlChar *)"timeout"
 #define YANGCLI_USER        (const xmlChar *)"user"
 
 /* bad-data enumeration values */
@@ -298,6 +301,7 @@ typedef struct agent_cb_t_ {
     /* true if optional nodes should be filled in by fill_valset */
     boolean              get_optional;
 
+    uint32               timeout;
     mgr_io_state_t       state;
     ses_id_t             mysid;
     ncx_bad_data_t       baddata;
@@ -307,8 +311,6 @@ typedef struct agent_cb_t_ {
     dlq_hdr_t            varbindQ;   /* Q of ncx_var_t */
     dlq_hdr_t            modptrQ;     /* Q of modptr_t */
 } agent_cb_t;
-
-
 
 
 /* forward decl needed by do_save function */
@@ -326,7 +328,6 @@ static void
     yangcli_reply_handler (ses_cb_t *scb,
 			   mgr_rpc_req_t *req,
 			   mgr_rpc_rpy_t *rpy);
-
 
 
 /********************************************************************
@@ -388,8 +389,8 @@ static xmlChar        *logfilename;
  */
 static boolean         autoload;
 
-/* TRUE if forcing PDUs sent in manager-specified order
- * FALSE if OK to always send in correct order
+/* FALSE to send PDUs in manager-specified order
+ * TRUE to always send in correct canonical order
  */
 static boolean         fixorder;
 
@@ -416,6 +417,8 @@ static xmlChar        *runscript;
 /* TRUE if runscript has been completed */
 static boolean         runscriptdone;
 
+/* 0 for no timeout; N for N seconds message timeout */
+static uint32          default_timeout;
 
 /* CLI input buffer */
 static xmlChar         clibuff[YANGCLI_BUFFLEN];
@@ -516,6 +519,7 @@ static agent_cb_t *
     agent_cb->autoload = autoload;
     agent_cb->fixorder = fixorder;
     agent_cb->get_optional = FALSE;
+    agent_cb->timeout = default_timeout;
 
     return agent_cb;
 
@@ -658,42 +662,26 @@ static xmlChar *
 *  Create a parm 
 * 
 * INPUTS:
-*   obj == object template for the parameter to clone
-*   valset == value set to add parm to
-*   valstr == string value of the value to add
+*   val == value to clone and add
+*   valset == value set to add parm into
 *
 * RETURNS:
 *    status
 *********************************************************************/
 static status_t
-    add_clone_parm (const obj_template_t *obj,
-		    val_value_t *valset,
-		    const xmlChar *valstr)
+    add_clone_parm (const val_value_t *val,
+		    val_value_t *valset)
 {
     val_value_t    *parm;
-    status_t        res;
 
-    parm = val_new_value();
+    parm = val_clone(val);
     if (!parm) {
-	log_error("\nyangcli: malloc failed in clone value");
+	log_error("\nyangcli: val_clone failed");
 	return ERR_INTERNAL_MEM;
-    }
-    val_init_from_template(parm, obj); 
-
-    res = val_set_simval(parm,
-			 obj_get_ctypdef(obj),
-			 obj_get_nsid(obj),
-			 obj_get_name(obj),
-			 valstr);
-    if (res != NO_ERR) {
-	log_error("\nyangcli: set value failed %s (%s)",
-		  (valstr) ? valstr : (const xmlChar *)"--",
-		  get_error_string(res));
-	val_free_value(parm);
     } else {
 	val_add_child(parm, valset);
     }
-    return res;
+    return NO_ERR;
 
 }  /* add_clone_parm */
 
@@ -3049,6 +3037,7 @@ static status_t
 	} else {
 	    req->data = reqdata;
 	    req->rpc = rpc;
+	    req->timeout = agent_cb->timeout;
 	}
     }
 	
@@ -3712,8 +3701,7 @@ static void
  *
  *********************************************************************/
 static void
-    do_help_commands (agent_cb_t *agent_cb,
-		      help_mode_t mode)
+    do_help_commands (help_mode_t mode)
 {
     const ncx_module_t    *mod;
     const obj_template_t  *obj;
@@ -3826,7 +3814,7 @@ static void
     /* look for the specific definition parameters */
     parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_COMMANDS);
     if (parm && parm->res==NO_ERR) {
-	do_help_commands(agent_cb, mode);
+	do_help_commands(mode);
 	val_free_value(valset);
 	return;
     }
@@ -4746,6 +4734,7 @@ static status_t
 *   config_content == the node associated with the target
 *             to be used as content nested within the 
 *             <config> element
+*   timeoutval == timeout value to use
 *
 * OUTPUTS:
 *    agent_cb->state may be changed or other action taken
@@ -4758,7 +4747,8 @@ static status_t
 *********************************************************************/
 static status_t
     send_edit_config_to_agent (agent_cb_t *agent_cb,
-			       val_value_t *config_content)
+			       val_value_t *config_content,
+			       uint32 timeoutval)
 {
     const obj_template_t  *rpc, *input, *child;
     mgr_rpc_req_t         *req;
@@ -4894,6 +4884,7 @@ static status_t
 	} else {
 	    req->data = reqdata;
 	    req->rpc = rpc;
+	    req->timeout = timeoutval;
 	}
     }
 	
@@ -4991,6 +4982,7 @@ static status_t
 *             == NULL to use get_content instead
 *   source == optional database source 
 *             <candidate>, <running>
+*   timeoutval == timeout value to use
 *
 * OUTPUTS:
 *    agent_cb->state may be changed or other action taken
@@ -5008,7 +5000,8 @@ static status_t
     send_get_to_agent (agent_cb_t *agent_cb,
 		       val_value_t *get_content,
 		       const xmlChar *selectstr,
-		       val_value_t *source)
+		       val_value_t *source,
+		       uint32 timeoutval)
 {
     const obj_template_t  *rpc, *input;
     mgr_rpc_req_t         *req;
@@ -5116,6 +5109,7 @@ static status_t
 	} else {
 	    req->data = reqdata;
 	    req->rpc = rpc;
+	    req->timeout = timeoutval;
 	}
     }
 	
@@ -5611,8 +5605,9 @@ static void
 	       const xmlChar *line,
 	       uint32  len)
 {
-    val_value_t           *valset, *content;
+    val_value_t           *valset, *content, *parm;
     status_t               res;
+    uint32                 timeoutval;
 
     /* init locals */
     res = NO_ERR;
@@ -5627,12 +5622,20 @@ static void
 	return;
     }
 
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
+    if (parm && parm->res == NO_ERR) {
+	timeoutval = VAL_UINT(parm);
+    } else {
+	timeoutval = agent_cb->timeout;
+    }
+
     /* get the contents specified in the 'from' choice */
     content = get_content_from_choice(agent_cb, rpc, valset);
     if (!content) {
 	val_free_value(valset);
 	return;
     }
+
 
     /* add nc:operation attribute to the value node */
     res = add_operation_attr(content, OP_EDITOP_CREATE);
@@ -5645,7 +5648,7 @@ static void
     }
 
     /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(agent_cb, content);
+    res = send_edit_config_to_agent(agent_cb, content, timeoutval);
     if (res != NO_ERR) {
 	log_error("\nError: send create operation failed (%s)",
 		  get_error_string(res));
@@ -5678,8 +5681,9 @@ static void
 	      const xmlChar *line,
 	      uint32  len)
 {
-    val_value_t           *valset, *content;
+    val_value_t           *valset, *content, *parm;
     status_t               res;
+    uint32                 timeoutval;
 
     /* init locals */
     res = NO_ERR;
@@ -5692,6 +5696,13 @@ static void
 	    val_free_value(valset);
 	}
 	return;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
+    if (parm && parm->res == NO_ERR) {
+	timeoutval = VAL_UINT(parm);
+    } else {
+	timeoutval = agent_cb->timeout;
     }
 
     /* get the contents specified in the 'from' choice */
@@ -5712,7 +5723,7 @@ static void
     }
 
     /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(agent_cb, content);
+    res = send_edit_config_to_agent(agent_cb, content, timeoutval);
     if (res != NO_ERR) {
 	log_error("\nError: send merge operation failed (%s)",
 		  get_error_string(res));
@@ -5745,8 +5756,9 @@ static void
 		const xmlChar *line,
 		uint32  len)
 {
-    val_value_t           *valset, *content;
+    val_value_t           *valset, *content, *parm;
     status_t               res;
+    uint32                 timeoutval;
 
     /* init locals */
     res = NO_ERR;
@@ -5759,6 +5771,13 @@ static void
 	    val_free_value(valset);
 	}
 	return;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
+    if (parm && parm->res == NO_ERR) {
+	timeoutval = VAL_UINT(parm);
+    } else {
+	timeoutval = agent_cb->timeout;
     }
 
     /* get the contents specified in the 'from' choice */
@@ -5779,7 +5798,7 @@ static void
     }
 
     /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(agent_cb, content);
+    res = send_edit_config_to_agent(agent_cb, content, timeoutval);
     if (res != NO_ERR) {
 	log_error("\nError: send replace operation failed (%s)",
 		  get_error_string(res));
@@ -5813,8 +5832,9 @@ static void
 	       uint32  len)
 {
     obj_template_t        *targobj;
-    val_value_t           *valset, *content, *target;
+    val_value_t           *valset, *content, *target, *parm;
     status_t               res;
+    uint32                 timeoutval;
 
     /* init locals */
     res = NO_ERR;
@@ -5827,6 +5847,13 @@ static void
 	    val_free_value(valset);
 	}
 	return;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
+    if (parm && parm->res == NO_ERR) {
+	timeoutval = VAL_UINT(parm);
+    } else {
+	timeoutval = agent_cb->timeout;
     }
 
     target = val_find_child(valset, YANGCLI_MOD, 
@@ -5874,7 +5901,7 @@ static void
     }
 
     /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(agent_cb, content);
+    res = send_edit_config_to_agent(agent_cb, content, timeoutval);
     if (res != NO_ERR) {
 	log_error("\nError: send delete operation failed (%s)",
 		  get_error_string(res));
@@ -5907,11 +5934,12 @@ static void
 	       const xmlChar *line,
 	       uint32  len)
 {
-    val_value_t      *valset, *content, *tempval;
+    val_value_t      *valset, *content, *tempval, *parm;
     const xmlChar    *edit_target;
     op_editop_t       editop;
     op_insertop_t     insertop;
     status_t          res;
+    uint32            timeoutval;
 
     /* init locals */
     res = NO_ERR;
@@ -5931,6 +5959,13 @@ static void
     if (!content) {
 	val_free_value(valset);
 	return;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
+    if (parm && parm->res == NO_ERR) {
+	timeoutval = VAL_UINT(parm);
+    } else {
+	timeoutval = agent_cb->timeout;
     }
 
     /* get the insert order */
@@ -5999,7 +6034,7 @@ static void
     /* send the PDU, hand off the content node */
     if (res == NO_ERR) {
 	/* construct an edit-config PDU with default parameters */
-	res = send_edit_config_to_agent(agent_cb, content);
+	res = send_edit_config_to_agent(agent_cb, content, timeoutval);
 	if (res != NO_ERR) {
 	    log_error("\nError: send create operation failed (%s)",
 		      get_error_string(res));
@@ -6040,8 +6075,9 @@ static void
 	     const xmlChar *line,
 	     uint32  len)
 {
-    val_value_t           *valset, *content;
+    val_value_t           *valset, *content, *parm;
     status_t               res;
+    uint32                 timeoutval;
 
     /* init locals */
     res = NO_ERR;
@@ -6056,6 +6092,13 @@ static void
 	return;
     }
 
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
+    if (parm && parm->res == NO_ERR) {
+	timeoutval = VAL_UINT(parm);
+    } else {
+	timeoutval = agent_cb->timeout;
+    }
+
     /* get the contents specified in the 'from' choice */
     content = get_content_from_choice(agent_cb, rpc, valset);
     if (!content) {
@@ -6064,7 +6107,7 @@ static void
     }
 
     /* construct a get PDU with the content as the filter */
-    res = send_get_to_agent(agent_cb, content, NULL, NULL);
+    res = send_get_to_agent(agent_cb, content, NULL, NULL, timeoutval);
     if (res != NO_ERR) {
 	log_error("\nError: send get operation failed (%s)",
 		  get_error_string(res));
@@ -6098,9 +6141,10 @@ static void
 		    const xmlChar *line,
 		    uint32  len)
 {
-    val_value_t     *valset, *content, *source;
+    val_value_t     *valset, *content, *source, *parm;
     status_t         res;
-      
+    uint32           timeoutval;
+
     /* get the command line parameters for this command */
     valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (!valset || res != NO_ERR) {
@@ -6108,6 +6152,13 @@ static void
 	    val_free_value(valset);
 	}
 	return;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
+    if (parm && parm->res == NO_ERR) {
+	timeoutval = VAL_UINT(parm);
+    } else {
+	timeoutval = agent_cb->timeout;
     }
 
     /* get the source parameter */
@@ -6130,7 +6181,7 @@ static void
     val_change_nsid(source, xmlns_nc_id());
 
     /* construct a get PDU with the content as the filter */
-    res = send_get_to_agent(agent_cb, content, NULL, source);
+    res = send_get_to_agent(agent_cb, content, NULL, source, timeoutval);
     if (res != NO_ERR) {
 	log_error("\nError: send get-config operation failed (%s)",
 		  get_error_string(res));
@@ -6166,10 +6217,10 @@ static void
 {
     const ses_cb_t      *scb;
     const mgr_scb_t     *mscb;
-    val_value_t         *valset, *content;
+    val_value_t         *valset, *content, *parm;
     const xmlChar       *str;
     status_t             res;
-    uint32               retcode;
+    uint32               retcode, timeoutval;
 
     /* get the session info */
     scb = mgr_ses_get_scb(agent_cb->mysid);
@@ -6190,6 +6241,13 @@ static void
 	    val_free_value(valset);
 	}
 	return;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
+    if (parm && parm->res == NO_ERR) {
+	timeoutval = VAL_UINT(parm);
+    } else {
+	timeoutval = agent_cb->timeout;
     }
 
     /* check if the agent supports :xpath */
@@ -6240,8 +6298,8 @@ static void
     /* get the contents specified in the 'from' choice */
     content = get_content_from_choice(agent_cb, rpc, valset);
     if (content) {
-	if (content->btyp == NCX_BT_STRING && content->v.str) {
-	    str = content->v.str;
+	if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
+	    str = VAL_STR(content);
 	    while (*str && *str != '"') {
 		str++;
 	    }
@@ -6253,7 +6311,8 @@ static void
 		 * as the filter 
 		 */
 		res = send_get_to_agent(agent_cb, NULL, 
-					VAL_STR(content), NULL);
+					VAL_STR(content), 
+					NULL, timeoutval);
 		if (res != NO_ERR) {
 		    log_error("\nError: send get operation"
 			      " failed (%s)",
@@ -6296,10 +6355,10 @@ static void
 {
     const ses_cb_t      *scb;
     const mgr_scb_t     *mscb;
-    val_value_t         *valset, *content, *source;
+    val_value_t         *valset, *content, *source, *parm;
     const xmlChar       *str;
     status_t             res;
-    uint32               retcode;
+    uint32               retcode, timeoutval;
 
     /* get the session info */
     scb = mgr_ses_get_scb(agent_cb->mysid);
@@ -6320,6 +6379,13 @@ static void
 	    val_free_value(valset);
 	}
 	return;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
+    if (parm && parm->res == NO_ERR) {
+	timeoutval = VAL_UINT(parm);
+    } else {
+	timeoutval = agent_cb->timeout;
     }
 
     /* check if the agent supports :xpath */
@@ -6378,8 +6444,8 @@ static void
     /* get the contents specified in the 'from' choice */
     content = get_content_from_choice(agent_cb, rpc, valset);
     if (content) {
-	if (content->btyp == NCX_BT_STRING && content->v.str) {
-	    str = content->v.str;
+	if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
+	    str = VAL_STR(content);
 	    while (*str && *str != '"') {
 		str++;
 	    }
@@ -6395,7 +6461,8 @@ static void
 		res = send_get_to_agent(agent_cb, 
 					NULL, 
 					VAL_STR(content), 
-					source);
+					source,
+					timeoutval);
 		if (res != NO_ERR) {
 		    log_error("\nError: send get-config "
 			      "operation failed (%s)",
@@ -6848,11 +6915,11 @@ static void
 	    } else {
 		req->data = reqdata;
 		req->rpc = rpc;
+		req->timeout = agent_cb->timeout;
 	    }
 	}
 	
 	if (res == NO_ERR) {
-
 	    if (LOGDEBUG2) {
 		log_debug2("\nabout to send RPC request with reqdata:");
 		val_dump_value(reqdata, NCX_DEF_INDENT);
@@ -6965,10 +7032,26 @@ static status_t
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AGENT);
     if (parm && parm->res == NO_ERR) {
 	/* save to the connect_valset parmset */
-	res = add_clone_parm(parm->obj, connect_valset, VAL_STR(parm));
+	res = add_clone_parm(parm, connect_valset);
 	if (res != NO_ERR) {
 	    return res;
 	}
+    }
+
+    /* get the autocomp parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AUTOCOMP);
+    if (parm && parm->res == NO_ERR) {
+	autocomp = VAL_BOOL(parm);
+    } else {
+	autocomp = TRUE;
+    }
+
+    /* get the autoload parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AUTOLOAD);
+    if (parm && parm->res == NO_ERR) {
+	autoload = VAL_BOOL(parm);
+    } else {
+	autoload = TRUE;
     }
 
     /* get the bad-data parameter */
@@ -7002,29 +7085,25 @@ static status_t
 				 YANGCLI_MOD, 
 				 YANGCLI_DEF_MODULE);
 
+    /* get the fixorder parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_FIXORDER);
+    if (parm && parm->res == NO_ERR) {
+	fixorder = VAL_BOOL(parm);
+    } else {
+	fixorder = TRUE;
+    }
+
     /* get the help flag */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_HELP);
     if (parm && parm->res == NO_ERR) {
 	helpmode = TRUE;
     }
 
-#ifdef NOT_IMPLEMENTED
-    /* get the key parameter */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_KEY);
-    if (parm && parm->res == NO_ERR) {
-	/* save to the connect_valset parmset */
-	res = add_clone_parm(parm->obj, connect_valset, VAL_STR(parm));
-	if (res != NO_ERR) {
-	    return res;
-	}
-    }
-#endif
-
     /* get the password parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_PASSWORD);
     if (parm && parm->res == NO_ERR) {
 	/* save to the connect_valset parmset */
-	res = add_clone_parm(parm->obj, connect_valset, VAL_STR(parm));
+	res = add_clone_parm(parm, connect_valset);
 	if (res != NO_ERR) {
 	    return res;
 	}
@@ -7039,31 +7118,27 @@ static status_t
 	}
     }
 
-    /* get the no-autocomp parameter */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_NO_AUTOCOMP);
-    if (parm && parm->res == NO_ERR) {
-	autocomp = FALSE;
-    }
-
-    /* get the no-autoload parameter */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_NO_AUTOLOAD);
-    if (parm && parm->res == NO_ERR) {
-	autoload = FALSE;
-    }
-
-    /* get the no-fixorder parameter */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_NO_FIXORDER);
-    if (parm && parm->res == NO_ERR) {
-	fixorder = FALSE;
-    }
-
     /* get the run-script parameter */
     runscript = get_strparm(mgr_cli_valset, YANGCLI_MOD, YANGCLI_RUN_SCRIPT);
+
+    /* get the timeout parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
+    if (parm && parm->res == NO_ERR) {
+	default_timeout = VAL_UINT(parm);
+
+	/* save to the connect_valset parmset */
+	res = add_clone_parm(parm, connect_valset);
+	if (res != NO_ERR) {
+	    return res;
+	}
+    } else {
+	default_timeout = YANGCLI_DEF_TIMEOUT;
+    }
 
     /* get the user name */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_USER);
     if (parm && parm->res == NO_ERR) {
-	res = add_clone_parm(parm->obj, connect_valset, VAL_STR(parm));
+	res = add_clone_parm(parm, connect_valset);
 	if (res != NO_ERR) {
 	    return res;
 	}
@@ -7365,11 +7440,44 @@ static void
 
 
 /********************************************************************
+* message_timed_out
+*
+* Check if the request in progress (!) has timed out
+* TBD: check for a specific message if N requests per
+* session are ever supported
+*
+* INPUTS:
+*   scb == session control block to use
+*
+* RETURNS:
+*   TRUE if any messages have timed out
+*   FALSE if no messages have timed out
+*********************************************************************/
+static boolean
+    message_timed_out (ses_cb_t *scb)
+{
+    mgr_scb_t    *mscb;
+    uint32        deletecount;
+
+    mscb = (mgr_scb_t *)scb->mgrcb;
+
+    deletecount = mgr_rpc_timeout_requestQ(&mscb->reqQ);
+    if (deletecount) {
+	log_error("\nError: request to agent timed out");
+    }
+    return (deletecount) ? TRUE : FALSE;
+
+}  /* message_timed_out */
+
+
+/********************************************************************
 * yangcli_stdin_handler
 *
 * Temp: Calling readline which will block other IO while the user
 *       is editing the line.  This is okay for this CLI application
-*       but not multi-session applications
+*       but not multi-session applications;
+* Need to prevent replies from popping up on the screen
+* while new commands are being edited anyway
 *
 * RETURNS:
 *   new program state
@@ -7410,7 +7518,11 @@ static mgr_io_state_t
 	    report_capabilities(agent_cb, scb);
 	    check_module_capabilities(agent_cb, scb);
 	} else {
-	    /* still setting up session */
+	    /* check timeout */
+	    if (message_timed_out(scb)) {
+		agent_cb->state = MGR_IO_ST_IDLE;
+		break;
+	    } /* else still setting up session */
 	    return agent_cb->state;
 	}
 	break;
@@ -7424,6 +7536,11 @@ static mgr_io_state_t
 	    agent_cb->mysid = 0;
 	    agent_cb->state = MGR_IO_ST_IDLE;
 	} else  {
+	    /* check timeout */
+	    if (message_timed_out(scb)) {
+		agent_cb->state = MGR_IO_ST_CONN_IDLE;
+		break;
+	    }
 	    /* keep waiting for reply */
 	    return agent_cb->state;
 	}
@@ -7433,6 +7550,12 @@ static mgr_io_state_t
     case MGR_IO_ST_CONN_CANCELWAIT:
     case MGR_IO_ST_CONN_SHUT:
     case MGR_IO_ST_CONN_CLOSEWAIT:
+	/* check timeout */
+	if (message_timed_out(scb)) {
+	    agent_cb->state = MGR_IO_ST_IDLE;
+	    break;
+	}
+
 	/* do not accept chars in these states */
 	return agent_cb->state;
     default:

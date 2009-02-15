@@ -336,6 +336,11 @@ static boolean
 
     v_val = NULL;
 
+    /* skip matches of any password object */
+    if (obj_is_password(curval->obj)) {
+	return FALSE;
+    }
+
     /* handle virtual compare differently */
     if (val_is_virtual(curval)) {
 	/* get temp value to store virtual value */

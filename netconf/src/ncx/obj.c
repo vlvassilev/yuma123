@@ -8225,6 +8225,38 @@ boolean
 
 
 /********************************************************************
+* FUNCTION obj_is_np_container
+*
+* Check if the object is an NP-container
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is an NP-container
+*   FALSE if object is not an NP-container
+*********************************************************************/
+boolean
+    obj_is_np_container (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    if (obj->objtype != OBJ_TYP_CONTAINER) {
+	return FALSE;
+    }
+
+    return (obj->def.container->presence) ? FALSE : TRUE;
+
+}  /* obj_is_np_container */
+
+
+/********************************************************************
 * FUNCTION obj_ok_for_cli
 *
 * Figure out if the obj is OK for current CLI implementation

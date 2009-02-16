@@ -208,8 +208,6 @@ date         init     comment
 #define YANGCLI_EDIT_TARGET (const xmlChar *)"edit-target"
 #define YANGCLI_FIXORDER    (const xmlChar *)"fixorder"
 #define YANGCLI_FROM_CLI    (const xmlChar *)"from-cli"
-#define YANGCLI_FROM_GLOBAL (const xmlChar *)"from-global"
-#define YANGCLI_FROM_LOCAL  (const xmlChar *)"from-local"
 #define YANGCLI_FULL        (const xmlChar *)"full"
 #define YANGCLI_GLOBAL      (const xmlChar *)"global"
 #define YANGCLI_GLOBALS     (const xmlChar *)"globals"
@@ -225,6 +223,8 @@ date         init     comment
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
 #define YANGCLI_TIMEOUT     (const xmlChar *)"timeout"
 #define YANGCLI_USER        (const xmlChar *)"user"
+#define YANGCLI_VAR         (const xmlChar *)"var"
+#define YANGCLI_VARREF      (const xmlChar *)"varref"
 
 /* bad-data enumeration values */
 #define E_BAD_DATA_IGNORE (const xmlChar *)"ignore"
@@ -819,7 +819,11 @@ static status_t
     /* else got a valid varref, get the data type, which
      * will also indicate if the variable exists yet
      */
-    curval = var_get_str(name, nlen, isglobal);
+    if (!isglobal) {
+	curval = var_get_local_str(name, nlen);
+    } else {
+	curval = var_get_str(name, nlen, isglobal);
+    }
 
     /* keep parsing the assignment string */
     str += tlen;
@@ -869,7 +873,7 @@ static status_t
     /* get the script or CLI input as a new val_value_t struct */
     val = var_check_script_val(obj, str, ISTOP, &res);
     if (val) {
-	if (!obj) {
+	if (!obj || !xml_strcmp(val->name, NCX_EL_STRING)) {
 	    /* the generic name needs to be overwritten */
 	    val_set_name(val, name, nlen);
 	}
@@ -3244,11 +3248,14 @@ static void
  *  isglobal == TRUE if print just globals
  *              FALSE to print just locals
  *              Ignored unless shortmode==TRUE
+ * isany == TRUE to choose global or local
+ *          FALSE to use 'isglobal' valuse only
  *********************************************************************/
 static void
     do_show_vars (help_mode_t mode,
 		  boolean shortmode,
-		  boolean isglobal)
+		  boolean isglobal,
+		  boolean isany)
 
 {
     ncx_var_t  *var;
@@ -3348,7 +3355,7 @@ static void
     }
 
     /* Local Script Variables */
-    if (!shortmode || !isglobal) {
+    if (!shortmode || !isglobal || isany) {
 	que = runstack_get_que(ISLOCAL);
 	first = TRUE;
 	for (var = (ncx_var_t *)dlq_firstEntry(que);
@@ -3413,11 +3420,14 @@ static void
  * INPUTS:
  *   name == variable name to find 
  *   isglobal == TRUE if global var, FALSE if local var
+ *   isany == TRUE if don't care (global or local)
+ *         == FALSE to force local or global with 'isglobal'
  *   mode == help mode requested
  *********************************************************************/
 static void
     do_show_var (const xmlChar *name,
 		 boolean isglobal,
+		 boolean isany,
 		 help_mode_t mode)
 {
     const val_value_t *val;
@@ -3425,7 +3435,12 @@ static void
 
     imode = interactive_mode();
 
-    val = var_get(name, isglobal);
+    if (isany || isglobal) {
+	val = var_get(name, isglobal);
+    } else {
+	val = var_get_local(name);
+    }
+
     if (val) {
 	if (mode == HELP_MODE_BRIEF) {
 	    if (typ_is_simple(val->btyp)) {
@@ -3621,17 +3636,19 @@ static void
 	parm = val_get_first_child(valset);
 	if (parm) {
 	    if (!xml_strcmp(parm->name, YANGCLI_LOCAL)) {
-		do_show_var(VAL_STR(parm), ISLOCAL, mode);
+		do_show_var(VAL_STR(parm), ISLOCAL, FALSE, mode);
 	    } else if (!xml_strcmp(parm->name, YANGCLI_LOCALS)) {
-		do_show_vars(mode, TRUE, FALSE);
+		do_show_vars(mode, TRUE, FALSE, FALSE);
 	    } else if (!xml_strcmp(parm->name, YANGCLI_OBJECTS)) {
 		do_show_objects(mode);
 	    } else if (!xml_strcmp(parm->name, YANGCLI_GLOBAL)) {
-		do_show_var(VAL_STR(parm), ISGLOBAL, mode);
+		do_show_var(VAL_STR(parm), ISGLOBAL, FALSE, mode);
 	    } else if (!xml_strcmp(parm->name, YANGCLI_GLOBALS)) {
-		do_show_vars(mode, TRUE, TRUE);
+		do_show_vars(mode, TRUE, TRUE, FALSE);
+	    } else if (!xml_strcmp(parm->name, YANGCLI_VAR)) {
+		do_show_var(VAL_STR(parm), ISLOCAL, TRUE, mode);
 	    } else if (!xml_strcmp(parm->name, NCX_EL_VARS)) {
-		do_show_vars(mode, FALSE, FALSE);
+		do_show_vars(mode, FALSE, FALSE, TRUE);
 	    } else if (!xml_strcmp(parm->name, NCX_EL_MODULE)) {
 		/***/
 		mod = ncx_find_module(VAL_STR(parm));
@@ -5172,30 +5189,20 @@ static val_value_t *
     /* init locals */
     iscli = FALSE;
     isselect = FALSE;
-    isglobal = FALSE;
     fromstr = NULL;
     res = NO_ERR;
 
     /* look for the 'from' parameter variant */
-    parm = val_find_child(valset, YANGCLI_MOD, 
-			  YANGCLI_FROM_LOCAL);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_VARREF);
     if (parm) {
 	fromstr = VAL_STR(parm);
     } else {
-	parm = val_find_child(valset, YANGCLI_MOD, 
-			      YANGCLI_FROM_GLOBAL);
+	parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_SELECT);
 	if (parm) {
-	    isglobal = TRUE;
+	    isselect = TRUE;
 	    fromstr = VAL_STR(parm);
 	} else {
-	    parm = val_find_child(valset, YANGCLI_MOD, 
-				  NCX_EL_SELECT);
-	    if (parm) {
-		isselect = TRUE;
-		fromstr = VAL_STR(parm);
-	    } else {
-		iscli = TRUE;
-	    }
+	    iscli = TRUE;
 	}
     }
 
@@ -5316,20 +5323,32 @@ static val_value_t *
 	return newparm;
     } else {
 	/* from global or local variable */
-	userval = var_get(fromstr, isglobal);
-	if (!userval) {
-	    log_error("\nError: variable '%s' not found", 
-		      fromstr);
-	    return NULL;
+	if (*fromstr == '$' && fromstr[1] == '$') {
+	    isglobal = TRUE;
+	    fromstr += 2;
+	} else if (*fromstr == '$') {
+	    isglobal = FALSE;
+	    fromstr++;
 	} else {
-	    newparm = val_clone(userval);
-	    if (!newparm) {
-		log_error("\nError: valloc failed");
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    fromstr = NULL;
+	}
+	if (fromstr) {
+	    userval = var_get(fromstr, isglobal);
+	    if (!userval) {
+		log_error("\nError: variable '%s' not found", 
+			  fromstr);
+		return NULL;
+	    } else {
+		newparm = val_clone(userval);
+		if (!newparm) {
+		    log_error("\nError: valloc failed");
+		}
+		return newparm;
 	    }
-	    return newparm;
 	}
     }
-    /*NOTREACHED*/
+    return NULL;
 
 }  /* get_content_from_choice */
 

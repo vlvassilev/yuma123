@@ -63,10 +63,6 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-#ifdef DEBUG
-#define SES_MSG_DEBUG 1
-#endif
-
 /* max number of buffers a session is allowed to cache in its freeQ */
 #define MAX_FREE_MSGS  32
 
@@ -429,7 +425,7 @@ status_t
     uint32    buffleft, total;
     ssize_t   retcnt;
     int       i, cnt;
-    boolean   done;
+    boolean   done, dologmsg;
     struct iovec iovs[SES_MAX_BUFFSEND];
 
 #ifdef DEBUG
@@ -438,19 +434,22 @@ status_t
     }
 #endif
 
-#ifdef SES_MSG_DEBUG
-    log_debug2("\nses got send request on session %d", scb->sid);
-#endif
+    dologmsg = LOGDEBUG2;
+
+    if (dologmsg) {
+	log_debug2("\nses got send request on session %d", 
+		   scb->sid);
+    }
 
     /* check if an external write function is used */
     if (scb->wrfn) {
-#ifdef DEBUG
 	buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);
 	if (buff) {
-	    log_debug3("\nses_msg_send: first buff %s",
-		       &buff->buff[buff->buffpos]);
+	    if (dologmsg) {
+		log_debug2("\nses_msg_send: first buff %s",
+			   &buff->buff[buff->buffpos]);
+	    }
 	}
-#endif
 	return (*scb->wrfn)(scb);
     }
 
@@ -488,21 +487,21 @@ status_t
 	log_info("\nses msg write failed for session %d", scb->sid);
 	return errno_to_status();
     } else {
-#ifdef SES_MSG_DEBUG
-	log_debug2("\nses wrote %d of %d bytes on session %d\n", 
-		   retcnt, total, scb->sid);
-#endif
+	if (dologmsg) {
+	    log_debug2("\nses wrote %d of %d bytes on session %d\n", 
+		       retcnt, total, scb->sid);
+	}
     }
 
     /* clean up the buffers that were written */
     buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);
 
-#ifdef SES_MSG_DEBUG
     if (buff) {
-	log_debug3("\nses_msg_send: first buff %s",
-		   &buff->buff[buff->buffpos]);
+	if (dologmsg) {
+	    log_debug2("\nses_msg_send: first buff %s",
+		       &buff->buff[buff->buffpos]);
+	}
     }
-#endif
 
     while (retcnt && buff) {
 	/* get the number of bytes written from this buffer */

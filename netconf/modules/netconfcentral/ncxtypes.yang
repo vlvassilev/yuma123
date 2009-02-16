@@ -56,8 +56,8 @@ module ncxtypes {
     typedef NcxName {
         description "General Purpose NCX Name string.";
         type string {
-            length "1..1023";
-            pattern '[a-z,A-Z][a-z,A-Z,0-9,\-,_]*';
+            length "1..63";
+            pattern '[a-z,A-Z][a-z,A-Z,0-9,\-,_,\.]{0,62}';
         }
     }
 
@@ -66,33 +66,30 @@ module ncxtypes {
             "Qualified Name:
               module-name:NcxName OR owner-name:NcxName.";
         type string {
-            length "1..2046";
-            pattern '(([a-z,A-Z][a-z,A-Z,0-9,\-,_]*):)' +
-               '?([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)';
+            length "1..127";
+            pattern '(([a-z,A-Z][a-z,A-Z,0-9,\-,_,\.]{0,62}):)' +
+               '?([a-z,A-Z][a-z,A-Z,0-9,\-,_,\.]{0,62})';
         }
     }
 
-    typedef NcxSimpleId {
-      description "Simple Definition Identifier string.";
-      type NcxName;
+    typedef NcxVarReference {
+      description
+        "A variable reference string:
+           $foo: try local 'foo' first, then global 'foo'
+           $$foo: try only global 'foo' var";
+      type string {
+         length "1..63";
+         pattern '$[$][a-z,A-Z][a-z,A-Z,0-9,\-,_,\.]{0,62}';
+      }
     }
 
+/*
     typedef NcxScopedId {
         description "Scoped Definition Identifier string.";
         type string {
             length "3..max";
-            pattern '([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)\.' +
-              '(([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)+)';
-        }
-    }
-
-    typedef NcxModQualId {
-        description 
-           "Module Qualified Simple Definition Identifier string.";
-        type string {
-            length "3..max";
-            pattern '([a-z,A-Z][a-z,A-Z,0-9,\-,_]*):' +
-              '([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)';
+            pattern '([a-z,A-Z][a-z,A-Z,0-9,\-,_]{0,62})\.' +
+              '(([a-z,A-Z][a-z,A-Z,0-9,\-,_]{0,62})+)';
         }
     }
 
@@ -106,14 +103,13 @@ module ncxtypes {
                   '(([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)+)';
         }
     }
+*/
 
     typedef NcxIdentifier {
         description "Union of all the Identifier types.";
         type union { 
-            type NcxSimpleId;
-            type NcxScopedId;
-            type NcxModQualId;
-            type NcxModScopedId;
+            type NcxName;
+            type NcxQName;
         }
     }
 
@@ -268,6 +264,17 @@ module ncxtypes {
         }
         default "3";
     }
+
+    typedef Timeout {
+	description
+	  "Number of seconds to wait for a response
+	   from the NETCONF peer before declaring a timeout.
+           Zero means no timeout at all.";
+        type uint32;
+        units seconds;
+        default 30;
+    }
+
 
 }
 

@@ -295,23 +295,24 @@ void
 	    case HELP_MODE_BRIEF:
 		help_write_lines_max(val, indent+NCX_DEF_INDENT,
 				     TRUE, HELP_MODE_BRIEF_MAX); 
-		help_write_lines((const xmlChar *)"\n", 0, FALSE);
 		break;
 	    case HELP_MODE_NORMAL:
 		if (obj->objtype == OBJ_TYP_RPC || 
 		    obj->objtype == OBJ_TYP_NOTIF) {
 		    help_write_lines_max(val, indent+NCX_DEF_INDENT,
 					 TRUE, HELP_MODE_NORMAL_MAX); 
-		    help_write_lines((const xmlChar *)"\n", 0, FALSE);
 		}
 		break;
 	    case HELP_MODE_FULL:
 		help_write_lines(val, indent+NCX_DEF_INDENT, TRUE); 
-		help_write_lines((const xmlChar *)"\n", 0, FALSE);
 		break;
 	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);
 		return;
+	    }
+	    if (obj->objtype == OBJ_TYP_RPC || 
+		obj->objtype == OBJ_TYP_NOTIF) {
+		help_write_lines((const xmlChar *)"\n", 0, FALSE);
 	    }
 	}
     }

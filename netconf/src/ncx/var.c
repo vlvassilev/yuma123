@@ -368,7 +368,7 @@ static status_t
     }
 
     /* try to find this var */
-    var = find_var(varQ, name, xml_strlen(name), 0, isglobal);
+    var = find_var(varQ, name, namelen, 0, isglobal);
     if (var) {
 	if (var->flags & VAR_FL_SYSTEM) {
 	    /* found system var, replace only if same type */
@@ -700,6 +700,8 @@ status_t
 *   name == var name to get
 *   namelen == length of name
 *   isglobal == TRUE for global var, 
+*               which forces a global check only
+*               FALSE to try local first, then global
 *
 * RETURNS:
 *   pointer to value, or NULL if not found
@@ -726,9 +728,13 @@ const val_value_t *
     var = find_var(NULL, name, namelen, 0, isglobal);
     if (var) {
 	return var->val;
-    } else {
-	return NULL;
+    } else if (!isglobal) {
+	var = find_var(NULL, name, namelen, 0, TRUE);
+	if (var) {
+	    return var->val;
+	}
     }
+    return NULL;
 
 }  /* var_get_str */
 
@@ -741,6 +747,8 @@ const val_value_t *
 * INPUTS:
 *   name == var name to get
 *   isglobal == TRUE for global var, 
+*               which forces a global check only
+*               FALSE to try local first, then global
 * 
 * RETURNS:
 *   pointer to value, or NULL if not found
@@ -761,9 +769,13 @@ const val_value_t *
     var = find_var(NULL, name, xml_strlen(name), 0, isglobal);
     if (var) {
 	return var->val;
-    } else {
-	return NULL;
+    } else if (!isglobal) {
+	var = find_var(NULL, name, xml_strlen(name), 0, TRUE);
+	if (var) {
+	    return var->val;
+	}
     }
+    return NULL;
 
 }  /* var_get */
 
@@ -880,15 +892,81 @@ ncx_var_t *
 
 
 /********************************************************************
+* FUNCTION var_get_local
+* 
+* Find a local user variable
+* 
+* INPUTS:
+*   name == var name to get
+* 
+* RETURNS:
+*   pointer to value, or NULL if not found
+*********************************************************************/
+const val_value_t *
+    var_get_local (const xmlChar *name)
+{
+    const ncx_var_t  *var;
+
+#ifdef DEBUG
+    if (!name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    var = find_var(NULL, name, xml_strlen(name), 0, FALSE);
+    if (var) {
+	return var->val;
+    }
+    return NULL;
+
+}  /* var_get_local */
+
+
+/********************************************************************
+* FUNCTION var_get_local_str
+* 
+* Find a local user variable, count-based name string
+* 
+* INPUTS:
+*   name == var name to get
+* 
+* RETURNS:
+*   pointer to value, or NULL if not found
+*********************************************************************/
+const val_value_t *
+    var_get_local_str (const xmlChar *name,
+		       uint32 namelen)
+{
+    const ncx_var_t  *var;
+
+#ifdef DEBUG
+    if (!name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    var = find_var(NULL, name, namelen, 0, FALSE);
+    if (var) {
+	return var->val;
+    }
+    return NULL;
+
+}  /* var_get_local_str */
+
+
+/********************************************************************
 * FUNCTION var_unset
 * 
-* Find and remove a local user variable
+* Find and remove a local or global user variable
+*
+* !!! This function does not try global if local fails !!!
 * 
 * INPUTS:
 *   name == var name to unset
 *   namelen == length of name string
 *   isglobal == TRUE is global var, FALSE if local var
-* 
 *********************************************************************/
 void
     var_unset (const xmlChar *name,

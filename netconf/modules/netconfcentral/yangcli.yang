@@ -57,16 +57,6 @@ module yangcli {
      *************************************************************/
 
 
-    typedef Timeout {
-	description
-	  "Number of seconds to wait for a response
-	   from the agent before declaring a timeout.
-           Zero means no timeout at all.";
-        type uint32;
-        units seconds;
-        default 30;
-    }
-
     grouping HelpMode {
       choice brief-full {
         leaf brief {
@@ -134,22 +124,7 @@ module yangcli {
 
             An error will be reported if the global or local
             variable does not reference the same object type
-            as the target parameter.
-
-            3) Inline XML could be specified as:
-
-                current-value=[<x:bar>\
-                                 <x:baz>17</x:baz>\
-                               </x:bar>]
-
-            4) An external file containing XML can be specified as:
-
-                current-value=@foo.xml
-
-            5) An external file in YANGCLI conf file format can
-               be specified as:
-
-                current-value=@foo.txt";
+            as the target parameter.";
           
          type string {
            length "1..max";
@@ -165,14 +140,11 @@ module yangcli {
         choice from {
             mandatory true;
 
-            leaf from-local {
-                description "Use the local variable as the content";
-                type nt:NcxIdentifier;
-            }
-
-            leaf from-global {
-                description "Use the global variable as the content";
-                type nt:NcxIdentifier;
+            leaf varref {
+                description 
+                   "Use the contents of the specified variable 
+                    as the content";
+                type nt:NcxVarReference;
             }
 
             case from-cli {
@@ -189,7 +161,7 @@ module yangcli {
 
 	leaf timeout {
 	  description "Timeout to use";
-	  type Timeout;
+	  type nt:Timeout;
         }
     }
 
@@ -200,14 +172,11 @@ module yangcli {
 	choice from {
             mandatory true;
 
-            leaf from-local {
-                description "Use the local variable as the content";
-                type nt:NcxIdentifier;
-            }
-
-            leaf from-global {
-                description "Use the global variable as the content";
-                type nt:NcxIdentifier;
+            leaf varref {
+                description 
+                   "Use the contents of the specified variable 
+                    as the content";
+                type nt:NcxVarReference;
             }
 
             leaf select {
@@ -226,7 +195,7 @@ module yangcli {
 
 	leaf timeout {
 	  description "Timeout to use";
-	  type Timeout;
+	  type nt:Timeout;
         }
 
     }
@@ -273,7 +242,7 @@ module yangcli {
 	    "Number of seconds to wait for a response
 	     from the agent before declaring a timeout.
              Zero means no timeout at all.";
-          type Timeout;
+          type nt:Timeout;
         }
  
     }
@@ -772,8 +741,6 @@ module yangcli {
       description "Local show command for yangcli info.";
       ncx:rpc-type exec;
       input {
-        ncx:default-parm local;
-
         choice showtype {
           leaf module {
             description "Show full info for one module";
@@ -814,6 +781,11 @@ module yangcli {
             description 
               "Show config database objects available at this time";
             type empty;
+          }
+
+          leaf var {
+            description "Show info for one local or global variable";
+            type nt:NcxName;
           }
          
           leaf vars {

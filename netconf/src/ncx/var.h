@@ -151,6 +151,13 @@ extern ncx_var_t *
 		     xmlns_id_t  nsid,
 		     const xmlChar *name);
 
+extern const val_value_t *
+    var_get_local (const xmlChar *name);
+
+extern const val_value_t *
+    var_get_local_str (const xmlChar *name,
+		       uint32 namelen);
+
 extern void
     var_unset (const xmlChar *name,
 	       uint32 namelen,

@@ -240,6 +240,7 @@ void
 *    ns == namespace name
 *    pfix == namespace prefix to use (if none provided but needed)
 *    modname == name string of module associated with this NS
+*    modptr == back-ptr to ncx_module_t struct (may be NULL)
 *
 * OUTPUTS:
 *    *ns_id contains the ID assigned to the namespace
@@ -251,6 +252,7 @@ status_t
     xmlns_register_ns (const xmlChar *ns,
 		       const xmlChar *pfix,
 		       const xmlChar *modname,
+		       void *modptr,
 		       xmlns_id_t *ns_id)
 {
     xmlns_t  *rec;
@@ -313,12 +315,15 @@ status_t
 	return ERR_INTERNAL_MEM;
     }
 
-    /* copy the module name */
+    /* copy the name namespace URI string */
     rec->ns_module = xml_strdup(modname);
     if (!rec->ns_module) {
 	free_xmlns(rec);
 	return ERR_INTERNAL_MEM;
     }
+
+    /* copy the module back-ptr */
+    rec->ns_mod = (ncx_module_t *)modptr;
 
     /* assign the next XMLNS ID */
     rec->ns_id = xmlns_next_id;
@@ -433,7 +438,7 @@ xmlns_id_t
 
     for (i=0; i<xmlns_next_id-1; i++) {
 	rec = xmlns[i];
-	if (rec->ns_module[0]) {
+	if (rec->ns_module) {
             if (!xml_strcmp(rec->ns_module, modname)) {
                 return rec->ns_id;
             }
@@ -739,9 +744,34 @@ const xmlChar *
     if (!valid_id(nsid)) {
 	return NULL;
     }
-    return (const xmlChar *)xmlns[nsid-1]->ns_module;
+    return xmlns[nsid-1]->ns_module;
 
 }  /* xmlns_get_module */
+
+
+/********************************************************************
+* FUNCTION xmlns_get_modptr
+*
+* get the module pointer for the namespace ID
+*
+* INPUTS:
+*    nsid == namespace ID to check
+* RETURNS:
+*    void * cast of the module or NULL
+*********************************************************************/
+void *
+    xmlns_get_modptr (xmlns_id_t  nsid)
+{
+    if (!xmlns_init_done) {
+        xmlns_init();
+        return NULL;
+    }
+    if (!valid_id(nsid)) {
+	return NULL;
+    }
+    return xmlns[nsid-1]->ns_mod;
+
+}  /* xmlns_get_modptr */
 
 
 /********************************************************************

@@ -158,7 +158,7 @@ static status_t
 	    if (nsid) {
 		modname = xmlns_get_module(nsid);
 		if (modname) {
-		    targmod = ncx_find_module(modname);
+		    targmod = ncx_find_module(modname, NULL);
 		}
 		if (!targmod) {
 		    res = ERR_NCX_DEF_NOT_FOUND;

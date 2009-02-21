@@ -288,10 +288,12 @@ static xmlChar *
 
     len += xml_strlen(CAP_MODULE_EQ);
     len += xml_strlen(mod->name);
-    len++;   /* & char */
 
-    len += xml_strlen(CAP_REVISION_EQ);
-    len += xml_strlen(mod->version);
+    if (mod->version) {
+	len++;   /* & char */
+	len += xml_strlen(CAP_REVISION_EQ);
+	len += xml_strlen(mod->version);
+    }
 
     feature_count = ncx_feature_count(mod, TRUE);
 
@@ -306,7 +308,6 @@ static xmlChar *
 
     /*** TBD: Add deviations ***/
 
-
     /* get a string to hold the result */
     str = m__getMem(len+1);
     if (!str) {
@@ -320,10 +321,12 @@ static xmlChar *
 
     p += xml_strcpy(p, CAP_MODULE_EQ);
     p += xml_strcpy(p, mod->name);
-    *p++ = '&';
 
-    p += xml_strcpy(p, CAP_REVISION_EQ);
-    p += xml_strcpy(p, mod->version);
+    if (mod->version) {
+	*p++ = '&';
+	p += xml_strcpy(p, CAP_REVISION_EQ);
+	p += xml_strcpy(p, mod->version);
+    }
 
     feature_count = ncx_feature_count(mod, TRUE);
 
@@ -1017,7 +1020,7 @@ status_t
     if (!caplist || !mod) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!mod->name || !mod->ns || !mod->version || !mod->ismod) {
+    if (!mod->name || !mod->ns || !mod->ismod) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }	
 #endif

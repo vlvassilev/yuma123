@@ -579,6 +579,10 @@ const char *
 	return "key or select attribute not allowed";
     case ERR_NCX_INVALID_UNIQUE_NODE:
 	return "invalid unique-stmt node";
+    case ERR_NCX_INVALID_DUP_IMPORT:
+	return "invalid duplicate import-stmt";
+    case ERR_NCX_INVALID_DUP_INCLUDE:
+	return "invalid duplicate include-stmt";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:
@@ -605,7 +609,7 @@ const char *
 	return "session closed by remote peer";
     case ERR_NCX_DUP_IMPORT:
 	return "duplicate import";
-    case ERR_NCX_INVALID_DUP_IMPORT:
+    case ERR_NCX_PREFIX_DUP_IMPORT:
 	return "duplicate import with different prefix value";
     case ERR_NCX_TYPDEF_NOT_USED:
 	return "local typedef not used";
@@ -651,6 +655,8 @@ const char *
 	return "no descendant node available";
     case ERR_NCX_NO_XPATH_NODES:
 	return "no nodes available";
+    case ERR_NCX_BAD_REV_ORDER:
+	return "bad revision-stmt order";
 
     /* system info codes start at 500 */
     case ERR_PARS_SECDONE:

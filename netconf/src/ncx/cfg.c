@@ -29,10 +29,6 @@ date         init     comment
 #include  "cfg.h"
 #endif
 
-#ifndef _H_def_reg
-#include  "def_reg.h"
-#endif
-
 #ifndef _H_dlq
 #include  "dlq.h"
 #endif
@@ -233,14 +229,15 @@ static cfg_template_t *
     new_template (const xmlChar *name,
 		  ncx_cfg_t cfg_id)
 {
+    ncx_module_t          *mod;
     cfg_template_t        *cfg;
     const obj_template_t  *cfgobj;
-    ncx_node_t             dtyp;
 
-    dtyp = NCX_NT_OBJ;
-    cfgobj = def_reg_find_moddef(NCX_EL_NETCONF,
-				 NCX_EL_CONFIG,
-				 &dtyp);
+    cfgobj = NULL;
+    mod = ncx_find_module(NCX_EL_NETCONF, NULL);
+    if (mod) {
+	cfgobj = ncx_find_object(mod, NCX_EL_CONFIG);
+    }
     if (!cfgobj) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;

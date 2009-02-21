@@ -3183,7 +3183,7 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION yang_typ_consume_type
+* FUNCTION consume_type
 * 
 * Parse the next N tokens as a type clause
 * Add to the typ_template_t struct in progress

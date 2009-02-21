@@ -2043,7 +2043,7 @@ status_t
 	if (!modname) {
 	    return ERR_NCX_INVALID_VALUE;
 	}
-	mod = ncx_find_module(modname);
+	mod = ncx_find_module(modname, NULL);
 	if (!mod) {
 	    return ERR_NCX_INVALID_VALUE;
 	}
@@ -2175,7 +2175,8 @@ status_t
 	    if (xml_strcmp(mod->prefix, prefixbuff)) {
 		import = ncx_find_pre_import(mod, prefixbuff);
 		if (import) {
-		    impmod = ncx_find_module(import->module);
+		    impmod = ncx_find_module(import->module,
+					     import->revision);
 		    if (impmod) {
 			prefixnsid = impmod->nsid;
 			identity = ncx_find_identity(impmod, str);
@@ -2195,7 +2196,7 @@ status_t
 	    if (prefixnsid) {
 		modname = xmlns_get_module(prefixnsid);
 		if (modname) {
-		    impmod = ncx_find_module(modname);
+		    impmod = ncx_find_module(modname, NULL);
 		    if (impmod) {
 			prefixnsid = impmod->nsid;
 			identity = ncx_find_identity(impmod, str);

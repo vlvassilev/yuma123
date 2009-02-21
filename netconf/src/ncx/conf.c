@@ -90,10 +90,6 @@ date         init     comment
 #include "conf.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_dlq
 #include  "dlq.h"
 #endif
@@ -598,7 +594,7 @@ static status_t
 		boolean keepvals)
 {
     const obj_template_t   *obj;
-    const ncx_module_t     *mod;
+    const xmlChar          *modname;
     val_value_t            *curparm, *newparm;
     status_t                res;
     ncx_iqual_t             iqual;
@@ -619,9 +615,10 @@ static status_t
      * This is automatically processed in tk.c
      */
     if (TK_CUR_MOD(tkc)) {
-	mod = def_reg_find_module_prefix(TK_CUR_MOD(tkc));
-	if (mod) {
-	    curparm = val_find_child(val, mod->name,
+	modname = xmlns_get_module
+	    (xmlns_find_ns_by_prefix(TK_CUR_MOD(tkc)));
+	if (modname) {
+	    curparm = val_find_child(val, modname,
 				     TK_CUR_VAL(tkc));
 	}
     }  else {
@@ -633,7 +630,7 @@ static status_t
 	obj = curparm->obj;
     } else {
 	obj = obj_find_child(val->obj, TK_CUR_MOD(tkc),
-				  TK_CUR_VAL(tkc));
+			     TK_CUR_VAL(tkc));
     }
     if (!obj) {
 	res = ERR_NCX_UNKNOWN_PARM;

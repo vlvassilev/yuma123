@@ -213,9 +213,10 @@ static status_t
 status_t
     agt_cap_init (void)
 {
+    status_t  res;
 
-    /*  return ncxmod_load_module(AGT_CAP_SDISC_MODULE); */
-    return NO_ERR;
+    res = ncxmod_load_module(AGT_CAP_SDISC_MODULE, NULL, NULL);
+    return res;
 	
 } /* agt_cap_init */
 #endif

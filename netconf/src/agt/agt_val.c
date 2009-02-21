@@ -65,10 +65,6 @@ date         init     comment
 #include "cfg.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_dlq
 #include "dlq.h"
 #endif
@@ -1783,7 +1779,11 @@ static status_t
     }
 
     /* need to get a non-const pointer to the module */
-    mod = def_reg_find_module(obj_get_mod_name(curval->obj));
+    mod = ncx_find_module(curval->obj->mod->name,
+			  curval->obj->mod->version);
+    if (mod != curval->obj->mod) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
 
     /* for each unique component, get the descendant
      * node that is specifies and save it in a val_unique_t

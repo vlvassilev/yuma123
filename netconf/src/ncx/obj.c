@@ -27,10 +27,6 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_dlq
 #include "dlq.h"
 #endif
@@ -3234,7 +3230,9 @@ obj_template_t *
 
 	/* get the real submodule struct */
 	if (!inc->submod) {
-	    node = yang_find_node(mod->allincQ, inc->submodule);
+	    node = yang_find_node(mod->allincQ, 
+				  inc->submodule,
+				  inc->revision);
 	    if (node) {
 		inc->submod = node->submod;
 	    }
@@ -6028,8 +6026,7 @@ const xmlChar *
 /********************************************************************
 * FUNCTION obj_has_name
 * 
-* Check if the specified object type has a name that can
-* be registered as an identifier with def_reg_add_moddef
+* Check if the specified object type has a name
 *
 * INPUTS:
 *   obj == the specific object to check
@@ -7767,6 +7764,33 @@ boolean
 
 
 /********************************************************************
+* FUNCTION obj_is_notif
+* 
+* Check if the object is a notification
+* 
+* INPUTS:
+*   obj == object to check
+*  
+* RETURNS:
+*   TRUE if notification
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_notif (const obj_template_t *obj)
+{
+#ifdef DEBUG 
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    return (obj->objtype == OBJ_TYP_NOTIF) ? TRUE : FALSE;
+
+}  /* obj_is_notif */
+
+
+/********************************************************************
 * FUNCTION obj_is_empty
 *
 * Check if object was entered in empty fashion:
@@ -7984,39 +8008,6 @@ boolean
     return (obj->flags & OBJ_FL_ROOT) ? TRUE : FALSE;
 
 }   /* obj_is_root */
-
-
-#if 0
-/********************************************************************
-* FUNCTION obj_is_toproot
-*
-* Check if object is the tconfig top root
-*
-* INPUTS:
-*   obj == obj_template to check
-*
-* RETURNS:
-*   TRUE if object is the top root
-*   FALSE if not
-*********************************************************************/
-boolean
-    obj_is_toproot (const obj_template_t *obj)
-{
-
-    const obj_template_t *top;
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
-    top = ncx_get_gen_root();
-    return (top && top == obj) ? TRUE : FALSE;
-
-}   /* obj_is_toproot */
-#endif
 
 
 /********************************************************************
@@ -8365,6 +8356,7 @@ status_t
 {
     const obj_template_t  *foundobj, *nextchobj;
     const xmlChar         *foundmodname;
+    ncx_module_t          *foundmod;
     status_t               res;
     ncx_node_t             dtyp;
     boolean                topdone;
@@ -8382,7 +8374,10 @@ status_t
     topdone = FALSE;
 
     if (curnode->nsid) {
-	foundmodname = xmlns_get_module(curnode->nsid);
+	foundmod = xmlns_get_modptr(curnode->nsid);
+	if (foundmod) {
+	    foundmodname = ncx_get_modname(foundmod);
+	}
     } 
 
     if (obj_is_root(obj)) {
@@ -8391,17 +8386,16 @@ status_t
 	 */
 	if (foundmodname) {
 	    /* get the name from 1 module */
-	    foundobj = (const obj_template_t *)
-		def_reg_find_moddef(foundmodname,
-				    curnode->elname,
-				    &dtyp);
+	    foundobj =  ncx_find_object(foundmod,
+					curnode->elname);
 	} else {
 	    /* NSID not set, get the name from any module */
-	    foundobj = (const obj_template_t *)
-		def_reg_find_any_moddef(&foundmodname,
-					curnode->elname,
-					&dtyp);
+	    foundobj = ncx_find_any_object(curnode->elname);
+	    if (foundobj) {
+		foundmodname = obj_get_mod_name(foundobj);
+	    }
 	}
+
 	if (foundobj) {
 	    if (!obj_is_data_db(foundobj) ||
 		obj_is_abstract(foundobj) ||

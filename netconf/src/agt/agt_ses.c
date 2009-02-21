@@ -1016,12 +1016,11 @@ status_t
 #endif
 
     /* load the agent-specific modules */
-    res = ncxmod_load_module(AGT_SES_MODULE);
+    res = ncxmod_load_module(AGT_SES_MODULE, NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }
 #endif
-
 
     agt_ses_init_done = TRUE;
     return NO_ERR;

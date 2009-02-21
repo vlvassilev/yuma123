@@ -36,10 +36,6 @@ date         init     comment
 #include  "conf.h"
 #endif
 
-#ifndef _H_def_reg
-#include  "def_reg.h"
-#endif
-
 #ifndef _H_ext
 #include  "ext.h"
 #endif
@@ -767,13 +763,14 @@ static status_t
     compare_one (yangdiff_diffparms_t *cp)
 {
     yang_pcb_t        *oldpcb, *newpcb;
-    const xmlChar     *logsource, *modpath;
+    const xmlChar     *logsource, *modpath, *revision;
     status_t           res;
     boolean            skipreport;
 
     res = NO_ERR;
     skipreport = FALSE;
     cp->curindent = 0;
+    revision = NULL;  /****/
 
     /* force modules to be reloaded */
     ncx_set_cur_modQ(&cp->newmodQ);
@@ -791,6 +788,7 @@ static status_t
     }
 
     newpcb = ncxmod_load_module_diff((cp->curnew) ? cp->curnew : cp->new,
+				     revision,
 				     (cp->curnew) ? TRUE : FALSE,
 				     FALSE, modpath, &res);
     if (res == ERR_NCX_SKIPPED) {
@@ -860,7 +858,9 @@ static status_t
      * if this is a subtree call, then the curnew pointer
      * will be set, otherwise the 'new' pointer must be set
      */
+    revision = NULL;   /*****/
     oldpcb = ncxmod_load_module_diff(cp->curold, 
+				     revision,
 				     (cp->new_isdir) ? TRUE : FALSE,
 				     FALSE, modpath, &res);
     if (res == ERR_NCX_SKIPPED) {
@@ -910,7 +910,7 @@ static status_t
 		  oldpcb->top->errors, oldpcb->top->warnings);
     }
 
-    /* allow new modules to be available fore ncx_find_module */
+    /* allow new modules to be available for ncx_find_module */
     ncx_set_cur_modQ(&cp->newmodQ);
 
     /* check if old and new files parsed okay */
@@ -1240,7 +1240,7 @@ static status_t
 {
     const obj_template_t  *obj;
     val_value_t           *valset, *val;
-    ncx_node_t             dtyp;
+    ncx_module_t          *mod;
     status_t               res;
 
     res = NO_ERR;
@@ -1255,9 +1255,11 @@ static status_t
     cp->maxlen = YANGDIFF_DEF_MAXSIZE;
 
     /* find the parmset definition in the registry */
-    dtyp = NCX_NT_OBJ;
-    obj = (const obj_template_t *)
-	def_reg_find_moddef(YANGDIFF_MOD, YANGDIFF_CONTAINER, &dtyp);
+    obj = NULL;
+    mod = ncx_find_module(YANGDIFF_MOD, NULL);
+    if (mod) {
+	obj = ncx_find_object(mod, YANGDIFF_CONTAINER);
+    }
     if (!obj) {
 	res = ERR_NCX_NOT_FOUND;
     }
@@ -1489,10 +1491,10 @@ static status_t
 
     if (res == NO_ERR) {
 	/* load in the YANG converter CLI definition file */
-	res = ncxmod_load_module(YANGDIFF_MOD);
+	res = ncxmod_load_module(YANGDIFF_MOD, NULL, NULL);
 
 	if (res == NO_ERR) {
-	    res = ncxmod_load_module(NCXMOD_NCX);
+	    res = ncxmod_load_module(NCXMOD_NCX, NULL, NULL);
 	    if (res == NO_ERR) {
 		res = ncx_stage2_init();
 	    }

@@ -1331,6 +1331,7 @@ static status_t
     status_t               res;
 
     res = NO_ERR;
+    newval = NULL;
 
     val = val_find_child(msg->rpc_input, 
 			 NCXMOD_NETCONFD,
@@ -1339,37 +1340,40 @@ static status_t
 	return ERR_NCX_OPERATION_FAILED;
     }
 
-    mod = ncx_find_module(VAL_STR(val));
+    /**** TBD: revision parameter support ****/
+    mod = ncx_find_module(VAL_STR(val), NULL);
     if (!mod) {
-	res = ncxmod_load_module(VAL_STR(val));
+	res = ncxmod_load_module(VAL_STR(val), NULL, NULL);
 	if (res != NO_ERR) {
 	    agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
 			     methnode, NCX_NT_NONE, NULL, 
 			     NCX_NT_VAL, val);
 	    return res;
 	} else {
-	    mod = ncx_find_module(VAL_STR(val));
+	    mod = ncx_find_module(VAL_STR(val), NULL);
 	    if (!mod) {
 		return SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 	}
     }
 
-    newval = val_new_value();
-    if (!newval) {
-	res = ERR_INTERNAL_MEM;
-    } else {
-	dataobj = ncx_get_gen_string();
-	val_init_from_template(newval, dataobj);
-	res = val_set_simval(newval,
-			     obj_get_ctypdef(dataobj),
-			     val->nsid,
-			     NULL,
-			     mod->version);
-	if (res == NO_ERR) {
-	    /* name is set to 'string' at this point, need to change it */
-	    val_set_name(newval, NCX_EL_MOD_REVISION,
-			 xml_strlen(NCX_EL_MOD_REVISION));
+    if (mod->version) {
+	newval = val_new_value();
+	if (!newval) {
+	    res = ERR_INTERNAL_MEM;
+	} else {
+	    dataobj = ncx_get_gen_string();
+	    val_init_from_template(newval, dataobj);
+	    res = val_set_simval(newval,
+				 obj_get_ctypdef(dataobj),
+				 val->nsid,
+				 NULL,
+				 mod->version);
+	    if (res == NO_ERR) {
+		/* name is set to 'string' at this point, need to change it */
+		val_set_name(newval, NCX_EL_MOD_REVISION,
+			     xml_strlen(NCX_EL_MOD_REVISION));
+	    }
 	}
     }
 	

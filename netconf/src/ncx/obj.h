@@ -1001,6 +1001,9 @@ extern boolean
     obj_is_rpc (const obj_template_t *obj);
 
 extern boolean
+    obj_is_notif (const obj_template_t *obj);
+
+extern boolean
     obj_is_empty (const obj_template_t *obj);
 
 extern boolean

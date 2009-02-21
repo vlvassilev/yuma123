@@ -1860,6 +1860,7 @@ static void
 *   cp == conversion parameters to use
 *   modprefix == module prefix value for import
 *   modname == module name to use in import clause
+*   modrevision == module revision date (may be NULL)
 *   appinfoQ  == import appinfo Q (may be NULL)
 *   indent == start indent count
 *
@@ -1870,19 +1871,22 @@ static void
 			const yangdump_cvtparms_t *cp,
 			const xmlChar *modprefix,
 			const xmlChar *modname,
+			const xmlChar *modrevision,
 			const dlq_hdr_t *appinfoQ,
 			int32 indent)
 {
-    const ncx_module_t       *impmod;
-
     ses_indent(scb, indent);
     ses_putstr(scb, YANG_K_IMPORT);
     ses_putchar(scb, ' ');
-    impmod = ncx_find_module(modname);
     ses_putstr(scb, modname);
     ses_putstr(scb, START_SEC);
     write_cyang_simple_str(scb, YANG_K_PREFIX, modprefix,
 			   indent + ses_indent_count(scb), 2, TRUE);
+    if (modrevision) {
+	write_cyang_simple_str(scb, YANG_K_REVISION, modrevision,
+			       indent + ses_indent_count(scb), 2, TRUE);
+
+    }
     if (appinfoQ) {
 	write_cyang_appinfoQ(scb, mod, cp, appinfoQ,
 		       indent + ses_indent_count(scb));
@@ -1964,7 +1968,8 @@ static void
 
 	    /* the appinfoQ info is not saved in unified mode ouput!! */
 	    write_cyang_import(scb, mod, cp, impptr->modprefix,
-			       impptr->modname, NULL, indent);
+			       impptr->modname, impptr->revision, 
+			       NULL, indent);
 	}
 	if (!dlq_empty(&mod->saveimpQ)) {
 	    ses_putchar(scb, '\n');
@@ -1975,7 +1980,8 @@ static void
 	     imp = (const ncx_import_t *)dlq_nextEntry(imp)) {
 
 	    write_cyang_import(scb, mod, cp, imp->prefix,
-			       imp->module, &imp->appinfoQ, indent);
+			       imp->module, imp->revision,
+			       &imp->appinfoQ, indent);
 
 	}
 	if (!dlq_empty(&mod->importQ)) {
@@ -1991,8 +1997,14 @@ static void
 	    ses_putstr_indent(scb, YANG_K_INCLUDE, indent);
 	    ses_putchar(scb, ' ');
 	    ses_putstr(scb, inc->submodule);
-	    if (!dlq_empty(&inc->appinfoQ)) {
+	    if (inc->revision || !dlq_empty(&inc->appinfoQ)) {
 		ses_putstr(scb, START_SEC);
+		if (inc->revision) {
+		    write_cyang_simple_str(scb, YANG_K_REVISION, 
+					   inc->revision,
+					   indent + ses_indent_count(scb), 
+					   2, TRUE);
+		}
 		write_cyang_appinfoQ(scb, mod, cp, &inc->appinfoQ,
 				     indent + ses_indent_count(scb));
 		ses_putstr_indent(scb, END_SEC, indent);

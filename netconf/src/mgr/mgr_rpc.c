@@ -27,10 +27,6 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
-#ifndef _H_def_reg
-#include  "def_reg.h"
-#endif
-
 #ifndef _H_dlq
 #include  "dlq.h"
 #endif
@@ -602,9 +598,9 @@ void
     mgr_rpc_req_t           *req;
     xml_attr_t              *attr;
     xmlChar                 *msg_id;
+    ncx_module_t            *mod;
     mgr_rpc_cbfn_t           handler;
     ncx_num_t                num;
-    ncx_node_t               dtyp;
     status_t                 res;
 
 #ifdef DEBUG
@@ -639,9 +635,11 @@ void
 	rpyobj = reply_obj;
     } else {
 	/* get the rpcReply template from the registry */
-	dtyp = NCX_NT_OBJ;
-	rpyobj = (const obj_template_t *)
-	    def_reg_find_moddef(NC_MODULE, NC_RPC_REPLY_TYPE, &dtyp);
+	rpyobj = NULL;
+	mod = ncx_find_module(NC_MODULE, NULL);
+	if (mod) {
+	    rpyobj = ncx_find_object(mod, NC_RPC_REPLY_TYPE);
+	}
 	if (rpyobj) {
 	    reply_obj = rpyobj;
 	} else {

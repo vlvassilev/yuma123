@@ -2279,6 +2279,7 @@ static void
 *   cp == conversion parameters to use
 *   modprefix == module prefix value for import
 *   modname == module name to use in import clause
+*   modrevision == module revision date (may be NULL)
 *   submod == submodule name to use in URLs in unified mode only
 *   appinfoQ  == import appinfo Q (may be NULL)
 *   indent == start indent count
@@ -2290,22 +2291,25 @@ static void
 		  const yangdump_cvtparms_t *cp,
 		  const xmlChar *modprefix,
 		  const xmlChar *modname,
+		  const xmlChar *modrevision,
 		  const xmlChar *submod,
 		  const dlq_hdr_t *appinfoQ,
 		  int32 indent)
 {
-    const ncx_module_t       *impmod;
-
     ses_indent(scb, indent);
     write_kw(scb, YANG_K_IMPORT);
     ses_putchar(scb, ' ');
-    impmod = ncx_find_module(modname);
     write_a(scb, cp, modname, 
-	    (impmod) ? impmod->version : NULL,
-	    submod,	NULL, NULL, 0);
+	    (modrevision) ? modrevision : NULL,
+	    submod, NULL, NULL, 0);
     ses_putstr(scb, START_SEC);
     write_simple_str(scb, YANG_K_PREFIX, modprefix,
 		     indent + ses_indent_count(scb), 2, TRUE);
+    if (modrevision) {
+	write_simple_str(scb, YANG_K_REVISION, modrevision,
+			 indent + ses_indent_count(scb), 2, TRUE);
+
+    }
     if (appinfoQ) {
 	write_appinfoQ(scb, mod, cp, appinfoQ,
 		       indent + ses_indent_count(scb));
@@ -2393,8 +2397,13 @@ static void
 	     impptr = (const yang_import_ptr_t *)dlq_nextEntry(impptr)) {
 
 	    /* the appinfoQ info is not saved in unified mode ouput!! */
-	    write_import(scb, mod, cp, impptr->modprefix,
-			 impptr->modname, submod, NULL, indent);
+	    write_import(scb, mod, cp, 
+			 impptr->modprefix,
+			 impptr->modname, 
+			 impptr->revision,
+			 submod, 
+			 NULL, 
+			 indent);
 	}
 	if (!dlq_empty(&mod->saveimpQ)) {
 	    ses_putchar(scb, '\n');
@@ -2404,8 +2413,13 @@ static void
 	     imp != NULL;
 	     imp = (const ncx_import_t *)dlq_nextEntry(imp)) {
 
-	    write_import(scb, mod, cp, imp->prefix,
-			 imp->module, submod, &imp->appinfoQ, indent);
+	    write_import(scb, mod, cp, 
+			 imp->prefix,
+			 imp->module, 
+			 imp->revision,
+			 submod, 
+			 &imp->appinfoQ, 
+			 indent);
 
 	}
 	if (!dlq_empty(&mod->importQ)) {
@@ -2424,8 +2438,12 @@ static void
 	    write_a(scb, cp, inc->submodule, 
 		    (inc->submod) ? inc->submod->version : NULL,
 		    submod, NULL, NULL, 0);
-	    if (!dlq_empty(&inc->appinfoQ)) {
+	    if (inc->revision || !dlq_empty(&inc->appinfoQ)) {
 		ses_putstr(scb, START_SEC);
+		if (inc->revision) {
+		    write_simple_str(scb, YANG_K_REVISION, inc->revision,
+				     indent + ses_indent_count(scb), 2, TRUE);
+		}
 		write_appinfoQ(scb, mod, cp, &inc->appinfoQ,
 			       indent + ses_indent_count(scb));
 		ses_putstr_indent(scb, END_SEC, indent);

@@ -108,13 +108,13 @@ static status_t
     status_t res;
 
     /* load in the agent boot parameter definition file */
-    res = ncxmod_load_module(NCXMOD_NETCONFD);
+    res = ncxmod_load_module(NCXMOD_NETCONFD, NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module(NCXMOD_NETCONF);
+    res = ncxmod_load_module(NCXMOD_NETCONF, NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }
@@ -140,7 +140,7 @@ static status_t
 #endif
 
     /* load in the NCX extensions module */
-    res = ncxmod_load_module(NCXMOD_NCX);
+    res = ncxmod_load_module(NCXMOD_NCX, NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }
@@ -159,13 +159,19 @@ static status_t
 
 #ifdef NETCONFD_DEBUG_LOAD_TEST
     /* Load test module */
-    res = ncxmod_load_module((const xmlChar *) "test");
+    res = ncxmod_load_module((const xmlChar *)"test", NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Load testmust module */
-    res = ncxmod_load_module((const xmlChar *) "testmust");
+    res = ncxmod_load_module((const xmlChar *)"testmust", NULL, NULL);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* Load testrev module */
+    res = ncxmod_load_module((const xmlChar *)"testrev", NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }

@@ -74,6 +74,7 @@ typedef struct xmlns_t_ {
     xmlChar     *ns_pfix;
     xmlChar     *ns_name;
     xmlChar     *ns_module;
+    struct ncx_module_t_ *ns_mod;
 } xmlns_t;
 
 
@@ -102,6 +103,7 @@ extern status_t
     xmlns_register_ns (const xmlChar *ns,
 		       const xmlChar *pfix,
 		       const xmlChar *modname,
+		       void *modptr,
 		       xmlns_id_t *ns_id);
 
 extern const xmlChar * 
@@ -162,6 +164,9 @@ extern xmlns_id_t
 /* get module name that registered this namespace */
 extern const xmlChar *
     xmlns_get_module (xmlns_id_t  nsid);
+
+extern void *
+    xmlns_get_modptr (xmlns_id_t nsid);
 
 extern xmlns_pmap_t *
     xmlns_new_pmap (uint32 buffsize);

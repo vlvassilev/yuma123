@@ -29,10 +29,6 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_help
 #include "help.h"
 #endif
@@ -210,7 +206,10 @@ static void
 {
 
     /* dump some header info */
-    log_stdout("\n\nModule: %s (%s)", mod->name, mod->version);
+    log_stdout("\n\nModule: %s", mod->name);
+    if (mod->version) {
+	log_stdout(" (%s)", mod->version);
+    }
     log_stdout("\nPrefix: %s", mod->prefix);
     log_stdout("\nNamespace: %s", (mod->ns) ?
 	       (const char *)mod->ns : "(none)");
@@ -237,9 +236,8 @@ void
 			 const xmlChar *cliname,
 			 help_mode_t mode)
 {
-    const ncx_module_t   *mod;
+    ncx_module_t         *mod;
     const obj_template_t *cli;
-    ncx_node_t            dtyp;
     uint32                nestlevel;
 
 #ifdef DEBUG
@@ -255,7 +253,7 @@ void
 
     nestlevel = get_nestlevel(mode);
 
-    mod = ncx_find_module(modname);
+    mod = ncx_find_module(modname, NULL);
     if (!mod) {
 	log_error("\nhelp: Module '%s' not found", modname);
 	SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
@@ -286,9 +284,7 @@ void
     }
 
     if (cliname) {
-	dtyp = NCX_NT_OBJ;
-	cli = (const obj_template_t *)
-	    def_reg_find_moddef(mod->name, cliname, &dtyp);
+	cli = ncx_find_object(mod, cliname);
 	if (!cli) {
 	    log_error("\nhelp: CLI Object %s not found", cliname);
 	    SET_ERROR(ERR_NCX_DEF_NOT_FOUND);

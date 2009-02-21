@@ -1943,10 +1943,10 @@ status_t
 			   tk_token_t *errtk,
 			   typ_template_t **typ)
 {
-    const ncx_import_t   *imp;
-    tk_token_t           *savetk;
-    ncx_node_t            dtyp;
-    status_t              res;
+    ncx_import_t     *imp;
+    tk_token_t       *savetk;
+    ncx_node_t        dtyp;
+    status_t          res;
 
 #ifdef DEBUG
     if (!tkc || !mod || !prefix || !name || !typ) {
@@ -1963,8 +1963,7 @@ status_t
 	/* found import OK, look up imported type definition */
 	dtyp = NCX_NT_TYP;
 	*typ = (typ_template_t *)
-	    ncx_locate_modqual_import(imp->module, name, 
-				      mod->diffmode, &dtyp);
+	    ncx_locate_modqual_import(imp, name, &dtyp);
 	if (!*typ) {
 	    res = ERR_NCX_DEF_NOT_FOUND;
 	    log_error("\nError: typedef definition for '%s:%s' not found"
@@ -2042,8 +2041,7 @@ status_t
 	/* found import OK, look up imported type definition */
 	dtyp = NCX_NT_GRP;
 	*grp = (grp_template_t *)
-	    ncx_locate_modqual_import(imp->module, name, 
-				      mod->diffmode, &dtyp);
+	    ncx_locate_modqual_import(imp, name, &dtyp);
 	if (!*grp) {
 	    res = ERR_NCX_DEF_NOT_FOUND;
 	    log_error("\nError: grouping definition for '%s:%s' not found"
@@ -2117,41 +2115,33 @@ status_t
     if (!imp) {
 	res = ERR_NCX_PREFIX_NOT_FOUND;
 	log_error("\nError: import for prefix '%s' not found", prefix);
+    } else if (imp->mod) {
+	imod = imp->mod;
     } else {
-	/* First find or load the module */
-	if (mod->diffmode) {
-	    imod = ncx_find_module(imp->module);
-	} else {
-	    imod = def_reg_find_module(imp->module);
-	}
+	res = ncxmod_load_module(imp->module, 
+				 imp->revision, 
+				 &imod);
+	CHK_EXIT(res, retres);
+
 	if (!imod) {
-	    res = ncxmod_load_module(imp->module);
-	    CHK_EXIT(res, retres);
-
-	    /* try again to find the module; should not fail */
-	    if (mod->diffmode) {
-		imod = ncx_find_module(imp->module);
-	    } else {
-		imod = def_reg_find_module(imp->module);
-	    }
-	    if (!imod) {
-		log_error("\nError: failure importing module '%s'",
-			  imp->module);
-		res = ERR_NCX_DEF_NOT_FOUND;
-	    }
+	    log_error("\nError: failure importing module '%s'",
+		      imp->module);
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	} else {
+	    imp->mod = imod;
 	}
-
-	/* found import OK, look up imported extension definition */
-	if (imod) {
-	    *ext = ext_find_extension(&imod->extensionQ, name);
-	    if (!*ext) {
-		res = ERR_NCX_DEF_NOT_FOUND;
-		log_error("\nError: extension definition for '%s:%s' not found"
-			  " in module %s", 
-			  prefix, name, imp->module);
-	    } else {
-		return NO_ERR;
-	    }
+    }
+	
+    /* found import OK, look up imported extension definition */
+    if (imod) {
+	*ext = ext_find_extension(&imod->extensionQ, name);
+	if (!*ext) {
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	    log_error("\nError: extension definition for '%s:%s' not found"
+		      " in module %s", 
+		      prefix, name, imp->module);
+	} else {
+	    return NO_ERR;
 	}
     }
 
@@ -2218,41 +2208,33 @@ status_t
     if (!imp) {
 	res = ERR_NCX_PREFIX_NOT_FOUND;
 	log_error("\nError: import for prefix '%s' not found", prefix);
+    } else if (imp->mod) {
+	imod = imp->mod;
     } else {
-	/* First find or load the module */
-	if (mod->diffmode) {
-	    imod = ncx_find_module(imp->module);
-	} else {
-	    imod = def_reg_find_module(imp->module);
-	}
+	res = ncxmod_load_module(imp->module,
+				 imp->revision,
+				 &imp->mod);
+	CHK_EXIT(res, retres);
+
 	if (!imod) {
-	    res = ncxmod_load_module(imp->module);
-	    CHK_EXIT(res, retres);
-
-	    /* try again to find the module; should not fail */
-	    if (mod->diffmode) {
-		imod = ncx_find_module(imp->module);
-	    } else {
-		imod = def_reg_find_module(imp->module);
-	    }
-	    if (!imod) {
-		log_error("\nError: failure importing module '%s'",
-			  imp->module);
-		res = ERR_NCX_DEF_NOT_FOUND;
-	    }
+	    log_error("\nError: failure importing module '%s'",
+		      imp->module);
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	} else {
+	    imp->mod = imod;
 	}
+    }
 
-	/* found import OK, look up imported extension definition */
-	if (imod) {
-	    *feature = ncx_find_feature(imod, name);
-	    if (!*feature) {
-		res = ERR_NCX_DEF_NOT_FOUND;
-		log_error("\nError: feature definition for '%s:%s' not found"
-			  " in module %s", 
-			  prefix, name, imp->module);
-	    } else {
-		return NO_ERR;
-	    }
+    /* found import OK, look up imported extension definition */
+    if (imod) {
+	*feature = ncx_find_feature(imod, name);
+	if (!*feature) {
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	    log_error("\nError: feature definition for '%s:%s' not found"
+		      " in module %s", 
+		      prefix, name, imp->module);
+	} else {
+	    return NO_ERR;
 	}
     }
 
@@ -2319,41 +2301,33 @@ status_t
     if (!imp) {
 	res = ERR_NCX_PREFIX_NOT_FOUND;
 	log_error("\nError: import for prefix '%s' not found", prefix);
+    } else if (imp->mod) {
+	imod = imp->mod;
     } else {
-	/* First find or load the module */
-	if (mod->diffmode) {
-	    imod = ncx_find_module(imp->module);
-	} else {
-	    imod = def_reg_find_module(imp->module);
-	}
+	res = ncxmod_load_module(imp->module,
+				 imp->revision,
+				 &imp->mod);
+	CHK_EXIT(res, retres);
+
 	if (!imod) {
-	    res = ncxmod_load_module(imp->module);
-	    CHK_EXIT(res, retres);
-
-	    /* try again to find the module; should not fail */
-	    if (mod->diffmode) {
-		imod = ncx_find_module(imp->module);
-	    } else {
-		imod = def_reg_find_module(imp->module);
-	    }
-	    if (!imod) {
-		log_error("\nError: failure importing module '%s'",
-			  imp->module);
-		res = ERR_NCX_DEF_NOT_FOUND;
-	    }
+	    log_error("\nError: failure importing module '%s'",
+		      imp->module);
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	} else {
+	    imp->mod = imod;
 	}
+    } 
 
+    if (imod) {
 	/* found import OK, look up imported extension definition */
-	if (imod) {
-	    *identity = ncx_find_identity(imod, name);
-	    if (!*identity) {
-		res = ERR_NCX_DEF_NOT_FOUND;
-		log_error("\nError: identity definition for '%s:%s' not found"
-			  " in module %s", 
-			  prefix, name, imp->module);
-	    } else {
-		return NO_ERR;
-	    }
+	*identity = ncx_find_identity(imod, name);
+	if (!*identity) {
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	    log_error("\nError: identity definition for '%s:%s' not found"
+		      " in module %s", 
+		      prefix, name, imp->module);
+	} else {
+	    return NO_ERR;
 	}
     }
 
@@ -2467,15 +2441,20 @@ void
 	}
 
 	/* check if the import is newer than this file */
-	impmod = ncx_find_module(testimp->module);
+	impmod = ncx_find_module(testimp->module,
+				 testimp->revision);
 	if (impmod) {
-	    ret = xml_strcmp(impmod->version,
-			     mod->version);
+	    ret = yang_compare_revision_dates(impmod->version,
+					      mod->version);
 	    if (ret > 0) {
 		log_info("\nInfo: imported module '%s' (%s)"
 			 " is newer than '%s' (%s)",
-			 impmod->name, impmod->version,
-			 mod->name, mod->version);
+			 impmod->name, 
+			 (impmod->version) 
+			 ? impmod->version : EMPTY_STRING,
+			 mod->name,
+			 (mod->version) 
+			 ? mod->version : EMPTY_STRING);
 	    }
 	}
     }
@@ -2530,6 +2509,9 @@ void
     if (node->failed) {
 	m__free(node->failed);
     }
+    if (node->failedrev) {
+	m__free(node->failedrev);
+    }
     if (node->tkc) {
 	tk_free_chain(node->tkc);
     }
@@ -2575,13 +2557,15 @@ void
 * INPUTS:
 *    que == Q of yang_node_t to check
 *    name == module name to find
+*    revision == module revision date (may be NULL)
 *
 * RETURNS:
 *    pointer to found node, NULL if not found
 *********************************************************************/
 yang_node_t *
     yang_find_node (const dlq_hdr_t *que,
-		    const xmlChar *name)
+		    const xmlChar *name,
+		    const xmlChar *revision)
 {
     yang_node_t *node;
 
@@ -2597,7 +2581,10 @@ yang_node_t *
 	 node = (yang_node_t *)dlq_nextEntry(node)) {
 
 	if (!xml_strcmp(node->name, name)) {
-	    return node;
+	    if (!yang_compare_revision_dates(node->revision,
+					     revision)) {
+		return node;
+	    }
 	}
     }
     return NULL;
@@ -3163,14 +3150,17 @@ boolean
 * Create a new YANG import pointer node
 *
 * INPUTS:
-*   import name to set
+*   modname = module name to set
+*   modprefix = module prefix to set
+*   revision = revision date to set
 *
 * RETURNS:
 *   pointer to new and initialized struct, NULL if memory error
 *********************************************************************/
 yang_import_ptr_t *
     yang_new_import_ptr (const xmlChar *modname,
-			 const xmlChar *modprefix)
+			 const xmlChar *modprefix,
+			 const xmlChar *revision)
 {
     yang_import_ptr_t *impptr;
 
@@ -3179,16 +3169,29 @@ yang_import_ptr_t *
 	return NULL;
     }
     memset(impptr, 0x0, sizeof(yang_import_ptr_t));
-    impptr->modprefix = xml_strdup(modprefix);
-    if (!impptr->modprefix) {
-	m__free(impptr);
-	return NULL;
+
+    if (modname) {
+	impptr->modname = xml_strdup(modname);
+	if (!impptr->modname) {
+	    yang_free_import_ptr(impptr);
+	    return NULL;
+	}
     }
-    impptr->modname = xml_strdup(modname);
-    if (!impptr->modname) {
-	m__free(impptr->modprefix);
-	m__free(impptr);
-	return NULL;
+
+    if (modprefix) {
+	impptr->modprefix = xml_strdup(modprefix);
+	if (!impptr->modprefix) {
+	    yang_free_import_ptr(impptr);
+	    return NULL;
+	}
+    }
+
+    if (revision) {
+	impptr->revision = xml_strdup(revision);
+	if (!impptr->revision) {
+	    yang_free_import_ptr(impptr);
+	    return NULL;
+	}
     }
 
     return impptr;
@@ -3197,7 +3200,7 @@ yang_import_ptr_t *
 
 
 /********************************************************************
-* FUNCTION yang_free_impotr_ptr
+* FUNCTION yang_free_impptr_ptr
 * 
 * Delete a YANG import pointer node
 *
@@ -3220,6 +3223,9 @@ void
     }
     if (impptr->modprefix) {
 	m__free(impptr->modprefix);
+    }
+    if (impptr->revision) {
+	m__free(impptr->revision);
     }
 
     m__free(impptr);
@@ -3292,6 +3298,92 @@ yang_import_ptr_t *
     return NULL;
 
 }  /* yang_find_import_ptr */
+
+
+/********************************************************************
+* FUNCTION yang_compare_revision_dates
+* 
+* Compare 2 revision strings, which either may be NULL
+*
+* INPUTS:
+*   revstring1 == revision string 1 (may be NULL)
+*   revstring2 == revision string 2 (may be NULL)
+*
+* RETURNS:
+*    -1 if revision 1 < revision 2
+*    0 of they are the same
+*    +1 if revision1 > revision 2   
+*********************************************************************/
+int32
+    yang_compare_revision_dates (const xmlChar *revstring1,
+				 const xmlChar *revstring2)
+{
+
+    if (!revstring1 && !revstring2) {
+	return 0;
+    } else if (!revstring1) {
+	return -1;
+    } else if (!revstring2) {
+	return 1;
+    } else {
+	return xml_strcmp(revstring1, revstring2);
+    }
+
+}  /* yang_compare_revision_dates */
+
+
+/********************************************************************
+* FUNCTION yang_make_filename
+* 
+* Malloc and construct a YANG filename 
+*
+* INPUTS:
+*   modname == [sub]module name
+*   revision == [sub]module revision date (may be NULL)
+*
+* RETURNS:
+*    malloced and filled in string buffer with filename
+*    NULL if any error
+*********************************************************************/
+xmlChar *
+    yang_make_filename (const xmlChar *modname,
+			const xmlChar *revision)
+{
+    xmlChar    *buff, *p;
+    uint32      mlen, rlen;
+
+#ifdef DEBUG
+    if (!modname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    mlen = xml_strlen(modname);
+    rlen = (revision) ? xml_strlen(revision) : 0;
+
+    if (rlen) {
+	rlen++;
+    }
+
+    buff = m__getMem(mlen + rlen + 6);
+    if (!buff) {
+	return NULL;
+    }
+
+    p = buff;
+
+    p += xml_strcpy(p, modname);
+    if (revision && *revision) {
+	*p++ = '.';
+	p += xml_strcpy(p, revision);
+    }
+    *p++ = '.';
+    xml_strcpy(p, (const xmlChar *)"yang");
+
+    return buff;
+
+}  /* yang_make_filename */
 
 
 /* END file yang.c */

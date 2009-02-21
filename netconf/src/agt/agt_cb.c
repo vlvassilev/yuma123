@@ -50,6 +50,10 @@ date         init     comment
 #include  "xpath.h"
 #endif
 
+#ifndef _H_yang
+#include  "yang.h"
+#endif
+
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
@@ -394,7 +398,8 @@ static status_t
 
     /* check if the version loaded is acceptable for this callback */
     if (callback->minversion) {
-	ret = xml_strcmp(modhdr->modversion, callback->minversion);
+	ret = yang_compare_revision_dates(modhdr->modversion, 
+					  callback->minversion);
 	if (ret < 0) {
 	    res = ERR_NCX_WRONG_VERSION;
 	    callback->loadstatus = AGTCB_STAT_LOAD_FAILED;
@@ -581,7 +586,7 @@ status_t
     /* data structures in place, now check if the module
      * is loaded yet
      */
-    mod = ncx_find_module(modname);
+    mod = ncx_find_module(modname, NULL);
     if (!mod) {
 	/* module not present yet */
 	return NO_ERR;

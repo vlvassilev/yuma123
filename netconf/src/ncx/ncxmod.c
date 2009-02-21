@@ -640,6 +640,7 @@ static status_t
 *
 * INPUTS:
 *   modname == failed module name
+*   revision == failed revision date (may be NULL)
 *   pcb == parser control block
 *   res == final result status for the failed module
 *
@@ -648,6 +649,7 @@ static status_t
 *********************************************************************/
 static status_t 
     add_failed (const xmlChar *modname,
+		const xmlChar *revision,
 		yang_pcb_t *pcb,
 		status_t res)
 {
@@ -657,12 +659,23 @@ static status_t
     if (!node) {
 	return ERR_INTERNAL_MEM;
     }
+
     node->failed = xml_strdup(modname);
     if (!node->failed) {
 	yang_free_node(node);
 	return ERR_INTERNAL_MEM;
     }
+
+    if (revision) {
+	node->failedrev = xml_strdup(revision);
+	if (!node->failed) {
+	    yang_free_node(node);
+	    return ERR_INTERNAL_MEM;
+	}
+    }
+
     node->name = node->failed;
+    node->revision = node->failedrev;
     node->res = res;
     dlq_enque(node, &pcb->failedQ);
     return NO_ERR;
@@ -680,6 +693,7 @@ static status_t
 *   buff == buffer to use for the filespec
 *   bufflen == size of 'buff' in bytes
 *   modname == module name to find (no file suffix)
+*   revision == module revision date (may be NULL)
 *   pcb == parser control block in progress
 *   ptyp == parser source type
 *   usepath == TRUE if path should be used directly
@@ -698,21 +712,20 @@ static status_t
 		       xmlChar *buff,
 		       uint32 bufflen,
 		       const xmlChar *modname,
+		       const xmlChar *revision,
 		       yang_pcb_t *pcb,
 		       yang_parsetype_t ptyp,
 		       boolean usepath,
 		       boolean *done)
 {
     const xmlChar  *path2;
-    xmlChar        *fnamebuff, *str, *p;
+    xmlChar        *fnamebuff;
     uint32          total;
     status_t        res, res2;
-
 
     *done = FALSE;
     res = NO_ERR;
     res2 = NO_ERR;
-    p = buff;
     path2 = (usepath) ? NULL : NCXMOD_DIR;
 
     total = xml_strlen(path);
@@ -728,17 +741,13 @@ static status_t
 	    return res;
 	}
 
-	fnamebuff = m__getMem(xml_strlen(modname)+6);
+	fnamebuff = yang_make_filename(modname, revision);
 	if (!fnamebuff) {
 	    *done = TRUE;
 	    return ERR_INTERNAL_MEM;
 	}
-	str = fnamebuff;
-	str += xml_strcpy(fnamebuff, modname);
-	*str++ = '.';
 
 	/* try YANG file */
-	xml_strcpy(str, NCXMOD_YANG_SUFFIX);
 	res = search_subdirs(buff, bufflen, fnamebuff, done);
 	if (*done) {
 	    if (res == NO_ERR) {
@@ -746,7 +755,8 @@ static status_t
 				 NULL, NCXMOD_MODE_FILEYANG,
 				 TRUE, done, pcb, ptyp);
 		if (res != NO_ERR) {
-		    res2 = add_failed(modname, pcb, res);
+		    res2 = add_failed(modname, revision,
+				      pcb, res);
 		}
 	    }
 	}
@@ -754,7 +764,7 @@ static status_t
 	return (res2 != NO_ERR) ? res2 : res;
     }
 
-    /* else subdir searches not alloed
+    /* else subdir searches not allowed
      * first check for YANG file in the current path
      * then check for NCX file in the current path
      */
@@ -762,7 +772,8 @@ static status_t
 		     NCXMOD_MODE_YANG, FALSE, done, pcb, ptyp);
     if (*done) {
 	if (res != NO_ERR) {
-	    res2 = add_failed(modname, pcb, res);
+	    res2 = add_failed(modname, revision,
+			      pcb, res);
 	}
     }
     return (res2 != NO_ERR) ? res2 : res;
@@ -783,6 +794,7 @@ static status_t
 *   buff == buffer to use for the filespec
 *   bufflen == size of 'buff' in bytes
 *   modname == module name to find (no file suffix)
+*   revision == module revision date (may be NULL)
 *   pcb == parser control block in progress
 *   ptyp == parser source type
 *   done == address of return done flag
@@ -799,6 +811,7 @@ static status_t
 			   xmlChar *buff,
 			   uint32 bufflen,
 			   const xmlChar *modname,
+			   const xmlChar *revision,
 			   yang_pcb_t *pcb,
 			   yang_parsetype_t ptyp,
 			   boolean *done)
@@ -834,7 +847,8 @@ static status_t
 	/* copy the next string into the path buffer */
 	xml_strncpy(pathbuff, str, pathlen);
 	res = check_module_path(pathbuff, buff, bufflen,
-				modname, pcb, ptyp, TRUE, done);
+				modname, revision,
+				pcb, ptyp, TRUE, done);
 	if (*done) {
 	    m__free(pathbuff);
 	    return res;
@@ -872,16 +886,24 @@ static status_t
 *
 * INPUTS:
 *   modname == module name with no path prefix or file extension
+*   revision == optional revision date of 'modname' to find
 *   pcb == parser control block
 *   ptyp == current parser source type
+*   retmod == address of return module (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL:
+*    *retmod == pointer to requested module version
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t 
     load_module (const xmlChar *modname,
+		 const xmlChar *revision,
 		 yang_pcb_t *pcb,
-		 yang_parsetype_t ptyp)
+		 yang_parsetype_t ptyp,
+		 ncx_module_t **retmod)
 {
     const xmlChar  *str;
     xmlChar        *buff;
@@ -891,13 +913,24 @@ static status_t
     boolean         done, isfile;
 
 #ifdef NCXMOD_DEBUG
-    log_debug2("\nAttempting to load module (%s)", modname);
+    if (LOGDEBUG2) {
+	log_debug2("\nAttempting to load module '%s'", modname);
+	if (revision) {
+	    log_debug2(" r:%s", revision);
+	}
+    }
 #endif
 
+    res = NO_ERR;
     res2 = NO_ERR;
     isfile = FALSE;
     bufflen = 0;
+    done = FALSE;
     modlen = xml_strlen(modname);
+
+    if (retmod) {
+	*retmod = NULL;
+    }
 
     /* check which form of input is present, module name or filespec */
     if ((*modname == '.') || (*modname == NCXMOD_PSCHAR)) {
@@ -922,11 +955,11 @@ static status_t
 	str--;
     }
 
-    /* try to find a YANG or NCX file suffix */
+    /* try to find a YANG file suffix */
     if (*str == '.') {
 	/* since the dot-char is allowed in YANG identifier names
 	 * only treat this string with a dot in it as a file if
-	 * this is an NCX or YANG file extension
+	 * it has a YANG file extension
 	 */
 	str++;
 	if (!xml_strcmp(str, (const xmlChar *)"yang")) {
@@ -937,7 +970,7 @@ static status_t
     /* check valid module name pattern */
     if (!isfile && !ncx_valid_name(modname, modlen)) {
 	log_error("\nError: Invalid module name (%s)", modname);
-	res = add_failed(modname, pcb, res);
+	res = add_failed(modname, revision, pcb, res);
 	if (res != NO_ERR) {
 	    return res;
 	} else {
@@ -947,11 +980,14 @@ static status_t
 
     /* check if the module is already loaded (in the current ncx_modQ) */
     if (!isfile) {
-	testmod = ncx_find_module(modname);
+	testmod = ncx_find_module(modname, revision);
 	if (testmod) {
 	    log_debug3("\nncxmod: module %s already loaded", modname);
 	    if (!pcb->top) {
 		pcb->top = testmod;
+	    }
+	    if (retmod) {
+		*retmod = testmod;
 	    }
 	    return testmod->status;
 	}
@@ -976,6 +1012,10 @@ static status_t
 	m__free(buff);
 	if (res == ERR_NCX_MISSING_FILE) {
 	    log_error("\nError: file not found (%s)", modname);
+	} else if (res == NO_ERR) {
+	    if (retmod) {
+		*retmod = pcb->top;
+	    }
 	}
 	return res;
     }
@@ -983,30 +1023,36 @@ static status_t
     /* 0) try alt_path variable if set; used by yangdiff */
     if (!done && ncxmod_alt_path) {
 	res = check_module_path(ncxmod_alt_path, buff, bufflen,
-				modname, pcb, ptyp, FALSE, &done);
+				modname, revision,
+				pcb, ptyp, FALSE, &done);
     }
 
     /* 1a) try as module in current dir, YANG format  */
-    res = try_module(buff, bufflen, NULL, NULL,
-		     modname, NCXMOD_MODE_YANG,
-		     FALSE, &done, pcb, ptyp);
+    if (!done) {
+	res = try_module(buff, bufflen, NULL, NULL,
+			 modname, NCXMOD_MODE_YANG,
+			 FALSE, &done, pcb, ptyp);
+    }
 
     /* 2) try YANG_MODPATH environment variable if set */
     if (!done && ncxmod_mod_path) {
 	res = check_module_pathlist(ncxmod_mod_path, buff, bufflen,
-				    modname, pcb, ptyp, &done);
+				    modname, revision,
+				    pcb, ptyp, &done);
     }
 
     /* 3) HOME/modules directory */
     if (!done && ncxmod_env_userhome) {
 	res = check_module_path(ncxmod_env_userhome, buff, bufflen,
-				modname, pcb, ptyp, FALSE, &done);
+				modname, revision,
+				pcb, ptyp, FALSE, &done);
     }
 
     /* 4) YANG_HOME/modules directory */
     if (!done && ncxmod_env_home) {
 	res = check_module_path(ncxmod_env_home, buff, bufflen,
-				modname, pcb, ptyp, FALSE, &done);
+				modname, revision,
+				pcb, ptyp, FALSE, &done);
     }
 
     /* 5) YANG_INSTALL/modules directory or default install path
@@ -1016,24 +1062,33 @@ static status_t
     if (!done) {
 	if (ncxmod_env_install) {
 	    res = check_module_path(ncxmod_env_install, buff, bufflen,
-				    modname, pcb, ptyp, FALSE, &done);
+				    modname, revision,
+				    pcb, ptyp, FALSE, &done);
 	} else {
 	    res = check_module_path(NCXMOD_DEFAULT_INSTALL, buff, bufflen,
-				    modname, pcb, ptyp, FALSE, &done);
+				    modname, revision,
+				    pcb, ptyp, FALSE, &done);
         }
     }
 
+    res2 = NO_ERR;
     if (res != NO_ERR || !done) {
-	res2 = add_failed(modname, pcb, res);
+	res2 = add_failed(modname, revision, pcb, res);
+    }
+
+    if (res == NO_ERR) {
+	res = res2;
     }
 
     m__free(buff);
 
     if (done) {
-	return (res2 != NO_ERR) ? res2 : res;
+	if (res == NO_ERR && retmod) {
+	    *retmod = pcb->top;
+	}
+	return res;
     } else {
-	log_error("\nError: module (%s) not found.", modname);
-	return ERR_NCX_MOD_NOT_FOUND;
+	return (res == NO_ERR) ? ERR_NCX_MOD_NOT_FOUND : res;
     }
 
 }  /* load_module */
@@ -1274,16 +1329,24 @@ void
 *
 * INPUTS:
 *   modname == module name with no path prefix or file extension
+*   revision == optional revision date of 'modname' to find
+*   retmod == address of return module (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL:
+*    *retmod == pointer to requested module version
 *
 * RETURNS:
 *   status
 *********************************************************************/
 status_t 
-    ncxmod_load_module (const xmlChar *modname)
+    ncxmod_load_module (const xmlChar *modname,
+			const xmlChar *revision,
+			ncx_module_t **retmod)
 {
 
-    yang_pcb_t *pcb;
-    status_t    res;
+    yang_pcb_t      *pcb;
+    status_t         res;
 
 #ifdef DEBUG
     if (!modname) {
@@ -1295,7 +1358,15 @@ status_t
     if (!pcb) {
 	res = ERR_INTERNAL_MEM;
     } else {
-	res = load_module(modname, pcb, YANG_PT_TOP);
+	pcb->revision = revision;
+	res = load_module(modname, revision, 
+			  pcb, YANG_PT_TOP,  retmod);
+	if (res == ERR_NCX_MOD_NOT_FOUND && 
+	    revision && *revision) {
+	    /* try filenames without revision dates in them */
+	    res = load_module(modname, NULL, 
+			      pcb, YANG_PT_TOP,  retmod);
+	}
     }
     if (pcb) {
 	yang_free_pcb(pcb);
@@ -1323,6 +1394,7 @@ status_t
 *
 * INPUTS:
 *   modname == module name with no path prefix or file extension
+*   revision == optional revision date of 'modname' to find
 *   pcb == YANG parser control block
 *   ptyp == YANG parser source type
 *
@@ -1331,11 +1403,14 @@ status_t
 *********************************************************************/
 status_t 
     ncxmod_load_imodule (const xmlChar *modname,
+			 const xmlChar *revision,
 			 yang_pcb_t *pcb,
 			 yang_parsetype_t ptyp)
 {
 
-    yang_node_t *node;
+    yang_node_t     *node;
+    const xmlChar   *savedrev;
+    status_t         res;
 
 #ifdef DEBUG
     if (!modname || !pcb) {
@@ -1344,12 +1419,24 @@ status_t
 #endif
 
     /* see if [sub]module already tried and failed */
-    node = yang_find_node(&pcb->failedQ, modname);
+    node = yang_find_node(&pcb->failedQ, modname, revision);
     if (node) {
 	return node->res;
     }
 
-    return load_module(modname, pcb, ptyp);
+    savedrev = pcb->revision;
+    pcb->revision = revision;
+
+    res = load_module(modname, revision, pcb, ptyp, NULL);
+
+    if (res == ERR_NCX_MOD_NOT_FOUND && revision && *revision) {
+	/* try filenames without revision dates in them */
+	res = load_module(modname, NULL, pcb, ptyp,  NULL);
+    }
+
+    pcb->revision = savedrev;
+
+    return res;
 
 }  /* ncxmod_load_imodule */
 
@@ -1363,6 +1450,7 @@ status_t
 *
 * INPUTS:
 *   modname == module name with no path prefix or file extension
+*   revision == optional revision date of 'modname' to find
 *   subtree_mode == TRUE if in a subtree loop
 *                == FALSE if processing one module in yangdump
 *   with_submods == TRUE if YANG_PT_TOP mode should skip submodules
@@ -1377,13 +1465,13 @@ status_t
 *********************************************************************/
 yang_pcb_t *
     ncxmod_load_module_xsd (const xmlChar *modname,
+			    const xmlChar *revision,
 			    boolean subtree_mode,
 			    boolean with_submods,
 			    status_t *res)
 {
-
-    yang_pcb_t *pcb;
-
+    yang_pcb_t     *pcb;
+    
 #ifdef DEBUG
     if (!modname || !res) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1395,9 +1483,11 @@ yang_pcb_t *
     if (!pcb) {
 	*res = ERR_INTERNAL_MEM;
     } else {
+	pcb->revision = revision;
 	pcb->subtree_mode = subtree_mode;
 	pcb->with_submods = with_submods;
-	*res = load_module(modname, pcb, YANG_PT_TOP);
+	*res = load_module(modname, revision, 
+			   pcb, YANG_PT_TOP, NULL);
     }
 
     return pcb;
@@ -1415,6 +1505,7 @@ yang_pcb_t *
 *
 * INPUTS:
 *   modname == module name with no path prefix or file extension
+*   revision == optional revision date of 'modname' to find
 *   subtree_mode == TRUE if in a subtree loop
 *                == FALSE if processing one module in yangdump
 *   with_submods == TRUE if YANG_PT_TOP mode should skip submodules
@@ -1431,6 +1522,7 @@ yang_pcb_t *
 *********************************************************************/
 yang_pcb_t *
     ncxmod_load_module_diff (const xmlChar *modname,
+			     const xmlChar *revision,
 			     boolean subtree_mode,
 			     boolean with_submods,
 			     const xmlChar *modpath,
@@ -1456,7 +1548,8 @@ yang_pcb_t *
 	if (modpath) {
 	    ncxmod_set_altpath(modpath);
 	}
-	*res = load_module(modname, pcb, YANG_PT_TOP);
+	*res = load_module(modname, revision, 
+			   pcb, YANG_PT_TOP, NULL);
     }
 
     return pcb;

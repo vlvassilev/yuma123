@@ -139,11 +139,6 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-typedef struct objptr_t_ {
-    dlq_hdr_t       qhdr;
-    obj_template_t *obj;
-}  objptr_t;
-
 
 /********************************************************************
 *                                                                   *
@@ -172,8 +167,6 @@ static obj_template_t   *gen_empty;
 static obj_template_t   *gen_float;
 
 static obj_template_t   *gen_root;
-
-static dlq_hdr_t         objstoreQ;
 
 /* TBD: support multiple callbacks */
 static ncx_load_cbfn_t  mod_load_callback;
@@ -259,91 +252,81 @@ static xmlChar *
 * specified definition name.
 *
 * INPUTS:
-*   modname == module to look up or load
+*   imp == import struct to use
 *   defname == name of the app-specific definition to find
-*   diffmode == TRUE if Q search only; FALSE=def_reg OK
+*   dtyp == address of return definition type (for verification)
+*   *dtyp == NCX_NT_NONE for any match, or a specific type to find
+*   dptr == addres of return definition pointer
 *
 * OUTPUTS:
-*   *dtyp == NCX_NT_PARMSET  (if NO_ERR)
+*   imp->mod may be set if not already
+*   *dtyp == node type found NCX_NT_OBJ or NCX_NT_TYPE, etc. 
 *   *dptr == pointer to data struct or NULL if not found
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
-    check_moddef (const xmlChar  *modname, 
-		  const xmlChar  *defname,
-		  boolean diffmode,
-		  ncx_node_t      *dtyp,
-		  void          **dptr)
+    check_moddef (ncx_import_t *imp,
+		  const xmlChar *defname,
+		  ncx_node_t *dtyp,
+		  void **dptr)
 {
-    ncx_module_t  *imod;
     status_t       res, retres;
 
     retres = NO_ERR;
 
     /* First find or load the module */
-    if (diffmode) {
-	imod = ncx_find_module(modname);
-    } else {
-	imod = def_reg_find_module(modname);
+    if (!imp->mod) {
+	imp->mod = ncx_find_module(imp->module, imp->revision);
     }
 
-    if (!imod) {
-	res = ncxmod_load_module(modname);
+    if (!imp->mod) {
+	res = ncxmod_load_module(imp->module, imp->revision, &imp->mod);
 	CHK_EXIT(res, retres);
-
-	/* try again to find the module; should not fail */
-	if (diffmode) {
-	    imod = ncx_find_module(modname);
-	} else {
-	    imod = def_reg_find_module(modname);
-	}
-	if (!imod) {
+	if (!imp->mod) {
 	    return ERR_NCX_MOD_NOT_FOUND;
 	}
     }
 
     /* have a module loaded that might contain this def 
-     * look in the def_reg for the defname
+     * look for the defname
      * the module may be loaded with non-fatal errors
      */
-    if (diffmode) {
-	switch (*dtyp) {
-	case NCX_NT_TYP:
-	    *dptr = ncx_find_type(imod, defname);
-	    break;
-	case NCX_NT_GRP:
-	    *dptr = ncx_find_grouping(imod, defname);
-	    break;
-	    break;
-	case NCX_NT_OBJ:
-	    *dptr = obj_find_template(&imod->datadefQ, imod->name, defname);
-	    break;
-	case NCX_NT_NONE:
-	    *dptr = ncx_find_type(imod, defname);
-	    if (*dptr) {
-		*dtyp = NCX_NT_TYP;
-	    }
-	    if (!*dptr) {
-		*dptr = ncx_find_grouping(imod, defname);
-		if (*dptr) {
-		    *dtyp = NCX_NT_GRP;
-		}
-	    }
-	    if (!*dptr) {
-		*dptr = obj_find_template(&imod->datadefQ, imod->name, defname);
-		if (*dptr) {
-		    *dtyp = NCX_NT_OBJ;
-		}
-	    }
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    *dptr = NULL;
+    switch (*dtyp) {
+    case NCX_NT_TYP:
+	*dptr = ncx_find_type(imp->mod, defname);
+	break;
+    case NCX_NT_GRP:
+	*dptr = ncx_find_grouping(imp->mod, defname);
+	break;
+	break;
+    case NCX_NT_OBJ:
+	*dptr = obj_find_template(&imp->mod->datadefQ, 
+				  imp->module, defname);
+	break;
+    case NCX_NT_NONE:
+	*dptr = ncx_find_type(imp->mod, defname);
+	if (*dptr) {
+	    *dtyp = NCX_NT_TYP;
 	}
-    } else {
-	*dptr = def_reg_find_moddef(imod->name, defname, dtyp);
+	if (!*dptr) {
+	    *dptr = ncx_find_grouping(imp->mod, defname);
+	    if (*dptr) {
+		*dtyp = NCX_NT_GRP;
+	    }
+	}
+	if (!*dptr) {
+	    *dptr = obj_find_template(&imp->mod->datadefQ, 
+				      imp->module, defname);
+	    if (*dptr) {
+		*dtyp = NCX_NT_OBJ;
+	    }
+	}
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	*dptr = NULL;
     }
 
     return (*dptr) ? NO_ERR : ERR_NCX_DEF_NOT_FOUND;
@@ -516,111 +499,48 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION add_to_registry
+* FUNCTION set_toplevel_defs
 *
-* Add all the definitions stored in an ncx_module_t to the registry
-* This step is deferred to keep the registry stable as possible
-* and only add modules in an all-or-none fashion.
-* 
 * INPUTS:
-*   mod == module to add to registry
-*   modname == name of main module being added
+*   mod == module to check
 *   nsid == namespace ID of the main module being added
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
-    add_to_registry (ncx_module_t *mod,
-		     const xmlChar *modname,
-		     xmlns_id_t    nsid)
+    set_toplevel_defs (ncx_module_t *mod,
+		       xmlns_id_t    nsid)
 {
     typ_template_t *typ;
     grp_template_t *grp;
     obj_template_t *obj;
     ext_template_t *ext;
-    dlq_hdr_t      *topQ;
-    objptr_t       *objptr;
-    status_t        res;
 
-    /* add the type definitions to the def_reg hash table */
     for (typ = (typ_template_t *)dlq_firstEntry(&mod->typeQ);
          typ != NULL;
          typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
-	/* register the top-level type */
 	typ->nsid = nsid;
-	res = def_reg_add_moddef(modname, typ->name, NCX_NT_TYP, typ);
-        if (res != NO_ERR) {
-	    /* this type registration failed */
-	    log_error("\nncx reg: Module '%s' registering "
-		      "type '%s' failed (%s)",
-		      modname, typ->name, get_error_string(res));
-            return res;
-        }
     }
 
-    /* add the grouping definitions to the def_reg hash table */
     for (grp = (grp_template_t *)dlq_firstEntry(&mod->groupingQ);
          grp != NULL;
          grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
-	/* register the top-level grouping */
 	grp->nsid = nsid;
-	res = def_reg_add_moddef(modname,
-				 grp->name, NCX_NT_GRP, grp);
-        if (res != NO_ERR) {
-	    /* this type registration failed */
-	    log_error("\nncx reg: Module '%s' registering "
-		      "grouping '%s' failed (%s)",
-		      modname, grp->name, get_error_string(res));
-            return res;
-        }
     }
 
-    if (!dlq_empty(&mod->datadefQ)) {
-	if (gen_root) {
-	    topQ = obj_get_datadefQ(gen_root);
-	} else {
-	    topQ = &objstoreQ;
-	}
+    for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+	 obj != NULL;
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	/* add the top-level object definitions to the def_reg hash table */
-	for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	     obj != NULL;
-	     obj = (obj_template_t *)dlq_nextEntry(obj)) {
-	    if (!obj_has_name(obj)) {
-		/* these are not real objects, and do not have names */
-		continue;
-	    }
-
-	    res = def_reg_add_moddef(modname,
-				     obj_get_name(obj), 
-				     NCX_NT_OBJ, obj);
-	    if (res != NO_ERR) {
-		/* this object registration failed */
-		log_error("\nncx reg: Module '%s' registering "
-			  "object '%s' failed (%s)",
-			  modname, obj_get_name(obj),
-			  get_error_string(res));
-		return res;
-	    }
-
-	    if (gen_root) {
-		obj->parent = gen_root;
-	    } else {
-		objptr = m__getObj(objptr_t);
-		if (!objptr) {
-		    return ERR_INTERNAL_MEM;
-		}
-		memset(objptr, 0x0, sizeof(objptr_t));
-		objptr->obj = obj;
-		dlq_enque(objptr, topQ);
-	    }
+	if (obj_is_data_db(obj) || obj_is_rpc(obj) 
+	    || obj_is_notif(obj)) {
+	    obj->parent = gen_root;
 	}
     }
 
-    /* jsut set the extension namespace ID */
     for (ext = (ext_template_t *)dlq_firstEntry(&mod->extensionQ);
          ext != NULL;
          ext = (ext_template_t *)dlq_nextEntry(ext)) {
@@ -629,7 +549,7 @@ static status_t
 
     return NO_ERR;
 
-}  /* add_to_registry */
+}  /* set_toplevel_defs */
 
 
 /********************************************************************
@@ -646,21 +566,15 @@ static status_t
 *
 * INPUTS:
 *    mod == ncx_module_t data structure to free
-*    removereg == TRUE if should if all defs be removed 
-*                 from registry, FALSE if not
 *********************************************************************/
 static void 
-    free_module (ncx_module_t *mod,
-		 boolean removereg)
+    free_module (ncx_module_t *mod)
 {
     ncx_revhist_t  *revhist;
     ncx_import_t   *import;
     ncx_include_t  *incl;
     ncx_feature_t  *feature;
     ncx_identity_t *identity;
-    typ_template_t *typ;
-    grp_template_t *grp;
-    obj_template_t *obj;
     yang_stmt_t    *stmt;
 
 #ifdef DEBUG
@@ -669,11 +583,6 @@ static void
 	return;
     }
 #endif
-
-    /* unregister the module */
-    if (mod->ismod && !mod->diffmode && removereg) {
-	def_reg_del_module(mod->name);
-    }
 
     /* clear the revision Q */
     while (!dlq_empty(&mod->revhistQ)) {
@@ -694,31 +603,13 @@ static void
     }
 
     /* clear the type Que */
-    while (!dlq_empty(&mod->typeQ)) {
-	typ = (typ_template_t *)dlq_deque(&mod->typeQ);
-	if (typ->name && !mod->diffmode && removereg) {
-	    def_reg_del_moddef(mod->name, typ->name, NCX_NT_TYP);
-	}
-	typ_free_template(typ);
-    }
+    typ_clean_typeQ(&mod->typeQ);
 
     /* clear the grouping Que */
-    while (!dlq_empty(&mod->groupingQ)) {
-	grp = (grp_template_t *)dlq_deque(&mod->groupingQ);
-	if (grp->name && !mod->diffmode && removereg) {
-	    def_reg_del_moddef(mod->name, grp->name, NCX_NT_GRP);
-	}
-	grp_free_template(grp);
-    }
+    grp_clean_groupingQ(&mod->groupingQ);
 
     /* clear the datadefQ */
-    while (!dlq_empty(&mod->datadefQ)) {
-	obj = (obj_template_t *)dlq_deque(&mod->datadefQ);
-	if (obj_has_name(obj) && !mod->diffmode && removereg) {
-	    def_reg_del_moddef(mod->name, obj_get_name(obj), NCX_NT_OBJ);
-	}
-	obj_free_template(obj);
-    }
+    obj_clean_datadefQ(&mod->datadefQ);
 
     /* clear the extension Que */
     ext_clean_extensionQ(&mod->extensionQ);
@@ -970,6 +861,59 @@ static status_t
 } /* bootstrap_cli */
 
 
+/********************************************************************
+* FUNCTION add_to_modQ
+*
+* INPUTS:
+*   mod == module to add to modQ
+*   modQ == Q of ncx_module_t to use
+*
+*********************************************************************/
+static void
+    add_to_modQ (ncx_module_t *mod,
+		 dlq_hdr_t *modQ)
+{
+    ncx_module_t   *testmod;
+    boolean         done;
+    int32           retval;
+
+    done = FALSE;
+
+    for (testmod = (ncx_module_t *)dlq_firstEntry(modQ);
+	 testmod != NULL && !done;
+	 testmod = (ncx_module_t *)dlq_nextEntry(testmod)) {
+
+	retval = xml_strcmp(mod->name, testmod->name);
+	if (retval == 0) {
+	    retval = yang_compare_revision_dates(mod->version,
+						 testmod->version);
+	    if (retval == 0) {
+		SET_ERROR(ERR_INTERNAL_VAL);
+		testmod->defaultrev = FALSE;
+		mod->defaultrev = TRUE;
+		dlq_insertAhead(mod, testmod);
+		done = TRUE;
+	    } else if (retval > 0) {
+		testmod->defaultrev = FALSE;
+		mod->defaultrev = TRUE;
+		dlq_insertAhead(mod, testmod);
+		done = TRUE;
+	    }   /* else keep going */
+	} else if (retval < 0) {
+	    mod->defaultrev = TRUE;
+	    dlq_insertAhead(mod, testmod);
+	    done = TRUE;
+	} /* else keep going */
+    }
+
+    if (!done) {
+	mod->defaultrev = TRUE;
+	dlq_enque(mod, modQ);
+    }
+	    
+}  /* add_to_modQ */
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -1032,7 +976,6 @@ status_t
     dlq_createSQue(&ncx_filptrQ);
     ncx_max_filptrs = NCX_DEF_FILPTR_CACHESIZE;
     ncx_cur_filptrs = 0;
-    dlq_createSQue(&objstoreQ);
 
     /* check that the correct version of libxml2 is installed */
     LIBXML_TEST_VERSION;
@@ -1055,55 +998,64 @@ status_t
     ncx_init_done = TRUE;
 
     /* Initialize the INVALID namespace to help filter handling */
-    res = xmlns_register_ns(INVALID_URN, INV_PREFIX, NCX_MODULE, &nsid);
+    res = xmlns_register_ns(INVALID_URN, INV_PREFIX, 
+			    NCX_MODULE, NULL, &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the XML namespace for NETCONF */
-    res = xmlns_register_ns(NC_URN, NC_PREFIX, NC_MODULE, &nsid);
+    res = xmlns_register_ns(NC_URN, NC_PREFIX, 
+			    NC_MODULE, NULL, &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the XML namespace for YANG */
-    res = xmlns_register_ns(YANG_URN, YANG_PREFIX, YANG_MODULE, &nsid);
+    res = xmlns_register_ns(YANG_URN, YANG_PREFIX, 
+			    YANG_MODULE, NULL, &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the NCX namespace for NCX specific extensions */
-    res = xmlns_register_ns(NCX_URN, NCX_PREFIX, NCX_MODULE, &nsid);
+    res = xmlns_register_ns(NCX_URN, NCX_PREFIX, 
+			    NCX_MODULE, NULL, &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the XMLNS namespace for xmlns attributes */
-    res = xmlns_register_ns(NS_URN, NS_PREFIX, NCX_MODULE, &nsid);
+    res = xmlns_register_ns(NS_URN, NS_PREFIX, 
+			    NCX_MODULE, NULL, &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the XSD namespace for ncxdump program */
-    res = xmlns_register_ns(XSD_URN, XSD_PREFIX, NCX_MODULE, &nsid);
+    res = xmlns_register_ns(XSD_URN, XSD_PREFIX, 
+			    NCX_MODULE, NULL, &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the XSI namespace for ncxdump program */
-    res = xmlns_register_ns(XSI_URN, XSI_PREFIX, NCX_MODULE, &nsid);
+    res = xmlns_register_ns(XSI_URN, XSI_PREFIX, 
+			    NCX_MODULE, NULL, &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the XML namespace for xml:lang attribute support */
-    res = xmlns_register_ns(XML_URN, XML_PREFIX, NCX_MODULE, &nsid);
+    res = xmlns_register_ns(XML_URN, XML_PREFIX, 
+			    NCX_MODULE, NULL, &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the Notifications namespace for ncxdump program */
-    res = xmlns_register_ns(NCN_URN, NCN_PREFIX, NCX_MODULE, &nsid);
+    res = xmlns_register_ns(NCN_URN, NCN_PREFIX, 
+			    NCX_MODULE, NULL, &nsid);
     if (res != NO_ERR) {
 	return res;
     }
@@ -1138,59 +1090,45 @@ status_t
 status_t 
     ncx_stage2_init (void)
 {
-    obj_template_t   *obj;
-    objptr_t         *objptr;
-    ncx_node_t        deftyp;
+    ncx_module_t     *mod;
 
     if (stage2_init_done) {
 	return NO_ERR;
     }
 
-    /* find all 4 required object templates */
-    deftyp = NCX_NT_OBJ;
+    mod = ncx_find_module(NCX_MODULE, NULL);
+    if (!mod) {
+	return ERR_NCX_MOD_NOT_FOUND;
+    }
 
-    gen_anyxml = (obj_template_t *)
-	def_reg_find_moddef(NCX_MODULE, NCX_EL_ANY, &deftyp);
+    gen_anyxml = ncx_find_object(mod, NCX_EL_ANY);
     if (!gen_anyxml) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    gen_container = (obj_template_t *)
-	def_reg_find_moddef(NCX_MODULE, NCX_EL_STRUCT, &deftyp);
+    gen_container = ncx_find_object(mod, NCX_EL_STRUCT);
     if (!gen_container) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    gen_string = (obj_template_t *)
-	def_reg_find_moddef(NCX_MODULE, NCX_EL_STRING, &deftyp);
+    gen_string = ncx_find_object(mod, NCX_EL_STRING);
     if (!gen_string) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    gen_empty = (obj_template_t *)
-	def_reg_find_moddef(NCX_MODULE, NCX_EL_EMPTY, &deftyp);
+    gen_empty = ncx_find_object(mod, NCX_EL_EMPTY);
     if (!gen_empty) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    gen_float = (obj_template_t *)
-	def_reg_find_moddef(NCX_MODULE, NCX_EL_FLOAT, &deftyp);
+    gen_float = ncx_find_object(mod, NCX_EL_FLOAT);
     if (!gen_float) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    gen_root = (obj_template_t *)
-	def_reg_find_moddef(NCX_MODULE, NCX_EL_ROOT, &deftyp);
+    gen_root = ncx_find_object(mod, NCX_EL_ROOT);
     if (!gen_root) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
-    /* add the top-level object definitions to the def_reg hash table */
-    while (!dlq_empty(&objstoreQ)) {
-	objptr = (objptr_t *)dlq_deque(&objstoreQ);
-
-	obj->parent = gen_root;
-	m__free(objptr);
     }
 
     stage2_init_done = TRUE;
@@ -1209,20 +1147,14 @@ void
 {
     ncx_module_t   *mod;
     ncx_filptr_t   *filptr;
-    objptr_t       *objptr;
 
     if (!ncx_init_done) {
 	return;
     }
 
-    while (!dlq_empty(&objstoreQ)) {
-	objptr = (objptr_t *)dlq_deque(&objstoreQ);
-	m__free(objptr);
-    }
-
     while (!dlq_empty(&ncx_modQ)) {
 	mod = (ncx_module_t *)dlq_deque(&ncx_modQ);
-	free_module(mod, TRUE);
+	free_module(mod);
     }
 
     while (!dlq_empty(&ncx_filptrQ)) {
@@ -1299,19 +1231,20 @@ ncx_module_t *
 *
 * Find a ncx_module_t in the ncx_modQ
 * These are the modules that are already loaded
-* This search is done instead of the def_reg directly
-* to force the selection specified by the <import>
-* instead of what might be loaded into the registry
 *
 * INPUTS:
 *   modname == module name
+*   revision == module revision date
+*
 * RETURNS:
 *  module pointer if found or NULL if not
 *********************************************************************/
 ncx_module_t *
-    ncx_find_module (const xmlChar *modname)
+    ncx_find_module (const xmlChar *modname,
+		     const xmlChar *revision)
 {
     ncx_module_t  *mod;
+    int32          retval;
 
 #ifdef DEBUG
     if (!modname) {
@@ -1323,34 +1256,52 @@ ncx_module_t *
     for (mod = (ncx_module_t *)dlq_firstEntry(ncx_curQ);
          mod != NULL;
          mod = (ncx_module_t *)dlq_nextEntry(mod)) {
-        if (!xml_strcmp(mod->name, modname)) {
-            return mod;
-        }
+
+        retval = xml_strcmp(modname, mod->name);
+	if (retval == 0) {
+	    if (!revision || !mod->version) {
+		if (mod->defaultrev) {
+		    return mod;
+		}
+	    } else {
+		retval = yang_compare_revision_dates(revision,
+						     mod->version);
+		if (retval == 0) {
+		    return mod;
+		} else if (retval > 0) {
+		    return NULL;
+		}
+	    }
+	} else if (retval < 0) {
+	    return NULL;
+	}
     }
     return NULL;
 
 }   /* ncx_find_module */
 
 
+#ifdef REMOVED_FROM_YANGDUMP_SO_LEAVE_OUT
 /********************************************************************
 * FUNCTION ncx_find_submodule
 *
 * Find a submodule of an ncx_module_t in the ncx_modQ
 * These are the modules that are already loaded
-* This search is done instead of the def_reg directly
-* to force the selection specified by the <import>
-* instead of what might be loaded into the registry
 *
 * INPUTS:
 *   modname == module name
+*   modrevision == module revision date
 *   submodname == submodule name
+*   revision == submodule revision date
 *
 * RETURNS:
 *  module pointer if found or NULL if not
 *********************************************************************/
 ncx_module_t *
     ncx_find_submodule (const xmlChar *modname,
-			const xmlChar *submodname)
+			const xmlChar *modrevision,
+			const xmlChar *submodname,
+			const xmlChar *revision)
 {
     ncx_module_t  *mod;
     yang_node_t   *node;
@@ -1363,13 +1314,13 @@ ncx_module_t *
     }
 #endif
 
-    mod = ncx_find_module(modname);
+    mod = ncx_find_module(modname, modrevision);
     if (!mod) {
 	return NULL;
     }
 
     que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
-    node = yang_find_node(que, submodname);
+    node = yang_find_node(que, submodname, revision);
     if (node) {
 	return node->submod;
     }
@@ -1377,6 +1328,7 @@ ncx_module_t *
     return NULL;
 
 }   /* ncx_find_submodule */
+#endif
 
 
 /********************************************************************
@@ -1397,43 +1349,9 @@ ncx_module_t *
 void 
     ncx_free_module (ncx_module_t *mod)
 {
-    free_module(mod, FALSE);
+    free_module(mod);
 
 }  /* ncx_free_module */
-
-
-/********************************************************************
-* FUNCTION ncx_remove_module
-* 
-* Scrub the memory in a ncx_module_t by freeing all
-* the sub-fields and then freeing the entire struct itself 
-* Also remove all module definitions from the registry
-*
-* INPUTS:
-*    modname == module name of the NCX module to remove
-*********************************************************************/
-void 
-    ncx_remove_module (const xmlChar *modname)
-{
-    ncx_module_t  *mod;
-
-#ifdef DEBUG
-    if (!modname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    /* if the module isn't in the hash table,
-     * then it was never registered
-     */
-    mod = def_reg_find_module(modname);
-    if (mod) {
-        dlq_remove(mod);
-        free_module(mod, TRUE);
-    }
-
-}  /* ncx_remove_module */
 
 
 /********************************************************************
@@ -1486,7 +1404,8 @@ boolean
 	 impptr != NULL;
 	 impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
 
-	testmod = ncx_find_module(impptr->modname);
+	testmod = ncx_find_module(impptr->modname,
+				  impptr->revision);
 	if (!testmod) {
 	    /* missing import */
 	    return TRUE;
@@ -1547,7 +1466,9 @@ typ_template_t *
 
 	/* get the real submodule struct */
 	if (!inc->submod) {
-	    node = yang_find_node(que, inc->submodule);
+	    node = yang_find_node(que, 
+				  inc->submodule,
+				  inc->revision);
 	    if (node) {
 		inc->submod = node->submod;
 	    }
@@ -1652,7 +1573,9 @@ grp_template_t *
 
 	/* get the real submodule struct */
 	if (!inc->submod) {
-	    node = yang_find_node(que, inc->submodule);
+	    node = yang_find_node(que, 
+				  inc->submodule,
+				  inc->revision);
 	    if (node) {
 		inc->submod = node->submod;
 	    }
@@ -1818,7 +1741,7 @@ obj_template_t *
 
     rpc = NULL;
     if (module) {
-	mod = ncx_find_module(module);
+	mod = ncx_find_module(module, NULL);
 	if (mod) {
 	    rpc = ncx_match_rpc(mod, rpcname);
 	}
@@ -1839,26 +1762,86 @@ obj_template_t *
 
 
 /********************************************************************
+* FUNCTION ncx_find_any_object
+*
+* Check if an obj_template_t in in any module that
+* matches the object name string
+*
+* INPUTS:
+*   rpcname == RPC name to match
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+obj_template_t *
+    ncx_find_any_object (const xmlChar *objname)
+{
+    obj_template_t *obj;
+    ncx_module_t   *mod;
+
+#ifdef DEBUG
+    if (!objname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    obj = NULL;
+    for (mod = ncx_get_first_module();
+	 mod != NULL;
+	 mod =  ncx_get_next_module(mod)) {
+
+	obj = obj_find_template_top(mod, 
+				    ncx_get_modname(mod), 
+				    objname);
+	if (obj) {
+	    return obj;
+	}
+    }
+    return NULL;
+
+}   /* ncx_find_any_object */
+
+
+/********************************************************************
+* FUNCTION ncx_find_object
+*
+* Find a top level module object
+*
+* INPUTS:
+*   mod == ncx_module to check
+*   typname == type name
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+obj_template_t *
+    ncx_find_object (ncx_module_t *mod,
+		     const xmlChar *objname)
+{
+    return obj_find_template_top(mod, mod->name, objname);
+
+}  /* ncx_find_object */
+
+
+/********************************************************************
 * FUNCTION ncx_add_to_registry
 *
 * Add all the definitions stored in an ncx_module_t to the registry
 * This step is deferred to keep the registry stable as possible
 * and only add modules in an all-or-none fashion.
 * 
-* HACK:
-*    Also used to set the namespace ID of duplicate modules
-*    for the yangdump application.  In subtree mode, multiple
-*    parser control blocks are used and destroyed, but the
-*    def_reg is not reset
-*
 * INPUTS:
 *   mod == module to add to registry
+*   alreadyreg == TRUE if another version has already 
+*                 registered the namespace
+*                 FALSE if this is the first revision
+*                 being added to the registry
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 status_t 
-    ncx_add_to_registry (ncx_module_t *mod)
+    ncx_add_to_registry (ncx_module_t *mod,
+			 boolean alreadyreg)
 {
     yang_node_t    *node;
     xmlns_t        *ns;
@@ -1870,6 +1853,8 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
+
+    res = NO_ERR;
 
     /* check module parse code */
     if (mod->status != NO_ERR) {
@@ -1895,6 +1880,10 @@ status_t
 	needns = FALSE;
     }
 
+    if (alreadyreg) {
+	needns = FALSE;
+    }
+
     /* first add the application namespace
      * Multiple NS URIs are allowed to map to the same app 
      */
@@ -1907,6 +1896,8 @@ status_t
 	    }
 	}
     
+	/**** CHECK PREFIX COLLISION HERE ****/
+
 	ns = def_reg_find_ns(mod->ns);
 	if (ns) {
 	    if (xml_strcmp(mod->name, ns->ns_module) &&
@@ -1923,7 +1914,7 @@ status_t
 	    }
 	} else {
 	    res = xmlns_register_ns(mod->ns, mod->prefix, 
-				    mod->name, &mod->nsid);
+				    mod->name, mod, &mod->nsid);
 	    if (res != NO_ERR) {
 		/* this NS registration failed */
 		log_error("\nncx reg: Module '%s' registering "
@@ -1933,10 +1924,12 @@ status_t
 		return res;
 	    }
 	}
+    } else if (alreadyreg) {
+	mod->nsid = xmlns_find_ns_by_module(mod->name);
     }
 
-    /* add the main module definitions */
-    res = add_to_registry(mod, mod->name, mod->nsid);
+    res = set_toplevel_defs(mod, mod->nsid);
+
     if (res != NO_ERR) {
 	return res;
     }
@@ -1947,8 +1940,7 @@ status_t
 	 node = (yang_node_t *)dlq_nextEntry(node)) {
 
 	node->submod->nsid = mod->nsid;
-	res = add_to_registry(node->submod, mod->name, 
-			      mod->nsid);
+	res = set_toplevel_defs(node->submod, mod->nsid);
 	if (res != NO_ERR) {
 	    return res;
 	}
@@ -1958,24 +1950,16 @@ status_t
      * of other modules
      */
     if (mod->ismod) {
-	res = def_reg_add_module(mod);
-	if (res != NO_ERR) {
-	    /* this module registration failed */
-	    log_error("\nncx reg: Module '%s' registration failed (%s)",
-		      mod->name, get_error_string(res));
-	    return res;
-	}
-
 	/* save the module in the module Q */
+	add_to_modQ(mod, &ncx_modQ);
 	mod->added = TRUE;
-	dlq_enque(mod, &ncx_modQ);
 
 	if (mod_load_callback) {
 	    (*mod_load_callback)(mod);
 	}
     }
     
-    return NO_ERR;
+    return res;
 
 }  /* ncx_add_to_registry */
 
@@ -1987,8 +1971,6 @@ status_t
 * Used by yangdiff to bypass add_to_registry to support
 * N different module trees
 *
-* !!! Does not add anything to the def_reg database !!!
-* 
 * INPUTS:
 *   mod == module to add to current module Q
 *
@@ -1999,8 +1981,8 @@ status_t
     ncx_add_to_modQ (ncx_module_t *mod)
 {
 
+    add_to_modQ(mod, ncx_curQ);
     mod->added = TRUE;
-    dlq_enque(mod, ncx_curQ);
     return NO_ERR;
 
 } /* ncx_add_to_modQ */
@@ -2053,7 +2035,16 @@ boolean
 ncx_module_t *
     ncx_get_first_module (void)
 {
-    return (ncx_module_t *)dlq_firstEntry(ncx_curQ);
+    ncx_module_t *mod;
+
+    mod = (ncx_module_t *)dlq_firstEntry(ncx_curQ);
+    while (mod) {
+	if (mod->defaultrev) {
+	    return mod;
+	}
+	mod = (ncx_module_t *)dlq_nextEntry(mod);
+    }
+    return mod;
 
 }  /* ncx_get_first_module */
 
@@ -2069,8 +2060,17 @@ ncx_module_t *
 ncx_module_t *
     ncx_get_next_module (const ncx_module_t *mod)
 {
-    return (mod) ? 
+    ncx_module_t *nextmod;
+
+    nextmod = (mod) ? 
 	(ncx_module_t *)dlq_nextEntry(mod) : NULL;
+    while (nextmod) {
+	if (nextmod->defaultrev) {
+	    return nextmod;
+	}
+	nextmod = (ncx_module_t *)dlq_nextEntry(nextmod);
+    }
+    return nextmod;
 
 }  /* ncx_get_next_module */
 
@@ -2118,7 +2118,9 @@ ncx_module_t *
     if (mod->ismod) {
 	return mod;
     }
-    return ncx_find_module(mod->belongs);
+
+    /**** DO NOT KNOW THE REAL MAIN MODULE REVISION ****/
+    return ncx_find_module(mod->belongs, NULL);
 
 }  /* ncx_get_mainmod */
 
@@ -2427,6 +2429,10 @@ void
 	m__free(import->prefix);
     }
 
+    if (import->revision) {
+	m__free(import->revision);
+    }
+
     /* YANG only */
     ncx_clean_appinfoQ(&import->appinfoQ);
 
@@ -2587,47 +2593,6 @@ ncx_import_t *
 }  /* ncx_find_pre_import_test */
 
 
-#if 0
-/********************************************************************
-* FUNCTION ncx_find_pre_import_saveQ
-* 
-* Search the specified importQ for a specified prefix value
-* Test only, do not set used flag
-*
-* INPUTS:
-*   que == Q of ncx_import_t to search
-*   prefix == prefix string to find
-*
-* RETURNS:
-*   pointer to the node if found, NULL if not found
-*********************************************************************/
-ncx_import_t * 
-    ncx_find_pre_import_saveQ (const ncx_module_t *mod,
-			       const xmlChar *prefix)
-{
-    ncx_import_t  *import;
-    yang_import_ptr_t  *import;
-
-#ifdef DEBUG
-    if (!mod || !prefix) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    for (import = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
-	 import != NULL;
-	 import = (ncx_import_t *)dlq_nextEntry(import)) {
-	if (import->prefix && !xml_strcmp(import->prefix, prefix)) {
-	    return import;
-	}
-    }
-    return NULL;
-
-}  /* ncx_find_pre_import_test */
-#endif
-
-
 /********************************************************************
 * FUNCTION ncx_locate_import
 * 
@@ -2667,8 +2632,7 @@ void *
          imp = (ncx_import_t *)dlq_nextEntry(imp)) {
 
         /* check only if there is no item list this time */
-	res = check_moddef(imp->module, defname, mod->diffmode,
-			   deftyp, &dptr);
+	res = check_moddef(imp, defname, deftyp, &dptr);
 	if (res == NO_ERR) {
 	    return dptr;
 	} else if (res != ERR_NCX_DEF_NOT_FOUND) {
@@ -2691,45 +2655,40 @@ void *
 *
 * Okay for YANG or NCX
 *
-* YANG && NCX:
-*   - typ_template_t (NCX_NT_TYP)
-*
-* YANG:
+*  - typ_template_t (NCX_NT_TYP)
 *  - grp_template_t (NCX_NT_GRP)
 *  - obj_template_t (NCX_NT_OBJ)
-*
-* NCX:
-*  - psd_template_t  (NCX_NT_PSD)
 *  - rpc_template_t  (NCX_NT_RPC)
+*  - not_template_t (NCX_NT_NOTIF)
 *
 * INPUTS:
-*     modstr == module name to check
+*     imp == NCX import struct to use
 *     defname == name of definition to find
-*     diffmode == T: search ncx_curQ, F: search def_reg
 *     *deftyp == specified type or NCX_NT_NONE if any will do
 *
 * OUTPUTS:
+*    imp->mod may get set if not already
 *    *deftyp == type retrieved if NO_ERR
+*
 * RETURNS:
 *    pointer to the located definition or NULL if not found
 *********************************************************************/
 void *
-    ncx_locate_modqual_import (const xmlChar *modstr,
+    ncx_locate_modqual_import (ncx_import_t *imp,
 			       const xmlChar *defname,
-			       boolean diffmode,
-			       ncx_node_t     *deftyp)
+			       ncx_node_t *deftyp)
 {
     void *dptr;
     status_t  res;
 
 #ifdef DEBUG
-    if (!modstr || !defname || !deftyp) {
+    if (!imp || !defname || !deftyp) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
-    res = check_moddef(modstr, defname, diffmode, deftyp, &dptr);
+    res = check_moddef(imp, defname, deftyp, &dptr);
     return (res==NO_ERR) ? dptr : NULL;
     /*** error res is lost !!! ***/
 
@@ -2761,9 +2720,9 @@ ncx_include_t *
 
 
 /********************************************************************
-* FUNCTION ncx_free_inlude
+* FUNCTION ncx_free_include
 * 
-* Scrub the memory in a ncx_iclude_t by freeing all
+* Scrub the memory in a ncx_include_t by freeing all
 * the sub-fields and then freeing the entire struct itself 
 * The struct must be removed from any queue it is in before
 * this function is called.
@@ -2783,6 +2742,10 @@ void
 
     if (inc->submodule) {
 	m__free(inc->submodule);
+    }
+
+    if (inc->revision) {
+	m__free(inc->revision);
     }
 
     ncx_clean_appinfoQ(&inc->appinfoQ);
@@ -6610,7 +6573,9 @@ ncx_feature_t *
 
 	/* get the real submodule struct */
 	if (!inc->submod) {
-	    node = yang_find_node(que, inc->submodule);
+	    node = yang_find_node(que, 
+				  inc->submodule,
+				  inc->revision);
 	    if (node) {
 		inc->submod = node->submod;
 	    }
@@ -6727,7 +6692,9 @@ void
 
 	/* get the real submodule struct */
 	if (!inc->submod) {
-	    node = yang_find_node(que, inc->submodule);
+	    node = yang_find_node(que, 
+				  inc->submodule,
+				  inc->revision);
 	    if (node) {
 		inc->submod = node->submod;
 	    }
@@ -6806,7 +6773,9 @@ uint32
 
 	/* get the real submodule struct */
 	if (!inc->submod) {
-	    node = yang_find_node(que, inc->submodule);
+	    node = yang_find_node(que, 
+				  inc->submodule,
+				  inc->revision);
 	    if (node) {
 		inc->submod = node->submod;
 	    }
@@ -6969,7 +6938,9 @@ ncx_identity_t *
 
 	/* get the real submodule struct */
 	if (!inc->submod) {
-	    node = yang_find_node(que, inc->submodule);
+	    node = yang_find_node(que, 
+				  inc->submodule,
+				  inc->revision);
 	    if (node) {
 		inc->submod = node->submod;
 	    }

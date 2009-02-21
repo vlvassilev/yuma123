@@ -241,8 +241,8 @@ module netconfd {
       output {
         leaf mod-revision {
           description  
-            "Revision date of the module in use by the agent.";
-          mandatory true;
+            "Revision date of the module in use by the agent.
+             Will only be present if the module has a version";
           type string {
             pattern '\d{4}-\d{2}-\d{2}';
           }

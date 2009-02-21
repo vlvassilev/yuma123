@@ -167,23 +167,26 @@ extern void
     ncxmod_cleanup (void);
 
 extern status_t 
-    ncxmod_load_module (const xmlChar *modname);
+    ncxmod_load_module (const xmlChar *modname,
+			const xmlChar *revision,
+			ncx_module_t **retmod);
 
 extern status_t 
     ncxmod_load_imodule (const xmlChar *modname,
+			 const xmlChar *revision,
 			 yang_pcb_t *pcb,
 			 yang_parsetype_t ptyp);
 
 extern yang_pcb_t *
     ncxmod_load_module_xsd (const xmlChar *modname,
+			    const xmlChar *revision,
 			    boolean subtree_mode,
 			    boolean with_submods,
 			    status_t  *res);
 
-
-
 extern yang_pcb_t *
     ncxmod_load_module_diff (const xmlChar *modname,
+			     const xmlChar *revision,
 			     boolean subtree_mode,
 			     boolean with_submods,
 			     const xmlChar *modpath,

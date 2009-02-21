@@ -13,21 +13,10 @@
    Provides fast tiered lookup for data structures used to
    process NCX messages.
 
-   Maintains a tiered registry of module specific
-   definition such as TYPEs, PSDs, RPCs and NOTs.
-
    The data structures 'pointed to' by these registry entries
    are not managed in this module.  Deleting a registry entry
    will not delete the 'pointed to' data structure.
 
-   Note that it is up to the module user application
-   to decide the granularity of an onwer.
-
-   In NCX, the owner of the module was originially used
-   to separate the naming scopes, but this has been changed
-   to separate by module instead.  This aligns with the
-   requirements for YANG.
- 
    Entry types
 
    NS: 
@@ -40,46 +29,6 @@
      Key: File Descriptor Index
      Data: Session Ptr attached to that FD
 
-   MODULE: 
-     NCX Module Lookup
-     Key: module name
-     Data: pointer to ncx_module_t in ncx_modQ
-  	
-   MODULE:
-     Parent registry for all data definitions by one module
-     Key: module name
-     Data: 
-       Child node: DEFINITION (keyed by ncx_node_t enum)
-          Child type: NCX_NT_OBJ
-                      NCX_NT_GRP
-                      NCX_NT_TYP
-
-   MODULE DEFINITIONS:
-
-   TYPE:
-     Data structure descriptor
-     Key: Type name     
-     Data: back pointer to typ_template_t struct
-
-   GRP:
-     Grouping Definition
-     Key: GRP name
-     Data: back pointer to grp_template_t struct
-
-   OBJ:
-     Object Node Definition
-     Key: OBJ name
-     Data: back pointer to obj_template_t struct
-
- CONFIG: 
-     Configuration database parmset instances
-     Key: module, application, parmset
-
-     All top-level names must be unique within the entry type
-     (e.g., MODULE, NAMESPACE, or MODULE)
-
-  All DEF names for the same module must be unique
-
 *********************************************************************
 *								    *
 *		   C H A N G E	 H I S T O R Y			    *
@@ -91,21 +40,15 @@ date	     init     comment
 14-oct-05    abb      Begun
 11-nov-05    abb      re-design to add OWNER as top-level instead of APP
 11-feb-06    abb      remove application layer; too complicated
-12-07-07     abb      changed owner-based definitions to
+12-jul-07    abb      changed owner-based definitions to
                       module-based definitions throughout all code
                       Change OWNER to MODULE
-
+19-feb-09    abb      Give up on module/mod_def/cfg_def because
+                      too complicated once import-by-revision added
+                      Too much memory usage as well.
 */
 
 #include <xmlstring.h>
-
-#ifndef _H_ncx
-#include "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
-#include "ncxconst.h"
-#endif
 
 #ifndef _H_ses
 #include "ses.h"
@@ -165,89 +108,5 @@ extern ses_cb_t *
 /* unregister a xmlns_t */
 extern void
     def_reg_del_scb (int fd);
-
-/********************** MODULE ***************************/
-
-/* add one ncx_module_t registry */
-extern status_t 
-    def_reg_add_module (ncx_module_t *mod);
-
-/* find an ncx_module_t by its name */
-extern ncx_module_t * 
-    def_reg_find_module (const xmlChar *modname);
-
-/* find an ncx_module_t by its prefix */
-extern ncx_module_t * 
-    def_reg_find_module_prefix (const xmlChar *prefix);
-
-/* remove a module pointer rec from the registry */
-extern void
-    def_reg_del_module (const xmlChar *modname);
-
-/****************** MODULE DEFINITIONS ***********************/
-
-/* add a module-specific definition */
-extern status_t 
-    def_reg_add_moddef (const xmlChar *modname,
-			const xmlChar *defname,
-			ncx_node_t dtyp,
-			void  *dptr);
-
-/* find a module-specific definition */
-extern void *
-    def_reg_find_moddef (const xmlChar *modname,
-			 const xmlChar *defname,
-			 ncx_node_t  *dtyp);
-
-/* find a module-specific definition, but try all modules */
-extern void *
-    def_reg_find_any_moddef (const xmlChar **modname,
-			     const xmlChar *defname,
-			     ncx_node_t  *dtyp);
-
-/* delete a module-specific definition */
-extern void
-    def_reg_del_moddef (const xmlChar *modname,
-			const xmlChar *defname,
-			ncx_node_t dtyp);
-
-#if 0
-/******************** CONFIG DATA *********************/
-
-/* add an configuration definition */
-extern status_t 
-    def_reg_add_cfgdef (const xmlChar *modname,
-			const xmlChar *defpath,
-			const xmlChar *instance,
-			ncx_cfg_t cfgid, 
-			ncx_node_t dtyp,
-			void  *dptr);
-
-
-
-
-/* find an configuration definition */
-extern void *
-    def_reg_find_cfgdef (const xmlChar *ownname,
-			 const xmlChar *appname,
-			 const xmlChar *defname,
-			const xmlChar *instance,
-			 ncx_cfg_t cfgid,
-			 ncx_node_t  *dtyp);
-
-
-/* delete an configuration definition 
- *   cfgid == -1 means delete instance for all configs
- *         >= 0  means delete jsust for that config ID
- *   instance == NULL means delete all instances
- */
-extern void
-    def_reg_del_cfgdef (const xmlChar *ownname,
-			const xmlChar *appname,
-			const xmlChar *defname,
-			const xmlChar *instance,
-			int32 cfgid);
-
-#endif
 
 #endif	    /* _H_def_reg */

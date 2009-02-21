@@ -40,10 +40,6 @@ date         init     comment
 #include "conf.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_ncx
 #include "ncx.h"
 #endif
@@ -251,16 +247,17 @@ status_t
 			   boolean *showver,
 			   boolean *showhelp)
 {
+    ncx_module_t          *mod;
     const obj_template_t  *obj;
     val_value_t           *valset, *val;
-    ncx_node_t             dtyp;
     status_t               res;
 
     /* find the parmset definition in the registry */
-    dtyp = NCX_NT_OBJ;
-    obj = (const obj_template_t *)
-	def_reg_find_moddef(AGT_CLI_MODULE, 
-			    AGT_CLI_CONTAINER, &dtyp);
+    obj = NULL;
+    mod = ncx_find_module(AGT_CLI_MODULE, NULL);
+    if (mod) {
+	obj = ncx_find_object(mod, AGT_CLI_CONTAINER);
+    }
     if (!obj) {
 	log_error("\nError: netconfd module with CLI definitions not loaded");
 	return ERR_NCX_NOT_FOUND;

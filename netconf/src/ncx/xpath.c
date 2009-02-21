@@ -27,10 +27,6 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_dlq
 #include "dlq.h"
 #endif
@@ -427,7 +423,7 @@ static status_t
 	    do_errmsg(tkc, mod, errtk, res);
 	    return res;
 	}
-	impmod = ncx_find_module(imp->module);
+	impmod = ncx_find_module(imp->module, imp->revision);
 	if (!impmod) {
 	    log_error("\nError: module '%s' not found for prefix %s"
 		      " in Xpath target %s",
@@ -440,8 +436,7 @@ static status_t
 
     /* get the first object template */
     if (imp) {
-	curobj = ncx_locate_modqual_import(imp->module, name,
-					   mod->diffmode, &dtyp);
+	curobj = ncx_locate_modqual_import(imp, name, &dtyp);
     } else if (*target == '/') {
 	curobj = obj_find_template_top(mod,
 				       ncx_get_modname(mod),
@@ -522,7 +517,7 @@ static status_t
 	if (curQ) {
 	    nextobj = obj_find_template(curQ,
 					(imp) ? imp->module : 
-					mod->name, name);
+					ncx_get_modname(mod), name);
 	} else {
 	    res = ERR_NCX_DEFSEG_NOT_FOUND;
 	    log_error("\nError: '%s' in Xpath target '%s' invalid: "
@@ -584,10 +579,9 @@ static status_t
     obj_template_t *curobj, *nextobj;
     dlq_hdr_t      *curQ;
     ncx_module_t   *mod;
-    const xmlChar  *str, *modname;
+    const xmlChar  *str;
     uint32          len;
     status_t        res;
-    ncx_node_t      dtyp;
     xmlChar         prefix[NCX_MAX_NLEN+1];
     xmlChar         name[NCX_MAX_NLEN+1];
 
@@ -613,17 +607,18 @@ static status_t
 
     /* get the import if there is a real prefix entered */
     if (*prefix) {
-	mod = def_reg_find_module_prefix(prefix);
+	mod = (ncx_module_t *)xmlns_get_modptr
+	    (xmlns_find_ns_by_prefix(prefix));
 	if (!mod) {
 	    return ERR_NCX_INVALID_NAME;
 	}
 	/* get the first object template */
-	curobj = obj_find_template_top(mod, mod->name, name);
+	curobj = obj_find_template_top(mod, 
+				       ncx_get_modname(mod), 
+				       name);
     } else {
 	/* no prefix given, check all top-level objects */
-	dtyp = NCX_NT_OBJ;
-        curobj = (obj_template_t *)
-	    def_reg_find_any_moddef(&modname, name, &dtyp);
+        curobj = ncx_find_any_object(name);
     }
 
     /* check if first level object found */
@@ -666,11 +661,14 @@ static status_t
 
 	/* make sure the prefix is valid, if present */
 	if (*prefix) {
-	    mod = def_reg_find_module_prefix(prefix);
+	    mod = (ncx_module_t *)xmlns_get_modptr
+		(xmlns_find_ns_by_prefix(prefix));
 	    if (!mod) {
 		return ERR_NCX_INVALID_NAME;
 	    }
-	    nextobj = obj_find_template(curQ, mod->name, name);
+	    nextobj = obj_find_template(curQ, 
+					ncx_get_modname(mod), 
+					name);
 	} else {
 	    /* no prefix given; try current module first */
 	    nextobj = obj_find_template(curQ, obj_get_mod_name(curobj), 
@@ -1765,7 +1763,8 @@ status_t
     /* get the import if there is a real prefix entered */
     if (prefix && *prefix) {
 	if (!mod) {
-	    *targmod = def_reg_find_module_prefix(prefix);
+	    *targmod = (ncx_module_t *)xmlns_get_modptr
+		(xmlns_find_ns_by_prefix(prefix));
 	    if (!*targmod) {
 		res = ERR_NCX_MOD_NOT_FOUND;
 	    }
@@ -1774,7 +1773,8 @@ status_t
 	    if (!imp) {
 		res = ERR_NCX_INVALID_NAME;
 	    } else {
-		*targmod = ncx_find_module(imp->module);
+		*targmod = ncx_find_module(imp->module, 
+					   imp->revision);
 		if (!*targmod) {
 		    res = ERR_NCX_MOD_NOT_FOUND;
 		}

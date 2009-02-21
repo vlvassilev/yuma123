@@ -60,8 +60,14 @@ date	     init     comment
 #define NCX_SSH_PORT    22
 #define NCX_NCSSH_PORT  830
 
+
+/* ncx.yang module */
 #define NCX_MODULE       (const xmlChar *)"ncx"
 #define NCX_PREFIX       (const xmlChar *)"ncx"
+/**** MUST UPDATE NCX_REVISION DATE BY HAND TO GET
+ **** typ_load_basetypes() TO WORK CORRECTLY
+ ****/
+#define NCX_REVISION    (const xmlChar *)"2009-02-19"
 
 #define INVALID_URN    (const xmlChar *)"INVALID"
 

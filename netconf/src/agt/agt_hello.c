@@ -53,10 +53,6 @@ date         init     comment
 #include "cap.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_log
 #include "log.h"
 #endif
@@ -217,6 +213,7 @@ void
     status_t         res;
     xml_msg_hdr_t    msg;
     val_value_t     *val;
+    ncx_module_t    *mod;
     const obj_template_t  *obj;
     ncx_node_t       dtyp;
 
@@ -256,8 +253,11 @@ void
 
     /* get the type definition from the registry */
     if (res == NO_ERR) {
-	obj = (const obj_template_t *)
-	    def_reg_find_moddef(NC_MODULE, MGR_HELLO_CON, &dtyp);
+	obj = NULL;
+	mod = ncx_find_module(NC_MODULE, NULL);
+	if (mod) {
+	    obj = ncx_find_object(mod, MGR_HELLO_CON);
+	}
 	if (!obj) {
 	    /* netconf module should have loaded this definition */
 	    res = SET_ERROR(ERR_INTERNAL_PTR);

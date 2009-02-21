@@ -130,19 +130,19 @@ extern ncx_module_t *
     ncx_new_module (void);
 
 extern ncx_module_t *
-    ncx_find_module (const xmlChar *modname);
+    ncx_find_module (const xmlChar *modname,
+		     const xmlChar *revision);
 
+#ifdef REMOVED_FROM_YANGDUMP_SO_LEAVE_OUT
 extern ncx_module_t *
     ncx_find_submodule (const xmlChar *modname,
 			const xmlChar *submodname);
+#endif
 
 /* use if module was not added to registry */
 extern void 
     ncx_free_module (ncx_module_t *mod);
 
-/* use in normal path if module was successfully added */
-extern void 
-    ncx_remove_module (const xmlChar *modname);
 
 /* check if any YANG modules loaded with non-fatal errors
  * NCX files are loaded with no errors or nothing
@@ -184,8 +184,16 @@ extern obj_template_t *
     ncx_match_any_rpc (const xmlChar *module,
 		       const xmlChar *rpcname);
 
+extern obj_template_t *
+    ncx_find_any_object (const xmlChar *objname);
+
+extern obj_template_t *
+    ncx_find_object (ncx_module_t *mod,
+		     const xmlChar *objname);
+
 extern status_t 
-    ncx_add_to_registry (ncx_module_t *mod);
+    ncx_add_to_registry (ncx_module_t *mod,
+			 boolean alreadyreg);
 
 extern status_t 
     ncx_add_to_modQ (ncx_module_t *mod);
@@ -253,10 +261,9 @@ extern void *
 		       ncx_node_t     *deftyp);
 
 extern void *
-    ncx_locate_modqual_import (const xmlChar *modstr,
+    ncx_locate_modqual_import (ncx_import_t *imp,
 			       const xmlChar *defname,
-			       boolean diffmode,
-			       ncx_node_t     *deftyp);
+			       ncx_node_t *deftyp);
 
 /******************** ncx_include_t ******************/
 

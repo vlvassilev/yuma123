@@ -57,6 +57,7 @@ date	     init     comment
 #include "typ.h"
 #endif
 
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
@@ -100,10 +101,12 @@ typedef struct yang_stmt_t_ {
 typedef struct yang_node_t_ {
     dlq_hdr_t     qhdr;
     const xmlChar *name;    /* module name in imp/inc/failed */
+    const xmlChar *revision;   /* revision date in imp/inc/failed */
     ncx_module_t  *mod;     /* back-ptr to module w/ imp/inc */
     tk_token_t    *tk;      /* back-ptr to token for imp/inc */
     ncx_module_t  *submod;             /* submod for allincQ */
     xmlChar       *failed;  /* saved name for failed entries */
+    xmlChar       *failedrev;  /* saved revision for failed entries */
     tk_chain_t    *tkc;      /* saved token chain for errors */
     status_t       res;         /* saved result for 'failed' */
 } yang_node_t;
@@ -114,19 +117,13 @@ typedef struct yang_import_ptr_t_ {
     dlq_hdr_t    qhdr;
     xmlChar     *modname;
     xmlChar     *modprefix;
+    xmlChar     *revision;
 } yang_import_ptr_t;
 
 
 /* YANG parser control block
  *
  * top level parse can be for a module or a submodule
- * if module:
- *     top == module being processed
- *     mod == NULL (not used)
- * If submodule:
- *     top == submodule being processed
- *     mod == module identified by 'belongs-to', parsed
- *            just enough to get the namespace and prefix
  *
  * The allimpQ is a cache of pointers to all the imports that
  *  have been processed.  This is used by yangdump for
@@ -150,6 +147,7 @@ typedef struct yang_import_ptr_t_ {
  */
 typedef struct yang_pcb_t_ {
     struct ncx_module_t_ *top;        /* top-level file */
+    const xmlChar *revision;        /* back-ptr to rev to match */
     boolean       subtree_mode;
     boolean       with_submods;
     boolean       stmtmode;      /* save top-level stmt order */
@@ -378,7 +376,8 @@ extern void
 
 extern yang_node_t *
     yang_find_node (const dlq_hdr_t *que,
-		    const xmlChar *name);
+		    const xmlChar *name,
+		    const xmlChar *revision);
 
 extern yang_pcb_t *
     yang_new_pcb (void);
@@ -424,7 +423,8 @@ extern boolean
 
 extern yang_import_ptr_t *
     yang_new_import_ptr (const xmlChar *modname,
-			 const xmlChar *modprefix);
+			 const xmlChar *modprefix,
+			 const xmlChar *revision);
 
 extern void
     yang_free_import_ptr (yang_import_ptr_t *impptr);
@@ -435,5 +435,13 @@ extern void
 extern yang_import_ptr_t *
     yang_find_import_ptr (dlq_hdr_t *que,
 			  const xmlChar *name);
+
+extern int32
+    yang_compare_revision_dates (const xmlChar *revstring1,
+				 const xmlChar *revstring2);
+
+extern xmlChar *
+    yang_make_filename (const xmlChar *modname,
+			const xmlChar *revision);
 
 #endif	    /* _H_yang */

@@ -33,10 +33,6 @@ date         init     comment
 #include "cfg.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_dlq
 #include "dlq.h"
 #endif
@@ -935,7 +931,6 @@ static status_t
 	    /* inside a grouping, include submod, etc.
 	     * this has to be a type in the current [sub]module
 	     * or it would have a NSID assigned already
-	     * and be in the def_reg type registry
 	     *
 	     * The design of the local typename to 
 	     * global XSD typename translation does not
@@ -1136,7 +1131,7 @@ static val_value_t *
 *    schemaloc == URL prefix parameter from user (may be NULL)
 *    modname == module name
 *    modname == module version string (may be NULL)
-*    cstr == constr URI string to use
+*    cstr == const URI string to use
 *    versionnames == TRUE if version in filename requested (CLI default)
 *                 == FALSE for no version names in the filenames
 *                 Ignored if modversion is NULL
@@ -1181,7 +1176,7 @@ static xmlChar *
     }
     str2 += xml_strcpy(str2, modname);
     if (versionnames && modversion) {
-	*str2++ = '_';
+	*str2++ = '_';    /***** CHANGE TO DOT *****/
 	str2 += xml_strcpy(str2, modversion);
     }
     *str2++ = '.';
@@ -1393,7 +1388,8 @@ static val_value_t *
 *   Add one import node
 *
 * INPUTS:
-*    mod == module in progress
+*    modname == name of module
+*    revision == revision date of module
 *    cp == conversion parameters in use
 *    val == struct parent to contain child nodes for each import
 *
@@ -1405,26 +1401,22 @@ static val_value_t *
 *********************************************************************/
 static status_t
     add_one_import (const xmlChar *modname,
+		    const xmlChar *revision,
 		    const yangdump_cvtparms_t *cp,
 		    val_value_t *val)
 {
     val_value_t         *imval;
-    const ncx_module_t  *immod;
+    ncx_module_t        *immod;
     xmlChar             *str;
     xmlns_id_t           id;
     status_t             res;
 
     id = xmlns_xs_id();
 
-    immod = def_reg_find_module(modname);
+    immod = ncx_find_module(modname, revision);
     if (!immod) {
-	res = ncxmod_load_module(modname);
-	if (res == NO_ERR) {
-	    immod = def_reg_find_module(modname);
-	    if (!immod) {
-		return SET_ERROR(ERR_INTERNAL_PTR);
-	    }
-	} else {
+	res = ncxmod_load_module(modname, revision, &immod);
+	if (!immod) {
 	    return res;
 	}
     }
@@ -1439,7 +1431,8 @@ static status_t
     res = xml_val_add_cattr(NCX_EL_NAMESPACE, 0, 
 			    xmlns_get_ns_name(immod->nsid), imval);
     if (res == NO_ERR) {
-	str = xsd_make_schema_location(immod, cp->schemaloc, !cp->noversionnames);
+	str = xsd_make_schema_location(immod, cp->schemaloc, 
+				       !cp->noversionnames);
 	if (str) {
 	    res = xml_val_add_attr(XSD_LOC, 0, str, imval);
 	    if (res != NO_ERR) {
@@ -1835,7 +1828,7 @@ xmlChar *
     }
 
     return make_schema_loc(schemaloc, mod->name, 
-			   cstr, mod->version, versionnames);
+			   mod->version, cstr, versionnames);
 
 }   /* xsd_make_schema_location */
 
@@ -2280,8 +2273,10 @@ status_t
     if (res != NO_ERR) {
 	return res;
     }
-    str = make_schema_loc(cp->schemaloc, NCX_MOD, NCX_URN,
+    str = make_schema_loc(cp->schemaloc, 
+			  NCX_MOD, 
 			  (cp->noversionnames) ? NULL : mod->version,
+			  NCX_URN,
 			  !cp->noversionnames);
     if (str) {
 	res = xml_val_add_attr(XSD_LOC, 0, str, imval);
@@ -2298,7 +2293,9 @@ status_t
 	for (impptr = (const yang_import_ptr_t *)dlq_firstEntry(&mod->saveimpQ);
 	     impptr != NULL;
 	     impptr = (const yang_import_ptr_t *)dlq_nextEntry(impptr)) {
-	    res = add_one_import(impptr->modname, cp, val);
+	    res = add_one_import(impptr->modname, 
+				 impptr->revision,
+				 cp, val);
 	    if (res != NO_ERR) {
 		return res;
 	    }
@@ -2307,7 +2304,9 @@ status_t
 	for (import = (const ncx_import_t *)dlq_firstEntry(&mod->importQ);
 	     import != NULL;
 	     import = (const ncx_import_t *)dlq_nextEntry(import)) {
-	    res = add_one_import(import->module, cp, val);
+	    res = add_one_import(import->module, 
+				 import->revision,
+				 cp, val);
 	    if (res != NO_ERR) {
 		return res;
 	    }

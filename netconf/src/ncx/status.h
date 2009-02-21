@@ -273,7 +273,9 @@ typedef enum status_t_
     ERR_NCX_MISSING_INSTANCE,           /* 350 */
     ERR_NCX_UNEXPECTED_INSERT_ATTRS,    /* 351 */
     ERR_NCX_INVALID_UNIQUE_NODE,        /* 352 */
-    ERR_LAST_USR_ERR,                   /* 353 -- not really used */
+    ERR_NCX_INVALID_DUP_IMPORT,         /* 353 */
+    ERR_NCX_INVALID_DUP_INCLUDE,        /* 354 */
+    ERR_LAST_USR_ERR,                   /* 355 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */
@@ -288,7 +290,7 @@ typedef enum status_t_
     ERR_NCX_NO_INSTANCE,                /* 409 */
     ERR_NCX_SESSION_CLOSED,             /* 410 */
     ERR_NCX_DUP_IMPORT,                 /* 411 */
-    ERR_NCX_INVALID_DUP_IMPORT,         /* 412 */
+    ERR_NCX_PREFIX_DUP_IMPORT,          /* 412 */
     ERR_NCX_TYPDEF_NOT_USED,            /* 413 */
     ERR_NCX_GRPDEF_NOT_USED,            /* 414 */
     ERR_NCX_IMPORT_NOT_USED,            /* 415 */
@@ -311,8 +313,8 @@ typedef enum status_t_
     ERR_NCX_NO_XPATH_CHILD,             /* 432 */
     ERR_NCX_NO_XPATH_DESCENDANT,        /* 433 */
     ERR_NCX_NO_XPATH_NODES,             /* 434 */
-
-    ERR_LAST_WARN,                      /* 435 -- not really used */
+    ERR_NCX_BAD_REV_ORDER,              /* 435 */
+    ERR_LAST_WARN,                      /* 436 -- not really used */
 
     /* system info return codes start at 500 */
     ERR_PARS_SECDONE=ERR_INFO_BASE,     /* 500 */

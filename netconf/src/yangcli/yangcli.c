@@ -48,10 +48,6 @@ date         init     comment
 #include "conf.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_help
 #include "help.h"
 #endif
@@ -343,6 +339,12 @@ static dlq_hdr_t      agent_cbQ;
  * agent processing context; later search by session ID
  */
 static agent_cb_t    *cur_agent_cb = NULL;
+
+/* yangcli.yang file used for quicker lookups */
+static ncx_module_t  *yangcli_mod;
+
+/* netconf.yang file used for quicker lookups */
+static ncx_module_t  *netconf_mod;
 
 /* CLI parameters */
 static val_value_t   *mgr_cli_valset;
@@ -1217,6 +1219,91 @@ static xmlChar *
 
 
 /********************************************************************
+* FUNCTION try_parse_def
+* 
+* Parse the possibly module-qualified definition (module:def)
+* and find the template for the requested definition
+*
+* INPUTS:
+*   modname == module name to try
+*   defname == definition name to try
+*   dtyp == definition type 
+*
+* OUTPUTS:
+*    *dtyp is set if it started as NONE
+*
+* RETURNS:
+*   pointer to the found definition template or NULL if not found
+*********************************************************************/
+static void *
+    try_parse_def (const xmlChar *modname,
+		   const xmlChar *defname,
+		   ncx_node_t *dtyp)
+
+{
+    void          *def;
+    ncx_module_t  *mod;
+
+    mod = ncx_find_module(modname, NULL);
+    if (!mod) {
+	return NULL;
+    }
+
+    def = NULL;
+    switch (*dtyp) {
+    case NCX_NT_NONE:
+	def = ncx_find_object(mod, defname);
+	if (def) {
+	    *dtyp = NCX_NT_OBJ;
+	    break;
+	}
+	def = ncx_find_grouping(mod, defname);
+	if (def) {
+	    *dtyp = NCX_NT_GRP;
+	    break;
+	}
+	def = ncx_find_type(mod, defname);
+	if (def) {
+	    *dtyp = NCX_NT_TYP;
+	    break;
+	}
+	break;
+    case NCX_NT_OBJ:
+	def = ncx_find_object(mod, defname);
+	break;
+    case NCX_NT_GRP:
+	def = ncx_find_grouping(mod, defname);
+	break;
+    case NCX_NT_TYP:
+	def = ncx_find_type(mod, defname);
+	break;
+    default:
+	def = NULL;
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* if an explicit module is given, then no others
+     * can be tried, but check partial command
+     */
+    if (!def && autoload) {
+	switch (*dtyp) {
+	case NCX_NT_NONE:
+	case NCX_NT_OBJ:
+	    def = ncx_match_any_rpc(modname, defname);
+	    if (def) {
+		*dtyp = NCX_NT_OBJ;
+	    }
+	default:
+	    ;
+	}
+    }
+
+    return def;
+    
+} /* try_parse_def */
+
+
+/********************************************************************
 * FUNCTION parse_def
 * 
 * Definitions have two forms:
@@ -1248,6 +1335,7 @@ static void *
     void          *def;
     xmlChar       *start, *p, *q, oldp, oldq;
     const xmlChar *prefix, *defname, *modname;
+    ncx_module_t  *mod;
     uint32         prelen;
     xmlns_id_t     nsid;
     
@@ -1310,54 +1398,43 @@ static void *
      * first check if only the user supplied a module name
      */
     if (prefix) {
-
 	modname = NULL;
 	nsid = xmlns_find_ns_by_prefix(prefix);
 	if (nsid) {
 	    modname = xmlns_get_module(nsid);
 	}
 	if (modname) {
-	    def = def_reg_find_moddef(modname, defname, dtyp);
-
-	    /* if an explicit module is given, then no others
-	     * can be tried, but check partial command
-	     */
-	    if (!def && autoload) {
-		switch (*dtyp) {
-		case NCX_NT_NONE:
-		case NCX_NT_OBJ:
-		    def = ncx_match_any_rpc(modname, defname);
-		    if (def) {
-			*dtyp = NCX_NT_OBJ;
-		    }
-		default:
-		    ;
-		}
-	    }
+	    def = try_parse_def(modname, defname, dtyp);
 	} else {
-	    log_error("\nError: no module found for prefix '%s'", prefix);
+	    log_error("\nError: no module found for prefix '%s'", 
+		      prefix);
 	}
     } else {
-	/* no module prefix given, first try default module */
 	if (default_module) {
-	    def = def_reg_find_moddef(default_module, defname, dtyp);
+	    def = try_parse_def(default_module, defname, dtyp);
 	}
+	if (!def && (!default_module ||
+		     xml_strcmp(default_module, 
+				NC_MODULE))) {
 
-	/* if not found, try module 'netconf' if not already done */
-	if (!def && (!default_module || 
-		     xml_strcmp(default_module, NC_MODULE))) {
-	    def = def_reg_find_moddef(NC_MODULE, defname, dtyp);
+	    def = try_parse_def(NC_MODULE, defname, dtyp);
 	}
 
 	/* if not found, try module 'ncx' if not already done */
 	if (!def && (!default_module || 
-		     xml_strcmp(default_module, YANGCLI_MOD))) {
-	    def = def_reg_find_moddef(YANGCLI_MOD, defname, dtyp);
+		     xml_strcmp(default_module, 
+				YANGCLI_MOD))) {
+	    def = try_parse_def(NC_MODULE, defname, dtyp);
 	}
-
+	    
 	/* if not found, try any module */
 	if (!def) {
-	    def = def_reg_find_any_moddef(&modname, defname, dtyp);
+	    for (mod = ncx_get_first_module();
+		 mod != NULL && !def;
+		 mod = ncx_get_next_module(mod)) {
+
+		def = try_parse_def(mod->name, defname, dtyp);
+	    }
 	}
 
 	/* if not found, try a partial RPC command name */
@@ -2806,13 +2883,10 @@ static void
     val_value_t           *valset, *use_valset;;
     status_t               res;
     boolean                s1, s2, s3;
-    ncx_node_t             dtyp;
 
     /* retrieve the 'connect' RPC template, if not done already */
     if (!rpc) {
-	dtyp = NCX_NT_OBJ;
-	rpc = (const obj_template_t *)
-	    def_reg_find_moddef(YANGCLI_MOD, YANGCLI_CONNECT, &dtyp);
+	rpc = ncx_find_object(yangcli_mod, YANGCLI_CONNECT);
 	if (!rpc) {
 	    log_write("\nError finding the 'connect' RPC method");
 	    return;
@@ -2963,18 +3037,14 @@ static status_t
     val_value_t           *reqdata, *parm, *target, *source;
     ses_cb_t              *scb;
     status_t               res;
-    ncx_node_t             dtyp;
 
     req = NULL;
     reqdata = NULL;
     res = NO_ERR;
+    rpc = NULL;
 
     /* get the <copy-config> template */
-    dtyp = NCX_NT_OBJ;
-    rpc = (const obj_template_t *)
-	def_reg_find_moddef(NC_MODULE,
-			    NCX_EL_COPY_CONFIG,
-			    &dtyp);
+    rpc = ncx_find_object(netconf_mod, NCX_EL_COPY_CONFIG);
     if (!rpc) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
@@ -3187,7 +3257,7 @@ static void
 
     /* load the module */
     if (res == NO_ERR) {
-	res = ncxmod_load_module(VAL_STR(val));
+	res = ncxmod_load_module(VAL_STR(val), NULL, NULL);
     }
 
     /* print the result to stdout */
@@ -3515,10 +3585,19 @@ static void
     while (mod) {
 	if (mode == HELP_MODE_BRIEF) {
 	    if (imode) {
-		log_stdout("\n  %s:%s/%s", mod->prefix, 
-			   mod->name, mod->version);
+		if (mod->version) {
+		    log_stdout("\n  %s:%s/%s", mod->prefix, 
+			       mod->name, mod->version);
+		} else {
+		    log_stdout("\n  %s:%s", mod->prefix, 
+			       mod->name);
+		}
 	    } else {
-		log_write("\n  %s/%s", mod->name, mod->version);
+		if (mod->version) {
+		    log_write("\n  %s/%s", mod->name, mod->version);
+		} else {
+		    log_write("\n  %s", mod->name);
+		}
 	    }
 	} else {
 	    help_data_module(mod, HELP_MODE_BRIEF);
@@ -3650,8 +3729,8 @@ static void
 	    } else if (!xml_strcmp(parm->name, NCX_EL_VARS)) {
 		do_show_vars(mode, FALSE, FALSE, TRUE);
 	    } else if (!xml_strcmp(parm->name, NCX_EL_MODULE)) {
-		/***/
-		mod = ncx_find_module(VAL_STR(parm));
+		/*** NEED TO GET REQUESTED VERSION FROM USER ***/
+		mod = ncx_find_module(VAL_STR(parm), NULL);
 		if (mod) {
 		    do_show_module(mod, mode);
 		} else {
@@ -3720,27 +3799,19 @@ static void
 static void
     do_help_commands (help_mode_t mode)
 {
-    const ncx_module_t    *mod;
     const obj_template_t  *obj;
     boolean anyout, imode;
-
-    /***/
-    mod = ncx_find_module(YANGCLI_MOD);
-    if (!mod) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
-    }
 
     imode = interactive_mode();
     anyout = FALSE;
 
-    obj = ncx_get_first_object(mod);
+    obj = ncx_get_first_object(yangcli_mod);
     while (obj) {
 	if (obj_is_rpc(obj)) {
 	    obj_dump_template(obj, mode, 0, 0);
 	    anyout = TRUE;
 	}
-	obj = ncx_get_next_object(mod, obj);
+	obj = ncx_get_next_object(yangcli_mod, obj);
     }
 
     if (anyout) {
@@ -3917,9 +3988,7 @@ static void
 	    break;
 	}
 
-	dtyp = NCX_NT_OBJ;
-	obj = (const obj_template_t *)
-	    def_reg_find_moddef(YANGCLI_MOD, YANGCLI_HELP, &dtyp);
+	obj = ncx_find_object(yangcli_mod, YANGCLI_HELP);
 	if (obj && obj->objtype == OBJ_TYP_RPC) {
 	    help_object(obj, HELP_MODE_FULL);
 	} else {
@@ -4097,7 +4166,6 @@ static status_t
     const obj_template_t *rpc;
     xmlChar              *line, *p;
     status_t              res;
-    ncx_node_t            dtyp;
     uint32                linelen;
 
     /* make sure there is a runscript string */
@@ -4106,9 +4174,7 @@ static status_t
     }
 
     /* get the 'run' RPC method template */
-    dtyp = NCX_NT_OBJ;
-    rpc = (const obj_template_t *)
-	def_reg_find_moddef(YANGCLI_MOD, YANGCLI_RUN, &dtyp);
+    rpc = ncx_find_object(yangcli_mod, YANGCLI_RUN);
     if (!rpc) {
 	return ERR_NCX_DEF_NOT_FOUND;
     }
@@ -4772,7 +4838,6 @@ static status_t
     val_value_t           *reqdata, *parm, *target, *dummy_parm;
     ses_cb_t              *scb;
     status_t               res;
-    ncx_node_t             dtyp;
 
     req = NULL;
     reqdata = NULL;
@@ -4785,11 +4850,7 @@ static status_t
     }
 
     /* get the <edit-config> template */
-    dtyp = NCX_NT_OBJ;
-    rpc = (const obj_template_t *)
-	def_reg_find_moddef(NC_MODULE,
-			    NCX_EL_EDIT_CONFIG,
-			    &dtyp);
+    rpc = ncx_find_object(netconf_mod, NCX_EL_EDIT_CONFIG);
     if (!rpc) {
 	val_free_value(config_content);
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
@@ -5025,7 +5086,6 @@ static status_t
     val_value_t           *reqdata, *filter, *dummy_parm;
     ses_cb_t              *scb;
     status_t               res;
-    ncx_node_t             dtyp;
 
     req = NULL;
     reqdata = NULL;
@@ -5033,12 +5093,9 @@ static status_t
     input = NULL;
 
     /* get the <get> or <get-config> input template */
-    dtyp = NCX_NT_OBJ;
-    rpc = (const obj_template_t *)
-	def_reg_find_moddef(NC_MODULE,
-			    (source) ? 
-			    NCX_EL_GET_CONFIG : NCX_EL_GET,
-			    &dtyp);
+    rpc = ncx_find_object(netconf_mod,
+			  (source) ? 
+			  NCX_EL_GET_CONFIG : NCX_EL_GET);
     if (rpc) {
 	input = obj_find_child(rpc, NULL, YANG_K_INPUT);
     }
@@ -5372,19 +5429,13 @@ static status_t
     const obj_template_t *operobj;
     const xmlChar        *editopstr;
     val_value_t          *metaval;
-    ncx_node_t            dtyp;
     status_t              res;
 
     /* get the internal nc:operation object */
-    dtyp = NCX_NT_OBJ;
-    operobj = (const obj_template_t *)
-	def_reg_find_moddef(NC_MODULE, 
-			    NC_OPERATION_ATTR_NAME, 
-			    &dtyp);
+    operobj = ncx_find_object(netconf_mod, NC_OPERATION_ATTR_NAME);
     if (!operobj) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
-
 
     /* create a value node for the meta-value */
     metaval = val_new_value();
@@ -6992,15 +7043,12 @@ static status_t
     const obj_template_t  *obj;
     val_value_t           *parm;
     status_t               res;
-    ncx_node_t             dtyp;
 
     res = NO_ERR;
     mgr_cli_valset = NULL;
 
     /* find the parmset definition in the registry */
-    dtyp = NCX_NT_OBJ;
-    obj = (const obj_template_t *)
-	def_reg_find_moddef(YANGCLI_MOD, YANGCLI_BOOT, &dtyp);
+    obj = ncx_find_object(yangcli_mod, YANGCLI_BOOT);
     if (!obj) {
 	res = ERR_NCX_NOT_FOUND;
     }
@@ -7191,19 +7239,19 @@ static status_t
     log_debug2("\nYangcli: Loading NCX yangcli-cli Parmset");
 
     /* load in the agent boot parameter definition file */
-    res = ncxmod_load_module(YANGCLI_MOD);
+    res = ncxmod_load_module(YANGCLI_MOD, NULL, &yangcli_mod);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module(NCMOD);
+    res = ncxmod_load_module(NCMOD, NULL, &netconf_mod);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* load in the NCX extensions */
-    res = ncxmod_load_module(NCXMOD_NCX);
+    res = ncxmod_load_module(NCXMOD_NCX, NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }
@@ -7241,13 +7289,13 @@ static status_t
     log_debug2("\nNcxmgr: Loading NETCONF Module");
 
     /* load in the XSD data types */
-    res = ncxmod_load_module(XSDMOD);
+    res = ncxmod_load_module(XSDMOD, NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* load in the NCX data types */
-    res = ncxmod_load_module(NCXDTMOD);
+    res = ncxmod_load_module(NCXDTMOD, NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }
@@ -7387,7 +7435,7 @@ static void
 			       const ses_cb_t *scb)
 {
     const mgr_scb_t    *mscb;
-    const ncx_module_t *mod;
+    ncx_module_t       *mod;
     const cap_rec_t    *cap;
     const xmlChar      *module, *version;
     modptr_t           *modptr;
@@ -7415,10 +7463,10 @@ static void
 	}
 
 	xml_strncpy(namebuff, module, modlen);
-	mod = ncx_find_module(namebuff);
+	mod = ncx_find_module(namebuff, version);
 	if (!mod) {
 	    if (autoload) {
-		res = ncxmod_load_module(namebuff);
+		res = ncxmod_load_module(namebuff, version, &mod);
 		if (res != NO_ERR) {
 		    log_error("\nyangcli error: Module %s not loaded (%s)!!",
 			      namebuff, get_error_string(res));
@@ -7427,10 +7475,6 @@ static void
 		log_info("\nyangcli warning: Module %s not loaded!!",
 			 namebuff);
 	    }
-	}
-
-	if (!mod) {
-	    mod = ncx_find_module(namebuff);
 	}
 
 	/* keep track of the exact modules the agent knows about */
@@ -7442,10 +7486,8 @@ static void
 	    } else {
 		dlq_enque(modptr, &agent_cb->modptrQ);
 	    }
-	}
 
-	if (mod) {
-	    if (xml_strcmp(mod->version, version)) {
+	    if (yang_compare_revision_dates(mod->version, version)) {
 		log_warn("\nyangcli warning: Module %s "
 			 "has different version on agent!! (%s)",
 			 namebuff, mod->version);
@@ -7668,7 +7710,6 @@ static status_t
     agent_cb_t           *agent_cb;
     ncx_lmem_t           *lmem;
     val_value_t          *parm;
-    ncx_node_t            dtyp;
     status_t              res;
 
 #ifdef YANGCLI_DEBUG
@@ -7753,10 +7794,9 @@ static status_t
 
     /* init the connect parmset object template;
      * find the connect RPC method
+     * !!! MUST BE AFTER load_base_schema !!!
      */
-    dtyp = NCX_NT_OBJ;
-    obj = (const obj_template_t *)
-	def_reg_find_moddef(YANGCLI_MOD, YANGCLI_CONNECT, &dtyp);
+    obj = ncx_find_object(yangcli_mod, YANGCLI_CONNECT);
     if (!obj) {
 	return ERR_NCX_DEF_NOT_FOUND;
     }
@@ -7800,7 +7840,6 @@ static status_t
 	return NO_ERR;
     }
 
-
     /* create a default agent control block */
     agent_cb = new_agent_cb(YANGCLI_DEF_AGENT);
     if (!agent_cb) {
@@ -7829,7 +7868,10 @@ static status_t
 	    log_info("\nyangcli: Loading requested module %s", 
 		     NCX_LMEM_STRVAL(lmem));
 
-	    res = ncxmod_load_module((const xmlChar *)NCX_LMEM_STRVAL(lmem));
+	    res = ncxmod_load_module
+		((const xmlChar *)NCX_LMEM_STRVAL(lmem),
+		 NULL,   /*** need revision parameter ***/
+		 NULL);
 	    if (res != NO_ERR) {
 		log_info("\n load failed (%s)", get_error_string(res));
 	    } else {

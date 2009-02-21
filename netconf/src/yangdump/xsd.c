@@ -33,10 +33,6 @@ date         init     comment
 #include "cfg.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_dlq
 #include "dlq.h"
 #endif
@@ -138,6 +134,7 @@ date         init     comment
 *
 * INPUTS:
 *   modname == import module name to check
+*   revision == module revision to find (may be NULL)
 *   top_attrs == pointer to receive the top element attributes
 *               HACK: rpc_agt needs the top-level attrs to
 *               be in xml_attr_t format, not val_value_t metaval format
@@ -150,6 +147,7 @@ date         init     comment
 *********************************************************************/
 static status_t
     add_one_prefix (const xmlChar *modname,
+		    const xmlChar *revision,
 		    xml_attrs_t *top_attrs)
 {
     const xmlChar *cstr;
@@ -168,12 +166,9 @@ static status_t
     /* first load the module to get the NS ID 
      * It will probably be loaded anyway to find external names.
      */
-    immod = def_reg_find_module(modname);
+    immod = ncx_find_module(modname, revision);
     if (!immod) {
-	res = ncxmod_load_module(modname);
-	if (res == NO_ERR) {
-	    immod = def_reg_find_module(modname);
-	}
+	res = ncxmod_load_module(modname, revision, &immod);
     }
     if (!immod) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
@@ -450,7 +445,7 @@ status_t
 	for (impptr = (yang_import_ptr_t *)dlq_firstEntry(&mod->saveimpQ);
 	     impptr != NULL;
 	     impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
-	    res = add_one_prefix(impptr->modname, top_attrs);
+	    res = add_one_prefix(impptr->modname, impptr->revision, top_attrs);
 	    if (res != NO_ERR) {
 		return res;
 	    }
@@ -460,7 +455,7 @@ status_t
 	     import != NULL;
 	     import = (ncx_import_t *)dlq_nextEntry(import)) {
 
-	    res = add_one_prefix(import->module, top_attrs);
+	    res = add_one_prefix(import->module, import->revision, top_attrs);
 	    if (res != NO_ERR) {
 		return res;
 	    }

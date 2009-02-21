@@ -39,10 +39,6 @@ date         init     comment
 #include  "cyang.h"
 #endif
 
-#ifndef _H_def_reg
-#include  "def_reg.h"
-#endif
-
 #ifndef _H_help
 #include  "help.h"
 #endif
@@ -226,8 +222,8 @@ static status_t
 		       yangdump_cvtparms_t  *cp)
 {
     const obj_template_t  *obj;
+    ncx_module_t          *mod;
     val_value_t           *valset, *val;
-    ncx_node_t             dtyp;
     status_t               res;
 
     res = NO_ERR;
@@ -240,9 +236,12 @@ static status_t
     cp->bufflen = YANGDUMP_BUFFSIZE;
 
     /* find the CLI container definition in the registry */
-    dtyp = NCX_NT_OBJ;
-    obj = (const obj_template_t *)
-	def_reg_find_moddef(YANGDUMP_MOD, YANGDUMP_CONTAINER, &dtyp);
+    obj = NULL;
+    mod = ncx_find_module(YANGDUMP_MOD, NULL);
+    if (mod) {
+	obj = ncx_find_object(mod, YANGDUMP_CONTAINER);
+    }
+
     if (!obj) {
 	log_error("\nError: yangdump module with CLI definitions not loaded");
 	res = ERR_NCX_NOT_FOUND;
@@ -533,10 +532,10 @@ static status_t
     if (res == NO_ERR) {
 
 	/* load in the YANGDUMP converter parmset definition file */
-	res = ncxmod_load_module(YANGDUMP_MOD);
+	res = ncxmod_load_module(YANGDUMP_MOD, NULL, NULL);
 
 	if (res == NO_ERR) {
-	    res = ncxmod_load_module(NCXMOD_NCX);
+	    res = ncxmod_load_module(NCXMOD_NCX, NULL, NULL);
 	    if (res == NO_ERR) {
 		res = ncx_stage2_init();
 	    }
@@ -753,8 +752,10 @@ static void
 	    sprintf(cp->buff, "\nsubmodule %s", mod->name);
 	}
 	ses_putstr(scb, (const xmlChar *)cp->buff);
-	ses_putchar(scb, ' ');
-	ses_putstr(scb, mod->version);
+	if (mod->version) {
+	    ses_putchar(scb, ' ');
+	    ses_putstr(scb, mod->version);
+	}
     }
 
     output_one_module_exports(mod, scb, cp->buff);
@@ -795,10 +796,11 @@ static void
 	 impptr != NULL;
 	 impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
 
-	testmod = def_reg_find_module(impptr->modname);
+	testmod = ncx_find_module(impptr->modname,
+				  impptr->revision);
 	sprintf(cp->buff, "\nimport %s", impptr->modname);
 	ses_putstr(scb,(const xmlChar *)cp->buff);
-	if (testmod) {
+	if (testmod && testmod->version) {
 	    sprintf(cp->buff, " %s", testmod->version);
 	    ses_putstr(scb,(const xmlChar *)cp->buff);		
 	}
@@ -810,7 +812,7 @@ static void
 
 	    sprintf(cp->buff, "\ninclude %s", node->name);
 	    ses_putstr(scb,(const xmlChar *)cp->buff);
-	    if (node->submod) {
+	    if (node->submod && node->submod->version) {
 		sprintf(cp->buff, " %s", node->submod->version);
 		ses_putstr(scb,(const xmlChar *)cp->buff);
 	    }
@@ -856,8 +858,10 @@ static void
 	    sprintf(cp->buff, "\nsubmodule %s", mod->name);
 	}
 	ses_putstr(scb,(const xmlChar *)cp->buff);
-	ses_putchar(scb, ' ');
-	ses_putstr(scb, mod->version);
+	if (mod->version) {
+	    ses_putchar(scb, ' ');
+	    ses_putstr(scb, mod->version);
+	}
     }
 
     output_one_module_dependencies(mod, scb, cp);
@@ -997,8 +1001,10 @@ static void
 	}
 	ses_putstr(scb, (const xmlChar *)cp->buff);
 
-	sprintf((char *)cp->buff, " %s", mod->version);
-	ses_putstr(scb, (const xmlChar *)cp->buff);
+	if (mod->version) {
+	    sprintf((char *)cp->buff, " %s", mod->version);
+	    ses_putstr(scb, (const xmlChar *)cp->buff);
+	}
     }
 
     output_one_module_identifiers(mod, scb,
@@ -1163,17 +1169,17 @@ static status_t
     convert_one (yangdump_cvtparms_t *cp)
 {
     ses_cb_t          *scb;
-    ncx_module_t      *targmod;
+    ncx_module_t      *targmod, *mainmod;
     val_value_t       *val;
     yang_pcb_t        *pcb;
     xmlChar           *namebuff;
-    const xmlChar     *modname, *logsource;
+    const xmlChar     *modname, *logsource, *revision;
     xml_attrs_t        attrs;
     status_t           res;
 
     scb = NULL;
     res = NO_ERR;
-
+    revision = NULL;   /*****/
 
     if (cp->modcount > 1) {
 	modname = (const xmlChar *)cp->curmodule;
@@ -1183,6 +1189,7 @@ static status_t
 
     /* load in the requested module to convert */
     pcb = ncxmod_load_module_xsd(modname,
+				 revision,
 				 cp->subtree ? TRUE : FALSE,
 				 cp->unified, &res);
     if (res == ERR_NCX_SKIPPED) {
@@ -1282,8 +1289,10 @@ static status_t
 		/* need to load the entire module now,
 		 * in order to get a namespace ID for
 		 * the main module, which is also used in the submodule
+		 * !!! DO NOT KNOW THE REVISION OF THE PARENT !!!
 		 */
-		res = ncxmod_load_module(ncx_get_modname(pcb->top));
+		res = ncxmod_load_module(ncx_get_modname(pcb->top), 
+					 NULL, &mainmod);
 		if (res != NO_ERR) {
 		    log_error("\nError: main module '%s' had errors."
 			      "\n       XSD conversion of '%s' terminated.",
@@ -1292,10 +1301,25 @@ static status_t
 		    ncx_print_errormsg(NULL, pcb->top, res);
 		    break;
 		} else {
+		    /**** WHY IS THE SUBMOD RELOADED!!!
+		     **** IT SHOULD NOT HAVE CHANGED FROM pcb->top
+		     ****
 		    targmod = 
 			ncx_find_submodule
 			(ncx_get_modname(pcb->top), 
 			 pcb->top->name);
+		    ****/
+		    targmod = pcb->top;
+
+		    /* make a copy of the module namespace URI
+		     * so the XSD targetNamespace will be generated
+		     */
+		    targmod->ns = xml_strdup(mainmod->ns);
+		    if (!targmod->ns) {
+			res = ERR_INTERNAL_MEM;
+			log_error("\nMalloc failed in yangdump");
+			break;
+		    }
 		}
 	    } else {
 		targmod = pcb->top;

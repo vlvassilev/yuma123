@@ -1165,7 +1165,7 @@ status_t
 #endif
 
     /* load in the access control parameters */
-    res = ncxmod_load_module(AGT_ACM_MODULE);
+    res = ncxmod_load_module(AGT_ACM_MODULE, NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }

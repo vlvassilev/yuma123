@@ -40,10 +40,6 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_dlq
 #include  "dlq.h"
 #endif
@@ -128,6 +124,12 @@ date         init     comment
 /* #define YANG_PARSE_RDLN_DEBUG 1 */
 /* #define YANG_PARSE_DEBUG_TRACE 1 */
 #endif
+
+static status_t 
+    consume_revision_date (tk_chain_t *tkc,
+			   ncx_module_t  *mod,
+			   xmlChar **revstring);
+
 
 /********************************************************************
 * FUNCTION resolve_mod_appinfo
@@ -1231,9 +1233,9 @@ static status_t
     yang_node_t        *node;
     yang_import_ptr_t  *impptr;
     xmlChar            *str;
-    tk_token_t         *savetk;
+    tk_token_t         *savetk, *revtk;
     tk_type_t           tktyp;
-    boolean             done, pfixdone;
+    boolean             done, pfixdone, revdone;
     status_t            res, retres;
 
     val = NULL;
@@ -1241,6 +1243,7 @@ static status_t
     expstr = "module name";
     done = FALSE;
     pfixdone = FALSE;
+    revdone = FALSE;
     retres = NO_ERR;
 
     /* Get a new ncx_import_t to fill in */
@@ -1328,10 +1331,53 @@ static status_t
 		    return res;
 		}
 	    }
+	} else if (!xml_strcmp(val, YANG_K_REVISION)) {
+	    revtk = TK_CUR(tkc);
+	    if (revdone) {
+		res = retres = ERR_NCX_ENTRY_EXISTS;
+		ncx_print_errormsg(tkc, mod, retres);
+		if (imp->revision) {
+		    m__free(imp->revision);
+		    imp->revision = NULL;
+		}
+	    } else {
+		res = NO_ERR;
+		revdone = TRUE;
+	    }
+
+	    res = consume_revision_date(tkc, mod, &imp->revision);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT(res)) {
+		    ncx_free_import(imp);
+		    return res;
+		}
+	    }
+
+	    res = yang_consume_semiapp(tkc, mod, &imp->appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT(res)) {
+		    ncx_free_import(imp);
+		    return res;
+		}
+	    }
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
 	    yang_skip_statement(tkc, mod);
+	}
+    }
+
+    if (imp->revision) {
+	/* validate the revision date */
+	res = yang_validate_date_string(tkc, mod, revtk, imp->revision);
+	if (res != NO_ERR) {
+	    retres = res;
+	    if (NEED_EXIT(res)) {
+		ncx_free_import(imp);
+		return res;
+	    }
 	}
     }
 
@@ -1345,25 +1391,34 @@ static status_t
 	ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
+
     /* check if the import is already present */
     if (imp->module && imp->prefix) {
 
 	/* check if module already present */
 	testimp = ncx_find_import_test(mod, imp->module);
 	if (testimp) {
-	    imp->usexsd = FALSE;
-	    if (!xml_strcmp(testimp->prefix, imp->prefix)) {
-		/* warning for exact duplicate import */
-		log_warn("\nWarning: duplicate import found on line %u",
-			 testimp->tk->linenum);
-		res = ERR_NCX_DUP_IMPORT;
+	    if (yang_compare_revision_dates(testimp->revision, 
+					    imp->revision)) {
+		log_error("\nError: invalid duplicate import found on line %u",
+			  testimp->tk->linenum);
+		retres = res = ERR_NCX_INVALID_DUP_IMPORT;
 		ncx_print_errormsg(tkc, mod, res);
 	    } else {
-		/* warning for dup. import w/ different prefix */
-		log_warn("\nWarning: same import with different prefix"
-			 " found on line %u", testimp->tk->linenum);
-		res = ERR_NCX_INVALID_DUP_IMPORT;
-		ncx_print_errormsg(tkc, mod, res);
+		imp->usexsd = FALSE;
+		if (!xml_strcmp(testimp->prefix, imp->prefix)) {
+		    /* warning for exact duplicate import */
+		    log_warn("\nWarning: duplicate import found on line %u",
+			     testimp->tk->linenum);
+		    res = ERR_NCX_DUP_IMPORT;
+		    ncx_print_errormsg(tkc, mod, res);
+		} else {
+		    /* warning for dup. import w/ different prefix */
+		    log_warn("\nWarning: same import with different prefix"
+			     " found on line %u", testimp->tk->linenum);
+		    res = ERR_NCX_PREFIX_DUP_IMPORT;
+		    ncx_print_errormsg(tkc, mod, res);
+		}
 	    }
 	}
 
@@ -1415,7 +1470,9 @@ static status_t
 	}
 	
 	/* check for import loop */
-	node = yang_find_node(&pcb->impchainQ, imp->module);
+	node = yang_find_node(&pcb->impchainQ, 
+			      imp->module,
+			      imp->revision);
 	if (node) {
 	    log_error("\nError: loop created by import '%s'"
 		      " from module '%s', line %u",
@@ -1434,7 +1491,9 @@ static status_t
 	    ncx_print_errormsg(tkc, mod, retres);
 	    ncx_free_import(imp);
 	} else {
-	    impptr = yang_new_import_ptr(imp->module, imp->prefix);
+	    impptr = yang_new_import_ptr(imp->module, 
+					 imp->prefix,
+					 imp->revision);
 	    if (!impptr) {
 		retres = ERR_INTERNAL_MEM;
 		ncx_print_errormsg(tkc, mod, retres);
@@ -1443,6 +1502,7 @@ static status_t
 	    } else {
 		/* save the import used record and the import */
 		node->name = imp->module;
+		node->revision = imp->revision;
 		node->mod = mod;
 		node->tk = imp->tk;
 
@@ -1461,7 +1521,9 @@ static status_t
 		/* load the module now instead of later for validation
 		 * it may not get used, but assume it will
 		 */
-		res = ncxmod_load_imodule(imp->module, pcb, YANG_PT_IMPORT);
+		res = ncxmod_load_imodule(imp->module, 
+					  imp->revision,
+					  pcb, YANG_PT_IMPORT);
 		if (res != NO_ERR) {
 		    if (!pcb || !pcb->top || pcb->top->errors) {
 			retres = ERR_NCX_IMPORT_ERRORS;
@@ -1521,10 +1583,14 @@ static status_t
 
     ncx_include_t  *inc, *testinc;
     const char     *expstr;
+    const xmlChar  *val;
     yang_node_t    *node, *testnode;
-    tk_token_t     *savetk;
+    tk_token_t     *savetk, *revtk;
+    tk_type_t       tktyp;
     status_t        res, retres;
+    boolean         done, revdone;
 
+    done = FALSE;
     expstr = "submodule name";
     retres = NO_ERR;
 
@@ -1549,13 +1615,118 @@ static status_t
 	}
     }
 
-    /* Get the end of the statement */
-    res = yang_consume_semiapp(tkc, mod, &inc->appinfoQ);
+    /* Get the starting left brace for the sub-clauses
+     * or a semi-colon to end the include statement
+     */
+    res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	retres = res;
-	if (NEED_EXIT(res)) {
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+	done = TRUE;
+	break;
+    case TK_TT_LBRACE:
+	break;
+    default:
+	retres = ERR_NCX_WRONG_TKTYPE;
+	expstr = "semi-colon or left brace";
+	ncx_mod_exp_err(tkc, mod, retres, expstr);
+	done = TRUE;
+    }
+
+    /* get the revision clause and any appinfo extensions */
+    while (!done) {
+	/* get the next token */
+	res = TK_ADV(tkc);
+	if (res != NO_ERR) {
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
 	    ncx_free_include(inc);
 	    return res;
+	}
+
+	tktyp = TK_CUR_TYP(tkc);
+	val = TK_CUR_VAL(tkc);
+
+	/* check the current token type */
+	switch (tktyp) {
+	case TK_TT_NONE:
+	    res = ERR_NCX_EOF;
+	    ncx_mod_exp_err(tkc, mod, res, expstr);
+	    ncx_free_include(inc);
+	    return res;
+	case TK_TT_MSTRING:
+	    /* vendor-specific clause found instead */
+	    res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT(res)) {
+		    ncx_free_include(inc);
+		    return res;
+		}
+	    }
+	    continue;
+	case TK_TT_TSTRING:
+	    break;  /* YANG clause assumed */
+	case TK_TT_RBRACE:
+	    done = TRUE;
+	    continue;
+	default:
+	    retres = ERR_NCX_WRONG_TKTYPE;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    yang_skip_statement(tkc, mod);
+	    continue;
+	}
+
+	/* Got a token string so check the value, should be 'prefix' */
+	if (!xml_strcmp(val, YANG_K_REVISION)) {
+	    revtk = TK_CUR(tkc);
+	    if (revdone) {
+		res = retres = ERR_NCX_ENTRY_EXISTS;
+		ncx_print_errormsg(tkc, mod, retres);
+		if (inc->revision) {
+		    m__free(inc->revision);
+		    inc->revision = NULL;
+		}
+	    } else {
+		res = NO_ERR;
+		revdone = TRUE;
+	    }
+
+	    res = consume_revision_date(tkc, mod, &inc->revision);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT(res)) {
+		    ncx_free_include(inc);
+		    return res;
+		}
+	    }
+
+	    res = yang_consume_semiapp(tkc, mod, &inc->appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT(res)) {
+		    ncx_free_include(inc);
+		    return res;
+		}
+	    }
+	} else {
+	    retres = ERR_NCX_WRONG_TKVAL;
+	    ncx_mod_exp_err(tkc, mod, retres, expstr);
+	    yang_skip_statement(tkc, mod);
+	}
+    }
+
+    if (inc->revision) {
+	/* validate the revision date */
+	res = yang_validate_date_string(tkc, mod, revtk, inc->revision);
+	if (res != NO_ERR) {
+	    retres = res;
+	    if (NEED_EXIT(res)) {
+		ncx_free_include(inc);
+		return res;
+	    }
 	}
     }
 
@@ -1576,16 +1747,24 @@ static status_t
 	/* check if submodule already present */
 	testinc = ncx_find_include(mod, inc->submodule);
 	if (testinc) {
-	    /* warning for same duplicate already in the
-	     * include statements
-	     */
-	    inc->usexsd = FALSE;
-	    log_warn("\nWarning: duplicate include found on line %u",
-		     testinc->tk->linenum);
-	    res = ERR_NCX_DUP_INCLUDE;
-	    ncx_print_errormsg(tkc, mod, res);
+	    /* check if there is a revision conflict */
+	    if (yang_compare_revision_dates(testinc->revision, 
+					    inc->revision)) {
+		log_error("\nError: invalid duplicate include found on line %u",
+			  testinc->tk->linenum);
+		retres = res = ERR_NCX_INVALID_DUP_INCLUDE;
+		ncx_print_errormsg(tkc, mod, res);
+	    } else {
+		/* warning for same duplicate already in the
+		 * include statements
+		 */
+		inc->usexsd = FALSE;
+		log_warn("\nWarning: duplicate include found on line %u",
+			 testinc->tk->linenum);
+		res = ERR_NCX_DUP_INCLUDE;
+		ncx_print_errormsg(tkc, mod, res);
+	    }
 	} else {
-
 	    /* check simple submodule loop with itself */
 	    if (!xml_strcmp(inc->submodule, mod->name)) {
 		log_error("\nError: include '%s' for current submodule",
@@ -1612,7 +1791,9 @@ static status_t
 	    }
 
 	    /* check for include loop */
-	    node = yang_find_node(&pcb->incchainQ, inc->submodule);
+	    node = yang_find_node(&pcb->incchainQ, 
+				  inc->submodule,
+				  inc->revision);
 	    if (node) {
 		log_error("\nError: loop created by include '%s'"
 			  " from %smodule '%s', line %u",
@@ -1634,19 +1815,23 @@ static status_t
 	} else {
 	    /* save the import used record and the include */
 	    node->name = inc->submodule;
+	    node->revision = inc->revision;
 	    node->mod = mod;
 	    node->tk = inc->tk;
 
 	    dlq_enque(inc, &mod->includeQ);
 
 	    /* check if already parsed, and in the allincQ */
-	    testnode = yang_find_node(&pcb->allincQ, inc->submodule);
+	    testnode = yang_find_node(&pcb->allincQ, 
+				      inc->submodule,
+				      inc->revision);
 	    if (!testnode) {
 		dlq_enque(node, &pcb->incchainQ);
 
 		/* load the module now instead of later for validation */
-		retres = ncxmod_load_imodule(inc->submodule, pcb,
-					     YANG_PT_INCLUDE);
+		retres = ncxmod_load_imodule(inc->submodule, 
+					     inc->revision,
+					     pcb, YANG_PT_INCLUDE);
 
 		/* remove the node in the include chain that 
 		 * was added before the submodule was loaded
@@ -1896,6 +2081,99 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION consume_revision_date
+* 
+* Parse the next N tokens as a date-arg-str clause
+* Adds the string form to the specified string object
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* NEXT token is the start of the 'date-arg-str' clause
+*
+* INPUTS:
+*   tkc == token chain
+*   mod   == module struct that will get the ncx_import_t 
+*   revstring == address of return revision date string
+*
+* OUTPUTS:
+*   *revstring malloced and set to date-arg-str value
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    consume_revision_date (tk_chain_t *tkc,
+			   ncx_module_t  *mod,
+			   xmlChar **revstring)
+{
+    xmlChar       *str, *p;
+    const char    *expstr;
+    status_t       res;
+
+    str = NULL;
+    expstr = "date-arg-str";
+    res = NO_ERR;
+
+    /* get the mandatory version identifier date string */
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+	ncx_print_errormsg(tkc, mod, res);
+	return res;
+    }
+
+    if (TK_CUR_STR(tkc)) {
+	*revstring = xml_strdup(TK_CUR_VAL(tkc));
+	if (!*revstring) {
+	    res = ERR_INTERNAL_MEM;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	}
+    } else if (TK_CUR_TYP(tkc)==TK_TT_DNUM) {
+	/* assume this is an unquoted date string
+	 * this code does not detect corner-cases
+	 * like 2007 -11 -20 because an unquoted
+	 * dateTime string is the same as 3 integers
+	 * and if there are spaces between them
+	 * this will be parsed ok by tk.c
+	 */
+	str = m__getMem(64);
+	if (!str) {
+	    res = ERR_INTERNAL_MEM;
+	    ncx_print_errormsg(tkc, mod, res);
+	    return res;
+	} else {
+	    p = str;
+	    p += xml_strcpy(p, TK_CUR_VAL(tkc));
+	    res = ncx_consume_token(tkc, mod, TK_TT_DNUM);
+	    if (res != NO_ERR) {
+		if (NEED_EXIT(res)) {
+		    m__free(str);
+		    return res;
+		}
+	    } else {
+		p += xml_strcpy(p, TK_CUR_VAL(tkc));
+		res = ncx_consume_token(tkc, mod, TK_TT_DNUM);
+		if (res != NO_ERR) {
+		    m__free(str);
+		    return res;
+		} else {
+		    xml_strcpy(p, TK_CUR_VAL(tkc));
+		    *revstring = str;
+		}
+	    }
+	}
+    } else {
+	res = ERR_NCX_WRONG_TKTYPE;
+	ncx_mod_exp_err(tkc, mod, res, expstr);
+    }
+
+    return res;
+
+}  /* consume_revision_date */
+
+
+/********************************************************************
 * FUNCTION consume_revision
 * 
 * Parse the next N tokens as a revision clause
@@ -1920,21 +2198,17 @@ static status_t
     ncx_revhist_t *rev, *testrev;
     const xmlChar *val;
     const char    *expstr;
-    xmlChar       *str, *p;
     tk_type_t      tktyp;
     boolean        done, descrdone;
     status_t       res, retres;
 
-    rev = NULL;
     val = NULL;
-    str = NULL;
     expstr = "module name";
     done = FALSE;
     descrdone = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
 
-    /* only malloc a new record if descr strings are being saved */
     rev = ncx_new_revhist();
     if (!rev) {
 	res = ERR_INTERNAL_MEM;
@@ -1945,65 +2219,13 @@ static status_t
     }
 
     /* get the mandatory version identifier date string */
-    res = TK_ADV(tkc);
+    res = consume_revision_date(tkc, mod, &rev->version);
     if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	ncx_free_revhist(rev);
-	return res;
-    }
-
-    if (TK_CUR_STR(tkc)) {
-	rev->version = xml_strdup(TK_CUR_VAL(tkc));
-	if (!rev->version) {
-	    res = ERR_INTERNAL_MEM;
-	    ncx_print_errormsg(tkc, mod, res);
+	retres = res;
+	if (NEED_EXIT(res)) {
 	    ncx_free_revhist(rev);
 	    return res;
 	}
-    } else if (TK_CUR_TYP(tkc)==TK_TT_DNUM) {
-	/* assume this is an unquoted date string
-	 * this code does not detect corner-cases
-	 * like 2007 -11 -20 because an unquoted
-	 * dateTime string is the same as 3 integers
-	 * and if there are spaces between them
-	 * this will be parsed ok by tk.c
-	 */
-	str = m__getMem(64);
-	if (!str) {
-	    res = ERR_INTERNAL_MEM;
-	    ncx_print_errormsg(tkc, mod, res);
-	    ncx_free_revhist(rev);
-	    return res;
-	} else {
-	    p = str;
-	    p += xml_strcpy(p, TK_CUR_VAL(tkc));
-	    res = ncx_consume_token(tkc, mod, TK_TT_DNUM);
-	    if (res != NO_ERR) {
-		retres = res;
-		if (NEED_EXIT(res)) {
-		    ncx_free_revhist(rev);
-		    m__free(str);
-		    return res;
-		}
-	    } else {
-		p += xml_strcpy(p, TK_CUR_VAL(tkc));
-		res = ncx_consume_token(tkc, mod, TK_TT_DNUM);
-		if (res != NO_ERR) {
-		    retres = res;
-		    if (NEED_EXIT(res)) {
-			ncx_free_revhist(rev);
-			m__free(str);
-			return res;
-		    }
-		} else {
-		    xml_strcpy(p, TK_CUR_VAL(tkc));
-		    rev->version = str;
-		}
-	    }
-	}
-    } else {
-	retres = ERR_NCX_WRONG_TKTYPE;
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
     /* Get the starting left brace for the sub-clauses */
@@ -2096,6 +2318,8 @@ static status_t
 	if (testrev) {
 	    /* error for dup. revision with same version */
 	    retres = ERR_NCX_DUP_ENTRY;
+	    log_error("\nError: revision with same date on line %u",
+		      testrev->tk->linenum);
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
     }
@@ -2125,18 +2349,20 @@ static status_t
 * INPUTS:
 *   tkc == token chain
 *   mod == module struct that will get the ncx_revhist_t entries
+*   pcb == parser control block to use to check rev-date
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
     consume_revision_stmts (tk_chain_t *tkc,
-			    ncx_module_t  *mod)
+			    ncx_module_t  *mod,
+			    yang_pcb_t *pcb)
 {
     const xmlChar *val;
-    xmlChar       *str;
     const char    *expstr;
     ncx_revhist_t *rev;
+    tk_token_t    *savetk;
     tk_type_t      tktyp;
     status_t       res, retres;
     boolean        done;
@@ -2213,8 +2439,15 @@ static status_t
 	    if (!val) {
 		val = rev->version;
 	    } else {
-		ret = xml_strcmp(rev->version, val);
+		ret = yang_compare_revision_dates(rev->version, val);
 		if (ret > 0) {
+		    log_warn("\nWarning: revision dates not in "
+			     "descending order");
+		    savetk = TK_CUR(tkc);
+		    TK_CUR(tkc) = rev->tk;
+		    ncx_print_errormsg(tkc, mod, 
+				       ERR_NCX_BAD_REV_ORDER);
+		    TK_CUR(tkc) = savetk;
 		    val = rev->version;
 		}
 	    }
@@ -2227,6 +2460,7 @@ static status_t
 	mod->version = xml_strdup(val);
     }
 
+#ifdef LEAVE_VERSION_NULL
     if (!mod->version) {
 	/* hard-wire the version to current date if no revision clauses */
 	str = m__getMem(TSTAMP_DATE_SIZE);
@@ -2235,12 +2469,13 @@ static status_t
 	    mod->version = str;
 	}
     }
-
     /* check if malloc worked */
     if (!mod->version) {
 	retres = ERR_INTERNAL_MEM;
 	ncx_print_errormsg(tkc, mod, retres);
-    } else if (val) {
+    }
+
+    if (val) {
 	;
     } else if (!dlq_empty(&mod->revhistQ)) {
 	log_warn("\nWarning: no valid revision statements, setting "
@@ -2253,6 +2488,25 @@ static status_t
 		 mod->version, (mod->ismod) ? "" : "sub", mod->name);
 	mod->warnings++;
     }
+#else
+    if (!val) {
+	log_warn("\nWarning: no revision statements "
+		 "for %smodule '%s'",
+		 (mod->ismod) ? "" : "sub", mod->name);
+	mod->warnings++;
+    }
+
+    if (pcb->revision && 
+	yang_compare_revision_dates(val, pcb->revision)) {
+
+	log_error("\nError: found version '%s' instead of "
+		  "requested version '%s",
+		  (val) ? val : EMPTY_STRING,
+		  pcb->revision);
+	retres = ERR_NCX_WRONG_VERSION;
+	ncx_print_errormsg(tkc, mod, retres);
+    }
+#endif
 
     return retres;
 
@@ -2386,8 +2640,7 @@ static status_t
 *
 * OUTPUTS:
 *   *wasadded == TRUE if the module was addeed to the NCX moduleQ
-*             == FALSE if error-exit, not added and ncx_free_module
-*                should be called instead of ncx_remove_module
+*             == FALSE if error-exit, not added
 *
 * RETURNS:
 *   status of the operation
@@ -2402,7 +2655,7 @@ static status_t
     yang_node_t    *node;
     ncx_feature_t  *feature;
     ncx_identity_t *identity;
-    boolean         ismain, loaded;
+    boolean         ismain, loaded, otherversion;
     status_t        res, retres;
 
 #ifdef YANG_PARSE_DEBUG_TRACE
@@ -2421,6 +2674,7 @@ static status_t
     ismain = TRUE;
     retres = NO_ERR;
     *wasadded = FALSE;
+    otherversion = FALSE;
 
     /* could be module or submodule -- get the first keyword */
     res = TK_ADV(tkc);
@@ -2494,20 +2748,6 @@ static status_t
 	CHK_EXIT(res, retres);
     }
 
-    /* check if this module is already loaded, except in diff mode */
-    if (mod->ismod && mod->name && !pcb->diffmode &&
-	def_reg_find_module(mod->name)) {
-	switch (ptyp) {
-	case YANG_PT_TOP:
-	    loaded = TRUE;
-	    break;
-	case YANG_PT_IMPORT:
-	    return NO_ERR;
-	default:
-	    ;
-	}
-    }
-
     /* Get the linkage statements (imports, include) */
     res = consume_linkage_stmts(tkc, mod, pcb);
     CHK_EXIT(res, retres);
@@ -2517,13 +2757,34 @@ static status_t
     CHK_EXIT(res, retres);
 
     /* Get the revision statements */
-    res = consume_revision_stmts(tkc, mod);
+    res = consume_revision_stmts(tkc, mod, pcb);
     CHK_EXIT(res, retres);
 
-    /* make sure there is at least name and prefix to continue */
-    if (!mod->name || (mod->ismod && !mod->prefix) || 
+    /* make sure there is at least name and prefix to continue
+     * do not continue if requested version does not match
+     */
+    if (retres == ERR_NCX_WRONG_VERSION ||
+	!mod->name || (mod->ismod && !mod->prefix) || 
 	!*mod->name || (mod->ismod && !*mod->prefix)) {
 	return retres;
+    }
+
+    /* check if this module is already loaded, except in diff mode */
+    if (mod->ismod && !pcb->diffmode &&
+	ncx_find_module(mod->name, mod->version)) {
+	switch (ptyp) {
+	case YANG_PT_TOP:
+	    loaded = TRUE;
+	    if (ncx_find_module(mod->name, NULL)) {
+		/* do not re-register the namespace */
+		otherversion = TRUE;
+	    }
+	    break;
+	case YANG_PT_IMPORT:
+	    return NO_ERR;
+	default:
+	    ;
+	}
     }
 
     /* Get the definition statements */
@@ -2654,8 +2915,8 @@ static status_t
 	}
     }
 
-    /* add the definitions to the def_reg hash table;
-     * check the parse type before adding to registry
+    /* add the NS definitions to the registry;
+     * check the parse type first
      */
     switch (ptyp) {
     case YANG_PT_TOP:
@@ -2674,7 +2935,7 @@ static status_t
 		if (pcb->diffmode) {
 		    res = ncx_add_to_modQ(mod);
 		} else {
-		    res = ncx_add_to_registry(mod);
+		    res = ncx_add_to_registry(mod, otherversion);
 		}
 		if (res != NO_ERR) {
 		    retres = res;
@@ -2700,6 +2961,7 @@ static status_t
 	    ncx_print_errormsg(tkc, mod, retres);
 	} else {
 	    node->name = mod->name;
+	    node->revision = mod->version;
 	    node->mod = NULL;
 	    node->tk = NULL;
 	    node->tkc = tkc;
@@ -2831,7 +3093,7 @@ status_t
 	    /* set the stmt-track mode flag to the master flag in the PCB */
 	    mod->stmtmode = pcb->stmtmode;
 
-	    /* set the diff-mode to flag that def_reg is used or not */
+	    /* set the diff-mode flag */
 	    mod->diffmode = pcb->diffmode;
 	}
     }
@@ -2864,7 +3126,8 @@ status_t
 	    if (mod->ismod) {
 		if (pcb->top == mod) {
 		    /* swap with the real module already done */
-		    pcb->top = ncx_find_module(mod->name);
+		    pcb->top = ncx_find_module(mod->name,
+					       mod->version);
 		}
 	    } else if (!pcb->with_submods) {
 		/* subtree parsing mode can cause top-level to already
@@ -2872,7 +3135,8 @@ status_t
 		 * module with the real one
 		 */
 		if (pcb->top == mod) {
-		    pcb->top = ncx_find_module(mod->belongs);
+		    pcb->top = ncx_find_module(mod->belongs,
+					       mod->version);
 		}
 	    } else if (pcb->top == mod) {
 		pcb->top = NULL;

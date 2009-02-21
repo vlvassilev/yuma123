@@ -565,6 +565,7 @@ typedef struct ncx_module_t_ {
     boolean           stmtmode;       /* T: save yang_stmt_t */
     boolean           diffmode;      /* T: don't use def_reg */
     boolean           added;         /* T: don't free on err */
+    boolean           defaultrev;  /* T: use for default ver */
     status_t          status;         /* module parse result */
     uint32            errors;            /* yangdump results */
     uint32            warnings;          /* yangdump results */
@@ -629,11 +630,13 @@ typedef boolean (*ncx_nodetest_fn_t) (boolean withdef,
 typedef struct ncx_import_t_ {
     dlq_hdr_t           qhdr;
     xmlChar            *module;
-    xmlChar            *prefix;                 /* YANG only */
-    struct tk_token_t_ *tk;            /* YANG only back-ptr */
-    boolean             used;                   /* YANG-only */
+    xmlChar            *prefix;
+    xmlChar            *revision;
+    struct tk_token_t_ *tk;                    /* back-ptr */
+    ncx_module_t       *mod;                   /* back-ptr */
+    boolean             used;
     boolean             usexsd;        /* FALSE if duplicate */
-    dlq_hdr_t           appinfoQ;               /* YANG only */
+    dlq_hdr_t           appinfoQ;
 } ncx_import_t;
 
 
@@ -641,9 +644,10 @@ typedef struct ncx_import_t_ {
 typedef struct ncx_include_t_ {
     dlq_hdr_t             qhdr;
     xmlChar              *submodule;
-    struct tk_token_t_   *tk;
-    struct ncx_module_t_ *submod;
-    boolean               usexsd;        /* FALSE if duplicate */
+    xmlChar              *revision;
+    struct tk_token_t_   *tk;                     /* back-ptr */
+    struct ncx_module_t_ *submod;                 /* back-ptr */
+    boolean               usexsd;       /* FALSE if duplicate */
     dlq_hdr_t             appinfoQ;
 } ncx_include_t;
 

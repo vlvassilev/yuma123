@@ -62,10 +62,6 @@ date         init     comment
 #include  "agt_xml.h"
 #endif
 
-#ifndef _H_def_reg
-#include  "def_reg.h"
-#endif
-
 #ifndef _H_dlq
 #include  "dlq.h"
 #endif
@@ -571,13 +567,15 @@ static obj_template_t *
     find_rpc (const xmlChar *modname,
 	      const xmlChar *rpcname)
 {
+    ncx_module_t    *mod;
     obj_template_t  *rpc;
-    ncx_node_t       deftyp;
 
     /* look for the RPC method in the definition registry */
-    deftyp = NCX_NT_OBJ;
-    rpc = (obj_template_t *)
-	def_reg_find_moddef(modname, rpcname, &deftyp);
+    rpc = NULL;
+    mod = ncx_find_module(modname, NULL);
+    if (mod) {
+	rpc = ncx_find_rpc(mod, rpcname);
+    }
     return rpc;
 
 }  /* find_rpc */

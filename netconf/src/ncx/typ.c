@@ -26,10 +26,6 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_dlq
 #include "dlq.h"
 #endif
@@ -219,7 +215,6 @@ status_t
 {
     typ_template_t  *typ;
     ncx_btype_t      btyp;
-    status_t         res;
     xmlns_id_t       xsd_id;
 
     if (typ_init_done) {
@@ -253,13 +248,6 @@ status_t
 	typ->typdef.def.base = btyp;
 	typ->nsid = xsd_id;
 
-	/* add the type to the registry */
-	res = def_reg_add_moddef(NCX_MODULE, typ->name, NCX_NT_TYP, typ);
-	if (res != NO_ERR) {
-	    typ_free_template(typ);
-	    return res;
-	}
-
 	/* save the struct in the basetype queue */
 	basetypes[btyp] = typ;
     }
@@ -288,7 +276,6 @@ void
 
     for (btyp = NCX_FIRST_DATATYPE; btyp <= NCX_LAST_DATATYPE; btyp++) {
 	typ = basetypes[btyp];
-	def_reg_del_moddef(NCX_MODULE, typ->name, NCX_NT_TYP);
 	typ_free_template(typ);
 	basetypes[btyp] = NULL;
     }

@@ -275,7 +275,8 @@ typedef enum status_t_
     ERR_NCX_INVALID_UNIQUE_NODE,        /* 352 */
     ERR_NCX_INVALID_DUP_IMPORT,         /* 353 */
     ERR_NCX_INVALID_DUP_INCLUDE,        /* 354 */
-    ERR_LAST_USR_ERR,                   /* 355 -- not really used */
+    ERR_NCX_AMBIGUOUS_CMD,              /* 355 */
+    ERR_LAST_USR_ERR,                   /* 356 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */

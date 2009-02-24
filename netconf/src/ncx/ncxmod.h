@@ -53,8 +53,12 @@ date	     init     comment
 /* maximum abolute filespec */
 #define NCXMOD_MAX_FSPEC_LEN 2047
 
-/* path, file separator char : SET TO UNIX */
+/* path, file separator char */
+#ifdef WINDOWS
+#define NCXMOD_PSCHAR   '\\'
+#else
 #define NCXMOD_PSCHAR   '/'
+#endif
 
 #define NCXMOD_HMCHAR   '~'
 

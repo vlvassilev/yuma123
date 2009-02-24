@@ -367,6 +367,20 @@ static status_t
 	cp->helpmode = TRUE;
     }
 
+    /* help submode parameter (brief/normal/full) */
+    val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_BRIEF);
+    if (val) {
+	cp->helpsubmode = HELP_MODE_BRIEF;
+    } else {
+	/* full parameter */
+	val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_FULL);
+	if (val) {
+	    cp->helpsubmode = HELP_MODE_FULL;
+	} else {
+	    cp->helpsubmode = HELP_MODE_NORMAL;
+	}
+    }
+
     /* html-div parameter */
     val = val_find_child(valset, YANGDUMP_MOD, 
 			 YANGDUMP_PARM_HTML_DIV);
@@ -1211,8 +1225,15 @@ static status_t
 			 pcb->top->warnings);
 	    }
 	} else {
-	    /* make sure next task starts on a newline */
-	    log_error("\n");
+	    /* invalid module name and/or revision date */
+	    if (revision) {
+		log_error("\nError: module '%s' revision '%s' "
+			  "not found", modname, revision);
+	    } else {
+		log_error("\nError: module '%s' not found",
+			  modname);
+	    }
+	    ncx_print_errormsg(NULL, NULL, res);
 	}
 	if (!pcb || !pcb->top || pcb->top->errors) {
 	    if (pcb) {
@@ -1566,7 +1587,7 @@ int
 	if (cvtparms.helpmode) {
 	    help_program_module(YANGDUMP_MOD, 
 				YANGDUMP_CONTAINER, 
-				HELP_MODE_FULL);
+				cvtparms.helpsubmode);
 	}
 	if (!(cvtparms.helpmode || cvtparms.versionmode)) {
 	    /* check if subdir search suppression is requested */

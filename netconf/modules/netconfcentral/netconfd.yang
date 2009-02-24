@@ -54,6 +54,18 @@ module netconfd {
         type empty;
       }
 
+      choice brief-full {
+        // ignored unless help param is present
+        leaf brief {
+          description "Show brief help text";
+          type empty;
+        }
+        leaf full {
+          description "Show full help text";
+          type empty;
+        }
+      }
+
       leaf log {
 	description
 	 "Full or relative filespec for the logfile to use instead of 

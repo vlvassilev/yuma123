@@ -469,6 +469,18 @@ module yangdump {
           type empty;
         }
 
+        choice brief-full {
+          // ignored unless help param is present
+          leaf brief {
+            description "Show brief help text";
+            type empty;
+          }
+          leaf full {
+            description "Show full help text";
+            type empty;
+          }
+        }
+
         leaf html-div {
           description 
             "If HTML translation is requested, then this parameter will

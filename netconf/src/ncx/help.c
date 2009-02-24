@@ -92,11 +92,12 @@ date         init     comment
 static uint32
     get_nestlevel (help_mode_t mode)
 {
+    /* these are arbitrary numbers; need better plan */
     switch (mode) {
     case HELP_MODE_BRIEF:
-	return 1;
+	return 9;
     case HELP_MODE_NORMAL:
-	return NCX_DEF_DUMP_LEVEL;
+	return 31;
     case HELP_MODE_FULL:
 	return 0;
     case HELP_MODE_NONE:
@@ -263,20 +264,23 @@ void
     log_stdout("\n\n  Program %s", mod->name);
     log_stdout("\n\n  Usage:");
     log_stdout("\n\n    %s [parameters]", mod->name);
-    log_stdout("\n\n  Parameters can be entered in any order, and have ");
-    log_stdout("the form:");
-    log_stdout("\n\n    [start] name separator [value]");
-    log_stdout("\n\n  where:");
-    log_stdout("\n\n    start == 0, 1, or 2 dashes (foo, -foo, --foo)");
-    log_stdout("\n\n    name == parameter name"
-	       "\n         Parameter name completion "
-	       "will be attempted "
-	       "\n         if a partial name is entered.");
-    log_stdout("\n\n    separator == whitespace or equals sign "
-	       "(foo=bar, foo bar)");
-    log_stdout("\n\n    value == string value for the parameter.");
-    log_stdout("\n         Strings with whitespace need to be double quoted "
-	       "\n         (--foo=\"some string\")");
+    if (mode != HELP_MODE_BRIEF) {
+	log_stdout("\n\n  Parameters can be entered in any order, and have ");
+	log_stdout("the form:");
+	log_stdout("\n\n    [start] name separator [value]");
+	log_stdout("\n\n  where:");
+	log_stdout("\n\n    start == 0, 1, or 2 dashes (foo, -foo, --foo)");
+	log_stdout("\n\n    name == parameter name"
+		   "\n         Parameter name completion "
+		   "will be attempted "
+		   "\n         if a partial name is entered.");
+	log_stdout("\n\n    separator == whitespace or equals sign "
+		   "(foo=bar, foo bar)");
+	log_stdout("\n\n    value == string value for the parameter.");
+	log_stdout("\n         Strings with whitespace need to be "
+		   "double quoted "
+		   "\n         (--foo=\"some string\")");
+    }
 
     if (mode == HELP_MODE_FULL && mod->descr) {
 	log_stdout("\n\n  Description:");

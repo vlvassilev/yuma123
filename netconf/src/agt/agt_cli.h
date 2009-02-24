@@ -27,6 +27,10 @@ date	     init     comment
 #include "agt.h"
 #endif
 
+#ifndef _H_help
+#include "help.h"
+#endif
+
 #ifndef _H_val
 #include "val.h"
 #endif
@@ -61,7 +65,7 @@ extern status_t
 			   const char *argv[],
 			   agt_profile_t *agt_profile,
 			   boolean *showver,
-			   boolean *showhelp);
+			   help_mode_t *showhelpmode);
 
 extern const val_value_t *
     agt_cli_get_valset (void);

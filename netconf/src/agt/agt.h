@@ -105,6 +105,10 @@ date	     init     comment
                       and parm layers in the NETCONF database
 */
 
+#ifndef _H_help
+#include "help.h"
+#endif
+
 #ifndef _H_log
 #include "log.h"
 #endif
@@ -184,7 +188,7 @@ extern status_t
     agt_init1 (int argc,
 	       const char *argv[],
 	       boolean *showver,
-	       boolean *showhelp);
+	       help_mode_t *showhelpmode);
 
 extern status_t
     agt_init2 (void);

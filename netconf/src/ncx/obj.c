@@ -1885,10 +1885,18 @@ static void
 *            == NULL and first match will be done, and the
 *               module ignored (Name instead of QName)
 *    objname == object name to find
-*    test == TRUE to check choice object names for name collisions
-*         == FALSE to check just the object names directly in 'que'
+*    lookdeep == TRUE to check objects inside choices/cases
+*                and match these nodes before matching the 
+*                choice or case
+*             == FALSE to match choice/case names right away
 *    match == TRUE if a strncmp test desired
 *             FALSE if a normal strcmp (full match) test desired
+*    matchcount == address of return parameter match count
+*                  (may be NULL)
+* OUTPUTS:
+*   if non-NULL:
+*    *matchcount == number of parameters that matched
+*                   only the first match will be returned
 *
 * RETURNS:
 *    pointer to obj_template_t or NULL if not found in 'que'
@@ -1897,13 +1905,16 @@ static obj_template_t *
     find_template (const dlq_hdr_t  *que,
 		   const xmlChar *modname,
 		   const xmlChar *objname,
-		   boolean test,
-		   boolean match)
+		   boolean lookdeep,
+		   boolean match,
+		   uint32 *matchcount)
 {
-    obj_template_t *obj, *chobj, *casobj;
+    obj_template_t *obj, *chobj, *casobj, *matchobj;
     obj_case_t     *cas;
     const xmlChar  *name, *mname;
     uint32          len, ret;
+
+    matchobj = NULL;
 
     if (match) {
 	len = xml_strlen(objname);
@@ -1928,12 +1939,25 @@ static obj_template_t *
 	    ret = xml_strcmp(objname, name);
 	}
 
-	if (!test) {
+	if (!lookdeep) {
+	    /* if lookdeep == TRUE then look past
+	     * OBJ_TYP_CHOICE and OBJ_TYP_CASE objects
+	     * to see if any 'real' nodes match first
+	     * If not, then the case, then choice
+	     * name will be checked
+	     */
 	    if (modname && xml_strcmp(modname, mname)) {
 		continue;
 	    }
 	    if (ret == 0) {
-		return obj;
+		if (match) {
+		    if (matchcount) {
+			(*matchcount)++;
+		    }
+		    matchobj = obj;
+		} else {
+		    return obj;
+		}
 	    }
 	}
 
@@ -1951,53 +1975,82 @@ static obj_template_t *
 		cas = casobj->def.cas;
 		chobj = find_template(cas->datadefQ,
 				      modname, objname,
-				      FALSE, match);
+				      lookdeep, match, matchcount);
 		if (chobj) {
-		    return chobj;
+		    if (match) {
+			matchobj = chobj;
+		    } else {
+			return chobj;
+		    }
 		}
-	    }
-
-	    /* case contents did not work, so try the case names
-	     * themselves
-	     */
-	    chobj = find_template(obj->def.choic->caseQ, modname, 
-				  objname, FALSE, match);
-	    if (chobj) {
-		return chobj;
 	    }
 
 	    /* last try: the choice name itself */
 	    if (ret == 0) {
-		return obj;
+		if (match) {
+		    if (!matchobj) {
+			if (matchcount) {
+			    (*matchcount)++;
+			}
+			matchobj = obj;
+		    }
+		} else {
+		    return obj;
+		}
 	    }
 	    break;
 	case OBJ_TYP_CASE:
 	    cas = obj->def.cas;
 	    chobj = find_template(cas->datadefQ,
 				  modname, objname,
-				  FALSE, match);
+				  lookdeep, match, matchcount);
 	    if (chobj) {
-		return chobj;
-	    }
-
-	    if (ret == 0) {
-		return obj;
+		if (match) {
+		    matchobj = chobj;
+		} else {
+		    return chobj;
+		}
+	    } else if (ret == 0) {
+		/* try case name itself */
+		if (match) {
+		    if (!matchobj) {
+			if (matchcount) {
+			    (*matchcount)++;
+			}
+			matchobj = obj;
+		    }
+		} else {
+		    return obj;
+		}
 	    }
 	    break;
 	default:
 	    /* check if a specific module name requested,
 	     * and if so, skip any object not from that module
 	     */
-	    if (modname && xml_strcmp(modname, mname)) {
-		continue;
-	    }
-	    if (ret == 0) {
-		return obj;
+	    if (lookdeep) {
+		if (modname && xml_strcmp(modname, mname)) {
+		    continue;
+		}
+		if (ret == 0) {
+		    if (match) {
+			if (matchcount) {
+			    (*matchcount)++;
+			}
+			matchobj = obj;
+		    } else {
+			return obj;
+		    }
+		}
 	    }
 	}
     }
 
-    return NULL;
+    if (match) {
+	return matchobj;
+    } else {
+	return NULL;
+    }
 
 }  /* find_template */
 
@@ -3106,7 +3159,7 @@ obj_template_t *
     }
 #endif
 
-    return find_template(que, modname, objname, FALSE, FALSE);
+    return find_template(que, modname, objname, FALSE, FALSE, NULL);
 
 }  /* obj_find_template */
 
@@ -3140,7 +3193,7 @@ const obj_template_t *
     }
 #endif
 
-    return find_template(que, modname, objname, FALSE, FALSE);
+    return find_template(que, modname, objname, FALSE, FALSE, NULL);
 
 }  /* obj_find_template_con */
 
@@ -3173,7 +3226,7 @@ obj_template_t *
     }
 #endif
 
-    return find_template(que, modname, objname, TRUE, FALSE);
+    return find_template(que, modname, objname, TRUE, FALSE, NULL);
 
 }  /* obj_find_template_test */
 
@@ -3212,7 +3265,8 @@ obj_template_t *
 #endif
 
     /* check the main module */
-    obj = find_template(&mod->datadefQ, modname, objname, FALSE, FALSE);
+    obj = find_template(&mod->datadefQ, modname, 
+			objname, FALSE, FALSE, NULL);
     if (obj) {
 	return obj;
     }
@@ -3245,7 +3299,8 @@ obj_template_t *
 
 	/* check the type Q in this submodule */
 	obj = find_template(&inc->submod->datadefQ,
-			    modname, objname, FALSE, FALSE);
+			    modname, objname,
+			    FALSE, FALSE, NULL);
 	if (obj) {
 	    return obj;
 	}
@@ -3291,7 +3346,8 @@ const obj_template_t *
 
     que = obj_get_cdatadefQ(obj);
     if (que) {
-	return find_template(que, modname, objname, TRUE, FALSE);
+	return find_template(que, modname, 
+			     objname, TRUE, FALSE, NULL);
     }
 
     return NULL;
@@ -3338,7 +3394,8 @@ const obj_template_t *
     que = obj_get_cdatadefQ(obj);
     if (que) {
 	xml_strncpy(buff, objname, objnamelen);
-	return find_template(que, modname, buff, TRUE, FALSE);
+	return find_template(que, modname, buff, 
+			     TRUE, FALSE, NULL);
     }
 
     return NULL;
@@ -3363,6 +3420,12 @@ const obj_template_t *
 *               module ignored (Name instead of QName)
 *    objname == object name to find, not Z-terminated
 *    objnamelen == length of objname string
+*    matchcount == address of return parameter match count
+*                  (may be NULL)
+* OUTPUTS:
+*   if non-NULL:
+*    *matchcount == number of parameters that matched
+*                   only the first match will be returned
 *
 * RETURNS:
 *    pointer to obj_template_t or NULL if not found
@@ -3371,7 +3434,8 @@ const obj_template_t *
     obj_match_child_str (const obj_template_t *obj,
 			 const xmlChar *modname,
 			 const xmlChar *objname,
-			 uint32 objnamelen)
+			 uint32 objnamelen,
+			 uint32 *matchcount)
 {
     const dlq_hdr_t  *que;
     xmlChar           buff[NCX_MAX_NLEN+1];
@@ -3390,7 +3454,8 @@ const obj_template_t *
     que = obj_get_cdatadefQ(obj);
     if (que) {
 	xml_strncpy(buff, objname, objnamelen);
-	return find_template(que, modname, buff, TRUE, TRUE);
+	return find_template(que, modname, buff, 
+			     TRUE, TRUE, matchcount);
     }
 
     return NULL;

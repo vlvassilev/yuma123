@@ -2801,8 +2801,8 @@ static status_t
 
 		    if (!done) {
 			res = ERR_NCX_NOT_IN_RANGE;
-			log_error("\nError: Range definition for '%s' is not a"
-				  " valid restriction of a parent range",
+			log_error("\nError: Range definition not a "
+				  "valid restriction of parent type '%s'",
 				  typname);
 		    } else {
 			parentdef = typ_get_parent_typdef(parentdef);
@@ -2952,6 +2952,7 @@ static status_t
     typ_template_t   *errtyp;
     grp_template_t   *nextgrp;
     typ_enum_t       *enu;
+    const xmlChar    *errname;
     status_t         res, retres;
     boolean          errdone;
     ncx_btype_t      btyp;
@@ -3023,7 +3024,13 @@ static status_t
      * Errors printed in the called fn
      */
     if (res == NO_ERR) {
-	res = validate_range_chain(tkc, mod, typdef, name);
+	if (!name && (typdef->class == NCX_CL_NAMED)) {
+	    /* name field just used for error messages */
+	    errname = typdef->typename;
+	} else {
+	    errname = name;
+	}
+	res = validate_range_chain(tkc, mod, typdef, errname);
     }
 
     /* check default value if any defined */

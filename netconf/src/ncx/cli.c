@@ -329,23 +329,13 @@ static cli_rawparm_t *
 	return NULL;
     }
 
-    /* check exact match */
+    /* check exact match only */
     for (parm = (cli_rawparm_t *)dlq_firstEntry(parmQ);
 	 parm != NULL;
 	 parm = (cli_rawparm_t *)dlq_nextEntry(parm)) {
 
 	if (strlen(parm->name) == (size_t)namelen &&
 	    !strncmp(parm->name, name, namelen)) {
-	    return parm;
-	}
-    }
-
-    /* check first partial match */
-    for (parm = (cli_rawparm_t *)dlq_firstEntry(parmQ);
-	 parm != NULL;
-	 parm = (cli_rawparm_t *)dlq_nextEntry(parm)) {
-
-	if (!strncmp(parm->name, name, namelen)) {
 	    return parm;
 	}
     }
@@ -641,13 +631,18 @@ status_t
 
 	/* check if this parameter name is in the parmset def */
 	rawparm = find_rawparm(rawparmQ, parmname, parmnamelen);
-
 	if (rawparm) {
 	    rawparm->count++;
 	}
 
-	if (buffpos < bufflen && buff[buffpos] == '=') {
+	if (buffpos < bufflen && 
+	    (buff[buffpos] == '=' || isspace(buff[buffpos]))) {
+
 	    buffpos++;
+
+	    while (buff[buffpos] && isspace(buff[buffpos])) {
+		buffpos++;
+	    }
 
 	    /* if any chars left in buffer, get the parmval */
 	    if (buffpos < bufflen) {
@@ -806,7 +801,7 @@ val_value_t *
     const char     *msg;
     char           *parmname, *parmval, *str, *buff;
     int32           parmnum;
-    uint32          parmnamelen, buffpos, bufflen;
+    uint32          parmnamelen, buffpos, bufflen, matchcount;
     ncx_btype_t     btyp;
     status_t        res;
     xmlChar         errbuff[NCX_MAX_NLEN], savechar;
@@ -963,12 +958,17 @@ val_value_t *
 
 	    /* check if parm was found, try partial name if not */
 	    if (!chobj && autocomp) {
+		matchcount = 0;
 		chobj = 
 		    obj_match_child_str(obj, obj_get_mod_name(obj),
 					(const xmlChar *)parmname,
-					parmnamelen);
+					parmnamelen,
+					&matchcount);
 		if (chobj) {
 		    gotmatch = TRUE;
+		    if (matchcount > 1) {
+			res = ERR_NCX_AMBIGUOUS_CMD;
+		    }
 		}
 	    }
 
@@ -988,7 +988,9 @@ val_value_t *
 		}
 	    }
 
-	    if (!chobj) {
+	    if (res != NO_ERR) {
+		/* got ambiguous cmd error */;
+	    } else if (!chobj) {
 		res = ERR_NCX_UNKNOWN_PARM;
 	    } else {
 		/* do not check parameter order for CLI */
@@ -1123,6 +1125,11 @@ val_value_t *
 	    switch (res) {
 	    case ERR_NCX_UNKNOWN_PARM:
 		log_error("\nError: Unknown parameter (%s)", errbuff);
+		break;
+	    case ERR_NCX_AMBIGUOUS_CMD:
+		parmname[parmnamelen] = 0;
+		log_error("\nError: multiple matches for '%s'",
+			  parmname);
 		break;
 	    default:
 		if (buffpos < bufflen) {

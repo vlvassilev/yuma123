@@ -363,6 +363,7 @@ static xmlChar        *default_module;
 
 /* true if printing program help and exiting */
 static boolean         helpmode;
+static help_mode_t     helpsubmode;
 
 /* true if printing program version and exiting */
 static boolean         versionmode;
@@ -7166,6 +7167,20 @@ static status_t
 	helpmode = TRUE;
     }
 
+    /* help submode parameter (brief/normal/full) */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_BRIEF);
+    if (parm) {
+	helpsubmode = HELP_MODE_BRIEF;
+    } else {
+	/* full parameter */
+	parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_FULL);
+	if (parm) {
+	    helpsubmode = HELP_MODE_FULL;
+	} else {
+	    helpsubmode = HELP_MODE_NORMAL;
+	}
+    }
+
     /* get the password parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_PASSWORD);
     if (parm && parm->res == NO_ERR) {
@@ -7731,6 +7746,7 @@ static status_t
     batchmode = FALSE;
     default_module = NULL;
     helpmode = FALSE;
+    helpsubmode = HELP_MODE_NONE;
     versionmode = FALSE;
     modules = NULL;
     autoload = TRUE;
@@ -7832,7 +7848,9 @@ static status_t
     /* check print help and exit */
     if (helpmode) {
 	log_stdout("\nyangcli version %s", progver);
-	help_program_module(YANGCLI_MOD, YANGCLI_BOOT, HELP_MODE_FULL);
+	help_program_module(YANGCLI_MOD, 
+			    YANGCLI_BOOT, 
+			    helpsubmode);
     }
 
     /* check quick exit */

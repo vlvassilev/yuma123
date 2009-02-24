@@ -527,6 +527,8 @@ static boolean
 *            is found or an error occurs
 *    bufflen == size of buff in bytes
 *    fname == filename (with extension) to find
+*    matchmode == TRUE if searching for a partial filename match
+*              == FALSE for full filename match 
 *    done == address of recurse done flag
 *
 * OUTPUTS:
@@ -540,12 +542,13 @@ static status_t
     search_subdirs (xmlChar *buff, 
 		    uint32 bufflen,
 		    const xmlChar *fname,
+		    boolean matchmode,
 		    boolean *done)
 {
     DIR           *dp;
     struct dirent *ep;
     struct stat    statbuf;
-    uint32         pathlen, fnamelen;
+    uint32         pathlen, fnamelen, dentlen;
     int            ret;
     boolean        dirdone;
     status_t       res;
@@ -561,6 +564,7 @@ static status_t
 	return ERR_BUFF_OVFL;
     } 
 
+    /* make sure path ends with a pathsep char */
     if (buff[pathlen-1] != NCXMOD_PSCHAR) {
 	buff[pathlen++] = NCXMOD_PSCHAR;
 	buff[pathlen] = 0;
@@ -571,19 +575,30 @@ static status_t
      * algorithm could result in a file at a lower level
      * in the subtree matching, instead of a file higher up
      * in the tree
+     *
+     * This will happen anyway if matchmode == TRUE
      */
-    xml_strcpy(&buff[pathlen], fname);
-    ret = stat((const char *)buff, &statbuf);
-    if (ret == 0) {
-	*done = TRUE;
-	if (S_ISREG(statbuf.st_mode)) {
-	    res = NO_ERR;
-	} else {
-	    res = ERR_FIL_BAD_FILENAME;
-	}
-        return res;	
-    } else {
+    if (matchmode) {
 	buff[pathlen] = 0;
+    } else {
+	/* try to open the full filespec in this directory
+	 * do not bother if this is matchmode, since the
+	 * filename is intentionally truncated, and might
+	 * match something unrelated by mistake
+	 */
+	xml_strcpy(&buff[pathlen], fname);
+	ret = stat((const char *)buff, &statbuf);
+	if (ret == 0) {
+	    *done = TRUE;
+	    if (S_ISREG(statbuf.st_mode)) {
+		res = NO_ERR;
+	    } else {
+		res = ERR_FIL_BAD_FILENAME;
+	    }
+	    return res;	
+	} else {
+	    buff[pathlen] = 0;
+	}
     }
 
     /* try to open the buffer spec as a directory */
@@ -605,22 +620,59 @@ static status_t
 	 * according to the glibc 2.7 documentation!!
 	 * only using dir file which works on linux. 
 	 * !!!No support for symbolic links at this time!!!
+	 *
+	 * Always skip any directory or file that starts with
+	 * the dot-char or is named CVS
 	 */
-	if ((ep->d_type == DT_DIR) && 
-	    (*ep->d_name != '.') && strcmp(ep->d_name, "CVS")) {
-	    if ((pathlen + 
-		 xml_strlen((const xmlChar *)ep->d_name)) >=  bufflen) {
-		res = ERR_BUFF_OVFL;
-		*done = TRUE;
-		dirdone = TRUE;
-	    } else {
-		xml_strcpy(&buff[pathlen], (const xmlChar *)ep->d_name);
-		res = search_subdirs(buff, bufflen, fname, done);
-		if (*done) {
+	dentlen = xml_strlen((const xmlChar *)ep->d_name); 
+
+	/* this dive-first behavior is not really what is desired
+	 * but do not have a 'stat' function for partial filenames
+	 * so just going through the directory block in order
+	 */
+	if (ep->d_type == DT_DIR) {
+	    if (*ep->d_name != '.' && strcmp(ep->d_name, "CVS")) {
+		if ((pathlen + dentlen) >= bufflen) {
+		    res = ERR_BUFF_OVFL;
+		    *done = TRUE;
 		    dirdone = TRUE;
 		} else {
-		    res = NO_ERR;
-		    buff[pathlen] = 0;
+		    xml_strcpy(&buff[pathlen], (const xmlChar *)ep->d_name);
+		    res = search_subdirs(buff, bufflen, 
+					 fname, matchmode, done);
+		    if (*done) {
+			dirdone = TRUE;
+		    } else {
+			/* erase the filename and keep trying */
+			res = NO_ERR;
+			buff[pathlen] = 0;
+		    }
+		}
+	    }
+	} else if (matchmode && (ep->d_type == DT_REG)) {
+	    if (!xml_strncmp(fname, 
+			     (const xmlChar *)ep->d_name,
+			     fnamelen)) {
+		/* filename is a partial match so check it out
+		 * further to see if it is a match
+		 * check if length matches foo.YYYY-MM-DD.yang
+		 */
+		if (dentlen == fnamelen + 16) {
+		    /* check if the file extension is really .yang
+		     * TBD: validate the date-string format
+		     * even more TBD: search the entire dir
+		     * for the highest valued date string
+		     */
+		    if (!strcmp(&ep->d_name[fnamelen+11], ".yang")) {
+			*done = TRUE;
+			if ((pathlen + dentlen) >= bufflen) {
+			    res = ERR_BUFF_OVFL;
+			} else {
+			    res = NO_ERR;
+			    xml_strcpy(&buff[pathlen], 
+				       (const xmlChar *)ep->d_name);
+			}
+		    }
 		}
 	    }
 	}
@@ -698,6 +750,8 @@ static status_t
 *   ptyp == parser source type
 *   usepath == TRUE if path should be used directly
 *              FALSE if the path should be appended with the 'modules' dir
+*   matchmode == TRUE if partial filename match OK
+*                FALSE for full filename match only
 *   done == address of return done flag
 *
 * OUTPUTS:
@@ -716,6 +770,7 @@ static status_t
 		       yang_pcb_t *pcb,
 		       yang_parsetype_t ptyp,
 		       boolean usepath,
+		       boolean matchmode,
 		       boolean *done)
 {
     const xmlChar  *path2;
@@ -741,14 +796,20 @@ static status_t
 	    return res;
 	}
 
-	fnamebuff = yang_make_filename(modname, revision);
+	if (matchmode) {
+	    fnamebuff = xml_strdup(modname);
+	} else {
+	    fnamebuff = yang_make_filename(modname, revision);
+	}
+
 	if (!fnamebuff) {
 	    *done = TRUE;
 	    return ERR_INTERNAL_MEM;
 	}
 
 	/* try YANG file */
-	res = search_subdirs(buff, bufflen, fnamebuff, done);
+	res = search_subdirs(buff, bufflen, 
+			     fnamebuff, matchmode, done);
 	if (*done) {
 	    if (res == NO_ERR) {
 		res = try_module(buff, bufflen, NULL, NULL,
@@ -797,6 +858,8 @@ static status_t
 *   revision == module revision date (may be NULL)
 *   pcb == parser control block in progress
 *   ptyp == parser source type
+*   matchmode == TRUE if partial filename match OK
+*                FALSE for full filename match only
 *   done == address of return done flag
 *
 * OUTPUTS:
@@ -814,6 +877,7 @@ static status_t
 			   const xmlChar *revision,
 			   yang_pcb_t *pcb,
 			   yang_parsetype_t ptyp,
+			   boolean matchmode,
 			   boolean *done)
 {
     const xmlChar  *str, *p;
@@ -848,7 +912,7 @@ static status_t
 	xml_strncpy(pathbuff, str, pathlen);
 	res = check_module_path(pathbuff, buff, bufflen,
 				modname, revision,
-				pcb, ptyp, TRUE, done);
+				pcb, ptyp, TRUE, matchmode, done);
 	if (*done) {
 	    m__free(pathbuff);
 	    return res;
@@ -876,19 +940,21 @@ static status_t
 * and then load it into the system, if not already loaded
 *
 * Module Search order:
-*   0) filespec == try that only and exit
-*   1) current directory
-*   2) YANG_MODPATH environment var (or set by modpath CLI var)
-*   3) HOME/modules directory
-*   4) YANG_HOME/modules directory
-*   5a) YANG_INSTALL/modules directory OR
-*   5b) default install module location, which is '/usr/share/yang/modules'
+*   1) filespec == try that only and exit
+*   2) current directory
+*   3) YANG_MODPATH environment var (or set by modpath CLI var)
+*   4) HOME/modules directory
+*   5) YANG_HOME/modules directory
+*   6) YANG_INSTALL/modules directory OR
+*   7) default install module location, which is '/usr/share/yang/modules'
 *
 * INPUTS:
 *   modname == module name with no path prefix or file extension
 *   revision == optional revision date of 'modname' to find
 *   pcb == parser control block
 *   ptyp == current parser source type
+*   matchmode == TRUE if partial filename match OK
+*                FALSE for full filename match only
 *   retmod == address of return module (may be NULL)
 *
 * OUTPUTS:
@@ -903,6 +969,7 @@ static status_t
 		 const xmlChar *revision,
 		 yang_pcb_t *pcb,
 		 yang_parsetype_t ptyp,
+		 boolean matchmode,
 		 ncx_module_t **retmod)
 {
     const xmlChar  *str;
@@ -949,20 +1016,19 @@ static status_t
 	}
     }
 
-    /* find the start of the file name extension, determine NCX or YANG  */
+    /* find the start of the file name extension, expecting .yang  */
     str = &modname[modlen];
     while (str > modname && *str != '.') {
 	str--;
     }
 
-    /* try to find a YANG file suffix */
+    /* try to find a .yang file suffix */
     if (*str == '.') {
 	/* since the dot-char is allowed in YANG identifier names
 	 * only treat this string with a dot in it as a file if
 	 * it has a YANG file extension
 	 */
-	str++;
-	if (!xml_strcmp(str, (const xmlChar *)"yang")) {
+	if (!xml_strcmp(++str, NCXMOD_YANG_SUFFIX)) {
 	    isfile = TRUE;
 	}
     }
@@ -1002,7 +1068,7 @@ static status_t
 	*buff = 0;
     }
 
-    /* 0) if parameter is a filespec, then try it and exit
+    /* 1) if parameter is a filespec, then try it and exit
      *    if it does not work, instead of trying other directories
      */
     if (isfile) {
@@ -1020,42 +1086,46 @@ static status_t
 	return res;
     }
 
-    /* 0) try alt_path variable if set; used by yangdiff */
+    /* 2) try alt_path variable if set; used by yangdiff */
     if (!done && ncxmod_alt_path) {
 	res = check_module_path(ncxmod_alt_path, buff, bufflen,
 				modname, revision,
-				pcb, ptyp, FALSE, &done);
+				pcb, ptyp, FALSE, 
+				matchmode, &done);
     }
 
-    /* 1a) try as module in current dir, YANG format  */
+    /* 3) try as module in current dir, YANG format  */
     if (!done) {
 	res = try_module(buff, bufflen, NULL, NULL,
 			 modname, NCXMOD_MODE_YANG,
 			 FALSE, &done, pcb, ptyp);
     }
 
-    /* 2) try YANG_MODPATH environment variable if set */
+    /* 4) try YANG_MODPATH environment variable if set */
     if (!done && ncxmod_mod_path) {
 	res = check_module_pathlist(ncxmod_mod_path, buff, bufflen,
 				    modname, revision,
-				    pcb, ptyp, &done);
+				    pcb, ptyp, 
+				    matchmode, &done);
     }
 
-    /* 3) HOME/modules directory */
+    /* 5) HOME/modules directory */
     if (!done && ncxmod_env_userhome) {
 	res = check_module_path(ncxmod_env_userhome, buff, bufflen,
 				modname, revision,
-				pcb, ptyp, FALSE, &done);
+				pcb, ptyp, FALSE, 
+				matchmode, &done);
     }
 
-    /* 4) YANG_HOME/modules directory */
+    /* 6) YANG_HOME/modules directory */
     if (!done && ncxmod_env_home) {
 	res = check_module_path(ncxmod_env_home, buff, bufflen,
 				modname, revision,
-				pcb, ptyp, FALSE, &done);
+				pcb, ptyp, FALSE, 
+				matchmode, &done);
     }
 
-    /* 5) YANG_INSTALL/modules directory or default install path
+    /* 7) YANG_INSTALL/modules directory or default install path
      *    If this envvar is set then the default install path will not
      *    be tried
      */
@@ -1063,11 +1133,14 @@ static status_t
 	if (ncxmod_env_install) {
 	    res = check_module_path(ncxmod_env_install, buff, bufflen,
 				    modname, revision,
-				    pcb, ptyp, FALSE, &done);
+				    pcb, ptyp, FALSE, 
+				    matchmode, &done);
 	} else {
-	    res = check_module_path(NCXMOD_DEFAULT_INSTALL, buff, bufflen,
+	    res = check_module_path(NCXMOD_DEFAULT_INSTALL, 
+				    buff, bufflen,
 				    modname, revision,
-				    pcb, ptyp, FALSE, &done);
+				    pcb, ptyp, FALSE, 
+				    matchmode, &done);
         }
     }
 
@@ -1237,6 +1310,82 @@ static status_t
 }  /* process_subtree */
 
 
+/********************************************************************
+* FUNCTION try_load_module
+*
+* Try 1 to 3 forms of the YANG filespec to
+* locate the specified module
+*
+* INPUTS:
+*   pcb == parser control block to use
+*   ptyp == parser mode type to use
+*   modname == module name with no path prefix or file extension
+*   revision == optional revision date of 'modname' to find
+*   retmod == address of return module (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL:
+*    *retmod == pointer to requested module version
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    try_load_module (yang_pcb_t *pcb,
+		     yang_parsetype_t ptyp,
+		     const xmlChar *modname,
+		     const xmlChar *revision,
+		     ncx_module_t **retmod)
+{
+    ncx_module_t    *testmod;
+    status_t         res;
+
+#ifdef DEBUG
+    if (!modname) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    testmod = NULL;
+
+    res = load_module(modname, revision, 
+		      pcb, ptyp, 
+		      FALSE, &testmod);
+    
+    if (res == ERR_NCX_MOD_NOT_FOUND) {
+	if (revision && *revision) {
+	    /* try filenames without revision dates in them */
+	    res = load_module(modname, NULL, 
+			      pcb, ptyp, 
+			      FALSE, &testmod);
+	    if (res == NO_ERR && testmod &&
+		yang_compare_revision_dates(revision,
+					    testmod->version)) {
+		/* error should already be reported */
+		res = ERR_NCX_WRONG_VERSION;
+	    }
+	} else {
+	    /* already tried no revision date and it failed
+	     * so try to match the module name in a
+	     * filename with a revision date.
+	     * The user does not care which version is found
+	     * TBD: find the best version anyway
+	     */
+	    res = load_module(modname, NULL, 
+			      pcb, ptyp, 
+			      TRUE, &testmod);
+	}
+    }
+
+    if (retmod) {
+	*retmod = testmod;
+    }
+
+    return res;
+
+}  /* try_load_module */
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -1344,7 +1493,6 @@ status_t
 			const xmlChar *revision,
 			ncx_module_t **retmod)
 {
-
     yang_pcb_t      *pcb;
     status_t         res;
 
@@ -1359,14 +1507,8 @@ status_t
 	res = ERR_INTERNAL_MEM;
     } else {
 	pcb->revision = revision;
-	res = load_module(modname, revision, 
-			  pcb, YANG_PT_TOP,  retmod);
-	if (res == ERR_NCX_MOD_NOT_FOUND && 
-	    revision && *revision) {
-	    /* try filenames without revision dates in them */
-	    res = load_module(modname, NULL, 
-			      pcb, YANG_PT_TOP,  retmod);
-	}
+	res = try_load_module(pcb, YANG_PT_TOP,
+			      modname, revision, retmod);
     }
     if (pcb) {
 	yang_free_pcb(pcb);
@@ -1407,7 +1549,6 @@ status_t
 			 yang_pcb_t *pcb,
 			 yang_parsetype_t ptyp)
 {
-
     yang_node_t     *node;
     const xmlChar   *savedrev;
     status_t         res;
@@ -1427,15 +1568,10 @@ status_t
     savedrev = pcb->revision;
     pcb->revision = revision;
 
-    res = load_module(modname, revision, pcb, ptyp, NULL);
-
-    if (res == ERR_NCX_MOD_NOT_FOUND && revision && *revision) {
-	/* try filenames without revision dates in them */
-	res = load_module(modname, NULL, pcb, ptyp,  NULL);
-    }
+    res = try_load_module(pcb, ptyp,
+			  modname, revision, NULL);
 
     pcb->revision = savedrev;
-
     return res;
 
 }  /* ncxmod_load_imodule */
@@ -1471,7 +1607,7 @@ yang_pcb_t *
 			    status_t *res)
 {
     yang_pcb_t     *pcb;
-    
+
 #ifdef DEBUG
     if (!modname || !res) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1486,8 +1622,8 @@ yang_pcb_t *
 	pcb->revision = revision;
 	pcb->subtree_mode = subtree_mode;
 	pcb->with_submods = with_submods;
-	*res = load_module(modname, revision, 
-			   pcb, YANG_PT_TOP, NULL);
+	*res = try_load_module(pcb, YANG_PT_TOP,
+			       modname, revision, NULL);
     }
 
     return pcb;
@@ -1528,8 +1664,7 @@ yang_pcb_t *
 			     const xmlChar *modpath,
 			     status_t *res)
 {
-
-    yang_pcb_t *pcb;
+    yang_pcb_t    *pcb;
 
 #ifdef DEBUG
     if (!modname || !res) {
@@ -1548,8 +1683,8 @@ yang_pcb_t *
 	if (modpath) {
 	    ncxmod_set_altpath(modpath);
 	}
-	*res = load_module(modname, revision, 
-			   pcb, YANG_PT_TOP, NULL);
+	*res = try_load_module(pcb, YANG_PT_TOP,
+			       modname, revision, NULL);
     }
 
     return pcb;

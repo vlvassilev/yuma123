@@ -213,7 +213,7 @@ static status_t
     cmn_init (int argc,
 	      const char *argv[],
 	      boolean *showver,
-	      boolean *showhelp)
+	      help_mode_t *showhelpmode)
 {
     status_t   res;
 #ifdef NETCONFD_DEBUG_TEST
@@ -277,13 +277,13 @@ static status_t
     /* Initialize the Netconf Agent Library
      * with command line and conf file parameters 
      */
-    res = agt_init1(argc, argv, showver, showhelp);
+    res = agt_init1(argc, argv, showver, showhelpmode);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* check quick-exit mode */
-    if (*showver || *showhelp) {
+    if (*showver || *showhelpmode != HELP_MODE_NONE) {
 	return NO_ERR;
     }
 
@@ -390,8 +390,9 @@ int
     main (int argc, 
 	  const char *argv[])
 {
-    status_t   res;
-    boolean    showver, showhelp, stdlog;
+    status_t     res;
+    boolean      showver, stdlog;
+    help_mode_t  showhelpmode;
 
 #ifdef MEMORY_DEBUG
     mtrace();
@@ -400,8 +401,7 @@ int
     malloc_cnt = 0;
     free_cnt = 0;
 
-
-    res = cmn_init(argc, argv, &showver, &showhelp);
+    res = cmn_init(argc, argv, &showver, &showhelpmode);
 
     stdlog = !log_is_open();
     
@@ -411,10 +411,10 @@ int
     } else {
 	if (showver) {
 	    log_write("\nnetconfd version %s\n", progver);
-	} else if (showhelp) {
+	} else if (showhelpmode != HELP_MODE_NONE) {
 	    help_program_module(NETCONFD_MOD,
 				NETCONFD_CLI,
-				HELP_MODE_FULL);
+				showhelpmode);
 	} else {
 	    netconfd_run();
 	}

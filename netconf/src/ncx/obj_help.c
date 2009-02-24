@@ -330,12 +330,24 @@ void
 		help_write_lines((const xmlChar *)" (NP)", 
 				 0, FALSE); 
 	    }
+	    testobj = obj_get_default_parm(obj);
+	    if (testobj) {
+		help_write_lines((const xmlChar *)"default parameter: ", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+		help_write_lines(obj_get_name(testobj), 0, FALSE);
+	    }
 	    break;
 	case HELP_MODE_FULL:
 	    if (obj->def.container->presence) {
 		help_write_lines((const xmlChar *)"presence: ", 
 				 indent+NCX_DEF_INDENT, TRUE); 
 		help_write_lines(obj->def.container->presence, 0, FALSE);
+	    }
+	    testobj = obj_get_default_parm(obj);
+	    if (testobj) {
+		help_write_lines((const xmlChar *)"default parameter: ", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+		help_write_lines(obj_get_name(testobj), 0, FALSE);
 	    }
 	    if (mode == HELP_MODE_FULL) {
 		/*** add mustQ ***/;

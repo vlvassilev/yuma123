@@ -583,6 +583,8 @@ const char *
 	return "invalid duplicate import-stmt";
     case ERR_NCX_INVALID_DUP_INCLUDE:
 	return "invalid duplicate include-stmt";
+    case ERR_NCX_AMBIGUOUS_CMD:
+	return "ambiguous command";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

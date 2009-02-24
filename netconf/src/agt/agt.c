@@ -267,7 +267,7 @@ status_t
     agt_init1 (int argc,
 	       const char *argv[],
 	       boolean *showver,
-	       boolean *showhelp)
+	       help_mode_t *showhelpmode)
 {
     status_t  res;
 
@@ -293,13 +293,13 @@ status_t
 
     /* get the command line params and also any config file params */
     res = agt_cli_process_input(argc, argv, &agt_profile,
-				showver, showhelp);
+				showver, showhelpmode);
     if (res != NO_ERR) {
 	return res;
     } /* else the agt_profile is filled in */
 
     /* check if quick exit mode */
-    if (*showver || *showhelp) {
+    if (*showver || *showhelpmode == HELP_MODE_NONE) {
 	return NO_ERR;
     }
 

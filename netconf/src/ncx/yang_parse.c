@@ -1525,11 +1525,21 @@ static status_t
 					  imp->revision,
 					  pcb, YANG_PT_IMPORT);
 		if (res != NO_ERR) {
-		    if (!pcb || !pcb->top || pcb->top->errors) {
+		    /* skip error if module has just warnings */
+		    if (get_errtyp(res) < ERR_TYP_WARN) {
 			retres = ERR_NCX_IMPORT_ERRORS;
-			log_error("\nError: '%s' import of module '%s' failed",
-				  mod->sourcefn, imp->module);
-			ncx_print_errormsg(tkc, mod, retres);
+			if (imp->revision) {
+			    log_error("\nError: '%s' import of "
+				      "module '%s' revision '%s' failed",
+				      mod->sourcefn, 
+				      imp->module,
+				      imp->revision);
+			} else {
+			    log_error("\nError: '%s' import of "
+				      "module '%s' failed",
+				      mod->sourcefn, imp->module);
+			}
+			ncx_print_errormsg(tkc, mod, res);
 		    }
 		} /* else ignore the warnings */
 

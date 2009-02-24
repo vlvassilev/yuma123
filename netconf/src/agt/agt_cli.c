@@ -40,6 +40,10 @@ date         init     comment
 #include "conf.h"
 #endif
 
+#ifndef _H_help
+#include "help.h"
+#endif
+
 #ifndef _H_ncx
 #include "ncx.h"
 #endif
@@ -230,12 +234,13 @@ static void
 *    argv == array of command line argument strings
 *    agt_profile == agent profile struct to fill in
 *    showver == address of version return quick-exit status
-*    showhelp == address of help return quick-exit status
+*    showhelpmode == address of help return quick-exit status
 *
 * OUTPUTS:
 *    *agt_profile is filled in, with parms gathered or defaults
 *    *showver == TRUE if user requsted version quick-exit mode
-*    *showhelp == TRUE if user requsted help quick-exit mode
+*    *showhelpmode == requested help mode 
+*                     (none, breief, normal, full)
 *
 * RETURNS:
 *    NO_ERR if all goes well
@@ -245,12 +250,21 @@ status_t
 			   const char *argv[],
 			   agt_profile_t *agt_profile,
 			   boolean *showver,
-			   boolean *showhelp)
+			   help_mode_t *showhelpmode)
 {
     ncx_module_t          *mod;
     const obj_template_t  *obj;
     val_value_t           *valset, *val;
     status_t               res;
+
+#ifdef DEBUG
+    if (!argv || !agt_profile || !showver || !showhelpmode) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    *showver = FALSE;
+    *showhelpmode = HELP_MODE_NONE;
 
     /* find the parmset definition in the registry */
     obj = NULL;
@@ -306,10 +320,21 @@ status_t
 
 	/* check if help mode requested */
 	val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_HELP);
-	*showhelp = (val) ? TRUE : FALSE;
-    } else {
-	*showver = FALSE;
-	*showhelp = FALSE;
+	if (val) {
+	    *showhelpmode = HELP_MODE_NORMAL;
+
+	    /* help submode parameter (brief/normal/full) */
+	    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_BRIEF);
+	    if (val) {
+		*showhelpmode = HELP_MODE_BRIEF;
+	    } else {
+		/* full parameter */
+		val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_FULL);
+		if (val) {
+		    *showhelpmode = HELP_MODE_FULL;
+		}
+	    }
+	}
     }
 
     /* cleanup and exit */

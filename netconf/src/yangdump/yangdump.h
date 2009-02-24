@@ -24,6 +24,10 @@ date	     init     comment
 
 #include <xmlstring.h>
 
+#ifndef _H_help
+#include "help.h"
+#endif
+
 #ifndef _H_log
 #include "log.h"
 #endif
@@ -89,6 +93,7 @@ typedef struct yangdump_cvtparms_t_ {
     boolean         dependencies;
     boolean         exports;
     boolean         helpmode;
+    help_mode_t     helpsubmode;
     boolean         identifiers;
     int32           indent;
     boolean         logappend;

@@ -768,42 +768,54 @@ static status_t
     logappend = FALSE;
     loglevel = LOG_DEBUG_NONE;
 
+    /* create bootstrap parm: log-level */
     parm = cli_new_rawparm(NCX_EL_LOGLEVEL);
     if (parm) {
 	dlq_enque(parm, &parmQ);
     } else {
+	log_error("\nError: malloc failed");
 	res = ERR_INTERNAL_MEM;
     }
 
+    /* create bootstrap parm: log */
     if (res == NO_ERR) {
 	parm = cli_new_rawparm(NCX_EL_LOG);
 	if (parm) {
 	    dlq_enque(parm, &parmQ);
 	} else {
+	    log_error("\nError: malloc failed");
 	    res = ERR_INTERNAL_MEM;
 	}
     }
 
+    /* create bootstrap parm: log-append */
     if (res == NO_ERR) {
 	parm = cli_new_rawparm(NCX_EL_LOGAPPEND);
 	if (parm) {
 	    dlq_enque(parm, &parmQ);
 	} else {
+	    log_error("\nError: malloc failed");
 	    res = ERR_INTERNAL_MEM;
 	}
     }
 
+    /* create bootstrap parm: modpath */
     if (res == NO_ERR) {
 	parm = cli_new_rawparm(NCX_EL_MODPATH);
 	if (parm) {
 	    dlq_enque(parm, &parmQ);
 	} else {
+	    log_error("\nError: malloc failed");
 	    res = ERR_INTERNAL_MEM;
 	}
     }
 
     if (res == NO_ERR) {
 	res = cli_parse_raw(argc, argv, &parmQ);
+	if (res != NO_ERR) {
+	    log_error("\nError: bootstrap CLI failed (%s)",
+		      get_error_string(res));
+	}
     }
 
     if (res != NO_ERR) {
@@ -812,12 +824,23 @@ static status_t
     }
 
     parm = cli_find_rawparm(NCX_EL_LOGLEVEL, &parmQ);
-    if (parm && parm->value) {
-	loglevel = log_get_debug_level_enum(parm->value);
-	if (loglevel == LOG_DEBUG_NONE) {
-	    res = ERR_NCX_INVALID_VALUE;
+    if (parm && parm->count) {
+	if (parm->count > 1) {
+	    log_error("\nError: Only one log-level parameter allowed");
+	    res = ERR_NCX_DUP_ENTRY;
+	} else if (parm->value) {
+	    loglevel = log_get_debug_level_enum(parm->value);
+	    if (loglevel == LOG_DEBUG_NONE) {
+		log_error("\nError: '%s' not valid log-level",
+			  parm->value);
+		res = ERR_NCX_INVALID_VALUE;
+	    } else {
+		log_set_debug_level(loglevel);
+	    }
 	} else {
-	    log_set_debug_level(loglevel);
+	    log_error("\nError: no value entered for "
+		      "'log-level' parameter");
+	    res = ERR_NCX_INVALID_VALUE;
 	}
     } else {
 	log_set_debug_level(dlevel);
@@ -826,29 +849,54 @@ static status_t
     if (res == NO_ERR) {
 	parm = cli_find_rawparm(NCX_EL_LOGAPPEND, &parmQ);
 	logappend = (parm && parm->count) ? TRUE : FALSE;
-	if (parm && parm->value) {
+	if (parm->value) {
+	    log_error("\nError: log-append is empty parameter");
 	    res = ERR_NCX_INVALID_VALUE;
 	}
     }
 
     if (res == NO_ERR) {
 	parm = cli_find_rawparm(NCX_EL_LOG, &parmQ);
-	if (parm && parm->value) {
-	    logfilename = (char *)
-		ncx_get_source((const xmlChar *)parm->value);
-	    if (!logfilename) {
-		res = ERR_INTERNAL_MEM;
+	if (parm && parm->count) {
+	    if (parm->count > 1) {
+		log_error("\nError: Only one 'log' filename allowed");
+		res = ERR_NCX_DUP_ENTRY;
+	    } else if (parm->value) {
+		logfilename = (char *)
+		    ncx_get_source((const xmlChar *)parm->value);
+		if (!logfilename) {
+		    log_error("\nError: malloc failed");
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    res = log_open(logfilename, logappend, logtstamps);
+		    if (res != NO_ERR) {
+			log_error("\nError: open logfile '%s' failed",
+				  logfilename);		    
+		    }
+		}
 	    } else {
-		res = log_open(logfilename, logappend, logtstamps);
+		log_error("\nError: no value entered for "
+			  "'log' parameter");
+		res = ERR_NCX_INVALID_VALUE;
 	    }
-	}
+	} /* else use default log (stdout) */
     }
 
     if (res == NO_ERR) {
 	parm = cli_find_rawparm(NCX_EL_MODPATH, &parmQ);
-	if (parm && parm->value) {
-	    ncxmod_set_modpath((const xmlChar *)parm->value);
-	}
+	if (parm && parm->count) {
+	    if (parm->count > 1) {
+		log_error("\nError: Only one 'modpath' parameter allowed");
+		res = ERR_NCX_DUP_ENTRY;
+	    } else if (parm->value) {
+		/*** VALIDATE MODPATH FIRST ***/
+		ncxmod_set_modpath((const xmlChar *)parm->value);
+	    } else {
+		log_error("\nError: no value entered for "
+			  "'modpath' parameter");
+		res = ERR_NCX_INVALID_VALUE;
+	    }
+	} /* else use default modpath */
     }
 
     if (logfilename) {

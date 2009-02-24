@@ -598,7 +598,8 @@ extern const obj_template_t *
     obj_match_child_str (const obj_template_t *obj,
 			 const xmlChar *modname,
 			 const xmlChar *objname,
-			 uint32 objnamelen);
+			 uint32 objnamelen,
+			 uint32 *matchcount);
 
 /* skips augment and uses */
 extern const obj_template_t *

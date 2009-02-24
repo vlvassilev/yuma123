@@ -162,8 +162,6 @@ date	     init     comment
 
 #define NCX_DEF_MERGETYPE NCX_MERGE_LAST
 
-#define NCX_DEF_DUMP_LEVEL  4
-
 #define NCX_DEF_LINELEN     72
 
 #define NCX_ROOT_USER       (const xmlChar *)"root"
@@ -347,6 +345,7 @@ date	     init     comment
 #define NCX_EL_BINARY          ((const xmlChar *)"binary")
 #define NCX_EL_BITS            ((const xmlChar *)"bits")
 #define NCX_EL_BOOLEAN         ((const xmlChar *)"boolean")
+#define NCX_EL_BRIEF           ((const xmlChar *)"brief")
 #define NCX_EL_BYTE            ((const xmlChar *)"byte")
 #define NCX_EL_C               ((const xmlChar *)"C")
 #define NCX_EL_CANDIDATE       ((const xmlChar *)"candidate")
@@ -413,6 +412,7 @@ date	     init     comment
 #define NCX_EL_FLOAT           ((const xmlChar *)"float")
 #define NCX_EL_FLOAT32         ((const xmlChar *)"float32")
 #define NCX_EL_FLOAT64         ((const xmlChar *)"float64")
+#define NCX_EL_FULL            ((const xmlChar *)"full")
 #define NCX_EL_GET             ((const xmlChar *)"get")
 #define NCX_EL_GET_CONFIG      ((const xmlChar *)"get-config")
 #define NCX_EL_GROUP_ID        ((const xmlChar *)"group-id")

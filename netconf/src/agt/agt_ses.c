@@ -132,14 +132,6 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-/* Session Total Statistics */
-typedef struct total_stats_t_ {
-    uint64            active_sessions;
-    uint64            closed_sessions;
-    uint64            failed_sessions;
-    ses_stats_t       stats;
-} total_stats_t;
-
 
 /********************************************************************
 *                                                                   *
@@ -151,36 +143,9 @@ static boolean    agt_ses_init_done = FALSE;
 
 static uint32     next_sesid;
 
-static total_stats_t totals;
-
-/* static ps_parmset_t *sesinfo, *mySession; */
-
 static ses_cb_t  *agtses[AGT_SES_MAX_SESSIONS];
 
-
-/********************************************************************
-* FUNCTION add_ses_stats
-*
-* Update the global stats totals 
-*
-* INPUTS:
-*   stats == session stats block
-*
-*********************************************************************/
-static void
-    add_ses_stats (const ses_stats_t *stats)
-{
-    totals.stats.in_bytes += stats->in_bytes;
-    totals.stats.in_drop_bytes += stats->in_drop_bytes;
-    totals.stats.in_msgs += stats->in_msgs;
-    totals.stats.in_err_msgs += stats->in_err_msgs;
-    totals.stats.out_bytes += stats->out_bytes;
-    totals.stats.out_drop_bytes += stats->out_drop_bytes;
-    totals.stats.out_msgs += stats->out_msgs;
-    totals.stats.out_err_msgs += stats->out_err_msgs;
-
-}  /* add_ses_stats */
-
+static ses_total_stats_t *agttotals;
 
 #if 0
 /********************************************************************
@@ -226,28 +191,28 @@ static void
 	/* brute force set the child value */
 	if (!xml_strcmp(typch->name, 
 			(const xmlChar *)"inBytes")) {
-	    VAL_ULONG(chval) = stats->in_bytes;
+	    VAL_UINT(chval) = stats->in_bytes;
 	} else if (!xml_strcmp(typch->name, 
-			       (const xmlChar *)"inDropBytes")) {
-	    VAL_ULONG(chval) = stats->in_drop_bytes;
+			       (const xmlChar *)"inDropMsgs")) {
+	    VAL_UINT(chval) = stats->in_drop_msgs;
 	} else if (!xml_strcmp(typch->name,
 			       (const xmlChar *)"inMsgs")) {
-	    VAL_ULONG(chval) = stats->in_msgs;
+	    VAL_UINT(chval) = stats->in_msgs;
 	} else if (!xml_strcmp(typch->name, 
 			       (const xmlChar *)"inErrMsgs")) {
-	    VAL_ULONG(chval) = stats->in_err_msgs;
+	    VAL_UINT(chval) = stats->in_err_msgs;
 	} else if (!xml_strcmp(typch->name, 
 			       (const xmlChar *)"outBytes")) {
-	    VAL_ULONG(chval) = stats->out_bytes;
+	    VAL_UINT(chval) = stats->out_bytes;
 	} else if (!xml_strcmp(typch->name, 
 			       (const xmlChar *)"outDropBytes")) {
-	    VAL_ULONG(chval) = stats->out_drop_bytes;
+	    VAL_UINT(chval) = stats->out_drop_bytes;
 	} else if (!xml_strcmp(typch->name, 
 			       (const xmlChar *)"outMsgs")) {
-	    VAL_ULONG(chval) = stats->out_msgs;
+	    VAL_UINT(chval) = stats->out_msgs;
 	} else if (!xml_strcmp(typch->name,
 			       (const xmlChar *)"outErrMsgs")) {
-	    VAL_ULONG(chval) = stats->out_err_msgs;
+	    VAL_UINT(chval) = stats->out_err_msgs;
 	} else {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
@@ -430,7 +395,6 @@ static status_t
 		       val_value_t  *dstval)
 {
     ses_stats_t sum, *cur;
-    uint32      i;
 
     (void)scb;
 
@@ -441,21 +405,6 @@ static status_t
 
     /* setup the running totals with the deleted sessions totals */
     memcpy(&sum, &totals.stats, sizeof(ses_stats_t));
-
-    /* gather all the running totals */
-    for (i=1; i < AGT_SES_MAX_SESSIONS; i++) {
-	if (agtses[i]) {
-	    cur = &agtses[i]->stats;
-	    sum.in_bytes += cur->in_bytes;
-	    sum.in_drop_bytes += cur->in_drop_bytes;
-	    sum.in_msgs += cur->in_msgs;
-	    sum.in_err_msgs += cur->in_err_msgs;
-	    sum.out_bytes += cur->out_bytes;
-	    sum.out_drop_bytes += cur->out_drop_bytes;
-	    sum.out_msgs += cur->out_msgs;
-	    sum.out_err_msgs += cur->out_err_msgs;
-	}
-    }
 
     /* check if a filter is supplied, and prune if so */
     if (fil != NULL) {
@@ -996,8 +945,7 @@ static status_t
 status_t
     agt_ses_init (void)
 {
-    uint32    i;
-    /* status_t  res; */
+    uint32             i;
 
     if (agt_ses_init_done) {
 	return ERR_INTERNAL_INIT_SEQ;
@@ -1008,19 +956,9 @@ status_t
     }
     next_sesid = 1;
 
-#if 0
-    memset(&totals, 0x0, sizeof(total_stats_t));
-
-#ifdef AGT_SES_DEBUG
-    log_debug2("\nagt: Loading NCX Sessions module");
-#endif
-
-    /* load the agent-specific modules */
-    res = ncxmod_load_module(AGT_SES_MODULE, NULL, NULL);
-    if (res != NO_ERR) {
-	return res;
-    }
-#endif
+    agttotals = ses_get_total_stats();
+    memset(agttotals, 0x0, sizeof(ses_total_stats_t));
+    tstamp_datetime(agttotals->startTime);
 
     agt_ses_init_done = TRUE;
     return NO_ERR;
@@ -1310,7 +1248,7 @@ ses_cb_t *
 	    }
 	}
 	log_info("\nNew session %d created OK", slot);
-	totals.active_sessions++;
+	agttotals->active_sessions++;
     } else {
 	if (scb) {
 	    ses_free_scb(scb);
@@ -1360,13 +1298,12 @@ void
     cfg_release_locks(slot);
 
     /* add this session to ses stats */
-    totals.active_sessions--;
+    agttotals->active_sessions--;
     if (scb->active) {
-	totals.closed_sessions++;
+	agttotals->closed_sessions++;
     } else {
-	totals.failed_sessions++;
+	agttotals->failed_sessions++;
     }
-    add_ses_stats(&scb->stats);
 
     /* this will close the socket if it is still open */
     ses_free_scb(scb);
@@ -1627,8 +1564,8 @@ boolean
 	}
 	return FALSE;
     } else {
-	/* no ports configured so allow 830 and 22 */
-	if (port==NCX_SSH_PORT || port==NCX_NCSSH_PORT) {
+	/* no ports configured so allow 830 */
+	if (port==NCX_NCSSH_PORT) {
 	    return TRUE;
 	} else {
 	    return FALSE;

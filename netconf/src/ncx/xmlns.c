@@ -775,6 +775,47 @@ void *
 
 
 /********************************************************************
+* FUNCTION xmlns_set_modptrs
+*
+* get the module pointer for the namespace ID
+*
+* INPUTS:
+*    modname == module owner name to find
+*    modptr == ncx_module_t back-ptr to set
+*
+*********************************************************************/
+void
+    xmlns_set_modptrs (const xmlChar *modname,
+		       void *modptr)
+{
+    uint32    i;
+    xmlns_t  *rec;
+
+#ifdef DEBUG
+    if (!modname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (!xmlns_init_done) {
+        xmlns_init();
+        return;
+    }
+
+    for (i=0; i<xmlns_next_id-1; i++) {
+	rec = xmlns[i];
+	if (rec->ns_module) {
+            if (!xml_strcmp(rec->ns_module, modname)) {
+		rec->ns_mod = modptr;
+            }
+	}
+    }
+
+}  /* xmlns_set_modptrs */
+
+
+/********************************************************************
 * FUNCTION xmlns_xs_id
 *
 * Get the ID for the XSD namespace or 0 if it doesn't exist

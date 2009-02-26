@@ -1424,6 +1424,7 @@ static status_t
 			  retval->name, chnode.qname);
 		curchild = ncx_get_gen_anyxml();
 		res = NO_ERR;
+		errmode = TRUE;
 	    }
 	}
 
@@ -1437,7 +1438,8 @@ static status_t
 	     * Allocate a new val_value_t for the child value node
 	     */
 	    chval = val_new_child_val(obj_get_nsid(curchild),
-				      (errmode) ? chnode.elname : obj_get_name(curchild), 
+				      (errmode) ? chnode.elname : 
+				      obj_get_name(curchild), 
 				      FALSE, retval, 
 				      get_editop(&chnode));
 	    if (!chval) {

@@ -34,6 +34,10 @@ date             init     comment
 #include "status.h"
 #endif
 
+#ifndef _H_tstamp
+#include "tstamp.h"
+#endif
+
 /********************************************************************
 *                                                                   *
 *                         C O N S T A N T S                         *
@@ -131,18 +135,42 @@ typedef enum ses_mode_t_ {
 } ses_mode_t;
 
 
+/*** using uint32 instead of uint64 because the netconf-state
+ *** data model is specified that way
+ ***/
+
 /* Per Session Statistics */
 typedef struct ses_stats_t_ {
-    uint64            in_bytes;
-    uint64            in_drop_bytes;
-    uint64            in_msgs;
-    uint64            in_err_msgs;
-    uint64            out_bytes;
-    uint64            out_drop_bytes;
-    uint64            out_msgs;
-    uint64            out_err_msgs;
-    uint32            out_line;    /* hack: bytes since '\n', pretty-print */
+    /* extra original internal byte counters */
+    uint32            in_bytes;
+    uint32            in_drop_msgs;
+    uint32            out_bytes;
+    uint32            out_drop_bytes;
+
+    /* hack: bytes since '\n', pretty-print */
+    uint32            out_line;    
+
+    /* netconf-state counters */
+    uint32            inXMLParseErrors;
+    uint32            inBadHellos;
+    uint32            inRpcs;
+    uint32            inBadRpcs;
+    uint32            inNotSupportedRpcs;
+    uint32            outRpcReplies;
+    uint32            outRpcErrors;
+    uint32            outNotifications;
 } ses_stats_t;
+
+
+/* Session Total Statistics */
+typedef struct ses_total_stats_t_ {
+    uint32            active_sessions;
+    uint32            closed_sessions;
+    uint32            failed_sessions;
+    uint32            inSessions;
+    ses_stats_t       stats;
+    xmlChar           startTime[TSTAMP_MIN_SIZE];
+} ses_total_stats_t;
 
 
 /* Session Message Buffer */
@@ -298,7 +326,7 @@ extern void
     ses_put_extern (ses_cb_t *scb,
 		    const xmlChar *fname);
 
-extern uint64
-    ses_get_outbytes (const ses_cb_t *scb);
+extern ses_total_stats_t *
+    ses_get_total_stats (void);
 
 #endif            /* _H_ses */

@@ -137,7 +137,7 @@ module netconfd {
            will be accepted by the agent.
 
            If no ports are configured, then the agent will accept
-           connections on the netconf-ssh and ssh ports (830 and 22).";
+           connections on the netconf-ssh port (tcp/830).";
 
          type inet:port-number;
       }

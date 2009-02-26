@@ -64,6 +64,10 @@ date         init     comment
 #include "agt_ses.h"
 #endif
 
+#ifndef _H_agt_state
+#include "agt_state.h"
+#endif
+
 #ifndef _H_agt_val
 #include "agt_val.h"
 #endif
@@ -371,6 +375,7 @@ status_t
 	return res;
     }
 
+
     /* setup an empty <running> config 
      * The config state is still CFG_ST_INIT
      * so no user access can occur yet (except OP_LOAD by root)
@@ -438,6 +443,12 @@ status_t
 	return res;
     }
 #endif
+
+    /* load the NETCONF state monitoring data model module */
+    res = agt_state_init();
+    if (res != NO_ERR) {
+	return res;
+    }
     
     /*** ALL INITIAL YANG MODULES SHOULD BE LOADED AT THIS POINT ***/
     if (ncx_any_mod_errors()) {
@@ -462,6 +473,12 @@ status_t
 
     /* load the agent sessions callback functions and DM module */
     agt_ses_init2();
+
+    /* load the agent state monitoring callback functions and DM module */
+    res = agt_state_init2();
+    if (res != NO_ERR) {
+	return res;
+    }
 
     /*** TEMP: NEED TO CONVERT TO WG DM ***/
     /* load the schema-discovery:modules parmset */
@@ -520,6 +537,7 @@ void
 	agt_ncx_cleanup();
 	agt_hello_cleanup();
 	agt_cli_cleanup();
+	agt_state_cleanup();
 	agt_ses_cleanup();
 	agt_cap_cleanup();
 	agt_rpc_cleanup();

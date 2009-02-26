@@ -1142,7 +1142,7 @@ static status_t
     if (diffparms.helpmode) {
 	help_program_module(YANGDIFF_MOD, 
 			    YANGDIFF_CONTAINER, 
-			    HELP_MODE_FULL);
+			    diffparms.helpsubmode);
     }
     if ((diffparms.helpmode || diffparms.versionmode)) {
 	return res;
@@ -1359,6 +1359,20 @@ static status_t
     val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_HELP);
     if (val) {
 	cp->helpmode = TRUE;
+    }
+
+    /* help submode parameter (brief/normal/full) */
+    val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_BRIEF);
+    if (val) {
+	cp->helpsubmode = HELP_MODE_BRIEF;
+    } else {
+	/* full parameter */
+	val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_FULL);
+	if (val) {
+	    cp->helpsubmode = HELP_MODE_FULL;
+	} else {
+	    cp->helpsubmode = HELP_MODE_NORMAL;
+	}
     }
 
     /* modpath parameter */

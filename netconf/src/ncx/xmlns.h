@@ -168,6 +168,9 @@ extern const xmlChar *
 extern void *
     xmlns_get_modptr (xmlns_id_t nsid);
 
+extern void
+    xmlns_set_modptrs (const xmlChar *modname,
+		       void *modptr);
 extern xmlns_pmap_t *
     xmlns_new_pmap (uint32 buffsize);
 

@@ -1081,6 +1081,16 @@ void
 	     chval != NULL;
 	     chval = val_get_next_child(chval)) {
 
+#if 0
+	    xml_wr_full_check_val(scb, msg, chval, indent, testfn);
+#else
+	    /* check the user filter callback function */
+	    if (testfn) {
+		if (!(*testfn)(msg->withdef, NCX_NT_VAL, chval)) {
+		    continue;   /* skip this entry */
+		}
+	    }
+
 	    /* check special manager-only external mode;
 	     * send the contents of a file instead of the val node
 	     */
@@ -1168,6 +1178,8 @@ void
 	    if (v_chval) {
 		val_free_value(v_chval);
 	    }
+#endif
+
 	} 
 	break;
     default:
@@ -1240,6 +1252,15 @@ void
     if (!scb || !msg || !val) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return;
+    }
+#endif
+
+#if 0
+    /* check the user filter callback function */
+    if (testfn) {
+	if (!(*testfn)(msg->withdef, NCX_NT_VAL, val)) {
+	    return;   /* skip this entry */
+	}
     }
 #endif
 

@@ -422,11 +422,13 @@ void
 			      const void *errnode,
 			      const ncx_errinfo_t *errinfo)
 {
-    rpc_err_rec_t   *err;
-    dlq_hdr_t       *errQ;
-    xmlChar         *pathbuff;
+    rpc_err_rec_t      *err;
+    dlq_hdr_t          *errQ;
+    xmlChar            *pathbuff;
+    ses_total_stats_t  *totals;
 
     errQ = (msghdr) ? &msghdr->errQ : NULL;
+    totals = ses_get_total_stats();
 
     /* dump some error info to the log */
     if (LOGDEBUG3) {
@@ -486,16 +488,11 @@ void
 	    if (pathbuff) {
 		m__free(pathbuff);
 	    }
-	    /*** inc error-dropped counter for the session stats ***/
 	    if (scb) {
-		;
+		scb->stats.out_drop_bytes++;
+		totals->stats.out_drop_bytes++;
 	    }
 	}
-    }
-
-    /* TBD: inc the specific error type for the session stats */
-    if (scb) {
-	scb->stats.in_err_msgs++;
     }
 
 } /* agt_record_error_errinfo */
@@ -537,11 +534,13 @@ void
 			   ncx_node_t nodetyp,
 			   const void *errnode)
 {
-    rpc_err_rec_t   *err;
-    xmlChar         *buff;
-    dlq_hdr_t       *errQ;
+    rpc_err_rec_t      *err;
+    xmlChar            *buff;
+    dlq_hdr_t          *errQ;
+    ses_total_stats_t  *totals;
 
     errQ = (msghdr) ? &msghdr->errQ : NULL;
+    totals = ses_get_total_stats();
 
     if (errQ) {
 	buff = NULL;
@@ -564,14 +563,10 @@ void
 	    }
 	    /*** inc error-dropped counter for the session stats ***/
 	    if (scb) {
-		;
+		scb->stats.out_drop_bytes++;
+		totals->stats.out_drop_bytes++;
 	    }
 	}
-    }
-
-    /* inc the specific error type for the session stats */
-    if (scb) {
-	scb->stats.in_err_msgs++;
     }
 
 } /* agt_record_attr_error */
@@ -606,9 +601,10 @@ void
 			     status_t  res,
 			     const val_value_t *errval)
 {
-    rpc_err_rec_t   *err;
-    dlq_hdr_t       *errQ;
-    xmlChar         *pathbuff;
+    rpc_err_rec_t       *err;
+    dlq_hdr_t           *errQ;
+    xmlChar             *pathbuff;
+    ses_total_stats_t   *totals;
 
 #ifdef DEBUG
     if (!errval) {
@@ -618,6 +614,7 @@ void
 #endif
 
     errQ = (msghdr) ? &msghdr->errQ : NULL;
+    totals = ses_get_total_stats();
 
     /* dump some error info to the log */
     if (LOGDEBUG3) {
@@ -644,16 +641,11 @@ void
 	    if (pathbuff) {
 		m__free(pathbuff);
 	    }
-	    /*** inc error-dropped counter for the session stats ***/
 	    if (scb) {
-		;
+		scb->stats.out_drop_bytes++;
+		totals->stats.out_drop_bytes++;
 	    }
 	}
-    }
-
-    /* TBD: inc the specific error type for the session stats */
-    if (scb) {
-	scb->stats.in_err_msgs++;
     }
 
 } /* agt_record_insert_error */
@@ -688,10 +680,11 @@ void
 			     val_value_t *errval,
 			     dlq_hdr_t  *valuniqueQ)
 {
-    rpc_err_rec_t   *err;
-    dlq_hdr_t       *errQ;
-    xmlChar         *pathbuff;
-    status_t         interr;
+    rpc_err_rec_t       *err;
+    dlq_hdr_t           *errQ;
+    xmlChar             *pathbuff;
+    ses_total_stats_t   *totals;
+    status_t             interr;
 
 #ifdef DEBUG
     if (!errval) {
@@ -701,8 +694,8 @@ void
 #endif
 
     interr = ERR_NCX_UNIQUE_TEST_FAILED;
-
     errQ = (msghdr) ? &msghdr->errQ : NULL;
+    totals = ses_get_total_stats();
 
     /* dump some error info to the log */
     if (LOGDEBUG3) {
@@ -730,16 +723,11 @@ void
 	    if (pathbuff) {
 		m__free(pathbuff);
 	    }
-	    /*** inc error-dropped counter for the session stats ***/
 	    if (scb) {
-		;
+		scb->stats.out_drop_bytes++;
+		totals->stats.out_drop_bytes++;
 	    }
 	}
-    }
-
-    /* TBD: inc the specific error type for the session stats */
-    if (scb) {
-	scb->stats.in_err_msgs++;
     }
 
 } /* agt_record_unique_error */
@@ -767,7 +755,6 @@ status_t
     const xmlChar  *errstr;
     op_filtertyp_t  filtyp;
     status_t        res;
-    xmlns_id_t      nsid;
     xml_attr_t      selattr;
 
 #ifdef DEBUG
@@ -780,7 +767,6 @@ status_t
     filtertype = NULL;
     sel = NULL;
     errstr = NULL;
-    nsid = xmlns_nc_id();
     res = NO_ERR;
 
     /* filter parm is optional */
@@ -792,7 +778,7 @@ status_t
 	return NO_ERR;   /* not an error */
     } else if (filter->res == NO_ERR) {
 	/* setup the filter parameters */
-	filtertype = val_find_meta(filter, nsid, NCX_EL_TYPE);
+	filtertype = val_find_meta(filter, 0, NCX_EL_TYPE);
 	if (!filtertype) {
 	    /* should not happen; the default is subtree */
 	    filtyp = OP_FILTER_SUBTREE;
@@ -805,7 +791,7 @@ status_t
 	case OP_FILTER_SUBTREE:
 	    break;
 	case OP_FILTER_XPATH:
-	    sel = val_find_meta(filter, nsid, NCX_EL_SELECT);
+	    sel = val_find_meta(filter, 0, NCX_EL_SELECT);
 	    if (!sel || !sel->xpathpcb) {
 		res = ERR_NCX_MISSING_ATTRIBUTE;
 	    } else if (sel->xpathpcb->parseres != NO_ERR) {
@@ -813,7 +799,7 @@ status_t
 	    }
 	    if (res != NO_ERR) {
 		memset(&selattr, 0x0, sizeof(xml_attr_t));
-		selattr.attr_ns = xmlns_nc_id();
+		selattr.attr_ns = 0;
 		selattr.attr_name = NCX_EL_SELECT;
 		agt_record_attr_error(scb, 
 				      &msg->mhdr, 

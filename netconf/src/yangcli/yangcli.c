@@ -4995,7 +4995,7 @@ static status_t
 /********************************************************************
  * FUNCTION add_filter_attrs
  * 
- * Add the nc:type and possibly the nc:select 
+ * Add the type and possibly the select 
  * attribute to a value node
  *
  * INPUTS:
@@ -5011,26 +5011,18 @@ static status_t
 		      const xmlChar *selectstr)
 {
     val_value_t          *metaval;
-    xmlns_id_t            ncid;
-
-    ncid = xmlns_nc_id();
 
     /* create a value node for the meta-value */
-    if (selectstr) {
-	metaval = val_make_string(ncid, NCX_EL_TYPE,
-				  NCX_EL_XPATH);
-    } else {
-	metaval = val_make_string(ncid, NCX_EL_TYPE,
-				  NCX_EL_SUBTREE);
-    }
+    metaval = val_make_string(0, NCX_EL_TYPE,
+			      (selectstr) 
+			      ?  NCX_EL_XPATH : NCX_EL_SUBTREE);
     if (!metaval) {
 	return ERR_INTERNAL_MEM;
     }
     dlq_enque(metaval, &val->metaQ);
 
     if (selectstr) {
-	metaval = val_make_string(ncid, NCX_EL_SELECT,
-				  selectstr);
+	metaval = val_make_string(0, NCX_EL_SELECT,  selectstr);
 	if (!metaval) {
 	    return ERR_INTERNAL_MEM;
 	}

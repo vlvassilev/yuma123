@@ -109,6 +109,7 @@ date         init     comment
 *********************************************************************/
 static boolean agt_hello_init_done = FALSE;
 
+static ses_total_stats_t   *mytotals;
 
 /********************************************************************
 * FUNCTION check_manager_hello
@@ -172,9 +173,11 @@ status_t
 	if (res != NO_ERR) {
 	    return res;
 	}
+	mytotals = ses_get_total_stats();
 	agt_hello_init_done = TRUE;
     }
     return NO_ERR;
+
 
 } /* agt_hello_init */
 
@@ -280,6 +283,7 @@ void
     if (res != NO_ERR) {
 	log_info("\nagt_connect error (%s), dropping session %d",
 		 get_error_string(res), scb->sid);
+	mytotals->stats.inBadHellos++;
     } else {
 	scb->state = SES_ST_IDLE;
 	scb->active = TRUE;

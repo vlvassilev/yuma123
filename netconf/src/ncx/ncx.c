@@ -115,6 +115,10 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xmlns
+#include "xmlns.h"
+#endif
+
 #ifndef _H_yang
 #include "yang.h"
 #endif
@@ -2002,10 +2006,23 @@ status_t
 	add_to_modQ(mod, &ncx_modQ);
 	mod->added = TRUE;
 
+	/* !!! hack to cleanup after xmlns init cycle !!!
+	 * check for netconf.yang or ncx.yang and back-fill
+	 * all the xmlns entries for those modules with the
+	 * real module pointer
+	 */
+	if (!xml_strcmp(mod->name, NC_MODULE)) {
+	    xmlns_set_modptrs(NC_MODULE, mod);
+	} else if (!xml_strcmp(mod->name, NCX_MODULE)) {
+	    xmlns_set_modptrs(NCX_MODULE, mod);
+	}
+
 	if (mod_load_callback) {
 	    (*mod_load_callback)(mod);
 	}
+
     }
+
     
     return res;
 

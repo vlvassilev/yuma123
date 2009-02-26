@@ -368,6 +368,18 @@ module yangdiff {
           type empty;
         }
 
+        choice brief-full {
+          // ignored unless help param is present
+          leaf brief {
+            description "Show brief help text";
+            type empty;
+          }
+          leaf full {
+            description "Show full help text";
+            type empty;
+          }
+        }
+
         leaf indent {
           description 
             "Number of spaces to indent (0..9) in formatted output.";

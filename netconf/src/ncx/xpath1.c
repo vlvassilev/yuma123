@@ -8448,7 +8448,7 @@ status_t
     }
 
     if (result) {
-	if (LOGDEBUG2) {
+	if (LOGDEBUG3) {
 	    dump_result(pcb, result, "validate_expr");
 	}
 
@@ -8547,7 +8547,7 @@ xpath_result_t *
 	result = parse_expr(pcb, &pcb->valueres);
     }
 
-    if (LOGDEBUG2 && result) {
+    if (LOGDEBUG3 && result) {
 	dump_result(pcb, result, "eval_expr");
     }
 
@@ -8782,7 +8782,7 @@ xpath_result_t *
 
     *res = pcb->valueres;
 
-    if (LOGDEBUG2 && result) {
+    if (LOGDEBUG3 && result) {
 	dump_result(pcb, result, "eval_xml_instanceid");
     }
 

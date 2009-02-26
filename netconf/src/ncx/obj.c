@@ -3243,6 +3243,7 @@ obj_template_t *
 * INPUTS:
 *   mod == ncx_module to check
 *   modname == module name for the object (needed for augments)
+*              (may be NULL to match any 'objname' instance)
 *   objname == object name to find
 *
 * RETURNS:
@@ -3258,7 +3259,7 @@ obj_template_t *
     ncx_include_t  *inc;
 
 #ifdef DEBUG
-    if (!mod || !modname || !objname) {
+    if (!mod || !objname) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
@@ -6358,7 +6359,7 @@ const xmlChar *
 boolean
     obj_get_config_flag (const obj_template_t *obj)
 {
-    boolean setflag;
+    boolean setflag, retval;
 
 #ifdef DEBUG
     if (!obj) {
@@ -6367,7 +6368,8 @@ boolean
     }
 #endif
 
-    return get_config_flag(obj, &setflag);
+    retval = get_config_flag(obj, &setflag);
+    return retval;
 
 }   /* obj_get_config_flag */
 

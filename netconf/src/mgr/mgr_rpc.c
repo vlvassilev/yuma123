@@ -526,7 +526,7 @@ status_t
     nc_id = xmlns_nc_id();
 
     /* make sure the message-id attribute is not already present */
-    attr = xml_find_attr_q(&req->attrs, nc_id, NCX_EL_MESSAGE_ID);
+    attr = xml_find_attr_q(&req->attrs, 0, NCX_EL_MESSAGE_ID);
     if (attr) {
 	dlq_remove(attr);
 	xml_free_attr(attr);
@@ -538,7 +538,7 @@ status_t
 
     /* add the message-id attribute */
     if (res == NO_ERR) {
-	res = xml_add_attr(&req->attrs, nc_id, NCX_EL_MESSAGE_ID,
+	res = xml_add_attr(&req->attrs, 0, NCX_EL_MESSAGE_ID,
 			   req->msg_id);
     }
 
@@ -616,7 +616,7 @@ void
 
     /* make sure any real session has been properly established */
     if (scb->type != SES_TYP_DUMMY && scb->state != SES_ST_IDLE) {
-	scb->stats.in_err_msgs++;
+	scb->stats.in_drop_msgs++;
 	log_error("\nError: mgr_rpc: skipping incoming message");
 	mgr_xml_skip_subtree(scb->reader, top);
 	return;
@@ -624,7 +624,7 @@ void
 
     /* make sure 'top' is the right kind of node */
     if (top->nodetyp != XML_NT_START) {
-	scb->stats.in_err_msgs++;
+	scb->stats.in_drop_msgs++;
 	log_error("\nError: mgr_rpc: skipping incoming message");
 	mgr_xml_skip_subtree(scb->reader, top);
 	return;
@@ -644,7 +644,7 @@ void
 	    reply_obj = rpyobj;
 	} else {
 	    SET_ERROR(ERR_INTERNAL_VAL);
-	    scb->stats.in_err_msgs++;
+	    scb->stats.in_drop_msgs++;
 	    log_error("\nError: mgr_rpc: skipping incoming message");
 	    mgr_xml_skip_subtree(scb->reader, top);
 	    return;
@@ -652,12 +652,12 @@ void
     }
 
     /* get the NC RPC message-id attribute; must be present */
-    attr = xml_find_attr(top, xmlns_nc_id(), NCX_EL_MESSAGE_ID);
+    attr = xml_find_attr(top, 0, NCX_EL_MESSAGE_ID);
     if (attr && attr->attr_val) {
 	msg_id = xml_strdup(attr->attr_val);
     }
     if (!msg_id) {
-	scb->stats.in_err_msgs++;
+	scb->stats.in_drop_msgs++;
 	mgr_xml_skip_subtree(scb->reader, top);
 	log_error("\nError: mgr_rpc: skipping incoming message");
 	return;
@@ -669,7 +669,7 @@ void
     rpy = new_reply();
     if (!rpy) {
 	m__free(msg_id);
-	scb->stats.in_err_msgs++;
+	scb->stats.in_drop_msgs++;
 	log_error("\nError: mgr_rpc: skipping incoming message");
 	mgr_xml_skip_subtree(scb->reader, top);
 	return;

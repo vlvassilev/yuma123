@@ -24,6 +24,10 @@ date	     init     comment
 
 #include <xmlstring.h>
 
+#ifndef _H_help
+#include "help.h"
+#endif
+
 #ifndef _H_log
 #include "log.h"
 #endif
@@ -110,6 +114,7 @@ typedef struct yangdiff_diffparms_t_ {
     const xmlChar  *logfilename;
     const xmlChar  *config;
     boolean         helpmode;
+    help_mode_t     helpsubmode;
     int32           indent;
     boolean         logappend;
     log_debug_t     log_level;

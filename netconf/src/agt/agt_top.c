@@ -114,9 +114,10 @@ date         init     comment
 void
     agt_top_dispatch_msg (ses_cb_t  *scb)
 {
-    xml_node_t     top;
-    status_t       res;
-    top_handler_t  handler;
+    ses_total_stats_t  *myagttotals;
+    xml_node_t          top;
+    status_t            res;
+    top_handler_t       handler;
 
 #ifdef DEBUG
     if (!scb) {
@@ -125,15 +126,20 @@ void
     }
 #endif
 
+    myagttotals = ses_get_total_stats();
+
     xml_init_node(&top);
 
     /* get the first node */
     res = agt_xml_consume_node(scb, &top, 
 			       NCX_LAYER_TRANSPORT, NULL);
     if (res != NO_ERR) {
-	scb->stats.in_err_msgs++;
+	scb->stats.inXMLParseErrors++;
+	myagttotals->stats.inXMLParseErrors++;
+
 	log_info("\nagt_top: bad msg for session %d (%s)",
 		 scb->sid, get_error_string(res));
+
 	xml_clean_node(&top);
 	/****  agt_ses_kill_session(scb->sid);  ****/
         return;
@@ -162,7 +168,8 @@ void
 
     /* check any error trying to invoke the top handler */
     if (res != NO_ERR) {
-	scb->stats.in_err_msgs++;
+	scb->stats.inXMLParseErrors++;
+	myagttotals->stats.inXMLParseErrors++;
 	log_info("\nagt_top: bad msg for session %d (%s)",
 		 scb->sid, get_error_string(res));
     }

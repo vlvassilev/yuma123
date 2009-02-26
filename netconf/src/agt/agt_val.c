@@ -2209,6 +2209,15 @@ static status_t
     status_t             res, res2;
     char                 buff[NCX_MAX_NUMLEN];
 
+    if (!obj_is_config(val->obj)) {
+	if (LOGDEBUG3) {
+	    log_debug3("\ninstance_chk: skipping r/o node '%s:%s'",
+		       obj_get_mod_name(val->obj),
+		       val->name);
+	}
+	return NO_ERR;
+    }
+
     res = NO_ERR;
     res2 = NO_ERR;
     errinfo = NULL;
@@ -2836,6 +2845,10 @@ static status_t
 
 	nextchild = val_get_next_child(chval);
 
+	if (!obj_is_config(chval->obj)) {
+	    continue;
+	}
+
 	res = when_stmt_check(scb, msg, 
 			      root, chval, 
 			      configmode,
@@ -3275,6 +3288,10 @@ status_t
 	 chval != NULL;
 	 chval = val_get_next_child(chval)) {
 
+	if (!obj_is_config(chval->obj)) {
+	    continue;
+	}
+
 	res = must_stmt_check(scb, msg, root, chval);
 	CHK_EXIT(res, retres);
 
@@ -3302,7 +3319,9 @@ status_t
 	     chobj != NULL;
 	     chobj = ncx_get_next_data_object(mod, chobj)) {
 
-	    if (obj_is_cli(chobj) || obj_is_abstract(chobj)) {
+	    if (obj_is_cli(chobj) || 
+		obj_is_abstract(chobj) ||
+		!obj_is_config(chobj)) {
 		continue;
 	    }
 

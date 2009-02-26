@@ -13,7 +13,9 @@ module netconf-state {
     "NETCONF Monitoring Module.
      All elements in this module are read-only.";
 
-  revision "2008-11-03" {
+  reference "draft-ietf-netconf-monitoring-02.txt";
+
+  revision "2008-06-23" {
     description "Initial revision.";
   }
 
@@ -24,7 +26,7 @@ module netconf-state {
     reference "rfc4741";
   }
 
-  grouping NETCONFDatastoreType {
+  grouping ConfigurationDatastoreType {
     description
       "Enumeration of possible NETCONF datastore types.";
     reference "rfc4741";
@@ -83,7 +85,7 @@ module netconf-state {
          may be different than those exchanged during session setup
          (i.e. hello).";
       leaf-list capability {
-        type inet:uri;
+        type yang:uri;
         min-elements 1;
       }
     }
@@ -95,7 +97,7 @@ module netconf-state {
          information.";
       list configuration {
         container name {
-          uses NETCONFDatastoreType;
+          uses ConfigurationDatastoreType;
         }
         container locks {
           description
@@ -172,7 +174,7 @@ module netconf-state {
             "Schema language for the file/module.";
         }
         leaf namespace {
-          type inet:uri;
+          type yang:uri;
           description
             "The XML namespace defined by the data model.";
         }
@@ -181,7 +183,7 @@ module netconf-state {
             type enumeration {
               enum "NETCONF";
             }
-            type inet:uri;
+            type yang:uri;
           }
           description
             "A location from which the schema can be retrieved.  Can be
@@ -351,11 +353,7 @@ module netconf-state {
         mandatory true;
       }
     }
-    output {
-      anyxml data {
-        description "Contains the schema content.";
-      }
-    }
   }
 
 }
+

@@ -20,6 +20,7 @@ date	     init     comment
 17-apr-06    abb      begun
 */
 
+
 #define TSTAMP_MIN_SIZE   50
 #define TSTAMP_DATE_SIZE  12
 #define TSTAMP_SQL_SIZE   20

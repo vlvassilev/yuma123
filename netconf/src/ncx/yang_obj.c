@@ -305,6 +305,8 @@ static void
 	    flag = obj_get_config_flag(obj->parent);
 	    if (flag) {
 		obj->flags |= OBJ_FL_CONFIG;
+	    } else {
+		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (OBJ_DEF_CONFIG) {
 	    obj->flags |= OBJ_FL_CONFIG;
@@ -581,6 +583,8 @@ static status_t
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
+	    } else {
+		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    res = yang_consume_boolean(tkc, mod,
@@ -760,6 +764,8 @@ static status_t
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
+	    } else {
+		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    res = yang_consume_status(tkc, mod, &con->status,
@@ -952,6 +958,8 @@ static status_t
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
+	    } else {
+		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    res = yang_consume_boolean(tkc, mod,
@@ -1153,6 +1161,8 @@ static status_t
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
+	    } else {
+		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
 	    res = yang_consume_uint32(tkc, mod,
@@ -1377,6 +1387,8 @@ static status_t
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
+	    } else {
+		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
 	    res = yang_consume_uint32(tkc, mod,
@@ -1812,6 +1824,8 @@ static status_t
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
+	    } else {
+		obj->flags &= OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
 	    res = consume_case(tkc, mod,
@@ -2047,6 +2061,8 @@ static status_t
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
+	    } else {
+		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    refine->mandatory_tk = TK_CUR(tkc);
@@ -5049,6 +5065,8 @@ static status_t
 	    keepobj->flags |= OBJ_FL_CONFSET;
 	    if (mergeobj->flags & OBJ_FL_CONFIG) {
 		keepobj->flags |= OBJ_FL_CONFIG;
+	    } else {
+		keepobj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	}
     }
@@ -5676,7 +5694,6 @@ static status_t
 		ncx_print_errormsg(tkc, mod, retres);
 		break;
 	    case OBJ_TYP_NONE:
-	    case OBJ_TYP_USES:
 	    case OBJ_TYP_AUGMENT:
 	    case OBJ_TYP_REFINE:
 		retres = SET_ERROR(ERR_INTERNAL_VAL);

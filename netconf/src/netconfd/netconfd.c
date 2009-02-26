@@ -164,17 +164,22 @@ static status_t
 	return res;
     }
 
+#if 0
     /* Load testmust module */
     res = ncxmod_load_module((const xmlChar *)"testmust", NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }
+#endif
 
+#if 0
     /* Load testrev module */
     res = ncxmod_load_module((const xmlChar *)"testrev", NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }
+#endif
+
 #endif
 
     return NO_ERR;
@@ -229,7 +234,7 @@ static status_t
     /* set the default debug output level */
 #ifdef DEBUG
 #ifdef NETCONFD_DEBUG_TEST
-    dlevel = LOG_DEBUG_DEBUG3;
+    dlevel = LOG_DEBUG_DEBUG2;
 #else 
     dlevel = LOG_DEBUG_INFO;
 #endif

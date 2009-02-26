@@ -436,21 +436,27 @@ static void
     agt_rpc_data_cb_t    agtcb;
     const rpc_err_rec_t *err;
     val_value_t         *val;
+    ses_total_stats_t   *agttotals;
     status_t             res;
     xmlns_id_t           ncid;
     uint64               outbytes;
-    boolean              datasend, datawritten;
+    boolean              datasend, datawritten, errsend;
 
     res = ses_start_msg(scb);
     if (res != NO_ERR) {
 	return;
     }
 
+    agttotals = ses_get_total_stats();
+    errsend = FALSE;
+
     res = xml_msg_gen_xmlns_attrs(&msg->mhdr, 
 				  msg->rpc_in_attrs);
     if (res != NO_ERR) {
 	ses_finish_msg(scb);
-	return;  /*** !!! ***/
+	scb->stats.out_drop_bytes++;
+	agttotals->stats.out_drop_bytes++;
+	return;
     }
 
     ncid = xmlns_nc_id();
@@ -484,6 +490,9 @@ static void
 	for (err = (const rpc_err_rec_t *)dlq_firstEntry(&msg->mhdr.errQ);
 	     err != NULL;
 	     err = (const rpc_err_rec_t *)dlq_nextEntry(err)) {
+
+	    errsend = TRUE;
+
 	    res = send_rpc_error(scb, msg, err, NCX_DEF_INDENT);
 	    if (res != NO_ERR) {
 		SET_ERROR(res);
@@ -547,6 +556,13 @@ static void
 
     /* finish the message */
     ses_finish_msg(scb);
+
+    scb->stats.outRpcReplies++;
+    agttotals->stats.outRpcReplies++;
+    if (errsend) {
+	scb->stats.outRpcErrors++;
+	agttotals->stats.outRpcErrors++;
+    }
 
 }  /* send_rpc_reply */
 
@@ -870,16 +886,17 @@ void
     agt_rpc_dispatch (ses_cb_t *scb,
 		      xml_node_t *top)
 {
-    rpc_msg_t       *msg;
-    xml_attr_t      *attr;
-    obj_template_t  *rpcobj;
+    rpc_msg_t             *msg;
+    xml_attr_t            *attr;
+    obj_template_t        *rpcobj;
+    obj_rpc_t             *rpc;
     const obj_template_t  *testobj;
-    obj_rpc_t       *rpc;
-    agt_rpc_cbset_t *cbset;
-    xmlChar         *buff;
-    xml_node_t       method, testnode;
-    status_t         res;
-    boolean          errdone;
+    agt_rpc_cbset_t       *cbset;
+    ses_total_stats_t     *agttotals;
+    xmlChar               *buff;
+    xml_node_t             method, testnode;
+    status_t               res;
+    boolean                errdone;
 
 #ifdef DEBUG
     if (!scb || !top) {
@@ -891,6 +908,10 @@ void
     /* init local vars */
     res = NO_ERR;
     cbset = NULL;
+    agttotals = ses_get_total_stats();
+
+    scb->stats.inRpcs++;
+    agttotals->stats.inRpcs++;
 
     /* make sure any real session has been properly established */
     if (scb->type != SES_TYP_DUMMY && scb->state != SES_ST_IDLE) {
@@ -899,13 +920,7 @@ void
 	log_info("\nagt_rpc dropping session %d (%d) %s",
 		  scb->sid, res, get_error_string(res));
 	agt_ses_request_close(scb->sid);
-	return;
-    }
-
-    /* make sure 'rpc' is the right kind of node */
-    if (top->nodetyp != XML_NT_START) {
-	res = ERR_NCX_WRONG_NODETYP;
-	scb->stats.in_err_msgs++;
+	agttotals->stats.inBadRpcs++;
 	return;
     }
 
@@ -915,10 +930,25 @@ void
     msg = rpc_new_msg();
     if (!msg) {
 	res = ERR_INTERNAL_MEM;
-	scb->stats.in_err_msgs++;
-	/* TBD: send_opfailed_reply */
+	scb->stats.out_drop_bytes++;
+	agttotals->stats.out_drop_bytes++;
+	log_info("\nagt_rpc dropping session %d (%d) %s",
+		  scb->sid, res, get_error_string(res));
+	agt_ses_request_close(scb->sid);
 	return;
     }
+
+    /* make sure 'rpc' is the right kind of node */
+    if (top->nodetyp != XML_NT_START) {
+	res = ERR_NCX_WRONG_NODETYP;
+	scb->stats.inXMLParseErrors++;
+	agttotals->stats.inXMLParseErrors++;
+
+	/* cleanup and exit */
+	rpc_free_msg(msg);
+	return;
+    }
+
 
     /* setup the struct as an incoming RPC message
      * borrow the top->attrs queue without copying it 
@@ -965,7 +995,7 @@ void
 
 #ifdef STRICT_RFC4741
     /* get the NC RPC message-id attribute; must be present */
-    attr = xml_find_attr(top, xmlns_nc_id(), NCX_EL_MESSAGE_ID);
+    attr = xml_find_attr(top, 0, NCX_EL_MESSAGE_ID);
     if (!attr || !attr->attr_val) {
 	res = ERR_NCX_MISSING_ATTRIBUTE;
 	    
@@ -973,7 +1003,6 @@ void
 	errattr.attr_ns = xmlns_nc_id();
 	errattr.attr_name = NCX_EL_MESSAGE_ID;
 	errattr.attr_val = (xmlChar *)NULL;
-
 	agt_record_attr_error(scb, &msg->mhdr, NCX_LAYER_RPC,
 			      res, &errattr, top, NULL, NCX_NT_STRING,
 			      RPC_ROOT);
@@ -997,6 +1026,8 @@ void
     if (res != NO_ERR) {
 	send_rpc_reply(scb, msg);
 	rpc_free_msg(msg);
+	scb->stats.inBadRpcs++;
+	agttotals->stats.inBadRpcs++;
 	return;
     }
 
@@ -1057,11 +1088,41 @@ void
  	 * The NCX_NT_STRING node type enum is ignored if 
 	 * the buff pointer is NULL
 	 */
-	agt_record_error(scb, &msg->mhdr, NCX_LAYER_RPC, res, 
-		 &method, NCX_NT_NONE, NULL, NCX_NT_STRING, buff);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_RPC, 
+			 res, 
+			 &method, 
+			 NCX_NT_NONE, 
+			 NULL, 
+			 (buff) ? NCX_NT_STRING : NCX_NT_NONE, 
+			 buff);
 	if (buff) {
 	    m__free(buff);
 	}
+	send_rpc_reply(scb, msg);
+	rpc_free_msg(msg);
+	xml_clean_node(&method);
+
+	switch (res) {
+	case ERR_NCX_WRONG_NODETYP:
+	    scb->stats.inXMLParseErrors++;
+	    agttotals->stats.inXMLParseErrors++;
+	    break;
+	case ERR_NCX_DEF_NOT_FOUND:
+	    scb->stats.inBadRpcs++;
+	    agttotals->stats.inBadRpcs++;
+	    break;
+	case ERR_NCX_OPERATION_NOT_SUPPORTED:
+	case ERR_NCX_ACCESS_DENIED:
+	    scb->stats.inNotSupportedRpcs++;
+	    agttotals->stats.inNotSupportedRpcs++;
+	    break;
+	default:
+	    scb->stats.inBadRpcs++;
+	    agttotals->stats.inBadRpcs++;
+	}
+	return;
     }
 
     /* change the session state */
@@ -1136,6 +1197,11 @@ void
 	 */
 	msg->rpc_agt_state = AGT_RPC_PH_VALIDATE;
 	res = (*cbset->acb[AGT_RPC_PH_VALIDATE])(scb, msg, &method);
+    }
+
+    if (res != NO_ERR) {
+	scb->stats.inBadRpcs++;
+	agttotals->stats.inBadRpcs++;
     }
 
     /* there does not always have to be an invoke callback */

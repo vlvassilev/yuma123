@@ -82,6 +82,7 @@ date         init     comment
 *                       V A R I A B L E S			    *
 *                                                                   *
 *********************************************************************/
+static ses_total_stats_t totals;
 
 /********************************************************************
 * FUNCTION accept_buffer
@@ -118,7 +119,12 @@ static status_t
     endmatch = NC_SSH_END;
     done = FALSE;
 
-    log_debug2("\nses: accept buffer (%u)", buff->bufflen);
+    if (LOGDEBUG3) {
+	log_debug3("\nses: accept buffer (%u):\n%s\n", 
+		   buff->bufflen, buff->buff);
+    } else if (LOGDEBUG2) {
+	log_debug2("\nses: accept buffer (%u)", buff->bufflen);
+    }
 	       
     /* make sure there is a current message */
     msg = (ses_msg_t *)dlq_lastEntry(&scb->msgQ);
@@ -235,11 +241,12 @@ static status_t
 			    
 			    /* truncate the input and continue */
 			    buff->bufflen = buff->buffpos;
-			    log_info("\nses dropping input "
+			    log_info("\nses: dropping input "
 				     "for session %d (%s)",
 				     scb->sid,
 				     get_error_string(res));
-			    scb->stats.in_err_msgs++;
+			    scb->stats.in_drop_msgs++;
+			    totals.stats.in_drop_msgs++;
 
 			    /* do not barf on input overflow error */
 			    res = NO_ERR;   
@@ -257,7 +264,6 @@ static status_t
 			msg->curbuff = NULL;
 			msg->ready = TRUE;
 			ses_msg_make_inready(scb);
-			scb->stats.in_msgs++;
 		    }  else {
 			/* only thing in the buffer was an EOM string 
 			 * or part of the string, corner-case, need to
@@ -362,6 +368,7 @@ ses_cb_t *
     scb->withmeta = NCX_DEF_WITHMETA;
     scb->indent = NCX_DEF_INDENT;
     scb->xmladvance = TRUE;
+    totals.inSessions++;
     return scb;
 
 }  /* ses_new_scb */
@@ -526,8 +533,10 @@ void
 
 	if (res != NO_ERR) {
 	    scb->stats.out_drop_bytes++;
+	    totals.stats.out_drop_bytes++;
 	} else {
 	    scb->stats.out_bytes++;
+	    totals.stats.out_bytes++;
 	}
     } else if (scb->fp) {
 	/* debug session, sending output to a file */
@@ -843,8 +852,6 @@ void
 	ses_msg_finish_outmsg(scb);
     }
 
-    scb->stats.out_msgs++;
-
 }  /* ses_finish_msg */
 
 
@@ -1050,7 +1057,8 @@ status_t
 #endif
 
 	    buff->bufflen = (size_t)ret;
-	    scb->stats.in_bytes += (uint64)ret;
+	    scb->stats.in_bytes += (uint32)ret;
+	    totals.stats.in_bytes += (uint32)ret;
 	}
 
 	res = accept_buffer(scb, buff);
@@ -1163,7 +1171,6 @@ uint32
 } /* ses_line_left */
 
 
-
 /********************************************************************
 * FUNCTION ses_put_extern
 * 
@@ -1202,22 +1209,19 @@ void
 } /* ses_put_extern */
 
 
-
 /********************************************************************
-* FUNCTION ses_get_outbytes
+* FUNCTION ses_get_total_stats
 * 
-*  Get the session out-bytes count
+*  Get a r/w pointer to the the session totals stats
 *
-* INPUTS:
-     scb == session to check
-*
+* RETURNS:
+*  pointer to the global session stats struct 
 *********************************************************************/
-uint64
-    ses_get_outbytes (const ses_cb_t *scb)
+ses_total_stats_t *
+    ses_get_total_stats (void)
 {
-    return scb->stats.out_bytes;
-
-} /* ses_get_outbytes */
+    return &totals;
+} /* ses_get_total_stats */
 
 
 /* END file ses.c */

@@ -5,7 +5,7 @@ module netconf {
    prefix "nc";
 
    // for the uri data type
-   import yang-types { prefix "yang"; }
+   import inet-types { prefix "inet"; }
 
    // for NCX 'metadata' language extension
    import ncx { prefix "ncx"; }
@@ -20,6 +20,11 @@ module netconf {
    contact
      "Translated by Andy Bierman.
       Send comments to <andy@netconfcentral.com>.";
+
+   revision "2009-02-24" {
+     description 
+       "Change yang:uri to inet:uri (import moved).";
+   }
 
    revision "2008-08-30" {
      description 
@@ -231,7 +236,7 @@ module netconf {
    }
 
    typedef ConfigURIType {
-     type yang:uri;
+     type inet:uri;
    }
 
    // NETCONF Hello PDU Data Types
@@ -243,7 +248,7 @@ module netconf {
        config false;
        leaf-list capability {
           description "One Generic Capability URI.";
-          type yang:uri;
+          type inet:uri;
        }
      }
    }

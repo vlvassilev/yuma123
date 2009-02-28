@@ -199,6 +199,9 @@ static void
     if (cfg->load_time) {
 	m__free(cfg->load_time);
     }
+    if (cfg->lock_time) {
+	m__free(cfg->lock_time);
+    }
     if (cfg->last_ch_time) {
 	m__free(cfg->last_ch_time);
     } 
@@ -254,6 +257,15 @@ static cfg_template_t *
     if (!cfg->name) {
 	m__free(cfg);
 	return NULL;
+    }
+
+    cfg->lock_time = m__getMem(TSTAMP_MIN_SIZE);
+    if (!cfg->lock_time) {
+	m__free(cfg->name);
+	m__free(cfg);
+	return NULL;
+    } else {
+	memset(cfg->lock_time, 0x0, TSTAMP_MIN_SIZE);
     }
 
     cfg->cfg_id = cfg_id;
@@ -949,6 +961,77 @@ status_t
 
 
 /********************************************************************
+* FUNCTION cfg_is_global_locked
+*
+* Check if the specified config has ab active global lock
+*
+* INPUTS:
+*    cfg = Config template to check 
+*
+* RETURNS:
+*    TRUE if global lock active, FALSE if not
+*********************************************************************/
+boolean
+    cfg_is_global_locked (const cfg_template_t *cfg)
+{
+
+#ifdef DEBUG
+    if (!cfg) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    return (cfg->cfg_state == CFG_ST_FLOCK) ? TRUE : FALSE;
+
+} /* cfg_is_global_locked */
+
+
+/********************************************************************
+* FUNCTION cfg_get_global_lock_info
+*
+* Get the current global lock info
+*
+* INPUTS:
+*    cfg = Config template to check 
+*    sid == address of return session ID
+*    locktime == address of return locktime pointer
+*
+* OUTPUTS:
+*    *sid == session ID of lock holder
+*    *locktime == pointer to lock time string
+*
+* RETURNS:
+*    status, NCX_ERR_SKIPPED if not locked
+*********************************************************************/
+status_t
+    cfg_get_global_lock_info (const cfg_template_t *cfg,
+			      ses_id_t  *sid,
+			      const xmlChar **locktime)
+{
+
+#ifdef DEBUG
+    if (!cfg || !sid || !locktime) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    *sid = 0;
+    *locktime = NULL;
+
+    if (cfg->cfg_state == CFG_ST_FLOCK) {
+	*sid = cfg->locked_by;
+	*locktime = cfg->lock_time;
+	return NO_ERR;
+    } else {
+	return ERR_NCX_SKIPPED;
+    }
+    /*NOTREACHED*/
+
+} /* cfg_get_global_lock_info */
+
+
+/********************************************************************
 * FUNCTION cfg_lock
 *
 * Lock the specified config.
@@ -981,6 +1064,7 @@ status_t
 	cfg->cfg_state = CFG_ST_FLOCK;
 	cfg->locked_by = locked_by;
 	cfg->lock_src = lock_src;
+	tstamp_datetime(cfg->lock_time);
     }
 
     return res;

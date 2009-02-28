@@ -903,7 +903,9 @@ void
     if (val_is_virtual(val)) {
 	v_val = val_get_virtual_value(scb, val, &res);
 	if (!v_val) {
-	    SET_ERROR(res);
+	    if (res != ERR_NCX_SKIPPED) {
+		/*** handle inline error ***/
+	    }
 	    return;
 	}
     }
@@ -1101,7 +1103,9 @@ void
 	    if (val_is_virtual(chval)) {
 		v_chval = val_get_virtual_value(scb, chval, &res);
 		if (!v_chval) {
-		    SET_ERROR(res);
+		    if (res != ERR_NCX_SKIPPED) {
+			/*** handle inline error ***/
+		    }
 		    continue;
 		}
 	    }
@@ -1249,7 +1253,9 @@ void
     if (val_is_virtual(val)) {
 	vir = val_get_virtual_value(scb, val, &res);
 	if (!vir) {
-	    SET_ERROR(res);
+	    if (res != ERR_NCX_SKIPPED) {
+		/*** handle inline error ***/
+	    }
 	    return;
 	}
 	out = vir;

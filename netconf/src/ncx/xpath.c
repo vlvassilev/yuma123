@@ -1210,7 +1210,7 @@ status_t
 * Error messages are logged by this function
 *
 * INPUTS:
-*    cfg == configuration to search
+*    startval == top-level start element to search
 *    mod == module to use for the default context
 *           and prefixes will be relative to this module's
 *           import statements.

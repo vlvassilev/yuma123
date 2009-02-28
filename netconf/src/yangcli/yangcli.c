@@ -210,6 +210,7 @@ date         init     comment
 #define YANGCLI_LOCAL       (const xmlChar *)"local"
 #define YANGCLI_LOCALS      (const xmlChar *)"locals"
 #define YANGCLI_KEY         (const xmlChar *)"key"
+#define YANGCLI_NOFILL      (const xmlChar *)"nofill"
 #define YANGCLI_OBJECTS     (const xmlChar *)"objects"
 #define YANGCLI_OPERATION   (const xmlChar *)"operation"
 #define YANGCLI_OPTIONAL    (const xmlChar *)"optional"
@@ -4533,6 +4534,11 @@ static void
 *   curobj == the current object node for config_content, going
 *                 up the chain to the root object.
 *                 First call should pass config_content->obj
+*   dofill == TRUE if interactive mode and mandatory parms
+*             need to be specified (they can still be skipped)
+*             FALSE if no checking for mandatory parms
+*             Just fill out the minimum path to root from
+*             the 'config_content' node
 *   curtop == address of steady-storage node to add the
 *             next new level
 *
@@ -4549,13 +4555,14 @@ static status_t
 		 const obj_template_t *rpc,
 		 val_value_t *config_content,
 		 const obj_template_t *curobj,
+		 boolean dofill,
 		 val_value_t **curtop)
 {
 
     const obj_key_t       *curkey;
     val_value_t           *newnode, *keyval, *lastkey;
     status_t               res;
-    boolean                done;
+    boolean                done, content_used;
 
     res = NO_ERR;
 
@@ -4588,6 +4595,7 @@ static status_t
 	    *curtop = newnode;
 	}
 
+	content_used = FALSE;
 	lastkey = NULL;
 	for (curkey = obj_first_ckey(curobj);
 	     curkey != NULL;
@@ -4600,10 +4608,10 @@ static status_t
 		if (curkey->keyobj == config_content->obj) {
 		    keyval = config_content;
 		    val_insert_child(keyval, lastkey, *curtop);
-		    *curtop = config_content;
+		    content_used = TRUE;
 		    lastkey = keyval;
 		    res = NO_ERR;
-		} else {
+		} else if (dofill) {
 		    res = get_parm(agent_cb, rpc, 
 				   curkey->keyobj, *curtop, NULL);
 		    if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
@@ -4622,8 +4630,15 @@ static status_t
 			val_insert_child(keyval, lastkey, *curtop);
 			lastkey = keyval;
 		    } /* else skip this key (for debugging agent) */
-		}
+		}  /* else --nofill; skip this node */
 	    }
+	}
+
+	/* wait until all the key leafs are accounted for before
+	 * changing the *curtop pointer
+	 */
+	if (content_used) {
+	    *curtop = config_content;
 	}
 	break;
     case OBJ_TYP_CONTAINER:
@@ -4652,8 +4667,12 @@ static status_t
 	    newnode = val_get_first_child(config_content);
 	    if (newnode) {
 		val_remove_child(newnode);
-		res = add_content(agent_cb, rpc, newnode, 
-				  newnode->obj, curtop);
+		res = add_content(agent_cb, 
+				  rpc, 
+				  newnode, 
+				  newnode->obj, 
+				  dofill,
+				  curtop);
 		if (res != NO_ERR) {
 		    val_free_value(newnode);
 		    done = TRUE;
@@ -4735,8 +4754,12 @@ static status_t
 	*curtop = config;
     }
 
-    res = add_content(agent_cb, rpc, config_content, 
-		      curobj, curtop);
+    res = add_content(agent_cb, 
+		      rpc, 
+		      config_content, 
+		      curobj, 
+		      TRUE,
+		      curtop);
 
     return res;
 
@@ -4760,6 +4783,8 @@ static status_t
 *                 up the chain to the root object.
 *                 First call should pass get_content->obj
 *   filter == the starting <filter> node to add the data into
+*   dofill == TRUE for fill mode
+*             FALSE to skip filling any nodes
 *   curtop == address of stable storage for current add-to node
 *            This pointer MUST be set to NULL upon first fn call
 * OUTPUTS:
@@ -4774,6 +4799,7 @@ static status_t
 				  val_value_t *get_content,
 				  const obj_template_t *curobj,
 				  val_value_t *filter,
+				  boolean dofill,
 				  val_value_t **curtop)
 {
     const obj_template_t  *parent;
@@ -4787,6 +4813,7 @@ static status_t
 					   get_content,
 					   parent,
 					   filter,
+					   dofill,
 					   curtop);
 	if (res != NO_ERR) {
 	    return res;
@@ -4801,9 +4828,12 @@ static status_t
 	*curtop = filter;
     }
 
-    res = add_content(agent_cb, rpc, get_content, 
-		      curobj, curtop);
-
+    res = add_content(agent_cb, 
+		      rpc, 
+		      get_content, 
+		      curobj, 
+		      dofill,
+		      curtop);
     return res;
 
 }  /* add_filter_from_content_node */
@@ -5059,6 +5089,11 @@ static status_t
 *   source == optional database source 
 *             <candidate>, <running>
 *   timeoutval == timeout value to use
+*   dofill == TRUE if interactive mode and mandatory parms
+*             need to be specified (they can still be skipped)
+*             FALSE if no checking for mandatory parms
+*             Just fill out the minimum path to root from
+*             the 'get_content' node
 *
 * OUTPUTS:
 *    agent_cb->state may be changed or other action taken
@@ -5077,7 +5112,8 @@ static status_t
 		       val_value_t *get_content,
 		       const xmlChar *selectstr,
 		       val_value_t *source,
-		       uint32 timeoutval)
+		       uint32 timeoutval,
+		       boolean dofill)
 {
     const obj_template_t  *rpc, *input;
     mgr_rpc_req_t         *req;
@@ -5156,9 +5192,12 @@ static status_t
     if (get_content) {
 	dummy_parm = NULL;
 	res = add_filter_from_content_node(agent_cb,
-					   rpc, get_content,
+					   rpc, 
+					   get_content,
 					   get_content->obj,
-					   filter, &dummy_parm);
+					   filter, 
+					   dofill,
+					   &dummy_parm);
 	if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
 	    /*  val_free_value(get_content); already freed! */
 	    val_free_value(reqdata);
@@ -6146,10 +6185,12 @@ static void
     val_value_t           *valset, *content, *parm;
     status_t               res;
     uint32                 timeoutval;
+    boolean                dofill;
 
     /* init locals */
     res = NO_ERR;
     content = NULL;
+    dofill = TRUE;
 
     /* get the command line parameters for this command */
     valset = get_valset(agent_cb, rpc, &line[len], &res);
@@ -6167,6 +6208,11 @@ static void
 	timeoutval = agent_cb->timeout;
     }
 
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_NOFILL);
+    if (parm && parm->res == NO_ERR) {
+	dofill = FALSE;
+    }
+
     /* get the contents specified in the 'from' choice */
     content = get_content_from_choice(agent_cb, rpc, valset);
     if (!content) {
@@ -6175,7 +6221,12 @@ static void
     }
 
     /* construct a get PDU with the content as the filter */
-    res = send_get_to_agent(agent_cb, content, NULL, NULL, timeoutval);
+    res = send_get_to_agent(agent_cb, 
+			    content, 
+			    NULL, 
+			    NULL, 
+			    timeoutval, 
+			    dofill);
     if (res != NO_ERR) {
 	log_error("\nError: send get operation failed (%s)",
 		  get_error_string(res));
@@ -6212,6 +6263,9 @@ static void
     val_value_t     *valset, *content, *source, *parm;
     status_t         res;
     uint32           timeoutval;
+    boolean          dofill;
+
+    dofill = TRUE;
 
     /* get the command line parameters for this command */
     valset = get_valset(agent_cb, rpc, &line[len], &res);
@@ -6227,6 +6281,11 @@ static void
 	timeoutval = VAL_UINT(parm);
     } else {
 	timeoutval = agent_cb->timeout;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_NOFILL);
+    if (parm && parm->res == NO_ERR) {
+	dofill = FALSE;
     }
 
     /* get the source parameter */
@@ -6249,7 +6308,12 @@ static void
     val_change_nsid(source, xmlns_nc_id());
 
     /* construct a get PDU with the content as the filter */
-    res = send_get_to_agent(agent_cb, content, NULL, source, timeoutval);
+    res = send_get_to_agent(agent_cb, 
+			    content, 
+			    NULL, 
+			    source, 
+			    timeoutval, 
+			    dofill);
     if (res != NO_ERR) {
 	log_error("\nError: send get-config operation failed (%s)",
 		  get_error_string(res));
@@ -6378,9 +6442,12 @@ static void
 		/* construct a get PDU with the content
 		 * as the filter 
 		 */
-		res = send_get_to_agent(agent_cb, NULL, 
+		res = send_get_to_agent(agent_cb, 
+					NULL, 
 					VAL_STR(content), 
-					NULL, timeoutval);
+					NULL, 
+					timeoutval,
+					FALSE);
 		if (res != NO_ERR) {
 		    log_error("\nError: send get operation"
 			      " failed (%s)",
@@ -6530,7 +6597,8 @@ static void
 					NULL, 
 					VAL_STR(content), 
 					source,
-					timeoutval);
+					timeoutval,
+					FALSE);
 		if (res != NO_ERR) {
 		    log_error("\nError: send get-config "
 			      "operation failed (%s)",

@@ -177,6 +177,7 @@ typedef struct cfg_template_t_ {
     xmlChar       *name;
     xmlChar       *src_url;
     xmlChar       *load_time;
+    xmlChar       *lock_time;
     xmlChar       *last_ch_time;
     uint32         flags;
     ses_id_t       locked_by;
@@ -246,6 +247,14 @@ extern status_t
 extern status_t
     cfg_ok_to_write (const cfg_template_t *cfg,
 		     ses_id_t sesid);
+
+extern boolean
+    cfg_is_global_locked (const cfg_template_t *cfg);
+
+extern status_t
+    cfg_get_global_lock_info (const cfg_template_t *cfg,
+			      ses_id_t  *sid,
+			      const xmlChar **locktime);
 
 extern status_t
     cfg_lock (cfg_template_t *cfg,

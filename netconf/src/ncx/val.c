@@ -7113,6 +7113,10 @@ boolean
 * 
 * If the val->getcb is NULL, then an error will be returned
 *
+* Caller should check for *res == ERR_NCX_SKIPPED
+* This will be returned if virtual value has no
+* instance at this time.
+*
 * INPUTS:
 *   session == session CB ptr cast as void *
 *              that is getting the virtual value

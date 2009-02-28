@@ -1426,7 +1426,9 @@ static status_t
 	if (curval && val_is_virtual(curval)) {
 	    v_val = val_get_virtual_value(scb, curval, &res);
 	}
-
+	if (res == ERR_NCX_SKIPPED) {
+	    res = NO_ERR;
+	}
 	if (res != NO_ERR) {
 	    return res;
 	}

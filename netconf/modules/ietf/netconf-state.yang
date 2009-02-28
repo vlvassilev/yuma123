@@ -154,7 +154,8 @@ module netconf-state {
 
     container schemas {
       list schema {
-        key "identifier format version";
+        // order not corrected yet in I-D
+        key "identifier version format";
         leaf identifier {
           type string;
           description

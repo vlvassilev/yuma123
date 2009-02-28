@@ -112,6 +112,7 @@ date         init     comment
 #include  "xml_util.h"
 #endif
 
+
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
@@ -178,6 +179,9 @@ static val_value_t          *myschemasval;
 static const obj_template_t *mysessionobj;
 
 static const obj_template_t *myschemaobj;
+
+
+
 
 
 /********************************************************************
@@ -282,6 +286,102 @@ static val_value_t *
 
 
 /********************************************************************
+* FUNCTION get_locks
+*
+* <get> operation handler for the locks NP container
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    get_locks (ses_cb_t *scb,
+	       getcb_mode_t cbmode,
+	       val_value_t *virval,
+	       val_value_t  *dstval)
+{
+    val_value_t           *nameval, *targval, *newval, *globallockval;
+    const obj_template_t  *globallock;
+    cfg_template_t        *cfg;
+    const xmlChar         *locktime;
+    status_t          res;
+    ses_id_t          sid;
+    boolean           globallocked;
+    xmlChar           numbuff[NCX_MAX_NUMLEN+1];
+
+    (void)scb;
+    res = NO_ERR;
+
+    if (cbmode == GETCB_GET_VALUE) {
+	globallock = obj_find_child(virval->obj,
+				    AGT_STATE_MODULE,
+				    (const xmlChar *)"globalLock");
+	if (!globallock) {
+	    return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+	}
+
+	nameval = val_find_child(virval->parent,
+				 AGT_STATE_MODULE,
+				 (const xmlChar *)"name");
+	if (!nameval) {
+	    return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+	}
+	
+	targval = val_get_first_child(nameval);
+	if (!targval) {
+	    return SET_ERROR(ERR_NCX_DATA_MISSING);
+	}
+	cfg = cfg_get_config(targval->name);
+	if (!cfg) {
+	    return SET_ERROR(ERR_NCX_CFG_NOT_FOUND);	    
+	}
+
+	globallocked = cfg_is_global_locked(cfg);
+	if (globallocked) {
+	    /* make the 2 return value leafs to put into
+	     * the retval container
+	     */
+	    res = cfg_get_global_lock_info(cfg, &sid, &locktime);
+	    if (res == NO_ERR) {
+		/* add locks/globalLock */
+		globallockval = val_new_value();
+		if (!globallockval) {
+		    return ERR_INTERNAL_MEM;
+		}
+		val_init_from_template(globallockval, globallock);
+		val_add_child(globallockval, dstval);
+
+		/* add locks/globalLock/lockedBySession */ 
+		sprintf((char *)numbuff, "%u", sid);
+		newval = make_leaf(globallock,
+				   (const xmlChar *)"lockedBySession",
+				   numbuff, &res);
+		if (newval) {
+		    val_add_child(newval, globallockval);
+		}
+
+		/* add locks/globalLock/lockedTime */ 
+		newval = make_leaf(globallock,
+				   (const xmlChar *)"lockedTime",
+				   locktime, &res);
+		if (newval) {
+		    val_add_child(newval, globallockval);
+		}
+	    }
+	} else {
+	    res = ERR_NCX_SKIPPED;
+	}
+    } else {
+	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+    return res;
+
+} /* get_locks */
+
+
+/********************************************************************
 * FUNCTION make_configuration_val
 *
 * make a val_value_t struct for a specified configuration
@@ -363,7 +463,7 @@ static val_value_t *
 	*res = ERR_INTERNAL_MEM;
 	return NULL;
     }
-    val_init_from_template(leafval, testobj);
+    val_init_virtual(leafval, get_locks, testobj);
     val_add_child(leafval, confval);
 
     *res = NO_ERR;
@@ -415,21 +515,9 @@ static val_value_t *
     }
     val_add_child(childval, schemaval);
 
-
-    /*********** CHECK DRAFT KEY ORDER BUGFIX **********/
-
-
-    /* create schema/format */
-    childval = make_leaf(schemaobj,
-			 AGT_STATE_OBJ_FORMAT,
-			 AGT_STATE_FORMAT_YANG, res);
-    if (!childval) {
-	val_free_value(schemaval);
-	return NULL;
-    }
-    val_add_child(childval, schemaval);
-
-
+    /**** DRAFT-03 HAS BUG IN KEY ORDER
+     **** THIS IS THE CORRECTED ORDER
+     ****/
 
     /* create schema/version */
     childval = make_leaf(schemaobj,
@@ -441,9 +529,15 @@ static val_value_t *
     }
     val_add_child(childval, schemaval);
 
-
-
-
+    /* create schema/format */
+    childval = make_leaf(schemaobj,
+			 AGT_STATE_OBJ_FORMAT,
+			 AGT_STATE_FORMAT_YANG, res);
+    if (!childval) {
+	val_free_value(schemaval);
+	return NULL;
+    }
+    val_add_child(childval, schemaval);
 
     /* create schema/namespace */
     childval = make_leaf(schemaobj,

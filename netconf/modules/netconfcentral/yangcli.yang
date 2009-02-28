@@ -165,6 +165,21 @@ module yangcli {
         }
     }
 
+    grouping SGetParms {
+        description
+            "Common parms for sget and sget-config operations.";
+
+        leaf nofill {
+           description
+            "If present, and the 'from-cli' option is used
+             for input, then filling of mandatory nodes
+             and key leafs will be skipped.  Instead, the target
+             object will be treated as a terminating select node
+             in the filter element.";
+           type empty;
+       }
+    }
+
     grouping XGetParms {
         description
             "Common parms for xget and xget-config operations.";
@@ -293,7 +308,8 @@ module yangcli {
           enum ignore {
             description 
               "Silently accept invalid PDU and data model 
-               parameters.";
+               parameters.  Intended for advanced agent 
+               testing mode only.";
           }
           enum warn {
             description 
@@ -307,7 +323,7 @@ module yangcli {
           }
           enum error {
             description 
-              "Prompt the user to re-neter the invalid value.";
+              "Prompt the user to re-enter the invalid value.";
           }
         }
         default "check";
@@ -709,6 +725,7 @@ module yangcli {
       input {
         ncx:default-parm target;
         uses CommonPduParms;
+        uses SGetParms;
       }
       output {
         anyxml data {
@@ -726,6 +743,7 @@ module yangcli {
       input {
         ncx:default-parm target;
         uses CommonPduParms;
+        uses SGetParms;
         container source {
           description "Particular configuration to retrieve.";
           uses nc:GetConfigSourceType;

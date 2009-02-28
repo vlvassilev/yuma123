@@ -346,8 +346,10 @@ static boolean
 	/* get temp value to store virtual value */
 	v_val = val_get_virtual_value(scb, curval, &res);
 	if (!v_val) {
-	    log_error("\agt_tree: get virtual failed %s",
-		      get_error_string(res));
+	    if (res != ERR_NCX_SKIPPED) {
+		log_error("\agt_tree: get virtual failed %s",
+			  get_error_string(res));
+	    }
 	    return FALSE;
 	}
     }

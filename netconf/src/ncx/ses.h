@@ -100,7 +100,7 @@ typedef enum ses_transport_t_ {
     SES_TRANSPORT_NONE,
     SES_TRANSPORT_SSH,
     SES_TRANSPORT_BEEP,
-    SES_TRANSPORTT_SOAP
+    SES_TRANSPORT_SOAP
 } ses_transport_t;
 
 
@@ -328,5 +328,8 @@ extern void
 
 extern ses_total_stats_t *
     ses_get_total_stats (void);
+
+extern const xmlChar *
+    ses_get_transport_name (ses_transport_t transport);
 
 #endif            /* _H_ses */

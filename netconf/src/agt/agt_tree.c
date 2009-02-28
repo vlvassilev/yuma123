@@ -322,7 +322,7 @@ static boolean
 *          type and not a simple type
 *********************************************************************/
 static boolean
-    content_match_test (const ses_cb_t *scb,
+    content_match_test (ses_cb_t *scb,
 			const xmlChar *testval, 
 			val_value_t *curval)
 {
@@ -470,7 +470,7 @@ static boolean
 *     status, NO_ERR or malloc error
 *********************************************************************/
 static status_t
-    process_val (const ses_cb_t *scb,
+    process_val (ses_cb_t *scb,
 		 boolean getop,
 		 val_value_t *filval,
 		 val_value_t *curval,

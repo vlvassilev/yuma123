@@ -41,12 +41,16 @@ date         init     comment
 #include "agt_connect.h"
 #endif
 
+#ifndef _H_agt_hello
+#include "agt_hello.h"
+#endif
+
 #ifndef _H_agt_rpcerr
 #include "agt_rpcerr.h"
 #endif
 
-#ifndef _H_agt_hello
-#include "agt_hello.h"
+#ifndef _H_agt_state
+#include "agt_state.h"
 #endif
 
 #ifndef _H_agt_ses
@@ -170,7 +174,6 @@ void
 			  xml_node_t *top)
 {
     xml_attr_t      *attr;
- /* xml_node_t       testnode; */
     status_t         res;
     ncx_num_t        num;
 
@@ -183,10 +186,6 @@ void
 
 #ifdef AGT_CONNECT_DEBUG
     log_debug("\nagt_connect got node");
-    /* if (LOGDEBUG3) {
-     *	xml_dump_node(top);
-     * }
-     */
 #endif
 
     res = NO_ERR;
@@ -290,16 +289,27 @@ void
     }
 
     if (res == NO_ERR) {
+	/* add the session to the netconf-state DM */
+	res = agt_state_add_session(scb);
+
 	/* bump the session state and send the agent hello message */
-	scb->state = SES_ST_HELLO_WAIT;
-	res = agt_hello_send(scb);
+	if (res == NO_ERR) {
+	    res = agt_hello_send(scb);
+	    if (res != NO_ERR) {
+		agt_state_remove_session(scb->sid);
+	    }
+	}
+
+	if (res == NO_ERR) {
+	    scb->state = SES_ST_HELLO_WAIT;
+	}
     }
 
     /* report first error and close session */
     if (res != NO_ERR) {
 	agt_ses_request_close(scb->sid);
-	log_info("\nagt_connect error (%s)\n  dropping session %d (%d)",
-		 get_error_string(res), scb->sid, res);
+	log_error("\nagt_connect error (%s)\n  dropping session %d (%d)",
+		  get_error_string(res), scb->sid, res);
     } else {
 	log_debug("\nagt_connect msg ok");
     }

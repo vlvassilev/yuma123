@@ -44,6 +44,10 @@ date         init     comment
 #include  "agt_ses.h"
 #endif
 
+#ifndef _H_agt_state
+#include  "agt_state.h"
+#endif
+
 #ifndef _H_agt_top
 #include  "agt_top.h"
 #endif
@@ -90,6 +94,10 @@ date         init     comment
 
 #ifndef _H_tstamp
 #include  "tstamp.h"
+#endif
+
+#ifndef _H_val
+#include  "val.h"
 #endif
 
 #ifndef _H_xmlns
@@ -1248,6 +1256,7 @@ ses_cb_t *
 	    }
 	}
 	log_info("\nNew session %d created OK", slot);
+	agttotals->inSessions++;
 	agttotals->active_sessions++;
     } else {
 	if (scb) {
@@ -1296,6 +1305,8 @@ void
     }
 
     cfg_release_locks(slot);
+
+    agt_state_remove_session(slot);
 
     /* add this session to ses stats */
     agttotals->active_sessions--;
@@ -1617,6 +1628,275 @@ void
 
 }  /* agt_ses_fill_writeset */
 
+
+/********************************************************************
+* FUNCTION agt_ses_get_inSessions
+*
+* <get> operation handler for the inSessions counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_inSessions (ses_cb_t *scb,
+			    getcb_mode_t cbmode,
+			    val_value_t *virval,
+			    val_value_t  *dstval)
+{
+    (void)scb;
+    (void)virval;
+
+    if (cbmode == GETCB_GET_VALUE) {
+	VAL_UINT(dstval) = agttotals->inSessions;
+	return NO_ERR;
+    } else {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* agt_ses_get_inSessions */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_inXMLParseErrors
+*
+* <get> operation handler for the inXMLParseErrors counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_inXMLParseErrors (ses_cb_t *scb,
+				  getcb_mode_t cbmode,
+				  val_value_t *virval,
+				  val_value_t  *dstval)
+{
+    (void)scb;
+    (void)virval;
+
+    if (cbmode == GETCB_GET_VALUE) {
+	VAL_UINT(dstval) = agttotals->stats.inXMLParseErrors;
+	return NO_ERR;
+    } else {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* agt_ses_get_inXMLParseErrors */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_inBadHellos
+*
+* <get> operation handler for the inBadHellos counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_inBadHellos (ses_cb_t *scb,
+			     getcb_mode_t cbmode,
+			     val_value_t *virval,
+			     val_value_t  *dstval)
+{
+    (void)scb;
+    (void)virval;
+
+    if (cbmode == GETCB_GET_VALUE) {
+	VAL_UINT(dstval) = agttotals->stats.inBadHellos;
+	return NO_ERR;
+    } else {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* agt_ses_get_inBadHellos */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_inRpcs
+*
+* <get> operation handler for the inRpcs counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_inRpcs (ses_cb_t *scb,
+			getcb_mode_t cbmode,
+			val_value_t *virval,
+			val_value_t  *dstval)
+{
+    (void)scb;
+    (void)virval;
+
+    if (cbmode == GETCB_GET_VALUE) {
+	VAL_UINT(dstval) = agttotals->stats.inRpcs;
+	return NO_ERR;
+    } else {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* agt_ses_get_inRpcs */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_inBadRpcs
+*
+* <get> operation handler for the inBadRpcs counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_inBadRpcs (ses_cb_t *scb,
+			   getcb_mode_t cbmode,
+			   val_value_t *virval,
+			   val_value_t  *dstval)
+{
+    (void)scb;
+    (void)virval;
+
+    if (cbmode == GETCB_GET_VALUE) {
+	VAL_UINT(dstval) = agttotals->stats.inBadRpcs;
+	return NO_ERR;
+    } else {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* agt_ses_get_inBadRpcs */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_inNotSupportedRpcs
+*
+* <get> operation handler for the inNotSupportedRpcs counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_inNotSupportedRpcs (ses_cb_t *scb,
+				    getcb_mode_t cbmode,
+				    val_value_t *virval,
+				    val_value_t  *dstval)
+{
+    (void)scb;
+    (void)virval;
+
+    if (cbmode == GETCB_GET_VALUE) {
+	VAL_UINT(dstval) = agttotals->stats.inNotSupportedRpcs;
+	return NO_ERR;
+    } else {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* agt_ses_get_inNotSupportedRpcs */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_outRpcReplies
+*
+* <get> operation handler for the outRpcReplies counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_outRpcReplies (ses_cb_t *scb,
+			       getcb_mode_t cbmode,
+			       val_value_t *virval,
+			       val_value_t  *dstval)
+{
+    (void)scb;
+    (void)virval;
+
+    if (cbmode == GETCB_GET_VALUE) {
+	VAL_UINT(dstval) = agttotals->stats.outRpcReplies;
+	return NO_ERR;
+    } else {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* agt_ses_get_outRpcReplies */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_outRpcErrors
+*
+* <get> operation handler for the outRpcErrors counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_outRpcErrors (ses_cb_t *scb,
+			      getcb_mode_t cbmode,
+			      val_value_t *virval,
+			      val_value_t  *dstval)
+{
+    (void)scb;
+    (void)virval;
+
+    if (cbmode == GETCB_GET_VALUE) {
+	VAL_UINT(dstval) = agttotals->stats.outRpcErrors;
+	return NO_ERR;
+    } else {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* agt_ses_get_outRpcErrors */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_outNotifications
+*
+* <get> operation handler for the outNotifications counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_outNotifications (ses_cb_t *scb,
+				  getcb_mode_t cbmode,
+				  val_value_t *virval,
+				  val_value_t  *dstval)
+{
+    (void)scb;
+    (void)virval;
+
+    if (cbmode == GETCB_GET_VALUE) {
+	VAL_UINT(dstval) = agttotals->stats.outNotifications;
+	return NO_ERR;
+    } else {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* agt_ses_get_outNotifications */
 
 
 /* END file agt_ses.c */

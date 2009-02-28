@@ -1214,15 +1214,11 @@ val_value_t *
 
     /* check if strval is NULL */
     if (!strval) {
-	if (obj_get_basetype(obj) == NCX_BT_EMPTY) {
-	    *res = val_set_simval(useval,
-				  obj_get_ctypdef(obj),
-				  obj_get_nsid(obj),
-				  obj_get_name(obj),
-				  NULL);
-	} else {
-	    *res = ERR_NCX_EMPTY_VAL;
-	}
+	*res = val_set_simval(useval,
+			      obj_get_ctypdef(obj),
+			      obj_get_nsid(obj),
+			      obj_get_name(obj),
+			      NULL);
     } else if (*strval==NCX_AT_CH) {
 	/* this is a NCX_BT_EXTERNAL value
 	 * find the file with the raw XML data

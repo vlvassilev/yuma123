@@ -22,6 +22,10 @@ date             init     comment
 
 #include <xmlstring.h>
 
+#ifndef _H_getcb
+#include "getcb.h"
+#endif
+
 #ifndef _H_ncxconst
 #include "ncxconst.h"
 #endif
@@ -32,6 +36,10 @@ date             init     comment
 
 #ifndef _H_status
 #include "status.h"
+#endif
+
+#ifndef _H_val
+#include "val.h"
 #endif
 
 
@@ -104,5 +112,59 @@ extern boolean
 extern void
     agt_ses_fill_writeset (fd_set *fdset,
 			   int *maxfdnum);
+
+extern status_t 
+    agt_ses_get_inSessions (ses_cb_t *scb,
+			    getcb_mode_t cbmode,
+			    val_value_t *virval,
+			    val_value_t  *dstval);
+
+extern status_t 
+    agt_ses_get_inXMLParseErrors (ses_cb_t *scb,
+				  getcb_mode_t cbmode,
+				  val_value_t *virval,
+				  val_value_t  *dstval);
+
+extern status_t 
+    agt_ses_get_inBadHellos (ses_cb_t *scb,
+			     getcb_mode_t cbmode,
+			     val_value_t *virval,
+			     val_value_t  *dstval);
+
+extern status_t 
+    agt_ses_get_inRpcs (ses_cb_t *scb,
+			getcb_mode_t cbmode,
+			val_value_t *virval,
+			val_value_t  *dstval);
+
+extern status_t 
+    agt_ses_get_inBadRpcs (ses_cb_t *scb,
+			   getcb_mode_t cbmode,
+			   val_value_t *virval,
+			   val_value_t  *dstval);
+
+extern status_t 
+    agt_ses_get_inNotSupportedRpcs (ses_cb_t *scb,
+				    getcb_mode_t cbmode,
+				    val_value_t *virval,
+				    val_value_t  *dstval);
+
+extern status_t 
+    agt_ses_get_outRpcReplies (ses_cb_t *scb,
+			       getcb_mode_t cbmode,
+			       val_value_t *virval,
+			       val_value_t  *dstval);
+
+extern status_t 
+    agt_ses_get_outRpcErrors (ses_cb_t *scb,
+			      getcb_mode_t cbmode,
+			      val_value_t *virval,
+			      val_value_t  *dstval);
+
+extern status_t 
+    agt_ses_get_outNotifications (ses_cb_t *scb,
+				  getcb_mode_t cbmode,
+				  val_value_t *virval,
+				  val_value_t  *dstval);
 
 #endif            /* _H_agt_ses */

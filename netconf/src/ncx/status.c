@@ -585,6 +585,12 @@ const char *
 	return "invalid duplicate include-stmt";
     case ERR_NCX_AMBIGUOUS_CMD:
 	return "ambiguous command";
+    case ERR_NCX_UNKNOWN_MODULE:
+	return "unknown module";
+    case ERR_NCX_UNKNOWN_VERSION:
+	return "unknown version";
+    case ERR_NCX_VALUE_NOT_SUPPORTED:
+	return "value not supported";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

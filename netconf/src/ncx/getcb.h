@@ -71,12 +71,10 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/* placeholder for expansion modes */
 typedef enum getcb_mode_t_ {
     GETCB_NONE,
-    GETCB_GET_METAQ,
-    GETCB_GET_VALUE,
-    GETCB_GET_FIRST_CHILD,
-    GETCB_GET_NEXT_CHILD
+    GETCB_GET_VALUE
 } getcb_mode_t;
 
 
@@ -85,9 +83,9 @@ typedef enum getcb_mode_t_ {
  * Callback function for agent node get handler 
  * 
  * INPUTS:
- *   scb == session control block
+ *   scb    == session that issued the get (may be NULL)
+ *             can be used for access control purposes
  *   cbmode == reason for the callback
- *   fil == filter tree in progress (NULL if not used)
  *   virval == place-holder node in the data model for
  *              this virtual value node
  *   dstval == pointer to value output struct
@@ -100,9 +98,8 @@ typedef enum getcb_mode_t_ {
  *    status:
  */
 typedef status_t 
-    (*getcb_fn_t) (const ses_cb_t *scb,
+    (*getcb_fn_t) (ses_cb_t *scb,
 		   getcb_mode_t cbmode,
-		   ncx_filptr_t *fil,
 		   val_value_t *virval,
 		   val_value_t *dstval);
 

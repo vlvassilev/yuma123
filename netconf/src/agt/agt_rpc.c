@@ -438,9 +438,10 @@ static void
     val_value_t         *val;
     ses_total_stats_t   *agttotals;
     status_t             res;
-    xmlns_id_t           ncid;
+    xmlns_id_t           ncid, rpcid;
     uint64               outbytes;
     boolean              datasend, datawritten, errsend;
+    int32                indent, indentamount;
 
     res = ses_start_msg(scb);
     if (res != NO_ERR) {
@@ -460,18 +461,16 @@ static void
     }
 
     ncid = xmlns_nc_id();
+    rpcid = obj_get_nsid(msg->rpc_method);
+    indentamount = ses_indent_count(scb);
+    indent = indentamount;
 
     /* generate the <rpc-reply> start tag */
     xml_wr_begin_elem_ex(scb, &msg->mhdr, 0, ncid, NCX_EL_RPC_REPLY, 
 			 msg->rpc_in_attrs, ATTRQ, 0, START);
 
 
-    /* check if there is data to send 
-     * do not use msg->rpc_method as intended, but rather
-     * the info in the msg itself; This may need to be
-     * changed later, but the standard requires a very
-     * specific format to all <rpc-reply> elements
-     */
+    /* check if there is data to send */
     datasend = (!dlq_empty(&msg->rpc_dataQ) 
 		|| msg->rpc_datacb) ? TRUE : FALSE;
 
@@ -479,7 +478,7 @@ static void
     if (dlq_empty(&msg->mhdr.errQ) && !datasend) {
 	/* no errors and no data, so send <ok> variant */
 	xml_wr_empty_elem(scb, &msg->mhdr, ncid, ncid,
-			  NCX_EL_OK, NCX_DEF_INDENT);
+			  NCX_EL_OK, indent);
     } else {
 	/* send rpcResponse variant
 	 * 0 or <rpc-error> elements followed by
@@ -493,7 +492,7 @@ static void
 
 	    errsend = TRUE;
 
-	    res = send_rpc_error(scb, msg, err, NCX_DEF_INDENT);
+	    res = send_rpc_error(scb, msg, err, indent);
 	    if (res != NO_ERR) {
 		SET_ERROR(res);
 	    }
@@ -508,48 +507,46 @@ static void
 	 * node is not NULL
 	 */
 	if (datasend) {
-
-	    /* check corner case, just empty data and no data callback */
-	    if (!msg->rpc_datacb && dlq_empty(&msg->rpc_dataQ)) {
-		xml_wr_empty_elem(scb, &msg->mhdr, ncid,
-				  ncid, NCX_EL_DATA, NCX_DEF_INDENT);
-	    } else {
-		if (msg->rpc_data_type == RPC_DATA_STD) {
-		    xml_wr_begin_elem(scb, &msg->mhdr, ncid, ncid,
-				      NCX_EL_DATA, NCX_DEF_INDENT);
-		}
-
-		outbytes = SES_OUT_BYTES(scb);
-
-		if (msg->rpc_datacb) {
-		    /* use user callback to generate the contents */
-		    agtcb = (agt_rpc_data_cb_t)msg->rpc_datacb;
-		    res = (*agtcb)(scb, msg, NCX_DEF_INDENT*2);
-		    if (res != NO_ERR) {
-			SET_ERROR(res);
-		    }
-		} else {
-		    /* just write the contents of the rpc <data> varQ */
-		    for (val = (val_value_t *)
-			     dlq_firstEntry(&msg->rpc_dataQ);
-			 val != NULL;
-			 val = (val_value_t *)dlq_nextEntry(val)) {
-
-			xml_wr_full_val(scb, &msg->mhdr, 
-					val, NCX_DEF_INDENT*2);
-		    }
-		}
-
-		/* only indent the </data> end tag if any data written */
-		datawritten = (outbytes != SES_OUT_BYTES(scb));
-
-		if (msg->rpc_data_type == RPC_DATA_STD) {
-		    xml_wr_end_elem(scb, &msg->mhdr, ncid, NCX_EL_DATA, 
-				    (datawritten) ? NCX_DEF_INDENT : -1);
+	    if (msg->rpc_data_type == RPC_DATA_STD) {
+		xml_wr_begin_elem(scb, &msg->mhdr, ncid, rpcid,
+				  NCX_EL_DATA, indent);
+		if (indent > 0) {
+		    indent *= 2;
 		}
 	    }
-	} 
-    }
+
+	    outbytes = SES_OUT_BYTES(scb);
+
+	    if (msg->rpc_datacb) {
+		/* use user callback to generate the contents */
+		agtcb = (agt_rpc_data_cb_t)msg->rpc_datacb;
+		res = (*agtcb)(scb, msg, indent);
+		if (res != NO_ERR) {
+		    SET_ERROR(res);
+		}
+	    } else {
+		/* just write the contents of the rpc <data> varQ */
+		for (val = (val_value_t *)
+			 dlq_firstEntry(&msg->rpc_dataQ);
+		     val != NULL;
+		     val = (val_value_t *)dlq_nextEntry(val)) {
+
+		    xml_wr_full_val(scb, &msg->mhdr, val, indent);
+		}
+	    }
+
+	    /* only indent the </data> end tag if any data written */
+	    datawritten = (outbytes != SES_OUT_BYTES(scb));
+
+	    if (msg->rpc_data_type == RPC_DATA_STD) {
+		if (indent > 0) {
+		    indent /= 2;
+		}
+		xml_wr_end_elem(scb, &msg->mhdr, rpcid, NCX_EL_DATA, 
+				(datawritten) ? indent : -1);
+	    }
+	}
+    } 
 
     /* generate the <rpc-reply> end tag */
     xml_wr_end_elem(scb, &msg->mhdr, ncid, NCX_EL_RPC_REPLY, 0);
@@ -605,7 +602,7 @@ static obj_template_t *
 * INPUTS:
 *   scb == session control block
 *   msg == rpc_msg_t in progress
-    rpc == RPC template to use
+    rpcobj == RPC object template to use
 *   method == method node
 *
 * RETURNS:
@@ -614,7 +611,7 @@ static obj_template_t *
 static status_t
     parse_rpc_input (ses_cb_t *scb,
 		     rpc_msg_t  *msg,
-		     obj_rpc_t *rpc,
+		     obj_template_t *rpcobj,
 		     xml_node_t  *method)
 {
     const obj_template_t  *obj;
@@ -624,7 +621,8 @@ static status_t
     res = NO_ERR;
 
     /* check if there is an input parmset specified */
-    obj = obj_find_template(&rpc->datadefQ, NULL, YANG_K_INPUT);
+    obj = obj_find_template(obj_get_datadefQ(rpcobj),
+			    NULL, YANG_K_INPUT);
     if (obj && obj_get_child_count(obj)) {
 	rpcio = obj->def.rpcio;
 	msg->rpc_agt_state = AGT_RPC_PH_PARSE;
@@ -1069,7 +1067,7 @@ void
 		cbset = (agt_rpc_cbset_t *)rpcobj->cbset;
 
 		/* finish setting up the rpc_msg_t struct */
-		msg->rpc_method = rpc;
+		msg->rpc_method = rpcobj;
 	    }
 	}
     }
@@ -1136,7 +1134,7 @@ void
 
     /* parameter set parse state */
     if (res == NO_ERR) {
-	res = parse_rpc_input(scb, msg, rpc, &method);
+	res = parse_rpc_input(scb, msg, rpcobj, &method);
     }
 
     /* read in a node which should be the endnode to match 'top' */
@@ -1266,7 +1264,6 @@ status_t
     ses_cb_t        *scb;
     rpc_msg_t       *msg;
     obj_template_t  *rpcobj;
-    obj_rpc_t       *rpc;
     agt_rpc_cbset_t *cbset;
     val_value_t     *testval;
     xml_node_t       method;
@@ -1292,7 +1289,6 @@ status_t
     if (!cbset) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
-    rpc = rpcobj->def.rpc;
 
     /* make sure the config is in the init state */
     if (cfg->cfg_state != CFG_ST_INIT) {
@@ -1332,7 +1328,7 @@ status_t
     method.elname = NCX_EL_LOAD_CONFIG;
     method.depth = 1;
 
-    msg->rpc_method = rpc;
+    msg->rpc_method = rpcobj;
     msg->rpc_user1 = cfg;
     msg->rpc_err_option = OP_ERROP_CONTINUE;
 
@@ -1341,7 +1337,7 @@ status_t
 
     /* parse the config file as a root object */
     if (res == NO_ERR) {
-	res = parse_rpc_input(scb, msg, rpc, &method);
+	res = parse_rpc_input(scb, msg, rpcobj, &method);
 	if (res != NO_ERR) {
 	    retres = res;
 	}

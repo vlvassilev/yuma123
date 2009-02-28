@@ -164,6 +164,8 @@ date	     init     comment
 
 #define NCX_DEF_LINELEN     72
 
+#define NCX_MAX_LINELEN     4095
+
 #define NCX_ROOT_USER       (const xmlChar *)"root"
 
 #define NCX_SUFFIX          (const xmlChar *)"ncx"

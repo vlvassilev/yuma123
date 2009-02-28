@@ -212,6 +212,14 @@ extern ncx_module_t *
 extern const xmlChar *
     ncx_get_modname (const ncx_module_t *mod);
 
+/* returns highest revision date or NULL if none */
+extern const xmlChar *
+    ncx_get_modversion (const ncx_module_t *mod);
+
+/* get the module namespace URI */
+extern const xmlChar *
+    ncx_get_modnamespace (const ncx_module_t *mod);
+
 extern ncx_module_t *
     ncx_get_mainmod (ncx_module_t *mod);
 

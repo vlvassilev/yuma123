@@ -403,11 +403,7 @@ static void
     val_index_t   *in;
     ncx_btype_t    btyp;
 
-    if (val->btyp==NCX_BT_UNION) {
-	btyp = val->unbtyp;
-    } else {
-	btyp = val->btyp;
-    }
+    btyp = val->btyp;
 
     if (val->editvars) {
 	val_free_editvars(val);
@@ -867,12 +863,7 @@ static void
 	(*dumpfn)("%s ", (val->name) ? (const char *)val->name : "--");
     }
 
-    /* get the real base type */
-    if (val->btyp == NCX_BT_UNION) {
-	btyp = val->unbtyp;
-    } else {
-	btyp = val->btyp;
-    }
+    btyp = val->btyp;
 
     /* check if an index clause needs to be printed next */
     if (!dlq_empty(&val->indexQ)) {
@@ -1223,6 +1214,46 @@ static boolean
     return fnresult;
 
 }  /* process_one_valwalker */
+
+
+/********************************************************************
+* FUNCTION setup_virtual_retval
+* 
+* Set an initialized val_value_t as a virtual return val
+*
+* INPUTS:
+*    virval == virtual value to set from
+*    realval == value to set to
+*
+* OUTPUTS:
+*    *realval is setup for return if NO_ERR
+*********************************************************************/
+static void
+    setup_virtual_retval (val_value_t  *virval,
+			  val_value_t *realval)
+{
+    const typ_template_t  *listtyp;
+    ncx_btype_t            btyp;
+
+    realval->name = virval->name;
+    realval->nsid = virval->nsid;
+    realval->obj = virval->obj;
+    realval->typdef = virval->typdef;
+    realval->flags = virval->flags;
+    realval->btyp = virval->btyp;
+    realval->dataclass = virval->dataclass;
+    realval->parent = virval->parent;
+
+    if (!typ_is_simple(virval->btyp)) {
+	val_init_complex(realval, virval->btyp);
+    } else if (virval->btyp == NCX_BT_SLIST ||
+	       virval->btyp == NCX_BT_BITS) {
+	listtyp = typ_get_listtyp(realval->typdef);
+	btyp = typ_get_basetype(&listtyp->typdef);
+	ncx_init_list(&realval->v.list, btyp);
+    }
+
+}  /* setup_virtual_retval */
 
 
 /*************** E X T E R N A L    F U N C T I O N S  *************/
@@ -2738,12 +2769,11 @@ status_t
 	     * registered, the un->typ field should be set
 	     */
 	    if (!retdone) {
-		retval->untyp = un->typ;   /****/
-
-		/* what if this is set to NCX_BT_UNION still?
-		 * not sure it matters.  Check!!!
+		/* if this is set to NCX_BT_UNION still
+		 * then it will eventually get overwritten
+		 * the final time with the real base type
 		 */
-		retval->unbtyp = typ_get_basetype(undef);
+		retval->btyp = typ_get_basetype(undef);
 	    }
 	    done = TRUE;
 	} else if (res != ERR_INTERNAL_MEM) {
@@ -3405,7 +3435,11 @@ status_t
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_LEAFREF:   /****/
-	VAL_STR(val) = xml_strdup(valstr);
+	if (valstr) {
+	    VAL_STR(val) = xml_strdup(valstr);
+	} else {
+	    VAL_STR(val) = xml_strdup(EMPTY_STRING);
+	}
 	if (!VAL_STR(val)) {
 	    res = ERR_INTERNAL_MEM;
 	}
@@ -3455,8 +3489,7 @@ status_t
 	/* set as generic string -- parser as other end will
 	 * match against actual union types
 	 */
-	val->untyp = typ_get_basetype_typ(NCX_BT_STRING);
-	val->unbtyp = NCX_BT_STRING;
+	val->btyp = NCX_BT_STRING;
 	VAL_STR(val) = xml_strdup(valstr);
 	if (!VAL_STR(val)) {
 	    res = ERR_INTERNAL_MEM;
@@ -3663,32 +3696,7 @@ boolean
 	    merge_simple(btyp, src, dest);
 	    break;
 	case NCX_BT_UNION:
-	    /* first clean the dest */
-	    if (typ_is_number(dest->unbtyp)) {
-		ncx_clean_num(dest->unbtyp, &dest->v.num);
-	    } else if (typ_is_string(dest->unbtyp)) {		
-		ncx_clean_str(&dest->v.str);
-	    } else {
-		switch (dest->unbtyp) {
-		case NCX_BT_BINARY:
-		    ncx_clean_binary(&dest->v.binary);
-		    break;
-		case NCX_BT_ENUM:
-		    ncx_clean_enum(&dest->v.enu);
-		    break;
-		case NCX_BT_LIST:
-		case NCX_BT_BITS:
-		    ncx_clean_list(&dest->v.list);
-		    break;
-		default:
-		    ;
-		}
-	    }
-
-	    /* set the union member type */
-	    dest->untyp = src->untyp;
-	    dest->unbtyp = src->unbtyp;
-	    merge_simple(src->unbtyp, src, dest);
+	    SET_ERROR(ERR_INTERNAL_VAL);
 	    break;
 	case NCX_BT_SLIST:
 	    dupsok = val_duplicates_allowed(dest);
@@ -3864,8 +3872,6 @@ val_value_t *
     /* DO NOT COPY copy->index = val->index; */
     /* set copy->indexQ after cloning child nodes is done */
 
-    copy->untyp = val->untyp;
-    copy->unbtyp = val->unbtyp;
     copy->casobj = val->casobj;
 
     /* assume OK return for now */
@@ -6035,11 +6041,7 @@ int32
     }
 #endif
 
-    if (val1->btyp == NCX_BT_UNION) {
-	btyp = val1->unbtyp;
-    } else {
-	btyp = val1->btyp;
-    }
+    btyp = val1->btyp;
 
     switch (btyp) {
     case NCX_BT_EMPTY:
@@ -6642,11 +6644,7 @@ boolean
 	return TRUE;
     }
 
-    if (val->btyp==NCX_BT_UNION) {
-	btyp = val->unbtyp;
-    } else {
-	btyp = val->btyp;
-    }
+    btyp = val->btyp;
 
     if (typ_has_children(btyp)) {
 	return !dlq_empty(&val->v.childQ);
@@ -6917,11 +6915,7 @@ boolean
     }
 #endif
 
-    if (val->btyp == NCX_BT_UNION) {
-	btyp = val->unbtyp;
-    } else {
-	btyp = val->btyp;
-    }
+    btyp = val->btyp;
 
     switch (btyp) {
     case NCX_BT_ENUM:
@@ -7134,13 +7128,13 @@ boolean
 *   return value is non-NULL
 *********************************************************************/
 val_value_t *
-    val_get_virtual_value (const void *session,
+    val_get_virtual_value (void *session,
 			   val_value_t *val,
 			   status_t *res)
 {
-    const ses_cb_t *scb;
-    getcb_fn_t  getcb;
+    ses_cb_t    *scb;
     val_value_t *retval;
+    getcb_fn_t   getcb;
 
 #ifdef DEBUG
     if (!val || !res) {
@@ -7154,7 +7148,7 @@ val_value_t *
 	return NULL;
     }
 
-    scb = (const ses_cb_t *)session;
+    scb = (ses_cb_t *)session;
     getcb = (getcb_fn_t)val->getcb;
 
     retval = val_new_value();
@@ -7162,8 +7156,9 @@ val_value_t *
 	*res = ERR_INTERNAL_MEM;
 	return NULL;
     }
+    setup_virtual_retval(val, retval);
 
-    *res = (*getcb)(scb, GETCB_GET_VALUE, NULL, val, retval);
+    *res = (*getcb)(scb, GETCB_GET_VALUE, val, retval);
     if (*res != NO_ERR) {
 	val_free_value(retval);
 	retval = NULL;
@@ -7173,116 +7168,6 @@ val_value_t *
 
 }  /* val_get_virtual_value */
 
-
-/********************************************************************
-* FUNCTION val_setup_virtual_retval
-* 
-* Set an initialized val_value_t as a virtual return val
-*
-* INPUTS:
-*    virval == virtual value to set from
-*    realval == value to set to
-*
-* OUTPUTS:
-*    *realval is setup for return if NO_ERR
-*********************************************************************/
-void
-    val_setup_virtual_retval (val_value_t  *virval,
-			      val_value_t *realval)
-{
-    const typ_template_t  *listtyp;
-    ncx_btype_t            btyp;
-
-#ifdef DEBUG
-    if (!virval || !realval) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    realval->name = virval->name;
-    realval->nsid = virval->nsid;
-    realval->obj = virval->obj;
-    realval->typdef = virval->typdef;
-    realval->flags = virval->flags;
-    realval->btyp = virval->btyp;
-    realval->dataclass = virval->dataclass;
-    realval->parent = virval->parent;
-
-    if (virval->btyp==NCX_BT_UNION) {
-	realval->untyp = virval->untyp;
-	realval->unbtyp = virval->unbtyp;
-    } else if (!typ_is_simple(virval->btyp)) {
-	val_init_complex(realval, virval->btyp);
-    } else if (virval->btyp == NCX_BT_SLIST ||
-	       virval->btyp == NCX_BT_BITS) {
-	listtyp = typ_get_listtyp(realval->typdef);
-	btyp = typ_get_basetype(&listtyp->typdef);
-	ncx_init_list(&realval->v.list, btyp);
-    }
-
-}  /* val_setup_virtual_retval */
-
-
-/********************************************************************
-* FUNCTION val_new_virtual_chval
-* 
-* Create and initialize a val_value_t as a child node
-* of a virtual return val
-*
-* INPUTS:
-*    name == name of child node
-*    nsid == namespace ID of child node
-*    typdef == typdef struct for the child node
-*    parent == the parent struct to add the child node to
-*              (real value node, not the virtual node!)
-* OUTPUTS:
-*    new child node added to parent childQ
-*
-* RETURNS:
-*    pointer to new child value, actual value not set yet!!!
-*********************************************************************/
-val_value_t *
-    val_new_virtual_chval (const xmlChar *name,
-			   xmlns_id_t nsid,
-			   typ_def_t *typdef,
-			   val_value_t *parent)
-{
-    const typ_template_t *listtyp;
-    val_value_t          *retval;
-    ncx_btype_t           btyp;
-
-#ifdef DEBUG
-    if (!name || !typdef || !parent) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    retval = val_new_value();
-    if (!retval) {
-	return NULL;
-    }
-
-    retval->name = name;
-    retval->nsid = nsid;
-    retval->typdef = typdef;
-    retval->btyp = typ_get_basetype(typdef);
-    retval->dataclass = NCX_DC_STATE;
-
-    if (!typ_is_simple(retval->btyp)) {
-	val_init_complex(retval, retval->btyp);
-    } else if (retval->btyp == NCX_BT_SLIST ||
-	       retval->btyp == NCX_BT_BITS) {
-	listtyp = typ_get_listtyp(retval->typdef);
-	btyp = typ_get_basetype(&listtyp->typdef);
-	ncx_init_list(&retval->v.list, btyp);
-    }
-
-    val_add_child(retval, parent);
-    return retval;
-
-}  /* val_new_virtual_chval */
 
 
 /********************************************************************
@@ -7343,11 +7228,7 @@ boolean
 
     ret = FALSE;
 
-    if (val->btyp == NCX_BT_UNION) {
-	btyp = val->unbtyp;
-    } else {
-	btyp = val->btyp;
-    }
+    btyp = val->btyp;
 
     switch (btyp) {
     case NCX_BT_EMPTY:

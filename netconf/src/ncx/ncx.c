@@ -2163,6 +2163,50 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION ncx_get_modversion
+* 
+* Get the [sub]module version
+* 
+* RETURNS:
+*   module version or NULL if error
+*********************************************************************/
+const xmlChar *
+    ncx_get_modversion (const ncx_module_t *mod)
+{
+#ifdef DEBUG
+    if (!mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+    return mod->version;
+
+}  /* ncx_get_modversion */
+
+
+/********************************************************************
+* FUNCTION ncx_get_modnamespace
+* 
+* Get the module namespace
+* 
+* RETURNS:
+*   module namespace or NULL if error
+*********************************************************************/
+const xmlChar *
+    ncx_get_modnamespace (const ncx_module_t *mod)
+{
+#ifdef DEBUG
+    if (!mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+    return mod->ns;
+
+}  /* ncx_get_modnamespace */
+
+
+/********************************************************************
 * FUNCTION ncx_get_mainmod
 * 
 * Get the main module

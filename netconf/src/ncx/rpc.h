@@ -131,7 +131,7 @@ typedef struct rpc_msg_t_ {
      * 2nd-level method name element data, used in agt_output_filter
      * to check get or get-config
      */
-    const struct obj_rpc_t_ *rpc_method; 
+    const struct obj_template_t_ *rpc_method; 
 
     /* incoming: AGENT RPC processing state */
     int              rpc_agt_state;        /* rpc_agt_phase_t */

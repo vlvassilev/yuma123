@@ -1821,7 +1821,7 @@ static status_t
 
     /* check if any non-whitespace chars entered */
     if (!*start) {
-	/* no input, use default or old value */
+	/* no input, use default or old value or EMPTY_STRING */
 	if (def) {
 	    /* use default */
 	    res = cli_parse_parm_ex(valset, parm, 
@@ -1829,8 +1829,8 @@ static status_t
 	} else if (oldparm) {
 	    /* no default, try old value */
 	    if (btyp==NCX_BT_EMPTY) {
-		res = cli_parse_parm_ex(valset, parm, 
-					NULL, SCRIPTMODE, baddata);
+		res = cli_parse_parm_ex(valset, parm, NULL,
+					SCRIPTMODE, baddata);
 	    } else {
 		/* use a copy of the last value */
 		newparm = val_clone(oldparm);
@@ -1840,7 +1840,14 @@ static status_t
 		    val_add_child(newparm, valset);
 		}
 	    }
-	} else if (btyp != NCX_BT_EMPTY) {
+	} else if (btyp == NCX_BT_EMPTY) {
+	    res = cli_parse_parm_ex(valset, parm, NULL,
+				    SCRIPTMODE, baddata);
+	} else if (val_simval_ok(obj_get_ctypdef(parm), 
+				 EMPTY_STRING) == NO_ERR) {
+	    res = cli_parse_parm_ex(valset, parm, EMPTY_STRING,
+				    SCRIPTMODE, baddata);
+	} else {
 	    /* data type requires some form of input */
 	    res = ERR_NCX_DATA_MISSING;
 	}  /* else flag should not be set */
@@ -1853,16 +1860,16 @@ static status_t
 	    ; /* skip; do not add the flag */
 	} else if (oldparm) {
 	    /* previous value was set, so add this flag */
-	    res = cli_parse_parm_ex(valset, parm, 
-				    NULL, SCRIPTMODE, baddata);
+	    res = cli_parse_parm_ex(valset, parm, NULL,
+				    SCRIPTMODE, baddata);
 	} else {
 	    /* some value was entered, other than Y or N */
 	    res = ERR_NCX_WRONG_VAL;
 	}
     } else {
 	/* normal case: input for regular data type */
-	res = cli_parse_parm_ex(valset, parm, 
-				start, SCRIPTMODE, baddata);
+	res = cli_parse_parm_ex(valset, parm, start,
+				SCRIPTMODE, baddata);
     }
 
     if (res != NO_ERR) {
@@ -2385,8 +2392,9 @@ static val_value_t *
 	return NULL;
     }
 
-    if (!obj_is_config(parm) || obj_is_abstract(parm)) {
+    if (obj_is_abstract(parm)) {
 	*res = ERR_NCX_NO_ACCESS_MAX;
+	log_error("\nError: no access to abstract objects");
 	return NULL;
     }
 
@@ -2403,6 +2411,7 @@ static val_value_t *
     dummy = val_new_value();
     if (!dummy) {
 	*res = ERR_INTERNAL_MEM;
+	log_error("\nError: malloc failed");
 	return NULL;
     }
     val_init_from_template(dummy, parentobj);
@@ -4589,10 +4598,6 @@ static status_t
 				    obj_get_name(curkey->keyobj));
 	    if (!keyval) {
 		if (curkey->keyobj == config_content->obj) {
-		    /* for debugging the agent, allow a PDU
-		     * that should fail; there is an operation
-		     * attribute in a key leaf
-		     */
 		    keyval = config_content;
 		    val_insert_child(keyval, lastkey, *curtop);
 		    *curtop = config_content;

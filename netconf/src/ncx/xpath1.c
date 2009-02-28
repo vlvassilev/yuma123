@@ -8663,7 +8663,7 @@ xpath_result_t *
 	}
     }
 
-    if (pcb->valueres == NO_ERR && result &&
+    if (val && pcb->valueres == NO_ERR && result &&
 	val->btyp == NCX_BT_LEAFREF) {
 	pcb->valueres = check_instance_result(pcb, result);
     }
@@ -8677,119 +8677,6 @@ xpath_result_t *
     return result;
 
 }  /* xpath1_eval_xmlexpr */
-
-
-#ifdef KEEP_AROUND_UNTIL_LEAFREF_TESTED
-/********************************************************************
-* FUNCTION xpath1_eval_xml_instanceid
-* 
-* Evaluate the expression and get the expression nodeset result
-* Called from inside the XML parser, so the XML reader
-* must be used to get the XML namespace to prefix mappings
-*
-* 
-* INPUTS:
-*    reader == XML reader to use
-*    pcb == initialized XPath parser control block
-*           the xpath_new_pcb(exprstr) function is
-*           all that is needed.  This function will
-*           vall xpath1_parse_expr if it has not
-*           already been called.
-*    val == start context node for value of current()
-*    docroot == ptr to cfg->root or top of rpc/rpc-replay/notif tree
-*    logerrors == TRUE if log_error and ncx_print_errormsg
-*                  should be used to log XPath errors and warnings
-*                 FALSE if internal error info should be recorded
-*                 in the xpath_result_t struct instead
-*                !!! use FALSE unless DEBUG mode !!!
-*     res == address of return status
-*
-* OUTPUTS:
-*   *res is set to the return status
-*
-* RETURNS:
-*   malloced result struct with expr result
-*   NULL if no result produced (see *res for reason)
-*********************************************************************/
-xpath_result_t *
-    xpath1_eval_xml_instanceid (xmlTextReaderPtr reader,
-				xpath_pcb_t *pcb,
-				val_value_t *val,
-				val_value_t *docroot,
-				boolean logerrors,
-				status_t *res)
-{
-    xpath_result_t *result;
-    status_t        myres;
-
-#ifdef DEBUG
-    if (!pcb || !res) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    *res = NO_ERR;
-    if (pcb->tkc) {
-	tk_reset_chain(pcb->tkc);
-    } else {
-	pcb->tkc = tk_tokenize_xpath_string(NULL, pcb->exprstr, 
-					    0, 0, res);
-	if (!pcb->tkc || *res != NO_ERR) {
-	    if (logerrors) {
-		log_error("\nError: Invalid XPath string '%s'",
-			  pcb->exprstr);
-		ncx_print_errormsg(NULL, NULL, *res);
-	    }
-	    return NULL;
-	}
-    }
-
-    pcb->obj = NULL;
-    pcb->mod = NULL;
-    pcb->val = val;
-    pcb->val_docroot = docroot;
-    pcb->logerrors = logerrors;
-    pcb->reader = reader;
-
-    if (val) {
-	pcb->context.node.valptr = val;
-    } else {
-	pcb->context.node.valptr = docroot;
-    }
-
-    pcb->flags |= (XP_FL_USEROOT | XP_FL_INSTANCEID);
-
-    result = parse_location_path(pcb, &pcb->valueres);
-
-    if (pcb->valueres == NO_ERR && pcb->tkc->cur) {
-	myres = TK_ADV(pcb->tkc);
-	if (myres == NO_ERR) {
-	    pcb->valueres = ERR_NCX_INVALID_INSTANCEID;	    
-	    if (pcb->logerrors) {
-		log_error("\nError: extra tokens in "
-			  "instance-identifier '%s'",
-			  pcb->exprstr);
-		ncx_print_errormsg(pcb->tkc, pcb->mod, 
-				   pcb->valueres);
-	    }
-	}
-    }
-
-    if (pcb->valueres == NO_ERR && result) {
-	pcb->valueres = check_instance_result(pcb, result);
-    }
-
-    *res = pcb->valueres;
-
-    if (LOGDEBUG3 && result) {
-	dump_result(pcb, result, "eval_xml_instanceid");
-    }
-
-    return result;
-
-}  /* xpath1_eval_xml_instanceid */
-#endif
 
 
 /********************************************************************

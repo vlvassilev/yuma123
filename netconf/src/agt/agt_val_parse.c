@@ -1695,7 +1695,7 @@ static status_t
     const ncx_errinfo_t *errinfo;
     xml_node_t           valnode, endnode;
     status_t             res, res2, res3;
-    boolean              errdone;
+    boolean              errdone, stopnow;
 
     /* init local vars */
     xml_init_node(&valnode);
@@ -1706,15 +1706,14 @@ static status_t
     res2 = NO_ERR;
     res3 = NO_ERR;
     errinfo = NULL;
+    stopnow = FALSE;
 
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
-    if (res == NO_ERR) {
-	res = xml_node_match(startnode, obj_get_nsid(obj), 
-			     NULL, XML_NT_START); 
-    }
+    res = xml_node_match(startnode, obj_get_nsid(obj), 
+			 NULL, XML_NT_START); 
     if (res == NO_ERR) {
 	/* get the next node which should be a string node */
 	res = get_xml_node(scb, msg, &valnode, TRUE);
@@ -1736,6 +1735,7 @@ static status_t
 	case XML_NT_START:
 	    res = ERR_NCX_WRONG_NODETYP_CPX;
 	    errnode = &valnode;
+	    stopnow = TRUE;
 	    break;
 	case XML_NT_STRING:
 	    /* get the non-whitespace string here */
@@ -1745,27 +1745,55 @@ static status_t
 		badval = valnode.simval;
 	    }
 	    break;
+	case XML_NT_END:
+	    stopnow = TRUE;
+	    res = val_union_ok_errinfo(obj_get_ctypdef(obj), 
+				       EMPTY_STRING, 
+				       retval, &errinfo);
+	    if (res != NO_ERR) {
+		badval = EMPTY_STRING;
+	    }
+	    break;
 	default:
+	    stopnow = TRUE;
+	    SET_ERROR(ERR_INTERNAL_VAL);
 	    res = ERR_NCX_WRONG_NODETYP;
 	    errnode = &valnode;
 	}
 
-	/* get the matching end node for startnode */
-	res2 = get_xml_node(scb, msg, &endnode, TRUE);
-	if (res2 == NO_ERR) {
-#ifdef AGT_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_union: expecting end for %s", 
-		       startnode->qname);
-	    if (LOGDEBUG3) {
-		xml_dump_node(&endnode);
-	    }
-#endif
-	    res2 = xml_endnode_match(startnode, &endnode);
-	    if (res2 != NO_ERR) {
-		errnode = &endnode;
-	    }
+	if (stopnow) {
+	    res2 = val_set_simval(retval, 
+				  retval->typdef,
+				  retval->nsid,
+				  retval->name,
+				  EMPTY_STRING);
 	} else {
-	    errdone = TRUE;
+	    res = val_set_simval(retval, 
+				 retval->typdef,
+				 retval->nsid,
+				 retval->name,
+				 valnode.simval);
+	    if (res != NO_ERR) {
+		errnode = &valnode;
+	    }
+
+	    /* get the matching end node for startnode */
+	    res2 = get_xml_node(scb, msg, &endnode, TRUE);
+	    if (res2 == NO_ERR) {
+#ifdef AGT_VAL_PARSE_DEBUG
+		log_debug3("\nparse_union: expecting end for %s", 
+			   startnode->qname);
+		if (LOGDEBUG3) {
+		    xml_dump_node(&endnode);
+		}
+#endif
+		res2 = xml_endnode_match(startnode, &endnode);
+		if (res2 != NO_ERR) {
+		    errnode = &endnode;
+		}
+	    } else {
+		errdone = TRUE;
+	    }
 	}
     }
 

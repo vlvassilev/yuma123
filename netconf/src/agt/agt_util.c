@@ -955,8 +955,8 @@ status_t
     boolean          getop;
     status_t         res;
 
-    getop = !xml_strcmp(msg->rpc_method->name, NCX_EL_GET);
-
+    getop = !xml_strcmp(obj_get_name(msg->rpc_method), 
+			NCX_EL_GET);
     if (getop) {
 	source = cfg_get_config_id(NCX_CFGID_RUNNING);
     } else {
@@ -1002,6 +1002,60 @@ status_t
     return res;
 		
 } /* agt_output_filter */
+
+
+/********************************************************************
+* FUNCTION agt_output_schema
+*
+* output the specified YANG file for the get-schema operation
+*
+* INPUTS:
+*    see rpc/agt_rpc.h   (agt_rpc_data_cb_t)
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    agt_output_schema (ses_cb_t *scb,
+		       rpc_msg_t *msg,
+		       int32 indent)
+{
+    ncx_module_t    *findmod;
+    FILE            *fil;
+    char            *buffer;
+    boolean          done;
+    status_t         res;
+
+    buffer = m__getMem(NCX_MAX_LINELEN+1);
+    if (!buffer) {
+	return ERR_INTERNAL_MEM;
+    }
+    memset(buffer, 0x0, NCX_MAX_LINELEN+1);
+
+    findmod = (ncx_module_t *)msg->rpc_user1;
+    /*** ignoring the format for now; assume YANG ***/
+
+    res = NO_ERR;
+    fil = fopen((const char *)findmod->source, "r");
+    if (fil) {
+	ses_putstr(scb, (const xmlChar *)"\n");
+	done = FALSE;
+	while (!done) {
+	    if (fgets(buffer, NCX_MAX_LINELEN, fil)) {
+		ses_putcstr(scb, (const xmlChar *)buffer, indent);
+	    } else {
+		fclose(fil);
+		done = TRUE;
+	    }
+	}
+    } else {
+	res = ERR_FIL_OPEN;
+    }
+
+    m__free(buffer);
+
+    return res;
+		
+} /* agt_output_schema */
 
 
 /********************************************************************

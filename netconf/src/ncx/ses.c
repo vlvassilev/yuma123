@@ -368,7 +368,6 @@ ses_cb_t *
     scb->withmeta = NCX_DEF_WITHMETA;
     scb->indent = NCX_DEF_INDENT;
     scb->xmladvance = TRUE;
-    totals.inSessions++;
     return scb;
 
 }  /* ses_new_scb */
@@ -1222,6 +1221,39 @@ ses_total_stats_t *
 {
     return &totals;
 } /* ses_get_total_stats */
+
+
+
+/********************************************************************
+* FUNCTION ses_get_transport_name
+* 
+*  Get the name of the transport for a given enum value
+*
+* INPUTS:
+*   transport == ses_transport_t enum value
+
+* RETURNS:
+*   pointer to the string value for the specified enum
+*********************************************************************/
+const xmlChar *
+    ses_get_transport_name (ses_transport_t transport)
+{
+    /* needs to match netconf-state DM values */
+    switch (transport) {
+    case SES_TRANSPORT_NONE:
+	return (const xmlChar *)"none";
+    case SES_TRANSPORT_SSH:
+	return (const xmlChar *)"SSH";
+    case SES_TRANSPORT_BEEP:
+	return (const xmlChar *)"SSL";
+    case SES_TRANSPORT_SOAP:
+	return (const xmlChar *)"HTTPS";
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return (const xmlChar *)"none";
+    }
+
+} /* ses_get_transport_name */
 
 
 /* END file ses.c */

@@ -910,11 +910,7 @@ void
 
     useval = (v_val) ? v_val : val;
 
-    if (useval->btyp == NCX_BT_UNION) {
-	btyp = useval->unbtyp;
-    } else {
-	btyp = useval->btyp;
-    }
+    btyp = useval->btyp;
 
     switch (btyp) {
     case NCX_BT_ENUM:
@@ -1081,9 +1077,6 @@ void
 	     chval != NULL;
 	     chval = val_get_next_child(chval)) {
 
-#if 0
-	    xml_wr_full_check_val(scb, msg, chval, indent, testfn);
-#else
 	    /* check the user filter callback function */
 	    if (testfn) {
 		if (!(*testfn)(msg->withdef, NCX_NT_VAL, chval)) {
@@ -1178,8 +1171,6 @@ void
 	    if (v_chval) {
 		val_free_value(v_chval);
 	    }
-#endif
-
 	} 
 	break;
     default:
@@ -1255,15 +1246,6 @@ void
     }
 #endif
 
-#if 0
-    /* check the user filter callback function */
-    if (testfn) {
-	if (!(*testfn)(msg->withdef, NCX_NT_VAL, val)) {
-	    return;   /* skip this entry */
-	}
-    }
-#endif
-
     if (val_is_virtual(val)) {
 	vir = val_get_virtual_value(scb, val, &res);
 	if (!vir) {
@@ -1274,6 +1256,16 @@ void
     } else {
 	vir = NULL;
 	out = val;
+    }
+
+    /* check the user filter callback function */
+    if (testfn) {
+	if (!(*testfn)(msg->withdef, NCX_NT_VAL, out)) {
+	    if (vir) {
+		val_free_value(vir);
+	    }
+	    return;   /* skip this entry */
+	}
     }
 
     /* check if this is a false (not present) flag */

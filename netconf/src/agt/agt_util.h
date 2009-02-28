@@ -146,8 +146,15 @@ extern boolean
 		    ncx_node_t nodetyp,
 		    const void *node);
 
+/* generate the data that matched the subtree or XPath filter */
 extern status_t
     agt_output_filter (ses_cb_t *scb,
+		       rpc_msg_t *msg,
+		       int32 indent);
+
+/* generate the YANG file contents for the get-schema operation */
+extern status_t
+    agt_output_schema (ses_cb_t *scb,
 		       rpc_msg_t *msg,
 		       int32 indent);
 

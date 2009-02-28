@@ -284,10 +284,6 @@ typedef struct val_value_t_ {
     struct val_index_t_ *index;   /* back-ptr/flag in use as index */
     dlq_hdr_t       indexQ;    /* Q of val_index_t or ncx_filptr_t */
 
-    /* these fields are used for NCX_BT_UNION */
-    typ_template_t *untyp;               /* actual union node type */
-    ncx_btype_t     unbtyp;              /* union member base type */
-
     /* this field is used for NCX_BT_CHOICE 
      * If set, the object path for this node is really:
      *    $this --> casobj --> casobj.parent --> $this.parent
@@ -914,19 +910,9 @@ extern boolean
     val_is_virtual (const val_value_t *val);
 
 extern val_value_t *
-    val_get_virtual_value (const void *scb,
+    val_get_virtual_value (void *session,
 			   val_value_t *val,
 			   status_t *res);
-
-extern void
-    val_setup_virtual_retval (val_value_t  *virval,
-			      val_value_t *realval);
-
-extern val_value_t *
-    val_new_virtual_chval (const xmlChar *name,
-			   xmlns_id_t nsid,
-			   typ_def_t *typdef,
-			   val_value_t *parent);
 
 extern boolean
     val_is_default (const val_value_t *val);

@@ -22,6 +22,14 @@ date             init     comment
 
 #include <xmlstring.h>
 
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
+#ifndef _H_ses
+#include "ses.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -56,5 +64,14 @@ extern status_t
 
 extern void 
     agt_state_cleanup (void);
+
+extern status_t
+    agt_state_add_session (ses_cb_t *scb);
+
+extern void
+    agt_state_remove_session (ses_id_t sid);
+
+extern status_t
+    agt_state_add_module_schema (ncx_module_t *mod);
 
 #endif            /* _H_agt_state */

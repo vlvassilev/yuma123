@@ -1188,20 +1188,20 @@ static status_t
     const ncx_errinfo_t *errinfo;
     xml_node_t           valnode, endnode;
     status_t             res, res2;
+    boolean              stopnow;
 
     /* init local vars */
     xml_init_node(&valnode);
     xml_init_node(&endnode);
     res2 = NO_ERR;
     errinfo = NULL;
+    stopnow = FALSE;
 
     val_init_from_template(retval, obj);
 
     /* make sure the startnode is correct */
-    if (res == NO_ERR) {
-	res = xml_node_match(startnode, obj_get_nsid(obj), 
-			     NULL, XML_NT_START); 
-    }
+    res = xml_node_match(startnode, obj_get_nsid(obj), 
+			 NULL, XML_NT_START); 
     if (res == NO_ERR) {
 	/* get the next node which should be a string node */
 	res = get_xml_node(scb, &valnode);
@@ -1219,27 +1219,49 @@ static status_t
 	switch (valnode.nodetyp) {
 	case XML_NT_START:
 	    res = ERR_NCX_WRONG_NODETYP_CPX;
+	    stopnow = TRUE;
 	    break;
 	case XML_NT_STRING:
 	    /* get the non-whitespace string here */
 	    res = val_union_ok_errinfo(obj_get_ctypdef(obj), 
 				       valnode.simval, retval, &errinfo);
 	    break;
+	case XML_NT_END:
+	    stopnow = TRUE;
+	    res = val_union_ok_errinfo(obj_get_ctypdef(obj), 
+				       EMPTY_STRING, retval, &errinfo);
+	    break;
 	default:
+	    stopnow = TRUE;
+	    SET_ERROR(ERR_INTERNAL_VAL);
 	    res = ERR_NCX_WRONG_NODETYP;
 	}
 
-	/* get the matching end node for startnode */
-	res2 = get_xml_node(scb, &endnode);
-	if (res2 == NO_ERR) {
+	if (stopnow) {
+	    res2 = val_set_simval(retval, 
+				  retval->typdef,
+				  retval->nsid,
+				  retval->name,
+				  EMPTY_STRING);
+	} else {
+	    res = val_set_simval(retval, 
+				 retval->typdef,
+				 retval->nsid,
+				 retval->name,
+				 valnode.simval);
+
+	    /* get the matching end node for startnode */
+	    res2 = get_xml_node(scb, &endnode);
+	    if (res2 == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_union: expecting end for %s", 
-		       startnode->qname);
-	    if (LOGDEBUG3) {
-		xml_dump_node(&endnode);
-	    }
+		log_debug3("\nparse_union: expecting end for %s", 
+			   startnode->qname);
+		if (LOGDEBUG3) {
+		    xml_dump_node(&endnode);
+		}
 #endif
-	    res2 = xml_endnode_match(startnode, &endnode);
+		res2 = xml_endnode_match(startnode, &endnode);
+	    }
 	}
     }
 
@@ -1249,6 +1271,7 @@ static status_t
 
     xml_clean_node(&valnode);
     xml_clean_node(&endnode);
+
     return res;
 
 } /* parse_union */

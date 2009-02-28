@@ -231,13 +231,19 @@ static void
 	/* no other result nodes are going to be
 	 * present which are descendants of this node
 	 * since it was explicitly set in the result
+	 *
+	 * special check to make sure not duplicating
+	 * a key leaf; cannot use the obj_is_key()
+	 * function because the object is a generic string
 	 */
-	if (getop) {
-	    xml_wr_full_val(scb, &msg->mhdr, 
-			    curval, indent);
-	} else {
-	    xml_wr_full_check_val(scb, &msg->mhdr, curval, 
-				  indent, agt_check_config);
+	if (!curval->index) {
+	    if (getop) {
+		xml_wr_full_val(scb, &msg->mhdr, 
+				curval, indent);
+	    } else {
+		xml_wr_full_check_val(scb, &msg->mhdr, curval, 
+				      indent, agt_check_config);
+	    }
 	}
 	return;
     }

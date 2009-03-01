@@ -1412,23 +1412,17 @@ static void *
 		      prefix);
 	}
     } else {
-	if (default_module) {
+	def = try_parse_def(YANGCLI_MOD, defname, dtyp);
+
+	if (!def && default_module) {
 	    def = try_parse_def(default_module, defname, dtyp);
 	}
 	if (!def && (!default_module ||
-		     xml_strcmp(default_module, 
-				NC_MODULE))) {
+		     xml_strcmp(default_module, NC_MODULE))) {
 
 	    def = try_parse_def(NC_MODULE, defname, dtyp);
 	}
 
-	/* if not found, try module 'ncx' if not already done */
-	if (!def && (!default_module || 
-		     xml_strcmp(default_module, 
-				YANGCLI_MOD))) {
-	    def = try_parse_def(NC_MODULE, defname, dtyp);
-	}
-	    
 	/* if not found, try any module */
 	if (!def) {
 	    for (mod = ncx_get_first_module();
@@ -7602,11 +7596,18 @@ static boolean
 
     mscb = (mgr_scb_t *)scb->mgrcb;
 
-    deletecount = mgr_rpc_timeout_requestQ(&mscb->reqQ);
-    if (deletecount) {
-	log_error("\nError: request to agent timed out");
+    if (mscb) {
+	deletecount = mgr_rpc_timeout_requestQ(&mscb->reqQ);
+	if (deletecount) {
+	    log_error("\nError: request to agent timed out");
+	}
+	return (deletecount) ? TRUE : FALSE;
     }
-    return (deletecount) ? TRUE : FALSE;
+
+    /* else mgr_shutdown could have been issued via control-C
+     * and the session control block has been deleted
+     */
+    return FALSE;
 
 }  /* message_timed_out */
 

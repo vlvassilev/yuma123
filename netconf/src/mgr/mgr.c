@@ -316,6 +316,7 @@ void
 void
     mgr_request_shutdown (void)
 {
+    log_debug3("\nmgr: shutdown requested\n");
     mgr_shutdown = TRUE;
 
 }  /* mgr_request_shutdown */

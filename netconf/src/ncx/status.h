@@ -216,7 +216,7 @@ typedef enum status_t_
     ERR_NCX_UNKNOWN_OBJECT,             /* 293 */
     ERR_NCX_EXTRA_PARMINST,             /* 294 */
     ERR_NCX_EXTRA_CHOICE,               /* 295 */
-    ERR_NCX_MISSING_CHOICE,             /* 296 */
+    ERR_NCX_MISSING_CHOICE,             /* 296 */   /* 13.n */
     ERR_NCX_CFG_STATE,                  /* 297 */
     ERR_NCX_UNKNOWN_APP,                /* 298 */
     ERR_NCX_UNKNOWN_TYPE,               /* 299 */
@@ -270,7 +270,7 @@ typedef enum status_t_
     ERR_NCX_INVALID_DEV_STMT,           /* 347 */
     ERR_NCX_INVALID_XPATH_EXPR,         /* 348 */
     ERR_NCX_INVALID_INSTANCEID,         /* 349 */
-    ERR_NCX_MISSING_INSTANCE,           /* 350 */
+    ERR_NCX_MISSING_INSTANCE,           /* 350 */   /* 13.n */
     ERR_NCX_UNEXPECTED_INSERT_ATTRS,    /* 351 */
     ERR_NCX_INVALID_UNIQUE_NODE,        /* 352 */
     ERR_NCX_INVALID_DUP_IMPORT,         /* 353 */

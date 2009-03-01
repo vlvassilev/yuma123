@@ -237,7 +237,7 @@ static rpc_err_t
 	return (isel) ? RPC_ERR_BAD_ELEMENT
 	    : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_NCX_MISSING_PARM:
-	return RPC_ERR_MISSING_ELEMENT;
+	return RPC_ERR_DATA_MISSING;
     case ERR_NCX_EXTRA_PARM:
 	return RPC_ERR_UNKNOWN_ELEMENT;
     case ERR_NCX_EMPTY_VAL:
@@ -368,8 +368,7 @@ static rpc_err_t
 	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT 
 	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_MISSING_CHOICE:
-	return (isel) ? RPC_ERR_MISSING_ELEMENT 
-	    : RPC_ERR_MISSING_ATTRIBUTE;
+	return RPC_ERR_DATA_MISSING;
     case ERR_NCX_CFG_STATE:
 	return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_UNKNOWN_APP:
@@ -390,7 +389,7 @@ static rpc_err_t
     case ERR_NCX_WRONG_INSTANCE_TYPE:
 	return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_MISSING_INDEX:
-	return RPC_ERR_OPERATION_FAILED;
+	return RPC_ERR_DATA_MISSING;
     case ERR_NCX_CFG_NOT_FOUND:
 	return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_EXTRA_ATTR:
@@ -398,7 +397,7 @@ static rpc_err_t
     case ERR_NCX_MISSING_ATTR:
 	return RPC_ERR_MISSING_ATTRIBUTE;
     case ERR_NCX_MISSING_VAL_INST:
-	return RPC_ERR_MISSING_ELEMENT;
+	return RPC_ERR_DATA_MISSING;
     case ERR_NCX_EXTRA_VAL_INST:
 	return RPC_ERR_UNKNOWN_ELEMENT;
     case ERR_NCX_NOT_WRITABLE:
@@ -466,8 +465,9 @@ static rpc_err_t
 	return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_XPATH_EXPR:
     case ERR_NCX_INVALID_INSTANCEID:
-    case ERR_NCX_MISSING_INSTANCE:
 	return RPC_ERR_INVALID_VALUE;
+    case ERR_NCX_MISSING_INSTANCE:  /* 13.n */
+	return RPC_ERR_DATA_MISSING;
     case ERR_NCX_UNEXPECTED_INSERT_ATTRS:
 	return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_UNIQUE_NODE:
@@ -1015,10 +1015,16 @@ rpc_err_rec_t *
 	    apptag = (const xmlChar *)"data-restriction-violation";
 	    break;
 	case ERR_NCX_MUST_TEST_FAILED:
-	    apptag = (const xmlChar *)"must-violation";  /* 14.4 */
+	    apptag = (const xmlChar *)"must-violation";  /* 13.4 */
+	    break;
+	case ERR_NCX_MISSING_INSTANCE:
+	    apptag = (const xmlChar *)"instance-required"; /* 13.n */
 	    break;
 	case ERR_NCX_INSERT_MISSING_INSTANCE:
-	    apptag = (const xmlChar *)"missing-instance"; /* 14.5 */
+	    apptag = (const xmlChar *)"missing-instance"; /* 13.5 */
+	    break;
+	case ERR_NCX_MISSING_CHOICE:
+	    apptag = (const xmlChar *)"missing-choice"; /* 13.n */
 	    break;
 	default:
 	    apptag = NULL;

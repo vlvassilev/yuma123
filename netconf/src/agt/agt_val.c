@@ -2512,7 +2512,7 @@ static status_t
 	    res = ERR_NCX_MISSING_CHOICE;
 	    if (msg) {
 		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_OBJ, choicobj, 
+				 NULL, NCX_NT_VAL, val, 
 				 NCX_NT_VAL, val);
 	    }
 	}

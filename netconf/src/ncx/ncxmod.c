@@ -1358,11 +1358,18 @@ static status_t
 	    res = load_module(modname, NULL, 
 			      pcb, ptyp, 
 			      FALSE, &testmod);
-	    if (res == NO_ERR && testmod &&
-		yang_compare_revision_dates(revision,
-					    testmod->version)) {
-		/* error should already be reported */
-		res = ERR_NCX_WRONG_VERSION;
+	    if (res == NO_ERR && testmod) {
+		if (!testmod->version) {
+		    /* asked for a spcific version; 
+		     * got a generic version instead
+		     * rejected!; return error
+		     */
+		    res = ERR_NCX_WRONG_VERSION;
+		} else if (yang_compare_revision_dates(revision,
+						       testmod->version)) {
+		    /* error should already be reported */
+		    res = ERR_NCX_WRONG_VERSION;
+		}
 	    }
 	} else {
 	    /* already tried no revision date and it failed
@@ -1591,6 +1598,8 @@ status_t
 *                == FALSE if processing one module in yangdump
 *   with_submods == TRUE if YANG_PT_TOP mode should skip submodules
 *                == FALSE if top-level mode skip process sub-modules 
+*   cookedmode == TRUE if producing cooked output
+*                 FALSE if producing raw output
 *   res == address of return status
 *
 * OUTPUTS:
@@ -1604,6 +1613,7 @@ yang_pcb_t *
 			    const xmlChar *revision,
 			    boolean subtree_mode,
 			    boolean with_submods,
+			    boolean cookedmode,
 			    status_t *res)
 {
     yang_pcb_t     *pcb;
@@ -1622,6 +1632,7 @@ yang_pcb_t *
 	pcb->revision = revision;
 	pcb->subtree_mode = subtree_mode;
 	pcb->with_submods = with_submods;
+	pcb->cookedmode = cookedmode;
 	*res = try_load_module(pcb, YANG_PT_TOP,
 			       modname, revision, NULL);
     }

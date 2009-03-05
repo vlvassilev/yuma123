@@ -111,6 +111,7 @@ date	     init     comment
 #define YANG_K_REPLACE           (const xmlChar *)"replace"
 #define YANG_K_REQUIRE_INSTANCE  (const xmlChar *)"require-instance"
 #define YANG_K_REVISION          (const xmlChar *)"revision"
+#define YANG_K_REVISION_DATE     (const xmlChar *)"revision-date"
 #define YANG_K_RPC               (const xmlChar *)"rpc"
 #define YANG_K_STATUS            (const xmlChar *)"status"
 #define YANG_K_SUBMODULE         (const xmlChar *)"submodule"

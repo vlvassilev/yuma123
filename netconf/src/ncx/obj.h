@@ -424,6 +424,7 @@ typedef struct obj_template_t_ {
     dlq_hdr_t               metadataQ;       /* Q of obj_metadata_t */
     dlq_hdr_t               appinfoQ;         /* Q of ncx_appinfo_t */
     dlq_hdr_t               iffeatureQ;     /* Q of ncx_iffeature_t */
+    dlq_hdr_t               deviateQ;         /* Q of obj_deviate_t */
       /* cbset is agt_rpc_cbset_t for RPC or agt_cb_fnset_t for OBJ */
     void                   *cbset;   
 
@@ -471,8 +472,6 @@ typedef enum obj_deviate_arg_t_ {
 typedef struct obj_deviate_t_ {
     dlq_hdr_t          qhdr;
 
-
-
     /* the token for each sub-clause is saved because
      * when the deviation-stmt is parsed, the target is not
      * known yet so picking the correct variant
@@ -484,7 +483,6 @@ typedef struct obj_deviate_t_ {
     tk_token_t       *tk;
     uint32            linenum;
     boolean           empty;
-    status_t          res;
     obj_deviate_arg_t arg;
     tk_token_t       *arg_tk;
     typ_def_t        *typdef;
@@ -891,9 +889,6 @@ extern boolean
     obj_get_config_flag2 (const obj_template_t *obj,
 			  boolean *setflag);
 
-extern void
-    obj_set_config_flag (obj_template_t *obj);
-
 extern ncx_access_t
     obj_get_max_access (const obj_template_t *obj);
 
@@ -970,6 +965,9 @@ extern obj_template_t *
 
 extern const obj_template_t *
     obj_get_cparent (const obj_template_t  *obj);
+
+extern boolean
+    obj_is_leafy (const obj_template_t  *obj);
 
 extern boolean
     obj_is_mandatory (const obj_template_t *obj);

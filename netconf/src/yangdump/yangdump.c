@@ -1205,7 +1205,10 @@ static status_t
     pcb = ncxmod_load_module_xsd(modname,
 				 revision,
 				 cp->subtree ? TRUE : FALSE,
-				 cp->unified, &res);
+				 cp->unified, 
+				 strcmp(cp->objview, OBJVIEW_COOKED) 
+				 ? FALSE : TRUE,
+				 &res);
     if (res == ERR_NCX_SKIPPED) {
 	if (pcb) {
 	    yang_free_pcb(pcb);

@@ -186,6 +186,7 @@ extern yang_pcb_t *
 			    const xmlChar *revision,
 			    boolean subtree_mode,
 			    boolean with_submods,
+			    boolean cookedmode,
 			    status_t  *res);
 
 extern yang_pcb_t *

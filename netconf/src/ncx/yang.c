@@ -2443,7 +2443,7 @@ void
 	/* check if the import is newer than this file */
 	impmod = ncx_find_module(testimp->module,
 				 testimp->revision);
-	if (impmod) {
+	if (impmod && impmod->version && mod->version) {
 	    ret = yang_compare_revision_dates(impmod->version,
 					      mod->version);
 	    if (ret > 0) {
@@ -2676,6 +2676,12 @@ yang_pcb_t *
      * mode to FALSE to indicate do not care about module display
      */
     pcb->stmtmode = ncx_save_descr(); 
+
+    /* only ncxmod_load_module_xsd will set this to FALSE
+     * T: merge deviations into cooked objects
+     * F: leave deviations out of cooked objects
+     */
+    pcb->cookedmode = TRUE;
     return pcb;
 
 } /* yang_new_pcb */
@@ -3319,12 +3325,11 @@ int32
 				 const xmlChar *revstring2)
 {
 
-    if (!revstring1 && !revstring2) {
+    /* if either revision is NULL then call it a match
+     * else actually compare the revision date strings 
+     */
+    if (!revstring1 || !revstring2) {
 	return 0;
-    } else if (!revstring1) {
-	return -1;
-    } else if (!revstring2) {
-	return 1;
     } else {
 	return xml_strcmp(revstring1, revstring2);
     }

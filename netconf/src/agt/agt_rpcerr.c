@@ -589,12 +589,12 @@ static status_t
 		   const void *errparm3,
 		   const void *errparm4)
 {
-    xmlns_id_t         ncid, ncxid, badid;
-    const xmlChar     *badel;
-    ses_id_t           sesid;
-    cfg_source_t       locksrc;
-    rpc_err_info_t    *errinfo;
-    boolean            attrerr;
+    rpc_err_info_t       *errinfo;
+    const xmlChar        *badel;
+    ses_id_t              sesid;
+    cfg_source_t          locksrc;
+    boolean               attrerr;
+    xmlns_id_t            ncid, ncxid, badid;
 
     /* setup local vars */
     ncid = xmlns_nc_id();
@@ -752,6 +752,30 @@ static status_t
 	dlq_enque(errinfo, &err->error_info);
 
 	break;
+    case RPC_ERR_DATA_MISSING:
+	if (errparm2) {
+	    /* expecting the obj_template_t of the missing choice */
+	    badel = (const xmlChar *)errparm2;
+	    
+	    errinfo = rpc_err_new_info();
+	    if (!errinfo) {
+		return ERR_INTERNAL_MEM;
+	    }
+	    errinfo->dval = xml_strdup(badel);
+	    if (!errinfo->dval) {
+		rpc_err_free_info(errinfo);
+		return ERR_INTERNAL_MEM;
+	    }
+	    errinfo->name_nsid = xmlns_yang_id();
+	    errinfo->name = (const xmlChar *)"missing-choice";
+	    errinfo->val_btype = NCX_BT_STRING;
+	    errinfo->val_nsid = 0;
+	    errinfo->v.strval = errinfo->dval;
+	    dlq_enque(errinfo, &err->error_info);
+	} else {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	break;
     default:
 	;   /* all other rpc-err_t enums handled elsewhere */
     } 
@@ -873,6 +897,7 @@ rpc_err_rec_t *
     const obj_template_t     *parm, *in, *obj;
     const cfg_template_t     *cfg;
     const xmlns_qname_t      *qname;
+    const val_value_t        *valparm;
     xmlChar                  *error_msg;
     const xmlChar            *badval, *badns, *msg, *apptag;
     const void               *err1, *err2, *err3, *err4;
@@ -895,16 +920,26 @@ rpc_err_rec_t *
 	if (!error_parm) {
 	    SET_ERROR(ERR_INTERNAL_PTR);
 	} else {
-	    if (parmtyp == NCX_NT_OBJ) {
+	    switch (parmtyp) {
+	    case NCX_NT_OBJ:
 		parm = (const obj_template_t *)error_parm;
 		if (parm) {
 		    nsid = obj_get_nsid(parm);
 		    err2 = (const void *)obj_get_name(parm);
 		}
-	    } else if (parmtyp == NCX_NT_STRING) {
+		break;
+	    case NCX_NT_VAL:
+		valparm = (const val_value_t *)error_parm;
+		if (valparm) {
+		    nsid = val_get_nsid(valparm);
+		    err2 = (const void *)valparm->name;
+		}
+		break;
+	    case NCX_NT_STRING:
 		err1 = (const void *)0;
 		err2 = (const void *)error_parm;
-	    } else {
+		break;
+	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 	}
@@ -1065,6 +1100,11 @@ rpc_err_rec_t *
     case RPC_ERR_MISSING_ATTRIBUTE:
     case RPC_ERR_BAD_ATTRIBUTE:
     case RPC_ERR_UNKNOWN_ATTRIBUTE:
+	break;
+    case RPC_ERR_DATA_MISSING:
+	if (interr != ERR_NCX_MISSING_CHOICE) {
+	    return err;
+	}
 	break;
     default:
 	if (error_parm && parmtyp==NCX_NT_STRING) {

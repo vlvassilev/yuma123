@@ -155,6 +155,7 @@ static obj_template_t *
     dlq_createSQue(&obj->metadataQ);
     dlq_createSQue(&obj->appinfoQ);
     dlq_createSQue(&obj->iffeatureQ);
+    dlq_createSQue(&obj->deviateQ);
     return obj;
 
 }  /* new_blank_template */
@@ -2373,10 +2374,7 @@ static boolean
 
     fnresult = TRUE;
     if (textmode) {
-	if ((obj->objtype == OBJ_TYP_LEAF ||
-	     obj->objtype == OBJ_TYP_LEAF_LIST) &&
-	    obj_get_basetype(obj) != NCX_BT_ANY) {
-
+	if (obj_is_leafy(obj)) {
 	    fnresult = (*walkerfn)(obj, cookie1, cookie2);
 	    *fncalled = TRUE;
 	}
@@ -2934,6 +2932,7 @@ obj_template_t *
     dlq_createSQue(&obj->metadataQ);
     dlq_createSQue(&obj->appinfoQ);
     dlq_createSQue(&obj->iffeatureQ);
+    dlq_createSQue(&obj->deviateQ);
     
     switch (objtype) {
     case OBJ_TYP_CONTAINER:
@@ -3045,12 +3044,20 @@ obj_template_t *
 void 
     obj_free_template (obj_template_t *obj)
 {
+    obj_deviate_t  *deviate;
+
 #ifdef DEBUG
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
 	return;
     }
 #endif
+
+    while (!dlq_empty(&obj->deviateQ)) {
+	deviate = (obj_deviate_t *)
+	    dlq_deque(&obj->deviateQ);
+	obj_free_deviate(deviate);
+    }
 
     clean_metadataQ(&obj->metadataQ);
     ncx_clean_appinfoQ(&obj->appinfoQ);
@@ -6411,54 +6418,6 @@ boolean
 
 
 /********************************************************************
-* FUNCTION obj_set_config_flag
-*
-* Set the config flag for an obj_template_t 
-*
-* INPUTS:
-*   obj == obj_template to set
-*
-*********************************************************************/
-void
-    obj_set_config_flag (obj_template_t *obj)
-{
-    boolean parentconf;
-
-#ifdef DEBUG
-    if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    parentconf = (obj->parent) ? obj_get_config_flag(obj->parent) : TRUE;
-
-    switch (obj->objtype) {
-    case OBJ_TYP_CONTAINER:
-    case OBJ_TYP_LEAF:
-    case OBJ_TYP_LEAF_LIST:
-    case OBJ_TYP_LIST:
-    case OBJ_TYP_CHOICE:
-    case OBJ_TYP_REFINE:
-	obj->flags |= OBJ_FL_CONFIG;
-	break;
-    case OBJ_TYP_CASE:
-	break;
-    case OBJ_TYP_USES:
-    case OBJ_TYP_AUGMENT:
-    case OBJ_TYP_RPC:
-    case OBJ_TYP_RPCIO:
-    case OBJ_TYP_NOTIF:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-}   /* obj_set_config_flag */
-
-
-/********************************************************************
 * FUNCTION obj_get_max_access
 *
 * Get the NCX max-access enum for an obj_template_t 
@@ -6977,6 +6936,8 @@ typ_def_t *
 }  /* obj_get_typdef */
 
 
+
+
 /********************************************************************
 * FUNCTION obj_get_ctypdef
 * 
@@ -7431,6 +7392,35 @@ const obj_template_t *
     return obj->parent;
 
 }  /* obj_get_cparent */
+
+
+/********************************************************************
+* FUNCTION obj_is_leafy
+* 
+* Check if object is a proper leaf or leaflist 
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    TRUE if proper leaf or leaf-list
+*    FALSE if node
+*********************************************************************/
+boolean
+    obj_is_leafy (const obj_template_t  *obj)
+{
+    ncx_btype_t  btyp;
+
+    if (obj->objtype == OBJ_TYP_LEAF ||
+	obj->objtype == OBJ_TYP_LEAF_LIST) {
+	btyp = obj_get_basetype(obj);
+	return (btyp == NCX_BT_ANY) ? FALSE : TRUE;
+    } else {
+	return FALSE;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_is_leafy */
 
 
 /********************************************************************

@@ -1331,7 +1331,7 @@ static status_t
 		    return res;
 		}
 	    }
-	} else if (!xml_strcmp(val, YANG_K_REVISION)) {
+	} else if (!xml_strcmp(val, YANG_K_REVISION_DATE)) {
 	    revtk = TK_CUR(tkc);
 	    if (revdone) {
 		res = retres = ERR_NCX_ENTRY_EXISTS;
@@ -1398,8 +1398,11 @@ static status_t
 	/* check if module already present */
 	testimp = ncx_find_import_test(mod, imp->module);
 	if (testimp) {
-	    if (yang_compare_revision_dates(testimp->revision, 
+	    if (((testimp->revision && imp->revision) ||
+		 (!testimp->revision && !imp->revision)) &&
+		yang_compare_revision_dates(testimp->revision, 
 					    imp->revision)) {
+		
 		log_error("\nError: invalid duplicate import found on line %u",
 			  testimp->tk->linenum);
 		retres = res = ERR_NCX_INVALID_DUP_IMPORT;
@@ -1690,7 +1693,7 @@ static status_t
 	}
 
 	/* Got a token string so check the value, should be 'prefix' */
-	if (!xml_strcmp(val, YANG_K_REVISION)) {
+	if (!xml_strcmp(val, YANG_K_REVISION_DATE)) {
 	    revtk = TK_CUR(tkc);
 	    if (revdone) {
 		res = retres = ERR_NCX_ENTRY_EXISTS;
@@ -1758,7 +1761,9 @@ static status_t
 	testinc = ncx_find_include(mod, inc->submodule);
 	if (testinc) {
 	    /* check if there is a revision conflict */
-	    if (yang_compare_revision_dates(testinc->revision, 
+	    if (((testinc->revision && inc->revision) ||
+		 (!testinc->revision && !inc->revision)) &&
+		yang_compare_revision_dates(testinc->revision, 
 					    inc->revision)) {
 		log_error("\nError: invalid duplicate include found on line %u",
 			  testinc->tk->linenum);
@@ -2447,6 +2452,7 @@ static status_t
 
 	if (rev->res == NO_ERR) {
 	    if (!val) {
+		/* first pass through loop */
 		val = rev->version;
 	    } else {
 		ret = yang_compare_revision_dates(rev->version, val);
@@ -2470,7 +2476,8 @@ static status_t
 	mod->version = xml_strdup(val);
     }
 
-#ifdef LEAVE_VERSION_NULL
+#if 0
+    /**** WAS USED TO SET REVISION TO CUR-DATE ****/
     if (!mod->version) {
 	/* hard-wire the version to current date if no revision clauses */
 	str = m__getMem(TSTAMP_DATE_SIZE);
@@ -2499,15 +2506,14 @@ static status_t
 	mod->warnings++;
     }
 #else
+    /* leave the version NULL if no good revision dates found */
     if (!val) {
 	log_warn("\nWarning: no revision statements "
 		 "for %smodule '%s'",
 		 (mod->ismod) ? "" : "sub", mod->name);
 	mod->warnings++;
-    }
-
-    if (pcb->revision && 
-	yang_compare_revision_dates(val, pcb->revision)) {
+    } else if (pcb->revision && 
+	       yang_compare_revision_dates(val, pcb->revision)) {
 
 	log_error("\nError: found version '%s' instead of "
 		  "requested version '%s",
@@ -2886,6 +2892,13 @@ static status_t
 
     /* Expand and validate any augment-stmts within module-level datadefs */
     res = yang_obj_resolve_augments(tkc, mod, &mod->datadefQ);
+    CHK_EXIT(res, retres);
+
+    /* Expand and validate any deviation-stmts within the module
+     * Only expand if source mode is XML
+     * Or if it is XMLDOC mode, but 'cooked-mode' output
+     */
+    res = yang_obj_resolve_deviations(pcb, tkc, mod);
     CHK_EXIT(res, retres);
 
     /* One final check for grouping integrity */

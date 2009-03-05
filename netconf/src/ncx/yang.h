@@ -152,6 +152,7 @@ typedef struct yang_pcb_t_ {
     boolean       with_submods;
     boolean       stmtmode;      /* save top-level stmt order */
     boolean       diffmode;        /* TRUE = yangdiff old ver */
+    boolean       cookedmode;  /* TRUE = OK to cook in deviations */
     dlq_hdr_t     allimpQ;          /* Q of yang_import_ptr_t */
 
     /* 4 Qs of yang_node_t */

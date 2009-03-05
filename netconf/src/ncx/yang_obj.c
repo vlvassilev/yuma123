@@ -283,6 +283,23 @@ static status_t
 		    obj_template_t *obj,
 		    dlq_hdr_t *datadefQ);
 
+static status_t 
+    resolve_datadef (tk_chain_t *tkc,
+		     ncx_module_t  *mod,
+		     obj_template_t *testobj,
+		     boolean redo);
+
+static status_t 
+    resolve_datadefs (tk_chain_t *tkc,
+		      ncx_module_t  *mod,
+		      dlq_hdr_t *datadefQ,
+		      boolean redo);
+
+static status_t 
+    resolve_iffeatureQ (tk_chain_t *tkc,
+			ncx_module_t  *mod,
+			obj_template_t *obj);
+
 /*************    P A R S E   F U N C T I O N S    *************/
 
 
@@ -3120,6 +3137,662 @@ static status_t
 }  /* consume_notif */
 
 
+
+
+/********************************************************************
+* FUNCTION apply_object_deviations
+* 
+* Apply the Q of deviations to the specified object
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   targobj == target object to check for deviations pending
+*   deleted == address of return deleted flag
+*
+* OUTPUTS:
+*   *deleted == TRUE if the targobj was deleted and freed
+*               FALSE if not
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    apply_object_deviations (tk_chain_t *tkc,
+			     ncx_module_t  *mod,
+			     obj_template_t *targobj,
+			     boolean *deleted)
+{
+    obj_deviate_t      *devi;
+    xmlChar           **strarg;
+    dlq_hdr_t          *targQ, datadefQ;
+    xpath_pcb_t        *must, *targmust;
+    obj_unique_t       *unique, *targunique;
+    status_t            res;
+    boolean             retest, done;
+
+    *deleted = FALSE;
+    res = NO_ERR;
+    retest = FALSE;
+    done = FALSE;
+    dlq_createSQue(&datadefQ);
+
+    for (devi = (obj_deviate_t *)
+	     dlq_firstEntry(&targobj->deviateQ);
+	 devi != NULL && res == NO_ERR && !done;
+	 devi = (obj_deviate_t *)dlq_nextEntry(devi)) {
+
+	switch (devi->arg) {
+	case OBJ_DARG_NOT_SUPPORTED:
+	    /* make sure not deleting a key leaf */
+	    if (obj_is_key(targobj)) {
+		res = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: cannot remove key leaf %s:%s",
+			  obj_get_mod_name(targobj),
+			  obj_get_name(targobj));
+		tkc->cur = devi->tk;
+		ncx_print_errormsg(tkc, mod, res);
+		continue;
+	    }
+
+	    /* remove the node and toss it out */
+	    if (LOGDEBUG2) {
+		log_debug2("\napply_dev: remove target obj %s:%s",
+			   obj_get_mod_name(targobj),
+			   obj_get_name(targobj));
+	    }
+	    dlq_remove(targobj);
+	    obj_free_template(targobj);
+	    *deleted = TRUE;
+	    done = TRUE;
+	    break;
+	case OBJ_DARG_ADD:
+	case OBJ_DARG_REPLACE:
+	case OBJ_DARG_DELETE:
+	    /* type-stmt */
+	    if (devi->typdef) {
+		/* only allowed arg is replace, so
+		 * replace the typdef; minor alteration :-) 
+		 */
+		retest = TRUE;
+		if (LOGDEBUG2) {
+		    log_debug2("\napply_dev: replacing type in "
+			       "target obj %s:%s",
+			       obj_get_mod_name(targobj),
+			       obj_get_name(targobj));
+		}
+		switch (targobj->objtype) {
+		case OBJ_TYP_LEAF:
+		    typ_free_typdef(targobj->def.leaf->typdef);
+		    targobj->def.leaf->typdef = devi->typdef;
+		    devi->typdef = NULL;
+		    break;
+		case OBJ_TYP_LEAF_LIST:
+		    typ_free_typdef(targobj->def.leaflist->typdef);
+		    targobj->def.leaflist->typdef = devi->typdef;
+		    devi->typdef = NULL;
+		    break;
+		default:
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+	    }
+
+	    /* units-stmt */
+	    if (devi->units) {
+		switch (targobj->objtype) {
+		case OBJ_TYP_LEAF:
+		    strarg = &targobj->def.leaf->units;
+		    break;
+		case OBJ_TYP_LEAF_LIST:
+		    strarg = &targobj->def.leaflist->units;
+		    break;
+		default:
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+		switch (devi->arg) {
+		case OBJ_DARG_ADD:
+		    if (LOGDEBUG2) {
+			log_debug2("\napply_dev: adding units to "
+				   "target obj %s:%s",
+				   obj_get_mod_name(targobj),
+				   obj_get_name(targobj));
+		    }
+		    if (*strarg != NULL) {
+			SET_ERROR(ERR_INTERNAL_VAL);
+			m__free(*strarg);
+		    }
+		    *strarg = devi->units;
+		    devi->units = NULL;
+		    break;
+		case OBJ_DARG_DELETE:
+		    if (LOGDEBUG2) {
+			log_debug2("\napply_dev: deleting units in "
+				   "target obj %s:%s",
+				   obj_get_mod_name(targobj),
+				   obj_get_name(targobj));
+		    }
+		    if (*strarg == NULL) {
+			SET_ERROR(ERR_INTERNAL_VAL);
+		    }
+		    m__free(*strarg);
+		    *strarg = NULL;
+		    break;
+		case OBJ_DARG_REPLACE:
+		    if (*strarg == NULL) {
+			SET_ERROR(ERR_INTERNAL_VAL);
+		    } else {
+			if (LOGDEBUG2) {
+			    log_debug2("\napply_dev: replacing units in "
+				       "target obj %s:%s",
+				       obj_get_mod_name(targobj),
+				       obj_get_name(targobj));
+			}
+			m__free(*strarg);
+			*strarg = devi->units;
+			devi->units = NULL;
+		    }
+		    break;
+		default:
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+	    }
+
+	    /* default-stmt */
+	    if (devi->defval) {
+		retest = TRUE;
+		switch (targobj->objtype) {
+		case OBJ_TYP_LEAF:
+		    strarg = &targobj->def.leaf->defval;
+		    break;
+		case OBJ_TYP_CHOICE:
+		    strarg = &targobj->def.choic->defval;
+		    break;
+		default:
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+		switch (devi->arg) {
+		case OBJ_DARG_ADD:
+		    if (*strarg != NULL) {
+			SET_ERROR(ERR_INTERNAL_VAL);
+		    } else {
+			if (LOGDEBUG2) {
+			    log_debug2("\napply_dev: adding default to "
+				       "target obj %s:%s",
+				       obj_get_mod_name(targobj),
+				       obj_get_name(targobj));
+			}
+			*strarg = devi->defval;
+			devi->defval = NULL;
+		    }
+		    break;
+		case OBJ_DARG_DELETE:
+		    if (*strarg == NULL) {
+			SET_ERROR(ERR_INTERNAL_VAL);
+		    } else {
+			if (LOGDEBUG2) {
+			    log_debug2("\napply_dev: deleting default in "
+				       "target obj %s:%s",
+				       obj_get_mod_name(targobj),
+				       obj_get_name(targobj));
+			}
+			m__free(*strarg);
+			*strarg = NULL;
+		    }
+		    break;
+		case OBJ_DARG_REPLACE:
+		    if (*strarg == NULL) {
+			SET_ERROR(ERR_INTERNAL_VAL);
+		    } else {
+			if (LOGDEBUG2) {
+			    log_debug2("\napply_dev: replacing default in "
+				       "target obj %s:%s",
+				       obj_get_mod_name(targobj),
+				       obj_get_name(targobj));
+			}
+			m__free(*strarg);
+			*strarg = devi->units;
+			devi->units = NULL;
+		    }
+		    break;
+		default:
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+	    }
+
+	    /* config-stmt */
+	    if (devi->config_tk) {
+		retest = TRUE;
+		if (LOGDEBUG2) {
+		    log_debug2("\napply_dev: replacing config-stmt in "
+			       "target obj %s:%s",
+			       obj_get_mod_name(targobj),
+			       obj_get_name(targobj));
+		}
+
+		targobj->flags |= OBJ_FL_CONFSET;
+		if (devi->config) {
+		    targobj->flags |= OBJ_FL_CONFIG;
+		} else {
+		    targobj->flags &= ~OBJ_FL_CONFIG;
+		}
+	    }
+
+	    /* mandatory-stmt */
+	    if (devi->mandatory_tk) {
+		retest = TRUE;
+		if (LOGDEBUG2) {
+		    log_debug2("\napply_dev: replacing mandatory-stmt in "
+			       "target obj %s:%s",
+			       obj_get_mod_name(targobj),
+			       obj_get_name(targobj));
+		}
+
+		targobj->flags |= OBJ_FL_MANDSET;
+		if (devi->mandatory) {
+		    targobj->flags |= OBJ_FL_MANDATORY;
+		} else {
+		    targobj->flags &= ~OBJ_FL_MANDATORY;
+		}
+	    }
+
+	    /* min-elements-stmt */
+	    if (devi->minelems_tk) {
+		retest = TRUE;
+		if (LOGDEBUG2) {
+		    log_debug2("\napply_dev: replacing min-elements in "
+			       "target obj %s:%s",
+			       obj_get_mod_name(targobj),
+			       obj_get_name(targobj));
+		}
+		switch (targobj->objtype) {
+		case OBJ_TYP_LIST:
+		    targobj->def.list->minelems = devi->minelems;
+		    break;
+		case OBJ_TYP_LEAF_LIST:
+		    targobj->def.leaflist->minelems = devi->minelems;
+		    break;
+		default:
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+	    }
+
+	    /* max-elements-stmt */
+	    if (devi->maxelems_tk) {
+		retest = TRUE;
+		if (LOGDEBUG2) {
+		    log_debug2("\napply_dev: replacing max-elements in "
+			       "target obj %s:%s",
+			       obj_get_mod_name(targobj),
+			       obj_get_name(targobj));
+		}
+		switch (targobj->objtype) {
+		case OBJ_TYP_LIST:
+		    targobj->def.list->maxelems = devi->maxelems;
+		    break;
+		case OBJ_TYP_LEAF_LIST:
+		    targobj->def.leaflist->maxelems = devi->maxelems;
+		    break;
+		default:
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+	    }
+
+	    /* must-stmt */
+	    if (!dlq_empty(&devi->mustQ)) {
+		targQ = obj_get_mustQ(targobj);
+		if (!targQ) {
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+		switch (devi->arg) {
+		case OBJ_DARG_ADD:
+		    if (LOGDEBUG2) {
+			log_debug2("\napply_dev: adding must-stmt(s) to "
+				   "target obj %s:%s",
+				   obj_get_mod_name(targobj),
+				   obj_get_name(targobj));
+		    }
+		    dlq_block_enque(&devi->mustQ, targQ);
+		    break;
+		case OBJ_DARG_DELETE:
+		    if (LOGDEBUG2) {
+			log_debug2("\napply_dev: removing must-stmt(s) from "
+				   "target obj %s:%s",
+				   obj_get_mod_name(targobj),
+				   obj_get_name(targobj));
+		    }
+		    for (must = (xpath_pcb_t *)dlq_firstEntry(&devi->mustQ);
+			 must != NULL;
+			 must = (xpath_pcb_t *)dlq_nextEntry(must)) {
+
+			targmust = xpath_find_pcb(targQ,
+						  must->exprstr);
+			if (targmust) {
+			    dlq_remove(targmust);
+			    xpath_free_pcb(targmust);
+			} else {
+			    res = SET_ERROR(ERR_INTERNAL_VAL);
+			}
+		    }
+		    break;
+		default:
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		}
+	    }
+
+	    /* unique-stmt */
+	    if (!dlq_empty(&devi->uniqueQ)) {
+		if (targobj->objtype != OBJ_TYP_LIST) {
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+		targQ = targobj->def.list->uniqueQ;
+		if (!targQ) {
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+		switch (devi->arg) {
+		case OBJ_DARG_ADD:
+		    if (LOGDEBUG2) {
+			log_debug2("\napply_dev: adding unique-stmt(s) to "
+				   "target obj %s:%s",
+				   obj_get_mod_name(targobj),
+				   obj_get_name(targobj));
+		    }
+		    dlq_block_enque(&devi->uniqueQ, targQ);
+		    break;
+		case OBJ_DARG_DELETE:
+		    if (LOGDEBUG2) {
+			log_debug2("\napply_dev: removing unique-stmt(s) from "
+				   "target obj %s:%s",
+				   obj_get_mod_name(targobj),
+				   obj_get_name(targobj));
+		    }
+		    for (unique = (obj_unique_t *)
+			     dlq_firstEntry(&devi->uniqueQ);
+			 unique != NULL;
+			 unique = (obj_unique_t *)dlq_nextEntry(unique)) {
+
+			targunique = obj_find_unique(targQ, unique->xpath);
+			if (targunique) {
+			    dlq_remove(targunique);
+			    obj_free_unique(targunique);
+			} else {
+			    res = SET_ERROR(ERR_INTERNAL_VAL);
+			}
+		    }
+		    break;
+		default:
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+		break;
+	    }
+	    break;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+    }
+
+    /* clean the deviateQ */
+    if (!deleted) {
+	while (!dlq_empty(&targobj->deviateQ)) {
+	    devi = (obj_deviate_t *)dlq_deque(&targobj->deviateQ);
+	    obj_free_deviate(devi);
+	}
+    }
+
+    if (res == NO_ERR && retest && !deleted) {
+	if (LOGDEBUG2) {
+	    log_debug2("\nRechecking %s:%s after "
+		       "applying deviation(s)",
+		       obj_get_mod_name(targobj),
+		       obj_get_name(targobj));
+	}
+	res = resolve_datadef(tkc, mod, targobj, TRUE);
+    }
+
+    return res;
+
+}  /* apply_object_deviations */
+
+
+/********************************************************************
+* FUNCTION apply_all_object_deviations
+* 
+* Apply all the deviations to the specified object
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   datadefQ == module in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    apply_all_object_deviations (tk_chain_t *tkc,
+				 ncx_module_t *mod,
+				 dlq_hdr_t  *datadefQ)
+{
+    obj_deviation_t    *deviation;
+    obj_template_t     *childobj, *nextobj, *parentobj;
+    dlq_hdr_t          *childdatadefQ;
+    status_t            res, retres;
+    boolean             deleted;
+
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    for (childobj = (obj_template_t *)dlq_firstEntry(datadefQ);
+	 childobj != NULL;
+	 childobj = nextobj) {
+
+	 nextobj = (obj_template_t *)dlq_nextEntry(childobj);
+
+	 if (dlq_empty(&childobj->deviateQ)) {
+	     continue;
+	 }
+
+	 /* make sure not already processed
+	 * all the deviate structs from this deviation
+	 * have been moved to the object deviate Q
+	 */
+	 deleted = FALSE;
+	 parentobj = childobj->parent;
+	 res = apply_object_deviations(tkc, 
+				       mod,
+				       childobj,
+				       &deleted);
+	 CHK_EXIT(res, retres);
+
+	 if (deleted && parentobj) {
+	     /* need to retest the parent to see if it
+	      * is still OK; there should not be any other
+	      * deviations with the same target object
+	      */
+	     if (LOGDEBUG2) {
+		 log_debug2("\nRechecking %s:%s after "
+			    "applying deviation(s) to child",
+			    obj_get_mod_name(parentobj),
+			    obj_get_name(parentobj));
+	     }
+	     res = resolve_datadef(tkc, mod, parentobj, TRUE);
+	     CHK_EXIT(res, retres);
+	 } /* else this object was not deleted */
+
+	 if (!deleted) {
+	     childdatadefQ = obj_get_datadefQ(childobj);
+	     if (childdatadefQ) {
+		 res = apply_all_object_deviations(tkc, 
+						   mod,
+						   childdatadefQ);
+		 CHK_EXIT(res, retres);
+	     }
+	 }
+    }
+
+    /* clean the Q of deviations */
+    while (!dlq_empty(&mod->deviationQ)) {
+	deviation = (obj_deviation_t *)
+	    dlq_deque(&mod->deviationQ);
+	obj_free_deviation(deviation);
+    }
+
+    return retres;
+
+}  /* apply_all_object_deviations */
+
+
+/********************************************************************
+* FUNCTION check_deviate_collision
+* 
+* Check if the specified obj_deviate_t stmt would
+* overlap with any of the existing deviate-stmts
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   devi == current obj_deviate_t to validate against the rest
+*   deviateQ == Q of obj_deviate_t structs to check against
+*        
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    check_deviate_collision (tk_chain_t *tkc,
+			     ncx_module_t  *mod,
+			     obj_deviate_t *devi,
+			     dlq_hdr_t *deviateQ)
+{
+    obj_deviate_t     *testdevi;
+    status_t           res;
+
+    res = NO_ERR;
+
+    /* check valid deviation-stmt syntax */
+    if (devi->arg != OBJ_DARG_NOT_SUPPORTED) {
+	for (testdevi = (obj_deviate_t *)dlq_firstEntry(deviateQ);
+	     testdevi != NULL;
+	     testdevi = (obj_deviate_t *)dlq_nextEntry(testdevi)) {
+
+	    /* check the deviateQ to see if a 'not-supported' clause
+	     * already entered; if so, call it a fatal error
+	     */
+	    if (testdevi->arg == OBJ_DARG_NOT_SUPPORTED) {
+		res = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: not-supported deviate-stmt "
+			  "already entered on line %u",
+			  testdevi->tk->linenum);
+		tkc->cur = devi->tk;
+		ncx_print_errormsg(tkc, mod, res);
+	    } else {
+		/* make sure none of the same sub-stmts are
+		 * touched in these 2 deviate structs
+		 */
+		if (devi->typdef && testdevi->typdef) {
+		    res = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'type' deviate-stmt "
+			      "already entered on line %u",
+			      testdevi->tk->linenum);
+		    tkc->cur = devi->tk;
+		    ncx_print_errormsg(tkc, mod, res);
+		}
+
+		if (devi->units && testdevi->units) {
+		    res = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'units' deviate-stmt "
+			      "already entered on line %u",
+			      testdevi->tk->linenum);
+		    tkc->cur = devi->tk;
+		    ncx_print_errormsg(tkc, mod, res);
+		}
+
+		if (devi->defval && testdevi->defval) {
+		    res = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'default' deviate-stmt "
+			      "already entered on line %u",
+			      testdevi->tk->linenum);
+		    tkc->cur = devi->tk;
+		    ncx_print_errormsg(tkc, mod, res);
+		}
+
+		if (devi->config_tk && testdevi->config_tk) {
+		    res = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'config' deviate-stmt "
+			      "already entered on line %u",
+			      testdevi->tk->linenum);
+		    tkc->cur = devi->tk;
+		    ncx_print_errormsg(tkc, mod, res);
+		}
+
+		if (devi->mandatory_tk && testdevi->mandatory_tk) {
+		    res = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'mandatory' deviate-stmt "
+			      "already entered on line %u",
+			      testdevi->tk->linenum);
+		    tkc->cur = devi->tk;
+		    ncx_print_errormsg(tkc, mod, res);
+		}
+
+		if (devi->minelems_tk && testdevi->minelems_tk) {
+		    res = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'min-elements' deviate-stmt "
+			      "already entered on line %u",
+			      testdevi->tk->linenum);
+		    tkc->cur = devi->tk;
+		    ncx_print_errormsg(tkc, mod, res);
+		}
+
+		if (devi->maxelems_tk && testdevi->maxelems_tk) {
+		    res = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'max-elements' deviate-stmt "
+			      "already entered on line %u",
+			      testdevi->tk->linenum);
+		    tkc->cur = devi->tk;
+		    ncx_print_errormsg(tkc, mod, res);
+		}
+
+		/**** check devi->mustQ against testdevi->mustQ
+		 **** just ignore them for now
+		 ****/
+
+		/**** check devi->uniqueQ against testdevi->uniqueQ
+		 **** just ignore them for now
+		 ****/
+	    }
+	}
+    } else {
+	/* adding a not-supported, so make sure the Q is empty */
+	if (!dlq_empty(deviateQ)) {
+	    res = ERR_NCX_INVALID_DEV_STMT;
+	    log_error("\nError: 'not-supported' deviate-stmt "
+		      "not allowed");
+	    tkc->cur = devi->tk;
+	    ncx_print_errormsg(tkc, mod, res);
+	}
+    }
+
+    return res;
+
+}  /* check_deviate_collision */
+
+
 /********************************************************************
 * FUNCTION consume_deviate
 * 
@@ -3299,6 +3972,7 @@ static status_t
 		ncx_print_errormsg(tkc, mod, retres);
 		break;
 	    case OBJ_DARG_REPLACE:
+		/* only allowed verb is 'replace' for type-stmt */
 		break;
 	    case OBJ_DARG_NOT_SUPPORTED:
 		retres = ERR_NCX_INVALID_DEV_STMT;
@@ -3326,7 +4000,6 @@ static status_t
 		    typ_free_typdef(dummy);
 		}
 	    } else {
-
 		type = TRUE;
 		devi->typdef = typ_new_typdef();
 		if (!devi->typdef) {
@@ -3350,9 +4023,6 @@ static status_t
 	    case OBJ_DARG_ADD:
 		break;
 	    case OBJ_DARG_DELETE:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: units-stmt cannot be deleted");
-		ncx_print_errormsg(tkc, mod, retres);
 		break;
 	    case OBJ_DARG_REPLACE:
 		break;
@@ -3378,9 +4048,6 @@ static status_t
 	    case OBJ_DARG_ADD:
 		break;
 	    case OBJ_DARG_DELETE:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: default-stmt cannot be deleted");
-		ncx_print_errormsg(tkc, mod, retres);
 		break;
 	    case OBJ_DARG_REPLACE:
 		break;
@@ -3589,8 +4256,20 @@ static status_t
 	CHK_DEVI_EXIT(devi, res, retres);
     }
 
-    devi->res = retres;
-    dlq_enque(devi, &deviation->deviateQ);
+    /* check valid deviation-stmt syntax */
+    if (retres == NO_ERR) {
+	retres = check_deviate_collision(tkc, 
+					 mod, 
+					 devi,
+					 &deviation->deviateQ);
+    }
+
+    /* not going to resolve this deviate-stmt if it has errors */
+    if (retres != NO_ERR) {
+	obj_free_deviate(devi);
+    } else {
+	dlq_enque(devi, &deviation->deviateQ);
+    }
 
     return retres;
 
@@ -3993,6 +4672,7 @@ static status_t
 *   mod == module in progress
 *   con == obj_container_t to check
 *   obj == parent object for 'con'
+*   redo == TRUE if this is a 2nd pass due to deviations added
 *
 * RETURNS:
 *   status of the operation
@@ -4001,16 +4681,19 @@ static status_t
     resolve_container (tk_chain_t *tkc,
 		       ncx_module_t  *mod,
 		       obj_container_t *con,
-		       obj_template_t *obj)
+		       obj_template_t *obj,
+		       boolean redo)
 {
     status_t              res, retres;
 
     retres = NO_ERR;
 
-    res = resolve_metadata(tkc, mod, obj);
-    CHK_EXIT(res, retres);
+    if (!redo) {
+	res = resolve_metadata(tkc, mod, obj);
+	CHK_EXIT(res, retres);
+    }
 
-    if (!obj_is_refine(obj)) {
+    if (!obj_is_refine(obj) && !redo) {
 	res = yang_typ_resolve_typedefs(tkc, mod, con->typedefQ, obj);
 	CHK_EXIT(res, retres);
 
@@ -4020,7 +4703,7 @@ static status_t
 
     finish_config_flag(obj);
 
-    res = yang_obj_resolve_datadefs(tkc, mod, con->datadefQ);
+    res = resolve_datadefs(tkc, mod, con->datadefQ, redo);
     CHK_EXIT(res, retres);
 
     res = check_parent(tkc, mod, obj);
@@ -4044,6 +4727,7 @@ static status_t
 *   mod == module in progress
 *   leaf == obj_leaf_t to check
 *   obj == parent object for 'leaf'
+*   redo == TRUE if this is a 2nd pass due to deviations added
 *
 * RETURNS:
 *   status of the operation
@@ -4052,16 +4736,19 @@ static status_t
     resolve_leaf (tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  obj_leaf_t *leaf,
-		  obj_template_t *obj)
+		  obj_template_t *obj,
+		  boolean redo)
 {
     status_t res, retres;
 
     retres = NO_ERR;
 
-    res = resolve_metadata(tkc, mod, obj);
-    CHK_EXIT(res, retres);
+    if (!redo) {
+	res = resolve_metadata(tkc, mod, obj);
+	CHK_EXIT(res, retres);
+    }
 
-    if (!obj_is_refine(obj)) {
+    if (!obj_is_refine(obj) || !redo) {
 	res = yang_typ_resolve_type(tkc, mod, leaf->typdef,
 				    leaf->defval, obj);
 	if (res == NO_ERR) {
@@ -4101,6 +4788,7 @@ static status_t
 *   mod == module in progress
 *   llist == obj_leaflist_t to check
 *   obj == parent object for 'llist'
+*   redo == TRUE if this is a 2nd pass due to deviations added
 *
 * RETURNS:
 *   status of the operation
@@ -4109,16 +4797,19 @@ static status_t
     resolve_leaflist (tk_chain_t *tkc,
 		      ncx_module_t  *mod,
 		      obj_leaflist_t *llist,
-		      obj_template_t *obj)
+		      obj_template_t *obj,
+		      boolean redo)
 {
     status_t res, retres;
 
     retres = NO_ERR;
 
-    res = resolve_metadata(tkc, mod, obj);
-    CHK_EXIT(res, retres);
+    if (!redo) {
+	res = resolve_metadata(tkc, mod, obj);
+	CHK_EXIT(res, retres);
+    }
 
-    if (!obj_is_refine(obj)) {
+    if (!obj_is_refine(obj) && !redo) {
 	res = yang_typ_resolve_type(tkc, mod,
 				    llist->typdef, NULL, obj);
 	if (res == NO_ERR) {
@@ -4167,6 +4858,7 @@ static status_t
 *   mod == module in progress
 *   list == obj_list_t to check
 *   obj == parent object for 'list'
+*   redo == TRUE if this is a 2nd pass due to deviations added
 *
 * RETURNS:
 *   status of the operation
@@ -4175,16 +4867,19 @@ static status_t
     resolve_list (tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  obj_list_t *list,
-		  obj_template_t *obj)
+		  obj_template_t *obj,
+		  boolean redo)
 {
     status_t res, retres;
 
     retres = NO_ERR;
 
-    res = resolve_metadata(tkc, mod, obj);
-    CHK_EXIT(res, retres);
+    if (!redo) {
+	res = resolve_metadata(tkc, mod, obj);
+	CHK_EXIT(res, retres);
+    }
 
-    if (!obj_is_refine(obj)) {
+    if (!obj_is_refine(obj) && !redo) {
 	res = yang_typ_resolve_typedefs(tkc, mod, list->typedefQ, obj);
 	CHK_EXIT(res, retres);
 
@@ -4194,7 +4889,7 @@ static status_t
 
     finish_config_flag(obj);
 
-    res = yang_obj_resolve_datadefs(tkc, mod, list->datadefQ);
+    res = resolve_datadefs(tkc, mod, list->datadefQ, redo);
     CHK_EXIT(res, retres);
 
     res = check_parent(tkc, mod, obj);
@@ -4648,6 +5343,7 @@ static status_t
 *   mod == module in progress
 *   cas == obj_case_t to check
 *   obj == parent object for 'cas'
+*   redo == TRUE if this is a 2nd pass due to deviations added
 *
 * RETURNS:
 *   status of the operation
@@ -4656,13 +5352,14 @@ static status_t
     resolve_case (tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  obj_case_t *cas,
-		  obj_template_t *obj)
+		  obj_template_t *obj,
+		  boolean redo)
 {
     status_t res, retres;
 
     retres = NO_ERR;
 
-    res = yang_obj_resolve_datadefs(tkc, mod, cas->datadefQ);
+    res = resolve_datadefs(tkc, mod, cas->datadefQ, redo);
     CHK_EXIT(res, retres);
 
     res = check_parent(tkc, mod, obj);
@@ -4686,6 +5383,7 @@ static status_t
 *   mod == module in progress
 *   choic == obj_choice_t to check
 *   obj == parent object for 'choic'
+*   redo == TRUE if this is a 2nd pass due to deviations added
 *
 * RETURNS:
 *   status of the operation
@@ -4694,7 +5392,8 @@ static status_t
     resolve_choice (tk_chain_t *tkc,
 		    ncx_module_t  *mod,
 		    obj_choice_t *choic,
-		    obj_template_t *obj)
+		    obj_template_t *obj,
+		    boolean redo)
 {
     obj_case_t *cas;
     obj_template_t *cobj;
@@ -4717,7 +5416,7 @@ static status_t
     CHK_EXIT(res, retres);
 
     /* finish up the data-def-stmts in each case arm */
-    res = yang_obj_resolve_datadefs(tkc, mod, choic->caseQ);
+    res = resolve_datadefs(tkc, mod, choic->caseQ, redo);
     CHK_EXIT(res, retres);
 
     /* check defval is valid case name */
@@ -5557,7 +6256,7 @@ static status_t
     const xmlChar     *name;
     dlq_hdr_t         *targQ, *augQ;
     status_t           res, retres;
-    boolean            augextern, augdefcase, config, confset;
+    boolean            augextern, augdefcase, config;
     
     aug = obj->def.augment;
     if (!aug->target) {
@@ -5796,9 +6495,13 @@ static status_t
 		    /* may need to set the config flag now, under the context
 		     * of the actual target, not within the grouping
 		     */
-		    config = obj_get_config_flag2(newobj, &confset);
-		    if (!confset) {
-			obj_set_config_flag(newobj);
+		    if (!(newobj->flags & OBJ_FL_CONFSET)) {
+			config = obj_get_config_flag(newobj->parent);
+			if (config) {
+			    newobj->flags |= OBJ_FL_CONFIG;
+			} else {
+			    newobj->flags &= ~OBJ_FL_CONFIG;
+			}
 		    }
 
 #ifdef YANG_OBJ_DEBUG
@@ -5820,6 +6523,408 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION resolve_deviation
+* 
+* Resolve and possibly expand the indicated top-level deviation-stmt
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   deviation == obj_deviation_t to validate
+*   cookedmode == TRUE if expand deviation
+*                 FALSE to just validate the deviation
+*        
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_deviation (tk_chain_t *tkc,
+		       ncx_module_t  *mod,
+		       obj_deviation_t *deviation,
+		       boolean expandmode)
+{
+    obj_deviate_t     *devi, *nextdevi;
+    obj_template_t    *targobj;
+    const xmlChar     *curval;
+    tk_token_t        *curtk;
+    xpath_pcb_t       *must, *targmust;
+    obj_unique_t      *unique, *targunique;
+    dlq_hdr_t         *targQ;
+    status_t           res, retres;
+    boolean            instancetest, curexists;
+
+    retres = NO_ERR;
+    targobj = NULL;
+
+    /* find schema-nodeid target
+     * the node being augmented MUST exist to be valid
+     */
+    res = xpath_find_schema_target(tkc, 
+				   mod, 
+				   NULL, 
+				   &mod->datadefQ,
+				   deviation->target, 
+				   &targobj, 
+				   NULL);
+    if (res != NO_ERR) {
+	return res;
+    }
+	
+    deviation->targobj = targobj;
+    curtk = TK_CUR(tkc);
+    
+    /* make sure all the deviate statements are 
+     * are OK for that object type
+     */
+    for (devi = (obj_deviate_t *)
+	     dlq_firstEntry(&deviation->deviateQ);
+	 devi != NULL;
+	 devi = nextdevi) {
+
+	TK_CUR(tkc) = devi->tk;
+
+	nextdevi = (obj_deviate_t *)dlq_nextEntry(devi);
+
+	res = NO_ERR;
+
+	/* check if no sub-clauses are expected */
+	if (devi->arg == OBJ_DARG_NOT_SUPPORTED) {
+	    continue;
+	} else if (devi->arg == OBJ_DARG_ADD) {
+	    /* current clause must not exist */
+	    instancetest = FALSE;
+	} else {
+	    /* current clause must exist */
+	    instancetest = TRUE;
+	}
+
+	/* check the object type against the clauses
+	 * in this deviate statement;
+	 * check type-stmt first
+	 */
+	if (devi->typdef) {
+	    /* replace type statement entered */
+	    if (!obj_is_leafy(targobj)) {
+		res = retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: target '%s' is a '%s': "
+			  "type-stmt not allowed",
+			  deviation->target,
+			  obj_get_typestr(targobj));
+		ncx_print_errormsg(tkc, mod, retres);
+	    } else {
+		res = yang_typ_resolve_type(tkc,
+					    mod,
+					    devi->typdef,
+					    obj_get_default(targobj),
+					    targobj);
+		CHK_EXIT(res, retres);
+	    }
+	}
+
+	/* check if units-stmt was entered */
+	if (devi->units) {
+	    if (!obj_is_leafy(targobj)) {
+		res = retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: target '%s' is a '%s': "
+			  "type-stmt not allowed",
+			  deviation->target,
+			  obj_get_typestr(targobj));
+		ncx_print_errormsg(tkc, mod, retres);
+	    } else {
+		switch (targobj->objtype) {
+		case OBJ_TYP_LEAF:
+		    curexists = (targobj->def.leaf->units) 
+			? TRUE : FALSE;
+		    break;
+		case OBJ_TYP_LEAF_LIST:
+		    curexists = (targobj->def.leaflist->units) 
+			? TRUE : FALSE;
+		    break;
+		default:
+		    curexists = FALSE;
+		    res = retres = SET_ERROR(ERR_INTERNAL_VAL);
+		}
+
+		if (instancetest && !curexists) {
+		    res = retres = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'units' must exist in "
+			      "deviate target '%s'",
+			      deviation->target);
+		    ncx_print_errormsg(tkc, mod, retres);
+		} else if (!instancetest && curexists) {
+		    res = retres = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'units' must not exist in "
+			      "deviate target '%s'",
+			      deviation->target);
+		    ncx_print_errormsg(tkc, mod, retres);
+		} else if (devi->arg == OBJ_DARG_DELETE &&
+			   xml_strcmp(devi->units,
+				      obj_get_units(targobj))) {
+		    res = retres = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'units' value '%s' must match in "
+			      "deviate target '%s'",
+			      devi->units,
+			      deviation->target);
+		    ncx_print_errormsg(tkc, mod, retres);
+		}
+	    }
+	}
+
+	/* check if default-stmt entered */
+	if (devi->defval) {
+	    if ((targobj->objtype == OBJ_TYP_LEAF &&
+		 obj_get_basetype(targobj) != NCX_BT_ANY) ||
+		targobj->objtype == OBJ_TYP_CHOICE) {
+
+		if (targobj->objtype == OBJ_TYP_CHOICE) {
+		    curval = targobj->def.choic->defval;
+		} else {
+		    curval = targobj->def.leaf->defval;
+		}
+		curexists = (curval) ? TRUE : FALSE;
+
+		if (instancetest && !curexists) {
+		    res = retres = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'default' must exist in "
+			      "deviate target '%s'",
+			      deviation->target);
+		    ncx_print_errormsg(tkc, mod, retres);
+		} else if (!instancetest && curexists) {
+		    res = retres = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'default' must not exist in "
+			      "deviate target '%s'",
+			      deviation->target);
+		    ncx_print_errormsg(tkc, mod, retres);
+		} else if (devi->arg == OBJ_DARG_DELETE &&
+			   xml_strcmp(devi->defval, curval)) {
+		    res = retres = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: 'default' value '%s' must match in "
+			      "deviate target '%s'",
+			      devi->defval,
+			      deviation->target);
+		    ncx_print_errormsg(tkc, mod, retres);
+		}
+	    } else {
+		res = retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: target '%s' is a '%s': "
+			  "default-stmt not allowed",
+			  deviation->target,
+			  obj_get_typestr(targobj));
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
+
+	/* check if config-stmt entered */
+	if (devi->config_tk) {
+	    switch (targobj->objtype) {
+	    case OBJ_TYP_LEAF:
+		if (!devi->config && obj_is_key(targobj) &&
+		    obj_is_config(targobj)) {
+		    res = retres = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: leaf %s:%s is a key; "
+			      "cannot change config to false",
+			      obj_get_mod_name(targobj),
+			      obj_get_name(targobj));
+		    ncx_print_errormsg(tkc, mod, retres);		    
+		}
+		break;
+	    case OBJ_TYP_CONTAINER:
+	    case OBJ_TYP_LEAF_LIST:
+	    case OBJ_TYP_CHOICE:
+		break;
+	    case OBJ_TYP_LIST:
+		if (!obj_first_key(targobj) && devi->config) {
+		    res = retres = ERR_NCX_INVALID_DEV_STMT;
+		    log_error("\nError: list %s:%s has no key; "
+			      "cannot change config to true",
+			      obj_get_mod_name(targobj),
+			      obj_get_name(targobj));
+		    ncx_print_errormsg(tkc, mod, retres);		    
+		}
+		break;
+	    default:
+		res = retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: target '%s' is a '%s': "
+			  "config-stmt not allowed",
+			  deviation->target,
+			  obj_get_typestr(targobj));
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
+
+	/* check if mandatory-stmt entered */
+	if (devi->mandatory_tk) {
+	    switch (targobj->objtype) {
+	    case OBJ_TYP_CHOICE:
+	    case OBJ_TYP_LEAF:
+		break;
+	    default:
+		res = retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: target '%s' is a '%s': "
+			  "mandatory-stmt not allowed",
+			  deviation->target,
+			  obj_get_typestr(targobj));
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
+
+	/* check if min-elements stmt entered */
+	if (devi->minelems_tk) {
+	    switch (targobj->objtype) {
+	    case OBJ_TYP_LEAF_LIST:
+	    case OBJ_TYP_LIST:
+		break;
+	    default:
+		res = retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: target '%s' is a '%s': "
+			  "min-elements-stmt not allowed",
+			  deviation->target,
+			  obj_get_typestr(targobj));
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
+
+	/* check if max-elements stmt entered */
+	if (devi->maxelems_tk) {
+	    switch (targobj->objtype) {
+	    case OBJ_TYP_LEAF_LIST:
+	    case OBJ_TYP_LIST:
+		break;
+	    default:
+		res = retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: target '%s' is a '%s': "
+			  "max-elements-stmt not allowed",
+			  deviation->target,
+			  obj_get_typestr(targobj));
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
+
+	/* check if any must-stmts entered */
+	if (!dlq_empty(&devi->mustQ)) {
+	    switch (targobj->objtype) {
+	    case OBJ_TYP_CONTAINER:
+	    case OBJ_TYP_LEAF:
+	    case OBJ_TYP_LEAF_LIST:
+	    case OBJ_TYP_LIST:
+		targQ = obj_get_mustQ(targobj);
+		if (!targQ) {
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+		for (must = (xpath_pcb_t *)dlq_firstEntry(&devi->mustQ);
+		     must != NULL;
+		     must = (xpath_pcb_t *)dlq_nextEntry(must)) {
+
+		    targmust = xpath_find_pcb(targQ,
+					      must->exprstr);
+		    curexists = (targmust) ? TRUE : FALSE;
+
+		    if (instancetest && !curexists) {
+			res = retres = ERR_NCX_INVALID_DEV_STMT;
+			log_error("\nError: 'must %s' must exist in "
+				  "deviate target '%s'",
+				  must->exprstr,
+				  deviation->target);
+			ncx_print_errormsg(tkc, mod, retres);
+		    } else if (!instancetest && curexists) {
+			res = retres = ERR_NCX_INVALID_DEV_STMT;
+			log_error("\nError: 'must %s' must not exist in "
+				  "deviate target '%s'",
+				  must->exprstr,
+				  deviation->target);
+			ncx_print_errormsg(tkc, mod, retres);
+		    }
+		}
+		break;
+	    default:
+		res = retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: target '%s' is a '%s': "
+			  "must-stmt not allowed",
+			  deviation->target,
+			  obj_get_typestr(targobj));
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
+
+	/* check if any unique-stmts entered */
+	if (!dlq_empty(&devi->uniqueQ)) {
+	    switch (targobj->objtype) {
+	    case OBJ_TYP_LIST:
+		targQ = targobj->def.list->uniqueQ;
+		if (!targQ) {
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		    continue;
+		}
+		for (unique = (obj_unique_t *)
+			 dlq_firstEntry(&devi->uniqueQ);
+		     unique != NULL;
+		     unique = (obj_unique_t *)dlq_nextEntry(unique)) {
+
+		    targunique = obj_find_unique(targQ, unique->xpath);
+		    curexists = (targunique) ? TRUE : FALSE;
+
+		    if (instancetest && !curexists) {
+			res = retres = ERR_NCX_INVALID_DEV_STMT;
+			log_error("\nError: 'unique %s' must exist in "
+				  "deviate target '%s'",
+				  unique->xpath,
+				  deviation->target);
+			ncx_print_errormsg(tkc, mod, retres);
+		    } else if (!instancetest && curexists) {
+			res = retres = ERR_NCX_INVALID_DEV_STMT;
+			log_error("\nError: 'unique %s' must not exist in "
+				  "deviate target '%s'",
+				  unique->xpath,
+				  deviation->target);
+			ncx_print_errormsg(tkc, mod, retres);
+		    }
+		}
+		break;
+	    default:
+		res = retres = ERR_NCX_INVALID_DEV_STMT;
+		log_error("\nError: target '%s' is a '%s': "
+			  "unique-stmt not allowed",
+			  deviation->target,
+			  obj_get_typestr(targobj));
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
+
+	if (res == NO_ERR) {
+	    res = check_deviate_collision(tkc,
+					  mod,
+					  devi,
+					  &targobj->deviateQ);
+	}
+
+	/* finally, if entire deviate-stmt is OK save it
+	 * or else toss it
+	 */
+	if (res != NO_ERR) {
+	    /* toss this deviate-stmt; it is no good */
+	    dlq_remove(devi);
+	    obj_free_deviate(devi);
+	} else if (expandmode) {
+	    dlq_remove(devi);
+	    dlq_enque(devi, &targobj->deviateQ);
+	    /*** IF THIS MOD IS DIFFERENT THAN THE TARGET MOD
+	     *** THEN THE DEVIATION WILL BE IGNORED
+	     ***/
+	} /* else leave in this Q for HTML or YANG output */
+    }
+
+    TK_CUR(tkc) = curtk;
+
+    return retres;
+				    
+}  /* resolve_deviation */
+
+
+/********************************************************************
 * FUNCTION resolve_rpc
 * 
 * Check the rpc method object type
@@ -5832,6 +6937,7 @@ static status_t
 *   mod == module in progress
 *   rpc == obj_rpc_t to check
 *   obj == parent object for 'rpc'
+*   redo == TRUE if this is a 2nd pass due to deviations added
 *
 * RETURNS:
 *   status of the operation
@@ -5840,19 +6946,22 @@ static status_t
     resolve_rpc (tk_chain_t *tkc,
 		 ncx_module_t  *mod,
 		 obj_rpc_t *rpc,
-		 obj_template_t *obj)
+		 obj_template_t *obj,
+		 boolean redo)
 {
     status_t          res, retres;
 
     retres = NO_ERR;
 
-    res = yang_typ_resolve_typedefs(tkc, mod, &rpc->typedefQ, obj);
-    CHK_EXIT(res, retres);
+    if (!redo) {
+	res = yang_typ_resolve_typedefs(tkc, mod, &rpc->typedefQ, obj);
+	CHK_EXIT(res, retres);
 
-    res = yang_grp_resolve_groupings(tkc, mod, &rpc->groupingQ, obj);
-    CHK_EXIT(res, retres);
+	res = yang_grp_resolve_groupings(tkc, mod, &rpc->groupingQ, obj);
+	CHK_EXIT(res, retres);
+    }
 
-    res = yang_obj_resolve_datadefs(tkc, mod, &rpc->datadefQ);
+    res = resolve_datadefs(tkc, mod, &rpc->datadefQ, redo);
     CHK_EXIT(res, retres);
 
     return retres;
@@ -5873,6 +6982,7 @@ static status_t
 *   mod == module in progress
 *   rpcio == obj_rpcio_t to check
 *   obj == parent object for 'rpcio'
+*   redo == TRUE if this is a 2nd pass due to deviations added
 *
 * RETURNS:
 *   status of the operation
@@ -5881,19 +6991,22 @@ static status_t
     resolve_rpcio (tk_chain_t *tkc,
 		   ncx_module_t  *mod,
 		   obj_rpcio_t *rpcio,
-		   obj_template_t *obj)
+		   obj_template_t *obj,
+		   boolean redo)
 {
     status_t              res, retres;
 
     retres = NO_ERR;
 
-    res = yang_typ_resolve_typedefs(tkc, mod, &rpcio->typedefQ, obj);
-    CHK_EXIT(res, retres);
+    if (!redo) {
+	res = yang_typ_resolve_typedefs(tkc, mod, &rpcio->typedefQ, obj);
+	CHK_EXIT(res, retres);
 
-    res = yang_grp_resolve_groupings(tkc, mod, &rpcio->groupingQ, obj);
-    CHK_EXIT(res, retres);
+	res = yang_grp_resolve_groupings(tkc, mod, &rpcio->groupingQ, obj);
+	CHK_EXIT(res, retres);
+    }
 
-    res = yang_obj_resolve_datadefs(tkc, mod, &rpcio->datadefQ);
+    res = resolve_datadefs(tkc, mod, &rpcio->datadefQ, redo);
     CHK_EXIT(res, retres);
 
     return retres;
@@ -5914,6 +7027,7 @@ static status_t
 *   mod == module in progress
 *   notif == obj_notif_t to check
 *   obj == parent object for 'notif'
+*   redo == TRUE if this is a 2nd pass due to deviations added
 *
 * RETURNS:
 *   status of the operation
@@ -5922,25 +7036,184 @@ static status_t
     resolve_notif (tk_chain_t *tkc,
 		   ncx_module_t  *mod,
 		   obj_notif_t *notif,
-		   obj_template_t *obj)
+		   obj_template_t *obj,
+		   boolean redo)
 {
     status_t          res, retres;
 
     retres = NO_ERR;
 
-    res = yang_typ_resolve_typedefs(tkc, mod, &notif->typedefQ, obj);
-    CHK_EXIT(res, retres);
+    if (!redo) {
+	res = yang_typ_resolve_typedefs(tkc, mod, &notif->typedefQ, obj);
+	CHK_EXIT(res, retres);
 
-    res = yang_grp_resolve_groupings(tkc, mod, &notif->groupingQ, obj);
-    CHK_EXIT(res, retres);
+	res = yang_grp_resolve_groupings(tkc, mod, &notif->groupingQ, obj);
+	CHK_EXIT(res, retres);
+    }
 
     /* resolve notification contents */
-    res = yang_obj_resolve_datadefs(tkc, mod, &notif->datadefQ);
+    res = resolve_datadefs(tkc, mod, &notif->datadefQ, redo);
     CHK_EXIT(res, retres);
 
     return retres;
 				    
 }  /* resolve_notif */
+
+
+/********************************************************************
+* FUNCTION resolve_datadef
+* 
+* First pass object validation
+*
+* Analyze the entire datadefQ within the module struct
+* Finish all the clauses within this struct that
+* may have been defered because of possible forward references
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   testobj == obj_template_t to check
+*   redo == TRUE if this is a 2nd pass due to deviations added
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_datadef (tk_chain_t *tkc,
+		     ncx_module_t  *mod,
+		     obj_template_t *testobj,
+		     boolean redo)
+{
+    status_t         res, retres;
+
+    retres = NO_ERR;
+
+    if (!redo) {
+	res = ncx_resolve_appinfoQ(tkc, mod, &testobj->appinfoQ);
+	CHK_EXIT(res, retres);
+
+	res = resolve_iffeatureQ(tkc, mod, testobj);
+	CHK_EXIT(res, retres);
+    }
+
+    switch (testobj->objtype) {
+    case OBJ_TYP_CONTAINER:
+	res = resolve_container(tkc, mod,
+				testobj->def.container, 
+				testobj, redo);
+	break;
+    case OBJ_TYP_LEAF:
+	res = resolve_leaf(tkc, mod,
+			   testobj->def.leaf, 
+			   testobj, redo);
+	break;
+    case OBJ_TYP_LEAF_LIST:
+	res = resolve_leaflist(tkc, mod,
+			       testobj->def.leaflist, 
+			       testobj, redo);
+	break;
+    case OBJ_TYP_LIST:
+	res = resolve_list(tkc, mod,
+			   testobj->def.list, 
+			   testobj, redo);
+	break;
+    case OBJ_TYP_CHOICE:
+	res = resolve_choice(tkc, mod,
+			     testobj->def.choic, 
+			     testobj, redo);
+	break;
+    case OBJ_TYP_CASE:
+	res = resolve_case(tkc, mod,
+			   testobj->def.cas, 
+			   testobj, redo);
+	break;
+    case OBJ_TYP_USES:
+	if (!redo) {
+	    res = resolve_uses(tkc, mod,
+			       testobj->def.uses, testobj);
+	}
+	break;
+    case OBJ_TYP_AUGMENT:
+	if (!redo) {
+	    res = resolve_augment(tkc, mod,
+				  testobj->def.augment, testobj);
+	}
+	break;
+    case OBJ_TYP_RPC:
+	res = resolve_rpc(tkc, mod,
+			  testobj->def.rpc, 
+			  testobj, redo);
+	break;
+    case OBJ_TYP_RPCIO:
+	res = resolve_rpcio(tkc, mod,
+			    testobj->def.rpcio, 
+			    testobj, redo);
+	break;
+    case OBJ_TYP_NOTIF:
+	res = resolve_notif(tkc, mod,
+			    testobj->def.notif, 
+			    testobj, redo);
+	break;
+    case OBJ_TYP_REFINE:
+	res = NO_ERR;
+	break;
+    case OBJ_TYP_NONE:
+    default:
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    CHK_EXIT(res, retres);
+    return retres;
+
+}  /* resolve_datadef */
+
+
+/********************************************************************
+* FUNCTION resolve_datadefs
+* 
+* First pass object validation
+*
+* Analyze the entire datadefQ within the module struct
+* Finish all the clauses within this struct that
+* may have been defered because of possible forward references
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   datadefQ == Q of obj_template_t structs to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_datadefs (tk_chain_t *tkc,
+		      ncx_module_t  *mod,
+		      dlq_hdr_t *datadefQ,
+		      boolean redo)
+{
+    obj_template_t  *testobj;
+    status_t         res, retres;
+
+    retres = NO_ERR;
+
+    /* first resolve all the local type names */
+    for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
+	 testobj != NULL;
+	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+
+	res = resolve_datadef(tkc, mod, testobj, redo);
+	CHK_EXIT(res, retres);
+    }
+
+    return retres;
+
+}  /* resolve_datadefs */
 
 
 /********************************************************************
@@ -6364,6 +7637,7 @@ static status_t
 }  /* check_conditional_mismatch */
 
 
+
 /************   E X T E R N A L   F U N C T I O N S   ***************/
 
 
@@ -6718,6 +7992,7 @@ status_t
 
     /* save or delete the obj_deviation_t struct */
     if (dev->target) {
+	dev->res = retres;
 	dlq_enque(dev, &mod->deviationQ);
     } else {
 	obj_free_deviation(dev);
@@ -6753,8 +8028,7 @@ status_t
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *datadefQ)
 {
-    obj_template_t  *testobj;
-    status_t         res, retres;
+    status_t    retres;
 
 #ifdef DEBUG
     if (!tkc || !mod || !datadefQ) {
@@ -6762,76 +8036,7 @@ status_t
     }
 #endif
 
-    res = NO_ERR;
-    retres = NO_ERR;
-
-
-    /* first resolve all the local type names */
-    for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 testobj != NULL;
-	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
-
-	res = ncx_resolve_appinfoQ(tkc, mod, &testobj->appinfoQ);
-	CHK_EXIT(res, retres);
-
-	res = resolve_iffeatureQ(tkc, mod, testobj);
-	CHK_EXIT(res, retres);
-
-	switch (testobj->objtype) {
-	case OBJ_TYP_CONTAINER:
-	    res = resolve_container(tkc, mod,
-				    testobj->def.container, testobj);
-	    break;
-	case OBJ_TYP_LEAF:
-	    res = resolve_leaf(tkc, mod,
-			       testobj->def.leaf, testobj);
-	    break;
-	case OBJ_TYP_LEAF_LIST:
-	    res = resolve_leaflist(tkc, mod,
-				   testobj->def.leaflist, testobj);
-	    break;
-	case OBJ_TYP_LIST:
-	    res = resolve_list(tkc, mod,
-			       testobj->def.list, testobj);
-	    break;
-	case OBJ_TYP_CHOICE:
-	    res = resolve_choice(tkc, mod,
-				 testobj->def.choic, testobj);
-	    break;
-	case OBJ_TYP_CASE:
-	    res = resolve_case(tkc, mod,
-			       testobj->def.cas, testobj);
-	    break;
-	case OBJ_TYP_USES:
-	    res = resolve_uses(tkc, mod,
-			       testobj->def.uses, testobj);
-	    break;
-	case OBJ_TYP_AUGMENT:
-	    res = resolve_augment(tkc, mod,
-				  testobj->def.augment, testobj);
-	    break;
-	case OBJ_TYP_RPC:
-	    res = resolve_rpc(tkc, mod,
-			      testobj->def.rpc, testobj);
-	    break;
-	case OBJ_TYP_RPCIO:
-	    res = resolve_rpcio(tkc, mod,
-			      testobj->def.rpcio, testobj);
-	    break;
-	case OBJ_TYP_NOTIF:
-	    res = resolve_notif(tkc, mod,
-				testobj->def.notif, testobj);
-	    break;
-	case OBJ_TYP_REFINE:
-	    res = NO_ERR;
-	    break;
-	case OBJ_TYP_NONE:
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	CHK_EXIT(res, retres);
-    }
-
+    retres = resolve_datadefs(tkc, mod, datadefQ, FALSE);
     return retres;
 
 }  /* yang_obj_resolve_datadefs */
@@ -7030,6 +8235,76 @@ status_t
     return retres;
 
 }  /* yang_obj_resolve_augments */
+
+
+/********************************************************************
+* FUNCTION yang_obj_resolve_deviations
+* 
+*
+* Validate any deviation statements within the 
+* module deviationQ
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_obj_resolve_deviations (yang_pcb_t *pcb,
+				 tk_chain_t *tkc,
+				 ncx_module_t  *mod)
+{
+    obj_deviation_t   *deviation;
+    status_t           res, retres;
+    boolean            anydevs;
+
+#ifdef DEBUG
+    if (!tkc || !mod) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    retres = NO_ERR;
+    anydevs = FALSE;
+
+    /* first resolve all the local type names */
+    for (deviation = (obj_deviation_t *)
+	     dlq_firstEntry(&mod->deviationQ);
+	 deviation != NULL;
+	 deviation = (obj_deviation_t *)dlq_nextEntry(deviation)) {
+
+	if (deviation->res != NO_ERR) {
+	    continue;
+	}
+
+	anydevs = TRUE;
+
+	res = resolve_deviation(tkc, 
+				mod, 
+				deviation,
+				pcb->cookedmode);
+	deviation->res = res;
+	CHK_EXIT(res, retres);
+    }
+
+    if (anydevs && retres == NO_ERR && pcb->cookedmode) {
+	/*** THIS HAS NO AFFECT IF THE MOD WITH THE DEVIATIONS
+	 *** IS DIFFERENT THAN THE TARGOBJ MODULE
+	 ***/
+	retres = apply_all_object_deviations(tkc, 
+					     mod, 
+					     &mod->datadefQ);
+    }
+
+    return retres;
+
+}  /* yang_obj_resolve_deviations */
 
 
 /********************************************************************

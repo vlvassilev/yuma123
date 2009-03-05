@@ -464,9 +464,9 @@ const char *
     case ERR_NCX_EXTRA_PARMINST:
 	return "extra parameter instance"; 
     case ERR_NCX_EXTRA_CHOICE:
-	return "extra choice member"; 
+	return "extra case in choice"; 
     case ERR_NCX_MISSING_CHOICE:
-	return "missing choice member"; 
+	return "missing mandatory choice"; 
     case ERR_NCX_CFG_STATE:
 	return "wrong config state"; 
     case ERR_NCX_UNKNOWN_APP:

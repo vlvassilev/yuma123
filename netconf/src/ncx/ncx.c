@@ -940,7 +940,15 @@ static void
 	    retval = yang_compare_revision_dates(mod->version,
 						 testmod->version);
 	    if (retval == 0) {
-		SET_ERROR(ERR_INTERNAL_VAL);
+		if ((!mod->version && !testmod->version) ||
+		    (mod->version && testmod->version)) {
+		    /* !!! adding duplicate version !!! */
+		    log_info("\nInfo: Adding duplicate revision '%s' of "
+			     "%s module (%s)",
+			     (mod->version) ? mod->version : EMPTY_STRING,
+			     mod->name,
+			     mod->source);
+		}
 		testmod->defaultrev = FALSE;
 		mod->defaultrev = TRUE;
 		dlq_insertAhead(mod, testmod);
@@ -6375,6 +6383,11 @@ status_t
 	 appinfo = (ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
 
 	if (appinfo->isclone) {
+	    continue;
+	}
+
+	if (appinfo->ext) {
+	    /* this is a redo validation */
 	    continue;
 	}
 

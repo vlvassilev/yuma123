@@ -411,7 +411,6 @@ typedef struct ncx_bit_t_ {
     const xmlChar *name;     /* bptr to typ_enum_t.name or this.dname */
     xmlChar       *dname;    /* malloced bit name (value not checked) */
     uint32         pos;      /* position value */
-    uint32         order;    /* typedef order */
 } ncx_bit_t;
 
 

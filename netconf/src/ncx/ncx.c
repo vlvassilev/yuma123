@@ -5272,7 +5272,6 @@ status_t
 	    break;
 	case NCX_BT_BITS:
 	    lcopy->val.bit.pos = lmem->val.bit.pos;
-	    lcopy->val.bit.order = lmem->val.bit.order;
 	    lcopy->val.bit.dname = xml_strdup(lmem->val.bit.name);
 	    if (!lcopy->val.bit.dname) {
 		res = ERR_INTERNAL_MEM;
@@ -5605,8 +5604,7 @@ status_t
 	    lmem->val.bit.dname = str;
 	    lmem->val.bit.name = lmem->val.bit.dname;
 	    res = val_bit_ok(typdef, str, 
-			     &lmem->val.bit.pos,
-			     &lmem->val.bit.order);
+			     &lmem->val.bit.pos);
 	} else if (typ_is_number(btyp)){
 	    res = ncx_decode_num(str, btyp, &lmem->val.num);
 	} else {
@@ -7458,9 +7456,9 @@ int32
     }
 #endif
 
-    if (bitone->order < bittwo->order) {
+    if (bitone->pos < bittwo->pos) {
 	return -1;
-    } else if (bitone->order > bittwo->order) {
+    } else if (bitone->pos > bittwo->pos) {
 	return 1;
     } else {
 	return 0;

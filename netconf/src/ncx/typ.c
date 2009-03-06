@@ -1955,7 +1955,11 @@ ncx_tclass_t
     case NCX_CL_COMPLEX:
 	return typdef->class;
     case NCX_CL_NAMED:
-        return typ_get_base_class(&typdef->def.named.typ->typdef);
+	if (typdef->def.named.typ) {
+	    return typ_get_base_class(&typdef->def.named.typ->typdef);
+	} else {
+	    return NCX_CL_NAMED;
+	}
     case NCX_CL_REF:
         return typ_get_base_class(typdef->def.ref.typdef);
     default:
@@ -2047,7 +2051,11 @@ typ_def_t *
     case NCX_CL_COMPLEX:
         return NULL;
     case NCX_CL_NAMED:
-	return &typdef->def.named.typ->typdef;
+	if (typdef->def.named.typ) {
+	    return &typdef->def.named.typ->typdef;
+	} else {
+	    return NULL;
+	}
     case NCX_CL_REF:
         return typdef->def.ref.typdef;
     default:

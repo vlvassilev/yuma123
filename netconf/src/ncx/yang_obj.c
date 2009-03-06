@@ -8569,6 +8569,11 @@ status_t
 			if (res == NO_ERR && leafobj) {
 			    typ_set_xref_typdef(typdef, 
 						obj_get_ctypdef(leafobj));
+			    if (testobj->objtype == OBJ_TYP_LEAF) {
+				testobj->def.leaf->leafrefobj = leafobj;
+			    } else {
+				testobj->def.leaflist->leafrefobj = leafobj;
+			    }
 			}
 		    }
 		    xpath_free_pcb(pcbclone);
@@ -8646,6 +8651,125 @@ status_t
 	return retres;
 
 }  /* yang_obj_resolve_xpath */
+
+
+/********************************************************************
+* FUNCTION yang_obj_check_leafref_loops
+* 
+* Check all leafref objects for hard-wired object loops
+* Must be done after yang_obj_resolve_xpath
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   datadefQ == Q of obj_template_t structs to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_obj_check_leafref_loops (tk_chain_t *tkc,
+				  ncx_module_t *mod,
+				  const dlq_hdr_t *datadefQ)
+{
+    const obj_template_t  *testobj, *nextobj, *lastobj;
+    const dlq_hdr_t       *childdatadefQ;
+    status_t               res, retres;
+    boolean                isleaf;
+
+#ifdef DEBUG
+    if (!tkc || !mod || !datadefQ) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    /* first resolve all the local object names */
+    for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
+	 testobj != NULL;
+	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+
+	isleaf = FALSE;
+	switch (testobj->objtype) {
+	case OBJ_TYP_LEAF:
+	    isleaf = TRUE;
+	    /* fall through */
+	case OBJ_TYP_LEAF_LIST:
+	    if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
+#ifdef YANG_OBJ_DEBUG
+		if (LOGDEBUG2) {
+		    log_debug2("\ncheck_leafref_loop: mod %s, "
+			       "object %s, on line %u",
+			       mod->name, obj_get_name(testobj), 
+			       testobj->linenum);
+		}
+#endif
+		
+		if (isleaf) {
+		    nextobj = testobj->def.leaf->leafrefobj;
+		} else {
+		    nextobj = testobj->def.leaflist->leafrefobj;
+		}
+
+		if (nextobj == testobj) {
+		    res = ERR_NCX_LEAFREF_LOOP;
+		    log_error("\nError: leafref path in "
+			      "%s %s loops with self",
+			      obj_get_typestr(testobj),
+			      obj_get_name(testobj));
+		    TK_CUR(tkc) = testobj->tk;
+		    ncx_print_errormsg(tkc, mod, res);
+		} else {
+		    while (nextobj) {
+			if (obj_is_leafy(nextobj) &&
+			    obj_get_basetype(nextobj) == NCX_BT_LEAFREF) {
+
+			    lastobj = nextobj;
+			    if (isleaf) {
+				nextobj = nextobj->def.leaf->leafrefobj;
+			    } else {
+				nextobj = nextobj->def.leaflist->leafrefobj;
+			    }
+
+			    if (nextobj == testobj) {
+				res = ERR_NCX_LEAFREF_LOOP;
+				log_error("\nError: leafref path in "
+					  "%s %s loops with %s %s",
+					  obj_get_typestr(testobj),
+					  obj_get_name(testobj),
+					  obj_get_typestr(lastobj),
+					  obj_get_name(lastobj));
+				TK_CUR(tkc) = testobj->tk;
+				ncx_print_errormsg(tkc, mod, res);
+				nextobj = NULL;
+			    }
+			} else {
+			    nextobj = NULL;
+			}
+		    }
+		}
+		CHK_EXIT(res, retres);
+	    }
+	    break;
+	default:
+	    childdatadefQ = obj_get_cdatadefQ(testobj);
+	    if (childdatadefQ) {
+		res = yang_obj_check_leafref_loops(tkc,
+						   mod,
+						   childdatadefQ);
+		CHK_EXIT(res, retres);
+	    }
+	}
+    }
+
+    return retres;
+
+}  /* yang_obj_check_leafref_loops */
 
 
 /* END file yang_obj.c */

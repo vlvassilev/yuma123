@@ -591,6 +591,8 @@ const char *
 	return "unknown version";
     case ERR_NCX_VALUE_NOT_SUPPORTED:
 	return "value not supported";
+    case ERR_NCX_LEAFREF_LOOP:
+	return "leafref path loop";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

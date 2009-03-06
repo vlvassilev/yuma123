@@ -161,7 +161,6 @@ typedef struct typ_enum_t_ {
     ncx_status_t  status;
     int32         val;
     uint32        pos;
-    uint32        order;
     uint32        flags;
     dlq_hdr_t     appinfoQ;
 } typ_enum_t;
@@ -251,6 +250,8 @@ typedef struct typ_simple_t_ {
     dlq_hdr_t        patternQ;  /* Q of ncx_pattern_t for NCX_BT_STRING */
     ncx_strrest_t    strrest;   /* string/type restriction type in valQ */
     uint32           flags;
+    uint32           maxbit;                /* max bit position in valQ */
+    uint32           maxenum;                 /* max enum value in valQ */
 } typ_simple_t;
 
 

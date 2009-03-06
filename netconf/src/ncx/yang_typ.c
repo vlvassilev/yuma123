@@ -155,28 +155,31 @@ static status_t
 * Called during phase 2 of module parsing
 *
 * INPUTS:
-*   tkc == token chain
 *   typdef == typdef in progress
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t 
-    loop_test (tk_chain_t *tkc,
-	       typ_def_t *typdef)
+    loop_test (typ_def_t *typdef)
 {
-    typ_def_t *testdef;
+    typ_def_t *testdef, *lastdef;
     status_t   res;
 
     res = NO_ERR;
 
     if (typdef->class == NCX_CL_NAMED) {
 	testdef = typ_get_parent_typdef(typdef);
+	lastdef = testdef;
 	while (testdef && res==NO_ERR) {
 	    if (testdef == typdef) {
 		res = ERR_NCX_DEF_LOOP;
-		tkc->cur = typdef->tk;
+		log_error("\nError: named type loops with "
+			  "type '%s' on line %u",
+			  testdef->typename,
+			  lastdef->tk->linenum);
 	    } else {
+		lastdef = testdef;    
 		testdef = typ_get_parent_typdef(testdef);
 	    }
 	}
@@ -1230,8 +1233,8 @@ static status_t
 	}
     }
 
-    /* check if this is an out-of-order insert */
     if (valset) {
+	/* check if this is an out-of-order insert */
 	done = FALSE;
 	for (enl = (typ_enum_t *)dlq_firstEntry(&sim->valQ);
 	     enl != NULL && !done;
@@ -1255,25 +1258,41 @@ static status_t
 	    }
 	}
     } else {
-	/* value not set, use last value + 1 */
-	enl = (typ_enum_t *)dlq_lastEntry(&sim->valQ);
-	if (!enl) {
+	/* value not set, use highest value + 1 */
+	if (dlq_empty(&sim->valQ)) {
+	    /* first enum set gets the value zero */
 	    if (btyp==NCX_BT_ENUM) {
 		en->val = 0;
+		sim->maxenum = 0;
 	    } else {
 		en->pos = 0;
+		sim->maxbit = 0;
 	    }
 	} else {
+	    /* assign the highest value in use + 1 */
 	    if (btyp==NCX_BT_ENUM) {
-		en->val = enl->val+1;
+		if (sim->maxenum < NCX_MAX_INT) {
+		    en->val = ++(sim->maxenum);
+		} else {
+		    res = ERR_NCX_INVALID_VALUE;
+		    log_error("\nError: Cannot auto-increment enum "
+			      "value beyond MAXINT");
+		    ncx_print_errormsg(tkc, mod, res);
+		}
 	    } else {
-		en->pos = enl->pos+1;
+		if (sim->maxbit < NCX_MAX_UINT) {
+		    en->pos = ++(sim->maxbit);
+		} else {
+		    res = ERR_NCX_INVALID_VALUE;
+		    log_error("\nError: Cannot auto-increment bit "
+			      "position beyond MAXUINT");
+		    ncx_print_errormsg(tkc, mod, res);
+		}
 	    }
 	}
     }
 
     /* always insert in the user-defined order == new last entry */
-    en->order = dlq_count(&sim->valQ) + 1;
     dlq_enque(en, &sim->valQ);
     return NO_ERR;
 
@@ -2502,16 +2521,23 @@ static status_t
 		       typ_def_t *typdef,
 		       ncx_btype_t rbtyp)
 {
-    dlq_hdr_t  *rangeQ;
-    status_t    res;
-
+    dlq_hdr_t    *rangeQ;
+    typ_def_t    *parentdef;
+    status_t      res;
+    
     res = NO_ERR;
 
-    switch (typ_get_base_class(typdef)) {
+    switch (typdef->class) {
     case NCX_CL_NAMED:
-	res = finish_yang_range(tkc, mod,
-				typ_get_parent_typdef(typdef),
-				rbtyp);
+	parentdef = typ_get_parent_typdef(typdef);
+	if (parentdef) {
+	    res = finish_yang_range(tkc, 
+				    mod,
+				    parentdef,
+				    rbtyp);
+	} else {
+	    res = ERR_NCX_MISSING_TYPE;
+	}
 	if (res == NO_ERR) {
 	    res = resolve_minmax(tkc, mod, typdef, FALSE, rbtyp);
 	    if (res == NO_ERR) {
@@ -2987,7 +3013,7 @@ static status_t
 
     /* type name loop check */
     if (res == NO_ERR) {
-	res = loop_test(tkc, typdef);
+	res = loop_test(typdef);
     }
 
     /* If no loops then make sure base type is correct */

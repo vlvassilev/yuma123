@@ -1633,6 +1633,7 @@ static status_t
      */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
+	ncx_free_include(inc);
 	ncx_print_errormsg(tkc, mod, res);
 	return res;
     }
@@ -1789,7 +1790,8 @@ static status_t
 	    }
 
 	    /* check simple submodule loop with the top-level file */
-	    if (xml_strcmp(mod->name, pcb->top->name) &&
+	    if (retres == NO_ERR &&
+		xml_strcmp(mod->name, pcb->top->name) &&
 		!xml_strcmp(inc->submodule, pcb->top->name)) {
 		log_error("\nError: include loop for top-level %smodule '%s'",
 			  (pcb->top->ismod) ? "" : "sub", inc->submodule);
@@ -1798,7 +1800,8 @@ static status_t
 	    }
 
 	    /* check simple submodule including its parent module */
-	    if (mod->belongs && !xml_strcmp(mod->belongs, inc->submodule)) {
+	    if (retres == NO_ERR &&
+		mod->belongs && !xml_strcmp(mod->belongs, inc->submodule)) {
 		log_error("\nError: submodule '%s' cannot include its"
 			  " parent module '%s'", mod->name, inc->submodule);
 		retres = ERR_NCX_INCLUDE_LOOP;
@@ -1806,16 +1809,18 @@ static status_t
 	    }
 
 	    /* check for include loop */
-	    node = yang_find_node(&pcb->incchainQ, 
-				  inc->submodule,
-				  inc->revision);
-	    if (node) {
-		log_error("\nError: loop created by include '%s'"
-			  " from %smodule '%s', line %u",
-			  inc->submodule, (node->mod->ismod) ? "" : "sub",
-			  node->mod->name, node->tk->linenum);
-		retres = ERR_NCX_INCLUDE_LOOP;
-		ncx_print_errormsg(tkc, mod, retres);
+	    if (retres == NO_ERR) {
+		node = yang_find_node(&pcb->incchainQ, 
+				      inc->submodule,
+				      inc->revision);
+		if (node) {
+		    log_error("\nError: loop created by include '%s'"
+			      " from %smodule '%s', line %u",
+			      inc->submodule, (node->mod->ismod) ? "" : "sub",
+			      node->mod->name, node->tk->linenum);
+		    retres = ERR_NCX_INCLUDE_LOOP;
+		    ncx_print_errormsg(tkc, mod, retres);
+		}
 	    }
 	}
     }
@@ -1834,6 +1839,7 @@ static status_t
 	    node->mod = mod;
 	    node->tk = inc->tk;
 
+	    /* hand off malloced 'inc' struct here */
 	    dlq_enque(inc, &mod->includeQ);
 
 	    /* check if already parsed, and in the allincQ */
@@ -1862,7 +1868,9 @@ static status_t
 		yang_free_node(node);
 	    }
 	}
-    }
+    } else {
+	ncx_free_include(inc);
+    }	
 
     tkc->cur = savetk;
 
@@ -2911,6 +2919,10 @@ static status_t
 
     /* Validate all the XPath expressions within all cooked objects */
     res = yang_obj_resolve_xpath(tkc, mod, &mod->datadefQ);
+    CHK_EXIT(res, retres);
+
+    /* check for loops in any leafref XPath targets */
+    res = yang_obj_check_leafref_loops(tkc, mod, &mod->datadefQ);
     CHK_EXIT(res, retres);
 
     /* Check for imports not used warnings */

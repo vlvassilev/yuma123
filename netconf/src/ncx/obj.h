@@ -243,6 +243,7 @@ typedef struct obj_leaf_t_ {
     typ_def_t     *typdef;
     ncx_status_t   status;
     dlq_hdr_t      mustQ;              /* Q of xpath_pcb_t */
+    const struct obj_template_t_ *leafrefobj;
 } obj_leaf_t;
 
 
@@ -260,6 +261,7 @@ typedef struct obj_leaflist_t_ {
     uint32         maxelems;
     ncx_status_t   status;
     dlq_hdr_t      mustQ;              /* Q of xpath_pcb_t */
+    const struct obj_template_t_ *leafrefobj;
 } obj_leaflist_t;
 
 

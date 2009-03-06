@@ -1473,13 +1473,15 @@ static void
     const xmlChar           *fname, *fversion, *submod;
     int32                    indent;
     char                     buff[NCX_MAX_NUMLEN];
-    boolean                  notrefined, isanyxml, isempty;
+    boolean                  notrefined, isanyxml, isempty, rawmode;
 
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
 
     indent = startindent + ses_indent_count(scb);
 
-    if (obj_is_cloned(obj) && !strcmp(cp->objview, OBJVIEW_RAW)) {
+    rawmode = strcmp(cp->objview, OBJVIEW_RAW) ? FALSE : TRUE;
+
+    if (obj_is_cloned(obj) && rawmode) {
 	/* skip cloned objects in 'raw' object view mode */
 	return;
     }
@@ -1492,7 +1494,7 @@ static void
 	con = obj->def.container;
 	write_href_id(scb, submod, YANG_K_CONTAINER, con->name,
 		      startindent, obj->linenum, isempty, !first);
-	if (isempty) {
+	if (isempty && rawmode) {
 	    return;
 	}
 

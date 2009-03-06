@@ -1765,8 +1765,7 @@ status_t
 					lmem->val.str,
 					errinfo);
 	} else {
-	    res = val_bit_ok(typdef, 
-			     lmem->val.str, NULL, NULL);
+	    res = val_bit_ok(typdef, lmem->val.str, NULL);
 	}
 	if (res != NO_ERR) {
 	    return res;
@@ -1905,12 +1904,10 @@ status_t
 *    typdef == typ_def_t for the designated bits type
 *    bitname == bit name value to check
 *    position == address of return bit struct position value
-*    order == address of return bit struct order
 *
 * OUTPUTS:
 *  if non-NULL:
 *     *position == bit position value
-*     *order == bit struct typedef order
 *
 * RETURNS:
 *    status
@@ -1918,8 +1915,7 @@ status_t
 status_t
     val_bit_ok (const typ_def_t *typdef,
 		const xmlChar *bitname,
-		uint32 *position,
-		uint32 *order)
+		uint32 *position)
 {
     const dlq_hdr_t  *checkQ;
     status_t       res;
@@ -1962,9 +1958,6 @@ status_t
 	    if (res == NO_ERR) {
 		if (position) {
 		    *position = en->pos;
-		}
-		if (order) {
-		    *order = en->order;
 		}
 		return NO_ERR;
 	    }

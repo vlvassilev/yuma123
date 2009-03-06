@@ -1073,11 +1073,12 @@ static void
     const obj_unique_comp_t *unicomp, *nextunicomp;
     int32                    indent;
     char                     buff[NCX_MAX_NUMLEN];
-    boolean                  notrefined, isanyxml, isempty;
+    boolean                  notrefined, isanyxml, isempty, rawmode;
 
     indent = startindent + ses_indent_count(scb);
+    rawmode = strcmp(cp->objview, OBJVIEW_RAW) ? FALSE : TRUE;
 
-    if (obj_is_cloned(obj) && !strcmp(cp->objview, OBJVIEW_RAW)) {
+    if (obj_is_cloned(obj) && rawmode) {
 	/* skip cloned objects in 'raw' object view mode */
 	return;
     }
@@ -1090,7 +1091,7 @@ static void
 	con = obj->def.container;
 	write_cyang_id(scb, YANG_K_CONTAINER, con->name, startindent, 
 		       isempty, !first);
-	if (isempty) {
+	if (isempty && rawmode) {
 	    return;
 	}
 

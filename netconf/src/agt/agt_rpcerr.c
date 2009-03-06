@@ -477,6 +477,7 @@ static rpc_err_t
     case ERR_NCX_UNKNOWN_MODULE:
     case ERR_NCX_UNKNOWN_VERSION:
     case ERR_NCX_VALUE_NOT_SUPPORTED:
+    case ERR_NCX_LEAFREF_LOOP:
 	return RPC_ERR_INVALID_VALUE;
 
     /* user warnings start at 400 and do not need to be listed here */

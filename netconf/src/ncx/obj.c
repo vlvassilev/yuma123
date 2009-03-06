@@ -4762,7 +4762,7 @@ status_t
 	    log_error("\nError: typedef '%s' cannot use type '%s'",
 		      typname, typname);
 	    tkc->cur = typdef->tk;
-	    return ERR_NCX_WRONG_VAL;
+	    return ERR_NCX_DEF_LOOP;
 	}
 
 	testtyp = NULL;

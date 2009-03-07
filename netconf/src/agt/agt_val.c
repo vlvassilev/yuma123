@@ -908,11 +908,6 @@ static status_t
 	case OP_EDITOP_LOAD:
 	    val_remove_child(newval);
 	    val_set_canonical_order(newval);
-
-	    /*** DOES NOT ALLOW FOR NESTED LOAD OPERATIONS
-	     *** such as loading a module at runtime with an
-	     *** augment of a nested object as the root
-	     ***/
 	    res = cfg_apply_load_root(target, newval);
 	    break;
 	case OP_EDITOP_DELETE:
@@ -928,9 +923,9 @@ static status_t
 	}
     }
 
-    if (res == NO_ERR 
-	&& newval->btyp == NCX_BT_LIST
-	&& cur_editop == OP_EDITOP_MERGE) {
+    if (res == NO_ERR && newval && 
+	newval->btyp == NCX_BT_LIST && 
+	cur_editop == OP_EDITOP_MERGE) {
 	if (newval->editvars
 	    && newval->editvars->insertstr ) {
 

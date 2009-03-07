@@ -220,7 +220,7 @@ void
 {
     const xmlChar        *val;
     const obj_template_t *testobj;
-    uint32                count;
+    uint32                count, objnestlevel;
     char                  numbuff[NCX_MAX_NUMLEN];
     boolean               normalpass;
 
@@ -243,7 +243,13 @@ void
 	return;
     }
 
-    normalpass = (nestlevel && (obj_get_level(obj) > nestlevel))
+    objnestlevel = obj_get_level(obj);
+
+    if (mode == HELP_MODE_BRIEF && objnestlevel > nestlevel) {
+	return;
+    }
+
+    normalpass = (nestlevel && (objnestlevel > nestlevel))
 	? FALSE : TRUE;
 
     if (obj->objtype == OBJ_TYP_RPCIO || 
@@ -270,6 +276,7 @@ void
     case OBJ_TYP_NOTIF:
 	break;
     default:
+	/* print type and default for leafy and choice objects */
 	if (obj->objtype != OBJ_TYP_CHOICE) {
 	    help_write_lines((const xmlChar *)" [", 0, FALSE); 
 	    help_write_lines((const xmlChar *)
@@ -293,8 +300,11 @@ void
 	if (val) {
 	    switch (mode) {
 	    case HELP_MODE_BRIEF:
-		help_write_lines_max(val, indent+NCX_DEF_INDENT,
-				     TRUE, HELP_MODE_BRIEF_MAX); 
+		if (obj->objtype == OBJ_TYP_RPC || 
+		    obj->objtype == OBJ_TYP_NOTIF) {
+		    help_write_lines_max(val, indent+NCX_DEF_INDENT,
+					 TRUE, HELP_MODE_BRIEF_MAX); 
+		}
 		break;
 	    case HELP_MODE_NORMAL:
 		if (obj->objtype == OBJ_TYP_RPC || 
@@ -309,10 +319,6 @@ void
 	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);
 		return;
-	    }
-	    if (obj->objtype == OBJ_TYP_RPC || 
-		obj->objtype == OBJ_TYP_NOTIF) {
-		help_write_lines((const xmlChar *)"\n", 0, FALSE);
 	    }
 	}
     }
@@ -489,36 +495,39 @@ void
 	}
 	break;
     case OBJ_TYP_RPC:
-	if (mode != HELP_MODE_BRIEF) {
-	    testobj = obj_find_child(obj, NULL, YANG_K_INPUT);
-	    if (testobj && obj_get_child_count(testobj)) {
-		obj_dump_template(testobj,
-				  mode,
-				  nestlevel,
-				  indent+NCX_DEF_INDENT);
-	    }
+	testobj = obj_find_child(obj, NULL, YANG_K_INPUT);
+	if (testobj && obj_get_child_count(testobj)) {
+	    obj_dump_template(testobj,
+			      mode,
+			      nestlevel,
+			      indent+NCX_DEF_INDENT);
+	}
 
-	    testobj = obj_find_child(obj, NULL, YANG_K_OUTPUT);
-	    if (testobj && obj_get_child_count(testobj)) {
-		obj_dump_template(testobj,
-				  mode,
-				  nestlevel,
-				  indent+NCX_DEF_INDENT);
-	    }
+	testobj = obj_find_child(obj, NULL, YANG_K_OUTPUT);
+	if (testobj && obj_get_child_count(testobj)) {
+	    obj_dump_template(testobj,
+			      mode,
+			      nestlevel,
+			      indent+NCX_DEF_INDENT);
 	}
 	help_write_lines((const xmlChar *)"\n", 0, FALSE);
 	break;
     case OBJ_TYP_RPCIO:
 	if (mode != HELP_MODE_BRIEF) {
-	    obj_dump_datadefQ(&obj->def.rpcio->datadefQ, mode, 
-			      nestlevel, indent+NCX_DEF_INDENT);
+	    testobj = obj_get_default_parm(obj);
+	    if (testobj) {
+		help_write_lines((const xmlChar *)"default parameter: ", 
+				 indent+NCX_DEF_INDENT, TRUE); 
+		help_write_lines(obj_get_name(testobj), 0, FALSE);
+	    }
 	}
+	obj_dump_datadefQ(&obj->def.rpcio->datadefQ, mode, 
+			  nestlevel, indent+NCX_DEF_INDENT);
 	break;
     case OBJ_TYP_NOTIF:
-	if (mode != HELP_MODE_BRIEF) {
-	    obj_dump_datadefQ(&obj->def.notif->datadefQ, mode, 
-			      nestlevel, indent+NCX_DEF_INDENT);
-	}
+	obj_dump_datadefQ(&obj->def.notif->datadefQ, mode, 
+			  nestlevel, indent+NCX_DEF_INDENT);
+	break;
     case OBJ_TYP_AUGMENT:
     case OBJ_TYP_USES:
     case OBJ_TYP_REFINE:
@@ -549,8 +558,8 @@ void
 		       uint32 nestlevel,
 		       uint32 indent)
 {
-
     const obj_template_t  *obj;
+    uint32                 objnestlevel;
 
 #ifdef DEBUG
     if (!datadefQ) {
@@ -572,6 +581,11 @@ void
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (!obj_has_name(obj)) {
+	    continue;
+	}
+
+	objnestlevel = obj_get_level(obj);
+	if (mode == HELP_MODE_BRIEF && objnestlevel > nestlevel) {
 	    continue;
 	}
 

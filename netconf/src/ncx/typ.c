@@ -2612,6 +2612,52 @@ boolean
 
 
 /********************************************************************
+* FUNCTION typ_is_qname_string
+*
+* Find the ncx:qname extension within the specified typdef chain
+*
+* INPUTS:
+*  typdef == start of typ_def_t chain to check
+*
+* RETURNS:
+*   TRUE if ncx:qname extension found
+*   FALSE otherwise
+*********************************************************************/
+boolean
+    typ_is_qname_string (const typ_def_t *typdef)
+{
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    if (ncx_find_appinfo(&typdef->appinfoQ,
+			 NCX_PREFIX, NCX_EL_QNAME)) {
+	return TRUE;
+    }
+
+    if (typdef->class == NCX_CL_NAMED) {
+	if (typdef->def.named.newtyp &&
+	    ncx_find_appinfo(&typdef->def.named.newtyp->appinfoQ,
+			     NCX_PREFIX, NCX_EL_QNAME)) {
+	    return TRUE;
+	}
+	if (typdef->def.named.typ) {
+	    return typ_is_qname_string(&typdef->def.named.typ->typdef);
+	} else {
+	    return FALSE;
+	}
+    } else {
+	return FALSE;
+    }
+
+}  /* typ_is_qname_string */
+
+
+/********************************************************************
 * FUNCTION typ_get_defval
 *
 * Find the default value string for the specified type template

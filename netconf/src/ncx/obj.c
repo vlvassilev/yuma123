@@ -5967,10 +5967,6 @@ status_t
 }  /* obj_copy_object_id */
 
 
-
-
-
-
 /********************************************************************
 * FUNCTION obj_gen_aughook_id
 * 
@@ -6679,41 +6675,6 @@ const dlq_hdr_t *
     /*NOTREACHED*/
 
 }   /* obj_get_cdatadefQ */
-
-
-/********************************************************************
-* FUNCTION obj_get_object_id_len
-* 
-* Get the Object ID length for the specified obj_template_t
-* 
-* INPUTS:
-*   obj == node to check
-*
-* RETURNS:
-*   number of bytes in name (not including terminating zero)
-*********************************************************************/
-uint32
-    obj_get_object_id_len (const obj_template_t *obj)
-{
-    uint32    len;
-    status_t  res;
-
-#ifdef DEBUG 
-    if (!obj) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    /* figure out the length of the object ID */
-    res = get_object_string(obj, NULL, 0, TRUE, &len);
-    if (res != NO_ERR) {
-	SET_ERROR(res);
-	return 0;
-    }
-
-    return len;
-
-}  /* obj_get_object_id_len */
 
 
 /********************************************************************
@@ -7959,15 +7920,20 @@ void
 	obj->flags |= OBJ_FL_ABSTRACT;
     }
 
-    if (obj->objtype == OBJ_TYP_LEAF && 
-	obj_get_basetype(obj) != NCX_BT_ANY) {
-	if (typ_is_xpath_string(obj->def.leaf->typdef)) {
+    if (obj_is_leafy(obj)) {
+	if (typ_is_xpath_string(obj_get_ctypdef(obj))) {
+	    obj->flags |= OBJ_FL_XPATH;
+	} else if (ncx_find_appinfo(appinfoQ, 
+				    NCX_PREFIX, 
+				    NCX_EL_XPATH)) {
 	    obj->flags |= OBJ_FL_XPATH;
 	}
-    } else if (obj->objtype == OBJ_TYP_LEAF_LIST &&
-	       obj_get_basetype(obj) != NCX_BT_ANY) {
-	if (typ_is_xpath_string(obj->def.leaflist->typdef)) {
-	    obj->flags |= OBJ_FL_XPATH;
+	if (typ_is_qname_string(obj_get_ctypdef(obj))) {
+	    obj->flags |= OBJ_FL_QNAME;
+	} else if (ncx_find_appinfo(appinfoQ, 
+				    NCX_PREFIX, 
+				    NCX_EL_XPATH)) {
+	    obj->flags |= OBJ_FL_QNAME;
 	}
     }
 

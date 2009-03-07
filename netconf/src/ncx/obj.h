@@ -152,6 +152,9 @@ date	     init     comment
 /* object data type is an XPath string */
 #define OBJ_FL_XPATH        bit21
 
+/* object data type is a QName string */
+#define OBJ_FL_QNAME        bit22
+
 
 /********************************************************************
 *								    *
@@ -908,9 +911,6 @@ extern dlq_hdr_t *
 
 extern const dlq_hdr_t *
     obj_get_cdatadefQ (const obj_template_t *obj);
-
-extern uint32
-    obj_get_object_id_len (const obj_template_t *obj);
 
 extern const xmlChar *
     obj_get_default (const obj_template_t *obj);

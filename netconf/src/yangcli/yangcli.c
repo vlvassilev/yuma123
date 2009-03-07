@@ -207,9 +207,11 @@ date         init     comment
 #define YANGCLI_FULL        (const xmlChar *)"full"
 #define YANGCLI_GLOBAL      (const xmlChar *)"global"
 #define YANGCLI_GLOBALS     (const xmlChar *)"globals"
+#define YANGCLI_OIDS        (const xmlChar *)"oids"
 #define YANGCLI_LOCAL       (const xmlChar *)"local"
 #define YANGCLI_LOCALS      (const xmlChar *)"locals"
-#define YANGCLI_KEY         (const xmlChar *)"key"
+#define YANGCLI_MODULE      (const xmlChar *)"module"
+#define YANGCLI_MODULES     (const xmlChar *)"modules"
 #define YANGCLI_NOFILL      (const xmlChar *)"nofill"
 #define YANGCLI_OBJECTS     (const xmlChar *)"objects"
 #define YANGCLI_OPERATION   (const xmlChar *)"operation"
@@ -222,6 +224,7 @@ date         init     comment
 #define YANGCLI_USER        (const xmlChar *)"user"
 #define YANGCLI_VAR         (const xmlChar *)"var"
 #define YANGCLI_VARREF      (const xmlChar *)"varref"
+#define YANGCLI_VARS        (const xmlChar *)"vars"
 
 /* bad-data enumeration values */
 #define E_BAD_DATA_IGNORE (const xmlChar *)"ignore"
@@ -239,6 +242,7 @@ date         init     comment
 #define YANGCLI_FILL    (const xmlChar *)"fill"
 #define YANGCLI_HELP    (const xmlChar *)"help"
 #define YANGCLI_INSERT  (const xmlChar *)"insert"
+#define YANGCLI_LIST    (const xmlChar *)"list"
 #define YANGCLI_LOAD    (const xmlChar *)"load"
 #define YANGCLI_MERGE   (const xmlChar *)"merge"
 #define YANGCLI_PWD     (const xmlChar *)"pwd"
@@ -273,7 +277,7 @@ date         init     comment
  */
 typedef struct modptr_t_ {
     dlq_hdr_t            qhdr;
-    const ncx_module_t  *mod;
+    ncx_module_t         *mod;
 } modptr_t;
 
 
@@ -453,7 +457,7 @@ static char progver[] = "0.7.7";
 *   malloced modptr_t struct or NULL of malloc failed
 *********************************************************************/
 static modptr_t *
-    new_modptr (const ncx_module_t *mod)
+    new_modptr (ncx_module_t *mod)
 {
     modptr_t  *modptr;
 
@@ -573,6 +577,133 @@ static void
     m__free(agent_cb);
 
 }  /* free_agent_cb */
+
+
+/********************************************************************
+* FUNCTION clear_agent_cb_session
+* 
+*  Clean the current session data from an agent control block
+* 
+* INPUTS:
+*    agent_cb == control block to use for clearing
+*                the session data
+*********************************************************************/
+static void
+    clear_agent_cb_session (agent_cb_t *agent_cb)
+{
+
+    modptr_t  *modptr;
+
+    while (!dlq_empty(&agent_cb->modptrQ)) {
+	modptr = (modptr_t *)dlq_deque(&agent_cb->modptrQ);
+	free_modptr(modptr);
+    }
+    agent_cb->mysid = 0;
+    agent_cb->state = MGR_IO_ST_IDLE;
+
+}  /* clear_agent_cb_session */
+
+
+/********************************************************************
+* FUNCTION is_top
+* 
+* Check the state and determine if the top or conn
+* mode is active
+* 
+* INPUTS:
+*   agent state to use
+*
+* RETURNS:
+*  TRUE if this is TOP mode
+*  FALSE if this is CONN mode (or associated states)
+*********************************************************************/
+static boolean
+    is_top (mgr_io_state_t state)
+{
+    switch (state) {
+    case MGR_IO_ST_INIT:
+    case MGR_IO_ST_IDLE:
+	return TRUE;
+    case MGR_IO_ST_CONNECT:
+    case MGR_IO_ST_CONN_START:
+    case MGR_IO_ST_SHUT:
+    case MGR_IO_ST_CONN_IDLE:
+    case MGR_IO_ST_CONN_RPYWAIT:
+    case MGR_IO_ST_CONN_CANCELWAIT:
+    case MGR_IO_ST_CONN_CLOSEWAIT:
+    case MGR_IO_ST_CONN_SHUT:
+	return FALSE;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+
+}  /* is_top */
+
+
+/********************************************************************
+* FUNCTION use_agentcb
+* 
+* Check if the agent_cb should be used for modules right now
+*
+* INPUTS:
+*   agent_cb == agent control block to check
+*
+* RETURNS:
+*   TRUE to use agent_cb
+*   FALSE if not
+*********************************************************************/
+static boolean
+    use_agentcb (agent_cb_t *agent_cb)
+{
+    if (!agent_cb || is_top(agent_cb->state)) {
+	return FALSE;
+    } else if (dlq_empty(&agent_cb->modptrQ)) {
+	return FALSE;
+    }
+    return TRUE;
+}  /* use_agentcb */
+
+
+/********************************************************************
+* FUNCTION find_module
+* 
+*  Check the agent_cb for the specified module; if not found
+*  then try ncx_find_module
+* 
+* INPUTS:
+*    agent_cb == control block to free
+*    modname == module name
+*
+* RETURNS:
+*   pointer to the requested module
+*      using the registered 'current' version
+*   NULL if not found
+*********************************************************************/
+static ncx_module_t *
+    find_module (agent_cb_t *agent_cb,
+		 const xmlChar *modname)
+{
+
+    modptr_t      *modptr;
+    ncx_module_t  *mod;
+
+    if (use_agentcb(agent_cb)) {
+	for (modptr = (modptr_t *)dlq_firstEntry(&agent_cb->modptrQ);
+	     modptr != NULL;
+	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+	    if (!xml_strcmp(modptr->mod->name, modname)) {
+		return modptr->mod;
+	    }
+	}
+    }
+
+    mod = ncx_find_module(modname, NULL);
+
+    return mod;
+
+}  /* find_module */
 
 
 /********************************************************************
@@ -715,42 +846,6 @@ static boolean
 
 }  /* is_yangcli_ns */
 
-
-/********************************************************************
-* FUNCTION is_top
-* 
-* Check the state and determine if the top or conn
-* mode is active
-* 
-* INPUTS:
-*   agent state to use
-*
-* RETURNS:
-*  TRUE if this is TOP mode
-*  FALSE if this is CONN mode (or associated states)
-*********************************************************************/
-static boolean
-    is_top (mgr_io_state_t state)
-{
-    switch (state) {
-    case MGR_IO_ST_INIT:
-    case MGR_IO_ST_IDLE:
-	return TRUE;
-    case MGR_IO_ST_CONNECT:
-    case MGR_IO_ST_CONN_START:
-    case MGR_IO_ST_SHUT:
-    case MGR_IO_ST_CONN_IDLE:
-    case MGR_IO_ST_CONN_RPYWAIT:
-    case MGR_IO_ST_CONN_CANCELWAIT:
-    case MGR_IO_ST_CONN_CLOSEWAIT:
-    case MGR_IO_ST_CONN_SHUT:
-	return FALSE;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
-    }
-
-}  /* is_top */
 
 
 /********************************************************************
@@ -1227,6 +1322,7 @@ static xmlChar *
 * and find the template for the requested definition
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   modname == module name to try
 *   defname == definition name to try
 *   dtyp == definition type 
@@ -1238,7 +1334,8 @@ static xmlChar *
 *   pointer to the found definition template or NULL if not found
 *********************************************************************/
 static void *
-    try_parse_def (const xmlChar *modname,
+    try_parse_def (agent_cb_t *agent_cb,
+		   const xmlChar *modname,
 		   const xmlChar *defname,
 		   ncx_node_t *dtyp)
 
@@ -1246,7 +1343,7 @@ static void *
     void          *def;
     ncx_module_t  *mod;
 
-    mod = ncx_find_module(modname, NULL);
+    mod = find_module(agent_cb, modname);
     if (!mod) {
 	return NULL;
     }
@@ -1284,6 +1381,7 @@ static void *
 	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+#if 0
     /* if an explicit module is given, then no others
      * can be tried, but check partial command
      */
@@ -1299,6 +1397,7 @@ static void *
 	    ;
 	}
     }
+#endif
 
     return def;
     
@@ -1317,6 +1416,7 @@ static void *
 * and find the template for the requested definition
 *
 * INPUTS:
+*   agent_cb == agent control block to use
 *   dtyp == definition type 
 *       (NCX_NT_OBJ or  NCX_NT_TYP)
 *   line == input command line from user
@@ -1330,7 +1430,8 @@ static void *
 *   pointer to the found definition template or NULL if not found
 *********************************************************************/
 static void *
-    parse_def (ncx_node_t *dtyp,
+    parse_def (agent_cb_t *agent_cb,
+	       ncx_node_t *dtyp,
 	       xmlChar *line,
 	       uint32 *len)
 {
@@ -1338,6 +1439,7 @@ static void *
     xmlChar       *start, *p, *q, oldp, oldq;
     const xmlChar *prefix, *defname, *modname;
     ncx_module_t  *mod;
+    modptr_t      *modptr;
     uint32         prelen;
     xmlns_id_t     nsid;
     
@@ -1406,30 +1508,48 @@ static void *
 	    modname = xmlns_get_module(nsid);
 	}
 	if (modname) {
-	    def = try_parse_def(modname, defname, dtyp);
+	    def = try_parse_def(agent_cb,
+				modname, defname, dtyp);
 	} else {
 	    log_error("\nError: no module found for prefix '%s'", 
 		      prefix);
 	}
     } else {
-	def = try_parse_def(YANGCLI_MOD, defname, dtyp);
+	def = try_parse_def(agent_cb,
+			    YANGCLI_MOD, defname, dtyp);
 
 	if (!def && default_module) {
-	    def = try_parse_def(default_module, defname, dtyp);
+	    def = try_parse_def(agent_cb,
+				default_module, defname, dtyp);
 	}
 	if (!def && (!default_module ||
 		     xml_strcmp(default_module, NC_MODULE))) {
 
-	    def = try_parse_def(NC_MODULE, defname, dtyp);
+	    def = try_parse_def(agent_cb,
+				NC_MODULE, defname, dtyp);
 	}
 
 	/* if not found, try any module */
 	if (!def) {
+	    if (use_agentcb(agent_cb)) {
+		for (modptr = (modptr_t *)
+			 dlq_firstEntry(&agent_cb->modptrQ);
+		     modptr != NULL && !def;
+		     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+		    def = try_parse_def(agent_cb, 
+					modptr->mod->name, 
+					defname, 
+					dtyp);
+		}
+	    }
+
 	    for (mod = ncx_get_first_module();
 		 mod != NULL && !def;
 		 mod = ncx_get_next_module(mod)) {
 
-		def = try_parse_def(mod->name, defname, dtyp);
+		def = try_parse_def(agent_cb, 
+				    mod->name, defname, dtyp);
 	    }
 	}
 
@@ -1438,10 +1558,26 @@ static void *
 	    switch (*dtyp) {
 	    case NCX_NT_NONE:
 	    case NCX_NT_OBJ:
-		def = ncx_match_any_rpc(NULL, defname);
-		if (def) {
-		    *dtyp = NCX_NT_OBJ;
+		if (use_agentcb(agent_cb)) {
+		    for (modptr = (modptr_t *)
+			     dlq_firstEntry(&agent_cb->modptrQ);
+			 modptr != NULL && !def;
+			 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+			def = ncx_match_any_rpc(modptr->mod->name, 
+						defname);
+			if (def) {
+			    *dtyp = NCX_NT_OBJ;
+			}
+		    }
 		}
+		if (!def) {
+		    def = ncx_match_any_rpc(NULL, defname);
+		    if (def) {
+			*dtyp = NCX_NT_OBJ;
+		    }
+		}
+		break;
 	    default:
 		;
 	    }
@@ -3568,47 +3704,91 @@ static void
 } /* do_show_module */
 
 
+
+
+/********************************************************************
+ * FUNCTION do_show_one_module (sub-mode of show modules RPC)
+ * 
+ * for 1 of N: show modules
+ *
+ * INPUTS:
+ *    mod == module to show
+ *    mode == requested help mode
+ *
+ *********************************************************************/
+static void
+    do_show_one_module (ncx_module_t *mod,
+			help_mode_t mode)
+{
+    boolean        anyout, imode;
+
+    imode = interactive_mode();
+    anyout = FALSE;
+
+    if (mode == HELP_MODE_BRIEF) {
+	if (imode) {
+	    log_stdout("\n  %s", mod->name); 
+	} else {
+	    log_write("\n  %s", mod->name); 
+	}
+    } else if (mode == HELP_MODE_NORMAL) {
+	if (imode) {
+	    if (mod->version) {
+		log_stdout("\n  %s:%s/%s", mod->prefix, 
+			   mod->name, mod->version);
+	    } else {
+		log_stdout("\n  %s:%s", mod->prefix, 
+			   mod->name);
+	    }
+	} else {
+	    if (mod->version) {
+		log_write("\n  %s/%s", mod->name, mod->version);
+	    } else {
+		log_write("\n  %s", mod->name);
+	    }
+	}
+    } else {
+	help_data_module(mod, HELP_MODE_BRIEF);
+    }
+}  /* do_show_one_module */
+
+
 /********************************************************************
  * FUNCTION do_show_modules (sub-mode of local RPC)
  * 
  * show modules
  *
  * INPUTS:
- *    mod == first module to show
+ *    agent_cb == agent control block to use
  *    mode == requested help mode
  *
  *********************************************************************/
 static void
-    do_show_modules (const ncx_module_t *mod,
+    do_show_modules (agent_cb_t *agent_cb,
 		     help_mode_t mode)
 {
-    boolean anyout, imode;
+    ncx_module_t  *mod;
+    modptr_t      *modptr;
+    boolean        anyout, imode;
 
     imode = interactive_mode();
     anyout = FALSE;
 
-    while (mod) {
-	if (mode == HELP_MODE_BRIEF) {
-	    if (imode) {
-		if (mod->version) {
-		    log_stdout("\n  %s:%s/%s", mod->prefix, 
-			       mod->name, mod->version);
-		} else {
-		    log_stdout("\n  %s:%s", mod->prefix, 
-			       mod->name);
-		}
-	    } else {
-		if (mod->version) {
-		    log_write("\n  %s/%s", mod->name, mod->version);
-		} else {
-		    log_write("\n  %s", mod->name);
-		}
-	    }
-	} else {
-	    help_data_module(mod, HELP_MODE_BRIEF);
+    if (use_agentcb(agent_cb)) {
+	for (modptr = (modptr_t *)dlq_firstEntry(&agent_cb->modptrQ);
+	     modptr != NULL;
+	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+	    do_show_one_module(modptr->mod, mode);
+	    anyout = TRUE;
 	}
-	anyout = TRUE;
-	mod = (const ncx_module_t *)ncx_get_next_module(mod);
+    } else {
+	mod = ncx_get_first_module();
+	while (mod) {
+	    do_show_one_module(mod, mode);
+	    anyout = TRUE;
+	    mod = ncx_get_next_module(mod);
+	}
     }
 
     if (anyout) {
@@ -3617,9 +3797,60 @@ static void
 	} else {
 	    log_write("\n");
 	}
+    } else {
+	if (imode) {
+	    log_stdout("\nyangcli: no modules loaded\n");
+	} else {
+	    log_error("\nyangcli: no modules loaded\n");
+	}
     }
 
 } /* do_show_modules */
+
+
+/********************************************************************
+ * FUNCTION do_show_one_object (sub-mode of show objects local RPC)
+ * 
+ * show objects: 1 of N
+ *
+ * INPUTS:
+ *    obj == object to show
+ *    mode == requested help mode
+ *    anyout == address of return anyout status
+ *
+ * OUTPUTS:
+ *    *anyout set to TRUE only if any suitable objects found
+ *********************************************************************/
+static void
+    do_show_one_object (const obj_template_t *obj,
+			help_mode_t mode,
+			boolean *anyout)
+{
+    boolean               imode;
+
+    imode = interactive_mode();
+
+    if (obj_is_data_db(obj) && 
+	obj_has_name(obj) &&
+	!obj_is_hidden(obj) && !obj_is_abstract(obj)) {
+
+	if (mode == HELP_MODE_BRIEF) {
+	    if (imode) {
+		log_stdout("\n%s:%s",
+			   obj_get_mod_name(obj),
+			   obj_get_name(obj));
+	    } else {
+		log_write("\n%s:%s",
+			  obj_get_mod_name(obj),
+			  obj_get_name(obj));
+	    }
+	} else {
+	    obj_dump_template(obj, mode-1, 0, 0); 
+	}
+	*anyout = TRUE;
+    }
+
+} /* do_show_one_object */
 
 
 /********************************************************************
@@ -3628,37 +3859,47 @@ static void
  * show objects
  *
  * INPUTS:
+ *    agent_cb == agent control block to use
  *    mode == requested help mode
  *
  *********************************************************************/
 static void
-    do_show_objects (help_mode_t mode)
+    do_show_objects (agent_cb_t *agent_cb,
+		     help_mode_t mode)
 {
     const ncx_module_t   *mod;
     const obj_template_t *obj;
+    const modptr_t       *modptr;
     boolean               anyout, imode;
-
-    mod = ncx_get_first_module();
 
     imode = interactive_mode();
     anyout = FALSE;
 
-    while (mod) {
-	for (obj = ncx_get_first_object(mod);
-	     obj != NULL;
-	     obj = ncx_get_next_object(mod, obj)) {
+    if (use_agentcb(agent_cb)) {
+	for (modptr = (const modptr_t *)
+		 dlq_firstEntry(&agent_cb->modptrQ);
+	     modptr != NULL;
+	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
 
-	    if (obj_is_data_db(obj) && 
-		obj_has_name(obj) &&
-		!obj_is_hidden(obj) && !obj_is_abstract(obj)) {
+	    for (obj = ncx_get_first_object(modptr->mod);
+		 obj != NULL;
+		 obj = ncx_get_next_object(modptr->mod, obj)) {
 
-		obj_dump_template(obj, mode, 0, 0); 
-		anyout = TRUE;
+		do_show_one_object(obj, mode, &anyout);
 	    }
 	}
-	mod = (const ncx_module_t *)ncx_get_next_module(mod);
-    }
+    } else {
+	mod = ncx_get_first_module();
+	while (mod) {
+	    for (obj = ncx_get_first_object(mod);
+		 obj != NULL;
+		 obj = ncx_get_next_object(mod, obj)) {
 
+		do_show_one_object(obj, mode, &anyout);
+	    }
+	    mod = (const ncx_module_t *)ncx_get_next_module(mod);
+	}
+    }
     if (anyout) {
 	if (imode) {
 	    log_stdout("\n");
@@ -3696,7 +3937,7 @@ static void
     val_value_t        *valset, *parm;
     const ncx_module_t *mod;
     status_t            res;
-    boolean             imode;
+    boolean             imode, done;
     help_mode_t         mode;
 
     imode = interactive_mode();
@@ -3716,26 +3957,74 @@ static void
 	    }
 	}
 	    
-	/* there is 1 parm which is a choice of N */
-	parm = val_get_first_child(valset);
+	/* get the 1 of N 'showtype' choice */
+	done = FALSE;
+	parm = val_find_child(valset, YANGCLI_MOD,
+			      YANGCLI_LOCAL);
 	if (parm) {
-	    if (!xml_strcmp(parm->name, YANGCLI_LOCAL)) {
-		do_show_var(VAL_STR(parm), ISLOCAL, FALSE, mode);
-	    } else if (!xml_strcmp(parm->name, YANGCLI_LOCALS)) {
+	    do_show_var(VAL_STR(parm), ISLOCAL, FALSE, mode);
+	    done = TRUE;
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, YANGCLI_MOD,
+				  YANGCLI_LOCALS);
+	    if (parm) {
 		do_show_vars(mode, TRUE, FALSE, FALSE);
-	    } else if (!xml_strcmp(parm->name, YANGCLI_OBJECTS)) {
-		do_show_objects(mode);
-	    } else if (!xml_strcmp(parm->name, YANGCLI_GLOBAL)) {
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, YANGCLI_MOD,
+				  YANGCLI_OBJECTS);
+	    if (parm) {
+		do_show_objects(agent_cb, mode);
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, YANGCLI_MOD,
+				  YANGCLI_GLOBAL);
+	    if (parm) {
 		do_show_var(VAL_STR(parm), ISGLOBAL, FALSE, mode);
-	    } else if (!xml_strcmp(parm->name, YANGCLI_GLOBALS)) {
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, YANGCLI_MOD,
+				  YANGCLI_GLOBALS);
+	    if (parm) {
 		do_show_vars(mode, TRUE, TRUE, FALSE);
-	    } else if (!xml_strcmp(parm->name, YANGCLI_VAR)) {
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, YANGCLI_MOD,
+				  YANGCLI_VAR);
+	    if (parm) {
 		do_show_var(VAL_STR(parm), ISLOCAL, TRUE, mode);
-	    } else if (!xml_strcmp(parm->name, NCX_EL_VARS)) {
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, YANGCLI_MOD,
+				  YANGCLI_VARS);
+	    if (parm) {
 		do_show_vars(mode, FALSE, FALSE, TRUE);
-	    } else if (!xml_strcmp(parm->name, NCX_EL_MODULE)) {
-		/*** NEED TO GET REQUESTED VERSION FROM USER ***/
-		mod = ncx_find_module(VAL_STR(parm), NULL);
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, YANGCLI_MOD,
+				  YANGCLI_MODULE);
+	    if (parm) {
+		mod = find_module(agent_cb, VAL_STR(parm));
 		if (mod) {
 		    do_show_module(mod, mode);
 		} else {
@@ -3747,40 +4036,30 @@ static void
 				  VAL_STR(parm));
 		    }
 		}
-	    } else if (!xml_strcmp(parm->name, NCX_EL_MODULELIST)) {
-		mod = ncx_get_first_module();
-		if (mod) {
-		    do_show_modules(mod, TRUE);
-		} else {
-		    if (imode) {
-			log_stdout("\nyangcli: no modules loaded");
-		    } else {
-			log_error("\nyangcli: no modules loaded");
-		    }
-		}
-	    } else if (!xml_strcmp(parm->name, NCX_EL_MODULES)) {
-		mod = ncx_get_first_module();
-		if (mod) {
-		    do_show_modules(mod, mode);
-		} else {
-		    if (imode) {
-			log_stdout("\nyangcli: no modules loaded");
-		    } else {
-			log_error("\nyangcli: no modules loaded");
-		    }
-		}
-	    } else if (!xml_strcmp(parm->name, NCX_EL_VERSION)) {
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, YANGCLI_MOD,
+				  YANGCLI_MODULES);
+	    if (parm) {
+		do_show_modules(agent_cb, mode);
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, YANGCLI_MOD,
+				  NCX_EL_VERSION);
+	    if (parm) {
 		if (imode) {
 		    log_stdout("\nyangcli version %s\n", progver);
 		} else {
 		    log_write("\nyangcli version %s\n", progver);
 		}
-	    } else {
-		/* else some internal error */
-		SET_ERROR(ERR_INTERNAL_VAL);
+		done = TRUE;
 	    }
-	} else {
-	    log_write("\nError: at least one parameter expected");
 	}
     }
 
@@ -3789,6 +4068,431 @@ static void
     }
 
 }  /* do_show */
+
+
+/********************************************************************
+ * FUNCTION do_list_one_oid (sub-mode of list oids RPC)
+ * 
+ * list oids: 1 of N
+ *
+ * INPUTS:
+ *    obj == the object to use
+ *********************************************************************/
+static void
+    do_list_one_oid (const obj_template_t *obj)
+{
+    xmlChar      *buffer;
+    boolean       imode;
+    status_t      res;
+
+    if (obj_is_data_db(obj) && 
+	obj_has_name(obj) &&
+	!obj_is_hidden(obj) && 
+	!obj_is_abstract(obj)) {
+
+	buffer = NULL;
+	res = obj_gen_object_id(obj, &buffer);
+	if (res != NO_ERR) {
+	    log_error("\nError: list OID failed (%s)",
+		      get_error_string(res));
+	} else {
+	    if (imode) {
+		log_stdout("\n   %s", buffer);
+	    } else {
+		log_write("\n   %s", buffer);
+	    }
+	}
+	if (buffer) {
+	    m__free(buffer);
+	}
+    }
+
+} /* do_list_one_oid */
+
+
+/********************************************************************
+ * FUNCTION do_list_oid (sub-mode of local RPC)
+ * 
+ * list oids
+ *
+ * INPUTS:
+ *    obj == object to use
+ *    nestlevel to stop at
+ *********************************************************************/
+static void
+    do_list_oid (const obj_template_t *obj,
+		 uint32 level)
+{
+    const obj_template_t  *chobj;
+
+    if (obj_get_level(obj) <= level) {
+	do_list_one_oid(obj);
+	for (chobj = obj_first_child(obj);
+	     chobj != NULL;
+	     chobj = obj_next_child(chobj)) {
+	    do_list_oid(chobj, level);
+	}
+    }
+
+} /* do_list_oid */
+
+
+/********************************************************************
+ * FUNCTION do_list_oids (sub-mode of local RPC)
+ * 
+ * list oids
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    mod == the 1 module to use
+ *           NULL to use all available modules instead
+ *    mode == requested help mode
+ *********************************************************************/
+static void
+    do_list_oids (agent_cb_t *agent_cb,
+		  const ncx_module_t *mod,
+		  help_mode_t mode)
+{
+    const modptr_t        *modptr;
+    const obj_template_t  *obj;
+    boolean                imode;
+    uint32                 level;
+
+
+    switch (mode) {
+    case HELP_MODE_NONE:
+	return;
+    case HELP_MODE_BRIEF:
+	level = 1;
+	break;
+    case HELP_MODE_NORMAL:
+	level = 5;
+	break;
+    case HELP_MODE_FULL:
+	level = 999;
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+
+    imode = interactive_mode();
+
+    if (mod) {
+	obj = ncx_get_first_object(mod);
+	while (obj) {
+	    do_list_oid(obj, level);
+	    obj = ncx_get_next_object(mod, obj);
+	}
+    } else if (use_agentcb(agent_cb)) {
+	for (modptr = (const modptr_t *)
+		 dlq_firstEntry(&agent_cb->modptrQ);
+	     modptr != NULL;
+	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+
+	    obj = ncx_get_first_object(modptr->mod);
+	    while (obj) {
+		do_list_oid(obj, level);
+		obj = ncx_get_next_object(modptr->mod, obj);
+	    }
+	}
+    } else {
+	return;
+    }
+    if (imode) {
+	log_stdout("\n");
+    } else {
+	log_write("\n");
+    }
+
+
+} /* do_list_oids */
+
+
+/********************************************************************
+ * FUNCTION do_list_one_command (sub-mode of list command RPC)
+ * 
+ * list commands: 1 of N
+ *
+ * INPUTS:
+ *    obj == object template for the RPC command to use
+ *    mode == requested help mode
+ *********************************************************************/
+static void
+    do_list_one_command (const obj_template_t *obj,
+			 help_mode_t mode)
+{
+    if (interactive_mode()) {
+	if (mode == HELP_MODE_BRIEF) {
+	    log_stdout("\n   %s", obj_get_name(obj));
+	} else if (mode == HELP_MODE_NORMAL) {
+	    log_stdout("\n   %s:%s",
+		       obj_get_mod_prefix(obj),
+		       obj_get_name(obj));
+	} else {
+	    log_stdout("\n   %s:%s",
+		       obj_get_mod_name(obj),
+		       obj_get_name(obj));
+	}
+    } else {
+	if (mode == HELP_MODE_BRIEF) {
+	    log_write("\n   %s", obj_get_name(obj));
+	} else if (mode == HELP_MODE_NORMAL) {
+	    log_write("\n   %s:%s",
+		      obj_get_mod_prefix(obj),
+		      obj_get_name(obj));
+	} else {
+	    log_write("\n   %s:%s",
+		      obj_get_mod_name(obj),
+		      obj_get_name(obj));
+	}
+    }
+
+} /* do_list_one_command */
+
+
+/********************************************************************
+ * FUNCTION do_list_objects (sub-mode of local RPC)
+ * 
+ * list objects
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    mod == the 1 module to use
+ *           NULL to use all available modules instead
+ *    mode == requested help mode
+ *********************************************************************/
+static void
+    do_list_objects (agent_cb_t *agent_cb,
+		     const ncx_module_t *mod,
+		     help_mode_t mode)
+{
+    const modptr_t        *modptr;
+    const obj_template_t  *obj;
+    boolean                imode;
+
+    imode = interactive_mode();
+
+    if (mod) {
+	obj = ncx_get_first_object(mod);
+	while (obj) {
+	    if (obj_is_data_db(obj) && 
+		obj_has_name(obj) &&
+		!obj_is_hidden(obj) && 
+		!obj_is_abstract(obj)) {
+		do_list_one_command(obj, mode);
+	    }
+	    obj = ncx_get_next_object(mod, obj);
+	}
+	if (imode) {
+	    log_stdout("\n");
+	} else {
+	    log_write("\n");
+	}
+    } else if (use_agentcb(agent_cb)) {
+	for (modptr = (const modptr_t *)
+		 dlq_firstEntry(&agent_cb->modptrQ);
+	     modptr != NULL;
+	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+
+	    obj = ncx_get_first_object(modptr->mod);
+	    while (obj) {
+		if (obj_is_data_db(obj) && 
+		    obj_has_name(obj) &&
+		    !obj_is_hidden(obj) && 
+		    !obj_is_abstract(obj)) {
+
+		    do_list_one_command(obj, mode);
+		}
+		obj = ncx_get_next_object(modptr->mod, obj);
+	    }
+	}
+
+	if (imode) {
+	    log_stdout("\n");
+	} else {
+	    log_write("\n");
+	}
+    }
+
+} /* do_list_objects */
+
+
+/********************************************************************
+ * FUNCTION do_list_commands (sub-mode of local RPC)
+ * 
+ * list commands
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    mod == the 1 module to use
+ *           NULL to use all available modules instead
+ *    mode == requested help mode
+ *********************************************************************/
+static void
+    do_list_commands (agent_cb_t *agent_cb,
+		      const ncx_module_t *mod,
+		      help_mode_t mode)
+{
+    const modptr_t        *modptr;
+    const obj_template_t  *obj;
+    boolean                imode;
+
+    imode = interactive_mode();
+
+    if (mod) {
+	obj = ncx_get_first_object(mod);
+	while (obj) {
+	    if (obj_is_rpc(obj)) {
+		do_list_one_command(obj, mode);
+	    }
+	    obj = ncx_get_next_object(mod, obj);
+	}
+    } else if (use_agentcb(agent_cb)) {
+	if (imode) {
+	    log_stdout("\nAgent Commands:");
+	} else {
+	    log_write("\nAgent Commands:");
+	}
+	
+	for (modptr = (const modptr_t *)
+		 dlq_firstEntry(&agent_cb->modptrQ);
+	     modptr != NULL;
+	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+
+	    obj = ncx_get_first_object(modptr->mod);
+	    while (obj) {
+		if (obj_is_rpc(obj)) {
+		    do_list_one_command(obj, mode);
+		}
+		obj = ncx_get_next_object(modptr->mod, obj);
+	    }
+	}
+    }
+
+    if (imode) {
+	log_stdout("\n\nLocal Commands:");
+    } else {
+	log_write("\n\nLocal Commands:");
+    }
+
+    obj = ncx_get_first_object(yangcli_mod);
+    while (obj) {
+	if (obj_is_rpc(obj)) {
+	    do_list_one_command(obj, mode);
+	}
+	obj = ncx_get_next_object(yangcli_mod, obj);
+    }
+
+    if (imode) {
+	log_stdout("\n");
+    } else {
+	log_write("\n");
+    }
+
+} /* do_list_commands */
+
+
+/********************************************************************
+ * FUNCTION do_list (local RPC)
+ * 
+ * list objects   [module=mod-name]
+ *      ids
+ *      commands
+ *
+ * List the specified information based on the parameters
+ *
+ * INPUTS:
+ * agent_cb == agent control block to use
+ *    rpc == RPC method for the show command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ *********************************************************************/
+static void
+    do_list (agent_cb_t *agent_cb,
+	     const obj_template_t *rpc,
+	     const xmlChar *line,
+	     uint32  len)
+{
+    val_value_t        *valset, *parm;
+    const ncx_module_t *mod;
+    status_t            res;
+    boolean             imode, done;
+    help_mode_t         mode;
+
+    mod = NULL;
+    done = FALSE;
+
+    imode = interactive_mode();
+
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    if (valset && res == NO_ERR) {
+	mode = HELP_MODE_NORMAL;
+
+	/* check if the 'brief' flag is set first */
+	parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_BRIEF);
+	if (parm && parm->res == NO_ERR) {
+	    mode = HELP_MODE_BRIEF;
+	} else {
+	    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_FULL);
+	    if (parm && parm->res == NO_ERR) {
+		mode = HELP_MODE_FULL;
+	    }
+	}
+
+	parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_MODULE);
+	if (parm && parm->res == NO_ERR) {
+	    mod = find_module(agent_cb, VAL_STR(parm));
+	    if (!mod) {
+		if (imode) {
+		    log_stdout("\nError: no module found named '%s'",
+			       VAL_STR(parm)); 
+		} else {
+		    log_write("\nError: no module found named '%s'",
+			      VAL_STR(parm)); 
+		}
+		done = TRUE;
+	    }
+	}
+
+	/* find the 1 of N choice */
+	if (!done) {
+	    parm = val_find_child(valset, YANGCLI_MOD, 
+				  YANGCLI_COMMANDS);
+	    if (parm) {
+		/* do list commands */
+		do_list_commands(agent_cb, mod, mode);
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, YANGCLI_MOD, 
+				  YANGCLI_OBJECTS);
+	    if (parm) {
+		/* do list objects */
+		do_list_objects(agent_cb, mod, mode);
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, YANGCLI_MOD, 
+				  YANGCLI_OIDS);
+	    if (parm) {
+		/* do list oids */
+		do_list_oids(agent_cb, mod, mode);
+		done = TRUE;
+	    }
+	}
+    }
+
+    if (valset) {
+	val_free_value(valset);
+    }
+
+}  /* do_list */
 
 
 /********************************************************************
@@ -3802,18 +4506,57 @@ static void
  *
  *********************************************************************/
 static void
-    do_help_commands (help_mode_t mode)
+    do_help_commands (agent_cb_t *agent_cb,
+		      help_mode_t mode)
 {
+    const modptr_t        *modptr;
     const obj_template_t  *obj;
-    boolean anyout, imode;
+    boolean                anyout, imode;
 
     imode = interactive_mode();
     anyout = FALSE;
 
+    if (use_agentcb(agent_cb)) {
+	if (imode) {
+	    log_stdout("\nAgent Commands:\n");
+	} else {
+	    log_write("\nAgent Commands:\n");
+	}
+
+	for (modptr = (const modptr_t *)
+		 dlq_firstEntry(&agent_cb->modptrQ);
+	     modptr != NULL;
+	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+
+	    obj = ncx_get_first_object(modptr->mod);
+	    while (obj) {
+		if (obj_is_rpc(obj)) {
+		    if (mode == HELP_MODE_BRIEF) {
+			obj_dump_template(obj, mode, 1, 0);
+		    } else {
+			obj_dump_template(obj, mode, 0, 0);
+		    }
+		    anyout = TRUE;
+		}
+		obj = ncx_get_next_object(modptr->mod, obj);
+	    }
+	}
+    }
+
+    if (imode) {
+	log_stdout("\nLocal Commands:\n");
+    } else {
+	log_write("\nLocal Commands:\n");
+    }
+
     obj = ncx_get_first_object(yangcli_mod);
     while (obj) {
 	if (obj_is_rpc(obj)) {
-	    obj_dump_template(obj, mode, 0, 0);
+	    if (mode == HELP_MODE_BRIEF) {
+		obj_dump_template(obj, mode, 1, 0);
+	    } else {
+		obj_dump_template(obj, mode, 0, 0);
+	    }
 	    anyout = TRUE;
 	}
 	obj = ncx_get_next_object(yangcli_mod, obj);
@@ -3888,7 +4631,7 @@ static void
 			  YANGCLI_COMMAND);
     if (parm && parm->res == NO_ERR) {
 	dtyp = NCX_NT_OBJ;
-	obj = parse_def(&dtyp, VAL_STR(parm), &dlen);
+	obj = parse_def(agent_cb, &dtyp, VAL_STR(parm), &dlen);
 	if (obj && obj->objtype == OBJ_TYP_RPC) {
 	    help_object(obj, mode);
 	} else {
@@ -3907,7 +4650,7 @@ static void
     /* look for the specific definition parameters */
     parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_COMMANDS);
     if (parm && parm->res==NO_ERR) {
-	do_help_commands(mode);
+	do_help_commands(agent_cb, mode);
 	val_free_value(valset);
 	return;
     }
@@ -3915,7 +4658,7 @@ static void
     parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_TYPE);
     if (parm && parm->res==NO_ERR) {
 	dtyp = NCX_NT_TYP;
-	typ = parse_def(&dtyp, VAL_STR(parm), &dlen);
+	typ = parse_def(agent_cb, &dtyp, VAL_STR(parm), &dlen);
 	if (typ) {
 	    help_type(typ, mode);
 	} else {
@@ -3934,7 +4677,7 @@ static void
     parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_OBJECT);
     if (parm && parm->res == NO_ERR) {
 	dtyp = NCX_NT_OBJ;
-	obj = parse_def(&dtyp, VAL_STR(parm), &dlen);
+	obj = parse_def(agent_cb, &dtyp, VAL_STR(parm), &dlen);
 	if (obj && obj_is_data(obj)) {
 	    help_object(obj, mode);
 	} else {
@@ -3954,7 +4697,7 @@ static void
     parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_NOTIF);
     if (parm && parm->res == NO_ERR) {
 	dtyp = NCX_NT_OBJ;
-	obj = parse_def(&dtyp, VAL_STR(parm), &dlen);
+	obj = parse_def(agent_cb, &dtyp, VAL_STR(parm), &dlen);
 	if (obj && obj->objtype == OBJ_TYP_NOTIF) {
 	    help_object(obj, mode);
 	} else {
@@ -6707,6 +7450,8 @@ static void
 	do_fill(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
 	do_help(agent_cb, rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_LIST)) {
+	do_list(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_LOAD)) {
 	do_load(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_PWD)) {
@@ -6753,7 +7498,8 @@ static void
     }
 
     dtyp = NCX_NT_OBJ;
-    rpc = (const obj_template_t *)parse_def(&dtyp, line, &len);
+    rpc = (const obj_template_t *)parse_def(agent_cb,
+					    &dtyp, line, &len);
     if (!rpc) {
 	if (agent_cb->result_name) {
 	    /* this is just a string assignment */
@@ -6930,7 +7676,8 @@ static void
 
     /* get the RPC method template */
     dtyp = NCX_NT_OBJ;
-    rpc = (const obj_template_t *)parse_def(&dtyp, line, &len);
+    rpc = (const obj_template_t *)parse_def(agent_cb,
+					    &dtyp, line, &len);
     if (!rpc) {
 	if (agent_cb->result_name) {
 	    /* this is just a string assignment */
@@ -7521,8 +8268,22 @@ static void
 
     log_info("\n\nChecking Agent Modules...");
 
-    cap = cap_first_modcap(&mscb->caplist);
+    /**** HARDWIRE ADD NETCONF V1 TO THE QUEUE
+     **** NEED TO GET THE STD CAP INSTEAD
+     ****/
+    mod = ncx_find_module(NC_MODULE, NULL);
+    if (mod) {
+	modptr = new_modptr(mod);
+	if (!modptr) {
+	    log_error("\nMalloc failure");
+	    return;
+	} else {
+	    dlq_enque(modptr, &agent_cb->modptrQ);
+	}
+    }
 
+    /* check all the YANG modules */
+    cap = cap_first_modcap(&mscb->caplist);
     while (cap) {
 	cap_split_modcap(cap,
 			 &module,
@@ -7675,8 +8436,7 @@ static mgr_io_state_t
 	    if (scb) {
 		(void)mgr_ses_free_session(agent_cb->mysid);
 	    }
-	    agent_cb->mysid = 0;
-	    agent_cb->state = MGR_IO_ST_IDLE;
+	    clear_agent_cb_session(agent_cb);
 	} else  {
 	    /* check timeout */
 	    if (message_timed_out(scb)) {
@@ -7693,9 +8453,14 @@ static mgr_io_state_t
     case MGR_IO_ST_CONN_SHUT:
     case MGR_IO_ST_CONN_CLOSEWAIT:
 	/* check timeout */
-	if (message_timed_out(scb)) {
-	    agent_cb->state = MGR_IO_ST_IDLE;
-	    break;
+	scb = mgr_ses_get_scb(agent_cb->mysid);
+	if (!scb || scb->state == SES_ST_SHUTDOWN_REQ) {
+	    if (scb) {
+		(void)mgr_ses_free_session(agent_cb->mysid);
+	    }
+	    clear_agent_cb_session(agent_cb);
+	} else if (message_timed_out(scb)) {
+	    clear_agent_cb_session(agent_cb);
 	}
 
 	/* do not accept chars in these states */

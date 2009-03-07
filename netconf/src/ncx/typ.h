@@ -607,6 +607,8 @@ extern const ncx_appinfo_t *
 extern boolean
     typ_is_xpath_string (const typ_def_t *typdef);
 
+extern boolean
+    typ_is_qname_string (const typ_def_t *typdef);
 
 /* get default from template */
 extern const xmlChar * 

@@ -4934,12 +4934,13 @@ static status_t
 		  obj_list_t    *list,
 		  obj_template_t *obj)
 {
-    obj_template_t    *key;
+    obj_template_t    *keyobj;
     xmlChar           *str, *p, savech;
     tk_token_t        *errtk;
     obj_key_t         *objkey;
     status_t           retres;
     ncx_btype_t        btyp;
+    boolean            keyconfig, listconfig;
 
     retres = NO_ERR;
     errtk = (list->keytk) ? list->keytk : obj->tk;
@@ -4949,6 +4950,8 @@ static status_t
     while (*p && xml_isspace(*p)) {
 	p++;
     }
+
+    /* check whitespace only string */
     if (!*p) {
 	log_error("\nError: no identifiers entered in key '%s'",
 		  list->keystr);
@@ -4958,106 +4961,140 @@ static status_t
 	return retres;
     }
 
-    /* find end of non-whitespace string */
+    /* keep parsing Xpath strings until EOS reached
+     * they will be checked to make sure only proper
+     * child nodes are used as keys
+     */
     while (*p) {
-	str = p;
+	/* save start of identifier */
+	str = p;       
+
+	/* find end of the identifier string */
 	while (*p && !xml_isspace(*p)) {
 	    p++;
 	}
 
-	/* check for a valid identifier name
-	 * YANG does not currently allow deep keys
-	 * so do not look for descendant-schema-nodeid
-	 */
-	if (!ncx_valid_name(str, (uint32)(p-str))) {
-	    savech = *p;
-	    *p = 0;
-	    log_error("\nError: invalid identifier in key"
-		      " for list '%s' (%s)", list->name, str);
-	    retres = ERR_NCX_INVALID_NAME;
-	    tkc->cur = errtk;
-	    ncx_print_errormsg(tkc, mod, retres);
-	    *p = savech;
-	    while (*p && xml_isspace(*p)) {
-		p++;
-	    }
-	    continue;
-	}
-
-	/* got a valid identifier so find it as a
-	 * child node in the obj_list_t datadefQ
-	 */
+	/* make Zstring for 1 key identifier */
 	savech = *p;
 	*p = 0;
-	key = obj_find_template(list->datadefQ, 
-				obj_get_mod_name(obj), 
-				str);
-	if (!key) {
-	    log_error("\nError: node %s not found in key "
-		      "for list '%s'", str, list->name);
-	    retres = ERR_NCX_DEF_NOT_FOUND;
+
+	/* check for a valid descendant-schema-nodeid string */
+	retres = xpath_find_schema_target_err(tkc, 
+					      mod, 
+					      obj,
+					      list->datadefQ,
+					      str, 
+					      &keyobj, 
+					      NULL, 
+					      errtk);
+
+
+	/* check identifier is bogus, nothing found */
+	if (retres != NO_ERR) {
+	    log_error("\nError: invalid identifier in key"
+		      " for list '%s' (%s)", 
+		      list->name, str);
 	    tkc->cur = errtk;
 	    ncx_print_errormsg(tkc, mod, retres);
+
+	    /* waited to restore string so it could be used 
+	     * in the log_error msg above
+	     */
 	    *p = savech;
 	    while (*p && xml_isspace(*p)) {
 		p++;
 	    }
 	    continue;
-	} else {
-	    key->flags |= OBJ_FL_KEY;
 	}
 
-	/* skip any whitespace between key components */
+	/* mark the object as a key leaf for obj_is_key() fn */
+	keyobj->flags |= OBJ_FL_KEY;
+
+	/* restore string and skip any whitespace between key components */
 	*p = savech;
 	while (*p && xml_isspace(*p)) {
 	    p++;
 	}
 
+	/* get the base type of the object */
+	btyp = obj_get_basetype(keyobj);
+
 	/* make sure the key is a leaf */
-	if (key->objtype != OBJ_TYP_LEAF) {
+	if (keyobj->objtype != OBJ_TYP_LEAF || btyp == NCX_BT_ANY) {
 	    /* found the key node, but it is not a leaf */
 	    log_error("\nError: node '%s' on line %u not a leaf in key"
 		      " for list '%s' (%s)",
-		      obj_get_name(key), 
-		      key->linenum,
-		      list->name, obj_get_typestr(key));
+		      obj_get_name(keyobj), 
+		      keyobj->linenum,
+		      list->name, 
+		      (btyp==NCX_BT_ANY) 
+		      ? NCX_EL_ANYXML : obj_get_typestr(keyobj));
 	    retres = ERR_NCX_TYPE_NOT_INDEX;
 	    tkc->cur = errtk;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    continue;
 	} 
 
+	/* make sure the leaf is a child of the list object */
+	if (keyobj->parent != obj || keyobj->mod != obj->mod) {
+	    log_error("\nError: leaf node '%s' on line %u not child "
+		      "of list '%s'",
+		      obj_get_name(keyobj),
+		      keyobj->linenum,
+		      list->name);
+	    retres = ERR_NCX_WRONG_INDEX_TYPE;
+	    tkc->cur = errtk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+
 	/* make sure the base type is OK for an index */
-	if (!typ_ok_for_index(key->def.leaf->typdef)) {
-	    btyp = typ_get_basetype(key->def.leaf->typdef);
-	    if (btyp != NCX_BT_NONE) {
-		log_error("\nError: leaf node '%s' on line %u not valid type "
-			  "in key, for list '%s' (%s)",
-			  obj_get_name(key),
-			  key->linenum,
-			  list->name,
-			  tk_get_btype_sym(btyp));
-		retres = ERR_NCX_TYPE_NOT_INDEX;
-		tkc->cur = errtk;
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
+	if (!typ_ok_for_inline_index(btyp)) {
+	    log_error("\nError: leaf node '%s' on line %u not valid type "
+		      "in key, for list '%s' (%s)",
+		      obj_get_name(keyobj),
+		      keyobj->linenum,
+		      list->name,
+		      tk_get_btype_sym(btyp));
+	    retres = ERR_NCX_TYPE_NOT_INDEX;
+	    tkc->cur = errtk;
+	    ncx_print_errormsg(tkc, mod, retres);
 	}
 
 	/* make sure madatory=false is not set for the key leaf */
-	if ((key->flags & OBJ_FL_MANDSET) && !(key->flags & OBJ_FL_MANDATORY)) {
+	if ((keyobj->flags & OBJ_FL_MANDSET) && 
+	    !(keyobj->flags & OBJ_FL_MANDATORY)) {
 	    log_warn("\nWarning: 'mandatory false;' ignored in leaf '%s' "
-		      "on line %u for list '%s'",
-		      obj_get_name(key), key->linenum, list->name);
+		     "on line %u for list '%s'",
+		     obj_get_name(keyobj), 
+		     keyobj->linenum, 
+		     list->name);
 	    tkc->cur = errtk;
 	    ncx_print_errormsg(tkc, mod, ERR_NCX_STMT_IGNORED);
 	}
 
-	/* make sure key component not already used (YANG CLR) */
-	objkey = obj_find_key2(list->keyQ, key);
+	/* make sure config has same setting as the list parent */
+	keyconfig = obj_get_config_flag_deep(keyobj);
+	listconfig = obj_get_config_flag_deep(obj);
+
+	if (keyconfig != listconfig) {
+	    retres = ERR_NCX_WRONG_INDEX_TYPE;
+	    log_error("\nError: 'config-stmt for key leaf '%s' "
+		      "on line %u must match list '%s'",
+		      obj_get_name(keyobj), 
+		      keyobj->linenum, 
+		      list->name);
+	    tkc->cur = errtk;
+	    ncx_print_errormsg(tkc, mod, retres);
+	}
+
+	/* make sure key component not already used */
+	objkey = obj_find_key2(list->keyQ, keyobj);
 	if (objkey) {
 	    log_error("\nError: duplicate key node '%s' on line %u "
 		      "for list '%s'",
-		      obj_get_name(key), key->linenum, list->name);
+		      obj_get_name(keyobj), 
+		      keyobj->linenum, 
+		      list->name);
 	    retres = ERR_NCX_DUP_ENTRY;
 	    tkc->cur = errtk;
 	    ncx_print_errormsg(tkc, mod, retres);
@@ -5078,7 +5115,7 @@ static status_t
 	 * because 'key' may be inside a grouping, and a simple
 	 * uses foo; will cause the groupingQ to be used directly
 	 */
-	objkey->keyobj = key;
+	objkey->keyobj = keyobj;
 	dlq_enque(objkey, list->keyQ);
     }
 
@@ -6057,6 +6094,7 @@ static status_t
     obj_template_t *chobj, *newobj, *testobj;
     const xmlChar  *name;
     status_t        res, retres;
+    boolean         config;
 
     retres = NO_ERR;
     uses = obj->def.uses;
@@ -6114,6 +6152,16 @@ static status_t
 		    newobj->mod = obj->mod;
 		    newobj->parent = obj->parent;
 		    newobj->usesobj = obj;
+
+		    if (!(newobj->flags & OBJ_FL_CONFSET)) {
+			config = obj_get_config_flag_deep(newobj);
+			if (config) {
+			    newobj->flags |= OBJ_FL_CONFIG;
+			} else {
+			    newobj->flags &= ~OBJ_FL_CONFIG;
+			}
+		    }
+		    
 		    dlq_insertAhead(newobj, obj);
 
 #ifdef YANG_OBJ_DEBUG
@@ -6496,7 +6544,7 @@ static status_t
 		     * of the actual target, not within the grouping
 		     */
 		    if (!(newobj->flags & OBJ_FL_CONFSET)) {
-			config = obj_get_config_flag(newobj->parent);
+			config = obj_get_config_flag_deep(newobj);
 			if (config) {
 			    newobj->flags |= OBJ_FL_CONFIG;
 			} else {
@@ -6505,8 +6553,8 @@ static status_t
 		    }
 
 #ifdef YANG_OBJ_DEBUG
-		    log_debug3("\nexpand_aug: add new obj %s to target %s.%u,"
-			       " aug.%u",
+		    log_debug3("\nexpand_aug: add new obj %s "
+			       "to target %s.%u, aug.%u",
 			       obj_get_name(newobj),
 			       obj_get_name(targobj),
 			       targobj->linenum,

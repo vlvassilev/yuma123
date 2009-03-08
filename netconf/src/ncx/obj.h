@@ -1086,5 +1086,8 @@ extern obj_metadata_t *
 extern const obj_template_t * 
     obj_get_default_parm (const obj_template_t *obj);
 
+/* get config flag during augment expand */
+extern boolean
+    obj_get_config_flag_deep (const obj_template_t *obj);
 
 #endif	    /* _H_obj */

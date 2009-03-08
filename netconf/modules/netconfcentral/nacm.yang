@@ -1,0 +1,248 @@
+module nacm {
+
+    namespace "http://netconfcentral.com/ns/nacm";
+
+    prefix "nacm";
+
+    // used just for ncx:qname extension
+    import ncx { prefix ncx; }
+
+    organization  "Netconf Central";
+
+    contact "Andy Bierman <andy@netconfcentral.com>.";
+
+    description 
+      "NETCONF Agent Access Control Model Parameters";
+
+    revision 2009-03-05 {
+        description  "Initial version of the rewrite.";
+    }
+
+    typedef NacmUserName {
+        description "General Purpose User Name string.";
+        type string {
+            length "1..31";
+            pattern '[a-z,A-Z][a-z,A-Z,0-9]{0,30}';
+        }
+    }
+
+    typedef NacmRights {
+      description 
+        "NETCONF Access Rights; 
+         These are individually assigned, not hierarchical.";
+
+      type bits {
+	bit read {
+           description
+              "Read access allowed to all specified data.";
+        }
+	bit write {
+           description
+              "Write access allowed to all specified data.";
+        }
+	bit exec {
+           description
+              "Execution access to the specified RPC operation.";
+        }
+      }
+    }
+
+    typedef NacmRole {
+      description 
+        "Type of administrative role that can be
+         assigned to the user, and specified in
+         an access control rule.
+
+         The identityref data type is used to allow as 
+         many roles to be added as needed.  There are
+         three default roles defined here:
+
+           root == root account
+           admin == administrative account
+           guest == guest account";
+       
+      type identityref {
+         base nacmRoles;
+      }
+    }
+
+    identity nacmRoles {
+       description 
+          "Root of all NETCONF Administrative Roles";
+    }
+
+    identity root {
+       description 
+          "Root user role";
+       base nacmRoles;
+    }
+
+    identity admin {
+       description 
+          "Admin user role";
+       base nacmRoles;
+    }
+
+    identity guest {
+       description 
+          "Admin user role";
+       base nacmRoles;
+    }
+
+
+    container nacm {
+        description
+          "Parameters for NETCONF Access Control Model.";
+
+        leaf noRuleDefault {
+            description
+              "Controls whether access is granted if
+               no appropriate rule is found for a
+               particular request.
+
+               This object is initially set to 'permit'
+               to allow the system to be configured
+               for first use by any user.
+
+               This object MUST be set to 'deny'
+               in order to secure access to NETCONF content.";
+            type enumeration {
+                enum permit;
+                enum deny;
+            }
+            default "permit";
+        }
+
+        container users {
+            description "NETCONF User Table";
+
+            list user {
+                description "One NETCONF User Entry";
+
+                key name;
+
+                leaf name {
+                    description "System user name";
+                    type NacmUserName;
+                }
+
+                leaf role {
+                    description 
+                      "Admiinistrative role assigned to this user.";
+                    mandatory true;
+                    type NacmRole;
+                }
+
+                leaf fullName {
+                    description "Full user name";
+                    type string {
+                        length "1..1023";
+                    }
+                }
+            }
+        }
+
+        container rules {
+            description 
+              "NETCONF Access Control Rules Table.
+               Processing model for node /X/Y/Z:
+               Start with longest match and proceed
+               with shorter path (next ancestor) matches,
+               if the longer rule does not apply.
+               (E.g., /X/Y/Z, then /X/Y, then /X.)
+
+               1) Find the longest match rule by its
+                  'path' value.
+               2) If a rule with a 'path' covering the
+                  requested access is not present,
+                  then access is granted or denied,
+                  depending on the value of 'noRuleDefault'.
+               3) If a 'path' matches, then check that rule;
+                  If the requested role and access right is present
+                  in the found rule, then permission is granted,
+                  otherwise check the next ancestor node.
+                  If there is no other rule found which matches
+                  the role and access rights requested,
+                  then permission is denied.     
+                  
+
+               Special note: access to the 'close-session'
+               RPC operation is always granted, even if
+               no rule exists controlling its access.";
+
+            grouping RulesCommon {
+                leaf allowedRights {
+                    description
+                      "List of access rights granted to
+                       specified administrative roles for the
+                       content specified by the associated path.";
+                    type NacmRights;
+                }
+
+                leaf-list allowedRole {
+                    description
+                      "List of administrative roles which will be
+                       assigned the associated access rights
+                       for the content specified by the associated
+                       path.";
+                    type NacmRole;
+                    min-elements 1;
+                }
+
+                leaf comment {
+                    description 
+                      "A textual description of the access rule.";
+                    type string {
+                        length "0..1023";
+                    }
+                }
+            }
+
+            list rpcRules {
+                description "One RPC Method Access Rule"; 
+
+                key "rpcName allowedRights";
+
+                leaf rpcName {
+                    description
+                      "Qualified name of the RPC method.";
+                    type string {
+                        ncx:qname;
+			length "1..63";
+                    }
+                }
+
+                uses RulesCommon;
+            }
+
+            list rule {
+                description "One Data Access Control Rule";
+
+                key "path allowedRights";
+
+                leaf path {
+                    description
+                      "Instance identifier of the 
+                       configuration or state data
+                       controlled by this rule.
+
+                       Configuration data or state data
+                       instance identifiers start with
+                       a top-level data node.
+                       A complete instance identifier is 
+                       required for this type of path value.
+
+                       The special value '/' refers to all
+                       possible database contents.";
+
+                    type instance-identifier {
+                        require-instance false;
+                    }
+                }
+
+                uses RulesCommon;
+            }
+        }
+    }      
+
+}

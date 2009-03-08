@@ -4810,10 +4810,10 @@ status_t
 * Compare 2 ncx_str_t union contents
 *
 * INPUTS:
-*     str1 == first number
-*     str2 == second number
+*     str1 == first string
+*     str2 == second string
 *     btyp == expected data type 
-*             (NCX_BT_STRING, NCX_BT_INSTANCE_ID, NCX_BT_LEAFREF)
+*             (NCX_BT_STRING, NCX_BT_INSTANCE_ID)
 * RETURNS:
 *     -1 if str1 is < str2
 *      0 if str1 == str2   (also for error, after SET_ERROR called)

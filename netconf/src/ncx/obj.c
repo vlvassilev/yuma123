@@ -8810,4 +8810,82 @@ const obj_template_t *
 }  /* obj_get_default_parm */
 
 
+/********************************************************************
+* FUNCTION get_config_flag_deep
+*
+* Get the config flag for an obj_template_t 
+* Go all the way up the tree until an explicit
+* set node or the root is found
+*
+* Used by get_list_key because the config flag
+* of the parent is not set yet when a key leaf is expanded
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if config set to TRUE
+*   FALSE if config set to FALSE
+*********************************************************************/
+boolean
+    obj_get_config_flag_deep (const obj_template_t *obj)
+{
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+    case OBJ_TYP_LIST:
+    case OBJ_TYP_CHOICE:
+	if (obj_is_root(obj)) {
+	    return TRUE;
+	}
+	/* check if this normal object has a config-stmt */
+	if (obj->flags & OBJ_FL_CONFSET) {
+	    return (obj->flags & OBJ_FL_CONFIG) ? TRUE : FALSE;
+	}
+
+	if (obj->parent) {
+	    return obj_get_config_flag_deep(obj->parent);
+	}
+
+	/* should not really get here, since all 
+	 * top-level objects should have the OBJ_FL_CONFSET
+	 * flag set: default ifor top-level is config=true
+	 */
+	return TRUE;
+    case OBJ_TYP_CASE:
+	if (obj->parent) {
+	    return obj_get_config_flag_deep(obj->parent);
+	} else {
+	    /* should not happen */
+	    return FALSE;
+	}
+    case OBJ_TYP_USES:
+    case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
+	/* no real setting -- not applicable */
+	return FALSE;
+    case OBJ_TYP_RPC:
+	/* no real setting for this, but has to be true
+	 * to allow rpc/input to be true
+	 */
+	return TRUE;
+    case OBJ_TYP_RPCIO:
+	if (!xml_strcmp(obj->def.rpcio->name, YANG_K_INPUT)) {
+	    return TRUE;
+	} else {
+	    return FALSE;
+	}
+    case OBJ_TYP_NOTIF:
+	return FALSE;
+    case OBJ_TYP_NONE:
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+    /*NOTREACHED*/
+
+}   /* obj_get_config_flag_deep */
+
+
 /* END obj.c */

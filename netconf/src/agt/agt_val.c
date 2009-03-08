@@ -2178,6 +2178,7 @@ static status_t
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   obj == object template for child node in valset to check
 *   val == val_value_t list, leaf-list, or container to check
+*   valroot == root node of the database
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -2195,6 +2196,7 @@ static status_t
 		    xml_msg_hdr_t *msg,
 		    const obj_template_t *obj,
 		    val_value_t *val,
+		    val_value_t *valroot,
 		    ncx_layer_t layer)
 {
     val_value_t         *errval;
@@ -2202,10 +2204,11 @@ static status_t
     const ncx_errinfo_t *errinfo;
     ncx_iqual_t          iqual;
     uint32               cnt, i, minelems, maxelems;
-    boolean              minset, maxset, minerr, maxerr;
+    boolean              minset, maxset, minerr, maxerr, cond;
     status_t             res, res2;
     char                 buff[NCX_MAX_NUMLEN];
 
+    /* skip this node if it is non-config */
     if (!obj_is_config(val->obj)) {
 	if (LOGDEBUG3) {
 	    log_debug3("\ninstance_chk: skipping r/o node '%s:%s'",
@@ -2215,6 +2218,26 @@ static status_t
 	return NO_ERR;
     }
 
+    /* check if the child object should be skipped because
+     * of false if-feature or when-stmts
+     */
+    res = val_check_child_conditional(val, 
+				      valroot,
+				      obj,
+				      &cond);
+    if (res != NO_ERR) {
+	return res;
+    }
+    if (!cond) {
+	if (LOGDEBUG2) {
+	    log_debug2("\ninstance_chk: skipping false conditional "
+		       "node '%s:%s'",
+		       obj_get_mod_name(val->obj),
+		       val->name);
+	}
+	return NO_ERR;
+    }
+				       
     res = NO_ERR;
     res2 = NO_ERR;
     errinfo = NULL;
@@ -2454,6 +2477,7 @@ static status_t
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   choicobj == object template for the choice to check
 *   val == parent val_value_t list or container to check
+*   valroot == root of database to check
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -2470,6 +2494,7 @@ static status_t
 		      xml_msg_hdr_t *msg,
 		      const obj_template_t *choicobj,
 		      val_value_t *val,
+		      val_value_t *valroot,
 		      ncx_layer_t   layer)
 {
     const obj_template_t  *testobj;
@@ -2522,7 +2547,7 @@ static status_t
 	 testobj != NULL;
 	 testobj = obj_next_child(testobj)) {
 
-	res = instance_check(scb, msg, testobj, val, layer);
+	res = instance_check(scb, msg, testobj, val, valroot, layer);
 	CHK_EXIT(res, retres);
 	/* errors already recorded if other than NO_ERR */
     }
@@ -3203,10 +3228,10 @@ status_t
 
 	if (chobj->objtype == OBJ_TYP_CHOICE) {
 	    res = choice_check_agt(scb, msg, chobj, 
-				   valset, layer);
+				   valset, root, layer);
 	} else {
 	    res = instance_check(scb, msg, chobj, 
-				 valset, layer);
+				 valset, root, layer);
 	}
 	if (res != NO_ERR && valset->res == NO_ERR) {	    
 	    valset->res = res;
@@ -3324,10 +3349,12 @@ status_t
 
 	    if (chobj->objtype == OBJ_TYP_CHOICE) {
 		res = choice_check_agt(scb, msg, chobj, 
-				       root, NCX_LAYER_CONTENT);
+				       root, root, 
+				       NCX_LAYER_CONTENT);
 	    } else {
 		res = instance_check(scb, msg, chobj, 
-				     root, NCX_LAYER_CONTENT);
+				     root, root, 
+				     NCX_LAYER_CONTENT);
 	    }
 	    CHK_EXIT(res, retres);
 	}

@@ -74,6 +74,14 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
+#ifndef _H_xpath1
+#include "xpath1.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -336,7 +344,7 @@ static status_t
 	    if (chobj->objtype == OBJ_TYP_LIST) {
 		while (res == NO_ERR && chval) {
 		    chval = val_find_next_child(val,
-						obj_get_mod_prefix(chobj),
+						obj_get_mod_name(chobj),
 						obj_get_name(chobj),
 						chval);
 		    if (chval) {
@@ -1809,8 +1817,197 @@ status_t
     *len = total;
     return NO_ERR;
 
-    }  /* val_get_index_string */
+}  /* val_get_index_string */
 
+
+
+/********************************************************************
+* FUNCTION val_check_child_conditional
+* 
+* Get the index string for the specified table or container entry
+* 
+* INPUTS:
+*   val == parent value node of the object node to check
+*   valroot == database root for XPath purposes
+*   childobj == object template of child to check
+*   condresult == address of conditional test result
+*   
+* OUTPUTS:
+*   *condresult == TRUE if conditional is true or there are none
+*                  FALSE if conditional test failed
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_check_child_conditional (val_value_t *val,
+				 val_value_t *valroot,
+				 const obj_template_t *childobj,
+				 boolean *condresult)
+{
+    val_value_t       *dummychild;
+    xpath_result_t    *result;
+    xpath_pcb_t       *whenclone;
+    status_t           res;
+    boolean            whentest, done;
+
+#ifdef DEBUG
+    if (!val || !valroot || !childobj || !condresult) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (childobj->when ||
+	(childobj->usesobj && childobj->usesobj->when) ||
+	(childobj->augobj && childobj->augobj->when)) {
+
+	dummychild = val_new_value();
+	if (!dummychild) {
+	    return ERR_INTERNAL_MEM;
+	}
+	val_init_from_template(dummychild, childobj);
+	val_add_child(dummychild, val);
+
+	done = FALSE;
+
+	if (childobj->when) {
+	    whenclone = xpath_clone_pcb(childobj->when);
+	    if (!whenclone) {
+		res = ERR_INTERNAL_MEM;
+		done = TRUE;
+	    } else {
+		result = xpath1_eval_expr(whenclone,
+					  dummychild,
+					  valroot,
+					  FALSE,
+					  TRUE,
+					  &res);
+		if (!result) {
+		    *condresult = FALSE;
+		    done = TRUE;
+		} else {
+		    whentest = xpath_cvt_boolean(result);
+		    if (!whentest) {
+			if (LOGDEBUG3) {
+			    log_debug3("\nval: when test '%s' failed "
+				       "for object %s in parent %s",
+				       whenclone->exprstr,
+				       obj_get_name(childobj),
+				       val->name);
+			} else {
+			    if (LOGDEBUG3) {
+				log_debug3("\nval: when test '%s' OK "
+					   "for object %s in parent %s",
+					   whenclone->exprstr,
+					   obj_get_name(childobj),
+					   val->name);
+			    }
+			}
+			*condresult = FALSE;
+			done = TRUE;
+		    }
+		    xpath_free_result(result);
+		}
+		xpath_free_pcb(whenclone);
+	    }
+	}
+				   
+	if (!done && childobj->usesobj && childobj->usesobj->when) {
+	    whenclone = xpath_clone_pcb(childobj->usesobj->when);
+	    if (!whenclone) {
+		res = ERR_INTERNAL_MEM;
+		done = TRUE;
+	    } else {
+		result = xpath1_eval_expr(whenclone,
+					  dummychild,
+					  valroot,
+					  FALSE,
+					  TRUE,
+					  &res);
+		if (!result) {
+		    *condresult = FALSE;
+		    done = TRUE;
+		} else {
+		    whentest = xpath_cvt_boolean(result);
+		    if (!whentest) {
+			if (LOGDEBUG3) {
+			    log_debug3("\nval: when test '%s' failed "
+				       "for object %s in parent %s",
+				       whenclone->exprstr,
+				       obj_get_name(childobj),
+				       val->name);
+			} else {
+			    if (LOGDEBUG3) {
+				log_debug3("\nval: when test '%s' OK "
+					   "for object %s in parent %s",
+					   whenclone->exprstr,
+					   obj_get_name(childobj),
+					   val->name);
+			    }
+			}
+			*condresult = FALSE;
+			done = TRUE;
+		    }
+		    xpath_free_result(result);
+		}
+		xpath_free_pcb(whenclone);
+	    }
+	}
+
+	if (!done && childobj->augobj && childobj->augobj->when) {
+	    whenclone = xpath_clone_pcb(childobj->augobj->when);
+	    if (!whenclone) {
+		res = ERR_INTERNAL_MEM;
+		done = TRUE;
+	    } else {
+		result = xpath1_eval_expr(whenclone,
+					  dummychild,
+					  valroot,
+					  FALSE,
+					  TRUE,
+					  &res);
+		if (!result) {
+		    *condresult = FALSE;
+		    done = TRUE;
+		} else {
+		    whentest = xpath_cvt_boolean(result);
+		    if (!whentest) {
+			if (LOGDEBUG3) {
+			    log_debug3("\nval: when test '%s' failed "
+				       "for object %s in parent %s",
+				       whenclone->exprstr,
+				       obj_get_name(childobj),
+				       val->name);
+			}
+			*condresult = FALSE;
+			done = TRUE;
+		    } else {
+			if (LOGDEBUG3) {
+			    log_debug3("\nval: when test '%s' OK "
+				       "for object %s in parent %s",
+				       whenclone->exprstr,
+				       obj_get_name(childobj),
+				       val->name);
+			}
+		    }
+		    xpath_free_result(result);
+		}
+		xpath_free_pcb(whenclone);
+	    }
+	}
+
+	val_remove_child(dummychild);
+	val_free_value(dummychild);
+
+	if (done) {
+	    return res;
+	}
+    }
+
+    *condresult = TRUE;
+    return NO_ERR;
+
+} /* val_check_child_conditional */
 
 
 /* END file val_util.c */

@@ -212,6 +212,9 @@ static void
 	log_stdout(" (%s)", mod->version);
     }
     log_stdout("\nPrefix: %s", mod->prefix);
+    if (mod->xmlprefix) {
+	log_stdout("\nXML prefix: %s", mod->xmlprefix);
+    }
     log_stdout("\nNamespace: %s", (mod->ns) ?
 	       (const char *)mod->ns : "(none)");
     log_stdout("\nSource: %s", mod->source);

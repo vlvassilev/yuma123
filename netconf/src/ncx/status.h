@@ -320,7 +320,8 @@ typedef enum status_t_
     ERR_NCX_NO_XPATH_DESCENDANT,        /* 433 */
     ERR_NCX_NO_XPATH_NODES,             /* 434 */
     ERR_NCX_BAD_REV_ORDER,              /* 435 */
-    ERR_LAST_WARN,                      /* 436 -- not really used */
+    ERR_NCX_DUP_PREFIX,                 /* 436 */
+    ERR_LAST_WARN,                      /* 437 -- not really used */
 
     /* system info return codes start at 500 */
     ERR_PARS_SECDONE=ERR_INFO_BASE,     /* 500 */

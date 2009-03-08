@@ -549,6 +549,7 @@ typedef struct ncx_module_t_ {
     xmlChar          *ref;
     xmlChar          *ns;       /* malloc:main, copy:submod */
     xmlChar          *prefix;   /* may be empty in a submod */
+    xmlChar          *xmlprefix;   /* will be diff. if duplicate */
     xmlChar          *source;              /* full filespec */
     xmlChar          *belongs;             /* set if submod */
 

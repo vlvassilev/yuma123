@@ -668,15 +668,15 @@ static void
     if (mod->ismod && mod->ns) {
 	m__free(mod->ns);
     } 
-
     if (mod->prefix) {
 	m__free(mod->prefix);
     }
-
+    if (mod->xmlprefix) {
+	m__free(mod->xmlprefix);
+    }
     if (mod->source) {
 	m__free(mod->source);
     }
-
     if (mod->belongs) {
 	m__free(mod->belongs);
     }
@@ -1074,13 +1074,6 @@ status_t
     /* Initialize the XML namespace for YANG */
     res = xmlns_register_ns(YANG_URN, YANG_PREFIX, 
 			    YANG_MODULE, NULL, &nsid);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* Initialize the NCX namespace for NCX specific extensions */
-    res = xmlns_register_ns(NCX_URN, NCX_PREFIX, 
-			    NCX_MODULE, NULL, &nsid);
     if (res != NO_ERR) {
 	return res;
     }
@@ -1905,8 +1898,11 @@ status_t
 {
     yang_node_t    *node;
     xmlns_t        *ns;
+    xmlChar        *buffer, *p;
     boolean         needns;
     status_t        res;
+    xmlns_id_t      nsid;
+    uint32          prefixlen, i;
 
 #ifdef DEBUG
     if (!mod) {
@@ -1923,6 +1919,7 @@ status_t
 	    /* should not happen */
 	    log_error("\nError: cannot add module '%s' to registry"
 		      " with fatal errors", mod->name);
+	    ncx_print_errormsg(NULL, mod, res);
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	} else {
 	    log_debug2("\nAdding module '%s' to registry"
@@ -1956,7 +1953,42 @@ status_t
 	    }
 	}
     
-	/**** CHECK PREFIX COLLISION HERE ****/
+	/* check module prefix collision */
+	nsid = xmlns_find_ns_by_prefix(mod->prefix);
+	if (nsid) {
+	    log_warn("\nWarning: prefix '%s' already in use "
+		     "by module '%s'",
+		     mod->prefix, 
+		     xmlns_get_module(nsid));
+	    ncx_print_errormsg(NULL, mod, ERR_NCX_DUP_PREFIX);
+
+	    /* redo the module xmlprefix */
+	    prefixlen = xml_strlen(mod->prefix);
+	    buffer = m__getMem(prefixlen + 6);
+	    if (!buffer) {
+		return ERR_INTERNAL_MEM;
+	    }
+	    p = buffer;
+	    p += xml_strcpy(p, mod->prefix);
+
+	    /* keep adding numbers to end of prefix until
+	     * 1 is unused or run out of numbers
+	     */
+	    for (i=1; i<10000 && nsid; i++) {
+		sprintf((char *)p, "%u", i);
+		nsid = xmlns_find_ns_by_prefix(buffer);
+	    }
+	    if (nsid) {
+		log_error("\nError: could not assign module prefix");
+		res = ERR_NCX_OPERATION_FAILED;
+		ncx_print_errormsg(NULL, mod, res);
+		m__free(buffer);
+		return res;
+	    }
+
+	    /* else the current buffer contains an unused prefix */
+	    mod->xmlprefix = buffer;
+	}
 
 	ns = def_reg_find_ns(mod->ns);
 	if (ns) {
@@ -1973,13 +2005,18 @@ status_t
 		mod->nsid = ns->ns_id;
 	    }
 	} else {
-	    res = xmlns_register_ns(mod->ns, mod->prefix, 
-				    mod->name, mod, &mod->nsid);
+	    res = xmlns_register_ns(mod->ns, 
+				    (mod->xmlprefix) 
+				    ? mod->xmlprefix : mod->prefix, 
+				    mod->name, 
+				    mod, 
+				    &mod->nsid);
 	    if (res != NO_ERR) {
 		/* this NS registration failed */
 		log_error("\nncx reg: Module '%s' registering "
 			  "namespace '%s' failed (%s)",
-			  mod->name, mod->ns,
+			  mod->name, 
+			  mod->ns,
 			  get_error_string(res));
 		return res;
 	    }
@@ -2030,7 +2067,6 @@ status_t
 	}
 
     }
-
     
     return res;
 

@@ -669,6 +669,8 @@ const char *
 	return "no nodes available";
     case ERR_NCX_BAD_REV_ORDER:
 	return "bad revision-stmt order";
+    case ERR_NCX_DUP_PREFIX:
+	return "duplicate prefix";
 
     /* system info codes start at 500 */
     case ERR_PARS_SECDONE:

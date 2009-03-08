@@ -126,4 +126,10 @@ extern status_t
 			  xmlChar *buff,
 			  uint32  *len);
 
+extern status_t
+    val_check_child_conditional (val_value_t *val,
+				 val_value_t *valroot,
+				 const obj_template_t *childobj,
+				 boolean *condresult);
+
 #endif	    /* _H_val_util */

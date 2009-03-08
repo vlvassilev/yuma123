@@ -4319,8 +4319,8 @@ static ncx_var_t *
     /* check if prefix set and specifies an import */
     if (pcb->source != XP_SRC_XML) {
 	if (prefix && prefixlen && 
-	    xml_strncmp(pcb->mod->prefix, prefix, prefixlen)
-	    && (xml_strlen(pcb->mod->prefix) != prefixlen)) {
+	    xml_strlen(pcb->mod->prefix) == prefixlen &&
+	    xml_strncmp(pcb->mod->prefix, prefix, prefixlen)) {
 
 	    *res = xpath_get_curmod_from_prefix_str(prefix,
 						    prefixlen,

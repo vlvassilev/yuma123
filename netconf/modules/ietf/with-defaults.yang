@@ -33,6 +33,31 @@ module with-defaults {
         description "Initial version.";
     }
 
+    typedef DefaultStyle {
+        description
+           "Selects the type of filtering behavior the agent will
+            advertise in the 'with-defaults' capability.  The agent
+            will use this default handling behavior if the 
+            'with-defaults' parameter is not explicitly set.";
+        type enumeration {
+            enum report-all {
+               description
+                 "All default data is always reported.";
+               value 1;
+            }
+            enum trim {
+               description
+                 "Values are not reported if they match the default.";
+               value 2;
+            }
+            enum explicit {
+               description
+                 "Report values if they are explicitly set.";
+               value 3;
+            }
+        }
+    }
+
     grouping WithDefaults {
        leaf with-defaults {
          description 

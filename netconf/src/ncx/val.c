@@ -4013,7 +4013,10 @@ val_value_t *
 *
 * INPUTS:
 *    val == value to clone from
-*    copy == value to replace
+*    copy == address of value to replace
+*
+* OUTPUTS:
+*   *copy has been deleted and reforms with the contents of 'val'
 *
 * RETURNS:
 *   status
@@ -4022,133 +4025,39 @@ status_t
     val_replace (const val_value_t *val,
 		 val_value_t *copy)
 {
-    const val_value_t *ch;
-    val_value_t       *copych;
-    status_t           res;
+    xmlChar    *buffer;
+    uint32      len;
+    status_t    res;
+
 
 #ifdef DEBUG
-    if (!val|| !copy) {
+    if (!val || !copy) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    val_free_value(copy);
-    copy = val_new_value();
-    if (!copy) {
-	return ERR_INTERNAL_MEM;
-    }
-    val_init_from_template(copy, val->obj);
+    buffer = NULL;
 
-    if (val->editvars && copy->editvars) {
-	copy->editvars->editop = val->editvars->editop;
-    }
-
-    copy->res = val->res;
-    copy->flags = val->flags;
-
-    /**** THIS MAY NEED TO CHANGE !!! ****/
-    copy->parent = val->parent;
-
-    /* copy meta-data */
-    for (ch = (const val_value_t *)dlq_firstEntry(&val->metaQ);
-	 ch != NULL;
-	 ch = (const val_value_t *)dlq_nextEntry(ch)) {
-	copych = val_clone(ch);
-	if (!copych) {
+    res = val_sprintf_simval_nc(NULL, val, &len);
+    if (res == NO_ERR) {
+	buffer = m__getMem(len+1);
+	if (!buffer) {
 	    return ERR_INTERNAL_MEM;
 	}
-	dlq_enque(copych, &copy->metaQ);
+	res = val_sprintf_simval_nc(buffer, val, &len);
+	if (res == NO_ERR) {
+	    res = val_set_simval(copy,
+				 val->typdef,
+				 val->nsid,
+				 val->name,
+				 buffer);
+	}
     }
-
-    /* copy the actual value or children for complex types */
-    res = NO_ERR;
-    switch (val->btyp) {
-    case NCX_BT_ENUM:
-	VAL_ENUM(copy) = VAL_ENUM(val);
-	VAL_ENUM_NAME(copy) = VAL_ENUM_NAME(val);
-	break;
-    case NCX_BT_EMPTY:
-    case NCX_BT_BOOLEAN:
-	copy->v.bool = val->v.bool;
-	break;
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
-    case NCX_BT_FLOAT64:
-	res = ncx_copy_num(&val->v.num, &copy->v.num, val->btyp);
-	break;
-    case NCX_BT_BINARY:
-	ncx_clean_binary(&copy->v.binary);
-	if (val->v.binary.ustr) {
-	    copy->v.binary.ustr = m__getMem(val->v.binary.ustrlen);
-	    if (!copy->v.binary.ustr) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		memcpy(copy->v.binary.ustr, val->v.binary.ustr,
-		       val->v.binary.ustrlen);
-		copy->v.binary.ustrlen = val->v.binary.ustrlen;
-		copy->v.binary.ubufflen = val->v.binary.ustrlen;
-	    }
-	}
-	break;
-    case NCX_BT_STRING:	
-    case NCX_BT_INSTANCE_ID:
-    case NCX_BT_LEAFREF:   /*****/
-	res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
-	break;
-    case NCX_BT_SLIST:
-    case NCX_BT_BITS:
-	res = ncx_copy_list(&val->v.list, &copy->v.list);
-	break;
-    case NCX_BT_ANY:
-    case NCX_BT_LIST:
-    case NCX_BT_CONTAINER:
-    case NCX_BT_CHOICE:
-    case NCX_BT_CASE:
-	for (ch = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
-	     ch != NULL && res==NO_ERR;
-	     ch = (const val_value_t *)dlq_nextEntry(ch)) {
-	    copych = val_clone(ch);
-	    if (!copych) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		val_add_child(copych, copy);
-	    }
-	}
-	break;
-    case NCX_BT_EXTERN:
-	if (val->v.fname) {
-	    copy->v.fname = xml_strdup(val->v.fname);
-	    if (!copy->v.fname) {
-		res = ERR_INTERNAL_MEM;
-	    }
-	}
-	break;
-    case NCX_BT_INTERN:
-	if (val->v.intbuff) {
-	    copy->v.intbuff = xml_strdup(val->v.intbuff);
-	    if (!copy->v.intbuff) {
-		res = ERR_INTERNAL_MEM;
-	    }
-	}
-	break;
-    default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
+    if (buffer) {
+	m__free(buffer);
     }
-
-    /* reconstruct index records if needed */
-    if (res==NO_ERR && !dlq_empty(&val->indexQ)) {
-	res = val_gen_index_chain(val->obj, copy);
-    }
-
     return res;
-
+    
 }  /* val_replace */
 
 
@@ -7211,7 +7120,7 @@ boolean
     }
 
     /* check if the data type has a default */
-    def = typ_get_default(val->typdef);
+    def = obj_get_default(val->obj);
     if (!def) {
 	return FALSE;
     }
@@ -7289,8 +7198,7 @@ boolean
 	break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-	if (!ncx_compare_strs((const ncx_str_t *)def, 
-			      &val->v.str, btyp)) {
+	if (!xml_strcmp(def, val->v.str)) {
 	    ret = TRUE;
 	}
 	break;

@@ -77,6 +77,8 @@ date	     init     comment
 
 #define NCXMOD_NCX        (const xmlChar *)"ncx"
 
+#define NCXMOD_WITH_DEFAULTS (const xmlChar *)"with-defaults"
+
 /* name of the NETCONF module containing NETCONF protocol definitions,
  * that is loaded by default during startup 
  */

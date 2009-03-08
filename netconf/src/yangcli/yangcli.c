@@ -31,7 +31,7 @@ date         init     comment
 #include <errno.h>
 #include <stdio.h>
 #include <ctype.h>
-
+#include <mcheck.h>
 #include "libtecla.h"
 
 #define _C_main 1
@@ -148,6 +148,7 @@ date         init     comment
 *********************************************************************/
 #ifdef DEBUG
 #define YANGCLI_DEBUG   1
+/* #define MEMORY_DEBUG    1 */  /**** HANGS ON DOUBLE FREE ****/
 #endif
 
 #define MAX_PROMPT_LEN 56
@@ -6154,15 +6155,19 @@ static val_value_t *
 	return newparm;
     } else {
 	/* from global or local variable */
-	if (*fromstr == '$' && fromstr[1] == '$') {
+	if (!fromstr) {
+	    ;  /* should not be NULL */
+	} else if (*fromstr == '$' && fromstr[1] == '$') {
+	    /* $$foo */
 	    isglobal = TRUE;
 	    fromstr += 2;
 	} else if (*fromstr == '$') {
+	    /* $foo */
 	    isglobal = FALSE;
 	    fromstr++;
 	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    fromstr = NULL;
+	    /* 'foo' : just assume local, not error */
+	    isglobal = FALSE;
 	}
 	if (fromstr) {
 	    userval = var_get(fromstr, isglobal);
@@ -8233,6 +8238,14 @@ static void
 	log_stdout("none");
 	break;
     }
+
+    log_stdout("\nDefault with-defaults behavior: ");
+    if (mscb->caplist.cap_defstyle) {
+	log_stdout("%s", mscb->caplist.cap_defstyle);
+    } else {
+	log_stdout("unknown");
+    }
+
     log_stdout("\n");
     
 } /* report_capabilities */
@@ -8845,6 +8858,10 @@ int
 	  const char *argv[])
 {
     status_t   res;
+
+#ifdef MEMORY_DEBUG
+    mtrace();
+#endif
 
     res = yangcli_init(argc, argv);
     if (res != NO_ERR) {

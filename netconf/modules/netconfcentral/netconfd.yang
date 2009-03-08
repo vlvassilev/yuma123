@@ -10,15 +10,17 @@ module netconfd {
 
     import inet-types { prefix inet; }
 
+    import with-defaults { prefix wd; }
+
     organization  "Netconf Central";
 
     contact "Andy Bierman <support@netconfcentral.com>.";
 
     description "NCX Agent Configuration Parameters and Statistics";
 
-    revision 2008-10-11 {
+    revision 2009-03-07 {
        description 
-         "Added runtime load module support and candidate config";
+         "work-in-progress version.";
     }
 
     revision 2008-08-01 {
@@ -46,6 +48,16 @@ module netconfd {
         description
            "Internal file search path for config files.";
         type nt:NcPathList;
+      }
+
+      leaf default-style {
+        description
+           "Selects the type of filtering behavior the agent will
+            advertise in the 'with-defaults' capability.  The agent
+            will use this default handling behavior if the 
+            'with-defaults' parameter is not explicitly set.";
+         type wd:DefaultStyle;
+         default report-all;
       }
 
       leaf help {
@@ -168,7 +180,6 @@ module netconfd {
               character is the forward slash '/', indicating
               an absolute file path.";
           type string;
-  
         }
       }
 
@@ -193,6 +204,7 @@ module netconfd {
           }
         }
         // default is set in the agt_profile
+        default candidate;
       }
 
       leaf version {
@@ -205,9 +217,11 @@ module netconfd {
         description
           "If present, then XML element order will be enforced.
            Otherwise, XML element order errors will not be
-           generated if possible.";
+           generated if possible. Default is no enforcement of
+           strict XML order.";
         type empty;
       }
+
     }
 
     rpc load-config {

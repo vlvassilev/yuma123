@@ -147,6 +147,7 @@ static status_t
 		  xml_node_t *methnode)
 {
     cfg_template_t *source;
+    val_value_t    *parm;
     status_t        res;
 
     /* check if the <running> config is ready to read */
@@ -162,6 +163,12 @@ static status_t
 			 methnode, NCX_NT_NONE, 
 			 NULL, NCX_NT_NONE, NULL);
 	return res;
+    }
+
+    parm = val_find_child(msg->rpc_input,
+			  NULL, NCX_EL_WITH_DEFAULTS);
+    if (parm && parm->res == NO_ERR) {
+	msg->mhdr.withdef = VAL_BOOL(parm);
     }
 
     /* check if the optional filter parameter is ok */
@@ -199,6 +206,7 @@ static status_t
 			 xml_node_t *methnode)
 {
     cfg_template_t *source;
+    val_value_t    *parm;
     status_t        res;
 
     /* check if the source config database exists */
@@ -227,6 +235,12 @@ static status_t
 			 methnode, NCX_NT_NONE, 
 			 NULL, NCX_NT_NONE, NULL);
 	return res;
+    }
+
+    parm = val_find_child(msg->rpc_input,
+			  NULL, NCX_EL_WITH_DEFAULTS);
+    if (parm && parm->res == NO_ERR) {
+	msg->mhdr.withdef = VAL_BOOL(parm);
     }
 
     /* check if the optional filter parameter is ok */
@@ -430,9 +444,10 @@ static status_t
 			  rpc_msg_t *msg,
 			  xml_node_t *methnode)
 {
-    status_t         res;
-    cfg_template_t  *srccfg, *destcfg;
+    cfg_template_t     *srccfg, *destcfg;
     const cap_list_t   *mycaps;
+    val_value_t        *parm;
+    status_t            res;
 
     /* get the agent capabilities */
     mycaps = agt_cap_get_caps();
@@ -475,6 +490,14 @@ static status_t
      */
     if (res == NO_ERR) {
 	res = cfg_ok_to_write(destcfg, SES_MY_SID(scb));
+    }
+
+    if (res == NO_ERR) {
+	parm = val_find_child(msg->rpc_input,
+			      NULL, NCX_EL_WITH_DEFAULTS);
+	if (parm && parm->res == NO_ERR) {
+	    msg->mhdr.withdef = VAL_BOOL(parm);
+	}
     }
 
     if (res != NO_ERR) {

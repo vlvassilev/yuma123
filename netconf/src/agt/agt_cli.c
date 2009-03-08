@@ -114,11 +114,8 @@ static void
     /* check all the netconfd CLI parameters;
      * follow the order in netconfd.yang since
      * no action will be taken until all params are collected
-     */
-
-    /* config param:
-     * do not look for config file param in this function
-     * so it can be called for the config file itself
+     *
+     * conf=filespec param checked externally
      */
 
     /* get datapath param */
@@ -127,7 +124,20 @@ static void
 	agt_profile->agt_datapath = VAL_STR(val);
     }
 
+    /* get default-style param */
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DEFAULT_STYLE);
+    if (val && val->res == NO_ERR) {
+	agt_profile->agt_defaultStyle = VAL_ENUM_NAME(val);
+	agt_profile->agt_defaultStyleEnum = VAL_ENUM(val);
+    }
+
     /* help parameter checked externally */
+
+    /* the logging parameters might have already been
+     * set in the bootstrap CLI (cli_parse_raw)
+     * they may get reset here, if the conf file has
+     * a different value selected
+     */
 
     /* get log param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOG);

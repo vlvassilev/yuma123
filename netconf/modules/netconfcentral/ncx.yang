@@ -471,6 +471,18 @@ module ncx {
        will automatically be processed as an XPath string,
        so the xpath extension is not needed in that case.";
   }
+
+  extension qname {
+    description
+      "Used to indicate that the content of a data type
+       is a Qualified Name.  This is needed to properly
+       evaluate the namespace prefix, if used.
+
+       The qname extension may appear within the type-stmt,
+       within a typedef, leaf, or leaf-list.  The builtin
+       data type must be 'string', or the 'qname' extension
+       will be ignored.";
+  }
  
 }
 

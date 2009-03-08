@@ -593,6 +593,8 @@ const char *
 	return "value not supported";
     case ERR_NCX_LEAFREF_LOOP:
 	return "leafref path loop";
+    case ERR_NCX_VAR_NOT_FOUND:
+	return "variable not found";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

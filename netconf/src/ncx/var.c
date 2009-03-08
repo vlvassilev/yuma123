@@ -1239,7 +1239,7 @@ val_value_t *
 	if (*res == NO_ERR) {
 	    varval = var_get_str(name, namelen, isglobal);
 	    if (!varval) {
-		*res = ERR_NCX_DEF_NOT_FOUND;
+		*res = ERR_NCX_VAR_NOT_FOUND;
 	    } else {
 		*res = val_replace(varval, useval);
 	    }

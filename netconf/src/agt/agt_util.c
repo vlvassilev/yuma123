@@ -890,6 +890,49 @@ boolean
 
 
 /********************************************************************
+* FUNCTION agt_check_default
+*
+* ncx_nodetest_fn_t callback
+*
+* Used by the <get*> operation to return only values
+* not set to the default
+*
+* INPUTS:
+*    see ncx/ncxtypes.h   (ncx_nodetest_fn_t)
+*
+* RETURNS:
+*    status
+*********************************************************************/
+boolean
+    agt_check_default (boolean withdef,
+		       ncx_node_t nodetyp,
+		       const void *node)
+{
+    boolean ret;
+
+    /* check if defaults are suppressed */
+    if (!withdef) {
+	/* with-defaults=false, check if this is a val with 
+	 * a default value set
+	 */
+	if (is_default(nodetyp, node)) {
+	    ret = FALSE;
+	} else {
+	    ret = TRUE;
+	}
+    } else {
+	/* not a node that should be saved with a copy-config 
+	 * to NVRAM
+	 */
+	ret = FALSE;
+    }
+
+    return ret;
+
+} /* agt_check_default */
+
+
+/********************************************************************
 * FUNCTION agt_check_save
 *
 * ncx_nodetest_fn_t callback
@@ -962,7 +1005,7 @@ status_t
     } else {
 	source = (cfg_template_t *)msg->rpc_user1;
     }
-    if (!source) {
+    if (!source || !source->root) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 
@@ -970,21 +1013,53 @@ status_t
 
     switch (msg->rpc_filter.op_filtyp) {
     case OP_FILTER_NONE:
-	if (source->root) {
+	if (msg->mhdr.withdef) {
+	    /* with-defaults=true: return everything */
 	    if (getop) {
-		xml_wr_val(scb, &msg->mhdr, source->root, indent);
+		/* all config and state data */
+		xml_wr_val(scb, 
+			   &msg->mhdr, 
+			   source->root, 
+			   indent);
 	    } else {
-		xml_wr_check_val(scb, &msg->mhdr, source->root, 
-				 indent, agt_check_config);
+		/* all config nodes */
+		xml_wr_check_val(scb, 
+				 &msg->mhdr, 
+				 source->root, 
+				 indent, 
+				 agt_check_config);
+	    }
+	} else {
+	    /* with-defaults=false: return only non-defaults */
+	    if (getop) {
+		/* all non-default config and state data */		
+		xml_wr_check_val(scb, 
+				 &msg->mhdr, 
+				 source->root, 
+				 indent,
+				 agt_check_default);
+	    } else {
+		/* all non-default config data */
+		xml_wr_check_val(scb, 
+				 &msg->mhdr, 
+				 source->root, 
+				 indent, 
+				 agt_check_config);
 	    }
 	}
 	break;
     case OP_FILTER_SUBTREE:
 	if (source->root) {
-	    top = agt_tree_prune_filter(scb, msg, source, getop);
+	    top = agt_tree_prune_filter(scb, 
+					msg, 
+					source, 
+					getop);
 	    if (top) {
-		agt_tree_output_filter(scb, msg, top, 
-				       indent, getop);
+		agt_tree_output_filter(scb, 
+				       msg, 
+				       top, 
+				       indent, 
+				       getop);
 		ncx_free_filptr(top);
 		break;
 	    }
@@ -992,8 +1067,11 @@ status_t
 	break;
     case OP_FILTER_XPATH:
 	if (source->root) {
-	    res = agt_xpath_output_filter(scb, msg, source,
-					  getop, indent);
+	    res = agt_xpath_output_filter(scb, 
+					  msg, 
+					  source,
+					  getop,
+					  indent);
 	}
 	break;
     default:

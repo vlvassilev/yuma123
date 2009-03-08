@@ -955,6 +955,8 @@ void
      */
     msg->rpc_in_attrs = &top->attrs;
 
+#if 0
+    /***** REPLACED: USE with-defaults.yang INSTEAD *****/
     /* get the NCX RPC with-defaults attribute if present */
     attr = xml_find_attr(top, xmlns_ncx_id(), NCX_EL_WITH_DEFAULTS);
     if (attr && attr->attr_val) {
@@ -972,6 +974,7 @@ void
 	/* with-defaults not explicitly set, so get the default */
 	msg->mhdr.withdef = ses_withdef(scb);	
     }
+#endif
 
     /* get the NCX RPC with-metadata attribute if present */
     attr = xml_find_attr(top, xmlns_ncx_id(), NCX_EL_WITH_METADATA);

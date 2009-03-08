@@ -35,7 +35,6 @@
    <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
       <t:a2>gina</t:a2>
       <t:a1>33</t:a1>
-      <t:b2>6</t:b2>
       <t:foo>fff</t:foo>
    </t:test2>
    <t:test3 xmlns:t="http://netconfcentral.com/ns/test">
@@ -55,7 +54,4 @@
       <t:c2>-6</t:c2>
       <t:c2>-1</t:c2>
    </t:test3>
-   <t:musttest xmlns:t="http://netconfcentral.com/ns/test">
-      <t:B2leaf></t:B2leaf>
-   </t:musttest>
 </nd:config>

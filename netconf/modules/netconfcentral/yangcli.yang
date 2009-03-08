@@ -37,18 +37,9 @@ module yangcli {
       
          ";
 
-    revision 2009-01-21 {
-       description "added sget and xget support";
+    revision 2009-03-06 {
+       description "Initial published version (TBD)";
     }
-
-    revision 2008-10-11 {
-       description "cleaned up ConnectParms grouping";
-    }
-
-    revision 2008-08-01 {
-       description "Initial yang version started from ncxcli v 0.2";
-    }
-
 
     /*************************************************************
      *
@@ -613,6 +604,39 @@ module yangcli {
       }
     }
 
+    rpc list {
+      description "List some NETCONF info.";
+      ncx:rpc-type exec;
+      input {
+        choice listtype {
+          mandatory true;
+
+          leaf commands {
+            description "List all local and remote commands";
+            type empty;
+          }
+
+          leaf objects {
+            description "List all available top-level object names.";
+            type empty;
+          }
+
+          leaf oids {
+            description "List all available object identifiers.";
+            type empty;
+          }
+
+        }
+
+        leaf module {
+          description "List only from this module, if specified.";
+          type nt:NcxIdentifier;
+        }
+
+        uses HelpMode;
+      }
+    }
+
     rpc load {
       description "Internal command to load a module or other file.";
       ncx:rpc-type exec;
@@ -765,11 +789,6 @@ module yangcli {
           leaf module {
             description "Show full info for one module";
             type nt:NcxIdentifier;
-          }
-
-          leaf modulelist {
-            description "Show brief info for all modules";
-            type empty;
           }
 
           leaf modules {

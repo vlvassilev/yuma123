@@ -159,8 +159,8 @@ static void
     agt_profile.agt_modpath = NULL;
     agt_profile.agt_datapath = NULL;
     agt_profile.agt_runpath = NULL;
-
-    /* TBD: ports to listen to */
+    agt_profile.agt_defaultStyle = AGT_DEFSTYLE_REPORT_ALL;
+    agt_profile.agt_defaultStyleEnum = AGT_DS_REPORT_ALL;
 
 } /* init_agent_profile */
 
@@ -389,7 +389,8 @@ status_t
 
     /* must set the agent capabilities after the profile is set */
     res = agt_cap_set_caps(agt_profile.agt_targ, 
-			   agt_profile.agt_start);
+			   agt_profile.agt_start,
+			   agt_profile.agt_defaultStyle);
     if (res != NO_ERR) {
 	return res;
     }
@@ -436,14 +437,6 @@ status_t
 	return res;
     }
 
-#ifdef WILL_CHANGE_TO_STD_SDISC_MODULE
-    /* load the agent schema discovery data model module */
-    res = agt_cap_init();
-    if (res != NO_ERR) {
-	return res;
-    }
-#endif
-
     /* load the NETCONF state monitoring data model module */
     res = agt_state_init();
     if (res != NO_ERR) {
@@ -479,10 +472,6 @@ status_t
     if (res != NO_ERR) {
 	return res;
     }
-
-    /*** TEMP: NEED TO CONVERT TO WG DM ***/
-    /* load the schema-discovery:modules parmset */
-    /*** agt_cap_set_modcaps_parmset(); ***/
 
     /* allow users to access the configuration databases now */
     cfg_set_state(NCX_CFGID_RUNNING, CFG_ST_READY);

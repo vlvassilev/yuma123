@@ -71,6 +71,10 @@ date             init     comment
 #define CAP_BIT_STARTUP       bit6
 #define CAP_BIT_URL           bit7
 #define CAP_BIT_XPATH         bit8
+#define CAP_BIT_NOTIFICATION  bit9
+#define CAP_BIT_INTERLEAVE    bit10
+#define CAP_BIT_PARTIAL_LOCK  bit11
+#define CAP_BIT_WITH_DEFAULTS bit12
 
 /* put the version numbers in the capability names for now */
 #define CAP_NAME_V1            ""
@@ -82,19 +86,24 @@ date             init     comment
 #define CAP_NAME_STARTUP       "startup:1.0"
 #define CAP_NAME_URL           "url:1.0"
 #define CAP_NAME_XPATH         "xpath:1.0"
+#define CAP_NAME_NOTIFICATION  "notification:1.0"
+#define CAP_NAME_INTERLEAVE    "interleave:1.0"
+#define CAP_NAME_PARTIAL_LOCK  "partial-lock:1.0"
+#define CAP_NAME_WITH_DEFAULTS "with-defaults"
 
 /* some YANG capability details */
 #define CAP_REVISION_EQ        (const xmlChar *)"revision="
 #define CAP_MODULE_EQ          (const xmlChar *)"module="
 #define CAP_FEATURES_EQ        (const xmlChar *)"features="
 #define CAP_DEVIATIONS_EQ      (const xmlChar *)"deviations="
+#define CAP_SCHEME_EQ          (const xmlChar *)"scheme="
+#define CAP_BASIC_EQ           (const xmlChar *)"basic="
 
 /********************************************************************
 *                                                                   *
 *                                    T Y P E S                      *
 *                                                                   *
 *********************************************************************/
-
 
 /* NETCONF capability subject types */
 typedef enum cap_subjtyp_t_ {
@@ -116,6 +125,10 @@ typedef enum cap_stdid_t_ {
     CAP_STDID_STARTUP,
     CAP_STDID_URL,
     CAP_STDID_XPATH,
+    CAP_STDID_NOTIFICATION,
+    CAP_STDID_INTERLEAVE,
+    CAP_STDID_PARTIAL_LOCK,
+    CAP_STDID_WITH_DEFAULTS,
     CAP_STDID_LAST_MARKER
 } cap_stdid_t;
 
@@ -123,6 +136,7 @@ typedef enum cap_stdid_t_ {
 typedef struct cap_list_t_ {
     uint32          cap_std;         /* bitset of std caps */
     xmlChar        *cap_protos;  /* URL capability protocol list */
+    xmlChar        *cap_defstyle;  /* with-defaults 'basic' parm */
     dlq_hdr_t       capQ;              /* queue of non-std caps */
 } cap_list_t;
 
@@ -176,6 +190,7 @@ extern status_t
     cap_add_std (cap_list_t *caplist, 
 		 cap_stdid_t   capstd);
 
+/* add a standard capability to the value struct version */
 extern status_t
     cap_add_stdval (val_value_t *caplist,
 		    cap_stdid_t   capstd);
@@ -189,18 +204,30 @@ extern status_t
     cap_add_module_string (cap_list_t *caplist, 
 			   const xmlChar *uri);
 
-/* add the #url capability to the list */
+/* add the :url capability to the list */
 extern status_t 
     cap_add_url (cap_list_t *caplist, 
 		 const xmlChar *proto_list);
 
-#ifdef DO_NOT_NEED
+/* add the :with-defaults capability to the list */
+extern status_t 
+    cap_add_withdef (cap_list_t *caplist, 
+		     const xmlChar *defstyle);
+
+/* add the :with-defaults cap as a value struct */
+extern status_t
+    cap_add_withdefval (val_value_t *caplist,
+			const xmlChar *defstyle);
+
+
+#if 0  /* DO_NOT_NEED */
 extern status_t 
     cap_add_mod (cap_list_t *caplist, 
 		 const xmlChar *modname,
 		 const xmlChar *modversion);
 #endif
 
+/* add a generic enterprise capability */
 extern status_t 
     cap_add_ent (cap_list_t *caplist, 
 		 const xmlChar *uristr);
@@ -210,11 +237,6 @@ extern status_t
     cap_add_modval (val_value_t *caplist, 
 		    const ncx_module_t *mod);
 
-
-#ifdef ONLY_USED_BY_AGT_CAP_DELETED
-extern xmlChar *
-    cap_make_mod_url (const cap_rec_t *caprec);
-#endif
 
 /* fast search of standard protocol capability set */
 extern boolean 
@@ -232,24 +254,32 @@ extern void
     cap_printf_XML (cap_list_t *caplist);
 #endif
 
+/* get the protocols field for the :url capability */
 extern const xmlChar *
     cap_get_protos (cap_list_t *caplist);
 
+
+/* debug function */
 extern void
     cap_dump_stdcaps (const cap_list_t *caplist);
 
+/* debug function */
 extern void
     cap_dump_modcaps (const cap_list_t *caplist);
 
+/* debug function */
 extern void
     cap_dump_entcaps (const cap_list_t *caplist);
 
+/* app processing access */
 extern const cap_rec_t *
     cap_first_modcap (const cap_list_t *caplist);
 
+/* app processing access */
 extern const cap_rec_t *
     cap_next_modcap (const cap_rec_t *curcap);
 
+/* app processing access */
 extern void
     cap_split_modcap (const cap_rec_t *cap,
 		      const xmlChar **module,

@@ -72,13 +72,6 @@ date         init     comment
 
 /* #define AGT_CAP_DEBUG 1 */
 
-#define AGT_CAP_SDISC_MODULE  (const xmlChar *)"schema-discovery"
-#define AGT_CAP_SDISC_PARMSET (const xmlChar *)"schemaList"
-#define AGT_CAP_SDISC_PARM    (const xmlChar *)"schema"
-
-#define LEAF_SCHEMA_IDENTIFIER  (const xmlChar *)"identifier"
-#define LEAF_SCHEMA_VERSION     (const xmlChar *)"version"
-#define LEAF_SCHEMA_LOCATION    (const xmlChar *)"location"
 
 /********************************************************************
 *                                                                   *
@@ -89,137 +82,8 @@ date         init     comment
 static val_value_t   *agt_caps = NULL;
 static cap_list_t    *my_agt_caps = NULL;
 
-#if 0
-/********************************************************************
-* FUNCTION add_schema_parm
-*
-* Create and add a <schema> element for the <schemaList>
-* which contains identifier, version, and location strings
-* for a single module
-*
-* INPUTS:
-*     ps == initialized schemaList parmset
-*     modcap == module capability record to use for the info
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t
-    add_schema_parm (val_value_t *valset,
-		     const cap_rec_t *modcap)
-{
-    val_value_t    *parm, *val;
-    xmlChar        *str;
-    xmlns_id_t      nsid;
-    status_t        res;
-
-    chobj = obj_find_child(valset->obj, 
-			   AGT_CAP_PREFIX,
-			   AGT_CAP_SDISC_PARM);			   
-    if (!chobj) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    /*******  CONVERSION STOPPED HERE *************/
-
-    /* create a new parm struct */
-    parm = val_new_value();
-    if (!parm) {
-	return ERR_INTERNAL_MEM;
-    }
-    val_init_from_template(parm, chobj);
-
-    /* get namespace for all nodes */
-    nsid = obj_get_nsid(parm->obj);
-
-    /* add identifier node */
-    typdef = typ_find_child_typdef(LEAF_SCHEMA_IDENTIFIER,
-				   parentdef);
-    if (!typdef) {
-	ps_free_parm(parm);
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-    val = val_make_simval(typdef, nsid,
-			  LEAF_SCHEMA_IDENTIFIER,
-			  modcap->cap_uri, &res);
-    if (!val || res != NO_ERR) {
-	ps_free_parm(parm);
-	return res;
-    }
-    val_add_child(val, parm->val);
-
-    /* add version node */
-    typdef = typ_find_child_typdef(LEAF_SCHEMA_VERSION,
-				   parentdef);
-    if (!typdef) {
-	ps_free_parm(parm);
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-    val = val_make_simval(typdef, nsid,
-			  LEAF_SCHEMA_VERSION,
-			  modcap->cap_ver, &res);
-    if (!val || res != NO_ERR) {
-	ps_free_parm(parm);
-	return res;
-    }
-    val_add_child(val, parm->val);
-
-
-    /* add location node */
-    typdef = typ_find_child_typdef(LEAF_SCHEMA_LOCATION,
-				   parentdef);
-    if (!typdef) {
-	ps_free_parm(parm);
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-    str = cap_make_mod_url(NC_OWNER, modcap);
-    if (!str) {
-	ps_free_parm(parm);
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-	
-    val = val_make_simval(typdef, nsid,
-			  LEAF_SCHEMA_LOCATION,
-			  str, &res);
-    m__free(str);
-    if (!val || res != NO_ERR) {
-	ps_free_parm(parm);
-	return SET_ERROR(res);
-    }
-    val_add_child(val, parm->val);
-
-    ps_add_parm(parm, ps, NCX_MERGE_LAST);
-    return NO_ERR;
-
-} /* add_schema_parm */
-#endif
-
-
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
-
-
-#ifdef WILL_CHANGE_TO_STD_SDISC_MODULE
-/********************************************************************
-* FUNCTION agt_cap_init
-*
-* Initialize the NETCONF agent capabilities module
-*
-* INPUTS:
-*    none
-* RETURNS:
-*    status
-*********************************************************************/
-status_t
-    agt_cap_init (void)
-{
-    status_t  res;
-
-    res = ncxmod_load_module(AGT_CAP_SDISC_MODULE, NULL, NULL);
-    return res;
-	
-} /* agt_cap_init */
-#endif
 
 
 /********************************************************************
@@ -257,13 +121,15 @@ void
 * INPUTS:
 *    agttarg == the target of edit-config for this agent
 *    agtstart == the type of startup configuration for this agent
+*    defstyle == default with-defaults style for the entire agent
 *
 * RETURNS:
 *    NO_ERR if all goes well
 *********************************************************************/
 status_t 
     agt_cap_set_caps (ncx_agttarg_t  agttarg,
-		      ncx_agtstart_t agtstart)
+		      ncx_agtstart_t agtstart,
+		      const xmlChar *defstyle)
 {
     status_t  res;
     val_value_t *oldcaps, *newcaps;
@@ -352,14 +218,6 @@ status_t
 	}
     }
 
-    /* set the xpath capability */
-    if (res == NO_ERR) {
-	res = cap_add_std(newmycaps, CAP_STDID_XPATH);
-	if (res == NO_ERR) {
-	    res = cap_add_stdval(newcaps, CAP_STDID_XPATH);
-	}
-    }
-
 #ifdef NOT_YET
     /* set the url capability */
     if (res == NO_ERR) {
@@ -369,6 +227,53 @@ status_t
 	}
     }
 #endif
+
+    /* set the xpath capability */
+    if (res == NO_ERR) {
+	res = cap_add_std(newmycaps, CAP_STDID_XPATH);
+	if (res == NO_ERR) {
+	    res = cap_add_stdval(newcaps, CAP_STDID_XPATH);
+	}
+    }
+
+#ifdef NOT_YET 
+    /* set the notification capability */
+    if (res == NO_ERR) {
+	res = cap_add_std(newmycaps, CAP_STDID_NOTIFICATION);
+	if (res == NO_ERR) {
+	    res = cap_add_stdval(newcaps, CAP_STDID_NOTIFICATION);
+	}
+    }
+#endif
+
+#ifdef NOT_YET 
+    /* set the interleave capability */
+    if (res == NO_ERR) {
+	res = cap_add_std(newmycaps, CAP_STDID_INTERLEAVE);
+	if (res == NO_ERR) {
+	    res = cap_add_stdval(newcaps, CAP_STDID_INTERLEAVE);
+	}
+    }
+#endif
+
+#ifdef NOT_YET 
+    /* set the partial-lock capability */
+    if (res == NO_ERR) {
+	res = cap_add_std(newmycaps, CAP_STDID_PARTIAL_LOCK);
+	if (res == NO_ERR) {
+	    res = cap_add_stdval(newcaps, CAP_STDID_PARTIAL_LOCK);
+	}
+    }
+#endif
+
+
+    /* set the with-defaults capability */
+    if (res == NO_ERR) {
+	res = cap_add_withdef(newmycaps, defstyle);
+	if (res == NO_ERR) {
+	    res = cap_add_withdefval(newcaps, defstyle);
+	}
+    }
 
     /* check the return value */
     if (res != NO_ERR) {

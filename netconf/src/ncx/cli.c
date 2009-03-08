@@ -952,7 +952,7 @@ val_value_t *
 	    buffpos += parmnamelen;
 
 	    /* check if this parameter name is in the parmset def */
-	    chobj = obj_find_child_str(obj, obj_get_mod_name(obj),
+	    chobj = obj_find_child_str(obj, NULL,
 				       (const xmlChar *)parmname,
 				       parmnamelen);
 
@@ -960,7 +960,7 @@ val_value_t *
 	    if (!chobj && autocomp) {
 		matchcount = 0;
 		chobj = 
-		    obj_match_child_str(obj, obj_get_mod_name(obj),
+		    obj_match_child_str(obj, NULL,
 					(const xmlChar *)parmname,
 					parmnamelen,
 					&matchcount);

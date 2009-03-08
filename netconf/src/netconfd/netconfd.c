@@ -17,10 +17,10 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <string.h>
-#include  <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <mcheck.h>
 
 #define _C_main 1
@@ -141,6 +141,12 @@ static status_t
 
     /* load in the NCX extensions module */
     res = ncxmod_load_module(NCXMOD_NCX, NULL, NULL);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* load in the with-defaults extension module */
+    res = ncxmod_load_module(NCXMOD_WITH_DEFAULTS, NULL, NULL);
     if (res != NO_ERR) {
 	return res;
     }

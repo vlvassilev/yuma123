@@ -138,6 +138,13 @@ extern boolean
 		      ncx_node_t nodetyp,
 		      const void *node);
 
+/* default handler when no filter is present */
+extern boolean
+    agt_check_default (boolean withdef,
+		       ncx_node_t nodetyp,
+		       const void *node);
+
+
 /* filter: returns TRUE for NCX_DC_CONFIG 
  * and with-defaults test passes as well
  */

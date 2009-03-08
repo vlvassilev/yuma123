@@ -51,9 +51,11 @@ extern status_t
 extern void 
     agt_cap_cleanup (void);
 
+/* initial setup of agent capabilities structs */
 extern status_t 
     agt_cap_set_caps (ncx_agttarg_t  agttarg,
-		      ncx_agtstart_t agtstart);
+		      ncx_agtstart_t agtstart,
+		      const xmlChar *defstyle);
 
 extern status_t 
     agt_cap_set_modules (void);

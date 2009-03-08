@@ -91,7 +91,7 @@ date         init     comment
 /* controls extra attributes in the <capability> element */
 /* #define USE_EXTENDED_HELLO 0 */
 
-#define URL_ORG    (const xmlChar *)"http://netconfcentral.com/"
+#define URL_COM    (const xmlChar *)"http://netconfcentral.com/"
 #define URL_START  (const xmlChar *)"xsd/"
 
 
@@ -120,6 +120,10 @@ static cap_stdrec_t stdcaps[] =
   { CAP_STDID_STARTUP, CAP_BIT_STARTUP, CAP_NAME_STARTUP },
   { CAP_STDID_URL, CAP_BIT_URL, CAP_NAME_URL },
   { CAP_STDID_XPATH, CAP_BIT_XPATH, CAP_NAME_XPATH },
+  { CAP_STDID_NOTIFICATION, CAP_BIT_NOTIFICATION, CAP_NAME_NOTIFICATION },
+  { CAP_STDID_INTERLEAVE, CAP_BIT_INTERLEAVE, CAP_NAME_INTERLEAVE },
+  { CAP_STDID_PARTIAL_LOCK, CAP_BIT_PARTIAL_LOCK, CAP_NAME_PARTIAL_LOCK },
+  { CAP_STDID_WITH_DEFAULTS, CAP_BIT_WITH_DEFAULTS, CAP_NAME_WITH_DEFAULTS },
   { CAP_STDID_LAST_MARKER, 0x0, "" }    /* end-of-list marker */
 };
 
@@ -462,8 +466,6 @@ void
 #endif
     
     memset(caplist, 0x0, sizeof(cap_list_t));
-    caplist->cap_std = 0;
-    caplist->cap_protos = NULL;
     dlq_createSQue(&caplist->capQ);
 
 }  /* cap_init_caplist */
@@ -493,9 +495,15 @@ void
 #endif
 
     caplist->cap_std = 0;
+
     if (caplist->cap_protos) {
 	m__free(caplist->cap_protos);
 	caplist->cap_protos = NULL;
+    }
+
+    if (caplist->cap_defstyle) {
+	m__free(caplist->cap_defstyle);
+	caplist->cap_defstyle = NULL;
     }
 
     /* drain the capability Q and free the memory */
@@ -578,10 +586,10 @@ status_t
     cap_add_stdval (val_value_t *caplist,
 		    cap_stdid_t   capstd)
 {
-    val_value_t  *capval;
-    xmlChar      *str, *p;
-    const xmlChar  *pfix, *cap;
-    uint32        len;
+    val_value_t     *capval;
+    xmlChar         *str, *p;
+    const xmlChar   *pfix, *cap;
+    uint32           len;
 
 #ifdef DEBUG
     if (!caplist || capstd >= CAP_STDID_LAST_MARKER) {
@@ -604,8 +612,6 @@ status_t
     str = m__getMem(len+1);
     if (!str) {
 	return ERR_INTERNAL_MEM;
-    } else {
-	memset(str, 0x0, len+1);
     }
 
     /* concat the capability name if not the base string */
@@ -648,7 +654,7 @@ status_t
 			const xmlChar *uri)
 {
     const xmlChar *str;
-    uint32         caplen;
+    uint32         caplen, namelen, schemelen, basiclen;
     cap_stdid_t    stdid;
 
 #ifdef DEBUG
@@ -671,8 +677,50 @@ status_t
 	/* go through the standard capability suffix strings */
 	for (stdid=CAP_STDID_WRITE_RUNNING;
 	     stdid < CAP_STDID_LAST_MARKER; stdid++) {
-	    if (!xml_strcmp(str, stdcaps[stdid].cap_name)) {
-		return cap_add_std(caplist, stdid);
+
+	    switch (stdid) {
+	    case CAP_STDID_URL:
+		namelen = xml_strlen(stdcaps[stdid].cap_name);
+		if (!xml_strncmp(str, stdcaps[stdid].cap_name,
+				 namelen)) {
+		    str += namelen;
+		    if (*str == '?') {
+			str++;
+			schemelen = xml_strlen(CAP_SCHEME_EQ);
+			if (!xml_strncmp(str,
+					 CAP_SCHEME_EQ,
+					 schemelen)) {
+			    str += schemelen;
+			    if (*str) {
+				return cap_add_url(caplist, str);
+			    }
+			}
+		    }
+		}
+		break;
+	    case CAP_STDID_WITH_DEFAULTS:
+		namelen = xml_strlen(stdcaps[stdid].cap_name);
+		if (!xml_strncmp(str, stdcaps[stdid].cap_name,
+				 namelen)) {
+		    str += namelen;
+		    if (*str == '?') {
+			str++;
+			basiclen = xml_strlen(CAP_BASIC_EQ);
+			if (!xml_strncmp(str,
+					 CAP_BASIC_EQ,
+					 basiclen)) {
+			    str += basiclen;
+			    if (*str) {
+				return cap_add_withdef(caplist, str);
+			    }
+			}
+		    }
+		}
+		break;
+	    default:
+		if (!xml_strcmp(str, stdcaps[stdid].cap_name)) {
+		    return cap_add_std(caplist, stdid);
+		}
 	    }
 	}
     }
@@ -756,7 +804,8 @@ status_t
 	    continue;
 	}
 
-	res = parse_uri_parm(parmname, &parmnamelen, &parmval, &parmvallen, &nextparmname);
+	res = parse_uri_parm(parmname, &parmnamelen, 
+			     &parmval, &parmvallen, &nextparmname);
 	if (res != NO_ERR) {
 	    log_warn("\nWarning: skipping invalid parameter syntax (%s) "
 		     "in capability URI '%s'", get_error_string(res), uri);
@@ -776,7 +825,8 @@ status_t
 		module = parmval;
 		modulelen = parmvallen;
 	    }
-	} else if (!xml_strncmp(parmname, YANG_K_REVISION, xml_strlen(YANG_K_REVISION))) {
+	} else if (!xml_strncmp(parmname, YANG_K_REVISION, 
+				xml_strlen(YANG_K_REVISION))) {
 	    if (currev) {
 		log_warn("\nWarning: skipping duplicate 'revision' parameter "
 			 "in capability URI '%s'", uri);
@@ -785,7 +835,8 @@ status_t
 		revision = parmval;
 		revisionlen = parmvallen;
 	    }
-	} else if (!xml_strncmp(parmname, YANG_K_FEATURES, xml_strlen(YANG_K_FEATURES))) {
+	} else if (!xml_strncmp(parmname, YANG_K_FEATURES, 
+				xml_strlen(YANG_K_FEATURES))) {
 	    if (curfeat) {
 		log_warn("\nWarning: skipping duplicate 'features' parameter "
 			 "in capability URI '%s'", uri);
@@ -794,7 +845,8 @@ status_t
 		features = parmval;
 		featureslen = parmvallen;
 	    }
-	} else if (!xml_strncmp(parmname, YANG_K_DEVIATIONS, xml_strlen(YANG_K_DEVIATIONS))) {
+	} else if (!xml_strncmp(parmname, YANG_K_DEVIATIONS, 
+				xml_strlen(YANG_K_DEVIATIONS))) {
 	    if (curdev) {
 		log_warn("\nWarning: skipping duplicate 'deviations' parameter "
 			 "in capability URI '%s'", uri);
@@ -930,7 +982,8 @@ status_t
 *
 * INPUTS:
 *    caplist == capability list that will contain the standard cap 
-*    capstd == the standard capability ID
+*    proto_list == the protocol list for the :url capability
+*
 * RETURNS:
 *    status, should always be NO_ERR
 *********************************************************************/
@@ -952,6 +1005,100 @@ status_t
     return NO_ERR;
 
 } /* cap_add_url */
+
+
+/********************************************************************
+* FUNCTION cap_add_withdef
+*
+* Add the #with-defaults capability to the list
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap 
+*    
+* RETURNS:
+*    status, should always be NO_ERR
+*********************************************************************/
+status_t 
+    cap_add_withdef (cap_list_t *caplist, 
+		     const xmlChar *defstyle)
+{
+#ifdef DEBUG
+    if (!caplist || !defstyle) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    m__setbit(caplist->cap_std, 
+	      stdcaps[CAP_STDID_WITH_DEFAULTS].cap_bitnum);
+    caplist->cap_defstyle = xml_strdup(defstyle);
+    if (!caplist->cap_defstyle) {
+        return ERR_INTERNAL_MEM;
+    }
+    return NO_ERR;
+
+} /* cap_add_withdef */
+
+
+/********************************************************************
+* FUNCTION cap_add_withdefval
+*
+* Add the #with-defaults capability to t`he list
+* valuse struct version
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap 
+*    capstd == the standard capability ID
+* OUTPUTS:
+*    status
+*********************************************************************/
+status_t
+    cap_add_withdefval (val_value_t *caplist,
+			const xmlChar *defstyle)
+{
+    val_value_t     *capval;
+    xmlChar         *str, *p;
+    const xmlChar   *pfix, *cap, *basic;
+    uint32           len;
+
+#ifdef DEBUG
+    if (!caplist || !defstyle) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* setup the string */
+    pfix = CAP_URN;
+    basic = CAP_BASIC_EQ;
+    cap = stdcaps[CAP_STDID_WITH_DEFAULTS].cap_name;
+    len = xml_strlen(pfix) + xml_strlen(cap) +
+	xml_strlen(basic) + xml_strlen(defstyle) + 1;
+
+    /* make the string */
+    str = m__getMem(len+1);
+    if (!str) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    /* concat the capability name if not the base string */
+    p = str;
+    p += xml_strcpy(p, pfix);
+    p += xml_strcpy(p, cap);
+    *p++ = '?';
+    p += xml_strcpy(p, basic);
+    xml_strcpy(p, defstyle);
+
+    /* make the capability element */
+    capval = xml_val_new_string(NCX_EL_CAPABILITY,
+				xmlns_nc_id(), str);
+    if (!capval) {
+	m__free(str);
+	return ERR_INTERNAL_MEM;
+    }
+
+    val_add_child(capval, caplist);
+    return NO_ERR;
+
+}  /* cap_add_withdefval */
 
 
 /********************************************************************
@@ -1044,52 +1191,6 @@ status_t
     return NO_ERR;
 
 }  /* cap_add_modval */ 
-
-
-#ifdef ONLY_USED_BY_AGT_CAP_DELETED
-/********************************************************************
-* FUNCTION cap_make_mod_url
-*
-* Construct and malloc a module schema URL string
-*
-* INPUTS:
-*    caprec == cap_rec_t for the module capability
-*
-* RETURNS:
-*    status
-*********************************************************************/
-xmlChar *
-    cap_make_mod_url (const cap_rec_t *caprec)
-{
-    uint32        len;
-    xmlChar      *str, *p;
-
-#ifdef DEBUG
-    if (!caprec) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    /* http://netconfcentral.com/xsd/module.xsd */
-    len = xml_strlen(URL_ORG) + 
-	xml_strlen(URL_START) + caprec->cap_mod_len + 4;
-
-    str = m__getMem(len+1);
-    if (!str) {
-	return NULL;
-    }
-
-    p = str;
-    p += xml_strcpy(p, URL_ORG);
-    p += xml_strcpy(p, URL_START);
-    p += xml_strncpy(p, caprec->cap_mod, caprec->cap_mod_len);
-    p += xml_strcpy(p, (const xmlChar *)".xsd");
-
-    return str;
-
-}  /* cap_make_mod_url */ 
-#endif
 
 
 /********************************************************************
@@ -1284,7 +1385,8 @@ void
 	
 	if (!dlq_empty(&cap->cap_feature_list.memQ)) {
 	    log_write("\n   Features: ");
-	    for (lmem = (ncx_lmem_t *)dlq_firstEntry(&cap->cap_feature_list.memQ);
+	    for (lmem = (ncx_lmem_t *)
+		     dlq_firstEntry(&cap->cap_feature_list.memQ);
 		 lmem != NULL;
 		 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
 
@@ -1294,7 +1396,8 @@ void
 
 	if (!dlq_empty(&cap->cap_deviation_list.memQ)) {
 	    log_write("\n   Deviations: ");
-	    for (lmem = (ncx_lmem_t *)dlq_firstEntry(&cap->cap_deviation_list.memQ);
+	    for (lmem = (ncx_lmem_t *)
+		     dlq_firstEntry(&cap->cap_deviation_list.memQ);
 		 lmem != NULL;
 		 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
 
@@ -1434,15 +1537,11 @@ const cap_rec_t *
 *
 * INPUTS:
 *    cap ==  capability rec to parse
-*    owner == address of return owner name
-*    ownerlen == address of return owner name length
 *    module == address of return module name
 *    modlen == address of return module name length
 *    version == address of return module version string
 *
 * OUTPUTS:
-*    *owner == return owner name
-*    *ownerlen == return module name length
 *    *module == return module name
 *    *modlen == return module name length
 *    *version == return module version string

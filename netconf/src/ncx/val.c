@@ -395,9 +395,12 @@ static status_t
 *
 * INPUTS:
 *    val == val_value_t data structure to clean
+*    full == TRUE if full clean
+*            FALSE if value only
 *********************************************************************/
 static void 
-    clean_value (val_value_t *val)
+    clean_value (val_value_t *val,
+		 boolean full)
 {
     val_value_t   *cur;
     val_index_t   *in;
@@ -437,6 +440,7 @@ static void
     case NCX_BT_IDREF:
 	if (val->v.idref.name) {
 	    m__free(val->v.idref.name);
+	    val->v.idref.name = NULL;
 	}
 	break;
     case NCX_BT_SLIST:
@@ -456,11 +460,13 @@ static void
     case NCX_BT_EXTERN:
 	if (val->v.fname) { 
 	    m__free(val->v.fname);
+	    val->v.fname = NULL;
 	}
 	break;
     case NCX_BT_INTERN:
 	if (val->v.intbuff) { 
 	    m__free(val->v.intbuff);
+	    val->v.intbuff = NULL;
 	}
 	break;
     case NCX_BT_EMPTY:
@@ -471,8 +477,10 @@ static void
 	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    if (val->dname) {
-	m__free(val->dname);
+    if (full) {
+	if (val->dname) {
+	    m__free(val->dname);
+	}
     }
 
     while (!dlq_empty(&val->metaQ)) {
@@ -1377,7 +1385,7 @@ void
 	return;
     }
 #endif
-    clean_value(val);
+    clean_value(val, TRUE);
     m__free(val);
 
 }  /* val_free_value */
@@ -3359,6 +3367,8 @@ status_t
 
     res = NO_ERR;
 
+    clean_value(val, FALSE);
+
     /* only set name if it is not already set */
     if (!val->name && valname) {
 	val->dname = xml_strndup(valname, valnamelen);
@@ -3400,7 +3410,6 @@ status_t
 	}
 	break;
     case NCX_BT_BINARY:
-	ncx_init_binary(&val->v.binary);
 	ulen = 0;
 	if (valstr && *valstr) {
 	    ulen = xml_strlen(valstr);
@@ -3594,6 +3603,9 @@ val_value_t *
 * Merge src val into dest val (! MUST be same type !)
 * Any meta vars in src are also merged into dest
 *
+* This function is not used to merge complex objects
+* !!! For typ_is_simple() only !!!
+*
 * INPUTS:
 *    src == val to merge from
 *
@@ -3643,8 +3655,6 @@ boolean
 	if (mergetyp == NCX_MERGE_NONE) {
 	    mergetyp = NCX_MERGE_LAST;
 	}
-
-	/***************** !!!!!!!!!!! *******************/
     }
 
     switch (iqual) {
@@ -4022,7 +4032,7 @@ val_value_t *
 *   status
 *********************************************************************/
 status_t
-    val_replace (const val_value_t *val,
+    val_replace (val_value_t *val,
 		 val_value_t *copy)
 {
     xmlChar    *buffer;
@@ -4036,7 +4046,21 @@ status_t
     }
 #endif
 
+    if (!typ_is_simple(val->btyp)) {
+	return ERR_NCX_WRONG_TYPE;
+    }
+
     buffer = NULL;
+
+    if (typ_is_string(val->btyp) && typ_is_string(copy->btyp)) {
+	if (copy->v.str) {
+	    ncx_clean_str(&copy->v.str);
+	}
+	copy->v.str = val->v.str;
+	val->v.str = NULL;
+	copy->btyp = val->btyp;
+	return NO_ERR;
+    }
 
     res = val_sprintf_simval_nc(NULL, val, &len);
     if (res == NO_ERR) {

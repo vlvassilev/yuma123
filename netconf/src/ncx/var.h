@@ -19,7 +19,7 @@
 date	     init     comment
 ----------------------------------------------------------------------
 23-aug-07    abb      Begun
-
+09-mar-09    abb      Add more support for yangcli
 */
 
 #include <xmlstring.h>
@@ -52,9 +52,6 @@ date	     init     comment
 #define  ISTOP   TRUE
 #define  ISPARM  FALSE
 
-/* bits for ncx_var_t flags field */
-#define VAR_FL_GLOBAL bit0
-#define VAR_FL_SYSTEM bit1
 
 /********************************************************************
 *								    *
@@ -62,10 +59,22 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/* different types of variables supported */
+typedef enum var_type_t_ {
+    VAR_TYP_NONE,
+    VAR_TYP_SESSION,
+    VAR_TYP_LOCAL,
+    VAR_TYP_CONFIG,
+    VAR_TYP_GLOBAL,
+    VAR_TYP_SYSTEM,
+    VAR_TYP_QUEUE
+} var_type_t;
+
+
 /* struct of NCX user variable mapping for yangcli */
 typedef struct ncx_var_t_ {
     dlq_hdr_t     hdr;
-    uint32        flags;
+    var_type_t    vartype;
     xmlns_id_t    nsid;     /* set to zero if not used */
     xmlChar      *name;
     val_value_t  *val;
@@ -87,16 +96,25 @@ typedef enum var_side_t_ {
 *								    *
 *********************************************************************/
 
+extern void
+    var_free (ncx_var_t *var);
+
+extern void
+    var_clean_varQ (dlq_hdr_t *varQ);
+
+
+/*****   S E T   F U N C T I O N S  *****/
+
 extern status_t
     var_set_str (const xmlChar *name,
 		 uint32 namelen,
 		 const val_value_t *value,
-		 boolean isglobal);
+		 var_type_t vartype);
 
 extern status_t
     var_set (const xmlChar *name,
 	     const val_value_t *value,
-	     boolean isglobal);
+	     var_type_t vartype);
 
 
 extern status_t
@@ -110,38 +128,60 @@ extern status_t
 		 const xmlChar *name,
 		 const val_value_t *value);
 
-extern void
-    var_free (ncx_var_t *var);
-
-extern void
-    var_clean_varQ (dlq_hdr_t *varQ);
-
 extern status_t
     var_set_move (const xmlChar *name,
 		  uint32 namelen,
-		  boolean isglobal,
+		  var_type_t vartype,
 		  val_value_t *value);
 
 extern status_t
     var_set_sys (const xmlChar *name,
 		 const val_value_t *value);
 
-extern const val_value_t *
+extern status_t
+    var_set_from_string (const xmlChar *name,
+			 const xmlChar *valstr,
+			 var_type_t vartype);
+
+extern status_t
+    var_unset (const xmlChar *name,
+	       uint32 namelen,
+	       var_type_t vartype);
+
+extern status_t
+    var_unset_que (dlq_hdr_t *varQ,
+		   const xmlChar *name,
+		   uint32 namelen,
+		   xmlns_id_t  nsid);
+
+
+/*****   G E T   F U N C T I O N S  *****/
+
+extern val_value_t *
     var_get_str (const xmlChar *name,
 		 uint32 namelen,
-		 boolean isglobal);
+		 var_type_t vartype);
 
-extern const val_value_t *
+extern val_value_t *
     var_get (const xmlChar *name,
-	     boolean isglobal);
+	     var_type_t vartype);
 
-extern const val_value_t *
+extern var_type_t
+    var_get_type_str (const xmlChar *name,
+		      uint32 namelen,
+		      boolean globalonly);
+
+extern var_type_t
+    var_get_type (const xmlChar *name,
+		  boolean globalonly);
+
+extern val_value_t *
     var_get_str_que (dlq_hdr_t *varQ,
 		     const xmlChar *name,
 		     uint32 namelen,
 		     xmlns_id_t nsid);
 
-extern const val_value_t *
+extern val_value_t *
     var_get_que (dlq_hdr_t *varQ,
 		 const xmlChar *name,
 		 xmlns_id_t nsid);
@@ -151,31 +191,24 @@ extern ncx_var_t *
 		     xmlns_id_t  nsid,
 		     const xmlChar *name);
 
-extern const val_value_t *
+extern val_value_t *
     var_get_local (const xmlChar *name);
 
-extern const val_value_t *
+extern val_value_t *
     var_get_local_str (const xmlChar *name,
 		       uint32 namelen);
-
-extern void
-    var_unset (const xmlChar *name,
-	       uint32 namelen,
-	       boolean isglobal);
-
-extern void
-    var_unset_que (dlq_hdr_t *varQ,
-		   const xmlChar *name,
-		   uint32 namelen,
-		   xmlns_id_t  nsid);
 
 extern status_t
     var_check_ref (const xmlChar *line,
 		   var_side_t side,
 		   uint32   *len,
-		   boolean *isglobal,
+		   var_type_t *vartype,
 		   const xmlChar **name,
 		   uint32 *namelen);
+
+
+/*****   C L I   F U N C T I O N S  *****/
+
 
 extern val_value_t *
     var_get_script_val (const obj_template_t *obj,
@@ -191,10 +224,5 @@ extern val_value_t *
 			  boolean istop,
 			  status_t *res);
 
-
-extern status_t
-    var_set_from_string (const xmlChar *name,
-			 const xmlChar *valstr,
-			 boolean isglobal);
 
 #endif	    /* _H_var */

@@ -506,6 +506,47 @@ log_debug_t
 
 
 /********************************************************************
+* FUNCTION log_get_debug_level_string
+* 
+* Get the corresponding string for the debug enum
+* 
+* INPUTS:
+*   level ==  the enum for the specified debug level
+*
+* RETURNS:
+*   the string value for this enum
+
+*********************************************************************/
+const xmlChar *
+    log_get_debug_level_string (log_debug_t level)
+{
+    switch (level) {
+    case LOG_DEBUG_OFF:
+	return LOG_DEBUG_STR_OFF;
+    case LOG_DEBUG_ERROR:
+	return LOG_DEBUG_STR_ERROR;
+    case LOG_DEBUG_WARN:
+	return LOG_DEBUG_STR_WARN;
+    case LOG_DEBUG_INFO:
+	return LOG_DEBUG_STR_INFO;
+    case LOG_DEBUG_DEBUG:
+	return LOG_DEBUG_STR_DEBUG;
+    case LOG_DEBUG_DEBUG2:
+	return LOG_DEBUG_STR_DEBUG2;
+    case LOG_DEBUG_DEBUG3:
+	return LOG_DEBUG_STR_DEBUG3;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return LOG_DEBUG_STR_OFF;
+    }
+    /*NOTREACHED*/
+
+}  /* log_get_debug_level_string */
+
+
+
+
+/********************************************************************
 * FUNCTION log_is_open
 * 
 * Check if the logfile is active

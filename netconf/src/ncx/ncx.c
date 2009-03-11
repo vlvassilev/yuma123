@@ -1899,6 +1899,7 @@ status_t
     yang_node_t    *node;
     xmlns_t        *ns;
     xmlChar        *buffer, *p;
+    const xmlChar  *modname;
     boolean         needns;
     status_t        res;
     xmlns_id_t      nsid;
@@ -1956,38 +1957,40 @@ status_t
 	/* check module prefix collision */
 	nsid = xmlns_find_ns_by_prefix(mod->prefix);
 	if (nsid) {
-	    log_warn("\nWarning: prefix '%s' already in use "
-		     "by module '%s'",
-		     mod->prefix, 
-		     xmlns_get_module(nsid));
-	    ncx_print_errormsg(NULL, mod, ERR_NCX_DUP_PREFIX);
+	    modname = xmlns_get_module(nsid);
+	    if (xml_strcmp(mod->name, modname)) {
+		log_warn("\nWarning: prefix '%s' already in use "
+			 "by module '%s'",
+			 mod->prefix, modname);
+		ncx_print_errormsg(NULL, mod, ERR_NCX_DUP_PREFIX);
 
-	    /* redo the module xmlprefix */
-	    prefixlen = xml_strlen(mod->prefix);
-	    buffer = m__getMem(prefixlen + 6);
-	    if (!buffer) {
-		return ERR_INTERNAL_MEM;
-	    }
-	    p = buffer;
-	    p += xml_strcpy(p, mod->prefix);
+		/* redo the module xmlprefix */
+		prefixlen = xml_strlen(mod->prefix);
+		buffer = m__getMem(prefixlen + 6);
+		if (!buffer) {
+		    return ERR_INTERNAL_MEM;
+		}
+		p = buffer;
+		p += xml_strcpy(p, mod->prefix);
 
-	    /* keep adding numbers to end of prefix until
-	     * 1 is unused or run out of numbers
-	     */
-	    for (i=1; i<10000 && nsid; i++) {
-		sprintf((char *)p, "%u", i);
-		nsid = xmlns_find_ns_by_prefix(buffer);
-	    }
-	    if (nsid) {
-		log_error("\nError: could not assign module prefix");
-		res = ERR_NCX_OPERATION_FAILED;
-		ncx_print_errormsg(NULL, mod, res);
-		m__free(buffer);
-		return res;
-	    }
+		/* keep adding numbers to end of prefix until
+		 * 1 is unused or run out of numbers
+		 */
+		for (i=1; i<10000 && nsid; i++) {
+		    sprintf((char *)p, "%u", i);
+		    nsid = xmlns_find_ns_by_prefix(buffer);
+		}
+		if (nsid) {
+		    log_error("\nError: could not assign module prefix");
+		    res = ERR_NCX_OPERATION_FAILED;
+		    ncx_print_errormsg(NULL, mod, res);
+		    m__free(buffer);
+		    return res;
+		}
 
-	    /* else the current buffer contains an unused prefix */
-	    mod->xmlprefix = buffer;
+		/* else the current buffer contains an unused prefix */
+		mod->xmlprefix = buffer;
+	    }
 	}
 
 	ns = def_reg_find_ns(mod->ns);
@@ -8791,8 +8794,7 @@ boolean
 #endif
 
     if (!xml_strcmp(str, (const xmlChar *)"true") ||
-	!xml_strcmp(str, (const xmlChar *)"1") ||
-	!xml_strcmp(str, (const xmlChar *)"true(1)")) {
+	!xml_strcmp(str, (const xmlChar *)"1")) {
 	return TRUE;
     } else {
 	return FALSE;
@@ -8824,8 +8826,7 @@ boolean
 #endif
 
     if (!xml_strcmp(str, (const xmlChar *)"false") ||
-	!xml_strcmp(str, (const xmlChar *)"0") ||
-	!xml_strcmp(str, (const xmlChar *)"false(0)")) {
+	!xml_strcmp(str, (const xmlChar *)"0")) {
 	return TRUE;
     } else {
 	return FALSE;
@@ -9528,7 +9529,6 @@ void
 }  /* ncx_set_load_callback */
 
 
-
 /********************************************************************
 * FUNCTION ncx_prefix_different
 * 
@@ -9563,6 +9563,79 @@ boolean
     return (xml_strcmp(prefix1, prefix2)) ? TRUE : FALSE;
 
 }  /* ncx_prefix_different */
+
+
+/********************************************************************
+* FUNCTION ncx_get_baddata_enum
+* 
+* Check if the specified string matches an ncx_baddata_t enum
+* 
+* INPUT:
+*   valstr == value string to check
+*
+* RETURNS:
+*   enum value if OK
+*   NCX_BAD_DATA_NONE if an error
+*********************************************************************/
+ncx_bad_data_t
+    ncx_get_baddata_enum (const xmlChar *valstr)
+{
+#ifdef DEBUG
+    if (!valstr) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NCX_BAD_DATA_NONE;
+    }
+#endif
+
+    if (!xml_strcmp(valstr, E_BAD_DATA_IGNORE)) {
+	return NCX_BAD_DATA_IGNORE;
+    } else if (!xml_strcmp(valstr, E_BAD_DATA_WARN)) {
+	return NCX_BAD_DATA_WARN;
+    } else if (!xml_strcmp(valstr, E_BAD_DATA_CHECK)) {
+	return NCX_BAD_DATA_CHECK;
+    } else if (!xml_strcmp(valstr, E_BAD_DATA_ERROR)) {
+	return NCX_BAD_DATA_ERROR;
+    } else {
+	return NCX_BAD_DATA_NONE;
+    }
+    /*NOTREACHED*/
+
+}  /* ncx_get_baddata_enum */
+
+
+/********************************************************************
+* FUNCTION ncx_get_baddata_string
+* 
+* Get the string for the specified enum value
+* 
+* INPUT:
+*   baddatar == enum value to check
+*
+* RETURNS:
+*   string pointer if OK
+*   NULL if an error
+*********************************************************************/
+const xmlChar *
+    ncx_get_baddata_string (ncx_bad_data_t baddata)
+{
+
+    switch (baddata) {
+    case NCX_BAD_DATA_IGNORE:
+	return E_BAD_DATA_IGNORE;
+    case NCX_BAD_DATA_WARN:
+	return E_BAD_DATA_WARN;
+    case NCX_BAD_DATA_CHECK:
+	return E_BAD_DATA_CHECK;
+    case NCX_BAD_DATA_ERROR:
+	return E_BAD_DATA_ERROR;
+    default:
+	return NULL;
+    }
+    /*NOTREACHED*/
+
+}  /* ncx_get_baddata_string */
+
+
 
 
 /* END file ncx.c */

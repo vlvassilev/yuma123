@@ -244,7 +244,7 @@ status_t
     script_level++;
 
     /* ceate a new var entry and add it to the runstack que */
-    res = var_set_move((const xmlChar *)"0", 1, ISLOCAL, val);
+    res = var_set_move((const xmlChar *)"0", 1, VAR_TYP_LOCAL, val);
     if (res != NO_ERR) {
 	val_free_value(val);
 	m__free(se->buff);

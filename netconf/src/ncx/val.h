@@ -659,7 +659,7 @@ extern val_value_t *
 			   status_t *res);
 
 extern status_t
-    val_replace (const val_value_t *val,
+    val_replace (val_value_t *val,
 		 val_value_t *copy);
 
 extern void

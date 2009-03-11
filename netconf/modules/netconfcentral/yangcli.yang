@@ -289,7 +289,7 @@ module yangcli {
         default true;
       }
 
-      leaf bad-data {
+      leaf baddata {
         description
           "Specifies how invalid user input from the CLI
            will be handled when filling PDUs for remote
@@ -637,8 +637,21 @@ module yangcli {
       }
     }
 
-    rpc load {
-      description "Internal command to load a module or other file.";
+    rpc merge {
+      description
+       "Merge some NETCONF config data with the edit-config operation";
+      ncx:rpc-type config;
+      input {
+        ncx:default-parm target;
+        uses EditParms;
+      }
+    }
+
+    rpc mgrload {
+      description 
+        "Load a module or other file into the manager.
+         Use the 'load' command to load a module into
+         the agent.";
       ncx:rpc-type exec;
       input {
         ncx:default-parm module;
@@ -648,16 +661,6 @@ module yangcli {
           type nt:NcxName;
           mandatory true;
         }
-      }
-    }
-
-    rpc merge {
-      description
-       "Merge some NETCONF config data with the edit-config operation";
-      ncx:rpc-type config;
-      input {
-        ncx:default-parm target;
-        uses EditParms;
       }
     }
 

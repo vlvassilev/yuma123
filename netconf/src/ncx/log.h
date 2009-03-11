@@ -20,6 +20,8 @@ date	     init     comment
 08-jan-06    abb      begun
 */
 
+#include <xmlstring.h>
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -114,6 +116,9 @@ extern log_debug_t
 
 extern log_debug_t
     log_get_debug_level_enum (const char *str);
+
+extern const xmlChar *
+    log_get_debug_level_string (log_debug_t level);
 
 extern boolean
     log_is_open (void);

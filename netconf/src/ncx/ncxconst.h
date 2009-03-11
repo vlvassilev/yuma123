@@ -591,4 +591,11 @@ date	     init     comment
 #define ISGLOBAL  TRUE
 #define ISLOCAL   FALSE
 
+/* bad-data enumeration values */
+#define E_BAD_DATA_IGNORE (const xmlChar *)"ignore"
+#define E_BAD_DATA_WARN   (const xmlChar *)"warn"
+#define E_BAD_DATA_CHECK  (const xmlChar *)"check"
+#define E_BAD_DATA_ERROR  (const xmlChar *)"error"
+
+
 #endif	    /* _H_ncxconst */

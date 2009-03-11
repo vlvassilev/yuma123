@@ -281,7 +281,8 @@ typedef enum status_t_
     ERR_NCX_VALUE_NOT_SUPPORTED,        /* 358 */
     ERR_NCX_LEAFREF_LOOP,               /* 359 */
     ERR_NCX_VAR_NOT_FOUND,              /* 360 */
-    ERR_LAST_USR_ERR,                   /* 360 -- not really used */
+    ERR_NCX_VAR_READ_ONLY,              /* 361 */
+    ERR_LAST_USR_ERR,                   /* 362 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */

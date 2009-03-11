@@ -860,4 +860,10 @@ extern boolean
 			  const xmlChar *modprefix);
 
 
+extern ncx_bad_data_t
+    ncx_get_baddata_enum (const xmlChar *valstr);
+
+extern const xmlChar *
+    ncx_get_baddata_string (ncx_bad_data_t baddata);
+
 #endif	    /* _H_ncx */

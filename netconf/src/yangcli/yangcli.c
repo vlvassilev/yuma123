@@ -96,6 +96,10 @@ date         init     comment
 #include "obj_help.h"
 #endif
 
+#ifndef _H_op
+#include "op.h"
+#endif
+
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -167,13 +171,17 @@ date         init     comment
 
 #define YANGCLI_MOD  (const xmlChar *)"yangcli"
 
+#define ENV_HOSTNAME    (const char *)"HOSTNAME"
+#define ENV_SHELL       (const char *)"SHELL"
+#define ENV_USERNAME    (const char *)"USERNAME"
+#define ENV_LANG        (const char *)"LANG"
+
 /* CLI parmset for the ncxcli application */
 #define YANGCLI_BOOT YANGCLI_MOD
 
 /* core modules auto-loaded at startup */
-#define NCMOD        (const xmlChar *)"netconf"
-#define NCXDTMOD     (const xmlChar *)"ncxtypes"
-#define XSDMOD       (const xmlChar *)"xsd"
+#define NCXDTMOD       (const xmlChar *)"ncxtypes"
+#define XSDMOD         (const xmlChar *)"xsd"
 
 #define DEF_PROMPT     (const xmlChar *)"yangcli> "
 #define DEF_FN_PROMPT  (const xmlChar *)"yangcli:"
@@ -193,7 +201,7 @@ date         init     comment
 #define YANGCLI_AGENT       (const xmlChar *)"agent"
 #define YANGCLI_AUTOCOMP    (const xmlChar *)"autocomp"
 #define YANGCLI_AUTOLOAD    (const xmlChar *)"autoload"
-#define YANGCLI_BAD_DATA    (const xmlChar *)"bad-data"
+#define YANGCLI_BADDATA     (const xmlChar *)"baddata"
 #define YANGCLI_BATCHMODE   (const xmlChar *)"batch-mode"
 #define YANGCLI_BRIEF       (const xmlChar *)"brief"
 #define YANGCLI_COMMAND     (const xmlChar *)"command"
@@ -203,6 +211,7 @@ date         init     comment
 #define YANGCLI_DEF_MODULE  (const xmlChar *)"default-module"
 #define YANGCLI_DIR         (const xmlChar *)"dir"
 #define YANGCLI_EDIT_TARGET (const xmlChar *)"edit-target"
+#define YANGCLI_ERROR_OPTION (const xmlChar *)"error-option"
 #define YANGCLI_FIXORDER    (const xmlChar *)"fixorder"
 #define YANGCLI_FROM_CLI    (const xmlChar *)"from-cli"
 #define YANGCLI_FULL        (const xmlChar *)"full"
@@ -221,17 +230,12 @@ date         init     comment
 #define YANGCLI_PASSWORD    (const xmlChar *)"password"
 #define YANGCLI_PORT        (const xmlChar *)"port"
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
+#define YANGCLI_TEST_OPTION (const xmlChar *)"test-option"
 #define YANGCLI_TIMEOUT     (const xmlChar *)"timeout"
 #define YANGCLI_USER        (const xmlChar *)"user"
 #define YANGCLI_VAR         (const xmlChar *)"var"
 #define YANGCLI_VARREF      (const xmlChar *)"varref"
 #define YANGCLI_VARS        (const xmlChar *)"vars"
-
-/* bad-data enumeration values */
-#define E_BAD_DATA_IGNORE (const xmlChar *)"ignore"
-#define E_BAD_DATA_WARN   (const xmlChar *)"warn"
-#define E_BAD_DATA_CHECK  (const xmlChar *)"check"
-#define E_BAD_DATA_ERROR  (const xmlChar *)"error"
 
 #define BAD_DATA_DEFAULT NCX_BAD_DATA_CHECK
 
@@ -244,8 +248,8 @@ date         init     comment
 #define YANGCLI_HELP    (const xmlChar *)"help"
 #define YANGCLI_INSERT  (const xmlChar *)"insert"
 #define YANGCLI_LIST    (const xmlChar *)"list"
-#define YANGCLI_LOAD    (const xmlChar *)"load"
 #define YANGCLI_MERGE   (const xmlChar *)"merge"
+#define YANGCLI_MGRLOAD (const xmlChar *)"mgrload"
 #define YANGCLI_PWD     (const xmlChar *)"pwd"
 #define YANGCLI_QUIT    (const xmlChar *)"quit"
 #define YANGCLI_REPLACE (const xmlChar *)"replace"
@@ -298,7 +302,7 @@ typedef struct agent_cb_t_ {
      * !!! THIS WILL NOT WORK:
      * !!!     $foo = run script2 ...
      */
-    boolean              result_isglobal;
+    var_type_t          result_vartype;
 
     /* true if optional nodes should be filled in by fill_valset */
     boolean              get_optional;
@@ -310,10 +314,23 @@ typedef struct agent_cb_t_ {
     log_debug_t          log_level;
     boolean              autoload;
     boolean              fixorder;
+    op_testop_t          testoption;
+    op_errop_t           erroption;
     dlq_hdr_t            varbindQ;   /* Q of ncx_var_t */
     dlq_hdr_t            modptrQ;     /* Q of modptr_t */
 } agent_cb_t;
 
+/* logging function template to switch between
+ * log_stdout and log_write
+ */
+typedef void (*logfn_t) (const char *fstr, ...);
+
+
+/********************************************************************
+*                                                                   *
+*             F O R W A R D   D E C L A R A T I O N S               *
+*                                                                   *
+*********************************************************************/
 
 /* forward decl needed by do_save function */
 static void
@@ -338,6 +355,8 @@ static void
 *                                                                   *
 *********************************************************************/
 
+/*****************  I N T E R N A L   V A R S  ****************/
+
 /* TBD: use multiple agent control blocks, stored in this Q */
 static dlq_hdr_t      agent_cbQ;
 
@@ -352,20 +371,11 @@ static ncx_module_t  *yangcli_mod;
 /* netconf.yang file used for quicker lookups */
 static ncx_module_t  *netconf_mod;
 
-/* CLI parameters */
+/* need to save CLI parameters: other vars are back-pointers */
 static val_value_t   *mgr_cli_valset;
-
-/* global connect param set, copied to agent connect parmsets */
-static val_value_t   *connect_valset;
 
 /* true if running a script from the invocation and exiting */
 static boolean         batchmode;
-
-/* the module to check first when no prefix is given and there
- * is no parent node to check;
- * usually set to module 'netconf'
- */
-static xmlChar        *default_module;  
 
 /* true if printing program help and exiting */
 static boolean         helpmode;
@@ -377,18 +387,29 @@ static boolean         versionmode;
 /* contains list of modules entered from CLI --modules parm */
 static val_value_t    *modules;
 
-/* global log level for all logging except for direct STDOUT output */
-static log_debug_t     log_level;
+/* name of script pased at invocation to auto-run */
+static xmlChar        *runscript;
 
-/* TRUE if append to existing log; FALSE to start a new log */
-static boolean         logappend;
+/* TRUE if runscript has been completed */
+static boolean         runscriptdone;
 
-/* optional log filespec given at invocation to store output
- * user IO from the KBD will still be done, but errors and
- * warnings will be sent to the file, not STDOUT
- */
-static xmlChar        *logfilename;
+/* CLI input buffer */
+static xmlChar         clibuff[YANGCLI_BUFFLEN];
 
+/* CLI generic 'more' mode */
+static boolean         climore;
+
+/* CLI prompt function-specific extension mode */
+static const xmlChar  *cli_fn;
+
+/* libtecla data structure for 1 CLI context */
+static GetLine        *cli_gl;
+
+/* program version string */
+static char progver[] = "0.9.1";
+
+
+/*****************  C O N F I G   V A R S  ****************/
 
 /* TRUE if OK to load modules automatically
  * FALSE if --no-autoload set by user
@@ -397,11 +418,6 @@ static xmlChar        *logfilename;
  * will be loaded into this application automatically
  */
 static boolean         autoload;
-
-/* FALSE to send PDUs in manager-specified order
- * TRUE to always send in correct canonical order
- */
-static boolean         fixorder;
 
 /* TRUE if OK to check for partial command names and parameter
  * names by the user.  First match (TBD: longest match!!)
@@ -417,34 +433,52 @@ static boolean         autocomp;
  */
 static ncx_bad_data_t  baddata;
 
+/* global connect param set, copied to agent connect parmsets */
+static val_value_t   *connect_valset;
+
+static xmlChar       *connect_user;
+
+static xmlChar       *connect_agent;
+
 /* name of external CLI config file used on invocation */
 static xmlChar        *confname;
 
-/* name of script pased at invocation to auto-run */
-static xmlChar        *runscript;
-
-/* TRUE if runscript has been completed */
-static boolean         runscriptdone;
+/* the module to check first when no prefix is given and there
+ * is no parent node to check;
+ * usually set to module 'netconf'
+ */
+static xmlChar        *default_module;  
 
 /* 0 for no timeout; N for N seconds message timeout */
 static uint32          default_timeout;
 
-/* CLI input buffer */
-static xmlChar         clibuff[YANGCLI_BUFFLEN];
+/* FALSE to send PDUs in manager-specified order
+ * TRUE to always send in correct canonical order
+ */
+static boolean         fixorder;
 
-/* CLI generic 'more' mode */
-static boolean         climore;
+/* global log level for all logging except for direct STDOUT output */
+static log_debug_t     log_level;
 
-/* CLI prompt function-specific extension mode */
-static const xmlChar  *cli_fn;
+/* TRUE if append to existing log; FALSE to start a new log */
+static boolean         logappend;
 
-/* libtecla data structure for 1 CLI context */
-static GetLine        *cli_gl;
+/* optional log filespec given at invocation to store output
+ * user IO from the KBD will still be done, but errors and
+ * warnings will be sent to the file, not STDOUT
+ */
+static xmlChar        *logfilename;
 
-/* program version string */
-static char progver[] = "0.7.7";
+/* FALSE to skip optional nodes in do_fill
+ * TRUE to check optional nodes in do_fill
+ */
+static boolean         optional;
 
+/* default NETCONF test-option value */
+static op_testop_t     testoption;
 
+/* default NETCONF error-option value */
+static op_errop_t      erroption;
 
 /********************************************************************
 * FUNCTION new_modptr
@@ -527,7 +561,9 @@ static agent_cb_t *
     agent_cb->log_level = log_level;
     agent_cb->autoload = autoload;
     agent_cb->fixorder = fixorder;
-    agent_cb->get_optional = FALSE;
+    agent_cb->get_optional = optional;
+    agent_cb->testoption = testoption;
+    agent_cb->erroption = erroption;
     agent_cb->timeout = default_timeout;
 
     return agent_cb;
@@ -848,6 +884,196 @@ static boolean
 }  /* is_yangcli_ns */
 
 
+/********************************************************************
+ * FUNCTION handle_config_assign
+ * 
+ * handle a user assignment of a config variable
+ *
+ * INPUTS:
+ *   agent_cb == agent control block to use
+ *   configval == value to set
+ *   newval == value to use for changing 'configval' 
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    handle_config_assign (agent_cb_t *agent_cb,
+			  val_value_t *configval,
+			  val_value_t *newval)
+{
+    xmlChar        *dupval;
+    status_t        res;
+    log_debug_t     testloglevel;
+    ncx_bad_data_t  testbaddata;
+    op_testop_t     testop;
+    op_errop_t      errop;
+    ncx_num_t       testnum;
+
+    res = NO_ERR;
+    if (!typ_is_string(newval->btyp)) {
+	return ERR_NCX_WRONG_TYPE;
+    }
+    if (!newval->v.str) {
+	return ERR_NCX_INVALID_VALUE;
+    }
+
+    if (!xml_strcmp(configval->name, YANGCLI_AGENT)) {
+	/* should check for valid IP address!!! */
+
+	/* save a copy of the string value */
+	dupval = xml_strdup(VAL_STR(newval));
+	if (!dupval) {
+	    log_error("\nError: malloc failed");
+	    res = ERR_INTERNAL_MEM;
+	} else {
+	    if (connect_agent) {
+		m__free(connect_agent);
+	    }
+	    connect_agent = dupval;
+	}
+    } else if (!xml_strcmp(configval->name, YANGCLI_AUTOCOMP)) {
+	if (ncx_is_true(VAL_STR(newval))) {
+	    autocomp = TRUE;
+	} else if (ncx_is_false(VAL_STR(newval))) {
+	    autocomp = FALSE;
+	} else {
+	    log_error("\nError: value must be 'true' or 'false'");
+	    res = ERR_NCX_INVALID_VALUE;
+	}
+    } else if (!xml_strcmp(configval->name, YANGCLI_BADDATA)) {
+	testbaddata = ncx_get_baddata_enum(VAL_STR(newval));
+	if (testbaddata != NCX_BAD_DATA_NONE) {
+	    agent_cb->baddata = testbaddata;
+	    baddata = testbaddata;
+	} else {
+	    log_error("\nError: value must be 'true' or 'false'");
+	    res = ERR_NCX_INVALID_VALUE;
+	}
+    } else if (!xml_strcmp(configval->name, YANGCLI_DEF_MODULE)) {
+	if (!ncx_valid_name2(VAL_STR(newval))) {
+	    log_error("\nError: must be a valid user name");
+	    res = ERR_NCX_INVALID_VALUE;
+	} else {
+	    /* save a copy of the string value */
+	    dupval = xml_strdup(VAL_STR(newval));
+	    if (!dupval) {
+		log_error("\nError: malloc failed");
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		if (default_module) {
+		    m__free(default_module);
+		}
+		default_module = dupval;
+	    }
+	}
+    } else if (!xml_strcmp(configval->name, YANGCLI_USER)) {
+	if (!ncx_valid_name2(VAL_STR(newval))) {
+	    log_error("\nError: must be a valid module name");
+	    res = ERR_NCX_INVALID_VALUE;
+	} else {
+	    /* save a copy of the string value */
+	    dupval = xml_strdup(VAL_STR(newval));
+	    if (!dupval) {
+		log_error("\nError: malloc failed");
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		if (connect_user) {
+		    m__free(connect_user);
+		}
+		connect_user = dupval;
+	    }
+	}
+    } else if (!xml_strcmp(configval->name, YANGCLI_TEST_OPTION)) {
+	if (!xml_strcmp(VAL_STR(newval), NCX_EL_NONE)) {
+	    agent_cb->testoption = OP_TESTOP_NONE;
+	    testop = OP_TESTOP_NONE;
+	} else {	    
+	    testop = op_testop_enum(VAL_STR(newval));
+	    if (testop != OP_TESTOP_NONE) {
+		agent_cb->testoption = testop;
+		testoption = testop;
+	    } else {
+		log_error("\nError: must be a valid 'test-option'");
+		log_error("\n       (none, test, test-then-set, "
+			  "test-only)\n");
+		res = ERR_NCX_INVALID_VALUE;
+	    }
+	}
+    } else if (!xml_strcmp(configval->name, YANGCLI_ERROR_OPTION)) {
+	if (!xml_strcmp(VAL_STR(newval), NCX_EL_NONE)) {
+	    agent_cb->erroption = OP_ERROP_NONE;
+	    erroption = OP_ERROP_NONE;
+	} else {	    
+	    errop = op_errop_id(VAL_STR(newval));
+	    if (errop != OP_ERROP_NONE) {
+		agent_cb->erroption = errop;
+		erroption = errop;
+	    } else {
+		log_error("\nError: must be a valid 'error-option'");
+		log_error("\n       (none, stop-on-error, "
+			  "continue-on-error, rollback-on-error)\n");
+		res = ERR_NCX_INVALID_VALUE;
+	    }
+	}
+    } else if (!xml_strcmp(configval->name, YANGCLI_TIMEOUT)) {
+	ncx_init_num(&testnum);
+	res = ncx_decode_num(VAL_STR(newval),
+			     NCX_BT_UINT32,
+			     &testnum);
+	if (res == NO_ERR) {
+	    agent_cb->timeout = testnum.u;
+	    default_timeout = testnum.u;
+	} else {
+	    log_error("\nError: must be valid uint32 value");
+	}
+	ncx_clean_num(NCX_BT_UINT32, &testnum);
+    } else if (!xml_strcmp(configval->name, YANGCLI_OPTIONAL)) {
+	if (ncx_is_true(VAL_STR(newval))) {
+	    optional = TRUE;
+	    agent_cb->get_optional = TRUE;
+	} else if (ncx_is_false(VAL_STR(newval))) {
+	    optional = FALSE;
+	    agent_cb->get_optional = FALSE;
+	} else {
+	    log_error("\nError: value must be 'true' or 'false'");
+	    res = ERR_NCX_INVALID_VALUE;
+	}
+    } else if (!xml_strcmp(configval->name, NCX_EL_LOGLEVEL)) {
+	testloglevel = 
+	    log_get_debug_level_enum((const char *)VAL_STR(newval));
+	if (testloglevel == LOG_DEBUG_NONE) {
+	    log_error("\nError: value must be valid log-level:");
+	    log_error("\n       (off, error, warn, info, debug, debug2)\n");
+	    res = ERR_NCX_INVALID_VALUE;
+	} else {
+	    agent_cb->log_level = testloglevel;
+	    log_set_debug_level(testloglevel);
+	}
+    } else if (!xml_strcmp(configval->name, YANGCLI_FIXORDER)) {
+	if (ncx_is_true(VAL_STR(newval))) {
+	    fixorder = TRUE;
+	    agent_cb->fixorder = TRUE;
+	} else if (ncx_is_false(VAL_STR(newval))) {
+	    fixorder = FALSE;
+	    agent_cb->fixorder = FALSE;
+	} else {
+	    log_error("\nError: value must be 'true' or 'false'");
+	    res = ERR_NCX_INVALID_VALUE;
+	}
+    } else {
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (res == NO_ERR) {
+	res = var_set_move(configval->name, 
+			   xml_strlen(configval->name),
+			   VAR_TYP_CONFIG, newval);
+    }
+    return res;
+
+} /* handle_config_assign */
+
 
 /********************************************************************
 * FUNCTION check_assign_statement
@@ -893,11 +1119,11 @@ static status_t
 			    boolean *getrpc)
 {
     const xmlChar         *str, *name;
-    const val_value_t     *curval;
+    val_value_t           *curval;
     const obj_template_t  *obj;
     val_value_t           *val;
     uint32                 nlen, tlen;
-    boolean                isglobal;
+    var_type_t             vartype;
     status_t               res;
 
     /* save start point in line */
@@ -906,7 +1132,8 @@ static status_t
     *getrpc = FALSE;
 
     /* check if a varref is being made */
-    res = var_check_ref(str, ISLEFT, &tlen, &isglobal, &name, &nlen);
+    res = var_check_ref(str, ISLEFT, &tlen, 
+			&vartype, &name, &nlen);
     if (res != NO_ERR) {
 	/* error in the varref */
 	return res;
@@ -916,13 +1143,23 @@ static status_t
 	return NO_ERR;
     }
 
-    /* else got a valid varref, get the data type, which
+    /* check for a valid varref, get the data type, which
      * will also indicate if the variable exists yet
      */
-    if (!isglobal) {
+    switch (vartype) {
+    case VAR_TYP_SYSTEM:
+	log_error("\nError: system variables are read-only");
+	return ERR_NCX_VAR_READ_ONLY;
+    case VAR_TYP_GLOBAL:
+    case VAR_TYP_CONFIG:
+	curval = var_get_str(name, nlen, vartype);
+	break;
+    case VAR_TYP_LOCAL:
+    case VAR_TYP_SESSION:
 	curval = var_get_local_str(name, nlen);
-    } else {
-	curval = var_get_str(name, nlen, isglobal);
+	break;
+    default:
+	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* keep parsing the assignment string */
@@ -956,9 +1193,16 @@ static status_t
 	/* got $foo =  EOLN
          * treat this as a request to unset the variable
 	 */
-	var_unset(name, nlen, isglobal);
+	if (vartype == VAR_TYP_SYSTEM ||
+	    vartype == VAR_TYP_CONFIG) {
+	    log_error("\nError: cannot remove system variables");
+	    return ERR_NCX_OPERATION_FAILED;
+	}
+
+	/* else try to unset this variable */
+	res = var_unset(name, nlen, vartype);
 	*len = str - line;
-	return NO_ERR;
+	return res;
     }
 
     /* the variable name and equals sign is parsed
@@ -978,11 +1222,23 @@ static status_t
 	    val_set_name(val, name, nlen);
 	}
 
+	
 	/* this is a plain assignment statement
-	 * val is a malloced struct, pass it over to the
-	 * var struct instead of cloning it
+	 * first check if the input is VAR_TYP_CONFIG
 	 */
-	res = var_set_move(name, nlen, isglobal, val);
+	if (vartype == VAR_TYP_CONFIG) {
+	    if (!curval) {
+		res = SET_ERROR(ERR_INTERNAL_VAL);
+	    } else {
+		res = handle_config_assign(agent_cb,
+					   curval, val);
+	    }
+	} else {
+	    /* val is a malloced struct, pass it over to the
+	     * var struct instead of cloning it
+	     */
+	    res = var_set_move(name, nlen, vartype, val);
+	}
 	if (res != NO_ERR) {
 	    val_free_value(val);
 	}
@@ -991,7 +1247,7 @@ static status_t
 	 * of an RPC function call 
 	 */
 	if (agent_cb->result_name) {
-	    log_error("\nyangcli: result already pending for %s",
+	    log_warn("\nWarning: result already pending for %s",
 		      agent_cb->result_name);
 	    m__free(agent_cb->result_name);
 	    agent_cb->result_name = NULL;
@@ -1003,7 +1259,8 @@ static status_t
 	    *len = 0;
 	    res = ERR_INTERNAL_MEM;
 	} else {
-	    agent_cb->result_isglobal = isglobal;
+	    
+	    agent_cb->result_vartype = vartype;
 	    *len = str - line;
 	    *getrpc = TRUE;
 	}
@@ -1382,24 +1639,6 @@ static void *
 	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-#if 0
-    /* if an explicit module is given, then no others
-     * can be tried, but check partial command
-     */
-    if (!def && autoload) {
-	switch (*dtyp) {
-	case NCX_NT_NONE:
-	case NCX_NT_OBJ:
-	    def = ncx_match_any_rpc(modname, defname);
-	    if (def) {
-		*dtyp = NCX_NT_OBJ;
-	    }
-	default:
-	    ;
-	}
-    }
-#endif
-
     return def;
     
 } /* try_parse_def */
@@ -1436,13 +1675,14 @@ static void *
 	       xmlChar *line,
 	       uint32 *len)
 {
-    void          *def;
-    xmlChar       *start, *p, *q, oldp, oldq;
-    const xmlChar *prefix, *defname, *modname;
-    ncx_module_t  *mod;
-    modptr_t      *modptr;
-    uint32         prelen;
-    xmlns_id_t     nsid;
+    void           *def;
+    xmlChar        *start, *p, *q, oldp, oldq;
+    const xmlChar  *prefix, *defname, *modname;
+    ncx_module_t   *mod;
+    obj_template_t *obj;
+    modptr_t       *modptr;
+    uint32          prelen;
+    xmlns_id_t      nsid;
     
     def = NULL;
     q = NULL;
@@ -1532,6 +1772,7 @@ static void *
 
 	/* if not found, try any module */
 	if (!def) {
+	    /* try any of the agent modules first */
 	    if (use_agentcb(agent_cb)) {
 		for (modptr = (modptr_t *)
 			 dlq_firstEntry(&agent_cb->modptrQ);
@@ -1545,6 +1786,7 @@ static void *
 		}
 	    }
 
+	    /* try any of the manager-loaded modules */
 	    for (mod = ncx_get_first_module();
 		 mod != NULL && !def;
 		 mod = ncx_get_next_module(mod)) {
@@ -1575,7 +1817,16 @@ static void *
 		if (!def) {
 		    def = ncx_match_any_rpc(NULL, defname);
 		    if (def) {
-			*dtyp = NCX_NT_OBJ;
+			obj = (obj_template_t *)def;
+			if (obj_get_nsid(obj) == xmlns_nc_id()) {
+			    /* matched a NETCONF RPC and not connected;
+			     * would have matched in the use_agentcb()
+			     * code above if this is a partial NC op
+			     */
+			    def = NULL;
+			} else {
+			    *dtyp = NCX_NT_OBJ;
+			}
 		    }
 		}
 		break;
@@ -3357,9 +3608,9 @@ static void
 
 
 /********************************************************************
- * FUNCTION do_load (local RPC)
+ * FUNCTION do_mgrload (local RPC)
  * 
- * load module=mod-name
+ * mgrload module=mod-name
  *
  * Get the module parameter and load the specified NCX module
  *
@@ -3374,10 +3625,10 @@ static void
  *
  *********************************************************************/
 static void
-    do_load (agent_cb_t *agent_cb,
-	     const obj_template_t *rpc,
-	     const xmlChar *line,
-	     uint32  len)
+    do_mgrload (agent_cb_t *agent_cb,
+		const obj_template_t *rpc,
+		const xmlChar *line,
+		uint32  len)
 {
     val_value_t  *valset, *val;
     status_t      res;
@@ -3414,38 +3665,227 @@ static void
 	val_free_value(valset);
     }
 
-}  /* do_load */
+}  /* do_mgrload */
 
 
 /********************************************************************
- * FUNCTION do_show_env_var (sub-mode of local RPC)
+ * FUNCTION create_system_var
  * 
- * show enviromnment var
+ * create a read-only system variable
  *
  * INPUTS:
- *  brief == TRUE if brief report desired
- *           FALSE if full report desired
+ *   varname == variable name
+ *   varval  == variable string value (may be NULL)
+ *
+ * RETURNS:
+ *    status
  *********************************************************************/
-static void
-    do_show_env_var (const char *varname)
+static status_t
+    create_system_var (const char *varname,
+		       const char *varval)
 {
-    const char *envvar;
+    status_t  res;
 
-    envvar = getenv(varname);
-    if (interactive_mode()) {
-	if (envvar) {
-	    log_stdout("\n  %s = %s", varname, envvar);
-	} else {
-	    log_stdout("\n  %s not set", varname);
-	}
-    } else {
-	if (envvar) {
-	    log_write("\n  %s = %s", varname, envvar);
-	} else {
-	    log_write("\n  %s not set", varname);
-	}
+    res = var_set_from_string((const xmlChar *)varname,
+			      (const xmlChar *)varval,
+			      VAR_TYP_SYSTEM);
+    return res;
+
+} /* create_system_var */
+
+/********************************************************************
+ * FUNCTION create_config_var
+ * 
+ * create a read-write system variable
+ *
+ * INPUTS:
+ *   varname == variable name
+ *   varval  == variable string value (may be NULL)
+ *
+ * RETURNS:
+ *    status
+ *********************************************************************/
+static status_t
+    create_config_var (const xmlChar *varname,
+		       const xmlChar *varval)
+{
+    status_t  res;
+
+    res = var_set_from_string(varname, varval,
+			      VAR_TYP_CONFIG);
+    return res;
+
+} /* create_config_var */
+
+
+/********************************************************************
+ * FUNCTION init_system_vars
+ * 
+ * create the read-only system variables
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    init_system_vars (void)
+{
+    const char *envstr;
+    status_t    res;
+
+    envstr = getenv(NCXMOD_PWD);
+    res = create_system_var(NCXMOD_PWD, envstr);
+    if (res != NO_ERR) {
+	return res;
     }
-} /* do_show_env_var */
+
+    envstr = getenv(USER_HOME);
+    res = create_system_var(USER_HOME, envstr);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    envstr = getenv(ENV_HOSTNAME);
+    res = create_system_var(ENV_HOSTNAME, envstr);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    envstr = getenv(ENV_SHELL);
+    res = create_system_var(ENV_SHELL, envstr);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    envstr = getenv(ENV_USERNAME);
+    res = create_system_var(ENV_USERNAME, envstr);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    envstr = getenv(ENV_LANG);
+    res = create_system_var(ENV_LANG, envstr);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    envstr = getenv(NCXMOD_MODPATH);
+    res = create_system_var(NCXMOD_MODPATH, envstr);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    envstr = getenv(NCXMOD_DATAPATH);
+    res = create_system_var(NCXMOD_DATAPATH, envstr);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    envstr = getenv(NCXMOD_RUNPATH);
+    res = create_system_var(NCXMOD_RUNPATH, envstr);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    return NO_ERR;
+
+} /* init_system_vars */
+
+
+/********************************************************************
+ * FUNCTION init_config_vars
+ * 
+ * create the read-write global variables
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    init_config_vars (void)
+{
+    val_value_t    *parm;
+    const xmlChar  *strval;
+    status_t        res;
+    xmlChar         numbuff[NCX_MAX_NUMLEN];
+
+    strval = NULL;
+    parm = val_find_child(mgr_cli_valset, NULL, YANGCLI_AGENT);
+    if (parm) {
+	strval = VAL_STR(parm);
+    }
+    res = create_config_var(YANGCLI_AGENT, strval);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    res = create_config_var(YANGCLI_AUTOCOMP, 
+			    (autocomp) ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    res = create_config_var(YANGCLI_BADDATA, 
+			    ncx_get_baddata_string(baddata));
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    res = create_config_var(YANGCLI_DEF_MODULE, default_module);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    strval = NULL;
+    parm = val_find_child(mgr_cli_valset, NULL, YANGCLI_USER);
+    if (parm) {
+	strval = VAL_STR(parm);
+    }
+    res = create_config_var(YANGCLI_USER, strval);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    res = create_config_var(YANGCLI_TEST_OPTION, 
+			    (const xmlChar *)"test");
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    res = create_config_var(YANGCLI_ERROR_OPTION, 
+			    (const xmlChar *)"stop-on-error");
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    sprintf((char *)numbuff, "%u", default_timeout);
+    res = create_config_var(YANGCLI_TIMEOUT, numbuff);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    res = create_config_var(YANGCLI_OPTIONAL, 
+			    (cur_agent_cb->get_optional) 
+			    ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+
+    res = create_config_var(NCX_EL_LOGLEVEL, 
+			    log_get_debug_level_string(log_level));
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    res = create_config_var(YANGCLI_FIXORDER, 
+			    (fixorder) ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    return NO_ERR;
+
+} /* init_config_vars */
+
 
 
 /********************************************************************
@@ -3472,59 +3912,45 @@ static void
 {
     ncx_var_t  *var;
     dlq_hdr_t  *que;
+    logfn_t     logfn;
     boolean     first, imode;
 
     imode = interactive_mode();
+    if (imode) {
+	logfn = log_stdout;
+    } else {
+	logfn = log_write;
+    }
 
     if (mode > HELP_MODE_BRIEF && !shortmode) {
 	/* CLI Parameters */
 	if (mgr_cli_valset && val_child_cnt(mgr_cli_valset)) {
+	    (*logfn)("\nCLI Variables\n");
 	    if (imode) {
-		log_stdout("\nCLI Variables\n");
 		val_stdout_value(mgr_cli_valset, NCX_DEF_INDENT);
-		log_stdout("\n");
 	    } else {
-		log_write("\nCLI Variables\n");
 		val_dump_value(mgr_cli_valset, NCX_DEF_INDENT);
-		log_write("\n");
 	    }
+	    (*logfn)("\n");
 	} else {
-	    if (imode) {
-		log_stdout("\nNo CLI variables\n");
-	    } else {
-		log_write("\nNo CLI variables\n");
-	    }
+	    (*logfn)("\nNo CLI variables\n");
 	}
-
-	/* Program Environment Variables */
-	if (imode) {
-	    log_stdout("\nEnvironment Variables\n");
-	} else {
-	    log_write("\nEnvironment Variables\n");
-	}
-
-	do_show_env_var(NCXMOD_PWD);
-	do_show_env_var(USER_HOME);
-	do_show_env_var(NCXMOD_HOME);
-	do_show_env_var(NCXMOD_MODPATH);
-	do_show_env_var(NCXMOD_DATAPATH);
-	do_show_env_var(NCXMOD_RUNPATH);
-	log_write("\n");
     }
 
-    /* Global Script Variables */
-    if (!shortmode || isglobal) {
+    /* System Script Variables */
+    if (!shortmode) {
 	que = runstack_get_que(ISGLOBAL);
 	first = TRUE;
 	for (var = (ncx_var_t *)dlq_firstEntry(que);
 	     var != NULL;
 	     var = (ncx_var_t *)dlq_nextEntry(var)) {
+
+	    if (var->vartype != VAR_TYP_SYSTEM) {
+		continue;
+	    }
+
 	    if (first) {
-		if (imode) {
-		    log_stdout("\nGlobal Variables");
-		} else {
-		    log_write("\nGlobal Variables");
-		}
+		(*logfn)("\nRead-only system variables");
 		first = FALSE;
 	    }
 	    if (typ_is_simple(var->val->btyp)) {
@@ -3534,15 +3960,9 @@ static void
 		    val_dump_value(var->val, NCX_DEF_INDENT);
 		}
 	    } else {
-		if (imode) {
-		    log_stdout("\n   %s (%s)", 
-			       var->name,
-			       tk_get_btype_sym(var->val->btyp));
-		} else {
-		    log_write("\n   %s (%s)", 
-			      var->name,
-			      tk_get_btype_sym(var->val->btyp));
-		}
+		(*logfn)("\n   %s (%s)", 
+			 var->name,
+			 tk_get_btype_sym(var->val->btyp));
 		if (mode == HELP_MODE_FULL) {
 		    if (imode) {
 			val_stdout_value(var->val, NCX_DEF_INDENT);
@@ -3553,17 +3973,91 @@ static void
 	    }
 	}
 	if (first) {
-	    if (imode) {
-		log_stdout("\nNo global variables");
+	    (*logfn)("\nNo read-only system variables");
+	}
+	(*logfn)("\n");
+    }
+
+    /* System Config Variables */
+    if (!shortmode || isglobal) {
+	que = runstack_get_que(ISGLOBAL);
+	first = TRUE;
+	for (var = (ncx_var_t *)dlq_firstEntry(que);
+	     var != NULL;
+	     var = (ncx_var_t *)dlq_nextEntry(var)) {
+
+	    if (var->vartype != VAR_TYP_CONFIG) {
+		continue;
+	    }
+
+	    if (first) {
+		(*logfn)("\nRead-write system variables");
+		first = FALSE;
+	    }
+	    if (typ_is_simple(var->val->btyp)) {
+		if (imode) {
+		    val_stdout_value(var->val, NCX_DEF_INDENT);
+		} else {
+		    val_dump_value(var->val, NCX_DEF_INDENT);
+		}
 	    } else {
-		log_write("\nNo global variables");
+		(*logfn)("\n   %s (%s)", 
+			 var->name,
+			 tk_get_btype_sym(var->val->btyp));
+		if (mode == HELP_MODE_FULL) {
+		    if (imode) {
+			val_stdout_value(var->val, NCX_DEF_INDENT);
+		    } else {
+			val_dump_value(var->val, NCX_DEF_INDENT);
+		    }
+		}
 	    }
 	}
-	if (imode) {
-	    log_stdout("\n");
-	} else {
-	    log_write("\n");
+	if (first) {
+	    (*logfn)("\nNo system config variables");
 	}
+	(*logfn)("\n");
+    }
+
+    /* Global Script Variables */
+    if (!shortmode || isglobal) {
+	que = runstack_get_que(ISGLOBAL);
+	first = TRUE;
+	for (var = (ncx_var_t *)dlq_firstEntry(que);
+	     var != NULL;
+	     var = (ncx_var_t *)dlq_nextEntry(var)) {
+
+	    if (var->vartype != VAR_TYP_GLOBAL) {
+		continue;
+	    }
+
+	    if (first) {
+		(*logfn)("\nGlobal variables");
+		first = FALSE;
+	    }
+	    if (typ_is_simple(var->val->btyp)) {
+		if (imode) {
+		    val_stdout_value(var->val, NCX_DEF_INDENT);
+		} else {
+		    val_dump_value(var->val, NCX_DEF_INDENT);
+		}
+	    } else {
+		(*logfn)("\n   %s (%s)", 
+			 var->name,
+			 tk_get_btype_sym(var->val->btyp));
+		if (mode == HELP_MODE_FULL) {
+		    if (imode) {
+			val_stdout_value(var->val, NCX_DEF_INDENT);
+		    } else {
+			val_dump_value(var->val, NCX_DEF_INDENT);
+		    }
+		}
+	    }
+	}
+	if (first) {
+	    (*logfn)("\nNo global variables");
+	}
+	(*logfn)("\n");
     }
 
     /* Local Script Variables */
@@ -3574,11 +4068,7 @@ static void
 	     var != NULL;
 	     var = (ncx_var_t *)dlq_nextEntry(var)) {
 	    if (first) {
-		if (imode) {
-		    log_stdout("\nLocal Variables");
-		} else {
-		    log_write("\nLocal Variables");
-		}
+		(*logfn)("\nLocal variables");
 		first = FALSE;
 	    }
 	    if (typ_is_simple(var->val->btyp)) {
@@ -3589,15 +4079,9 @@ static void
 		}
 	    } else {
 		/* just print the data type name for complex types */
-		if (imode) {
-		    log_stdout("\n   %s (%s)", 
-			       var->name,
-			       tk_get_btype_sym(var->val->btyp));
-		} else {
-		    log_write("\n   %s (%s)", 
-			      var->name,
-			      tk_get_btype_sym(var->val->btyp));
-		}
+		(*logfn)("\n   %s (%s)", 
+			 var->name,
+			 tk_get_btype_sym(var->val->btyp));
 		if (mode == HELP_MODE_FULL) {
 		    if (imode) {
 			val_stdout_value(var->val, NCX_DEF_INDENT);
@@ -3608,17 +4092,9 @@ static void
 	    }
 	}
 	if (first) {
-	    if (imode) {
-		log_stdout("\nNo local variables");
-	    } else {
-		log_write("\nNo local variables");
-	    }
+	    (*logfn)("\nNo local variables");
 	}
-	if (imode) {
-	    log_stdout("\n");
-	} else {
-	    log_write("\n");
-	}
+	(*logfn)("\n");
     }
 
 } /* do_show_vars */
@@ -3643,12 +4119,21 @@ static void
 		 help_mode_t mode)
 {
     const val_value_t *val;
+    logfn_t            logfn;
     boolean            imode;
 
     imode = interactive_mode();
+    if (imode) {
+	logfn = log_stdout;
+    } else {
+	logfn = log_write;
+    }
 
     if (isany || isglobal) {
-	val = var_get(name, isglobal);
+	val = var_get(name, VAR_TYP_GLOBAL);
+	if (!val) {
+	    val = var_get(name, VAR_TYP_CONFIG);
+	}
     } else {
 	val = var_get_local(name);
     }
@@ -3662,11 +4147,7 @@ static void
 		    val_dump_value(val, NCX_DEF_INDENT);
 		}
 	    } else {
-		if (imode) {
-		    log_stdout("\n  %s (complex type)");
-		} else {
-		    log_write("\n  %s (complex type)");
-		}
+		(*logfn)("\n  %s (complex type)");
 	    }
 	} else {
 	    if (imode) {
@@ -3676,11 +4157,7 @@ static void
 	    }
 	}
     } else {
-	if (imode) {
-	    log_stdout("\nVariable '%s' not found", name);
-	} else {
-	    log_write("\nVariable '%s' not found", name);
-	}
+	(*logfn)("\nVariable '%s' not found", name);
     }
 
 } /* do_show_var */
@@ -4814,7 +5291,7 @@ static status_t
 	parm = (valset) ? val_find_child(valset, YANGCLI_MOD, buff) : NULL;
 	if (parm) {
 	    /* store P7 named as ASCII 7 */
-	    res = var_set_str(buff+1, 1, parm, ISLOCAL);
+	    res = var_set_str(buff+1, 1, parm, VAR_TYP_LOCAL);
 	    if (res != NO_ERR) {
 		runstack_pop();
 		return res;
@@ -5221,10 +5698,12 @@ static void
 
     if (res == NO_ERR) {
 	if (agent_cb->result_name) {
+
 	    /* save the filled in value */
 	    res = var_set_move(agent_cb->result_name, 
 			       xml_strlen(agent_cb->result_name),
-			       agent_cb->result_isglobal, newparm);
+			       agent_cb->result_vartype,
+			       newparm);
 	    if (res != NO_ERR) {
 		val_free_value(newparm);
 
@@ -6015,7 +6494,8 @@ static val_value_t *
     const val_value_t     *userval;
     obj_template_t        *targobj;
     const xmlChar         *fromstr;
-    boolean                isglobal, iscli, isselect, saveopt;
+    var_type_t             vartype;
+    boolean                iscli, isselect, saveopt;
     status_t               res;
 
     /* init locals */
@@ -6159,18 +6639,18 @@ static val_value_t *
 	    ;  /* should not be NULL */
 	} else if (*fromstr == '$' && fromstr[1] == '$') {
 	    /* $$foo */
-	    isglobal = TRUE;
+	    vartype = VAR_TYP_GLOBAL;
 	    fromstr += 2;
 	} else if (*fromstr == '$') {
 	    /* $foo */
-	    isglobal = FALSE;
+	    vartype = VAR_TYP_LOCAL;
 	    fromstr++;
 	} else {
 	    /* 'foo' : just assume local, not error */
-	    isglobal = FALSE;
+	    vartype = VAR_TYP_LOCAL;
 	}
 	if (fromstr) {
-	    userval = var_get(fromstr, isglobal);
+	    userval = var_get(fromstr, vartype);
 	    if (!userval) {
 		log_error("\nError: variable '%s' not found", 
 			  fromstr);
@@ -7457,8 +7937,8 @@ static void
 	do_help(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_LIST)) {
 	do_list(agent_cb, rpc, line, len);
-    } else if (!xml_strcmp(rpcname, YANGCLI_LOAD)) {
-	do_load(agent_cb, rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_MGRLOAD)) {
+	do_mgrload(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_PWD)) {
 	do_pwd(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_QUIT)) {
@@ -7508,12 +7988,15 @@ static void
     if (!rpc) {
 	if (agent_cb->result_name) {
 	    /* this is just a string assignment */
-	    res = var_set_from_string(agent_cb->result_name, line, 
-				      agent_cb->result_isglobal);
+	    res = var_set_from_string(agent_cb->result_name, 
+				      line, 
+				      agent_cb->result_vartype);
 	    if (res != NO_ERR) {
 		log_error("\nyangcli: Error setting variable %s (%s)",
 			  agent_cb->result_name, 
 			  get_error_string(res));
+	    } else {
+		log_info("\nOK\n");
 	    }
 
 	    /* clear the result flag either way */
@@ -7607,7 +8090,8 @@ static void
 	    }
 	    res = var_set_move(agent_cb->result_name, 
 			       xml_strlen(agent_cb->result_name),
-			       agent_cb->result_isglobal, val);
+			       agent_cb->result_vartype,
+			       val);
 	    if (res != NO_ERR) {
 		log_error("\nyangcli reply: set result failed (%s)",
 			  get_error_string(res));
@@ -7688,7 +8172,7 @@ static void
 	    /* this is just a string assignment */
 	    res = var_set_from_string(agent_cb->result_name,
 				      line, 
-				      agent_cb->result_isglobal);
+				      agent_cb->result_vartype);
 	    if (res != NO_ERR) {
 		log_error("\nyangcli: Error setting variable %s (%s)",
 			  agent_cb->result_name, get_error_string(res));
@@ -7933,19 +8417,12 @@ static status_t
 	autoload = TRUE;
     }
 
-    /* get the bad-data parameter */
+    /* get the baddata parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, 
-			  YANGCLI_BAD_DATA);
+			  YANGCLI_BADDATA);
     if (parm && parm->res == NO_ERR) {
-	if (!xml_strcmp(VAL_STR(parm), E_BAD_DATA_IGNORE)) {
-	    baddata = NCX_BAD_DATA_IGNORE;
-	} else if (!xml_strcmp(VAL_STR(parm), E_BAD_DATA_WARN)) {
-	    baddata = NCX_BAD_DATA_WARN;
-	} else if (!xml_strcmp(VAL_STR(parm), E_BAD_DATA_CHECK)) {
-	    baddata = NCX_BAD_DATA_CHECK;
-	} else if (!xml_strcmp(VAL_STR(parm), E_BAD_DATA_ERROR)) {
-	    baddata = NCX_BAD_DATA_ERROR;
-	} else {
+	baddata = ncx_get_baddata_enum(VAL_ENUM_NAME(parm));
+	if (baddata == NCX_BAD_DATA_NONE) {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	    baddata = BAD_DATA_DEFAULT;
 	}
@@ -8071,7 +8548,7 @@ static status_t
     }
 
     /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module(NCMOD, NULL, &netconf_mod);
+    res = ncxmod_load_module(NC_MODULE, NULL, &netconf_mod);
     if (res != NO_ERR) {
 	return res;
     }
@@ -8595,6 +9072,7 @@ static status_t
     modules = NULL;
     autoload = TRUE;
     fixorder = TRUE;
+    optional = FALSE;
     autocomp = TRUE;
     logappend = FALSE;
     logfilename = NULL;
@@ -8744,6 +9222,18 @@ static status_t
 	}
     }
 
+    /* load the system (read-only) variables */
+    res = init_system_vars();
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* load the system config variables */
+    res = init_config_vars();
+    if (res != NO_ERR) {
+	return res;
+    }
+
     /* check to see if a session should be auto-started
      * --> if the agent parameter is set a connect will
      * --> be attempted
@@ -8833,6 +9323,16 @@ static void
     if (runscript) {
 	m__free(runscript);
 	runscript = NULL;
+    }
+
+    if (connect_user) {
+	m__free(connect_user);
+	connect_user = NULL;
+    }
+
+    if (connect_agent) {
+	m__free(connect_agent);
+	connect_agent = NULL;
     }
 
     if (malloc_cnt != free_cnt) {

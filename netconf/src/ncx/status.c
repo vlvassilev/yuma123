@@ -595,6 +595,8 @@ const char *
 	return "leafref path loop";
     case ERR_NCX_VAR_NOT_FOUND:
 	return "variable not found";
+    case ERR_NCX_VAR_READ_ONLY:
+	return "variable is read-only";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

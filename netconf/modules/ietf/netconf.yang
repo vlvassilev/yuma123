@@ -5,7 +5,7 @@ module netconf {
    prefix "nc";
 
    // for the uri data type
-   import inet-types { prefix "inet"; }
+   import ietf-inet-types { prefix "inet"; }
 
    // for NCX 'metadata' language extension
    import ncx { prefix "ncx"; }

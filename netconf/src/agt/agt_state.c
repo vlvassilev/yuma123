@@ -122,12 +122,12 @@ date         init     comment
 #define AGT_STATE_DEBUG 1
 #endif
 
-#define AGT_STATE_TOP_CONTAINER (const xmlChar *)"netconf"
+#define AGT_STATE_TOP_CONTAINER (const xmlChar *)"ietf-netconf-state"
 
 #define AGT_STATE_GET_SCHEMA    (const xmlChar *)"get-schema"
 
-#define AGT_STATE_OBJ_CONFIGURATION   (const xmlChar *)"configuration"
-#define AGT_STATE_OBJ_CONFIGURATIONS  (const xmlChar *)"configurations"
+#define AGT_STATE_OBJ_DATASTORE   (const xmlChar *)"datastore"
+#define AGT_STATE_OBJ_DATASTORES  (const xmlChar *)"datastores"
 #define AGT_STATE_OBJ_LOCKS           (const xmlChar *)"locks"
 
 #define AGT_STATE_OBJ_SCHEMA          (const xmlChar *)"schema"
@@ -179,8 +179,6 @@ static val_value_t          *myschemasval;
 static const obj_template_t *mysessionobj;
 
 static const obj_template_t *myschemaobj;
-
-
 
 
 
@@ -382,7 +380,7 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION make_configuration_val
+* FUNCTION make_datastore_val
 *
 * make a val_value_t struct for a specified configuration
 *
@@ -398,9 +396,9 @@ INPUTS:
 *   malloced value struct or NULL if some error
 *********************************************************************/
 static val_value_t *
-    make_configuration_val (const xmlChar *confname,
-			    const obj_template_t *confobj,
-			    status_t *res)
+    make_datastore_val (const xmlChar *confname,
+			const obj_template_t *confobj,
+			status_t *res)
 {
     const obj_template_t  *nameobj, *testobj;
     val_value_t           *confval, *nameval, *leafval;
@@ -412,7 +410,7 @@ static val_value_t *
 	return NULL;
     }
 
-    /* create configuration node */
+    /* create datastore node */
     confval = val_new_value();
     if (!confval) {
 	*res = ERR_INTERNAL_MEM;
@@ -420,7 +418,7 @@ static val_value_t *
     }
     val_init_from_template(confval, confobj);
 
-    /* create configuration/name */
+    /* create datastore/name */
     nameval = val_new_value();
     if (!nameval) {
 	val_free_value(confval);
@@ -430,7 +428,7 @@ static val_value_t *
     val_init_from_template(nameval, nameobj);
     val_add_child(nameval, confval);
     
-    /* create configuration/name/<config-name> */
+    /* create datastore/name/<config-name> */
     testobj = obj_find_child(nameobj, 
 			     AGT_STATE_MODULE,
 			     confname);
@@ -449,7 +447,7 @@ static val_value_t *
 	val_add_child(leafval, nameval);
     }
 
-    /* create configuration/locks */
+    /* create datastore/locks */
     testobj = obj_find_child(confobj, AGT_STATE_MODULE, 
 			     AGT_STATE_OBJ_LOCKS);
     if (!testobj) {
@@ -469,7 +467,7 @@ static val_value_t *
     *res = NO_ERR;
     return confval;
 
-} /* make_configuration_val */
+} /* make_datastore_val */
 
 
 /********************************************************************
@@ -1044,14 +1042,14 @@ status_t
 
     confsobj = obj_find_child(topobj, 
 			      AGT_STATE_MODULE, 
-			      AGT_STATE_OBJ_CONFIGURATIONS);
+			      AGT_STATE_OBJ_DATASTORES);
     if (!confsobj) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     confobj = obj_find_child(confsobj,
 			     AGT_STATE_MODULE,
-			     AGT_STATE_OBJ_CONFIGURATION);
+			     AGT_STATE_OBJ_DATASTORE);
     if (!confobj) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
@@ -1101,7 +1099,7 @@ status_t
     /* handing off the malloced memory here */
     val_add_child(topval, runningcfg->root);
 
-    /* add /netconf/capabilities */
+    /* add /ietf-netconf-state/capabilities */
     capsval = val_clone(agt_cap_get_capsval());
     if (!capsval) {
 	return ERR_INTERNAL_MEM;
@@ -1113,7 +1111,7 @@ status_t
 	val_add_child(capsval, topval);
     }
 
-    /* add /netconf/configurations */
+    /* add /ietf-netconf-state/datastores */
     confsval = val_new_value();
     if (!confsval) {
 	return ERR_INTERNAL_MEM;
@@ -1121,38 +1119,38 @@ status_t
     val_init_from_template(confsval, confsobj);
     val_add_child(confsval, topval);
 
-    /* add /netconf/configurations/configuration[1] */
+    /* add /ietf-netconf-state/datastores/datastore[1] */
     if (agt_cap_std_set(CAP_STDID_CANDIDATE)) {
-	confval = make_configuration_val(NCX_EL_CANDIDATE,
-					 confobj,
-					 &res);
+	confval = make_datastore_val(NCX_EL_CANDIDATE,
+				     confobj,
+				     &res);
 	if (!confval) {
 	    return res;
 	}
 	val_add_child(confval, confsval);
     }
 
-    /* add /netconf/configurations/configuration[2] */
-    confval = make_configuration_val(NCX_EL_RUNNING,
-				     confobj,
-				     &res);
+    /* add /ietf-netconf-state/datastores/datastore[2] */
+    confval = make_datastore_val(NCX_EL_RUNNING,
+				 confobj,
+				 &res);
     if (!confval) {
 	return res;
     }
     val_add_child(confval, confsval);
 
-    /* add /netconf/configurations/configuration[3] */
+    /* add /ietf-netconf-state/datastores/datastore[3] */
     if (agt_cap_std_set(CAP_STDID_STARTUP)) {
-	confval = make_configuration_val(NCX_EL_STARTUP,
-					 confobj,
-					 &res);
+	confval = make_datastore_val(NCX_EL_STARTUP,
+				     confobj,
+				     &res);
 	if (!confval) {
 	    return res;
 	}
 	val_add_child(confval, confsval);
     }
 
-    /* add /netconf/schemas */
+    /* add /ietf-netconf-state/schemas */
     myschemasval = val_new_value();
     if (!myschemasval) {
 	return ERR_INTERNAL_MEM;
@@ -1160,7 +1158,7 @@ status_t
     val_init_from_template(myschemasval, schemasobj);
     val_add_child(myschemasval, topval);
 
-    /* add all the /netconf/schemas/schema nodes */
+    /* add all the /ietf-netconf-state/schemas/schema nodes */
     for (mod = ncx_get_first_module();
 	 mod != NULL;
 	 mod = ncx_get_next_module(mod)) {
@@ -1170,7 +1168,7 @@ status_t
 	}
     }
 
-    /* add /netconf/sessions */
+    /* add /ietf-netconf-state/sessions */
     sessionsval = val_new_value();
     if (!sessionsval) {
 	return ERR_INTERNAL_MEM;
@@ -1179,9 +1177,9 @@ status_t
     val_add_child(sessionsval, topval);
     mysessionsval = sessionsval;
 
-    /*** TBD: add /netconf/subscriptions here ***/
+    /*** TBD: add /ietf-netconf-state/subscriptions here ***/
 
-    /* add /netconf/statistics */
+    /* add /ietf-netconf-state/statistics */
     statisticsval = make_statistics_val(statisticsobj,
 					&res);
     if (!statisticsval) {

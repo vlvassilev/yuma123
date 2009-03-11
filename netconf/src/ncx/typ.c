@@ -4260,6 +4260,7 @@ boolean
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
+    case NCX_BT_NONE:
         return FALSE;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -4373,6 +4374,7 @@ boolean
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
+    case NCX_BT_NONE:
         return FALSE;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -4470,6 +4472,7 @@ boolean
     case NCX_BT_EMPTY:
 	return FALSE;
     case NCX_BT_ANY:
+    case NCX_BT_NONE:
         return FALSE;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -4736,6 +4739,7 @@ boolean
 	case NCX_BT_LEAFREF:
 	case NCX_BT_IDREF:
 	    return TRUE;
+	case NCX_BT_NONE:
 	default:
 	    return FALSE;
 	}

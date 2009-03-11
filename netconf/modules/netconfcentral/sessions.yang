@@ -4,14 +4,10 @@ module sessions {
 
   prefix "ses";
 
-  import yang-types { prefix "yang"; }   // for zero-based-counter types
-
-  import netconf { prefix "nc"; }   // for SessionID type
-
   organization  "Netconf Central";
 
   contact
-    "Andy Bierman <support@netconfcentral.com>";
+    "Andy Bierman <andy@netconfcentral.com>";
 
   description
     "This module contains objects for monitoring NETCONF
@@ -37,15 +33,8 @@ module sessions {
     }
   }
 
-
-  // Data objects
-       
-  container sessions {
-    description
-      "The sessionInfo container is implemented as a child
-       of the top-level element <netconfd>.";
-
-    container sessionInfo {
+/*       
+  container sessionInfo {
       description
         "Read-only Session Statistics and Information";
       config false;
@@ -69,8 +58,7 @@ module sessions {
            failed to be established for any reason.";
         type yang:zero-based-counter32;
       }
-
-    }      // end container sessionInfo
-  }        // end container netconfd
+  }
+*/
 
 }

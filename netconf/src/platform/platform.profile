@@ -40,7 +40,8 @@ else
 CINC=-I. -I../agt -I../agtinst -I../db -I../mgr \
     -I../ncx -I../platform \
     -I/usr/include -I/usr/include/libxml2 \
-    -I/usr/include/libxml2/libxml
+    -I/usr/include/libxml2/libxml \
+    -I/usr/local/include
 endif
         
 CC=gcc

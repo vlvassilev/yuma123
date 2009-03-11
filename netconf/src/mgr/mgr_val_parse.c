@@ -297,8 +297,8 @@ static status_t
     if (res == NO_ERR) {
 
 #ifdef MGR_VAL_PARSE_DEBUG
-	log_debug3("\nparse_any: expecting any node type");
 	if (LOGDEBUG3) {
+	    log_debug3("\nparse_any: expecting any node type");
 	    xml_dump_node(&nextnode);
 	}
 #endif
@@ -345,9 +345,9 @@ static status_t
 	res2 = mgr_xml_consume_node_nons(scb->reader, &nextnode);
 	if (res2 == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_any: expecting end node for %s", 
-		   startnode->qname);
 	    if (LOGDEBUG3) {
+		log_debug3("\nparse_any: expecting end node for %s", 
+			   startnode->qname);
 		xml_dump_node(&nextnode);
 	    }
 #endif
@@ -408,8 +408,8 @@ static status_t
 	res = mgr_xml_consume_node_nons(scb->reader, &nextnode);
 	if (res == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_any: expecting start, empty, or end node");
 	    if (LOGDEBUG3) {
+		log_debug3("\nparse_any: expecting start, empty, or end node");
 		xml_dump_node(&nextnode);
 	    }
 #endif
@@ -479,8 +479,8 @@ static status_t
 
     if (res == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-	log_debug3("\nparse_enum: expecting string node");
 	if (LOGDEBUG3) {
+	    log_debug3("\nparse_enum: expecting string node");
 	    xml_dump_node(&valnode);
 	}
 #endif
@@ -505,9 +505,9 @@ static status_t
 	res2 = get_xml_node(scb, &endnode);
 	if (res2 == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_enum: expecting end for %s", 
-		       startnode->qname);
 	    if (LOGDEBUG3) {
+		log_debug3("\nparse_enum: expecting end for %s", 
+			   startnode->qname);
 		xml_dump_node(&endnode);
 	    }
 #endif
@@ -576,9 +576,9 @@ static status_t
 	    res = get_xml_node(scb, &endnode);
 	    if (res == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-		log_debug3("\nparse_empty: expecting end for %s", 
-		       startnode->qname);
 		if (LOGDEBUG3) {
+		    log_debug3("\nparse_empty: expecting end for %s", 
+		       startnode->qname);
 		    xml_dump_node(&endnode);
 		}
 #endif
@@ -593,9 +593,10 @@ static status_t
 			res = get_xml_node(scb, &endnode);
 			if (res == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-			    log_debug3("\nparse_empty: expecting end for %s", 
-				   startnode->qname);
 			    if (LOGDEBUG3) {
+				log_debug3("\nparse_empty: expecting "
+					   "end for %s", 
+					   startnode->qname);
 				xml_dump_node(&endnode);
 			    }
 #endif
@@ -670,8 +671,8 @@ static status_t
 
     if (res == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-	log_debug3("\nparse_boolean: expecting string node.");
 	if (LOGDEBUG3) {
+	    log_debug3("\nparse_boolean: expecting string node.");
 	    xml_dump_node(&valnode);
 	}
 #endif
@@ -699,9 +700,9 @@ static status_t
 	res2 = get_xml_node(scb, &endnode);
 	if (res2 == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_boolean: expecting end for %s", 
-		       startnode->qname);
 	    if (LOGDEBUG3) {
+		log_debug3("\nparse_boolean: expecting end for %s", 
+			   startnode->qname);
 		xml_dump_node(&endnode);
 	    }
 #endif
@@ -776,8 +777,8 @@ static status_t
     }
 
 #ifdef MGR_VAL_PARSE_DEBUG
-    log_debug3("\nparse_num: expecting string node.");
     if (LOGDEBUG3) {
+	log_debug3("\nparse_num: expecting string node.");
 	xml_dump_node(&valnode);
     }
 #endif
@@ -812,8 +813,8 @@ static status_t
     res2 = get_xml_node(scb, &endnode);
     if (res2 == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-	log_debug3("\nparse_num: expecting end for %s", startnode->qname);
 	if (LOGDEBUG3) {
+	    log_debug3("\nparse_num: expecting end for %s", startnode->qname);
 	    xml_dump_node(&endnode);
 	}
 #endif
@@ -921,8 +922,8 @@ static status_t
     }
 
 #ifdef MGR_VAL_PARSE_DEBUG
-    log_debug3("\nparse_string: expecting string node.");
     if (LOGDEBUG3) {
+	log_debug3("\nparse_string: expecting string node.");
 	xml_dump_node(&valnode);
     }
 #endif
@@ -1007,9 +1008,9 @@ static status_t
     res2 = get_xml_node(scb, &endnode);
     if (res2 == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-	log_debug3("\nparse_string: expecting end for %s", 
-		   startnode->qname);
 	if (LOGDEBUG3) {
+	    log_debug3("\nparse_string: expecting end for %s", 
+		       startnode->qname);
 	    xml_dump_node(&endnode);
 	}
 #endif
@@ -1082,8 +1083,8 @@ static status_t
 
     if (res == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-	log_debug3("\nparse_idref: expecting string node");
 	if (LOGDEBUG3) {
+	    log_debug3("\nparse_idref: expecting string node");
 	    xml_dump_node(&valnode);
 	}
 #endif
@@ -1131,9 +1132,9 @@ static status_t
 	    res2 = get_xml_node(scb, &endnode);
 	    if (res2 == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-		log_debug3("\nparse_idref: expecting end for %s", 
-			   startnode->qname);
 		if (LOGDEBUG3) {
+		    log_debug3("\nparse_idref: expecting end for %s", 
+			       startnode->qname);
 		    xml_dump_node(&endnode);
 		}
 #endif
@@ -1209,8 +1210,8 @@ static status_t
 
     if (res == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-	log_debug3("\nparse_union: expecting string or number node.");
 	if (LOGDEBUG3) {
+	    log_debug3("\nparse_union: expecting string or number node.");
 	    xml_dump_node(&valnode);
 	}
 #endif
@@ -1254,9 +1255,9 @@ static status_t
 	    res2 = get_xml_node(scb, &endnode);
 	    if (res2 == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
-		log_debug3("\nparse_union: expecting end for %s", 
-			   startnode->qname);
 		if (LOGDEBUG3) {
+		    log_debug3("\nparse_union: expecting end for %s", 
+			       startnode->qname);
 		    xml_dump_node(&endnode);
 		}
 #endif
@@ -1402,8 +1403,8 @@ static status_t
 	}
 
 #ifdef MGR_VAL_PARSE_DEBUG
-	log_debug3("\nparse_complex: expecting start-child or end node.");
 	if (LOGDEBUG3) {
+	    log_debug3("\nparse_complex: expecting start-child or end node.");
 	    xml_dump_node(&chnode);
 	}
 #endif
@@ -1673,8 +1674,9 @@ static status_t
 	    done = TRUE;
 	} else {
 #ifdef MGR_VAL_PARSE_DEBUG
-	    log_debug3("\nparse_complex: expecting start-child or end node.");
 	    if (LOGDEBUG3) {
+		log_debug3("\nparse_complex: expecting start-child or "
+			   "end node.");
 		xml_dump_node(&chnode);
 	    }
 #endif
@@ -2051,13 +2053,11 @@ static status_t
 {
     ncx_btype_t  btyp;
     status_t     res, res2, res3;
-    op_editop_t  editop;
     boolean      nserr;
 
     btyp = obj_get_basetype(obj);
 
     /* get the attribute values from the start node */
-    editop = OP_EDITOP_NONE;
     retval->nsid = startnode->nsid;
 
     /* check namespace errors except if the type is ANY */
@@ -2116,11 +2116,6 @@ static status_t
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    /* this will only be non-zero if the operation attribute
-     * was seen in XML subtree for the value
-     */
-    retval->editvars->editop = editop;
-
     /* set the config flag for this value */
     res3 = NO_ERR;
 
@@ -2174,13 +2169,11 @@ static status_t
 {
     ncx_btype_t  btyp;
     status_t     res, res2, res3;
-    op_editop_t  editop;
     boolean      nserr;
 
     btyp = obj_get_basetype(obj);
 
     /* get the attribute values from the start node */
-    editop = OP_EDITOP_NONE;
     retval->nsid = startnode->nsid;
 
     /* check namespace errors except if the type is ANY */
@@ -2236,11 +2229,6 @@ static status_t
     default:
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
-
-    /* this will only be non-zero if the operation attribute
-     * was seen in XML subtree for the value
-     */
-    retval->editvars->editop = editop;
 
     /* set the config flag for this value */
     res3 = NO_ERR;
@@ -2312,10 +2300,12 @@ status_t
 #endif
 
 #ifdef MGR_VAL_PARSE_DEBUG
-    log_debug3("\nmgr_val_parse: %s:%s btyp:%s", 
-	       obj_get_mod_prefix(obj),
-	       obj_get_name(obj), 
-	       tk_get_btype_sym(obj_get_basetype(obj)));
+    if (LOGDEBUG3) {
+	log_debug3("\nmgr_val_parse: %s:%s btyp:%s", 
+		   obj_get_mod_prefix(obj),
+		   obj_get_name(obj), 
+		   tk_get_btype_sym(obj_get_basetype(obj)));
+    }
 #endif
 
     /* get the element values */
@@ -2374,10 +2364,12 @@ status_t
 #endif
 
 #ifdef MGR_VAL_PARSE_DEBUG
-    log_debug3("\nmgr_val_parse_reply: %s:%s btyp:%s", 
-	       obj_get_mod_prefix(obj),
-	       obj_get_name(obj), 
-	       tk_get_btype_sym(obj_get_basetype(obj)));
+    if (LOGDEBUG3) {
+	log_debug3("\nmgr_val_parse_reply: %s:%s btyp:%s", 
+		   obj_get_mod_prefix(obj),
+		   obj_get_name(obj), 
+		   tk_get_btype_sym(obj_get_basetype(obj)));
+    }
 #endif
 
     output = (rpc) ? obj_find_child(rpc, NULL, NCX_EL_OUTPUT) : NULL;

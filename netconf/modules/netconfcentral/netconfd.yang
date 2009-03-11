@@ -8,7 +8,7 @@ module netconfd {
 
     import ncxtypes { prefix nt; }
 
-    import inet-types { prefix inet; }
+    import ietf-inet-types { prefix inet; }
 
     import with-defaults { prefix wd; }
 

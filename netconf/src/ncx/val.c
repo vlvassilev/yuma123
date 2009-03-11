@@ -472,6 +472,7 @@ static void
     case NCX_BT_EMPTY:
     case NCX_BT_BOOLEAN:
     case NCX_BT_NONE:
+    case NCX_BT_UNION:
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -2490,7 +2491,6 @@ status_t
 } /* val_simval_ok */
 
 
-
 /********************************************************************
 * FUNCTION val_simval_ok_errinfo
 * 
@@ -2606,7 +2606,7 @@ status_t
 	} else {
 	    unval->btyp = NCX_BT_UNION;
 	    unval->typdef = typdef;
-	    res = val_union_ok(typdef, simval, unval);
+	    res = val_union_ok_errinfo(typdef, simval, unval, errinfo);
 	    val_free_value(unval);
 	}
 	break;
@@ -2722,7 +2722,8 @@ status_t
     const typ_def_t        *undef;
     const typ_unionnode_t  *un;
     status_t                res;
-    boolean                 done, retdone;
+    boolean                 done;
+    ncx_btype_t             testbtyp;
 
 #ifdef DEBUG
     if (!typdef || !strval || !retval) {
@@ -2743,7 +2744,6 @@ status_t
     }
 #endif
 
-    retdone = FALSE;
     done = FALSE;
 
     /* go through all the union member typdefs until
@@ -2762,18 +2762,19 @@ status_t
 	    continue;
 	}
 
-	res = val_simval_ok_errinfo(undef, strval, errinfo);
+	testbtyp = typ_get_basetype(undef);
+	if (testbtyp == NCX_BT_UNION) {
+	    res = val_union_ok_errinfo(undef, strval, retval, errinfo);
+	} else {
+	    res = val_simval_ok_errinfo(undef, strval, errinfo);
+	}
 	if (res == NO_ERR) {
 	    /* the un->typ field may be NULL for YANG unions in progress
 	     * When the default is checked this ptr may be NULL, but the
 	     * retval is not used by that fn.  After the module is
 	     * registered, the un->typ field should be set
 	     */
-	    if (!retdone) {
-		/* if this is set to NCX_BT_UNION still
-		 * then it will eventually get overwritten
-		 * the final time with the real base type
-		 */
+	    if (!testbtyp != NCX_BT_UNION) {
 		retval->btyp = typ_get_basetype(undef);
 	    }
 	    done = TRUE;

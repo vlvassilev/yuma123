@@ -261,17 +261,37 @@ status_t
     if (res == NO_ERR) {
 	res = cap_add_std(newmycaps, CAP_STDID_PARTIAL_LOCK);
 	if (res == NO_ERR) {
-	    res = cap_add_stdval(newcaps, CAP_STDID_PARTIAL_LOCK);
+	    res = cap_add_stdval(newcaps, 
+				 CAP_STDID_PARTIAL_LOCK);
 	}
     }
 #endif
-
 
     /* set the with-defaults capability */
     if (res == NO_ERR) {
 	res = cap_add_withdef(newmycaps, defstyle);
 	if (res == NO_ERR) {
 	    res = cap_add_withdefval(newcaps, defstyle);
+	}
+    }
+
+    /* set the netconf-monitoring capability */
+    if (res == NO_ERR) {
+	res = cap_add_std(newmycaps, 
+			  CAP_STDID_NETCONF_MONITORING);
+	if (res == NO_ERR) {
+	    res = cap_add_stdval(newcaps, 
+				 CAP_STDID_NETCONF_MONITORING);
+	}
+    }
+
+    /* set the schema-retrieval capability */
+    if (res == NO_ERR) {
+	res = cap_add_std(newmycaps, 
+			  CAP_STDID_SCHEMA_RETRIEVAL);
+	if (res == NO_ERR) {
+	    res = cap_add_stdval(newcaps,
+				 CAP_STDID_SCHEMA_RETRIEVAL);
 	}
     }
 

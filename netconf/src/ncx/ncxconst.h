@@ -138,7 +138,7 @@ date	     init     comment
 #define NCX_PREFIX_LEN  3
 
 /* default prefix for the xmlns namespace (not really used */
-#define NS_PREFIX      (const xmlChar *)"ns"
+#define NS_PREFIX      (const xmlChar *)"namespace"
 #define NS_PREFIX_LEN  2
 #define NS_URN     (const xmlChar *)"http://www.w3.org/2000/xmlns/"
 

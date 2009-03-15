@@ -140,6 +140,10 @@ date         init     comment
 #include "xml_val.h"
 #endif
 
+#ifndef _H_xml_wr
+#include "xml_wr.h"
+#endif
+
 #ifndef _H_yangconst
 #include "yangconst.h"
 #endif
@@ -286,6 +290,14 @@ typedef struct modptr_t_ {
 } modptr_t;
 
 
+/* save the requested result format type */
+typedef enum result_format_t {
+    RF_NONE,
+    RF_TEXT,
+    RF_XML
+} result_format_t;
+
+
 /* NETCONF agent control block */
 typedef struct agent_cb_t_ {
     dlq_hdr_t            qhdr;
@@ -294,31 +306,36 @@ typedef struct agent_cb_t_ {
     xmlChar             *password;
     const xmlChar       *default_target;
     val_value_t         *connect_valset; 
+
     /* assignment statement support */
     xmlChar             *result_name;
-
-    /* local result or global result 
-     * !!! TBD: integrate into runstack 
-     * !!! THIS WILL NOT WORK:
-     * !!!     $foo = run script2 ...
-     */
     var_type_t          result_vartype;
+    xmlChar             *result_filename;
+    result_format_t      result_format;
 
-    /* true if optional nodes should be filled in by fill_valset */
+    /* per-agent shadows of global config vars */
     boolean              get_optional;
-
     uint32               timeout;
-    mgr_io_state_t       state;
-    ses_id_t             mysid;
     ncx_bad_data_t       baddata;
     log_debug_t          log_level;
     boolean              autoload;
     boolean              fixorder;
     op_testop_t          testoption;
     op_errop_t           erroption;
+
+    /* session support */
+    mgr_io_state_t       state;
+    ses_id_t             mysid;
+
+    /* TBD: session-specific user variables */
     dlq_hdr_t            varbindQ;   /* Q of ncx_var_t */
+
+    /* contains only the modules that the agent is using
+     * plus the 'netconf.yang' module
+     */
     dlq_hdr_t            modptrQ;     /* Q of modptr_t */
 } agent_cb_t;
+
 
 /* logging function template to switch between
  * log_stdout and log_write
@@ -436,10 +453,6 @@ static ncx_bad_data_t  baddata;
 /* global connect param set, copied to agent connect parmsets */
 static val_value_t   *connect_valset;
 
-static xmlChar       *connect_user;
-
-static xmlChar       *connect_agent;
-
 /* name of external CLI config file used on invocation */
 static xmlChar        *confname;
 
@@ -479,6 +492,51 @@ static op_testop_t     testoption;
 
 /* default NETCONF error-option value */
 static op_errop_t      erroption;
+
+
+/********************************************************************
+* FUNCTION is_top_command
+* 
+* Check if command name is a top command
+* Must be full name
+*
+* INPUTS:
+*   rpcname == command name to check
+*
+* RETURNS:
+*   TRUE if this is a top command
+*   FALSE if not
+*********************************************************************/
+static boolean
+    is_top_command (const xmlChar *rpcname)
+{
+    if (!xml_strcmp(rpcname, YANGCLI_CD)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_LIST)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_MGRLOAD)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_PWD)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_QUIT)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_RUN)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {
+	;
+    } else {
+	return FALSE;
+    }
+    return TRUE;
+
+}  /* is_top_command */
+
 
 /********************************************************************
 * FUNCTION new_modptr
@@ -598,6 +656,9 @@ static void
     }
     if (agent_cb->result_name) {
 	m__free(agent_cb->result_name);
+    }
+    if (agent_cb->result_filename) {
+	m__free(agent_cb->result_filename);
     }
 
     if (agent_cb->connect_valset) {
@@ -884,6 +945,33 @@ static boolean
 }  /* is_yangcli_ns */
 
 
+
+/********************************************************************
+ * FUNCTION clear_result
+ * 
+ * clear out the pending result info
+ *
+ * INPUTS:
+ *   agent_cb == agent control block to use
+ *
+ *********************************************************************/
+static void
+    clear_result (agent_cb_t *agent_cb)
+
+{
+    if (agent_cb->result_name) {
+	m__free(agent_cb->result_name);
+	agent_cb->result_name = NULL;
+    }
+    if (agent_cb->result_filename) {
+	m__free(agent_cb->result_filename);
+	agent_cb->result_filename = NULL;
+    }
+
+}  /* clear_result */
+
+
+
 /********************************************************************
  * FUNCTION handle_config_assign
  * 
@@ -892,57 +980,88 @@ static boolean
  * INPUTS:
  *   agent_cb == agent control block to use
  *   configval == value to set
+ *  use 1 of:
  *   newval == value to use for changing 'configval' 
- *
+ *   newvalstr == value to use as string form 
+ * 
  * RETURNS:
  *   status
  *********************************************************************/
 static status_t
     handle_config_assign (agent_cb_t *agent_cb,
 			  val_value_t *configval,
-			  val_value_t *newval)
+			  val_value_t *newval,
+			  const xmlChar *newvalstr)
 {
-    xmlChar        *dupval;
-    status_t        res;
-    log_debug_t     testloglevel;
-    ncx_bad_data_t  testbaddata;
-    op_testop_t     testop;
-    op_errop_t      errop;
-    ncx_num_t       testnum;
+    const xmlChar         *usestr;
+    xmlChar               *dupval;
+    val_value_t           *testval;
+    const obj_template_t  *testobj;
+    status_t               res;
+    log_debug_t            testloglevel;
+    ncx_bad_data_t         testbaddata;
+    op_testop_t            testop;
+    op_errop_t             errop;
+    ncx_num_t              testnum;
 
     res = NO_ERR;
-    if (!typ_is_string(newval->btyp)) {
-	return ERR_NCX_WRONG_TYPE;
-    }
-    if (!newval->v.str) {
+    if (newval) {
+	if (!typ_is_string(newval->btyp)) {
+	    return ERR_NCX_WRONG_TYPE;
+	}
+	if (!VAL_STR(newval)) {
+	    return ERR_NCX_INVALID_VALUE;
+	}
+	usestr = VAL_STR(newval);
+    } else if (newvalstr) {
+	usestr = newvalstr;
+    } else {
+	log_error("\nError: NULL value in config assignment");
 	return ERR_NCX_INVALID_VALUE;
     }
 
     if (!xml_strcmp(configval->name, YANGCLI_AGENT)) {
 	/* should check for valid IP address!!! */
-
-	/* save a copy of the string value */
-	dupval = xml_strdup(VAL_STR(newval));
-	if (!dupval) {
-	    log_error("\nError: malloc failed");
-	    res = ERR_INTERNAL_MEM;
+	if (val_need_quotes(usestr)) {
+	    /* using this dumb test as a placeholder */
+	    log_error("\nError: invalid hostname");
 	} else {
-	    if (connect_agent) {
-		m__free(connect_agent);
+	    /* save or update the connnect_valset */
+	    testval = val_find_child(connect_valset,
+				     NULL, YANGCLI_AGENT);
+	    if (testval) {
+		res = val_set_simval(testval,
+				     testval->typdef,
+				     testval->nsid,
+				     testval->name,
+				     usestr);
+		if (res != NO_ERR) {
+		    log_error("\nError: changing 'agent' failed");
+		}
+	    } else {
+		testobj = obj_find_child(connect_valset->obj,
+					 NULL, YANGCLI_AGENT);
+		testval = val_make_simval(obj_get_ctypdef(testobj),
+					  obj_get_nsid(testobj),
+					  YANGCLI_AGENT,
+					  usestr,
+					  &res);
+		if (testval) {
+		    val_add_child(testval, connect_valset);
+		}
 	    }
-	    connect_agent = dupval;
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_AUTOCOMP)) {
-	if (ncx_is_true(VAL_STR(newval))) {
+	if (ncx_is_true(usestr)) {
 	    autocomp = TRUE;
-	} else if (ncx_is_false(VAL_STR(newval))) {
+	} else if (ncx_is_false(usestr)) {
 	    autocomp = FALSE;
 	} else {
 	    log_error("\nError: value must be 'true' or 'false'");
 	    res = ERR_NCX_INVALID_VALUE;
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_BADDATA)) {
-	testbaddata = ncx_get_baddata_enum(VAL_STR(newval));
+	testbaddata = ncx_get_baddata_enum(usestr);
 	if (testbaddata != NCX_BAD_DATA_NONE) {
 	    agent_cb->baddata = testbaddata;
 	    baddata = testbaddata;
@@ -951,12 +1070,12 @@ static status_t
 	    res = ERR_NCX_INVALID_VALUE;
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_DEF_MODULE)) {
-	if (!ncx_valid_name2(VAL_STR(newval))) {
-	    log_error("\nError: must be a valid user name");
+	if (!ncx_valid_name2(usestr)) {
+	    log_error("\nError: must be a valid module name");
 	    res = ERR_NCX_INVALID_VALUE;
 	} else {
 	    /* save a copy of the string value */
-	    dupval = xml_strdup(VAL_STR(newval));
+	    dupval = xml_strdup(usestr);
 	    if (!dupval) {
 		log_error("\nError: malloc failed");
 		res = ERR_INTERNAL_MEM;
@@ -968,28 +1087,41 @@ static status_t
 	    }
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_USER)) {
-	if (!ncx_valid_name2(VAL_STR(newval))) {
-	    log_error("\nError: must be a valid module name");
+	if (!ncx_valid_name2(usestr)) {
+	    log_error("\nError: must be a valid user name");
 	    res = ERR_NCX_INVALID_VALUE;
 	} else {
-	    /* save a copy of the string value */
-	    dupval = xml_strdup(VAL_STR(newval));
-	    if (!dupval) {
-		log_error("\nError: malloc failed");
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		if (connect_user) {
-		    m__free(connect_user);
+	    /* save or update the connnect_valset */
+	    testval = val_find_child(connect_valset,
+				     NULL, YANGCLI_USER);
+	    if (testval) {
+		res = val_set_simval(testval,
+				     testval->typdef,
+				     testval->nsid,
+				     testval->name,
+				     usestr);
+		if (res != NO_ERR) {
+		    log_error("\nError: changing user name failed");
 		}
-		connect_user = dupval;
+	    } else {
+		testobj = obj_find_child(connect_valset->obj,
+					 NULL, YANGCLI_USER);
+		testval = val_make_simval(obj_get_ctypdef(testobj),
+					  obj_get_nsid(testobj),
+					  YANGCLI_USER,
+					  usestr,
+					  &res);
+		if (testval) {
+		    val_add_child(testval, connect_valset);
+		}
 	    }
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_TEST_OPTION)) {
-	if (!xml_strcmp(VAL_STR(newval), NCX_EL_NONE)) {
+	if (!xml_strcmp(usestr, NCX_EL_NONE)) {
 	    agent_cb->testoption = OP_TESTOP_NONE;
 	    testop = OP_TESTOP_NONE;
 	} else {	    
-	    testop = op_testop_enum(VAL_STR(newval));
+	    testop = op_testop_enum(usestr);
 	    if (testop != OP_TESTOP_NONE) {
 		agent_cb->testoption = testop;
 		testoption = testop;
@@ -1001,11 +1133,11 @@ static status_t
 	    }
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_ERROR_OPTION)) {
-	if (!xml_strcmp(VAL_STR(newval), NCX_EL_NONE)) {
+	if (!xml_strcmp(usestr, NCX_EL_NONE)) {
 	    agent_cb->erroption = OP_ERROP_NONE;
 	    erroption = OP_ERROP_NONE;
 	} else {	    
-	    errop = op_errop_id(VAL_STR(newval));
+	    errop = op_errop_id(usestr);
 	    if (errop != OP_ERROP_NONE) {
 		agent_cb->erroption = errop;
 		erroption = errop;
@@ -1018,7 +1150,7 @@ static status_t
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_TIMEOUT)) {
 	ncx_init_num(&testnum);
-	res = ncx_decode_num(VAL_STR(newval),
+	res = ncx_decode_num(usestr,
 			     NCX_BT_UINT32,
 			     &testnum);
 	if (res == NO_ERR) {
@@ -1029,10 +1161,10 @@ static status_t
 	}
 	ncx_clean_num(NCX_BT_UINT32, &testnum);
     } else if (!xml_strcmp(configval->name, YANGCLI_OPTIONAL)) {
-	if (ncx_is_true(VAL_STR(newval))) {
+	if (ncx_is_true(usestr)) {
 	    optional = TRUE;
 	    agent_cb->get_optional = TRUE;
-	} else if (ncx_is_false(VAL_STR(newval))) {
+	} else if (ncx_is_false(usestr)) {
 	    optional = FALSE;
 	    agent_cb->get_optional = FALSE;
 	} else {
@@ -1041,7 +1173,7 @@ static status_t
 	}
     } else if (!xml_strcmp(configval->name, NCX_EL_LOGLEVEL)) {
 	testloglevel = 
-	    log_get_debug_level_enum((const char *)VAL_STR(newval));
+	    log_get_debug_level_enum((const char *)usestr);
 	if (testloglevel == LOG_DEBUG_NONE) {
 	    log_error("\nError: value must be valid log-level:");
 	    log_error("\n       (off, error, warn, info, debug, debug2)\n");
@@ -1051,10 +1183,10 @@ static status_t
 	    log_set_debug_level(testloglevel);
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_FIXORDER)) {
-	if (ncx_is_true(VAL_STR(newval))) {
+	if (ncx_is_true(usestr)) {
 	    fixorder = TRUE;
 	    agent_cb->fixorder = TRUE;
-	} else if (ncx_is_false(VAL_STR(newval))) {
+	} else if (ncx_is_false(usestr)) {
 	    fixorder = FALSE;
 	    agent_cb->fixorder = FALSE;
 	} else {
@@ -1065,14 +1197,357 @@ static status_t
 	res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+    /* update the variable value for user access */
     if (res == NO_ERR) {
-	res = var_set_move(configval->name, 
-			   xml_strlen(configval->name),
-			   VAR_TYP_CONFIG, newval);
+	if (newval) {
+	    res = var_set_move(configval->name, 
+			       xml_strlen(configval->name),
+			       VAR_TYP_CONFIG, newval);
+	} else {
+	    res = var_set_from_string(configval->name,
+				      newvalstr, 
+				      VAR_TYP_CONFIG);
+	}
+	if (res != NO_ERR) {
+	    log_error("\nError: set result for '%s' failed (%s)",
+			  agent_cb->result_name, 
+			  get_error_string(res));
+	}
     }
+
+    if (res == NO_ERR) {
+	log_info("\nOK\n");
+    }
+
     return res;
 
 } /* handle_config_assign */
+
+
+/********************************************************************
+* FUNCTION handle_delete_result
+* 
+* Delete the specified file, if it is ASCII and a regular file
+*
+* INPUTS:
+*    agent_cb == agent control block to use
+*
+* OUTPUTS:
+*    agent_cb->result_filename will get deleted if NO_ERR
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    handle_delete_result (agent_cb_t *agent_cb)
+{
+    status_t     res;
+    struct stat  statbuf;
+    int          statresult;
+
+    res = NO_ERR;
+
+    if (LOGDEBUG2) {
+	log_debug2("\n*** delete file result '%s'",
+		   agent_cb->result_filename);
+    }
+
+    /* see if file already exists */
+    statresult = stat((const char *)agent_cb->result_filename,
+		      &statbuf);
+    if (statresult != 0) {
+	log_error("\nError: assignment file '%s' could not be opened",
+		  agent_cb->result_filename);
+	res = errno_to_status();
+    } else if (!S_ISREG(statbuf.st_mode)) {
+	log_error("\nError: assignment file '%s' is not a regular file",
+		  agent_cb->result_filename);
+	res = ERR_NCX_OPERATION_FAILED;
+    } else {
+	statresult = remove((const char *)agent_cb->result_filename);
+	if (statresult == -1) {
+	    log_error("\nError: assignment file '%s' could not be deleted",
+		      agent_cb->result_filename);
+	    res = errno_to_status();
+	}
+    }
+
+    clear_result(agent_cb);
+
+    return res;
+
+}  /* handle_delete_result */
+
+
+/********************************************************************
+* FUNCTION output_file_result
+* 
+* Check the filespec string for a file assignment statement
+* Save it if it si good
+*
+* INPUTS:
+*    agent_cb == agent control block to use
+* use 1 of these 2 parms:
+*    resultval == result to output to file
+*    resultstr == result to output as string
+*
+* OUTPUTS:
+*    agent_cb->result_filename will get set if NO_ERR
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    output_file_result (agent_cb_t *agent_cb,
+			val_value_t *resultval,
+			const xmlChar *resultstr)
+{
+    FILE        *fil;
+    status_t     res;
+    xml_attrs_t  attrs;
+    struct stat  statbuf;
+    int          statresult;
+
+    if (LOGDEBUG2) {
+	log_debug2("\n*** output file result to '%s'",
+		   agent_cb->result_filename);
+    }
+
+    /* see if file already exists */
+    statresult = stat((const char *)agent_cb->result_filename,
+		      &statbuf);
+    if (statresult == 0) {
+	log_error("\nError: assignment file '%s' already exists",
+		  agent_cb->result_filename);
+	clear_result(agent_cb);
+	return ERR_NCX_DATA_EXISTS;
+    }
+    
+    if (resultval) {
+	/* output to the specified file */
+	xml_init_attrs(&attrs);
+	res = xml_wr_check_file(agent_cb->result_filename,
+				resultval,
+				&attrs, 
+				XMLMODE, 
+				WITHHDR, 
+				NCX_DEF_INDENT,
+				NULL);
+	xml_clean_attrs(&attrs);
+    } else if (resultstr) {
+	fil = fopen((const char *)agent_cb->result_filename, "w");
+	if (!fil) {
+	    log_error("\nError: assignment file '%s' could "
+		      "not be opened",
+		      agent_cb->result_filename);
+	    res = errno_to_status();
+	} else {
+	    statresult = fputs((const char *)resultstr, fil);
+	    if (statresult == EOF) {
+		log_error("\nError: assignment file '%s' could "
+			  "not be written",
+			  agent_cb->result_filename);
+		res = errno_to_status();
+	    } else {
+		statresult = fputc('\n', fil);	
+		if (statresult == EOF) {
+		    log_error("\nError: assignment file '%s' could "
+			      "not be written",
+			      agent_cb->result_filename);
+		    res = errno_to_status();
+		}
+	    }
+	}
+	statresult = fclose(fil);
+	if (statresult == EOF) {
+	    log_error("\nError: assignment file '%s' could "
+		      "not be closed",
+		      agent_cb->result_filename);
+	    res = errno_to_status();
+	}
+    } else {
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (res == NO_ERR) {
+	log_info("\nOK\n");
+    }
+
+    clear_result(agent_cb);
+
+    return res;
+
+}  /* output_file_result */
+
+
+/********************************************************************
+ * FUNCTION finish_result_assign
+ * 
+ * finish the assignment to result_name or result_filename
+ * use 1 of these 2 parms:
+ *    resultval == result to output to file
+ *    resultstr == result to output as string
+ *
+ * INPUTS:
+ *   agent_cb == agent control block to use
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    finish_result_assign (agent_cb_t *agent_cb,
+			  val_value_t *resultvar,
+			  const xmlChar *resultstr)
+{
+    val_value_t   *configvar;
+    status_t       res;
+
+    res = NO_ERR;
+
+    if (agent_cb->result_filename) {
+	res = output_file_result(agent_cb, resultvar, resultstr);
+	if (resultvar) {
+	    val_free_value(resultvar);
+	}
+    } else if (agent_cb->result_name) {
+	if (agent_cb->result_vartype == VAR_TYP_CONFIG) {
+	    configvar = var_get(agent_cb->result_name,
+				VAR_TYP_CONFIG);
+	    if (!configvar) {
+		res = SET_ERROR(ERR_INTERNAL_VAL);
+	    } else {
+		res = handle_config_assign(agent_cb,
+					   configvar,
+					   resultvar,
+					   resultstr);
+	    }
+	} else if (resultvar) {
+	    /* save the filled in value
+	     * hand off the malloced 'resultvar' here
+	     */
+	    res = var_set_move(agent_cb->result_name, 
+			       xml_strlen(agent_cb->result_name),
+			       agent_cb->result_vartype,
+			       resultvar);
+	    if (res != NO_ERR) {
+		val_free_value(resultvar);
+		log_error("\nError: set result for '%s' failed (%s)",
+			  agent_cb->result_name, 
+			  get_error_string(res));
+	    } else {
+		log_info("\nOK\n");
+	    }
+	} else {
+	    /* this is just a string assignment */
+	    res = var_set_from_string(agent_cb->result_name,
+				      resultstr, 
+				      agent_cb->result_vartype);
+	    if (res != NO_ERR) {
+		log_error("\nyangcli: Error setting variable %s (%s)",
+			  agent_cb->result_name, 
+			  get_error_string(res));
+	    } else {
+		log_info("\nOK\n");
+	    }
+	}
+    }
+
+    clear_result(agent_cb);
+
+    return res;
+
+}  /* finish_result_assign */
+
+
+/********************************************************************
+* FUNCTION check_filespec
+* 
+* Check the filespec string for a file assignment statement
+* Save it if it si good
+*
+* INPUTS:
+*    agent_cb == agent control block to use
+*    filespec == string to check
+*    varname == variable name to use in log_error
+*              if this is complex form
+*
+* OUTPUTS:
+*    agent_cb->result_filename will get set if NO_ERR
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    check_filespec (agent_cb_t *agent_cb,
+		    const xmlChar *filespec,
+		    const xmlChar *varname)
+{
+    const xmlChar *teststr;
+
+    if (!filespec || !*filespec) {
+	if (varname) {
+	    log_error("\nError: file assignment variable '%s' "
+		      "is empty string", varname);
+	} else {
+	    log_error("\nError: file assignment filespec "
+		      "is empty string");
+	}
+	return ERR_NCX_INVALID_VALUE;
+    }
+
+    /* variable must be a string with only
+     * valid filespec chars in it; no spaces
+     * are allowed; too many security holes
+     * if arbitrary strings are allowed here
+     */
+    if (val_need_quotes(filespec)) {
+	if (varname) {
+	    log_error("\nError: file assignment variable '%s' "
+		      "contains whitespace (%s)", 
+		      varname, filespec);
+	} else {
+	    log_error("\nError: file assignment filespec '%s' "
+		      "contains whitespace", filespec);
+	}
+	return ERR_NCX_INVALID_VALUE;
+    }
+
+    /* check for acceptable chars */
+    teststr = filespec;
+    while (*teststr) {
+	if (*teststr == NCXMOD_PSCHAR ||
+	    *teststr == '.' ||
+#ifdef WINDOWS
+	    *teststr == ':' ||
+#endif
+	    ncx_valid_name_ch(*teststr)) {
+	    teststr++;
+	} else {
+	    if (varname) {
+		log_error("\nError: file assignment variable '%s' "
+			  "contains invalid filespec (%s)", 
+			  varname, filespec);
+	    } else {
+		log_error("\nError: file assignment filespec '%s' "
+			  "contains invalid filespec", filespec);
+	    }
+	    return ERR_NCX_INVALID_VALUE;
+	}
+    }
+
+    /* toss out the old value, if any */
+    if (agent_cb->result_filename) {
+	m__free(agent_cb->result_filename);
+    }
+
+    /* save the filename, may still be an invalid fspec  */
+    agent_cb->result_filename = xml_strdup(filespec);
+    if (!agent_cb->result_filename) {
+	return ERR_INTERNAL_MEM;
+    }
+    return NO_ERR;
+
+}  /* check_filespec */
 
 
 /********************************************************************
@@ -1095,11 +1570,15 @@ static status_t
 *   getrpc == address of return flag to parse and execute an
 *            RPC, which will be assigned to the var found
 *            in the 'result' module variable
+*   fileassign == address of file assign flag
 *
 * OUTPUTS:
 *   *len == number chars parsed in the assignment statement
 *   *getrpc == TRUE if the rest of the line represent an
 *              RPC command that needs to be evaluated
+*   *fileassign == TRUE if the assignment is for a
+*                  file output (starts with @)
+*                  FALSE if not a file assignment
 *
 * SIDE EFFECTS:
 *    If this is an 'rpc' assignment statement, 
@@ -1116,12 +1595,14 @@ static status_t
     check_assign_statement (agent_cb_t *agent_cb,
 			    const xmlChar *line,
 			    uint32 *len,
-			    boolean *getrpc)
+			    boolean *getrpc,
+			    boolean *fileassign)
 {
-    const xmlChar         *str, *name;
+    const xmlChar         *str, *name, *filespec;
     val_value_t           *curval;
     const obj_template_t  *obj;
     val_value_t           *val;
+    xmlChar               *tempstr;
     uint32                 nlen, tlen;
     var_type_t             vartype;
     status_t               res;
@@ -1130,48 +1611,128 @@ static status_t
     str = line;
     *len = 0;
     *getrpc = FALSE;
+    *fileassign = FALSE;
 
-    /* check if a varref is being made */
-    res = var_check_ref(str, ISLEFT, &tlen, 
-			&vartype, &name, &nlen);
-    if (res != NO_ERR) {
-	/* error in the varref */
-	return res;
-    } else if (tlen == 0) {
-	/* returned not a varref */
+    /* skip leading whitespace */
+    while (*str && isspace(*str)) {
+	str++;
+    }
+
+    if (*str == '@') {
+	/* check if valid file assignment is being made */
+	*fileassign = TRUE;
+	str++;
+    }
+
+    if (*str == '$') {
+	/* check if a valid variable assignment is being made */
+	res = var_check_ref(str, ISLEFT, &tlen, 
+			    &vartype, &name, &nlen);
+	if (res != NO_ERR) {
+	    /* error in the varref */
+	    return res;
+	} else if (tlen == 0) {
+	    /* should not happen: returned not a varref */
+	    *getrpc = TRUE;
+	    return NO_ERR;
+	} else if (*fileassign) {
+	    /* file assignment complex form:
+	     *
+	     *    @$foo = bar or @$$foo = bar
+	     *
+	     * get the var reference for real because
+	     * it is supposed to contain the filespec
+	     * for the output file
+	     */
+	    curval = var_get_str(name, nlen, vartype);
+	    if (!curval) {
+		log_error("\nError: file assignment variable "
+			  "not found");
+		return ERR_NCX_VAR_NOT_FOUND;
+	    }
+
+	    /* variable must be a string */
+	    if (!typ_is_string(curval->btyp)) {
+		log_error("\nError: file assignment variable '%s' "
+			  "is wrong type '%s'",
+			  curval->name,
+			  tk_get_btype_sym(curval->btyp));
+		return ERR_NCX_VAR_NOT_FOUND;
+	    }
+	    filespec = VAL_STR(curval);
+	    res = check_filespec(agent_cb, filespec, curval->name);
+	    if (res != NO_ERR) {
+		return res;
+	    }
+	} else {
+	    /* variable regerence:
+	     *
+	     *     $foo or $$foo
+	     *
+	     * check for a valid varref, get the data type, which
+	     * will also indicate if the variable exists yet
+	     */
+	    switch (vartype) {
+	    case VAR_TYP_SYSTEM:
+		log_error("\nError: system variables "
+			  "are read-only");
+		return ERR_NCX_VAR_READ_ONLY;
+	    case VAR_TYP_GLOBAL:
+	    case VAR_TYP_CONFIG:
+		curval = var_get_str(name, nlen, vartype);
+		break;
+	    case VAR_TYP_LOCAL:
+	    case VAR_TYP_SESSION:
+		curval = var_get_local_str(name, nlen);
+		break;
+	    default:
+		return SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	}
+	/* move the str pointer past the variable name */
+	str += tlen;
+    } else if (*fileassign) {
+	/* file assignment, simple form:
+	 *
+	 *     @foo.txt = bar
+	 *
+	 * get the length of the filename 
+	 */
+	name = str;
+	while (*str && !isspace(*str) && *str != '=') {
+	    str++;
+	}
+	nlen = (uint32)(str-name);
+
+	/* save the filename in a temp string */
+	tempstr = xml_strndup(name, nlen);
+	if (!tempstr) {
+	    return ERR_INTERNAL_MEM;
+	}
+
+	/* check filespec and save filename for real */
+	res = check_filespec(agent_cb, tempstr, NULL);
+
+	m__free(tempstr);
+
+	if (res != NO_ERR) {
+	    return res;
+	}
+    } else {
+	/* not an assignment statement at all */
 	*getrpc = TRUE;
 	return NO_ERR;
     }
 
-    /* check for a valid varref, get the data type, which
-     * will also indicate if the variable exists yet
-     */
-    switch (vartype) {
-    case VAR_TYP_SYSTEM:
-	log_error("\nError: system variables are read-only");
-	return ERR_NCX_VAR_READ_ONLY;
-    case VAR_TYP_GLOBAL:
-    case VAR_TYP_CONFIG:
-	curval = var_get_str(name, nlen, vartype);
-	break;
-    case VAR_TYP_LOCAL:
-    case VAR_TYP_SESSION:
-	curval = var_get_local_str(name, nlen);
-	break;
-    default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    /* keep parsing the assignment string */
-    str += tlen;
-
-    /* skip any more whitespace */
+    /* skip any more whitespace, after the LHS term */
     while (*str && xml_isspace(*str)) {
 	str++;
     }
 
     /* check end of string */
     if (!*str) {
+	log_error("\nError: truncated assignment statement");
+	clear_result(agent_cb);
 	return ERR_NCX_DATA_MISSING;
     }
 
@@ -1180,6 +1741,8 @@ static status_t
 	/* move past assignment char */
 	str++;
     } else {
+	log_error("\nError: equals sign '=' expected");
+	clear_result(agent_cb);
 	return ERR_NCX_WRONG_TKTYPE;
     }
 
@@ -1190,17 +1753,25 @@ static status_t
 
     /* check end of string */
     if (!*str) {
-	/* got $foo =  EOLN
-         * treat this as a request to unset the variable
-	 */
-	if (vartype == VAR_TYP_SYSTEM ||
-	    vartype == VAR_TYP_CONFIG) {
-	    log_error("\nError: cannot remove system variables");
-	    return ERR_NCX_OPERATION_FAILED;
-	}
+	if (*fileassign) {
+	    /* got file assignment (@foo) =  EOLN
+	     * treat this as a request to delete the file
+	     */
+	    res = handle_delete_result(agent_cb);
+	} else {
+	    /* got $foo =  EOLN
+	     * treat this as a request to unset the variable
+	     */
+	    if (vartype == VAR_TYP_SYSTEM ||
+		vartype == VAR_TYP_CONFIG) {
+		log_error("\nError: cannot remove system variables");
+		clear_result(agent_cb);
+		return ERR_NCX_OPERATION_FAILED;
+	    }
 
-	/* else try to unset this variable */
-	res = var_unset(name, nlen, vartype);
+	    /* else try to unset this variable */
+	    res = var_unset(name, nlen, vartype);
+	}
 	*len = str - line;
 	return res;
     }
@@ -1212,35 +1783,49 @@ static status_t
      *      $foo = blah
      *             ^
      */
-    obj = (curval) ? curval->obj : NULL;
+    if (*fileassign) {
+	obj = NULL;
+    } else {
+	obj = (curval) ? curval->obj : NULL;
+    }
 
     /* get the script or CLI input as a new val_value_t struct */
     val = var_check_script_val(obj, str, ISTOP, &res);
     if (val) {
+	/* a script value reference was found */
 	if (!obj || !xml_strcmp(val->name, NCX_EL_STRING)) {
 	    /* the generic name needs to be overwritten */
 	    val_set_name(val, name, nlen);
 	}
 
-	
-	/* this is a plain assignment statement
-	 * first check if the input is VAR_TYP_CONFIG
-	 */
-	if (vartype == VAR_TYP_CONFIG) {
-	    if (!curval) {
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-	    } else {
-		res = handle_config_assign(agent_cb,
-					   curval, val);
-	    }
-	} else {
-	    /* val is a malloced struct, pass it over to the
-	     * var struct instead of cloning it
+	if (*fileassign) {
+	    /* file assignment of a variable value 
+	     *   @foo.txt=$bar  or @$foo=$bar
 	     */
-	    res = var_set_move(name, nlen, vartype, val);
-	}
-	if (res != NO_ERR) {
+	    res = output_file_result(agent_cb, val, NULL);
 	    val_free_value(val);
+	} else {
+	    /* this is a plain assignment statement
+	     * first check if the input is VAR_TYP_CONFIG
+	     */
+	    if (vartype == VAR_TYP_CONFIG) {
+		if (!curval) {
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		} else {
+		    res = handle_config_assign(agent_cb,
+					       curval, 
+					       val,
+					       NULL);
+		}
+	    } else {
+		/* val is a malloced struct, pass it over to the
+		 * var struct instead of cloning it
+		 */
+		res = var_set_move(name, nlen, vartype, val);
+	    }
+	    if (res != NO_ERR) {
+		val_free_value(val);
+	    }
 	}
     } else if (res==NO_ERR) {
 	/* this is as assignment to the results
@@ -1248,29 +1833,30 @@ static status_t
 	 */
 	if (agent_cb->result_name) {
 	    log_warn("\nWarning: result already pending for %s",
-		      agent_cb->result_name);
+		     agent_cb->result_name);
 	    m__free(agent_cb->result_name);
 	    agent_cb->result_name = NULL;
 	}
 
-	/* save the variable result name */
-	agent_cb->result_name = xml_strndup(name, nlen);
-	if (!agent_cb->result_name) {
-	    *len = 0;
-	    res = ERR_INTERNAL_MEM;
-	} else {
-	    
-	    agent_cb->result_vartype = vartype;
+	if (!*fileassign) {
+	    /* save the variable result name */
+	    agent_cb->result_name = xml_strndup(name, nlen);
+	    if (!agent_cb->result_name) {
+		*len = 0;
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		agent_cb->result_vartype = vartype;
+	    }
+	}
+
+	if (res == NO_ERR) {
 	    *len = str - line;
 	    *getrpc = TRUE;
 	}
     } else {
 	/* there was some error in the statement processing */
 	*len = 0;
-	if (agent_cb->result_name) {
-	    m__free(agent_cb->result_name);
-	    agent_cb->result_name = NULL;
-	}
+	clear_result(agent_cb);
     }
 
     return res;
@@ -1385,10 +1971,14 @@ static void
 	    parm = val_find_child(agent_cb->connect_valset, 
 				  YANGCLI_MOD, YANGCLI_USER);
 	}
+
+	/*
 	if (!parm && connect_valset) {
 	    parm = val_find_child(connect_valset, 
 				  YANGCLI_MOD, YANGCLI_USER);
 	}
+	*/
+
 	if (parm) {
 	    len = xml_strncpy(p, VAL_STR(parm), bufflen);
 	    p += len;
@@ -1408,10 +1998,14 @@ static void
 	    parm = val_find_child(agent_cb->connect_valset, 
 				  YANGCLI_MOD, YANGCLI_AGENT);
 	}
+
+	/*
 	if (!parm && connect_valset) {
 	    parm= val_find_child(connect_valset, 
 				 YANGCLI_MOD, YANGCLI_AGENT);
 	}
+	*/
+
 	if (parm) {
 	    len = xml_strncpy(p, VAL_STR(parm), bufflen);
 	    p += len;
@@ -3273,7 +3867,7 @@ static void
 		boolean  cli)
 {
     const obj_template_t  *obj;
-    val_value_t           *valset, *use_valset;;
+    val_value_t           *valset;
     status_t               res;
     boolean                s1, s2, s3;
 
@@ -3309,10 +3903,6 @@ static void
 	}
     }
 
-    /* pick the local over the global connect valset */
-    use_valset = (agent_cb->connect_valset) ? 
-	agent_cb->connect_valset : connect_valset;
-
     /* get an empty parmset and use the old set for defaults 
      * unless this is a cli from the program startup and all
      * of the parameters are entered
@@ -3320,11 +3910,11 @@ static void
     if (!valset) {
 	s1 = s2 = s3 = FALSE;
 	if (cli) {
-	    s1 = val_find_child(use_valset, YANGCLI_MOD, 
+	    s1 = val_find_child(connect_valset, YANGCLI_MOD, 
 				YANGCLI_AGENT) ? TRUE : FALSE;
-	    s2 = val_find_child(use_valset, YANGCLI_MOD,
+	    s2 = val_find_child(connect_valset, YANGCLI_MOD,
 				YANGCLI_USER) ? TRUE : FALSE;
-	    s3 = val_find_child(use_valset, YANGCLI_MOD,
+	    s3 = val_find_child(connect_valset, YANGCLI_MOD,
 				YANGCLI_PASSWORD) ? TRUE : FALSE;
 	}
 	if (!(s1 && s2 && s3)) {
@@ -3338,11 +3928,14 @@ static void
 	} /* else use all of connect_valset */
     }
 
-    /* if anything entered, try to get any missing params in ps */
+    /* complete the connect valset if needed
+     * and transfer it to the agent_cb version
+     */
     res = NO_ERR;
     if (valset) {
+	/* try to get any missing params in valset */
 	if (interactive_mode()) {
-	    res = fill_valset(agent_cb, rpc, valset, use_valset);
+	    res = fill_valset(agent_cb, rpc, valset, connect_valset);
 	    if (res == ERR_NCX_SKIPPED) {
 		res = NO_ERR;
 	    }
@@ -3372,21 +3965,22 @@ static void
 			      connect_valset);
 	}
     } else {
+	if (agent_cb->connect_valset) {
+	    val_free_value(agent_cb->connect_valset);
+	}
 	agent_cb->connect_valset = val_clone(connect_valset);
 	if (!agent_cb->connect_valset) {
 	    res = ERR_INTERNAL_MEM;
 	}
     }
 
+    /* check result so far */
     if (res != NO_ERR) {
 	log_write("\nError: Connect failed (%s)", 
 		  get_error_string(res));
 	agent_cb->state = MGR_IO_ST_IDLE;
     } else {
-	/* hack: make sure the 3 required parms are set instead of
-	 * full validation of the parmset
-	 */
-
+	/* make sure the 3 required parms are set */
 	s1 = val_find_child(agent_cb->connect_valset, YANGCLI_MOD, 
 			    YANGCLI_AGENT) ? TRUE : FALSE;
 	s2 = val_find_child(agent_cb->connect_valset, YANGCLI_MOD,
@@ -3844,14 +4438,12 @@ static status_t
 	return res;
     }
 
-    res = create_config_var(YANGCLI_TEST_OPTION, 
-			    (const xmlChar *)"test");
+    res = create_config_var(YANGCLI_TEST_OPTION, NCX_EL_NONE);
     if (res != NO_ERR) {
 	return res;
     }
 
-    res = create_config_var(YANGCLI_ERROR_OPTION, 
-			    (const xmlChar *)"stop-on-error");
+    res = create_config_var(YANGCLI_ERROR_OPTION, NCX_EL_NONE); 
     if (res != NO_ERR) {
 	return res;
     }
@@ -4857,7 +5449,17 @@ static void
     obj = ncx_get_first_object(yangcli_mod);
     while (obj) {
 	if (obj_is_rpc(obj)) {
-	    do_list_one_command(obj, mode);
+	    if (use_agentcb(agent_cb)) {
+		/* list all local commands */
+		do_list_one_command(obj, mode);
+	    } else {
+		/* session not active so filter out
+		 * all the commands except top command
+		 */
+		if (is_top_command(obj_get_name(obj))) {
+		    do_list_one_command(obj, mode);
+		}
+	    }
 	}
 	obj = ncx_get_next_object(yangcli_mod, obj);
     }
@@ -5697,31 +6299,13 @@ static void
     }
 
     if (res == NO_ERR) {
-	if (agent_cb->result_name) {
-
+	if (agent_cb->result_name || agent_cb->result_filename) {
 	    /* save the filled in value */
-	    res = var_set_move(agent_cb->result_name, 
-			       xml_strlen(agent_cb->result_name),
-			       agent_cb->result_vartype,
-			       newparm);
-	    if (res != NO_ERR) {
-		val_free_value(newparm);
-
-		log_error("\nError: set result for '%s' failed (%s)",
-			  agent_cb->result_name, 
-			  get_error_string(res));
-	    }
+	    res = finish_result_assign(agent_cb, newparm, NULL);
 	    newparm = NULL;
-
-	    /* clear the result flag */
-	    m__free(agent_cb->result_name);
-	    agent_cb->result_name = NULL;
 	}
     } else {
-	if (agent_cb->result_name) {
-	    m__free(agent_cb->result_name);
-	    agent_cb->result_name = NULL;
-	}
+	clear_result(agent_cb);
     }
 
     /* cleanup */
@@ -6168,6 +6752,58 @@ static status_t
 	val_free_value(config_content);
 	val_free_value(reqdata);
 	return res;
+    }
+
+    if (agent_cb->testoption != OP_TESTOP_NONE) {
+	/* set the edit-config/input/test-option node to
+	 * the user-specified value
+	 */
+	child = obj_find_child(input, NC_MODULE,
+			       NCX_EL_TEST_OPTION);
+	parm = val_new_value();
+	if (!parm) {
+	    val_free_value(config_content);
+	    val_free_value(reqdata);
+	    return ERR_INTERNAL_MEM;
+	}
+	val_init_from_template(parm, child);
+	val_add_child(parm, reqdata);
+	res = val_set_simval(parm,
+			     obj_get_ctypdef(child),
+			     obj_get_nsid(child),
+			     obj_get_name(child),
+			     op_testop_name(agent_cb->testoption));
+	if (res != NO_ERR) {
+	    val_free_value(config_content);
+	    val_free_value(reqdata);
+	    return res;
+	}
+    }
+
+    if (agent_cb->erroption != OP_ERROP_NONE) {
+	/* set the edit-config/input/error-option node to
+	 * the user-specified value
+	 */
+	child = obj_find_child(input, NC_MODULE,
+			       NCX_EL_ERROR_OPTION);
+	parm = val_new_value();
+	if (!parm) {
+	    val_free_value(config_content);
+	    val_free_value(reqdata);
+	    return ERR_INTERNAL_MEM;
+	}
+	val_init_from_template(parm, child);
+	val_add_child(parm, reqdata);
+	res = val_set_simval(parm,
+			     obj_get_ctypdef(child),
+			     obj_get_nsid(child),
+			     obj_get_name(child),
+			     op_errop_name(agent_cb->erroption));
+	if (res != NO_ERR) {
+	    val_free_value(config_content);
+	    val_free_value(reqdata);
+	    return res;
+	}
     }
 
     /* set the edit-config/input/config node to the
@@ -7929,8 +8565,6 @@ static void
 	do_cd(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
 	do_connect(agent_cb, rpc, line, len, FALSE);
-    } else if (!xml_strcmp(rpcname, YANGCLI_DELETE)) {
-	do_delete(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
 	do_fill(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
@@ -7953,6 +8587,7 @@ static void
 		   rpcname);
     }
 } /* do_local_command */
+
 
 
 /********************************************************************
@@ -7986,22 +8621,8 @@ static void
     rpc = (const obj_template_t *)parse_def(agent_cb,
 					    &dtyp, line, &len);
     if (!rpc) {
-	if (agent_cb->result_name) {
-	    /* this is just a string assignment */
-	    res = var_set_from_string(agent_cb->result_name, 
-				      line, 
-				      agent_cb->result_vartype);
-	    if (res != NO_ERR) {
-		log_error("\nyangcli: Error setting variable %s (%s)",
-			  agent_cb->result_name, 
-			  get_error_string(res));
-	    } else {
-		log_info("\nOK\n");
-	    }
-
-	    /* clear the result flag either way */
-	    m__free(agent_cb->result_name);
-	    agent_cb->result_name = NULL;
+	if (agent_cb->result_name || agent_cb->result_filename) {
+	    res = finish_result_assign(agent_cb, NULL, line);
 	} else {
 	    /* this is an unknown command */
 	    log_error("\nError: Unrecognized command");
@@ -8041,7 +8662,7 @@ static void
     val_value_t  *val;
     mgr_scb_t    *mgrcb;
     status_t      res;
-    boolean       anyout;
+    boolean       anyout, anyerrors;
     uint32        usesid;
 
     mgrcb = scb->mgrcb;
@@ -8051,9 +8672,12 @@ static void
 	usesid = 0;
     }
 
-    /*****/
+    /***  TBD: multi-session support ***/
     agent_cb = cur_agent_cb;
 
+    anyerrors = FALSE;
+
+    /* check the contents of the reply */
     if (rpy && rpy->reply) {
 	if (val_find_child(rpy->reply, NC_MODULE,
 			   NCX_EL_RPC_ERROR)) {
@@ -8062,6 +8686,7 @@ static void
 	    val_dump_value(rpy->reply, 0);
 	    log_error("\n");
 	    anyout = TRUE;
+	    anyerrors = TRUE;
 	} else if (val_find_child(rpy->reply, NC_MODULE, NCX_EL_OK)) {
 	    log_info("\nRPC OK Reply %s for session %u:\n",
 		     rpy->msg_id, usesid);
@@ -8078,28 +8703,31 @@ static void
 	    anyout = FALSE;
 	}
 
-	if (agent_cb->result_name) {
+	/* output data even if there were errors
+	 * TBD: use a CLI switch to control whether
+	 * to save if <rpc-errors> received
+	 */
+	if (agent_cb->result_name || agent_cb->result_filename) {
 	    /* save the data element if it exists */
 	    val = val_first_child_name(rpy->reply, NCX_EL_DATA);
-	    if (!val) {
-		/* no, so save the entire reply */
-		val = rpy->reply;
-		rpy->reply = NULL;
+	    if (val) {
+		val_remove_child(val);
 	    } else {
-		dlq_remove(val);
-	    }
-	    res = var_set_move(agent_cb->result_name, 
-			       xml_strlen(agent_cb->result_name),
-			       agent_cb->result_vartype,
-			       val);
-	    if (res != NO_ERR) {
-		log_error("\nyangcli reply: set result failed (%s)",
-			  get_error_string(res));
+		if (val_child_cnt(rpy->reply) == 1) {
+		    val = val_get_first_child(rpy->reply);
+		    val_remove_child(val);
+		} else {
+		    /* not 1 child node, so save the entire reply
+		     * need a single top-level element to be a
+		     * valid XML document
+		     */
+		    val = rpy->reply;
+		    rpy->reply = NULL;
+		}
 	    }
 
-	    /* clear the result flag */
-	    m__free(agent_cb->result_name);
-	    agent_cb->result_name = NULL;
+	    /* hand off the malloced 'val' node here */
+	    res = finish_result_assign(agent_cb, val, NULL);
 	}  else if (!anyout && interactive_mode()) {
 	    log_stdout("\nOK\n");
 	}
@@ -8168,19 +8796,8 @@ static void
     rpc = (const obj_template_t *)parse_def(agent_cb,
 					    &dtyp, line, &len);
     if (!rpc) {
-	if (agent_cb->result_name) {
-	    /* this is just a string assignment */
-	    res = var_set_from_string(agent_cb->result_name,
-				      line, 
-				      agent_cb->result_vartype);
-	    if (res != NO_ERR) {
-		log_error("\nyangcli: Error setting variable %s (%s)",
-			  agent_cb->result_name, get_error_string(res));
-	    }
-
-	    /* clear the result flag either way */
-	    m__free(agent_cb->result_name);
-	    agent_cb->result_name = NULL;
+	if (agent_cb->result_name || agent_cb->result_filename) {
+	    res = finish_result_assign(agent_cb, NULL, line);
 	} else {
 	    /* this is an unknown command */
 	    log_stdout("\nUnrecognized command");
@@ -8881,7 +9498,7 @@ static mgr_io_state_t
     agent_cb_t    *agent_cb;
     xmlChar       *line;
     ses_cb_t       *scb;
-    boolean         getrpc;
+    boolean         getrpc, fileassign;
     status_t        res;
     uint32          len;
 
@@ -8995,7 +9612,11 @@ static mgr_io_state_t
     }
 
     /* check if this is an assignment statement */
-    res = check_assign_statement(agent_cb, line, &len, &getrpc);
+    res = check_assign_statement(agent_cb, 
+				 line, 
+				 &len, 
+				 &getrpc,
+				 &fileassign);
     if (res != NO_ERR) {
 	log_error("\nyangcli: Variable assignment failed (%s) (%s)",
 		  line, get_error_string(res));
@@ -9323,16 +9944,6 @@ static void
     if (runscript) {
 	m__free(runscript);
 	runscript = NULL;
-    }
-
-    if (connect_user) {
-	m__free(connect_user);
-	connect_user = NULL;
-    }
-
-    if (connect_agent) {
-	m__free(connect_agent);
-	connect_agent = NULL;
     }
 
     if (malloc_cnt != free_cnt) {

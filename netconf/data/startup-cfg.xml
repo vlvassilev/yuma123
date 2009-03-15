@@ -37,6 +37,10 @@
       <t:a1>33</t:a1>
       <t:foo>fff</t:foo>
    </t:test2>
+   <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
+      <t:a2>f14</t:a2>
+      <t:foo>g14</t:foo>
+   </t:test2>
    <t:test3 xmlns:t="http://netconfcentral.com/ns/test">
       <t:x>fred</t:x>
       <t:test3deep>

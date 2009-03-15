@@ -328,7 +328,7 @@ static status_t
      * Get the value to check for the test-only extension
      */
     val = val_find_child(msg->rpc_input, NC_MODULE,
-			 NCX_EL_TESTOP);
+			 NCX_EL_TEST_OPTION);
     if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
 	testop = OP_TESTOP_SET;
@@ -1875,8 +1875,10 @@ status_t
     case CFG_LOC_FILE:
 	if (bkup) {
 	    /* remove any existing backup */
+	    /****/
 
 	    /* rename the current startup to the backup */
+	    /****/
 	} 
 
 	/* write the new startup config */

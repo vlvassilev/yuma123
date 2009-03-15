@@ -338,8 +338,6 @@ op_editop_t
     if (!xml_strcmp(defstr, NCX_EL_NONE)) {
 	return OP_EDITOP_NONE;
     }
-
-    SET_ERROR(ERR_INTERNAL_VAL);
     return OP_EDITOP_NONE;
 
 } /* op_defop_id */
@@ -456,8 +454,6 @@ op_errop_t
     if (!xml_strcmp(errstr, NCX_EL_ROLLBACK_ON_ERROR)) {
 	return OP_ERROP_ROLLBACK;
     }
-
-    SET_ERROR(ERR_INTERNAL_VAL);
     return OP_ERROP_NONE;
 
 } /* op_errop_id */

@@ -1224,7 +1224,6 @@ val_value_t *
 }  /* var_get_local_str */
 
 
-
 /********************************************************************
 * FUNCTION var_check_ref
 * 
@@ -1326,7 +1325,7 @@ status_t
     /* check the global var further */
     if (*vartype == VAR_TYP_GLOBAL) {
 	/* VAR_TYP_GLOBAL selects anything in the globalQ */
-	testvar = find_var(NULL, *name, *len, 
+	testvar = find_var(NULL, *name, *namelen, 
 			   0, VAR_TYP_GLOBAL);
 	if (testvar) {
 	    /* could be VAR_TYP_SYSTEM, VAR_TYP_CONFIG,

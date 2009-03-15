@@ -779,8 +779,10 @@ ssize_t
     log_debug3("\n");
 
     if (ret < 0) {
-	log_error("\nmgr_ses channel read failed on session %d",
-		 scb->sid);
+	if (ret != LIBSSH2_ERROR_EAGAIN) {
+	    log_error("\nmgr_ses channel read failed on session %d",
+		      scb->sid);
+	}
     } else if (ret > 0) {
 	log_debug2("\nmgr_ses channel read %d bytes OK on session %d",
 		   ret, scb->sid);

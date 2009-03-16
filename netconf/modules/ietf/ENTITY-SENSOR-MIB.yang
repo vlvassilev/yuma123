@@ -298,12 +298,12 @@ module ENTITY-SENSOR-MIB {
          smi:oid "1.3.6.1.2.1.99.1.1.1";
 
          leaf entPhysicalIndex {
-            type keyref {
+            type leafref {
                path "/entity-mib:entityPhysical/entity-mib:entPhysicalEntry/entity-mib:entPhysicalIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf entPhySensorType {

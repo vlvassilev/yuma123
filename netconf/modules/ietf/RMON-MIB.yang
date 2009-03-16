@@ -3245,23 +3245,23 @@ module RMON-MIB {
 
       container risingAlarm-alarmIndex {
          leaf alarmIndex {
-            type keyref {
+            type leafref {
                path "/rmon-mib:alarm/rmon-mib:alarmEntry/rmon-mib:alarmIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
       }
 
       container risingAlarm-alarmVariable {
          leaf alarmIndex {
-            type keyref {
+            type leafref {
                path "/rmon-mib:alarm/rmon-mib:alarmEntry/rmon-mib:alarmIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf alarmVariable {
             type yang:object-identifier;
@@ -3299,12 +3299,12 @@ module RMON-MIB {
 
       container risingAlarm-alarmSampleType {
          leaf alarmIndex {
-            type keyref {
+            type leafref {
                path "/rmon-mib:alarm/rmon-mib:alarmEntry/rmon-mib:alarmIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf alarmSampleType {
             type enumeration {
@@ -3332,12 +3332,12 @@ module RMON-MIB {
 
       container risingAlarm-alarmValue {
          leaf alarmIndex {
-            type keyref {
+            type leafref {
                path "/rmon-mib:alarm/rmon-mib:alarmEntry/rmon-mib:alarmIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf alarmValue {
             type int32;
@@ -3362,12 +3362,12 @@ module RMON-MIB {
 
       container risingAlarm-alarmRisingThreshold {
          leaf alarmIndex {
-            type keyref {
+            type leafref {
                path "/rmon-mib:alarm/rmon-mib:alarmEntry/rmon-mib:alarmIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf alarmRisingThreshold {
             type int32;
@@ -3407,23 +3407,23 @@ module RMON-MIB {
 
       container fallingAlarm-alarmIndex {
          leaf alarmIndex {
-            type keyref {
+            type leafref {
                path "/rmon-mib:alarm/rmon-mib:alarmEntry/rmon-mib:alarmIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
       }
 
       container fallingAlarm-alarmVariable {
          leaf alarmIndex {
-            type keyref {
+            type leafref {
                path "/rmon-mib:alarm/rmon-mib:alarmEntry/rmon-mib:alarmIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf alarmVariable {
             type yang:object-identifier;
@@ -3461,12 +3461,12 @@ module RMON-MIB {
 
       container fallingAlarm-alarmSampleType {
          leaf alarmIndex {
-            type keyref {
+            type leafref {
                path "/rmon-mib:alarm/rmon-mib:alarmEntry/rmon-mib:alarmIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf alarmSampleType {
             type enumeration {
@@ -3494,12 +3494,12 @@ module RMON-MIB {
 
       container fallingAlarm-alarmValue {
          leaf alarmIndex {
-            type keyref {
+            type leafref {
                path "/rmon-mib:alarm/rmon-mib:alarmEntry/rmon-mib:alarmIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf alarmValue {
             type int32;
@@ -3524,12 +3524,12 @@ module RMON-MIB {
 
       container fallingAlarm-alarmFallingThreshold {
          leaf alarmIndex {
-            type keyref {
+            type leafref {
                path "/rmon-mib:alarm/rmon-mib:alarmEntry/rmon-mib:alarmIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf alarmFallingThreshold {
             type int32;

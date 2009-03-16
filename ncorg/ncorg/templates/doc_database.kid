@@ -143,11 +143,6 @@
 	    generated output.
 	  </li>
 	  <li>
-	    The order of YANG clauses are not preserved.
-	    The canonical clause order defined
-	    in the YANG ABNF is used instead.
-	  </li>
-	  <li>
 	    String concatenation is not preserved.  The
 	    converted string is used in the generated output.
 	  </li>

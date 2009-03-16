@@ -208,7 +208,7 @@
          description "Export of received records without any
            modifications. Records are processed by all Exporting
            Processes in the list.";
-         type keyref { path "/ipfix/exportingProcess/name"; }
+         type leafref { path "/ipfix/exportingProcess/name"; }
        }
      }
 
@@ -243,7 +243,7 @@
        leaf-list selectionProcess {
          description "Selection Processes in this list process packets
            in parallel.";
-         type keyref { path "/ipfix/selectionProcess/name"; }
+         type leafref { path "/ipfix/selectionProcess/name"; }
        }
 
      }
@@ -342,13 +342,13 @@
            records to further Selection Processes, building Selection
            Sequences. All Selection Processes in this list process
            packets or records in parallel.";
-         type keyref { path "/ipfix/selectionProcess/name"; }
+         type leafref { path "/ipfix/selectionProcess/name"; }
        }
 
        leaf-list cache {
          description "Caches in this list receive packets or records in
            parallel.";
-         type keyref { path "/ipfix/cache/name"; }
+         type leafref { path "/ipfix/cache/name"; }
        }
      }
 
@@ -398,7 +398,7 @@
        leaf-list exportingProcess {
          description "Records are exported by all Exporting Processes in
            the list.";
-         type keyref { path "/ipfix/exportingProcess/name"; }
+         type leafref { path "/ipfix/exportingProcess/name"; }
        }
      }
 

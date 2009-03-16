@@ -1105,7 +1105,7 @@ static void
 		 pat = typ_get_next_cpattern(pat)) {
 
 		errinfo_set = ncx_errinfo_set(&pat->pat_errinfo);
-		write_simple_str(scb, YANG_K_PATTERN, str,
+		write_simple_str(scb, YANG_K_PATTERN, pat->pat_str,
 				 startindent, 1, !errinfo_set);
 		if (errinfo_set) {
 		    write_errinfo(scb, &pat->pat_errinfo, indent);

@@ -192,12 +192,12 @@ module DISMAN-SCRIPT-MIB {
          smi:oid "1.3.6.1.2.1.64.1.2.1";
 
          leaf smLangIndex {
-            type keyref {
+            type leafref {
                path "/disman-script:smObjects/disman-script:smLangEntry/disman-script:smLangIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf smExtsnIndex {
@@ -607,20 +607,20 @@ module DISMAN-SCRIPT-MIB {
          smi:oid "1.3.6.1.2.1.64.1.3.2.1";
 
          leaf smScriptOwner {
-            type keyref {
+            type leafref {
                path "/disman-script:smScriptObjects/disman-script:smScriptEntry/disman-script:smScriptOwner";
             }
             config true;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smScriptName {
-            type keyref {
+            type leafref {
                path "/disman-script:smScriptObjects/disman-script:smScriptEntry/disman-script:smScriptName";
             }
             config true;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf smCodeIndex {
@@ -1128,20 +1128,20 @@ module DISMAN-SCRIPT-MIB {
          smi:oid "1.3.6.1.2.1.64.1.4.2.1";
 
          leaf smLaunchOwner {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchOwner";
             }
             config true;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smLaunchName {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchName";
             }
             config true;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf smRunIndex {
@@ -1441,28 +1441,28 @@ module DISMAN-SCRIPT-MIB {
 
       container smScriptAbort-smRunExitCode {
          leaf smLaunchOwner {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchOwner";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smLaunchName {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchName";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smRunIndex {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smRunEntry/disman-script:smRunIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smRunExitCode {
             type enumeration {
@@ -1519,28 +1519,28 @@ module DISMAN-SCRIPT-MIB {
 
       container smScriptAbort-smRunEndTime {
          leaf smLaunchOwner {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchOwner";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smLaunchName {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchName";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smRunIndex {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smRunEntry/disman-script:smRunIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smRunEndTime {
             type smiv2:DateAndTime;
@@ -1556,28 +1556,28 @@ module DISMAN-SCRIPT-MIB {
 
       container smScriptAbort-smRunError {
          leaf smLaunchOwner {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchOwner";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smLaunchName {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchName";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smRunIndex {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smRunEntry/disman-script:smRunIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smRunError {
             type snmp-framework:SnmpAdminString;
@@ -1609,28 +1609,28 @@ module DISMAN-SCRIPT-MIB {
 
       container smScriptResult-smRunResult {
          leaf smLaunchOwner {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchOwner";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smLaunchName {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchName";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smRunIndex {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smRunEntry/disman-script:smRunIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smRunResult {
             type binary;
@@ -1658,28 +1658,28 @@ module DISMAN-SCRIPT-MIB {
 
       container smScriptException-smRunError {
          leaf smLaunchOwner {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchOwner";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smLaunchName {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smLaunchEntry/disman-script:smLaunchName";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smRunIndex {
-            type keyref {
+            type leafref {
                path "/disman-script:smRunObjects/disman-script:smRunEntry/disman-script:smRunIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf smRunError {
             type snmp-framework:SnmpAdminString;

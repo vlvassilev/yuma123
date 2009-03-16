@@ -326,12 +326,12 @@ module NETWORK-SERVICES-MIB {
          smi:oid "1.3.6.1.2.1.27.2.1";
 
          leaf applIndex {
-            type keyref {
+            type leafref {
                path "/network-services:application/network-services:applEntry/network-services:applIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf assocIndex {

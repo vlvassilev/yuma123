@@ -229,12 +229,12 @@ module SNMP-VIEW-BASED-ACM-MIB {
          smi:oid "1.3.6.1.6.3.16.1.4.1";
 
          leaf vacmGroupName {
-            type keyref {
+            type leafref {
                path "/snmp-view:vacmMIBObjects/snmp-view:vacmSecurityToGroupEntry/snmp-view:vacmGroupName";
             }
             config true;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf vacmAccessContextPrefix {

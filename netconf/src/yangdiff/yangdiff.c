@@ -17,10 +17,16 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <string.h>
-#include  <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+/* #define MEMORY_DEBUG 1 */
+
+#ifdef MEMORY_DEBUG
+#include <mcheck.h>
+#endif
 
 #define _C_main 1
 
@@ -115,6 +121,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 #define YANGDIFF_DEBUG   1
+
 
 
 /********************************************************************
@@ -1406,6 +1413,8 @@ static status_t
 	}
     }
 
+    /***** THESE 2 PARMS ARE NOT VISIBLE IN yangdiff.yang *****/
+
     /* oldpath parameter */
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_OLDPATH);
     if (val) {
@@ -1417,19 +1426,6 @@ static status_t
     if (val) {
 	cp->newpath = VAL_STR(val);
     }
-
-    /* new parameter */
-    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NEW);
-    if (val) {
-	cp->new = VAL_STR(val);
-	cp->full_new = ncx_get_source(VAL_STR(val));
-	if (!cp->full_new) {
-	    return ERR_INTERNAL_MEM;
-	} else {
-	    cp->new_isdir = ncxmod_test_subdir(cp->full_new);
-	}
-    }
-
 
     /* no-header parameter */
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NO_HEADER);
@@ -1601,6 +1597,10 @@ int
 	  const char *argv[])
 {
     status_t    res;
+
+#ifdef MEMORY_DEBUG
+    mtrace();
+#endif
 
     res = main_init(argc, argv);
 

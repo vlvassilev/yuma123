@@ -207,12 +207,12 @@ module SNMP-NOTIFICATION-MIB {
          smi:oid "1.3.6.1.6.3.13.1.2.1";
 
          leaf snmpTargetParamsName {
-            type keyref {
+            type leafref {
                path "/snmp-target:snmpTargetObjects/snmp-target:snmpTargetParamsEntry/snmp-target:snmpTargetParamsName";
             }
             config true;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf snmpNotifyFilterProfileName {
@@ -275,12 +275,12 @@ module SNMP-NOTIFICATION-MIB {
          smi:oid "1.3.6.1.6.3.13.1.3.1";
 
          leaf snmpNotifyFilterProfileName {
-            type keyref {
+            type leafref {
                path "/snmp-notification:snmpNotifyObjects/snmp-notification:snmpNotifyFilterProfileEntry/snmp-notification:snmpNotifyFilterProfileName";
             }
             config true;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf snmpNotifyFilterSubtree {

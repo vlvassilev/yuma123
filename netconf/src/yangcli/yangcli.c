@@ -31,7 +31,13 @@ date         init     comment
 #include <errno.h>
 #include <stdio.h>
 #include <ctype.h>
+
+/* #define MEMORY_DEBUG 1 */
+
+#ifdef MEMORY_DEBUG
 #include <mcheck.h>
+#endif
+
 #include "libtecla.h"
 
 #define _C_main 1
@@ -156,7 +162,7 @@ date         init     comment
 *********************************************************************/
 #ifdef DEBUG
 #define YANGCLI_DEBUG   1
-/* #define MEMORY_DEBUG    1 */  /**** HANGS ON DOUBLE FREE ****/
+
 #endif
 
 #define MAX_PROMPT_LEN 56

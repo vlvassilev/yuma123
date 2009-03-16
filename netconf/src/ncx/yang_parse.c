@@ -3071,6 +3071,7 @@ status_t
     tkc = NULL;
     mod = NULL;
     res = NO_ERR;
+    str = NULL;
 
     /* open the YANG source file for reading */
     fp = fopen((const char *)filespec, "r");
@@ -3105,8 +3106,12 @@ status_t
 	mod = ncx_new_module();
 	if (!mod) {
 	    res = ERR_INTERNAL_MEM;
+	    m__free(str);
+	    str = NULL;
 	} else {
-	    /* save the source of this ncx-module for monitor / debug */
+	    /* save the source of this ncx-module for monitor / debug 
+	     * hand off malloced src string here
+	     */
 	    mod->source = str;
 
 	    /* find the start of the file name */

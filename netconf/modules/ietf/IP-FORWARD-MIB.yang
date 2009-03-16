@@ -20,9 +20,9 @@ module IP-FORWARD-MIB {
    import INET-ADDRESS-MIB { prefix "inet-address"; }
    import IP-MIB           { prefix "ip-mib"; }
    import SNMPv2-TC        { prefix "smiv2"; }
-   import inet-types       { prefix "inet"; }
+   import ietf-inet-types  { prefix "inet"; }
    import yang-smi         { prefix "smi"; }
-   import yang-types       { prefix "yang"; }
+   import ietf-yang-types  { prefix "yang"; }
 
    /*** META INFORMATION ***/
 

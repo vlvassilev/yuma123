@@ -8,7 +8,7 @@ html, body {
   background-color: white;
   margin: 0;
   padding: 0;
-  font-size: 10pt;
+/*  font-size: 10pt;  */
 }
 
 div.ncmain {
@@ -140,22 +140,21 @@ fieldlabel {
   list-style: none;
   line-height: 1;
   background: white;
-  font-weight: bold;
-  font-size: 100%;
-  padding: 0;
+  font-weight: normal;
+  padding: 0 0 0 0;
   border: solid #eda;
   border-width: 1px 0;
-  margin: 0 0 1em 0;
+/*  margin: 0 0 1em 0; */
+  margin: 0 0 0 0;
   background-color:  #fffed6;
 }
 
 #nav a {
 	display: block;
 	width: 10em;
-	w\idth: 6em;
 	color: #7C6240;
 	text-decoration: none;
-	padding: 0.25em 2em;
+	padding: 0.25em 2em 0.25em 0.5em;
 }
 
 #nav a.daddy {
@@ -182,7 +181,6 @@ li.daddy {
 	left: -999em;
 	height: auto;
 	width: 14.4em;
-	w\idth: 13.9em;
 	font-weight: normal;
 	border-width: 0.25em;
 	margin: 0;
@@ -190,12 +188,11 @@ li.daddy {
 
 #nav li li {
 	padding-right: 1em;
-	width: 13em
+	width: 13em;
 }
 
 #nav li ul a {
 	width: 13em;
-	w\idth: 9em;
 }
 
 #nav li ul ul {
@@ -212,6 +209,7 @@ li.daddy {
 
 #nav li:hover, #nav li.sfhover {
 	background: #eda;
+/*	width: 14em; */
 }
 
 

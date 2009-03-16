@@ -674,20 +674,20 @@ module DISMAN-SCHEDULE-MIB {
 
       container schedActionFailure-schedLastFailure {
          leaf schedOwner {
-            type keyref {
+            type leafref {
                path "/disman-schedule:schedObjects/disman-schedule:schedEntry/disman-schedule:schedOwner";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf schedName {
-            type keyref {
+            type leafref {
                path "/disman-schedule:schedObjects/disman-schedule:schedEntry/disman-schedule:schedName";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf schedLastFailure {
             type disman-schedule:SnmpPduErrorStatus;
@@ -703,20 +703,20 @@ module DISMAN-SCHEDULE-MIB {
 
       container schedActionFailure-schedLastFailed {
          leaf schedOwner {
-            type keyref {
+            type leafref {
                path "/disman-schedule:schedObjects/disman-schedule:schedEntry/disman-schedule:schedOwner";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf schedName {
-            type keyref {
+            type leafref {
                path "/disman-schedule:schedObjects/disman-schedule:schedEntry/disman-schedule:schedName";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf schedLastFailed {
             type smiv2:DateAndTime;

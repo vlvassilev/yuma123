@@ -1,6 +1,6 @@
  module inet-types {
 
-   namespace "urn:ietf:params:xml:ns:yang:inet-types";
+   namespace "urn:ietf:params:xml:ns:yang:inet-types:old";
    prefix "inet";
 
    organization

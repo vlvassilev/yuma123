@@ -59,20 +59,20 @@ module IF-INVERTED-STACK-MIB {
          smi:oid "1.3.6.1.2.1.77.1.1.1";
 
          leaf ifStackLowerLayer {
-            type keyref {
+            type leafref {
                path "/if-mib:ifMIBObjects/if-mib:ifStackEntry/if-mib:ifStackLowerLayer";
             }
             config true;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf ifStackHigherLayer {
-            type keyref {
+            type leafref {
                path "/if-mib:ifMIBObjects/if-mib:ifStackEntry/if-mib:ifStackHigherLayer";
             }
             config true;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf ifInvStackStatus {

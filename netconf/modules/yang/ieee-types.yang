@@ -1,6 +1,6 @@
 module ieee-types {
 
-    namespace "urn:ietf:params:xml:ns:yang:ieee-types";
+    namespace "urn:ietf:params:xml:ns:yang:ieee-types:old";
     prefix "ieee";
 
     import yang-types { prefix yang; }

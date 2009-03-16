@@ -146,7 +146,7 @@ module EtherLike-MIB {
 
          leaf dot3StatsIndex {
             type if-mib:InterfaceIndex;
-            config false;
+            // config false;
             description   
               "An index value that uniquely identifies an
                interface to an ethernet-like medium.  The
@@ -734,19 +734,19 @@ module EtherLike-MIB {
          smi:oid "1.3.6.1.2.1.10.7.5.1";
 
          leaf ifIndex {
-            type keyref {
+            type leafref {
                path "/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex";
             }
-            config false;
+            // config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf dot3CollCount {
             type int32 {
                range "1..16";
             }
-            config false;
+            // config false;
             description   
               "The number of per-frame media collisions for
                which a particular collision histogram cell
@@ -800,12 +800,12 @@ module EtherLike-MIB {
          smi:oid "1.3.6.1.2.1.10.7.9.1";
 
          leaf dot3StatsIndex {
-            type keyref {
+            type leafref {
                path "/etherlike-mib:dot3/etherlike-mib:dot3StatsEntry/etherlike-mib:dot3StatsIndex";
             }
-            config false;
+            // config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf dot3ControlFunctionsSupported {
@@ -886,12 +886,12 @@ module EtherLike-MIB {
          smi:oid "1.3.6.1.2.1.10.7.10.1";
 
          leaf dot3StatsIndex {
-            type keyref {
+            type leafref {
                path "/etherlike-mib:dot3/etherlike-mib:dot3StatsEntry/etherlike-mib:dot3StatsIndex";
             }
-            config false;
+            // config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf dot3PauseAdminMode {
@@ -1092,12 +1092,12 @@ module EtherLike-MIB {
          smi:oid "1.3.6.1.2.1.10.7.11.1";
 
          leaf dot3StatsIndex {
-            type keyref {
+            type leafref {
                path "/etherlike-mib:dot3/etherlike-mib:dot3StatsEntry/etherlike-mib:dot3StatsIndex";
             }
-            config false;
+            // config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf dot3HCStatsAlignmentErrors {

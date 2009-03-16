@@ -1540,6 +1540,7 @@ status_t
 	res = xsd_finish_union(mod, typdef, val);
 	break;
     case NCX_BT_LEAFREF:
+    case NCX_BT_IDREF:
 	break;
     case NCX_BT_BITS:
 	/* a bits type is list of identifier strings */

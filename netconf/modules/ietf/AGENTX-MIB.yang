@@ -211,12 +211,12 @@ module AGENTX-MIB {
          smi:oid "1.3.6.1.2.1.74.1.3.2.1";
 
          leaf agentxConnIndex {
-            type keyref {
+            type leafref {
                path "/agentx-mib:agentxConnection/agentx-mib:agentxConnectionEntry/agentx-mib:agentxConnIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf agentxSessionIndex {
@@ -340,20 +340,20 @@ module AGENTX-MIB {
          smi:oid "1.3.6.1.2.1.74.1.4.2.1";
 
          leaf agentxConnIndex {
-            type keyref {
+            type leafref {
                path "/agentx-mib:agentxConnection/agentx-mib:agentxConnectionEntry/agentx-mib:agentxConnIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
          leaf agentxSessionIndex {
-            type keyref {
+            type leafref {
                path "/agentx-mib:agentxSession/agentx-mib:agentxSessionEntry/agentx-mib:agentxSessionIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf agentxRegIndex {

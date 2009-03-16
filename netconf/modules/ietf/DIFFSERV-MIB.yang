@@ -146,12 +146,12 @@ module DIFFSERV-MIB {
          smi:oid "1.3.6.1.2.1.97.1.1.1.1";
 
          leaf ifIndex {
-            type keyref {
+            type leafref {
                path "/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex";
             }
             config false;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf diffServDataPathIfDirection {
@@ -290,12 +290,12 @@ module DIFFSERV-MIB {
          smi:oid "1.3.6.1.2.1.97.1.2.4.1";
 
          leaf diffServClfrId {
-            type keyref {
+            type leafref {
                path "/diffserv-mib:diffServClassifier/diffserv-mib:diffServClfrEntry/diffserv-mib:diffServClfrId";
             }
             config true;
             description   
-              "Automagically generated keyref leaf.";
+              "Automagically generated leafref leaf.";
          }
 
          leaf diffServClfrElementId {

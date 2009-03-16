@@ -1,6 +1,6 @@
 module yang-types {
 
-  namespace "urn:ietf:params:xml:ns:yang:yang-types";
+  namespace "urn:ietf:params:xml:ns:yang:yang-types:old";
   prefix "yang";
 
   organization

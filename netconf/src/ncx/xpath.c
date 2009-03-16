@@ -1760,6 +1760,8 @@ status_t
     }
 #endif
 
+    res = NO_ERR;
+
     /* get the import if there is a real prefix entered */
     if (prefix && *prefix) {
 	if (!mod) {

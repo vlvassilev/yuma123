@@ -255,7 +255,7 @@ static void
 	if (cp->simurls) {
 	    ses_putchar(scb, NCXMOD_PSCHAR);
 	} else {	    
-	    ses_putchar(scb, '_');
+	    ses_putchar(scb, '.');
 	}
 	ses_putstr(scb, mod->version);
     }
@@ -568,7 +568,7 @@ static void
 
     /* column: xsdurl
      * HARD-WIRED TO
-     *   /xsd/modname.xsd OR /xsd/modname_modversion.xsd
+     *   /xsd/modname.xsd OR /xsd/modname.modversion.xsd
      */
     ses_putstr(scb, (const xmlChar *)"\n    '/xsd/");
     if (cp->unified && !mod->ismod) {
@@ -577,7 +577,7 @@ static void
 	ses_putstr(scb, mod->name);
     }
     if (!cp->noversionnames) {
-	ses_putchar(scb, '_');
+	ses_putchar(scb, '.');
 	ses_putstr(scb, mod->version);
     }
     ses_putstr(scb, (const xmlChar *)".xsd',");
@@ -589,7 +589,7 @@ static void
      * HARD-WIRED TO
      *   /src/modname.yang (or .ncx)
      *  OR
-     *   /src/modname_modversion.yang (or .ncx)
+     *   /src/modname.modversion.yang (or .ncx)
      */
     ses_putstr(scb, (const xmlChar *)"\n    '/src/");
     if (cp->unified && !mod->ismod) {
@@ -598,7 +598,7 @@ static void
 	ses_putstr(scb, mod->name);
     }
     if (!cp->noversionnames) {
-	ses_putchar(scb, '_');
+	ses_putchar(scb, '.');
 	ses_putstr(scb, mod->version);
     }
     ses_putstr(scb, (const xmlChar *)".yang',");

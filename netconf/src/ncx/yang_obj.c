@@ -1392,7 +1392,7 @@ static status_t
 					 &objuniq->xpath,
 					 NULL, &obj->appinfoQ);
 	    if (res == NO_ERR) {
-		dlq_enque(objuniq, list->uniqueQ);
+		dlq_enque(objuniq, &list->uniqueQ);
 	    } else {
 		obj_free_unique(objuniq);
 	    }
@@ -3495,7 +3495,7 @@ static status_t
 		    res = SET_ERROR(ERR_INTERNAL_VAL);
 		    continue;
 		}
-		targQ = targobj->def.list->uniqueQ;
+		targQ = &targobj->def.list->uniqueQ;
 		if (!targQ) {
 		    res = SET_ERROR(ERR_INTERNAL_VAL);
 		    continue;
@@ -4433,6 +4433,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   tkc == token chain in progress
 *   mod == module in progress containing obj
 *   obj == object to check (from the cooked module,
 *                           not from any grouping or augment)
@@ -4441,7 +4442,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_mustQ (ncx_module_t  *mod,
+    resolve_mustQ (tk_chain_t *tkc,
+		   ncx_module_t  *mod,
 		   obj_template_t *obj)
 {
     xpath_pcb_t    *must;
@@ -4457,6 +4459,15 @@ static status_t
     for (must = (xpath_pcb_t *)dlq_firstEntry(mustQ);
 	 must != NULL;
 	 must = (xpath_pcb_t *)dlq_nextEntry(must)) {
+
+	if (must->tkc == NULL) {
+	    /* this is a clone object and the xpath PCB
+	     * is a bare-minimum copy; need to parse
+	     * the expression again,
+	     */
+	    tkc->cur = must->tk;
+	    res = xpath1_parse_expr(tkc, mod, must, XP_SRC_YANG);
+	}
 
 	if (must->parseres != NO_ERR) {
 	    /* some errors already reported so do not
@@ -5088,7 +5099,7 @@ static status_t
 	}
 
 	/* make sure key component not already used */
-	objkey = obj_find_key2(list->keyQ, keyobj);
+	objkey = obj_find_key2(&list->keyQ, keyobj);
 	if (objkey) {
 	    log_error("\nError: duplicate key node '%s' on line %u "
 		      "for list '%s'",
@@ -5116,7 +5127,7 @@ static status_t
 	 * uses foo; will cause the groupingQ to be used directly
 	 */
 	objkey->keyobj = keyobj;
-	dlq_enque(objkey, list->keyQ);
+	dlq_enque(objkey, &list->keyQ);
     }
 
     return retres;
@@ -5355,7 +5366,7 @@ static status_t
     }
 
     /* validate Q of unique clauses */
-    for (uni = (obj_unique_t *)dlq_firstEntry(list->uniqueQ);
+    for (uni = (obj_unique_t *)dlq_firstEntry(&list->uniqueQ);
 	 uni != NULL;
 	 uni = (obj_unique_t *)dlq_nextEntry(uni)) {
 	res = get_unique_comps(tkc, mod, list, obj, uni);
@@ -6902,7 +6913,7 @@ static status_t
 	if (!dlq_empty(&devi->uniqueQ)) {
 	    switch (targobj->objtype) {
 	    case OBJ_TYP_LIST:
-		targQ = targobj->def.list->uniqueQ;
+		targQ = &targobj->def.list->uniqueQ;
 		if (!targQ) {
 		    res = SET_ERROR(ERR_INTERNAL_VAL);
 		    continue;
@@ -8381,6 +8392,7 @@ status_t
 {
     obj_template_t  *testobj;
     status_t         res, retres;
+    boolean          notclone;
 
 #ifdef DEBUG
     if (!tkc || !mod || !datadefQ) {
@@ -8396,43 +8408,64 @@ status_t
 	 testobj != NULL;
 	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-	/* skip all cloned nodes */
-	if (obj_is_cloned(testobj)) {
-	    continue;
-	}
+	/* go through all the cloned nodes to find any lists
+	 * so their keyQ and uniqueQ structures can be
+	 * set with pointers to the cloned objects
+	 * instead of pointers to the original objects
+	 */
+	notclone = !obj_is_cloned(testobj);
 
 #ifdef YANG_OBJ_DEBUG
 	log_debug3("\nresolve_final: mod %s, object %s, on line %u",
-		   mod->name, obj_get_name(testobj), testobj->linenum);
+		   mod->name, 
+		   obj_get_name(testobj), 
+		   testobj->linenum);
 #endif
 	
 	switch (testobj->objtype) {
 	case OBJ_TYP_CONTAINER:
-	    res = yang_grp_resolve_final(tkc, mod,
-					 testobj->def.container->groupingQ);
+	    if (notclone) {
+		res = yang_grp_resolve_final
+		    (tkc, mod,
+		     testobj->def.container->groupingQ);
+		CHK_EXIT(res, retres);
+	    }
+
+	    res = yang_obj_resolve_final
+		(tkc, mod, testobj->def.container->datadefQ);
 	    CHK_EXIT(res, retres);
-	    res = yang_obj_resolve_final(tkc, mod, 
-					 testobj->def.container->datadefQ);
-	    CHK_EXIT(res, retres);
-	    res = resolve_default_parm(tkc, mod, testobj);
-	    yang_check_obj_used(tkc, mod,
-				testobj->def.container->typedefQ,
-				testobj->def.container->groupingQ);
+
+	    if (notclone) {
+		res = resolve_default_parm(tkc, mod, testobj);
+
+		yang_check_obj_used(tkc, mod,
+				    testobj->def.container->typedefQ,
+				    testobj->def.container->groupingQ);
+	    }
 	    break;
 	case OBJ_TYP_LEAF:
 	case OBJ_TYP_LEAF_LIST:
 	    break;
 	case OBJ_TYP_LIST:
-	    res = yang_grp_resolve_final(tkc, mod,
-					 testobj->def.list->groupingQ);
+	    if (notclone) {
+		res = yang_grp_resolve_final
+		    (tkc, mod, testobj->def.list->groupingQ);
+		CHK_EXIT(res, retres);
+	    }
+
+	    res = yang_obj_resolve_final
+		(tkc, mod, testobj->def.list->datadefQ);
 	    CHK_EXIT(res, retres);
-	    res = yang_obj_resolve_final(tkc, mod, 
-					 testobj->def.list->datadefQ);
-	    CHK_EXIT(res, retres);
-	    yang_check_obj_used(tkc, mod,
-				testobj->def.list->typedefQ,
-				testobj->def.list->groupingQ);
-	    res = resolve_list_final(tkc, mod, testobj->def.list, testobj);
+
+	    if (notclone) {
+		yang_check_obj_used(tkc, mod,
+				    testobj->def.list->typedefQ,
+				    testobj->def.list->groupingQ);
+	    }
+
+	    res = resolve_list_final(tkc, mod, 
+				     testobj->def.list, 
+				     testobj);
 	    break;
 	case OBJ_TYP_CHOICE:
 	    res = yang_obj_resolve_final(tkc, mod, 
@@ -8443,44 +8476,66 @@ status_t
 					 testobj->def.cas->datadefQ);
 	    break;
 	case OBJ_TYP_USES:
-	    res = yang_obj_resolve_final(tkc, mod, 
-					 testobj->def.uses->datadefQ);
+	    if (notclone) {
+		res = yang_obj_resolve_final
+		    (tkc, mod, testobj->def.uses->datadefQ);
+	    }
 	    break;
 	case OBJ_TYP_AUGMENT:
-	    res = yang_obj_resolve_final(tkc, mod, 
-					 &testobj->def.augment->datadefQ);
+	    if (notclone) {
+		res = yang_obj_resolve_final
+		    (tkc, mod, &testobj->def.augment->datadefQ);
+	    }
 	    break;
 	case OBJ_TYP_RPC:
-	    res = yang_grp_resolve_final(tkc, mod,
-					 &testobj->def.rpc->groupingQ);
-	    CHK_EXIT(res, retres);
+	    if (notclone) {
+		res = yang_grp_resolve_final
+		    (tkc, mod, &testobj->def.rpc->groupingQ);
+		CHK_EXIT(res, retres);
+	    }
+
 	    res = yang_obj_resolve_final(tkc, mod, 
 					 &testobj->def.rpc->datadefQ);
-	    yang_check_obj_used(tkc, mod,
-				&testobj->def.rpc->typedefQ,
-				&testobj->def.rpc->groupingQ);
+
+	    if (notclone) {
+		yang_check_obj_used(tkc, mod,
+				    &testobj->def.rpc->typedefQ,
+				    &testobj->def.rpc->groupingQ);
+	    }
 	    break;
 	case OBJ_TYP_RPCIO:
-	    res = yang_grp_resolve_final(tkc, mod,
-					 &testobj->def.rpcio->groupingQ);
-	    CHK_EXIT(res, retres);
+	    if (notclone) {
+		res = yang_grp_resolve_final
+		    (tkc, mod, &testobj->def.rpcio->groupingQ);
+		CHK_EXIT(res, retres);
+	    }
+
 	    res = yang_obj_resolve_final(tkc, mod, 
 					 &testobj->def.rpcio->datadefQ);
 	    CHK_EXIT(res, retres);
-	    res = resolve_default_parm(tkc, mod, testobj);
-	    yang_check_obj_used(tkc, mod,
-				&testobj->def.rpcio->typedefQ,
-				&testobj->def.rpcio->groupingQ);
+
+	    if (notclone) {
+		res = resolve_default_parm(tkc, mod, testobj);
+		yang_check_obj_used(tkc, mod,
+				    &testobj->def.rpcio->typedefQ,
+				    &testobj->def.rpcio->groupingQ);
+	    }
 	    break;
 	case OBJ_TYP_NOTIF:
-	    res = yang_grp_resolve_final(tkc, mod,
-					 &testobj->def.notif->groupingQ);
-	    CHK_EXIT(res, retres);
-	    res = yang_obj_resolve_final(tkc, mod, 
-					 &testobj->def.notif->datadefQ);
-	    yang_check_obj_used(tkc, mod,
-				&testobj->def.notif->typedefQ,
-				&testobj->def.notif->groupingQ);
+	    if (notclone) {
+		res = yang_grp_resolve_final
+		    (tkc, mod,  &testobj->def.notif->groupingQ);
+		CHK_EXIT(res, retres);
+	    }
+
+	    res = yang_obj_resolve_final
+		(tkc, mod, &testobj->def.notif->datadefQ);
+
+	    if (notclone) {
+		yang_check_obj_used(tkc, mod,
+				    &testobj->def.notif->typedefQ,
+				    &testobj->def.notif->groupingQ);
+	    }
 	    break;
 	case OBJ_TYP_REFINE:
 	    break;
@@ -8577,7 +8632,7 @@ status_t
 	}
 
 	/* validate correct Xpath in must clauses */
-	res = resolve_mustQ(mod, testobj);
+	res = resolve_mustQ(tkc, mod, testobj);
 	CHK_EXIT(res, retres);
 	
 	switch (testobj->objtype) {

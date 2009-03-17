@@ -566,7 +566,7 @@ static status_t
     }
 
     /* go through all the key nodes and generate elements for them */
-    for (idx = (const obj_key_t *)dlq_firstEntry(list->keyQ);
+    for (idx = (const obj_key_t *)dlq_firstEntry(&list->keyQ);
 	 idx != NULL;
 	 idx = (const obj_key_t *)dlq_nextEntry(idx)) {
 
@@ -584,7 +584,7 @@ static status_t
 	 child = (const obj_template_t *)dlq_nextEntry(child)) {
 
 	if (child->objtype == OBJ_TYP_LEAF) {
-	    iskey = (obj_find_key(list->keyQ, obj_get_name(child))) 
+	    iskey = (obj_find_key(&list->keyQ, obj_get_name(child))) 
 		? TRUE : FALSE;
 	} else {
 	    iskey = FALSE;
@@ -603,7 +603,7 @@ static status_t
 	return res;
     }
 
-    if (!dlq_empty(list->keyQ)) {
+    if (!dlq_empty(&list->keyQ)) {
 	/* create a 'key' node */
 	key = xml_val_new_struct(XSD_KEY, xsd_id);
 	if (!key) {
@@ -649,7 +649,7 @@ static status_t
 	/* add all the field child nodes
 	 * go through all the index nodes as field nodes
 	 */
-	for (idx = (const obj_key_t *)dlq_firstEntry(list->keyQ);
+	for (idx = (const obj_key_t *)dlq_firstEntry(&list->keyQ);
 	     idx != NULL;
 	     idx = (const obj_key_t *)dlq_nextEntry(idx)) {
 
@@ -676,7 +676,7 @@ static status_t
     uniqcnt = 0;
     namelen = xml_strlen(list->name);
 
-    for (uniq = (const obj_unique_t *)dlq_firstEntry(list->uniqueQ);
+    for (uniq = (const obj_unique_t *)dlq_firstEntry(&list->uniqueQ);
 	 uniq != NULL;
 	 uniq = (const obj_unique_t *)dlq_nextEntry(uniq)) {
 

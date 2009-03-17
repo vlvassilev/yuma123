@@ -19,7 +19,7 @@ module SNMP-NOTIFICATION-MIB {
    import SNMP-TARGET-MIB    { prefix "snmp-target"; }
    import SNMPv2-TC          { prefix "smiv2"; }
    import yang-smi           { prefix "smi"; }
-   import yang-types         { prefix "yang"; }
+   import ietf-yang-types    { prefix "yang"; }
 
    /*** META INFORMATION ***/
 
@@ -114,7 +114,7 @@ module SNMP-NOTIFICATION-MIB {
             type snmp-framework:SnmpAdminString {
                length "1..32";
             }
-            config false;
+            // config false;
             description   
               "The locally arbitrary, but unique identifier associated
                with this snmpNotifyEntry.";
@@ -285,7 +285,7 @@ module SNMP-NOTIFICATION-MIB {
 
          leaf snmpNotifyFilterSubtree {
             type yang:object-identifier;
-            config false;
+            // config false;
             description   
               "The MIB subtree which, when combined with the corresponding
                instance of snmpNotifyFilterMask, defines a family of

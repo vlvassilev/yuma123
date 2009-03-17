@@ -20,7 +20,7 @@ module DISMAN-EVENT-MIB {
    import SNMPv2-MIB         { prefix "snmpv2-mib"; }
    import SNMPv2-TC          { prefix "smiv2"; }
    import yang-smi           { prefix "smi"; }
-   import yang-types         { prefix "yang"; }
+   import ietf-yang-types    { prefix "yang"; }
 
    /*** META INFORMATION ***/
 
@@ -222,7 +222,7 @@ module DISMAN-EVENT-MIB {
             type snmp-framework:SnmpAdminString {
                length "0..32";
             }
-            config false;
+            // config false;
             description   
               "The owner of this entry. The exact semantics of this
                string are subject to the security policy defined by the
@@ -234,7 +234,7 @@ module DISMAN-EVENT-MIB {
             type snmp-framework:SnmpAdminString {
                length "1..32";
             }
-            config false;
+            // config false;
             description   
               "A locally-unique, administratively assigned name for the
                trigger within the scope of mteOwner.";
@@ -1180,7 +1180,7 @@ module DISMAN-EVENT-MIB {
             type snmp-framework:SnmpAdminString {
                length "1..32";
             }
-            config false;
+            // config false;
             description   
               "A locally-unique, administratively assigned name for a group
                of objects.";
@@ -1191,7 +1191,7 @@ module DISMAN-EVENT-MIB {
             type uint32 {
                range "1..4294967295";
             }
-            config false;
+            // config false;
             description   
               "An arbitrary integer for the purpose of identifying
                individual objects within a mteObjectsName group.
@@ -1297,7 +1297,7 @@ module DISMAN-EVENT-MIB {
             type snmp-framework:SnmpAdminString {
                length "1..32";
             }
-            config false;
+            // config false;
             description   
               "A locally-unique, administratively assigned name for the
                event.";

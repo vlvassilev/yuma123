@@ -21,6 +21,11 @@
       <div>
 	<h2>Summary</h2>
 	<p>
+	  [Note: This is not official documentation for the NETCONF
+	  protocol.  Refer to the actual RFC specifications for authoritative
+	  documentation.]
+	</p>
+	<p>
 	  The Network Configuration Protocol (NETCONF) provides 
 	  operators and application developers
 	  with a standard framework and a
@@ -97,7 +102,9 @@
           The <b>Network Configuration Protocol</b> is defined in 
           <a href="http://tools.ietf.org/html/rfc4741">RFC 4741</a>,
 	  and was published as a Proposed Standard in December 2006, by the
-	  <a href="http://www.ops.ietf.org/netconf/">NETCONF Working Group</a>
+	  <a href="http://www.ietf.org/html.charters/netconf-charter.html">
+	    NETCONF Working Group
+	  </a>
 	  within the
 	  <a href="http://www.ietf.org/">
 	    Internet Engineering Task Force</a> (IETF).
@@ -309,8 +316,19 @@
 		operation to activate the changes embodied
 		in the &lt;candidate/&gt; database, and make
 		them part of the &lt;running/&gt; configuration.
-		This also clears out the &lt;candidate/&gt;
-		database and leaves it ready for the next use.
+	      </p>
+	      <p>
+		After a successful  &lt;commit&gt; operation, 
+		the &lt;candidate/&gt; database and the 
+		&lt;running/&gt; database have the same 
+		configuration contents.  This special condition
+		is important because a &lt;lock&gt; operation
+		on the &lt;candidate/&gt; database cannot
+		be granted otherwise.  It does not matter
+		which session makes any changes to the 
+		&lt;candidate/&gt; database.  If it is different
+		than the &lt;running/&gt; database,
+		then it cannot be locked.
 	      </p>
 	      <p>
 		Since this is a global database,
@@ -321,6 +339,9 @@
 		activating any changes that it may contain, and
 		prevent the next manager using this global database
 		from making unintended changes.
+		Care must be taken (e.g., use locks) to make sure
+		multiple sessions do not make any database edits 
+		at the same time.
 	      </p>
               <p>
 		Agent platforms which support 
@@ -766,14 +787,6 @@
 	  which an agent may choose to support.
 	</p>
 	<ul>
-	  <li><b>:writable-running</b>
-	    <p>
-	      The agent allows the manager to change the
-	      running configuration directly.  Either this capability
-	      or the <b>:candidate</b> capability will be supported
-	      by the agent, but usually not both.
-	    </p>
-	  </li>
 	  <li><b>:candidate</b>
 	    <p>
 	      The agent supports the &lt;candidate/&gt; database.
@@ -796,6 +809,27 @@
 	      the running configuration to the previous version.
 	    </p>
 	  </li>
+	  <li><b>:interleave</b>
+	    <p>
+	      The agent will accept &lt;rpc&gt; requests
+	      (besides &lt;close-session&gt; while
+	      notification delivery is active.  The
+	      :notification capability must also be present
+	      if this capability is advertised.
+	    </p>
+	  </li>
+	  <li><b>:notification</b>
+	    <p>
+	      The agent supports the basic notification delivery
+	      mechanisms defined in RFC 5277, e.g., the
+	      &lt;create-subscription&gt; operation will
+	      be accepted by the agent.  Unless the
+	      :interleave capability is also supported, only
+	      the &lt;close-session&gt; operation must be
+	      supported by the agent while notification
+	      delivery is active.
+	    </p>
+	  </li>
 	  <li><b>:rollback-on-error</b>
 	    <p>
 	      The agent supports the 'rollback-on-error'
@@ -806,25 +840,6 @@
 	      running configuration) will be left affected.
 	      <b>This provides an 'all-or-nothing' edit mode
 	      for a single &lt;edit-config&gt; request.</b>
-	    </p>
-	  </li>
-	  <li><b>:validate</b>
-	    <p>
-	      The agent supports the &lt;validate&gt; operation.
-	      When this operation is requested on a target database,
-	      the agent will perform some amount of parameter validation
-	      and referential integrity checking.  Since the standard
-	      does not define exactly what must be validated by this
-	      operation, a manager cannot really rely on it for anything
-	      useful.
-	    </p>
-	    <p>
-	      This operation is used to validate a complete database.
-	      There is no standard way to validate a single edit
-	      request against a target database, however a
-	      non-standard set-option for the &lt;edit-config&gt;
-	      operation called <b>test-only</b> has been defined
-	      for this purpose.
 	    </p>
 	  </li>
 	  <li><b>:startup</b>
@@ -846,6 +861,33 @@
 	      The 'file' scheme allows for editable local 
 	      configuration databases.   The other schemes allow
 	      for remote storage of configuration databases.
+	    </p>
+	  </li>
+	  <li><b>:validate</b>
+	    <p>
+	      The agent supports the &lt;validate&gt; operation.
+	      When this operation is requested on a target database,
+	      the agent will perform some amount of parameter validation
+	      and referential integrity checking.  Since the standard
+	      does not define exactly what must be validated by this
+	      operation, a manager cannot really rely on it for anything
+	      useful.
+	    </p>
+	    <p>
+	      This operation is used to validate a complete database.
+	      There is no standard way to validate a single edit
+	      request against a target database, however a
+	      non-standard set-option for the &lt;edit-config&gt;
+	      operation called <b>test-only</b> has been defined
+	      for this purpose.
+	    </p>
+	  </li>
+	  <li><b>:writable-running</b>
+	    <p>
+	      The agent allows the manager to change the
+	      running configuration directly.  Either this capability
+	      or the <b>:candidate</b> capability will be supported
+	      by the agent, but usually not both.
 	    </p>
 	  </li>
 	  <li><b>:xpath</b>
@@ -872,10 +914,31 @@
       <div>
 	<h2>Notifications</h2>
 	<p>
-	  NETCONF has a Notification delivery mechanism that
-	  will be published as an RFC soon.  The current
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-notification-12.txt">Internet draft</a> defines two new modules.
-	  These have been converted to YANG, named
+	  NETCONF has a notification delivery mechanism,
+	  defined in
+	  <a href="http://www.rfc-editor.org/rfc/rfc5277.txt">
+	    RFC 5277.
+	  </a>
+	</p>
+	<p>
+	  The  &lt;create-subscription&gt; operation is used
+	  to setup session-specific filtering and optional
+	  buffered notification delivery parameters.
+	  These parameters cannot be modified after
+	  notification delivery has started on a particular session.
+	  The only way to stop live notification delivery
+	  is to terminate the session, usually with the
+	  &lt;close-session&gt; operation.
+	</p>
+	<p>
+	  The NETCONF notification definitions are divided
+	  into 2 namespaces, one for the top-level
+	  &lt;notification&gt; element, and the other
+	  for some initial notification content, 
+	  such as the &lt;replayComplete&gt; event.
+	</p>
+	<p>
+	  These definitions have been converted to YANG, named
 	  <a href="${tg.url('/modulereport/nc-notifications')}">
 	    nc-notifications.yang
 	  </a> and
@@ -884,19 +947,123 @@
 	  </a>
 	</p>
       </div>
+
+      <div class="publication-list">
+	<h2>Completed RFC Specifications</h2>
+
+	<h4>RFC 4741</h4>
+	<p>
+	  Defines the NETCONF protocol RPC layer and operations layer.<br/>
+	  Status: Proposed Standard RFC, mandatory-to-implement<br/>
+	  <a href="http://www.rfc-editor.org/rfc/rfc4741.txt">
+	    NETCONF Configuration Protocol
+	  </a>
+	</p>
+
+	<h4>RFC 4742</h4>
+	<p>
+	  Defines the NETCONF-over-SSH transport mapping.<br/>
+	  Status: Proposed Standard RFC, mandatory-to-implement<br/>
+	  <a href="http://www.rfc-editor.org/rfc/rfc4742.txt">
+	    Using the NETCONF Configuration Protocol over Secure Shell (SSH)
+	  </a>
+	</p>
+
+	<h4>RFC 4743</h4>
+	<p>
+	  Defines the NETCONF-over-SOAP transport mapping.<br/>
+	  Status: Proposed Standard RFC, optional-to-implement<br/>
+	  <a href="http://www.rfc-editor.org/rfc/rfc4743.txt">
+	    Using NETCONF over the Simple Object Access Protocol (SOAP)
+	  </a>
+	</p>
+
+	<h4>RFC 4744</h4>
+	<p>
+	  Defines the NETCONF-over-BEEP transport mapping.<br/>
+	  Status: Proposed Standard RFC, optional-to-implement<br/>
+	  <a href="http://www.rfc-editor.org/rfc/rfc4744.txt">
+	    Using the NETCONF Protocol over
+            the Blocks Extensible Exchange Protocol (BEEP)
+	  </a>
+	</p>
+
+	<h4>RFC 5277</h4>
+	<p>
+	  Defines the NETCONF notification delivery mechanisms and the
+	  top-level &lt;notification&gt; element.<br/>
+	  Status: Proposed Standard RFC, optional-to-implement<br/>
+	    <a href="http://www.rfc-editor.org/rfc/rfc5277.txt">
+	      NETCONF Event Notifications
+	    </a>
+	</p>
+
+	<h4>RFC 5381</h4>
+	<p>
+	  Documents some NETCONF-over-SOAP implementation experience
+	  top-level &lt;notification&gt; element.<br/>
+	  Status: Informational RFC, nothing-to-implement<br/>
+	    <a href="http://www.rfc-editor.org/rfc/rfc5381.txt">
+	      Experience of Implementing NETCONF over SOAP
+	    </a>
+	</p>
+
+      </div>
+
+      <div class="publication-list">
+	<h2>Standards Work in Progress</h2>
+
+	<h4>draft-ietf-netconf-tls</h4>
+	<p>
+	  Defines the NETCONF-over-TLS transport mapping.<br/>
+	  Intended Status: Proposed Standard RFC, optional-to-implement<br/>
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-tls-07.txt">
+	    NETCONF Over Transport Layer Security (TLS)
+	  </a>
+	</p>
+
+	<h4>draft-ietf-netconf-partial-lock</h4>
+	<p>
+	  Defines a partial database locking mechanism (based on
+	  instance-identifier or XPath expressions) for the 
+	  NETCONF protocol.<br/>
+	  Intended Status: Proposed Standard RFC, optional-to-implement<br/>
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-partial-lock-07.txt">
+	    Partial Lock RPC for NETCONF
+	  </a>
+	</p>
+
+	<h4>draft-ietf-netconf-monitoring</h4>
+	<p>
+	  Defines an agent monitoring data model and schema retrieval
+	  mechanism for the NETCONF protocol.<br/>
+	  Intended Status: Proposed Standard RFC, optional-to-implement<br/>
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-monitoring-04.txt">
+	    NETCONF Monitoring Schema
+	  </a>
+	</p>
+
+	<h4>draft-ietf-netconf-with-defaults</h4>
+	<p>
+	  Defines a mechanism to control the filtering of leaf objects
+          containing the 'default' value, during NETCONF retrieval operations.<br/>
+	  Intended Status: Proposed Standard RFC, optional-to-implement<br/>
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-with-defaults-00.txt">
+	    With-defaults capability for NETCONF
+	  </a>
+	</p>
+      </div>
+
       <div>
-	<h2>Resources</h2>
+	<h2>Additional NETCONF Resources</h2>
 	<ul>
-	  <li>
-	    <a href="${tg.url('/slides/netconf/netconf_tutorial.html')}">Tutorial Slides (circa 2004)</a>
-	  </li>
 	  <li>
 	    <a href="http://www.ietf.org/html.charters/netconf-charter.html">
 	      NETCONF WG Charter
 	    </a>
 	  </li>
 	  <li>
-	    <a href="http://www3.tools.ietf.org/wg/netconf/trac/wiki">
+	    <a href="http://trac.tools.ietf.org/wg/netconf/trac/wiki">
 	      NETCONF WG Wiki Page
 	    </a>
 	  </li>
@@ -925,8 +1092,16 @@
 	      IANA version of the NETCONF protocol XSD
 	    </a>
 	  </li>
+	  <li>
+	    <a href="${tg.url('/slides/netconf/netconf_tutorial.html')}">Tutorial Slides (circa 2004)</a>
+	  </li>
+	  <li>
+	    <a href="${tg.url('/static/papers/df_netconf_white_paper.pdf')}">
+	      NETCONF White Paper by David French (embeddedmind.com)</a>
+	  </li>
 	</ul>
       </div>
+
     </div>
   </body>
 </html>

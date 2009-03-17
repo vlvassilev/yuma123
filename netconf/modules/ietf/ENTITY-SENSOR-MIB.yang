@@ -18,7 +18,7 @@ module ENTITY-SENSOR-MIB {
    import ENTITY-MIB         { prefix "entity-mib"; }
    import SNMP-FRAMEWORK-MIB { prefix "snmp-framework"; }
    import yang-smi           { prefix "smi"; }
-   import yang-types         { prefix "yang"; }
+   import ietf-yang-types    { prefix "yang"; }
 
    /*** META INFORMATION ***/
 
@@ -301,7 +301,7 @@ module ENTITY-SENSOR-MIB {
             type leafref {
                path "/entity-mib:entityPhysical/entity-mib:entPhysicalEntry/entity-mib:entPhysicalIndex";
             }
-            config false;
+            // config false;
             description   
               "Automagically generated leafref leaf.";
          }

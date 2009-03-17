@@ -111,7 +111,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 
     <div id="footer">
       <hr />
-      <p>YangTools 0.9.3, Copyright &#169; 2008, Andy Bierman</p>
+      <p>YangTools 0.9.4, Copyright &#169; 2008, 2009, Andy Bierman</p>
       <p>TurboGears is Copyright &#169; 2007, Kevin Dangoor</p>
     </div>
   </body>

@@ -17,7 +17,7 @@ module RMON-MIB {
 
    import SNMPv2-TC  { prefix "smiv2"; }
    import yang-smi   { prefix "smi"; }
-   import yang-types { prefix "yang"; }
+   import ietf-yang-types { prefix "yang"; }
 
    /*** META INFORMATION ***/
 
@@ -229,7 +229,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "The value of this object uniquely identifies this
                etherStats entry.";
@@ -567,7 +567,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry in the
                historyControl table.  Each such entry defines a
@@ -750,7 +750,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "The history of which this entry is a part.  The
                history identified by a particular value of this
@@ -763,7 +763,7 @@ module RMON-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies the particular
                sample this entry represents among all samples
@@ -1003,7 +1003,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry in the
                alarm table.  Each such entry defines a
@@ -1264,7 +1264,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry in the
                
@@ -1363,7 +1363,7 @@ module RMON-MIB {
 
          leaf hostAddress {
             type binary;
-            config false;
+            // config false;
             description   
               "The physical address of this host.";
             smi:oid "1.3.6.1.2.1.16.4.2.1.1";
@@ -1402,7 +1402,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "The set of collected host statistics of which
                this entry is a part.  The set of hosts
@@ -1519,7 +1519,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry in
                the hostTime table among those entries associated
@@ -1553,7 +1553,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "The set of collected host statistics of which
                this entry is a part.  The set of hosts
@@ -1665,7 +1665,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry
                in the hostTopNControl table.  Each such
@@ -1845,7 +1845,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "This object identifies the top N report of which
                this entry is a part.  The set of hosts
@@ -1859,7 +1859,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry in
                the hostTopN table among those in the same report.
@@ -1915,7 +1915,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry in the
                matrixControl table.  Each such entry defines
@@ -2006,7 +2006,7 @@ module RMON-MIB {
       /* XXX table comments here XXX */
 
       list matrixSDEntry {
-
+         config false;
          key "matrixSDIndex matrixSDSourceAddress 
               matrixSDDestAddress";
          description 
@@ -2019,7 +2019,7 @@ module RMON-MIB {
 
          leaf matrixSDSourceAddress {
             type binary;
-            config false;
+            // config false;
             description   
               "The source physical address.";
             smi:oid "1.3.6.1.2.1.16.6.2.1.1";
@@ -2027,7 +2027,7 @@ module RMON-MIB {
 
          leaf matrixSDDestAddress {
             type binary;
-            config false;
+            // config false;
             description   
               "The destination physical address.";
             smi:oid "1.3.6.1.2.1.16.6.2.1.2";
@@ -2037,7 +2037,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "The set of collected matrix statistics of which
                this entry is a part.  The set of matrix statistics
@@ -2050,7 +2050,7 @@ module RMON-MIB {
          leaf matrixSDPkts {
             type yang:counter32;
             units "Packets";
-            config false;
+            // config false;
             description   
               "The number of packets transmitted from the source
                address to the destination address (this number includes
@@ -2085,7 +2085,7 @@ module RMON-MIB {
       /* XXX table comments here XXX */
 
       list matrixDSEntry {
-
+         config false;
          key "matrixDSIndex matrixDSDestAddress 
               matrixDSSourceAddress";
          description 
@@ -2181,7 +2181,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry
                in the filter table.  Each such entry defines
@@ -2441,7 +2441,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry in the channel
                table.  Each such entry defines one channel, a logical
@@ -2685,7 +2685,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry
                in the bufferControl table.  The value of this
@@ -2944,7 +2944,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "The index of the bufferControlEntry with which
                this packet is associated.";
@@ -2955,7 +2955,7 @@ module RMON-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry
                in the captureBuffer table associated with a
@@ -3081,7 +3081,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry in the
                event table.  Each such entry defines one event that
@@ -3183,7 +3183,7 @@ module RMON-MIB {
             type int32 {
                range "1..65535";
             }
-            config false;
+            // config false;
             description   
               "The event entry that generated this log
                entry.  The log identified by a particular
@@ -3197,7 +3197,7 @@ module RMON-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "An index that uniquely identifies an entry
                in the log table amongst those generated by the

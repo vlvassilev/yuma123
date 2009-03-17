@@ -16,7 +16,7 @@ module TRANSPORT-ADDRESS-MIB {
    /*** LINKAGE (IMPORTS / INCLUDES) ***/
 
    import yang-smi   { prefix "smi"; }
-   import yang-types { prefix "yang"; }
+   import ietf-yang-types { prefix "yang"; }
 
    /*** META INFORMATION ***/
 

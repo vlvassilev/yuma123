@@ -18,7 +18,7 @@ module DISMAN-SCHEDULE-MIB {
    import SNMP-FRAMEWORK-MIB { prefix "snmp-framework"; }
    import SNMPv2-TC          { prefix "smiv2"; }
    import yang-smi           { prefix "smi"; }
-   import yang-types         { prefix "yang"; }
+   import ietf-yang-types    { prefix "yang"; }
 
    /*** META INFORMATION ***/
 
@@ -146,7 +146,7 @@ module DISMAN-SCHEDULE-MIB {
             type snmp-framework:SnmpAdminString {
                length "0..32";
             }
-            config false;
+            // config false;
             description   
               "The owner of this scheduling entry.  The exact semantics of
                this string are subject to the security policy defined by
@@ -159,7 +159,7 @@ module DISMAN-SCHEDULE-MIB {
             type snmp-framework:SnmpAdminString {
                length "1..32";
             }
-            config false;
+            // config false;
             description   
               "The locally-unique, administratively assigned name for this
                scheduling entry.  This object allows a schedOwner to have

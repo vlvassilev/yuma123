@@ -18,7 +18,7 @@ module SNMP-TARGET-MIB {
    import SNMP-FRAMEWORK-MIB { prefix "snmp-framework"; }
    import SNMPv2-TC          { prefix "smiv2"; }
    import yang-smi           { prefix "smi"; }
-   import yang-types         { prefix "yang"; }
+   import ietf-yang-types    { prefix "yang"; }
 
    /*** META INFORMATION ***/
 
@@ -292,7 +292,7 @@ module SNMP-TARGET-MIB {
             type snmp-framework:SnmpAdminString {
                length "1..32";
             }
-            config false;
+            // config false;
             description   
               "The locally arbitrary, but unique identifier associated
                with this snmpTargetAddrEntry.";
@@ -445,7 +445,7 @@ module SNMP-TARGET-MIB {
             type snmp-framework:SnmpAdminString {
                length "1..32";
             }
-            config false;
+            // config false;
             description   
               "The locally arbitrary, but unique identifier associated
                with this snmpTargetParamsEntry.";

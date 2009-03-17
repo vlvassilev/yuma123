@@ -1920,7 +1920,7 @@ xmlChar *
 	    }
 	    p += xml_strcpy(p, mod->name);
 	    if (!cp->noversionnames) {
-		*p++ = '_';
+		*p++ = '.';
 		p += xml_strcpy(p, mod->version);
 	    }
 	    xml_strcpy(p, ext); 

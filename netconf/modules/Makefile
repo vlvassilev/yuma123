@@ -37,26 +37,26 @@ all: xsd html cookedhtml sqldb copy
 
 xsd:
 	$(YANGDUMP) --format=xsd --subtree=. --defnames \
-	--output=$(XSD_TARGET) --urlstart=/xsd --log-level=info
+	--output=$(XSD_TARGET) --urlstart=/xsd --log-level=warn
 
 html:
 	$(YANGDUMP) --format=html --subtree=. --defnames \
-	--output=$(HTML_TARGET) --log-level=info --html-div \
+	--output=$(HTML_TARGET) --log-level=warn --html-div \
 	--html-toc=menu --urlstart=/modules --simurls
 
 cookedhtml:
 	$(YANGDUMP) --format=html --subtree=. --defnames \
-	--output=$(COOKEDHTML_TARGET) --log-level=info --html-div \
+	--output=$(COOKEDHTML_TARGET) --log-level=warn --html-div \
 	--html-toc=menu --urlstart=/modules --simurls --objview=cooked
 
 sqldb:
 	$(YANGDUMP) --format=sqldb --subtree=. \
-	--output=$(SQLDB_TARGET) --log-level=info \
+	--output=$(SQLDB_TARGET) --log-level=warn \
 	--urlstart=/modules --simurls
 
 copy:
 	$(YANGDUMP) --format=copy --subtree=. --defnames \
-	--output=$(COPY_TARGET) --log-level=info 
+	--output=$(COPY_TARGET) --log-level=warn 
 
 test:
 

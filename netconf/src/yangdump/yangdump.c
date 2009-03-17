@@ -1253,12 +1253,12 @@ static status_t
 	    /* just warnings reported */
 	    res = NO_ERR;
 	}
-    } else if (LOGINFO && pcb && pcb->top) {
+    } else if (pcb && pcb->top) {
 	logsource = (LOGDEBUG) ? pcb->top->source 
 	    : pcb->top->sourcefn;
-	log_info("\n*** %s: %u Errors, %u Warnings\n", 
-		 logsource, pcb->top->errors, 
-		 pcb->top->warnings);
+	log_write("\n*** %s: %u Errors, %u Warnings\n", 
+		  logsource, pcb->top->errors, 
+		  pcb->top->warnings);
     }
 
     /* check if output session needed, any reports requestd or

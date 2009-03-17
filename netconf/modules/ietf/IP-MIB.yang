@@ -535,7 +535,7 @@ module IP-MIB {
 
          leaf ipAdEntAddr {
             type inet:ipv4-address;
-            config false;
+            // config false;
             status deprecated;
             description   
               "The IPv4 address to which this entry's addressing
@@ -790,7 +790,7 @@ module IP-MIB {
 
          leaf ipv4InterfaceIfIndex {
             type if-mib:InterfaceIndex;
-            config false;
+            // config false;
             description   
               "The index value that uniquely identifies the interface to
                which this entry is applicable.  The interface identified by
@@ -873,7 +873,7 @@ module IP-MIB {
 
          leaf ipv6InterfaceIfIndex {
             type if-mib:InterfaceIndex;
-            config false;
+            // config false;
             description   
               "The index value that uniquely identifies the interface to
                which this entry is applicable.  The interface identified by
@@ -1001,7 +1001,7 @@ module IP-MIB {
 
          leaf ipAddressPrefixIfIndex {
             type if-mib:InterfaceIndex;
-            config false;
+            // config false;
             description   
               "The index value that uniquely identifies the interface on
                which this prefix is configured.  The interface identified
@@ -1012,7 +1012,7 @@ module IP-MIB {
 
          leaf ipAddressPrefixType {
             type inet-address:InetAddressType;
-            config false;
+            // config false;
             description   
               "The address type of ipAddressPrefix.";
             smi:oid "1.3.6.1.2.1.4.32.1.2";
@@ -1020,7 +1020,7 @@ module IP-MIB {
 
          leaf ipAddressPrefixPrefix {
             type inet-address:InetAddress;
-            config false;
+            // config false;
             description   
               "The address prefix.  The address type of this object is
                specified in ipAddressPrefixType.  The length of this object
@@ -1037,7 +1037,7 @@ module IP-MIB {
 
          leaf ipAddressPrefixLength {
             type inet-address:InetAddressPrefixLength;
-            config false;
+            // config false;
             description   
               "The prefix length associated with this prefix.
                
@@ -1167,7 +1167,7 @@ module IP-MIB {
 
          leaf ipAddressAddrType {
             type inet-address:InetAddressType;
-            config false;
+            // config false;
             description   
               "The address type of ipAddressAddr.";
             smi:oid "1.3.6.1.2.1.4.34.1.1";
@@ -1175,7 +1175,7 @@ module IP-MIB {
 
          leaf ipAddressAddr {
             type inet-address:InetAddress;
-            config false;
+            // config false;
             description   
               "The IP address to which this entry's addressing information
                
@@ -1317,7 +1317,7 @@ module IP-MIB {
 
          leaf ipNetToPhysicalIfIndex {
             type if-mib:InterfaceIndex;
-            config false;
+            // config false;
             description   
               "The index value that uniquely identifies the interface to
                which this entry is applicable.  The interface identified by
@@ -1328,7 +1328,7 @@ module IP-MIB {
 
          leaf ipNetToPhysicalNetAddressType {
             type inet-address:InetAddressType;
-            config false;
+            // config false;
             description   
               "The type of ipNetToPhysicalNetAddress.";
             smi:oid "1.3.6.1.2.1.4.35.1.2";
@@ -1336,7 +1336,7 @@ module IP-MIB {
 
          leaf ipNetToPhysicalNetAddress {
             type inet-address:InetAddress;
-            config false;
+            // config false;
             description   
               "The IP Address corresponding to the media-dependent
                `physical' address.  The address type of this object is
@@ -1482,7 +1482,7 @@ module IP-MIB {
 
          leaf ipv6ScopeZoneIndexIfIndex {
             type if-mib:InterfaceIndex;
-            config false;
+            // config false;
             description   
               "The index value that uniquely identifies the interface to
                which these scopes belong.  The interface identified by a
@@ -1604,7 +1604,7 @@ module IP-MIB {
 
          leaf ipDefaultRouterAddressType {
             type inet-address:InetAddressType;
-            config false;
+            // config false;
             description   
               "The address type for this row.";
             smi:oid "1.3.6.1.2.1.4.37.1.1";
@@ -1612,7 +1612,7 @@ module IP-MIB {
 
          leaf ipDefaultRouterAddress {
             type inet-address:InetAddress;
-            config false;
+            // config false;
             description   
               "The IP address of the default router represented by this
                row.  The address type of this object is specified in
@@ -1628,7 +1628,7 @@ module IP-MIB {
 
          leaf ipDefaultRouterIfIndex {
             type if-mib:InterfaceIndex;
-            config false;
+            // config false;
             description   
               "The index value that uniquely identifies the interface by
                which the router can be reached.  The interface identified
@@ -1723,7 +1723,7 @@ module IP-MIB {
 
          leaf ipv6RouterAdvertIfIndex {
             type if-mib:InterfaceIndex;
-            config false;
+            // config false;
             description   
               "The index value that uniquely identifies the interface on
                which router advertisements constructed with this
@@ -1940,7 +1940,7 @@ module IP-MIB {
 
          leaf ipSystemStatsIPVersion {
             type inet-address:InetVersion;
-            config false;
+            // config false;
             description   
               "The IP version of this row.";
             smi:oid "1.3.6.1.2.1.4.31.1.1.1";
@@ -2733,7 +2733,7 @@ module IP-MIB {
 
          leaf ipIfStatsIPVersion {
             type inet-address:InetVersion;
-            config false;
+            // config false;
             description   
               "The IP version of this row.";
             smi:oid "1.3.6.1.2.1.4.31.3.1.1";
@@ -2741,7 +2741,7 @@ module IP-MIB {
 
          leaf ipIfStatsIfIndex {
             type if-mib:InterfaceIndex;
-            config false;
+            // config false;
             description   
               "The index value that uniquely identifies the interface to
                which this entry is applicable.  The interface identified by
@@ -3866,7 +3866,7 @@ module IP-MIB {
 
          leaf icmpStatsIPVersion {
             type inet-address:InetVersion;
-            config false;
+            // config false;
             description   
               "The IP version of the statistics.";
             smi:oid "1.3.6.1.2.1.5.29.1.1";
@@ -3940,7 +3940,7 @@ module IP-MIB {
 
          leaf icmpMsgStatsIPVersion {
             type inet-address:InetVersion;
-            config false;
+            // config false;
             description   
               "The IP version of the statistics.";
             smi:oid "1.3.6.1.2.1.5.30.1.1";
@@ -3950,7 +3950,7 @@ module IP-MIB {
             type int32 {
                range "0..255";
             }
-            config false;
+            // config false;
             description   
               "The ICMP type field of the message type being counted by
                this row.

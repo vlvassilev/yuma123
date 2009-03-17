@@ -17,7 +17,7 @@ module SNMPv2-MIB {
 
    import SNMPv2-TC  { prefix "smiv2"; }
    import yang-smi   { prefix "smi"; }
-   import yang-types { prefix "yang"; }
+   import ietf-yang-types { prefix "yang"; }
 
    /*** META INFORMATION ***/
 
@@ -210,7 +210,7 @@ module SNMPv2-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "The auxiliary variable used for identifying instances
                of the columnar objects in the sysORTable.";

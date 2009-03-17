@@ -18,7 +18,7 @@ module DISMAN-SCRIPT-MIB {
    import SNMP-FRAMEWORK-MIB { prefix "snmp-framework"; }
    import SNMPv2-TC          { prefix "smiv2"; }
    import yang-smi           { prefix "smi"; }
-   import yang-types         { prefix "yang"; }
+   import ietf-yang-types    { prefix "yang"; }
 
    /*** META INFORMATION ***/
 
@@ -105,7 +105,7 @@ module DISMAN-SCRIPT-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "The locally arbitrary, but unique identifier associated
                with this language entry.
@@ -195,7 +195,7 @@ module DISMAN-SCRIPT-MIB {
             type leafref {
                path "/disman-script:smObjects/disman-script:smLangEntry/disman-script:smLangIndex";
             }
-            config false;
+            // config false;
             description   
               "Automagically generated leafref leaf.";
          }
@@ -204,7 +204,7 @@ module DISMAN-SCRIPT-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "The locally arbitrary, but unique identifier associated
                with this language extension entry.
@@ -298,7 +298,7 @@ module DISMAN-SCRIPT-MIB {
             type snmp-framework:SnmpAdminString {
                length "0..32";
             }
-            config false;
+            // config false;
             description   
               "The manager who owns this row in the smScriptTable.";
             smi:oid "1.3.6.1.2.1.64.1.3.1.1.1";
@@ -308,7 +308,7 @@ module DISMAN-SCRIPT-MIB {
             type snmp-framework:SnmpAdminString {
                length "1..32";
             }
-            config false;
+            // config false;
             description   
               "The locally-unique, administratively assigned name for this
                script. This object allows an smScriptOwner to have multiple
@@ -627,7 +627,7 @@ module DISMAN-SCRIPT-MIB {
             type uint32 {
                range "1..4294967295";
             }
-            config false;
+            // config false;
             description   
               "The index value identifying this code fragment.";
             smi:oid "1.3.6.1.2.1.64.1.3.2.1.1";
@@ -677,7 +677,7 @@ module DISMAN-SCRIPT-MIB {
             type snmp-framework:SnmpAdminString {
                length "0..32";
             }
-            config false;
+            // config false;
             description   
               "The manager who owns this row in the smLaunchTable. Every
                instance of a running script started from a particular entry
@@ -692,7 +692,7 @@ module DISMAN-SCRIPT-MIB {
             type snmp-framework:SnmpAdminString {
                length "1..32";
             }
-            config false;
+            // config false;
             description   
               "The locally-unique, administratively assigned name for this
                launch table entry. This object allows an smLaunchOwner to
@@ -1148,7 +1148,7 @@ module DISMAN-SCRIPT-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "The locally arbitrary, but unique identifier associated
                with this running or finished script. This value must be

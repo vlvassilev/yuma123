@@ -18,7 +18,7 @@ module HOST-RESOURCES-MIB {
    import IF-MIB     { prefix "if-mib"; }
    import SNMPv2-TC  { prefix "smiv2"; }
    import yang-smi   { prefix "smi"; }
-   import yang-types { prefix "yang"; }
+   import ietf-yang-types { prefix "yang"; }
 
    /*** META INFORMATION ***/
 
@@ -285,7 +285,7 @@ module HOST-RESOURCES-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "A unique value for each logical storage area
                contained by the host.";
@@ -390,7 +390,7 @@ module HOST-RESOURCES-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "A unique value for each device contained by the host.
                The value for each device must remain constant at
@@ -510,7 +510,7 @@ module HOST-RESOURCES-MIB {
             type leafref {
                path "/host-resources:hrDevice/host-resources:hrDeviceEntry/host-resources:hrDeviceIndex";
             }
-            config false;
+            // config false;
             description   
               "Automagically generated leafref leaf.";
          }
@@ -559,7 +559,7 @@ module HOST-RESOURCES-MIB {
             type leafref {
                path "/host-resources:hrDevice/host-resources:hrDeviceEntry/host-resources:hrDeviceIndex";
             }
-            config false;
+            // config false;
             description   
               "Automagically generated leafref leaf.";
          }
@@ -596,7 +596,7 @@ module HOST-RESOURCES-MIB {
             type leafref {
                path "/host-resources:hrDevice/host-resources:hrDeviceEntry/host-resources:hrDeviceIndex";
             }
-            config false;
+            // config false;
             description   
               "Automagically generated leafref leaf.";
          }
@@ -677,7 +677,7 @@ module HOST-RESOURCES-MIB {
             type leafref {
                path "/host-resources:hrDevice/host-resources:hrDeviceEntry/host-resources:hrDeviceIndex";
             }
-            config false;
+            // config false;
             description   
               "Automagically generated leafref leaf.";
          }
@@ -757,7 +757,7 @@ module HOST-RESOURCES-MIB {
             type leafref {
                path "/host-resources:hrDevice/host-resources:hrDeviceEntry/host-resources:hrDeviceIndex";
             }
-            config false;
+            // config false;
             description   
               "Automagically generated leafref leaf.";
          }
@@ -766,7 +766,7 @@ module HOST-RESOURCES-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "A unique value for each partition on this long-term
                storage device.  The value for each long-term storage
@@ -845,7 +845,7 @@ module HOST-RESOURCES-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "A unique value for each file system local to this
                host.  The value for each file system must remain
@@ -1005,7 +1005,7 @@ module HOST-RESOURCES-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "A unique value for each piece of software running on
                the host.  Wherever possible, this should be the
@@ -1144,7 +1144,7 @@ module HOST-RESOURCES-MIB {
             type int32 {
                range "1..2147483647";
             }
-            config false;
+            // config false;
             description   
               "A unique value for each piece of software installed
                on the host.  This value shall be in the range from 1

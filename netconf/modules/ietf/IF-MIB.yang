@@ -18,7 +18,7 @@ module IF-MIB {
    import IANAifType-MIB { prefix "ianaiftype-mib"; }
    import SNMPv2-TC      { prefix "smiv2"; }
    import yang-smi       { prefix "smi"; }
-   import yang-types     { prefix "yang"; }
+   import ietf-yang-types  { prefix "yang"; }
 
    /*** META INFORMATION ***/
 

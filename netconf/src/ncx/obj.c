@@ -1055,19 +1055,17 @@ static void
 	m__free(list->ref);
     }
 
+    while (!dlq_empty(&list->keyQ)) {
+	key = (obj_key_t *)dlq_deque(&list->keyQ);
+	obj_free_key(key);
+    }
+
+    while (!dlq_empty(&list->uniqueQ)) {
+	uni = (obj_unique_t *)dlq_deque(&list->uniqueQ);
+	obj_free_unique(uni);
+    }
+
     if (notclone) {
-	while (!dlq_empty(list->keyQ)) {
-	    key = (obj_key_t *)dlq_deque(list->keyQ);
-	    obj_free_key(key);
-	}
-	dlq_destroyQue(list->keyQ);
-
-	while (!dlq_empty(list->uniqueQ)) {
-	    uni = (obj_unique_t *)dlq_deque(list->uniqueQ);
-	    obj_free_unique(uni);
-	}
-	dlq_destroyQue(list->uniqueQ);
-
 	typ_clean_typeQ(list->typedefQ);
 	dlq_destroyQue(list->typedefQ);
 
@@ -1110,24 +1108,16 @@ static obj_list_t *
     }
     (void)memset(list, 0x0, sizeof(obj_list_t));
 
+
+    dlq_createSQue(&list->keyQ);
+    dlq_createSQue(&list->uniqueQ);
+
+    list->status = NCX_STATUS_CURRENT;
+    list->ordersys = TRUE;
+
     if (isreal) {
-	list->keyQ = dlq_createQue();
-	if (!list->keyQ) {
-	    m__free(list);
-	    return NULL;
-	}
-
-	list->uniqueQ = dlq_createQue();
-	if (!list->uniqueQ) {
-	    dlq_destroyQue(list->keyQ);
-	    m__free(list);
-	    return NULL;
-	}
-
 	list->typedefQ = dlq_createQue();
 	if (!list->typedefQ) {
-	    dlq_destroyQue(list->keyQ);
-	    dlq_destroyQue(list->uniqueQ);
 	    m__free(list);
 	    return NULL;
 	}
@@ -1139,8 +1129,6 @@ static obj_list_t *
 	    return NULL;
 	}
 
-	list->status = NCX_STATUS_CURRENT;
-	list->ordersys = TRUE;
     }
 
     dlq_createSQue(&list->mustQ);
@@ -1163,8 +1151,8 @@ static obj_list_t *
 *
 * INPUTS:
 *    mod == module owner of the cloned data
-*    parent == new obj containing 'list'
-*    list == obj_list_t data structure to clone
+*    newparent == new obj containing 'list'
+*    srclist == obj_template_t data structure to clone
 *    mlist == obj_refine_t data structure to merge
 *            into the clone, as refinements.  Only
 *            legal list refinements will be checked
@@ -1177,12 +1165,12 @@ static obj_list_t *
 *********************************************************************/
 static obj_list_t *
     clone_list (ncx_module_t *mod,
-		obj_template_t *parent,
-		obj_list_t *list,
+		obj_template_t *newparent,
+		obj_template_t *srclist,
 		obj_refine_t *mlist,
 		dlq_hdr_t *mobjQ)
 {
-    obj_list_t      *newlist;
+    obj_list_t      *list, *newlist;
     status_t         res;
 
     newlist = new_list(FALSE);
@@ -1190,13 +1178,13 @@ static obj_list_t *
 	return NULL;
     }
 
+    list = srclist->def.list;
+
     /* set the fields that cannot be refined */
     newlist->name = list->name;
     newlist->keystr = list->keystr;
     newlist->typedefQ = list->typedefQ;
     newlist->groupingQ = list->groupingQ;
-    newlist->keyQ = list->keyQ;
-    newlist->uniqueQ = list->uniqueQ;
     newlist->ordersys = list->ordersys;
     newlist->status = list->status;
 
@@ -1252,12 +1240,16 @@ static obj_list_t *
     }
 
     res = clone_datadefQ(mod, newlist->datadefQ, list->datadefQ, 
-			 mobjQ, parent);
+			 mobjQ, newparent);
     if (res != NO_ERR) {
 	free_list(newlist, OBJ_FL_CLONE);
 	return NULL;
     }
 
+    /* newlist->keyQ is still empty
+     * newlist->uniqueQ is still empty
+     * these are filled in by the yang_obj_resolve_final function
+     */
     return newlist;
 
 }  /* clone_list */
@@ -4917,8 +4909,9 @@ obj_template_t *
 	break;
     case OBJ_TYP_LIST:
 	newobj->def.list = 
-	    clone_list(mod, newobj, srcobj->def.list,
-		       (mobj) ? mobj->def.refine : NULL, mobjQ);
+	    clone_list(mod, newobj, srcobj,
+		       (mobj) ? mobj->def.refine : NULL, 
+		       mobjQ);
 	if (!newobj->def.list) {
 	    res = ERR_INTERNAL_MEM;
 	}
@@ -5274,7 +5267,7 @@ const obj_unique_t *
     }
 
     return (const obj_unique_t *)
-	dlq_firstEntry(listobj->def.list->uniqueQ);
+	dlq_firstEntry(&listobj->def.list->uniqueQ);
 
 }  /* obj_first_unique */
 
@@ -5418,7 +5411,7 @@ void
 *   pointer to found key component or NULL if not found
 *********************************************************************/
 obj_key_t *
-    obj_find_key (dlq_hdr_t *que,
+    obj_find_key (const dlq_hdr_t *que,
 		  const xmlChar *keycompname)
 {
     obj_key_t  *key;
@@ -5456,7 +5449,7 @@ obj_key_t *
 *   pointer to found key component or NULL if not found
 *********************************************************************/
 obj_key_t *
-    obj_find_key2 (dlq_hdr_t *que,
+    obj_find_key2 (const dlq_hdr_t *que,
 		   const obj_template_t *keyobj)
 {
     obj_key_t  *key;
@@ -5505,10 +5498,7 @@ obj_key_t *
     }
 #endif
 
-    if (obj->def.list->keyQ) {
-	return (obj_key_t *)dlq_firstEntry(obj->def.list->keyQ);
-    }
-    return NULL;
+    return (obj_key_t *)dlq_firstEntry(&obj->def.list->keyQ);
 
 }  /* obj_first_key */
 
@@ -5538,10 +5528,7 @@ const obj_key_t *
     }
 #endif
 
-    if (obj->def.list->keyQ) {
-	return (const obj_key_t *)dlq_firstEntry(obj->def.list->keyQ);
-    }
-    return NULL;
+    return (const obj_key_t *)dlq_firstEntry(&obj->def.list->keyQ);
 
 }  /* obj_first_ckey */
 
@@ -5623,11 +5610,7 @@ uint32
 	return 0;
     }
 
-    if (obj->def.list->keyQ) {
-	return dlq_count(obj->def.list->keyQ);
-    } else {
-	return 0;
-    }
+    return dlq_count(&obj->def.list->keyQ);
 
 }  /* obj_key_count */
 

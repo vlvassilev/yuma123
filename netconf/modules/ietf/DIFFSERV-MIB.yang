@@ -21,7 +21,7 @@ module DIFFSERV-MIB {
    import INTEGRATED-SERVICES-MIB { prefix "integrated-services"; }
    import SNMPv2-TC               { prefix "smiv2"; }
    import yang-smi                { prefix "smi"; }
-   import yang-types              { prefix "yang"; }
+   import ietf-yang-types         { prefix "yang"; }
 
    /*** META INFORMATION ***/
 
@@ -149,14 +149,14 @@ module DIFFSERV-MIB {
             type leafref {
                path "/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex";
             }
-            config false;
+            // config false;
             description   
               "Automagically generated leafref leaf.";
          }
 
          leaf diffServDataPathIfDirection {
             type diffserv-mib:IfDirection;
-            config false;
+            // config false;
             description   
               "IfDirection specifies whether the reception or transmission path
                for this interface is in view.";
@@ -237,7 +237,7 @@ module DIFFSERV-MIB {
 
          leaf diffServClfrId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the classifier entries.  Managers
                should obtain new values for row creation in this table by
@@ -300,7 +300,7 @@ module DIFFSERV-MIB {
 
          leaf diffServClfrElementId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the Classifier Element entries.
                Managers obtain new values for row creation in this table by
@@ -429,7 +429,7 @@ module DIFFSERV-MIB {
 
          leaf diffServMultiFieldClfrId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the MultiField Classifier filter
                entries.  Managers obtain new values for row creation in this
@@ -634,7 +634,7 @@ module DIFFSERV-MIB {
 
          leaf diffServMeterId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the Meter entries.  Managers obtain new
                values for row creation in this table by reading
@@ -768,7 +768,7 @@ module DIFFSERV-MIB {
 
          leaf diffServTBParamId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the Token Bucket Parameter entries.
                Managers obtain new values for row creation in this table by
@@ -891,7 +891,7 @@ module DIFFSERV-MIB {
 
          leaf diffServActionId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the Action entries.  Managers obtain
                new values for row creation in this table by reading
@@ -1008,7 +1008,7 @@ module DIFFSERV-MIB {
 
          leaf diffServDscpMarkActDscp {
             type diffserv-dscp:Dscp;
-            config false;
+            // config false;
             description   
               "The DSCP that this Action will store into the DSCP field of the
                subject. It is quite possible that the only packets subject to
@@ -1043,7 +1043,7 @@ module DIFFSERV-MIB {
 
          leaf diffServCountActId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the Count Action entries.  Managers
                obtain new values for row creation in this table by reading
@@ -1136,7 +1136,7 @@ module DIFFSERV-MIB {
 
          leaf diffServAlgDropId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the Algorithmic Dropper entries.
                Managers obtain new values for row creation in this table by
@@ -1386,7 +1386,7 @@ module DIFFSERV-MIB {
 
          leaf diffServRandomDropId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the Random Drop entries.  Managers
                obtain new values for row creation in this table by reading
@@ -1556,7 +1556,7 @@ module DIFFSERV-MIB {
 
          leaf diffServQId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the Queue entries.  Managers obtain new
                values for row creation in this table by reading
@@ -1673,7 +1673,7 @@ module DIFFSERV-MIB {
 
          leaf diffServSchedulerId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the Scheduler entries.  Managers obtain
                new values for row creation in this table by reading
@@ -1819,7 +1819,7 @@ module DIFFSERV-MIB {
 
          leaf diffServMinRateId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the Scheduler Parameter entries.
                Managers obtain new values for row creation in this table by
@@ -1951,7 +1951,7 @@ module DIFFSERV-MIB {
 
          leaf diffServMaxRateId {
             type diffserv-mib:IndexInteger;
-            config false;
+            // config false;
             description   
               "An index that enumerates the Maximum Rate Parameter entries.
                Managers obtain new values for row creation in this table by
@@ -1963,7 +1963,7 @@ module DIFFSERV-MIB {
             type uint32 {
                range "1..32";
             }
-            config false;
+            // config false;
             description   
               "An index that indicates which level of a multi-rate shaper is
                being given its parameters. A multi-rate shaper has some number

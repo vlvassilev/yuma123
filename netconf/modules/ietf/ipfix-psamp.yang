@@ -1,587 +1,1076 @@
- module ipfix-psamp {
-   namespace "urn:ietf:params:xml:ns:ipfix-psamp-config";
-   prefix ipfix;
+module ipfix-psamp {
+  namespace "urn:ietf:params:xml:ns:ipfix-psamp-config";
+  prefix ipfix;
 
-   import yang-types { prefix yang; }
-   import inet-types { prefix inet; }
-   import IF-MIB { prefix if; }
-   import ENTITY-MIB { prefix ent; }
+  import ietf-yang-types { prefix yang; }
+  import ietf-inet-types { prefix inet; }
 
-   organization "IPFIX WG";
-   contact "muenz@informatik.uni-tuebingen.de";
+  organization "IPFIX WG";
+  contact "muenz@net.in.tum.de";
 
-   description "IPFIX/PSAMP Configuration Data Model";
-   reference "draft-ietf-ipfix-configuration-model-00.txt + asn bugfix";
+  description "IPFIX/PSAMP Configuration Data Model";
 
-   revision 2008-07-07 {
-     description "Version of draft-ietf-ipfix-configuration-model-00
-       Changes in draft-ietf-ipfix-configuration-model-00:
-       - Metering Process container replaced by direct reference to
-         Selection Process
-       - concatenation of Selection Processes realize Selection Sequence
-       - removal of premature support of IPFIX Mediators/Concentrators.
-       - more SCTP parameters in SctpReceiver and SctpExport classes
-       - sendBufferSize parameter for all *Export classes
-       - templateId no longer configuration parameter
-       Changes in draft-muenz-ipfix-configuration-04:
-       - first version in yang
-       - Collecting Process can be configured for file import
-       - Collecting Process can be configured to export received
-         records without modifications (e.g., to file or other
-         collectors)
-       - SCTP export parameter timedReliability
-       - parameter for eligible local IP addresses for SCTP endpoint
-       - all tags names uncapitalized, types names etc. capitalized
-       - CacheParameters renamed as Cache
-       - description attribute removed
-       Changes in -03:
-       - Linecard and Interface classes now have direction element
-       - sec => s (SI unit)
-       - optional description attribute for annotations
-       - simplifications in ExportingProcess class
-       - new parameters: observationPointId, meteringProcessId,
-         selectorId, exportingProcessId (note that devices do not
-         have to support the configuration of these parameters)
-       - new FileExport class for exporting into a file
-       - Reporting class renamed Option Class
-       Changes in -02:
-       - new structure without next pointers
-       - packet reporting and flow metering replaced by record cache
-       - added reporting with options";
-   }
+  revision 2009-03-02 {
+    description "Version of draft-ietf-ipfix-configuration-model-02
+      Changes in draft-ietf-ipfix-configuration-model-02:
+      - conformance to draft-ietf-netmod-yang-03 and
+        draft-ietf-netmod-yang-types-01
+      - canonical form
+      - observationDomainId is now mandatory parameter
+      - usage of YANG features
+      - renamed parameter 'idleTimeout' in 'inactiveTimeout'
+      - state data: Selector statistics, Cache statistics, Templates,
+        Transport Sessions
+      - Exporting Process: new structure of destination, fileWriter
+      - Collecting Process: new structure of receiver, fileReader
+      - more groupings and typedefs
+      - options configured per Exporting Process, not per destination
+      - verified optional parameters, added default values or
+        description clause if necessary
+      Changes in draft-ietf-ipfix-configuration-model-01:
+      - separation of Selectors and Selection Processes as in PSAMP
+        documents
+      - parameter modifications in filterMatch
+      - new rateLimit parameter in destinations of Exporting Process
+      - Cache Type 'normal' now called 'timeout'
+      Changes in draft-ietf-ipfix-configuration-model-00:
+      - Metering Process container replaced by direct reference to
+        Selection Process
+      - meteringProcessId parameter disappears together with the
+        Metering Process container
+      - concatenation of Selection Processes realize Selection Sequence
+      - removal of premature support of IPFIX Mediators/Concentrators.
+      - more SCTP parameters in SctpReceiver and SctpExport classes
+      - sendBufferSize parameter for all *Export classes
+      - templateId no longer configuration parameter
+      Changes in draft-muenz-ipfix-configuration-04:
+      - first version in yang
+      - Collecting Process can be configured for file import
+      - Collecting Process can be configured to export received
+        records without modifications (e.g., to file or other
+        collectors)
+      - SCTP export parameter timedReliability
+      - parameter for eligible local IP addresses for SCTP endpoint
+      - all tags names uncapitalized, types names etc. capitalized
+      - CacheParameters renamed as Cache
+      - description attribute removed
+      Changes in -03:
+      - Linecard and Interface classes now have direction element
+      - sec => s (SI unit)
+      - optional description attribute for annotations
+      - simplifications in ExportingProcess class
+      - new parameters: observationPointId, meteringProcessId,
+        selectorId, exportingProcessId (note that devices do not
+        have to support the configuration of these parameters)
+      - new FileExport class for exporting into a file
+      - Reporting class renamed Options Class
+      Changes in -02:
+      - new structure without next pointers
+      - packet reporting and flow metering replaced by record cache
+      - added reporting with options";
+  }
 
-   grouping InformationElement {
-     description "Parameters of an Information Element.";
+  feature exporter {
+    description "If supported, the device can be used as an Exporter.
+      Exporting Processes can be configured.";
+  }
 
-     leaf ieEnterpriseNumber {
-       description "Omitted in the case of an IETF specified Information
-         Elements.";
-       type uint32;
-     }
+  feature collector {
+    description "If supported, the device can be used as a Collector.
+      Collecting Processes can be configured.";
+  }
 
-     choice NameOrId {
-       mandatory true;
-       leaf ieName {
-         type string;
-       }
-       leaf ieId {
-         type uint16;
-       }
-     }
+  feature meter {
+    description "If supported, Observation Points, Selection
+      Processes, and Caches can be configured.";
+  }
 
-     leaf ieLength {
-       description "Length can be omitted if a default length exists for
-         the specified Information Element.";
-       type uint16;
-     }
-   }
+  feature psampSampCountBased {
+    description "If supported, the device supports count-based Sampling.
+      The Selector method sampCountBased can be configured.";
+  }
 
+  feature psampSampTimeBased {
+    description "If supported, the device supports time-based Sampling.
+      The Selector method sampTimeBased can be configured.";
+  }
 
-   typedef Direction {
-     description "Direction of packets going through an interface or
-       linecard.";
+  feature psampSampRandOutOfN {
+    description "If supported, the device supports random n-out-of-N
+      Sampling. The Selector method sampRandOutOfN can be configured.";
+  }
 
-     type enumeration {
-       enum ingress;
-       enum egress;
-       enum both;
-     }
-   }
+  feature psampSampUniProb {
+    description "If supported, the device supports uniform probabilistic
+      Sampling. The Selector method sampUniProb can be configured.";
+  }
 
-   grouping Interface {
-     description "Interface as input to Observation Point.";
+  feature psampSampNonUniProb {
+    description "If supported, the device supports non-uniform
+      probabilistic Sampling. The Selector method sampNonUniProb can be
+      configured.";
+  }
 
-     choice IndexOrName {
-       description "Index or name of the interface as stored in the
-         ifTable of IF-MIB.";
-       reference "RFC 1229.";
-       mandatory true;
-       leaf ifIndex { type uint32; }
-       leaf ifName { type string; }
-     }
+  feature psampSampFlowState {
+    description "If supported, the device supports flow state dependent
+      Sampling. The Selector method sampFlowState can be configured.";
+  }
 
-     leaf direction {
-       description "Direction of packets. If not applicable (e.g., in
-         the case of a sniffing interface in promiscuous mode), this
-         parameter is omitted";
-       type Direction;
-       default both;
-     }
-   }
+  feature psampFilterMatch {
+    description "If supported, the device supports property match
+      Filtering. The Selector method filterMatch can be configured.";
+  }
 
-   grouping Linecard {
-     description "Linecard as input to Observation Point.";
+  feature psampFilterHash {
+    description "If supported, the device supports hash-based Filtering.
+      The Selector method filterHash can be configured.";
+  }
 
-     choice IndexOrName {
-       description "Index or name of the linecard as stored in the
-         entPhysicalTable of ENTITY-MIB.";
-       reference "RFC 4133.";
-       mandatory true;
-       leaf entPhysicalIndex { type uint32; }
-       leaf entPhysicalName { type string; }
-     }
+  feature psampFilterRState {
+    description "If supported, the device supports router state
+      Filtering. The Selector method filterRState can be configured.";
+  }
 
-     leaf direction {
-       description "Direction of packets. If not applicable (e.g., in
-         the case of a sniffing interface in promiscuous mode), this
-         parameter is omitted";
-       type Direction;
-       default both;
-     }
-   }
+  feature udpTransport {
+    description "If supported, the device supports UDP as transport
+      protocol.";
+  }
 
-   container ipfix {
+  feature tcpTransport {
+    description "If supported, the device supports TCP as transport
+      protocol.";
+  }
 
-     list collectingProcess {
-       description "Parameters of a Collecting Process.";
-       key name;
+  feature fileReader {
+    description "If supported, the device supports the configuration
+      of Collecting Processes as File Readers.";
+  }
 
-       leaf name {
-         description "Arbitrary but unique name of the Collecting
-           Process.";
-         type string;
-       }
+  feature fileWriter {
+    description "If supported, the device supports the configuration
+      of Exporting Processes as File Writers.";
+  }
 
-       list receiver {
-         description "Receiver parameters.";
-         key name;
+  typedef direction {
+    type enumeration {
+      enum ingress;
+      enum egress;
+      enum both;
+    }
+    description "Direction of packets going through an interface or
+      linecard.";
+  }
 
-         leaf name { type string; }
+  typedef cacheType {
+    type enumeration {
+      enum immediate {
+        description "Flow expiration after the first packet,
+          generation of Packet Records.";
+      }
+      enum timeout {
+        description "Flow expiration after active and inactive timeout,
+          generation of Flow Records.";
+      }
+      enum permanent {
+        description "No flow expiration, periodical export after
+          active timeout, generation of Flow Records.";
+      }
+    }
+    description "Cache Type specifies the Flow expiration policy of a
+      Cache.";
+  }
 
-         choice TransportProtocol {
-           mandatory true;
-           container sctpReceiver {
-             description "SCTP receiver parameters.";
-             reference "RFC 4960.";
-             leaf-list ipAddress {
-               description "List of eligible local IP addresses to be
-                 used by the SCTP endpoint. If omitted, all locally
-                 assigned IP addresses are used by the SCTP endpoint.";
-               type inet:ip-address;
-             }
-             leaf transportPort {
-               mandatory true;
-               type inet:port-number;
-             }
-             leaf maxAllowedStreams {
-               description "Maximum number of allowed inbound streams
-                 per SCTP association.";
-               type uint16;
-             }
-           }
-           container udpReceiver {
-             description "UDP receiver parameters.";
-             leaf ipAddress {
-               description "If omitted, all locally assigned IP
-                 addresses are used by the UDP endpoint.";
-               type inet:ip-address;
-             }
-             leaf transportPort {
-               mandatory true;
-               type inet:port-number;
-             }
-             leaf defaultTemplateLifetime { type uint32; }
-           }
-           container tcpReceiver {
-             description "TCP receiver parameters.";
-             leaf ipAddress {
-               description "If omitted, all locally assigned IP
-                 addresses are used by the TCP endpoint.";
-               type inet:ip-address;
-             }
-             leaf transportPort {
-               mandatory true;
-               type inet:port-number;
-             }
-           }
-           container fileReader {
-             description "File Reader parameters.";
-             leaf uri {
-               mandatory true;
-               type yang:uri;
-             }
-           }
-         }
-       }
+  typedef exportMemberType {
+    type enumeration {
+      enum primary;
+      enum secondary;
+      enum duplicate;
+      enum loadBalancing;
+      enum unused;
+    }
+    description "This type defines different usages of an export
+      destination among all destinations of an Exporting Process.
+      It corresponds to ipfixExportMemberType in IPFIX-MIB.";
+    reference "draft-ietf-ipfix-mib-05.";
+  }
 
-       leaf-list exportingProcess {
-         description "Export of received records without any
-           modifications. Records are processed by all Exporting
-           Processes in the list.";
-         type leafref { path "/ipfix/exportingProcess/name"; }
-       }
-     }
+  typedef optionType {
+    type enumeration {
+      enum meteringStatistics {
+        description "Metering Process Statistics.";
+        reference "RFC 5101, section 4.1.";
+      }
+      enum meteringReliability {
+        description "Metering Process Reliability Statistics.";
+        reference "RFC 5101, section 4.2.";
+      }
+      enum exportingReliability {
+        description "Exporting Process Reliability
+          Statistics.";
+        reference "RFC 5101, section 4.3.";
+      }
+      enum flowKeys {
+        description "Flow Keys.";
+        reference "RFC 5101, section 4.4.";
+      }
+      enum selectionSequence {
+        description "Selection Sequence and Selector Reports.";
+        reference "draft-ietf-psamp-protocol-09, section 6.5.1
+          and 6.5.2.";
+      }
+      enum selectionStatistics {
+        description "Selection Sequence Statistics Report.";
+        reference "draft-ietf-psamp-protocol-09, section
+          6.5.3.";
+      }
+      enum accuracy {
+        description "Accuracy Report.";
+        reference "draft-ietf-psamp-protocol-09, section
+          6.5.4.";
+      }
+      enum reducingRedundancy {
+        description "Application of ipfix-reducing-redundancy.";
+        reference "draft-ietf-ipfix-reducing-redundancy-04";
+      }
+    }
+    description "Options Templates specified by IPFIX and PSAMP.";
+  }
 
-     list observationPoint {
-       description "Parameters of an Observation Point.";
-       key name;
+  typedef transportSessionStatus {
+    type enumeration {
+      enum inactive;
+      enum active;
+      enum unknown;
+    }
+    description "Status of a Transport Session.";
+    reference "draft-ietf-ipfix-mib-05, section 7
+      (ipfixTransportSessionStatus).";
+  }
 
-       leaf name {
-         description "Arbitrary but unique name of the Observation
-           Point.";
-         type string;
-       }
+  typedef ipfixTransportProtocol {
+    type enumeration {
+      enum sctp;
+      enum udp {
+        description "only applicable if the feature udpTransport is
+          supported";
+      }
+      enum tcp {
+        description "only applicable if the feature tcpTransport is
+          supported";
+      }
+    }
+    description "Transport protocols of IPFIX.";
+    reference "RFC5101.";
+  }
 
-       leaf observationPointId {
-         description "If omitted, the Observation Point ID is assigned
-           by the monitoring device.";
-         type uint32;
-       }
+  typedef templateFieldFlags {
+    type bits {
+      bit scope {
+        position 0;
+      }
+      bit flowKey {
+        position 1;
+      }
+    }
+    description "Attributes of a field in a Template.";
+    reference "draft-ietf-ipfix-mib-05, section 7
+      (ipfixTemplateDefinitionFlags)";
+  }
 
-       leaf observationDomainId {
-         description "If omitted, the Observation Domain ID is assigned
-           by the monitoring device.";
-         type uint32;
-       }
+  typedef filterRStateFunction {
+    type enumeration {
+      enum other;
+      enum ingressIf;
+      enum egressIf;
+      enum aclViolation;
+      enum rpfFailure;
+      enum noResources;
+      enum noRoute;
+      enum originAS;
+      enum destAS;
+    }
+    description "Filter function applied to router state.";
+    reference "draft-ietf-psamp-mib-06, section 5.2.3.";
+  }
 
-       choice OPType {
-         mandatory true;
-         container interface { uses Interface; }
-         container linecard { uses Linecard; }
-       }
+  grouping informationElement {
+    description "Parameters of an Information Element.";
+    choice nameOrId {
+      mandatory true;
+      description "Name or ID of the Information Element.";
+      reference "RFC5102";
+      leaf ieName { type string; }
+      leaf ieId { type uint16; }
+    }
+    leaf ieLength {
+      type uint16;
+      description "Length can be omitted if a default length exists
+        for the specified Information Element. A value of 65535
+        specifies a variable-length Information Element.";
+      reference "RFC5102";
+    }
+    leaf ieEnterpriseNumber {
+      type uint32;
+      description "If present, this is an enterprise-specific
+        Information Element.";
+      reference "RFC5101, RFC5102";
+    }
+  }
 
-       leaf-list selectionProcess {
-         description "Selection Processes in this list process packets
-           in parallel.";
-         type leafref { path "/ipfix/selectionProcess/name"; }
-       }
+  grouping interfaceParameters {
+    description "Interface as input to Observation Point.";
+    choice indexOrName {
+      mandatory true;
+      description "Index or name of the interface as stored in the
+        ifTable of IF-MIB.";
+      reference "RFC 1229.";
+      leaf ifIndex { type uint32; }
+      leaf ifName { type string; }
+    }
+    leaf direction {
+      type direction;
+      default both;
+      description "Direction of packets. If not applicable (e.g., in
+        the case of a sniffing interface in promiscuous mode), this
+        parameter is ignored.";
+    }
+  }
 
-     }
+  grouping linecardParameters {
+    description "Linecard as input to Observation Point.";
+    choice indexOrName {
+      mandatory true;
+      description "Index or name of the linecard as stored in the
+        entPhysicalTable of ENTITY-MIB.";
+      reference "RFC 4133.";
+      leaf entPhysicalIndex { type uint32; }
+      leaf entPhysicalName { type string; }
+    }
+    leaf direction {
+      type direction;
+      default both;
+      description "Direction of packets. If not applicable (e.g., in
+        the case of a sniffing interface in promiscuous mode), this
+        parameter is ignored.";
+    }
+  }
 
-     list selectionProcess {
-       description "Parameters of a Selection Process (i.e., Primitive
-         Selector).";
-       key name;
+  grouping selectorParameters {
+    description "Configuration and state parameters of a Selector.";
+    leaf selectorId {
+      type uint16;
+      description "The Selector ID must be unique within the
+        Observation Domain.
+        If not configured, this parameter is set by the monitoring
+        device.";
+      reference "draft-ietf-psamp-info-11";
+    }
+    choice Method {
+      mandatory true;
+      description "See PSAMP-MIB for details about the selection
+        methods and their parameters.";
+      reference "draft-ietf-psamp-mib-06.";
+      leaf selectAll { type empty; }
+      container sampCountBased {
+        if-feature psampSampCountBased;
+        leaf interval {
+          type uint32;
+          mandatory true;
+        }
+        leaf spacing {
+          type uint32;
+          mandatory true;
+        }
+      }
+      container sampTimeBased {
+        if-feature psampSampTimeBased;
+        leaf interval {
+          type uint32;
+          mandatory true;
+        }
+        leaf spacing {
+          type uint32;
+          mandatory true;
+        }
+      }
+      container sampRandOutOfN {
+        if-feature psampSampRandOutOfN;
+        leaf population {
+          type uint32;
+          mandatory true;
+        }
+        leaf sample {
+          type uint32;
+          mandatory true;
+        }
+      }
+      container sampUniProb {
+        if-feature psampSampUniProb;
+        leaf probability {
+          type uint32;
+          mandatory true;
+          description "The given value must be divided by
+            4294967295.";
+        }
+      }
+      container sampNonUniProb {
+        if-feature psampSampNonUniProb;
+        leaf function {
+          type yang:object-identifier;
+          mandatory true;
+        }
+        leaf funcParam {
+          type yang:object-identifier;
+          mandatory true;
+        }
+      }
+      container sampFlowState {
+        if-feature psampSampFlowState;
+        leaf function {
+          type yang:object-identifier;
+          mandatory true;
+        }
+        leaf funcParam {
+          type yang:object-identifier;
+          mandatory true;
+        }
+      }
+      container filterMatch {
+        if-feature psampFilterMatch;
 
-       leaf name {
-         description "Arbitrary but unique name of the Selection
-           Process.";
-         type string;
-       }
+        choice nameOrId {
+          mandatory true;
+          description "Deviating from the PSAMP MIB, the field is
+            specified by either the name or the ID of the
+            Information Element.";
+          leaf ieName {
+            type string;
+          }
+          leaf ieId {
+            type uint16;
+          }
+        }
+        leaf ieEnterpriseNumber {
+          type uint32;
+          description "Deviating from the PSAMP MIB, an enterprise
+            number may be specified to refer to an
+            enterprise-specific Information Element.";
+        }
+        leaf startValue {
+          type string;
+          mandatory true;
+        }
+        leaf stopValue {
+          type string;
+          mandatory true;
+        }
+        leaf mask {
+          type string;
+          description "If not configured, no mask is applied.";
+        }
+      }
+      container filterHash {
+        if-feature psampFilterHash;
+        leaf addrType {
+          type inet:ip-version;
+          mandatory true;
+        }
+        leaf headerBits {
+          type string {
+            length 40;
+          }
+          mandatory true;
+          description "If addrType is 'ipv4', only the first 20 bytes
+            are used.";
+        }
+        leaf payloadBytes {
+          type uint32;
+          default 0;
+        }
+        leaf payloadBits {
+          type string;
+          description "If not configured, all bits included in the
+            payload section defined by payloadBytes are used.";
+        }
+        leaf function {
+          type yang:object-identifier;
+          mandatory true;
+        }
+        leaf funcParam {
+          type yang:object-identifier;
+          mandatory true;
+        }
+        leaf inputBits {
+          type uint32;
+          mandatory true;
+        }
+        leaf outputBits {
+          type uint32;
+          mandatory true;
+        }
+        leaf outputMask {
+          type string;
+          mandatory true;
+        }
+        leaf selection {
+          type string;
+          mandatory true;
+        }
+      }
+      container filterRState {
+        if-feature psampFilterRState;
+        leaf function {
+          type filterRStateFunction;
+          mandatory true;
+        }
+        leaf negate {
+          type boolean;
+          default false;
+        }
+        leaf ifIndex {
+          type uint32;
+          mandatory true;
+          description "Index of the interface as stored in the
+            ifTable of IF-MIB.";
+          reference "RFC 2863.";
+        }
+        leaf startAS {
+          type inet:as-number;
+          must "../function='originAS' or ../function='destAS'";
+        }
+        leaf stopAS {
+          type inet:as-number;
+          must "../function='originAS' or ../function='destAS'";
+        }
+        leaf vendorFunc {
+          type yang:object-identifier;
+          must "../function='other'";
+        }
+      }
+    }
+    leaf packetsObserved {
+      type yang:counter64;
+      config false;
+      description "Corresponds to ipfixSelectorStatsPacketsObserved
+        in IPFIX-MIB.";
+      reference "draft-ietf-ipfix-mib-05, section 7
+        (ipfixSelectorStatsPacketsObserved).";
+    }
+    leaf packetsDropped {
+      type yang:counter64;
+      config false;
+      description "Corresponds to ipfixSelectorStatsPacketsDropped
+        in IPFIX-MIB.";
+      reference "draft-ietf-ipfix-mib-05, section 7
+        (ipfixSelectorStatsPacketsDropped).";
+    }
+  }
 
-       leaf selectorId {
-         description "If omitted, the Selector ID is assigned by the
-           monitoring device.";
-         type uint32;
-       }
+  grouping cacheLayoutParameters {
+    description "Fields of a Cache Layout.";
+    list cacheField {
+      key name;
+      min-elements 1;
+      leaf name { type string; }
+      uses informationElement;
+      leaf isFlowKey {
+        type empty;
+        description "If present, this is a flow key.";
+      }
+    }
+  }
 
-       choice Method {
-         description "See PSAMP-MIB for details about the selection
-           methods and their parameters.";
-         reference "draft-ietf-psamp-mib-06.";
-         mandatory true;
-         leaf selectAll {
-           type empty;
-         }
-         container sampCountBased {
-           leaf interval { type uint32; }
-           leaf spacing { type uint32; }
-         }
-         container sampTimeBased {
-           leaf interval { type uint32; }
-           leaf spacing { type uint32; }
-         }
-         container sampRandOutOfN {
-           leaf population { type uint32; }
-           leaf sample { type uint32; }
-         }
-         container sampUniProb {
-           leaf probability {
-             description "The given value must be divided by
-               4294967295.";
-             type uint32;
-           }
-         }
-         container sampNonUniProb {
-           description "In PSAMP-MIB, these are OIDs.";
-           leaf function { type string; }
-           leaf funcParam { type string; }
-         }
-         container sampFlowState {
-           description "In PSAMP-MIB, these are OIDs.";
-           leaf function { type string; }
-           leaf funcParam { type string; }
-         }
-         container filterMatch {
-           leaf fieldId { type uint32; }
-           leaf startValue { type string; }
-           leaf stopValue { type string; }
-           leaf mask { type string; }
-         }
-         container filterHash {
-           description "In PSAMP-MIB, function and funcParam are OIDs.";
-           leaf addrType { type inet:ip-version; }
-           leaf headerBits { type string; }
-           leaf payloadBytes { type uint32; }
-           leaf payloadBits { type string; }
-           leaf function { type string; }
-           leaf funcParam { type string; }
-           leaf inputBits { type uint32; }
-           leaf outputBits { type uint32; }
-           leaf outputMask { type string; }
-           leaf selection { type string; }
-         }
-         container filterRState {
-           description "In PSAMP-MIB, vendorFunc is OID.";
-           leaf function { type int32; }
-           leaf negate { type boolean; }
-           leaf ifIndex {
-             description "Index of the interface as stored in the
-               ifTable of IF-MIB.";
-             reference "RFC 2863.";
-             type uint32;
-           }
-           leaf startAS { type inet:as-number; }
-           leaf stopAS { type inet:as-number; }
-           leaf vendorFunc { type string; }
-         }
-       }
+  grouping destinationParameters {
+    description "Parameters specifying an export destination.";
+    leaf type {
+      type exportMemberType;
+      default primary;
+      description "Member type within the Transport Session group
+        that is composed of all destinations and fileWriters of the
+        Exporting Process.";
+    }
+    leaf transportProtocol {
+      type ipfixTransportProtocol;
+      mandatory true;
+    }
+    leaf destinationIpAddress {
+      type inet:ip-address;
+      mandatory true;
+    }
+    leaf destinationPort {
+      type inet:port-number;
+      default 4739;
+    }
+    leaf sourceIpAddress {
+      type inet:ip-address;
+      must "../transportProtocol='udp'";
+      description "Sets source IP address if UDP is transport
+        protocol. If not configured, the IP address assigned to the
+        outgoing interface is used.";
+    }
+    leaf-list localIpAddress {
+      type inet:ip-address;
+      must "../transportProtocol='sctp'";
+      description "List of eligible local IP addresses to be
+        used by the SCTP endpoint. If not configured, all locally
+        assigned IP addresses are used by the local endpoint.";
+      reference "RFC 3758, RFC 4960.";
+    }
+    leaf sendBufferSize {
+      type uint32;
+      units bytes;
+      description "Size of the socket send buffer.
+        If not configured, this parameter is set by the monitoring
+        device";
+    }
+    leaf rateLimit {
+      type uint32;
+      units "bytes per second";
+      description "Maximum number of bytes per second the Exporting
+        Process may export to the given destination. The number of
+        bytes is calculated from the lengths of the IPFIX Messages
+        exported. If not configured, no rate limiting is performed.";
+      reference "draft-ietf-psamp-protocol-09, section 6.3.";
+    }
+    leaf timedReliability {
+      type yang:timeticks;
+      must "../transportProtocol='sctp'";
+      default 0;
+      description "PR-SCTP lifetime for IPFIX Messages
+        containing Data Sets only. Zero means reliable transport.";
+      reference "RFC 3758, RFC 4960.";
+    }
+    leaf numberOfStreams {
+      type uint16;
+      must "../transportProtocol='sctp'";
+      description "Number of outbound streams requested for the
+        SCTP association.
+        If not configured, this parameter is set by the monitoring
+        device.";
+      reference "RFC 3758, RFC 4960.";
+    }
+    leaf orderedDelivery {
+      type boolean;
+      must "../transportProtocol='sctp'";
+      default true;
+      description "Ordered delivery of IPFIX Messages
+        containing Data Sets.";
+      reference "RFC 3758, RFC 4960.";
+    }
+    leaf templateRefreshTimeout {
+      type uint32;
+      units seconds;
+      must "../transportProtocol='udp'";
+      default 600;
+      description "Sets time after which Templates are resent if UDP
+        is transport protocol.";
+      reference "RFC5101.";
+    }
+    leaf optionTemplateRefreshTimeout {
+      type uint32;
+      units seconds;
+      must "../transportProtocol='udp'";
+      default 600;
+      description "Sets time after which Options Templates are resent
+        if UDP is transport protocol.";
+      reference "RFC5101.";
+    }
+    leaf templateRefreshPacket {
+      type uint32;
+      units "IPFIX Messages";
+      must "../transportProtocol='udp'";
+      description "Sets number of IPFIX Messages after which
+        Templates are resent if UDP is transport protocol.
+        If omitted, Templates are only resent after timeout.";
+      reference "RFC5101.";
+    }
+    leaf optionTemplateRefreshPacket {
+      type uint32;
+      units "IPFIX Messages";
+      must "../transportProtocol='udp'";
+      description "Sets number of IPFIX Messages after which
+        Options Templates are resent if UDP is transport protocol.
+        If omitted, Templates are only resent after timeout.";
+      reference "RFC5101.";
+    }
+  }
 
-       leaf-list selectionProcess {
-         description "A Selection Process may pass selected packets or
-           records to further Selection Processes, building Selection
-           Sequences. All Selection Processes in this list process
-           packets or records in parallel.";
-         type leafref { path "/ipfix/selectionProcess/name"; }
-       }
+  grouping optionParameters {
+    description "Parameters specifying the data export using an
+      Options Template.";
+    leaf type {
+      type optionType;
+      mandatory true;
+    }
+    leaf timeout {
+      type yang:timeticks;
+      default 0;
+      description "Time interval for exporting options data.
+        If set to zero, the options data is sent once.";
+    }
+    container optionTemplate {
+      description "If no Options Template is specified, the
+        Exporter defines a template according to options type and
+        available options data.";
+      list optionField {
+        key name;
+        ordered-by user;
+        leaf name { type string; }
+        uses informationElement;
+        leaf isScope {
+          type empty;
+          description "If present, this is a scope field.";
+        }
+      }
+    }
+  }
 
-       leaf-list cache {
-         description "Caches in this list receive packets or records in
-           parallel.";
-         type leafref { path "/ipfix/cache/name"; }
-       }
-     }
+  grouping receiverParameters {
+    leaf transportProtocol {
+      type ipfixTransportProtocol;
+      mandatory true;
+    }
+    leaf-list localIpAddress {
+      type inet:ip-address;
+      description "List of local IP addresses on which the Collecting
+        Process listens for IPFIX Messages. If not configured, all
+        locally assigned IP addresses are used. In the case of SCTP,
+        these IP addresses correspond to the eligible local IP
+        addresses to be used by the SCTP endpoint.";
+      reference "RFC 4960.";
+    }
+    leaf localPort {
+      type inet:port-number;
+      default 4739;
+    }
+    leaf maxAllowedStreams {
+      type uint16;
+      must "../transportProtocol='sctp'";
+      description "Maximum number of allowed inbound streams
+        per SCTP association. If not configured, the maximum number of
+        inbound streams is not restricted.";
+    }
+    leaf templateLifetime {
+      type uint32;
+      units seconds;
+      must "../transportProtocol='udp'";
+      default 1800;
+      description "Template lifetime if UDP is transport protocol.";
+      reference "RFC5101, section 10.3.7";
+    }
+  }
 
-     list cache {
-       description "Parameters of a Cache.";
-       key name;
+  grouping fileWriterParameters {
+    description "File Writer parameters.";
+    leaf type {
+      type exportMemberType;
+      must "current()!='loadBalancing'";
+      default primary;
+      description "Member type within the Transport Session group
+        that is composed of all destinations and fileWriters of the
+        Exporting Process.";
+    }
+    leaf uri {
+      type inet:uri;
+      mandatory true;
+      description "URI specifying the location of the file.";
+    }
+  }
 
-       leaf name {
-         description "Arbitrary but unique name of the Cache.";
-         type string;
-       }
+  grouping fileReaderParameters {
+    description "File Reader parameters.";
+    leaf uri {
+      type inet:uri;
+      mandatory true;
+      description "URI specifying the location of the file.";
+    }
+  }
 
-       leaf cacheType {
-         mandatory true;
-         type enumeration {
-           enum immediate {
-             description "Flow expiration after the first packet,
-               generation of Packet Records.";
-           }
-           enum normal {
-             description "Flow expiration after active and idle timeout,
-               generation of Flow Records.";
-           }
-           enum permanent {
-             description "No flow expiration, periodical export after
-               active timeout, generation of Flow Records.";
-           }
-         }
-       }
+  grouping templateParameters {
+    description "State parameters of a Template used by an Exporting
+      Process or received by a Collecting Process. Parameter names
+      and semantics correspond to the managed objects in IPFIX-MIB";
+    reference "draft-ietf-ipfix-mib-05, section 7
+      (ipfixTemplateEntry, ipfixTemplateDefinitionEntry,
+      ipfixTemplateStatsEntry)";
+    leaf observationDomainId { type uint32; }
+    leaf templateId { type uint16; }
+    leaf setId { type uint16; }
+    leaf accessTime { type yang:date-and-time; }
+    leaf dataRecords { type yang:counter64; }
+    list field {
+      leaf ieId { type uint16; }
+      leaf ieLength { type uint16; }
+      leaf enterprise { type uint32; }
+      leaf flags { type templateFieldFlags; }
+    }
+  }
 
-       leaf maxRecords { type uint32; }
+  grouping transportSessionParameters {
+    description "State parameters of a Transport Session originating
+      from an Exporting or terminating at a Collecting Process.
+      Parameter names and semantics correspond to the managed
+      objects in IPFIX-MIB";
+    reference "draft-ietf-ipfix-mib-05, section 7
+      (ipfixTransportSessionEntry, ipfixTransportSessionStatsEntry)";
+    leaf index { type int32; }
+    leaf sourceAddress { type inet:ip-address; }
+    leaf destinationAddress { type inet:ip-address; }
+    leaf sourcePort { type inet:port-number; }
+    leaf destinationPort { type inet:port-number; }
+    leaf sctpAssocId { type uint32; }
+    leaf templateRefreshTimeout {
+      type uint32;
+      units seconds;
+    }
+    leaf optionTemplateRefreshTimeout {
+      type uint32;
+      units seconds;
+    }
+    leaf templateRefreshPacket {
+      type uint32;
+      units "IPFIX Messages";
+    }
+    leaf optionTemplateRefreshPacket {
+      type uint32;
+      units "IPFIX Messages";
+    }
+    leaf status { type transportSessionStatus; }
+    leaf rate {
+      type int32;
+      units "bytes per second";
+    }
+    leaf packets {
+      type yang:counter64;
+      units packets;
+    }
+    leaf bytes {
+      type yang:counter64;
+      units bytes;
+    }
+    leaf messages {
+      type yang:counter64;
+      units "IPFIX Messages";
+    }
+    leaf discardedMessages {
+      type yang:counter64;
+      units "IPFIX Messages";
+    }
+    leaf records {
+      type yang:counter64;
+      units "Data Records";
+    }
+    leaf templates {
+      type yang:counter32;
+      units "Templates";
+    }
+    leaf optionTemplates {
+      type yang:counter32;
+      units "Options Templates";
+    }
+  }
 
-       leaf activeTimeout { type yang:timeticks; }
+  container ipfix {
+    list collectingProcess {
+      if-feature collector;
+      key name;
+      description "Parameters of a Collecting Process.";
+      leaf name { type string; }
+      list receiver {
+        key name;
+        description "List of receivers (sockets) on which the
+          Collecting Process receives IPFIX Messages.";
+        leaf name { type string; }
+        uses receiverParameters;
+      }
+      list fileReader {
+        if-feature fileReader;
+        key name;
+        description "List of File Readers from which the Collecting
+          Process reads IPFIX Messages.";
+        leaf name { type string; }
+        uses fileReaderParameters;
+      }
+      leaf-list exportingProcess {
+        type leafref { path "/ipfix/exportingProcess/name"; }
+        description "Export of received records without any
+          modifications. Records are processed by all Exporting
+          Processes in the list.";
+      }
+      list template {
+        config false;
+        uses templateParameters;
+      }
+      list transportSession {
+        config false;
+        uses transportSessionParameters;
+      }
+    }
 
-       leaf idleTimeout { type yang:timeticks; }
+    list observationPoint {
+      if-feature meter;
+      key name;
+      description "Parameters of an Observation Point.";
+      leaf name { type string; }
+      leaf observationPointId {
+        type uint32;
+        description "If not configured, this parameter is set by the
+          Monitoring Device.";
+      }
+      leaf observationDomainId {
+        type uint32;
+        mandatory true;
+        description "The Observation Domain ID associates the
+          Observation Point to an Observation Domain. Observation
+          Points with identical Observation Domain ID belong to the
+          same Observation Domain.";
+      }
+      choice OPType {
+        mandatory true;
+        container interface { uses interfaceParameters; }
+        container linecard { uses linecardParameters; }
+      }
+      leaf-list selectionProcess {
+        type leafref { path "/ipfix/selectionProcess/name"; }
+        description "Selection Processes in this list process packets
+          in parallel.";
+      }
+    }
 
-       container cacheLayout {
-         list field {
-           min-elements 1;
-           key name;
-           leaf name { type string; }
-           uses InformationElement;
-           leaf isFlowKey { type empty; }
-         }
-       }
+    list selectionProcess {
+      if-feature meter;
+      key name;
+      description "Parameters of a Selection Process.";
+      leaf name { type string; }
+      leaf selectionSequenceId {
+        type uint64;
+        description "The Selection Sequence ID must be unique within
+          the Observation Domain.
+          If not configured, this parameter is set by the monitoring
+          device.";
+        reference "draft-ietf-psamp-info-11";
+      }
+      list selector {
+        key name;
+        min-elements 1;
+        ordered-by user;
+        description "List of Selectors that define the action of the
+          Selection Process on a single packet. The Selectors are
+          serially invoked in the same order as they appear in this
+          list.";
+        leaf name { type string; }
+        uses selectorParameters;
+      }
+      leaf-list selectionProcess {
+        type leafref { path "/ipfix/selectionProcess/name"; }
+        description "Selection Processes in this list receive the
+          selected packets in parallel.";
+      }
+      leaf-list cache {
+        type leafref { path "/ipfix/cache/name"; }
+        description "Caches in this list receive the selected packets
+          in parallel.";
+      }
+    }
 
-       leaf-list exportingProcess {
-         description "Records are exported by all Exporting Processes in
-           the list.";
-         type leafref { path "/ipfix/exportingProcess/name"; }
-       }
-     }
+    list cache {
+      if-feature meter;
+      key name;
+      description "Parameters of a Cache.";
+      leaf name { type string; }
+      leaf cacheType {
+        type cacheType;
+        mandatory true;
+      }
+      leaf maxRecords {
+        type uint32;
+        description "If not configured, this parameter is set by the
+          Monitoring Device.";
+      }
+      leaf activeTimeout {
+        type uint32;
+        units seconds;
+        must "../cacheType!='immediate'";
+        description "If not configured, this parameter is set by the
+          Monitoring Device.";
+      }
+      leaf inactiveTimeout {
+        type uint32;
+        units seconds;
+        must "../cacheType!='permanent'";
+        description "If not configured, this parameter is set by the
+          Monitoring Device.";
+      }
+      container cacheLayout { uses cacheLayoutParameters; }
+      leaf-list exportingProcess {
+        type leafref { path "/ipfix/exportingProcess/name"; }
+        description "Records are exported by all Exporting Processes in
+          the list.";
+      }
+      leaf activeFlows {
+        type uint32;
+        units flows;
+        config false;
+        description "Corresponds to
+          ipfixMeteringProcessCacheActiveFlows in IPFIX-MIB.";
+        reference "ietf-draft-ipfix-mib-05, section 7
+          (ipfixMeteringProcessCacheActiveFlows)";
+      }
+      leaf inactiveFlows {
+        type uint32;
+        units flows;
+        config false;
+        description "Corresponds to
+            ipfixMeteringProcessCacheInactiveFlows in IPFIX-MIB.";
+        reference "ietf-draft-ipfix-mib-0, section 7
+          (ipfixMeteringProcessCacheInactiveFlows)";
+      }
+      leaf dataRecords {
+        type yang:counter64;
+        units "Data Records";
+        config false;
+        description "Corresponds to
+            ipfixMeteringProcessDataRecords in IPFIX-MIB.";
+        reference "ietf-draft-ipfix-mib-0, section 7
+          (ipfixMeteringProcessDataRecords)";
+      }
+    }
 
-     list exportingProcess {
-       description "Parameters of an Exporting Process.";
-       key name;
+    list exportingProcess {
+      if-feature exporter;
+      key name;
+      description "Parameters of an Exporting Process.";
+      leaf name { type string; }
+      leaf exportingProcessId {
+        type uint32;
+        description "If not configured, this parameter is set by the
+          Monitoring Device.";
+      }
+      list destination {
+        key name;
 
-       leaf name {
-         description "Arbitrary but unique name of the Exporting
-           Process.";
-         type string;
-       }
-
-       leaf exportingProcessId {
-         description "If omitted, the Exporting Process ID is assigned
-           by the monitoring device.";
-         type uint32;
-       }
-
-       list destination {
-         key name;
-
-         leaf name { type string; }
-
-         leaf type {
-           description "Transport Session type according to IPFIX-MIB";
-           reference "draft-ietf-ipfix-mib-02.";
-           type enumeration {
-             enum primary;
-             enum secondary;
-             enum duplicate;
-             enum loadBalancing;
-             enum unused;
-           }
-         }
-
-         choice TransportProtocol {
-           mandatory true;
-           container sctpExport {
-             description "SCTP export parameters.";
-             reference "RFC 3758, RFC 4960.";
-             leaf destinationIpAddress {
-               mandatory true;
-               type inet:ip-address;
-             }
-             leaf destinationTransportPort {
-               type inet:port-number;
-               default 4739;
-             }
-             leaf-list sourceIpAddress {
-               description "List of eligible local IP addresses to be
-                 used by the SCTP endpoint. If omitted, all locally
-                 assigned IP addresses are used by the local endpoint.";
-               type inet:ip-address;
-             }
-             leaf sendBufferSize { type uint32; }
-             leaf timedReliability {
-               description "PR-SCTP lifetime for IPFIX Messages
-                 containing Data Sets only.";
-               type yang:timeticks;
-               default 0;
-             }
-             leaf numberOfStreams {
-               description "Number of outbound streams requested for the
-                 SCTP association.";
-               type uint16;
-             }
-             leaf orderedDelivery {
-               description "Ordered delivery of IPFIX Messages
-                 containing Data Sets.";
-               type boolean;
-               default "true";
-             }
-           }
-           container udpExport {
-             description "UDP export parameters.";
-             leaf destinationIpAddress {
-               mandatory true;
-               type inet:ip-address;
-             }
-             leaf destinationTransportPort {
-               type inet:port-number;
-               default 4739;
-             }
-             leaf sourceIpAddress {
-               description "Source IP address. If omitted, the address
-                 assigned to the outgoing interface is used.";
-               type inet:ip-address;
-             }
-             leaf sendBufferSize { type uint32; }
-             leaf templateRefreshTimeout { type yang:timeticks; }
-             leaf templateRefreshPacket { type uint32; }
-             leaf optionTemplateRefreshTimeout { type yang:timeticks; }
-             leaf optionTemplateRefreshPacket { type uint32; }
-           }
-           container tcpExport {
-             description "TCP export parameters.";
-             leaf destinationIpAddress {
-               mandatory true;
-               type inet:ip-address;
-             }
-             leaf destinationTransportPort {
-               type inet:port-number;
-               default 4739;
-             }
-             leaf sendBufferSize { type uint32; }
-           }
-           container fileWriter {
-             description "File Writer parameters.";
-             leaf uri {
-               mandatory true;
-               type yang:uri;
-             }
-           }
-         }
-
-         list option {
-           key name;
-           leaf name { type string; }
-           leaf type {
-             mandatory true;
-             type enumeration {
-               enum "meteringStatistics" {
-                 description "Metering Process Statistics.";
-                 reference "RFC 5101, section 4.1.";
-               }
-               enum "meteringReliability" {
-                 description "Metering Process Reliability Statistics.";
-                 reference "RFC 5101, section 4.2.";
-               }
-
-               enum "exportingReliability" {
-                 description "Exporting Process Reliability
-                   Statistics.";
-                 reference "RFC 5101, section 4.3.";
-               }
-               enum "flowKeys" {
-                 description "Flow Keys.";
-                 reference "RFC 5101, section 4.4.";
-               }
-               enum "selectionSequence" {
-                 description "Selection Sequence and Selector Reports.";
-                 reference "draft-ietf-psamp-protocol-09, section 6.5.1
-                   and 6.5.2.";
-               }
-               enum "selectionStatistics" {
-                 description "Selection Sequence Statistics Report.";
-                 reference "draft-ietf-psamp-protocol-09, section
-                   6.5.3.";
-               }
-               enum "accuracy" {
-                 description "Accuracy Report.";
-                 reference "draft-ietf-psamp-protocol-09, section
-                   6.5.4.";
-               }
-               enum "reducingRedundancy" {
-                 description "Application of
-                   ipfix-reducing-redundancy.";
-                 reference "draft-ietf-ipfix-reducing-redundancy-04";
-               }
-             }
-           }
-           leaf timeout {
-             description "Time interval for exporting option data.";
-             type yang:timeticks;
-             default 0;
-           }
-           container optionTemplate {
-             description "If no Option Template is specified, the
-               Exporter defines a template according to option type and
-               available option data.";
-             presence "If present, the Exporter is to use this Option
-               Template to export the option data.";
-             list optionField {
-               key name;
-               ordered-by user;
-               leaf name { type string; }
-               uses InformationElement;
-               leaf isScope { type empty; }
-             }
-           }
-         }
-       }
-     }
-   }
- }
+        leaf name { type string; }
+        uses destinationParameters;
+      }
+      list fileWriter {
+        if-feature fileWriter;
+        key name;
+        leaf name { type string; }
+        uses fileWriterParameters;
+      }
+      list options {
+        key name;
+        leaf name { type string; }
+        uses optionParameters;
+      }
+      list template {
+        config false;
+        uses templateParameters;
+      }
+      list transportSession {
+        config false;
+        uses transportSessionParameters;
+      }
+    }
+  }
+}

@@ -18,7 +18,7 @@ module EtherLike-MIB {
    import IF-MIB     { prefix "if-mib"; }
    import SNMPv2-TC  { prefix "smiv2"; }
    import yang-smi   { prefix "smi"; }
-   import yang-types { prefix "yang"; }
+   import ietf-yang-types { prefix "yang"; }
 
    /*** META INFORMATION ***/
 

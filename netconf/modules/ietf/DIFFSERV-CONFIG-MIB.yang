@@ -83,7 +83,7 @@ module DIFFSERV-CONFIG-MIB {
             type snmp-framework:SnmpAdminString {
                length "1..116";
             }
-            config false;
+            // config false;
             description   
               "A unique id for the per-hop-behavior policy for at
                least the SNMP agent.  For ease of administration the

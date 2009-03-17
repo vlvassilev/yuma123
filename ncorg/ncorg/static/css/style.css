@@ -538,6 +538,14 @@ div.ncdocs ul {
   width: 80%;
 }
 
+div.publication-list h4 {
+  margin-left: .3in;
+}
+
+div.publication-list p {
+  margin-left: .5in;
+}
+
 
 /* copied from yangtools/trunk/netconf/data/yangdump-css-contents.txt */
 

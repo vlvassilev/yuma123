@@ -1077,7 +1077,7 @@ status_t
     val_gen_index_chain (const obj_template_t *obj,
 			 val_value_t *val)
 {
-    const obj_key_t       *instart, *in;
+    const obj_key_t       *key;
     status_t               res;
 
 #ifdef DEBUG
@@ -1089,14 +1089,11 @@ status_t
     }
 #endif
 
-    instart = (const obj_key_t *)
-	dlq_firstEntry(obj->def.list->keyQ);
-
-    /* 1 or more index components expected */
-    for (in = instart; 
-	 in != NULL;
-	 in = (const obj_key_t *)dlq_nextEntry(in)) {
-	res = val_gen_index_comp(in, val);
+    /* 0 or more index components expected */
+    for (key = obj_first_ckey(obj);
+	 key != NULL;
+	 key = obj_next_ckey(key)) {
+	res = val_gen_index_comp(key, val);
 	if (res != NO_ERR) {
 	    return res;
 	}

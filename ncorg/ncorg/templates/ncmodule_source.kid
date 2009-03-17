@@ -14,7 +14,7 @@
 
        err = ""
        opened = 0
-       fname = os.getcwd() + "/ncorg/static/modules/" + mod + "_" + version + ".div"
+       fname = os.getcwd() + "/ncorg/static/modules/" + mod + "." + version + ".div"
        try:
            f = open(fname, 'r')
        except IOError:

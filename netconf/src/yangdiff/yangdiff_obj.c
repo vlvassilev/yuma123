@@ -836,7 +836,7 @@ static uint32
 	return 1;
     }
 
-    if (uniqueQ_changed(old->uniqueQ, new->uniqueQ)) {
+    if (uniqueQ_changed(&old->uniqueQ, &new->uniqueQ)) {
 	return 1;
     }
 
@@ -937,7 +937,7 @@ static void
 	output_cdb_line(cp, &cdb);
     }
 
-    output_uniqueQ_diff(cp, old->uniqueQ, new->uniqueQ);
+    output_uniqueQ_diff(cp, &old->uniqueQ, &new->uniqueQ);
 
     if (bool_field_changed(YANG_K_CONFIG,
 			   (oldobj->flags & OBJ_FL_CONFIG),

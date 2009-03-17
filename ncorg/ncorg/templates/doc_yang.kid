@@ -27,8 +27,8 @@
 	  is developing a high-level data modeling language for the 
 	  NETCONF protocol, called <b>YANG</b>.  The current version
 	  of the language specification is dated
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-00.txt">
-	    May 2008.
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-04.txt">
+	    March 2009.
 	  </a>
 	</p>
 	<h2>YANG Central</h2>

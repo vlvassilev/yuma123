@@ -377,7 +377,7 @@
           version = ncmodule.version
 
        fname = os.getcwd() + "/ncorg/static/modules/" + \
-          mod + "_" + version + ".div"
+          mod + "." + version + ".div"
        try:
            f = open(fname, 'r')
        except IOError:
@@ -412,7 +412,7 @@
           version = ncmodule.version
 
        fname = os.getcwd() + "/ncorg/static/cookedmodules/" + \
-          mod + "_" + version + ".div"
+          mod + "." + version + ".div"
        try:
            f = open(fname, 'r')
        except IOError:

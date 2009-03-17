@@ -277,9 +277,9 @@ typedef struct obj_list_t_ {
     xmlChar       *ref;
     dlq_hdr_t     *typedefQ;         /* Q of typ_template_t */
     dlq_hdr_t     *groupingQ;       /* Q of grp_template_t */
-    dlq_hdr_t     *keyQ;                 /* Q of obj_key_t */
-    dlq_hdr_t     *uniqueQ;           /* Q of obj_unique_t */
     dlq_hdr_t     *datadefQ;        /* Q of obj_template_t */
+    dlq_hdr_t      keyQ;                 /* Q of obj_key_t */
+    dlq_hdr_t      uniqueQ;           /* Q of obj_unique_t */
     boolean        datadefclone;
     boolean        ordersys;   /* ordered-by system or user */
     boolean        minset;
@@ -783,11 +783,11 @@ extern void
     obj_free_key (obj_key_t *key);
 
 extern obj_key_t *
-    obj_find_key (dlq_hdr_t *que,
+    obj_find_key (const dlq_hdr_t *que,
 		  const xmlChar *keycompname);
 
 extern obj_key_t *
-    obj_find_key2 (dlq_hdr_t *que,
+    obj_find_key2 (const dlq_hdr_t *que,
 		   const obj_template_t *keyobj);
 
 extern obj_key_t *

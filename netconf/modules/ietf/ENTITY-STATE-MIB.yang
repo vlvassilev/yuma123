@@ -74,7 +74,7 @@ module ENTITY-STATE-MIB {
             type leafref {
                path "/entity-mib:entityPhysical/entity-mib:entPhysicalEntry/entity-mib:entPhysicalIndex";
             }
-            config false;
+            // config false;
             description   
               "Automagically generated leafref leaf.";
          }

@@ -525,7 +525,7 @@ static void
 	    if (cp->simurls) {
 		ses_putchar(scb, NCXMOD_PSCHAR);
 	    } else {
-		ses_putchar(scb, '_');
+		ses_putchar(scb, '.');
 	    }
 	    ses_putstr(scb, fversion);
 	}
@@ -602,7 +602,7 @@ static void
 	    if (cp->simurls) {
 		ses_putchar(scb, NCXMOD_PSCHAR);
 	    } else {
-		ses_putchar(scb, '_');
+		ses_putchar(scb, '.');
 	    }
 	    ses_putstr(scb, fversion);
 	}
@@ -1710,14 +1710,14 @@ static void
 	write_musts(scb, &list->mustQ, indent);
 
 	/* key field, manual generation to make links */
-	if (notrefined && !dlq_empty(list->keyQ)) {
+	if (notrefined && !dlq_empty(&list->keyQ)) {
 	    ses_indent(scb, indent);
 	    write_kw(scb, YANG_K_KEY);
 	    ses_putstr(scb, (const xmlChar *)" \"");
 
-	    for (key = (const obj_key_t *)dlq_firstEntry(list->keyQ);
+	    for (key = obj_first_ckey(obj);
 		 key != NULL; key = nextkey) {
-		nextkey = (const obj_key_t *)dlq_nextEntry(key);
+		nextkey = obj_next_ckey(key);
 		write_a(scb, cp, NULL, NULL, submod, NULL,
 			obj_get_name(key->keyobj),
 			key->keyobj->linenum);
@@ -1729,9 +1729,9 @@ static void
 	}
 
 	/* unique fields, manual generation to make links */
-	if (notrefined && !dlq_empty(list->uniqueQ)) {
+	if (notrefined && !dlq_empty(&list->uniqueQ)) {
 	    for (uni = (const obj_unique_t *)
-		     dlq_firstEntry(list->uniqueQ);
+		     dlq_firstEntry(&list->uniqueQ);
 		 uni != NULL;
 		 uni = (const obj_unique_t *)dlq_nextEntry(uni)) {
 
@@ -2115,6 +2115,8 @@ static void
 	/* end notification section comment */
 	write_endsec_cmt(scb, YANG_K_NOTIFICATION, notif->name);
 	break;
+    case OBJ_TYP_REFINE:
+	break;   /****/
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
     }

@@ -18,7 +18,7 @@ module INTEGRATED-SERVICES-MIB {
    import IF-MIB     { prefix "if-mib"; }
    import SNMPv2-TC  { prefix "smiv2"; }
    import yang-smi   { prefix "smi"; }
-   import yang-types { prefix "yang"; }
+   import ietf-yang-types { prefix "yang"; }
 
    /*** META INFORMATION ***/
 
@@ -183,7 +183,7 @@ module INTEGRATED-SERVICES-MIB {
             type leafref {
                path "/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex";
             }
-            config false;
+            // config false;
             description   
               "Automagically generated leafref leaf.";
          }
@@ -269,7 +269,7 @@ module INTEGRATED-SERVICES-MIB {
 
          leaf intSrvFlowNumber {
             type integrated-services:SessionNumber;
-            config false;
+            // config false;
             description   
               "The number of this flow.  This is for SNMP In-
                dexing purposes only and has no relation to any

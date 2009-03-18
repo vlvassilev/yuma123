@@ -35,7 +35,11 @@ LIBS = 	-lmgr \
 #	-lncx \
 #	-L/sw/lib -lxml2 -lcurses -lssh2 -ltecla
 
-
+ifdef MAC
+  GRP=
+else
+  GRP=--group=root
+endif
 
 ############################# MAKE RULES ##################
 all: yangcli
@@ -62,7 +66,7 @@ test:
 
 # needs to be done by root
 install:
-	install --owner=root --group=root $(BIN_INST)/$(PROG) $(REAL_INST)
+	install --owner=root $(GRP)  $(BIN_INST)/$(PROG) $(REAL_INST)
 
 # this real rule keeps make from deleting the $(OBJS) as
 # intermediate files

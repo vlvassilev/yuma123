@@ -11,7 +11,14 @@ SUBDIR_CPP=
 
 TARGET=$(TBASE)/$(SUBDIR_NM)
 BIN_INST=$(TBASE)/bin
+REAL_INST=/usr/bin
 PROG=netconfd
+
+ifdef MAC
+   GRP=
+else
+   GRP=--group=root
+endif
 
 ##################### LIBRARIES ########################
 
@@ -61,7 +68,7 @@ test:
 
 
 install:
-
+	install --owner=root $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
 
 # this real rule keeps make from deleting the $(OBJS) as
 # intermediate files

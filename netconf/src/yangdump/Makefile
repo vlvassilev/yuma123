@@ -16,6 +16,12 @@ BIN_INST=$(TBASE)/bin
 REAL_INST=/usr/bin
 PROG=yangdump
 
+ifdef MAC
+   GRP=
+else
+   GRP=--group=root
+endif
+
 ##################### LIBRARIES ########################
 
 # The order of these LIBS matters!
@@ -47,7 +53,7 @@ test:
 
 # needs to be done by root
 install:
-	install --owner=root --group=root $(BIN_INST)/$(PROG) $(REAL_INST)
+	install --owner=root $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
 
 
 # this real test rule keeps make from deleting the $(OBJS) as

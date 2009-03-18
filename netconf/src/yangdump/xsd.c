@@ -313,28 +313,28 @@ status_t
 	return res;
     }
 
+    cstr = (mod->ns) ? mod->ns : EMPTY_STRING;
+
     /* Set the xmlns directive for the target namespace
      * !!! This is set as the default namespace, and code in other
      * !!! modules is hardwired to know that the default namespace
      * !!! is set to the target namespace
      */
-    res = xml_add_xmlns_attr(top_attrs, mod->nsid, NULL);
+    if (mod->nsid) {
+	res = xml_add_xmlns_attr(top_attrs, mod->nsid, NULL);
+    } else {
+	res = xml_add_xmlns_attr_string(top_attrs, cstr, NULL);
+    }
     if (res != NO_ERR) {
 	val_free_value(val);
 	return res;
     }
 
     /* set the target namespace */
-    cstr = xmlns_get_ns_name(mod->nsid);
-    if (cstr) {
-	res = xml_add_attr(top_attrs, 0, XSD_TARG_NS, cstr);
-	if (res != NO_ERR) {
-	    val_free_value(val);
-	    return res;
-	}
-    } else {
+    res = xml_add_attr(top_attrs, 0, XSD_TARG_NS, cstr);
+    if (res != NO_ERR) {
 	val_free_value(val);
-	return SET_ERROR(ERR_INTERNAL_VAL);
+	return res;
     }
 
     if (cp->schemaloc) {
@@ -384,10 +384,12 @@ status_t
     }
 
     /* set the version attribute */
-    res = xml_add_attr(top_attrs, 0, NCX_EL_VERSION, mod->version);
-    if (res != NO_ERR) {
-	val_free_value(val);
-	return res;
+    if (mod->version) {
+	res = xml_add_attr(top_attrs, 0, NCX_EL_VERSION, mod->version);
+	if (res != NO_ERR) {
+	    val_free_value(val);
+	    return res;
+	}
     }
 
     /* Add the NCX namespace for appinfo stuff;

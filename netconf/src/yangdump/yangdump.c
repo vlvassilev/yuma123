@@ -1189,7 +1189,7 @@ static status_t
     convert_one (yangdump_cvtparms_t *cp)
 {
     ses_cb_t          *scb;
-    ncx_module_t      *targmod, *mainmod;
+    ncx_module_t      *mainmod;
     val_value_t       *val;
     yang_pcb_t        *pcb;
     xmlChar           *namebuff;
@@ -1297,164 +1297,155 @@ static status_t
 	}
     }
 
-    /* check the type of translation requested */
-    switch (cp->format) {
-    case NCX_CVTTYP_NONE:
-	if (ncx_any_dependency_errors(pcb->top)) {
-	    log_warn("\nWarning: one or more modules imported into '%s' "
-		     "had errors", pcb->top->sourcefn);
-	}
-	log_debug2("\nFile '%s' compiled without errors",
-		   pcb->top->sourcefn);
-	break;
-    case NCX_CVTTYP_XSD:
-	if (ncx_any_dependency_errors(pcb->top)) {
-	    log_error("\nError: one or more imported modules had errors."
-		      "\n       XSD conversion of '%s' terminated.",
-		      pcb->top->sourcefn);
-	    res = ERR_NCX_IMPORT_ERRORS;
-	    ncx_print_errormsg(NULL, pcb->top, res);
-	} else {
-	    if (!pcb->top->ismod) {
-		/* need to load the entire module now,
-		 * in order to get a namespace ID for
-		 * the main module, which is also used in the submodule
-		 * !!! DO NOT KNOW THE REVISION OF THE PARENT !!!
-		 */
-		res = ncxmod_load_module(ncx_get_modname(pcb->top), 
-					 NULL, &mainmod);
-		if (res != NO_ERR) {
-		    log_error("\nError: main module '%s' had errors."
-			      "\n       XSD conversion of '%s' terminated.",
-			      ncx_get_modname(pcb->top),
-			      pcb->top->sourcefn);
-		    ncx_print_errormsg(NULL, pcb->top, res);
-		    break;
-		} else {
-		    /**** WHY IS THE SUBMOD RELOADED!!!
-		     **** IT SHOULD NOT HAVE CHANGED FROM pcb->top
-		     ****
-		    targmod = 
-			ncx_find_submodule
-			(ncx_get_modname(pcb->top), 
-			 pcb->top->name);
-		    ****/
-		    targmod = pcb->top;
+    /* get the namespace info for submodules */
+    if (cp->format == NCX_CVTTYP_XSD ||
+	cp->format == NCX_CVTTYP_SQLDB ||
+	cp->format == NCX_CVTTYP_HTML) {
 
-		    /* make a copy of the module namespace URI
-		     * so the XSD targetNamespace will be generated
-		     */
-		    targmod->ns = xml_strdup(mainmod->ns);
-		    if (!targmod->ns) {
-			res = ERR_INTERNAL_MEM;
-			log_error("\nMalloc failed in yangdump");
-			break;
-		    }
-		}
+	if (!pcb->top->ismod) {
+	    /* need to load the entire module now,
+	     * in order to get a namespace ID for
+	     * the main module, which is also used in the submodule
+	     * !!! DO NOT KNOW THE REVISION OF THE PARENT !!!
+	     */
+	    res = ncxmod_load_module(ncx_get_modname(pcb->top), 
+				     NULL, &mainmod);
+	    if (res != NO_ERR) {
+		log_error("\nError: main module '%s' had errors."
+			  "\n       XSD conversion of '%s' terminated.",
+			  ncx_get_modname(pcb->top),
+			  pcb->top->sourcefn);
+		ncx_print_errormsg(NULL, pcb->top, res);
+		
 	    } else {
-		targmod = pcb->top;
-	    }
-
-	    val = NULL;
-	    xml_init_attrs(&attrs);
-	    res = xsd_convert_module(targmod, cp, &val, &attrs);
-	    if (res == NO_ERR) {
-		if (cp->defnames || (cp->output && cp->output_isdir)) {
-		    namebuff = xsd_make_output_filename(pcb->top, cp);
-		    if (!namebuff) {
-			res = ERR_INTERNAL_MEM;
-		    } else {
-			/* output to the specified file or STDOUT */
-			res = xml_wr_file(namebuff, val, &attrs, 
-					  DOCMODE, WITHHDR, cp->indent);
-			m__free(namebuff);
-		    }
-		} else {
-		    /* output to the specified file or STDOUT */
-		    res = xml_wr_file((const xmlChar *)cp->output, 
-				      val, &attrs, DOCMODE, WITHHDR, 
-				      cp->indent);
-		}
-	    }
-	    if (res != NO_ERR) {
-		pr_err(res);
-	    }
-	    xml_clean_attrs(&attrs);
-	    if (val) {
-		val_free_value(val);
+			/* make a copy of the module namespace URI
+		 * so the XSD targetNamespace will be generated
+		 */
+		pcb->top->ns = mainmod->ns;
+		pcb->top->nsid = mainmod->nsid;
 	    }
 	}
-	break;
-    case NCX_CVTTYP_SQL:
-	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	pr_err(res);
-	break;
-    case NCX_CVTTYP_SQLDB:
-	if (ncx_any_dependency_errors(pcb->top)) {
-	    log_error("\nError: one or more imported modules had errors."
-		      "\n       SQL object database conversion of "
-		      "'%s' terminated.",
-		      pcb->top->sourcefn);
-	    res = ERR_NCX_IMPORT_ERRORS;
-	    ncx_print_errormsg(NULL, pcb->top, res);
-	} else {
-	    res = sql_convert_module(pcb, cp, scb);
-	    if (res != NO_ERR) {
-		pr_err(res);
-	    }
-	}
-	break;
-    case NCX_CVTTYP_COPY:
-	if (ncx_any_dependency_errors(pcb->top)) {
-	    log_error("\nError: one or more imported modules had errors."
-		      "\n       Copy source for '%s' terminated.",
-		      pcb->top->sourcefn);
-	    res = ERR_NCX_IMPORT_ERRORS;
-	    ncx_print_errormsg(NULL, pcb->top, res);
-	} else {
-	    res = copy_module(pcb, cp, scb);
-	    if (res != NO_ERR) {
-		pr_err(res);
-	    }
-	}
-	break;
-    case NCX_CVTTYP_HTML:
-	if (ncx_any_dependency_errors(pcb->top)) {
-	    log_error("\nError: one or more imported modules had errors."
-		      "\n       HTML conversion of '%s' terminated.",
-		      pcb->top->sourcefn);
-	    res = ERR_NCX_IMPORT_ERRORS;
-	    ncx_print_errormsg(NULL, pcb->top, res);
-	} else {
-	    res = html_convert_module(pcb, cp, scb);
-	    if (res != NO_ERR) {
-		pr_err(res);
-	    }
-	}
-	break;
-    case NCX_CVTTYP_H:
-	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	pr_err(res);
-	break;
-    case NCX_CVTTYP_YANG:
-	if (ncx_any_dependency_errors(pcb->top)) {
-	    log_error("\nError: one or more imported modules had errors."
-		      "\n       YANG conversion of '%s' terminated.",
-		      pcb->top->sourcefn);
-	    res = ERR_NCX_IMPORT_ERRORS;
-	    ncx_print_errormsg(NULL, pcb->top, res);
-	} else {
-	    res = cyang_convert_module(pcb, cp, scb);
-	    if (res != NO_ERR) {
-		pr_err(res);
-	    }
-	}
-	break;
-    default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
-	pr_err(res);
     }
 
+    if (res == NO_ERR) {
+	/* check the type of translation requested */
+	switch (cp->format) {
+	case NCX_CVTTYP_NONE:
+	    if (ncx_any_dependency_errors(pcb->top)) {
+		log_warn("\nWarning: one or more modules imported into '%s' "
+			 "had errors", pcb->top->sourcefn);
+	    }
+	    log_debug2("\nFile '%s' compiled without errors",
+		       pcb->top->sourcefn);
+	    break;
+	case NCX_CVTTYP_XSD:
+	    if (ncx_any_dependency_errors(pcb->top)) {
+		log_error("\nError: one or more imported modules had errors."
+			  "\n       XSD conversion of '%s' terminated.",
+			  pcb->top->sourcefn);
+		res = ERR_NCX_IMPORT_ERRORS;
+		ncx_print_errormsg(NULL, pcb->top, res);
+	    } else {
+		val = NULL;
+		xml_init_attrs(&attrs);
+		res = xsd_convert_module(pcb->top, cp, &val, &attrs);
+		if (res == NO_ERR) {
+		    if (cp->defnames || (cp->output && cp->output_isdir)) {
+			namebuff = xsd_make_output_filename(pcb->top, cp);
+			if (!namebuff) {
+			    res = ERR_INTERNAL_MEM;
+			} else {
+			    /* output to the specified file or STDOUT */
+			    res = xml_wr_file(namebuff, val, &attrs, 
+					      DOCMODE, WITHHDR, cp->indent);
+			    m__free(namebuff);
+			}
+		    } else {
+			/* output to the specified file or STDOUT */
+			res = xml_wr_file((const xmlChar *)cp->output, 
+					  val, &attrs, DOCMODE, WITHHDR, 
+					  cp->indent);
+		    }
+		}
+		if (res != NO_ERR) {
+		    pr_err(res);
+		}
+		xml_clean_attrs(&attrs);
+		if (val) {
+		    val_free_value(val);
+		}
+	    }
+	    break;
+	case NCX_CVTTYP_SQL:
+	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+	    pr_err(res);
+	    break;
+	case NCX_CVTTYP_SQLDB:
+	    if (ncx_any_dependency_errors(pcb->top)) {
+		log_error("\nError: one or more imported modules had errors."
+			  "\n       SQL object database conversion of "
+			  "'%s' terminated.",
+			  pcb->top->sourcefn);
+		res = ERR_NCX_IMPORT_ERRORS;
+		ncx_print_errormsg(NULL, pcb->top, res);
+	    } else {
+		res = sql_convert_module(pcb, cp, scb);
+		if (res != NO_ERR) {
+		    pr_err(res);
+		}
+	    }
+	    break;
+	case NCX_CVTTYP_COPY:
+	    if (ncx_any_dependency_errors(pcb->top)) {
+		log_error("\nError: one or more imported modules had errors."
+			  "\n       Copy source for '%s' terminated.",
+			  pcb->top->sourcefn);
+		res = ERR_NCX_IMPORT_ERRORS;
+		ncx_print_errormsg(NULL, pcb->top, res);
+	    } else {
+		res = copy_module(pcb, cp, scb);
+		if (res != NO_ERR) {
+		    pr_err(res);
+		}
+	    }
+	    break;
+	case NCX_CVTTYP_HTML:
+	    if (ncx_any_dependency_errors(pcb->top)) {
+		log_error("\nError: one or more imported modules had errors."
+			  "\n       HTML conversion of '%s' terminated.",
+			  pcb->top->sourcefn);
+		res = ERR_NCX_IMPORT_ERRORS;
+		ncx_print_errormsg(NULL, pcb->top, res);
+	    } else {
+		res = html_convert_module(pcb, cp, scb);
+		if (res != NO_ERR) {
+		    pr_err(res);
+		}
+	    }
+	    break;
+	case NCX_CVTTYP_H:
+	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+	    pr_err(res);
+	    break;
+	case NCX_CVTTYP_YANG:
+	    if (ncx_any_dependency_errors(pcb->top)) {
+		log_error("\nError: one or more imported modules had errors."
+			  "\n       YANG conversion of '%s' terminated.",
+			  pcb->top->sourcefn);
+		res = ERR_NCX_IMPORT_ERRORS;
+		ncx_print_errormsg(NULL, pcb->top, res);
+	    } else {
+		res = cyang_convert_module(pcb, cp, scb);
+		if (res != NO_ERR) {
+		    pr_err(res);
+		}
+	    }
+	    break;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	    pr_err(res);
+	}
+    }
     if (res != NO_ERR || LOGDEBUG2) {
 	if (pcb && pcb->top) {
 	    log_write("\n*** %s: %u Errors, %u Warnings\n", 

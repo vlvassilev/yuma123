@@ -243,6 +243,11 @@ extern status_t
 			const xmlChar *pfix);
 
 extern status_t
+    xml_add_xmlns_attr_string (xml_attrs_t *attrs, 
+			       const xmlChar *ns,
+			       const xmlChar *pfix);
+
+extern status_t
     xml_add_inv_xmlns_attr (xml_attrs_t *attrs, 
 			    xmlns_id_t  ns_id,
 			    const xmlChar *pfix,

@@ -938,6 +938,86 @@ status_t
 
 
 /********************************************************************
+* FUNCTION xml_add_xmlns_attr_string
+*
+* add an xmlns decl to the attribute Queue
+*
+* INPUTS:
+*    attrs == attribute queue to add to
+*    ns == namespace URI string of the xmlns target
+*    pfix == namespace prefix string assigned
+*         == NULL for default namespace
+*
+* RETURNS:
+*    NO_ERR if all okay
+*********************************************************************/
+status_t
+    xml_add_xmlns_attr_string (xml_attrs_t *attrs, 
+			       const xmlChar *ns,
+			       const xmlChar *pfix)
+{
+    xml_attr_t    *attr;
+    xmlChar       *s;
+    uint32         len;
+
+#ifdef DEBUG
+    if (!attrs || !ns) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* get a new attr struct */
+    attr = xml_new_attr();
+    if (!attr) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    /* copy the namespace URI as the attr value */
+    attr->attr_val = xml_strdup(ns);
+    if (!attr->attr_val) {
+	xml_free_attr(attr);
+        return SET_ERROR(ERR_INTERNAL_MEM);
+    }
+
+    /* get the dname buffer length to malloc */
+    len = XMLNS_LEN+1;
+    if (pfix) {
+	len += (xml_strlen(pfix) + 1);
+    }
+
+    /* get a name buffer */
+    attr->attr_dname = m__getMem(len);
+    if (!attr->attr_dname) {
+	xml_free_attr(attr);
+        return ERR_INTERNAL_MEM;
+    }
+    attr->attr_qname = attr->attr_dname;
+
+    /* construct an xmlns:prefix string in the name buffer */
+    s = attr->attr_dname;    
+    s += xml_strcpy(attr->attr_dname, XMLNS);
+
+    /* point the name field at the prefix value if there is one */
+    if (pfix) {
+	*s++ = XMLNS_SEPCH;
+	attr->attr_name = s;
+	while (*pfix) {
+	    *s++ = *pfix++;
+	}
+    } else {
+	attr->attr_name = attr->attr_dname;
+    }
+    *s = 0;
+
+    attr->attr_ns = xmlns_ns_id();
+    attr->attr_xmlns_ns = 0;   /*****/
+    dlq_enque(attr, attrs);
+    return NO_ERR;
+
+}  /* xml_add_xmlns_attr_string */
+
+
+/********************************************************************
 * FUNCTION xml_add_inv_xmlns_attr
 *
 * add an xmlns decl to the attribute Queue

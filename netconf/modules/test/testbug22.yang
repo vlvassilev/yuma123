@@ -1,0 +1,5 @@
+submodule testbug22 {
+
+    belongs-to test1;
+
+}

@@ -444,6 +444,13 @@ static status_t
 	}
     }
 
+    if (!mod->prefix) {
+	mod->prefix = xml_strdup(EMPTY_STRING);
+	if (!mod->prefix) {
+	    retres = ERR_INTERNAL_MEM;
+	}
+    }
+
     return retres;
 
 }  /* consume_belongs_to */
@@ -2940,7 +2947,7 @@ static status_t
 	    return retres;
 	}
     } else if (mod->prefix) {
-	if (!ncx_valid_name2(mod->prefix)) {
+	if (mod->ismod && !ncx_valid_name2(mod->prefix)) {
 	    return retres;
 	}
     } else {

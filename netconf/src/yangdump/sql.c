@@ -251,7 +251,7 @@ static void
     } else {
 	ses_putstr(scb, mod->name);
     }
-    if (!cp->noversionnames) {
+    if (!cp->noversionnames && mod->version) {
 	if (cp->simurls) {
 	    ses_putchar(scb, NCXMOD_PSCHAR);
 	} else {	    
@@ -306,7 +306,9 @@ static void
     /* columns: ID, modname, submodname, version, name, linenum */
     sprintf(buff, "\n    '', '%s', '%s', '%s', '%s', '%u',",
 	    (mod->ismod) ? mod->name : mod->belongs,
-	    mod->name, mod->version, name, linenum);
+	    mod->name, 
+	    (mod->version) ? mod->version : NCX_EL_NONE,
+	    name, linenum);
     ses_putstr(scb, (const xmlChar *)buff);
 
 } /* write_first_tuple */
@@ -454,7 +456,11 @@ static void
     }
 
     ses_putstr(scb, (const xmlChar *)"\n# version: ");
-    write_cstring(scb, mod->version);
+    if (mod->version) {
+	write_cstring(scb, mod->version);
+    } else {
+	write_cstring(scb, NCX_EL_NONE);
+    }
     ses_putstr(scb, (const xmlChar *)"\n#");
     ses_putstr(scb, SEP_BAR);
 
@@ -479,7 +485,7 @@ static void
 
 {
 
-    if (!mod->ismod) {
+    if (!mod->ismod || !mod->defaultrev) {
 	return;
     }
 
@@ -522,14 +528,22 @@ static void
 
     /* columns: version, modprefix */
     ses_putchar(scb, '\'');
-    write_cstring(scb, mod->version);
+    if (mod->version) {
+	write_cstring(scb, mod->version);
+    } else {
+	write_cstring(scb, NCX_EL_NONE);
+    }
     ses_putstr(scb, (const xmlChar *)"', ");
     sprintf(buff, "'%s',", (mod->prefix) ? mod->prefix : mod->name);
     ses_putstr(scb, (const xmlChar *)buff);
 
     /* column: namespace */
     ses_putstr(scb, (const xmlChar *)"\n    '");
-    write_cstring(scb, xmlns_get_ns_name(mod->nsid));
+    if (mod->nsid) {
+	write_cstring(scb, xmlns_get_ns_name(mod->nsid));
+    } else {
+	write_cstring(scb, EMPTY_STRING);
+    }
     ses_putstr(scb, (const xmlChar *)"',");
 
     /* column: organization */
@@ -557,7 +571,10 @@ static void
     ses_putstr(scb, (const xmlChar *)"',");
 
     /* column: revcomment */
-    revhist = ncx_find_revhist(mod, mod->version);
+    revhist = NULL;
+    if (mod->version) {
+	revhist = ncx_find_revhist(mod, mod->version);
+    }
     if (revhist && revhist->descr) {
 	ses_putstr(scb, (const xmlChar *)"\n    '");
 	write_cstring(scb, revhist->descr);
@@ -576,7 +593,7 @@ static void
     } else {
 	ses_putstr(scb, mod->name);
     }
-    if (!cp->noversionnames) {
+    if (!cp->noversionnames && mod->version) {
 	ses_putchar(scb, '.');
 	ses_putstr(scb, mod->version);
     }
@@ -597,7 +614,7 @@ static void
     } else {
 	ses_putstr(scb, mod->name);
     }
-    if (!cp->noversionnames) {
+    if (!cp->noversionnames && mod->version) {
 	ses_putchar(scb, '.');
 	ses_putstr(scb, mod->version);
     }

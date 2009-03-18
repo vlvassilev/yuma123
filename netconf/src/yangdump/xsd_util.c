@@ -941,7 +941,9 @@ static status_t
 	    typ_id = mod->nsid;
 	    name = ncx_find_typname(typdef->def.named.typ, &mod->typnameQ);
 	    if (!name) {
-		SET_ERROR(ERR_INTERNAL_VAL);
+		if (mod->ismod) {
+		    SET_ERROR(ERR_INTERNAL_VAL);
+		}
 		name = typdef->def.named.typ->name;
 	    }
 	}
@@ -1821,7 +1823,11 @@ xmlChar *
 {
     const xmlChar *cstr;
 
-    cstr = xmlns_get_ns_name(mod->nsid);
+    if (mod->nsid) {
+	cstr = xmlns_get_ns_name(mod->nsid);
+    } else {
+	cstr = EMPTY_STRING;
+    }
     if (!cstr) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
@@ -1891,17 +1897,22 @@ xmlChar *
 	    }
 	    if (cp->noversionnames) {
 		len += xml_strlen(mod->name) + xml_strlen(ext); 
-	    } else {
+	    } else if (mod->version) {
 		len += xml_strlen(mod->name) + xml_strlen(mod->version) + 1 +
 		    xml_strlen(ext); 
+	    } else {
+		len += xml_strlen(mod->name) + xml_strlen(ext); 
+
 	    }
 	}
     } else {
 	if (cp->noversionnames) {
 	    len = xml_strlen(mod->name) + xml_strlen(ext); 
-	} else {
+	} else if (mod->version) {
 	    len = xml_strlen(mod->name) + xml_strlen(mod->version) + 1 +
 		xml_strlen(ext); 
+	} else {
+	    len = xml_strlen(mod->name) + xml_strlen(ext); 
 	}
     }
 
@@ -1919,7 +1930,7 @@ xmlChar *
 		*p++ = NCXMOD_PSCHAR;
 	    }
 	    p += xml_strcpy(p, mod->name);
-	    if (!cp->noversionnames) {
+	    if (!cp->noversionnames && mod->version) {
 		*p++ = '.';
 		p += xml_strcpy(p, mod->version);
 	    }
@@ -1929,8 +1940,8 @@ xmlChar *
 	}
     } else {
 	p += xml_strcpy(p, mod->name);
-	if (!cp->noversionnames) {
-	    *p++ = '_';
+	if (!cp->noversionnames && mod->version) {
+	    *p++ = '.';
 	    p += xml_strcpy(p, mod->version);
 	}
 	xml_strcpy(p, ext); 
@@ -2055,7 +2066,7 @@ status_t
 	xml_strlen(mod->sourcefn) +
 	xml_strlen(XSD_BANNER_0END) +
 	xml_strlen(YANGDUMP_PROGVER) +      
-	xml_strlen(banner1) +            /* (Sub)Module */
+	xml_strlen(banner1) +           /* (Sub)Module */
 	xml_strlen(XSD_BANNER_3);            /* Version */
 
     if (mod->organization) {
@@ -2067,7 +2078,13 @@ status_t
 	len += xml_strlen(XSD_BANNER_1B) + xml_strlen(mod->belongs);
     }
 
-    len += xml_strlen(mod->name) + xml_strlen(mod->version);
+    len += xml_strlen(mod->name);
+
+    if (mod->version) {
+	len += xml_strlen(mod->version);
+    } else {
+	len += xml_strlen(NCX_EL_NONE);
+    }
 
     if (mod->contact_info) {
 	len += (xml_strlen(XSD_BANNER_5) + xml_strlen(mod->contact_info));
@@ -2098,7 +2115,11 @@ status_t
     }
 
     str2 += xml_strcpy(str2, XSD_BANNER_3);
-    str2 += xml_strcpy(str2, mod->version);
+    if (mod->version) {
+	str2 += xml_strcpy(str2, mod->version);
+    } else {
+	str2 += xml_strcpy(str2, NCX_EL_NONE);
+    }
 
     if (mod->contact_info) {
 	str2 += xml_strcpy(str2, XSD_BANNER_5);

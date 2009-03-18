@@ -958,7 +958,11 @@ static void
 		mod->defaultrev = TRUE;
 		dlq_insertAhead(mod, testmod);
 		done = TRUE;
-	    }   /* else keep going */
+	    } else {
+		mod->defaultrev = FALSE;
+		dlq_insertAfter(mod, testmod);
+		done = TRUE;
+	    }
 	} else if (retval < 0) {
 	    mod->defaultrev = TRUE;
 	    dlq_insertAhead(mod, testmod);

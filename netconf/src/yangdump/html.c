@@ -3107,7 +3107,11 @@ static void
 	       (const xmlChar *)"Submodule ");
     ses_putstr(scb, mod->name);
     ses_putstr(scb, (const xmlChar *)" Version ");
-    ses_putstr(scb, mod->version);
+    if (mod->version) {
+	ses_putstr(scb, mod->version);
+    } else {
+	ses_putstr(scb, NCX_EL_NONE);
+    }
     ses_putstr(scb, (const xmlChar *)"</title>");
     ses_putstr_indent(scb, (const xmlChar *)
 		      "<meta http-equiv=\"Content-Type\" "
@@ -3183,9 +3187,11 @@ static void
     }
     ses_putstr(scb, (const xmlChar *)": ");
     ses_putstr(scb, mod->name);
+    ses_putstr(scb, (const xmlChar *)", version: ");
     if (mod->version) {
-	ses_putstr(scb, (const xmlChar *)", version: ");
 	ses_putstr(scb, mod->version);    
+    } else {
+	ses_putstr(scb, NCX_EL_NONE);    
     }
 #else
     ses_putstr(scb, mod->sourcefn);
@@ -3374,12 +3380,6 @@ status_t
     if (!mod) {
 	return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
     }
-
-#ifdef DEBUG
-    if (!mod->ismod && !mod->nsid) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-    }
-#endif
 
     if (!cp->html_div) {
 	write_html_header(scb, mod, cp->indent);

@@ -2686,7 +2686,7 @@ static status_t
     yang_node_t    *node;
     ncx_feature_t  *feature;
     ncx_identity_t *identity;
-    boolean         ismain, loaded, otherversion;
+    boolean         ismain, loaded, otherversion, done;
     status_t        res, retres;
 
 #ifdef YANG_PARSE_DEBUG_TRACE
@@ -2925,8 +2925,10 @@ static status_t
     CHK_EXIT(res, retres);
 
     /* Validate all the XPath expressions within all cooked objects */
-    res = yang_obj_resolve_xpath(tkc, mod, &mod->datadefQ);
-    CHK_EXIT(res, retres);
+    if (mod->ismod || pcb->top == mod) {
+	res = yang_obj_resolve_xpath(tkc, mod, &mod->datadefQ);
+	CHK_EXIT(res, retres);
+    }
 
     /* check for loops in any leafref XPath targets */
     res = yang_obj_check_leafref_loops(tkc, mod, &mod->datadefQ);
@@ -2963,7 +2965,7 @@ static status_t
     switch (ptyp) {
     case YANG_PT_TOP:
     case YANG_PT_IMPORT:
-	/* add this regular module to the registry */
+	/* finish up the import or top module */
 	if (mod->ismod || pcb->top == mod) {
 
 	    if (pcb->top == mod) {
@@ -2973,6 +2975,29 @@ static status_t
 	    mod->allincQ = NULL;
 	    mod->allimpQ = NULL;
 
+	    /* update the result, errors, and warnings */
+	    if (mod->ismod) {
+		res = NO_ERR;
+		done = FALSE;
+		for (node = (yang_node_t *)
+			 dlq_firstEntry(&mod->saveincQ);
+		     node != NULL && !done;
+		     node = (yang_node_t *)dlq_nextEntry(node)) {
+
+		    if (node->submod) {
+			if (node->submod->status != NO_ERR) {
+			    mod->status = retres = node->submod->status;
+			    if (NEED_EXIT(node->submod->status)) {
+				done = TRUE;
+			    }
+			}
+			mod->errors += node->submod->errors;
+			mod->warnings += node->submod->warnings;
+		    } /* else include not found */
+		}
+	    }
+	    
+	    /* add this regular module to the registry */
 	    if (!loaded) {
 		if (pcb->diffmode) {
 		    res = ncx_add_to_modQ(mod);

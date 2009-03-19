@@ -6501,12 +6501,14 @@ static status_t
 
 	    /* try to find the node in any namespace (warning) */
 	    testobj = obj_find_template_test(targQ, NULL, name);
-	    if (testobj && xml_strcmp(testobj->mod->name,
-				      chobj->mod->name)) {
+	    if (testobj && xml_strcmp(obj_get_mod_name(testobj),
+				      obj_get_mod_name(chobj))) {
 		log_warn("\nWarning: sibling object '%s' "
 			 "already defined "
-			 "in module %s at line %u",
-			 name, testobj->mod->name,
+			 "in %smodule '%s' at line %u",
+			 name, 
+			 (testobj->mod->ismod) ? "" : "sub",
+			 testobj->mod->name,
 			 testobj->linenum);
 		res = ERR_NCX_DUP_AUGNODE;
 		tkc->cur = chobj->tk;
@@ -6514,11 +6516,16 @@ static status_t
 	    }
 
 	    /* try to find the node in the target namespace (error) */
-	    testobj = obj_find_template_test(targQ, targobj->mod->name,
+	    testobj = obj_find_template_test(targQ, 
+					     obj_get_mod_name(targobj),
 					     name);
 	    if (testobj) {
-		log_error("\nError: object '%s' already defined at line %u",
-			  name, testobj->linenum);
+		log_error("\nError: object '%s' already defined "
+			  "in %smodule '%s' at line %u",
+			  name, 
+			  (testobj->mod->ismod) ? "" : "sub",
+			  testobj->mod->name,
+			  testobj->linenum);
 		retres = ERR_NCX_DUP_ENTRY;
 		tkc->cur = chobj->tk;
 		ncx_print_errormsg(tkc, mod, retres);
@@ -7696,6 +7703,218 @@ static status_t
 }  /* check_conditional_mismatch */
 
 
+/********************************************************************
+* FUNCTION resolve_xpath
+* 
+* Fifth (and final) pass object validation
+*
+* Check all leafref, must, and when XPath expressions
+* to make sure they are well-formed
+*
+* Checks the cooked objects, and skips all groupings
+* uses, and augment nodes
+*
+* MUST BE CALLED AFTER yang_obj_resolve_final
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   datadefQ == Q of obj_template_t structs to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_xpath (tk_chain_t *tkc,
+		   ncx_module_t  *mod,
+		   dlq_hdr_t *datadefQ)
+{
+    obj_template_t        *testobj, *targobj;
+    const obj_template_t  *leafobj;
+    obj_key_t             *key;
+    const obj_unique_t    *uniq;
+    obj_unique_comp_t     *uncomp;
+    typ_def_t             *typdef;
+    const xpath_pcb_t     *pcb;
+    xpath_pcb_t           *pcbclone;
+    status_t               res, retres;
+
+
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    /* first resolve all the local object names */
+    for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
+	 testobj != NULL;
+	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+
+	if (!obj_has_name(testobj)) {
+	    /* skip augment and uses */
+	    continue;
+	}
+
+	/* check the when-stmt in the object itself */
+	if (testobj->when) {
+	    res = resolve_when(mod, testobj->when, testobj);
+	    CHK_EXIT(res, retres);
+	}
+
+	/* check the when-stmt in the uses object carried fwd */
+	if (testobj->usesobj && testobj->usesobj->when) {
+	    res = resolve_when(mod,
+			       testobj->usesobj->when,
+			       testobj);
+	    CHK_EXIT(res, retres);
+	}
+
+	/* check the when-stmt in the augment object carried fwd */
+	if (testobj->augobj && testobj->augobj->when) {
+
+	    targobj = testobj->augobj->def.augment->targobj;
+
+	    if (targobj->objtype == OBJ_TYP_CASE) {
+		targobj = targobj->parent;
+	    }
+
+	    if (targobj->objtype == OBJ_TYP_CHOICE) {
+		targobj = targobj->parent;
+		if (!targobj) {
+		    targobj = ncx_get_gen_root();
+		}
+	    }
+
+	    res = resolve_when(mod,
+			       testobj->augobj->when,
+			       targobj);
+	    CHK_EXIT(res, retres);
+	}
+
+	/* validate correct Xpath in must clauses */
+	res = resolve_mustQ(tkc, mod, testobj);
+	CHK_EXIT(res, retres);
+	
+	switch (testobj->objtype) {
+	case OBJ_TYP_CONTAINER:
+	    /* check container children */
+	    res = resolve_xpath(tkc, mod, 
+				testobj->def.container->datadefQ);
+	    break;
+	case OBJ_TYP_LEAF:
+	case OBJ_TYP_LEAF_LIST:
+	    if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
+#ifdef YANG_OBJ_DEBUG
+		log_debug3("\nresolve_xpath: mod %s, object %s, on line %u",
+			   mod->name, obj_get_name(testobj), 
+			   testobj->linenum);
+#endif
+
+		/* need to make a copy of the XPath PCB because
+		 * typedefs are treated as read-only when referenced
+		 * from a val_value_t node
+		 */
+		typdef = obj_get_typdef(testobj);
+		pcb = typ_get_leafref_pcb(typdef);
+		pcbclone = xpath_clone_pcb(pcb);
+		if (!pcbclone) {
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    tkc->cur = pcb->tk;
+		    res = xpath_yang_parse_path(tkc, mod, pcbclone);
+		    if (res == NO_ERR) {
+			leafobj = NULL;
+			res = xpath_yang_validate_path(mod, 
+						       testobj, 
+						       pcbclone, 
+						       &leafobj);
+			if (res == NO_ERR && leafobj) {
+			    typ_set_xref_typdef(typdef, 
+						obj_get_ctypdef(leafobj));
+			    if (testobj->objtype == OBJ_TYP_LEAF) {
+				testobj->def.leaf->leafrefobj = leafobj;
+			    } else {
+				testobj->def.leaflist->leafrefobj = leafobj;
+			    }
+			}
+		    }
+		    xpath_free_pcb(pcbclone);
+		}
+	    }
+	    break;
+	case OBJ_TYP_LIST:
+	    /* check that none of the key leafs have more
+	     * conditionals than their list parent
+	     */
+	    for (key = obj_first_key(testobj);
+		 key != NULL;
+		 key = obj_next_key(key)) {
+
+		if (key->keyobj) {
+		    res = check_conditional_mismatch(tkc, mod,
+						     testobj,
+						     key->keyobj);
+		    CHK_EXIT(res, retres);
+		}
+	    }
+
+	    /* check that none of the unique set leafs have more
+	     * conditionals than their list parent
+	     */
+	    for (uniq = obj_first_unique(testobj);
+		 uniq != NULL;
+		 uniq = obj_next_unique(uniq)) {
+
+		for (uncomp = obj_first_unique_comp(uniq);
+		     uncomp != NULL;
+		     uncomp = obj_next_unique_comp(uncomp)) {
+
+		    if (uncomp->unobj) {
+			res = check_conditional_mismatch(tkc, mod,
+							 testobj,
+							 uncomp->unobj);
+			CHK_EXIT(res, retres);
+		    }
+		}
+	    }
+
+	    /* check list children */
+	    res = resolve_xpath(tkc, mod, 
+				testobj->def.list->datadefQ);
+	    CHK_EXIT(res, retres);
+	    break;
+	case OBJ_TYP_CHOICE:
+	    res = resolve_xpath(tkc, mod, 
+				testobj->def.choic->caseQ);
+	    break;
+	case OBJ_TYP_CASE:
+	    res = resolve_xpath(tkc, mod, 
+				testobj->def.cas->datadefQ);
+	    break;
+	case OBJ_TYP_RPC:
+	    res = resolve_xpath(tkc, mod, 
+				&testobj->def.rpc->datadefQ);
+	    break;
+	case OBJ_TYP_RPCIO:
+	    res = resolve_xpath(tkc, mod, 
+				&testobj->def.rpcio->datadefQ);
+	    break;
+	case OBJ_TYP_NOTIF:
+	    res = resolve_xpath(tkc, mod, 
+				&testobj->def.notif->datadefQ);
+	    break;
+	case OBJ_TYP_NONE:
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	CHK_EXIT(res, retres);
+    }
+
+    return retres;
+
+}  /* resolve_xpath */
+
 
 /************   E X T E R N A L   F U N C T I O N S   ***************/
 
@@ -8580,15 +8799,9 @@ status_t
 			    ncx_module_t  *mod,
 			    dlq_hdr_t *datadefQ)
 {
-    obj_template_t        *testobj;
-    const obj_template_t  *leafobj;
-    obj_key_t             *key;
-    const obj_unique_t    *uniq;
-    obj_unique_comp_t     *uncomp;
-    typ_def_t             *typdef;
-    const xpath_pcb_t     *pcb;
-    xpath_pcb_t           *pcbclone;
-    status_t               res, retres;
+    yang_node_t        *node;
+    status_t            res, retres;
+    boolean             done;
 
 #ifdef DEBUG
     if (!tkc || !mod || !datadefQ) {
@@ -8599,159 +8812,26 @@ status_t
     res = NO_ERR;
     retres = NO_ERR;
 
-    /* first resolve all the local object names */
-    for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 testobj != NULL;
-	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+    res = resolve_xpath(tkc, mod, datadefQ);
+    CHK_EXIT(res, retres);
 
-	if (!obj_has_name(testobj)) {
-	    /* skip augment and uses */
-	    continue;
-	}
+    if (mod->ismod) {
+	done = FALSE;
+	for (node = (yang_node_t *)
+		 dlq_firstEntry(mod->allincQ);
+	     node != NULL && !done;
+	     node = (yang_node_t *)dlq_nextEntry(node)) {
 
-	/* check the when-stmt in the object itself */
-	if (testobj->when) {
-	    res = resolve_when(mod, testobj->when, testobj);
-	    CHK_EXIT(res, retres);
-	}
-
-	/* check the when-stmt in the uses object carried fwd */
-	if (testobj->usesobj && testobj->usesobj->when) {
-	    res = resolve_when(mod,
-			       testobj->usesobj->when,
-			       testobj);
-	    CHK_EXIT(res, retres);
-	}
-
-	/* check the when-stmt in the augment object carried fwd */
-	if (testobj->augobj && testobj->augobj->when) {
-	    res = resolve_when(mod,
-			       testobj->augobj->when,
-			       testobj);
-	    CHK_EXIT(res, retres);
-	}
-
-	/* validate correct Xpath in must clauses */
-	res = resolve_mustQ(tkc, mod, testobj);
-	CHK_EXIT(res, retres);
-	
-	switch (testobj->objtype) {
-	case OBJ_TYP_CONTAINER:
-	    /* check container children */
-	    res = 
-		yang_obj_resolve_xpath(tkc, mod, 
-				       testobj->def.container->datadefQ);
-	    break;
-	case OBJ_TYP_LEAF:
-	case OBJ_TYP_LEAF_LIST:
-	    if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
-#ifdef YANG_OBJ_DEBUG
-		log_debug3("\nresolve_xpath: mod %s, object %s, on line %u",
-			   mod->name, obj_get_name(testobj), 
-			   testobj->linenum);
-#endif
-
-		/* need to make a copy of the XPath PCB because
-		 * typedefs are treated as read-only when referenced
-		 * from a val_value_t node
-		 */
-		typdef = obj_get_typdef(testobj);
-		pcb = typ_get_leafref_pcb(typdef);
-		pcbclone = xpath_clone_pcb(pcb);
-		if (!pcbclone) {
-		    res = ERR_INTERNAL_MEM;
-		} else {
-		    tkc->cur = pcb->tk;
-		    res = xpath_yang_parse_path(tkc, mod, pcbclone);
-		    if (res == NO_ERR) {
-			leafobj = NULL;
-			res = xpath_yang_validate_path(mod, 
-						       testobj, 
-						       pcbclone, 
-						       &leafobj);
-			if (res == NO_ERR && leafobj) {
-			    typ_set_xref_typdef(typdef, 
-						obj_get_ctypdef(leafobj));
-			    if (testobj->objtype == OBJ_TYP_LEAF) {
-				testobj->def.leaf->leafrefobj = leafobj;
-			    } else {
-				testobj->def.leaflist->leafrefobj = leafobj;
-			    }
-			}
-		    }
-		    xpath_free_pcb(pcbclone);
-		}
+	    if (node->submod) {
+		res = resolve_xpath(tkc, 
+				    node->submod,
+				    &node->submod->datadefQ);
+		CHK_EXIT(res, retres);
 	    }
-	    break;
-	case OBJ_TYP_LIST:
-	    /* check that none of the key leafs have more
-	     * conditionals than their list parent
-	     */
-	    for (key = obj_first_key(testobj);
-		 key != NULL;
-		 key = obj_next_key(key)) {
-
-		if (key->keyobj) {
-		    res = check_conditional_mismatch(tkc, mod,
-						     testobj,
-						     key->keyobj);
-		    CHK_EXIT(res, retres);
-		}
-	    }
-
-	    /* check that none of the unique set leafs have more
-	     * conditionals than their list parent
-	     */
-	    for (uniq = obj_first_unique(testobj);
-		 uniq != NULL;
-		 uniq = obj_next_unique(uniq)) {
-
-		for (uncomp = obj_first_unique_comp(uniq);
-		     uncomp != NULL;
-		     uncomp = obj_next_unique_comp(uncomp)) {
-
-		    if (uncomp->unobj) {
-			res = check_conditional_mismatch(tkc, mod,
-							 testobj,
-							 uncomp->unobj);
-			CHK_EXIT(res, retres);
-		    }
-		}
-	    }
-
-	    /* check list children */
-	    res = yang_obj_resolve_xpath(tkc, mod, 
-					 testobj->def.list->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_CHOICE:
-	    res = yang_obj_resolve_xpath(tkc, mod, 
-					 testobj->def.choic->caseQ);
-	    break;
-	case OBJ_TYP_CASE:
-	    res = yang_obj_resolve_xpath(tkc, mod, 
-					 testobj->def.cas->datadefQ);
-	    break;
-	case OBJ_TYP_RPC:
-	    res = yang_obj_resolve_xpath(tkc, mod, 
-					 &testobj->def.rpc->datadefQ);
-	    break;
-	case OBJ_TYP_RPCIO:
-	    res = yang_obj_resolve_xpath(tkc, mod, 
-					 &testobj->def.rpcio->datadefQ);
-	    break;
-	case OBJ_TYP_NOTIF:
-	    res = yang_obj_resolve_xpath(tkc, mod, 
-					 &testobj->def.notif->datadefQ);
-	    break;
-	case OBJ_TYP_NONE:
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	}
-	CHK_EXIT(res, retres);
     }
 
-	return retres;
+    return retres;
 
 }  /* yang_obj_resolve_xpath */
 

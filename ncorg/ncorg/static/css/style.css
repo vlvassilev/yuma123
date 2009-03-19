@@ -46,15 +46,16 @@ div.nchello h4 {
 
 div.nchello_home {
   padding-top: 1px;
-  padding-left: 5px;
-  padding-bottom: 10px;
+  padding-left: 1px;
+  padding-bottom: 7px;
   padding-right: 5px;
-  margin-top: .75in;
-  margin-left: .5in;
+  margin-top: .5in;
+  margin-left: .1in;
   margin-bottom: .5in;
-  margin-right: 1in;
+  margin-right: .5in;
   text-align: center;
 }
+
 
 div.nchello_home h3 {
   text-align: center;

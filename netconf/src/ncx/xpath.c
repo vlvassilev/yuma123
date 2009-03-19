@@ -400,7 +400,7 @@ static status_t
 
     /* skip the first fwd slash, if any */
     if (*target == '/') {
-	str = ++target;
+	str = target+1;
     } else {
 	str = target;
     }
@@ -491,7 +491,7 @@ static status_t
 	    imp = ncx_find_pre_import(mod, prefix);
 	    if (!imp) {
 		log_error("\nError: prefix '%s' not found in module"
-			  " imports in Xpath target %s",
+			  " imports in Xpath target '%s'",
 			  prefix, target);
 		res = ERR_NCX_INVALID_NAME;
 		do_errmsg(tkc, mod, errtk, res);
@@ -504,7 +504,7 @@ static status_t
 	/* make sure the name is a valid name string */
 	if (!ncx_valid_name2(name)) {
 	    log_error("\nError: object name '%s' not a valid "
-		      "identifier in Xpath target %s",
+		      "identifier in Xpath target '%s'",
 		      name, target);
 	    res = ERR_NCX_INVALID_NAME;
 	    do_errmsg(tkc, mod, errtk, res);

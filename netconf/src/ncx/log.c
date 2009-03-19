@@ -197,6 +197,10 @@ void
 {
     va_list args;
 
+    if (log_get_debug_level() == LOG_DEBUG_NONE) {
+	return;
+    }
+
     va_start(args, fstr);
 
     if (logfile) {

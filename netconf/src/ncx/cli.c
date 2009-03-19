@@ -635,8 +635,16 @@ status_t
 	    rawparm->count++;
 	}
 
-	if (buffpos < bufflen && 
-	    (buff[buffpos] == '=' || isspace(buff[buffpos]))) {
+	if ((buffpos < bufflen) &&
+	    ((buff[buffpos] == '=') || isspace(buff[buffpos]))) {
+
+	    /* assume that the unknown parm followed by a 
+	     * space is the termination, try again on
+	     * the next keyword match
+	     */
+	    if (buff[buffpos] != '=' && !rawparm) {
+		continue;
+	    }
 
 	    buffpos++;
 

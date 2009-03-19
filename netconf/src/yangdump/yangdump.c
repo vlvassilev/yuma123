@@ -1174,6 +1174,33 @@ static status_t
 
 
 /********************************************************************
+ * FUNCTION print_score_banner
+ * 
+ *  Generate the banner for the yangdump results
+ *  
+ * INPUTS:
+ *    pcb == parser control block to use
+ *
+ *********************************************************************/
+static void
+    print_score_banner (yang_pcb_t *pcb)
+{
+    const xmlChar       *logsource;
+    uint32               errors, warnings;
+
+    errors = pcb->top->errors;
+    warnings = pcb->top->warnings;
+    
+    logsource = (LOGDEBUG) 
+	? pcb->top->source : pcb->top->sourcefn;
+
+    log_write("\n*** %s: %u Errors, %u Warnings\n", 
+	      logsource, errors, warnings);
+
+}   /* print_score_banner */
+
+
+/********************************************************************
  * FUNCTION convert_one
  * 
  *  Validate and then perhaps convert one module to the specified format
@@ -1193,7 +1220,7 @@ static status_t
     val_value_t       *val;
     yang_pcb_t        *pcb;
     xmlChar           *namebuff;
-    const xmlChar     *modname, *logsource, *revision;
+    const xmlChar     *modname, *revision;
     xml_attrs_t        attrs;
     status_t           res;
 
@@ -1222,17 +1249,7 @@ static status_t
 	return NO_ERR;
     } else if (res != NO_ERR) {
 	if (pcb && pcb->top) {
-	    logsource = (LOGDEBUG) ? pcb->top->source 
-		: pcb->top->sourcefn;
-	    if (pcb->top->errors) {
-		log_error("\n*** %s: %u Errors, %u Warnings\n", 
-			  logsource, pcb->top->errors, 
-			  pcb->top->warnings);
-	    } else if (pcb->top->warnings) {
-		log_warn("\n*** %s: %u Errors, %u Warnings\n", 
-			 logsource, pcb->top->errors, 
-			 pcb->top->warnings);
-	    }
+	    print_score_banner(pcb);
 	} else {
 	    /* invalid module name and/or revision date */
 	    if (revision) {
@@ -1254,11 +1271,7 @@ static status_t
 	    res = NO_ERR;
 	}
     } else if (pcb && pcb->top) {
-	logsource = (LOGDEBUG) ? pcb->top->source 
-	    : pcb->top->sourcefn;
-	log_write("\n*** %s: %u Errors, %u Warnings\n", 
-		  logsource, pcb->top->errors, 
-		  pcb->top->warnings);
+	print_score_banner(pcb);
     }
 
     /* check if output session needed, any reports requestd or

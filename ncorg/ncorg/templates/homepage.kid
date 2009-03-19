@@ -16,8 +16,9 @@
       <h3>XML-based Network Configuration Tools<br/>
 	Online YANG Module Database</h3>
       <br/>
-      <img border="2" src="${tg.url('/static/images/nc-roadmap.png')}" 
-	   alt="YangTools Roadmap"/>
+      <img border="0" height="529" width="705" 
+	   src="${tg.url('/static/images/yangtools.png')}" 
+	   alt="YangTools 1.0"/>
       <br/><br/>
       <h3><a href="/netconf_docs">Learn About NETCONF</a></h3>
       <h3><a href="/yang_docs">Learn About YANG</a></h3>

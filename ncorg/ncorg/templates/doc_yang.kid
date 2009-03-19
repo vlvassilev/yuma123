@@ -47,6 +47,23 @@
 	    examples</a>
 	  that may be helpful as well.
 	</p>
+	<h2>Additional Resources</h2>
+	<p>
+          <ul>
+	    <li>
+	      <a target="_blank"
+		 href="http://www.ibr.cs.tu-bs.de/projects/libsmi/">
+		libsmi</a> contains <b>smidump</b>, which can be used to
+	      automatically convert SMIv2 modules to YANG modules.
+	    </li>
+	    <li>Another YANG
+	      <a target="_blank"
+		 href="${tg.url('/static/slides/yangtutorial/yang_getting_started2.html')}">
+		tutorial
+	      </a>, still a work-in-progress
+	    </li>
+	  </ul>
+	</p>
       </div>
     </div>
   </body>

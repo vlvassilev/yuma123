@@ -552,14 +552,12 @@ class Root(controllers.RootController):
         if mod:
             ncobjects = Ncobject.select(
                 AND(Ncobject.q.islatest=="1",
-                    Ncobject.q.istop=="1",
                     Ncobject.q.objtyp=="rpc",
                     Ncobject.q.modname==mod),
                 orderBy=Ncobject.q.name)
         else:
             ncobjects = Ncobject.select(
                 AND(Ncobject.q.islatest=="1",
-                    Ncobject.q.istop=="1",
                     Ncobject.q.objtyp=="rpc"),
                 orderBy=Ncobject.q.name)
 
@@ -573,14 +571,12 @@ class Root(controllers.RootController):
         if mod:
             ncobjects = Ncobject.select(
                 AND(Ncobject.q.islatest=="1",
-                    Ncobject.q.istop=="1",
                     Ncobject.q.objtyp=="notification",
                     Ncobject.q.modname==mod),
                 orderBy=Ncobject.q.name)
         else:
             ncobjects = Ncobject.select(
                 AND(Ncobject.q.islatest=="1",
-                    Ncobject.q.istop=="1",
                     Ncobject.q.objtyp=="notification"),
                 orderBy=Ncobject.q.name)
 

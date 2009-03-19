@@ -80,6 +80,7 @@
 
       <a name="summary"/>
       <div>
+	<br/>
 	<h2>Summary</h2>
 	<p>
 	  [Note: This is not official documentation for the NETCONF
@@ -160,6 +161,7 @@
 
       <a name="base"/>
       <div>
+	<br/>
 	<h2>Base Protocol</h2>
 	<p>
           The <b>Network Configuration Protocol</b> is defined in 
@@ -248,6 +250,7 @@
 
       <a name="sessions"/>
       <div>
+	<br/>
 	<h2>NETCONF Sessions</h2>
 	<p>
 	  All NETCONF operations are carried out within a session,
@@ -312,6 +315,7 @@
 
       <a name="databases"/>
       <div>
+	<br/>
 	<h2>Configuration Databases</h2>
 	<p>
 	  The NETCONF protocol contains several standard operations
@@ -448,6 +452,7 @@
 
       <a name="operations"/>
       <div>
+	<br/>
 	<h2>Protocol Operations</h2>
 	<p>
 	  Once a NETCONF session is established, the manager knows
@@ -797,6 +802,7 @@
 
       <a name="capabilities"/>
       <div>
+	<br/>
 	<h2>Protocol Capabilities</h2>
 	<p>
 	  Many features and mechanisms within the NETCONF protocol
@@ -987,6 +993,7 @@
 
       <a name="notifications"/>
       <div>
+	<br/>
 	<h2>Notifications</h2>
 	<p>
 	  NETCONF has a notification delivery mechanism,
@@ -1025,12 +1032,13 @@
 
       <a name="standards"/>
       <div class="publication-list">
+	<br/>
 	<h2>Completed RFC Specifications</h2>
 
 	<h4>RFC 4741</h4>
 	<p>
-	  Defines the NETCONF protocol RPC layer and operations layer.<br/>
-	  Status: Proposed Standard RFC, mandatory-to-implement<br/>
+	  Defines the NETCONF protocol RPC layer and operations layer.<br/><br/>
+	  <b>Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
 	  <a href="http://www.rfc-editor.org/rfc/rfc4741.txt">
 	    NETCONF Configuration Protocol
 	  </a>
@@ -1038,8 +1046,8 @@
 
 	<h4>RFC 4742</h4>
 	<p>
-	  Defines the NETCONF-over-SSH transport mapping.<br/>
-	  Status: Proposed Standard RFC, mandatory-to-implement<br/>
+	  Defines the NETCONF-over-SSH transport mapping.<br/><br/>
+	  <b>Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
 	  <a href="http://www.rfc-editor.org/rfc/rfc4742.txt">
 	    Using the NETCONF Configuration Protocol over Secure Shell (SSH)
 	  </a>
@@ -1047,8 +1055,8 @@
 
 	<h4>RFC 4743</h4>
 	<p>
-	  Defines the NETCONF-over-SOAP transport mapping.<br/>
-	  Status: Proposed Standard RFC, optional-to-implement<br/>
+	  Defines the NETCONF-over-SOAP transport mapping.<br/><br/>
+	  <b>Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
 	  <a href="http://www.rfc-editor.org/rfc/rfc4743.txt">
 	    Using NETCONF over the Simple Object Access Protocol (SOAP)
 	  </a>
@@ -1056,8 +1064,8 @@
 
 	<h4>RFC 4744</h4>
 	<p>
-	  Defines the NETCONF-over-BEEP transport mapping.<br/>
-	  Status: Proposed Standard RFC, optional-to-implement<br/>
+	  Defines the NETCONF-over-BEEP transport mapping.<br/><br/>
+	  <b>Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
 	  <a href="http://www.rfc-editor.org/rfc/rfc4744.txt">
 	    Using the NETCONF Protocol over
             the Blocks Extensible Exchange Protocol (BEEP)
@@ -1066,9 +1074,8 @@
 
 	<h4>RFC 5277</h4>
 	<p>
-	  Defines the NETCONF notification delivery mechanisms and the
-	  top-level &lt;notification&gt; element.<br/>
-	  Status: Proposed Standard RFC, optional-to-implement<br/>
+	  Defines the NETCONF notification delivery mechanisms.<br/><br/>
+	  <b>Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
 	    <a href="http://www.rfc-editor.org/rfc/rfc5277.txt">
 	      NETCONF Event Notifications
 	    </a>
@@ -1076,9 +1083,8 @@
 
 	<h4>RFC 5381</h4>
 	<p>
-	  Documents some NETCONF-over-SOAP implementation experience
-	  top-level &lt;notification&gt; element.<br/>
-	  Status: Informational RFC, nothing-to-implement<br/>
+	  Documents some NETCONF-over-SOAP implementation experience.<br/><br/>
+	  <b>Status:</b> Informational RFC, nothing-to-implement<br/><br/>
 	    <a href="http://www.rfc-editor.org/rfc/rfc5381.txt">
 	      Experience of Implementing NETCONF over SOAP
 	    </a>
@@ -1087,12 +1093,13 @@
 
       <a name="work"/>
       <div class="publication-list">
+	<br/>
 	<h2>Standards Work in Progress</h2>
 
 	<h4>draft-ietf-netconf-tls</h4>
 	<p>
-	  Defines the NETCONF-over-TLS transport mapping.<br/>
-	  Intended Status: Proposed Standard RFC, optional-to-implement<br/>
+	  Defines the NETCONF-over-TLS transport mapping.<br/><br/>
+	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
 	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-tls-07.txt">
 	    NETCONF Over Transport Layer Security (TLS)
 	  </a>
@@ -1102,8 +1109,8 @@
 	<p>
 	  Defines a partial database locking mechanism (based on
 	  instance-identifier or XPath expressions) for the 
-	  NETCONF protocol.<br/>
-	  Intended Status: Proposed Standard RFC, optional-to-implement<br/>
+	  NETCONF protocol.<br/><br/>
+	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
 	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-partial-lock-07.txt">
 	    Partial Lock RPC for NETCONF
 	  </a>
@@ -1112,8 +1119,8 @@
 	<h4>draft-ietf-netconf-monitoring</h4>
 	<p>
 	  Defines an agent monitoring data model and schema retrieval
-	  mechanism for the NETCONF protocol.<br/>
-	  Intended Status: Proposed Standard RFC, optional-to-implement<br/>
+	  mechanism for the NETCONF protocol.<br/><br/>
+	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
 	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-monitoring-04.txt">
 	    NETCONF Monitoring Schema
 	  </a>
@@ -1122,8 +1129,8 @@
 	<h4>draft-ietf-netconf-with-defaults</h4>
 	<p>
 	  Defines a mechanism to control the filtering of leaf objects
-          containing the 'default' value, during NETCONF retrieval operations.<br/>
-	  Intended Status: Proposed Standard RFC, optional-to-implement<br/>
+          containing the 'default' value, during NETCONF retrieval operations.<br/><br/>
+	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
 	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-with-defaults-00.txt">
 	    With-defaults capability for NETCONF
 	  </a>
@@ -1132,6 +1139,7 @@
 
       <a name="resources"/>
       <div>
+	<br/>
 	<h2>Additional NETCONF Resources</h2>
 	<ul>
 	  <li>

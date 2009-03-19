@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+     "http://www.w3.org/TR/html4/transitional.dtd">
+<html>
+<head>
+  <meta HTTP-EQUIV=CONTENT-TYPE CONTENT="text/html; charset=utf-8">
+  <title>Basic YANG Module Structure</title>
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#0000CC" vlink="#000080" alink="#0000CC">
+<center>
+<a href="text0.html">First page</a> <a href="text5.html">Back</a> <a href="text7.html">Continue</a> <a href="text19.html">Last page</a> <a href="yang_getting_started2.html">Overview</a> <a href="img6.html">Graphics</a></center><br>
+<h1>Basic YANG Module Structure</h1>
+<ul><li><h2>module <b><font color="#0000FF">interfaces</b></font> {</h2></li>
+<li><h2>    yang-version 1;</h2></li>
+<li><h2>    <b>namespace</b> “<font color="#0000FF">some-unique-URI</font>”;</h2></li>
+<li><h2>    <b>prefix</b> <font color="#0000FF">if</font>;</h2></li>
+<li><h2>    import<font color="#0000FF"> foo-module </font>{ prefix<font color="#0000FF"> foo</font>; }</h2></li>
+<li><h2><font color="#0000FF">    </font>include<font color="#0000FF"> bar-submodule</font>;</h2></li>
+<li><h2>    organization “<font color="#0000FF">your organization/company name here</font>”;</h2></li>
+<li><h2>    contact “<font color="#0000FF">your name and email address here</font>”;</h2></li>
+<li><h2>    description   “<font color="#0000FF">Module summary here</font>”;</h2></li>
+<li><h2>    reference  “<font color="#0000FF">Module references here</font>”;</h2></li>
+<li><h2>    </h2></li>
+<li><h2>    revision <font color="#0000FF">2008-03-05</font> { description “<font color="#0000FF">initial version</font>.”; }</h2></li>
+<li><h2><font color="#0000FF"></font></h2></li>
+<li><h2><font color="#0000FF">    </font>&lt;data model definitions here, in any order&gt;     </h2></li>
+<li><h2>}</h2></li>
+</ul></body>
+</html>

@@ -252,7 +252,7 @@ li.daddy {
     padding-top: 5px;
     margin-top: 3px;
     margin-bottom: 2px;
-    font-size: 125%;
+    font-size: 120%;
     color: red;
     text-align: left;
 }
@@ -262,7 +262,7 @@ li.daddy {
     padding-top: 5px;
     margin-top: 3px;
     margin-bottom: 2px;
-    font-size: 125%;
+    font-size: 120%;
     color: red;
     text-align: left;
 }
@@ -283,7 +283,7 @@ h1 {
 }
 
 h2 {
-  font-size: 130%;
+  font-size: 120%;
 }
 
 #footer {
@@ -342,7 +342,7 @@ pre.code {
 #about h3 {
     margin: 0;
     margin-bottom: 10px;
-    font-size: 14px;
+    font-size: 100%;
 }
       
 #about-content {
@@ -353,7 +353,7 @@ pre.code {
 #about-content table {
      margin-top: 10px;
      margin-bottom: 10px;
-     font-size: 11px;
+     font-size: 100%;
      border-collapse: collapse;
 }
 #about-content td {
@@ -487,7 +487,7 @@ div.ncdocs {
   margin-bottom: .5in;
   margin-right: 1in;
   text-align: center;
-  font-size: 10pt;
+  font-size: 100%;
 }
 
 div.ncdocs table {
@@ -548,6 +548,27 @@ div.publication-list p {
 }
 
 
+div.sidebar {
+  padding: 5px 5px 5px 5px;
+  margin: 45px 5px 5px 5px;
+  text-align: left;
+  font-size: 95%;
+  float: right;
+  border: 1px solid black;
+}
+
+div.sidebar td {
+  padding-left: 4px;
+}
+
+div.sidebar h2 {
+  text-align: left;
+}
+
+
+
+
+
 /* copied from yangtools/trunk/netconf/data/yangdump-css-contents.txt */
 
   a.yang_kw:link    { 
@@ -579,7 +600,7 @@ div.publication-list p {
   div.yang {
     width: 80%;
     background-color:  white;
-    font-size: 9pt;
+    font-size: 90%;  /*9pt; */
     color: black;
     margin: 10px 10px 10px .4in;
     padding: 1px 10px 10px 1px;

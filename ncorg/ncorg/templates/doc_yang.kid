@@ -17,6 +17,7 @@
       <img src="${tg.url('/static/images/yang_layers.png')}" 
 	   border="2" alt="yang layers"/>
       <p>&nbsp;</p>
+
       <div>
 	<h2>NETMOD WG</h2>
 	<p>

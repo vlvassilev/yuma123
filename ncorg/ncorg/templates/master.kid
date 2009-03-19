@@ -97,6 +97,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 	    <li><a href="/yangdiff_manual">yangdiff&nbsp;program</a></li>
 	    <li><a href="/netconf_docs">NETCONF&nbsp;protocol</a></li>
 	    <li><a href="/yang_docs">YANG&nbsp;language</a></li>
+	    <li><a href="/yang_auto">YANG&nbsp;automation</a></li>
 	  </ul>
 	</li>
 	<li><a href="/download">Free&nbsp;Downloads</a></li>

@@ -11,6 +11,66 @@
     <title>Netconf Central NETCONF Documentation</title>
   </head>
   <body>
+    <div class="sidebar">
+      <table>
+	<tr>
+	  <td>
+	    <b>Contents</b>
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <a href="#summary">Summary</a>
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <a href="#base">Base&nbsp;Protocol</a>
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <a href="#sessions">Sessions</a>
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <a href="#databases">Databases</a>
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <a href="#operations">Operations</a>
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <a href="#capabilities">Capabilities</a>
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <a href="#notifications">Notifications</a>
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <a href="#standards">RFCs</a>
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <a href="#work">Internet&nbsp;Drafts</a>
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <a href="#resources">Additional&nbsp;Resources</a>
+	  </td>
+	</tr>
+      </table>
+    </div>
+
     <div class="ncdocs">
       <h1>Network Configuration Protocol</h1>
 
@@ -18,6 +78,7 @@
 	   border="2" alt="netconf layers"/>
       <p>&nbsp;</p>
 
+      <a name="summary"/>
       <div>
 	<h2>Summary</h2>
 	<p>
@@ -96,6 +157,8 @@
 	  associated with that operation.
 	</p>
       </div>
+
+      <a name="base"/>
       <div>
 	<h2>Base Protocol</h2>
 	<p>
@@ -182,6 +245,8 @@
 	  </a>
 	</p>
       </div>
+
+      <a name="sessions"/>
       <div>
 	<h2>NETCONF Sessions</h2>
 	<p>
@@ -243,9 +308,9 @@
 	  element.  The <b>message-id</b> attribute is required by the
 	  protocol, although this is not really needed.
 	</p>
-
-
       </div>
+
+      <a name="databases"/>
       <div>
 	<h2>Configuration Databases</h2>
 	<p>
@@ -380,6 +445,8 @@
 	  </ul>
 	</p>
       </div>
+
+      <a name="operations"/>
       <div>
 	<h2>Protocol Operations</h2>
 	<p>
@@ -405,7 +472,50 @@
 	  <tr>
 	    <td><b>Operation</b></td>
 	    <td><b>Usage</b></td>
-	    <td><b>Description</b></td></tr>
+	    <td><b>Description</b></td>
+	  </tr>
+	  <tr>
+	    <td>close-session</td>
+	    <td>:base</td>
+	    <td>Terminate this session</td>
+	  </tr>
+	  <tr>
+	    <td>commit</td>
+	    <td>:base AND :candidate</td>
+	    <td>
+	      Commit the contents of the &lt;candidate/&gt; configuration
+	      database to the &lt;running/&gt; configuration database
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>copy-config</td>
+	    <td>:base</td>
+	    <td>Copy a configuration database</td>
+	  </tr>
+	  <tr>
+	    <td>create-subscription</td>
+	    <td>:notification</td>
+	    <td>Create a NETCONF notification subscription</td>
+	  </tr>
+	  <tr>
+	    <td>delete-config</td>
+	    <td>:base</td>
+	    <td>Delete a configuration database</td>
+	  </tr>
+	  <tr>
+	    <td>discard-changes</td>
+	    <td>:base AND :candidate</td>
+	    <td>
+	      Clear all changes from the &lt;candidate/&gt; configuration
+	      database and make it match the &lt;running/&gt; configuration
+	      database
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>edit-config</td>
+	    <td>:base</td>
+	    <td>Modify a configuration database</td>
+	  </tr>
 	  <tr>
 	    <td>get</td>
 	    <td>:base</td>
@@ -422,19 +532,9 @@
 	    </td>
 	  </tr>
 	  <tr>
-	    <td>edit-config</td>
+	    <td>kill-session</td>
 	    <td>:base</td>
-	    <td>Modify a configuration database</td>
-	  </tr>
-	  <tr>
-	    <td>copy-config</td>
-	    <td>:base</td>
-	    <td>Copy a configuration database</td>
-	  </tr>
-	  <tr>
-	    <td>delete-config</td>
-	    <td>:base</td>
-	    <td>Delete a configuration database</td>
+	    <td>Terminate another session</td>
 	  </tr>
 	  <tr>
 	    <td>lock</td>
@@ -445,33 +545,6 @@
 	    <td>unlock</td>
 	    <td>:base</td>
 	    <td>Unlock a configuration database so any session can write</td>
-	  </tr>
-	  <tr>
-	    <td>close-session</td>
-	    <td>:base</td>
-	    <td>Terminate this session</td>
-	  </tr>
-	  <tr>
-	    <td>kill-session</td>
-	    <td>:base</td>
-	    <td>Terminate another session</td>
-	  </tr>
-	  <tr>
-	    <td>commit</td>
-	    <td>:base AND :candidate</td>
-	    <td>
-	      Commit the contents of the &lt;candidate/&gt; configuration
-	      database to the &lt;running/&gt; configuration database
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>discard-changes</td>
-	    <td>:base AND :candidate</td>
-	    <td>
-	      Clear all changes from the &lt;candidate/&gt; configuration
-	      database and make it match the &lt;running/&gt; configuration
-	      database
-	    </td>
 	  </tr>
 	  <tr>
 	    <td>validate</td>
@@ -722,6 +795,7 @@
 	</pre>
       </div>
 
+      <a name="capabilities"/>
       <div>
 	<h2>Protocol Capabilities</h2>
 	<p>
@@ -911,6 +985,7 @@
 	</ul>
       </div>
 
+      <a name="notifications"/>
       <div>
 	<h2>Notifications</h2>
 	<p>
@@ -948,6 +1023,7 @@
 	</p>
       </div>
 
+      <a name="standards"/>
       <div class="publication-list">
 	<h2>Completed RFC Specifications</h2>
 
@@ -1007,9 +1083,9 @@
 	      Experience of Implementing NETCONF over SOAP
 	    </a>
 	</p>
-
       </div>
 
+      <a name="work"/>
       <div class="publication-list">
 	<h2>Standards Work in Progress</h2>
 
@@ -1054,6 +1130,7 @@
 	</p>
       </div>
 
+      <a name="resources"/>
       <div>
 	<h2>Additional NETCONF Resources</h2>
 	<ul>

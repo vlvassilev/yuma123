@@ -1626,6 +1626,14 @@ class Root(controllers.RootController):
 
     #################################################################################
     #
+    # Show the YANG automation page
+    #
+    @expose(template="ncorg.templates.doc_yangauto")
+    def yang_auto(self, *args, **kw):
+        return dict(modmenu=moduleJumpMenu)
+
+    #################################################################################
+    #
     # Show the download page
     #
     @expose(template="ncorg.templates.download")

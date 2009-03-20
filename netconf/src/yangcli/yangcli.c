@@ -181,7 +181,7 @@ date         init     comment
 
 #define YANGCLI_MOD  (const xmlChar *)"yangcli"
 
-#ifdef MAC
+#ifdef MACOSX
 #define ENV_HOST        (const char *)"HOST"
 #else
 #define ENV_HOST        (const char *)"HOSTNAME"

@@ -18,30 +18,33 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Wredundant-decls -Wnested-externs -Winline -std=gnu99
 
 
+CFLAGS=-DDEBUG -DLINUX -DGCC -DHAS_FLOAT $(CWARN)
 
-# debug
+# production (1) or debug (0) build
 ifdef BLD
-  CFLAGS=-DDEBUG -DLINUX -DGCC -DHAS_FLOAT $(CWARN) -Werror
+  CFLAGS += -Werror
 else
-  CFLAGS=-ggdb3 -DDEBUG -DLINUX -DGCC -DHAS_FLOAT $(CWARN)
+  CFLAGS += -ggdb3   
 endif
 
+# memory leak debugging mode
+ifdef MEMTRACE
+  CFLAGS += -DMEMORY_DEBUG=1
+endif
+
+CINC=-I. -I../agt -I../agtinst -I../db -I../mgr \
+    -I../ncx -I../platform \
+    -I/usr/include -I/usr/include/libxml2 \
+    -I/usr/include/libxml2/libxml
 
 # added /sw/include for MacOSX
 ifdef MAC
 # MACOSX version
-CINC=-I. -I../agt -I../agtinst -I../db -I../mgr \
-    -I../ncx -I../platform \
-    -I/usr/include -I/usr/include/libxml2 \
-    -I/usr/include/libxml2/libxml \
-    -I/sw/include
+  CINC +=-I/sw/include
+  CFLAGS += -DMACOSX=1
 else
 # LINUX version
-CINC=-I. -I../agt -I../agtinst -I../db -I../mgr \
-    -I../ncx -I../platform \
-    -I/usr/include -I/usr/include/libxml2 \
-    -I/usr/include/libxml2/libxml \
-    -I/usr/local/include
+  CINC += -I/usr/local/include
 endif
         
 CC=gcc

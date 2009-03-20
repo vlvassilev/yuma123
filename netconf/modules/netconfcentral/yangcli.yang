@@ -33,11 +33,11 @@ module yangcli {
 
          Script-mode:
             If the 'run-script' parameter is present, then the
-            specified script will be run automatically upon startup
+            specified script will be run automatically upon startup.
       
          ";
 
-    revision 2009-03-06 {
+    revision 2009-03-19 {
        description "Initial published version (TBD)";
     }
 
@@ -135,7 +135,7 @@ module yangcli {
                 description 
                    "Use the contents of the specified variable 
                     as the content";
-                type nt:NcxVarReference;
+                type string;
             }
 
             case from-cli {
@@ -182,7 +182,7 @@ module yangcli {
                 description 
                    "Use the contents of the specified variable 
                     as the content";
-                type nt:NcxVarReference;
+                type string;
             }
 
             leaf select {
@@ -487,7 +487,7 @@ module yangcli {
         Used in an assignment statement to create a variable
         for later use:
 
-            $foo = fill --target=/t:foo-con/bar-list[index='fred'] \
+            $foo = fill --target=/t:foo-con/bar-list \
                         --optional \
                         --current-value=$bar    ";
        ncx:rpc-type exec;

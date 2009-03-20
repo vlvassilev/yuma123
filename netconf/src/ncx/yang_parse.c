@@ -800,6 +800,7 @@ static status_t
     const xmlChar      *val;
     const char         *expstr;
     ncx_identity_t     *identity, *testidentity;
+    yang_stmt_t        *stmt;
     tk_type_t           tktyp;
     boolean             done, base, stat, desc, ref, keep;
     status_t            res, retres;
@@ -821,6 +822,7 @@ static status_t
 	return res;
     }
     identity->tk = TK_CUR(tkc);
+    identity->linenum = TK_CUR_LNUM(tkc);
     identity->isroot = TRUE;
     identity->mod = mod;
 
@@ -940,6 +942,17 @@ static status_t
 	}
 	identity->res = retres;
 	dlq_enque(identity, &mod->identityQ);
+
+	if (mod->stmtmode) {
+	    stmt = yang_new_id_stmt(identity);
+	    if (stmt) {
+		dlq_enque(stmt, &mod->stmtQ);
+	    } else {
+		log_error("\nError: malloc failure for id_stmt");
+		retres = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
     } else {
 	ncx_free_identity(identity);
     }

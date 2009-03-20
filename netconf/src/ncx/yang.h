@@ -79,7 +79,8 @@ typedef enum yang_stmttype_t_ {
     YANG_ST_TYPEDEF,            /* node is typ_template_t */
     YANG_ST_GROUPING,           /* node is grp_template_t */
     YANG_ST_EXTENSION,          /* node is ext_template_t */
-    YANG_ST_OBJECT              /* node is obj_template_t */
+    YANG_ST_OBJECT,             /* node is obj_template_t */
+    YANG_ST_IDENTITY            /* node is ncx_identity_t */
 } yang_stmttype_t;
 
 
@@ -93,6 +94,7 @@ typedef struct yang_stmt_t_ {
 	grp_template_t *grp;
 	ext_template_t *ext;
 	obj_template_t *obj;
+	ncx_identity_t *identity;
     } s;
 } yang_stmt_t;
 
@@ -398,6 +400,9 @@ extern yang_stmt_t *
 
 extern yang_stmt_t *
     yang_new_obj_stmt (obj_template_t *obj);
+
+extern yang_stmt_t *
+    yang_new_id_stmt (ncx_identity_t *obj);
 
 extern void
     yang_free_stmt (yang_stmt_t *stmt);

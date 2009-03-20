@@ -2978,6 +2978,8 @@ static status_t
     typ_template_t   *errtyp;
     grp_template_t   *nextgrp;
     typ_enum_t       *enu;
+    typ_idref_t      *idref;
+    ncx_identity_t   *testidentity;
     const xmlChar    *errname;
     status_t         res, retres;
     boolean          errdone;
@@ -3087,11 +3089,12 @@ static status_t
 	}
     }
 
-    /* check each enumeration appinfoQ */
+    /* check builin type specific details */
     if (res == NO_ERR) {
 	switch (typ_get_basetype(typdef)) {
 	case NCX_BT_ENUM:
 	case NCX_BT_BITS:
+	    /* check each enumeration appinfoQ */
 	    if (typdef->class == NCX_CL_SIMPLE) {
 		for (enu = (typ_enum_t *)
 			 dlq_firstEntry(&typdef->def.simple.valQ);
@@ -3102,6 +3105,42 @@ static status_t
 		    CHK_EXIT(res, retres);
 		}
 		res = NO_ERR;
+	    }
+	    break;
+	case NCX_BT_IDREF:
+	    idref = typ_get_idref(typdef);
+	    if (idref) {
+		testidentity = NULL;
+		if (idref->baseprefix &&
+		    xml_strcmp(idref->baseprefix, mod->prefix)) {
+
+		    /* find the identity in another module */
+		    res = yang_find_imp_identity(tkc, 
+						 mod, 
+						 idref->baseprefix,
+						 idref->basename, 
+						 typdef->tk,
+						 &testidentity);
+		} else {
+		    testidentity = ncx_find_identity
+			(mod, idref->basename);
+		    if (!testidentity) {
+			res = ERR_NCX_DEF_NOT_FOUND;
+		    } else {
+			idref->base = testidentity;
+		    }
+		}
+		idref->base = testidentity;
+		if (res != NO_ERR) {
+		    log_error("\nError: identityref '%s' has invalid "
+			      "base value (%s)",
+			      (name) ? (const char *)name : "--", 
+			      idref->basename);
+		    tkc->cur = typdef->tk;
+		    ncx_print_errormsg(tkc, mod, res);
+		}
+	    } else {
+		res = SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 	    break;
 	default:

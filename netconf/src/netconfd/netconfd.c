@@ -244,7 +244,7 @@ static status_t
     /* set the default debug output level */
 #ifdef DEBUG
 #ifdef NETCONFD_DEBUG_TEST
-    dlevel = LOG_DEBUG_DEBUG2;
+    dlevel = LOG_DEBUG_DEBUG;
 #else 
     dlevel = LOG_DEBUG_INFO;
 #endif

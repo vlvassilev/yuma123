@@ -2054,7 +2054,7 @@ status_t
 
     found = FALSE;
 
-    idref = typ_get_idref(typdef);
+    idref = typ_get_cidref(typdef);
     if (!idref) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }

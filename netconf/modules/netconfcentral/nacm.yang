@@ -15,7 +15,9 @@ module nacm {
       "NETCONF Agent Access Control Model Parameters";
 
     revision 2009-03-05 {
-        description  "Initial version of the rewrite.";
+        description  
+	  "Initial version of the rewrite.
+	   Preliminary!! Work-in-progress!!";
     }
 
     typedef NacmUserName {
@@ -198,7 +200,7 @@ module nacm {
                 }
             }
 
-            list rpcRules {
+            list rpcRule {
                 description "One RPC Method Access Rule"; 
 
                 key "rpcName allowedRights";
@@ -215,7 +217,7 @@ module nacm {
                 uses RulesCommon;
             }
 
-            list rule {
+            list dataRule {
                 description "One Data Access Control Rule";
 
                 key "path allowedRights";

@@ -181,9 +181,14 @@ date         init     comment
 
 #define YANGCLI_MOD  (const xmlChar *)"yangcli"
 
-#define ENV_HOSTNAME    (const char *)"HOSTNAME"
+#ifdef MAC
+#define ENV_HOST        (const char *)"HOST"
+#else
+#define ENV_HOST        (const char *)"HOSTNAME"
+#endif
+
 #define ENV_SHELL       (const char *)"SHELL"
-#define ENV_USERNAME    (const char *)"USERNAME"
+#define ENV_USER        (const char *)"USER"
 #define ENV_LANG        (const char *)"LANG"
 
 /* CLI parmset for the ncxcli application */
@@ -4344,8 +4349,8 @@ static status_t
 	return res;
     }
 
-    envstr = getenv(ENV_HOSTNAME);
-    res = create_system_var(ENV_HOSTNAME, envstr);
+    envstr = getenv(ENV_HOST);
+    res = create_system_var(ENV_HOST, envstr);
     if (res != NO_ERR) {
 	return res;
     }
@@ -4356,14 +4361,20 @@ static status_t
 	return res;
     }
 
-    envstr = getenv(ENV_USERNAME);
-    res = create_system_var(ENV_USERNAME, envstr);
+    envstr = getenv(ENV_USER);
+    res = create_system_var(ENV_USER, envstr);
     if (res != NO_ERR) {
 	return res;
     }
 
     envstr = getenv(ENV_LANG);
     res = create_system_var(ENV_LANG, envstr);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    envstr = getenv(NCXMOD_HOME);
+    res = create_system_var(NCXMOD_HOME, envstr);
     if (res != NO_ERR) {
 	return res;
     }

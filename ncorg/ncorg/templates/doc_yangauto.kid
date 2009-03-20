@@ -14,53 +14,6 @@
     <div class="ncdocs">
       <h1>YANG Based Automation</h1>
 
-      <img src="${tg.url('/static/images/coststack.png')}" 
-	   border="0" height="507" width="657" alt="cost stack"/>
-      <p>&nbsp;</p>
-
-      <div>
-	<h2>NETCONF Development Costs</h2>	
-	<p>
-	  Another source of significant costs
-	  in network configuration management is the labor-intensive
-	  nature of data model agent implementation on multiple product
-	  platforms.  
-	</p>
-	<p>
-	  There are three basic types of code within the agent implementation
-	  for a particular data model module:
-	  <ul>
-	    <li>
-	      <b>Networking feature</b>:<br/>
-	      This code performs the actual operations/behavior indicated
-	      by the configuration database contents (e.g., turn the
-	      fan motor on or off).  This code would be the same
-	      cost regardless of the management protocol that is used.
-	    </li>
-	    <li>
-	      <b>NETCONF database access</b>:<br/>
-	      This code handles all the protocol operation access to
-	      the data model content in all of the NETCONF databases.
-	      Most of the development costs are found here, due to
-	      complex validation, creation, deletion, editing, filtering,
-	      commit and rollback requirements imposed by the protocol.
-	      The platform-dependent development costs are the highest,
-	      and they are also the source of divergence between
-	      implementation behavior for the same data model.
-	    </li>
-	    <li>
-	      <b>NETCONF operations</b>:<br/>
-	      This code handles the NETCONF protocol operation processing
-	      which is unrelated to data models, such as session support,
-	      XML message handling, error reporting, and transport mappings.
-	      Due to the significant complexity, but universal applicability,
-	      this code is often available in 'toolkits', so the cost
-	      is relatively low, compared to the rest of the agent implementation.
-	    </li>
-	  </ul>
-	</p>
-      </div>
-
       <img src="${tg.url('/static/images/cookedmodules.png')}" 
 	   border="0" height="507" width="657" alt="cooked modules"/>
       <p>&nbsp;</p>
@@ -193,6 +146,53 @@
 	  An agent can utilize a platform-specific set of XPath
 	  variables, during normal automatic processing of
 	  all 'must' and 'when' statement validation.
+	</p>
+      </div>
+
+      <img src="${tg.url('/static/images/coststack.png')}" 
+	   border="0" height="507" width="657" alt="cost stack"/>
+      <p>&nbsp;</p>
+
+      <div>
+	<h2>NETCONF Development Costs</h2>	
+	<p>
+	  Another source of significant costs
+	  in network configuration management is the labor-intensive
+	  nature of data model agent implementation on multiple product
+	  platforms.  
+	</p>
+	<p>
+	  There are three basic types of code within the agent implementation
+	  for a particular data model module:
+	  <ul>
+	    <li>
+	      <b>Networking feature</b>:<br/>
+	      This code performs the actual operations/behavior indicated
+	      by the configuration database contents (e.g., turn the
+	      fan motor on or off).  This code would be the same
+	      cost regardless of the management protocol that is used.
+	    </li>
+	    <li>
+	      <b>NETCONF database access</b>:<br/>
+	      This code handles all the protocol operation access to
+	      the data model content in all of the NETCONF databases.
+	      Most of the development costs are found here, due to
+	      complex validation, creation, deletion, editing, filtering,
+	      commit and rollback requirements imposed by the protocol.
+	      The platform-dependent development costs are the highest,
+	      and they are also the source of divergence between
+	      implementation behavior for the same data model.
+	    </li>
+	    <li>
+	      <b>NETCONF operations</b>:<br/>
+	      This code handles the NETCONF protocol operation processing
+	      which is unrelated to data models, such as session support,
+	      XML message handling, error reporting, and transport mappings.
+	      Due to the significant complexity, but universal applicability,
+	      this code is often available in 'toolkits', so the cost
+	      is relatively low, compared to the rest of the agent implementation.
+	    </li>
+	  </ul>
 	</p>
       </div>
 

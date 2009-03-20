@@ -631,6 +631,110 @@ static void
 
 
 /********************************************************************
+* FUNCTION write_idref_base
+* 
+* Generate a base QName; clause for an identityref
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parameters to use
+*   idref == identity ref struct to use
+*   startindent == start indent count
+*********************************************************************/
+static void
+    write_idref_base (ses_cb_t *scb,
+		      const ncx_module_t *mod,
+		      const yangdump_cvtparms_t *cp,
+		      const typ_idref_t *idref,
+		      int32 startindent)
+{
+    const xmlChar       *fname, *fversion, *submod;
+    uint32               linenum;
+
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+    fname = NULL;
+    fversion = NULL;
+    linenum = 0;
+
+    ses_indent(scb, startindent);
+    write_kw(scb, YANG_K_BASE);
+    ses_putchar(scb, ' ');
+
+    /* get filename if identity-stmt found */
+    if (idref->base) {
+	linenum = idref->base->linenum;
+	fname = idref->base->mod->name;
+	fversion = idref->base->mod->version;
+    }
+
+    ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
+    write_a(scb, cp, 
+	    fname, 
+	    fversion, 
+	    submod,
+	    idref->baseprefix,
+	    idref->basename, 
+	    linenum);
+    ses_putstr(scb, (const xmlChar *)"</span>");
+    ses_putchar(scb, ';');
+
+}  /* write_idref_base */
+
+
+/********************************************************************
+* FUNCTION write_identity_base
+* 
+* Generate a base QName; clause for an identity
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parameters to use
+*   identity == identity struct to use
+*   startindent == start indent count
+*********************************************************************/
+static void
+    write_identity_base (ses_cb_t *scb,
+			 const ncx_module_t *mod,
+			 const yangdump_cvtparms_t *cp,
+			 const ncx_identity_t *identity,
+			 int32 startindent)
+{
+    const xmlChar       *fname, *fversion, *submod;
+    uint32               linenum;
+
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+    fname = NULL;
+    fversion = NULL;
+    linenum = 0;
+
+    ses_indent(scb, startindent);
+    write_kw(scb, YANG_K_BASE);
+    ses_putchar(scb, ' ');
+
+    /* get filename if identity-stmt found */
+    if (identity->base) {
+	linenum = identity->base->linenum;
+	fname = identity->base->mod->name;
+	fversion = identity->base->mod->version;
+    }
+
+    ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
+    write_a(scb, cp, 
+	    fname, 
+	    fversion, 
+	    submod,
+	    identity->baseprefix,
+	    identity->basename, 
+	    linenum);
+    ses_putstr(scb, (const xmlChar *)"</span>");
+    ses_putchar(scb, ';');
+
+}  /* write_identity_base */
+
+
+/********************************************************************
 * FUNCTION write_href_id
 * 
 * Generate a simple clause on 1 line with a name anchor for the ID
@@ -967,6 +1071,7 @@ static void
     const xmlChar         *str;
     const typ_range_t     *range;
     const typ_pattern_t   *pat;
+    const typ_idref_t     *idref;
     char                   buff[NCX_MAX_NUMLEN];
     int32                  indent;
     boolean                errinfo_set, constrained_set;
@@ -1128,6 +1233,13 @@ static void
 			     (constrained_set) 
 			     ? NCX_EL_TRUE : NCX_EL_FALSE,
 			     startindent, 2, TRUE);
+	    break;
+	case NCX_BT_IDREF:
+	    idref = typ_get_cidref(typdef);
+	    if (idref) {
+		write_idref_base(scb, mod, cp, 
+				 idref, startindent);
+	    }
 	    break;
 	default:
 	    break;
@@ -2264,12 +2376,121 @@ static void
 
     for (ext = (const ext_template_t *)dlq_firstEntry(extensionQ);
 	 ext != NULL;
-	 ext = (ext_template_t *)dlq_nextEntry(ext)) {
+	 ext = (const ext_template_t *)dlq_nextEntry(ext)) {
 
 	write_extension(scb, mod, cp, ext, startindent);
     }
 
 }  /* write_extensions */
+
+
+/********************************************************************
+* FUNCTION write_identity
+* 
+* Generate the HTML for 1 identity statement
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   identity == ncx_identity_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_identity (ses_cb_t *scb,
+		    const ncx_module_t *mod,
+		    const yangdump_cvtparms_t *cp,
+		    const ncx_identity_t *identity,
+		    int32 startindent)
+{
+    const xmlChar     *submod;
+    int32              indent;
+
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+    indent = startindent + ses_indent_count(scb);
+
+    write_href_id(scb, submod, 
+		  YANG_K_IDENTITY, 
+		  identity->name, 
+		  startindent, 
+		  identity->linenum, 
+		  FALSE, TRUE);
+
+    /* optional base sub-clause */
+    if (identity->base) {
+	write_identity_base(scb, mod, cp,
+			    identity, indent);
+    }
+
+    /* status field */
+    write_status(scb, identity->status, indent);
+
+    /* description field */
+    if (identity->descr) {
+	write_simple_str(scb, YANG_K_DESCRIPTION, 
+			 identity->descr, 
+			 indent, 2, TRUE);
+    }
+
+    /* reference field */
+    if (identity->ref) {
+	write_simple_str(scb, YANG_K_REFERENCE, 
+			 identity->ref, 
+			 indent, 2, TRUE);
+    }
+
+    write_appinfoQ(scb, mod, cp, 
+		   &identity->appinfoQ, 
+		   indent);
+
+    /* end identity clause */
+    ses_putstr_indent(scb, END_SEC, startindent);
+
+}  /* write_identity */
+
+
+/********************************************************************
+* FUNCTION write_identities
+* 
+* Generate the HTML for the specified identityQ
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   identityQ == que of ncx_identity_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_identities (ses_cb_t *scb,
+		      const ncx_module_t *mod,
+		      const yangdump_cvtparms_t *cp,
+		      const dlq_hdr_t *identityQ,
+		      int32 startindent)
+{
+    const ncx_identity_t *identity;
+
+    if (dlq_empty(identityQ)) {
+	return;
+    }
+
+    write_banner_cmt(scb, mod, cp,
+		     (const xmlChar *)"identities", 
+		     startindent);
+
+    for (identity = (const ncx_identity_t *)
+	     dlq_firstEntry(identityQ);
+	 identity != NULL;
+	 identity = (const ncx_identity_t *)
+	     dlq_nextEntry(identity)) {
+
+	write_identity(scb, mod, cp, 
+		       identity, startindent);
+    }
+
+}  /* write_identities */
 
 
 /********************************************************************
@@ -3167,7 +3388,7 @@ static void
 {
     const yang_node_t     *node;
     const yang_stmt_t     *stmt;
-    boolean                stmtmode, first;
+    boolean                stmtmode;
 
     if (cp->html_div) {
 	/* start wrapper div */
@@ -3219,6 +3440,24 @@ static void
      * the YANG_PT_TOP module, and none of the sub-modules
      */
     stmtmode = dlq_empty(&mod->stmtQ) ? FALSE : TRUE;
+
+    if (!stmtmode) {
+	write_identities(scb, mod, cp, 
+			 &mod->identityQ, 
+			 2*cp->indent);
+    }
+
+    if (cp->unified && mod->ismod) {
+	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	     node != NULL;
+	     node = (const yang_node_t *)dlq_nextEntry(node)) {
+	    if (node->submod) {
+		write_identities(scb, node->submod, cp, 
+				 &node->submod->identityQ, 
+				 2*cp->indent);
+	    }
+	}
+    }
 
     if (!stmtmode) {
 	write_typedefs(scb, mod, cp, &mod->typeQ, 2*cp->indent);
@@ -3281,7 +3520,6 @@ static void
     }
 
     if (stmtmode) {
-	first = TRUE;
 	for (stmt = (const yang_stmt_t *)dlq_firstEntry(&mod->stmtQ);
 	     stmt != NULL;
 	     stmt = (const yang_stmt_t *)dlq_nextEntry(stmt)) {
@@ -3290,24 +3528,35 @@ static void
 		SET_ERROR(ERR_INTERNAL_VAL);
 		break;
 	    case YANG_ST_TYPEDEF:
-		write_typedef(scb, mod, cp, stmt->s.typ, 2*cp->indent, first);
+		write_typedef(scb, mod, cp, 
+			      stmt->s.typ, 
+			      2*cp->indent, FALSE);
 		break;
 	    case YANG_ST_GROUPING:
-		write_grouping(scb, mod, cp, stmt->s.grp, 2*cp->indent, first);
+		write_grouping(scb, mod, cp, 
+			       stmt->s.grp, 
+			       2*cp->indent, FALSE);
 		break;
 	    case YANG_ST_EXTENSION:
-		write_extension(scb, mod, cp, stmt->s.ext, 2*cp->indent);
+		write_extension(scb, mod, cp, 
+				stmt->s.ext, 
+				2*cp->indent);
 		break;
 	    case YANG_ST_OBJECT:
-		write_object(scb, mod, cp, stmt->s.obj, 2*cp->indent, first);
+		write_object(scb, mod, cp, 
+			     stmt->s.obj, 
+			     2*cp->indent, FALSE);
+		break;
+	    case YANG_ST_IDENTITY:
+		write_identity(scb, mod, cp, 
+			       stmt->s.identity,
+			       2*cp->indent);
 		break;
 	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
-	    first = FALSE;
 	}
     }
-
 
     /* TBD: need a better way to generate all the top-level
      * extensions.  This approach is broken because it gathers

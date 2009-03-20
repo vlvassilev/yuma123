@@ -1732,7 +1732,8 @@ static void
 
     if (datadefQ == &mod->datadefQ) {
 	write_cyang_banner_cmt(scb, mod, cp,
-			       (const xmlChar *)"objects", startindent);
+			       (const xmlChar *)"objects", 
+			       startindent);
     }
 
     first = TRUE;
@@ -1775,7 +1776,8 @@ static void
 
     indent = startindent + ses_indent_count(scb);
 
-    write_cyang_id(scb, YANG_K_EXTENSION, ext->name, startindent, 
+    write_cyang_id(scb, YANG_K_EXTENSION, 
+		   ext->name, startindent, 
 		   FALSE, FALSE);
 
     /* argument sub-clause */
@@ -1839,18 +1841,135 @@ static void
     }
 
     write_cyang_banner_cmt(scb, mod, cp,
-			   (const xmlChar *)"extensions", startindent);
+			   (const xmlChar *)"extensions", 
+			   startindent);
 
     indent = startindent + ses_indent_count(scb);
 
     for (ext = (const ext_template_t *)dlq_firstEntry(extensionQ);
 	 ext != NULL;
-	 ext = (ext_template_t *)dlq_nextEntry(ext)) {
+	 ext = (const ext_template_t *)dlq_nextEntry(ext)) {
 
 	write_cyang_extension(scb, mod, cp, ext, startindent);
     }
 
 }  /* write_cyang_extensions */
+
+
+/********************************************************************
+* FUNCTION write_cyang_identity
+* 
+* Generate the YANG for 1 identity
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   identity == ncx_identity_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_cyang_identity (ses_cb_t *scb,
+			  const ncx_module_t *mod,
+			  const yangdump_cvtparms_t *cp,
+			  const ncx_identity_t *identity,
+			  int32 startindent)
+{
+    int32              indent;
+
+    indent = startindent + ses_indent_count(scb);
+
+    write_cyang_id(scb, YANG_K_IDENTITY, 
+		   identity->name, 
+		   startindent, 
+		   FALSE, FALSE);
+
+    /* base sub-clause */
+    if (identity->base) {
+	ses_putstr_indent(scb, YANG_K_BASE, indent);
+	ses_putchar(scb, ' ');
+	if (identity->baseprefix) {
+	    write_cyang_extkw(scb, 
+			      identity->baseprefix, 
+			      identity->basename);
+	} else {
+	    ses_putstr(scb, identity->basename);
+	}
+	ses_putchar(scb, ';');
+    }
+
+    /* status field */
+    write_cyang_status(scb, identity->status, indent);
+
+    /* description field */
+    if (identity->descr) {
+	write_cyang_simple_str(scb, YANG_K_DESCRIPTION, 
+			       identity->descr, 
+			       indent, 2, TRUE);
+    }
+
+    /* reference field */
+    if (identity->ref) {
+	write_cyang_simple_str(scb, YANG_K_REFERENCE, 
+			       identity->ref, 
+			       indent, 2, TRUE);
+    }
+
+    write_cyang_appinfoQ(scb, mod, cp, 
+			 &identity->appinfoQ, 
+			 indent);
+
+    /* end identity clause */
+    ses_putstr_indent(scb, END_SEC, startindent);
+
+}  /* write_cyang_identity */
+
+
+/********************************************************************
+* FUNCTION write_cyang_identities
+* 
+* Generate the YANG for the specified identityQ
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   identityQ == que of ncx_identity_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_cyang_identities (ses_cb_t *scb,
+			    const ncx_module_t *mod,
+			    const yangdump_cvtparms_t *cp,
+			    const dlq_hdr_t *identityQ,
+			    int32 startindent)
+{
+    const ncx_identity_t *identity;
+    int32                 indent;
+
+    if (dlq_empty(identityQ)) {
+	return;
+    }
+
+    write_cyang_banner_cmt(scb, mod, cp,
+			   (const xmlChar *)"identities", 
+			   startindent);
+
+    indent = startindent + ses_indent_count(scb);
+
+    for (identity = (const ncx_identity_t *)
+	     dlq_firstEntry(identityQ);
+	 identity != NULL;
+	 identity = (const ncx_identity_t *)
+	     dlq_nextEntry(identity)) {
+
+	write_cyang_identity(scb, mod, cp, 
+			     identity, startindent);
+    }
+
+}  /* write_cyang_identities */
 
 
 /********************************************************************
@@ -1966,9 +2085,11 @@ static void
 
     /* imports section */
     if (cp->unified) {
-	for (impptr = (const yang_import_ptr_t *)dlq_firstEntry(&mod->saveimpQ);
+	for (impptr = (const yang_import_ptr_t *)
+		 dlq_firstEntry(&mod->saveimpQ);
 	     impptr != NULL;
-	     impptr = (const yang_import_ptr_t *)dlq_nextEntry(impptr)) {
+	     impptr = (const yang_import_ptr_t *)
+		 dlq_nextEntry(impptr)) {
 
 	    /* the appinfoQ info is not saved in unified mode ouput!! */
 	    write_cyang_import(scb, mod, cp, impptr->modprefix,
@@ -1979,9 +2100,11 @@ static void
 	    ses_putchar(scb, '\n');
 	}
     } else {
-	for (imp = (const ncx_import_t *)dlq_firstEntry(&mod->importQ);
+	for (imp = (const ncx_import_t *)
+		 dlq_firstEntry(&mod->importQ);
 	     imp != NULL;
-	     imp = (const ncx_import_t *)dlq_nextEntry(imp)) {
+	     imp = (const ncx_import_t *)
+		 dlq_nextEntry(imp)) {
 
 	    write_cyang_import(scb, mod, cp, imp->prefix,
 			       imp->module, imp->revision,
@@ -1995,7 +2118,8 @@ static void
 
     /* includes section	*/
     if (!cp->unified) {
-	for (inc = (const ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+	for (inc = (const ncx_include_t *)
+		 dlq_firstEntry(&mod->includeQ);
 	     inc != NULL;
 	     inc = (const ncx_include_t *)dlq_nextEntry(inc)) {
 	    ses_putstr_indent(scb, YANG_K_INCLUDE, indent);
@@ -2050,7 +2174,8 @@ static void
     }
 
     /* revision history section	*/
-    for (rev = (const ncx_revhist_t *)dlq_firstEntry(&mod->revhistQ);
+    for (rev = (const ncx_revhist_t *)
+	     dlq_firstEntry(&mod->revhistQ);
 	 rev != NULL;
 	 rev = (const ncx_revhist_t *)dlq_nextEntry(rev)) {
 
@@ -2089,7 +2214,7 @@ static void
 {
     const yang_node_t     *node;
     const yang_stmt_t     *stmt;
-    boolean                stmtmode, first;
+    boolean                stmtmode;
 
     write_cyang_header(scb, mod, cp);
 
@@ -2099,68 +2224,99 @@ static void
     stmtmode = dlq_empty(&mod->stmtQ) ? FALSE : TRUE;
 
     if (!stmtmode) {
-	write_cyang_typedefs(scb, mod, cp, &mod->typeQ, cp->indent);
+	write_cyang_identities(scb, mod, cp, 
+			       &mod->identityQ, 
+			       cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	for (node = (const yang_node_t *)
+		 dlq_firstEntry(&mod->saveincQ);
+	     node != NULL;
+	     node = (const yang_node_t *)dlq_nextEntry(node)) {
+	    if (node->submod) {
+		write_cyang_identities(scb, node->submod, cp, 
+				       &node->submod->identityQ, 
+				       cp->indent);
+	    }
+	}
+    }
+
+    if (!stmtmode) {
+	write_cyang_typedefs(scb, mod, cp, &mod->typeQ, 
+			     cp->indent);
+    }
+
+    if (cp->unified && mod->ismod) {
+	for (node = (const yang_node_t *)
+		 dlq_firstEntry(&mod->saveincQ);
 	     node != NULL;
 	     node = (const yang_node_t *)dlq_nextEntry(node)) {
 	    if (node->submod) {
 		write_cyang_typedefs(scb, node->submod, cp, 
-				     &node->submod->typeQ, cp->indent);
+				     &node->submod->typeQ, 
+				     cp->indent);
 	    }
 	}
     }
 
     if (!stmtmode) {
-	write_cyang_groupings(scb, mod, cp, &mod->groupingQ, cp->indent);
+	write_cyang_groupings(scb, mod, cp, &mod->groupingQ, 
+			      cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	for (node = (const yang_node_t *)
+		 dlq_firstEntry(&mod->saveincQ);
 	     node != NULL;
 	     node = (const yang_node_t *)dlq_nextEntry(node)) {
 	    if (node->submod) {
 		write_cyang_groupings(scb, node->submod, cp, 
-				      &node->submod->groupingQ, cp->indent);
+				      &node->submod->groupingQ, 
+				      cp->indent);
 	    }
 	}
     }
 
     if (!stmtmode) {
-	write_cyang_extensions(scb, mod, cp, &mod->extensionQ, cp->indent);
+	write_cyang_extensions(scb, mod, cp, &mod->extensionQ, 
+			       cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	for (node = (const yang_node_t *)
+		 dlq_firstEntry(&mod->saveincQ);
 	     node != NULL;
 	     node = (const yang_node_t *)dlq_nextEntry(node)) {
 	    if (node->submod) {
 		write_cyang_extensions(scb, node->submod, cp, 
-				       &node->submod->extensionQ, cp->indent);
+				       &node->submod->extensionQ, 
+				       cp->indent);
 	    }
 	}
     }
 
     if (!stmtmode) {
-	write_cyang_objects(scb, mod, cp, &mod->datadefQ, cp->indent);
+	write_cyang_objects(scb, mod, cp, &mod->datadefQ, 
+			    cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	for (node = (const yang_node_t *)
+		 dlq_firstEntry(&mod->saveincQ);
 	     node != NULL;
 	     node = (const yang_node_t *)dlq_nextEntry(node)) {
 	    if (node->submod) {
 		write_cyang_objects(scb, node->submod, cp, 
-				    &node->submod->datadefQ, cp->indent);
+				    &node->submod->datadefQ, 
+				    cp->indent);
 	    }
 	}
     }
 
     if (stmtmode) {
-	first = TRUE;
-	for (stmt = (const yang_stmt_t *)dlq_firstEntry(&mod->stmtQ);
+	for (stmt = (const yang_stmt_t *)
+		 dlq_firstEntry(&mod->stmtQ);
 	     stmt != NULL;
 	     stmt = (const yang_stmt_t *)dlq_nextEntry(stmt)) {
 	    switch (stmt->stmttype) {
@@ -2168,21 +2324,32 @@ static void
 		SET_ERROR(ERR_INTERNAL_VAL);
 		break;
 	    case YANG_ST_TYPEDEF:
-		write_cyang_typedef(scb, mod, cp, stmt->s.typ, cp->indent, first);
+		write_cyang_typedef(scb, mod, cp, 
+				    stmt->s.typ, cp->indent, 
+				    FALSE);
 		break;
 	    case YANG_ST_GROUPING:
-		write_cyang_grouping(scb, mod, cp, stmt->s.grp, cp->indent, first);
+		write_cyang_grouping(scb, mod, cp, 
+				     stmt->s.grp, cp->indent, 
+				     FALSE);
 		break;
 	    case YANG_ST_EXTENSION:
-		write_cyang_extension(scb, mod, cp, stmt->s.ext, cp->indent);
+		write_cyang_extension(scb, mod, cp, 
+				      stmt->s.ext, cp->indent);
 		break;
 	    case YANG_ST_OBJECT:
-		write_cyang_object(scb, mod, cp, stmt->s.obj, cp->indent, first);
+		write_cyang_object(scb, mod, cp, 
+				   stmt->s.obj, 
+				   cp->indent, FALSE);
+		break;
+	    case YANG_ST_IDENTITY:
+		write_cyang_identity(scb, mod, cp, 
+				     stmt->s.identity, 
+				     cp->indent);
 		break;
 	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
-	    first = FALSE;
 	}
     }
     

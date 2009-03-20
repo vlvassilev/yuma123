@@ -780,7 +780,10 @@ extern const typ_def_t *
 extern boolean
     typ_has_subclauses (const typ_def_t *typdef);
 
+extern typ_idref_t *
+    typ_get_idref (typ_def_t  *typdef);
+
 extern const typ_idref_t *
-    typ_get_idref (const typ_def_t  *typdef);
+    typ_get_cidref (const typ_def_t  *typdef);
 
 #endif	    /* _H_typ */

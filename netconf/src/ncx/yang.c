@@ -54,6 +54,10 @@ date         init     comment
 #include "ncx.h"
 #endif
 
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
 #ifndef _H_ncxconst
 #include "ncxconst.h"
 #endif
@@ -2446,15 +2450,15 @@ void
 	if (impmod && impmod->version && mod->version) {
 	    ret = yang_compare_revision_dates(impmod->version,
 					      mod->version);
-	    if (ret > 0) {
-		log_info("\nInfo: imported module '%s' (%s)"
-			 " is newer than '%s' (%s)",
-			 impmod->name, 
-			 (impmod->version) 
-			 ? impmod->version : EMPTY_STRING,
-			 mod->name,
-			 (mod->version) 
-			 ? mod->version : EMPTY_STRING);
+	    if (ret > 0 && LOGDEBUG) {
+		log_debug("\nNote: imported module '%s' (%s)"
+			  " is newer than '%s' (%s)",
+			  impmod->name, 
+			  (impmod->version) 
+			  ? impmod->version : EMPTY_STRING,
+			  mod->name,
+			  (mod->version) 
+			  ? mod->version : EMPTY_STRING);
 	    }
 	}
     }
@@ -2617,6 +2621,10 @@ void
 	return;
     }
 #endif
+
+    if (!LOGDEBUG3) {
+	return;
+    }
 
     if (name) {
 	anyout = TRUE;
@@ -2847,6 +2855,38 @@ yang_stmt_t *
     return stmt;
 
 } /* yang_new_obj_stmt */
+
+
+/********************************************************************
+* FUNCTION yang_new_id_stmt
+* 
+* Create a new YANG stmt node for an identity
+*
+* RETURNS:
+*   pointer to new and initialized struct, NULL if memory error
+*********************************************************************/
+yang_stmt_t *
+    yang_new_id_stmt (ncx_identity_t *identity)
+{
+    yang_stmt_t *stmt;
+
+#ifdef DEBUG
+    if (!identity) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    stmt = m__getObj(yang_stmt_t);
+    if (!stmt) {
+	return NULL;
+    }
+    memset(stmt, 0x0, sizeof(yang_stmt_t));
+    stmt->stmttype = YANG_ST_IDENTITY;
+    stmt->s.identity = identity;
+    return stmt;
+
+} /* yang_new_id_stmt */
 
 
 /********************************************************************

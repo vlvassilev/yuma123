@@ -4768,8 +4768,42 @@ boolean
 * RETURNS:
 *     pointer to idref field or NULL if wrong type
 *********************************************************************/
+typ_idref_t *
+    typ_get_idref (typ_def_t  *typdef)
+{
+   typ_def_t  *basetypdef;
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (typ_get_basetype(typdef) != NCX_BT_IDREF) {
+	return NULL;
+    }
+
+    basetypdef = typ_get_base_typdef(typdef);
+    return &basetypdef->def.simple.idref;
+
+}  /* typ_get_idref */
+
+
+/********************************************************************
+* FUNCTION typ_get_cidref
+* 
+* Get the idref field if this is an NCX_BT_IDREF typdef
+* Const version
+*
+* INPUTS:
+*     typdef == typdef to  check
+*
+* RETURNS:
+*     pointer to idref field or NULL if wrong type
+*********************************************************************/
 const typ_idref_t *
-    typ_get_idref (const typ_def_t  *typdef)
+    typ_get_cidref (const typ_def_t  *typdef)
 {
     const typ_def_t  *basetypdef;
 
@@ -4787,6 +4821,6 @@ const typ_idref_t *
     basetypdef = typ_get_cbase_typdef(typdef);
     return &basetypdef->def.simple.idref;
 
-}  /* typ_get_idref */
+}  /* typ_get_cidref */
 
 /* END typ.c */

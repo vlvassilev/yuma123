@@ -539,6 +539,10 @@ div.ncdocs ul {
   width: 80%;
 }
 
+div.ncdocs li {
+   padding-bottom: 8px;
+}
+
 div.publication-list h4 {
   margin-left: .3in;
 }

@@ -188,12 +188,12 @@
 	      XML message handling, error reporting, and transport mappings.
 	      Due to the significant complexity, but universal applicability,
 	      this code is often available in 'toolkits', so the cost
-	      is relatively low, compared to the rest of the agent implementation.
+	      is relatively low, compared to the rest of the agent 
+	      implementation.
 	    </li>
 	  </ul>
 	</p>
       </div>
-
     </div>
   </body>
 </html>

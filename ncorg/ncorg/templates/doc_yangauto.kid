@@ -15,8 +15,7 @@
       <h1>YANG Based Automation</h1>
 
       <img src="${tg.url('/static/images/cookedmodules.png')}" 
-	   border="0" height="507" width="657" alt="cooked modules"/>
-      <p>&nbsp;</p>
+	   border="0" alt="cooked modules"/>
 
       <div>
 	<h2>Cooked YANG Modules</h2>	
@@ -150,8 +149,7 @@
       </div>
 
       <img src="${tg.url('/static/images/coststack.png')}" 
-	   border="0" height="507" width="657" alt="cost stack"/>
-      <p>&nbsp;</p>
+	   border="0" alt="cost stack"/>
 
       <div>
 	<h2>NETCONF Development Costs</h2>	

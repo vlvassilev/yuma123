@@ -16,7 +16,7 @@
       <h3>XML-based Network Configuration Tools<br/>
 	Online YANG Module Database</h3>
       <br/>
-      <img border="0" height="529" width="705" 
+      <img border="0" 
 	   src="${tg.url('/static/images/yangtools.png')}" 
 	   alt="YangTools 1.0"/>
       <br/><br/>

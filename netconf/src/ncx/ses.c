@@ -1022,9 +1022,15 @@ status_t
 	    if (ret < 0) {
 		/* !!! treat any read error as nothing to read !!! */
 		ses_msg_free_buff(scb, buff);
-		return NO_ERR;
+		scb->retries++;
+		if (scb->retries < SES_MAX_RETRIES) {
+		    return NO_ERR;
+		} else {
+		    return ERR_NCX_READ_FAILED;
+		}
 	    }
 	} else {
+	    scb->retries = 0;
 	    ret = read(scb->fd, buff->buff, SES_MSG_BUFFSIZE);
 	    if (ret < 0 && errno == EAGAIN) {
 		ses_msg_free_buff(scb, buff);
@@ -1054,7 +1060,7 @@ status_t
 #ifdef SES_DEBUG
 	    log_debug2("\nses read OK (%d) on session %d", ret, scb->sid);
 #endif
-
+	    scb->retries = 0;
 	    buff->bufflen = (size_t)ret;
 	    scb->stats.in_bytes += (uint32)ret;
 	    totals.stats.in_bytes += (uint32)ret;

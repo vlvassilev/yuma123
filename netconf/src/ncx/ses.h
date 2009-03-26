@@ -58,6 +58,8 @@ date             init     comment
 
 #define SES_LINESIZE(S) (S)->linesize
 
+#define SES_MAX_RETRIES   6
+
 #define SES_NULL_SID  0
 
 /* controls the size of each buffer chuck */
@@ -236,6 +238,7 @@ typedef struct ses_cb_t_ {
     ses_ready_t      outready;          /* header for outreadyQ */
     ses_stats_t      stats;           /* per-session statistics */
     void            *mgrcb;    /* if manager session, mgr_scb_t */
+    uint32           retries;   /* mgr error read 5 times then give up */
     /*** user preferences ***/
     int32            indent;          /* indent N spaces (0..9) */
     uint32           linesize;              /* TERM line length */

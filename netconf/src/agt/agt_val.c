@@ -926,9 +926,14 @@ static status_t
     if (res == NO_ERR && newval && 
 	newval->btyp == NCX_BT_LIST && 
 	cur_editop == OP_EDITOP_MERGE) {
+	/* bug 3/24: not sure why insertstr was checked
+	 * this is not mandatory to use in val_add_child_clean_editvars
+	 *
 	if (newval->editvars
 	    && newval->editvars->insertstr ) {
-
+	*/
+	
+	if (newval->editvars) {
 	    /* move the list entry after the merge is done */
 	    move_mergedlist_node(newval, curval, parent, undo);
 	} else {

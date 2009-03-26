@@ -92,7 +92,7 @@
 	</p>
 	<p>
 	  At YANG module set processing time, a tool can automatically
-	  patch the deviations into the internal YAMG module 
+	  patch the deviations into the internal YANG module 
 	  representation.  The composite module can be constructed
 	  by the manager application, using the deviations information
 	  in the module &lt;capabilities&gt; advertised in each 

@@ -9,6 +9,7 @@
          <t:ee>a2000</t:ee>
          <t:ee>c105</t:ee>
          <t:ee>e3333</t:ee>
+         <t:ee>a15</t:ee>
       </t:e>
       <t:f1>test one</t:f1>
    </t:test1>
@@ -40,6 +41,16 @@
    <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
       <t:a2>f14</t:a2>
       <t:foo>g14</t:foo>
+   </t:test2>
+   <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
+      <t:a2>ddd</t:a2>
+      <t:foo>eee</t:foo>
+   </t:test2>
+   <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
+      <t:a2>eee</t:a2>
+      <t:a1>4</t:a1>
+      <t:b2>3</t:b2>
+      <t:foo>sss</t:foo>
    </t:test2>
    <t:test3 xmlns:t="http://netconfcentral.com/ns/test">
       <t:x>fred</t:x>

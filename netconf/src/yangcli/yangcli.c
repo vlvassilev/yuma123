@@ -207,7 +207,8 @@ date         init     comment
 #define YESNO_YES    1
 #define YESNO_NO     2
 
-#define DEF_OPTIONS (const xmlChar *)"?, \?\?, \?s, ?c"
+#define DEF_OPTIONS (const xmlChar *)" ? (help), \?\? \
+(full help), \?s (skip) , ?c (cancel)"
 
 /* YANGCLI boot and operation parameter names 
  * matches parm clauses in yangcli container in yangcli.yang
@@ -434,7 +435,7 @@ static const xmlChar  *cli_fn;
 static GetLine        *cli_gl;
 
 /* program version string */
-static char progver[] = "0.9.1";
+static char progver[] = "0.9.4";
 
 
 /*****************  C O N F I G   V A R S  ****************/
@@ -2073,6 +2074,7 @@ static xmlChar *
     xmlChar prompt[MAX_PROMPT_LEN];
 
     line = NULL;
+
     get_prompt(agent_cb, prompt, MAX_PROMPT_LEN-1);
 
     if (!climore) {
@@ -2705,18 +2707,22 @@ static status_t
     done = FALSE;
     while (!done) {
 	if (btyp==NCX_BT_EMPTY) {
-	    log_stdout("\nShould flag %s be set? (Y, N, %s)", 
+	    log_stdout("\nShould flag %s be set? [Y, N, %s]", 
 		       parmname, DEF_OPTIONS);
 	} else {
-	    if (typdef && typdef->typename) {
-		def = typdef->typename;
-	    } else {
-		def = (const xmlChar *)tk_get_btype_sym(btyp);
-	    }
-	    log_stdout("\nEnter value for %s %s (%s, %s)", 
+	    log_stdout("\nEnter value for %s <%s>",
 		       obj_get_typestr(parm),
-		       parmname, def, DEF_OPTIONS);
-	    def = NULL;
+		       parmname);
+	    log_stdout(" (%s)\n    ", 
+		       (typdef && typdef->typename) 
+		       ? typdef->typename :
+		       (const xmlChar *)tk_get_btype_sym(btyp));
+	    
+	    def = obj_get_default(parm);
+	    if (def) {
+		log_stdout(" default: %s", def);
+	    }
+	    log_stdout(" %s", DEF_OPTIONS);
 	}
 	if (oldvalset) {
 	    oldparm = val_find_child(oldvalset, 
@@ -2883,7 +2889,7 @@ static status_t
 	    done = FALSE;
 	    while (!done) {
 		log_stdout("\nError: parameter '%s' value '%s' is invalid"
-			   "\nShould this value be used anyway? (Y, N, %s)"
+			   "\nShould this value be used anyway? [Y, N, %s]"
 			   " [N]", 
 			   obj_get_name(parm),
 			   (start) ? start : EMPTY_STRING,
@@ -3212,12 +3218,12 @@ static status_t
 
 	/* Pick a prompt, depending on the choice default case */
 	if (obj_get_default(choic)) {
-	    log_stdout("\nEnter choice number (%d - %d, %s), "
+	    log_stdout("\nEnter choice number [%d - %d, %s], "
 		       "[ENTER] for default (%s): ",
 		       1, num-1, DEF_OPTIONS,
 		       obj_get_default(choic));
 	} else {
-	    log_stdout("\nEnter choice number (%d - %d, %s): ",
+	    log_stdout("\nEnter choice number [%d - %d, %s]: ",
 		       1, num-1, DEF_OPTIONS);
 	}
 
@@ -3990,6 +3996,9 @@ static void
 	log_write("\nError: Connect failed (%s)", 
 		  get_error_string(res));
 	agent_cb->state = MGR_IO_ST_IDLE;
+	if (valset) {
+	    val_free_value(valset);
+	}
     } else {
 	/* make sure the 3 required parms are set */
 	s1 = val_find_child(agent_cb->connect_valset, YANGCLI_MOD, 
@@ -9720,6 +9729,7 @@ static status_t
     climore = FALSE;
     malloc_cnt = 0;
     free_cnt = 0;
+    cli_gl = NULL;
 
     /* get a read line context with a history buffer 
     * change later to not get allocated if batch mode active

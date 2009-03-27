@@ -1720,22 +1720,25 @@ static void
 	break;
     case OBJ_TYP_RPCIO:
 	rpcio = obj->def.rpcio;
-	write_cyang_id(scb, obj_get_name(obj), NULL, startindent, 
-		       isempty, !first);
-	if (isempty) {
-	    return;
+
+	if (!dlq_empty(&rpcio->typedefQ) ||
+	    !dlq_empty(&rpcio->groupingQ) ||
+	    !dlq_empty(&rpcio->datadefQ) ||
+	    !dlq_empty(&obj->appinfoQ)) {
+
+	    write_cyang_id(scb, obj_get_name(obj), NULL, startindent, 
+			   FALSE, !first);
+
+	    write_cyang_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
+
+	    write_cyang_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
+
+	    write_cyang_objects(scb, mod, cp, &rpcio->datadefQ, indent);
+
+	    write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+
+	    ses_putstr_indent(scb, END_SEC, startindent);
 	}
-
-	write_cyang_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
-
-	write_cyang_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
-
-	write_cyang_objects(scb, mod, cp, &rpcio->datadefQ, indent);
-
-	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
-	ses_putstr_indent(scb, END_SEC, startindent);
 	break;
     case OBJ_TYP_NOTIF:
 	notif = obj->def.notif;

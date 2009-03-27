@@ -2281,22 +2281,25 @@ static void
 	break;
     case OBJ_TYP_RPCIO:
 	rpcio = obj->def.rpcio;
-	write_href_id(scb, submod, obj_get_name(obj), NULL,
-		      startindent, obj->linenum, isempty, !first);
-	if (isempty) {
-	    return;
+
+	if (!dlq_empty(&rpcio->typedefQ) ||
+	    !dlq_empty(&rpcio->groupingQ) ||
+	    !dlq_empty(&rpcio->datadefQ) ||
+	    !dlq_empty(&obj->appinfoQ)) {
+
+	    write_href_id(scb, submod, obj_get_name(obj), NULL,
+			  startindent, obj->linenum, FALSE, !first);
+
+	    write_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
+
+	    write_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
+
+	    write_objects(scb, mod, cp, &rpcio->datadefQ, indent);
+
+	    write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+
+	    ses_putstr_indent(scb, END_SEC, startindent);
 	}
-
-	write_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
-
-	write_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
-
-	write_objects(scb, mod, cp, &rpcio->datadefQ, indent);
-
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
-	ses_putstr_indent(scb, END_SEC, startindent);
 	break;
     case OBJ_TYP_NOTIF:
 	notif = obj->def.notif;

@@ -482,6 +482,7 @@ static status_t
     const xmlChar      *val;
     const char         *expstr;
     ncx_feature_t      *feature, *testfeature;
+    yang_stmt_t        *stmt;
     tk_type_t           tktyp;
     boolean             done, stat, desc, ref, keep;
     status_t            res, retres;
@@ -502,6 +503,8 @@ static status_t
 	return res;
     }
     feature->tk = TK_CUR(tkc);
+    feature->linenum = TK_CUR_LNUM(tkc);
+    feature->mod = mod;
 
     /* Get the mandatory feature name */
     res = yang_consume_id_string(tkc, mod, &feature->name);
@@ -617,6 +620,18 @@ static status_t
 	}
 	feature->res = retres;
 	dlq_enque(feature, &mod->featureQ);
+
+	if (mod->stmtmode) {
+	    stmt = yang_new_feature_stmt(feature);
+	    if (stmt) {
+		dlq_enque(stmt, &mod->stmtQ);
+	    } else {
+		log_error("\nError: malloc failure for feature_stmt");
+		retres = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+	}
+
     } else {
 	ncx_free_feature(feature);
     }

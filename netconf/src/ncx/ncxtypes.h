@@ -465,6 +465,7 @@ typedef struct ncx_revhist_t_ {
     status_t            res;
 } ncx_revhist_t;
 
+
 /* YANG if-feature entry */
 typedef struct ncx_iffeature_t_ {
     dlq_hdr_t              qhdr;
@@ -472,6 +473,7 @@ typedef struct ncx_iffeature_t_ {
     xmlChar               *name;
     struct ncx_feature_t_ *feature;
     struct tk_token_t_    *tk;
+    uint32                 linenum;
 } ncx_iffeature_t;
 
 
@@ -481,7 +483,9 @@ typedef struct ncx_feature_t_ {
     xmlChar            *name;
     xmlChar            *descr;
     xmlChar            *ref;
+    struct ncx_module_t_   *mod;      /* back-ptr to module */
     struct tk_token_t_ *tk;
+    uint32              linenum;
     ncx_status_t        status;
     dlq_hdr_t           iffeatureQ;   /* Q of ncx_iffeature_t */
     dlq_hdr_t           appinfoQ;       /* Q of ncx_appinfo_t */

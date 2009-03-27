@@ -1036,6 +1036,64 @@ static void
 
 
 /********************************************************************
+* FUNCTION write_cyang_iffeature
+* 
+* Generate the YANG for 1 if-feature statement
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   iffeature == ncx_iffeature_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_cyang_iffeature (ses_cb_t *scb,
+			   const ncx_iffeature_t *iffeature,
+			   int32 startindent)
+{
+    ses_putstr_indent(scb, YANG_K_IF_FEATURE, startindent);
+    ses_putchar(scb, ' ');
+    if (iffeature->prefix) {
+	ses_putstr(scb, iffeature->prefix);
+	ses_putchar(scb, ':');
+    }
+    ses_putstr(scb, iffeature->name);
+    ses_putchar(scb, ';');
+
+}  /* write_cyang_iffeature */
+
+
+/********************************************************************
+* FUNCTION write_cyang_iffeatureQ
+* 
+* Generate the YANG for a Q of if-feature statements
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   iffeatureQ == Q of ncx_iffeature_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_cyang_iffeatureQ (ses_cb_t *scb,
+			    const dlq_hdr_t *iffeatureQ,
+			    int32 startindent)
+{
+    const ncx_iffeature_t   *iffeature;
+
+    for (iffeature = (const ncx_iffeature_t *)
+	     dlq_firstEntry(iffeatureQ);
+	 iffeature != NULL;
+	 iffeature = (const ncx_iffeature_t *)
+	     dlq_nextEntry(iffeature)) {
+
+	write_cyang_iffeature(scb, iffeature, startindent);
+    }
+
+}  /* write_cyang_iffeatureQ */
+
+
+/********************************************************************
 * FUNCTION write_cyang_object
 * 
 * Generate the YANG for 1 datadef
@@ -1094,6 +1152,8 @@ static void
 	if (isempty && rawmode) {
 	    return;
 	}
+
+	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
 
 	/* 0 or more must-stmts */
 	write_cyang_musts(scb, &con->mustQ, indent);
@@ -1161,6 +1221,8 @@ static void
 		return;
 	    }
 
+	    write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
+
 	    /* type field */
 	    if (notrefined) {
 		write_cyang_type_clause(scb, mod, cp, leaf->typdef, indent);
@@ -1227,6 +1289,8 @@ static void
 	if (isempty) {
 	    return;
 	}
+
+	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
 
 	/* type field */
 	if (notrefined) {
@@ -1303,6 +1367,9 @@ static void
 	if (isempty) {
 	    return;
 	}
+
+	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
+
 	/* 0 or more must-stmts */
 	write_cyang_musts(scb, &list->mustQ, indent);
 
@@ -1423,6 +1490,8 @@ static void
 	    return;
 	}
 
+	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
+
 	/* default case field */
 	if (choic->defval) {
 	    write_cyang_simple_str(scb, YANG_K_DEFAULT, 
@@ -1472,6 +1541,8 @@ static void
 	    return;
 	}
 
+	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
+
 	/* status field */
 	if (notrefined) {
 	    write_cyang_status(scb, cas->status, indent);
@@ -1519,10 +1590,14 @@ static void
 
 	if (uses->descr || uses->ref || 
 	    uses->status != NCX_STATUS_CURRENT ||
+	    !dlq_empty(&obj->iffeatureQ) ||
 	    !dlq_empty(uses->datadefQ) ||
 	    !dlq_empty(&obj->appinfoQ)) {
 
 	    ses_putstr(scb, START_SEC);
+
+	    write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
+
 
 	    /* status field */
 	    write_cyang_status(scb, uses->status, indent);
@@ -1570,6 +1645,8 @@ static void
 
 	ses_putstr(scb, START_SEC);
 
+	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
+
 	/* when field */
 	if (obj->when && obj->when->exprstr) {
 	    write_cyang_simple_str(scb, YANG_K_WHEN, 
@@ -1608,6 +1685,9 @@ static void
 	if (isempty) {
 	    return;
 	}
+
+	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
+
 
 	/* status field */
 	write_cyang_status(scb, rpc->status, indent);
@@ -1664,6 +1744,8 @@ static void
 	if (isempty) {
 	    return;
 	}
+
+	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
 
 	/* status field */
 	write_cyang_status(scb, notif->status, indent);
@@ -1973,6 +2055,108 @@ static void
 
 
 /********************************************************************
+* FUNCTION write_cyang_feature
+* 
+* Generate the YANG for 1 feature statement
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   feature == ncx_feature_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_cyang_feature (ses_cb_t *scb,
+			 const ncx_module_t *mod,
+			 const yangdump_cvtparms_t *cp,
+			 const ncx_feature_t *feature,
+			 int32 startindent)
+{
+    int32              indent;
+
+    indent = startindent + ses_indent_count(scb);
+
+    write_cyang_id(scb, YANG_K_FEATURE, 
+		   feature->name, 
+		   startindent, 
+		   FALSE, FALSE);
+
+    /* optional Q of if-feature statements */
+    write_cyang_iffeatureQ(scb, &feature->iffeatureQ, indent);
+
+    /* status field */
+    write_cyang_status(scb, feature->status, indent);
+
+    /* description field */
+    if (feature->descr) {
+	write_cyang_simple_str(scb, YANG_K_DESCRIPTION, 
+			       feature->descr, 
+			       indent, 2, TRUE);
+    }
+
+    /* reference field */
+    if (feature->ref) {
+	write_cyang_simple_str(scb, YANG_K_REFERENCE, 
+			       feature->ref, 
+			       indent, 2, TRUE);
+    }
+
+    write_cyang_appinfoQ(scb, mod, cp, 
+			 &feature->appinfoQ, 
+			 indent);
+
+    /* end feature clause */
+    ses_putstr_indent(scb, END_SEC, startindent);
+
+}  /* write_cyang_feature */
+
+
+/********************************************************************
+* FUNCTION write_cyang_features
+* 
+* Generate the YANG for the specified featureQ
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   featureQ == que of ncx_feature_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_cyang_features (ses_cb_t *scb,
+			  const ncx_module_t *mod,
+			  const yangdump_cvtparms_t *cp,
+			  const dlq_hdr_t *featureQ,
+			  int32 startindent)
+{
+    const ncx_feature_t *feature;
+
+    if (dlq_empty(featureQ)) {
+	return;
+    }
+
+    write_cyang_banner_cmt(scb, mod, cp,
+			   (const xmlChar *)"features", 
+			   startindent);
+
+    for (feature = (const ncx_feature_t *)
+	     dlq_firstEntry(featureQ);
+	 feature != NULL;
+	 feature = (const ncx_feature_t *)
+	     dlq_nextEntry(feature)) {
+
+	write_cyang_feature(scb, mod, cp, 
+			    feature, startindent);
+    }
+
+}  /* write_cyang_features */
+
+
+/********************************************************************
 * FUNCTION write_cyang_import
 * 
 * Generate the YANG for an import statement
@@ -2223,6 +2407,26 @@ static void
      */
     stmtmode = dlq_empty(&mod->stmtQ) ? FALSE : TRUE;
 
+    /* 1) features */
+    if (!stmtmode) {
+	write_cyang_features(scb, mod, cp, 
+			     &mod->featureQ, 
+			     2*cp->indent);
+    }
+
+    if (cp->unified && mod->ismod) {
+	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	     node != NULL;
+	     node = (const yang_node_t *)dlq_nextEntry(node)) {
+	    if (node->submod) {
+		write_cyang_features(scb, node->submod, cp, 
+				     &node->submod->featureQ, 
+				     2*cp->indent);
+	    }
+	}
+    }
+
+    /* 2) identities */
     if (!stmtmode) {
 	write_cyang_identities(scb, mod, cp, 
 			       &mod->identityQ, 
@@ -2242,6 +2446,7 @@ static void
 	}
     }
 
+    /* 3) typedefs */
     if (!stmtmode) {
 	write_cyang_typedefs(scb, mod, cp, &mod->typeQ, 
 			     cp->indent);
@@ -2260,6 +2465,7 @@ static void
 	}
     }
 
+    /* 4) groupings */
     if (!stmtmode) {
 	write_cyang_groupings(scb, mod, cp, &mod->groupingQ, 
 			      cp->indent);
@@ -2278,6 +2484,7 @@ static void
 	}
     }
 
+    /* 5) extensions */
     if (!stmtmode) {
 	write_cyang_extensions(scb, mod, cp, &mod->extensionQ, 
 			       cp->indent);
@@ -2296,6 +2503,7 @@ static void
 	}
     }
 
+    /* 6) objects */
     if (!stmtmode) {
 	write_cyang_objects(scb, mod, cp, &mod->datadefQ, 
 			    cp->indent);
@@ -2314,6 +2522,7 @@ static void
 	}
     }
 
+    /* check statement mode on top-level module only */
     if (stmtmode) {
 	for (stmt = (const yang_stmt_t *)
 		 dlq_firstEntry(&mod->stmtQ);
@@ -2346,6 +2555,11 @@ static void
 		write_cyang_identity(scb, mod, cp, 
 				     stmt->s.identity, 
 				     cp->indent);
+		break;
+	    case YANG_ST_FEATURE:
+		write_cyang_feature(scb, mod, cp, 
+				    stmt->s.feature, 
+				    cp->indent);
 		break;
 	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);

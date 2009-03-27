@@ -16,10 +16,10 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <string.h>
-#include  <memory.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <memory.h>
 #include <ctype.h>
 
 #include <xmlstring.h>
@@ -1547,6 +1547,93 @@ static void
 
 
 /********************************************************************
+* FUNCTION write_iffeature
+* 
+* Generate the HTML for 1 if-feature statement
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   iffeature == ncx_iffeature_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_iffeature (ses_cb_t *scb,
+		     const ncx_module_t *mod,
+		     const yangdump_cvtparms_t *cp,
+		     const ncx_iffeature_t *iffeature,
+		     int32 startindent)
+{
+    const xmlChar     *fname, *fversion, *submod;
+    uint32             linenum;
+
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+    fname = NULL;
+    fversion = NULL;
+    linenum = 0;
+
+    ses_indent(scb, startindent);
+    write_kw(scb, YANG_K_IF_FEATURE);
+    ses_putchar(scb, ' ');
+
+    /* get filename if-feature-stmt filled in */
+    if (iffeature->feature) {
+	linenum = iffeature->feature->linenum;
+	fname = iffeature->feature->mod->name;
+	fversion = iffeature->feature->mod->version;
+    }
+
+    ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
+    write_a(scb, cp, 
+	    fname, 
+	    fversion, 
+	    submod,
+	    iffeature->prefix,
+	    iffeature->name, 
+	    linenum);
+    ses_putstr(scb, (const xmlChar *)"</span>");
+    ses_putchar(scb, ';');
+
+}  /* write_iffeature */
+
+
+/********************************************************************
+* FUNCTION write_iffeatureQ
+* 
+* Generate the HTML for a Q of if-feature statements
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   iffeatureQ == Q of ncx_iffeature_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_iffeatureQ (ses_cb_t *scb,
+		      const ncx_module_t *mod,
+		      const yangdump_cvtparms_t *cp,
+		      const dlq_hdr_t *iffeatureQ,
+		      int32 startindent)
+{
+    const ncx_iffeature_t   *iffeature;
+
+    for (iffeature = (const ncx_iffeature_t *)
+	     dlq_firstEntry(iffeatureQ);
+	 iffeature != NULL;
+	 iffeature = (const ncx_iffeature_t *)
+	     dlq_nextEntry(iffeature)) {
+
+	write_iffeature(scb, mod, cp, iffeature, startindent);
+    }
+
+}  /* write_iffeatureQ */
+
+
+/********************************************************************
 * FUNCTION write_object
 * 
 * Generate the HTML for the 1 datadef
@@ -1610,6 +1697,8 @@ static void
 	    return;
 	}
 
+	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+
 	/* 0 or more must-stmts */
 	write_musts(scb, &con->mustQ, indent);
 
@@ -1669,12 +1758,15 @@ static void
 	    if (isempty) {
 		return;
 	    }
+	    write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
 	} else {
 	    write_href_id(scb, submod, YANG_K_LEAF, leaf->name,
 			  startindent, obj->linenum, isempty, !first);
 	    if (isempty) {
 		return;
 	    }
+
+	    write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
 
 	    /* type field */
 	    if (notrefined) {
@@ -1742,6 +1834,8 @@ static void
 	if (isempty) {
 	    return;
 	}
+
+	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
 
 	/* type field */
 	if (notrefined) {
@@ -1818,6 +1912,9 @@ static void
 	if (isempty) {
 	    return;
 	}
+
+	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+
 	/* 0 or more must-stmts */
 	write_musts(scb, &list->mustQ, indent);
 
@@ -1940,6 +2037,8 @@ static void
 	    return;
 	}
 
+	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+
 	/* default case field */
 	if (choic->defval) {
 	    write_simple_str(scb, YANG_K_DEFAULT, 
@@ -1988,6 +2087,8 @@ static void
 	if (isempty) {
 	    return;
 	}
+
+	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
 
 	/* status field */
 	if (notrefined) {
@@ -2048,6 +2149,8 @@ static void
 
 	    ses_putstr(scb, START_SEC);
 
+	    write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+
 	    /* status field */
 	    write_status(scb, uses->status, indent);
 
@@ -2104,6 +2207,8 @@ static void
 
 	ses_putstr(scb, START_SEC);
 
+	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+
 	/* when field */
 	if (obj->when && obj->when->exprstr) {
 	    write_simple_str(scb, YANG_K_WHEN, 
@@ -2142,6 +2247,9 @@ static void
 	if (isempty) {
 	    return;
 	}
+
+	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+
 	/* status field */
 	write_status(scb, rpc->status, indent);
 
@@ -2197,6 +2305,8 @@ static void
 	if (isempty) {
 	    return;
 	}
+
+	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
 
 	/* status field */
 	write_status(scb, notif->status, indent);
@@ -2491,6 +2601,112 @@ static void
     }
 
 }  /* write_identities */
+
+
+/********************************************************************
+* FUNCTION write_feature
+* 
+* Generate the HTML for 1 feature statement
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   feature == ncx_feature_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_feature (ses_cb_t *scb,
+		   const ncx_module_t *mod,
+		   const yangdump_cvtparms_t *cp,
+		   const ncx_feature_t *feature,
+		   int32 startindent)
+{
+    const xmlChar     *submod;
+    int32              indent;
+
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+    indent = startindent + ses_indent_count(scb);
+
+    write_href_id(scb, submod, 
+		  YANG_K_FEATURE, 
+		  feature->name, 
+		  startindent, 
+		  feature->linenum, 
+		  FALSE, TRUE);
+
+    /* optional Q of if-feature statements */
+    write_iffeatureQ(scb, mod, cp, &feature->iffeatureQ, indent);
+
+    /* status field */
+    write_status(scb, feature->status, indent);
+
+    /* description field */
+    if (feature->descr) {
+	write_simple_str(scb, YANG_K_DESCRIPTION, 
+			 feature->descr, 
+			 indent, 2, TRUE);
+    }
+
+    /* reference field */
+    if (feature->ref) {
+	write_simple_str(scb, YANG_K_REFERENCE, 
+			 feature->ref, 
+			 indent, 2, TRUE);
+    }
+
+    write_appinfoQ(scb, mod, cp, 
+		   &feature->appinfoQ, 
+		   indent);
+
+    /* end feature clause */
+    ses_putstr_indent(scb, END_SEC, startindent);
+
+}  /* write_feature */
+
+
+/********************************************************************
+* FUNCTION write_features
+* 
+* Generate the HTML for the specified featureQ
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   featureQ == que of ncx_feature_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_features (ses_cb_t *scb,
+		    const ncx_module_t *mod,
+		    const yangdump_cvtparms_t *cp,
+		    const dlq_hdr_t *featureQ,
+		    int32 startindent)
+{
+    const ncx_feature_t *feature;
+
+    if (dlq_empty(featureQ)) {
+	return;
+    }
+
+    write_banner_cmt(scb, mod, cp,
+		     (const xmlChar *)"features", 
+		     startindent);
+
+    for (feature = (const ncx_feature_t *)
+	     dlq_firstEntry(featureQ);
+	 feature != NULL;
+	 feature = (const ncx_feature_t *)
+	     dlq_nextEntry(feature)) {
+
+	write_feature(scb, mod, cp, 
+		      feature, startindent);
+    }
+
+}  /* write_features */
 
 
 /********************************************************************
@@ -3438,9 +3654,34 @@ static void
 
     /* if the top-level statement order was saved, it was only for
      * the YANG_PT_TOP module, and none of the sub-modules
+     * generate the canonical order for all the submodule content
+     * if 'unified mode'
+     *
+     * Generate the main module canonical order only
+     * if top-level statement order is ever disabled
      */
     stmtmode = dlq_empty(&mod->stmtQ) ? FALSE : TRUE;
 
+    /* 1) features */
+    if (!stmtmode) {
+	write_features(scb, mod, cp, 
+		       &mod->featureQ, 
+		       2*cp->indent);
+    }
+
+    if (cp->unified && mod->ismod) {
+	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	     node != NULL;
+	     node = (const yang_node_t *)dlq_nextEntry(node)) {
+	    if (node->submod) {
+		write_features(scb, node->submod, cp, 
+			       &node->submod->featureQ, 
+			       2*cp->indent);
+	    }
+	}
+    }
+
+    /* 2) identities */
     if (!stmtmode) {
 	write_identities(scb, mod, cp, 
 			 &mod->identityQ, 
@@ -3459,6 +3700,7 @@ static void
 	}
     }
 
+    /* 3) typedefs */
     if (!stmtmode) {
 	write_typedefs(scb, mod, cp, &mod->typeQ, 2*cp->indent);
     }
@@ -3474,6 +3716,7 @@ static void
 	}
     }
 
+    /* 4) groupings */
     if (!stmtmode) {
 	write_groupings(scb, mod, cp, &mod->groupingQ, 2*cp->indent);
     }
@@ -3489,6 +3732,7 @@ static void
 	}
     }
 
+    /* 5) extensions */
     if (!stmtmode) {
 	write_extensions(scb, mod, cp, &mod->extensionQ, 2*cp->indent);
     }
@@ -3504,6 +3748,7 @@ static void
 	}
     }
 
+    /* 6) objects */
     if (!stmtmode) {
 	write_objects(scb, mod, cp, &mod->datadefQ, 2*cp->indent);
     }
@@ -3519,6 +3764,7 @@ static void
 	}
     }
 
+    /* check statement mode on top-level module only */
     if (stmtmode) {
 	for (stmt = (const yang_stmt_t *)dlq_firstEntry(&mod->stmtQ);
 	     stmt != NULL;
@@ -3551,6 +3797,11 @@ static void
 		write_identity(scb, mod, cp, 
 			       stmt->s.identity,
 			       2*cp->indent);
+		break;
+	    case YANG_ST_FEATURE:
+		write_feature(scb, mod, cp, 
+			      stmt->s.feature,
+			      2*cp->indent);
 		break;
 	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);

@@ -1646,6 +1646,7 @@ status_t
 		iff->prefix = prefix;
 		iff->name = name;
 		iff->tk = TK_CUR(tkc);
+		iff->linenum = TK_CUR_LNUM(tkc);
 		dlq_enque(iff, iffeatureQ);
 	    }
 	}
@@ -2887,6 +2888,38 @@ yang_stmt_t *
     return stmt;
 
 } /* yang_new_id_stmt */
+
+
+/********************************************************************
+* FUNCTION yang_new_feature_stmt
+* 
+* Create a new YANG stmt node for a feature definition
+*
+* RETURNS:
+*   pointer to new and initialized struct, NULL if memory error
+*********************************************************************/
+yang_stmt_t *
+    yang_new_feature_stmt (ncx_feature_t *feature)
+{
+    yang_stmt_t *stmt;
+
+#ifdef DEBUG
+    if (!feature) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    stmt = m__getObj(yang_stmt_t);
+    if (!stmt) {
+	return NULL;
+    }
+    memset(stmt, 0x0, sizeof(yang_stmt_t));
+    stmt->stmttype = YANG_ST_FEATURE;
+    stmt->s.feature = feature;
+    return stmt;
+
+} /* yang_new_feature_stmt */
 
 
 /********************************************************************

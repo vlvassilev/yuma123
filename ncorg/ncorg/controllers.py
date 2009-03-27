@@ -453,25 +453,8 @@ class Root(controllers.RootController):
     #
     @expose(template="ncorg.templates.homepage")
     def index(self, *args, **kw):
-        return dict(modmenu=moduleJumpMenu)
-
-
-    #################################################################################
-    #
-    # About Page
-    #
-    @expose(template="ncorg.templates.ncorg_about")
-    def about(self, *args, **kw):
-        return dict(modmenu=moduleJumpMenu)
-
-
-    #################################################################################
-    #
-    # Contact Info Page
-    #
-    @expose(template="ncorg.templates.ncorg_contactinfo")
-    def contactinfo(self, *args, **kw):
-        return dict(modmenu=moduleJumpMenu)
+        return dict(modmenu=moduleJumpMenu,
+                    copyright=1)
 
 
     #################################################################################
@@ -480,7 +463,8 @@ class Root(controllers.RootController):
     #
     @expose(template="ncorg.templates.unknown")
     def default(self, *args, **kw):
-        return dict(modmenu=moduleJumpMenu)
+        return dict(modmenu=moduleJumpMenu,
+                    copyright=0)
 
 
     #################################################################################
@@ -493,7 +477,8 @@ class Root(controllers.RootController):
                                         Ncmodule.q.islatest=="1"),
                                     orderBy=Ncmodule.q.modname)
         return dict(modmenu=moduleJumpMenu,
-                    ncmodules=ncmodules)
+                    ncmodules=ncmodules,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.nctypedef_list")
@@ -509,7 +494,8 @@ class Root(controllers.RootController):
                                           orderBy=Nctypedef.q.name)
         return dict(modmenu=moduleJumpMenu,
                     nctypedefs=nctypedefs,
-                    mod=mod)
+                    mod=mod,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.ncgrouping_list")
@@ -523,7 +509,8 @@ class Root(controllers.RootController):
                                             orderBy=Ncgrouping.q.name)
         return dict(modmenu=moduleJumpMenu,
                     ncgroupings=ncgroupings,
-                    mod=mod)
+                    mod=mod,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.ncobject_list")
@@ -544,7 +531,8 @@ class Root(controllers.RootController):
 
         return dict(modmenu=moduleJumpMenu,
                     ncobjects=ncobjects,
-                    mod=mod)
+                    mod=mod,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.ncrpc_list")
@@ -563,7 +551,8 @@ class Root(controllers.RootController):
 
         return dict(modmenu=moduleJumpMenu,
                     ncobjects=ncobjects,
-                    mod=mod)
+                    mod=mod,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.ncnotif_list")
@@ -582,7 +571,8 @@ class Root(controllers.RootController):
 
         return dict(modmenu=moduleJumpMenu,
                     ncobjects=ncobjects,
-                    mod=mod)
+                    mod=mod,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.ncextension_list")
@@ -597,7 +587,8 @@ class Root(controllers.RootController):
 
         return dict(modmenu=moduleJumpMenu,
                     ncextensions=ncextensions,
-                    mod=mod)
+                    mod=mod,
+                    copyright=0)
 
 
 
@@ -623,7 +614,8 @@ class Root(controllers.RootController):
         return dict(modmenu=moduleJumpMenu,
                     tabber=tabber, 
                     ncmodules=ncmodules,
-                    mod=mod)
+                    mod=mod,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.nctypedef_browse")
@@ -652,7 +644,8 @@ class Root(controllers.RootController):
                     tabber=tabber, 
                     nctypedefs=nctypedefs,
                     mod=mod,
-                    name=name)
+                    name=name,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.ncgrouping_browse")
@@ -677,7 +670,8 @@ class Root(controllers.RootController):
                     tabber=tabber, 
                     ncgroupings=ncgroupings,
                     mod=mod,
-                    name=name)
+                    name=name,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.ncobject_browse")
@@ -711,7 +705,8 @@ class Root(controllers.RootController):
                     tabber=tabber, 
                     ncobjects=ncobjects,
                     mod=mod,
-                    name=name)
+                    name=name,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.ncrpc_browse")
@@ -742,7 +737,8 @@ class Root(controllers.RootController):
                     tabber=tabber, 
                     ncobjects=ncobjects,
                     mod=mod,
-                    name=name)
+                    name=name,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.ncnotif_browse")
@@ -773,7 +769,8 @@ class Root(controllers.RootController):
                     tabber=tabber, 
                     ncobjects=ncobjects,
                     mod=mod,
-                    name=name)
+                    name=name,
+                    ccopyright=0)
 
 
     @expose(template="ncorg.templates.ncextension_browse")
@@ -799,7 +796,8 @@ class Root(controllers.RootController):
                     tabber=tabber, 
                     ncextensions=ncextensions,
                     mod=mod,
-                    name=name)
+                    name=name,
+                    copyright=0)
 
 
     #################################################################################
@@ -873,7 +871,8 @@ class Root(controllers.RootController):
                     ncnotifs=ncnotifs,
                     ncextensions=ncextensions,
                     mod=mod,
-                    version=version)
+                    version=version,
+                    copyright=0)
 
 
     #################################################################################
@@ -884,7 +883,9 @@ class Root(controllers.RootController):
     def modules(self, mod, version, *args, **kw):
         return dict(modmenu=moduleJumpMenu,
                     mod=mod,
-                    version=version)
+                    version=version,
+                    copyright=0)
+                    
 
     #################################################################################
     #
@@ -894,7 +895,8 @@ class Root(controllers.RootController):
     def run_yangdump(self, *args, **kw):
 
         return dict(modmenu=moduleJumpMenu,
-                    form=runyangdump_form)
+                    form=runyangdump_form,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.yangdump_results")
@@ -903,7 +905,8 @@ class Root(controllers.RootController):
         return dict(modmenu=moduleJumpMenu,
                     srcfile=srcfile,
                     resfile=resfile,
-                    report=report)
+                    report=report,
+                    copyright=0)
 
 
     #################################################################################
@@ -982,7 +985,8 @@ class Root(controllers.RootController):
     def run_yangdiff(self, *args, **kw):
 
         return dict(modmenu=moduleJumpMenu,
-                    form=runyangdiff_form)
+                    form=runyangdiff_form,
+                    copyright=0)
 
 
     @expose(template="ncorg.templates.yangdiff_results")
@@ -991,7 +995,8 @@ class Root(controllers.RootController):
         return dict(modmenu=moduleJumpMenu,
                     srcfile=srcfile,
                     resfile=resfile,
-                    report=report)
+                    report=report,
+                    copyright=0)
 
 
     #################################################################################
@@ -1063,7 +1068,8 @@ class Root(controllers.RootController):
                     typform=typsearch_form,
                     objform=objsearch_form,
                     tuform=tusearch_form,
-                    extform=extsearch_form)
+                    extform=extsearch_form,
+                    copyright=0)
 
 
     #################################################################################
@@ -1183,7 +1189,8 @@ class Root(controllers.RootController):
                                                 orderBy=Ncmodule.q.modname)
 
         return dict(modmenu=moduleJumpMenu,
-                    ncmodules=ncmodules)
+                    ncmodules=ncmodules,
+                    copyright=0)
 
     #################################################################################
     #
@@ -1293,7 +1300,8 @@ class Root(controllers.RootController):
                                                   orderBy=Nctypedef.q.name)
 
         return dict(modmenu=moduleJumpMenu,
-                    nctypedefs=nctypedefs)
+                    nctypedefs=nctypedefs,
+                    copyright=0)
 
 
     #################################################################################
@@ -1405,7 +1413,8 @@ class Root(controllers.RootController):
                                                 orderBy=Ncobject.q.objectid)
 
         return dict(modmenu=moduleJumpMenu,
-                    ncobjects=ncobjects)
+                    ncobjects=ncobjects,
+                    copyright=0)
 
 
     #################################################################################
@@ -1462,7 +1471,8 @@ class Root(controllers.RootController):
                                         orderBy=Ncobject.q.objectid)
 
         return dict(modmenu=moduleJumpMenu,
-                    ncobjects=ncobjects)
+                    ncobjects=ncobjects,
+                    copyright=0)
 
 
     #################################################################################
@@ -1573,7 +1583,8 @@ class Root(controllers.RootController):
                                                 orderBy=Ncextension.q.name)
 
         return dict(modmenu=moduleJumpMenu,
-                    ncexts=ncexts)
+                    ncexts=ncexts,
+                    copyright=0)
 
 
 
@@ -1583,7 +1594,8 @@ class Root(controllers.RootController):
     #
     @expose(template="ncorg.templates.man_yangdump")
     def yangdump_manual(self, *args, **kw):
-        return dict(modmenu=moduleJumpMenu)
+        return dict(modmenu=moduleJumpMenu,
+                    copyright=0)
 
     #################################################################################
     #
@@ -1591,7 +1603,8 @@ class Root(controllers.RootController):
     #
     @expose(template="ncorg.templates.man_yangdiff")
     def yangdiff_manual(self, *args, **kw):
-        return dict(modmenu=moduleJumpMenu)
+        return dict(modmenu=moduleJumpMenu,
+                    copyright=0)
 
 
     #################################################################################
@@ -1600,7 +1613,8 @@ class Root(controllers.RootController):
     #
     @expose(template="ncorg.templates.doc_database")
     def database_docs(self, *args, **kw):
-        return dict(modmenu=moduleJumpMenu)
+        return dict(modmenu=moduleJumpMenu,
+                    copyright=0)
 
 
     #################################################################################
@@ -1609,7 +1623,8 @@ class Root(controllers.RootController):
     #
     @expose(template="ncorg.templates.doc_netconf")
     def netconf_docs(self, *args, **kw):
-        return dict(modmenu=moduleJumpMenu)
+        return dict(modmenu=moduleJumpMenu,
+                    copyright=0)
 
 
     #################################################################################
@@ -1618,7 +1633,8 @@ class Root(controllers.RootController):
     #
     @expose(template="ncorg.templates.doc_yang")
     def yang_docs(self, *args, **kw):
-        return dict(modmenu=moduleJumpMenu)
+        return dict(modmenu=moduleJumpMenu,
+                    copyright=0)
 
     #################################################################################
     #
@@ -1626,7 +1642,8 @@ class Root(controllers.RootController):
     #
     @expose(template="ncorg.templates.doc_yangauto")
     def yang_auto(self, *args, **kw):
-        return dict(modmenu=moduleJumpMenu)
+        return dict(modmenu=moduleJumpMenu,
+                    copyright=0)
 
     #################################################################################
     #
@@ -1636,6 +1653,7 @@ class Root(controllers.RootController):
     def download(self, *args, **kw):
         tabber = widgets.Tabber()
         return dict(modmenu=moduleJumpMenu,
-                    tabber=tabber)
+                    tabber=tabber,
+                    copyright=0)
 
 

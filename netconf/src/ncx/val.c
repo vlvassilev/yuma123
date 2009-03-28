@@ -1180,10 +1180,7 @@ static boolean
 
     fnresult = TRUE;
     if (textmode) {
-	if ((val->obj->objtype == OBJ_TYP_LEAF ||
-	     val->obj->objtype == OBJ_TYP_LEAF_LIST) &&
-	    val->btyp != NCX_BT_ANY) {
-
+	if (obj_is_leafy(val->obj)) {
 	    if (walkerfn) {
 		fnresult = (*walkerfn)(val, cookie1, cookie2);
 	    }
@@ -7685,10 +7682,7 @@ val_value_t *
     }
 #endif
 
-    if ((val->obj->objtype == OBJ_TYP_LEAF ||
-	 val->obj->objtype == OBJ_TYP_LEAF_LIST) &&
-	val->btyp != NCX_BT_ANY) {
-
+    if (obj_is_leafy(val->obj)) {
 	return val;
     } else if (typ_has_children(val->btyp)) {
 	for (child = (val_value_t *)

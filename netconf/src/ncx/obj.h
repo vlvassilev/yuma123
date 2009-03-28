@@ -179,7 +179,8 @@ typedef enum obj_type_t_ {
     OBJ_TYP_AUGMENT,
     OBJ_TYP_RPC,
     OBJ_TYP_RPCIO,
-    OBJ_TYP_NOTIF
+    OBJ_TYP_NOTIF,
+    OBJ_TYP_ANYXML
 } obj_type_t;
 
 

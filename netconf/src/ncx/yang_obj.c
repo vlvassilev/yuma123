@@ -5031,15 +5031,14 @@ static status_t
 	btyp = obj_get_basetype(keyobj);
 
 	/* make sure the key is a leaf */
-	if (keyobj->objtype != OBJ_TYP_LEAF || btyp == NCX_BT_ANY) {
+	if (keyobj->objtype != OBJ_TYP_LEAF) {
 	    /* found the key node, but it is not a leaf */
 	    log_error("\nError: node '%s' on line %u not a leaf in key"
 		      " for list '%s' (%s)",
 		      obj_get_name(keyobj), 
 		      keyobj->linenum,
 		      list->name, 
-		      (btyp==NCX_BT_ANY) 
-		      ? NCX_EL_ANYXML : obj_get_typestr(keyobj));
+		      obj_get_typestr(keyobj));
 	    retres = ERR_NCX_TYPE_NOT_INDEX;
 	    tkc->cur = errtk;
 	    ncx_print_errormsg(tkc, mod, retres);
@@ -5226,8 +5225,7 @@ static status_t
 	 * child node in the obj_list_t datadefQ
 	 * make sure the unique target is a leaf
 	 */
-	if (uniobj->objtype != OBJ_TYP_LEAF ||
-	    obj_get_basetype(uniobj) == NCX_BT_ANY) {
+	if (uniobj->objtype != OBJ_TYP_LEAF) {
 	    log_error("\nError: node '%s' on line %u not leaf in "
 		      "list '%s' unique-stmt",
 		      obj_get_name(uniobj),
@@ -5545,20 +5543,17 @@ static status_t
     case OBJ_TYP_LEAF:
 	conf = TRUE;
 	mand = TRUE;
-	if (obj_get_basetype(targobj) != NCX_BT_ANY) {
-	    bmust = TRUE;
-	    def = TRUE;
-	}
+	bmust = TRUE;
+	def = TRUE;
+	break;
+    case OBJ_TYP_ANYXML:
+	mand = TRUE;
 	break;
     case OBJ_TYP_LEAF_LIST:
 	conf = TRUE;
-	if (obj_get_basetype(targobj) == NCX_BT_ANY) {
-	    mand = TRUE;
-	} else {
-	    bmust = TRUE;
-	    minel = TRUE;
-	    maxel = TRUE;
-	}
+	bmust = TRUE;
+	minel = TRUE;
+	maxel = TRUE;
 	break;
     case OBJ_TYP_CONTAINER:
 	bmust = TRUE;
@@ -5707,20 +5702,17 @@ static status_t
     case OBJ_TYP_LEAF:
 	conf = TRUE;
 	mand = TRUE;
-	if (obj_get_basetype(targobj) != NCX_BT_ANY) {
-	    bmust = TRUE;
-	    def = TRUE;
-	}
+	bmust = TRUE;
+	def = TRUE;
+	break;
+    case OBJ_TYP_ANYXML:
+	mand = TRUE;
 	break;
     case OBJ_TYP_LEAF_LIST:
 	conf = TRUE;
-	if (obj_get_basetype(targobj) == NCX_BT_ANY) {
-	    mand = TRUE;
-	} else {
-	    bmust = TRUE;
-	    minel = TRUE;
-	    maxel = TRUE;
-	}
+	bmust = TRUE;
+	minel = TRUE;
+	maxel = TRUE;
 	break;
     case OBJ_TYP_CONTAINER:
 	bmust = TRUE;
@@ -6422,18 +6414,13 @@ static status_t
 	break;
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
-	/* in this implementation, anyxml is tagged as a base type
-	 * for a leaf, since it originally was a builtin type
-	 * TBD: make anyxml a separate object type
-	 * until then, make sure the basetype is not anyxml
-	 */
-	if (obj_get_basetype(targobj) == NCX_BT_ANY) {
-	    retres = ERR_NCX_INVALID_AUGTARGET;
-	    log_error("\nError: cannot augment anyxml node '%s'",
-		      obj_get_name(testobj));
-	    tkc->cur = obj->tk;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
+	break;
+    case OBJ_TYP_ANYXML:
+	retres = ERR_NCX_INVALID_AUGTARGET;
+	log_error("\nError: cannot augment anyxml node '%s'",
+		  obj_get_name(testobj));
+	tkc->cur = obj->tk;
+	ncx_print_errormsg(tkc, mod, retres);
 	break;
     default:
 	for (testobj = (obj_template_t *)dlq_firstEntry(augQ);
@@ -6741,8 +6728,7 @@ static status_t
 
 	/* check if default-stmt entered */
 	if (devi->defval) {
-	    if ((targobj->objtype == OBJ_TYP_LEAF &&
-		 obj_get_basetype(targobj) != NCX_BT_ANY) ||
+	    if ((targobj->objtype == OBJ_TYP_LEAF) ||
 		targobj->objtype == OBJ_TYP_CHOICE) {
 
 		if (targobj->objtype == OBJ_TYP_CHOICE) {

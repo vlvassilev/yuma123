@@ -8322,9 +8322,6 @@ void
     uint32      skipcount;
     status_t    res;
 
-    ncx_print_errormsg_ex(tkc, mod, result, NULL, 0,
-			  (expstr) ? FALSE : TRUE);
-
     skip = FALSE;
     if (TK_CUR(tkc)) {
 	tktyp = TK_CUR_TYP(tkc);
@@ -8345,10 +8342,13 @@ void
 
     if (LOGERROR) {
 	if (gotval && expstr) {
-	    log_write("  Got '%s', Expected: %s\n", gotval, expstr);
+	    log_write("\nError:  Got '%s', Expected: %s", gotval, expstr);
 	} else if (expstr) {
-	    log_write("  Expected: %s\n", expstr);
+	    log_write("\nError:  Expected: %s", expstr);
 	}
+	ncx_print_errormsg_ex(tkc, mod, result, NULL, 0,
+			      (expstr) ? FALSE : TRUE);
+	log_error("\n");
     }
 
     if (skip) {

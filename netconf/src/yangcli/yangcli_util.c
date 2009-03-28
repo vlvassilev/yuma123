@@ -1,0 +1,637 @@
+/*  FILE: yangcli_util.c
+
+   Utilities for NETCONF YANG-based CLI Tool
+
+*********************************************************************
+*                                                                   *
+*                  C H A N G E   H I S T O R Y                      *
+*                                                                   *
+*********************************************************************
+
+date         init     comment
+----------------------------------------------------------------------
+01-jun-08    abb      begun; started from ncxcli.c
+27-mar-09    abb      split out from yangcli.c
+
+*********************************************************************
+*                                                                   *
+*                     I N C L U D E    F I L E S                    *
+*                                                                   *
+*********************************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <libssh2.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <stdio.h>
+#include <ctype.h>
+
+#include "libtecla.h"
+
+#ifndef _H_procdefs
+#include "procdefs.h"
+#endif
+
+#ifndef _H_cli
+#include "cli.h"
+#endif
+
+#ifndef _H_conf
+#include "conf.h"
+#endif
+
+#ifndef _H_help
+#include "help.h"
+#endif
+
+#ifndef _H_log
+#include "log.h"
+#endif
+
+#ifndef _H_mgr
+#include "mgr.h"
+#endif
+
+#ifndef _H_mgr_hello
+#include "mgr_hello.h"
+#endif
+
+#ifndef _H_mgr_io
+#include "mgr_io.h"
+#endif
+
+#ifndef _H_mgr_rpc
+#include "mgr_rpc.h"
+#endif
+
+#ifndef _H_mgr_ses
+#include "mgr_ses.h"
+#endif
+
+#ifndef _H_ncx
+#include "ncx.h"
+#endif
+
+#ifndef _H_ncxconst
+#include "ncxconst.h"
+#endif
+
+#ifndef _H_ncxmod
+#include "ncxmod.h"
+#endif
+
+#ifndef _H_obj
+#include "obj.h"
+#endif
+
+#ifndef _H_obj_help
+#include "obj_help.h"
+#endif
+
+#ifndef _H_op
+#include "op.h"
+#endif
+
+#ifndef _H_rpc
+#include "rpc.h"
+#endif
+
+#ifndef _H_runstack
+#include "runstack.h"
+#endif
+
+#ifndef _H_status
+#include "status.h"
+#endif
+
+#ifndef _H_val
+#include "val.h"
+#endif
+
+#ifndef _H_val_util
+#include "val_util.h"
+#endif
+
+#ifndef _H_var
+#include "var.h"
+#endif
+
+#ifndef _H_xmlns
+#include "xmlns.h"
+#endif
+
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
+#ifndef _H_xml_util
+#include "xml_util.h"
+#endif
+
+#ifndef _H_xml_val
+#include "xml_val.h"
+#endif
+
+#ifndef _H_xml_wr
+#include "xml_wr.h"
+#endif
+
+#ifndef _H_yangconst
+#include "yangconst.h"
+#endif
+
+#ifndef _H_yangcli
+#include "yangcli.h"
+#endif
+
+#ifndef _H_yangcli_util
+#include "yangcli_util.h"
+#endif
+
+
+/********************************************************************
+*                                                                   *
+*                       C O N S T A N T S                           *
+*                                                                   *
+*********************************************************************/
+
+
+/********************************************************************
+*                                                                   *
+*                          T Y P E S                                *
+*                                                                   *
+*********************************************************************/
+
+
+/********************************************************************
+*                                                                   *
+*                       V A R I A B L E S			    *
+*                                                                   *
+*********************************************************************/
+
+
+/********************************************************************
+* FUNCTION is_top_command
+* 
+* Check if command name is a top command
+* Must be full name
+*
+* INPUTS:
+*   rpcname == command name to check
+*
+* RETURNS:
+*   TRUE if this is a top command
+*   FALSE if not
+*********************************************************************/
+boolean
+    is_top_command (const xmlChar *rpcname)
+{
+    if (!xml_strcmp(rpcname, YANGCLI_CD)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_LIST)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_MGRLOAD)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_PWD)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_QUIT)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_RUN)) {
+	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {
+	;
+    } else {
+	return FALSE;
+    }
+    return TRUE;
+
+}  /* is_top_command */
+
+
+/********************************************************************
+* FUNCTION new_modptr
+* 
+*  Malloc and init a new module pointer block
+* 
+* INPUTS:
+*    mod == module to cache in this struct
+*
+* RETURNS:
+*   malloced modptr_t struct or NULL of malloc failed
+*********************************************************************/
+modptr_t *
+    new_modptr (ncx_module_t *mod)
+{
+    modptr_t  *modptr;
+
+    modptr = m__getObj(modptr_t);
+    if (!modptr) {
+	return NULL;
+    }
+    memset(modptr, 0x0, sizeof(modptr_t));
+    modptr->mod = mod;
+    return modptr;
+
+}  /* new_modptr */
+
+
+/********************************************************************
+* FUNCTION free_modptr
+* 
+*  Clean and free a module pointer block
+* 
+* INPUTS:
+*    modptr == mod pointer block to free
+*              MUST BE REMOVED FROM ANY Q FIRST
+*
+*********************************************************************/
+void
+    free_modptr (modptr_t *modptr)
+{
+    m__free(modptr);
+
+}  /* free_modptr */
+
+
+
+/********************************************************************
+* FUNCTION clear_agent_cb_session
+* 
+*  Clean the current session data from an agent control block
+* 
+* INPUTS:
+*    agent_cb == control block to use for clearing
+*                the session data
+*********************************************************************/
+void
+    clear_agent_cb_session (agent_cb_t *agent_cb)
+{
+
+    modptr_t  *modptr;
+
+    while (!dlq_empty(&agent_cb->modptrQ)) {
+	modptr = (modptr_t *)dlq_deque(&agent_cb->modptrQ);
+	free_modptr(modptr);
+    }
+    agent_cb->mysid = 0;
+    agent_cb->state = MGR_IO_ST_IDLE;
+
+}  /* clear_agent_cb_session */
+
+
+/********************************************************************
+* FUNCTION is_top
+* 
+* Check the state and determine if the top or conn
+* mode is active
+* 
+* INPUTS:
+*   agent state to use
+*
+* RETURNS:
+*  TRUE if this is TOP mode
+*  FALSE if this is CONN mode (or associated states)
+*********************************************************************/
+boolean
+    is_top (mgr_io_state_t state)
+{
+    switch (state) {
+    case MGR_IO_ST_INIT:
+    case MGR_IO_ST_IDLE:
+	return TRUE;
+    case MGR_IO_ST_CONNECT:
+    case MGR_IO_ST_CONN_START:
+    case MGR_IO_ST_SHUT:
+    case MGR_IO_ST_CONN_IDLE:
+    case MGR_IO_ST_CONN_RPYWAIT:
+    case MGR_IO_ST_CONN_CANCELWAIT:
+    case MGR_IO_ST_CONN_CLOSEWAIT:
+    case MGR_IO_ST_CONN_SHUT:
+	return FALSE;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+
+}  /* is_top */
+
+
+/********************************************************************
+* FUNCTION use_agentcb
+* 
+* Check if the agent_cb should be used for modules right now
+*
+* INPUTS:
+*   agent_cb == agent control block to check
+*
+* RETURNS:
+*   TRUE to use agent_cb
+*   FALSE if not
+*********************************************************************/
+boolean
+    use_agentcb (agent_cb_t *agent_cb)
+{
+    if (!agent_cb || is_top(agent_cb->state)) {
+	return FALSE;
+    } else if (dlq_empty(&agent_cb->modptrQ)) {
+	return FALSE;
+    }
+    return TRUE;
+}  /* use_agentcb */
+
+
+/********************************************************************
+* FUNCTION find_module
+* 
+*  Check the agent_cb for the specified module; if not found
+*  then try ncx_find_module
+* 
+* INPUTS:
+*    agent_cb == control block to free
+*    modname == module name
+*
+* RETURNS:
+*   pointer to the requested module
+*      using the registered 'current' version
+*   NULL if not found
+*********************************************************************/
+ncx_module_t *
+    find_module (agent_cb_t *agent_cb,
+		 const xmlChar *modname)
+{
+
+    modptr_t      *modptr;
+    ncx_module_t  *mod;
+
+    if (use_agentcb(agent_cb)) {
+	for (modptr = (modptr_t *)dlq_firstEntry(&agent_cb->modptrQ);
+	     modptr != NULL;
+	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+	    if (!xml_strcmp(modptr->mod->name, modname)) {
+		return modptr->mod;
+	    }
+	}
+    }
+
+    mod = ncx_find_module(modname, NULL);
+
+    return mod;
+
+}  /* find_module */
+
+
+
+
+/********************************************************************
+* FUNCTION get_strparm
+* 
+* Get the specified string parm from the parmset and then
+* make a strdup of the value
+*
+* INPUTS:
+*   valset == value set to check if not NULL
+*   modname == module defining parmname
+*   parmname  == name of parm to get
+*
+* RETURNS:
+*   pointer to string !!! THIS IS A MALLOCED COPY !!!
+*********************************************************************/
+xmlChar *
+    get_strparm (val_value_t *valset,
+		 const xmlChar *modname,
+		 const xmlChar *parmname)
+{
+    val_value_t    *parm;
+    xmlChar        *str;
+    
+    str = NULL;
+    parm = findparm(valset, modname, parmname);
+    if (parm) {
+	str = xml_strdup(VAL_STR(parm));
+	if (!str) {
+	    log_error("\nyangcli: Out of Memory error");
+	}
+    }
+    return str;
+
+}  /* get_strparm */
+
+
+/********************************************************************
+* FUNCTION findparm
+* 
+* Get the specified string parm from the parmset and then
+* make a strdup of the value
+*
+* INPUTS:
+*   valset == value set to search
+*   modname == optional module name defining the parameter to find
+*   parmname  == name of parm to get, or partial name to get
+*
+* RETURNS:
+*   pointer to val_value_t if found
+*********************************************************************/
+val_value_t *
+    findparm (val_value_t *valset,
+	      const xmlChar *modname,
+	      const xmlChar *parmname)
+{
+    val_value_t *parm;
+
+    if (!valset) {
+	return NULL;
+    }
+
+    parm = val_find_child(valset, modname, parmname);
+    if (!parm && get_autocomp()) {
+	parm = val_match_child(valset, modname, parmname);
+    }
+    return parm;
+
+}  /* findparm */
+
+
+/********************************************************************
+* FUNCTION add_clone_parm
+* 
+*  Create a parm 
+* 
+* INPUTS:
+*   val == value to clone and add
+*   valset == value set to add parm into
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    add_clone_parm (const val_value_t *val,
+		    val_value_t *valset)
+{
+    val_value_t    *parm;
+
+    parm = val_clone(val);
+    if (!parm) {
+	log_error("\nyangcli: val_clone failed");
+	return ERR_INTERNAL_MEM;
+    } else {
+	val_add_child(parm, valset);
+    }
+    return NO_ERR;
+
+}  /* add_clone_parm */
+
+
+/********************************************************************
+* FUNCTION is_yangcli_ns
+* 
+*  Check the namespace and make sure this is an YANGCLI command
+* 
+* INPUTS:
+*   ns == namespace ID to check
+*
+* RETURNS:
+*  TRUE if this is the YANGCLI namespace ID
+*********************************************************************/
+boolean
+    is_yangcli_ns (xmlns_id_t ns)
+{
+    const xmlChar *modname;
+
+    modname = xmlns_get_module(ns);
+    if (modname && !xml_strcmp(modname, YANGCLI_MOD)) {
+	return TRUE;
+    } else {
+	return FALSE;
+    }
+
+}  /* is_yangcli_ns */
+
+
+/********************************************************************
+ * FUNCTION clear_result
+ * 
+ * clear out the pending result info
+ *
+ * INPUTS:
+ *   agent_cb == agent control block to use
+ *
+ *********************************************************************/
+void
+    clear_result (agent_cb_t *agent_cb)
+
+{
+    if (agent_cb->result_name) {
+	m__free(agent_cb->result_name);
+	agent_cb->result_name = NULL;
+    }
+    if (agent_cb->result_filename) {
+	m__free(agent_cb->result_filename);
+	agent_cb->result_filename = NULL;
+    }
+
+}  /* clear_result */
+
+
+/********************************************************************
+* FUNCTION check_filespec
+* 
+* Check the filespec string for a file assignment statement
+* Save it if it si good
+*
+* INPUTS:
+*    agent_cb == agent control block to use
+*    filespec == string to check
+*    varname == variable name to use in log_error
+*              if this is complex form
+*
+* OUTPUTS:
+*    agent_cb->result_filename will get set if NO_ERR
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    check_filespec (agent_cb_t *agent_cb,
+		    const xmlChar *filespec,
+		    const xmlChar *varname)
+{
+    const xmlChar *teststr;
+
+    if (!filespec || !*filespec) {
+	if (varname) {
+	    log_error("\nError: file assignment variable '%s' "
+		      "is empty string", varname);
+	} else {
+	    log_error("\nError: file assignment filespec "
+		      "is empty string");
+	}
+	return ERR_NCX_INVALID_VALUE;
+    }
+
+    /* variable must be a string with only
+     * valid filespec chars in it; no spaces
+     * are allowed; too many security holes
+     * if arbitrary strings are allowed here
+     */
+    if (val_need_quotes(filespec)) {
+	if (varname) {
+	    log_error("\nError: file assignment variable '%s' "
+		      "contains whitespace (%s)", 
+		      varname, filespec);
+	} else {
+	    log_error("\nError: file assignment filespec '%s' "
+		      "contains whitespace", filespec);
+	}
+	return ERR_NCX_INVALID_VALUE;
+    }
+
+    /* check for acceptable chars */
+    teststr = filespec;
+    while (*teststr) {
+	if (*teststr == NCXMOD_PSCHAR ||
+	    *teststr == '.' ||
+#ifdef WINDOWS
+	    *teststr == ':' ||
+#endif
+	    ncx_valid_name_ch(*teststr)) {
+	    teststr++;
+	} else {
+	    if (varname) {
+		log_error("\nError: file assignment variable '%s' "
+			  "contains invalid filespec (%s)", 
+			  varname, filespec);
+	    } else {
+		log_error("\nError: file assignment filespec '%s' "
+			  "contains invalid filespec", filespec);
+	    }
+	    return ERR_NCX_INVALID_VALUE;
+	}
+    }
+
+    /* toss out the old value, if any */
+    if (agent_cb->result_filename) {
+	m__free(agent_cb->result_filename);
+    }
+
+    /* save the filename, may still be an invalid fspec  */
+    agent_cb->result_filename = xml_strdup(filespec);
+    if (!agent_cb->result_filename) {
+	return ERR_INTERNAL_MEM;
+    }
+    return NO_ERR;
+
+}  /* check_filespec */
+
+/* END yangcli_util.c */

@@ -1350,8 +1350,8 @@ status_t
 *
 * INPUTS:
 *   obj == expected type template 
-*          == NULL and will be set to NCX_BT_STRING for simple
-*             and NCX_BT_ANY for complex types
+*          == NULL and will be set to NCX_BT_STRING for
+*             simple types
 *   val == value to fill in :: val->obj MUST be set
 *          == NULL to create a new one
 *   strval == string value to check
@@ -1520,8 +1520,8 @@ val_value_t *
 *
 * INPUTS:
 *   obj == expected object template 
-*          == NULL and will be set to NCX_BT_STRING for simple
-*             and NCX_BT_ANY for complex types
+*          == NULL and will be set to NCX_BT_STRING for
+*             simple types
 *   strval == string value to check
 *   istop == TRUE if calling from top level assignment
 *            An unquoted string is the start of a command

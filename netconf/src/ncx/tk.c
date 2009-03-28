@@ -186,10 +186,6 @@ static tk_ent_t tlist [] = {
  *  !!! NEED TO CHANGE IF NCX DATA TYPE NAMES ARE CHANGED !!!
  *  !!! NEED TO KEEP ARRAY POSITION AND NCX_BT_ VALUE THE SAME !!!
  *
- * In YANG, the NCX_BT_ANY is not represented with a leaf
- * but rather a separate 'anyxml' construct.  Even so, it is
- * stored intervally as a leaf with type NCX_BT_ANY
- *
  * hack: string lengths are stored so only string compares
  * with the correct number of chars are actually made
  * when parsing the YANG type statements
@@ -199,7 +195,7 @@ static tk_ent_t tlist [] = {
  */
 static tk_btyp_t blist [] = {
     { NCX_BT_NONE, 4, (const xmlChar *)"NONE", 0 },
-    { NCX_BT_ANY, 6, NCX_EL_ANYXML, 0 },
+    { NCX_BT_ANY, 6, NCX_EL_ANYXML, 0 },   /* anyxml */
     { NCX_BT_BITS, 4, NCX_EL_BITS, FL_YANG },
     { NCX_BT_ENUM, 11, NCX_EL_ENUMERATION, FL_YANG },
     { NCX_BT_EMPTY, 5, NCX_EL_EMPTY, FL_YANG },
@@ -1539,10 +1535,16 @@ static status_t
 	    if (res != NO_ERR) {
 		return finish_string(tkc, str);
 	    }
-	    str += len;
+
+	    /* if we stopped on a colon char then treat this as a URI */
+	    if (str[len] == ':') {
+		return finish_string(tkc, str);
+	    }
+
 	    /* drop through -- either we stopped on a scope char or
 	     * the end of the prefix-scoped identifier string
 	     */
+	    str += len;
 	}
     } 
 

@@ -1404,9 +1404,8 @@ status_t
 	}
 
 	/* check for a leaf, then if that is OK */
-	if (!obj_get_ctypdef(pcb->targobj) ||
-	    pcb->targobj->objtype != OBJ_TYP_LEAF ||
-	    obj_get_basetype(pcb->targobj) == NCX_BT_ANY) {
+	if (!obj_get_ctypdef(pcb->targobj) ||  
+	    pcb->targobj->objtype != OBJ_TYP_LEAF) {
 	    res = ERR_NCX_INVALID_VALUE;
 	    if (pcb->logerrors) {
 		log_error("\nError: invalid path target anyxml '%s'",

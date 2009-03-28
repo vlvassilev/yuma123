@@ -980,7 +980,7 @@ static status_t
 	}
     }
 
-    if (typdef->class == NCX_CL_NAMED) {
+    if (elem->btyp == NCX_BT_EMPTY) {
 	return NO_ERR;
     }
 

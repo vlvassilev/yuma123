@@ -45,6 +45,10 @@ date         init     comment
 #include  "cyang.h"
 #endif
 
+#ifndef _H_h
+#include  "h.h"
+#endif
+
 #ifndef _H_help
 #include  "help.h"
 #endif
@@ -1437,8 +1441,18 @@ static status_t
 	    }
 	    break;
 	case NCX_CVTTYP_H:
-	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    pr_err(res);
+	    if (ncx_any_dependency_errors(pcb->top)) {
+		log_error("\nError: one or more imported modules had errors."
+			  "\n       H file conversion of '%s' terminated.",
+			  pcb->top->sourcefn);
+		res = ERR_NCX_IMPORT_ERRORS;
+		ncx_print_errormsg(NULL, pcb->top, res);
+	    } else {
+		res = h_convert_module(pcb, cp, scb);
+		if (res != NO_ERR) {
+		    pr_err(res);
+		}
+	    }
 	    break;
 	case NCX_CVTTYP_YANG:
 	    if (ncx_any_dependency_errors(pcb->top)) {

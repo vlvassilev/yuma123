@@ -134,10 +134,6 @@ date         init     comment
 #include "xmlns.h"
 #endif
 
-#ifndef _H_xpath
-#include "xpath.h"
-#endif
-
 #ifndef _H_xml_util
 #include "xml_util.h"
 #endif
@@ -148,6 +144,18 @@ date         init     comment
 
 #ifndef _H_xml_wr
 #include "xml_wr.h"
+#endif
+
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
+#ifndef _H_xpath1
+#include "xpath1.h"
+#endif
+
+#ifndef _H_xpath_yang
+#include "xpath_yang.h"
 #endif
 
 #ifndef _H_yangconst
@@ -435,7 +443,6 @@ static void
     m__free(agent_cb);
 
 }  /* free_agent_cb */
-
 
 
 /********************************************************************
@@ -5586,10 +5593,13 @@ static void
 	     uint32  len)
 {
     val_value_t           *valset, *parm, *newparm, *curparm;
-    obj_template_t        *targobj;
+    const obj_template_t  *targobj;
     const xmlChar         *target;
+    xpath_pcb_t           *xpathpcb;
     status_t               res;
     boolean                imode, save_getopt;
+
+    xpathpcb = NULL;
 
     valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (res != NO_ERR) {
@@ -5613,13 +5623,50 @@ static void
     newparm = NULL;
     curparm = NULL;
 
+#ifdef OLDWAY
     res = xpath_find_schema_target_int(target, &targobj);
     if (res != NO_ERR) {
 	log_error("\nError: Object '%s' not found", target);
 	val_free_value(valset);
 	return;
     }	
+#endif
 
+    /* get a parser block for the instance-id */
+    xpathpcb = xpath_new_pcb(target);
+    if (!xpathpcb) {
+	log_error("\nError: malloc failed");	
+	val_free_value(valset);
+	return;
+    }
+
+    /* initial parse into a token chain */
+    res = xpath_yang_parse_path(NULL, 
+				NULL, 
+				XP_SRC_INSTANCEID,
+				xpathpcb);
+    if (res != NO_ERR) {
+	log_error("\nError: parse XPath target '%s' failed",
+		  xpathpcb->exprstr);
+	xpath_free_pcb(xpathpcb);
+	val_free_value(valset);
+	return;
+    }
+
+    /* validate against the object tree */
+    res = xpath_yang_validate_path(NULL, 
+				   ncx_get_gen_root(),
+				   xpathpcb,
+				   &targobj);
+    if (res != NO_ERR) {
+	log_error("\nError: validate XPath target '%s' failed",
+		  xpathpcb->exprstr);
+	xpath_free_pcb(xpathpcb);
+	val_free_value(valset);
+	return;
+    }
+
+    /* find the current_value to use as template, if any */
     parm = val_find_child(valset, YANGCLI_MOD, 
 			  YANGCLI_CURRENT_VALUE);
     if (parm && parm->res == NO_ERR) {
@@ -5629,17 +5676,20 @@ static void
 	if (!curparm || res != NO_ERR) {
 	    log_error("\nError: Script value '%s' invalid (%s)", 
 		      VAL_STR(parm), get_error_string(res)); 
+	    xpath_free_pcb(xpathpcb);
 	    val_free_value(valset);
 	    return;
 	}
     }
 
+    /* find the --optional flag */
     parm = val_find_child(valset, YANGCLI_MOD, 
 			  YANGCLI_OPTIONAL);
     if (parm && parm->res == NO_ERR) {
 	agent_cb->get_optional = TRUE;
     }
 
+    /* fill in the value based on all the parameters */
     switch (targobj->objtype) {
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
@@ -5687,6 +5737,7 @@ static void
 	}
     }
 
+    /* check save result or clear it */
     if (res == NO_ERR) {
 	if (agent_cb->result_name || agent_cb->result_filename) {
 	    /* save the filled in value */
@@ -5704,6 +5755,9 @@ static void
     }
     if (curparm) {
 	val_free_value(curparm);
+    }
+    if (xpathpcb) {
+	xpath_free_pcb(xpathpcb);
     }
     agent_cb->get_optional = save_getopt;
 

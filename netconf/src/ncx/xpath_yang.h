@@ -60,6 +60,7 @@ date	     init     comment
 extern status_t
     xpath_yang_parse_path (tk_chain_t *tkc,
 			   ncx_module_t *mod,
+			   xpath_source_t source,
 			   xpath_pcb_t *pcb);
 
 extern status_t

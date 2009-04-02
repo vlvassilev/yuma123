@@ -2092,7 +2092,9 @@ static status_t
 			return res;
 		    } else {
 			sim->xleafref->tk = TK_CUR(tkc);
-			res = xpath_yang_parse_path(tkc, mod, 
+			res = xpath_yang_parse_path(tkc, 
+						    mod, 
+						    XP_SRC_LEAFREF,
 						    sim->xleafref);
 			if (res != NO_ERR) {
 			    /* errors already reported */

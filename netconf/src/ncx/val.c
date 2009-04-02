@@ -2608,6 +2608,24 @@ status_t
 	}
 	break;
     case NCX_BT_LEAFREF:
+#if 0
+	xpathpcb = xpath_new_pcb(simval);
+	if (!xpathpcb) {
+	    res = ERR_INTERNAL_MEM;
+	} else {
+	    tkc->cur = pcb->tk;
+	    res = xpath_yang_parse_path(tkc, mod, pcbclone);
+	    if (res == NO_ERR) {
+		leafobj = NULL;
+		res = xpath_yang_validate_path(NULL, 
+					       NULL, 
+					       xpathpcb, 
+					       XP_SRC_LEAFREF,
+					       &leafobj);
+	    }
+	}
+#endif
+
 	/*****/
 	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
 	break;

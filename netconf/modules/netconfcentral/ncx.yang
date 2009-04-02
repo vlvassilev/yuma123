@@ -483,6 +483,32 @@ module ncx {
        data type must be 'string', or the 'qname' extension
        will be ignored.";
   }
+
+  extension secure {
+    description
+      "Used to indicate that the data model node 
+       controls a sensitive security system parameter.
+
+       If present, the netconfd agent will only allow
+       the 'root' user to modify or delete the node.
+
+       The 'secure' extension may appear within the type-stmt,
+       or within a data node definition.  It is ignored
+       otherwise.";
+  }
+
+  extension very-secure {
+    description
+      "Used to indicate that the data model node 
+       controls a very sensitive security system parameter.
+
+       If present, the netconfd agent will only allow
+       the 'root' user to access the node.
+
+       The 'very-secure' extension may appear within the type-stmt,
+       or within a data node definition.  It is ignored
+       otherwise.";
+  }
  
 }
 

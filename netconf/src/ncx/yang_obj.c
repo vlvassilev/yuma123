@@ -7808,7 +7808,10 @@ static status_t
 		    res = ERR_INTERNAL_MEM;
 		} else {
 		    tkc->cur = pcb->tk;
-		    res = xpath_yang_parse_path(tkc, mod, pcbclone);
+		    res = xpath_yang_parse_path(tkc, 
+						mod, 
+						XP_SRC_LEAFREF,
+						pcbclone);
 		    if (res == NO_ERR) {
 			leafobj = NULL;
 			res = xpath_yang_validate_path(mod, 

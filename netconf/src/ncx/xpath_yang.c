@@ -14,7 +14,6 @@
     - augment target
     - refine target
     - leafref path target
-    - instance-identifier
     - key attribute for insert operation
 
 		
@@ -174,7 +173,7 @@ static status_t
 			      pcb->exprstr);
 		}
 	    }
-	} else {
+	} else if (pcb->mod) {
 	    res = xpath_get_curmod_from_prefix(prefix,
 					       pcb->mod,
 					       &targmod);
@@ -196,10 +195,22 @@ static status_t
     if (!targmod && laxnamespaces && 
 	res == NO_ERR && (!nsid || !prefix)) {
 
+	if (!pcb->targobj) {
+	    pcb->targobj = pcb->obj;
+	}
+
 	if (pcb->targobj) {
-	    foundobj = obj_find_child(pcb->targobj,
-				      obj_get_mod_name(pcb->targobj),
-				      nodename);
+	    if (obj_is_root(pcb->targobj)) {
+		foundobj = ncx_find_any_object(nodename);
+		if (foundobj && nsid && 
+		    obj_get_nsid(foundobj) != nsid) {
+		    foundobj = NULL;
+		}
+	    } else {
+		foundobj = obj_find_child(pcb->targobj,
+					  obj_get_mod_name(pcb->targobj),
+					  nodename);
+	    }
 	}
 
 	if (!foundobj) {
@@ -414,7 +425,7 @@ static status_t
 	prefix = TK_CUR_MOD(pcb->tkc);
 
 	if (pcb->source != XP_SRC_XML) {
-	    if (xml_strcmp(pcb->mod->prefix, prefix)) {
+	    if (pcb->mod && xml_strcmp(pcb->mod->prefix, prefix)) {
 		import = ncx_find_pre_import(pcb->mod, prefix);
 		if (!import) {
 		    res = ERR_NCX_PREFIX_NOT_FOUND;
@@ -1240,8 +1251,10 @@ static status_t
 *
 *
 * INPUTS:
-*    tkc == parent token chain
+*    tkc == parent token chain (may be NULL)
 *    mod == module in progress
+*    source == context for this expression
+*              XP_SRC_LEAFREF or XP_SRC_INSTANCEID
 *    pcb == initialized xpath parser control block
 *           for the leafref path; use xpath_new_pcb
 *           to initialize before calling this fn.
@@ -1256,25 +1269,33 @@ static status_t
 status_t
     xpath_yang_parse_path (tk_chain_t *tkc,
 			   ncx_module_t *mod,
+			   xpath_source_t source,
 			   xpath_pcb_t *pcb)
 {
     status_t       res;
+    uint32         linenum, linepos;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !pcb || !pcb->exprstr) {
+    if (!pcb || !pcb->exprstr) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (source != XP_SRC_LEAFREF && source != XP_SRC_INSTANCEID) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
     pcb->logerrors = TRUE;
+    linenum = (tkc) ? TK_CUR_LNUM(tkc) : 1;
+    linepos = (tkc) ? TK_CUR_LPOS(tkc) : 1;
 
     /* before all objects are known, only simple validation
      * is done, and the token chain is saved for reuse
      * each time the expression is evaluated
      */
-    pcb->tkc = tk_tokenize_xpath_string(mod, pcb->exprstr, 
-					TK_CUR_LNUM(tkc),
-					TK_CUR_LPOS(tkc),
+    pcb->tkc = tk_tokenize_xpath_string(mod, 
+					pcb->exprstr, 
+					linenum,
+					linepos,
 					&res);
     if (!pcb->tkc || res != NO_ERR) {
 	if (pcb->logerrors) {
@@ -1290,8 +1311,11 @@ status_t
      * within the XPath expression
      */
     pcb->mod = mod;
-    pcb->source = XP_SRC_LEAFREF;
-
+    pcb->source = source;
+    if (source == XP_SRC_INSTANCEID) {
+	pcb->flags |= XP_FL_INSTANCEID;
+    }
+	
     /* since the pcb->obj is not set, this validation
      * phase will skip identifier tests, predicate tests
      * and completeness tests
@@ -1324,6 +1348,7 @@ status_t
 *
 * INPUTS:
 *    mod == module containing the 'obj' (in progress)
+*        == NULL if no object in progress
 *    obj == object using the leafref data type
 *    pcb == the leafref parser control block, possibly
 *           cloned from from the typdef
@@ -1344,7 +1369,7 @@ status_t
     status_t  res;
 
 #ifdef DEBUG
-    if (!mod || !obj || !pcb || !leafobj || !pcb->exprstr) {
+    if (!obj || !pcb || !leafobj || !pcb->exprstr) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!pcb->tkc) {
@@ -1366,10 +1391,8 @@ status_t
     }
 
     tk_reset_chain(pcb->tkc);
-    pcb->flags = 0;
     pcb->objmod = mod;
     pcb->obj = obj;
-    pcb->source = XP_SRC_LEAFREF;
     pcb->targobj = NULL;
     pcb->altobj = NULL;
     pcb->varobj = NULL;
@@ -1404,15 +1427,17 @@ status_t
 	}
 
 	/* check for a leaf, then if that is OK */
-	if (!obj_get_ctypdef(pcb->targobj) ||  
-	    pcb->targobj->objtype != OBJ_TYP_LEAF) {
-	    res = ERR_NCX_INVALID_VALUE;
-	    if (pcb->logerrors) {
-		log_error("\nError: invalid path target anyxml '%s'",
-			  obj_get_name(pcb->targobj));
-		ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	if (pcb->source == XP_SRC_LEAFREF) {
+	    if (!obj_get_ctypdef(pcb->targobj) ||  
+		pcb->targobj->objtype != OBJ_TYP_LEAF) {
+		res = ERR_NCX_INVALID_VALUE;
+		if (pcb->logerrors) {
+		    log_error("\nError: invalid path target anyxml '%s'",
+			      obj_get_name(pcb->targobj));
+		    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+		}
+		pcb->validateres = res;
 	    }
-	    pcb->validateres = res;
 	}
 
 	/* this test is probably not worth doing,

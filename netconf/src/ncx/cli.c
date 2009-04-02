@@ -945,39 +945,60 @@ val_value_t *
 	    }
 	} /* else no dashes, leave parmname pointer alone */
 
-	/* check for the end of the parm name, wsp or equal sign
+	/* should be pointing at start of the parm name
+	 * check for the end of the parm name, wsp or equal sign
 	 * get the parm template, and get ready to parse it
 	 */
 	if (res == NO_ERR) {
 	    /* check the parmname string for a terminating char */
 	    parmname = &buff[buffpos];
-	    str = &parmname[1];
-	    while (*str && !isspace(*str) && *str != NCX_ASSIGN_CH) {
-		str++;
-	    }
+	    parmnamelen = 0;
 
-	    parmnamelen = (uint32)(str - parmname);
-	    buffpos += parmnamelen;
+	    if (ncx_valid_fname_ch(*parmname)) {
+		str = &parmname[1];
+		while (*str && ncx_valid_name_ch(*str)) {
+		    str++;
+		}
+		parmnamelen = (uint32)(str - parmname);
 
-	    /* check if this parameter name is in the parmset def */
-	    chobj = obj_find_child_str(obj, NULL,
-				       (const xmlChar *)parmname,
-				       parmnamelen);
+		/* check if this parameter name is in the parmset def */
+		chobj = obj_find_child_str(obj, NULL,
+					   (const xmlChar *)parmname,
+					   parmnamelen);
 
-	    /* check if parm was found, try partial name if not */
-	    if (!chobj && autocomp) {
-		matchcount = 0;
-		chobj = 
-		    obj_match_child_str(obj, NULL,
-					(const xmlChar *)parmname,
-					parmnamelen,
-					&matchcount);
-		if (chobj) {
-		    gotmatch = TRUE;
-		    if (matchcount > 1) {
-			res = ERR_NCX_AMBIGUOUS_CMD;
+		/* check if parm was found, try partial name if not */
+		if (!chobj && autocomp) {
+		    matchcount = 0;
+		    chobj = 
+			obj_match_child_str(obj, NULL,
+					    (const xmlChar *)parmname,
+					    parmnamelen,
+					    &matchcount);
+		    if (chobj) {
+			gotmatch = TRUE;
+			if (matchcount > 1) {
+			    res = ERR_NCX_AMBIGUOUS_CMD;
+			}
+		    } else {
+			parmnamelen = 0;
 		    }
 		}
+
+		/* advance the buffer pointer */
+		buffpos += parmnamelen;
+
+	    }  /* else it could be a default-parm value */
+
+	    /* check if the start of the value was not found */
+	    if (!parmnamelen) {
+		/* parmname/parmnamelen is really the value, 
+		 * not the name 
+		 */
+		str = parmname;
+		while (*str && !xml_isspace(*str)) {
+		    str++;
+		}
+		parmnamelen = (uint32)(str - parmname);
 	    }
 
 	    if (!chobj && !gotdashes) {
@@ -987,6 +1008,7 @@ val_value_t *
 		 */
 		chobj = obj_get_default_parm(obj);
 		if (chobj) {
+		    buffpos += parmnamelen;
 		    savechar = parmname[parmnamelen];
 		    parmname[parmnamelen] = 0;
 		    res = parse_parm(val, chobj, 

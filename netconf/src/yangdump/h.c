@@ -157,8 +157,7 @@ date         init     comment
 #define UNION         (const xmlChar *)"union"
 
 #define QHEADER       (const xmlChar *)"\n    dlq_hdr_t qhdr;"
-
-#define QUEUE         (const xmlChar *)"\n    dlq_hdr_t nodeQ;"
+#define QUEUE         (const xmlChar *)"\n    dlq_hdr_t"
 
 #define START_LINE    (const xmlChar *)"\n    "
 
@@ -361,7 +360,6 @@ static void
 }  /* write_h_iffeature_start */
 
 
-
 /********************************************************************
 * FUNCTION write_h_iffeature_end
 * 
@@ -383,6 +381,95 @@ static void
 }  /* write_h_iffeature_end */
 
 
+/*******************************************************************
+* FUNCTION write_h_objtype
+* 
+* Generate the C definitions for 1 datadef child type line
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == obj_template_t to use
+*
+**********************************************************************/
+static void
+    write_h_objtype (ses_cb_t *scb,
+		     const obj_template_t *obj)
+
+{
+    ncx_btype_t    btyp;
+    boolean        needspace;
+
+    needspace = TRUE;
+
+    ses_putstr(scb, START_LINE);
+    btyp = obj_get_basetype(obj);
+
+    switch (btyp) {
+    case NCX_BT_BOOLEAN:
+	ses_putstr(scb, BOOLEAN);
+	break;
+    case NCX_BT_INT8:
+	ses_putstr(scb, INT8);
+	break;
+    case NCX_BT_INT16:
+	ses_putstr(scb, INT16);
+	break;
+    case NCX_BT_INT32:
+	ses_putstr(scb, INT32);
+	break;
+    case NCX_BT_INT64:
+	ses_putstr(scb, INT64);
+	break;
+    case NCX_BT_UINT8:
+	ses_putstr(scb, UINT8);
+	break;
+    case NCX_BT_UINT16:
+	ses_putstr(scb, UINT16);
+	break;
+    case NCX_BT_UINT32:
+	ses_putstr(scb, UINT32);
+	break;
+    case NCX_BT_UINT64:
+	ses_putstr(scb, UINT64);
+	break;
+    case NCX_BT_FLOAT32:
+	ses_putstr(scb, FLOAT);
+	break;
+    case NCX_BT_FLOAT64:
+	ses_putstr(scb, DOUBLE);
+	break;
+    case NCX_BT_ENUM:
+    case NCX_BT_STRING:
+    case NCX_BT_BINARY:
+    case NCX_BT_INSTANCE_ID:
+    case NCX_BT_LEAFREF:
+    case NCX_BT_IDREF:
+    case NCX_BT_SLIST:
+	ses_putstr(scb, STRING);
+	needspace = FALSE;
+	break;
+    case NCX_BT_LIST:
+	ses_putstr(scb, QUEUE);
+	break;
+    default:
+	/* assume complex type */
+	write_identifier(scb,
+			 obj_get_mod_name(obj),
+			 DEF_TYPE,
+			 obj_get_name(obj));
+    }
+
+
+    if (needspace) {
+	ses_putchar(scb, ' ');
+    }
+
+    write_h_safe_str(scb, obj_get_name(obj));
+    ses_putchar(scb, ';');
+
+}  /* write_h_objtype */
+
+
 /********************************************************************
 * FUNCTION write_h_object
 * 
@@ -400,12 +487,17 @@ static void
 {
     const obj_template_t    *childobj;
     xmlChar                 *buffer;
-    ncx_btype_t              btyp, childbtyp;
+    ncx_btype_t              btyp;
     status_t                 res;
+    boolean                  isleaflist;
 
     /* typedefs not needed for simple objects */
-    if (obj_is_leafy(obj)) {
+    if (obj->objtype == OBJ_TYP_LEAF) {
 	return;
+    } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
+	isleaflist = TRUE;
+    } else {
+	isleaflist = FALSE;
     }
 
     btyp = obj_get_basetype(obj);
@@ -426,19 +518,23 @@ static void
     /* start a new line and a C type definition */
     ses_putstr(scb, START_TYPEDEF);
 
-    /* print the C top-level data type */
-    switch (btyp) {
-    case NCX_BT_CONTAINER:
-    case NCX_BT_CASE:
-    case NCX_BT_LIST:
+    if (isleaflist) {
 	ses_putstr(scb, STRUCT);
-	break;
-    case NCX_BT_CHOICE:
-	ses_putstr(scb, UNION);
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+    } else {
+	/* print the C top-level data type */
+	switch (btyp) {
+	case NCX_BT_CONTAINER:
+	case NCX_BT_CASE:
+	case NCX_BT_LIST:
+	    ses_putstr(scb, STRUCT);
+	    break;
+	case NCX_BT_CHOICE:
+	    ses_putstr(scb, UNION);
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return;
+	}
     }
     ses_putchar(scb, ' ');
 
@@ -453,84 +549,32 @@ static void
     ses_putstr(scb, START_BLOCK);
 
     /* generate a line for a Q header or a Queue */
-    if (obj->objtype == OBJ_TYP_LIST) {
+    if (obj->objtype == OBJ_TYP_LIST || 
+	obj->objtype == OBJ_TYP_LEAF_LIST) {
 	ses_putstr(scb, QHEADER);
     }
 
-    /* generate a line for each child node */
-    for (childobj = obj_first_child(obj);
-	 childobj != NULL;
-	 childobj = obj_next_child(childobj)) {
+    if (isleaflist) { 
+	/* generate a line for the leaf-list data type */
+	write_h_objtype(scb, obj);
+    } else {
+	/* generate a line for each child node */
+	for (childobj = obj_first_child(obj);
+	     childobj != NULL;
+	     childobj = obj_next_child(childobj)) {
 
-	if (!obj_has_name(childobj) ||
-	    !obj_is_data_db(childobj)) {
-	    continue;
-	}
-
-	ses_putstr(scb, START_LINE);
-
-	if (childobj->objtype == OBJ_TYP_LEAF_LIST) {
-	    ses_putstr(scb, QUEUE);
-	} else {
-	    childbtyp = obj_get_basetype(childobj);
-
-	    switch (childbtyp) {
-	    case NCX_BT_BOOLEAN:
-		ses_putstr(scb, BOOLEAN);
-		break;
-	    case NCX_BT_INT8:
-		ses_putstr(scb, INT8);
-		break;
-	    case NCX_BT_INT16:
-		ses_putstr(scb, INT16);
-		break;
-	    case NCX_BT_INT32:
-		ses_putstr(scb, INT32);
-		break;
-	    case NCX_BT_INT64:
-		ses_putstr(scb, INT64);
-		break;
-	    case NCX_BT_UINT8:
-		ses_putstr(scb, UINT8);
-		break;
-	    case NCX_BT_UINT16:
-		ses_putstr(scb, UINT16);
-		break;
-	    case NCX_BT_UINT32:
-		ses_putstr(scb, UINT32);
-		break;
-	    case NCX_BT_UINT64:
-		ses_putstr(scb, UINT64);
-		break;
-	    case NCX_BT_FLOAT32:
-		ses_putstr(scb, FLOAT);
-		break;
-	    case NCX_BT_FLOAT64:
-		ses_putstr(scb, DOUBLE);
-		break;
-	    case NCX_BT_ENUM:
-	    case NCX_BT_STRING:
-	    case NCX_BT_BINARY:
-	    case NCX_BT_INSTANCE_ID:
-	    case NCX_BT_LEAFREF:
-	    case NCX_BT_IDREF:
-	    case NCX_BT_SLIST:
-	    case NCX_BT_UNION:
-		ses_putstr(scb, STRING);
-		break;
-	    default:
-		/* assume complex type */
-		write_identifier(scb,
-				 obj_get_mod_name(childobj),
-				 DEF_TYPE,
-				 obj_get_name(childobj));
-		ses_putchar(scb, ' ');
-		ses_putchar(scb, '*');
+	    if (!obj_has_name(childobj) ||
+		!obj_is_data_db(childobj)) {
+		continue;
 	    }
-
-	    ses_putchar(scb, ' ');
-	    write_h_safe_str(scb, obj_get_name(childobj));
-	    ses_putchar(scb, ';');
+	    if (childobj->objtype == OBJ_TYP_LEAF_LIST) {
+		ses_putstr(scb, QUEUE);
+		ses_putchar(scb, ' ');
+		write_h_safe_str(scb, obj_get_name(childobj));
+		ses_putchar(scb, ';');
+	    } else {
+		write_h_objtype(scb, childobj);
+	    }
 	}
     }
 
@@ -968,6 +1012,7 @@ static void
     }
 
     /* Write the end of the H file */
+    ses_putchar(scb, '\n');
     ses_putstr(scb, POUND_ENDIF);
 
 } /* write_h_file */

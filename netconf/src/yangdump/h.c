@@ -157,7 +157,8 @@ date         init     comment
 #define UNION         (const xmlChar *)"union"
 
 #define QHEADER       (const xmlChar *)"\n    dlq_hdr_t qhdr;"
-#define QUEUE         (const xmlChar *)"\n    dlq_hdr_t"
+
+#define QUEUE         (const xmlChar *)"dlq_hdr_t"
 
 #define START_LINE    (const xmlChar *)"\n    "
 
@@ -459,7 +460,6 @@ static void
 			 obj_get_name(obj));
     }
 
-
     if (needspace) {
 	ses_putchar(scb, ' ');
     }
@@ -568,6 +568,7 @@ static void
 		continue;
 	    }
 	    if (childobj->objtype == OBJ_TYP_LEAF_LIST) {
+		ses_putstr(scb, START_LINE);
 		ses_putstr(scb, QUEUE);
 		ses_putchar(scb, ' ');
 		write_h_safe_str(scb, obj_get_name(childobj));
@@ -911,12 +912,12 @@ static void
 
 	    ses_putstr(scb, POUND_IFNDEF);
 	    ses_putstr(scb, BAR_H);
-	    ses_putstr(scb, inc->submodule);
+	    write_h_safe_str(scb, inc->submodule);
 
 	    ses_putstr(scb, POUND_INCLUDE);
 	    ses_putchar(scb, ' ');
 	    ses_putchar(scb, '"');
-	    ses_putstr(scb, inc->submodule);
+	    write_h_safe_str(scb, inc->submodule);
 	    ses_putstr(scb, DOT_H);
 	    ses_putchar(scb, '"');
 	    ses_putstr(scb, POUND_ENDIF);
@@ -949,10 +950,10 @@ static void
     /* Write the start of the H file */
     ses_putstr(scb, POUND_IFNDEF);
     ses_putstr(scb, BAR_H);
-    ses_putstr(scb, mod->name);
+    write_h_safe_str(scb, mod->name);
     ses_putstr(scb, POUND_DEFINE);
     ses_putstr(scb, BAR_H);
-    ses_putstr(scb, mod->name);
+    write_h_safe_str(scb, mod->name);
 
     write_h_header(scb, mod, cp);
 

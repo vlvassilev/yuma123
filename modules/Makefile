@@ -16,19 +16,19 @@
 ############### SOURCE PROFILE ##############################
 
 SUBDIR_NM=modules
-YANGDUMP=../target/bin/yangdump
+YANGDUMP=$(YANG_HOME)/target/bin/yangdump
 SUBDIR_CPP=""
 
 
 ############### TARGET PROFILE ##############################
 
-TBASE=../../ncorg/ncorg/static
+TBASE=../ncorg/ncorg/static
 XSD_TARGET=$(TBASE)/xsd
 COPY_TARGET=$(TBASE)/src
 HTML_TARGET=$(TBASE)/modules
 COOKEDHTML_TARGET=$(TBASE)/cookedmodules
 
-SQLDB_TARGET=../../mysql/newmod.sql
+SQLDB_TARGET=../mysql/newmod.sql
 
 
 ######################### MAKE RULES ######################

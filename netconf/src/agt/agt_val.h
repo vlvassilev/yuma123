@@ -87,7 +87,7 @@ date	     init     comment
  * Additional steps to write to a config database
  *
  * step 4: call agt_val_validate_write
- * step 5: call agt_vall_apply_write
+ * step 5: call agt_val_apply_write
  */
 extern status_t 
     agt_val_instance_check (ses_cb_t *scb,

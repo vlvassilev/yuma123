@@ -83,4 +83,9 @@ extern status_t
 				boolean logerrors);
 
 
+extern val_value_t *
+    xpath_yang_make_instanceid_val (xpath_pcb_t *pcb,
+				    status_t *retres,
+				    val_value_t **deepest);
+
 #endif	    /* _H_xpath_yang */

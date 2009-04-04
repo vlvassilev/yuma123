@@ -22,21 +22,13 @@ date	     init     comment
 
 */
 
-/*
+
 #include <xmlstring.h>
 
-#ifndef _H_help
-#include "help.h"
+#ifndef _H_mgr_io
+#include "mgr_io.h"
 #endif
 
-#ifndef _H_log
-#include "log.h"
-#endif
-
-#ifndef _H_ncxtypes
-#include "ncxtypes.h"
-#endif
-*/
 
 /********************************************************************
 *								    *

@@ -1246,6 +1246,11 @@ static status_t
 * 
 * Parse the leafref path as a leafref path
 *
+* DOES NOT VALIDATE PATH NODES USED IN THIS PHASE
+* A 2-pass validation is used in case the path expression
+* is defined within a grouping.  This pass is
+* used on all objects, even in groupings
+*
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
 *
@@ -1261,7 +1266,8 @@ static status_t
 *           The pcb->exprstr field must be set
 *
 * OUTPUTS:
-*   pcb->tkc is filled and then validated
+*   pcb->tkc is filled and then validated for well-formed
+*   leafref or instance-identifier syntax
 *
 * RETURNS:
 *   status
@@ -1339,6 +1345,10 @@ status_t
 *   - objects are all 'config true'
 *   - target object is a leaf
 *   - leafref represents a single instance
+*
+* A 2-pass validation is used in case the path expression
+* is defined within a grouping.  This pass is
+* used only on cooked (real) objects
 *
 * Called after all 'uses' and 'augment' expansion
 * so validation against cooked object tree can be done
@@ -1463,6 +1473,295 @@ status_t
     return pcb->validateres;
 
 }  /* xpath_yang_validate_path */
+
+
+/********************************************************************
+* FUNCTION xpath_yang_make_instanceid_val
+* 
+* Make a value subtree out of an instance-identifier
+* Used by yangcli to send PDUs from CLI target parameters
+*
+* The XPath pcb must be previously parsed and found valid
+* It must be an instance-identifier value, 
+* not a leafref path
+*
+* INPUTS:
+*    pcb == the leafref parser control block, possibly
+*           cloned from from the typdef
+*    retres == address of return status (may be NULL)
+*    deepest == address of return deepest node created (may be NULL)
+*
+* OUTPUTS:
+*   if (non-NULL)
+*       *retres == return status
+*       *deepest == pointer to end of instance-id chain node
+* RETURNS:
+*   malloced value subtree representing the instance-identifier
+*   in internal val_value_t data structures
+*********************************************************************/
+val_value_t *
+    xpath_yang_make_instanceid_val (xpath_pcb_t *pcb,
+				    status_t *retres,
+				    val_value_t **deepest)
+{
+    val_value_t          *childval, *top, *curtop;
+    const obj_template_t *curobj, *childobj;
+    const xmlChar        *objprefix, *objname, *modname;
+    status_t              res;
+    boolean               done, done2;
+
+#ifdef DEBUG
+    if (!pcb) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+    if (!pcb->tkc) {
+	if (retres) {
+	    *retres = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	return NULL;
+    }
+#endif
+
+    if (retres) {
+	*retres = NO_ERR;
+    }
+    if (deepest) {
+	*deepest = NULL;
+    }
+
+    top = NULL;
+    curtop = NULL;
+
+    if (pcb->parseres != NO_ERR) {
+	/* errors already reported, skip this one */
+	if (retres) {
+	    *retres = pcb->parseres;
+	}
+	return NULL;
+    }
+
+    /* get first token */
+    tk_reset_chain(pcb->tkc);
+    res = TK_ADV(pcb->tkc);
+    if (res != NO_ERR) {
+	if (retres) {
+	    *retres = res;
+	}
+	return NULL;
+    }
+
+    /* get the start object */
+    if (TK_CUR_TYP(pcb->tkc) == TK_TT_FSLASH) {
+	/* absolute path, use objroot to start */
+	curobj = pcb->docroot;
+	res = TK_ADV(pcb->tkc);
+	if (res != NO_ERR) {
+	    if (retres) {
+		*retres = res;
+	    }
+	    return NULL;
+	}
+    } else {
+	/* relative path, use context object to start */
+	curobj = pcb->obj;
+    }
+    if (!curobj) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	if (retres) {
+	    *retres = ERR_INTERNAL_VAL;
+	}
+	return NULL;
+    }
+
+    /* get all the path steps */
+    res = NO_ERR;
+    done = FALSE;
+    while (!done && res == NO_ERR) {
+	/* this is expected to be a QName or LCName identifier */
+	objprefix = TK_CUR_MOD(pcb->tkc);
+	if (objprefix) {
+	    modname = xmlns_get_module
+		(xmlns_find_ns_by_prefix(objprefix));
+	} else {
+	    modname = NULL;
+	}
+	objname = TK_CUR_VAL(pcb->tkc);
+
+	/* find the child node and add it to the curtop */
+	if (obj_is_root(curobj)) {
+	    if (modname) {
+		childobj = ncx_find_object(ncx_find_module(modname, NULL), 
+					   objname);
+	    } else {
+		childobj = ncx_find_any_object(objname);
+	    }
+	} else {
+	    childobj = obj_find_child(curobj, modname, objname);
+	}
+	if (!childobj) {
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	    continue;
+	}
+
+	childval = val_new_value();
+	if (!childval) {
+	    res = ERR_INTERNAL_MEM;
+	    continue;
+	}
+	val_init_from_template(childval, childobj);
+
+	if (curtop) {
+	    val_add_child(childval, curtop);
+	} else {
+	    top = childval;
+	}
+	curtop = childval;
+	curobj = childobj;
+	if (deepest) {
+	    *deepest = curtop;
+	}
+
+	/* move on to the next token */
+	res = TK_ADV(pcb->tkc);
+	if (res != NO_ERR) {
+	    /* reached end of the line at an OK point */
+	    res = NO_ERR;
+	    done = TRUE;
+	    continue;
+	}
+
+	switch (TK_CUR_TYP(pcb->tkc)) {
+	case TK_TT_FSLASH:
+	    /* normal identifier expected next, go back to start */
+	    res = TK_ADV(pcb->tkc);
+	    continue;
+	case TK_TT_LBRACK:
+	    /* predicate expected next, keep going */
+	    break;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	    continue;
+	}
+
+	done2 = FALSE;
+	while (!done2 && res == NO_ERR) {
+	    /* got a start of predicate, get the key leaf name */
+	    res = TK_ADV(pcb->tkc);
+	    if (res != NO_ERR) {
+		continue;
+	    }
+
+	    /* this is expected to be a QName or LCName identifier */
+	    objprefix = TK_CUR_MOD(pcb->tkc);
+	    if (objprefix) {
+		modname = xmlns_get_module
+		    (xmlns_find_ns_by_prefix(objprefix));
+	    } else {
+		modname = NULL;
+	    }
+	    objname = TK_CUR_VAL(pcb->tkc);
+
+	    /* find the child node and add it to the curtop */
+	    childobj = obj_find_child(curobj, modname, objname);
+	    if (!childobj) {
+		res = ERR_NCX_DEF_NOT_FOUND;
+		continue;
+	    }
+	    childval = val_new_value();
+	    if (!childval) {
+		res = ERR_INTERNAL_MEM;
+		continue;
+	    }
+	    val_init_from_template(childval, childobj);
+	    val_add_child(childval, curtop);
+
+	    /* get the = sign */
+	    res = TK_ADV(pcb->tkc);
+	    if (res != NO_ERR) {
+		continue;
+	    }
+	    if (TK_CUR_TYP(pcb->tkc) != TK_TT_EQUAL) {
+		res = SET_ERROR(ERR_INTERNAL_VAL);
+		continue;
+	    }
+
+	    /* get the key leaf value */
+	    res = TK_ADV(pcb->tkc);
+	    if (res != NO_ERR) {
+		continue;
+	    }
+	    if (!TK_CUR_STR(pcb->tkc)) {
+		res = SET_ERROR(ERR_INTERNAL_VAL);
+		continue;
+	    }
+
+	    /* set the new leaf with the value */
+	    res = val_set_simval(childval,
+				 obj_get_ctypdef(childobj),
+				 obj_get_nsid(childobj),
+				 obj_get_name(childobj),
+				 TK_CUR_VAL(pcb->tkc));
+	    if (res != NO_ERR) {
+		continue;
+	    }
+
+	    /* get the closing predicate bracket */
+	    res = TK_ADV(pcb->tkc);
+	    if (res != NO_ERR) {
+		continue;
+	    }
+	    if (TK_CUR_TYP(pcb->tkc) != TK_TT_RBRACK) {
+		res = SET_ERROR(ERR_INTERNAL_VAL);
+		continue;
+	    }
+
+	    /* check any more predicates or path steps */
+	    res = TK_ADV(pcb->tkc);
+	    if (res != NO_ERR) {
+		/* no more steps, stopped at an OK spot */
+		done = TRUE;
+		done2 = TRUE;
+		res = NO_ERR;
+		continue;
+	    }
+
+	    switch (TK_CUR_TYP(pcb->tkc)) {
+	    case TK_TT_LBRACK:
+		/* get another predicate */
+		break;
+	    case TK_TT_FSLASH:
+		/* done with predicates for now 
+		 * setup the next path step
+		 */
+		res = TK_ADV(pcb->tkc);
+		if (res != NO_ERR) {
+		    continue;
+		}
+		done2 = TRUE;
+		break;
+	    default:
+		res = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	}
+    }
+
+
+    /* cleanup and exit */
+    if (res != NO_ERR && top) {
+	val_free_value(top);
+	top = NULL;
+    }
+
+    if (LOGDEBUG2 && top) {
+	log_debug2("\nval_inst for expr '%s'\n", 
+		   pcb->exprstr);
+	val_dump_value(top, NCX_DEF_INDENT);
+    }
+
+    return top;
+
+}  /* xpath_yang_make_instanceid_val */
 
 
 /********************************************************************

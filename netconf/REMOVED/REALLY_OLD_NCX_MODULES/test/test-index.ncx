@@ -1,0 +1,88 @@
+ncx-module test-index {
+  header {
+    description "Test index module";
+    version 1.0;
+    owner ncx;
+    application test;
+  }
+
+  definitions {
+
+    # definitions can appear in any order, but no forward
+    # definitions are allowed.
+
+    type String1 {
+      syntax  {
+        string pattern = '/c+';
+      }
+    } 
+
+    type String2 {
+      syntax  {
+        string = { x "testing one two" "testing 3 4" }*;
+      }
+    } 
+
+    type String3 {
+      syntax  {
+        String2;
+      }
+      metadata {
+         String1  m1;
+         string mstr;
+      }
+      default "x";
+    } 
+
+    type TestIndexRow {
+      description "Test index row";
+      syntax  {
+        container
+        {
+	   # inline definitions do not need to use
+           # the contaainer data struct but the table
+           # indexing is coupled to the table contents
+           # and no reindexing is possible
+           
+           String1  str1;
+           String2  str2;
+           container foo {
+              int32   x;
+              int32   y?;
+              string z*;
+           }
+           uint64    longval;
+        }
+      }
+    }
+
+    type Table-1 {
+      syntax  {
+        list [row/str2, row/str1] (60) {
+           TestIndexRow row;
+        }
+      }
+    }
+
+    type Table-2 {
+      syntax  {
+        list [row/str1, row/str1, row/foo/x] {
+           TestIndexRow row;
+        }
+      }
+    }
+
+    parmset Test1-Psd {
+      type data;
+      parms {
+        parm p1 {
+          type Table-1;
+        }
+        parm p2 {
+          type Table-2;
+        }
+      }
+    }
+
+  }
+}

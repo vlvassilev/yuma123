@@ -3390,6 +3390,8 @@ static void
 }  /* do_connect */
 
 
+
+
 /********************************************************************
 * FUNCTION send_copy_config_to_agent
 * 
@@ -5593,13 +5595,11 @@ static void
 	     uint32  len)
 {
     val_value_t           *valset, *parm, *newparm, *curparm;
-    const obj_template_t  *targobj;
+    val_value_t           /* *valroot, */ *targval;
+    obj_template_t        *targobj;
     const xmlChar         *target;
-    xpath_pcb_t           *xpathpcb;
     status_t               res;
     boolean                imode, save_getopt;
-
-    xpathpcb = NULL;
 
     valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (res != NO_ERR) {
@@ -5622,7 +5622,10 @@ static void
     imode = interactive_mode();
     newparm = NULL;
     curparm = NULL;
+    targobj = NULL;
+    targval = NULL;
 
+#define OLDWAY 1
 #ifdef OLDWAY
     res = xpath_find_schema_target_int(target, &targobj);
     if (res != NO_ERR) {
@@ -5632,39 +5635,17 @@ static void
     }	
 #endif
 
-    /* get a parser block for the instance-id */
-    xpathpcb = xpath_new_pcb(target);
-    if (!xpathpcb) {
-	log_error("\nError: malloc failed");	
+#ifdef NEWWAY
+    valroot = get_instanceid_parm(agent_cb,
+				  target,
+				  &targobj,
+				  &targval,
+				  &res);
+    if (!valroot) {
 	val_free_value(valset);
 	return;
     }
-
-    /* initial parse into a token chain */
-    res = xpath_yang_parse_path(NULL, 
-				NULL, 
-				XP_SRC_INSTANCEID,
-				xpathpcb);
-    if (res != NO_ERR) {
-	log_error("\nError: parse XPath target '%s' failed",
-		  xpathpcb->exprstr);
-	xpath_free_pcb(xpathpcb);
-	val_free_value(valset);
-	return;
-    }
-
-    /* validate against the object tree */
-    res = xpath_yang_validate_path(NULL, 
-				   ncx_get_gen_root(),
-				   xpathpcb,
-				   &targobj);
-    if (res != NO_ERR) {
-	log_error("\nError: validate XPath target '%s' failed",
-		  xpathpcb->exprstr);
-	xpath_free_pcb(xpathpcb);
-	val_free_value(valset);
-	return;
-    }
+#endif
 
     /* find the current_value to use as template, if any */
     parm = val_find_child(valset, YANGCLI_MOD, 
@@ -5676,7 +5657,6 @@ static void
 	if (!curparm || res != NO_ERR) {
 	    log_error("\nError: Script value '%s' invalid (%s)", 
 		      VAL_STR(parm), get_error_string(res)); 
-	    xpath_free_pcb(xpathpcb);
 	    val_free_value(valset);
 	    return;
 	}
@@ -5693,7 +5673,11 @@ static void
     switch (targobj->objtype) {
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
-	newparm = fill_value(agent_cb, rpc, targobj, curparm, &res);
+	newparm = fill_value(agent_cb, 
+			     rpc, 
+			     targobj, 
+			     curparm, 
+			     &res);
 	break;
     case OBJ_TYP_CHOICE:
 	newparm = val_new_value();
@@ -5703,7 +5687,11 @@ static void
 	} else {
 	    val_init_from_template(newparm, targobj);
 	    
-	    res = get_choice(agent_cb, rpc, targobj, newparm, curparm);
+	    res = get_choice(agent_cb, 
+			     rpc, 
+			     targobj, 
+			     newparm, 
+			     curparm);
 	    if (res == ERR_NCX_SKIPPED) {
 		res = NO_ERR;
 	    }
@@ -5717,7 +5705,11 @@ static void
 	} else {
 	    val_init_from_template(newparm, targobj);
 
-	    res = get_case(agent_cb, rpc, targobj, newparm, curparm);
+	    res = get_case(agent_cb, 
+			   rpc, 
+			   targobj, 
+			   newparm, 
+			   curparm);
 	    if (res == ERR_NCX_SKIPPED) {
 		res = NO_ERR;
 	    }
@@ -5730,7 +5722,10 @@ static void
 	    res = ERR_INTERNAL_MEM;
 	} else {
 	    val_init_from_template(newparm, targobj);
-	    res = fill_valset(agent_cb, rpc, newparm, curparm);
+	    res = fill_valset(agent_cb, 
+			      rpc, 
+			      newparm, 
+			      curparm);
 	    if (res == ERR_NCX_SKIPPED) {
 		res = NO_ERR;
 	    }
@@ -5739,9 +5734,12 @@ static void
 
     /* check save result or clear it */
     if (res == NO_ERR) {
-	if (agent_cb->result_name || agent_cb->result_filename) {
+	if (agent_cb->result_name || 
+	    agent_cb->result_filename) {
 	    /* save the filled in value */
-	    res = finish_result_assign(agent_cb, newparm, NULL);
+	    res = finish_result_assign(agent_cb, 
+				       newparm, 
+				       NULL);
 	    newparm = NULL;
 	}
     } else {
@@ -5755,9 +5753,6 @@ static void
     }
     if (curparm) {
 	val_free_value(curparm);
-    }
-    if (xpathpcb) {
-	xpath_free_pcb(xpathpcb);
     }
     agent_cb->get_optional = save_getopt;
 

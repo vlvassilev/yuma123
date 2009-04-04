@@ -1,0 +1,100 @@
+module yt12 {
+
+   namespace "urn:ietf:params:xml:ns:yang:yt12a";
+
+   prefix "yt12a";
+
+   import yang-types { prefix ty; }
+   import inet-types { prefix in; }
+
+   organization "Netconf Central";
+
+   contact "Andy Bierman";
+
+   description "YANG test module 12 A. yangdiff test";
+
+   revision 2008-06-21 { description "added stuff for yangdiff tests"; }
+
+   revision 2008-04-11 { description "initial version"; }
+
+   leaf a1 { type int32; }
+
+   container con1 {
+      leaf a2 { type string; }
+      list list-a2 { 
+        key  list-a2-x;
+        container pcon {
+	  presence "means something";
+        }
+        leaf list-a2-x { type int32; }
+      }
+   }
+
+   container con2 {
+      grouping foo;
+      leaf aa2 { type string; }
+   }
+
+
+
+   extension e1 {
+      description "extension test";
+      argument bar {
+         yin-element false;
+      }
+      reference "foobar page 7";
+      status deprecated;
+   }
+
+   typedef my-bits-type {
+     type bits {
+       bit 'x2' { description "some other bit"; }
+       bit 'x1' { reference "A new reference"; }
+       bit 'x3' { description "A new third bit"; }
+     }
+   }
+
+   typedef my-enum-type {
+     type enumeration {
+       enum '2' { description "some other enum"; }
+       enum 'x 1' { reference "A new reference"; }
+       enum 3 { description "A new third enum"; }
+     }
+   }
+
+   typedef my-str-type {
+     type string {
+       length "1..255";
+       pattern '[1-9][a-z]*';
+     }
+     default "1fredflintstone";
+     status current;
+     description "type description";
+     reference "type external references";
+   }
+
+   typedef error-1 {
+      type bits {
+        bit one;
+      }
+   }
+
+   grouping bar {
+     typedef bar-type { type uint64; }
+     list bar-list { 
+       leaf l {
+         type bar-type; 
+       }
+     }
+   }
+
+    list order-test {
+      key l1;
+      leaf l1 { type string; }   
+      leaf l2 { type string; }   
+      leaf l3 { type string; }   
+      leaf l5 { type string; } 
+      leaf l4 { type string; }   
+    }
+
+}   

@@ -37,40 +37,12 @@ date         init     comment
 #include "procdefs.h"
 #endif
 
-#ifndef _H_cli
-#include "cli.h"
-#endif
-
-#ifndef _H_conf
-#include "conf.h"
-#endif
-
-#ifndef _H_help
-#include "help.h"
-#endif
-
 #ifndef _H_log
 #include "log.h"
 #endif
 
 #ifndef _H_mgr
 #include "mgr.h"
-#endif
-
-#ifndef _H_mgr_hello
-#include "mgr_hello.h"
-#endif
-
-#ifndef _H_mgr_io
-#include "mgr_io.h"
-#endif
-
-#ifndef _H_mgr_rpc
-#include "mgr_rpc.h"
-#endif
-
-#ifndef _H_mgr_ses
-#include "mgr_ses.h"
 #endif
 
 #ifndef _H_ncx
@@ -87,22 +59,6 @@ date         init     comment
 
 #ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_obj_help
-#include "obj_help.h"
-#endif
-
-#ifndef _H_op
-#include "op.h"
-#endif
-
-#ifndef _H_rpc
-#include "rpc.h"
-#endif
-
-#ifndef _H_runstack
-#include "runstack.h"
 #endif
 
 #ifndef _H_status
@@ -125,10 +81,6 @@ date         init     comment
 #include "xmlns.h"
 #endif
 
-#ifndef _H_xpath
-#include "xpath.h"
-#endif
-
 #ifndef _H_xml_util
 #include "xml_util.h"
 #endif
@@ -140,6 +92,15 @@ date         init     comment
 #ifndef _H_xml_wr
 #include "xml_wr.h"
 #endif
+
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
+#ifndef _H_xpath_yang
+#include "xpath_yang.h"
+#endif
+
 
 #ifndef _H_yangconst
 #include "yangconst.h"
@@ -191,6 +152,13 @@ date         init     comment
 boolean
     is_top_command (const xmlChar *rpcname)
 {
+#ifdef DEBUG
+    if (!rpcname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
     if (!xml_strcmp(rpcname, YANGCLI_CD)) {
 	;
     } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
@@ -235,6 +203,13 @@ modptr_t *
 {
     modptr_t  *modptr;
 
+#ifdef DEBUG
+    if (!mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     modptr = m__getObj(modptr_t);
     if (!modptr) {
 	return NULL;
@@ -259,10 +234,16 @@ modptr_t *
 void
     free_modptr (modptr_t *modptr)
 {
+#ifdef DEBUG
+    if (!modptr) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
     m__free(modptr);
 
 }  /* free_modptr */
-
 
 
 /********************************************************************
@@ -277,8 +258,14 @@ void
 void
     clear_agent_cb_session (agent_cb_t *agent_cb)
 {
-
     modptr_t  *modptr;
+
+#ifdef DEBUG
+    if (!agent_cb) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
 
     while (!dlq_empty(&agent_cb->modptrQ)) {
 	modptr = (modptr_t *)dlq_deque(&agent_cb->modptrQ);
@@ -370,9 +357,15 @@ ncx_module_t *
     find_module (agent_cb_t *agent_cb,
 		 const xmlChar *modname)
 {
-
     modptr_t      *modptr;
     ncx_module_t  *mod;
+
+#ifdef DEBUG
+    if (!modname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
 
     if (use_agentcb(agent_cb)) {
 	for (modptr = (modptr_t *)dlq_firstEntry(&agent_cb->modptrQ);
@@ -415,6 +408,13 @@ xmlChar *
 {
     val_value_t    *parm;
     xmlChar        *str;
+
+#ifdef DEBUG
+    if (!valset || !parmname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
     
     str = NULL;
     parm = findparm(valset, modname, parmname);
@@ -450,6 +450,13 @@ val_value_t *
 {
     val_value_t *parm;
 
+#ifdef DEBUG
+    if (!parmname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     if (!valset) {
 	return NULL;
     }
@@ -480,6 +487,12 @@ status_t
 		    val_value_t *valset)
 {
     val_value_t    *parm;
+
+#ifdef DEBUG
+    if (!val || !valset) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     parm = val_clone(val);
     if (!parm) {
@@ -532,6 +545,13 @@ void
     clear_result (agent_cb_t *agent_cb)
 
 {
+#ifdef DEBUG
+    if (!agent_cb) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
     if (agent_cb->result_name) {
 	m__free(agent_cb->result_name);
 	agent_cb->result_name = NULL;
@@ -568,6 +588,12 @@ status_t
 		    const xmlChar *varname)
 {
     const xmlChar *teststr;
+
+#ifdef DEBUG
+    if (!agent_cb || !filespec || !varname) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     if (!filespec || !*filespec) {
 	if (varname) {
@@ -633,5 +659,108 @@ status_t
     return NO_ERR;
 
 }  /* check_filespec */
+
+
+/********************************************************************
+ * FUNCTION get_instanceid_parm
+ * 
+ * Validate an instance identifier parameter
+ * Return the target object
+ * Return a value struct from root containing
+ * all the predicate assignments in the stance identifier
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use (NULL if none)
+ *    target == XPath expression for the instance-identifier
+ *    targobj == address of return target object for this expr
+ *    targval == address of return pointer to target value
+ *               node within the value subtree returned
+ *    retres == address of return status
+ *
+ * OUTPUTS:
+ *    *targobj == the object template for the target
+ *    *targval == the target node within the returned subtree
+ *                from root
+ *    *retres == return status for the operation
+ *
+ * RETURNS:
+ *   If NO_ERR:
+ *     malloced value node representing the instance-identifier
+ *     from root to the targobj
+ *  else:
+ *    NULL, check *retres
+ *********************************************************************/
+val_value_t *
+    get_instanceid_parm (agent_cb_t *agent_cb,
+			 const xmlChar *target,
+			 const obj_template_t **targobj,
+			 val_value_t **targval,
+			 status_t *retres)
+{
+    xpath_pcb_t           *xpathpcb;
+    val_value_t           *retval;
+    status_t               res;
+
+#ifdef DEBUG
+    if (!agent_cb || !target || !targobj || !targval || !retres) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    *targobj = NULL;
+    *targval = NULL;
+    *retres = NO_ERR;
+
+    /* get a parser block for the instance-id */
+    xpathpcb = xpath_new_pcb(target);
+    if (!xpathpcb) {
+	log_error("\nError: malloc failed");
+	*retres = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+
+    /* initial parse into a token chain */
+    res = xpath_yang_parse_path(NULL, 
+				NULL, 
+				XP_SRC_INSTANCEID,
+				xpathpcb);
+    if (res != NO_ERR) {
+	log_error("\nError: parse XPath target '%s' failed",
+		  xpathpcb->exprstr);
+	xpath_free_pcb(xpathpcb);
+	*retres = res;
+	return NULL;
+    }
+
+    /* validate against the object tree */
+    res = xpath_yang_validate_path(NULL, 
+				   ncx_get_gen_root(),
+				   xpathpcb,
+				   targobj);
+    if (res != NO_ERR) {
+	log_error("\nError: validate XPath target '%s' failed",
+		  xpathpcb->exprstr);
+	xpath_free_pcb(xpathpcb);
+	*retres = res;
+	return NULL;
+    }
+
+    /* have a valid target object, so follow the
+     * parser chain and build a value subtree
+     * from the XPath expression
+     */
+    retval = xpath_yang_make_instanceid_val(xpathpcb, 
+					    &res,
+					    targval);
+
+    xpath_free_pcb(xpathpcb);
+    *retres = res;
+
+    return retval;
+
+} /* get_instanceid_parm */
+
+
 
 /* END yangcli_util.c */

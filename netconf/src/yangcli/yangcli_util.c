@@ -590,7 +590,7 @@ status_t
     const xmlChar *teststr;
 
 #ifdef DEBUG
-    if (!agent_cb || !filespec || !varname) {
+    if (!agent_cb || !filespec) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -761,6 +761,68 @@ val_value_t *
 
 } /* get_instanceid_parm */
 
+
+/********************************************************************
+* FUNCTION file_is_text
+* 
+* Check the filespec string for a file assignment statement
+* to see if it is text or XML
+*
+* INPUTS:
+*    filespec == string to check
+*
+* RETURNS:
+*   TRUE if text file, FALSE otherwise
+*********************************************************************/
+boolean
+    file_is_text (const xmlChar *filespec)
+{
+    const xmlChar *teststr;
+    uint32         len;
+
+#ifdef DEBUG
+    if (!filespec) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    len = xml_strlen(filespec);
+    if (len < 5) {
+	return FALSE;
+    }
+
+    teststr = &filespec[len-1];
+
+    while (teststr > filespec && *teststr != '.') {
+	teststr--;
+    }
+
+    if (teststr == filespec) {
+	return FALSE;
+    }
+
+    teststr++;
+
+    if (!xml_strcmp(teststr, NCX_EL_YANG)) {
+	return TRUE;
+    }
+
+    if (!xml_strcmp(teststr, NCX_EL_TXT)) {
+	return TRUE;
+    }
+
+    if (!xml_strcmp(teststr, NCX_EL_TEXT)) {
+	return TRUE;
+    }
+
+    if (!xml_strcmp(teststr, NCX_EL_LOG)) {
+	return TRUE;
+    }
+
+    return FALSE;
+
+}  /* file_is_text */
 
 
 /* END yangcli_util.c */

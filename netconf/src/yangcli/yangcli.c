@@ -797,17 +797,32 @@ static status_t
     }
     
     if (resultval) {
-	/* output to the specified file */
-	xml_init_attrs(&attrs);
-	res = xml_wr_check_file(agent_cb->result_filename,
-				resultval,
-				&attrs, 
-				XMLMODE, 
-				WITHHDR, 
-				NCX_DEF_INDENT,
-				NULL);
-	xml_clean_attrs(&attrs);
-    } else if (resultstr) {
+	if (file_is_text(agent_cb->result_filename)) {
+	    /* output in text format to the specified file */
+	    res = log_alt_open((const char *)
+			       agent_cb->result_filename);
+	    if (res != NO_ERR) {
+		log_error("\nError: assignment file '%s' could "
+			  "not be opened (%s)",
+			  agent_cb->result_filename,
+			  get_error_string(res));
+	    } else {
+		val_dump_alt_value(resultval, 0);
+		log_alt_close();
+	    }
+	} else {
+	    /* output in XML format to the specified file */
+	    xml_init_attrs(&attrs);
+	    res = xml_wr_check_file(agent_cb->result_filename,
+				    resultval,
+				    &attrs, 
+				    XMLMODE, 
+				    WITHHDR, 
+				    NCX_DEF_INDENT,
+				    NULL);
+	    xml_clean_attrs(&attrs);
+	}
+    } else {
 	fil = fopen((const char *)agent_cb->result_filename, "w");
 	if (!fil) {
 	    log_error("\nError: assignment file '%s' could "
@@ -838,8 +853,6 @@ static status_t
 		      agent_cb->result_filename);
 	    res = errno_to_status();
 	}
-    } else {
-	res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     if (res == NO_ERR) {

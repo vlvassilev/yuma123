@@ -531,6 +531,7 @@ date	     init     comment
 #define NCX_EL_TEST_OPTION     (const xmlChar *)"test-option"
 #define NCX_EL_TESTTHENSET     (const xmlChar *)"test-then-set"
 #define NCX_EL_TEXT            (const xmlChar *)"text"
+#define NCX_EL_TXT             (const xmlChar *)"txt"
 #define NCX_EL_TRANSPORT       (const xmlChar *)"transport"
 #define NCX_EL_TRUE            (const xmlChar *)"true"
 #define NCX_EL_TYPE            (const xmlChar *)"type"

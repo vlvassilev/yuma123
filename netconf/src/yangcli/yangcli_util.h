@@ -98,4 +98,7 @@ extern val_value_t *
 			 val_value_t **targval,
 			 status_t *retres);
 
+extern boolean
+    file_is_text (const xmlChar *filespec);
+
 #endif	    /* _H_yangcli_util */

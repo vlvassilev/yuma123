@@ -66,6 +66,8 @@ static boolean       use_tstamps;
 
 static FILE *logfile = NULL;
 
+static FILE *altlogfile = NULL;
+
 
 /********************************************************************
 * FUNCTION log_open
@@ -154,6 +156,67 @@ void
 
 
 /********************************************************************
+* FUNCTION log_alt_open
+*
+*   Open an alternate logfile for writing
+*   DO NOT use this function to send log entries to STDOUT
+*   Leave the logfile NULL instead.
+*
+* INPUTS:
+*   fname == full filespec string for logfile
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    log_alt_open (const char *fname)
+{
+    const char *str;
+
+#ifdef DEBUG
+    if (!fname) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (altlogfile) {
+	return ERR_NCX_DATA_EXISTS;
+    }
+
+    str="w";
+
+    altlogfile = fopen(fname, str);
+    if (!altlogfile) {
+	return ERR_FIL_OPEN;
+    }
+
+    return NO_ERR;
+
+}  /* log_alt_open */
+
+
+/********************************************************************
+* FUNCTION log_alt_close
+*
+*   Close the alternate logfile
+*
+* RETURNS:
+*    none
+*********************************************************************/
+void
+    log_alt_close (void)
+{
+    if (!altlogfile) {
+	return;
+    }
+
+    fclose(altlogfile);
+    altlogfile = NULL;
+
+}  /* log_alt_close */
+
+
+/********************************************************************
 * FUNCTION log_stdout
 *
 *   Write lines of text to STDOUT, even if the logfile
@@ -214,6 +277,33 @@ void
     va_end(args);
 
 }  /* log_write */
+
+
+/********************************************************************
+* FUNCTION log_alt_write
+*
+*   Write to the alternate log file
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for fprintf
+*
+*********************************************************************/
+void 
+    log_alt_write (const char *fstr, ...)
+{
+    va_list args;
+
+    va_start(args, fstr);
+
+    if (altlogfile) {
+	vfprintf(altlogfile, fstr, args);
+	fflush(altlogfile);
+    }
+
+    va_end(args);
+
+}  /* log_alt_write */
 
 
 /********************************************************************

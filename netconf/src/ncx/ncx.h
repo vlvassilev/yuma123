@@ -375,6 +375,10 @@ extern void
     ncx_printf_num (const ncx_num_t *num,
 		    ncx_btype_t  btyp);
 
+extern void
+    ncx_alt_printf_num (const ncx_num_t *num,
+			ncx_btype_t  btyp);
+
 extern status_t
     ncx_sprintf_num (xmlChar *buff,
 		     const ncx_num_t *num,

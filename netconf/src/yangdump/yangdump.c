@@ -1287,6 +1287,9 @@ static status_t
 
 	scb = get_output_session(pcb, cp, &res);
 	if (!scb || res != NO_ERR) {
+	    log_error("\nError: open session failed (%s)\n",
+		      get_error_string(res));
+	    yang_free_pcb(pcb);
 	    return res;
 	}
 

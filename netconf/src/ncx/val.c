@@ -127,6 +127,13 @@ static uint32 editvars_malloc = 0;
 static uint32 editvars_free = 0;
 #endif
 
+typedef enum dumpvalue_mode_t_ {
+    DUMP_VAL_NONE,
+    DUMP_VAL_STDOUT,
+    DUMP_VAL_LOG,
+    DUMP_VAL_ALT_LOG
+} dumpvalue_mode_t;
+
 /********************************************************************
 * FUNCTION stdout_num
 * 
@@ -197,6 +204,47 @@ static void
 
 
 /********************************************************************
+* FUNCTION dump_alt_extern
+* 
+* Printf the specified external file to the alternate logfile
+*
+* INPUTS:
+*    fspec == filespec to printf
+*
+*********************************************************************/
+static void
+    dump_alt_extern (const xmlChar *fname)
+{
+    FILE               *fil;
+    boolean             done;
+    int                 ch;
+
+    if (!fname) {
+	log_error("\nval: No extern fname");
+	return;
+    }
+
+    fil = fopen((const char *)fname, "r");
+    if (!fil) {
+	log_error("\nval: Open extern failed (%s)", fname);
+	return;
+    } 
+
+    done = FALSE;
+    while (!done) {
+	ch = fgetc(fil);
+	if (ch == EOF) {
+	    fclose(fil);
+	    done = TRUE;
+	} else {
+	    log_alt_write("%c", ch);
+	}
+    }
+
+} /* dump_alt_extern */
+
+
+/********************************************************************
 * FUNCTION stdout_extern
 * 
 * Printf the specified external file to stdout
@@ -262,6 +310,33 @@ static void
     }
 
 } /* dump_intern */
+
+
+/********************************************************************
+* FUNCTION dump_alt_intern
+* 
+* Printf the specified internal XML buffer to the alternate logfile
+*
+* INPUTS:
+*    intbuff == internal buffer to printf
+*
+*********************************************************************/
+static void
+    dump_alt_intern (const xmlChar *intbuff)
+{
+    const xmlChar      *ch;
+
+    if (!intbuff) {
+	log_error("\nval: No internal buffer");
+	return;
+    }
+
+    ch = intbuff;
+    while (*ch) {
+	log_alt_write("%c", *ch++);
+    }
+
+} /* dump_alt_intern */
 
 
 /********************************************************************
@@ -818,13 +893,13 @@ static status_t
 * INPUTS:
 *    val == value to dump
 *    startindent == start indent char count
-*    tolog == TRUE if use log for output
-*             FALSE if use STDOUT for output
+*    tofil == 
+*    dumpmode == logging mode to use
 *********************************************************************/
 static void
     dump_value (const val_value_t *val,
 		int32 startindent,
-		boolean tolog)
+		dumpvalue_mode_t dumpmode)
 {
     dumpfn_t            dumpfn, errorfn;
     indentfn_t          indentfn;
@@ -849,14 +924,27 @@ static void
     }
 #endif
 
-    if (tolog) {
-	dumpfn = log_write;
-	errorfn = log_error;
-	indentfn = log_indent;
-    } else {
+    switch (dumpmode) {
+    case DUMP_VAL_NONE:
+	return;
+    case DUMP_VAL_STDOUT:
 	dumpfn = log_stdout;
 	errorfn = log_stdout;
 	indentfn = log_stdout_indent;
+	break;
+    case DUMP_VAL_LOG:
+	dumpfn = log_write;
+	errorfn = log_error;
+	indentfn = log_indent;
+	break;
+    case DUMP_VAL_ALT_LOG:
+	dumpfn = log_alt_write;
+	errorfn = log_error;
+	indentfn = log_indent;
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
     }
 
     /* indent and print the val name */
@@ -868,6 +956,9 @@ static void
     } else if (val->btyp == NCX_BT_INTERN) {
 	(*dumpfn)("%s (intern) ",
 		  (val->name) ? (const char *)val->name : "--");
+    } else if (dumpmode == DUMP_VAL_ALT_LOG &&
+	       !xml_strcmp(val->name, NCX_EL_DATA)) {
+	;  /* skip the name */
     } else {
 	(*dumpfn)("%s ", (val->name) ? (const char *)val->name : "--");
     }
@@ -934,10 +1025,18 @@ static void
     case NCX_BT_UINT64:
     case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
-	if (tolog) {
-	    ncx_printf_num(&val->v.num, btyp);
-	} else {
+	switch (dumpmode) {
+	case DUMP_VAL_STDOUT:
 	    stdout_num(btyp, &val->v.num);
+	    break;
+	case DUMP_VAL_LOG:
+	    ncx_printf_num(&val->v.num, btyp);
+	    break;
+	case DUMP_VAL_ALT_LOG:
+	    ncx_alt_printf_num(&val->v.num, btyp);
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
 	break;
     case NCX_BT_BINARY:
@@ -949,6 +1048,12 @@ static void
     case NCX_BT_LEAFREF:   /*******/
 	if (VAL_STR(val)) {
 	    quotes = val_need_quotes(VAL_STR(val));
+
+	    if (dumpmode == DUMP_VAL_ALT_LOG &&
+		!xml_strcmp(val->name, NCX_EL_DATA)) {
+		quotes = FALSE;
+	    }
+
 	    if (quotes) {
 		(*dumpfn)("%c", VAL_QUOTE_CH);
 	    }
@@ -996,10 +1101,18 @@ static void
 			}
 		    }
 		} else if (typ_is_number(lbtyp)) {
-		    if (tolog) {
-			ncx_printf_num(&listmem->val.num, lbtyp);
-		    } else {
+		    switch (dumpmode) {
+		    case DUMP_VAL_STDOUT:
 			stdout_num(lbtyp, &listmem->val.num);
+			break;
+		    case DUMP_VAL_LOG:
+			ncx_printf_num(&listmem->val.num, lbtyp);
+			break;
+		    case DUMP_VAL_ALT_LOG:
+			ncx_alt_printf_num(&listmem->val.num, lbtyp);
+			break;
+		    default:
+			SET_ERROR(ERR_INTERNAL_VAL);
 		    }
 		    (*dumpfn)(" ");
 		} else {
@@ -1037,7 +1150,7 @@ static void
 	     chval = (const val_value_t *)dlq_nextEntry(chval)) {
 	    dump_value(chval, (startindent >= 0) ?
 		       startindent+NCX_DEF_INDENT : startindent,
-		       tolog);
+		       dumpmode);
 	}
 	(*indentfn)(startindent);
 	(*dumpfn)("}");
@@ -1045,22 +1158,43 @@ static void
     case NCX_BT_EXTERN:
 	(*dumpfn)("{");
 	(*indentfn)(startindent);
-	if (tolog) {
-	    dump_extern(val->v.fname);
-	} else {
+
+	switch (dumpmode) {
+	case DUMP_VAL_STDOUT:
 	    stdout_extern(val->v.fname);
+	    break;
+	case DUMP_VAL_LOG:
+	    dump_extern(val->v.fname);
+	    break;
+	case DUMP_VAL_ALT_LOG:
+	    dump_alt_extern(val->v.fname);
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
+	
 	(*indentfn)(startindent);
 	(*dumpfn)("}");
 	break;
     case NCX_BT_INTERN:
 	(*dumpfn)("{");
 	(*indentfn)(startindent);
-	if (tolog) {
-	    dump_intern(val->v.intbuff);
-	} else {
+
+
+	switch (dumpmode) {
+	case DUMP_VAL_STDOUT:
 	    stdout_intern(val->v.intbuff);
+	    break;
+	case DUMP_VAL_LOG:
+	    dump_intern(val->v.intbuff);
+	    break;
+	case DUMP_VAL_ALT_LOG:
+	    dump_alt_intern(val->v.intbuff);
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
+
 	(*indentfn)(startindent);
 	(*dumpfn)("}");
 	break;
@@ -1081,7 +1215,7 @@ static void
 	     metaval = val_get_next_meta(metaval)) {
 	    dump_value(metaval, (startindent >= 0) ?
 		       startindent+(2*NCX_DEF_INDENT) : startindent,
-		       tolog);
+		       dumpmode);
 	}
     }
 #endif
@@ -3124,9 +3258,37 @@ void
     }
 #endif
 
-    dump_value(val, startindent, TRUE);
+    dump_value(val, startindent, DUMP_VAL_LOG);
 
 } /* val_dump_value */
+
+
+/********************************************************************
+* FUNCTION val_dump_alt_value
+* 
+* Printf the specified val_value_t struct to 
+* the alternate logfile
+* Uses conf file format (see ncx/conf.h)
+*
+* INPUTS:
+*    val == value to printf
+*    startindent == start indent char count
+*
+*********************************************************************/
+void
+    val_dump_alt_value (const val_value_t *val,
+			int32 startindent)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    dump_value(val, startindent, DUMP_VAL_ALT_LOG);
+
+} /* val_dump_alt_value */
 
 
 /********************************************************************

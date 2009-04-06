@@ -4582,6 +4582,41 @@ void
 
 
 /********************************************************************
+* FUNCTION ncx_alt_printf_num
+* 
+* Printf a ncx_num_t contents to the alternate log file
+*
+* INPUTS:
+*    num == number to printf
+*    btyp == number base type
+*
+*********************************************************************/
+void
+    ncx_alt_printf_num (const ncx_num_t *num,
+			ncx_btype_t  btyp)
+{
+    xmlChar   numbuff[VAL_MAX_NUMLEN];
+    uint32    len;
+    status_t  res;
+
+#ifdef DEBUG
+    if (!num) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    res = ncx_sprintf_num(numbuff, num, btyp, &len);
+    if (res != NO_ERR) {
+	log_alt_write("invalid num '%s'", get_error_string(res));
+    } else {
+	log_alt_write("%s", numbuff);
+    }
+
+} /* ncx_alt_printf_num */
+
+
+/********************************************************************
 * FUNCTION ncx_sprintf_num
 * 
 * Sprintf a ncx_num_t contents
@@ -9638,8 +9673,5 @@ const xmlChar *
     /*NOTREACHED*/
 
 }  /* ncx_get_baddata_string */
-
-
-
 
 /* END file ncx.c */

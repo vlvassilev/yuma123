@@ -571,23 +571,20 @@ extern uint32
 
 
 
-
-
-
-
-
 /* print a val_value_t struct contents to logfile or stdout */
 extern void
     val_dump_value (const val_value_t *val,
 		    int32 startindent);
 
+/* print a val_value_t struct contents to alternate logfile */
+extern void
+    val_dump_alt_value (const val_value_t *val,
+			int32 startindent);
+
 /* print a val_value_t struct contents to stdout */
 extern void
     val_stdout_value (const val_value_t *val,
 		      int32 startindent);
-
-
-
 
 
 /* use next 4 functions after calling

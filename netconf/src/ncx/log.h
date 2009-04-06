@@ -81,11 +81,20 @@ extern status_t
 extern void
     log_close (void);
 
+extern status_t
+    log_alt_open (const char *fname);
+
+extern void
+    log_alt_close (void);
+
 extern void 
     log_stdout (const char *fstr, ...);
 
 extern void 
     log_write (const char *fstr, ...);
+
+extern void 
+    log_alt_write (const char *fstr, ...);
 
 extern void 
     log_fatal (const char *fstr, ...);

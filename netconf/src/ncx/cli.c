@@ -916,6 +916,7 @@ val_value_t *
 
 	gotdashes = FALSE;
 	gotmatch = FALSE;
+	chobj = NULL;
 
 	/* first skip starting whitespace */
 	while (buff[buffpos] && isspace(buff[buffpos])) {

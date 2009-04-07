@@ -1579,6 +1579,16 @@ boolean
 	if (port==NCX_NCSSH_PORT) {
 	    return TRUE;
 	} else {
+#ifdef MACOSX
+	    /* there is a bug in the libssh2 and even though
+	     * connections on port 830 are accepted, they
+	     * are reported as port 22 (SSH) in the
+	     * SSH_CONNECTION environment variable
+	     */
+	    if (port==22) {
+		return TRUE;
+	    }
+#endif
 	    return FALSE;
 	}
     }

@@ -37,6 +37,8 @@ superclean: treesuperclean
 
 test: treetest
 
+lint: treelint
+
 install: treeinstall
 
 treeall:
@@ -52,6 +54,11 @@ treedepend:
 treetest:
 	for dir in $(DIRS); do\
 	  cd $$dir && $(MAKE) $(JFLAG) test && cd ..;\
+        done
+
+treetest:
+	for dir in $(DIRS); do\
+	  cd $$dir && $(MAKE) $(JFLAG) lint && cd ..;\
         done
 
 treeclean:

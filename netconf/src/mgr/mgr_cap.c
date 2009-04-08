@@ -106,6 +106,7 @@ status_t
     status_t  res;
 
     res = NO_ERR;
+    newcaps = NULL;
     nc_id = xmlns_nc_id();
     oldcaps = mgr_caps;
     oldmycaps = my_mgr_caps;

@@ -781,6 +781,8 @@ static status_t
     struct stat  statbuf;
     int          statresult;
 
+    res = NO_ERR;
+
     if (LOGDEBUG2) {
 	log_debug2("\n*** output file result to '%s'",
 		   agent_cb->result_filename);
@@ -1007,6 +1009,8 @@ static status_t
     *len = 0;
     *getrpc = FALSE;
     *fileassign = FALSE;
+    vartype = VAR_TYP_NONE;
+    curval = NULL;
 
     /* skip leading whitespace */
     while (*str && isspace(*str)) {
@@ -1676,6 +1680,7 @@ static void *
     
     def = NULL;
     q = NULL;
+    oldq = 0;
     prelen = 0;
     *len = 0;
     start = line;
@@ -2484,6 +2489,7 @@ static status_t
 	return ERR_NCX_ACCESS_DENIED;
     }
 
+    casenum = 0;
     res = NO_ERR;
 
     if (obj_is_data_db(choic)) {
@@ -4571,6 +4577,7 @@ static void
 	!obj_is_hidden(obj) && 
 	!obj_is_abstract(obj)) {
 
+	imode = interactive_mode();
 	buffer = NULL;
 	res = obj_gen_object_id(obj, &buffer);
 	if (res != NO_ERR) {
@@ -5622,6 +5629,7 @@ static void
 	return;
     }
 
+    target = NULL;
     parm = val_find_child(valset, YANGCLI_MOD, 
 			  NCX_EL_TARGET);
     if (!parm || parm->res != NO_ERR) {
@@ -5817,6 +5825,7 @@ static status_t
     boolean                done, content_used;
 
     res = NO_ERR;
+    newnode = NULL;
 
     /* add content based on the current node type */
     switch (curobj->objtype) {
@@ -6590,6 +6599,7 @@ static val_value_t *
     isselect = FALSE;
     fromstr = NULL;
     res = NO_ERR;
+    vartype = VAR_TYP_NONE;
 
     /* look for the 'from' parameter variant */
     parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_VARREF);

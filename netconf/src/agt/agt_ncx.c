@@ -449,6 +449,8 @@ static status_t
     val_value_t        *parm;
     status_t            res;
 
+    destcfg = NULL;
+
     /* get the agent capabilities */
     mycaps = agt_cap_get_caps();
     if (!mycaps) {
@@ -464,8 +466,8 @@ static status_t
 	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
 	agt_record_error(scb, &msg->mhdr, 
 			 NCX_LAYER_OPERATION, res,
-			 methnode, NCX_NT_CFG, 
-			 (const void *)destcfg, NCX_NT_NONE, NULL);
+			 methnode, NCX_NT_NONE,  NULL,
+			 NCX_NT_NONE, NULL);
 	return res;
     }
 
@@ -875,6 +877,8 @@ static status_t
     status_t         res;
     val_value_t     *val;
 
+    res = NO_ERR;
+
     /* get the session-id parameter */
     val = val_find_child(msg->rpc_input, NC_MODULE,
 			 NCX_EL_SESSION_ID);
@@ -966,6 +970,7 @@ static status_t
     res = NO_ERR;
     rootval = NULL;
     errstr = NULL;
+    child = NULL;
 
     /* get the source parameter */
     val = val_find_child(msg->rpc_input, NC_MODULE,

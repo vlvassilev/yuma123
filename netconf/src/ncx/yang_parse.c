@@ -1084,6 +1084,8 @@ static status_t
 {
     status_t          res;
 
+    res = NO_ERR;
+
     /* check if there is a base statement, and if it leads
      * back to startidentity or not
      */
@@ -1280,6 +1282,7 @@ static status_t
     pfixdone = FALSE;
     revdone = FALSE;
     retres = NO_ERR;
+    revtk = NULL;
 
     /* Get a new ncx_import_t to fill in */
     imp = ncx_new_import();
@@ -1641,6 +1644,8 @@ static status_t
     done = FALSE;
     expstr = "submodule name";
     retres = NO_ERR;
+    revdone = FALSE;
+    revtk = NULL;
 
     /* Get a new ncx_include_t to fill in */
     inc = ncx_new_include();

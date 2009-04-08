@@ -1252,6 +1252,8 @@ static status_t
     errinfo = NULL;
     res2 = NO_ERR;
     res3 = NO_ERR;
+    listbtyp = NCX_BT_NONE;
+    listtyp = NULL;
 
     allow_delete_all = FALSE;
 
@@ -1886,6 +1888,7 @@ static status_t
     done = FALSE;
     errdone = FALSE;
     empty = FALSE;
+    chbtyp = NCX_BT_NONE;
 
     profile = agt_get_profile();
     if (!profile) {

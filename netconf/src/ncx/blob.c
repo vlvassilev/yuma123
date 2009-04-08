@@ -66,7 +66,7 @@ static uint32
     default:
       return (uint32)(*c-'0');   /* assume a number 0..9 */
     }
-    /*NOTREACHED*/
+    /*@notreached@*/
 } /* c2i */
 
 
@@ -83,11 +83,11 @@ static char
     i2c (uint32 i)
 {
     if (i<10) {
-        return (char)(i+'0');
+        return (char)(i+(uint32)'0');
     } else /* if (i<16) */ {
-        return (char)(i-10+'A');
+        return (char)(i-10+(uint32)'A');
     } 
-    /*NOTREACHED*/
+    /*@notreached@*/
 } /* i2c */
 
 

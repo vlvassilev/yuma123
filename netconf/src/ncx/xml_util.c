@@ -1918,6 +1918,7 @@ xmlChar *
     allwhitespace = FALSE;
     len = xml_strlen(str);
     newlen = len;
+    newstart = NULL;
 
     if (len) {
 	newstart = str;

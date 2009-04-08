@@ -1393,6 +1393,7 @@ val_value_t *
 
     newval = NULL;
     isvarref = FALSE;
+    useval = NULL;
 
     *res = NO_ERR;
 

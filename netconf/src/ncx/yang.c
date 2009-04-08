@@ -1290,6 +1290,7 @@ status_t
     tk_type_t      nexttk;
     status_t       res;
 
+    res = NO_ERR;
     nexttk = tk_next_typ(tkc);
     nextval = tk_next_val(tkc);
 
@@ -2627,6 +2628,7 @@ void
 	return;
     }
 
+    anyout = FALSE;
     if (name) {
 	anyout = TRUE;
 	log_debug3("\n%s Q:", name);

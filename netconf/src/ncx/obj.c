@@ -1908,6 +1908,7 @@ static obj_template_t *
     uint32          len, ret;
 
     matchobj = NULL;
+    len = 0;
 
     if (match) {
 	len = xml_strlen(objname);
@@ -8384,6 +8385,7 @@ status_t
 
     foundobj = NULL;
     foundmodname = NULL;
+    foundmod = NULL;
     dtyp = NCX_NT_OBJ;
     res = NO_ERR;
     topdone = FALSE;

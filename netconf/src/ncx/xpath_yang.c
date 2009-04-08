@@ -135,6 +135,7 @@ static status_t
     targmod = NULL;
     foundobj = NULL;
     res = NO_ERR;
+    useobj = NULL;
 
     /* set the pcb target to get the result */
     switch (pcb->curmode) {
@@ -1803,6 +1804,7 @@ status_t
     }
 #endif
 
+    res = NO_ERR;
     *targobj = NULL;
     pcb->logerrors = logerrors;
 

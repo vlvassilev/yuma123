@@ -3177,6 +3177,7 @@ static status_t
     res = NO_ERR;
     retest = FALSE;
     done = FALSE;
+    strarg = NULL;
     dlq_createSQue(&datadefQ);
 
     for (devi = (obj_deviate_t *)
@@ -6146,8 +6147,8 @@ static status_t
 		if (!newobj) {
 		    retres = ERR_INTERNAL_MEM;
 		    tkc->cur = chobj->tk;
-		    ncx_print_errormsg(tkc, mod, res);
-		    return res;
+		    ncx_print_errormsg(tkc, mod, retres);
+		    return retres;
 		} else {
 		    /* set the object module (and namespace)
 		     * to the target, not the module w/ grouping
@@ -6418,7 +6419,7 @@ static status_t
     case OBJ_TYP_ANYXML:
 	retres = ERR_NCX_INVALID_AUGTARGET;
 	log_error("\nError: cannot augment anyxml node '%s'",
-		  obj_get_name(testobj));
+		  obj_get_name(targobj));
 	tkc->cur = obj->tk;
 	ncx_print_errormsg(tkc, mod, retres);
 	break;
@@ -6611,6 +6612,7 @@ static status_t
 
     retres = NO_ERR;
     targobj = NULL;
+    instancetest = FALSE;
 
     /* find schema-nodeid target
      * the node being augmented MUST exist to be valid
@@ -6628,7 +6630,7 @@ static status_t
 	
     deviation->targobj = targobj;
     curtk = TK_CUR(tkc);
-    
+
     /* make sure all the deviate statements are 
      * are OK for that object type
      */
@@ -7141,6 +7143,7 @@ static status_t
 {
     status_t         res, retres;
 
+    res = NO_ERR;
     retres = NO_ERR;
 
     if (!redo) {

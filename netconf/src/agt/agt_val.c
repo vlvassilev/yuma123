@@ -985,6 +985,7 @@ static status_t
     res = NO_ERR;
     mergehere = FALSE;
     freenew = FALSE;
+    testval = NULL;
 
     /* check if this node needs the edit operation applied */
     if (*done) {
@@ -1266,6 +1267,8 @@ static status_t
 
     retres = NO_ERR;
     initialdone = done;
+    cur_editop = OP_EDITOP_NONE;
+    curparent = NULL;
 
     /* check the 'operation' attribute in VALIDATE phase */
     switch (cbtyp) {
@@ -2065,6 +2068,7 @@ static status_t
 
     res = NO_ERR;
     errinfo = NULL;
+    constrained = FALSE;
 
     switch (val->btyp) {
     case NCX_BT_LEAFREF:

@@ -4085,11 +4085,10 @@ uint32
     }
 #endif
 
+    cnt = 1;    
     pat = typ_get_first_cpattern(typdef);
     if (!pat) {
 	return 0;
-    } else {
-	cnt = 1;
     }
     pat = typ_get_next_cpattern(pat);
     while (pat) {

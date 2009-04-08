@@ -256,8 +256,9 @@ status_t
 
     errval = val;
     cfgname = NULL;
+    cfg = NULL;
     res = NO_ERR;
-
+    
     /* got some value in *val */
     switch (val->btyp) {
     case NCX_BT_STRING:
@@ -765,6 +766,7 @@ status_t
 
     filter = NULL;
     filtertype = NULL;
+    filtyp = OP_FILTER_NONE;
     sel = NULL;
     errstr = NULL;
     res = NO_ERR;

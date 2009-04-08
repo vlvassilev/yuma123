@@ -118,6 +118,7 @@ static status_t
 
     endmatch = NC_SSH_END;
     done = FALSE;
+    msg2 = NULL;
 
     if (LOGDEBUG3) {
 	log_debug3("\nses: accept buffer (%u):\n%s\n", 

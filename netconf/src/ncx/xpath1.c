@@ -959,6 +959,7 @@ static boolean
     status_t     res;
     ncx_numfmt_t numfmt;
 
+    cmpresult = 0;
     numfmt = ncx_get_numfmt(numstr2);
     if (numfmt == NCX_NF_OCTAL) {
 	numfmt = NCX_NF_DEC;
@@ -1593,6 +1594,8 @@ static boolean
     if (!pcb->val) {
 	return TRUE;
     }
+
+    cmpval = 0;
 
     /* compare directly if the vals are the same result type */
     if (val1->restype == val2->restype) {
@@ -2904,6 +2907,7 @@ static xpath_result_t *
 
     nsid = 0;
     name = NULL;
+    prefix = NULL;
 
     parm = (xpath_result_t *)dlq_firstEntry(parmQ);
     if (parm && parm->restype != XP_RT_NODESET) {
@@ -3912,6 +3916,9 @@ static xpath_result_t *
     if (!pcb->val && !pcb->obj) {
 	return NULL;
     }
+
+    malloc1 = FALSE;
+    malloc2 = FALSE;
 
     parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
     parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
@@ -5704,6 +5711,8 @@ static status_t
     dlq_createSQue(&resnodeQ);
 
     res = NO_ERR;
+    testval = NULL;
+    testobj = NULL;
 
     modname = (nsid) ? xmlns_get_module(nsid) : NULL;
 
@@ -6289,6 +6298,7 @@ static status_t
 	return res;
     }
 
+    bool = FALSE;
     if (pcb->val) {
 	leftbrack = TK_CUR(pcb->tkc);
 	contextset = *result;

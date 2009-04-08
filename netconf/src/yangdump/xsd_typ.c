@@ -333,7 +333,7 @@ static status_t
     uint32                 patcnt, patnum;
 
     curtop = NULL;
-
+    pat = NULL;
     xsd_id = xmlns_xs_id();
     patcnt = typ_get_pattern_count(typdef);
 

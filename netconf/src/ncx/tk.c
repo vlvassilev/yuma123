@@ -429,6 +429,7 @@ static status_t
     tk_token_t  *tk;
     uint32       total;
 
+    tk = NULL;
     total = (str) ? (uint32)(str - tkc->bptr) : 0;
 
     if (total > NCX_MAX_STRLEN) {
@@ -494,9 +495,10 @@ static status_t
     uint32         total, linepos, cnt, tcnt, scnt, chcnt;
     boolean        done;
 
+    tk = NULL;
     buff = NULL;
     total = (endstr) ? (uint32)(endstr - tkbuff) : 0;
-
+    
     if (total > NCX_MAX_STRLEN) {
 	return ERR_NCX_LEN_EXCEEDED;
     } else if (total == 0) {
@@ -1385,6 +1387,7 @@ static status_t
 
     prefix = NULL;
     item = NULL;
+    prelen = 0;
 
     /* the bptr is pointing at the dollar sign char */
     str = tkc->bptr+1;
@@ -1472,6 +1475,7 @@ static status_t
     scoped = FALSE;
     namestar = FALSE;
     tk = NULL;
+    prelen = 0;
 
     /* the bptr is pointing at the first string char which
      * is a valid identifier first char; start at the next char

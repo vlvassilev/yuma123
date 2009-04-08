@@ -303,7 +303,7 @@ static status_t
 	    break;
 	case TK_TT_RBRACE:
 	    if (brace_count <= 1) {
-		return NO_ERR;
+		done = TRUE;
 	    } else {
 		brace_count--;
 	    }
@@ -600,10 +600,12 @@ static status_t
     ncx_iqual_t             iqual;
     boolean                 match;
 
+    
     /* get the next token, which must be a TSTRING
      * representing the parameter name 
      */
     if (TK_CUR_TYP(tkc) != TK_TT_TSTRING) {
+	res = ERR_NCX_WRONG_TKTYPE;
 	ncx_conf_exp_err(tkc, res, "parameter name");
 	return res;
     }

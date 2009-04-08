@@ -117,6 +117,8 @@ static status_t
     boolean        done;
     uint32         plen;
 
+    res = NO_ERR;
+
     /* check the attribute count first */
     cnt = xmlTextReaderAttributeCount(reader);
     if (cnt==0) {

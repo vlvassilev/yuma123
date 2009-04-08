@@ -222,7 +222,9 @@ static const char cd64[]="|$$$}rstuvwxyz{$$$$$$$>?@ABCDEFGHIJKLMNOPQRSTUVW$$$$$$
 **
 ** encode 3 8-bit binary bytes as 4 '6-bit' characters
 */
-static void encodeblock( unsigned char in[3], unsigned char out[4], int len )
+static void encodeblock( unsigned char in[3], 
+			 unsigned char out[4], 
+			 unsigned int len )
 {
     out[0] = cb64[ in[0] >> 2 ];
     out[1] = cb64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xf0) >> 4) ];
@@ -296,7 +298,7 @@ status_t
 
     *retlen = 0;
 
-    if (!inbufflen) {
+    if (inbufflen == 0) {
 	return NO_ERR;
     }
 
@@ -313,11 +315,11 @@ status_t
 		in[i] = inbuff[inx++];
                 len++;
             } else {
-                in[i] = 0;
+                in[i] = (unsigned char)0;
             }
         }
 
-        if (len) {
+        if (len != 0) {
             encodeblock(in, out, len);
             for (i = 0; i < 4; i++) {
 		if (outx < outbufflen) {
@@ -334,7 +336,7 @@ status_t
         }
 
         if ((blocksout >= (linesize/4)) || (inx==inbufflen)) {
-            if (blocksout) {
+            if (blocksout > 0) {
 		if (outx+1 < outbufflen) {
 		    if (outbuff) {
 			outbuff[outx++] = '\r';

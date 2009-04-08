@@ -249,7 +249,7 @@ static boolean
     (void)mod;
     str = (xmlChar **)cookie;
     *str += xml_strcpy(*str, feature->name);
-    **str++ = ',';
+    **str++ = (xmlChar)',';
     return TRUE;
 
 }  /* add_features */
@@ -312,7 +312,7 @@ static xmlChar *
 
     feature_count = ncx_feature_count(mod, TRUE);
 
-    if (feature_count) {
+    if (feature_count > 0) {
 	len++;   /* & char */
 	len += xml_strlen(CAP_FEATURES_EQ);
 	len += (feature_count-1);   /* all the commas */
@@ -332,21 +332,21 @@ static xmlChar *
     /* repeat the previous steps for real */
     p = str;
     p += xml_strcpy(p, mod->ns);
-    *p++ = '?';
+    *p++ = (xmlChar)'?';
 
     p += xml_strcpy(p, CAP_MODULE_EQ);
     p += xml_strcpy(p, mod->name);
 
     if (mod->version) {
-	*p++ = '&';
+	*p++ = (xmlChar)'&';
 	p += xml_strcpy(p, CAP_REVISION_EQ);
 	p += xml_strcpy(p, mod->version);
     }
 
     feature_count = ncx_feature_count(mod, TRUE);
 
-    if (feature_count) {
-	*p++ = '&';
+    if (feature_count > 0) {
+	*p++ = (xmlChar)'&';
 	p += xml_strcpy(p, CAP_FEATURES_EQ);
 
 	/* add in all the enabled 'feature-name,' strings */
@@ -396,12 +396,12 @@ static status_t
 
     /* find the equals sign after the parameter name */
     equal = parmname;
-    while (*equal && *equal != '=') {
+    while (*equal && *equal != (xmlChar)'=') {
 	equal++;
     }
     if (!*equal || equal == parmname) {
 	/* error: skip to next parm or EOS */
-	while (*equal && *equal != '&') {
+	while (*equal && *equal != (xmlChar)'&') {
 	    equal++;
 	}
 	if (*equal) {
@@ -415,7 +415,7 @@ static status_t
     *parmnamelen = (uint32)(equal - parmname);
     *parmval = str = equal+1;
 
-    while (*str && *str != '&') {
+    while (*str && *str != (xmlChar)'&') {
 	str++;
     }
 
@@ -695,7 +695,7 @@ status_t
 		if (!xml_strncmp(str, stdcaps[stdid].cap_name,
 				 namelen)) {
 		    str += namelen;
-		    if (*str == '?') {
+		    if (*str == (xmlChar)'?') {
 			str++;
 			schemelen = xml_strlen(CAP_SCHEME_EQ);
 			if (!xml_strncmp(str,
@@ -714,7 +714,7 @@ status_t
 		if (!xml_strncmp(str, stdcaps[stdid].cap_name,
 				 namelen)) {
 		    str += namelen;
-		    if (*str == '?') {
+		    if (*str == (xmlChar)'?') {
 			str++;
 			basiclen = xml_strlen(CAP_BASIC_EQ);
 			if (!xml_strncmp(str,
@@ -776,7 +776,7 @@ status_t
 
     /* look for the end of the URI, for any parameters */
     qmark = uri;
-    while (*qmark && *qmark != '?') {
+    while (*qmark && *qmark != (xmlChar)'?') {
 	qmark++;
     }
     if (!*qmark) {
@@ -785,6 +785,7 @@ status_t
 
     baselen = (uint32)(qmark-uri);
 
+    res = NO_ERR;
     module = NULL;
     revision = NULL;
     features = NULL;
@@ -797,12 +798,14 @@ status_t
     currev = FALSE;
     curfeat = FALSE;
     curdev = FALSE;
+    parmnamelen = 0;
 
     /* lookup this namespace to see if it is already loaded */
     foundnsid = xmlns_find_ns_by_name_str(uri, baselen);
 
     /* setup the start of the parameter name for each loop iteration */
     parmname = qmark + 1;
+
     parmval = NULL;
     nextparmname = parmname;
 
@@ -941,8 +944,8 @@ status_t
 
 	commastr = liststr;
 	while (*commastr) {
-	    if (*commastr == ',') {
-		*commastr = ' ';
+	    if (*commastr == (xmlChar)',') {
+		*commastr = (xmlChar)' ';
 	    }
 	}
 
@@ -964,8 +967,8 @@ status_t
 
 	commastr = liststr;
 	while (*commastr) {
-	    if (*commastr == ',') {
-		*commastr = ' ';
+	    if (*commastr == (xmlChar)',') {
+		*commastr = (xmlChar)' ';
 	    }
 	}
 

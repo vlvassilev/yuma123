@@ -298,7 +298,8 @@ status_t
 
     xsd_id = xmlns_xs_id();
     *retval = NULL;
-    
+    needed = FALSE;
+
     /* create a struct named 'schema' to hold the entire result */
     val = xml_val_new_struct(XSD_SCHEMA, xsd_id);
     if (!val) {

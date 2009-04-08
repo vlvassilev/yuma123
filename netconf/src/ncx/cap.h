@@ -91,7 +91,7 @@ date             init     comment
 #define CAP_NAME_NOTIFICATION       "notification:1.0"
 #define CAP_NAME_INTERLEAVE         "interleave:1.0"
 #define CAP_NAME_PARTIAL_LOCK       "partial-lock:1.0"
-#define CAP_NAME_WITH_DEFAULTS      "with-defaults"
+#define CAP_NAME_WITH_DEFAULTS      "with-defaults:1.0"
 #define CAP_NAME_NETCONF_MONITORING "netconf-monitoring:1.0"
 #define CAP_NAME_SCHEMA_RETRIEVAL   "schema-retrieval:1.0"
 

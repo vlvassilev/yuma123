@@ -491,13 +491,13 @@ static void
     status_t                 res;
     boolean                  isleaflist;
 
+    isleaflist = FALSE;
+
     /* typedefs not needed for simple objects */
     if (obj->objtype == OBJ_TYP_LEAF) {
 	return;
     } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
 	isleaflist = TRUE;
-    } else {
-	isleaflist = FALSE;
     }
 
     btyp = obj_get_basetype(obj);

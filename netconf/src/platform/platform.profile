@@ -17,8 +17,8 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Wpacked -Wunreachable-code -Winvalid-pch \
 	-Wredundant-decls -Wnested-externs -Winline -std=gnu99
 
-
-CFLAGS=-DDEBUG -DLINUX -DGCC -DHAS_FLOAT $(CWARN)
+CDEFS=-DDEBUG -DLINUX -DGCC -DHAS_FLOAT 
+CFLAGS=$(CDEFS) $(CWARN)
 
 # production (1) or debug (0) build
 ifdef BLD
@@ -49,6 +49,8 @@ endif
         
 CC=gcc
 LINK=gcc
+LINT=splint
+LINTFLAGS= '-weak -macrovarprefix "m_"'
 ##LIBFLAGS=-lsocket
 
 TBASE=../../target
@@ -67,7 +69,7 @@ DEPS = $(patsubst %.c,%.D,$(wildcard *.c))
 ######################## PLATFORM DEFINITIONS #############
 PLATFORM_CPP=
 
-.PHONY: all superclean clean test install 
+.PHONY: all superclean clean test install depend lint
 
 ######################### MAKE DEPENDENCIES ###############
 COMPILE.c= $(CC) $(CFLAGS) $(CPPFLAGS) $(PLATFORM_CPP) $(CINC) $(SUBDIR_CPP) $(TARGET_ARCH) -c
@@ -85,6 +87,11 @@ $(LBASE)/lib%.a: $(OBJS)
 
 
 #### common cleanup rules
+
+lint:
+	$(LINT) $(LINTFLAGS) $(CDEFS) $(CPPFLAGS) $(PLATFORM_CPP) \
+	$(CINC) $(SUBDIR_CPP) *.c
+
 
 # dependency rule to make temp .D files from .c sources
 # all the .D files are collected and appended to the

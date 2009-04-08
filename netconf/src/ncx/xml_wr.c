@@ -271,14 +271,16 @@ static void
 		 xmlns_id_t elem_nsid)
 {
     const xml_attr_t  *attr;
-    val_value_t *val;
-    dlq_hdr_t    *hdr;
+    val_value_t       *val;
+    dlq_hdr_t         *hdr;
     const xmlChar     *pfix, *attr_name, *attr_qname;
     boolean            xneeded;
     uint32             len;
     xmlns_id_t         ns_id, attr_nsid;
 
     ns_id = xmlns_ns_id();
+    attr = NULL;
+    val = NULL;
 
     for (hdr = dlq_firstEntry(attrQ); 
 	 hdr != NULL;
@@ -1377,6 +1379,7 @@ status_t
     anyout = FALSE;
     fp = NULL;
     indent = min(indent, 9);
+    sesmode = SES_MODE_NONE;
 
     if (filespec) {
 	fp = fopen((const char *)filespec, "w");

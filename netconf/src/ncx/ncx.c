@@ -489,6 +489,7 @@ static status_t
 	TK_BKUP(tkc);
     }
 
+    res = NO_ERR;
     done = FALSE;
     while (!done) {
 	res = consume_appinfo_entry(tkc, mod, appinfoQ, bkup);
@@ -3489,6 +3490,10 @@ status_t
 #endif
 
     err = NULL;
+    l = 0;
+    ll = 0;
+    ul = 0;
+    ull = 0;
 
     /* check the number format set to don't know */
     if (numfmt==NCX_NF_NONE) {
@@ -5654,6 +5659,7 @@ status_t
     dlq_hdr_t        tempQ;
 
     btyp = typ_get_basetype(typdef);
+    res = NO_ERR;
     retres = NO_ERR;
 
     /* check if any work to do */
@@ -5845,6 +5851,7 @@ ncx_lmem_t *
     num = NULL;
     str = NULL;
     enu = NULL;
+    bool = FALSE;
 
     if (typ_is_number(list->btyp)) {
 	num = &memval->val.num;
@@ -7583,6 +7590,8 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
+
+    res = NO_ERR;
 
     /* split the buffer into name and value parts as needed */
     if (isdigit(*((const char *)enumval))) {

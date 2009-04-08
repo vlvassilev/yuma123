@@ -381,6 +381,7 @@ static val_value_t *
     }
 #endif
 
+    outputobj = NULL;
     needed = FALSE;
     config_needed = FALSE;
     ncx_id = xmlns_ncx_id();

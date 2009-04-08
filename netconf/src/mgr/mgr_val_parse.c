@@ -873,6 +873,8 @@ static status_t
     xml_init_node(&endnode);
     empty = FALSE;
     errinfo = NULL;
+    listbtyp = NCX_BT_NONE;
+    listtyp = NULL;
 
     val_init_from_template(retval, obj);
 
@@ -1341,6 +1343,7 @@ static status_t
     done = FALSE;
     empty = FALSE;
     errmode = FALSE;
+    chbtyp = NCX_BT_NONE;
 
     val_init_from_template(retval, obj);
 
@@ -1619,6 +1622,7 @@ static status_t
     retres = NO_ERR;
     done = FALSE;
     empty = FALSE;
+    chbtyp = NCX_BT_EMPTY;
 
     val_init_from_template(retval, obj);
 

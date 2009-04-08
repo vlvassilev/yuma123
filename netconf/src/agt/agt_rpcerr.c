@@ -908,7 +908,8 @@ rpc_err_rec_t *
     status_t                  res;
     rpc_err_sev_t             errsev;
     xmlns_id_t                nsid;
-    
+
+    qname = NULL;
     badval = NULL;
     badns = NULL;
     err1 = NULL;

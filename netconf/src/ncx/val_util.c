@@ -1183,6 +1183,8 @@ status_t
 	iqual = obj_get_iqualval(chobj);
 	minerr = FALSE;
 	maxerr = FALSE;
+	minelems = 0;
+	maxelems = 0;
 
 	switch (chobj->objtype) {
 	case OBJ_TYP_LEAF_LIST:
@@ -1403,6 +1405,7 @@ boolean
     }
 #endif
 
+    chval = NULL;
     done = FALSE;
     for (testval = val_get_first_child(val);
 	 testval != NULL && !done;
@@ -1854,6 +1857,7 @@ status_t
     }
 #endif
 
+    res = NO_ERR;
     if (childobj->when ||
 	(childobj->usesobj && childobj->usesobj->when) ||
 	(childobj->augobj && childobj->augobj->when)) {

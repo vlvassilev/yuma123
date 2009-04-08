@@ -715,10 +715,16 @@ static void
 		 pat = typ_get_next_cpattern(pat)) {
 
 		errinfo_set = ncx_errinfo_set(&pat->pat_errinfo);
-		write_cyang_simple_str(scb, YANG_K_PATTERN, str,
-				       startindent, 1, !errinfo_set);
+		write_cyang_simple_str(scb, 
+				       YANG_K_PATTERN, 
+				       pat->pat_str,
+				       startindent, 
+				       1, 
+				       !errinfo_set);
 		if (errinfo_set) {		
-		    write_cyang_errinfo(scb, &pat->pat_errinfo, indent);
+		    write_cyang_errinfo(scb, 
+					&pat->pat_errinfo, 
+					indent);
 		    ses_putstr_indent(scb, END_SEC, startindent);
 		}
 	    }

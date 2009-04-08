@@ -1766,6 +1766,8 @@ status_t
     }
 #endif
 
+    res = NO_ERR;
+
     if (errinfo) {
 	*errinfo = NULL;
     }
@@ -1881,6 +1883,8 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
+
+    listdef = NULL;
 
     if (errinfo) {
 	*errinfo = NULL;
@@ -2309,7 +2313,9 @@ status_t
     
     res = NO_ERR;
     impmod = NULL;
-    
+    identity = NULL;
+    prefixnsid = 0;
+
     if (nsid) {
 	*nsid = 0;
     }
@@ -2879,6 +2885,8 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
+
+    res = NO_ERR;
 
     if (errinfo) {
 	*errinfo = NULL;
@@ -6383,7 +6391,6 @@ status_t
     ncx_btype_t        btyp;
     status_t           res;
     int32              icnt;
-    uint32             bufflen;
     char               numbuff[VAL_MAX_NUMLEN];
 
 #ifdef DEBUG
@@ -6400,13 +6407,11 @@ status_t
 	/* flag is element name : <foo/>  */
 	if (val->v.bool) {
 	    if (buff) {
-		if ((xml_strlen(val->name)+3) < bufflen) {
-		    icnt = sprintf((char *)buff, "<%s/>", val->name);
-		    if (icnt < 0) {
-			return SET_ERROR(ERR_INTERNAL_VAL);
-		    } else {
-			*len = (uint32)icnt;
-		    }
+		icnt = sprintf((char *)buff, "<%s/>", val->name);
+		if (icnt < 0) {
+		    return SET_ERROR(ERR_INTERNAL_VAL);
+		} else {
+		    *len = (uint32)icnt;
 		}
 	    } else {
 		*len = xml_strlen(val->name) + 3;
@@ -6875,6 +6880,7 @@ status_t
     }
 #endif
 
+    res = NO_ERR;
     btyp = typ_get_basetype(typdef);
     attrval = attr->attr_val;
 

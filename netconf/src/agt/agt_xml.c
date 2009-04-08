@@ -261,6 +261,9 @@ static status_t
 	return NO_ERR;
     }
 
+    name = NULL;
+    res = NO_ERR;
+
     /* move through the list of attributes */
     for (i=0, done=FALSE; i<cnt && !done; i++) {
 	res = NO_ERR;

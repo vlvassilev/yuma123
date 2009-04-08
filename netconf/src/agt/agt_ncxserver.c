@@ -191,7 +191,8 @@ status_t
 	 * the outreadyQ in ses_msg.c
 	 */
 	agt_ses_fill_writeset(&write_copy, &maxwrnum);
-	
+
+	ret = 0;
 	done2 = FALSE;
 	while (!done2) {
 	    read_fd_set = active_fd_set;

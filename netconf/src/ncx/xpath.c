@@ -103,6 +103,7 @@ static void
 {
     tk_token_t  *savetk;
 
+    savetk = NULL;
     if (tkc) {
 	savetk = tkc->cur;
 	tkc->cur = errtk;
@@ -397,6 +398,7 @@ static status_t
     imp = NULL;
     impmod = NULL;
     dtyp = NCX_NT_OBJ;
+    curQ = NULL;
 
     /* skip the first fwd slash, if any */
     if (*target == '/') {
@@ -1412,7 +1414,7 @@ xpath_pcb_t *
     xpath_pcb_t *pcb;
 
 #ifdef DEBUG
-    if (!pcb || !exprstr) {
+    if (!pcbQ || !exprstr) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }

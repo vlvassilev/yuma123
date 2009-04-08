@@ -906,8 +906,9 @@ void
     /* init local vars */
     res = NO_ERR;
     cbset = NULL;
-    agttotals = ses_get_total_stats();
+    rpcobj = NULL;
 
+    agttotals = ses_get_total_stats();
     scb->stats.inRpcs++;
     agttotals->stats.inRpcs++;
 

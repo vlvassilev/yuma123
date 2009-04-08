@@ -137,6 +137,8 @@ status_t
     xmlns_id_t  nc_id, ncx_id;
 
     res = NO_ERR;
+    newcaps = NULL;
+
     nc_id = xmlns_nc_id();
     ncx_id = xmlns_ncx_id();
     oldcaps = agt_caps;

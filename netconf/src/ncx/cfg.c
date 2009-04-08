@@ -1272,6 +1272,7 @@ val_value_t *
     }
 #endif
 
+    retval = NULL;
     cfg = cfg_get_config_id(cfgid);
     if (!cfg) {
 	return NULL;

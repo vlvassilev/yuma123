@@ -8828,9 +8828,10 @@ static void
     const cap_rec_t    *cap;
     const xmlChar      *module, *version;
     modptr_t           *modptr;
+    xmlChar            *namebuff;
     uint32              modlen;
     status_t            res;
-    xmlChar             namebuff[NCX_MAX_NLEN+1];
+
 
     mscb = (const mgr_scb_t *)scb->mgrcb;
 
@@ -8865,7 +8866,12 @@ static void
 	    continue;
 	}
 
-	xml_strncpy(namebuff, module, modlen);
+	namebuff = xml_strndup(module, modlen);
+	if (!namebuff) {
+	    log_error("\nMalloc failure");
+	    return;
+	}
+
 	mod = ncx_find_module(namebuff, version);
 	if (!mod) {
 	    if (autoload) {
@@ -8896,6 +8902,9 @@ static void
 			 namebuff, mod->version);
 	    }
 	}
+
+	m__free(namebuff);
+	namebuff = NULL;
 
 	cap = cap_next_modcap(cap);
     }

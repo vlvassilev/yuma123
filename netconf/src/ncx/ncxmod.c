@@ -2134,10 +2134,10 @@ const xmlChar *
 		  uint32 userlen)
 {
     struct passwd  *pw;
-    char            buff[64];
+    char            buff[NCX_MAX_USERNAME_LEN+1];
 
-    /* only support user names up to 63 chars in length */
-    if (userlen > 63) {
+    /* only support user names up to N chars in length */
+    if (userlen > NCX_MAX_USERNAME_LEN) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }
@@ -2173,7 +2173,7 @@ const xmlChar *
     ncxmod_get_envvar (const xmlChar *name,
 		       uint32 namelen)
 {
-    char            buff[64];
+    char            buff[NCX_MAX_USERNAME_LEN+1];
 
 #ifdef DEBUG
     if (!name) {
@@ -2182,8 +2182,8 @@ const xmlChar *
     }
 #endif
 
-    /* only support user names up to 63 chars in length */
-    if (namelen > 63) {
+    /* only support user names up to N chars in length */
+    if (namelen > NCX_MAX_USERNAME_LEN) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }

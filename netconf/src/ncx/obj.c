@@ -3381,8 +3381,9 @@ const obj_template_t *
 			const xmlChar *objname,
 			uint32 objnamelen)
 {
-    const dlq_hdr_t  *que;
-    xmlChar           buff[NCX_MAX_NLEN+1];
+    const obj_template_t *template;
+    const dlq_hdr_t      *que;
+    xmlChar              *buff;
 
 #ifdef DEBUG
     if (!obj || !objname) {
@@ -3397,9 +3398,18 @@ const obj_template_t *
     
     que = obj_get_cdatadefQ(obj);
     if (que) {
-	xml_strncpy(buff, objname, objnamelen);
-	return find_template(que, modname, buff, 
-			     TRUE, FALSE, NULL);
+	buff = m__getMem(objnamelen+1);
+	if (buff) {
+	    xml_strncpy(buff, objname, objnamelen);
+	    template = find_template(que, 
+				     modname, 
+				     buff, 
+				     TRUE, 
+				     FALSE, 
+				     NULL);
+	    m__free(buff);
+	    return template;
+	}
     }
 
     return NULL;
@@ -3441,8 +3451,9 @@ const obj_template_t *
 			 uint32 objnamelen,
 			 uint32 *matchcount)
 {
-    const dlq_hdr_t  *que;
-    xmlChar           buff[NCX_MAX_NLEN+1];
+    const obj_template_t  *template;
+    const dlq_hdr_t       *que;
+    xmlChar               *buff;
 
 #ifdef DEBUG
     if (!obj || !objname) {
@@ -3457,9 +3468,18 @@ const obj_template_t *
     
     que = obj_get_cdatadefQ(obj);
     if (que) {
-	xml_strncpy(buff, objname, objnamelen);
-	return find_template(que, modname, buff, 
-			     TRUE, TRUE, matchcount);
+	buff = m__getMem(objnamelen+1);
+	if (buff) {
+	    xml_strncpy(buff, objname, objnamelen);
+	    template = find_template(que, 
+				     modname, 
+				     buff, 
+				     TRUE, 
+				     TRUE, 
+				     matchcount);
+	    m__free(buff);
+	    return template;
+	}
     }
 
     return NULL;

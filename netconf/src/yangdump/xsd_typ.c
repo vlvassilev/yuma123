@@ -844,7 +844,7 @@ static status_t
     uint32                len;
     xmlns_id_t            xsd_id, list_id;
     ncx_btype_t           range_btyp;
-    xmlChar              *str, numbuff[NCX_MAX_NLEN];
+    xmlChar              *str, numbuff[NCX_MAX_NUMLEN];
 
     res = NO_ERR;
     xsd_id = xmlns_xs_id();

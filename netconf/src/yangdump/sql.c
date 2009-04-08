@@ -238,7 +238,7 @@ static void
 		  const xmlChar *fragname,
 		  uint32 linenum)
 {
-    char numbuff[NCX_MAX_NLEN];
+    char numbuff[NCX_MAX_NUMLEN];
 
     /* column: docurl */
     if (cp->urlstart && *cp->urlstart) {

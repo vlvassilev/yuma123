@@ -307,7 +307,7 @@ mgr_rpc_req_t *
 {
     mgr_scb_t       *mscb;
     mgr_rpc_req_t   *req;
-    char             numbuff[NCX_MAX_NLEN];
+    char             numbuff[NCX_MAX_NUMLEN];
 
     req = m__getObj(mgr_rpc_req_t);
     if (!req) {

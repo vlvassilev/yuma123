@@ -6588,6 +6588,8 @@ status_t
 			     const xmlChar *name,
 			     val_value_t **chval)
 {
+#define BUFFLEN 0xfffe
+
     xmlChar        *buff;
     const xmlChar  *next;
     val_value_t    *ch, *nextch;
@@ -6598,7 +6600,7 @@ status_t
     }
 #endif
 
-    buff = m__getMem(NCX_MAX_NLEN+1);
+    buff = m__getMem(BUFFLEN+1);
     if (!buff) {
 	return SET_ERROR(ERR_INTERNAL_MEM);
     }
@@ -6607,10 +6609,11 @@ status_t
      * in the child queue.  This is going to work because
      * the token was already parsed as a scoped token string
      */
-    next = ncx_get_name_segment(name, buff);
+    next = ncx_get_name_segment(name, buff, BUFFLEN);
 
     /* the first segment is the start value */
-    if (xml_strcmp(buff, val->name)) {
+    if (!next || xml_strcmp(buff, val->name)) {
+	m__free(buff);
 	return SET_ERROR(ERR_NCX_NOT_FOUND);
     }
 
@@ -6622,12 +6625,12 @@ status_t
      * the *next char should be non-zero.
      */
     ch = val;
-    while (*next) {
+    while (next && *next) {
         /* there is a next child, this better be a complex value */
 
 	nextch = NULL;
         if (typ_has_children(ch->btyp)) {
-	    next = ncx_get_name_segment(++next, buff);	    
+	    next = ncx_get_name_segment(++next, buff, BUFFLEN);	    
 	    nextch = val_first_child_name(ch, buff);
 	}
 	if (!nextch) {

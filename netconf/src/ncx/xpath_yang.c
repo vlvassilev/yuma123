@@ -723,6 +723,7 @@ static int32
 static status_t
     parse_path_predicate (xpath_pcb_t *pcb)
 {
+#define MAX_KEYS   64
     tk_type_t              nexttyp;
     status_t               res;
     boolean                done, leaflist;
@@ -740,10 +741,11 @@ static status_t
 
     if (pcb->targobj && pcb->targobj->objtype == OBJ_TYP_LIST) {
 	keytotal = obj_key_count(pcb->targobj);
-	if (keytotal > 64) {
+	if (keytotal > MAX_KEYS) {
 	    if (pcb->logerrors) {
-		log_warn("\nWarning: Only first 64 keys in list '%s'"
+		log_warn("\nWarning: Only first %u keys in list '%s'"
 			 " can be checked in XPath expression", 
+			 MAX_KEYS,
 			 obj_get_name(pcb->obj));
 	    }
 	}
@@ -814,7 +816,7 @@ static status_t
 	    }
 	    if (keynum == -1) {
 		SET_ERROR(ERR_INTERNAL_VAL);
-	    } else if (keynum < 64) {
+	    } else if (keynum < MAX_KEYS) {
 		keybit = (uint64)(1 << keynum);
 		if (keyflags & keybit) {
 		    res = ERR_NCX_EXTRA_PARM;

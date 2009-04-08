@@ -718,7 +718,8 @@ extern const xmlChar *
 
 extern const xmlChar *
     ncx_get_name_segment (const xmlChar *str,
-			  xmlChar  *buff);
+			  xmlChar  *buff,
+			  uint32 buffsize);
 
 extern boolean
     ncx_save_descr (void);

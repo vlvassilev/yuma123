@@ -713,8 +713,8 @@ static void
 {
     obj_leaflist_t   *old, *new;
     yangdiff_cdb_t    cdb;
-    char              oldnum[NCX_MAX_NLEN];
-    char              newnum[NCX_MAX_NLEN];
+    char              oldnum[NCX_MAX_NUMLEN];
+    char              newnum[NCX_MAX_NUMLEN];
     const xmlChar    *oldn, *newn;
     const xmlChar    *oldorder, *neworder;
     boolean           isrev;
@@ -920,8 +920,8 @@ static void
 {
     obj_list_t       *old, *new;
     yangdiff_cdb_t    cdb;
-    char              oldnum[NCX_MAX_NLEN];
-    char              newnum[NCX_MAX_NLEN];
+    char              oldnum[NCX_MAX_NUMLEN];
+    char              newnum[NCX_MAX_NUMLEN];
     const xmlChar    *oldn, *newn;
     const xmlChar    *oldorder, *neworder;
     boolean           isrev;

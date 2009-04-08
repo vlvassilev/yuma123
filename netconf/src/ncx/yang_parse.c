@@ -2170,6 +2170,8 @@ static status_t
 			   ncx_module_t  *mod,
 			   xmlChar **revstring)
 {
+#define REVBUFF_SIZE   128
+
     xmlChar       *str, *p;
     const char    *expstr;
     status_t       res;
@@ -2200,7 +2202,7 @@ static status_t
 	 * and if there are spaces between them
 	 * this will be parsed ok by tk.c
 	 */
-	str = m__getMem(64);
+	str = m__getMem(REVBUFF_SIZE);
 	if (!str) {
 	    res = ERR_INTERNAL_MEM;
 	    ncx_print_errormsg(tkc, mod, res);

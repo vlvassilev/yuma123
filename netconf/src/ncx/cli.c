@@ -804,6 +804,8 @@ val_value_t *
 	       boolean autocomp,
 	       status_t  *status)
 {
+#define ERRLEN  127
+
     val_value_t    *val;
     const obj_template_t *chobj;
     const char     *msg;
@@ -812,7 +814,7 @@ val_value_t *
     uint32          parmnamelen, buffpos, bufflen, matchcount;
     ncx_btype_t     btyp;
     status_t        res;
-    xmlChar         errbuff[NCX_MAX_NLEN], savechar;
+    xmlChar         errbuff[ERRLEN+1], savechar;
     boolean         gotdashes, gotmatch;
 
 #ifdef DEBUG
@@ -1155,7 +1157,8 @@ val_value_t *
 	/* check any errors in the parm name or value */
 	if (res != NO_ERR) {
 	    msg = get_error_string(res);
-	    xml_strncpy(errbuff, (const xmlChar *)parmname, parmnamelen);
+	    xml_strncpy(errbuff, (const xmlChar *)parmname, 
+			min(parmnamelen, ERRLEN));
 	    switch (res) {
 	    case ERR_NCX_UNKNOWN_PARM:
 		log_error("\nError: Unknown parameter (%s)", errbuff);

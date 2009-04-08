@@ -127,7 +127,7 @@ typedef struct def_topnode_t_ {
  * Top Tier: File Descriptor Mapping Content Struct
  */
 typedef struct def_fdmap_t_ {
-    xmlChar    num[NCX_MAX_NLEN];
+    xmlChar    num[NCX_MAX_NUMLEN];
     int        fd;
     ses_cb_t  *scb;
 } def_fdmap_t;
@@ -488,7 +488,7 @@ ses_cb_t *
     def_topnode_t *fddef;
     def_fdmap_t   *fdmap;
     int            ret;
-    xmlChar        buff[NCX_MAX_NLEN];
+    xmlChar        buff[NCX_MAX_NUMLEN];
 
     ret = sprintf((char *)buff, "%d", fd);
     if (ret <= 0) {
@@ -520,7 +520,7 @@ void
 {
     def_topnode_t *fddef;
     int            ret;
-    xmlChar        buff[NCX_MAX_NLEN];
+    xmlChar        buff[NCX_MAX_NUMLEN];
 
     ret = sprintf((char *)buff, "%d", fd);
     if (ret <= 0) {

@@ -74,10 +74,12 @@ date	     init     comment
 /* max number len to use for static buffer allocation only */
 #define NCX_MAX_NUMLEN   47
 
- /* all name fields in YANG or NCX can be 1 to 63 bytes
-  * YANG conformance requires this number to be >= 63
+ /* all name fields in YANG can be 1 to N bytes
+  * set a limit based on likely malloc failure
   */
-#define NCX_MAX_NLEN  63
+#define NCX_MAX_NLEN  0xffffffe
+
+#define NCX_MAX_USERNAME_LEN   127
 
 /* ncxserver server transport */
 #define NCX_SERVER_TRANSPORT "ssh"

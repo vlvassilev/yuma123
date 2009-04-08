@@ -343,8 +343,6 @@ void
 
     msg->defns = 0;
     msg->cur_defns = 0;
-    msg->last_defns = 0;
-    msg->last_defpfix[0] = 0;
     msg->withdef = NCX_DEF_WITHDEF;
     msg->withmeta = NCX_DEF_WITHMETA;
 
@@ -395,11 +393,6 @@ const xmlChar *
     /* check if the default namespace is requested */
     if (nsid == msg->defns || nsid==0) {
 	return NULL;
-    }
-
-    /* check if the last default namespace is requested */
-    if (nsid == msg->last_defns) {
-	return (msg->last_defpfix[0]) ? msg->last_defpfix : NULL;
     }
 
     /* see if a prefix is already present in the rpc-reply element */

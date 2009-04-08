@@ -494,8 +494,8 @@ static void
 		     yang_pcb_t *newpcb)
 {
 
-    char  oldnumbuff[NCX_MAX_NLEN];
-    char  newnumbuff[NCX_MAX_NLEN];
+    char  oldnumbuff[NCX_MAX_NUMLEN];
+    char  newnumbuff[NCX_MAX_NUMLEN];
 
     /* module name, module/submodule mismatch */
     if (oldpcb->top->ismod != newpcb->top->ismod ||

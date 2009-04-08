@@ -128,13 +128,15 @@ static void
 *    mod == module in progress
 *    obj == object calling this fn (for error purposes)
 *    target == Xpath expression string to evaluate
-*    prefix == buffer to store prefix portion of QName (if any)
-*    name == buffer to store name portion of segment
+*    prefix == address for return buffer to store 
+*          prefix portion of QName (if any)
+*    name == address for return buffer to store 
+*          name portion of segment
 *    len == address of return byte count
 *
 * OUTPUTS:
-*   prefix[] == prefix portion of QName
-*   name[] == name portion of QName
+*   *prefix == malloced buffer with prefix portion of QName
+*   *name == malloced name name portion of QName
 *   *cnt == number of bytes used in target
 *
 * RETURNS:
@@ -145,13 +147,17 @@ static status_t
 		 ncx_module_t *mod,
 		 obj_template_t *obj,
 		 const xmlChar *target,
-		 xmlChar *prefix,
-		 xmlChar *name,
+		 xmlChar **prefix,
+		 xmlChar **name,
 		 uint32 *len)
 {
     const xmlChar *p, *q;
     uint32         cnt;
     status_t       res;
+
+    *prefix = NULL;
+    *name = NULL;
+    *len = 0;
 
     /* find the EOS or a separator */
     p = target;
@@ -161,8 +167,8 @@ static status_t
     cnt = (uint32)(p-target);
 
     if (!ncx_valid_name(target, cnt)) {
-	xml_strncpy(prefix, target, min(cnt, NCX_MAX_NLEN));
-	log_error("\nError: invalid name string (%s)", prefix);
+	log_error("\nError: invalid name string (%s)", 
+		  target);
 	res = ERR_NCX_INVALID_NAME;
 	do_errmsg(tkc, mod, obj->tk, res);
 	return res;
@@ -170,7 +176,14 @@ static status_t
 
     if (*p==':') {
 	/* copy prefix, then get name portion */
-	xml_strncpy(prefix, target, cnt);
+	*prefix = m__getMem(cnt+1);
+	if (!*prefix) {
+	    log_error("\nError: malloc failed");
+	    res = ERR_INTERNAL_MEM;
+	    do_errmsg(tkc, mod, obj->tk, res);
+	    return res;
+	}
+	xml_strncpy(*prefix, target, cnt);
 
 	q = ++p;
 	while (*q && *q != '/') {
@@ -179,19 +192,41 @@ static status_t
 	cnt = (uint32)(q-p);
 
 	if (!ncx_valid_name(p, cnt)) {
-	    xml_strncpy(name, p, min(cnt, NCX_MAX_NLEN));
-	    log_error("\nError: invalid name string (%s)", name);
+	    log_error("\nError: invalid name string (%s)", 
+		      target);
 	    res = ERR_NCX_INVALID_NAME;
 	    do_errmsg(tkc, mod, obj->tk, res);
+	    if (*prefix) {
+		m__free(*prefix);
+		*prefix = NULL;
+	    }
 	    return res;
 	}
 
-	xml_strncpy(name, p, cnt);
+	*name = m__getMem(cnt+1);
+	if (!*name) {
+	    log_error("\nError: malloc failed");
+	    res = ERR_INTERNAL_MEM;
+	    do_errmsg(tkc, mod, obj->tk, res);
+	    if (*prefix) {
+		m__free(*prefix);
+		*prefix = NULL;
+	    }
+	    return res;
+	}
+
+	xml_strncpy(*name, p, cnt);
 	*len = (uint32)(q-target);
     } else  {
 	/* found EOS or pathsep, got just one 'name' string */
-	xml_strncpy(name, target, cnt);
-	*prefix = '\0';
+	*name = m__getMem(cnt+1);
+	if (!*name) {
+	    log_error("\nError: malloc failed");
+	    res = ERR_INTERNAL_MEM;
+	    do_errmsg(tkc, mod, obj->tk, res);
+	    return res;
+	}
+	xml_strncpy(*name, target, cnt);
 	*len = cnt;
     }
     return NO_ERR;
@@ -208,13 +243,15 @@ static status_t
 *
 * INPUTS:
 *    target == Xpath expression string in progress to evaluate
-*    prefix == buffer to store prefix portion of QName (if any)
-*    name == buffer to store name portion of segment
+*    prefix == address for return buffer to store 
+*          prefix portion of QName (if any)
+*    name == address for return buffer to store 
+*          name portion of segment
 *    len == address of return byte count
 *
 * OUTPUTS:
-*   prefix[] == prefix portion of QName
-*   name[] == name portion of QName
+*   *prefix == malloced buffer with prefix portion of QName
+*   *name == malloced name name portion of QName
 *   *cnt == number of bytes used in target
 *
 * RETURNS:
@@ -222,12 +259,16 @@ static status_t
 *********************************************************************/
 static status_t
     next_nodeid_noerr (const xmlChar *target,
-		       xmlChar *prefix,
-		       xmlChar *name,
+		       xmlChar **prefix,
+		       xmlChar **name,
 		       uint32 *len)
 {
     const xmlChar *p, *q;
     uint32         cnt;
+
+    *prefix = NULL;
+    *name = NULL;
+    *len = 0;
 
     /* find the EOS or a separator */
     p = target;
@@ -241,8 +282,12 @@ static status_t
     }
 
     if (*p==':') {
+	*prefix = m__getMem(cnt+1);
+	if (!*prefix) {
+	    return ERR_INTERNAL_MEM;
+	}
 	/* copy prefix, then get name portion */
-	xml_strncpy(prefix, target, cnt);
+	xml_strncpy(*prefix, target, cnt);
 
 	q = ++p;
 	while (*q && *q != '/') {
@@ -251,15 +296,31 @@ static status_t
 	cnt = (uint32)(q-p);
 
 	if (!ncx_valid_name(p, cnt)) {
+	    if (*prefix) {
+		m__free(*prefix);
+		*prefix = NULL;
+	    }
 	    return ERR_NCX_INVALID_NAME;
 	}
 
-	xml_strncpy(name, p, cnt);
+	*name = m__getMem(cnt+1);
+	if (!*name) {
+	    if (*prefix) {
+		m__free(*prefix);
+		*prefix = NULL;
+	    }
+	    return ERR_INTERNAL_MEM;
+	}
+	    
+	xml_strncpy(*name, p, cnt);
 	*len = (uint32)(q-target);
     } else  {
 	/* found EOS or pathsep, got just one 'name' string */
-	xml_strncpy(name, target, cnt);
-	*prefix = '\0';
+	*name = m__getMem(cnt+1);
+	if (!*name) {
+	    return ERR_INTERNAL_MEM;
+	}
+	xml_strncpy(*name, target, cnt);
 	*len = cnt;
     }
     return NO_ERR;
@@ -278,13 +339,15 @@ static status_t
 * INPUTS:
 *    target == Xpath expression string to evaluate
 *    logerrors = TRUE to use log_error, FALSE to skip it
-*    prefix == buffer to store prefix portion of QName (if any)
-*    name == buffer to store name portion of segment
+*    prefix == address for return buffer to store 
+*          prefix portion of QName (if any)
+*    name == address for return buffer to store 
+*          name portion of segment
 *    len == address of return byte count
 *
 * OUTPUTS:
-*   prefix[] == prefix portion of QName
-*   name[] == name portion of QName
+*   *prefix == malloced buffer with prefix portion of QName
+*   *name == malloced name name portion of QName
 *   *cnt == number of bytes used in target
 *
 * RETURNS:
@@ -293,12 +356,16 @@ static status_t
 static status_t
     next_val_nodeid (const xmlChar *target,
 		     boolean logerrors,
-		     xmlChar *prefix,
-		     xmlChar *name,
+		     xmlChar **prefix,
+		     xmlChar **name,
 		     uint32 *len)
 {
     const xmlChar *p, *q;
     uint32         cnt;
+
+    *prefix = NULL;
+    *name = NULL;
+    *len = 0;
 
     /* find the EOS or a separator */
     p = target;
@@ -308,16 +375,20 @@ static status_t
     cnt = (uint32)(p-target);
 
     if (!ncx_valid_name(target, cnt)) {
-	xml_strncpy(prefix, target, min(cnt, NCX_MAX_NLEN));
 	if (logerrors) {
-	    log_error("\nError: invalid name string (%s)", prefix);
+	    log_error("\nError: invalid name string (%s)", 
+		      target);
 	}
 	return ERR_NCX_INVALID_NAME;
     }
 
     if (*p==':') {
+	*prefix = m__getMem(cnt+1);
+	if (!*prefix) {
+	    return ERR_INTERNAL_MEM;
+	}
 	/* copy prefix, then get name portion */
-	xml_strncpy(prefix, target, cnt);
+	xml_strncpy(*prefix, target, cnt);
 
 	q = ++p;
 	while (*q && *q != '/') {
@@ -326,19 +397,32 @@ static status_t
 	cnt = (uint32)(q-p);
 
 	if (!ncx_valid_name(p, cnt)) {
-	    xml_strncpy(name, p, min(cnt, NCX_MAX_NLEN));
 	    if (logerrors) {
-		log_error("\nError: invalid name string (%s)", name);
+		log_error("\nError: invalid name string (%s)", 
+			  target);
 	    }
+	    m__free(*prefix);
+	    *prefix = NULL;
 	    return ERR_NCX_INVALID_NAME;
 	}
 
-	xml_strncpy(name, p, cnt);
+	*name = m__getMem(cnt+1);
+	if (!*name) {
+	    if (*prefix) {
+		m__free(*prefix);
+		*prefix = NULL;
+	    }
+	    return ERR_INTERNAL_MEM;
+	}
+	xml_strncpy(*name, p, cnt);
 	*len = (uint32)(q-target);
     } else  {
+	*name = m__getMem(cnt+1);
+	if (!*name) {
+	    return ERR_INTERNAL_MEM;
+	}
 	/* found EOS or pathsep, got just one 'name' string */
-	xml_strncpy(name, target, cnt);
-	*prefix = '\0';
+	xml_strncpy(*name, target, cnt);
 	*len = cnt;
     }
     return NO_ERR;
@@ -392,13 +476,15 @@ static status_t
     uint32          len;
     status_t        res;
     ncx_node_t      dtyp;
-    xmlChar         prefix[NCX_MAX_NLEN+1];
-    xmlChar         name[NCX_MAX_NLEN+1];
+    xmlChar        *prefix;
+    xmlChar        *name;
 
     imp = NULL;
     impmod = NULL;
     dtyp = NCX_NT_OBJ;
     curQ = NULL;
+    prefix = NULL;
+    name = NULL;
 
     /* skip the first fwd slash, if any */
     if (*target == '/') {
@@ -408,21 +494,31 @@ static status_t
     }
 
     /* get the first QName (prefix, name) */
-    res = next_nodeid(tkc, mod, obj, str, prefix, name, &len);
+    res = next_nodeid(tkc, mod, obj, str, &prefix, &name, &len);
     if (res != NO_ERR) {
+	if (prefix) {
+	    m__free(prefix);
+	}
+	if (name) {
+	    m__free(name);
+	}
 	return res;
     } else {
 	str += len;
     }
 
     /* get the import if there is a real prefix entered */
-    if (*prefix && xml_strcmp(prefix, mod->prefix)) {
+    if (prefix && xml_strcmp(prefix, mod->prefix)) {
 	imp = ncx_find_pre_import(mod, prefix);
 	if (!imp) {
 	    log_error("\nError: prefix '%s' not found in module imports"
 		      " in Xpath target %s", prefix, target);
 	    res = ERR_NCX_INVALID_NAME;
 	    do_errmsg(tkc, mod, errtk, res);
+	    m__free(prefix);
+	    if (name) {
+		m__free(name);
+	    }
 	    return res;
 	}
 	impmod = ncx_find_module(imp->module, imp->revision);
@@ -432,6 +528,10 @@ static status_t
 		      imp->module, prefix, target);
 	    res = ERR_NCX_MOD_NOT_FOUND;
 	    do_errmsg(tkc, mod, errtk, res);
+	    m__free(prefix);
+	    if (name) {
+		m__free(name);
+	    }
 	    return res;
 	}
     }
@@ -460,6 +560,12 @@ static status_t
 		  name, (imp) ? imp->module : mod->name,
 		  target);
 	do_errmsg(tkc, mod, errtk, res);
+	if (prefix) {
+	    m__free(prefix);
+	}
+	if (name) {
+	    m__free(name);
+	}
 	return res;
     } else {
 	curQ = datadefQ;
@@ -469,10 +575,27 @@ static status_t
 	res = ERR_NCX_INVALID_VALUE;
 	log_error("\nError: augment is external: node '%s'"
 		  " from module %s, line %u in Xpath target %s",
-		  name, curobj->mod->name,
-		  curobj->tk->linenum, target);
+		  (name) ? name : NCX_EL_NONE,
+		  curobj->mod->name,
+		  curobj->tk->linenum, 
+		  target);
 	do_errmsg(tkc, mod, errtk, res);
+	if (prefix) {
+	    m__free(prefix);
+	}
+	if (name) {
+	    m__free(name);
+	}
 	return res;
+    }
+
+    if (prefix) {
+	m__free(prefix);
+	prefix = NULL;
+    }
+    if (name) {
+	m__free(name);
+	name = NULL;
     }
 
     /* got the first object; keep parsing node IDs
@@ -481,15 +604,21 @@ static status_t
     while (*str == '/') {
 	str++;
 	/* get the next QName (prefix, name) */
-	res = next_nodeid(tkc, mod, obj, str, prefix, name, &len);
+	res = next_nodeid(tkc, mod, obj, str, &prefix, &name, &len);
 	if (res != NO_ERR) {
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
 	    return res;
 	} else {
 	    str += len;
 	}
 
 	/* make sure the prefix is valid, if present */
-	if (*prefix && xml_strcmp(prefix, mod->prefix)) {
+	if (prefix && xml_strcmp(prefix, mod->prefix)) {
 	    imp = ncx_find_pre_import(mod, prefix);
 	    if (!imp) {
 		log_error("\nError: prefix '%s' not found in module"
@@ -497,6 +626,10 @@ static status_t
 			  prefix, target);
 		res = ERR_NCX_INVALID_NAME;
 		do_errmsg(tkc, mod, errtk, res);
+		m__free(prefix);
+		if (name) {
+		    m__free(name);
+		}
 		return res;
 	    }
 	} else {
@@ -504,19 +637,23 @@ static status_t
 	}
 
 	/* make sure the name is a valid name string */
-	if (!ncx_valid_name2(name)) {
+	if (name && !ncx_valid_name2(name)) {
 	    log_error("\nError: object name '%s' not a valid "
 		      "identifier in Xpath target '%s'",
 		      name, target);
 	    res = ERR_NCX_INVALID_NAME;
 	    do_errmsg(tkc, mod, errtk, res);
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    m__free(name);
 	    return res;
 	}
 
 	/* determine 'nextval' based on [curval, prefix, name] */
 	curQ = obj_get_datadefQ(curobj);
 
-	if (curQ) {
+	if (name && curQ) {
 	    nextobj = obj_find_template(curQ,
 					(imp) ? imp->module : 
 					ncx_get_modname(mod), name);
@@ -527,6 +664,12 @@ static status_t
 		      name, target, obj_get_name(curobj),
 		      curobj->tk->linenum, obj_get_typestr(curobj));
 	    do_errmsg(tkc, mod, errtk, res);
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
 	    return res;
 	}
 
@@ -537,7 +680,22 @@ static status_t
 	    log_error("\nError: object '%s' not found in module %s",
 		      name, (imp) ? imp->module : mod->name);
 	    do_errmsg(tkc, mod, errtk, res);
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
 	    return res;
+	}
+
+	if (prefix) {
+	    m__free(prefix);
+	    prefix = NULL;
+	}
+	if (name) {
+	    m__free(name);
+	    name = NULL;
 	}
     }
 
@@ -546,6 +704,13 @@ static status_t
     }
     if (targQ) {
 	*targQ = curQ;
+    }
+
+    if (prefix) {
+	m__free(prefix);
+    }
+    if (name) {
+	m__free(name);
     }
 
     return NO_ERR;
@@ -582,11 +747,13 @@ static status_t
     dlq_hdr_t      *curQ;
     ncx_module_t   *mod;
     const xmlChar  *str;
+    xmlChar        *prefix;
+    xmlChar        *name;
     uint32          len;
     status_t        res;
-    xmlChar         prefix[NCX_MAX_NLEN+1];
-    xmlChar         name[NCX_MAX_NLEN+1];
 
+    prefix = NULL;
+    name = NULL;
 
     /* skip the first fwd slash, if any
      * the target must be from the config root
@@ -600,18 +767,30 @@ static status_t
     }
 
     /* get the first QName (prefix, name) */
-    res = next_nodeid_noerr(str, prefix, name, &len);
+    res = next_nodeid_noerr(str, &prefix, &name, &len);
     if (res != NO_ERR) {
+	if (prefix) {
+	    m__free(prefix);
+	}
+	if (name) {
+	    m__free(name);
+	}
 	return res;
     } else {
 	str += len;
     }
 
     /* get the import if there is a real prefix entered */
-    if (*prefix) {
+    if (prefix) {
 	mod = (ncx_module_t *)xmlns_get_modptr
 	    (xmlns_find_ns_by_prefix(prefix));
 	if (!mod) {
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
 	    return ERR_NCX_INVALID_NAME;
 	}
 	/* get the first object template */
@@ -630,7 +809,22 @@ static status_t
 	} else {
 	    res = ERR_NCX_INVALID_NAME;
 	}
+	if (prefix) {
+	    m__free(prefix);
+	}
+	if (name) {
+	    m__free(name);
+	}
 	return res;
+    }
+
+    if (prefix) {
+	m__free(prefix);
+	prefix = NULL;
+    }
+    if (name) {
+	m__free(name);
+	name = NULL;
     }
 
     if (obj_is_augclone(curobj)) {
@@ -643,41 +837,77 @@ static status_t
     while (*str == '/') {
 	str++;
 	/* get the next QName (prefix, name) */
-	res = next_nodeid_noerr(str, prefix, name, &len);
+	res = next_nodeid_noerr(str, &prefix, &name, &len);
 	if (res != NO_ERR) {
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
 	    return res;
 	} else {
 	    str += len;
 	}
 
 	/* make sure the name is a valid name string */
-	if (!ncx_valid_name2(name)) {
+	if (!name || !ncx_valid_name2(name)) {
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
 	    return ERR_NCX_INVALID_NAME;
 	}
 
 	/* determine 'nextval' based on [curval, prefix, name] */
 	curQ = obj_get_datadefQ(curobj);
 	if (!curQ) {
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
 	    return ERR_NCX_DEFSEG_NOT_FOUND;
 	}
 
 	/* make sure the prefix is valid, if present */
-	if (*prefix) {
+	if (prefix && name) {
 	    mod = (ncx_module_t *)xmlns_get_modptr
 		(xmlns_find_ns_by_prefix(prefix));
 	    if (!mod) {
+		m__free(prefix);
+		if (name) {
+		    m__free(name);
+		}
 		return ERR_NCX_INVALID_NAME;
 	    }
 	    nextobj = obj_find_template(curQ, 
 					ncx_get_modname(mod), 
 					name);
-	} else {
+	} else if (name) {
 	    /* no prefix given; try current module first */
-	    nextobj = obj_find_template(curQ, obj_get_mod_name(curobj), 
+	    nextobj = obj_find_template(curQ, 
+					obj_get_mod_name(curobj), 
 					name); 
 	    if (!nextobj) {
-		nextobj = obj_find_template(curQ, NULL, name); 
+		nextobj = obj_find_template(curQ, 
+					    NULL, 
+					    name); 
 	    }
+	} else {
+	    nextobj = NULL;
+	}
+
+	if (prefix) {
+	    m__free(prefix);
+	    prefix = NULL;
+	}
+	if (name) {
+	    m__free(name);
+	    name = NULL;
 	}
 
 	/* setup next loop or error exit because last node not found */
@@ -688,6 +918,12 @@ static status_t
 	}
     }
 
+    if (prefix) {
+	m__free(prefix);
+    }
+    if (name) {
+	m__free(name);
+    }
     if (targobj) {
 	*targobj = curobj;
     }
@@ -732,10 +968,13 @@ static status_t
     val_value_t    *curval;
     ncx_module_t   *usemod;
     const xmlChar  *str;
+    xmlChar        *prefix;
+    xmlChar        *name;
     uint32          len;
     status_t        res;
-    xmlChar         prefix[NCX_MAX_NLEN+1];
-    xmlChar         name[NCX_MAX_NLEN+1];
+
+    prefix = NULL;
+    name = NULL;
 
     /* check absolute path starting with root val */
     if (*target == '/' && !obj_is_root(startval->obj)) {
@@ -760,8 +999,14 @@ static status_t
     }
 
     /* get the first QName (prefix, name) */
-    res = next_val_nodeid(str, TRUE, prefix, name, &len);
+    res = next_val_nodeid(str, TRUE, &prefix, &name, &len);
     if (res != NO_ERR) {
+	if (prefix) {
+	    m__free(prefix);
+	}
+	if (name) {
+	    m__free(name);
+	}
 	return res;
     } else {
 	str += len;
@@ -769,16 +1014,19 @@ static status_t
 
     res = xpath_get_curmod_from_prefix(prefix, mod, &usemod);
     if (res != NO_ERR) {
-	if (*prefix) {
+	if (prefix) {
 	    log_error("\nError: module not found for prefix %s"
 		      " in Xpath target %s",
 		      prefix, target);
-	    return ERR_NCX_MOD_NOT_FOUND;
+	    m__free(prefix);
 	} else {
 	    log_error("\nError: no module prefix specified"
 			  " in Xpath target %s", target);
-	    return ERR_NCX_MOD_NOT_FOUND;
 	}
+	if (name) {
+	    m__free(name);
+	}
+	return ERR_NCX_MOD_NOT_FOUND;
     }
 
     /* get the first value node */
@@ -792,7 +1040,22 @@ static status_t
 	log_error("\nError: value node '%s' not found for module %s"
 		  " in Xpath target %s",
 		  name, usemod->name, target);
+	if (prefix) {
+	    m__free(prefix);
+	}
+	if (name) {
+	    m__free(name);
+	}
 	return res;
+    }
+
+    if (prefix) {
+	m__free(prefix);
+	prefix = NULL;
+    }
+    if (name) {
+	m__free(name);
+	name = NULL;
     }
 
     /* got the first object; keep parsing node IDs
@@ -801,8 +1064,14 @@ static status_t
     while (*str == '/') {
 	str++;
 	/* get the next QName (prefix, name) */
-	res = next_val_nodeid(str, TRUE, prefix, name, &len);
+	res = next_val_nodeid(str, TRUE, &prefix, &name, &len);
 	if (res != NO_ERR) {
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
 	    return res;
 	} else {
 	    str += len;
@@ -810,16 +1079,19 @@ static status_t
 
 	res = xpath_get_curmod_from_prefix(prefix, mod, &usemod);
 	if (res != NO_ERR) {
-	    if (*prefix) {
+	    if (prefix) {
 		log_error("\nError: module not found for prefix %s"
 			  " in Xpath target %s",
 			  prefix, target);
-		return ERR_NCX_MOD_NOT_FOUND;
+		m__free(prefix);
 	    } else {
 		log_error("\nError: no module prefix specified"
 			  " in Xpath target %s", target);
-		return ERR_NCX_MOD_NOT_FOUND;
 	    }
+	    if (name) {
+		m__free(name);
+	    }
+	    return ERR_NCX_MOD_NOT_FOUND;
 	}
 
 	/* determine 'nextval' based on [curval, prefix, name] */
@@ -841,6 +1113,12 @@ static status_t
 		log_error("\nError: value node '%s' not found for module %s"
 			  " in Xpath target %s",
 			  name, usemod->name, target);
+		if (prefix) {
+		    m__free(prefix);
+		}
+		if (name) {
+		    m__free(name);
+		}
 		return res;
 	    }
 	    break;
@@ -851,12 +1129,32 @@ static status_t
 		      "%s is a %s",
 		      name, target, curval->name,
 		      obj_get_typestr(curval->obj));
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
 	    return res;
 	default:
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	    do_errmsg(NULL, mod, NULL, res);
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
 	    return res;
 	}
+    }
+
+
+    if (prefix) {
+	m__free(prefix);
+    }
+    if (name) {
+	m__free(name);
     }
 
     if (targval) {
@@ -914,10 +1212,13 @@ static status_t
     val_value_t    *curval;
     ncx_module_t   *usemod;
     const xmlChar  *str;
+    xmlChar        *prefix;
+    xmlChar        *name;
     uint32          len;
     status_t        res;
-    xmlChar         prefix[NCX_MAX_NLEN+1];
-    xmlChar         name[NCX_MAX_NLEN+1];
+
+    prefix = NULL;
+    name = NULL;
 
     /* skip the first fwd slash, if any */
     if (*target == '/') {
@@ -927,8 +1228,14 @@ static status_t
     }
 
     /* get the first QName (prefix, name) */
-    res = next_val_nodeid(str, logerrors, prefix, name, &len);
+    res = next_val_nodeid(str, logerrors, &prefix, &name, &len);
     if (res != NO_ERR) {
+	if (prefix) {
+	    m__free(prefix);
+	}
+	if (name) {
+	    m__free(name);
+	}
 	return res;
     } else {
 	str += len;
@@ -936,20 +1243,23 @@ static status_t
 
     res = xpath_get_curmod_from_prefix(prefix, mod, &usemod);
     if (res != NO_ERR) {
-	if (*prefix) {
+	if (prefix) {
 	    if (logerrors) {
 		log_error("\nError: module not found for prefix %s"
 			  " in Xpath target %s",
 			  prefix, target);
 	    }
-	    return ERR_NCX_MOD_NOT_FOUND;
+	    m__free(prefix);
 	} else {
 	    if (logerrors) {
 		log_error("\nError: no module prefix specified"
 			  " in Xpath target %s", target);
-		return ERR_NCX_MOD_NOT_FOUND;
 	    }
 	}
+	if (name) {
+	    m__free(name);
+	}
+	return ERR_NCX_MOD_NOT_FOUND;
     }
 
     /* get the first value node */
@@ -965,17 +1275,38 @@ static status_t
 		      " in Xpath target %s",
 		      name, usemod->name, target);
 	}
+	if (prefix) {
+	    m__free(prefix);
+	}
+	if (name) {
+	    m__free(name);
+	}
 	return res;
     }
 
+    if (prefix) {
+	m__free(prefix);
+	prefix = NULL;
+    }
+    if (name) {
+	m__free(name);
+	name = NULL;
+    }
+    
     /* got the first object; keep parsing node IDs
      * until the Xpath expression is done or an error occurs
      */
     while (*str == '/') {
 	str++;
 	/* get the next QName (prefix, name) */
-	res = next_val_nodeid(str, logerrors, prefix, name, &len);
+	res = next_val_nodeid(str, logerrors, &prefix, &name, &len);
 	if (res != NO_ERR) {
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
 	    return res;
 	} else {
 	    str += len;
@@ -983,20 +1314,23 @@ static status_t
 
 	res = xpath_get_curmod_from_prefix(prefix, mod, &usemod);
 	if (res != NO_ERR) {
-	    if (*prefix) {
+	    if (prefix) {
 		if (logerrors) {
 		    log_error("\nError: module not found for prefix %s"
 			      " in Xpath target %s",
 			      prefix, target);
 		}
-		return ERR_NCX_MOD_NOT_FOUND;
+		m__free(prefix);
 	    } else {
 		if (logerrors) {
 		    log_error("\nError: no module prefix specified"
 			      " in Xpath target %s", target);
 		}
-		return ERR_NCX_MOD_NOT_FOUND;
 	    }
+	    if (name) {
+		m__free(name);
+	    }
+	    return ERR_NCX_MOD_NOT_FOUND;
 	}
 
 	/* determine 'nextval' based on [curval, prefix, name] */
@@ -1018,7 +1352,15 @@ static status_t
 		if (logerrors) {
 		    log_error("\nError: value node '%s' not found for module %s"
 			      " in Xpath target %s",
-			      name, usemod->name, target);
+			      (name) ? name : NCX_EL_NONE, 
+			      usemod->name, 
+			      target);
+		}
+		if (prefix) {
+		    m__free(prefix);
+		}
+		if (name) {
+		    m__free(name);
 		}
 		return res;
 	    }
@@ -1029,8 +1371,16 @@ static status_t
 	    if (logerrors) {
 		log_error("\nError: '%s' in Xpath target '%s' invalid: "
 			  "%s is a %s",
-			  name, target, curval->name,
+			  (name) ? name : NCX_EL_NONE, 
+			  target, 
+			  curval->name,
 			  obj_get_typestr(curval->obj));
+	    }
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
 	    }
 	    return res;
 	default:
@@ -1038,8 +1388,30 @@ static status_t
 	    if (logerrors) {
 		do_errmsg(NULL, mod, NULL, res);
 	    }
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
 	    return res;
 	}
+
+	if (prefix) {
+	    m__free(prefix);
+	    prefix = NULL;
+	}
+	if (name) {
+	    m__free(name);
+	    name = NULL;
+	}
+    }
+
+    if (prefix) {
+	m__free(prefix);
+    }
+    if (name) {
+	m__free(name);
     }
 
     if (targval) {

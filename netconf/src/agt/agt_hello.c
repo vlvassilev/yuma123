@@ -318,7 +318,7 @@ status_t
     xml_attrs_t   attrs;
     boolean       anyout;
     xmlns_id_t    nc_id, ncx_id;
-    xmlChar       numbuff[NCX_MAX_NLEN];
+    xmlChar       numbuff[NCX_MAX_NUMLEN];
 
 #ifdef DEBUG
     if (!scb) {

@@ -7989,21 +7989,38 @@ const xmlChar *
 *
 * INPUTS:
 *    str == scoped string
+*    buff == address of return buffer
+*    buffsize == buffer size
+*
 * OUTPUTS:
 *    buff is filled in with the namestring segment
+*
 * RETURNS:
 *    current string pointer after operation
 *********************************************************************/
 const xmlChar *
     ncx_get_name_segment (const xmlChar *str,
-			  xmlChar  *buff)
+			  xmlChar  *buff,
+			  uint32 buffsize)
 {
+    const xmlChar *teststr;
+
 #ifdef DEBUG
     if (!str || !buff) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }
 #endif
+
+    teststr = str;
+    while (*teststr && *teststr != NCX_SCOPE_CH) {
+        teststr++;
+    }
+
+    if ((uint32)(teststr - str) >= buffsize) {
+	SET_ERROR(ERR_BUFF_OVFL);
+	return NULL;
+    }
 
     while (*str && *str != NCX_SCOPE_CH) {
         *buff++ = *str++;

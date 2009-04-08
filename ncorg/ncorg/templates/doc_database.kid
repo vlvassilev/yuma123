@@ -12,10 +12,8 @@
   </head>
   <body>
     <div class="ncdocs">
-      <h1>YANG Database Tools</h1>
-
-      <img src="${tg.url('/static/images/ncorgdb.png')}" 
-	   border="2" alt="netconfcentral database"/>
+      <img src="${tg.url('/static/images/yangtools.png')}" 
+	   border="0" alt="YangTools"/>
       <p>&nbsp;</p>
       <div>
 	<h2>

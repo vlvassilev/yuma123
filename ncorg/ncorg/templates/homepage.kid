@@ -17,8 +17,8 @@
 	Online YANG Module Database</h3>
       <br/>
       <img border="0" 
-	   src="${tg.url('/static/images/yangtools.png')}" 
-	   alt="YangTools 1.0"/>
+	   src="${tg.url('/static/images/nails.png')}" 
+	   alt="Nails"/>
       <br/><br/>
       <h3><a href="/netconf_docs">Learn About NETCONF</a></h3>
       <h3><a href="/yang_docs">Learn About YANG</a></h3>

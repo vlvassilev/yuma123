@@ -322,7 +322,7 @@
 	  which operate on one or more conceptual configuration
 	  databases.  For example, the &lt;target&gt; parameter
 	  for the 
-	  <a href="${tg.url('/modules/netconf/2008-04-26#edit-config.530')}">
+	  <a href="${tg.url('/modules/netconf/2009-02-24#edit-config.623')}">
 	    &lt;edit-config&gt;
 	  </a> operation specifies which database to edit.
 	</p>
@@ -1131,7 +1131,7 @@
 	  Defines a mechanism to control the filtering of leaf objects
           containing the 'default' value, during NETCONF retrieval operations.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-with-defaults-00.txt">
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-with-defaults-01.txt">
 	    With-defaults capability for NETCONF
 	  </a>
 	</p>

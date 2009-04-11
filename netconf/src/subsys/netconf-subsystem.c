@@ -72,7 +72,8 @@ date         init     comment
 #define BUFFLEN  2000
 
 /* micro second sleep count to get rid of IO timing bug */
-#define USLEEP_CNT  10000
+/* #define USLEEP_CNT  10000 */
+#define USLEEP_CNT  5000
 
 /********************************************************************
 *                                                                   *

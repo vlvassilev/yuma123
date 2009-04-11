@@ -245,7 +245,7 @@ static status_t
     boolean     authdone;
 
     authdone = FALSE;
-    mscb = (mgr_scb_t *)scb->mgrcb;
+    mscb = mgr_ses_get_mscb(scb);
 
     mscb->session = libssh2_session_init();
     if (!mscb->session) {
@@ -586,7 +586,6 @@ void
     if (scb->mgrcb) {
 	mgr_free_scb(scb->mgrcb);
 	scb->mgrcb = NULL;
-
     }
 
     /* deactivate the session IO */
@@ -766,7 +765,7 @@ ssize_t
     int        ret;
 
     scb = (ses_cb_t *)s;
-    mscb = (mgr_scb_t *)scb->mgrcb;
+    mscb = mgr_ses_get_mscb(scb);
 
     log_debug3("\nmgr_ses: About to read from NETCONF session %d",
 	       scb->sid);
@@ -817,7 +816,7 @@ status_t
     uint32     i;
 
     scb = (ses_cb_t *)s;
-    mscb = (mgr_scb_t *)scb->mgrcb;
+    mscb = mgr_ses_get_mscb(scb);
 
     /* go through buffer outQ */
     buff = (ses_msg_buff_t *)dlq_deque(&scb->outQ);
@@ -870,6 +869,32 @@ ses_cb_t *
 
 }  /* mgr_ses_get_scb */
 
+
+
+/********************************************************************
+* FUNCTION mgr_ses_get_mscb
+*
+* Retrieve the manager session control block
+*
+* INPUTS:
+*   scb == session control block to use
+*
+* RETURNS:
+*   pointer to manager session control block or NULL if invalid
+*********************************************************************/
+mgr_scb_t *
+    mgr_ses_get_mscb (ses_cb_t *scb)
+{
+#ifdef DEBUG
+    if (!scb) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (mgr_scb_t *)scb->mgrcb;
+
+}  /* mgr_ses_get_mscb */
 
 
 /* END file mgr_ses.c */

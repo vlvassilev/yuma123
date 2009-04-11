@@ -334,6 +334,8 @@ static op_testop_t     testoption;
 /* default NETCONF error-option value */
 static op_errop_t      erroption;
 
+/* default NETCONF with-defaults value */
+static ncx_withdefaults_t  withdefaults;
 
 /********************************************************************
 * FUNCTION interactive_mode
@@ -391,6 +393,7 @@ static agent_cb_t *
     agent_cb->testoption = testoption;
     agent_cb->erroption = erroption;
     agent_cb->timeout = default_timeout;
+    agent_cb->withdefaults = withdefaults;
 
     return agent_cb;
 
@@ -600,7 +603,7 @@ static status_t
 		testoption = testop;
 	    } else {
 		log_error("\nError: must be a valid 'test-option'");
-		log_error("\n       (none, test, test-then-set, "
+		log_error("\n       (none, test-then-set, set, "
 			  "test-only)\n");
 		res = ERR_NCX_INVALID_VALUE;
 	    }
@@ -665,6 +668,19 @@ static status_t
 	} else {
 	    log_error("\nError: value must be 'true' or 'false'");
 	    res = ERR_NCX_INVALID_VALUE;
+	}
+    } else if (!xml_strcmp(configval->name, NCX_EL_WITH_DEFAULTS)) {
+	if (!xml_strcmp(usestr, NCX_EL_NONE)) {
+	    withdefaults = NCX_WITHDEF_NONE;
+	} else {
+	    if (ncx_get_withdefaults_enum(usestr) == NCX_WITHDEF_NONE) {
+		log_error("\nError: value must be 'none', "
+			  "'report-all', 'trim', or 'explicit'");
+		res = ERR_NCX_INVALID_VALUE;
+	    } else {
+		withdefaults = ncx_get_withdefaults_enum(usestr);
+		agent_cb->withdefaults = withdefaults;
+	    }
 	}
     } else {
 	res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -2739,14 +2755,15 @@ static status_t
 * FUNCTION fill_value
 * 
 * Malloc and fill the specified value
-* Use the last value for the default (may be NULL)
-* This function will block on readline for user input
+* Use the last value for the value if it is present and valid
+* This function will block on readline for user input if no
+* valid useval is given
 *
 * INPUTS:
 *   agent_cb == agent control block to use
 *   rpc == RPC method that is being called
 *   parm == object for value to fill
-*   oldval == last value (or NULL if none)
+*   useval == value to use (or NULL if none)
 *   res == address of return status
 *
 * OUTPUTS:
@@ -2759,7 +2776,7 @@ static val_value_t *
     fill_value (agent_cb_t *agent_cb,
 		const obj_template_t *rpc,
 		const obj_template_t *parm,
-		val_value_t *oldval,
+		val_value_t *useval,
 		status_t  *res)
 {
     const obj_template_t  *parentobj;
@@ -2781,6 +2798,25 @@ static val_value_t *
 	return NULL;
     }
 
+    /* just copy the useval if it is given */
+    if (useval) {
+	/* make sure it is a simple value */
+	if (!typ_is_simple(useval->btyp)) {
+	    *res = ERR_NCX_WRONG_TYPE;
+	    log_error("\nError: var '%s' must be a simple type",
+		      useval->name);
+	    return NULL;
+	}
+
+	newval = val_make_simval(val_get_typdef(useval),
+				 obj_get_nsid(parm),
+				 obj_get_name(parm),
+				 VAL_STR(useval),
+				 res);
+	return newval;
+    }	
+
+
     /* since the CLI and original NCX language were never designed
      * to support top-level leafs, a dummy container must be
      * created for the new and old leaf or leaf-list entries
@@ -2801,14 +2837,10 @@ static val_value_t *
 
     cli_fn = obj_get_name(rpc);
 
-    if (oldval) {
-	oldval = oldval->parent;
-    }
-
     newval = NULL;
     saveopt = agent_cb->get_optional;
     agent_cb->get_optional = TRUE;
-    *res = get_parm(agent_cb, rpc, parm, dummy, oldval);
+    *res = get_parm(agent_cb, rpc, parm, dummy, NULL);
     agent_cb->get_optional = saveopt;
 
     switch (*res) {
@@ -3891,6 +3923,11 @@ static status_t
 	return res;
     }
 
+    res = create_config_var(YANGCLI_WITH_DEFAULTS, NCX_EL_NONE); 
+    if (res != NO_ERR) {
+	return res;
+    }
+
     return NO_ERR;
 
 } /* init_config_vars */
@@ -4123,7 +4160,7 @@ static void
  *********************************************************************/
 static void
     do_show_var (const xmlChar *name,
-		 boolean isglobal,
+		 var_type_t vartype,
 		 boolean isany,
 		 help_mode_t mode)
 {
@@ -4138,13 +4175,20 @@ static void
 	logfn = log_write;
     }
 
-    if (isany || isglobal) {
-	val = var_get(name, VAR_TYP_GLOBAL);
+    if (isany) {
+	/* skipping VAR_TYP_SESSION for now */
+	val = var_get_local(name);
 	if (!val) {
-	    val = var_get(name, VAR_TYP_CONFIG);
+	    val = var_get(name, VAR_TYP_GLOBAL);
+	    if (!val) {
+		val = var_get(name, VAR_TYP_CONFIG);
+		if (!val) {
+		    val = var_get(name, VAR_TYP_SYSTEM);
+		}
+	    }
 	}
     } else {
-	val = var_get_local(name);
+	val = var_get(name, vartype);
     }
 
     if (val) {
@@ -4165,6 +4209,7 @@ static void
 		val_dump_value(val, NCX_DEF_INDENT);
 	    }
 	}
+	(*logfn)("\n");
     } else {
 	(*logfn)("\nVariable '%s' not found", name);
     }
@@ -4449,7 +4494,7 @@ static void
 	parm = val_find_child(valset, YANGCLI_MOD,
 			      YANGCLI_LOCAL);
 	if (parm) {
-	    do_show_var(VAL_STR(parm), ISLOCAL, FALSE, mode);
+	    do_show_var(VAL_STR(parm), VAR_TYP_LOCAL, FALSE, mode);
 	    done = TRUE;
 	}
 
@@ -4475,7 +4520,7 @@ static void
 	    parm = val_find_child(valset, YANGCLI_MOD,
 				  YANGCLI_GLOBAL);
 	    if (parm) {
-		do_show_var(VAL_STR(parm), ISGLOBAL, FALSE, mode);
+		do_show_var(VAL_STR(parm), VAR_TYP_GLOBAL, FALSE, mode);
 		done = TRUE;
 	    }
 	}
@@ -4493,7 +4538,7 @@ static void
 	    parm = val_find_child(valset, YANGCLI_MOD,
 				  YANGCLI_VAR);
 	    if (parm) {
-		do_show_var(VAL_STR(parm), ISLOCAL, TRUE, mode);
+		do_show_var(VAL_STR(parm), VAR_TYP_NONE, TRUE, mode);
 		done = TRUE;
 	    }
 	}
@@ -5668,19 +5713,11 @@ static void
     }
 #endif
 
-    /* find the current_value to use as template, if any */
+    /* find the value to use as content value or template, if any */
     parm = val_find_child(valset, YANGCLI_MOD, 
-			  YANGCLI_CURRENT_VALUE);
+			  YANGCLI_VALUE);
     if (parm && parm->res == NO_ERR) {
-	curparm = var_get_script_val(targobj, NULL, 
-				     VAL_STR(parm),
-				     ISPARM, &res);
-	if (!curparm || res != NO_ERR) {
-	    log_error("\nError: Script value '%s' invalid (%s)", 
-		      VAL_STR(parm), get_error_string(res)); 
-	    val_free_value(valset);
-	    return;
-	}
+	curparm = parm;
     }
 
     /* find the --optional flag */
@@ -5771,9 +5808,6 @@ static void
     val_free_value(valset);
     if (newparm) {
 	val_free_value(newparm);
-    }
-    if (curparm) {
-	val_free_value(curparm);
     }
     agent_cb->get_optional = save_getopt;
 
@@ -6407,6 +6441,9 @@ static status_t
 *             FALSE if no checking for mandatory parms
 *             Just fill out the minimum path to root from
 *             the 'get_content' node
+*   withdef == the desired with-defaults parameter
+*              It may be ignored or altered, depending on
+*              whether the agent supports the capability or not
 *
 * OUTPUTS:
 *    agent_cb->state may be changed or other action taken
@@ -6426,12 +6463,15 @@ static status_t
 		       const xmlChar *selectstr,
 		       val_value_t *source,
 		       uint32 timeoutval,
-		       boolean dofill)
+		       boolean dofill,
+		       ncx_withdefaults_t withdef)
 {
-    const obj_template_t  *rpc, *input;
+    const obj_template_t  *rpc, *input, *withdefobj;
+    val_value_t           *reqdata, *filter;
+    val_value_t           *withdefval, *dummy_parm;
     mgr_rpc_req_t         *req;
-    val_value_t           *reqdata, *filter, *dummy_parm;
     ses_cb_t              *scb;
+    mgr_scb_t             *mscb;
     status_t               res;
 
     req = NULL;
@@ -6519,13 +6559,56 @@ static status_t
 	res = NO_ERR;
     }
 
-    /* !!! get_content consumed at this point !!!
-     * allocate an RPC request and send it 
-     */
+    /* get the session control block */
     scb = mgr_ses_get_scb(agent_cb->mysid);
     if (!scb) {
 	res = SET_ERROR(ERR_INTERNAL_PTR);
-    } else {
+    }
+
+    /* !!! get_content consumed at this point !!!
+     * check if the with-defaults parmaeter should be added
+     */
+    if (res == NO_ERR) {
+	mscb = mgr_ses_get_mscb(scb);
+	if (cap_std_set(&mscb->caplist, CAP_STDID_WITH_DEFAULTS)) {
+	    switch (withdef) {
+	    case NCX_WITHDEF_NONE:
+		break;
+	    case NCX_WITHDEF_TRIM:
+	    case NCX_WITHDEF_EXPLICIT:
+		/*** !!! NEED TO CHECK IF TRIM / EXPLICT 
+		 *** !!! REALLY SUPPORTED IN THE caplist
+		 ***/
+		/* fall through */
+	    case NCX_WITHDEF_REPORT_ALL:
+		/* it is OK to send a with-defaults to this agent */
+		withdefobj = obj_find_child(input, NULL,
+					    NCX_EL_WITH_DEFAULTS);
+		if (!withdefobj) {
+		    SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+		} else {
+		    withdefval 
+			= val_make_simval(obj_get_ctypdef(withdefobj),
+					  obj_get_nsid(withdefobj),
+					  obj_get_name(withdefobj),
+					  ncx_get_withdefaults_string(withdef),
+					  &res);
+		    if (withdefval) {
+			val_add_child(withdefval, reqdata);
+		    }
+		}
+		break;
+	    default:
+		SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	} else {
+	    log_warn("\nWarning: 'with-defaults' "
+		     "capability not-supported so parameter ignored");
+	}
+    }
+
+    if (res == NO_ERR) {
+	/* allocate an RPC request and send it */
 	req = mgr_rpc_new_request(scb);
 	if (!req) {
 	    res = ERR_INTERNAL_MEM;
@@ -6640,8 +6723,7 @@ static val_value_t *
 	}	
 
 	curparm = NULL;
-	parm = val_find_child(valset, YANGCLI_MOD, 
-			      YANGCLI_CURRENT_VALUE);
+	parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_VALUE);
 	if (parm && parm->res == NO_ERR) {
 	    curparm = var_get_script_val(targobj, NULL, 
 					 VAL_STR(parm),
@@ -7505,6 +7587,7 @@ static void
     status_t               res;
     uint32                 timeoutval;
     boolean                dofill;
+    ncx_withdefaults_t     withdef;
 
     /* init locals */
     res = NO_ERR;
@@ -7532,6 +7615,18 @@ static void
 	dofill = FALSE;
     }
 
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_NOFILL);
+    if (parm && parm->res == NO_ERR) {
+	dofill = FALSE;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_WITH_DEFAULTS);
+    if (parm && parm->res == NO_ERR) {
+	withdef = ncx_get_withdefaults_enum(VAL_STR(parm));
+    } else {
+	withdef = agent_cb->withdefaults;
+    }
+    
     /* get the contents specified in the 'from' choice */
     content = get_content_from_choice(agent_cb, rpc, valset);
     if (!content) {
@@ -7545,7 +7640,8 @@ static void
 			    NULL, 
 			    NULL, 
 			    timeoutval, 
-			    dofill);
+			    dofill,
+			    withdef);
     if (res != NO_ERR) {
 	log_error("\nError: send get operation failed (%s)",
 		  get_error_string(res));
@@ -7579,10 +7675,11 @@ static void
 		    const xmlChar *line,
 		    uint32  len)
 {
-    val_value_t     *valset, *content, *source, *parm;
-    status_t         res;
-    uint32           timeoutval;
-    boolean          dofill;
+    val_value_t        *valset, *content, *source, *parm;
+    status_t            res;
+    uint32              timeoutval;
+    boolean             dofill;
+    ncx_withdefaults_t  withdef;
 
     dofill = TRUE;
 
@@ -7607,12 +7704,18 @@ static void
 	dofill = FALSE;
     }
 
-    /* get the source parameter */
     source = val_find_child(valset, NULL, NCX_EL_SOURCE);
     if (!source) {
 	log_error("\nError: mandatory source parameter missing");
 	val_free_value(valset);
 	return;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_WITH_DEFAULTS);
+    if (parm && parm->res == NO_ERR) {
+	withdef = ncx_get_withdefaults_enum(VAL_STR(parm));
+    } else {
+	withdef = agent_cb->withdefaults;
     }
 
     /* get the contents specified in the 'from' choice */
@@ -7632,7 +7735,8 @@ static void
 			    NULL, 
 			    source, 
 			    timeoutval, 
-			    dofill);
+			    dofill,
+			    withdef);
     if (res != NO_ERR) {
 	log_error("\nError: send get-config operation failed (%s)",
 		  get_error_string(res));
@@ -7672,6 +7776,7 @@ static void
     const xmlChar       *str;
     status_t             res;
     uint32               retcode, timeoutval;
+    ncx_withdefaults_t   withdef;
 
     /* get the session info */
     scb = mgr_ses_get_scb(agent_cb->mysid);
@@ -7699,6 +7804,13 @@ static void
 	timeoutval = VAL_UINT(parm);
     } else {
 	timeoutval = agent_cb->timeout;
+    }
+
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_WITH_DEFAULTS);
+    if (parm && parm->res == NO_ERR) {
+	withdef = ncx_get_withdefaults_enum(VAL_STR(parm));
+    } else {
+	withdef = agent_cb->withdefaults;
     }
 
     /* check if the agent supports :xpath */
@@ -7766,7 +7878,8 @@ static void
 					VAL_STR(content), 
 					NULL, 
 					timeoutval,
-					FALSE);
+					FALSE,
+					withdef);
 		if (res != NO_ERR) {
 		    log_error("\nError: send get operation"
 			      " failed (%s)",
@@ -7813,6 +7926,7 @@ static void
     const xmlChar       *str;
     status_t             res;
     uint32               retcode, timeoutval;
+    ncx_withdefaults_t   withdef;
 
     /* get the session info */
     scb = mgr_ses_get_scb(agent_cb->mysid);
@@ -7895,6 +8009,13 @@ static void
 	return;
     }
 
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_WITH_DEFAULTS);
+    if (parm && parm->res == NO_ERR) {
+	withdef = ncx_get_withdefaults_enum(VAL_STR(parm));
+    } else {
+	withdef = agent_cb->withdefaults;
+    }
+
     /* get the contents specified in the 'from' choice */
     content = get_content_from_choice(agent_cb, rpc, valset);
     if (content) {
@@ -7917,7 +8038,8 @@ static void
 					VAL_STR(content), 
 					source,
 					timeoutval,
-					FALSE);
+					FALSE,
+					withdef);
 		if (res != NO_ERR) {
 		    log_error("\nError: send get-config "
 			      "operation failed (%s)",
@@ -8454,7 +8576,8 @@ static status_t
     }
 
     /* next get any params from the conf file */
-    confname = get_strparm(mgr_cli_valset, YANGCLI_MOD, YANGCLI_CONF);
+    confname = get_strparm(mgr_cli_valset, 
+			   YANGCLI_MOD, YANGCLI_CONFIG);
     if (confname) {
 	res = conf_parse_val_from_filespec(confname, 
 					   mgr_cli_valset,

@@ -25,6 +25,10 @@ date	     init     comment
 
 #include <xmlstring.h>
 
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
 #ifndef _H_mgr_io
 #include "mgr_io.h"
 #endif
@@ -96,8 +100,7 @@ date	     init     comment
 #define YANGCLI_BRIEF       (const xmlChar *)"brief"
 #define YANGCLI_COMMAND     (const xmlChar *)"command"
 #define YANGCLI_COMMANDS    (const xmlChar *)"commands"
-#define YANGCLI_CONF        (const xmlChar *)"conf"
-#define YANGCLI_CURRENT_VALUE (const xmlChar *)"current-value"
+#define YANGCLI_CONFIG      (const xmlChar *)"config"
 #define YANGCLI_DEF_MODULE  (const xmlChar *)"default-module"
 #define YANGCLI_DIR         (const xmlChar *)"dir"
 #define YANGCLI_EDIT_TARGET (const xmlChar *)"edit-target"
@@ -123,9 +126,11 @@ date	     init     comment
 #define YANGCLI_TEST_OPTION (const xmlChar *)"test-option"
 #define YANGCLI_TIMEOUT     (const xmlChar *)"timeout"
 #define YANGCLI_USER        (const xmlChar *)"user"
+#define YANGCLI_VALUE       (const xmlChar *)"value"
 #define YANGCLI_VAR         (const xmlChar *)"var"
 #define YANGCLI_VARREF      (const xmlChar *)"varref"
 #define YANGCLI_VARS        (const xmlChar *)"vars"
+#define YANGCLI_WITH_DEFAULTS  (const xmlChar *)"with-defaults"
 
 #define BAD_DATA_DEFAULT NCX_BAD_DATA_CHECK
 
@@ -207,6 +212,7 @@ typedef struct agent_cb_t_ {
     boolean              fixorder;
     op_testop_t          testoption;
     op_errop_t           erroption;
+    ncx_withdefaults_t   withdefaults;
 
     /* session support */
     mgr_io_state_t       state;

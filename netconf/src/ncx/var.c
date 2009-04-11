@@ -1375,7 +1375,7 @@ val_value_t *
 			boolean istop,
 			status_t *res)
 {
-    val_value_t           *varval;
+    val_value_t           *varval, *cloneval;
     const xmlChar         *str, *name;
     val_value_t           *newval, *useval;
 
@@ -1410,6 +1410,7 @@ val_value_t *
 	    *res = ERR_INTERNAL_MEM;
 	    return NULL;
 	} else {
+	    val_init_from_template(newval, obj);
 	    useval = newval;
 	}
     }
@@ -1443,7 +1444,13 @@ val_value_t *
 	    if (!varval) {
 		*res = ERR_NCX_VAR_NOT_FOUND;
 	    } else if (typ_is_simple(varval->btyp)) {
-		*res = val_replace(varval, useval);
+		cloneval = val_clone(varval);
+		if (!cloneval) {
+		    *res = ERR_INTERNAL_MEM;
+		} else {
+		    *res = val_replace(cloneval, useval);
+		    val_free_value(cloneval);
+		}
 	    } else {
 		*res = ERR_NCX_WRONG_DATATYP;
 	    }
@@ -1488,7 +1495,7 @@ val_value_t *
 	    val_free_value(newval);
 	}
 	return NULL;
-    } else {
+    } else if (obj_is_leafy(obj)) {
 	/* this is a regular string, but not a valid NcxName,
 	 * so just treat as a string instead of potential RPC method
 	 */
@@ -1497,6 +1504,8 @@ val_value_t *
 			      val_get_nsid(useval), 
 			      useval->name, 
 			      strval);
+    } else {
+	*res = ERR_NCX_WRONG_TYPE;
     }
 
     /* clean up and exit */
@@ -1653,7 +1662,7 @@ val_value_t *
 	*res = NO_ERR;
 	val_free_value(newval);
 	return NULL;
-    } else {
+    } else if (typ_is_simple(obj_get_basetype(useobj))) {
 	/* this is a regular string, treated as a string
 	 * when used within an RPC function  parameter
 	 */
@@ -1661,6 +1670,24 @@ val_value_t *
 			      obj_get_ctypdef(useobj), 
 			      obj_get_nsid(useobj),
 			      obj_get_name(useobj), 
+			      strval);
+    } else {
+	/* need to convert the value to a simple value
+	 * could just make it an error, but interpreted
+	 * scripts usually allow this sort of thing
+	 * issue a warning that the old data type is
+	 * getting changed to generic string
+	 */
+	log_warn("\nWarning: changing object type from '%s' "
+		 "to 'string' for var '%s'",
+		 obj_get_typestr(useobj),
+		 newval->name);
+
+	useobj = ncx_get_gen_string();
+	*res = val_set_simval(newval,
+			      obj_get_ctypdef(useobj), 
+			      val_get_nsid(newval),
+			      newval->name,
 			      strval);
     }
 

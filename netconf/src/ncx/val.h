@@ -985,5 +985,8 @@ extern val_unique_t *
 extern void
     val_free_unique (val_unique_t *valuni);
 
+extern const typ_def_t *
+    val_get_typdef (const val_value_t *val);
+
 
 #endif	    /* _H_val */

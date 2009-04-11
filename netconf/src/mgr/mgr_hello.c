@@ -135,7 +135,7 @@ static status_t
     boolean       c1, c2;
     status_t      res;
 
-    mscb = (mgr_scb_t *)scb->mgrcb;
+    mscb = mgr_ses_get_mscb(scb);
 
     /* make sure the capabilities element is present
      * This should not fail, since already parsed this far 

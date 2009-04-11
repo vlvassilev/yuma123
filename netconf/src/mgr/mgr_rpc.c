@@ -193,7 +193,7 @@ static void
 {
     mgr_scb_t *mscb;
 
-    mscb = (mgr_scb_t *)scb->mgrcb;
+    mscb = mgr_ses_get_mscb(scb);
 
     (void)time(&req->starttime);
 
@@ -226,7 +226,7 @@ static mgr_rpc_req_t *
     mgr_scb_t *mscb;
     mgr_rpc_req_t *req;
 
-    mscb = (mgr_scb_t *)scb->mgrcb;
+    mscb = mgr_ses_get_mscb(scb);
 
     for (req = (mgr_rpc_req_t *)dlq_firstEntry(&mscb->reqQ);
 	 req != NULL;
@@ -315,7 +315,7 @@ mgr_rpc_req_t *
     }
     memset(req, 0x0, sizeof(mgr_rpc_req_t));
 
-    mscb = (mgr_scb_t *)scb->mgrcb;
+    mscb = mgr_ses_get_mscb(scb);
     if (mscb->next_id >= MGR_MAX_REQUEST_ID) {
 	mscb->next_id = 0;
     }

@@ -517,6 +517,11 @@ void
 	caplist->cap_defstyle = NULL;
     }
 
+    if (caplist->cap_supported) {
+	m__free(caplist->cap_supported);
+	caplist->cap_supported = NULL;
+    }
+
     /* drain the capability Q and free the memory */
     cap = (cap_rec_t *)dlq_deque(&caplist->capQ);
     while (cap != NULL) {
@@ -1069,10 +1074,15 @@ status_t
     cap_add_withdefval (val_value_t *caplist,
 			const xmlChar *defstyle)
 {
-    val_value_t     *capval;
-    xmlChar         *str, *p;
-    const xmlChar   *pfix, *cap, *basic;
-    uint32           len;
+#define SUPPORTED_BUFFSIZE 64
+
+    val_value_t          *capval;
+    xmlChar              *str, *p;
+    const xmlChar        *pfix, *cap;
+    const xmlChar        *basic, *supported;
+    uint32                len;
+    ncx_withdefaults_t    withdef;
+    xmlChar               buffer[SUPPORTED_BUFFSIZE];
 
 #ifdef DEBUG
     if (!caplist || !defstyle) {
@@ -1080,12 +1090,47 @@ status_t
     }
 #endif
 
-    /* setup the string */
+    /* setup the string 
+     * <capability-uri>:with-defaults:1.0?basic=<defstyle>
+     *    &supported=<other-two-enums>
+     */
     pfix = CAP_URN;
     basic = CAP_BASIC_EQ;
+    supported = CAP_SUPPORTED_EQ;
     cap = stdcaps[CAP_STDID_WITH_DEFAULTS].cap_name;
-    len = xml_strlen(pfix) + xml_strlen(cap) +
-	xml_strlen(basic) + xml_strlen(defstyle) + 1;
+
+    /* figure out what the supported parameter value
+     * should be and fill the buffer
+     */
+    withdef = ncx_get_withdefaults_enum(defstyle);
+    if (withdef == NCX_WITHDEF_NONE) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    str = buffer;
+    switch (withdef) {
+    case NCX_WITHDEF_REPORT_ALL:
+	str += xml_strcpy(buffer, NCX_EL_TRIM);
+	*str += ':';
+	str += xml_strcpy(buffer, NCX_EL_EXPLICIT);
+	break;
+    case NCX_WITHDEF_TRIM:
+	str += xml_strcpy(buffer, NCX_EL_REPORT_ALL);
+	*str += ':';
+	str += xml_strcpy(buffer, NCX_EL_EXPLICIT);
+	break;
+    case NCX_WITHDEF_EXPLICIT:
+	str += xml_strcpy(buffer, NCX_EL_REPORT_ALL);
+	*str += ':';
+	str += xml_strcpy(buffer, NCX_EL_TRIM);
+	break;
+    default:
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* get the total length */
+    len = xml_strlen(pfix) + xml_strlen(cap) + 1 +
+	xml_strlen(basic) + xml_strlen(defstyle) + 1 +
+	xml_strlen(supported) + xml_strlen(buffer);
 
     /* make the string */
     str = m__getMem(len+1);
@@ -1093,13 +1138,16 @@ status_t
 	return ERR_INTERNAL_MEM;
     }
 
-    /* concat the capability name if not the base string */
+    /* build the capability string */
     p = str;
     p += xml_strcpy(p, pfix);
     p += xml_strcpy(p, cap);
     *p++ = '?';
     p += xml_strcpy(p, basic);
     xml_strcpy(p, defstyle);
+    *p++ = '&';
+    p += xml_strcpy(p, supported);
+    xml_strcpy(p, buffer);
 
     /* make the capability element */
     capval = xml_val_new_string(NCX_EL_CAPABILITY,

@@ -3305,8 +3305,6 @@ void
 * Printf the specified val_value_t struct to stdout
 * Uses conf file format (see ncx/conf.h)
 *
-* Brute force clone of val_dump_value
-*
 * INPUTS:
 *    val == value to printf
 *    startindent == start indent char count
@@ -3323,7 +3321,7 @@ void
     }
 #endif
 
-    dump_value(val, startindent, FALSE);
+    dump_value(val, startindent, DUMP_VAL_STDOUT);
 
 } /* val_stdout_value */
 
@@ -7915,10 +7913,11 @@ const xmlChar *
 
     if (val->nsid) {
 	return xmlns_get_module(val->nsid);
-    } else {
+    } else if (val->obj) {
 	return obj_get_mod_name(val->obj);
+    } else {
+	return NULL;
     }
-
 }  /* val_get_mod_name */
 
 
@@ -7946,8 +7945,10 @@ xmlns_id_t
 
     if (val->nsid) {
 	return val->nsid;
-    } else {
+    } else if (val->obj) {
 	return obj_get_nsid(val->obj);
+    } else {
+	return 0;
     }
 
 }  /* val_get_nsid */
@@ -8163,6 +8164,33 @@ void
     m__free(valuni);
 
 }  /* val_free_unique */
+
+
+
+/********************************************************************
+* FUNCTION val_get_typdef
+* 
+* Get the typdef field for a value struct
+*
+* INPUTS:
+*    val == val_value_t struct to use
+*
+* RETURNS:
+*   pointer to the typdef or NULL if none
+*********************************************************************/
+const typ_def_t *
+    val_get_typdef (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return val->typdef;
+
+}  /* val_get_typdef */
 
 
 /* END file val.c */

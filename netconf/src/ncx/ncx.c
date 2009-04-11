@@ -9685,6 +9685,8 @@ const xmlChar *
 {
 
     switch (baddata) {
+    case NCX_BAD_DATA_NONE:
+	return NCX_EL_NONE;
     case NCX_BAD_DATA_IGNORE:
 	return E_BAD_DATA_IGNORE;
     case NCX_BAD_DATA_WARN:
@@ -9694,10 +9696,82 @@ const xmlChar *
     case NCX_BAD_DATA_ERROR:
 	return E_BAD_DATA_ERROR;
     default:
+	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }
-    /*NOTREACHED*/
 
 }  /* ncx_get_baddata_string */
+
+
+/********************************************************************
+* FUNCTION ncx_get_withdefaults_string
+* 
+* Get the string for the specified enum value
+* 
+* INPUT:
+*   withdef == enum value to check
+*
+* RETURNS:
+*   string pointer if OK
+*   NULL if an error
+*********************************************************************/
+const xmlChar *
+    ncx_get_withdefaults_string (ncx_withdefaults_t withdef)
+{
+
+    switch (withdef) {
+    case NCX_WITHDEF_NONE:
+	return NCX_EL_NONE;
+    case NCX_WITHDEF_REPORT_ALL:
+	return NCX_EL_REPORT_ALL;
+    case NCX_WITHDEF_TRIM:
+	return NCX_EL_TRIM;
+    case NCX_WITHDEF_EXPLICIT:
+	return NCX_EL_EXPLICIT;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+
+}  /* ncx_get_withdefaults_string */
+
+
+/********************************************************************
+* FUNCTION ncx_get_withdefaults_enum
+* 
+* Get the enum for the specified string value
+* 
+* INPUT:
+*   withdefstr == string value to check
+*
+* RETURNS:
+*   enum value for the string
+*   NCX_WITHDEF_NONE if invalid value
+*********************************************************************/
+ncx_withdefaults_t
+    ncx_get_withdefaults_enum (const xmlChar *withdefstr)
+{
+#ifdef DEBUG
+    if (!withdefstr) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NCX_WITHDEF_NONE;
+    }
+#endif
+
+    if (!xml_strcmp(withdefstr, NCX_EL_REPORT_ALL)) {
+	return NCX_WITHDEF_REPORT_ALL;
+    } else if (!xml_strcmp(withdefstr, NCX_EL_TRIM)) {
+	return NCX_WITHDEF_TRIM;
+    } else if (!xml_strcmp(withdefstr, NCX_EL_EXPLICIT)) {
+	return NCX_WITHDEF_EXPLICIT;
+    } else if (!xml_strcmp(withdefstr, NCX_EL_NONE)) {
+	return NCX_WITHDEF_NONE;
+    } else {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NCX_WITHDEF_NONE;
+    }
+
+}  /* ncx_get_withdefaults_enum */
+
 
 /* END file ncx.c */

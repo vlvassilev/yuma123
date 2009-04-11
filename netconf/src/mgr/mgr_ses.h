@@ -89,4 +89,7 @@ extern status_t
 extern ses_cb_t *
     mgr_ses_get_scb (ses_id_t sid);
 
+extern mgr_scb_t *
+    mgr_ses_get_mscb (ses_cb_t *scb);
+
 #endif            /* _H_mgr_ses */

@@ -102,6 +102,7 @@ date             init     comment
 #define CAP_DEVIATIONS_EQ      (const xmlChar *)"deviations="
 #define CAP_SCHEME_EQ          (const xmlChar *)"scheme="
 #define CAP_BASIC_EQ           (const xmlChar *)"basic="
+#define CAP_SUPPORTED_EQ       (const xmlChar *)"supported="
 
 /********************************************************************
 *                                                                   *
@@ -143,6 +144,7 @@ typedef struct cap_list_t_ {
     uint32          cap_std;         /* bitset of std caps */
     xmlChar        *cap_protos;  /* URL capability protocol list */
     xmlChar        *cap_defstyle;  /* with-defaults 'basic' parm */
+    xmlChar        *cap_supported;  /* with-defaults 'supported' parm */
     dlq_hdr_t       capQ;              /* queue of non-std caps */
 } cap_list_t;
 

@@ -731,13 +731,22 @@ typedef boolean (*ncx_feature_cbfn_t) (const ncx_module_t *mod,
 				       void *cookie);
 
 
-/* enum for get-schema format types */
-typedef enum ncx_modformat__t_ { 
+/* enum for get-schema format type enum values */
+typedef enum ncx_modformat_t_ { 
     NCX_MODFORMAT_NONE,
     NCX_MODFORMAT_XSD,
     NCX_MODFORMAT_YANG,
     NCX_MODFORMAT_RNG
 } ncx_modformat_t;
+
+
+/* enum for with-defaults enum values */
+typedef enum ncx_withdefaults_t_ { 
+    NCX_WITHDEF_NONE,
+    NCX_WITHDEF_REPORT_ALL,
+    NCX_WITHDEF_TRIM,
+    NCX_WITHDEF_EXPLICIT
+} ncx_withdefaults_t;
 
 
 #endif	    /* _H_ncxtypes */

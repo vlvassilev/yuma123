@@ -77,12 +77,14 @@ date	     init     comment
 
 #define NCXMOD_NCX        (const xmlChar *)"ncx"
 
-#define NCXMOD_WITH_DEFAULTS (const xmlChar *)"with-defaults"
+#define NCXMOD_WITH_DEFAULTS (const xmlChar *)"ietf-with-defaults"
 
 /* name of the NETCONF module containing NETCONF protocol definitions,
  * that is loaded by default during startup 
  */
 #define NCXMOD_NETCONF        (const xmlChar *)"netconf"
+
+#define NCXMOD_IETF_NETCONF   (const xmlChar *)"ietf-netconf"
 
 /* name of the NCX modules directory appended when YANG_HOME or HOME
  * ENV vars used to construct NCX module filespec

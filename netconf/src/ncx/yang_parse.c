@@ -2835,6 +2835,15 @@ static status_t
 	return retres;
     }
 
+    /* special hack -- check if this is the ietf-netconf
+     * YANG module, in which case do not load it because
+     * the internal netconf.yang needs to be used instead
+     */
+    if (mod->ismod && 
+	!xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
+	loaded = TRUE;
+    }
+
     /* check if this module is already loaded, except in diff mode */
     if (mod->ismod && !pcb->diffmode &&
 	ncx_find_module(mod->name, mod->version)) {
@@ -3232,9 +3241,17 @@ status_t
 	} else if (!wasadd && !pcb->diffmode) {
 	    if (mod->ismod) {
 		if (pcb->top == mod) {
-		    /* swap with the real module already done */
-		    pcb->top = ncx_find_module(mod->name,
-					       mod->version);
+		    /* hack: make sure netconf-ietf does not 
+		     * get swapped out for netconf.yang;
+		     * the internal version is used instead of
+		     * the standard one to fill in the
+		     * missing peices
+		     */
+		    if (xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
+			/* swap with the real module already done */
+			pcb->top = ncx_find_module(mod->name,
+						   mod->version);
+		    }
 		}
 	    } else if (!pcb->with_submods) {
 		/* subtree parsing mode can cause top-level to already

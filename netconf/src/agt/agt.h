@@ -134,10 +134,6 @@ date	     init     comment
 
 #define AGT_MAX_PORTS  4
 
-#define AGT_DEFSTYLE_REPORT_ALL  (const xmlChar *)"report-all"
-#define AGT_DEFSTYLE_TRIM        (const xmlChar *)"trim"
-#define AGT_DEFSTYLE_EXPLICIT    (const xmlChar *)"explicit"
-
 
 /********************************************************************
 *								    *
@@ -145,13 +141,6 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-typedef enum agt_defstyle_t_ {
-    AGT_DS_NONE,
-    AGT_DS_REPORT_ALL,
-    AGT_DS_TRIM,
-    AGT_DS_EXPLICIT
-} agt_defstyle_t;
-    
 
 /* enumeration of the different agent callback types 
  * These are used are array indices so there is no dummy zero enum
@@ -165,8 +154,6 @@ typedef enum agt_cbtyp_t_ {
     AGT_CB_ROLLBACK,           /* P3-neg: write operation rollback */
     AGT_CB_TEST_APPLY          /* P1a-int: config data only, no CB */
 } agt_cbtyp_t;
-
-
 
 
 /* hardwire some of the agent profile parameters
@@ -189,7 +176,7 @@ typedef struct agt_profile_t_ {
     const xmlChar   *agt_datapath;
     const xmlChar   *agt_runpath;
     const xmlChar   *agt_defaultStyle;
-    agt_defstyle_t   agt_defaultStyleEnum;
+    ncx_withdefaults_t  agt_defaultStyleEnum;
     uint16           agt_ports[AGT_MAX_PORTS];
 } agt_profile_t;
 

@@ -146,66 +146,83 @@ date         init     comment
 
 
 /********************************************************************
-* FUNCTION get_dataclass
-*
-* Get the dataclass field from the node
-*
-* INPUTS:
-*    nodetyp == ncx_node_t enum for node
-*    node == node to get dataclass from
-*
-* RETURNS:
-*    data class
-*********************************************************************/
-static ncx_data_class_t
-    get_dataclass (ncx_node_t nodetyp,
-		   const void *node)
-{
-    const val_value_t *val;
-
-    switch (nodetyp) {
-    case NCX_NT_VAL:
-	val = node;
-	return val->dataclass;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NCX_DC_NONE;
-    }
-    /*NOTREACHED*/
-
-} /* get_dataclass */
-
-
-/********************************************************************
 * FUNCTION is_default
 *
 * Check if the node is set to the default value
 *
 * INPUTS:
-*    nodetyp == ncx_node_t enum for node
-*    node == node to get dataclass from
+*    withdef == type of default requested
+*    val == node to check
 *
 * RETURNS:
 *    TRUE if set to the default value (by user or agent)
 *    FALSE if no default applicable or not set to default
 *********************************************************************/
 static boolean
-    is_default (ncx_node_t nodetyp,
-		const void *node)
+    is_default (ncx_withdefaults_t withdef,
+		const val_value_t *val)
 {
-    const val_value_t *val;
-
-    switch (nodetyp) {
-    case NCX_NT_VAL:
-	val = node;
+    switch (withdef) {
+    case NCX_WITHDEF_NONE:
+	return FALSE;
+    case NCX_WITHDEF_TRIM:
 	return val_is_default(val);
+    case NCX_WITHDEF_EXPLICIT:
+	return val_set_by_default(val);
+    case NCX_WITHDEF_REPORT_ALL:
+	return FALSE;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
     }
-    /*NOTREACHED*/
 
 } /* is_default */
+
+
+/********************************************************************
+* FUNCTION check_withdef
+*
+* Check the with-defaults flag
+*
+* INPUTS:
+*    withdef == requested with-defaults action
+*    node == value node to check
+*
+* RETURNS:
+*    TRUE if node should be output
+*    FALSE if node is filtered out
+*********************************************************************/
+static boolean
+    check_withdef (ncx_withdefaults_t withdef,
+		   const val_value_t *node)
+{
+    const agt_profile_t     *profile;
+    boolean                  ret;
+    ncx_withdefaults_t       defwithdef;
+
+    /* check if defaults are suppressed */
+    ret = TRUE;
+    switch (withdef) {
+    case NCX_WITHDEF_NONE:
+	profile = agt_get_profile();
+	defwithdef = profile->agt_defaultStyleEnum;
+	if (is_default(defwithdef, node)) {
+	    ret = FALSE;
+	}
+	break;
+    case NCX_WITHDEF_REPORT_ALL:
+    case NCX_WITHDEF_TRIM:
+    case NCX_WITHDEF_EXPLICIT:
+	if (is_default(withdef, node)) {
+	    ret = FALSE;
+	}
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    return ret;
+
+} /* check_withdef */
 
 
 /************  E X T E R N A L    F U N C T I O N S    **************/
@@ -848,37 +865,25 @@ status_t
 /********************************************************************
 * FUNCTION agt_check_config
 *
-* ncx_nodetest_fn_t callback
+* val_nodetest_fn_t callback
 *
 * Used by the <get-config> operation to return any type of 
 * configuration data
 *
 * INPUTS:
-*    see ncx/ncxtypes.h   (ncx_nodetest_fn_t)
+*    see ncx/val_util.h   (val_nodetest_fn_t)
+*
 * RETURNS:
 *    status
 *********************************************************************/
 boolean
-    agt_check_config (boolean withdef,
-		      ncx_node_t nodetyp,
-		      const void *node)
+    agt_check_config (ncx_withdefaults_t withdef,
+		      const val_value_t *node)
 {
-    ncx_data_class_t  dataclass;
-    boolean ret;
+    boolean           ret;
 
-    dataclass = get_dataclass(nodetyp, node);
-    if (dataclass==NCX_DC_CONFIG) {
-	ret = TRUE;
-
-	/* check if defaults are suppressed */
-	if (!withdef) {
-	    /* with-defaults=false, check if this is a val with 
-	     * a default value set
-	     */
-	    if (is_default(nodetyp, node)) {
-		ret = FALSE;
-	    }
-	}
+    if (node->dataclass == NCX_DC_CONFIG) {
+	ret = check_withdef(withdef, node);
     } else {
 	/* not a node that should be saved with a copy-config 
 	 * to NVRAM
@@ -894,38 +899,27 @@ boolean
 /********************************************************************
 * FUNCTION agt_check_default
 *
-* ncx_nodetest_fn_t callback
+* val_nodetest_fn_t callback
 *
 * Used by the <get*> operation to return only values
 * not set to the default
 *
 * INPUTS:
-*    see ncx/ncxtypes.h   (ncx_nodetest_fn_t)
+*    see ncx/val_util.h   (val_nodetest_fn_t)
 *
 * RETURNS:
 *    status
 *********************************************************************/
 boolean
-    agt_check_default (boolean withdef,
-		       ncx_node_t nodetyp,
-		       const void *node)
+    agt_check_default (ncx_withdefaults_t withdef,
+		       const val_value_t *node)
 {
     boolean ret;
 
+    ret = TRUE;
+
     /* check if defaults are suppressed */
-    if (!withdef) {
-	/* with-defaults=false, check if this is a val with 
-	 * a default value set
-	 */
-	if (is_default(nodetyp, node)) {
-	    ret = FALSE;
-	} else {
-	    ret = TRUE;
-	}
-    } else {
-	/* not a node that should be saved with a copy-config 
-	 * to NVRAM
-	 */
+    if (is_default(withdef, node)) {
 	ret = FALSE;
     }
 
@@ -937,36 +931,27 @@ boolean
 /********************************************************************
 * FUNCTION agt_check_save
 *
-* ncx_nodetest_fn_t callback
+* val_nodetest_fn_t callback
 *
 * Used by agt_ncx_cfg_save function to filter just what
 * is supposed to be saved in the <startup> config file
 *
 * INPUTS:
-*    see ncx/ncxconst.h   (ncx_nodetest_fn_t)
+*    see ncx/val_util.h   (val_nodetest_fn_t)
+*
 * RETURNS:
 *    status
 *********************************************************************/
 boolean
-    agt_check_save (boolean withdef,
-		    ncx_node_t nodetyp,
-		    const void *node)
+    agt_check_save (ncx_withdefaults_t withdef,
+		    const val_value_t *node)
 {
-    ncx_data_class_t  dataclass;
     boolean ret;
 
-    dataclass = get_dataclass(nodetyp, node);
-    if (dataclass==NCX_DC_CONFIG) {
-	ret = TRUE;
-
-	/* check if defaults are suppressed */
-	if (!withdef) {
-	    /* with-defaults=false, check if this is a val with 
-	     * a default value set
-	     */
-	    if (is_default(nodetyp, node)) {
-		ret = FALSE;
-	    }
+    ret = TRUE;
+    if (node->dataclass==NCX_DC_CONFIG) {
+	if (is_default(withdef, node)) {
+	    ret = FALSE;
 	}
     } else {
 	/* not a node that should be saved with a copy-config 
@@ -974,7 +959,6 @@ boolean
 	 */
 	ret = FALSE;
     }
-
     return ret;
 
 } /* agt_check_save */
@@ -1015,8 +999,9 @@ status_t
 
     switch (msg->rpc_filter.op_filtyp) {
     case OP_FILTER_NONE:
-	if (msg->mhdr.withdef) {
-	    /* with-defaults=true: return everything */
+	switch (msg->mhdr.withdef) {
+	case NCX_WITHDEF_REPORT_ALL:
+	    /* return everything */
 	    if (getop) {
 		/* all config and state data */
 		xml_wr_val(scb, 
@@ -1031,7 +1016,9 @@ status_t
 				 indent, 
 				 agt_check_config);
 	    }
-	} else {
+	    break;
+	case NCX_WITHDEF_TRIM:
+	case NCX_WITHDEF_EXPLICIT:
 	    /* with-defaults=false: return only non-defaults */
 	    if (getop) {
 		/* all non-default config and state data */		
@@ -1048,6 +1035,10 @@ status_t
 				 indent, 
 				 agt_check_config);
 	    }
+	    break;
+	case NCX_WITHDEF_NONE:
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
 	break;
     case OP_FILTER_SUBTREE:
@@ -1428,10 +1419,6 @@ status_t
     return res;
 
 } /* agt_check_editop */
-
-
-
-
 
 
 /* END file agt_util.c */

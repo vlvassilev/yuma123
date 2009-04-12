@@ -159,8 +159,8 @@ static void
     agt_profile.agt_modpath = NULL;
     agt_profile.agt_datapath = NULL;
     agt_profile.agt_runpath = NULL;
-    agt_profile.agt_defaultStyle = AGT_DEFSTYLE_REPORT_ALL;
-    agt_profile.agt_defaultStyleEnum = AGT_DS_REPORT_ALL;
+    agt_profile.agt_defaultStyle = NCX_EL_REPORT_ALL;
+    agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_REPORT_ALL;
 
 } /* init_agent_profile */
 

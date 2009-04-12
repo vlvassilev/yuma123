@@ -29,6 +29,10 @@ date             init     comment
 14-jan-07    abb      Begun; split from agt_rpc.h
 */
 
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -69,7 +73,7 @@ typedef struct xml_msg_hdr_t_ {
      */
     xmlns_id_t      defns;       /* req. default namespace ID */
     xmlns_id_t      cur_defns;        /* minimize xmlns decls */
-    boolean         withdef;           /* with-defaults value */
+    ncx_withdefaults_t withdef;       /* with-defaults value */
     boolean         withmeta;          /* with-metadata value */
     dlq_hdr_t       prefixQ;             /* Q of xmlns_pmap_t */
     dlq_hdr_t       errQ;               /* Q of rpc_err_rec_t */

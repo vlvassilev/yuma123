@@ -54,6 +54,10 @@ date         init     comment
 #include  "val.h"
 #endif
 
+#ifndef _H_val_util
+#include  "val_util.h"
+#endif
+
 #ifndef _H_xmlns
 #include  "xmlns.h"
 #endif
@@ -81,14 +85,8 @@ date         init     comment
 #define XML_WR_DEBUG  1
 #endif
 
-
 #define XML_WR_MAX_LINESTR   34
 
-/********************************************************************
-*                                                                   *
-*                       V A R I A B L E S			    *
-*                                                                   *
-*********************************************************************/
 
 
 /********************************************************************
@@ -292,19 +290,22 @@ static void
 	    attr_nsid = attr->attr_ns;
 	    attr_name = attr->attr_name;
 	    attr_qname = attr->attr_qname;
-	    len = xml_strlen(attr->attr_val) + xml_strlen(attr->attr_name);
+	    len = xml_strlen(attr->attr_val) 
+		+ xml_strlen(attr->attr_name);
 	} else {
 	    val = (val_value_t *)hdr;
 	    attr_nsid = val->nsid;
 	    attr_name = val->name;
 	    attr_qname = NULL;
-	    len = xml_strlen(val->v.str) + xml_strlen(val->name);
+	    len = xml_strlen(val->v.str) 
+		+ xml_strlen(val->name);
 	}
 
 	/* deal with initial indent */
 	if (indent < 0) {
 	    ses_putchar(scb, ' ');
-	} else if (len + 4 + SES_LINELEN(scb) >= SES_LINESIZE(scb)) {
+	} else if (len + 4 + SES_LINELEN(scb) 
+		   >= SES_LINESIZE(scb)) {
 	    ses_indent(scb, indent);
 	} else {
 	    ses_putchar(scb, ' ');
@@ -327,18 +328,23 @@ static void
 	    }
 	} else if (attr_nsid) {
 	    /* prefix:attribute-name format */
-	    pfix = xml_msg_get_prefix(msg, elem_nsid, 
+	    pfix = xml_msg_get_prefix(msg, 
+				      elem_nsid, 
 				      attr_nsid, 
 				      curelem,
 				      &xneeded);
 	    if (xneeded) {
-		write_xmlns_decl(scb, pfix, attr_nsid, indent);
+		write_xmlns_decl(scb, 
+				 pfix, 
+				 attr_nsid, 
+				 indent);
 	    }
 
 	    /* deal with indent again */
 	    if (indent < 0) {
 		ses_putchar(scb, ' ');
-	    } else if (len + 4 + SES_LINELEN(scb) >= SES_LINESIZE(scb)) {
+	    } else if (len + 4 + SES_LINELEN(scb) 
+		       >= SES_LINESIZE(scb)) {
 		ses_indent(scb, indent);
 	    } else {
 		ses_putchar(scb, ' ');
@@ -452,8 +458,11 @@ void
 
     /* start the element and write the prefix, if any */
     ses_putchar(scb, '<');
-    pfix = xml_msg_get_prefix(msg, parent_nsid,
-			      nsid, NULL, &xneeded);
+    pfix = xml_msg_get_prefix(msg, 
+			      parent_nsid,
+			      nsid, 
+			      NULL, 
+			      &xneeded);
     if (pfix) {
 	ses_putstr(scb, pfix);
 	ses_putchar(scb, ':');
@@ -474,7 +483,10 @@ void
 	    if (!attrQ || dlq_empty(attrQ)) {
 		indent = -1;
 	    }
-	    write_xmlns_decl(scb, pfix, nsid, indent);
+	    write_xmlns_decl(scb, 
+			     pfix, 
+			     nsid, 
+			     indent);
 	}
     }
 
@@ -543,7 +555,11 @@ void
 
     /* start the element and write the prefix, if any */
     ses_putchar(scb, '<');
-    pfix = xml_msg_get_prefix(msg, parent_nsid, nsid, val, &xneeded);
+    pfix = xml_msg_get_prefix(msg, 
+			      parent_nsid, 
+			      nsid, 
+			      val, 
+			      &xneeded);
     if (pfix) {
 	ses_putstr(scb, pfix);
 	ses_putchar(scb, ':');
@@ -557,13 +573,22 @@ void
 	    indent += ses_indent_count(scb);
 	}
 	if (attrQ) {
-	    write_attrs(scb, msg, attrQ, FALSE, val, indent, nsid);
+	    write_attrs(scb, 
+			msg, 
+			attrQ,
+			FALSE,
+			val,
+			indent,
+			nsid);
 	}
 	if (xneeded) {
 	    if (!attrQ || dlq_empty(attrQ)) {
 		indent = -1;
 	    }
-	    write_xmlns_decl(scb, pfix, nsid, indent);
+	    write_xmlns_decl(scb,
+			     pfix,
+			     nsid,
+			     indent);
 	}
     }
 
@@ -608,8 +633,15 @@ void
 		       const xmlChar *elname,
 		       int32 indent)
 {
-    xml_wr_begin_elem_ex(scb, msg, parent_nsid, nsid, elname,
-			 NULL, FALSE, indent, FALSE);
+    xml_wr_begin_elem_ex(scb, 
+			 msg, 
+			 parent_nsid,
+			 nsid,
+			 elname,
+			 NULL,
+			 FALSE,
+			 indent,
+			 FALSE);
 
 } /* xml_wr_begin_elem */
 
@@ -640,8 +672,15 @@ void
 		       const xmlChar *elname,
 		       int32 indent)
 {
-    xml_wr_begin_elem_ex(scb, msg, parent_nsid, nsid, elname,
-			 NULL, FALSE, indent, TRUE);
+    xml_wr_begin_elem_ex(scb, 
+			 msg, 
+			 parent_nsid, 
+			 nsid, 
+			 elname,
+			 NULL, 
+			 FALSE, 
+			 indent,
+			 TRUE);
 
 } /* xml_wr_empty_elem */
 
@@ -687,7 +726,11 @@ void
     /* start the element and write the prefix, if any */
     ses_putchar(scb, '<');
     ses_putchar(scb, '/');
-    pfix = xml_msg_get_prefix(msg, 0, nsid, NULL, &xneeded);
+    pfix = xml_msg_get_prefix(msg, 
+			      0, 
+			      nsid, 
+			      NULL, 
+			      &xneeded);
     if (pfix) {
 	ses_putstr(scb, pfix);
 	ses_putchar(scb, ':');
@@ -754,11 +797,21 @@ void
     }
 #endif
 
-    xml_wr_begin_elem_ex(scb, msg, parent_nsid, 
-			 nsid, elname, attrQ, isattrq, 
-			 indent, FALSE);
+    xml_wr_begin_elem_ex(scb, 
+			 msg, 
+			 parent_nsid, 
+			 nsid, 
+			 elname, 
+			 attrQ,
+			 isattrq, 
+			 indent,
+			 FALSE);
     ses_putstr(scb, str);
-    xml_wr_end_elem(scb, msg, nsid, elname, -1);
+    xml_wr_end_elem(scb, 
+		    msg, 
+		    nsid,
+		    elname,
+		    -1);
 
 }  /* xml_wr_string_elem */
 
@@ -791,15 +844,15 @@ void
 *********************************************************************/
 void
     xml_wr_qname_elem (ses_cb_t *scb,
-		    xml_msg_hdr_t *msg,
-		    xmlns_id_t val_nsid,
-		    const xmlChar *str,
-		    xmlns_id_t  parent_nsid,
-		    xmlns_id_t  nsid,
-		    const xmlChar *elname,
-		    const dlq_hdr_t *attrQ,
-		    boolean isattrq,
-		    int32 indent)
+		       xml_msg_hdr_t *msg,
+		       xmlns_id_t val_nsid,
+		       const xmlChar *str,
+		       xmlns_id_t  parent_nsid,
+		       xmlns_id_t  nsid,
+		       const xmlChar *elname,
+		       const dlq_hdr_t *attrQ,
+		       boolean isattrq,
+		       int32 indent)
 {
     boolean         xneeded;
     const xmlChar  *pfix;
@@ -811,22 +864,35 @@ void
     }
 #endif
 
-    xml_wr_begin_elem_ex(scb, msg, parent_nsid, 
-			 nsid, elname, attrQ, isattrq, 
-			 indent, FALSE);
+    xml_wr_begin_elem_ex(scb,
+			 msg,
+			 parent_nsid, 
+			 nsid,
+			 elname,
+			 attrQ,
+			 isattrq, 
+			 indent,
+			 FALSE);
 
     /* counting on xmlns decl to be in ancestor node
      * because the xneeded node is being ignored here
      */
-    pfix = xml_msg_get_prefix(msg, parent_nsid, val_nsid, 
-			      NULL, &xneeded);
+    pfix = xml_msg_get_prefix(msg,
+			      parent_nsid,
+			      val_nsid, 
+			      NULL,
+			      &xneeded);
     if (pfix) {
 	ses_putstr(scb, pfix);
 	ses_putchar(scb, XMLNS_SEPCH);
     }
     ses_putstr(scb, str);
 
-    xml_wr_end_elem(scb, msg, nsid, elname, -1);
+    xml_wr_end_elem(scb,
+		    msg,
+		    nsid,
+		    elname,
+		    -1);
 
 }  /* xml_wr_qname_elem */
 
@@ -862,7 +928,7 @@ void
 		      xml_msg_hdr_t *msg,
 		      val_value_t *val,
 		      int32  indent,
-		      ncx_nodetest_fn_t testfn)
+		      val_nodetest_fn_t testfn)
 {
     const ncx_lmem_t   *listmem;
     const xmlChar      *pfix;
@@ -883,7 +949,7 @@ void
 
     /* check the user filter callback function */
     if (testfn) {
-	if (!(*testfn)(msg->withdef, NCX_NT_VAL, val)) {
+	if (!(*testfn)(msg->withdef, val)) {
 	    return;   /* skip this entry */
 	}
     }
@@ -924,8 +990,12 @@ void
 	break;
     case NCX_BT_EMPTY:
 	if (useval->v.bool) {
-	    xml_wr_empty_elem(scb, msg, val_get_parent_nsid(useval),
-			      useval->nsid, useval->name, -1);
+	    xml_wr_empty_elem(scb,
+			      msg,
+			      val_get_parent_nsid(useval),
+			      useval->nsid,
+			      useval->name,
+			      -1);
 	}
 	break;
     case NCX_BT_BOOLEAN:
@@ -945,7 +1015,10 @@ void
     case NCX_BT_UINT64:
     case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
-	res = ncx_sprintf_num(buff, &useval->v.num, btyp, &len);
+	res = ncx_sprintf_num(buff, 
+			      &useval->v.num, 
+			      btyp, 
+			      &len);
 	if (res == NO_ERR) {
 	    ses_putstr(scb, buff); 
 	} else {
@@ -970,7 +1043,8 @@ void
 				  (useval->parent) 
 				  ? useval->parent->nsid : 0,
 				  useval->v.idref.nsid, 
-				  useval, &xneeded);
+				  useval, 
+				  &xneeded);
 	if (pfix) {
 	    ses_putstr(scb, pfix);
 	    ses_putchar(scb, XMLNS_SEPCH);
@@ -986,7 +1060,8 @@ void
 		    res = ERR_INTERNAL_MEM;
 		} else {
 		    res = val_sprintf_simval_nc(binbuff, 
-						useval, &len); 
+						useval, 
+						&len); 
 		    if (res == NO_ERR) {
 			ses_putcstr(scb, binbuff, indent);
 		    }
@@ -1083,7 +1158,7 @@ void
 
 	    /* check the user filter callback function */
 	    if (testfn) {
-		if (!(*testfn)(msg->withdef, NCX_NT_VAL, chval)) {
+		if (!(*testfn)(msg->withdef, chval)) {
 		    continue;   /* skip this entry */
 		}
 	    }
@@ -1103,7 +1178,9 @@ void
 	    v_chval = NULL;
 
 	    if (val_is_virtual(chval)) {
-		v_chval = val_get_virtual_value(scb, chval, &res);
+		v_chval = val_get_virtual_value(scb,
+						chval,
+						&res);
 		if (!v_chval) {
 		    if (res != ERR_NCX_SKIPPED) {
 			/*** handle inline error ***/
@@ -1135,25 +1212,31 @@ void
 	    if (usechval->btyp == NCX_BT_IDREF) {
 		if (usechval->v.idref.name) {
 		    /* write a complete QName element */
-		    xml_wr_qname_elem(scb, msg, 
+		    xml_wr_qname_elem(scb,
+				      msg, 
 				      usechval->v.idref.nsid,
 				      usechval->v.idref.name,
 				      useval->nsid,
 				      usechval->nsid,
 				      usechval->name,
 				      &usechval->metaQ, 
-				      FALSE, indent);
+				      FALSE, 
+				      indent);
 		} else {
 		    /* empty contents, eg, create PDU */
-		    xml_wr_begin_elem_val(scb, msg,
+		    xml_wr_begin_elem_val(scb,
+					  msg,
 					  usechval, 
 					  indent, 
 					  TRUE);
 		}
 	    } else {
 		/* write the child start tag, recurse, then end tag */
-		xml_wr_begin_elem_val(scb, msg, usechval,
-				      indent, empty);
+		xml_wr_begin_elem_val(scb,
+				      msg, 
+				      usechval,
+				      indent,
+				      empty);
 
 		/* check corner-case; empty application placeholder */
 		if (!empty) {
@@ -1163,13 +1246,20 @@ void
 		    }
 
 		    /* write the child node value */
-		    xml_wr_check_val(scb, msg, usechval, indent, testfn);
+		    xml_wr_check_val(scb,
+				     msg,
+				     usechval,
+				     indent,
+				     testfn);
 
 		    /* reset the indent and write the value end node */
 		    if (indent >= 0) {
 			indent -= ses_indent_count(scb);
 		    }
-		    xml_wr_end_elem(scb, msg, usechval->nsid, usechval->name, 
+		    xml_wr_end_elem(scb, 
+				    msg, 
+				    usechval->nsid,
+				    usechval->name, 
 				    fit_on_line(scb, usechval) ? -1 : indent);
 		}
 	    }
@@ -1212,7 +1302,11 @@ void
 		val_value_t *val,
 		int32  indent)
 {
-    xml_wr_check_val(scb, msg, val, indent, NULL);
+    xml_wr_check_val(scb, 
+		     msg, 
+		     val, 
+		     indent, 
+		     NULL);
 
 }  /* xml_wr_val */
 
@@ -1239,7 +1333,7 @@ void
 			   xml_msg_hdr_t *msg,
 			   val_value_t *val,
 			   int32  indent,
-			   ncx_nodetest_fn_t testfn)
+			   val_nodetest_fn_t testfn)
 {
     val_value_t  *vir;
     val_value_t *out;
@@ -1268,7 +1362,7 @@ void
 
     /* check the user filter callback function */
     if (testfn) {
-	if (!(*testfn)(msg->withdef, NCX_NT_VAL, out)) {
+	if (!(*testfn)(msg->withdef, out)) {
 	    if (vir) {
 		val_free_value(vir);
 	    }
@@ -1284,27 +1378,40 @@ void
     /* write the value node contents or an empty node if none */
     if (out->btyp == NCX_BT_IDREF) {
 	/* write a complete QName element */
-	xml_wr_qname_elem(scb, msg, 
+	xml_wr_qname_elem(scb, 
+			  msg, 
 			  out->v.idref.nsid,
 			  out->v.idref.name,
 			  (out->parent) ? out->parent->nsid : 0,
-			  out->nsid, out->name,
-			  &out->metaQ, FALSE, indent);
+			  out->nsid, 
+			  out->name,
+			  &out->metaQ, 
+			  FALSE, 
+			  indent);
     } else if (val_has_content(out)) {
-
 	/* write the top-level start node */
 	xml_wr_begin_elem_val(scb, msg, out, indent, START);
 
 	/* write the value node contents */
-	xml_wr_check_val(scb, msg, out, 
-			 indent+ses_indent_count(scb), testfn);
+	xml_wr_check_val(scb, 
+			 msg, 
+			 out, 
+			 indent+ses_indent_count(scb), 
+			 testfn);
 
 	/* write the top-level end node */
-	xml_wr_end_elem(scb, msg, out->nsid, out->name, 
+	xml_wr_end_elem(scb, 
+			msg, 
+			out->nsid, 
+			out->name, 
 			fit_on_line(scb, out) ? -1 : indent);
     } else {
 	/* write the top-level empty node */
-	xml_wr_begin_elem_val(scb, msg, out, indent, EMPTY);
+	xml_wr_begin_elem_val(scb, 
+			      msg, 
+			      out, 
+			      indent, 
+			      EMPTY);
     }
 
     if (vir) {
@@ -1334,7 +1441,11 @@ void
 		     val_value_t *val,
 		     int32  indent)
 {
-    xml_wr_full_check_val(scb, msg, val, indent, NULL);
+    xml_wr_full_check_val(scb, 
+			  msg, 
+			  val, 
+			  indent, 
+			  NULL);
 				
 } /* xml_wr_full_val */
 
@@ -1365,7 +1476,7 @@ status_t
 		       boolean docmode,
 		       boolean xmlhdr,
 		       int32  indent,
-		       ncx_nodetest_fn_t testfn)
+		       val_nodetest_fn_t testfn)
 {
     FILE       *fp;
     ses_cb_t   *scb;
@@ -1427,32 +1538,53 @@ status_t
     /* setup an empty prefix map */
     if (res == NO_ERR) {
 	res = xml_msg_build_prefix_map(&msg->mhdr,
-				       msg->rpc_in_attrs, FALSE, FALSE);
+				       msg->rpc_in_attrs, 
+				       FALSE, 
+				       FALSE);
     }
 
     /* generate the <foo> start tag */
     if (res == NO_ERR) {
 	if (val->btyp == NCX_BT_IDREF) {
-	    xml_wr_qname_elem(scb, &msg->mhdr, 
+	    xml_wr_qname_elem(scb, 
+			      &msg->mhdr, 
 			      val->v.idref.nsid,
-			      val->v.idref.name, 0,
-			      val->nsid, val->name,
-			      attrs, TRUE, 0);
+			      val->v.idref.name, 
+			      0,
+			      val->nsid, 
+			      val->name,
+			      attrs, 
+			      TRUE, 
+			      0);
 	} else {
-	    xml_wr_begin_elem_ex(scb, &msg->mhdr,
-				 0, val->nsid, val->name, 
-				 attrs, TRUE, 0, FALSE);
+	    xml_wr_begin_elem_ex(scb, 
+				 &msg->mhdr,
+				 0, 
+				 val->nsid, 
+				 val->name, 
+				 attrs, 
+				 TRUE, 
+				 0, 
+				 FALSE);
 	}
 	anyout = TRUE;
 
 	/* output the value */
 	if (res == NO_ERR) {
-	    xml_wr_check_val(scb, &msg->mhdr, val, indent, testfn);
+	    xml_wr_check_val(scb, 
+			     &msg->mhdr, 
+			     val, 
+			     indent, 
+			     testfn);
 	}
 
 	/* generate the <foo> end tag */
 	if (res == NO_ERR) {
-	    xml_wr_end_elem(scb, &msg->mhdr, val->nsid, val->name, 0);
+	    xml_wr_end_elem(scb, 
+			    &msg->mhdr, 
+			    val->nsid, 
+			    val->name,
+			    0);
 	}
     }
 
@@ -1504,8 +1636,13 @@ status_t
 		 boolean xmlhdr,
 		 int32 indent)
 {
-    return xml_wr_check_file(filespec, val, attrs, 
-			     docmode, xmlhdr, indent, NULL);
+    return xml_wr_check_file(filespec, 
+			     val, 
+			     attrs, 
+			     docmode, 
+			     xmlhdr, 
+			     indent, 
+			     NULL);
 
 } /* xml_wr_file */
 

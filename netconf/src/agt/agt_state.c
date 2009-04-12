@@ -1274,7 +1274,7 @@ void
 	    return;
 	}
     }
-    SET_ERROR(ERR_NCX_INVALID_VALUE);
+    /* session already removed -- ignore the error */
 
 }  /* agt_state_remove_session */
 

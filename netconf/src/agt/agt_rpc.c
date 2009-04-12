@@ -956,27 +956,6 @@ void
      */
     msg->rpc_in_attrs = &top->attrs;
 
-#if 0
-    /***** REPLACED: USE with-defaults.yang INSTEAD *****/
-    /* get the NCX RPC with-defaults attribute if present */
-    attr = xml_find_attr(top, xmlns_ncx_id(), NCX_EL_WITH_DEFAULTS);
-    if (attr && attr->attr_val) {
-	if (ncx_is_true(attr->attr_val)) {
-	    msg->mhdr.withdef = TRUE;
-	} else if (ncx_is_false(attr->attr_val)) {
-	    msg->mhdr.withdef = FALSE;
-	} else {
-	    /* else this is an invalid-attribute error !!! */
-	    agt_record_attr_error(scb, &msg->mhdr, NCX_LAYER_RPC,
-				  ERR_NCX_BAD_ATTRIBUTE, attr, top, NULL, 
-				  NCX_NT_STRING, RPC_ROOT);
-	}
-    } else {
-	/* with-defaults not explicitly set, so get the default */
-	msg->mhdr.withdef = ses_withdef(scb);	
-    }
-#endif
-
     /* get the NCX RPC with-metadata attribute if present */
     attr = xml_find_attr(top, xmlns_ncx_id(), NCX_EL_WITH_METADATA);
     if (attr && attr->attr_val) {
@@ -994,6 +973,9 @@ void
 	/* with-metadata not explicitly set, so get the default */
 	msg->mhdr.withmeta = ses_withmeta(scb);	
     }
+
+    /* set the default for the with-defaults parameter */
+    msg->mhdr.withdef = ses_withdef(scb);
 
 #ifdef STRICT_RFC4741
     /* get the NC RPC message-id attribute; must be present */

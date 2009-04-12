@@ -988,5 +988,7 @@ extern void
 extern const typ_def_t *
     val_get_typdef (const val_value_t *val);
 
+extern boolean
+    val_set_by_default (const val_value_t *val);
 
 #endif	    /* _H_val */

@@ -30,6 +30,10 @@ date             init     comment
 #include "dlq.h"
 #endif
 
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -242,7 +246,7 @@ typedef struct ses_cb_t_ {
     /*** user preferences ***/
     int32            indent;          /* indent N spaces (0..9) */
     uint32           linesize;              /* TERM line length */
-    boolean          withdef;          /* with-defaults default */
+    ncx_withdefaults_t  withdef;       /* with-defaults default */
     boolean          withmeta;         /* with-metadata default */
 } ses_cb_t;
 
@@ -315,7 +319,7 @@ extern status_t
 extern const xmlChar *
     ses_state_name (ses_state_t state);
 
-extern boolean
+extern ncx_withdefaults_t
     ses_withdef (const ses_cb_t *scb);
 
 extern boolean

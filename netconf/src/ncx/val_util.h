@@ -52,6 +52,35 @@ date	     init     comment
 
 
 /********************************************************************
+*                                                                   *
+*                            T Y P E S                              *
+*                                                                   *
+*********************************************************************/
+
+
+/* user function callback template to test output 
+ * of a specified node.
+ *
+ * val_nodetest_fn_t
+ * 
+ *  Run a user-defined test on the supplied node, and 
+ *  determine if it should be output or not.
+ *
+ * INPUTS:
+ *   withdef == with-defaults value in affect
+ *   nodetyp == node type enumeration
+ *   mode == void pointer to the node to check
+ *
+ * RETURNS:
+ *   TRUE if the node should be output
+ *   FALSE if the node should be skipped
+ */
+typedef boolean 
+    (*val_nodetest_fn_t) (ncx_withdefaults_t withdef,
+			  const val_value_t *node);
+
+
+/********************************************************************
 *								    *
 *			F U N C T I O N S			    *
 *								    *

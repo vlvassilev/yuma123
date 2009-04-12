@@ -128,7 +128,8 @@ static void
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DEFAULT_STYLE);
     if (val && val->res == NO_ERR) {
 	agt_profile->agt_defaultStyle = VAL_ENUM_NAME(val);
-	agt_profile->agt_defaultStyleEnum = VAL_ENUM(val);
+	agt_profile->agt_defaultStyleEnum = 
+	    ncx_get_withdefaults_enum(VAL_ENUM_NAME(val));
     }
 
     /* help parameter checked externally */

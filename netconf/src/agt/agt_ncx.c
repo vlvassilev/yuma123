@@ -158,17 +158,24 @@ static status_t
 	res = cfg_ok_to_read(source);
     }
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res,
-			 methnode, NCX_NT_NONE, 
-			 NULL, NCX_NT_NONE, NULL);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION, 
+			 res,
+			 methnode, 
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_NONE, 
+			 NULL);
 	return res;
     }
 
+    /* check the with-defaults parameter */
     parm = val_find_child(msg->rpc_input,
 			  NULL, NCX_EL_WITH_DEFAULTS);
     if (parm && parm->res == NO_ERR) {
-	msg->mhdr.withdef = VAL_BOOL(parm);
+	msg->mhdr.withdef = 
+	    ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
     }
 
     /* check if the optional filter parameter is ok */
@@ -210,7 +217,10 @@ static status_t
     status_t        res;
 
     /* check if the source config database exists */
-    res = agt_get_cfg_from_parm(NCX_EL_SOURCE, msg, methnode, &source);
+    res = agt_get_cfg_from_parm(NCX_EL_SOURCE, 
+				msg, 
+				methnode, 
+				&source);
     if (res != NO_ERR) {
 	return res;  /* error already recorded */
     } 
@@ -220,27 +230,39 @@ static status_t
      */
     if (source->cfg_id == NCX_CFGID_STARTUP) {
 	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res,
-			 methnode, NCX_NT_NONE, 
-			 NULL, NCX_NT_NONE, NULL);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION, 
+			 res,
+			 methnode, 
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_NONE, 
+			 NULL);
 	return res;
     }
 
     /* check if this config can be read right now */
     res = cfg_ok_to_read(source);
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res,
-			 methnode, NCX_NT_NONE, 
-			 NULL, NCX_NT_NONE, NULL);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION, 
+			 res,
+			 methnode, 
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_NONE, 
+			 NULL);
 	return res;
     }
 
+    /* check the with-defaults parameter */
     parm = val_find_child(msg->rpc_input,
 			  NULL, NCX_EL_WITH_DEFAULTS);
     if (parm && parm->res == NO_ERR) {
-	msg->mhdr.withdef = VAL_BOOL(parm);
+	msg->mhdr.withdef = 
+	    ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
     }
 
     /* check if the optional filter parameter is ok */

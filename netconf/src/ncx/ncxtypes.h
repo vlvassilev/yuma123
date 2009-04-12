@@ -609,26 +609,13 @@ typedef enum ncx_cvttyp_t_ {
 } ncx_cvttyp_t;
 
 
-/* user function callback template to test output 
- * of a specified node.
- *
- * ncx_nodetest_fn_t
- * 
- *  Run a user-defined test on the supplied node, and 
- *  determine if it should be output or not.
- *
- * INPUTS:
- *   withdef == with-defaults value in affect
- *   nodetyp == node type enumeration
- *   mode == void pointer to the node to check
- *
- * RETURNS:
- *   TRUE if the node should be output
- *   FALSE if the node should be skipped
- */
-typedef boolean (*ncx_nodetest_fn_t) (boolean withdef,
-				      ncx_node_t nodetyp,
-				      const void *node);
+/* enum for with-defaults enum values */
+typedef enum ncx_withdefaults_t_ { 
+    NCX_WITHDEF_NONE,
+    NCX_WITHDEF_REPORT_ALL,
+    NCX_WITHDEF_TRIM,
+    NCX_WITHDEF_EXPLICIT
+} ncx_withdefaults_t;
 
 
 /* One 'import' clause in YANG */
@@ -739,14 +726,6 @@ typedef enum ncx_modformat_t_ {
     NCX_MODFORMAT_RNG
 } ncx_modformat_t;
 
-
-/* enum for with-defaults enum values */
-typedef enum ncx_withdefaults_t_ { 
-    NCX_WITHDEF_NONE,
-    NCX_WITHDEF_REPORT_ALL,
-    NCX_WITHDEF_TRIM,
-    NCX_WITHDEF_EXPLICIT
-} ncx_withdefaults_t;
 
 
 #endif	    /* _H_ncxtypes */

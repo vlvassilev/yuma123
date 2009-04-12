@@ -8193,4 +8193,31 @@ const typ_def_t *
 }  /* val_get_typdef */
 
 
+/********************************************************************
+* FUNCTION val_set_by_default
+* 
+* Check if the value was set by val_add_defaults
+*
+* INPUTS:
+*    val == val_value_t struct to check
+*
+* RETURNS:
+*   TRUE if set by default
+*   FALSE if set explicitly by some user or the ctartup config
+*********************************************************************/
+boolean
+    val_set_by_default (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    return (val->flags & VAL_FL_DEFSET) ? TRUE : FALSE;
+
+}  /* val_set_by_default */
+
+
 /* END file val.c */

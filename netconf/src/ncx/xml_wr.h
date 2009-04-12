@@ -46,6 +46,10 @@ date	     init     comment
 #include "val.h"
 #endif
 
+#ifndef _H_val_util
+#include "val_util.h"
+#endif
+
 #ifndef _H_xml_msg
 #include "xml_msg.h"
 #endif
@@ -152,7 +156,7 @@ extern void
 		      xml_msg_hdr_t *msg,
 		      val_value_t *val,
 		      int32  indent,
-		      ncx_nodetest_fn_t testfn);
+		      val_nodetest_fn_t testfn);
 
 
 /* output val_value_t node contents only */
@@ -168,7 +172,7 @@ extern void
 			   xml_msg_hdr_t *msg,
 			   val_value_t *val,
 			   int32  indent,
-			   ncx_nodetest_fn_t testfn);
+			   val_nodetest_fn_t testfn);
 
 /* generate entire val_value_t */
 extern void
@@ -184,7 +188,7 @@ extern status_t
 		       boolean docmode,
 		       boolean xmlhdr,
 		       int32 indent,
-		       ncx_nodetest_fn_t testfn);
+		       val_nodetest_fn_t testfn);
 
 
 extern status_t

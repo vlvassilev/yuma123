@@ -1126,7 +1126,7 @@ const xmlChar *
 * RETURNS:
 *   with-defaults value for the session
 *********************************************************************/
-boolean
+ncx_withdefaults_t
     ses_withdef (const ses_cb_t *scb)
 {
     return scb->withdef;

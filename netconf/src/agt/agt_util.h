@@ -134,24 +134,21 @@ extern status_t
  *  and with-defaults test passes as well
  */
 extern boolean
-    agt_check_config (boolean withdef,
-		      ncx_node_t nodetyp,
-		      const void *node);
+    agt_check_config (ncx_withdefaults_t withdef,
+		      const val_value_t *node);
 
 /* default handler when no filter is present */
 extern boolean
-    agt_check_default (boolean withdef,
-		       ncx_node_t nodetyp,
-		       const void *node);
+    agt_check_default (ncx_withdefaults_t withdef,
+		       const val_value_t *node);
 
 
 /* filter: returns TRUE for NCX_DC_CONFIG 
  * and with-defaults test passes as well
  */
 extern boolean
-    agt_check_save (boolean withdef,
-		    ncx_node_t nodetyp,
-		    const void *node);
+    agt_check_save (ncx_withdefaults_t withdef,
+		    const val_value_t *node);
 
 /* generate the data that matched the subtree or XPath filter */
 extern status_t

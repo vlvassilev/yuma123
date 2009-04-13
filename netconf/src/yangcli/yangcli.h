@@ -25,12 +25,26 @@ date	     init     comment
 
 #include <xmlstring.h>
 
+#include "libtecla.h"
+
 #ifndef _H_ncxtypes
 #include "ncxtypes.h"
 #endif
 
 #ifndef _H_mgr_io
 #include "mgr_io.h"
+#endif
+
+#ifndef _H_mgr_rpc
+#include "mgr_rpc.h"
+#endif
+
+#ifndef _H_ses
+#include "ses.h"
+#endif
+
+#ifndef _H_val
+#include "val.h"
 #endif
 
 
@@ -236,5 +250,49 @@ typedef void (*logfn_t) (const char *fstr, ...);
 
 extern boolean
     get_autocomp (void);
+
+extern boolean
+    get_autoload (void);
+
+extern boolean
+    get_batchmode (void);
+
+extern GetLine *
+    get_cli_gl (void);
+
+extern const xmlChar *
+    get_default_module (void);
+
+extern const xmlChar *
+    get_runscript (void);
+
+extern xmlChar *
+    get_clibuff (void);
+
+extern ncx_bad_data_t
+    get_baddata (void);
+
+extern ncx_module_t *
+    get_netconf_mod (void);
+
+extern ncx_module_t *
+    get_yangcli_mod (void);
+
+extern val_value_t *
+    get_mgr_cli_valset (void);
+
+extern val_value_t *
+    get_connect_valset (void);
+
+/* forward decl needed by send_copy_config_to_agent function */
+extern void
+    yangcli_reply_handler (ses_cb_t *scb,
+			   mgr_rpc_req_t *req,
+			   mgr_rpc_rpy_t *rpy);
+
+extern status_t
+    finish_result_assign (agent_cb_t *agent_cb,
+			  val_value_t *resultvar,
+			  const xmlChar *resultstr);
 
 #endif	    /* _H_yangcli */

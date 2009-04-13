@@ -101,4 +101,7 @@ extern val_value_t *
 extern boolean
     file_is_text (const xmlChar *filespec);
 
+extern boolean
+    interactive_mode (void);
+
 #endif	    /* _H_yangcli_util */

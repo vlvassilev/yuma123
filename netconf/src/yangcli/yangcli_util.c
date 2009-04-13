@@ -61,6 +61,10 @@ date         init     comment
 #include "obj.h"
 #endif
 
+#ifndef _H_runstack
+#include "runstack.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -71,10 +75,6 @@ date         init     comment
 
 #ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_var
-#include "var.h"
 #endif
 
 #ifndef _H_xmlns
@@ -89,10 +89,6 @@ date         init     comment
 #include "xml_val.h"
 #endif
 
-#ifndef _H_xml_wr
-#include "xml_wr.h"
-#endif
-
 #ifndef _H_xpath
 #include "xpath.h"
 #endif
@@ -100,7 +96,6 @@ date         init     comment
 #ifndef _H_xpath_yang
 #include "xpath_yang.h"
 #endif
-
 
 #ifndef _H_yangconst
 #include "yangconst.h"
@@ -823,6 +818,22 @@ boolean
     return FALSE;
 
 }  /* file_is_text */
+
+
+/********************************************************************
+* FUNCTION interactive_mode
+* 
+*  Check if the program is in interactive mode
+* 
+* RETURNS:
+*   TRUE if insteractive mode, FALSE if script or batch mode
+*********************************************************************/
+boolean
+    interactive_mode (void)
+{
+    return (get_batchmode() || runstack_level()) ? FALSE : TRUE;
+
+}  /* interactive_mode */
 
 
 /* END yangcli_util.c */

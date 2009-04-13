@@ -98,10 +98,6 @@ date         init     comment
 #include "obj.h"
 #endif
 
-#ifndef _H_obj_help
-#include "obj_help.h"
-#endif
-
 #ifndef _H_op
 #include "op.h"
 #endif
@@ -130,32 +126,12 @@ date         init     comment
 #include "var.h"
 #endif
 
-#ifndef _H_xmlns
-#include "xmlns.h"
-#endif
-
 #ifndef _H_xml_util
 #include "xml_util.h"
 #endif
 
-#ifndef _H_xml_val
-#include "xml_val.h"
-#endif
-
 #ifndef _H_xml_wr
 #include "xml_wr.h"
-#endif
-
-#ifndef _H_xpath
-#include "xpath.h"
-#endif
-
-#ifndef _H_xpath1
-#include "xpath1.h"
-#endif
-
-#ifndef _H_xpath_yang
-#include "xpath_yang.h"
 #endif
 
 #ifndef _H_yangconst

@@ -7903,6 +7903,8 @@ void
 {
 
     const dlq_hdr_t  *appinfoQ;
+    const typ_def_t  *typdef;
+
 
 #ifdef DEBUG
     if (!obj) {
@@ -7913,83 +7915,86 @@ void
 
     appinfoQ = obj_get_appinfoQ(obj);
 
-    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_PASSWORD)) {
+    if (ncx_find_appinfo(appinfoQ, 
+			 NCX_PREFIX, 
+			 NCX_EL_PASSWORD)) {
 	obj->flags |= OBJ_FL_PASSWD;
     }
 
-    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_HIDDEN)) {
+    if (ncx_find_appinfo(appinfoQ, 
+			 NCX_PREFIX, 
+			 NCX_EL_HIDDEN)) {
 	obj->flags |= OBJ_FL_HIDDEN;
     }
 
-    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_XSDLIST)) {
+    if (ncx_find_appinfo(appinfoQ, 
+			 NCX_PREFIX, 
+			 NCX_EL_XSDLIST)) {
 	obj->flags |= OBJ_FL_XSDLIST;
     }
 
-    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_ROOT)) {
+    if (ncx_find_appinfo(appinfoQ, 
+			 NCX_PREFIX, 
+			 NCX_EL_ROOT)) {
 	obj->flags |= OBJ_FL_ROOT;
     }
 
-    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_CLI)) {
+    if (ncx_find_appinfo(appinfoQ, 
+			 NCX_PREFIX, 
+			 NCX_EL_CLI)) {
 	obj->flags |= OBJ_FL_CLI;
     }
 
-    if (ncx_find_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_ABSTRACT)) {
+    if (ncx_find_appinfo(appinfoQ, 
+			 NCX_PREFIX, 
+			 NCX_EL_ABSTRACT)) {
 	obj->flags |= OBJ_FL_ABSTRACT;
     }
 
+    if (ncx_find_appinfo(appinfoQ, 
+			 NCX_PREFIX, 
+			 NCX_EL_SECURE)) {
+	obj->flags |= OBJ_FL_SECURE;
+    }
+
+    if (ncx_find_appinfo(appinfoQ, 
+			 NCX_PREFIX, 
+			 NCX_EL_VERY_SECURE)) {
+	obj->flags |= OBJ_FL_VERY_SECURE;
+    }
+
     if (obj_is_leafy(obj)) {
-	if (typ_is_xpath_string(obj_get_ctypdef(obj))) {
+	typdef = obj_get_ctypdef(obj);
+
+	/* ncx:xpath extension */
+	if (typ_is_xpath_string(typdef)) {
 	    obj->flags |= OBJ_FL_XPATH;
 	} else if (ncx_find_appinfo(appinfoQ, 
 				    NCX_PREFIX, 
 				    NCX_EL_XPATH)) {
 	    obj->flags |= OBJ_FL_XPATH;
 	}
-	if (typ_is_qname_string(obj_get_ctypdef(obj))) {
+
+	/* ncx:qname extension */
+	if (typ_is_qname_string(typdef)) {
 	    obj->flags |= OBJ_FL_QNAME;
 	} else if (ncx_find_appinfo(appinfoQ, 
 				    NCX_PREFIX, 
 				    NCX_EL_XPATH)) {
 	    obj->flags |= OBJ_FL_QNAME;
+	}
+
+	/* ncx:schema-instance extension */
+	if (typ_is_schema_instance_string(typdef)) {
+	    obj->flags |= OBJ_FL_SCHEMAINST;
+	} else if (ncx_find_appinfo(appinfoQ, 
+				    NCX_PREFIX, 
+				    NCX_EL_SCHEMA_INSTANCE)) {
+	    obj->flags |= OBJ_FL_SCHEMAINST;
 	}
     }
 
 }   /* obj_set_ncx_flags */
-
-
-/********************************************************************
-* FUNCTION obj_set_xpath_flags
-*
-* Check the NCX xpath appinfo extensions and set flags as needed
-*
-** INPUTS:
-*   obj == obj_template to check
-*
-* OUTPUTS:
-*   may set additional bits in the obj->flags field
-*
-*********************************************************************/
-void
-    obj_set_xpath_flags (obj_template_t *obj)
-{
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    if (obj->objtype == OBJ_TYP_LEAF) {
-	if (typ_is_xpath_string(obj->def.leaf->typdef)) {
-	    obj->flags |= OBJ_FL_XPATH;
-	}
-    } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
-	if (typ_is_xpath_string(obj->def.leaflist->typdef)) {
-	    obj->flags |= OBJ_FL_XPATH;
-	}
-    }
-
-}   /* obj_set_xpath_flags */
 
 
 /********************************************************************
@@ -8215,6 +8220,97 @@ boolean
 	    obj_get_basetype(obj)==NCX_BT_INSTANCE_ID) ? TRUE : FALSE;
 
 }   /* obj_is_xpath_string */
+
+
+/********************************************************************
+* FUNCTION obj_is_schema_instance_string
+*
+* Check if object is a schema-instance string
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:schema-instance
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_schema_instance_string (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    if (obj_get_basetype(obj) != NCX_BT_STRING) {
+	return FALSE;
+    }
+
+    return (obj->flags & OBJ_FL_SCHEMAINST)
+	? TRUE : FALSE;
+
+}   /* obj_is_schema_instance_string */
+
+
+/********************************************************************
+* FUNCTION obj_is_secure
+*
+* Check if object is tagged ncx:secure
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:secure
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_secure (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_SECURE)
+	? TRUE : FALSE;
+
+}   /* obj_is_secure */
+
+
+/********************************************************************
+* FUNCTION obj_is_very_secure
+*
+* Check if object is tagged ncx:very-secure
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:very-secure
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_very_secure (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_VERY_SECURE)
+	? TRUE : FALSE;
+
+}   /* obj_is_very_secure */
 
 
 /********************************************************************

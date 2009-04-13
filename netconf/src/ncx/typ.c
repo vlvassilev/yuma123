@@ -2658,6 +2658,60 @@ boolean
 
 
 /********************************************************************
+* FUNCTION typ_is_schema_instance_string
+*
+* Find the ncx:schema-instance extension within 
+* the specified typdef chain
+*
+* INPUTS:
+*  typdef == start of typ_def_t chain to check
+*
+* RETURNS:
+*   TRUE if ncx:schema-instance extension found
+*   FALSE otherwise
+*********************************************************************/
+boolean
+    typ_is_schema_instance_string (const typ_def_t *typdef)
+{
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    if (typ_get_basetype(typdef) != NCX_BT_STRING) {
+	return FALSE;
+    }
+
+    if (ncx_find_appinfo(&typdef->appinfoQ,
+			 NCX_PREFIX, 
+			 NCX_EL_SCHEMA_INSTANCE)) {
+	return TRUE;
+    }
+
+    if (typdef->class == NCX_CL_NAMED) {
+	if (typdef->def.named.newtyp &&
+	    ncx_find_appinfo(&typdef->def.named.newtyp->appinfoQ,
+			     NCX_PREFIX, 
+			     NCX_EL_SCHEMA_INSTANCE)) {
+	    return TRUE;
+	}
+	if (typdef->def.named.typ) {
+	    return typ_is_schema_instance_string
+		(&typdef->def.named.typ->typdef);
+	} else {
+	    return FALSE;
+	}
+    } else {
+	return FALSE;
+    }
+
+}  /* typ_is_schema_instance_string */
+
+
+/********************************************************************
 * FUNCTION typ_get_defval
 *
 * Find the default value string for the specified type template

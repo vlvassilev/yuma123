@@ -610,6 +610,9 @@ extern boolean
 extern boolean
     typ_is_qname_string (const typ_def_t *typdef);
 
+extern boolean
+    typ_is_schema_instance_string (const typ_def_t *typdef);
+
 /* get default from template */
 extern const xmlChar * 
     typ_get_defval (const typ_template_t *typ);

@@ -155,6 +155,15 @@ date	     init     comment
 /* object data type is a QName string */
 #define OBJ_FL_QNAME        bit22
 
+/* object data type is a schema-instance string */
+#define OBJ_FL_SCHEMAINST   bit23
+
+/* object is tagged ncx:secure */
+#define OBJ_FL_SECURE       bit24
+
+/* object is tagged ncx:very-secure */
+#define OBJ_FL_VERY_SECURE  bit25
+
 
 /********************************************************************
 *								    *
@@ -852,14 +861,9 @@ extern status_t
     obj_gen_aughook_id (const obj_template_t *obj,
 			xmlChar  **buff);
 
-/* set the ncx:hidden, root, and password flags */
+/* set all the ncx.yang extension flags */
 extern void
     obj_set_ncx_flags (obj_template_t *obj);
-
-/* set the ncx:xpath flags */
-extern void
-    obj_set_xpath_flags (obj_template_t *obj);
-
 
 /***************** ACCESS OBJECT PROPERTIES  *******************/
 
@@ -1040,6 +1044,15 @@ extern boolean
 
 extern boolean
     obj_is_xpath_string (const obj_template_t *obj);
+
+extern boolean
+    obj_is_schema_instance_string (const obj_template_t *obj);
+
+extern boolean
+    obj_is_secure (const obj_template_t *obj);
+
+extern boolean
+    obj_is_very_secure (const obj_template_t *obj);
 
 extern boolean
     obj_is_system_ordered (const obj_template_t *obj);

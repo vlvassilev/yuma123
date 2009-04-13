@@ -4763,9 +4763,6 @@ static status_t
     if (!obj_is_refine(obj) || !redo) {
 	res = yang_typ_resolve_type(tkc, mod, leaf->typdef,
 				    leaf->defval, obj);
-	if (res == NO_ERR) {
-	    obj_set_xpath_flags(obj);
-	}
 	CHK_EXIT(res, retres);
     } 
 
@@ -4824,9 +4821,6 @@ static status_t
     if (!obj_is_refine(obj) && !redo) {
 	res = yang_typ_resolve_type(tkc, mod,
 				    llist->typdef, NULL, obj);
-	if (res == NO_ERR) {
-	    obj_set_xpath_flags(obj);
-	}
 	CHK_EXIT(res, retres);
     }
 

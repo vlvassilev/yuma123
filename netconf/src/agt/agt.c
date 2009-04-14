@@ -464,6 +464,12 @@ status_t
 		 "to no-startup CLI option\n");
     }
 
+    /* load the nacm access control DM module */
+    res = agt_acm_init2();
+    if (res != NO_ERR) {
+	return res;
+    }
+
     /* load the agent sessions callback functions and DM module */
     agt_ses_init2();
 

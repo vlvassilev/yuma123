@@ -772,10 +772,16 @@ static void
 
 	if (dlq_empty(&filptr->childQ)) {
 	    if (getop) {
-		xml_wr_full_val(scb, &msg->mhdr, val, indent);
+		xml_wr_full_check_val(scb, 
+				      &msg->mhdr, 
+				      val, 
+				      indent,
+				      agt_check_default);
 	    } else {
-		xml_wr_full_check_val(scb, &msg->mhdr, 
-				      val, indent,
+		xml_wr_full_check_val(scb, 
+				      &msg->mhdr, 
+				      val, 
+				      indent,
 				      agt_check_config);
 	    }
 	} else {
@@ -837,21 +843,23 @@ static void
     ncx_filptr_t        *fp;
     int32                i;
 
-    log_debug2("\n");
-    for (i=0; i<indent; i++) {
-	log_debug2(" ");
-    }
+    if (LOGDEBUG2) {
+	log_debug2("\n");
+	for (i=0; i<indent; i++) {
+	    log_debug2(" ");
+	}
 
-    log_debug2("filptr: %u:%s %s",  
-	       filptr->node->nsid,
-	       filptr->node->name,
-	       tk_get_btype_sym(filptr->node->btyp));
+	log_debug2("filptr: %u:%s %s",  
+		   filptr->node->nsid,
+		   filptr->node->name,
+		   tk_get_btype_sym(filptr->node->btyp));
 
 
-    for (fp = (ncx_filptr_t *)dlq_firstEntry(&filptr->childQ);
-	 fp != NULL;
-	 fp = (ncx_filptr_t *)dlq_nextEntry(fp)) {
-	dump_filptr_node(fp, indent+2);
+	for (fp = (ncx_filptr_t *)dlq_firstEntry(&filptr->childQ);
+	     fp != NULL;
+	     fp = (ncx_filptr_t *)dlq_nextEntry(fp)) {
+	    dump_filptr_node(fp, indent+2);
+	}
     }
     
 }  /* dump_filptr_node */

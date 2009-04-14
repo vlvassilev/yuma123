@@ -650,7 +650,10 @@ static void
 		     BAR_ID,
 		     identity->name);
     ses_putchar(scb, ' ');
-    ses_putchar(scb, '1');
+    ses_putstr(scb, BAR_CONST);
+    ses_putchar(scb, '"');
+    ses_putstr(scb, identity->name);
+    ses_putchar(scb, '"');
 
 }  /* write_h_identity */
 

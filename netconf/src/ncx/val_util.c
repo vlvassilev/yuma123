@@ -282,15 +282,25 @@ static status_t
 	     * If mandatory, then default is ignored
 	     */
 	    if (!obj_is_mandatory(chobj)) {
-		chval = val_find_child(val, obj_get_mod_name(chobj),
+		chval = val_find_child(val, 
+				       obj_get_mod_name(chobj),
 				       obj_get_name(chobj));
 		if (!chval) {
 		    defval = obj_get_default(chobj);
 		    if (defval) {
-			res = cli_parse_parm(val, chobj,
-					    defval, scriptmode);
+			res = cli_parse_parm(val, 
+					     chobj,
+					     defval, 
+					     scriptmode);
 			if (res==NO_ERR) {
-			    val->flags |= VAL_FL_DEFSET;
+			    chval = val_find_child(val, 
+						   obj_get_mod_name(chobj),
+						   obj_get_name(chobj));
+			    if (!chval) {
+				SET_ERROR(ERR_INTERNAL_VAL);
+			    } else {
+				chval->flags |= VAL_FL_DEFSET;
+			    }
 			}
 		    }
 		}
@@ -326,7 +336,7 @@ static status_t
 	    }
 	    break;
 	case OBJ_TYP_LEAF_LIST:
-	    /* these object types never gets default entries */
+	    /* leaf list objects never get default entries */
 	    break;
 	case OBJ_TYP_CONTAINER:
 	case OBJ_TYP_RPCIO:

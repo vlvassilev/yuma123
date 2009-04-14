@@ -1,5 +1,32 @@
 /*  FILE: agt_acm.c
 
+object identifiers:
+
+container /nacm
+leaf /nacm/noRuleDefault
+container /nacm/groups
+list /nacm/groups/group
+leaf /nacm/groups/group/groupIdentity
+leaf-list /nacm/groups/group/userName
+container /nacm/rules
+list /nacm/rules/moduleRule
+leaf /nacm/rules/moduleRule/moduleName
+leaf /nacm/rules/moduleRule/allowedRights
+leaf-list /nacm/rules/moduleRule/allowedGroup
+leaf /nacm/rules/moduleRule/comment
+list /nacm/rules/rpcRule
+leaf /nacm/rules/rpcRule/rpcModuleName
+leaf /nacm/rules/rpcRule/rpcName
+leaf /nacm/rules/rpcRule/allowedRights
+leaf-list /nacm/rules/rpcRule/allowedGroup
+leaf /nacm/rules/rpcRule/comment
+list /nacm/rules/dataRule
+leaf /nacm/rules/dataRule/name
+leaf /nacm/rules/dataRule/path
+leaf /nacm/rules/dataRule/allowedRights
+leaf-list /nacm/rules/dataRule/allowedGroup
+leaf /nacm/rules/dataRule/comment
+
 		
 *********************************************************************
 *                                                                   *
@@ -77,6 +104,10 @@ date         init     comment
 #include "val.h"
 #endif
 
+#ifndef _H_val_util
+#include "val_util.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -88,54 +119,30 @@ date         init     comment
 
 #define AGT_ACM_MODULE      (const xmlChar *)"nacm"
 
-#define AGT_ACM_CBPATH    (const xmlChar *)"/nacm:accessControl"
+#define nacm_I_nacmGroups (const xmlChar *)"nacmGroups"
+#define nacm_I_superuser (const xmlChar *)"superuser"
+#define nacm_I_admin (const xmlChar *)"admin"
+#define nacm_I_guest (const xmlChar *)"guest"
 
-#define AGT_ACM_DEF_MODE  AGT_ACM_CM_LOOSE
+#define nacm_N_allowedGroup (const xmlChar *)"allowedGroup"
+#define nacm_N_allowedRights (const xmlChar *)"allowedRights"
+#define nacm_N_comment (const xmlChar *)"comment"
+#define nacm_N_dataRule (const xmlChar *)"dataRule"
+#define nacm_N_group (const xmlChar *)"group"
+#define nacm_N_groupIdentity (const xmlChar *)"groupIdentity"
+#define nacm_N_groups (const xmlChar *)"groups"
+#define nacm_N_moduleName (const xmlChar *)"moduleName"
+#define nacm_N_moduleRule (const xmlChar *)"moduleRule"
+#define nacm_N_nacm (const xmlChar *)"nacm"
+#define nacm_N_name (const xmlChar *)"name"
+#define nacm_N_noRuleDefault (const xmlChar *)"noRuleDefault"
+#define nacm_N_path (const xmlChar *)"path"
+#define nacm_N_rpcModuleName (const xmlChar *)"rpcModuleName"
+#define nacm_N_rpcName (const xmlChar *)"rpcName"
+#define nacm_N_rpcRule (const xmlChar *)"rpcRule"
+#define nacm_N_rules (const xmlChar *)"rules"
+#define nacm_N_userName (const xmlChar *)"userName"
 
-#define AGT_ACM_CONTAINER   (const xmlChar *)"accessControl"
-#define AGT_ACM_INSTANCE_ID (const xmlChar *)"/accessControl"
-
-#define PARM_CONFIGCAPS (const xmlChar *)"configCapabilities"
-#define PARM_PROFILE    (const xmlChar *)"profile"
-#define PARM_GROUPS     (const xmlChar *)"groups"
-#define PARM_RPCRULES   (const xmlChar *)"rpcRules"
-#define PARM_DATARULES  (const xmlChar *)"dataRules"
-#define PARM_NOTIFRULES (const xmlChar *)"notificationRules"
-
-#define LEAF_AC_MODE (const xmlChar *)"accessControlMode"
-#define LEAF_GLOBAL_CONFIG (const xmlChar *)"globalConfig"
-#define LEAF_GROUP_CONFIG (const xmlChar *)"groupConfig"
-#define LEAF_RPC_CONFIG (const xmlChar *)"rpcAccessConfig"
-#define LEAF_RPCTYPE_CONFIG (const xmlChar *)"rpcTypeAccessConfig"
-#define LEAF_DATA_CONFIG (const xmlChar *)"databaseAccessConfig"
-#define LEAF_NOTIF_CONFIG (const xmlChar *)"notificationAccessConfig"
-
-#define LEAF_USERS        (const xmlChar *)"users"
-#define LEAF_USER         (const xmlChar *)"user"
-#define LEAF_ROLE         (const xmlChar *)"role"
-#define LEAF_RULETYPE     (const xmlChar *)"ruleType"
-#define LEAF_NAME         (const xmlChar *)"name"
-
-#define LEAF_GROUPLIST    (const xmlChar *)"groupList"
-#define LEAF_XPATHEXPR    (const xmlChar *)"xpathExpr"
-#define LEAF_ALL          (const xmlChar *)"all"
-
-#define LEAF_RPCTARGET    (const xmlChar *)"rpcTarget"
-#define LEAF_RPCTLIST     (const xmlChar *)"rpcTypeList"
-#define LEAF_RPCLIST      (const xmlChar *)"rpcMethodList"
-
-#define LEAF_NSURI        (const xmlChar *)"namespaceUri"
-#define LEAF_ELNAMES      (const xmlChar *)"elementNames"
-
-#define ROLE_ROOT         (const xmlChar *)"root"
-#define ROLE_ADMIN        (const xmlChar *)"admin"
-#define ROLE_GUEST        (const xmlChar *)"guest"
-
-#define ACCESS_PERMIT     (const xmlChar *)"permit"
-#define ACCESS_DENY       (const xmlChar *)"deny"
-
-
-#define MAX_GROUPS 16
 
 /********************************************************************
 *								    *
@@ -143,12 +150,7 @@ date         init     comment
 *								    *
 *********************************************************************/
 
-typedef struct user_ent_t_ {
-    dlq_hdr_t hdr;
-    xmlChar *user;
-    const xmlChar *group;
-    const xmlChar *role;
-} user_ent_t;
+
 
 /********************************************************************
 *                                                                   *
@@ -157,208 +159,12 @@ typedef struct user_ent_t_ {
 *********************************************************************/
 static boolean agt_acm_init_done = FALSE;
 
-static agt_acm_config_caps_t configCaps;
-
-static agt_acm_control_mode_t accessControlMode;
-static val_value_t   *accessControl;
-static boolean        acStale;
-static boolean        acModeStale;
-static boolean        userQStale;
-static dlq_hdr_t      userQ;
+static ncx_module_t  *nacmmod;
+static val_value_t   *nacmval;
+static val_value_t   *groupsval;
+static val_value_t   *rulesval;
 
 #if 0
-/********************************************************************
-* FUNCTION new_user_ent
-*
-* Create a new user entry
-*
-* INPUTS:
-*    name == user name
-*
-* RETURNS:
-*    pointer to malloced user ent (NOT FILLED IN COMPLETELY)
-*********************************************************************/
-static user_ent_t *
-    new_user_ent (const xmlChar *user)
-{
-
-    user_ent_t  *userent;
-
-    userent = m__getObj(user_ent_t);
-    if (!userent) {
-	return NULL;
-    }
-
-    memset(userent, 0x0, sizeof(user_ent_t));
-    userent->user = xml_strdup(user);
-    if (!userent->user) {
-	m__free(userent);
-	return NULL;
-    }
-
-    return userent;
-
-} /* new_user_ent */
-
-
-/********************************************************************
-* FUNCTION free_user_ent
-*
-* Free a user entry
-*
-* INPUTS:
-*    userent == user entry to delete
-*********************************************************************/
-static void
-    free_user_ent (user_ent_t *userent)
-{
-
-    if (userent->user) {
-	m__free(userent->user);
-    }
-    m__free(userent);
-
-} /* free_user_ent */
-
-
-/********************************************************************
-* FUNCTION find_user_ent
-*
-* Find a user entry
-*
-* INPUTS:
-*    name == user name to find
-*
-* RETURNS:
-*    pointer to found user ent or NULL if not found
-*********************************************************************/
-static user_ent_t *
-    find_user_ent (const xmlChar *user)
-{
-
-    user_ent_t  *userent;
-
-    for (userent = (user_ent_t *)dlq_firstEntry(&userQ);
-	 userent != NULL;
-	 userent = (user_ent_t *)dlq_nextEntry(userent)) {
-
-	if (!xml_strcmp(user, userent->user)) {
-	    return userent;
-	}
-    }
-    return NULL;
-
-} /* find_user_ent */
-
-
-/********************************************************************
-* FUNCTION flush_user_entQ
-*
-* Delete all the userQ cache entries
-*
-*********************************************************************/
-static void
-    flush_user_entQ (void)
-{
-
-    user_ent_t  *user;
-
-    while (!dlq_empty(&userQ)) {
-	user = (user_ent_t *)dlq_deque(&userQ);
-	free_user_ent(user);
-    }
-
-
-} /* find_user_ent */
-
-
-/********************************************************************
-* FUNCTION get_ac_valset
-*
-* get the cached value set pointer
-*
-* RETURNS:
-*    accessControl pointer
-*********************************************************************/
-static val_value_t *
-    get_ac_valset (void)
-{
-    if (!accessControl || acStale) {
-
-	accessControl = 
-	    cfg_find_datanode(AGT_ACM_INSTANCE_ID,
-			      NCX_CFGID_RUNNING);
-	if (accessControl) {
-	    acStale = FALSE;
-	    acModeStale = TRUE;
-	    userQStale = TRUE;
-	}
-    }
-
-    return accessControl;
-
-} /* get_ac_valset */
-
-
-/********************************************************************
-* FUNCTION get_ac_mode
-*
-* get the access control mode
-*
-* RETURNS:
-*    accessContro.accessControlMode
-*********************************************************************/
-static agt_acm_control_mode_t
-    get_ac_mode (void)
-{
-    val_value_t            *valset, *val, *chval;
-
-    if (acModeStale) {
-	/* get the accessControl parmset */
-	valset = get_ac_valset();
-	if (!valset) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return AGT_ACM_CM_NONE;
-	}
-
-	/* get the accessControlMode value struct */
-	val = val_find_child(valset, AGT_ACM_MODULE, PARM_PROFILE);
-	if (val) {
-	    chval = val_find_child(val, AGT_ACM_MODULE, LEAF_AC_MODE);
-	    if (!chval) {
-		SET_ERROR(ERR_INTERNAL_VAL);
-		return AGT_ACM_CM_NONE;
-	    }
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return AGT_ACM_CM_NONE;
-	}	    
-
-	/* check the string value and convert to enum */
-	if (!xml_strcmp(VAL_STR(chval),
-			(const xmlChar *)"off")) {
-	    accessControlMode = AGT_ACM_CM_OFF;
-	} else if (!xml_strcmp(VAL_STR(chval),
-			       (const xmlChar *)"warn")) {
-	    accessControlMode = AGT_ACM_CM_WARN;
-	} else if (!xml_strcmp(VAL_STR(chval),
-			       (const xmlChar *)"loose")) {
-	    accessControlMode = AGT_ACM_CM_LOOSE;
-	} else if (!xml_strcmp(VAL_STR(chval),
-			       (const xmlChar *)"strict")) {
-	    accessControlMode = AGT_ACM_CM_STRICT;
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return AGT_ACM_CM_NONE;
-	}
-	acModeStale = FALSE;
-    }
-
-    return accessControlMode;
-
-} /* get_ac_mode */
-
-
 /********************************************************************
 * FUNCTION get_group_from_user
 *
@@ -384,13 +190,6 @@ static status_t
     val_value_t   *valset, *groups, *group, *users, *user, *role, *name;
     user_ent_t    *userent;
 
-    /* first check the userQ cache */
-    userent = find_user_ent(username);
-    if (userent) {
-	*groupname = userent->group;
-	*rolestr = userent->role;
-	return NO_ERR;
-    }
 
     /* not in the queue, so check the groups value struct
      * get tha accessControl parmset
@@ -431,14 +230,6 @@ static status_t
 
 		    *groupname = VAL_STR(name);
 		    *rolestr = VAL_STR(role);
-
-		    /* add a new userent struct to the userQ cache */
-		    userent = new_user_ent(username);
-		    if (userent) {
-			userent->group = *groupname;
-			userent->role = *rolestr;
-			dlq_enque(userent, &userQ);
-		    } /* else memory error, skip cache add ! */
 
 		    return NO_ERR;
 		}
@@ -668,7 +459,7 @@ static boolean
 	return FALSE;
     }
 
-    /* return TRUE if this is the root user */
+    /* return TRUE if this is the super user */
     if (!xml_strcmp(role, ROLE_ROOT)) {
 	return TRUE;
     }
@@ -738,398 +529,7 @@ static boolean
     return granted;
 
 } /* check_rpc_rules */
-
-
-/********************************************************************
-* FUNCTION set_accessControl
-*
-* <edit-config> operation handler for the accessControl parmset
-*
-* When the <accessControl> parmset is created, it needs a read-only
-* parm called 'configCapabilities' filled in by the agent
-*
-* INPUTS:
-*    see agt/agt_.h agt_cb_pscb_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    set_accessControl (ses_cb_t  *scb,
-		       rpc_msg_t *msg,
-		       agt_cbtyp_t cbtyp,
-		       op_editop_t  editop,
-		       val_value_t *newval,
-		       val_value_t *curval)
-{
-    val_value_t           *caps, *val;
-    const obj_template_t  *obj, *chobj;
-    typ_template_t *typ;
-    typ_def_t   *typdef;
-    const xmlChar *str;
-    status_t     res;
-
-#ifdef AGT_ACM_DEBUG
-    log_debug2("\nagt_acm: set accessControl for session %d", scb->sid);
 #endif
-
-    res = NO_ERR;
-
-    if (cbtyp != AGT_CB_APPLY) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    acStale = TRUE;
-
-    /* need to add the configCapabilities object instance */
-    switch (editop) {
-    case OP_EDITOP_NONE:
-	res = NO_ERR;
-	break;
-    case OP_EDITOP_MERGE:
-    case OP_EDITOP_REPLACE:
-    case OP_EDITOP_CREATE:
-    case OP_EDITOP_LOAD:
-	/* check if the current valset already has an
-	 * entry for the configCapabilities
-	 */
-	if (curval && val_find_child(curval, AGT_ACM_MODULE, 
-				     PARM_CONFIGCAPS)) {
-	    res = NO_ERR;
-	    break;
-	} else if (!newval) {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	    break;
-	}
-
-	/* hardwired code !! expecting only boolean objects
-	 * in the configCapabilities struct
-	 */
-	obj = obj_find_child(newval->obj, AGT_ACM_MODULE, 
-			     PARM_CONFIGCAPS);
-	if (!obj) {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	    break;
-	}
-
-	/* get the nacm:globalCapabilities object */
-	chobj = obj_find_child(obj, AGT_ACM_MODULE,
-			       LEAF_GLOBAL_CONFIG);
-	if (!chobj) {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	    break;
-	} 
-
-
-	/************ STOPPED CONVERION HERE ************/
-
-	/* start the configCapabilities parm */
-	caps = val_new_value()
-	if (!caps) {
-	    res = ERR_INTERNAL_MEM;
-	    break;
-	}
-	
-	/* add globalConfig field */
-	str = (configCaps.globalConfig) ? NCX_EL_TRUE : 
-	    NCX_EL_FALSE;
-	val = val_make_simval(obj_get_typdef(chobj), 
-			      caps->val->nsid,
-			      LEAF_GLOBAL_CONFIG, str, &res);
-	if (val) {
-	    val_add_child(val, caps->val);
-	} else {
-	    break;
-	}
-
-	/* add groupConfig field */
-	str = (configCaps.groupConfig) ? NCX_EL_TRUE : 
-	    NCX_EL_FALSE;
-	val = val_make_simval(typdef, caps->val->nsid,
-			      LEAF_GROUP_CONFIG, str, &res);
-	if (val) {
-	    val_add_child(val, caps->val);
-	} else {
-	    break;
-	}
-
-	/* add rpcAccessConfig field */
-	str = (configCaps.rpcAccessConfig) ? NCX_EL_TRUE : 
-	    NCX_EL_FALSE;
-	val = val_make_simval(typdef, caps->val->nsid,
-			      LEAF_RPC_CONFIG, str, &res);
-	if (val) {
-	    val_add_child(val, caps->val);
-	} else {
-	    break;
-	}
-
-	/* add rpcTypeAccessConfig field */
-	str = (configCaps.rpcTypeAccessConfig) ? NCX_EL_TRUE : 
-	    NCX_EL_FALSE;
-	val = val_make_simval(typdef, caps->val->nsid,
-			      LEAF_RPCTYPE_CONFIG, str, &res);
-	if (val) {
-	    val_add_child(val, caps->val);
-	} else {
-	    break;
-	}
-
-	/* add databaseAccessConfig field */
-	str = (configCaps.databaseAccessConfig) ? NCX_EL_TRUE : 
-	    NCX_EL_FALSE;
-	val = val_make_simval(typdef, caps->val->nsid,
-			      LEAF_DATA_CONFIG, str, &res);
-	if (val) {
-	    val_add_child(val, caps->val);
-	} else {
-	    break;
-	}
-
-	/* add notificationAccessConfig field */
-	str = (configCaps.notificationAccessConfig) 
-	    ? NCX_EL_TRUE : NCX_EL_FALSE;
-	val = val_make_simval(typdef, caps->val->nsid,
-			      LEAF_NOTIF_CONFIG, str, &res);
-	if (val) {
-	    val_add_child(val, caps->val);
-	} else {
-	    break;
-	}
-
-	/* add the configCapabilities parm to the accessControl
-	 * parmset
-	 */
-	ps_add_parm(caps, newps, NCX_MERGE_FIRST);
-	break;
-    case OP_EDITOP_DELETE:
-	res = ERR_NCX_NO_ACCESS_MAX;
-	break;
-    default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_CONTENT, res, NULL,
-			 NCX_NT_NONE, NULL,
-			 (caps) ? NCX_NT_PARM : NCX_NT_NONE, caps);
-	if (caps) {
-	    ps_free_parm(caps);
-	}
-    }
-
-    return res;
-
-}  /* set_accessControl */
-
-
-/********************************************************************
-* FUNCTION validate_profile
-*
-* <edit-config> operation handler for the profile parm
-*
-* INPUTS:
-*    see agt/agt_.h agt_cb_pcb_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    validate_profile (ses_cb_t  *scb,
-		      rpc_msg_t *msg,
-		      agt_cbtyp_t cbtyp,
-		      op_editop_t  editop,
-		      ps_parm_t *newp,
-		      ps_parm_t *curp)
-{
-    status_t  res;
-
-    /* get rid of compiler warnings about unused parameters */
-    (void)editop;
-    (void)curp;
-
-    res = NO_ERR;
-    if (cbtyp==AGT_CB_VALIDATE) {
-	if (!configCaps.globalConfig) {
-	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    agt_record_error(scb, &msg->mhdr,
-			     NCX_LAYER_CONTENT,
-			     res,
-			     NULL,
-			     NCX_NT_NONE, NULL,
-			     NCX_NT_PARM, newp);
-	}
-    }
-    return res;
-			     
-} /* validate_profile */
-
-
-/********************************************************************
-* FUNCTION validate_groups
-*
-* <edit-config> operation handler for the groups parm
-*
-* INPUTS:
-*    see agt/agt_.h agt_cb_pcb_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    validate_groups (ses_cb_t  *scb,
-		     rpc_msg_t *msg,
-		     agt_cbtyp_t cbtyp,
-		     op_editop_t  editop,
-		     ps_parm_t *newp,
-		     ps_parm_t *curp)
-{
-    status_t  res;
-
-    (void)editop;
-    (void)curp;
-
-    res = NO_ERR;
-    if (cbtyp==AGT_CB_VALIDATE) {
-	if (!configCaps.groupConfig) {
-	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    agt_record_error(scb, &msg->mhdr,
-			     NCX_LAYER_CONTENT,
-			     res,
-			     NULL,
-			     NCX_NT_NONE, NULL,
-			     NCX_NT_PARM, newp);
-	}
-    }
-    return res;
-			     
-} /* validate_groups */
-
-
-/********************************************************************
-* FUNCTION validate_rpcRules
-*
-* <edit-config> operation handler for the rpcRules parm
-*
-* INPUTS:
-*    see agt/agt_.h agt_cb_pcb_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    validate_rpcRules (ses_cb_t  *scb,
-		       rpc_msg_t *msg,
-		       agt_cbtyp_t cbtyp,
-		       op_editop_t  editop,
-		       ps_parm_t *newp,
-		       ps_parm_t *curp)
-{
-    status_t  res;
-
-    (void)editop;
-    (void)curp;
-
-    res = NO_ERR;
-    if (cbtyp==AGT_CB_VALIDATE) {
-	if (!configCaps.rpcAccessConfig) {
-	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    agt_record_error(scb, &msg->mhdr,
-			     NCX_LAYER_CONTENT,
-			     res,
-			     NULL,
-			     NCX_NT_NONE, NULL,
-			     NCX_NT_PARM, newp);
-	}
-    }
-    return res;
-			     
-} /* validate_rpcRules */
-
-
-/********************************************************************
-* FUNCTION validate_dataRules
-*
-* <edit-config> operation handler for the dataRules parm
-*
-* INPUTS:
-*    see agt/agt_.h agt_cb_pcb_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    validate_dataRules (ses_cb_t  *scb,
-			rpc_msg_t *msg,
-			agt_cbtyp_t cbtyp,
-			op_editop_t  editop,
-			ps_parm_t *newp,
-			ps_parm_t *curp)
-{
-    status_t  res;
-
-    (void)editop;
-    (void)curp;
-
-    res = NO_ERR;
-    if (cbtyp==AGT_CB_VALIDATE) {
-	if (!configCaps.databaseAccessConfig) {
-	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    agt_record_error(scb, &msg->mhdr,
-			     NCX_LAYER_CONTENT,
-			     res,
-			     NULL,
-			     NCX_NT_NONE, NULL,
-			     NCX_NT_PARM, newp);
-	}
-    }
-    return res;
-			     
-} /* validate_dataRules */
-
-
-/********************************************************************
-* FUNCTION validate_notificationRules
-*
-* <edit-config> operation handler for the notificationRules parm
-*
-* INPUTS:
-*    see agt/agt_.h agt_cb_pcb_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    validate_notificationRules (ses_cb_t  *scb,
-				rpc_msg_t *msg,
-				agt_cbtyp_t cbtyp,
-				op_editop_t  editop,
-				ps_parm_t *newp,
-				ps_parm_t *curp)
-{
-    status_t  res;
-
-    (void)editop;
-    (void)curp;
-
-    res = NO_ERR;
-    if (cbtyp==AGT_CB_VALIDATE) {
-	if (!configCaps.notificationAccessConfig) {
-	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    agt_record_error(scb, &msg->mhdr,
-			     NCX_LAYER_CONTENT,
-			     res,
-			     NULL,
-			     NCX_NT_NONE, NULL,
-			     NCX_NT_PARM, newp);
-	}
-    }
-    return res;
-			     
-} /* validate_notificationRules */
-#endif   /*** 0 ***/
-
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
@@ -1147,107 +547,127 @@ static status_t
 status_t 
     agt_acm_init (void)
 {
-#if 0
     status_t  res;
-#endif
 
-    accessControlMode = AGT_ACM_DEF_MODE;
-    accessControl = NULL;
-    dlq_createSQue(&userQ);
-    accessControl = NULL;
-    acStale = TRUE;
-    acModeStale = TRUE;
-    userQStale = TRUE;
+    if (agt_acm_init_done) {
+	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+    }
 
-#if 0
 #ifdef AGT_ACM_DEBUG
     log_debug2("\nagt: Loading NCX Access Control module");
 #endif
 
+    nacmmod = NULL;
+    nacmval = NULL;
+    groupsval = NULL;
+    rulesval = NULL;
+
     /* load in the access control parameters */
-    res = ncxmod_load_module(AGT_ACM_MODULE, NULL, NULL);
+    res = ncxmod_load_module(AGT_ACM_MODULE, 
+			     NULL, 
+			     &nacmmod);
     if (res != NO_ERR) {
 	return res;
     }
-
-    /* register callback function for the accessControl parmset */
-    res = agt_cb_register_callback(AGT_ACM_CBPATH,
-				   FORONE,
-				   AGT_CB_APPLY,
-				   set_accessControl);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* register callback function for the profile parm */
-    res = agt_cb_register_parm_callback(AGT_ACM_MODULE,
-					AGT_ACM_PARMSET,
-					PARM_PROFILE,
-					FORONE,
-					AGT_CB_VALIDATE,
-					validate_profile);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* register callback function for the groups parm */
-    res = agt_cb_register_parm_callback(AGT_ACM_MODULE,
-					AGT_ACM_PARMSET,
-					PARM_GROUPS,
-					FORONE,
-					AGT_CB_VALIDATE,
-					validate_groups);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* register callback function for the rpcRules parm */
-    res = agt_cb_register_parm_callback(AGT_ACM_MODULE,
-					AGT_ACM_PARMSET,
-					PARM_RPCRULES,
-					FORONE,
-					AGT_CB_VALIDATE,
-					validate_rpcRules);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* register callback function for the dataRules parm */
-    res = agt_cb_register_parm_callback(AGT_ACM_MODULE,
-					AGT_ACM_PARMSET,
-					PARM_DATARULES,
-					FORONE,
-					AGT_CB_VALIDATE,
-					validate_dataRules);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* register callback function for the notificationRules parm */
-    res = agt_cb_register_parm_callback(AGT_ACM_MODULE,
-					AGT_ACM_PARMSET,
-					PARM_NOTIFRULES,
-					FORONE,
-					AGT_CB_VALIDATE,
-					validate_notificationRules);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-#endif
-
-    /* set the agent config capabilities by hand here!!! */
-    configCaps.globalConfig = TRUE;
-    configCaps.groupConfig = TRUE;
-    configCaps.rpcAccessConfig = TRUE;
-    configCaps.rpcTypeAccessConfig = TRUE;
-    configCaps.databaseAccessConfig = FALSE;
-    configCaps.notificationAccessConfig = FALSE;
 
     agt_acm_init_done = TRUE;
     return NO_ERR;
 
 }  /* agt_acm_init */
+
+
+/********************************************************************
+* FUNCTION agt_acm_init2
+* 
+* Phase 2:
+*   Initialize the nacm.yang configuration data structures
+* 
+* INPUTS:
+*   none
+* RETURNS:
+*   status of the initialization procedure
+*********************************************************************/
+status_t 
+    agt_acm_init2 (void)
+{
+    const obj_template_t  *nacmobj, *rulesobj, *groupsobj;
+    cfg_template_t        *runningcfg;
+    status_t               res;
+
+    if (!agt_acm_init_done) {
+	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+    }
+
+    /* make sure the running config root is set */
+    runningcfg = cfg_get_config(NCX_EL_RUNNING);
+    if (!runningcfg || !runningcfg->root) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* get all the static object nodes first */
+    nacmobj = obj_find_template_top(nacmmod, 
+				    AGT_ACM_MODULE,
+				    nacm_N_nacm);
+    if (!nacmobj) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    groupsobj = obj_find_child(nacmobj, 
+			       AGT_ACM_MODULE, 
+			       nacm_N_groups);
+
+    if (!groupsobj) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    rulesobj = obj_find_child(nacmobj, 
+			      AGT_ACM_MODULE, 
+			      nacm_N_rules);
+    if (!rulesobj) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    /* create the static structure for the /nacm data model
+     * start with the top node /nacm
+     */
+    nacmval = val_new_value();
+    if (!nacmval) {
+	return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(nacmval, nacmobj);
+
+    /* handing off the malloced memory here */
+    val_add_child(nacmval, runningcfg->root);
+
+    /* add /nacm/noRuleDefault */
+    res = val_add_defaults(nacmval, FALSE);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* add /nacm/groups */
+    groupsval = val_new_value();
+    if (!groupsval) {
+	return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(groupsval, groupsobj);
+
+    /* handing off the malloced memory here */
+    val_add_child(groupsval, nacmval);
+
+    /* add /nacm/rules */
+    rulesval = val_new_value();
+    if (!rulesval) {
+	return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(rulesval, rulesobj);
+
+    /* handing off the malloced memory here */
+    val_add_child(rulesval, nacmval);
+
+    return NO_ERR;
+
+}  /* agt_acm_init2 */
 
 
 /********************************************************************
@@ -1263,28 +683,10 @@ void
 	return;
     }
 
-#if 0
-    agt_cb_unregister_parm_callback(AGT_ACM_MODULE,
-				    AGT_ACM_PARMSET,
-				    PARM_PROFILE);
-    agt_cb_unregister_parm_callback(AGT_ACM_MODULE,
-				    AGT_ACM_PARMSET,
-				    PARM_GROUPS);
-    agt_cb_unregister_parm_callback(AGT_ACM_MODULE,
-				    AGT_ACM_PARMSET,
-				    PARM_RPCRULES);
-    agt_cb_unregister_parm_callback(AGT_ACM_MODULE,
-				    AGT_ACM_PARMSET,
-				    PARM_DATARULES);
-    agt_cb_unregister_parm_callback(AGT_ACM_MODULE,
-				    AGT_ACM_PARMSET,
-				    PARM_NOTIFRULES);
-    agt_cb_unregister_ps_callback(AGT_ACM_MODULE,
-				  AGT_ACM_PARMSET);
-
-    flush_user_entQ();
-#endif
-
+    nacmmod = NULL;
+    nacmval = NULL;
+    groupsval = NULL;
+    rulesval = NULL;
     agt_acm_init_done = FALSE;
 
 }   /* agt_acm_cleanup */
@@ -1306,7 +708,6 @@ boolean
     agt_acm_rpc_allowed (const xmlChar *user,
 			 const obj_template_t *rpcobj)
 {
-    /* agt_acm_control_mode_t acmode; */
 
 #ifdef DEBUG
     if (!user || !rpcobj) {
@@ -1315,20 +716,8 @@ boolean
     }
 #endif
 
-#if 0
-    /* check the access control mode */
-    acmode = get_ac_mode();
-    switch (acmode) {
-    case AGT_ACM_CM_NONE:
-    case AGT_ACM_CM_OFF:
-	return TRUE;
-    default:
-	;
-    }
-#endif
-
-    /* root user is allowed to access anything */
-    if (!xml_strcmp(user, NCX_ROOT_USER)) {
+    /* super user is allowed to access anything */
+    if (!xml_strcmp(user, NCX_SUPERUSER)) {
 	return TRUE;
     }
 
@@ -1364,8 +753,8 @@ boolean
     }
 #endif
 
-    /* root user is allowed to access anything */
-    if (!xml_strcmp(user, NCX_ROOT_USER)) {
+    /* super user is allowed to access anything */
+    if (!xml_strcmp(user, NCX_SUPERUSER)) {
 	return TRUE;
     }
 
@@ -1397,8 +786,8 @@ boolean
     }
 #endif
 
-    /* root user is allowed to access anything */
-    if (!xml_strcmp(user, NCX_ROOT_USER)) {
+    /* super user is allowed to access anything */
+    if (!xml_strcmp(user, NCX_SUPERUSER)) {
 	return TRUE;
     }
 

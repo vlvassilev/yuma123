@@ -45,26 +45,6 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-/* configCapabilities element */
-typedef struct agt_acm_config_caps_t_ {
-    boolean globalConfig;
-    boolean groupConfig;
-    boolean rpcAccessConfig;
-    boolean rpcTypeAccessConfig;
-    boolean databaseAccessConfig;
-    boolean notificationAccessConfig;
-} agt_acm_config_caps_t;
-
-
-/* enumeration for different access control modes */
-typedef enum agt_acm_control_mode_t_ {
-    AGT_ACM_CM_NONE,
-    AGT_ACM_CM_OFF,
-    AGT_ACM_CM_WARN,
-    AGT_ACM_CM_LOOSE,
-    AGT_ACM_CM_STRICT
-} agt_acm_control_mode_t;
-
 
 /********************************************************************
 *								    *
@@ -74,6 +54,9 @@ typedef enum agt_acm_control_mode_t_ {
 
 extern status_t 
     agt_acm_init (void);
+
+extern status_t 
+    agt_acm_init2 (void);
 
 extern void 
     agt_acm_cleanup (void);

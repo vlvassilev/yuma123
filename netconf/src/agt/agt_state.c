@@ -2,6 +2,76 @@
 
    NETCONF State Data Model implementation: Agent Side Support
 
+
+identifiers:
+container /ietf-netconf-state
+container /ietf-netconf-state/capabilities
+leaf-list /ietf-netconf-state/capabilities/capability
+container /ietf-netconf-state/datastores
+list /ietf-netconf-state/datastores/datastore
+container /ietf-netconf-state/datastores/datastore/name
+choice /ietf-netconf-state/datastores/datastore/name/datastore
+case /ietf-netconf-state/datastores/datastore/name/datastore/running
+leaf /ietf-netconf-state/datastores/datastore/name/datastore/running/running
+case /ietf-netconf-state/datastores/datastore/name/datastore/candidate
+leaf /ietf-netconf-state/datastores/datastore/name/datastore/candidate/candidate
+case /ietf-netconf-state/datastores/datastore/name/datastore/startup
+leaf /ietf-netconf-state/datastores/datastore/name/datastore/startup/startup
+container /ietf-netconf-state/datastores/datastore/locks
+choice /ietf-netconf-state/datastores/datastore/locks/lockType
+case /ietf-netconf-state/datastores/datastore/locks/lockType/globalLock
+container /ietf-netconf-state/datastores/datastore/locks/lockType/globalLock/globalLock
+leaf /ietf-netconf-state/datastores/datastore/locks/lockType/globalLock/globalLock/lockedBySession
+leaf /ietf-netconf-state/datastores/datastore/locks/lockType/globalLock/globalLock/lockedTime
+case /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks
+list /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks
+leaf /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockId
+leaf /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockedBySession
+leaf /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockedTime
+leaf-list /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/select
+leaf-list /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockedNodes
+container /ietf-netconf-state/schemas
+list /ietf-netconf-state/schemas/schema
+leaf /ietf-netconf-state/schemas/schema/identifier
+leaf /ietf-netconf-state/schemas/schema/version
+leaf /ietf-netconf-state/schemas/schema/format
+leaf /ietf-netconf-state/schemas/schema/namespace
+leaf /ietf-netconf-state/schemas/schema/location
+container /ietf-netconf-state/sessions
+list /ietf-netconf-state/sessions/session
+leaf /ietf-netconf-state/sessions/session/sessionId
+leaf /ietf-netconf-state/sessions/session/transport
+leaf /ietf-netconf-state/sessions/session/protocol
+leaf /ietf-netconf-state/sessions/session/username
+leaf /ietf-netconf-state/sessions/session/sourceHost
+leaf /ietf-netconf-state/sessions/session/loginTime
+container /ietf-netconf-state/subscriptions
+list /ietf-netconf-state/subscriptions/subscription
+leaf /ietf-netconf-state/subscriptions/subscription/sessionId
+leaf /ietf-netconf-state/subscriptions/subscription/stream
+leaf /ietf-netconf-state/subscriptions/subscription/filter
+leaf /ietf-netconf-state/subscriptions/subscription/startTime
+leaf /ietf-netconf-state/subscriptions/subscription/stopTime
+leaf /ietf-netconf-state/subscriptions/subscription/outNotifications
+container /ietf-netconf-state/statistics
+leaf /ietf-netconf-state/statistics/netconfStartTime
+leaf /ietf-netconf-state/statistics/inSessions
+leaf /ietf-netconf-state/statistics/inXMLParseErrors
+leaf /ietf-netconf-state/statistics/inBadHellos
+leaf /ietf-netconf-state/statistics/inRpcs
+leaf /ietf-netconf-state/statistics/inBadRpcs
+leaf /ietf-netconf-state/statistics/inNotSupportedRpcs
+leaf /ietf-netconf-state/statistics/outRpcReplies
+leaf /ietf-netconf-state/statistics/outRpcErrors
+leaf /ietf-netconf-state/statistics/outNotifications
+rpc /get-schema
+input or output /get-schema/input
+leaf /get-schema/input/identifier
+leaf /get-schema/input/version
+leaf /get-schema/input/format
+input or output /get-schema/output
+leaf /get-schema/output/data
+
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -972,7 +1042,7 @@ status_t
     status_t   res;
 
     if (agt_state_init_done) {
-	return ERR_INTERNAL_INIT_SEQ;
+	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
 #ifdef AGT_STATE_DEBUG
@@ -1089,7 +1159,7 @@ status_t
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    /* add /netconf */
+    /* add /ietf-netconf-state */
     topval = val_new_value();
     if (!topval) {
 	return ERR_INTERNAL_MEM;

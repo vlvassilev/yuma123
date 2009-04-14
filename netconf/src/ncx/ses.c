@@ -398,7 +398,7 @@ ses_cb_t *
     scb->mode = SES_MODE_XML;
     scb->state = SES_ST_IDLE;
     scb->sid = 0;
-    scb->username = xml_strdup(NCX_ROOT_USER);
+    scb->username = xml_strdup(NCX_SUPERUSER);
 
     return scb;
 

@@ -5138,7 +5138,9 @@ static status_t
  *    agent_cb == agent control block to use
  *    rpc == RPC method for the load command
  *    valset == parsed CLI valset
- *
+ *    getoptional == TRUE if optional nodes are desired
+ *    dofill == TRUE to fill the content,
+ *              FALSE to skip fill phase
  * RETURNS:
  *   malloced result of the choice; this is the content
  *   that will be affected by the edit-config operation
@@ -5147,7 +5149,9 @@ static status_t
 static val_value_t *
     get_content_from_choice (agent_cb_t *agent_cb,
 			     const obj_template_t *rpc,
-			     val_value_t *valset)
+			     val_value_t *valset,
+			     boolean getoptional,
+			     boolean dofill)
 {
     val_value_t           *parm, *curparm, *newparm;
     const val_value_t     *userval;
@@ -5184,12 +5188,7 @@ static val_value_t *
 
     if (iscli) {
 	saveopt = agent_cb->get_optional;
-	parm = val_find_child(valset, 
-			      YANGCLI_MOD, 
-			      YANGCLI_OPTIONAL);
-	if (parm && parm->res == NO_ERR) {
-	    agent_cb->get_optional = TRUE;
-	}
+	agent_cb->get_optional = getoptional;
 
 	/* from CLI -- look for the 'target' parameter */
 	parm = val_find_child(valset, 
@@ -5234,8 +5233,21 @@ static val_value_t *
 	switch (targobj->objtype) {
 	case OBJ_TYP_LEAF:
 	case OBJ_TYP_LEAF_LIST:
-	    newparm = fill_value(agent_cb, rpc, targobj, 
-				 curparm, &res);
+	    if (dofill) {
+		newparm = fill_value(agent_cb, 
+				     rpc, 
+				     targobj, 
+				     curparm, 
+				     &res);
+	    } else {
+		newparm = val_new_value();
+		if (!newparm) {
+		    log_error("\nError: malloc failure");
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    val_init_from_template(newparm, targobj);
+		}
+	    }
 	    break;
 	case OBJ_TYP_CHOICE:
 	    newparm = val_new_value();
@@ -5244,11 +5256,16 @@ static val_value_t *
 		res = ERR_INTERNAL_MEM;
 	    } else {
 		val_init_from_template(newparm, targobj);
-	    
-		res = get_choice(agent_cb, rpc, targobj,
-				 newparm, curparm);
-		if (res == ERR_NCX_SKIPPED) {
-		    res = NO_ERR;
+
+		if (dofill) {
+		    res = get_choice(agent_cb, 
+				     rpc, 
+				     targobj,
+				     newparm, 
+				     curparm);
+		    if (res == ERR_NCX_SKIPPED) {
+			res = NO_ERR;
+		    }
 		}
 	    }
 	    break;
@@ -5259,11 +5276,15 @@ static val_value_t *
 		res = ERR_INTERNAL_MEM;
 	    } else {
 		val_init_from_template(newparm, targobj);
-
-		res = get_case(agent_cb, rpc, targobj,
-			       newparm, curparm);
-		if (res == ERR_NCX_SKIPPED) {
-		    res = NO_ERR;
+		if (dofill) {
+		    res = get_case(agent_cb, 
+				   rpc, 
+				   targobj,
+				   newparm, 
+				   curparm);
+		    if (res == ERR_NCX_SKIPPED) {
+			res = NO_ERR;
+		    }
 		}
 	    }
 	    break;
@@ -5275,10 +5296,14 @@ static val_value_t *
 	    } else {
 		val_init_from_template(newparm, targobj);
 
-		res = fill_valset(agent_cb, rpc,
-				  newparm, curparm);
-		if (res == ERR_NCX_SKIPPED) {
-		    res = NO_ERR;
+		if (dofill) {
+		    res = fill_valset(agent_cb, 
+				      rpc,
+				      newparm, 
+				      curparm);
+		    if (res == ERR_NCX_SKIPPED) {
+			res = NO_ERR;
+		    }
 		}
 	    }
 	}
@@ -5605,10 +5630,12 @@ static void
     val_value_t           *valset, *content, *parm;
     status_t               res;
     uint32                 timeoutval;
+    boolean                getoptional, dofill;
 
     /* init locals */
     res = NO_ERR;
     content = NULL;
+    dofill = TRUE;
 
     /* get the command line parameters for this command */
     valset = get_valset(agent_cb, rpc, &line[len], &res);
@@ -5628,13 +5655,32 @@ static void
 	timeoutval = agent_cb->timeout;
     }
 
+    parm = val_find_child(valset, 
+			  YANGCLI_MOD, 
+			  YANGCLI_OPTIONAL);
+    if (parm && parm->res == NO_ERR) {
+	getoptional = TRUE;
+    } else {
+	getoptional = agent_cb->get_optional;
+    }
+
+    parm = val_find_child(valset, 
+			  YANGCLI_MOD, 
+			  YANGCLI_NOFILL);
+    if (parm && parm->res == NO_ERR) {
+	dofill = FALSE;
+    }
+
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(agent_cb, rpc, valset);
+    content = get_content_from_choice(agent_cb, 
+				      rpc, 
+				      valset,
+				      getoptional,
+				      dofill);
     if (!content) {
 	val_free_value(valset);
 	return;
     }
-
 
     /* add nc:operation attribute to the value node */
     res = add_operation_attr(content, OP_EDITOP_CREATE);
@@ -5683,13 +5729,18 @@ static void
     val_value_t           *valset, *content, *parm;
     status_t               res;
     uint32                 timeoutval;
+    boolean                getoptional, dofill;
 
     /* init locals */
     res = NO_ERR;
     content = NULL;
+    dofill = TRUE;
 
     /* get the command line parameters for this command */
-    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    valset = get_valset(agent_cb, 
+			rpc, 
+			&line[len], 
+			&res);
     if (!valset || res != NO_ERR) {
 	if (valset) {
 	    val_free_value(valset);
@@ -5706,8 +5757,28 @@ static void
 	timeoutval = agent_cb->timeout;
     }
 
+    parm = val_find_child(valset, 
+			  YANGCLI_MOD, 
+			  YANGCLI_OPTIONAL);
+    if (parm && parm->res == NO_ERR) {
+	getoptional = TRUE;
+    } else {
+	getoptional = agent_cb->get_optional;
+    }
+
+    parm = val_find_child(valset, 
+			  YANGCLI_MOD, 
+			  YANGCLI_NOFILL);
+    if (parm && parm->res == NO_ERR) {
+	dofill = FALSE;
+    }
+
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(agent_cb, rpc, valset);
+    content = get_content_from_choice(agent_cb, 
+				      rpc, 
+				      valset,
+				      getoptional,
+				      dofill);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -5724,7 +5795,9 @@ static void
     }
 
     /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(agent_cb, content, timeoutval);
+    res = send_edit_config_to_agent(agent_cb, 
+				    content, 
+				    timeoutval);
     if (res != NO_ERR) {
 	log_error("\nError: send merge operation failed (%s)",
 		  get_error_string(res));
@@ -5760,10 +5833,12 @@ static void
     val_value_t           *valset, *content, *parm;
     status_t               res;
     uint32                 timeoutval;
+    boolean                getoptional, dofill;
 
     /* init locals */
     res = NO_ERR;
     content = NULL;
+    dofill = TRUE;
 
     /* get the command line parameters for this command */
     valset = get_valset(agent_cb, rpc, &line[len], &res);
@@ -5782,9 +5857,28 @@ static void
     } else {
 	timeoutval = agent_cb->timeout;
     }
+    parm = val_find_child(valset, 
+			  YANGCLI_MOD, 
+			  YANGCLI_OPTIONAL);
+    if (parm && parm->res == NO_ERR) {
+	getoptional = TRUE;
+    } else {
+	getoptional = agent_cb->get_optional;
+    }
+
+    parm = val_find_child(valset, 
+			  YANGCLI_MOD, 
+			  YANGCLI_NOFILL);
+    if (parm && parm->res == NO_ERR) {
+	dofill = FALSE;
+    }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(agent_cb, rpc, valset);
+    content = get_content_from_choice(agent_cb, 
+				      rpc, 
+				      valset,
+				      getoptional,
+				      dofill);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -5801,7 +5895,9 @@ static void
     }
 
     /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(agent_cb, content, timeoutval);
+    res = send_edit_config_to_agent(agent_cb, 
+				    content, 
+				    timeoutval);
     if (res != NO_ERR) {
 	log_error("\nError: send replace operation failed (%s)",
 		  get_error_string(res));
@@ -5946,10 +6042,12 @@ static void
     op_insertop_t     insertop;
     status_t          res;
     uint32            timeoutval;
+    boolean           getoptional, dofill;
 
     /* init locals */
     res = NO_ERR;
     content = NULL;
+    dofill = TRUE;
 
     /* get the command line parameters for this command */
     valset = get_valset(agent_cb, rpc, &line[len], &res);
@@ -5960,8 +6058,28 @@ static void
 	return;
     }
 
+    parm = val_find_child(valset, 
+			  YANGCLI_MOD, 
+			  YANGCLI_OPTIONAL);
+    if (parm && parm->res == NO_ERR) {
+	getoptional = TRUE;
+    } else {
+	getoptional = agent_cb->get_optional;
+    }
+
+    parm = val_find_child(valset, 
+			  YANGCLI_MOD, 
+			  YANGCLI_NOFILL);
+    if (parm && parm->res == NO_ERR) {
+	dofill = FALSE;
+    }
+
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(agent_cb, rpc, valset);
+    content = get_content_from_choice(agent_cb, 
+				      rpc, 
+				      valset,
+				      getoptional,
+				      dofill);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -6089,7 +6207,7 @@ static void
     val_value_t           *valset, *content, *parm;
     status_t               res;
     uint32                 timeoutval;
-    boolean                dofill;
+    boolean                dofill, getoptional;
     ncx_withdefaults_t     withdef;
 
     /* init locals */
@@ -6124,9 +6242,11 @@ static void
 
     parm = val_find_child(valset, 
 			  YANGCLI_MOD, 
-			  YANGCLI_NOFILL);
+			  YANGCLI_OPTIONAL);
     if (parm && parm->res == NO_ERR) {
-	dofill = FALSE;
+	getoptional = TRUE;
+    } else {
+	getoptional = agent_cb->get_optional;
     }
 
     parm = val_find_child(valset, 
@@ -6139,7 +6259,11 @@ static void
     }
     
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(agent_cb, rpc, valset);
+    content = get_content_from_choice(agent_cb, 
+				      rpc, 
+				      valset,
+				      getoptional,
+				      dofill);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -6189,7 +6313,7 @@ static void
     val_value_t        *valset, *content, *source, *parm;
     status_t            res;
     uint32              timeoutval;
-    boolean             dofill;
+    boolean             dofill, getoptional;
     ncx_withdefaults_t  withdef;
 
     dofill = TRUE;
@@ -6210,6 +6334,15 @@ static void
 	timeoutval = VAL_UINT(parm);
     } else {
 	timeoutval = agent_cb->timeout;
+    }
+
+    parm = val_find_child(valset, 
+			  YANGCLI_MOD, 
+			  YANGCLI_OPTIONAL);
+    if (parm && parm->res == NO_ERR) {
+	getoptional = TRUE;
+    } else {
+	getoptional = agent_cb->get_optional;
     }
 
     parm = val_find_child(valset,
@@ -6236,7 +6369,11 @@ static void
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(agent_cb, rpc, valset);
+    content = get_content_from_choice(agent_cb, 
+				      rpc, 
+				      valset,
+				      getoptional,
+				      dofill);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -6380,7 +6517,11 @@ static void
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(agent_cb, rpc, valset);
+    content = get_content_from_choice(agent_cb, 
+				      rpc, 
+				      valset,
+				      FALSE,
+				      FALSE);
     if (content) {
 	if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
 	    str = VAL_STR(content);
@@ -6542,7 +6683,11 @@ static void
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(agent_cb, rpc, valset);
+    content = get_content_from_choice(agent_cb, 
+				      rpc, 
+				      valset,
+				      FALSE,
+				      FALSE);
     if (content) {
 	if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
 	    str = VAL_STR(content);

@@ -163,6 +163,7 @@ static ncx_module_t  *nacmmod;
 static val_value_t   *nacmval;
 static val_value_t   *groupsval;
 static val_value_t   *rulesval;
+static val_value_t   *noruleval;
 
 #if 0
 /********************************************************************
@@ -561,6 +562,7 @@ status_t
     nacmval = NULL;
     groupsval = NULL;
     rulesval = NULL;
+    noruleval = NULL;
 
     /* load in the access control parameters */
     res = ncxmod_load_module(AGT_ACM_MODULE, 
@@ -645,6 +647,13 @@ status_t
 	return res;
     }
 
+    noruleval = val_find_child(nacmval,
+			       AGT_ACM_MODULE,
+			       nacm_N_noRuleDefault);
+    if (!noruleval) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
     /* add /nacm/groups */
     groupsval = val_new_value();
     if (!groupsval) {
@@ -687,6 +696,7 @@ void
     nacmval = NULL;
     groupsval = NULL;
     rulesval = NULL;
+    noruleval = NULL;
     agt_acm_init_done = FALSE;
 
 }   /* agt_acm_cleanup */

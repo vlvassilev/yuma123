@@ -955,19 +955,11 @@ static status_t
 	    log_stdout("\nShould flag %s be set? [Y, N, %s]", 
 		       parmname, DEF_OPTIONS);
 	} else {
-	    log_stdout("\nEnter value for %s <%s>",
+	    log_stdout("\nEnter %s value for %s <%s>",
+		       (const xmlChar *)tk_get_btype_sym(btyp),
 		       obj_get_typestr(parm),
 		       parmname);
-	    log_stdout(" (%s)\n    ", 
-		       (typdef && typdef->typename) 
-		       ? typdef->typename :
-		       (const xmlChar *)tk_get_btype_sym(btyp));
-	    
-	    def = obj_get_default(parm);
-	    if (def) {
-		log_stdout(" default: %s", def);
-	    }
-	    log_stdout(" %s", DEF_OPTIONS);
+	    log_stdout("\n    %s", DEF_OPTIONS);
 	}
 	if (oldvalset) {
 	    oldparm = val_find_child(oldvalset, 
@@ -1704,17 +1696,6 @@ static val_value_t *
     agent_cb->get_optional = TRUE;
     *res = get_parm(agent_cb, rpc, parm, dummy, NULL);
     agent_cb->get_optional = saveopt;
-
-    switch (*res) {
-    case NO_ERR:
-	break;
-    case ERR_NCX_SKIPPED:
-	*res = NO_ERR;
-	break;
-    case ERR_NCX_CANCELED:
-    default:
-	break;
-    }
 
     if (*res == NO_ERR) {
 	newval = val_get_first_child(dummy);
@@ -4359,17 +4340,19 @@ static status_t
 	if (curobj == config_content->obj) {
 	    val_add_child(config_content, *curtop);
 	    *curtop = config_content;
-	} else {
-	    newnode = val_new_value();
-	    if (!newnode) {
-		return ERR_INTERNAL_MEM;
-	    }
-	    val_init_from_template(newnode, curobj);
-	    val_add_child(newnode, *curtop);
-	    *curtop = newnode;
+	    return NO_ERR;
 	}
 
+	/* else need to fill in the keys for this content layer */
+	newnode = val_new_value();
+	if (!newnode) {
+	    return ERR_INTERNAL_MEM;
+	}
+	val_init_from_template(newnode, curobj);
+	val_add_child(newnode, *curtop);
+	*curtop = newnode;
 	content_used = FALSE;
+
 	lastkey = NULL;
 	for (curkey = obj_first_ckey(curobj);
 	     curkey != NULL;
@@ -4388,10 +4371,11 @@ static status_t
 		} else if (dofill) {
 		    res = get_parm(agent_cb, rpc, 
 				   curkey->keyobj, *curtop, NULL);
-		    if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
+		    if (res == ERR_NCX_SKIPPED) {
+			res = NO_ERR;
+		    } else if (res != NO_ERR) {
 			return res;
-		    }
-		    if (res == NO_ERR) {
+		    } else {
 			keyval = val_find_child(*curtop,
 						obj_get_mod_name
 						(curkey->keyobj),
@@ -4991,10 +4975,13 @@ static status_t
 	return ERR_INTERNAL_MEM;
     }
 
+    /* add /get-star/input/source */
     if (source) {
 	val_add_child(source, reqdata);
     }
 
+
+    /* add /get-star/input/filter */
     if (get_content) {
 	/* set the get/input/filter node to the
 	 * get_content, but after filling in any
@@ -5022,6 +5009,10 @@ static status_t
 	return ERR_INTERNAL_MEM;
     }
 
+    /* add the content to the filter element
+     * building the path from the content node
+     * to the root; fill if dofill is true
+     */
     if (get_content) {
 	dummy_parm = NULL;
 	res = add_filter_from_content_node(agent_cb,
@@ -5162,6 +5153,7 @@ static val_value_t *
     status_t               res;
 
     /* init locals */
+    targobj = NULL;
     iscli = FALSE;
     isselect = FALSE;
     fromstr = NULL;
@@ -5200,9 +5192,11 @@ static val_value_t *
 	    return NULL;
 	}
 
-	res = xpath_find_schema_target_int(VAL_STR(parm), &targobj);
+	res = xpath_find_schema_target_int(VAL_STR(parm), 
+					   &targobj);
 	if (res != NO_ERR) {
-	    log_error("\nError: Object '%s' not found", VAL_STR(parm));
+	    log_error("\nError: Object '%s' not found", 
+		      VAL_STR(parm));
 	    agent_cb->get_optional = saveopt;
 	    return NULL;
 	}	
@@ -5212,12 +5206,15 @@ static val_value_t *
 			      YANGCLI_MOD, 
 			      YANGCLI_VALUE);
 	if (parm && parm->res == NO_ERR) {
-	    curparm = var_get_script_val(targobj, NULL, 
+	    curparm = var_get_script_val(targobj, 
+					 NULL, 
 					 VAL_STR(parm),
-					 ISPARM, &res);
+					 ISPARM, 
+					 &res);
 	    if (!curparm || res != NO_ERR) {
 		log_error("\nError: Script value '%s' invalid (%s)", 
-			  VAL_STR(parm), get_error_string(res)); 
+			  VAL_STR(parm), 
+			  get_error_string(res)); 
 		agent_cb->get_optional = saveopt;
 		return NULL;
 	    }
@@ -5263,9 +5260,6 @@ static val_value_t *
 				     targobj,
 				     newparm, 
 				     curparm);
-		    if (res == ERR_NCX_SKIPPED) {
-			res = NO_ERR;
-		    }
 		}
 	    }
 	    break;
@@ -5282,9 +5276,6 @@ static val_value_t *
 				   targobj,
 				   newparm, 
 				   curparm);
-		    if (res == ERR_NCX_SKIPPED) {
-			res = NO_ERR;
-		    }
 		}
 	    }
 	    break;
@@ -5301,15 +5292,28 @@ static val_value_t *
 				      rpc,
 				      newparm, 
 				      curparm);
-		    if (res == ERR_NCX_SKIPPED) {
-			res = NO_ERR;
-		    }
 		}
 	    }
 	}
 
 	agent_cb->get_optional = saveopt;
-	if (res != NO_ERR) {
+	if (res == ERR_NCX_SKIPPED) {
+	    if (newparm) {
+		val_free_value(newparm);
+	    }
+	    newparm = 
+		xml_val_new_flag(obj_get_name(targobj),
+				 obj_get_nsid(targobj));
+	    if (!newparm) {
+		log_error("\nError: malloc failure");
+	    } else {
+		/* need to set the real object so the
+		 * path to root will be built correctly
+		 */
+		newparm->obj = targobj;
+	    }
+	    return newparm;
+	} else if (res != NO_ERR) {
 	    if (newparm) {
 		val_free_value(newparm);
 	    }

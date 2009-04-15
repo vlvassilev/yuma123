@@ -231,6 +231,7 @@ status_t
     mgr_io_run (void)
 {
     ses_cb_t      *scb;
+    mgr_scb_t     *mscb;
     fd_set         write_copy;
     struct timeval timeout;
     int            i, ret;
@@ -385,8 +386,13 @@ status_t
 		    if (!dlq_empty(&scb->outQ)) {
 			res = ses_msg_send_buffs(scb);
 			if (res != NO_ERR) {
-			    log_info("\nmgr_io write failed; "
-				     "closing session %d ", scb->sid);
+			    if (LOGINFO) {
+				mscb = mgr_ses_get_mscb(scb);
+				log_info("\nmgr_io write failed; "
+					 "closing session %u (a:%u)", 
+					 scb->sid,
+					 mscb->agtsid);
+			    }
 			    mgr_ses_free_session(scb->sid);
 			    scb = NULL;
 			    FD_CLR(i, &active_fd_set);
@@ -410,15 +416,20 @@ status_t
 		if (scb) {
 		    res = ses_accept_input(scb);
 		    if (res != NO_ERR) {
+			if (res != ERR_NCX_SESSION_CLOSED) {
+			    if (LOGINFO) {
+				mscb = mgr_ses_get_mscb(scb);
+				log_info("\nmgr_io input failed"
+					 " for session %u (a:%u) (%s)",
+					 scb->sid, 
+					 mscb->agtsid,
+					 get_error_string(res));
+			    }
+			}
 			mgr_ses_free_session(scb->sid);
 			FD_CLR(i, &active_fd_set);
 			if (i >= maxrdnum) {
 			    maxrdnum = i-1;
-			}
-			if (res != ERR_NCX_SESSION_CLOSED) {
-			    log_info("\nmgr_io input failed"
-				     " for session %d (%s)",
-				     scb->sid, get_error_string(res));
 			}
 		    }
 		}

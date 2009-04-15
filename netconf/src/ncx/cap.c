@@ -1041,6 +1041,9 @@ status_t
     cap_add_withdef (cap_list_t *caplist, 
 		     const xmlChar *defstyle)
 {
+    const xmlChar *str;
+    uint32         featureslen, basiclen;
+
 #ifdef DEBUG
     if (!caplist || !defstyle) {
         return SET_ERROR(ERR_INTERNAL_PTR);
@@ -1049,9 +1052,36 @@ status_t
 
     m__setbit(caplist->cap_std, 
 	      stdcaps[CAP_STDID_WITH_DEFAULTS].cap_bitnum);
-    caplist->cap_defstyle = xml_strdup(defstyle);
-    if (!caplist->cap_defstyle) {
-        return ERR_INTERNAL_MEM;
+
+    /* check for &features=foo:bar */
+    str = defstyle;
+    while (*str && *str != '&') {
+	str++;
+    }
+    if (*str) {
+	/* check parameter is really features= */
+	featureslen = xml_strlen(CAP_SUPPORTED_EQ);
+	basiclen = (uint32)(str - defstyle);
+	if (!xml_strncmp(++str, 
+			 CAP_SUPPORTED_EQ,
+			 featureslen)) {
+	    str += featureslen;
+	    caplist->cap_supported = xml_strdup(str);
+	    if (!caplist->cap_supported) {
+		return ERR_INTERNAL_MEM;
+	    }
+	    caplist->cap_defstyle = 
+		xml_strndup(defstyle,
+			    basiclen);
+	    if (!caplist->cap_defstyle) {
+		return ERR_INTERNAL_MEM;
+	    }
+	}
+    } else {
+	caplist->cap_defstyle = xml_strdup(defstyle);
+	if (!caplist->cap_defstyle) {
+	    return ERR_INTERNAL_MEM;
+	}
     }
     return NO_ERR;
 
@@ -1109,19 +1139,19 @@ status_t
     str = buffer;
     switch (withdef) {
     case NCX_WITHDEF_REPORT_ALL:
-	str += xml_strcpy(buffer, NCX_EL_TRIM);
-	*str += ':';
-	str += xml_strcpy(buffer, NCX_EL_EXPLICIT);
+	str += xml_strcpy(str, NCX_EL_TRIM);
+	*str++ = ':';
+	xml_strcpy(str, NCX_EL_EXPLICIT);
 	break;
     case NCX_WITHDEF_TRIM:
-	str += xml_strcpy(buffer, NCX_EL_REPORT_ALL);
-	*str += ':';
-	str += xml_strcpy(buffer, NCX_EL_EXPLICIT);
+	str += xml_strcpy(str, NCX_EL_REPORT_ALL);
+	*str++  = ':';
+	xml_strcpy(str, NCX_EL_EXPLICIT);
 	break;
     case NCX_WITHDEF_EXPLICIT:
-	str += xml_strcpy(buffer, NCX_EL_REPORT_ALL);
-	*str += ':';
-	str += xml_strcpy(buffer, NCX_EL_TRIM);
+	str += xml_strcpy(str, NCX_EL_REPORT_ALL);
+	*str++ = ':';
+	xml_strcpy(str, NCX_EL_TRIM);
 	break;
     default:
 	return SET_ERROR(ERR_INTERNAL_VAL);
@@ -1144,14 +1174,15 @@ status_t
     p += xml_strcpy(p, cap);
     *p++ = '?';
     p += xml_strcpy(p, basic);
-    xml_strcpy(p, defstyle);
+    p += xml_strcpy(p, defstyle);
     *p++ = '&';
     p += xml_strcpy(p, supported);
     xml_strcpy(p, buffer);
 
     /* make the capability element */
     capval = xml_val_new_string(NCX_EL_CAPABILITY,
-				xmlns_nc_id(), str);
+				xmlns_nc_id(), 
+				str);
     if (!capval) {
 	m__free(str);
 	return ERR_INTERNAL_MEM;

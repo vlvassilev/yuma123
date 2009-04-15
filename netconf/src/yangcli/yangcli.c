@@ -1698,7 +1698,11 @@ static void
     }
 
     log_stdout("\n\nNETCONF session established for %s on %s",
-	   scb->username, mscb->target ? mscb->target : agent);
+	       scb->username, 
+	       mscb->target ? mscb->target : agent);
+
+    log_stdout("\n\nManager Session Id: %u", scb->sid);
+    log_stdout("\nAgent Session Id: %u", mscb->agtsid);
 
     log_stdout("\n\nAgent Protocol Capabilities");
     cap_dump_stdcaps(&mscb->caplist);
@@ -1779,6 +1783,13 @@ static void
     log_stdout("\nDefault with-defaults behavior: ");
     if (mscb->caplist.cap_defstyle) {
 	log_stdout("%s", mscb->caplist.cap_defstyle);
+    } else {
+	log_stdout("unknown");
+    }
+
+    log_stdout("\nAdditional with-defaults behavior: ");
+    if (mscb->caplist.cap_supported) {
+	log_stdout("%s", mscb->caplist.cap_supported);
     } else {
 	log_stdout("unknown");
     }
@@ -2828,7 +2839,5 @@ int
     return 0;
 
 } /* main */
-
-
 
 /* END yangcli.c */

@@ -179,11 +179,14 @@ static status_t
 					 &res);
 	    } else {
 		typdef = obj_get_ctypdef(obj);
-		res = val_set_simval(new_parm,
-				     typdef,  
-				     obj_get_nsid(obj),
-				     obj_get_name(obj),
-				     strval);
+		res = val_simval_ok(typdef, strval);
+		if (res == NO_ERR) {
+		    res = val_set_simval(new_parm,
+					 typdef,  
+					 obj_get_nsid(obj),
+					 obj_get_name(obj),
+					 strval);
+		}
 	    }
 	} else {
 	    res = ERR_NCX_INVALID_VALUE;
@@ -815,7 +818,7 @@ val_value_t *
     ncx_btype_t     btyp;
     status_t        res;
     xmlChar         errbuff[ERRLEN+1], savechar;
-    boolean         gotdashes, gotmatch;
+    boolean         gotdashes, gotmatch, gotdefaultparm;
 
 #ifdef DEBUG
     if (!status) {
@@ -907,6 +910,7 @@ val_value_t *
 
     /* setup parm loop */
     buffpos = 0;
+    gotdefaultparm = FALSE;
 
     /* 1) go through all the command line strings
      * setup parmname and parmval based on strings found
@@ -1014,12 +1018,24 @@ val_value_t *
 		 */
 		chobj = obj_get_default_parm(obj);
 		if (chobj) {
+		    if (chobj->objtype != OBJ_TYP_LEAF_LIST &&
+			gotdefaultparm) {
+			log_error("\nError: default parm '%s' "
+				  "already entered",
+				  obj_get_name(chobj));
+			res = ERR_NCX_DUP_ENTRY;
+		    }			
 		    buffpos += parmnamelen;
 		    savechar = parmname[parmnamelen];
 		    parmname[parmnamelen] = 0;
-		    res = parse_parm(val, chobj, 
-				     (const xmlChar *)parmname, script);
+		    if (res == NO_ERR) {
+			res = parse_parm(val, 
+					 chobj, 
+					 (const xmlChar *)parmname, 
+					 script);
+		    }
 		    parmname[parmnamelen] = savechar;
+		    gotdefaultparm = TRUE;
 		    continue;
 		}
 	    }
@@ -1188,11 +1204,10 @@ val_value_t *
     /* cleanup after loop */
     m__free(buff);
     buff = NULL;
-    res = NO_ERR;
 
 #ifdef PUT_BACK_ADDING_DEFAULTS_TO_CLI
     /* 2) add any defaults for mandatory parms that are not set */
-    if (!valonly) {
+    if (res == NO_ERR && !valonly) {
 	res = val_add_defaults(val, script);
     }
 #endif

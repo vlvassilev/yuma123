@@ -197,7 +197,9 @@ static status_t
     } else {
 	mscb->targtyp = NCX_AGT_TARG_NONE;
 	log_info("\nmgr_hello: no writable target found for"
-		 " session %d", scb->sid);
+		 " session %u (a:%u)", 
+		 scb->sid,
+		 mscb->agtsid);
     }
 
     /* set the startup type in the mscb */
@@ -276,6 +278,7 @@ void
     val_value_t           *val;
     ncx_module_t          *mod;
     const obj_template_t  *obj;
+    mgr_scb_t             *mscb;
     xml_msg_hdr_t          msg;
     status_t               res;
     ncx_node_t             dtyp;
@@ -293,6 +296,8 @@ void
 	xml_dump_node(top);
     }
 #endif
+
+    mscb = mgr_ses_get_mscb(scb);
 
     /* only process this message in hello wait state */
     if (scb->state != SES_ST_HELLO_WAIT) {
@@ -341,8 +346,11 @@ void
 
     /* report first error and close session */
     if (res != NO_ERR) {
-	log_info("\nmgr_connect error (%s)\n  dropping session %d (%d)",
-		 get_error_string(res), scb->sid, res);
+	log_info("\nmgr_connect error (%s)\n  dropping session %u (a:%u)",
+		 get_error_string(res), 
+		 scb->sid, 
+		 mscb->agtsid,
+		 res);
     } else {
 	scb->state = SES_ST_IDLE;
 	log_debug("\nmgr_hello manager hello ok");

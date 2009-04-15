@@ -245,7 +245,9 @@ void
 
     objnestlevel = obj_get_level(obj);
 
-    if (mode == HELP_MODE_BRIEF && objnestlevel > nestlevel) {
+    if (mode == HELP_MODE_BRIEF && 
+	nestlevel > 0 &&
+	objnestlevel > nestlevel) {
 	return;
     }
 

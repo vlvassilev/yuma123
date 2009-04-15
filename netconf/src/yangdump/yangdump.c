@@ -350,7 +350,8 @@ static status_t
 			 YANGDUMP_PARM_FORMAT);
     if (val) {
 	/* format -- use string provided */
-	cp->format = ncx_get_cvttyp_enum((char *)VAL_STR(val));
+	cp->format = 
+	    ncx_get_cvttyp_enum((const char *)VAL_ENUM_NAME(val));
     } else {
 	cp->format = NCX_CVTTYP_NONE;
     }

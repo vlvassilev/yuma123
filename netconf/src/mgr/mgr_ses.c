@@ -767,26 +767,42 @@ ssize_t
     scb = (ses_cb_t *)s;
     mscb = mgr_ses_get_mscb(scb);
 
-    log_debug3("\nmgr_ses: About to read from NETCONF session %d",
-	       scb->sid);
+    if (LOGDEBUG3) {
+	log_debug3("\nmgr_ses: About to read from NETCONF session %u (a:%u)",
+		   scb->sid,
+		   mscb->agtsid);
+    }
 
     /* fix bug in libssh2 or my code -- cannot tell for sure !!! */
     ret = libssh2_channel_read(mscb->channel, buff, bufflen);
 
-    log_debug3("\nmgr_ses: Done reading from NETCONF session %d (%d)",
-	       scb->sid, ret);
-    log_debug3("\n");
+    if (LOGDEBUG3) {
+	log_debug3("\nmgr_ses: Done reading from NETCONF session %u (a:%u) (%d)",
+		   scb->sid, 
+		   mscb->agtsid,
+		   ret);
+	log_debug3("\n");
+    }
 
     if (ret < 0) {
 	if (ret != LIBSSH2_ERROR_EAGAIN) {
-	    log_error("\nmgr_ses channel read failed on session %d",
-		      scb->sid);
+	    log_error("\nmgr_ses channel read failed on session %u (a:%u)",
+		      scb->sid,
+		      mscb->agtsid);
 	}
     } else if (ret > 0) {
-	log_debug2("\nmgr_ses channel read %d bytes OK on session %d",
-		   ret, scb->sid);
+	if (LOGDEBUG2) {
+	    log_debug2("\nmgr_ses channel read %d bytes OK on session %u (a:%u)",
+		       ret, 
+		       scb->sid,
+		       mscb->agtsid);
+	}
     } else {
-	log_debug2("\nmgr_ses channel closed on session %d", scb->sid);
+	if (LOGDEBUG2) {
+	    log_debug2("\nmgr_ses channel closed on session %u (a:%u)", 
+		       scb->sid,
+		       mscb->agtsid);
+	}
     }
 
     return (ssize_t)ret;

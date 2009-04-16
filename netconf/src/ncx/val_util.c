@@ -435,6 +435,9 @@ static status_t
 	case NCX_BT_UNION:
 	    quotes = TRUE;
 	    break;
+	case NCX_BT_IDREF:
+	    quotes = FALSE;
+	    break;
 	default:
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	}

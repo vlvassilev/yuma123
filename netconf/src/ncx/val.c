@@ -6385,10 +6385,12 @@ status_t
 			   uint32 *len)
 {
     const ncx_lmem_t  *lmem;
-    const xmlChar     *s;
+    const xmlChar     *s, *prefix;
+    xmlChar           *str;
     ncx_btype_t        btyp;
     status_t           res;
     int32              icnt;
+    uint32             mylen;
     char               numbuff[VAL_MAX_NUMLEN];
 
 #ifdef DEBUG
@@ -6547,6 +6549,39 @@ status_t
 		*len += (2 + ((s) ? xml_strlen(s) : 0));
 	    }
 	}
+	break;
+    case NCX_BT_IDREF:
+	/* use the xmlprefix assigned to the NS ID for the
+	 * identityref, plus ':', plus the identity name
+	 */
+	prefix = NULL;
+	if (val->v.idref.nsid) {
+	    prefix = xmlns_get_ns_prefix(val->v.idref.nsid);
+	}
+
+	mylen = 0;
+	if (buff) {
+	    str = buff;
+	    if (prefix) {
+		mylen = xml_strcpy(str, prefix);
+		str += mylen;
+		mylen++;
+		*str++ = ':';
+	    }
+	    if(val->v.idref.name) {
+		mylen += xml_strcpy(str, val->v.idref.name);
+	    } else {
+		mylen += xml_strcpy(str, NCX_EL_NONE);
+	    }
+	} else {
+	    mylen = (prefix) ? xml_strlen(prefix)+1 : 0;
+	    if(val->v.idref.name) {
+		mylen += xml_strlen(val->v.idref.name);
+	    } else {
+		mylen += xml_strlen(NCX_EL_NONE);
+	    }
+	}
+	*len = mylen;
 	break;
     case NCX_BT_LIST:
     case NCX_BT_ANY:

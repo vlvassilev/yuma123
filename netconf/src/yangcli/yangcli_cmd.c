@@ -5610,9 +5610,11 @@ static status_t
 
 
 /********************************************************************
- * FUNCTION do_create
+ * FUNCTION do_edit
  * 
- * Create some database object on the agent
+ * Edit some database object on the agent
+ * operation attribute:
+ *   create/delete/merge/replace
  *
  * INPUTS:
  *    agent_cb == agent control block to use
@@ -5626,10 +5628,11 @@ static status_t
  *
  *********************************************************************/
 static void
-    do_create (agent_cb_t *agent_cb,
-	       const obj_template_t *rpc,
-	       const xmlChar *line,
-	       uint32  len)
+    do_edit (agent_cb_t *agent_cb,
+	     const obj_template_t *rpc,
+	     const xmlChar *line,
+	     uint32  len,
+	     op_editop_t editop)
 {
     val_value_t           *valset, *content, *parm;
     status_t               res;
@@ -5686,110 +5689,9 @@ static void
 	return;
     }
 
-    /* add nc:operation attribute to the value node */
-    res = add_operation_attr(content, OP_EDITOP_CREATE);
-    if (res != NO_ERR) {
-	log_error("\nError: Creation of nc:operation"
-		  " attribute failed");
-	val_free_value(valset);
-	val_free_value(content);
-	return;
-    }
-
-    /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(agent_cb, content, timeoutval);
-    if (res != NO_ERR) {
-	log_error("\nError: send create operation failed (%s)",
-		  get_error_string(res));
-    }
-
-    val_free_value(valset);
-
-}  /* do_create */
-
-
-/********************************************************************
- * FUNCTION do_merge
- * 
- * Merge some database object on the agent
- *
- * INPUTS:
- *    agent_cb == agent control block to use
- *    rpc == RPC method for the merge command
- *    line == CLI input in progress
- *    len == offset into line buffer to start parsing
- *
- * OUTPUTS:
- *   the completed data node is output and
- *   an edit-config operation is sent to the agent
- *
- *********************************************************************/
-static void
-    do_merge (agent_cb_t *agent_cb,
-	      const obj_template_t *rpc,
-	      const xmlChar *line,
-	      uint32  len)
-{
-    val_value_t           *valset, *content, *parm;
-    status_t               res;
-    uint32                 timeoutval;
-    boolean                getoptional, dofill;
-
-    /* init locals */
-    res = NO_ERR;
-    content = NULL;
-    dofill = TRUE;
-
-    /* get the command line parameters for this command */
-    valset = get_valset(agent_cb, 
-			rpc, 
-			&line[len], 
-			&res);
-    if (!valset || res != NO_ERR) {
-	if (valset) {
-	    val_free_value(valset);
-	}
-	return;
-    }
-
-    parm = val_find_child(valset, 
-			  YANGCLI_MOD, 
-			  YANGCLI_TIMEOUT);
-    if (parm && parm->res == NO_ERR) {
-	timeoutval = VAL_UINT(parm);
-    } else {
-	timeoutval = agent_cb->timeout;
-    }
-
-    parm = val_find_child(valset, 
-			  YANGCLI_MOD, 
-			  YANGCLI_OPTIONAL);
-    if (parm && parm->res == NO_ERR) {
-	getoptional = TRUE;
-    } else {
-	getoptional = agent_cb->get_optional;
-    }
-
-    parm = val_find_child(valset, 
-			  YANGCLI_MOD, 
-			  YANGCLI_NOFILL);
-    if (parm && parm->res == NO_ERR) {
-	dofill = FALSE;
-    }
-
-    /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(agent_cb, 
-				      rpc, 
-				      valset,
-				      getoptional,
-				      dofill);
-    if (!content) {
-	val_free_value(valset);
-	return;
-    }
 
     /* add nc:operation attribute to the value node */
-    res = add_operation_attr(content, OP_EDITOP_MERGE);
+    res = add_operation_attr(content, editop);
     if (res != NO_ERR) {
 	log_error("\nError: Creation of nc:operation"
 		  " attribute failed");
@@ -5803,219 +5705,14 @@ static void
 				    content, 
 				    timeoutval);
     if (res != NO_ERR) {
-	log_error("\nError: send merge operation failed (%s)",
+	log_error("\nError: send %s operation failed (%s)",
+		  op_editop_name(editop),
 		  get_error_string(res));
     }
 
     val_free_value(valset);
 
-}  /* do_merge */
-
-
-/********************************************************************
- * FUNCTION do_replace
- * 
- * Replace some database object on the agent
- *
- * INPUTS:
- *    agent_cb == agent control block to use
- *    rpc == RPC method for the replace command
- *    line == CLI input in progress
- *    len == offset into line buffer to start parsing
- *
- * OUTPUTS:
- *   the completed data node is output and
- *   an edit-config operation is sent to the agent
- *
- *********************************************************************/
-static void
-    do_replace (agent_cb_t *agent_cb,
-		const obj_template_t *rpc,
-		const xmlChar *line,
-		uint32  len)
-{
-    val_value_t           *valset, *content, *parm;
-    status_t               res;
-    uint32                 timeoutval;
-    boolean                getoptional, dofill;
-
-    /* init locals */
-    res = NO_ERR;
-    content = NULL;
-    dofill = TRUE;
-
-    /* get the command line parameters for this command */
-    valset = get_valset(agent_cb, rpc, &line[len], &res);
-    if (!valset || res != NO_ERR) {
-	if (valset) {
-	    val_free_value(valset);
-	}
-	return;
-    }
-
-    parm = val_find_child(valset, 
-			  YANGCLI_MOD, 
-			  YANGCLI_TIMEOUT);
-    if (parm && parm->res == NO_ERR) {
-	timeoutval = VAL_UINT(parm);
-    } else {
-	timeoutval = agent_cb->timeout;
-    }
-    parm = val_find_child(valset, 
-			  YANGCLI_MOD, 
-			  YANGCLI_OPTIONAL);
-    if (parm && parm->res == NO_ERR) {
-	getoptional = TRUE;
-    } else {
-	getoptional = agent_cb->get_optional;
-    }
-
-    parm = val_find_child(valset, 
-			  YANGCLI_MOD, 
-			  YANGCLI_NOFILL);
-    if (parm && parm->res == NO_ERR) {
-	dofill = FALSE;
-    }
-
-    /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(agent_cb, 
-				      rpc, 
-				      valset,
-				      getoptional,
-				      dofill);
-    if (!content) {
-	val_free_value(valset);
-	return;
-    }
-
-    /* add nc:operation attribute to the value node */
-    res = add_operation_attr(content, OP_EDITOP_REPLACE);
-    if (res != NO_ERR) {
-	log_error("\nError: Creation of nc:operation"
-		  " attribute failed");
-	val_free_value(valset);
-	val_free_value(content);
-	return;
-    }
-
-    /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(agent_cb, 
-				    content, 
-				    timeoutval);
-    if (res != NO_ERR) {
-	log_error("\nError: send replace operation failed (%s)",
-		  get_error_string(res));
-    }
-
-    val_free_value(valset);
-
-}  /* do_replace */
-
-
-/********************************************************************
- * FUNCTION do_delete
- * 
- * Delete some database object on the agent
- *
- * INPUTS:
- *    agent_cb == agent control block to use
- *    rpc == RPC method for the delete command
- *    line == CLI input in progress
- *    len == offset into line buffer to start parsing
- *
- * OUTPUTS:
- *   the completed data node is output and
- *   an edit-config operation is sent to the agent
- *
- *********************************************************************/
-static void
-    do_delete (agent_cb_t *agent_cb,
-	       const obj_template_t *rpc,
-	       const xmlChar *line,
-	       uint32  len)
-{
-    obj_template_t        *targobj;
-    val_value_t           *valset, *content, *target, *parm;
-    status_t               res;
-    uint32                 timeoutval;
-
-    /* init locals */
-    res = NO_ERR;
-    content = NULL;
-
-    /* get the command line parameters for this command */
-    valset = get_valset(agent_cb, rpc, &line[len], &res);
-    if (!valset || res != NO_ERR) {
-	if (valset) {
-	    val_free_value(valset);
-	}
-	return;
-    }
-
-    parm = val_find_child(valset, 
-			  YANGCLI_MOD, 
-			  YANGCLI_TIMEOUT);
-    if (parm && parm->res == NO_ERR) {
-	timeoutval = VAL_UINT(parm);
-    } else {
-	timeoutval = agent_cb->timeout;
-    }
-
-    target = val_find_child(valset, 
-			    YANGCLI_MOD, 
-			    NCX_EL_TARGET);
-    if (!target) {
-	log_error("\nError: target parameter is missing");
-	val_free_value(valset);
-	return;
-    }
-
-    res = xpath_find_schema_target_int(VAL_STR(target), 
-				       &targobj);
-    if (res != NO_ERR) {
-	log_error("\nError: Object '%s' not found", 
-		  VAL_STR(target));
-	val_free_value(valset);
-	return;
-    }
-
-    /* add content only if this is a leaf-list */
-    if (targobj->objtype == OBJ_TYP_LEAF_LIST) {
-	log_stdout("\nSpecify the leaf-list value to delete:");
-	content = fill_value(agent_cb, rpc, targobj, NULL, &res);
-    } else {
-	/* create an empty content node to delete */
-	content = val_new_value();
-	if (content) {
-	    val_init_from_template(content, targobj);
-	}
-    }
-
-    if (!content) {
-	val_free_value(valset);
-	return;
-    }
-
-    /* add nc:operation attribute to the value node */
-    res = add_operation_attr(content, OP_EDITOP_DELETE);
-    if (res != NO_ERR) {
-	log_error("\nError: Creation of nc:operation"
-		  " attribute failed");
-	val_free_value(valset);
-	val_free_value(content);
-	return;
-    }
-
-    /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_agent(agent_cb, content, timeoutval);
-    if (res != NO_ERR) {
-	log_error("\nError: send delete operation failed (%s)",
-		  get_error_string(res));
-    }
-
-    val_free_value(valset);
-
-}  /* do_delete */
+}  /* do_edit */
 
 
 /********************************************************************
@@ -6761,15 +6458,15 @@ static status_t
     rpcname = obj_get_name(rpc);
 
     if (!xml_strcmp(rpcname, YANGCLI_CREATE)) {
-	do_create(agent_cb, rpc, line, len);
+	do_edit(agent_cb, rpc, line, len, OP_EDITOP_CREATE);
     } else if (!xml_strcmp(rpcname, YANGCLI_DELETE)) {
-	do_delete(agent_cb, rpc, line, len);
+	do_edit(agent_cb, rpc, line, len, OP_EDITOP_DELETE);
     } else if (!xml_strcmp(rpcname, YANGCLI_INSERT)) {
 	do_insert(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_MERGE)) {
-	do_merge(agent_cb, rpc, line, len);
+	do_edit(agent_cb, rpc, line, len, OP_EDITOP_MERGE);
     } else if (!xml_strcmp(rpcname, YANGCLI_REPLACE)) {
-	do_replace(agent_cb, rpc, line, len);
+	do_edit(agent_cb, rpc, line, len, OP_EDITOP_REPLACE);
     } else if (!xml_strcmp(rpcname, YANGCLI_SAVE)) {
 	if (len < xml_strlen(line)) {
 	    log_error("\nWarning: Extra characters ignored (%s)",

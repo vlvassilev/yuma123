@@ -606,7 +606,40 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    /* get all the static object nodes first */
+    /* check to see if the /nacm branch already exists
+     * if so, then skip all this init stuff
+     */
+    nacmval = val_find_child(runningcfg->root,
+			     AGT_ACM_MODULE,
+			     nacm_N_nacm);
+    if (nacmval) {
+	groupsval = val_find_child(nacmval,
+				   AGT_ACM_MODULE,
+				   nacm_N_groups);
+	if (!groupsval) {
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+
+	rulesval = val_find_child(nacmval,
+				  AGT_ACM_MODULE,
+				  nacm_N_rules);
+	if (!rulesval) {
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+
+	noruleval = val_find_child(nacmval,
+				   AGT_ACM_MODULE,
+				   nacm_N_noRuleDefault);
+	if (!noruleval) {
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	agt_acm_init_done = TRUE;
+	return NO_ERR;
+    }
+
+    /* else did not find the /nacm node so create one;
+     * get all the static object nodes first 
+     */
     nacmobj = obj_find_template_top(nacmmod, 
 				    AGT_ACM_MODULE,
 				    nacm_N_nacm);
@@ -674,6 +707,7 @@ status_t
     /* handing off the malloced memory here */
     val_add_child(rulesval, nacmval);
 
+    agt_acm_init_done = TRUE;
     return NO_ERR;
 
 }  /* agt_acm_init2 */

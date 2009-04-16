@@ -160,168 +160,109 @@ date         init     comment
 static boolean agt_acm_init_done = FALSE;
 
 static ncx_module_t  *nacmmod;
-static val_value_t   *nacmval;
-static val_value_t   *groupsval;
-static val_value_t   *rulesval;
-static val_value_t   *noruleval;
+
 
 #if 0
 /********************************************************************
-* FUNCTION get_group_from_user
+* FUNCTION get_nacm_root
+*
+* get the /nacm root object
+*
+* RETURNS:
+*   pointer to root or NULL if none
+*********************************************************************/
+static val_value_t *
+    get_nacm_root (void)
+{
+    cfg_template_t        *runningcfg;
+    val_value_t           *nacmval;
+
+    /* make sure the running config root is set */
+    runningcfg = cfg_get_config(NCX_EL_RUNNING);
+    if (!runningcfg || !runningcfg->root) {
+	return NULL;
+    }
+    
+    nacmval = val_find_child(runningcfg->root,
+			     AGT_ACM_MODULE,
+			     nacm_N_nacm);
+
+    return nacmval;
+
+}  /* get_nacm_root */
+
+
+/********************************************************************
+* FUNCTION get_group_for_user
 *
 * get the group name associated with this user name
 *
+* First call:
+*   SET group to NULL
+*  2nd to Nth call:
+*   Leave *group set to its previous value
+*
+* This initial implementation uses a brute-force lookup
+* instead of a cache approach.  May change later if
+* this is too slow
+*
 * INPUTS:
+*    groupsval == root value struct of all group entries
 *    username == username
-*    groupname == address of return group name string
-*    rolestr == address of return admin role
+*    group == address of return group value struct
+*    groupid == address of return groupIdentity value struct
 *
 * OUTPUTS:
-*   *groupname == group name, if NO_ERR
-*   *rolestr == group admin role, if NO_ERR
+*   *group == group value struct, if found
+*   *groupid == groupIdentity value struct, if found
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
-    get_group_from_user (const xmlChar *username,
-			 const xmlChar **groupname,
-			 const xmlChar **rolestr)
+    get_group_for_user (val_value_t *groupsval,
+			const xmlChar *username,
+			val_value_t **group,
+			val_value_t **groupid)
 {
-    val_value_t   *valset, *groups, *group, *users, *user, *role, *name;
-    user_ent_t    *userent;
-
-
-    /* not in the queue, so check the groups value struct
-     * get tha accessControl parmset
-     */
-    valset = get_ac_valset();
-    if (!valset) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
+    val_value_t   *nacmval, *groupval, *usernameval;
     
-    /* get the groups parameter */
-    groups = val_find_child(valset, AGT_ACM_MODULE, PARM_GROUPS);
-    if (!groups) {
-	return ERR_NCX_DEF_NOT_FOUND;
+    *groupid = NULL;
+
+    if (*group == NULL) {
+	*group = val_get_first_child(groupsval);
+    } else {
+	*group = val_get_next_child(*group);
     }
 
     /* go through the groups in order and check the user list */
-    for (group = val_get_first_child(groups);
-	 group != NULL;
-	 group = val_get_next_child(group)) {
+    for (groupval = *group;
+	 groupval != NULL;
+	 groupval = val_get_next_child(groupval)) {
 
-	name = val_find_child(group, AGT_ACM_MODULE, LEAF_NAME);
-	if (!name) {
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	    
-	role = val_find_child(group, AGT_ACM_MODULE, LEAF_ROLE);
-	if (!role) {
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-
-	users = val_find_child(group, AGT_ACM_MODULE, LEAF_USERS);
-	if (users) {
-	    for (user = val_get_first_child(users);
-		 user != NULL;
-		 user = val_get_next_child(user)) {
-
-		if (!xml_strcmp(VAL_STR(user), username)) {
-
-		    *groupname = VAL_STR(name);
-		    *rolestr = VAL_STR(role);
-
-		    return NO_ERR;
-		}
+	usernameval = val_find_child(group, 
+				     AGT_ACM_MODULE, 
+				     nacm_N_userName);
+	while (usernameval != NULL) {
+	    if (!xml_strcmp(username, VAL_STR(usernameval))) {
+		*groupid = val_find_child(groupval,
+					  AGT_ACM_MODULE,
+					  nacm_N_groupIdentity);
+		*group = groupval;
+		return NO_ERR;
+	    } else {
+		usernameval = 
+		    val_find_next_child(groupval,
+					AGT_ACM_MODULE,
+					nacm_N_groupIdentity,
+					usernameval);
 	    }
 	}
     }
 
     return ERR_NCX_DEF_NOT_FOUND;
 
-} /* get_group_from_user */
-
-
-/********************************************************************
-* FUNCTION group_in_list
-*
-* Check the groupList value to see if the groupname is present
-*
-* INPUTS:
-*    groupname == group name for this user
-*    ruleval == value struct representing the current *Rule
-*
-* RETURNS:
-*    TRUE if the group in the groupList
-*    FALSE if the group is not in the groupList, or some error
-*********************************************************************/
-static boolean
-    group_in_list (const xmlChar *groupname,
-		   val_value_t *ruleval)
-{
-    val_value_t *grouplist;
-
-    /* get the groupList field */
-    grouplist = val_find_child(ruleval, AGT_ACM_MODULE, 
-			       LEAF_GROUPLIST);
-    if (!grouplist) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
-    }
-
-    /* see if this rule applies to the groupname */
-    return ncx_string_in_list(groupname, &(VAL_LIST(grouplist)));
-
-} /* group_in_list */
-
-
-/********************************************************************
-* FUNCTION node_in_list
-*
-* Check the NcxAccessNodeList type value to see if the 
-* node namespace and name are in the list
-*
-* INPUTS:
-*    nsid == namespace ID of the node
-*    nodename == node name to find
-*    listval == value struct representing the current nodeList
-*
-* RETURNS:
-*    TRUE if the node in the list
-*    FALSE if the node is not in the list, or some error
-*********************************************************************/
-static boolean
-    node_in_list (xmlns_id_t  nsid,
-		  const xmlChar *nodename,
-		  val_value_t *listval)
-{
-    val_value_t *val;
-    xmlns_id_t   valnsid;
-
-    /* get the namespace URI */
-    val = val_find_child(listval, AGT_ACM_MODULE, LEAF_NSURI);
-    if (!val) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
-    }
-
-    /* compare the NS ID to the node NSID */
-    valnsid = xmlns_find_ns_by_name(VAL_STR(val));
-    if (valnsid != nsid) {
-	return FALSE;  /* no match */
-    }
-
-    /* get the optional element names list */
-    val = val_find_child(listval, AGT_ACM_MODULE, LEAF_ELNAMES);
-    if (!val) {
-	return TRUE;  /* matched namespace URI */
-    }
-
-    /* check the list */
-    return ncx_string_in_list(nodename, &(VAL_LIST(val)));
-
-} /* node_in_list */
+} /* get_group_for_user */
 
 
 /********************************************************************
@@ -347,7 +288,7 @@ static boolean
 *********************************************************************/
 static boolean
     check_rpc_rule (const obj_template_t *rpcobj,
-		    const xmlChar *groupname,
+		    val_value_t groupval,
 		    val_value_t *ruleval,
 		    boolean *granted)
 {
@@ -559,10 +500,6 @@ status_t
 #endif
 
     nacmmod = NULL;
-    nacmval = NULL;
-    groupsval = NULL;
-    rulesval = NULL;
-    noruleval = NULL;
 
     /* load in the access control parameters */
     res = ncxmod_load_module(AGT_ACM_MODULE, 
@@ -594,6 +531,8 @@ status_t
 {
     const obj_template_t  *nacmobj, *rulesobj, *groupsobj;
     cfg_template_t        *runningcfg;
+    val_value_t           *nacmval, *groupsval;
+    val_value_t           *rulesval, *noruleval;
     status_t               res;
 
     if (!agt_acm_init_done) {
@@ -613,26 +552,6 @@ status_t
 			     AGT_ACM_MODULE,
 			     nacm_N_nacm);
     if (nacmval) {
-	groupsval = val_find_child(nacmval,
-				   AGT_ACM_MODULE,
-				   nacm_N_groups);
-	if (!groupsval) {
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-
-	rulesval = val_find_child(nacmval,
-				  AGT_ACM_MODULE,
-				  nacm_N_rules);
-	if (!rulesval) {
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-
-	noruleval = val_find_child(nacmval,
-				   AGT_ACM_MODULE,
-				   nacm_N_noRuleDefault);
-	if (!noruleval) {
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
 	agt_acm_init_done = TRUE;
 	return NO_ERR;
     }
@@ -727,10 +646,6 @@ void
     }
 
     nacmmod = NULL;
-    nacmval = NULL;
-    groupsval = NULL;
-    rulesval = NULL;
-    noruleval = NULL;
     agt_acm_init_done = FALSE;
 
 }   /* agt_acm_cleanup */
@@ -764,6 +679,14 @@ boolean
     if (!xml_strcmp(user, NCX_SUPERUSER)) {
 	return TRUE;
     }
+
+    /* everybody is allowed to close their own session */
+    if (obj_get_nsid(rpcobj) == xmlns_nc_id() &&
+	!xml_strcmp(obj_get_name(rpcobj),
+		    NCX_EL_CLOSE_SESSION)) {
+	return TRUE;
+    }
+
 
     /*** TEMP ***/
     /* return check_rpc_rules(rpcobj, user, acmode); */

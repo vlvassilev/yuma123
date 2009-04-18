@@ -67,7 +67,7 @@ date	     init     comment
 
 #define YANGCLI_BUFFLEN  32000
 
-#define YANGCLI_HISTLEN  64000
+#define YANGCLI_HISTLEN  4095
 
 #define YANGCLI_DEF_TIMEOUT   30
 
@@ -242,6 +242,28 @@ typedef struct agent_cb_t_ {
 } agent_cb_t;
 
 
+/* command state enumerations for each situation
+ * where the tecla get_line function is called
+ */
+typedef enum command_state_t {
+    CMD_STATE_NONE,
+    CMD_STATE_FULL,
+    CMD_STATE_GETVAL,
+    CMD_STATE_YESNO
+} command_state_t;
+
+/* saved state for libtecla command line completion */
+typedef struct completion_state_t_ {
+    const obj_template_t  *cmdobj;
+    const obj_template_t  *cmdinput;
+    const obj_template_t  *cmdcurparm;
+    agent_cb_t            *agent_cb;
+    ncx_module_t          *cmdmodule;
+    command_state_t        cmdstate;
+    boolean                assignstmt;
+} completion_state_t;
+
+
 /* logging function template to switch between
  * log_stdout and log_write
  */
@@ -283,6 +305,12 @@ extern val_value_t *
 
 extern val_value_t *
     get_connect_valset (void);
+
+extern dlq_hdr_t *
+    get_mgrloadQ (void);
+
+extern completion_state_t *
+    get_completion_state (void);
 
 /* forward decl needed by send_copy_config_to_agent function */
 extern void

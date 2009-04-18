@@ -836,4 +836,36 @@ boolean
 }  /* interactive_mode */
 
 
+/********************************************************************
+ * FUNCTION init_completion_state
+ * 
+ * init the completion_state struct for a new command
+ *
+ * INPUTS:
+ *    completion_state == record to initialize
+ *    agent_cb == agent control block to use
+ *    cmdstate ==initial  calling state
+ *********************************************************************/
+void
+    init_completion_state (completion_state_t *completion_state,
+			   agent_cb_t *agent_cb,
+			   command_state_t  cmdstate)
+{
+#ifdef DEBUG
+    if (!completion_state) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    memset(completion_state, 
+	   0x0, 
+	   sizeof(completion_state_t));
+    completion_state->agent_cb = agent_cb;
+    completion_state->cmdstate = cmdstate;
+
+}  /* init_completion_state */
+
+
+
 /* END yangcli_util.c */

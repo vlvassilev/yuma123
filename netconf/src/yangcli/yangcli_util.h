@@ -37,6 +37,10 @@ date	     init     comment
 #include "ncxtypes.h"
 #endif
 
+#ifndef _H_yangcli
+#include "yangcli.h"
+#endif
+
 
 /********************************************************************
 *								    *
@@ -103,5 +107,10 @@ extern boolean
 
 extern boolean
     interactive_mode (void);
+
+extern void
+    init_completion_state (completion_state_t *completion_state,
+			   agent_cb_t *agent_cb,
+			   command_state_t  cmdstate);
 
 #endif	    /* _H_yangcli_util */

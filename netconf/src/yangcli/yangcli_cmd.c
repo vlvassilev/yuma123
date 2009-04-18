@@ -2352,13 +2352,26 @@ static void
 		const xmlChar *line,
 		uint32  len)
 {
-    val_value_t  *valset, *val;
-    status_t      res;
+    val_value_t     *valset, *val;
+    ncx_module_t    *mod;
+    modptr_t        *modptr;
+    dlq_hdr_t       *mgrloadQ;
+    logfn_t          logfn;
+    status_t         res;
 
     val = NULL;
     res = NO_ERR;
 
-    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    if (interactive_mode()) {
+	logfn = log_stdout;
+    } else {
+	logfn = log_write;
+    }
+	
+    valset = get_valset(agent_cb, 
+			rpc, 
+			&line[len], 
+			&res);
 
     /* get the module name */
     if (res == NO_ERR) {
@@ -2372,17 +2385,48 @@ static void
 	}
     }
 
+    /* check if the module is loaded already */
+    if (res == NO_ERR) {
+	mod = ncx_find_module(VAL_STR(val), NULL);
+	if (mod) {
+	    if (mod->version) {
+		(*logfn)("\nModule '%s' revision '%s' already loaded",
+			 mod->name, 
+			 mod->version);
+	    } else {
+		(*logfn)("\nModule '%s' already loaded",
+			 mod->name);
+	    }
+	    if (valset) {
+		val_free_value(valset);
+	    }
+	    return;
+	}
+    }
+
     /* load the module */
     if (res == NO_ERR) {
-	res = ncxmod_load_module(VAL_STR(val), NULL, NULL);
+	mod = NULL;
+	res = ncxmod_load_module(VAL_STR(val), 
+				 NULL, 
+				 &mod);
+	if (res == NO_ERR) {
+	    modptr = new_modptr(mod);
+	    if (!modptr) {
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		mgrloadQ = get_mgrloadQ();
+		dlq_enque(modptr, mgrloadQ);
+	    }
+	}
     }
 
     /* print the result to stdout */
     if (res == NO_ERR) {
-	log_stdout("\nLoad module %s OK", VAL_STR(val));
+	(*logfn)("\nLoad module %s OK", VAL_STR(val));
     } else {
-	log_stdout("\nError: Load module failed (%s)",
-		   get_error_string(res));
+	(*logfn)("\nError: Load module failed (%s)",
+		 get_error_string(res));
     }
 
     if (valset) {
@@ -2773,6 +2817,13 @@ static void
 	    do_show_one_module(modptr->mod, mode);
 	    anyout = TRUE;
 	}
+	for (modptr = (modptr_t *)dlq_firstEntry(get_mgrloadQ());
+	     modptr != NULL;
+	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+	    do_show_one_module(modptr->mod, mode);
+	    anyout = TRUE;
+	}
     } else {
 	mod = ncx_get_first_module();
 	while (mod) {
@@ -2869,6 +2920,19 @@ static void
     if (use_agentcb(agent_cb)) {
 	for (modptr = (const modptr_t *)
 		 dlq_firstEntry(&agent_cb->modptrQ);
+	     modptr != NULL;
+	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+
+	    for (obj = ncx_get_first_object(modptr->mod);
+		 obj != NULL;
+		 obj = ncx_get_next_object(modptr->mod, obj)) {
+
+		do_show_one_object(obj, mode, &anyout);
+	    }
+	}
+
+	for (modptr = (const modptr_t *)
+		 dlq_firstEntry(get_mgrloadQ());
 	     modptr != NULL;
 	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
 
@@ -3389,7 +3453,7 @@ static void
     while (obj) {
 	if (obj_is_rpc(obj)) {
 	    if (use_agentcb(agent_cb)) {
-		/* list all local commands */
+		/* list a local command */
 		do_list_one_command(obj, mode);
 	    } else {
 		/* session not active so filter out
@@ -4117,13 +4181,18 @@ static void
 	     uint32  len)
 {
     val_value_t           *valset, *parm, *newparm, *curparm;
-    val_value_t           /* *valroot, */ *targval;
+    val_value_t           *targval;
     obj_template_t        *targobj;
+    completion_state_t    *comstate;
     const xmlChar         *target;
     status_t               res;
     boolean                imode, save_getopt;
+    command_state_t        save_cmdstate;
 
-    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    valset = get_valset(agent_cb, 
+			rpc, 
+			&line[len], 
+			&res);
     if (res != NO_ERR) {
 	if (valset) {
 	    val_free_value(valset);
@@ -4143,6 +4212,11 @@ static void
     }
 
     save_getopt = agent_cb->get_optional;
+
+    comstate = get_completion_state();
+    save_cmdstate = comstate->cmdstate;
+    comstate->cmdstate = CMD_STATE_GETVAL;
+
     imode = interactive_mode();
     newparm = NULL;
     curparm = NULL;
@@ -4270,6 +4344,7 @@ static void
 	val_free_value(newparm);
     }
     agent_cb->get_optional = save_getopt;
+    comstate->cmdstate = save_cmdstate;
 
 }  /* do_fill */
 

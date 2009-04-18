@@ -21,6 +21,7 @@ date         init     comment
 *********************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>
 #include <string.h>
 #include <unistd.h>
 #include <libssh2.h>
@@ -225,6 +226,13 @@ static xmlChar         clibuff[YANGCLI_BUFFLEN];
 
 /* libtecla data structure for 1 CLI context */
 static GetLine        *cli_gl;
+
+/* tab-completion state block */
+static completion_state_t completion_state;
+
+/* Q of modtrs that have been loaded with 'mgrload' */
+static dlq_hdr_t       mgrloadQ;
+
 
 /*****************  C O N F I G   V A R S  ****************/
 
@@ -1967,6 +1975,10 @@ static mgr_io_state_t
 
     /****/
     agent_cb = cur_agent_cb;
+    
+    init_completion_state(&completion_state,
+			  agent_cb, 
+			  CMD_STATE_FULL);
 
     if (mgr_shutdown_requested()) {
 	agent_cb->state = MGR_IO_ST_SHUT;
@@ -2110,6 +2122,485 @@ static mgr_io_state_t
 } /* yangcli_stdin_handler */
 
 
+
+
+/********************************************************************
+ * FUNCTION cpl_add_completion
+ *
+ *  COPIED FROM /usr/local/include/libtecla.h
+ *
+ *  Used by libtecla to store one completion possibility
+ *  for the current command line in progress
+ * 
+ *  cpl      WordCompletion *  The argument of the same name that was passed
+ *                             to the calling CPL_MATCH_FN() callback function.
+ *  line         const char *  The input line, as received by the callback
+ *                             function.
+ *  word_start          int    The index within line[] of the start of the
+ *                             word that is being completed. If an empty
+ *                             string is being completed, set this to be
+ *                             the same as word_end.
+ *  word_end            int    The index within line[] of the character which
+ *                             follows the incomplete word, as received by the
+ *                             callback function.
+ *  suffix       const char *  The appropriately quoted string that could
+ *                             be appended to the incomplete token to complete
+ *                             it. A copy of this string will be allocated
+ *                             internally.
+ *  type_suffix  const char *  When listing multiple completions, gl_get_line()
+ *                             appends this string to the completion to indicate
+ *                             its type to the user. If not pertinent pass "".
+ *                             Otherwise pass a literal or static string.
+ *  cont_suffix  const char *  If this turns out to be the only completion,
+ *                             gl_get_line() will append this string as
+ *                             a continuation. For example, the builtin
+ *                             file-completion callback registers a directory
+ *                             separator here for directory matches, and a
+ *                             space otherwise. If the match were a function
+ *                             name you might want to append an open
+ *                             parenthesis, etc.. If not relevant pass "".
+ *                             Otherwise pass a literal or static string.
+ * Output:
+ *  return              int    0 - OK.
+ *                             1 - Error.
+ */
+
+
+/********************************************************************
+ * FUNCTION fill_one_module_completion_commands
+ * 
+ * fill the command struct for one command string
+ * for one module; check all the commands in the module
+ *
+ * command state is CMD_STATE_FULL
+ *
+ * INPUTS:
+ *    mod == module to use
+ *    cpl == word completion struct to fill in
+ *    comstate == completion state in progress
+ *    line == line passed to callback
+ *    word_start == start position within line of the 
+ *                  word being completed
+ *    word_end == word_end passed to callback
+ *    cmdpos == start position to use for cmdstr
+ *    cmdlen == length of command already entered
+ *              this may not be the same as 
+ *              word_end - word_start if the cursor was
+ *              moved within a long line
+ *
+ * OUTPUTS:
+ *   cpl filled in if any matching commands found
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    fill_one_module_completion_commands (const ncx_module_t *mod,
+					 WordCompletion *cpl,
+					 completion_state_t *comstate,
+					 const char *line,
+					 int word_start,
+					 int word_end,
+					 int cmdlen)
+{
+    const obj_template_t  *obj;
+    const xmlChar         *cmdname;
+    int                    retval;
+    boolean                toponly;
+
+    toponly = FALSE;
+    if (mod == yangcli_mod &&
+	!use_agentcb(comstate->agent_cb)) {
+	toponly = TRUE;
+    }
+
+    /* check all the OBJ_TYP_RPC objects in the module */
+    for (obj = ncx_get_first_object(mod);
+	 obj != NULL;
+	 obj = ncx_get_next_object(mod, obj)) {
+
+	if (!obj_is_rpc(obj)) {
+	    continue;
+	}
+
+	cmdname = obj_get_name(obj);
+
+	if (toponly && !is_top_command(cmdname)) {
+	    continue;
+	}
+
+
+	/* check if there is a partial command name */
+	if (cmdlen > 0 &&
+	    xml_strncmp(cmdname,
+			(const xmlChar *)&line[word_start],
+			(uint32)cmdlen)) {
+	    /* command start is not the same so skip it */
+	    continue;
+	}
+
+	retval = 
+	    cpl_add_completion(cpl,
+			       line,
+			       word_start,
+			       word_end,
+			       (const char *)&cmdname[cmdlen],
+			       (const char *)"",
+			       (const char *)" ");
+
+	if (retval != 0) {
+	    return ERR_NCX_OPERATION_FAILED;
+	}
+    }
+
+    return NO_ERR;
+
+}  /* fill_one_module_completion_commands */
+
+
+/********************************************************************
+ * FUNCTION fill_one_completion_commands
+ * 
+ * fill the command struct for one command string
+ *
+ * command state is CMD_STATE_FULL
+ *
+ * INPUTS:
+ *    cpl == word completion struct to fill in
+ *    comstate == completeion state struct in progress
+ *    line == line passed to callback
+ *    word_start == start position within line of the 
+ *                  word being completed
+ *    word_end == word_end passed to callback
+ *    cmdpos == start position to use for cmdstr
+ *    cmdlen == length of command already entered
+ *              this may not be the same as 
+ *              word_end - word_start if the cursor was
+ *              moved within a long line
+ *
+ * OUTPUTS:
+ *   cpl filled in if any matching commands found
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    fill_one_completion_commands (WordCompletion *cpl,
+				  completion_state_t *comstate,
+				  const char *line,
+				  int word_start,
+				  int word_end,
+				  int cmdlen)
+{
+    const modptr_t     *modptr;
+    status_t            res;
+
+    res = NO_ERR;
+
+    /* figure out which modules to use */
+    if (comstate->cmdmodule) {
+	/* if foo:\t entered as the current token, then
+	 * the comstate->curmodule pointer will be set
+	 */
+	res = fill_one_module_completion_commands
+	    (comstate->cmdmodule,
+	     cpl,
+	     comstate,
+	     line,
+	     word_start,
+	     word_end,
+	     cmdlen);
+    } else {
+	if (use_agentcb(comstate->agent_cb)) {
+	    /* list agent commands first */
+	    for (modptr = (const modptr_t *)
+		     dlq_firstEntry(&comstate->agent_cb->modptrQ);
+		 modptr != NULL && res == NO_ERR;
+		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+
+		res = fill_one_module_completion_commands
+		    (modptr->mod,
+		     cpl,
+		     comstate,
+		     line,
+		     word_start,
+		     word_end,
+		     cmdlen);
+	    }
+
+	    /* list manager loaded commands next */
+	    for (modptr = (const modptr_t *)get_mgrloadQ();
+		 modptr != NULL && res == NO_ERR;
+		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+
+		res = fill_one_module_completion_commands
+		    (modptr->mod,
+		     cpl,
+		     comstate,
+		     line,
+		     word_start,
+		     word_end,
+		     cmdlen);
+	    }
+	} else {
+	    /* use the yangcli top only */
+	    res = fill_one_module_completion_commands
+		(yangcli_mod,
+		 cpl,
+		 comstate,
+		 line,
+		 word_start,
+		 word_end,
+		 cmdlen);
+	}
+    }
+
+    return res;
+
+}  /* fill_one_completion_commands */
+
+
+/********************************************************************
+ * FUNCTION fill_completion_commands
+ * 
+ * go through the available commands to see what
+ * matches should be returned
+ *
+ * command state is CMD_STATE_FULL
+ *
+ * INPUTS:
+ *    cpl == word completion struct to fill in
+ *    comstate == completion state struct to use
+ *    line == current line in progress
+ *    word_end == current cursor pos in the 'line'
+ *              may be in the middle if the user 
+ *              entered editing keys; libtecla will 
+ *              handle the text insertion if needed
+ * OUTPUTS:
+ *   comstate
+ * RETURN:
+ *   status
+ *********************************************************************/
+static status_t
+    fill_completion_commands (WordCompletion *cpl,
+			      completion_state_t *comstate,
+			      const char *line,
+			      int word_end)
+
+{
+    const char            *str, *cmdend;
+    status_t               res;
+    int                    word_start, cmdlen;
+
+    res = NO_ERR;
+    str = line;
+    cmdend = NULL;
+    word_start = 0;
+
+    /* skip starting whitespace */
+    while ((str < &line[word_end]) && isspace(*str)) {
+	str++;
+    }
+
+    /* check if any real characters entered yet */
+    if (word_end == 0 || str == &line[word_end]) {
+	/* found only spaces so far or
+	 * nothing entered yet 
+	 */
+	res = fill_one_completion_commands(cpl,
+					   comstate,
+					   line,
+					   word_end,
+					   word_end,
+					   0);
+	if (res != NO_ERR) {
+	    cpl_record_error(cpl,
+			     get_error_string(res));
+	}
+	return res;
+    }
+
+    /* else found a non-whitespace char in the buffer that
+     * is before the current tab position
+     * check what kind of command line is in progress
+     */
+    if (*str == '@' || *str == '$') {
+	/* at-file-assign start sequence OR
+	 * variable assignment start sequence 
+	 * may deal with auto-completion for 
+	 * variables and files later
+	 * For now, skip until the end of the 
+	 * assignment is found or word_end hit
+	 */
+	comstate->assignstmt = TRUE;
+	while ((str < &line[word_end]) && 
+	       !isspace(*str) && (*str != '=')) {
+	    str++;
+	}
+
+	/* check where the string search stopped */
+	if (isspace(*str) || *str == '=') {
+	    /* stopped past the first word
+	     * so need to skip further
+	     */
+	    if (isspace(*str)) {
+		/* find equals sign or word_end */
+		while ((str < &line[word_end]) && 
+		       isspace(*str)) {
+		    str++;
+		}
+	    }
+	    if ((*str == '=') && (str < &line[word_end])) {
+		str++;  /* skip equals sign */
+
+		/* skip more whitespace */
+		while ((str < &line[word_end]) && 
+		       isspace(*str)) {
+		    str++;
+		}
+	    }
+
+	    /* got past the '$foo =' part 
+	     * now looking for a command 
+	     */
+	    if (str < &line[word_end]) {
+		/* go to next part and look for
+		 * the end of this start command
+		 */
+		word_start = (int)(str - line);
+	    } else {
+		/* still inside the file or variable name */
+		return res;
+	    }
+	} else {
+	    /* word_end is still inside the first
+	     * word, which is an assignment of
+	     * some sort; not going to show
+	     * any completions for vars and files yet
+	     */
+	    return res;
+	}
+    } else {
+	/* first word starts with a normal char */
+	word_start = (int)(str - line);
+    }
+
+    /* the word_start var is set to the first char
+     * that is supposed to be start command name
+     * the 'str' var points to that char
+     * check if it is an entire or partial command name
+     */
+    cmdend = str;
+    while (*cmdend != '\0' &&
+	   cmdend < &line[word_end] &&
+	   !isspace(*cmdend)) {
+	cmdend++;
+    }
+
+    /* check if still inside the start command */
+    if (cmdend == &line[word_end]) {
+
+	cmdlen = (int)(cmdend - str);
+
+	res = fill_one_completion_commands(cpl,
+					   comstate,
+					   line,
+					   word_start,
+					   word_end,
+					   cmdlen);
+	if (res != NO_ERR) {
+	    cpl_record_error(cpl,
+			     get_error_string(res));
+	}
+	return res;
+    }
+
+    log_debug("\n** 3 **");
+
+    /* not inside the start command so get the command that
+     * was selected if it exists
+     */
+
+    return res;
+
+} /* fill_completion_commands */
+
+
+/*.......................................................................
+ *
+ * FUNCTION word_complete_cb
+ *
+ *   libtecla tab-completion callback function
+ *
+ * Matches the CplMatchFn typedef
+ *
+ * From /usr/lib/include/libtecla.h:
+ * 
+ * Callback functions declared and prototyped using the following macro
+ * are called upon to return an array of possible completion suffixes
+ * for the token that precedes a specified location in the given
+ * input line. It is up to this function to figure out where the token
+ * starts, and to call cpl_add_completion() to register each possible
+ * completion before returning.
+ *
+ * Input:
+ *  cpl  WordCompletion *  An opaque pointer to the object that will
+ *                         contain the matches. This should be filled
+ *                         via zero or more calls to cpl_add_completion().
+ *  data           void *  The anonymous 'data' argument that was
+ *                         passed to cpl_complete_word() or
+ *                         gl_customize_completion()).
+ *  line     const char *  The current input line.
+ *  word_end        int    The index of the character in line[] which
+ *                         follows the end of the token that is being
+ *                         completed.
+ * Output
+ *  return          int    0 - OK.
+ *                         1 - Error.
+ */
+static int
+    word_complete_cb (WordCompletion *cpl, 
+		      void *data,
+		      const char *line, 
+		      int word_end)
+{
+    completion_state_t   *comstate;
+    status_t              res;
+
+#ifdef DEBUG
+    if (!cpl || !data || !line ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 1;
+    }
+#endif
+
+    comstate = (completion_state_t *)data;
+
+    switch (comstate->cmdstate) {
+    case CMD_STATE_NONE:
+    case CMD_STATE_FULL:
+	res = fill_completion_commands(cpl,
+				       comstate,
+				       line,
+				       word_end);
+	if (res != NO_ERR) {
+	    return 1;
+	}
+	break;
+    case CMD_STATE_GETVAL:
+	break;
+    case CMD_STATE_YESNO:
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return 1;
+    }
+
+    return 0;
+
+} /* word_complete_cb */
+
+
 /********************************************************************
  * FUNCTION yangcli_init
  * 
@@ -2131,6 +2622,7 @@ static status_t
     ncx_lmem_t           *lmem;
     val_value_t          *parm;
     status_t              res;
+    int                   retval;
 
 #ifdef YANGCLI_DEBUG
     int   i;
@@ -2145,6 +2637,8 @@ static status_t
 
     /* init the module static vars */
     dlq_createSQue(&agent_cbQ);
+    dlq_createSQue(&mgrloadQ);
+
     /* state = MGR_IO_ST_INIT; */
     mgr_cli_valset = NULL;
     connect_valset = NULL;
@@ -2165,7 +2659,11 @@ static status_t
     memset(clibuff, 0x0, sizeof(clibuff));
     malloc_cnt = 0;
     free_cnt = 0;
-    cli_gl = NULL;
+
+    memset(&completion_state, 0x0, sizeof(completion_state_t));
+
+    /* set the character set LOCALE to the user default */
+    setlocale(LC_CTYPE, "");
 
     /* get a read line context with a history buffer 
     * change later to not get allocated if batch mode active
@@ -2173,6 +2671,14 @@ static status_t
     cli_gl = new_GetLine(YANGCLI_LINELEN, YANGCLI_HISTLEN);
     if (!cli_gl) {
 	return ERR_INTERNAL_MEM;
+    }
+
+    /* setup the yangcli tab-completion function for libtecla */
+    retval = gl_customize_completion(cli_gl,
+				     &completion_state,
+				     word_complete_cb);
+    if (retval != 0) {
+	return ERR_NCX_OPERATION_FAILED;
     }
 
     /* initialize the NCX Library first to allow NCX modules
@@ -2183,7 +2689,8 @@ static status_t
 		   log_level, 
 		   TRUE,
 		   "\nStarting yangcli",
-		   argc, argv);
+		   argc, 
+		   argv);
 
     if (res != NO_ERR) {
 	return res;
@@ -2348,6 +2855,7 @@ static void
     yangcli_cleanup (void)
 {
     agent_cb_t  *agent_cb;
+    modptr_t    *modptr;
 
     log_debug2("\nShutting down yangcli\n");
 
@@ -2355,6 +2863,11 @@ static void
     if (cli_gl) {
 	(void)del_GetLine(cli_gl);
 	cli_gl = NULL;
+    }
+
+    while (!dlq_empty(&mgrloadQ)) {
+	modptr = (modptr_t *)dlq_deque(&mgrloadQ);
+	free_modptr(modptr);
     }
 
     /* Cleanup the Netconf Agent Library */
@@ -2417,6 +2930,9 @@ static void
     log_close();
 
 }  /* yangcli_cleanup */
+
+
+
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -2601,6 +3117,36 @@ val_value_t *
 {
     return connect_valset;
 }  /* get_connect_valset */
+
+
+/********************************************************************
+* FUNCTION get_mgrloadQ
+* 
+*  Get the mgrloadQ value pointer
+* 
+* RETURNS:
+*    mgrloadQ variable
+*********************************************************************/
+dlq_hdr_t *
+    get_mgrloadQ (void)
+{
+    return &mgrloadQ;
+}  /* get_mgrloadQ */
+
+
+/********************************************************************
+* FUNCTION get_completion_state
+* 
+*  Get the completion_state value pointer
+* 
+* RETURNS:
+*    completion_state variable
+*********************************************************************/
+completion_state_t *
+    get_completion_state (void)
+{
+    return &completion_state;
+}  /* get_completion_state */
 
 
 /********************************************************************

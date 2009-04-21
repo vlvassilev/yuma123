@@ -2452,15 +2452,15 @@ void
 	if (impmod && impmod->version && mod->version) {
 	    ret = yang_compare_revision_dates(impmod->version,
 					      mod->version);
-	    if (ret > 0 && LOGDEBUG) {
-		log_debug("\nNote: imported module '%s' (%s)"
-			  " is newer than '%s' (%s)",
-			  impmod->name, 
-			  (impmod->version) 
-			  ? impmod->version : EMPTY_STRING,
-			  mod->name,
-			  (mod->version) 
-			  ? mod->version : EMPTY_STRING);
+	    if (ret > 0 && LOGDEBUG2) {
+		log_debug2("\nNote: imported module '%s' (%s)"
+			   " is newer than '%s' (%s)",
+			   impmod->name, 
+			   (impmod->version) 
+			   ? impmod->version : EMPTY_STRING,
+			   mod->name,
+			   (mod->version) 
+			   ? mod->version : EMPTY_STRING);
 	    }
 	}
     }

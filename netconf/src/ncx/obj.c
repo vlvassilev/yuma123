@@ -8672,6 +8672,40 @@ uint32
 
 
 /********************************************************************
+* FUNCTION obj_has_children
+*
+* Check if there are any accessible nodes within the object
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if there are any accessible children
+*   FALSE if no datadb child nodes found
+*********************************************************************/
+boolean
+    obj_has_children (const obj_template_t *obj)
+{
+    const obj_template_t *childobj;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    childobj = obj_first_child_deep(obj);
+    if (childobj) {
+	return TRUE;
+    } else {
+	return FALSE;
+    }
+
+}   /* obj_has_children */
+
+
+/********************************************************************
 * FUNCTION obj_new_metadata
 * 
 * Malloc and initialize the fields in a an obj_metadata_t

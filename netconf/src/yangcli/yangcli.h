@@ -43,6 +43,10 @@ date	     init     comment
 #include "ses.h"
 #endif
 
+#ifndef _H_status
+#include "status.h"
+#endif
+
 #ifndef _H_val
 #include "val.h"
 #endif

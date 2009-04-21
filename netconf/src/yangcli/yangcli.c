@@ -147,6 +147,10 @@ date         init     comment
 #include "yangcli_cmd.h"
 #endif
 
+#ifndef _H_yangcli_tab
+#include "yangcli_tab.h"
+#endif
+
 #ifndef _H_yangcli_util
 #include "yangcli_util.h"
 #endif
@@ -322,7 +326,7 @@ static agent_cb_t *
     agent_cb_t  *agent_cb;
 
     agent_cb = m__getObj(agent_cb_t);
-    if (!agent_cb) {
+    if (agent_cb == NULL) {
 	return NULL;
     }
     memset(agent_cb, 0x0, sizeof(agent_cb_t));
@@ -330,7 +334,7 @@ static agent_cb_t *
     dlq_createSQue(&agent_cb->modptrQ);
 
     agent_cb->name = xml_strdup(name);
-    if (!agent_cb->name) {
+    if (agent_cb->name == NULL) {
 	m__free(agent_cb);
 	return NULL;
     }
@@ -437,7 +441,7 @@ static status_t
 	if (!typ_is_string(newval->btyp)) {
 	    return ERR_NCX_WRONG_TYPE;
 	}
-	if (!VAL_STR(newval)) {
+	if (VAL_STR(newval) == NULL) {
 	    return ERR_NCX_INVALID_VALUE;
 	}
 	usestr = VAL_STR(newval);
@@ -504,7 +508,7 @@ static status_t
 	} else {
 	    /* save a copy of the string value */
 	    dupval = xml_strdup(usestr);
-	    if (!dupval) {
+	    if (dupval == NULL) {
 		log_error("\nError: malloc failed");
 		res = ERR_INTERNAL_MEM;
 	    } else {
@@ -794,7 +798,7 @@ static status_t
 	}
     } else {
 	fil = fopen((const char *)agent_cb->result_filename, "w");
-	if (!fil) {
+	if (fil == NULL) {
 	    log_error("\nError: assignment file '%s' could "
 		      "not be opened",
 		      agent_cb->result_filename);
@@ -934,7 +938,7 @@ static status_t
 	     * for the output file
 	     */
 	    curval = var_get_str(name, nlen, vartype);
-	    if (!curval) {
+	    if (curval == NULL) {
 		log_error("\nError: file assignment variable "
 			  "not found");
 		return ERR_NCX_VAR_NOT_FOUND;
@@ -995,7 +999,7 @@ static status_t
 
 	/* save the filename in a temp string */
 	tempstr = xml_strndup(name, nlen);
-	if (!tempstr) {
+	if (tempstr == NULL) {
 	    return ERR_INTERNAL_MEM;
 	}
 
@@ -1082,7 +1086,7 @@ static status_t
     val = var_check_script_val(obj, str, ISTOP, &res);
     if (val) {
 	/* a script value reference was found */
-	if (!obj || !xml_strcmp(val->name, NCX_EL_STRING)) {
+	if (obj==NULL || !xml_strcmp(val->name, NCX_EL_STRING)) {
 	    /* the generic name needs to be overwritten */
 	    val_set_name(val, name, nlen);
 	}
@@ -1098,7 +1102,7 @@ static status_t
 	     * first check if the input is VAR_TYP_CONFIG
 	     */
 	    if (vartype == VAR_TYP_CONFIG) {
-		if (!curval) {
+		if (curval==NULL) {
 		    res = SET_ERROR(ERR_INTERNAL_VAL);
 		} else {
 		    res = handle_config_assign(agent_cb,
@@ -1130,7 +1134,7 @@ static status_t
 	if (!*fileassign) {
 	    /* save the variable result name */
 	    agent_cb->result_name = xml_strndup(name, nlen);
-	    if (!agent_cb->result_name) {
+	    if (agent_cb->result_name == NULL) {
 		*len = 0;
 		res = ERR_INTERNAL_MEM;
 	    } else {
@@ -1412,7 +1416,7 @@ static status_t
 
     /* find the parmset definition in the registry */
     obj = ncx_find_object(yangcli_mod, YANGCLI_BOOT);
-    if (!obj) {
+    if (obj == NULL) {
 	res = ERR_NCX_NOT_FOUND;
     }
 
@@ -1420,7 +1424,7 @@ static status_t
 	/* check no command line parms */
 	if (argc <= 1) {
 	    mgr_cli_valset = val_new_value();
-	    if (!mgr_cli_valset) {
+	    if (mgr_cli_valset == NULL) {
 		res = ERR_INTERNAL_MEM;
 	    } else {
 		res = NO_ERR;
@@ -1551,7 +1555,7 @@ static status_t
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_MODULES);
     if (parm && parm->res == NO_ERR) {
 	modules = val_clone(parm);
-	if (!modules) {
+	if (modules == NULL) {
 	    return ERR_INTERNAL_MEM;
 	}
     }
@@ -1844,7 +1848,7 @@ static void
     mod = ncx_find_module(NC_MODULE, NULL);
     if (mod) {
 	modptr = new_modptr(mod);
-	if (!modptr) {
+	if (modptr == NULL) {
 	    log_error("\nMalloc failure");
 	    return;
 	} else {
@@ -1860,7 +1864,7 @@ static void
 			 &modlen,
 			 &version);
 
-	if (!module || !modlen || !version) {
+	if (module==NULL || !modlen || !version) {
 	    log_warn("\nWarning: skipping invalid module capability "
 		     "for URI '%s'", cap->cap_uri);
 	    cap = cap_next_modcap(cap);
@@ -1868,13 +1872,13 @@ static void
 	}
 
 	namebuff = xml_strndup(module, modlen);
-	if (!namebuff) {
+	if (namebuff == NULL) {
 	    log_error("\nMalloc failure");
 	    return;
 	}
 
 	mod = ncx_find_module(namebuff, version);
-	if (!mod) {
+	if (mod == NULL) {
 	    if (autoload) {
 		res = ncxmod_load_module(namebuff, version, &mod);
 		if (res != NO_ERR) {
@@ -1890,7 +1894,7 @@ static void
 	/* keep track of the exact modules the agent knows about */
 	if (mod) {
 	    modptr = new_modptr(mod);
-	    if (!modptr) {
+	    if (modptr == NULL) {
 		log_error("\nMalloc failure");
 		return;
 	    } else {
@@ -1993,7 +1997,7 @@ static mgr_io_state_t
     case MGR_IO_ST_CONN_START:
 	/* waiting until <hello> processing complete */
 	scb = mgr_ses_get_scb(agent_cb->mysid);
-	if (!scb) {
+	if (scb == NULL) {
 	    /* session startup failed */
 	    agent_cb->state = MGR_IO_ST_IDLE;
 	} else if (scb->state == SES_ST_IDLE 
@@ -2014,7 +2018,7 @@ static mgr_io_state_t
     case MGR_IO_ST_CONN_RPYWAIT:
 	/* check if session was dropped by remote peer */
 	scb = mgr_ses_get_scb(agent_cb->mysid);
-	if (!scb || scb->state == SES_ST_SHUTDOWN_REQ) {
+	if (scb==NULL || scb->state == SES_ST_SHUTDOWN_REQ) {
 	    if (scb) {
 		(void)mgr_ses_free_session(agent_cb->mysid);
 	    }
@@ -2036,7 +2040,7 @@ static mgr_io_state_t
     case MGR_IO_ST_CONN_CLOSEWAIT:
 	/* check timeout */
 	scb = mgr_ses_get_scb(agent_cb->mysid);
-	if (!scb || scb->state == SES_ST_SHUTDOWN_REQ) {
+	if (scb==NULL || scb->state == SES_ST_SHUTDOWN_REQ) {
 	    if (scb) {
 		(void)mgr_ses_free_session(agent_cb->mysid);
 	    }
@@ -2072,7 +2076,7 @@ static mgr_io_state_t
     if (runstack_level()) {
 	/* get one line of script text */
 	line = runstack_get_cmd(&res);
-	if (!line || res != NO_ERR) {
+	if (line==NULL || res != NO_ERR) {
 	    if (batchmode) {
 		mgr_request_shutdown();
 	    }
@@ -2081,7 +2085,7 @@ static mgr_io_state_t
     } else {
 	/* block until user enters some input */
 	line = get_cmd_line(agent_cb, &res);
-	if (!line) {
+	if (line==NULL) {
 	    return agent_cb->state;
 	}
     }
@@ -2120,485 +2124,6 @@ static mgr_io_state_t
     return agent_cb->state;
 
 } /* yangcli_stdin_handler */
-
-
-
-
-/********************************************************************
- * FUNCTION cpl_add_completion
- *
- *  COPIED FROM /usr/local/include/libtecla.h
- *
- *  Used by libtecla to store one completion possibility
- *  for the current command line in progress
- * 
- *  cpl      WordCompletion *  The argument of the same name that was passed
- *                             to the calling CPL_MATCH_FN() callback function.
- *  line         const char *  The input line, as received by the callback
- *                             function.
- *  word_start          int    The index within line[] of the start of the
- *                             word that is being completed. If an empty
- *                             string is being completed, set this to be
- *                             the same as word_end.
- *  word_end            int    The index within line[] of the character which
- *                             follows the incomplete word, as received by the
- *                             callback function.
- *  suffix       const char *  The appropriately quoted string that could
- *                             be appended to the incomplete token to complete
- *                             it. A copy of this string will be allocated
- *                             internally.
- *  type_suffix  const char *  When listing multiple completions, gl_get_line()
- *                             appends this string to the completion to indicate
- *                             its type to the user. If not pertinent pass "".
- *                             Otherwise pass a literal or static string.
- *  cont_suffix  const char *  If this turns out to be the only completion,
- *                             gl_get_line() will append this string as
- *                             a continuation. For example, the builtin
- *                             file-completion callback registers a directory
- *                             separator here for directory matches, and a
- *                             space otherwise. If the match were a function
- *                             name you might want to append an open
- *                             parenthesis, etc.. If not relevant pass "".
- *                             Otherwise pass a literal or static string.
- * Output:
- *  return              int    0 - OK.
- *                             1 - Error.
- */
-
-
-/********************************************************************
- * FUNCTION fill_one_module_completion_commands
- * 
- * fill the command struct for one command string
- * for one module; check all the commands in the module
- *
- * command state is CMD_STATE_FULL
- *
- * INPUTS:
- *    mod == module to use
- *    cpl == word completion struct to fill in
- *    comstate == completion state in progress
- *    line == line passed to callback
- *    word_start == start position within line of the 
- *                  word being completed
- *    word_end == word_end passed to callback
- *    cmdpos == start position to use for cmdstr
- *    cmdlen == length of command already entered
- *              this may not be the same as 
- *              word_end - word_start if the cursor was
- *              moved within a long line
- *
- * OUTPUTS:
- *   cpl filled in if any matching commands found
- *
- * RETURNS:
- *   status
- *********************************************************************/
-static status_t
-    fill_one_module_completion_commands (const ncx_module_t *mod,
-					 WordCompletion *cpl,
-					 completion_state_t *comstate,
-					 const char *line,
-					 int word_start,
-					 int word_end,
-					 int cmdlen)
-{
-    const obj_template_t  *obj;
-    const xmlChar         *cmdname;
-    int                    retval;
-    boolean                toponly;
-
-    toponly = FALSE;
-    if (mod == yangcli_mod &&
-	!use_agentcb(comstate->agent_cb)) {
-	toponly = TRUE;
-    }
-
-    /* check all the OBJ_TYP_RPC objects in the module */
-    for (obj = ncx_get_first_object(mod);
-	 obj != NULL;
-	 obj = ncx_get_next_object(mod, obj)) {
-
-	if (!obj_is_rpc(obj)) {
-	    continue;
-	}
-
-	cmdname = obj_get_name(obj);
-
-	if (toponly && !is_top_command(cmdname)) {
-	    continue;
-	}
-
-
-	/* check if there is a partial command name */
-	if (cmdlen > 0 &&
-	    xml_strncmp(cmdname,
-			(const xmlChar *)&line[word_start],
-			(uint32)cmdlen)) {
-	    /* command start is not the same so skip it */
-	    continue;
-	}
-
-	retval = 
-	    cpl_add_completion(cpl,
-			       line,
-			       word_start,
-			       word_end,
-			       (const char *)&cmdname[cmdlen],
-			       (const char *)"",
-			       (const char *)" ");
-
-	if (retval != 0) {
-	    return ERR_NCX_OPERATION_FAILED;
-	}
-    }
-
-    return NO_ERR;
-
-}  /* fill_one_module_completion_commands */
-
-
-/********************************************************************
- * FUNCTION fill_one_completion_commands
- * 
- * fill the command struct for one command string
- *
- * command state is CMD_STATE_FULL
- *
- * INPUTS:
- *    cpl == word completion struct to fill in
- *    comstate == completeion state struct in progress
- *    line == line passed to callback
- *    word_start == start position within line of the 
- *                  word being completed
- *    word_end == word_end passed to callback
- *    cmdpos == start position to use for cmdstr
- *    cmdlen == length of command already entered
- *              this may not be the same as 
- *              word_end - word_start if the cursor was
- *              moved within a long line
- *
- * OUTPUTS:
- *   cpl filled in if any matching commands found
- *
- * RETURNS:
- *   status
- *********************************************************************/
-static status_t
-    fill_one_completion_commands (WordCompletion *cpl,
-				  completion_state_t *comstate,
-				  const char *line,
-				  int word_start,
-				  int word_end,
-				  int cmdlen)
-{
-    const modptr_t     *modptr;
-    status_t            res;
-
-    res = NO_ERR;
-
-    /* figure out which modules to use */
-    if (comstate->cmdmodule) {
-	/* if foo:\t entered as the current token, then
-	 * the comstate->curmodule pointer will be set
-	 */
-	res = fill_one_module_completion_commands
-	    (comstate->cmdmodule,
-	     cpl,
-	     comstate,
-	     line,
-	     word_start,
-	     word_end,
-	     cmdlen);
-    } else {
-	if (use_agentcb(comstate->agent_cb)) {
-	    /* list agent commands first */
-	    for (modptr = (const modptr_t *)
-		     dlq_firstEntry(&comstate->agent_cb->modptrQ);
-		 modptr != NULL && res == NO_ERR;
-		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
-
-		res = fill_one_module_completion_commands
-		    (modptr->mod,
-		     cpl,
-		     comstate,
-		     line,
-		     word_start,
-		     word_end,
-		     cmdlen);
-	    }
-
-	    /* list manager loaded commands next */
-	    for (modptr = (const modptr_t *)get_mgrloadQ();
-		 modptr != NULL && res == NO_ERR;
-		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
-
-		res = fill_one_module_completion_commands
-		    (modptr->mod,
-		     cpl,
-		     comstate,
-		     line,
-		     word_start,
-		     word_end,
-		     cmdlen);
-	    }
-	} else {
-	    /* use the yangcli top only */
-	    res = fill_one_module_completion_commands
-		(yangcli_mod,
-		 cpl,
-		 comstate,
-		 line,
-		 word_start,
-		 word_end,
-		 cmdlen);
-	}
-    }
-
-    return res;
-
-}  /* fill_one_completion_commands */
-
-
-/********************************************************************
- * FUNCTION fill_completion_commands
- * 
- * go through the available commands to see what
- * matches should be returned
- *
- * command state is CMD_STATE_FULL
- *
- * INPUTS:
- *    cpl == word completion struct to fill in
- *    comstate == completion state struct to use
- *    line == current line in progress
- *    word_end == current cursor pos in the 'line'
- *              may be in the middle if the user 
- *              entered editing keys; libtecla will 
- *              handle the text insertion if needed
- * OUTPUTS:
- *   comstate
- * RETURN:
- *   status
- *********************************************************************/
-static status_t
-    fill_completion_commands (WordCompletion *cpl,
-			      completion_state_t *comstate,
-			      const char *line,
-			      int word_end)
-
-{
-    const char            *str, *cmdend;
-    status_t               res;
-    int                    word_start, cmdlen;
-
-    res = NO_ERR;
-    str = line;
-    cmdend = NULL;
-    word_start = 0;
-
-    /* skip starting whitespace */
-    while ((str < &line[word_end]) && isspace(*str)) {
-	str++;
-    }
-
-    /* check if any real characters entered yet */
-    if (word_end == 0 || str == &line[word_end]) {
-	/* found only spaces so far or
-	 * nothing entered yet 
-	 */
-	res = fill_one_completion_commands(cpl,
-					   comstate,
-					   line,
-					   word_end,
-					   word_end,
-					   0);
-	if (res != NO_ERR) {
-	    cpl_record_error(cpl,
-			     get_error_string(res));
-	}
-	return res;
-    }
-
-    /* else found a non-whitespace char in the buffer that
-     * is before the current tab position
-     * check what kind of command line is in progress
-     */
-    if (*str == '@' || *str == '$') {
-	/* at-file-assign start sequence OR
-	 * variable assignment start sequence 
-	 * may deal with auto-completion for 
-	 * variables and files later
-	 * For now, skip until the end of the 
-	 * assignment is found or word_end hit
-	 */
-	comstate->assignstmt = TRUE;
-	while ((str < &line[word_end]) && 
-	       !isspace(*str) && (*str != '=')) {
-	    str++;
-	}
-
-	/* check where the string search stopped */
-	if (isspace(*str) || *str == '=') {
-	    /* stopped past the first word
-	     * so need to skip further
-	     */
-	    if (isspace(*str)) {
-		/* find equals sign or word_end */
-		while ((str < &line[word_end]) && 
-		       isspace(*str)) {
-		    str++;
-		}
-	    }
-	    if ((*str == '=') && (str < &line[word_end])) {
-		str++;  /* skip equals sign */
-
-		/* skip more whitespace */
-		while ((str < &line[word_end]) && 
-		       isspace(*str)) {
-		    str++;
-		}
-	    }
-
-	    /* got past the '$foo =' part 
-	     * now looking for a command 
-	     */
-	    if (str < &line[word_end]) {
-		/* go to next part and look for
-		 * the end of this start command
-		 */
-		word_start = (int)(str - line);
-	    } else {
-		/* still inside the file or variable name */
-		return res;
-	    }
-	} else {
-	    /* word_end is still inside the first
-	     * word, which is an assignment of
-	     * some sort; not going to show
-	     * any completions for vars and files yet
-	     */
-	    return res;
-	}
-    } else {
-	/* first word starts with a normal char */
-	word_start = (int)(str - line);
-    }
-
-    /* the word_start var is set to the first char
-     * that is supposed to be start command name
-     * the 'str' var points to that char
-     * check if it is an entire or partial command name
-     */
-    cmdend = str;
-    while (*cmdend != '\0' &&
-	   cmdend < &line[word_end] &&
-	   !isspace(*cmdend)) {
-	cmdend++;
-    }
-
-    /* check if still inside the start command */
-    if (cmdend == &line[word_end]) {
-
-	cmdlen = (int)(cmdend - str);
-
-	res = fill_one_completion_commands(cpl,
-					   comstate,
-					   line,
-					   word_start,
-					   word_end,
-					   cmdlen);
-	if (res != NO_ERR) {
-	    cpl_record_error(cpl,
-			     get_error_string(res));
-	}
-	return res;
-    }
-
-    log_debug("\n** 3 **");
-
-    /* not inside the start command so get the command that
-     * was selected if it exists
-     */
-
-    return res;
-
-} /* fill_completion_commands */
-
-
-/*.......................................................................
- *
- * FUNCTION word_complete_cb
- *
- *   libtecla tab-completion callback function
- *
- * Matches the CplMatchFn typedef
- *
- * From /usr/lib/include/libtecla.h:
- * 
- * Callback functions declared and prototyped using the following macro
- * are called upon to return an array of possible completion suffixes
- * for the token that precedes a specified location in the given
- * input line. It is up to this function to figure out where the token
- * starts, and to call cpl_add_completion() to register each possible
- * completion before returning.
- *
- * Input:
- *  cpl  WordCompletion *  An opaque pointer to the object that will
- *                         contain the matches. This should be filled
- *                         via zero or more calls to cpl_add_completion().
- *  data           void *  The anonymous 'data' argument that was
- *                         passed to cpl_complete_word() or
- *                         gl_customize_completion()).
- *  line     const char *  The current input line.
- *  word_end        int    The index of the character in line[] which
- *                         follows the end of the token that is being
- *                         completed.
- * Output
- *  return          int    0 - OK.
- *                         1 - Error.
- */
-static int
-    word_complete_cb (WordCompletion *cpl, 
-		      void *data,
-		      const char *line, 
-		      int word_end)
-{
-    completion_state_t   *comstate;
-    status_t              res;
-
-#ifdef DEBUG
-    if (!cpl || !data || !line ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 1;
-    }
-#endif
-
-    comstate = (completion_state_t *)data;
-
-    switch (comstate->cmdstate) {
-    case CMD_STATE_NONE:
-    case CMD_STATE_FULL:
-	res = fill_completion_commands(cpl,
-				       comstate,
-				       line,
-				       word_end);
-	if (res != NO_ERR) {
-	    return 1;
-	}
-	break;
-    case CMD_STATE_GETVAL:
-	break;
-    case CMD_STATE_YESNO:
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return 1;
-    }
-
-    return 0;
-
-} /* word_complete_cb */
 
 
 /********************************************************************
@@ -2669,14 +2194,14 @@ static status_t
     * change later to not get allocated if batch mode active
     */
     cli_gl = new_GetLine(YANGCLI_LINELEN, YANGCLI_HISTLEN);
-    if (!cli_gl) {
+    if (cli_gl==NULL) {
 	return ERR_INTERNAL_MEM;
     }
 
     /* setup the yangcli tab-completion function for libtecla */
     retval = gl_customize_completion(cli_gl,
 				     &completion_state,
-				     word_complete_cb);
+				     yangcli_tab_callback);
     if (retval != 0) {
 	return ERR_NCX_OPERATION_FAILED;
     }
@@ -2726,13 +2251,13 @@ static status_t
      * !!! MUST BE AFTER load_base_schema !!!
      */
     obj = ncx_find_object(yangcli_mod, YANGCLI_CONNECT);
-    if (!obj) {
+    if (obj==NULL) {
 	return ERR_NCX_DEF_NOT_FOUND;
     }
 
     /* set the parmset object to the input node of the RPC */
     obj = obj_find_child(obj, NULL, YANG_K_INPUT);
-    if (!obj) {
+    if (obj==NULL) {
 	return ERR_NCX_DEF_NOT_FOUND;
     }
 
@@ -2741,7 +2266,7 @@ static status_t
      * Setup an empty parmset to hold the connect parameters
      */
     connect_valset = val_new_value();
-    if (!connect_valset) {
+    if (connect_valset==NULL) {
 	return ERR_INTERNAL_MEM;
     } else {
 	val_init_from_template(connect_valset, obj);
@@ -2773,7 +2298,7 @@ static status_t
 
     /* create a default agent control block */
     agent_cb = new_agent_cb(YANGCLI_DEF_AGENT);
-    if (!agent_cb) {
+    if (agent_cb==NULL) {
 	return ERR_INTERNAL_MEM;
     }
     dlq_enque(agent_cb, &agent_cbQ);
@@ -3305,7 +2830,7 @@ status_t
 	if (agent_cb->result_vartype == VAR_TYP_CONFIG) {
 	    configvar = var_get(agent_cb->result_name,
 				VAR_TYP_CONFIG);
-	    if (!configvar) {
+	    if (configvar==NULL) {
 		res = SET_ERROR(ERR_INTERNAL_VAL);
 	    } else {
 		res = handle_config_assign(agent_cb,

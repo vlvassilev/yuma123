@@ -66,4 +66,10 @@ extern void
 		uint32 start,
 		boolean  cli);
 
+extern void *
+    parse_def (agent_cb_t *agent_cb,
+	       ncx_node_t *dtyp,
+	       xmlChar *line,
+	       uint32 *len);
+
 #endif	    /* _H_yangcli_cmd */

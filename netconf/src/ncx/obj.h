@@ -1075,6 +1075,9 @@ extern status_t
 extern uint32
     obj_get_child_count (const obj_template_t *obj);
 
+extern boolean
+    obj_has_children (const obj_template_t *obj);
+
 extern obj_metadata_t * 
     obj_new_metadata (void);
 

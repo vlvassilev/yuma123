@@ -487,219 +487,6 @@ static void *
 
 
 /********************************************************************
-* FUNCTION parse_def
-* 
-* Definitions have two forms:
-*   def       (default module used)
-*   module:def (explicit module name used)
-*   prefix:def (if prefix-to-module found, explicit module name used)
-*
-* Parse the possibly module-qualified definition (module:def)
-* and find the template for the requested definition
-*
-* INPUTS:
-*   agent_cb == agent control block to use
-*   dtyp == definition type 
-*       (NCX_NT_OBJ or  NCX_NT_TYP)
-*   line == input command line from user
-*   len  == pointer to output var for number of bytes parsed
-*
-* OUTPUTS:
-*    *dtyp is set if it started as NONE
-*    *len == number of bytes parsed
-*
-* RETURNS:
-*   pointer to the found definition template or NULL if not found
-*********************************************************************/
-static void *
-    parse_def (agent_cb_t *agent_cb,
-	       ncx_node_t *dtyp,
-	       xmlChar *line,
-	       uint32 *len)
-{
-    void           *def;
-    xmlChar        *start, *p, *q, oldp, oldq;
-    const xmlChar  *prefix, *defname, *modname;
-    ncx_module_t   *mod;
-    obj_template_t *obj;
-    modptr_t       *modptr;
-    uint32          prelen;
-    xmlns_id_t      nsid;
-    
-    def = NULL;
-    q = NULL;
-    oldq = 0;
-    prelen = 0;
-    *len = 0;
-    start = line;
-
-    /* skip any leading whitespace */
-    while (*start && xml_isspace(*start)) {
-	start++;
-    }
-
-    p = start;
-
-    /* look for a colon or EOS or whitespace to end method name */
-    while (*p && (*p != ':') && !xml_isspace(*p)) {
-	p++;
-    }
-
-    /* make sure got something */
-    if (p==start) {
-	return NULL;
-    }
-
-    /* search for a module prefix if a separator was found */
-    if (*p == ':') {
-
-	/* use an explicit module prefix in YANG */
-	prelen = p - start;
-	q = p+1;
-	while (*q && !xml_isspace(*q)) {
-	    q++;
-	}
-	*len = q - line;
-
-	oldq = *q;
-	*q = 0;
-	oldp = *p;
-	*p = 0;
-
-	prefix = start;
-	defname = p+1;
-    } else {
-	/* no module prefix, use default module, if any */
-	*len = p - line;
-
-	oldp = *p;
-	*p = 0;
-
-	/* try the default module, which will be NULL
-	 * unless set by the default-module CLI param
-	 */
-	prefix = NULL;
-	defname = start;
-    }
-
-    /* look in the registry for the definition name 
-     * first check if only the user supplied a module name
-     */
-    if (prefix) {
-	modname = NULL;
-	nsid = xmlns_find_ns_by_prefix(prefix);
-	if (nsid) {
-	    modname = xmlns_get_module(nsid);
-	}
-	if (modname) {
-	    def = try_parse_def(agent_cb,
-				modname, defname, dtyp);
-	} else {
-	    log_error("\nError: no module found for prefix '%s'", 
-		      prefix);
-	}
-    } else {
-	def = try_parse_def(agent_cb,
-			    YANGCLI_MOD, 
-			    defname, 
-			    dtyp);
-
-	if (!def && get_default_module()) {
-	    def = try_parse_def(agent_cb,
-				get_default_module(), 
-				defname, 
-				dtyp);
-	}
-	if (!def && (!get_default_module() ||
-		     xml_strcmp(get_default_module(), 
-				NC_MODULE))) {
-
-	    def = try_parse_def(agent_cb,
-				NC_MODULE, 
-				defname, 
-				dtyp);
-	}
-
-	/* if not found, try any module */
-	if (!def) {
-	    /* try any of the agent modules first */
-	    if (use_agentcb(agent_cb)) {
-		for (modptr = (modptr_t *)
-			 dlq_firstEntry(&agent_cb->modptrQ);
-		     modptr != NULL && !def;
-		     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-
-		    def = try_parse_def(agent_cb, 
-					modptr->mod->name, 
-					defname, 
-					dtyp);
-		}
-	    }
-
-	    /* try any of the manager-loaded modules */
-	    for (mod = ncx_get_first_module();
-		 mod != NULL && !def;
-		 mod = ncx_get_next_module(mod)) {
-
-		def = try_parse_def(agent_cb, 
-				    mod->name, 
-				    defname, 
-				    dtyp);
-	    }
-	}
-
-	/* if not found, try a partial RPC command name */
-	if (!def && get_autoload()) {
-	    switch (*dtyp) {
-	    case NCX_NT_NONE:
-	    case NCX_NT_OBJ:
-		if (use_agentcb(agent_cb)) {
-		    for (modptr = (modptr_t *)
-			     dlq_firstEntry(&agent_cb->modptrQ);
-			 modptr != NULL && !def;
-			 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-
-			def = ncx_match_any_rpc(modptr->mod->name, 
-						defname);
-			if (def) {
-			    *dtyp = NCX_NT_OBJ;
-			}
-		    }
-		}
-		if (!def) {
-		    def = ncx_match_any_rpc(NULL, defname);
-		    if (def) {
-			obj = (obj_template_t *)def;
-			if (obj_get_nsid(obj) == xmlns_nc_id()) {
-			    /* matched a NETCONF RPC and not connected;
-			     * would have matched in the use_agentcb()
-			     * code above if this is a partial NC op
-			     */
-			    def = NULL;
-			} else {
-			    *dtyp = NCX_NT_OBJ;
-			}
-		    }
-		}
-		break;
-	    default:
-		;
-	    }
-	}
-    }
-
-    /* restore string as needed */
-    *p = oldp;
-    if (q) {
-	*q = oldq;
-    }
-
-    return def;
-    
-} /* parse_def */
-
-
-/********************************************************************
 * FUNCTION get_yesno
 * 
 * Get the user-selected choice, yes or no
@@ -7197,6 +6984,218 @@ void
 
 }  /* do_connect */
 
+
+/********************************************************************
+* FUNCTION parse_def
+* 
+* Definitions have two forms:
+*   def       (default module used)
+*   module:def (explicit module name used)
+*   prefix:def (if prefix-to-module found, explicit module name used)
+*
+* Parse the possibly module-qualified definition (module:def)
+* and find the template for the requested definition
+*
+* INPUTS:
+*   agent_cb == agent control block to use
+*   dtyp == definition type 
+*       (NCX_NT_OBJ or  NCX_NT_TYP)
+*   line == input command line from user
+*   len  == pointer to output var for number of bytes parsed
+*
+* OUTPUTS:
+*    *dtyp is set if it started as NONE
+*    *len == number of bytes parsed
+*
+* RETURNS:
+*   pointer to the found definition template or NULL if not found
+*********************************************************************/
+void *
+    parse_def (agent_cb_t *agent_cb,
+	       ncx_node_t *dtyp,
+	       xmlChar *line,
+	       uint32 *len)
+{
+    void           *def;
+    xmlChar        *start, *p, *q, oldp, oldq;
+    const xmlChar  *prefix, *defname, *modname;
+    ncx_module_t   *mod;
+    obj_template_t *obj;
+    modptr_t       *modptr;
+    uint32          prelen;
+    xmlns_id_t      nsid;
+    
+    def = NULL;
+    q = NULL;
+    oldq = 0;
+    prelen = 0;
+    *len = 0;
+    start = line;
+
+    /* skip any leading whitespace */
+    while (*start && xml_isspace(*start)) {
+	start++;
+    }
+
+    p = start;
+
+    /* look for a colon or EOS or whitespace to end method name */
+    while (*p && (*p != ':') && !xml_isspace(*p)) {
+	p++;
+    }
+
+    /* make sure got something */
+    if (p==start) {
+	return NULL;
+    }
+
+    /* search for a module prefix if a separator was found */
+    if (*p == ':') {
+
+	/* use an explicit module prefix in YANG */
+	prelen = p - start;
+	q = p+1;
+	while (*q && !xml_isspace(*q)) {
+	    q++;
+	}
+	*len = q - line;
+
+	oldq = *q;
+	*q = 0;
+	oldp = *p;
+	*p = 0;
+
+	prefix = start;
+	defname = p+1;
+    } else {
+	/* no module prefix, use default module, if any */
+	*len = p - line;
+
+	oldp = *p;
+	*p = 0;
+
+	/* try the default module, which will be NULL
+	 * unless set by the default-module CLI param
+	 */
+	prefix = NULL;
+	defname = start;
+    }
+
+    /* look in the registry for the definition name 
+     * first check if only the user supplied a module name
+     */
+    if (prefix) {
+	modname = NULL;
+	nsid = xmlns_find_ns_by_prefix(prefix);
+	if (nsid) {
+	    modname = xmlns_get_module(nsid);
+	}
+	if (modname) {
+	    def = try_parse_def(agent_cb,
+				modname, defname, dtyp);
+	} else {
+	    log_error("\nError: no module found for prefix '%s'", 
+		      prefix);
+	}
+    } else {
+	def = try_parse_def(agent_cb,
+			    YANGCLI_MOD, 
+			    defname, 
+			    dtyp);
+
+	if (!def && get_default_module()) {
+	    def = try_parse_def(agent_cb,
+				get_default_module(), 
+				defname, 
+				dtyp);
+	}
+	if (!def && (!get_default_module() ||
+		     xml_strcmp(get_default_module(), 
+				NC_MODULE))) {
+
+	    def = try_parse_def(agent_cb,
+				NC_MODULE, 
+				defname, 
+				dtyp);
+	}
+
+	/* if not found, try any module */
+	if (!def) {
+	    /* try any of the agent modules first */
+	    if (use_agentcb(agent_cb)) {
+		for (modptr = (modptr_t *)
+			 dlq_firstEntry(&agent_cb->modptrQ);
+		     modptr != NULL && !def;
+		     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+		    def = try_parse_def(agent_cb, 
+					modptr->mod->name, 
+					defname, 
+					dtyp);
+		}
+	    }
+
+	    /* try any of the manager-loaded modules */
+	    for (mod = ncx_get_first_module();
+		 mod != NULL && !def;
+		 mod = ncx_get_next_module(mod)) {
+
+		def = try_parse_def(agent_cb, 
+				    mod->name, 
+				    defname, 
+				    dtyp);
+	    }
+	}
+
+	/* if not found, try a partial RPC command name */
+	if (!def && get_autoload()) {
+	    switch (*dtyp) {
+	    case NCX_NT_NONE:
+	    case NCX_NT_OBJ:
+		if (use_agentcb(agent_cb)) {
+		    for (modptr = (modptr_t *)
+			     dlq_firstEntry(&agent_cb->modptrQ);
+			 modptr != NULL && !def;
+			 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+			def = ncx_match_any_rpc(modptr->mod->name, 
+						defname);
+			if (def) {
+			    *dtyp = NCX_NT_OBJ;
+			}
+		    }
+		}
+		if (!def) {
+		    def = ncx_match_any_rpc(NULL, defname);
+		    if (def) {
+			obj = (obj_template_t *)def;
+			if (obj_get_nsid(obj) == xmlns_nc_id()) {
+			    /* matched a NETCONF RPC and not connected;
+			     * would have matched in the use_agentcb()
+			     * code above if this is a partial NC op
+			     */
+			    def = NULL;
+			} else {
+			    *dtyp = NCX_NT_OBJ;
+			}
+		    }
+		}
+		break;
+	    default:
+		;
+	    }
+	}
+    }
+
+    /* restore string as needed */
+    *p = oldp;
+    if (q) {
+	*q = oldq;
+    }
+
+    return def;
+    
+} /* parse_def */
 
 
 /* END yangcli.c */

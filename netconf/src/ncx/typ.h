@@ -646,6 +646,7 @@ extern boolean
 extern boolean
     typ_is_xsd_simple (ncx_btype_t btyp);
 
+/* looks past named typedefs to base typedef */
 extern const typ_enum_t *
     typ_first_enumdef (const typ_def_t *typdef);
 
@@ -655,6 +656,7 @@ extern const typ_enum_t *
 extern typ_enum_t *
     typ_first_enumdef2 (typ_def_t *typdef);
 
+/* constrained to this typdef */
 extern const typ_enum_t *
     typ_first_con_enumdef (const typ_def_t *typdef);
 

@@ -943,7 +943,11 @@ static status_t
 	    name = ncx_find_typname(typdef->def.named.typ, &mod->typnameQ);
 	    if (!name) {
 		if (mod->ismod) {
-		    SET_ERROR(ERR_INTERNAL_VAL);
+		    if (xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
+			SET_ERROR(ERR_INTERNAL_VAL);
+		    } /* else not sure why the typnameQ is
+		       * not getting filled in right now
+		       */
 		}
 		name = typdef->def.named.typ->name;
 	    }

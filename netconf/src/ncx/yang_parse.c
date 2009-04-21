@@ -2842,6 +2842,7 @@ static status_t
     if (mod->ismod && 
 	!xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
 	loaded = TRUE;
+	mod->nsid = xmlns_nc_id();
     }
 
     /* check if this module is already loaded, except in diff mode */

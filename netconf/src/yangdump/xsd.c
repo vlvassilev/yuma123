@@ -575,10 +575,16 @@ status_t
 
     /* setup the local typedefs in all objects */
     if (res == NO_ERR) {
-	res = xsd_do_typedefs_datadefQ(mod, &mod->datadefQ, &mod->typnameQ);
+	res = xsd_do_typedefs_datadefQ(mod, 
+				       &mod->datadefQ, 
+				       &mod->typnameQ);
     }
 
-    res = xsd_do_typedefs_groupingQ(mod, &mod->groupingQ, &mod->typnameQ);
+    if (res == NO_ERR) {
+	res = xsd_do_typedefs_groupingQ(mod, 
+					&mod->groupingQ, 
+					&mod->typnameQ);
+    }
 
     return res;
 

@@ -3135,7 +3135,7 @@ status_t
     FILE           *fp;
     xmlChar        *str;
     status_t        res;
-    boolean         wasadd;
+    boolean         wasadd, keepmod;
 
 #ifdef DEBUG
     if (!filespec || !pcb) {
@@ -3148,6 +3148,8 @@ status_t
     mod = NULL;
     res = NO_ERR;
     str = NULL;
+    keepmod = FALSE;
+    wasadd = FALSE;
 
     /* open the YANG source file for reading */
     fp = fopen((const char *)filespec, "r");
@@ -3251,6 +3253,8 @@ status_t
 			/* swap with the real module already done */
 			pcb->top = ncx_find_module(mod->name,
 						   mod->version);
+		    } else {
+			keepmod = TRUE;
 		    }
 		}
 	    } else if (!pcb->with_submods) {
@@ -3265,7 +3269,9 @@ status_t
 	    } else if (pcb->top == mod) {
 		pcb->top = NULL;
 	    }
-	    ncx_free_module(mod);
+	    if (!keepmod) {
+		ncx_free_module(mod);
+	    }
 	    if (!pcb->top && !pcb->with_submods) {
 		res = ERR_NCX_MOD_NOT_FOUND;
 	    }

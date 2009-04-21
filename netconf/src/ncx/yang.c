@@ -2717,8 +2717,21 @@ void
     }
 #endif
 
-    if (pcb->top && !pcb->top->ismod) {
-	ncx_free_module(pcb->top);
+    if (pcb->top) {
+	if (pcb->top->ismod) {
+	    if (pcb->top->name &&
+		!xml_strcmp(pcb->top->name,
+			    NCXMOD_IETF_NETCONF)) {
+		/* special hack; the ietf-netconf module
+		 * was used in yangdump, but it was not
+		 * added to the registry; needs to be
+		 * deleted here
+		 */
+		ncx_free_module(pcb->top);
+	    }
+	} else {
+	    ncx_free_module(pcb->top);
+	}
     }
 
     yang_clean_import_ptrQ(&pcb->allimpQ);

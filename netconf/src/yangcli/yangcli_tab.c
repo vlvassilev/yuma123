@@ -1450,6 +1450,10 @@ int
 
     comstate = (completion_state_t *)data;
 
+    if (comstate->agent_cb->climore) {
+	comstate->cmdstate = CMD_STATE_MORE;
+    }
+
     switch (comstate->cmdstate) {
     case CMD_STATE_NONE:
     case CMD_STATE_FULL:
@@ -1464,6 +1468,8 @@ int
     case CMD_STATE_GETVAL:
 	break;
     case CMD_STATE_YESNO:
+	break;
+    case CMD_STATE_MORE:
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);

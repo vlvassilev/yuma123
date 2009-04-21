@@ -224,15 +224,6 @@ static xmlChar        *runscript;
 /* TRUE if runscript has been completed */
 static boolean         runscriptdone;
 
-/* CLI input buffer */
-static xmlChar         clibuff[YANGCLI_BUFFLEN];
-
-
-/* libtecla data structure for 1 CLI context */
-static GetLine        *cli_gl;
-
-/* tab-completion state block */
-static completion_state_t completion_state;
 
 /* Q of modtrs that have been loaded with 'mgrload' */
 static dlq_hdr_t       mgrloadQ;
@@ -309,51 +300,6 @@ static op_errop_t      erroption;
 static ncx_withdefaults_t  withdefaults;
 
 
-/********************************************************************
-* FUNCTION new_agent_cb
-* 
-*  Malloc and init a new agent control block
-* 
-* INPUTS:
-*    name == name of agent record
-*
-* RETURNS:
-*   malloced agent_cb struct or NULL of malloc failed
-*********************************************************************/
-static agent_cb_t *
-    new_agent_cb (const xmlChar *name)
-{
-    agent_cb_t  *agent_cb;
-
-    agent_cb = m__getObj(agent_cb_t);
-    if (agent_cb == NULL) {
-	return NULL;
-    }
-    memset(agent_cb, 0x0, sizeof(agent_cb_t));
-    dlq_createSQue(&agent_cb->varbindQ);
-    dlq_createSQue(&agent_cb->modptrQ);
-
-    agent_cb->name = xml_strdup(name);
-    if (agent_cb->name == NULL) {
-	m__free(agent_cb);
-	return NULL;
-    }
-
-    /* set default agent flags to current settings */
-    agent_cb->state = MGR_IO_ST_INIT;
-    agent_cb->baddata = baddata;
-    agent_cb->log_level = log_level;
-    agent_cb->autoload = autoload;
-    agent_cb->fixorder = fixorder;
-    agent_cb->get_optional = optional;
-    agent_cb->testoption = testoption;
-    agent_cb->erroption = erroption;
-    agent_cb->timeout = default_timeout;
-    agent_cb->withdefaults = withdefaults;
-
-    return agent_cb;
-
-}  /* new_agent_cb */
 
 
 /********************************************************************
@@ -392,6 +338,11 @@ static void
 	val_free_value(agent_cb->connect_valset);
     }
 
+    /* cleanup the user edit buffer */
+    if (agent_cb->cli_gl) {
+	(void)del_GetLine(agent_cb->cli_gl);
+    }
+
     var_clean_varQ(&agent_cb->varbindQ);
 
     while (!dlq_empty(&agent_cb->modptrQ)) {
@@ -402,6 +353,79 @@ static void
     m__free(agent_cb);
 
 }  /* free_agent_cb */
+
+
+/********************************************************************
+* FUNCTION new_agent_cb
+* 
+*  Malloc and init a new agent control block
+* 
+* INPUTS:
+*    name == name of agent record
+*
+* RETURNS:
+*   malloced agent_cb struct or NULL of malloc failed
+*********************************************************************/
+static agent_cb_t *
+    new_agent_cb (const xmlChar *name)
+{
+    agent_cb_t  *agent_cb;
+    boolean      err;
+    int          retval;
+
+    err = FALSE;
+    agent_cb = m__getObj(agent_cb_t);
+    if (agent_cb == NULL) {
+	return NULL;
+    }
+
+    memset(agent_cb, 0x0, sizeof(agent_cb_t));
+    dlq_createSQue(&agent_cb->varbindQ);
+    dlq_createSQue(&agent_cb->modptrQ);
+
+    /* set default agent flags to current settings */
+    agent_cb->state = MGR_IO_ST_INIT;
+    agent_cb->baddata = baddata;
+    agent_cb->log_level = log_level;
+    agent_cb->autoload = autoload;
+    agent_cb->fixorder = fixorder;
+    agent_cb->get_optional = optional;
+    agent_cb->testoption = testoption;
+    agent_cb->erroption = erroption;
+    agent_cb->timeout = default_timeout;
+    agent_cb->withdefaults = withdefaults;
+
+    agent_cb->name = xml_strdup(name);
+    if (agent_cb->name == NULL) {
+	err = TRUE;
+    } else {
+
+	/* get a read line context with a history buffer 
+	 * change later to not get allocated if batch mode active
+	 */
+	agent_cb->cli_gl = new_GetLine(YANGCLI_LINELEN, 
+				       YANGCLI_HISTLEN);
+	if (agent_cb->cli_gl == NULL) {
+	    err = TRUE;
+	} else {
+	    /* setup the yangcli tab-completion function for libtecla */
+	    retval = gl_customize_completion(agent_cb->cli_gl,
+					     &agent_cb->completion_state,
+					     yangcli_tab_callback);
+	    if (retval != 0) {
+		err = TRUE;
+	    }
+	}
+    }
+
+    if (err) {
+	free_agent_cb(agent_cb);
+	agent_cb = NULL;
+    }
+
+    return agent_cb;
+
+}  /* new_agent_cb */
 
 
 /********************************************************************
@@ -1977,12 +2001,16 @@ static mgr_io_state_t
     status_t        res;
     uint32          len;
 
-    /****/
+    /* assuming cur_agent_cb will be set dynamically
+     * at some point; currently 1 session supported in yangcli
+     */
     agent_cb = cur_agent_cb;
     
-    init_completion_state(&completion_state,
-			  agent_cb, 
-			  CMD_STATE_FULL);
+    if (agent_cb->cli_fn == NULL && !agent_cb->climore) {
+	init_completion_state(&agent_cb->completion_state,
+			      agent_cb, 
+			      CMD_STATE_FULL);
+    }
 
     if (mgr_shutdown_requested()) {
 	agent_cb->state = MGR_IO_ST_SHUT;
@@ -2147,7 +2175,6 @@ static status_t
     ncx_lmem_t           *lmem;
     val_value_t          *parm;
     status_t              res;
-    int                   retval;
 
 #ifdef YANGCLI_DEBUG
     int   i;
@@ -2181,30 +2208,11 @@ static status_t
     logfilename = NULL;
     runscript = NULL;
     runscriptdone = FALSE;
-    memset(clibuff, 0x0, sizeof(clibuff));
     malloc_cnt = 0;
     free_cnt = 0;
 
-    memset(&completion_state, 0x0, sizeof(completion_state_t));
-
     /* set the character set LOCALE to the user default */
     setlocale(LC_CTYPE, "");
-
-    /* get a read line context with a history buffer 
-    * change later to not get allocated if batch mode active
-    */
-    cli_gl = new_GetLine(YANGCLI_LINELEN, YANGCLI_HISTLEN);
-    if (cli_gl==NULL) {
-	return ERR_INTERNAL_MEM;
-    }
-
-    /* setup the yangcli tab-completion function for libtecla */
-    retval = gl_customize_completion(cli_gl,
-				     &completion_state,
-				     yangcli_tab_callback);
-    if (retval != 0) {
-	return ERR_NCX_OPERATION_FAILED;
-    }
 
     /* initialize the NCX Library first to allow NCX modules
      * to be processed.  No module can get its internal config
@@ -2384,12 +2392,6 @@ static void
 
     log_debug2("\nShutting down yangcli\n");
 
-    /* cleanup the user edit buffer */
-    if (cli_gl) {
-	(void)del_GetLine(cli_gl);
-	cli_gl = NULL;
-    }
-
     while (!dlq_empty(&mgrloadQ)) {
 	modptr = (modptr_t *)dlq_deque(&mgrloadQ);
 	free_modptr(modptr);
@@ -2509,21 +2511,6 @@ boolean
 
 
 /********************************************************************
-* FUNCTION get_cli_gl
-* 
-*  Get the CLI line
-* 
-* RETURNS:
-*    cli_gl variable
-*********************************************************************/
-GetLine *
-    get_cli_gl (void)
-{
-    return cli_gl;
-}  /* get_cli_gl */
-
-
-/********************************************************************
 * FUNCTION get_default_module
 * 
 *  Get the default module
@@ -2552,21 +2539,6 @@ const xmlChar *
     return runscript;
 
 }  /* get_runscript */
-
-/********************************************************************
-* FUNCTION get_clibuff
-* 
-*  Get the clibuff variable
-* 
-* RETURNS:
-*    clibuff value
-*********************************************************************/
-xmlChar *
-    get_clibuff (void)
-{
-    return clibuff;
-
-}  /* get_clibuff */
 
 
 /********************************************************************
@@ -2657,21 +2629,6 @@ dlq_hdr_t *
 {
     return &mgrloadQ;
 }  /* get_mgrloadQ */
-
-
-/********************************************************************
-* FUNCTION get_completion_state
-* 
-*  Get the completion_state value pointer
-* 
-* RETURNS:
-*    completion_state variable
-*********************************************************************/
-completion_state_t *
-    get_completion_state (void)
-{
-    return &completion_state;
-}  /* get_completion_state */
 
 
 /********************************************************************

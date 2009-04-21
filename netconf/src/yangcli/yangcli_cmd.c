@@ -58,10 +58,6 @@ date         init     comment
 #include "mgr.h"
 #endif
 
-#ifndef _H_mgr_hello
-#include "mgr_hello.h"
-#endif
-
 #ifndef _H_mgr_io
 #include "mgr_io.h"
 #endif
@@ -168,33 +164,6 @@ date         init     comment
 
 
 /********************************************************************
-*                                                                   *
-*                       C O N S T A N T S                           *
-*                                                                   *
-*********************************************************************/
-
-
-/********************************************************************
-*                                                                   *
-*                          T Y P E S                                *
-*                                                                   *
-*********************************************************************/
-
-
-/********************************************************************
-*                                                                   *
-*                       V A R I A B L E S			    *
-*                                                                   *
-*********************************************************************/
-
-/* CLI prompt function-specific extension mode */
-static const xmlChar  *cli_fn = NULL;
-
-/* CLI generic 'more' mode */
-static boolean         climore = FALSE;
-
-
-/********************************************************************
 * FUNCTION parse_rpc_cli
 * 
 *  Call the cli_parse for an RPC input value set
@@ -257,7 +226,7 @@ static void
     val_value_t    *parm;
     uint32          len;
 
-    if (climore) {
+    if (agent_cb->climore) {
 	xml_strncpy(buff, MORE_PROMPT, bufflen);
 	return;
     }
@@ -268,12 +237,12 @@ static void
     case MGR_IO_ST_CONNECT:
     case MGR_IO_ST_CONN_START:
     case MGR_IO_ST_SHUT:
-	if (cli_fn) {
+	if (agent_cb->cli_fn) {
 	    if ((xml_strlen(DEF_FN_PROMPT) 
-		 + xml_strlen(cli_fn) + 2) < bufflen) {
+		 + xml_strlen(agent_cb->cli_fn) + 2) < bufflen) {
 		p = buff;
 		p += xml_strcpy(p, DEF_FN_PROMPT);
-		p += xml_strcpy(p, cli_fn);
+		p += xml_strcpy(p, agent_cb->cli_fn);
 		xml_strcpy(p, (const xmlChar *)"> ");
 	    } else {
 		xml_strncpy(buff, DEF_PROMPT, bufflen);
@@ -349,9 +318,9 @@ static void
 	    }
 	}
 
-	if (cli_fn && bufflen > 3) {
+	if (agent_cb->cli_fn && bufflen > 3) {
 	    *p++ = ':';
-	    len = xml_strncpy(p, cli_fn, --bufflen);
+	    len = xml_strncpy(p, agent_cb->cli_fn, --bufflen);
 	    p += len;
 	    bufflen -= len;
 	}
@@ -399,10 +368,10 @@ static xmlChar *
 
     get_prompt(agent_cb, prompt, MAX_PROMPT_LEN-1);
 
-    if (!climore) {
+    if (!agent_cb->climore) {
 	log_stdout("\n");
     }
-    line = (xmlChar *)gl_get_line(get_cli_gl(),
+    line = (xmlChar *)gl_get_line(agent_cb->cli_gl,
 				  (const char *)prompt,
 				  NULL, -1);
     if (!line) {
@@ -1476,7 +1445,7 @@ static val_value_t *
     }
     val_init_from_template(dummy, parentobj);
 
-    cli_fn = obj_get_name(rpc);
+    agent_cb->cli_fn = obj_get_name(rpc);
 
     newval = NULL;
     saveopt = agent_cb->get_optional;
@@ -1490,7 +1459,7 @@ static val_value_t *
 	    val_remove_child(newval);
 	}
     }
-    cli_fn = NULL;
+    agent_cb->cli_fn = NULL;
     val_free_value(dummy);
     return newval;
 
@@ -1531,7 +1500,7 @@ static status_t
     uint32                 yesnocode;
 
     res = NO_ERR;
-    cli_fn = obj_get_name(rpc);
+    agent_cb->cli_fn = obj_get_name(rpc);
 
     if (obj_is_data_db(valset->obj)) {
 	objbuff = NULL;
@@ -1731,7 +1700,7 @@ static status_t
         }
     }
 
-    cli_fn = NULL;
+    agent_cb->cli_fn = NULL;
     return res;
 
 } /* fill_valset */
@@ -2215,6 +2184,7 @@ static void
 	(*logfn)("\nError: Load module failed (%s)",
 		 get_error_string(res));
     }
+    (*logfn)("\n");
 
     if (valset) {
 	val_free_value(valset);
@@ -3196,69 +3166,71 @@ static void
 {
     const modptr_t        *modptr;
     const obj_template_t  *obj;
-    boolean                imode;
+    logfn_t                logfn;
+    boolean                imode, anyout;
 
     imode = interactive_mode();
+    if (imode) {
+	logfn = log_stdout;
+    } else {
+	logfn = log_write;
+    }
 
     if (mod) {
+	anyout = FALSE;
 	obj = ncx_get_first_object(mod);
 	while (obj) {
 	    if (obj_is_rpc(obj)) {
 		do_list_one_command(obj, mode);
+		anyout = TRUE;
 	    }
 	    obj = ncx_get_next_object(mod, obj);
 	}
-    } else if (use_agentcb(agent_cb)) {
-	if (imode) {
-	    log_stdout("\nAgent Commands:");
-	} else {
-	    log_write("\nAgent Commands:");
+	if (!anyout) {
+	    (*logfn)("\nNo commands found in module '%s'",
+		     mod->name);
 	}
+    } else {
+	if (use_agentcb(agent_cb)) {
+	    (*logfn)("\nAgent Commands:");
 	
-	for (modptr = (const modptr_t *)
-		 dlq_firstEntry(&agent_cb->modptrQ);
-	     modptr != NULL;
-	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+	    for (modptr = (const modptr_t *)
+		     dlq_firstEntry(&agent_cb->modptrQ);
+		 modptr != NULL;
+		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
 
-	    obj = ncx_get_first_object(modptr->mod);
-	    while (obj) {
-		if (obj_is_rpc(obj)) {
-		    do_list_one_command(obj, mode);
-		}
-		obj = ncx_get_next_object(modptr->mod, obj);
-	    }
-	}
-    }
-
-    if (imode) {
-	log_stdout("\n\nLocal Commands:");
-    } else {
-	log_write("\n\nLocal Commands:");
-    }
-
-    obj = ncx_get_first_object(get_yangcli_mod());
-    while (obj) {
-	if (obj_is_rpc(obj)) {
-	    if (use_agentcb(agent_cb)) {
-		/* list a local command */
-		do_list_one_command(obj, mode);
-	    } else {
-		/* session not active so filter out
-		 * all the commands except top command
-		 */
-		if (is_top_command(obj_get_name(obj))) {
-		    do_list_one_command(obj, mode);
+		obj = ncx_get_first_object(modptr->mod);
+		while (obj) {
+		    if (obj_is_rpc(obj)) {
+			do_list_one_command(obj, mode);
+		    }
+		    obj = ncx_get_next_object(modptr->mod, obj);
 		}
 	    }
 	}
-	obj = ncx_get_next_object(get_yangcli_mod(), obj);
+
+	(*logfn)("\n\nLocal Commands:");
+
+	obj = ncx_get_first_object(get_yangcli_mod());
+	while (obj) {
+	    if (obj_is_rpc(obj)) {
+		if (use_agentcb(agent_cb)) {
+		    /* list a local command */
+		    do_list_one_command(obj, mode);
+		} else {
+		    /* session not active so filter out
+		     * all the commands except top command
+		     */
+		    if (is_top_command(obj_get_name(obj))) {
+			do_list_one_command(obj, mode);
+		    }
+		}
+	    }
+	    obj = ncx_get_next_object(get_yangcli_mod(), obj);
+	}
     }
 
-    if (imode) {
-	log_stdout("\n");
-    } else {
-	log_write("\n");
-    }
+    (*logfn)("\n");
 
 } /* do_list_commands */
 
@@ -4000,7 +3972,7 @@ static void
 
     save_getopt = agent_cb->get_optional;
 
-    comstate = get_completion_state();
+    comstate = &agent_cb->completion_state;
     save_cmdstate = comstate->cmdstate;
     comstate->cmdstate = CMD_STATE_GETVAL;
 
@@ -6747,7 +6719,7 @@ xmlChar *
 #endif
 
     /* init locals */
-    clibuff = get_clibuff();
+    clibuff = agent_cb->clibuff;
     total = 0;
     str = NULL;
     maxlen = YANGCLI_BUFFLEN;
@@ -6777,7 +6749,7 @@ xmlChar *
 	if (len && str[len-1]=='\\') {
 	    /* get rid of the final backslash */
 	    str[--len] = 0;
-	    climore = TRUE;
+	    agent_cb->climore = TRUE;
 	} else {
 	    /* done getting lines */
 	    *res = NO_ERR;
@@ -6797,7 +6769,7 @@ xmlChar *
 	str = NULL;
     }
 
-    climore = FALSE;
+    agent_cb->climore = FALSE;
     if (*res == NO_ERR) {
 	return clibuff;
     } else {
@@ -7198,4 +7170,4 @@ void *
 } /* parse_def */
 
 
-/* END yangcli.c */
+/* END yangcli_cmd.c */

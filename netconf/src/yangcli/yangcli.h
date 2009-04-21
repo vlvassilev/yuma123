@@ -69,7 +69,8 @@ date	     init     comment
 
 #define YANGCLI_LINELEN   4095
 
-#define YANGCLI_BUFFLEN  32000
+/* 8K CLI buffer per agent session */
+#define YANGCLI_BUFFLEN  8192
 
 #define YANGCLI_HISTLEN  4095
 
@@ -206,6 +207,30 @@ typedef enum result_format_t {
 } result_format_t;
 
 
+/* command state enumerations for each situation
+ * where the tecla get_line function is called
+ */
+typedef enum command_state_t {
+    CMD_STATE_NONE,
+    CMD_STATE_FULL,
+    CMD_STATE_GETVAL,
+    CMD_STATE_YESNO,
+    CMD_STATE_MORE
+} command_state_t;
+
+
+/* saved state for libtecla command line completion */
+typedef struct completion_state_t_ {
+    const obj_template_t  *cmdobj;
+    const obj_template_t  *cmdinput;
+    const obj_template_t  *cmdcurparm;
+    struct agent_cb_t_    *agent_cb;
+    ncx_module_t          *cmdmodule;
+    command_state_t        cmdstate;
+    boolean                assignstmt;
+} completion_state_t;
+
+
 /* NETCONF agent control block */
 typedef struct agent_cb_t_ {
     dlq_hdr_t            qhdr;
@@ -217,7 +242,7 @@ typedef struct agent_cb_t_ {
 
     /* assignment statement support */
     xmlChar             *result_name;
-    var_type_t          result_vartype;
+    var_type_t           result_vartype;
     xmlChar             *result_filename;
     result_format_t      result_format;
 
@@ -232,6 +257,7 @@ typedef struct agent_cb_t_ {
     op_errop_t           erroption;
     ncx_withdefaults_t   withdefaults;
 
+
     /* session support */
     mgr_io_state_t       state;
     ses_id_t             mysid;
@@ -243,29 +269,14 @@ typedef struct agent_cb_t_ {
      * plus the 'netconf.yang' module
      */
     dlq_hdr_t            modptrQ;     /* Q of modptr_t */
+
+    /* per-session CLI support */
+    const xmlChar       *cli_fn;
+    GetLine             *cli_gl;
+    boolean              climore;
+    completion_state_t completion_state;
+    xmlChar              clibuff[YANGCLI_BUFFLEN];
 } agent_cb_t;
-
-
-/* command state enumerations for each situation
- * where the tecla get_line function is called
- */
-typedef enum command_state_t {
-    CMD_STATE_NONE,
-    CMD_STATE_FULL,
-    CMD_STATE_GETVAL,
-    CMD_STATE_YESNO
-} command_state_t;
-
-/* saved state for libtecla command line completion */
-typedef struct completion_state_t_ {
-    const obj_template_t  *cmdobj;
-    const obj_template_t  *cmdinput;
-    const obj_template_t  *cmdcurparm;
-    agent_cb_t            *agent_cb;
-    ncx_module_t          *cmdmodule;
-    command_state_t        cmdstate;
-    boolean                assignstmt;
-} completion_state_t;
 
 
 /* logging function template to switch between
@@ -283,17 +294,11 @@ extern boolean
 extern boolean
     get_batchmode (void);
 
-extern GetLine *
-    get_cli_gl (void);
-
 extern const xmlChar *
     get_default_module (void);
 
 extern const xmlChar *
     get_runscript (void);
-
-extern xmlChar *
-    get_clibuff (void);
 
 extern ncx_bad_data_t
     get_baddata (void);
@@ -312,9 +317,6 @@ extern val_value_t *
 
 extern dlq_hdr_t *
     get_mgrloadQ (void);
-
-extern completion_state_t *
-    get_completion_state (void);
 
 /* forward decl needed by send_copy_config_to_agent function */
 extern void

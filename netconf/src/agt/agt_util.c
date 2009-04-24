@@ -265,8 +265,14 @@ status_t
 	} else {
 	    res = val->res;
 	}
-	agt_record_error(NULL, &msg->mhdr, NCX_LAYER_OPERATION,
-			 res, methnode, NCX_NT_NONE, NULL, NCX_NT_VAL, 
+	agt_record_error(NULL, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION,
+			 res, 
+			 methnode, 
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_VAL, 
 			 msg->rpc_input);
 	return res;
     }
@@ -313,11 +319,15 @@ status_t
     }
 
     if (res != NO_ERR) {
-	agt_record_error(NULL, &msg->mhdr, NCX_LAYER_OPERATION,
-			 res, methnode,
+	agt_record_error(NULL, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION,
+			 res, 
+			 methnode,
 			 (cfgname) ? NCX_NT_STRING : NCX_NT_NONE,
 			 (const void *)cfgname, 
-			 NCX_NT_VAL, errval);
+			 NCX_NT_VAL, 
+			 errval);
 	return res;
     }
 
@@ -391,9 +401,16 @@ void
 		      ncx_node_t nodetyp,
 		      const void *errnode)
 {
-    agt_record_error_errinfo(scb, msghdr, layer, res, xmlnode,
-			     parmtyp, error_parm, nodetyp,
-			     errnode, NULL);
+    agt_record_error_errinfo(scb, 
+			     msghdr, 
+			     layer, 
+			     res, 
+			     xmlnode,
+			     parmtyp, 
+			     error_parm, 
+			     nodetyp,
+			     errnode, 
+			     NULL);
 
 } /* agt_record_error */
 
@@ -463,7 +480,8 @@ void
 	}
 	if (nodetyp == NCX_NT_VAL && errnode) {
 	    log_debug3(" errnode: \n");
-	    val_dump_value((const val_value_t *)errnode, NCX_DEF_INDENT);
+	    val_dump_value((const val_value_t *)errnode, 
+			   NCX_DEF_INDENT);
 	    log_debug3("\n");
 	}
     }
@@ -478,7 +496,8 @@ void
 		pathbuff = xml_strdup((const xmlChar *)errnode);
 		break;
 	    case NCX_NT_VAL:
-		(void)val_gen_instance_id(msghdr, errnode, 
+		(void)val_gen_instance_id(msghdr, 
+					  errnode, 
 					  NCX_IFMT_XPATH1, 
 					  &pathbuff);
 		break;
@@ -491,12 +510,19 @@ void
 	}
 
 	if (errinfo) {
-	    err = agt_rpcerr_gen_error_errinfo(layer, res, xmlnode, 
-					       parmtyp, error_parm, 
-					       pathbuff, errinfo);
+	    err = agt_rpcerr_gen_error_errinfo(layer, 
+					       res, 
+					       xmlnode, 
+					       parmtyp, 
+					       error_parm, 
+					       pathbuff, 
+					       errinfo);
 	} else {
-	    err = agt_rpcerr_gen_error(layer, res, xmlnode, 
-				       parmtyp, error_parm, 
+	    err = agt_rpcerr_gen_error(layer, 
+				       res, 
+				       xmlnode, 
+				       parmtyp, 
+				       error_parm, 
 				       pathbuff);
 	}
 
@@ -566,13 +592,18 @@ void
 	    if (nodetyp==NCX_NT_STRING) {
 		buff = xml_strdup((const xmlChar *)errnode);
 	    } else {
-		(void)val_gen_instance_id(msghdr, errnode, 
+		(void)val_gen_instance_id(msghdr, 
+					  errnode, 
 					  NCX_IFMT_XPATH1, 
 					  &buff);
 	    }
 	}
-	err = agt_rpcerr_gen_attr_error(layer, res, xmlattr, 
-				    xmlnode, badns, buff);
+	err = agt_rpcerr_gen_attr_error(layer, 
+					res, 
+					xmlattr, 
+					xmlnode, 
+					badns, 
+					buff);
 	if (err) {
 	    dlq_enque(err, errQ);
 	} else {
@@ -645,7 +676,8 @@ void
     if (errQ) {
 	/* get the error-path */
 	pathbuff = NULL;
-	(void)val_gen_instance_id(msghdr, errval, 
+	(void)val_gen_instance_id(msghdr, 
+				  errval, 
 				  NCX_IFMT_XPATH1, 
 				  &pathbuff);
 
@@ -1112,7 +1144,9 @@ status_t
 	done = FALSE;
 	while (!done) {
 	    if (fgets(buffer, NCX_MAX_LINELEN, fil)) {
-		ses_putcstr(scb, (const xmlChar *)buffer, indent);
+		ses_putcstr(scb, 
+			    (const xmlChar *)buffer, 
+			    indent);
 	    } else {
 		fclose(fil);
 		done = TRUE;

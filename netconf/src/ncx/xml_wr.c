@@ -375,7 +375,7 @@ static void
 
 
 /********************************************************************
-* FUNCTION xml_wr_write
+* FUNCTION xml_wr_buff
 *
 * Write some xmlChars to the specified session
 *
@@ -932,11 +932,12 @@ void
 {
     const ncx_lmem_t   *listmem;
     const xmlChar      *pfix;
-    val_value_t        *v_val, *v_chval, *chval, *useval, *usechval;
+    val_value_t        *v_val, /*  *v_chval, */ *chval, 
+	*useval /*, *usechval */;
     xmlChar            *binbuff;
     uint32              len;
     status_t            res;
-    boolean             empty, first, wspace, xneeded;
+    boolean             /*empty,*/ first, wspace, xneeded;
     ncx_btype_t         btyp, listbtyp;
     xmlChar             buff[NCX_MAX_NUMLEN];
 
@@ -1092,9 +1093,11 @@ void
 		 */
 		if (!len) {
 		    if (!first) {
-			ses_putstr(scb, (const xmlChar *)" \"\"");
+			ses_putstr(scb, 
+				   (const xmlChar *)" \"\"");
 		    } else {
-			ses_putstr(scb, (const xmlChar *)"\"\"");
+			ses_putstr(scb, 
+				   (const xmlChar *)"\"\"");
 			first = FALSE;
 		    }
 		    continue;
@@ -1119,8 +1122,10 @@ void
 	    if (typ_is_string(listbtyp)) {
 		ses_putcstr(scb, listmem->val.str, indent);
 	    } else if (typ_is_number(listbtyp)) {
-		(void)ncx_sprintf_num(buff, &listmem->val.num, 
-				      listbtyp, &len);
+		(void)ncx_sprintf_num(buff, 
+				      &listmem->val.num, 
+				      listbtyp, 
+				      &len);
 		ses_putcstr(scb, buff, indent);
 	    } else {
 		switch (listbtyp) {
@@ -1156,117 +1161,11 @@ void
 	     chval != NULL;
 	     chval = val_get_next_child(chval)) {
 
-	    /* check the user filter callback function */
-	    if (testfn) {
-		if (!(*testfn)(msg->withdef, chval)) {
-		    continue;   /* skip this entry */
-		}
-	    }
-
-	    /* check special manager-only external mode;
-	     * send the contents of a file instead of the val node
-	     */
-	    if (chval->btyp == NCX_BT_EXTERN) {
-		write_extern(scb, chval);
-		continue;
-	    }
-	    if (chval->btyp == NCX_BT_INTERN) {
-		write_intern(scb, chval);
-		continue;
-	    }
-
-	    v_chval = NULL;
-
-	    if (val_is_virtual(chval)) {
-		v_chval = val_get_virtual_value(scb,
-						chval,
-						&res);
-		if (!v_chval) {
-		    if (res != ERR_NCX_SKIPPED) {
-			/*** handle inline error ***/
-		    }
-		    continue;
-		}
-	    }
-
-	    usechval = (v_chval) ? v_chval : chval;
-
-	    /* check empty node or some element content */
-	    empty = !val_has_content(usechval);
-
-
-	    /* write the <ns:childname> node 
-	     * NCX_BT_EMPTY type is a special case
-	     * always an empty element, and only visible
-	     * if set to TRUE; otherwise skip the value node
-	     */
-	    if (usechval->btyp == NCX_BT_EMPTY) {
-		if (!usechval->v.bool) {
-		    /* skip this false flag */
-		    continue;
-		} else {
-		    empty = TRUE;
-		}
-	    }
-
-	    if (usechval->btyp == NCX_BT_IDREF) {
-		if (usechval->v.idref.name) {
-		    /* write a complete QName element */
-		    xml_wr_qname_elem(scb,
-				      msg, 
-				      usechval->v.idref.nsid,
-				      usechval->v.idref.name,
-				      useval->nsid,
-				      usechval->nsid,
-				      usechval->name,
-				      &usechval->metaQ, 
-				      FALSE, 
-				      indent);
-		} else {
-		    /* empty contents, eg, create PDU */
-		    xml_wr_begin_elem_val(scb,
-					  msg,
-					  usechval, 
-					  indent, 
-					  TRUE);
-		}
-	    } else {
-		/* write the child start tag, recurse, then end tag */
-		xml_wr_begin_elem_val(scb,
-				      msg, 
-				      usechval,
-				      indent,
-				      empty);
-
-		/* check corner-case; empty application placeholder */
-		if (!empty) {
-		    /* indent all the child nodes if any */
-		    if (indent >= 0) {
-			indent += ses_indent_count(scb);
-		    }
-
-		    /* write the child node value */
-		    xml_wr_check_val(scb,
-				     msg,
-				     usechval,
-				     indent,
-				     testfn);
-
-		    /* reset the indent and write the value end node */
-		    if (indent >= 0) {
-			indent -= ses_indent_count(scb);
-		    }
-		    xml_wr_end_elem(scb, 
-				    msg, 
-				    usechval->nsid,
-				    usechval->name, 
-				    fit_on_line(scb, usechval) ? -1 : indent);
-		}
-	    }
-
-	    if (v_chval) {
-		val_free_value(v_chval);
-	    }
+	    xml_wr_full_check_val(scb, 
+				  msg,
+				  chval,
+				  indent,
+				  testfn);
 	} 
 	break;
     default:
@@ -1309,7 +1208,6 @@ void
 		     NULL);
 
 }  /* xml_wr_val */
-
 
 
 /********************************************************************
@@ -1543,11 +1441,16 @@ status_t
 				       FALSE);
     }
 
-    /* generate the <foo> start tag */
+    /* cannot use xml_wr_full_val because that
+     * function assumes the attrQ is val_value_t
+     * but it is really xml_attr_t
+     *
+     * first, generate the <foo> start tag
+     */
     if (res == NO_ERR) {
 	if (val->btyp == NCX_BT_IDREF) {
 	    xml_wr_qname_elem(scb, 
-			      &msg->mhdr, 
+			      &msg->mhdr,
 			      val->v.idref.nsid,
 			      val->v.idref.name, 
 			      0,

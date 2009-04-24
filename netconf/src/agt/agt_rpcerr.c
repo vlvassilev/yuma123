@@ -850,8 +850,13 @@ rpc_err_rec_t *
 			  const void *error_parm,
 			  xmlChar *error_path)
 {
-    return agt_rpcerr_gen_error_errinfo(layer, interr, errnode, parmtyp, 
-					error_parm, error_path, NULL);
+    return agt_rpcerr_gen_error_errinfo(layer, 
+					interr, 
+					errnode, 
+					parmtyp, 
+					error_parm, 
+					error_path, 
+					NULL);
 
 } /* agt_rpcerr_gen_error */
 
@@ -1071,8 +1076,14 @@ rpc_err_rec_t *
     }
 
     /* get a new error record */
-    err = start_err(layer, interr, rpcerr, errsev, apptag, error_path, 
-		    error_msg, NULL);
+    err = start_err(layer, 
+		    interr, 
+		    rpcerr, 
+		    errsev, 
+		    apptag, 
+		    error_path, 
+		    error_msg, 
+		    NULL);
     if (!err) {
 	if (error_msg) {
 	    m__free(error_msg);
@@ -1119,8 +1130,15 @@ rpc_err_rec_t *
     } 
 
     /* add the required error-info, call even if err2 is NULL */
-    res = add_base_vars(err, rpcerr, errnode, badval, badns, 
-			err1, err2, err3, err4);
+    res = add_base_vars(err, 
+			rpcerr, 
+			errnode, 
+			badval, 
+			badns, 
+			err1, 
+			err2, 
+			err3, 
+			err4);
     if (res != NO_ERR) {
 	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
 	;    /* add error statistics (TBD) */
@@ -1191,8 +1209,14 @@ rpc_err_rec_t *
     apptag = (const xmlChar *)"missing-instance"; /* 13.5 */
 
     /* get a new error record */
-    err = start_err(layer, interr, rpcerr, errsev, apptag, error_path, 
-		    error_msg, NULL);
+    err = start_err(layer, 
+		    interr, 
+		    rpcerr, 
+		    errsev, 
+		    apptag, 
+		    error_path, 
+		    error_msg, 
+		    NULL);
     if (!err) {
 	if (error_msg) {
 	    m__free(error_msg);
@@ -1216,8 +1240,15 @@ rpc_err_rec_t *
     err4 = (const void *)errval->name;
 
     /* add the required error-info, call even if err2 is NULL */
-    res = add_base_vars(err, rpcerr, NULL, badval, badns, 
-			err1, err2, err3, err4);
+    res = add_base_vars(err, 
+			rpcerr, 
+			NULL, 
+			badval, 
+			badns, 
+			err1, 
+			err2, 
+			err3, 
+			err4);
     if (res != NO_ERR) {
 	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
 	;    /* add error statistics (TBD) */
@@ -1278,9 +1309,14 @@ rpc_err_rec_t *
     apptag = (const xmlChar *)"data-not-unique"; /* 13.1 */
 
     /* get a new error record */
-    err = start_err(layer, interr, rpcerr, 
-		    errsev, apptag, error_path, 
-		    error_msg, NULL);
+    err = start_err(layer, 
+		    interr, 
+		    rpcerr, 
+		    errsev, 
+		    apptag, 
+		    error_path, 
+		    error_msg, 
+		    NULL);
     if (!err) {
 	if (error_msg) {
 	    m__free(error_msg);
@@ -1398,8 +1434,14 @@ rpc_err_rec_t *
     error_msg = (msg) ? xml_strdup(msg) : NULL;
 
     /* get a new error record */
-    err = start_err(layer, interr, rpcerr, errsev, NULL, error_path, 
-		    error_msg, NULL);
+    err = start_err(layer, 
+		    interr, 
+		    rpcerr, 
+		    errsev, 
+		    NULL, 
+		    error_path, 
+		    error_msg, 
+		    NULL);
     if (!err) {
 	if (error_msg) {
 	    m__free(error_msg);
@@ -1408,8 +1450,15 @@ rpc_err_rec_t *
     }
 
     /* add the required error-info */
-    res = add_base_vars(err, rpcerr, errnode, badval, 
-			badns, err1, err2, NULL, NULL);
+    res = add_base_vars(err, 
+			rpcerr, 
+			errnode, 
+			badval, 
+			badns, 
+			err1, 
+			err2, 
+			NULL, 
+			NULL);
     if (res != NO_ERR) {
 	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
 	;    /* add error statistics (TBD) */

@@ -867,5 +867,66 @@ void
 }  /* init_completion_state */
 
 
+/********************************************************************
+ * FUNCTION set_completion_state
+ * 
+ * set the completion_state struct for a new mode or sub-command
+ *
+ * INPUTS:
+ *    completion_state == record to set
+ *    rpc == rpc operation in progress (may be NULL)
+ *    parm == parameter being filled in
+ *    cmdstate ==current calling state
+ *********************************************************************/
+void
+    set_completion_state (completion_state_t *completion_state,
+			  const obj_template_t *rpc,
+			  const obj_template_t *parm,
+			  command_state_t  cmdstate)
+{
+#ifdef DEBUG
+    if (!completion_state) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    completion_state->cmdstate = cmdstate;
+    completion_state->cmdobj = rpc;
+    if (rpc) {
+	completion_state->cmdinput =
+	    obj_find_child(rpc, NULL, YANG_K_INPUT);
+    } else {
+	completion_state->cmdinput = NULL;
+    }
+    completion_state->cmdcurparm = parm;
+
+}  /* set_completion_state */
+
+
+/********************************************************************
+ * FUNCTION set_completion_state_curparm
+ * 
+ * set the current parameter in the completion_state struct
+ *
+ * INPUTS:
+ *    completion_state == record to set
+ *    parm == parameter being filled in
+ *********************************************************************/
+void
+    set_completion_state_curparm (completion_state_t *completion_state,
+				  const obj_template_t *parm)
+{
+#ifdef DEBUG
+    if (!completion_state) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    completion_state->cmdcurparm = parm;
+
+}  /* set_completion_state_curparm */
+
 
 /* END yangcli_util.c */

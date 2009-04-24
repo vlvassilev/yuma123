@@ -324,7 +324,8 @@ static status_t
      * the <rpc-error> element
      */
     xml_init_attrs(&attrs);
-    for (errinfo = (rpc_err_info_t *)dlq_firstEntry(&err->error_info);
+    for (errinfo = (rpc_err_info_t *)
+	     dlq_firstEntry(&err->error_info);
 	 errinfo != NULL;
 	 errinfo = (rpc_err_info_t *)dlq_nextEntry(errinfo)) {
 	res = xml_msg_check_xmlns_attr(&msg->mhdr,
@@ -344,8 +345,15 @@ static status_t
     }
 
     /* generate the <rpc-error> start tag */
-    xml_wr_begin_elem_ex(scb, &msg->mhdr, ncid, ncid, NCX_EL_RPC_ERROR, 
-			 &attrs, ATTRQ, indent, START);
+    xml_wr_begin_elem_ex(scb, 
+			 &msg->mhdr, 
+			 ncid, 
+			 ncid, 
+			 NCX_EL_RPC_ERROR, 
+			 &attrs, 
+			 ATTRQ, 
+			 indent, 
+			 START);
 
     xml_clean_attrs(&attrs);
 
@@ -354,64 +362,120 @@ static status_t
     }
 
     /* generate the <error-type> field */
-    xml_wr_string_elem(scb, &msg->mhdr, ncx_get_layer(err->error_type),
-		       ncid, ncid, NCX_EL_ERROR_TYPE, NULL, FALSE, indent);
+    xml_wr_string_elem(scb, 
+		       &msg->mhdr, 
+		       ncx_get_layer(err->error_type),
+		       ncid, 
+		       ncid, 
+		       NCX_EL_ERROR_TYPE, 
+		       NULL, 
+		       FALSE, 
+		       indent);
 
     /* generate the <error-tag> field */
-    xml_wr_string_elem(scb, &msg->mhdr, err->error_tag, ncid, ncid, 
-		       NCX_EL_ERROR_TAG, NULL, FALSE, indent);
+    xml_wr_string_elem(scb, 
+		       &msg->mhdr, 
+		       err->error_tag, 
+		       ncid, 
+		       ncid, 
+		       NCX_EL_ERROR_TAG, 
+		       NULL, 
+		       FALSE, 
+		       indent);
 
     /* generate the <error-severity> field */
-    xml_wr_string_elem(scb, &msg->mhdr, 
-		       rpc_err_get_severity(err->error_severity), ncid,
-		       ncid, NCX_EL_ERROR_SEVERITY, NULL, FALSE, indent);
+    xml_wr_string_elem(scb, 
+		       &msg->mhdr, 
+		       rpc_err_get_severity(err->error_severity), 
+		       ncid,
+		       ncid, 
+		       NCX_EL_ERROR_SEVERITY, 
+		       NULL, 
+		       FALSE, 
+		       indent);
 
     /* generate the <error-app-tag> field */
     if (err->error_app_tag) {
-	xml_wr_string_elem(scb, &msg->mhdr, err->error_app_tag, ncid,
-			   ncid, NCX_EL_ERROR_APP_TAG, NULL, FALSE, indent);
+	xml_wr_string_elem(scb, 
+			   &msg->mhdr, 
+			   err->error_app_tag, 
+			   ncid,
+			   ncid, 
+			   NCX_EL_ERROR_APP_TAG, 
+			   NULL, 
+			   FALSE, 
+			   indent);
     } else if (err->error_res != NO_ERR) {
 	/* use the internal error code instead */
 	*buff = 0;
 	sprintf((char *)buff, "%u", err->error_res);
 	if (*buff) {
-	    xml_wr_string_elem(scb, &msg->mhdr, buff, ncid, ncid,
-			       NCX_EL_ERROR_APP_TAG, NULL, FALSE, indent);
+	    xml_wr_string_elem(scb, 
+			       &msg->mhdr, 
+			       buff, 
+			       ncid, 
+			       ncid,
+			       NCX_EL_ERROR_APP_TAG, 
+			       NULL, 
+			       FALSE, 
+			       indent);
 	}
     }
 
     /* generate the <error-path> field */
     if (err->error_path) {
-	xml_wr_string_elem(scb, &msg->mhdr, err->error_path, ncid,
-			   ncid, NCX_EL_ERROR_PATH, NULL, FALSE, indent);
+	xml_wr_string_elem(scb, 
+			   &msg->mhdr, 
+			   err->error_path, 
+			   ncid,
+			   ncid, 
+			   NCX_EL_ERROR_PATH, 
+			   NULL, 
+			   FALSE, 
+			   indent);
     }
 
     /* generate the <error-message> field */
     if (err->error_message) {
 	/* see if there is a xml:lang attribute */
 	if (err->error_message_lang) {
-	    res = xml_add_attr(&attrs, 0, NCX_EL_LANG, 
-		       err->error_message_lang);
+	    res = xml_add_attr(&attrs, 
+			       0, 
+			       NCX_EL_LANG, 
+			       err->error_message_lang);
 	    if (res != NO_ERR) {
 		SET_ERROR(res);
 		retres = res;
 	    }
 	}
-	xml_wr_string_elem(scb, &msg->mhdr, err->error_message, ncid,
-			   ncid, NCX_EL_ERROR_MESSAGE, &attrs,
-			   TRUE, indent);
+	xml_wr_string_elem(scb, 
+			   &msg->mhdr, 
+			   err->error_message,
+			   ncid,
+			   ncid,
+			   NCX_EL_ERROR_MESSAGE,
+			   &attrs,
+			   TRUE,
+			   indent);
 	xml_clean_attrs(&attrs);
     }
 
     /* print all the <error-info> elements */    
-    send_rpc_error_info(scb, msg, err, indent);
+    send_rpc_error_info(scb,
+			msg,
+			err,
+			indent);
 
     if (indent >= 0) {
 	indent -= NCX_DEF_INDENT;
     }
 
     /* generate the <rpc-error> end tag */
-    xml_wr_end_elem(scb, &msg->mhdr, ncid, NCX_EL_RPC_ERROR, indent);
+    xml_wr_end_elem(scb, 
+		    &msg->mhdr, 
+		    ncid, 
+		    NCX_EL_RPC_ERROR, 
+		    indent);
 
     return retres;
 

@@ -1150,12 +1150,13 @@ static status_t
 	/* found only spaces so far or
 	 * nothing entered yet 
 	 */
-	res = fill_one_completion_commands(cpl,
-					   comstate,
-					   line,
-					   word_end,
-					   word_end,
-					   0);
+	res = 
+	    fill_one_completion_commands(cpl,
+					 comstate,
+					 line,
+					 word_end,
+					 word_end,
+					 0);
 	if (res != NO_ERR) {
 	    cpl_record_error(cpl,
 			     get_error_string(res));
@@ -1219,7 +1220,7 @@ static status_t
 	    /* word_end is still inside the first
 	     * word, which is an assignment of
 	     * some sort; not going to show
-	     * any completions for vars and files yet
+	     * any completions for user vars and files yet
 	     */
 	    return res;
 	}
@@ -1265,9 +1266,11 @@ static status_t
 
     buffer = xml_strndup((const xmlChar *)cmdname,
 			 (uint32)cmdlen);
-    if (!buffer) {
-	cpl_record_error(cpl,
-			 get_error_string(ERR_INTERNAL_MEM));
+    if (buffer == NULL) {
+	if (cpl != NULL) {
+	    cpl_record_error(cpl,
+			     get_error_string(ERR_INTERNAL_MEM));
+	}
 	return 1;
     }
     retlen = 0;
@@ -1280,7 +1283,9 @@ static status_t
     m__free(buffer);
 
     if (comstate->cmdobj == NULL) {
-	cpl_record_error(cpl, "unknown command");
+	if (cpl != NULL) {
+	    cpl_record_error(cpl, "unknown command");
+	}
 	return 1;
     }
 
@@ -1434,7 +1439,7 @@ int
     status_t              res;
 
 #ifdef DEBUG
-    if (!cpl || !data || !line ) {
+    if (!cpl || !data || !line) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return 1;
     }

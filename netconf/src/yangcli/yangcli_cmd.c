@@ -158,6 +158,10 @@ date         init     comment
 #include "yangcli_cmd.h"
 #endif
 
+#ifndef _H_yangcli_tab
+#include "yangcli_tab.h"
+#endif
+
 #ifndef _H_yangcli_util
 #include "yangcli_util.h"
 #endif
@@ -488,8 +492,13 @@ static status_t
     status_t                 res;
     boolean                  done;
 
-
+    done = FALSE;
     res = NO_ERR;
+
+    set_completion_state(&agent_cb->completion_state,
+			 NULL,
+			 NULL,
+			 CMD_STATE_YESNO);
 
     if (prompt) {
 	log_stdout("\n%s", prompt);
@@ -505,16 +514,18 @@ static status_t
 	log_stdout(" [default: N]");
 	break;
     default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+	done = TRUE;
     }
 
-    done = FALSE;
+
     while (!done) {
 
 	/* get input from the user STDIN */
 	myline = get_cmd_line(agent_cb, &res);
 	if (!myline) {
-	    return res;
+	    done = TRUE;
+	    continue;
 	}
 
 	/* strip leading whitespace */
@@ -549,13 +560,15 @@ static status_t
 		done = TRUE;
 		break;
 	    default:
-		return SET_ERROR(ERR_INTERNAL_VAL);
+		res = SET_ERROR(ERR_INTERNAL_VAL);
+		done = TRUE;
 	    }
 	}
-	if (!done) {
+	if (res == NO_ERR && !done) {
 	    log_stdout("\nError: invalid value '%s'\n", str);
 	}
     }
+
     return res;
 
 }  /* get_yesno */
@@ -764,6 +777,9 @@ static status_t
 	    }
 	    log_stdout("]\n");
 	}
+
+	set_completion_state_curparm(&agent_cb->completion_state,
+				     parm);
 
 	/* get a line of input from the user */
 	line = get_cmd_line(agent_cb, &res);
@@ -1450,6 +1466,12 @@ static val_value_t *
     newval = NULL;
     saveopt = agent_cb->get_optional;
     agent_cb->get_optional = TRUE;
+
+    set_completion_state(&agent_cb->completion_state,
+			 rpc,
+			 parm,
+			 CMD_STATE_GETVAL);
+
     *res = get_parm(agent_cb, rpc, parm, dummy, NULL);
     agent_cb->get_optional = saveopt;
 
@@ -1528,6 +1550,11 @@ static status_t
 	if (!agent_cb->get_optional && !obj_is_mandatory(parm)) {
 	    continue;
 	}
+
+	set_completion_state(&agent_cb->completion_state,
+			     rpc,
+			     parm,
+			     CMD_STATE_GETVAL);			     
 
         switch (parm->objtype) {
         case OBJ_TYP_CHOICE:
@@ -1736,6 +1763,11 @@ static val_value_t *
     *res = NO_ERR;
     valset = NULL;
     len = 0;
+
+    set_completion_state(&agent_cb->completion_state,
+			 rpc,
+			 NULL,
+			 CMD_STATE_GETVAL);
 
     /* skip leading whitespace */
     while (line[len] && xml_isspace(line[len])) {
@@ -3099,9 +3131,15 @@ static void
 {
     const modptr_t        *modptr;
     const obj_template_t  *obj;
-    boolean                imode;
+    logfn_t                logfn;
+    boolean                anyout;
 
-    imode = interactive_mode();
+    anyout = FALSE;
+    if (interactive_mode()) {
+	logfn = log_stdout;
+    } else {
+	logfn = log_write;
+    }
 
     if (mod) {
 	obj = ncx_get_first_object(mod);
@@ -3110,18 +3148,34 @@ static void
 		obj_has_name(obj) &&
 		!obj_is_hidden(obj) && 
 		!obj_is_abstract(obj)) {
+		anyout = TRUE;
 		do_list_one_command(obj, mode);
 	    }
 	    obj = ncx_get_next_object(mod, obj);
 	}
-	if (imode) {
-	    log_stdout("\n");
-	} else {
-	    log_write("\n");
+    } else {
+	if (use_agentcb(agent_cb)) {
+	    for (modptr = (const modptr_t *)
+		     dlq_firstEntry(&agent_cb->modptrQ);
+		 modptr != NULL;
+		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+
+		obj = ncx_get_first_object(modptr->mod);
+		while (obj) {
+		    if (obj_is_data_db(obj) && 
+			obj_has_name(obj) &&
+			!obj_is_hidden(obj) && 
+			!obj_is_abstract(obj)) {
+			anyout = TRUE;			
+			do_list_one_command(obj, mode);
+		    }
+		    obj = ncx_get_next_object(modptr->mod, obj);
+		}
+	    }
 	}
-    } else if (use_agentcb(agent_cb)) {
+
 	for (modptr = (const modptr_t *)
-		 dlq_firstEntry(&agent_cb->modptrQ);
+		 dlq_firstEntry(get_mgrloadQ());
 	     modptr != NULL;
 	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
 
@@ -3131,19 +3185,19 @@ static void
 		    obj_has_name(obj) &&
 		    !obj_is_hidden(obj) && 
 		    !obj_is_abstract(obj)) {
-
+		    anyout = TRUE;		    
 		    do_list_one_command(obj, mode);
 		}
 		obj = ncx_get_next_object(modptr->mod, obj);
 	    }
 	}
-
-	if (imode) {
-	    log_stdout("\n");
-	} else {
-	    log_write("\n");
-	}
     }
+
+    if (!anyout) {
+	(*logfn)("\nNo objects found to list");
+    }
+
+    (*logfn)("\n");
 
 } /* do_list_objects */
 
@@ -3942,11 +3996,9 @@ static void
     val_value_t           *valset, *parm, *newparm, *curparm;
     val_value_t           *targval;
     obj_template_t        *targobj;
-    completion_state_t    *comstate;
     const xmlChar         *target;
     status_t               res;
     boolean                imode, save_getopt;
-    command_state_t        save_cmdstate;
 
     valset = get_valset(agent_cb, 
 			rpc, 
@@ -3970,11 +4022,8 @@ static void
 	target = VAL_STR(parm);
     }
 
-    save_getopt = agent_cb->get_optional;
 
-    comstate = &agent_cb->completion_state;
-    save_cmdstate = comstate->cmdstate;
-    comstate->cmdstate = CMD_STATE_GETVAL;
+    save_getopt = agent_cb->get_optional;
 
     imode = interactive_mode();
     newparm = NULL;
@@ -4103,7 +4152,6 @@ static void
 	val_free_value(newparm);
     }
     agent_cb->get_optional = save_getopt;
-    comstate->cmdstate = save_cmdstate;
 
 }  /* do_fill */
 
@@ -4154,6 +4202,12 @@ static status_t
 
     res = NO_ERR;
     newnode = NULL;
+
+    set_completion_state(&agent_cb->completion_state,
+			 rpc,
+			 curobj,
+			 CMD_STATE_GETVAL);
+
 
     /* add content based on the current node type */
     switch (curobj->objtype) {
@@ -4280,7 +4334,7 @@ static status_t
 	break;
     default:
 	/* any other object type is an error */
-	return SET_ERROR(ERR_INTERNAL_VAL);
+	res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     return res;

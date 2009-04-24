@@ -145,7 +145,8 @@ static status_t
 
 	/* check if the only child is an OBJ_TYP_CHOICE */
 	choiceobj = obj_first_child(obj);
-	if (choiceobj->objtype != OBJ_TYP_CHOICE) {
+	if (choiceobj == NULL || 
+	    choiceobj->objtype != OBJ_TYP_CHOICE) {
 	    res = ERR_NCX_INVALID_VALUE;
 	} else {
 	    /* check if a child of any case is named 'strval' */

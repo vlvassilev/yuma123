@@ -113,4 +113,16 @@ extern void
 			   agent_cb_t *agent_cb,
 			   command_state_t  cmdstate);
 
+
+/* agent_cb field must already be set */
+extern void
+    set_completion_state (completion_state_t *completion_state,
+			  const obj_template_t *rpc,
+			  const obj_template_t *parm,
+			  command_state_t  cmdstate);
+
+extern void
+    set_completion_state_curparm (completion_state_t *completion_state,
+				  const obj_template_t *parm);
+
 #endif	    /* _H_yangcli_util */

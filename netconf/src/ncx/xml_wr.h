@@ -54,6 +54,13 @@ date	     init     comment
 #include "xml_msg.h"
 #endif
 
+
+/********************************************************************
+*								    *
+*			 C O N S T A N T S			    *
+*								    *
+*********************************************************************/
+
 /* isattrq labels */
 #define ATTRQ   TRUE
 #define METAQ   FALSE
@@ -69,6 +76,16 @@ date	     init     comment
 /* xmlhdr labels */
 #define NOHDR FALSE
 #define WITHHDR TRUE
+
+/* buffer size used in begin_elem_val function
+ * this is sort of a hack -- a hard limit in the code:
+ * this limits the number of different namespace IDs
+ * that can be present in a single XPath expression
+ * and the xmlns attributes will be corrected generated
+ * in element start tags for the XPath expression
+ */
+#define XML_WR_MAX_NAMESPACES  512
+
 
 /********************************************************************
 *								    *
@@ -92,13 +109,6 @@ extern void
 			  int32 indent,
 			  boolean empty);
 
-
-extern void
-    xml_wr_begin_elem_val (ses_cb_t *scb,
-			   xml_msg_hdr_t *msg,
-			   const val_value_t *val,
-			   int32 indent,
-			   boolean empty);
 
 extern void
     xml_wr_begin_elem (ses_cb_t *scb,

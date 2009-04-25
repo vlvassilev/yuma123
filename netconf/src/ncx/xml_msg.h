@@ -99,9 +99,15 @@ extern const xmlChar *
 			const val_value_t *curelem,
 			boolean  *xneeded);
 
+/* creates a new pfixmap if needed */
 extern const xmlChar *
     xml_msg_get_prefix_xpath (xml_msg_hdr_t *msg,
 			      xmlns_id_t nsid);
+
+/* does not create any pfixmap, just returns NULL if not found */
+extern const xmlChar *
+    xml_msg_get_prefix_start_tag (xml_msg_hdr_t *msg,
+				  xmlns_id_t nsid);
 
 extern status_t 
     xml_msg_gen_new_prefix (xml_msg_hdr_t *msg,

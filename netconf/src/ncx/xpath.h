@@ -315,6 +315,7 @@ typedef struct xpath_pcb_t_ {
     const obj_template_t  *obj;            /* bptr to start object */
     ncx_module_t          *objmod;        /* module containing obj */
     const obj_template_t  *docroot;        /* bptr to <config> obj */
+    const obj_template_t  *pathobj;        /* bptr to obj w/ path  */
     xpath_document_t       doctype;
     val_value_t           *val;                  /* current() node */
     val_value_t           *val_docroot;        /* cfg->root for db */

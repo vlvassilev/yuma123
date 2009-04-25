@@ -1385,6 +1385,7 @@ static status_t
 		 */
 		res = xpath_yang_validate_xmlpath(scb->reader,
 						  retval->xpathpcb,
+						  obj,
 						  FALSE,
 						  &targobj);
 	    } else {

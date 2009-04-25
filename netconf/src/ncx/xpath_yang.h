@@ -72,6 +72,7 @@ extern status_t
 extern status_t
     xpath_yang_validate_xmlpath (xmlTextReaderPtr reader,
 				 xpath_pcb_t *pcb,
+				 const obj_template_t *pathobj,
 				 boolean logerrors,
 				 const obj_template_t **targobj);
 
@@ -87,5 +88,11 @@ extern val_value_t *
     xpath_yang_make_instanceid_val (xpath_pcb_t *pcb,
 				    status_t *retres,
 				    val_value_t **deepest);
+
+extern status_t
+    xpath_yang_get_namespaces (xpath_pcb_t *pcb,
+			       xmlns_id_t *nsid_array,
+			       uint32 max_nsids,
+			       uint32 *num_nsids);
 
 #endif	    /* _H_xpath_yang */

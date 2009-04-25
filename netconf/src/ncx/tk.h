@@ -134,6 +134,10 @@ date	     init     comment
 			(T)->cur->typ <= TK_TT_RNUM)
 
 
+/* return the namespace ID field in the token */
+#define TK_CUR_NSID(T) ((T)->cur->nsid)
+
+
 /* bits for tk_chain_t flags field */
 #define TK_FL_REDO    bit0
 

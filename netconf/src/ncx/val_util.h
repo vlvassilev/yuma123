@@ -50,6 +50,10 @@ date	     init     comment
 #include "xmlns.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -160,5 +164,8 @@ extern status_t
 				 val_value_t *valroot,
 				 const obj_template_t *childobj,
 				 boolean *condresult);
+
+extern xpath_pcb_t *
+    val_get_xpathpcb (val_value_t *val);
 
 #endif	    /* _H_val_util */

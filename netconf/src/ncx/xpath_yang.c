@@ -42,24 +42,16 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
-#ifndef _H_dlq
-#include "dlq.h"
-#endif
-
-#ifndef _H_grp
-#include "grp.h"
+#ifndef _H_ncx
+#include "ncx.h"
 #endif
 
 #ifndef _H_ncxconst
 #include "ncxconst.h"
 #endif
 
-#ifndef _H_ncx
-#include "ncx.h"
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
 #endif
 
 #ifndef _H_obj
@@ -72,6 +64,14 @@ date         init     comment
 
 #ifndef _H_typ
 #include "typ.h"
+#endif
+
+#ifndef _H_val
+#include "val.h"
+#endif
+
+#ifndef _H_xmlns
+#include "xmlns.h"
 #endif
 
 #ifndef _H_xpath
@@ -937,12 +937,19 @@ static status_t
     if (pcb->obj) {
 	if (loopcount != keytotal) {
 	    if (keycount < keytotal) {
-		res = ERR_NCX_MISSING_INDEX;
-		if (pcb->logerrors) {
-		    log_error("\nError: missing key components in"
-			      " XPath expression for list '%s'",
-			      obj_get_name(pcb->targobj));
-		    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+		if (pcb->pathobj &&
+		    obj_is_schema_instance_string(pcb->pathobj)) {
+		    /* schema-instance allowed to skip keys */
+		    ;   
+		} else {
+		    /* regular instance-identifier must have all keys */
+		    res = ERR_NCX_MISSING_INDEX;
+		    if (pcb->logerrors) {
+			log_error("\nError: missing key components in"
+				  " XPath expression for list '%s'",
+				  obj_get_name(pcb->targobj));
+			ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+		    }
 		}
 	    } else {
 		res = ERR_NCX_EXTRA_VAL_INST;
@@ -1478,6 +1485,189 @@ status_t
 }  /* xpath_yang_validate_path */
 
 
+
+/********************************************************************
+* FUNCTION xpath_yang_validate_xmlpath
+* 
+* Validate an instance-identifier expression
+* within an XML PDU context
+*
+* INPUTS:
+*    reader == XML reader to use
+*    pcb == initialized XPath parser control block
+*           with a possibly unchecked pcb->exprstr.
+*           This function will  call tk_tokenize_xpath_string
+*           if it has not already been called.
+*    logerrors == TRUE if log_error and ncx_print_errormsg
+*                  should be used to log XPath errors and warnings
+*                 FALSE if internal error info should be recorded
+*                 in the xpath_result_t struct instead
+*                !!! use FALSE unless DEBUG mode !!!
+*    targobj == address of return target object
+*     
+* OUTPUTS:
+*   *targobj is set to the object that this instance-identifier
+*    references, if NO_ERR
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_yang_validate_xmlpath (xmlTextReaderPtr reader,
+				 xpath_pcb_t *pcb,
+				 const obj_template_t *pathobj,
+				 boolean logerrors,
+				 const obj_template_t **targobj)
+{
+    status_t  res;
+
+#ifdef DEBUG
+    if (!reader || !pcb || !targobj || !pcb->exprstr) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    *targobj = NULL;
+    pcb->logerrors = logerrors;
+
+    if (pcb->tkc) {
+	tk_reset_chain(pcb->tkc);
+    } else {
+	pcb->tkc = tk_tokenize_xpath_string(NULL, 
+					    pcb->exprstr, 
+					    0, 
+					    0, 
+					    &res);
+    }
+
+    if (!pcb->tkc || res != NO_ERR) {
+	if (pcb->logerrors) {
+	    log_error("\nError: Invalid path string '%s'",
+		      pcb->exprstr);
+	}
+	pcb->parseres = res;
+	return res;
+    }
+
+    pcb->docroot = ncx_get_gen_root();
+    if (!pcb->docroot) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    pcb->pathobj = pathobj;
+    pcb->obj = pcb->docroot;
+    pcb->reader = reader;
+    pcb->flags = XP_FL_INSTANCEID;
+    pcb->source = XP_SRC_XML;
+    pcb->objmod = NULL;
+    pcb->val = NULL;
+    pcb->val_docroot = NULL;
+    pcb->targobj = NULL;
+    pcb->altobj = NULL;
+    pcb->varobj = NULL;
+    pcb->curmode = XP_CM_TARGET;
+
+    /* validate the XPath expression against the 
+     * full cooked object tree
+     */
+    pcb->validateres = parse_absolute_path(pcb);
+
+    /* check leafref is config but target is not */
+    if (pcb->validateres == NO_ERR && pcb->targobj) {
+	*targobj = pcb->targobj;
+    }
+
+    return pcb->validateres;
+
+}  /* xpath_yang_validate_xmlpath */
+
+
+/********************************************************************
+* FUNCTION xpath_yang_validate_xmlkey
+* 
+* Validate a key XML attribute value given in
+* an <edit-config> operation with an 'insert' attribute
+* Check that a complete set of predicates is present
+* for the specified list of leaf-list
+*
+* INPUTS:
+*    reader == XML reader to use
+*    pcb == initialized XPath parser control block
+*           with a possibly unchecked pcb->exprstr.
+*           This function will  call tk_tokenize_xpath_string
+*           if it has not already been called.
+*    obj == list or leaf-list object associated with
+*           the pcb->exprstr predicate expression
+*           (MAY be NULL if first-pass parsing and
+*           object is not known yet -- parsed in XML attribute)
+*    logerrors == TRUE if log_error and ncx_print_errormsg
+*                  should be used to log XPath errors and warnings
+*                 FALSE if internal error info should be recorded
+*                 in the xpath_result_t struct instead
+*                !!! use FALSE unless DEBUG mode !!!
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_yang_validate_xmlkey (xmlTextReaderPtr reader,
+				xpath_pcb_t *pcb,
+				const obj_template_t *obj,
+				boolean logerrors)
+{
+    status_t  res;
+
+#ifdef DEBUG
+    if (!reader || !pcb || !pcb->exprstr) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    pcb->logerrors = logerrors;
+
+    if (pcb->tkc) {
+	tk_reset_chain(pcb->tkc);
+    } else {
+	pcb->tkc = tk_tokenize_xpath_string(NULL, pcb->exprstr, 
+					    0, 0, &res);
+    }
+
+    if (!pcb->tkc || res != NO_ERR) {
+	if (pcb->logerrors) {
+	    log_error("\nError: Invalid path string '%s'",
+		      pcb->exprstr);
+	}
+	pcb->parseres = res;
+	return res;
+    }
+
+    pcb->docroot = ncx_get_gen_root();
+    if (!pcb->docroot) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    pcb->obj = obj;
+    pcb->reader = reader;
+    pcb->flags = XP_FL_INSTANCEID;
+    pcb->source = XP_SRC_XML;
+    pcb->objmod = NULL;
+    pcb->val = NULL;
+    pcb->val_docroot = NULL;
+    pcb->targobj = obj;
+    pcb->altobj = NULL;
+    pcb->varobj = NULL;
+    pcb->curmode = XP_CM_TARGET;
+
+    /* validate the XPath expression against the 
+     * full cooked object tree
+     */
+    pcb->validateres = parse_keyexpr(pcb);
+
+    return pcb->validateres;
+
+}  /* xpath_yang_validate_xmlkey */
+
+
 /********************************************************************
 * FUNCTION xpath_yang_make_instanceid_val
 * 
@@ -1768,179 +1958,124 @@ val_value_t *
 
 
 /********************************************************************
-* FUNCTION xpath_yang_validate_xmlpath
+* FUNCTION xpath_yang_get_namespaces
 * 
-* Validate an instance-identifier expression
-* within an XML PDU context
+* Get the namespace URI IDs used in the specified
+* XPath expression;
+* 
+* usually an instance-identifier or schema-instance node
+* but this function simply reports all the TK_TT_MSTRING
+* tokens that have an nsid set
+*
+* The XPath pcb must be previously parsed and found valid
 *
 * INPUTS:
-*    reader == XML reader to use
-*    pcb == initialized XPath parser control block
-*           with a possibly unchecked pcb->exprstr.
-*           This function will  call tk_tokenize_xpath_string
-*           if it has not already been called.
-*    logerrors == TRUE if log_error and ncx_print_errormsg
-*                  should be used to log XPath errors and warnings
-*                 FALSE if internal error info should be recorded
-*                 in the xpath_result_t struct instead
-*                !!! use FALSE unless DEBUG mode !!!
-*    targobj == address of return target object
-*     
+*    pcb == the XPath parser control block to use
+*    nsid_array == address of return array of xmlns_id_t
+*    max_nsids == number of NSIDs that can be held
+*    num_nsids == address of return number of NSIDs
+*                 written to the buffer. No duplicates
+*                 will be present in the buffer
+*
 * OUTPUTS:
-*   *targobj is set to the object that this instance-identifier
-*    references, if NO_ERR
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    xpath_yang_validate_xmlpath (xmlTextReaderPtr reader,
-				 xpath_pcb_t *pcb,
-				 boolean logerrors,
-				 const obj_template_t **targobj)
-{
-    status_t  res;
-
-#ifdef DEBUG
-    if (!reader || !pcb || !targobj || !pcb->exprstr) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    res = NO_ERR;
-    *targobj = NULL;
-    pcb->logerrors = logerrors;
-
-    if (pcb->tkc) {
-	tk_reset_chain(pcb->tkc);
-    } else {
-	pcb->tkc = tk_tokenize_xpath_string(NULL, pcb->exprstr, 
-					    0, 0, &res);
-    }
-
-    if (!pcb->tkc || res != NO_ERR) {
-	if (pcb->logerrors) {
-	    log_error("\nError: Invalid path string '%s'",
-		      pcb->exprstr);
-	}
-	pcb->parseres = res;
-	return res;
-    }
-
-    pcb->docroot = ncx_get_gen_root();
-    if (!pcb->docroot) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-    pcb->obj = pcb->docroot;
-    pcb->reader = reader;
-    pcb->flags = XP_FL_INSTANCEID;
-    pcb->source = XP_SRC_XML;
-    pcb->objmod = NULL;
-    pcb->val = NULL;
-    pcb->val_docroot = NULL;
-    pcb->targobj = NULL;
-    pcb->altobj = NULL;
-    pcb->varobj = NULL;
-    pcb->curmode = XP_CM_TARGET;
-
-    /* validate the XPath expression against the 
-     * full cooked object tree
-     */
-    pcb->validateres = parse_absolute_path(pcb);
-
-    /* check leafref is config but target is not */
-    if (pcb->validateres == NO_ERR && pcb->targobj) {
-	*targobj = pcb->targobj;
-    }
-
-    return pcb->validateres;
-
-}  /* xpath_yang_validate_xmlpath */
-
-
-/********************************************************************
-* FUNCTION xpath_yang_validate_xmlkey
-* 
-* Validate a key XML attribute value given in
-* an <edit-config> operation with an 'insert' attribute
-* Check that a complete set of predicates is present
-* for the specified list of leaf-list
-*
-* INPUTS:
-*    reader == XML reader to use
-*    pcb == initialized XPath parser control block
-*           with a possibly unchecked pcb->exprstr.
-*           This function will  call tk_tokenize_xpath_string
-*           if it has not already been called.
-*    obj == list or leaf-list object associated with
-*           the pcb->exprstr predicate expression
-*           (MAY be NULL if first-pass parsing and
-*           object is not known yet -- parsed in XML attribute)
-*    logerrors == TRUE if log_error and ncx_print_errormsg
-*                  should be used to log XPath errors and warnings
-*                 FALSE if internal error info should be recorded
-*                 in the xpath_result_t struct instead
-*                !!! use FALSE unless DEBUG mode !!!
+*    nsid_array[0..*num_nsids] == returned NSIDs used
+*       in the XPath expression
+*    *num_nsids == number of NSIDs written to the array
 *
 * RETURNS:
 *   status
 *********************************************************************/
 status_t
-    xpath_yang_validate_xmlkey (xmlTextReaderPtr reader,
-				xpath_pcb_t *pcb,
-				const obj_template_t *obj,
-				boolean logerrors)
+    xpath_yang_get_namespaces (xpath_pcb_t *pcb,
+			       xmlns_id_t *nsid_array,
+			       uint32 max_nsids,
+			       uint32 *num_nsids)
 {
-    status_t  res;
+    boolean               done, found;
+    uint32                i, next;
+    xmlns_id_t            cur_nsid;
+    status_t              res;
 
 #ifdef DEBUG
-    if (!reader || !pcb || !pcb->exprstr) {
+    if (!pcb || !nsid_array || !num_nsids) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (!pcb->tkc) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    if (max_nsids == 0) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
+    if (pcb->parseres != NO_ERR) {
+	return  pcb->parseres;
+    }
+
     res = NO_ERR;
-    pcb->logerrors = logerrors;
+    next = 0;
+    *num_nsids = 0;
 
-    if (pcb->tkc) {
-	tk_reset_chain(pcb->tkc);
-    } else {
-	pcb->tkc = tk_tokenize_xpath_string(NULL, pcb->exprstr, 
-					    0, 0, &res);
-    }
+    tk_reset_chain(pcb->tkc);
 
-    if (!pcb->tkc || res != NO_ERR) {
-	if (pcb->logerrors) {
-	    log_error("\nError: Invalid path string '%s'",
-		      pcb->exprstr);
+    done = FALSE;
+    while (!done) {
+
+	/* get the next token */
+	res = TK_ADV(pcb->tkc);
+	if (res != NO_ERR) {
+	    res = NO_ERR;
+	    done = TRUE;
+	    continue;
 	}
-	pcb->parseres = res;
-	return res;
+
+	/* only MSTRING and QVARBIND tokens have relevant NSID fields
+	 * as used in instance-identifier or schema-instance
+	 * path syntax
+	 */
+	switch (TK_CUR_TYP(pcb->tkc)) {
+	case TK_TT_MSTRING:
+	case TK_TT_QVARBIND:
+	    break;
+	default:
+	    continue;
+	}
+
+	cur_nsid = TK_CUR_NSID(pcb->tkc);
+	if (cur_nsid == 0) {
+	    /* this token never had an NSID set */
+	    continue;
+	}
+
+	/* check if this NSID already recorded */
+	found = FALSE;
+	for (i = 0; i < next && !found; i++) {
+	    if (nsid_array[i] == cur_nsid) {
+		found = TRUE;
+	    }
+	}
+	if (found) {
+	    continue;
+	}
+
+	/* need to add this entry
+	 * check if there would be a buffer overflow
+	 */
+	if (next >= max_nsids) {
+	    res = ERR_BUFF_OVFL;
+	    done = TRUE;
+	} else {
+	    nsid_array[next++] = cur_nsid;
+	}
     }
 
-    pcb->docroot = ncx_get_gen_root();
-    if (!pcb->docroot) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+    if (next) {
+	*num_nsids = next - 1;
     }
-    pcb->obj = obj;
-    pcb->reader = reader;
-    pcb->flags = XP_FL_INSTANCEID;
-    pcb->source = XP_SRC_XML;
-    pcb->objmod = NULL;
-    pcb->val = NULL;
-    pcb->val_docroot = NULL;
-    pcb->targobj = obj;
-    pcb->altobj = NULL;
-    pcb->varobj = NULL;
-    pcb->curmode = XP_CM_TARGET;
 
-    /* validate the XPath expression against the 
-     * full cooked object tree
-     */
-    pcb->validateres = parse_keyexpr(pcb);
+    return res;
 
-    return pcb->validateres;
-
-}  /* xpath_yang_validate_xmlkey */
+}  /* xpath_yang_get_namespaces */
 
 
 /* END xpath_yang.c */

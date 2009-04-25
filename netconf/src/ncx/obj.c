@@ -8216,8 +8216,9 @@ boolean
     }
 #endif
 
-    return ((obj->flags & OBJ_FL_XPATH) ||
-	    obj_get_basetype(obj)==NCX_BT_INSTANCE_ID) ? TRUE : FALSE;
+    return ((obj->flags & (OBJ_FL_XPATH | OBJ_FL_SCHEMAINST)) ||
+	    obj_get_basetype(obj)==NCX_BT_INSTANCE_ID) 
+	? TRUE : FALSE;
 
 }   /* obj_is_xpath_string */
 

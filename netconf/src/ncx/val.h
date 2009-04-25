@@ -29,8 +29,7 @@
   2) Bind the value to an object template:
       val_init_from_template
 
-     The leaf-list object uses a special function instead:
-      val_init_from_template_primary 
+      or use val_make_simval to combine steps 1a and 2
 
   3) set simple values with various functions, such as
      val_set_simval
@@ -64,8 +63,6 @@
   If a value node does not store its data locally, then it
   is called a virtual node.  Callback functions are used
   for almost all protocol operation support.
-
-
 
 
 *********************************************************************
@@ -138,13 +135,8 @@ date	     init     comment
 #define VAL_EQUAL_CH      '='
 #define VAL_XPATH_SEPCH   '/'
 
-#ifdef USE_AND_EXPR_IN_XPATH
-#define VAL_XPATH_INDEX_SEPSTR ((const xmlChar *)" and ")
-#define VAL_XPATH_INDEX_SEPLEN 5
-#else
 #define VAL_XPATH_INDEX_SEPSTR ((const xmlChar *)"][")
 #define VAL_XPATH_INDEX_SEPLEN 2
-#endif
 
 /* val_value_t flags field */
 

@@ -2024,4 +2024,31 @@ status_t
 } /* val_check_child_conditional */
 
 
+/********************************************************************
+* FUNCTION val_get_xpathpcb
+* 
+* Get the XPath parser control block in the specified value struct
+* 
+* INPUTS:
+*   val == value struct to check
+*
+* RETURNS:
+*    poijter to xpath control block or NULL if none
+*********************************************************************/
+xpath_pcb_t *
+    val_get_xpathpcb (val_value_t *val)
+{
+
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return val->xpathpcb;
+
+}  /* val_get_xpathpcb */
+
+
 /* END file val_util.c */

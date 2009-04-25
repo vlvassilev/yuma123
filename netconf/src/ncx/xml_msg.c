@@ -519,6 +519,47 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION xml_msg_get_prefix_start_tag
+*
+* Find the namespace prefix for the specified namespace ID
+* DO NOT CREATE A NEW PREFIX MAP IF IT IS NOT THERE
+*
+* INPUTS:
+*    msg  == message to search
+*    nsid == namespace ID to find
+*
+* RETURNS:
+*   pointer to prefix if found, else NULL if not found
+*********************************************************************/
+const xmlChar *
+    xml_msg_get_prefix_start_tag (xml_msg_hdr_t *msg,
+				  xmlns_id_t nsid)
+{
+    const xmlChar  *pfix;
+
+#ifdef DEBUG
+    if (!msg) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+    if (!nsid) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+#endif
+
+    /* see if a prefix is already present in the rpc-reply element */
+    pfix = find_prefix(msg, nsid);
+    if (pfix) {
+	return pfix;
+    } else {
+	return NULL;
+    }
+
+}  /* xml_msg_get_prefix_start_tag */
+
+
+/********************************************************************
 * FUNCTION xml_msg_gen_new_prefix
 *
 * Generate a new namespace prefix

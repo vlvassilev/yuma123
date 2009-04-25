@@ -303,6 +303,56 @@ static ncx_withdefaults_t  withdefaults;
 
 
 /********************************************************************
+* FUNCTION do_startup_screen
+* 
+*  Print the startup messages to the log and stdout output
+* 
+*********************************************************************/
+static void
+    do_startup_screen (void)
+{
+    logfn_t     logfn;
+    boolean     imode;
+
+    imode = interactive_mode();
+    if (imode) {
+	logfn = log_stdout;
+    } else {
+	logfn = log_write;
+    }
+
+    (*logfn)("\n  yangcli version %s",  YANGCLI_PROGVER);
+    (*logfn)("\n  Copyright 2009, Andy Bierman\n");
+
+    if (!imode) {
+	return;
+    }
+
+    (*logfn)("\n  Type 'help' or 'help <command-name>' to get started");
+    (*logfn)("\n    e.g., 'help help' or 'help connect'");
+    (*logfn)("\n  Use the <tab> key for command and value completion");
+    (*logfn)("\n  Use the <enter> key to accept the default value ");
+    (*logfn)("in brackets");
+
+    (*logfn)("\n\n  These escape sequences are available ");
+    (*logfn)("when filling parameter values:");
+    (*logfn)("\n\n\t?\thelp");
+    (*logfn)("\n\t??\tfull help");
+    (*logfn)("\n\t?s\tskip current parameter");
+    (*logfn)("\n\t?c\tcancel current command");
+
+    (*logfn)("\n\n  These assignment statements are available ");
+    (*logfn)("when entering commands:");
+    (*logfn)("\n\n\t$<varname> = <expr>\tLocal user variable assignment");
+    (*logfn)("\n\t$$<varname> = <expr>\tGlobal user variable assignment");
+    (*logfn)("\n\t@<filespec> = <expr>\tFile assignment");
+    (*logfn)("\n\n  Refer to the user manual for more details\n");
+
+
+}  /* do_startup_screen */
+
+
+/********************************************************************
 * FUNCTION free_agent_cb
 * 
 *  Clean and free an agent control block
@@ -1357,7 +1407,10 @@ static status_t
     parm = val_find_child(mgr_cli_valset, NULL, YANGCLI_USER);
     if (parm) {
 	strval = VAL_STR(parm);
+    } else {
+	strval = (const xmlChar *)getenv(ENV_USER);
     }
+
     res = create_config_var(YANGCLI_USER, strval);
     if (res != NO_ERR) {
 	return res;
@@ -2854,7 +2907,7 @@ int
 	log_error("\nYangcli: init returned error (%s)\n", 
 		  get_error_string(res));
     } else if (!(helpmode || versionmode)) {
-	log_stdout("\nyangcli version %s\n", YANGCLI_PROGVER);
+	do_startup_screen();
 	res = mgr_io_run();
 	if (res != NO_ERR) {
 	    log_error("\nmgr_io failed (%d)\n", res);

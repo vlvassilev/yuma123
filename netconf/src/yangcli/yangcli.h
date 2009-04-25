@@ -104,9 +104,6 @@ date	     init     comment
 #define YESNO_YES    1
 #define YESNO_NO     2
 
-#define DEF_OPTIONS (const xmlChar *)" ? (help), \?\? \
-(full help), \?s (skip) , ?c (cancel)"
-
 /* YANGCLI boot and operation parameter names 
  * matches parm clauses in yangcli container in yangcli.yang
  */

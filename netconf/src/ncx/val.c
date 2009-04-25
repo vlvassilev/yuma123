@@ -3350,11 +3350,17 @@ status_t
     if (valname) {
 	return val_set_simval_str(val, 
 				  typ_get_basetype_typdef(NCX_BT_STRING),
-				  0, valname, xml_strlen(valname), valstr);
+				  0, 
+				  valname, 
+				  xml_strlen(valname), 
+				  valstr);
     } else {
 	return val_set_simval_str(val, 
 				  typ_get_basetype_typdef(NCX_BT_STRING),
-				  0, NULL, 0, valstr);
+				  0, 
+				  NULL, 
+				  0, 
+				  valstr);
 
     }
 
@@ -3470,10 +3476,19 @@ status_t
 		    const xmlChar *valstr)
 {
     if (valname) {
-	return val_set_simval_str(val, typdef, nsid, 
-				  valname, xml_strlen(valname), valstr);
+	return val_set_simval_str(val, 
+				  typdef, 
+				  nsid, 
+				  valname, 
+				  xml_strlen(valname), 
+				  valstr);
     } else {
-	return val_set_simval_str(val, typdef, nsid, NULL, 0, valstr);
+	return val_set_simval_str(val, 
+				  typdef, 
+				  nsid, 
+				  NULL, 
+				  0, 
+				  valstr);
     }
 
 }  /* val_set_simval */
@@ -3587,8 +3602,10 @@ status_t
     case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
 	if (valstr && *valstr) {
-	    res = ncx_convert_num(valstr, NCX_NF_NONE, 
-				  val->btyp, &val->v.num);
+	    res = ncx_convert_num(valstr, 
+				  NCX_NF_NONE, 
+				  val->btyp, 
+				  &val->v.num);
 	} else {
 	    res = ERR_NCX_EMPTY_VAL;
 	}
@@ -3618,6 +3635,10 @@ status_t
 	    val->v.binary.ustrlen = ulen;
 	}
 	break;
+    case NCX_BT_ANY:
+	val->btyp = NCX_BT_STRING;
+	val->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
+	/* fall through and set the string value */
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_LEAFREF:   /****/
@@ -3631,11 +3652,17 @@ status_t
 	}
 	break;
     case NCX_BT_IDREF:
-	res = val_parse_idref(NULL, valstr, &qname_nsid, 
-			      &localname, &identity);
+	res = val_parse_idref(NULL, 
+			      valstr, 
+			      &qname_nsid, 
+			      &localname, 
+			      &identity);
 	if (res == NO_ERR) {
-	    res = val_idref_ok(typdef, valstr, qname_nsid, 
-			       &localname, &identity);
+	    res = val_idref_ok(typdef, 
+			       valstr, 
+			       qname_nsid, 
+			       &localname, 
+			       &identity);
 	    if (res == NO_ERR) {
 		val->v.idref.nsid = qname_nsid;
 		val->v.idref.identity = identity;
@@ -3733,10 +3760,19 @@ val_value_t *
     }
 
     if (valname) {
-	*res = val_set_simval_str(val, typdef, nsid, 
-				  valname, xml_strlen(valname), valstr);
+	*res = val_set_simval_str(val, 
+				  typdef, 
+				  nsid, 
+				  valname, 
+				  xml_strlen(valname), 
+				  valstr);
     } else {
-	*res = val_set_simval_str(val, typdef, nsid, NULL, 0, valstr);
+	*res = val_set_simval_str(val, 
+				  typdef, 
+				  nsid, 
+				  NULL, 
+				  0, 
+				  valstr);
     }
     return val;
 
@@ -4335,8 +4371,10 @@ void
     }
 #endif
 
-    val_add_child_clean_editvars(child->editvars, child, 
-				 parent, cleanQ);
+    val_add_child_clean_editvars(child->editvars, 
+				 child, 
+				 parent, 
+				 cleanQ);
 
 }   /* val_add_child_clean */
 

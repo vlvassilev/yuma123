@@ -199,9 +199,13 @@ static val_value_t *
     if (obj && obj_get_child_count(obj)) {
 	myargv[0] = obj_get_name(rpc);
 	myargv[1] = args;
-	return cli_parse(2, (const char **)myargv, 
-			 obj, VALONLY, SCRIPTMODE,
-			 get_autocomp(), res);
+	return cli_parse(2, 
+			 (const char **)myargv, 
+			 obj, 
+			 VALONLY, 
+			 SCRIPTMODE,
+			 get_autocomp(), 
+			 res);
     } else {
 	*res = ERR_NCX_SKIPPED;
 	return NULL;
@@ -721,14 +725,13 @@ static status_t
     done = FALSE;
     while (!done) {
 	if (btyp==NCX_BT_EMPTY) {
-	    log_stdout("\nShould flag %s be set? [Y, N, %s]", 
-		       parmname, DEF_OPTIONS);
+	    log_stdout("\nShould flag %s be set? [Y, N]", 
+		       parmname);
 	} else {
 	    log_stdout("\nEnter %s value for %s <%s>",
 		       (const xmlChar *)tk_get_btype_sym(btyp),
 		       obj_get_typestr(parm),
 		       parmname);
-	    log_stdout("\n    %s", DEF_OPTIONS);
 	}
 	if (oldvalset) {
 	    oldparm = val_find_child(oldvalset, 
@@ -919,11 +922,10 @@ static status_t
 	    done = FALSE;
 	    while (!done) {
 		log_stdout("\nError: parameter '%s' value '%s' is invalid"
-			   "\nShould this value be used anyway? [Y, N, %s]"
+			   "\nShould this value be used anyway? [Y, N]"
 			   " [N]", 
 			   obj_get_name(parm),
-			   (start) ? start : EMPTY_STRING,
-			   DEF_OPTIONS);
+			   (start) ? start : EMPTY_STRING);
 
 		/* save the previous value because it is about
 		 * to get trashed by getting a new line
@@ -1249,13 +1251,15 @@ static status_t
 
 	/* Pick a prompt, depending on the choice default case */
 	if (obj_get_default(choic)) {
-	    log_stdout("\nEnter choice number [%d - %d, %s], "
+	    log_stdout("\nEnter choice number [%d - %d], "
 		       "[ENTER] for default (%s): ",
-		       1, num-1, DEF_OPTIONS,
+		       1, 
+		       num-1,
 		       obj_get_default(choic));
 	} else {
-	    log_stdout("\nEnter choice number [%d - %d, %s]: ",
-		       1, num-1, DEF_OPTIONS);
+	    log_stdout("\nEnter choice number [%d - %d]: ",
+		       1, 
+		       num-1);
 	}
 
 	/* get input from the user STDIN */
@@ -1898,8 +1902,10 @@ static void
     /* this function call will cause us to block while the
      * protocol layer connect messages are processed
      */
-    res = mgr_ses_new_session(username, password, 
-			      agent, port, 
+    res = mgr_ses_new_session(username, 
+			      password, 
+			      agent, 
+			      port, 
 			      &agent_cb->mysid);
     if (res == NO_ERR) {
 	agent_cb->state = MGR_IO_ST_CONN_START;
@@ -2412,6 +2418,9 @@ static void
 		first = FALSE;
 	    }
 	    if (typ_is_simple(var->val->btyp)) {
+		if (xml_strcmp(var->name, var->val->name)) {
+		    (*logfn)("\n  var %s", var->name);
+		}
 		if (imode) {
 		    val_stdout_value(var->val, NCX_DEF_INDENT);
 		} else {
@@ -2486,6 +2495,10 @@ static void
     }
 
     if (val) {
+	if (xml_strcmp(name, val->name)) {
+	    (*logfn)("\n  var %s", name);
+	}
+
 	if (mode == HELP_MODE_BRIEF) {
 	    if (typ_is_simple(val->btyp)) {
 		if (imode) {
@@ -6940,7 +6953,12 @@ void
     if (valset) {
 	/* try to get any missing params in valset */
 	if (interactive_mode()) {
-	    res = fill_valset(agent_cb, rpc, valset, connect_valset);
+	    res = fill_valset(agent_cb, 
+			      rpc, 
+			      valset, 
+			      (agent_cb->connect_valset) ?
+			      agent_cb->connect_valset :
+			      connect_valset);
 	    if (res == ERR_NCX_SKIPPED) {
 		res = NO_ERR;
 	    }
@@ -6965,8 +6983,11 @@ void
 					   obj);
 		}
 	    }
-	    (void)fill_valset(agent_cb, rpc,
+	    res = fill_valset(agent_cb, 
+			      rpc,
 			      agent_cb->connect_valset, 
+			      (agent_cb->connect_valset) ?
+			      agent_cb->connect_valset :
 			      connect_valset);
 	}
     } else {
@@ -6981,8 +7002,10 @@ void
 
     /* check result so far */
     if (res != NO_ERR) {
-	log_write("\nError: Connect failed (%s)", 
-		  get_error_string(res));
+	if (res != ERR_NCX_CANCELED) {
+	    log_write("\nError: Connect failed (%s)", 
+		      get_error_string(res));
+	}
 	agent_cb->state = MGR_IO_ST_IDLE;
 	if (valset) {
 	    val_free_value(valset);

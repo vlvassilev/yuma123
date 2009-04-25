@@ -171,7 +171,7 @@ static status_t
 	/* get the base type value */
 	btyp = obj_get_basetype(obj);
 
-	if (typ_is_simple(btyp)) {
+	if (btyp == NCX_BT_ANY || typ_is_simple(btyp)) {
 	    if (script) {
 		(void)var_get_script_val(obj, 
 					 new_parm,
@@ -179,8 +179,10 @@ static status_t
 					 ISPARM, 
 					 &res);
 	    } else {
-		typdef = obj_get_ctypdef(obj);
-		res = val_simval_ok(typdef, strval);
+		if (btyp != NCX_BT_ANY) {
+		    typdef = obj_get_ctypdef(obj);
+		    res = val_simval_ok(typdef, strval);
+		}
 		if (res == NO_ERR) {
 		    res = val_set_simval(new_parm,
 					 typdef,  

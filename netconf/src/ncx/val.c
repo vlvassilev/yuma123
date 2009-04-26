@@ -6831,7 +6831,7 @@ boolean
 
     if (typ_has_children(btyp)) {
 	return !dlq_empty(&val->v.childQ);
-    } else if (btyp == NCX_BT_EMPTY && !val->v.bool) {
+    } else if (btyp == NCX_BT_EMPTY) {
 	return FALSE;
     } else if ((btyp == NCX_BT_SLIST || btyp==NCX_BT_BITS)
 	       && ncx_list_empty(&val->v.list)) {

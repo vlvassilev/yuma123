@@ -120,13 +120,15 @@ static status_t
     done = FALSE;
     msg2 = NULL;
 
+#ifdef SES_DEBUG
     if (LOGDEBUG3) {
 	log_debug3("\nses: accept buffer (%u):\n%s\n", 
 		   buff->bufflen, buff->buff);
     } else if (LOGDEBUG2) {
 	log_debug2("\nses: accept buffer (%u)", buff->bufflen);
     }
-	       
+#endif
+
     /* make sure there is a current message */
     msg = (ses_msg_t *)dlq_lastEntry(&scb->msgQ);
     if (!msg || msg->ready) {
@@ -242,10 +244,12 @@ static status_t
 			    
 			    /* truncate the input and continue */
 			    buff->bufflen = buff->buffpos;
-			    log_info("\nses: dropping input "
-				     "for session %d (%s)",
-				     scb->sid,
-				     get_error_string(res));
+			    if (LOGINFO) {
+				log_info("\nses: dropping input "
+					 "for session %d (%s)",
+					 scb->sid,
+					 get_error_string(res));
+			    }
 			    scb->stats.in_drop_msgs++;
 			    totals.stats.in_drop_msgs++;
 
@@ -1000,7 +1004,10 @@ status_t
 #endif
 
 #ifdef SES_DEBUG
-    log_debug("\nses accept input for session %d", scb->sid);
+    if (LOGDEBUG2) {
+	log_debug2("\nses accept input for session %d", 
+		   scb->sid);
+    }
 #endif
 
     res = NO_ERR;
@@ -1019,9 +1026,15 @@ status_t
 
 	/* read data into the new buffer */
 	if (scb->rdfn) {
-	    ret = (*scb->rdfn)(scb, (char *)buff->buff, SES_MSG_BUFFSIZE);
+	    ret = (*scb->rdfn)(scb, 
+			       (char *)buff->buff, 
+			       SES_MSG_BUFFSIZE);
 	    if (ret < 0) {
 		/* !!! treat any read error as nothing to read !!! */
+		/*** NEED TO FIX : WHEN AGENT DROPS SESSION
+		 *** THEN THIS CODE NEEDS TO MAKE SURE THE
+		 *** SSH SESSION IS STILL UP (-1 returned every error)
+		 ***/
 		ses_msg_free_buff(scb, buff);
 		scb->retries++;
 		if (scb->retries < SES_MAX_RETRIES) {
@@ -1045,21 +1058,30 @@ status_t
 	     */
 
 #ifdef SES_DEBUG
-	    log_debug2("\nses read failed on session %d (%s)", 
-		       scb->sid, strerror(errno));
+	    if (LOGDEBUG2) {
+		log_debug2("\nses read failed on session %d (%s)", 
+			   scb->sid, strerror(errno));
+	    }
 #endif
 
 	    ses_msg_free_buff(scb, buff);
 	    return ERR_NCX_READ_FAILED;
 	} else if (ret == 0) {
 	    /* session closed by remote peer */
-	    log_info("\nses: session %d shut by remote peer", scb->sid);
+	    if (LOGINFO) {
+		log_info("\nses: session %d shut by remote peer", 
+			 scb->sid);
+	    }
 	    ses_msg_free_buff(scb, buff);
 	    return ERR_NCX_SESSION_CLOSED;
 	} else {
 
 #ifdef SES_DEBUG
-	    log_debug2("\nses read OK (%d) on session %d", ret, scb->sid);
+	    if (LOGDEBUG2) {
+		log_debug2("\nses read OK (%d) on session %d", 
+			   ret, 
+			   scb->sid);
+	    }
 #endif
 	    scb->retries = 0;
 	    buff->bufflen = (size_t)ret;

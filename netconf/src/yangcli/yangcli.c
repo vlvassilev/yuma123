@@ -311,8 +311,8 @@ static ncx_withdefaults_t  withdefaults;
 static void
     do_startup_screen (void)
 {
-    logfn_t     logfn;
-    boolean     imode;
+    logfn_t             logfn;
+    boolean             imode;
 
     imode = interactive_mode();
     if (imode) {
@@ -1776,6 +1776,7 @@ static void
     const xmlChar      *agent;
     const val_value_t  *parm;
 
+
     mscb = (const mgr_scb_t *)scb->mgrcb;
 
     parm = val_find_child(agent_cb->connect_valset, 
@@ -1786,104 +1787,109 @@ static void
 	agent = (const xmlChar *)"--";
     }
 
-    log_stdout("\n\nNETCONF session established for %s on %s",
-	       scb->username, 
-	       mscb->target ? mscb->target : agent);
+    log_write("\n\nNETCONF session established for %s on %s",
+	      scb->username, 
+	      mscb->target ? mscb->target : agent);
 
-    log_stdout("\n\nManager Session Id: %u", scb->sid);
-    log_stdout("\nAgent Session Id: %u", mscb->agtsid);
+    if (!LOGINFO) {
+	/* skip the rest unless log level is INFO or higher */
+	return;
+    }
 
-    log_stdout("\n\nAgent Protocol Capabilities");
+    log_write("\n\nManager Session Id: %u", scb->sid);
+    log_write("\nAgent Session Id: %u", mscb->agtsid);
+
+    log_write("\n\nAgent Protocol Capabilities");
     cap_dump_stdcaps(&mscb->caplist);
 
-    log_stdout("\n\nAgent Module Capabilities");
+    log_write("\n\nAgent Module Capabilities");
     cap_dump_modcaps(&mscb->caplist);
 
-    log_stdout("\n\nAgent Enterprise Capabilities");
+    log_write("\n\nAgent Enterprise Capabilities");
     cap_dump_entcaps(&mscb->caplist);
-    log_stdout("\n");
+    log_write("\n");
 
-    log_stdout("\nDefault target set to: ");
+    log_write("\nDefault target set to: ");
     switch (mscb->targtyp) {
     case NCX_AGT_TARG_NONE:
 	agent_cb->default_target = NULL;
-	log_stdout("none");
+	log_write("none");
 	break;
     case NCX_AGT_TARG_CANDIDATE:
 	agent_cb->default_target = NCX_EL_CANDIDATE;
-	log_stdout("<candidate>");
+	log_write("<candidate>");
 	break;
     case NCX_AGT_TARG_RUNNING:
 	agent_cb->default_target = NCX_EL_RUNNING;	
-	log_stdout("<running>");
+	log_write("<running>");
 	break;
     case NCX_AGT_TARG_CAND_RUNNING:
-	log_stdout("<candidate> (<running> also supported)");
+	log_write("<candidate> (<running> also supported)");
 	break;
     case NCX_AGT_TARG_LOCAL:
 	agent_cb->default_target = NULL;
-	log_stdout("none -- local file");	
+	log_write("none -- local file");	
 	break;
     case NCX_AGT_TARG_REMOTE:
 	agent_cb->default_target = NULL;
-	log_stdout("none -- remote file");	
+	log_write("none -- remote file");	
 	break;
     default:
 	agent_cb->default_target = NULL;
 	SET_ERROR(ERR_INTERNAL_VAL);
-	log_stdout("none -- unknown (%d)", mscb->targtyp);
+	log_write("none -- unknown (%d)", mscb->targtyp);
 	break;
     }
 
-    log_stdout("\nSave operation mapped to: ");
+    log_write("\nSave operation mapped to: ");
     switch (mscb->targtyp) {
     case NCX_AGT_TARG_NONE:
-	log_stdout("none");
+	log_write("none");
 	break;
     case NCX_AGT_TARG_CANDIDATE:
     case NCX_AGT_TARG_CAND_RUNNING:
-	log_stdout("commit");
+	log_write("commit");
 	if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-	    log_stdout(" + copy-config <running> <startup>");
+	    log_write(" + copy-config <running> <startup>");
 	}
 	break;
     case NCX_AGT_TARG_RUNNING:
 	if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-	    log_stdout("copy-config <running> <startup>");
+	    log_write("copy-config <running> <startup>");
 	} else {
-	    log_stdout("none");
+	    log_write("none");
 	}	    
 	break;
     case NCX_AGT_TARG_LOCAL:
     case NCX_AGT_TARG_REMOTE:
 	/* no way to assign these enums from the capabilities alone! */
 	if (cap_std_set(&mscb->caplist, CAP_STDID_URL)) {
-	    log_stdout("copy-config <running> <url>");
+	    log_write("copy-config <running> <url>");
 	} else {
-	    log_stdout("none");
+	    log_write("none");
 	}	    
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
-	log_stdout("none");
+	log_write("none");
 	break;
     }
 
-    log_stdout("\nDefault with-defaults behavior: ");
+    log_write("\nDefault with-defaults behavior: ");
     if (mscb->caplist.cap_defstyle) {
-	log_stdout("%s", mscb->caplist.cap_defstyle);
+	log_write("%s", mscb->caplist.cap_defstyle);
     } else {
-	log_stdout("unknown");
+	log_write("unknown");
     }
 
-    log_stdout("\nAdditional with-defaults behavior: ");
+    log_write("\nAdditional with-defaults behavior: ");
     if (mscb->caplist.cap_supported) {
-	log_stdout("%s", mscb->caplist.cap_supported);
+	log_write("%s", mscb->caplist.cap_supported);
     } else {
-	log_stdout("unknown");
+	log_write("unknown");
     }
 
-    log_stdout("\n");
+    log_write("\n");
     
 } /* report_capabilities */
 
@@ -1917,7 +1923,7 @@ static void
 
     mscb = (const mgr_scb_t *)scb->mgrcb;
 
-    log_info("\n\nChecking Agent Modules...");
+    log_info("\n\nChecking Agent Modules...\n");
 
     /**** HARDWIRE ADD NETCONF V1 TO THE QUEUE
      **** NEED TO GET THE STD CAP INSTEAD
@@ -2410,6 +2416,11 @@ static status_t
     if (res != NO_ERR) {
 	return res;
     }
+
+    /* make sure the startup screen is generated
+     * before the auto-connect sequence starts
+     */
+    do_startup_screen();    
 
     /* check to see if a session should be auto-started
      * --> if the agent parameter is set a connect will

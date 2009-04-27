@@ -371,8 +371,11 @@ static status_t
 	 *  Allocate a new val_value_t for the child value node 
 	 */
 	res = NO_ERR;
-	chval = val_new_child_val(nextnode.nsid, nextnode.elname, 
-				  TRUE, retval, get_editop(&nextnode));
+	chval = val_new_child_val(nextnode.nsid, 
+				  nextnode.elname, 
+				  TRUE, 
+				  retval, 
+				  get_editop(&nextnode));
 	if (!chval) {
 	    res = ERR_INTERNAL_MEM;
 	}
@@ -387,8 +390,10 @@ static status_t
 	     * Cannot call this function directly or the
 	     * XML attributes will not get processed
 	     */
-	    res = parse_btype(scb, ncx_get_gen_anyxml(), 
-			      &nextnode, chval);
+	    res = parse_btype(scb, 
+			      ncx_get_gen_anyxml(), 
+			      &nextnode, 
+			      chval);
 	    chval->res = res;
 	    xml_clean_node(&nextnode);
 	    val_add_child(chval, retval);
@@ -801,8 +806,10 @@ static status_t
 	    res = ERR_NCX_WRONG_NUMTYP;
 	}
 	if (res == NO_ERR) {
-	    res = val_range_ok_errinfo(obj_get_ctypdef(obj), btyp, 
-				       &retval->v.num, &errinfo);
+	    res = val_range_ok_errinfo(obj_get_ctypdef(obj), 
+				       btyp, 
+				       &retval->v.num, 
+				       &errinfo);
 	}
 	break;
     default:
@@ -814,7 +821,8 @@ static status_t
     if (res2 == NO_ERR) {
 #ifdef MGR_VAL_PARSE_DEBUG
 	if (LOGDEBUG3) {
-	    log_debug3("\nparse_num: expecting end for %s", startnode->qname);
+	    log_debug3("\nparse_num: expecting end for %s", 
+		       startnode->qname);
 	    xml_dump_node(&endnode);
 	}
 #endif
@@ -879,11 +887,15 @@ static status_t
     val_init_from_template(retval, obj);
 
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, obj_get_nsid(obj),
-			 NULL, XML_NT_START); 
+    res = xml_node_match(startnode, 
+			 obj_get_nsid(obj),
+			 NULL, 
+			 XML_NT_START); 
     if (res != NO_ERR) {
-	res = xml_node_match(startnode, obj_get_nsid(obj),
-			     NULL, XML_NT_EMPTY); 
+	res = xml_node_match(startnode, 
+			     obj_get_nsid(obj),
+			     NULL, 
+			     XML_NT_EMPTY); 
 	if (res == NO_ERR) {
 	    empty = TRUE;
 	}
@@ -905,7 +917,8 @@ static status_t
 	} else {
 	    /* check the empty string */
 	    res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
-					btyp, EMPTY_STRING,
+					btyp, 
+					EMPTY_STRING,
 					&errinfo);
 	    retval->v.str = xml_strdup(EMPTY_STRING);
 	    if (!retval->v.str) {
@@ -959,13 +972,16 @@ static status_t
 
 	    if (res == NO_ERR) {
 		res = val_list_ok_errinfo(obj_get_ctypdef(obj), 
-					  btyp, &retval->v.list,
+					  btyp, 
+					  &retval->v.list,
 					  &errinfo);
 	    }
 	} else {
 	    /* check the non-whitespace string */
 	    res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
-					btyp, valnode.simval, &errinfo);
+					btyp, 
+					valnode.simval, 
+					&errinfo);
 	}
 
 	/* record the value even if there are errors */
@@ -978,7 +994,8 @@ static status_t
 		if (!retval->v.binary.ustr) {
 		    res = ERR_INTERNAL_MEM;
 		} else {
-		    res = b64_decode(valnode.simval, valnode.simlen,
+		    res = b64_decode(valnode.simval, 
+				     valnode.simlen,
 				     retval->v.binary.ustr, 
 				     retval->v.binary.ubufflen,
 				     &retval->v.binary.ustrlen);
@@ -1227,12 +1244,16 @@ static status_t
 	case XML_NT_STRING:
 	    /* get the non-whitespace string here */
 	    res = val_union_ok_errinfo(obj_get_ctypdef(obj), 
-				       valnode.simval, retval, &errinfo);
+				       valnode.simval, 
+				       retval, 
+				       &errinfo);
 	    break;
 	case XML_NT_END:
 	    stopnow = TRUE;
 	    res = val_union_ok_errinfo(obj_get_ctypdef(obj), 
-				       EMPTY_STRING, retval, &errinfo);
+				       EMPTY_STRING, 
+				       retval, 
+				       &errinfo);
 	    break;
 	default:
 	    stopnow = TRUE;
@@ -1443,8 +1464,12 @@ static status_t
 	if (res==NO_ERR) {
 	    curchild = NULL;
 	    if (!errmode) {
-		res = obj_get_child_node(obj, chobj, &chnode, FALSE,
-					 &curtop, &curchild);
+		res = obj_get_child_node(obj, 
+					 chobj, 
+					 &chnode, 
+					 FALSE,
+					 &curtop, 
+					 &curchild);
 	    }
 	    if (!curchild || res != NO_ERR) {
 		log_error("\nError: '%s' has no child node '%s'. Using anyxml",
@@ -1467,7 +1492,8 @@ static status_t
 	    chval = val_new_child_val(obj_get_nsid(curchild),
 				      (errmode) ? chnode.elname : 
 				      obj_get_name(curchild), 
-				      FALSE, retval, 
+				      FALSE, 
+				      retval, 
 				      get_editop(&chnode));
 	    if (!chval) {
 		res = ERR_INTERNAL_MEM;
@@ -1718,8 +1744,12 @@ static status_t
 	    res = obj_get_child_node(obj, chobj, &chnode, FALSE,
 				     &curtop, &curchild);
 	    if (res != NO_ERR && output) {
-		res = obj_get_child_node(output, outchobj, &chnode, FALSE,
-					 &curtop, &curchild);
+		res = obj_get_child_node(output, 
+					 outchobj, 
+					 &chnode, 
+					 FALSE,
+					 &curtop, 
+					 &curchild);
 	    }
 	    if (res != NO_ERR) {
 		log_error("\nError: '%s' has no child node '%s'. Using anyxml",

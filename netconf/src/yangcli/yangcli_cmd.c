@@ -2797,6 +2797,7 @@ static void
     boolean             imode, done;
     help_mode_t         mode;
 
+    res = NO_ERR;
     imode = interactive_mode();
     valset = get_valset(agent_cb, rpc, &line[len], &res);
 
@@ -3332,7 +3333,7 @@ static void
 
     mod = NULL;
     done = FALSE;
-
+    res = NO_ERR;
     imode = interactive_mode();
 
     valset = get_valset(agent_cb, rpc, &line[len], &res);
@@ -3521,6 +3522,7 @@ static void
     ncx_node_t            dtyp;
     uint32                dlen;
 
+    res = NO_ERR;
     imode = interactive_mode();
     valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (res != NO_ERR) {
@@ -3714,6 +3716,8 @@ static status_t
     status_t       res;
     int            num;
     xmlChar        buff[4];
+
+    res = NO_ERR;
 
     /* saerch for the script */
     fspec = ncxmod_find_script_file(source, &res);
@@ -3911,6 +3915,7 @@ static void
     status_t          res;
     boolean           imode;
 
+    res = NO_ERR;
     imode = interactive_mode();
     valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (res == NO_ERR || res == ERR_NCX_SKIPPED) {
@@ -3949,6 +3954,7 @@ static void
     int               ret;
     boolean           imode;
 
+    res = NO_ERR;
     imode = interactive_mode();
     valset = get_valset(agent_cb, rpc, &line[len], &res);
     if (res != NO_ERR) {
@@ -4013,6 +4019,7 @@ static void
     status_t               res;
     boolean                imode, save_getopt;
 
+    res = NO_ERR;
     valset = get_valset(agent_cb, 
 			rpc, 
 			&line[len], 
@@ -6475,13 +6482,17 @@ void
     }
 #endif
 
+    res = NO_ERR;
+
     if (!xml_strlen(line)) {
 	return;
     }
 
     dtyp = NCX_NT_OBJ;
     rpc = (const obj_template_t *)parse_def(agent_cb,
-					    &dtyp, line, &len);
+					    &dtyp, 
+					    line, 
+					    &len);
     if (!rpc) {
 	if (agent_cb->result_name || agent_cb->result_filename) {
 	    res = finish_result_assign(agent_cb, NULL, line);

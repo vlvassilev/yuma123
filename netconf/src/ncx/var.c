@@ -362,8 +362,10 @@ static status_t
 	     var_type_t vartype)
 {
     val_value_t  *tempval;
+    xmlChar      *buffer;
     ncx_var_t    *var;
     status_t      res;
+    uint32        len;
 
     res = NO_ERR;
 
@@ -379,21 +381,49 @@ static status_t
 	    return ERR_NCX_VAR_READ_ONLY;
 	}
 
-	/* only allow local vars to change the data type */
-	if ((vartype != VAR_TYP_LOCAL) &&
-	    (val->btyp != var->val->btyp ||
-	     val->typdef != var->val->typdef)) {
+	/* only allow user vars to change the data type */
+	if ((vartype == VAR_TYP_CONFIG) &&
+	    (val->btyp != var->val->btyp)) {
 	    log_error("\nError: cannot change the variable data type");
 	    return ERR_NCX_WRONG_TYPE;
 	}
 
-	/* swap out the vars, but keep the old QName */
-	tempval = var->val;
-	var->val = val;
-	var->val->nsid = tempval->nsid;
-	val_set_name(var->val, tempval->name, 
-		     xml_strlen(tempval->name));
-	val_free_value(tempval);
+
+	if (vartype == VAR_TYP_CONFIG && var->val->typdef != NULL) {
+	    /* do not replace this typdef since it might
+	     * not be generic like all the user variables
+	     */
+	    res = val_sprintf_simval_nc(NULL, val, &len);
+	    if (res == NO_ERR) {
+		buffer = m__getMem(len+1);
+		if (buffer == NULL) {
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    res = val_sprintf_simval_nc(buffer, val, &len);
+
+		    if (res == NO_ERR) {
+			res = val_set_simval(var->val,
+					     var->val->typdef,
+					     var->val->nsid,
+					     var->val->name,
+					     buffer);
+		    }
+
+		    m__free(buffer);
+		}
+	    }
+	    val_free_value(val);
+	} else {
+	    /* swap out the value structs and free the old one */
+	    tempval = var->val;
+	    var->val = val;
+	    var->val->nsid = tempval->nsid;
+
+	    /* make sure the name stays the same */
+	    val_set_name(var->val, tempval->name, 
+			 xml_strlen(tempval->name));
+	    val_free_value(tempval);
+	}
     } else {
 	if (!varQ) {
 	    varQ = get_que(vartype, name);

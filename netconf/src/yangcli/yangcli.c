@@ -721,7 +721,8 @@ static status_t
 	if (newval) {
 	    res = var_set_move(configval->name, 
 			       xml_strlen(configval->name),
-			       VAR_TYP_CONFIG, newval);
+			       VAR_TYP_CONFIG, 
+			       newval);
 	} else {
 	    res = var_set_from_string(configval->name,
 				      newvalstr, 
@@ -732,10 +733,6 @@ static status_t
 			  agent_cb->result_name, 
 			  get_error_string(res));
 	}
-    }
-
-    if (res == NO_ERR) {
-	log_info("\nOK\n");
     }
 
     return res;

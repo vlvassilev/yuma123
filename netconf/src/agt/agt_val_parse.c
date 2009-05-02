@@ -1261,11 +1261,15 @@ static status_t
     retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, obj_get_nsid(obj),
-			 NULL, XML_NT_START); 
+    res = xml_node_match(startnode, 
+			 obj_get_nsid(obj),
+			 NULL, 
+			 XML_NT_START); 
     if (res != NO_ERR) {
-	res = xml_node_match(startnode, obj_get_nsid(obj),
-			     NULL, XML_NT_EMPTY); 
+	res = xml_node_match(startnode, 
+			     obj_get_nsid(obj),
+			     NULL, 
+			     XML_NT_EMPTY); 
 	if (res == NO_ERR) {
 	    empty = TRUE;
 	}
@@ -1299,7 +1303,8 @@ static status_t
 	} else {
 	    /* check the empty string */
 	    res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
-					btyp, EMPTY_STRING,
+					btyp, 
+					EMPTY_STRING,
 					&errinfo);
 	    retval->v.str = xml_strdup(EMPTY_STRING);
 	    if (!retval->v.str) {
@@ -1311,10 +1316,16 @@ static status_t
     if (res != NO_ERR) {
 	if (!errdone) {
 	    /* add rpc-error to msg->errQ */
-	    (void)parse_error_subtree_errinfo(scb, msg, startnode,
-					      errnode, res, 
-					      NCX_NT_NONE, NULL, 
-					      NCX_NT_VAL, retval, errinfo);
+	    (void)parse_error_subtree_errinfo(scb, 
+					      msg, 
+					      startnode,
+					      errnode, 
+					      res, 
+					      NCX_NT_NONE, 
+					      NULL, 
+					      NCX_NT_VAL, 
+					      retval, 
+					      errinfo);
 	}
 	xml_clean_node(&valnode);
 	return res;
@@ -1349,7 +1360,8 @@ static status_t
 		listbtyp = NCX_BT_BITS;
 	    }
 
-	    res = ncx_set_list(listbtyp, valnode.simval, 
+	    res = ncx_set_list(listbtyp, 
+			       valnode.simval, 
 			       &retval->v.list);
 	    if (res == NO_ERR) {
 		if (btyp == NCX_BT_SLIST) {
@@ -1363,7 +1375,8 @@ static status_t
 
 	    if (res == NO_ERR) {
 		res = val_list_ok_errinfo(obj_get_ctypdef(obj), 
-					  btyp, &retval->v.list,
+					  btyp, 
+					  &retval->v.list,
 					  &errinfo);
 	    }
 	    break;
@@ -1371,7 +1384,8 @@ static status_t
 	    if (!obj_is_xpath_string(obj)) {
 		/* check the non-whitespace string */
 		res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
-					    btyp, valnode.simval, 
+					    btyp, 
+					    valnode.simval, 
 					    &errinfo);
 		break;
 	    }  /* else fall through and parse XPath string */
@@ -1379,7 +1393,8 @@ static status_t
 	    retval->xpathpcb = xpath_new_pcb(valnode.simval);
 	    if (!retval->xpathpcb) {
 		res = ERR_INTERNAL_MEM;
-	    } else if (btyp == NCX_BT_INSTANCE_ID) {
+	    } else if (btyp == NCX_BT_INSTANCE_ID ||
+		       obj_is_schema_instance_string(obj)) {
 		/* do a first pass parsing to resolve all
 		 * the prefixes and check well-formed XPath
 		 */
@@ -1417,7 +1432,8 @@ static status_t
 		if (!retval->v.binary.ustr) {
 		    res = ERR_INTERNAL_MEM;
 		} else {
-		    res = b64_decode(valnode.simval, valnode.simlen,
+		    res = b64_decode(valnode.simval, 
+				     valnode.simlen,
 				     retval->v.binary.ustr, 
 				     retval->v.binary.ubufflen,
 				     &retval->v.binary.ustrlen);
@@ -1480,9 +1496,16 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR)	&& !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)parse_error_subtree_errinfo(scb, msg, startnode,
-					  errnode, res, NCX_NT_STRING,
-					  badval, NCX_NT_VAL, retval, errinfo);
+	(void)parse_error_subtree_errinfo(scb, 
+					  msg, 
+					  startnode,
+					  errnode, 
+					  res, 
+					  NCX_NT_STRING,
+					  badval, 
+					  NCX_NT_VAL, 
+					  retval, 
+					  errinfo);
     }
 
     xml_clean_node(&valnode);
@@ -1547,8 +1570,10 @@ static status_t
 	}
     } else {
 	/* make sure the startnode is correct */
-	res = xml_node_match(startnode, obj_get_nsid(obj), 
-			     NULL, XML_NT_START); 
+	res = xml_node_match(startnode, 
+			     obj_get_nsid(obj), 
+			     NULL, 
+			     XML_NT_START); 
     }
 
     if (res == NO_ERR && !empty) {
@@ -1662,9 +1687,15 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR) && !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)parse_error_subtree(scb, msg, startnode,
-				  errnode, res, NCX_NT_STRING, 
-				  badval, NCX_NT_VAL, retval);
+	(void)parse_error_subtree(scb, 
+				  msg, 
+				  startnode,
+				  errnode, 
+				  res, 
+				  NCX_NT_STRING, 
+				  badval, 
+				  NCX_NT_VAL, 
+				  retval);
     }
 
     xml_clean_node(&valnode);
@@ -1746,7 +1777,9 @@ static status_t
 	case XML_NT_STRING:
 	    /* get the non-whitespace string here */
 	    res = val_union_ok_errinfo(obj_get_ctypdef(obj), 
-				       valnode.simval, retval, &errinfo);
+				       valnode.simval, 
+				       retval, 
+				       &errinfo);
 	    if (res != NO_ERR) {
 		badval = valnode.simval;
 	    }
@@ -1755,7 +1788,8 @@ static status_t
 	    stopnow = TRUE;
 	    res = val_union_ok_errinfo(obj_get_ctypdef(obj), 
 				       EMPTY_STRING, 
-				       retval, &errinfo);
+				       retval, 
+				       &errinfo);
 	    if (res != NO_ERR) {
 		badval = EMPTY_STRING;
 	    }
@@ -1821,10 +1855,16 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR) && !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)parse_error_subtree_errinfo(scb, msg, startnode,
-					  errnode, res, 
-					  NCX_NT_STRING, badval, 
-					  NCX_NT_VAL, retval, errinfo);
+	(void)parse_error_subtree_errinfo(scb, 
+					  msg, 
+					  startnode,
+					  errnode, 
+					  res, 
+					  NCX_NT_STRING, 
+					  badval, 
+					  NCX_NT_VAL, 
+					  retval, 
+					  errinfo);
     }
 
     xml_clean_node(&valnode);
@@ -1930,10 +1970,15 @@ static status_t
 	chobj = obj_first_child(obj);
     } else {
 	/* add rpc-error to msg->errQ */
-	(void)parse_error_subtree(scb, msg, startnode,
-				  errnode, res, 
-				  NCX_NT_NONE, NULL, 
-				  NCX_NT_VAL, retval);
+	(void)parse_error_subtree(scb, 
+				  msg, 
+				  startnode,
+				  errnode, 
+				  res, 
+				  NCX_NT_NONE, 
+				  NULL, 
+				  NCX_NT_VAL, 
+				  retval);
 	return res;
     }
 
@@ -2022,7 +2067,8 @@ static status_t
 	     */
 	    chval = val_new_child_val(obj_get_nsid(curchild),
 				      obj_get_name(curchild), 
-				      FALSE, retval, 
+				      FALSE, 
+				      retval, 
 				      get_editop(&chnode));
 	    if (!chval) {
 		res = ERR_INTERNAL_MEM;
@@ -2034,9 +2080,15 @@ static status_t
 	    /* try to skip just the child node sub-tree */
 	    if (!errdone) {
 		/* add rpc-error to msg->errQ */
-		res2 = parse_error_subtree(scb, msg, &chnode,
-					   errnode, res, NCX_NT_NONE, 
-					   NULL, NCX_NT_VAL, retval);
+		res2 = parse_error_subtree(scb, 
+					   msg, 
+					   &chnode,
+					   errnode, 
+					   res, 
+					   NCX_NT_NONE, 
+					   NULL, 
+					   NCX_NT_VAL, 
+					   retval);
 	    }
 	    xml_clean_node(&chnode);
 	    if (chval) {
@@ -2061,8 +2113,12 @@ static status_t
 	 * in the child node
 	 */
 	val_add_child(chval, retval);
-	res = parse_btype_nc(scb, msg, curchild,
-			     &chnode, retval->dataclass, chval);
+	res = parse_btype_nc(scb, 
+			     msg, 
+			     curchild,
+			     &chnode, 
+			     retval->dataclass, 
+			     chval);
 	chval->res = res;
 	if (res != NO_ERR) {
 	    retres = res;
@@ -2259,10 +2315,15 @@ static status_t
 	}
 
 	if (res != NO_ERR) {
-	    agt_record_attr_error(scb, msg, 
-				  NCX_LAYER_OPERATION, res,  
-				  attr, node, NULL, 
-				  NCX_NT_VAL, retval);
+	    agt_record_attr_error(scb, 
+				  msg, 
+				  NCX_LAYER_OPERATION, 
+				  res,  
+				  attr, 
+				  node, 
+				  NULL, 
+				  NCX_NT_VAL, 
+				  retval);
 	    CHK_EXIT(res, retres);
 	}
     }
@@ -2358,18 +2419,30 @@ static status_t
 		res = ERR_NCX_EXTRA_ATTR;
 		qname.nsid = yangid;
 		qname.name = YANG_K_KEY;
-		agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
-				 NULL, NCX_NT_QNAME, &qname, 
-				 NCX_NT_VAL, val);
+		agt_record_error(scb, 
+				 msg, 
+				 NCX_LAYER_CONTENT, 
+				 res, 
+				 NULL, 
+				 NCX_NT_QNAME, 
+				 &qname, 
+				 NCX_NT_VAL, 
+				 val);
 	    }
 	} else {
 	    if (!checkcnt || val->obj->objtype != OBJ_TYP_LEAF_LIST) {
 		res = ERR_NCX_EXTRA_ATTR;
 		qname.nsid = yangid;
 		qname.name = YANG_K_VALUE;
-		agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
-				 NULL, NCX_NT_QNAME, &qname, 
-				 NCX_NT_VAL, val);
+		agt_record_error(scb, 
+				 msg, 
+				 NCX_LAYER_CONTENT,
+				 res, 
+				 NULL,
+				 NCX_NT_QNAME,
+				 &qname, 
+				 NCX_NT_VAL,
+				 val);
 	    }
 	}
     }
@@ -2384,17 +2457,29 @@ static status_t
 	    res = ERR_NCX_MISSING_ATTR;
 	    qname.nsid = yangid;
 	    qname.name = YANG_K_VALUE;
-	    agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
-			     NULL, NCX_NT_QNAME, &qname, 
-			     NCX_NT_VAL, val);
+	    agt_record_error(scb,
+			     msg,
+			     NCX_LAYER_CONTENT,
+			     res, 
+			     NULL,
+			     NCX_NT_QNAME,
+			     &qname, 
+			     NCX_NT_VAL,
+			     val);
 	} else if (val->obj->objtype == OBJ_TYP_LIST) {
 	    /* the key attribute is missing */
 	    res = ERR_NCX_MISSING_ATTR;
 	    qname.nsid = yangid;
 	    qname.name = YANG_K_KEY;
-	    agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
-			     NULL, NCX_NT_QNAME, &qname, 
-			     NCX_NT_VAL, val);
+	    agt_record_error(scb,
+			     msg,
+			     NCX_LAYER_CONTENT,
+			     res, 
+			     NULL,
+			     NCX_NT_QNAME,
+			     &qname, 
+			     NCX_NT_VAL,
+			     val);
 	}
     }
 
@@ -2415,10 +2500,15 @@ static status_t
 	    res = ERR_NCX_EXTRA_ATTR;
 	    qname.nsid = meta->nsid;
 	    qname.name = meta->name;
-	    agt_record_error(scb, msg, NCX_LAYER_CONTENT, 
-			     res, NULL,
-			     NCX_NT_QNAME, &qname, 
-			     NCX_NT_VAL, val);
+	    agt_record_error(scb,
+			     msg,
+			     NCX_LAYER_CONTENT, 
+			     res,
+			     NULL,
+			     NCX_NT_QNAME,
+			     &qname, 
+			     NCX_NT_VAL,
+			     val);
 	}
     }
 
@@ -2515,8 +2605,13 @@ static status_t
 	/* leafref and instance-identifier do not get
 	 * fully validated until commit time
 	 */
-	res = parse_string_nc(scb, msg, obj, btyp, startnode, 
-			      parentdc, retval);
+	res = parse_string_nc(scb, 
+			      msg, 
+			      obj, 
+			      btyp,
+			      startnode, 
+			      parentdc,
+			      retval);
 	break;
     case NCX_BT_IDREF:
 	res = parse_idref_nc(scb, msg, obj, startnode, parentdc, retval);
@@ -2526,8 +2621,12 @@ static status_t
 	break;
     case NCX_BT_CONTAINER:
     case NCX_BT_LIST:
-	res = parse_complex_nc(scb, msg, obj, startnode, 
-			       parentdc, retval);
+	res = parse_complex_nc(scb,
+			       msg, 
+			       obj,
+			       startnode, 
+			       parentdc,
+			       retval);
 	break;
     default:
 	return SET_ERROR(ERR_INTERNAL_VAL);

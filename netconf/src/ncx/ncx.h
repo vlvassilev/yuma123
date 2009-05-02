@@ -876,4 +876,10 @@ extern const xmlChar *
 extern ncx_withdefaults_t
     ncx_get_withdefaults_enum (const xmlChar *withdefstr);
 
+extern const xmlChar *
+    ncx_get_mod_prefix (const ncx_module_t *mod);
+
+extern const xmlChar *
+    ncx_get_mod_xmlprefix (const ncx_module_t *mod);
+
 #endif	    /* _H_ncx */

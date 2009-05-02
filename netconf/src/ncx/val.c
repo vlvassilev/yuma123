@@ -2749,18 +2749,22 @@ status_t
 	break;
     case NCX_BT_LEAFREF:
 #if 0
+	/**** NOT SURE WHY THIS IS REMOVED STILL *****/
 	xpathpcb = xpath_new_pcb(simval);
 	if (!xpathpcb) {
 	    res = ERR_INTERNAL_MEM;
 	} else {
 	    tkc->cur = pcb->tk;
-	    res = xpath_yang_parse_path(tkc, mod, pcbclone);
+	    res = xpath_yang_parse_path(tkc, 
+					mod, 
+					XP_SRC_LEAFREF,
+					pcbclone);
 	    if (res == NO_ERR) {
 		leafobj = NULL;
 		res = xpath_yang_validate_path(NULL, 
 					       NULL, 
 					       xpathpcb, 
-					       XP_SRC_LEAFREF,
+					       FALSE,
 					       &leafobj);
 	    }
 	}

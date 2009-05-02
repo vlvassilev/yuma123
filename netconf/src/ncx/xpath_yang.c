@@ -937,8 +937,7 @@ static status_t
     if (pcb->obj) {
 	if (loopcount != keytotal) {
 	    if (keycount < keytotal) {
-		if (pcb->pathobj &&
-		    obj_is_schema_instance_string(pcb->pathobj)) {
+		if (pcb->flags & XP_FL_SCHEMA_INSTANCEID) {
 		    /* schema-instance allowed to skip keys */
 		    ;   
 		} else {
@@ -1372,6 +1371,9 @@ status_t
 *    obj == object using the leafref data type
 *    pcb == the leafref parser control block, possibly
 *           cloned from from the typdef
+*    schemainst == TRUE if ncx:scnea-instance string
+*               == FALSE to use the pcb->source field 
+*                  to determine the exact parse mode
 *    leafobj == address of the return target object
 *
 * OUTPUTS:
@@ -1384,6 +1386,7 @@ status_t
     xpath_yang_validate_path (ncx_module_t *mod,
 			      const obj_template_t *obj,
 			      xpath_pcb_t *pcb,
+			      boolean schemainst,
 			      const obj_template_t **leafobj)
 {
     status_t  res;
@@ -1396,6 +1399,11 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
+
+    if (schemainst) {
+	/* relax errors for missing keys in instance-identifier */
+	pcb->flags |= XP_FL_SCHEMA_INSTANCEID;
+    }
 
     pcb->logerrors = TRUE;
     *leafobj = NULL;
@@ -1485,7 +1493,6 @@ status_t
 }  /* xpath_yang_validate_path */
 
 
-
 /********************************************************************
 * FUNCTION xpath_yang_validate_xmlpath
 * 
@@ -1554,10 +1561,15 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    pcb->pathobj = pathobj;
+    if (pathobj && obj_is_schema_instance_string(pathobj)) {
+	pcb->flags |= XP_FL_SCHEMA_INSTANCEID;
+    } else {
+	pcb->flags |= XP_FL_INSTANCEID;
+    }
+
     pcb->obj = pcb->docroot;
     pcb->reader = reader;
-    pcb->flags = XP_FL_INSTANCEID;
+
     pcb->source = XP_SRC_XML;
     pcb->objmod = NULL;
     pcb->val = NULL;
@@ -1629,8 +1641,11 @@ status_t
     if (pcb->tkc) {
 	tk_reset_chain(pcb->tkc);
     } else {
-	pcb->tkc = tk_tokenize_xpath_string(NULL, pcb->exprstr, 
-					    0, 0, &res);
+	pcb->tkc = tk_tokenize_xpath_string(NULL, 
+					    pcb->exprstr, 
+					    0, 
+					    0, 
+					    &res);
     }
 
     if (!pcb->tkc || res != NO_ERR) {
@@ -1784,8 +1799,9 @@ val_value_t *
 	/* find the child node and add it to the curtop */
 	if (obj_is_root(curobj)) {
 	    if (modname) {
-		childobj = ncx_find_object(ncx_find_module(modname, NULL), 
-					   objname);
+		childobj = 
+		    ncx_find_object(ncx_find_module(modname, NULL), 
+				    objname);
 	    } else {
 		childobj = ncx_find_any_object(objname);
 	    }

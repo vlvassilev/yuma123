@@ -7814,6 +7814,7 @@ static status_t
 			res = xpath_yang_validate_path(mod, 
 						       testobj, 
 						       pcbclone, 
+						       FALSE,
 						       &leafobj);
 			if (res == NO_ERR && leafobj) {
 			    typ_set_xref_typdef(typdef, 

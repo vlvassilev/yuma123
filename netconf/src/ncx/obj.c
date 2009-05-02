@@ -6999,9 +6999,29 @@ const xmlChar *
     obj_get_mod_prefix (const obj_template_t  *obj)
 {
 
-    return obj->mod->prefix;
+    return ncx_get_mod_prefix(obj->mod);
 
 }  /* obj_get_mod_prefix */
+
+
+/********************************************************************
+* FUNCTION obj_get_mod_xmlprefix
+* 
+* Get the module prefix for this object
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    const pointer to mod XML prefix
+*********************************************************************/
+const xmlChar *
+    obj_get_mod_xmlprefix (const obj_template_t  *obj)
+{
+
+    return ncx_get_mod_xmlprefix(obj->mod);
+
+}  /* obj_get_mod_xmlprefix */
 
 
 /********************************************************************

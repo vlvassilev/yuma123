@@ -2571,17 +2571,23 @@ static void
     } else if (mode == HELP_MODE_NORMAL) {
 	if (imode) {
 	    if (mod->version) {
-		log_stdout("\n  %s:%s/%s", mod->prefix, 
-			   mod->name, mod->version);
+		log_stdout("\n  %s:%s/%s", 
+			   ncx_get_mod_xmlprefix(mod), 
+			   mod->name, 
+			   mod->version);
 	    } else {
-		log_stdout("\n  %s:%s", mod->prefix, 
+		log_stdout("\n  %s:%s", 
+			   ncx_get_mod_xmlprefix(mod), 
 			   mod->name);
 	    }
 	} else {
 	    if (mod->version) {
-		log_write("\n  %s/%s", mod->name, mod->version);
+		log_write("\n  %s/%s", 
+			  mod->name, 
+			  mod->version);
 	    } else {
-		log_write("\n  %s", mod->name);
+		log_write("\n  %s", 
+			  mod->name);
 	    }
 	}
     } else {
@@ -3103,7 +3109,7 @@ static void
 	    log_stdout("\n   %s", obj_get_name(obj));
 	} else if (mode == HELP_MODE_NORMAL) {
 	    log_stdout("\n   %s:%s",
-		       obj_get_mod_prefix(obj),
+		       obj_get_mod_xmlprefix(obj),
 		       obj_get_name(obj));
 	} else {
 	    log_stdout("\n   %s:%s",
@@ -3115,7 +3121,7 @@ static void
 	    log_write("\n   %s", obj_get_name(obj));
 	} else if (mode == HELP_MODE_NORMAL) {
 	    log_write("\n   %s:%s",
-		      obj_get_mod_prefix(obj),
+		      obj_get_mod_xmlprefix(obj),
 		      obj_get_name(obj));
 	} else {
 	    log_write("\n   %s:%s",
@@ -4012,9 +4018,9 @@ static void
 	     const xmlChar *line,
 	     uint32  len)
 {
-    val_value_t           *valset, *parm, *newparm, *curparm;
+    val_value_t           *valset, *valroot, *parm, *newparm, *curparm;
     val_value_t           *targval;
-    obj_template_t        *targobj;
+    const obj_template_t  *targobj;
     const xmlChar         *target;
     status_t               res;
     boolean                imode, save_getopt;
@@ -4051,27 +4057,41 @@ static void
     targobj = NULL;
     targval = NULL;
 
-#define OLDWAY 1
-#ifdef OLDWAY
-    res = xpath_find_schema_target_int(target, &targobj);
-    if (res != NO_ERR) {
-	log_error("\nError: Object '%s' not found", target);
-	val_free_value(valset);
-	return;
-    }	
-#endif
-
-#ifdef NEWWAY
     valroot = get_instanceid_parm(agent_cb,
 				  target,
+				  TRUE,
 				  &targobj,
 				  &targval,
 				  &res);
-    if (!valroot) {
+    if (res != NO_ERR) {
+	if (valroot) {
+	    val_free_value(valroot);
+	}
 	val_free_value(valset);
 	return;
+    } else if (targval != valroot) {
+	/* keep targval, toss valroot */
+	val_remove_child(targval);
+	val_free_value(valroot);
+	valroot = NULL;
     }
-#endif
+
+
+    /* check if targval is valid if it is an empty string
+     * this corner-case is what the get_instanceid_parm will
+     * return if the last node was a leaf
+     */
+    if (targval && 
+	targval->btyp == NCX_BT_STRING &&
+	VAL_STR(targval) == NULL) {
+
+	/* the NULL string was not entered;
+	 * if a value was entered as '' it would be recorded
+	 * as a zero-length string, not a NULL string
+	 */
+	val_free_value(targval);
+	targval = NULL;
+    }
 
     /* find the value to use as content value or template, if any */
     parm = val_find_child(valset, 
@@ -4093,20 +4113,30 @@ static void
     switch (targobj->objtype) {
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
+	/* make a new leaf, toss the targval if any */
 	newparm = fill_value(agent_cb, 
 			     rpc, 
 			     targobj, 
-			     curparm, 
+			     (curparm) ? curparm : targval,
 			     &res);
+	if (targval) {
+	    val_free_value(targval);
+	    targval = NULL;
+	}
 	break;
     case OBJ_TYP_CHOICE:
-	newparm = val_new_value();
-	if (!newparm) {
-	    log_error("\nError: malloc failure");
-	    res = ERR_INTERNAL_MEM;
+	if (targval) {
+	    newparm = targval;
 	} else {
-	    val_init_from_template(newparm, targobj);
-	    
+	    newparm = val_new_value();
+	    if (!newparm) {
+		log_error("\nError: malloc failure");
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		val_init_from_template(newparm, targobj);
+	    }
+	}
+	if (res == NO_ERR) {
 	    res = get_choice(agent_cb, 
 			     rpc, 
 			     targobj, 
@@ -4118,37 +4148,44 @@ static void
 	}
 	break;
     case OBJ_TYP_CASE:
-	newparm = val_new_value();
-	if (!newparm) {
-	    log_error("\nError: malloc failure");
-	    res = ERR_INTERNAL_MEM;
+	if (targval) {
+	    newparm = targval;
 	} else {
-	    val_init_from_template(newparm, targobj);
-
-	    res = get_case(agent_cb, 
-			   rpc, 
-			   targobj, 
-			   newparm, 
-			   curparm);
-	    if (res == ERR_NCX_SKIPPED) {
-		res = NO_ERR;
+	    newparm = val_new_value();
+	    if (!newparm) {
+		log_error("\nError: malloc failure");
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		val_init_from_template(newparm, targobj);
 	    }
+	}
+	res = get_case(agent_cb, 
+		       rpc, 
+		       targobj, 
+		       newparm, 
+		       curparm);
+	if (res == ERR_NCX_SKIPPED) {
+	    res = NO_ERR;
 	}
 	break;
     default:
-	newparm = val_new_value();
-	if (!newparm) {
-	    log_error("\nError: malloc failure");
-	    res = ERR_INTERNAL_MEM;
+	if (targval) {
+	    newparm = targval;
 	} else {
-	    val_init_from_template(newparm, targobj);
-	    res = fill_valset(agent_cb, 
-			      rpc, 
-			      newparm, 
-			      curparm);
-	    if (res == ERR_NCX_SKIPPED) {
-		res = NO_ERR;
+	    newparm = val_new_value();
+	    if (!newparm) {
+		log_error("\nError: malloc failure");
+		res = ERR_INTERNAL_MEM;
+	    } else {
+		val_init_from_template(newparm, targobj);
 	    }
+	}
+	res = fill_valset(agent_cb, 
+			  rpc, 
+			  newparm, 
+			  curparm);
+	if (res == ERR_NCX_SKIPPED) {
+	    res = NO_ERR;
 	}
     }
 
@@ -4277,8 +4314,11 @@ static status_t
 		    lastkey = keyval;
 		    res = NO_ERR;
 		} else if (dofill) {
-		    res = get_parm(agent_cb, rpc, 
-				   curkey->keyobj, *curtop, NULL);
+		    res = get_parm(agent_cb, 
+				   rpc, 
+				   curkey->keyobj, 
+				   *curtop, 
+				   NULL);
 		    if (res == ERR_NCX_SKIPPED) {
 			res = NO_ERR;
 		    } else if (res != NO_ERR) {
@@ -4433,6 +4473,97 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION complete_path_content
+* 
+* Use the valroot and content pointer to work up the already
+* constructed value tree to find any missing mandatory
+* nodes or key leafs
+*
+* INPUTS:
+*   agent_cb == agent control block to use
+*   rpc == RPC method in progress
+*   valroot == value root of content
+*           == NULL if not used (config_content used instead)
+*   config_content == the node associated with the target
+*                    within valroot (if valroot non-NULL)
+*   dofill == TRUE if fill mode
+*          == FALSE if --nofill is in effect
+*
+* OUTPUTS:
+*    valroot tree is filled out as needed and requested
+*
+* RETURNS:
+*    status; config_content is NOT freed if returning an error
+*********************************************************************/
+static status_t
+    complete_path_content (agent_cb_t *agent_cb,
+			   const obj_template_t *rpc,
+			   val_value_t *valroot,
+			   val_value_t *config_content,
+			   boolean dofill)
+{
+    const obj_key_t   *curkey;
+    val_value_t       *curnode, *keyval, *lastkey;
+    status_t           res;
+    boolean            done;
+
+    res = NO_ERR;
+
+    curnode = config_content;
+
+    /* handle all the nodes from bottom to valroot */
+    done = FALSE;
+    while (!done) {
+	if (curnode->btyp == NCX_BT_LIST) {
+	    lastkey = NULL;
+	    for (curkey = obj_first_ckey(curnode->obj);
+		 curkey != NULL;
+		 curkey = obj_next_ckey(curkey)) {
+
+		keyval = val_find_child(curnode,
+					obj_get_mod_name(curkey->keyobj),
+					obj_get_name(curkey->keyobj));
+		if (!keyval && dofill) {
+		    res = get_parm(agent_cb, 
+				   rpc, 
+				   curkey->keyobj, 
+				   curnode, 
+				   NULL);
+		    if (res == ERR_NCX_SKIPPED) {
+			res = NO_ERR;
+		    } else if (res != NO_ERR) {
+			return res;
+		    } else {
+			keyval = val_find_child(curnode,
+						obj_get_mod_name
+						(curkey->keyobj),
+						obj_get_name
+						(curkey->keyobj));
+			if (!keyval) {
+			    return SET_ERROR(ERR_INTERNAL_VAL);
+			}
+			val_remove_child(keyval);
+			val_insert_child(keyval, lastkey, curnode);
+			lastkey = keyval;
+		    } /* else skip this key (for debugging agent) */
+		}  /* else --nofill; skip this node */
+	    } /* for all the keys in the list */
+	} /* else not list so skip this node */
+
+	/* move up the tree */
+	if (curnode != valroot && curnode->parent != NULL) {
+	    curnode = curnode->parent;
+	} else {
+	    done = TRUE;
+	}
+    }
+
+    return res;
+
+}  /* complete_path_content */
+
+
+/********************************************************************
 * FUNCTION add_filter_from_content_node
 * 
 * Add the filter node content for the get or get-config operation
@@ -4516,6 +4647,8 @@ static status_t
 *
 * INPUTS:
 *   agent_cb == agent control block to use
+*   valroot == value tree root if used
+*              (via get_content_from_choice)
 *   config_content == the node associated with the target
 *             to be used as content nested within the 
 *             <config> element
@@ -4524,6 +4657,7 @@ static status_t
 * OUTPUTS:
 *    agent_cb->state may be changed or other action taken
 *
+*    !!! valroot is consumed id non-NULL
 *    !!! config_content is consumed -- freed or transfered to a PDU
 *    !!! that will be freed later
 *
@@ -4532,6 +4666,7 @@ static status_t
 *********************************************************************/
 static status_t
     send_edit_config_to_agent (agent_cb_t *agent_cb,
+			       val_value_t *valroot,
 			       val_value_t *config_content,
 			       uint32 timeoutval)
 {
@@ -4540,14 +4675,28 @@ static status_t
     val_value_t           *reqdata, *parm, *target, *dummy_parm;
     ses_cb_t              *scb;
     status_t               res;
+    boolean                freeroot, dofill;
 
     req = NULL;
     reqdata = NULL;
     res = NO_ERR;
+    dofill = FALSE;
 
+    /* either going to free valroot or config_content */
+    if (valroot == NULL || valroot == config_content) {
+	freeroot = FALSE;
+    } else {
+	freeroot = TRUE;
+    }
+
+    /* make sure there is an edit target on this agent */
     if (!agent_cb->default_target) {
 	log_error("\nError: no <edit-config> target available on agent");
-	val_free_value(config_content);
+	if (freeroot) {
+	    val_free_value(valroot);
+	} else {
+	    val_free_value(config_content);
+	}
 	return ERR_NCX_OPERATION_FAILED;
     }
 
@@ -4555,14 +4704,22 @@ static status_t
     rpc = ncx_find_object(get_netconf_mod(), 
 			  NCX_EL_EDIT_CONFIG);
     if (!rpc) {
-	val_free_value(config_content);
+	if (freeroot) {
+	    val_free_value(valroot);
+	} else {
+	    val_free_value(config_content);
+	}
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     /* get the 'input' section container */
     input = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (!input) {
-	val_free_value(config_content);
+	if (freeroot) {
+	    val_free_value(valroot);
+	} else {
+	    val_free_value(config_content);
+	}
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
@@ -4570,7 +4727,11 @@ static status_t
     reqdata = xml_val_new_struct(obj_get_name(rpc), 
 				 obj_get_nsid(rpc));
     if (!reqdata) {
-	val_free_value(config_content);
+	if (freeroot) {
+	    val_free_value(valroot);
+	} else {
+	    val_free_value(config_content);
+	}
 	log_error("\nError allocating a new RPC request");
 	return ERR_INTERNAL_MEM;
     }
@@ -4580,7 +4741,11 @@ static status_t
 			   NCX_EL_TARGET);
     parm = val_new_value();
     if (!parm) {
-	val_free_value(config_content);
+	if (freeroot) {
+	    val_free_value(valroot);
+	} else {
+	    val_free_value(config_content);
+	}
 	val_free_value(reqdata);
 	return ERR_INTERNAL_MEM;
     }
@@ -4590,7 +4755,11 @@ static status_t
     target = xml_val_new_flag(agent_cb->default_target,
 			      obj_get_nsid(child));
     if (!target) {
-	val_free_value(config_content);
+	if (freeroot) {
+	    val_free_value(valroot);
+	} else {
+	    val_free_value(config_content);
+	}
 	val_free_value(reqdata);
 	return ERR_INTERNAL_MEM;
     }
@@ -4602,7 +4771,11 @@ static status_t
 			   NCX_EL_DEFAULT_OPERATION);
     parm = val_new_value();
     if (!parm) {
-	val_free_value(config_content);
+	if (freeroot) {
+	    val_free_value(valroot);
+	} else {
+	    val_free_value(config_content);
+	}
 	val_free_value(reqdata);
 	return ERR_INTERNAL_MEM;
     }
@@ -4615,11 +4788,16 @@ static status_t
 			 NCX_EL_NONE);
 
     if (res != NO_ERR) {
-	val_free_value(config_content);
+	if (freeroot) {
+	    val_free_value(valroot);
+	} else {
+	    val_free_value(config_content);
+	}
 	val_free_value(reqdata);
 	return res;
     }
 
+    /* set the test-option to the user-configured or default value */
     if (agent_cb->testoption != OP_TESTOP_NONE) {
 	/* set the edit-config/input/test-option node to
 	 * the user-specified value
@@ -4628,7 +4806,11 @@ static status_t
 			       NCX_EL_TEST_OPTION);
 	parm = val_new_value();
 	if (!parm) {
-	    val_free_value(config_content);
+	    if (freeroot) {
+		val_free_value(valroot);
+	    } else {
+		val_free_value(config_content);
+	    }
 	    val_free_value(reqdata);
 	    return ERR_INTERNAL_MEM;
 	}
@@ -4640,12 +4822,17 @@ static status_t
 			     obj_get_name(child),
 			     op_testop_name(agent_cb->testoption));
 	if (res != NO_ERR) {
-	    val_free_value(config_content);
+	    if (freeroot) {
+		val_free_value(valroot);
+	    } else {
+		val_free_value(config_content);
+	    }
 	    val_free_value(reqdata);
 	    return res;
 	}
     }
 
+    /* set the error-option to the user-configured or default value */
     if (agent_cb->erroption != OP_ERROP_NONE) {
 	/* set the edit-config/input/error-option node to
 	 * the user-specified value
@@ -4654,7 +4841,11 @@ static status_t
 			       NCX_EL_ERROR_OPTION);
 	parm = val_new_value();
 	if (!parm) {
-	    val_free_value(config_content);
+	    if (freeroot) {
+		val_free_value(valroot);
+	    } else {
+		val_free_value(config_content);
+	    }
 	    val_free_value(reqdata);
 	    return ERR_INTERNAL_MEM;
 	}
@@ -4666,45 +4857,73 @@ static status_t
 			     obj_get_name(child),
 			     op_errop_name(agent_cb->erroption));
 	if (res != NO_ERR) {
-	    val_free_value(config_content);
+	    if (freeroot) {
+		val_free_value(valroot);
+	    } else {
+		val_free_value(config_content);
+	    }
 	    val_free_value(reqdata);
 	    return res;
 	}
     }
 
-    /* set the edit-config/input/config node to the
-     * config_content, but after filling in any
-     * missing nodes from the root to the target
-     */
-    child = obj_find_child(input, NC_MODULE,
+    /* create the <config> node */
+    child = obj_find_child(input, 
+			   NC_MODULE,
 			   NCX_EL_CONFIG);
     parm = val_new_value();
     if (!parm) {
-	val_free_value(config_content);
+	if (freeroot) {
+	    val_free_value(valroot);
+	} else {
+	    val_free_value(config_content);
+	}
 	val_free_value(reqdata);
 	return ERR_INTERNAL_MEM;
     }
     val_init_from_template(parm, child);
     val_add_child(parm, reqdata);
 
-    dummy_parm = NULL;
-    res = add_config_from_content_node(agent_cb,
-				       rpc, config_content,
-				       config_content->obj,
-				       parm, &dummy_parm);
-    if (res != NO_ERR) {
-	val_free_value(config_content);
-	val_free_value(reqdata);
-	return res;
+
+    /* set the edit-config/input/config node to the
+     * config_content, but after filling in any
+     * missing nodes from the root to the target
+     */
+    if (valroot) {
+	val_add_child(valroot, parm);
+	res = complete_path_content(agent_cb,
+				    rpc,
+				    valroot,
+				    config_content,
+				    dofill);
+	if (res != NO_ERR) {
+	    val_free_value(valroot);
+	    val_free_value(reqdata);
+	    return res;
+	}
+    } else {
+	dummy_parm = NULL;
+	res = add_config_from_content_node(agent_cb,
+					   rpc, 
+					   config_content,
+					   config_content->obj,
+					   parm, 
+					   &dummy_parm);
+	if (res != NO_ERR) {
+	    val_free_value(config_content);
+	    val_free_value(reqdata);
+	    return res;
+	}
     }
 
+    /* rearrange the nodes to canonical order if requested */
     if (agent_cb->fixorder) {
 	/* must set the order of a root container seperately */
 	val_set_canonical_order(parm);
     }
 
     /* !!! config_content consumed at this point !!!
-     * allocate an RPC request and send it 
+     * allocate an RPC request
      */
     scb = mgr_ses_get_scb(agent_cb->mysid);
     if (!scb) {
@@ -4721,6 +4940,7 @@ static status_t
 	}
     }
 	
+    /* if all OK, send the RPC request */
     if (res == NO_ERR) {
 	if (LOGDEBUG2) {
 	    log_debug2("\nabout to send RPC request with reqdata:");
@@ -4731,6 +4951,7 @@ static status_t
 	res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
     }
 
+    /* cleanup and set next state */
     if (res != NO_ERR) {
 	if (req) {
 	    mgr_rpc_free_request(req);
@@ -4799,6 +5020,12 @@ static status_t
 *
 * INPUTS:
 *   agent_cb == agent control block to use
+*   valroot == root of get_data if set via
+*              the CLI Xpath code; if so, then the
+*              get_content is the target within this
+*              subtree (may == get_content)
+*           == NULL if not used and get_content is
+*              the only parameter gathered from input
 *   get_content == the node associated with the target
 *             to be used as content nested within the 
 *             <filter> element
@@ -4820,6 +5047,9 @@ static status_t
 * OUTPUTS:
 *    agent_cb->state may be changed or other action taken
 *
+*    !!! valroot is consumed -- freed or transfered to a PDU
+*    !!! that will be freed later
+*
 *    !!! get_content is consumed -- freed or transfered to a PDU
 *    !!! that will be freed later
 *
@@ -4831,6 +5061,7 @@ static status_t
 *********************************************************************/
 static status_t
     send_get_to_agent (agent_cb_t *agent_cb,
+		       val_value_t *valroot,
 		       val_value_t *get_content,
 		       const xmlChar *selectstr,
 		       val_value_t *source,
@@ -4845,11 +5076,19 @@ static status_t
     ses_cb_t              *scb;
     mgr_scb_t             *mscb;
     status_t               res;
+    boolean                freeroot;
 
     req = NULL;
     reqdata = NULL;
     res = NO_ERR;
     input = NULL;
+
+    /* either going to free valroot or config_content */
+    if (valroot == NULL || valroot == get_content) {
+	freeroot = FALSE;
+    } else {
+	freeroot = TRUE;
+    }
 
     /* get the <get> or <get-config> input template */
     rpc = ncx_find_object(get_netconf_mod(),
@@ -4860,68 +5099,76 @@ static status_t
     }
 
     if (!input) {
-	if (source) {
-	    val_free_value(source);
+	res = SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    } else {
+	/* construct a method + parameter tree */
+	reqdata = xml_val_new_struct(obj_get_name(rpc), 
+				     obj_get_nsid(rpc));
+	if (!reqdata) {
+	    log_error("\nError allocating a new RPC request");
+	    res = ERR_INTERNAL_MEM;
 	}
-	if (get_content) {
-	    val_free_value(get_content);
-	}
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
-    /* construct a method + parameter tree */
-    reqdata = xml_val_new_struct(obj_get_name(rpc), 
-				 obj_get_nsid(rpc));
-    if (!reqdata) {
-	if (source) {
-	    val_free_value(source);
-	}
-	if (get_content) {
-	    val_free_value(get_content);
-	}
-	log_error("\nError allocating a new RPC request");
-	return ERR_INTERNAL_MEM;
     }
 
     /* add /get-star/input/source */
-    if (source) {
-	val_add_child(source, reqdata);
+    if (res == NO_ERR) {
+	if (source) {
+	    val_add_child(source, reqdata);
+	}
     }
-
 
     /* add /get-star/input/filter */
-    if (get_content) {
-	/* set the get/input/filter node to the
-	 * get_content, but after filling in any
-	 * missing nodes from the root to the target
-	 */
-	filter = xml_val_new_struct(NCX_EL_FILTER, xmlns_nc_id());
-    } else {
-	filter = xml_val_new_flag(NCX_EL_FILTER, xmlns_nc_id());
-    }
-    if (!filter) {
+    if (res == NO_ERR) {
 	if (get_content) {
-	    val_free_value(get_content);
+	    /* set the get/input/filter node to the
+	     * get_content, but after filling in any
+	     * missing nodes from the root to the target
+	     */
+	    filter = xml_val_new_struct(NCX_EL_FILTER, xmlns_nc_id());
+	} else {
+	    filter = xml_val_new_flag(NCX_EL_FILTER, xmlns_nc_id());
 	}
-	val_free_value(reqdata);
-	return ERR_INTERNAL_MEM;
+	if (!filter) {
+	    log_error("\nError: malloc failure");
+	    res = ERR_INTERNAL_MEM;
+	} else {
+	    val_add_child(filter, reqdata);
+	}
     }
-    val_add_child(filter, reqdata);
 
-    res = add_filter_attrs(filter, selectstr);
+    /* add the type and maybe select attributes */
+    if (res == NO_ERR) {
+	res = add_filter_attrs(filter, selectstr);
+    }
+
+    /* check any errors so far */
     if (res != NO_ERR) {
-	if (get_content) {
+	if (freeroot) {
+	    val_free_value(valroot);
+	} else if (get_content) {
 	    val_free_value(get_content);
 	}
 	val_free_value(reqdata);
-	return ERR_INTERNAL_MEM;
+	return res;
     }
 
     /* add the content to the filter element
      * building the path from the content node
      * to the root; fill if dofill is true
      */
-    if (get_content) {
+    if (valroot) {
+	val_add_child(valroot, filter);
+	res = complete_path_content(agent_cb,
+				    rpc,
+				    valroot,
+				    get_content,
+				    dofill);
+	if (res != NO_ERR) {
+	    val_free_value(valroot);
+	    val_free_value(reqdata);
+	    return res;
+	}
+    } else if (get_content) {
 	dummy_parm = NULL;
 	res = add_filter_from_content_node(agent_cb,
 					   rpc, 
@@ -5040,48 +5287,77 @@ static status_t
  *    getoptional == TRUE if optional nodes are desired
  *    dofill == TRUE to fill the content,
  *              FALSE to skip fill phase
+ *    valroot == address of return value root pointer
+ *               used when the content is from the CLI XPath
+ *
+ * OUTPUTS:
+ *    *valroot ==  pointer to malloced value tree content root. 
+ *        This is the top of the tree that will be added
+ *        as a child of the <config> node for the edit-config op
+ *        If this is non-NULL, then the return value should
+ *        not be freed. This pointer should be freed instead.
+ *        == NULL if the from choice mode does not use
+ *           an XPath schema-instance node as input
+ *
  * RETURNS:
- *   malloced result of the choice; this is the content
- *   that will be affected by the edit-config operation
- *   via create, merge, or replace
+ *    result of the choice; this is the content
+ *    that will be affected by the edit-config operation
+ *    via create, merge, or replace
+ *
+ *   This is the specified target node in the
+ *   content target, which may be the 
+ *   same as the content root or will, if *valroot != NULL
+ *   be a descendant of the content root 
+ *
+ *   If *valroot == NULL then this is a malloced pointer that
+ *   must be freed by the caller
  *********************************************************************/
 static val_value_t *
     get_content_from_choice (agent_cb_t *agent_cb,
 			     const obj_template_t *rpc,
 			     val_value_t *valset,
 			     boolean getoptional,
-			     boolean dofill)
+			     boolean dofill,
+			     val_value_t **valroot)
 {
     val_value_t           *parm, *curparm, *newparm;
     const val_value_t     *userval;
-    obj_template_t        *targobj;
-    const xmlChar         *fromstr;
+    val_value_t           *targval;
+    const obj_template_t  *targobj;
+    const xmlChar         *fromstr, *target;
     var_type_t             vartype;
     boolean                iscli, isselect, saveopt;
     status_t               res;
 
     /* init locals */
     targobj = NULL;
+    targval = NULL;
+    newparm = NULL;
+    fromstr = NULL;
     iscli = FALSE;
     isselect = FALSE;
-    fromstr = NULL;
     res = NO_ERR;
     vartype = VAR_TYP_NONE;
+
+    *valroot = NULL;
 
     /* look for the 'from' parameter variant */
     parm = val_find_child(valset, 
 			  YANGCLI_MOD, 
 			  YANGCLI_VARREF);
     if (parm) {
+	/* content = uservar or $varref */
 	fromstr = VAL_STR(parm);
     } else {
 	parm = val_find_child(valset, 
 			      YANGCLI_MOD, 
 			      NCX_EL_SELECT);
 	if (parm) {
+	    /* content == select string for xget or xget-config */
 	    isselect = TRUE;
 	    fromstr = VAL_STR(parm);
 	} else {
+	    /* last choice; content is from the CLI */
 	    iscli = TRUE;
 	}
     }
@@ -5100,14 +5376,40 @@ static val_value_t *
 	    return NULL;
 	}
 
-	res = xpath_find_schema_target_int(VAL_STR(parm), 
-					   &targobj);
+	target = VAL_STR(parm);
+
+	*valroot = get_instanceid_parm(agent_cb,
+				       target,
+				       TRUE,
+				       &targobj,
+				       &targval,
+				       &res);
 	if (res != NO_ERR) {
-	    log_error("\nError: Object '%s' not found", 
-		      VAL_STR(parm));
-	    agent_cb->get_optional = saveopt;
+	    log_error("\nError: invalid target parameter (%s)",
+		      get_error_string(res));
+	    if (*valroot) {
+		val_free_value(*valroot);
+		*valroot = NULL;
+	    }
 	    return NULL;
-	}	
+	}
+
+	/* check if targval is valid if it is an empty string
+	 * this corner-case is what the get_instanceid_parm will
+	 * return if the last node was a leaf
+	 */
+	if (targval && 
+	    targval->btyp == NCX_BT_STRING &&
+	    VAL_STR(targval) == NULL) {
+
+	    /* the NULL string was not entered;
+	     * if a value was entered as '' it would be recorded
+	     * as a zero-length string, not a NULL string
+	     */
+	    val_remove_child(targval);
+	    val_free_value(targval);
+	    targval = NULL;
+	}
 
 	curparm = NULL;
 	parm = val_find_child(valset, 
@@ -5124,6 +5426,8 @@ static val_value_t *
 			  VAL_STR(parm), 
 			  get_error_string(res)); 
 		agent_cb->get_optional = saveopt;
+		val_free_value(*valroot);
+		*valroot = NULL;
 		return NULL;
 	    }
 	    if (curparm->obj != targobj) {
@@ -5131,6 +5435,8 @@ static val_value_t *
 			  "object type is incorrect.",
 			  VAL_STR(parm));
 		agent_cb->get_optional = saveopt;
+		val_free_value(*valroot);
+		*valroot = NULL;
 		return NULL;
 	    }
 	}
@@ -5142,9 +5448,20 @@ static val_value_t *
 		newparm = fill_value(agent_cb, 
 				     rpc, 
 				     targobj, 
-				     curparm, 
+				     (curparm) ? curparm : targval,
 				     &res);
-	    } else {
+	    } else if (targval == NULL) {
+		newparm = val_new_value();
+		if (!newparm) {
+		    log_error("\nError: malloc failure");
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    val_init_from_template(newparm, targobj);
+		}
+	    }  /* else going to use targval, not newval */
+	    break;
+	case OBJ_TYP_CHOICE:
+	    if (targval == NULL) {
 		newparm = val_new_value();
 		if (!newparm) {
 		    log_error("\nError: malloc failure");
@@ -5153,54 +5470,47 @@ static val_value_t *
 		    val_init_from_template(newparm, targobj);
 		}
 	    }
-	    break;
-	case OBJ_TYP_CHOICE:
-	    newparm = val_new_value();
-	    if (!newparm) {
-		log_error("\nError: malloc failure");
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		val_init_from_template(newparm, targobj);
-
-		if (dofill) {
-		    res = get_choice(agent_cb, 
-				     rpc, 
-				     targobj,
-				     newparm, 
-				     curparm);
-		}
+	    if (res == NO_ERR && dofill) {
+		res = get_choice(agent_cb, 
+				 rpc, 
+				 targobj,
+				 (newparm) ? newparm : targval,
+				 curparm);
 	    }
 	    break;
 	case OBJ_TYP_CASE:
-	    newparm = val_new_value();
-	    if (!newparm) {
-		log_error("\nError: malloc failure");
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		val_init_from_template(newparm, targobj);
-		if (dofill) {
-		    res = get_case(agent_cb, 
-				   rpc, 
-				   targobj,
-				   newparm, 
-				   curparm);
+	    if (targval == NULL) {
+		newparm = val_new_value();
+		if (!newparm) {
+		    log_error("\nError: malloc failure");
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    val_init_from_template(newparm, targobj);
 		}
+	    }
+	    if (res == NO_ERR && dofill) {
+		res = get_case(agent_cb, 
+			       rpc, 
+			       targobj,
+			       (newparm) ? newparm : targval, 
+			       curparm);
 	    }
 	    break;
 	default:
-	    newparm = val_new_value();
-	    if (!newparm) {
-		log_error("\nError: malloc failure");
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		val_init_from_template(newparm, targobj);
-
-		if (dofill) {
-		    res = fill_valset(agent_cb, 
-				      rpc,
-				      newparm, 
-				      curparm);
+	    if (targval == NULL) {
+		newparm = val_new_value();
+		if (!newparm) {
+		    log_error("\nError: malloc failure");
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    val_init_from_template(newparm, targobj);
 		}
+	    }
+	    if (res == NO_ERR && dofill) {
+		res = fill_valset(agent_cb, 
+				  rpc,
+				  (newparm) ? newparm : targval,
+				  curparm);
 	    }
 	}
 
@@ -5213,6 +5523,7 @@ static val_value_t *
 		xml_val_new_flag(obj_get_name(targobj),
 				 obj_get_nsid(targobj));
 	    if (!newparm) {
+		res = ERR_INTERNAL_MEM;
 		log_error("\nError: malloc failure");
 	    } else {
 		/* need to set the real object so the
@@ -5220,13 +5531,22 @@ static val_value_t *
 		 */
 		newparm->obj = targobj;
 	    }
+
+	    if (res != NO_ERR) {
+		val_free_value(*valroot);
+		*valroot = NULL;
+	    } /* else *valroot is active and in use */
+
 	    return newparm;
 	} else if (res != NO_ERR) {
 	    if (newparm) {
 		val_free_value(newparm);
 	    }
+	    val_free_value(*valroot);
+	    *valroot = NULL;
 	    return NULL;
 	} else {
+	    /* *valroot is active and in use */
 	    return newparm;
 	}
     } else if (isselect) {
@@ -5236,9 +5556,12 @@ static val_value_t *
 	if (!newparm) {
 	    log_error("\nError: make string failed");
 	}
+	/*  *valroot == NULL and not in use */
 	return newparm;
     } else {
-	/* from global or local variable */
+	/* from global or local variable 
+	 * *valroot == NULL and not used
+	 */
 	if (!fromstr) {
 	    ;  /* should not be NULL */
 	} else if (*fromstr == '$' && fromstr[1] == '$') {
@@ -5542,7 +5865,7 @@ static void
 	     uint32  len,
 	     op_editop_t editop)
 {
-    val_value_t           *valset, *content, *parm;
+    val_value_t           *valset, *content, *parm, *valroot;
     status_t               res;
     uint32                 timeoutval;
     boolean                getoptional, dofill;
@@ -5550,6 +5873,7 @@ static void
     /* init locals */
     res = NO_ERR;
     content = NULL;
+    valroot = NULL;
     dofill = TRUE;
 
     /* get the command line parameters for this command */
@@ -5561,6 +5885,7 @@ static void
 	return;
     }
 
+    /* get the timeout parameter */
     parm = val_find_child(valset, 
 			  YANGCLI_MOD, 
 			  YANGCLI_TIMEOUT);
@@ -5570,6 +5895,7 @@ static void
 	timeoutval = agent_cb->timeout;
     }
 
+    /* get the 'fill-in optional parms' parameter */
     parm = val_find_child(valset, 
 			  YANGCLI_MOD, 
 			  YANGCLI_OPTIONAL);
@@ -5579,6 +5905,7 @@ static void
 	getoptional = agent_cb->get_optional;
     }
 
+    /* get the --nofill parameter */
     parm = val_find_child(valset, 
 			  YANGCLI_MOD, 
 			  YANGCLI_NOFILL);
@@ -5591,12 +5918,12 @@ static void
 				      rpc, 
 				      valset,
 				      getoptional,
-				      dofill);
+				      dofill,
+				      &valroot);
     if (!content) {
 	val_free_value(valset);
 	return;
     }
-
 
     /* add nc:operation attribute to the value node */
     res = add_operation_attr(content, editop);
@@ -5604,12 +5931,17 @@ static void
 	log_error("\nError: Creation of nc:operation"
 		  " attribute failed");
 	val_free_value(valset);
-	val_free_value(content);
+	if (valroot) {
+	    val_free_value(valroot);
+	} else {
+	    val_free_value(content);
+	}
 	return;
     }
 
     /* construct an edit-config PDU with default parameters */
     res = send_edit_config_to_agent(agent_cb, 
+				    valroot,
 				    content, 
 				    timeoutval);
     if (res != NO_ERR) {
@@ -5645,7 +5977,7 @@ static void
 	       const xmlChar *line,
 	       uint32  len)
 {
-    val_value_t      *valset, *content, *tempval, *parm;
+    val_value_t      *valset, *content, *tempval, *parm, *valroot;
     const xmlChar    *edit_target;
     op_editop_t       editop;
     op_insertop_t     insertop;
@@ -5656,6 +5988,7 @@ static void
     /* init locals */
     res = NO_ERR;
     content = NULL;
+    valroot = NULL;
     dofill = TRUE;
 
     /* get the command line parameters for this command */
@@ -5667,6 +6000,7 @@ static void
 	return;
     }
 
+    /* get the 'fill-in optional parms' parameter */
     parm = val_find_child(valset, 
 			  YANGCLI_MOD, 
 			  YANGCLI_OPTIONAL);
@@ -5676,6 +6010,7 @@ static void
 	getoptional = agent_cb->get_optional;
     }
 
+    /* get the --nofill parameter */
     parm = val_find_child(valset, 
 			  YANGCLI_MOD, 
 			  YANGCLI_NOFILL);
@@ -5688,12 +6023,14 @@ static void
 				      rpc, 
 				      valset,
 				      getoptional,
-				      dofill);
+				      dofill,
+				      &valroot);
     if (!content) {
 	val_free_value(valset);
 	return;
     }
 
+    /* get the timeout parameter */
     parm = val_find_child(valset, 
 			  YANGCLI_MOD, 
 			  YANGCLI_TIMEOUT);
@@ -5741,7 +6078,11 @@ static void
     case OP_INSOP_AFTER:
 	if (!edit_target) {
 	    log_error("\nError: edit-target parameter missing");
-	    val_free_value(content);
+	    if (valroot) {
+		val_free_value(valroot);
+	    } else {
+		val_free_value(content);
+	    }
 	    val_free_value(valset);
 	    return;
 	}
@@ -5761,7 +6102,8 @@ static void
      * attribute as well
      */
     if (res == NO_ERR) {
-	res = add_insert_attrs(content, insertop,
+	res = add_insert_attrs(content, 
+			       insertop,
 			       edit_target);
 	if (res != NO_ERR) {
 	    log_error("\nError: Creation of yang:insert"
@@ -5772,16 +6114,22 @@ static void
     /* send the PDU, hand off the content node */
     if (res == NO_ERR) {
 	/* construct an edit-config PDU with default parameters */
-	res = send_edit_config_to_agent(agent_cb, content, timeoutval);
+	res = send_edit_config_to_agent(agent_cb, 
+					valroot,
+					content, 
+					timeoutval);
 	if (res != NO_ERR) {
 	    log_error("\nError: send create operation failed (%s)",
 		      get_error_string(res));
 	}
+	valroot = NULL;
 	content = NULL;
     }
 
     /* cleanup and exit */
-    if (content) {
+    if (valroot) {
+	val_free_value(valroot);
+    } else if (content) {
 	val_free_value(content);
     }
 
@@ -5813,7 +6161,7 @@ static void
 	     const xmlChar *line,
 	     uint32  len)
 {
-    val_value_t           *valset, *content, *parm;
+    val_value_t           *valset, *content, *parm, *valroot;
     status_t               res;
     uint32                 timeoutval;
     boolean                dofill, getoptional;
@@ -5822,6 +6170,7 @@ static void
     /* init locals */
     res = NO_ERR;
     content = NULL;
+    valroot = NULL;
     dofill = TRUE;
 
     /* get the command line parameters for this command */
@@ -5872,7 +6221,8 @@ static void
 				      rpc, 
 				      valset,
 				      getoptional,
-				      dofill);
+				      dofill,
+				      &valroot);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -5880,6 +6230,7 @@ static void
 
     /* construct a get PDU with the content as the filter */
     res = send_get_to_agent(agent_cb, 
+			    valroot,
 			    content, 
 			    NULL, 
 			    NULL, 
@@ -5919,13 +6270,16 @@ static void
 		    const xmlChar *line,
 		    uint32  len)
 {
-    val_value_t        *valset, *content, *source, *parm;
+    val_value_t        *valset, *content, *source, *parm, *valroot;
     status_t            res;
     uint32              timeoutval;
     boolean             dofill, getoptional;
     ncx_withdefaults_t  withdef;
 
     dofill = TRUE;
+    valroot = NULL;
+    content = NULL;
+    res = NO_ERR;
 
     /* get the command line parameters for this command */
     valset = get_valset(agent_cb, rpc, &line[len], &res);
@@ -5936,6 +6290,7 @@ static void
 	return;
     }
 
+    /* get the timeout parameter */
     parm = val_find_child(valset,
 			  YANGCLI_MOD,
 			  YANGCLI_TIMEOUT);
@@ -5945,6 +6300,7 @@ static void
 	timeoutval = agent_cb->timeout;
     }
 
+    /* get the'fill-in optional' parameter */
     parm = val_find_child(valset, 
 			  YANGCLI_MOD, 
 			  YANGCLI_OPTIONAL);
@@ -5954,6 +6310,7 @@ static void
 	getoptional = agent_cb->get_optional;
     }
 
+    /* get the --nofill parameter */
     parm = val_find_child(valset,
 			  YANGCLI_MOD,
 			  YANGCLI_NOFILL);
@@ -5961,6 +6318,7 @@ static void
 	dofill = FALSE;
     }
 
+    /* get the config source parameter */
     source = val_find_child(valset, NULL, NCX_EL_SOURCE);
     if (!source) {
 	log_error("\nError: mandatory source parameter missing");
@@ -5968,6 +6326,7 @@ static void
 	return;
     }
 
+    /* get the with-defaults parameter */
     parm = val_find_child(valset, 
 			  YANGCLI_MOD,
 			  NCX_EL_WITH_DEFAULTS);
@@ -5982,7 +6341,8 @@ static void
 				      rpc, 
 				      valset,
 				      getoptional,
-				      dofill);
+				      dofill,
+				      &valroot);
     if (!content) {
 	val_free_value(valset);
 	return;
@@ -5994,6 +6354,7 @@ static void
 
     /* construct a get PDU with the content as the filter */
     res = send_get_to_agent(agent_cb, 
+			    valroot,
 			    content, 
 			    NULL, 
 			    source, 
@@ -6035,11 +6396,16 @@ static void
 {
     const ses_cb_t      *scb;
     const mgr_scb_t     *mscb;
-    val_value_t         *valset, *content, *parm;
+    val_value_t         *valset, *content, *parm, *valroot;
     const xmlChar       *str;
     status_t             res;
     uint32               retcode, timeoutval;
     ncx_withdefaults_t   withdef;
+
+    /* init locals */
+    res = NO_ERR;
+    content = NULL;
+    valroot = NULL;
 
     /* get the session info */
     scb = mgr_ses_get_scb(agent_cb->mysid);
@@ -6048,10 +6414,6 @@ static void
 	return;
     }
     mscb = (const mgr_scb_t *)scb->mgrcb;
-
-    /* init locals */
-    res = NO_ERR;
-    content = NULL;
 
     /* get the command line parameters for this command */
     valset = get_valset(agent_cb, rpc, &line[len], &res);
@@ -6062,6 +6424,7 @@ static void
 	return;
     }
 
+    /* get the timeout parameter */
     parm = val_find_child(valset,
 			  YANGCLI_MOD, 
 			  YANGCLI_TIMEOUT);
@@ -6071,6 +6434,7 @@ static void
 	timeoutval = agent_cb->timeout;
     }
 
+    /* get the with-defaults parameter */
     parm = val_find_child(valset, 
 			  YANGCLI_MOD, 
 			  NCX_EL_WITH_DEFAULTS);
@@ -6130,7 +6494,8 @@ static void
 				      rpc, 
 				      valset,
 				      FALSE,
-				      FALSE);
+				      FALSE,
+				      &valroot);
     if (content) {
 	if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
 	    str = VAL_STR(content);
@@ -6145,6 +6510,7 @@ static void
 		 * as the filter 
 		 */
 		res = send_get_to_agent(agent_cb, 
+					valroot,
 					NULL, 
 					VAL_STR(content), 
 					NULL, 
@@ -6160,7 +6526,12 @@ static void
 	} else {
 	    log_error("\nError: xget content wrong type");
 	}
-	val_free_value(content);
+	if (valroot) {
+	    /* should not happen */
+	    val_free_value(valroot);
+	} else {
+	    val_free_value(content);
+	}
     }
 
     val_free_value(valset);
@@ -6193,11 +6564,16 @@ static void
 {
     const ses_cb_t      *scb;
     const mgr_scb_t     *mscb;
-    val_value_t         *valset, *content, *source, *parm;
+    val_value_t         *valset, *content, *source, *parm, *valroot;
     const xmlChar       *str;
     status_t             res;
     uint32               retcode, timeoutval;
     ncx_withdefaults_t   withdef;
+
+    /* init locals */
+    res = NO_ERR;
+    content = NULL;
+    valroot = NULL;
 
     /* get the session info */
     scb = mgr_ses_get_scb(agent_cb->mysid);
@@ -6206,10 +6582,6 @@ static void
 	return;
     }
     mscb = (const mgr_scb_t *)scb->mgrcb;
-
-    /* init locals */
-    res = NO_ERR;
-    content = NULL;
       
     /* get the command line parameters for this command */
     valset = get_valset(agent_cb, rpc, &line[len], &res);
@@ -6220,6 +6592,25 @@ static void
 	return;
     }
 
+    /* get the source parameter */
+    source = val_find_child(valset, NULL, NCX_EL_SOURCE);
+    if (!source) {
+	log_error("\nError: mandatory source parameter missing");
+	val_free_value(valset);
+	return;
+    }
+
+    /* get the with-defaults parameter */
+    parm = val_find_child(valset, 
+			  YANGCLI_MOD, 
+			  NCX_EL_WITH_DEFAULTS);
+    if (parm && parm->res == NO_ERR) {
+	withdef = ncx_get_withdefaults_enum(VAL_STR(parm));
+    } else {
+	withdef = agent_cb->withdefaults;
+    }
+
+    /* get the timeout parameter */
     parm = val_find_child(valset, 
 			  YANGCLI_MOD, 
 			  YANGCLI_TIMEOUT);
@@ -6274,29 +6665,13 @@ static void
 	return;
     }
 
-    /* get the source parameter */
-    source = val_find_child(valset, NULL, NCX_EL_SOURCE);
-    if (!source) {
-	log_error("\nError: mandatory source parameter missing");
-	val_free_value(valset);
-	return;
-    }
-
-    parm = val_find_child(valset, 
-			  YANGCLI_MOD, 
-			  NCX_EL_WITH_DEFAULTS);
-    if (parm && parm->res == NO_ERR) {
-	withdef = ncx_get_withdefaults_enum(VAL_STR(parm));
-    } else {
-	withdef = agent_cb->withdefaults;
-    }
-
     /* get the contents specified in the 'from' choice */
     content = get_content_from_choice(agent_cb, 
 				      rpc, 
 				      valset,
 				      FALSE,
-				      FALSE);
+				      FALSE,
+				      &valroot);
     if (content) {
 	if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
 	    str = VAL_STR(content);
@@ -6313,6 +6688,7 @@ static void
 
 		/* construct a get PDU with the content as the filter */
 		res = send_get_to_agent(agent_cb, 
+					valroot,
 					NULL, 
 					VAL_STR(content), 
 					source,
@@ -6328,7 +6704,12 @@ static void
 	} else {
 	    log_error("\nError: xget content wrong type");
 	}
-	val_free_value(content);
+	if (valroot) {
+	    /* should not happen */
+	    val_free_value(valroot);
+	} else {
+	    val_free_value(content);
+	}
     }
 
     val_free_value(valset);

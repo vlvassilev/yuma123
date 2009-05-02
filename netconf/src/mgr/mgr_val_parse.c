@@ -99,6 +99,18 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
+#ifndef _H_xpath_yang
+#include "xpath_yang.h"
+#endif
+
+#ifndef _H_xpath1
+#include "xpath1.h"
+#endif
+
 #ifndef _H_yangconst
 #include "yangconst.h"
 #endif
@@ -871,6 +883,8 @@ static status_t
 {
     const ncx_errinfo_t  *errinfo;
     const typ_template_t *listtyp;
+    const obj_template_t *targobj;
+    xpath_result_t       *result;
     xml_node_t            valnode, endnode;
     status_t              res, res2;
     boolean               empty;
@@ -949,7 +963,9 @@ static status_t
 	res = ERR_NCX_WRONG_NODETYP_CPX;
 	break;
     case XML_NT_STRING:
-	if (btyp==NCX_BT_SLIST || btyp==NCX_BT_BITS) {
+	switch (btyp) {
+	case NCX_BT_SLIST:
+	case NCX_BT_BITS:
 	    if (btyp==NCX_BT_SLIST) {
 		/* get the list of strings, then check them */
 		listtyp = typ_get_listtyp(obj_get_ctypdef(obj));
@@ -976,12 +992,43 @@ static status_t
 					  &retval->v.list,
 					  &errinfo);
 	    }
-	} else {
-	    /* check the non-whitespace string */
-	    res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
-					btyp, 
-					valnode.simval, 
-					&errinfo);
+	    break;
+	default:
+	    if (!obj_is_xpath_string(obj)) {
+		/* check the non-whitespace string */
+		res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
+					    btyp, 
+					    valnode.simval, 
+					    &errinfo);
+		break;
+	    }  /* else fall through and parse XPath string */
+	case NCX_BT_INSTANCE_ID:
+	    retval->xpathpcb = xpath_new_pcb(valnode.simval);
+	    if (!retval->xpathpcb) {
+		res = ERR_INTERNAL_MEM;
+	    } else if (btyp == NCX_BT_INSTANCE_ID ||
+		       obj_is_schema_instance_string(obj)) {
+		/* do a first pass parsing to resolve all
+		 * the prefixes and check well-formed XPath
+		 */
+		res = xpath_yang_validate_xmlpath(scb->reader,
+						  retval->xpathpcb,
+						  obj,
+						  FALSE,
+						  &targobj);
+	    } else {
+		result = 
+		    xpath1_eval_xmlexpr(scb->reader,
+					retval->xpathpcb,
+					NULL,
+					NULL,
+					FALSE,
+					FALSE,
+					&res);
+		if (result) {
+		    xpath_free_result(result);
+		}
+	    }
 	}
 
 	/* record the value even if there are errors */

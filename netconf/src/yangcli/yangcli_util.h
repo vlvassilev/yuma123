@@ -98,6 +98,7 @@ extern status_t
 extern val_value_t *
     get_instanceid_parm (agent_cb_t *agent_cb,
 			 const xmlChar *target,
+			 boolean schemainst,
 			 const obj_template_t **targobj,
 			 val_value_t **targval,
 			 status_t *retres);

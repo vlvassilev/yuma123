@@ -67,6 +67,7 @@ extern status_t
     xpath_yang_validate_path (ncx_module_t *mod,
 			      const obj_template_t *obj,
 			      xpath_pcb_t *pcb,
+			      boolean schemainst,
 			      const obj_template_t **leafobj);
 
 extern status_t

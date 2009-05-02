@@ -9774,4 +9774,60 @@ ncx_withdefaults_t
 }  /* ncx_get_withdefaults_enum */
 
 
+/********************************************************************
+* FUNCTION ncx_get_mod_prefix
+* 
+* Get the module prefix for the specified module
+* 
+* INPUT:
+*   mod == module to check
+*
+* RETURNS:
+*   pointer to module YANG prefix
+*********************************************************************/
+const xmlChar *
+    ncx_get_mod_prefix (const ncx_module_t *mod)
+{
+#ifdef DEBUG
+    if (!mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return mod->prefix;
+
+}  /* ncx_get_mod_prefix */
+
+
+/********************************************************************
+* FUNCTION ncx_get_mod_xmlprefix
+* 
+* Get the module XML prefix for the specified module
+* 
+* INPUT:
+*   mod == module to check
+*
+* RETURNS:
+*   pointer to module XML prefix
+*********************************************************************/
+const xmlChar *
+    ncx_get_mod_xmlprefix (const ncx_module_t *mod)
+{
+#ifdef DEBUG
+    if (!mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (mod->xmlprefix) {
+	return mod->xmlprefix;
+    } else {
+	return mod->prefix;
+    }
+
+}  /* ncx_get_mod_xmlprefix */
+
+
 /* END file ncx.c */

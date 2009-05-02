@@ -667,6 +667,8 @@ status_t
  * INPUTS:
  *    agent_cb == agent control block to use (NULL if none)
  *    target == XPath expression for the instance-identifier
+ *    schemainst == TRUE if ncx:schema-instance string
+ *                  FALSE if instance-identifier
  *    targobj == address of return target object for this expr
  *    targval == address of return pointer to target value
  *               node within the value subtree returned
@@ -688,6 +690,7 @@ status_t
 val_value_t *
     get_instanceid_parm (agent_cb_t *agent_cb,
 			 const xmlChar *target,
+			 boolean schemainst,
 			 const obj_template_t **targobj,
 			 val_value_t **targval,
 			 status_t *retres)
@@ -732,6 +735,7 @@ val_value_t *
     res = xpath_yang_validate_path(NULL, 
 				   ncx_get_gen_root(),
 				   xpathpcb,
+				   schemainst,
 				   targobj);
     if (res != NO_ERR) {
 	log_error("\nError: validate XPath target '%s' failed",

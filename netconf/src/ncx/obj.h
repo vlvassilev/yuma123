@@ -942,6 +942,9 @@ extern const xmlChar *
     obj_get_mod_prefix (const obj_template_t *obj);
 
 extern const xmlChar *
+    obj_get_mod_xmlprefix (const obj_template_t  *obj);
+
+extern const xmlChar *
     obj_get_mod_name (const obj_template_t  *obj);
 
 extern const xmlChar *

@@ -55,14 +55,14 @@
    <t:test3 xmlns:t="http://netconfcentral.com/ns/test">
       <t:x>fred</t:x>
       <t:test3deep>
-         <t:yy>13.9</t:yy>
+         <t:yy>139</t:yy>
          <t:y>this is a string</t:y>
-         <t:bb>13.9</t:bb>
+         <t:bb>139</t:bb>
          <t:deepy>
             <t:yy3>fred</t:yy3>
-            <t:yy2>1.123400005</t:yy2>
+            <t:yy2>1123400005</t:yy2>
          </t:deepy>
-         <t:yy64>13.9</t:yy64>
+         <t:yy64>139</t:yy64>
       </t:test3deep>
       <t:c2>3</t:c2>
       <t:c2>-3</t:c2>

@@ -198,15 +198,23 @@ static void
     ncid = xmlns_nc_id();
 
     /* generate the <error-info> start tag */
-    xml_wr_begin_elem_ex(scb, &msg->mhdr, ncid, ncid, NCX_EL_ERROR_INFO, 
-	   NULL, FALSE, indent, START);
+    xml_wr_begin_elem_ex(scb, 
+			 &msg->mhdr, 
+			 ncid, 
+			 ncid, 
+			 NCX_EL_ERROR_INFO, 
+			 NULL, 
+			 FALSE, 
+			 indent,
+			 START);
 
     if (indent >= 0) {
 	indent += NCX_DEF_INDENT;
     }
 
     /* generate each child variable */
-    for (errinfo = (rpc_err_info_t *)dlq_firstEntry(&err->error_info);
+    for (errinfo = (rpc_err_info_t *)
+	     dlq_firstEntry(&err->error_info);
 	 errinfo != NULL;
 	 errinfo = (rpc_err_info_t *)dlq_nextEntry(errinfo)) {
 
@@ -216,23 +224,32 @@ static void
 	case NCX_BT_LEAFREF:
 	    if (errinfo->v.strval) {
 		if (errinfo->isqname) {
-		    xml_wr_qname_elem(scb, &msg->mhdr, 
+		    xml_wr_qname_elem(scb,
+				      &msg->mhdr, 
 				      errinfo->val_nsid, 
 				      errinfo->v.strval, 
-				      ncid, errinfo->name_nsid, 
+				      ncid, 
+				      errinfo->name_nsid, 
 				      errinfo->name, 
-				      NULL, FALSE, indent);
+				      NULL, 
+				      FALSE, 
+				      indent);
 		} else {
-		    xml_wr_string_elem(scb, &msg->mhdr, 
+		    xml_wr_string_elem(scb, 
+				       &msg->mhdr, 
 				       errinfo->v.strval, 
-				       ncid, errinfo->name_nsid, 
+				       ncid, 
+				       errinfo->name_nsid, 
 				       errinfo->name, 
-				       NULL, FALSE, indent);
+				       NULL, 
+				       FALSE,
+				       indent);
 		}
 	    } else {
 		SET_ERROR(ERR_INTERNAL_PTR);
 	    }
 	    break;
+	case NCX_BT_DECIMAL64:
 	case NCX_BT_INT8:
 	case NCX_BT_INT16:
 	case NCX_BT_INT32:
@@ -241,15 +258,20 @@ static void
 	case NCX_BT_UINT16:
 	case NCX_BT_UINT32:
 	case NCX_BT_UINT64:
-	case NCX_BT_FLOAT32:
 	case NCX_BT_FLOAT64:
-	    res = ncx_sprintf_num(numbuff, &errinfo->v.numval, 
-			    errinfo->val_btype, &len);
+	    res = ncx_sprintf_num(numbuff, 
+				  &errinfo->v.numval, 
+				  errinfo->val_btype, 
+				  &len);
 	    if (res == NO_ERR) {
-		xml_wr_string_elem(scb, &msg->mhdr, numbuff,
-				   ncid, errinfo->name_nsid,
+		xml_wr_string_elem(scb, 
+				   &msg->mhdr, numbuff,
+				   ncid, 
+				   errinfo->name_nsid,
 				   errinfo->name, 
-				   NULL, FALSE, indent);
+				   NULL, 
+				   FALSE,
+				   indent);
 	    } else {
 		SET_ERROR(res);
 	    }
@@ -271,7 +293,8 @@ static void
 	    if (typ_is_simple(errinfo->val_btype)) {
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    } else if (errinfo->v.cpxval) {
-		xml_wr_full_val(scb, &msg->mhdr, 
+		xml_wr_full_val(scb,
+				&msg->mhdr, 
 				errinfo->v.cpxval,
 				indent);
 	    } else {
@@ -285,7 +308,11 @@ static void
     }
 
     /* generate the <error-info> end tag */
-    xml_wr_end_elem(scb, &msg->mhdr, ncid, NCX_EL_ERROR_INFO, indent);
+    xml_wr_end_elem(scb, 
+		    &msg->mhdr, 
+		    ncid, 
+		    NCX_EL_ERROR_INFO, 
+		    indent);
 
 }  /* send_rpc_error_info */
 

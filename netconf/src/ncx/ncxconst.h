@@ -164,6 +164,8 @@ date	     init     comment
 
 #define NCX_DEF_MERGETYPE NCX_MERGE_LAST
 
+#define NCX_DEF_FRACTION_DIGITS 2
+
 #define NCX_DEF_LINELEN     72
 
 #define NCX_MAX_LINELEN     4095
@@ -379,6 +381,7 @@ date	     init     comment
 #define NCX_EL_DATAPATH        (const xmlChar *)"datapath"
 #define NCX_EL_DATA_CLASS      (const xmlChar *)"data-class"
 #define NCX_EL_DEBUG           (const xmlChar *)"debug"
+#define NCX_EL_DECIMAL64       (const xmlChar *)"decimal64"
 #define NCX_EL_DEF             (const xmlChar *)"def"
 #define NCX_EL_DEFAULT         (const xmlChar *)"default"
 #define NCX_EL_DEFAULT_OPERATION (const xmlChar *)"default-operation"
@@ -416,7 +419,6 @@ date	     init     comment
 #define NCX_EL_FILTER          (const xmlChar *)"filter"
 #define NCX_EL_FLAG            (const xmlChar *)"flag"
 #define NCX_EL_FLOAT           (const xmlChar *)"float"
-#define NCX_EL_FLOAT32         (const xmlChar *)"float32"
 #define NCX_EL_FLOAT64         (const xmlChar *)"float64"
 #define NCX_EL_FULL            (const xmlChar *)"full"
 #define NCX_EL_GET             (const xmlChar *)"get"

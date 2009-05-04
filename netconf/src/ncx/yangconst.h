@@ -70,6 +70,7 @@ date	     init     comment
 #define YANG_K_FEATURE           (const xmlChar *)"feature"
 #define YANG_K_FEATURES          (const xmlChar *)"features"
 #define YANG_K_FIRST             (const xmlChar *)"first"
+#define YANG_K_FRACTION_DIGITS   (const xmlChar *)"fraction-digits"
 #define YANG_K_GROUPING          (const xmlChar *)"grouping"
 #define YANG_K_IDENTITY          (const xmlChar *)"identity"
 #define YANG_K_IDENTITYREF       (const xmlChar *)"identityref"

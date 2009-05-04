@@ -910,7 +910,7 @@ void
 * Combine any consecutive range definitions like
 *   1..4|5|6|7..9  would break replaced with 1..9
 *
-* Not done for NCX_BT_FLOAT32 or NCX_BT_FLOAT64 data types
+* Not done for NCX_BT_FLOAT64 data types
 *
 * INPUTS:
 *   rangeQ == Q of typ_rangeval_t structs to normalize
@@ -944,7 +944,9 @@ void
     case NCX_BT_UINT64:
 	/* range type OK, continue on */
 	break;
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
+	/***********/
+	break;
     case NCX_BT_FLOAT64:
 	/* cannot concat real numbers (by definition ;-) */
 	return;
@@ -1747,7 +1749,7 @@ ncx_btype_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
         return btyp;
     case NCX_BT_STRING:
@@ -3018,7 +3020,7 @@ boolean
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
@@ -3072,7 +3074,7 @@ boolean
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
@@ -3816,7 +3818,7 @@ boolean
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
 	return TRUE;
     default:
@@ -4298,7 +4300,7 @@ boolean
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
@@ -4413,7 +4415,7 @@ boolean
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
@@ -4513,7 +4515,7 @@ boolean
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
     case NCX_BT_STRING:   /*** really NMTOKEN, not string ***/
 	return TRUE;
@@ -4779,9 +4781,10 @@ boolean
 	case NCX_BT_UINT16:
 	case NCX_BT_UINT32:
 	case NCX_BT_UINT64:
-	case NCX_BT_FLOAT32:
 	case NCX_BT_FLOAT64:
 	    return !dlq_empty(&typdef->def.simple.range.rangeQ);
+	case NCX_BT_DECIMAL64:
+	    return TRUE;
 	case NCX_BT_STRING:
 	case NCX_BT_BINARY:
 	    if (!dlq_empty(&typdef->def.simple.range.rangeQ)) {
@@ -4875,5 +4878,77 @@ const typ_idref_t *
     return &basetypdef->def.simple.idref;
 
 }  /* typ_get_cidref */
+
+
+/********************************************************************
+* FUNCTION typ_get_fraction_digits
+* 
+* Get the fraction-digits field from the typdef chain
+*
+* INPUTS:
+*     typdef == typdef to  check
+*
+* RETURNS:
+*     number of fixed decimal digits expected (1..18)
+*     0 if some error
+*********************************************************************/
+uint8
+    typ_get_fraction_digits (const typ_def_t  *typdef)
+{
+    const typ_def_t  *basetypdef;
+
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
+    if (typ_get_basetype(typdef) != NCX_BT_DECIMAL64) {
+	return 0;
+    }
+
+    basetypdef = typ_get_cbase_typdef(typdef);
+    return basetypdef->def.simple.digits;
+
+}  /* typ_get_fraction_digits */
+
+
+/********************************************************************
+* FUNCTION typ_set_fraction_digits
+* 
+* Set the fraction-digits field from the typdef chain
+*
+* INPUTS:
+*   typdef == typdef to set (must be TYP_CL_SIMPLE)
+*   digits == digits value to set
+*
+* RETURNS:
+*     status
+*********************************************************************/
+status_t
+    typ_set_fraction_digits (typ_def_t  *typdef,
+			     uint8 digits)
+{
+#ifdef DEBUG
+    if (!typdef) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (typdef->class != NCX_CL_SIMPLE) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+    
+    if (digits < TYP_DEC64_MIN_DIGITS ||
+	digits > TYP_DEC64_MAX_DIGITS) {
+	return ERR_NCX_INVALID_VALUE;
+    }
+
+    typdef->def.simple.digits = digits;
+
+    return NO_ERR;
+
+}  /* typ_set_fraction_digits */
+
 
 /* END typ.c */

@@ -168,8 +168,6 @@ static obj_template_t   *gen_string;
 
 static obj_template_t   *gen_empty;
 
-static obj_template_t   *gen_float;
-
 static obj_template_t   *gen_root;
 
 /* TBD: support multiple callbacks */
@@ -1179,11 +1177,6 @@ status_t
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    gen_float = ncx_find_object(mod, NCX_EL_FLOAT);
-    if (!gen_float) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
     gen_root = ncx_find_object(mod, NCX_EL_ROOT);
     if (!gen_root) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
@@ -1225,7 +1218,6 @@ void
 	gen_container = NULL;
 	gen_string = NULL;
 	gen_empty = NULL;
-	gen_float = NULL;
 	gen_root = NULL;
     }
 
@@ -3009,8 +3001,9 @@ void
     case NCX_BT_UINT64:
 	memset(num, 0x0, sizeof(ncx_num_t));
 	break;
-    case NCX_BT_FLOAT32:
-	num->f = 0;
+    case NCX_BT_DECIMAL64:
+	num->dec.val = 0;
+	num->dec.digits = 0;
 	break;
     case NCX_BT_FLOAT64:
 	num->d = 0;
@@ -3041,6 +3034,9 @@ int32
 		      const ncx_num_t *num2,
 		      ncx_btype_t  btyp)
 {
+    int64    temp1, temp2;
+    uint8    diffdigits;
+
 #ifdef DEBUG
     if (!num1 || !num2) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -3085,11 +3081,34 @@ int32
         } else {
             return 1;
         }
-    case NCX_BT_FLOAT32:
-        if (num1->f < num2->f) {
-            return -1;
-        } else if (num1->f == num2->f) {
-            return 0;
+    case NCX_BT_DECIMAL64:
+	/* check the base parts first */
+	temp1 = ncx_get_dec64_base(num1);
+	temp2 = ncx_get_dec64_base(num2);
+
+	if (temp1 < temp2) {
+	    return -1;
+        } else if (temp1 == temp2) {
+	    /* check fraction parts next */
+	    temp1 = ncx_get_dec64_fraction(num1);
+	    temp2 = ncx_get_dec64_fraction(num2);
+
+	    /* normalize these numbers to compare them */
+	    if (num1->dec.digits > num2->dec.digits) {
+		diffdigits = num1->dec.digits - num2->dec.digits;
+		temp2 *= (10 * diffdigits);
+	    } else if (num1->dec.digits < num2->dec.digits) {
+		diffdigits = num2->dec.digits - num1->dec.digits;
+		temp1 *= (10 * diffdigits);
+	    }
+
+	    if (temp1 < temp2) {
+		return -1;
+	    } else if (temp1 == temp2) {
+		return 0;
+	    } else {
+		return 1;
+	    }
         } else {
             return 1;
         }
@@ -3151,12 +3170,8 @@ void
     case NCX_BT_UINT64:
 	num->ul = NCX_MIN_ULONG;
 	break;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	num->f = -INFINITY;
-#else
-	num->f = NCX_MIN_LONG;
-#endif
+    case NCX_BT_DECIMAL64:
+	num->dec.val = NCX_MIN_LONG;
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -3218,12 +3233,8 @@ void
     case NCX_BT_UINT64:
 	num->ul = NCX_MAX_ULONG;
 	break;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	num->f = INFINITY;
-#else
-	num->f = NCX_MAX_LONG-1;
-#endif
+    case NCX_BT_DECIMAL64:
+	num->dec.val = NCX_MAX_LONG;
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -3275,8 +3286,8 @@ void
     case NCX_BT_UINT64:
 	num->ul = 1;
 	break;
-    case NCX_BT_FLOAT32:
-	num->f = 1;
+    case NCX_BT_DECIMAL64:
+	num->dec.val = 10 * num->dec.digits;
 	break;
     case NCX_BT_FLOAT64:
 	num->d = 1;
@@ -3324,8 +3335,8 @@ void
     case NCX_BT_UINT64:
 	num->ul = 0;
 	break;
-    case NCX_BT_FLOAT32:
-	num->f = 0;
+    case NCX_BT_DECIMAL64:
+	num->dec.val = 0;
 	break;
     case NCX_BT_FLOAT64:
 	num->d = 0;
@@ -3358,32 +3369,12 @@ void
     }
 #endif
 
-    switch (btyp) {
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-	break;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	num->f = NAN;
-#else
-	num->f = NCX_MAX_LONG;
-#endif
-	break;
-    case NCX_BT_FLOAT64:
+    if (btyp == NCX_BT_FLOAT64) {
 #ifdef HAS_FLOAT
 	num->d = NAN;
 #else
 	num->d = NCX_MAX_LONG;
 #endif
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
 } /* ncx_set_num_nan */
@@ -3396,7 +3387,7 @@ void
 *
 * INPUTS:
 *     num == number to check
-*     btyp == expected data type (NCX_BT_INT, UINT, FLOAT, DOUBLE)
+*     btyp == expected data type (e.g., NCX_BT_INT32, NCX_BT_UINT64)
 *
 * RETURNS:
 *     TRUE if value is equal to zero
@@ -3426,8 +3417,8 @@ boolean
         return (num->u) ? FALSE : TRUE;
     case NCX_BT_UINT64:
         return (num->ul) ? FALSE : TRUE;
-    case NCX_BT_FLOAT32:
-        return (num->f == 0) ? TRUE : FALSE;
+    case NCX_BT_DECIMAL64:
+        return (num->dec.val == 0) ? TRUE : FALSE;
     case NCX_BT_FLOAT64:
         return (num->d == 0) ? TRUE : FALSE;
     default:
@@ -3441,13 +3432,13 @@ boolean
 /********************************************************************
 * FUNCTION ncx_convert_num
 * 
-* Convert a number string to an int32, uint32, or float
+* Convert a number string to a numeric type
 *
 * INPUTS:
 *     numstr == number string
 *     numfmt == NCX_NF_OCTAL, NCX_NF_DEC, NCX_NF_HEX, or NCX_NF_REAL
 *     btyp == desired number type 
-*             (e.g., NCX_BT_INT, NCX_BT_UINT, NCX_BT_FLOAT)
+*             (e.g., NCX_BT_INT32, NCX_BT_UINT32, NCX_BT_FLOAT64)
 *     val == pointer to ncx_num_t to hold result
 *
 * OUTPUTS:
@@ -3469,14 +3460,8 @@ status_t
     unsigned long long ull;
 
 #ifdef HAS_FLOAT
-# ifdef STRTOF_FIXED
-    float f;
-# else
-    double f;
-# endif
     double d;
 #else
-    int64 f;
     int64 d;
 #endif
 
@@ -3633,58 +3618,8 @@ status_t
 
 	val->ul = (uint64)ull;
 	break;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-        switch (numfmt) {
-	case NCX_NF_OCTAL:
-        case NCX_NF_DEC:
-        case NCX_NF_REAL:
-	    errno = 0;
-#ifdef STRTOF_FIXED
-            f = strtof((const char *)numstr, &err);
-#else 
-            f = strtod((const char *)numstr, &err);
-#endif
-            if (errno) {
-                return ERR_NCX_INVALID_NUM;
-            }
-            val->f = f;
-            break;
-        case NCX_NF_HEX:
-            return ERR_NCX_WRONG_NUMTYP;
-        default:
-            return SET_ERROR(ERR_INTERNAL_VAL);
-        }
-#else
-        switch (numfmt) {
-        case NCX_NF_OCTAL:
-            ll = strtoll((const char *)numstr, &err, 8);
-            if (err && *err) {
-                return ERR_NCX_INVALID_NUM;
-            }
-            val->f = (int64)ll;
-            break;
-        case NCX_NF_DEC:
-            ll = strtoll((const char *)numstr, &err, 10);
-            if (err && *err) {
-                return ERR_NCX_INVALID_NUM;
-            }
-            val->f = (int64)ll;
-            break;
-        case NCX_NF_HEX:
-            ll = strtoll((const char *)numstr, &err, 16);
-            if (err && *err) {
-                return ERR_NCX_INVALID_HEXNUM;
-            }
-            val->f = (int64)ll;
-            break;
-        case NCX_NF_REAL:
-            return ERR_NCX_WRONG_NUMTYP;
-        default:
-            return SET_ERROR(ERR_INTERNAL_VAL);
-        }
-#endif
-        break;
+    case NCX_BT_DECIMAL64:
+	return SET_ERROR(ERR_INTERNAL_VAL);
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
         switch (numfmt) {
@@ -3742,6 +3677,169 @@ status_t
 
 
 /********************************************************************
+* FUNCTION ncx_convert_dec64
+* 
+* Convert a number string to a decimal64 number
+*
+* INPUTS:
+*     numstr == number string
+*     numfmt == number format used
+*     digits == number of fixed-point digits expected
+*     val == pointer to ncx_num_t to hold result
+*
+* OUTPUTS:
+*     *val == converted number value
+*
+* RETURNS:
+*     status
+*********************************************************************/
+status_t
+    ncx_convert_dec64 (const xmlChar *numstr,
+		       ncx_numfmt_t numfmt,
+		       uint8 digits,
+		       ncx_num_t *val)
+{
+    const xmlChar  *point, *str;
+    char           *err;
+    int64           basenum, fracnum, testnum;
+    uint32          numdigits;
+    boolean         isneg;
+    uint8           i;
+    xmlChar         numbuff[NCX_MAX_NUMLEN];
+
+#ifdef DEBUG
+    if (!numstr || !val) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (!*numstr) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    err = NULL;
+    point = NULL;
+    basenum = 0;
+    fracnum = 0;
+    isneg = FALSE;
+
+    /* check the number format set to don't know */
+    if (numfmt==NCX_NF_NONE) {
+	numfmt = ncx_get_numfmt(numstr);
+    }
+
+    /* check the number string for plus or minus sign */
+    str = numstr;
+    if (*str == '+') {
+	str++;
+    } else if (*str == '-') {
+	str++;
+	isneg = TRUE;
+    }
+    while (isdigit((char)*str)) {
+	str++;
+    }
+
+    /* check if stopped on a decimal point */
+    if (*str == '.') {
+	/* get just the base part now */
+	point = str;
+	xml_strncpy(numbuff, 
+		    numstr, 
+		    (uint32)(point - str));
+	basenum = strtoll((const char *)numbuff, &err, 10);
+    } else {
+	/* assume the entire string is just a base part
+	 * the token parser broke up the string
+	 * already so a string concat '123foo' should
+	 * not happen here
+	 */
+	switch (numfmt) {
+	case NCX_NF_OCTAL:
+	    basenum = strtoll((const char *)numstr, &err, 8);
+	    break;
+	case NCX_NF_DEC:
+	case NCX_NF_REAL:
+	    basenum = strtoll((const char *)numstr, &err, 10);
+	    break;
+	case NCX_NF_HEX:
+	    basenum = strtoll((const char *)numstr, &err, 16);
+	    break;
+	default:
+	    return SET_ERROR(ERR_INTERNAL_VAL);
+	}
+
+	/* check if strtoll accepted the number string */
+	if (err && *err) {
+	    return ERR_NCX_INVALID_NUM;
+	}
+    }
+
+    /* check that the number is actually in range */
+    if (isneg) {
+	testnum = NCX_MIN_LONG;
+    } else {
+	testnum = NCX_MAX_LONG;
+    }
+
+    /* adjust the test number to the maximum for
+     * the specified number of fraction digits
+     */
+    for (i = 0; i < digits; i++) {
+	testnum /= 10;
+    }
+
+    /* check if the base number is OK wrt/ testnum */
+    if (isneg) {
+	if (basenum < testnum) {
+	    return ERR_NCX_DEC64_BASEOVFL;
+	}
+    } else {
+	if (basenum > testnum) {
+	    return ERR_NCX_DEC64_BASEOVFL;
+	}
+    }
+
+    /* check if there is a fraction part entered */
+    if (point) {
+	str = point + 1;
+	while (isdigit((char)*str)) {
+	    str++;
+	}
+	numdigits = (uint32)(str - point - 1);
+
+	/* check if fraction part too big */
+	if (numdigits > (uint32)digits) {
+	    return ERR_NCX_DEC64_FRACOVFL;
+	}
+
+	err = NULL;
+	xml_strncpy(numbuff, point+1, numdigits);
+	fracnum = strtoll((const char *)numbuff, &err, 10);
+
+	/* check if strtoll accepted the number string */
+	if (err && *err) {
+	    return ERR_NCX_INVALID_NUM;
+	}
+	if (isneg) {
+	    fracnum *= -1;
+	}
+    }
+
+    /* encode the decimal64 as an int64 */
+    for (i= 0; i < digits; i++) {
+	basenum *= 10;
+    }
+
+    /* save the number and the fraction-digits value */
+    val->dec.val = basenum + fracnum;
+    val->dec.digits = digits;
+
+    return NO_ERR;
+
+}  /* ncx_convert_dec64 */
+
+
+/********************************************************************
 * FUNCTION ncx_decode_num
 * 
 * Handle some sort of number string
@@ -3772,7 +3870,10 @@ status_t
 
     /* check if this is a hex number */
     if (*numstr == '0' && NCX_IS_HEX_CH(*(numstr+1))) {
-	return ncx_convert_num(numstr+2, NCX_NF_HEX, btyp, retnum);
+	return ncx_convert_num(numstr+2, 
+			       NCX_NF_HEX, 
+			       btyp, 
+			       retnum);
     }
 
     /* check if this is a real number */
@@ -3785,14 +3886,86 @@ status_t
     }
 
     /* check octal number */
-    if (*numstr == '0') {
-	return ncx_convert_num(numstr, NCX_NF_OCTAL, btyp, retnum);
+    if (*numstr == '0' && numstr[1] != '.') {
+	return ncx_convert_num(numstr, 
+			       NCX_NF_OCTAL, 
+			       btyp, 
+			       retnum);
     }
 
     /* else assume this is a decimal number */
-    return ncx_convert_num(numstr, NCX_NF_DEC, btyp, retnum);
+    return ncx_convert_num(numstr, 
+			   NCX_NF_DEC, 
+			   btyp, 
+			   retnum);
 
 }  /* ncx_decode_num */
+
+
+/********************************************************************
+* FUNCTION ncx_decode_dec64
+* 
+* Handle some sort of decimal64 number string (NCX_BT_DECIMAL64)
+*
+* INPUTS:
+*   numstr == number string
+*    digits == number of expected digits for this decimal64
+*   retnum == pointer to initialized ncx_num_t to hold result
+*
+* OUTPUTS:
+*   *retnum == converted number
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    ncx_decode_dec64 (const xmlChar *numstr,
+		      uint8  digits,
+		      ncx_num_t  *retnum)
+{
+    const xmlChar *str;
+
+#ifdef DEBUG
+    if (!numstr || !retnum) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* check if this is a hex number */
+    if (*numstr == '0' && NCX_IS_HEX_CH(*(numstr+1))) {
+	return ncx_convert_dec64(numstr+2, 
+				 NCX_NF_HEX, 
+				 digits, 
+				 retnum);
+    }
+
+    /* check if this is a real number */
+    str = numstr;
+    while (*str && (*str != '.')) {
+        str++;
+    }
+    if (*str) {
+	return ncx_convert_dec64(numstr, 
+				 NCX_NF_REAL, 
+				 digits, 
+				 retnum);
+    }
+
+    /* check octal number */
+    if (*numstr == '0') {
+	return ncx_convert_dec64(numstr, 
+				 NCX_NF_OCTAL, 
+				 digits, 
+				 retnum);
+    }
+
+    /* else assume this is a decimal number */
+    return ncx_convert_dec64(numstr, 
+			     NCX_NF_DEC, 
+			     digits, 
+			     retnum);
+
+}  /* ncx_decode_dec64 */
 
 
 /********************************************************************
@@ -3803,7 +3976,8 @@ status_t
 * Supports all NCX numeric types:
 *    NCX_BT_INT*
 *    NCX_BT_UINT*
-*    NCX_BT_FLOAT*
+*    NCX_BT_DECIMAL64
+*    NCX_BT_FLOAT64
 *
 * INPUTS:
 *     num1 == first number
@@ -3840,8 +4014,9 @@ status_t
     case NCX_BT_UINT64:
         num2->ul = num1->ul;
         break;
-    case NCX_BT_FLOAT32:
-        num2->f = num1->f;
+    case NCX_BT_DECIMAL64:
+        num2->dec.val = num1->dec.val;
+        num2->dec.digits = num1->dec.digits;
         break;
     case NCX_BT_FLOAT64:
         num2->d = num1->d;
@@ -3861,7 +4036,7 @@ status_t
 * Supports all NCX numeric types:
 *    NCX_BT_INT*
 *    NCX_BT_UINT*
-*    NCX_BT_FLOAT*
+*    NCX_BT_FLOAT64
 *
 * INPUTS:
 *     num1 == source number
@@ -3878,6 +4053,7 @@ status_t
 		  ncx_num_t *num2,
 		  ncx_btype_t  btyp2)
 {
+    int64      testbase, testfrac;
     status_t   res;
 
 #ifdef DEBUG
@@ -3909,16 +4085,14 @@ status_t
 	case NCX_BT_UINT64:
 	    num2->ul = (uint64)num1->i;
 	    break;
-	case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-# ifdef STRTOF_FIXED
-	    num2->f = (float)num1->i;
-# else
-	    num2->f = (double)num1->i;
-# endif
-#else
-	    num2->f = (int64)num1->i;
-#endif
+	case NCX_BT_DECIMAL64:
+	    if (num2->dec.digits == 0) {
+		/* hack: set a default if none set already */
+		num2->dec.digits = NCX_DEF_FRACTION_DIGITS;
+	    }
+	    /* this may cause an overflow, but too bad !!! */
+	    num2->dec.val = 
+		(int64)(num1->i * (10 * num2->dec.digits));
 	    break;
 	case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -3947,16 +4121,14 @@ status_t
 	case NCX_BT_UINT64:
 	    num2->ul = (uint64)num1->l;
 	    break;
-	case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-# ifdef STRTOF_FIXED
-	    num2->f = (float)num1->l;
-# else
-	    num2->f = (double)num1->l;
-# endif
-#else
-	    num2->f = (int64)num1->l;
-#endif
+	case NCX_BT_DECIMAL64:
+	    if (num2->dec.digits == 0) {
+		/* hack: set a default if none set already */
+		num2->dec.digits = NCX_DEF_FRACTION_DIGITS;
+	    }
+	    /* this may cause an overflow, but too bad !!! */
+	    num2->dec.val = 
+		(int64)(num1->l * (10 * num2->dec.digits));
 	    break;
 	case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -3989,16 +4161,14 @@ status_t
 	case NCX_BT_UINT64:
 	    num2->ul = (uint64)num1->u;
 	    break;
-	case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-# ifdef STRTOF_FIXED
-	    num2->f = (float)num1->u;
-# else
-	    num2->f = (double)num1->u;
-# endif
-#else
-	    num2->f = (int64)num1->u;
-#endif
+	case NCX_BT_DECIMAL64:
+	    if (num2->dec.digits == 0) {
+		/* hack: set a default if none set already */
+		num2->dec.digits = NCX_DEF_FRACTION_DIGITS;
+	    }
+	    /* this may cause an overflow, but too bad !!! */
+	    num2->dec.val = 
+		(int64)(num1->u * (10 * num2->dec.digits));
 	    break;
 	case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -4027,16 +4197,14 @@ status_t
 	case NCX_BT_UINT64:
 	    num2->ul = num1->ul;
 	    break;
-	case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-# ifdef STRTOF_FIXED
-	    num2->f = (float)num1->ul;
-# else
-	    num2->f = (double)num1->ul;
-# endif
-#else
-	    num2->f = (int64)num1->ul;
-#endif
+	case NCX_BT_DECIMAL64:
+	    if (num2->dec.digits == 0) {
+		/* hack: set a default if none set already */
+		num2->dec.digits = NCX_DEF_FRACTION_DIGITS;
+	    }
+	    /* this may cause an overflow, but too bad !!! */
+	    num2->dec.val = 
+		(int64)(num1->ul * (10 * num2->dec.digits));
 	    break;
 	case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -4049,67 +4217,43 @@ status_t
 	    res = SET_ERROR(ERR_INTERNAL_VAL);
 	}
         break;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	switch (btyp2) {
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
+    case NCX_BT_DECIMAL64:
+	if (num1->dec.digits == 0) {
 	    res = ERR_NCX_INVALID_VALUE;
-	    break;
-	case NCX_BT_INT64:
-#ifdef STRTOF_FIXED
-	    num2->l = (int64)lrintf(num1->f);
-#else
-	    num2->l = (int64)lrint(num1->f);
-#endif
-	    break;
-	case NCX_BT_UINT64:
-#ifdef STRTOF_FIXED
-	    num2->ul = (uint64)lrintf(num1->f);
-#else
-	    num2->ul = (uint64)lrint(num1->f);
-#endif
-	    break;
-	case NCX_BT_FLOAT32:
-	    num2->f = num1->f;
-	    break;
-	case NCX_BT_FLOAT64:
-	    num2->d = (double)num1->f;
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	} else {
+	    /* just use testbase for now;
+	     * not sure if this will ever be used
+	     */
+	    testbase = num1->dec.val / (10 * num1->dec.digits);
+	    testfrac = num1->dec.val % (10 * num1->dec.digits);
+
+	    switch (btyp2) {
+	    case NCX_BT_INT8:
+	    case NCX_BT_INT16:
+	    case NCX_BT_INT32:
+	    case NCX_BT_UINT8:
+	    case NCX_BT_UINT16:
+	    case NCX_BT_UINT32:
+		return ERR_NCX_INVALID_VALUE;
+	    case NCX_BT_INT64:
+		/* just do a floor() function for now */
+		num2->l = testbase;
+		break;
+	    case NCX_BT_UINT64:
+		num2->ul = (uint64)testbase;
+		break;
+	    case NCX_BT_DECIMAL64:
+		num2->dec.val = num1->dec.val;
+		num2->dec.digits = num1->dec.digits;
+		break;
+	    case NCX_BT_FLOAT64:
+		num2->d = (double)testbase;
+		break;
+	    default:
+		res = SET_ERROR(ERR_INTERNAL_VAL);
+	    }
 	}
-#else
-	switch (btyp2) {
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
-	    res = ERR_NCX_INVALID_VALUE;
-	    break;
-	case NCX_BT_INT64:
-	    num2->l = num1->f;
-	    break;
-	case NCX_BT_UINT64:
-	    num2->ul = (uint64)num1->f;
-	    break;
-	case NCX_BT_FLOAT32:
-	    num2->f = num1->f;
-	    break;
-	case NCX_BT_FLOAT64:
-	    num2->d = num1->f;
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-#endif
-        break;
+	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	switch (btyp2) {
@@ -4119,7 +4263,7 @@ status_t
 	case NCX_BT_UINT8:
 	case NCX_BT_UINT16:
 	case NCX_BT_UINT32:
-	case NCX_BT_FLOAT32:
+	case NCX_BT_DECIMAL64:
 	    return ERR_NCX_INVALID_VALUE;
 	case NCX_BT_INT64:
 	    num2->l = (int64)lrint(num1->d);
@@ -4141,7 +4285,7 @@ status_t
 	case NCX_BT_UINT8:
 	case NCX_BT_UINT16:
 	case NCX_BT_UINT32:
-	case NCX_BT_FLOAT32:
+	case NCX_BT_DECIMAL64:
 	    return ERR_NCX_INVALID_VALUE;
 	case NCX_BT_INT64:
 	    num2->l = num1->d;
@@ -4174,7 +4318,8 @@ status_t
 * Supports all NCX numeric types:
 *    NCX_BT_INT*
 *    NCX_BT_UINT*
-*    NCX_BT_FLOAT*
+*    NCX_BT_DECIMAL64
+*    NCX_BT_FLOAT64
 *
 * INPUTS:
 *     num1 == source number
@@ -4216,12 +4361,9 @@ status_t
     case NCX_BT_UINT64:
 	num2->ul = num1->ul;
 	break;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	num2->f = floorf(num1->f);
-#else
-	num2->f = num1->f;
-#endif
+    case NCX_BT_DECIMAL64:
+	num2->dec.digits = num1->dec.digits;
+	num2->dec.val = num1->dec.val % (10 * num1->dec.digits);
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -4247,7 +4389,8 @@ status_t
 * Supports all NCX numeric types:
 *    NCX_BT_INT*
 *    NCX_BT_UINT*
-*    NCX_BT_FLOAT*
+*    NCX_BT_DECIMAL64
+*    NCX_BT_FLOAT64
 *
 * INPUTS:
 *     num1 == source number
@@ -4289,12 +4432,10 @@ status_t
     case NCX_BT_UINT64:
 	num2->ul = num1->ul;
 	break;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	num2->f = ceilf(num1->f);
-#else
-	num2->f = num1->f;
-#endif
+    case NCX_BT_DECIMAL64:
+	num2->dec.digits = num1->dec.digits;
+	/*** this is not right !!!! ***/
+	num2->dec.val = num1->dec.val % (10 * num1->dec.digits);
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -4320,7 +4461,8 @@ status_t
 * Supports all NCX numeric types:
 *    NCX_BT_INT*
 *    NCX_BT_UINT*
-*    NCX_BT_FLOAT*
+*    NCX_BT_DECIMAL64
+*    NCX_BT_FLOAT64
 *
 * INPUTS:
 *     num1 == source number
@@ -4362,12 +4504,11 @@ status_t
     case NCX_BT_UINT64:
 	num2->ul = num1->ul;
 	break;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	num2->f = roundf(num1->f);
-#else
-	num2->f = num1->f;
-#endif
+
+    case NCX_BT_DECIMAL64:
+	num2->dec.digits = num1->dec.digits;
+	/*** this is not right !!!! ***/
+	num2->dec.val = num1->dec.val % (10 * num1->dec.digits);
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -4392,7 +4533,8 @@ status_t
 * Supports all NCX numeric types:
 *    NCX_BT_INT*
 *    NCX_BT_UINT*
-*    NCX_BT_FLOAT*
+*    NCX_BT_DECIMAL64
+*    NCX_BT_FLOAT64
 *
 * INPUTS:
 *     num == number to check
@@ -4406,7 +4548,6 @@ boolean
 			 ncx_btype_t  btyp)
 {
 #ifdef HAS_FLOAT
-    float f;
     double d;
 #endif
 
@@ -4427,13 +4568,16 @@ boolean
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
 	return TRUE;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT        
-	f = roundf(num->f);
-	return (f == num->f) ? TRUE : FALSE;
-#else
-	return TRUE;
-#endif
+    case NCX_BT_DECIMAL64:
+	if (num->dec.digits == 0) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return FALSE;
+	}
+	if (num->dec.val / (10 * num->dec.digits)) {
+	    return TRUE;
+	} else {
+	    return FALSE;
+	}
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT        
 	d = round(num->d);
@@ -4450,12 +4594,11 @@ boolean
 }  /* ncx_num_is_integral */
 
 
-
 /********************************************************************
 * FUNCTION ncx_cvt_to_int64
 * 
 * Convert a number to an integer64;
-* Use rounding for float32 and float64
+* Use rounding for float64
 *
 * INPUTS:
 *     num == number to convert
@@ -4471,7 +4614,7 @@ int64
 #ifdef DEBUG
     if (!num) {
 	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+	return 0;
     }
 #endif
 
@@ -4488,12 +4631,12 @@ int64
 	return (int64)num->u;
     case NCX_BT_UINT64:
 	return (int64)num->ul;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT        
-	return lrintf(num->f);
-#else
-	return num->f;
-#endif
+    case NCX_BT_DECIMAL64:
+	if (num->dec.digits == 0) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    return 0;
+	}
+	return (int64)(num->dec.val / (10 * num->dec.digits));
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT        
 	return lrint(num->d);
@@ -4502,7 +4645,7 @@ int64
 #endif
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+	return 0;
     }
     /*NOTREACHED*/
 
@@ -4645,7 +4788,9 @@ status_t
 		     uint32   *len)
 {
 
-    int32    ilen, tzcount;
+    int32    ilen, pos, tzcount;
+    int64    fracpart, testnum;
+    uint8    digit, i;
     xmlChar  dumbuff[VAL_MAX_NUMLEN];
 
 #ifdef DEBUG
@@ -4655,7 +4800,7 @@ status_t
 #endif
 
     if (!buff) {
-	buff = dumbuff;
+	buff = dumbuff;    
     }
 
     *len = 0;
@@ -4676,19 +4821,54 @@ status_t
     case NCX_BT_UINT64:
 	ilen = sprintf((char *)buff, "%llu", num->ul);
 	break;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	ilen = sprintf((char *)buff, "%.14f", num->f);
-	tzcount = remove_trailing_zero_count(buff);
-	if (tzcount) {
-	    ilen -= tzcount;
-	    if (buff != dumbuff) {
-		buff[ilen] =  0;
+    case NCX_BT_DECIMAL64:
+	if (num->dec.val == 0) {
+	    ilen = xml_strcpy(buff, (const xmlChar *)"0.0");
+	} else {
+	    if (num->dec.digits == 0) {
+		return SET_ERROR(ERR_INTERNAL_VAL);
+	    } else {
+		/* print the base part */
+		pos = sprintf((char *)buff, 
+			      "%lld", 
+			      num->dec.val / (10 * num->dec.digits));
+
+		/* print the decimal point */
+		buff[pos] = '.';
+
+		/* get the fraction as an int64 */
+		fracpart = num->dec.val % (10 * num->dec.digits);
+
+		/* adjust the fraction number if it negative */
+		if (fracpart < 0) {
+		    fracpart *= -1;
+		}
+
+		/* go through each digit left to right
+		 * and determine its value; subtract that
+		 * digit out from fracpart each time through the loop
+		 */
+		for (i = 1, digit = num->dec.digits;
+		     digit > 0;
+		     i++, digit--) {
+
+		    if (digit > 1) {
+			testnum = fracpart / (int64)(10 * (digit-1));
+			sprintf((char *)&buff[pos+i], 
+				"%lld", 
+				testnum);
+			fracpart -= (testnum * (10 * (digit-1)));
+		    } else {
+			/* last digit */
+			testnum = fracpart % 10;
+			sprintf((char *)&buff[pos+i], 
+				"%lld", 
+				testnum);
+		    }
+		}
 	    }
+	    ilen = pos + 1 + num->dec.digits;
 	}
-#else
-	ilen = sprintf((char *)buff, "%lld", num->f);
-#endif
 	break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -4758,12 +4938,9 @@ boolean
         return (num->u == NCX_MIN_UINT) ? TRUE : FALSE;
     case NCX_BT_UINT64:
         return (num->ul == NCX_MIN_ULONG) ? TRUE : FALSE;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	return (num->f == -INFINITY) ? TRUE : FALSE;
-#else
-	return (num->f == NCX_MIN_LONG) ? TRUE : FALSE;
-#endif
+
+    case NCX_BT_DECIMAL64:
+        return (num->dec.val == NCX_MIN_LONG) ? TRUE : FALSE;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	return (num->d == -INFINITY) ? TRUE : FALSE;
@@ -4820,12 +4997,8 @@ boolean
         return (num->u == NCX_MAX_UINT) ? TRUE : FALSE;
     case NCX_BT_UINT64:
         return (num->ul == NCX_MAX_ULONG) ? TRUE : FALSE;
-    case NCX_BT_FLOAT32:
-#ifdef HAS_FLOAT
-	return (num->f == INFINITY) ? TRUE : FALSE;
-#else
-	return (num->f == NCX_MAX_LONG-1) ? TRUE : FALSE;
-#endif
+    case NCX_BT_DECIMAL64:
+        return (num->dec.val == NCX_MAX_LONG) ? TRUE : FALSE;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
 	return (num->d == INFINITY) ? TRUE : FALSE;
@@ -4851,7 +5024,7 @@ boolean
 *     tkc == token chain; current token will be converted
 *            tkc->typ == TK_TT_DNUM, TK_TT_HNUM, TK_TT_RNUM
 *     btyp == desired number type 
-*             (e.g., NCX_BT_INT, NCX_BT_UINT, NCX_BT_FLOAT)
+*             (e.g., NCX_BT_INT32, NCX_BT_UINT64, NCX_BT_FLOAT64)
 * OUTPUTS:
 *     *val == converted number value (0..2G-1), if NO_ERR
 * RETURNS:
@@ -4859,32 +5032,101 @@ boolean
 *********************************************************************/
 status_t
     ncx_convert_tkcnum (tk_chain_t *tkc,
-			ncx_btype_t  btyp,
-			ncx_num_t    *val)
+			ncx_btype_t btyp,
+			ncx_num_t *val)
 {
     const xmlChar *numstr;
+
+    if (btyp == NCX_BT_DECIMAL64) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
 
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_DNUM:
 	numstr = TK_CUR_VAL(tkc);
 	if (numstr && *numstr=='0') {
 	    return ncx_convert_num(TK_CUR_VAL(tkc), 
-				   NCX_NF_OCTAL, btyp, val);
+				   NCX_NF_OCTAL, 
+				   btyp, 
+				   val);
 	} else {
 	    return ncx_convert_num(TK_CUR_VAL(tkc), 
-				   NCX_NF_DEC, btyp, val);
+				   NCX_NF_DEC, 
+				   btyp, 
+				   val);
 	}
     case TK_TT_HNUM:
 	return ncx_convert_num(TK_CUR_VAL(tkc), 
-			       NCX_NF_HEX, btyp, val);
+			       NCX_NF_HEX, 
+			       btyp, 
+			       val);
     case TK_TT_RNUM:
 	return ncx_convert_num(TK_CUR_VAL(tkc), 
-			       NCX_NF_REAL, btyp, val);
+			       NCX_NF_REAL, 
+			       btyp, 
+			       val);
     default:
 	/* if this is a string, then this might work */
 	return ncx_decode_num(TK_CUR_VAL(tkc), btyp, val);
     }
 }  /* ncx_convert_tkcnum */
+
+
+/********************************************************************
+* FUNCTION ncx_convert_tkc_dec64
+* 
+* Convert the current token in a token chain to
+* a ncx_num_t struct, expecting NCX_BT_DECIMAL64
+*
+* INPUTS:
+*     tkc == token chain; current token will be converted
+*            tkc->typ == TK_TT_DNUM, TK_TT_HNUM, TK_TT_RNUM
+*     digits == number of expected digits
+*
+* OUTPUTS:
+*     *val == converted number value, if NO_ERR
+*
+* RETURNS:
+*     status
+*********************************************************************/
+status_t
+    ncx_convert_tkc_dec64 (tk_chain_t *tkc,
+			   uint8 digits,
+			   ncx_num_t *val)
+{
+    const xmlChar *numstr;
+
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_DNUM:
+	numstr = TK_CUR_VAL(tkc);
+	if (numstr && *numstr=='0' && numstr[1] != '.') {
+	    return ncx_convert_dec64(TK_CUR_VAL(tkc), 
+				     NCX_NF_OCTAL, 
+				     digits, 
+				     val);
+	} else {
+	    return ncx_convert_dec64(TK_CUR_VAL(tkc), 
+				     NCX_NF_DEC, 
+				     digits, 
+				     val);
+	}
+    case TK_TT_HNUM:
+	return ncx_convert_dec64(TK_CUR_VAL(tkc), 
+				 NCX_NF_HEX, 
+				 digits, 
+				 val);
+    case TK_TT_RNUM:
+	return ncx_convert_dec64(TK_CUR_VAL(tkc), 
+				 NCX_NF_REAL, 
+				 digits, 
+				 val);
+    default:
+	/* if this is a string, then this might work */
+	return ncx_decode_dec64(TK_CUR_VAL(tkc), 
+				digits, 
+				val);
+    }
+}  /* ncx_convert_tkc_dec64 */
 
 
 /********************************************************************
@@ -7916,22 +8158,6 @@ obj_template_t *
 
 } /* ncx_get_gen_empty */
 
-/********************************************************************
-* FUNCTION ncx_get_gen_float
-* 
-* Get the object template for the NCX generic float32 leaf
-*
-*********************************************************************/
-obj_template_t *
-    ncx_get_gen_float (void)
-{
-    if (!stage2_init_done) {
-	return NULL;
-    }
-    return gen_float;
-
-} /* ncx_get_gen_float */
-
 
 /********************************************************************
 * FUNCTION ncx_get_gen_root
@@ -8639,7 +8865,7 @@ ncx_tclass_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
@@ -9828,6 +10054,72 @@ const xmlChar *
     }
 
 }  /* ncx_get_mod_xmlprefix */
+
+
+
+/********************************************************************
+* FUNCTION ncx_get_dec64_base
+* 
+* Get the base part of a decimal64 number
+* 
+* INPUT:
+*   num == number to check (expected to be NCX_BT_DECIMAL64)
+*
+* RETURNS:
+*   base part of the number
+*********************************************************************/
+int64
+    ncx_get_dec64_base (const ncx_num_t *num)
+{
+    int64 temp1;
+
+#ifdef DEBUG
+    if (!num) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+    temp1 = num->dec.val;
+    if (num->dec.digits) {
+	 temp1 = temp1 / (10 * num->dec.digits);
+    }
+    return temp1;
+
+}  /* ncx_get_dec64_base */
+
+
+/********************************************************************
+* FUNCTION ncx_get_dec64_fraction
+* 
+* Get the fraction part of a decimal64 number
+* 
+* INPUT:
+*   num == number to check (expected to be NCX_BT_DECIMAL64)
+*
+* RETURNS:
+*   fraction part of the number
+*********************************************************************/
+int64
+    ncx_get_dec64_fraction (const ncx_num_t *num)
+{
+    int64 temp1;
+
+#ifdef DEBUG
+    if (!num) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
+    if (num->dec.digits) {
+	temp1 = num->dec.val % (10 * num->dec.digits);
+    } else {
+	temp1 = 0;
+    }
+
+    return temp1;
+
+}  /* ncx_get_dec64_fraction */
 
 
 /* END file ncx.c */

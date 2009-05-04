@@ -9055,4 +9055,38 @@ boolean
 }   /* obj_get_config_flag_deep */
 
 
+/********************************************************************
+* FUNCTION obj_get_fraction_digits
+* 
+* Get the fraction-digits field from the object typdef
+*
+* INPUTS:
+*     obj == object template to  check
+*
+* RETURNS:
+*     number of fixed decimal digits expected (1..18)
+*     0 if some error
+*********************************************************************/
+uint8
+    obj_get_fraction_digits (const obj_template_t  *obj)
+{
+    const typ_def_t  *typdef;
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
+    typdef = obj_get_ctypdef(obj);
+    if (typdef) {
+	return typ_get_fraction_digits(typdef);
+    } else {
+	return 0;
+    }
+
+}  /* obj_get_fraction_digits */
+
+
 /* END obj.c */

@@ -584,6 +584,7 @@ static status_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
+    case NCX_BT_DECIMAL64:
 	if (rdef->flags & TYP_FL_LBMIN) {
 	    skipit = TRUE;
 	} else {
@@ -593,7 +594,6 @@ static status_t
 	    }
 	}
 	break;
-    case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
 	if (rdef->flags & TYP_FL_LBINF) {
 	    skipit = TRUE;
@@ -658,6 +658,7 @@ static status_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
+    case NCX_BT_DECIMAL64:
 	if (rdef->flags & TYP_FL_UBMAX) {
 	    skipit = TRUE;
 	} else {
@@ -667,7 +668,6 @@ static status_t
 	    }
 	}
 	break;
-    case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
 	if (rdef->flags & TYP_FL_UBINF) {
 	    skipit = TRUE;
@@ -1465,7 +1465,7 @@ status_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
     case NCX_BT_BINARY:
     case NCX_BT_BOOLEAN:
@@ -1688,7 +1688,7 @@ status_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
 	isext = FALSE;
 	hasnodes = (mdef || rdef) ? TRUE : FALSE;	

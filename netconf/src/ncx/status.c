@@ -597,6 +597,10 @@ const char *
 	return "variable not found";
     case ERR_NCX_VAR_READ_ONLY:
 	return "variable is read-only";
+    case ERR_NCX_DEC64_BASEOVFL:
+	return "decimal64 base number overflow";
+    case ERR_NCX_DEC64_FRACOVFL:
+	return "decimal64 fraction precision overflow";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

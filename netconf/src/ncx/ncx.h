@@ -325,14 +325,25 @@ extern boolean
 
 extern status_t
     ncx_convert_num (const xmlChar *numstr,
-		     ncx_numfmt_t   numfmt,
+		     ncx_numfmt_t numfmt,
 		     ncx_btype_t  btyp,
 		     ncx_num_t    *val);
+
+extern status_t
+    ncx_convert_dec64 (const xmlChar *numstr,
+		       ncx_numfmt_t numfmt,
+		       uint8 digits,
+		       ncx_num_t *val);
 
 extern status_t 
     ncx_decode_num (const xmlChar *numstr,
 		    ncx_btype_t  btyp,
 		    ncx_num_t  *retnum);
+
+extern status_t 
+    ncx_decode_dec64 (const xmlChar *numstr,
+		      uint8 digits,
+		      ncx_num_t  *retnum);
 
 extern status_t
     ncx_copy_num (const ncx_num_t *num1,
@@ -396,8 +407,12 @@ extern boolean
 extern status_t
     ncx_convert_tkcnum (tk_chain_t *tkc,
 			ncx_btype_t  btyp,
-			ncx_num_t    *val);
+			ncx_num_t *val);
 
+extern status_t
+    ncx_convert_tkc_dec64 (tk_chain_t *tkc,
+			   uint8 digits,
+			   ncx_num_t *val);
 
 /********************** ncx_str_t *********************/
 
@@ -706,9 +721,6 @@ extern obj_template_t *
     ncx_get_gen_empty (void);
 
 extern obj_template_t *
-    ncx_get_gen_float (void);
-
-extern obj_template_t *
     ncx_get_gen_root (void);
 
 /* translate ncx_layer_t enum to a string */
@@ -881,5 +893,11 @@ extern const xmlChar *
 
 extern const xmlChar *
     ncx_get_mod_xmlprefix (const ncx_module_t *mod);
+
+extern int64
+    ncx_get_dec64_base (const ncx_num_t *num);
+
+extern int64
+    ncx_get_dec64_fraction (const ncx_num_t *num);
 
 #endif	    /* _H_ncx */

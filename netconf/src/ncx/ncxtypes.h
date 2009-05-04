@@ -139,9 +139,9 @@ typedef enum ncx_btype_t_ {
     NCX_BT_UINT8,
     NCX_BT_UINT16,
     NCX_BT_UINT32,
-    NCX_BT_UINT64,
-    NCX_BT_FLOAT32,
-    NCX_BT_FLOAT64,
+    NCX_BT_UINT64,   
+    NCX_BT_DECIMAL64,
+    NCX_BT_FLOAT64,   /* hidden: just for XPath */
     NCX_BT_STRING,
     NCX_BT_BINARY,
     NCX_BT_INSTANCE_ID,
@@ -367,25 +367,27 @@ typedef enum ncx_xpath_axis_t_ {
 } ncx_xpath_axis_t;
 
 
+typedef struct ncx_dec64_t_ {
+    int64  val;        /* adjusted number to fit in 64 bits */
+    uint8  digits;      /* number of decimal digits 1 .. 18 */
+} ncx_dec64_t;
+
+
 /* union of all the basic number types
- * if float not supported, then it is stored as a string 
+ * if float not supported, then it is stored as an int64
  */
 typedef union ncx_num_t_ {
     int32  i;                            /* NCX_BT_INT */
     int64  l;                           /* NCX_BT_LONG */
     uint32 u;                           /* NCX_BT_UINT */
     uint64 ul;                         /* NCX_BT_ULONG */
-#ifdef HAS_FLOAT
-# ifdef STRTOF_FIXED
-    float f;                           /* NCX_BT_FLOAT */
-# else
-    double f;                          /* NCX_BT_FLOAT */
-# endif
+    
+#ifdef HAS_FLOAT             /* 'd' used only in XPath */
     double d;                         /* NCX_BT_DOUBLE */
 #else
-    int64  f;                       /* NCX_BT_FLOAT */
-    int64  d;                      /* NCX_BT_DOUBLE */
+    int64  d;                         /* NCX_BT_DOUBLE */
 #endif
+    ncx_dec64_t  dec;              /* NCX_BT_DECIMAL64 */
 } ncx_num_t;
 
 

@@ -19,8 +19,8 @@
     NCX_BT_UINT32           uint16
     NCX_BT_UINT32           uint32
     NCX_BT_UINT64           uint64
-    NCX_BT_FLOAT            float32
-    NCX_BT_DOUBLE           float64
+    NCX_BT_DECIMAL64        decimal64
+    NCX_BT_FLOAT64          float64
     NCX_BT_STRING           string
     NCX_BT_USTRING          binary
     NCX_BT_UNION            union
@@ -424,7 +424,7 @@ static status_t
 	} else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MAX)) {
 	    /* flag lower bound max for later eval */
 	    rv->flags |= TYP_FL_LBMAX;
-	} else if (btyp==NCX_BT_FLOAT32 || btyp==NCX_BT_FLOAT64) {
+	} else if (btyp==NCX_BT_FLOAT64) {
 	    /* -INF and INF keywords allowed for real numbers */
 	    if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_NEGINF)) {
 		/* flag lower bound -INF for later eval */
@@ -440,7 +440,13 @@ static status_t
 	}
     } else if (TK_CUR_NUM(tkc)) {
 	if (btyp != NCX_BT_NONE) {
-	    res = ncx_convert_tkcnum(tkc, btyp, &rv->lb);
+	    if (btyp == NCX_BT_DECIMAL64) {
+		res = ncx_convert_tkc_dec64(tkc, 
+					    typ_get_fraction_digits(typdef), 
+					    &rv->lb);
+	    } else {
+		res = ncx_convert_tkcnum(tkc, btyp, &rv->lb);
+	    }
 	} else {
 	    rv->lbstr = xml_strdup(TK_CUR_VAL(tkc));
 	    if (!rv->lbstr) {
@@ -524,7 +530,7 @@ static status_t
 	    } else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MAX)) {
 		/* flag upper bound max for later eval */
 		rv->flags |= TYP_FL_UBMAX;
-	    } else if (btyp==NCX_BT_FLOAT32 || btyp==NCX_BT_FLOAT64) {
+	    } else if (btyp==NCX_BT_FLOAT64) {
 		if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_NEGINF)) {
 		    /* flag upper bound -INF for later eval */
 		    rv->flags |= TYP_FL_UBINF2;
@@ -539,7 +545,14 @@ static status_t
 	    }
 	} else if (TK_CUR_NUM(tkc)) {
 	    if (btyp != NCX_BT_NONE) {
-		res = ncx_convert_tkcnum(tkc, btyp, &rv->ub);
+		if (btyp == NCX_BT_DECIMAL64) {
+		    res = ncx_convert_tkc_dec64
+			(tkc, 
+			 typ_get_fraction_digits(typdef), 
+			 &rv->ub);
+		} else {
+		    res = ncx_convert_tkcnum(tkc, btyp, &rv->ub);
+		}
 	    } else {
 		rv->ubstr = xml_strdup(TK_CUR_VAL(tkc));
 		if (!rv->ubstr) {
@@ -980,6 +993,7 @@ static status_t
 * INPUTS:
 *   tkc    == token chain
 *   mod    == module in progress
+*   btyp == basetype of the number
 *   typdef == typ_def_t in progress
 *
 * RETURNS:
@@ -988,16 +1002,20 @@ static status_t
 static status_t 
     finish_number_type (tk_chain_t  *tkc,
 			ncx_module_t *mod,
+			ncx_btype_t btyp,
 			typ_def_t *typdef)
 {
     const xmlChar *val;
     const char    *expstr;
     tk_type_t      tktyp;
     status_t       res, retres;
-    boolean        done, rangedone;
+    uint32         digits;
+    boolean        done, rangedone, digitsdone;
 
     expstr = "range keyword";
     rangedone = FALSE;
+    digitsdone = FALSE;
+    digits = 0;
     res = NO_ERR;
     retres = NO_ERR;
     done = FALSE;
@@ -1047,6 +1065,38 @@ static status_t
 	    rangedone = TRUE;
 	    res = consume_yang_range(tkc, mod, typdef, TRUE);
 	    CHK_EXIT(res, retres);
+	} else if (!xml_strcmp(val, YANG_K_FRACTION_DIGITS)) {
+	    res = yang_consume_uint32(tkc,
+				      mod,
+				      &digits,
+				      &digitsdone,
+				      &typdef->appinfoQ);
+	    if (res == NO_ERR && btyp != NCX_BT_DECIMAL64) {
+		retres = res = ERR_NCX_RESTRICT_NOT_ALLOWED;
+		log_error("\nError: fraction-digits found for '%s'",
+			  tk_get_btype_sym(btyp));
+		ncx_print_errormsg(tkc, mod, retres);
+	    }
+
+	    if (res == NO_ERR) {
+		/* check value is actually in proper range */
+		if (digits < TYP_DEC64_MIN_DIGITS ||
+		    digits > TYP_DEC64_MAX_DIGITS) {
+		    retres = res = ERR_NCX_INVALID_VALUE;
+		    log_error("\nError: fraction-digits '%u' out of range",
+			      digits);
+		    ncx_print_errormsg(tkc, mod, retres);
+		}
+	    }
+
+	    if (res == NO_ERR) {
+		res = typ_set_fraction_digits(typdef, (uint8)digits);
+		if (res != NO_ERR) {
+		    retres = res;
+		    log_error("\nError: set fraction-digits failed");
+		    ncx_print_errormsg(tkc, mod, retres);
+		}
+	    }
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -2404,7 +2454,7 @@ static status_t
 		    res = ncx_copy_num(&pfirstrv->lb, &rv->lb, rbtyp);
 		}
 	    } else {
-		if (rbtyp==NCX_BT_FLOAT32 || rbtyp==NCX_BT_FLOAT64) {
+		if (rbtyp==NCX_BT_FLOAT64) {
 		    rv->flags |= TYP_FL_LBINF;
 		} else {
 		    ncx_set_num_min(&rv->lb, rbtyp);
@@ -2420,7 +2470,7 @@ static status_t
 		    res = ncx_copy_num(&plastrv->ub, &rv->lb, rbtyp);
 		}
 	    } else {
-		if (rbtyp==NCX_BT_FLOAT32 || rbtyp==NCX_BT_FLOAT64) {
+		if (rbtyp==NCX_BT_FLOAT64) {
 		    rv->flags |= TYP_FL_LBINF2;
 		} else {
 		    ncx_set_num_max(&rv->lb, rbtyp);
@@ -2445,7 +2495,7 @@ static status_t
 		    res = ncx_copy_num(&plastrv->ub, &rv->ub, rbtyp);
 		}
 	    } else {
-		if (rbtyp==NCX_BT_FLOAT32 || rbtyp==NCX_BT_FLOAT64) {
+		if (rbtyp==NCX_BT_FLOAT64) {
 		    rv->flags |= TYP_FL_UBINF;
 		} else {
 		    ncx_set_num_max(&rv->ub, rbtyp);
@@ -2461,7 +2511,7 @@ static status_t
 		    res = ncx_copy_num(&pfirstrv->lb, &rv->ub, rbtyp);
 		}
 	    } else {
-		if (rbtyp==NCX_BT_FLOAT32 || rbtyp==NCX_BT_FLOAT64) {
+		if (rbtyp==NCX_BT_FLOAT64) {
 		    rv->flags |= TYP_FL_UBINF2;
 		} else {
 		    ncx_set_num_min(&rv->ub, rbtyp);
@@ -3456,9 +3506,9 @@ static status_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
-	res = finish_number_type(tkc, mod, typdef);
+	res = finish_number_type(tkc, mod, btyp, typdef);
 	CHK_EXIT(res, retres);
 	break;
     case NCX_BT_STRING:

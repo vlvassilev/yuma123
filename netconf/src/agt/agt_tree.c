@@ -392,13 +392,15 @@ static boolean
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
 	ncx_init_num(&num);
 	res = ncx_decode_num(testval, cmpval->btyp, &num);
 	if (res == NO_ERR) {
-	    testres = !ncx_compare_nums(&num, &cmpval->v.num, 
-					curval->btyp) ? TRUE : FALSE;
+	    testres = !ncx_compare_nums(&num, 
+					&cmpval->v.num, 
+					curval->btyp) 
+		? TRUE : FALSE;
 	}
 	ncx_clean_num(cmpval->btyp, &num);
 	break;

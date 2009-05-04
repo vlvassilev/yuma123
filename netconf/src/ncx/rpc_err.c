@@ -166,7 +166,7 @@ static void
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
 	ncx_printf_num(&errinfo->v.numval, errinfo->val_btype);
 	break;

@@ -1126,7 +1126,7 @@ void
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
 	res = ncx_sprintf_num(buff, 
 			      &useval->v.num, 

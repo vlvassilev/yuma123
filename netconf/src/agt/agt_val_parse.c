@@ -196,9 +196,15 @@ static status_t
 
     res = NO_ERR;
 
-    agt_record_error(scb, msg, NCX_LAYER_OPERATION, errcode, 
-		     errnode, errnodetyp, error_parm, 
-		     intnodetyp, intnode);
+    agt_record_error(scb, 
+		     msg, 
+		     NCX_LAYER_OPERATION, 
+		     errcode, 
+		     errnode, 
+		     errnodetyp, 
+		     error_parm, 
+		     intnodetyp, 
+		     intnode);
 
     if (scb && startnode) {
 	res = agt_xml_skip_subtree(scb, startnode);
@@ -253,9 +259,16 @@ static status_t
 
     res = NO_ERR;
 
-    agt_record_error_errinfo(scb, msg, NCX_LAYER_OPERATION, errcode, 
-			     errnode, errnodetyp, error_parm, 
-			     intnodetyp, intnode, errinfo);
+    agt_record_error_errinfo(scb, 
+			     msg, 
+			     NCX_LAYER_OPERATION, 
+			     errcode, 
+			     errnode, 
+			     errnodetyp, 
+			     error_parm, 
+			     intnodetyp, 
+			     intnode, 
+			     errinfo);
 
     if (scb && startnode) {
 	res = agt_xml_skip_subtree(scb, startnode);
@@ -1104,9 +1117,15 @@ static status_t
     if (res != NO_ERR) {
 	/* fatal error */
 	if (!errdone) {
-	    (void)parse_error_subtree(scb, msg, startnode,
-				      errnode, res, NCX_NT_NONE, 
-				      NULL, NCX_NT_VAL, retval);
+	    (void)parse_error_subtree(scb, 
+				      msg, 
+				      startnode,
+				      errnode, 
+				      res, 
+				      NCX_NT_NONE, 
+				      NULL, 
+				      NCX_NT_VAL, 
+				      retval);
 	}
 	xml_clean_node(&valnode);
 	return res;
@@ -1126,20 +1145,34 @@ static status_t
 	errnode = &valnode;
 	break;
     case XML_NT_STRING:
-	/* convert the non-whitespace string to a number */
+	/* convert the non-whitespace string to a number
+	 * XML numbers are only allowed to be in decimal
+	 * or real format, not octal or hex
+	 */
 	numfmt = ncx_get_numfmt(valnode.simval);
 	if (numfmt == NCX_NF_OCTAL) {
 	    numfmt = NCX_NF_DEC;
 	}
 	if (numfmt == NCX_NF_DEC || numfmt == NCX_NF_REAL) {
-	    res = ncx_convert_num(valnode.simval, numfmt,
-				 btyp, &retval->v.num);
+	    if (btyp == NCX_BT_DECIMAL64) {
+		res = ncx_convert_dec64(valnode.simval, 
+					numfmt,
+					obj_get_fraction_digits(obj),
+					&retval->v.num);
+	    } else {
+		res = ncx_convert_num(valnode.simval, 
+				      numfmt,
+				      btyp, 
+				      &retval->v.num);
+	    }
 	}  else {
 	    res = ERR_NCX_WRONG_NUMTYP;
 	}
 	if (res == NO_ERR) {
-	    res = val_range_ok_errinfo(obj_get_ctypdef(obj), btyp, 
-				       &retval->v.num, &errinfo);
+	    res = val_range_ok_errinfo(obj_get_ctypdef(obj), 
+				       btyp, 
+				       &retval->v.num, 
+				       &errinfo);
 	}
 	if (res != NO_ERR) {
 	    badval = valnode.simval;
@@ -1186,9 +1219,16 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR) && !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)parse_error_subtree_errinfo(scb, msg, startnode,
-					  errnode, res, NCX_NT_STRING, 
-					  badval, NCX_NT_VAL, retval, errinfo);
+	(void)parse_error_subtree_errinfo(scb, 
+					  msg, 
+					  startnode,
+					  errnode, 
+					  res, 
+					  NCX_NT_STRING, 
+					  badval, 
+					  NCX_NT_VAL, 
+					  retval, 
+					  errinfo);
     }
 
     xml_clean_node(&valnode);
@@ -2405,9 +2445,15 @@ static status_t
 	res = ERR_NCX_EXTRA_ATTR;
 	qname.nsid = yangid;
 	qname.name = YANG_K_INSERT;
-	agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, 
-			 NULL, NCX_NT_QNAME, &qname, 
-			 NCX_NT_VAL, val);
+	agt_record_error(scb, 
+			 msg, 
+			 NCX_LAYER_CONTENT, 
+			 res, 
+			 NULL, 
+			 NCX_NT_QNAME, 
+			 &qname, 
+			 NCX_NT_VAL, 
+			 val);
     }
 
     /* check the inst count of the YANG attributes
@@ -2572,16 +2618,35 @@ static status_t
      */
     switch (btyp) {
     case NCX_BT_ANY:
-	res = parse_any_nc(scb, msg, startnode, parentdc, retval);
+	res = parse_any_nc(scb, 
+			   msg, 
+			   startnode, 
+			   parentdc, 
+			   retval);
 	break;
     case NCX_BT_ENUM:
-	res = parse_enum_nc(scb, msg, obj, startnode, parentdc, retval);
+	res = parse_enum_nc(scb, 
+			    msg, 
+			    obj, 
+			    startnode, 
+			    parentdc, 
+			    retval);
 	break;
     case NCX_BT_EMPTY:
-	res = parse_empty_nc(scb, msg, obj, startnode, parentdc, retval);
+	res = parse_empty_nc(scb, 
+			     msg, 
+			     obj, 
+			     startnode, 
+			     parentdc, 
+			     retval);
 	break;
     case NCX_BT_BOOLEAN:
-	res = parse_boolean_nc(scb, msg, obj, startnode, parentdc, retval);
+	res = parse_boolean_nc(scb, 
+			       msg, 
+			       obj, 
+			       startnode, 
+			       parentdc, 
+			       retval);
 	break;
     case NCX_BT_INT8:
     case NCX_BT_INT16:
@@ -2591,10 +2656,15 @@ static status_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
-	res = parse_num_nc(scb, msg, obj, btyp, startnode, 
-			   parentdc, retval);
+	res = parse_num_nc(scb, 
+			   msg, 
+			   obj, 
+			   btyp, 
+			   startnode, 
+			   parentdc, 
+			   retval);
 	break;
     case NCX_BT_LEAFREF:
     case NCX_BT_STRING:
@@ -2614,10 +2684,20 @@ static status_t
 			      retval);
 	break;
     case NCX_BT_IDREF:
-	res = parse_idref_nc(scb, msg, obj, startnode, parentdc, retval);
+	res = parse_idref_nc(scb, 
+			     msg, 
+			     obj, 
+			     startnode, 
+			     parentdc, 
+			     retval);
 	break;
     case NCX_BT_UNION:
-	res = parse_union_nc(scb, msg, obj, startnode, parentdc, retval);
+	res = parse_union_nc(scb, 
+			     msg, 
+			     obj, 
+			     startnode, 
+			     parentdc, 
+			     retval);
 	break;
     case NCX_BT_CONTAINER:
     case NCX_BT_LIST:

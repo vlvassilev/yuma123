@@ -968,10 +968,14 @@ static boolean
     if (numfmt == NCX_NF_DEC || numfmt == NCX_NF_REAL) {
 	ncx_init_num(&num2);
 	
-	res = ncx_convert_num(numstr2, numfmt, 
-			      NCX_BT_FLOAT64, &num2);
+	res = ncx_convert_num(numstr2, 
+			      numfmt, 
+			      NCX_BT_FLOAT64, 
+			      &num2);
 	if (res == NO_ERR) {
-	    cmpresult = ncx_compare_nums(num1, &num2, NCX_BT_FLOAT64);
+	    cmpresult = ncx_compare_nums(num1, 
+					 &num2, 
+					 NCX_BT_FLOAT64);
 	}
 	ncx_clean_num(NCX_BT_FLOAT64, &num2);
     } else if (numfmt == NCX_NF_NONE) {

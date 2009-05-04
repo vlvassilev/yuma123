@@ -1496,8 +1496,8 @@ const xmlChar *
 	return NCX_EL_UNSIGNED_INT;
     case NCX_BT_UINT64:
 	return NCX_EL_UNSIGNED_LONG;
-    case NCX_BT_FLOAT32:
-	return NCX_EL_FLOAT;
+    case NCX_BT_DECIMAL64:
+	return NCX_EL_LONG;
     case NCX_BT_FLOAT64:
 	return NCX_EL_DOUBLE;
     case NCX_BT_STRING:

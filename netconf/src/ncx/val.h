@@ -310,7 +310,7 @@ typedef struct val_value_t_ {
 	 *   NCX_BT_INT32, NCX_BT_INT64
 	 *   NCX_BT_UINT8, NCX_BT_UINT16
 	 *   NCX_BT_UINT32, NCX_BT_UINT64
-	 *   NCX_BT_FLOAT32, NCX_BT_FLOAT64 
+	 *   NCX_BT_DECIMAL64, NCX_BT_FLOAT64 
 	 */
 	ncx_num_t   num; 
 

@@ -1169,6 +1169,15 @@ static void
 	case NCX_BT_BOOLEAN:
 	    /* appinfo only */
 	    break;
+	case NCX_BT_DECIMAL64:
+	    sprintf(buff, "%d", typ_get_fraction_digits(typdef));
+	    write_simple_str(scb,
+			     YANG_K_FRACTION_DIGITS,
+			     (const xmlChar *)buff,
+			     startindent,
+			     0,
+			     FALSE);
+	    /* fall through to check range */
 	case NCX_BT_INT8:
 	case NCX_BT_INT16:
 	case NCX_BT_INT32:
@@ -1177,7 +1186,6 @@ static void
 	case NCX_BT_UINT16:
 	case NCX_BT_UINT32:
 	case NCX_BT_UINT64:
-	case NCX_BT_FLOAT32:
 	case NCX_BT_FLOAT64:
 	    range = typ_get_crange_con(typdef);
 	    if (range && range->rangestr) {

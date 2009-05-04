@@ -1,5 +1,11 @@
 /*  FILE: val.c
 
+   support for the val_value_t data structure
+
+   Note: NCX_BT_LEAFREF code marked with a **** comment
+   is not completed yet.  The string value version of the
+   leafref is always returned, instead of the canonical form
+   of the data type of the leafref path target
 		
 *********************************************************************
 *                                                                   *
@@ -497,7 +503,7 @@ static void
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
 	ncx_clean_num(btyp, &val->v.num);
 	break;
@@ -621,9 +627,10 @@ static void
     case NCX_BT_UINT64:
 	dest->v.num.ul = src->v.num.ul;
 	break;
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
 	ncx_clean_num(btyp, &dest->v.num);
-	dest->v.num.f = src->v.num.f;
+	dest->v.num.dec.val = src->v.num.dec.val;
+	dest->v.num.dec.digits = src->v.num.dec.digits;
 	break;
     case NCX_BT_FLOAT64:
 	ncx_clean_num(btyp, &dest->v.num);
@@ -1023,7 +1030,7 @@ static void
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
 	switch (dumpmode) {
 	case DUMP_VAL_STDOUT:
@@ -2720,11 +2727,19 @@ status_t
     case NCX_BT_INT16:
     case NCX_BT_INT32:
     case NCX_BT_INT64:
-    case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
 	res = ncx_decode_num(simval, btyp, &num);
 	if (res == NO_ERR) {
 	    res = val_range_ok_errinfo(typdef, btyp, &num, errinfo);
+	}
+	ncx_clean_num(btyp, &num);
+	break;
+    case NCX_BT_DECIMAL64:
+	res = ncx_decode_dec64(simval, 
+			       typ_get_fraction_digits(typdef),
+			       &num);
+	if (res == NO_ERR) {
+	    res = val_range_ok(typdef, btyp, &num);
 	}
 	ncx_clean_num(btyp, &num);
 	break;
@@ -3521,7 +3536,7 @@ status_t
 *  NCX_BT_UINT16
 *  NCX_BT_UINT32
 *  NCX_BT_UINT64
-*  NCX_BT_FLOAT32
+*  NCX_BT_DECIMAL64
 *  NCX_BT_FLOAT64
 *  NCX_BT_BINARY
 *  NCX_BT_STRING
@@ -3603,13 +3618,22 @@ status_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
 	if (valstr && *valstr) {
 	    res = ncx_convert_num(valstr, 
 				  NCX_NF_NONE, 
 				  val->btyp, 
 				  &val->v.num);
+	} else {
+	    res = ERR_NCX_EMPTY_VAL;
+	}
+	break;
+    case NCX_BT_DECIMAL64:
+	if (valstr && *valstr) {
+	    res = ncx_convert_dec64(valstr, 
+				    NCX_NF_NONE, 
+				    typ_get_fraction_digits(val->typdef), 
+				    &val->v.num);
 	} else {
 	    res = ERR_NCX_EMPTY_VAL;
 	}
@@ -3914,7 +3938,7 @@ boolean
 	case NCX_BT_UINT16:
 	case NCX_BT_UINT32:
 	case NCX_BT_UINT64:
-	case NCX_BT_FLOAT32:
+	case NCX_BT_DECIMAL64:
 	case NCX_BT_FLOAT64:
 	case NCX_BT_STRING:
 	case NCX_BT_BINARY:
@@ -4122,7 +4146,7 @@ val_value_t *
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
 	*res = ncx_copy_num(&val->v.num, &copy->v.num, val->btyp);
 	break;
@@ -6223,7 +6247,7 @@ int32
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
 	ret = ncx_compare_nums(&val1->v.num, &val2->v.num, btyp);
 	break;
@@ -6501,11 +6525,28 @@ status_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
 	res = ncx_sprintf_num(buff, &val->v.num, btyp, len);
 	if (res != NO_ERR) {
 	    return SET_ERROR(res);
+	}
+	break;
+    case NCX_BT_DECIMAL64:
+	if (val->v.num.dec.val == 0) {
+	    if (buff) {
+		*len = xml_strcpy(buff, (const xmlChar *)"0.0");
+	    } else {
+		*len = xml_strlen((const xmlChar *)"0.0");
+	    }
+	} else {
+	    /* need to generate the value string */
+	    res = ncx_sprintf_num(buff, 
+				  &val->v.num, 
+				  btyp, 
+				  len);
+	    if (res != NO_ERR) {
+		return SET_ERROR(res);
+	    }
 	}
 	break;
     case NCX_BT_STRING:	
@@ -7009,9 +7050,16 @@ status_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
 	res = ncx_decode_num(attrval, btyp, &retval->v.num);
+	if (res == NO_ERR) {
+	    res = val_range_ok(typdef, btyp, &retval->v.num);
+	}
+	break;
+    case NCX_BT_DECIMAL64:
+	res = ncx_decode_dec64(attrval, 
+			       typ_get_fraction_digits(typdef),
+			       &retval->v.num);
 	if (res == NO_ERR) {
 	    res = val_range_ok(typdef, btyp, &retval->v.num);
 	}
@@ -7117,7 +7165,7 @@ boolean
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
 	return TRUE;
     case NCX_BT_BINARY:
@@ -7453,10 +7501,20 @@ boolean
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
     case NCX_BT_FLOAT64:
 	ncx_init_num(&num);
 	res = ncx_decode_num(def, btyp, &num);
+	if (res == NO_ERR && 
+	    !ncx_compare_nums(&num, &val->v.num, btyp)) {
+	    ret = TRUE;
+	}
+	ncx_clean_num(btyp, &num);
+	break;
+    case NCX_BT_DECIMAL64:
+	ncx_init_num(&num);
+	res = ncx_decode_dec64(def,
+			       typ_get_fraction_digits(val->typdef),
+			       &num);
 	if (res == NO_ERR && 
 	    !ncx_compare_nums(&num, &val->v.num, btyp)) {
 	    ret = TRUE;

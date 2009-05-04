@@ -1110,4 +1110,7 @@ extern const obj_template_t *
 extern boolean
     obj_get_config_flag_deep (const obj_template_t *obj);
 
+extern uint8
+    obj_get_fraction_digits (const obj_template_t  *obj);
+
 #endif	    /* _H_obj */

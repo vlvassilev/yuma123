@@ -3078,7 +3078,10 @@ status_t
 	numbuff[0] = datestr[5];
 	numbuff[1] = datestr[6];
 	numbuff[2] = 0;
-	res = ncx_convert_num(numbuff, NCX_NF_DEC, NCX_BT_UINT32, &num);
+	res = ncx_convert_num(numbuff, 
+			      NCX_NF_DEC, 
+			      NCX_BT_UINT32, 
+			      &num);
 	if (res != NO_ERR) {
 	    retres = ERR_NCX_INVALID_VALUE;
 	    log_error("\nError: Invalid month string (%s)", numbuff);
@@ -3105,7 +3108,10 @@ status_t
 	numbuff[0] = datestr[8];
 	numbuff[1] = datestr[9];
 	numbuff[2] = 0;
-	res = ncx_convert_num(numbuff, NCX_NF_DEC, NCX_BT_UINT32, &num);
+	res = ncx_convert_num(numbuff, 
+			      NCX_NF_DEC, 
+			      NCX_BT_UINT32, 
+			      &num);
 	if (res != NO_ERR) {
 	    retres = ERR_NCX_INVALID_VALUE;
 	    log_error("\nError: Invalid day string (%s)", numbuff);

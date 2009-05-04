@@ -433,8 +433,8 @@ static void
     case NCX_BT_UINT64:
 	ses_putstr(scb, UINT64);
 	break;
-    case NCX_BT_FLOAT32:
-	ses_putstr(scb, FLOAT);
+    case NCX_BT_DECIMAL64:
+	ses_putstr(scb, INT64);
 	break;
     case NCX_BT_FLOAT64:
 	ses_putstr(scb, DOUBLE);

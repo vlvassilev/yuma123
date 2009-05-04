@@ -812,8 +812,17 @@ static status_t
 	    numfmt = NCX_NF_DEC;
 	}
 	if (numfmt == NCX_NF_DEC || numfmt == NCX_NF_REAL) {
-	    res = ncx_convert_num(valnode.simval, numfmt,
-				  btyp, &retval->v.num);
+	    if (btyp == NCX_BT_DECIMAL64) {
+		res = ncx_convert_dec64(valnode.simval, 
+					numfmt,
+					obj_get_fraction_digits(obj),
+					&retval->v.num);
+	    } else {
+		res = ncx_convert_num(valnode.simval, 
+				      numfmt,
+				      btyp, 
+				      &retval->v.num);
+	    }
 	}  else {
 	    res = ERR_NCX_WRONG_NUMTYP;
 	}
@@ -2171,7 +2180,7 @@ static status_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
 	res = parse_num(scb, obj, btyp, startnode, retval);
 	break;
@@ -2287,7 +2296,7 @@ static status_t
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-    case NCX_BT_FLOAT32:
+    case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
 	res = parse_num(scb, obj, btyp, startnode, retval);
 	break;

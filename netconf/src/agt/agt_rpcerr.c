@@ -480,6 +480,8 @@ static rpc_err_t
     case ERR_NCX_LEAFREF_LOOP:
     case ERR_NCX_VAR_NOT_FOUND:
     case ERR_NCX_VAR_READ_ONLY:
+    case ERR_NCX_DEC64_BASEOVFL:
+    case ERR_NCX_DEC64_FRACOVFL:
 	return RPC_ERR_INVALID_VALUE;
 
     /* user warnings start at 400 and do not need to be listed here */

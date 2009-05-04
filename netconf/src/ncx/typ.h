@@ -52,6 +52,10 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/* decimal64 constants */
+#define TYP_DEC64_MIN_DIGITS   1
+#define TYP_DEC64_MAX_DIGITS   18
+
 /* typ_rangedef_t flags field */
 #define TYP_FL_LBINF     bit0         /* lower bound = -INF */
 #define TYP_FL_LBINF2    bit1         /* lower bound = INF */
@@ -223,8 +227,8 @@ typedef struct typ_idref_t {
  *  NCX_BT_UINT16 -- 16 bit unsigned integer value
  *  NCX_BT_UINT32 -- 32 bit unsigned integer value
  *  NCX_BT_UINT64 -- 64 bit unsigned integer value
- *  NCX_BT_FLOAT32 -- 32 bit float number value
- *  NCX_BT_FLOAT64 -- 64 bit float number value
+ *  NCX_BT_DECIMAL64 -- 64 bit fixed-point number value
+ *  NCX_BT_FLOAT64 -- 64 bit floating-point number value
  *  NCX_BT_STRING -- char string
  *  NCX_BT_BINARY -- binary string (base64 from RFC 4648)
  *  NCX_BT_LEAFREF -- YANG leafref (XPath path expression)
@@ -252,6 +256,7 @@ typedef struct typ_simple_t_ {
     uint32           flags;
     uint32           maxbit;                /* max bit position in valQ */
     uint32           maxenum;                 /* max enum value in valQ */
+    uint8            digits;           /* fraction-digits for decimal64 */
 } typ_simple_t;
 
 
@@ -790,5 +795,17 @@ extern typ_idref_t *
 
 extern const typ_idref_t *
     typ_get_cidref (const typ_def_t  *typdef);
+
+/* typdef must be an NCX_BT_DECIMAL64 or 0 will be returned
+ * valid values are 1..18
+ */
+extern uint8
+    typ_get_fraction_digits (const typ_def_t *typdef);
+
+
+extern status_t
+    typ_set_fraction_digits (typ_def_t *typdef,
+			     uint8 digits);
+
 
 #endif	    /* _H_typ */

@@ -268,6 +268,7 @@ typedef struct rpc_err_info_ {
     xmlChar           *dname;
     boolean            isqname;     /* val_nsid + v.strval == QName */
     ncx_btype_t        val_btype;
+    uint8              val_digits;       /* used for decimal64 only */
     xmlns_id_t         val_nsid;
     xmlChar           *badns;      /* if val_nsid INVALID namespace */
     xmlChar           *dval;

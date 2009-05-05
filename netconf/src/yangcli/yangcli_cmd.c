@@ -5547,7 +5547,7 @@ static val_value_t *
 	    return NULL;
 	} else {
 	    /* *valroot is active and in use */
-	    return newparm;
+	    return (newparm) ? newparm : targval;
 	}
     } else if (isselect) {
 	newparm = val_make_string(xmlns_nc_id(),

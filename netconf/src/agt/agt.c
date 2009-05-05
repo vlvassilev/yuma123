@@ -616,4 +616,21 @@ boolean
 }  /* agt_shutdown_requested */
 
 
+/********************************************************************
+* FUNCTION agt_shutdown_mode_requested
+* 
+* Check what shutdown mode was requested
+* 
+* RETURNS:
+*    shutdown mode
+*
+*********************************************************************/
+ncx_shutdowntyp_t
+    agt_shutdown_mode_requested (void)
+{
+    return agt_shutmode;
+
+}  /* agt_shutdown_mode_requested */
+
+
 /* END file agt.c */

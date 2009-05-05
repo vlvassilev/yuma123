@@ -580,6 +580,17 @@ void
 	    free_xmlns(xmlns[i]);
             xmlns[i] = NULL;
         }
+
+	xmlns_invid = 0;
+	xmlns_ncid = 0;
+	xmlns_nsid = 0;
+	xmlns_xsid = 0;
+	xmlns_ncxid = 0;
+	xmlns_xsiid = 0;
+	xmlns_xmlid = 0;
+	xmlns_ncnid = 0;
+	xmlns_yangid = 0;
+	xmlns_next_id = 1;
         xmlns_init_done = FALSE;
     }
 

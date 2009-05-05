@@ -405,37 +405,49 @@ int
     main (int argc, 
 	  const char *argv[])
 {
-    status_t     res;
-    boolean      showver, stdlog;
-    help_mode_t  showhelpmode;
+    status_t           res;
+    boolean            showver, stdlog, done;
+    help_mode_t        showhelpmode;
+    ncx_shutdowntyp_t  shutmode;
 
 #ifdef MEMORY_DEBUG
     mtrace();
 #endif
 
+    done = FALSE;
+
     malloc_cnt = 0;
     free_cnt = 0;
 
-    res = cmn_init(argc, argv, &showver, &showhelpmode);
+    while (!done) {
 
-    stdlog = !log_is_open();
+	res = cmn_init(argc, argv, &showver, &showhelpmode);
+
+	stdlog = !log_is_open();
     
-    if (res != NO_ERR) {
-	log_error("\nnetconfd: init returned (%s)", 
-		  get_error_string(res));
-    } else {
-	if (showver) {
-	    log_write("\nnetconfd version %s\n", progver);
-	} else if (showhelpmode != HELP_MODE_NONE) {
-	    help_program_module(NETCONFD_MOD,
-				NETCONFD_CLI,
-				showhelpmode);
+	if (res != NO_ERR) {
+	    log_error("\nnetconfd: init returned (%s)", 
+		      get_error_string(res));
 	} else {
-	    netconfd_run();
+	    if (showver) {
+		log_write("\nnetconfd version %s\n", progver);
+	    } else if (showhelpmode != HELP_MODE_NONE) {
+		help_program_module(NETCONFD_MOD,
+				    NETCONFD_CLI,
+				    showhelpmode);
+	    } else {
+		netconfd_run();
+	    }
+	}
+
+	shutmode = agt_shutdown_mode_requested();
+
+	netconfd_cleanup();
+
+	if (shutmode == NCX_SHUT_EXIT) {
+	    done = TRUE;
 	}
     }
-
-    netconfd_cleanup();
 
     if (malloc_cnt != free_cnt) {
 	printf("\n*** netconfd error: memory leak (m:%u f:%u)\n", 

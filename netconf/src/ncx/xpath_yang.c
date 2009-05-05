@@ -1389,7 +1389,9 @@ status_t
 			      boolean schemainst,
 			      const obj_template_t **leafobj)
 {
-    status_t  res;
+    status_t          res;
+    boolean           doerror;
+    ncx_btype_t       btyp;
 
 #ifdef DEBUG
     if (!obj || !pcb || !leafobj || !pcb->exprstr) {
@@ -1440,18 +1442,41 @@ status_t
 
 	/* make sure the config vs. non-config rules are followed */
 	if (obj_get_config_flag(obj) &&
-	    !obj_get_config_flag(pcb->targobj) &&
-	    typ_get_constrained(obj_get_ctypdef(obj))) {
+	    !obj_get_config_flag(pcb->targobj)) {
 
-	    res = ERR_NCX_NOT_CONFIG;
-	    if (pcb->logerrors) {
-		log_error("\nError: XPath target '%s' for leafref '%s'"
-			  " must be a config object",
-			  obj_get_name(pcb->targobj),
-			  obj_get_name(obj));
-		ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+	    doerror = TRUE;
+
+	    btyp = obj_get_basetype(obj);
+
+	    /* only some instance-identifier and leafref 
+	     * objects will ever return TRUE 
+	     */
+	    if ((btyp == NCX_BT_INSTANCE_ID || 
+		 btyp == NCX_BT_LEAFREF) && 
+		!typ_get_constrained(obj_get_ctypdef(obj))) {
+		doerror = FALSE;
 	    }
-	    pcb->validateres = res;
+
+	    /* yangcli_util/get_instanceid_parm sets the
+	     * object field to the config root instead
+	     * of the leafref object, so this hack is used
+	     * to suppress the error intended for leafrefs
+	     */
+	    if (obj_is_root(obj)) {
+		doerror = FALSE;
+	    }
+
+	    if (doerror) {
+		res = ERR_NCX_NOT_CONFIG;
+		if (pcb->logerrors) {
+		    log_error("\nError: XPath target '%s' for leafref '%s'"
+			      " must be a config object",
+			      obj_get_name(pcb->targobj),
+			      obj_get_name(obj));
+		    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+		}
+		pcb->validateres = res;
+	    }
 	}
 
 	/* check for a leaf, then if that is OK */

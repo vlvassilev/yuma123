@@ -103,6 +103,10 @@ date         init     comment
 #include  "status.h"
 #endif
 
+#ifndef _H_tstamp
+#include  "tstamp.h"
+#endif
+
 #ifndef _H_val
 #include  "val.h"
 #endif
@@ -1474,6 +1478,76 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION restart_invoke
+*
+* restart : invoke callback
+* 
+* INPUTS:
+*    see rpc/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    restart_invoke (ses_cb_t *scb,
+		    rpc_msg_t *msg,
+		    xml_node_t *methnode)
+{
+    xmlChar   timebuff[TSTAMP_MIN_SIZE];
+
+    (void)msg;
+    (void)methnode;
+
+    tstamp_datetime(timebuff);
+
+    log_write("\n\n**************"
+	      "\nNotice: restart requested\n   by %s "
+	      "on session %u at %s\n\n",
+	      scb->username,
+	      scb->sid,
+	      timebuff);
+
+    agt_request_shutdown(NCX_SHUT_RESTART);
+    return NO_ERR;
+
+} /* restart_invoke */
+
+
+/********************************************************************
+* FUNCTION shutdown_invoke
+*
+* shutdown : invoke callback
+* 
+* INPUTS:
+*    see rpc/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    shutdown_invoke (ses_cb_t *scb,
+		     rpc_msg_t *msg,
+		     xml_node_t *methnode)
+{
+    xmlChar   timebuff[TSTAMP_MIN_SIZE];
+
+    (void)msg;
+    (void)methnode;
+
+    tstamp_datetime(timebuff);
+
+    log_write("\n\n*****************************"
+	      "\nNotice: shutdown requested\n    by %s "
+	      "on session %u at %s\n\n",
+	      scb->username,
+	      scb->sid,
+	      timebuff);
+
+    agt_request_shutdown(NCX_SHUT_EXIT);
+    return NO_ERR;
+
+} /* shutdown_invoke */
+
+
+/********************************************************************
 * FUNCTION register_nc_callbacks
 *
 * Register the agent callback functions for the NETCONF RPC methods 
@@ -1664,24 +1738,50 @@ static status_t
     }
 
     /* load-config extension */
-    res = agt_rpc_register_method(AGT_CLI_MODULE, NCX_EL_LOAD_CONFIG,
-	  AGT_RPC_PH_VALIDATE, load_config_validate);
+    res = agt_rpc_register_method(AGT_CLI_MODULE, 
+				  NCX_EL_LOAD_CONFIG,
+				  AGT_RPC_PH_VALIDATE, 
+				  load_config_validate);
     if (res != NO_ERR) {
 	return SET_ERROR(res);
     }
 
-    res = agt_rpc_register_method(AGT_CLI_MODULE, NCX_EL_LOAD_CONFIG,
-	  AGT_RPC_PH_INVOKE,  load_config_invoke);
+    res = agt_rpc_register_method(AGT_CLI_MODULE, 
+				  NCX_EL_LOAD_CONFIG,
+				  AGT_RPC_PH_INVOKE,
+				  load_config_invoke);
     if (res != NO_ERR) {
 	return SET_ERROR(res);
     }
 
     /* load module extension */
-    res = agt_rpc_register_method(AGT_CLI_MODULE, NCX_EL_LOAD,
-	  AGT_RPC_PH_INVOKE,  load_invoke);
+    res = agt_rpc_register_method(AGT_CLI_MODULE, 
+				  NCX_EL_LOAD,
+				  AGT_RPC_PH_INVOKE,  
+				  load_invoke);
     if (res != NO_ERR) {
 	return SET_ERROR(res);
     }
+
+    /* restart extension */
+    res = agt_rpc_register_method(AGT_CLI_MODULE, 
+				  NCX_EL_RESTART,
+				  AGT_RPC_PH_INVOKE,  
+				  restart_invoke);
+    if (res != NO_ERR) {
+	return SET_ERROR(res);
+    }
+
+
+    /* shutdown extension */
+    res = agt_rpc_register_method(AGT_CLI_MODULE, 
+				  NCX_EL_SHUTDOWN,
+				  AGT_RPC_PH_INVOKE,  
+				  shutdown_invoke);
+    if (res != NO_ERR) {
+	return SET_ERROR(res);
+    }
+
 
     return NO_ERR;
 
@@ -1698,46 +1798,64 @@ static void
     unregister_nc_callbacks (void)
 {
     /* get */
-    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_GET));
+    agt_rpc_unregister_method(NC_MODULE, 
+			      op_method_name(OP_GET));
 
     /* get-config */
-    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_GET_CONFIG));
+    agt_rpc_unregister_method(NC_MODULE, 
+			      op_method_name(OP_GET_CONFIG));
 
     /* edit-config */
-    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_EDIT_CONFIG));
+    agt_rpc_unregister_method(NC_MODULE, 
+			      op_method_name(OP_EDIT_CONFIG));
 
     /* copy-config */
-    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_COPY_CONFIG));
+    agt_rpc_unregister_method(NC_MODULE, 
+			      op_method_name(OP_COPY_CONFIG));
 
     /* delete-config */
-    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_DELETE_CONFIG));
+    agt_rpc_unregister_method(NC_MODULE, 
+			      op_method_name(OP_DELETE_CONFIG));
 
     /* lock */
-    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_LOCK));
+    agt_rpc_unregister_method(NC_MODULE, 
+			      op_method_name(OP_LOCK));
 
     /* unlock */
-    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_UNLOCK));
+    agt_rpc_unregister_method(NC_MODULE, 
+			      op_method_name(OP_UNLOCK));
 
     /* close-session */
-    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_CLOSE_SESSION));
+    agt_rpc_unregister_method(NC_MODULE, 
+			      op_method_name(OP_CLOSE_SESSION));
 
     /* kill-session */
-    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_KILL_SESSION));
+    agt_rpc_unregister_method(NC_MODULE, 
+			      op_method_name(OP_KILL_SESSION));
 
     /* validate */
-    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_VALIDATE));
+    agt_rpc_unregister_method(NC_MODULE, 
+			      op_method_name(OP_VALIDATE));
 
     /* commit */
-    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_COMMIT));
+    agt_rpc_unregister_method(NC_MODULE, 
+			      op_method_name(OP_COMMIT));
 
     /* discard-changes */
-    agt_rpc_unregister_method(NC_MODULE, op_method_name(OP_DISCARD_CHANGES));
+    agt_rpc_unregister_method(NC_MODULE, 
+			      op_method_name(OP_DISCARD_CHANGES));
 
     /* load-config extension */
     agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_LOAD_CONFIG);
 
     /* load module extension */
     agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_LOAD);
+
+    /* restart extension */
+    agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_RESTART);
+
+    /* shutdown extension */
+    agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_SHUTDOWN);
 
 } /* unregister_nc_callbacks */
 

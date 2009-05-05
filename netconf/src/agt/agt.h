@@ -208,4 +208,7 @@ extern void
 extern boolean
     agt_shutdown_requested (void);
 
+extern ncx_shutdowntyp_t
+    agt_shutdown_mode_requested (void);
+
 #endif	    /* _H_agt */

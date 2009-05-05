@@ -552,6 +552,7 @@ static status_t
     status_t               res;
     boolean                haserror, constrained;
     uint32                 nodecount;
+    ncx_btype_t            btyp;
 
     /* skip unless this is a real value tree eval */
     if (!pcb->val || !pcb->val_docroot) {
@@ -581,9 +582,16 @@ static status_t
 		return SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 
-	    constrained = 
-		typ_get_constrained
-		(obj_get_ctypdef(contextval->obj));
+	    btyp = contextval->btyp;
+
+	    if (btyp == NCX_BT_INSTANCE_ID || 
+		btyp == NCX_BT_LEAFREF) {
+		constrained = 
+		    typ_get_constrained
+		    (obj_get_ctypdef(contextval->obj));
+	    } else {
+		constrained = TRUE;
+	    }
 
 	    if (constrained && !nodecount) {
 		/* should have matched exactly one instance */

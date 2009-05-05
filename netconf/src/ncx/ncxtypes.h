@@ -291,6 +291,7 @@ typedef enum ncx_shutdowntyp_t_ {
     NCX_SHUT_NONE,
     NCX_SHUT_RESET,
     NCX_SHUT_RELOAD,
+    NCX_SHUT_RESTART,
     NCX_SHUT_EXIT
 } ncx_shutdowntyp_t;
 

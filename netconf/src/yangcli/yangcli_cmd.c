@@ -701,8 +701,10 @@ static status_t
 	    str = (const xmlChar *)"optional";
 	}
 
-	log_stdout("\nFilling %s %s %s:", str,
-		   obj_get_typestr(parm), objbuff);
+	log_stdout("\nFilling %s %s %s:", 
+		   str,
+		   obj_get_typestr(parm), 
+		   objbuff);
 	    
 	m__free(objbuff);
     }
@@ -2232,6 +2234,84 @@ static void
 
 
 /********************************************************************
+ * FUNCTION show_user_var
+ * 
+ * generate the output for a global or local variable
+ *
+ * INPUTS:
+ *   varname == variable name to show
+ *   vartype == type of user variable
+ *   val == value associated with this variable
+ *   mode == help mode in use
+ *********************************************************************/
+static void
+    show_user_var (const xmlChar *varname,
+		   var_type_t vartype,
+		   const val_value_t *val,
+		   help_mode_t mode)
+{
+    xmlChar      *objbuff;
+    logfn_t       logfn;
+    boolean       imode;
+    int32         doubleindent;
+    status_t      res;
+
+    doubleindent = 1;
+
+    imode = interactive_mode();
+    if (imode) {
+	logfn = log_stdout;
+    } else {
+	logfn = log_write;
+    }
+
+    switch (vartype) {
+    case VAR_TYP_GLOBAL:
+    case VAR_TYP_LOCAL:
+    case VAR_TYP_SESSION:
+	if (xml_strcmp(varname, val->name)) {
+	    doubleindent = 2;
+
+	    (*logfn)("\n   %s ", varname);
+
+	    if (val->obj && obj_is_data_db(val->obj)) {
+		res = obj_gen_object_id(val->obj, &objbuff);
+		if (res != NO_ERR) {
+		    (*logfn)("[no object id]");
+		} else {
+		    (*logfn)("[%s]", objbuff);
+		    m__free(objbuff);
+		}
+	    }
+	}
+	break;
+    default:
+	;
+    }
+
+    if (!typ_is_simple(val->btyp) && mode == HELP_MODE_BRIEF) {
+	if (doubleindent == 1) {
+	    (*logfn)("\n   %s (%s)",
+		     varname,
+		     tk_get_btype_sym(val->btyp));
+	} else {
+	    (*logfn)("\n      (%s)", 
+		     tk_get_btype_sym(val->btyp));
+	}
+    } else {
+	if (imode) {
+	    val_stdout_value(val, 
+			     NCX_DEF_INDENT * doubleindent);
+	} else {
+	    val_dump_value(val, 
+			   NCX_DEF_INDENT * doubleindent);
+	}
+    }
+
+}  /* show_user_var */
+
+
+/********************************************************************
  * FUNCTION do_show_vars (sub-mode of local RPC)
  * 
  * show brief info for all user variables
@@ -2299,24 +2379,10 @@ static void
 		(*logfn)("\nRead-only system variables");
 		first = FALSE;
 	    }
-	    if (typ_is_simple(var->val->btyp)) {
-		if (imode) {
-		    val_stdout_value(var->val, NCX_DEF_INDENT);
-		} else {
-		    val_dump_value(var->val, NCX_DEF_INDENT);
-		}
-	    } else {
-		(*logfn)("\n   %s (%s)", 
-			 var->name,
-			 tk_get_btype_sym(var->val->btyp));
-		if (mode == HELP_MODE_FULL) {
-		    if (imode) {
-			val_stdout_value(var->val, NCX_DEF_INDENT);
-		    } else {
-			val_dump_value(var->val, NCX_DEF_INDENT);
-		    }
-		}
-	    }
+	    show_user_var(var->name, 
+			  var->vartype,
+			  var->val,
+			  mode);
 	}
 	if (first) {
 	    (*logfn)("\nNo read-only system variables");
@@ -2340,24 +2406,10 @@ static void
 		(*logfn)("\nRead-write system variables");
 		first = FALSE;
 	    }
-	    if (typ_is_simple(var->val->btyp)) {
-		if (imode) {
-		    val_stdout_value(var->val, NCX_DEF_INDENT);
-		} else {
-		    val_dump_value(var->val, NCX_DEF_INDENT);
-		}
-	    } else {
-		(*logfn)("\n   %s (%s)", 
-			 var->name,
-			 tk_get_btype_sym(var->val->btyp));
-		if (mode == HELP_MODE_FULL) {
-		    if (imode) {
-			val_stdout_value(var->val, NCX_DEF_INDENT);
-		    } else {
-			val_dump_value(var->val, NCX_DEF_INDENT);
-		    }
-		}
-	    }
+	    show_user_var(var->name,
+			  var->vartype,
+			  var->val,
+			  mode);
 	}
 	if (first) {
 	    (*logfn)("\nNo system config variables");
@@ -2381,24 +2433,10 @@ static void
 		(*logfn)("\nGlobal variables");
 		first = FALSE;
 	    }
-	    if (typ_is_simple(var->val->btyp)) {
-		if (imode) {
-		    val_stdout_value(var->val, NCX_DEF_INDENT);
-		} else {
-		    val_dump_value(var->val, NCX_DEF_INDENT);
-		}
-	    } else {
-		(*logfn)("\n   %s (%s)", 
-			 var->name,
-			 tk_get_btype_sym(var->val->btyp));
-		if (mode == HELP_MODE_FULL) {
-		    if (imode) {
-			val_stdout_value(var->val, NCX_DEF_INDENT);
-		    } else {
-			val_dump_value(var->val, NCX_DEF_INDENT);
-		    }
-		}
-	    }
+	    show_user_var(var->name,
+			  var->vartype,
+			  var->val,
+			  mode);
 	}
 	if (first) {
 	    (*logfn)("\nNo global variables");
@@ -2417,28 +2455,10 @@ static void
 		(*logfn)("\nLocal variables");
 		first = FALSE;
 	    }
-	    if (typ_is_simple(var->val->btyp)) {
-		if (xml_strcmp(var->name, var->val->name)) {
-		    (*logfn)("\n  var %s", var->name);
-		}
-		if (imode) {
-		    val_stdout_value(var->val, NCX_DEF_INDENT);
-		} else {
-		    val_dump_value(var->val, NCX_DEF_INDENT);
-		}
-	    } else {
-		/* just print the data type name for complex types */
-		(*logfn)("\n   %s (%s)", 
-			 var->name,
-			 tk_get_btype_sym(var->val->btyp));
-		if (mode == HELP_MODE_FULL) {
-		    if (imode) {
-			val_stdout_value(var->val, NCX_DEF_INDENT);
-		    } else {
-			val_dump_value(var->val, NCX_DEF_INDENT);
-		    }
-		}
-	    }
+	    show_user_var(var->name, 
+			  var->vartype,
+			  var->val,
+			  mode);
 	}
 	if (first) {
 	    (*logfn)("\nNo local variables");
@@ -2481,12 +2501,21 @@ static void
     if (isany) {
 	/* skipping VAR_TYP_SESSION for now */
 	val = var_get_local(name);
-	if (!val) {
+	if (val) {
+	    vartype = VAR_TYP_LOCAL;
+	} else {
 	    val = var_get(name, VAR_TYP_GLOBAL);
-	    if (!val) {
+	    if (val) {
+		vartype = VAR_TYP_GLOBAL;
+	    } else {
 		val = var_get(name, VAR_TYP_CONFIG);
-		if (!val) {
+		if (val) {
+		    vartype = VAR_TYP_CONFIG;
+		} else {
 		    val = var_get(name, VAR_TYP_SYSTEM);
+		    if (val) {
+			vartype = VAR_TYP_SYSTEM;
+		    }
 		}
 	    }
 	}
@@ -2495,27 +2524,7 @@ static void
     }
 
     if (val) {
-	if (xml_strcmp(name, val->name)) {
-	    (*logfn)("\n  var %s", name);
-	}
-
-	if (mode == HELP_MODE_BRIEF) {
-	    if (typ_is_simple(val->btyp)) {
-		if (imode) {
-		    val_stdout_value(val, NCX_DEF_INDENT);
-		} else {
-		    val_dump_value(val, NCX_DEF_INDENT);
-		}
-	    } else {
-		(*logfn)("\n  %s (complex type)");
-	    }
-	} else {
-	    if (imode) {
-		val_stdout_value(val, NCX_DEF_INDENT);
-	    } else {
-		val_dump_value(val, NCX_DEF_INDENT);
-	    }
-	}
+	show_user_var(name, vartype, val, mode);
 	(*logfn)("\n");
     } else {
 	(*logfn)("\nVariable '%s' not found", name);

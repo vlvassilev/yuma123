@@ -284,7 +284,8 @@ typedef enum status_t_
     ERR_NCX_VAR_READ_ONLY,              /* 361 */
     ERR_NCX_DEC64_BASEOVFL,             /* 362 */
     ERR_NCX_DEC64_FRACOVFL,             /* 363 */
-    ERR_LAST_USR_ERR,                   /* 364 -- not really used */
+    ERR_NCX_RPC_WHEN_FAILED,            /* 364 */
+    ERR_LAST_USR_ERR,                   /* 365 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */

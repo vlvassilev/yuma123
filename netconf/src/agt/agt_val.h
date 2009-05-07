@@ -82,19 +82,33 @@ date	     init     comment
  *
  * step 1: call agt_val_parse_nc
  * step 2: call val_add_defaults
- * step 3: call agt_val_instance_check
+ * step 3: call agt_val_rpc_xpath_check
+ * step 4: call agt_val_instance_check
  *
  * Additional steps to write to a config database
  *
  * step 4: call agt_val_validate_write
  * step 5: call agt_val_apply_write
+ *
+ * Steps to test for commit-ready
+ * 
+ * step 6a: agt_val_root_check (candidate)
+ * step 6b: agt_val_split_root_check (running)
+ * step 7: agt_val_apply_commit
  */
+
+extern status_t 
+    agt_val_rpc_xpath_check (ses_cb_t *scb,
+			     xml_msg_hdr_t *msg,
+			     val_value_t *rpcinput,
+			     const obj_template_t *rpcroot);
+
 extern status_t 
     agt_val_instance_check (ses_cb_t *scb,
 			    xml_msg_hdr_t *msg,
 			    val_value_t *valset,
 			    val_value_t *root,
-			    ncx_layer_t   layer);
+			    ncx_layer_t layer);
 
 
 extern status_t 

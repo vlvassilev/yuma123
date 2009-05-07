@@ -713,12 +713,17 @@ static status_t
 
     /* check if there is an input parmset specified */
     obj = obj_find_template(obj_get_datadefQ(rpcobj),
-			    NULL, YANG_K_INPUT);
+			    NULL, 
+			    YANG_K_INPUT);
     if (obj && obj_get_child_count(obj)) {
 	rpcio = obj->def.rpcio;
 	msg->rpc_agt_state = AGT_RPC_PH_PARSE;
-	res = agt_val_parse_nc(scb, &msg->mhdr, obj, method,
-			       NCX_DC_CONFIG, msg->rpc_input);
+	res = agt_val_parse_nc(scb, 
+			       &msg->mhdr, 
+			       obj, 
+			       method,
+			       NCX_DC_CONFIG, 
+			       msg->rpc_input);
 
 #ifdef AGT_RPC_DEBUG
 	if (LOGDEBUG3) {
@@ -771,6 +776,20 @@ static status_t
     }
 
     if (res == NO_ERR) {
+	/* check for any false when-stmts on nodes 
+	 * in the rpc/input section and flag them
+	 * as unexpected-element errors
+	 */
+	res = agt_val_rpc_xpath_check(scb,
+				      &msg->mhdr,
+				      msg->rpc_input,
+				      msg->rpc_method);
+
+	if (res != NO_ERR && NEED_EXIT(res)) {
+	    return res;
+	} /* else non-fatal errors already recorded */
+
+
 	/* check that the number of instances of the parameters
 	 * is reasonable and only one member from any choice is
 	 * present (if applicable)
@@ -779,7 +798,8 @@ static status_t
 	 * any missing choices would be incorrectly interpreted
 	 * as multiple missing parameter errors
 	 */
-	res = agt_val_instance_check(scb, &msg->mhdr, 
+	res = agt_val_instance_check(scb, 
+				     &msg->mhdr, 
 				     msg->rpc_input, 
 				     msg->rpc_input,
 				     NCX_LAYER_OPERATION);
@@ -810,7 +830,9 @@ status_t
     status_t  res;
 
     if (!agt_rpc_init_done) {
-	res = top_register_node(NC_MODULE, NCX_EL_RPC, agt_rpc_dispatch);
+	res = top_register_node(NC_MODULE, 
+				NCX_EL_RPC, 
+				agt_rpc_dispatch);
 	if (res != NO_ERR) {
 	    return res;
 	}
@@ -1056,9 +1078,15 @@ void
 	    msg->mhdr.withmeta = FALSE;
 	} else {
 	    /* else this is an invalid-attribute error !!! */
-	    agt_record_attr_error(scb, &msg->mhdr, NCX_LAYER_RPC,
-				  ERR_NCX_BAD_ATTRIBUTE, attr, top, NULL, 
-				  NCX_NT_STRING, RPC_ROOT);
+	    agt_record_attr_error(scb, 
+				  &msg->mhdr, 
+				  NCX_LAYER_RPC,
+				  ERR_NCX_BAD_ATTRIBUTE, 
+				  attr, 
+				  top, 
+				  NULL, 
+				  NCX_NT_STRING, 
+				  RPC_ROOT);
 	}
     } else {
 	/* with-metadata not explicitly set, so get the default */
@@ -1078,8 +1106,14 @@ void
 	errattr.attr_ns = xmlns_nc_id();
 	errattr.attr_name = NCX_EL_MESSAGE_ID;
 	errattr.attr_val = (xmlChar *)NULL;
-	agt_record_attr_error(scb, &msg->mhdr, NCX_LAYER_RPC,
-			      res, &errattr, top, NULL, NCX_NT_STRING,
+	agt_record_attr_error(scb, 
+			      &msg->mhdr, 
+			      NCX_LAYER_RPC,
+			      res, 
+			      &errattr, 
+			      top, 
+			      NULL, 
+			      NCX_NT_STRING,
 			      RPC_ROOT);
     }
 #endif
@@ -1087,14 +1121,21 @@ void
     /* analyze the <rpc> element and populate the 
      * initial namespace prefix map for the <rpc-reply> message
      */
-    res = xml_msg_build_prefix_map(&msg->mhdr, msg->rpc_in_attrs, 
+    res = xml_msg_build_prefix_map(&msg->mhdr, 
+				   msg->rpc_in_attrs, 
 				   TRUE, 
-				   dlq_empty(&msg->mhdr.errQ) 
-				   ? FALSE : TRUE);
+				   !dlq_empty(&msg->mhdr.errQ));
     if (res != NO_ERR) {
 	SET_ERROR(res);
-	agt_record_error(scb, &msg->mhdr, NCX_LAYER_RPC, res, 
-			 top, NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_RPC, 
+			 res, 
+			 top, 
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_NONE, 
+			 NULL);
     }
 
     /* check any errors in the <rpc> node */
@@ -1108,8 +1149,10 @@ void
 
     /* get the next XML node, which is the RPC method name */
     xml_init_node(&method);
-    res = agt_xml_consume_node(scb, &method,
-			       NCX_LAYER_RPC, &msg->mhdr);
+    res = agt_xml_consume_node(scb, 
+			       &method,
+			       NCX_LAYER_RPC, 
+			       &msg->mhdr);
     if (res != NO_ERR) {
 	errdone = TRUE;
     } else {
@@ -1217,8 +1260,10 @@ void
     /* read in a node which should be the endnode to match 'top' */
     xml_init_node(&testnode);
     if (res == NO_ERR) {
-	res = agt_xml_consume_node(scb, &testnode,
-				   NCX_LAYER_RPC, &msg->mhdr);
+	res = agt_xml_consume_node(scb, 
+				   &testnode,
+				   NCX_LAYER_RPC, 
+				   &msg->mhdr);
     }
     if (res == NO_ERR) {
 #ifdef AGT_RPC_DEBUG
@@ -1243,8 +1288,15 @@ void
 		   NCX_LAYER_NONE, NULL);
 	    if (res==NO_ERR) {
 		res = ERR_NCX_UNKNOWN_ELEMENT;
-		agt_record_error(scb, &msg->mhdr, NCX_LAYER_RPC, res, 
-			 &method, NCX_NT_NONE, NULL, NCX_NT_STRING, RPC_ROOT);
+		agt_record_error(scb, 
+				 &msg->mhdr, 
+				 NCX_LAYER_RPC, 
+				 res, 
+				 &method, 
+				 NCX_NT_NONE, 
+				 NULL, 
+				 NCX_NT_STRING, 
+				 RPC_ROOT);
 	    }
 	}
 

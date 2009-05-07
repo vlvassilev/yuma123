@@ -4077,6 +4077,7 @@ static void
 	    val_free_value(valroot);
 	}
 	val_free_value(valset);
+	clear_result(agent_cb);
 	return;
     } else if (targval != valroot) {
 	/* keep targval, toss valroot */
@@ -4084,7 +4085,6 @@ static void
 	val_free_value(valroot);
 	valroot = NULL;
     }
-
 
     /* check if targval is valid if it is an empty string
      * this corner-case is what the get_instanceid_parm will

@@ -534,7 +534,8 @@ static status_t
 	} else {
 	    /* save or update the connnect_valset */
 	    testval = val_find_child(connect_valset,
-				     NULL, YANGCLI_AGENT);
+				     NULL, 
+				     YANGCLI_AGENT);
 	    if (testval) {
 		res = val_set_simval(testval,
 				     testval->typdef,
@@ -546,12 +547,15 @@ static status_t
 		}
 	    } else {
 		testobj = obj_find_child(connect_valset->obj,
-					 NULL, YANGCLI_AGENT);
-		testval = val_make_simval(obj_get_ctypdef(testobj),
-					  obj_get_nsid(testobj),
-					  YANGCLI_AGENT,
-					  usestr,
-					  &res);
+					 NULL, 
+					 YANGCLI_AGENT);
+		if (testobj) {
+		    testval = val_make_simval(obj_get_ctypdef(testobj),
+					      obj_get_nsid(testobj),
+					      YANGCLI_AGENT,
+					      usestr,
+					      &res);
+		}
 		if (testval) {
 		    val_add_child(testval, connect_valset);
 		}
@@ -599,7 +603,8 @@ static status_t
 	} else {
 	    /* save or update the connnect_valset */
 	    testval = val_find_child(connect_valset,
-				     NULL, YANGCLI_USER);
+				     NULL, 
+				     YANGCLI_USER);
 	    if (testval) {
 		res = val_set_simval(testval,
 				     testval->typdef,
@@ -611,12 +616,15 @@ static status_t
 		}
 	    } else {
 		testobj = obj_find_child(connect_valset->obj,
-					 NULL, YANGCLI_USER);
-		testval = val_make_simval(obj_get_ctypdef(testobj),
-					  obj_get_nsid(testobj),
-					  YANGCLI_USER,
-					  usestr,
-					  &res);
+					 NULL, 
+					 YANGCLI_USER);
+		if (testobj) {
+		    testval = val_make_simval(obj_get_ctypdef(testobj),
+					      obj_get_nsid(testobj),
+					      YANGCLI_USER,
+					      usestr,
+					      &res);
+		}
 		if (testval) {
 		    val_add_child(testval, connect_valset);
 		}
@@ -682,7 +690,8 @@ static status_t
 	    log_get_debug_level_enum((const char *)usestr);
 	if (testloglevel == LOG_DEBUG_NONE) {
 	    log_error("\nError: value must be valid log-level:");
-	    log_error("\n       (off, error, warn, info, debug, debug2)\n");
+	    log_error("\n       (off, error,"
+		      "warn, info, debug, debug2)\n");
 	    res = ERR_NCX_INVALID_VALUE;
 	} else {
 	    agent_cb->log_level = testloglevel;

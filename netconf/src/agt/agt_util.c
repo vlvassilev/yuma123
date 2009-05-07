@@ -377,11 +377,11 @@ const val_value_t *
 *    res == internal error code                      <error-app-tag>
 *    xmlnode == XML node causing error  <bad-element>   <error-path> 
 *            == NULL if not available 
-*    parmtyp == type of node in 'error_parm'
-*    error_parm == error data, specific to 'res'        <error-info>
+*    parmtyp == type of node in 'error_info'
+*    error_info == error data, specific to 'res'        <error-info>
 *               == NULL if not available
-*    nodetyp == type of node in 'errnode'
-*    errnode == internal data node with the error       <error-path>
+*    nodetyp == type of node in 'error_path'
+*    error_path == internal data node with the error       <error-path>
 *            == NULL if not available or not used  
 * OUTPUTS:
 *   errQ has error message added if no malloc errors
@@ -397,9 +397,9 @@ void
 		      status_t  res,
 		      const xml_node_t *xmlnode,
 		      ncx_node_t parmtyp,
-		      const void *error_parm,
+		      const void *error_info,
 		      ncx_node_t nodetyp,
-		      const void *errnode)
+		      const void *error_path)
 {
     agt_record_error_errinfo(scb, 
 			     msghdr, 
@@ -407,9 +407,9 @@ void
 			     res, 
 			     xmlnode,
 			     parmtyp, 
-			     error_parm, 
+			     error_info, 
 			     nodetyp,
-			     errnode, 
+			     error_path, 
 			     NULL);
 
 } /* agt_record_error */
@@ -430,11 +430,11 @@ void
 *    res == internal error code                      <error-app-tag>
 *    xmlnode == XML node causing error  <bad-element>   <error-path> 
 *            == NULL if not available 
-*    parmtyp == type of node in 'error_parm'
-*    error_parm == error data, specific to 'res'        <error-info>
+*    parmtyp == type of node in 'error_info'
+*    error_info == error data, specific to 'res'        <error-info>
 *               == NULL if not available (then nodetyp ignred)
-*    nodetyp == type of node in 'errnode'
-*    errnode == internal data node with the error       <error-path>
+*    nodetyp == type of node in 'error_path'
+*    error_path == internal data node with the error       <error-path>
 *            == NULL if not available or not used  
 *    errinfo == error info record to use
 *
@@ -452,9 +452,9 @@ void
 			      status_t  res,
 			      const xml_node_t *xmlnode,
 			      ncx_node_t parmtyp,
-			      const void *error_parm,
+			      const void *error_info,
 			      ncx_node_t nodetyp,
-			      const void *errnode,
+			      const void *error_path,
 			      const ncx_errinfo_t *errinfo)
 {
     rpc_err_rec_t      *err;
@@ -464,6 +464,8 @@ void
 
     errQ = (msghdr) ? &msghdr->errQ : NULL;
     totals = ses_get_total_stats();
+    pathbuff = NULL;
+    err = NULL;
 
     /* dump some error info to the log */
     if (LOGDEBUG3) {
@@ -478,9 +480,9 @@ void
 			   xmlnode->elname : (const xmlChar *)"--");
 	    }
 	}
-	if (nodetyp == NCX_NT_VAL && errnode) {
-	    log_debug3(" errnode: \n");
-	    val_dump_value((const val_value_t *)errnode, 
+	if (nodetyp == NCX_NT_VAL && error_path) {
+	    log_debug3(" error-path: \n");
+	    val_dump_value((const val_value_t *)error_path, 
 			   NCX_DEF_INDENT);
 	    log_debug3("\n");
 	}
@@ -489,20 +491,19 @@ void
     /* generate an error only if there is a Q to hold the result */
     if (errQ) {
 	/* get the error-path */
-	pathbuff = NULL;
-	if (errnode) {
+	if (error_path) {
 	    switch (nodetyp) {
 	    case NCX_NT_STRING:
-		pathbuff = xml_strdup((const xmlChar *)errnode);
+		pathbuff = xml_strdup((const xmlChar *)error_path);
 		break;
 	    case NCX_NT_VAL:
 		(void)val_gen_instance_id(msghdr, 
-					  errnode, 
+					  error_path, 
 					  NCX_IFMT_XPATH1, 
 					  &pathbuff);
 		break;
 	    case NCX_NT_OBJ:
-		(void)obj_gen_object_id(errnode, &pathbuff);
+		(void)obj_gen_object_id(error_path, &pathbuff);
 		break;
 	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);
@@ -514,7 +515,7 @@ void
 					       res, 
 					       xmlnode, 
 					       parmtyp, 
-					       error_parm, 
+					       error_info, 
 					       pathbuff, 
 					       errinfo);
 	} else {
@@ -522,7 +523,7 @@ void
 				       res, 
 				       xmlnode, 
 				       parmtyp, 
-				       error_parm, 
+				       error_info, 
 				       pathbuff);
 	}
 
@@ -532,11 +533,13 @@ void
 	    if (pathbuff) {
 		m__free(pathbuff);
 	    }
-	    if (scb) {
-		scb->stats.out_drop_bytes++;
-		totals->stats.out_drop_bytes++;
-	    }
 	}
+    }
+
+    if (scb) {
+	/*** need to change this counter ***/
+	scb->stats.out_drop_bytes++;
+	totals->stats.out_drop_bytes++;
     }
 
 } /* agt_record_error_errinfo */
@@ -610,13 +613,15 @@ void
 	    if (buff) {
 		m__free(buff);
 	    }
-	    /*** inc error-dropped counter for the session stats ***/
-	    if (scb) {
-		scb->stats.out_drop_bytes++;
-		totals->stats.out_drop_bytes++;
-	    }
 	}
     }
+
+    /*** inc error-dropped counter for the session stats ***/
+    if (scb) {
+	scb->stats.out_drop_bytes++;
+	totals->stats.out_drop_bytes++;
+    }
+
 
 } /* agt_record_attr_error */
 

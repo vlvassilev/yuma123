@@ -601,6 +601,8 @@ const char *
 	return "decimal64 base number overflow";
     case ERR_NCX_DEC64_FRACOVFL:
 	return "decimal64 fraction precision overflow";
+    case ERR_NCX_RPC_WHEN_FAILED:
+	return "when-stmt tested false";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

@@ -85,9 +85,9 @@ extern void
 		      status_t  res,
 		      const xml_node_t *xmlnode,
 		      ncx_node_t parmtyp,
-		      const void *error_parm,
+		      const void *error_info,
 		      ncx_node_t nodetyp,
-		      const void *errnode);
+		      const void *error_path);
 
 extern void
     agt_record_error_errinfo (ses_cb_t *scb,
@@ -98,7 +98,7 @@ extern void
 			      ncx_node_t parmtyp,
 			      const void *error_parm,
 			      ncx_node_t nodetyp,
-			      const void *errnode,
+			      const void *error_path,
 			      const ncx_errinfo_t *errinfo);
 
 extern void

@@ -6969,6 +6969,8 @@ ncx_btype_t
 	return NCX_BT_CHOICE;
     case OBJ_TYP_CASE:
 	return NCX_BT_CASE;
+    case OBJ_TYP_RPC:
+	return NCX_BT_CONTAINER;
     case OBJ_TYP_RPCIO:
 	return NCX_BT_CONTAINER;
     case OBJ_TYP_NOTIF:

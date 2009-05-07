@@ -345,11 +345,16 @@ static status_t
 
 /********************************************************************
  * FUNCTION netconfd_run
+ *  
+ * Startup and run the NCX server loop
  * 
- * 
- * 
+ * RETURNS:
+ *    status:  NO_ERR if startup OK and then run OK
+ *             this will be a delayed return code
+ *             some error if server startup failed
+ *             e.g., socket already in use
  *********************************************************************/
-static void
+static status_t
     netconfd_run (void)
 {
 
@@ -364,6 +369,7 @@ static void
 	log_error("\nncxserver failed (%s)",
 		  get_error_string(res));
     }
+    return res;
     
 }  /* netconfd_run */
 
@@ -436,7 +442,10 @@ int
 				    NETCONFD_CLI,
 				    showhelpmode);
 	    } else {
-		netconfd_run();
+		res = netconfd_run();
+		if (res != NO_ERR) {
+		    agt_request_shutdown(NCX_SHUT_EXIT);
+		}
 	    }
 	}
 

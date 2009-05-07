@@ -483,11 +483,12 @@ static rpc_err_t
     case ERR_NCX_DEC64_BASEOVFL:
     case ERR_NCX_DEC64_FRACOVFL:
 	return RPC_ERR_INVALID_VALUE;
+    case ERR_NCX_RPC_WHEN_FAILED:
+	return RPC_ERR_UNKNOWN_ELEMENT;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:
 	return RPC_ERR_OPERATION_FAILED;	
-
     }
     /*NOTREACHED*/
 

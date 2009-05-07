@@ -173,10 +173,11 @@ static status_t
 * 
 * Create and store a change-audit record, if needed
 *
+* !!! ONLY CALLED FOR RUNNING CONFIG !!!!
+*
 * INPUTS:
 *   editop == edit operation requested
 *   scb == session control block
-*   target == config database target 
 *   node == top value node involved in edit
 *   res == result of edit operation
 *
@@ -186,7 +187,6 @@ static status_t
 static void
     handle_audit_record (op_editop_t editop,
 			 ses_cb_t  *scb,
-			 cfg_template_t *target,
 			 val_value_t *node,
 			 status_t res)
 {
@@ -201,19 +201,20 @@ static void
 	tstamp_datetime(tbuff);
 
 	if (node) {
-	    (void)val_gen_instance_id(NULL, node, NCX_IFMT_XPATH1, 
+	    (void)val_gen_instance_id(NULL, 
+				      node, 
+				      NCX_IFMT_XPATH1, 
 				      &ibuff);
 	}
 
 	log_info("\nedit-config: operation %s on session %d by %s@%s"
-		 "\n  at %s on target %s with result (%s)"
+		 "\n  at %s on target 'running' with result (%s)"
 		 "\n  data: %s",
 		 op_editop_name(editop),
 		 scb->sid, 
 		 scb->username,
 		 scb->peeraddr,
 		 tbuff,
-		 target->name,
 		 get_error_string(res),
 		 (ibuff) ? (const char *)ibuff : "--");
 
@@ -828,16 +829,23 @@ static status_t
 #endif
 
 	if (msg->rpc_need_undo) {
-	    undo = add_undo_node(msg, editop, newval,
-				 curval, parent, NO_ERR, &res);
+	    undo = add_undo_node(msg, 
+				 editop,
+				 newval,
+				 curval, 
+				 parent, 
+				 NO_ERR, 
+				 &res);
 	    if (res != NO_ERR) {
 		return res;
 	    }
 	}
 
 	if (target->cfg_id == NCX_CFGID_RUNNING) {
-	    handle_audit_record(cur_editop, scb, target, 
-				(curval) ? curval : newval, res);
+	    handle_audit_record(cur_editop, 
+				scb, 
+				(curval) ? curval : newval,
+				res);
 	}
 
 	if (editop != OP_EDITOP_LOAD) {
@@ -1175,10 +1183,15 @@ static status_t
 	    /* any errors already recorded */
 	} else {
 	    /* record error that happened above */
-	    agt_record_error(scb, &msg->mhdr, 
-			     NCX_LAYER_CONTENT, res, 
-			     NULL, NCX_NT_VAL, newval, 
-			     NCX_NT_VAL, newval);
+	    agt_record_error(scb, 
+			     &msg->mhdr, 
+			     NCX_LAYER_CONTENT, 
+			     res, 
+			     NULL, 
+			     NCX_NT_VAL, 
+			     newval, 
+			     NCX_NT_VAL, 
+			     newval);
 	}
 	break;
     case AGT_CB_TEST_APPLY:
@@ -1189,8 +1202,10 @@ static status_t
 	} else {
 	    curparent = NULL;
 	}
-	res = test_apply_write_val(curparent, newval, 
-				   curval, &done);
+	res = test_apply_write_val(curparent, 
+				   newval, 
+				   curval, 
+				   &done);
 	break;
     case AGT_CB_APPLY:
 	if (newval) {
@@ -1206,8 +1221,14 @@ static status_t
 		}
 	    }
 	}
-	res = apply_write_val(cureditop, scb, msg, target, 
-			      curparent, newval, curval, &done);
+	res = apply_write_val(cureditop, 
+			      scb, 
+			      msg, 
+			      target, 
+			      curparent, 
+			      newval, 
+			      curval, 
+			      &done);
 	break;
     case AGT_CB_COMMIT:
     case AGT_CB_ROLLBACK:
@@ -1219,8 +1240,12 @@ static status_t
 
     /* check if the typdef for this value has a callback */
     if (res == NO_ERR) {
-	res = handle_user_callback(cbtyp, editop, scb, msg, 
-				   newval, curval);
+	res = handle_user_callback(cbtyp, 
+				   editop, 
+				   scb, 
+				   msg, 
+				   newval, 
+				   curval);
     }
 
     return res;
@@ -1284,8 +1309,11 @@ static status_t
 
 	/* check and adjust the operation attribute */
 	iqual = val_get_iqualval(newval);
-	res = agt_check_editop(editop, &newval->editvars->editop, 
-			       newval, curval, iqual);
+	res = agt_check_editop(editop, 
+			       &newval->editvars->editop, 
+			       newval, 
+			       curval, 
+			       iqual);
 	if (res == NO_ERR) {
 	    res = agt_check_max_access(newval->editvars->editop, 
 				       obj_get_max_access(newval->obj), 
@@ -1303,16 +1331,23 @@ static status_t
 	}
 
 	if (res != NO_ERR) {
-	    agt_record_error(scb, &msg->mhdr, 
-			     NCX_LAYER_CONTENT, res, 
-			     NULL, NCX_NT_VAL, newval, 
-			     NCX_NT_VAL, newval);
+	    agt_record_error(scb, 
+			     &msg->mhdr, 
+			     NCX_LAYER_CONTENT, 
+			     res, 
+			     NULL, 
+			     NCX_NT_VAL, 
+			     newval, 
+			     NCX_NT_VAL, 
+			     newval);
 	    CHK_EXIT(res, retres);
 	}
 	break;
     case AGT_CB_TEST_APPLY:
 	retres = test_apply_write_val(newval->editvars->curparent, 
-				      newval, curval, &done);
+				      newval, 
+				      curval, 
+				      &done);
 	break;
     case AGT_CB_APPLY:
 	if (newval) {
@@ -1326,9 +1361,14 @@ static status_t
 	}
 
 	if (retres == NO_ERR) {
-	    retres = apply_write_val(cur_editop, scb, msg, target,
-				     curparent, newval, 
-				     curval, &done);
+	    retres = apply_write_val(cur_editop, 
+				     scb, 
+				     msg, 
+				     target,
+				     curparent, 
+				     newval, 
+				     curval, 
+				     &done);
 	}
 	break;
     case AGT_CB_COMMIT:
@@ -1364,8 +1404,14 @@ static status_t
 	    } else {
 		curch = NULL;
 	    }
-	    res = invoke_btype_cb(cbtyp, cur_editop, scb, msg, 
-				  target, chval, curch, FALSE);
+	    res = invoke_btype_cb(cbtyp, 
+				  cur_editop, 
+				  scb, 
+				  msg, 
+				  target, 
+				  chval, 
+				  curch, 
+				  FALSE);
 	    if (chval->res == NO_ERR) {
 		chval->res = res;
 	    }
@@ -1377,8 +1423,11 @@ static status_t
      * only call if the operation was applied here
      */
     if (retres == NO_ERR && !initialdone && done) {
-	retres = handle_user_callback(cbtyp, editop, scb, msg,
-				      newval, curval);
+	retres = handle_user_callback(cbtyp, 
+				      editop, scb, 
+				      msg,
+				      newval, 
+				      curval);
     }
 	
     return retres;
@@ -1449,18 +1498,28 @@ static status_t
     switch (objtype) {
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
-	res = invoke_simval_cb(cbtyp, editop, scb, msg,
-			       target, newval, 
-			       (v_val) ? v_val : curval, done);
+	res = invoke_simval_cb(cbtyp, 
+			       editop, 
+			       scb, 
+			       msg,
+			       target, 
+			       newval, 
+			       (v_val) ? v_val : curval, 
+			       done);
 	break;
     case OBJ_TYP_CONTAINER:
     case OBJ_TYP_LIST:
     case OBJ_TYP_RPC:
     case OBJ_TYP_RPCIO:
     case OBJ_TYP_NOTIF:
-	res = invoke_cpxval_cb(cbtyp, editop, scb, msg, 
-			       target, newval, 
-			       (v_val) ? v_val : curval, done);
+	res = invoke_cpxval_cb(cbtyp, 
+			       editop, 
+			       scb, 
+			       msg, 
+			       target, 
+			       newval, 
+			       (v_val) ? v_val : curval,
+			       done);
 	break;
     default:
 	res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -1505,15 +1564,23 @@ static void
 	/* Since 'create' cannot apply to an attribute,
 	 * the metadata is not checked
 	 */
-	res = handle_user_callback(AGT_CB_ROLLBACK, undo->editop,
-				   scb, msg, undo->newnode, undo->curnode);
+	res = handle_user_callback(AGT_CB_ROLLBACK, 
+				   undo->editop,
+				   scb, 
+				   msg, 
+				   undo->newnode, 
+				   undo->curnode);
 
 #ifdef NOT_YET
 	/**** SET done !!! ***/
 	if (!done) {
 	    /* no rollback callback, so apply a delete operation */
-	    res = handle_user_callback(AGT_CB_APPLY, OP_EDITOP_DELETE,
-				       scb, msg, undo->newnode, NULL);
+	    res = handle_user_callback(AGT_CB_APPLY, 
+				       OP_EDITOP_DELETE,
+				       scb, 
+				       msg, 
+				       undo->newnode, 
+				       NULL);
 	}
 #endif
 
@@ -1527,15 +1594,22 @@ static void
 	 * the metadata is not checked
 	 */
 	res = handle_user_callback(AGT_CB_ROLLBACK, 
-				   undo->editop, scb, msg, 
-				   undo->newnode, undo->curnode);
+				   undo->editop,
+				   scb,
+				   msg, 
+				   undo->newnode,
+				   undo->curnode);
 
 #ifdef NOT_YET
 	/**** SET done !!! ***/
 	if (!done) {
 	    /* no rollback callback, so apply a create operation */
-	    res = handle_user_callback(AGT_CB_APPLY, OP_EDITOP_CREATE,
-				       scb, msg, undo->curnode, NULL);
+	    res = handle_user_callback(AGT_CB_APPLY,
+				       OP_EDITOP_CREATE,
+				       scb,
+				       msg,
+				       undo->curnode, 
+				       NULL);
 	}
 #endif
 
@@ -1548,14 +1622,20 @@ static void
 
 	/* call the user rollback handler, if any */
 	res = handle_user_callback(AGT_CB_ROLLBACK, 
-				   undo->editop, scb, msg, 
-				   undo->newnode, undo->curnode);
+				   undo->editop,
+				   scb,
+				   msg, 
+				   undo->newnode,
+				   undo->curnode);
 #ifdef NOT_YET
 	/**** SET done !!! ***/
 	if (!done) {
 	    /* no rollback callback, so apply a create operation */
-	    res = handle_user_callback(AGT_CB_APPLY, OP_EDITOP_DELETE,
-				       scb, msg, undo->newnode,
+	    res = handle_user_callback(AGT_CB_APPLY,
+				       OP_EDITOP_DELETE,
+				       scb,
+				       msg,
+				       undo->newnode,
 				       undo->curnode);
 	}
 #endif
@@ -1618,8 +1698,11 @@ static void
     while (!dlq_empty(&msg->rpc_undoQ)) {
 	undo = (rpc_undo_rec_t *)dlq_deque(&msg->rpc_undoQ);
 	if (cbtyp==AGT_CB_COMMIT) {
-	    res = handle_user_callback(AGT_CB_COMMIT, undo->editop, 
-				       scb, msg, undo->newnode, 
+	    res = handle_user_callback(AGT_CB_COMMIT, 
+				       undo->editop, 
+				       scb, 
+				       msg, 
+				       undo->newnode, 
 				       undo->curnode);
 
 	    /* just clean up 'curnode' if it was held instead of deleted */
@@ -1683,8 +1766,14 @@ static status_t
     case AGT_CB_APPLY:
     case AGT_CB_TEST_APPLY:
 	/* keep checking until all the child nodes have been processed */
-	res = invoke_btype_cb(cbtyp, editop, scb, msg, 
-			      target, newval, curval, FALSE);
+	res = invoke_btype_cb(cbtyp, 
+			      editop, 
+			      scb, 
+			      msg, 
+			      target, 
+			      newval, 
+			      curval, 
+			      FALSE);
 	break;
     case AGT_CB_COMMIT:
     case AGT_CB_ROLLBACK:
@@ -1794,7 +1883,8 @@ static status_t
      * node that is specifies and save it in a val_unique_t
      */
     while (unicomp && retres == NO_ERR) {
-	res = xpath_find_val_unique(curval, mod,
+	res = xpath_find_val_unique(curval, 
+				    mod,
 				    unicomp->xpath,
 				    FALSE,
 				    &targval);
@@ -1898,8 +1988,10 @@ static status_t
 	     testval = (val_value_t *)dlq_nextEntry(testval)) {
 
 	    if (testval->obj == curval->obj) {
-		res = make_unique_testset(testval, unidef, 
-					  &uni2Q, &freeQ);
+		res = make_unique_testset(testval, 
+					  unidef, 
+					  &uni2Q, 
+					  &freeQ);
 		if (res == NO_ERR) {
 		    if (compare_unique_testsets(&uni1Q, &uni2Q)) {
 			/* 2 lists have the same values
@@ -1911,8 +2003,10 @@ static status_t
 			 * be duplicated in the <rpc-reply>
 			 */
 			if (!errordone) {
-			    agt_record_unique_error
-				(scb, msg, curval, &uni1Q);
+			    agt_record_unique_error(scb, 
+						    msg, 
+						    curval, 
+						    &uni1Q);
 			    errordone = TRUE;
 			}
 			/* curval->res = ERR_NCX_UNIQUE_TEST_FAILED; */
@@ -1924,9 +2018,15 @@ static status_t
 		} else if (res == ERR_NCX_CANCELED) {
 		    dlq_block_enque(&uni2Q, &freeQ);
 		} else {
-		    agt_record_error(scb, msg, NCX_LAYER_CONTENT,
-				     res, NULL, NCX_NT_NONE, NULL,
-				     NCX_NT_VAL, curval);
+		    agt_record_error(scb, 
+				     msg, 
+				     NCX_LAYER_CONTENT,
+				     res, 
+				     NULL, 
+				     NCX_NT_NONE,
+				     NULL,
+				     NCX_NT_VAL,
+				     curval);
 		    done2 = TRUE;
 		    retres = res;
 		}
@@ -2122,9 +2222,16 @@ static status_t
 
 	if (res != NO_ERR) {
 	    val->res = res;
-	    agt_record_error_errinfo(scb, msg, layer, res, 
-				     NULL, NCX_NT_OBJ, val->obj, 
-				     NCX_NT_VAL, val, errinfo);
+	    agt_record_error_errinfo(scb,
+				     msg,
+				     layer,
+				     res, 
+				     NULL,
+				     NCX_NT_OBJ,
+				     val->obj, 
+				     NCX_NT_VAL,
+				     val,
+				     errinfo);
 	}
 	break;
     case NCX_BT_INSTANCE_ID:
@@ -2156,9 +2263,15 @@ static status_t
 
 	    if (res != NO_ERR) {
 		val->res = res;
-		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_OBJ, val->obj, 
-				 NCX_NT_VAL, val);
+		agt_record_error(scb, 
+				 msg,
+				 layer,
+				 res, 
+				 NULL,
+				 NCX_NT_OBJ,
+				 val->obj, 
+				 NCX_NT_VAL,
+				 val);
 	    }
 	}
 	break;
@@ -2258,7 +2371,8 @@ static status_t
     minset = obj_get_min_elements(obj, &minelems);
     maxset = obj_get_max_elements(obj, &maxelems);
 
-    cnt = val_instance_count(val, obj_get_mod_name(obj),
+    cnt = val_instance_count(val, 
+			     obj_get_mod_name(obj),
 			     obj_get_name(obj));
 
 #ifdef AGT_VAL_DEBUG
@@ -2322,25 +2436,44 @@ static status_t
 		errval = val_find_child(val,
 					obj_get_mod_name(obj),
 					obj_get_name(obj));
-		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_NONE, NULL, 
-				 NCX_NT_VAL, errval);
+		agt_record_error(scb, 
+				 msg, 
+				 layer, 
+				 res, 
+				 NULL, 
+				 NCX_NT_NONE, 
+				 NULL, 
+				 NCX_NT_VAL, 
+				 errval);
 	    } else {
 		/* need to construct a string error-path */
 		instbuff = NULL;
-		res2 = val_gen_split_instance_id(msg, val,
+		res2 = val_gen_split_instance_id(msg, 
+						 val,
 						 NCX_IFMT_XPATH1,
 						 obj_get_nsid(obj),
 						 obj_get_name(obj),
 						 &instbuff);
 		if (res2 == NO_ERR) {
-		    agt_record_error(scb, msg, layer, res, 
-				     NULL, NCX_NT_NONE, NULL, 
-				     NCX_NT_STRING, instbuff);
+		    agt_record_error(scb, 
+				     msg, 
+				     layer, 
+				     res, 
+				     NULL, 
+				     NCX_NT_NONE, 
+				     NULL, 
+				     NCX_NT_STRING, 
+				     instbuff);
 		} else {
-		    agt_record_error(scb, msg, layer, res, 
-				     NULL, NCX_NT_OBJ, obj, 
-				     NCX_NT_VAL, val);
+		    agt_record_error(scb, 
+				     msg, 
+				     layer, 
+				     res, 
+				     NULL, 
+				     NCX_NT_OBJ, 
+				     obj, 
+				     NCX_NT_VAL, 
+				     val);
 		}
 		if (instbuff) {
 		    m__free(instbuff);
@@ -2376,13 +2509,25 @@ static status_t
 		i++;
 	    }
 	    if (errval) {
-		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_OBJ, obj, 
-				 NCX_NT_VAL, errval);
+		agt_record_error(scb, 
+				 msg, 
+				 layer, 
+				 res, 
+				 NULL, 
+				 NCX_NT_OBJ, 
+				 obj, 
+				 NCX_NT_VAL, 
+				 errval);
 	    } else {
-		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_OBJ, obj, 
-				 NCX_NT_VAL, val);
+		agt_record_error(scb, 
+				 msg, 
+				 layer, 
+				 res, 
+				 NULL, 
+				 NCX_NT_OBJ, 
+				 obj, 
+				 NCX_NT_VAL, 
+				 val);
 	    }
 	}
     }
@@ -2397,19 +2542,32 @@ static status_t
 
 	    /* need to construct a string error-path */
 	    instbuff = NULL;
-	    res2 = val_gen_split_instance_id(msg, val,
+	    res2 = val_gen_split_instance_id(msg, 
+					     val,
 					     NCX_IFMT_XPATH1,
 					     obj_get_nsid(obj),
 					     obj_get_name(obj),
 					     &instbuff);
 	    if (res2 == NO_ERR) {
-		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_OBJ, obj, 
-				 NCX_NT_STRING, instbuff);
+		agt_record_error(scb,
+				 msg,
+				 layer,
+				 res, 
+				 NULL,
+				 NCX_NT_OBJ,
+				 obj, 
+				 NCX_NT_STRING,
+				 instbuff);
 	    } else {
-		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_OBJ, obj, 
-				 NCX_NT_VAL, val);
+		agt_record_error(scb,
+				 msg,
+				 layer,
+				 res, 
+				 NULL,
+				 NCX_NT_OBJ,
+				 obj, 
+				 NCX_NT_VAL,
+				 val);
 	    }
 	    if (instbuff) {
 		m__free(instbuff);
@@ -2440,13 +2598,25 @@ static status_t
 		i++;
 	    }
 	    if (errval) {
-		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_OBJ, obj, 
-				 NCX_NT_VAL, errval);
+		agt_record_error(scb,
+				 msg,
+				 layer,
+				 res, 
+				 NULL,
+				 NCX_NT_OBJ,
+				 obj, 
+				 NCX_NT_VAL,
+				 errval);
 	    } else {
-		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_OBJ, obj, 
-				 NCX_NT_VAL, val);
+		agt_record_error(scb,
+				 msg,
+				 layer, 
+				 res, 
+				 NULL,
+				 NCX_NT_OBJ, 
+				 obj, 
+				 NCX_NT_VAL, 
+				 val);
 	    }
 	}
 	break;
@@ -2455,9 +2625,15 @@ static status_t
     default:
 	res = SET_ERROR(ERR_INTERNAL_VAL);
 	val->res = res;
-	agt_record_error(scb, msg, layer, res, 
-			 NULL, NCX_NT_OBJ, obj, 
-			 NCX_NT_VAL, val);
+	agt_record_error(scb, 
+			 msg,
+			 layer,
+			 res, 
+			 NULL,
+			 NCX_NT_OBJ,
+			 obj, 
+			 NCX_NT_VAL,
+			 val);
 
     }
 
@@ -2540,9 +2716,15 @@ static status_t
 	    /* error missing choice */
 	    res = ERR_NCX_MISSING_CHOICE;
 	    if (msg) {
-		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_VAL, val, 
-				 NCX_NT_VAL, val);
+		agt_record_error(scb,
+				 msg,
+				 layer,
+				 res, 
+				 NULL,
+				 NCX_NT_VAL,
+				 val, 
+				 NCX_NT_VAL,
+				 val);
 	    }
 	}
 	return res;
@@ -2568,9 +2750,15 @@ static status_t
 	    /* error: extra case object in this choice */
 	    retres = res = ERR_NCX_EXTRA_CHOICE;
 	    if (msg) {
-		agt_record_error(scb, msg, layer, res, 
-				 NULL, NCX_NT_OBJ, choicobj, 
-				 NCX_NT_VAL, testval);
+		agt_record_error(scb,
+				 msg, 
+				 layer, 
+				 res, 
+				 NULL, 
+				 NCX_NT_OBJ, 
+				 choicobj, 
+				 NCX_NT_VAL, 
+				 testval);
 	    }
 	}
 	testval = val_get_choice_next_set(val, choicobj, testval);
@@ -2639,8 +2827,12 @@ static status_t
 	     must = (xpath_pcb_t *)dlq_nextEntry(must)) {
 
 	    res = NO_ERR;
-	    result = xpath1_eval_expr(must, curval, root, 
-				      FALSE, TRUE, &res);
+	    result = xpath1_eval_expr(must, 
+				      curval, 
+				      root, 
+				      FALSE, 
+				      TRUE, 
+				      &res);
 	    if (!result || res != NO_ERR) {
 		log_error("\nmust_chk: failed for "
 			  "%s:%s (%s) expr '%s'",
@@ -2651,9 +2843,11 @@ static status_t
 		if (res == NO_ERR) {
 		    res = SET_ERROR(ERR_INTERNAL_VAL);
 		}
-		agt_record_error_errinfo(scb, msg,
+		agt_record_error_errinfo(scb, 
+					 msg,
 					 NCX_LAYER_CONTENT,
-					 res, NULL,
+					 res, 
+					 NULL,
 					 NCX_NT_STRING,
 					 must->exprstr,
 					 NCX_NT_VAL,
@@ -2671,7 +2865,8 @@ static status_t
 		}
 
 		res = ERR_NCX_MUST_TEST_FAILED;
-		agt_record_error_errinfo(scb, msg,
+		agt_record_error_errinfo(scb, 
+					 msg,
 					 NCX_LAYER_CONTENT,
 					 res,
 					 NULL,
@@ -2743,6 +2938,10 @@ static status_t
 *                 FALSE to test config=FALSE
 *   deleteQ  == address of Q for deleted descendants
 *   deleteme == address of return delete flag
+*   rpcmode == TRUE if this function is being called
+*              to flag false when-stmt errors in
+*              the RPC input parameters
+*              FALSE if this is regular data tree processing mode
 *
 * OUTPUTS:
 *   if msg not NULL:
@@ -2764,7 +2963,8 @@ static status_t
 		     val_value_t *curval,
 		     boolean configmode,
 		     dlq_hdr_t *deleteQ,
-		     boolean *deleteme)
+		     boolean *deleteme,
+		     boolean rpcmode)
 {
     const obj_template_t  *obj;
     const xpath_pcb_t     *objwhen, *augwhen, *useswhen, *whendef;
@@ -2828,8 +3028,12 @@ static status_t
 	    }
 
 	    res = NO_ERR;
-	    result = xpath1_eval_expr(whenclone, curval, root, 
-				      FALSE, TRUE, &res);
+	    result = xpath1_eval_expr(whenclone, 
+				      curval, 
+				      root, 
+				      FALSE, 
+				      TRUE, 
+				      &res);
 	    if (!result || res != NO_ERR) {
 		log_error("\nError: when_chk: failed for "
 			   "%s:%s (%s) '%s'",
@@ -2838,7 +3042,17 @@ static status_t
 			  get_error_string(res),
 			  whenclone->exprstr);
 	    } else if (!xpath_cvt_boolean(result)) {
-		if (LOGDEBUG2) {
+		if (rpcmode) {
+		    agt_record_error(scb,
+				     msg,
+				     NCX_LAYER_OPERATION,
+				     ERR_NCX_RPC_WHEN_FAILED,
+				     NULL,
+				     NCX_NT_STRING,
+				     whenclone->exprstr,
+				     NCX_NT_VAL,
+				     curval);
+		} else if (LOGDEBUG2) {
 		    log_debug2("\nwhen_chk: test false for "
 			       "node '%s:%s' expr '%s'", 
 			       obj_get_mod_name(obj),
@@ -2880,11 +3094,14 @@ static status_t
 	    continue;
 	}
 
-	res = when_stmt_check(scb, msg, 
-			      root, chval, 
+	res = when_stmt_check(scb, 
+			      msg, 
+			      root, 
+			      chval, 
 			      configmode,
 			      deleteQ, 
-			      &deletechild);
+			      &deletechild,
+			      rpcmode);
 	CHK_EXIT(res, retres);
 	if (res == NO_ERR && deletechild) {
 	    val_remove_child(chval);
@@ -2958,8 +3175,10 @@ static void
 
 	nextchild = val_get_next_child(chval);
 
-	delete_empty_npcontainers(scb, msg, 
-				  root, chval, 
+	delete_empty_npcontainers(scb, 
+				  msg, 
+				  root, 
+				  chval, 
 				  configmode,
 				  deleteQ, 
 				  &deletechild);
@@ -2984,6 +3203,8 @@ static void
 *   root == target database root value node
 *   configmode == TRUE for testing config=TRUE nodes only
 *              == FALSE for testing config=FALSE nodes only
+*   npcontainers == TRUE to delete empty NP containers as well
+*                   FALSE to ignore empty NP containers
 *
 * OUTPUTS:
 *   false when-stmt nodes will be deleted from the database
@@ -2995,48 +3216,71 @@ static status_t
     delete_dead_nodes (ses_cb_t  *scb,
 		       xml_msg_hdr_t *msg,
 		       val_value_t *root,
-		       boolean configmode)
+		       boolean configmode,
+		       boolean npcontainers)
 {
-    val_value_t  *deleteval;
-    dlq_hdr_t     deleteQ;
-    boolean       deleteme, done;
-    status_t      res;
+    cfg_template_t  *cfg;
+    val_value_t     *deleteval;
+    dlq_hdr_t        deleteQ;
+    boolean          deleteme, done, isrunning;
+    status_t         res;
 
     dlq_createSQue(&deleteQ);
     res = NO_ERR;
     done = FALSE;
 
-    delete_empty_npcontainers(scb, msg, 
-			      root, root, 
-			      configmode,
-			      &deleteQ, 
-			      &deleteme);
+    cfg = cfg_get_config_id(NCX_CFGID_RUNNING);
+    if (cfg && cfg->root && cfg->root == root) {
+	isrunning = TRUE;
+    } else {
+	isrunning = FALSE;
+    }
 
-    while (!dlq_empty(&deleteQ)) {
-	/**** NEED TO DEAL WITH ROLLBACK
-	 **** INSTEAD OF REALLY DELETING THESE NODES
-	 ****/
-	deleteval = (val_value_t *)dlq_deque(&deleteQ);
+    if (npcontainers) {
+	delete_empty_npcontainers(scb, 
+				  msg, 
+				  root, 
+				  root, 
+				  configmode,
+				  &deleteQ, 
+				  &deleteme);
 
-	/*** TBD: CHECK AUDIT IF TARGET IS RUNNING ***/
 
-	if (LOGDEBUG) {
-	    log_debug("\nagt_val: deleting empty NP "
-		      "container node '%s:%s'",
-		      obj_get_mod_name(deleteval->obj),
-		      deleteval->name);
+	while (!dlq_empty(&deleteQ)) {
+	    /**** NEED TO DEAL WITH ROLLBACK
+	     **** INSTEAD OF REALLY DELETING THESE NODES
+	     ****/
+	    deleteval = (val_value_t *)dlq_deque(&deleteQ);
+
+	    if (LOGDEBUG) {
+		log_debug("\nagt_val: deleting empty NP "
+			  "container node '%s:%s'",
+			  obj_get_mod_name(deleteval->obj),
+			  deleteval->name);
+	    }
+
+	    if (isrunning) {
+		handle_audit_record(OP_EDITOP_DELETE, 
+				    scb, 
+				    deleteval,
+				    NO_ERR);
+	    }
+
+	    val_free_value(deleteval);
 	}
-	val_free_value(deleteval);
     }
 
     while (!done && res == NO_ERR) {
 
 	/* keep checking the root until no more deletes */
-	res = when_stmt_check(scb, msg, 
-			      root, root, 
+	res = when_stmt_check(scb, 
+			      msg, 
+			      root, 
+			      root, 
 			      configmode,
 			      &deleteQ, 
-			      &deleteme);
+			      &deleteme,
+			      FALSE);
 
 	if (!dlq_empty(&deleteQ)) {
 	    while (!dlq_empty(&deleteQ)) {
@@ -3045,14 +3289,20 @@ static status_t
 		 ****/
 		deleteval = (val_value_t *)dlq_deque(&deleteQ);
 
-		/*** TBD: CHECK AUDIT IF TARGET IS RUNNING ***/
-
 		if (LOGDEBUG) {
 		    log_debug("\nagt_val: deleting false "
 			      "when node '%s:%s'",
 			      obj_get_mod_name(deleteval->obj),
 			      deleteval->name);
 		}
+
+		if (isrunning) {
+		    handle_audit_record(OP_EDITOP_DELETE, 
+					scb, 
+					deleteval,
+					NO_ERR);
+		}
+		
 		val_free_value(deleteval);
 	    }
 	} else {
@@ -3121,15 +3371,21 @@ static status_t
 
 		/* deleted in the source, so delete in the target */
 		res = handle_callback(AGT_CB_APPLY,
-				      OP_EDITOP_DELETE, scb, 
-				      msg, target, 
-				      NULL, curval);
+				      OP_EDITOP_DELETE, 
+				      scb, 
+				      msg, 
+				      target, 
+				      NULL, 
+				      curval);
 	    } else {
 		/* else keep this node in target config
 		 * but check any child nodes for deletion
 		 */
-		res = apply_commit_deletes(scb, msg, target,
-					   matchval, curval);
+		res = apply_commit_deletes(scb, 
+					   msg, 
+					   target,
+					   matchval, 
+					   curval);
 	    }
 	}  /* else skip non-config database node */
     }
@@ -3140,6 +3396,148 @@ static status_t
 
 
 /******************* E X T E R N   F U N C T I O N S ***************/
+
+
+/********************************************************************
+* FUNCTION agt_val_rpcwhen_check
+* 
+* Check for any nodes which are present
+* but have false when-stmts associated
+* with the node.  These are errors and
+* need to be flagged as unknown-element
+* 
+* Any false nodes will be removed from the input PDU
+* and discarded, after the error is recorded.
+* This prevents false positives or negatives in
+* the agt_val_instance_check, called after this function
+*
+* Also checks any false must-stmts for nodes
+* which are present (after false when removal)
+* These are flagged as 'must-violation' errors
+* as per YANG, 13.4
+*
+* INPUTS:
+*   scb == session control block (may be NULL; no session stats)
+*   msg == xml_msg_hdr t from msg in progress 
+*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   rpcinput == RPC input node conceptually under rpcroot
+*               except this rpcinput has no parent node
+*               so a fake one will be termporarily added 
+*               to prevent false XPath validation errors
+*   rpcroot == RPC method node. 
+*              The conceptual parent of this node 
+*              is used as the document root (/rpc == /)
+*
+* OUTPUTS:
+*   if false nodes found under :
+*     they are deleted
+*   if msg not NULL:
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+*      which must be freed by the called with the 
+*      rpc_err_free_record function
+*
+* RETURNS:
+*   status of the operation
+*   NO_ERR if no false when or must statements found
+*********************************************************************/
+status_t 
+    agt_val_rpc_xpath_check (ses_cb_t *scb,
+			     xml_msg_hdr_t *msg,
+			     val_value_t *rpcinput,
+			     const obj_template_t *rpcroot)
+{
+    val_value_t           *method, *deleteval;
+    dlq_hdr_t              deleteQ;
+    status_t               res, retres;
+    boolean                deleteme, done;
+
+#ifdef DEBUG
+    if (!rpcinput || !rpcroot) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    retres = NO_ERR;
+    method = NULL;
+    deleteme = FALSE;
+    done = FALSE;
+    dlq_createSQue(&deleteQ);
+
+#ifdef AGT_VAL_DEBUG
+    if (LOGDEBUG3) {
+	log_debug3("\nagt_val_rpc_xpathchk: %s:%s start", 
+		   obj_get_mod_name(rpcroot),
+		   obj_get_name(rpcroot));
+    }
+#endif
+
+    /* make a dummy tree to align with the XPath code */
+    method = val_new_value();
+    if (!method) {
+	return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(method, rpcroot);
+
+    /* add the rpc/method-name/input node */
+    val_add_child(rpcinput, method);
+
+    /* loop through the PDU over and over until there
+     * are no more entries found in the deleteQ
+     */
+    while (!done) {
+
+	deleteme = FALSE;
+
+	/* keep checking the root until no more deletes */
+	res = when_stmt_check(scb, 
+			      msg, 
+			      method, 
+			      rpcinput, 
+			      TRUE,
+			      &deleteQ, 
+			      &deleteme,
+			      TRUE);
+	if (res != NO_ERR) {
+	    retres = res;
+	    if (NEED_EXIT(res)) {
+		done = TRUE;
+	    }
+	}
+
+	if (deleteme) {
+	    /* the input node is not allowed to have 
+	     * must or when statements
+	     */
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	}
+
+	if (!dlq_empty(&deleteQ)) {
+	    while (!dlq_empty(&deleteQ)) {
+		deleteval = (val_value_t *)dlq_deque(&deleteQ);
+		val_free_value(deleteval);
+	    }
+	} else {
+	    done = TRUE;
+	}
+    }
+
+    retres = res;
+
+    /* check if any must expressions apply to
+     * descendent-or-self nodes in the rpcinput node
+     */
+    res = must_stmt_check(scb, msg, method, rpcinput);
+
+    /* cleanup fake RPC method parent node */
+    val_remove_child(rpcinput);
+    val_free_value(method);
+
+    CHK_EXIT(res, retres);
+
+    return retres;
+
+} /* agt_val_rpc_xpath_check */
 
 
 /********************************************************************
@@ -3214,13 +3612,19 @@ status_t
 	    if (obj_is_root(chval->obj)) {
 		continue;
 	    } else if (chval->obj->objtype != OBJ_TYP_LEAF) {
-		res = agt_val_instance_check(scb, msg, 
-					     chval, root, layer);
+		res = agt_val_instance_check(scb, 
+					     msg, 
+					     chval, 
+					     root, 
+					     layer);
 		CHK_EXIT(res, retres);
 	    } else if (chval->btyp == NCX_BT_LEAFREF ||
 		       chval->btyp == NCX_BT_INSTANCE_ID) {
-		res = instance_xpath_check(scb, msg, chval, 
-					   root, layer);
+		res = instance_xpath_check(scb, 
+					   msg, 
+					   chval, 
+					   root, 
+					   layer);
 		CHK_EXIT(res, retres);
 	    }
 	}
@@ -3236,11 +3640,19 @@ status_t
 	}
 
 	if (chobj->objtype == OBJ_TYP_CHOICE) {
-	    res = choice_check_agt(scb, msg, chobj, 
-				   valset, root, layer);
+	    res = choice_check_agt(scb, 
+				   msg, 
+				   chobj, 
+				   valset, 
+				   root, 
+				   layer);
 	} else {
-	    res = instance_check(scb, msg, chobj, 
-				 valset, root, layer);
+	    res = instance_check(scb, 
+				 msg, 
+				 chobj, 
+				 valset, 
+				 root, 
+				 layer);
 	}
 	if (res != NO_ERR && valset->res == NO_ERR) {	    
 	    valset->res = res;
@@ -3306,12 +3718,15 @@ status_t
      * config objects and empty NP containers
      * and then see if the config is valid
      */
-    res = delete_dead_nodes(scb, msg, root, TRUE);
+    res = delete_dead_nodes(scb, msg, root, TRUE, TRUE);
     CHK_EXIT(res, retres);
 
     /* check the instance counts for the subtrees that are present */
-    res = agt_val_instance_check(scb, msg, root, 
-				 root, NCX_LAYER_CONTENT);
+    res = agt_val_instance_check(scb, 
+				 msg, 
+				 root, 
+				 root, 
+				 NCX_LAYER_CONTENT);
     CHK_EXIT(res, retres);
 
     /* check the must-stmt expressions for the subtrees that are present */
@@ -3357,12 +3772,18 @@ status_t
 	    }
 
 	    if (chobj->objtype == OBJ_TYP_CHOICE) {
-		res = choice_check_agt(scb, msg, chobj, 
-				       root, root, 
+		res = choice_check_agt(scb, 
+				       msg, 
+				       chobj, 
+				       root, 
+				       root, 
 				       NCX_LAYER_CONTENT);
 	    } else {
-		res = instance_check(scb, msg, chobj, 
-				     root, root, 
+		res = instance_check(scb, 
+				     msg, 
+				     chobj, 
+				     root, 
+				     root, 
 				     NCX_LAYER_CONTENT);
 	    }
 	    CHK_EXIT(res, retres);
@@ -3436,18 +3857,28 @@ status_t
     res = NO_ERR;
     copyroot = val_clone_config_data(root, &res);
     if (!copyroot) {
-	agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT,
-			 ERR_NCX_OPERATION_FAILED, NULL,
-			 NCX_NT_STRING, get_error_string(res), 
-			 NCX_NT_VAL, root);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_CONTENT,
+			 ERR_NCX_OPERATION_FAILED, 
+			 NULL,
+			 NCX_NT_STRING, 
+			 get_error_string(res), 
+			 NCX_NT_VAL, 
+			 root);
 	return res;
     }
 
     /* do a dummy test apply to the partial config
      * start with the config root, which is a val_value_t node 
      */
-    res = handle_callback(AGT_CB_TEST_APPLY, defop, scb, 
-			  msg, NULL, newroot, copyroot);
+    res = handle_callback(AGT_CB_TEST_APPLY, 
+			  defop, 
+			  scb, 
+			  msg, 
+			  NULL, 
+			  newroot, 
+			  copyroot);
 
     if (res == NO_ERR) {
 	res = agt_val_root_check(scb, &msg->mhdr, copyroot);
@@ -3521,9 +3952,15 @@ status_t
 	/* check the lock first */
 	res = cfg_ok_to_write(target, scb->sid);
 	if (res != NO_ERR) {
-	    agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, res, NULL,
-			     NCX_NT_NONE, NULL, 
-			     NCX_NT_VAL, valroot);
+	    agt_record_error(scb, 
+			     &msg->mhdr, 
+			     NCX_LAYER_CONTENT,
+			     res,
+			     NULL,
+			     NCX_NT_NONE,
+			     NULL, 
+			     NCX_NT_VAL, 
+			     valroot);
 	    return res;
 	}
     }
@@ -3531,8 +3968,12 @@ status_t
     /* the <config> root is just a value node of type 'root'
      * traverse all nodes and check the <edit-config> request
      */
-    res = handle_callback(AGT_CB_VALIDATE, editop, scb, 
-			  msg, target, valroot,
+    res = handle_callback(AGT_CB_VALIDATE, 
+			  editop,
+			  scb, 
+			  msg,
+			  target,
+			  valroot,
 			  (target) ? target->root : NULL);
 
     return res;
@@ -3587,21 +4028,49 @@ status_t
 #endif
 
     /* start with the config root, which is a val_value_t node */
-    res = handle_callback(AGT_CB_APPLY, editop, scb, 
-			  msg, target, pducfg, target->root);
+    res = handle_callback(AGT_CB_APPLY, 
+			  editop, 
+			  scb, 
+			  msg, 
+			  target, 
+			  pducfg, 
+			  target->root);
 
     /* check if undo was in effect */
     if (msg->rpc_need_undo) {
 	if (res==NO_ERR) {
 	    /* complete the operation */
-	    res = handle_callback(AGT_CB_COMMIT, editop, scb, 
-				  msg, target, pducfg, target->root);
+	    res = handle_callback(AGT_CB_COMMIT, 
+				  editop,
+				  scb, 
+				  msg,
+				  target, 
+				  pducfg,
+				  target->root);
 	} else {
 	    /* rollback the operation */
-	    res = handle_callback(AGT_CB_ROLLBACK, editop, scb, 
-				  msg, target, pducfg, target->root);
+	    res = handle_callback(AGT_CB_ROLLBACK,
+				  editop,
+				  scb, 
+				  msg,
+				  target,
+				  pducfg,
+				  target->root);
 	}
     }  /* else there was no rollback, so APPLY is the final phase */
+
+
+    /* first need to delete all the false when-stmt
+     * config objects and empty NP containers
+     * and then see if the config is valid
+     */
+    if (res == NO_ERR) {
+	res = delete_dead_nodes(scb, 
+				&msg->mhdr, 
+				target->root, 
+				TRUE,
+				FALSE);
+    }
 
     return res;
 
@@ -3672,9 +4141,12 @@ status_t
 	    newval->editvars->curparent = target->root;
 	    
 	    res = handle_callback(AGT_CB_APPLY,
-				  OP_EDITOP_COMMIT, scb, 
-				  msg, target, 
-				  newval, matchval);
+				  OP_EDITOP_COMMIT, 
+				  scb, 
+				  msg, 
+				  target, 
+				  newval, 
+				  matchval);
 	}
     }
 
@@ -3683,15 +4155,19 @@ status_t
 	if (res==NO_ERR) {
 	    /* complete the operation */
 	    res = handle_callback(AGT_CB_COMMIT,
-				  OP_EDITOP_COMMIT, scb, 
-				  msg, target, 
+				  OP_EDITOP_COMMIT, 
+				  scb, 
+				  msg, 
+				  target, 
 				  source->root,
 				  target->root);
 	} else {
 	    /* rollback the operation */
 	    res = handle_callback(AGT_CB_ROLLBACK,
-				  OP_EDITOP_COMMIT, scb, 
-				  msg, target, 
+				  OP_EDITOP_COMMIT, 
+				  scb, 
+				  msg, 
+				  target, 
 				  source->root,
 				  target->root);
 	}
@@ -3701,11 +4177,15 @@ status_t
 	res = agt_ncx_cfg_save(target, FALSE);
 	if (res != NO_ERR) {
 	    /* config save failed */
-	    agt_record_error(scb, &msg->mhdr, 
+	    agt_record_error(scb,
+			     &msg->mhdr, 
 			     NCX_LAYER_OPERATION, 
-			     res, NULL, 
-			     NCX_NT_CFG, target,
-			     NCX_NT_NONE, NULL);
+			     res, 
+			     NULL, 
+			     NCX_NT_CFG, 
+			     target,
+			     NCX_NT_NONE, 
+			     NULL);
 	} else {
 	    val_clean_tree(target->root);
 	}

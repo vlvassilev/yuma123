@@ -2060,8 +2060,10 @@ static status_t
  * OUTPUTS:
  *   copy-config and/or commit operation will be sent to agent
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_save (agent_cb_t *agent_cb)
 {
     const ses_cb_t   *scb;
@@ -2069,11 +2071,12 @@ static void
     xmlChar          *line;
     status_t          res;
 
+    res = NO_ERR;
+
     /* get the session info */
     scb = mgr_ses_get_scb(agent_cb->mysid);
     if (!scb) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+	return SET_ERROR(ERR_INTERNAL_VAL);
     }
     mscb = (const mgr_scb_t *)scb->mgrcb;
 
@@ -2088,7 +2091,7 @@ static void
     case NCX_AGT_TARG_CAND_RUNNING:
 	line = xml_strdup(NCX_EL_COMMIT);
 	if (line) {
-	    conn_command(agent_cb, line);
+	    res = conn_command(agent_cb, line);
 #ifdef NOT_YET
 	    if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
 		log_stdout(" + copy-config <running> <startup>");
@@ -2119,8 +2122,10 @@ static void
 	break;
     default:
 	log_stdout("Error: Internal target not set");
-	SET_ERROR(ERR_INTERNAL_VAL);
+	res = SET_ERROR(ERR_INTERNAL_VAL);
     }
+
+    return res;
 
 }  /* do_save */
 
@@ -2141,8 +2146,10 @@ static void
  * OUTPUTS:
  *   specified module is loaded into the definition registry, if NO_ERR
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_mgrload (agent_cb_t *agent_cb,
 		const obj_template_t *rpc,
 		const xmlChar *line,
@@ -2196,7 +2203,7 @@ static void
 	    if (valset) {
 		val_free_value(valset);
 	    }
-	    return;
+	    return res;
 	}
     }
 
@@ -2230,6 +2237,8 @@ static void
 	val_free_value(valset);
     }
 
+    return res;
+
 }  /* do_mgrload */
 
 
@@ -2243,8 +2252,11 @@ static void
  *   vartype == type of user variable
  *   val == value associated with this variable
  *   mode == help mode in use
+ *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     show_user_var (const xmlChar *varname,
 		   var_type_t vartype,
 		   const val_value_t *val,
@@ -2256,6 +2268,7 @@ static void
     int32         doubleindent;
     status_t      res;
 
+    res = NO_ERR;
     doubleindent = 1;
 
     imode = interactive_mode();
@@ -2308,6 +2321,8 @@ static void
 	}
     }
 
+    return res;
+
 }  /* show_user_var */
 
 
@@ -2325,8 +2340,10 @@ static void
  *              Ignored unless shortmode==TRUE
  * isany == TRUE to choose global or local
  *          FALSE to use 'isglobal' valuse only
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_show_vars (help_mode_t mode,
 		  boolean shortmode,
 		  boolean isglobal,
@@ -2391,7 +2408,7 @@ static void
     }
 
     /* System Config Variables */
-    if (!shortmode || isglobal) {
+    if (!shortmode) {
 	que = runstack_get_que(ISGLOBAL);
 	first = TRUE;
 	for (var = (ncx_var_t *)dlq_firstEntry(que);
@@ -2466,6 +2483,8 @@ static void
 	(*logfn)("\n");
     }
 
+    return NO_ERR;
+
 } /* do_show_vars */
 
 
@@ -2480,8 +2499,11 @@ static void
  *   isany == TRUE if don't care (global or local)
  *         == FALSE to force local or global with 'isglobal'
  *   mode == help mode requested
+ *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_show_var (const xmlChar *name,
 		 var_type_t vartype,
 		 boolean isany,
@@ -2528,7 +2550,10 @@ static void
 	(*logfn)("\n");
     } else {
 	(*logfn)("\nVariable '%s' not found", name);
+	return ERR_NCX_DEF_NOT_FOUND;
     }
+
+    return NO_ERR;
 
 } /* do_show_var */
 
@@ -2542,12 +2567,15 @@ static void
  *    mod == module to show
  *    mode == requested help mode
  * 
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_show_module (const ncx_module_t *mod,
 		    help_mode_t mode)
 {
     help_data_module(mod, mode);
+    return NO_ERR;
 
 } /* do_show_module */
 
@@ -2561,8 +2589,10 @@ static void
  *    mod == module to show
  *    mode == requested help mode
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_show_one_module (ncx_module_t *mod,
 			help_mode_t mode)
 {
@@ -2602,6 +2632,9 @@ static void
     } else {
 	help_data_module(mod, HELP_MODE_BRIEF);
     }
+
+    return NO_ERR;
+
 }  /* do_show_one_module */
 
 
@@ -2614,37 +2647,41 @@ static void
  *    agent_cb == agent control block to use
  *    mode == requested help mode
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_show_modules (agent_cb_t *agent_cb,
 		     help_mode_t mode)
 {
     ncx_module_t  *mod;
     modptr_t      *modptr;
     boolean        anyout, imode;
+    status_t       res;
 
     imode = interactive_mode();
     anyout = FALSE;
+    res = NO_ERR;
 
     if (use_agentcb(agent_cb)) {
 	for (modptr = (modptr_t *)dlq_firstEntry(&agent_cb->modptrQ);
-	     modptr != NULL;
+	     modptr != NULL && res == NO_ERR;
 	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
-	    do_show_one_module(modptr->mod, mode);
+	    res = do_show_one_module(modptr->mod, mode);
 	    anyout = TRUE;
 	}
 	for (modptr = (modptr_t *)dlq_firstEntry(get_mgrloadQ());
-	     modptr != NULL;
+	     modptr != NULL && res == NO_ERR;
 	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
-	    do_show_one_module(modptr->mod, mode);
+	    res = do_show_one_module(modptr->mod, mode);
 	    anyout = TRUE;
 	}
     } else {
 	mod = ncx_get_first_module();
-	while (mod) {
-	    do_show_one_module(mod, mode);
+	while (mod && res == NO_ERR) {
+	    res = do_show_one_module(mod, mode);
 	    anyout = TRUE;
 	    mod = ncx_get_next_module(mod);
 	}
@@ -2664,6 +2701,8 @@ static void
 	}
     }
 
+    return res;
+
 } /* do_show_modules */
 
 
@@ -2679,8 +2718,11 @@ static void
  *
  * OUTPUTS:
  *    *anyout set to TRUE only if any suitable objects found
+ *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_show_one_object (const obj_template_t *obj,
 			help_mode_t mode,
 			boolean *anyout)
@@ -2709,6 +2751,8 @@ static void
 	*anyout = TRUE;
     }
 
+    return NO_ERR;
+
 } /* do_show_one_object */
 
 
@@ -2721,8 +2765,10 @@ static void
  *    agent_cb == agent control block to use
  *    mode == requested help mode
  *
+ * RETURNS:
+ *    status
  *********************************************************************/
-static void
+static status_t
     do_show_objects (agent_cb_t *agent_cb,
 		     help_mode_t mode)
 {
@@ -2730,9 +2776,11 @@ static void
     const obj_template_t *obj;
     const modptr_t       *modptr;
     boolean               anyout, imode;
+    status_t              res;
 
     imode = interactive_mode();
     anyout = FALSE;
+    res = NO_ERR;
 
     if (use_agentcb(agent_cb)) {
 	for (modptr = (const modptr_t *)
@@ -2741,10 +2789,10 @@ static void
 	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
 
 	    for (obj = ncx_get_first_object(modptr->mod);
-		 obj != NULL;
+		 obj != NULL && res == NO_ERR;
 		 obj = ncx_get_next_object(modptr->mod, obj)) {
 
-		do_show_one_object(obj, mode, &anyout);
+		res = do_show_one_object(obj, mode, &anyout);
 	    }
 	}
 
@@ -2754,20 +2802,20 @@ static void
 	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
 
 	    for (obj = ncx_get_first_object(modptr->mod);
-		 obj != NULL;
+		 obj != NULL && res == NO_ERR;
 		 obj = ncx_get_next_object(modptr->mod, obj)) {
 
-		do_show_one_object(obj, mode, &anyout);
+		res = do_show_one_object(obj, mode, &anyout);
 	    }
 	}
     } else {
 	mod = ncx_get_first_module();
 	while (mod) {
 	    for (obj = ncx_get_first_object(mod);
-		 obj != NULL;
+		 obj != NULL && res == NO_ERR;
 		 obj = ncx_get_next_object(mod, obj)) {
 
-		do_show_one_object(obj, mode, &anyout);
+		res = do_show_one_object(obj, mode, &anyout);
 	    }
 	    mod = (const ncx_module_t *)ncx_get_next_module(mod);
 	}
@@ -2779,6 +2827,8 @@ static void
 	    log_write("\n");
 	}
     }
+
+    return res;
 
 } /* do_show_objects */
 
@@ -2799,8 +2849,10 @@ static void
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_show (agent_cb_t *agent_cb,
 	     const obj_template_t *rpc,
 	     const xmlChar *line,
@@ -2840,7 +2892,10 @@ static void
 			      YANGCLI_MOD,
 			      YANGCLI_LOCAL);
 	if (parm) {
-	    do_show_var(VAL_STR(parm), VAR_TYP_LOCAL, FALSE, mode);
+	    res = do_show_var(VAL_STR(parm), 
+			      VAR_TYP_LOCAL, 
+			      FALSE, 
+			      mode);
 	    done = TRUE;
 	}
 
@@ -2849,7 +2904,7 @@ static void
 				  YANGCLI_MOD,
 				  YANGCLI_LOCALS);
 	    if (parm) {
-		do_show_vars(mode, TRUE, FALSE, FALSE);
+		res = do_show_vars(mode, TRUE, FALSE, FALSE);
 		done = TRUE;
 	    }
 	}
@@ -2859,7 +2914,7 @@ static void
 				  YANGCLI_MOD,
 				  YANGCLI_OBJECTS);
 	    if (parm) {
-		do_show_objects(agent_cb, mode);
+		res = do_show_objects(agent_cb, mode);
 		done = TRUE;
 	    }
 	}
@@ -2869,7 +2924,7 @@ static void
 				  YANGCLI_MOD,
 				  YANGCLI_GLOBAL);
 	    if (parm) {
-		do_show_var(VAL_STR(parm), 
+		res = do_show_var(VAL_STR(parm), 
 			    VAR_TYP_GLOBAL, 
 			    FALSE, 
 			    mode);
@@ -2882,7 +2937,7 @@ static void
 				  YANGCLI_MOD,
 				  YANGCLI_GLOBALS);
 	    if (parm) {
-		do_show_vars(mode, TRUE, TRUE, FALSE);
+		res = do_show_vars(mode, TRUE, TRUE, FALSE);
 		done = TRUE;
 	    }
 	}
@@ -2892,7 +2947,7 @@ static void
 				  YANGCLI_MOD,
 				  YANGCLI_VAR);
 	    if (parm) {
-		do_show_var(VAL_STR(parm), VAR_TYP_NONE, TRUE, mode);
+		res = do_show_var(VAL_STR(parm), VAR_TYP_NONE, TRUE, mode);
 		done = TRUE;
 	    }
 	}
@@ -2902,7 +2957,7 @@ static void
 				  YANGCLI_MOD,
 				  YANGCLI_VARS);
 	    if (parm) {
-		do_show_vars(mode, FALSE, FALSE, TRUE);
+		res = do_show_vars(mode, FALSE, FALSE, TRUE);
 		done = TRUE;
 	    }
 	}
@@ -2914,7 +2969,7 @@ static void
 	    if (parm) {
 		mod = find_module(agent_cb, VAL_STR(parm));
 		if (mod) {
-		    do_show_module(mod, mode);
+		    res = do_show_module(mod, mode);
 		} else {
 		    if (imode) {
 			log_stdout("\nyangcli: module (%s) not loaded",
@@ -2933,7 +2988,7 @@ static void
 				  YANGCLI_MOD,
 				  YANGCLI_MODULES);
 	    if (parm) {
-		do_show_modules(agent_cb, mode);
+		res = do_show_modules(agent_cb, mode);
 		done = TRUE;
 	    }
 	}
@@ -2957,6 +3012,8 @@ static void
 	val_free_value(valset);
     }
 
+    return res;
+
 }  /* do_show */
 
 
@@ -2967,13 +3024,18 @@ static void
  *
  * INPUTS:
  *    obj == the object to use
+ *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_list_one_oid (const obj_template_t *obj)
 {
     xmlChar      *buffer;
     boolean       imode;
     status_t      res;
+
+    res = NO_ERR;
 
     if (obj_is_data_db(obj) && 
 	obj_has_name(obj) &&
@@ -2998,6 +3060,8 @@ static void
 	}
     }
 
+    return res;
+
 } /* do_list_one_oid */
 
 
@@ -3009,21 +3073,29 @@ static void
  * INPUTS:
  *    obj == object to use
  *    nestlevel to stop at
+ *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_list_oid (const obj_template_t *obj,
 		 uint32 level)
 {
     const obj_template_t  *chobj;
+    status_t               res;
+
+    res = NO_ERR;
 
     if (obj_get_level(obj) <= level) {
-	do_list_one_oid(obj);
+	res = do_list_one_oid(obj);
 	for (chobj = obj_first_child(obj);
-	     chobj != NULL;
+	     chobj != NULL && res != NO_ERR;
 	     chobj = obj_next_child(chobj)) {
-	    do_list_oid(chobj, level);
+	    res = do_list_oid(chobj, level);
 	}
     }
+
+    return res;
 
 } /* do_list_oid */
 
@@ -3038,8 +3110,11 @@ static void
  *    mod == the 1 module to use
  *           NULL to use all available modules instead
  *    mode == requested help mode
+ *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_list_oids (agent_cb_t *agent_cb,
 		  const ncx_module_t *mod,
 		  help_mode_t mode)
@@ -3048,11 +3123,13 @@ static void
     const obj_template_t  *obj;
     boolean                imode;
     uint32                 level;
+    status_t               res;
 
+    res = NO_ERR;
 
     switch (mode) {
     case HELP_MODE_NONE:
-	return;
+	return res;
     case HELP_MODE_BRIEF:
 	level = 1;
 	break;
@@ -3063,16 +3140,15 @@ static void
 	level = 999;
 	break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     imode = interactive_mode();
 
     if (mod) {
 	obj = ncx_get_first_object(mod);
-	while (obj) {
-	    do_list_oid(obj, level);
+	while (obj && res == NO_ERR) {
+	    res = do_list_oid(obj, level);
 	    obj = ncx_get_next_object(mod, obj);
 	}
     } else if (use_agentcb(agent_cb)) {
@@ -3082,13 +3158,13 @@ static void
 	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
 
 	    obj = ncx_get_first_object(modptr->mod);
-	    while (obj) {
-		do_list_oid(obj, level);
+	    while (obj && res == NO_ERR) {
+		res = do_list_oid(obj, level);
 		obj = ncx_get_next_object(modptr->mod, obj);
 	    }
 	}
     } else {
-	return;
+	return res;
     }
     if (imode) {
 	log_stdout("\n");
@@ -3096,6 +3172,7 @@ static void
 	log_write("\n");
     }
 
+    return res;
 
 } /* do_list_oids */
 
@@ -3108,8 +3185,11 @@ static void
  * INPUTS:
  *    obj == object template for the RPC command to use
  *    mode == requested help mode
+ *
+ * RETURNS:
+ *    status
  *********************************************************************/
-static void
+static status_t
     do_list_one_command (const obj_template_t *obj,
 			 help_mode_t mode)
 {
@@ -3139,6 +3219,8 @@ static void
 	}
     }
 
+    return NO_ERR;
+
 } /* do_list_one_command */
 
 
@@ -3152,8 +3234,11 @@ static void
  *    mod == the 1 module to use
  *           NULL to use all available modules instead
  *    mode == requested help mode
+ *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_list_objects (agent_cb_t *agent_cb,
 		     const ncx_module_t *mod,
 		     help_mode_t mode)
@@ -3162,8 +3247,11 @@ static void
     const obj_template_t  *obj;
     logfn_t                logfn;
     boolean                anyout;
+    status_t               res;
 
+    res = NO_ERR;
     anyout = FALSE;
+
     if (interactive_mode()) {
 	logfn = log_stdout;
     } else {
@@ -3172,13 +3260,13 @@ static void
 
     if (mod) {
 	obj = ncx_get_first_object(mod);
-	while (obj) {
+	while (obj && res == NO_ERR) {
 	    if (obj_is_data_db(obj) && 
 		obj_has_name(obj) &&
 		!obj_is_hidden(obj) && 
 		!obj_is_abstract(obj)) {
 		anyout = TRUE;
-		do_list_one_command(obj, mode);
+		res = do_list_one_command(obj, mode);
 	    }
 	    obj = ncx_get_next_object(mod, obj);
 	}
@@ -3190,13 +3278,13 @@ static void
 		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
 
 		obj = ncx_get_first_object(modptr->mod);
-		while (obj) {
+		while (obj && res == NO_ERR) {
 		    if (obj_is_data_db(obj) && 
 			obj_has_name(obj) &&
 			!obj_is_hidden(obj) && 
 			!obj_is_abstract(obj)) {
 			anyout = TRUE;			
-			do_list_one_command(obj, mode);
+			res = do_list_one_command(obj, mode);
 		    }
 		    obj = ncx_get_next_object(modptr->mod, obj);
 		}
@@ -3205,17 +3293,17 @@ static void
 
 	for (modptr = (const modptr_t *)
 		 dlq_firstEntry(get_mgrloadQ());
-	     modptr != NULL;
+	     modptr != NULL && res == NO_ERR;
 	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
 
 	    obj = ncx_get_first_object(modptr->mod);
-	    while (obj) {
+	    while (obj && res == NO_ERR) {
 		if (obj_is_data_db(obj) && 
 		    obj_has_name(obj) &&
 		    !obj_is_hidden(obj) && 
 		    !obj_is_abstract(obj)) {
 		    anyout = TRUE;		    
-		    do_list_one_command(obj, mode);
+		    res = do_list_one_command(obj, mode);
 		}
 		obj = ncx_get_next_object(modptr->mod, obj);
 	    }
@@ -3227,6 +3315,8 @@ static void
     }
 
     (*logfn)("\n");
+
+    return res;
 
 } /* do_list_objects */
 
@@ -3241,8 +3331,11 @@ static void
  *    mod == the 1 module to use
  *           NULL to use all available modules instead
  *    mode == requested help mode
+ *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_list_commands (agent_cb_t *agent_cb,
 		      const ncx_module_t *mod,
 		      help_mode_t mode)
@@ -3251,7 +3344,9 @@ static void
     const obj_template_t  *obj;
     logfn_t                logfn;
     boolean                imode, anyout;
+    status_t               res;
 
+    res = NO_ERR;
     imode = interactive_mode();
     if (imode) {
 	logfn = log_stdout;
@@ -3262,9 +3357,9 @@ static void
     if (mod) {
 	anyout = FALSE;
 	obj = ncx_get_first_object(mod);
-	while (obj) {
+	while (obj && res == NO_ERR) {
 	    if (obj_is_rpc(obj)) {
-		do_list_one_command(obj, mode);
+		res = do_list_one_command(obj, mode);
 		anyout = TRUE;
 	    }
 	    obj = ncx_get_next_object(mod, obj);
@@ -3279,13 +3374,13 @@ static void
 	
 	    for (modptr = (const modptr_t *)
 		     dlq_firstEntry(&agent_cb->modptrQ);
-		 modptr != NULL;
+		 modptr != NULL && res == NO_ERR;
 		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
 
 		obj = ncx_get_first_object(modptr->mod);
 		while (obj) {
 		    if (obj_is_rpc(obj)) {
-			do_list_one_command(obj, mode);
+			res = do_list_one_command(obj, mode);
 		    }
 		    obj = ncx_get_next_object(modptr->mod, obj);
 		}
@@ -3295,17 +3390,17 @@ static void
 	(*logfn)("\n\nLocal Commands:");
 
 	obj = ncx_get_first_object(get_yangcli_mod());
-	while (obj) {
+	while (obj && res == NO_ERR) {
 	    if (obj_is_rpc(obj)) {
 		if (use_agentcb(agent_cb)) {
 		    /* list a local command */
-		    do_list_one_command(obj, mode);
+		    res = do_list_one_command(obj, mode);
 		} else {
 		    /* session not active so filter out
 		     * all the commands except top command
 		     */
 		    if (is_top_command(obj_get_name(obj))) {
-			do_list_one_command(obj, mode);
+			res = do_list_one_command(obj, mode);
 		    }
 		}
 	    }
@@ -3314,6 +3409,8 @@ static void
     }
 
     (*logfn)("\n");
+
+    return res;
 
 } /* do_list_commands */
 
@@ -3333,8 +3430,10 @@ static void
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_list (agent_cb_t *agent_cb,
 	     const obj_template_t *rpc,
 	     const xmlChar *line,
@@ -3394,7 +3493,7 @@ static void
 				  YANGCLI_COMMANDS);
 	    if (parm) {
 		/* do list commands */
-		do_list_commands(agent_cb, mod, mode);
+		res = do_list_commands(agent_cb, mod, mode);
 		done = TRUE;
 	    }
 	}
@@ -3405,7 +3504,7 @@ static void
 				  YANGCLI_OBJECTS);
 	    if (parm) {
 		/* do list objects */
-		do_list_objects(agent_cb, mod, mode);
+		res = do_list_objects(agent_cb, mod, mode);
 		done = TRUE;
 	    }
 	}
@@ -3416,7 +3515,7 @@ static void
 				  YANGCLI_OIDS);
 	    if (parm) {
 		/* do list oids */
-		do_list_oids(agent_cb, mod, mode);
+		res = do_list_oids(agent_cb, mod, mode);
 		done = TRUE;
 	    }
 	}
@@ -3425,6 +3524,8 @@ static void
     if (valset) {
 	val_free_value(valset);
     }
+
+    return res;
 
 }  /* do_list */
 
@@ -3438,8 +3539,10 @@ static void
  *    agent_cb == agent control block to use
  *    mode == requested help mode
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_help_commands (agent_cb_t *agent_cb,
 		      help_mode_t mode)
 {
@@ -3504,6 +3607,8 @@ static void
 	}
     }
 
+    return NO_ERR;
+
 } /* do_help_commands */
 
 
@@ -3521,8 +3626,10 @@ static void
  * OUTPUTS:
  *   log_stdout global help message
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_help (agent_cb_t *agent_cb,
 	     const obj_template_t *rpc,
 	     const xmlChar *line,
@@ -3544,7 +3651,7 @@ static void
 	if (valset) {
 	    val_free_value(valset);
 	}
-	return;
+	return res;
     }
 
     done = FALSE;
@@ -3575,6 +3682,7 @@ static void
 	if (obj && obj->objtype == OBJ_TYP_RPC) {
 	    help_object(obj, mode);
 	} else {
+	    res = ERR_NCX_DEF_NOT_FOUND;
 	    if (imode) {
 		log_stdout("\nyangcli: command (%s) not found",
 			   VAL_STR(parm));
@@ -3584,7 +3692,7 @@ static void
 	    }
 	}
 	val_free_value(valset);
-	return;
+	return res;
     }
 
     /* look for the specific definition parameters */
@@ -3592,9 +3700,9 @@ static void
 			  YANGCLI_MOD, 
 			  YANGCLI_COMMANDS);
     if (parm && parm->res==NO_ERR) {
-	do_help_commands(agent_cb, mode);
+	res = do_help_commands(agent_cb, mode);
 	val_free_value(valset);
-	return;
+	return res;
     }
 
     parm = val_find_child(valset, 
@@ -3606,6 +3714,7 @@ static void
 	if (typ) {
 	    help_type(typ, mode);
 	} else {
+	    res = ERR_NCX_DEF_NOT_FOUND;
 	    if (imode) {
 		log_stdout("\nyangcli: type definition (%s) not found",
 			   VAL_STR(parm));
@@ -3615,7 +3724,7 @@ static void
 	    }
 	}
 	val_free_value(valset);
-	return;
+	return res;
     }
 
     parm = val_find_child(valset, 
@@ -3627,6 +3736,7 @@ static void
 	if (obj && obj_is_data(obj)) {
 	    help_object(obj, mode);
 	} else {
+	    res = ERR_NCX_DEF_NOT_FOUND;
 	    if (imode) {
 		log_stdout("\nyangcli: object definition (%s) not found",
 			   VAL_STR(parm));
@@ -3636,7 +3746,7 @@ static void
 	    }
 	}
 	val_free_value(valset);
-	return;
+	return res;
     }
 
 
@@ -3649,6 +3759,7 @@ static void
 	if (obj && obj->objtype == OBJ_TYP_NOTIF) {
 	    help_object(obj, mode);
 	} else {
+	    res = ERR_NCX_DEF_NOT_FOUND;
 	    if (imode) {
 		log_stdout("\nyangcli: notification definition (%s) not found",
 			   VAL_STR(parm));
@@ -3658,7 +3769,7 @@ static void
 	    }
 	}
 	val_free_value(valset);
-	return;
+	return res;
     }
 
 
@@ -3701,6 +3812,8 @@ static void
     }
 
     val_free_value(valset);
+
+    return res;
 
 }  /* do_help */
 
@@ -3779,9 +3892,9 @@ static status_t
     if (str && res == NO_ERR) {
 	/* execute the line as an RPC command */
 	if (is_top(agent_cb->state)) {
-	    top_command(agent_cb, str);
+	    res = top_command(agent_cb, str);
 	} else {
-	    conn_command(agent_cb, str);
+	    res = conn_command(agent_cb, str);
 	}
     }
 
@@ -3848,8 +3961,6 @@ static status_t
     return res;
 
 }  /* do_run */
-
-
 
 
 /********************************************************************
@@ -3919,8 +4030,10 @@ static void
  * OUTPUTS:
  *   log_stdout global help message
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_pwd (agent_cb_t *agent_cb,
 	    const obj_template_t *rpc,
 	    const xmlChar *line,
@@ -3939,6 +4052,7 @@ static void
     if (valset) {
 	val_free_value(valset);
     }
+    return res;
 
 }  /* do_pwd */
 
@@ -3957,8 +4071,10 @@ static void
  * OUTPUTS:
  *   log_stdout global help message
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_cd (agent_cb_t *agent_cb,
 	   const obj_template_t *rpc,
 	   const xmlChar *line,
@@ -3976,7 +4092,7 @@ static void
 	if (valset) {
 	    val_free_value(valset);
 	}
-	return;
+	return res;
     }
 
     parm = val_find_child(valset, 
@@ -3984,11 +4100,12 @@ static void
 			  YANGCLI_DIR);
     if (!parm || parm->res != NO_ERR) {
 	val_free_value(valset);
-	return;
+	return ERR_NCX_MISSING_PARM;
     }
 
     ret = chdir((const char *)VAL_STR(parm));
     if (ret) {
+	res = ERR_NCX_INVALID_VALUE;
 	if (imode) {
 	    log_stdout("\nChange CWD failure (%s)\n",
 		       get_error_string(errno_to_status()));
@@ -4001,6 +4118,8 @@ static void
     }
 
     val_free_value(valset);
+
+    return res;
 
 }  /* do_cd */
 
@@ -4020,8 +4139,10 @@ static void
  *   the completed data node is output and
  *   is usually part of an assignment statement
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_fill (agent_cb_t *agent_cb,
 	     const obj_template_t *rpc,
 	     const xmlChar *line,
@@ -4043,7 +4164,7 @@ static void
 	if (valset) {
 	    val_free_value(valset);
 	}
-	return;
+	return res;
     }
 
     target = NULL;
@@ -4052,11 +4173,10 @@ static void
 			  NCX_EL_TARGET);
     if (!parm || parm->res != NO_ERR) {
 	val_free_value(valset);
-	return;
+	return ERR_NCX_MISSING_PARM;
     } else {
 	target = VAL_STR(parm);
     }
-
 
     save_getopt = agent_cb->get_optional;
 
@@ -4078,7 +4198,7 @@ static void
 	}
 	val_free_value(valset);
 	clear_result(agent_cb);
-	return;
+	return res;
     } else if (targval != valroot) {
 	/* keep targval, toss valroot */
 	val_remove_child(targval);
@@ -4218,6 +4338,8 @@ static void
 	val_free_value(newparm);
     }
     agent_cb->get_optional = save_getopt;
+
+    return res;
 
 }  /* do_fill */
 
@@ -5866,8 +5988,10 @@ static status_t
  *   the completed data node is output and
  *   an edit-config operation is sent to the agent
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_edit (agent_cb_t *agent_cb,
 	     const obj_template_t *rpc,
 	     const xmlChar *line,
@@ -5891,7 +6015,7 @@ static void
 	if (valset) {
 	    val_free_value(valset);
 	}
-	return;
+	return res;
     }
 
     /* get the timeout parameter */
@@ -5931,7 +6055,7 @@ static void
 				      &valroot);
     if (!content) {
 	val_free_value(valset);
-	return;
+	return ERR_NCX_MISSING_PARM;
     }
 
     /* add nc:operation attribute to the value node */
@@ -5945,7 +6069,7 @@ static void
 	} else {
 	    val_free_value(content);
 	}
-	return;
+	return res;
     }
 
     /* construct an edit-config PDU with default parameters */
@@ -5960,6 +6084,8 @@ static void
     }
 
     val_free_value(valset);
+
+    return res;
 
 }  /* do_edit */
 
@@ -5979,8 +6105,10 @@ static void
  *   the completed data node is output and
  *   an edit-config operation is sent to the agent
  *
+ * RETURNS:
+ *  status
  *********************************************************************/
-static void
+static status_t
     do_insert (agent_cb_t *agent_cb,
 	       const obj_template_t *rpc,
 	       const xmlChar *line,
@@ -6006,7 +6134,7 @@ static void
 	if (valset) {
 	    val_free_value(valset);
 	}
-	return;
+	return res;
     }
 
     /* get the 'fill-in optional parms' parameter */
@@ -6036,7 +6164,7 @@ static void
 				      &valroot);
     if (!content) {
 	val_free_value(valset);
-	return;
+	return ERR_NCX_MISSING_PARM;
     }
 
     /* get the timeout parameter */
@@ -6093,7 +6221,7 @@ static void
 		val_free_value(content);
 	    }
 	    val_free_value(valset);
-	    return;
+	    return ERR_NCX_MISSING_PARM;
 	}
 	break;
     default:
@@ -6144,6 +6272,8 @@ static void
 
     val_free_value(valset);
 
+    return res;
+
 }  /* do_insert */
 
 
@@ -6163,8 +6293,10 @@ static void
  *   the completed data node is output and
  *   a <get> operation is sent to the agent
  *
+ * RETURNS:
+ *  status
  *********************************************************************/
-static void
+static status_t
     do_sget (agent_cb_t *agent_cb,
 	     const obj_template_t *rpc,
 	     const xmlChar *line,
@@ -6188,7 +6320,7 @@ static void
 	if (valset) {
 	    val_free_value(valset);
 	}
-	return;
+	return res;
     }
 
     parm = val_find_child(valset, 
@@ -6234,7 +6366,7 @@ static void
 				      &valroot);
     if (!content) {
 	val_free_value(valset);
-	return;
+	return ERR_NCX_MISSING_PARM;
     }
 
     /* construct a get PDU with the content as the filter */
@@ -6252,6 +6384,8 @@ static void
     }
 
     val_free_value(valset);
+
+    return res;
 
 }  /* do_sget */
 
@@ -6272,8 +6406,10 @@ static void
  *   the completed data node is output and
  *   a <get-config> operation is sent to the agent
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_sget_config (agent_cb_t *agent_cb,
 		    const obj_template_t *rpc,
 		    const xmlChar *line,
@@ -6296,7 +6432,7 @@ static void
 	if (valset) {
 	    val_free_value(valset);
 	}
-	return;
+	return res;
     }
 
     /* get the timeout parameter */
@@ -6332,7 +6468,7 @@ static void
     if (!source) {
 	log_error("\nError: mandatory source parameter missing");
 	val_free_value(valset);
-	return;
+	return ERR_NCX_MISSING_PARM;
     }
 
     /* get the with-defaults parameter */
@@ -6354,7 +6490,7 @@ static void
 				      &valroot);
     if (!content) {
 	val_free_value(valset);
-	return;
+	return ERR_NCX_MISSING_PARM;
     }
 
     /* hand off this malloced node to send_get_to_agent */
@@ -6377,6 +6513,8 @@ static void
 
     val_free_value(valset);
 
+    return res;
+
 }  /* do_sget_config */
 
 
@@ -6396,8 +6534,10 @@ static void
  *   the completed data node is output and
  *   a <get> operation is sent to the agent
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_xget (agent_cb_t *agent_cb,
 	     const obj_template_t *rpc,
 	     const xmlChar *line,
@@ -6419,8 +6559,7 @@ static void
     /* get the session info */
     scb = mgr_ses_get_scb(agent_cb->mysid);
     if (!scb) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+	return SET_ERROR(ERR_INTERNAL_VAL);
     }
     mscb = (const mgr_scb_t *)scb->mgrcb;
 
@@ -6430,7 +6569,7 @@ static void
 	if (valset) {
 	    val_free_value(valset);
 	}
-	return;
+	return res;
     }
 
     /* get the timeout parameter */
@@ -6495,7 +6634,7 @@ static void
 	if (valset) {
 	    val_free_value(valset);
 	}
-	return;
+	return res;
     }
 
     /* get the contents specified in the 'from' choice */
@@ -6545,6 +6684,8 @@ static void
 
     val_free_value(valset);
 
+    return res;
+
 }  /* do_xget */
 
 
@@ -6564,8 +6705,10 @@ static void
  *   the completed data node is output and
  *   a <get-config> operation is sent to the agent
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     do_xget_config (agent_cb_t *agent_cb,
 		    const obj_template_t *rpc,
 		    const xmlChar *line,
@@ -6587,8 +6730,7 @@ static void
     /* get the session info */
     scb = mgr_ses_get_scb(agent_cb->mysid);
     if (!scb) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+	return SET_ERROR(ERR_INTERNAL_VAL);
     }
     mscb = (const mgr_scb_t *)scb->mgrcb;
       
@@ -6598,7 +6740,7 @@ static void
 	if (valset) {
 	    val_free_value(valset);
 	}
-	return;
+	return res;
     }
 
     /* get the source parameter */
@@ -6606,7 +6748,7 @@ static void
     if (!source) {
 	log_error("\nError: mandatory source parameter missing");
 	val_free_value(valset);
-	return;
+	return ERR_NCX_MISSING_PARM;
     }
 
     /* get the with-defaults parameter */
@@ -6671,7 +6813,7 @@ static void
 	if (valset) {
 	    val_free_value(valset);
 	}
-	return;
+	return res;
     }
 
     /* get the contents specified in the 'from' choice */
@@ -6723,6 +6865,8 @@ static void
 
     val_free_value(valset);
 
+    return res;
+
 }  /* do_xget_config */
 
 
@@ -6742,8 +6886,9 @@ static void
 *    the line buffer is NOT consumed or freed by this function
 *
 * RETURNS:
-*    NO_ERR if a RPC was executed
+*    NO_ERR if a RPC was executed OK
 *    ERR_NCX_SKIPPED if no command was invoked
+*    some other error if command execution failed
 *********************************************************************/
 static status_t
     do_local_conn_command (agent_cb_t *agent_cb,
@@ -6752,37 +6897,41 @@ static status_t
 			   uint32  len)
 {
     const xmlChar *rpcname;
+    status_t       res;
 
+    res = NO_ERR;
     rpcname = obj_get_name(rpc);
 
     if (!xml_strcmp(rpcname, YANGCLI_CREATE)) {
-	do_edit(agent_cb, rpc, line, len, OP_EDITOP_CREATE);
+	res = do_edit(agent_cb, rpc, line, len, OP_EDITOP_CREATE);
     } else if (!xml_strcmp(rpcname, YANGCLI_DELETE)) {
-	do_edit(agent_cb, rpc, line, len, OP_EDITOP_DELETE);
+	res = do_edit(agent_cb, rpc, line, len, OP_EDITOP_DELETE);
     } else if (!xml_strcmp(rpcname, YANGCLI_INSERT)) {
-	do_insert(agent_cb, rpc, line, len);
+	res = do_insert(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_MERGE)) {
-	do_edit(agent_cb, rpc, line, len, OP_EDITOP_MERGE);
+	res = do_edit(agent_cb, rpc, line, len, OP_EDITOP_MERGE);
     } else if (!xml_strcmp(rpcname, YANGCLI_REPLACE)) {
-	do_edit(agent_cb, rpc, line, len, OP_EDITOP_REPLACE);
+	res = do_edit(agent_cb, rpc, line, len, OP_EDITOP_REPLACE);
     } else if (!xml_strcmp(rpcname, YANGCLI_SAVE)) {
 	if (len < xml_strlen(line)) {
-	    log_error("\nWarning: Extra characters ignored (%s)",
+	    res = ERR_NCX_INVALID_VALUE;
+	    log_error("\nError: Extra characters found (%s)",
 		      &line[len]);
+	} else {
+	    res = do_save(agent_cb);
 	}
-	do_save(agent_cb);
     } else if (!xml_strcmp(rpcname, YANGCLI_SGET)) {
-	do_sget(agent_cb, rpc, line, len);
+	res = do_sget(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_SGET_CONFIG)) {
-	do_sget_config(agent_cb, rpc, line, len);
+	res = do_sget_config(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_XGET)) {
-	do_xget(agent_cb, rpc, line, len);
+	res = do_xget(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_XGET_CONFIG)) {
-	do_xget_config(agent_cb, rpc, line, len);
+	res = do_xget_config(agent_cb, rpc, line, len);
     } else {
-	return ERR_NCX_SKIPPED;
+	res = ERR_NCX_SKIPPED;
     }
-    return NO_ERR;
+    return res;
 
 } /* do_local_conn_command */
 
@@ -6802,44 +6951,51 @@ static status_t
 *    state may be changed or other action taken
 *    the line buffer is NOT consumed or freed by this function
 *
+* RETURNS:
+*  status
 *********************************************************************/
-static void
+static status_t
     do_local_command (agent_cb_t *agent_cb,
 		      const obj_template_t *rpc,
 		      xmlChar *line,
 		      uint32  len)
 {
     const xmlChar *rpcname;
+    status_t       res;
 
+    res = NO_ERR;
     rpcname = obj_get_name(rpc);
 
     if (!xml_strcmp(rpcname, YANGCLI_CD)) {
-	do_cd(agent_cb, rpc, line, len);
+	res = do_cd(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
-	do_connect(agent_cb, rpc, line, len, FALSE);
+	res = do_connect(agent_cb, rpc, line, len, FALSE);
     } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
-	do_fill(agent_cb, rpc, line, len);
+	res = do_fill(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
-	do_help(agent_cb, rpc, line, len);
+	res = do_help(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_LIST)) {
-	do_list(agent_cb, rpc, line, len);
+	res = do_list(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_MGRLOAD)) {
-	do_mgrload(agent_cb, rpc, line, len);
+	res = do_mgrload(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_PWD)) {
-	do_pwd(agent_cb, rpc, line, len);
+	res = do_pwd(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_QUIT)) {
 	agent_cb->state = MGR_IO_ST_SHUT;
 	mgr_request_shutdown();
     } else if (!xml_strcmp(rpcname, YANGCLI_RUN)) {
-	(void)do_run(agent_cb, rpc, line, len);
+	res = do_run(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {
-	do_show(agent_cb, rpc, line, len);
+	res = do_show(agent_cb, rpc, line, len);
     } else {
+	res = ERR_NCX_INVALID_VALUE;
 	log_error("\nError: The %s command is not allowed in this mode",
 		   rpcname);
     }
-} /* do_local_command */
 
+    return res;
+
+} /* do_local_command */
 
 
 /********************************************************************
@@ -6855,8 +7011,10 @@ static void
 *    state may be changed or other action taken
 *    the line buffer is NOT consumed or freed by this function
 *
+* RETURNS:
+*   status
 *********************************************************************/
-void
+status_t
     top_command (agent_cb_t *agent_cb,
 		 xmlChar *line)
 {
@@ -6867,15 +7025,14 @@ void
 
 #ifdef DEBUG
     if (!agent_cb || !line) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     res = NO_ERR;
 
     if (!xml_strlen(line)) {
-	return;
+	return res;
     }
 
     dtyp = NCX_NT_OBJ;
@@ -6887,19 +7044,23 @@ void
 	if (agent_cb->result_name || agent_cb->result_filename) {
 	    res = finish_result_assign(agent_cb, NULL, line);
 	} else {
+	    res = ERR_NCX_INVALID_VALUE;
 	    /* this is an unknown command */
 	    log_error("\nError: Unrecognized command");
 	}
-	return;
+	return res;
     }
 
     /* check  handful of yangcli commands */
     if (is_yangcli_ns(obj_get_nsid(rpc))) {
-	do_local_command(agent_cb, rpc, line, len);
+	res = do_local_command(agent_cb, rpc, line, len);
     } else {
+	res = ERR_NCX_OPERATION_FAILED;
 	log_error("\nError: Not connected to agent."
 		  "\nLocal commands only in this mode.");
     }
+
+    return res;
 
 } /* top_command */
 
@@ -6917,8 +7078,10 @@ void
 *    state may be changed or other action taken
 *    the line buffer is NOT consumed or freed by this function
 *
+* RETURNS:
+*   status
 *********************************************************************/
-void
+status_t
     conn_command (agent_cb_t *agent_cb,
 		  xmlChar *line)
 {
@@ -6933,8 +7096,7 @@ void
 
 #ifdef DEBUG
     if (!agent_cb || !line) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -6948,7 +7110,7 @@ void
     /* make sure there is something to parse */
     linelen = xml_strlen(line);
     if (!linelen) {
-	return;
+	return res;
     }
 
     /* get the RPC method template */
@@ -6959,24 +7121,25 @@ void
 	if (agent_cb->result_name || agent_cb->result_filename) {
 	    res = finish_result_assign(agent_cb, NULL, line);
 	} else {
+	    res = ERR_NCX_DEF_NOT_FOUND;
 	    /* this is an unknown command */
 	    log_stdout("\nUnrecognized command");
 	}
-	return;
+	return res;
     }
 
     /* check local commands */
     if (is_yangcli_ns(obj_get_nsid(rpc))) {
 	if (!xml_strcmp(obj_get_name(rpc), YANGCLI_CONNECT)) {
+	    res = ERR_NCX_OPERATION_FAILED;
 	    log_stdout("\nError: Already connected");
 	} else {
 	    res = do_local_conn_command(agent_cb, rpc, line, len);
 	    if (res == ERR_NCX_SKIPPED) {
-		res = NO_ERR;
-		do_local_command(agent_cb, rpc, line, len);
+		res = do_local_command(agent_cb, rpc, line, len);
 	    }
 	}
-	return;
+	return res;
     }
 
     /* else treat this as an RPC request going to the agent
@@ -7088,6 +7251,8 @@ void
     } else {
 	agent_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
+
+    return res;
 
 } /* conn_command */
 
@@ -7264,8 +7429,10 @@ xmlChar *
  *   connect_valset parms may be set 
  *   create_session may be called
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-void
+status_t
     do_connect (agent_cb_t *agent_cb,
 		const obj_template_t *rpc,
 		const xmlChar *line,
@@ -7279,8 +7446,7 @@ void
 
 #ifdef DEBUG
     if (!agent_cb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -7292,15 +7458,14 @@ void
 			      YANGCLI_CONNECT);
 	if (!rpc) {
 	    log_write("\nError finding the 'connect' RPC method");
-	    return;
+	    return ERR_NCX_DEF_NOT_FOUND;
 	}
     }	    
 
     obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_VAL);
 	log_write("\nError finding the connect RPC 'input' node");	
-	return;
+	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* process any parameters entered on the command line */
@@ -7314,7 +7479,7 @@ void
 	    if (!valset || res != NO_ERR) {
 		log_write("\nError in the parameters for RPC %s (%s)",
 			  obj_get_name(rpc), get_error_string(res));
-		return;
+		return res;
 	    }
 	}
     }
@@ -7339,8 +7504,9 @@ void
 	if (!(s1 && s2 && s3)) {
 	    valset = val_new_value();
 	    if (!valset) {
+		res = ERR_INTERNAL_MEM;
 		log_write("\nError: malloc failure");
-		return;
+		return res;
 	    } else {
 		val_init_from_template(valset, obj);
 	    }
@@ -7378,7 +7544,7 @@ void
 		agent_cb->connect_valset = val_new_value();
 		if (!agent_cb->connect_valset) {
 		    log_write("\nError: malloc failure");
-		    return;
+		    return ERR_INTERNAL_MEM;
 		} else {
 		    val_init_from_template(agent_cb->connect_valset,
 					   obj);
@@ -7431,6 +7597,8 @@ void
 	    agent_cb->state = MGR_IO_ST_IDLE;
 	}
     }
+
+    return res;
 
 }  /* do_connect */
 

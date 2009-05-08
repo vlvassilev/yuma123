@@ -548,7 +548,8 @@ static status_t
     /* figure out which modules to use */
     if (comstate->cmdmodule) {
 	/* if foo:\t entered as the current token, then
-	 * the comstate->curmodule pointer will be set
+	 * the comstate->cmdmodule pointer will be set
+	 * to limit the definitions to that module 
 	 */
 	res = fill_one_module_completion_commands
 	    (comstate->cmdmodule,
@@ -577,7 +578,8 @@ static status_t
 	    }
 
 	    /* list manager loaded commands next */
-	    for (modptr = (const modptr_t *)get_mgrloadQ();
+	    for (modptr = (const modptr_t *)
+		     dlq_firstEntry(get_mgrloadQ());
 		 modptr != NULL && res == NO_ERR;
 		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
 
@@ -590,17 +592,17 @@ static status_t
 		     word_end,
 		     cmdlen);
 	    }
-	} else {
-	    /* use the yangcli top only */
-	    res = fill_one_module_completion_commands
-		(get_yangcli_mod(),
-		 cpl,
-		 comstate,
-		 line,
-		 word_start,
-		 word_end,
-		 cmdlen);
 	}
+
+	/* use the yangcli top commands every time */
+	res = fill_one_module_completion_commands
+	    (get_yangcli_mod(),
+	     cpl,
+	     comstate,
+	     line,
+	     word_start,
+	     word_end,
+	     cmdlen);
     }
 
     return res;
@@ -1133,7 +1135,7 @@ static status_t
     status_t               res;
     int                    word_start, cmdlen;
     uint32                 retlen;
-    boolean                done;
+    boolean                done, equaldone;
 
     res = NO_ERR;
     str = line;
@@ -1177,6 +1179,8 @@ static status_t
 	 * assignment is found or word_end hit
 	 */
 	comstate->assignstmt = TRUE;
+	equaldone = FALSE;
+
 	while ((str < &line[word_end]) && 
 	       !isspace(*str) && (*str != '=')) {
 	    str++;
@@ -1194,7 +1198,9 @@ static status_t
 		    str++;
 		}
 	    }
+
 	    if ((*str == '=') && (str < &line[word_end])) {
+		equaldone = TRUE;
 		str++;  /* skip equals sign */
 
 		/* skip more whitespace */
@@ -1212,6 +1218,19 @@ static status_t
 		 * the end of this start command
 		 */
 		word_start = (int)(str - line);
+	    } else if (equaldone) {
+		res = 
+		    fill_one_completion_commands(cpl,
+						 comstate,
+						 line,
+						 word_end,
+						 word_end,
+						 0);
+		if (res != NO_ERR) {
+		    cpl_record_error(cpl,
+				     get_error_string(res));
+		}
+		return res;
 	    } else {
 		/* still inside the file or variable name */
 		return res;

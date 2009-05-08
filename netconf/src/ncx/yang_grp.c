@@ -409,8 +409,11 @@ status_t
 		testtyp->grp = grp;
 	    }
 #ifdef YANG_GRP_DEBUG
-	    log_debug3("\nyang_grp: adding grouping (%s) to mod (%s)", 
-		       grp->name, mod->name);
+	    if (LOGDEBUG3) {
+		log_debug3("\nyang_grp: adding grouping (%s) to mod (%s)", 
+			   grp->name, 
+			   mod->name);
+	    }
 #endif
 	    dlq_enque(grp, que);  /* may have some errors */
 

@@ -2725,11 +2725,11 @@ static status_t
     status_t        res, retres;
 
 #ifdef YANG_PARSE_DEBUG_TRACE
-    log_debug3("\nEnter parse_yang_module");
-    if (mod->sourcefn) {
-	log_debug3(" %s", mod->sourcefn);
-    }
     if (LOGDEBUG3) {
+	log_debug3("\nEnter parse_yang_module");
+	if (mod->sourcefn) {
+	    log_debug3(" %s", mod->sourcefn);
+	}
 	yang_dump_nodeQ(&pcb->impchainQ, "impchainQ");
 	yang_dump_nodeQ(&pcb->incchainQ, "incchainQ");
 	yang_dump_nodeQ(&pcb->allincQ, "allincQ");
@@ -3158,7 +3158,10 @@ status_t
 	return ERR_NCX_MISSING_FILE;
     }
 
-    log_debug2("\nLoading YANG module from file %s", filespec);
+    if (LOGDEBUG2) {
+	log_debug2("\nLoading YANG module from file %s", 
+		   filespec);
+    }
 
     /* get a new token chain */
     if (res == NO_ERR) {

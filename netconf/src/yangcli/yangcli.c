@@ -2061,6 +2061,7 @@ static mgr_io_state_t
 {
     agent_cb_t    *agent_cb;
     xmlChar       *line;
+    const xmlChar *resultstr;
     ses_cb_t       *scb;
     boolean         getrpc, fileassign;
     status_t        res;
@@ -2196,11 +2197,11 @@ static mgr_io_state_t
 	switch (agent_cb->state) {
 	case MGR_IO_ST_IDLE:
 	    /* waiting for top-level commands */
-	    top_command(agent_cb, &line[len]);
+	    res = top_command(agent_cb, &line[len]);
 	    break;
 	case MGR_IO_ST_CONN_IDLE:
 	    /* waiting for session commands */
-	    conn_command(agent_cb, &line[len]);
+	    res = conn_command(agent_cb, &line[len]);
 	    break;
 	case MGR_IO_ST_CONN_RPYWAIT:
 	    /* waiting for RPC reply while more input typed */
@@ -2210,6 +2211,32 @@ static mgr_io_state_t
 	default:
 	    break;
 	}
+
+	switch (agent_cb->state) {
+	case MGR_IO_ST_IDLE:
+	case MGR_IO_ST_CONN_IDLE:
+	    /* check assignment statement active */
+	    if (agent_cb->result_name || 
+		agent_cb->result_filename) {
+		/* save the filled in value */
+		resultstr = (res == NO_ERR) ? 
+		    (const xmlChar *)"ok" :
+		    (const xmlChar *)get_error_string(res);
+
+		res = finish_result_assign(agent_cb, 
+					   NULL,
+					   resultstr);
+	    } else {
+		clear_result(agent_cb);
+	    }
+	    break;
+	default:
+	    ;
+	}
+
+
+
+
     } else {
 	log_info("\nOK\n");
     }

@@ -44,11 +44,11 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-extern void
+extern status_t
     top_command (agent_cb_t *agent_cb,
 		 xmlChar *line);
 
-extern void
+extern status_t
     conn_command (agent_cb_t *agent_cb,
 		  xmlChar *line);
 
@@ -59,7 +59,7 @@ extern xmlChar *
     get_cmd_line (agent_cb_t *agent_cb,
 		  status_t *res);
 
-extern void
+extern status_t
     do_connect (agent_cb_t *agent_cb,
 		const obj_template_t *rpc,
 		const xmlChar *line,

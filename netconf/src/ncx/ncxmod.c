@@ -1048,7 +1048,12 @@ static status_t
     if (!isfile) {
 	testmod = ncx_find_module(modname, revision);
 	if (testmod) {
-	    log_debug3("\nncxmod: module %s already loaded", modname);
+#ifdef NCXMOD_DEBUG
+	    if (LOGDEBUG2) {
+		log_debug2("\nncxmod: module %s already loaded", 
+			   modname);
+	    }
+#endif
 	    if (!pcb->top) {
 		pcb->top = testmod;
 	    }
@@ -1750,7 +1755,10 @@ xmlChar *
 
 #ifdef NCXMOD_DEBUG
     if (generrors) {
-	log_debug2("\nNcxmod: Finding data file (%s)", fname);
+	if (LOGDEBUG2) {
+	    log_debug2("\nNcxmod: Finding data file (%s)", 
+		       fname);
+	}
     }
 #endif
 
@@ -1851,7 +1859,10 @@ xmlChar *
     *res = NO_ERR;
 
 #ifdef NCXMOD_DEBUG
-    log_debug2("\nNcxmod: Finding script file (%s)", fname);
+    if (LOGDEBUG2) {
+	log_debug2("\nNcxmod: Finding script file (%s)", 
+		   fname);
+    }
 #endif
 
     flen = xml_strlen(fname);

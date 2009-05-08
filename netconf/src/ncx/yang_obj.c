@@ -3199,8 +3199,8 @@ static status_t
 	    }
 
 	    /* remove the node and toss it out */
-	    if (LOGDEBUG2) {
-		log_debug2("\napply_dev: remove target obj %s:%s",
+	    if (LOGDEBUG3) {
+		log_debug3("\napply_dev: remove target obj %s:%s",
 			   obj_get_mod_name(targobj),
 			   obj_get_name(targobj));
 	    }
@@ -3218,8 +3218,8 @@ static status_t
 		 * replace the typdef; minor alteration :-) 
 		 */
 		retest = TRUE;
-		if (LOGDEBUG2) {
-		    log_debug2("\napply_dev: replacing type in "
+		if (LOGDEBUG3) {
+		    log_debug3("\napply_dev: replacing type in "
 			       "target obj %s:%s",
 			       obj_get_mod_name(targobj),
 			       obj_get_name(targobj));
@@ -3256,8 +3256,8 @@ static status_t
 		}
 		switch (devi->arg) {
 		case OBJ_DARG_ADD:
-		    if (LOGDEBUG2) {
-			log_debug2("\napply_dev: adding units to "
+		    if (LOGDEBUG3) {
+			log_debug3("\napply_dev: adding units to "
 				   "target obj %s:%s",
 				   obj_get_mod_name(targobj),
 				   obj_get_name(targobj));
@@ -3270,8 +3270,8 @@ static status_t
 		    devi->units = NULL;
 		    break;
 		case OBJ_DARG_DELETE:
-		    if (LOGDEBUG2) {
-			log_debug2("\napply_dev: deleting units in "
+		    if (LOGDEBUG3) {
+			log_debug3("\napply_dev: deleting units in "
 				   "target obj %s:%s",
 				   obj_get_mod_name(targobj),
 				   obj_get_name(targobj));
@@ -3286,8 +3286,8 @@ static status_t
 		    if (*strarg == NULL) {
 			SET_ERROR(ERR_INTERNAL_VAL);
 		    } else {
-			if (LOGDEBUG2) {
-			    log_debug2("\napply_dev: replacing units in "
+			if (LOGDEBUG3) {
+			    log_debug3("\napply_dev: replacing units in "
 				       "target obj %s:%s",
 				       obj_get_mod_name(targobj),
 				       obj_get_name(targobj));
@@ -3322,8 +3322,8 @@ static status_t
 		    if (*strarg != NULL) {
 			SET_ERROR(ERR_INTERNAL_VAL);
 		    } else {
-			if (LOGDEBUG2) {
-			    log_debug2("\napply_dev: adding default to "
+			if (LOGDEBUG3) {
+			    log_debug3("\napply_dev: adding default to "
 				       "target obj %s:%s",
 				       obj_get_mod_name(targobj),
 				       obj_get_name(targobj));
@@ -3336,8 +3336,8 @@ static status_t
 		    if (*strarg == NULL) {
 			SET_ERROR(ERR_INTERNAL_VAL);
 		    } else {
-			if (LOGDEBUG2) {
-			    log_debug2("\napply_dev: deleting default in "
+			if (LOGDEBUG3) {
+			    log_debug3("\napply_dev: deleting default in "
 				       "target obj %s:%s",
 				       obj_get_mod_name(targobj),
 				       obj_get_name(targobj));
@@ -3350,8 +3350,8 @@ static status_t
 		    if (*strarg == NULL) {
 			SET_ERROR(ERR_INTERNAL_VAL);
 		    } else {
-			if (LOGDEBUG2) {
-			    log_debug2("\napply_dev: replacing default in "
+			if (LOGDEBUG3) {
+			    log_debug3("\napply_dev: replacing default in "
 				       "target obj %s:%s",
 				       obj_get_mod_name(targobj),
 				       obj_get_name(targobj));
@@ -3370,8 +3370,8 @@ static status_t
 	    /* config-stmt */
 	    if (devi->config_tk) {
 		retest = TRUE;
-		if (LOGDEBUG2) {
-		    log_debug2("\napply_dev: replacing config-stmt in "
+		if (LOGDEBUG3) {
+		    log_debug3("\napply_dev: replacing config-stmt in "
 			       "target obj %s:%s",
 			       obj_get_mod_name(targobj),
 			       obj_get_name(targobj));
@@ -3388,8 +3388,8 @@ static status_t
 	    /* mandatory-stmt */
 	    if (devi->mandatory_tk) {
 		retest = TRUE;
-		if (LOGDEBUG2) {
-		    log_debug2("\napply_dev: replacing mandatory-stmt in "
+		if (LOGDEBUG3) {
+		    log_debug3("\napply_dev: replacing mandatory-stmt in "
 			       "target obj %s:%s",
 			       obj_get_mod_name(targobj),
 			       obj_get_name(targobj));
@@ -3406,8 +3406,8 @@ static status_t
 	    /* min-elements-stmt */
 	    if (devi->minelems_tk) {
 		retest = TRUE;
-		if (LOGDEBUG2) {
-		    log_debug2("\napply_dev: replacing min-elements in "
+		if (LOGDEBUG3) {
+		    log_debug3("\napply_dev: replacing min-elements in "
 			       "target obj %s:%s",
 			       obj_get_mod_name(targobj),
 			       obj_get_name(targobj));
@@ -3428,8 +3428,8 @@ static status_t
 	    /* max-elements-stmt */
 	    if (devi->maxelems_tk) {
 		retest = TRUE;
-		if (LOGDEBUG2) {
-		    log_debug2("\napply_dev: replacing max-elements in "
+		if (LOGDEBUG3) {
+		    log_debug3("\napply_dev: replacing max-elements in "
 			       "target obj %s:%s",
 			       obj_get_mod_name(targobj),
 			       obj_get_name(targobj));
@@ -3456,8 +3456,8 @@ static status_t
 		}
 		switch (devi->arg) {
 		case OBJ_DARG_ADD:
-		    if (LOGDEBUG2) {
-			log_debug2("\napply_dev: adding must-stmt(s) to "
+		    if (LOGDEBUG3) {
+			log_debug3("\napply_dev: adding must-stmt(s) to "
 				   "target obj %s:%s",
 				   obj_get_mod_name(targobj),
 				   obj_get_name(targobj));
@@ -3465,8 +3465,8 @@ static status_t
 		    dlq_block_enque(&devi->mustQ, targQ);
 		    break;
 		case OBJ_DARG_DELETE:
-		    if (LOGDEBUG2) {
-			log_debug2("\napply_dev: removing must-stmt(s) from "
+		    if (LOGDEBUG3) {
+			log_debug3("\napply_dev: removing must-stmt(s) from "
 				   "target obj %s:%s",
 				   obj_get_mod_name(targobj),
 				   obj_get_name(targobj));
@@ -3503,8 +3503,8 @@ static status_t
 		}
 		switch (devi->arg) {
 		case OBJ_DARG_ADD:
-		    if (LOGDEBUG2) {
-			log_debug2("\napply_dev: adding unique-stmt(s) to "
+		    if (LOGDEBUG3) {
+			log_debug3("\napply_dev: adding unique-stmt(s) to "
 				   "target obj %s:%s",
 				   obj_get_mod_name(targobj),
 				   obj_get_name(targobj));
@@ -3512,8 +3512,8 @@ static status_t
 		    dlq_block_enque(&devi->uniqueQ, targQ);
 		    break;
 		case OBJ_DARG_DELETE:
-		    if (LOGDEBUG2) {
-			log_debug2("\napply_dev: removing unique-stmt(s) from "
+		    if (LOGDEBUG3) {
+			log_debug3("\napply_dev: removing unique-stmt(s) from "
 				   "target obj %s:%s",
 				   obj_get_mod_name(targobj),
 				   obj_get_name(targobj));
@@ -3553,8 +3553,8 @@ static status_t
     }
 
     if (res == NO_ERR && retest && !deleted) {
-	if (LOGDEBUG2) {
-	    log_debug2("\nRechecking %s:%s after "
+	if (LOGDEBUG3) {
+	    log_debug3("\nRechecking %s:%s after "
 		       "applying deviation(s)",
 		       obj_get_mod_name(targobj),
 		       obj_get_name(targobj));
@@ -3624,8 +3624,8 @@ static status_t
 	      * is still OK; there should not be any other
 	      * deviations with the same target object
 	      */
-	     if (LOGDEBUG2) {
-		 log_debug2("\nRechecking %s:%s after "
+	     if (LOGDEBUG3) {
+		 log_debug3("\nRechecking %s:%s after "
 			    "applying deviation(s) to child",
 			    obj_get_mod_name(parentobj),
 			    obj_get_name(parentobj));
@@ -6116,9 +6116,11 @@ static status_t
 	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
 #ifdef YANG_OBJ_DEBUG
-	log_debug3("\nexpand_uses: mod %s, object %s, on line %u",
-		   mod->name, obj_get_name(chobj),
-		   chobj->linenum);
+	if (LOGDEBUG3) {
+	    log_debug3("\nexpand_uses: mod %s, object %s, on line %u",
+		       mod->name, obj_get_name(chobj),
+		       chobj->linenum);
+	}
 #endif
 
 	switch (chobj->objtype) {
@@ -6163,13 +6165,15 @@ static status_t
 		    dlq_insertAhead(newobj, obj);
 
 #ifdef YANG_OBJ_DEBUG
-		    log_debug3("\nexpand_uses: add new obj %s to parent %s,"
-			       " uses.%u",
-			       obj_get_name(newobj),
-			       (obj->grp) ? obj->grp->name :
-			       ((obj->parent) ? 
-				obj_get_name(obj->parent) : NCX_EL_NONE),
-			       obj->linenum);
+		    if (LOGDEBUG3) {
+			log_debug3("\nexpand_uses: add new obj %s to parent %s,"
+				   " uses.%u",
+				   obj_get_name(newobj),
+				   (obj->grp) ? obj->grp->name :
+				   ((obj->parent) ? 
+				    obj_get_name(obj->parent) : NCX_EL_NONE),
+				   obj->linenum);
+		    }
 #endif
 		}
 	    }
@@ -6191,8 +6195,11 @@ static status_t
 	}
 
 #ifdef YANG_OBJ_DEBUG
-	log_debug3("\nexpand_uses_augment: mod %s, augment on line %u",
-		   mod->name, chobj->linenum);
+	if (LOGDEBUG3) {
+	    log_debug3("\nexpand_uses_augment: mod %s, augment on line %u",
+		       mod->name, 
+		       chobj->linenum);
+	}
 #endif
 
 	res = expand_augment(tkc, mod, chobj, datadefQ);
@@ -6466,9 +6473,11 @@ static status_t
 	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
 #ifdef YANG_OBJ_DEBUG
-	log_debug3("\nexpand_aug: mod %s, object %s, on line %u",
-		   mod->name, obj_get_name(chobj),
-		   chobj->linenum);
+	if (LOGDEBUG3) {
+	    log_debug3("\nexpand_aug: mod %s, object %s, on line %u",
+		       mod->name, obj_get_name(chobj),
+		       chobj->linenum);
+	}
 #endif
 
 	switch (chobj->objtype) {
@@ -6553,12 +6562,14 @@ static status_t
 		    }
 
 #ifdef YANG_OBJ_DEBUG
-		    log_debug3("\nexpand_aug: add new obj %s "
-			       "to target %s.%u, aug.%u",
-			       obj_get_name(newobj),
-			       obj_get_name(targobj),
-			       targobj->linenum,
-			       obj->linenum);
+		    if (LOGDEBUG3) {
+			log_debug3("\nexpand_aug: add new obj %s "
+				   "to target %s.%u, aug.%u",
+				   obj_get_name(newobj),
+				   obj_get_name(targobj),
+				   targobj->linenum,
+				   obj->linenum);
+		    }
 #endif
 		}
 	    }
@@ -7789,9 +7800,11 @@ static status_t
 	case OBJ_TYP_LEAF_LIST:
 	    if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
 #ifdef YANG_OBJ_DEBUG
-		log_debug3("\nresolve_xpath: mod %s, object %s, on line %u",
-			   mod->name, obj_get_name(testobj), 
-			   testobj->linenum);
+		if (LOGDEBUG3) {
+		    log_debug3("\nresolve_xpath: mod %s, object %s, on line %u",
+			       mod->name, obj_get_name(testobj), 
+			       testobj->linenum);
+		}
 #endif
 
 		/* need to make a copy of the XPath PCB because
@@ -8354,9 +8367,12 @@ status_t
 	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
 #ifdef YANG_OBJ_DEBUG
-	log_debug3("\nresolve_uses: mod %s, object %s, on line %u",
-		   mod->name, obj_get_name(testobj),
-		   testobj->linenum);
+	if (LOGDEBUG3) {
+	    log_debug3("\nresolve_uses: mod %s, object %s, on line %u",
+		       mod->name, 
+		       obj_get_name(testobj),
+		       testobj->linenum);
+	}
 #endif
 
 	switch (testobj->objtype) {
@@ -8622,10 +8638,12 @@ status_t
 	notclone = !obj_is_cloned(testobj);
 
 #ifdef YANG_OBJ_DEBUG
-	log_debug3("\nresolve_final: mod %s, object %s, on line %u",
-		   mod->name, 
-		   obj_get_name(testobj), 
-		   testobj->linenum);
+	if (LOGDEBUG3) {
+	    log_debug3("\nresolve_final: mod %s, object %s, on line %u",
+		       mod->name, 
+		       obj_get_name(testobj), 
+		       testobj->linenum);
+	}
 #endif
 	
 	switch (testobj->objtype) {
@@ -8872,8 +8890,8 @@ status_t
 	case OBJ_TYP_LEAF_LIST:
 	    if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
 #ifdef YANG_OBJ_DEBUG
-		if (LOGDEBUG2) {
-		    log_debug2("\ncheck_leafref_loop: mod %s, "
+		if (LOGDEBUG3) {
+		    log_debug3("\ncheck_leafref_loop: mod %s, "
 			       "object %s, on line %u",
 			       mod->name, obj_get_name(testobj), 
 			       testobj->linenum);

@@ -3745,7 +3745,7 @@ status_t
 	point = str;
 	xml_strncpy(numbuff, 
 		    numstr, 
-		    (uint32)(point - str));
+		    (uint32)(point - numstr));
 	basenum = strtoll((const char *)numbuff, &err, 10);
     } else {
 	/* assume the entire string is just a base part
@@ -3801,6 +3801,7 @@ status_t
 
     /* check if there is a fraction part entered */
     if (point) {
+	fracnum = 0;
 	str = point + 1;
 	while (isdigit((char)*str)) {
 	    str++;
@@ -3812,25 +3813,37 @@ status_t
 	    return ERR_NCX_DEC64_FRACOVFL;
 	}
 
-	err = NULL;
-	xml_strncpy(numbuff, point+1, numdigits);
-	fracnum = strtoll((const char *)numbuff, &err, 10);
+	if (numdigits) {
+	    err = NULL;
+	    xml_strncpy(numbuff, point+1, numdigits);
+	    fracnum = strtoll((const char *)numbuff, &err, 10);
 
-	/* check if strtoll accepted the number string */
-	if (err && *err) {
-	    return ERR_NCX_INVALID_NUM;
-	}
-	if (isneg) {
-	    fracnum *= -1;
+	    /* check if strtoll accepted the number string */
+	    if (err && *err) {
+		return ERR_NCX_INVALID_NUM;
+	    }
+
+	    /* adjust the fraction part will trailing zeros
+	     * if the user omitted them
+	     */
+	    for (i = numdigits; i < digits; i++) {
+		fracnum *= 10;
+	    }
+
+	    if (isneg) {
+		fracnum *= -1;
+	    }
 	}
     }
 
-    /* encode the decimal64 as an int64 */
-    for (i= 0; i < digits; i++) {
-	basenum *= 10;
+    /* encode the base part shifted left 10 * fraction-digits */
+    if (basenum) {
+	for (i= 0; i < digits; i++) {
+	    basenum *= 10;
+	}
     }
 
-    /* save the number and the fraction-digits value */
+    /* save the number with the fraction-digits value added in */
     val->dec.val = basenum + fracnum;
     val->dec.digits = digits;
 
@@ -4787,11 +4800,11 @@ status_t
 		     ncx_btype_t  btyp,
 		     uint32   *len)
 {
-
-    int32    ilen, pos, tzcount;
-    int64    fracpart, testnum;
-    uint8    digit, i;
-    xmlChar  dumbuff[VAL_MAX_NUMLEN];
+    xmlChar  *point;
+    int32     ilen, pos, tzcount;
+    uint32    ulen;
+    xmlChar   dumbuff[VAL_MAX_NUMLEN];
+    xmlChar   decbuff[VAL_MAX_NUMLEN];
 
 #ifdef DEBUG
     if (!num || !len) {
@@ -4828,46 +4841,36 @@ status_t
 	    if (num->dec.digits == 0) {
 		return SET_ERROR(ERR_INTERNAL_VAL);
 	    } else {
-		/* print the base part */
-		pos = sprintf((char *)buff, 
+		/* get the encoded number in the temp buffer */
+		pos = sprintf((char *)decbuff, 
 			      "%lld", 
-			      num->dec.val / (10 * num->dec.digits));
+			      num->dec.val);
 
-		/* print the decimal point */
-		buff[pos] = '.';
+		if (pos <= num->dec.digits) {
+		    return SET_ERROR(ERR_INTERNAL_VAL);
+		} else {
+		    /* find where the decimal point should go */
+		    point = &decbuff[pos - num->dec.digits];
 
-		/* get the fraction as an int64 */
-		fracpart = num->dec.val % (10 * num->dec.digits);
+		    /* copy the base part to the real buffer */
+		    ulen = xml_strncpy(buff, 
+				       decbuff, 
+				       (uint32)(point - decbuff));
 
-		/* adjust the fraction number if it negative */
-		if (fracpart < 0) {
-		    fracpart *= -1;
-		}
+		    buff[ulen] = '.';
 
-		/* go through each digit left to right
-		 * and determine its value; subtract that
-		 * digit out from fracpart each time through the loop
-		 */
-		for (i = 1, digit = num->dec.digits;
-		     digit > 0;
-		     i++, digit--) {
+		    xml_strcpy(&buff[ulen+1], point);
 
-		    if (digit > 1) {
-			testnum = fracpart / (int64)(10 * (digit-1));
-			sprintf((char *)&buff[pos+i], 
-				"%lld", 
-				testnum);
-			fracpart -= (testnum * (10 * (digit-1)));
-		    } else {
-			/* last digit */
-			testnum = fracpart % 10;
-			sprintf((char *)&buff[pos+i], 
-				"%lld", 
-				testnum);
-		    }
+		    /* current length is pos+1
+		     * need to check for trailing zeros
+		     * and remove them
+		     * (!!! need flag to override!!!)
+		     * !!! TBD: WAITING FOR WG TO DECIDE
+		     * !! RETURN WITH TRAILING ZEROS FOR NOW
+		     */
+		    ilen = pos + 1;
 		}
 	    }
-	    ilen = pos + 1 + num->dec.digits;
 	}
 	break;
     case NCX_BT_FLOAT64:

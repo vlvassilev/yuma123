@@ -2951,7 +2951,6 @@ int
 	log_error("\nYangcli: init returned error (%s)\n", 
 		  get_error_string(res));
     } else if (!(helpmode || versionmode)) {
-	do_startup_screen();
 	res = mgr_io_run();
 	if (res != NO_ERR) {
 	    log_error("\nmgr_io failed (%d)\n", res);

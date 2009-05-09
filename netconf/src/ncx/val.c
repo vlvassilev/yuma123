@@ -489,7 +489,7 @@ static void
 
     btyp = val->btyp;
 
-    if (val->editvars) {
+    if (full && val->editvars) {
 	val_free_editvars(val);
     }
 
@@ -565,9 +565,11 @@ static void
 	}
     }
 
-    while (!dlq_empty(&val->metaQ)) {
-	cur = (val_value_t *)dlq_deque(&val->metaQ);
-	val_free_value(cur);
+    if (full) {
+	while (!dlq_empty(&val->metaQ)) {
+	    cur = (val_value_t *)dlq_deque(&val->metaQ);
+	    val_free_value(cur);
+	}
     }
 
     while (!dlq_empty(&val->indexQ)) {
@@ -3468,6 +3470,37 @@ status_t
     return res;
 
 }  /* val_set_string2 */
+
+
+/********************************************************************
+* FUNCTION val_reset_empty
+* 
+* Recast an already initialized value as an NCX_BT_EMPTY
+*
+* INPUTS:
+*    val == value to set
+*
+* OUTPUTS:
+*    *val is filled in if return NO_ERR
+* RETURNS:
+*  status
+*********************************************************************/
+status_t 
+    val_reset_empty (val_value_t  *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+    
+    return val_set_simval(val,
+			  typ_get_basetype_typdef(NCX_BT_EMPTY),
+			  val_get_nsid(val),
+			  val->name,
+			  NULL);
+
+}  /* val_reset_empty */
 
 
 /********************************************************************

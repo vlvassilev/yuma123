@@ -684,12 +684,13 @@ static status_t
 	    break;
 	default:
 	    res = ERR_NCX_WRONG_NODETYP;
-	    errnode = startnode;
 	}
     } else {
 	/* make sure the startnode is correct */
-	res = xml_node_match(startnode, obj_get_nsid(obj), 
-			     NULL, XML_NT_START); 
+	res = xml_node_match(startnode, 
+			     obj_get_nsid(obj), 
+			     NULL, 
+			     XML_NT_START); 
     }
 
     if (res == NO_ERR && !empty) {
@@ -845,12 +846,16 @@ static status_t
     /* validate the node type and enum string or number content */
     switch (startnode->nodetyp) {
     case XML_NT_EMPTY:
-	res = xml_node_match(startnode, obj_get_nsid(obj),
-	     NULL, XML_NT_NONE);
+	res = xml_node_match(startnode, 
+			     obj_get_nsid(obj),
+			     NULL, 
+			     XML_NT_NONE);
 	break;
     case XML_NT_START:
-	res = xml_node_match(startnode, obj_get_nsid(obj),
-	     NULL, XML_NT_NONE);
+	res = xml_node_match(startnode, 
+			     obj_get_nsid(obj),
+			     NULL, 
+			     XML_NT_NONE);
 	if (res == NO_ERR) {
 	    res = get_xml_node(scb, msg, &endnode, TRUE);
 	    if (res != NO_ERR) {
@@ -943,7 +948,7 @@ static status_t
     const xmlChar     *badval;
     xml_node_t         valnode, endnode;
     status_t           res, res2, res3;
-    boolean            errdone;
+    boolean            errdone, empty;
 
     /* init local vars */
     xml_init_node(&valnode);
@@ -951,6 +956,8 @@ static status_t
     errnode = startnode;
     errdone = FALSE;
     badval = NULL;
+    empty = FALSE;
+    res = NO_ERR;
     res2 = NO_ERR;
     res3 = NO_ERR;
 
@@ -958,9 +965,24 @@ static status_t
     retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, obj_get_nsid(obj), 
-			 NULL, XML_NT_START); 
-    if (res == NO_ERR) {
+    if (retval->editvars->editop == OP_EDITOP_DELETE) {
+	switch (startnode->nodetyp) {
+	case XML_NT_EMPTY:
+	    empty = TRUE;
+	    break;
+	case XML_NT_START:
+	    break;
+	default:
+	    res = ERR_NCX_WRONG_NODETYP;
+	}
+    } else {
+	res = xml_node_match(startnode, 
+			     obj_get_nsid(obj), 
+			     NULL, 
+			     XML_NT_START); 
+    }
+
+    if (res == NO_ERR && !empty) {
 	/* get the next node which should be a string node */
 	res = get_xml_node(scb, msg, &valnode, TRUE);
 	if (res != NO_ERR) {
@@ -968,7 +990,7 @@ static status_t
 	}
     }
 
-    if (res == NO_ERR) {
+    if (res == NO_ERR && !empty) {
 #ifdef AGT_VAL_PARSE_DEBUG
 	if (LOGDEBUG3) {
 	    log_debug3("\nparse_boolean: expecting string node.");
@@ -1087,7 +1109,7 @@ static status_t
     const ncx_errinfo_t *errinfo;
     xml_node_t           valnode, endnode;
     status_t             res, res2, res3;
-    boolean              errdone;
+    boolean              errdone, empty, endtagdone;
     ncx_numfmt_t         numfmt;
 
     /* init local vars */
@@ -1096,7 +1118,10 @@ static status_t
     badval = NULL;
     errnode = startnode;
     errdone = FALSE;
+    empty = FALSE;
+    endtagdone = FALSE;
     errinfo = NULL;
+    res = NO_ERR;
     res2 = NO_ERR;
     res3 = NO_ERR;
 
@@ -1104,31 +1129,29 @@ static status_t
     retval->dataclass = pick_dataclass(parentdc, obj);
     
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, obj_get_nsid(obj),
-			 NULL, XML_NT_START); 
-    if (res == NO_ERR) {
+    if (retval->editvars->editop == OP_EDITOP_DELETE) {
+	switch (startnode->nodetyp) {
+	case XML_NT_EMPTY:
+	    empty = TRUE;
+	    break;
+	case XML_NT_START:
+	    break;
+	default:
+	    res = ERR_NCX_WRONG_NODETYP;
+	}
+    } else {
+	res = xml_node_match(startnode, 
+			     obj_get_nsid(obj), 
+			     NULL, 
+			     XML_NT_START); 
+    }
+
+    if (res == NO_ERR && !empty) {
 	/* get the next node which should be a string node */
 	res = get_xml_node(scb, msg, &valnode, TRUE);
 	if (res != NO_ERR) {
 	    errdone = TRUE;
 	}
-    }
-
-    if (res != NO_ERR) {
-	/* fatal error */
-	if (!errdone) {
-	    (void)parse_error_subtree(scb, 
-				      msg, 
-				      startnode,
-				      errnode, 
-				      res, 
-				      NCX_NT_NONE, 
-				      NULL, 
-				      NCX_NT_VAL, 
-				      retval);
-	}
-	xml_clean_node(&valnode);
-	return res;
     }
 
 #ifdef AGT_VAL_PARSE_DEBUG
@@ -1138,67 +1161,85 @@ static status_t
     }
 #endif
 
-    /* validate the number content */
-    switch (valnode.nodetyp) {
-    case XML_NT_START:
-	res = ERR_NCX_WRONG_NODETYP_CPX;
-	errnode = &valnode;
-	break;
-    case XML_NT_STRING:
-	/* convert the non-whitespace string to a number
-	 * XML numbers are only allowed to be in decimal
-	 * or real format, not octal or hex
-	 */
-	numfmt = ncx_get_numfmt(valnode.simval);
-	if (numfmt == NCX_NF_OCTAL) {
-	    numfmt = NCX_NF_DEC;
-	}
-	if (numfmt == NCX_NF_DEC || numfmt == NCX_NF_REAL) {
-	    if (btyp == NCX_BT_DECIMAL64) {
-		res = ncx_convert_dec64(valnode.simval, 
-					numfmt,
-					obj_get_fraction_digits(obj),
-					&retval->v.num);
-	    } else {
-		res = ncx_convert_num(valnode.simval, 
-				      numfmt,
-				      btyp, 
-				      &retval->v.num);
+    if (res == NO_ERR && !empty) {
+	/* validate the number content */
+	switch (valnode.nodetyp) {
+	case XML_NT_START:
+	    res = ERR_NCX_WRONG_NODETYP_CPX;
+	    errnode = &valnode;
+	    break;
+	case XML_NT_STRING:
+	    /* convert the non-whitespace string to a number
+	     * XML numbers are only allowed to be in decimal
+	     * or real format, not octal or hex
+	     */
+	    numfmt = ncx_get_numfmt(valnode.simval);
+	    if (numfmt == NCX_NF_OCTAL) {
+		numfmt = NCX_NF_DEC;
 	    }
-	}  else {
-	    res = ERR_NCX_WRONG_NUMTYP;
-	}
-	if (res == NO_ERR) {
-	    res = val_range_ok_errinfo(obj_get_ctypdef(obj), 
-				       btyp, 
-				       &retval->v.num, 
-				       &errinfo);
-	}
-	if (res != NO_ERR) {
-	    badval = valnode.simval;
-	}
-	break;
-    default:
-	res = ERR_NCX_WRONG_NODETYP;
-	errnode = &valnode;
-    }
+	    if (numfmt == NCX_NF_DEC || numfmt == NCX_NF_REAL) {
+		if (btyp == NCX_BT_DECIMAL64) {
+		    res = ncx_convert_dec64(valnode.simval, 
+					    numfmt,
+					    obj_get_fraction_digits(obj),
+					    &retval->v.num);
+		} else {
+		    res = ncx_convert_num(valnode.simval, 
+					  numfmt,
+					  btyp, 
+					  &retval->v.num);
+		}
+	    }  else {
+		res = ERR_NCX_WRONG_NUMTYP;
+	    }
+	    if (res == NO_ERR) {
+		res = val_range_ok_errinfo(obj_get_ctypdef(obj), 
+					   btyp, 
+					   &retval->v.num, 
+					   &errinfo);
+	    }
+	    if (res != NO_ERR) {
+		badval = valnode.simval;
+	    }
+	    break;
+	case XML_NT_END:
+	    /* got a start-end NULL string
+	     * treat as an invalid value 
+	     */
+	    res = ERR_NCX_INVALID_VALUE;
+	    badval = EMPTY_STRING;
+	    errnode = &valnode;
+	    endtagdone = TRUE;
 
-    /* get the matching end node for startnode */
-    res2 = get_xml_node(scb, msg, &endnode, TRUE);
-    if (res2 == NO_ERR) {
+	    /* not trying to match the end node; 
+	     * skip that error; the XML parser should have
+	     * already complained if the wrong end tag was present
+	     */
+	    break;
+	default:
+	    res = ERR_NCX_WRONG_NODETYP;
+	    errnode = &valnode;
+	}
+
+	/* get the matching end node for startnode */
+	if (!endtagdone) {
+	    res2 = get_xml_node(scb, msg, &endnode, TRUE);
+	    if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-	if (LOGDEBUG3) {
-	    log_debug3("\nparse_num: expecting end for %s", 
-		       startnode->qname);
-	    xml_dump_node(&endnode);
-	}
+		if (LOGDEBUG3) {
+		    log_debug3("\nparse_num: expecting end for %s", 
+			       startnode->qname);
+		    xml_dump_node(&endnode);
+		}
 #endif
-	res2 = xml_endnode_match(startnode, &endnode);
-	if (res2 != NO_ERR) {
-	    errnode = &endnode;
+		res2 = xml_endnode_match(startnode, &endnode);
+		if (res2 != NO_ERR) {
+		    errnode = &endnode;
+		}
+	    } else {
+		errdone = TRUE;
+	    }
 	}
-    } else {
-	errdone = TRUE;
     }
 
     /* check if this is a list index, add it now so
@@ -1772,14 +1813,16 @@ static status_t
     const ncx_errinfo_t *errinfo;
     xml_node_t           valnode, endnode;
     status_t             res, res2, res3;
-    boolean              errdone, stopnow;
+    boolean              errdone, stopnow, empty;
 
     /* init local vars */
     xml_init_node(&valnode);
     xml_init_node(&endnode);
     errnode = startnode;
     errdone = FALSE;
+    empty = FALSE;
     badval = NULL;
+    res = NO_ERR;
     res2 = NO_ERR;
     res3 = NO_ERR;
     errinfo = NULL;
@@ -1789,9 +1832,24 @@ static status_t
     retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, obj_get_nsid(obj), 
-			 NULL, XML_NT_START); 
-    if (res == NO_ERR) {
+    if (retval->editvars->editop == OP_EDITOP_DELETE) {
+	switch (startnode->nodetyp) {
+	case XML_NT_EMPTY:
+	    empty = TRUE;
+	    break;
+	case XML_NT_START:
+	    break;
+	default:
+	    res = ERR_NCX_WRONG_NODETYP;
+	}
+    } else {
+	res = xml_node_match(startnode, 
+			     obj_get_nsid(obj), 
+			     NULL, 
+			     XML_NT_START); 
+    }
+
+    if (res == NO_ERR && !empty) {
 	/* get the next node which should be a string node */
 	res = get_xml_node(scb, msg, &valnode, TRUE);
 	if (res != NO_ERR) {
@@ -1799,7 +1857,7 @@ static status_t
 	}
     }
 
-    if (res == NO_ERR) {
+    if (res == NO_ERR && !empty) {
 #ifdef AGT_VAL_PARSE_DEBUG
 	if (LOGDEBUG3) {
 	    log_debug3("\nparse_union: expecting string or number node.");

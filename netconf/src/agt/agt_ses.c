@@ -599,8 +599,11 @@ static status_t
     (void)msg;
     (void)curp;
 
-#ifdef DEBUG
-    log_debug("\nagt_ses: set linesize for session %d", scb->sid);
+#ifdef AGT_SES_DEBUG
+    if (LOGDEBUG) {
+	log_debug("\nagt_ses: set linesize for session %d", 
+		  scb->sid);
+    }
 #endif
 
     res = NO_ERR;
@@ -712,8 +715,10 @@ static status_t
     (void)msg;
     (void)curp;
 
-#ifdef DEBUG
-    log_debug("\nagt_ses: set withdef for session %d", scb->sid);
+#ifdef AGT_SES_DEBUG
+    if (LOGDEBUG) {
+	log_debug("\nagt_ses: set withdef for session %d", scb->sid);
+    }
 #endif
 
     res = NO_ERR;
@@ -830,8 +835,11 @@ static status_t
     (void)msg;
     (void)curp;
 
-#ifdef DEBUG
-    log_debug("\nagt_ses: set withmeta for session %d", scb->sid);
+#ifdef AGT_SES_DEBUG
+    if (LOGDEBUG) {
+	log_debug("\nagt_ses: set withmeta for session %d", 
+		  scb->sid);
+    }
 #endif
 
     res = NO_ERR;
@@ -1255,7 +1263,9 @@ ses_cb_t *
 		next_sesid = 0;
 	    }
 	}
-	log_info("\nNew session %d created OK", slot);
+	if (LOGINFO) {
+	    log_info("\nNew session %d created OK", slot);
+	}
 	agttotals->inSessions++;
 	agttotals->active_sessions++;
     } else {
@@ -1263,8 +1273,10 @@ ses_cb_t *
 	    ses_free_scb(scb);
 	    scb = NULL;
 	}
-	log_info("\nNew session request failed (%s)",
-		 get_error_string(res));
+	if (LOGINFO) {
+	    log_info("\nNew session request failed (%s)",
+		     get_error_string(res));
+	}
     }
 
     return scb;
@@ -1321,7 +1333,9 @@ void
 
     agtses[slot] = NULL;
 
-    log_info("\nSession %d closed", slot);
+    if (LOGINFO) {
+	log_info("\nSession %d closed", slot);
+    }
 
 }  /* agt_ses_free_session */
 
@@ -1467,7 +1481,9 @@ boolean
     mysid = scb->sid;
 
 #ifdef AGT_SES_DEBUG
-    log_debug("\nagt_ses msg ready for session %d", scb->sid);
+    if (LOGDEBUG) {
+	log_debug("\nagt_ses msg ready for session %d", scb->sid);
+    }
 #endif
 
     /* check the session control block state */
@@ -1476,8 +1492,10 @@ boolean
 	 * It will be cleaned up when the session is freed
 	 */
 #ifdef AGT_SES_DEBUG
-	log_debug("\nagt_ses drop input, session %d shutting down", 
-		  scb->sid);
+	if (LOGDEBUG) {
+	    log_debug("\nagt_ses drop input, session %d shutting down", 
+		      scb->sid);
+	}
 #endif
 
 	return TRUE;
@@ -1512,8 +1530,10 @@ boolean
 	/* process the message */
 	agt_top_dispatch_msg(scb);
     } else {
-	log_info("\nReset xmlreader failed for session %d (%s)",
-		  scb->sid, get_error_string(res));
+	if (LOGINFO) {
+	    log_info("\nReset xmlreader failed for session %d (%s)",
+		     scb->sid, get_error_string(res));
+	}
 	scb->state = SES_ST_SHUTDOWN_REQ;
     }
 

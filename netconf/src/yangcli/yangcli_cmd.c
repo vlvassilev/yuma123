@@ -4246,7 +4246,7 @@ static status_t
 	newparm = fill_value(agent_cb, 
 			     rpc, 
 			     targobj, 
-			     (curparm) ? curparm : targval,
+			     curparm,
 			     &res);
 	if (targval) {
 	    val_free_value(targval);
@@ -5418,6 +5418,8 @@ static status_t
  *    getoptional == TRUE if optional nodes are desired
  *    dofill == TRUE to fill the content,
  *              FALSE to skip fill phase
+ *    isdelete == TRUE if this is for an edit-config delete
+ *                FALSE for some other operation
  *    valroot == address of return value root pointer
  *               used when the content is from the CLI XPath
  *
@@ -5448,6 +5450,7 @@ static val_value_t *
 			     const obj_template_t *rpc,
 			     val_value_t *valset,
 			     boolean getoptional,
+			     boolean isdelete,
 			     boolean dofill,
 			     val_value_t **valroot)
 {
@@ -5525,23 +5528,6 @@ static val_value_t *
 	    return NULL;
 	}
 
-	/* check if targval is valid if it is an empty string
-	 * this corner-case is what the get_instanceid_parm will
-	 * return if the last node was a leaf
-	 */
-	if (targval && 
-	    targval->btyp == NCX_BT_STRING &&
-	    VAL_STR(targval) == NULL) {
-
-	    /* the NULL string was not entered;
-	     * if a value was entered as '' it would be recorded
-	     * as a zero-length string, not a NULL string
-	     */
-	    val_remove_child(targval);
-	    val_free_value(targval);
-	    targval = NULL;
-	}
-
 	curparm = NULL;
 	parm = val_find_child(valset, 
 			      YANGCLI_MOD, 
@@ -5574,13 +5560,41 @@ static val_value_t *
 
 	switch (targobj->objtype) {
 	case OBJ_TYP_LEAF:
+	    if (isdelete) {
+		dofill = FALSE;
+	    } /* else fall through */
 	case OBJ_TYP_LEAF_LIST:
 	    if (dofill) {
+		/* if targval is non-NULL then it is an empty
+		 * value struct because it was the deepest node
+		 * specified in the schema-instance string
+		 */
 		newparm = fill_value(agent_cb, 
 				     rpc, 
 				     targobj, 
-				     (curparm) ? curparm : targval,
+				     curparm,
 				     &res);
+
+		if (newparm && res == NO_ERR) {
+		    if (targval) {
+			if (targval == *valroot) {
+			    /* get a top-level leaf or leaf-list
+			     * so get rid of the instance ID and
+			     * just use the fill_value result
+			     */
+			    val_free_value(*valroot);
+			    *valroot = NULL;
+			} else {
+			    /* got a leaf or leaf-list that is not
+			     * a top-level node so just swap
+			     * out the old leaf for the new leaf
+			     */
+			    val_swap_child(newparm, targval);
+			    val_free_value(targval);
+			    targval = NULL;
+			}
+		    }
+		}
 	    } else if (targval == NULL) {
 		newparm = val_new_value();
 		if (!newparm) {
@@ -5589,6 +5603,11 @@ static val_value_t *
 		} else {
 		    val_init_from_template(newparm, targobj);
 		}
+		if (isdelete) {
+		    val_reset_empty(newparm);
+		}
+	    } else if (isdelete) {
+		val_reset_empty(targval);
 	    }  /* else going to use targval, not newval */
 	    break;
 	case OBJ_TYP_CHOICE:
@@ -6001,13 +6020,19 @@ static status_t
     val_value_t           *valset, *content, *parm, *valroot;
     status_t               res;
     uint32                 timeoutval;
-    boolean                getoptional, dofill;
+    boolean                getoptional, dofill, isdelete;
 
     /* init locals */
     res = NO_ERR;
     content = NULL;
     valroot = NULL;
     dofill = TRUE;
+
+    if (editop == OP_EDITOP_DELETE) {
+	isdelete = TRUE;
+    } else {
+	isdelete = FALSE;
+    }
 
     /* get the command line parameters for this command */
     valset = get_valset(agent_cb, rpc, &line[len], &res);
@@ -6051,6 +6076,7 @@ static status_t
 				      rpc, 
 				      valset,
 				      getoptional,
+				      isdelete,
 				      dofill,
 				      &valroot);
     if (!content) {
@@ -6160,6 +6186,7 @@ static status_t
 				      rpc, 
 				      valset,
 				      getoptional,
+				      FALSE,
 				      dofill,
 				      &valroot);
     if (!content) {
@@ -6362,6 +6389,7 @@ static status_t
 				      rpc, 
 				      valset,
 				      getoptional,
+				      FALSE,
 				      dofill,
 				      &valroot);
     if (!content) {
@@ -6486,6 +6514,7 @@ static status_t
 				      rpc, 
 				      valset,
 				      getoptional,
+				      FALSE,
 				      dofill,
 				      &valroot);
     if (!content) {
@@ -6641,6 +6670,7 @@ static status_t
     content = get_content_from_choice(agent_cb, 
 				      rpc, 
 				      valset,
+				      FALSE,
 				      FALSE,
 				      FALSE,
 				      &valroot);
@@ -6820,6 +6850,7 @@ static status_t
     content = get_content_from_choice(agent_cb, 
 				      rpc, 
 				      valset,
+				      FALSE,
 				      FALSE,
 				      FALSE,
 				      &valroot);

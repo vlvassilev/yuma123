@@ -597,6 +597,12 @@ extern status_t
 		     const xmlChar *valstr,
 		     uint32 valstrlen);
 
+/* clean a value and set it to empty type
+ * used by yangcli to delete leafs
+ */
+extern status_t 
+    val_reset_empty (val_value_t  *val);
+
 /* set any simple value with any typdef */
 extern status_t 
     val_set_simval (val_value_t  *val,

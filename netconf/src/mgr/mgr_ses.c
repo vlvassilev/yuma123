@@ -167,7 +167,9 @@ static status_t
 
     /* set non-blocking IO */
     if (fcntl(scb->fd, F_SETFD, O_NONBLOCK)) {
-	log_info("\nmgr_ses: fnctl failed");
+	if (LOGINFO) {
+	    log_info("\nmgr_ses: fnctl failed");
+	}
     }
 
     /* activate the socket in the select loop */
@@ -249,13 +251,17 @@ static status_t
 
     mscb->session = libssh2_session_init();
     if (!mscb->session) {
-	log_info("\nmgr_ses SSH2 new session failed");
+	if (LOGINFO) {
+	    log_info("\nmgr_ses: SSH2 new session failed");
+	}
 	return ERR_NCX_SESSION_FAILED;
     }
 
     ret = libssh2_session_startup(mscb->session, scb->fd);
     if (ret) {
-	log_info("\nmgr_ses SSH2 establishment failed");
+	if (LOGINFO) {
+	    log_info("\nmgr_ses: SSH2 establishment failed");
+	}
 	return ERR_NCX_SESSION_FAILED;
     }
 
@@ -274,16 +280,22 @@ static status_t
     if (!userauthlist) {
 	/* check if the agent accepted NONE as an auth method */
 	if (libssh2_userauth_authenticated(mscb->session)) {
-	    log_info("\nmgr_ses: agent accepted SSH_AUTH_NONE");
+	    if (LOGINFO) {
+		log_info("\nmgr_ses: agent accepted SSH_AUTH_NONE");
+	    }
 	    authdone = TRUE;
 	} else {
-	    log_info("\nmgr_ses: SSH2 get authlist failed");
+	    if (LOGINFO) {
+		log_info("\nmgr_ses: SSH2 get authlist failed");
+	    }
 	    return ERR_NCX_SESSION_FAILED;
 	}
     }
 
-    log_debug2("\nmgr_ses: Got agent authentication methods: %s\n", 
-	       userauthlist);
+    if (LOGDEBUG2) {
+	log_debug2("\nmgr_ses: Got agent authentication methods: %s\n", 
+		   userauthlist);
+    }
 
     if (!authdone) {
 
@@ -294,7 +306,9 @@ static status_t
 	if (!authdone && strstr(userauthlist, "password") != NULL) {
 	    ret = libssh2_userauth_password(mscb->session, user, password);
 	    if (ret) {
-		log_info("\nmgr_ses SSH2 password authentication failed");
+		if (LOGINFO) {
+		    log_info("\nmgr_ses: SSH2 password authentication failed");
+		}
 		return ERR_NCX_AUTH_FAILED;
 	    } else {
 		authdone = TRUE;
@@ -304,21 +318,27 @@ static status_t
     }
 
     if (!authdone) {
-	log_info("\nmgr_ses: No supported authentication methods found!\n");
+	if (LOGINFO) {
+	    log_info("\nmgr_ses: No supported authentication methods found!\n");
+	}
 	return ERR_NCX_AUTH_FAILED;
     }
 
     /* Request a shell */
     mscb->channel = libssh2_channel_open_session(mscb->session);
     if (!mscb->channel) {
-	log_info("\nmgr_ses: SSH2 channel open failed");
+	if (LOGINFO) {
+	    log_info("\nmgr_ses: SSH2 channel open failed");
+	}
 	return ERR_NCX_SESSION_FAILED;
     }
 
     /* Connect to the NETCONF subsystem */
     ret = libssh2_channel_subsystem(mscb->channel, "netconf");
     if (ret) {
-	log_info("\nmgr_ses: Unable to request netconf subsystem");
+	if (LOGINFO) {
+	    log_info("\nmgr_ses: Unable to request netconf subsystem");
+	}
 	return ERR_NCX_SESSION_FAILED;
     }
 
@@ -578,7 +598,9 @@ void
     /* check if the session exists */
     scb = mgrses[sid];
     if (!scb) {
-	log_info("\nmgr_ses: delete invalid session (%d)", sid);
+	if (LOGINFO) {
+	    log_info("\nmgr_ses: delete invalid session (%d)", sid);
+	}
 	return;
     }
 
@@ -633,7 +655,9 @@ boolean
     }
 
 #ifdef MGR_SES_DEBUG
-    log_debug("\nmgr_ses msg ready for session");
+    if (LOGDEBUG) {
+	log_debug("\nmgr_ses: msg ready for session");
+    }
 #endif
 
     /* check the session control block state */
@@ -649,7 +673,7 @@ boolean
     msg = (ses_msg_t *)dlq_firstEntry(&scb->msgQ);
     if (!msg || !msg->ready) {
 	SET_ERROR(ERR_INTERNAL_PTR);
-	log_error("\nmgr_ses ready Q message not correct");
+	log_error("\nmgr_ses: ready Q message not correct");
 	return FALSE;
     } else if (LOGDEBUG2) {
 	cnt = xml_strcpy(buff, (const xmlChar *)"Incoming msg for session ");
@@ -786,20 +810,20 @@ ssize_t
 
     if (ret < 0) {
 	if (ret != LIBSSH2_ERROR_EAGAIN) {
-	    log_error("\nmgr_ses channel read failed on session %u (a:%u)",
+	    log_error("\nmgr_ses: channel read failed on session %u (a:%u)",
 		      scb->sid,
 		      mscb->agtsid);
 	}
     } else if (ret > 0) {
 	if (LOGDEBUG2) {
-	    log_debug2("\nmgr_ses channel read %d bytes OK on session %u (a:%u)",
+	    log_debug2("\nmgr_ses: channel read %d bytes OK on session %u (a:%u)",
 		       ret, 
 		       scb->sid,
 		       mscb->agtsid);
 	}
     } else {
 	if (LOGDEBUG2) {
-	    log_debug2("\nmgr_ses channel closed on session %u (a:%u)", 
+	    log_debug2("\nmgr_ses: channel closed on session %u (a:%u)", 
 		       scb->sid,
 		       mscb->agtsid);
 	}
@@ -838,7 +862,9 @@ status_t
     buff = (ses_msg_buff_t *)dlq_deque(&scb->outQ);
 
     if (!buff) {
-	log_info("\nmgr_ses channel write no out buffer");
+	if (LOGINFO) {
+	    log_info("\nmgr_ses: channel write no out buffer");
+	}
     }
 
     while (buff) {
@@ -846,10 +872,14 @@ status_t
 				    (char *)buff->buff, 
 				    buff->bufflen);
 	if (ret <= 0 || ret != (int)buff->bufflen) {
-	    log_info("\nmgr_ses write channel failed");
+	    if (LOGINFO) {
+		log_info("\nmgr_ses: write channel failed");
+	    }
 	} else {
-	    log_debug2("\nmgr_ses channel write %u bytes OK",
-		       buff->bufflen);
+	    if (LOGDEBUG2) {
+		log_debug2("\nmgr_ses: channel write %u bytes OK",
+			   buff->bufflen);
+	    }
 	    if (LOGDEBUG3) {
 		for (i=0; i < buff->bufflen; i++) {
 		    log_debug3("%c", buff->buff[i]);

@@ -487,8 +487,10 @@ static status_t
     val_init_from_template(retval, obj);
 
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, obj_get_nsid(obj), 
-			 NULL, XML_NT_START); 
+    res = xml_node_match(startnode, 
+			 obj_get_nsid(obj), 
+			 NULL, 
+			 XML_NT_START); 
     if (res == NO_ERR) {
 	/* get the next node which should be a string node */
 	res = get_xml_node(scb, &valnode);
@@ -583,12 +585,16 @@ static status_t
     /* validate the node type and enum string or number content */
     switch (startnode->nodetyp) {
     case XML_NT_EMPTY:
-	res = xml_node_match(startnode, obj_get_nsid(obj),
-	     NULL, XML_NT_NONE);
+	res = xml_node_match(startnode, 
+			     obj_get_nsid(obj),
+			     NULL, 
+			     XML_NT_NONE);
 	break;
     case XML_NT_START:
-	res = xml_node_match(startnode, obj_get_nsid(obj),
-	     NULL, XML_NT_NONE);
+	res = xml_node_match(startnode, 
+			     obj_get_nsid(obj),
+			     NULL, 
+			     XML_NT_NONE);
 	if (res == NO_ERR) {
 	    res = get_xml_node(scb, &endnode);
 	    if (res == NO_ERR) {
@@ -679,8 +685,10 @@ static status_t
     val_init_from_template(retval, obj);
 
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, obj_get_nsid(obj), 
-			 NULL, XML_NT_START); 
+    res = xml_node_match(startnode, 
+			 obj_get_nsid(obj), 
+			 NULL, 
+			 XML_NT_START); 
     if (res == NO_ERR) {
 	/* get the next node which should be a string node */
 	res = get_xml_node(scb, &valnode);
@@ -780,8 +788,10 @@ static status_t
     val_init_from_template(retval, obj);
     
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, obj_get_nsid(obj),
-			 NULL, XML_NT_START); 
+    res = xml_node_match(startnode, 
+			 obj_get_nsid(obj),
+			 NULL, 
+			 XML_NT_START); 
     if (res == NO_ERR) {
 	/* get the next node which should be a string node */
 	res = get_xml_node(scb, &valnode);
@@ -1149,8 +1159,10 @@ static status_t
     val_init_from_template(retval, obj);
 
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, obj_get_nsid(obj), 
-			 NULL, XML_NT_START); 
+    res = xml_node_match(startnode, 
+			 obj_get_nsid(obj), 
+			 NULL, 
+			 XML_NT_START); 
     if (res == NO_ERR) {
 	/* get the next node which should be a string node */
 	res = get_xml_node(scb, &valnode);
@@ -1276,8 +1288,10 @@ static status_t
     val_init_from_template(retval, obj);
 
     /* make sure the startnode is correct */
-    res = xml_node_match(startnode, obj_get_nsid(obj), 
-			 NULL, XML_NT_START); 
+    res = xml_node_match(startnode, 
+			 obj_get_nsid(obj), 
+			 NULL, 
+			 XML_NT_START); 
     if (res == NO_ERR) {
 	/* get the next node which should be a string node */
 	res = get_xml_node(scb, &valnode);

@@ -426,10 +426,12 @@ static void
     val_value_t  *val;
     dlq_hdr_t     cleanQ;
 
+#ifdef AGT_VAL_DEBUG
     if (LOGDEBUG3) {
 	log_debug3("\nAdd child '%s' to parent '%s'",
 		   child->name, parent->name);
     }
+#endif
 
     dlq_createSQue(&cleanQ);
 
@@ -470,10 +472,12 @@ static void
     val_value_t  *val;
     dlq_hdr_t     cleanQ;
 
+#ifdef AGT_VAL_DEBUG
     if (LOGDEBUG3) {
 	log_debug3("\nMove child '%s' in parent '%s'",
 		   newchild->name, parent->name);
     }
+#endif
 
     dlq_createSQue(&cleanQ);
 
@@ -527,10 +531,12 @@ static void
     val_value_t  *val;
     dlq_hdr_t     cleanQ;
 
+#ifdef AGT_VAL_DEBUG
     if (LOGDEBUG3) {
 	log_debug3("\nMove list '%s' in parent '%s'",
 		   newchild->name, parent->name);
     }
+#endif
 
     dlq_createSQue(&cleanQ);
 
@@ -1959,11 +1965,14 @@ static status_t
     done = FALSE;
     errordone = FALSE;
 
+#ifdef AGT_VAL_DEBUG
     if (LOGDEBUG3) {
 	log_debug3("\nunique_chk: %s:%s start %u", 
 		   obj_get_mod_name(curval->obj),
-		   curval->name, uninum);
+		   curval->name, 
+		   uninum);
     }
+#endif
 
     /* try to get the start set for this list */
     res = make_unique_testset(curval, unidef, &uni1Q, &freeQ);
@@ -2332,11 +2341,13 @@ static status_t
 
     /* skip this node if it is non-config */
     if (!obj_is_config(val->obj)) {
+#ifdef AGT_VAL_DEBUG
 	if (LOGDEBUG3) {
 	    log_debug3("\ninstance_chk: skipping r/o node '%s:%s'",
 		       obj_get_mod_name(val->obj),
 		       val->name);
 	}
+#endif
 	return NO_ERR;
     }
 
@@ -2351,12 +2362,14 @@ static status_t
 	return res;
     }
     if (!cond) {
+#ifdef AGT_VAL_DEBUG
 	if (LOGDEBUG2) {
 	    log_debug2("\ninstance_chk: skipping false conditional "
 		       "node '%s:%s'",
 		       obj_get_mod_name(val->obj),
 		       val->name);
 	}
+#endif
 	return NO_ERR;
     }
 				       
@@ -2857,12 +2870,14 @@ static status_t
 					 &must->errinfo : NULL);
 		CHK_EXIT(res, retres);
 	    } else if (!xpath_cvt_boolean(result)) {
+#ifdef AGT_VAL_DEBUG
 		if (LOGDEBUG2) {
 		    log_debug2("\nmust_chk: false for %s:%s expr '%s'", 
 			       obj_get_mod_name(obj),
 			       curval->name,
 			       must->exprstr);
 		}
+#endif
 
 		res = ERR_NCX_MUST_TEST_FAILED;
 		agt_record_error_errinfo(scb, 
@@ -2879,12 +2894,14 @@ static status_t
 					 &must->errinfo : NULL);
 		CHK_EXIT(res, retres);
 	    } else {
+#ifdef AGT_VAL_DEBUG
 		if (LOGDEBUG3) {
 		    log_debug3("\nmust_chk: OK for %s:%s expr '%s'", 
 			       obj_get_mod_name(obj),
 			       curval->name,
 			       must->exprstr);
 		}
+#endif
 	    }
 
 	    if (result) {
@@ -3052,15 +3069,20 @@ static status_t
 				     whenclone->exprstr,
 				     NCX_NT_VAL,
 				     curval);
-		} else if (LOGDEBUG2) {
-		    log_debug2("\nwhen_chk: test false for "
-			       "node '%s:%s' expr '%s'", 
-			       obj_get_mod_name(obj),
-			       curval->name,
-			       whenclone->exprstr);
+		} else {
+#ifdef AGT_VAL_DEBUG
+		    if (LOGDEBUG2) {
+			log_debug2("\nwhen_chk: test false for "
+				   "node '%s:%s' expr '%s'", 
+				   obj_get_mod_name(obj),
+				   curval->name,
+				   whenclone->exprstr);
+		    }
+#endif
 		}
 		*deleteme = TRUE;
 	    } else {
+#ifdef AGT_VAL_DEBUG
 		if (LOGDEBUG3) {
 		    log_debug3("\nwhen_chk: test passed for "
 			       "node '%s:%s' expr '%s'", 
@@ -3068,6 +3090,7 @@ static status_t
 			       curval->name,
 			       whenclone->exprstr);
 		}
+#endif
 	    }
 
 	    if (result) {
@@ -3252,12 +3275,14 @@ static status_t
 	     ****/
 	    deleteval = (val_value_t *)dlq_deque(&deleteQ);
 
+#ifdef AGT_VAL_DEBUG
 	    if (LOGDEBUG) {
 		log_debug("\nagt_val: deleting empty NP "
 			  "container node '%s:%s'",
 			  obj_get_mod_name(deleteval->obj),
 			  deleteval->name);
 	    }
+#endif
 
 	    if (isrunning) {
 		handle_audit_record(OP_EDITOP_DELETE, 
@@ -3289,12 +3314,14 @@ static status_t
 		 ****/
 		deleteval = (val_value_t *)dlq_deque(&deleteQ);
 
+#ifdef AGT_VAL_DEBUG
 		if (LOGDEBUG) {
 		    log_debug("\nagt_val: deleting false "
 			      "when node '%s:%s'",
 			      obj_get_mod_name(deleteval->obj),
 			      deleteval->name);
 		}
+#endif
 
 		if (isrunning) {
 		    handle_audit_record(OP_EDITOP_DELETE, 
@@ -3706,9 +3733,11 @@ status_t
     }
 #endif
 
+#ifdef AGT_VAL_DEBUG
     if (LOGDEBUG3) {
 	log_debug3("\nagt_val_root_check: start");
     }
+#endif
 
     retres = NO_ERR;
     ncxid = xmlns_ncx_id();
@@ -3790,9 +3819,11 @@ status_t
 	}
     }
 
+#ifdef AGT_VAL_DEBUG
     if (LOGDEBUG3) {
 	log_debug3("\nagt_val_root_check: end");
     }
+#endif
 
     return retres;
     

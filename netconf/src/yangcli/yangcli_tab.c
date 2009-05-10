@@ -180,6 +180,7 @@ date         init     comment
  *
  * INPUTS:
  *    cpl == word completion struct to fill in
+ *    comstate == completion state to use
  *    line == line passed to callback
  *    parmval == parm value string to check
  *    word_start == start position within line of the 
@@ -195,6 +196,7 @@ date         init     comment
  *********************************************************************/
 static status_t
     fill_one_parm_completion (WordCompletion *cpl,
+			      completion_state_t *comstate,
 			      const char *line,
 			      const char *parmval,
 			      int word_start,
@@ -203,7 +205,8 @@ static status_t
 
 
 {
-    int                    retval;
+    const char  *endchar;
+    int          retval;
 
     /* check no partial match so need to skip this one */
     if (parmlen > 0 &&
@@ -214,6 +217,12 @@ static status_t
 	return NO_ERR;
     }
 
+    if (comstate->cmdstate == CMD_STATE_FULL) {
+	endchar = " ";
+    } else {
+	endchar = "";
+    }
+
     retval = 
 	cpl_add_completion(cpl,
 			   line,
@@ -221,7 +230,7 @@ static status_t
 			   word_end,
 			   (const char *)&parmval[parmlen],
 			   (const char *)"",
-			   (const char *)" ");
+			   endchar);
 
     if (retval != 0) {
 	return ERR_NCX_OPERATION_FAILED;
@@ -287,6 +296,7 @@ static status_t
 	     typenum = typ_next_enumdef(typenum)) {
 
 	    res = fill_one_parm_completion(cpl,
+					   comstate,
 					   line,
 					   (const char *)typenum->name,
 					   word_start,
@@ -296,6 +306,7 @@ static status_t
 	break;
     case NCX_BT_BOOLEAN:
 	res = fill_one_parm_completion(cpl,
+				       comstate,
 				       line,
 				       (const char *)NCX_EL_TRUE,
 				       word_start,
@@ -303,6 +314,7 @@ static status_t
 				       parmlen);
 	if (res == NO_ERR) {
 	    res = fill_one_parm_completion(cpl,
+					   comstate,
 					   line,
 					   (const char *)NCX_EL_FALSE,
 					   word_start,
@@ -1013,7 +1025,10 @@ static status_t
  * go through the command line backwards
  * from word_end to word_start, figuring
  *
- * command state is CMD_STATE_FULL or CMD_STATE_GETVAL
+ * command state is CMD_STATE_FULL
+ *
+ * This function only used when there are allowed
+ * to be multiple parm=value pairs on the same line
  *
  * INPUTS:
  *    cpl == word completion struct to fill in
@@ -1098,6 +1113,60 @@ static status_t
     return res;
 
 } /* parse_backwards_parm */
+
+
+/********************************************************************
+ * FUNCTION fill_parm_values
+ * 
+ * go through the command line 
+ * from word_start to word_end, figuring
+ * out which value is entered
+ *
+ * command state is CMD_STATE_GETVAL
+ *
+ * INPUTS:
+ *    cpl == word completion struct to fill in
+ *    comstate == completion state struct to use
+ *    line == current line in progress
+ *    word_start == lower bound of string to check
+ *    word_end == current cursor pos in the 'line'
+ *              may be in the middle if the user 
+ *              entered editing keys; libtecla will 
+ *              handle the text insertion if needed
+ *
+ * OUTPUTS:
+ *   value completions addeed if found
+ *
+ * RETURN:
+ *   status
+ *********************************************************************/
+static status_t
+    fill_parm_values (WordCompletion *cpl,
+		      completion_state_t *comstate,
+		      const char *line,
+		      int word_start,
+		      int word_end)
+{
+    status_t               res;
+
+    /* skip starting whitespace */
+    while (word_start < word_end && isspace(line[word_start])) {
+	word_start++;
+    }
+
+    /*** NEED TO CHECK FOR STRING QUOTES ****/
+
+    res = fill_parm_completion(comstate->cmdcurparm,
+			       cpl,
+			       comstate,
+			       line,
+			       word_start,
+			       word_end,
+			       word_end - word_start);
+
+    return res;
+
+} /* fill_parm_values */
 
 
 /********************************************************************
@@ -1416,6 +1485,83 @@ static status_t
 } /* fill_completion_commands */
 
 
+/********************************************************************
+ * FUNCTION fill_completion_yesno
+ * 
+ * go through the available commands to see what
+ * matches should be returned
+ *
+ * command state is CMD_STATE_YESNO
+ *
+ * INPUTS:
+ *    cpl == word completion struct to fill in
+ *    line == current line in progress
+ *    word_end == current cursor pos in the 'line'
+ *              may be in the middle if the user 
+ *              entered editing keys; libtecla will 
+ *              handle the text insertion if needed
+ * OUTPUTS:
+ *   comstate
+ * RETURN:
+ *   status
+ *********************************************************************/
+static status_t
+    fill_completion_yesno (WordCompletion *cpl,
+			   const char *line,
+			   int word_end)
+{
+    const char            *str;
+    int                    word_start, retval;
+
+    str = line;
+    word_start = 0;
+
+    /* skip starting whitespace */
+    while ((str < &line[word_end]) && isspace(*str)) {
+	str++;
+    }
+
+    /* check if any real characters entered yet */
+    if (word_end == 0 || str == &line[word_end]) {
+	/* found only spaces so far or
+	 * nothing entered yet 
+	 */
+
+	retval = 
+	    cpl_add_completion(cpl,
+			       line,
+			       word_start,
+			       word_end,
+			       (const char *)NCX_EL_YES,
+			       (const char *)"",
+			       (const char *)" ");
+
+	if (retval != 0) {
+	    return ERR_NCX_OPERATION_FAILED;
+	}
+
+
+	retval = 
+	    cpl_add_completion(cpl,
+			       line,
+			       word_start,
+			       word_end,
+			       (const char *)NCX_EL_NO,
+			       (const char *)"",
+			       (const char *)" ");
+
+	if (retval != 0) {
+	    return ERR_NCX_OPERATION_FAILED;
+	}
+    }
+
+    /*** !!!! ELSE NOT GIVING ANY PARTIAL COMPLETIONS YET !!! ***/
+
+    return NO_ERR;
+
+}  /* fill_completion_yesno */
+
+
 /*.......................................................................
  *
  * FUNCTION word_complete_cb
@@ -1456,6 +1602,7 @@ int
 {
     completion_state_t   *comstate;
     status_t              res;
+    int                   retval;
 
 #ifdef DEBUG
     if (!cpl || !data || !line) {
@@ -1464,12 +1611,14 @@ int
     }
 #endif
 
+    retval = 0;
+
     /* check corner case that never has any completions
      * no matter what state; backslash char only allowed
      * for escaped-EOLN or char-sequence that we can't guess
      */
     if (word_end > 0 &&	line[word_end] == '\\') {
-	return 0;
+	return retval;
     }
 
     comstate = (completion_state_t *)data;
@@ -1479,28 +1628,46 @@ int
     }
 
     switch (comstate->cmdstate) {
-    case CMD_STATE_NONE:
     case CMD_STATE_FULL:
 	res = fill_completion_commands(cpl,
 				       comstate,
 				       line,
 				       word_end);
 	if (res != NO_ERR) {
-	    return 1;
+	    retval = 1;
 	}
 	break;
     case CMD_STATE_GETVAL:
+	res = fill_parm_values(cpl,
+			       comstate,
+			       line,
+			       0,
+			       word_end);
+	if (res != NO_ERR) {
+	    retval = 1;
+	}
 	break;
     case CMD_STATE_YESNO:
+	res = fill_completion_yesno(cpl, line, word_end);
+	if (res != NO_ERR) {
+	    retval = 1;
+	}
 	break;
     case CMD_STATE_MORE:
+	/*** NO SUPPORT FOR MORE MODE YET ***/
+	break;
+    case CMD_STATE_NONE:
+	/* command state not initialized */
+	SET_ERROR(ERR_INTERNAL_VAL);
+	retval = 1;
 	break;
     default:
+	/* command state garbage value */
 	SET_ERROR(ERR_INTERNAL_VAL);
-	return 1;
+	retval = 1;
     }
 
-    return 0;
+    return retval;
 
 } /* yangcli_tab_callback */
 

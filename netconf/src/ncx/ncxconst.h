@@ -471,6 +471,7 @@ date	     init     comment
 #define NCX_EL_NCXCONNECT      (const xmlChar *)"ncx-connect"
 #define NCX_EL_NAMESPACE       (const xmlChar *)"namespace"
 #define NCX_EL_NETCONF         (const xmlChar *)"netconf"
+#define NCX_EL_NO              (const xmlChar *)"no"
 #define NCX_EL_NODUPLICATES    (const xmlChar *)"no-duplicates"
 #define NCX_EL_NONE            (const xmlChar *)"none"
 #define NCX_EL_NON_UNIQUE      (const xmlChar *)"non-unique"
@@ -582,6 +583,7 @@ date	     init     comment
 #define NCX_EL_XSD             (const xmlChar *)"xsd"
 #define NCX_EL_XSDLIST         (const xmlChar *)"xsdlist"
 #define NCX_EL_YANG            (const xmlChar *)"yang"
+#define NCX_EL_YES             (const xmlChar *)"yes"
 
 
 /* bit definitions for ncx_lstr_t flags field */

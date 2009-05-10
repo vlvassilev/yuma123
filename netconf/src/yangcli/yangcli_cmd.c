@@ -7435,6 +7435,19 @@ xmlChar *
 
     agent_cb->climore = FALSE;
     if (*res == NO_ERR) {
+	/* trim all the trailing whitespace
+	 * the user or the tab completion might
+	 * add an extra space at the end of
+	 * value, and this will cause an invalid-value
+	 * error to be incorrectly generated
+	 */
+	len = xml_strlen(clibuff);
+	if (len > 0) {
+	    while (len > 0 && isspace(clibuff[len-1])) {
+		len--;
+	    }
+	    clibuff[len] = 0;
+	}
 	return clibuff;
     } else {
 	return NULL;

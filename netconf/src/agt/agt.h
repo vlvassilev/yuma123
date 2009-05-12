@@ -211,4 +211,7 @@ extern boolean
 extern ncx_shutdowntyp_t
     agt_shutdown_mode_requested (void);
 
+extern const xmlChar *
+    agt_cbtype_name (agt_cbtyp_t cbtyp);
+
 #endif	    /* _H_agt */

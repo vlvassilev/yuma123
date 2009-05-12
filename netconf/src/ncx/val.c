@@ -6310,6 +6310,16 @@ int32
     case NCX_BT_BITS:
 	ret = ncx_compare_lists(&val1->v.list, &val2->v.list);
 	break;
+    case NCX_BT_IDREF:
+	if (val1->v.idref.nsid == val2->v.idref.nsid) {
+	    ret = xml_strcmp(val1->v.idref.name,
+			     val2->v.idref.name);
+	} else if (val1->v.idref.nsid < val2->v.idref.nsid) {
+	    ret = -1;
+	} else {
+	   ret = 1;
+	}
+	break;
     case NCX_BT_LIST:
 	ret = index_match(val1, val2);
 	if (ret) {

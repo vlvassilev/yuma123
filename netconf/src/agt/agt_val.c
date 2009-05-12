@@ -1386,10 +1386,8 @@ static status_t
 
     if (retres == NO_ERR) {
 	if (newval) {
-	    cur_editop = newval->editvars->editop;
 	    curparent = newval;
 	} else if (curval) {
-	    cur_editop = editop;
 	    curparent = curval;
 	} else {
 	    retres = SET_ERROR(ERR_INTERNAL_VAL);
@@ -1410,6 +1408,11 @@ static status_t
 	    } else {
 		curch = NULL;
 	    }
+	    cur_editop = chval->editvars->editop;
+	    if (cur_editop == OP_EDITOP_NONE) {
+		cur_editop = editop;
+	    }
+
 	    res = invoke_btype_cb(cbtyp, 
 				  cur_editop, 
 				  scb, 
@@ -1425,12 +1428,23 @@ static status_t
 	}
     }
 
+    if (retres == NO_ERR) {
+	if (newval) {
+	    cur_editop = newval->editvars->editop;
+	} else if (curval) {
+	    cur_editop = editop;
+	} else {
+	    retres = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+    }
+
     /* check if the typdef for this value has a callback
      * only call if the operation was applied here
      */
     if (retres == NO_ERR && !initialdone && done) {
 	retres = handle_user_callback(cbtyp, 
-				      editop, scb, 
+				      cur_editop, 
+				      scb, 
 				      msg,
 				      newval, 
 				      curval);

@@ -38,10 +38,6 @@ date         init     comment
 #include  "agt.h"
 #endif
 
-#ifndef _H_agt_cb
-#include  "agt_cb.h"
-#endif
-
 #ifndef _H_agt_ncxserver
 #include  "agt_ncxserver.h"
 #endif
@@ -82,7 +78,6 @@ date         init     comment
 *********************************************************************/
 #ifdef DEBUG
 #define NETCONFD_DEBUG   1
-#define NETCONFD_DEBUG_TEST 1
 #define NETCONFD_DEBUG_LOAD_TEST 1
 #endif
 
@@ -140,7 +135,9 @@ static status_t
     status_t   res;
 
 #ifdef NETCONFD_DEBUG
-    log_debug2("\nnetconfd: Loading NCX Module");
+    if (LOGDEBUG2) {
+	log_debug2("\nnetconfd: Loading NCX Module");
+    }
 #endif
 
     /* load in the NCX extensions module */
@@ -164,7 +161,9 @@ static status_t
     }
 
 #ifdef NETCONFD_DEBUG
-    log_debug2("\nnetconfd: Loading Debug Test Module");
+    if (LOGDEBUG2) {
+	log_debug2("\nnetconfd: Loading Debug Test Module");
+    }
 #endif
 
 #ifdef NETCONFD_DEBUG_LOAD_TEST
@@ -173,49 +172,11 @@ static status_t
     if (res != NO_ERR) {
 	return res;
     }
-
-#if 0
-    /* Load testmust module */
-    res = ncxmod_load_module((const xmlChar *)"testmust", NULL, NULL);
-    if (res != NO_ERR) {
-	return res;
-    }
-#endif
-
-#if 0
-    /* Load testrev module */
-    res = ncxmod_load_module((const xmlChar *)"testrev", NULL, NULL);
-    if (res != NO_ERR) {
-	return res;
-    }
-#endif
-
 #endif
 
     return NO_ERR;
 
 }  /* load_core_schema */
-
-
-#ifdef NETCONFD_DEBUG_TEST
-static status_t 
-    test_callback (ses_cb_t  *scb,
-		   rpc_msg_t *msg,
-		   agt_cbtyp_t cbtyp,
-		   op_editop_t  editop,
-		   val_value_t  *newval,
-		   val_value_t  *curval)
-{
-    (void)scb;
-    (void)msg;
-    (void)cbtyp;
-    (void)editop;
-    (void)newval;
-    (void)curval;
-    return NO_ERR;
-}
-#endif
-
 
 
 /********************************************************************
@@ -231,19 +192,15 @@ static status_t
 	      help_mode_t *showhelpmode)
 {
     status_t   res;
-#ifdef NETCONFD_DEBUG_TEST
-    agt_cb_fnset_t cbset;
-#endif
+    log_debug_t  dlevel;
 
 #ifdef NETCONFD_DEBUG
     int   i;
 #endif
 
-    log_debug_t  dlevel;
-
     /* set the default debug output level */
 #ifdef DEBUG
-#ifdef NETCONFD_DEBUG_TEST
+#ifdef NETCONFD_DEBUG
     dlevel = LOG_DEBUG_DEBUG;
 #else 
     dlevel = LOG_DEBUG_INFO;
@@ -276,7 +233,9 @@ static status_t
 #endif
 
 #ifdef NETCONFD_DEBUG
-    log_debug2("\nnetconfd: Starting Netconf Agent Library");
+    if (LOGDEBUG2) {
+	log_debug2("\nnetconfd: Starting Netconf Agent Library");
+    }
 #endif
 
     /* at this point, modules that need to read config
@@ -314,28 +273,10 @@ static status_t
 	return res;
     }
 
-#ifdef NETCONFD_DEBUG_TEST
-
-    memset(&cbset, 0x0, sizeof(agt_cb_fnset_t));
-    cbset.cbfn[AGT_CB_LOAD_MOD] = test_callback;
-    cbset.cbfn[AGT_CB_UNLOAD_MOD] = test_callback;
-    cbset.cbfn[AGT_CB_VALIDATE] = test_callback;
-    cbset.cbfn[AGT_CB_APPLY] = test_callback;
-
-    res = agt_cb_register_callbacks((const xmlChar *)"test",
-				    (const xmlChar *)"/t:test1",
-				    (const xmlChar *)"2007-04-01",
-				    &cbset);
-
-    if (res != NO_ERR) {
-	SET_ERROR(res);
-	return res;
-    }
-
-#endif
-
 #ifdef NETCONFD_DEBUG
-    log_debug("\nnetconfd init OK, ready for sessions\n");
+    if (LOGDEBUG) {
+	log_debug("\nnetconfd init OK, ready for sessions\n");
+    }
 #endif
 
     return NO_ERR;
@@ -361,7 +302,9 @@ static status_t
     status_t  res;
 
 #ifdef NETCONFD_DEBUG
-    log_debug2("\nStart running netconfd agent\n");
+    if (LOGDEBUG) {
+	log_debug("\nStart running netconfd agent\n");
+    }
 #endif
 
     res = agt_ncxserver_run();
@@ -385,12 +328,9 @@ static void
 {
 
 #ifdef NETCONFD_DEBUG
-    log_debug2("\nShutting down netconf agent\n");
-#endif
-
-#ifdef NETCONFD_DEBUG_TEST
-    agt_cb_unregister_callbacks((const xmlChar *)"test",
-				(const xmlChar *)"/t:test1");
+    if (LOGDEBUG) {
+	log_debug("\nShutting down netconf agent\n");
+    }
 #endif
 
     /* Cleanup the Netconf Agent Library */
@@ -434,13 +374,16 @@ int
 	if (res != NO_ERR) {
 	    log_error("\nnetconfd: init returned (%s)", 
 		      get_error_string(res));
+	    agt_request_shutdown(NCX_SHUT_EXIT);
 	} else {
 	    if (showver) {
 		log_write("\nnetconfd version %s\n", progver);
+		agt_request_shutdown(NCX_SHUT_EXIT);
 	    } else if (showhelpmode != HELP_MODE_NONE) {
 		help_program_module(NETCONFD_MOD,
 				    NETCONFD_CLI,
 				    showhelpmode);
+		agt_request_shutdown(NCX_SHUT_EXIT);
 	    } else {
 		res = netconfd_run();
 		if (res != NO_ERR) {

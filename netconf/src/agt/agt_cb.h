@@ -110,11 +110,23 @@ extern void
 extern void
     agt_cb_cleanup (void);
 
+/* use the same fn for all callback phases 
+ * all phases will be invoked
+ */
+extern status_t 
+    agt_cb_register_callback (const xmlChar *modname,
+			      const xmlChar *defpath,
+			      const xmlChar *version,
+			      const agt_cb_fn_t cbfn);
+
+/* setup array of callbacks, could be different or NULL
+ * to skip that phase
+ */
 extern status_t 
     agt_cb_register_callbacks (const xmlChar *modname,
 			       const xmlChar *defpath,
-			       const xmlChar *minversion,
-			       agt_cb_fnset_t *cbfnset);
+			       const xmlChar *version,
+			       const agt_cb_fnset_t *cbfnset);
 
 
 extern void

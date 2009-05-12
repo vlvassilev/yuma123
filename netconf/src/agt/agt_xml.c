@@ -38,20 +38,12 @@ date         init     comment
 #include "agt_xml.h"
 #endif
 
-#ifndef _H_def_reg
-#include "def_reg.h"
-#endif
-
 #ifndef _H_log
 #include "log.h"
 #endif
 
 #ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_rpc
-#include "rpc.h"
 #endif
 
 #ifndef _H_status
@@ -289,8 +281,11 @@ static status_t
 		res = ERR_XML_READER_NULLNAME;
 	    } else {
 		value = NULL;
-		res = xml_check_ns(scb->reader, name, 
-				   &nsid, &plen, &badns);
+		res = xml_check_ns(scb->reader, 
+				   name, 
+				   &nsid, 
+				   &plen, 
+				   &badns);
 		if (!nserr && res != NO_ERR) {
 		    nsid = xmlns_inv_id();
 		    plen = 0;
@@ -305,8 +300,12 @@ static status_t
 		    /* save the values as received, may be QName 
 		     * only error that can occur is a malloc fail
 		     */
-		    attr = xml_add_qattr(attrs, nsid, name, 
-					 plen, value, &res);
+		    attr = xml_add_qattr(attrs, 
+					 nsid, 
+					 name, 
+					 plen, 
+					 value, 
+					 &res);
 		    if (!attr) {
 			res = ERR_INTERNAL_MEM;
 		    } else {
@@ -380,15 +379,26 @@ static status_t
 		errattr.attr_val = value;
 
 		/* generate an attribute error */
-		agt_record_attr_error(scb, msghdr, 
-				      layer, res, &errattr, 
-				      &errnode, badns,
-				      NCX_NT_NONE, NULL);
+		agt_record_attr_error(scb, 
+				      msghdr, 
+				      layer, 
+				      res, 
+				      &errattr, 
+				      &errnode, 
+				      badns,
+				      NCX_NT_NONE,
+				      NULL);
 	    } else {
 		/* generate an operation-failed error */
-		agt_record_error(scb, msghdr, layer, res, 
-				 &errnode, NCX_NT_STRING, 
-				 name, NCX_NT_NONE, NULL);
+		agt_record_error(scb, 
+				 msghdr, 
+				 layer, 
+				 res, 
+				 &errnode, 
+				 NCX_NT_STRING, 
+				 name, 
+				 NCX_NT_NONE, 
+				 NULL);
 	    }
 	    xml_clean_node(&errnode);
 	}
@@ -402,9 +412,15 @@ static status_t
 	    xml_init_node(&errnode);
 	    get_errnode(scb->reader, &errnode);
 
-	    agt_record_error(scb, msghdr, layer, res, 
-			     &errnode, NCX_NT_STRING, 
-			     name, NCX_NT_NONE, NULL);
+	    agt_record_error(scb, 
+			     msghdr, 
+			     layer, 
+			     res, 
+			     &errnode, 
+			     NCX_NT_STRING, 
+			     name, 
+			     NCX_NT_NONE, 
+			     NULL);
 	    xml_clean_node(&errnode);
 	}
     }	
@@ -466,9 +482,15 @@ static status_t
 		res = ERR_XML_READER_EOF;
 		if (msghdr && eoferr) {
 		    /* generate an operation-failed error */
-		    agt_record_error(scb, msghdr, layer, res, 
-				     NULL, NCX_NT_NONE, NULL, 
-				     NCX_NT_NONE, NULL);
+		    agt_record_error(scb, 
+				     msghdr, 
+				     layer, 
+				     res, 
+				     NULL, 
+				     NCX_NT_NONE,
+				     NULL, 
+				     NCX_NT_NONE,
+				     NULL);
 		}
 		return res;
 	    }
@@ -505,9 +527,11 @@ static status_t
 	    break;
 	default:
 	    /* unused node type -- keep trying */
-#ifdef XML_UTIL_DEBUG
-	    log_debug3("\nxml_consume_node: skip unused node (%s)",
-		   xml_get_node_name(nodetyp));
+#ifdef AGT_XML_DEBUG
+	    if (LOGDEBUG3) {
+		log_debug3("\nxml_consume_node: skip unused node (%s)",
+			   xml_get_node_name(nodetyp));
+	    }
 #endif
 	    advance = TRUE;
 	}
@@ -543,8 +567,11 @@ static status_t
 	
 	/* get all the attributes, except for XML_NT_END */
 	if (res == NO_ERR && node->nodetyp != XML_NT_END) {
-	    res2 = get_all_attrs(scb, &node->attrs, 
-				 layer, msghdr, nserr);
+	    res2 = get_all_attrs(scb, 
+				 &node->attrs, 
+				 layer, 
+				 msghdr, 
+				 nserr);
 	}
 
 	/* Set the node module */
@@ -591,20 +618,32 @@ static status_t
     if ((res != NO_ERR) && msghdr) {
 	if (badns) {
 	    /* generate an operation-failed error */
-	    agt_record_error(scb, msghdr, layer, res, 
-			     node, NCX_NT_STRING, badns, 
-			     NCX_NT_NONE, NULL);
+	    agt_record_error(scb,
+			     msghdr,
+			     layer, 
+			     res, 
+			     node,
+			     NCX_NT_STRING, 
+			     badns, 
+			     NCX_NT_NONE, 
+			     NULL);
 	} else {
-	    agt_record_error(scb, msghdr, layer, res, 
-			     node, NCX_NT_NONE, NULL, 
-			     NCX_NT_NONE, NULL);
+	    agt_record_error(scb,
+			     msghdr,
+			     layer,
+			     res, 
+			     node,
+			     NCX_NT_NONE,
+			     NULL, 
+			     NCX_NT_NONE, 
+			     NULL);
 	}
     }
 
-#ifdef XML_UTIL_DEBUG
-    log_debug3("\nxml_consume_node: return (%d)", 
-	   (res==NO_ERR) ? res2 : res);
+#ifdef AGT_XML_DEBUG
     if (LOGDEBUG3) {
+	log_debug3("\nxml_consume_node: return (%d)", 
+		   (res==NO_ERR) ? res2 : res);
 	xml_dump_node(node);
     }
 #endif
@@ -685,8 +724,14 @@ status_t
 			  ncx_layer_t layer,
 			  xml_msg_hdr_t *msghdr)
 {
-    return consume_node(scb, TRUE, node, layer, msghdr, 
-			TRUE, TRUE, TRUE);
+    return consume_node(scb, 
+			TRUE, 
+			node, 
+			layer, 
+			msghdr, 
+			TRUE, 
+			TRUE, 
+			TRUE);
 
 }  /* agt_xml_consume_node */
 
@@ -697,8 +742,14 @@ status_t
 				ncx_layer_t layer,
 				xml_msg_hdr_t *msghdr)
 {
-    return consume_node(scb, TRUE, node, layer, msghdr, 
-			FALSE, TRUE, TRUE);
+    return consume_node(scb, 
+			TRUE, 
+			node, 
+			layer, 
+			msghdr, 
+			FALSE, 
+			TRUE, 
+			TRUE);
 
 }  /* agt_xml_consume_node_noeof */
 
@@ -709,8 +760,14 @@ status_t
 			       ncx_layer_t layer,
 			       xml_msg_hdr_t *msghdr)
 {
-    return consume_node(scb, TRUE, node, layer, msghdr, 
-			FALSE, FALSE, TRUE);
+    return consume_node(scb, 
+			TRUE, 
+			node, 
+			layer, 
+			msghdr, 
+			FALSE, 
+			FALSE, 
+			TRUE);
 
 }  /* agt_xml_consume_node_nons */
 
@@ -721,8 +778,14 @@ status_t
 				ncx_layer_t layer,
 				xml_msg_hdr_t *msghdr)
 {
-    return consume_node(scb, FALSE, node, layer, msghdr, 
-			TRUE, TRUE, TRUE);
+    return consume_node(scb, 
+			FALSE, 
+			node, 
+			layer, 
+			msghdr, 
+			TRUE, 
+			TRUE, 
+			TRUE);
 
 }  /* agt_xml_consume_node_noadv */
 
@@ -733,8 +796,14 @@ status_t
 				     ncx_layer_t layer,
 				     xml_msg_hdr_t *msghdr)
 {
-    return consume_node(scb, FALSE, node, layer, msghdr, 
-			TRUE, FALSE, TRUE);
+    return consume_node(scb, 
+			FALSE, 
+			node, 
+			layer, 
+			msghdr, 
+			TRUE, 
+			FALSE, 
+			TRUE);
 
 }  /* agt_xml_consume_node_nons_noadv */
 
@@ -791,8 +860,10 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
     xml_init_node(&node);
-    res = agt_xml_consume_node_noadv(scb, &node, 
-				     NCX_LAYER_NONE, NULL);
+    res = agt_xml_consume_node_noadv(scb, 
+				     &node, 
+				     NCX_LAYER_NONE, 
+				     NULL);
     if (res == NO_ERR) {
 	res = xml_endnode_match(startnode, &node);
 	if (res == NO_ERR) {
@@ -841,8 +912,11 @@ status_t
 	     * which doesn't matter in this case
 	     */
 	    nsid = 0;
-	    (void)xml_check_ns(scb->reader, qname, &nsid, 
-			       &len, &badns);
+	    (void)xml_check_ns(scb->reader, 
+			       qname, 
+			       &nsid, 
+			       &len, 
+			       &badns);
 
 	    /* set the element name to the char after the prefix */
 	    elname = qname+len;
@@ -857,9 +931,13 @@ status_t
 	    done = TRUE;
 	}
 
-#ifdef XML_UTIL_DEBUG
-	log_debug3("\nxml_skip: %s L:%d T:%s",
-	       qname, depth, xml_get_node_name(nodetyp));
+#ifdef AGT_XML_DEBUG
+	if (LOGDEBUG3) {
+	    log_debug3("\nxml_skip: %s L:%d T:%s",
+		       qname, 
+		       depth, 
+		       xml_get_node_name(nodetyp));
+	}
 #endif
     }
 

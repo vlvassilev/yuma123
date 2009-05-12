@@ -144,6 +144,9 @@ date         init     comment
 #define nacm_N_userName (const xmlChar *)"userName"
 
 
+#define nacm_OID_group (const xmlChar *)"/nacm/groups/group"
+#define nacm_OID_moduleRule  (const xmlChar *)"/nacm/rules/moduleRule"
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
@@ -473,6 +476,114 @@ static boolean
 } /* check_rpc_rules */
 #endif
 
+
+
+/********************************************************************
+* FUNCTION nacm_group_callback
+*
+* nacm callback function [test]
+*
+* INPUTS:
+*    see agt/agt_cb.h  (agt_cb_pscb_t)
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    nacm_group_callback (ses_cb_t  *scb,
+			 rpc_msg_t  *msg,
+			 agt_cbtyp_t cbtyp,
+			 op_editop_t  editop,
+			 val_value_t  *newval,
+			 val_value_t  *curval)
+{
+
+    (void)scb;
+    (void)msg;
+    (void)editop;
+    (void)curval;
+
+#ifdef AGT_ACM_DEBUG
+    if (LOGDEBUG) {
+	log_debug("\n\n**** agt_acm_cb: (G) op:%s, n:%s s:%s\n", 
+		  op_editop_name(editop),
+		  newval->name,
+		  agt_cbtype_name(cbtyp));
+    }
+#endif
+
+    switch (cbtyp) {
+    case AGT_CB_LOAD_MOD:
+    case AGT_CB_UNLOAD_MOD:
+    case AGT_CB_VALIDATE:
+    case AGT_CB_APPLY:
+	break;
+    case AGT_CB_COMMIT:
+	break;
+    case AGT_CB_ROLLBACK:
+	break;
+    default:
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    
+    return NO_ERR;
+
+} /* nacm_group_callback */
+
+
+/********************************************************************
+* FUNCTION nacm_rule_callback
+*
+* nacm callback function [test]
+*
+* INPUTS:
+*    see agt/agt_cb.h  (agt_cb_pscb_t)
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    nacm_rule_callback (ses_cb_t  *scb,
+			rpc_msg_t  *msg,
+			agt_cbtyp_t cbtyp,
+			op_editop_t  editop,
+			val_value_t  *newval,
+			val_value_t  *curval)
+{
+
+    (void)scb;
+    (void)msg;
+    (void)editop;
+    (void)curval;
+
+#ifdef AGT_ACM_DEBUG
+    if (LOGDEBUG) {
+	log_debug("\n\n**** agt_acm_cb: (R) op:%s, n:%s s:%s\n", 
+		  op_editop_name(editop),
+		  newval->name,
+		  agt_cbtype_name(cbtyp));
+    }
+#endif
+
+    switch (cbtyp) {
+    case AGT_CB_LOAD_MOD:
+    case AGT_CB_UNLOAD_MOD:
+    case AGT_CB_VALIDATE:
+    case AGT_CB_APPLY:
+	break;
+    case AGT_CB_COMMIT:
+	break;
+    case AGT_CB_ROLLBACK:
+	break;
+    default:
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    
+    return NO_ERR;
+
+} /* nacm_rule_callback */
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -529,14 +640,29 @@ status_t
 status_t 
     agt_acm_init2 (void)
 {
-    const obj_template_t  *nacmobj, *rulesobj, *groupsobj;
+    const obj_template_t  *nacmobj;
     cfg_template_t        *runningcfg;
-    val_value_t           *nacmval, *groupsval;
-    val_value_t           *rulesval, *noruleval;
+    val_value_t           *nacmval;
     status_t               res;
 
     if (!agt_acm_init_done) {
 	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+    }
+
+    res = agt_cb_register_callback(AGT_ACM_MODULE,
+				   nacm_OID_group,
+				   NULL,
+				   nacm_group_callback);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    res = agt_cb_register_callback(AGT_ACM_MODULE,
+				   nacm_OID_moduleRule,
+				   NULL,
+				   nacm_rule_callback);
+    if (res != NO_ERR) {
+	return res;
     }
 
     /* make sure the running config root is set */
@@ -552,11 +678,12 @@ status_t
 			     AGT_ACM_MODULE,
 			     nacm_N_nacm);
     if (nacmval) {
+	/* minimum init done OK, so just exit */
 	agt_acm_init_done = TRUE;
 	return NO_ERR;
     }
-
-    /* else did not find the /nacm node so create one;
+	
+    /* did not find the /nacm node so create one;
      * get all the static object nodes first 
      */
     nacmobj = obj_find_template_top(nacmmod, 
@@ -566,68 +693,23 @@ status_t
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    groupsobj = obj_find_child(nacmobj, 
-			       AGT_ACM_MODULE, 
-			       nacm_N_groups);
-
-    if (!groupsobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
-    rulesobj = obj_find_child(nacmobj, 
-			      AGT_ACM_MODULE, 
-			      nacm_N_rules);
-    if (!rulesobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
     /* create the static structure for the /nacm data model
      * start with the top node /nacm
      */
     nacmval = val_new_value();
     if (!nacmval) {
-	return ERR_INTERNAL_MEM;
-    }
-    val_init_from_template(nacmval, nacmobj);
+	res = ERR_INTERNAL_MEM;
+    } else {
+	val_init_from_template(nacmval, nacmobj);
 
-    /* handing off the malloced memory here */
-    val_add_child(nacmval, runningcfg->root);
+	/* handing off the malloced memory here */
+	val_add_child(nacmval, runningcfg->root);
 
-    /* add /nacm/noRuleDefault */
-    res = val_add_defaults(nacmval, FALSE);
-    if (res != NO_ERR) {
-	return res;
+	/* add /nacm/noRuleDefault */
+	res = val_add_defaults(nacmval, FALSE);
     }
 
-    noruleval = val_find_child(nacmval,
-			       AGT_ACM_MODULE,
-			       nacm_N_noRuleDefault);
-    if (!noruleval) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    /* add /nacm/groups */
-    groupsval = val_new_value();
-    if (!groupsval) {
-	return ERR_INTERNAL_MEM;
-    }
-    val_init_from_template(groupsval, groupsobj);
-
-    /* handing off the malloced memory here */
-    val_add_child(groupsval, nacmval);
-
-    /* add /nacm/rules */
-    rulesval = val_new_value();
-    if (!rulesval) {
-	return ERR_INTERNAL_MEM;
-    }
-    val_init_from_template(rulesval, rulesobj);
-
-    /* handing off the malloced memory here */
-    val_add_child(rulesval, nacmval);
-
-    agt_acm_init_done = TRUE;
-    return NO_ERR;
+    return res;
 
 }  /* agt_acm_init2 */
 
@@ -645,6 +727,10 @@ void
 	return;
     }
 
+    agt_cb_unregister_callbacks(AGT_ACM_MODULE,	
+				nacm_OID_group);
+    agt_cb_unregister_callbacks(AGT_ACM_MODULE,	
+				nacm_OID_moduleRule);
     nacmmod = NULL;
     agt_acm_init_done = FALSE;
 

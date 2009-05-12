@@ -633,4 +633,40 @@ ncx_shutdowntyp_t
 }  /* agt_shutdown_mode_requested */
 
 
+/********************************************************************
+* FUNCTION agt_cbtype_name
+* 
+* Get the string for the agent callback phase
+* 
+* INPUTS:
+*   cbtyp == callback type enum
+*
+* RETURNS:
+*    const string for this enum
+*********************************************************************/
+const xmlChar *
+    agt_cbtype_name (agt_cbtyp_t cbtyp)
+{
+    switch (cbtyp) {
+    case AGT_CB_LOAD_MOD:
+	return (const xmlChar *)"load module";
+    case AGT_CB_UNLOAD_MOD:
+	return (const xmlChar *)"unload module";
+    case AGT_CB_VALIDATE:
+	return (const xmlChar *)"validate";
+    case AGT_CB_APPLY:
+	return (const xmlChar *)"apply";
+    case AGT_CB_COMMIT:
+	return (const xmlChar *)"commit";
+    case AGT_CB_ROLLBACK:
+	return (const xmlChar *)"rolllback";
+    case AGT_CB_TEST_APPLY:
+	return (const xmlChar *)"test apply";
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return (const xmlChar *)"invalid";
+    }
+}  /* agt_cbtyp_name */
+
+
 /* END file agt.c */

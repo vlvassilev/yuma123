@@ -89,7 +89,7 @@ typedef struct agt_cb_set_t_ {
     dlq_hdr_t          qhdr;
     agt_cb_modhdr_t   *parent;
     const xmlChar     *defpath;
-    const xmlChar     *minversion;
+    const xmlChar     *version;
     agt_cb_fnset_t     cbset;
     agt_cb_status_t    loadstatus;
     status_t           status;
@@ -129,7 +129,7 @@ static void
 *
 * INPUTS:
 *   defpath == Xpath OID for definition object target
-*   minversion == minimum usable revision data for this object
+*   version == expected revision data for this object
 *   cbset == set of callback functions to copy
 *
 * RETURNS:
@@ -138,13 +138,12 @@ static void
 static agt_cb_set_t *
     new_callback (agt_cb_modhdr_t  *parent,
 		  const xmlChar *defpath,
-		  const xmlChar *minversion,
+		  const xmlChar *version,
 		  const agt_cb_fnset_t *cbset)
 {
 
     agt_cb_set_t *callback;
-    uint32        i;
-
+    agt_cbtyp_t   cbtyp;
 
     callback = m__getObj(agt_cb_set_t);
     if (!callback) {
@@ -154,13 +153,15 @@ static agt_cb_set_t *
     memset(callback, 0x0, sizeof(agt_cb_set_t));
 
     callback->defpath = defpath;
-    callback->minversion = minversion;
+    callback->version = version;
     callback->parent = parent;
     callback->loadstatus = AGTCB_STAT_INIT_DONE;
     callback->status = NO_ERR;
 
-    for (i=0; i< AGT_NUM_CB; i++) {
-	callback->cbset.cbfn[i] = cbset->cbfn[i];
+    for (cbtyp = AGT_CB_LOAD_MOD;
+	 cbtyp <= AGT_CB_ROLLBACK;
+	 cbtyp++) {
+	callback->cbset.cbfn[cbtyp] = cbset->cbfn[cbtyp];
     }
 
     return callback;
@@ -397,17 +398,19 @@ static status_t
     modhdr->modversion = mod->version;
 
     /* check if the version loaded is acceptable for this callback */
-    if (callback->minversion) {
+    if (callback->version) {
 	ret = yang_compare_revision_dates(modhdr->modversion, 
-					  callback->minversion);
-	if (ret < 0) {
+					  callback->version);
+	if (ret != 0) {
 	    res = ERR_NCX_WRONG_VERSION;
 	    callback->loadstatus = AGTCB_STAT_LOAD_FAILED;
 	    callback->status = res;
 
 	    log_error("\nError: load callbacks failed for module '%s'"
 		      "\n  wrong version: got '%s', need '%s'", 
-		      mod->name, mod->version, callback->minversion);
+		      mod->name, 
+		      mod->version, 
+		      callback->version);
 
 	    return res;
 	}
@@ -429,7 +432,8 @@ static status_t
 
 	log_error("\nError: load callbacks failed for module '%s'"
 		  "\n  '%s' for defpath '%s'",
-		  mod->name, get_error_string(res), 
+		  mod->name, 
+		  get_error_string(res), 
 		  callback->defpath);
 
     }
@@ -519,6 +523,99 @@ void
 
 
 /********************************************************************
+* FUNCTION agt_cb_register_callback
+* 
+* Register an object specific callback function
+*
+* INPUTS:
+*   modname == module that defines the target object for
+*              these callback functions 
+*   defpath == Xpath with default (or no) prefixes
+*              defining the object that will get the callbacks
+*   version == exact module revision date expected
+*              if condition not met then an error will
+*              be logged  (TBD: force unload of module!)
+*           == NULL means use any version of the module
+*   cbfn    == address of callback function to use for
+*              all callback phases
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t 
+    agt_cb_register_callback (const xmlChar *modname,
+			      const xmlChar *defpath,
+			      const xmlChar *version,
+			      const agt_cb_fn_t cbfn)
+{
+    agt_cb_modhdr_t    *modhdr;
+    agt_cb_set_t       *callback;
+    ncx_module_t       *mod;
+    status_t            res;
+    agt_cbtyp_t         cbtyp;
+    agt_cb_fnset_t      cbset;
+
+#ifdef DEBUG
+    if (!modname || !defpath || !cbfn) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    modhdr = find_modhdr(modname);
+    if (!modhdr) {
+	modhdr = new_modhdr(modname);
+	if (!modhdr) {
+	    return ERR_INTERNAL_MEM;
+	}
+	res = add_modhdr(modhdr);
+	if (res != NO_ERR) {
+	    free_modhdr(modhdr);
+	    return res;
+	}
+    }
+
+    callback = find_callback(modhdr, defpath);
+    if (callback) {
+	return SET_ERROR(ERR_NCX_DUP_ENTRY);
+    }
+
+    memset(&cbset, 0x0, sizeof(agt_cb_fnset_t));
+    for (cbtyp = AGT_CB_LOAD_MOD;
+	 cbtyp <= AGT_CB_ROLLBACK;
+	 cbtyp++) {
+	cbset.cbfn[cbtyp] = cbfn;
+    }
+
+    callback = new_callback(modhdr, 
+			    defpath, 
+			    version, 
+			    &cbset);
+    if (!callback) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    res = add_callback(modhdr, callback);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* data structures in place, now check if the module
+     * is loaded yet
+     */
+    mod = ncx_find_module(modname, NULL);
+    if (!mod) {
+	/* module not present yet */
+	return NO_ERR;
+    }
+
+    res = load_callbacks(mod, modhdr, callback);
+	
+    return res;
+
+}  /* agt_cb_register_callback */
+
+
+/********************************************************************
 * FUNCTION agt_cb_register_callbacks
 * 
 * Register an object specific callback function
@@ -528,10 +625,10 @@ void
 *              these callback functions 
 *   defpath == Xpath with default (or no) prefixes
 *              defining the object that will get the callbacks
-*   minversion == lowest module revision date acceptable
-*                 if condition not met then an error will
-*                 be logged  (TBD: force unload of module!)
-*              == NULL means use any version of the module
+*   version == exact module revision date expected
+*              if condition not met then an error will
+*              be logged  (TBD: force unload of module!)
+*           == NULL means use any version of the module
 *   cbfnset == address of callback function set to copy
 *
 * RETURNS:
@@ -540,8 +637,8 @@ void
 status_t 
     agt_cb_register_callbacks (const xmlChar *modname,
 			       const xmlChar *defpath,
-			       const xmlChar *minversion,
-			       agt_cb_fnset_t *cbfnset)
+			       const xmlChar *version,
+			       const agt_cb_fnset_t *cbfnset)
 {
     agt_cb_modhdr_t    *modhdr;
     agt_cb_set_t       *callback;
@@ -572,8 +669,10 @@ status_t
 	return SET_ERROR(ERR_NCX_DUP_ENTRY);
     }
 
-    callback = new_callback(modhdr, defpath, 
-			    minversion, cbfnset);
+    callback = new_callback(modhdr, 
+			    defpath, 
+			    version, 
+			    cbfnset);
     if (!callback) {
 	return ERR_INTERNAL_MEM;
     }

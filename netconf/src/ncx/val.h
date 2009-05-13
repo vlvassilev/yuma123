@@ -185,6 +185,10 @@ date	     init     comment
 
 #define VAL_IDREF(V)    (&(V)->v.idref)
 
+#define VAL_IDREF_NSID(V)    ((V)->v.idref.nsid)
+
+#define VAL_IDREF_NAME(V)    ((V)->v.idref.name)
+
 #define VAL_UINT(V)    ((V)->v.num.u)
 
 #define VAL_UINT8(V)    ((uint8)((V)->v.num.u))

@@ -649,9 +649,9 @@ const xmlChar *
 {
     switch (cbtyp) {
     case AGT_CB_LOAD_MOD:
-	return (const xmlChar *)"load module";
+	return (const xmlChar *)"load-module";
     case AGT_CB_UNLOAD_MOD:
-	return (const xmlChar *)"unload module";
+	return (const xmlChar *)"unload-module";
     case AGT_CB_VALIDATE:
 	return (const xmlChar *)"validate";
     case AGT_CB_APPLY:
@@ -659,9 +659,9 @@ const xmlChar *
     case AGT_CB_COMMIT:
 	return (const xmlChar *)"commit";
     case AGT_CB_ROLLBACK:
-	return (const xmlChar *)"rolllback";
+	return (const xmlChar *)"rollback";
     case AGT_CB_TEST_APPLY:
-	return (const xmlChar *)"test apply";
+	return (const xmlChar *)"test-apply";
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return (const xmlChar *)"invalid";

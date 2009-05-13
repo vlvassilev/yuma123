@@ -147,12 +147,34 @@ date         init     comment
 #define nacm_OID_group (const xmlChar *)"/nacm/groups/group"
 #define nacm_OID_moduleRule  (const xmlChar *)"/nacm/rules/moduleRule"
 
+#define nacm_E_noRuleDefault_permit (const xmlChar *)"permit"
+#define nacm_E_noRuleDefault_deny   (const xmlChar *)"deny"
+
+#define nacm_E_allowedRights_read  (const xmlChar *)"read"
+#define nacm_E_allowedRights_write (const xmlChar *)"write"
+#define nacm_E_allowedRights_exec  (const xmlChar *)"exec"
+
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
 *								    *
 *********************************************************************/
 
+/* 1 group that the user is a member */
+typedef struct group_ptr_t_ {
+    dlq_hdr_t         qhdr;
+    xmlns_id_t        groupnsid;
+    const xmlChar    *groupname;
+} group_ptr_t;
+
+
+/* list of group identities that the user is a member */
+typedef struct user_groups_t_ {
+    dlq_hdr_t         qhdr;
+    const xmlChar    *username;
+    dlq_hdr_t         groupQ;   /* Q of group_ptr_t */
+} user_groups_t;
 
 
 /********************************************************************
@@ -165,7 +187,345 @@ static boolean agt_acm_init_done = FALSE;
 static ncx_module_t  *nacmmod;
 
 
-#if 0
+/********************************************************************
+* FUNCTION new_group_ptr
+*
+* create a group pointer
+*
+* INPUTS:
+*   groupnsid == group identity namspace ID
+*   groupname == group identity name to use
+*
+* RETURNS:
+*   filled in, malloced struct or NULL if malloc error
+*********************************************************************/
+static group_ptr_t *
+    new_group_ptr (xmlns_id_t groupnsid,
+		   const xmlChar *groupname)
+{
+    group_ptr_t *grptr;
+
+    grptr = m__getObj(group_ptr_t);
+    if (!grptr) {
+	return NULL;
+    }
+    memset(grptr, 0x0, sizeof(group_ptr_t));
+    grptr ->groupnsid = groupnsid;
+    grptr->groupname = groupname;
+    return grptr;
+
+}  /* new_group_ptr */
+
+
+/********************************************************************
+* FUNCTION free_group_ptr
+*
+* free a group pointer
+*
+* INPUTS:
+*   groupnsid == group identity namspace ID
+*   groupname == group identity name to use
+*
+* RETURNS:
+*   filled in, malloced struct or NULL if malloc error
+*********************************************************************/
+static void
+    free_group_ptr (group_ptr_t *grptr)
+{
+    m__free(grptr);
+
+}  /* free_group_ptr */
+
+
+/********************************************************************
+* FUNCTION find_group_ptr
+*
+* find a group pointer in a user group record
+*
+* INPUTS:
+*   usergroups == user-to-groups struct to check
+*   groupnsid == group identity namspace ID to find
+*   groupname == group identity name to find
+*
+* RETURNS:
+*   pointer to found record or NULL if not found
+*********************************************************************/
+static group_ptr_t *
+    find_group_ptr (user_groups_t *usergroups,
+		    xmlns_id_t  groupnsid,
+		    const xmlChar *groupname)
+{
+    group_ptr_t   *grptr;
+
+    for (grptr = (group_ptr_t *)
+	     dlq_firstEntry(&usergroups->groupQ);
+	 grptr != NULL;
+	 grptr = (group_ptr_t *)dlq_nextEntry(grptr)) {
+
+	if (grptr->groupnsid == groupnsid &&
+	    !xml_strcmp(grptr->groupname, groupname)) {
+	    return grptr;
+	}
+    }
+    return NULL;
+
+}  /* find_group_ptr */
+
+
+/********************************************************************
+* FUNCTION add_group_ptr
+*
+* add a group pointer in a user group record
+* if it is not already there
+*
+* INPUTS:
+*   usergroups == user-to-groups struct to use
+*   groupnsid == group identity namspace ID to add
+*   groupname == group identity name to add
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    add_group_ptr (user_groups_t *usergroups,
+		    xmlns_id_t  groupnsid,
+		    const xmlChar *groupname)
+{
+    group_ptr_t   *grptr;
+
+    grptr = find_group_ptr(usergroups, groupnsid, groupname);
+    if (grptr) {
+	return NO_ERR;
+    }
+
+    grptr = new_group_ptr(groupnsid, groupname);
+    if (!grptr) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    dlq_enque(grptr, &usergroups->groupQ);
+    return NO_ERR;
+
+}  /* add_group_ptr */
+
+
+/********************************************************************
+* FUNCTION new_usergroups
+*
+* create a user-to-groups struct
+*
+* INPUTS:
+*   username == name of user to use
+*
+* RETURNS:
+*   filled in, malloced struct or NULL if malloc error
+*********************************************************************/
+static user_groups_t *
+    new_usergroups (const xmlChar *username)
+{
+    user_groups_t *usergroups;
+
+
+    usergroups = m__getObj(user_groups_t);
+    if (!usergroups) {
+	return NULL;
+    }
+
+    memset(usergroups, 0x0, sizeof(user_groups_t));
+    dlq_createSQue(&usergroups->groupQ);
+    usergroups->username = username;
+
+    return usergroups;
+
+}  /* new_usergroups */
+
+
+/********************************************************************
+* FUNCTION free_usergroups
+*
+* free a user-to-groups struct
+*
+* INPUTS:
+*   usergroups == struct to free
+*
+*********************************************************************/
+static void
+    free_usergroups (user_groups_t *usergroups)
+{
+    group_ptr_t *grptr;
+
+    while (!dlq_empty(&usergroups->groupQ)) {
+	grptr = (group_ptr_t *)
+	    dlq_deque(&usergroups->groupQ);
+	free_group_ptr(grptr);
+    }
+    m__free(usergroups);
+
+}  /* free_usergroups */
+
+
+/********************************************************************
+* FUNCTION get_usergroups_entry
+*
+* create (TBD: cache) a user-to-groups entry
+* for the specified username, based on the /nacm/groups
+* contents at this time
+*
+* INPUTS:
+*   nacmroot == root of the nacm tree, already fetched
+*   username == user name to create mapping for
+*   groupcount == address of return group count field
+*
+* OUTPUTS:
+*   *groupcount == number of groups that the specified
+*                  user is part of (i.e., number of 
+*                  group_ptr_t structs in the groups Q
+*
+* RETURNS:
+*  malloced usergroups entry for the specified user
+*********************************************************************/
+static user_groups_t *
+    get_usergroups_entry (val_value_t *nacmroot,
+			  const xmlChar *username,
+			  uint32 *groupcount)
+{
+    user_groups_t  *usergroups;
+    val_value_t    *groupsval, *groupval, *groupid, *userval;
+    boolean         done;
+    status_t        res;
+
+    *groupcount = 0;
+    res = NO_ERR;
+
+    /*** no cache yet -- just create entry each time for now ***/
+
+    usergroups = new_usergroups(username);
+    if (!usergroups) {
+	return NULL;
+    }
+
+    /* get /nacm/groups node */
+    groupsval = val_find_child(nacmroot,
+			       AGT_ACM_MODULE,
+			       nacm_N_groups);
+    if (!groupsval) {
+	return usergroups;
+    }
+
+    /* check each /nacm/groups/group node */
+    for (groupval = val_get_first_child(groupsval);
+	 groupval != NULL && res == NO_ERR;
+	 groupval = val_get_next_child(groupval)) {
+
+	done = FALSE;
+
+	/* check each /nacm/groups/group/userName node */
+	for (userval = val_find_child(groupval,
+				      AGT_ACM_MODULE,
+				      nacm_N_userName);
+	     userval != NULL && !done;
+	     userval = val_find_next_child(groupval,
+					   AGT_ACM_MODULE,
+					   nacm_N_userName,
+					   userval)) {
+
+	    if (!xml_strcmp(username, VAL_STR(userval))) {
+		/* user is a member of this group
+		 * get the groupIdentity key leaf
+		 */
+		groupid = val_find_child(groupval,
+					 AGT_ACM_MODULE,
+					 nacm_N_groupIdentity);
+		done = TRUE;
+		if (!groupid) {
+		    res = SET_ERROR(ERR_INTERNAL_VAL);
+		} else {
+		    res = add_group_ptr(usergroups,
+					VAL_IDREF_NSID(groupid),
+					VAL_IDREF_NAME(groupid));
+		    (*groupcount)++;
+		}
+	    }
+	}
+    }
+
+    if (res != NO_ERR) {
+	log_error("\nError: agt_acm add user2group entry failed");
+    }
+
+    return usergroups;
+    
+}  /* get_usergroups_entry */
+
+
+/********************************************************************
+* FUNCTION check_access_bit
+*
+*
+* INPUTS:
+*    ruleval == /nacm/rules/<foo>Rule node, pre-fetched
+*    access == string (enum name) for the requested access
+*              (read, write, exec)
+*    usergroups == user-to-group mapping for access processing
+*    done == address of return done processing flag
+*
+* OUTPUTS:
+*    *done == TRUE if a matching group was found, 
+*             so return value is the final answer
+*          == FALSE if no matching group was found
+*
+* RETURNS:
+*    only valid if *done == TRUE:
+*      TRUE if requested access right found 
+*      FALSE if requested access right not found
+*********************************************************************/
+static boolean
+    check_access_bit (val_value_t *ruleval,
+		      const xmlChar *access,
+		      user_groups_t *usergroups,
+		      boolean *done)
+{
+    val_value_t      *group, *rights;
+    ncx_list_t       *bits;
+    boolean           granted;
+
+    *done = FALSE;
+    granted = FALSE;
+
+    for (group = val_find_child(ruleval, 
+				AGT_ACM_MODULE, 
+				nacm_N_allowedGroup);
+	 group != NULL && !*done;
+	 group = val_find_next_child(ruleval,
+				     AGT_ACM_MODULE,
+				     nacm_N_allowedGroup,
+				     group)) {
+	if (find_group_ptr(usergroups,
+			   VAL_IDREF_NSID(group),
+			   VAL_IDREF_NAME(group))) {
+	    /* this group is a match */
+	    *done = TRUE;
+
+	    /* get the allowedRights leaf
+	     * and check if the exec bit is set
+	     */
+	    rights = val_find_child(ruleval,
+				    AGT_ACM_MODULE,
+				    nacm_N_allowedRights);
+	    if (!rights) {
+		SET_ERROR(ERR_INTERNAL_VAL);
+	    } else {
+		bits = &VAL_BITS(rights);
+		granted = ncx_string_in_list(access, bits);
+	    }
+	}
+    }
+				   
+    return granted;
+
+} /* check_accesse_bit */
+
+
 /********************************************************************
 * FUNCTION get_nacm_root
 *
@@ -196,286 +556,230 @@ static val_value_t *
 
 
 /********************************************************************
-* FUNCTION get_group_for_user
+* FUNCTION get_default_rpc_response
 *
-* get the group name associated with this user name
+* get the default response for the specified RPC object
+* there are no rules that match any groups with this user
 *
-* First call:
-*   SET group to NULL
-*  2nd to Nth call:
-*   Leave *group set to its previous value
-*
-* This initial implementation uses a brute-force lookup
-* instead of a cache approach.  May change later if
-* this is too slow
-*
-* INPUTS:
-*    groupsval == root value struct of all group entries
-*    username == username
-*    group == address of return group value struct
-*    groupid == address of return groupIdentity value struct
-*
-* OUTPUTS:
-*   *group == group value struct, if found
-*   *groupid == groupIdentity value struct, if found
-*
+*  INPUTS:
+*    nacmroot == pre-fectched NACM root
+*    rpcobj == RPC template for this request
+*    
 * RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    get_group_for_user (val_value_t *groupsval,
-			const xmlChar *username,
-			val_value_t **group,
-			val_value_t **groupid)
-{
-    val_value_t   *nacmval, *groupval, *usernameval;
-    
-    *groupid = NULL;
-
-    if (*group == NULL) {
-	*group = val_get_first_child(groupsval);
-    } else {
-	*group = val_get_next_child(*group);
-    }
-
-    /* go through the groups in order and check the user list */
-    for (groupval = *group;
-	 groupval != NULL;
-	 groupval = val_get_next_child(groupval)) {
-
-	usernameval = val_find_child(group, 
-				     AGT_ACM_MODULE, 
-				     nacm_N_userName);
-	while (usernameval != NULL) {
-	    if (!xml_strcmp(username, VAL_STR(usernameval))) {
-		*groupid = val_find_child(groupval,
-					  AGT_ACM_MODULE,
-					  nacm_N_groupIdentity);
-		*group = groupval;
-		return NO_ERR;
-	    } else {
-		usernameval = 
-		    val_find_next_child(groupval,
-					AGT_ACM_MODULE,
-					nacm_N_groupIdentity,
-					usernameval);
-	    }
-	}
-    }
-
-    return ERR_NCX_DEF_NOT_FOUND;
-
-} /* get_group_for_user */
-
-
-/********************************************************************
-* FUNCTION check_rpc_rule
-*
-* Check the configured <rpcRule> element to see if the
-* group list is allowed to invoke the specified RPC method
-*
-* INPUTS:
-*    rpcobj == RPC object template requested
-*    groupname == group name for this user
-*    ruleval == value struct representing the current rpcRule
-*    granted == address of return access granted status
-*
-* OUTPUTS:
-*   If rule applies (returns TRUE)
-*     *granted == TRUE if access to invoke RPC granted
-*              == FALSE if access is not granted to invoke the RPC
-*
-* RETURNS:
-*    TRUE if the rule applied to this group list
-*    FALSE if the rule did not apply to this group list
+*   TRUE if access granted
+*   FALSE if access denied
 *********************************************************************/
 static boolean
-    check_rpc_rule (const obj_template_t *rpcobj,
-		    val_value_t groupval,
-		    val_value_t *ruleval,
-		    boolean *granted)
+    get_default_rpc_response (val_value_t *nacmroot,
+			      const obj_template_t *rpcobj)
 {
-    const obj_rpc_t   *rpc;
-    val_value_t       *target, *chval, *actype;
-    boolean            match;
+    val_value_t  *noRule;
 
-    rpc = rpcobj->def.rpc;
-
-    /* check if this rule applies to the groupname */
-    if (!group_in_list(groupname, ruleval)) {
-	return FALSE;
-    }
-
-    /* group applies to check the rpcTarget
-     * get the rpcTarget choice 
+    /* check if the RPC method is tagged as 
+     * ncx:secure or ncx:very-secure and
+     * deny access if so
      */
-    target = val_find_child(ruleval, AGT_ACM_MODULE, LEAF_RPCTARGET);
-    if (!target) {
-	SET_ERROR(ERR_INTERNAL_VAL);
+    if (obj_is_secure(rpcobj) ||
+	obj_is_very_secure(rpcobj)) {
 	return FALSE;
     }
-    chval = val_get_first_child(target);
 
-    /* check if the RPC rule matches the target choice */
-    if (!xml_strcmp(chval->name, LEAF_RPCTLIST)) {
-	/* check if rpc-type in the rpcTypeList */
-	match = ncx_string_in_list(rpc_get_rpctype_str(rpc->rpc_typ), 
-				   &(VAL_LIST(chval)));
-    } else if (!xml_strcmp(chval->name, LEAF_RPCLIST)) {
-	match = node_in_list(rpc->nsid, rpc->name, chval);
-    } else if (!xml_strcmp(chval->name, LEAF_XPATHEXPR)) {
-	match = FALSE; /***/
-    } else if (!xml_strcmp(chval->name, LEAF_ALL)) {
-	match = TRUE;
+    /* check the noDefaultRule setting on this agent */
+    noRule = val_find_child(nacmroot,
+			    AGT_ACM_MODULE,
+			    nacm_N_noRuleDefault);
+    if (!noRule) {
+	return TRUE;  /* default is TRUE */
+    }
+
+    if (!xml_strcmp(VAL_ENUM_NAME(noRule),
+		    nacm_E_noRuleDefault_permit)) {
+	return TRUE;
     } else {
-	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
     }
 
-    /* check if rule target applies to this RPC method */
-    if (!match) {
-	return FALSE;
-    }
-
-    /* rules does apply to this group and target
-     * check if the rule is permit or deny and set the
-     * *granted return value
-     */
-    actype = val_find_child(ruleval, AGT_ACM_MODULE, LEAF_RULETYPE);
-    if (!actype) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
-    }
-    if (!xml_strcmp(VAL_STR(actype), ACCESS_PERMIT)) {
-	*granted = TRUE;
-    } else if (!xml_strcmp(VAL_STR(actype), ACCESS_DENY)) {
-	*granted = FALSE;
-    } else {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
-    }
-
-    return TRUE;
-
-} /* check_rpc_rule */
+}  /* get_default_rpc_response */
 
 
 /********************************************************************
 * FUNCTION check_rpc_rules
 *
-* Check the configured <rpcRules> element to see if the
+* Check the configured /nacm/rules/rpcRule list to see if the
 * user is allowed to invoke the specified RPC method
 *
 * INPUTS:
+*    rulesval == /nacm/rules node, pre-fetched
 *    rpcobj == RPC template requested
-*    user == username requesting access
-*    cmode == current access control mode (warn, loose, strict)
+*    usergroups == user-to-group mapping for access processing
+*    done == address of return done processing flag
+*
+* OUTPUTS:
+*    *done == TRUE if a rule was found, so return value is
+*             the final answer
+*          == FALSE if no rpcRule was found to match
 *
 * RETURNS:
-*    TRUE if the user is allowed to invoke the RPC
-*    FALSE if the user is not allowed to invoke the RPC (or some error)
+*    only valid if *done == TRUE:
+*      TRUE if authorization to invoke the RPC op is granted
+*      FALSE if authorization to invoke the RPC op is not granted
 *********************************************************************/
 static boolean
-    check_rpc_rules (const obj_template_t *rpcobj,
-		     const xmlChar *user,
-		     agt_acm_control_mode_t cmode)
+    check_rpc_rules (val_value_t *rulesval,
+		     const obj_template_t *rpcobj,
+		     user_groups_t *usergroups,
+		     boolean *done)
 {
-    val_value_t      *valset, *val, *chval;
-    const xmlChar    *group, *role;
-    const obj_rpc_t  *rpc;
-    status_t          res;
-    boolean           granted, done;
+    val_value_t      *rpcrule, *modname, *rpcname;
+    boolean           granted, done2;
 
-    done = FALSE;
+    *done = FALSE;
     granted = FALSE;
-    rpc = rpcobj->def.rpc;
 
-    /* get the accessControl parmset */
-    valset = get_ac_valset();
-    if (!valset) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
-    }
+    /* check all the rpcRule entries */
+    for (rpcrule = val_find_child(rulesval, 
+				  AGT_ACM_MODULE, 
+				  nacm_N_rpcRule);
+	 rpcrule != NULL && !*done;
+	 rpcrule = val_find_next_child(rulesval,
+				       AGT_ACM_MODULE,
+				       nacm_N_rpcRule,
+				       rpcrule)) {
 
-    /* get the group and role for this user */
-    res = get_group_from_user(user, &group, &role);
-    if (res != NO_ERR) {
-	log_warn("\nagt_acm: User %s not in any groups", user);
-	return FALSE;
-    }
-
-    /* return TRUE if this is the super user */
-    if (!xml_strcmp(role, ROLE_ROOT)) {
-	return TRUE;
-    }
-
-    /* get the rpcRules value struct */
-    val = val_find_child(accessControl, AGT_ACM_MODULE, PARM_RPCRULES);
-    if (!val) {
-	log_warn("\nagt_acm: No RPC Rules found");
-	return FALSE;
-    }
-
-    /* find the first rule that matches this RPC method */
-    for (chval = val_get_first_child(val);
-	 chval != NULL && !done;
-	 chval = val_get_next_child(chval)) {
-	done = check_rpc_rule(rpcobj, group, chval, &granted);
-    }
-
-    /* check if any rule found */
-    if (!done) {
-	log_warn("\nagt_acm: RPC %s -- no rule found for user %s",
-		 obj_get_name(rpcobj), user);
-    }
-
-    /* generate return value based on global control mode */
-    switch (cmode) {
-    case AGT_ACM_CM_WARN:
-	if (!done || !granted) {
-	    /*  gen_rpc_warning(user, rpc)  */  ;
+	/* get the module name key */
+	modname = val_find_child(rpcrule,
+				 AGT_ACM_MODULE,
+				 nacm_N_rpcModuleName);
+	if (!modname) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    continue;
 	}
-	/* fall through */
-    case AGT_ACM_CM_LOOSE:
-	if (!done) {
-	    switch (rpc->rpc_typ) {
-	    case RPC_TYP_OTHER:
-	    case RPC_TYP_CONFIG:
-		granted = FALSE;
-		break;
-	    case RPC_TYP_EXEC:
-	    case RPC_TYP_MONITOR:
-	    case RPC_TYP_DEBUG:
-		granted = TRUE;
-		break;
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-		granted = FALSE;
-	    }
-	}
-	break;
-    case AGT_ACM_CM_STRICT:
-	if (!done) {
-	    /* always allow the close-session command to be invoked */
-	    if (obj_get_nsid(rpcobj) == xmlns_nc_id() &&
-		!xml_strcmp(rpc->name, NCX_EL_CLOSE_SESSION)) {
-		granted = TRUE;
-	    } else {
-		/* no rule for any other RPC method is denied access */
-		granted = FALSE;
-	    }
-	}
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	granted = FALSE;
-    }
 
+	/* get the rpc operation name key */
+	rpcname = val_find_child(rpcrule,
+				 AGT_ACM_MODULE,
+				 nacm_N_rpcModuleName);
+	if (!rpcname) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    continue;
+	}
+
+	/* check if this is the right module */
+	if (xml_strcmp(obj_get_mod_name(rpcobj),
+		       VAL_STR(modname))) {
+	    continue;
+	}
+
+	/* check if this is the right RPC operation */
+	if (xml_strcmp(obj_get_name(rpcobj),
+		       VAL_STR(rpcname))) {
+	    continue;
+	}
+
+	/* this rpcRule is for the specified RPC operation
+	 * check if any of the groups in the usergroups
+	 * list for this user match any of the groups in
+	 * the allowedGroup leaf-list
+	 */
+	done2 = FALSE;
+	granted = check_access_bit(rpcrule,
+				   nacm_E_allowedRights_exec,
+				   usergroups,
+				   &done2);
+	if (done2) {
+	    *done = TRUE;
+	} else {
+	    granted = FALSE;
+	}
+    }
+				   
     return granted;
 
 } /* check_rpc_rules */
-#endif
 
+
+/********************************************************************
+* FUNCTION check_module_rules
+*
+* Check the configured /nacm/rules/moduleRule list to see if the
+* user is allowed access the specified module
+*
+* INPUTS:
+*    rulesval == /nacm/rules node, pre-fetched
+*    obj == RPC or data template requested
+*    access == string (enum name) for the requested access
+*              (read, write, exec)
+*    usergroups == user-to-group mapping for access processing
+*    done == address of return done processing flag
+*
+* OUTPUTS:
+*    *done == TRUE if a rule was found, so return value is
+*             the final answer
+*          == FALSE if no rpcRule was found to match
+*
+* RETURNS:
+*    only valid if *done == TRUE:
+*      TRUE if authorization to invoke the RPC op is granted
+*      FALSE if authorization to invoke the RPC op is not granted
+*********************************************************************/
+static boolean
+    check_module_rules (val_value_t *rulesval,
+			const obj_template_t *obj,
+			const xmlChar *access,
+			user_groups_t *usergroups,
+			boolean *done)
+{
+    val_value_t      *modrule, *modname;
+    boolean           granted, done2;
+
+    *done = FALSE;
+    granted = FALSE;
+
+    /* check all the rpcRule entries */
+    for (modrule = val_find_child(rulesval, 
+				  AGT_ACM_MODULE, 
+				  nacm_N_moduleRule);
+	 modrule != NULL && !*done;
+	 modrule = val_find_next_child(rulesval,
+				       AGT_ACM_MODULE,
+				       nacm_N_moduleRule,
+				       modrule)) {
+
+	/* get the module name key */
+	modname = val_find_child(modrule,
+				 AGT_ACM_MODULE,
+				 nacm_N_moduleName);
+	if (!modname) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    continue;
+	}
+
+	/* check if this is the right module */
+	if (xml_strcmp(obj_get_mod_name(obj),
+		       VAL_STR(modname))) {
+	    continue;
+	}
+
+	/* this moduleRule is for the specified node
+	 * check if any of the groups in the usergroups
+	 * list for this user match any of the groups in
+	 * the allowedGroup leaf-list
+	 */
+	done2 = FALSE;
+	granted = check_access_bit(modrule,
+				   access,
+				   usergroups,
+				   &done2);
+	if (done2) {
+	    *done = TRUE;
+	} else {
+	    granted = FALSE;
+	}
+    }
+				   
+    return granted;
+
+} /* check_module_rules */
 
 
 /********************************************************************
@@ -753,6 +1057,10 @@ boolean
     agt_acm_rpc_allowed (const xmlChar *user,
 			 const obj_template_t *rpcobj)
 {
+    val_value_t      *nacmroot, *rulesval;
+    user_groups_t    *usergroups;
+    uint32            groupcnt;
+    boolean           retval, done;
 
 #ifdef DEBUG
     if (!user || !rpcobj) {
@@ -773,10 +1081,66 @@ boolean
 	return TRUE;
     }
 
+    /* get the NACM root to decide any more */
+    nacmroot = get_nacm_root();
+    if (!nacmroot) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
 
-    /*** TEMP ***/
-    /* return check_rpc_rules(rpcobj, user, acmode); */
-    return TRUE;
+    groupcnt = 0;
+
+    usergroups = get_usergroups_entry(nacmroot, 
+				      user, 
+				      &groupcnt);
+    if (!usergroups) {
+	/* out of memory! deny all access! */
+	return FALSE;
+    }
+
+    /* usergroups malloced at this point */
+    retval = FALSE;
+
+    if (groupcnt == 0) {
+	/* just check the default for this RPC operation */
+	retval = get_default_rpc_response(nacmroot, rpcobj);
+    } else {
+	/* get the /nacm/rules node to decide any more */
+	rulesval = val_find_child(nacmroot,
+				  AGT_ACM_MODULE,
+				  nacm_N_rules);
+	if (!rulesval) {
+	    /* no rules at all so use the default */
+	    retval = get_default_rpc_response(nacmroot, 
+					      rpcobj);
+	} else {
+	    /* there is a rules node so check the rpcRules */
+	    done = FALSE;
+	    retval = check_rpc_rules(rulesval,
+				     rpcobj,
+				     usergroups, 
+				     &done);
+	    if (!done) {
+		/* no RPC rule found;
+		 * try a module namespace rule
+		 */
+		retval = check_module_rules(rulesval,
+					    rpcobj,
+					    nacm_E_allowedRights_exec,
+					    usergroups, 
+					    &done);
+		if (!done) {
+		    /* no module rule so use the default */
+		    retval = get_default_rpc_response(nacmroot, 
+						      rpcobj);
+		}
+	    }
+	}
+    }
+
+    free_usergroups(usergroups);
+
+    return retval;
 
 }   /* agt_acm_rpc_allowed */
 

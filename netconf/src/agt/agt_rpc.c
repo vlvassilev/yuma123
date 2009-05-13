@@ -1172,6 +1172,7 @@ void
 	} else {
 	    /* look for the RPC method in the definition registry */
 	    rpcobj = find_rpc(method.module, method.elname);
+	    msg->rpc_method = rpcobj;
 	    rpc = (rpcobj) ? rpcobj->def.rpc : NULL;
 	    if (!rpc) {
 		res = ERR_NCX_DEF_NOT_FOUND;
@@ -1185,9 +1186,6 @@ void
 		 * registered yet for this RPC method
 		 */
 		cbset = (agt_rpc_cbset_t *)rpcobj->cbset;
-
-		/* finish setting up the rpc_msg_t struct */
-		msg->rpc_method = rpcobj;
 	    }
 	}
     }

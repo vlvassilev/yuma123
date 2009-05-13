@@ -74,8 +74,14 @@
       <nacm:groups>
          <nacm:group>
             <nacm:groupIdentity>nacm:admin</nacm:groupIdentity>
+            <nacm:userName>andy</nacm:userName>
+            <nacm:userName>fred</nacm:userName>
+            <nacm:userName>barney</nacm:userName>
+         </nacm:group>
+         <nacm:group>
+            <nacm:groupIdentity>nacm:guest</nacm:groupIdentity>
+            <nacm:userName>guest</nacm:userName>
          </nacm:group>
       </nacm:groups>
-      <nacm:rules/>
    </nacm:nacm>
 </nd:config>

@@ -453,6 +453,7 @@ static boolean
 * recursively as more container nodes are matched to the target
 *
 * INPUTS:
+*    msg == incoming message in progress
 *    scb == session control block
 *        == NULL if no read access control is desired
 *    getop  == TRUE if this is a <get> and not a <get-config>
@@ -474,7 +475,8 @@ static boolean
 *     status, NO_ERR or malloc error
 *********************************************************************/
 static status_t
-    process_val (ses_cb_t *scb,
+    process_val (rpc_msg_t *msg,
+		 ses_cb_t *scb,
 		 boolean getop,
 		 val_value_t *filval,
 		 val_value_t *curval,
@@ -568,16 +570,17 @@ static status_t
 					     filchild->name,
 					     curchild)) {
 
-#ifdef NOT_YET	
 	    /* check access control if scb is non-NULL */
-	    if (scb && !agt_acm_val_read_allowed(scb->username, 
-						 curchild)) {
+	    if (scb && 
+		!agt_acm_val_read_allowed(msg,
+					  scb->username, 
+					  curchild)) {
 		/* treat an access-failed on a content match
 		 * test as a termination trigger
 		 */
 		return NO_ERR;
 	    }
-#endif
+
 	    test = content_match_test(scb, 
 				      VAL_STR(filchild), 
 				      curchild);
@@ -636,13 +639,13 @@ static status_t
 	    
 	    filptr = NULL;
 
-#ifdef NOT_YET	
 	    /* check access control if scb is non-NULL */
-	    if (scb && !agt_acm_val_read_allowed(scb->username, 
-						 testval)) {
+	    if (scb && 
+		!agt_acm_val_read_allowed(msg,
+					  scb->username, 
+					  curchild)) {
 		continue;
 	    }
-#endif
 
 	    /* check any attr-match tests */
 	    if (!attr_test(filchild, curchild)) {
@@ -686,8 +689,12 @@ static status_t
 		/* go through the child nodes of the filter
 		 * and compare to the complex target 
 		 */
-		res = process_val(scb, getop, filchild,
-				  curchild, filptr, 
+		res = process_val(msg,
+				  scb, 
+				  getop, 
+				  filchild,
+				  curchild, 
+				  filptr, 
 				  &mykeepempty);
 		if (res != NO_ERR) {
 		    return res;
@@ -963,8 +970,13 @@ ncx_filptr_t *
 	}
 	top->node = cfg->root;
 	
-	res = process_val(scb, getop, filter, 
-			  cfg->root, top, &keepempty);
+	res = process_val(msg,
+			  scb, 
+			  getop, 
+			  filter, 
+			  cfg->root, 
+			  top, 
+			  &keepempty);
 	if (res != NO_ERR || dlq_empty(&top->childQ)) {
 	    /* ignore keepempty because the result will
 	     * be the same w/NULL return, just faster

@@ -1125,8 +1125,15 @@ void
 				   msg->rpc_in_attrs, 
 				   TRUE, 
 				   !dlq_empty(&msg->mhdr.errQ));
+
+    /* init agt_acm cache struct even though it may not
+     * get used if the RPC method is invalid
+     */
+    if (res == NO_ERR) {
+	res = agt_acm_init_msg_cache(msg);
+    }
+
     if (res != NO_ERR) {
-	SET_ERROR(res);
 	agt_record_error(scb, 
 			 &msg->mhdr, 
 			 NCX_LAYER_RPC, 
@@ -1141,12 +1148,14 @@ void
     /* check any errors in the <rpc> node */
     if (res != NO_ERR) {
 	send_rpc_reply(scb, msg);
+	agt_acm_clear_msg_cache(msg);
 	rpc_free_msg(msg);
 	scb->stats.inBadRpcs++;
 	agttotals->stats.inBadRpcs++;
 	return;
     }
 
+    
     /* get the next XML node, which is the RPC method name */
     xml_init_node(&method);
     res = agt_xml_consume_node(scb, 
@@ -1178,7 +1187,9 @@ void
 		res = ERR_NCX_DEF_NOT_FOUND;
 	    } else if (!rpc->supported) {
 		res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    } else if (!agt_acm_rpc_allowed(scb->username, rpcobj)) {
+	    } else if (!agt_acm_rpc_allowed(msg,
+					    scb->username, 
+					    rpcobj)) {
 		res = ERR_NCX_ACCESS_DENIED;
 	    } else {
 		/* get the agent callback set for this RPC 
@@ -1217,6 +1228,7 @@ void
 	    m__free(buff);
 	}
 	send_rpc_reply(scb, msg);
+	agt_acm_clear_msg_cache(msg);
 	rpc_free_msg(msg);
 	xml_clean_node(&method);
 
@@ -1353,6 +1365,7 @@ void
 
     /* cleanup and exit */
     xml_clean_node(&method);
+    agt_acm_clear_msg_cache(msg);
     rpc_free_msg(msg);
 
 #ifdef AGT_RPC_DEBUG

@@ -8530,6 +8530,23 @@ xpath_result_t *
     }
 #endif
 
+    if (pcb->tkc) {
+	tk_reset_chain(pcb->tkc);
+    } else {
+	pcb->tkc = tk_tokenize_xpath_string(NULL, 
+					    pcb->exprstr, 
+					    0, 
+					    0, 
+					    res);
+	if (!pcb->tkc || *res != NO_ERR) {
+	    if (logerrors) {
+		log_error("\nError: Invalid XPath string '%s'",
+			  pcb->exprstr);
+	    }
+	    return NULL;
+	}
+    }
+
     if (pcb->parseres != NO_ERR) {
 	*res = pcb->parseres;
 	return NULL;
@@ -8537,13 +8554,6 @@ xpath_result_t *
 
     if (pcb->validateres != NO_ERR) {
 	*res = pcb->validateres;
-	return NULL;
-    }
-
-    if (pcb->tkc) {
-	tk_reset_chain(pcb->tkc);
-    } else {
-	*res = SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }
 
@@ -8645,7 +8655,6 @@ xpath_result_t *
 	    if (logerrors) {
 		log_error("\nError: Invalid XPath string '%s'",
 			  pcb->exprstr);
-		ncx_print_errormsg(NULL, NULL, *res);
 	    }
 	    return NULL;
 	}
@@ -8813,7 +8822,7 @@ void
 boolean
     xpath1_check_node_exists (xpath_pcb_t *pcb,
 			      dlq_hdr_t *resultQ,
-			      val_value_t *val)
+			      const val_value_t *val)
 {
 #ifdef DEBUG
     if (!pcb || !resultQ || !val) {

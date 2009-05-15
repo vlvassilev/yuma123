@@ -117,7 +117,7 @@ extern void
 extern boolean
     xpath1_check_node_exists (xpath_pcb_t *pcb,
 			      dlq_hdr_t *resultQ,
-			      val_value_t *val);
+			      const val_value_t *val);
 
 extern status_t
     xpath1_stringify_nodeset (xpath_pcb_t *pcb,

@@ -1751,16 +1751,43 @@ xpath_pcb_t *
 	return NULL;
     }
 
+    /*** clone tkc ***/
+    newpcb->tk = srcpcb->tk;
+    newpcb->reader = srcpcb->reader;
+    newpcb->mod = srcpcb->mod;
+    newpcb->source = srcpcb->source;
+
     res = ncx_copy_errinfo(&srcpcb->errinfo, &newpcb->errinfo);
     if (res != NO_ERR) {
 	xpath_free_pcb(newpcb);
 	return NULL;
     }
-
-    newpcb->mod = srcpcb->mod;
-    newpcb->source = srcpcb->source;
+    newpcb->logerrors = srcpcb->logerrors;
+    newpcb->targobj = srcpcb->targobj;
+    newpcb->altobj = srcpcb->altobj;
+    newpcb->varobj = srcpcb->varobj;
+    newpcb->curmode = srcpcb->curmode;
+    newpcb->obj = srcpcb->obj;
+    newpcb->objmod = srcpcb->objmod;
+    newpcb->docroot = srcpcb->docroot;
+    newpcb->doctype = srcpcb->doctype;
+    newpcb->val = srcpcb->val;
+    newpcb->val_docroot = srcpcb->val_docroot;
+    newpcb->flags = srcpcb->flags;
+    /*** skip copying the scratch result ***/
+    /*** ??? context ??? ***/
+    /*** ??? varbindQ ??? ***/
     newpcb->functions = srcpcb->functions;
-    newpcb->tk = srcpcb->tk;
+    /* result_cacheQ not copied */
+    /* resnode_cacheQ not copied */
+    /* result_count not copied */
+    /* resnode_count not copied */
+    newpcb->parseres = srcpcb->parseres;
+    newpcb->validateres = srcpcb->validateres;
+    newpcb->valueres = srcpcb->valueres;
+    newpcb->errtoken = srcpcb->errtoken;
+    newpcb->errpos = srcpcb->errpos;
+    newpcb->seen = srcpcb->seen;
 
     return newpcb;
 
@@ -2530,6 +2557,35 @@ status_t
     return res;
 
 }  /* xpath_cvt_string */
+
+
+/********************************************************************
+* FUNCTION xpath_get_resnodeQ
+* 
+* Get the renodeQ from a result struct
+*
+* INPUTS:
+*    result == result struct to check
+*
+* RETURNS:
+*   pointer to resnodeQ or NULL if some error
+*********************************************************************/
+dlq_hdr_t *
+    xpath_get_resnodeQ (xpath_result_t *result)
+{
+#ifdef DEBUG
+    if (!result) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (result->restype != XP_RT_NODESET) {
+	return NULL;
+    }
+    return &result->r.nodeQ;
+
+}  /* xpath_get_resnodeQ */
 
 
 

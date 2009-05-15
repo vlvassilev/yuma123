@@ -556,5 +556,7 @@ extern status_t
 		      const xpath_result_t *result,
 		      xmlChar **str);
 
+extern dlq_hdr_t *
+    xpath_get_resnodeQ (xpath_result_t *result);
 
 #endif	    /* _H_xpath */

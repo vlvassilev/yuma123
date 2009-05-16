@@ -570,9 +570,10 @@ static status_t
 					     filchild->name,
 					     curchild)) {
 
+#ifdef CHECK_BEFORE_THE_CHECK_IN_XML_WR
 	    /* check access control if scb is non-NULL */
 	    if (scb && 
-		!agt_acm_val_read_allowed(msg,
+		!agt_acm_val_read_allowed(&msg->mhdr,
 					  scb->username, 
 					  curchild)) {
 		/* treat an access-failed on a content match
@@ -580,6 +581,7 @@ static status_t
 		 */
 		return NO_ERR;
 	    }
+#endif
 
 	    test = content_match_test(scb, 
 				      VAL_STR(filchild), 
@@ -639,13 +641,15 @@ static status_t
 	    
 	    filptr = NULL;
 
+#ifdef CHECK_BEFORE_THE_CHECK_IN_XML_WR
 	    /* check access control if scb is non-NULL */
 	    if (scb && 
-		!agt_acm_val_read_allowed(msg,
+		!agt_acm_val_read_allowed(&msg->mhdr,
 					  scb->username, 
 					  curchild)) {
 		continue;
 	    }
+#endif
 
 	    /* check any attr-match tests */
 	    if (!attr_test(filchild, curchild)) {
@@ -764,6 +768,7 @@ static void
     val_value_t   *val;
     xmlns_id_t     parentnsid, valnsid;
     int32          indentamount;
+    boolean        retval;
 
     indentamount = ses_indent_count(scb);
 
@@ -794,6 +799,10 @@ static void
 				      agt_check_config);
 	    }
 	} else {
+	    /* check if access control is allowing this user
+	     * to retrieve this value node
+	     */
+	    
 	    /* check the child nodes in the filter
 	     * If there are container nodes or select nodes
 	     * then only those specific nodes will be output
@@ -801,33 +810,37 @@ static void
 	     * If there are only content match nodes then
 	     * the entire filval node is supposed to be output
 	     */
+	     
+	    retval = agt_acm_val_read_allowed(&msg->mhdr,
+					      scb->username,
+					      val);
+	    if (retval) {
+		xml_wr_begin_elem_ex(scb, 
+				     &msg->mhdr,
+				     parentnsid,
+				     valnsid,
+				     val->name, 
+				     &val->metaQ, 
+				     FALSE, 
+				     indent, 
+				     FALSE);
 
-	    /* else 1 or more containers and/or select nodes */
-	    xml_wr_begin_elem_ex(scb, 
-				 &msg->mhdr,
-				 parentnsid,
-				 valnsid,
-				 val->name, 
-				 &val->metaQ, 
-				 FALSE, 
-				 indent, 
-				 FALSE);
+		if (indent >= 0) {
+		    indent += indentamount;
+		}
 
-	    if (indent >= 0) {
-		indent += indentamount;
+		output_node(scb, msg, filptr, indent, getop);	    
+
+		if (indent >= 0) {
+		    indent -= indentamount;
+		}
+
+		xml_wr_end_elem(scb, 
+				&msg->mhdr, 
+				valnsid,
+				val->name, 
+				indent);
 	    }
-
-	    output_node(scb, msg, filptr, indent, getop);	    
-
-	    if (indent >= 0) {
-		indent -= indentamount;
-	    }
-
-	    xml_wr_end_elem(scb, 
-			    &msg->mhdr, 
-			    valnsid,
-			    val->name, 
-			    indent);
 	}
     }
 }  /* output_node */

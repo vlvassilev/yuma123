@@ -602,7 +602,7 @@ static void
 		xml_wr_begin_elem(scb, &msg->mhdr, ncid, rpcid,
 				  NCX_EL_DATA, indent);
 		if (indent > 0) {
-		    indent *= 2;
+		    indent += ses_indent_count(scb);
 		}
 	    }
 
@@ -613,7 +613,8 @@ static void
 		agtcb = (agt_rpc_data_cb_t)msg->rpc_datacb;
 		res = (*agtcb)(scb, msg, indent);
 		if (res != NO_ERR) {
-		    SET_ERROR(res);
+		    /*** need to generate operation failed error ***/
+		    /*** TBD ***/
 		}
 	    } else {
 		/* just write the contents of the rpc <data> varQ */
@@ -631,9 +632,12 @@ static void
 
 	    if (msg->rpc_data_type == RPC_DATA_STD) {
 		if (indent > 0) {
-		    indent /= 2;
+		    indent -= ses_indent_count(scb);
 		}
-		xml_wr_end_elem(scb, &msg->mhdr, rpcid, NCX_EL_DATA, 
+		xml_wr_end_elem(scb, 
+				&msg->mhdr, 
+				rpcid, 
+				NCX_EL_DATA, 
 				(datawritten) ? indent : -1);
 	    }
 	}
@@ -1130,7 +1134,7 @@ void
      * get used if the RPC method is invalid
      */
     if (res == NO_ERR) {
-	res = agt_acm_init_msg_cache(msg);
+	res = agt_acm_init_msg_cache(&msg->mhdr);
     }
 
     if (res != NO_ERR) {
@@ -1148,7 +1152,7 @@ void
     /* check any errors in the <rpc> node */
     if (res != NO_ERR) {
 	send_rpc_reply(scb, msg);
-	agt_acm_clear_msg_cache(msg);
+	agt_acm_clear_msg_cache(&msg->mhdr);
 	rpc_free_msg(msg);
 	scb->stats.inBadRpcs++;
 	agttotals->stats.inBadRpcs++;
@@ -1187,7 +1191,7 @@ void
 		res = ERR_NCX_DEF_NOT_FOUND;
 	    } else if (!rpc->supported) {
 		res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    } else if (!agt_acm_rpc_allowed(msg,
+	    } else if (!agt_acm_rpc_allowed(&msg->mhdr,
 					    scb->username, 
 					    rpcobj)) {
 		res = ERR_NCX_ACCESS_DENIED;
@@ -1228,7 +1232,7 @@ void
 	    m__free(buff);
 	}
 	send_rpc_reply(scb, msg);
-	agt_acm_clear_msg_cache(msg);
+	agt_acm_clear_msg_cache(&msg->mhdr);
 	rpc_free_msg(msg);
 	xml_clean_node(&method);
 
@@ -1365,7 +1369,7 @@ void
 
     /* cleanup and exit */
     xml_clean_node(&method);
-    agt_acm_clear_msg_cache(msg);
+    agt_acm_clear_msg_cache(&msg->mhdr);
     rpc_free_msg(msg);
 
 #ifdef AGT_RPC_DEBUG

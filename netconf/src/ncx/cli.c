@@ -821,7 +821,7 @@ val_value_t *
     ncx_btype_t     btyp;
     status_t        res;
     xmlChar         errbuff[ERRLEN+1], savechar;
-    boolean         gotdashes, gotmatch, gotdefaultparm;
+    boolean         gotdashes, gotmatch, gotdefaultparm, isdefaultparm;
 
 #ifdef DEBUG
     if (!status) {
@@ -925,6 +925,7 @@ val_value_t *
 
 	gotdashes = FALSE;
 	gotmatch = FALSE;
+	isdefaultparm = FALSE;
 	chobj = NULL;
 	parmval = NULL;
 	parmname = NULL;
@@ -975,7 +976,8 @@ val_value_t *
 		parmnamelen = (uint32)(str - parmname);
 
 		/* check if this parameter name is in the parmset def */
-		chobj = obj_find_child_str(obj, NULL,
+		chobj = obj_find_child_str(obj, 
+					   NULL,
 					   (const xmlChar *)parmname,
 					   parmnamelen);
 
@@ -983,7 +985,8 @@ val_value_t *
 		if (!chobj && autocomp) {
 		    matchcount = 0;
 		    chobj = 
-			obj_match_child_str(obj, NULL,
+			obj_match_child_str(obj, 
+					    NULL,
 					    (const xmlChar *)parmname,
 					    parmnamelen,
 					    &matchcount);
@@ -1002,6 +1005,8 @@ val_value_t *
 
 	    }  /* else it could be a default-parm value */
 
+
+#if 0
 	    /* check if the start of the value was not found */
 	    if (!parmnamelen) {
 		/* parmname/parmnamelen is really the value, 
@@ -1012,6 +1017,11 @@ val_value_t *
 		    str++;
 		}
 		parmnamelen = (uint32)(str - parmname);
+	    }
+#endif
+
+	    if (res != NO_ERR) {
+		continue;
 	    }
 
 	    if (!chobj && !gotdashes) {
@@ -1027,7 +1037,12 @@ val_value_t *
 				  "already entered",
 				  obj_get_name(chobj));
 			res = ERR_NCX_DUP_ENTRY;
-		    }			
+			continue;
+		    }
+		    gotdefaultparm = TRUE;
+		    isdefaultparm = TRUE;
+
+#if 0
 		    buffpos += parmnamelen;
 		    savechar = parmname[parmnamelen];
 		    parmname[parmnamelen] = 0;
@@ -1038,8 +1053,9 @@ val_value_t *
 					 script);
 		    }
 		    parmname[parmnamelen] = savechar;
-		    gotdefaultparm = TRUE;
+
 		    continue;
+#endif
 		}
 	    }
 
@@ -1053,8 +1069,10 @@ val_value_t *
 		parmval = NULL;
 
 		/* skip past any whitespace after the parm name */
-		while (isspace(buff[buffpos]) && buffpos < bufflen) {
-		    buffpos++;
+		if (!isdefaultparm) {
+		    while (isspace(buff[buffpos]) && buffpos < bufflen) {
+			buffpos++;
+		    }
 		}
 
 		/* check if ended on space of EOLN */
@@ -1066,14 +1084,16 @@ val_value_t *
 			res = ERR_NCX_INVALID_VALUE;
 		    }
 		} else if (buffpos < bufflen) {
-		    if (buff[buffpos] == '=') {
-			buffpos++;
-
-			/* skip any whitespace */
-			while (buff[buffpos] && isspace(buff[buffpos])) {
+		    if (!isdefaultparm) {
+			if (buff[buffpos] == '=') {
 			    buffpos++;
-			}
-		    } /* else whitespace already skipped */
+
+			    /* skip any whitespace */
+			    while (buff[buffpos] && isspace(buff[buffpos])) {
+				buffpos++;
+			    }
+			} /* else whitespace already skipped */
+		    }
 
 		    /* if any chars left in buffer, get the parmval */
 		    if (buffpos < bufflen) {
@@ -1154,7 +1174,8 @@ val_value_t *
 
 	/* create a new val_value struct and set the value */
 	if (res == NO_ERR) {
-	    res = parse_parm(val, chobj, 
+	    res = parse_parm(val, 
+			     chobj, 
 			     (const xmlChar *)parmval,
 			     script);
 	} else if (res == ERR_NCX_EMPTY_VAL &&
@@ -1167,8 +1188,10 @@ val_value_t *
 	    if (chobj) {
 		savechar = parmname[parmnamelen];
 		parmname[parmnamelen] = 0;
-		res = parse_parm(val, chobj, 
-				 (const xmlChar *)parmname, script);
+		res = parse_parm(val, 
+				 chobj, 
+				 (const xmlChar *)parmname, 
+				 script);
 		parmname[parmnamelen] = savechar;
 	    }
 	}
@@ -1190,11 +1213,18 @@ val_value_t *
 	    default:
 		if (buffpos < bufflen) {
 		    log_error("\nError: %s (%s = %s)", 
-			      msg, errbuff, &buff[buffpos]);
+			      msg, 
+			      errbuff, 
+			      &buff[buffpos]);
 		} else if (parmval) {
-		    log_error("\nError: %s (%s = %s)", msg, errbuff, parmval);
+		    log_error("\nError: %s (%s = %s)", 
+			      msg, 
+			      errbuff, 
+			      parmval);
 		} else {
-		    log_error("\nError: %s (%s)", msg, errbuff);
+		    log_error("\nError: %s (%s)", 
+			      msg, 
+			      errbuff);
 		}
 	    }
 	    ncx_print_errormsg(NULL, NULL, res);

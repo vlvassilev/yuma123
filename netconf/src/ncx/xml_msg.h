@@ -62,7 +62,7 @@ date             init     comment
 *                         T Y P E S                                 *
 *                                                                   *
 *********************************************************************/
-				      
+
 /* Common XML Message Header */
 typedef struct xml_msg_hdr_t_ {
     /* incoming: 
@@ -77,7 +77,29 @@ typedef struct xml_msg_hdr_t_ {
     boolean         withmeta;          /* with-metadata value */
     dlq_hdr_t       prefixQ;             /* Q of xmlns_pmap_t */
     dlq_hdr_t       errQ;               /* Q of rpc_err_rec_t */
+
+    /* agent access control for reads;
+     * for incoming agent <rpc> requests, the access control
+     * cache is used to minimize data structure processing
+     * during authorization procedures in agt/agt_acm.c
+     * this is embedded in the XML header so it can
+     * be easily passed to the xml_wr functions
+     */
+    struct agt_acm_cache_t_ *acm_cache;
+
+    /* agent access control read authorization 
+     * callback function: xml_msg_authfn_t
+     */
+    void                    *acm_cbfn;
+
 } xml_msg_hdr_t;
+
+
+/* read authorization callback template */
+typedef boolean (*xml_msg_authfn_t) (xml_msg_hdr_t *msg,
+				     const xmlChar *username,
+				     const val_value_t *val);
+
 
 				      
 /********************************************************************

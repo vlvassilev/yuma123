@@ -32,16 +32,16 @@ date	     init     comment
 #include "obj.h"
 #endif
 
-#ifndef _H_rpc
-#include "rpc.h"
-#endif
-
 #ifndef _H_status
 #include "status.h"
 #endif
 
 #ifndef _H_val
 #include "val.h"
+#endif
+
+#ifndef _H_xml_msg
+#include "xmlmsg.h"
 #endif
 
 #ifndef _H_xmlns
@@ -125,26 +125,26 @@ extern void
     agt_acm_cleanup (void);
 
 extern boolean 
-    agt_acm_rpc_allowed (rpc_msg_t *msg,
+    agt_acm_rpc_allowed (xml_msg_hdr_t *msg,
 			 const xmlChar *user,
 			 const obj_template_t *rpcobj);
 
 extern boolean 
-    agt_acm_val_write_allowed (rpc_msg_t *msg,
+    agt_acm_val_write_allowed (xml_msg_hdr_t *msg,
 			       const xmlChar *user,
 			       const val_value_t *val);
 
 extern boolean 
-    agt_acm_val_read_allowed (rpc_msg_t *msg,
+    agt_acm_val_read_allowed (xml_msg_hdr_t *msg,
 			      const xmlChar *user,
 			      const val_value_t *val);
 
 
 extern status_t
-    agt_acm_init_msg_cache (rpc_msg_t *msg);
+    agt_acm_init_msg_cache (xml_msg_hdr_t *msg);
 
 extern void
-    agt_acm_clear_msg_cache (rpc_msg_t *msg);
+    agt_acm_clear_msg_cache (xml_msg_hdr_t *msg);
 
 
 

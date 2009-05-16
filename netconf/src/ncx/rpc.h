@@ -167,12 +167,6 @@ typedef struct rpc_msg_t_ {
     boolean          rpc_need_undo;   /* set by edit_config_validate */
     dlq_hdr_t        rpc_undoQ;       /* Q of rpc_undo_rec_t */
 
-    /* for incoming agent <rpc> requests, the access control
-     * cache is used to minimize data structure processing
-     * during authorization procedures in agt/agt_acm.c
-     */
-    struct agt_acm_cache_t_  *acm_cache;
-
 } rpc_msg_t;
 
 

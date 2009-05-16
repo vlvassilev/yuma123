@@ -1563,7 +1563,7 @@ void
 * Check if the specified user is allowed to invoke an RPC
 * 
 * INPUTS:
-*   msg == incoming message in progress
+*   msg == XML header in incoming message in progress
 *   user == user name string
 *   rpcobj == obj_template_t for the RPC method to check
 *
@@ -1571,7 +1571,7 @@ void
 *   TRUE if user allowed invoke this RPC; FALSE otherwise
 *********************************************************************/
 boolean 
-    agt_acm_rpc_allowed (rpc_msg_t *msg,
+    agt_acm_rpc_allowed (xml_msg_hdr_t *msg,
 			 const xmlChar *user,
 			 const obj_template_t *rpcobj)
 {
@@ -1691,7 +1691,7 @@ boolean
 * requested access and the user's configured max-access
 * 
 * INPUTS:
-*   msg == incoming message in progress
+*   msg == XML header from incoming message in progress
 *   user == user name string
 *   val  == val_value_t in progress to check
 *
@@ -1699,7 +1699,7 @@ boolean
 *   TRUE if user allowed this level of access to the value node
 *********************************************************************/
 boolean 
-    agt_acm_val_write_allowed (rpc_msg_t *msg,
+    agt_acm_val_write_allowed (xml_msg_hdr_t *msg,
 			       const xmlChar *user,
 			       const val_value_t *val)
 {
@@ -1724,7 +1724,7 @@ boolean
 * Check if the specified user is allowed to read a value node
 * 
 * INPUTS:
-*   msg == incoming message in progress
+*   msg == XML header from incoming message in progress
 *   user == user name string
 *   val  == val_value_t in progress to check
 *
@@ -1732,7 +1732,7 @@ boolean
 *   TRUE if user allowed read access to the value node
 *********************************************************************/
 boolean 
-    agt_acm_val_read_allowed (rpc_msg_t *msg,
+    agt_acm_val_read_allowed (xml_msg_hdr_t *msg,
 			      const xmlChar *user,
 			      const val_value_t *val)
 {
@@ -1767,7 +1767,7 @@ boolean
 *   status
 *********************************************************************/
 status_t
-    agt_acm_init_msg_cache (rpc_msg_t *msg)
+    agt_acm_init_msg_cache (xml_msg_hdr_t *msg)
 {
     agt_acm_cache_t  *acm_cache;
 
@@ -1791,6 +1791,7 @@ status_t
     dlq_createSQue(&acm_cache->dataruleQ);
 
     msg->acm_cache = acm_cache;
+    msg->acm_cbfn = agt_acm_val_read_allowed;
     return NO_ERR;
 
 } /* agt_acm_init_msg_cache */
@@ -1810,7 +1811,7 @@ status_t
 *
 *********************************************************************/
 void
-    agt_acm_clear_msg_cache (rpc_msg_t *msg)
+    agt_acm_clear_msg_cache (xml_msg_hdr_t *msg)
 {
     agt_acm_modrule_t    *modrule;
     agt_acm_datarule_t   *datarule;
@@ -1822,6 +1823,7 @@ void
     }
 #endif
 
+    msg->acm_cbfn = NULL;
     if (!msg->acm_cache) {
 	return;
     }

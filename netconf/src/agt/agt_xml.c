@@ -105,106 +105,6 @@ date         init     comment
 
 
 /********************************************************************
-* FUNCTION get_errnode
-* 
-* Parse the current node and return its namespace, type and name
-*
-* INPUTS:
-*   reader == XmlReader already initialized from File, Memory,
-*             or whatever
-*   node    == pointer to an initialized xml_node_t struct
-*              to be filled in
-*   
-* OUTPUTS:
-*   *node == xml_node_t struct filled in 
-*   
-*********************************************************************/
-static void
-    get_errnode (xmlTextReaderPtr reader,
-		 xml_node_t      *node)
-{
-    int             nodetyp;
-    const xmlChar  *str, *errstr;
-    xmlChar        *valstr;
-    uint32          len;
-
-    /* get the node depth to match the end node correctly */
-    node->depth = xmlTextReaderDepth(reader);
-    if (node->depth == -1) {
-	node->depth = 0;
-    }
-
-    /* get the internal nodetype, check it and convert it */
-    nodetyp = xmlTextReaderNodeType(reader);
-    switch (nodetyp) {
-    case XML_ELEMENT_NODE:
-	if (xmlTextReaderIsEmptyElement(reader)) {
-	    node->nodetyp = XML_NT_EMPTY;
-	} else {
-	    node->nodetyp = XML_NT_START;
-	}
-	break;
-    case XML_ELEMENT_DECL:
-	node->nodetyp = XML_NT_END;
-	break;
-    case XML_DTD_NODE:
-    case XML_TEXT_NODE:
-	node->nodetyp = XML_NT_STRING;
-	break;
-    default:
-	node->nodetyp = XML_NT_NONE;
-    }
-
-    /* finish the node, depending on its type */
-    switch (node->nodetyp) {
-    case XML_NT_START:
-    case XML_NT_END:
-    case XML_NT_EMPTY:
-	/* get the element QName */
-	str = xmlTextReaderConstName(reader);
-	if (!str) {
-	    str = (const xmlChar *)"--";
-	}
-	node->qname = str;
-
-	/* check for namespace prefix in the name 
-	 * ignore unknown namespace error if any
-	 */
-	len = 0;
-	(void)xml_check_ns(reader, str, &node->nsid, &len, &errstr);
-
-	/* set the element name to the char after the prefix, if any */
-	node->elname = (const xmlChar *)(str+len);
-	node->module = NULL;
-	break;
-    case XML_NT_STRING:
-	/* get the text value -- this is a malloced string */
-	node->simval = NULL;
-	valstr = xmlTextReaderValue(reader);
-	if (valstr) {
-	    /* normal case: assume clean the string is desired! */
-	    node->simfree = xml_copy_clean_string(valstr);
-	    if (node->simfree) {
-		node->simlen = xml_strlen(node->simfree);
-		node->simval = (const xmlChar *)node->simfree;
-	    }
-	    xmlFree(valstr);
-	}
-	if (!node->simval) {
-	    /* prevent a NULL ptr reference */
-	    node->simval = EMPTY_STRING;
-	    node->simlen = 0;     
-	    node->simfree = NULL;
-	}
-	break;
-    default:
-	break;
-    }
-
-}  /* get_errnode */
-
-
-/********************************************************************
 * FUNCTION get_all_attrs
 * 
 *  Copy all the attributes from the current node to
@@ -212,6 +112,7 @@ static void
 *
 * INPUTS:
 *    scb == session control block
+*    errnode == element node to use for reporting errors
 *    msghdr  == msg hdr w/ Q to get any rpc-errors as found, 
 *               NULL if not used
 *    nserr == TRUE if unknown namespace should cause the
@@ -230,6 +131,7 @@ static void
 *********************************************************************/
 static status_t
     get_all_attrs (ses_cb_t *scb,
+		   xml_node_t *errnode,
 		   xml_attrs_t *attrs,
 		   ncx_layer_t layer,
 		   xml_msg_hdr_t *msghdr,
@@ -242,9 +144,8 @@ static status_t
     int             i, cnt, ret;
     xmlns_id_t      nsid;
     status_t        res;
-    boolean         done;
+    boolean         done, xpatherror;
     xml_attr_t      errattr;
-    xml_node_t      errnode;
     uint32          plen;
 
     /* check the attribute count first */
@@ -255,6 +156,7 @@ static status_t
 
     name = NULL;
     res = NO_ERR;
+    xpatherror = FALSE;
 
     /* move through the list of attributes */
     for (i=0, done=FALSE; i<cnt && !done; i++) {
@@ -280,13 +182,13 @@ static status_t
 	    if (!name) {
 		res = ERR_XML_READER_NULLNAME;
 	    } else {
-		value = NULL;
 		res = xml_check_ns(scb->reader, 
 				   name, 
 				   &nsid, 
 				   &plen, 
 				   &badns);
 		if (!nserr && res != NO_ERR) {
+		    /* mask invalid namespace as requested */
 		    nsid = xmlns_inv_id();
 		    plen = 0;
 		    res = NO_ERR;
@@ -314,12 +216,6 @@ static status_t
 			 * are tagged as XPath strings at this point
 			 * To save resources, only the 'select' and
 			 * 'key' attributes are supported at this time.
-			 * Only check the name, not the namespace
-			 * since it is often left out for attributes
-			 *
-			 * In case this hack guesses wrong, only 
-			 * return fatal errors from the xpath check
-			 * the pcb->validateres will record the error
 			 */
 			if (!xml_strcmp(&name[plen], NCX_EL_SELECT)) {
 			    attr->attr_xpcb = xpath_new_pcb(value);
@@ -340,6 +236,9 @@ static status_t
 				if (result) {
 				    xpath_free_result(result);
 				}
+				if (res != NO_ERR) {
+				    xpatherror = TRUE;
+				}
 			    }
 			} else if (!xml_strcmp(&name[plen], NCX_EL_KEY)) {
 			    attr->attr_xpcb = xpath_new_pcb(value);
@@ -351,56 +250,66 @@ static status_t
 				     attr->attr_xpcb,
 				     NULL,
 				     FALSE);
+				if (res != NO_ERR) {
+				    xpatherror = TRUE;
+				}
 			    }
 			}
-
-			if (res != NO_ERR && !NEED_EXIT(res)) {
-			    res = NO_ERR;
-			}
 		    }
-		    xmlFree(value);
 		}
 	    }
 	}
 
 	/* check the result */
 	if (res != NO_ERR && msghdr) {
-	    xml_init_node(&errnode);
-	    get_errnode(scb->reader, &errnode);
+
+	    /* need a dummy attribute struct to report this error */
+	    memset(&errattr, 0x0, sizeof(xml_attr_t));
+	    errattr.attr_ns = 0;
+	    errattr.attr_qname = name;
+	    errattr.attr_name = name;
+	    errattr.attr_val = value;
 
 	    /* save the error info */
-	    if (res==ERR_XML_READER_NULLVAL ||
-		res==ERR_NCX_UNKNOWN_NAMESPACE) {
-
-		memset(&errattr, 0x0, sizeof(xml_attr_t));
-		errattr.attr_ns = 0;
-		errattr.attr_qname = name;
-		errattr.attr_name = name;
-		errattr.attr_val = value;
-
-		/* generate an attribute error */
+	    if (xpatherror) {
+		/* generate an invalid-value error */
 		agt_record_attr_error(scb, 
 				      msghdr, 
 				      layer, 
 				      res, 
 				      &errattr, 
-				      &errnode, 
+				      errnode, 
+				      NULL, 
+				      NCX_NT_NONE, 
+				      NULL);
+	    } else if (res==ERR_XML_READER_NULLVAL ||
+		res==ERR_NCX_UNKNOWN_NAMESPACE) {
+		/* generate a bad namespace error */
+		agt_record_attr_error(scb, 
+				      msghdr, 
+				      layer, 
+				      res, 
+				      &errattr, 
+				      errnode, 
 				      badns,
 				      NCX_NT_NONE,
 				      NULL);
 	    } else {
-		/* generate an operation-failed error */
-		agt_record_error(scb, 
-				 msghdr, 
-				 layer, 
-				 res, 
-				 &errnode, 
-				 NCX_NT_STRING, 
-				 name, 
-				 NCX_NT_NONE, 
-				 NULL);
+		/* generate a generic error */
+		agt_record_attr_error(scb, 
+				      msghdr, 
+				      layer, 
+				      res, 
+				      &errattr,
+				      errnode,
+				      NULL,
+				      NCX_NT_NONE, 
+				      NULL);
 	    }
-	    xml_clean_node(&errnode);
+	}
+
+	if (value) {
+	    xmlFree(value);
 	}
     }
 
@@ -409,19 +318,15 @@ static status_t
     if (ret != 1) {
 	if (msghdr) {
 	    res = ERR_XML_READER_INTERNAL;
-	    xml_init_node(&errnode);
-	    get_errnode(scb->reader, &errnode);
-
 	    agt_record_error(scb, 
 			     msghdr, 
 			     layer, 
 			     res, 
-			     &errnode, 
+			     errnode, 
 			     NCX_NT_STRING, 
 			     name, 
 			     NCX_NT_NONE, 
 			     NULL);
-	    xml_clean_node(&errnode);
 	}
     }	
 
@@ -568,6 +473,7 @@ static status_t
 	/* get all the attributes, except for XML_NT_END */
 	if (res == NO_ERR && node->nodetyp != XML_NT_END) {
 	    res2 = get_all_attrs(scb, 
+				 node,
 				 &node->attrs, 
 				 layer, 
 				 msghdr, 

@@ -1420,6 +1420,9 @@ rpc_err_rec_t *
     case RPC_ERR_UNKNOWN_ATTRIBUTE:
     case RPC_ERR_MISSING_ATTRIBUTE:
 	break;
+    case RPC_ERR_INVALID_VALUE:
+	rpcerr = RPC_ERR_BAD_ATTRIBUTE;
+	/* fall through */
     case RPC_ERR_BAD_ATTRIBUTE:
 	if (attr) {
 	    badval = attr->attr_val;

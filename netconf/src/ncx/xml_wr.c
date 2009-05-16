@@ -584,6 +584,302 @@ static void
 }  /* begin_elem_val */
 
 
+/********************************************************************
+* FUNCTION write_check_val
+* 
+* Write an NCX value in XML encoding
+* while checking nodes for suppression of output with
+* the supplied test fn
+*
+* !!! NOTE !!!
+* 
+* This function generates the contents of the val_value_t
+* but not the top node itself.  This function is called
+* recursively and this is the intended behavior.
+*
+* To generate XML for an entire val_value_t, including
+* the top-level node, use the xml_wr_full_val fn.
+*
+* If the acm_cache and acm_cbfn fields are set in
+* the msg header then access control will be checked
+* If FALSE, then nothing will be written to the output session
+*
+* INPUTS:
+*   scb == session control block
+*   msg == xml_msg_hdr_t in progress
+*   val == value to write
+*   indent == start indent amount if indent enabled
+*   testcb == callback function to use, NULL if not used
+*   acmcheck == TRUE if the ACM check should be done
+*
+* RETURNS:
+*   none
+*********************************************************************/
+static void
+    write_check_val (ses_cb_t *scb,
+		     xml_msg_hdr_t *msg,
+		     val_value_t *val,
+		     int32  indent,
+		     val_nodetest_fn_t testfn,
+		     boolean acmcheck)
+{
+    const ncx_lmem_t   *listmem;
+    const xmlChar      *pfix;
+    val_value_t        *v_val, *chval, *useval;
+    xmlChar            *binbuff;
+    xml_msg_authfn_t    cbfn;
+    uint32              len;
+    status_t            res;
+    boolean             first, wspace, xneeded, acmtest;
+    ncx_btype_t         btyp, listbtyp;
+    xmlChar             buff[NCX_MAX_NUMLEN];
+
+
+    /* check the user filter callback function */
+    if (testfn) {
+	if (!(*testfn)(msg->withdef, val)) {
+	    return;   /* skip this entry */
+	}
+    }
+
+    if (acmcheck && msg->acm_cbfn) {
+	cbfn = (xml_msg_authfn_t)msg->acm_cbfn;
+	acmtest = (*cbfn)(msg, scb->username, val);
+	if (!acmtest) {
+	    return;
+	}
+    }
+				   
+    /* check if this is an external file to send */
+    if (val->btyp == NCX_BT_EXTERN) {
+	write_extern(scb, val);
+	return;
+    }
+
+    /* check if this is an internal buffer to send */
+    if (val->btyp == NCX_BT_INTERN) {
+	write_intern(scb, val);
+	return;
+    }
+
+    v_val = NULL;
+
+    if (val_is_virtual(val)) {
+	v_val = val_get_virtual_value(scb, val, &res);
+	if (!v_val) {
+	    if (res != ERR_NCX_SKIPPED) {
+		/*** handle inline error ***/
+	    }
+	    return;
+	}
+    }
+
+    useval = (v_val) ? v_val : val;
+
+    btyp = useval->btyp;
+
+    switch (btyp) {
+    case NCX_BT_ENUM:
+	if (useval->v.enu.name) {
+	    ses_putstr(scb, useval->v.enu.name);
+	}
+	break;
+    case NCX_BT_EMPTY:
+	if (useval->v.bool) {
+	    xml_wr_empty_elem(scb,
+			      msg,
+			      val_get_parent_nsid(useval),
+			      useval->nsid,
+			      useval->name,
+			      -1);
+	}
+	break;
+    case NCX_BT_BOOLEAN:
+	if (useval->v.bool) {
+	    ses_putcstr(scb, NCX_EL_TRUE, indent);
+	} else {
+	    ses_putcstr(scb, NCX_EL_FALSE, indent);
+	}
+	break;
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+    case NCX_BT_INT64:
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+    case NCX_BT_UINT64:
+    case NCX_BT_DECIMAL64:
+    case NCX_BT_FLOAT64:
+	res = ncx_sprintf_num(buff, 
+			      &useval->v.num, 
+			      btyp, 
+			      &len);
+	if (res == NO_ERR) {
+	    ses_putstr(scb, buff); 
+	} else {
+	    SET_ERROR(res);
+	}
+	break;
+    case NCX_BT_INSTANCE_ID:
+	ses_indent(scb, indent);
+	res = xpath_wr_expr(scb, val);
+	if (res != NO_ERR) {
+	    SET_ERROR(res);
+	}
+	break;
+    case NCX_BT_STRING:
+    case NCX_BT_LEAFREF:        /****/
+	if (VAL_STR(useval)) {
+	    if (!fit_on_line(scb, useval) && (indent>0)) {
+		ses_indent(scb, indent);
+	    }
+	    ses_putcstr(scb, VAL_STR(useval), indent);
+	}
+	break;
+    case NCX_BT_IDREF:
+	/* counting on xmlns decl to be in ancestor node
+	 * because the xneeded node is being ignored here
+	 */
+	pfix = xml_msg_get_prefix(msg,
+				  (useval->parent) 
+				  ? useval->parent->nsid : 0,
+				  useval->v.idref.nsid, 
+				  useval, 
+				  &xneeded);
+	if (pfix) {
+	    ses_putstr(scb, pfix);
+	    ses_putchar(scb, XMLNS_SEPCH);
+	}
+	ses_putstr(scb, useval->v.idref.name);
+	break;
+    case NCX_BT_BINARY:
+	if (useval->v.binary.ustr) {
+	    res = val_sprintf_simval_nc(NULL, useval, &len);
+	    if (res == NO_ERR) {
+		binbuff = m__getMem(len);
+		if (!binbuff) {
+		    res = ERR_INTERNAL_MEM;
+		} else {
+		    res = val_sprintf_simval_nc(binbuff, 
+						useval, 
+						&len); 
+		    if (res == NO_ERR) {
+			ses_putcstr(scb, binbuff, indent);
+		    }
+		    m__free(binbuff);
+		}
+	    }
+	}
+	break;
+    case NCX_BT_BITS:
+    case NCX_BT_SLIST:
+	listbtyp = useval->v.list.btyp;
+	first = TRUE;
+	for (listmem = (const ncx_lmem_t *)
+		 dlq_firstEntry(&useval->v.list.memQ);
+	     listmem != NULL;
+	     listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) {
+
+	    wspace = FALSE;
+
+	    /* handle indent+double quote or space for non-strings */
+	    if (typ_is_string(listbtyp)) {
+
+		/* get len and whitespace flag */
+		len = xml_strlen_sp(listmem->val.str, &wspace);
+
+		/* check special case -- empty string
+		 * handle it here instead of going through the loop
+		 */
+		if (!len) {
+		    if (!first) {
+			ses_putstr(scb, 
+				   (const xmlChar *)" \"\"");
+		    } else {
+			ses_putstr(scb, 
+				   (const xmlChar *)"\"\"");
+			first = FALSE;
+		    }
+		    continue;
+		}
+	    }
+
+	    /* handle newline+indent or space between list elements */
+	    if (first) {
+		first = FALSE;
+	    } else if (SES_LINELEN(scb) > SES_LINESIZE(scb)) {
+		ses_indent(scb, indent);
+	    } else {
+		ses_putchar(scb, ' ');
+	    }		
+
+	    /* check if double quotes needed */
+	    if (wspace) {
+		ses_putchar(scb, '\"');
+	    }
+
+	    /* print the list member content as a string */
+	    if (typ_is_string(listbtyp)) {
+		ses_putcstr(scb, listmem->val.str, indent);
+	    } else if (typ_is_number(listbtyp)) {
+		(void)ncx_sprintf_num(buff, 
+				      &listmem->val.num, 
+				      listbtyp, 
+				      &len);
+		ses_putcstr(scb, buff, indent);
+	    } else {
+		switch (listbtyp) {
+		case NCX_BT_BITS:
+		    ses_putstr(scb, listmem->val.bit.name);
+		    break;
+		case NCX_BT_ENUM:
+		    ses_putstr(scb, listmem->val.enu.name); 
+		    break;
+		case NCX_BT_BOOLEAN:
+		    ses_putcstr(scb,
+				(listmem->val.bool) ?
+				NCX_EL_TRUE : NCX_EL_FALSE,
+				indent);
+		    break;
+		default:
+		    SET_ERROR(ERR_INTERNAL_VAL);
+		}
+	    }
+
+	    /* check finish quoted string */
+	    if (wspace) {
+		ses_putchar(scb, '\"');
+	    }
+	}
+	break;
+    case NCX_BT_ANY:
+    case NCX_BT_CONTAINER:
+    case NCX_BT_LIST:
+    case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
+	for (chval = val_get_first_child(useval);
+	     chval != NULL;
+	     chval = val_get_next_child(chval)) {
+
+	    xml_wr_full_check_val(scb, 
+				  msg,
+				  chval,
+				  indent,
+				  testfn);
+	} 
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (v_val) {
+	val_free_value(v_val);
+    }
+
+}  /* write_check_val */
+
+
 /************  E X T E R N A L    F U N C T I O N S    **************/
 
 
@@ -1025,6 +1321,10 @@ void
 * To generate XML for an entire val_value_t, including
 * the top-level node, use the xml_wr_full_val fn.
 *
+* If the acm_cache and acm_cbfn fields are set in
+* the msg header then access control will be checked
+* If FALSE, then nothing will be written to the output session
+*
 * INPUTS:
 *   scb == session control block
 *   msg == xml_msg_hdr_t in progress
@@ -1042,16 +1342,6 @@ void
 		      int32  indent,
 		      val_nodetest_fn_t testfn)
 {
-    const ncx_lmem_t   *listmem;
-    const xmlChar      *pfix;
-    val_value_t        *v_val, /*  *v_chval, */ *chval, 
-	*useval /*, *usechval */;
-    xmlChar            *binbuff;
-    uint32              len;
-    status_t            res;
-    boolean             /*empty,*/ first, wspace, xneeded;
-    ncx_btype_t         btyp, listbtyp;
-    xmlChar             buff[NCX_MAX_NUMLEN];
 
 #ifdef DEBUG
     if (!scb || !msg || !val) {
@@ -1059,240 +1349,7 @@ void
 	return;
     }
 #endif
-
-    /* check the user filter callback function */
-    if (testfn) {
-	if (!(*testfn)(msg->withdef, val)) {
-	    return;   /* skip this entry */
-	}
-    }
-
-    /* check if this is an external file to send */
-    if (val->btyp == NCX_BT_EXTERN) {
-	write_extern(scb, val);
-	return;
-    }
-
-    /* check if this is an internal buffer to send */
-    if (val->btyp == NCX_BT_INTERN) {
-	write_intern(scb, val);
-	return;
-    }
-
-    v_val = NULL;
-
-    if (val_is_virtual(val)) {
-	v_val = val_get_virtual_value(scb, val, &res);
-	if (!v_val) {
-	    if (res != ERR_NCX_SKIPPED) {
-		/*** handle inline error ***/
-	    }
-	    return;
-	}
-    }
-
-    useval = (v_val) ? v_val : val;
-
-    btyp = useval->btyp;
-
-    switch (btyp) {
-    case NCX_BT_ENUM:
-	if (useval->v.enu.name) {
-	    ses_putstr(scb, useval->v.enu.name);
-	}
-	break;
-    case NCX_BT_EMPTY:
-	if (useval->v.bool) {
-	    xml_wr_empty_elem(scb,
-			      msg,
-			      val_get_parent_nsid(useval),
-			      useval->nsid,
-			      useval->name,
-			      -1);
-	}
-	break;
-    case NCX_BT_BOOLEAN:
-	if (useval->v.bool) {
-	    ses_putcstr(scb, NCX_EL_TRUE, indent);
-	} else {
-	    ses_putcstr(scb, NCX_EL_FALSE, indent);
-	}
-	break;
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_DECIMAL64:
-    case NCX_BT_FLOAT64:
-	res = ncx_sprintf_num(buff, 
-			      &useval->v.num, 
-			      btyp, 
-			      &len);
-	if (res == NO_ERR) {
-	    ses_putstr(scb, buff); 
-	} else {
-	    SET_ERROR(res);
-	}
-	break;
-    case NCX_BT_INSTANCE_ID:
-	ses_indent(scb, indent);
-	res = xpath_wr_expr(scb, val);
-	if (res != NO_ERR) {
-	    SET_ERROR(res);
-	}
-	break;
-    case NCX_BT_STRING:
-    case NCX_BT_LEAFREF:        /****/
-	if (VAL_STR(useval)) {
-	    if (!fit_on_line(scb, useval) && (indent>0)) {
-		ses_indent(scb, indent);
-	    }
-	    ses_putcstr(scb, VAL_STR(useval), indent);
-	}
-	break;
-    case NCX_BT_IDREF:
-	/* counting on xmlns decl to be in ancestor node
-	 * because the xneeded node is being ignored here
-	 */
-	pfix = xml_msg_get_prefix(msg,
-				  (useval->parent) 
-				  ? useval->parent->nsid : 0,
-				  useval->v.idref.nsid, 
-				  useval, 
-				  &xneeded);
-	if (pfix) {
-	    ses_putstr(scb, pfix);
-	    ses_putchar(scb, XMLNS_SEPCH);
-	}
-	ses_putstr(scb, useval->v.idref.name);
-	break;
-    case NCX_BT_BINARY:
-	if (useval->v.binary.ustr) {
-	    res = val_sprintf_simval_nc(NULL, useval, &len);
-	    if (res == NO_ERR) {
-		binbuff = m__getMem(len);
-		if (!binbuff) {
-		    res = ERR_INTERNAL_MEM;
-		} else {
-		    res = val_sprintf_simval_nc(binbuff, 
-						useval, 
-						&len); 
-		    if (res == NO_ERR) {
-			ses_putcstr(scb, binbuff, indent);
-		    }
-		    m__free(binbuff);
-		}
-	    }
-	}
-	break;
-    case NCX_BT_BITS:
-    case NCX_BT_SLIST:
-	listbtyp = useval->v.list.btyp;
-	first = TRUE;
-	for (listmem = (const ncx_lmem_t *)
-		 dlq_firstEntry(&useval->v.list.memQ);
-	     listmem != NULL;
-	     listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) {
-
-	    wspace = FALSE;
-
-	    /* handle indent+double quote or space for non-strings */
-	    if (typ_is_string(listbtyp)) {
-
-		/* get len and whitespace flag */
-		len = xml_strlen_sp(listmem->val.str, &wspace);
-
-		/* check special case -- empty string
-		 * handle it here instead of going through the loop
-		 */
-		if (!len) {
-		    if (!first) {
-			ses_putstr(scb, 
-				   (const xmlChar *)" \"\"");
-		    } else {
-			ses_putstr(scb, 
-				   (const xmlChar *)"\"\"");
-			first = FALSE;
-		    }
-		    continue;
-		}
-	    }
-
-	    /* handle newline+indent or space between list elements */
-	    if (first) {
-		first = FALSE;
-	    } else if (SES_LINELEN(scb) > SES_LINESIZE(scb)) {
-		ses_indent(scb, indent);
-	    } else {
-		ses_putchar(scb, ' ');
-	    }		
-
-	    /* check if double quotes needed */
-	    if (wspace) {
-		ses_putchar(scb, '\"');
-	    }
-
-	    /* print the list member content as a string */
-	    if (typ_is_string(listbtyp)) {
-		ses_putcstr(scb, listmem->val.str, indent);
-	    } else if (typ_is_number(listbtyp)) {
-		(void)ncx_sprintf_num(buff, 
-				      &listmem->val.num, 
-				      listbtyp, 
-				      &len);
-		ses_putcstr(scb, buff, indent);
-	    } else {
-		switch (listbtyp) {
-		case NCX_BT_BITS:
-		    ses_putstr(scb, listmem->val.bit.name);
-		    break;
-		case NCX_BT_ENUM:
-		    ses_putstr(scb, listmem->val.enu.name); 
-		    break;
-		case NCX_BT_BOOLEAN:
-		    ses_putcstr(scb,
-				(listmem->val.bool) ?
-				NCX_EL_TRUE : NCX_EL_FALSE,
-				indent);
-		    break;
-		default:
-		    SET_ERROR(ERR_INTERNAL_VAL);
-		}
-	    }
-
-	    /* check finish quoted string */
-	    if (wspace) {
-		ses_putchar(scb, '\"');
-	    }
-	}
-	break;
-    case NCX_BT_ANY:
-    case NCX_BT_CONTAINER:
-    case NCX_BT_LIST:
-    case NCX_BT_CHOICE:
-    case NCX_BT_CASE:
-	for (chval = val_get_first_child(useval);
-	     chval != NULL;
-	     chval = val_get_next_child(chval)) {
-
-	    xml_wr_full_check_val(scb, 
-				  msg,
-				  chval,
-				  indent,
-				  testfn);
-	} 
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    if (v_val) {
-	val_free_value(v_val);
-    }
+    write_check_val(scb, msg, val, indent, testfn, TRUE);
 
 }  /* xml_wr_check_val */
 
@@ -1351,9 +1408,12 @@ void
 			   int32  indent,
 			   val_nodetest_fn_t testfn)
 {
-    val_value_t  *vir;
-    val_value_t *out;
-    status_t  res;
+    val_value_t       *vir;
+    val_value_t       *out;
+    xml_msg_authfn_t   cbfn;
+    status_t           res;
+    boolean            acmtest;
+
 
 #ifdef DEBUG
     if (!scb || !msg || !val) {
@@ -1382,7 +1442,15 @@ void
 	    if (vir) {
 		val_free_value(vir);
 	    }
-	    return;   /* skip this entry */
+	    return;   /* skip this entry: filtered */
+	}
+    }
+
+    if (msg->acm_cbfn) {
+	cbfn = (xml_msg_authfn_t)msg->acm_cbfn;
+	acmtest = (*cbfn)(msg, scb->username, val);
+	if (!acmtest) {
+	    return;  /* skip this entry: access-denied */
 	}
     }
 
@@ -1411,12 +1479,13 @@ void
 		       out, 
 		       indent);
 
-	/* write the value node contents */
-	xml_wr_check_val(scb, 
-			 msg, 
-			 out, 
-			 indent+ses_indent_count(scb), 
-			 testfn);
+	/* write the value node contents; skip ACM on this node */
+	write_check_val(scb, 
+			msg, 
+			out, 
+			indent+ses_indent_count(scb), 
+			testfn,
+			FALSE);
 
 	/* write the top-level end node */
 	xml_wr_end_elem(scb, 

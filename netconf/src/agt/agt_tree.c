@@ -802,6 +802,9 @@ static void
 	    /* check if access control is allowing this user
 	     * to retrieve this value node
 	     */
+	    retval = agt_acm_val_read_allowed(&msg->mhdr,
+					      scb->username,
+					      val);
 	    
 	    /* check the child nodes in the filter
 	     * If there are container nodes or select nodes
@@ -811,9 +814,6 @@ static void
 	     * the entire filval node is supposed to be output
 	     */
 	     
-	    retval = agt_acm_val_read_allowed(&msg->mhdr,
-					      scb->username,
-					      val);
 	    if (retval) {
 		xml_wr_begin_elem_ex(scb, 
 				     &msg->mhdr,

@@ -320,6 +320,10 @@ extern void
 		     ncx_btype_t  btyp);
 
 extern boolean
+    ncx_num_is_nan (ncx_num_t *num,
+		    ncx_btype_t  btyp);
+
+extern boolean
     ncx_num_zero (const ncx_num_t *num,
 		  ncx_btype_t  btyp);
 

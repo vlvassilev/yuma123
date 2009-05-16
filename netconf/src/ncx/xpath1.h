@@ -124,6 +124,11 @@ extern status_t
 			      const xpath_result_t *result,
 			      xmlChar **str);
 
+extern status_t
+    xpath1_stringify_node (xpath_pcb_t *pcb,
+			   val_value_t *val,
+			   xmlChar **str);
+
 extern boolean
     xpath1_compare_result_to_string (xpath_pcb_t *pcb,
 				     xpath_result_t *result,

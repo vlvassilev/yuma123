@@ -3381,6 +3381,39 @@ void
 
 
 /********************************************************************
+* FUNCTION ncx_num_is_nan
+* 
+* Check if a FP number is set to the Not a Number value
+*
+* INPUTS:
+*     num == number to check
+*     btyp == expected data type
+*
+*********************************************************************/
+boolean
+    ncx_num_is_nan (ncx_num_t *num,
+		    ncx_btype_t  btyp)
+{
+#ifdef DEBUG
+    if (!num) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return TRUE;
+    }
+#endif
+
+    if (btyp == NCX_BT_FLOAT64) {
+#ifdef HAS_FLOAT
+	return (num->d == NAN) ? TRUE : FALSE;
+#else
+	return (num->d == NCX_MAX_LONG) ? TRUE : FALSE;
+#endif
+    }
+    return FALSE;
+
+} /* ncx_num_is_nan */
+
+
+/********************************************************************
 * FUNCTION ncx_num_zero
 * 
 * Compare a ncx_num_t to zero
@@ -3469,10 +3502,11 @@ status_t
     if (!numstr || !val) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!*numstr) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
 #endif
+
+    if (*numstr == '\0') {
+	return ERR_NCX_INVALID_VALUE;
+    }
 
     err = NULL;
     l = 0;
@@ -3484,6 +3518,7 @@ status_t
     if (numfmt==NCX_NF_NONE) {
 	numfmt = ncx_get_numfmt(numstr);
     }
+
 
     switch (btyp) {
     case NCX_BT_INT8:
@@ -3711,10 +3746,13 @@ status_t
     if (!numstr || !val) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!*numstr) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
 #endif
+
+    if (*numstr == '\0') {
+	val->dec.val = 0;
+	val->dec.digits = digits;
+	return NO_ERR;
+    }
 
     err = NULL;
     point = NULL;
@@ -4682,11 +4720,15 @@ ncx_numfmt_t
     ncx_get_numfmt (const xmlChar *numstr)
 {
 #ifdef DEBUG
-    if (!numstr || !*numstr) {
+    if (!numstr) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return NCX_NF_NONE;
     }
 #endif
+
+    if (*numstr == '\0') {
+	return NCX_NF_NONE;
+    }
 
     /* check for a HEX string first */
     if (*numstr=='0' && (numstr[1]=='x' || numstr[1]=='X')) {

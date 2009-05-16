@@ -215,6 +215,7 @@ static void
     xpath_resnode_t   *testnode, *nextnode, dummynode;
     dlq_hdr_t          dummyQ, descendantQ;
     int32              indentamount;
+    boolean            dowrite;
 
     dlq_createSQue(&dummyQ);
     dlq_createSQue(&descendantQ);
@@ -238,11 +239,15 @@ static void
 	 */
 	if (!curval->index) {
 	    if (getop) {
-		xml_wr_full_val(scb, &msg->mhdr, 
-				curval, indent);
+		xml_wr_full_val(scb, 
+				&msg->mhdr, 
+				curval, 
+				indent);
 	    } else {
-		xml_wr_full_check_val(scb, &msg->mhdr, curval, 
-				      indent, agt_check_config);
+		xml_wr_full_check_val(scb, 
+				      &msg->mhdr, curval, 
+				      indent, 
+				      agt_check_config);
 	    }
 	}
 	return;
@@ -256,7 +261,7 @@ static void
     xpath_init_resnode(&dummynode);
     dummynode.node.valptr = topval;
     dlq_enque(&dummynode, &dummyQ);
-	
+
     /* gather all the remaining resnodes
      * that also have this value node as its top
      * level parent
@@ -267,7 +272,8 @@ static void
 
 	nextnode = (xpath_resnode_t *)dlq_nextEntry(testnode);
 
-	if (xpath1_check_node_exists(pcb, &dummyQ,
+	if (xpath1_check_node_exists(pcb, 
+				     &dummyQ,
 				     testnode->node.valptr)) {
 	    dlq_remove(testnode);
 	    dlq_enque(testnode, &descendantQ);
@@ -277,20 +283,29 @@ static void
     dlq_remove(&dummynode);
     xpath_clean_resnode(&dummynode);
 
+    /* check if access control is allowing this user
+     * to retrieve this value node
+     */
+    dowrite = agt_acm_val_read_allowed(&msg->mhdr,
+				      scb->username,
+				      topval);
+	    
     /* have all the nodes required for this subtree
      * start with the top and keep going until
      * curval and all the dummyQ contents
      * have been output
      */
-    xml_wr_begin_elem_ex(scb, 
-			 &msg->mhdr,
-			 ceilingval->nsid,
-			 topval->nsid,
-			 topval->name, 
-			 &topval->metaQ, 
-			 FALSE, 
-			 indent, 
-			 FALSE);
+    if (dowrite) {
+	xml_wr_begin_elem_ex(scb, 
+			     &msg->mhdr,
+			     ceilingval->nsid,
+			     topval->nsid,
+			     topval->name, 
+			     &topval->metaQ, 
+			     FALSE, 
+			     indent, 
+			     FALSE);
+    }
 
     if (indent >= 0) {
 	indent += indentamount;
@@ -306,8 +321,12 @@ static void
 	     valindex != NULL;
 	     valindex = val_get_next_index(valindex)) {
 
-	    xml_wr_full_val(scb, &msg->mhdr, 
-			    valindex->val, indent);
+	    if (dowrite) {
+		xml_wr_full_val(scb, 
+				&msg->mhdr, 
+				valindex->val, 
+				indent);
+	    }
 
 	    testnode = find_val_resnode(&descendantQ,
 					valindex->val);
@@ -324,7 +343,7 @@ static void
     for (testnode = (xpath_resnode_t *)dlq_firstEntry(&descendantQ);
 	 testnode != NULL;
 	 testnode = nextnode) {
-
+	    
 	nextnode = (xpath_resnode_t *)dlq_nextEntry(testnode);
 
 	if (testnode->node.valptr->parent == topval) {
@@ -333,23 +352,38 @@ static void
 	     */
 	    dlq_remove(testnode);
 	    if (getop) {
-		xml_wr_full_val(scb, &msg->mhdr, 
-				testnode->node.valptr, 
-				indent);
+		if (dowrite) {
+		    xml_wr_full_val(scb, 
+				    &msg->mhdr, 
+				    testnode->node.valptr, 
+				    indent);
+		}
 	    } else {
-		xml_wr_full_check_val(scb, &msg->mhdr,
-				      testnode->node.valptr, 
-				      indent, agt_check_config);
+		if (dowrite) {
+		    xml_wr_full_check_val(scb, 
+					  &msg->mhdr,
+					  testnode->node.valptr, 
+					  indent, 
+					  agt_check_config);
+		}
+		xpath_free_resnode(testnode);
 	    }
-	    xpath_free_resnode(testnode);
 	}
     }
 
-    /* move the ceiling closer to the curval and try again
-     * with the current value
-     */
-    output_resnode(scb, msg, pcb, &descendantQ, 
-		   curval, topval, getop, indent);
+    if (dowrite) {
+	/* move the ceiling closer to the curval and try again
+	 * with the current value
+	 */
+	output_resnode(scb, 
+		       msg, 
+		       pcb, 
+		       &descendantQ, 
+		       curval, 
+		       topval, 
+		       getop, 
+		       indent);
+    }
 
 
     /* need to clear the descendant nodes before 
@@ -357,9 +391,16 @@ static void
      */
     testnode = (xpath_resnode_t *)dlq_deque(&descendantQ);
     while (testnode) {
-	output_resnode(scb, msg, pcb, &descendantQ, 
-		       testnode->node.valptr, 
-		       topval, getop, indent);
+	if (dowrite) {
+	    output_resnode(scb, 
+			   msg, 
+			   pcb, 
+			   &descendantQ, 
+			   testnode->node.valptr, 
+			   topval, 
+			   getop, 
+			   indent);
+	}
 	xpath_free_resnode(testnode);
 	testnode = (xpath_resnode_t *)dlq_deque(&descendantQ);
     }
@@ -369,11 +410,13 @@ static void
     }
 
     /* finish off the topval node */
-    xml_wr_end_elem(scb, 
-		    &msg->mhdr, 
-		    topval->nsid,
-		    topval->name, 
-		    indent);
+    if (dowrite) {
+	xml_wr_end_elem(scb, 
+			&msg->mhdr, 
+			topval->nsid,
+			topval->name, 
+			indent);
+    }
 
 } /* output_resnode */
 

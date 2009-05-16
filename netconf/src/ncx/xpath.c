@@ -2400,7 +2400,21 @@ void
 				       NCX_BT_FLOAT64);
 		    if (res != NO_ERR) {
 			ncx_set_num_nan(num, NCX_BT_FLOAT64);
-		    }			
+		    }
+		} else if (val && val->btyp == NCX_BT_STRING) {
+		    ncx_init_num(&testnum);
+		    res = ncx_convert_num(result->r.str,
+					  NCX_NF_NONE,
+					  NCX_BT_FLOAT64,
+					  &testnum);
+		    if (res == NO_ERR) {
+			(void)ncx_copy_num(&testnum, 
+					   num, 
+					   NCX_BT_FLOAT64);
+		    } else {
+			ncx_set_num_nan(num, NCX_BT_FLOAT64);
+		    }
+		    ncx_clean_num(NCX_BT_FLOAT64, &testnum);
 		} else {
 		    ncx_set_num_nan(num, NCX_BT_FLOAT64);
 		}

@@ -366,8 +366,8 @@ static void
 					  indent, 
 					  agt_check_config);
 		}
-		xpath_free_resnode(testnode);
 	    }
+	    xpath_free_resnode(testnode);
 	}
     }
 
@@ -384,7 +384,6 @@ static void
 		       getop, 
 		       indent);
     }
-
 
     /* need to clear the descendant nodes before 
      * generating the topval end tag

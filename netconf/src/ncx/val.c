@@ -6493,7 +6493,7 @@ status_t
 			   const val_value_t *val,
 			   uint32 *len)
 {
-    const ncx_lmem_t  *lmem;
+    const ncx_lmem_t  *lmem, *nextlmem;
     const xmlChar     *s, *prefix;
     xmlChar           *str;
     ncx_btype_t        btyp;
@@ -6628,8 +6628,39 @@ status_t
 	    *len = 0;
 	}
 	break;
-    case NCX_BT_SLIST:
     case NCX_BT_BITS:
+	*len = 0;
+	for (lmem = (const ncx_lmem_t *)dlq_firstEntry(&val->v.list.memQ);
+	     lmem != NULL;
+	     lmem = nextlmem) {
+
+	    nextlmem = (const ncx_lmem_t *)dlq_nextEntry(lmem);
+
+	    s = lmem->val.str;
+	    if (buff) {
+		/* hardwire double quotes to wrapper list strings */
+		icnt = sprintf((char *)buff,
+			       "%s", 
+			       (s) ? (const char *)s : "");
+		if (icnt < 0) {
+		    return SET_ERROR(ERR_INTERNAL_VAL);
+		} else {
+		    buff += icnt;
+		    *len += (uint32)icnt;
+		}
+		if (nextlmem) {
+		    *buff++ = ' ';
+		    *len += 1;
+		}
+	    } else {
+		*len += ((s) ? xml_strlen(s) : 0);
+		if (nextlmem) {
+		    *len += 1;
+		}
+	    }
+	}
+	break;
+    case NCX_BT_SLIST:
 	*len = 0;
 	for (lmem = (const ncx_lmem_t *)dlq_firstEntry(&val->v.list.memQ);
 	     lmem != NULL;
@@ -6658,21 +6689,22 @@ status_t
 		    }
 		    break;
 		default:
+		    SET_ERROR(ERR_INTERNAL_VAL);
 		    s = NULL;
 		}
 	    }
 
 	    if (buff) {
-		/* hardwire double quotes to wrapper list strings */
-		icnt = sprintf((char *)buff, "\"%s\"", 
+		icnt = sprintf((char *)buff, "%s ", 
 			       (s) ? (const char *)s : "");
 		if (icnt < 0) {
 		    return SET_ERROR(ERR_INTERNAL_VAL);
 		} else {
+		    buff += icnt;
 		    *len += (uint32)icnt;
 		}
 	    } else {
-		*len += (2 + ((s) ? xml_strlen(s) : 0));
+		*len += (1 + ((s) ? xml_strlen(s) : 0));
 	    }
 	}
 	break;

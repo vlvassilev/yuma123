@@ -83,5 +83,22 @@
             <nacm:userName>guest</nacm:userName>
          </nacm:group>
       </nacm:groups>
+      <nacm:rules>
+	<nacm:moduleRule>
+	  <nacm:moduleName>netconf</nacm:moduleName>
+	  <nacm:allowedRights>read write exec</nacm:allowedRights>
+	  <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
+	</nacm:moduleRule>
+	<nacm:moduleRule>
+	  <nacm:moduleName>netconf</nacm:moduleName>
+	  <nacm:allowedRights>read exec</nacm:allowedRights>
+	  <nacm:allowedGroup>nacm:guest</nacm:allowedGroup>
+	</nacm:moduleRule>
+	<nacm:moduleRule>
+	  <nacm:moduleName>netconfd</nacm:moduleName>
+	  <nacm:allowedRights>read write exec</nacm:allowedRights>
+	  <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
+	</nacm:moduleRule>
+      </nacm:rules>
    </nacm:nacm>
 </nd:config>

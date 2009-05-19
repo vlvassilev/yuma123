@@ -15,8 +15,8 @@
       'http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-netmod-yang-types.xml'>
 ]>
 
-<rfc category="informational" 
-     docName="draft-ietf-netmod-yang-usage-00" 
+<rfc category="info" 
+     docName="draft-ietf-netmod-yang-usage-00"
      ipr="trust200811">
 
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
@@ -177,7 +177,7 @@
 	 The following terms are used throughout this document:
 	 <list style="symbols">
 	   <t>
-	     <b>module</b>:
+	     module:
 	     Generic term for a YANG data model module or submodule.
 	     When describing properties which are specific to submodules,
 	     the term 'YANG submodule', or simply 'submodule' is used instead.
@@ -414,7 +414,6 @@
 	 groupings, data objects, rpcs, and notifications
 	 MUST be between 1 and 64 characters in length.
        </t>
-       <t>
      </section>
 
      <section title="Defaults">
@@ -509,7 +508,7 @@
      </section>
 
 
-     <section title="Lifecycle Management">
+     <section title="Module Life-cycle Management">
        <t>
 	 The status statement SHOULD NOT be present if its value
 	 is 'current'.  It MUST be present if its value
@@ -813,7 +812,7 @@
      &rfc4181;
    </references>
 
-   <appendix title="Module Review Checklist">
+   <section title="Module Review Checklist">
      <t>
        This section is adapted from RFC 4181.
      </t>
@@ -824,97 +823,100 @@
        The following checklist may be helpful when reviewing
        a draft document:
      </t>
-     <list style="numbers">
-       <t>
-	 <b>I-D Boilerplate</b> -- 
-	 verify that the draft contains the required
-	 Internet-Draft boilerplate 
-	 (see http://www.ietf.org/ietf/1id-guidelines.txt), 
-	 including the appropriate statement to permit
-	 publication as an RFC, and that I-D boilerplate does 
-	 not contain references or section numbers.
-       </t>
-       <t><b>Abstract</b>
-       -- verify that the abstract does not contain references,
-       that it does not have a section number, and that its content follows
-       the guidelines in http://www.ietf.org/ietf/1id-guidelines.txt.
-       </t>
-       <t>
-	 <b>YANG Module Boilerplate</b> -- 
-	 verify that the draft contains the latest
-	 approved SNMP Network Management Framework boilerplate from the OPS
-	 area web site (http://www.ops.ietf.org/mib-boilerplate.html).
-	 [ed: real URL TBD]
-       </t>
-       <t>
-	 <b>Security Considerations Section</b>
-	 -- verify that the draft uses the
-	 latest approved template from the OPS area web site
-	 (http://www.ops.ietf.org/mib-security.html) and that the guidelines
-	 therein have been followed.
-       </t>
-       <t>
-	 <b>IANA Considerations Section</b>
-	 -- this section must always be
-	 present.  If the draft requires no action from the IANA, ensure that
-	 this is explicitly noted.  If the draft requires URI values to be
-	 assigned, ensure that the IANA Considerations section contains the
-	 information specified in [TBD] of these guidelines.  If the
-	 draft contains the initial version of an IANA-maintained module,
-	 verify that the [TBD] invocation contains maintenance
-	 instructions that comply with the requirements in RFC 2434.  In the
-	 latter case, the IANA Considerations section that will appear in the
-	 RFC MUST contain a pointer to the actual IANA-maintained module.
-       </t>
-       <t>
-	 <b>References</b>
-	 -- verify that the references are properly divided
-	 between normative and informative references, that RFC 2119 is
-	 included as a normative reference if the terminology defined therein
-	 is used in the document, that all references required by the
-	 boilerplate are present, that all YANG modules containing imported
-	 items are cited as normative references, and that all citations point
-	 to the most current RFCs unless there is a valid reason to do
-	 otherwise (for example, it is OK to include an informative reference
-	 to a previous version of a specification to help explain a feature
-	 included for backward compatibility).
-       </t>
-       <t>
-	 <b>Copyright Notices</b>
-	 -- verify that the draft contains an
-	 abbreviated copyright notice in the description statement of each
-	 YANG module or sub-module, and that it contains the full copyright
-	 notice and disclaimer specified in Sections 5.4 and 5.5 of RFC 3978
-	 at the end of the document.  Make sure that the correct year is used
-	 in all copyright dates.
-       </t>
-       <t>
-	 <b>IPR Notice</b>
-	 -- if the draft does not contains a verbatim copy of
-	 the IPR notice specified in Section 5 of RFC 3979, recommend that the
-	 IPR notice be included.
-       </t>
-       <t>
-	 <b>Other Issues</b>
-	 -- check for any issues mentioned in
-	 http://www.ietf.org/ID-Checklist.html that are not covered elsewhere.
-       </t>
-       <t>
-	 <b>Technical Content</b>
-	 -- review the actual technical content for
-	 compliance with the guidelines in this document.  The use of a YANG
-	 module compiler is recommended when checking for syntax errors; see
-	 [YANG tool URL TBD] for more information.
-	 Checking for correct syntax, however, is only part of the job.  It is
-	 just as important to actually read the YANG module document 
-	 from the point of view of a potential implementor. 
-	 It is particularly important to
-	 check that description statements are sufficiently
-	 clear and unambiguous to allow interoperable 
-	 implementations to be created.
-       </t>
-     </list>
-   </appendix>
+     <t>
+       <list style="numbers">
+	 <t>
+	   I-D Boilerplate -- 
+	   verify that the draft contains the required
+	   Internet-Draft boilerplate 
+	   (see http://www.ietf.org/ietf/1id-guidelines.txt), 
+	   including the appropriate statement to permit
+	   publication as an RFC, and that I-D boilerplate does 
+	   not contain references or section numbers.
+	 </t>
+	 <t>
+	   Abstract
+	   -- verify that the abstract does not contain references,
+	   that it does not have a section number, and that its content follows
+	   the guidelines in http://www.ietf.org/ietf/1id-guidelines.txt.
+	 </t>
+	 <t>
+	   YANG Module Boilerplate -- 
+	   verify that the draft contains the latest
+	   approved SNMP Network Management Framework boilerplate from the OPS
+	   area web site (http://www.ops.ietf.org/mib-boilerplate.html).
+	   [ed: real URL TBD]
+	 </t>
+	 <t>
+	   Security Considerations Section
+	   -- verify that the draft uses the
+	   latest approved template from the OPS area web site
+	   (http://www.ops.ietf.org/mib-security.html) and that the guidelines
+	   therein have been followed.
+	 </t>
+	 <t>
+	   IANA Considerations Section
+	   -- this section must always be
+	   present.  If the draft requires no action from the IANA, ensure that
+	   this is explicitly noted.  If the draft requires URI values to be
+	   assigned, ensure that the IANA Considerations section contains the
+	   information specified in [TBD] of these guidelines.  If the
+	   draft contains the initial version of an IANA-maintained module,
+	   verify that the [TBD] invocation contains maintenance
+	   instructions that comply with the requirements in RFC 2434.  In the
+	   latter case, the IANA Considerations section that will appear in the
+	   RFC MUST contain a pointer to the actual IANA-maintained module.
+	 </t>
+	 <t>
+	   References
+	   -- verify that the references are properly divided
+	   between normative and informative references, that RFC 2119 is
+	   included as a normative reference if the terminology defined therein
+	   is used in the document, that all references required by the
+	   boilerplate are present, that all YANG modules containing imported
+	   items are cited as normative references, and that all citations point
+	   to the most current RFCs unless there is a valid reason to do
+	   otherwise (for example, it is OK to include an informative reference
+	   to a previous version of a specification to help explain a feature
+	   included for backward compatibility).
+	 </t>
+	 <t>
+	   Copyright Notices
+	   -- verify that the draft contains an
+	   abbreviated copyright notice in the description statement of each
+	   YANG module or sub-module, and that it contains the full copyright
+	   notice and disclaimer specified in Sections 5.4 and 5.5 of RFC 3978
+	   at the end of the document.  Make sure that the correct year is used
+	   in all copyright dates.
+	 </t>
+	 <t>
+	   IPR Notice
+	   -- if the draft does not contains a verbatim copy of
+	   the IPR notice specified in Section 5 of RFC 3979, recommend that the
+	   IPR notice be included.
+	 </t>
+	 <t>
+	   Other Issues
+	   -- check for any issues mentioned in
+	   http://www.ietf.org/ID-Checklist.html that are not covered elsewhere.
+	 </t>
+	 <t>
+	   Technical Content
+	   -- review the actual technical content for
+	   compliance with the guidelines in this document.  The use of a YANG
+	   module compiler is recommended when checking for syntax errors; see
+	   [YANG tool URL TBD] for more information.
+	   Checking for correct syntax, however, is only part of the job.  It is
+	   just as important to actually read the YANG module document 
+	   from the point of view of a potential implementor. 
+	   It is particularly important to
+	   check that description statements are sufficiently
+	   clear and unambiguous to allow interoperable 
+	   implementations to be created.
+	 </t>
+       </list>
+     </t>
+   </section>
  </back>
 </rfc>
 

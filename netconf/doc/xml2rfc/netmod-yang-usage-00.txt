@@ -1,0 +1,1233 @@
+
+
+
+Internet Engineering Task Force                               A. Bierman
+Internet-Draft                                           Netconf Central
+Intended status: Informational                              May 18, 2009
+Expires: November 19, 2009
+
+
+   Guidelines for Authors and Reviewers of YANG Data Model Documents
+                    draft-ietf-netmod-yang-usage-00
+
+Status of this Memo
+
+   This Internet-Draft is submitted to IETF in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on November 19, 2009.
+
+Copyright Notice
+
+   Copyright (c) 2009 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents in effect on the date of
+   publication of this document (http://trustee.ietf.org/license-info).
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.
+
+
+
+
+
+
+
+
+
+Bierman                 Expires November 19, 2009               [Page 1]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+Abstract
+
+   This memo provides guidelines for authors and reviewers of standards
+   track specifications containing YANG data model modules.  Applicable
+   portions may be used as a basis for reviews of other YANG data model
+   documents.  Recommendations and procedures are defined, which are
+   intended to increase interoperability and usability of NETCONF
+   implementations which utilize YANG data model modules.
+
+
+Table of Contents
+
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  4
+   2.  Terminology  . . . . . . . . . . . . . . . . . . . . . . . . .  5
+     2.1.  Requirements Notation  . . . . . . . . . . . . . . . . . .  5
+     2.2.  NETCONF Terms  . . . . . . . . . . . . . . . . . . . . . .  5
+     2.3.  YANG Terms . . . . . . . . . . . . . . . . . . . . . . . .  5
+     2.4.  Terms  . . . . . . . . . . . . . . . . . . . . . . . . . .  5
+   3.  General Documentation Guidelines . . . . . . . . . . . . . . .  7
+     3.1.  YANG Data Model Boilerplate Section  . . . . . . . . . . .  7
+     3.2.  Narrative Sections . . . . . . . . . . . . . . . . . . . .  7
+     3.3.  Definitions Section  . . . . . . . . . . . . . . . . . . .  8
+     3.4.  Security Considerations Section  . . . . . . . . . . . . .  8
+     3.5.  IANA Considerations Section  . . . . . . . . . . . . . . .  8
+       3.5.1.  Documents that Create a New Name Space . . . . . . . .  8
+       3.5.2.  Documents that Extend an Existing Name Space . . . . .  8
+     3.6.  Reference Sections . . . . . . . . . . . . . . . . . . . .  9
+     3.7.  Copyright Notices  . . . . . . . . . . . . . . . . . . . .  9
+     3.8.  Intellectual Property Section  . . . . . . . . . . . . . .  9
+   4.  YANG Usage Guidelines  . . . . . . . . . . . . . . . . . . . . 10
+     4.1.  Module Naming Conventions  . . . . . . . . . . . . . . . . 10
+     4.2.  Identifiers  . . . . . . . . . . . . . . . . . . . . . . . 10
+     4.3.  Defaults . . . . . . . . . . . . . . . . . . . . . . . . . 10
+     4.4.  Conditional Statements . . . . . . . . . . . . . . . . . . 11
+     4.5.  Module Life-cycle Management . . . . . . . . . . . . . . . 12
+     4.6.  Header Contents  . . . . . . . . . . . . . . . . . . . . . 12
+     4.7.  Data Types . . . . . . . . . . . . . . . . . . . . . . . . 13
+     4.8.  Reusable Type Definitions  . . . . . . . . . . . . . . . . 13
+     4.9.  Object Definitions . . . . . . . . . . . . . . . . . . . . 14
+     4.10. RPC Definitions  . . . . . . . . . . . . . . . . . . . . . 15
+     4.11. Notification Definitions . . . . . . . . . . . . . . . . . 15
+   5.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 16
+   6.  Security Considerations  . . . . . . . . . . . . . . . . . . . 17
+   7.  Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 18
+   8.  References . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+     8.1.  Normative References . . . . . . . . . . . . . . . . . . . 19
+     8.2.  Informative References . . . . . . . . . . . . . . . . . . 19
+   Appendix A.  Module Review Checklist . . . . . . . . . . . . . . . 20
+
+
+
+Bierman                 Expires November 19, 2009               [Page 2]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+   Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 22
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires November 19, 2009               [Page 3]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+1.  Introduction
+
+   The standardization of network configuration interfaces for use with
+   the NETCONF [RFC4741] protocol requires a modular set of data models,
+   which can be reused and extended over time.
+
+   This document defines a set of usage guidelines for standards track
+   documents containing YANG [I-D.ietf-netmod-yang] data models.  It is
+   similar to the MIB usage guidelines specification [RFC4181] in intent
+   and structure.
+
+   Many YANG constructs are defined as optional to use, such as the
+   description clause.  However, in order to maximize interoperability
+   of NETCONF implementations utilizing YANG data models, it is
+   desirable to define a set of usage guidelines which may require a
+   higher level of compliance than the minimum level defined in the YANG
+   specification.
+
+
+
+
+    The NETCONF stack can be conceptually partitioned into four layers.
+
+          Layer                Example
+         +-------------+   +--------------------+ +-------------------+
+     (4) |   Content   |   | Configuration data | | Notification data |
+         +-------------+   +--------------------+ +-------------------+
+                |                    |                   |
+         +-------------+   +-----------------+     +---------------+
+     (3) | Operations  |   |  <edit-config>  |     |  <eventType>  |
+         +-------------+   +-----------------+     +---------------+
+                |                    |                   |
+         +-------------+   +--------------------+  +----------------+
+     (2) |     RPC     |   | <rpc>, <rpc-reply> |  | <notification> |
+         +-------------+   +--------------------+  +----------------+
+                |                    |                   |
+         +-------------+       +-----------------------------+
+     (1) |  Transport  |       |   BEEP, SSH, SSL, console   |
+         |   Protocol  |       |                             |
+         +-------------+       +-----------------------------+
+
+
+
+                                 Figure 1
+
+   This document defines usage guidelines related to the NETCONF
+   operations layer (3), and NETCONF content layer (4).
+
+
+
+
+Bierman                 Expires November 19, 2009               [Page 4]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+2.  Terminology
+
+2.1.  Requirements Notation
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [RFC2119].
+
+2.2.  NETCONF Terms
+
+   The following terms are defined in [RFC4741] and are not redefined
+   here:
+
+   o  agent
+
+   o  application
+
+   o  capabilities
+
+   o  manager
+
+   o  operation
+
+   o  RPC
+
+2.3.  YANG Terms
+
+   The following terms are defined in [I-D.ietf-netmod-yang] and are not
+   redefined here:
+
+   o  data node
+
+   o  module
+
+   o  submodule
+
+   o  namespace
+
+   o  version
+
+2.4.  Terms
+
+   The following terms are used throughout this document:
+
+   o  module: Generic term for a YANG data model module or submodule.
+      When describing properties which are specific to submodules, the
+      term 'YANG submodule', or simply 'submodule' is used instead.
+
+
+
+
+Bierman                 Expires November 19, 2009               [Page 5]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+   o  Published Document: A stable release of a module, usually
+      contained in an RFC.
+
+   o  Unpublished Document: An unstable release of a module, usually
+      contained in an Internet Draft.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires November 19, 2009               [Page 6]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+3.  General Documentation Guidelines
+
+   YANG data model modules under review are likely to be contained in
+   Internet Drafts.  All guidelines for Internet Draft authors MUST be
+   followed.  These guidelines are available online at:
+
+   http://www.isi.edu/in-notes/rfc-editor/instructions2authors.txt
+
+   The following sections MUST be present in an Internet Draft
+   containing a module:
+
+   o  YANG data model boilerplate section
+
+   o  Narrative sections
+
+   o  Definitions section
+
+   o  Security Considerations section
+
+   o  IANA Considerations section
+
+   o  References section
+
+3.1.  YANG Data Model Boilerplate Section
+
+   This section MUST contain a verbatim copy of the latest approved
+   Internet-Standard Management Framework boilerplate, which is
+   available on-line at [ed: URL TBD].
+
+3.2.  Narrative Sections
+
+   The narrative part MUST include an overview section that describes
+   the scope and field of application of the module(s) defined by the
+   specification and that specifies the relationship (if any) of these
+   modules to other standards, particularly to standards containing
+   other module modules.  The narrative part SHOULD include one or more
+   sections to briefly describe the structure of the modules defined in
+   the specification.
+
+   If the module(s) defined by the specification import definitions from
+   other modules (except for those defined in the YANG
+   [I-D.ietf-netmod-yang] or YANG Types [I-D.ietf-netmod-yang-types]
+   documents) or are always implemented in conjunction with other
+   modules, then those facts MUST be noted in the overview section, as
+   MUST any special interpretations of objects in other modules.
+
+
+
+
+
+
+Bierman                 Expires November 19, 2009               [Page 7]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+3.3.  Definitions Section
+
+   This section contains the module(s) defined by the specification.
+   These modules MUST be written in YANG [I-D.ietf-netmod-yang].
+
+   See Section 4 for guidelines on YANG usage.
+
+3.4.  Security Considerations Section
+
+   Each specification that defines one or more modules MUST contain a
+   section that discusses security considerations relevant to those
+   modules.  This section MUST be patterned after the latest approved
+   template (available at [ed: URL TBD]).
+
+   In particular, writable module objects that could be especially
+   disruptive if abused MUST be explicitly listed by name and the
+   associated security risks MUST be spelled out; similarly, readable
+   module objects that contain especially sensitive information or that
+   raise significant privacy concerns MUST be explicitly listed by name
+   and the reasons for the sensitivity/privacy concerns MUST be
+   explained.
+
+3.5.  IANA Considerations Section
+
+   In order to comply with IESG policy as set forth in
+   http://www.ietf.org/ID-Checklist.html, every Internet-Draft that is
+   submitted to the IESG for publication MUST contain an IANA
+   Considerations section.  The requirements for this section vary
+   depending what actions are required of the IANA.
+
+3.5.1.  Documents that Create a New Name Space
+
+   If an Internet-Draft defines a new name space that is to be
+   administered by the IANA, then the document MUST include an IANA
+   Considerations section, specifies how the name space is to be
+   administered.
+
+   Specifically, if any YANG module namespace statement value contained
+   in the document is not already registered with IANA, then a new YANG
+   Namespace registry entry must be requested from the IANA [ed:
+   procedure TBD].
+
+3.5.2.  Documents that Extend an Existing Name Space
+
+   If an Internet-Draft defines any extensions to a YANG Namespace
+   already administered by the IANA, then the document MUST include an
+   IANA Considerations section, specifies how the name space extension
+   is to be administered.
+
+
+
+Bierman                 Expires November 19, 2009               [Page 8]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+   Specifically, if any YANG submodule belongs-to value contained in the
+   document is associated with a module that contains a namespace
+   statement value equal to a YANG Namespace already administered by the
+   IANA, then a new YANG Module registry entry and YANG Namespace Update
+   Procedure must be requested from the IANA [ed: procedure TBD].
+
+3.6.  Reference Sections
+
+   [ed: 2223bis text TBD]
+
+   For every import or include statement which appears in a module
+   contained in the specification, which identifies a module in a
+   separate document, a corresponding normative reference to that
+   document MUST appear in the Normative References section.  The
+   reference MUST correspond to the specific module version actually
+   used within the specification.
+
+   For every reference statement which appears in a module contained in
+   the specification, which identifies a separate document, a
+   corresponding normative reference to that document SHOULD appear in
+   the Normative References section.  The reference SHOULD correspond to
+   the specific document version actually used within the specification.
+
+3.7.  Copyright Notices
+
+   The proper copyright notices MUST be present in the module
+   description statement. [ed.: See RFC 4181, 3.7.  Exact text for
+   insertion is TBD.]
+
+3.8.  Intellectual Property Section
+
+   The proper IPR statements MUST be present in the document, according
+   to the most current Internet Draft boilerplate. [ed.: actual IETF IPR
+   text reference TBD]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires November 19, 2009               [Page 9]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+4.  YANG Usage Guidelines
+
+   In general, modules in IETF standards-track specifications MUST
+   comply with all syntactic and semantic requirements of YANG.
+   [I-D.ietf-netmod-yang].  The guidelines in this section are intended
+   to supplement the YANG specification, which is intended to define a
+   minimum set of conformance requirements.
+
+   In order to promote interoperability and establish a set of practices
+   based on previous experience, the following sections establish usage
+   guidelines for specific YANG constructs.
+
+   Only guidelines which clarify or restrict the minimum conformance
+   requirements are included here.
+
+4.1.  Module Naming Conventions
+
+   Modules contained in standards track documents SHOULD be named with
+   the prefix 'ietf-'.  Other types of modules MUST NOT use the 'ietf-'
+   prefix string.
+
+   A distinctive word or acronym (e.g., protocol name or working group
+   acronym) SHOULD be used in the module name.  If new definitions are
+   being defined to extend one or more existing modules, then the same
+   word or acronym should be reused, instead of creating a new one.
+
+   All published module names MUST be unique.
+
+   Once a module name is published, it MUST not be reused, even if the
+   RFC containing the module is reclassified to 'Historic' status.
+
+4.2.  Identifiers
+
+   Identifiers for modules, submodules, typedefs, groupings, data
+   objects, rpcs, and notifications MUST be between 1 and 64 characters
+   in length.
+
+4.3.  Defaults
+
+   In general, it is suggested that sub-statements containing default
+   values SHOULD NOT be present.  For example, 'status current;',
+   'config true;', 'mandatory false;', and 'max-elements unbounded;' are
+   common defaults which would make the module difficult to read if used
+   everywhere they are allowed.
+
+   Instead, it is suggested that common statements SHOULD only be used
+   when being set to a value other than the default value.
+
+
+
+
+Bierman                 Expires November 19, 2009              [Page 10]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+4.4.  Conditional Statements
+
+   A module may be conceptually partitioned in several ways, using the
+   'if-feature' and/or 'when' statements.  In addition, NETCONF
+   capabilities are designed to identify optional functionality.
+
+   Data model designers need to carefully consider all modularity
+   aspects, including the use of YANG conditional statements.
+
+   Objects SHOULD NOT directly reference NETCONF capabilities, in order
+   to specify optional behavior.  Instead, a 'feature' statement SHOULD
+   be defined to represent the NETCONF capability, and the 'if-feature'
+   statement SHOULD be used within the object definition.
+
+   If the condition associated with the desired semantics is not
+   dependent on any particular instance value within the database, then
+   an 'if-feature' statement SHOULD be used instead of a 'when'
+   statement.
+
+   All 'must' and 'when' statements MUST contain valid XPath.  If any
+   name tests are present, they MUST contain valid module prefixes
+   and/or data node names.
+
+   The 'attribute' and 'namespace' axis SHOULD NOT be used because the
+   associated XML node types are not supported in YANG, and may not be
+   supported consistently across NETCONF agent implementations.
+
+   The 'position' and 'last' functions SHOULD NOT be used.  Also, the
+   'preceding', 'preceding-sibling', 'following', and 'following-
+   sibling' axis SHOULD NOT be used.  These constructs rely on XML
+   document order within a NETCONF agent configuration database, which
+   may not be supported consistently or produce reliable results across
+   implementations.  Predicate expressions based on static node
+   properties (e.g., name, value, ancestors, descendants) SHOULD be used
+   instead.
+
+   Implicit 'position' function calls within predicates SHOULD NOT be
+   used. (e.g., //chapter[42]).
+
+   Data nodes which use the 'int64' and 'uint64' built-in type SHOULD
+   NOT be used within relational expressions.  There are boundary
+   conditions in which the translation from the YANG 64-bit type to an
+   XPath number can cause incorrect results.
+
+   Data modelers need to be careful not to confuse the YANG value space
+   and the XPath value space.  The data types are not the same in both,
+   and conversion between YANG and XPath data types SHOULD be considered
+   carefully.
+
+
+
+Bierman                 Expires November 19, 2009              [Page 11]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+   Explicit XPath data type conversions MAY be used (e.g., 'string',
+   'boolean', or 'number' functions), instead of implicit XPath data
+   type conversions.
+
+4.5.  Module Life-cycle Management
+
+   The status statement SHOULD NOT be present if its value is 'current'.
+   It MUST be present if its value is 'deprecated' or 'obsolete'.
+
+   The module or submodule name MUST NOT be changed, once the document
+   containing the module or submodule is published.
+
+   The module namespace URI value SHOULD NOT be changed, once the
+   document containing the module is published.
+
+   The revision-date sub-statement (within the imports statement) SHOULD
+   be present.  It MUST be present (in all published modules) if any
+   groupings are used from the external module.
+
+   The revision-date sub-statement (within the include statement) MAY be
+   present.  It SHOULD be present (in all published modules) if any
+   groupings are used from the external sub-module.
+
+4.6.  Header Contents
+
+   o  The namespace MUST be a globally unique URI, as defined in
+      [RFC3986].  This value is usually assigned by the IANA.
+
+   o  Until a URI is assigned by the IANA, a temporary namespace URI MAY
+      be selected which is not likely to collide with other YANG
+      namespaces, such as the filename of the Internet Draft containing
+      the module.  This value MUST be a valid URI (e.g.,
+      'file:///draft-ietf-foo-bar-00').
+
+   o  The organization statement MUST be present.
+
+   o  The contact statement MUST be present.
+
+   o  The description statement MUST be present.
+
+   o  If the module represents a model defined in one or more external
+      documents, then a reference statement MUST be present.
+
+   o  A revision statement MUST be present for each published version of
+      the module.
+
+   o  Each new revision MUST include a revision date which is higher
+      than any other revision date in the module.
+
+
+
+Bierman                 Expires November 19, 2009              [Page 12]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+   o  It is acceptable to reuse the same revision statement within
+      unpublished versions (i.e., Internet Drafts), but the revision
+      date MUST be updated to a higher value each time the Internet
+      Draft is re-published.
+
+4.7.  Data Types
+
+   o  Selection of an appropriate data type (i.e., built-in type,
+      existing derived type, or new derived type) is very subjective and
+      therefore few requirements can be specified on that subject.
+
+   o  Data model designers SHOULD use the most appropriate built-in data
+      type for the particular application.
+
+   o  If extensibility of enumerated values is required, then the
+      identityref data type SHOULD be used instead of an enumeration or
+      other built-in type.
+
+   o  For string data types, if a machine-readable pattern can be
+      defined for the desired semantics, then one or more pattern
+      statements SHOULD be present.
+
+   o  For string data types, if the length of the string is not required
+      to be unbounded in all implementations, then a length statement
+      SHOULD be present. [ed: should the 'resource-denied' error be
+      mentioned here?]
+
+   o  For numeric data types, if the values allowed by the intended
+      semantics are different than those allowed by the unbounded
+      intrinsic data type (e.g., int32), then a range statement SHOULD
+      be present.
+
+   o  The signed numeric data types (i.e., 'int8', 'int16', 'int32', and
+      'int64') SHOULD NOT be used unless negative values are allowed for
+      the desired semantics.
+
+   o  For enumeration or bits data types, the semantics for each enum or
+      bit SHOULD be documented.  A separate description statement
+      (within each enum or bit statement) SHOULD be present.
+
+4.8.  Reusable Type Definitions
+
+   o  If an appropriate derived type exists in any standard module, such
+      as [I-D.ietf-netmod-yang-types], then it SHOULD be used instead of
+      defining a new derived type.
+
+   o  If an appropriate units identifier can be associated with the
+      desired semantics, then a units statement SHOULD be present.
+
+
+
+Bierman                 Expires November 19, 2009              [Page 13]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+   o  If an appropriate default value can be associated with the desired
+      semantics, then a default statement SHOULD be present.
+
+   o  If a significant number of derived types are defined, and it is
+      anticipated that these data types will be reused by multiple
+      modules, then these derived types SHOULD be contained in a
+      separate module or submodule, to allow easier reuse without
+      unnecessary coupling.
+
+   o  The description statement MUST be present.
+
+   o  If the type definition semantics are defined in an external
+      document, then the reference statement SHOULD be present.
+
+4.9.  Object Definitions
+
+   o  The description statement MUST be present in the following body
+      statements:
+
+      *  extension
+
+      *  feature
+
+      *  identity
+
+      *  typedef
+
+      *  grouping
+
+      *  augment
+
+      *  rpc
+
+      *  notification
+
+   o  The description statement MUST be present in the following data
+      definition constructs:
+
+      *  container
+
+      *  leaf
+
+      *  leaf-list
+
+      *  list
+
+      *  choice
+
+
+
+
+Bierman                 Expires November 19, 2009              [Page 14]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+      *  anyxml
+
+   o  If the object semantics are defined in an external document, then
+      a reference statement SHOULD be present.
+
+   o  The 'anyxml' construct MUST NOT be used within configuration data.
+
+   o  If there are referential integrity constraints associated with the
+      desired semantics that can be represented with XPath, then one or
+      more must statements SHOULD be present.
+
+   o  For list and leaf-list objects, if the number of possible
+      instances is not required to be unbounded for all implementations,
+      then the max-elements statement SHOULD be present.
+
+   o  If any must or when statements are used within the object
+      definition, then the object description statement SHOULD describe
+      the purpose of each one.
+
+4.10.  RPC Definitions
+
+   o  The description statement MUST be present.
+
+   o  If the RPC method semantics are defined in an external document,
+      then a reference statement SHOULD be present.
+
+   o  If the RPC method impacts system behavior in some way, it SHOULD
+      be mentioned in the description statement.
+
+   o  If the RPC method is potentially harmful to system behavior in
+      some way, it MUST be mentioned in the Security Considerations
+      section of the document.
+
+4.11.  Notification Definitions
+
+   o  The description statement MUST be present.
+
+   o  If the notification semantics are defined in an external document,
+      then a reference statement SHOULD be present.
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires November 19, 2009              [Page 15]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+5.  IANA Considerations
+
+   There are no actions requested of IANA at this time.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires November 19, 2009              [Page 16]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+6.  Security Considerations
+
+   This document defines documentation guidelines for NETCONF content
+   defined with the YANG data modeling language.  It does not introduce
+   any new or increased security risks into the management system. [ed:
+   RFC 4181 style security section TBD]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires November 19, 2009              [Page 17]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+7.  Acknowledgments
+
+   The structure and contents of this document are adapted from
+   Guidelines for MIB Documents [RFC4181], by C. M. Heard.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires November 19, 2009              [Page 18]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+8.  References
+
+8.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC3986]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+              Resource Identifier (URI): Generic Syntax", STD 66,
+              RFC 3986, January 2005.
+
+   [RFC4741]  Enns, R., "NETCONF Configuration Protocol", RFC 4741,
+              December 2006.
+
+   [I-D.ietf-netmod-yang]
+              Bjorklund, M., "YANG - A data modeling language for
+              NETCONF", draft-ietf-netmod-yang-05 (work in progress),
+              April 2009.
+
+   [I-D.ietf-netmod-yang-types]
+              Schoenwaelder, J., "Common YANG Data Types",
+              draft-ietf-netmod-yang-types-03 (work in progress),
+              May 2009.
+
+8.2.  Informative References
+
+   [RFC4181]  Heard, C., "Guidelines for Authors and Reviewers of MIB
+              Documents", BCP 111, RFC 4181, September 2005.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires November 19, 2009              [Page 19]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+Appendix A.  Module Review Checklist
+
+   This section is adapted from RFC 4181.
+
+   The purpose of a YANG module review is to review the YANG module both
+   for technical correctness and for adherence to IETF documentation
+   requirements.  The following checklist may be helpful when reviewing
+   a draft document:
+
+   1.   I-D Boilerplate -- verify that the draft contains the required
+        Internet-Draft boilerplate (see
+        http://www.ietf.org/ietf/1id-guidelines.txt), including the
+        appropriate statement to permit publication as an RFC, and that
+        I-D boilerplate does not contain references or section numbers.
+
+   2.   Abstract -- verify that the abstract does not contain
+        references, that it does not have a section number, and that its
+        content follows the guidelines in
+        http://www.ietf.org/ietf/1id-guidelines.txt.
+
+   3.   YANG Module Boilerplate -- verify that the draft contains the
+        latest approved SNMP Network Management Framework boilerplate
+        from the OPS area web site
+        (http://www.ops.ietf.org/mib-boilerplate.html). [ed: real URL
+        TBD]
+
+   4.   Security Considerations Section -- verify that the draft uses
+        the latest approved template from the OPS area web site
+        (http://www.ops.ietf.org/mib-security.html) and that the
+        guidelines therein have been followed.
+
+   5.   IANA Considerations Section -- this section must always be
+        present.  If the draft requires no action from the IANA, ensure
+        that this is explicitly noted.  If the draft requires URI values
+        to be assigned, ensure that the IANA Considerations section
+        contains the information specified in [TBD] of these guidelines.
+        If the draft contains the initial version of an IANA-maintained
+        module, verify that the [TBD] invocation contains maintenance
+        instructions that comply with the requirements in RFC 2434.  In
+        the latter case, the IANA Considerations section that will
+        appear in the RFC MUST contain a pointer to the actual IANA-
+        maintained module.
+
+   6.   References -- verify that the references are properly divided
+        between normative and informative references, that RFC 2119 is
+        included as a normative reference if the terminology defined
+        therein is used in the document, that all references required by
+        the boilerplate are present, that all YANG modules containing
+
+
+
+Bierman                 Expires November 19, 2009              [Page 20]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+        imported items are cited as normative references, and that all
+        citations point to the most current RFCs unless there is a valid
+        reason to do otherwise (for example, it is OK to include an
+        informative reference to a previous version of a specification
+        to help explain a feature included for backward compatibility).
+
+   7.   Copyright Notices -- verify that the draft contains an
+        abbreviated copyright notice in the description statement of
+        each YANG module or sub-module, and that it contains the full
+        copyright notice and disclaimer specified in Sections 5.4 and
+        5.5 of RFC 3978 at the end of the document.  Make sure that the
+        correct year is used in all copyright dates.
+
+   8.   IPR Notice -- if the draft does not contains a verbatim copy of
+        the IPR notice specified in Section 5 of RFC 3979, recommend
+        that the IPR notice be included.
+
+   9.   Other Issues -- check for any issues mentioned in
+        http://www.ietf.org/ID-Checklist.html that are not covered
+        elsewhere.
+
+   10.  Technical Content -- review the actual technical content for
+        compliance with the guidelines in this document.  The use of a
+        YANG module compiler is recommended when checking for syntax
+        errors; see [YANG tool URL TBD] for more information.  Checking
+        for correct syntax, however, is only part of the job.  It is
+        just as important to actually read the YANG module document from
+        the point of view of a potential implementor.  It is
+        particularly important to check that description statements are
+        sufficiently clear and unambiguous to allow interoperable
+        implementations to be created.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires November 19, 2009              [Page 21]
+
+Internet-Draft            YANG Usage Guidelines                 May 2009
+
+
+Author's Address
+
+   Andy Bierman
+   Netconf Central
+   Simi Valley, CA
+   USA
+
+   Email: andy@netconfcentral.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bierman                 Expires November 19, 2009              [Page 22]
+
+

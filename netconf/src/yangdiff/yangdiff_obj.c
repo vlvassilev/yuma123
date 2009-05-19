@@ -181,16 +181,23 @@ static void
 	    newm->seen = TRUE;
 	    if (errinfo_changed(&oldm->errinfo, 
 				&newm->errinfo)) {
-		output_mstart_line(cp, YANG_K_MUST, 
-				   oldm->exprstr, FALSE);
+		output_mstart_line(cp, 
+				   YANG_K_MUST, 
+				   oldm->exprstr, 
+				   FALSE);
 		indent_in(cp);
-		output_errinfo_diff(cp, &oldm->errinfo, 
+		output_errinfo_diff(cp, 
+				    &oldm->errinfo, 
 				    &newm->errinfo);
 		indent_out(cp);
 	    }
 	} else {
 	    /* must-stmt was removed from the new module */
-	    output_diff(cp, YANG_K_MUST,  oldm->exprstr, NULL, FALSE);
+	    output_diff(cp, 
+			YANG_K_MUST,  
+			oldm->exprstr, 
+			NULL, 
+			FALSE);
 	}
     }
 
@@ -200,7 +207,11 @@ static void
 	 newm = (xpath_pcb_t *)dlq_nextEntry(newm)) {
 	if (!newm->seen) {
 	    /* must-stmt was added in the new module */
-	    output_diff(cp, YANG_K_MUST,  NULL, newm->exprstr, FALSE);
+	    output_diff(cp, 
+			YANG_K_MUST,  
+			NULL, 
+			newm->exprstr, 
+			FALSE);
 	}
     }
 
@@ -298,7 +309,11 @@ static void
 	    newu->seen = TRUE;
 	} else {
 	    /* must-stmt was removed from the new module */
-	    output_diff(cp, YANG_K_UNIQUE,  oldu->xpath, NULL, FALSE);
+	    output_diff(cp, 
+			YANG_K_UNIQUE, 
+			oldu->xpath,
+			NULL, 
+			FALSE);
 	}
     }
 
@@ -308,7 +323,11 @@ static void
 	 newu = (obj_unique_t *)dlq_nextEntry(newu)) {
 	if (!newu->seen) {
 	    /* must-stmt was added in the new module */
-	    output_diff(cp, YANG_K_UNIQUE,  NULL, newu->xpath, FALSE);
+	    output_diff(cp,
+			YANG_K_UNIQUE,
+			NULL,
+			newu->xpath,
+			FALSE);
 	}
     }
 
@@ -345,33 +364,42 @@ static uint32
     }
 
     if (str_field_changed(YANG_K_PRESENCE,
-			  old->presence, new->presence, 
-			  FALSE, NULL)) {
+			  old->presence,
+			  new->presence, 
+			  FALSE,
+			  NULL)) {
 	return 1;
     }
 
     if (bool_field_changed(YANG_K_CONFIG,
 			   (oldobj->flags & OBJ_FL_CONFIG),
 			   (newobj->flags & OBJ_FL_CONFIG), 
-			   FALSE, NULL)) {
+			   FALSE,
+			   NULL)) {
 	return 1;
     }
 
     if (status_field_changed(YANG_K_STATUS,
-			     old->status, new->status, 
-			     FALSE, NULL)) {
+			     old->status, 
+			     new->status, 
+			     FALSE,
+			     NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_DESCRIPTION,
-			  old->descr, new->descr, 
-			  FALSE, NULL)) {
+			  old->descr,
+			  new->descr, 
+			  FALSE,
+			  NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_REFERENCE,
-			  old->ref, new->ref, 
-			  FALSE, NULL)) {
+			  old->ref,
+			  new->ref, 
+			  FALSE,
+			  NULL)) {
 	return 1;
     }
 
@@ -419,30 +447,42 @@ static void
     output_mustQ_diff(cp, &old->mustQ, &new->mustQ);
 
     if (str_field_changed(YANG_K_PRESENCE,
-			  old->presence, new->presence, 
-			  isrev, &cdb)) {
+			  old->presence, 
+			  new->presence, 
+			  isrev,
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
     if (bool_field_changed(YANG_K_CONFIG, 
 			   (oldobj->flags & OBJ_FL_CONFIG),
 			   (newobj->flags & OBJ_FL_CONFIG), 
-			   isrev, &cdb)) {
+			   isrev,
+			   &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (status_field_changed(YANG_K_STATUS, old->status,
-			     new->status, isrev, &cdb)) {
+    if (status_field_changed(YANG_K_STATUS,
+			     old->status,
+			     new->status, 
+			     isrev,
+			     &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_DESCRIPTION, old->descr,
-			  new->descr, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_DESCRIPTION,
+			  old->descr,
+			  new->descr,
+			  isrev,
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_REFERENCE, old->ref,
-			  new->ref, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_REFERENCE,
+			  old->ref,
+			  new->ref,
+			  isrev,
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -483,8 +523,11 @@ static uint32
 	return 1;
     }
 
-    if (str_field_changed(YANG_K_UNITS, old->units, new->units, 
-			  FALSE, NULL)) {
+    if (str_field_changed(YANG_K_UNITS, 
+			  old->units, 
+			  new->units, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
@@ -493,40 +536,50 @@ static uint32
     }
 
     if (str_field_changed(YANG_K_DEFAULT,
-			  old->defval, new->defval, 
-			  FALSE, NULL)) {
+			  old->defval, 
+			  new->defval, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
     if (bool_field_changed(YANG_K_CONFIG,
 			   (oldobj->flags & OBJ_FL_CONFIG),
 			   (newobj->flags & OBJ_FL_CONFIG), 
-			   FALSE, NULL)) {
+			   FALSE, 
+			   NULL)) {
 	return 1;
     }
 
     if (bool_field_changed(YANG_K_MANDATORY,
 			   (oldobj->flags & OBJ_FL_MANDATORY),
 			   (newobj->flags & OBJ_FL_MANDATORY), 
-			   FALSE, NULL)) {
+			   FALSE, 
+			   NULL)) {
 	return 1;
     }
 
     if (status_field_changed(YANG_K_STATUS,
-			     old->status, new->status, 
-			     FALSE, NULL)) {
+			     old->status, 
+			     new->status, 
+			     FALSE, 
+			     NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_DESCRIPTION,
-			  old->descr, new->descr, 
-			  FALSE, NULL)) {
+			  old->descr, 
+			  new->descr, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_REFERENCE,
-			  old->ref, new->ref, 
-			  FALSE, NULL)) {
+			  old->ref, 
+			  new->ref, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
@@ -563,45 +616,61 @@ static void
 	output_one_type_diff(cp, old->typdef, new->typdef);
     }
 
-    if (str_field_changed(YANG_K_UNITS, old->units, new->units, 
-			  isrev, &cdb)) {
+    if (str_field_changed(YANG_K_UNITS, 
+			  old->units, 
+			  new->units, 
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
     output_mustQ_diff(cp, &old->mustQ, &new->mustQ);
 
     if (str_field_changed(YANG_K_DEFAULT,
-			    old->defval, new->defval, 
-			  isrev, &cdb)) {
+			  old->defval, 
+			  new->defval, 
+			  isrev,
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
     if (bool_field_changed(YANG_K_CONFIG,
 			   (oldobj->flags & OBJ_FL_CONFIG),
 			   (newobj->flags & OBJ_FL_CONFIG), 
-			   isrev, &cdb)) {
+			   isrev,
+			   &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
     if (bool_field_changed(YANG_K_MANDATORY,
 			   (oldobj->flags & OBJ_FL_MANDATORY),
 			   (newobj->flags & OBJ_FL_MANDATORY), 
-			   isrev, &cdb)) {
+			   isrev,
+			   &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (status_field_changed(YANG_K_STATUS, old->status,
-			     new->status, isrev, &cdb)) {
+    if (status_field_changed(YANG_K_STATUS,
+			     old->status,
+			     new->status, 
+			     isrev,
+			     &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_DESCRIPTION, old->descr,
-			  new->descr, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_DESCRIPTION, 
+			  old->descr,
+			  new->descr, 
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_REFERENCE, old->ref,
-			  new->ref, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_REFERENCE,
+			  old->ref,
+			  new->ref,
+			  isrev,
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -636,8 +705,11 @@ static uint32
 	return 1;
     }
 
-    if (str_field_changed(YANG_K_UNITS, old->units, new->units, 
-			  FALSE, NULL)) {
+    if (str_field_changed(YANG_K_UNITS, 
+			  old->units, 
+			  new->units, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
@@ -648,20 +720,27 @@ static uint32
     if (bool_field_changed(YANG_K_CONFIG,
 			   (oldobj->flags & OBJ_FL_CONFIG),
 			   (newobj->flags & OBJ_FL_CONFIG), 
-			   FALSE, NULL)) {
+			   FALSE, 
+			   NULL)) {
 	return 1;
     }
 
-    if (bool_field_changed(YANG_K_MIN_ELEMENTS, old->minset,
-			   new->minset, FALSE, NULL)) {
+    if (bool_field_changed(YANG_K_MIN_ELEMENTS, 
+			   old->minset,
+			   new->minset, 
+			   FALSE, 
+			   NULL)) {
 	return 1;
     }
     if (new->minelems != old->minelems) {
 	return 1;
     }
 
-    if (bool_field_changed(YANG_K_MAX_ELEMENTS, old->maxset,
-			   new->maxset, FALSE, NULL)) {
+    if (bool_field_changed(YANG_K_MAX_ELEMENTS, 
+			   old->maxset,
+			   new->maxset, 
+			   FALSE, 
+			   NULL)) {
 	return 1;
     }
     if (new->maxelems != old->maxelems) {
@@ -673,20 +752,26 @@ static uint32
     }
 
     if (status_field_changed(YANG_K_STATUS,
-			     old->status, new->status, 
-			     FALSE, NULL)) {
+			     old->status, 
+			     new->status, 
+			     FALSE, 
+			     NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_DESCRIPTION,
-			  old->descr, new->descr, 
-			  FALSE, NULL)) {
+			  old->descr, 
+			  new->descr, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_REFERENCE,
-			  old->ref, new->ref, 
-			  FALSE, NULL)) {
+			  old->ref, 
+			  new->ref, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
@@ -737,7 +822,8 @@ static void
     if (bool_field_changed(YANG_K_CONFIG,
 			   (oldobj->flags & OBJ_FL_CONFIG),
 			   (newobj->flags & OBJ_FL_CONFIG), 
-			   isrev, &cdb)) {
+			   isrev, 
+			   &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -755,8 +841,10 @@ static void
     }
 
     if (str_field_changed(YANG_K_MIN_ELEMENTS, 
-			  oldn, newn,
-			  isrev, &cdb)) {
+			  oldn, 
+			  newn,
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -773,30 +861,45 @@ static void
 	newn = NULL;
     }
 
-    if (str_field_changed(YANG_K_MAX_ELEMENTS, oldn, newn,
-			  isrev, &cdb)) {
+    if (str_field_changed(YANG_K_MAX_ELEMENTS, 
+			  oldn, 
+			  newn,
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
     oldorder = (old->ordersys) ? YANG_K_SYSTEM : YANG_K_USER;
     neworder = (new->ordersys) ? YANG_K_SYSTEM : YANG_K_USER;
-    if (str_field_changed(YANG_K_ORDERED_BY, oldorder, neworder,
-			  isrev, &cdb)) {
+    if (str_field_changed(YANG_K_ORDERED_BY, 
+			  oldorder, 
+			  neworder,
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (status_field_changed(YANG_K_STATUS, old->status,
-			     new->status, isrev, &cdb)) {
+    if (status_field_changed(YANG_K_STATUS, 
+			     old->status,
+			     new->status, 
+			     isrev, 
+			     &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_DESCRIPTION, old->descr,
-			  new->descr, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_DESCRIPTION, 
+			  old->descr,
+			  new->descr, 
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_REFERENCE, old->ref,
-			  new->ref, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_REFERENCE, 
+			  old->ref,
+			  new->ref, 
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -831,8 +934,11 @@ static uint32
 	return 1;
     }
 
-    if (str_field_changed(YANG_K_KEY, old->keystr, 
-			  new->keystr, FALSE, NULL)) {
+    if (str_field_changed(YANG_K_KEY, 
+			  old->keystr, 
+			  new->keystr, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
@@ -843,20 +949,27 @@ static uint32
     if (bool_field_changed(YANG_K_CONFIG, 
 			   (oldobj->flags & OBJ_FL_CONFIG),
 			   (newobj->flags & OBJ_FL_CONFIG), 
-			   FALSE, NULL)) {
+			   FALSE, 
+			   NULL)) {
 	return 1;
     }
 
-    if (bool_field_changed(YANG_K_MIN_ELEMENTS, old->minset,
-			   new->minset, FALSE, NULL)) {
+    if (bool_field_changed(YANG_K_MIN_ELEMENTS, 
+			   old->minset,
+			   new->minset, 
+			   FALSE, 
+			   NULL)) {
 	return 1;
     }
     if (new->minelems != old->minelems) {
 	return 1;
     }
 
-    if (bool_field_changed(YANG_K_MAX_ELEMENTS, old->maxset,
-			   new->maxset, FALSE, NULL)) {
+    if (bool_field_changed(YANG_K_MAX_ELEMENTS, 
+			   old->maxset,
+			   new->maxset,
+			   FALSE, 
+			   NULL)) {
 	return 1;
     }
     if (new->maxelems != old->maxelems) {
@@ -868,20 +981,26 @@ static uint32
     }
 
     if (status_field_changed(YANG_K_STATUS,
-			     old->status, new->status, 
-			     FALSE, NULL)) {
+			     old->status,
+			     new->status, 
+			     FALSE,
+			     NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_DESCRIPTION,
-			  old->descr, new->descr, 
-			  FALSE, NULL)) {
+			  old->descr,
+			  new->descr, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_REFERENCE,
-			  old->ref, new->ref, 
-			  FALSE, NULL)) {
+			  old->ref,
+			  new->ref, 
+			  FALSE,
+			  NULL)) {
 	return 1;
     }
 
@@ -932,8 +1051,11 @@ static void
 
     output_mustQ_diff(cp, &old->mustQ, &new->mustQ);
 
-    if (str_field_changed(YANG_K_KEY, old->keystr, new->keystr,
-			  isrev, &cdb)) {
+    if (str_field_changed(YANG_K_KEY, 
+			  old->keystr,
+			  new->keystr,
+			  isrev,
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -942,7 +1064,8 @@ static void
     if (bool_field_changed(YANG_K_CONFIG,
 			   (oldobj->flags & OBJ_FL_CONFIG),
 			   (newobj->flags & OBJ_FL_CONFIG), 
-			   isrev, &cdb)) {
+			   isrev,
+			   &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -960,8 +1083,10 @@ static void
     }
 
     if (str_field_changed(YANG_K_MIN_ELEMENTS, 
-			  oldn, newn,
-			  isrev, &cdb)) {
+			  oldn,
+			  newn,
+			  isrev,
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -978,30 +1103,45 @@ static void
 	newn = NULL;
     }
 
-    if (str_field_changed(YANG_K_MAX_ELEMENTS, oldn, newn,
-			  isrev, &cdb)) {
+    if (str_field_changed(YANG_K_MAX_ELEMENTS, 
+			  oldn, 
+			  newn,
+			  isrev,
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
     oldorder = (old->ordersys) ? YANG_K_SYSTEM : YANG_K_USER;
     neworder = (new->ordersys) ? YANG_K_SYSTEM : YANG_K_USER;
-    if (str_field_changed(YANG_K_ORDERED_BY, oldorder, neworder,
-			  isrev, &cdb)) {
+    if (str_field_changed(YANG_K_ORDERED_BY, 
+			  oldorder, 
+			  neworder,
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (status_field_changed(YANG_K_STATUS, old->status,
-			     new->status, isrev, &cdb)) {
+    if (status_field_changed(YANG_K_STATUS,
+			     old->status,
+			     new->status,
+			     isrev,
+			     &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_DESCRIPTION, old->descr,
-			  new->descr, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_DESCRIPTION,
+			  old->descr,
+			  new->descr, 
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_REFERENCE, old->ref,
-			  new->ref, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_REFERENCE, 
+			  old->ref,
+			  new->ref, 
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -1039,33 +1179,43 @@ static uint32
     new = newobj->def.choic;
 
 
-    if (str_field_changed(YANG_K_DEFAULT, old->defval, new->defval, 
-			  FALSE, NULL)) {
+    if (str_field_changed(YANG_K_DEFAULT, 
+			  old->defval, 
+			  new->defval, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
     if (bool_field_changed(YANG_K_MANDATORY,
 			   (oldobj->flags & OBJ_FL_MANDATORY),
 			   (newobj->flags & OBJ_FL_MANDATORY),
-			   FALSE, NULL)) {
+			   FALSE, 
+			   NULL)) {
 	return 1;
     }
 
     if (status_field_changed(YANG_K_STATUS,
-			     old->status, new->status, 
-			     FALSE, NULL)) {
+			     old->status, 
+			     new->status, 
+			     FALSE, 
+			     NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_DESCRIPTION,
-			  old->descr, new->descr, 
-			  FALSE, NULL)) {
+			  old->descr, 
+			  new->descr, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_REFERENCE,
-			  old->ref, new->ref, 
-			  FALSE, NULL)) {
+			  old->ref, 
+			  new->ref, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
@@ -1104,30 +1254,42 @@ static void
     new = newobj->def.choic;
 
     if (str_field_changed(YANG_K_DEFAULT,
-			  old->defval, new->defval, 
-			  isrev, &cdb)) {
+			  old->defval, 
+			  new->defval, 
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
     if (bool_field_changed(YANG_K_MANDATORY,
 			   (oldobj->flags & OBJ_FL_MANDATORY),
 			   (newobj->flags & OBJ_FL_MANDATORY),
-			   isrev, &cdb)) {
+			   isrev, 
+			   &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (status_field_changed(YANG_K_STATUS, old->status,
-			     new->status, isrev, &cdb)) {
+    if (status_field_changed(YANG_K_STATUS, 
+			     old->status,
+			     new->status, 
+			     isrev, 
+			     &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_DESCRIPTION, old->descr,
-			  new->descr, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_DESCRIPTION, 
+			  old->descr,
+			  new->descr, 
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_REFERENCE, old->ref,
-			  new->ref, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_REFERENCE, 
+			  old->ref,
+			  new->ref, 
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -1161,20 +1323,26 @@ static uint32
     new = newobj->def.cas;
 
     if (status_field_changed(YANG_K_STATUS,
-			     old->status, new->status, 
-			     FALSE, NULL)) {
+			     old->status, 
+			     new->status, 
+			     FALSE, 
+			     NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_DESCRIPTION,
-			  old->descr, new->descr, 
-			  FALSE, NULL)) {
+			  old->descr, 
+			  new->descr, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_REFERENCE,
-			  old->ref, new->ref, 
-			  FALSE, NULL)) {
+			  old->ref, 
+			  new->ref, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
@@ -1211,18 +1379,27 @@ static void
     old = oldobj->def.cas;
     new = newobj->def.cas;
 
-    if (status_field_changed(YANG_K_STATUS, old->status,
-			     new->status, isrev, &cdb)) {
+    if (status_field_changed(YANG_K_STATUS, 
+			     old->status,
+			     new->status, 
+			     isrev, 
+			     &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_DESCRIPTION, old->descr,
-			  new->descr, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_DESCRIPTION, 
+			  old->descr,
+			  new->descr, 
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_REFERENCE, old->ref,
-			  new->ref, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_REFERENCE,
+			  old->ref,
+			  new->ref,
+			  isrev,
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -1256,20 +1433,26 @@ static uint32
     new = newobj->def.rpc;
 
     if (status_field_changed(YANG_K_STATUS,
-			     old->status, new->status, 
-			     FALSE, NULL)) {
+			     old->status,
+			     new->status, 
+			     FALSE,
+			     NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_DESCRIPTION,
-			  old->descr, new->descr, 
-			  FALSE, NULL)) {
+			  old->descr,
+			  new->descr, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_REFERENCE,
-			  old->ref, new->ref, 
-			  FALSE, NULL)) {
+			  old->ref,
+			  new->ref, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
@@ -1314,18 +1497,27 @@ static void
     old = oldobj->def.rpc;
     new = newobj->def.rpc;
 
-    if (status_field_changed(YANG_K_STATUS, old->status,
-			     new->status, isrev, &cdb)) {
+    if (status_field_changed(YANG_K_STATUS, 
+			     old->status,
+			     new->status, 
+			     isrev, 
+			     &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_DESCRIPTION, old->descr,
-			  new->descr, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_DESCRIPTION, 
+			  old->descr,
+			  new->descr, 
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_REFERENCE, old->ref,
-			  new->ref, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_REFERENCE, 
+			  old->ref,
+			  new->ref, 
+			  isrev, 
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -1434,20 +1626,26 @@ static uint32
     new = newobj->def.notif;
 
     if (status_field_changed(YANG_K_STATUS,
-			     old->status, new->status, 
-			     FALSE, NULL)) {
+			     old->status, 
+			     new->status, 
+			     FALSE, 
+			     NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_DESCRIPTION,
-			  old->descr, new->descr, 
-			  FALSE, NULL)) {
+			  old->descr, 
+			  new->descr, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
     if (str_field_changed(YANG_K_REFERENCE,
-			  old->ref, new->ref, 
-			  FALSE, NULL)) {
+			  old->ref, 
+			  new->ref, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
@@ -1492,18 +1690,27 @@ static void
     old = oldobj->def.notif;
     new = newobj->def.notif;
 
-    if (status_field_changed(YANG_K_STATUS, old->status,
-			     new->status, isrev, &cdb)) {
+    if (status_field_changed(YANG_K_STATUS, 
+			     old->status,
+			     new->status, 
+			     isrev, 
+			     &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_DESCRIPTION, old->descr,
-			  new->descr, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_DESCRIPTION,
+			  old->descr,
+			  new->descr,
+			  isrev,
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
-    if (str_field_changed(YANG_K_REFERENCE, old->ref,
-			  new->ref, isrev, &cdb)) {
+    if (str_field_changed(YANG_K_REFERENCE,
+			  old->ref,
+			  new->ref,
+			  isrev,
+			  &cdb)) {
 	output_cdb_line(cp, &cdb);
     }
 
@@ -1583,8 +1790,10 @@ static void
 			    obj_template_t *oldobj,
 			    obj_template_t *newobj)
 {
-    output_mstart_line(cp, obj_get_typestr(oldobj),
-		       obj_get_name(oldobj), TRUE);
+    output_mstart_line(cp, 
+		       obj_get_typestr(oldobj),
+		       obj_get_name(oldobj), 
+		       TRUE);
 
     if (cp->edifftype == YANGDIFF_DT_TERSE) {
 	return;
@@ -1593,9 +1802,11 @@ static void
     indent_in(cp);
 
     if (oldobj->objtype != newobj->objtype) {
-	output_diff(cp, (const xmlChar *)"object-type",
+	output_diff(cp, 
+		    (const xmlChar *)"object-type",
 		    obj_get_typestr(oldobj),
-		    obj_get_typestr(newobj), TRUE);
+		    obj_get_typestr(newobj), 
+		    TRUE);
     } else {
 	switch (oldobj->objtype) {
 	case OBJ_TYP_CONTAINER:
@@ -1669,7 +1880,8 @@ void
 	 oldobj = (obj_template_t *)dlq_nextEntry(oldobj)) {
 
 	if (obj_has_name(oldobj)) {
-	    newobj = obj_find_template(newQ, cp->newmod->name, 
+	    newobj = obj_find_template(newQ, 
+				       cp->newmod->name, 
 				       obj_get_name(oldobj));
 	} else {
 	    continue;
@@ -1692,8 +1904,11 @@ void
 	} else {
 	    /* object was removed from the new module */
 	    oldobj->flags |= OBJ_FL_SEEN;
-	    output_diff(cp, obj_get_typestr(oldobj), 
-			obj_get_name(oldobj), NULL, TRUE);
+	    output_diff(cp, 
+			obj_get_typestr(oldobj), 
+			obj_get_name(oldobj), 
+			NULL, 
+			TRUE);
 	    anyout = TRUE;
 	}
     }
@@ -1707,8 +1922,11 @@ void
 	}
 	if (!(newobj->flags & OBJ_FL_SEEN)) {
 	    /* this object was added in the new version */
-	    output_diff(cp, obj_get_typestr(newobj),
-			NULL, obj_get_name(newobj), TRUE);
+	    output_diff(cp, 
+			obj_get_typestr(newobj),
+			NULL, 
+			obj_get_name(newobj),
+			TRUE);
 	    anyout = TRUE;	    
 	}
     }
@@ -1722,9 +1940,11 @@ void
 	while (oldobj && newobj) {
 	    if (obj_has_name(oldobj)) {
 		if (!obj_is_match(oldobj, newobj)) {
-		    output_mstart_line(cp, (const xmlChar *)
+		    output_mstart_line(cp, 
+				       (const xmlChar *)
 				       "child node order", 
-				       NULL, FALSE);
+				       NULL, 
+				       FALSE);
 		    return;
 		}
 	    }
@@ -1779,7 +1999,8 @@ uint32
 	}
 
 	if (obj_has_name(oldobj)) {
-	    newobj = obj_find_template(newQ, cp->newmod->name, 
+	    newobj = obj_find_template(newQ, 
+				       cp->newmod->name, 
 				       obj_get_name(oldobj));
 	} else {
 	    continue;

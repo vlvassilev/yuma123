@@ -104,30 +104,42 @@ static void
     dchanged = FALSE;
     changecnt = 0;
 
-    if (typedefQ_changed(cp, &oldgrp->typedefQ, &newgrp->typedefQ)) {
+    if (typedefQ_changed(cp, 
+			 &oldgrp->typedefQ, 
+			 &newgrp->typedefQ)) {
 	tchanged = TRUE;
 	changecnt++;
     }
 
-    if (groupingQ_changed(cp, &oldgrp->groupingQ, &newgrp->groupingQ)) {
+    if (groupingQ_changed(cp, 
+			  &oldgrp->groupingQ, 
+			  &newgrp->groupingQ)) {
 	gchanged = TRUE;
 	changecnt++;
     }
 
-    if (datadefQ_changed(cp, &oldgrp->datadefQ, &newgrp->datadefQ)) {
+    if (datadefQ_changed(cp, 
+			 &oldgrp->datadefQ, 
+			 &newgrp->datadefQ)) {
 	dchanged = TRUE;
 	changecnt++;
     }
 
     changecnt += status_field_changed(YANG_K_STATUS,
-				      oldgrp->status, newgrp->status, 
-				      isrev, &cdb[0]);
+				      oldgrp->status, 
+				      newgrp->status, 
+				      isrev, 
+				      &cdb[0]);
     changecnt += str_field_changed(YANG_K_DESCRIPTION,
-				   oldgrp->descr, newgrp->descr, 
-				   isrev, &cdb[1]);
+				   oldgrp->descr, 
+				   newgrp->descr, 
+				   isrev, 
+				   &cdb[1]);
     changecnt += str_field_changed(YANG_K_REFERENCE,
-				   oldgrp->ref, newgrp->ref, 
-				   isrev, &cdb[2]);
+				   oldgrp->ref, 
+				   newgrp->ref, 
+				   isrev, 
+				   &cdb[2]);
     if (changecnt == 0) {
 	return;
     }
@@ -148,15 +160,21 @@ static void
     }
 
     if (tchanged) {
-	output_typedefQ_diff(cp, &oldgrp->typedefQ, &newgrp->typedefQ);
+	output_typedefQ_diff(cp, 
+			     &oldgrp->typedefQ, 
+			     &newgrp->typedefQ);
     }
 
     if (gchanged) {
-	output_groupingQ_diff(cp, &oldgrp->groupingQ, &newgrp->groupingQ);
+	output_groupingQ_diff(cp, 
+			      &oldgrp->groupingQ, 
+			      &newgrp->groupingQ);
     }
 
     if (dchanged) {
-	output_datadefQ_diff(cp, &oldgrp->datadefQ, &newgrp->datadefQ);
+	output_datadefQ_diff(cp, 
+			     &oldgrp->datadefQ, 
+			     &newgrp->datadefQ);
     }
 
     indent_out(cp);
@@ -184,30 +202,42 @@ static uint32
 		      grp_template_t *newgrp)
 {
     if (status_field_changed(YANG_K_STATUS,
-			     oldgrp->status, newgrp->status, 
-			     FALSE, NULL)) {
+			     oldgrp->status, 
+			     newgrp->status, 
+			     FALSE, 
+			     NULL)) {
 	return 1;
     }
     if (str_field_changed(YANG_K_DESCRIPTION,
-			  oldgrp->descr, newgrp->descr, 
-			  FALSE, NULL)) {
+			  oldgrp->descr, 
+			  newgrp->descr, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
     if (str_field_changed(YANG_K_REFERENCE,
-			  oldgrp->ref, newgrp->ref, 
-			  FALSE, NULL)) {
+			  oldgrp->ref, 
+			  newgrp->ref, 
+			  FALSE, 
+			  NULL)) {
 	return 1;
     }
 
-    if (typedefQ_changed(cp, &oldgrp->typedefQ, &newgrp->typedefQ)) {
+    if (typedefQ_changed(cp, 
+			 &oldgrp->typedefQ, 
+			 &newgrp->typedefQ)) {
 	return 1;
     }
 
-    if (groupingQ_changed(cp, &oldgrp->groupingQ, &newgrp->groupingQ)) {
+    if (groupingQ_changed(cp, 
+			  &oldgrp->groupingQ, 
+			  &newgrp->groupingQ)) {
 	return 1;
     }
 
-    if (datadefQ_changed(cp, &oldgrp->datadefQ, &newgrp->datadefQ)) {
+    if (datadefQ_changed(cp, 
+			 &oldgrp->datadefQ, 
+			 &newgrp->datadefQ)) {
 	return 1;
     }
 
@@ -257,7 +287,11 @@ void
 	    newgrp->used = TRUE;
 	} else {
 	    /* grouping was removed from the new module */
-	    output_diff(cp, YANG_K_GROUPING, oldgrp->name, NULL, TRUE);
+	    output_diff(cp, 
+			YANG_K_GROUPING, 
+			oldgrp->name, 
+			NULL, 
+			TRUE);
 	}
     }
 
@@ -267,7 +301,11 @@ void
 	 newgrp = (grp_template_t *)dlq_nextEntry(newgrp)) {
 	if (!newgrp->used) {
 	    /* this grouping was added in the new version */
-	    output_diff(cp, YANG_K_GROUPING, NULL, newgrp->name, TRUE);
+	    output_diff(cp, 
+			YANG_K_GROUPING, 
+			NULL, 
+			newgrp->name, 
+			TRUE);
 	}
     }
 

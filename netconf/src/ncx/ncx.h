@@ -610,6 +610,8 @@ extern uint32
     ncx_feature_count (const ncx_module_t *mod,
 		       boolean enabledonly);
 
+extern boolean
+    ncx_feature_enabled (const ncx_feature_t *feature);
 
 /********************** ncx_identity_t *********************/
 

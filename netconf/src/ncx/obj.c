@@ -7136,7 +7136,6 @@ xmlns_id_t
 ncx_iqual_t
     obj_get_iqualval (const obj_template_t  *obj)
 {
-    ncx_iqual_t  ret;
     boolean      required;
 
 #ifdef DEBUG
@@ -7146,8 +7145,38 @@ ncx_iqual_t
     }
 #endif
 
-    ret = NCX_IQUAL_NONE;
     required = obj_is_mandatory(obj);
+    return obj_get_iqualval_ex(obj, required);
+    
+}  /* obj_get_iqualval */
+
+
+/********************************************************************
+* FUNCTION obj_get_iqualval_ex
+* 
+* Get the instance qualifier for this object
+*
+* INPUTS:
+*    obj  == object to check
+*    mand == value to use for 'is_mandatory()' logic
+*
+* RETURNS:
+*    instance qualifier enumeration
+*********************************************************************/
+ncx_iqual_t
+    obj_get_iqualval_ex (const obj_template_t  *obj,
+			 boolean required)
+{
+    ncx_iqual_t  ret;
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NCX_IQUAL_NONE;
+    }
+#endif
+
+    ret = NCX_IQUAL_NONE;
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
@@ -7202,7 +7231,7 @@ ncx_iqual_t
     }
     return ret;
 
-}  /* obj_get_iqualval */
+}  /* obj_get_iqualval_ex */
 
 
 /********************************************************************
@@ -9089,6 +9118,63 @@ uint8
     }
 
 }  /* obj_get_fraction_digits */
+
+
+/********************************************************************
+* FUNCTION obj_get_first_iffeature
+* 
+* Get the first if-feature clause (if any) for the specified object
+*
+* INPUTS:
+*     obj == object template to  check
+*
+* RETURNS:
+*     pointer to first if-feature struct
+*     NULL if none available
+*********************************************************************/
+const ncx_iffeature_t *
+    obj_get_first_iffeature (const obj_template_t  *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (const ncx_iffeature_t *)
+	dlq_firstEntry(&obj->iffeatureQ);
+
+}  /* obj_get_first_iffeature */
+
+
+/********************************************************************
+* FUNCTION obj_get_next_iffeature
+* 
+* Get the next if-feature clause (if any)
+*
+* INPUTS:
+*     iffeature == current iffeature struct
+*
+* RETURNS:
+*     pointer to next if-feature struct
+*     NULL if none available
+*********************************************************************/
+const ncx_iffeature_t *
+    obj_get_next_iffeature (const ncx_iffeature_t  *iffeature)
+{
+
+#ifdef DEBUG
+    if (!iffeature) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return (const ncx_iffeature_t *)dlq_nextEntry(iffeature);
+
+}  /* obj_get_next_iffeature */
 
 
 /* END obj.c */

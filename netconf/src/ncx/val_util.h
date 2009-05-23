@@ -165,6 +165,17 @@ extern status_t
 				 const obj_template_t *childobj,
 				 boolean *condresult);
 
+extern boolean
+    val_is_mandatory (val_value_t *val,
+		      val_value_t *valroot,
+		      const obj_template_t *childobj);
+
+
+extern ncx_iqual_t 
+    val_get_cond_iqualval (val_value_t *val,
+			   val_value_t *valroot,
+			   const obj_template_t *obj);
+
 extern xpath_pcb_t *
     val_get_xpathpcb (val_value_t *val);
 

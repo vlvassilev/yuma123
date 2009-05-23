@@ -7166,7 +7166,7 @@ void
 	 feature != NULL && keepgoing;
 	 feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	if (enabledonly && !feature->enabled) {
+	if (enabledonly && !ncx_feature_enabled(feature)) {
 	    continue;
 	}
 
@@ -7202,7 +7202,7 @@ void
 	     feature != NULL && keepgoing;
 	     feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	    if (enabledonly && !feature->enabled) {
+	    if (enabledonly && !ncx_feature_enabled(feature)) {
 		continue;
 	    }
 
@@ -7247,7 +7247,7 @@ uint32
 	 feature != NULL;
 	 feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	if (enabledonly && !feature->enabled) {
+	if (enabledonly && !ncx_feature_enabled(feature)) {
 	    continue;
 	}
 
@@ -7283,17 +7283,66 @@ uint32
 	     feature != NULL;
 	     feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	    if (enabledonly && !feature->enabled) {
+	    if (enabledonly && !ncx_feature_enabled(feature)) {
 		continue;
 	    }
-
 	    count++;
 	}
     }
-
     return count;
 
 } /* ncx_feature_count */
+
+
+/********************************************************************
+* FUNCTION ncx_feature_enabled
+* 
+* Check if the specified feature and any referenced
+* if-features are enabled
+*
+* INPUTS:
+*    feature == feature to check
+*
+* RETURNS:
+*   TRUE if feature is completely enabled
+*   FALSE if feature is not enabled, or partially enabled
+*********************************************************************/
+boolean
+    ncx_feature_enabled (const ncx_feature_t *feature)
+{
+    const ncx_iffeature_t  *iffeature;
+
+#ifdef DEBUG
+    if (!feature) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    if (!feature->enabled) {
+	return FALSE;
+    }
+
+    /* make sure all nested if-features are also enabled */
+    for (iffeature = (const ncx_iffeature_t *)
+	     dlq_firstEntry(&feature->iffeatureQ);
+	 iffeature != NULL;
+	 iffeature = (const ncx_iffeature_t *)
+	     dlq_nextEntry(iffeature)) {
+
+	if (!iffeature->feature) {
+	    /* feature was not found, so call it disabled */
+	    return FALSE;
+	}
+
+	if (!ncx_feature_enabled(iffeature->feature)) {
+	    return FALSE;
+	}
+    }
+
+    return TRUE;
+
+} /* ncx_feature_enabled */
 
 
 /********************************************************************

@@ -956,6 +956,10 @@ extern xmlns_id_t
 extern ncx_iqual_t
     obj_get_iqualval (const obj_template_t  *obj);
 
+extern ncx_iqual_t
+    obj_get_iqualval_ex (const obj_template_t  *obj,
+			 boolean required);
+
 /* return TRUE if min is set */
 extern boolean
     obj_get_min_elements (const obj_template_t  *obj,
@@ -1112,5 +1116,12 @@ extern boolean
 
 extern uint8
     obj_get_fraction_digits (const obj_template_t  *obj);
+
+extern const ncx_iffeature_t *
+    obj_get_first_iffeature (const obj_template_t *obj);
+
+extern const ncx_iffeature_t *
+    obj_get_next_iffeature (const ncx_iffeature_t *iffeature);
+
 
 #endif	    /* _H_obj */

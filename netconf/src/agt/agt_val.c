@@ -2329,7 +2329,6 @@ static status_t
 * OUTPUTS:
 *   if msg not NULL:
 *      msg->msg_errQ may have rpc_err_rec_t structs added to it 
-
 *      which must be freed by the called with the 
 *      rpc_err_free_record function
 *
@@ -2390,7 +2389,7 @@ static status_t
     res = NO_ERR;
     res2 = NO_ERR;
     errinfo = NULL;
-    iqual = obj_get_iqualval(obj);
+    iqual = val_get_cond_iqualval(val, valroot, obj);
     minerr = FALSE;
     maxerr = FALSE;
     minelems = 0;
@@ -3653,6 +3652,10 @@ status_t
 	    if (obj_is_root(chval->obj)) {
 		continue;
 	    } else if (chval->obj->objtype != OBJ_TYP_LEAF) {
+		/* skipping leafs because if they already
+		 * exist, there is nothing to check;
+		 * there is already one of them as required
+		 */
 		res = agt_val_instance_check(scb, 
 					     msg, 
 					     chval, 

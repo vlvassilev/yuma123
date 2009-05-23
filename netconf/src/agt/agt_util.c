@@ -1460,4 +1460,97 @@ status_t
 } /* agt_check_editop */
 
 
+/********************************************************************
+* FUNCTION agt_enable_feature
+* 
+* Enable a YANG feature in the agent
+* This will not be detected by any sessions in progress!!!
+* It will take affect the next time a <hello> message
+* is sent by the agent
+*
+* INPUTS:
+*   modname == module name containing the feature
+*   featurename == feature name to enable
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    agt_enable_feature (const xmlChar *modname,
+			const xmlChar *featurename)
+{
+
+    ncx_module_t   *mod;
+    ncx_feature_t  *feature;
+    status_t        res;
+
+#ifdef DEBUG
+    if (!modname || !featurename) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    mod = ncx_find_module(modname, NULL);
+    if (!mod) {
+	return ERR_NCX_MOD_NOT_FOUND;
+    }
+
+    feature = ncx_find_feature(mod, featurename);
+    if (!feature) {
+	return ERR_NCX_DEF_NOT_FOUND;
+    }
+
+    feature->enabled = TRUE;
+    return NO_ERR;
+
+} /* agt_enable_feature */
+
+
+/********************************************************************
+* FUNCTION agt_disable_feature
+* 
+* Disable a YANG feature in the agent
+* This will not be detected by any sessions in progress!!!
+* It will take affect the next time a <hello> message
+* is sent by the agent
+*
+* INPUTS:
+*   modname == module name containing the feature
+*   featurename == feature name to disable
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    agt_disable_feature (const xmlChar *modname,
+			 const xmlChar *featurename)
+{
+    ncx_module_t   *mod;
+    ncx_feature_t  *feature;
+
+#ifdef DEBUG
+    if (!modname || !featurename) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    mod = ncx_find_module(modname, NULL);
+    if (!mod) {
+	return ERR_NCX_MOD_NOT_FOUND;
+    }
+
+    feature = ncx_find_feature(mod, featurename);
+    if (!feature) {
+	return ERR_NCX_DEF_NOT_FOUND;
+    }
+
+    feature->enabled = FALSE;
+    return NO_ERR;
+
+} /* agt_disable_feature */
+
+
+
 /* END file agt_util.c */

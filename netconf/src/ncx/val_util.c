@@ -1833,12 +1833,13 @@ status_t
 }  /* val_get_index_string */
 
 
-
 /********************************************************************
 * FUNCTION val_check_child_conditional
 * 
-* Get the index string for the specified table or container entry
-* 
+* Check if the specified child object node is
+* conditionally TRUE or FALSE, based on any
+* if-feature of when statements attached to the child node
+*
 * INPUTS:
 *   val == parent value node of the object node to check
 *   valroot == database root for XPath purposes
@@ -1858,11 +1859,12 @@ status_t
 				 const obj_template_t *childobj,
 				 boolean *condresult)
 {
-    val_value_t       *dummychild;
-    xpath_result_t    *result;
-    xpath_pcb_t       *whenclone;
-    status_t           res;
-    boolean            whentest, done;
+    const ncx_iffeature_t   *iffeature;
+    val_value_t             *dummychild;
+    xpath_result_t          *result;
+    xpath_pcb_t             *whenclone;
+    status_t                 res;
+    boolean                  whentest, done;
 
 #ifdef DEBUG
     if (!val || !valroot || !childobj || !condresult) {
@@ -1870,6 +1872,26 @@ status_t
     }
 #endif
 
+    /* object is marked as mandatory, so need to
+     * check any if-feature statements that are false
+     */
+    for (iffeature = obj_get_first_iffeature(childobj);
+	 iffeature != NULL;
+	 iffeature = obj_get_next_iffeature(iffeature)) {
+
+	if (!iffeature->feature ||
+	    !ncx_feature_enabled(iffeature->feature)) {
+	    
+	    /* the required feature is not enabled */
+	    *condresult = FALSE;
+	    return NO_ERR;
+	}
+    }
+
+    /* there are no false if-feature statements
+     * so check for any whan statements attached
+     * to this object
+     */
     res = NO_ERR;
     if (childobj->when ||
 	(childobj->usesobj && childobj->usesobj->when) ||
@@ -2022,6 +2044,136 @@ status_t
     return NO_ERR;
 
 } /* val_check_child_conditional */
+
+
+/********************************************************************
+* FUNCTION val_is_mandatory
+*
+* Figure out if the value node is YANG mandatory or not
+*
+* INPUTS:
+*   val == parent value node of the object node to check
+*   valroot == database root for XPath purposes
+*   childobj == object template of child to check
+*   
+* RETURNS:
+*   TRUE if value is mandatory
+*   FALSE if value is not mandatory
+*********************************************************************/
+boolean
+    val_is_mandatory (val_value_t *val,
+		      val_value_t *valroot,
+		      const obj_template_t *childobj)
+{
+    const obj_template_t *chobj;
+    boolean               mand, condresult;
+    status_t              res;
+
+#ifdef DEBUG
+    if (!val) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    mand = obj_is_mandatory(childobj);
+    if (!mand) {
+	return FALSE;
+    }
+
+    if (obj_is_key(childobj)) {
+	return TRUE;
+    }
+
+    res = val_check_child_conditional(val,
+				      valroot,
+				      childobj,
+				      &condresult);
+    if (res != NO_ERR) {
+	SET_ERROR(res);
+	return FALSE;
+    }
+
+    if (!condresult) {
+	return FALSE;
+    }
+
+    /* need to check if mandatory true is for real or not */
+    switch (childobj->objtype) {
+    case OBJ_TYP_CONTAINER:
+	if (childobj->def.container->presence) {
+	    return FALSE;
+	}
+	/* else drop through and check children */
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_RPCIO:
+	for (chobj = obj_first_child(childobj);
+	     chobj != NULL;
+	     chobj = obj_next_child(chobj)) {
+
+	    mand = val_is_mandatory(val, valroot, chobj);
+	    if (mand) {
+		return TRUE;
+	    }
+	}
+	return FALSE;
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_ANYXML:
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_LEAF_LIST:
+    case OBJ_TYP_LIST:
+	return TRUE;
+    case OBJ_TYP_USES:
+    case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
+    case OBJ_TYP_RPC:
+    case OBJ_TYP_NOTIF:
+	return FALSE;
+    case OBJ_TYP_NONE:
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+
+}   /* val_is_mandatory */
+
+
+/********************************************************************
+* FUNCTION val_get_cond_iqualval
+* 
+* Get the instance qualifier enum for this value node
+* Check all the conditional statements that can make
+* the object required or not
+*
+* INPUTS:
+*   val == parent value node of the object node to check
+*   valroot == database root for XPath purposes
+*   dobj == object template of child to check
+*   
+* RETURNS:
+*   instance qualifier value
+*********************************************************************/
+ncx_iqual_t 
+    val_get_cond_iqualval (val_value_t *val,
+			   val_value_t *valroot,
+			   const obj_template_t *obj)
+{
+    ncx_iqual_t  ret;
+    boolean      required;
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NCX_IQUAL_NONE;
+    }
+#endif
+
+    ret = NCX_IQUAL_NONE;
+    required = val_is_mandatory(val, valroot, obj);
+
+    return obj_get_iqualval_ex(obj, required);
+
+}  /* val_get_cond_iqualval */
 
 
 /********************************************************************

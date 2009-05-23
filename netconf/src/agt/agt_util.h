@@ -175,4 +175,13 @@ extern status_t
 		      ncx_iqual_t  iqual);
 
 
+extern status_t
+    agt_enable_feature (const xmlChar *modname,
+			const xmlChar *featurename);
+
+extern status_t
+    agt_disable_feature (const xmlChar *modname,
+			 const xmlChar *featurename);
+
+
 #endif	    /* _H_agt_util */

@@ -42,6 +42,10 @@ date         init     comment
 #include  "agt_ncxserver.h"
 #endif
 
+#ifndef _H_agt_util
+#include  "agt_util.h"
+#endif
+
 #ifndef _H_help
 #include  "help.h"
 #endif
@@ -167,10 +171,16 @@ static status_t
 #endif
 
 #ifdef NETCONFD_DEBUG_LOAD_TEST
+
+#define TESTMOD (const xmlChar *)"test"
+#define TESTFEATURE (const xmlChar *)"feature1"
+
     /* Load test module */
-    res = ncxmod_load_module((const xmlChar *)"test", NULL, NULL);
+    res = ncxmod_load_module(TESTMOD, NULL, NULL);
     if (res != NO_ERR) {
 	return res;
+    } else {
+	agt_enable_feature(TESTMOD, TESTFEATURE);
     }
 #endif
 

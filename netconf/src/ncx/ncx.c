@@ -2299,7 +2299,9 @@ const obj_template_t *
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
-	if (!obj_has_name(obj) || obj_is_cli(obj) || 
+	if (!obj_has_name(obj) ||
+	    !obj_is_enabled(obj) ||
+	    obj_is_cli(obj) || 
 	    obj_is_abstract(obj)) {
 	    continue;
 	}
@@ -2320,7 +2322,9 @@ const obj_template_t *
 	     obj != NULL;
 	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	    if (!obj_has_name(obj)  || obj_is_cli(obj) ||
+	    if (!obj_has_name(obj)  || 
+		!obj_is_enabled(obj) ||
+		obj_is_cli(obj) ||
 		obj_is_abstract(obj)) {
 		continue;
 	    }
@@ -2355,7 +2359,9 @@ const obj_template_t *
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) || obj_is_cli(obj) ||
+	if (!obj_has_name(obj) || 
+	    !obj_is_enabled(obj) ||
+	    obj_is_cli(obj) ||
 	    obj_is_abstract(obj)) {
 	    continue;
 	}
@@ -2386,7 +2392,9 @@ const obj_template_t *
 	     obj != NULL;
 	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	    if (!obj_has_name(obj)  || obj_is_cli(obj) ||
+	    if (!obj_has_name(obj) || 
+		!obj_is_enabled(obj) ||
+		obj_is_cli(obj) ||
 		obj_is_abstract(obj)) {
 		continue;
 	    }
@@ -2421,7 +2429,9 @@ const obj_template_t *
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
-	if (!obj_has_name(obj) || obj_is_cli(obj) ||
+	if (!obj_has_name(obj) || 
+	    !obj_is_enabled(obj) ||
+	    obj_is_cli(obj) ||
 	    obj_is_abstract(obj)) {
 	    continue;
 	}
@@ -2444,7 +2454,9 @@ const obj_template_t *
 	     obj != NULL;
 	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	    if (!obj_has_name(obj) || obj_is_cli(obj) ||
+	    if (!obj_has_name(obj) || 
+		!obj_is_enabled(obj) ||
+		obj_is_cli(obj) ||
 		obj_is_abstract(obj)) {
 		continue;
 	    }
@@ -2480,7 +2492,9 @@ const obj_template_t *
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) || obj_is_cli(obj) ||
+	if (!obj_has_name(obj) || 
+	    !obj_is_enabled(obj) ||
+	    obj_is_cli(obj) ||
 	    obj_is_abstract(obj)) {
 	    continue;
 	}
@@ -2513,7 +2527,9 @@ const obj_template_t *
 	     obj != NULL;
 	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	    if (!obj_has_name(obj)  || obj_is_cli(obj) ||
+	    if (!obj_has_name(obj) || 
+		!obj_is_enabled(obj) ||
+		obj_is_cli(obj) ||
 		obj_is_abstract(obj)) {
 		continue;
 	    }
@@ -5483,6 +5499,7 @@ boolean
     switch (list->btyp) {
     case NCX_BT_STRING:
     case NCX_BT_ENUM:
+    case NCX_BT_BITS:
 	break;
     default:
 	SET_ERROR(ERR_NCX_WRONG_TYPE);
@@ -5557,8 +5574,10 @@ int32
 	}
 	switch (list1->btyp) {
 	case NCX_BT_STRING:
-	    switch (ncx_compare_strs(&s1->val.str, &s2->val.str, 
-				     list1->btyp)) {
+	case NCX_BT_BITS:
+	    switch (ncx_compare_strs(&s1->val.str, 
+				     &s2->val.str, 
+				     NCX_BT_STRING)) {
 	    case -1:
 		return -1;
 	    case 0:
@@ -6974,6 +6993,12 @@ ncx_feature_t *
     dlq_createSQue(&feature->iffeatureQ);
     dlq_createSQue(&feature->appinfoQ);
 
+    /*** setting feature enabled as the default
+     *** the agent code needs to adjust this
+     *** with agt_disable_feature() ifneeded
+     ***/
+    feature->enabled = TRUE;
+
     return feature;
 
 } /* ncx_new_feature */
@@ -7147,7 +7172,7 @@ void
 			  void *cookie,
 			  boolean enabledonly)
 {
-    const ncx_feature_t  *feature;
+    ncx_feature_t        *feature;
     const dlq_hdr_t      *que;
     yang_node_t          *node;
     ncx_include_t        *inc;
@@ -7162,9 +7187,9 @@ void
 
     keepgoing = TRUE;
 
-    for (feature = (const ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
+    for (feature = (ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
 	 feature != NULL && keepgoing;
-	 feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
+	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
 	if (enabledonly && !ncx_feature_enabled(feature)) {
 	    continue;
@@ -7197,10 +7222,10 @@ void
 	    }
 	}
 
-	for (feature = (const ncx_feature_t *)
+	for (feature = (ncx_feature_t *)
 		 dlq_firstEntry(&inc->submod->featureQ);
 	     feature != NULL && keepgoing;
-	     feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
+	     feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
 	    if (enabledonly && !ncx_feature_enabled(feature)) {
 		continue;

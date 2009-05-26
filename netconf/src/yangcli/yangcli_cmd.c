@@ -2210,11 +2210,10 @@ static status_t
     /* load the module */
     if (res == NO_ERR) {
 	mod = NULL;
-	res = ncxmod_load_module(VAL_STR(val), 
-				 NULL, 
-				 &mod);
+	res = ncxmod_load_module(VAL_STR(val), NULL, &mod);
 	if (res == NO_ERR) {
-	    modptr = new_modptr(mod);
+	    /*** TBD: prompt user for features to enable/disable ***/
+	    modptr = new_modptr(mod, NULL, NULL);
 	    if (!modptr) {
 		res = ERR_INTERNAL_MEM;
 	    } else {

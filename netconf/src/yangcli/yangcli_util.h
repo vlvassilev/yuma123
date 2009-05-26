@@ -52,7 +52,9 @@ extern boolean
     is_top_command (const xmlChar *rpcname);
 
 extern modptr_t *
-    new_modptr (ncx_module_t *mod);
+    new_modptr (ncx_module_t *mod,
+		ncx_list_t *feature_list,
+		ncx_list_t *deviation_list);
 
 extern void
     free_modptr (modptr_t *modptr);

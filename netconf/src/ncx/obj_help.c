@@ -582,7 +582,8 @@ void
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj)) {
+	if (!obj_has_name(obj) ||
+	    !obj_is_enabled(obj)) {
 	    continue;
 	}
 

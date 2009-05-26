@@ -1859,7 +1859,6 @@ status_t
 				 const obj_template_t *childobj,
 				 boolean *condresult)
 {
-    const ncx_iffeature_t   *iffeature;
     val_value_t             *dummychild;
     xpath_result_t          *result;
     xpath_pcb_t             *whenclone;
@@ -1875,17 +1874,9 @@ status_t
     /* object is marked as mandatory, so need to
      * check any if-feature statements that are false
      */
-    for (iffeature = obj_get_first_iffeature(childobj);
-	 iffeature != NULL;
-	 iffeature = obj_get_next_iffeature(iffeature)) {
-
-	if (!iffeature->feature ||
-	    !ncx_feature_enabled(iffeature->feature)) {
-	    
-	    /* the required feature is not enabled */
-	    *condresult = FALSE;
-	    return NO_ERR;
-	}
+    if (!obj_is_enabled(childobj)) {
+	*condresult = FALSE;
+	return NO_ERR;
     }
 
     /* there are no false if-feature statements

@@ -2932,6 +2932,12 @@ static status_t
 	 chval != NULL && retres == NO_ERR;
 	 chval = val_get_next_child(chval)) {
 
+	if (obj_is_root(chval->obj)) {
+	    /* do not dive into <config> parameters and
+	     * hit database must-stmts by mistake
+	     */
+	    continue;
+	}
 	res = must_stmt_check(scb, msg, root, chval);
 	CHK_EXIT(res, retres);
     }
@@ -3127,6 +3133,13 @@ static status_t
 	nextchild = val_get_next_child(chval);
 
 	if (!obj_is_config(chval->obj)) {
+	    continue;
+	}
+
+	if (obj_is_root(chval->obj)) {
+	    /* do not dive into a <config> node parameter
+	     * while processing an RPC input node
+	     */
 	    continue;
 	}
 

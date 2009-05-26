@@ -213,14 +213,14 @@ static void
 *********************************************************************/
 static boolean
     get_features_len (const ncx_module_t *mod,
-		     const ncx_feature_t *feature,
-		     void *cookie)
+		      ncx_feature_t *feature,
+		      void *cookie)
 {
     uint32  *count;
 
     (void)mod;
     count = (uint32 *)cookie;
-    *count += xml_strlen(feature->name);
+    *count += (xml_strlen(feature->name) + 1);
     return TRUE;
 
 }  /* get_features_len */
@@ -241,7 +241,7 @@ static boolean
 *********************************************************************/
 static boolean
     add_features (const ncx_module_t *mod,
-		  const ncx_feature_t *feature,
+		  ncx_feature_t *feature,
 		  void *cookie)
 {
     xmlChar  **str;
@@ -249,7 +249,8 @@ static boolean
     (void)mod;
     str = (xmlChar **)cookie;
     *str += xml_strcpy(*str, feature->name);
-    **str++ = (xmlChar)',';
+    **str = (xmlChar)',';
+    (*str)++;
     return TRUE;
 
 }  /* add_features */
@@ -952,6 +953,7 @@ status_t
 	    if (*commastr == (xmlChar)',') {
 		*commastr = (xmlChar)' ';
 	    }
+	    commastr++;
 	}
 
 	res = ncx_set_list(NCX_BT_STRING, liststr, 
@@ -975,6 +977,7 @@ status_t
 	    if (*commastr == (xmlChar)',') {
 		*commastr = (xmlChar)' ';
 	    }
+	    commastr++;
 	}
 
 	res = ncx_set_list(NCX_BT_STRING, liststr, 
@@ -1273,7 +1276,8 @@ status_t
 
     /* make the capability element */
     capval = xml_val_new_string(NCX_EL_CAPABILITY,
-				 xmlns_nc_id(), str);
+				 xmlns_nc_id(), 
+				str);
     if (!capval) {
 	m__free(str);
 	return ERR_INTERNAL_MEM;
@@ -1477,24 +1481,24 @@ void
 	}
 	
 	if (!dlq_empty(&cap->cap_feature_list.memQ)) {
-	    log_write("\n   Features: ");
+	    log_write("\n      Features: ");
 	    for (lmem = (ncx_lmem_t *)
 		     dlq_firstEntry(&cap->cap_feature_list.memQ);
 		 lmem != NULL;
 		 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
 
-		log_write("\n       %s ", lmem->val.str);
+		log_write("\n         %s ", lmem->val.str);
 	    }
 	}
 
 	if (!dlq_empty(&cap->cap_deviation_list.memQ)) {
-	    log_write("\n   Deviations: ");
+	    log_write("\n      Deviations: ");
 	    for (lmem = (ncx_lmem_t *)
 		     dlq_firstEntry(&cap->cap_deviation_list.memQ);
 		 lmem != NULL;
 		 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
 
-		log_write("\n       %s ", lmem->val.str);
+		log_write("\n         %s ", lmem->val.str);
 	    }
 	}
     }
@@ -1559,10 +1563,10 @@ void
 *  pointer to first record, to use for next record
 *  NULL if no first record
 *********************************************************************/
-const cap_rec_t *
-    cap_first_modcap (const cap_list_t *caplist)
+cap_rec_t *
+    cap_first_modcap (cap_list_t *caplist)
 {
-    const cap_rec_t *cap;
+    cap_rec_t *cap;
 
 #ifdef DEBUG
     if (!caplist) {
@@ -1597,10 +1601,10 @@ const cap_rec_t *
 *  pointer to next record
 *  NULL if no next record
 *********************************************************************/
-const cap_rec_t *
-    cap_next_modcap (const cap_rec_t *curcap)
+cap_rec_t *
+    cap_next_modcap (cap_rec_t *curcap)
 {
-    const cap_rec_t *cap;
+    cap_rec_t *cap;
 
 #ifdef DEBUG
     if (!curcap) {
@@ -1643,7 +1647,7 @@ const cap_rec_t *
 *    status
 *********************************************************************/
 void
-    cap_split_modcap (const cap_rec_t *cap,
+    cap_split_modcap (cap_rec_t *cap,
 		      const xmlChar **module,
 		      uint32 *modlen,
 		      const xmlChar **version)

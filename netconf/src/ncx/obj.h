@@ -1123,5 +1123,8 @@ extern const ncx_iffeature_t *
 extern const ncx_iffeature_t *
     obj_get_next_iffeature (const ncx_iffeature_t *iffeature);
 
+extern boolean
+    obj_is_enabled (const obj_template_t *obj);
+
 
 #endif	    /* _H_obj */

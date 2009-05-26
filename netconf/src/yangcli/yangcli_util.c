@@ -189,12 +189,16 @@ boolean
 * 
 * INPUTS:
 *    mod == module to cache in this struct
+*    feature_list == feature list from capability
+*    deviation_list = deviations list from capability
 *
 * RETURNS:
 *   malloced modptr_t struct or NULL of malloc failed
 *********************************************************************/
 modptr_t *
-    new_modptr (ncx_module_t *mod)
+    new_modptr (ncx_module_t *mod,
+		ncx_list_t *feature_list,
+		ncx_list_t *deviation_list)
 {
     modptr_t  *modptr;
 
@@ -211,6 +215,9 @@ modptr_t *
     }
     memset(modptr, 0x0, sizeof(modptr_t));
     modptr->mod = mod;
+    modptr->feature_list = feature_list;
+    modptr->deviation_list = deviation_list;
+
     return modptr;
 
 }  /* new_modptr */

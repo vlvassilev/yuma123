@@ -192,7 +192,9 @@ date	     init     comment
  */
 typedef struct modptr_t_ {
     dlq_hdr_t            qhdr;
-    ncx_module_t         *mod;
+    ncx_module_t         *mod;               /* back-ptr, not live */
+    ncx_list_t           *feature_list;      /* back-ptr, not live */
+    ncx_list_t           *deviation_list;    /* back-ptr, not live */
 } modptr_t;
 
 

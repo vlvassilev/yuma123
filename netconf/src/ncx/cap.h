@@ -280,16 +280,16 @@ extern void
     cap_dump_entcaps (const cap_list_t *caplist);
 
 /* app processing access */
-extern const cap_rec_t *
-    cap_first_modcap (const cap_list_t *caplist);
+extern cap_rec_t *
+    cap_first_modcap (cap_list_t *caplist);
 
 /* app processing access */
-extern const cap_rec_t *
-    cap_next_modcap (const cap_rec_t *curcap);
+extern cap_rec_t *
+    cap_next_modcap (cap_rec_t *curcap);
 
 /* app processing access */
 extern void
-    cap_split_modcap (const cap_rec_t *cap,
+    cap_split_modcap (cap_rec_t *cap,
 		      const xmlChar **module,
 		      uint32 *modlen,
 		      const xmlChar **version);

@@ -717,7 +717,7 @@ typedef void (*ncx_load_cbfn_t) (ncx_module_t *mod);
  *    FALSE if feature traversal should terminate
  */
 typedef boolean (*ncx_feature_cbfn_t) (const ncx_module_t *mod,
-				       const ncx_feature_t *feature,
+				       ncx_feature_t *feature,
 				       void *cookie);
 
 

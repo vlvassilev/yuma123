@@ -1900,6 +1900,41 @@ static void
 } /* report_capabilities */
 
 
+
+
+/********************************************************************
+* FUNCTION reset_feature
+* 
+* Go through the feature list and see if the specified
+* feature should be enabled or not
+*
+* INPUTS:
+*    mod == module containing this feature
+*    feature == feature found
+*    cookie == cookie passed in (feature_list)
+*
+* RETURNS:
+*    TRUE if processing should continue, FALSE if done
+*********************************************************************/
+static boolean
+    reset_feature (const ncx_module_t *mod,
+		   ncx_feature_t *feature,
+		   void *cookie)
+{
+    const ncx_list_t *feature_list;
+
+    (void)mod;
+    feature_list = (const ncx_list_t *)cookie;
+
+    feature->enabled = 
+	(ncx_string_in_list(feature->name, feature_list)) ?
+	TRUE : FALSE;
+
+    return TRUE;
+
+}  /* reset_feature */
+
+
 /********************************************************************
 * FUNCTION check_module_capabilities
 * 
@@ -1917,9 +1952,9 @@ static void
     check_module_capabilities (agent_cb_t *agent_cb,
 			       const ses_cb_t *scb)
 {
-    const mgr_scb_t    *mscb;
+    mgr_scb_t          *mscb;
     ncx_module_t       *mod;
-    const cap_rec_t    *cap;
+    cap_rec_t          *cap;
     const xmlChar      *module, *version;
     modptr_t           *modptr;
     xmlChar            *namebuff;
@@ -1927,7 +1962,7 @@ static void
     status_t            res;
 
 
-    mscb = (const mgr_scb_t *)scb->mgrcb;
+    mscb = (mgr_scb_t *)scb->mgrcb;
 
     log_info("\n\nChecking Agent Modules...\n");
 
@@ -1936,7 +1971,7 @@ static void
      ****/
     mod = ncx_find_module(NC_MODULE, NULL);
     if (mod) {
-	modptr = new_modptr(mod);
+	modptr = new_modptr(mod, NULL, NULL);
 	if (modptr == NULL) {
 	    log_error("\nMalloc failure");
 	    return;
@@ -1980,9 +2015,25 @@ static void
 	    }
 	}
 
-	/* keep track of the exact modules the agent knows about */
+	/* keep track of the exact modules the agent knows about
+	 * this is a hack that needs to be replaced!!!
+	 * need a complete copy of every module for each agent
+	 * instead of simply rewriting the feature enabled flags
+	 * in all the modules each time.
+	 *
+	 * This will not work when deviations are supported because
+	 * they are destructive patches to the object tree which
+	 * cannot be reversed after the module is done being
+	 * used for one agent session
+	 *
+	 * This approach does not support multiple concurrent agent_cb
+	 * structs in use at the same time.  Need a complete copy of
+	 * each module, not just a pointer into the NCX module list
+	 */
 	if (mod) {
-	    modptr = new_modptr(mod);
+	    modptr = new_modptr(mod, 
+				&cap->cap_feature_list,
+				&cap->cap_deviation_list);
 	    if (modptr == NULL) {
 		log_error("\nMalloc failure");
 		return;
@@ -2002,7 +2053,31 @@ static void
 
 	cap = cap_next_modcap(cap);
     }
-    
+
+    /* need to wait until all the modules are loaded to
+     * go through the modptr list and enable/disable the features
+     * to match what the agent has reported
+     */
+
+    for (modptr = (modptr_t *)
+	     dlq_firstEntry(&agent_cb->modptrQ);
+	 modptr != NULL;
+	 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+	if (modptr->feature_list) {
+	    ncx_for_all_features(modptr->mod,
+				 reset_feature,
+				 modptr->feature_list,
+				 FALSE);
+	}
+    }
+
+    /*** TBD: handle external deviations; any deviations in
+     *** the specified module have already been applied to the
+     *** module, but not any external deviations modules
+     *** These are TBD in ncx/ncxmod.c and ncx/yang_parse.c
+     ***/
+
 } /* check_module_capabilities */
 
 

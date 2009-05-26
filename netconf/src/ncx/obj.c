@@ -1920,7 +1920,7 @@ static obj_template_t *
 	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	/* skip augment and uses */
-	if (!obj_has_name(obj)) {
+	if (!obj_has_name(obj) || !obj_is_enabled(obj)) {
 	    continue;
 	}
 
@@ -3520,7 +3520,7 @@ const obj_template_t *
 	for (chobj = (const obj_template_t *)dlq_firstEntry(que);
 	     chobj != NULL;
 	     chobj = (const obj_template_t *)dlq_nextEntry(chobj)) {
-	    if (obj_has_name(chobj)) {
+	    if (obj_has_name(chobj) && obj_is_enabled(chobj)) {
 		return chobj;
 	    }
 	}
@@ -3564,7 +3564,7 @@ const obj_template_t *
 	for (chobj = (const obj_template_t *)dlq_lastEntry(que);
 	     chobj != NULL;
 	     chobj = (const obj_template_t *)dlq_prevEntry(chobj)) {
-	    if (obj_has_name(chobj)) {
+	    if (obj_has_name(chobj) && obj_is_enabled(chobj)) {
 		return chobj;
 	    }
 	}
@@ -3609,7 +3609,7 @@ const obj_template_t *
 	next = (const obj_template_t *)dlq_nextEntry(next);
 	if (!next) {
 	    done = TRUE;
-	} else if (obj_has_name(next)) {
+	} else if (obj_has_name(next) && obj_is_enabled(next)) {
 	    return next;
 	}
     }
@@ -3652,7 +3652,7 @@ const obj_template_t *
 	prev = (const obj_template_t *)dlq_prevEntry(prev);
 	if (!prev) {
 	    done = TRUE;
-	} else if (obj_has_name(prev)) {
+	} else if (obj_has_name(prev) && obj_is_enabled(prev)) {
 	    return prev;
 	}
     }
@@ -3699,7 +3699,7 @@ const obj_template_t *
 	     chobj != NULL;
 	     chobj = (const obj_template_t *)dlq_nextEntry(chobj)) {
 
-	    if (obj_has_name(chobj)) {
+	    if (obj_has_name(chobj) && obj_is_enabled(chobj)) {
 		if (chobj->objtype == OBJ_TYP_CHOICE ||
 		    chobj->objtype == OBJ_TYP_CASE) {
 		    return (obj_first_child_deep(chobj));
@@ -9175,6 +9175,46 @@ const ncx_iffeature_t *
     return (const ncx_iffeature_t *)dlq_nextEntry(iffeature);
 
 }  /* obj_get_next_iffeature */
+
+
+/********************************************************************
+* FUNCTION obj_is_enabled
+* 
+* Check any if-feature statement that may
+* cause the specified object to be invisible
+*
+* INPUTS:
+*    obj == obj_template_t to check
+
+* RETURNS:
+*    TRUE if object is enabled
+*    FALSE if any if-features are present and FALSE
+*********************************************************************/
+boolean
+    obj_is_enabled (const obj_template_t *obj)
+{
+    const ncx_iffeature_t   *iffeature;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    for (iffeature = obj_get_first_iffeature(obj);
+	 iffeature != NULL;
+	 iffeature = obj_get_next_iffeature(iffeature)) {
+
+	if (!iffeature->feature ||
+	    !ncx_feature_enabled(iffeature->feature)) {
+	    return FALSE;
+	}
+    }
+
+    return TRUE;
+
+}  /* obj_is_enabled */
 
 
 /* END obj.c */

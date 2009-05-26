@@ -84,21 +84,28 @@
          </nacm:group>
       </nacm:groups>
       <nacm:rules>
-	<nacm:moduleRule>
-	  <nacm:moduleName>netconf</nacm:moduleName>
-	  <nacm:allowedRights>read write exec</nacm:allowedRights>
-	  <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
-	</nacm:moduleRule>
-	<nacm:moduleRule>
-	  <nacm:moduleName>netconf</nacm:moduleName>
-	  <nacm:allowedRights>read exec</nacm:allowedRights>
-	  <nacm:allowedGroup>nacm:guest</nacm:allowedGroup>
-	</nacm:moduleRule>
-	<nacm:moduleRule>
-	  <nacm:moduleName>netconfd</nacm:moduleName>
-	  <nacm:allowedRights>read write exec</nacm:allowedRights>
-	  <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
-	</nacm:moduleRule>
+         <nacm:moduleRule>
+            <nacm:moduleName>netconf</nacm:moduleName>
+            <nacm:allowedRights>read write exec</nacm:allowedRights>
+            <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
+         </nacm:moduleRule>
+         <nacm:moduleRule>
+            <nacm:moduleName>netconf</nacm:moduleName>
+            <nacm:allowedRights>read exec</nacm:allowedRights>
+            <nacm:allowedGroup>nacm:guest</nacm:allowedGroup>
+         </nacm:moduleRule>
+         <nacm:moduleRule>
+            <nacm:moduleName>netconfd</nacm:moduleName>
+            <nacm:allowedRights>read write exec</nacm:allowedRights>
+            <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
+         </nacm:moduleRule>
       </nacm:rules>
    </nacm:nacm>
+   <t:bits.1 xmlns:t="http://netconfcentral.com/ns/test">two ten</t:bits.1>
+   <t:xpath.1 xmlns:t="http://netconfcentral.com/ns/test">
+      <t:name>barney</t:name>
+      <t:name2>freddy</t:name2>
+      <t:data1>44</t:data1>
+      <t:data3>rrr</t:data3>
+   </t:xpath.1>
 </nd:config>

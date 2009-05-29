@@ -118,6 +118,40 @@ static void
      * conf=filespec param checked externally
      */
 
+    /* get access-control param */
+    val = val_find_child(valset, 
+			 AGT_CLI_MODULE, 
+			 NCX_EL_ACCESS_CONTROL);
+    if (val && val->res == NO_ERR) {
+	agt_profile->agt_accesscontrol = VAL_ENUM_NAME(val);
+    }
+    if (agt_profile->agt_accesscontrol) {
+	if (!xml_strcmp(agt_profile->agt_accesscontrol,
+			NCX_EL_ENFORCING)) {
+	    agt_profile->agt_accesscontrol_enum = 
+		AGT_ACMOD_ENFORCING;
+	} else if (!xml_strcmp(agt_profile->agt_accesscontrol,
+			       NCX_EL_PERMISSIVE)) {
+	    agt_profile->agt_accesscontrol_enum = 
+		AGT_ACMOD_PERMISSIVE;
+	} else if (!xml_strcmp(agt_profile->agt_accesscontrol,
+			       NCX_EL_DISABLED)) {
+	    agt_profile->agt_accesscontrol_enum = 
+		AGT_ACMOD_DISABLED;
+	} else if (!xml_strcmp(agt_profile->agt_accesscontrol,
+			       NCX_EL_OFF)) {
+	    agt_profile->agt_accesscontrol_enum = 
+		AGT_ACMOD_OFF;
+	} else {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    agt_profile->agt_accesscontrol_enum = 
+		AGT_ACMOD_ENFORCING;
+	}
+    } else {
+	agt_profile->agt_accesscontrol_enum = 
+	    AGT_ACMOD_ENFORCING;
+    }
+
     /* get datapath param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DATAPATH);
     if (val && val->res == NO_ERR) {
@@ -203,6 +237,12 @@ static void
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_STARTUP);
     if (val && val->res == NO_ERR) {
 	agt_profile->agt_startup = VAL_STR(val);
+    }
+
+    /* superuser param */
+    val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_SUPERUSER);
+    if (val && val->res == NO_ERR) {
+	agt_profile->agt_superuser = VAL_STR(val);
     }
 
     /* get target param */

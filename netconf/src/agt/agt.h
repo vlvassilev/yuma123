@@ -141,6 +141,15 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/* matches access-control enumeration in netconfd.yang */
+typedef enum agt_acmode_t_ {
+    AGT_ACMOD_NONE,
+    AGT_ACMOD_ENFORCING,
+    AGT_ACMOD_PERMISSIVE,
+    AGT_ACMOD_DISABLED,
+    AGT_ACMOD_OFF
+} agt_acmode_t;
+
 
 /* enumeration of the different agent callback types 
  * These are used are array indices so there is no dummy zero enum
@@ -161,23 +170,26 @@ typedef enum agt_cbtyp_t_ {
  * They cannot be changed after boot-time.
  */
 typedef struct agt_profile_t_ {
-    ncx_agttarg_t    agt_targ;
-    ncx_agtstart_t   agt_start;
-    log_debug_t      agt_loglevel;
-    boolean          agt_del_startup;
-    boolean          agt_usestartup;
-    boolean          agt_logappend;
-    boolean          agt_xmlorder;
-    boolean          agt_deleteall_ok;   /* TBD: not implemented */
-    const xmlChar   *agt_conffile;
-    const xmlChar   *agt_logfile;
-    const xmlChar   *agt_startup;
-    const xmlChar   *agt_modpath;
-    const xmlChar   *agt_datapath;
-    const xmlChar   *agt_runpath;
-    const xmlChar   *agt_defaultStyle;
+    ncx_agttarg_t       agt_targ;
+    ncx_agtstart_t      agt_start;
+    log_debug_t         agt_loglevel;
+    boolean             agt_del_startup;
+    boolean             agt_usestartup;
+    boolean             agt_logappend;
+    boolean             agt_xmlorder;
+    boolean             agt_deleteall_ok;   /* TBD: not implemented */
+    const xmlChar      *agt_accesscontrol;
+    const xmlChar      *agt_conffile;
+    const xmlChar      *agt_logfile;
+    const xmlChar      *agt_startup;
+    const xmlChar      *agt_modpath;
+    const xmlChar      *agt_datapath;
+    const xmlChar      *agt_runpath;
+    const xmlChar      *agt_defaultStyle;
+    const xmlChar      *agt_superuser;
     ncx_withdefaults_t  agt_defaultStyleEnum;
-    uint16           agt_ports[AGT_MAX_PORTS];
+    agt_acmode_t        agt_accesscontrol_enum;
+    uint16              agt_ports[AGT_MAX_PORTS];
 } agt_profile_t;
 
 

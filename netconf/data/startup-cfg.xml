@@ -70,7 +70,6 @@
       <t:c2>-1</t:c2>
    </t:test3>
    <nacm:nacm xmlns:nacm="http://netconfcentral.com/ns/nacm">
-      <nacm:noRuleDefault>permit</nacm:noRuleDefault>
       <nacm:groups>
          <nacm:group>
             <nacm:groupIdentity>nacm:admin</nacm:groupIdentity>

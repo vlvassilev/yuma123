@@ -24,6 +24,10 @@ date	     init     comment
 
 #include <xmlstring.h>
 
+#ifndef _H_agt
+#include "agt.h"
+#endif
+
 #ifndef _H_dlq
 #include "dlq.h"
 #endif
@@ -58,6 +62,16 @@ date	     init     comment
 *			 C O N S T A N T S			    *
 *								    *
 *********************************************************************/
+
+/* flags fields for the agt_acm_cache_t */
+#define FL_ACM_DEFREAD_SET      bit0
+#define FL_ACM_DEFREAD_OK       bit1
+#define FL_ACM_DEFWRITE_SET     bit2
+#define FL_ACM_DEFWRITE_OK      bit3
+#define FL_ACM_DEFEXEC_SET      bit4
+#define FL_ACM_DEFEXEC_OK       bit5
+#define FL_ACM_MODRULES_SET     bit6
+#define FL_ACM_DATARULES_SET    bit7
 
 
 /********************************************************************
@@ -100,10 +114,8 @@ typedef struct agt_acm_cache_t_ {
     val_value_t          *nacmroot;     /* back-ptr */
     val_value_t          *rulesval;     /* back-ptr */
     uint32                groupcnt;
-    boolean               defset;
-    boolean               defpermit;
-    boolean               modruleset;
-    boolean               dataruleset;
+    uint32                flags;
+    agt_acmode_t          mode;
     dlq_hdr_t             modruleQ;     /* Q of agt_acm_modrule_t */
     dlq_hdr_t             dataruleQ;    /* Q of agt_acm_datarule_t */
 } agt_acm_cache_t;

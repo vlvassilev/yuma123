@@ -161,6 +161,7 @@ static void
     agt_profile.agt_runpath = NULL;
     agt_profile.agt_defaultStyle = NCX_EL_REPORT_ALL;
     agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_REPORT_ALL;
+    agt_profile.agt_superuser = NCX_DEF_SUPERUSER;
 
 } /* init_agent_profile */
 

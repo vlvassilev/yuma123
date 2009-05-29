@@ -170,8 +170,6 @@ date	     init     comment
 
 #define NCX_MAX_LINELEN     4095
 
-#define NCX_SUPERUSER      (const xmlChar *)"superuser"
-
 #define NCX_SUFFIX          (const xmlChar *)"ncx"
 
 #define NCX_CONF_SUFFIX     (const xmlChar *)"conf"
@@ -253,6 +251,8 @@ date	     init     comment
 /* default value for the with-metadata option */
 #define NCX_DEF_WITHMETA  FALSE
 
+/* default value for the agent superuser */
+#define NCX_DEF_SUPERUSER  NCX_EL_SUPERUSER
 
 /* String start char:
  * if the XML string starts with a double quote
@@ -329,13 +329,15 @@ date	     init     comment
  *
  */
 
+#define NCX_EL_ACCESS_RC       (const xmlChar *)"read-create"
+#define NCX_EL_ACCESS_RO       (const xmlChar *)"read-only"
+#define NCX_EL_ACCESS_RW       (const xmlChar *)"read-write"
+
 #define NCX_AUGHOOK_START      (const xmlChar *)"__"
 #define NCX_AUGHOOK_END        (const xmlChar *)".A__"
 
 #define NCX_EL_ABSTRACT        (const xmlChar *)"abstract"
-#define NCX_EL_ACCESS_RC       (const xmlChar *)"read-create"
-#define NCX_EL_ACCESS_RO       (const xmlChar *)"read-only"
-#define NCX_EL_ACCESS_RW       (const xmlChar *)"read-write"
+#define NCX_EL_ACCESS_CONTROL  (const xmlChar *)"access-control"
 #define NCX_EL_ADDRESS         (const xmlChar *)"address"
 #define NCX_EL_AGTMODE_ST      (const xmlChar *)"standalone"
 #define NCX_EL_AGTMODE_DU      (const xmlChar *)"dual"
@@ -393,11 +395,12 @@ date	     init     comment
 #define NCX_EL_DELETE_CONFIG   (const xmlChar *)"delete-config"
 #define NCX_EL_DEPRECATED      (const xmlChar *)"deprecated"
 #define NCX_EL_DESCRIPTION     (const xmlChar *)"description"
+#define NCX_EL_DISABLED        (const xmlChar *)"disabled"
 #define NCX_EL_DISCARD_CHANGES (const xmlChar *)"discard-changes"
 #define NCX_EL_DOUBLE          (const xmlChar *)"double"
 #define NCX_EL_EDIT_CONFIG     (const xmlChar *)"edit-config"
 #define NCX_EL_EMPTY           (const xmlChar *)"empty"
-#define NCX_EL_ENAME           (const xmlChar *)"ename"
+#define NCX_EL_ENFORCING       (const xmlChar *)"enforcing"
 #define NCX_EL_ENUM            (const xmlChar *)"enum"
 #define NCX_EL_ENUMERATION     (const xmlChar *)"enumeration"
 #define NCX_EL_ERR_ELEMENT     (const xmlChar *)"err-element"
@@ -484,6 +487,7 @@ date	     init     comment
 #define NCX_EL_OBJECT          (const xmlChar *)"object"
 #define NCX_EL_OBJECTS         (const xmlChar *)"objects"
 #define NCX_EL_OBSOLETE        (const xmlChar *)"obsolete"
+#define NCX_EL_OFF             (const xmlChar *)"off"
 #define NCX_EL_OK              (const xmlChar *)"ok"
 #define NCX_EL_OK_ELEMENT      (const xmlChar *)"ok-element"
 #define NCX_EL_ORDER           (const xmlChar *)"order"
@@ -498,6 +502,7 @@ date	     init     comment
 #define NCX_EL_PASSWORD        (const xmlChar *)"password"
 #define NCX_EL_PATH            (const xmlChar *)"path"
 #define NCX_EL_PATTERN         (const xmlChar *)"pattern"
+#define NCX_EL_PERMISSIVE      (const xmlChar *)"permissive"
 #define NCX_EL_PORT            (const xmlChar *)"port"
 #define NCX_EL_POS             (const xmlChar *)"pos"
 #define NCX_EL_POSITION        (const xmlChar *)"position"
@@ -535,6 +540,7 @@ date	     init     comment
 #define NCX_EL_STRING          (const xmlChar *)"string"
 #define NCX_EL_STRUCT          (const xmlChar *)"struct"
 #define NCX_EL_SUBTREE         (const xmlChar *)"subtree"
+#define NCX_EL_SUPERUSER       (const xmlChar *)"superuser"
 #define NCX_EL_SYNTAX          (const xmlChar *)"syntax"
 #define NCX_EL_TABLE           (const xmlChar *)"table"
 #define NCX_EL_TARGET          (const xmlChar *)"target"

@@ -3,7 +3,9 @@
 object identifiers:
 
 container /nacm
-leaf /nacm/noRuleDefault
+leaf /nacm/noRuleReadDefault
+leaf /nacm/noRuleWriteDefault
+leaf /nacm/noRuleExecDefault
 container /nacm/groups
 list /nacm/groups/group
 leaf /nacm/groups/group/groupIdentity
@@ -147,7 +149,9 @@ date         init     comment
 #define nacm_N_moduleRule (const xmlChar *)"moduleRule"
 #define nacm_N_nacm (const xmlChar *)"nacm"
 #define nacm_N_name (const xmlChar *)"name"
-#define nacm_N_noRuleDefault (const xmlChar *)"noRuleDefault"
+#define nacm_N_noRuleReadDefault (const xmlChar *)"noRuleReadDefault"
+#define nacm_N_noRuleWriteDefault (const xmlChar *)"noRuleWriteDefault"
+#define nacm_N_noRuleExecDefault (const xmlChar *)"noRuleExecDefault"
 #define nacm_N_path (const xmlChar *)"path"
 #define nacm_N_rpcModuleName (const xmlChar *)"rpcModuleName"
 #define nacm_N_rpcName (const xmlChar *)"rpcName"
@@ -183,6 +187,96 @@ date         init     comment
 static boolean agt_acm_init_done = FALSE;
 
 static ncx_module_t  *nacmmod;
+
+static const xmlChar *superuser;
+
+static agt_acmode_t   acmode;
+
+
+/********************************************************************
+* FUNCTION is_superuser
+*
+* Check if the specified user name is the superuser
+*
+* INPUTS:
+*   username == username to check
+*
+* RETURNS:
+*   TRUE if username is the superuser
+*   FALSE if username is not the superuser
+*********************************************************************/
+static boolean
+    is_superuser (const xmlChar *username)
+{
+    if (!superuser || !*superuser) {
+	return FALSE;
+    }
+    if (!username || !*username) {
+	return FALSE;
+    }
+    return (xml_strcmp(superuser, username)) ? FALSE : TRUE;
+
+}  /* is_superuser */
+
+
+/********************************************************************
+* FUNCTION check_mode
+*
+* Check the access-control mode being used
+* 
+* INPUTS:
+*   cache == cache to use
+*   access == requested access mode
+*   obj == object template to check
+*
+* RETURNS:
+*   TRUE if access granted
+*   FALSE to check the rules and find out
+*********************************************************************/
+static boolean 
+    check_mode (agt_acm_cache_t *cache,
+		const xmlChar *access,
+		const obj_template_t *obj)
+{
+    boolean    isread;
+
+    /* check if this is a read or a write */
+    if (!xml_strcmp(access, nacm_E_allowedRights_write)) {
+	isread = FALSE;
+    } else if (!xml_strcmp(access, 
+			   nacm_E_allowedRights_exec)) {
+	isread = FALSE;
+    } else {
+	isread = TRUE;
+    }
+
+    switch (cache->mode) {
+    case AGT_ACMOD_ENFORCING:
+	break;
+    case AGT_ACMOD_PERMISSIVE:
+	if (isread && !obj_is_very_secure(obj)) {
+	    return TRUE;
+	}
+	break;
+    case AGT_ACMOD_DISABLED:
+	if (isread) {
+	    if (!obj_is_very_secure(obj)) {
+		return TRUE;
+	    }
+	} else {
+	    if (!obj_is_secure(obj)) {
+		return TRUE;
+	    }
+	}
+	break;
+    case AGT_ACMOD_OFF:
+	return TRUE;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    return FALSE;
+
+}  /* check_mode */
 
 
 /********************************************************************
@@ -685,16 +779,16 @@ static boolean
     }
 
     /* check the noDefaultRule setting on this agent */
-    if (cache->defset) {
-	return cache->defpermit;
+    if (cache->flags & FL_ACM_DEFEXEC_SET) {
+	return (cache->flags & FL_ACM_DEFEXEC_OK) ? 
+	    TRUE : FALSE;
     }
 
     noRule = val_find_child(nacmroot,
 			    AGT_ACM_MODULE,
-			    nacm_N_noRuleDefault);
+			    nacm_N_noRuleExecDefault);
     if (!noRule) {
-	cache->defset = TRUE;
-	cache->defpermit = TRUE;
+	cache->flags |= (FL_ACM_DEFEXEC_SET | FL_ACM_DEFEXEC_OK);
 	return TRUE;  /* default is TRUE */
     } 
 
@@ -704,8 +798,11 @@ static boolean
     } else {
 	retval = FALSE;
     }
-    cache->defset = TRUE;
-    cache->defpermit = retval;
+    cache->flags |= FL_ACM_DEFEXEC_SET;
+    if (retval) {
+	cache->flags |= FL_ACM_DEFEXEC_OK;
+    }
+
     return retval;
 
 }  /* get_default_rpc_response */
@@ -857,8 +954,8 @@ static boolean
     granted = FALSE;
     res = NO_ERR;
 
-    if (!cache->modruleset) {
-	cache->modruleset = TRUE;
+    if (!(cache->flags & FL_ACM_MODRULES_SET)) {
+	cache->flags |= FL_ACM_MODRULES_SET;
 
 	/* check all the moduleRule entries */
 	for (modrule = val_find_child(rulesval, 
@@ -985,28 +1082,56 @@ static boolean
     }
 
     /* check the noDefaultRule setting on this agent */
-    if (cache->defset) {
-	return cache->defpermit;
-    }
+    if (iswrite) {
+	if (cache->flags & FL_ACM_DEFWRITE_SET) {
+	    return (cache->flags & FL_ACM_DEFWRITE_OK) ?
+		TRUE : FALSE;
+	}
+	noRule = val_find_child(nacmroot,
+				AGT_ACM_MODULE,
+				nacm_N_noRuleWriteDefault);
+	if (!noRule) {
+	    cache->flags |= FL_ACM_DEFWRITE_SET;
+	    return FALSE;  /* default is FALSE */
+	}
 
-    noRule = val_find_child(nacmroot,
-			    AGT_ACM_MODULE,
-			    nacm_N_noRuleDefault);
-    if (!noRule) {
-	cache->defset = TRUE;
-	cache->defpermit = TRUE;
-	return TRUE;  /* default is TRUE */
-    }
+	if (!xml_strcmp(VAL_ENUM_NAME(noRule),
+			nacm_E_noRuleDefault_permit)) {
+	    retval = TRUE;
+	} else {
+	    retval = FALSE;
+	}
 
-    if (!xml_strcmp(VAL_ENUM_NAME(noRule),
-		    nacm_E_noRuleDefault_permit)) {
-	retval = TRUE;
+	cache->flags |= FL_ACM_DEFWRITE_SET;
+	if (retval) {
+	    cache->flags |= FL_ACM_DEFWRITE_OK;
+	}
     } else {
-	retval = FALSE;
+	if (cache->flags & FL_ACM_DEFREAD_SET) {
+	    return (cache->flags & FL_ACM_DEFREAD_OK) ?
+		TRUE : FALSE;
+	}
+	noRule = val_find_child(nacmroot,
+				AGT_ACM_MODULE,
+				nacm_N_noRuleReadDefault);
+	if (!noRule) {
+	    cache->flags |= (FL_ACM_DEFREAD_SET | FL_ACM_DEFREAD_OK);
+	    return TRUE;  /* default is TRUE */
+	}
+
+	if (!xml_strcmp(VAL_ENUM_NAME(noRule),
+			nacm_E_noRuleDefault_permit)) {
+	    retval = TRUE;
+	} else {
+	    retval = FALSE;
+	}
+
+	cache->flags |= FL_ACM_DEFREAD_SET;
+	if (retval) {
+	    cache->flags |= FL_ACM_DEFREAD_OK;
+	}
     }
 
-    cache->defset = TRUE;
-    cache->defpermit = retval;
     return retval;
 
 }  /* get_default_data_response */
@@ -1068,8 +1193,8 @@ static boolean
     }
 
     /* fill the dataruleQ in the cache if needed */
-    if (!cache->dataruleset) {
-	cache->dataruleset = TRUE;
+    if (!(cache->flags & FL_ACM_DATARULES_SET)) {
+	cache->flags |= FL_ACM_DATARULES_SET;
 
 	/* check all the dataRule entries */
 	for (datarule = val_find_child(rulesval, 
@@ -1194,7 +1319,19 @@ static boolean
     boolean                  retval, done, iswrite;
 
     /* super user is allowed to access anything */
-    if (!xml_strcmp(user, NCX_SUPERUSER)) {
+    if (is_superuser(user)) {
+	return TRUE;
+    }
+
+    /* check if this is a read or a write */
+    if (!xml_strcmp(access, nacm_E_allowedRights_write)) {
+	iswrite = TRUE;
+    } else {
+	iswrite = FALSE;
+    }
+
+    /* check if access granted without any rules */
+    if (check_mode(cache, access, val->obj)) {
 	return TRUE;
     }
 
@@ -1238,13 +1375,6 @@ static boolean
 					   val, 
 					   iswrite);
     } else {
-	/* check if this is a read or a write */
-	if (!xml_strcmp(access, nacm_E_allowedRights_write)) {
-	    iswrite = TRUE;
-	} else {
-	    iswrite = FALSE;
-	}
-
 	/* get the /nacm/rules node to decide any more */
 	if (cache->rulesval) {
 	    rulesval = cache->rulesval;
@@ -1440,6 +1570,8 @@ status_t
 	return res;
     }
 
+    superuser = NULL;
+    acmode = AGT_ACMOD_ENFORCING;
     agt_acm_init_done = TRUE;
     return NO_ERR;
 
@@ -1460,6 +1592,7 @@ status_t
 status_t 
     agt_acm_init2 (void)
 {
+    const agt_profile_t   *profile;
     const obj_template_t  *nacmobj;
     cfg_template_t        *runningcfg;
     val_value_t           *nacmval;
@@ -1468,6 +1601,10 @@ status_t
     if (!agt_acm_init_done) {
 	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
+
+    profile = agt_get_profile();
+    superuser = profile->agt_superuser;
+    acmode = profile->agt_accesscontrol_enum;
 
     res = agt_cb_register_callback(AGT_ACM_MODULE,
 				   nacm_OID_group,
@@ -1589,7 +1726,7 @@ boolean
 #endif
 
     /* super user is allowed to access anything */
-    if (!xml_strcmp(user, NCX_SUPERUSER)) {
+    if (is_superuser(user)) {
 	return TRUE;
     }
 
@@ -1601,6 +1738,13 @@ boolean
     }
 
     cache = msg->acm_cache;
+
+    /* check if access granted without any rules */
+    if (check_mode(cache, 
+		   nacm_E_allowedRights_exec, 
+		   rpcobj)) {
+	return TRUE;
+    }
 
     /* get the NACM root to decide any more */
     if (cache->nacmroot) {
@@ -1789,7 +1933,7 @@ status_t
     memset(acm_cache, 0x0, sizeof(agt_acm_cache_t));
     dlq_createSQue(&acm_cache->modruleQ);
     dlq_createSQue(&acm_cache->dataruleQ);
-
+    acm_cache->mode = acmode;
     msg->acm_cache = acm_cache;
     msg->acm_cbfn = agt_acm_val_read_allowed;
     return NO_ERR;

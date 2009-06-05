@@ -1136,7 +1136,7 @@ status_t
 	return SET_ERROR(res);
     }
 
-    runningcfg = cfg_get_config(NCX_EL_RUNNING);
+    runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
     if (!runningcfg || !runningcfg->root) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }

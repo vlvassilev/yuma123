@@ -1,6 +1,7 @@
-/*  FILE: agt_state.c
+/*  FILE: agt_not.c
 
-   NETCONF State Data Model implementation: Agent Side Support
+   NETCONF Notification Data Model implementation: Agent Side Support
+   RFC 5277 version
 
 identifiers:
 container /netconf
@@ -643,7 +644,17 @@ static status_t
 	    }
 	}
     } else {
+	/* setup live subscription by setting the
+	 * lastmsg to the end of the replayQ
+	 * so none of the buffered notifications
+	 * are send to this subscription
+	 */
 	sub->state = AGT_NOT_STATE_LIVE;
+	sub->lastmsg = (agt_not_msg_t *)
+	    dlq_lastEntry(&notificationQ);
+	if (sub->lastmsg) {
+	    sub->lastmsgid = sub->lastmsg->msgid;
+	}
     }
 
     dlq_enque(sub, &subscriptionQ);
@@ -660,76 +671,6 @@ static status_t
 
 } /* create_subscription_invoke */
 
-
-/********************************************************************
-* FUNCTION new_notification
-* 
-* Malloc and initialize the fields in an agt_not_msg_t
-*
-* INPUTS:
-*   eventType == object template of the event type
-*
-* RETURNS:
-*   pointer to the malloced and initialized struct or NULL if an error
-*********************************************************************/
-static agt_not_msg_t * 
-    new_notification (const obj_template_t *eventType)
-{
-    agt_not_msg_t  *not;
-
-    not = m__getObj(agt_not_msg_t);
-    if (!not) {
-	return NULL;
-    }
-    (void)memset(not, 0x0, sizeof(agt_not_msg_t));
-    dlq_createSQue(&not->payloadQ);
-    not->msgid = ++msgid;
-    if (msgid == 0) {
-	/* msgid is wrapping!!! */
-	SET_ERROR(ERR_INTERNAL_VAL);
-    }
-    tstamp_datetime(not->eventTime);
-    not->notobj = eventType;
-    return not;
-
-}  /* new_notification */
-
-
-/********************************************************************
-* FUNCTION free_notification
-* 
-* Scrub the memory in an agt_not_template_t by freeing all
-* the sub-fields and then freeing the entire struct itself 
-* The struct must be removed from any queue it is in before
-* this function is called.
-*
-* INPUTS:
-*    not == agt_not_template_t to delete
-*********************************************************************/
-static void 
-    free_notification (agt_not_msg_t *not)
-{
-    val_value_t *val;
-
-#ifdef DEBUG
-    if (!not) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    while (!dlq_empty(&not->payloadQ)) {
-	val = (val_value_t *)dlq_deque(&not->payloadQ);
-	val_free_value(val);
-    }
-
-    if (not->msg) {
-	val_free_value(not->msg);
-    }
-
-    m__free(not);
-
-}  /* free_notification */
 
 
 /********************************************************************
@@ -759,6 +700,39 @@ static void
     }
 
 }  /* expire_subscription */
+
+
+
+
+/********************************************************************
+* FUNCTION get_entry_after
+*
+* Get the entry after the specified msgid
+*
+* INPUTS:
+*    thismsgid == get the first msg with an ID higher than this value
+*
+* RETURNS:
+*    pointer to an notification to use
+*    NULL if none found
+*********************************************************************/
+static agt_not_msg_t *
+    get_entry_after (uint32 thismsgid)
+{
+    agt_not_msg_t *not;
+
+    for (not = (agt_not_msg_t *)dlq_firstEntry(&notificationQ);
+	 not != NULL;
+	 not = (agt_not_msg_t *)dlq_nextEntry(not)) {
+
+	if (not->msgid > thismsgid) {
+	    return not;
+	}
+    }
+
+    return NULL;
+
+} /* get_entry_after */
 
 
 /********************************************************************
@@ -888,37 +862,6 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION get_entry_after
-*
-* Get the entry after the specified msgid
-*
-* INPUTS:
-*    thismsgid == get the first msg with an ID higher than this value
-*
-* RETURNS:
-*    pointer to an notification to use
-*    NULL if none found
-*********************************************************************/
-static agt_not_msg_t *
-    get_entry_after (uint32 thismsgid)
-{
-    agt_not_msg_t *not;
-
-    for (not = (agt_not_msg_t *)dlq_firstEntry(&notificationQ);
-	 not != NULL;
-	 not = (agt_not_msg_t *)dlq_nextEntry(not)) {
-
-	if (not->msgid > thismsgid) {
-	    return not;
-	}
-    }
-
-    return NULL;
-
-} /* get_entry_after */
-
-
-/********************************************************************
 * FUNCTION send_replayComplete
 *
 * Send the <replayComplate> notification
@@ -932,7 +875,7 @@ static void
     agt_not_msg_t  *not;
     status_t        res;
 
-    not = new_notification(replayCompleteobj);
+    not = agt_not_new_notification(replayCompleteobj);
     if (!not) {
 	log_error("\nError: malloc failed; cannot "
 		  "send <replayComplete>");
@@ -944,7 +887,7 @@ static void
 	sub->state = AGT_NOT_STATE_SHUTDOWN;
     }
 
-    free_notification(not);
+    agt_not_free_notification(not);
 
 } /* send_replayComplete */
 
@@ -963,7 +906,7 @@ static void
     agt_not_msg_t  *not;
     status_t        res;
 
-    not = new_notification(notificationCompleteobj);
+    not = agt_not_new_notification(notificationCompleteobj);
     if (!not) {
 	log_error("\nError: malloc failed; cannot "
 		  "send <notificationComplete>");
@@ -975,7 +918,7 @@ static void
 	sub->state = AGT_NOT_STATE_SHUTDOWN;
     }
 
-    free_notification(not);
+    agt_not_free_notification(not);
 
 } /* send_notificationComplete */
 
@@ -1296,7 +1239,7 @@ void
 	/* clear the notificationQ */
 	while (!dlq_empty(&notificationQ)) {
 	    msg = (agt_not_msg_t *)dlq_deque(&notificationQ);
-	    free_notification(msg);
+	    agt_not_free_notification(msg);
 	}
 
 	agt_not_init_done = FALSE;
@@ -1317,11 +1260,15 @@ void
 *   in some throttling based on the ncxserver select loop
 *   timeout (or however this function is called).
 *
-*  OUTPUTS:
+* OUTPUTS:
 *     notifications may be written to some active sessions
 *
+* RETURNS:
+*    number of notifications sent;
+*    used during shutdown to make sure all sysShutdown
+*    notifications get sent properly;
 *********************************************************************/
-void
+uint32
     agt_not_send_notifications (void)
 {
     agt_not_subscription_t  *sub, *nextsub;
@@ -1329,11 +1276,14 @@ void
     xmlChar                  nowbuff[TSTAMP_MIN_SIZE];
     status_t                 res;
     int                      ret;
+    uint32                   notcount;
+
 
     if (!anySubscriptions) {
-	return;
+	return 0;
     }
 
+    notcount = 0;
     tstamp_datetime(nowbuff);
 
     for (sub = (agt_not_subscription_t *)
@@ -1369,6 +1319,7 @@ void
 			    sub->flags |= AGT_NOT_FL_NC_READY;
 			    send_notificationComplete(sub);
 			    sub->flags |= AGT_NOT_FL_NC_DONE;
+			    notcount++;
 
 			    /* cleanup subscription next time
 			     * through this function 
@@ -1383,6 +1334,7 @@ void
 		    /* send <replayComplete> */
 		    send_replayComplete(sub);
 		    sub->flags |= AGT_NOT_FL_RC_DONE;
+		    notcount++;
 		    /* figure out the rest next time through fn */
 		}
 	    } else {
@@ -1412,6 +1364,7 @@ void
 			sub->state = AGT_NOT_STATE_SHUTDOWN;
 		    } else {
 			/* msg sent OK; set up next loop through fn */
+			notcount++;
 			sub->lastmsg = not;
 			sub->lastmsgid = not->msgid;
 			if (sub->lastreplaymsg == not) {
@@ -1428,6 +1381,7 @@ void
 		    sub->flags |= AGT_NOT_FL_RC_READY;
 		    send_replayComplete(sub);
 		    sub->flags |= AGT_NOT_FL_RC_DONE;
+		    notcount++;
 
 		    if (sub->stopTime) {
 			/* need to terminate the subscription 
@@ -1468,6 +1422,8 @@ void
 		if (res != NO_ERR && NEED_EXIT(res)) {
 		    /* treat as a fatal error */
 		    sub->state = AGT_NOT_STATE_SHUTDOWN;
+		} else {
+		    notcount++;
 		}
 	    } else {
 		/* there is no notification to send */
@@ -1501,6 +1457,8 @@ void
 		if (res != NO_ERR && NEED_EXIT(res)) {
 		    /* treat as a fatal error */
 		    sub->state = AGT_NOT_STATE_SHUTDOWN;
+		} else {
+		    notcount++;
 		}
 	    } /* else don't do anything */
 	    break;
@@ -1513,6 +1471,7 @@ void
 		if (!(sub->flags & AGT_NOT_FL_NC_DONE)) {
 		    send_notificationComplete(sub);
 		    sub->flags |= AGT_NOT_FL_NC_DONE;
+		    notcount++;
 		    break;
 		}
 	    }
@@ -1523,7 +1482,8 @@ void
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
     }
-    
+    return notcount;
+
 }  /* agt_not_send_notifications */
 
 
@@ -1561,6 +1521,155 @@ void
     }
     
 }  /* agt_not_remove_subscriptions */
+
+
+/********************************************************************
+* FUNCTION agt_not_new_notification
+* 
+* Malloc and initialize the fields in an agt_not_msg_t
+*
+* INPUTS:
+*   eventType == object template of the event type
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
+agt_not_msg_t * 
+    agt_not_new_notification (const obj_template_t *eventType)
+{
+    agt_not_msg_t  *not;
+
+#ifdef DEBUG
+    if (!eventType) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    not = m__getObj(agt_not_msg_t);
+    if (!not) {
+	return NULL;
+    }
+    (void)memset(not, 0x0, sizeof(agt_not_msg_t));
+    dlq_createSQue(&not->payloadQ);
+    not->msgid = ++msgid;
+    if (msgid == 0) {
+	/* msgid is wrapping!!! */
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    tstamp_datetime(not->eventTime);
+    not->notobj = eventType;
+    return not;
+
+}  /* agt_not_new_notification */
+
+
+/********************************************************************
+* FUNCTION agt_not_free_notification
+* 
+* Scrub the memory in an agt_not_template_t by freeing all
+* the sub-fields and then freeing the entire struct itself 
+* The struct must be removed from any queue it is in before
+* this function is called.
+*
+* INPUTS:
+*    not == agt_not_template_t to delete
+*********************************************************************/
+void 
+    agt_not_free_notification (agt_not_msg_t *not)
+{
+    val_value_t *val;
+
+#ifdef DEBUG
+    if (!not) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    while (!dlq_empty(&not->payloadQ)) {
+	val = (val_value_t *)dlq_deque(&not->payloadQ);
+	val_free_value(val);
+    }
+
+    if (not->msg) {
+	val_free_value(not->msg);
+    }
+
+    m__free(not);
+
+}  /* agt_not_free_notification */
+
+
+/********************************************************************
+* FUNCTION agt_not_add_to_payload
+*
+* Queue the specified value node into the payloadQ
+* for the specified notification
+*
+* INPUTS:
+*   notif == notification to send
+*   val == value to add to payloadQ
+*            !!! THIS IS LIVE MALLOCED MEMORY PASSED OFF
+*            !!! TO THIS FUNCTION.  IT WILL BE FREED LATER
+*            !!! DO NOT CALL val_free_value
+*            !!! AFTER THIS CALL
+*
+* OUTPUTS:
+*   val added to the notif->payloadQ
+*
+*********************************************************************/
+void
+    agt_not_add_to_payload (agt_not_msg_t *notif,
+			    val_value_t *val)
+{
+#ifdef DEBUG
+    if (!notif || !val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    dlq_enque(val, &notif->payloadQ);
+
+}  /* agt_not_add_to_payload */
+
+
+/********************************************************************
+* FUNCTION agt_not_queue_notification
+*
+* Queue the specified notification in the replay log.
+* It will be sent to all the active subscriptions
+* as needed.
+*
+* INPUTS:
+*   notif == notification to send
+*            !!! THIS IS LIVE MALLOCED MEMORY PASSED OFF
+*            !!! TO THIS FUNCTION.  IT WILL BE FREED LATER
+*            !!! DO NOT CALL agt_not_free_notification
+*            !!! AFTER THIS CALL
+*
+* OUTPUTS:
+*   message added to the notificationQ
+*
+*********************************************************************/
+void
+    agt_not_queue_notification (agt_not_msg_t *notif)
+{
+#ifdef DEBUG
+    if (!notif) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (agt_not_init_done) {
+	dlq_enque(notif, &notificationQ);
+    } else {
+	SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+    }
+
+}  /* agt_not_queue_notification */
 
 
 /* END file agt_not.c */

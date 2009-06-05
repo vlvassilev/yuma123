@@ -219,7 +219,7 @@ status_t
 		if (agt_shutdown_requested()) {
 		    done2 = TRUE; 
 		} else {
-		    agt_not_send_notifications();
+		    (void)agt_not_send_notifications();
 		}
 	    } else {
 		/* normal return with some bytes */
@@ -340,7 +340,7 @@ status_t
 		} else if (agt_shutdown_requested()) {
 		    done = done2 = TRUE;
 		} else {
-		    agt_not_send_notifications();
+		    (void)agt_not_send_notifications();
 		}
 	    }
 	}

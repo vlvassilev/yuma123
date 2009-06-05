@@ -655,8 +655,8 @@ boolean
     }
 
 #ifdef MGR_SES_DEBUG
-    if (LOGDEBUG) {
-	log_debug("\nmgr_ses: msg ready for session");
+    if (LOGDEBUG2) {
+	log_debug2("\nmgr_ses: msg ready for session");
     }
 #endif
 
@@ -801,7 +801,8 @@ ssize_t
     ret = libssh2_channel_read(mscb->channel, buff, bufflen);
 
     if (LOGDEBUG3) {
-	log_debug3("\nmgr_ses: Done reading from NETCONF session %u (a:%u) (%d)",
+	log_debug3("\nmgr_ses: Done reading from "
+		   "NETCONF session %u (a:%u) (%d)",
 		   scb->sid, 
 		   mscb->agtsid,
 		   ret);
@@ -816,7 +817,8 @@ ssize_t
 	}
     } else if (ret > 0) {
 	if (LOGDEBUG2) {
-	    log_debug2("\nmgr_ses: channel read %d bytes OK on session %u (a:%u)",
+	    log_debug2("\nmgr_ses: channel read %d bytes OK"
+		       "on session %u (a:%u)",
 		       ret, 
 		       scb->sid,
 		       mscb->agtsid);

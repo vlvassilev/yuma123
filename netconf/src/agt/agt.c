@@ -68,24 +68,30 @@ date         init     comment
 #include "agt_ses.h"
 #endif
 
+#ifndef _H_agt_signal
+#include "agt_signal.h"
+#endif
+
 #ifndef _H_agt_state
 #include "agt_state.h"
+#endif
+
+#ifndef _H_agt_sys
+#include "agt_sys.h"
 #endif
 
 #ifndef _H_agt_val
 #include "agt_val.h"
 #endif
 
-#ifndef _H_agt_signal
-#include "agt_signal.h"
-#endif
-
 #ifndef _H_agt_timer
 #include "agt_timer.h"
 #endif
 
+#if 0
 #ifndef _H_agtinst
 #include "agtinst.h"
+#endif
 #endif
 
 #ifndef _H_log
@@ -434,10 +440,18 @@ status_t
     /* initialize the session handler data structures */
     agt_ses_init();
 
+#if 0
     /* initialize the agent parmset callback functions 
      *  *** TBD: make this modular and callable at any time
      */
     res = agtinst_init();
+    if (res != NO_ERR) {
+	return res;
+    }
+#endif
+
+    /* load the system module */
+    res = agt_sys_init();
     if (res != NO_ERR) {
 	return res;
     }
@@ -481,7 +495,13 @@ status_t
 	return res;
     }
 
-    /* load the agent sessions callback functions and DM module */
+    /* load the system module callback functions and data */
+    res = agt_sys_init2();
+    if (res != NO_ERR) {
+	return res;
+    }
+    
+    /* load the agent sessions callback functions and data */
     agt_ses_init2();
 
     /* load the agent state monitoring callback functions and data */
@@ -544,11 +564,15 @@ void
         log_debug3("\nAgent Cleanup Starting...\n");
 #endif
 
+#if 0
 	agtinst_cleanup();
+#endif
+
 	agt_acm_cleanup();
 	agt_ncx_cleanup();
 	agt_hello_cleanup();
 	agt_cli_cleanup();
+	agt_sys_cleanup();
 	agt_state_cleanup();
 	agt_not_cleanup();
 	agt_ses_cleanup();

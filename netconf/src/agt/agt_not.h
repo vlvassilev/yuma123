@@ -165,11 +165,27 @@ extern status_t
 extern void 
     agt_not_cleanup (void);
 
-extern void
+extern uint32
     agt_not_send_notifications (void);
 
 extern void
     agt_not_remove_subscriptions (ses_id_t sid);
+
+extern agt_not_msg_t * 
+    agt_not_new_notification (const obj_template_t *eventType);
+
+extern void 
+    agt_not_free_notification (agt_not_msg_t *not);
+
+/* consumes 'val'; will be freed later */
+extern void
+    agt_not_add_to_payload (agt_not_msg_t *notif,
+			    val_value_t *val);
+
+
+/* consumes 'notif'; will be freed later */
+extern void
+    agt_not_queue_notification (agt_not_msg_t *notif);
 
 
 #endif            /* _H_agt_not */

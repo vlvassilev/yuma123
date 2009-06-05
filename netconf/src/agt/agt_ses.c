@@ -600,9 +600,9 @@ static status_t
     (void)curp;
 
 #ifdef AGT_SES_DEBUG
-    if (LOGDEBUG) {
-	log_debug("\nagt_ses: set linesize for session %d", 
-		  scb->sid);
+    if (LOGDEBUG2) {
+	log_debug2("\nagt_ses: set linesize for session %d", 
+		   scb->sid);
     }
 #endif
 
@@ -716,8 +716,8 @@ static status_t
     (void)curp;
 
 #ifdef AGT_SES_DEBUG
-    if (LOGDEBUG) {
-	log_debug("\nagt_ses: set withdef for session %d", scb->sid);
+    if (LOGDEBUG2) {
+	log_debug2("\nagt_ses: set withdef for session %d", scb->sid);
     }
 #endif
 
@@ -836,9 +836,9 @@ static status_t
     (void)curp;
 
 #ifdef AGT_SES_DEBUG
-    if (LOGDEBUG) {
-	log_debug("\nagt_ses: set withmeta for session %d", 
-		  scb->sid);
+    if (LOGDEBUG2) {
+	log_debug2("\nagt_ses: set withmeta for session %d", 
+		   scb->sid);
     }
 #endif
 
@@ -1482,8 +1482,8 @@ boolean
     mysid = scb->sid;
 
 #ifdef AGT_SES_DEBUG
-    if (LOGDEBUG) {
-	log_debug("\nagt_ses msg ready for session %d", scb->sid);
+    if (LOGDEBUG2) {
+	log_debug2("\nagt_ses msg ready for session %d", scb->sid);
     }
 #endif
 

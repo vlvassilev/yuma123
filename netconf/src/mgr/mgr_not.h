@@ -1,13 +1,13 @@
-#ifndef _H_mgr_rpc
-#define _H_mgr_rpc
-/*  FILE: mgr_rpc.h
+#ifndef _H_mgr_not
+#define _H_mgr_not
+/*  FILE: mgr_not.h
 *********************************************************************
 *                                                                   *
 *                         P U R P O S E                             *
 *                                                                   *
 *********************************************************************
 
-    NETCONF protocol remote procedure call manager-side definitions
+    NETCONF protocol notification manager-side definitions
 
 *********************************************************************
 *                                                                   *
@@ -17,7 +17,7 @@
 
 date             init     comment
 ----------------------------------------------------------------------
-13-feb-07    abb      Begun; started from agt_rpc.h
+03-jun-09    abb      Begun;
 */
 #include <time.h>
 
@@ -37,6 +37,10 @@ date             init     comment
 #include "status.h"
 #endif
 
+#ifndef _H_tstamp
+#include "tstamp.h"
+#endif
+
 #ifndef _H_xml_util
 #include "xml_util.h"
 #endif
@@ -48,7 +52,6 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-#define MGR_RPC_NUM_PHASES   6
 
 /********************************************************************
 *                                                                   *
@@ -57,41 +60,25 @@ date             init     comment
 *********************************************************************/
 
 
-typedef struct mgr_rpc_req_t_ {
-    dlq_hdr_t      qhdr;
-    xml_msg_hdr_t  mhdr;
-    uint32         group_id;
-    const obj_template_t *rpc;
-    xmlChar       *msg_id;       /* malloced message ID */
-    xml_attrs_t    attrs;          /* Extra <rpc> attrs */
-    val_value_t   *data;      /* starts with the method */
-    time_t         starttime;     /* tstamp for timeout */
-    uint32         timeout;       /* timeout in seconds */
-    void          *replycb;           /* mgr_rpc_cbfn_t */
-} mgr_rpc_req_t;
+/* struct to save and process an incoming notification */
+typedef struct mgr_not_msg_t_ {
+    dlq_hdr_t               qhdr;
+    /* xml_msg_hdr_t           mhdr; */
+    val_value_t            *notification;  /* parsed message */
+    val_value_t            *eventTime;   /* ptr into notification */
+    val_value_t            *eventType;   /* ptr into notification */
+    status_t                res;         /* parse result */
+} mgr_not_msg_t;
 
 
-typedef struct mgr_rpc_rpy_t_ {
-    dlq_hdr_t      qhdr;
-    /* xml_msg_hdr_t  mhdr; */
-    uint32         group_id;
-    xmlChar       *msg_id;
-    status_t       res;
-    val_value_t   *reply;
-} mgr_rpc_rpy_t;
-
-
-/* manager RPC reply callback function
+/* manager notification callback function
  *
  *  INPUTS:
  *   scb == session control block for session that got the reply
- *   req == RPC request returned to the caller (for reuse or free)
- *   rpy == RPY reply header; this will be NULL if the timeout
- *          occurred so there is no reply
+ *   msg == incoming notification msg
  */
-typedef void (*mgr_rpc_cbfn_t) (ses_cb_t *scb,
-				mgr_rpc_req_t *req,
-				mgr_rpc_rpy_t *rpy);
+typedef void (*mgr_not_cbfn_t) (ses_cb_t *scb,
+				mgr_not_msg_t *msg);
 
 
 /********************************************************************
@@ -100,58 +87,35 @@ typedef void (*mgr_rpc_cbfn_t) (ses_cb_t *scb,
 *                                                                   *
 *********************************************************************/
 
-/* should call once to init RPC mgr module */
+/* should call once to init module */
 extern status_t 
-    mgr_rpc_init (void);
+    mgr_not_init (void);
 
-
-/* should call once to cleanup RPC mgr module */
+/* should call once to cleanup module */
 extern void 
-    mgr_rpc_cleanup (void);
-
-extern mgr_rpc_req_t *
-    mgr_rpc_new_request (ses_cb_t *scb);
+    mgr_not_cleanup (void);
 
 extern void
-    mgr_rpc_free_request (mgr_rpc_req_t *req);
+    mgr_not_free_msg (mgr_not_msg_t *msg);
 
 extern void
-    mgr_rpc_free_reply (mgr_rpc_rpy_t *rpy);
-
-extern void
-    mgr_rpc_clean_requestQ (dlq_hdr_t *reqQ);
-
-/*** returning number of msgs timed out
- *** need a callback-based cleanup later on
- *** to support N concurrent requests per agent
- ***/
-extern uint32
-    mgr_rpc_timeout_requestQ (dlq_hdr_t *reqQ);
-
-/* non-blocking send, reply function will be called when
- * one is received or a timeout occurs
- *
- */
-extern status_t
-    mgr_rpc_send_request (ses_cb_t *scb,
-			  mgr_rpc_req_t *req,
-			  mgr_rpc_cbfn_t rpyfn);
+    mgr_not_clean_msgQ (dlq_hdr_t *msgQ);
 
 
-/* cancel a request in progress */
-extern status_t
-    mgr_rpc_cancel_request (ses_cb_t *scb,
-			    const xmlChar *msg_id);
-
-
-/* handle the <rpc-reply> element
+/* handle the <notification> element
  * called by mgr_top.c: 
  * This function is registered with top_register_node
- * for the module 'netconf', top-node 'rpc-reply'
+ * for the module 'notification', top-node 'notification'
  */
 extern void
-    mgr_rpc_dispatch (ses_cb_t  *scb,
+    mgr_not_dispatch (ses_cb_t  *scb,
 		      xml_node_t *top);
 
+/* temp: just one notification callback; 
+ * not per eventType or any other filter
+ */
+extern void
+    mgr_not_set_callback_fn (mgr_not_cbfn_t cbfn);
 
-#endif            /* _H_mgr_rpc */
+
+#endif            /* _H_mgr_not */

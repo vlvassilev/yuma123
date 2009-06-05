@@ -1623,7 +1623,7 @@ int
 
     comstate = (completion_state_t *)data;
 
-    if (comstate->agent_cb->climore) {
+    if (comstate->agent_cb && comstate->agent_cb->climore) {
 	comstate->cmdstate = CMD_STATE_MORE;
     }
 

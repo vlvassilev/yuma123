@@ -49,7 +49,7 @@ container /ietf-netconf-state/subscriptions
 list /ietf-netconf-state/subscriptions/subscription
 leaf /ietf-netconf-state/subscriptions/subscription/sessionId
 leaf /ietf-netconf-state/subscriptions/subscription/stream
-leaf /ietf-netconf-state/subscriptions/subscription/filter
+*** out leaf /ietf-netconf-state/subscriptions/subscription/filter
 leaf /ietf-netconf-state/subscriptions/subscription/startTime
 leaf /ietf-netconf-state/subscriptions/subscription/stopTime
 leaf /ietf-netconf-state/subscriptions/subscription/outNotifications
@@ -220,6 +220,7 @@ date         init     comment
 #define AGT_STATE_OBJ_LOGINTIME       (const xmlChar *)"loginTime"
 
 #define AGT_STATE_OBJ_STATISTICS      (const xmlChar *)"statistics"
+#define AGT_STATE_OBJ_SUBSCRIPTIONS   (const xmlChar *)"subscriptions"
 
 #define AGT_STATE_FORMAT_YANG         (const xmlChar *)"YANG"
 
@@ -246,112 +247,18 @@ static val_value_t          *mysessionsval;
 
 static val_value_t          *myschemasval;
 
+static val_value_t          *mysubscriptionsval;
+
 static const obj_template_t *mysessionobj;
 
 static const obj_template_t *myschemaobj;
 
+static const obj_template_t *mysubscriptionsobj;
 
-
-/********************************************************************
-* FUNCTION make_leaf
-*
-* make a val_value_t struct for a specified leaf or leaf-list
-*
-INPUTS:
-*   parentobj == parent object to find child leaf object
-*   leafname == name of leaf to find (namespace hardwired)
-*   leafstrval == string version of value to set for leaf
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   malloced value struct or NULL if some error
-*********************************************************************/
-static val_value_t *
-    make_leaf (const obj_template_t *parentobj,
-	       const xmlChar *leafname,
-	       const xmlChar *leafstrval,
-	       status_t *res)
-{
-    const obj_template_t  *leafobj;
-    val_value_t           *leafval;
-    
-    leafobj = obj_find_child(parentobj,
-			     obj_get_mod_name(parentobj),
-			     leafname);
-    if (!leafobj) {
-	*res =ERR_NCX_DEF_NOT_FOUND;
-	return NULL;
-    }
-    if (!(leafobj->objtype == OBJ_TYP_LEAF ||
-	  leafobj->objtype == OBJ_TYP_LEAF_LIST)) {
-	*res = ERR_NCX_WRONG_TYPE;
-	return NULL;
-    }
-
-    leafval = val_make_simval(obj_get_ctypdef(leafobj),
-			      obj_get_nsid(leafobj),
-			      leafname,
-			      leafstrval,
-			      res);
-    return leafval;
-
-}  /* make_leaf */
-
-
-/********************************************************************
-* FUNCTION make_virtual_leaf
-*
-* make a val_value_t struct for a specified virtual 
-* leaf or leaf-list
-*
-INPUTS:
-*   parentobj == parent object to find child leaf object
-*   leafname == name of leaf to find (namespace hardwired)
-*   callbackfn == get callback function to install
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   malloced value struct or NULL if some error
-*********************************************************************/
-static val_value_t *
-    make_virtual_leaf (const obj_template_t *parentobj,
-		       const xmlChar *leafname,
-		       getcb_fn_t callbackfn,
-		       status_t *res)
-{
-    const obj_template_t  *leafobj;
-    val_value_t           *leafval;
-    
-    leafobj = obj_find_child(parentobj,
-			     obj_get_mod_name(parentobj),
-			     leafname);
-    if (!leafobj) {
-	*res =ERR_NCX_DEF_NOT_FOUND;
-	return NULL;
-    }
-    if (!(leafobj->objtype == OBJ_TYP_LEAF ||
-	  leafobj->objtype == OBJ_TYP_LEAF_LIST)) {
-	*res = ERR_NCX_WRONG_TYPE;
-	return NULL;
-    }
-
-    leafval = val_new_value();
-    if (!leafval) {
-	*res = ERR_INTERNAL_MEM;
-	return NULL;
-    }
-    val_init_virtual(leafval, callbackfn, leafobj);
-
-    return leafval;
-
-}  /* make_virtual_leaf */
-
+/* TRUE == mysubscriptionsval in the running config
+ * FALSE ==mysubscriptionsval is not in the running config
+ */
+static boolean               any_subscriptions;
 
 /********************************************************************
 * FUNCTION get_locks
@@ -423,17 +330,19 @@ static status_t
 
 		/* add locks/globalLock/lockedBySession */ 
 		sprintf((char *)numbuff, "%u", sid);
-		newval = make_leaf(globallock,
-				   (const xmlChar *)"lockedBySession",
-				   numbuff, &res);
+		newval = agt_make_leaf(globallock,
+				       (const xmlChar *)"lockedBySession",
+				       numbuff, 
+				       &res);
 		if (newval) {
 		    val_add_child(newval, globallockval);
 		}
 
 		/* add locks/globalLock/lockedTime */ 
-		newval = make_leaf(globallock,
-				   (const xmlChar *)"lockedTime",
-				   locktime, &res);
+		newval = agt_make_leaf(globallock,
+				       (const xmlChar *)"lockedTime",
+				       locktime, 
+				       &res);
 		if (newval) {
 		    val_add_child(newval, globallockval);
 		}
@@ -574,9 +483,10 @@ static val_value_t *
     val_init_from_template(schemaval, schemaobj);
 
     /* create schema/identifier */
-    childval = make_leaf(schemaobj,
-			 AGT_STATE_OBJ_IDENTIFIER,
-			 ncx_get_modname(mod), res);
+    childval = agt_make_leaf(schemaobj,
+			     AGT_STATE_OBJ_IDENTIFIER,
+			     ncx_get_modname(mod), 
+			     res);
     if (!childval) {
 	val_free_value(schemaval);
 	return NULL;
@@ -588,9 +498,10 @@ static val_value_t *
      ****/
 
     /* create schema/version */
-    childval = make_leaf(schemaobj,
-			 AGT_STATE_OBJ_VERSION,
-			 ncx_get_modversion(mod), res);
+    childval = agt_make_leaf(schemaobj,
+			     AGT_STATE_OBJ_VERSION,
+			     ncx_get_modversion(mod), 
+			     res);
     if (!childval) {
 	val_free_value(schemaval);
 	return NULL;
@@ -598,9 +509,10 @@ static val_value_t *
     val_add_child(childval, schemaval);
 
     /* create schema/format */
-    childval = make_leaf(schemaobj,
-			 AGT_STATE_OBJ_FORMAT,
-			 AGT_STATE_FORMAT_YANG, res);
+    childval = agt_make_leaf(schemaobj,
+			     AGT_STATE_OBJ_FORMAT,
+			     AGT_STATE_FORMAT_YANG, 
+			     res);
     if (!childval) {
 	val_free_value(schemaval);
 	return NULL;
@@ -608,9 +520,10 @@ static val_value_t *
     val_add_child(childval, schemaval);
 
     /* create schema/namespace */
-    childval = make_leaf(schemaobj,
-			 AGT_STATE_OBJ_NAMESPACE,
-			 ncx_get_modnamespace(mod), res);
+    childval = agt_make_leaf(schemaobj,
+			     AGT_STATE_OBJ_NAMESPACE,
+			     ncx_get_modnamespace(mod), 
+			     res);
     if (!childval) {
 	val_free_value(schemaval);
 	return NULL;
@@ -618,9 +531,10 @@ static val_value_t *
     val_add_child(childval, schemaval);
 
     /* create schema/location */
-    childval = make_leaf(schemaobj,
-			 AGT_STATE_OBJ_LOCATION,
-			 AGT_STATE_ENUM_NETCONF, res);
+    childval = agt_make_leaf(schemaobj,
+			     AGT_STATE_OBJ_LOCATION,
+			     AGT_STATE_ENUM_NETCONF, 
+			     res);
     if (!childval) {
 	val_free_value(schemaval);
 	return NULL;
@@ -674,9 +588,10 @@ static val_value_t *
 
     /* create session/sessionId */
     sprintf((char *)numbuff, "%u", scb->sid);
-    childval = make_leaf(sessionobj,
-			 AGT_STATE_OBJ_SESSIONID,
-			 numbuff, res);
+    childval = agt_make_leaf(sessionobj,
+			     AGT_STATE_OBJ_SESSIONID,
+			     numbuff, 
+			     res);
     if (!childval) {
 	val_free_value(sessionval);
 	return NULL;
@@ -684,10 +599,10 @@ static val_value_t *
     val_add_child(childval, sessionval);
 
     /* create session/transport */
-    childval = make_leaf(sessionobj,
-			 AGT_STATE_OBJ_TRANSPORT,
-			 ses_get_transport_name(scb->transport),
-			 res);
+    childval = agt_make_leaf(sessionobj,
+			     AGT_STATE_OBJ_TRANSPORT,
+			     ses_get_transport_name(scb->transport),
+			     res);
     if (!childval) {
 	val_free_value(sessionval);
 	return NULL;
@@ -695,10 +610,10 @@ static val_value_t *
     val_add_child(childval, sessionval);
     
     /* create session/protocol */
-    childval = make_leaf(sessionobj,
-			 AGT_STATE_OBJ_PROTOCOL,
-			 AGT_STATE_ENUM_NETCONF,
-			 res);
+    childval = agt_make_leaf(sessionobj,
+			     AGT_STATE_OBJ_PROTOCOL,
+			     AGT_STATE_ENUM_NETCONF,
+			     res);
     if (!childval) {
 	val_free_value(sessionval);
 	return NULL;
@@ -706,10 +621,10 @@ static val_value_t *
     val_add_child(childval, sessionval);
 
     /* create session/username */
-    childval = make_leaf(sessionobj,
-			 AGT_STATE_OBJ_USERNAME,
-			 scb->username,
-			 res);
+    childval = agt_make_leaf(sessionobj,
+			     AGT_STATE_OBJ_USERNAME,
+			     scb->username,
+			     res);
     if (!childval) {
 	val_free_value(sessionval);
 	return NULL;
@@ -717,10 +632,10 @@ static val_value_t *
     val_add_child(childval, sessionval);
 
     /* create session/sourceHost */
-    childval = make_leaf(sessionobj,
-			 AGT_STATE_OBJ_SOURCEHOST,
-			 scb->peeraddr,
-			 res);
+    childval = agt_make_leaf(sessionobj,
+			     AGT_STATE_OBJ_SOURCEHOST,
+			     scb->peeraddr,
+			     res);
     if (!childval) {
 	val_free_value(sessionval);
 	return NULL;
@@ -728,10 +643,10 @@ static val_value_t *
     val_add_child(childval, sessionval);
 
     /* create session/loginTime */
-    childval = make_leaf(sessionobj,
-			 AGT_STATE_OBJ_LOGINTIME,
-			 scb->start_time,
-			 res);
+    childval = agt_make_leaf(sessionobj,
+			     AGT_STATE_OBJ_LOGINTIME,
+			     scb->start_time,
+			     res);
     if (!childval) {
 	val_free_value(sessionval);
 	return NULL;
@@ -781,10 +696,10 @@ static val_value_t *
 
     /* add statistics/netconfStartTime static leaf */
     tstamp_datetime(tbuff);
-    childval = make_leaf(statisticsobj,
-			 (const xmlChar *)"netconfStartTime",
-			 tbuff,
-			 res);
+    childval = agt_make_leaf(statisticsobj,
+			     (const xmlChar *)"netconfStartTime",
+			     tbuff,
+			     res);
     if (!childval) {
 	val_free_value(statsval);
 	return NULL;
@@ -793,10 +708,10 @@ static val_value_t *
 
 
     /* add statistics/inSessions virtual leaf */
-    childval = make_virtual_leaf(statisticsobj,
-				 (const xmlChar *)"inSessions",
-				 agt_ses_get_inSessions,
-				 res);
+    childval = agt_make_virtual_leaf(statisticsobj,
+				     (const xmlChar *)"inSessions",
+				     agt_ses_get_inSessions,
+				     res);
     if (!childval) {
 	val_free_value(statsval);
 	return NULL;
@@ -804,10 +719,10 @@ static val_value_t *
     val_add_child(childval, statsval);
 
     /* add statistics/inXMLParseErrors virtual leaf */
-    childval = make_virtual_leaf(statisticsobj,
-				 (const xmlChar *)"inXMLParseErrors",
-				 agt_ses_get_inXMLParseErrors,
-				 res);
+    childval = agt_make_virtual_leaf(statisticsobj,
+				     (const xmlChar *)"inXMLParseErrors",
+				     agt_ses_get_inXMLParseErrors,
+				     res);
     if (!childval) {
 	val_free_value(statsval);
 	return NULL;
@@ -815,10 +730,10 @@ static val_value_t *
     val_add_child(childval, statsval);
 
     /* add statistics/inBadHellos virtual leaf */
-    childval = make_virtual_leaf(statisticsobj,
-				 (const xmlChar *)"inBadHellos",
-				 agt_ses_get_inBadHellos,
-				 res);
+    childval = agt_make_virtual_leaf(statisticsobj,
+				     (const xmlChar *)"inBadHellos",
+				     agt_ses_get_inBadHellos,
+				     res);
     if (!childval) {
 	val_free_value(statsval);
 	return NULL;
@@ -827,10 +742,10 @@ static val_value_t *
 
 
     /* add statistics/inRpcs virtual leaf */
-    childval = make_virtual_leaf(statisticsobj,
-				 (const xmlChar *)"inRpcs",
-				 agt_ses_get_inRpcs,
-				 res);
+    childval = agt_make_virtual_leaf(statisticsobj,
+				     (const xmlChar *)"inRpcs",
+				     agt_ses_get_inRpcs,
+				     res);
     if (!childval) {
 	val_free_value(statsval);
 	return NULL;
@@ -838,10 +753,10 @@ static val_value_t *
     val_add_child(childval, statsval);
 
     /* add statistics/inBadRpcs virtual leaf */
-    childval = make_virtual_leaf(statisticsobj,
-				 (const xmlChar *)"inBadRpcs",
-				 agt_ses_get_inBadRpcs,
-				 res);
+    childval = agt_make_virtual_leaf(statisticsobj,
+				     (const xmlChar *)"inBadRpcs",
+				     agt_ses_get_inBadRpcs,
+				     res);
     if (!childval) {
 	val_free_value(statsval);
 	return NULL;
@@ -850,10 +765,10 @@ static val_value_t *
 
 
     /* add statistics/inNotSupportedRpcs virtual leaf */
-    childval = make_virtual_leaf(statisticsobj,
-				 (const xmlChar *)"inNotSupportedRpcs",
-				 agt_ses_get_inNotSupportedRpcs,
-				 res);
+    childval = agt_make_virtual_leaf(statisticsobj,
+				     (const xmlChar *)"inNotSupportedRpcs",
+				     agt_ses_get_inNotSupportedRpcs,
+				     res);
     if (!childval) {
 	val_free_value(statsval);
 	return NULL;
@@ -861,10 +776,10 @@ static val_value_t *
     val_add_child(childval, statsval);
 
     /* add statistics/outRpcReplies virtual leaf */
-    childval = make_virtual_leaf(statisticsobj,
-				 (const xmlChar *)"outRpcReplies",
-				 agt_ses_get_outRpcReplies,
-				 res);
+    childval = agt_make_virtual_leaf(statisticsobj,
+				     (const xmlChar *)"outRpcReplies",
+				     agt_ses_get_outRpcReplies,
+				     res);
     if (!childval) {
 	val_free_value(statsval);
 	return NULL;
@@ -872,10 +787,10 @@ static val_value_t *
     val_add_child(childval, statsval);
 
     /* add statistics/outRpcErrors virtual leaf */
-    childval = make_virtual_leaf(statisticsobj,
-				 (const xmlChar *)"outRpcErrors",
-				 agt_ses_get_outRpcErrors,
-				 res);
+    childval = agt_make_virtual_leaf(statisticsobj,
+				     (const xmlChar *)"outRpcErrors",
+				     agt_ses_get_outRpcErrors,
+				     res);
     if (!childval) {
 	val_free_value(statsval);
 	return NULL;
@@ -883,10 +798,10 @@ static val_value_t *
     val_add_child(childval, statsval);
 
     /* add statistics/outNotifications virtual leaf */
-    childval = make_virtual_leaf(statisticsobj,
-				 (const xmlChar *)"outNotifications",
-				 agt_ses_get_outNotifications,
-				 res);
+    childval = agt_make_virtual_leaf(statisticsobj,
+				     (const xmlChar *)"outNotifications",
+				     agt_ses_get_outNotifications,
+				     res);
     if (!childval) {
 	val_free_value(statsval);
 	return NULL;
@@ -1022,6 +937,120 @@ static status_t
 } /* get_schema_validate */
 
 
+
+/********************************************************************
+* FUNCTION make_subscription_val
+*
+* make a val_value_t struct for a specified subscription
+*
+INPUTS:
+*   sub == subscription control block to use
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
+static val_value_t *
+    make_subscription_val (agt_not_subscription_t *sub,
+			   status_t *res)
+{
+    const obj_template_t *subscriptionobj;
+    val_value_t           *subval, *childval;
+    xmlChar               numbuff[NCX_MAX_NUMLEN];
+
+    *res = NO_ERR;
+
+    subscriptionobj = 
+	obj_find_child(mysubscriptionsobj,
+		       AGT_STATE_MODULE,
+		       (const xmlChar *)"subscription");
+    if (!subscriptionobj) {
+	*res = SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+
+    /* create session node */
+    subval = val_new_value();
+    if (!subval) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+    val_init_from_template(subval, subscriptionobj);
+
+    /* create subscription/sessionId */
+    sprintf((char *)numbuff, "%u", sub->scb->sid);
+    childval = agt_make_leaf(subscriptionobj,
+			     AGT_STATE_OBJ_SESSIONID,
+			     numbuff, 
+			     res);
+    if (!childval) {
+	val_free_value(subval);
+	return NULL;
+    }
+    val_add_child(childval, subval);
+
+    /* create subscription/stream */
+    childval = agt_make_leaf(subscriptionobj,
+			     (const xmlChar *)"stream",
+			     sub->stream,
+			     res);
+    if (!childval) {
+	val_free_value(subval);
+	return NULL;
+    }
+    val_add_child(childval, subval);
+    
+    /* create subscription/startTime */
+    if (sub->startTime) {
+	childval = agt_make_leaf(subscriptionobj,
+				 (const xmlChar *)"startTime",		 
+				 sub->startTime,
+				 res);
+	if (!childval) {
+	    val_free_value(subval);
+	    return NULL;
+	}
+	val_add_child(childval, subval);
+    }
+
+    /* create subscription/stopTime */
+    if (sub->stopTime) {
+	childval = agt_make_leaf(subscriptionobj,
+				 (const xmlChar *)"stopTime",		 
+				 sub->stopTime,
+				 res);
+	if (!childval) {
+	    val_free_value(subval);
+	    return NULL;
+	}
+	val_add_child(childval, subval);
+    }
+
+    /* create subscription/outNotifications */
+    childval = agt_make_virtual_leaf(subscriptionobj,
+				     (const xmlChar *)"outNotifications",
+				     agt_ses_get_outNotifications,
+				     res);
+    if (!childval) {
+	val_free_value(subval);
+	return NULL;
+    }
+    val_add_child(childval, subval);
+
+    *res = val_gen_index_chain(subscriptionobj, subval);
+    if (*res != NO_ERR) {
+	val_free_value(subval);
+	return NULL;
+    }
+
+    return subval;
+
+    } /* make_subscription_val */
+
+
 /************* E X T E R N A L    F U N C T I O N S ***************/
 
 
@@ -1055,6 +1084,13 @@ status_t
 	return res;
     }
 
+    mysessionsval = NULL;
+    myschemasval = NULL;
+    mysubscriptionsval = NULL;
+    mysessionobj = NULL;
+    myschemaobj = NULL;
+    mysubscriptionsobj = NULL;
+    any_subscriptions = FALSE;
     agt_state_init_done = TRUE;
     return NO_ERR;
 
@@ -1077,9 +1113,12 @@ status_t
     agt_state_init2 (void)
 {
     const obj_template_t  *topobj, *confsobj, *confobj;
-    const obj_template_t  *sessionsobj, *statisticsobj, *schemasobj;
-    val_value_t           *topval, *capsval, *confsval, *confval;
+    const obj_template_t  *sessionsobj, *statisticsobj;
+    const obj_template_t  *schemasobj;
+    val_value_t           *topval, *capsval;
+    val_value_t           *confsval, *confval;
     val_value_t           *sessionsval, *statisticsval;
+    val_value_t           *subscriptionsval;
     cfg_template_t        *runningcfg;
     ncx_module_t          *mod;
     status_t  res;
@@ -1156,6 +1195,13 @@ status_t
 				   AGT_STATE_MODULE,
 				   AGT_STATE_OBJ_STATISTICS);
     if (!statisticsobj) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    mysubscriptionsobj = obj_find_child(topobj,
+					AGT_STATE_MODULE,
+					AGT_STATE_OBJ_SUBSCRIPTIONS);
+    if (!mysubscriptionsobj) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
@@ -1247,7 +1293,18 @@ status_t
     val_add_child(sessionsval, topval);
     mysessionsval = sessionsval;
 
-    /*** TBD: add /ietf-netconf-state/subscriptions here ***/
+    /* make cached /ietf-netconf-state/subscriptions 
+     * this is an NP-container so it is only added
+     * to the running config when there is at
+     * least one subscription active
+     */
+    subscriptionsval = val_new_value();
+    if (!subscriptionsval) {
+	return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(subscriptionsval, 
+			   mysubscriptionsobj);
+    mysubscriptionsval = subscriptionsval;
 
     /* add /ietf-netconf-state/statistics */
     statisticsval = make_statistics_val(statisticsobj,
@@ -1276,7 +1333,25 @@ void
     agt_state_cleanup (void)
 {
     if (agt_state_init_done) {
+
+	if (!any_subscriptions) {
+	    /* not going to get cleaned up when 
+	     * the running config is deleted,
+	     * so delete it now
+	     */
+	    if (mysubscriptionsval) {
+		val_free_value(mysubscriptionsval);
+	    }
+	}
+
 	statemod = NULL;
+	mysessionsval = NULL;
+	myschemasval = NULL;
+	mysubscriptionsval = NULL;
+	mysessionobj = NULL;
+	myschemaobj = NULL;
+	mysubscriptionsobj = NULL;
+	any_subscriptions = FALSE;
 
 	agt_rpc_unregister_method(AGT_STATE_MODULE, 
 				  AGT_STATE_GET_SCHEMA);
@@ -1329,6 +1404,11 @@ void
 {
     val_value_t  *sessionval, *idval;
 
+    if (mysessionsval == NULL) {
+	/* cleanup already done */
+	return;
+    }
+
     for (sessionval = val_get_first_child(mysessionsval);
 	 sessionval != NULL;
 	 sessionval = val_get_next_child(sessionval)) {
@@ -1347,7 +1427,6 @@ void
     /* session already removed -- ignore the error */
 
 }  /* agt_state_remove_session */
-
 
 
 /********************************************************************
@@ -1377,6 +1456,90 @@ status_t
     return res;
 
 }  /* agt_state_add_module_schema */
+
+
+/********************************************************************
+* FUNCTION agt_state_add_subscription
+*
+* Add a notification subscription entry to the netconf-state DM
+*
+* INPUTS:
+*   sub == subscription control block to use for the info
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    agt_state_add_subscription (agt_not_subscription_t *sub)
+{
+    val_value_t *subscription;
+    status_t     res;
+
+    res = NO_ERR;
+    subscription = make_subscription_val(sub, &res);
+    if (!subscription) {
+	return res;
+    }
+
+    val_add_child(subscription, mysubscriptionsval);
+
+    if (!any_subscriptions) {
+	/* !!! special insert hack into the correct
+	 * !!! sibling position; OK because this is
+	 * !!! static read-only data and will not
+	 * !!! be removed by agt_val.c
+	 */
+	dlq_insertAfter(mysubscriptionsval, mysessionsval);
+	mysubscriptionsval->parent = mysessionsval->parent;
+	any_subscriptions = TRUE;
+    }
+
+    return NO_ERR;
+
+}  /* agt_state_add_subscription */
+
+
+/********************************************************************
+* FUNCTION agt_state_remove_subscription
+*
+* Remove a subscription entry from the netconf-state DM
+*
+* INPUTS:
+*   sid == session ID of the subscription entry to find and delete
+*
+*********************************************************************/
+void
+    agt_state_remove_subscription (ses_id_t sid)
+{
+    val_value_t  *subscriptionval, *sessionidval;
+
+    for (subscriptionval = val_get_first_child(mysubscriptionsval);
+	 subscriptionval != NULL;
+	 subscriptionval = val_get_next_child(subscriptionval)) {
+
+	sessionidval = val_find_child(subscriptionval, 
+				      AGT_STATE_MODULE, 
+				      AGT_STATE_OBJ_SESSIONID);
+	if (!sessionidval) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	    continue;
+	}
+
+	if (VAL_UINT(sessionidval) != sid) {
+	    continue;
+	}
+	    
+	dlq_remove(subscriptionval);
+	val_free_value(subscriptionval);
+
+	if (!val_has_content(mysubscriptionsval)) {
+	    val_remove_child(mysubscriptionsval);
+	    any_subscriptions = FALSE;
+	}
+	return;
+    }
+
+}  /* agt_state_remove_subscription */
 
 
 /* END file agt_state.c */

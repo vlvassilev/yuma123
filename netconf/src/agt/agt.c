@@ -56,6 +56,10 @@ date         init     comment
 #include "agt_ncx.h"
 #endif
 
+#ifndef _H_agt_not
+#include "agt_not.h"
+#endif
+
 #ifndef _H_agt_rpc
 #include "agt_rpc.h"
 #endif
@@ -232,10 +236,10 @@ static void
 		 fname);
     }
 
-    if (LOGDEBUG2) {
-	log_debug2("\nContents of %s configuration:", cfg->name);
+    if (LOGDEBUG) {
+	log_debug("\nContents of %s configuration:", cfg->name);
 	val_dump_value(cfg->root, 0);
-	log_debug2("\n");
+	log_debug("\n");
     }
 
     if (fname) {
@@ -443,6 +447,12 @@ status_t
     if (res != NO_ERR) {
 	return res;
     }
+
+    /* load the NETCONF Notifications data model module */
+    res = agt_not_init();
+    if (res != NO_ERR) {
+	return res;
+    }
     
     /*** ALL INITIAL YANG MODULES SHOULD BE LOADED AT THIS POINT ***/
     if (ncx_any_mod_errors()) {
@@ -474,8 +484,14 @@ status_t
     /* load the agent sessions callback functions and DM module */
     agt_ses_init2();
 
-    /* load the agent state monitoring callback functions and DM module */
+    /* load the agent state monitoring callback functions and data */
     res = agt_state_init2();
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* load the notifications callback functions and data */
+    res = agt_not_init2();
     if (res != NO_ERR) {
 	return res;
     }
@@ -534,6 +550,7 @@ void
 	agt_hello_cleanup();
 	agt_cli_cleanup();
 	agt_state_cleanup();
+	agt_not_cleanup();
 	agt_ses_cleanup();
 	agt_cap_cleanup();
 	agt_rpc_cleanup();

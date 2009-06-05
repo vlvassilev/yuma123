@@ -65,6 +65,10 @@ date         init     comment
 #include "dlq.h"
 #endif
 
+#ifndef _H_getcb
+#include "getcb.h"
+#endif
+
 #ifndef _H_log
 #include  "log.h"
 #endif
@@ -806,11 +810,8 @@ status_t
     agt_validate_filter (ses_cb_t *scb,
 			 rpc_msg_t *msg)
 {
-    val_value_t    *filter, *filtertype, *sel;
-    const xmlChar  *errstr;
-    op_filtertyp_t  filtyp;
+    val_value_t    *filter;
     status_t        res;
-    xml_attr_t      selattr;
 
 #ifdef DEBUG
     if (!scb || !msg) {
@@ -818,7 +819,53 @@ status_t
     }
 #endif
 
-    filter = NULL;
+    /* filter parm is optional */
+    filter = val_find_child(msg->rpc_input, 
+			    NC_MODULE, 
+			    NCX_EL_FILTER);
+    if (!filter) {
+	msg->rpc_filter.op_filtyp = OP_FILTER_NONE;
+	msg->rpc_filter.op_filter = NULL;
+	res = NO_ERR;   /* not an error */
+    } else {
+	res =agt_validate_filter_ex(scb, msg, filter);
+    }
+    return res;
+
+} /* agt_validate_filter */
+
+
+/********************************************************************
+* FUNCTION agt_validate_filter_ex
+*
+* Validate the <filter> parameter if present
+*
+* INPUTS:
+*    scb == session control block
+*    msg == rpc_msg_t in progress
+*    filter == filter element to use
+* OUTPUTS:
+*    msg->rpc_filter is filled in if NO_ERR; type could be NONE
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_validate_filter_ex (ses_cb_t *scb,
+			    rpc_msg_t *msg,
+			    val_value_t *filter)
+{
+    val_value_t    *filtertype, *sel;
+    const xmlChar  *errstr;
+    op_filtertyp_t  filtyp;
+    status_t        res;
+    xml_attr_t      selattr;
+
+#ifdef DEBUG
+    if (!scb || !msg || !filter) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     filtertype = NULL;
     filtyp = OP_FILTER_NONE;
     sel = NULL;
@@ -826,63 +873,57 @@ status_t
     res = NO_ERR;
 
     /* filter parm is optional */
-    filter = val_find_child(msg->rpc_input, 
-			    NC_MODULE, NCX_EL_FILTER);
-    if (!filter) {
-	msg->rpc_filter.op_filtyp = OP_FILTER_NONE;
-	msg->rpc_filter.op_filter = NULL;
-	return NO_ERR;   /* not an error */
-    } else if (filter->res == NO_ERR) {
-	/* setup the filter parameters */
-	filtertype = val_find_meta(filter, 0, NCX_EL_TYPE);
-	if (!filtertype) {
-	    /* should not happen; the default is subtree */
-	    filtyp = OP_FILTER_SUBTREE;
-	} else {
-	    filtyp = op_filtertyp_id(VAL_STR(filtertype));
-	}
+    if (filter->res != NO_ERR) {
+	return res;
+    }
 
-	/* check if the select attribute is needed */
-	switch (filtyp) {
-	case OP_FILTER_SUBTREE:
-	    break;
-	case OP_FILTER_XPATH:
-	    sel = val_find_meta(filter, 0, NCX_EL_SELECT);
-	    if (!sel || !sel->xpathpcb) {
-		res = ERR_NCX_MISSING_ATTRIBUTE;
-	    } else if (sel->xpathpcb->parseres != NO_ERR) {
-		res = sel->xpathpcb->parseres;
-	    }
-	    if (res != NO_ERR) {
-		memset(&selattr, 0x0, sizeof(xml_attr_t));
-		selattr.attr_ns = 0;
-		selattr.attr_name = NCX_EL_SELECT;
-		agt_record_attr_error(scb, 
-				      &msg->mhdr, 
-				      NCX_LAYER_OPERATION, 
-				      res,
-				      &selattr, 
-				      NULL, 
-				      NULL,
-				      NCX_NT_VAL, 
-				      filter);
-		return res;
-	    }
-	    break;
-	default:
-	    res = ERR_NCX_INVALID_VALUE;
-	}
 
+    /* setup the filter parameters */
+    filtertype = val_find_meta(filter, 0, NCX_EL_TYPE);
+    if (!filtertype) {
+	/* should not happen; the default is subtree */
+	filtyp = OP_FILTER_SUBTREE;
+    } else {
+	filtyp = op_filtertyp_id(VAL_STR(filtertype));
+    }
+
+    /* check if the select attribute is needed */
+    switch (filtyp) {
+    case OP_FILTER_SUBTREE:
+	break;
+    case OP_FILTER_XPATH:
+	sel = val_find_meta(filter, 0, NCX_EL_SELECT);
+	if (!sel || !sel->xpathpcb) {
+	    res = ERR_NCX_MISSING_ATTRIBUTE;
+	} else if (sel->xpathpcb->parseres != NO_ERR) {
+	    res = sel->xpathpcb->parseres;
+	}
 	if (res != NO_ERR) {
-	    agt_record_error(scb, &msg->mhdr, 
-			     NCX_LAYER_OPERATION, res, NULL,
-			     (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
-			     errstr, NCX_NT_VAL, filter);
+	    memset(&selattr, 0x0, sizeof(xml_attr_t));
+	    selattr.attr_ns = 0;
+	    selattr.attr_name = NCX_EL_SELECT;
+	    agt_record_attr_error(scb, 
+				  &msg->mhdr, 
+				  NCX_LAYER_OPERATION, 
+				  res,
+				  &selattr, 
+				  NULL, 
+				  NULL,
+				  NCX_NT_VAL, 
+				  filter);
+	    return res;
 	}
-    } /* else optional filter parameter is not present */
+	break;
+    default:
+	res = ERR_NCX_INVALID_VALUE;
+    }
 
-
-    if (res == NO_ERR) {
+    if (res != NO_ERR) {
+	agt_record_error(scb, &msg->mhdr, 
+			 NCX_LAYER_OPERATION, res, NULL,
+			 (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
+			 errstr, NCX_NT_VAL, filter);
+    } else {
 #ifdef AGT_UTIL_DEBUG
 	if (LOGDEBUG3) {
 	    log_debug3("\nagt_util_validate_filter:");
@@ -896,7 +937,7 @@ status_t
 
     return res;
 
-} /* agt_validate_filter */
+} /* agt_validate_filter_ex */
 
 
 /********************************************************************
@@ -1551,6 +1592,106 @@ status_t
 
 } /* agt_disable_feature */
 
+
+/********************************************************************
+* FUNCTION agt_make_leaf
+*
+* make a val_value_t struct for a specified leaf or leaf-list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   leafname == name of leaf to find (namespace hardwired)
+*   leafstrval == string version of value to set for leaf
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
+val_value_t *
+    agt_make_leaf (const obj_template_t *parentobj,
+		   const xmlChar *leafname,
+		   const xmlChar *leafstrval,
+		   status_t *res)
+{
+    const obj_template_t  *leafobj;
+    val_value_t           *leafval;
+    
+    leafobj = obj_find_child(parentobj,
+			     obj_get_mod_name(parentobj),
+			     leafname);
+    if (!leafobj) {
+	*res =ERR_NCX_DEF_NOT_FOUND;
+	return NULL;
+    }
+    if (!(leafobj->objtype == OBJ_TYP_LEAF ||
+	  leafobj->objtype == OBJ_TYP_LEAF_LIST)) {
+	*res = ERR_NCX_WRONG_TYPE;
+	return NULL;
+    }
+
+    leafval = val_make_simval(obj_get_ctypdef(leafobj),
+			      obj_get_nsid(leafobj),
+			      leafname,
+			      leafstrval,
+			      res);
+    return leafval;
+
+}  /* agt_make_leaf */
+
+
+/********************************************************************
+* FUNCTION agt_make_virtual_leaf
+*
+* make a val_value_t struct for a specified virtual 
+* leaf or leaf-list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   leafname == name of leaf to find (namespace hardwired)
+*   callbackfn == get callback function to install
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
+val_value_t *
+    agt_make_virtual_leaf (const obj_template_t *parentobj,
+			   const xmlChar *leafname,
+			   getcb_fn_t callbackfn,
+			   status_t *res)
+{
+    const obj_template_t  *leafobj;
+    val_value_t           *leafval;
+    
+    leafobj = obj_find_child(parentobj,
+			     obj_get_mod_name(parentobj),
+			     leafname);
+    if (!leafobj) {
+	*res =ERR_NCX_DEF_NOT_FOUND;
+	return NULL;
+    }
+    if (!(leafobj->objtype == OBJ_TYP_LEAF ||
+	  leafobj->objtype == OBJ_TYP_LEAF_LIST)) {
+	*res = ERR_NCX_WRONG_TYPE;
+	return NULL;
+    }
+
+    leafval = val_new_value();
+    if (!leafval) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+    val_init_virtual(leafval, callbackfn, leafobj);
+
+    return leafval;
+
+}  /* agt_make_virtual_leaf */
 
 
 /* END file agt_util.c */

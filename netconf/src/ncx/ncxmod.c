@@ -292,7 +292,8 @@ static status_t
 	    if (total >= bufflen) {
 		*done = TRUE;
 		log_error("\nncxmod: Filename too long error. Max: %d Got %u",
-			 NCXMOD_MAX_FSPEC_LEN, total);
+			 NCXMOD_MAX_FSPEC_LEN, 
+			  total);
 		return ERR_BUFF_OVFL;
 	    }
 	    
@@ -322,7 +323,8 @@ static status_t
 	    }
 	    if (total+pathlen >= bufflen) {
 		log_info("\nncxmod: Filename too long error. Max: %d Got %u",
-			 NCXMOD_MAX_FSPEC_LEN, total);
+			 NCXMOD_MAX_FSPEC_LEN, 
+			 total);
 		return ERR_BUFF_OVFL;
 	    }
 
@@ -394,7 +396,8 @@ static boolean
     flen = xml_strlen(filename);
     if (flen+total >= bufflen) {
 	log_error("\nError: Filename too long error. Max: %d Got %u",
-		 NCXMOD_MAX_FSPEC_LEN, flen+total);
+		  NCXMOD_MAX_FSPEC_LEN, 
+		  flen+total);
 	return ERR_BUFF_OVFL;
     }
 
@@ -638,8 +641,11 @@ static status_t
 		    dirdone = TRUE;
 		} else {
 		    xml_strcpy(&buff[pathlen], (const xmlChar *)ep->d_name);
-		    res = search_subdirs(buff, bufflen, 
-					 fname, matchmode, done);
+		    res = search_subdirs(buff, 
+					 bufflen, 
+					 fname, 
+					 matchmode, 
+					 done);
 		    if (*done) {
 			dirdone = TRUE;
 		    } else {
@@ -808,16 +814,28 @@ static status_t
 	}
 
 	/* try YANG file */
-	res = search_subdirs(buff, bufflen, 
-			     fnamebuff, matchmode, done);
+	res = search_subdirs(buff, 
+			     bufflen, 
+			     fnamebuff, 
+			     matchmode, 
+			     done);
 	if (*done) {
 	    if (res == NO_ERR) {
-		res = try_module(buff, bufflen, NULL, NULL,
-				 NULL, NCXMOD_MODE_FILEYANG,
-				 TRUE, done, pcb, ptyp);
+		res = try_module(buff, 
+				 bufflen, 
+				 NULL, 
+				 NULL,
+				 NULL, 
+				 NCXMOD_MODE_FILEYANG,
+				 TRUE, 
+				 done, 
+				 pcb, 
+				 ptyp);
 		if (res != NO_ERR) {
-		    res2 = add_failed(modname, revision,
-				      pcb, res);
+		    res2 = add_failed(modname, 
+				      revision,
+				      pcb, 
+				      res);
 		}
 	    }
 	}
@@ -829,12 +847,22 @@ static status_t
      * first check for YANG file in the current path
      * then check for NCX file in the current path
      */
-    res = try_module(buff, bufflen, path, path2, modname,
-		     NCXMOD_MODE_YANG, FALSE, done, pcb, ptyp);
+    res = try_module(buff,
+		     bufflen, 
+		     path,
+		     path2,
+		     modname,
+		     NCXMOD_MODE_YANG,
+		     FALSE, 
+		     done,
+		     pcb,
+		     ptyp);
     if (*done) {
 	if (res != NO_ERR) {
-	    res2 = add_failed(modname, revision,
-			      pcb, res);
+	    res2 = add_failed(modname,
+			      revision,
+			      pcb,
+			      res);
 	}
     }
     return (res2 != NO_ERR) ? res2 : res;
@@ -910,9 +938,16 @@ static status_t
 
 	/* copy the next string into the path buffer */
 	xml_strncpy(pathbuff, str, pathlen);
-	res = check_module_path(pathbuff, buff, bufflen,
-				modname, revision,
-				pcb, ptyp, TRUE, matchmode, done);
+	res = check_module_path(pathbuff, 
+				buff,
+				bufflen,
+				modname, 
+				revision,
+				pcb,
+				ptyp,
+				TRUE,
+				matchmode,
+				done);
 	if (*done) {
 	    m__free(pathbuff);
 	    return res;
@@ -1077,9 +1112,16 @@ static status_t
      *    if it does not work, instead of trying other directories
      */
     if (isfile) {
-	res = try_module(buff, bufflen,  modname, NULL,
-			 NULL, NCXMOD_MODE_FILEYANG,
-			 FALSE, &done, pcb, ptyp);
+	res = try_module(buff, 
+			 bufflen,
+			 modname, 
+			 NULL,
+			 NULL,
+			 NCXMOD_MODE_FILEYANG,
+			 FALSE,
+			 &done, 
+			 pcb,
+			 ptyp);
 	m__free(buff);
 	if (res == ERR_NCX_MISSING_FILE) {
 	    log_error("\nError: file not found (%s)", modname);
@@ -1093,41 +1135,71 @@ static status_t
 
     /* 2) try alt_path variable if set; used by yangdiff */
     if (!done && ncxmod_alt_path) {
-	res = check_module_path(ncxmod_alt_path, buff, bufflen,
-				modname, revision,
-				pcb, ptyp, FALSE, 
-				matchmode, &done);
+	res = check_module_path(ncxmod_alt_path,
+				buff,
+				bufflen,
+				modname,
+				revision,
+				pcb,
+				ptyp,
+				FALSE, 
+				matchmode,
+				&done);
     }
 
     /* 3) try as module in current dir, YANG format  */
     if (!done) {
-	res = try_module(buff, bufflen, NULL, NULL,
-			 modname, NCXMOD_MODE_YANG,
-			 FALSE, &done, pcb, ptyp);
+	res = try_module(buff, 
+			 bufflen,
+			 NULL,
+			 NULL,
+			 modname, 
+			 NCXMOD_MODE_YANG,
+			 FALSE,
+			 &done,
+			 pcb,
+			 ptyp);
     }
 
     /* 4) try YANG_MODPATH environment variable if set */
     if (!done && ncxmod_mod_path) {
-	res = check_module_pathlist(ncxmod_mod_path, buff, bufflen,
-				    modname, revision,
-				    pcb, ptyp, 
-				    matchmode, &done);
+	res = check_module_pathlist(ncxmod_mod_path,
+				    buff,
+				    bufflen,
+				    modname, 
+				    revision,
+				    pcb,
+				    ptyp, 
+				    matchmode, 
+				    &done);
     }
 
     /* 5) HOME/modules directory */
     if (!done && ncxmod_env_userhome) {
-	res = check_module_path(ncxmod_env_userhome, buff, bufflen,
-				modname, revision,
-				pcb, ptyp, FALSE, 
-				matchmode, &done);
+	res = check_module_path(ncxmod_env_userhome,
+				buff,
+				bufflen,
+				modname,
+				revision,
+				pcb,
+				ptyp,
+				FALSE, 
+				matchmode,
+				&done);
     }
 
     /* 6) YANG_HOME/modules directory */
     if (!done && ncxmod_env_home) {
-	res = check_module_path(ncxmod_env_home, buff, bufflen,
-				modname, revision,
-				pcb, ptyp, FALSE, 
-				matchmode, &done);
+	res = check_module_path(ncxmod_env_home,
+				buff,
+				bufflen,
+				modname, 
+				revision,
+				pcb,
+				ptyp,
+				FALSE, 
+				matchmode,
+				&done);
     }
 
     /* 7) YANG_INSTALL/modules directory or default install path
@@ -1136,16 +1208,27 @@ static status_t
      */
     if (!done) {
 	if (ncxmod_env_install) {
-	    res = check_module_path(ncxmod_env_install, buff, bufflen,
-				    modname, revision,
-				    pcb, ptyp, FALSE, 
-				    matchmode, &done);
+	    res = check_module_path(ncxmod_env_install, 
+				    buff,
+				    bufflen,
+				    modname,
+				    revision,
+				    pcb,
+				    ptyp,
+				    FALSE, 
+				    matchmode,
+				    &done);
 	} else {
 	    res = check_module_path(NCXMOD_DEFAULT_INSTALL, 
-				    buff, bufflen,
-				    modname, revision,
-				    pcb, ptyp, FALSE, 
-				    matchmode, &done);
+				    buff,
+				    bufflen,
+				    modname, 
+				    revision,
+				    pcb,
+				    ptyp,
+				    FALSE, 
+				    matchmode,
+				    &done);
         }
     }
 
@@ -1383,9 +1466,12 @@ static status_t
 	     * The user does not care which version is found
 	     * TBD: find the best version anyway
 	     */
-	    res = load_module(modname, NULL, 
-			      pcb, ptyp, 
-			      TRUE, &testmod);
+	    res = load_module(modname, 
+			      NULL, 
+			      pcb, 
+			      ptyp, 
+			      TRUE, 
+			      &testmod);
 	}
     }
 
@@ -1519,8 +1605,11 @@ status_t
 	res = ERR_INTERNAL_MEM;
     } else {
 	pcb->revision = revision;
-	res = try_load_module(pcb, YANG_PT_TOP,
-			      modname, revision, retmod);
+	res = try_load_module(pcb, 
+			      YANG_PT_TOP,
+			      modname, 
+			      revision, 
+			      retmod);
     }
     if (pcb) {
 	yang_free_pcb(pcb);
@@ -1580,8 +1669,11 @@ status_t
     savedrev = pcb->revision;
     pcb->revision = revision;
 
-    res = try_load_module(pcb, ptyp,
-			  modname, revision, NULL);
+    res = try_load_module(pcb, 
+			  ptyp,
+			  modname,
+			  revision,
+			  NULL);
 
     pcb->revision = savedrev;
     return res;
@@ -1638,8 +1730,11 @@ yang_pcb_t *
 	pcb->subtree_mode = subtree_mode;
 	pcb->with_submods = with_submods;
 	pcb->cookedmode = cookedmode;
-	*res = try_load_module(pcb, YANG_PT_TOP,
-			       modname, revision, NULL);
+	*res = try_load_module(pcb,
+			       YANG_PT_TOP,
+			       modname, 
+			       revision, 
+			       NULL);
     }
 
     return pcb;
@@ -1699,8 +1794,11 @@ yang_pcb_t *
 	if (modpath) {
 	    ncxmod_set_altpath(modpath);
 	}
-	*res = try_load_module(pcb, YANG_PT_TOP,
-			       modname, revision, NULL);
+	*res = try_load_module(pcb,
+			       YANG_PT_TOP,
+			       modname, 
+			       revision,
+			       NULL);
     }
 
     return pcb;
@@ -1783,23 +1881,33 @@ xmlChar *
 
     /* 2) try the NCX_DATAPATH environment variable */
     if (ncxmod_data_path) {
-	if (test_pathlist(ncxmod_data_path, buff, bufflen, fname, NULL)) {
+	if (test_pathlist(ncxmod_data_path, 
+			  buff, 
+			  bufflen, 
+			  fname, 
+			  NULL)) {
 	    return buff;
 	}
     }
 
     /* 3) HOME/data directory */
     if (ncxmod_env_userhome) {
-        if (test_file(buff, bufflen, ncxmod_env_userhome, 
-		      NCXMOD_DATA_DIR, fname)) {
+        if (test_file(buff, 
+		      bufflen, 
+		      ncxmod_env_userhome, 
+		      NCXMOD_DATA_DIR, 
+		      fname)) {
             return buff;
         }
     }
 
     /* 4) YANG_HOME/data directory */
     if (ncxmod_env_home) {
-        if (test_file(buff, bufflen, ncxmod_env_home,
-		      NCXMOD_DATA_DIR, fname)) {
+        if (test_file(buff, 
+		      bufflen, 
+		      ncxmod_env_home,
+		      NCXMOD_DATA_DIR, 
+		      fname)) {
             return buff;
         }
     }
@@ -1888,23 +1996,33 @@ xmlChar *
      * 2) check YANG_MODPATH env-var or modpath CLI param 
      */
     if (ncxmod_run_path) {
-	if (test_pathlist(ncxmod_run_path, buff, bufflen, fname, NULL)) {
+	if (test_pathlist(ncxmod_run_path, 
+			  buff, 
+			  bufflen, 
+			  fname, 
+			  NULL)) {
 	    return buff;
 	}
     }
 
     /* 3) try HOME/scripts/fname */
     if (ncxmod_env_userhome) {
-        if (test_file(buff, bufflen, ncxmod_env_userhome, 
-		      NCXMOD_SCRIPT_DIR, fname)) {
+        if (test_file(buff, 
+		      bufflen, 
+		      ncxmod_env_userhome, 
+		      NCXMOD_SCRIPT_DIR, 
+		      fname)) {
             return buff;
         }
     }
 
     /* 4) try YANG_HOME/scripts/fname */
     if (ncxmod_env_home) {
-        if (test_file(buff, bufflen, ncxmod_env_home, 
-		      NCXMOD_SCRIPT_DIR, fname)) {
+        if (test_file(buff, 
+		      bufflen, 
+		      ncxmod_env_home, 
+		      NCXMOD_SCRIPT_DIR, 
+		      fname)) {
             return buff;
         }
     }
@@ -1914,13 +2032,19 @@ xmlChar *
      *    be tried
      */
     if (ncxmod_env_install) {
-        if (test_file(buff, bufflen, ncxmod_env_install,
-		      NCXMOD_SCRIPT_DIR, fname)) {
+        if (test_file(buff, 
+		      bufflen, 
+		      ncxmod_env_install,
+		      NCXMOD_SCRIPT_DIR, 
+		      fname)) {
             return buff;
         }
     } else {
-        if (test_file(buff, bufflen, NCXMOD_DEFAULT_INSTALL,
-		      NCXMOD_SCRIPT_DIR, fname)) {
+        if (test_file(buff, 
+		      bufflen, 
+		      NCXMOD_DEFAULT_INSTALL,
+		      NCXMOD_SCRIPT_DIR, 
+		      fname)) {
             return buff;
         }
     }

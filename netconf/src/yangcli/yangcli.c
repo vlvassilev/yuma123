@@ -75,6 +75,10 @@ date         init     comment
 #include "mgr_io.h"
 #endif
 
+#ifndef _H_mgr_not
+#include "mgr_not.h"
+#endif
+
 #ifndef _H_mgr_rpc
 #include "mgr_rpc.h"
 #endif
@@ -2322,6 +2326,56 @@ static mgr_io_state_t
 
 
 /********************************************************************
+ * FUNCTION yangcli_notification_handler
+ * 
+ * 
+ * INPUTS:
+ *   scb == session receiving RPC reply
+ *   msg == notification msg that was parsed
+ *
+ * RETURNS:
+ *   none
+ *********************************************************************/
+static void
+    yangcli_notification_handler (ses_cb_t *scb,
+				  mgr_not_msg_t *msg)
+{
+    agent_cb_t   *agent_cb;
+    mgr_scb_t    *mgrcb;
+    uint32        usesid;
+
+#ifdef DEBUG
+    if (!scb || !msg) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    mgrcb = scb->mgrcb;
+    if (mgrcb) {
+	usesid = mgrcb->agtsid;
+    } else {
+	usesid = 0;
+    }
+
+    /***  TBD: multi-session support ***/
+    agent_cb = cur_agent_cb;
+
+    /* check the contents of the reply */
+    if (msg && msg->notification) {
+	if (LOGDEBUG) {
+	    log_debug("\n\nIncoming notification:");
+	    val_dump_value(msg->notification, NCX_DEF_INDENT);
+	    log_debug("\n\n");
+	}
+    }
+
+    /*** LOG THE NOTIFICATION ***/
+
+}  /* yangcli_notification_handler */
+
+
+/********************************************************************
  * FUNCTION yangcli_init
  * 
  * Init the NCX CLI application
@@ -2420,6 +2474,9 @@ static status_t
     if (res != NO_ERR) {
 	return res;
     }
+
+    /* set up handler for incoming notifications */
+    mgr_not_set_callback_fn(yangcli_notification_handler);
 
     /* init the connect parmset object template;
      * find the connect RPC method

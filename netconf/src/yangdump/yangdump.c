@@ -530,6 +530,7 @@ static status_t
 	       const char *argv[])
 {
     status_t       res;
+    xmlns_id_t     nsid;
 
     /* init module static variables */
     malloc_cnt = 0;
@@ -564,6 +565,16 @@ static status_t
 	    if (res == NO_ERR) {
 		res = ncx_stage2_init();
 	    }
+	}
+
+	/* Initialize the Notifications namespace */
+	res = xmlns_register_ns(NCN_URN, 
+				NCN_PREFIX, 
+				NCX_MODULE, 
+				NULL, 
+				&nsid);
+	if (res != NO_ERR) {
+	    return res;
 	}
 
 	if (res == NO_ERR) {
@@ -1330,7 +1341,8 @@ static status_t
 	     * !!! DO NOT KNOW THE REVISION OF THE PARENT !!!
 	     */
 	    res = ncxmod_load_module(ncx_get_modname(pcb->top), 
-				     NULL, &mainmod);
+				     NULL, 
+				     &mainmod);
 	    if (res != NO_ERR) {
 		log_error("\nError: main module '%s' had errors."
 			  "\n       XSD conversion of '%s' terminated.",

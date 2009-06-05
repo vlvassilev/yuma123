@@ -1843,18 +1843,27 @@ static void
     create_session (agent_cb_t *agent_cb)
 {
     const xmlChar *agent, *username, *password;
+    modptr_t      *modptr;
     val_value_t   *val;
     status_t       res;
     uint16         port;
 
+    /* make sure session not already running */
     if (agent_cb->mysid) {
 	if (mgr_ses_get_scb(agent_cb->mysid)) {
+	    /* already connected; fn should not have been called */
 	    SET_ERROR(ERR_INTERNAL_INIT_SEQ);
 	    return;
 	} else {
-	    /* session was reset */
+	    /* OK: reset session ID */
 	    agent_cb->mysid = 0;
 	}
+    }
+
+    /* make sure no stale modules in the control block */
+    while (!dlq_empty(&agent_cb->modptrQ)) {
+	modptr = (modptr_t *)dlq_deque(&agent_cb->modptrQ);
+	free_modptr(modptr);
     }
 
     /* retrieving the parameters should not fail */
@@ -3751,7 +3760,7 @@ static status_t
 
     parm = val_find_child(valset, 
 			  YANGCLI_MOD, 
-			  NCX_EL_NOTIF);
+			  NCX_EL_NOTIFICATION);
     if (parm && parm->res == NO_ERR) {
 	dtyp = NCX_NT_OBJ;
 	obj = parse_def(agent_cb, &dtyp, VAL_STR(parm), &dlen);

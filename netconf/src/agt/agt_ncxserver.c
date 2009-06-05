@@ -45,6 +45,10 @@ date         init     comment
 #include "agt_ncxserver.h"
 #endif
 
+#ifndef _H_agt_not
+#include  "agt_not.h"
+#endif
+
 #ifndef _H_agt_ses
 #include  "agt_ses.h"
 #endif
@@ -139,7 +143,6 @@ static status_t
 } /* make_named_socket */
 
 
-
 /********************************************************************
  * FUNCTION agt_ncxserver_run
  * 
@@ -215,6 +218,8 @@ status_t
 		/* should only happen if a timeout occurred */
 		if (agt_shutdown_requested()) {
 		    done2 = TRUE; 
+		} else {
+		    agt_not_send_notifications();
 		}
 	    } else {
 		/* normal return with some bytes */
@@ -252,7 +257,8 @@ status_t
 			res = ses_msg_send_buffs(scb);
 			if (res != NO_ERR) {
 			    log_info("\nagt_ncxserver write failed; "
-				     "closing session %d ", scb->sid);
+				     "closing session %d ", 
+				     scb->sid);
 			    agt_ses_kill_session(scb->sid);
 			    scb = NULL;
 			    FD_CLR(i, &active_fd_set);
@@ -322,17 +328,6 @@ status_t
 			} 
 		    }
 		}
-
-#ifdef KEEP_OUT
-		/* try to process 1 message in the Q after each input
- 		 * to minimize message allocation peaks
-		 */
-		if (agt_ses_process_first_ready()) {
-		    if (agt_shutdown_requested()) {
-			done = done2 = TRUE;
-		    }
-		}
-#endif
 	    }
 	}
 
@@ -344,6 +339,8 @@ status_t
 		    done2 = TRUE;
 		} else if (agt_shutdown_requested()) {
 		    done = done2 = TRUE;
+		} else {
+		    agt_not_send_notifications();
 		}
 	    }
 	}

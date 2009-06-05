@@ -1603,8 +1603,12 @@ status_t
     }
 
     profile = agt_get_profile();
+
     superuser = profile->agt_superuser;
-    acmode = profile->agt_accesscontrol_enum;
+
+    if (profile->agt_accesscontrol_enum != AGT_ACMOD_NONE) {
+	acmode = profile->agt_accesscontrol_enum;
+    }
 
     res = agt_cb_register_callback(AGT_ACM_MODULE,
 				   nacm_OID_group,

@@ -1270,9 +1270,8 @@ static boolean
     }
 
     /* setup 2nd walker parms */
-    newparms.result2 = NULL;
+    memset(&newparms, 0x0, sizeof(xpath_compwalkerparms_t));
     newparms.cmpstring = comparestr;
-    ncx_init_num(newparms.cmpnum);
     newparms.buffer = m__getMem(TEMP_BUFFSIZE);
     if (!newparms.buffer) {
 	if (buffer) {

@@ -30,6 +30,10 @@ date	     init     comment
 #include "dlq.h"
 #endif
 
+#ifndef _H_getcb
+#include "getcb.h"
+#endif
+
 #ifndef _H_ncxconst
 #include "ncxconst.h"
 #endif
@@ -130,6 +134,11 @@ extern status_t
     agt_validate_filter (ses_cb_t *scb,
 			 rpc_msg_t *msg);
 
+extern status_t 
+    agt_validate_filter_ex (ses_cb_t *scb,
+			    rpc_msg_t *msg,
+			    val_value_t *filter);
+
 /* filter: returns TRUE for NCX_DC_CONFIG or NCX_DC_TCONFIG 
  *  and with-defaults test passes as well
  */
@@ -182,6 +191,19 @@ extern status_t
 extern status_t
     agt_disable_feature (const xmlChar *modname,
 			 const xmlChar *featurename);
+
+
+extern val_value_t *
+    agt_make_leaf (const obj_template_t *parentobj,
+		   const xmlChar *leafname,
+		   const xmlChar *leafstrval,
+		   status_t *res);
+
+extern val_value_t *
+    agt_make_virtual_leaf (const obj_template_t *parentobj,
+			   const xmlChar *leafname,
+			   getcb_fn_t callbackfn,
+			   status_t *res);
 
 
 #endif	    /* _H_agt_util */

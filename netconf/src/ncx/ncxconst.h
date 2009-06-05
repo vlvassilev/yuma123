@@ -38,6 +38,8 @@ date	     init     comment
 
 #define NC_MODULE       (const xmlChar *)"netconf"
 
+#define NCN_MODULE       (const xmlChar *)"notifications"
+
 #define NC_OK_REPLY  (const xmlChar *)"RpcOkReplyType"
 
 #define NC_URN  (const xmlChar *)"urn:ietf:params:xml:ns:netconf:base:1.0"
@@ -254,6 +256,12 @@ date	     init     comment
 /* default value for the agent superuser */
 #define NCX_DEF_SUPERUSER  NCX_EL_SUPERUSER
 
+#define NCX_DEF_STREAM_NAME  (const xmlChar *)"NETCONF"
+
+#define NCX_DEF_STREAM_DESCR (const xmlChar *)\
+    "default NETCONF event stream"
+
+
 /* String start char:
  * if the XML string starts with a double quote
  * then it will be interpreted as whitespace-allowed
@@ -415,6 +423,7 @@ date	     init     comment
 #define NCX_EL_ERROR_SEVERITY  (const xmlChar *)"error-severity"
 #define NCX_EL_ERROR_TAG       (const xmlChar *)"error-tag"
 #define NCX_EL_ERROR_TYPE      (const xmlChar *)"error-type"
+#define NCX_EL_EVENTTIME       (const xmlChar *)"eventTime"
 #define NCX_EL_EXEC            (const xmlChar *)"exec"
 #define NCX_EL_EXPLICIT        (const xmlChar *)"explicit"
 #define NCX_EL_EXTERN          (const xmlChar *)"extern"
@@ -479,10 +488,7 @@ date	     init     comment
 #define NCX_EL_NONE            (const xmlChar *)"none"
 #define NCX_EL_NON_UNIQUE      (const xmlChar *)"non-unique"
 #define NCX_EL_NOOP_ELEMENT    (const xmlChar *)"noop-element"
-#define NCX_EL_NOTIF           (const xmlChar *)"notif"
-#define NCX_EL_NOTIF_CLASS     (const xmlChar *)"notif-class"
-#define NCX_EL_NOTIF_DATA      (const xmlChar *)"notif-data"
-#define NCX_EL_NOTIF_TYPE      (const xmlChar *)"notif-type"
+#define NCX_EL_NOTIFICATION    (const xmlChar *)"notification"
 #define NCX_EL_NODEFAULT       (const xmlChar *)"no default"
 #define NCX_EL_OBJECT          (const xmlChar *)"object"
 #define NCX_EL_OBJECTS         (const xmlChar *)"objects"

@@ -55,12 +55,20 @@ extern status_t
 		   const xml_node_t *startnode,
 		   val_value_t  *retval);
 
-
+/* parse an <rpc-reply> element */
 extern status_t 
     mgr_val_parse_reply (ses_cb_t  *scb,
 			 const obj_template_t *obj,
 			 const obj_template_t *rpc,
 			 const xml_node_t *startnode,
 			 val_value_t  *retval);
+
+
+/* parse a <notification> element */
+extern status_t 
+    mgr_val_parse_notification (ses_cb_t  *scb,
+				const obj_template_t *notobj,
+				const xml_node_t *startnode,
+				val_value_t  *retval);
 
 #endif	    /* _H_mgr_val_parse */

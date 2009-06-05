@@ -698,6 +698,12 @@ status_t
     boolean          invalid;
     status_t         res, retres;
 
+#ifdef DEBUG
+    if (!msg || !attrs) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     retres = NO_ERR;
     invid = xmlns_inv_id();
 
@@ -873,6 +879,12 @@ status_t
     xml_attr_t    *attr;
     status_t       res;
 
+#ifdef DEBUG
+    if (!msg || !attrs) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     /* no namespace is always ok, and if it is the same as the
      * current default, then nothing to do
      */
@@ -938,6 +950,12 @@ status_t
     xmlChar      *buff;
     status_t      res, retres;
 
+#ifdef DEBUG
+    if (!msg || !attrs) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     retres = NO_ERR;
 
     for (pmap = (xmlns_pmap_t *)dlq_firstEntry(&msg->prefixQ);
@@ -967,7 +985,6 @@ status_t
     return retres;
 
 }  /* xml_msg_gen_xmlns_attrs */
-
 
 
 /* END file xml_msg.c */

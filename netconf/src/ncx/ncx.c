@@ -1061,57 +1061,71 @@ status_t
     ncx_init_done = TRUE;
 
     /* Initialize the INVALID namespace to help filter handling */
-    res = xmlns_register_ns(INVALID_URN, INV_PREFIX, 
-			    NCX_MODULE, NULL, &nsid);
+    res = xmlns_register_ns(INVALID_URN, 
+			    INV_PREFIX, 
+			    NCX_MODULE, 
+			    NULL, 
+			    &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the XML namespace for NETCONF */
-    res = xmlns_register_ns(NC_URN, NC_PREFIX, 
-			    NC_MODULE, NULL, &nsid);
+    res = xmlns_register_ns(NC_URN, 
+			    NC_PREFIX, 
+			    NC_MODULE, 
+			    NULL, 
+			    &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the XML namespace for YANG */
-    res = xmlns_register_ns(YANG_URN, YANG_PREFIX, 
-			    YANG_MODULE, NULL, &nsid);
+    res = xmlns_register_ns(YANG_URN, 
+			    YANG_PREFIX, 
+			    YANG_MODULE, 
+			    NULL, 
+			    &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the XMLNS namespace for xmlns attributes */
-    res = xmlns_register_ns(NS_URN, NS_PREFIX, 
-			    NCX_MODULE, NULL, &nsid);
+    res = xmlns_register_ns(NS_URN, 
+			    NS_PREFIX, 
+			    NCX_MODULE, 
+			    NULL, 
+			    &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the XSD namespace for ncxdump program */
-    res = xmlns_register_ns(XSD_URN, XSD_PREFIX, 
-			    NCX_MODULE, NULL, &nsid);
+    res = xmlns_register_ns(XSD_URN, 
+			    XSD_PREFIX, 
+			    NCX_MODULE, 
+			    NULL, 
+			    &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the XSI namespace for ncxdump program */
-    res = xmlns_register_ns(XSI_URN, XSI_PREFIX, 
-			    NCX_MODULE, NULL, &nsid);
+    res = xmlns_register_ns(XSI_URN, 
+			    XSI_PREFIX, 
+			    NCX_MODULE, 
+			    NULL, 
+			    &nsid);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* Initialize the XML namespace for xml:lang attribute support */
-    res = xmlns_register_ns(XML_URN, XML_PREFIX, 
-			    NCX_MODULE, NULL, &nsid);
-    if (res != NO_ERR) {
-	return res;
-    }
-
-    /* Initialize the Notifications namespace for ncxdump program */
-    res = xmlns_register_ns(NCN_URN, NCN_PREFIX, 
-			    NCX_MODULE, NULL, &nsid);
+    res = xmlns_register_ns(XML_URN, 
+			    XML_PREFIX, 
+			    NCX_MODULE, 
+			    NULL, 
+			    &nsid);
     if (res != NO_ERR) {
 	return res;
     }

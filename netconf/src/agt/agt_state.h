@@ -22,6 +22,11 @@ date             init     comment
 
 #include <xmlstring.h>
 
+#ifndef _H_agt_not
+
+#include "agt_not.h"
+#endif
+
 #ifndef _H_ncxtypes
 #include "ncxtypes.h"
 #endif
@@ -73,5 +78,12 @@ extern void
 
 extern status_t
     agt_state_add_module_schema (ncx_module_t *mod);
+
+extern status_t
+    agt_state_add_subscription (agt_not_subscription_t *sub);
+
+extern void
+    agt_state_remove_subscription (ses_id_t sid);
+
 
 #endif            /* _H_agt_state */

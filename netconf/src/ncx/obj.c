@@ -8544,6 +8544,7 @@ status_t
     status_t               res;
     ncx_node_t             dtyp;
     boolean                topdone;
+    xmlns_id_t             ncnid;
 
 #ifdef DEBUG
     if (!obj || !curnode || !rettop || !retobj) {
@@ -8557,6 +8558,7 @@ status_t
     dtyp = NCX_NT_OBJ;
     res = NO_ERR;
     topdone = FALSE;
+    ncnid = xmlns_ncn_id();
 
     if (curnode->nsid) {
 	foundmod = xmlns_get_modptr(curnode->nsid);
@@ -8586,6 +8588,50 @@ status_t
 		obj_is_abstract(foundobj) ||
 		obj_is_cli(foundobj)) {
 		foundobj = NULL;
+	    }
+	}
+    } else if (obj_get_nsid(obj) == ncnid &&
+	       !xml_strcmp(obj_get_name(obj),
+			   NCX_EL_NOTIFICATION)) {
+	/* hack: special case handling of the
+	 * <notification> element
+	 * the child node can be <eventTime> or
+	 * any top-level OBJ_TYP_NOTIF node
+	 */
+	if (foundmodname) {
+	    if (foundmod->nsid == ncnid) {
+		/* try a child of <notification>;
+		 * should only be eventTime
+		 */
+		foundobj = obj_find_child(obj, 
+					  foundmodname,
+					  curnode->elname);
+	    } else {
+		/* try to find any top-level notification
+		 * with this eventType QName
+		 */
+		foundobj =  ncx_find_object(foundmod,
+					    curnode->elname);
+		if (foundobj && 
+		    foundobj->objtype != OBJ_TYP_NOTIF) {
+		    /* object is the wrong type */
+		    foundobj = NULL;
+		}
+	    }
+	} else {
+	    /* no namespace ID used
+	     * try to find any eventType object
+	     */
+	    foundobj = ncx_find_any_object(curnode->elname);
+	    if (foundobj) {
+		if (foundobj->objtype != OBJ_TYP_NOTIF) {
+		    foundobj = NULL;
+		}
+	    } else {
+		/* try a child of obj (eventTime) */
+		foundobj = obj_find_child(obj, 
+					  NULL,
+					  curnode->elname);
 	    }
 	}
     } else if (xmlorder) {
@@ -8668,7 +8714,8 @@ status_t
 	    }
 	} else {
 	    /* get the object from first match module */
-	    foundobj = obj_find_child(obj, NULL,
+	    foundobj = obj_find_child(obj, 
+				      NULL,
 				      curnode->elname);
 	}
     }

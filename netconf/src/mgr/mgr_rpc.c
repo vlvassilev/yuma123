@@ -140,7 +140,7 @@ date         init     comment
 *********************************************************************/
 static boolean mgr_rpc_init_done = FALSE;
 
-static const obj_template_t *reply_obj = NULL;
+static const obj_template_t *reply_obj;
 
 
 /********************************************************************
@@ -169,7 +169,7 @@ static mgr_rpc_rpy_t *
 	m__free(rpy);
 	return NULL;
     }
-    xml_msg_init_hdr(&rpy->mhdr);
+    /* xml_msg_init_hdr(&rpy->mhdr); */
     return rpy;
 
 } /* new_reply */
@@ -262,10 +262,12 @@ status_t
 
     if (!mgr_rpc_init_done) {
 	res = top_register_node(NC_MODULE,
-				NCX_EL_RPC_REPLY, mgr_rpc_dispatch);
+				NCX_EL_RPC_REPLY, 
+				mgr_rpc_dispatch);
 	if (res != NO_ERR) {
 	    return res;
 	}
+	reply_obj = NULL;
 	mgr_rpc_init_done = TRUE;
     }
     return NO_ERR;
@@ -285,6 +287,7 @@ void
 {
     if (mgr_rpc_init_done) {
 	top_unregister_node(NC_MODULE, NCX_EL_RPC_REPLY);
+	reply_obj = NULL;
 	mgr_rpc_init_done = FALSE;
     }
 
@@ -533,12 +536,16 @@ status_t
     }
 
     /* setup the prefix map with the NETCONF (and maybe NCX) namespace */
-    res = xml_msg_build_prefix_map(&msg, &req->attrs, TRUE, 
+    res = xml_msg_build_prefix_map(&msg, 
+				   &req->attrs, 
+				   TRUE, 
 				   (req->data->nsid == xmlns_ncx_id()));
 
     /* add the message-id attribute */
     if (res == NO_ERR) {
-	res = xml_add_attr(&req->attrs, 0, NCX_EL_MESSAGE_ID,
+	res = xml_add_attr(&req->attrs, 
+			   0, 
+			   NCX_EL_MESSAGE_ID,
 			   req->msg_id);
     }
 
@@ -550,8 +557,15 @@ status_t
     /* start the <rpc> element */
     if (res == NO_ERR) {
 	anyout = TRUE;
-	xml_wr_begin_elem_ex(scb, &msg, 0, nc_id, NCX_EL_RPC, 
-			     &req->attrs, ATTRQ, 0, START);
+	xml_wr_begin_elem_ex(scb, 
+			     &msg, 
+			     0, 
+			     nc_id, 
+			     NCX_EL_RPC, 
+			     &req->attrs, 
+			     ATTRQ, 
+			     0, 
+			     START);
     }
     
     /* send the method and parameters */
@@ -617,24 +631,17 @@ void
     /* make sure any real session has been properly established */
     if (scb->type != SES_TYP_DUMMY && scb->state != SES_ST_IDLE) {
 	scb->stats.in_drop_msgs++;
-	log_error("\nError: mgr_rpc: skipping incoming message");
+	log_error("\nError: mgr_not: skipping incoming message '%s'",
+		  top->qname);
 	mgr_xml_skip_subtree(scb->reader, top);
 	return;
     }
 
-    /* make sure 'top' is the right kind of node */
-    if (top->nodetyp != XML_NT_START) {
-	scb->stats.in_drop_msgs++;
-	log_error("\nError: mgr_rpc: skipping incoming message");
-	mgr_xml_skip_subtree(scb->reader, top);
-	return;
-    }
-
-    /* check if the reply template is already cacjed */
+    /* check if the reply template is already cached */
     if (reply_obj) {
 	rpyobj = reply_obj;
     } else {
-	/* get the rpcReply template from the registry */
+	/* get the rpcReply template */
 	rpyobj = NULL;
 	mod = ncx_find_module(NC_MODULE, NULL);
 	if (mod) {
@@ -643,15 +650,16 @@ void
 	if (rpyobj) {
 	    reply_obj = rpyobj;
 	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
+	    SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
 	    scb->stats.in_drop_msgs++;
-	    log_error("\nError: mgr_rpc: skipping incoming message");
 	    mgr_xml_skip_subtree(scb->reader, top);
 	    return;
 	}
     }
 
-    /* get the NC RPC message-id attribute; must be present */
+    /* get the NC RPC message-id attribute; should be present
+     * because the send-rpc function put a message-id in <rpc>
+     */
     attr = xml_find_attr(top, 0, NCX_EL_MESSAGE_ID);
     if (attr && attr->attr_val) {
 	msg_id = xml_strdup(attr->attr_val);
@@ -691,7 +699,8 @@ void
     if (!req) {
 #ifdef MGR_RPC_DEBUG
 	log_debug("\nmgr_rpc: missing request for msg (%s) on session %d", 
-		  rpy->msg_id, scb->sid);
+		  rpy->msg_id, 
+		  scb->sid);
 #endif
 	mgr_xml_skip_subtree(scb->reader, top);
 	mgr_rpc_free_reply(rpy);
@@ -703,15 +712,19 @@ void
     /* have a request/reply pair, so parse the reply 
      * as a val_value_t tree, stored in rpy->reply
      */
-    rpy->res = mgr_val_parse_reply(scb, rpyobj, req->rpc, 
-				   top, rpy->reply);
-    if (rpy->res != NO_ERR) {
+    rpy->res = mgr_val_parse_reply(scb, 
+				   rpyobj, 
+				   req->rpc, 
+				   top, 
+				   rpy->reply);
+    if (rpy->res != NO_ERR && LOGINFO) {
 	log_info("\nmgr_rpc: got invalid reply on session %d (%s)",
 		 scb->sid, get_error_string(rpy->res));
     }
 
     /* check that there is nothing after the <rpc-reply> element */
-    if (rpy->res==NO_ERR && !xml_docdone(scb->reader)) {
+    if (rpy->res==NO_ERR && 
+	!xml_docdone(scb->reader) && LOGINFO) {
 	log_info("\nmgr_rpc: got extra nodes in reply on session %d",
 		 scb->sid);
     }

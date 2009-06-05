@@ -49,6 +49,10 @@ date         init     comment
 #include "mgr_io.h"
 #endif
 
+#ifndef _H_mgr_not
+#include "mgr_not.h"
+#endif
+
 #ifndef _H_mgr_rpc
 #include "mgr_rpc.h"
 #endif
@@ -131,6 +135,11 @@ status_t
 	return res;
     }
 
+    res = mgr_not_init();
+    if (res != NO_ERR) {
+	return res;
+    }
+
     res = mgr_hello_init();
     if (res != NO_ERR) {
 	return res;
@@ -164,6 +173,7 @@ void
 
 	mgr_cap_cleanup();
 	mgr_rpc_cleanup();
+	mgr_not_cleanup();
 	mgr_ses_cleanup();
 	mgr_hello_cleanup();
 	mgr_signal_cleanup();

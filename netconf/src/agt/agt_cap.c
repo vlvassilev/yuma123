@@ -238,7 +238,6 @@ status_t
 	}
     }
 
-#ifdef NOT_YET 
     /* set the notification capability */
     if (res == NO_ERR) {
 	res = cap_add_std(newmycaps, CAP_STDID_NOTIFICATION);
@@ -246,9 +245,7 @@ status_t
 	    res = cap_add_stdval(newcaps, CAP_STDID_NOTIFICATION);
 	}
     }
-#endif
 
-#ifdef NOT_YET 
     /* set the interleave capability */
     if (res == NO_ERR) {
 	res = cap_add_std(newmycaps, CAP_STDID_INTERLEAVE);
@@ -256,7 +253,6 @@ status_t
 	    res = cap_add_stdval(newcaps, CAP_STDID_INTERLEAVE);
 	}
     }
-#endif
 
 #ifdef NOT_YET 
     /* set the partial-lock capability */

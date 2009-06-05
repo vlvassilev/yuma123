@@ -1543,7 +1543,8 @@ static status_t
 	    }
 	    if (!curchild || res != NO_ERR) {
 		log_error("\nError: '%s' has no child node '%s'. Using anyxml",
-			  retval->name, chnode.qname);
+			  retval->name, 
+			  chnode.qname);
 		curchild = ncx_get_gen_anyxml();
 		res = NO_ERR;
 		errmode = TRUE;
@@ -1811,9 +1812,16 @@ static status_t
 	 * if no xmlorder, then check for any valid child
 	 */
 	if (res==NO_ERR) {
-	    res = obj_get_child_node(obj, chobj, &chnode, FALSE,
-				     &curtop, &curchild);
+	    /* 1) try child of main object or notification */
+	    res = obj_get_child_node(obj, 
+				     chobj, 
+				     &chnode, 
+				     FALSE,
+				     &curtop, 
+				     &curchild);
+
 	    if (res != NO_ERR && output) {
+		/* 2) try child of output object */
 		res = obj_get_child_node(output, 
 					 outchobj, 
 					 &chnode, 
@@ -1821,9 +1829,11 @@ static status_t
 					 &curtop, 
 					 &curchild);
 	    }
+
 	    if (res != NO_ERR) {
 		log_error("\nError: '%s' has no child node '%s'. Using anyxml",
-			  retval->name, chnode.qname);
+			  retval->name, 
+			  chnode.qname);
 		curchild = ncx_get_gen_anyxml();
 		res = NO_ERR;
 	    }
@@ -1840,7 +1850,8 @@ static status_t
 	     */
 	    chval = val_new_child_val(obj_get_nsid(curchild),
 				      obj_get_name(curchild), 
-				      FALSE, retval, 
+				      FALSE, 
+				      retval, 
 				      get_editop(&chnode));
 	    if (!chval) {
 		res = ERR_INTERNAL_MEM;
@@ -2327,8 +2338,12 @@ static status_t
 	break;
     case NCX_BT_CONTAINER:
     case NCX_BT_LIST:
-	res = parse_complex_split(scb, obj, output, 
-				  btyp, startnode, retval);
+	res = parse_complex_split(scb, 
+				  obj, 
+				  output, 
+				  btyp, 
+				  startnode, 
+				  retval);
 	break;
     default:
 	return SET_ERROR(ERR_INTERNAL_VAL);
@@ -2423,7 +2438,7 @@ status_t
 * FUNCTION mgr_val_parse_reply
 * 
 * parse a value for a YANG type from a NETCONF PDU XML stream 
-* Use the rRPC object output type to parse any data
+* Use the RPC object output type to parse any data
 *
 * Parse NETCONF PDU sub-contents into value fields
 * This module does not enforce complex type completeness.
@@ -2484,6 +2499,57 @@ status_t
     return res;
 
 }  /* mgr_val_parse_reply */
+
+
+/********************************************************************
+* FUNCTION mgr_val_parse_notification
+* 
+* parse a value for a YANG type from a NETCONF PDU XML stream 
+* Use the notification object output type to parse any data
+*
+* This parsing phase checks that simple types are complete
+* and child members of complex types are valid (but maybe 
+* missing or incomplete child nodes.
+*
+* INPUTS:
+*     scb == session control block
+*     notobj == obj_template_t for the top-level notification
+*     startnode == top node of the parameter to be parsed
+*     retval ==  val_value_t that should get the results of the parsing
+*     
+* OUTPUTS:
+*    *retval will be filled in
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    mgr_val_parse_notification (ses_cb_t  *scb,
+				const obj_template_t *notobj,
+				const xml_node_t *startnode,
+				val_value_t  *retval)
+{
+    status_t  res;
+
+#ifdef DEBUG
+    if (!scb || !notobj || !startnode || !retval) {
+	/* non-recoverable error */
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+#ifdef MGR_VAL_PARSE_DEBUG
+    if (LOGDEBUG3) {
+	log_debug3("\nmgr_val_parse_notification: start");
+    }
+#endif
+
+    /* get the element values */
+    res = parse_btype_split(scb, notobj, NULL, startnode, retval);
+
+    return res;
+
+}  /* mgr_val_parse_notification */
 
 
 /* END file mgr_val_parse.c */

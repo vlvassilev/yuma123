@@ -1319,6 +1319,7 @@ void
     cfg_release_locks(slot);
 
     agt_state_remove_session(slot);
+    agt_not_remove_subscriptions(slot);
 
     /* add this session to ses stats */
     agttotals->active_sessions--;
@@ -1509,7 +1510,8 @@ boolean
 	log_error("\nagt_ses ready Q message not correct");
 	return FALSE;
     } else if (LOGDEBUG2) {
-	cnt = xml_strcpy(buff, (const xmlChar *)"Incoming msg for session ");
+	cnt = xml_strcpy(buff, 
+			 (const xmlChar *)"Incoming msg for session ");
 	sprintf((char *)(&buff[cnt]), "%u", scb->sid);
 	ses_msg_dump(msg, buff);
     }
@@ -1519,10 +1521,14 @@ boolean
     if (scb->reader) {
 	    /* reset the xmlreader */
 	res = xml_reset_reader_for_session(ses_read_cb,
-					   NULL, scb, scb->reader);
+					   NULL, 
+					   scb, 
+					   scb->reader);
     } else {
 	res = xml_get_reader_for_session(ses_read_cb,
-					 NULL, scb, &scb->reader);
+					 NULL, 
+					 scb, 
+					 &scb->reader);
     }
 
     /* process the message */
@@ -1532,7 +1538,8 @@ boolean
     } else {
 	if (LOGINFO) {
 	    log_info("\nReset xmlreader failed for session %d (%s)",
-		     scb->sid, get_error_string(res));
+		     scb->sid, 
+		     get_error_string(res));
 	}
 	scb->state = SES_ST_SHUTDOWN_REQ;
     }

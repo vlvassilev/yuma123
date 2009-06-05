@@ -552,13 +552,26 @@ static void
     }
 
     ncid = xmlns_nc_id();
-    rpcid = obj_get_nsid(msg->rpc_method);
+
+    if (msg->rpc_method) {
+	rpcid = obj_get_nsid(msg->rpc_method);
+    } else {
+	rpcid = ncid;
+    }
+
     indentamount = ses_indent_count(scb);
     indent = indentamount;
 
     /* generate the <rpc-reply> start tag */
-    xml_wr_begin_elem_ex(scb, &msg->mhdr, 0, ncid, NCX_EL_RPC_REPLY, 
-			 msg->rpc_in_attrs, ATTRQ, 0, START);
+    xml_wr_begin_elem_ex(scb, 
+			 &msg->mhdr, 
+			 0, 
+			 ncid, 
+			 NCX_EL_RPC_REPLY, 
+			 msg->rpc_in_attrs, 
+			 ATTRQ, 
+			 0, 
+			 START);
 
 
     /* check if there is data to send */
@@ -568,8 +581,12 @@ static void
     /* check which reply variant needs to be sent */
     if (dlq_empty(&msg->mhdr.errQ) && !datasend) {
 	/* no errors and no data, so send <ok> variant */
-	xml_wr_empty_elem(scb, &msg->mhdr, ncid, ncid,
-			  NCX_EL_OK, indent);
+	xml_wr_empty_elem(scb, 
+			  &msg->mhdr, 
+			  ncid, 
+			  ncid,
+			  NCX_EL_OK, 
+			  indent);
     } else {
 	/* send rpcResponse variant
 	 * 0 or <rpc-error> elements followed by
@@ -599,8 +616,12 @@ static void
 	 */
 	if (datasend) {
 	    if (msg->rpc_data_type == RPC_DATA_STD) {
-		xml_wr_begin_elem(scb, &msg->mhdr, ncid, rpcid,
-				  NCX_EL_DATA, indent);
+		xml_wr_begin_elem(scb, 
+				  &msg->mhdr, 
+				  ncid, 
+				  rpcid,
+				  NCX_EL_DATA, 
+				  indent);
 		if (indent > 0) {
 		    indent += ses_indent_count(scb);
 		}

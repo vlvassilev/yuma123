@@ -376,7 +376,7 @@ static status_t
 			 &msg->mhdr, 
 			 ncid, 
 			 ncid, 
-			 NCX_EL_RPC_ERROR, 
+ 			 NCX_EL_RPC_ERROR, 
 			 &attrs, 
 			 ATTRQ, 
 			 indent, 
@@ -1053,10 +1053,11 @@ void
     /* make sure any real session has been properly established */
     if (scb->type != SES_TYP_DUMMY && scb->state != SES_ST_IDLE) {
 	res = ERR_NCX_ACCESS_DENIED;
-	/* TBD: stats update */
 	log_info("\nagt_rpc dropping session %d (%d) %s",
-		  scb->sid, res, get_error_string(res));
-	agt_ses_request_close(scb->sid);
+		 scb->sid, 
+		 res, 
+		 get_error_string(res));
+	agt_ses_request_close(scb->sid, scb->sid, SES_TR_OTHER);
 	agttotals->stats.inBadRpcs++;
 	return;
     }
@@ -1070,8 +1071,10 @@ void
 	scb->stats.out_drop_bytes++;
 	agttotals->stats.out_drop_bytes++;
 	log_info("\nagt_rpc dropping session %d (%d) %s",
-		  scb->sid, res, get_error_string(res));
-	agt_ses_request_close(scb->sid);
+		 scb->sid, 
+		 res, 
+		 get_error_string(res));
+	agt_ses_request_close(scb->sid, scb->sid, SES_TR_OTHER);
 	return;
     }
 
@@ -1580,6 +1583,131 @@ status_t
     return retres;
 
 } /* agt_rpc_load_config_file */
+
+
+/********************************************************************
+* FUNCTION agt_rpc_fill_rpc_error
+*
+* Fill one <rpc-error> like element using the specified
+* namespace and name, which may be different than NETCONF
+*
+* INPUTS:
+*   err == error record to use to fill 'rpcerror'
+*   rpcerror == NCX_BT_CONTAINER value struct already
+*               initialized.  The val_add_child function
+*               will use this parm as the parent.
+*               This namespace will be used for all
+*               child nodes
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    agt_rpc_fill_rpc_error (const rpc_err_rec_t *err,
+			    val_value_t *rpcerror)
+{
+    val_value_t         *leafval;
+    status_t             res, retres;
+    xmlChar              buff[12];
+
+#ifdef DEBUG
+    if (!rpcerror || !err) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* init local vars */
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    /* add the <error-type> field */
+    leafval = agt_make_leaf(rpcerror->obj,
+			    NCX_EL_ERROR_TYPE,
+			    ncx_get_layer(err->error_type),
+			    &res);
+    if (leafval) {
+	val_add_child(leafval, rpcerror);
+    } else {
+	retres = res;
+    }
+
+    /* add the <error-tag> field */
+    leafval = agt_make_leaf(rpcerror->obj,
+			    NCX_EL_ERROR_TAG,
+			    err->error_tag,
+			    &res);
+    if (leafval) {
+	val_add_child(leafval, rpcerror);
+    } else {
+	retres = res;
+    }
+
+    /* add the <error-severity> field */
+    leafval = agt_make_leaf(rpcerror->obj,
+			    NCX_EL_ERROR_SEVERITY,
+			    rpc_err_get_severity(err->error_severity), 
+			    &res);
+    if (leafval) {
+	val_add_child(leafval, rpcerror);
+    } else {
+	retres = res;
+    }
+			    
+    /* generate the <error-app-tag> field */
+    leafval = NULL;
+    if (err->error_app_tag) {
+	leafval = agt_make_leaf(rpcerror->obj,
+				NCX_EL_ERROR_APP_TAG,
+				err->error_app_tag,
+				&res);
+    } else if (err->error_res != NO_ERR) {
+	*buff = 0;
+	sprintf((char *)buff, "%u", err->error_res);
+	if (*buff) {
+	    leafval = agt_make_leaf(rpcerror->obj,
+				    NCX_EL_ERROR_APP_TAG,
+				    buff,
+				    &res);
+	}
+    }
+    if (leafval) {
+	val_add_child(leafval, rpcerror);
+    } else {
+	retres = res;
+    }
+
+    /* generate the <error-path> field */
+    if (err->error_path) {
+	leafval = agt_make_leaf(rpcerror->obj,
+				NCX_EL_ERROR_PATH,
+				err->error_path, 
+				&res);
+	if (leafval) {
+	    val_add_child(leafval, rpcerror);
+	} else {
+	    retres = res;
+	}
+    }
+
+    /* generate the <error-message> field */
+    if (err->error_message) {
+	leafval = agt_make_leaf(rpcerror->obj,
+				NCX_EL_ERROR_MESSAGE,
+				err->error_message, 
+				&res);
+	if (leafval) {
+	    val_add_child(leafval, rpcerror);
+	} else {
+	    retres = res;
+	}
+    }
+
+    /* TBD: add the error info */    
+
+
+    return retres;
+
+}  /* agt_rpc_fill_rpc_error */
 
 
 /* END file agt_rpc.c */

@@ -78,5 +78,13 @@ extern status_t
 extern void 
     agt_sys_cleanup (void);
 
+extern void
+    agt_sys_send_sysSessionStart (const ses_cb_t *scb);
+
+extern void
+    agt_sys_send_sysSessionEnd (const ses_cb_t *scb,
+				ses_term_reason_t termreason,
+				ses_id_t killedby);
+
 
 #endif            /* _H_agt_sys */

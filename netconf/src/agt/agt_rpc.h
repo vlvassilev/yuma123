@@ -28,6 +28,10 @@ date             init     comment
 #include "rpc.h"
 #endif
 
+#ifndef _H_rpc_err
+#include "rpc_err.h"
+#endif
+
 #ifndef _H_ses
 #include "ses.h"
 #endif
@@ -157,5 +161,11 @@ extern void
 extern status_t
     agt_rpc_load_config_file (const xmlChar *filespec,
 			      cfg_template_t  *cfg);
+
+
+/* used to make the sysStartup notification */
+extern status_t
+    agt_rpc_fill_rpc_error (const rpc_err_rec_t *err,
+			    val_value_t *rpcerror);
 
 #endif            /* _H_agt_rpc */

@@ -259,12 +259,16 @@ status_t
 			    log_info("\nagt_ncxserver write failed; "
 				     "closing session %d ", 
 				     scb->sid);
-			    agt_ses_kill_session(scb->sid);
+			    agt_ses_kill_session(scb->sid, 
+						 scb->sid,
+						 SES_TR_OTHER);
 			    scb = NULL;
 			    FD_CLR(i, &active_fd_set);
 			} else if (scb->state == SES_ST_SHUTDOWN_REQ) {
 			    /* close-session reply sent, now kill ses */
-			    agt_ses_kill_session(scb->sid);
+			    agt_ses_kill_session(scb->sid, 
+						 scb->killedbysid,
+						 scb->termreason);
 			    scb = NULL;
 			    FD_CLR(i, &active_fd_set);
 			}
@@ -315,7 +319,9 @@ status_t
 		    if (scb) {
 			res = ses_accept_input(scb);
 			if (res != NO_ERR) {
-			    agt_ses_request_close(scb->sid);
+			    agt_ses_request_close(scb->sid,
+						  scb->sid,
+						  SES_TR_OTHER);
 			    FD_CLR(i, &active_fd_set);
 			    if (i >= maxrdnum) {
 				maxrdnum = i-1;
@@ -323,7 +329,8 @@ status_t
 			    if (res != ERR_NCX_SESSION_CLOSED) {
 				log_info("\nagt_ncxssrv input failed"
 					 " for session %d (%s)",
-					 scb->sid, get_error_string(res));
+					 scb->sid, 
+					 get_error_string(res));
 			    }
 			} 
 		    }

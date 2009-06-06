@@ -317,7 +317,8 @@ static status_t
     } 
 
     /* get the default-operation parameter */
-    val = val_find_child(msg->rpc_input, NC_MODULE,
+    val = val_find_child(msg->rpc_input, 
+			 NC_MODULE,
 			 NCX_EL_DEFAULT_OPERATION);
     if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
@@ -327,7 +328,8 @@ static status_t
     }
 
     /* get the error-option parameter */
-    val = val_find_child(msg->rpc_input, NC_MODULE,
+    val = val_find_child(msg->rpc_input, 
+			 NC_MODULE,
 			 NCX_EL_ERROR_OPTION);
     if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
@@ -353,7 +355,8 @@ static status_t
      *
      * Get the value to check for the test-only extension
      */
-    val = val_find_child(msg->rpc_input, NC_MODULE,
+    val = val_find_child(msg->rpc_input, 
+			 NC_MODULE,
 			 NCX_EL_TEST_OPTION);
     if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
@@ -363,7 +366,8 @@ static status_t
     }
 
     /* get the config parameter */
-    val = val_find_child(msg->rpc_input, NC_MODULE,
+    val = val_find_child(msg->rpc_input, 
+			 NC_MODULE,
 			 NCX_EL_CONFIG);
     if (val && val->res == NO_ERR) {
 	/* validate the <config> element (wrt/ embedded operation
@@ -383,8 +387,11 @@ static status_t
 	}
 
 	if (target->cfg_id == NCX_CFGID_RUNNING && res==NO_ERR) {
-	    res = agt_val_split_root_check(scb, msg, val, 
-					   target->root, defop);
+	    res = agt_val_split_root_check(scb, 
+					   msg, 
+					   val, 
+					   target->root, 
+					   defop);
 	}
     } else if (!val) {
 	/* this is reported in agt_val_parse phase */
@@ -441,7 +448,8 @@ static status_t
     } 
 
     /* get pointer to the config parameter */
-    val = val_find_child(msg->rpc_input, NC_MODULE,
+    val = val_find_child(msg->rpc_input, 
+			 NC_MODULE,
 			 NCX_EL_CONFIG);
     if (!val || val->res != NO_ERR) {
 	/* set to the default if any error */
@@ -490,10 +498,15 @@ static status_t
          * *** update in the future if copy to <running> ever supported
 	 */
 	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res,
-			 methnode, NCX_NT_NONE,  NULL,
-			 NCX_NT_NONE, NULL);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION, 
+			 res,
+			 methnode, 
+			 NCX_NT_NONE,
+			 NULL,
+			 NCX_NT_NONE,
+			 NULL);
 	return res;
     }
 
@@ -522,7 +535,8 @@ static status_t
 
     if (res == NO_ERR) {
 	parm = val_find_child(msg->rpc_input,
-			      NULL, NCX_EL_WITH_DEFAULTS);
+			      NULL,
+			      NCX_EL_WITH_DEFAULTS);
 	if (parm && parm->res == NO_ERR) {
 	    msg->mhdr.withdef = VAL_BOOL(parm);
 	}
@@ -530,10 +544,15 @@ static status_t
 
     if (res != NO_ERR) {
 	/* cannot write to this configuration datastore */
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res,
-			 methnode, NCX_NT_CFG, 
-			 (const void *)destcfg, NCX_NT_NONE, NULL);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION, 
+			 res,
+			 methnode, 
+			 NCX_NT_CFG, 
+			 (const void *)destcfg, 
+			 NCX_NT_NONE, 
+			 NULL);
     } else {
 	/* save the source and destination config */
 	msg->rpc_user1 = srccfg;
@@ -573,11 +592,15 @@ static status_t
 	res = agt_ncx_cfg_save(source, FALSE);
 	if (res != NO_ERR) {
 	    /* config save failed */
-	    agt_record_error(scb, &msg->mhdr, 
+	    agt_record_error(scb, 
+			     &msg->mhdr, 
 			     NCX_LAYER_OPERATION,
-			     res, methnode,
-			     NCX_NT_CFG, target, 
-			     NCX_NT_NONE, NULL);
+			     res, 
+			     methnode,
+			     NCX_NT_CFG, 
+			     target, 
+			     NCX_NT_NONE, 
+			     NULL);
 	}
     }
 
@@ -674,10 +697,15 @@ static status_t
 	    errval = NCX_EL_TARGET;
 	    errtyp = NCX_NT_STRING;
 	}
-	agt_record_error(scb, &msg->mhdr,
-			 NCX_LAYER_OPERATION, res, methnode, 
-			 errtyp, errval,
-			 NCX_NT_STRING, "/rpc/delete-config/target");
+	agt_record_error(scb, 
+			 &msg->mhdr,
+			 NCX_LAYER_OPERATION, 
+			 res, 
+			 methnode, 
+			 errtyp, 
+			 errval,
+			 NCX_NT_STRING, 
+			 "/rpc/delete-config/target");
     }
     return res;
 
@@ -745,10 +773,15 @@ static status_t
 	msg->rpc_user1 = (void *)cfg;
     } else {
 	/* lock probably already held */
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res,
-			 methnode, NCX_NT_CFG, 
-			 (const void *)cfg, NCX_NT_NONE, NULL);
+	agt_record_error(scb,
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION,
+			 res,
+			 methnode,
+			 NCX_NT_CFG, 
+			 (const void *)cfg,
+			 NCX_NT_NONE,
+			 NULL);
     }
     return res;
 
@@ -777,10 +810,15 @@ static status_t
     res = cfg_lock(cfg, SES_MY_SID(scb), CFG_SRC_NETCONF);
     if (res != NO_ERR) {
 	/* config is in a state where locks cannot be granted */
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res, 
-			 methnode, NCX_NT_NONE, 
-			 NULL, NCX_NT_NONE, NULL);
+	agt_record_error(scb,
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION,
+			 res, 
+			 methnode,
+			 NCX_NT_NONE, 
+			 NULL,
+			 NCX_NT_NONE, 
+			 NULL);
     }
 
     return res;
@@ -819,10 +857,15 @@ static status_t
     if (res == NO_ERR) {
 	msg->rpc_user1 = (void *)cfg;
     } else {
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res, 
-			 methnode, NCX_NT_NONE, 
-			 NULL, NCX_NT_NONE, NULL);
+	agt_record_error(scb,
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION,
+			 res, 
+			 methnode,
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_NONE,
+			 NULL);
     }
 
     return res;
@@ -851,10 +894,15 @@ static status_t
     cfg = (cfg_template_t *)msg->rpc_user1;
     res = cfg_unlock(cfg, SES_MY_SID(scb));
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res, 
-			 methnode, NCX_NT_NONE, NULL, 
-			 NCX_NT_NONE, NULL);
+	agt_record_error(scb,
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION,
+			 res, 
+			 methnode,
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_NONE,
+			 NULL);
     }
     return res;
 
@@ -879,7 +927,9 @@ static status_t
 
     (void)msg;
     (void)methnode;
-    agt_ses_request_close(SES_MY_SID(scb));
+    agt_ses_request_close(SES_MY_SID(scb), 
+			  SES_MY_SID(scb),
+			  SES_TR_CLOSED);
     return NO_ERR;
 
 } /* close_session_invoke */
@@ -906,7 +956,8 @@ static status_t
     res = NO_ERR;
 
     /* get the session-id parameter */
-    val = val_find_child(msg->rpc_input, NC_MODULE,
+    val = val_find_child(msg->rpc_input, 
+			 NC_MODULE,
 			 NCX_EL_SESSION_ID);
     if (!val || val->res != NO_ERR) {
 	/* error already recorded in parse phase */
@@ -925,10 +976,15 @@ static status_t
     if (VAL_UINT(val) == scb->sid
 	|| !agt_ses_session_id_valid(VAL_UINT(val))) {
 	res = ERR_NCX_INVALID_VALUE;
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res,
-			 methnode, NCX_NT_NONE, 
-			 NULL, NCX_NT_NONE, NULL);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION, 
+			 res,
+			 methnode, 
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_NONE, 
+			 NULL);
     } else {
 	/* save the session-id to kill */
 	msg->rpc_user1 = (void *)VAL_UINT(val);
@@ -961,10 +1017,14 @@ static status_t
     sid = (ses_id_t)msg->rpc_user1;
     if (sid==scb->sid) {
 	/* zapping the current session */
-	agt_ses_request_close(sid);
+	agt_ses_request_close(sid, 
+			      scb->sid,
+			      SES_TR_KILLED);
     } else {
 	/* zapping another session */
-	agt_ses_kill_session(sid);
+	agt_ses_kill_session(sid, 
+			     scb->sid,
+			     SES_TR_KILLED);
     }
     return NO_ERR;
 
@@ -1058,8 +1118,11 @@ static status_t
     }
 
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res, methnode,
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION, 
+			 res, 
+			 methnode,
 			 (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
 			 (errstr) ? errstr : NULL,
 			 (rootval) ? NCX_NT_VAL : NCX_NT_NONE, 
@@ -1075,7 +1138,11 @@ static status_t
      * attributes) against the existing data model.
      * <rpc-error> records will be added as needed 
      */
-    res = agt_val_validate_write(scb, msg, NULL, rootval, OP_EDITOP_MERGE);
+    res = agt_val_validate_write(scb, 
+				 msg, 
+				 NULL, 
+				 rootval, 
+				 OP_EDITOP_MERGE);
 
     if (res == NO_ERR) {
 	res = agt_val_root_check(scb, &msg->mhdr, rootval);
@@ -1132,7 +1199,8 @@ static status_t
 	    }
 
 	    if (res == NO_ERR) {
-		res = agt_val_root_check(scb, &msg->mhdr, 
+		res = agt_val_root_check(scb, 
+					 &msg->mhdr, 
 					 candidate->root);
 		if (res != NO_ERR) {
 		    errdone = TRUE;
@@ -1142,9 +1210,15 @@ static status_t
     }
 
     if (res != NO_ERR && !errdone) {
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res, methnode,
-			 NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION, 
+			 res, 
+			 methnode,
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_NONE, 
+			 NULL);
     }
 
     return res;
@@ -1176,19 +1250,29 @@ static status_t
     running = cfg_get_config_id(NCX_CFGID_RUNNING);
     if (!candidate || !running) {
 	res = SET_ERROR(ERR_INTERNAL_VAL);
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res, methnode,
-			 NCX_NT_NONE, NULL, 
-			 NCX_NT_NONE, NULL);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION,
+			 res,
+			 methnode,
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_NONE,
+			 NULL);
     } else {
 	res = agt_val_apply_commit(scb, msg, candidate, running);
 	if (res == NO_ERR) {
 	    res = cfg_fill_candidate_from_running();
 	    if (res != NO_ERR) {
-		agt_record_error(scb, &msg->mhdr, 
-				 NCX_LAYER_OPERATION, res, methnode,
-				 NCX_NT_NONE, NULL, 
-				 NCX_NT_VAL, candidate->root);
+		agt_record_error(scb,
+				 &msg->mhdr, 
+				 NCX_LAYER_OPERATION,
+				 res,
+				 methnode,
+				 NCX_NT_NONE, 
+				 NULL, 
+				 NCX_NT_VAL,
+				 candidate->root);
 	    }
 	}  /* else errors already recorded */
     }
@@ -1234,9 +1318,15 @@ static status_t
     }
 
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res, methnode,
-			 NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION, 
+			 res, 
+			 methnode,
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_NONE, 
+			 NULL);
 	return res;
     }
 
@@ -1275,9 +1365,15 @@ static status_t
     }
 
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res, methnode,
-			 NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION, 
+			 res, 
+			 methnode,
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_NONE, 
+			 NULL);
     }
 
     return res;
@@ -1330,7 +1426,11 @@ static status_t
     msg->rpc_err_option = OP_ERROP_CONTINUE;
 
     /* errors will be added as needed */
-    res = agt_val_validate_write(scb, msg, target, val, OP_EDITOP_LOAD);
+    res = agt_val_validate_write(scb, 
+				 msg, 
+				 target, 
+				 val, 
+				 OP_EDITOP_LOAD);
 
     if (res == NO_ERR) {
 	res = agt_val_root_check(scb, &msg->mhdr, val);
@@ -1377,7 +1477,10 @@ static status_t
 
     /* load the <config> into the target config */
     if (res == NO_ERR) {
-	res = agt_val_apply_write(scb, msg, target, val, 
+	res = agt_val_apply_write(scb, 
+				  msg, 
+				  target, 
+				  val, 
 				  OP_EDITOP_LOAD);
     }
 
@@ -1423,9 +1526,15 @@ static status_t
     if (!mod) {
 	res = ncxmod_load_module(VAL_STR(val), NULL, NULL);
 	if (res != NO_ERR) {
-	    agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
-			     methnode, NCX_NT_NONE, NULL, 
-			     NCX_NT_VAL, val);
+	    agt_record_error(scb, 
+			     &msg->mhdr, 
+			     NCX_LAYER_OPERATION, 
+			     res,
+			     methnode, 
+			     NCX_NT_NONE, 
+			     NULL, 
+			     NCX_NT_VAL, 
+			     val);
 	    return res;
 	} else {
 	    mod = ncx_find_module(VAL_STR(val), NULL);
@@ -1449,7 +1558,8 @@ static status_t
 				 mod->version);
 	    if (res == NO_ERR) {
 		/* name is set to 'string' at this point, need to change it */
-		val_set_name(newval, NCX_EL_MOD_REVISION,
+		val_set_name(newval, 
+			     NCX_EL_MOD_REVISION,
 			     xml_strlen(NCX_EL_MOD_REVISION));
 	    }
 	}
@@ -1463,10 +1573,15 @@ static status_t
 	if (newval) {
 	    val_free_value(newval);
 	}
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res,
-			 methnode, NCX_NT_NONE, NULL, 
-			 NCX_NT_VAL, val);
+	agt_record_error(scb,
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION,
+			 res,
+			 methnode,
+			 NCX_NT_NONE,
+			 NULL, 
+			 NCX_NT_VAL,
+			 val);
     } else {
 	msg->rpc_data_type = RPC_DATA_YANG;
 	dlq_enque(newval, &msg->rpc_dataQ);

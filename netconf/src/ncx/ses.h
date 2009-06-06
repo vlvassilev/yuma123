@@ -141,6 +141,18 @@ typedef enum ses_mode_t_ {
 } ses_mode_t;
 
 
+/* Session Termination reason */
+typedef enum ses_term_reason_t_ {
+    SES_TR_NONE,
+    SES_TR_CLOSED,
+    SES_TR_KILLED,
+    SES_TR_DROPPED,
+    SES_TR_TIMEOUT,
+    SES_TR_OTHER,
+    SES_TR_NOSTART
+} ses_term_reason_t;
+
+
 /*** using uint32 instead of uint64 because the netconf-state
  *** data model is specified that way
  ***/
@@ -220,6 +232,8 @@ typedef struct ses_cb_t_ {
     ses_state_t      state;                    /* session state */
     ses_mode_t       mode;                      /* session mode */
     ses_id_t         sid;                         /* session ID */
+    ses_id_t         killedbysid;       /* killed-by session ID */
+    ses_term_reason_t termreason;
     xmlChar         *start_time;         /* dateTime start time */
     xmlChar         *username;                       /* user ID */
     xmlChar         *peeraddr;           /* Inet address string */

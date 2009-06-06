@@ -49,12 +49,16 @@ date         init     comment
 #include "agt_rpcerr.h"
 #endif
 
+#ifndef _H_agt_ses
+#include "agt_ses.h"
+#endif
+
 #ifndef _H_agt_state
 #include "agt_state.h"
 #endif
 
-#ifndef _H_agt_ses
-#include "agt_ses.h"
+#ifndef _H_agt_sys
+#include "agt_sys.h"
 #endif
 
 #ifndef _H_agt_util
@@ -130,7 +134,8 @@ status_t
     status_t  res;
 
     if (!agt_connect_init_done) {
-	res = top_register_node(NCX_MODULE, NCX_EL_NCXCONNECT, 
+	res = top_register_node(NCX_MODULE, 
+				NCX_EL_NCXCONNECT, 
 				agt_connect_dispatch);
 	if (res != NO_ERR) {
 	    return res;
@@ -311,15 +316,22 @@ void
 
     /* report first error and close session */
     if (res != NO_ERR) {
-	agt_ses_request_close(scb->sid);
-	log_error("\nagt_connect error (%s)\n  dropping session %d (%d)",
-		  get_error_string(res), scb->sid, res);
+	agt_ses_request_close(scb->sid, scb->sid, SES_TR_NOSTART);
+	if (LOGINFO) {
+	    log_info("\nagt_connect error (%s)\n"
+		     "  dropping session %d",
+		     get_error_string(res), 
+		     scb->sid);
+	}
     } else {
-	log_debug("\nagt_connect msg ok");
+	if (LOGDEBUG) {
+	    log_debug("\nagt_connect msg ok");
+	}
+	agt_sys_send_sysSessionStart(scb);
     }
-
     
 } /* agt_connect_dispatch */
+
 
 /* END file agt_connect.c */
 

@@ -90,10 +90,14 @@ extern boolean
     agt_ses_session_id_valid (ses_id_t  sid);
 
 extern void
-    agt_ses_request_close (ses_id_t sid);
+    agt_ses_request_close (ses_id_t sid,
+			   ses_id_t killedby,
+			   ses_term_reason_t termreason);
 
 extern void
-    agt_ses_kill_session (ses_id_t sid);
+    agt_ses_kill_session (ses_id_t sid,
+			  ses_id_t killedby,
+			  ses_term_reason_t termreason);
 
 extern int
     agt_ses_read_cb (void *context,

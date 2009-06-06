@@ -48,6 +48,10 @@ date         init     comment
 #include  "agt_state.h"
 #endif
 
+#ifndef _H_agt_sys
+#include  "agt_sys.h"
+#endif
+
 #ifndef _H_agt_top
 #include  "agt_top.h"
 #endif
@@ -1369,11 +1373,16 @@ boolean
 *
 * INPUTS:
 *   sid == session ID to close
+*   killedby == session ID executing the kill-session or close-session
+*   termreason == termination reason code
+*
 * RETURNS:
 *   none
 *********************************************************************/
 void
-    agt_ses_request_close (ses_id_t sid)
+    agt_ses_request_close (ses_id_t sid,
+			   ses_id_t killedby,
+			   ses_term_reason_t termreason)
 {
     ses_cb_t *scb;
 
@@ -1393,19 +1402,26 @@ void
 	return;
     }
 
+    scb->killedbysid = killedby;
+    scb->termreason = termreason;
+
     /* change the session control block state */
     switch (scb->state) {
     case SES_ST_IDLE:
     case SES_ST_SHUTDOWN:
     case SES_ST_SHUTDOWN_REQ:
-	agt_ses_kill_session(scb->sid);
+	agt_ses_kill_session(scb->sid, 
+			     killedby,
+			     termreason);
 	break;
     case SES_ST_IN_MSG:
 	scb->state = SES_ST_SHUTDOWN_REQ;
 	break;
     default:
 	if (dlq_empty(&scb->outQ)) {
-	    agt_ses_kill_session(scb->sid);
+	    agt_ses_kill_session(scb->sid, 
+				 killedby,
+				 termreason);
 	} else {
 	    scb->state = SES_ST_SHUTDOWN_REQ;
 	}
@@ -1425,7 +1441,9 @@ void
 *   none
 *********************************************************************/
 void
-    agt_ses_kill_session (ses_id_t sid)
+    agt_ses_kill_session (ses_id_t sid,
+			  ses_id_t killedby,
+			  ses_term_reason_t termreason)
 {
     ses_cb_t *scb;
 
@@ -1442,6 +1460,10 @@ void
     if (scb->type==SES_TYP_DUMMY) {
 	return;
     }
+
+    agt_sys_send_sysSessionEnd(scb,
+			       termreason,
+			       killedby);
 
     /* clear all resources and delete the session control block */
     agt_ses_free_session(scb);

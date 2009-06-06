@@ -79,6 +79,10 @@ date         init     comment
 #include  "agt_not.h"
 #endif
 
+#ifndef _H_agt_rpc
+#include  "agt_rpc.h"
+#endif
+
 #ifndef _H_agt_ses
 #include  "agt_ses.h"
 #endif
@@ -181,6 +185,12 @@ date         init     comment
 #define system_N_sysSessionStart (const xmlChar *)"sysSessionStart"
 #define system_N_sysSessionEnd (const xmlChar *)"sysSessionEnd"
 
+#define system_N_userName (const xmlChar *)"userName"
+#define system_N_sessionId (const xmlChar *)"sessionId"
+#define system_N_remoteHost (const xmlChar *)"remoteHost"
+#define system_N_killedBy (const xmlChar *)"killedBy"
+#define system_N_terminationReason (const xmlChar *)\
+    "terminationReason"
 
 
 /********************************************************************
@@ -253,7 +263,7 @@ static status_t
 /********************************************************************
 * FUNCTION send_sysStartup
 *
-* Send the <sysStartup> notification
+* Queue the <sysStartup> notification
 *
 *********************************************************************/
 static void
@@ -261,7 +271,7 @@ static void
 {
     agt_not_msg_t         *not;
     cfg_template_t        *cfg;
-    val_value_t           *leafval, *booterrval;
+    val_value_t           *leafval, *bootErrorval;
     rpc_err_rec_t         *rpcerror;
     const obj_template_t  *bootErrorobj;
     status_t               res;
@@ -291,22 +301,42 @@ static void
     }
 
     /* add sysStartup/bootError for each error recorded */
-    for (rpcerror = (rpc_err_rec_t *)
-	     dlq_firstEntry(&cfg->load_errQ);
-	 rpcerror != NULL;
-	 rpcerror = (rpc_err_rec_t *)
-	     dlq_nextEntry(rpcerror)) {
-	/* make the bootError value struct */
-	
-
-
+    if (!dlq_empty(&cfg->load_errQ)) {
+	/* get the bootError object */
+	bootErrorobj = obj_find_child(sysStartupobj,
+				      AGT_SYS_MODULE,
+				      (const xmlChar *)"bootError");
+	if (!bootErrorobj) {
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	} else {
+	    for (rpcerror = (rpc_err_rec_t *)
+		     dlq_firstEntry(&cfg->load_errQ);
+		 rpcerror != NULL;
+		 rpcerror = (rpc_err_rec_t *)
+		     dlq_nextEntry(rpcerror)) {
+		/* make the bootError value struct */
+		bootErrorval = val_new_value();
+		if (!bootErrorval) {
+		    log_error("\nError: malloc failed; cannot "
+			      "make <bootError> struct");
+		} else {
+		    res = agt_rpc_fill_rpc_error(rpcerror,
+						 bootErrorval);
+		    if (res != NO_ERR) {
+			log_error("\nError: problems making "
+				  "<bootError> (%s)",
+				  get_error_string(res));
+		    }
+		    /* add even if there are some missing leafs */
+		    agt_not_add_to_payload(not, bootErrorval);
+		}
+	    }
+	}
     }
-	 
 
     agt_not_queue_notification(not);
 
 } /* send_sysStartup */
-
 
 
 /********************************************************************
@@ -515,6 +545,230 @@ void
 	agt_sys_init_done = FALSE;
     }
 }  /* agt_sys_cleanup */
+
+
+/********************************************************************
+* FUNCTION agt_sys_send_sysSessionStart
+*
+* Queue the <sysSessionStart> notification
+*
+* INPUTS:
+*   scb == session control block to use for payload values
+*
+* OUTPUTS:
+*   notification generated and added to notificationQ
+*
+*********************************************************************/
+void
+    agt_sys_send_sysSessionStart (const ses_cb_t *scb)
+{
+    agt_not_msg_t         *not;
+    val_value_t           *leafval;
+    status_t               res;
+    xmlChar                numbuff[NCX_MAX_NUMLEN];
+
+    not = agt_not_new_notification(sysSessionStartobj);
+    if (!not) {
+	log_error("\nError: malloc failed; cannot "
+		  "send <sysSessionStartup>");
+	return;
+    }
+
+    /* add sysSessionStart/userName */
+    if (scb->username) {
+	leafval = agt_make_leaf(sysSessionStartobj,
+				system_N_userName,
+				scb->username,
+				&res);
+	if (leafval) {
+	    agt_not_add_to_payload(not, leafval);
+	} else {
+	    log_error("\nError: cannot make payload leaf (%s)",
+		      get_error_string(res));
+	}
+    }
+
+    /* add sysSessionStart/sessionId */
+    sprintf((char *)numbuff, "%u", scb->sid);
+    leafval = agt_make_leaf(sysSessionStartobj,
+			    system_N_sessionId,
+			    numbuff,
+			    &res);
+    if (leafval) {
+	agt_not_add_to_payload(not, leafval);
+    } else {
+	log_error("\nError: cannot make payload leaf (%s)",
+		  get_error_string(res));
+    }
+
+    /* add sysSessionStart/remoteHost */
+    if (scb->peeraddr) {
+	leafval = agt_make_leaf(sysSessionStartobj,
+				system_N_remoteHost,
+				scb->peeraddr,
+				&res);
+	if (leafval) {
+	    agt_not_add_to_payload(not, leafval);
+	} else {
+	    log_error("\nError: cannot make payload leaf (%s)",
+		      get_error_string(res));
+	}
+    }
+
+    agt_not_queue_notification(not);
+
+} /* agt_sys_send_sysSessionStart */
+
+
+/********************************************************************
+* FUNCTION agt_sys_send_sysSessionEnd
+*
+* Queue the <sysSessionEnd> notification
+*
+* INPUTS:
+*   scb == session control block to use for payload values
+*   termreason == enum for the terminationReason leaf
+*   killedby == session-id for killedBy leaf if termreason == "killed"
+*               ignored otherwise
+*
+* OUTPUTS:
+*   notification generated and added to notificationQ
+*
+*********************************************************************/
+void
+    agt_sys_send_sysSessionEnd (const ses_cb_t *scb,
+				ses_term_reason_t termreason,
+				ses_id_t killedby)
+{
+    agt_not_msg_t         *not;
+    val_value_t           *leafval;
+    const xmlChar         *termreasonstr;
+    status_t               res;
+    xmlChar                numbuff[NCX_MAX_NUMLEN];
+
+#ifdef DEBUG
+    if (!scb || !termreason) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (termreason == SES_TR_NOSTART) {
+	/* session did not start; just being killed
+	 * in the <ncxconnect> message handler
+	 */
+	return;
+    }
+
+    not = agt_not_new_notification(sysSessionEndobj);
+    if (!not) {
+	log_error("\nError: malloc failed; cannot "
+		  "send <sysSessionEnd>");
+	return;
+    }
+
+    /* add sysSessionEnd/userName */
+    if (scb->username) {
+	leafval = agt_make_leaf(sysSessionEndobj,
+				system_N_userName,
+				scb->username,
+				&res);
+	if (leafval) {
+	    agt_not_add_to_payload(not, leafval);
+	} else {
+	    log_error("\nError: cannot make payload leaf (%s)",
+		      get_error_string(res));
+	}
+    }
+
+    /* add sysSessionEnd/sessionId */
+    sprintf((char *)numbuff, "%u", scb->sid);
+    leafval = agt_make_leaf(sysSessionEndobj,
+			    system_N_sessionId,
+			    numbuff,
+			    &res);
+    if (leafval) {
+	agt_not_add_to_payload(not, leafval);
+    } else {
+	log_error("\nError: cannot make payload leaf (%s)",
+		  get_error_string(res));
+    }
+
+    /* add sysSessionEnd/remoteHost */
+    if (scb->peeraddr) {
+	leafval = agt_make_leaf(sysSessionEndobj,
+				system_N_remoteHost,
+				scb->peeraddr,
+				&res);
+	if (leafval) {
+	    agt_not_add_to_payload(not, leafval);
+	} else {
+	    log_error("\nError: cannot make payload leaf (%s)",
+		      get_error_string(res));
+	}
+    }
+
+    /* add sysSessionEnd/killedBy */
+    if (termreason == SES_TR_KILLED) {
+	sprintf((char *)numbuff, "%u", killedby);
+	leafval = agt_make_leaf(sysSessionEndobj,
+				system_N_killedBy,
+				numbuff,
+				&res);
+	if (leafval) {
+	    agt_not_add_to_payload(not, leafval);
+	} else {
+	    log_error("\nError: cannot make payload leaf (%s)",
+		      get_error_string(res));
+	}
+    }
+
+    switch (termreason) {
+    case SES_TR_NONE:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	termreasonstr = (const xmlChar *)"other";
+	break;
+    case SES_TR_CLOSED:
+	termreasonstr = (const xmlChar *)"closed";
+	break;
+    case SES_TR_KILLED:
+	termreasonstr = (const xmlChar *)"killed";
+	break;
+    case SES_TR_DROPPED:
+	termreasonstr = (const xmlChar *)"dropped";
+	break;
+    case SES_TR_TIMEOUT:
+	termreasonstr = (const xmlChar *)"timeout";
+	break;
+    case SES_TR_OTHER:
+	termreasonstr = (const xmlChar *)"other";
+	break;
+    case SES_TR_NOSTART:
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	termreasonstr = (const xmlChar *)"other";
+    }
+
+    /* add sysSessionEnd/terminationReason */
+    leafval = agt_make_leaf(sysSessionEndobj,
+			    system_N_terminationReason,
+			    termreasonstr,
+			    &res);
+    if (leafval) {
+	agt_not_add_to_payload(not, leafval);
+    } else {
+	log_error("\nError: cannot make payload leaf (%s)",
+		  get_error_string(res));
+    }
+
+    agt_not_queue_notification(not);
+
+} /* agt_sys_send_sysSessionEnd */
+
+
+
+
+
 
 
 /* END file agt_sys.c */

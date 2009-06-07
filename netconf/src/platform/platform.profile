@@ -87,7 +87,7 @@ $(TARGET)/%.o: %.c
 
 $(LBASE)/lib%.a: $(OBJS)
 	$(LIBTOOL) cr $@ $(OBJS)
-
+	ranlib $@
 
 #### common cleanup rules
 
@@ -104,4 +104,5 @@ lint:
 	$(CC) -MM -MG -MT $(TARGET)/$(patsubst %.c,%.o,$<) \
 	-Wall -Wcomment $(CPPFLAGS) $(PLATFORM_CPP) $(CINC) \
 	$(SUBDIR_CPP) $(TARGET_ARCH) -c $< > $@
+
 

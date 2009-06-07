@@ -179,8 +179,8 @@ static status_t
 					 ISPARM, 
 					 &res);
 	    } else {
+		typdef = obj_get_ctypdef(obj);
 		if (btyp != NCX_BT_ANY) {
-		    typdef = obj_get_ctypdef(obj);
 		    res = val_simval_ok(typdef, strval);
 		}
 		if (res == NO_ERR) {

@@ -1514,6 +1514,8 @@ static status_t
 	return NO_ERR;
     }
 
+    res = NO_ERR;
+
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
 	res = do_typedefs_container(mod, obj, typnameQ);

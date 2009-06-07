@@ -14,11 +14,14 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Wwrite-strings -Wbad-function-cast -Wcast-qual -Wcast-align \
 	-Waggregate-return -Wstrict-prototypes -Wold-style-definition \
 	-Wmissing-prototypes -Wmissing-declarations \
-	-Wpacked -Wunreachable-code -Winvalid-pch \
+	-Wpacked -Winvalid-pch \
 	-Wredundant-decls -Wnested-externs -Winline -std=gnu99
 
+
+# -Wunreachable-code removed due to -O3
+
 CDEFS=-DDEBUG -DLINUX -DGCC -DHAS_FLOAT 
-CFLAGS=$(CDEFS) $(CWARN)
+CFLAGS=$(CDEFS) $(CWARN) -O3
 
 # production (1) or debug (0) build
 ifdef BLD

@@ -251,10 +251,11 @@ status_t
 	    continue;
 	}
 
-
+	state = MGR_IO_ST_INIT;
 	first = TRUE;
 	done2 = FALSE;
 	ret = 0;
+
 	while (!done2) {
 	    /* will block in idle states waiting for user KBD input
 	     * while no command is active

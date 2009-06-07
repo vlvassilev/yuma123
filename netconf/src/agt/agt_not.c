@@ -431,7 +431,7 @@ static status_t
     } 
 
     /* get the stopTime parameter */
-    valstartTime = 
+    valstopTime = 
 	val_find_child(msg->rpc_input, 
 		       AGT_NOT_MODULE1,
 		       notifications_N_create_subscription_stopTime);

@@ -9264,4 +9264,48 @@ boolean
 }  /* obj_is_enabled */
 
 
+/********************************************************************
+ * FUNCTION obj_is_single_instance
+ * 
+ * Check if the object is a single instance of if it
+ * allows multiple instances; check all of the
+ * ancestors if needed
+ *
+ * INPUTS:
+ *    obj == object template to check
+ *********************************************************************/
+boolean
+    obj_is_single_instance (const obj_template_t *obj)
+{
+    ncx_iqual_t  iqual;
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return TRUE;
+    }
+#endif
+
+    while (obj != NULL) {
+	iqual = obj_get_iqualval(obj);
+	switch (iqual) {
+	case NCX_IQUAL_ZMORE:
+	case NCX_IQUAL_1MORE:
+	    return FALSE;
+	default:
+	    /* don't bother checking the root
+	     * and don't go past the root into
+	     * the RPC parameters
+	     */
+	    obj = obj->parent;
+	    if (obj && obj_is_root(obj)) {
+		obj = NULL;
+	    }
+	}
+    }
+    return TRUE;
+
+}  /* obj_is_single_instance */
+
+
 /* END obj.c */

@@ -681,6 +681,7 @@ static status_t
 	return NO_ERR;
     }
 
+    btyp = obj_get_basetype(parm);
     res = NO_ERR;
 
     if (obj_is_data_db(parm)) {
@@ -5424,10 +5425,12 @@ static status_t
  *    rpc == RPC method for the load command
  *    valset == parsed CLI valset
  *    getoptional == TRUE if optional nodes are desired
- *    dofill == TRUE to fill the content,
- *              FALSE to skip fill phase
  *    isdelete == TRUE if this is for an edit-config delete
  *                FALSE for some other operation
+ *    dofill == TRUE to fill the content,
+ *              FALSE to skip fill phase
+ *    iswrite == TRUE if write operation
+ *               FALSE if a read operation
  *    valroot == address of return value root pointer
  *               used when the content is from the CLI XPath
  *
@@ -5460,6 +5463,7 @@ static val_value_t *
 			     boolean getoptional,
 			     boolean isdelete,
 			     boolean dofill,
+			     boolean iswrite,
 			     val_value_t **valroot)
 {
     val_value_t           *parm, *curparm, *newparm;
@@ -5573,6 +5577,9 @@ static val_value_t *
 	switch (targobj->objtype) {
 	case OBJ_TYP_LEAF:
 	    if (isdelete) {
+		dofill = FALSE;
+	    } else if (!iswrite && 
+		       obj_is_single_instance(targobj)) {
 		dofill = FALSE;
 	    } /* else fall through */
 	case OBJ_TYP_LEAF_LIST:
@@ -6095,6 +6102,7 @@ static status_t
 				      getoptional,
 				      isdelete,
 				      dofill,
+				      TRUE,
 				      &valroot);
     if (!content) {
 	val_free_value(valset);
@@ -6205,6 +6213,7 @@ static status_t
 				      getoptional,
 				      FALSE,
 				      dofill,
+				      TRUE,
 				      &valroot);
     if (!content) {
 	val_free_value(valset);
@@ -6408,6 +6417,7 @@ static status_t
 				      getoptional,
 				      FALSE,
 				      dofill,
+				      FALSE,
 				      &valroot);
     if (!content) {
 	val_free_value(valset);
@@ -6533,6 +6543,7 @@ static status_t
 				      getoptional,
 				      FALSE,
 				      dofill,
+				      FALSE,
 				      &valroot);
     if (!content) {
 	val_free_value(valset);
@@ -6687,6 +6698,7 @@ static status_t
     content = get_content_from_choice(agent_cb, 
 				      rpc, 
 				      valset,
+				      FALSE,
 				      FALSE,
 				      FALSE,
 				      FALSE,
@@ -6867,6 +6879,7 @@ static status_t
     content = get_content_from_choice(agent_cb, 
 				      rpc, 
 				      valset,
+				      FALSE,
 				      FALSE,
 				      FALSE,
 				      FALSE,

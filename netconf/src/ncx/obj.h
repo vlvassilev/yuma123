@@ -1126,5 +1126,8 @@ extern const ncx_iffeature_t *
 extern boolean
     obj_is_enabled (const obj_template_t *obj);
 
+extern boolean
+    obj_is_single_instance (const obj_template_t *obj);
+
 
 #endif	    /* _H_obj */

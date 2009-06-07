@@ -456,18 +456,24 @@ static void
 	    if (getop) {
 		xml_wr_val(scb, &msg->mhdr, curval, indent);
 	    } else {
-		xml_wr_check_val(scb, &msg->mhdr, curval, 
-				 indent, agt_check_config);
+		xml_wr_check_val(scb, 
+				 &msg->mhdr, 
+				 curval, 
+				 indent, 
+				 agt_check_config);
 	    }
 	    xpath_free_resnode(resnode);
 	    return;
 	}
 
-	output_resnode(scb, msg, pcb,
+	output_resnode(scb, 
+		       msg, 
+		       pcb,
 		       &result->r.nodeQ,
 		       curval, 
 		       pcb->val_docroot,
-		       getop, indent);
+		       getop, 
+		       indent);
 
 	xpath_free_resnode(resnode);
 

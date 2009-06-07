@@ -318,22 +318,26 @@ static status_t
     if (scb->xmladvance) {
 	/* get a new node */
 	if (usens) {
-	    res = agt_xml_consume_node(scb, xmlnode,
+	    res = agt_xml_consume_node(scb, 
+				       xmlnode,
 				       NCX_LAYER_OPERATION, 
 				       msg);
 	} else {
-	    res = agt_xml_consume_node_nons(scb, xmlnode,
+	    res = agt_xml_consume_node_nons(scb, 
+					    xmlnode,
 					    NCX_LAYER_OPERATION, 
 					    msg);
 	}
     } else {
 	/* get current node, not a new node */
 	if (usens) {
-	    res = agt_xml_consume_node_noadv(scb, xmlnode,
+	    res = agt_xml_consume_node_noadv(scb, 
+					     xmlnode,
 					     NCX_LAYER_OPERATION, 
 					     msg);
 	} else {
-	    res = agt_xml_consume_node_nons_noadv(scb, xmlnode,
+	    res = agt_xml_consume_node_nons_noadv(scb, 
+						  xmlnode,
 						  NCX_LAYER_OPERATION, 
 						  msg);
 	}
@@ -537,9 +541,15 @@ static status_t
     if (res != NO_ERR || res2 != NO_ERR) {
 	if (!errdone) {
 	    /* add rpc-error to msg->errQ */
-	    (void)parse_error_subtree(scb, msg, startnode,
-				      errnode, res, NCX_NT_NONE, 
-				      NULL, NCX_NT_VAL, retval);
+	    (void)parse_error_subtree(scb, 
+				      msg, 
+				      startnode,
+				      errnode, 
+				      res, 
+				      NCX_NT_NONE, 
+				      NULL, 
+				      NCX_NT_VAL, 
+				      retval);
 	}
 	xml_clean_node(&nextnode);
 	return (res==NO_ERR) ? res2 : res;
@@ -555,8 +565,11 @@ static status_t
 	 *  Allocate a new val_value_t for the child value node 
 	 */
 	res = NO_ERR;
-	chval = val_new_child_val(nextnode.nsid, nextnode.elname, 
-				  TRUE, retval, get_editop(&nextnode));
+	chval = val_new_child_val(nextnode.nsid, 
+				  nextnode.elname, 
+				  TRUE, 
+				  retval, 
+				  get_editop(&nextnode));
 	if (!chval) {
 	    res = ERR_INTERNAL_MEM;
 	}
@@ -591,10 +604,15 @@ static status_t
 	if (res != NO_ERR) {
 	    if (!errdone) {
 		/* add rpc-error to msg->errQ */
-		(void)parse_error_subtree(scb, msg, startnode,
-					  errnode, res, 
-					  NCX_NT_NONE, NULL, 
-					  NCX_NT_VAL, retval);
+		(void)parse_error_subtree(scb, 
+					  msg, 
+					  startnode,
+					  errnode, 
+					  res, 
+					  NCX_NT_NONE, 
+					  NULL, 
+					  NCX_NT_VAL, 
+					  retval);
 	    }
 	    xml_clean_node(&nextnode);
 	    if (chval) {
@@ -793,9 +811,15 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR) && !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)parse_error_subtree(scb, msg, startnode,
-				  errnode, res, NCX_NT_STRING, 
-				  badval, NCX_NT_VAL, retval);
+	(void)parse_error_subtree(scb, 
+				  msg, 
+				  startnode,
+				  errnode, 
+				  res, 
+				  NCX_NT_STRING, 
+				  badval, 
+				  NCX_NT_VAL, 
+				  retval);
     }
 
     xml_clean_node(&valnode);
@@ -908,10 +932,15 @@ static status_t
 	retval->v.bool = TRUE;
     } else if (!errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)parse_error_subtree(scb, msg, startnode,
-				  errnode, res, 
-				  NCX_NT_NONE, NULL, 
-				  NCX_NT_VAL, retval);
+	(void)parse_error_subtree(scb, 
+				  msg, 
+				  startnode,
+				  errnode, 
+				  res, 
+				  NCX_NT_NONE, 
+				  NULL, 
+				  NCX_NT_VAL, 
+				  retval);
     }
 
     xml_clean_node(&endnode);
@@ -1057,10 +1086,15 @@ static status_t
     /* check if any errors; record the first error */
     if ((res != NO_ERR) && !errdone) {
 	/* add rpc-error to msg->errQ */
-	(void)parse_error_subtree(scb, msg, startnode,
-				  errnode, res, 
-				  NCX_NT_STRING, badval, 
-				  NCX_NT_VAL, retval);
+	(void)parse_error_subtree(scb, 
+				  msg, 
+				  startnode,
+				  errnode, 
+				  res, 
+				  NCX_NT_STRING, 
+				  badval, 
+				  NCX_NT_VAL, 
+				  retval);
     }
 
     xml_clean_node(&valnode);

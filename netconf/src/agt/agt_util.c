@@ -919,10 +919,15 @@ status_t
     }
 
     if (res != NO_ERR) {
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, res, NULL,
+	agt_record_error(scb, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION, 
+			 res, 
+			 NULL,
 			 (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
-			 errstr, NCX_NT_VAL, filter);
+			 errstr, 
+			 NCX_NT_VAL, 
+			 filter);
     } else {
 #ifdef AGT_UTIL_DEBUG
 	if (LOGDEBUG3) {

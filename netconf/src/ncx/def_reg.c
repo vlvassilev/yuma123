@@ -237,6 +237,8 @@ static status_t
 	return SET_ERROR(ERR_INTERNAL_VAL);  /* zero key len */
     }
 
+    h = 0;
+
     /* check if the entry already exists */
     top = (def_topnode_t *)find_top_node_h(nodetyp, key, &h);
     if (top) {

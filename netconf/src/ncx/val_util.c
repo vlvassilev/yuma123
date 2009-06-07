@@ -1740,7 +1740,8 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
-	
+
+    cnt = 0;
     total = 0;
     *len = 0;
 

@@ -45,6 +45,10 @@ date         init     comment
 #include "agt_ncx.h"
 #endif
 
+#ifndef _H_agt_sys
+#include "agt_sys.h"
+#endif
+
 #ifndef _H_agt_util
 #include "agt_util.h"
 #endif
@@ -196,17 +200,18 @@ static void
 	return;
     }
 
+    /* generate a log record */
+    ibuff = NULL;
+    tstamp_datetime(tbuff);
+
+    if (node) {
+	(void)val_gen_instance_id(NULL, 
+				  node, 
+				  NCX_IFMT_XPATH1, 
+				  &ibuff);
+    }
+
     if (LOGINFO) {
-	ibuff = NULL;
-	tstamp_datetime(tbuff);
-
-	if (node) {
-	    (void)val_gen_instance_id(NULL, 
-				      node, 
-				      NCX_IFMT_XPATH1, 
-				      &ibuff);
-	}
-
 	log_info("\nedit-config: operation %s on session %d by %s@%s"
 		 "\n  at %s on target 'running' with result (%s)"
 		 "\n  data: %s",
@@ -217,10 +222,17 @@ static void
 		 tbuff,
 		 get_error_string(res),
 		 (ibuff) ? (const char *)ibuff : "--");
+    }
 
-	if (ibuff) {
-	    m__free(ibuff);
-	}
+    /* generate a sysConfigChange notification */
+    if (res == NO_ERR && ibuff) {
+	agt_sys_send_sysConfigChange(scb, 
+				     ibuff, 
+				     op_editop_name(editop));
+    }
+
+    if (ibuff) {
+	m__free(ibuff);
     }
 
 } /* handle_audit_record */
@@ -940,12 +952,6 @@ static status_t
     if (res == NO_ERR && newval && 
 	newval->btyp == NCX_BT_LIST && 
 	cur_editop == OP_EDITOP_MERGE) {
-	/* bug 3/24: not sure why insertstr was checked
-	 * this is not mandatory to use in val_add_child_clean_editvars
-	 *
-	if (newval->editvars
-	    && newval->editvars->insertstr ) {
-	*/
 	
 	if (newval->editvars) {
 	    /* move the list entry after the merge is done */
@@ -1171,8 +1177,11 @@ static status_t
 
 	/* check and adjust the operation attribute */
 	iqual = val_get_iqualval(newval);
-	res = agt_check_editop(editop, &newval->editvars->editop, 
-			       newval, curval, iqual);
+	res = agt_check_editop(editop, 
+			       &newval->editvars->editop, 
+			       newval, 
+			       curval, 
+			       iqual);
 
 	/* check the operation against the object definition
 	 * and whether or not the entry currently exists
@@ -1497,12 +1506,12 @@ static status_t
     if (cbtyp==AGT_CB_VALIDATE) {
 	if (curval && val_is_virtual(curval)) {
 	    v_val = val_get_virtual_value(scb, curval, &res);
-	}
-	if (res == ERR_NCX_SKIPPED) {
-	    res = NO_ERR;
-	}
-	if (res != NO_ERR) {
-	    return res;
+
+	    if (res == ERR_NCX_SKIPPED) {
+		res = NO_ERR;
+	    } else if (res != NO_ERR) {
+		return res;
+	    }
 	}
     }
 

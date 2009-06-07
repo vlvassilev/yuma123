@@ -86,5 +86,9 @@ extern void
 				ses_term_reason_t termreason,
 				ses_id_t killedby);
 
+extern void
+    agt_sys_send_sysConfigChange (const ses_cb_t *scb,
+				  const xmlChar *target,
+				  const xmlChar *operation);
 
 #endif            /* _H_agt_sys */

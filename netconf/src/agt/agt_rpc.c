@@ -1053,10 +1053,12 @@ void
     /* make sure any real session has been properly established */
     if (scb->type != SES_TYP_DUMMY && scb->state != SES_ST_IDLE) {
 	res = ERR_NCX_ACCESS_DENIED;
-	log_info("\nagt_rpc dropping session %d (%d) %s",
-		 scb->sid, 
-		 res, 
-		 get_error_string(res));
+	if (LOGINFO) {
+	    log_info("\nagt_rpc dropping session %d (%d) %s",
+		     scb->sid, 
+		     res, 
+		     get_error_string(res));
+	}
 	agt_ses_request_close(scb->sid, scb->sid, SES_TR_OTHER);
 	agttotals->stats.inBadRpcs++;
 	return;
@@ -1070,10 +1072,12 @@ void
 	res = ERR_INTERNAL_MEM;
 	scb->stats.out_drop_bytes++;
 	agttotals->stats.out_drop_bytes++;
-	log_info("\nagt_rpc dropping session %d (%d) %s",
-		 scb->sid, 
-		 res, 
-		 get_error_string(res));
+	if (LOGINFO) {
+	    log_info("\nagt_rpc dropping session %d (%d) %s",
+		     scb->sid, 
+		     res, 
+		     get_error_string(res));
+	}
 	agt_ses_request_close(scb->sid, scb->sid, SES_TR_OTHER);
 	return;
     }
@@ -1196,8 +1200,9 @@ void
 	errdone = FALSE;
 
 #ifdef AGT_RPC_DEBUG
-	log_debug("\nagt_rpc: got method node (%s)", method.elname);
 	if (LOGDEBUG2) {
+	    log_debug2("\nagt_rpc: got method node (%s)", 
+		       method.elname);
 	    xml_dump_node(&method);
 	}
 #endif
@@ -1305,7 +1310,10 @@ void
     }
     if (res == NO_ERR) {
 #ifdef AGT_RPC_DEBUG
-	log_debug2("\nagt_rpc: expecting %s end node", top->qname);
+	if (LOGDEBUG2) {
+	    log_debug2("\nagt_rpc: expecting %s end node", 
+		       top->qname);
+	}
 	if (LOGDEBUG3) {
 	    xml_dump_node(&testnode);
 	}

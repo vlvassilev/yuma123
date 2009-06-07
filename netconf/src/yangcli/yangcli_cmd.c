@@ -5553,6 +5553,9 @@ static val_value_t *
 		agent_cb->get_optional = saveopt;
 		val_free_value(*valroot);
 		*valroot = NULL;
+		if (curparm) {
+		    val_free_value(curparm);
+		}
 		return NULL;
 	    }
 	    if (curparm->obj != targobj) {
@@ -5562,6 +5565,7 @@ static val_value_t *
 		agent_cb->get_optional = saveopt;
 		val_free_value(*valroot);
 		*valroot = NULL;
+		val_free_value(curparm);
 		return NULL;
 	    }
 	}
@@ -5670,6 +5674,11 @@ static val_value_t *
 				  (newparm) ? newparm : targval,
 				  curparm);
 	    }
+	}
+
+	/* done with the current value */
+	if (curparm) {
+	    val_free_value(curparm);
 	}
 
 	agent_cb->get_optional = saveopt;

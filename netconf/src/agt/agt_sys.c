@@ -192,6 +192,8 @@ date         init     comment
 #define system_N_terminationReason (const xmlChar *)\
     "terminationReason"
 
+#define system_N_target (const xmlChar *)"target"
+#define system_N_operation (const xmlChar *)"operation"
 
 /********************************************************************
 *                                                                   *
@@ -276,6 +278,11 @@ static void
     const obj_template_t  *bootErrorobj;
     status_t               res;
 
+    if (LOGDEBUG) {
+	log_debug("\nagt_sys: generating <sysStartup> "
+		  "notification");
+    }
+
     not = agt_not_new_notification(sysStartupobj);
     if (!not) {
 	log_error("\nError: malloc failed; cannot "
@@ -337,6 +344,70 @@ static void
     agt_not_queue_notification(not);
 
 } /* send_sysStartup */
+
+
+/********************************************************************
+* FUNCTION add_common_session_parms
+*
+* Add the leafs from the SysCommonSessionParms grouping
+*
+* INPUTS:
+*   scb == session control block to use for payload values
+*   not == notification msg to use to add parms into
+*
+* OUTPUTS:
+*   'not' payloadQ has malloced entries added to it
+*********************************************************************/
+static void
+    add_common_session_parms (const ses_cb_t *scb,
+			      agt_not_msg_t *not)
+{
+    val_value_t     *leafval;
+    xmlChar          numbuff[NCX_MAX_NUMLEN];
+    status_t         res;
+
+    /* add userName */
+    if (scb->username) {
+	leafval = agt_make_leaf(not->notobj,
+				system_N_userName,
+				scb->username,
+				&res);
+	if (leafval) {
+	    agt_not_add_to_payload(not, leafval);
+	} else {
+	    log_error("\nError: cannot make payload leaf (%s)",
+		      get_error_string(res));
+	}
+    }
+
+    /* add sessionId */
+    sprintf((char *)numbuff, "%u", scb->sid);
+    leafval = agt_make_leaf(not->notobj,
+			    system_N_sessionId,
+			    numbuff,
+			    &res);
+    if (leafval) {
+	agt_not_add_to_payload(not, leafval);
+    } else {
+	log_error("\nError: cannot make payload leaf (%s)",
+		  get_error_string(res));
+    }
+
+    /* add remoteHost */
+    if (scb->peeraddr) {
+	leafval = agt_make_leaf(not->notobj,
+				system_N_remoteHost,
+				scb->peeraddr,
+				&res);
+	if (leafval) {
+	    agt_not_add_to_payload(not, leafval);
+	} else {
+	    log_error("\nError: cannot make payload leaf (%s)",
+		      get_error_string(res));
+	}
+    }
+
+} /* add_common_session_parms */
 
 
 /********************************************************************
@@ -563,9 +634,11 @@ void
     agt_sys_send_sysSessionStart (const ses_cb_t *scb)
 {
     agt_not_msg_t         *not;
-    val_value_t           *leafval;
-    status_t               res;
-    xmlChar                numbuff[NCX_MAX_NUMLEN];
+
+    if (LOGDEBUG) {
+	log_debug("\nagt_sys: generating <sysSessionStart> "
+		  "notification");
+    }
 
     not = agt_not_new_notification(sysSessionStartobj);
     if (!not) {
@@ -574,46 +647,7 @@ void
 	return;
     }
 
-    /* add sysSessionStart/userName */
-    if (scb->username) {
-	leafval = agt_make_leaf(sysSessionStartobj,
-				system_N_userName,
-				scb->username,
-				&res);
-	if (leafval) {
-	    agt_not_add_to_payload(not, leafval);
-	} else {
-	    log_error("\nError: cannot make payload leaf (%s)",
-		      get_error_string(res));
-	}
-    }
-
-    /* add sysSessionStart/sessionId */
-    sprintf((char *)numbuff, "%u", scb->sid);
-    leafval = agt_make_leaf(sysSessionStartobj,
-			    system_N_sessionId,
-			    numbuff,
-			    &res);
-    if (leafval) {
-	agt_not_add_to_payload(not, leafval);
-    } else {
-	log_error("\nError: cannot make payload leaf (%s)",
-		  get_error_string(res));
-    }
-
-    /* add sysSessionStart/remoteHost */
-    if (scb->peeraddr) {
-	leafval = agt_make_leaf(sysSessionStartobj,
-				system_N_remoteHost,
-				scb->peeraddr,
-				&res);
-	if (leafval) {
-	    agt_not_add_to_payload(not, leafval);
-	} else {
-	    log_error("\nError: cannot make payload leaf (%s)",
-		      get_error_string(res));
-	}
-    }
+    add_common_session_parms(scb, not);
 
     agt_not_queue_notification(not);
 
@@ -660,6 +694,11 @@ void
 	return;
     }
 
+    if (LOGDEBUG) {
+	log_debug("\nagt_sys: generating <sysSessionEnd> "
+		  "notification");
+    }
+
     not = agt_not_new_notification(sysSessionEndobj);
     if (!not) {
 	log_error("\nError: malloc failed; cannot "
@@ -667,46 +706,7 @@ void
 	return;
     }
 
-    /* add sysSessionEnd/userName */
-    if (scb->username) {
-	leafval = agt_make_leaf(sysSessionEndobj,
-				system_N_userName,
-				scb->username,
-				&res);
-	if (leafval) {
-	    agt_not_add_to_payload(not, leafval);
-	} else {
-	    log_error("\nError: cannot make payload leaf (%s)",
-		      get_error_string(res));
-	}
-    }
-
-    /* add sysSessionEnd/sessionId */
-    sprintf((char *)numbuff, "%u", scb->sid);
-    leafval = agt_make_leaf(sysSessionEndobj,
-			    system_N_sessionId,
-			    numbuff,
-			    &res);
-    if (leafval) {
-	agt_not_add_to_payload(not, leafval);
-    } else {
-	log_error("\nError: cannot make payload leaf (%s)",
-		  get_error_string(res));
-    }
-
-    /* add sysSessionEnd/remoteHost */
-    if (scb->peeraddr) {
-	leafval = agt_make_leaf(sysSessionEndobj,
-				system_N_remoteHost,
-				scb->peeraddr,
-				&res);
-	if (leafval) {
-	    agt_not_add_to_payload(not, leafval);
-	} else {
-	    log_error("\nError: cannot make payload leaf (%s)",
-		      get_error_string(res));
-	}
-    }
+    add_common_session_parms(scb, not);
 
     /* add sysSessionEnd/killedBy */
     if (termreason == SES_TR_KILLED) {
@@ -766,9 +766,77 @@ void
 } /* agt_sys_send_sysSessionEnd */
 
 
+/********************************************************************
+* FUNCTION agt_sys_send_sysConfigChange
+*
+* Queue the <sysConfigChange> notification
+*
+* INPUTS:
+*   scb == session control block to use for payload values
+*   target == instance-identifier of edit target
+*   operation == nc:operation attribute value
+*
+* OUTPUTS:
+*   notification generated and added to notificationQ
+*
+*********************************************************************/
+void
+    agt_sys_send_sysConfigChange (const ses_cb_t *scb,
+				  const xmlChar *target,
+				  const xmlChar *operation)
+{
+    agt_not_msg_t         *not;
+    val_value_t           *leafval;
+    status_t               res;
 
+#ifdef DEBUG
+    if (!scb || !target || !operation) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
 
+    if (LOGDEBUG) {
+	log_debug("\nagt_sys: generating <sysConfigChange> "
+		  "notification");
+    }
 
+    not = agt_not_new_notification(sysConfigChangeobj);
+    if (!not) {
+	log_error("\nError: malloc failed; cannot "
+		  "send <sysConfigChange>");
+	return;
+    }
+
+    add_common_session_parms(scb, not);
+
+    /* add sysConfigChange/target */
+    leafval = agt_make_leaf(sysConfigChangeobj,
+			    system_N_target,
+			    target,
+			    &res);
+    if (leafval) {
+	agt_not_add_to_payload(not, leafval);
+    } else {
+	log_error("\nError: cannot make payload leaf (%s)",
+		  get_error_string(res));
+    }
+
+    /* add sysConfigChange/operation */
+    leafval = agt_make_leaf(sysConfigChangeobj,
+			    system_N_operation,
+			    operation,
+			    &res);
+    if (leafval) {
+	agt_not_add_to_payload(not, leafval);
+    } else {
+	log_error("\nError: cannot make payload leaf (%s)",
+		  get_error_string(res));
+    }
+
+    agt_not_queue_notification(not);
+
+} /* agt_sys_send_sysConfigChange */
 
 
 /* END file agt_sys.c */

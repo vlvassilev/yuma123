@@ -1222,7 +1222,8 @@ static void
 	for (metaval = val_get_first_meta(metaQ);
 	     metaval != NULL;
 	     metaval = val_get_next_meta(metaval)) {
-	    dump_value(metaval, (startindent >= 0) ?
+	    dump_value(metaval, 
+		       (startindent >= 0) ?
 		       startindent+(2*NCX_DEF_INDENT) : startindent,
 		       dumpmode);
 	}
@@ -1403,6 +1404,62 @@ static void
     }
 
 }  /* setup_virtual_retval */
+
+
+/********************************************************************
+* FUNCTION copy_editvars
+* 
+* Copy the editvars struct contents
+*
+* INPUTS:
+*    val == value to copy from
+*    copy == value to copy to
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    copy_editvars (const val_value_t *val,
+		   val_value_t *copy)
+{
+    status_t   res;
+
+    res = NO_ERR;
+
+    /* set the copy->editvars */
+    if (val->editvars) {
+	if (!copy->editvars) {
+	    res = val_new_editvars(copy);
+	    if (res != NO_ERR) {
+		return res;
+	    }
+	}
+	copy->editvars->curparent = val->editvars->curparent;
+	copy->editvars->editop = val->editvars->editop;
+	copy->editvars->insertop = val->editvars->insertop;
+
+	if (val->editvars->insertstr) {
+	    copy->editvars->insertstr = 
+		xml_strdup(val->editvars->insertstr);
+	    if (!copy->editvars->insertstr) {
+		res = ERR_INTERNAL_MEM;
+	    }
+	}
+
+	if (val->editvars->insertxpcb) {
+	    copy->editvars->insertxpcb = 
+		xpath_clone_pcb(val->editvars->insertxpcb);
+	    if (!copy->editvars->insertxpcb) {
+		res = ERR_INTERNAL_MEM;
+	    }
+	}
+
+	copy->editvars->insertval = val->editvars->insertval;
+    }
+
+    return res;
+
+}  /* copy_editvars */
 
 
 /*************** E X T E R N A L    F U N C T I O N S  *************/
@@ -2005,8 +2062,12 @@ status_t
     /* check typdefs until the final one in the chain is reached */
     for (;;) {
 	if (checkQ) {
-	    res = check_svalQ_enum(i, iset, (elen) ? enumval : NULL, 
-				   elen, checkQ, &en);
+	    res = check_svalQ_enum(i, 
+				   iset, 
+				   (elen) ? enumval : NULL, 
+				   elen, 
+				   checkQ, 
+				   &en);
 	    if (res == NO_ERR) {
 		/* return both the name and number of the found enum */
 		*retval = en->val;
@@ -2105,9 +2166,12 @@ status_t
     /* check typdefs until the final one in the chain is reached */
     for (;;) {
 	if (checkQ) {
-	    res = check_svalQ_enum(0, FALSE, bitname,
+	    res = check_svalQ_enum(0, 
+				   FALSE, 
+				   bitname,
 				   xml_strlen(bitname),
-				   checkQ, &en);
+				   checkQ, 
+				   &en);
 	    if (res == NO_ERR) {
 		if (position) {
 		    *position = en->pos;
@@ -3910,6 +3974,7 @@ boolean
     ncx_iqual_t      iqual;
     ncx_merge_t      mergetyp;
     boolean          dupsok;
+    status_t         res;
 
 #ifdef DEBUG
     if (!src || !dest) {
@@ -3948,7 +4013,9 @@ boolean
 	     * leave the current value in place
 	     */
 
-	    /********** TBD: MOVE via insert attribute *****/
+	    /********** TBD: MOVE via insert attribute *****
+	     *** MOVE HANDLED ELSEWHERE (VERIFY?)
+	     ***/
 
 	    return TRUE;
 	default:
@@ -3984,12 +4051,16 @@ boolean
 	    break;
 	case NCX_BT_SLIST:
 	    dupsok = val_duplicates_allowed(dest);
-	    ncx_merge_list(&src->v.list, &dest->v.list,
-			   mergetyp, dupsok);
+	    ncx_merge_list(&src->v.list, 
+			   &dest->v.list,
+			   mergetyp, 
+			   dupsok);
 	    break;
 	case NCX_BT_BITS:
-	    ncx_merge_list(&src->v.list, &dest->v.list,
-			   mergetyp, FALSE);
+	    ncx_merge_list(&src->v.list, 
+			   &dest->v.list,
+			   mergetyp, 
+			   FALSE);
 	    break;
 	case NCX_BT_ANY:
 	case NCX_BT_CONTAINER:
@@ -4002,6 +4073,14 @@ boolean
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	    return TRUE;
 	}
+
+	/* copy the editvars struct to the leaf */
+	res = copy_editvars(src, dest);
+	if (res != NO_ERR) {
+	    /* !!! may not be an internal error !!! */
+	    SET_ERROR(res);
+	}
+
 	return TRUE;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
@@ -4121,33 +4200,11 @@ val_value_t *
 	}
     }
 
-    /* set the copy->insertstr */
-    if (val->editvars) {
-	copy->editvars->curparent = val->editvars->curparent;
-	copy->editvars->editop = val->editvars->editop;
-	copy->editvars->insertop = val->editvars->insertop;
-
-	if (val->editvars->insertstr) {
-	    copy->editvars->insertstr = 
-		xml_strdup(val->editvars->insertstr);
-	    if (!copy->editvars->insertstr) {
-		*res = ERR_INTERNAL_MEM;
-		val_free_value(copy);
-		return NULL;
-	    }
-	}
-
-	if (val->editvars->insertxpcb) {
-	    copy->editvars->insertxpcb = 
-		xpath_clone_pcb(val->editvars->insertxpcb);
-	    if (!copy->editvars->insertxpcb) {
-		*res = ERR_INTERNAL_MEM;
-		val_free_value(copy);
-		return NULL;
-	    }
-	}
-
-	copy->editvars->insertval = val->editvars->insertval;
+    /* set the copy->editvars */
+    *res = copy_editvars(val, copy);
+    if (*res != NO_ERR) {
+	val_free_value(copy);
+	return NULL;
     }
 
     copy->res = val->res;
@@ -4361,6 +4418,11 @@ status_t
     if (buffer) {
 	m__free(buffer);
     }
+
+    if (res == NO_ERR) {
+	res = copy_editvars(val, copy);
+    }
+
     return res;
     
 }  /* val_replace */

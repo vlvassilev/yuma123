@@ -2035,12 +2035,16 @@ tk_type_t
     tk_token_t *tk;
 
 #ifdef DEBUG
-    if (!tkc || !tkc->cur) {
+    if (!tkc) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return TK_TT_NONE;
     }
 #endif
 
+    if (!tkc->cur) {
+	/* hit EOF in token chain already */
+	return TK_TT_NONE;
+    }
     tk = (tk_token_t *)dlq_nextEntry(tkc->cur);
     return  (tk) ? tk->typ : TK_TT_NONE;
 
@@ -2063,11 +2067,15 @@ tk_type_t
     tk_token_t *tk;
 
 #ifdef DEBUG
-    if (!tkc || !tkc->cur) {
+    if (!tkc) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return TK_TT_NONE;
     }
 #endif
+
+    if (!tkc->cur) {
+	return TK_TT_NONE;
+    }
 
     tk = (tk_token_t *)dlq_nextEntry(tkc->cur);
     if (tk) {

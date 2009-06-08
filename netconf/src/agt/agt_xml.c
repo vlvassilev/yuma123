@@ -272,9 +272,7 @@ static status_t
 
 	    /* save the error info */
 	    if (xpatherror) {
-		if (!NEED_EXIT(res)) {
-		    res = ERR_NCX_INVALID_XPATH_EXPR;
-		}
+		res = ERR_NCX_INVALID_XPATH_EXPR;
 
 		/* generate an invalid-value error */
 		agt_record_attr_error(scb, 

@@ -840,7 +840,7 @@ static status_t
      * finding the QSTRING_CH. If input from buffer this is 
      * an error
      */
-    if (!tkc->filename) {
+    if (!(tkc->flags & TK_FL_MALLOC)) {
         return ERR_NCX_UNENDED_QSTRING;
     }
 
@@ -974,7 +974,7 @@ static status_t
      * finding the SQSTRING_CH. If input from buffer this is 
      * an error
      */
-    if (!tkc->filename) {
+    if (!(tkc->flags & TK_FL_MALLOC)) {
         return ERR_NCX_UNENDED_QSTRING;
     }
 
@@ -1091,7 +1091,7 @@ static status_t
     }
 
     /* else stopped at end of buffer, get rest of multiline comment */
-    if (!tkc->filename) {
+    if (!(tkc->flags & TK_FL_MALLOC)) {
         return ERR_NCX_UNENDED_COMMENT;
     }
 
@@ -1831,6 +1831,7 @@ void
     tkc->fp = fp;
     tkc->source = TK_SOURCE_CONF;
     tkc->filename = filename;
+    tkc->flags |= TK_FL_MALLOC;
            
 } /* tk_setup_chain_conf */
 
@@ -1860,6 +1861,7 @@ void
     tkc->fp = fp;
     tkc->source = TK_SOURCE_YANG;
     tkc->filename = filename;
+    tkc->flags |= TK_FL_MALLOC;
            
 } /* tk_setup_chain_yang */
 
@@ -1893,7 +1895,7 @@ void
         tk = (tk_token_t *)dlq_deque(&tkc->tkQ);
         free_token(tk);
     }
-    if (tkc->filename && tkc->buff) {
+    if ((tkc->flags & TK_FL_MALLOC) && tkc->buff) {
         m__free(tkc->buff);
     }
     m__free(tkc);
@@ -2204,10 +2206,21 @@ boolean
 * 
 * Parse the input (FILE or buffer) into tk_token_t structs
 *
-* The tkc param must be initialized
+* The tkc param must be initialized to use the internal
+* buffer to read from the specified filespec:
+*
 *    tkc->filename
+*    tkc->flags
 *    tkc->fp
 *    tkc->source
+*
+* External buffer mode:
+*
+* If no filename is provided, the the TK_FL_MALLOC 
+* flag will not be set, and the tkc->buff field 
+* must be initialized before this function is called.  
+* This function will not free the buffer,
+* but just read from it until a '0' char is reached.
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -2235,7 +2248,7 @@ status_t
 #endif
 
     /* check if a temp buffer is needed */
-    if (tkc->filename) {
+    if (tkc->flags & TK_FL_MALLOC) {
         tkc->buff = m__getMem(TK_BUFF_SIZE);
         if (!tkc->buff) {
 	    res = ERR_INTERNAL_MEM;
@@ -2398,7 +2411,7 @@ status_t
         }  /* end while non-zero chars left in buff and NO_ERR */
 
 	/* finish outer loop, once through for buffer mode */
-        if (!tkc->filename) {
+        if (!(tkc->flags & TK_FL_MALLOC)) {
             done = TRUE;
         }
     }

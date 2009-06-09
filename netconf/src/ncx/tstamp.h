@@ -21,7 +21,7 @@ date	     init     comment
 */
 
 
-#define TSTAMP_MIN_SIZE   50
+#define TSTAMP_MIN_SIZE   22
 #define TSTAMP_DATE_SIZE  12
 #define TSTAMP_SQL_SIZE   20
 
@@ -52,5 +52,10 @@ extern void
  */
 extern void 
     tstamp_datetime_sql (xmlChar *buff);
+
+extern xmlChar *
+    tstamp_convert_to_utctime (const xmlChar *timestr,
+			       boolean *isNegative,
+			       status_t *res);
 
 #endif	    /* _H_tstamp */

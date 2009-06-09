@@ -21,13 +21,13 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 # -Wunreachable-code removed due to -O3
 
 CDEFS=-DDEBUG -DLINUX -DGCC -DHAS_FLOAT 
-CFLAGS=$(CDEFS) $(CWARN) -O3
+CFLAGS=$(CDEFS) $(CWARN)
 
 # production (1) or debug (0) build
 ifdef BLD
-  CFLAGS += -Werror
+  CFLAGS += -Werror -O3
 else
-  CFLAGS += -ggdb3   
+  CFLAGS += -ggdb3
 endif
 
 # memory leak debugging mode

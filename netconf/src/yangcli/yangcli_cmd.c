@@ -956,7 +956,9 @@ static status_t
 		} else if (*start2 == '?') {
 		    if (start2[1] == '?') {
 			/* ?? == full help */
-			obj_dump_template(parm, HELP_MODE_FULL, 0,
+			obj_dump_template(parm, 
+					  HELP_MODE_FULL, 
+					  0,
 					  NCX_DEF_INDENT);
 		    } else if (start2[1] == 'C' || start2[1] == 'c') {
 			/* ?c or ?C == cancel the operation */
@@ -981,8 +983,10 @@ static status_t
 		    continue;
 		} else if (*start2 == 'Y' || *start2 == 'y') {
 		    /* use the invalid value */
-		    res = cli_parse_parm_ex(valset, parm, 
-					    saveline, SCRIPTMODE, 
+		    res = cli_parse_parm_ex(valset, 
+					    parm, 
+					    saveline, 
+					    SCRIPTMODE, 
 					    NCX_BAD_DATA_IGNORE);
 		    m__free(saveline);
 		    done = TRUE;

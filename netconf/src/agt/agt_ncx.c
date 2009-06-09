@@ -1507,7 +1507,6 @@ static status_t
 		 xml_node_t *methnode)
 {
     val_value_t           *val, *newval;
-    const obj_template_t  *dataobj;
     ncx_module_t          *mod;
     status_t               res;
 
@@ -1544,24 +1543,13 @@ static status_t
 	}
     }
 
+    /* generate the return value */
     if (mod->version) {
-	newval = val_new_value();
+	newval = val_make_string(val->nsid,
+				 NCX_EL_MOD_REVISION,
+				 mod->version);				 
 	if (!newval) {
 	    res = ERR_INTERNAL_MEM;
-	} else {
-	    dataobj = ncx_get_gen_string();
-	    val_init_from_template(newval, dataobj);
-	    res = val_set_simval(newval,
-				 obj_get_ctypdef(dataobj),
-				 val->nsid,
-				 NULL,
-				 mod->version);
-	    if (res == NO_ERR) {
-		/* name is set to 'string' at this point, need to change it */
-		val_set_name(newval, 
-			     NCX_EL_MOD_REVISION,
-			     xml_strlen(NCX_EL_MOD_REVISION));
-	    }
 	}
     }
 

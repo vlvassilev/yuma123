@@ -139,8 +139,19 @@ date	     init     comment
 
 
 /* bits for tk_chain_t flags field */
-#define TK_FL_REDO    bit0
 
+/* == 1: the current parse call is to redo a previously
+ *       parsed token
+ * == 0: normal parse mode
+ */
+#define TK_FL_REDO        bit0
+
+/* == 1: the tkc->buff field is malloced by this module
+ *       and will be freed in tk_free_chain
+ * == 0: the tkc-buff memory was provided externally
+ *       and will not be freed in tk_free_chain
+ */
+#define TK_FL_MALLOC      bit1
 
 /********************************************************************
 *								    *

@@ -3615,13 +3615,8 @@ status_t
 * 
 * Set an initialized val_value_t as a simple type
 *
-* This function is intended to bypass all typdef
-* checking wrt/ ranges, patterns, etc.
-* During CLI processing or test PDU generation,
-* any well-formed XML value needs to parsed or generated.
-*
-* Only the base type is used from the typdef parameter
-* when converting a string value to val_value_t format
+* The string value will be converted to a value
+* struct format and checked against the provided typedef
 *
 * Handles the following data types:
 * 
@@ -3680,7 +3675,10 @@ status_t
     }
 #endif
 
-    res = NO_ERR;
+    res = val_simval_ok(typdef, valstr);
+    if (res != NO_ERR) {
+	return res;
+    }
 
     clean_value(val, FALSE);
 

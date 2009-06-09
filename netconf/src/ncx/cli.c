@@ -1006,20 +1006,6 @@ val_value_t *
 	    }  /* else it could be a default-parm value */
 
 
-#if 0
-	    /* check if the start of the value was not found */
-	    if (!parmnamelen) {
-		/* parmname/parmnamelen is really the value, 
-		 * not the name 
-		 */
-		str = parmname;
-		while (*str && !xml_isspace(*str)) {
-		    str++;
-		}
-		parmnamelen = (uint32)(str - parmname);
-	    }
-#endif
-
 	    if (res != NO_ERR) {
 		continue;
 	    }
@@ -1041,21 +1027,6 @@ val_value_t *
 		    }
 		    gotdefaultparm = TRUE;
 		    isdefaultparm = TRUE;
-
-#if 0
-		    buffpos += parmnamelen;
-		    savechar = parmname[parmnamelen];
-		    parmname[parmnamelen] = 0;
-		    if (res == NO_ERR) {
-			res = parse_parm(val, 
-					 chobj, 
-					 (const xmlChar *)parmname, 
-					 script);
-		    }
-		    parmname[parmnamelen] = savechar;
-
-		    continue;
-#endif
 		}
 	    }
 
@@ -1346,10 +1317,12 @@ status_t
 	/* drop through */
     case NCX_BAD_DATA_IGNORE:
 	genstr = ncx_get_gen_string();
-	res = parse_parm_ex(val, genstr, 
+	res = parse_parm_ex(val, 
+			    genstr, 
 			    obj_get_nsid(obj),
 			    obj_get_name(obj),
-			    strval, script);
+			    strval, 
+			    script);
 	return res;
     case NCX_BAD_DATA_CHECK:
     case NCX_BAD_DATA_ERROR:

@@ -96,7 +96,7 @@ date         init     comment
 #endif
 
 /* how often to check for agent shutown (in seconds) */
-#define AGT_NCXSERVER_TIMEOUT  2
+#define AGT_NCXSERVER_TIMEOUT  1
 
 /********************************************************************
  * FUNCTION make_named_socket

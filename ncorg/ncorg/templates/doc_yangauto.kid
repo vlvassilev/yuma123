@@ -194,6 +194,10 @@
 	  </ul>
 	</p>
       </div>
+      <hr/>
+      <img border="0" 
+	   src="${tg.url('/static/images/nails.png')}" 
+	   alt="Nails"/>
     </div>
   </body>
 </html>

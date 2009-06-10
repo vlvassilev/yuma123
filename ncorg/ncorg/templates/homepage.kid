@@ -16,12 +16,13 @@
       <h3>XML-based Network Configuration Tools<br/>
 	Online YANG Module Database</h3>
       <br/>
-      <img border="0" 
-	   src="${tg.url('/static/images/nails.png')}" 
-	   alt="Nails"/>
       <br/><br/>
       <h3><a href="/netconf_docs">Learn About NETCONF</a></h3>
       <h3><a href="/yang_docs">Learn About YANG</a></h3>
+      <h3><a href="/modulelist">List all the YANG modules in the database</a></h3>
+      <h3><a href="/search">Search the YANG module database</a></h3>
+      <h3><a href="/run_yangdump">Validate a YANG module</a></h3>
+      <h3><a href="/run_yangdiff">Compare 2 revisions of a YANG module</a></h3>
     </div>
   </body>
 </html>

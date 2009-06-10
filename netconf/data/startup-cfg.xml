@@ -1,18 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nd:config xmlns:nd="http://netconfcentral.com/ns/netconfd">
-   <t:test1 xmlns:t="http://netconfcentral.com/ns/test">
-      <t:a>1</t:a>
-      <t:b>32</t:b>
-      <t:d>x</t:d>
-      <t:e>
-         <t:ee>a14</t:ee>
-         <t:ee>a2000</t:ee>
-         <t:ee>c105</t:ee>
-         <t:ee>e3333</t:ee>
-         <t:ee>a15</t:ee>
-      </t:e>
-      <t:f1>test one</t:f1>
-   </t:test1>
    <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
       <t:a2>fred</t:a2>
       <t:a1>-33</t:a1>
@@ -107,5 +94,5 @@
       <t:data1>44</t:data1>
       <t:data3>rrr</t:data3>
    </t:xpath.1>
-   <t:string.1 xmlns:t="http://netconfcentral.com/ns/test">fred</t:string.1>
+   <t:string.1 xmlns:t="http://netconfcentral.com/ns/test">freddy</t:string.1>
 </nd:config>

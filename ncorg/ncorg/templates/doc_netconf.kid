@@ -1039,7 +1039,7 @@
 	<p>
 	  Defines the NETCONF protocol RPC layer and operations layer.<br/><br/>
 	  <b>Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
-	  <a href="http://www.rfc-editor.org/rfc/rfc4741.txt">
+	  <a href="http://www.ietf.org/rfc/rfc4741.txt">
 	    NETCONF Configuration Protocol
 	  </a>
 	</p>
@@ -1048,7 +1048,7 @@
 	<p>
 	  Defines the NETCONF-over-SSH transport mapping.<br/><br/>
 	  <b>Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
-	  <a href="http://www.rfc-editor.org/rfc/rfc4742.txt">
+	  <a href="http://www.ietf.org/rfc/rfc4742.txt">
 	    Using the NETCONF Configuration Protocol over Secure Shell (SSH)
 	  </a>
 	</p>
@@ -1057,7 +1057,7 @@
 	<p>
 	  Defines the NETCONF-over-SOAP transport mapping.<br/><br/>
 	  <b>Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.rfc-editor.org/rfc/rfc4743.txt">
+	  <a href="http://www.ietf.org/rfc/rfc4743.txt">
 	    Using NETCONF over the Simple Object Access Protocol (SOAP)
 	  </a>
 	</p>
@@ -1066,7 +1066,7 @@
 	<p>
 	  Defines the NETCONF-over-BEEP transport mapping.<br/><br/>
 	  <b>Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.rfc-editor.org/rfc/rfc4744.txt">
+	  <a href="http://www.ietf.org/rfc/rfc4744.txt">
 	    Using the NETCONF Protocol over
             the Blocks Extensible Exchange Protocol (BEEP)
 	  </a>
@@ -1076,7 +1076,7 @@
 	<p>
 	  Defines the NETCONF notification delivery mechanisms.<br/><br/>
 	  <b>Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	    <a href="http://www.rfc-editor.org/rfc/rfc5277.txt">
+	    <a href="http://www.ietf.org/rfc/rfc5277.txt">
 	      NETCONF Event Notifications
 	    </a>
 	</p>
@@ -1085,10 +1085,20 @@
 	<p>
 	  Documents some NETCONF-over-SOAP implementation experience.<br/><br/>
 	  <b>Status:</b> Informational RFC, nothing-to-implement<br/><br/>
-	    <a href="http://www.rfc-editor.org/rfc/rfc5381.txt">
+	    <a href="http://www.ietf.org/rfc/rfc5381.txt">
 	      Experience of Implementing NETCONF over SOAP
 	    </a>
 	</p>
+
+	<h4>RFC 5539</h4>
+	<p>
+	  Defines the NETCONF-over-TLS transport mapping.<br/><br/>
+	  <b>Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
+	  <a href="http://www.ietf.org/rfc/rfc5539.txt">
+	    NETCONF Over Transport Layer Security (TLS)
+	  </a>
+	</p>
+
       </div>
 
       <a name="work"/>
@@ -1096,22 +1106,13 @@
 	<br/>
 	<h2>Standards Work in Progress</h2>
 
-	<h4>draft-ietf-netconf-tls</h4>
-	<p>
-	  Defines the NETCONF-over-TLS transport mapping.<br/><br/>
-	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-tls-07.txt">
-	    NETCONF Over Transport Layer Security (TLS)
-	  </a>
-	</p>
-
 	<h4>draft-ietf-netconf-partial-lock</h4>
 	<p>
 	  Defines a partial database locking mechanism (based on
 	  instance-identifier or XPath expressions) for the 
 	  NETCONF protocol.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-partial-lock-07.txt">
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-partial-lock-08.txt">
 	    Partial Lock RPC for NETCONF
 	  </a>
 	</p>
@@ -1135,6 +1136,16 @@
 	    With-defaults capability for NETCONF
 	  </a>
 	</p>
+
+	<h4>draft-ietf-netconf-4741bis</h4>
+	<p>
+	  Defines a minor update to the NETCONF protocol.<br/><br/>
+	  <b>Intended Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-4741bis-00.txt">
+	    Network Configuration Protocol
+	  </a>
+	</p>
+
       </div>
 
       <a name="resources"/>

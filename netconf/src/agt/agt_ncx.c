@@ -986,8 +986,8 @@ static status_t
 			 NCX_NT_NONE, 
 			 NULL);
     } else {
-	/* save the session-id to kill */
-	msg->rpc_user1 = (void *)VAL_UINT(val);
+	/* save the session control block */
+	msg->rpc_user1 = (void *)scb;
     }
 
     return res;
@@ -1010,22 +1010,14 @@ static status_t
 			 rpc_msg_t *msg,
 			 xml_node_t *methnode)
 {
-    ses_id_t  sid;
+    ses_cb_t    *savedscb;
 
     (void)methnode;
 
-    sid = (ses_id_t)msg->rpc_user1;
-    if (sid==scb->sid) {
-	/* zapping the current session */
-	agt_ses_request_close(sid, 
-			      scb->sid,
-			      SES_TR_KILLED);
-    } else {
-	/* zapping another session */
-	agt_ses_kill_session(sid, 
-			     scb->sid,
-			     SES_TR_KILLED);
-    }
+    savedscb = (ses_cb_t *)msg->rpc_user1;
+    agt_ses_kill_session(savedscb->sid, 
+			 scb->sid,
+			 SES_TR_KILLED);
     return NO_ERR;
 
 } /* kill_session_invoke */

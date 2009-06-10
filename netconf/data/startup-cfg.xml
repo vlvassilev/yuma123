@@ -107,4 +107,5 @@
       <t:data1>44</t:data1>
       <t:data3>rrr</t:data3>
    </t:xpath.1>
+   <t:string.1 xmlns:t="http://netconfcentral.com/ns/test">fred</t:string.1>
 </nd:config>

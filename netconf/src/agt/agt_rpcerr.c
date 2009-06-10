@@ -572,12 +572,13 @@ static rpc_err_rec_t *
 *   errnode == XML node that caused the error (or NULL)
 *   badval == bad_value string (or NULL)
 *   badns == bad-namespace string (or NULL)
+*   badnsid1 == bad NSID #1
+*   badnsid2 == bad NSID #2
 *   errparm1 == void * to the 1st extra parameter to use (per errcode)
 *           == NULL if not use
 *   errparm2 == void * to the 2nd extra parameter to use (per errcode)
 *           == NULL if not used
-*   errparm3 == void * to the 3rd extra parameter to use (per errcode)
-*           == NULL if not used
+*   !!! errparm3 removed !!!
 *   errparm4 == void * to the 4th extra parameter to use (per errcode)
 *           == NULL if not used
 
@@ -590,15 +591,16 @@ static status_t
 		   const xml_node_t *errnode,
 		   const xmlChar *badval,
 		   const xmlChar *badns,
+		   xmlns_id_t  badnsid1,
+		   xmlns_id_t  badnsid2,
 		   const void *errparm1,
 		   const void *errparm2,
-		   const void *errparm3,
 		   const void *errparm4)
 {
     rpc_err_info_t       *errinfo;
     const xmlChar        *badel;
+    const ses_cb_t       *badscb;
     ses_id_t              sesid;
-    cfg_source_t          locksrc;
     boolean               attrerr;
     xmlns_id_t            ncid, ncxid, badid;
 
@@ -612,11 +614,11 @@ static status_t
     case RPC_ERR_UNKNOWN_ATTRIBUTE:
     case RPC_ERR_MISSING_ATTRIBUTE:
     case RPC_ERR_BAD_ATTRIBUTE:
-	/* errparm1 == error attribute namespace ID
+	/* badnsid1 == error attribute namespace ID
 	 * errparm2 == error attribute name
 	 */
 	if (errparm2) {
-	    badid = (xmlns_id_t)errparm1;
+	    badid = badnsid1;
 	    badel = (const xmlChar *)errparm2;
 
 	    errinfo = rpc_err_new_info();
@@ -652,10 +654,10 @@ static status_t
 	    badid = errnode->nsid;
 	    badel = errnode->elname;
 	} else if (attrerr) {
-	    badid = (xmlns_id_t)errparm3;
+	    badid = badnsid2;
 	    badel = (const xmlChar *)errparm4;
 	} else {
-	    badid = (xmlns_id_t)errparm1;
+	    badid = badnsid1;
 	    badel = (const xmlChar *)errparm2;
 	}
 
@@ -708,31 +710,11 @@ static status_t
 		SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 	}
-
-#ifdef USE_ERROR_LEVEL
-	/* check generation of NCX extension error-level */
-	if (errnode) {
-	    errinfo = rpc_err_new_info();
-	    if (!errinfo) {
-		return ERR_INTERNAL_MEM;
-	    }
-	    errinfo->name_nsid = ncxid;
-	    errinfo->name = NCX_EL_ERROR_LEVEL;
-	    errinfo->val_btype = NCX_BT_UINT32;
-	    errinfo->val_nsid = 0;
-	    errinfo->v.numval.u = (uint32)errnode->depth;
-	    dlq_enque(errinfo, &err->error_info);
-	}
-#endif
-
 	break;
     case RPC_ERR_LOCK_DENIED:
 	/* generate session-id value */
-	if (!errparm1 || !errparm2) {
-	    return SET_ERROR(ERR_INTERNAL_PTR);
-	}
-	sesid = (ses_id_t)errparm1;
-	locksrc = (cfg_source_t)errparm2;
+	badscb = (const ses_cb_t *)errparm1;
+	sesid = badscb->sid;
 
 	errinfo = rpc_err_new_info();
 	if (!errinfo) {
@@ -744,19 +726,6 @@ static status_t
 	errinfo->val_nsid = 0;
 	errinfo->v.numval.u = (uint32)sesid;
 	dlq_enque(errinfo, &err->error_info);
-
-	/* generate lock source extension value */
-	errinfo = rpc_err_new_info();
-	if (!errinfo) {
-	    return ERR_INTERNAL_MEM;
-	}
-	errinfo->name_nsid = ncxid;
-	errinfo->name = NCX_EL_LOCK_SOURCE;
-	errinfo->val_btype = NCX_BT_UINT32;
-	errinfo->val_nsid = 0;
-	errinfo->v.numval.u = (uint32)locksrc;
-	dlq_enque(errinfo, &err->error_info);
-
 	break;
     case RPC_ERR_DATA_MISSING:
 	if (errparm2) {
@@ -906,24 +875,24 @@ rpc_err_rec_t *
 {
     rpc_err_rec_t            *err;
     const obj_template_t     *parm, *in, *obj;
-    const cfg_template_t     *cfg;
     const xmlns_qname_t      *qname;
     const val_value_t        *valparm;
     xmlChar                  *error_msg;
     const xmlChar            *badval, *badns, *msg, *apptag;
-    const void               *err1, *err2, *err3, *err4;
+    const void               *err1, *err2, *err4;
     rpc_err_t                 rpcerr;
     status_t                  res;
     rpc_err_sev_t             errsev;
-    xmlns_id_t                nsid;
+    xmlns_id_t                badnsid1, badnsid2;
 
     qname = NULL;
     badval = NULL;
     badns = NULL;
     err1 = NULL;
     err2 = NULL;
-    err3 = NULL;
     err4 = NULL;
+    badnsid1 = 0;
+    badnsid2 = 0;
 
     switch (interr) {
     case ERR_NCX_MISSING_PARM:
@@ -936,19 +905,19 @@ rpc_err_rec_t *
 	    case NCX_NT_OBJ:
 		parm = (const obj_template_t *)error_parm;
 		if (parm) {
-		    nsid = obj_get_nsid(parm);
+		    badnsid1 = obj_get_nsid(parm);
 		    err2 = (const void *)obj_get_name(parm);
 		}
 		break;
 	    case NCX_NT_VAL:
 		valparm = (const val_value_t *)error_parm;
 		if (valparm) {
-		    nsid = val_get_nsid(valparm);
+		    badnsid1 = val_get_nsid(valparm);
 		    err2 = (const void *)valparm->name;
 		}
 		break;
 	    case NCX_NT_STRING:
-		err1 = (const void *)0;
+		badnsid1 = 0;
 		err2 = (const void *)error_parm;
 		break;
 	    default:
@@ -960,9 +929,7 @@ rpc_err_rec_t *
 	if (!error_parm || parmtyp != NCX_NT_CFG) {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	} else {
-	    cfg = (const cfg_template_t *)error_parm;
-	    err1 = (const void *)cfg->locked_by;
-	    err2 = (const void *)cfg->lock_src;
+	    err1 = error_parm;
 	}
 	break;
     case ERR_NCX_MISSING_INDEX:
@@ -971,8 +938,7 @@ rpc_err_rec_t *
 	} else {
 	    in = (const obj_template_t *)error_parm;
 	    if (in) {
-		nsid = obj_get_nsid(in);
-		err1 = (const void *)nsid;
+		badnsid1 = obj_get_nsid(in);
 		err2 = (const void *)obj_get_name(in);
 	    }
 	}
@@ -993,15 +959,14 @@ rpc_err_rec_t *
 	if (error_parm) {
 	    if (parmtyp == NCX_NT_QNAME) {
 		qname = (const xmlns_qname_t *)error_parm;
-		err1 = (const void *)qname->nsid;
+		badnsid1 = qname->nsid;
 		err2 = (const void *)qname->name;
 	    } else if (parmtyp == NCX_NT_OBJ) {
 		obj = (const obj_template_t *)error_parm;
-		nsid = obj_get_nsid(obj);
-		err1 = (const void *)nsid;
+		badnsid1 = obj_get_nsid(obj);
 		err2 = (const void *)obj_get_name(obj);
 	    } else if (parmtyp == NCX_NT_STRING) {
-		err1 = (const void *)0;
+		badnsid1 = 0;
 		err2 = (const void *)error_parm;
 	    } else {
 		SET_ERROR(ERR_INTERNAL_VAL);
@@ -1014,7 +979,7 @@ rpc_err_rec_t *
 	 * for the bad-element name 
 	 */
 	if (errnode) {
-	    err3 = (const void *)qname->nsid;
+	    badnsid2 = qname->nsid;
 	    err4 = (const void *)errnode;
 	    /* make sure add_base_vars doesn't use as an xml_node_t */
 	    errnode = NULL;  
@@ -1138,9 +1103,10 @@ rpc_err_rec_t *
 			errnode, 
 			badval, 
 			badns, 
+			badnsid1,
+			badnsid2,
 			err1, 
 			err2, 
-			err3, 
 			err4);
     if (res != NO_ERR) {
 	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
@@ -1182,12 +1148,12 @@ rpc_err_rec_t *
 {
     rpc_err_rec_t            *err;
     xmlChar                  *error_msg;
-    const xmlChar            *badval, *badns, *msg, *apptag;
-    const void               *err1, *err2, *err3, *err4;
+    const xmlChar            *badval, *msg, *apptag;
+    const void               *err2, *err4;
+    xmlns_id_t                badnsid1, badnsid2;
     rpc_err_t                 rpcerr;
     status_t                  res;
     rpc_err_sev_t             errsev;
-    xmlns_id_t                nsid;
 
 #ifdef DEBUG
     if (!errval) {
@@ -1197,11 +1163,10 @@ rpc_err_rec_t *
 #endif
 
     badval = NULL;
-    badns = NULL;
-    err1 = NULL;
     err2 = NULL;
-    err3 = NULL;
     err4 = NULL;
+    badnsid1 = 0;
+    badnsid2 = 0;
 
     rpcerr = RPC_ERR_BAD_ATTRIBUTE;
     errsev = RPC_ERR_SEV_ERROR;
@@ -1231,15 +1196,13 @@ rpc_err_rec_t *
 	badval = errval->editvars->insertstr;
     }
 
-    nsid = xmlns_yang_id();
-    err1 = (const void *)nsid;
+    badnsid1 = xmlns_yang_id();
     if (errval->obj->objtype == OBJ_TYP_LIST) {
 	err2 = (const void *)NCX_EL_KEY;
     } else {
 	err2 = (const void *)NCX_EL_VALUE;
     }
-    nsid = val_get_nsid(errval);
-    err3 = (const void *)nsid;
+    badnsid2 = val_get_nsid(errval);
     err4 = (const void *)errval->name;
 
     /* add the required error-info, call even if err2 is NULL */
@@ -1247,10 +1210,11 @@ rpc_err_rec_t *
 			rpcerr, 
 			NULL, 
 			badval, 
-			badns, 
-			err1, 
+			NULL, 
+			badnsid1,
+			badnsid2,
+			NULL, 
 			err2, 
-			err3, 
 			err4);
     if (res != NO_ERR) {
 	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
@@ -1403,13 +1367,17 @@ rpc_err_rec_t *
     const void     *err1, *err2;
     const xmlChar  *msg;
     status_t        res;
+    xmlns_id_t      badnsid1, badnsid2;
 
     badval = NULL;
+    badnsid1 = 0;
+    badnsid2 = 0;
+    err1 = NULL;
+
     if (attr) {
-	err1 = (const void *)attr->attr_ns;
+	badnsid1 = attr->attr_ns;
 	err2 = (const void *)attr->attr_name;
     } else {
-	err1 = NULL;
 	err2 = NULL;
     }
 
@@ -1460,10 +1428,11 @@ rpc_err_rec_t *
 			rpcerr, 
 			errnode, 
 			badval, 
-			badns, 
+			badns,
+			badnsid1,
+			badnsid2,
 			err1, 
 			err2, 
-			NULL, 
 			NULL);
     if (res != NO_ERR) {
 	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/

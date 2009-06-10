@@ -279,19 +279,20 @@ static status_t
 {
     const xmlChar         *parmname;
     const typ_enum_t      *typenum;
-    const typ_def_t       *typdef;
+    const typ_def_t       *typdef, *basetypdef;
     ncx_btype_t            btyp;
     status_t               res;
 
     res = NO_ERR;
     parmname = obj_get_name(parmobj);
     typdef = obj_get_ctypdef(parmobj);
+    basetypdef = typ_get_cbase_typdef(typdef);
     btyp = obj_get_basetype(parmobj);
 
     switch (btyp) {
     case NCX_BT_ENUM:
     case NCX_BT_BITS:
-	for (typenum = typ_first_enumdef(typdef);
+	for (typenum = typ_first_enumdef(basetypdef);
 	     typenum != NULL && res == NO_ERR;
 	     typenum = typ_next_enumdef(typenum)) {
 

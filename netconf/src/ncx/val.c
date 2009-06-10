@@ -2656,18 +2656,13 @@ status_t
 	     pat != NULL;
 	     pat = typ_get_next_cpattern(pat)) {
 
-	    if (pat->res == NO_ERR) {
-		if (!pattern_match(pat->pattern, strval)) {
-		    if (errinfo && 
-			ncx_errinfo_set(&pat->pat_errinfo)) {
-
-			*errinfo = &pat->pat_errinfo;
-			return ERR_NCX_PATTERN_FAILED;
-		    }
+	    if (!pattern_match(pat->pattern, strval)) {
+		if (errinfo && 
+		    ncx_errinfo_set(&pat->pat_errinfo)) {
+		    *errinfo = &pat->pat_errinfo;
 		}
-	    } else {
-		/* return SET_ERROR(ERR_INTERNAL_VAL) */;
-	    }
+		return ERR_NCX_PATTERN_FAILED;
+	    } /* else matched -- keep trying more patterns */
 	}
 
 	typdef = typ_get_cparent_typdef(typdef);

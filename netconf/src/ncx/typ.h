@@ -197,7 +197,6 @@ typedef struct typ_pattern_t_ {
     xmlRegexpPtr    pattern;
     xmlChar        *pat_str;
     ncx_errinfo_t   pat_errinfo;
-    ncx_status_t    res;
 } typ_pattern_t;
 
 

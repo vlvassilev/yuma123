@@ -327,6 +327,8 @@ static void
 		    log_error("\nError: malloc failed; cannot "
 			      "make <bootError> struct");
 		} else {
+		    val_init_from_template(bootErrorval, 
+					   bootErrorobj);
 		    res = agt_rpc_fill_rpc_error(rpcerror,
 						 bootErrorval);
 		    if (res != NO_ERR) {

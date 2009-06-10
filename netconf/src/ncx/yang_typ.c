@@ -825,7 +825,6 @@ static status_t
 	/* make sure the pattern is valid */
 	res = typ_compile_pattern(pat);
 	if (res != NO_ERR) {
-	    pat->res = res;
 	    ncx_print_errormsg(tkc, mod, res);
 	    retres = res;
 	    if (NEED_EXIT(res)) {

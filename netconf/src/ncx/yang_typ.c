@@ -2958,8 +2958,14 @@ static status_t
 	 un != NULL;
 	 un = (typ_unionnode_t *)dlq_nextEntry(un)) {
 
-	res = resolve_type(tkc, mod, un->typdef,
-			   NULL, NULL, parent, grp, fromdef);
+	res = resolve_type(tkc, 
+			   mod, 
+			   un->typdef,
+			   NULL, 
+			   NULL, 
+			   parent, 
+			   grp, 
+			   fromdef);
 	CHK_EXIT(res, retres);
 
 	btyp = typ_get_basetype(un->typdef);
@@ -3031,7 +3037,7 @@ static status_t
     typ_enum_t       *enu;
     typ_idref_t      *idref;
     ncx_identity_t   *testidentity;
-    const xmlChar    *errname;
+    const xmlChar    *errname, *typdefval;
     status_t         res, retres;
     boolean          errdone;
     ncx_btype_t      btyp;
@@ -3095,7 +3101,9 @@ static status_t
      * This is needed if min and max keywords used
      * Errors printed in the called fn
      */
-    res = finish_yang_range(tkc, mod, typdef,
+    res = finish_yang_range(tkc, 
+			    mod, 
+			    typdef,
 			    typ_get_range_type
 			    (typ_get_basetype(typdef)));
 
@@ -3115,9 +3123,11 @@ static status_t
     }
 
     /* check default value if any defined */
-    if (res == NO_ERR) {
-	btyp = typ_get_basetype(typdef);
-	if (defval && (btyp != NCX_BT_NONE) && typ_ok(typdef)) {
+    btyp = typ_get_basetype(typdef);
+    if ((res == NO_ERR) &&
+	(btyp != NCX_BT_NONE) && typ_ok(typdef)) {
+
+	if (defval) {
 	    if (btyp == NCX_BT_IDREF) {
 		res = val_parse_idref(mod, defval, NULL, NULL, NULL);
 	    } else {
@@ -3129,15 +3139,48 @@ static status_t
 			      "default value (%s)",
 			      (name) ? "Type" : 
 			      (const char *)obj_get_typestr(obj),
-			      (name) ? name : obj_get_name(obj), defval);
+			      (name) ? name : obj_get_name(obj), 
+			      defval);
 		} else {
 		    log_error("\nError: %s '%s' has invalid "
 			      "default value (%s)",
 			      (name) ? "Type" : "leaf or leaf-list",
-			      (name) ? (const char *)name : "--", defval);
+			      (name) ? (const char *)name : "--", 
+			      defval);
 		}
 		tkc->cur = typdef->tk;
 		ncx_print_errormsg(tkc, mod, res);
+	    }
+	} else if (typdef->class == NCX_CL_NAMED) {
+	    typdefval = typ_get_defval(typdef->def.named.typ);
+	    if (typdefval) {
+		if (btyp == NCX_BT_IDREF) {
+		    res = val_parse_idref(mod, 
+					  typdefval, 
+					  NULL, 
+					  NULL, 
+					  NULL);
+		} else {
+		    res = val_simval_ok(typdef, typdefval);
+		}
+		if (res != NO_ERR) {
+		    if (obj) {
+			log_error("\nError: %s '%s' has invalid "
+				  "inherited default value (%s)",
+				  (name) ? "Type" : 
+				  (const char *)obj_get_typestr(obj),
+				  (name) ? name : obj_get_name(obj), 
+				  typdefval);
+		    } else {
+			log_error("\nError: %s '%s' has invalid "
+				  "inherited default value (%s)",
+				  (name) ? "Type" : "leaf or leaf-list",
+				  (name) ? (const char *)name : "--", 
+				  typdefval);
+		    }
+		    tkc->cur = typdef->tk;
+		    ncx_print_errormsg(tkc, mod, res);
+		}
 	    }
 	}
     }
@@ -3206,9 +3249,12 @@ static status_t
 	if (typdef->class == NCX_CL_SIMPLE &&
 	    typ_get_basetype(typdef) == NCX_BT_UNION) {
 	    testdef = typ_get_base_typdef(typdef);
-	    res = resolve_union_type(tkc, mod,
+	    res = resolve_union_type(tkc, 
+				     mod,
 				     &testdef->def.simple.unionQ,
-				     obj, grp, fromdef);
+				     obj, 
+				     grp, 
+				     fromdef);
 	}
     }
 
@@ -3292,11 +3338,19 @@ static status_t
     retres = NO_ERR;
 
     /* check the appinfoQ */
-    typ->res = res = ncx_resolve_appinfoQ(tkc, mod, &typ->appinfoQ);
+    typ->res = res = ncx_resolve_appinfoQ(tkc, 
+					  mod, 
+					  &typ->appinfoQ);
     CHK_EXIT(res, retres);
 
-    res = resolve_type(tkc, mod, &typ->typdef, typ->name,
-		       typ->defval, obj, grp, TRUE);
+    res = resolve_type(tkc, 
+		       mod, 
+		       &typ->typdef, 
+		       typ->name,
+		       typ->defval, 
+		       obj, 
+		       grp, 
+		       TRUE);
     if (typ->res == NO_ERR) {
 	typ->res = res;
     }
@@ -4063,7 +4117,14 @@ status_t
     }
 #endif
 
-    res = resolve_type(tkc, mod, typdef, NULL, defval, obj, NULL, FALSE);
+    res = resolve_type(tkc, 
+		       mod, 
+		       typdef, 
+		       NULL, 
+		       defval, 
+		       obj, 
+		       NULL, 
+		       FALSE);
     return res;
 
 }  /* yang_typ_resolve_type */

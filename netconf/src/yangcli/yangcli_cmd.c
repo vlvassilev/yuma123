@@ -369,8 +369,9 @@ static void
 static xmlChar *
     get_line (agent_cb_t *agent_cb)
 {
-    xmlChar *line;
-    xmlChar prompt[MAX_PROMPT_LEN];
+    xmlChar          *line;
+    xmlChar           prompt[MAX_PROMPT_LEN];
+    GlReturnStatus    returnstatus;
 
     line = NULL;
 
@@ -379,11 +380,50 @@ static xmlChar *
     if (!agent_cb->climore) {
 	log_stdout("\n");
     }
+
+    agent_cb->returncode = 0;
     line = (xmlChar *)gl_get_line(agent_cb->cli_gl,
 				  (const char *)prompt,
-				  NULL, -1);
+				  NULL, 
+				  -1);
     if (!line) {
-	log_stdout("\nyangcli: Error: gl_get_line failed");
+	if (agent_cb->returncode == MGR_IO_RC_DROPPED ||
+	    agent_cb->returncode == MGR_IO_RC_DROPPED_NOW) {
+	    log_write("\nSession was dropped by the agent");
+	    return NULL;
+	}
+
+	returnstatus = gl_return_status(agent_cb->cli_gl);
+	
+	log_write("\nget_line error: ");
+	switch (returnstatus) {
+	case GLR_NEWLINE:
+	    log_write("NEWLINE");
+	    break;
+	case GLR_BLOCKED:
+	    log_write("BLOCKED");
+	    break;
+	case GLR_SIGNAL:
+	    log_write("SIGNAL");
+	    break;
+	case GLR_TIMEOUT:
+	    log_write("TIMEOUT");
+	    break;
+	case GLR_FDABORT:
+	    log_write("FDABORT");
+	    break;
+	case GLR_EOF:
+	    log_write("EOF");
+	    break;
+	case GLR_ERROR:
+	    log_write("ERROR");
+	    break;
+	default:
+	    log_write("<unknown>");
+	}
+	log_write(" rt:%u errno:%u", 
+		  agent_cb->returncode,
+		  agent_cb->errnocode);
     }
 
     return line;
@@ -4881,7 +4921,8 @@ static status_t
     }
 
     /* set the edit-config/input/target node to the default_target */
-    child = obj_find_child(input, NC_MODULE,
+    child = obj_find_child(input, 
+			   NC_MODULE,
 			   NCX_EL_TARGET);
     parm = val_new_value();
     if (!parm) {
@@ -4911,27 +4952,12 @@ static status_t
     val_add_child(target, parm);
 
     /* set the edit-config/input/default-operation node to 'none' */
-    child = obj_find_child(input, NC_MODULE,
+    child = obj_find_child(input, 
+			   NC_MODULE,
 			   NCX_EL_DEFAULT_OPERATION);
-    parm = val_new_value();
+    res = NO_ERR;
+    parm = val_make_simval_obj(child, NCX_EL_NONE, &res);
     if (!parm) {
-	if (freeroot) {
-	    val_free_value(valroot);
-	} else {
-	    val_free_value(config_content);
-	}
-	val_free_value(reqdata);
-	return ERR_INTERNAL_MEM;
-    }
-    val_init_from_template(parm, child);
-    val_add_child(parm, reqdata);
-    res = val_set_simval(parm,
-			 obj_get_ctypdef(child),
-			 obj_get_nsid(child),
-			 obj_get_name(child),
-			 NCX_EL_NONE);
-
-    if (res != NO_ERR) {
 	if (freeroot) {
 	    val_free_value(valroot);
 	} else {
@@ -4940,32 +4966,21 @@ static status_t
 	val_free_value(reqdata);
 	return res;
     }
+    val_add_child(parm, reqdata);
 
     /* set the test-option to the user-configured or default value */
     if (agent_cb->testoption != OP_TESTOP_NONE) {
 	/* set the edit-config/input/test-option node to
 	 * the user-specified value
 	 */
-	child = obj_find_child(input, NC_MODULE,
+	child = obj_find_child(input, 
+			       NC_MODULE,
 			       NCX_EL_TEST_OPTION);
-	parm = val_new_value();
+	res = NO_ERR;
+	parm = val_make_simval_obj(child,
+				   op_testop_name(agent_cb->testoption),
+				   &res);
 	if (!parm) {
-	    if (freeroot) {
-		val_free_value(valroot);
-	    } else {
-		val_free_value(config_content);
-	    }
-	    val_free_value(reqdata);
-	    return ERR_INTERNAL_MEM;
-	}
-	val_init_from_template(parm, child);
-	val_add_child(parm, reqdata);
-	res = val_set_simval(parm,
-			     obj_get_ctypdef(child),
-			     obj_get_nsid(child),
-			     obj_get_name(child),
-			     op_testop_name(agent_cb->testoption));
-	if (res != NO_ERR) {
 	    if (freeroot) {
 		val_free_value(valroot);
 	    } else {
@@ -4981,9 +4996,13 @@ static status_t
 	/* set the edit-config/input/error-option node to
 	 * the user-specified value
 	 */
-	child = obj_find_child(input, NC_MODULE,
+	child = obj_find_child(input, 
+			       NC_MODULE,
 			       NCX_EL_ERROR_OPTION);
-	parm = val_new_value();
+	res = NO_ERR;
+	parm = val_make_simval_obj(child,
+				   op_errop_name(agent_cb->erroption),
+				   &res);
 	if (!parm) {
 	    if (freeroot) {
 		val_free_value(valroot);
@@ -4992,22 +5011,6 @@ static status_t
 	    }
 	    val_free_value(reqdata);
 	    return ERR_INTERNAL_MEM;
-	}
-	val_init_from_template(parm, child);
-	val_add_child(parm, reqdata);
-	res = val_set_simval(parm,
-			     obj_get_ctypdef(child),
-			     obj_get_nsid(child),
-			     obj_get_name(child),
-			     op_errop_name(agent_cb->erroption));
-	if (res != NO_ERR) {
-	    if (freeroot) {
-		val_free_value(valroot);
-	    } else {
-		val_free_value(config_content);
-	    }
-	    val_free_value(reqdata);
-	    return res;
 	}
     }
 
@@ -5352,17 +5355,16 @@ static status_t
 		/* fall through */
 	    case NCX_WITHDEF_REPORT_ALL:
 		/* it is OK to send a with-defaults to this agent */
-		withdefobj = obj_find_child(input, NULL,
+		withdefobj = obj_find_child(input, 
+					    NULL,
 					    NCX_EL_WITH_DEFAULTS);
 		if (!withdefobj) {
 		    SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
 		} else {
-		    withdefval 
-			= val_make_simval(obj_get_ctypdef(withdefobj),
-					  obj_get_nsid(withdefobj),
-					  obj_get_name(withdefobj),
-					  ncx_get_withdefaults_string(withdef),
-					  &res);
+		    withdefval = val_make_simval_obj
+			(withdefobj,
+			 ncx_get_withdefaults_string(withdef),
+			 &res);
 		    if (withdefval) {
 			val_add_child(withdefval, reqdata);
 		    }

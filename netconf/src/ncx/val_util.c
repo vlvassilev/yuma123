@@ -2195,4 +2195,81 @@ xpath_pcb_t *
 }  /* val_get_xpathpcb */
 
 
+/********************************************************************
+* FUNCTION val_make_simval_obj
+* 
+* Create and set a val_value_t as a simple type
+* from an object template instead of individual fields
+* Calls val_make_simval with the object settings
+*
+* INPUTS:
+*    obj == object template to use
+*    valstr == simple value encoded as a string
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    pointer to malloced and filled in val_value_t struct
+*    NULL if some error
+*********************************************************************/
+val_value_t *
+    val_make_simval_obj (const obj_template_t *obj,
+			 const xmlChar *valstr,
+			 status_t  *res)
+{
+#ifdef DEBUG
+    if (!obj || !res) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return val_make_simval(obj_get_ctypdef(obj),
+			   obj_get_nsid(obj),
+			   obj_get_name(obj),
+			   valstr,
+			   res);
+
+} /* val_make_simval_obj */
+
+
+/********************************************************************
+* FUNCTION val_set_simval_obj
+* 
+* Set an initialized val_value_t as a simple type
+
+* Set a pre-initialized val_value_t as a simple type
+* from an object template instead of individual fields
+* Calls val_set_simval with the object settings
+*
+* INPUTS:
+*    val == value struct to set
+*    obj == object template to use
+*    valstr == simple value encoded as a string to set
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t 
+    val_set_simval_obj (val_value_t  *val,
+			const obj_template_t *obj,
+			const xmlChar *valstr)
+{
+#ifdef DEBUG
+    if (!val || !obj) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    return val_set_simval(val,
+			  obj_get_ctypdef(obj),
+			  obj_get_nsid(obj),
+			  obj_get_name(obj),
+			  valstr);
+
+}  /* val_set_simval_obj */
+
+
 /* END file val_util.c */

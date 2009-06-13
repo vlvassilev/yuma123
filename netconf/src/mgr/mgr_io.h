@@ -22,6 +22,10 @@ date	     init     comment
 
 */
 
+#ifndef _H_ses
+#include "ses.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -38,6 +42,16 @@ date	     init     comment
 *			     T Y P E S				    *
 *								    *
 *********************************************************************/
+
+typedef enum mgr_io_returncode_t_ {
+    MGR_IO_RC_NONE,
+    MGR_IO_RC_IDLE,
+    MGR_IO_RC_DROPPED,
+    MGR_IO_RC_ERRNO11,
+    MGR_IO_RC_PROCESSED,
+    MGR_IO_RC_DROPPED_NOW
+} mgr_io_returncode_t;
+
 
 /* Manager application IO states */
 typedef enum mgr_io_state_t_ {
@@ -86,5 +100,9 @@ extern void
 
 extern status_t 
     mgr_io_run (void);
+
+
+extern boolean
+    mgr_io_process_timeout (ses_id_t  cursid);
 
 #endif	    /* _H_mgr_io */

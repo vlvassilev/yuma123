@@ -358,11 +358,11 @@ status_t
 	xmlns_yangid = xmlns_next_id;
     }
 
-    if (LOGDEBUG) {
-	log_debug("\nxmlns_reg: id:%2d mod:%s\turi: %s",
-		  rec->ns_id, 
-		  rec->ns_module, 
-		  rec->ns_name);
+    if (LOGDEBUG2) {
+	log_debug2("\nxmlns_reg: id:%2d mod:%s\turi: %s",
+		   rec->ns_id, 
+		   rec->ns_module, 
+		   rec->ns_name);
     }
 
     /* bump the next_id after returning the value used */

@@ -320,6 +320,7 @@ status_t
 		continue;
 	    }
 
+
 	    /* setup select parameters */
 	    read_fd_set = active_fd_set;
 	    write_fd_set = write_copy;
@@ -337,22 +338,23 @@ status_t
 	    /* Block until input arrives on one or more active sockets. 
 	     * or the timer expires
 	     */
-	    ret = select(max(maxrdnum+1, maxwrnum+1), &read_fd_set, 
-			 &write_fd_set, NULL, &timeout);
+	    ret = select(max(maxrdnum+1, maxwrnum+1), 
+			 &read_fd_set, 
+			 &write_fd_set, 
+			 NULL, 
+			 &timeout);
 	    if (ret > 0) {
+		/* normal return with some bytes */
 		done2 = TRUE;
 	    } else if (ret < 0) {
 		if (!(errno == EINTR || errno==EAGAIN)) {
 		    done2 = TRUE;
 		}
-	    } else if (ret == 0) {
+	    } else {
 		/* should only happen if a timeout occurred */
 		if (mgr_shutdown_requested()) {
 		    done2 = TRUE; 
 		}
-	    } else {
-		/* normal return with some bytes */
-		done2 = TRUE;
 	    }
 	}
 
@@ -372,7 +374,7 @@ status_t
 	    continue;
 	}
      
-	/* 2nd loop: go through the file desciptor numbers and
+	/* 2nd loop: go through the file descriptor numbers and
 	 * service all the sockets with input and/or output pending 
 	 */
 	done2 = FALSE;     /* used to quit-end-early-exit */
@@ -457,6 +459,139 @@ status_t
 
 }  /* mgr_io_run */
 
+
+
+/********************************************************************
+ * FUNCTION mgr_io_process_timeout
+ * 
+ * mini server loop while waiting for KBD input
+ * 
+ * INPUTS:
+ *    cursid == current session ID to check
+ *
+ * RETURNS:
+ *   TRUE if session alive or not confirmed
+ *   FALSE if cursid confirmed dropped
+ *********************************************************************/
+boolean
+    mgr_io_process_timeout (ses_id_t  cursid)
+{
+    ses_cb_t      *scb;
+    struct timeval timeout;
+    fd_set         write_copy;
+    int            i, ret;
+    status_t       res;
+    boolean        done, retval;
+    uint32         cnt;
+
+    /* get the write fd_set once, since this call will empty
+     * the outreadyQ in ses_msg.c
+     */
+    cnt = mgr_ses_fill_writeset(&write_copy, &maxwrnum);
+
+    /* setup select parameters */
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 10000;
+    read_fd_set = active_fd_set;
+    write_fd_set = write_copy;
+
+
+    if (!(any_fd_set(&read_fd_set, maxrdnum) ||
+	  any_fd_set(&write_fd_set, maxwrnum))) {
+	return TRUE;
+    }
+
+    /* Block until input arrives on one or more active sockets. 
+     * or the short timer expires
+     */
+    ret = select(max(maxrdnum+1, maxwrnum+1), 
+		 &read_fd_set, 
+		 &write_fd_set, 
+		 NULL, 
+		 &timeout);
+    if (ret > 0) {
+	/* normal return with some bytes */
+	;
+    } else if (ret < 0) {
+	/* some error, don't care about EAGAIN here */
+	return TRUE;
+    } else {
+	/* == 0: timeout */
+	return TRUE;
+    }
+
+    retval = TRUE;
+
+    /* loop: go through the file descriptor numbers and
+     * service all the sockets with input pending 
+     */
+    for (i = 0; i <= max(maxrdnum, maxwrnum); i++) {
+
+	/* check write output to agent */
+	if (FD_ISSET(i, &write_fd_set)) {
+	    /* try to send 1 packet worth of buffers for a session */
+	    scb = def_reg_find_scb(i);
+	    if (scb) {
+		/* check if anything to write */
+		if (!dlq_empty(&scb->outQ)) {
+		    res = ses_msg_send_buffs(scb);
+		    if (res != NO_ERR) {
+			/* write failed */
+			if (scb->sid == cursid) {
+			    retval = FALSE;
+			}
+			mgr_ses_free_session(scb->sid);
+			scb = NULL;
+			FD_CLR(i, &active_fd_set);
+		    }
+		}
+
+		/* check if any buffers left over for next loop */
+		if (scb && !dlq_empty(&scb->outQ)) {
+		    ses_msg_make_outready(scb);
+		}
+	    }
+	}
+
+	/* check read input from agent */
+	if (FD_ISSET(i, &read_fd_set)) {
+	    /* Data arriving on an already-connected socket.
+	     * Need to have the xmlreader for this session
+	     * unless it is input from STDIO
+	     */
+	    scb = def_reg_find_scb(i);
+	    if (scb) {
+		res = ses_accept_input(scb);
+		if ((res != NO_ERR) &&
+		    !(errno == EINTR || errno==EAGAIN)) {
+
+		    if (scb->sid == cursid) {
+			retval = FALSE;
+		    }
+
+		    mgr_ses_free_session(scb->sid);
+		    FD_CLR(i, &active_fd_set);
+		    if (i >= maxrdnum) {
+			maxrdnum = i-1;
+		    }
+		}
+	    }
+	}
+    }
+
+    /* drain the ready queue before accepting new input */
+    done = FALSE;
+    while (!done) {
+	if (!mgr_ses_process_first_ready()) {
+	    done = TRUE;
+	} else if (mgr_shutdown_requested()) {
+	    done = TRUE;
+	}
+    }
+
+    return retval;
+
+}  /* mgr_io_process_timeout */
 
 
 /* END mgr_io.c */

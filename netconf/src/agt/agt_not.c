@@ -174,6 +174,10 @@ date         init     comment
     (const xmlChar *)"notificationComplete"
 
 
+#define AGT_NOT_SEQID_MOD   (const xmlChar *)"ncx"
+#define AGT_NOT_SEQID_OBJ   (const xmlChar *)"sequence-id"
+
+
 /********************************************************************
 *                                                                   *
 *                           T Y P E S                               *
@@ -223,6 +227,9 @@ static const obj_template_t *replayCompleteobj;
 
 /* cached pointer to the /ncn:notificationComplete element template */
 static const obj_template_t *notificationCompleteobj;
+
+/* cached pointer to the /ncx:sequence-id element template */
+static const obj_template_t *sequenceidobj;
 
 /* flag to signal quick exit */
 static boolean               anySubscriptions;
@@ -761,10 +768,11 @@ static status_t
 		       boolean checkfilter)
 {
     val_value_t        *topval, *eventTime;
-    val_value_t        *eventType, *payloadval;
+    val_value_t        *eventType, *payloadval, *sequenceid;
     ses_total_stats_t  *totalstats;
     xml_msg_hdr_t       msghdr;
     status_t            res;
+    xmlChar             numbuff[NCX_MAX_NUMLEN];
 
     totalstats = ses_get_total_stats();
 
@@ -777,11 +785,10 @@ static status_t
 	}
 	val_init_from_template(topval, notificationobj);
 
-	eventTime = val_make_simval(obj_get_ctypdef(eventTimeobj),
-				    obj_get_nsid(eventTimeobj),
-				    obj_get_name(eventTimeobj),
-				    notif->eventTime,
-				    &res);
+	eventTime = 
+	    val_make_simval_obj(eventTimeobj,
+				notif->eventTime,
+				&res);
 	if (!eventTime) {
 	    log_error("\nError: make simval failed (%s): cannot "
 		      "send notification", 
@@ -809,6 +816,17 @@ static status_t
 	    payloadval = (val_value_t *)
 		dlq_deque(&notif->payloadQ);
 	    val_add_child(payloadval, eventType);
+	}
+
+	sprintf((char *)numbuff, "%u", notif->msgid);
+	sequenceid = 
+	    val_make_simval_obj(sequenceidobj,
+				numbuff,
+				&res);
+	if (!sequenceid) {
+	    log_error("\nError: malloc failed: cannot add sequence-id");
+	} else {
+	    val_add_child(sequenceid, topval);
 	}
 
 	notif->msg = topval;
@@ -938,6 +956,7 @@ static void
     eventTimeobj = NULL;
     replayCompleteobj = NULL;
     notificationCompleteobj = NULL;
+    sequenceidobj = NULL;
     anySubscriptions = FALSE;
     msgid = 0;
 
@@ -961,7 +980,8 @@ static void
 status_t
     agt_not_init (void)
 {
-    status_t   res;
+    ncx_module_t *ncxmod;
+    status_t      res;
 
     if (agt_not_init_done) {
 	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
@@ -990,6 +1010,11 @@ status_t
 	return res;
     }
 
+    ncxmod = ncx_find_module(AGT_NOT_SEQID_MOD, NULL);
+    if (res != NO_ERR) {
+	return ERR_NCX_MOD_NOT_FOUND;
+    }
+    
     /* find the object definition for the notification element */
     notificationobj = ncx_find_object(notifmod,
 				      NCX_EL_NOTIFICATION);
@@ -1016,6 +1041,12 @@ status_t
 	ncx_find_object(ncnotifmod,
 			nc_notifications_N_notificationComplete);
     if (!notificationCompleteobj) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    sequenceidobj = 
+	ncx_find_object(ncxmod, AGT_NOT_SEQID_OBJ);
+    if (!sequenceidobj) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 

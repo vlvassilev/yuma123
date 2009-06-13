@@ -1513,6 +1513,13 @@ void
     val_init_complex (val_value_t *val, 
 		      ncx_btype_t btyp)
 {
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
     val->btyp = btyp;
     dlq_createSQue(&val->v.childQ);
 
@@ -1536,6 +1543,13 @@ void
 		      void  *cbfn,
 		      const obj_template_t *obj)
 {
+#ifdef DEBUG
+    if (!val || !cbfn || !obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
     val_init_from_template(val, obj);
     val->getcb = cbfn;
 
@@ -1557,8 +1571,16 @@ void
     val_init_from_template (val_value_t *val,
 			    const obj_template_t *obj)
 {
+#ifdef DEBUG
+    if (!val || !obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
 
-    init_from_template(val, obj, obj_get_basetype(obj));
+    init_from_template(val, 
+		       obj, 
+		       obj_get_basetype(obj));
 
 }  /* val_init_from_template */
 
@@ -1791,6 +1813,11 @@ status_t
 		   ncx_btype_t btyp,
 		   const xmlChar *strval)
 {
+#ifdef DEBUG
+    if (!typdef) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     return val_string_ok_errinfo(typdef, btyp, strval, NULL);
 
@@ -1904,6 +1931,12 @@ status_t
 		 ncx_btype_t  btyp,
 		 ncx_list_t *list)
 {
+
+#ifdef DEBUG
+    if (!typdef || !list) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     return val_list_ok_errinfo(typdef, btyp, list, NULL);
 
@@ -2514,6 +2547,11 @@ status_t
 		  ncx_btype_t  btyp,
 		  const ncx_num_t *num)
 {
+#ifdef DEBUG
+    if (!typdef || !num) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     return val_range_ok_errinfo(typdef, btyp, num, NULL);
 
@@ -2549,7 +2587,6 @@ status_t
     const dlq_hdr_t       *checkQ;
     const ncx_errinfo_t   *range_errinfo;
     status_t          res;
-
 
 #ifdef DEBUG
     if (!typdef || !num) {
@@ -2602,6 +2639,11 @@ status_t
     val_pattern_ok (const typ_def_t *typdef,
 		    const xmlChar *strval)
 {
+#ifdef DEBUG
+    if (!typdef) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     return val_pattern_ok_errinfo(typdef, strval, NULL);
 
@@ -2691,6 +2733,12 @@ status_t
     val_simval_ok (const typ_def_t *typdef,
 		   const xmlChar *simval)
 {
+#ifdef DEBUG
+    if (!typdef) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     return val_simval_ok_errinfo(typdef, simval, NULL);
 
 } /* val_simval_ok */
@@ -2921,6 +2969,11 @@ status_t
 		  const xmlChar *strval,
 		  val_value_t *retval)
 {
+#ifdef DEBUG
+    if (!typdef || !retval) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     return val_union_ok_errinfo(typdef, strval, retval, NULL);
 
@@ -2961,7 +3014,7 @@ status_t
     ncx_btype_t             testbtyp;
 
 #ifdef DEBUG
-    if (!typdef || !strval || !retval) {
+    if (!typdef || !retval) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -3302,6 +3355,13 @@ uint32
     const val_value_t *metaval;
     uint32             cnt;
 
+#ifdef DEBUG
+    if (!val || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
     cnt = 0;
 
     for (metaval = (const val_value_t *)dlq_firstEntry(&val->metaQ);
@@ -3427,6 +3487,12 @@ status_t
 		    const xmlChar *valname,
 		    const xmlChar *valstr)
 {
+#ifdef DEBUG
+    if (!val) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     if (valname) {
 	return val_set_simval_str(val, 
 				  typ_get_basetype_typdef(NCX_BT_STRING),
@@ -3477,11 +3543,8 @@ status_t
     xmlChar  *temp;
 
 #ifdef DEBUG
-    if (!val || !valstr) {
+    if (!val) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-    if (!valstrlen) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -3510,7 +3573,12 @@ status_t
 	    val->name = val->dname;
 	}
 
-	VAL_STR(val) = xml_strndup(valstr, valstrlen);
+	if (valstr) {
+	    VAL_STR(val) = xml_strndup(valstr, valstrlen);
+	} else {
+	    VAL_STR(val) = xml_strdup(EMPTY_STRING);
+	}
+
 	if (!VAL_STR(val)) {
 	    res = ERR_INTERNAL_MEM;
 	} else {
@@ -3518,7 +3586,11 @@ status_t
 	}
 	break;
     default:
-	temp = xml_strndup(valstr, valstrlen);
+	if (valstr) {
+	    temp = xml_strndup(valstr, valstrlen);
+	} else {
+	    temp = xml_strdup(EMPTY_STRING);
+	}
 	if (temp) {
 	    res = val_set_simval(val, typdef, 0, NULL, temp);
 	    m__free(temp);
@@ -3586,6 +3658,12 @@ status_t
 		    const xmlChar *valname,
 		    const xmlChar *valstr)
 {
+#ifdef DEBUG
+    if (!val || !typdef) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     if (valname) {
 	return val_set_simval_str(val, 
 				  typdef, 
@@ -3935,6 +4013,7 @@ val_value_t *
 }  /* val_make_string */
 
 
+
 /********************************************************************
 * FUNCTION val_merge
 * 
@@ -4099,6 +4178,13 @@ val_value_t *
     val_clone (const val_value_t *val)
 {
     status_t res;
+
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
 
     return val_clone_test(val, NULL, &res);
 
@@ -4342,6 +4428,13 @@ val_value_t *
     val_clone_config_data (const val_value_t *val,
 			   status_t *res)
 {
+#ifdef DEBUG
+    if (!val || !res) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
     return val_clone_test(val, val_is_config_data, res);
 
 }  /* val_clone_config_data */
@@ -4369,7 +4462,6 @@ status_t
     xmlChar    *buffer;
     uint32      len;
     status_t    res;
-
 
 #ifdef DEBUG
     if (!val || !copy) {
@@ -4962,7 +5054,6 @@ val_value_t *
 }  /* val_find_child */
 
 
-
 /********************************************************************
 * FUNCTION val_match_child
 * 
@@ -5069,7 +5160,6 @@ val_value_t *
     return NULL;
 
 }  /* val_find_next_child */
-
 
 
 /********************************************************************
@@ -6257,6 +6347,13 @@ boolean
 {
     int32 ret;
 
+#ifdef DEBUG
+    if (!val1 || !val2) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
     ret = index_match(val1, val2);
     return (ret) ? FALSE : TRUE;
 
@@ -7227,6 +7324,13 @@ void
     val_set_extern (val_value_t  *val,
 		    xmlChar *fname)
 {
+#ifdef DEBUG
+    if (!val || !fname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
     val->btyp = NCX_BT_EXTERN;
     val->v.fname = fname;
 
@@ -7246,6 +7350,13 @@ void
     val_set_intern (val_value_t  *val,
 		    xmlChar *intbuff)
 {
+#ifdef DEBUG
+    if (!val || !intbuff) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
     val->btyp = NCX_BT_INTERN;
     val->v.intbuff = intbuff;
 
@@ -7888,6 +7999,13 @@ void
 boolean
     val_need_quotes (const xmlChar *str)
 {
+#ifdef DEBUG
+    if (!str) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
     /* any whitespace or newline needs quotes */
     while (*str) {
 	if (isspace(*str) || *str == '\n') {
@@ -7915,6 +8033,13 @@ boolean
 boolean
     val_all_whitespace (const xmlChar *str)
 {
+#ifdef DEBUG
+    if (!str) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
     /* any whitespace or newline needs quotes */
     while (*str) {
 	if (!(isspace(*str) || *str == '\n')) {
@@ -7945,6 +8070,13 @@ boolean
 		       xmlns_id_t  nsid,
 		       const xmlChar *name)
 {
+#ifdef DEBUG
+    if (!attr || !name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
     if (xml_strcmp(attr->attr_name, name)) {
 	return FALSE;
     }
@@ -8054,7 +8186,6 @@ void
     val_clean_tree (val_value_t *val)
 {
     val_value_t           *chval;
-
 
 #ifdef DEBUG
     if (!val || !val->obj) {
@@ -8429,7 +8560,6 @@ void
     m__free(valuni);
 
 }  /* val_free_unique */
-
 
 
 /********************************************************************

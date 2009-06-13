@@ -256,10 +256,11 @@ typedef struct agent_cb_t_ {
     op_errop_t           erroption;
     ncx_withdefaults_t   withdefaults;
 
-
     /* session support */
     mgr_io_state_t       state;
     ses_id_t             mysid;
+    mgr_io_returncode_t  returncode;
+    int32                errnocode;
 
     /* TBD: session-specific user variables */
     dlq_hdr_t            varbindQ;   /* Q of ncx_var_t */

@@ -446,7 +446,7 @@ status_t
 	buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);
 	if (buff) {
 	    if (dologmsg) {
-		log_debug2("\nses_msg_send: first buff %s",
+		log_debug2("\nses_msg_send_wrfn: first buff %s",
 			   &buff->buff[buff->buffpos]);
 	    }
 	}
@@ -469,6 +469,12 @@ status_t
 	    iovs[i].iov_base = &buff->buff[buff->buffpos];
 	    iovs[i].iov_len = buffleft;
 	    buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
+
+	    if (LOGDEBUG3) {
+		log_debug3("\nses_msg: setup send buff %d\n%s\n", 
+			   i,
+			   iovs[i].iov_base);
+	    }
 	    cnt++;
 	}
     }
@@ -497,7 +503,9 @@ status_t
     buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);
 
     if (buff) {
-	if (dologmsg) {
+	if (LOGDEBUG3) {
+	    ; /* buffers already printed */
+	} else if (dologmsg) {
 	    log_debug2("\nses_msg_send: first buff %s",
 		       &buff->buff[buff->buffpos]);
 	}

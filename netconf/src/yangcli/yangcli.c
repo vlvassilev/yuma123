@@ -307,6 +307,79 @@ static ncx_withdefaults_t  withdefaults;
 
 
 /********************************************************************
+* FUNCTION get_line_timeout
+* 
+*  Callback function for libtecla when the inactivity
+*  timeout occurs.  
+*
+* This function checks to see:
+*   1) if the session is still active
+*   2) if any notifications are pending
+*
+* INPUTS:
+*    gl == line in progress
+*    data == agent control block passed as cookie
+* 
+* OUTPUTS:
+*    prints/logs notifications pending
+*    may generate log output and/or change session state
+*
+* RETURNS:
+*    if session state changed (session lost)
+*    then GLTO_ABORT will be returned
+*
+*    if any text written to STDOUT, then GLTO_REFRESH 
+*    will be returned
+*
+*    if nothing done, then GLTO_CONTINUE will be returned
+*********************************************************************/
+static GlAfterTimeout
+    get_line_timeout (GetLine *gl, 
+		      void *data)
+{
+    agent_cb_t  *agent_cb;
+    ses_cb_t    *scb;
+    boolean      retval;
+
+    (void)gl;
+    agent_cb = (agent_cb_t *)data;
+    agent_cb->returncode = 0;
+
+    if (agent_cb->state != MGR_IO_ST_CONN_IDLE) {
+	agent_cb->returncode = MGR_IO_RC_IDLE;
+	return GLTO_CONTINUE;
+    }
+
+    scb = mgr_ses_get_scb(agent_cb->mysid);
+    if (scb == NULL) {
+	/* session was dropped */
+	agent_cb->returncode = MGR_IO_RC_DROPPED;
+	agent_cb->state = MGR_IO_ST_IDLE;
+	return GLTO_ABORT;
+    }
+
+    retval = mgr_io_process_timeout(scb->sid);
+    agent_cb->errnocode = errno;
+    if (retval) {
+	/* this session is still alive */
+	if (agent_cb->errnocode == 11) {
+	    agent_cb->returncode = MGR_IO_RC_ERRNO11;
+	    return GLTO_CONTINUE;
+	} else {
+	    agent_cb->returncode = MGR_IO_RC_PROCESSED;
+	    return GLTO_REFRESH;
+	}
+    } else {
+	/* this session was dropped just now */
+	agent_cb->returncode = MGR_IO_RC_DROPPED_NOW;
+	agent_cb->state = MGR_IO_ST_IDLE;
+	return GLTO_ABORT;
+    }
+
+} /* get_line_timeout */
+
+
+/********************************************************************
 * FUNCTION do_startup_screen
 * 
 *  Print the startup messages to the log and stdout output
@@ -469,6 +542,16 @@ static agent_cb_t *
 	    if (retval != 0) {
 		err = TRUE;
 	    }
+
+	    /* setup the inactivity timeout callback function */
+	    retval = gl_inactivity_timeout(agent_cb->cli_gl,
+					   get_line_timeout,
+					   agent_cb,
+					   1,
+					   0);
+	    if (retval != 0) {
+		err = TRUE;
+	    }
 	}
     }
 
@@ -554,14 +637,12 @@ static status_t
 					 NULL, 
 					 YANGCLI_AGENT);
 		if (testobj) {
-		    testval = val_make_simval(obj_get_ctypdef(testobj),
-					      obj_get_nsid(testobj),
-					      YANGCLI_AGENT,
-					      usestr,
-					      &res);
-		}
-		if (testval) {
-		    val_add_child(testval, connect_valset);
+		    testval = val_make_simval_obj(testobj,
+						  usestr,
+						  &res);
+		    if (testval) {
+			val_add_child(testval, connect_valset);
+		    }
 		}
 	    }
 	}
@@ -2364,6 +2445,7 @@ static void
     /* check the contents of the reply */
     if (msg && msg->notification) {
 	if (LOGDEBUG) {
+	    gl_normal_io(agent_cb->cli_gl);
 	    log_debug("\n\nIncoming notification:");
 	    val_dump_value(msg->notification, NCX_DEF_INDENT);
 	    log_debug("\n\n");

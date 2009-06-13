@@ -1033,6 +1033,7 @@ void
     xml_node_t             method, testnode;
     status_t               res;
     boolean                errdone;
+    xmlChar                tstampbuff[TSTAMP_MIN_SIZE];
 
 #ifdef DEBUG
     if (!scb || !top) {
@@ -1199,13 +1200,18 @@ void
     } else {
 	errdone = FALSE;
 
-#ifdef AGT_RPC_DEBUG
-	if (LOGDEBUG2) {
-	    log_debug2("\nagt_rpc: got method node (%s)", 
-		       method.elname);
-	    xml_dump_node(&method);
+	if (LOGDEBUG) {
+	    tstamp_datetime(tstampbuff);
+	    log_debug("\nagt_rpc: <%s> for %u=%s@%s [%s]", 
+		      method.elname,
+		      scb->sid,
+		      scb->username,
+		      scb->peeraddr,
+		      tstampbuff);
+	    if (LOGDEBUG2) {
+		xml_dump_node(&method);
+	    }
 	}
-#endif
 
 	/* check the node type which should be type start or simple */
 	if (!(method.nodetyp==XML_NT_START || 

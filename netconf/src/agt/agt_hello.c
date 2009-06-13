@@ -228,8 +228,8 @@ void
 #endif
 
 #ifdef AGT_HELLO_DEBUG
-    log_debug("\nagt_hello got node");
-    if (LOGDEBUG) {
+    if (LOGDEBUG2) {
+	log_debug2("\nagt_hello got node");
 	xml_dump_node(top);
     }
 #endif
@@ -237,8 +237,12 @@ void
     /* only process this message in hello wait state */
     if (scb->state != SES_ST_HELLO_WAIT) {
 	/* TBD: stats update */
-	log_info("\nagt_hello dropped, wrong state (%d) for session %d",
-		 scb->state, scb->sid);
+	if (LOGINFO) {
+	    log_info("\nagt_hello dropped, wrong state "
+		     "(%d) for session %d",
+		     scb->state, 
+		     scb->sid);
+	}
 	return;
     }
 
@@ -281,14 +285,21 @@ void
 
     /* report first error and close session */
     if (res != NO_ERR) {
-	log_info("\nagt_connect error (%s), dropping session %d",
-		 get_error_string(res), scb->sid);
+	if (LOGINFO) {
+	    log_info("\nagt_connect error "
+		     "(%s), dropping session %d",
+		     get_error_string(res), 
+		     scb->sid);
+	}
 	mytotals->stats.inBadHellos++;
     } else {
 	scb->state = SES_ST_IDLE;
 	scb->active = TRUE;
-	log_info("\nSession %d for %s@%s now active", 
-		 scb->sid, scb->username, scb->peeraddr);
+	if (LOGINFO) {
+	    log_info("\nSession %d for %s@%s now active", 
+		     scb->sid, scb->username, 
+		     scb->peeraddr);
+	}
     }
     if (val) {
 	val_free_value(val);

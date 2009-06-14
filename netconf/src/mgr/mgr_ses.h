@@ -78,10 +78,20 @@ extern uint32
     mgr_ses_fill_writeset (fd_set *fdset,
 			   int *maxfdnum);
 
+extern ses_cb_t *
+    mgr_ses_get_first_outready (void);
+
+extern ses_cb_t *
+    mgr_ses_get_first_session (void);
+
+extern ses_cb_t *
+    mgr_ses_get_next_session (ses_cb_t *curscb);
+
 extern ssize_t
     mgr_ses_readfn (void *scb,
 		    char *buff,
-		    size_t bufflen);
+		    size_t bufflen,
+                    boolean *erragain);
 
 extern status_t
     mgr_ses_writefn (void *scb);

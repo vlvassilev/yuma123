@@ -95,50 +95,90 @@ date         init     comment
 
 
 /********************************************************************
- *                                                                   *
- *                       C O N S T A N T S                           *
- *                                                                   *
- *********************************************************************/
-
-/* how often to check for agent shutown (in seconds) */
-#define MGR_IO_TIMEOUT  1
-
+ *                                                                  *
+ *                       V A R I A B L E S                          *
+ *                                                                  *
+ ********************************************************************/
 
 static mgr_io_stdin_fn_t  stdin_handler;
 
-static fd_set active_fd_set, read_fd_set, write_fd_set;
 
-static int maxwrnum;
-static int maxrdnum;
+/********************************************************************
+ * FUNCTION write_sessions
+ * 
+ * Go through any sessions ready to write  and send
+ * the buffers ready to send
+ *
+ *********************************************************************/
+static void
+    write_sessions (void)
+{
+    ses_cb_t      *scb;
+    mgr_scb_t     *mscb;
+    status_t       res;
 
+    scb = mgr_ses_get_first_outready();
+    while (scb) {
+        res = ses_msg_send_buffs(scb);
+        if (res != NO_ERR) {
+            if (LOGINFO) {
+                mscb = mgr_ses_get_mscb(scb);
+                log_info("\nmgr_io write failed; "
+                         "closing session %u (a:%u)", 
+                         scb->sid,
+                         mscb->agtsid);
+            }
+            mgr_ses_free_session(scb->sid);
+            scb = NULL;
+        }
+        /* check if any buffers left over for next loop */
+        if (scb && !dlq_empty(&scb->outQ)) {
+            ses_msg_make_outready(scb);
+        }
+
+        scb = mgr_ses_get_first_outready();
+    }
+
+}  /* write_sessions */
 
 
 /********************************************************************
- * FUNCTION any_fd_set
+ * FUNCTION read_sessions
  * 
- * Check if any bits are set in the fd_set
- * INPUTS:
- *   fs == fs_set to check
- *   maxfd == max FD number possibly in use
+ * Go through any sessions and check any ready to read
  *
- * RETURNS:
- *   TRUE if any bits set
- *   FALSE if no bits set
  *********************************************************************/
-static boolean
-    any_fd_set (fd_set *fd,
-		int maxfd)
+static void
+    read_sessions (void)
 {
-    int  i;
+    ses_cb_t      *scb, *nextscb;
+    mgr_scb_t     *mscb;
+    status_t       res;
 
-    for (i=0; i<=maxfd; i++) {
-	if (FD_ISSET(i, fd)) {
-	    return TRUE;
-	}
+
+    /* check read input from agent */
+    scb = mgr_ses_get_first_session();
+    while (scb) {
+        nextscb = mgr_ses_get_next_session(scb);
+        res = ses_accept_input(scb);
+        if (res != NO_ERR) {
+            if (res != ERR_NCX_SESSION_CLOSED) {
+                if (LOGINFO) {
+                    mscb = mgr_ses_get_mscb(scb);
+                    log_info("\nmgr_io input failed"
+                             " for session %u (a:%u) (%s)",
+                             scb->sid, 
+                             mscb->agtsid,
+                             get_error_string(res));
+                }
+            }
+            mgr_ses_free_session(scb->sid);
+        }
+        scb = nextscb;
     }
-    return FALSE;
 
-} /* any_fd_set */
+}  /* read_sessions */
+
 
 /********************************************************************
  * FUNCTION mgr_io_init
@@ -151,10 +191,6 @@ void
     mgr_io_init (void)
 {
     stdin_handler = NULL;
-    FD_ZERO(&write_fd_set);
-    FD_ZERO(&active_fd_set);
-    maxwrnum = 0;
-    maxrdnum = 0;
 
 } /* mgr_io_init */
 
@@ -176,50 +212,6 @@ void
 
 
 /********************************************************************
- * FUNCTION mgr_io_activate_session
- * 
- * Tell the IO manager to start listening on the specified socket
- * 
- * INPUTS:
- *   fd == file descriptor number of the socket
- *********************************************************************/
-void
-    mgr_io_activate_session (int fd)
-{
-    FD_SET(fd, &active_fd_set);
-    if (fd+1 > maxwrnum) {
-	maxwrnum = fd+1;
-    }
-    if (fd+1 > maxrdnum) {
-	maxrdnum = fd+1;
-    }
-
-} /* mgr_io_activate_session */
-
-
-/********************************************************************
- * FUNCTION mgr_io_deactivate_session
- * 
- * Tell the IO manager to stop listening on the specified socket
- * 
- * INPUTS:
- *   fd == file descriptor number of the socket
- *********************************************************************/
-void
-    mgr_io_deactivate_session (int fd)
-{
-    FD_CLR(fd, &active_fd_set);
-    if (fd+1 == maxwrnum) {
-	maxwrnum--;
-    }
-    if (fd+1 == maxrdnum) {
-	maxrdnum--;
-    }
-
-} /* mgr_io_deactivate_session */
-
-
-/********************************************************************
  * FUNCTION mgr_io_run
  * 
  * IO server loop for the ncx manager
@@ -230,16 +222,9 @@ void
 status_t
     mgr_io_run (void)
 {
-    ses_cb_t      *scb;
-    mgr_scb_t     *mscb;
-    fd_set         write_copy;
-    struct timeval timeout;
-    int            i, ret;
-    status_t       res;
-    boolean        done, done2, first;
-    uint32         cnt;
+    int            ret;
+    boolean        done, done2;
     mgr_io_state_t state;
-
 
     /* first loop, handle user IO and get some data to read or write */
     done = FALSE;
@@ -252,7 +237,6 @@ status_t
 	}
 
 	state = MGR_IO_ST_INIT;
-	first = TRUE;
 	done2 = FALSE;
 	ret = 0;
 
@@ -264,193 +248,68 @@ status_t
 		state = (*stdin_handler)();
 	    }
 
-	    /* get the write fd_set once, since this call will empty
-	     * the outreadyQ in ses_msg.c
-	     */
-	    cnt = 0;
-	    if (first) {
-		cnt = mgr_ses_fill_writeset(&write_copy, &maxwrnum);
-		if (cnt) {
-		    first = FALSE;
-		}
-	    }
-
-	    /* check exit program */
+	    /* check exit program or session */
 	    if (mgr_shutdown_requested()) {
-		done2 = done = TRUE;
+		done = done2 = TRUE;
 		continue;
-	    }
+	    } else if (state == MGR_IO_ST_CONN_SHUT) {
+                done2 = TRUE;
+                continue;
+            } else if (state == MGR_IO_ST_SHUT) {
+                done = done2 = TRUE;
+                continue;
+            }
 
-	    /* check no output and not expecting any reply 
-	     * Note that this will not work when notifications
-	     * are supported!!!  Need to run the IO-receive
-	     * every N times when there is a session active
-	     */
-	    if (!cnt) {
-		switch (state) {
-		case MGR_IO_ST_INIT:
-		case MGR_IO_ST_IDLE:
-		case MGR_IO_ST_CONN_IDLE:
-		    /* user didn't do anything at the KBD
-		     * skip the IO loop and try again
-		     */
-		    continue;
-		case MGR_IO_ST_CONNECT:
-		case MGR_IO_ST_CONN_START:
-		case MGR_IO_ST_CONN_RPYWAIT:
-		case MGR_IO_ST_CONN_CANCELWAIT:
-		case MGR_IO_ST_CONN_CLOSEWAIT:
-		    /* reply expected */
-		    break;
-		case MGR_IO_ST_CONN_SHUT:
-		    /* session shutdown in progress */
-		    done2 = TRUE;
-		    continue;
-		case MGR_IO_ST_SHUT:
-		    /* shutdown in progress */
-		    done = done2 = TRUE;
-		    continue;
-		default:
-		    SET_ERROR(ERR_INTERNAL_VAL);
-		}
-	    }
+            write_sessions();
+
+            switch (state) {
+            case MGR_IO_ST_INIT:
+            case MGR_IO_ST_IDLE:
+            case MGR_IO_ST_CONN_IDLE:
+                /* user didn't do anything at the KBD
+                 * skip the IO loop and try again
+                 */
+                continue;
+            case MGR_IO_ST_CONNECT:
+            case MGR_IO_ST_CONN_START:
+            case MGR_IO_ST_CONN_RPYWAIT:
+            case MGR_IO_ST_CONN_CANCELWAIT:
+            case MGR_IO_ST_CONN_CLOSEWAIT:
+                /* reply expected */
+                break;
+            case MGR_IO_ST_CONN_SHUT:
+                /* session shutdown in progress */
+                done2 = TRUE;
+                continue;
+            case MGR_IO_ST_SHUT:
+                /* shutdown in progress */
+                done = done2 = TRUE;
+                continue;
+            default:
+                SET_ERROR(ERR_INTERNAL_VAL);
+                done = done2 = TRUE;
+            }
 
 	    /* check error exit from this loop */
 	    if (done2) {
 		continue;
 	    }
 
+            read_sessions();
 
-	    /* setup select parameters */
-	    read_fd_set = active_fd_set;
-	    write_fd_set = write_copy;
-	    timeout.tv_sec = MGR_IO_TIMEOUT;
-	    timeout.tv_usec = 0;
-
-	    /* check if there are no sessions active to wait for,
-	     * so just go back to the STDIN handler
-	     */
-	    if (!(any_fd_set(&read_fd_set, maxrdnum) ||
-		  any_fd_set(&write_fd_set, maxwrnum))) {
-		continue;
-	    }
-
-	    /* Block until input arrives on one or more active sockets. 
-	     * or the timer expires
-	     */
-	    ret = select(max(maxrdnum+1, maxwrnum+1), 
-			 &read_fd_set, 
-			 &write_fd_set, 
-			 NULL, 
-			 &timeout);
-	    if (ret > 0) {
-		/* normal return with some bytes */
-		done2 = TRUE;
-	    } else if (ret < 0) {
-		if (!(errno == EINTR || errno==EAGAIN)) {
-		    done2 = TRUE;
-		}
-	    } else {
-		/* should only happen if a timeout occurred */
-		if (mgr_shutdown_requested()) {
-		    done2 = TRUE; 
-		}
-	    }
-	}
-
-	/* check exit program */
-	if (mgr_shutdown_requested()) {
-	    done = TRUE;
-	    continue;
-	}
-
-	/* check select return status for non-recoverable error */
-	if (ret < 0) {
-	    res = ERR_NCX_OPERATION_FAILED;
-	    log_error("\nmgr_io select failed (%s)", 
-		      strerror(errno));
-	    mgr_request_shutdown();
-	    done = TRUE;
-	    continue;
-	}
-     
-	/* 2nd loop: go through the file descriptor numbers and
-	 * service all the sockets with input and/or output pending 
-	 */
-	done2 = FALSE;     /* used to quit-end-early-exit */
-	for (i = 0; i <= max(maxrdnum, maxwrnum) && !done2; i++) {
-
-	    /* check write output to agent */
-	    if (FD_ISSET(i, &write_fd_set)) {
-		/* try to send 1 packet worth of buffers for a session */
-		scb = def_reg_find_scb(i);
-		if (scb) {
-		    /* check if anything to write */
-		    if (!dlq_empty(&scb->outQ)) {
-			res = ses_msg_send_buffs(scb);
-			if (res != NO_ERR) {
-			    if (LOGINFO) {
-				mscb = mgr_ses_get_mscb(scb);
-				log_info("\nmgr_io write failed; "
-					 "closing session %u (a:%u)", 
-					 scb->sid,
-					 mscb->agtsid);
-			    }
-			    mgr_ses_free_session(scb->sid);
-			    scb = NULL;
-			    FD_CLR(i, &active_fd_set);
-			}
-		    }
-
-		    /* check if any buffers left over for next loop */
-		    if (scb && !dlq_empty(&scb->outQ)) {
-			ses_msg_make_outready(scb);
-		    }
-		}
-	    }
-
-	    /* check read input from agent */
-	    if (FD_ISSET(i, &read_fd_set)) {
-		/* Data arriving on an already-connected socket.
-		 * Need to have the xmlreader for this session
-		 * unless it is input from STDIO
-		 */
-		scb = def_reg_find_scb(i);
-		if (scb) {
-		    res = ses_accept_input(scb);
-		    if (res != NO_ERR) {
-			if (res != ERR_NCX_SESSION_CLOSED) {
-			    if (LOGINFO) {
-				mscb = mgr_ses_get_mscb(scb);
-				log_info("\nmgr_io input failed"
-					 " for session %u (a:%u) (%s)",
-					 scb->sid, 
-					 mscb->agtsid,
-					 get_error_string(res));
-			    }
-			}
-			mgr_ses_free_session(scb->sid);
-			FD_CLR(i, &active_fd_set);
-			if (i >= maxrdnum) {
-			    maxrdnum = i-1;
-			}
-		    }
-		}
-	    }
-	}
-
-	/* drain the ready queue before accepting new input */
-	if (!done) {
-	    done2 = FALSE;
-	    while (!done2) {
-		if (!mgr_ses_process_first_ready()) {
-		    done2 = TRUE;
-		} else if (mgr_shutdown_requested()) {
-		    done = done2 = TRUE;
-		}
-	    }
-	}
-    }  /* end 2nd loop */
+            /* drain the ready queue before accepting new input */
+            if (!done) {
+                done2 = FALSE;
+                while (!done2) {
+                    if (!mgr_ses_process_first_ready()) {
+                        done2 = TRUE;
+                    } else if (mgr_shutdown_requested()) {
+                        done = done2 = TRUE;
+                    }
+                }
+            }
+        }  /* end inner loop */
+    }  /* end outer loop */
 
     /* all open client sockets will be closed as the sessions are
      * torn down, but the original ncxserver socket needs to be closed now
@@ -458,7 +317,6 @@ status_t
     return NO_ERR;
 
 }  /* mgr_io_run */
-
 
 
 /********************************************************************
@@ -473,113 +331,14 @@ status_t
  *   TRUE if session alive or not confirmed
  *   FALSE if cursid confirmed dropped
  *********************************************************************/
-boolean
+    boolean
     mgr_io_process_timeout (ses_id_t  cursid)
 {
     ses_cb_t      *scb;
-    struct timeval timeout;
-    fd_set         write_copy;
-    int            i, ret;
-    status_t       res;
-    boolean        done, retval;
-    uint32         cnt;
+    boolean        done;
 
-    /* get the write fd_set once, since this call will empty
-     * the outreadyQ in ses_msg.c
-     */
-    cnt = mgr_ses_fill_writeset(&write_copy, &maxwrnum);
+    read_sessions();
 
-    /* setup select parameters */
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 10000;
-    read_fd_set = active_fd_set;
-    write_fd_set = write_copy;
-
-
-    if (!(any_fd_set(&read_fd_set, maxrdnum) ||
-	  any_fd_set(&write_fd_set, maxwrnum))) {
-	return TRUE;
-    }
-
-    /* Block until input arrives on one or more active sockets. 
-     * or the short timer expires
-     */
-    ret = select(max(maxrdnum+1, maxwrnum+1), 
-		 &read_fd_set, 
-		 &write_fd_set, 
-		 NULL, 
-		 &timeout);
-    if (ret > 0) {
-	/* normal return with some bytes */
-	;
-    } else if (ret < 0) {
-	/* some error, don't care about EAGAIN here */
-	return TRUE;
-    } else {
-	/* == 0: timeout */
-	return TRUE;
-    }
-
-    retval = TRUE;
-
-    /* loop: go through the file descriptor numbers and
-     * service all the sockets with input pending 
-     */
-    for (i = 0; i <= max(maxrdnum, maxwrnum); i++) {
-
-	/* check write output to agent */
-	if (FD_ISSET(i, &write_fd_set)) {
-	    /* try to send 1 packet worth of buffers for a session */
-	    scb = def_reg_find_scb(i);
-	    if (scb) {
-		/* check if anything to write */
-		if (!dlq_empty(&scb->outQ)) {
-		    res = ses_msg_send_buffs(scb);
-		    if (res != NO_ERR) {
-			/* write failed */
-			if (scb->sid == cursid) {
-			    retval = FALSE;
-			}
-			mgr_ses_free_session(scb->sid);
-			scb = NULL;
-			FD_CLR(i, &active_fd_set);
-		    }
-		}
-
-		/* check if any buffers left over for next loop */
-		if (scb && !dlq_empty(&scb->outQ)) {
-		    ses_msg_make_outready(scb);
-		}
-	    }
-	}
-
-	/* check read input from agent */
-	if (FD_ISSET(i, &read_fd_set)) {
-	    /* Data arriving on an already-connected socket.
-	     * Need to have the xmlreader for this session
-	     * unless it is input from STDIO
-	     */
-	    scb = def_reg_find_scb(i);
-	    if (scb) {
-		res = ses_accept_input(scb);
-		if ((res != NO_ERR) &&
-		    !(errno == EINTR || errno==EAGAIN)) {
-
-		    if (scb->sid == cursid) {
-			retval = FALSE;
-		    }
-
-		    mgr_ses_free_session(scb->sid);
-		    FD_CLR(i, &active_fd_set);
-		    if (i >= maxrdnum) {
-			maxrdnum = i-1;
-		    }
-		}
-	    }
-	}
-    }
-
-    /* drain the ready queue before accepting new input */
     done = FALSE;
     while (!done) {
 	if (!mgr_ses_process_first_ready()) {
@@ -589,7 +348,8 @@ boolean
 	}
     }
 
-    return retval;
+    scb = mgr_ses_get_scb(cursid);
+    return (scb) ? TRUE : FALSE;
 
 }  /* mgr_io_process_timeout */
 

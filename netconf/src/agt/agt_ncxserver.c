@@ -156,7 +156,7 @@ status_t
 {
     ses_cb_t *scb;
     int ncxsock, maxwrnum, maxrdnum;
-    fd_set active_fd_set, read_fd_set, write_fd_set, write_copy;
+    fd_set active_fd_set, read_fd_set, write_fd_set;
     int i, new, ret;
     struct sockaddr_un clientname;
     struct timeval timeout;
@@ -190,16 +190,11 @@ status_t
 	    continue;
 	}
 
-	/* get the write fd_set once, since this call will empty
-	 * the outreadyQ in ses_msg.c
-	 */
-	agt_ses_fill_writeset(&write_copy, &maxwrnum);
-
 	ret = 0;
 	done2 = FALSE;
 	while (!done2) {
 	    read_fd_set = active_fd_set;
-	    write_fd_set = write_copy;
+	    agt_ses_fill_writeset(&write_fd_set, &maxwrnum);
 	    timeout.tv_sec = AGT_NCXSERVER_TIMEOUT;
 	    timeout.tv_usec = 0;
 

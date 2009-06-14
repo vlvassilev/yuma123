@@ -18,30 +18,23 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
+
 /*
-
 #include <memory.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <unistd.h>
 */
 
+#include <unistd.h>
 #include <fcntl.h>
 #include <netdb.h>
-
 #include <libssh2.h>
-
 
 #ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_def_reg
-#include "def_reg.h"
 #endif
 
 #ifndef _H_dlq
@@ -109,7 +102,7 @@ date         init     comment
 /* maximum number of concurrent outbound sessions 
  * Must be >= 2 since session 0 is used for the dummy scb
  */
-#define MGR_SES_MAX_SESSIONS     1024
+#define MGR_SES_MAX_SESSIONS     16
 
 
 /********************************************************************
@@ -172,9 +165,6 @@ static status_t
 	}
     }
 
-    /* activate the socket in the select loop */
-    mgr_io_activate_session(scb->fd);
-
     /* set the NETCONF agent address */
     memset(&targ, 0x0, sizeof(targ));
     targ.sin_family = AF_INET;
@@ -208,9 +198,6 @@ static status_t
 	    return NO_ERR;
 	}
     }
-
-    /* de-activate the socket in the select loop */
-    mgr_io_deactivate_session(scb->fd);
 
     return ERR_NCX_CONNECT_FAILED;
 
@@ -265,18 +252,27 @@ static status_t
 	return ERR_NCX_SESSION_FAILED;
     }
 
+    /* 
+     * this does not work because the AUTH phase will not
+     * handle the EAGAIN errors correctly
+     *
+     * libssh2_session_set_blocking(mscb->session, 0); 
+     */
+
     /* get the host fingerprint */
     fingerprint = libssh2_hostkey_hash(mscb->session, 
 				       LIBSSH2_HOSTKEY_HASH_MD5);
 
     /* TBD: check fingerprint against known hosts files !!! */
 
+
     /* get the userauth info by sending an SSH_USERAUTH_NONE
      * request to the agent, hoping it will fail, and the
      * list of supported auth methods will be returned
      */
     userauthlist = libssh2_userauth_list(mscb->session,
-					 user, strlen(user));
+					 user, 
+					 strlen(user));
     if (!userauthlist) {
 	/* check if the agent accepted NONE as an auth method */
 	if (libssh2_userauth_authenticated(mscb->session)) {
@@ -349,9 +345,58 @@ static status_t
      */
     libssh2_channel_set_blocking(mscb->channel, 0);
 
+    libssh2_channel_handle_extended_data2
+        (mscb->channel,
+         LIBSSH2_CHANNEL_EXTENDED_DATA_MERGE);
+
     return NO_ERR;
 
 }  /* ssh2_setup */
+
+
+/********************************************************************
+* FUNCTION log_ssh2_error
+*
+* Get the ssh2 error message and print to error log
+*
+* INPUTS:
+*   scb == session control block to use
+*   mscb == manager control block to use
+*   operation == string to use for operation (read, write, open)
+*
+* RETURNS:
+*   number of bytes read; -1  for error; 0 for connection closed
+*********************************************************************/
+static void
+    log_ssh2_error (ses_cb_t *scb,
+                    mgr_scb_t  *mscb,
+                    const char *operation)
+
+{
+    char      *errormsg;
+    int        errcode;
+
+    errcode = 0;
+    errormsg = NULL;
+
+    errcode = libssh2_session_last_error(mscb->session,
+                                         &errormsg,
+                                         NULL,
+                                         0);
+
+    if (errcode != LIBSSH2_ERROR_EAGAIN) {
+        log_error("\nmgr_ses: channel %s failed on session %u (a:%u)",
+                  operation,
+                  scb->sid,
+                  mscb->agtsid);
+        if (LOGINFO) {
+            log_info(" (%d:%s)",
+                     errcode,
+                     (errormsg) ? errormsg : "--");
+        }
+    }
+
+}  /* log_ssh2_error */
 
 
 /************ E X T E R N A L   F U N C T I O N S *****************/
@@ -525,7 +570,8 @@ status_t
 
     /* if TCP OK, get an SSH connection and channel */
     if (res == NO_ERR) {
-	res = ssh2_setup(scb, (const char *)user,
+	res = ssh2_setup(scb, 
+                         (const char *)user,
 			 (const char *)password);
     }
 
@@ -533,7 +579,7 @@ status_t
 	mgr_free_scb(scb->mgrcb);
 	scb->mgrcb = NULL;
 	ses_free_scb(scb);
-	return ERR_NCX_UNKNOWN_HOST;
+	return res;
     }
 
     /* do not have a session-ID from the agent yet 
@@ -542,11 +588,6 @@ status_t
     scb->sid = slot;
     scb->inready.sid = slot;
     scb->outready.sid = slot;
-
-    /* add the FD to SCB mapping in the definition registry */
-    if (res == NO_ERR) {
-	res = def_reg_add_scb(scb->fd, scb);
-    }
 
     /* send the manager hello to the agent */
     if (res == NO_ERR) {
@@ -608,12 +649,6 @@ void
     if (scb->mgrcb) {
 	mgr_free_scb(scb->mgrcb);
 	scb->mgrcb = NULL;
-    }
-
-    /* deactivate the session IO */
-    if (scb->fd) {
-	mgr_io_deactivate_session(scb->fd);
-	def_reg_del_scb(scb->fd);
     }
 
     ses_free_scb(scb);
@@ -767,6 +802,92 @@ uint32
 
 
 /********************************************************************
+* FUNCTION mgr_ses_get_first_outready
+*
+* Get the first ses_msg outreadyQ entry
+* Will remove the entry from the Q
+*
+* RETURNS:
+*    pointer to the session control block of the
+*    first session ready to write output to a socket
+*    or the screen or a file
+*********************************************************************/
+ses_cb_t *
+    mgr_ses_get_first_outready (void)
+{
+    ses_ready_t *rdy;
+    ses_cb_t    *scb;
+
+    rdy = ses_msg_get_first_outready();
+    if (rdy) {
+        scb = mgrses[rdy->sid];
+        if (scb && scb->state < SES_ST_SHUTDOWN_REQ) {
+            return scb;
+        }
+    }
+    return NULL;
+
+}  /* mgr_ses_get_first_outready */
+
+
+/********************************************************************
+* FUNCTION mgr_ses_get_first_session
+*
+* Get the first active session
+*
+* RETURNS:
+*    pointer to the session control block of the
+*    first active session found
+*********************************************************************/
+ses_cb_t *
+    mgr_ses_get_first_session (void)
+{
+    ses_cb_t    *scb;
+    uint32       i;
+
+    /* skip zero (dummy) session */
+    for (i = 1; i < MGR_SES_MAX_SESSIONS; i++) {
+        scb = mgrses[i];
+        if (scb && scb->state < SES_ST_SHUTDOWN_REQ) {
+            return scb;
+        }
+    }
+    return NULL;
+
+}  /* mgr_ses_get_first_session */
+
+
+/********************************************************************
+* FUNCTION mgr_ses_get_next_session
+*
+* Get the next active session
+*
+* INPUTS:
+*   curscb == current session control block to use
+*
+* RETURNS:
+*    pointer to the session control block of the
+*    next active session found
+*
+*********************************************************************/
+ses_cb_t *
+    mgr_ses_get_next_session (ses_cb_t *curscb)
+{
+    ses_cb_t    *scb;
+    uint32       i;
+
+    for (i = curscb->sid+1; i < MGR_SES_MAX_SESSIONS; i++) {
+        scb = mgrses[i];
+        if (scb && scb->state < SES_ST_SHUTDOWN_REQ) {
+            return scb;
+        }
+    }
+    return NULL;
+
+}  /* mgr_ses_get_next_session */
+
+
+/********************************************************************
 * FUNCTION mgr_ses_readfn
 *
 * Read callback function for a manager SSH2 session
@@ -775,46 +896,51 @@ uint32
 *   s == session control block
 *   buff == buffer to fill
 *   bufflen == length of buff
+*   erragain == address of return EAGAIN flag
+*
+* OUTPUTS:
+*   *erragain == TRUE if ret value < zero means 
+*                read would have blocked (not really an error)
+*                FALSE if the ret value is not < zero, or
+*                if it is, it is a real error
 *
 * RETURNS:
-*   number of bytes read; -1  for error; 0 for connection closed
+*   number of bytes read; -1 for error; 0 for connection closed
 *********************************************************************/
 ssize_t 
     mgr_ses_readfn (void *s,
 		    char *buff,
-		    size_t bufflen)
+		    size_t bufflen,
+                    boolean *erragain)
 {
     ses_cb_t  *scb;
     mgr_scb_t *mscb;
-    int        ret;
+    int        ret, errcode;
+    char      *errormsg;
+
+#ifdef DEBUG
+    if (!s || !buff || !erragain) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return (ssize_t) -1;
+    }
+#endif
+
+    errcode = 0;
+    errormsg = NULL;
+    *erragain = FALSE;
 
     scb = (ses_cb_t *)s;
     mscb = mgr_ses_get_mscb(scb);
 
-    if (LOGDEBUG3) {
-	log_debug3("\nmgr_ses: About to read from NETCONF session %u (a:%u)",
-		   scb->sid,
-		   mscb->agtsid);
-    }
-
     /* fix bug in libssh2 or my code -- cannot tell for sure !!! */
     ret = libssh2_channel_read(mscb->channel, buff, bufflen);
 
-    if (LOGDEBUG3) {
-	log_debug3("\nmgr_ses: Done reading from "
-		   "NETCONF session %u (a:%u) (%d)",
-		   scb->sid, 
-		   mscb->agtsid,
-		   ret);
-	log_debug3("\n");
-    }
-
     if (ret < 0) {
-	if (ret != LIBSSH2_ERROR_EAGAIN) {
-	    log_error("\nmgr_ses: channel read failed on session %u (a:%u)",
-		      scb->sid,
-		      mscb->agtsid);
-	}
+        if (ret == LIBSSH2_ERROR_EAGAIN) {
+            *erragain = TRUE;
+        } else {
+            log_ssh2_error(scb, mscb, "read");
+        }
     } else if (ret > 0) {
 	if (LOGDEBUG2) {
 	    log_debug2("\nmgr_ses: channel read %d bytes OK"
@@ -850,15 +976,18 @@ ssize_t
 status_t
     mgr_ses_writefn (void *s)
 {
-
-    ses_cb_t *scb;
-    mgr_scb_t *mscb;
-    ses_msg_buff_t  *buff;
-    int       ret;
-    uint32     i;
+    ses_cb_t          *scb;
+    mgr_scb_t         *mscb;
+    ses_msg_buff_t    *buff;
+    int                ret;
+    uint32             i;
+    boolean            done;
+    status_t           res;
 
     scb = (ses_cb_t *)s;
     mscb = mgr_ses_get_mscb(scb);
+    ret = 0;
+    res = NO_ERR;
 
     /* go through buffer outQ */
     buff = (ses_msg_buff_t *)dlq_deque(&scb->outQ);
@@ -870,14 +999,25 @@ status_t
     }
 
     while (buff) {
-	ret = libssh2_channel_write(mscb->channel, 
-				    (char *)buff->buff, 
-				    buff->bufflen);
-	if (ret <= 0 || ret != (int)buff->bufflen) {
-	    if (LOGINFO) {
-		log_info("\nmgr_ses: write channel failed");
-	    }
-	} else {
+        done = FALSE;
+        while (!done) {
+            ret = libssh2_channel_write(mscb->channel, 
+                                        (char *)buff->buff, 
+                                        buff->bufflen);
+            if (ret < 0 || ret != (int)buff->bufflen) {
+                if (ret == LIBSSH2_ERROR_EAGAIN) {
+                    /* not done; sleep and try again */
+                    usleep(1000);   /* 1000 micro-seconds */
+                    continue;
+                }
+                log_ssh2_error(scb, mscb, "write");
+            }
+            done = TRUE;
+        }
+
+        if (ret == 0) {
+            res = ERR_NCX_SESSION_CLOSED;
+        } else if (ret > 0) {
 	    if (LOGDEBUG2) {
 		log_debug2("\nmgr_ses: channel write %u bytes OK",
 			   buff->bufflen);
@@ -887,11 +1027,20 @@ status_t
 		    log_debug3("%c", buff->buff[i]);
 		}
 	    }
-	}
+	} else {
+            res = ERR_NCX_OPERATION_FAILED;
+        }
+
 	ses_msg_free_buff(scb, buff);
-	buff = (ses_msg_buff_t *)dlq_deque(&scb->outQ);
+
+        if (res == NO_ERR) {
+            buff = (ses_msg_buff_t *)dlq_deque(&scb->outQ);
+        } else {
+            buff = NULL;
+        }
     }
-    return NO_ERR;
+
+    return res;
 
 }  /* mgr_ses_writefn */
 
@@ -916,7 +1065,6 @@ ses_cb_t *
     return mgrses[sid];
 
 }  /* mgr_ses_get_scb */
-
 
 
 /********************************************************************

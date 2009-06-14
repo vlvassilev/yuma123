@@ -73,7 +73,7 @@ date         init     comment
 
 /* micro second sleep count to get rid of IO timing bug */
 /* #define USLEEP_CNT  10000 */
-#define USLEEP_CNT  5000
+#define USLEEP_CNT  5000       /* 5 milli-seconds */
 
 /********************************************************************
 *                                                                   *
@@ -219,7 +219,8 @@ static status_t
 	return ERR_NCX_CONNECT_FAILED;
     } 
     ncxname.sun_family = AF_LOCAL;
-    strncpy(ncxname.sun_path, NCXSERVER_SOCKNAME, 
+    strncpy(ncxname.sun_path, 
+	    NCXSERVER_SOCKNAME, 
 	    sizeof(ncxname.sun_path));
 
     /* try to connect to the NCX server */
@@ -324,9 +325,15 @@ static status_t
     "address=\"%s\" magic=\"%s\" transport=\"ssh\" port=\"%s\" />\n%s";
 
     memset(msgbuff, 0x0, BUFFLEN);
-    sprintf(msgbuff, connectmsg,
+    sprintf(msgbuff, 
+	    connectmsg,
 	    (const char *)XML_START_MSG, 
-	    NCX_URN, user, client_addr, NCX_SERVER_MAGIC, port, NC_SSH_END);
+	    NCX_URN, 
+	    user, 
+	    client_addr, 
+	    NCX_SERVER_MAGIC, 
+	    port, 
+	    NC_SSH_END);
 
     res = send_buff(ncxsock, msgbuff, strlen(msgbuff));
     return res;

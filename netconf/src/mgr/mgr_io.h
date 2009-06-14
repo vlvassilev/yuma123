@@ -91,16 +91,8 @@ extern void
 extern void
     mgr_io_set_stdin_handler (mgr_io_stdin_fn_t handler);
 
-
-extern void
-    mgr_io_activate_session (int fd);
-
-extern void
-    mgr_io_deactivate_session (int fd);
-
 extern status_t 
     mgr_io_run (void);
-
 
 extern boolean
     mgr_io_process_timeout (ses_id_t  cursid);

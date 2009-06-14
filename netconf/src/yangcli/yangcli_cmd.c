@@ -1966,10 +1966,14 @@ static void
     if (res == NO_ERR) {
 	agent_cb->state = MGR_IO_ST_CONN_START;
 	log_debug("\nyangcli: Start session %d OK for agent '%s'", 
-		  agent_cb->mysid, agent_cb->name);
+		  agent_cb->mysid, 
+                  agent_cb->name);
     } else {
 	log_info("\nyangcli: Start session failed for user %s on "
-		 "%s (%s)\n", username, agent, get_error_string(res));
+		 "%s (%s)\n", 
+                 username, 
+                 agent, 
+                 get_error_string(res));
 	agent_cb->state = MGR_IO_ST_IDLE;
     }
     

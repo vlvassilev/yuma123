@@ -995,18 +995,11 @@ status_t
     ses_msg_buff_t *buff;
     status_t        res;
     ssize_t         ret;
-    boolean         done;
+    boolean         done, erragain;
 
 #ifdef DEBUG
     if (!scb) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-#ifdef SES_DEBUG
-    if (LOGDEBUG2) {
-	log_debug2("\nses accept input for session %d", 
-		   scb->sid);
     }
 #endif
 
@@ -1024,75 +1017,66 @@ status_t
 	    return res;
 	}
 
+        erragain = FALSE;
+
 	/* read data into the new buffer */
 	if (scb->rdfn) {
 	    ret = (*scb->rdfn)(scb, 
 			       (char *)buff->buff, 
-			       SES_MSG_BUFFSIZE);
-	    if (ret < 0) {
-		/* !!! treat any read error as nothing to read !!! */
-		/*** NEED TO FIX : WHEN AGENT DROPS SESSION
-		 *** THEN THIS CODE NEEDS TO MAKE SURE THE
-		 *** SSH SESSION IS STILL UP (-1 returned every error)
-		 ***/
-		ses_msg_free_buff(scb, buff);
-		scb->retries++;
-		if (scb->retries < SES_MAX_RETRIES) {
-		    return NO_ERR;
-		} else {
-		    return ERR_NCX_READ_FAILED;
-		}
-	    }
+			       SES_MSG_BUFFSIZE,
+                               &erragain);
 	} else {
-	    scb->retries = 0;
-	    ret = read(scb->fd, buff->buff, SES_MSG_BUFFSIZE);
-	    if (ret < 0 && errno == EAGAIN) {
-		ses_msg_free_buff(scb, buff);
-		return NO_ERR;
-	    }
-	}
-	if (ret < 0) {
-	    /* this should cause the reader to call the IO close fn
-	     * this socket should not be selected unless there is 
-	     * something to read or the connection is closed
-	     */
+	    ret = read(scb->fd, 
+                       buff->buff, 
+                       SES_MSG_BUFFSIZE);
+        }
+
+        if (ret < 0) {
+            if (scb->rdfn) {
+                if (!erragain) {
+                    res = ERR_NCX_READ_FAILED;
+                }
+            } else {
+                if (errno != EAGAIN) {
+                    res = ERR_NCX_READ_FAILED;
+                }
+            }
 
 #ifdef SES_DEBUG
-	    if (LOGDEBUG2) {
-		log_debug2("\nses read failed on session %d (%s)", 
-			   scb->sid, strerror(errno));
-	    }
+            if (LOGDEBUG2 && res != NO_ERR) {
+                log_debug2("\nses read failed on session %d (%s)", 
+                           scb->sid, 
+                           strerror(errno));
+            }
 #endif
-
-	    ses_msg_free_buff(scb, buff);
-	    return ERR_NCX_READ_FAILED;
-	} else if (ret == 0) {
-	    /* session closed by remote peer */
-	    if (LOGINFO) {
-		log_info("\nses: session %d shut by remote peer", 
-			 scb->sid);
-	    }
-	    ses_msg_free_buff(scb, buff);
-	    return ERR_NCX_SESSION_CLOSED;
-	} else {
+            ses_msg_free_buff(scb, buff);
+            return res;
+        } else if (ret == 0) {
+            /* session closed by remote peer */
+            if (LOGINFO) {
+                log_info("\nses: session %d shut by remote peer", 
+                         scb->sid);
+            }
+            ses_msg_free_buff(scb, buff);
+            return ERR_NCX_SESSION_CLOSED;
+        } else {
 
 #ifdef SES_DEBUG
-	    if (LOGDEBUG2) {
-		log_debug2("\nses read OK (%d) on session %d", 
-			   ret, 
-			   scb->sid);
-	    }
+            if (LOGDEBUG2) {
+                log_debug2("\nses read OK (%d) on session %d", 
+                           ret, 
+                           scb->sid);
+                }
 #endif
-	    scb->retries = 0;
-	    buff->bufflen = (size_t)ret;
-	    scb->stats.in_bytes += (uint32)ret;
-	    totals.stats.in_bytes += (uint32)ret;
-	}
+            buff->bufflen = (size_t)ret;
+            scb->stats.in_bytes += (uint32)ret;
+            totals.stats.in_bytes += (uint32)ret;
 
-	res = accept_buffer(scb, buff);
-	if (res != NO_ERR || ret < SES_MSG_BUFFSIZE || !scb->rdfn) {
-	    done = TRUE;
-	} /* else the SSH2 channel probably has more bytes to read */
+            res = accept_buffer(scb, buff);
+            if (res != NO_ERR || ret < SES_MSG_BUFFSIZE || !scb->rdfn) {
+                done = TRUE;
+            } /* else the SSH2 channel probably has more bytes to read */
+        }
     }
     return res;
 

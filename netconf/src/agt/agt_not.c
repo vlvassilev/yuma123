@@ -174,7 +174,7 @@ date         init     comment
     (const xmlChar *)"notificationComplete"
 
 
-#define AGT_NOT_SEQID_MOD   (const xmlChar *)"ncx"
+#define AGT_NOT_SEQID_MOD   (const xmlChar *)"system"
 #define AGT_NOT_SEQID_OBJ   (const xmlChar *)"sequence-id"
 
 
@@ -980,7 +980,6 @@ static void
 status_t
     agt_not_init (void)
 {
-    ncx_module_t *ncxmod;
     status_t      res;
 
     if (agt_not_init_done) {
@@ -1010,11 +1009,6 @@ status_t
 	return res;
     }
 
-    ncxmod = ncx_find_module(AGT_NOT_SEQID_MOD, NULL);
-    if (res != NO_ERR) {
-	return ERR_NCX_MOD_NOT_FOUND;
-    }
-    
     /* find the object definition for the notification element */
     notificationobj = ncx_find_object(notifmod,
 				      NCX_EL_NOTIFICATION);
@@ -1045,7 +1039,9 @@ status_t
     }
 
     sequenceidobj = 
-	ncx_find_object(ncxmod, AGT_NOT_SEQID_OBJ);
+	obj_find_child(notificationobj,
+                       AGT_NOT_SEQID_MOD,
+                       AGT_NOT_SEQID_OBJ);
     if (!sequenceidobj) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
@@ -1296,8 +1292,7 @@ void
 *
 * RETURNS:
 *    number of notifications sent;
-*    used during shutdown to make sure all sysShutdown
-*    notifications get sent properly;
+*    used for simple burst throttling
 *********************************************************************/
 uint32
     agt_not_send_notifications (void)

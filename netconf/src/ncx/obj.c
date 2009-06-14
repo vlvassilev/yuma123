@@ -8599,17 +8599,12 @@ status_t
 	 * any top-level OBJ_TYP_NOTIF node
 	 */
 	if (foundmodname) {
-	    if (foundmod->nsid == ncnid) {
-		/* try a child of <notification>;
-		 * should only be eventTime
-		 */
-		foundobj = obj_find_child(obj, 
-					  foundmodname,
-					  curnode->elname);
-	    } else {
-		/* try to find any top-level notification
-		 * with this eventType QName
-		 */
+            /* try a child of <notification> */
+            foundobj = obj_find_child(obj, 
+                                      foundmodname,
+                                      curnode->elname);
+            if (!foundobj) {
+                /* try to find an <eventType> */
 		foundobj =  ncx_find_object(foundmod,
 					    curnode->elname);
 		if (foundobj && 

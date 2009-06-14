@@ -98,6 +98,10 @@ date         init     comment
 /* how often to check for agent shutown (in seconds) */
 #define AGT_NCXSERVER_TIMEOUT  1
 
+/* number of notifications to send out in 1 timeout interval */
+#define MAX_NOTIFICATION_BURST  10
+
+
 /********************************************************************
  * FUNCTION make_named_socket
  * 
@@ -141,6 +145,52 @@ static status_t
 
     return NO_ERR;
 } /* make_named_socket */
+
+
+/********************************************************************
+ * FUNCTION send_some_notifications
+ * 
+ * Send some notifications as needed
+ * 
+ * INPUTS:
+ *    filename == full filespec of the socket filename
+ *    sock == ptr to return value
+ *
+ * OUTPUTS:
+ *    *sock == the FD for the socket if return ok
+ *
+ * RETURNS:
+ *    status   
+ *********************************************************************/
+static void
+    send_some_notifications (void)
+{
+    uint32     sendcount, sendtotal, sendmax;
+    boolean    done;
+
+    sendtotal = 0;
+
+    /* TBD: set to CLI param */
+    sendmax = MAX_NOTIFICATION_BURST;
+
+    done = FALSE;
+    while (!done) {
+        sendcount = agt_not_send_notifications();
+        if (sendcount) {
+            sendtotal += sendcount;
+            if (sendtotal >= sendmax) {
+                done = TRUE;
+            }
+        } else {
+            done = TRUE;
+        }
+    }
+
+} /* send_some_notifications */
+
+
+
+/***********     E X P O R T E D   F U N C T I O N S   *************/
 
 
 /********************************************************************
@@ -214,7 +264,7 @@ status_t
 		if (agt_shutdown_requested()) {
 		    done2 = TRUE; 
 		} else {
-		    (void)agt_not_send_notifications();
+		    send_some_notifications();
 		}
 	    } else {
 		/* normal return with some bytes */
@@ -342,7 +392,7 @@ status_t
 		} else if (agt_shutdown_requested()) {
 		    done = done2 = TRUE;
 		} else {
-		    (void)agt_not_send_notifications();
+		    send_some_notifications();
 		}
 	    }
 	}
